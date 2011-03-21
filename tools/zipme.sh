@@ -67,40 +67,44 @@ else
    fi
 fi
 
-# Get the NuttX directory name and the path to the parent directory
+# Get the NuttX directory names and the path to the parent directory
 
-NUTTXDIR=${PROJECTS}/nuttx-${VERSION}
-NUTTX=${NUTTXDIR}/nuttx
-APPS=${NUTTXDIR}/apps
+TRUNKDIR=${PROJECTS}/trunk
+NUTTX=${TRUNKDIR}/nuttx-${VERSION}
+APPDIR=${TRUNKDIR}/apps-${VERSION}
 
 # Make sure that the versioned directory exists
 
-if [ ! -d ${NUTTXDIR} ]; then
-   echo "Directory ${NUTTXDIR} does not exist"
+if [ ! -d ${TRUNKDIR} ]; then
+   echo "Directory ${TRUNKDIR} does not exist"
    exit 1
 fi
 
-cd ${PROJECTS} || \
-   { echo "Failed to cd to ${PROJECTS}" ; exit 1 ; }
+cd ${TRUNKDIR} || \
+   { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
 
 if [ ! -d nuttx-${VERSION} ] ; then
    echo "Directory ${PROJECTS}/nuttx-${VERSION} does not exist!"
    exit 1
 fi
 
-if [ ! -d ${APPS} ] ; then
-   echo "Directory ${APPS} does not exist!"
+if [ ! -d app-${VERSION} ] ; then
+   echo "Directory ${PROJECTS}/nuttx-${VERSION} does not exist!"
    exit 1
 fi
 
-TAR_NAME=nuttx-${VERSION}.tar
-ZIP_NAME=${TAR_NAME}.gz
+# Create the versioned tarball names
+
+NUTTX_TARNAME=nuttx-${VERSION}.tar
+APPS_TARNAME=apps-${VERSION}.tar
+NUTTX_ZIPNAME=${NUTTX_TARNAME}.gz
+APPS_ZIPNAME=${APPS_TARNAME}.gz
 
 # Prepare the nuttx directory -- Remove editor garbage
 
-find ${NUTTXDIR} -name '*~' -exec rm -f '{}' ';' || \
+find ${TRUNKDIR} -name '*~' -exec rm -f '{}' ';' || \
       { echo "Removal of emacs garbage failed!" ; exit 1 ; }
-find ${NUTTXDIR} -name '*.swp' -exec rm -f '{}' ';' || \
+find ${TRUNKDIR} -name '*.swp' -exec rm -f '{}' ';' || \
       { echo "Removal of VI garbage failed!" ; exit 1 ; }
 
 # Make sure that all of the necessary soft links are in place
@@ -111,6 +115,14 @@ cd ${NUTTX}/Documentation || \
 ln -sf ../TODO TODO.txt
 ln -sf ../ChangeLog ChangeLog.txt
 
+# Write a version file into the NuttX directoy.  The syntax of file is such that it
+# may be sourced by a bash script or included by a Makefile.
+
+echo "#!/bin/bash" >${NUTTX}/.version
+echo "" >>${NUTTX}/.version
+echo "CONFIG_NUTTX_VERSION=\"${VERSION}\"" >>${NUTTX}/.version
+chmod 755 ${NUTTX}/.version
+
 # Perform a full clean for the distribution
 
 cd ${PROJECTS} || \
@@ -120,31 +132,44 @@ make -C ${NUTTX} distclean
 
 # Remove any previous tarballs
 
-if [ -f ${TAR_NAME} ] ; then
-   echo "Removing ${PROJECTS}/${TAR_NAME}"
-   rm -f ${TAR_NAME} || \
-      { echo "rm ${TAR_NAME} failed!" ; exit 1 ; }
+if [ -f ${NUTTX_TARNAME} ] ; then
+   echo "Removing ${PROJECTS}/${NUTTX_TARNAME}"
+   rm -f ${NUTTX_TARNAME} || \
+      { echo "rm ${NUTTX_TARNAME} failed!" ; exit 1 ; }
 fi
 
-if [ -f ${ZIP_NAME} ] ; then
-   echo "Removing ${PROJECTS}/${ZIP_NAME}"
-   rm -f ${ZIP_NAME} || \
-      { echo "rm ${ZIP_NAME} failed!" ; exit 1 ; }
+if [ -f ${NUTTX_ZIPNAME} ] ; then
+   echo "Removing ${PROJECTS}/${NUTTX_ZIPNAME}"
+   rm -f ${NUTTX_ZIPNAME} || \
+      { echo "rm ${NUTTX_ZIPNAME} failed!" ; exit 1 ; }
 fi
 
-# Write a version file.  The syntax of file is such that it may be sourced
-# by a bash script or included by a Makefile
+if [ -f ${APPS_TARNAME} ] ; then
+   echo "Removing ${PROJECTS}/${APPS_TARNAME}"
+   rm -f ${APPS_TARNAME} || \
+      { echo "rm ${APPS_TARNAME} failed!" ; exit 1 ; }
+fi
 
-echo "#!/bin/bash" >${NUTTX}/.version
-echo "" >>${NUTTX}/.version
-echo "CONFIG_NUTTX_VERSION=\"${VERSION}\" >>${NUTTX}/.version
-chmod 755 ${NUTTX}/.version
+if [ -f ${APPS_ZIPNAME} ] ; then
+   echo "Removing ${PROJECTS}/${APPS_ZIPNAME}"
+   rm -f ${APPS_ZIPNAME} || \
+      { echo "rm ${APPS_ZIPNAME} failed!" ; exit 1 ; }
+fi
 
-# Then zip-up the directories
+# Then tar and zip-up the directories
 
-${TAR} ${TAR_NAME} nuttx-${VERSION}/nuttx nuttx-${VERSION}/apps || \
-      { echo "tar of ${TAR_NAME} failed!" ; exit 1 ; }
-${ZIP} ${TAR_NAME} || \
-      { echo "zip of ${TAR_NAME} failed!" ; exit 1 ; }
+cd ${TRUNKDIR} || \
+   { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
+
+${TAR} ${NUTTX_TARNAME} nuttx-${VERSION}/nuttx || \
+      { echo "tar of ${NUTTX_TARNAME} failed!" ; exit 1 ; }
+${ZIP} ${NUTTX_TARNAME} || \
+      { echo "zip of ${NUTTX_TARNAME} failed!" ; exit 1 ; }
+
+${TAR} ${APPS_TARNAME} nuttx-${VERSION}/nuttx || \
+      { echo "tar of ${APPS_TARNAME} failed!" ; exit 1 ; }
+${ZIP} ${APPS_TARNAME} || \
+      { echo "zip of ${APPS_TARNAME} failed!" ; exit 1 ; }
 
 cd ${NUTTX}
+

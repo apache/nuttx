@@ -62,16 +62,22 @@ BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
 # Add-on directories.  These may or may not be in place in the
 # NuttX source tree (they must be specifically installed)
 #
-# APPLOC can be over-ridden from the command line or in the .config file:
+# CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
+# The default value of CONFIG_APPS_DIR is ../apps.  Ultimately, the application
+# will be built if APPDIR is defined.  APPDIR will be defined if a directory containing
+# a Makefile is found at the path provided by CONFIG_APPS_DIR
 
-ifeq ($(CONFIG_BUILTIN_APPS),y)
-ifeq ($(APPLOC),)
-APPLOC	= ../apps
+ifeq ($(CONFIG_APPS_DIR),)
+CONFIG_APPS_DIR	= ../apps
 endif
-APPDIR		:= ${shell if [ -r $(APPLOC)/Makefile ]; then echo "$(APPLOC)"; fi}
-endif
+APPDIR		:= ${shell if [ -r $(CONFIG_APPS_DIR)/Makefile ]; then echo "$(CONFIG_APPS_DIR)"; fi}
+
+# The Pascal p-code add-on directory
 
 PCODE_DIR	:= ${shell if [ -r pcode/Makefile ]; then echo "pcode"; fi}
+
+# All add-on directories
+
 ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR) $(APPDIR)
 
 # FSDIRS depend on file descriptor support; NONFSDIRS do not
@@ -86,10 +92,6 @@ CONTEXTDIRS	=
 ifeq ($(CONFIG_NX),y)
 NONFSDIRS	+= graphics
 CONTEXTDIRS	+= graphics
-endif
-
-ifneq ($(CONFIG_APP_DIR),)
-NONFSDIRS	= $(CONFIG_APP_DIR)
 endif
 
 # CLEANDIRS are the directories that will clean in.  These are
@@ -146,17 +148,11 @@ ifeq ($(CONFIG_HAVE_CXX),y)
 LINKLIBS	+= libxx/liblibxx$(LIBEXT)
 endif
 
-# Add application-specific library
-
-ifneq ($(CONFIG_APP_DIR),)
-LINKLIBS	= $(CONFIG_APP_DIR)/libapp$(LIBEXT)
-endif
-
 # Add library for application support
 # Always compile the framework which includes exec_nuttapp if users
 # or nuttX applications are to be included.
 
-ifeq ($(CONFIG_BUILTIN_APPS),y)
+ifneq ($(APPDIR),)
 LINKLIBS	+= $(APPDIR)/libapps$(LIBEXT)
 endif
 
@@ -291,9 +287,6 @@ pcode/libpcode$(LIBEXT): context
 graphics/libgraphics$(LIBEXT): context
 	@$(MAKE) -C graphics TOPDIR="$(TOPDIR)" libgraphics$(LIBEXT)
 
-$(CONFIG_APP_DIR)/libapp$(LIBEXT): context
-	@$(MAKE) -C $(CONFIG_APP_DIR) TOPDIR="$(TOPDIR)" libapp$(LIBEXT)
-
 # If the 2 pass build option is selected, then this pass1 target is
 # configured be build a extra link object. This is assumed to be an
 # incremental (relative) link object, but could be a static library
@@ -355,6 +348,7 @@ depend: context
 	done
 
 subdir_clean:
+	echo "CLEANDIRS: $(CLEANDIRS)"
 	@for dir in $(CLEANDIRS) ; do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" clean ; \

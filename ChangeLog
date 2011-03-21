@@ -1553,7 +1553,7 @@
 	* configs/olimex-lpc1766stk/slip-httpd - An example that uses SLIP to
 	  provide a serial-port based THTTPD web server.
 
-5.20 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+6.0 2011-03-21 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* lib/lib_fopen() -- fopen() was not returning the correct errno value
 	  when the underlying open() failed.
@@ -1587,7 +1587,7 @@
 	  incorporate code taken from the Linux kernel.  That changes the
 	  licensing on this module to GPL.  To avoid licensing contamination,
 	  this driver was moved to misc/drivers/rtl8187x *prior* to adding
-	  and of the GPL log.  There is an INSTALL.sh script at the location
+	  any of the GPL logic.  There is an INSTALL.sh script at the location
 	  where the GPL driver(s) can be re-installed into the NuttX source
 	  tree.  By re-installing the driver, you agree to the GPL licsensing
 	  and all of its implications.
@@ -1595,11 +1595,14 @@
 	  configs/<board>/<config>/appdir to apps/.config and to simply the
 	  application configuration logic.
 	* examples/nsh and apps/nshlib - Move the core NuttShell (NSH) logic
-	  out of the exemples directory and into the apps/directory where
+	  out of the exemples directory and into the apps/ directory where
 	  it belongs.
 	* apps/Makefile and configs/*/appconfig - Use '=' as the delimiter
 	  instead of '/' so that sub-directories in apps/ can be used.
 	* apps/vsn - Move all VSN apps to apps/vsn.
 	* nuttx/examples moved to apps/examples
+
+6.1 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
 
 	  

@@ -687,7 +687,7 @@ o ARM/LPC17xx (arch/arm/src/lpc17xx/)
                debug disabled.  For some reason, certain debug statements hang(?).
                Also, this example does not use UART1's hardware flow control.  UART1
                hardware flow control is partially implemented but does not behave as
-               expected.  It needs a little more work.
+               expected.  Hardware flow control needs a little more work.
   Status:      Open
   Priority:    Low
 

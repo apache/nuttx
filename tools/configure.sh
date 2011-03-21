@@ -162,8 +162,7 @@ if [ ! -z "${appdir}" ]; then
     echo "" >> "${TOPDIR}/.config"
     echo "# Application configuration" >> "${TOPDIR}/.config"
     echo "" >> "${TOPDIR}/.config"
-    echo "CONFIG_BUILTIN_APPS=y" >> "${TOPDIR}/.config"
-    echo "APPLOC=\"$appdir\"" >> "${TOPDIR}/.config"
+    echo "CONFIG_APPS_DIR=\"$appdir\"" >> "${TOPDIR}/.config"
   fi
 fi
 

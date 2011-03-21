@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 20, 2011</p>
+      <p>Last Updated: March 21, 2011</p>
     </td>
   </tr>
 </table>
@@ -1016,7 +1016,6 @@ netutils/
 </p>
 <ul>
   <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/appconfig</code> to &lt;app-dir&gt;<code>/.config</code></li>
-  <li><code>echo &quot;CONFIG_BUILTIN_APPS=y" &gt;&gt; "${TOPDIR}/.config&quot;</code></li>
   <li><code>echo &quot;APPS_LOC=\"&lt;app-dir&gt;\"" &gt;&gt; "${TOPDIR}/.config&quot;</code></li>
 </ul>
 
@@ -2668,10 +2667,10 @@ extern void up_ledoff(int led);
 <ul>
   <li>
     <p>
-      <code>CONFIG_APP_DIR</code>: Identifies the directory that builds the application to link with NuttX.
-      This symbol must be assigned to the path to the application build directory <i>relative</i> to the NuttX top build directory.
-      If the application resides in the top-level <code>apps</code> directory, it is not necessary to define <code>CONFIG_APP_DIR</code>.
-      If you had an application directory and the NuttX directory both within another directory like this:
+      <code>CONFIG_APPS_DIR</code>: Identifies the directory that builds the application to link with NuttX.
+      This symbol must be assigned to the path of the application build directory <i>relative</i> to the NuttX top build directory.
+      If the application resides in the top-level <code>../apps/</code> directory, it is not necessary to define <code>CONFIG_APPS_DIR</code>.
+      If you have an application directory and the NuttX directory each in separate directories such as this:
 <ul><pre>
 build
  |-nuttx
@@ -2681,14 +2680,15 @@ build
     |
     `- Makefile
 </pre></ul>
-      Then you would set <code>CONFIG_APP_DIR=../application</code>.
+      Then you would set <code>CONFIG_APPS_DIR=../application</code>.
+      The default value of <code>CONFIG_APPS_DIR</code> is <code>../apps/</code>.
     </p>
     <p>
       The application direction must contain <code>Makefile</code> and this make file must support the following targets:
       <ul>
         <li>
-          <code>libapp$(LIBEXT)</code> (usually <code>libapp.a</code>).
-          <code>libapp.a</code> is a static library ( an archive) that contains all of application object files.
+          <code>libapps$(LIBEXT)</code> (usually <code>libapps.a</code>).
+          <code>libapps.a</code> is a static library ( an archive) that contains all of application object files.
         </li>
         <li>
           <code>clean</code>.
@@ -2708,7 +2708,7 @@ build
     <p>
       When this application is invoked it will receive the setting <code>TOPDIR</code> like:
       <ul>
-        <code>$(MAKE) -C $(CONFIG_APP_DIR) TOPDIR=&quot;$(TOPDIR)&quot;</code> &lt;target&gt;
+        <code>$(MAKE) -C $(CONFIG_APPS_DIR) TOPDIR=&quot;$(TOPDIR)&quot;</code> &lt;target&gt;
       </ul>
     </p>
     <p>

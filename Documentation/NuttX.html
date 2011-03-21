@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 20, 2011</p>
+      <p>Last Updated: March 21, 2011</p>
     </td>
   </tr>
 </table>
@@ -807,77 +807,68 @@
   </tr>
 </table>
 
-<p><b>nuttx-5.19 Release Notes</b>:
+<p><b>nuttx-6.0 Release Notes</b>:
 
 <p>
-  The 66<sup>th</sup> release of NuttX, Version 5.19, was made on March 12, 2011 and is available for download from the
+  The 67<sup>th</sup> release of NuttX, Version 6.0, was made on March 21, 2011 and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release includes several new features in various states of integration and maturity:
+  The version number of this release was bumped from 5.19 to 6.0.
+  A change in the major revision number is used to reflect an incompatibility with previous versions.
+  In this release, the NuttX core OS functionality has been separated from NuttX application-related functionality.
+  These are provided as separate tarballs:
 </p>
 <ul>
-
+  <li><code>nuttx-6.0.tar.gz</code>, and</li>
+  <li><code>apps-6.0.tar.gz</code></li>
+</ul>
+<p>
+  The purpose of this separation is both to better organize and modularize the NuttX source tree,
+  but also to provide better support for incorporation of end-user applications with Nuttx.
+</p>
+<p>
+  The incompatibily results from the changes to the board configuration logic needed to supported the separable application. 
+  The major changes to the configuration include:
+</p>
+<ul>
+  <li><code>CONFIG_APPS_DIR</code> - This should not, typically be set.
+    The default is <code>../apps</code>. 
+    This should only be set if you have a custom, product-specific application directory in some different location.
   </li>
-  <li>
-    <b>486SX QEMU port</b>.
-    This port supports the Intel 486SX architecture using the QEMU simulator.
-    Initial functionality is in place a partially tested.
-    There are still some outstanding issues with timer interrupts.
-    A large part of the i486 logic was contributed by Biff of
-    <a href="http://bifferos.bizhat.com">Bifferboard</a> fame.
-  </li>
-  <li>
-    <b>Platform specific application support</b>.
-    A new <code>apps/</code> directory appears in this port.
-    This <code>apps/</code> directory provides a mechanism for applications using NuttX to have a highly customizable initialization process.
-    It supports a set of end-user applications than can be executed
-    (1) standalone so you can have a fully customizable application startup, or
-    (2) on top of NSH.
-    Think of it this way:
-    In a buckled-up embedded application, your end-user programs will probably have their own dedicated start-up logic.
-    But, during development, you might want to have you applications available and executable from the NSH command line.
-    This <code>apps/</code> add-on (and NSH hooks) was contributed by Uros Platise to accomplish just that.
-  </li>
-  <li>
-    <b>Custom NSH <code>/etc/init.d/rcS</code> File</b>.
-    NSH was also extended to support application specific ROMFS <code>/etc/init.d/rcS</code> start-up scripts.
-    This feature, as well, as all of the above-mentioned <code>apps/</code> directory support was contributed by Uros Platise
-  </li>
-  <li>
-    Additional NSH improvements and bug fixes.  See the Changelog for details.
-  </li>
-  <li>
-    <b>SLIP</b>.
-    This release also provides a new SLIP network driver.
-    This driver should support point-to-point network communications to a host using TCP/IP or UDP.
-    This driver is code complete, but not tested in this release.
-  </li>
-  <li>
-    <b>RAMTROM FRAM Driver</b>.
-    New RAMTRON FRAM driver (contributed by Uros Platise)
-  </li>
-  <li>
-    <b>16550 UART Driver</b>.
-    New generic 16550 UART driver.
-  </li>
-  <li>
-    <b>Cortex-M3 Power improvements</b>.
-    The Cortex-M3 can now waits for Interrupt (WFI) in idle loop for reduced power consumption
-    (LPC17xx and STM32 only - contributed by Uros Platise))
-  </li>
-  <li>
-    <b><code>waitpid()</code></b>.
-    New <code>waitpid()</code> system interface.
-  </li>
-  <li>
-    <b>Bugfixes</b>.
-    Additional bugfixes: pipes, stdint.h, STM32 SDIO and SPI drivers
+  <li><code>appconfig</code> - Each board configuration now requires a new file called <code>appconfig</code>.
+    As its name suggests, this file provides new configuration information needed by the logic in <code>../apps</code>.
   </li>
 </ul>
+<p>
+  In addition to this major reorganization in the directory structure, this release also includes some important extensions to existing features and
+  some important bugfixes.
+  These include:
+</p>
+<ul>
+  <li>
+    The SLIP driver was been well debugged and significantly re-designed.
+    Now you can have an Ethernet connection to you board even if you have no Ethernet hardware.
+    How cool is that?
+  </li>
+  <li>
+    The QEMU i486 port is now functional.
+    It has also been reported to work on the <a href="http://bifferos.bizhat.com/">Bifferboard</a>.
+  </li>
+  <li>
+    And extensions to the uIP driver interface, and
+  </li>
+  <li>
+    Bug fixes to <code>fopen()</code> and STM32 GPIO configuration
+  </li>
+  <li>
+</ul>
+<p>
+  Please see the ChangeLog for details.
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1452,14 +1443,17 @@
   <td><br></td>
   <td>
     <p>
-      <b>QEMU i486</b>.
+      <b>QEMU/Bifferboard i486</b>.
       This port uses the <a href="http://wiki.qemu.org/Main_Page">QEMU</a> i486 and the native
       Linux, Cywgin, MinGW the GCC toolchain under Linux or Cygwin.
     </p>
     <ul>
       <p>
        <b>STATUS:</b>
-        This port is code complete but not yet tested.  Stayed tuned.
+         The basic port was code-complete in NuttX-5.19 and verifed in NuttX-6.0.
+         The port was verified using the OS and NuttShell (NSH) examples under QEMU.
+         The port is reported to be functional on the <a href="http://bifferos.bizhat.com">Bifferboard</a> as well.
+         This is a great, stable starting point for anyone interest in fleshing out the x86 port!
       </p>
     </ul>
   </td>
@@ -2074,113 +2068,7 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * arch/arm/stm32/stm32_idle.c -- During idle times, the STM32 now uses the
-      WFI instruction to sleep in a reduced power mode until the next interrupt
-      occurs (Contributed by Uros Platise).      
-    * NSH: 'mem' command renamed to 'free'.  Output is now more similar to the
-      Linux 'free' command.
-    * NSH: Correct a redirection bug in NSH.  The following would not work; it
-      resulted in a hang after the 'cat /dev/fifo':
-
-        nsh&gt; mkfile /dev/fifo
-        nsh&gt; cd /tmp             # /tmp is a mounted RAM disk
-        nsh&gt; cat /dev/fifo &gt; test.txt &amp;
-        nsh&gt; echo &quot;This is a test&quot; &gt; /dev/fifo
-
-      The error was caused because (1) there was a path that resulted in stdout
-      being closed (the &quot;hang&quot;) and also (2) the 'cat' command was always outputting
-      to stdout, not to the redirected file descriptor.  Now:
-
-        nsh&gt; cat test.txt
-        This is a test
-
-    * drivers/pipes/pipe_common.c --  Driver open method was not returning an EINTR
-      error when it received a signal.  Instead, it just re-started the wait.  This
-      makes it impossible to kill a background pipe operation from NSH.
-    * include/stdint.h -- Correct some errors in conditional compilation (submitted
-      by Johannes Hampel).
-    * arch/arm/lpc17xx/lp17_idle.c -- Uses the same logic as the STM32: uses the
-      WFI instruction to sleep in a reduced power mode until the next interrupt
-      occurs.
-    * configs/olimex-lpc1766stk -- Added an LED encoded to indicate if the LPC1766
-      is in sleeping.      
-    * examples/mm  -- This is a simplified version of the &quot;built-in&quot; memory manager
-      test of mm/mm_test.c.  It is simplified because it does not have access to
-      the internals of the memory manager as does mm/mm_test.c, but it has the
-      advantage that it runs in the actual NuttX tasking environment (the
-      mm/mm_test.c only runs in a PC simulation environment).
-    * drivers/mmcsd_sdio.c/h -- Several corrections submitted by Uros Platise.
-    * arch/x86 - Provide support for x86 architectures.  Support for the i486
-      architecture under QEMU is provided under arch/x86/include/i486,
-      arch/x86/include/qemu, arch/x86/src/i486, and arch/x86/src/qemu.
-    * configs/qemu-i486 - &quot;Board&quot; support configurations for verifying the QEME
-      i486 port.
-    * arch/arm/src/stm32/stm32_spi.c -- Correct base address of SPI3 (reported by
-      Uros Platise).
-    * drivers/mmcsd/mmcsd_sdio.c -- Correct a loop termination condition (also
-      reported by Uros Platise).
-    * drivers/mtd/ramtron.c -  Driver for SPI-based RAMTRON NVRAM devices FM25V10
-      (and others).  Contributed by Uros Platise.
-    * examples/nsh and tools/mkromfsimg.sh -- Add support for platform-specific
-      ROMFS-based NSH start-up scripts.
-    * drivers/uart_16550.c and include/nuttx/uart_16550.h - Support for a generic
-      16550 UART.
-    * configure/qemu-i486/nsh - QEMU NSH example.
-    * ../apps - The apps directory add-on was created by Uros Platise.  It
-      supports a set of end-user applications than can be executed on top of
-      NSH.  Think of it this way:  In a buckled-up embedded application, your
-      end-user programs will probably have their own dedicated start-up logic.
-      But, during development, you might want to have you applications
-      available and executable from the NSH command line.  This apps/ addon
-      (and NSH hooks) was contributed by Uros to accomplish just that.
-    * sched/sched_waitpid() and include/sys/wait.h - Provides a simple and
-      very incomplete implementation of waitpid().  waitpid() is only available
-      if CONFIG_SCHED_WAITPID is defined in your configuration file.
-    * sched/atexit.c and sched/exit.c - The atexit function is not frequently
-      used.  In order to save a few bytes, it is now conditioned on
-      CONFIG_SCHED_ATEXIT.  It your application is currently using atexit(),
-      you will need to add CONFIG_SCHED_ATEXT to your configuration file.
-    * drivers/net/slip.c - Add a SLIP driver (untested on initial check-in).
-    * configs/olimex-lpc1766stk/slip-httpd - An example that uses SLIP to
-      provide a serial-port based THTTPD web server.
-
-apps-5.19 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * Initial version of the apps/ directory was released as contributed by
-      Uros Platise.
-
-pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * Updated to use standard C99 types in stdint.h and
-      stdbool.h.  This change was necessary for compatibility
-      with NuttX-5.0 (any beyond).
-
-buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
-
-    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
-    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
-      arm926
-    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
-    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
-      GDB 6.8 won't build because the tarbal was released with -Werror enabled and
-      the build stops on the first warning.
-    * Add support for Freescale m9s12x using binutils 2.18 and gcc 3.3.6 and
-      patches available from http://www.msextra.com/tools courtesy of James
-      Cortina.  Add configs/m9x12x-defconfig-3.3.6.
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<ul><pre>
-nuttx-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.1 2011-03-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * lib/lib_fopen() -- fopen() was not returning the correct errno value
       when the underlying open() failed.
@@ -2229,7 +2117,7 @@ nuttx-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * apps/vsn - Move all VSN apps to apps/vsn.
     * nuttx/examples moved to apps/examples
 
-apps-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+apps-6.0 2011-03-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * README.txt -- README cosmetics
     * hello/ -- hello world minor changes
@@ -2237,6 +2125,39 @@ apps-5.20 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * Make.defs -- New file adds common make definitions for applications.
     * hello/Makefile -- Now uses new Make.defs definitions.  Added README.txt.
     * apps/poweroff -- New application to turn off board power.
+
+pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * Updated to use standard C99 types in stdint.h and
+      stdbool.h.  This change was necessary for compatibility
+      with NuttX-5.0 (any beyond).
+
+buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
+
+    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
+    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
+      arm926
+    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
+    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
+      GDB 6.8 won't build because the tarbal was released with -Werror enabled and
+      the build stops on the first warning.
+    * Add support for Freescale m9s12x using binutils 2.18 and gcc 3.3.6 and
+      patches available from http://www.msextra.com/tools courtesy of James
+      Cortina.  Add configs/m9x12x-defconfig-3.3.6.
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<ul><pre>
+nuttx-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

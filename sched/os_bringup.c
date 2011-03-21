@@ -54,7 +54,7 @@
 #ifdef CONFIG_SCHED_WORKQUEUE
 # include "work_internal.h"
 #endif
-#ifdef CONFIG_BUILTIN_APPS
+#ifdef CONFIG_BUILTIN_APP_START
 # include "apps/apps.h"
 #endif
 
@@ -120,7 +120,7 @@
 
 int os_bringup(void)
 {
-#if defined(CONFIG_BUILTIN_APPS) && defined(CONFIG_BUILTIN_APP_START)
+#ifdef CONFIG_BUILTIN_APP_START 
   static const char *argv[3] = {NULL, "init", NULL};
 #endif
   int init_taskid;
@@ -155,8 +155,8 @@ int os_bringup(void)
    */
 
   svdbg("Starting init thread\n");
-  
-#if defined(CONFIG_BUILTIN_APPS) && defined(CONFIG_BUILTIN_APP_START)
+
+#ifdef CONFIG_BUILTIN_APP_START
   /* Start the built-in application, passing an "init" argument, so that
    * application can distinguish different run-levels 
    */
