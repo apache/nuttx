@@ -44,18 +44,18 @@ PASS1_LIBBOARD	= $(PASS1_BOARDDIR)/libboard$(LIBEXT)
 
 # Where is the application library?
 
-ifneq ($(CONFIG_APP_DIR),)
-PASS1_LIBAPP	= $(CONFIG_APP_DIR)/libapp$(LIBEXT)
+ifneq ($(CONFIG_APPS_DIR),)
+PASS1_LIBAPPS	= $(CONFIG_APPS_DIR)/libapps$(LIBEXT)
 else
 ifneq ($(APPDIR),)
-PASS1_LIBAPP	= $(APPDIR)/libapps$(LIBEXT)
+PASS1_LIBAPPS	= $(APPDIR)/libapps$(LIBEXT)
 endif
 endif
 
-# Remove the application library (libapp) from the list of libraries.  Add
+# Remove the application library (libapps) from the list of libraries.  Add
 # the boad library (liboard)
 
-PASS1_LINKLIBS	= $(filter-out $(PASS1_LIBAPP),$(LINKLIBS))
+PASS1_LINKLIBS	= $(filter-out $(PASS1_LIBAPPS),$(LINKLIBS))
 PASS1_LINKLIBS	+= $(PASS1_LIBBOARD)
 
 # Get the paths to the libraries and the links script path in format that

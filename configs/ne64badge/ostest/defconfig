@@ -205,8 +205,8 @@ CONFIG_PASS1_OBJECT=init.r
 #
 # General OS setup
 #
-# CONFIG_APP_DIR - Identifies the relative path to the directory
-#   that builds the application to link with NuttX.
+# CONFIG_APPS_DIR - Identifies the relative path to the directory
+#   that builds the application to link with NuttX.  Default: ../apps
 # CONFIG_DEBUG - enables built-in debug options
 # CONFIG_DEBUG_VERBOSE - enables verbose debug output
 # CONFIG_DEBUG_SYMBOLS - build without optimization and with
@@ -294,7 +294,7 @@ CONFIG_PASS1_OBJECT=init.r
 # CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
 #  the worker thread.  Default: 4
 #
-#CONFIG_APP_DIR=
+#CONFIG_APPS_DIR=
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n

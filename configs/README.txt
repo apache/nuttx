@@ -168,8 +168,8 @@ defconfig -- This is a configuration file similar to the Linux
 
 	Building application code:
 
-		CONFIG_APP_DIR - Identifies the directory that builds the
-		  application to link with NuttX. This symbol must be assigned
+		CONFIG_APPS_DIR - Identifies the directory that builds the
+		  application to link with NuttX.  Default: ../apps This symbol must be assigned
 		  to the path to the application build directory *relative* to
 		  the NuttX top build direcory. If you had an application
           directory and the NuttX directory each in separate directory
@@ -183,12 +183,12 @@ defconfig -- This is a configuration file similar to the Linux
 		   |
 		   `- Makefile
 
-		  Then you would set CONFIG_APP_DIR=../application.
+		  Then you would set CONFIG_APPS_DIR=../application.
 
 		  The application direction must contain Makefile and this make
 		  file must support the following targets:
 
-		  - libapp$(LIBEXT) (usually libapp.a). libapp.a is a static
+		  - libapps$(LIBEXT) (usually libapps.a). libapps.a is a static
 		    library ( an archive) that contains all of application object
 		    files.
 		  - clean. Do whatever is appropriate to clean the application
@@ -201,7 +201,7 @@ defconfig -- This is a configuration file similar to the Linux
 
 		  When this application is invoked it will receive the setting TOPDIR like:
 
-		    $(MAKE) -C $(CONFIG_APP_DIR) TOPDIR="$(TOPDIR)" <target>
+		    $(MAKE) -C $(CONFIG_APPS_DIR) TOPDIR="$(TOPDIR)" <target>
 
 		  TOPDIR is the full path to the NuttX directory. It can be used, for
 		  example, to include makefile fragments (e.g., .config or Make.defs)
@@ -1108,7 +1108,6 @@ And if configs/<board-name>/<config-dir>/appconfig exists in the board
 configuration directory:
 
   Copy configs/<board-name>/<config-dir>/appconfig to <app-dir>/.config
-  echo "CONFIG_BUILTIN_APPS=y" >> "${TOPDIR}/.config"
   echo "APPS_LOC=\"<app-dir>\"" >> "${TOPDIR}/.config"
 
 tools/configure.sh
