@@ -53,13 +53,13 @@ fi
 MYNAME=`basename $0`
 
 if [ -x ${WD}/${MYNAME} ] ; then
-   PROJECTS="${WD}/../../.."
+   TRUNKDIR="${WD}/../.."
 else
    if [ -x ${WD}/tools/${MYNAME} ] ; then
-     PROJECTS="${WD}/../.."
+     TRUNKDIR="${WD}/.."
    else
-     if [ -x ${WD}/nuttx/tools/${MYNAME} ] ; then
-       PROJECTS="${WD}/.."
+     if [ -x ${WD}/nuttx-${VERSION}/tools/${MYNAME} ] ; then
+       TRUNKDIR="${WD}"
      else
        echo "You must cd into the NUTTX directory to execute this script."
        exit 1
@@ -69,7 +69,6 @@ fi
 
 # Get the NuttX directory names and the path to the parent directory
 
-TRUNKDIR=${PROJECTS}/trunk
 NUTTX=${TRUNKDIR}/nuttx-${VERSION}
 APPDIR=${TRUNKDIR}/apps-${VERSION}
 
@@ -84,12 +83,12 @@ cd ${TRUNKDIR} || \
    { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
 
 if [ ! -d nuttx-${VERSION} ] ; then
-   echo "Directory ${PROJECTS}/nuttx-${VERSION} does not exist!"
+   echo "Directory ${TRUNKDIR}/nuttx-${VERSION} does not exist!"
    exit 1
 fi
 
-if [ ! -d app-${VERSION} ] ; then
-   echo "Directory ${PROJECTS}/nuttx-${VERSION} does not exist!"
+if [ ! -d apps-${VERSION} ] ; then
+   echo "Directory ${TRUNKDIR}/apps-${VERSION} does not exist!"
    exit 1
 fi
 
@@ -125,33 +124,33 @@ chmod 755 ${NUTTX}/.version
 
 # Perform a full clean for the distribution
 
-cd ${PROJECTS} || \
-   { echo "Failed to cd to ${PROJECTS}" ; exit 1 ; }
+cd ${TRUNKDIR} || \
+   { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
 
 make -C ${NUTTX} distclean
 
 # Remove any previous tarballs
 
 if [ -f ${NUTTX_TARNAME} ] ; then
-   echo "Removing ${PROJECTS}/${NUTTX_TARNAME}"
+   echo "Removing ${TRUNKDIR}/${NUTTX_TARNAME}"
    rm -f ${NUTTX_TARNAME} || \
       { echo "rm ${NUTTX_TARNAME} failed!" ; exit 1 ; }
 fi
 
 if [ -f ${NUTTX_ZIPNAME} ] ; then
-   echo "Removing ${PROJECTS}/${NUTTX_ZIPNAME}"
+   echo "Removing ${TRUNKDIR}/${NUTTX_ZIPNAME}"
    rm -f ${NUTTX_ZIPNAME} || \
       { echo "rm ${NUTTX_ZIPNAME} failed!" ; exit 1 ; }
 fi
 
 if [ -f ${APPS_TARNAME} ] ; then
-   echo "Removing ${PROJECTS}/${APPS_TARNAME}"
+   echo "Removing ${TRUNKDIR}/${APPS_TARNAME}"
    rm -f ${APPS_TARNAME} || \
       { echo "rm ${APPS_TARNAME} failed!" ; exit 1 ; }
 fi
 
 if [ -f ${APPS_ZIPNAME} ] ; then
-   echo "Removing ${PROJECTS}/${APPS_ZIPNAME}"
+   echo "Removing ${TRUNKDIR}/${APPS_ZIPNAME}"
    rm -f ${APPS_ZIPNAME} || \
       { echo "rm ${APPS_ZIPNAME} failed!" ; exit 1 ; }
 fi
@@ -161,12 +160,12 @@ fi
 cd ${TRUNKDIR} || \
    { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
 
-${TAR} ${NUTTX_TARNAME} nuttx-${VERSION}/nuttx || \
+${TAR} ${NUTTX_TARNAME} nuttx-${VERSION} || \
       { echo "tar of ${NUTTX_TARNAME} failed!" ; exit 1 ; }
 ${ZIP} ${NUTTX_TARNAME} || \
       { echo "zip of ${NUTTX_TARNAME} failed!" ; exit 1 ; }
 
-${TAR} ${APPS_TARNAME} nuttx-${VERSION}/nuttx || \
+${TAR} ${APPS_TARNAME} apps-${VERSION} || \
       { echo "tar of ${APPS_TARNAME} failed!" ; exit 1 ; }
 ${ZIP} ${APPS_TARNAME} || \
       { echo "zip of ${APPS_TARNAME} failed!" ; exit 1 ; }
