@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_gpioint.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,7 @@ static unsigned int lpc17_getintedge(unsigned int port, unsigned int pin)
 
   /* Return the value for the PINSEL */
 
-  return (unsigned int)((*intedge & (3 << (pin << 1))) >> shift);
+  return (unsigned int)(((*intedge) >> (pin << 1)) & 3);
 }
 
 /****************************************************************************
