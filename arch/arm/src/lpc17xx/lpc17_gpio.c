@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_gpio.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -280,7 +280,7 @@ static int lpc17_pullup(uint16_t cfgset, unsigned int port, unsigned int pin)
 #ifdef CONFIG_GPIO_IRQ
 static int lpc17_setintedge(unsigned int port, unsigned int pin, unsigned int value)
 {
-  const uint64_t *intedge;
+  uint64_t *intedge;
   unsigned int shift;
 
   /* Which word to we use? */

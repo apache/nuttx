@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/lpc17xxx/irq.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -223,20 +223,20 @@
 #  define LPC17_VALID_SHIFT2    (0)
 #  define LPC17_VALID_FIRST2    (LPC17_VALID_FIRST0H+LPC17_VALID_NIRQS0H)
 
-#  define LPC17_IRQ_P2p0        (LPC17_IRQ_GPIOINT+0)
-#  define LPC17_IRQ_P2p1        (LPC17_IRQ_GPIOINT+1)
-#  define LPC17_IRQ_P2p2        (LPC17_IRQ_GPIOINT+2)
-#  define LPC17_IRQ_P2p3        (LPC17_IRQ_GPIOINT+3)
-#  define LPC17_IRQ_P2p4        (LPC17_IRQ_GPIOINT+4)
-#  define LPC17_IRQ_P2p5        (LPC17_IRQ_GPIOINT+5)
-#  define LPC17_IRQ_P2p6        (LPC17_IRQ_GPIOINT+6)
-#  define LPC17_IRQ_P2p7        (LPC17_IRQ_GPIOINT+7)
-#  define LPC17_IRQ_P2p8        (LPC17_IRQ_GPIOINT+8)
-#  define LPC17_IRQ_P2p9        (LPC17_IRQ_GPIOINT+9)
-#  define LPC17_IRQ_P2p10       (LPC17_IRQ_GPIOINT+10)
-#  define LPC17_IRQ_P2p11       (LPC17_IRQ_GPIOINT+11)
-#  define LPC17_IRQ_P2p12       (LPC17_IRQ_GPIOINT+12)
-#  define LPC17_IRQ_P2p13       (LPC17_IRQ_GPIOINT+13)
+#  define LPC17_IRQ_P2p0        (LPC17_VALID_FIRST2+0)
+#  define LPC17_IRQ_P2p1        (LPC17_VALID_FIRST2+1)
+#  define LPC17_IRQ_P2p2        (LPC17_VALID_FIRST2+2)
+#  define LPC17_IRQ_P2p3        (LPC17_VALID_FIRST2+3)
+#  define LPC17_IRQ_P2p4        (LPC17_VALID_FIRST2+4)
+#  define LPC17_IRQ_P2p5        (LPC17_VALID_FIRST2+5)
+#  define LPC17_IRQ_P2p6        (LPC17_VALID_FIRST2+6)
+#  define LPC17_IRQ_P2p7        (LPC17_VALID_FIRST2+7)
+#  define LPC17_IRQ_P2p8        (LPC17_VALID_FIRST2+8)
+#  define LPC17_IRQ_P2p9        (LPC17_VALID_FIRST2+9)
+#  define LPC17_IRQ_P2p10       (LPC17_VALID_FIRST2+10)
+#  define LPC17_IRQ_P2p11       (LPC17_VALID_FIRST2+11)
+#  define LPC17_IRQ_P2p12       (LPC17_VALID_FIRST2+12)
+#  define LPC17_IRQ_P2p13       (LPC17_VALID_FIRST2+13)
 #  define LPC17_VALID_NIRQS2    (14)
 #  define LPC17_NGPIOAIRQS      (LPC17_VALID_NIRQS0L+LPC17_VALID_NIRQS0H+LPC17_VALID_NIRQS2)
 #else
