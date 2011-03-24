@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <nuttx/arch.h>
 
 #include "up_arch.h"
 #include "chip.h"
@@ -84,17 +85,17 @@
 
 static unsigned int lpc17_getintedge(unsigned int port, unsigned int pin)
 {
-  const uint64_t *intedge;
+  uint64_t *intedge;
 
   /* Which word to we use? */
 
   if (port == 0)
     {
-      intedge = g_intedge0;
+      intedge = &g_intedge0;
     }
   else if (port == 2)
     {
-      intedge  = g_intedge2;
+      intedge  = &g_intedge2;
     }
   else
     {
@@ -129,7 +130,6 @@ static void lpc17_setintedge(uint32_t intbase, unsigned int pin, unsigned int ed
     {
       regval &= ~GPIOINT(pin);
     }
-  endif
   putreg32(regval, intbase + LPC17_GPIOINT_INTENR_OFFSET);
 
   /* Set/clear the rising edge enable bit */
@@ -143,7 +143,6 @@ static void lpc17_setintedge(uint32_t intbase, unsigned int pin, unsigned int ed
     {
       regval &= ~GPIOINT(pin);
     }
-  endif
   putreg32(regval, intbase + LPC17_GPIOINT_INTENF_OFFSET);
 }
 
@@ -159,21 +158,21 @@ static int lpc17_irq2port(int irq)
 {
  /* Set 1: 12 interrupts p0.0-p0.11 */
 
-  if (irq >= LPC17_VALID_FIRST0L && irq < (LPC17_VALID_FIRST0L+LPC17_VALID_NIRQS0L)
+  if (irq >= LPC17_VALID_FIRST0L && irq < (LPC17_VALID_FIRST0L+LPC17_VALID_NIRQS0L))
     {
       return 0;
     }
 
   /* Set 2: 16 interrupts p0.15-p0.30 */
 
-  else if (irq >= LPC17_VALID_FIRST0H && irq < (LPC17_VALID_FIRST0H+LPC17_VALID_NIRQS0H)
+  else if (irq >= LPC17_VALID_FIRST0H && irq < (LPC17_VALID_FIRST0H+LPC17_VALID_NIRQS0H))
     {
       return 0;
     }
 
   /* Set 3: 14 interrupts p2.0-p2.13 */
 
-  else if (irq >= LPC17_VALID_NIRQS2 && irq < (LPC17_VALID_FIRST2+LPC17_VALID_NIRQS2)
+  else if (irq >= LPC17_VALID_NIRQS2 && irq < (LPC17_VALID_FIRST2+LPC17_VALID_NIRQS2))
     {
       return 2;
     }
@@ -188,45 +187,176 @@ static int lpc17_irq2port(int irq)
  *
  ****************************************************************************/
 
-static int lpc17_irq2port(int irq)
+static int lpc17_irq2pin(int irq)
 {
  /* Set 1: 12 interrupts p0.0-p0.11 */
 
-  if (irq >= LPC17_VALID_FIRST0L && irq < (LPC17_VALID_FIRST0L+LPC17_VALID_NIRQS0L)
+  if (irq >= LPC17_VALID_FIRST0L && irq < (LPC17_VALID_FIRST0L+LPC17_VALID_NIRQS0L))
     {
       return irq - LPC17_VALID_FIRST0L + LPC17_VALID_SHIFT0L;
     }
 
   /* Set 2: 16 interrupts p0.15-p0.30 */
 
-  else if (irq >= LPC17_VALID_FIRST0H && irq < (LPC17_VALID_FIRST0H+LPC17_VALID_NIRQS0H)
+  else if (irq >= LPC17_VALID_FIRST0H && irq < (LPC17_VALID_FIRST0H+LPC17_VALID_NIRQS0H))
     {
       return irq - LPC17_VALID_FIRST0H + LPC17_VALID_SHIFT0H;
-      
-      12
     }
 
   /* Set 3: 14 interrupts p2.0-p2.13 */
 
-  else if (irq >= LPC17_VALID_NIRQS2 && irq < (LPC17_VALID_FIRST2+LPC17_VALID_NIRQS2)
+  else if (irq >= LPC17_VALID_NIRQS2 && irq < (LPC17_VALID_FIRST2+LPC17_VALID_NIRQS2))
     {
       return irq - LPC17_VALID_FIRST0H + LPC17_VALID_SHIFT2;
     }
   return -EINVAL;
 }
 
+/****************************************************************************
+ * Name: lpc17_gpiodemux
+ *
+ * Description:
+ *  Demux all interrupts on one GPIO interrupt status register.
+ *
+ ****************************************************************************/
+
+static void lpc17_gpiodemux(uint32_t intbase, uint32_t intmask,
+                            int irqbase, void *context)
+{
+  uint32_t intstatr;
+  uint32_t intstatf;
+  uint32_t intstatus;
+  uint32_t bit;
+  int      irq;
+
+  /* Get the interrupt rising and falling edge status and mask out only the
+   * interrupts that are enabled.
+   */
+
+  intstatr  = getreg32(intbase + LPC17_GPIOINT_INTSTATR_OFFSET);
+  intstatr &= getreg32(intbase + LPC17_GPIOINT_INTENR_OFFSET);
+
+  intstatf  = getreg32(intbase + LPC17_GPIOINT_INTSTATF_OFFSET);
+  intstatf &= getreg32(intbase + LPC17_GPIOINT_INTENF_OFFSET);
+
+  /* And get the OR of the enabled interrupt sources.  We do not make any
+   * distinction between rising and falling edges (but the hardware does support
+   * the ability to differently if needed.
+   */
+
+  intstatus = intstatr | intstatf;
+
+  /* Now march through the (valid) bits and dispatch each interrupt */
+
+  irq = irqbase;
+  bit = 1;
+  while (intstatus != 0)
+    {
+      /* Does this pin support an interrupt?  If no, skip over it WITHOUT
+       * incrementing irq.
+       */
+
+      if ((intmask & bit) != 0)
+        {
+           /* This pin can support an interrupt.  Is there an interrupt pending
+            * and enabled?
+            */
+
+           if ((intstatus & bit) != 0)
+             {
+               /* Clear the interrupt status */
+
+               putreg32(bit, intbase + LPC17_GPIOINT_INTCLR_OFFSET);
+
+               /* And dispatch the interrupt */
+
+               irq_dispatch(irq, context);
+             }
+
+           /* Increment the IRQ number on each interrupt pin */
+
+           irq++;
+        }
+ 
+      /* Next bit */
+
+      intstatus &= ~bit;
+      bit      <<= 1;
+    }
+}
+
+/****************************************************************************
+ * Name: lpc17_gpiointerrupt
+ *
+ * Description:
+ *  Handle the EINT3 interrupt that also indicates that a GPIO interrupt has
+ *  occurred.  NOTE:  This logic will have to be extended if EINT3 is
+ *  actually used for External Interrupt 3.
+ *
+ ****************************************************************************/
+
+static int lpc17_gpiointerrupt(int irq, void *context)
+{
+  /* Get the GPIO interrupt status */
+
+  uint32_t intstatus = getreg32(LPC17_GPIOINT_IOINTSTATUS);
+
+  /* Check for an interrupt on GPIO0 */
+
+  if ((intstatus & GPIOINT_IOINTSTATUS_P0INT) != 0)
+    {
+      lpc17_gpiodemux(LPC17_GPIOINT0_BASE, LPC17_VALID_GPIOINT0,
+                      LPC17_VALID_FIRST0L, context);
+    }
+
+  /* Check for an interrupt on GPIO2 */
+
+  if ((intstatus & GPIOINT_IOINTSTATUS_P2INT) != 0)
+    {
+      lpc17_gpiodemux(LPC17_GPIOINT2_BASE, LPC17_VALID_GPIOINT2,
+                      LPC17_VALID_FIRST2, context);
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
+ * Name: lpc17_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
+ *
+ ****************************************************************************/
+
+void lpc17_gpioirqinitialize(void)
+{
+   /* Disable all GPIO interrupts */
+
+  putreg32(0, LPC17_GPIOINT0_INTENR);
+  putreg32(0, LPC17_GPIOINT0_INTENF);
+  putreg32(0, LPC17_GPIOINT2_INTENR);
+  putreg32(0, LPC17_GPIOINT2_INTENF);
+
+  /* Attach and enable the GPIO IRQ.  Note:  GPIO0 and GPIO2 interrupts share
+   * the same position in the NVIC with External Interrupt 3
+   */
+
+  (void)irq_attach(LPC17_IRQ_EINT3, lpc17_gpiointerrupt);
+  up_enable_irq(LPC17_IRQ_EINT3);
+}
+
+/****************************************************************************
  * Name: lpc17_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc17_gpioirqenable(int irq)
 {
@@ -239,25 +369,25 @@ void lpc17_gpioirqenable(int irq)
        * address of the GPIOINT registers for the port.
        */
 
-      uint32_t intbase = g_intbase[GPIO_NPORTS];
-      if (intabase != 0)
+      uint32_t intbase = g_intbase[port];
+      if (intbase != 0)
         {
           /* And get the pin number associated with the port */
 
-          unsigned int pin   = g_irq2pin(irq);
+          unsigned int pin   = lpc17_irq2pin(irq);
           unsigned int edges = lpc17_getintedge(port, pin);
           lpc17_setintedge(intbase, pin, edges);
         }
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc17_gpioirqdisable(int irq)
 {
@@ -270,18 +400,16 @@ void lpc17_gpioirqdisable(int irq)
        * address of the GPIOINT registers for the port.
        */
 
-      uint32_t intbase = g_intbase[GPIO_NPORTS];
-      if (intabase != 0)
+      uint32_t intbase = g_intbase[port];
+      if (intbase != 0)
         {
           /* And get the pin number associated with the port */
 
-          unsigned int pin   = g_irq2pin(irq);
+          unsigned int pin   = lpc17_irq2pin(irq);
           lpc17_setintedge(intbase, pin, 0);
         }
     }
 }
-
-#warning "Still needs initialization, interrupt handling and decoding logic"
 
 #endif /* CONFIG_GPIO_IRQ */
 
