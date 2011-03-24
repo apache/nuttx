@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 21, 2011</p>
+      <p>Last Updated: March 23, 2011</p>
     </td>
   </tr>
 </table>
@@ -2157,7 +2157,18 @@ buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
+    * arch/arm/include/lpc17xx/irq.h and arch/arm/src/lpc17xx/lpc17_gpio*.c
+      -- Fix several bugs in the GPIO interrupt logic.  Submited by
+      Decio Renno.
+    * Initialization for the CONFIG_APPS_DIR is now supported during the
+      earlier, 'context' build phase.
+    * arch/arm/src/lpc17_gpioint.c -- Finish coding of the LPC17xx GPIO
+      interrupt logic.
+
 apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * Creation of auto-generated header files now occurs during the context
+      build phase.
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
