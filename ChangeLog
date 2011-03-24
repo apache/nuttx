@@ -1609,6 +1609,9 @@
 	  Decio Renno.
 	* Initialization for the CONFIG_APPS_DIR is now supported during the
 	  earlier, 'context' build phase.
+	* arch/arm/src/lpc17_gpioint.c -- Finish coding of the LPC17xx GPIO
+	  interrupt logic.
+
 
 	  
 

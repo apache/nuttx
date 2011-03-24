@@ -278,7 +278,7 @@ static int lpc17_pullup(uint16_t cfgset, unsigned int port, unsigned int pin)
  ****************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-static int lpc17_setintedge(unsigned int port, unsigned int pin, unsigned int value)
+static void lpc17_setintedge(unsigned int port, unsigned int pin, unsigned int value)
 {
   uint64_t *intedge;
   unsigned int shift;
@@ -287,11 +287,11 @@ static int lpc17_setintedge(unsigned int port, unsigned int pin, unsigned int va
 
   if (port == 0)
     {
-      intedge = g_intedge0;
+      intedge = &g_intedge0;
     }
   else if (port == 2)
     {
-      intedge  = g_intedge2;
+      intedge  = &g_intedge2;
     }
   else
     {
