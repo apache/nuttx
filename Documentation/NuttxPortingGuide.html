@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 21, 2011</p>
+      <p>Last Updated: March 23, 2011</p>
     </td>
   </tr>
 </table>
@@ -2698,6 +2698,11 @@ build
           <code>distclean</code>.
           Clean everthing -- auto-generated files, symbolic links etc. -- so that the directory contents are the same as the contents in your configuration management system.
           This is only done when you change the NuttX configuration.
+        </li>
+        <li>
+          <code>context</code>.
+          Perform one-time configuration-related setup.
+          This might includes such things as creating auto-generated files or symbolic links for directory configurations.
         </li>
         <li>
           <code>depend</code>.

@@ -1604,5 +1604,13 @@
 
 6.1 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* arch/arm/include/lpc17xx/irq.h and arch/arm/src/lpc17xx/lpc17_gpio*.c
+	  -- Fix several bugs in the GPIO interrupt logic.  Submited by
+	  Decio Renno.
+	* Initialization for the CONFIG_APPS_DIR is now supported during the
+	  earlier, 'context' build phase.
+
+	  
+
 
 	  

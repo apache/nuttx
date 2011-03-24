@@ -87,7 +87,7 @@ ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR) $(APPDIR)
 NONFSDIRS	= sched lib $(ARCH_SRC) mm $(ADDON_DIRS)
 FSDIRS		= fs drivers binfmt
 NETFSDIRS	= fs drivers
-CONTEXTDIRS	=
+CONTEXTDIRS	= $(APPDIR)
 
 ifeq ($(CONFIG_NX),y)
 NONFSDIRS	+= graphics
@@ -348,7 +348,6 @@ depend: context
 	done
 
 subdir_clean:
-	echo "CLEANDIRS: $(CLEANDIRS)"
 	@for dir in $(CLEANDIRS) ; do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" clean ; \
