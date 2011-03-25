@@ -202,6 +202,11 @@ EXTERN int net_vfcntl(int sockfd, int cmd, va_list ap);
 
 EXTERN int netdev_register(FAR struct uip_driver_s *dev);
 
+/* netdev-unregister.c *********************************************************/
+/* Unregister a network device driver. */
+
+EXTERN int netdev_unregister(FAR struct uip_driver_s *dev);
+
 /* net_foreach.c ************************************************************/
 /* Enumerates all registered network devices */
 

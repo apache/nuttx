@@ -80,6 +80,7 @@ uip_ipaddr_t g_allrouters;
  *   Perform one-time IGMP initialization.
  *
  ****************************************************************************/
+
 void uip_igmpinit(void)
 {
   nvdbg("IGMP initializing\n");
