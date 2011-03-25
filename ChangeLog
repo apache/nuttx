@@ -1611,6 +1611,8 @@
 	  earlier, 'context' build phase.
 	* arch/arm/src/lpc17_gpioint.c -- Finish coding of the LPC17xx GPIO
 	  interrupt logic.
+	* net/netdev_unregister.c -- Add capability to un-register a network
+	  device.
 
 
 	  
