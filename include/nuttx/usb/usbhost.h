@@ -282,6 +282,11 @@
  *   the request/descriptor memory.  If the underlying hardware does not support
  *   such "special" memory, this functions may simply map to malloc.
  *
+ *   This interface was optimized under a particular assumption.  It was assumed
+ *   that the driver maintains a pool of small, pre-allocated buffers for descriptor
+ *   traffic.  NOTE that size is not an input, but an output:  The size of the
+ *   pre-allocated buffer is returned.
+ *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
@@ -325,6 +330,60 @@
  ************************************************************************************/
 
 #define DRVR_FREE(drvr,buffer) ((drvr)->free(drvr,buffer))
+
+/************************************************************************************
+ * Name: DRVR_IOALLOC
+ *
+ * Description:
+ *   Some hardware supports special memory in which larger IO buffers can
+ *   be accessed more efficiently.  This method provides a mechanism to allocate
+ *   the request/descriptor memory.  If the underlying hardware does not support
+ *   such "special" memory, this functions may simply map to malloc.
+ *
+ *   This interface differs from DRVR_ALLOC in that the buffers are variable-sized.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   buffer - The address of a memory location provided by the caller in which to
+ *     return the allocated buffer memory address.
+ *   buflen - The size of the buffer required.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_IOALLOC(drvr,buffer,buflen) ((drvr)->ioalloc(drvr,buffer,buflen))
+
+/************************************************************************************
+ * Name: DRVR_IOFREE
+ *
+ * Description:
+ *   Some hardware supports special memory in which IO data can  be accessed more
+ *   efficiently.  This method provides a mechanism to free that IO buffer
+ *   memory.  If the underlying hardware does not support such "special" memory,
+ *   this functions may simply map to free().
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   buffer - The address of the allocated buffer memory to be freed.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_IOFREE(drvr,buffer) ((drvr)->iofree(drvr,buffer))
 
 /************************************************************************************
  * Name: DRVR_CTRLIN and DRVR_CTRLOUT
@@ -553,11 +612,28 @@ struct usbhost_driver_s
    * to allocate and free the transfer descriptor memory.  If the underlying
    * hardware does not support such "special" memory, these functions may
    * simply map to malloc and free.
+   *
+   * This interface was optimized under a particular assumption.  It was assumed
+   * that the driver maintains a pool of small, pre-allocated buffers for descriptor
+   * traffic.  NOTE that size is not an input, but an output:  The size of the
+   * pre-allocated buffer is returned.
    */
 
   int (*alloc)(FAR struct usbhost_driver_s *drvr,
                FAR uint8_t **buffer, FAR size_t *maxlen);
   int (*free)(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
+
+  /*   Some hardware supports special memory in which larger IO buffers can
+   *   be accessed more efficiently.  This method provides a mechanism to allocate
+   *   the request/descriptor memory.  If the underlying hardware does not support
+   *   such "special" memory, this functions may simply map to malloc.
+   *
+   *   This interface differs from DRVR_ALLOC in that the buffers are variable-sized.
+   */
+
+  int (*ioalloc)(FAR struct usbhost_driver_s *drvr,
+               FAR uint8_t **buffer, size_t buflen);
+  int (*iofree)(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
 
   /* Process a IN or OUT request on the control endpoint.  These methods
    * will enqueue the request and wait for it to complete.  Only one transfer may

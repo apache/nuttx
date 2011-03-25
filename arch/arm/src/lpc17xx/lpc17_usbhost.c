@@ -1,7 +1,7 @@
 /*******************************************************************************
  * arch/arm/src/lpc17xx/lpc17_usbhost.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Authors: Rafael Noronha <rafael@pdsolucoes.com.br>
  *            Gregory Nutt <spudmonkey@racsa.co.cr>
  *
@@ -251,8 +251,8 @@ static void lpc17_tdfree(struct lpc17_gtd_s *buffer);
 static uint8_t *lpc17_tballoc(void);
 static void lpc17_tbfree(uint8_t *buffer);
 #if LPC17_IOBUFFERS > 0
-static uint8_t *lpc17_ioalloc(void);
-static void lpc17_iofree(uint8_t *buffer);
+static uint8_t *lpc17_allocio(void);
+static void lpc17_freeio(uint8_t *buffer);
 #endif
 
 /* ED list helper functions ****************************************************/
@@ -304,6 +304,9 @@ static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
                        FAR uint8_t **buffer, FAR size_t *maxlen);
 static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
+static int lpc17_ioalloc(FAR struct usbhost_driver_s *drvr,
+                         FAR uint8_t **buffer, size_t buflen);
+static int lpc17_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
 static int lpc17_ctrlin(FAR struct usbhost_driver_s *drvr,
                         FAR const struct usb_ctrlreq_s *req,
                         FAR uint8_t *buffer);
@@ -338,6 +341,8 @@ static struct lpc17_usbhost_s g_usbhost =
       .epfree       = lpc17_epfree,
       .alloc        = lpc17_alloc,
       .free         = lpc17_free,
+      .ioalloc      = lpc17_ioalloc,
+      .iofree       = lpc17_iofree,
       .ctrlin       = lpc17_ctrlin,
       .ctrlout      = lpc17_ctrlout,
       .transfer     = lpc17_transfer,
@@ -656,7 +661,7 @@ static void lpc17_tbfree(uint8_t *buffer)
 }
 
 /*******************************************************************************
- * Name: lpc17_ioalloc
+ * Name: lpc17_allocio
  *
  * Description:
  *   Allocate an IO buffer from the free list
@@ -668,7 +673,7 @@ static void lpc17_tbfree(uint8_t *buffer)
  *******************************************************************************/
 
 #if LPC17_IOBUFFERS > 0
-static uint8_t *lpc17_ioalloc(void)
+static uint8_t *lpc17_allocio(void)
 {
   uint8_t *ret = (uint8_t *)g_iofree;
   if (ret)
@@ -680,7 +685,7 @@ static uint8_t *lpc17_ioalloc(void)
 #endif
 
 /*******************************************************************************
- * Name: lpc17_iofree
+ * Name: lpc17_freeio
  *
  * Description:
  *   Return an TD buffer to the free list
@@ -688,7 +693,7 @@ static uint8_t *lpc17_ioalloc(void)
  *******************************************************************************/
 
 #if LPC17_IOBUFFERS > 0
-static void lpc17_iofree(uint8_t *buffer)
+static void lpc17_freeio(uint8_t *buffer)
 {
   struct lpc17_list_s *iofree = (struct lpc17_list_s *)buffer;
   iofree->flink               = g_iofree;
@@ -1895,6 +1900,11 @@ static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   the request/descriptor memory.  If the underlying hardware does not support
  *   such "special" memory, this functions may simply map to malloc.
  *
+ *   This interface was optimized under a particular assumption.  It was assumed
+ *   that the driver maintains a pool of small, pre-allocated buffers for descriptor
+ *   traffic.  NOTE that size is not an input, but an output:  The size of the
+ *   pre-allocated buffer is returned.
+ *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
@@ -1969,6 +1979,89 @@ static int lpc17_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
   lpc17_tbfree(buffer);
   lpc17_givesem(&priv->exclsem);
   return OK;
+}
+
+/************************************************************************************
+ * Name: lpc17_ioalloc
+ *
+ * Description:
+ *   Some hardware supports special memory in which larger IO buffers can
+ *   be accessed more efficiently.  This method provides a mechanism to allocate
+ *   the request/descriptor memory.  If the underlying hardware does not support
+ *   such "special" memory, this functions may simply map to malloc.
+ *
+ *   This interface differs from DRVR_ALLOC in that the buffers are variable-sized.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   buffer - The address of a memory location provided by the caller in which to
+ *     return the allocated buffer memory address.
+ *   buflen - The size of the buffer required.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static int lpc17_ioalloc(FAR struct usbhost_driver_s *drvr,
+                         FAR uint8_t **buffer, size_t buflen)
+{
+  DEBUGASSERT(drvr && buffer);
+
+#if LPC17_IOBUFFERS > 0
+  if (buflen <= CONFIG_USBHOST_IOBUFSIZE)
+    {
+      FAR uint8_t *alloc = lpc17_allocio();
+      if (alloc)
+        {
+          *buffer = alloc;
+          return OK;
+        }
+    }
+  return -ENOMEM;
+#else
+  return -ENOSYS;
+#endif
+}
+
+/************************************************************************************
+ * Name: lpc17_iofree
+ *
+ * Description:
+ *   Some hardware supports special memory in which IO data can  be accessed more
+ *   efficiently.  This method provides a mechanism to free that IO buffer
+ *   memory.  If the underlying hardware does not support such "special" memory,
+ *   this functions may simply map to free().
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   buffer - The address of the allocated buffer memory to be freed.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static int lpc17_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+{
+  DEBUGASSERT(drvr && buffer);
+
+#if LPC17_IOBUFFERS > 0
+  lpc17_freeio(buffer);
+  return OK;
+#else
+  return -ENOSYS;
+#endif
 }
 
 /*******************************************************************************
@@ -2158,7 +2251,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       /* Allocate an IO buffer in AHB SRAM */
 
       origbuf = buffer;
-      buffer  = lpc17_ioalloc();
+      buffer  = lpc17_allocio();
       if (!buffer)
         {
           uvdbg("IO buffer allocation failed\n");
@@ -2255,7 +2348,7 @@ errout:
 
       /* Then free the temporary I/O buffer */
 
-      lpc17_iofree(buffer);
+      lpc17_freeio(buffer);
     }
 #endif
 
@@ -2519,7 +2612,7 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
     {
       /* Put the IO buffer in a free list */
 
-      lpc17_iofree(buffer);
+      lpc17_freeio(buffer);
       buffer += CONFIG_USBHOST_IOBUFSIZE;
     }
 #endif
