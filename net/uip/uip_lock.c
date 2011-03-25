@@ -4,7 +4,6 @@
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -156,7 +155,7 @@ void uip_unlock(uip_lock_t flags)
 
   if (g_count == 1)
     {
-      /* We no longer hold the semaphored */
+      /* We no longer hold the semaphore */
 
       g_holder = NO_HOLDER;
       g_count  = 0;
@@ -164,7 +163,7 @@ void uip_unlock(uip_lock_t flags)
     }
   else
     {
-      /* We still hold the seamphore. Just decrement the count */
+      /* We still hold the semaphore. Just decrement the count */
 
       g_count--;
     }
