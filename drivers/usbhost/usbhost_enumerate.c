@@ -129,18 +129,19 @@ static inline int usbhost_devdesc(const struct usb_devdesc_s *devdesc,
 
   memset(id, 0, sizeof(struct usbhost_id_s));
 
-  /* Pick off the ID info */
+  /* Pick off the class ID info */
 
   id->base     = devdesc->class;
   id->subclass = devdesc->subclass;
   id->proto    = devdesc->protocol;
-  uvdbg("class:%d subclass:%d protocol:%d\n", id->base, id->subclass, id->proto);
 
-  /* Yes, then pick off the VID and PID as well */
+  /* Pick off the VID and PID as well (for vendor specfic devices) */
 
   id->vid = usbhost_getle16(devdesc->vendor);
   id->pid = usbhost_getle16(devdesc->product);
-  uvdbg("vid:%d pid:%d\n", id->vid, id->pid);
+
+  uvdbg("class:%d subclass:%04x protocol:%04x vid:%d pid:%d\n",
+        id->base, id->subclass, id->proto, id->vid, id->pid);
   return OK;
 }
                                 
@@ -188,9 +189,8 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
       if (ifdesc->type == USB_DESC_TYPE_INTERFACE)
         {
           /* Yes, extract the class information from the interface descriptor.
-           * (We are going to need to do more than this here in the future:
-           *  ID information might lie elsewhere and we will need the VID and
-           *  PID as well).
+           * Typically these values are zero meaning that the "real" ID
+           * information resides in the device descriptor.
            */
  
           DEBUGASSERT(remaining >= sizeof(struct usb_ifdesc_s));

@@ -87,8 +87,9 @@
 static bool usbhost_idmatch(const struct usbhost_id_s *classid,
                             const struct usbhost_id_s *devid)
 {
-  uvdbg("Compare to class:%d subclass:%d protocol:%d\n",
-         classid->base, classid->subclass, classid->proto);
+  uvdbg("Compare to class:%d subclass:%d protocol:%d vid:%04x pid:%04x\n",
+         classid->base, classid->subclass, classid->proto,
+         classid->vid, classid->pid);
 
   /* The base class ID, subclass and protocol have to match up in any event */
 
@@ -156,8 +157,8 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
   int ndx;
 
   DEBUGASSERT(id);
-  uvdbg("Looking for class:%d subclass:%d protocol:%d\n",
-        id->base, id->subclass, id->proto);
+  uvdbg("Looking for class:%d subclass:%d protocol:%d vid:%04x pid:%04x\n",
+        id->base, id->subclass, id->proto, id->vid, id->pid);
 
   /* g_classregistry is a singly-linkedlist of class ID information added by
    * calls to usbhost_registerclass().  Since this list is accessed from USB
