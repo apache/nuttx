@@ -2,7 +2,9 @@
  * arch/arm/src/stm32/stm32_tim.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *           Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +35,11 @@
  *
  ************************************************************************************/
 
+/** \file
+ *  \author Gregory Nutt, Uros Platise
+ *  \brief STM32 Timers
+ */
+
 #ifndef __ARCH_ARM_SRC_STM32_STM32_TIM_H
 #define __ARCH_ARM_SRC_STM32_STM32_TIM_H
 
@@ -41,7 +48,6 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-
 #include "chip.h"
 
 /************************************************************************************
@@ -49,6 +55,38 @@
  ************************************************************************************/
 
 /* Register Offsets *****************************************************************/
+
+/* Basic Timers - TIM6 and TIM7 */
+
+#define STM32_BTIM_CR1_OFFSET     0x0000  /* Control register 1 (16-bit) */
+#define STM32_BTIM_CR2_OFFSET     0x0004  /* Control register 2 (16-bit) */
+#define STM32_BTIM_DIER_OFFSET    0x000c  /* DMA/Interrupt enable register (16-bit) */
+#define STM32_BTIM_SR_OFFSET      0x0010  /* Status register (16-bit) */
+#define STM32_BTIM_EGR_OFFSET     0x0014  /* Event generation register (16-bit) */
+#define STM32_BTIM_CNT_OFFSET     0x0024  /* Counter (16-bit) */
+#define STM32_BTIM_PSC_OFFSET     0x0028  /* Prescaler (16-bit) */
+#define STM32_BTIM_ARR_OFFSET     0x002c  /* Auto-reload register (16-bit) */
+
+/* General Timers - TIM2, TIM3, TIM4, and TIM5 */
+
+#define STM32_GTIM_CR1_OFFSET     0x0000  /* Control register 1 (16-bit) */
+#define STM32_GTIM_CR2_OFFSET     0x0004  /* Control register 2 (16-bit) */
+#define STM32_GTIM_SMCR_OFFSET    0x0008  /* Slave mode control register (16-bit) */
+#define STM32_GTIM_DIER_OFFSET    0x000c  /* DMA/Interrupt enable register (16-bit) */
+#define STM32_GTIM_SR_OFFSET      0x0010  /* Status register (16-bit) */
+#define STM32_GTIM_EGR_OFFSET     0x0014  /* Event generation register (16-bit) */
+#define STM32_GTIM_CCMR1_OFFSET   0x0018  /* Capture/compare mode register 1 (16-bit) */
+#define STM32_GTIM_CCMR2_OFFSET   0x001c  /* Capture/compare mode register 2 (16-bit) */
+#define STM32_GTIM_CCER_OFFSET    0x0020  /* Capture/compare enable register (16-bit) */
+#define STM32_GTIM_CNT_OFFSET     0x0024  /* Counter (16-bit) */
+#define STM32_GTIM_PSC_OFFSET     0x0028  /* Prescaler (16-bit) */
+#define STM32_GTIM_ARR_OFFSET     0x002c  /* Auto-reload register (16-bit) */
+#define STM32_GTIM_CCR1_OFFSET    0x0034  /* Capture/compare register 1 (16-bit) */
+#define STM32_GTIM_CCR2_OFFSET    0x0038  /* Capture/compare register 2 (16-bit) */
+#define STM32_GTIM_CCR3_OFFSET    0x003c  /* Capture/compare register 3 (16-bit) */
+#define STM32_GTIM_CCR4_OFFSET    0x0040  /* Capture/compare register 4 (16-bit) */
+#define STM32_GTIM_DCR_OFFSET     0x0048  /* DMA control register (16-bit) */
+#define STM32_GTIM_DMAR_OFFSET    0x004c  /* DMA address for burst mode (16-bit) */
 
 /* Advanced Timers - TIM1 and TIM8 */
 
@@ -72,38 +110,6 @@
 #define STM32_ATIM_BDTR_OFFSET    0x0044  /* Break and dead-time register (16-bit) */
 #define STM32_ATIM_DCR_OFFSET     0x0048  /* DMA control register (16-bit) */
 #define STM32_ATIM_DMAR_OFFSET    0x004c  /* DMA address for burst mode (16-bit) */
-
-/* General Timers - TIM2, TIM3, TIM4, and TIM5 */
-
-#define STM32_GTIM_CR1_OFFSET     0x0000  /* Control register 1 (16-bit) */
-#define STM32_GTIM_CR2_OFFSET     0x0004  /* Control register 2 (16-bit) */
-#define STM32_GTIM_SMCR_OFFSET    0x0008  /* Slave mode control register (16-bit) */
-#define STM32_GTIM_DIER_OFFSET    0x000c  /* DMA/Interrupt enable register (16-bit) */
-#define STM32_GTIM_SR_OFFSET      0x0010  /* Status register (16-bit) */
-#define STM32_GTIM_EGR_OFFSET     0x0014  /* Event generation register (16-bit) */
-#define STM32_GTIM_CCMR1_OFFSET   0x0018  /* Capture/compare mode register 1 (16-bit) */
-#define STM32_GTIM_CCMR2_OFFSET   0x001c  /* Capture/compare mode register 2 (16-bit) */
-#define STM32_GTIM_CCER_OFFSET    0x0020  /* Capture/compare enable register (16-bit) */
-#define STM32_GTIM_CNT_OFFSET     0x0024  /* Counter (16-bit) */
-#define STM32_GTIM_PSC_OFFSET     0x0028  /* Prescaler (16-bit) */
-#define STM32_GTIM_ARR_OFFSET     0x002c  /* Auto-reload register (16-bit) */
-#define STM32_GTIM_CCR1_OFFSET    0x0034  /* Capture/compare register 1 (16-bit) */
-#define STM32_GTIM_CCR2_OFFSET    0x0038  /* Capture/compare register 2 (16-bit) */
-#define STM32_GTIM_CCR3_OFFSET    0x003c  /* Capture/compare register 3 (16-bit) */
-#define STM32_GTIM_CCR4_OFFSET    0x0040  /* Capture/compare register 4 (16-bit) */
-#define STM32_GTIM_DCR_OFFSET     0x0048  /* DMA control register (16-bit) */
-#define STM32_GTIM_DMAR_OFFSET    0x004c  /* DMA address for burst mode (16-bit) */
-
-/* Basic Timers - TIM6 and TIM7 */
-
-#define STM32_BTIM_CR1_OFFSET     0x0000  /* Control register 1 (16-bit) */
-#define STM32_BTIM_CR2_OFFSET     0x0004  /* Control register 2 (16-bit) */
-#define STM32_BTIM_DIER_OFFSET    0x000c  /* DMA/Interrupt enable register (16-bit) */
-#define STM32_BTIM_SR_OFFSET      0x0010  /* Status register (16-bit) */
-#define STM32_BTIM_EGR_OFFSET     0x0014  /* Event generation register (16-bit) */
-#define STM32_BTIM_CNT_OFFSET     0x0024  /* Counter (16-bit) */
-#define STM32_BTIM_PSC_OFFSET     0x0028  /* Prescaler (16-bit) */
-#define STM32_BTIM_ARR_OFFSET     0x002c  /* Auto-reload register (16-bit) */
 
 /* Register Addresses ***************************************************************/
 
@@ -269,23 +275,23 @@
 
 /* Control register 1 */
 
-#define ATIM_SR_CEN               (1 << 0)  /* Bit 0: Counter enable */
-#define ATIM_SR_UDIS              (1 << 1)  /* Bit 1: Update disable */
-#define ATIM_SR_URS               (1 << 2)  /* Bit 2: Update request source */
-#define ATIM_SR_OPM               (1 << 3)  /* Bit 3: One pulse mode */
-#define ATIM_SR_DIR               (1 << 4)  /* Bit 4: Direction */
-#define ATIM_SR_CMS_SHIFT         (5)       /* Bits 6-5: Center-aligned mode selection */
-#define ATIM_SR_CMS_MASK          (3 << ATIM_SR_CMS_SHIFT)
-#  define ATIM_SR_EDGE            (0 << ATIM_SR_CMS_SHIFT) /* 00: Edge-aligned mode */
-#  define ATIM_SR_CENTER1         (1 << ATIM_SR_CMS_SHIFT) /* 01: Center-aligned mode 1 */
-#  define ATIM_SR_CENTER2         (2 << ATIM_SR_CMS_SHIFT) /* 10: Center-aligned mode 2 */
-#  define ATIM_SR_CENTER3         (3 << ATIM_SR_CMS_SHIFT) /* 11: Center-aligned mode 3 */
-#define ATIM_SR_ARPE              (1 << 7)  /* Bit 7: Auto-reload preload enable */
-#define ATIM_SR_CKD_SHIFT         (8)       /* Bits 9-8: Clock division */
-#define ATIM_SR_CKD_MASK          (3 << ATIM_SR_CKD_SHIFT)
-#  define ATIM_SR_TCKINT          (0 << ATIM_SR_CKD_SHIFT) /* 00: tDTS=tCK_INT */
-#  define ATIM_SR_2TCKINT         (1 << ATIM_SR_CKD_SHIFT) /* 01: tDTS=2*tCK_INT */
-#  define ATIM_SR_4TCKINT         (2 << ATIM_SR_CKD_SHIFT) /* 10: tDTS=4*tCK_INT */
+#define ATIM_CR1_CEN               (1 << 0)  /* Bit 0: Counter enable */
+#define ATIM_CR1_UDIS              (1 << 1)  /* Bit 1: Update disable */
+#define ATIM_CR1_URS               (1 << 2)  /* Bit 2: Update request source */
+#define ATIM_CR1_OPM               (1 << 3)  /* Bit 3: One pulse mode */
+#define ATIM_CR1_DIR               (1 << 4)  /* Bit 4: Direction */
+#define ATIM_CR1_CMS_SHIFT         (5)       /* Bits 6-5: Center-aligned mode selection */
+#define ATIM_CR1_CMS_MASK          (3 << ATIM_CR1_CMS_SHIFT)
+#  define ATIM_CR1_EDGE            (0 << ATIM_CR1_CMS_SHIFT) /* 00: Edge-aligned mode */
+#  define ATIM_CR1_CENTER1         (1 << ATIM_CR1_CMS_SHIFT) /* 01: Center-aligned mode 1 */
+#  define ATIM_CR1_CENTER2         (2 << ATIM_CR1_CMS_SHIFT) /* 10: Center-aligned mode 2 */
+#  define ATIM_CR1_CENTER3         (3 << ATIM_CR1_CMS_SHIFT) /* 11: Center-aligned mode 3 */
+#define ATIM_CR1_ARPE              (1 << 7)  /* Bit 7: Auto-reload preload enable */
+#define ATIM_CR1_CKD_SHIFT         (8)       /* Bits 9-8: Clock division */
+#define ATIM_CR1_CKD_MASK          (3 << ATIM_CR1_CKD_SHIFT)
+#  define ATIM_CR1_TCKINT          (0 << ATIM_CR1_CKD_SHIFT) /* 00: tDTS=tCK_INT */
+#  define ATIM_CR1_2TCKINT         (1 << ATIM_CR1_CKD_SHIFT) /* 01: tDTS=2*tCK_INT */
+#  define ATIM_CR1_4TCKINT         (2 << ATIM_CR1_CKD_SHIFT) /* 10: tDTS=4*tCK_INT */
 
 /* Control register 2 */
 
@@ -508,7 +514,7 @@
 
                                             /* Bits 1-0:(same as output compare mode) */
 #define ATIM_CCMR2_IC3PSC_SHIFT   (2)       /* Bits 3-2: Input Capture 3 Prescaler */
-#define ATIM_CCMR1_IC1PSC_MASK    (3 << ATIM_CCMR2_IC3PSC_SHIFT)
+#define ATIM_CCMR1_IC3PSC_MASK    (3 << ATIM_CCMR2_IC3PSC_SHIFT)
                                             /* (See common (unshifted) bit field definitions above) */
 #define ATIM_CCMR2_IC3F_SHIFT     (4)       /* Bits 7-4: Input Capture 3 Filter */
 #define ATIM_CCMR2_IC3F_MASK      (0x0f << ATIM_CCMR2_IC3F_SHIFT)
@@ -589,7 +595,7 @@
 
 /* Control register 2 */
 
-#define GTIM_CR2_CCDS             (1 << 3)  /* Bit 3: Capture/Compare DMA Selection.
+#define GTIM_CR2_CCDS             (1 << 3)  /* Bit 3: Capture/Compare DMA Selection. */
 #define GTIM_CR2_MMS_SHIFT        (4)       /* Bits 6-4: Master Mode Selection */
 #define GTIM_CR2_MMS_MASK         (7 << GTIM_CR2_MMS_SHIFT)
 #  define GTIM_CR2_RESET          (0 << GTIM_CR2_MMS_SHIFT) /* 000: Reset */
@@ -609,7 +615,7 @@
 #  define GTIM_SMCR_DISAB         (0 << GTIM_SMCR_SMS_SHIFT) /* 000: Slave mode disabled */
 #  define GTIM_SMCR_ENCMD1        (1 << GTIM_SMCR_SMS_SHIFT) /* 001: Encoder mode 1 */
 #  define GTIM_SMCR_ENCMD2        (2 << GTIM_SMCR_SMS_SHIFT) /* 010: Encoder mode 2 */
-#  define GTIM_SMCR_ENCMD2        (3 << GTIM_SMCR_SMS_SHIFT) /* 011: Encoder mode 3 */
+#  define GTIM_SMCR_ENCMD3        (3 << GTIM_SMCR_SMS_SHIFT) /* 011: Encoder mode 3 */
 #  define GTIM_SMCR_RESET         (4 << GTIM_SMCR_SMS_SHIFT) /* 100: Reset Mode  */
 #  define GTIM_SMCR_GATED         (5 << GTIM_SMCR_SMS_SHIFT) /* 101: Gated Mode  */
 #  define GTIM_SMCR_TRIGGER       (6 << GTIM_SMCR_SMS_SHIFT) /* 110: Trigger Mode */
@@ -856,17 +862,117 @@
 
 #define BTIM_EGR_UG               (1 << 0)  /* Bit 0: Update generation */
 
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
+/** TIM Device Structure
+ */
+struct stm32_tim_dev_s {
+    struct stm32_tim_ops_s *ops;
+};
+
+
+/** TIM Modes of Operation
+ */
+typedef enum {
+    STM32_TIM_MODE_UNUSED       = -1,
+    
+    /* One of the following */
+    STM32_TIM_MODE_MASK         = 0x0300,
+    STM32_TIM_MODE_DISABLED     = 0x0000,
+    STM32_TIM_MODE_UP           = 0x0100,
+    STM32_TIM_MODE_DOWN         = 0x0110,
+    STM32_TIM_MODE_UPDOWN       = 0x0200,
+    STM32_TIM_MODE_PULSE        = 0x0300,
+    
+    /* One of the following */
+    STM32_TIM_MODE_CK_INT       = 0x0000,
+//  STM32_TIM_MODE_CK_INT_TRIG  = 0x0400,
+//  STM32_TIM_MODE_CK_EXT       = 0x0800,
+//  STM32_TIM_MODE_CK_EXT_TRIG  = 0x0C00,
+
+    /* Clock sources, OR'ed with CK_EXT */
+//  STM32_TIM_MODE_CK_CHINVALID = 0x0000,
+//  STM32_TIM_MODE_CK_CH1       = 0x0001,
+//  STM32_TIM_MODE_CK_CH2       = 0x0002,
+//  STM32_TIM_MODE_CK_CH3       = 0x0003,
+//  STM32_TIM_MODE_CK_CH4       = 0x0004
+    
+    /* Todo: external trigger block */
+    
+} stm32_tim_mode_t;
+
+
+/** TIM Channel Modes
+ */
+typedef enum {
+    STM32_TIM_CH_DISABLED       = 0x00,
+    
+    /* Common configuration */
+    STM32_TIM_CH_POLARITY_POS   = 0x00,
+    STM32_TIM_CH_POLARITY_NEG   = 0x01,
+    
+    /* MODES: */
+    STM32_TIM_CH_MODE_MASK      = 0x06,
+    
+    /* Output Compare Modes */
+    STM32_TIM_CH_OUTPWM         = 0x04,     /** Enable standard PWM mode, active high when counter < compare */
+//  STM32_TIM_CH_OUTCOMPARE     = 0x06,
+    
+    // TODO other modes ... as PWM capture, ENCODER and Hall Sensor
+//  STM32_TIM_CH_INCAPTURE      = 0x10,
+//  STM32_TIM_CH_INPWM          = 0x20
+    
+} stm32_tim_channel_t;
+
+
+/** TIM Operations
+ */
+struct stm32_tim_ops_s {
+
+    /* Basic Timers */
+    
+    int	    (*setmode)(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
+    int     (*setclock)(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
+    void    (*setperiod)(FAR struct stm32_tim_dev_s *dev, uint16_t period);
+    
+    /* General and Advanced Timers Adds */
+    
+    int     (*setchannel)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, stm32_tim_channel_t mode);
+    int	    (*setcompare)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, uint16_t compare);
+    int	    (*getcapture)(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
+    
+    int     (*setisr)(FAR struct stm32_tim_dev_s *dev, int (*handler)(int irq, void *context), int source);
+    void    (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
+    void    (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
+    void    (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
+};
+
+
+/* Helpers */
+
+#define STM32_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
+#define STM32_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
+#define STM32_TIM_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
+#define STM32_TIM_SETCHANNEL(d,ch,mode) ((d)->ops->setchannel(d,ch,mode))
+#define STM32_TIM_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
+#define STM32_TIM_GETCAPTURE(d,ch)      ((d)->ops->getcapture(d,ch))
+#define STM32_TIM_SETISR(d,hnd,s)       ((d)->ops->setisr(d,hnd,s))
+#define STM32_TIM_ENABLEINT(d,s)        ((d)->ops->enableint(d,s))
+#define STM32_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
+#define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/** Power-up timer and get its structure */
+FAR struct stm32_tim_dev_s * stm32_tim_init(int timer);
+
+/** Power-down timer, mark it as unused */
+int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev);
 
 #endif /* __ARCH_ARM_SRC_STM32_STM32_TIM_H */
 
