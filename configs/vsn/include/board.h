@@ -105,7 +105,8 @@
 
 /* On-board external frequency source is 9MHz (HSE) provided by the CC1101, so it is
  * not available on power-up. Instead we are about to run on HSI*9 = 36 MHz, see 
- * up_sysclock.c for details. */
+ * up_sysclock.c for details. 
+ */
 
 #define STM32_BOARD_XTAL        9000000UL
 #define STM32_BOARD_HCLK       36000000UL
@@ -114,6 +115,7 @@
  * When HSI: PLL multiplier is 9, out frequency 36 MHz
  * When HSE: PLL multiplier is 8: out frequency is 9 MHz x 8 = 72MHz 
  */
+ 
 #define STM32_CFGR_PLLSRC_HSI  0
 #define STM32_CFGR_PLLMUL_HSI  RCC_CFGR_PLLMUL_CLKx9
 
@@ -134,13 +136,18 @@
 
 /* APB2 clock (PCLK2) is HCLK (36MHz) */
 
-#define STM32_RCC_CFGR_PPRE2   RCC_CFGR_PPRE2_HCLK
-#define STM32_PCLK2_FREQUENCY  STM32_BOARD_HCLK
+#define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK
+#define STM32_PCLK2_FREQUENCY   STM32_BOARD_HCLK
 
 /* APB1 clock (PCLK1) is HCLK (36MHz) */
 
-#define STM32_RCC_CFGR_PPRE1   RCC_CFGR_PPRE1_HCLK
-#define STM32_PCLK1_FREQUENCY  STM32_BOARD_HCLK
+#define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK
+#define STM32_PCLK1_FREQUENCY   STM32_BOARD_HCLK
+
+/* Timer 1..8 Frequencies */
+
+#define STM32_TIM27_FREQUENCY   (STM32_BOARD_HCLK)
+#define STM32_TIM18_FREQUENCY   (STM32_BOARD_HCLK)
 
 /* USB divider -- Divide PLL clock by 1.5 */
 
@@ -247,28 +254,10 @@ EXTERN uint8_t up_buttons(void);
 #endif
 
 
-/************************************************************************************
- * Memories
- *  - SDcard is tested to work up to 2 GB
- *  - RAMTRON has size of 128 kB
- ************************************************************************************/
-
-EXTERN int up_sdcard(void);
-EXTERN int up_ramtron(void);
-
-
-/************************************************************************************
- * Public Power Supply Contol
- ************************************************************************************/
-
-void board_power_reboot(void);
-void board_power_off(void);
-
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif /* __ARCH_BOARD_BOARD_H */

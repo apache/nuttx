@@ -35,18 +35,16 @@
  ****************************************************************************/
 
 /** \file
-  */
+ *  \author Uros Platise
+ *  \brief VSN System Clock Configuration
+ */
 
-#include <arch/board/board.h>
-#include "stm32_rcc.h"
-#include "stm32_gpio.h"
-#include "stm32_flash.h"
-#include "up_internal.h"
-#include "up_arch.h"
-#include "chip.h"
+#include "vsn.h"
 
 
-		/*--- Private ---*/
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/ 
 
 /** Selects internal HSI Clock, SYSCLK = 36 MHz, HCLK = 36 MHz
   *  - HSI at 8 MHz, :2 enters DPLL * 9, to get 36 MHz
@@ -67,28 +65,28 @@
   */
 void sysclock_select_hsi(void)
 {
-	uint32_t regval;
+    uint32_t regval;
 
-	// Are we running on HSE?
-	regval = getreg32(STM32_RCC_CR);
-	if (regval & RCC_CR_HSEON) {
-		
-		// \todo: check is if we are running on HSE, we need the step down sequenuce from HSE -> HSI
-		
-		return;	// do nothing at this time
-	}
-	
-	// Set FLASH prefetch buffer and 1 wait state
-	regval  = getreg32(STM32_FLASH_ACR);
-	regval &= ~ACR_LATENCY_MASK;
-	regval |= (ACR_LATENCY_1|ACR_PRTFBE);
-	putreg32(regval, STM32_FLASH_ACR);
-	 
+    // Are we running on HSE?
+    regval = getreg32(STM32_RCC_CR);
+    if (regval & RCC_CR_HSEON) {
+        
+        // \todo: check is if we are running on HSE, we need the step down sequenuce from HSE -> HSI
+        
+        return; // do nothing at this time
+    }
+    
+    // Set FLASH prefetch buffer and 1 wait state
+    regval  = getreg32(STM32_FLASH_ACR);
+    regval &= ~ACR_LATENCY_MASK;
+    regval |= (ACR_LATENCY_1|ACR_PRTFBE);
+    putreg32(regval, STM32_FLASH_ACR);
+     
     // Set the HCLK source/divider
-	regval = getreg32(STM32_RCC_CFGR);
-	regval &= ~RCC_CFGR_HPRE_MASK;
-	regval |= STM32_RCC_CFGR_HPRE_HSI;
-	putreg32(regval, STM32_RCC_CFGR);
+    regval = getreg32(STM32_RCC_CFGR);
+    regval &= ~RCC_CFGR_HPRE_MASK;
+    regval |= STM32_RCC_CFGR_HPRE_HSI;
+    putreg32(regval, STM32_RCC_CFGR);
 
     // Set the PCLK2 divider
     regval = getreg32(STM32_RCC_CFGR);
@@ -101,20 +99,27 @@ void sysclock_select_hsi(void)
     regval &= ~RCC_CFGR_PPRE1_MASK;
     regval |= STM32_RCC_CFGR_PPRE1;
     putreg32(regval, STM32_RCC_CFGR);
+    
+    // Set the TIM1..8 clock multipliers
+#ifdef STM32_TIM27_FREQMUL2  
+#endif
+
+#ifdef STM32_TIM18_FREQMUL2
+#endif
  
     // Set the PLL source = HSI, divider (/2) and multipler (*9)
-	regval = getreg32(STM32_RCC_CFGR);
-	regval &= ~(RCC_CFGR_PLLSRC|RCC_CFGR_PLLXTPRE|RCC_CFGR_PLLMUL_MASK);
-	regval |= (STM32_CFGR_PLLSRC_HSI|STM32_CFGR_PLLMUL_HSI);
-	putreg32(regval, STM32_RCC_CFGR);
+    regval = getreg32(STM32_RCC_CFGR);
+    regval &= ~(RCC_CFGR_PLLSRC|RCC_CFGR_PLLXTPRE|RCC_CFGR_PLLMUL_MASK);
+    regval |= (STM32_CFGR_PLLSRC_HSI|STM32_CFGR_PLLMUL_HSI);
+    putreg32(regval, STM32_RCC_CFGR);
  
     // Enable the PLL
-	regval = getreg32(STM32_RCC_CR);
-	regval |= RCC_CR_PLLON;
-	putreg32(regval, STM32_RCC_CR);
+    regval = getreg32(STM32_RCC_CR);
+    regval |= RCC_CR_PLLON;
+    putreg32(regval, STM32_RCC_CR);
  
     // Wait until the PLL is ready
-	while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
+    while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
  
     // Select the system clock source (probably the PLL)
     regval  = getreg32(STM32_RCC_CFGR);
@@ -126,9 +131,9 @@ void sysclock_select_hsi(void)
     while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
     
     // map port PD0 and PD1 on OSC pins
-	regval = getreg32(STM32_AFIO_MAPR);
-	regval |= AFIO_MAPR_PD01_REMAP;
-	putreg32(regval, STM32_AFIO_MAPR);
+    regval = getreg32(STM32_AFIO_MAPR);
+    regval |= AFIO_MAPR_PD01_REMAP;
+    putreg32(regval, STM32_AFIO_MAPR);
 }
 
 
@@ -146,21 +151,23 @@ void sysclock_select_hsi(void)
   */
 int sysclock_select_hse(void)
 {
-	uint32_t regval;
+    uint32_t regval;
 
     // be sure to release PD0 and PD1 pins from the OSC pins
-	regval = getreg32(STM32_AFIO_MAPR);
-	regval &= ~AFIO_MAPR_PD01_REMAP;
-	putreg32(regval, STM32_AFIO_MAPR);
+    regval = getreg32(STM32_AFIO_MAPR);
+    regval &= ~AFIO_MAPR_PD01_REMAP;
+    putreg32(regval, STM32_AFIO_MAPR);
 
-	// if (is cc1101 9 MHz clock output enabled), otherwise return with -1
-	// I think that clock register provides HSE valid signal to detect that as well.
-	
-	return 0;
+    // if (is cc1101 9 MHz clock output enabled), otherwise return with -1
+    // I think that clock register provides HSE valid signal to detect that as well.
+    
+    return 0;
 }
 
 
-		/*--- Interrupts ---*/
+/****************************************************************************
+ * Interrupts, Callbacks
+ ****************************************************************************/ 
 
 
 /** TODO: Interrupt on lost HSE clock, change it to HSI, ... restarting is 
@@ -173,7 +180,9 @@ void sysclock_hse_lost(void)
 }
 
 
-		/*--- Public API ---*/
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/ 
 
 /** Setup system clock, enabled when:
   *   - CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
@@ -181,5 +190,5 @@ void sysclock_hse_lost(void)
   */
 void stm32_board_clockconfig(void)
 {
-	sysclock_select_hsi();
+    sysclock_select_hsi();
 }

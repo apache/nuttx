@@ -2,11 +2,9 @@
  * configs/vsn/src/leds.c
  * arch/arm/src/board/leds.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *
- *   Authors: Gregory Nutt <spudmonkey@racsa.co.cr>
- *            Uros Platise <uros.platise@isotel.eu>
+ *   Authors: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,20 +35,22 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+/** \file
+ *  \author Uros Platise
+ *  \brief VSN LED
+ */
 
 #include <nuttx/config.h>
-
 #include <arch/board/board.h>
+
+#ifdef CONFIG_ARCH_LEDS
+
 #include <arch/stm32/irq.h>
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
 
-#include "up_arch.h"
 #include "vsn.h"
 
 
@@ -79,6 +79,7 @@
  
 irqstate_t irqidle_mask;
 
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -87,23 +88,17 @@ static void led_setonoff(unsigned int bits)
 {
 }
 
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_ledinit
- ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
    stm32_configgpio(GPIO_LED);
 }
 
-/****************************************************************************
- * Name: up_ledon
- ****************************************************************************/
 
 void up_ledon(int led)
 {
@@ -113,9 +108,6 @@ void up_ledon(int led)
   }
 }
 
-/****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
 
 void up_ledoff(int led)
 {

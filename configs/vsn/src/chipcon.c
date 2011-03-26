@@ -1,10 +1,9 @@
 /****************************************************************************
- * config/vsn/src/power.c
- * arch/arm/src/board/power.c
+ * configs/vsn/src/chipcon.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *
- *   Authors: Uros Platise <uros.platise@isotel.eu>
+ * 
+ *   Author: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,72 +36,48 @@
 
 /** \file
  *  \author Uros Platise
- *  \brief VSN Power
+ *  \brief Chipcon CC1101 Interface
  */
-
-#include <nuttx/config.h>
-
-#include <arch/board/board.h>
-#include <arch/stm32/irq.h>
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
-#include "vsn.h"
-
-
-/****************************************************************************
- * Declarations and Structures
- ****************************************************************************/ 
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/ 
-
-void board_power_register(void);
-void board_power_adjust(void);
-void board_power_status(void);
-
 
 
 /****************************************************************************
  * Public Functions
- ****************************************************************************/ 
+ ****************************************************************************/
 
-void board_power_init(void)
+/** Set external clock frequency, or disable it
+ */
+int chipcon_setXclock(int prescaler)
 {
-    stm32_configgpio(GPIO_PVS);
-    stm32_configgpio(GPIO_PST);
-    stm32_configgpio(GPIO_XPWR);
-    stm32_configgpio(GPIO_SCTC);
-    stm32_configgpio(GPIO_PCLR);
+	// check present state, if it is enabled (in the chip!)
+	
+	// change state and with OK if everything is OK.
+	
+	return ERROR;
 }
 
 
-void board_power_reboot(void)
+int chipcon_setchannel(uint16_t channel)
 {
-    // low-level board reset (not just MCU reset)
-    // if external power is present, stimulate power-off as board
-    // will wake-up immediatelly, if power is not present, set an alarm
-    // before power off the board.
 }
 
 
-void board_power_off(void)
+void chipcon_init(int spino)
 {
-    // Check if external supply is not present, otherwise return
-    // notifying that it is not possible to power-off the board
+	// create stream driver, where STDIN is packet oriented
+	// means that two messages received are kept separated
+	// in internal buffers.
+	
+	// default mode is AUTO, RX enabled and auto TX on writes and
+	// when chipcon is IDLE.
+}
 
-    // \todo
-    
-    // stop background processes
-    irqsave();
 
-    // switch to internal HSI and get the PD0 and PD1 as GPIO
-    sysclock_select_hsi();
+void chipcon_open(void)
+{
+}
 
-    // trigger shutdown with pull-up resistor (not push-pull!) and wait.
-    stm32_gpiowrite(GPIO_PCLR, true);
-    for(;;);
+
+void chipcon_ioctl(void)
+{
+	// access to setXclock
 }

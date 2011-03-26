@@ -1,6 +1,6 @@
 /****************************************************************************
- * config/vsn/src/power.c
- * arch/arm/src/board/power.c
+ * config/vsn/src/rtac.c
+ * arch/arm/src/board/rtac.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *
@@ -37,72 +37,46 @@
 
 /** \file
  *  \author Uros Platise
- *  \brief VSN Power
+ *  \brief Real Time Alarm Clock
+ * 
+ * Implementation of the Real-Time Alarm Clock as per SNP Specifications.
+ * It provides real-time and phase controlled timer module while it 
+ * cooperates with hardware RTC for low-power operation.
+ * 
+ * It provides a replacement for a system 32-bit UTC time/date counter.
+ * 
+ * It runs at maximum STM32 allowed precision of 16384 Hz, providing 
+ * resolution of 61 us, required by the Sensor Network Protocol.
  */
 
-#include <nuttx/config.h>
-
-#include <arch/board/board.h>
-#include <arch/stm32/irq.h>
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
-#include "vsn.h"
-
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
 
 /****************************************************************************
- * Declarations and Structures
- ****************************************************************************/ 
+ * Private Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
- ****************************************************************************/ 
-
-void board_power_register(void);
-void board_power_adjust(void);
-void board_power_status(void);
-
-
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
- ****************************************************************************/ 
+ ****************************************************************************/
 
-void board_power_init(void)
+/** Execute from a group of events
+ **/
+int rtac_execg(int group)
 {
-    stm32_configgpio(GPIO_PVS);
-    stm32_configgpio(GPIO_PST);
-    stm32_configgpio(GPIO_XPWR);
-    stm32_configgpio(GPIO_SCTC);
-    stm32_configgpio(GPIO_PCLR);
+    // called by each thread to spawn its apps given by its ID or group ID of
+    // multiple threads, when group parameter is set.
 }
 
 
-void board_power_reboot(void)
+/** Wait and execute from a group of events
+ **/
+int rtac_waitg(int group, int time)
 {
-    // low-level board reset (not just MCU reset)
-    // if external power is present, stimulate power-off as board
-    // will wake-up immediatelly, if power is not present, set an alarm
-    // before power off the board.
-}
-
-
-void board_power_off(void)
-{
-    // Check if external supply is not present, otherwise return
-    // notifying that it is not possible to power-off the board
-
-    // \todo
-    
-    // stop background processes
-    irqsave();
-
-    // switch to internal HSI and get the PD0 and PD1 as GPIO
-    sysclock_select_hsi();
-
-    // trigger shutdown with pull-up resistor (not push-pull!) and wait.
-    stm32_gpiowrite(GPIO_PCLR, true);
-    for(;;);
+    // blocking variant of rtac_exec with timeout if specified
 }

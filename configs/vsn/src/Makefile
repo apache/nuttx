@@ -38,17 +38,23 @@
 
 -include $(TOPDIR)/Make.defs
 
+#$(TOPDIR)/$(CONFIG_APPS_DIR)
+APPDIR		= $(TOPDIR)/../apps/
+
+-include $(APPDIR)/Make.defs
+
+APPNAME		= sif
+PRIORITY	= SCHED_PRIORITY_DEFAULT
+STACKSIZE	= 4096
+
 CFLAGS		+= -I$(TOPDIR)/sched
 
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		= sysclock.c boot.c leds.c buttons.c spi.c \
-			  usbdev.c power.c
+			  usbdev.c power.c sif.c
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= nsh.c
-endif
 ifeq ($(CONFIG_USBSTRG),y)
 CSRCS		+= usbstrg.c
 endif
@@ -79,6 +85,16 @@ libboard$(LIBEXT): $(OBJS)
 		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
+# Register application
+
+.context:
+	$(call REGISTER,$(APPNAME),$(PRIORITY),$(STACKSIZE),$(APPNAME)_main)
+	@touch $@
+
+context: .context
+
+# Create dependencies
+
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
@@ -90,6 +106,6 @@ clean:
 	$(call CLEAN)
 
 distclean: clean
-	@rm -f Make.dep .depend
+	@rm -f Make.dep .depend .context
 
 -include Make.dep

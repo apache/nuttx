@@ -2,11 +2,9 @@
  * configs/vsn/src/vsn.h
  * arch/arm/src/board/vsn.n
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Copyright (c) 2011 Uros Platise. All rights reserved.
  *
- *   Authors: Gregory Nutt <spudmonkey@racsa.co.cr>
- *            Uros Platise <uros.platise@isotel.eu>
+ *   Authors: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,20 +35,21 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_VSN_1_2_SRC_VSN_INTERNAL_H
+#ifndef __CONFIGS_VSN_SRC_VSN_INTERNAL_H
 #define __CONFIGS_VSN_SRC_VSN_INTERNAL_H
 
-/************************************************************************************
- * Included Files
- ************************************************************************************/
-
-#include <arch/board/board.h>
 #include <nuttx/config.h>
+#include <arch/board/board.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
+#include "stm32.h"
+#include "up_internal.h"
+#include "up_arch.h"
+
+
 /************************************************************************************
- * Definitions
+ * PIN Definitions
  ************************************************************************************/
 
 /* LED */
@@ -69,12 +68,53 @@
 #define GPIO_PCLR		(GPIO_INPUT |GPIO_CNF_INPULLDWN|GPIO_MODE_INPUT|GPIO_PORTD|GPIO_PIN1 )	// by default this pin is OSCOUT, requires REMAP
 #define GPIO_XPWR		(GPIO_INPUT |GPIO_CNF_INFLOAT  |GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN4 )
 
-/* FRAM */
+/* FRAM (alt pins are not listed here and are a part of SPI) */
 
 #define GPIO_FRAM_CS	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_50MHz|GPIO_PORTA|GPIO_PIN15|GPIO_OUTPUT_SET)
 
+/* Sensor Interface */
 
-/* Debug ********************************************************************/
+#define GPIO_GP1_HIZ	(GPIO_INPUT |GPIO_CNF_INFLOAT  |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN10)
+#define GPIO_GP1_PUP	(GPIO_INPUT |GPIO_CNF_INPULLUP |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN10)
+#define GPIO_GP1_PDN	(GPIO_INPUT |GPIO_CNF_INPULLDWN|GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN10)
+#define GPIO_GP1_LOW	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTB|GPIO_PIN10|GPIO_OUTPUT_CLEAR)
+#define GPIO_GP1_HIGH	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTB|GPIO_PIN10|GPIO_OUTPUT_SET)
+
+#define GPIO_GP2_HIZ	(GPIO_INPUT |GPIO_CNF_INFLOAT  |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN11)
+#define GPIO_GP2_PUP	(GPIO_INPUT |GPIO_CNF_INPULLUP |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN11)
+#define GPIO_GP2_PDN	(GPIO_INPUT |GPIO_CNF_INPULLDWN|GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN11)
+#define GPIO_GP2_LOW	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTB|GPIO_PIN11|GPIO_OUTPUT_CLEAR)
+#define GPIO_GP2_HIGH	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTB|GPIO_PIN11|GPIO_OUTPUT_SET)
+
+#define GPIO_OPA_INPUT	(GPIO_INPUT |GPIO_CNF_ANALOGIN |GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN0 )
+#define GPIO_OPA_ENABLE	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTC|GPIO_PIN1 |GPIO_OUTPUT_CLEAR)
+#define GPIO_OPA_REFAIN	(GPIO_INPUT |GPIO_CNF_ANALOGIN |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN0 )
+#define GPIO_OPA_REFPWM	(GPIO_ALT   |GPIO_CNF_AFPP     |GPIO_MODE_50MHz|GPIO_PORTB|GPIO_PIN0 )
+
+#define GPIO_OUT_PWRON  (GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTC|GPIO_PIN6 |GPIO_OUTPUT_CLEAR)
+#define GPIO_OUT_PWROFF	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTC|GPIO_PIN6 |GPIO_OUTPUT_SET)
+#define GPIO_OUT_PWRPWM	(GPIO_ALT   |GPIO_CNF_AFPP     |GPIO_MODE_10MHz|GPIO_PORTC|GPIO_PIN6 )
+#define GPIO_OUT_PWRPWM_TIM8_CH1P   1   /* TIM8.CH1 */
+
+#define GPIO_OUT_HIZ	(GPIO_INPUT |GPIO_CNF_INFLOAT  |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN1 )
+#define GPIO_OUT_PUP	(GPIO_INPUT |GPIO_CNF_INPULLUP |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN1 )
+#define GPIO_OUT_PDN	(GPIO_INPUT |GPIO_CNF_INPULLDWN|GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN1 )
+#define GPIO_OUT_LOW	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTB|GPIO_PIN1 |GPIO_OUTPUT_CLEAR)
+#define GPIO_OUT_HIGH	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTB|GPIO_PIN1 |GPIO_OUTPUT_SET)
+#define GPIO_OUT_AIN	(GPIO_INPUT |GPIO_CNF_ANALOGIN |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN1 )
+#define GPIO_OUT_PWM	(GPIO_ALT   |GPIO_CNF_AFPP     |GPIO_MODE_10MHz|GPIO_PORTB|GPIO_PIN1 )
+#define GPIO_OUT_PWM_TIM3_CH4       4   /* TIM3.CH4 */ 
+
+
+/* Radio Connector */
+
+
+/* Expansion Connector */
+
+
+/************************************************************************************
+ * Debugging
+ ************************************************************************************/
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG
@@ -90,10 +130,6 @@
 #  endif
 #endif
 
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
 
 /************************************************************************************
  * Public data
