@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 23, 2011</p>
+      <p>Last Updated: March 24, 2011</p>
     </td>
   </tr>
 </table>
@@ -2164,6 +2164,14 @@ nuttx-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       earlier, 'context' build phase.
     * arch/arm/src/lpc17_gpioint.c -- Finish coding of the LPC17xx GPIO
       interrupt logic.
+    * net/netdev_unregister.c -- Add capability to un-register a network
+      device.
+    * drivers/mmcsd/mmcsd_sdio.c: extra effort to correctly handle cases
+      without the SDcard (but one issue still exists in STM32)
+    * arch/arm/src/stm32/stm32_tim.*: Added basic timer support without
+      output PWMs and interrupt logic
+    * config/vsn/src: added basic support for Sensor Interface (GPIO and
+      Power Output, and the sif utility program)
 
 apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
