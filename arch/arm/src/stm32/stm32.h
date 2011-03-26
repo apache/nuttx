@@ -1,12 +1,8 @@
 /************************************************************************************
- * configs/vsn/src/boot.c
- * arch/arm/src/board/boot.c
+ * arch/arm/src/stm32/stm32.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
- *   Copyright (c) 2011 Uros Platise. All rights reserved.
- *
- *   Authors: Gregory Nutt <spudmonkey@racsa.co.cr>
- *            Uros Platise <uros.platise@isotel.eu>
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *   Author: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,53 +33,33 @@
  *
  ************************************************************************************/
 
-/** \file
- *  \author Gregory Nutt, Uros Platise
- *  \brief VSN Button
+#ifndef __ARCH_ARM_SRC_STM32_STM32_H
+#define __ARCH_ARM_SRC_STM32_STM32_H
+
+#include "chip.h"
+#include "stm32_adc.h"
+#include "stm32_bkp.h"
+#include "stm32_can.h"
+#include "stm32_dgbmcu.h"
+#include "stm32_dma.h"
+#include "stm32_exti.h"
+#include "stm32_flash.h"
+#include "stm32_fsmc.h"
+#include "stm32_gpio.h"
+#include "stm32_i2c.h"
+#include "stm32_pwr.h"
+#include "stm32_rcc.h"
+#include "stm32_rtc.h"
+#include "stm32_sdio.h"
+#include "stm32_spi.h"
+#include "stm32_tim.h"
+#include "stm32_uart.h"
+#include "stm32_usbdev.h"
+#include "stm32_wdg.h"
+
+/* TODO: Inconsistency! Code uses GPIO macros from this file instead from gpio.h! 
+ * _internal also includes pinmap.h file. 
  */
+#include "stm32_internal.h"     
 
-#include <debug.h>
-#include "vsn.h"
-
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-/** Initialize Board
- *
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
- **/
-
-void stm32_boardinitialize(void)
-{
-  /* Set start-up board voltage */
-
-  board_power_init();
-
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
-   */
-
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-  if (stm32_spiinitialize) stm32_spiinitialize();
-#endif
-
-   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-    * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-    * into the build.
-    */
-
-#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
-  if (stm32_usbinitialize) stm32_usbinitialize();
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
-#endif
-}
+#endif /* __ARCH_ARM_SRC_STM32_STM32_H */

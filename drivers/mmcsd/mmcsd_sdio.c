@@ -2033,7 +2033,7 @@ static void mmcsd_mediachange(FAR void *arg)
   DEBUGASSERT(priv);
 
   /* Is there a card present in the slot? */
-
+  
   mmcsd_takesem(priv);
   if (SDIO_PRESENT(priv->dev))
     {
@@ -2688,7 +2688,9 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
       if (ret != OK)
         {
           fdbg("ERROR: Failed to initialize card: %d\n", ret);
+#ifdef CONFIG_MMCSD_HAVECARDDETECT
           SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
+#endif
         }
       else
         {
@@ -2738,7 +2740,9 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
       /* There is no card in the slot */
 
       fvdbg("No card\n");
+#ifdef CONFIG_MMCSD_HAVECARDDETECT
       SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
+#endif
       ret = -ENODEV;
     }
 

@@ -38,11 +38,6 @@
 #ifndef __ARCH_BOARD_POWER_H
 #define __ARCH_BOARD_POWER_H
 
-
-/************************************************************************************
- * Included Files
- ************************************************************************************/
-
 #ifndef __ASSEMBLY__
 #undef EXTERN
 #if defined(__cplusplus)
@@ -53,14 +48,20 @@ extern "C" {
 #endif
 
 /************************************************************************************
- * Public Power Supply Contol
+ * Public Functions
  ************************************************************************************/
 
+/** Perform system reset on board level
+ */
 void board_power_reboot(void);
 
-/* If this function returns, it means, that it was not possible to power-off the board */
+/** Power off the board
+ * 
+ * If it returns, then it was not possible to power-off the board due to some
+ * other constraints. In the case of VSN due to external power supply, press
+ * of a push-button or RTC alarm.
+ */
 void board_power_off(void);
-
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -75,7 +75,7 @@
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and TIM8 */
 #  define STM32_NGTIM                    4   /* General timers TIM2,3,4,5 */
-#  define STM32 NBTIM                    2   /* Two basic timers TIM6 and TIM7 */
+#  define STM32_NBTIM                    2   /* Two basic timers TIM6 and TIM7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
 #  define STM32_NUSART                   5   /* USART1-5 */

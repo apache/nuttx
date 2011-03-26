@@ -1,11 +1,9 @@
 /****************************************************************************
  * configs/vsn/src/buttons.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *
- *   Authors: Gregory Nutt <spudmonkey@racsa.co.cr>
- *            Uros Platise <uros.platise@isotel.eu>
+ *   Authors: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,16 +34,17 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+/** \file
+ *  \author Uros Platise
+ *  \brief VSN Button
+ */
+
+#ifdef CONFIG_ARCH_BUTTONS
 
 #include <nuttx/config.h>
 #include <stdint.h>
 #include <arch/board/board.h>
 #include "vsn.h"
-
-#ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
  * Definitions
@@ -59,12 +58,19 @@
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+/** Called from an interrupt
+ * 
+ * \todo Measure the time button is being pressed, and then:
+ *  - if short signal all processes (tasks and threads) with 'button user request': SIGUSR1
+ *  - if long (>0.5 s) signal all with 'power-off request': SIGTERM
+ **/ 
+void buttons_callback(void)
+{
+}
+
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Public Functions
  ****************************************************************************/
 
 void up_buttoninit(void)
@@ -72,13 +78,11 @@ void up_buttoninit(void)
   stm32_configgpio(GPIO_PUSHBUTTON);
 }
 
-/****************************************************************************
- * Name: up_buttons
- ****************************************************************************/
 
 uint8_t up_buttons(void)
 {
   return stm32_gpioread(GPIO_PUSHBUTTON);
 }
+
 
 #endif /* CONFIG_ARCH_BUTTONS */
