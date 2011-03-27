@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32_gpio.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,8 @@
 #ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_GPIO_H
 #define __ARCH_ARM_SRC_STM32_CHIP_STM32_GPIO_H
 
-
 /************************************************************************************
- * Pre-processor Definitions (Hardware Register Descriptions)
+ * Pre-processor Definitions
  ************************************************************************************/
 
 #define STM32_NGPIO_PORTS            ((STM32_NGPIO + 15) >> 4)
@@ -362,3 +361,4 @@
 #define AFIO_EXTICR4_EXTI15_MASK     (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR4_EXTI15_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_GPIO_H */
+

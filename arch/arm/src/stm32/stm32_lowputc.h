@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_internal.h
+ * arch/arm/src/stm32/stm32_lowputc.h
  *
  *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,13 +33,47 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_INTERNAL_H
-#define __ARCH_ARM_SRC_STM32_STM32_INTERNAL_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_LOWPUTC_H
+#define __ARCH_ARM_SRC_STM32_STM32_LOWPUTC_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
-#include "stm32.h"
+#include <nuttx/config.h>
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_INTERNAL_H */
+#include "chip.h"
+
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/************************************************************************************
+ * Name: stm32_lowsetup
+ *
+ * Description:
+ *   Called at the very beginning of _start.  Performs low level initialization
+ *   of serial console.
+ *
+ ************************************************************************************/
+
+EXTERN void stm32_lowsetup(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_LOWPUTC_H */
+

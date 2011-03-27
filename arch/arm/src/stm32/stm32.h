@@ -36,6 +36,35 @@
 #ifndef __ARCH_ARM_SRC_STM32_STM32_H
 #define __ARCH_ARM_SRC_STM32_STM32_H
 
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
+#include <nuttx/config.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "up_internal.h"
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/* Additional Configuration *********************************************************/
+
+#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_VERBOSE)
+#  undef CONFIG_DEBUG_DMA
+#endif
+
+/* NVIC priority levels *************************************************************/
+
+#define NVIC_SYSH_PRIORITY_MIN     0xff /* All bits set in minimum priority */
+#define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
+#define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
+
+/* Peripherals **********************************************************************/
+
 #include "chip.h"
 #include "stm32_adc.h"
 #include "stm32_bkp.h"
@@ -56,10 +85,8 @@
 #include "stm32_uart.h"
 #include "stm32_usbdev.h"
 #include "stm32_wdg.h"
-
-/* TODO: Inconsistency! Code uses GPIO macros from this file instead from gpio.h! 
- * _internal also includes pinmap.h file. 
- */
-#include "stm32_internal.h"     
+#include "stm32_lowputc.h"
+#include "stm32_eth.h"
 
 #endif /* __ARCH_ARM_SRC_STM32_STM32_H */
+

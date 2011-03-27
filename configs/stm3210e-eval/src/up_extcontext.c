@@ -45,7 +45,7 @@
 #include <debug.h>
 
 #include "up_arch.h"
-#include "stm32_gpio.h"
+#include "stm32.h"
 #include "stm3210e-internal.h"
 
 #ifdef CONFIG_STM32_FSMC

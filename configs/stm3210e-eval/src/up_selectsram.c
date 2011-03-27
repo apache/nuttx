@@ -2,7 +2,7 @@
  * configs/stm3210e-eval/src/up_selectsram.c
  * arch/arm/src/board/up_selectsram.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,9 +46,7 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "stm32_fsmc.h"
-#include "stm32_gpio.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm3210e-internal.h"
 
 #ifdef CONFIG_STM32_FSMC

@@ -33,13 +33,12 @@
  *
  ************************************************************************************/
 
-/** \file
- *  \author Gregory Nutt <spudmonkey@racsa.co.cr>
- *  \brief Chip Definition provides over-all memory Map, and pin mapping
- **/
-
 #ifndef __ARCH_ARM_SRC_STM32_CHIP_H
 #define __ARCH_ARM_SRC_STM32_CHIP_H
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -76,7 +75,7 @@
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCRC                     0   /* No CRC */
 #  define STM32_NTHERNET                 0   /* No ethernet */
-#  include "stm32f103ze_pinmap.h"
+#  include "chip/stm32f103ze_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103RET6)
 #  undef CONFIG_STM32_LOWDENSITY             /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
@@ -97,7 +96,7 @@
 #  define STM32_NDAC                     2   /* DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NTHERNET                 0   /* No ethernet */
-#  include "stm32f103re_pinmap.h"
+#  include "chip/stm32f103re_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
 #  undef CONFIG_STM32_LOWDENSITY             /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
@@ -118,7 +117,7 @@
 #  define STM32_NDAC                     2   /* DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
-#  include "stm32f107vc_pinmap.h"
+#  include "chip/stm32f107vc_pinmap.h"
 
 #else
 #  error "Unsupported STM32 chip"
@@ -128,6 +127,7 @@
  * Other chip hardware files should then include this file for the proper setup
  */
 
-#include "stm32_memorymap.h"
+#include "chip/stm32_memorymap.h"
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_H */
+

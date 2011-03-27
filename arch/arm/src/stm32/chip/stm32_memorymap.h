@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_memorymap.h
+ * arch/arm/src/stm32/chip/stm32_memorymap.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,16 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_MEMORYMAP_H
-#define __ARCH_ARM_SRC_STM32_STM32_MEMORYMAP_H
-
-/************************************************************************************
- * Included Files
- ************************************************************************************/
-
-#include <nuttx/config.h>
-
-#include "chip.h"
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_MEMORYMAP_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32_MEMORYMAP_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -140,16 +132,5 @@
 #define STM32_SCS_BASE      0xe000e000
 #define STM32_DEBUGMCU_BASE 0xe0042000
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_MEMORYMAP_H */
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-#endif /* __ARCH_ARM_SRC_STM32_STM32_MEMORYMAP_H */

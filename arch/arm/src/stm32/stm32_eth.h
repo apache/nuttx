@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_internal.h
+ * arch/arm/src/stm32/stm32_eth.h
  *
- *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,59 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_INTERNAL_H
-#define __ARCH_ARM_SRC_STM32_STM32_INTERNAL_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_ETH_H
+#define __ARCH_ARM_SRC_STM32_STM32_ETH_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
-#include "stm32.h"
+#include <nuttx/config.h>
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_INTERNAL_H */
+#include "chip.h"
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/************************************************************************************
+ * Function: stm32_ethinitialize
+ *
+ * Description:
+ *   Initialize the Ethernet driver for one interface.  If the STM32 chip
+ *   supports multiple Ethernet controllers, then bould specific logic
+ *   must implement up_netinitialize() and call this function to initialize
+ *   the desiresed interfaces.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ************************************************************************************/
+
+#if STM32_NTHERNET > 1
+EXTERN int stm32_ethinitialize(int intf);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_ETH_H */
+

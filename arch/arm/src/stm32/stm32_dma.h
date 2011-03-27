@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_dma.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,329 +42,183 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+
 #include "chip.h"
-
-/************************************************************************************
- * Definitions
- ************************************************************************************/
-
-/* 7 DMA Channels */
-
-#define DMA1 0
-#define DMA2 1
-#define DMA3 2
-#define DMA4 3
-#define DMA5 4
-#define DMA6 5
-#define DMA7 6
-
-/* Register Offsets *****************************************************************/
-
-#define STM32_DMA_ISR_OFFSET        0x0000 /* DMA interrupt status register */
-#define STM32_DMA_IFCR_OFFSET       0x0004 /* DMA interrupt flag clear register */
-
-#define STM32_DMACHAN_OFFSET(n)    (0x0014*(n))
-#define STM32_DMACHAN_CCR_OFFSET   0x0008
-#define STM32_DMACHAN_CNDTR_OFFSET 0x000c
-#define STM32_DMACHAN_CPAR_OFFSET  0x0010
-#define STM32_DMACHAN_CMAR_OFFSET  0x0014
-
-#define STM32_DMA_CCR_OFFSET(n)   (STM32_DMACHAN_CCR_OFFSET+STM32_DMACHAN_OFFSET(n))
-#define STM32_DMA_CNDTR_OFFSET(n) (STM32_DMACHAN_CNDTR_OFFSET+STM32_DMACHAN_OFFSET(n))
-#define STM32_DMA_CPAR_OFFSET(n)  (STM32_DMACHAN_CPAR_OFFSET+STM32_DMACHAN_OFFSET(n))
-#define STM32_DMA_CMAR_OFFSET(n)  (STM32_DMACHAN_CMAR_OFFSET+STM32_DMACHAN_OFFSET(n))
-
-#define STM32_DMA_CCR1_OFFSET     0x0008 /* DMA channel 1 configuration register */
-#define STM32_DMA_CCR2_OFFSET     0x001c /* DMA channel 2 configuration register */
-#define STM32_DMA_CCR3_OFFSET     0x0030 /* DMA channel 3 configuration register */
-#define STM32_DMA_CCR4_OFFSET     0x0044 /* DMA channel 4 configuration register */
-#define STM32_DMA_CCR5_OFFSET     0x0058 /* DMA channel 5 configuration register */
-#define STM32_DMA_CCR6_OFFSET     0x006c /* DMA channel 6 configuration register */
-#define STM32_DMA_CCR7_OFFSET     0x0080 /* DMA channel 7 configuration register */
-
-#define STM32_DMA_CNDTR1_OFFSET   0x000c /* DMA channel 1 number of data register */
-#define STM32_DMA_CNDTR2_OFFSET   0x0020 /* DMA channel 2 number of data register */
-#define STM32_DMA_CNDTR3_OFFSET   0x0034 /* DMA channel 3 number of data register */
-#define STM32_DMA_CNDTR4_OFFSET   0x0048 /* DMA channel 4 number of data register */
-#define STM32_DMA_CNDTR5_OFFSET   0x005c /* DMA channel 5 number of data register */
-#define STM32_DMA_CNDTR6_OFFSET   0x0070 /* DMA channel 6 number of data register */
-#define STM32_DMA_CNDTR7_OFFSET   0x0084 /* DMA channel 7 number of data register */
-
-#define STM32_DMA_CPAR1_OFFSET    0x0010 /* DMA channel 1 peripheral address register */
-#define STM32_DMA_CPAR2_OFFSET    0x0024 /* DMA channel 2 peripheral address register */
-#define STM32_DMA_CPAR3_OFFSET    0x0038 /* DMA channel 3 peripheral address register */
-#define STM32_DMA_CPAR4_OFFSET    0x004c /* DMA channel 4 peripheral address register */
-#define STM32_DMA_CPAR5_OFFSET    0x0060 /* DMA channel 5 peripheral address register */
-#define STM32_DMA_CPAR6_OFFSET    0x0074 /* DMA channel 6 peripheral address register */
-#define STM32_DMA_CPAR7_OFFSET    0x0088 /* DMA channel 7 peripheral address register */
-
-#define STM32_DMA_CMAR1_OFFSET    0x0014 /* DMA channel 1 memory address register */
-#define STM32_DMA_CMAR2_OFFSET    0x0028 /* DMA channel 2 memory address register */
-#define STM32_DMA_CMAR3_OFFSET    0x003c /* DMA channel 3 memory address register */
-#define STM32_DMA_CMAR4_OFFSET    0x0050 /* DMA channel 4 memory address register */
-#define STM32_DMA_CMAR5_OFFSET    0x0064 /* DMA channel 5 memory address register */
-#define STM32_DMA_CMAR6_OFFSET    0x0078 /* DMA channel 6 memory address register */
-#define STM32_DMA_CMAR7_OFFSET    0x008c /* DMA channel 7 memory address register */
-
-/* Register Addresses ***************************************************************/
-
-#define STM32_DMA1_ISRC           (STM32_DMA1_BASE+STM32_DMA_ISR_OFFSET)
-#define STM32_DMA1_IFCR           (STM32_DMA1_BASE+STM32_DMA_IFCR_OFFSET)
-
-#define STM32_DMA1_CCR(n)         (STM32_DMA1_BASE+STM32_DMA_CCR_OFFSET(n))
-#define STM32_DMA1_CCR1           (STM32_DMA1_BASE+STM32_DMA_CCR1_OFFSET)
-#define STM32_DMA1_CCR2           (STM32_DMA1_BASE+STM32_DMA_CCR2_OFFSET)
-#define STM32_DMA1_CCR3           (STM32_DMA1_BASE+STM32_DMA_CCR3_OFFSET)
-#define STM32_DMA1_CCR4           (STM32_DMA1_BASE+STM32_DMA_CCR4_OFFSET)
-#define STM32_DMA1_CCR5           (STM32_DMA1_BASE+STM32_DMA_CCR5_OFFSET)
-#define STM32_DMA1_CCR6           (STM32_DMA1_BASE+STM32_DMA_CCR6_OFFSET)
-#define STM32_DMA1_CCR7           (STM32_DMA1_BASE+STM32_DMA_CCR7_OFFSET)
-
-#define STM32_DMA1_CNDTR(n)       (STM32_DMA1_BASE+STM32_DMA_CNDTR_OFFSET(n))
-#define STM32_DMA1_CNDTR1         (STM32_DMA1_BASE+STM32_DMA_CNDTR1_OFFSET)
-#define STM32_DMA1_CNDTR2         (STM32_DMA1_BASE+STM32_DMA_CNDTR2_OFFSET)
-#define STM32_DMA1_CNDTR3         (STM32_DMA1_BASE+STM32_DMA_CNDTR3_OFFSET)
-#define STM32_DMA1_CNDTR4         (STM32_DMA1_BASE+STM32_DMA_CNDTR4_OFFSET)
-#define STM32_DMA1_CNDTR5         (STM32_DMA1_BASE+STM32_DMA_CNDTR5_OFFSET)
-#define STM32_DMA1_CNDTR6         (STM32_DMA1_BASE+STM32_DMA_CNDTR6_OFFSET)
-#define STM32_DMA1_CNDTR7         (STM32_DMA1_BASE+STM32_DMA_CNDTR7_OFFSET)
-
-#define STM32_DMA1_CPAR(n)        (STM32_DMA1_BASE+STM32_DMA_CPAR_OFFSET(n))
-#define STM32_DMA1_CPAR1          (STM32_DMA1_BASE+STM32_DMA_CPAR1_OFFSET)
-#define STM32_DMA1_CPAR2          (STM32_DMA1_BASE+STM32_DMA_CPAR2_OFFSET)
-#define STM32_DMA1_CPAR3          (STM32_DMA1_BASE+STM32_DMA_CPAR3_OFFSET)
-#define STM32_DMA1_CPAR4          (STM32_DMA1_BASE+STM32_DMA_CPAR4_OFFSET)
-#define STM32_DMA1_CPAR5          (STM32_DMA1_BASE+STM32_DMA_CPAR5_OFFSET)
-#define STM32_DMA1_CPAR6          (STM32_DMA1_BASE+STM32_DMA_CPAR6_OFFSET)
-#define STM32_DMA1_CPAR7          (STM32_DMA1_BASE+STM32_DMA_CPAR7_OFFSET)
-
-#define STM32_DMA1_CMAR(n)        (STM32_DMA1_BASE+STM32_DMA_CMAR_OFFSET(n))
-#define STM32_DMA1_CMAR1          (STM32_DMA1_BASE+STM32_DMA_CMAR1_OFFSET)
-#define STM32_DMA1_CMAR2          (STM32_DMA1_BASE+STM32_DMA_CMAR2_OFFSET)
-#define STM32_DMA1_CMAR3          (STM32_DMA1_BASE+STM32_DMA_CMAR3_OFFSET)
-#define STM32_DMA1_CMAR4          (STM32_DMA1_BASE+STM32_DMA_CMAR4_OFFSET)
-#define STM32_DMA1_CMAR5          (STM32_DMA1_BASE+STM32_DMA_CMAR5_OFFSET)
-#define STM32_DMA1_CMAR6          (STM32_DMA1_BASE+STM32_DMA_CMAR6_OFFSET)
-#define STM32_DMA1_CMAR7          (STM32_DMA1_BASE+STM32_DMA_CMAR7_OFFSET)
-
-#define STM32_DMA2_ISRC           (STM32_DMA2_BASE+STM32_DMA_ISR_OFFSET)
-#define STM32_DMA2_IFCR           (STM32_DMA2_BASE+STM32_DMA_IFCR_OFFSET)
-
-#define STM32_DMA2_CCR(n)         (STM32_DMA2_BASE+STM32_DMA_CCR_OFFSET(n))
-#define STM32_DMA2_CCR1           (STM32_DMA2_BASE+STM32_DMA_CCR1_OFFSET)
-#define STM32_DMA2_CCR2           (STM32_DMA2_BASE+STM32_DMA_CCR2_OFFSET)
-#define STM32_DMA2_CCR3           (STM32_DMA2_BASE+STM32_DMA_CCR3_OFFSET)
-#define STM32_DMA2_CCR4           (STM32_DMA2_BASE+STM32_DMA_CCR4_OFFSET)
-#define STM32_DMA2_CCR5           (STM32_DMA2_BASE+STM32_DMA_CCR5_OFFSET)
-
-#define STM32_DMA2_CNDTR(n)       (STM32_DMA2_BASE+STM32_DMA_CNDTR_OFFSET(n))
-#define STM32_DMA2_CNDTR1         (STM32_DMA2_BASE+STM32_DMA_CNDTR1_OFFSET)
-#define STM32_DMA2_CNDTR2         (STM32_DMA2_BASE+STM32_DMA_CNDTR2_OFFSET)
-#define STM32_DMA2_CNDTR3         (STM32_DMA2_BASE+STM32_DMA_CNDTR3_OFFSET)
-#define STM32_DMA2_CNDTR4         (STM32_DMA2_BASE+STM32_DMA_CNDTR4_OFFSET)
-#define STM32_DMA2_CNDTR5         (STM32_DMA2_BASE+STM32_DMA_CNDTR5_OFFSET)
-
-#define STM32_DMA2_CPAR(n)        (STM32_DMA2_BASE+STM32_DMA_CPAR_OFFSET(n))
-#define STM32_DMA2_CPAR1          (STM32_DMA2_BASE+STM32_DMA_CPAR1_OFFSET)
-#define STM32_DMA2_CPAR2          (STM32_DMA2_BASE+STM32_DMA_CPAR2_OFFSET)
-#define STM32_DMA2_CPAR3          (STM32_DMA2_BASE+STM32_DMA_CPAR3_OFFSET)
-#define STM32_DMA2_CPAR4          (STM32_DMA2_BASE+STM32_DMA_CPAR4_OFFSET)
-#define STM32_DMA2_CPAR5          (STM32_DMA2_BASE+STM32_DMA_CPAR5_OFFSET)
-
-#define STM32_DMA2_CMAR(n)        (STM32_DMA2_BASE+STM32_DMA_CMAR_OFFSET(n))
-#define STM32_DMA2_CMAR1          (STM32_DMA2_BASE+STM32_DMA_CMAR1_OFFSET)
-#define STM32_DMA2_CMAR2          (STM32_DMA2_BASE+STM32_DMA_CMAR2_OFFSET)
-#define STM32_DMA2_CMAR3          (STM32_DMA2_BASE+STM32_DMA_CMAR3_OFFSET)
-#define STM32_DMA2_CMAR4          (STM32_DMA2_BASE+STM32_DMA_CMAR4_OFFSET)
-#define STM32_DMA2_CMAR5          (STM32_DMA2_BASE+STM32_DMA_CMAR5_OFFSET)
-
-/* Register Bitfield Definitions ****************************************************/
-
-#define DMA_CHAN_SHIFT(n)         ((n) << 2)
-#define DMA_CHAN_MASK             0x0f
-#define DMA_CHAN_GIF_BIT          (1 << 0)  /* Bit 0: Channel Global interrupt flag */
-#define DMA_CHAN_TCIF_BIT         (1 << 1)  /* Bit 1: Channel Transfer Complete flag */
-#define DMA_CHAN_HTIF_BIT         (1 << 2)  /* Bit 2: Channel Half Transfer flag */
-#define DMA_CHAN_TEIF_BIT         (1 << 3)  /* Bit 3: Channel Transfer Error flag */
-
-/* DMA interrupt status register */
-
-#define DMA_ISR_CHAN_SHIFT(n)     DMA_CHAN_SHIFT(n)
-#define DMA_ISR_CHAN_MASK(n)      (DMA_CHAN_MASK <<  DMA_ISR_CHAN_SHIFT(n))
-#define DMA_ISR_CHAN1_SHIFT       (0)       /* Bits 3-0:  DMA Channel 1 interrupt status */
-#define DMA_ISR_CHAN1_MASK        (DMA_CHAN_MASK <<  DMA_ISR_CHAN1_SHIFT)
-#define DMA_ISR_CHAN2_SHIFT       (4)       /* Bits 7-4:  DMA Channel 2 interrupt status */
-#define DMA_ISR_CHAN2_MASK        (DMA_CHAN_MASK <<  DMA_ISR_CHAN2_SHIFT)
-#define DMA_ISR_CHAN3_SHIFT       (8)       /* Bits 11-8:  DMA Channel 3 interrupt status */
-#define DMA_ISR_CHAN3_MASK        (DMA_CHAN_MASK <<  DMA_ISR_CHAN3_SHIFT)
-#define DMA_ISR_CHAN4_SHIFT       (12)      /* Bits 15-12:  DMA Channel 4 interrupt status */
-#define DMA_ISR_CHAN4_MASK        (DMA_CHAN_MASK <<  DMA_ISR_CHAN4_SHIFT)
-#define DMA_ISR_CHAN5_SHIFT       (16)      /* Bits 19-16:  DMA Channel 5 interrupt status */
-#define DMA_ISR_CHAN5_MASK        (DMA_CHAN_MASK <<  DMA_ISR_CHAN5_SHIFT)
-#define DMA_ISR_CHAN6_SHIFT       (20)      /* Bits 23-20:  DMA Channel 6 interrupt status */
-#define DMA_ISR_CHAN6_MASK        (DMA_CHAN_MASK <<  DMA_ISR_CHAN6_SHIFT)
-#define DMA_ISR_CHAN7_SHIFT       (24)      /* Bits 27-24:  DMA Channel 7 interrupt status */
-#define DMA_ISR_CHAN7_MASK        (DMA_CHAN_MASK <<  DMA_ISR_CHAN7_SHIFT)
-
-#define DMA_ISR_GIF(n)            (DMA_CHAN_GIF_BIT << DMA_ISR_CHAN_SHIFT(n))
-#define DMA_ISR_TCIF(n)           (DMA_CHAN_TCIF_BIT << DMA_ISR_CHAN_SHIFT(n))
-#define DMA_ISR_HTIF(n)           (DMA_CHAN_HTIF_BIT << DMA_ISR_CHAN_SHIFT(n))
-#define DMA_ISR_TEIF(n)           (DMA_CHAN_TEIF_BIT << DMA_ISR_CHAN_SHIFT(n))
-
-/* DMA interrupt flag clear register */
-
-#define DMA_IFCR_CHAN_SHIFT(n)    DMA_CHAN_SHIFT(n)
-#define DMA_IFCR_CHAN_MASK(n)     (DMA_CHAN_MASK <<  DMA_IFCR_CHAN_SHIFT(n))
-#define DMA_IFCR_CHAN1_SHIFT      (0)       /* Bits 3-0:  DMA Channel 1 interrupt flag clear */
-#define DMA_IFCR_CHAN1_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN1_SHIFT)
-#define DMA_IFCR_CHAN2_SHIFT      (4)       /* Bits 7-4:  DMA Channel 2 interrupt flag clear */
-#define DMA_IFCR_CHAN2_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN2_SHIFT)
-#define DMA_IFCR_CHAN3_SHIFT      (8)       /* Bits 11-8:  DMA Channel 3 interrupt flag clear */
-#define DMA_IFCR_CHAN3_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN3_SHIFT)
-#define DMA_IFCR_CHAN4_SHIFT      (12)      /* Bits 15-12:  DMA Channel 4 interrupt flag clear */
-#define DMA_IFCR_CHAN4_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN4_SHIFT)
-#define DMA_IFCR_CHAN5_SHIFT      (16)      /* Bits 19-16:  DMA Channel 5 interrupt flag clear */
-#define DMA_IFCR_CHAN5_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN5_SHIFT)
-#define DMA_IFCR_CHAN6_SHIFT      (20)      /* Bits 23-20:  DMA Channel 6 interrupt flag clear */
-#define DMA_IFCR_CHAN6_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN6_SHIFT)
-#define DMA_IFCR_CHAN7_SHIFT      (24)      /* Bits 27-24:  DMA Channel 7 interrupt flag clear */
-#define DMA_IFCR_CHAN7_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN7_SHIFT)
-#define DMA_IFCR_ALLCHANNELS      (0x0fffffff)
-
-#define DMA_IFCR_CGIF(n)          (DMA_CHAN_GIF_BIT << DMA_IFCR_CHAN_SHIFT(n))
-#define DMA_IFCR_CTCIF(n)         (DMA_CHAN_TCIF_BIT << DMA_IFCR_CHAN_SHIFT(n))
-#define DMA_IFCR_CHTIF(n)         (DMA_CHAN_HTIF_BIT << DMA_IFCR_CHAN_SHIFT(n))
-#define DMA_IFCR_CTEIF(n)         (DMA_CHAN_TEIF_BIT << DMA_IFCR_CHAN_SHIFT(n))
-
-/* DMA channel configuration register */
-
-#define DMA_CCR_MEM2MEM           (1 << 14) /* Bit 14: Memory to memory mode */
-#define DMA_CCR_PL_SHIFT          (12)      /* Bits 13-12: Channel Priority level */
-#define DMA_CCR_PL_MASK           (3 << DMA_CCR_PL_SHIFT)
-#  define DMA_CCR_PRILO           (0 << DMA_CCR_PL_SHIFT) /* 00: Low */
-#  define DMA_CCR_PRIMED          (1 << DMA_CCR_PL_SHIFT) /* 01: Medium */
-#  define DMA_CCR_PRIHI           (2 << DMA_CCR_PL_SHIFT) /* 10: High */
-#  define DMA_CCR_PRIVERYHI       (3 << DMA_CCR_PL_SHIFT) /* 11: Very high */
-#define DMA_CCR_MSIZE_SHIFT       (10)      /* Bits 11-10: Memory size */
-#define DMA_CCR_MSIZE_MASK        (3 << DMA_CCR_MSIZE_SHIFT)
-#  define DMA_CCR_MSIZE_8BITS     (0 << DMA_CCR_MSIZE_SHIFT) /* 00: 8-bits */
-#  define DMA_CCR_MSIZE_16BITS    (1 << DMA_CCR_MSIZE_SHIFT) /* 01: 16-bits */
-#  define DMA_CCR_MSIZE_32BITS    (2 << DMA_CCR_MSIZE_SHIFT) /* 10: 32-bits */
-#define DMA_CCR_PSIZE_SHIFT       (8)       /* Bits 9-8: Peripheral size */
-#define DMA_CCR_PSIZE_MASK        (3 << DMA_CCR_PSIZE_SHIFT)
-#  define DMA_CCR_PSIZE_8BITS     (0 << DMA_CCR_PSIZE_SHIFT) /* 00: 8-bits */
-#  define DMA_CCR_PSIZE_16BITS    (1 << DMA_CCR_PSIZE_SHIFT) /* 01: 16-bits */
-#  define DMA_CCR_PSIZE_32BITS    (2 << DMA_CCR_PSIZE_SHIFT) /* 10: 32-bits */
-#define DMA_CCR_MINC              (1 << 7)  /* Bit 7: Memory increment mode */
-#define DMA_CCR_PINC              (1 << 6)  /* Bit 6: Peripheral increment mode */
-#define DMA_CCR_CIRC              (1 << 5)  /* Bit 5: Circular mode */
-#define DMA_CCR_DIR               (1 << 4)  /* Bit 4: Data transfer direction */
-#define DMA_CCR_TEIE              (1 << 3)  /* Bit 3: Transfer error interrupt enable */
-#define DMA_CCR_HTIE              (1 << 2)  /* Bit 2: Half Transfer interrupt enable */
-#define DMA_CCR_TCIE              (1 << 1)  /* Bit 1: Transfer complete interrupt enable */
-#define DMA_CCR_EN                (1 << 0)  /* Bit 0: Channel enable */
-
-#define DMA_CCR_ALLINTS           (DMA_CCR_TEIE|DMA_CCR_HTIE|DMA_CCR_TCIE)
-
-/* DMA channel number of data register */
-
-#define DMA_CNDTR_NDT_SHIFT       (0)       /* Bits 15-0: Number of data to Transfer */
-#define DMA_CNDTR_NDT_MASK       (0xffff << DMA_CNDTR_NDT_SHIFT)
-
-/* DMA Channel mapping.  Each DMA channel has a mapping to several possible
- * sources/sinks of data.  The requests from peripherals assigned to a channel
- * are simply OR'ed together before entering the DMA block.  This means that only
- * one request on a given channel can be enabled at once.
- */
-
-#define STM32_DMA1_CHAN1          (0)
-#define STM32_DMA1_CHAN2          (1)
-#define STM32_DMA1_CHAN3          (2)
-#define STM32_DMA1_CHAN4          (3)
-#define STM32_DMA1_CHAN5          (4)
-#define STM32_DMA1_CHAN6          (5)
-#define STM32_DMA1_CHAN7          (6)
-
-#define STM32_DMA2_CHAN1          (7)
-#define STM32_DMA2_CHAN2          (8)
-#define STM32_DMA2_CHAN3          (1)
-#define STM32_DMA2_CHAN4          (10)
-#define STM32_DMA2_CHAN5          (11)
-
-#define DMACHAN_ADC1              STM32_DMA1_CHAN1
-#define DMACHAN_TIM2_CH3          STM32_DMA1_CHAN1
-#define DMACHAN_TIM4_CH1          STM32_DMA1_CHAN1
-#define DMACHAN_SPI1_RX           STM32_DMA1_CHAN2
-#define DMACHAN_USART3_TX         STM32_DMA1_CHAN2
-#define DMACHAN_TIM1_CH1          STM32_DMA1_CHAN2
-#define DMACHAN_TIM2_UP           STM32_DMA1_CHAN2
-#define DMACHAN_TIM3_CH3          STM32_DMA1_CHAN2
-#define DMACHAN_SPI1_TX           STM32_DMA1_CHAN3
-#define DMACHAN_USART3_RX         STM32_DMA1_CHAN3
-#define DMACHAN_TIM1_CH2          STM32_DMA1_CHAN3
-#define DMACHAN_TIM3_CH4          STM32_DMA1_CHAN3
-#define DMACHAN_TIM3_UP           STM32_DMA1_CHAN3
-#define DMACHAN_SPI2_RX           STM32_DMA1_CHAN4
-#define DMACHAN_I2S2_RX           STM32_DMA1_CHAN4
-#define DMACHAN_USART1_TX         STM32_DMA1_CHAN4
-#define DMACHAN_I2C2_TX           STM32_DMA1_CHAN4
-#define DMACHAN_TIM1_CH4          STM32_DMA1_CHAN4
-#define DMACHAN_TIM1_TRIG         STM32_DMA1_CHAN4
-#define DMACHAN_TIM1_COM          STM32_DMA1_CHAN4
-#define DMACHAN_TIM4_CH2          STM32_DMA1_CHAN4
-#define DMACHAN_SPI2_TX           STM32_DMA1_CHAN5
-#define DMACHAN_I2S2_TX           STM32_DMA1_CHAN5
-#define DMACHAN_USART1_RX         STM32_DMA1_CHAN5
-#define DMACHAN_I2C2_RX           STM32_DMA1_CHAN5
-#define DMACHAN_TIM1_UP           STM32_DMA1_CHAN5
-#define DMACHAN_TIM2_CH1          STM32_DMA1_CHAN5
-#define DMACHAN_TIM4_CH3          STM32_DMA1_CHAN5
-#define DMACHAN_USART2_RX         STM32_DMA1_CHAN6
-#define DMACHAN_I2C1_TX           STM32_DMA1_CHAN6
-#define DMACHAN_TIM1_CH3          STM32_DMA1_CHAN6
-#define DMACHAN_TIM3_CH1          STM32_DMA1_CHAN6
-#define DMACHAN_TIM3_TRIG         STM32_DMA1_CHAN6
-#define DMACHAN_USART2_TX         STM32_DMA1_CHAN7
-#define DMACHAN_I2C1_RX           STM32_DMA1_CHAN7
-#define DMACHAN_TIM2_CH2          STM32_DMA1_CHAN7
-#define DMACHAN_TIM2_CH4          STM32_DMA1_CHAN7
-#define DMACHAN_TIM4_UP           STM32_DMA1_CHAN7
-#define DMACHAN_SPI3_RX           STM32_DMA2_CHAN1
-#define DMACHAN_I2S3_RX           STM32_DMA2_CHAN1
-#define DMACHAN_TIM5_CH4          STM32_DMA2_CHAN1
-#define DMACHAN_TIM5_TRIG         STM32_DMA2_CHAN1
-#define DMACHAN_TIM8_CH3          STM32_DMA2_CHAN1
-#define DMACHAN_TIM8_UP           STM32_DMA2_CHAN1
-#define DMACHAN_SPI3_TX           STM32_DMA2_CHAN2
-#define DMACHAN_I2S3_TX           STM32_DMA2_CHAN2
-#define DMACHAN_TIM5_CH3          STM32_DMA2_CHAN2
-#define DMACHAN_TIM5_UP           STM32_DMA2_CHAN2
-#define DMACHAN_TIM5_UP           STM32_DMA2_CHAN2
-#define DMACHAN_TIM8_TRIG         STM32_DMA2_CHAN2
-#define DMACHAN_TIM8_COM          STM32_DMA2_CHAN2
-#define DMACHAN_UART4_RX          STM32_DMA2_CHAN3
-#define DMACHAN_TIM6_UP           STM32_DMA2_CHAN3
-#define DMACHAN_DAC_CHAN1         STM32_DMA2_CHAN3
-#define DMACHAN_TIM8_CH1          STM32_DMA2_CHAN3
-#define DMACHAN_SDIO              STM32_DMA2_CHAN4
-#define DMACHAN_TIM5_CH2          STM32_DMA2_CHAN4
-#define DMACHAN_TIM7_UP           STM32_DMA2_CHAN4
-#define DMACHAN_DAC_CHAN2         STM32_DMA2_CHAN4
-#define DMACHAN_ADC3              STM32_DMA2_CHAN5
-#define DMACHAN_UART4_TX          STM32_DMA2_CHAN5
-#define DMACHAN_TIM5_CH1          STM32_DMA2_CHAN5
-#define DMACHAN_TIM8_CH2          STM32_DMA2_CHAN5
+#include "chip/stm32_dma.h"
 
 /************************************************************************************
  * Public Types
  ************************************************************************************/
 
+typedef FAR void *DMA_HANDLE;
+typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t isr, void *arg);
+
+#ifdef CONFIG_DEBUG_DMA
+struct stm32_dmaregs_s
+{
+  uint32_t isr;
+  uint32_t ccr;
+  uint32_t cndtr;
+  uint32_t cpar;
+  uint32_t cmar;
+};
+#endif
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
+/****************************************************************************
+ * Name: stm32_dmachannel
+ *
+ * Description:
+ *   Allocate a DMA channel.  This function gives the caller mutually
+ *   exclusive access to the DMA channel specified by the 'chan' argument.
+ *   DMA channels are shared on the STM32:  Devices sharing the same DMA
+ *   channel cannot do DMA concurrently!  See the DMACHAN_* definitions in
+ *   stm32_dma.h.
+ *
+ *   If the DMA channel is not available, then stm32_dmachannel() will wait
+ *   until the holder of the channel relinquishes the channel by calling
+ *   stm32_dmafree().  WARNING: If you have two devices sharing a DMA
+ *   channel and the code never releases the channel, the stm32_dmachannel
+ *   call for the other will hang forever in this function!  Don't let your
+ *   design do that!
+ *
+ *   Hmm.. I suppose this interface could be extended to make a non-blocking
+ *   version.  Feel free to do that if that is what you need.
+ *
+ * Returned Value:
+ *   Provided that 'chan' is valid, this function ALWAYS returns a non-NULL,
+ *   void* DMA channel handle.  (If 'chan' is invalid, the function will
+ *   assert if debug is enabled or do something ignorant otherwise).
+ *
+ * Assumptions:
+ *   - The caller does not hold he DMA channel.
+ *   - The caller can wait for the DMA channel to be freed if it is no
+ *     available.
+ *
+ ****************************************************************************/
+
+EXTERN DMA_HANDLE stm32_dmachannel(int chan);
+
+/****************************************************************************
+ * Name: stm32_dmafree
+ *
+ * Description:
+ *   Release a DMA channel.  If another thread is waiting for this DMA channel
+ *   in a call to stm32_dmachannel, then this function will re-assign the
+ *   DMA channel to that thread and wake it up.  NOTE:  The 'handle' used
+ *   in this argument must NEVER be used again until stm32_dmachannel() is
+ *   called again to re-gain access to the channel.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   - The caller holds the DMA channel.
+ *   - There is no DMA in progress
+ *
+ ****************************************************************************/
+
+EXTERN void stm32_dmafree(DMA_HANDLE handle);
+
+/****************************************************************************
+ * Name: stm32_dmasetup
+ *
+ * Description:
+ *   Configure DMA before using
+ *
+ ****************************************************************************/
+
+EXTERN void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                           size_t ntransfers, uint32_t ccr);
+
+/****************************************************************************
+ * Name: stm32_dmastart
+ *
+ * Description:
+ *   Start the DMA transfer
+ *
+ * Assumptions:
+ *   - DMA handle allocated by stm32_dmachannel()
+ *   - No DMA in progress
+ *
+ ****************************************************************************/
+
+EXTERN void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
+                           void *arg, bool half);
+
+/****************************************************************************
+ * Name: stm32_dmastop
+ *
+ * Description:
+ *   Cancel the DMA.  After stm32_dmastop() is called, the DMA channel is
+ *   reset and stm32_dmasetup() must be called before stm32_dmastart() can be
+ *   called again
+ *
+ * Assumptions:
+ *   - DMA handle allocated by stm32_dmachannel()
+ *
+ ****************************************************************************/
+
+EXTERN void stm32_dmastop(DMA_HANDLE handle);
+
+/****************************************************************************
+ * Name: stm32_dmasample
+ *
+ * Description:
+ *   Sample DMA register contents
+ *
+ * Assumptions:
+ *   - DMA handle allocated by stm32_dmachannel()
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_DMA
+EXTERN void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
+#else
+#  define stm32_dmasample(handle,regs)
+#endif
+
+/****************************************************************************
+ * Name: stm32_dmadump
+ *
+ * Description:
+ *   Dump previously sampled DMA register contents
+ *
+ * Assumptions:
+ *   - DMA handle allocated by stm32_dmachannel()
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_DMA
+EXTERN void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
+                          const char *msg);
+#else
+#  define stm32_dmadump(handle,regs,msg)
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_DMA_H */
+
