@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_i2c.h
+ * arch/arm/src/stm32/stm32_i2c.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
@@ -64,7 +64,6 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/i2c.h>
 #include <arch/board/board.h>
 
 #include <sys/types.h>
@@ -80,6 +79,7 @@
 #include "stm32_rcc.h"
 #include "stm32_i2c.h"
 
+#if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C1)
 
 /************************************************************************************
  * Private Types
@@ -159,7 +159,7 @@ void inline stm32_i2c_sem_destroy(FAR struct i2c_dev_s *dev)
 }
 
 
-static void stm32_i2c_setclock(FAR struct i2c_dev_s *inst, bool fast)
+static void stm32_i2c_setclock(FAR struct i2c_dev_s *inst)
 {
     /* Disable Peripheral if rising time is to be changed, 
      * and restore state on return. */
@@ -171,7 +171,7 @@ static void stm32_i2c_setclock(FAR struct i2c_dev_s *inst, bool fast)
         
     /* Update timing and control registers */
     
-    if (!fast) {
+    if (((struct stm32_i2c_inst_s *)inst)->frequency < 400e3) {
         
         /* Speed: 100 kHz 
          * Risetime: 1000 ns
@@ -231,7 +231,7 @@ static int stm32_i2c_init(FAR struct i2c_dev_s *inst)
         (STM32_BOARD_HCLK / 1000000) 
     );
     
-    stm32_i2c_setclock(inst, false);
+    stm32_i2c_setclock(inst);
     
     /* Enable I2C */
     
@@ -293,8 +293,8 @@ static int stm32_i2c2_isr(int irq, void *context)
 uint32_t stm32_i2c_setfrequency(FAR struct i2c_dev_s *inst, uint32_t frequency)
 {
     stm32_i2c_sem_wait(inst);
-    ((struct stm32_i2c_inst_s *)inst)->frequency = frequency;
     
+    ((struct stm32_i2c_inst_s *)inst)->frequency = frequency;
     
     stm32_i2c_sem_post(inst);    
     return ((struct stm32_i2c_inst_s *)inst)->frequency;
@@ -307,7 +307,6 @@ int stm32_i2c_setaddress(FAR struct i2c_dev_s *inst, int addr, int nbits)
     
     ((struct stm32_i2c_inst_s *)inst)->address = addr;
     
-    
     stm32_i2c_sem_post(inst);
     return OK;
 }
@@ -316,8 +315,10 @@ int stm32_i2c_setaddress(FAR struct i2c_dev_s *inst, int addr, int nbits)
 int stm32_i2c_write(FAR struct i2c_dev_s *inst, const uint8_t *buffer, int buflen)
 {
     stm32_i2c_sem_wait(inst);
-    stm32_i2c_sem_post(inst);
     
+    stm32_i2c_setclock(inst);
+    
+    stm32_i2c_sem_post(inst);
     return OK;
 }
 
@@ -325,8 +326,10 @@ int stm32_i2c_write(FAR struct i2c_dev_s *inst, const uint8_t *buffer, int bufle
 int stm32_i2c_read(FAR struct i2c_dev_s *inst, uint8_t *buffer, int buflen)
 {
     stm32_i2c_sem_wait(inst);
-    stm32_i2c_sem_post(inst);
     
+    stm32_i2c_setclock(inst);
+    
+    stm32_i2c_sem_post(inst);
     return OK;
 }
 
@@ -335,8 +338,9 @@ int stm32_i2c_read(FAR struct i2c_dev_s *inst, uint8_t *buffer, int buflen)
 int stm32_i2c_transfer(FAR struct i2c_dev_s *inst, FAR struct i2c_msg_s *msgs, int count)
 {
     stm32_i2c_sem_wait(inst);
-    stm32_i2c_sem_post(inst);
     
+    
+    stm32_i2c_sem_post(inst);
     return OK;
 }
 #endif
@@ -448,4 +452,6 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * inst)
     free(inst);
     return OK;
 }
+
+#endif /* CONFIG_STM32_I2C1 || CONFIG_STM32_I2C1 */
 

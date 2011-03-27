@@ -63,6 +63,7 @@
 #define getreg16(a)         (*(volatile uint16_t *)(a))
 #define putreg16(v,a)       (*(volatile uint16_t *)(a) = (v))
 
+#if defined(CONFIG_STM32_TIM5) && defined(CONFIG_STM32_TIM8)
 
 /************************************************************************************
  * Private Types
@@ -381,15 +382,6 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
     
     switch( ((struct stm32_tim_priv_s *)dev)->base ) {
 
-        case STM32_TIM1_BASE:
-            switch(channel) {
-                case 0: stm32_tim_gpioconfig(GPIO_TIM1_CH1OUT, mode); break;
-                case 1: stm32_tim_gpioconfig(GPIO_TIM1_CH2OUT, mode); break;
-                case 2: stm32_tim_gpioconfig(GPIO_TIM1_CH3OUT, mode); break;
-                case 3: stm32_tim_gpioconfig(GPIO_TIM1_CH4OUT, mode); break;
-            }
-            break;
-
         case STM32_TIM2_BASE:
             switch(channel) {
                 case 0: stm32_tim_gpioconfig(GPIO_TIM2_CH1OUT, mode); break;
@@ -426,6 +418,16 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
             }
             break;
 
+#if STM32_NATIM > 0
+        case STM32_TIM1_BASE:
+            switch(channel) {
+                case 0: stm32_tim_gpioconfig(GPIO_TIM1_CH1OUT, mode); break;
+                case 1: stm32_tim_gpioconfig(GPIO_TIM1_CH2OUT, mode); break;
+                case 2: stm32_tim_gpioconfig(GPIO_TIM1_CH3OUT, mode); break;
+                case 3: stm32_tim_gpioconfig(GPIO_TIM1_CH4OUT, mode); break;
+            }
+            break;
+
         case STM32_TIM8_BASE:
             switch(channel) {
                 case 0: stm32_tim_gpioconfig(GPIO_TIM8_CH1OUT, mode); break;
@@ -434,7 +436,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
                 case 3: stm32_tim_gpioconfig(GPIO_TIM8_CH4OUT, mode); break;
             }
             break;
-
+#endif
         default: return ERROR;
     }
     
@@ -582,3 +584,6 @@ int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev)
         
     return OK;
 }
+
+#endif /* CONFIG_STM32_TIM5 && CONFIG_STM32_TIM8 */
+

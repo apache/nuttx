@@ -43,104 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-#define STM32_SPI_CLK_MAX     18000000UL  /* Maximum allowed speed as per specifications for all SPIs */
-
-/* Register Offsets *****************************************************************/
-
-#define STM32_SPI_CR1_OFFSET      0x0000  /* SPI Control Register 1 (16-bit) */
-#define STM32_SPI_CR2_OFFSET      0x0004  /* SPI control register 2 (16-bit) */
-#define STM32_SPI_SR_OFFSET       0x0008  /* SPI status register (16-bit) */
-#define STM32_SPI_DR_OFFSET       0x000c  /* SPI data register (16-bit) */
-#define STM32_SPI_CRCPR_OFFSET    0x0010  /* SPI CRC polynomial register (16-bit) */
-#define STM32_SPI_RXCRCR_OFFSET   0x0014  /* SPI Rx CRC register (16-bit) */
-#define STM32_SPI_TXCRCR_OFFSET   0x0018  /* SPI Tx CRC register (16-bit) */
-
-/* Register Addresses ***************************************************************/
-
-#if STM32_NSPI > 0
-#  define STM32_SPI1_CR1          (STM32_SPI1_BASE+STM32_SPI_CR1_OFFSET)
-#  define STM32_SPI1_CR2          (STM32_SPI1_BASE+STM32_SPI_CR2_OFFSET)
-#  define STM32_SPI1_SR           (STM32_SPI1_BASE+STM32_SPI_SR_OFFSET)
-#  define STM32_SPI1_DR           (STM32_SPI1_BASE+STM32_SPI_DR_OFFSET)
-#  define STM32_SPI1_CRCPR        (STM32_SPI1_BASE+STM32_SPI_CRCPR_OFFSET)
-#  define STM32_SPI1_RXCRCR       (STM32_SPI1_BASE+STM32_SPI_RXCRCR_OFFSET)
-#  define STM32_SPI1_TXCRCR       (STM32_SPI1_BASE+STM32_SPI_TXCRCR_OFFSET)
-#endif
-
-#if STM32_NSPI > 1
-#  define STM32_SPI2_CR1          (STM32_SPI2_BASE+STM32_SPI_CR1_OFFSET)
-#  define STM32_SPI2_CR2          (STM32_SPI2_BASE+STM32_SPI_CR2_OFFSET)
-#  define STM32_SPI2_SR           (STM32_SPI2_BASE+STM32_SPI_SR_OFFSET)
-#  define STM32_SPI2_DR           (STM32_SPI2_BASE+STM32_SPI_DR_OFFSET)
-#  define STM32_SPI2_CRCPR        (STM32_SPI2_BASE+STM32_SPI_CRCPR_OFFSET)
-#  define STM32_SPI2_RXCRCR       (STM32_SPI2_BASE+STM32_SPI_RXCRCR_OFFSET)
-#  define STM32_SPI2_TXCRCR       (STM32_SPI2_BASE+STM32_SPI_TXCRCR_OFFSET)
-#endif
-
-#if STM32_NSPI > 2
-#  define STM32_SPI3_CR1          (STM32_SPI3_BASE+STM32_SPI_CR1_OFFSET)
-#  define STM32_SPI3_CR2          (STM32_SPI3_BASE+STM32_SPI_CR2_OFFSET)
-#  define STM32_SPI3_SR           (STM32_SPI3_BASE+STM32_SPI_SR_OFFSET)
-#  define STM32_SPI3_DR           (STM32_SPI3_BASE+STM32_SPI_DR_OFFSET)
-#  define STM32_SPI3_CRCPR        (STM32_SPI3_BASE+STM32_SPI_CRCPR_OFFSET)
-#  define STM32_SPI3_RXCRCR       (STM32_SPI3_BASE+STM32_SPI_RXCRCR_OFFSET)
-#  define STM32_SPI3_TXCRCR       (STM32_SPI3_BASE+STM32_SPI_TXCRCR_OFFSET)
-#endif
-
-/* Register Bitfield Definitions ****************************************************/
-
-/* SPI Control Register 1 */
-
-#define SPI_CR1_CPHA              (1 << 0)  /* Bit 0: Clock Phase */
-#define SPI_CR1_CPOL              (1 << 1)  /* Bit 1: Clock Polarity */
-#define SPI_CR1_MSTR              (1 << 2)  /* Bit 2: Master Selection */
-#define SPI_CR1_BR_SHIFT          (3)       /* Bits 5:3 Baud Rate Control */
-#define SPI_CR1_BR_MASK           (7 << SPI_CR1_BR_SHIFT)
-#  define SPI_CR1_FPCLCKd2        (0 << SPI_CR1_BR_SHIFT) /* 000: fPCLK/2 */
-#  define SPI_CR1_FPCLCKd4        (1 << SPI_CR1_BR_SHIFT) /* 001: fPCLK/4 */
-#  define SPI_CR1_FPCLCKd8        (2 << SPI_CR1_BR_SHIFT) /* 010: fPCLK/8 */
-#  define SPI_CR1_FPCLCKd16       (3 << SPI_CR1_BR_SHIFT) /* 011: fPCLK/16 */
-#  define SPI_CR1_FPCLCKd32       (4 << SPI_CR1_BR_SHIFT) /* 100: fPCLK/32 */
-#  define SPI_CR1_FPCLCKd64       (5 << SPI_CR1_BR_SHIFT) /* 101: fPCLK/64 */
-#  define SPI_CR1_FPCLCKd128      (6 << SPI_CR1_BR_SHIFT) /* 110: fPCLK/128 */
-#  define SPI_CR1_FPCLCKd256      (7 << SPI_CR1_BR_SHIFT) /* 111: fPCLK/256 */
-#define SPI_CR1_SPE               (1 << 6)  /* Bit 6: SPI Enable */
-#define SPI_CR1_LSBFIRST          (1 << 7)  /* Bit 7: Frame Format */
-#define SPI_CR1_SSI               (1 << 8)  /* Bit 8: Internal slave select */
-#define SPI_CR1_SSM               (1 << 9)  /* Bit 9: Software slave management */
-#define SPI_CR1_RXONLY            (1 << 10) /* Bit 10: Receive only */
-#define SPI_CR1_DFF               (1 << 11) /* Bit 11: Data Frame Format */
-#define SPI_CR1_CRCNEXT           (1 << 12) /* Bit 12: Transmit CRC next */
-#define SPI_CR1_CRCEN             (1 << 13) /* Bit 13: Hardware CRC calculation enable */
-#define SPI_CR1_BIDIOE            (1 << 14) /* Bit 14: Output enable in bidirectional mode */
-#define SPI_CR1_BIDIMODE          (1 << 15) /* Bit 15: Bidirectional data mode enable */
-
-/* SPI Control Register 2 */
-
-#define SPI_CR2_RXDMAEN           (1 << 0)  /* Bit 0: Rx Buffer DMA Enable */
-#define SPI_CR2_TXDMAEN           (1 << 1)  /* Bit 1: Tx Buffer DMA Enable */
-#define SPI_CR2_SSOE              (1 << 2)  /* Bit 2: SS Output Enable */
-#define SPI_CR2_ERRIE             (1 << 5)  /* Bit 5: Error interrupt enable */
-#define SPI_CR2_RXNEIE            (1 << 6)  /* Bit 6: RX buffer not empty interrupt enable */
-#define SPI_CR2_TXEIE             (1 << 7)  /* Bit 7: Tx buffer empty interrupt enable */
-
-/* SPI status register */
-
-#define SPI_SR_RXNE               (1 << 0)  /* Bit 0: Receive buffer not empty */
-#define SPI_SR_TXE                (1 << 1)  /* Bit 1: Transmit buffer empty */
-#define SPI_SR_CRCERR             (1 << 4)  /* Bit 4: CRC error flag */
-#define SPI_SR_MODF               (1 << 5)  /* Bit 5: Mode fault */
-#define SPI_SR_OVR                (1 << 6)  /* Bit 6: Overrun flag */
-#define SPI_SR_BSY                (1 << 7)  /* Bit 7: Busy flag */
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+#include "chip/stm32_spi.h"
 
 /************************************************************************************
  * Public Data
@@ -156,9 +59,53 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+struct  spi_dev_s;
+enum    spi_dev_e;
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name:  stm32_spi1/2/3select and stm32_spi1/2/3status
+ *
+ * Description:
+ *   The external functions, stm32_spi1/2/3select, stm32_spi1/2/3status, and
+ *   stm32_spi1/2/3cmddata must be provided by board-specific logic.  These are
+ *   implementations of the select, status, and cmddata methods of the SPI interface
+ *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods
+ *   (including up_spiinitialize()) are provided by common STM32 logic.  To use this
+ *   common SPI logic on your board:
+ *
+ *   1. Provide logic in stm32_boardinitialize() to configure SPI chip select
+ *      pins.
+ *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
+ *      board-specific logic.  These functions will perform chip selection and
+ *      status operations using GPIOs in the way your board is configured.
+ *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration file, then
+ *      provide stm32_spi1/2/3cmddata() functions in your board-specific logic. 
+ *      These functions will perform cmd/data selection operations using GPIOs in the
+ *      way your board is configured.
+ *   4. Add a calls to up_spiinitialize() in your low level application
+ *      initialization logic
+ *   5. The handle returned by up_spiinitialize() may then be used to bind the
+ *      SPI driver to higher level logic (e.g., calling 
+ *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
+ *      the SPI MMC/SD driver).
+ *
+ ************************************************************************************/
+
+EXTERN void  stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+
+EXTERN void  stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN int stm32_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+
+EXTERN void  stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+EXTERN int stm32_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -166,5 +113,5 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-
 #endif /* __ARCH_ARM_STC_STM32_STM32_SPI_H */
+
