@@ -51,6 +51,51 @@
 /************************************************************************************
  * PIN Definitions
  ************************************************************************************/
+ 
+ /* Board Peripheral Assignment
+ * 
+ * RS232/Power connector:
+ *  - USART1, is the default bootloader and console
+ * 
+ * Sensor Connector:
+ *  Digital:
+ *  - GPIOs: PB10, PB11 (or even TIM2 CH3 and CH4)
+ *  - USART3
+ *  - I2C2
+ *  Analog:
+ *  - ADC1
+ *  Supporting Analog Circuitry (not seen outside)
+ *  - RefTap (TIM3_CH3)
+ *  - Power PWM Out (TIM8_CH1 / TIM3_CH1)
+ *  - Filtered Out (TIM3_CH4)
+ *    (TIM8 could run at lower frequency, while TIM3 must run at highest possible)
+ *  - Gain selection muxed with SDcard I/Os.
+ * 
+ * Radio connector:
+ *  - UART3 / UART4
+ *  - SPI2
+ *  - I2C1 (remapped pins vs. Expansion connector)
+ *  - CAN
+ *  - TIM4 CH[3:4]
+ * 
+ * Expansion connector:
+ *  - WakeUp Pin
+ *  - System Wide Reset
+ *  - SPI1 is wired to expansion port
+ *  - I2C1
+ *  - USART2 [Rx, Tx, CTS, RTS]
+ *  - DAC [0:1]
+ *  - ADC2 on pins [0:7]
+ *  - TIM2 Channels [1:4]
+ *  - TIM5 Channels [1:4]
+ * 
+ * Onboard Components:
+ *  - SPI3 has direct connection with FRAM
+ *  - SDCard, conencts the microSD and shares the control lines with Sensor Interface
+ *    to select Amplifier Gain
+ *  - ADC3 is used also for power management (can be shared with ADC1 on sensor connector
+ *    if not used)
+ */
 
 /* LED */
 
@@ -94,7 +139,7 @@
 #define GPIO_OUT_PWRON  (GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTC|GPIO_PIN6 |GPIO_OUTPUT_CLEAR)
 #define GPIO_OUT_PWROFF	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTC|GPIO_PIN6 |GPIO_OUTPUT_SET)
 #define GPIO_OUT_PWRPWM	(GPIO_ALT   |GPIO_CNF_AFPP     |GPIO_MODE_10MHz|GPIO_PORTC|GPIO_PIN6 )
-#define GPIO_OUT_PWRPWM_TIM8_CH1P   1   /* TIM8.CH1 */
+#define GPIO_OUT_PWRPWM_TIM8_CH     1   /* TIM8.CH1 */
 
 #define GPIO_OUT_HIZ	(GPIO_INPUT |GPIO_CNF_INFLOAT  |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN1 )
 #define GPIO_OUT_PUP	(GPIO_INPUT |GPIO_CNF_INPULLUP |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN1 )
@@ -103,7 +148,7 @@
 #define GPIO_OUT_HIGH	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTB|GPIO_PIN1 |GPIO_OUTPUT_SET)
 #define GPIO_OUT_AIN	(GPIO_INPUT |GPIO_CNF_ANALOGIN |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN1 )
 #define GPIO_OUT_PWM	(GPIO_ALT   |GPIO_CNF_AFPP     |GPIO_MODE_10MHz|GPIO_PORTB|GPIO_PIN1 )
-#define GPIO_OUT_PWM_TIM3_CH4       4   /* TIM3.CH4 */ 
+#define GPIO_OUT_PWM_TIM3_CH        4   /* TIM3.CH4 */ 
 
 
 /* Radio Connector */
