@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_holder.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -249,11 +249,13 @@ static int sem_foreachholder(FAR sem_t *sem, holderhandler_t handler, FAR void *
  * Name: sem_recoverholders
  ****************************************************************************/
 
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
 static int sem_recoverholders(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
 {
   sem_freeholder(sem, pholder);
   return 0;
 }
+#endif
 
 /****************************************************************************
  * Name: sem_boostholderprio

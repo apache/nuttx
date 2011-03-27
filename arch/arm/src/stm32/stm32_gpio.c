@@ -33,9 +33,10 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+/** \file
+ *  \author Gregory Nutt <spudmonkey@racsa.co.cr>
+ *  \brief STM32 GPIO
+ **/
 
 #include <nuttx/config.h>
 
@@ -50,13 +51,6 @@
 #include "stm32_rcc.h"
 #include "stm32_internal.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
- 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -91,23 +85,12 @@ static const uint32_t g_gpiobase[STM32_NGPIO_PORTS] =
 static const char g_portchar[8]   = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
 #endif
 
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Global Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: stm32_configgpio
- *
- * Description:
- *   Configure a GPIO pin based on bit-encoded description of the pin.
- *
- ****************************************************************************/
-
-int stm32_configgpio(uint32_t cfgset)
+int stm32_gpio_configlock(uint32_t cfgset, bool altlock)
 {
   uint32_t base;
   uint32_t cr;
@@ -146,23 +129,44 @@ int stm32_configgpio(uint32_t cfgset)
       cr  = base + STM32_GPIO_CRH_OFFSET;
       pos = pin - 8;
     }
-
+    
   /* Input or output? */
 
   input = ((cfgset & GPIO_INPUT) != 0);
 
   /* Decode the mode and configuration */
+  
+  regval  = getreg32(cr);
+  
+  /* Is present (old) config already in GPIO_ALT? and we got request to
+   * lock the alternative configuration. If so we allow the following
+   * changes only:
+   *  - to HiZ (unlocking the configuration)
+   *  - AFPP
+   *  - AFOD
+   */
 
+  uint32_t oldmode = (regval >> GPIO_CR_MODECNF_SHIFT(pos));
+
+  if (altlock && 
+        (oldmode & (GPIO_MODE_MASK >> GPIO_MODE_SHIFT)) &&                  /* previous state was output? */
+        ((oldmode>>2) & GPIO_CR_CNF_ALTOD) > GPIO_CR_CNF_OUTOD &&           /* previous state is ALT? */
+      ( ((cfgset & GPIO_CNF_MASK) >> GPIO_CNF_SHIFT) < GPIO_CR_CNF_ALTPP || /* new state is not output ALT? */
+        input ) )                                                           /* or it is input */
+    {
+      return ERROR;
+    }
+      
   if (input)
     {
       /* Input.. force mode = INPUT */
 
       modecnf = 0;
-     }
+    }
   else
     {
       /* Output or alternate function */
-
+              
       modecnf = (cfgset & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT;
     }
 
@@ -170,7 +174,6 @@ int stm32_configgpio(uint32_t cfgset)
      
   /* Set the port configuration register */
 
-  regval  = getreg32(cr);
   regval &= ~(GPIO_CR_MODECNF_MASK(pos));
   regval |= (modecnf << GPIO_CR_MODECNF_SHIFT(pos));
   putreg32(regval, cr);
@@ -240,6 +243,139 @@ int stm32_configgpio(uint32_t cfgset)
   putreg32(regval, regaddr);
   return OK;
 }
+
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+void stm32_gpio_remap(void)
+{
+  uint32_t val = 0;
+
+#ifdef CONFIG_STM32_JTAG_FULL_ENABLE
+    // the reset default
+#elif CONFIG_STM32_JTAG_NOJNTRST_ENABLE
+    val |= AFIO_MAPR_SWJ;		/* enabled but without JNTRST */
+#elif CONFIG_STM32_JTAG_SW_ENABLE
+    val |= AFIO_MAPR_SWDP;      /* set JTAG-DP disabled and SW-DP enabled */
+#else
+    val |= AFIO_MAPR_DISAB;     /* set JTAG-DP and SW-DP Disabled */
+#endif
+
+#ifdef CONFIG_STM32_TIM1_FULL_REMAP
+    val |= AFIO_MAPR_TIM1_FULLREMAP;
+#endif
+#ifdef CONFIG_STM32_TIM1_PARTIAL_REMAP
+    val |= AFIO_MAPR_TIM1_PARTREMAP;
+#endif
+#ifdef CONFIG_STM32_TIM2_FULL_REMAP
+    val |= AFIO_MAPR_TIM2_FULLREMAP;
+#endif
+#ifdef CONFIG_STM32_TIM2_PARTIAL_REMAP_1
+    val |= AFIO_MAPR_TIM2_PARTREMAP1;
+#endif
+#ifdef CONFIG_STM32_TIM2_PARTIAL_REMAP_2
+    val |= AFIO_MAPR_TIM2_PARTREMAP2;
+#endif
+#ifdef CONFIG_STM32_TIM3_FULL_REMAP
+    val |= AFIO_MAPR_TIM3_FULLREMAP;
+#endif
+#ifdef CONFIG_STM32_TIM3_PARTIAL_REMAP
+    val |= AFIO_MAPR_TIM3_PARTREMAP;
+#endif
+#ifdef CONFIG_STM32_TIM4_REMAP
+    val |= AFIO_MAPR_TIM4_REMAP;
+#endif
+
+#ifdef CONFIG_STM32_USART1_REMAP
+    val |= AFIO_MAPR_USART1_REMAP;
+#endif
+#ifdef CONFIG_STM32_USART2_REMAP
+    val |= AFIO_MAPR_USART2_REMAP;
+#endif
+#ifdef CONFIG_STM32_USART3_FULL_REMAP
+    val |= AFIO_MAPR_USART3_FULLREMAP;
+#endif
+#ifdef CONFIG_STM32_USART3_PARTIAL_REMAP
+    val |= AFIO_MAPR_USART3_PARTREMAP;
+#endif
+
+#ifdef CONFIG_STM32_SPI1_REMAP
+    val |= AFIO_MAPR_SPI1_REMAP;
+#endif
+#ifdef CONFIG_STM32_SPI3_REMAP
+#endif
+
+#ifdef CONFIG_STM32_I2C1_REMAP
+    val |= AFIO_MAPR_I2C1_REMAP;
+#endif
+
+#ifdef CONFIG_STM32_CAN1_REMAP1
+    val |= AFIO_MAPR_PB89;
+#endif
+#ifdef CONFIG_STM32_CAN1_REMAP2
+    val |= AFIO_MAPR_PD01;
+#endif
+
+  putreg32(val, STM32_AFIO_MAPR);
+}
+
+
+/************************************************************************************
+ * Name: stm32_configgpio
+ *
+ * Description:
+ *   Configure a GPIO pin based on bit-encoded description of the pin.
+ *   Once it is configured as Alternative (GPIO_ALT|GPIO_CNF_AFPP|...) 
+ *   function, it must be unconfigured with stm32_unconfiggpio() with 
+ *   the same cfgset first before it can be set to non-alternative function.
+ * 
+ * Returns:
+ *   OK on success
+ *   ERROR on invalid port, or when pin is locked as ALT function.
+ * 
+ * \todo Auto Power Enable
+ ************************************************************************************/
+
+int stm32_configgpio(uint32_t cfgset)
+{
+   return stm32_gpio_configlock(cfgset, true);
+}
+
+
+/************************************************************************************
+ * Name: stm32_unconfiggpio
+ *
+ * Description:
+ *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set it
+ *   into default HiZ state (and possibly mark it's unused) and unlock it whether
+ *   it was previsouly selected as alternative function (GPIO_ALT|GPIO_CNF_AFPP|...).
+ * 
+ *   This is a safety function and prevents hardware from schocks, as unexpected
+ *   write to the Timer Channel Output GPIO to fixed '1' or '0' while it should
+ *   operate in PWM mode could produce excessive on-board currents and trigger 
+ *   over-current/alarm function. 
+ * 
+ * Returns:
+ *  OK on success
+ *  ERROR on invalid port
+ *
+ * \todo Auto Power Disable
+ ************************************************************************************/
+
+int stm32_unconfiggpio(uint32_t cfgset)
+{
+    /* Reuse port and pin number and set it to default HiZ INPUT */
+    
+    cfgset &= GPIO_PORT_MASK | GPIO_PIN_MASK;
+    cfgset |= GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT;
+    
+    /* \todo : Mark its unuse for automatic power saving options */
+    
+    return stm32_gpio_configlock(cfgset, false);
+}
+
 
 /****************************************************************************
  * Name: stm32_gpiowrite
@@ -357,6 +493,3 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
   return OK;
 }
 #endif
-
-
-

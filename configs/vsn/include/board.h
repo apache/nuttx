@@ -55,51 +55,6 @@
 /************************************************************************************
  * Definitions
  ************************************************************************************/
- 
-/* Board Peripheral Assignment
- * 
- * RS232/Power connector:
- *  - USART1, is the default bootloader and console
- * 
- * Sensor Connector:
- *  Digital:
- *  - GPIOs: PB10, PB11 (or even TIM2 CH3 and CH4)
- *  - USART3
- *  - I2C2
- *  Analog:
- *  - ADC1
- *  Supporting Analog Circuitry (not seen outside)
- *  - RefTap (TIM3_CH3)
- *  - Power PWM Out (TIM8_CH1 / TIM3_CH1)
- *  - Filtered Out (TIM3_CH4)
- *    (TIM8 could run at lower frequency, while TIM3 must run at highest possible)
- *  - Gain selection muxed with SDcard I/Os.
- * 
- * Radio connector:
- *  - UART3 / UART4
- *  - SPI2
- *  - I2C1 (remapped pins vs. Expansion connector)
- *  - CAN
- *  - TIM4 CH[3:4]
- * 
- * Expansion connector:
- *  - WakeUp Pin
- *  - System Wide Reset
- *  - SPI1 is wired to expansion port
- *  - I2C1
- *  - USART2 [Rx, Tx, CTS, RTS]
- *  - DAC [0:1]
- *  - ADC2 on pins [0:7]
- *  - TIM2 Channels [1:4]
- *  - TIM5 Channels [1:4]
- * 
- * Onboard Components:
- *  - SPI3 has direct connection with FRAM
- *  - SDCard, conencts the microSD and shares the control lines with Sensor Interface
- *    to select Amplifier Gain
- *  - ADC3 is used also for power management (can be shared with ADC1 on sensor connector
- *    if not used)
- */
 
 /* Clocking *************************************************************************/
 

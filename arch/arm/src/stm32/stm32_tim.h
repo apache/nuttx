@@ -880,7 +880,7 @@ typedef enum {
     STM32_TIM_MODE_UNUSED       = -1,
     
     /* One of the following */
-    STM32_TIM_MODE_MASK         = 0x0300,
+    STM32_TIM_MODE_MASK         = 0x0310,
     STM32_TIM_MODE_DISABLED     = 0x0000,
     STM32_TIM_MODE_UP           = 0x0100,
     STM32_TIM_MODE_DOWN         = 0x0110,
@@ -924,6 +924,7 @@ typedef enum {
     // TODO other modes ... as PWM capture, ENCODER and Hall Sensor
 //  STM32_TIM_CH_INCAPTURE      = 0x10,
 //  STM32_TIM_CH_INPWM          = 0x20
+//  STM32_TIM_CH_DRIVE_OC   -- open collector mode
     
 } stm32_tim_channel_t;
 

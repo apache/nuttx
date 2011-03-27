@@ -251,6 +251,24 @@ extern "C" {
 
 EXTERN FAR struct i2c_dev_s *up_i2cinitialize(int port);
 
+
+/****************************************************************************
+ * Name: up_i2cuninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameter:
+ *   Device structure as returned by the up_i2cinitalize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count missmatch or dev
+ *   points to invalid hardware device. 
+ *
+ ****************************************************************************/
+
+EXTERN int up_i2cuninitialize(FAR struct i2c_dev_s * dev);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

@@ -1469,7 +1469,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                 {
                   /* The transfer failed for some reason... dump some diagnostic info. */
 
-                  ulldbg("ERROR: ED: xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
+                  ulldbg("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
                          ed->xfrtype, td->hw.ctrl, ed->tdstatus,
                          lpc17_getreg(LPC17_USBHOST_RHPORTST1));
                 }

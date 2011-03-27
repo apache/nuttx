@@ -48,6 +48,7 @@
 
 #include "up_internal.h"
 #include "chip.h"
+#include "stm32_gpio.h"
 
 /************************************************************************************
  * Definitions
@@ -65,120 +66,6 @@
 #define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
 #define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
 
-/* Bit-encoded input to stm32_configgpio() *******************************************/
-
-/* 16-bit Encoding:
- * OFFS SX.. VPPP BBBB
- */
-
-/* Output mode:
- *
- * O... .... .... ....
- */
-
-#define GPIO_INPUT                    (1 << 15)                  /* Bit 15: 1=Input mode */
-#define GPIO_OUTPUT                   (0)                        /*         0=Output or alternate function */
-#define GPIO_ALT                      (0)
-
-/* If the pin is a GPIO digital output, then this identifies the initial output value.
- * If the pin is an input, this bit is overloaded to provide the qualifier to\
- * distinquish input pull-up and -down:
- *
- * .... .... V... ....
- */
-
-#define GPIO_OUTPUT_SET               (1 << 7)                   /* Bit 7: If output, inital value of output */
-#define GPIO_OUTPUT_CLEAR             (0)
-
-/* These bits set the primary function of the pin:
- * .FF. .... .... ....
- */
-
-#define GPIO_CNF_SHIFT                13                         /* Bits 13-14: GPIO function */
-#define GPIO_CNF_MASK                 (3 << GPIO_CNF_SHIFT)
-
-#  define GPIO_CNF_ANALOGIN           (0 << GPIO_CNF_SHIFT)      /* Analog input */
-#  define GPIO_CNF_INFLOAT            (1 << GPIO_CNF_SHIFT)      /* Input floating */
-#  define GPIO_CNF_INPULLUD           (2 << GPIO_CNF_SHIFT)      /* Input pull-up/down general bit, since up is composed of two parts */
-#  define GPIO_CNF_INPULLDWN          (2 << GPIO_CNF_SHIFT)      /* Input pull-down */
-#  define GPIO_CNF_INPULLUP          ((2 << GPIO_CNF_SHIFT) | GPIO_OUTPUT_SET) /* Input pull-up */
-
-#  define GPIO_CNF_OUTPP              (0 << GPIO_CNF_SHIFT)      /* Output push-pull */
-#  define GPIO_CNF_OUTOD              (1 << GPIO_CNF_SHIFT)      /* Output open-drain */
-#  define GPIO_CNF_AFPP               (2 << GPIO_CNF_SHIFT)      /* Alternate function push-pull */
-#  define GPIO_CNF_AFOD               (3 << GPIO_CNF_SHIFT)      /* Alternate function open-drain */
-
-/* Maximum frequency selection:
- * ...S S... .... ....
- */
-
-#define GPIO_MODE_SHIFT               11                         /* Bits 11-12: GPIO frequency selection */
-#define GPIO_MODE_MASK                (3 << GPIO_MODE_SHIFT)
-#  define GPIO_MODE_INPUT             (0 << GPIO_MODE_SHIFT)     /* Input mode (reset state) */
-#  define GPIO_MODE_10MHz             (1 << GPIO_MODE_SHIFT)     /* Output mode, max speed 10 MHz */
-#  define GPIO_MODE_2MHz              (2 << GPIO_MODE_SHIFT)     /* Output mode, max speed 2 MHz */
-#  define GPIO_MODE_50MHz             (3 << GPIO_MODE_SHIFT)     /* Output mode, max speed 50 MHz */
-
-/* External interrupt selection (GPIO inputs only):
- * .... .X.. .... ....
- */
-
-#define GPIO_EXTI                     (1 << 10)                   /* Bit 10: Configure as EXTI interrupt */
-
-/* This identifies the GPIO port:
- * .... .... .PPP ....
- */
-
-#define GPIO_PORT_SHIFT               4                          /* Bit 4-6:  Port number */
-#define GPIO_PORT_MASK                (7 << GPIO_PORT_SHIFT)
-#define GPIO_PORTA                    (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
-#define GPIO_PORTB                    (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
-#define GPIO_PORTC                    (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
-#define GPIO_PORTD                    (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
-#define GPIO_PORTE                    (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
-#define GPIO_PORTF                    (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
-#define GPIO_PORTG                    (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
-
-/* This identifies the bit in the port:
- * .... .... .... BBBB
- */
-
-#define GPIO_PIN_SHIFT                0                          /* Bits 0-3: GPIO number: 0-15 */
-#define GPIO_PIN_MASK                 (15 << GPIO_PIN_SHIFT)
-#define GPIO_PIN0                     (0 << GPIO_PIN_SHIFT)
-#define GPIO_PIN1                     (1 << GPIO_PIN_SHIFT)
-#define GPIO_PIN2                     (2 << GPIO_PIN_SHIFT)
-#define GPIO_PIN3                     (3 << GPIO_PIN_SHIFT)
-#define GPIO_PIN4                     (4 << GPIO_PIN_SHIFT)
-#define GPIO_PIN5                     (5 << GPIO_PIN_SHIFT)
-#define GPIO_PIN6                     (6 << GPIO_PIN_SHIFT)
-#define GPIO_PIN7                     (7 << GPIO_PIN_SHIFT)
-#define GPIO_PIN8                     (8 << GPIO_PIN_SHIFT)
-#define GPIO_PIN9                     (9 << GPIO_PIN_SHIFT)
-#define GPIO_PIN10                    (10 << GPIO_PIN_SHIFT)
-#define GPIO_PIN11                    (11 << GPIO_PIN_SHIFT)
-#define GPIO_PIN12                    (12 << GPIO_PIN_SHIFT)
-#define GPIO_PIN13                    (13 << GPIO_PIN_SHIFT)
-#define GPIO_PIN14                    (14 << GPIO_PIN_SHIFT)
-#define GPIO_PIN15                    (15 << GPIO_PIN_SHIFT)
-
-/* Alternate function pin-mapping ***************************************************/
-
-/* Each GPIO pin may serve either for general purpose I/O or for a special alternate
- * function (such as USART, CAN, USB, SDIO, etc.).  That particular pin-mapping will
- * depend on the package and STM32 family.  If you are incorporating a new STM32
- * chip into NuttX, you will need to add the pin-mapping to a header file and to
- * include that header file.  NOTE: You can get the chip-specific pin-mapping info
- * from the chip datasheet.
- */
- 
-#if defined(CONFIG_ARCH_CHIP_STM32F103ZET6)
-#  include "stm32f103ze_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32F103RET6)
-#  include "stm32f103re_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
-#  include "stm32f107vc_pinmap.h"
-#endif
 
 /************************************************************************************
  * Public Types
@@ -249,49 +136,6 @@ EXTERN void stm32_lowsetup(void);
 
 EXTERN void stm32_clockconfig(void);
 
-/************************************************************************************
- * Name: stm32_configgpio
- *
- * Description:
- *   Configure a GPIO pin based on bit-encoded description of the pin.
- *
- ************************************************************************************/
-
-EXTERN int stm32_configgpio(uint32_t cfgset);
-
-/************************************************************************************
- * Name: stm32_gpiowrite
- *
- * Description:
- *   Write one or zero to the selected GPIO pin
- *
- ************************************************************************************/
-
-EXTERN void stm32_gpiowrite(uint32_t pinset, bool value);
-
-/************************************************************************************
- * Name: stm32_gpioread
- *
- * Description:
- *   Read one or zero from the selected GPIO pin
- *
- ************************************************************************************/
-
-EXTERN bool stm32_gpioread(uint32_t pinset);
-
-/************************************************************************************
- * Function:  stm32_dumpgpio
- *
- * Description:
- *   Dump all GPIO registers associated with the provided base address
- *
- ************************************************************************************/
-
-#ifdef CONFIG_DEBUG
-EXTERN int stm32_dumpgpio(uint32_t pinset, const char *msg);
-#else
-#  define stm32_dumpgpio(p,m)
-#endif
 
 /****************************************************************************
  * Name: stm32_dmachannel

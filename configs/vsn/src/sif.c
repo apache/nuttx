@@ -70,6 +70,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs.h>
+#include <nuttx/i2c.h>
 #include <semaphore.h>
 
 #include <stdio.h>
@@ -171,6 +172,9 @@ struct vsn_sif_s {
     struct stm32_tim_dev_s * tim3;          // Timer3 is used for PWM, and Analog RefTap
     struct stm32_tim_dev_s * tim8;          // Timer8 is used for Power Switch
     
+    struct i2c_dev_s    * i2c1;
+    struct i2c_dev_s    * i2c2;
+    
     sem_t               exclusive_access;
 };
 
@@ -226,7 +230,8 @@ void sif_gpio1_update(void)
         case VSN_SIF_GPIO_OUTHIGH:  val = GPIO_GP1_HIGH;break;
         default: return;
     }
-    stm32_configgpio(val);
+    if (stm32_configgpio(val) == ERROR)
+        printf("Error updating1\n");
     
     if ( stm32_gpioread(val) ) 
         vsn_sif.gpio[0] |= VSN_SIF_GPIO_READ_MASK;
@@ -246,7 +251,8 @@ void sif_gpio2_update(void)
         case VSN_SIF_GPIO_OUTHIGH:  val = GPIO_GP2_HIGH;break;
         default: return;
     }
-    stm32_configgpio(val);
+    if (stm32_configgpio(val) == ERROR)
+        printf("Error updating2\n");
     
     if ( stm32_gpioread(val) ) 
         vsn_sif.gpio[1] |= VSN_SIF_GPIO_READ_MASK;
@@ -289,30 +295,31 @@ int sif_anout_init(void)
     vsn_sif.tim3 = stm32_tim_init(3);
     vsn_sif.tim8 = stm32_tim_init(8);
     
+    vsn_sif.i2c1 = up_i2cinitialize(1);
+    vsn_sif.i2c2 = up_i2cinitialize(2);
+    
     if (!vsn_sif.tim3 || !vsn_sif.tim8) return ERROR;
     
     // Use the TIM3 as PWM modulated analogue output
     
-    STM32_TIM_SETCHANNEL(vsn_sif.tim3, GPIO_OUT_PWM_TIM3_CH4, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
     STM32_TIM_SETPERIOD(vsn_sif.tim3, 4096);
-    STM32_TIM_SETCOMPARE(vsn_sif.tim3, GPIO_OUT_PWM_TIM3_CH4, 1024);
+    STM32_TIM_SETCOMPARE(vsn_sif.tim3, GPIO_OUT_PWM_TIM3_CH, 1024);
 
     STM32_TIM_SETCLOCK(vsn_sif.tim3, 36e6);
     STM32_TIM_SETMODE(vsn_sif.tim3, STM32_TIM_MODE_UP);
-    stm32_configgpio(GPIO_OUT_HIZ);
+    //STM32_TIM_SETCHANNEL(vsn_sif.tim3, GPIO_OUT_PWM_TIM3_CH, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
     
     // Use the TIM8 to drive the upper power mosfet
     
     STM32_TIM_SETISR(vsn_sif.tim8, sif_anout_isr, 0);
     STM32_TIM_ENABLEINT(vsn_sif.tim8, 0);
-
-    STM32_TIM_SETCHANNEL(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH1P, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
+    
     STM32_TIM_SETPERIOD(vsn_sif.tim8, 4096);
-    STM32_TIM_SETCOMPARE(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH1P, 0);
+    STM32_TIM_SETCOMPARE(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, 0);
     
     STM32_TIM_SETCLOCK(vsn_sif.tim8, 36e6);
     STM32_TIM_SETMODE(vsn_sif.tim8, STM32_TIM_MODE_UP);
-    stm32_configgpio(GPIO_OUT_PWRPWM);
+    STM32_TIM_SETCHANNEL(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
 
     return OK;
 }
@@ -476,7 +483,7 @@ int sif_init(void)
 int sif_main(int argc, char *argv[])
 {
     if (argc >= 2) {	
-        if (!strcmp(argv[1], "init")) {
+        if (!strcmp(argv[1], "init")) {          
           return sif_init();
         }
         else if (!strcmp(argv[1], "gpio") && argc == 4) {
@@ -489,7 +496,7 @@ int sif_main(int argc, char *argv[])
         }
         else if (!strcmp(argv[1], "pwr") && argc == 3) {
             int val = atoi(argv[2]);
-            STM32_TIM_SETCOMPARE(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH1P, val);
+            STM32_TIM_SETCOMPARE(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, val);
             return 0;
         }
         else if (!strcmp(argv[1], "c")) {
