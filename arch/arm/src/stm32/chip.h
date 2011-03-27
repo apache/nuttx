@@ -33,12 +33,13 @@
  *
  ************************************************************************************/
 
+/** \file
+ *  \author Gregory Nutt <spudmonkey@racsa.co.cr>
+ *  \brief Chip Definition provides over-all memory Map, and pin mapping
+ **/
+
 #ifndef __ARCH_ARM_SRC_STM32_CHIP_H
 #define __ARCH_ARM_SRC_STM32_CHIP_H
-
-/************************************************************************************
- * Included Files
- ************************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,7 +47,15 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Get customizations for each supported chip (only the STM32F103Z right now) */
+/* Get customizations for each supported chip and provide alternate function pin-mapping 
+ * 
+ * NOTE: Each GPIO pin may serve either for general purpose I/O or for a special 
+ * alternate function (such as USART, CAN, USB, SDIO, etc.).  That particular 
+ * pin-mapping will depend on the package and STM32 family.  If you are incorporating
+ * a new STM32 chip into NuttX, you will need to add the pin-mapping to a header file 
+ * and to include that header file below. The chip-specific pin-mapping is defined in
+ * the chip datasheet.
+ */
 
 #if defined(CONFIG_ARCH_CHIP_STM32F103ZET6) 
 #  undef CONFIG_STM32_LOWDENSITY             /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
@@ -67,6 +76,7 @@
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCRC                     0   /* No CRC */
 #  define STM32_NTHERNET                 0   /* No ethernet */
+#  include "stm32f103ze_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103RET6)
 #  undef CONFIG_STM32_LOWDENSITY             /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
@@ -87,6 +97,7 @@
 #  define STM32_NDAC                     2   /* DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NTHERNET                 0   /* No ethernet */
+#  include "stm32f103re_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
 #  undef CONFIG_STM32_LOWDENSITY             /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
@@ -107,27 +118,16 @@
 #  define STM32_NDAC                     2   /* DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
+#  include "stm32f107vc_pinmap.h"
 
 #else
 #  error "Unsupported STM32 chip"
 #endif
 
-/* Include only the memory map.  Other chip hardware files should then include this
- * file for the proper setup
+/* Include only the memory map.
+ * Other chip hardware files should then include this file for the proper setup
  */
 
 #include "stm32_memorymap.h"
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_H */

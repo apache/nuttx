@@ -111,7 +111,7 @@
 #define I2C_CR2_FREQ_MASK       (0x3f << I2C_CR2_FREQ_SHIFT)
 #define I2C_CR2_ITERREN         (1 << 8)  /* Bit 8: Error Interrupt Enable */
 #define I2C_CR2_ITEVTEN         (1 << 9)  /* Bit 9: Event Interrupt Enable */
-#define I2C_CR2_ITBUFEN         (1 << 10  /* Bit 10: Buffer Interrupt Enable */
+#define I2C_CR2_ITBUFEN         (1 << 10) /* Bit 10: Buffer Interrupt Enable */
 #define I2C_CR2_DMAEN           (1 << 11) /* Bit 11: DMA Requests Enable */
 #define I2C_CR2_LAST            (1 << 12) /* Bit 12: DMA Last Transfer */
 

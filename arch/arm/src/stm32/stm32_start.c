@@ -34,10 +34,6 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
 #include <nuttx/config.h>
 
 #include <stdint.h>
@@ -53,47 +49,6 @@
 #include "stm32_internal.h"
 #include "stm32_gpio.h"
 
-
-/****************************************************************************
- * Private Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
- 
-void stm32_jtag_enable(void)
-{
-#ifdef CONFIG_STM32_JTAG_FULL_ENABLE
-
-#elif CONFIG_STM32_JTAG_NOJNTRST_ENABLE
-  uint32_t val = getreg32(STM32_AFIO_MAPR);
-  val &= 0x00FFFFFF;		// clear undefined readings ... 
-  val |= AFIO_MAPR_SWJ;		// enabled but without JNTRST
-  putreg32(val, STM32_AFIO_MAPR);
-
-#elif CONFIG_STM32_JTAG_SW_ENABLE
-  uint32_t val = getreg32(STM32_AFIO_MAPR);
-  val &= 0x00FFFFFF;		// clear undefined readings ... 
-  val |= AFIO_MAPR_SWDP;	// set JTAG-DP disabled and SW-DP enabled
-  putreg32(val, STM32_AFIO_MAPR);
-  
-#else
-  uint32_t val = getreg32(STM32_AFIO_MAPR);
-  val &= 0x00FFFFFF;		// clear undefined readings ... 
-  val |= AFIO_MAPR_DISAB;	// set JTAG-DP and SW-DP Disabled
-  putreg32(val, STM32_AFIO_MAPR);
-  
-#endif
-}
 
 /****************************************************************************
  * Name: showprogress
@@ -130,7 +85,7 @@ void __start(void)
 
   stm32_clockconfig();
   stm32_lowsetup();
-  stm32_jtag_enable();
+  stm32_gpio_remap();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be

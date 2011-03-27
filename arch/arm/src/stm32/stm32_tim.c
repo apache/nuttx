@@ -139,6 +139,19 @@ static void stm32_tim_reset(FAR struct stm32_tim_dev_s *dev)
 }
 
 
+static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode)
+{
+    /** \todo Added support for input capture and bipolar dual outputs for TIM8 */
+
+    if (mode & STM32_TIM_CH_MODE_MASK) {
+        stm32_configgpio(cfg);
+    } 
+    else {
+        stm32_unconfiggpio(cfg);
+    }
+}
+
+
 /************************************************************************************
  * Basic Functions
  ************************************************************************************/
@@ -210,8 +223,6 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, int (*handler)(int 
     }
     
     /* Otherwise set callback and enable interrupt */
-    
-    printf("Attaching ISR: %d, %p\n", vectorno, handler);
 
     irq_attach(vectorno, handler);
     up_enable_irq(vectorno);
@@ -365,6 +376,67 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 
     stm32_tim_putreg(dev, ccmr_offset, ccmr_val);
     stm32_tim_putreg(dev, STM32_GTIM_CCER_OFFSET, ccer_val);
+    
+    /* set GPIO */
+    
+    switch( ((struct stm32_tim_priv_s *)dev)->base ) {
+
+        case STM32_TIM1_BASE:
+            switch(channel) {
+                case 0: stm32_tim_gpioconfig(GPIO_TIM1_CH1OUT, mode); break;
+                case 1: stm32_tim_gpioconfig(GPIO_TIM1_CH2OUT, mode); break;
+                case 2: stm32_tim_gpioconfig(GPIO_TIM1_CH3OUT, mode); break;
+                case 3: stm32_tim_gpioconfig(GPIO_TIM1_CH4OUT, mode); break;
+            }
+            break;
+
+        case STM32_TIM2_BASE:
+            switch(channel) {
+                case 0: stm32_tim_gpioconfig(GPIO_TIM2_CH1OUT, mode); break;
+                case 1: stm32_tim_gpioconfig(GPIO_TIM2_CH2OUT, mode); break;
+                case 2: stm32_tim_gpioconfig(GPIO_TIM2_CH3OUT, mode); break;
+                case 3: stm32_tim_gpioconfig(GPIO_TIM2_CH4OUT, mode); break;
+            }
+            break;
+
+        case STM32_TIM3_BASE:
+            switch(channel) {
+                case 0: stm32_tim_gpioconfig(GPIO_TIM3_CH1OUT, mode); break;
+                case 1: stm32_tim_gpioconfig(GPIO_TIM3_CH2OUT, mode); break;
+                case 2: stm32_tim_gpioconfig(GPIO_TIM3_CH3OUT, mode); break;
+                case 3: stm32_tim_gpioconfig(GPIO_TIM3_CH4OUT, mode); break;
+            }
+            break;
+            
+        case STM32_TIM4_BASE:
+            switch(channel) {
+                case 0: stm32_tim_gpioconfig(GPIO_TIM4_CH1OUT, mode); break;
+                case 1: stm32_tim_gpioconfig(GPIO_TIM4_CH2OUT, mode); break;
+                case 2: stm32_tim_gpioconfig(GPIO_TIM4_CH3OUT, mode); break;
+                case 3: stm32_tim_gpioconfig(GPIO_TIM4_CH4OUT, mode); break;
+            }
+            break;
+
+        case STM32_TIM5_BASE:
+            switch(channel) {
+                case 0: stm32_tim_gpioconfig(GPIO_TIM5_CH1OUT, mode); break;
+                case 1: stm32_tim_gpioconfig(GPIO_TIM5_CH2OUT, mode); break;
+                case 2: stm32_tim_gpioconfig(GPIO_TIM5_CH3OUT, mode); break;
+                case 3: stm32_tim_gpioconfig(GPIO_TIM5_CH4OUT, mode); break;
+            }
+            break;
+
+        case STM32_TIM8_BASE:
+            switch(channel) {
+                case 0: stm32_tim_gpioconfig(GPIO_TIM8_CH1OUT, mode); break;
+                case 1: stm32_tim_gpioconfig(GPIO_TIM8_CH2OUT, mode); break;
+                case 2: stm32_tim_gpioconfig(GPIO_TIM8_CH3OUT, mode); break;
+                case 3: stm32_tim_gpioconfig(GPIO_TIM8_CH4OUT, mode); break;
+            }
+            break;
+
+        default: return ERROR;
+    }
     
     return OK;
 }
