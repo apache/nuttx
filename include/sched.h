@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/sched.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@
  * Pre-processor Definitions
  ********************************************************************************/
 
-/* Task Management Definitins ***************************************************/
+/* Task Management Definitions **************************************************/
 
 /* POSIX-like scheduling policies */
 
@@ -62,6 +62,21 @@
 /* Pthread definitions **********************************************************/
 
 #define PTHREAD_KEYS_MAX CONFIG_NPTHREAD_KEYS
+
+/* Non-standard Helper **********************************************************/
+/* One processor family supported by NuttX has a single, fixed hardware stack.
+ * That is the 8051 family.  So for that family only, there is a variant form
+ * of task_create() that does not task a stack size of a parameter.  The following
+ * helper macro is provided to work around the ugliness of that exception.
+ */
+
+#ifndef CONFIG_CUSTOM_STACK
+#  define TASK_INIT(t,n,p,m,s,e,a) task_init(t,n,p,m,s,e,a)
+#  define TASK_CREATE(n,p,s,e,a)   task_create(n,p,s,e,a)
+#else
+#  define TASK_INIT(t,n,p,m,s,e,a) task_init(t,n,p,e,a)
+#  define TASK_CREATE(n,p,s,e,a)   task_create(n,p,e,a)
+#endif
 
 /********************************************************************************
  * Global Type Definitions
@@ -126,8 +141,8 @@ EXTERN int    sched_lock(void);
 EXTERN int    sched_unlock(void);
 EXTERN int32_t sched_lockcount(void);
 
-/* If instrumentation of the scheduler is enabled, then some
- * outboard logic must provide the following interfaces.
+/* If instrumentation of the scheduler is enabled, then some outboard logic
+ * must provide the following interfaces.
  */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
@@ -149,3 +164,4 @@ EXTERN void   sched_note_switch(FAR _TCB *pFromTcb, FAR _TCB *pToTcb);
 #endif /* __ASSEMBLY__ */
 
 #endif /* __INCLUDE_SCHED_H */
+
