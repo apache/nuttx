@@ -164,38 +164,44 @@ static inline void rcc_enableapb1(void)
   regval  = getreg32(STM32_RCC_APB1ENR);
 #if CONFIG_STM32_TIM2
   /* Timer 2 clock enable */
-
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM2EN;
+#endif
 #endif
 
 #if CONFIG_STM32_TIM3
   /* Timer 3 clock enable */
-
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM3EN;
+#endif
 #endif
 
 #if CONFIG_STM32_TIM4
   /* Timer 4 clock enable */
-
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM4EN;
+#endif
 #endif
 
 #if CONFIG_STM32_TIM5
   /* Timer 5 clock enable */
-
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM5EN;
+#endif
 #endif
 
 #if CONFIG_STM32_TIM6
   /* Timer 6 clock enable */
-
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM6EN;
+#endif
 #endif
 
 #if CONFIG_STM32_TIM7
   /* Timer 7 clock enable */
-
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_TIM7EN;
+#endif
 #endif
 
 #if CONFIG_STM32_WWDG
@@ -242,14 +248,16 @@ static inline void rcc_enableapb1(void)
 
 #if CONFIG_STM32_I2C1
   /* I2C 1 clock enable */
-
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_I2C1EN;
+#endif
 #endif
 
 #if CONFIG_STM32_I2C2
   /* I2C 2 clock enable */
-
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_I2C2EN;
+#endif
 #endif
 
 #if CONFIG_STM32_USB
@@ -333,8 +341,9 @@ static inline void rcc_enableapb2(void)
 
 #if CONFIG_STM32_TIM1
   /* TIM1 Timer clock enable */
-
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM1EN;
+#endif
 #endif
 
 #if CONFIG_STM32_SPI1
@@ -345,8 +354,9 @@ static inline void rcc_enableapb2(void)
 
 #if CONFIG_STM32_TIM8
   /* TIM8 Timer clock enable */
-
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_TIM8EN;
+#endif
 #endif
 
 #if CONFIG_STM32_USART1
