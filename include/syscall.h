@@ -1,7 +1,7 @@
-/************************************************************
- * sq_addfirst.c
+/****************************************************************************
+ * include/syscall.h
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,37 +31,40 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
- * Compilation Switches
- ************************************************************/
+#ifndef __INCLUDE_SYSCALL_H
+#define __INCLUDE_SYSCALL_H
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
+/* This is just a wrapper around sys/syscall.h for compatibility */
 
-#include <queue.h>
+#include <sys/syscall.h>
 
-/************************************************************
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
- * Name: sq_addfirst
- *
- * Description:
- *   The sq_addfirst function places the 'node' at the head
- *   of the 'queue'
- *
- ************************************************************/
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
-void sq_addfirst(FAR sq_entry_t *node, sq_queue_t *queue)
-{
-  node->flink = queue->head;
-  if (!queue->head)
-    {
-      queue->tail = node;
-    }
-  queue->head = node;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __INCLUDE_SYSCALL_H */
