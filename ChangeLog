@@ -1623,4 +1623,8 @@
 	  of the nuttx source tree
 	* apps/namedapp/binfs.c: Create a tiny filesystem that can be used
 	  to show the internal named apps under /bin.
+	* fs/fs_opendir.c: Correct an error that occurs when a file system is
+	  mounted in the root directory.  This was discovered while mounting
+	  the named app's /bin directory.
+
 

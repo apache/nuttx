@@ -56,6 +56,108 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: open_mountpoint
+ *
+ * Description:
+ *   Handle the case where the inode to be opened is within a mountpoint.
+ *
+ * Inputs:
+ *   inode -- the inode of the mountpoint to open
+ *   relpath -- the relative path within the mountpoint to open
+ *   dir -- the dirent structure to be initialized
+ *
+ * Return:
+ *   On success, OK is returned; Otherwise, a positive errno is returned.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+static inline int open_mountpoint(FAR struct inode *inode,
+                                  FAR const char *relpath,
+                                  FAR struct fs_dirent_s *dir)
+{
+  int ret;
+
+  /* The inode itself as the 'root' of mounted volume.  The actually
+   * directory is at relpath into the* mounted filesystem.
+   *
+   *
+   * Verify that the mountpoint inode  supports the opendir() method
+   */
+
+  if (!inode->u.i_mops || !inode->u.i_mops->opendir)
+    {
+       return ENOSYS;
+    }
+
+  /* Take reference to the mountpoint inode (fd_root).  Note that we do
+   * not use inode_addref() because we already hold the tree semaphore.
+   */
+
+  inode->i_crefs++;
+
+  /* Perform the opendir() operation */
+
+  ret = inode->u.i_mops->opendir(inode, relpath, dir);
+  if (ret < 0)
+    {
+      /* We now need to back off our reference to the inode.  We can't
+       * call inode_release() to do that unless we release the tree
+       * semaphore.  The following should be safe because:  (1) after the
+       * reference count was incremented above it should be >=1 so it should
+       * not decrement below zero, and (2) we hold the tree semaphore so no
+       * other thread should be able to change the reference count.
+       */
+
+      inode->i_crefs--;
+      DEBUGASSERT(inode->i_crefs >= 0);
+
+      /* Negate the error value so that it can be used to set errno */
+
+      return -ret;
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: open_pseudodir
+ *
+ * Description:
+ *   Handle the case where the inode to be opened is within the top-level
+ *   pseudo-file system.
+ *
+ * Inputs:
+ *   inode -- the inode of the mountpoint to open
+ *   dir -- the dirent structure to be initialized
+ *
+ * Return:
+ *   On success, OK is returned; Otherwise, a positive errno is returned.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+static void open_pseudodir(FAR struct inode *inode, FAR struct fs_dirent_s *dir)
+{
+  /* We have a valid psuedo-filesystem node.  Take two references on the
+   * inode -- one for the parent (fd_root) and one for the child (fd_next).
+   * Note that we do not call inode_addref because we are holding the tree
+   * semaphore and that would result in deadlock.
+   */
+
+  inode->i_crefs += 2;
+  dir->u.psuedo.fd_next = inode; /* This is the next node to use for readdir() */
+
+  /* Flag the inode as belonging to the psuedo-filesystem */
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  DIRENT_SETPSUEDONODE(dir->fd_flags);
+#endif
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -63,18 +165,16 @@
  * Name: opendir
  *
  * Description:
- *   The  opendir() function opens a directory stream
- *   corresponding to the directory name, and returns a
- *   pointer to the directory stream. The stream is
- *   positioned at the first entry in the directory.
+ *   The  opendir() function opens a directory stream corresponding to the
+ *   directory name, and returns a pointer to the directory stream. The
+ *   stream is positioned at the first entry in the directory.
  *
  * Inputs:
  *   path -- the directory to open
  *
  * Return:
- *   The opendir() function returns a pointer to the
- *   directory stream.  On error, NULL is returned, and
- *   errno is set appropriately.
+ *   The opendir() function returns a pointer to the directory stream.  On
+ *   error, NULL is returned, and errno is set appropriately.
  *
  *   EACCES  - Permission denied.
  *   EMFILE  - Too many file descriptors in use by process.
@@ -92,7 +192,7 @@ FAR DIR *opendir(FAR const char *path)
   FAR struct inode *inode = NULL;
   FAR struct fs_dirent_s *dir;
   FAR const char *relpath;
-  bool isroot = false;
+  bool bisroot = false;
   int ret;
 
   /* If we are given 'nothing' then we will interpret this as
@@ -102,8 +202,9 @@ FAR DIR *opendir(FAR const char *path)
   inode_semtake();
   if (!path || *path == 0 || strcmp(path, "/") == 0)
     {
-       inode = root_inode;
-       isroot = true;
+       inode   = root_inode;
+       bisroot = true;
+       relpath = NULL;
     }
   else
     {
@@ -151,85 +252,52 @@ FAR DIR *opendir(FAR const char *path)
   dir->fd_root     = inode;  /* Save the inode where we start */
   dir->fd_position = 0;      /* This is the position in the read stream */
 
-  /* Is this a node in the psuedo filesystem? Or a mountpoint? */
+  /* First, handle the special case of the root inode.  This must be
+   * special-cased here because the root inode might ALSO be a mountpoint.
+   */
+
+  if (bisroot)
+    {
+      /* Whatever payload the root inode carries, the root inode is always
+       * a directory inode in the pseudo-file system
+       */
+
+      open_pseudodir(inode, dir);
+    }
+
+  /* Is this a node in the psuedo filesystem? Or a mountpoint?  If the node
+   * is the root (bisroot == TRUE), then this is a special case.
+   */
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-   if (INODE_IS_MOUNTPT(inode))
+   else if (INODE_IS_MOUNTPT(inode))
      {
-       /* Yes, then return the inode itself as the 'root' of
-        * the directory.  The actually directory is at relpath into the
-        * mounted filesystem.
-        */
+       /* Yes, the node is a file system mointpoint. */
 
-      /* The node is a file system mointpoint. Verify that the mountpoint
-       * supports the opendir() method
-       */
-
-      if (!inode->u.i_mops || !inode->u.i_mops->opendir)
+      ret = open_mountpoint(inode, relpath, dir);
+      if (ret != OK)
         {
-           ret = ENOSYS;
            goto errout_with_direntry;
         }
-
-      /* Take reference to the mountpoint inode (fd_root).  Note that we do
-       * not use inode_addref() because we already hold the tree semaphore.
-       */
-
-      inode->i_crefs++;
-
-      /* Perform the opendir() operation */
-
-      ret = inode->u.i_mops->opendir(inode, relpath, dir);
-      if (ret < 0)
-        {
-          /* We now need to back off our reference to the inode.  We can't
-           * call inode_release() to do that unless we release the tree
-           * semaphore.  The following should be safe because:  (1) after the
-           * reference count was incremented above it should be >=1 so it should
-           * not decrement below zero, and (2) we hold the tree semaphore so no
-           * other thread should be able to change the reference count.
-           */
-
-          inode->i_crefs--;
-          DEBUGASSERT(inode->i_crefs >= 0);
-
-          /* Negate the error value so that it can be used to set errno */
-
-          ret = -ret;
-          goto errout_with_direntry;
-        }
     }
-  else
 #endif
+  else
     {
       /* The node is part of the root psuedo file system.  Does the inode have a child?
        * If so that the child would be the 'root' of a list of nodes under
        * the directory.
        */
 
-      if (!isroot)
+      inode = inode->i_child;
+      if (!inode)
         {
-          inode = inode->i_child;
-          if (!inode)
-            {
-              ret = ENOTDIR;
-              goto errout_with_direntry;
-            }
+          ret = ENOTDIR;
+          goto errout_with_direntry;
         }
 
-      /* It looks we have a valid psuedo-filesystem node.  Take two references
-       * on the inode -- one for the parent (fd_root) and one for the child (fd_next).
-       * Note that we do not call inode_addref because we are holding
-       * the tree semaphore and that would result in deadlock.
-       */
+      /* It looks we have a valid psuedo-filesystem directory node. */
 
-      inode->i_crefs += 2;
-      dir->u.psuedo.fd_next = inode; /* This is the next node to use for readdir() */
-
-      /* Flag the inode as belonging to the psuedo-filesystem */
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-      DIRENT_SETPSUEDONODE(dir->fd_flags);
-#endif
+      open_pseudodir(inode, dir);
     }
 
   inode_semgive();
@@ -242,7 +310,7 @@ errout_with_direntry:
 
 errout_with_semaphore:
   inode_semgive();
-  *get_errno_ptr() = ret;
+  errno = ret;
   return NULL;
 }
 
