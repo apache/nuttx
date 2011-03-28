@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_mount.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,10 @@
 #include <errno.h>
 #include <nuttx/fs.h>
 
+#ifdef CONFIG_APPS_BINDIR
+#  include <apps/apps.h>
+#endif
+
 #include "fs_internal.h"
 
 /* At least one filesystem must be defined, or this file will not compile.
@@ -87,6 +91,9 @@ static const struct fsmap_t g_fsmap[] =
 #endif
 #ifdef CONFIG_FS_ROMFS
     { "romfs", &romfs_operations },
+#endif
+#ifdef CONFIG_APPS_BINDIR
+    { "binfs", &binfs_operations },
 #endif
     { NULL,   NULL },
 };

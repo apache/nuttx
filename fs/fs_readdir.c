@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_readdir.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,9 @@
 #include <string.h>
 #include <dirent.h>
 #include <errno.h>
+
 #include <nuttx/fs.h>
+#include <nuttx/dirent.h>
 
 #include "fs_internal.h"
 
@@ -54,7 +56,7 @@
  * Name: readpsuedodir
  ****************************************************************************/
 
-static inline int readpsuedodir(struct internal_dir_s *idir)
+static inline int readpsuedodir(struct fs_dirent_s *idir)
 {
   FAR struct inode *prev;
 
@@ -158,7 +160,7 @@ static inline int readpsuedodir(struct internal_dir_s *idir)
 
 FAR struct dirent *readdir(DIR *dirp)
 {
-  FAR struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+  FAR struct fs_dirent_s *idir = (struct fs_dirent_s *)dirp;
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   struct inode *inode;
 #endif

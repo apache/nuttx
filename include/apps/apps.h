@@ -52,13 +52,26 @@
  * Public Types
  ****************************************************************************/
 
-struct nuttapp_s
+struct namedapp_s
 {
   const char *name;			/* Invocation name and as seen under /sbin/ */
   int         priority;		/* Use: SCHED_PRIORITY_DEFAULT */
   int         stacksize;	/* Desired stack size */
   main_t      main;			/* Entry point: main(int argc, char *argv[]) */
 };
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* The "bindir" is file system that supports access to the named applications.
+ * It is typically mounted under /bin.
+ */
+
+#ifdef CONFIG_APPS_BINDIR
+struct mountpt_operations;
+extern const struct mountpt_operations binfs_operations;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -73,7 +86,7 @@ extern "C" {
 #endif
 
 /****************************************************************************
- * Name: check for availability of builtin NuttX application
+ * Name: namedapp_isavail
  *
  * Description:
  *   Checks for availabiliy of application registerred during compile time.
@@ -88,10 +101,10 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int nuttapp_isavail(FAR const char *appname);
+EXTERN int namedapp_isavail(FAR const char *appname);
 
 /****************************************************************************
- * Name: get name of built-in application
+ * Name: namedapp_getname
  *
  * Description:
  *   Returns pointer to a name of built-in application pointed by the
@@ -106,13 +119,13 @@ EXTERN int nuttapp_isavail(FAR const char *appname);
  *
  ****************************************************************************/
 
-EXTERN const char * nuttapp_getname(int index);
+EXTERN const char *namedapp_getname(int index);
 
 /****************************************************************************
- * Name: execute builtin NuttX application
+ * Name: exec_namedapp
  *
  * Description:
- *   Executes builtin application registerred during compile time.
+ *   Executes builtin named application registered during compile time.
  *   New application is run in a separate task context (and thread).
  *
  * Input Parameter:
@@ -126,7 +139,7 @@ EXTERN const char * nuttapp_getname(int index);
  *
  ****************************************************************************/
 
-EXTERN int exec_nuttapp(FAR const char *appname, FAR const char *argv[]);
+EXTERN int exec_namedapp(FAR const char *appname, FAR const char *argv[]);
 
 #undef EXTERN
 #if defined(__cplusplus)

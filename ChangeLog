@@ -1619,4 +1619,8 @@
 	  output PWMs and interrupt logic
 	* config/vsn/src: added basic support for Sensor Interface (GPIO and
 	  Power Output, and the sif utility program)
+	* fs/ -- Reorgnize header so that file systems can be built outside
+	  of the nuttx source tree
+	* apps/namedapp/binfs.c -- Create a tiny filesystem that can be used
+	  to show the internal named apps under /bin.
 

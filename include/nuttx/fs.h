@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,7 +124,7 @@ struct block_operations
  */
 
 struct inode;
-struct internal_dir_s;
+struct fs_dirent_s;
 struct stat;
 struct statfs;
 struct mountpt_operations
@@ -160,10 +160,10 @@ struct mountpt_operations
 
   /* Directory operations */
 
-  int     (*opendir)(FAR struct inode *mountpt, FAR const char *relpath, FAR struct internal_dir_s *dir);
-  int     (*closedir)(FAR struct inode *mountpt, FAR struct internal_dir_s *dir);
-  int     (*readdir)(FAR struct inode *mountpt, FAR struct internal_dir_s *dir);
-  int     (*rewinddir)(FAR struct inode *mountpt, FAR struct internal_dir_s *dir);
+  int     (*opendir)(FAR struct inode *mountpt, FAR const char *relpath, FAR struct fs_dirent_s *dir);
+  int     (*closedir)(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
+  int     (*readdir)(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
+  int     (*rewinddir)(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
 
   /* General volume-related mountpoint operations: */
 

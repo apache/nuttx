@@ -149,7 +149,7 @@ LINKLIBS	+= libxx/liblibxx$(LIBEXT)
 endif
 
 # Add library for application support
-# Always compile the framework which includes exec_nuttapp if users
+# Always compile the framework which includes exec_namedapp if users
 # or nuttX applications are to be included.
 
 ifneq ($(APPDIR),)

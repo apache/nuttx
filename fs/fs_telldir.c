@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_telldir.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,10 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
+
 #include <nuttx/fs.h>
+#include <nuttx/dirent.h>
+
 #include "fs_internal.h"
 
 /****************************************************************************
@@ -74,7 +78,7 @@
 
 off_t telldir(FAR DIR *dirp)
 {
-  struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+  struct fs_dirent_s *idir = (struct fs_dirent_s *)dirp;
 
   if (!idir || !idir->fd_root)
     {

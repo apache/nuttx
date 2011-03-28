@@ -157,11 +157,11 @@ int os_bringup(void)
   svdbg("Starting init thread\n");
 
 #ifdef CONFIG_BUILTIN_APP_START
-  /* Start the built-in application, passing an "init" argument, so that
+  /* Start the built-in named application, passing an "init" argument, so that
    * application can distinguish different run-levels 
    */
   
-  init_taskid = exec_nuttapp(CONFIG_BUILTIN_APP_START, argv);
+  init_taskid = exec_namedapp(CONFIG_BUILTIN_APP_START, argv);
 #else
   /* Start the default application at user_start() */
 

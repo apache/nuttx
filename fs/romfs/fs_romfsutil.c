@@ -52,6 +52,7 @@
 #include <debug.h>
 
 #include <nuttx/ioctl.h>
+#include <nuttx/dirent.h>
 
 #include "fs_romfs.h"
 

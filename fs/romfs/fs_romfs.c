@@ -1,7 +1,7 @@
 /****************************************************************************
  * rm/romfs/fs_romfs.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -58,6 +58,7 @@
 
 #include <nuttx/fs.h>
 #include <nuttx/ioctl.h>
+#include <nuttx/dirent.h>
 
 #include "fs_romfs.h"
 
@@ -77,9 +78,9 @@ static off_t   romfs_seek(FAR struct file *filep, off_t offset, int whence);
 static int     romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 static int     romfs_opendir(struct inode *mountpt, const char *relpath,
-                           struct internal_dir_s *dir);
-static int     romfs_readdir(struct inode *mountpt, struct internal_dir_s *dir);
-static int     romfs_rewinddir(struct inode *mountpt, struct internal_dir_s *dir);
+                           struct fs_dirent_s *dir);
+static int     romfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir);
+static int     romfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir);
 
 static int     romfs_bind(FAR struct inode *blkdriver, const void *data,
                         void **handle);
@@ -589,7 +590,7 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 static int romfs_opendir(struct inode *mountpt, const char *relpath,
-                         struct internal_dir_s *dir)
+                         struct fs_dirent_s *dir)
 {
   struct romfs_mountpt_s *rm;
   struct romfs_dirinfo_s  dirinfo;
@@ -653,7 +654,7 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int romfs_readdir(struct inode *mountpt, struct internal_dir_s *dir)
+static int romfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
   struct romfs_mountpt_s *rm;
   uint32_t                linkoffset;
@@ -748,7 +749,7 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int romfs_rewinddir(struct inode *mountpt, struct internal_dir_s *dir)
+static int romfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
   struct romfs_mountpt_s *rm;
   int ret;
@@ -889,7 +890,6 @@ static int romfs_unbind(void *handle, FAR struct inode **blkdriver)
 
   /* Check if there are sill any files opened on the filesystem. */
 
-  ret = OK; /* Assume success */
   romfs_semtake(rm);
   if (rm->rm_head)
     {
@@ -934,6 +934,7 @@ static int romfs_unbind(void *handle, FAR struct inode **blkdriver)
 
       sem_destroy(&rm->rm_sem);
       free(rm);
+      return OK;
     }
 
   romfs_semgive(rm);

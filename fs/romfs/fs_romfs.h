@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/romfs/fs_romfs.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -46,6 +46,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
+#include <nuttx/dirent.h>
 
 #include "../fs_internal.h"
 

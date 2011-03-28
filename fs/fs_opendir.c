@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_opendir.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <errno.h>
 
 #include <nuttx/fs.h>
+#include <nuttx/dirent.h>
 
 #include "fs_internal.h"
 
@@ -89,7 +90,7 @@
 FAR DIR *opendir(FAR const char *path)
 {
   FAR struct inode *inode = NULL;
-  FAR struct internal_dir_s *dir;
+  FAR struct fs_dirent_s *dir;
   FAR const char *relpath;
   bool isroot = false;
   int ret;
@@ -133,7 +134,7 @@ FAR DIR *opendir(FAR const char *path)
    * container.
    */
 
-  dir = (FAR struct internal_dir_s *)zalloc(sizeof(struct internal_dir_s));
+  dir = (FAR struct fs_dirent_s *)zalloc(sizeof(struct fs_dirent_s));
   if (!dir)
     {
       /* Insufficient memory to complete the operation.*/

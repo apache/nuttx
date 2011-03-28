@@ -95,6 +95,7 @@
 #define XENIX_SUPER_MAGIC     0x012FF7B4
 #define XFS_SUPER_MAGIC       0x58465342
 #define _XIAFS_SUPER_MAGIC    0x012FD16D
+#define BINFS_MAGIC           0x4242
 
 /****************************************************************************
  * Type Definitions

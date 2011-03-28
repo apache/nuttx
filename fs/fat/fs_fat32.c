@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs_fat32.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -60,6 +60,7 @@
 
 #include <nuttx/fs.h>
 #include <nuttx/fat.h>
+#include <nuttx/dirent.h>
 
 #include "fs_internal.h"
 #include "fs_fat32.h"
@@ -87,9 +88,9 @@ static int     fat_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int     fat_sync(FAR struct file *filep);
 
 static int     fat_opendir(struct inode *mountpt, const char *relpath,
-                           struct internal_dir_s *dir);
-static int     fat_readdir(struct inode *mountpt, struct internal_dir_s *dir);
-static int     fat_rewinddir(struct inode *mountpt, struct internal_dir_s *dir);
+                           struct fs_dirent_s *dir);
+static int     fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir);
+static int     fat_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir);
 
 static int     fat_bind(FAR struct inode *blkdriver, const void *data,
                         void **handle);
@@ -1218,7 +1219,7 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int fat_opendir(struct inode *mountpt, const char *relpath, struct internal_dir_s *dir)
+static int fat_opendir(struct inode *mountpt, const char *relpath, struct fs_dirent_s *dir)
 {
   struct fat_mountpt_s *fs;
   struct fat_dirinfo_s  dirinfo;
@@ -1298,7 +1299,7 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int fat_readdir(struct inode *mountpt, struct internal_dir_s *dir)
+static int fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
   struct fat_mountpt_s *fs;
   unsigned int          dirindex;
@@ -1398,7 +1399,7 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int fat_rewinddir(struct inode *mountpt, struct internal_dir_s *dir)
+static int fat_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
   struct fat_mountpt_s *fs;
   int ret;

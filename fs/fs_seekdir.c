@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_seekdir.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,10 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
+
 #include <nuttx/fs.h>
+#include <nuttx/dirent.h>
+
 #include "fs_internal.h"
 
 /****************************************************************************
@@ -52,7 +56,7 @@
  * Name: seekpsuedodir
  ****************************************************************************/
 
-static inline void seekpsuedodir(struct internal_dir_s *idir, off_t offset)
+static inline void seekpsuedodir(struct fs_dirent_s *idir, off_t offset)
 {
   struct inode *curr;
   struct inode *prev;
@@ -110,7 +114,7 @@ static inline void seekpsuedodir(struct internal_dir_s *idir, off_t offset)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-static inline void seekmountptdir(struct internal_dir_s *idir, off_t offset)
+static inline void seekmountptdir(struct fs_dirent_s *idir, off_t offset)
 {
   struct inode *inode;
   off_t pos;
@@ -197,7 +201,7 @@ static inline void seekmountptdir(struct internal_dir_s *idir, off_t offset)
 
 void seekdir(FAR DIR *dirp, off_t offset)
 {
-  struct internal_dir_s *idir = (struct internal_dir_s *)dirp;
+  struct fs_dirent_s *idir = (struct fs_dirent_s *)dirp;
 
   /* Sanity checks */
 
