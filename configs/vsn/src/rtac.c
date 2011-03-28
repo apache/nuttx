@@ -80,3 +80,27 @@ int rtac_waitg(int group, int time)
 {
     // blocking variant of rtac_exec with timeout if specified
 }
+
+
+/** Power optimization of base systick timer
+ * 
+ * 1. Simple method to skip wake-ups:
+ *  - ask timers about the min. period, which is Ns * systick
+ *  - set the preload register with floor(Ns) * DEFAULT_PRELOAD
+ *  - on wake-up call routines Ns times.
+ * 
+ * 2. If intermediate ISR occuried then:
+ *  - check how many periods have passed by reading the counter: Np
+ *  - set the new counter value as (counter % DEFAULT_PRELOAD)
+ *  - call timer routines Np times; the next call is as usual, starting
+ *    at 1. point above
+ * 
+ * This is okay if ISR's do not read timers, if they read timers then:
+ *  - on ISR wake-up the code described under 2. must be called first
+ *    (on wake-up from IDLE)
+ * 
+ * BUT: the problem is that SYSTICK does not run in Stop mode but RTC
+ *   only, so it might be better to replace SYSTICK with RTAC (this
+ *   module) and do the job above, permitting ultra low power modes of
+ *   25 uA or further down to 5 uA.
+ */

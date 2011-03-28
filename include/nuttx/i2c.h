@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/i2c.h
  *
- *   Copyright(C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,11 +109,37 @@
  *   nbits -   The number of address bits provided (7 or 10)
  *
  * Returned Value:
- *   Returns the actual frequency selected
+ *   Returns OK on success; a negated errno on failure.
  *
  ****************************************************************************/
 
 #define I2C_SETADDRESS(d,f,b) ((d)->ops->setaddress(d,f,b))
+
+/****************************************************************************
+ * Name: I2C_SETOWNADDRESS
+ *
+ * Description:
+ *   Set our own I2C address. Calling this function enables Slave mode and
+ *   disables Master mode on given instance (note that I2C is a bus, where
+ *   multiple masters and slave may be handled by one device driver).
+ * 
+ *   One may register callback to be notifyed about reception. During the
+ *   slave mode reception, the function READ and WRITE must be used to 
+ *   to handle reads and writes from a master.
+ *
+ * Input Parameters:
+ *   dev -     Device-specific state data
+ *   address - Our own slave address; If it is 0x00, then the device driver
+ *             listens to general call
+ *   nbits -   The number of address bits provided (7 or 10)
+ *
+ * Returned Value:
+ *   OK on valid address and if the same address has not been assigned
+ *   to other existance sharing the same port. Otherwise ERROR is returned.
+ *
+ ****************************************************************************/
+
+#define I2C_SETOWNADDRESS(d,f,b)  ((d)->ops->setownaddress(d,f,b))
 
 /****************************************************************************
  * Name: I2C_WRITE
@@ -192,8 +218,16 @@ struct i2c_ops_s
   int    (*setaddress)(FAR struct i2c_dev_s *dev, int addr, int nbits);
   int    (*write)(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen);
   int    (*read)(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
+#ifdef CONFIG_I2C_WRITEREAD
+  int    (*writeread)(FAR struct i2c_dev_s *inst, const uint8_t *wbuffer, int wbuflen,
+                        uint8_t *rbuffer, int rbuflen);
+#endif
 #ifdef CONFIG_I2C_TRANSFER
   int    (*transfer)(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int count);
+#endif
+#ifdef CONFIG_I2C_SLAVE
+  int    (*setownaddress)(FAR struct i2c_dev_s *dev, int addr, int nbits);
+  int    (*registercallback)(FAR struct i2c_dev_s *dev, int (*callback)(void) );
 #endif
 };
 

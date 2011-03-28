@@ -49,7 +49,7 @@
 	* Separated C5471 serial driver; a shareable part is
 	  in drivers/. ; the C5471 specific part is in arch/C5471.
 	  serial.h defines the interface.
-	* Fixed mq_receive() and mq_send() -- bad memcpy()
+	* Fixed mq_receive() and mq_send(): bad memcpy()
 	* Fixed C5471 signal deliver logic: use of dbg() and
 	  other actions by use signal handler can alter errno.
 	  need to protect errno during signal handling.
@@ -247,7 +247,7 @@
 
 	* Removed unused uIP files
 	* sched/, mm/, and net/ subsystem debug can not be selectively enabled/disabled
-	* Correct socket close logic -- needs to disconnect TCP socket on close
+	* Correct socket close logic: needs to disconnect TCP socket on close
 	* uIP webserver now seems to be fully functional
 	* fs/ and lib/ subystem debug can not be selectively enabled/disabled
 	* Added vsnprintf
@@ -358,7 +358,7 @@
 0.3.11 2008-06-01 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Add support for recursive mutexes.
-	* Eliminate a memory leak -- contained watchdog instance was not being
+	* Eliminate a memory leak: contained watchdog instance was not being
 	  deleted with a POSIX timer was deleted reported by kwonsk.
 	* Eliminate a deadlock condition in opendir() reported by kwonsk.
 	* Fix several FAT filesystem problems reported by kwonsk (Changes not yet
@@ -604,7 +604,7 @@
 	  against toolchains that do not support 64-bit type 'long long'.
 	* Fix errors in some function prototypes in dirent.h
 	* Add eZ80F91 EMAC driver
-	* Fix recvfrom() compilation error -- only noted under ZDS
+	* Fix recvfrom() compilation error: only noted under ZDS
 	* Updated all ARM Make.def files to work with gcc 2.4.2 (However, there are
 	  still some build issues associated with that toolchain in use of arm-elf-objcopy
 	  -- see the TODO.txt list for details)
@@ -924,58 +924,58 @@
 	  context switches and background/user context switches.  This change should
 	  improve the performance of those background/user context switches by a factor
 	  of about two.
-	* arch/arm/src/stm32/ - fix several typos in the serial logic.	It turns out
+	* arch/arm/src/stm32/: fix several typos in the serial logic.	It turns out
 	  that these typose don't make any difference as long as you use only one
 	  serial port and all uarts are configured the same.  But the typos are bugs
 	  waiting to happen in any other configuration.
-	* arch/arm/src/stm32/ - You have to configure CTS/RTS function pins for USART
+	* arch/arm/src/stm32/: You have to configure CTS/RTS function pins for USART
 	  2 and USART 3 even if you are not using flow control.
-	* arch/arm/src/stm32/stm32_usbdev.c - Added a USB device-side driver for the
+	* arch/arm/src/stm32/stm32_usbdev.c: Added a USB device-side driver for the
 	  STM32.  NOTE: This is an early release of the USB driver.  There is at least
 	  one known issue. The examples/usbserial test only executes correctly under
 	  certain conditions (see the full bug description in the TODO list).
-	* arch/arm/src/stm32/stm32_rcc.c - Fixed an error in clock initialization.
+	* arch/arm/src/stm32/stm32_rcc.c: Fixed an error in clock initialization.
 	  On some boards (none of mine), the HSE (high speed external clock) delay
 	  loop times out if the optimization level is high. The STM32 then falls
 	  back to the HSI (internal clock), and the system clock is too slow by a
 	  factor of 11.1%.	This was fixed by simply add the volatile storage class
 	  to the timeout loop counter
-	* arch/arm/src/stm32/stm32_irq.c - Fixed a critical bug in the interrupt
+	* arch/arm/src/stm32/stm32_irq.c: Fixed a critical bug in the interrupt
 	  control logic.  The wrong register was being used for interrupts in a
 	  certain range.  Worked fine until you try to use an interrupt in that
 	  range!
 
 4.14 2009-12-02 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* arch/arm/src/stm32/stm32_gpio.c - Add support for configure an input GPIO
+	* arch/arm/src/stm32/stm32_gpio.c: Add support for configure an input GPIO
 	  to generate an EXTI interrupt.
-	* config/stm3210e-eval/src/up_buttons.c - Add support for on-board buttons.
-	* include/nuttx/rwbuffer.h -- Add generic support for read-ahead buffering
+	* config/stm3210e-eval/src/up_buttons.c: Add support for on-board buttons.
+	* include/nuttx/rwbuffer.h: Add generic support for read-ahead buffering
 	  and write buffering that can be used in any block driver.
-	* include/nuttx/wqueue.h -- Added a generic worker thread that can used to
+	* include/nuttx/wqueue.h: Added a generic worker thread that can used to
 	  defer processing from an interrupt to a task.
-	* include/nuttx/sdio.h -- Defines a generic SD/SDIO interface can can be
+	* include/nuttx/sdio.h: Defines a generic SD/SDIO interface can can be
 	  bound to a MMC/SD driver to provide SDIO-based MMC/SD support.
-	* drivers/mmcsd/mmcsd_sdio.c -- Provides an SDIO-based MMC/SD driver.
-	* arch/arm/src/stm32/stm32_sdio.c -- Provides an STM32 implementation of
+	* drivers/mmcsd/mmcsd_sdio.c: Provides an SDIO-based MMC/SD driver.
+	* arch/arm/src/stm32/stm32_sdio.c: Provides an STM32 implementation of
 	  the SDIO interface defined in include/nuttx/sdio.h.
-	* fs/fs_mount.c -- Correct error handling logic.  If the bind() method
+	* fs/fs_mount.c: Correct error handling logic.  If the bind() method
 	  fails, then a reserved node is left in the tree.	This causes subsequent
 	  attempts to mount at the location to fail (reporting that the node
 	  already exists).	This is a problem for block drivers for removable
 	  media: The bind method could fail repeatedly until media is inserted.
-	* arch/arm/src/stm32/chip.h & stm32_dma.c -- Fixed several definitions
+	* arch/arm/src/stm32/chip.h & stm32_dma.c: Fixed several definitions
 	  that can cause compilation errors when DMA2 is enabled.
-	* arch/arm/src/stm32/stm32_dma.c - Integrated and debugged STM32 DMA
+	* arch/arm/src/stm32/stm32_dma.c: Integrated and debugged STM32 DMA
 	  functionality that was added in 0.4.12.
-	* configs/stm3210e-eval/usbstorage - Add a configuration to exercise
+	* configs/stm3210e-eval/usbstorage: Add a configuration to exercise
 	  the STM32 with the USB mass storage device class example
 	  (examples/usbstorage).
-	* configs/mcu123-lpc214x/up_usbstrg - Move LPC-specific code from
+	* configs/mcu123-lpc214x/up_usbstrg: Move LPC-specific code from
 	  examples/usbstorage to configs/mcu123-lpc214x.
-	* configs/stm321e-eval/up_usbstrg - Add STM32-specific logic for the
+	* configs/stm321e-eval/up_usbstrg: Add STM32-specific logic for the
 	  examples/usbstorage test.
-	* arch/arm/src/stm32/stm32_usbdev.c - Fix bugs in STM32 USB device-side
+	* arch/arm/src/stm32/stm32_usbdev.c: Fix bugs in STM32 USB device-side
 	  driver:  (1) Need to disconnect after reset received, (2) Status setup
 	  to recover from stall on TX endpoint.
 
@@ -984,7 +984,7 @@
 	* arch/hc: Adding framework to support m68hc11/12
 	* configs/demo9s12ne64: Configuration to support Freescale DEMO9S12NE64
 	  development board (MC9S12NE64 m68hcs12 processor).
-	* drivers/mtd/ftl.c - A FLASH translation layer (FTL) has been implemented.
+	* drivers/mtd/ftl.c: A FLASH translation layer (FTL) has been implemented.
 	  This layer will convert a FLASH MTD interface into a block driver that
 	  can be used with any file system.  Good performance of this layer will
 	  depend upon functioning write buffer support!
@@ -994,7 +994,7 @@
 	  between uint32 (32-bits) and an mc68hc12 pointer (16-bits).
 	* sys/types:  Size of off_t and blkcnt_t should not depend on size of
 	  int in the architecture;  Removed non-standard type STATUS
-	* include/ - Added header files stdint.h, stdbool.h, cxx/cstdint, and
+	* include/: Added header files stdint.h, stdbool.h, cxx/cstdint, and
 	  cxx/cstdbool
 	* Changed ALL references to non-standard fixed-size types (like uint32,
 	  ubyte, etc.) to standard types (like uint32_t, uint8_t, etc.) from
@@ -1002,30 +1002,30 @@
 	  most of the files in the system!  Almost all configurations have been
 	  re-built and many have been re-verified in order to get confidence in
 	  these changes.
-	* graphics/ and examples/nx - Fix numerous build errors that have been
+	* graphics/ and examples/nx: Fix numerous build errors that have been
 	  introduced lately.  NXGL has suffered some bit-rot from not being used
 	  in some of the most recent ports.
 	* The misc/pascal NuttX add-on package has been updated to use the new
 	  standard types from stdint.h and stdbool.h and re-integrated with NuttX.
 	  The released pascal-2.0 will be the first version that contains the
 	  compatible changes.
-	* arch/arm/src/lm3s/lm3s_ethernet.c - Fixed an important bug in the LM3S
+	* arch/arm/src/lm3s/lm3s_ethernet.c: Fixed an important bug in the LM3S
 	  ethernet driver:  If full packet is received, the packet-too-big check
 	  will fail because it needs to subtract 6 from the packet size (to
 	  account for the 2-byte packet length and the 4-byte packet FCS in the
 	  FIFO).
-	* net/accept.c - Fixed a bad assertion (only happens when debug is enabled).
-	* net/send.c net/uip/uip_tcpseqno.c - Fixed a critical error in the TCP/IP
+	* net/accept.c: Fixed a bad assertion (only happens when debug is enabled).
+	* net/send.c net/uip/uip_tcpseqno.c: Fixed a critical error in the TCP/IP
 	  logic.  The NuttX port of uIP imcludes logic to send data ahead without
 	  waiting for ACKs from the recipient; this greatly improves throughput.
 	  However, the packet sequence number was not being updated correctly and,
 	  as a result, packets were not be ACKed by the recipient and transfers
 	  would sometimes stall.  This is a very important bug fix (in fact, I
 	  don't understand how TCP/IP worked at all without this fix???)
-	* include/nuttx/arch.h and arch/*/common/up_udelay.c - Change argument
+	* include/nuttx/arch.h and arch/*/common/up_udelay.c: Change argument
 	  of up_udelay() to type useconds_t to avoid warnings when sizeof(int)
 	  is 16-bits.
-	* drivers/mmcsd/* - Add casts in constant expressions to avoid warnings
+	* drivers/mmcsd/*: Add casts in constant expressions to avoid warnings
 	  when sizeof(int) is 16-bits.
 
 5.1 2010-01-30 Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -1042,194 +1042,194 @@
 	  the larger (but faster) table look-up version of the CRC32 algorithm.
 	* confgs/ea3131/tools: Added a tool to create a image suitable for
 	  use with the LPC313x bootloader.
-	* configs/sam3u-3k/ostest - Completed verification of the basic NuttX
+	* configs/sam3u-3k/ostest: Completed verification of the basic NuttX
 	  OS test for the SAM3U.
-	* arch/arm/src/common/up_createstack - stack was always been cleared
+	* arch/arm/src/common/up_createstack: stack was always been cleared
 	  when it was allocated.  This is a good feature for monitoring the 
 	  stack during debug, but really hurts thread start-up performance.
 	  Clearing is now done if CONFIG_DEBUG=y only.  Changes was only made
 	  for arm, but really should be made for all architectures.
-	* configs/sam3u/nsh - Added NSH configuration for SAM3U
+	* configs/sam3u/nsh: Added NSH configuration for SAM3U
 
 5.2 2010-03-18 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* arch/arm/src/sam3u/sam3u_pio.c - Fix an address calculation error
+	* arch/arm/src/sam3u/sam3u_pio.c: Fix an address calculation error
 	  that caused ports B & C to get mapped to the PIOA base address.
 	  This is an important bugfix! (a patch is available)
-	* arch/arm/src/lpc313x/lpc313x_boot.c - Fix an error in the vector
+	* arch/arm/src/lpc313x/lpc313x_boot.c: Fix an error in the vector
 	  initialization was causing a memory fault.
-	* lib/lib_strtod.c - Add strtod()
-	* lpc3131/ea3131 - Several bring fixes submitted by David Hewson.  The
+	* lib/lib_strtod.c: Add strtod()
+	* lpc3131/ea3131: Several bring fixes submitted by David Hewson.  The
 	  lpc3131 is almost there!  Thanks David!
-	* arch/arm/src/arm/up_head.S - Corrected backward conditional compilation
+	* arch/arm/src/arm/up_head.S: Corrected backward conditional compilation
 	  that selects if vectors are located at 0x0000:0000 or 0xffff:f000.
 	  This fixes the last show stopper bug in the lpc313x bring-up.
-	* configs/ea3131/nsh - Added a NuttShell (NSH) configuration for the
+	* configs/ea3131/nsh: Added a NuttShell (NSH) configuration for the
 	  EA3131.
 
 5.3 2010-04-11 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* arch/arm/src/lpc313x/lpc313x_usbdev.c - USB driver for the LPC313x
+	* arch/arm/src/lpc313x/lpc313x_usbdev.c: USB driver for the LPC313x
 	  contributed by David Hewson.
 	* configs/ea3131/src/up_ubstrgc.c, configs/ea3131/usbserial,
-	  configs/ea3131/usbstorage - USB storage and USB serial example support
+	  configs/ea3131/usbstorage: USB storage and USB serial example support
 	  contributed by David Hewson.
 	* Several important compilation error fixes in lpc313x and (dualspeed) USB
 	  code also contributed by David Hewson.
-	* arch/arm/src/sam3u/sam3u_dmac.c - DMA support for the AT90SAM3U.
-	* arch/arm/src/sam3u/sam3u_hsmci.c - SD memory card support for AT90SAM3U
+	* arch/arm/src/sam3u/sam3u_dmac.c: DMA support for the AT90SAM3U.
+	* arch/arm/src/sam3u/sam3u_hsmci.c: SD memory card support for AT90SAM3U
 	  (Neither the DMA nor the HSMCI driver are functional on the initial checkin).
-	* drivers/usbdev - Several important fixes to the USB mass storage driver
+	* drivers/usbdev: Several important fixes to the USB mass storage driver
 	  submitted by David Hewson.
 	* configs/olimex-lpc2378, arch/arm/include/lpc2378, and arch/arm/src/lpc2378 -
 	  Basic port of the NXP 2378 on the Olimex board contributed by
 	  Rommel Marcelo.
-	* arch/arm/src/sam3u/sam3u_internal.h - Fixed a critical bug in the AT91SAM3U
+	* arch/arm/src/sam3u/sam3u_internal.h: Fixed a critical bug in the AT91SAM3U
 	  PIO decoding.  No PIOs greater than 15 could be used on any port!  Obviously,
 	  no one has been using this port.
 
 5.4 2010-04-23 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* include/nuttx/lcd.h - Defines an LCD interface.
-	* graphics/nxglib/fb and lcd - Support LCD and framebuffer rasterizers for NX.
-	* configs/sam3u-ek/src/up_lcd.c - LCD driver for LCD on SAM3U-EK development
+	* include/nuttx/lcd.h: Defines an LCD interface.
+	* graphics/nxglib/fb and lcd: Support LCD and framebuffer rasterizers for NX.
+	* configs/sam3u-ek/src/up_lcd.c: LCD driver for LCD on SAM3U-EK development
 	  board.
-	* configs/sam3u-ek/nx - NX graphics configuration for the SAM3U-EK
+	* configs/sam3u-ek/nx: NX graphics configuration for the SAM3U-EK
 
 5.5 2010-05-09 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* drivers/net/enc28j60.c - Microchip ENC28J60 SPI ethernet chip driver.
+	* drivers/net/enc28j60.c: Microchip ENC28J60 SPI ethernet chip driver.
 	  (untested on original check-in).
-	* configs/olimex-str7p11/nettest - examples/nettest configuration using
+	* configs/olimex-str7p11/nettest: examples/nettest configuration using
 	  the ENC28J60 driver on the Olimex STMicro STR-P711.
 	  (unverified on original check-in)
-	* configs/olimex-str7p11/src/up_enc28j60.c - Add ENC28J60 initialization
+	* configs/olimex-str7p11/src/up_enc28j60.c: Add ENC28J60 initialization
 	  logic.
-	* configs/olimex-str7p11/src/up_spi.c - Fixed some bugs; added support
+	* configs/olimex-str7p11/src/up_spi.c: Fixed some bugs; added support
 	  for ENC28J60.
-	* arch/arm/src/str7x/str7x_xti.c - Add basic XTI support (external
+	* arch/arm/src/str7x/str7x_xti.c: Add basic XTI support (external
 	  interrupts).
-	* arch/arm/src/lm3s and arch/arm/include/lm3s - Add definitions for
+	* arch/arm/src/lm3s and arch/arm/include/lm3s: Add definitions for
 	  LM3S6965
-	* configs/lm3s6965-ek - Add configuration for Stellaris LM3S6965
+	* configs/lm3s6965-ek: Add configuration for Stellaris LM3S6965
 	  Evaluation Kit (including basic examples/ostest configuration)
-	* lib/lib_dtoa.c and lib/lib_dtoa.c - printf will not print floating
+	* lib/lib_dtoa.c and lib/lib_dtoa.c: printf will not print floating
 	  point values if you select CONFIG_LIBC_FLOATINGPOINT in your
 	  configuration file.  Contributed by Yolande Cates.  NOTE:  these
 	  floating point operations have not been well tested and may not
 	  be portable to all floating point implementations.
-	* configs/lm3s6965-ek/nsh - Added NuttShell (NSH) configuration for
+	* configs/lm3s6965-ek/nsh: Added NuttShell (NSH) configuration for
 	  the LM3S6965 Evaluation Kit.  Includes both serial and telnet
 	  interfaces.
-	* net/net_close.c - Correct a UDP reference counting error
+	* net/net_close.c: Correct a UDP reference counting error
 
 5.6 2010-06-05 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* drivers/lcd/p14201.c - Driver for RiT P14201 series 128x96 4-bit OLED.
-	* configs/lm3s6965-ek/nx - NX graphics configuration for the LM3S6965
+	* drivers/lcd/p14201.c: Driver for RiT P14201 series 128x96 4-bit OLED.
+	* configs/lm3s6965-ek/nx: NX graphics configuration for the LM3S6965
 	  Ethernet Evaluation Kit.
-	* graphics/ - Numerous fixes to get the P14201 4-bpp grayscale display
+	* graphics/: Numerous fixes to get the P14201 4-bpp grayscale display
 	  working (there may still be some minor issues .. see the TODO list).
-	* arch/arm/include/lpc17xx and arch/arm/src/lpc17xxx - Began port for
+	* arch/arm/include/lpc17xx and arch/arm/src/lpc17xxx: Began port for
 	  NXP LPC1768.  As of the 5.6 release, there is a complete set of
 	  LPC17xx header files defining all bits in all LPC17xx registers,
 	  but little else (I still do not have hardware in hand).
-	* drivers/mtd/m25px.c - Add support for M25P1 flash part (See NOTE)
-	* include/nuttx/i2c.h - Extended I2C interface definition to handle
+	* drivers/mtd/m25px.c: Add support for M25P1 flash part (See NOTE)
+	* include/nuttx/i2c.h: Extended I2C interface definition to handle
 	  multiple transfers (See NOTE).
-	* include/nuttx/usbdev.h - Corrected an important macro definition
+	* include/nuttx/usbdev.h: Corrected an important macro definition
 	  needed to correctly handle USB null packet transfers (See NOTE).
-	* arch/arm/src/lpc313x - New drivers: I2C and SPI.  Plus several
+	* arch/arm/src/lpc313x: New drivers: I2C and SPI.  Plus several
 	  important LPC313x USB bug fixes (See NOTE).
 
 	NOTE: Contributed by David Hewson.
 
 5.7 2010-06-22 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* configs/nucleus2g - Add ostest configuration for the Nucleus 2G
+	* configs/nucleus2g: Add ostest configuration for the Nucleus 2G
 	  LPC1768 board from 2G Engineering (http://www.2g-eng.com/)
-	* arch/arm/src/lpc17xx - Added basic LPC17xx boot-up logic,
+	* arch/arm/src/lpc17xx: Added basic LPC17xx boot-up logic,
 	  interrupt handling, and GPIO configuration.
-	* configs/nucleus2g/ostest - Completed bring-up of LPC1768 on
+	* configs/nucleus2g/ostest: Completed bring-up of LPC1768 on
 	  the Nucleus2G board using the examples/ostest
-	* configs/nucleus2g/nsh - Added and verified a NuttShell (NSH)
+	* configs/nucleus2g/nsh: Added and verified a NuttShell (NSH)
 	  configuration for the LPC1768 on the Nucleus2G board.
 
 5.8 2010-07-18 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* configs/nucleus2g/src/up_nsh.c and up_ssp.c - Add support
+	* configs/nucleus2g/src/up_nsh.c and up_ssp.c: Add support
 	  for SPI-based MMC/SD cards and integrate into the NSH example.
-	* arch/arm/src/lm3s/lm3s_vectors.S - Correct vectors for GPIOC & D
+	* arch/arm/src/lm3s/lm3s_vectors.S: Correct vectors for GPIOC & D
 	  interrupts.
-	* arch/arm/src/lpc17xx/lp17_clockconfig.c - Power was not being
+	* arch/arm/src/lpc17xx/lp17_clockconfig.c: Power was not being
 	  provided to GPIO module.  This is a critical bugfix!
-	* arch/arm/src/lpc17xx/lpc17_serial.c - Improved logic to handle
+	* arch/arm/src/lpc17xx/lpc17_serial.c: Improved logic to handle
 	  missed TX interrupts.
-	* arch/arm/src/lpc17xx/lpc17_ssp.c - Fix a hard fault during SSP
+	* arch/arm/src/lpc17xx/lpc17_ssp.c: Fix a hard fault during SSP
 	  initialization.
-	* configs/nucleus2g/src/up_led.c - Change how LEDs are controlled
+	* configs/nucleus2g/src/up_led.c: Change how LEDs are controlled
 	  so that they can be used both for NuttX instrumentation and
 	  by application software.
-	* include/net/uip/igmp.h and uip-igmp.h - Add header files ini
+	* include/net/uip/igmp.h and uip-igmp.h: Add header files ini
 	  preparation for NuttX IGMP support
-	* net/uip/uip_igmp*.c - Add IGMP support (untested on initial
+	* net/uip/uip_igmp*.c: Add IGMP support (untested on initial
 	  checkin).
-	* examples/igmp - Add a trivial test for IGMP (much more is needed)
-	* configs/nucleus2g/usbserial and usbstorage - Add USB configurations
+	* examples/igmp: Add a trivial test for IGMP (much more is needed)
+	* configs/nucleus2g/usbserial and usbstorage: Add USB configurations
 	  for testing purposes.
 	* arch/arm/src/common/up_internal.h, cortexm3/up_assert.c,
-	  */*_vectors.S - Correct compilations errors when CONFIG_ARCH_INTERRUPTSTACK
+	  */*_vectors.S: Correct compilations errors when CONFIG_ARCH_INTERRUPTSTACK
 	  is enabled (feature still not tested)
 
 5.9 2010-08-25 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* examples/nsh/nsh_telnetd.c - Fix compilation errors that happen
+	* examples/nsh/nsh_telnetd.c: Fix compilation errors that happen
 	  when both DHCPC and TELNETD are enabled in the Nuttshell.
-	* graphics/nxglib/fb/nxglib_moverectangle.c - Fix a logic error
+	* graphics/nxglib/fb/nxglib_moverectangle.c: Fix a logic error
 	  that caused an uninitialized variable warning.  I still don't 
 	  have a test to prove that the changes are correct.
-	* configs/olimex-lpc2378 - Add support for the CodeSourcery toolchain
+	* configs/olimex-lpc2378: Add support for the CodeSourcery toolchain
 	  under Linux (contributed by Alan Carvalho de Assis).
-	* arch/arm/src/lpc17xx/lpc17_gpio.c - Fix an important GPIO configuration
+	* arch/arm/src/lpc17xx/lpc17_gpio.c: Fix an important GPIO configuration
 	  bug:  When attempting to set no pull-up or pull-down (floating),
 	  it would, instead, select pull-down.
-	* arch/arm/src/lm3s/lm3s_gpioirq.c - Fix warning for returning a value
+	* arch/arm/src/lm3s/lm3s_gpioirq.c: Fix warning for returning a value
 	  from functions returning void (contributed by Tiago Maluta).
-	* netutils/dhcpc/dhcpc.c -- lease_time was not in host order
-	* examples/uip/main.c - if DHCPC is selected, this example now shows
+	* netutils/dhcpc/dhcpc.c: lease_time was not in host order
+	* examples/uip/main.c: if DHCPC is selected, this example now shows
 	  the assigned IP address.
-	* arch/arm/src/lm3s and arch/arm/include/lm3s - Definitions for the
+	* arch/arm/src/lm3s and arch/arm/include/lm3s: Definitions for the
 	  TI LM3S9B96 contributed by Tiago Maluta.
-	* arch/arm/src/lm3s/lm3s_gioirq.c - Fix a logic error in the address
+	* arch/arm/src/lm3s/lm3s_gioirq.c: Fix a logic error in the address
 	  table lookup.
-	* arch/arm/src/lm3s/lm3s_gioirq.c - Also needs to enable the global
+	* arch/arm/src/lm3s/lm3s_gioirq.c: Also needs to enable the global
 	  GPIO interrupts.
-	* arch/arm/src/lm3s/lm3s_internal.h and lm3s_gpio.c - Fixed the encoding
+	* arch/arm/src/lm3s/lm3s_internal.h and lm3s_gpio.c: Fixed the encoding
 	  of GPIO port number that limited support for GPIO ports to 8
-	* sched/pg_*.c and *.c and include/nuttx/page.h - Implemented the
+	* sched/pg_*.c and *.c and include/nuttx/page.h: Implemented the
 	  common, core logic for on-demand paging. See
 	  http://www.nuttx.org/NuttXDemandPaging.html for details.
-	* drivers/usbdev/usbdev_serial.c - Correct compilation errors that
+	* drivers/usbdev/usbdev_serial.c: Correct compilation errors that
 	  occur if CONFIG_USBDEV_DUALSPEED is selected.
-	* configs/ea3131/pgnsh - Add an NSH configuration with on-demand paging
+	* configs/ea3131/pgnsh: Add an NSH configuration with on-demand paging
 	  enabled.  This is not expected to be a functionality configuration (at
 	  least not yet); it was created in order to debug the on-demand paging
 	  feature.
-	* configs/ntosd-dm320/*/Make.defs - Codesourcery and devkitARM toolchains
+	* configs/ntosd-dm320/*/Make.defs: Codesourcery and devkitARM toolchains
 	  now supported for the Neuros OSD.
-	* configs/ntosd-dm320 and arch/arm/src/dm320 - Add support for the
+	* configs/ntosd-dm320 and arch/arm/src/dm320: Add support for the
 	  Neuros production OSD (changes contributed by bf.nuttx).
 
 5.10 2010-09-07 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* configs/ea3131/locked - Create logic to support a two pass build
+	* configs/ea3131/locked: Create logic to support a two pass build
 	  process:  The first pass forces critical logic into the locked text
 	  region, the second pass builds the NuttX executable more-or-less as
 	  normal.
-	* Makefile, arch/arm/src/Makefile, configs/ea3131 - Add logic to
+	* Makefile, arch/arm/src/Makefile, configs/ea3131: Add logic to
 	  support a two-pass final link.  This logic is only in place in
 	  the arch/arm/src/Makefile for now.
-	* arch/arm/src/lpc17xx/lpc17_internal.h - Add missing parentheses in
+	* arch/arm/src/lpc17xx/lpc17_internal.h: Add missing parentheses in
 	  macros definitions (patch submitted by Tiago Maluta).
 	* Documents/NuttxPortingGuide.html, configs/README.txt, etc. -
 	  Replaced CONFIG_EXAMPLE with CONFIG_APP_DIR (see documents for
@@ -1248,17 +1248,17 @@
 	    with libapp$(LIBEXT) in your Makefiles.
 	  - Check any other occurrences of CONFIG_EXAMPLE.
 
-	* arch/arm/src/lpc313x/lpc313x_spi.c - Fix compilation error when
+	* arch/arm/src/lpc313x/lpc313x_spi.c: Fix compilation error when
 	  when CONFIG_DEBUG is enabled.
-	* arch/arm/src/lm3s and arch/arm/include/lm3s - Support for the
+	* arch/arm/src/lm3s and arch/arm/include/lm3s: Support for the
 	  lm3s8962 contributed by Larry Arnold.
-	* configs/lm328962-ek - Support for the TI/Stellaris EKC-LM3S8962
+	* configs/lm328962-ek: Support for the TI/Stellaris EKC-LM3S8962
 	  board (also contributed by Larry Arnold).
-	* arch/arm/src/lpc313x/lpc313x_boot.c - The call to lpc313x_boardinitialized()
+	* arch/arm/src/lpc313x/lpc313x_boot.c: The call to lpc313x_boardinitialized()
 	  should not be conditioned on CONFIG_ARCH_LEDs being defined!
-	* arch/arm/src/lpc313x/ - APB0 and APB1 cannot lie in different
+	* arch/arm/src/lpc313x/: APB0 and APB1 cannot lie in different
 	  sections; they are too close together.
-	* arch/arm/src/lpc313x/lpc13x_boot.c - Resetting all of the clocking
+	* arch/arm/src/lpc313x/lpc13x_boot.c: Resetting all of the clocking
 	  had a side effect of wiping out the first 6 words of memory where the
 	  interrupt vectors are located (and also not resetting the fractional
 	  dividers).  This is not usually noticeable because the IRQ vectors
@@ -1267,43 +1267,43 @@
 
 5.11 2010-10-01 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* configs/ea3131/src/up_fillpage.c - Added new configuration item
+	* configs/ea3131/src/up_fillpage.c: Added new configuration item
 	  CONFIG_PAGING_BINPATH.  If CONFIG_PAGING_BINPATH is defined, then it
 	  is the full path to a file on a mounted file system that contains
 	  a binary image of the NuttX executable.  Pages will be filled by
 	  reading from offsets into this file that correspond to virtual
 	  fault addresses.  up_fillpage.c implements logic to perform page
 	  files using the CONFIG_PAGING_BINPATH file.
-	* configs/mbed - Add configuration to support the mbed.org LPC1768
+	* configs/mbed: Add configuration to support the mbed.org LPC1768
 	  board (Contributed by Dave Marples).
-	* sched/sem_wait.c and sem_waitirq.c - Eliminate a race condition
+	* sched/sem_wait.c and sem_waitirq.c: Eliminate a race condition
 	  that can occur when a semaphore wait is interrupt by a signal.
 	  (see email thread: http://tech.groups.yahoo.com/group/nuttx/message/530)
-	* drivers/mtd/at45db.c - Add a driver for the Atmel AT45DB161D 4Mbit
+	* drivers/mtd/at45db.c: Add a driver for the Atmel AT45DB161D 4Mbit
 	  SPI FLASH part (untested on initial check-in).
-	* arch/arm/src/lm3s and arch/arm/include/lm3s - Corrections for the
+	* arch/arm/src/lm3s and arch/arm/include/lm3s: Corrections for the
 	  lm3s8962 port contributed by Larry Arnold.  That port is purported
 	  to work correctly with these changes in place.
-	* examples/ostest/prioinherit.c - Need to reinitialize globals if
+	* examples/ostest/prioinherit.c: Need to reinitialize globals if
 	  test is ran repeatedly in a loop.
-	* configs/ez80f910200zco - Updated to used ZDS-II 4.11.1
+	* configs/ez80f910200zco: Updated to used ZDS-II 4.11.1
 
 5.12 2010-10-26 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* arch/avr - Add a place to support AVR family processors.
-	* arch/avr/include/avr32 and arch/avr/src/avr32 - Add support for AVR32
+	* arch/avr: Add a place to support AVR family processors.
+	* arch/avr/include/avr32 and arch/avr/src/avr32: Add support for AVR32
 	  (all of the AVR32 is a work in progress).
-	* arch/avr/include/at32uc3 and arch/avr/src/at32uc3 - Add support
+	* arch/avr/include/at32uc3 and arch/avr/src/at32uc3: Add support
 	  for the AVR32 UC3A/B family of AVR32 MCUs.
-	* confgs/avr32dev1 - Add support for the Atmel AVR32DEV1 board featuring
+	* confgs/avr32dev1: Add support for the Atmel AVR32DEV1 board featuring
 	  the AT32UC3B0256 MCU.  This board is produced by www.mcuzone.com.
 	* include/stdlib.h, lib/Makefile, lib/lib_abs.c, lib/lib_labs.c,
-	  lib_labs.c, lib_llabs.c, lib_imaxabs.c - Add abs(), labs(), llabs(), and
+	  lib_labs.c, lib_llabs.c, lib_imaxabs.c: Add abs(), labs(), llabs(), and
 	  imaxabs().
 	* Add include/inttypes.h
-	* arch/hc/src/mc9s12ne64 - This hcs12 port grew a few more files.  But it
+	* arch/hc/src/mc9s12ne64: This hcs12 port grew a few more files.  But it
 	  is still a long way from complete.
-	* arch/*/src/*/*_sigdeliver.c - Fixed a serious error in the signal
+	* arch/*/src/*/*_sigdeliver.c: Fixed a serious error in the signal
 	  trampoline logic.  Essentially, interrupts are re-enabled while the
 	  signal handler executes, but the logic to re-disable the interrupts
 	  before returning from the signal handler trampoline was missing.  Under
@@ -1316,44 +1316,44 @@
 
 5.13 2010-11-09 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* lib/lib_strnlen.c -- Added POSIX 2008 strnlen() function.  Contributed
+	* lib/lib_strnlen.c: Added POSIX 2008 strnlen() function.  Contributed
 	  by Michael Hrabanek.
 	* Fix wild, consistent naming error.  For some reason, I called the at32uc3*
 	  parts at91uc* everywhere.  Fixed by changing lots of files and directories.
-	* configs/avr32dev1/ostest - The AVR32 port now successfully passes the
+	* configs/avr32dev1/ostest: The AVR32 port now successfully passes the
 	  examples/ostest.  We have a good AVR32 port!
-	* configs/avr32dev1/nsh - Added a configuration to support the NuttShell
+	* configs/avr32dev1/nsh: Added a configuration to support the NuttShell
 	  (NSH). As of this writing, here is a problem receiving serial data (this
 	  is, very likely, my hardware setup).
-	* lib/lib_open.c - Fix an error in fdopen when a valid file desciptor does
+	* lib/lib_open.c: Fix an error in fdopen when a valid file desciptor does
 	  not refer to an open file.
-	* configs/olimex-lpc1766stk - Add support for the Olimex LPC1766-STK
+	* configs/olimex-lpc1766stk: Add support for the Olimex LPC1766-STK
 	  development board.  The OS test and NSH configurations (only) have been
 	  verified.
 
 5.14 2010-11-27 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* configs/olimex-lpc1766stk/nettest - Add examples/nettest configuration to
+	* configs/olimex-lpc1766stk/nettest: Add examples/nettest configuration to
 	  verify the LPC17xx ethernet driver currently under development.
-	* arch/arm/src/lpc17xx/lpc17xx_ethernet.c/.h - Began development of
+	* arch/arm/src/lpc17xx/lpc17xx_ethernet.c/.h: Began development of
 	  the LPC17xx Ethernet driver.  Driver in CVS functional after 2010-11-23.
-	* sched/timer_settime.c - Fix an error in set-up of a one-shot POSIX timer.  It
+	* sched/timer_settime.c: Fix an error in set-up of a one-shot POSIX timer.  It
 	  was using the repititive timer value (which is zero in the one-shot case),
 	  always resulting in a 10Ms timer!  Found and fixed by Wilton Tong.
 	* arch/arm/src/lpc17xx/lpc17_vector.S, stm32/stm32_vector.S, lm3s/lm3s_vector.S,
-	  sam3u/sam3u_vector.S -- Fixed a hard fault problem that can occur if certain
+	  sam3u/sam3u_vector.S: Fixed a hard fault problem that can occur if certain
 	  types of interrupts are pending at the time another interrupt returns
 	  (SYSTICK).  This has not been verified on all plaforms, but is a critical
 	  fixed that is needed by all Cortex-M3 NuttX users.
-	* configs/olimex-lpc1766stk/thttpd - Add a THTTPD configuration for the
+	* configs/olimex-lpc1766stk/thttpd: Add a THTTPD configuration for the
 	  Olimex LPC2766-STK board. Verified successfully.
-	* net/uip/uip_tcpappsend.c - Correct an important logic bug in some uIP state
+	* net/uip/uip_tcpappsend.c: Correct an important logic bug in some uIP state
 	  data the is used to manage retransmissions.  The uIP logic was incompatible
 	  with the retransmission logic of net/send.c in one place.  The final error
 	  was that the final packet in a sequence of packets was too large!  In the
 	  THTTPD example, this would leave some garbage at the bottom of the display
 	  (or worse).  I don't know why I haven't see this bug before???
-	* net/uip/uip_tcpinput.c -- The change to uip_tcpappsend.c unmasked an
+	* net/uip/uip_tcpinput.c: The change to uip_tcpappsend.c unmasked an
 	  additional error in the TCP sequence number handling.  This sympom was that
 	  the send() function would hang with outstanding, unacknowledged data (with
 	  no re-transmit requests).  The was due to differences in sequence number
@@ -1362,78 +1362,78 @@
 
 5.15 2010-12-12 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* net/uip/uip_tcpaddsend.c and net/send.c -- Another place where the TCP sequence
+	* net/uip/uip_tcpaddsend.c and net/send.c: Another place where the TCP sequence
 	  number problem "fixed" in 5.14 might occur.
-	* net/send.c -- Check if the destination IP address is in the ARP table.  If
+	* net/send.c: Check if the destination IP address is in the ARP table.  If
 	  not, then don't consider the packet sent.  It won't be, an ARP packet will go
 	  out instead.  This improves behavior, for example, on the first GET request
 	  from a browser.
-	* arch/arm/src/lpc17xx/lpc17_emacram.h and lpc17_allocateheap.c -- The Ethernet
+	* arch/arm/src/lpc17xx/lpc17_emacram.h and lpc17_allocateheap.c: The Ethernet
 	  logic was using all of AHB SRAM Bank0 for Ethernet packet buffers (16Kb).  An
 	  option was added to limit the amount of SRAM used for packet buffering and to
 	  re-use any extra Bank0 memory for heap.  configs/olimex-lpc1766stk/nettest
 	  now uses only 8Kb at the beginning of Bank0; the 8Kb at the end of Bank0 is
 	  included in the heap
-	* arch/arm/src/lpc17xx/lpc17_ssp.c -- Fix compilation errors when SSP1 is
+	* arch/arm/src/lpc17xx/lpc17_ssp.c: Fix compilation errors when SSP1 is
 	  selected.
-	* configs/olimex-lpc1766stk/nsh -- Enable network and SD/MMC card support in
+	* configs/olimex-lpc1766stk/nsh: Enable network and SD/MMC card support in
 	  NSH.  Networking and telnetd interface as well as SPI-based microSD are
 	  now functional.
-	* examples/nsh/nsh_netinit.c -- Fix NSH bug.  If CONFIG_NET is selected, but
+	* examples/nsh/nsh_netinit.c: Fix NSH bug.  If CONFIG_NET is selected, but
 	  CONFIG_EXAMPLES_NSH_TELNETD is not selected, then the network is never
 	  initialized and bad things happen if you try to ping.
-	* drivers/lcd -- Add header files for the Phillips PCF8833 LCD controller and
+	* drivers/lcd: Add header files for the Phillips PCF8833 LCD controller and
 	  for the Epson S1D15G10 LCD controller.  A driver for the Nokia 6100 LCD is
 	  coming.
-	* include/nuttx/spi.h and almost all other SPI files -- Added an optional
+	* include/nuttx/spi.h and almost all other SPI files: Added an optional
 	  cmddata() method to the SPI interface.  Some devices require an additional
 	  out-of-band bit to specify if the next word sent to the device is a command
 	  or data. This is typical, for example, in "9-bit" displays where the 9th bit
 	  is the CMD/DATA bit. The cmddata method provides selection of command or data.
-	* drivers/lcd/p14201.c -- Now uses the cmddata() method of the SPI interface.
-	* arch/arm/src/lpc17xx/lpc17_usbdev.c -- LPC17xx USB driver now appears to
+	* drivers/lcd/p14201.c: Now uses the cmddata() method of the SPI interface.
+	* arch/arm/src/lpc17xx/lpc17_usbdev.c: LPC17xx USB driver now appears to
 	  to be fully functional.  examples/usbstorage configuration verified (the
 	  examples/usbserial configuration is untested).
-	* drivers/usbdev/usbserial.c and usbstorage.c -- All USB class drivers need
+	* drivers/usbdev/usbserial.c and usbstorage.c: All USB class drivers need
 	  to call DEV_CONNECT() when they are ready to be enumerated.  That is,
 	  (1) initially when bound to the USB driver, and (2) after a USB reset.
-	* drivers/lcd/nokia6100.c -- A driver for the Nokia 6100 LCD.  This driver
+	* drivers/lcd/nokia6100.c: A driver for the Nokia 6100 LCD.  This driver
 	  has not be verified as of the initial check-in.
-	* configs/olimex-lpc1766stk/nx -- A NX graphics configuration for the Olimex
+	* configs/olimex-lpc1766stk/nx: A NX graphics configuration for the Olimex
 	  LPC1766-STK board using the Nokia 6100 LCD driver.  This configuration has
 	  not been verified as of the initial check-in.
-	* include/nuttx/spi.h -- the SPI_SETBITS macro was calling the setmode method.
+	* include/nuttx/spi.h: the SPI_SETBITS macro was calling the setmode method.
 	  This is a very important bug-fix in some usages.
 
 5.16 2011-01-10 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* include/nuttx/usb -- Created new directory.  Moved all usb-related header
+	* include/nuttx/usb: Created new directory.  Moved all usb-related header
 	  files to this new directory.  Created a skeleton for a new USB host header
 	  file
-	* drivers/usbhost -- Add USB host "registry" where connect devices can be
+	* drivers/usbhost: Add USB host "registry" where connect devices can be
 	  matched with the correct USB class driver.
-	* arc/arc/src/lpc17xx/lpc17_usbhost.c -- Add a simple USB host driver for
+	* arc/arc/src/lpc17xx/lpc17_usbhost.c: Add a simple USB host driver for
 	  the NXP lpc17xx.
-	* drivers/usbhost -- Add generic USB device enumeration logic.
-	* drivers/usbhost -- Add a USB host class driver for the (Bulk-Only) USB
+	* drivers/usbhost: Add generic USB device enumeration logic.
+	* drivers/usbhost: Add a USB host class driver for the (Bulk-Only) USB
 	  Mass Storage Class.
 
 5.17 2011-01-19 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* include/nuttx/usb -- rename usb_storage.h to storage.h.
-	* arch/arm/src/lpc17xx/lpc17_usbhost.c -- Add support for low-speed devices.
-	* drivers/usbhost/usbhost_skeleton.c -- Template for new class drivers
-	* include/nuttx/usb/hid.h and drivers/usbhost/usbhost_hidkbd.c -- New
+	* include/nuttx/usb: rename usb_storage.h to storage.h.
+	* arch/arm/src/lpc17xx/lpc17_usbhost.c: Add support for low-speed devices.
+	* drivers/usbhost/usbhost_skeleton.c: Template for new class drivers
+	* include/nuttx/usb/hid.h and drivers/usbhost/usbhost_hidkbd.c: New
 	  files for HID keyboard support.
-	* arch/arm/src/lpc17xx/lpc17_usbhost.c -- Will now handle multiple
+	* arch/arm/src/lpc17xx/lpc17_usbhost.c: Will now handle multiple
 	  concurrent transfers on different endpoints (still only one TD per
 	  endpoint).  All methods are protected from re-entrancy; lots of re-
 	  structuring in preparation for interrupt endpoint support.
-	* arch/arm/src/lpc17xx/lpc17_usbhost.c -- Add support for periodic
+	* arch/arm/src/lpc17xx/lpc17_usbhost.c: Add support for periodic
 	  interrupt transfers.
-	* examples/hidkbd - Added a simple test for the USB host HID keyboard
+	* examples/hidkbd: Added a simple test for the USB host HID keyboard
 	  class driver.
-	* configs/olimex-lpc1766stk/hidkbd - Added a configuration to build the
+	* configs/olimex-lpc1766stk/hidkbd: Added a configuration to build the
 	  USB host HID keyboard class driver test for the LPC17xx.
 	* Ran the tool CppCheck (http://sourceforge.net/apps/mediawiki/cppcheck) and
 	  fixed several errors in the code identified by the tool.
@@ -1444,37 +1444,37 @@
 	  - Lost SYNACK causes connection reset
 	  - Fix missing UDP stats for sent/received packets
 	  - Added support for Cygwin as development/test platform.
-	* configs/demo9s12ne64 - Integrate new buildroot-1.9 m8s12x toolchain.
+	* configs/demo9s12ne64: Integrate new buildroot-1.9 m8s12x toolchain.
 	* 'uname -o' is used throughout the build logic in bash scripts and also in
 	  Make.defs files in order to distinguish between Cygwin and Linux.  However,
 	  the -o option is not standard and is not supported under, for example, OS-X or
 	  Solaris.  This was solved by changing all 'uname -o' references to the more
 	  complex:  'uname -o 2>/dev/null || echo "Other"'
-	* drivers/usbhost/usbhost_enumerate.c -- Add logic to get the VID and PID.  This
+	* drivers/usbhost/usbhost_enumerate.c: Add logic to get the VID and PID.  This
 	  is necessary in order to support vendor-specific USB devices.
 	* examplex/wlan, configs/olimex-lpc1766stk/wlan, drivers/usbhost/usbhost_rtl8187.c,
 	  Add infrastructure to support RTL18187 wireless USB.
-	* configs/nucleus2g -- backed out USB host changes... wrong board.
-	* Renamed arc/hc/include/mc9s12ne64 and src/mc9s12ne64 -- m9s12.  That name is
+	* configs/nucleus2g: backed out USB host changes... wrong board.
+	* Renamed arc/hc/include/mc9s12ne64 and src/mc9s12ne64 to m9s12.  That name is
 	  shorter and more general.
 	* The NuttX repository has been converted to SVN and can now be found here
 	  http://nuttx.svn.sourceforge.net/viewvc/nuttx/
-	* configs/mbed/hidkbd -- Added USB host support for the mbed LPC1768 board; add
+	* configs/mbed/hidkbd: Added USB host support for the mbed LPC1768 board; add
 	  a USB host HID keyboard configuraion.
-	* drivers/usbhost/hid_parser.c -- Leverages the LUFA HID parser written by
+	* drivers/usbhost/hid_parser.c: Leverages the LUFA HID parser written by
 	  Dean Camera.
-	* examples/nsh -- Correct an usage of getopt(): If you stop calling getopt()
+	* examples/nsh: Correct an usage of getopt(): If you stop calling getopt()
 	  before all parameters are parsed, you can leave getopt() in a strange state.
-	* include/nuttx/fb.h -- Restore missing RGB type that was accidentally removed
+	* include/nuttx/fb.h: Restore missing RGB type that was accidentally removed
 	  when Nokia 6100 support was added.
 	* Rename arch/pjrc-8051 to arch/8051
-	* configs/ne64badge -- Add a configuration for the Future Electronics Group
+	* configs/ne64badge: Add a configuration for the Future Electronics Group
 	  NE64 Badge development board (Freescale MC9S12NE64)
 	* Changes contributed by Uros Platise:
 	  - Add support for the STM32F103RET6
-	  - configs/vsn - Support for the ISOTEL NetClamps VSN V1.2 ready2go sensor
+	  - configs/vsn: Support for the ISOTEL NetClamps VSN V1.2 ready2go sensor
 	    network platform
-	* arch/hc, configs/ne64badge -- Development is complete for the Freescale
+	* arch/hc, configs/ne64badge: Development is complete for the Freescale
 	  mc9s12ne64 on the Future Electronics Group NE64 /PoE Badge board.  Howeve,
 	  this port remains untested until I figure out this BDM / Code Warrior
 	  and paged build thing
@@ -1483,7 +1483,7 @@
 
 5.19 2011-03-12 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* arch/arm/stm32/stm32_idle.c -- During idle times, the STM32 now uses the
+	* arch/arm/stm32/stm32_idle.c: During idle times, the STM32 now uses the
 	  WFI instruction to sleep in a reduced power mode until the next interrupt
 	  occurs (Contributed by Uros Platise).      
 	* NSH: 'mem' command renamed to 'free'.  Output is now more similar to the
@@ -1506,84 +1506,84 @@
 	* drivers/pipes/pipe_common.c:  Driver open method was not returning an EINTR
 	  error when it received a signal.  Instead, it just re-started the wait.  This
 	  makes it impossible to kill a background pipe operation from NSH.
-	* include/stdint.h -- Correct some errors in conditional compilation (submitted
+	* include/stdint.h: Correct some errors in conditional compilation (submitted
 	  by Johannes Hampel).
-	* arch/arm/lpc17xx/lp17_idle.c -- Uses the same logic as the STM32: uses the
+	* arch/arm/lpc17xx/lp17_idle.c: Uses the same logic as the STM32: uses the
 	  WFI instruction to sleep in a reduced power mode until the next interrupt
 	  occurs.
-	* configs/olimex-lpc1766stk -- Added an LED encoded to indicate if the LPC1766
+	* configs/olimex-lpc1766stk: Added an LED encoded to indicate if the LPC1766
 	  is in sleeping.
-	* examples/mm  -- This is a simplified version of the "built-in" memory manager
+	* examples/mm: This is a simplified version of the "built-in" memory manager
 	  test of mm/mm_test.c.  It is simplified because it does not have access to
 	  the internals of the memory manager as does mm/mm_test.c, but it has the
 	  advantage that it runs in the actual NuttX tasking environment (the
 	  mm/mm_test.c only runs in a PC simulation environment).
-	* drivers/mmcsd_sdio.c/h -- Several corrections submitted by Uros Platise.
-	* arch/x86 - Provide support for x86 architectures.  Support for the i486
+	* drivers/mmcsd_sdio.c/h: Several corrections submitted by Uros Platise.
+	* arch/x86: Provide support for x86 architectures.  Support for the i486
 	  architecture under QEMU is provided under arch/x86/include/i486,
 	  arch/x86/include/qemu, arch/x86/src/i486, and arch/x86/src/qemu.
-	* configs/qemu-i486 - "Board" support configurations for verifying the QEME
+	* configs/qemu-i486: "Board" support configurations for verifying the QEME
 	  i486 port.
-	* arch/arm/src/stm32/stm32_spi.c -- Correct base address of SPI3 (reported by
+	* arch/arm/src/stm32/stm32_spi.c: Correct base address of SPI3 (reported by
 	  Uros Platise).
-	* drivers/mmcsd/mmcsd_sdio.c -- Correct a loop termination condition (also
+	* drivers/mmcsd/mmcsd_sdio.c: Correct a loop termination condition (also
 	  reported by Uros Platise).
-	* drivers/mtd/ramtron.c -  Driver for SPI-based RAMTRON NVRAM devices FM25V10
+	* drivers/mtd/ramtron.c: Driver for SPI-based RAMTRON NVRAM devices FM25V10
 	  (and others).  Contributed by Uros Platise.
-	* examples/nsh and tools/mkromfsimg.sh -- Add support for platform-specific
+	* examples/nsh and tools/mkromfsimg.sh: Add support for platform-specific
 	  ROMFS-based NSH start-up scripts.
-	* drivers/uart_16550.c and include/nuttx/uart_16550.h - Support for a generic
+	* drivers/uart_16550.c and include/nuttx/uart_16550.h: Support for a generic
 	  16550 UART.
-	* configure/qemu-i486/nsh - QEMU NSH example.
-	* ../apps - The apps directory add-on was created by Uros Platise.  It
+	* configure/qemu-i486/nsh: QEMU NSH example.
+	* ../apps: The apps directory add-on was created by Uros Platise.  It
 	  supports a set of end-user applications than can be executed on top of
 	  NSH.  Think of it this way:  In a buckled-up embedded application, your
 	  end-user programs will probably have their own dedicated start-up logic.
 	  But, during development, you might want to have you applications
 	  available and executable from the NSH command line.  This apps/ addon
 	  (and NSH hooks) was contributed by Uros to accomplish just that.
-	* sched/sched_waitpid() and include/sys/wait.h - Provides a simple and
+	* sched/sched_waitpid() and include/sys/wait.h: Provides a simple and
 	  very incomplete implementation of waitpid().  waitpid() is only available
 	  if CONFIG_SCHED_WAITPID is defined in your configuration file.
-	* sched/atexit.c and sched/exit.c - The atexit function is not frequently
+	* sched/atexit.c and sched/exit.c: The atexit function is not frequently
 	  used.  In order to save a few bytes, it is now conditioned on
 	  CONFIG_SCHED_ATEXIT.  It your application is currently using atexit(),
 	  you will need to add CONFIG_SCHED_ATEXT to your configuration file.
-	* drivers/net/slip.c - Add a SLIP driver (untested on initial check-in).
-	* configs/olimex-lpc1766stk/slip-httpd - An example that uses SLIP to
+	* drivers/net/slip.c: Add a SLIP driver (untested on initial check-in).
+	* configs/olimex-lpc1766stk/slip-httpd: An example that uses SLIP to
 	  provide a serial-port based THTTPD web server.
 
 6.0 2011-03-21 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* lib/lib_fopen() -- fopen() was not returning the correct errno value
+	* lib/lib_fopen(): fopen() was not returning the correct errno value
 	  when the underlying open() failed.
-	* include/net/uip/uip-arch.h -- The uIP interface has been extended
+	* include/net/uip/uip-arch.h: The uIP interface has been extended
 	  slightly so that drivers can be concurrenly filling and sending
 	  packet buffers.  This capability was needed by the SLIP driver.
-	* drivers/net/slip.c -- Several corrections and some re-design of
+	* drivers/net/slip.c: Several corrections and some re-design of
 	  of the driver.
-	* apps/ChangeLog.txt -- the apps/ directory now has its own ChangeLog.
+	* apps/ChangeLog.txt: the apps/ directory now has its own ChangeLog.
 	* configs/vsn:
 	  - IDLE LED blinking fix
 	  - Added board power off function
-	* arch/arm/src/stm32/stm32_gpio.c and stm32_internal.h -- Fixed
+	* arch/arm/src/stm32/stm32_gpio.c and stm32_internal.h: Fixed
 	  PullUp/Down Input Configuration.
-	* arch/arm/src/lpc17xx/lpc17_serial.h -- Now supports Auto-RTS and
+	* arch/arm/src/lpc17xx/lpc17_serial.h: Now supports Auto-RTS and
 	  Auto-CTS modes.  This is needed to support SLIP.
-	* drivers/net/slip.c -- SLIP is now basically functional on the
+	* drivers/net/slip.c: SLIP is now basically functional on the
 	  LPC17xx with some caveats as described in the TODO list under
 	  LPC17xx.
-	* arch/x86/include/i486/irq.h -- Fix irqrestore() macro... it was not
+	* arch/x86/include/i486/irq.h: Fix irqrestore() macro... it was not
 	  correctly re-enabling interrupts.
-	* arch/x86/src - Fix numerous problems with i486/QEMU context
+	* arch/x86/src: Fix numerous problems with i486/QEMU context
 	  switching.  Basically, the logic was missing the cases to handle
 	  the differing stack frames when a priority change occurs and when
 	  no priority change occurs.
-	* configs/qemu-i486/ostest and nsh -- The QEMU i486 port is complete.
+	* configs/qemu-i486/ostest and nsh: The QEMU i486 port is complete.
 	  it now passes the OS test and supports the NuttShell (NSH).
-	* misc/drivers -- Created a new directory to hold non-BSD licensed
+	* misc/drivers: Created a new directory to hold non-BSD licensed
 	  drivers that may be added into NuttX via an installation script.
-	* drivers/usbhost/usbhost_rtl8187.c -- A decision was made to
+	* drivers/usbhost/usbhost_rtl8187.c: A decision was made to
 	  incorporate code taken from the Linux kernel.  That changes the
 	  licensing on this module to GPL.  To avoid licensing contamination,
 	  this driver was moved to misc/drivers/rtl8187x *prior* to adding
@@ -1591,36 +1591,36 @@
 	  where the GPL driver(s) can be re-installed into the NuttX source
 	  tree.  By re-installing the driver, you agree to the GPL licsensing
 	  and all of its implications.
-	* Makefile, apps/Makefile, tools/configure.sh -- add logic to copy
+	* Makefile, apps/Makefile, tools/configure.sh: add logic to copy
 	  configs/<board>/<config>/appdir to apps/.config and to simply the
 	  application configuration logic.
-	* examples/nsh and apps/nshlib - Move the core NuttShell (NSH) logic
+	* examples/nsh and apps/nshlib: Move the core NuttShell (NSH) logic
 	  out of the exemples directory and into the apps/ directory where
 	  it belongs.
-	* apps/Makefile and configs/*/appconfig - Use '=' as the delimiter
+	* apps/Makefile and configs/*/appconfig: Use '=' as the delimiter
 	  instead of '/' so that sub-directories in apps/ can be used.
-	* apps/vsn - Move all VSN apps to apps/vsn.
+	* apps/vsn: Move all VSN apps to apps/vsn.
 	* nuttx/examples moved to apps/examples
 
 6.1 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* arch/arm/include/lpc17xx/irq.h and arch/arm/src/lpc17xx/lpc17_gpio*.c
-	  -- Fix several bugs in the GPIO interrupt logic.  Submited by
+	* arch/arm/include/lpc17xx/irq.h and arch/arm/src/lpc17xx/lpc17_gpio*.c:
+	  Fix several bugs in the GPIO interrupt logic.  Submited by
 	  Decio Renno.
 	* Initialization for the CONFIG_APPS_DIR is now supported during the
 	  earlier, 'context' build phase.
-	* arch/arm/src/lpc17_gpioint.c -- Finish coding of the LPC17xx GPIO
+	* arch/arm/src/lpc17_gpioint.c: Finish coding of the LPC17xx GPIO
 	  interrupt logic.
-	* net/netdev_unregister.c -- Add capability to un-register a network
+	* net/netdev_unregister.c: Add capability to un-register a network
 	  device.
 	* drivers/mmcsd/mmcsd_sdio.c: extra effort to correctly handle cases
 	  without the SDcard (but one issue still exists in STM32)
-	* arch/arm/src/stm32/stm32_tim.*: Added basic timer support without
-	  output PWMs and interrupt logic
+	* arch/arm/src/stm32/stm32_tim.*: Added basic timer support TIM1..TIM8
+	  with output PWMs and interrupt logic
 	* config/vsn/src: added basic support for Sensor Interface (GPIO and
-	  Power Output, and the sif utility program)
-	* fs/ -- Reorgnize header so that file systems can be built outside
+	  PWM Power Output, and the sif utility program)
+	* fs/: Reorgnize header so that file systems can be built outside
 	  of the nuttx source tree
-	* apps/namedapp/binfs.c -- Create a tiny filesystem that can be used
+	* apps/namedapp/binfs.c: Create a tiny filesystem that can be used
 	  to show the internal named apps under /bin.
 

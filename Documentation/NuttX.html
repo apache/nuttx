@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 24, 2011</p>
+      <p>Last Updated: March 28, 2011</p>
     </td>
   </tr>
 </table>
@@ -2068,7 +2068,7 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.1 2011-03-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.0 2011-03-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * lib/lib_fopen() -- fopen() was not returning the correct errno value
       when the underlying open() failed.
@@ -2157,21 +2157,25 @@ buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * arch/arm/include/lpc17xx/irq.h and arch/arm/src/lpc17xx/lpc17_gpio*.c
-      -- Fix several bugs in the GPIO interrupt logic.  Submited by
+    * arch/arm/include/lpc17xx/irq.h and arch/arm/src/lpc17xx/lpc17_gpio*.c:
+      Fix several bugs in the GPIO interrupt logic.  Submited by
       Decio Renno.
     * Initialization for the CONFIG_APPS_DIR is now supported during the
       earlier, 'context' build phase.
-    * arch/arm/src/lpc17_gpioint.c -- Finish coding of the LPC17xx GPIO
+    * arch/arm/src/lpc17_gpioint.c: Finish coding of the LPC17xx GPIO
       interrupt logic.
-    * net/netdev_unregister.c -- Add capability to un-register a network
+    * net/netdev_unregister.c: Add capability to un-register a network
       device.
     * drivers/mmcsd/mmcsd_sdio.c: extra effort to correctly handle cases
       without the SDcard (but one issue still exists in STM32)
-    * arch/arm/src/stm32/stm32_tim.*: Added basic timer support without
-      output PWMs and interrupt logic
+    * arch/arm/src/stm32/stm32_tim.*: Added basic timer support TIM1..TIM8
+      with output PWMs and interrupt logic
     * config/vsn/src: added basic support for Sensor Interface (GPIO and
-      Power Output, and the sif utility program)
+      PWM Power Output, and the sif utility program)
+    * fs/: Reorgnize header so that file systems can be built outside
+      of the nuttx source tree
+    * apps/namedapp/binfs.c: Create a tiny filesystem that can be used
+      to show the internal named apps under /bin.
 
 apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
