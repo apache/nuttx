@@ -203,61 +203,6 @@ static inline void irqrestore(irqstate_t flags)
      : "r" (flags)
      : "memory");
 }
-
-static inline void system_call0(unsigned int nbr)
-{
-  __asm__ __volatile__
-    (
-     "mov\tr0,%0\n\t"
-     "swi\t0x900001\n\t"
-     :
-     : "r" ((long)(nbr))
-     : "r0", "lr");
-}
-
-static inline void system_call1(unsigned int nbr, uintptr_t parm1)
-{
-  __asm__ __volatile__
-    (
-     "mov\tr0,%0\n\t"
-     "mov\tr1,%1\n\t"
-     "swi\t0x900001\n\t"
-     :
-     : "r" ((long)(nbr)),  "r" ((long)(parm1))
-     : "r0", "r1", "lr");
-}
-
-static inline void system_call2(unsigned int nbr, uintptr_t parm1,
-			                    uintptr_t parm2)
-{
-  __asm__ __volatile__
-    (
-     "mov\tr0,%0\n\t"
-     "mov\tr1,%1\n\t"
-     "mov\tr2,%2\n\t"
-     "swi\t0x900001\n\t"
-     :
-     : "r" ((long)(nbr)),  "r" ((long)(parm1)),
-       "r" ((long)(parm2))
-     : "r0", "r1", "r2", "lr");
-}
-
-static inline void system_call3(unsigned int nbr, uintptr_t parm1,
-			                    uintptr_t parm2, uintptr_t parm3)
-{
-  __asm__ __volatile__
-    (
-     "mov\tr0,%0\n\t"
-     "mov\tr1,%1\n\t"
-     "mov\tr2,%2\n\t"
-     "mov\tr3,%3\n\t"
-     "swi\t0x900001\n\t"
-     :
-     : "r" ((long)(nbr)),  "r" ((long)(parm1)),
-       "r" ((long)(parm2)), "r" ((long)(parm3))
-     : "r0", "r1", "r2", "r3", "lr");
-}
-
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
