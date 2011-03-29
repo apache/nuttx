@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/hc/include/hc12/irq.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,8 +81,8 @@ static inline void irqrestore(irqstate_t flags)
   /* To be provided */
 }
 
-static inline void system_call(swint_t func, int parm1,
-                               int parm2, int parm3)
+static inline void system_call3(unsigned int nbr, uintptr_t parm1,
+			                    uintptr_t parm2, uintptr_t parm3)
 {
   /* To be provided */
 }
