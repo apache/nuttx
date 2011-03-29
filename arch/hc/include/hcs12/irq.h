@@ -243,7 +243,12 @@ static inline void irqrestore(irqstate_t flags)
 
 /* System call */
 
-#define system_call(f,p1,p2,p3) __asm("swi")
+static inline void system_call3(unsigned int nbr, uintptr_t parm1,
+			                    uintptr_t parm2, uintptr_t parm3)
+{
+  /* To be provided */
+  /* __asm("swi") */
+}
 
 /************************************************************************************
  * Public Data
