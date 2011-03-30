@@ -34,6 +34,7 @@
 ###########################################################################
 
 -include $(TOPDIR)/Make.defs
+include stdio/Make.defs
 include string/Make.defs
 
 ASRCS = 
@@ -45,28 +46,6 @@ MISC_SRCS += lib_streamsem.c
 endif
 
 CTYPE_SRCS = 
-
-STDIO_SRCS = lib_fileno.c lib_printf.c lib_rawprintf.c lib_lowprintf.c \
-		  lib_sprintf.c lib_snprintf.c lib_libsprintf.c lib_vsprintf.c \
-		  lib_vsnprintf.c lib_libvsprintf.c lib_meminstream.c \
-		  lib_memoutstream.c lib_lowinstream.c lib_lowoutstream.c \
-		  lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c \
-		  lib_sscanf.c
-
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-STDIO_SRCS += lib_rawinstream.c lib_rawoutstream.c
-ifneq ($(CONFIG_NFILE_STREAMS),0)
-STDIO_SRCS += lib_fopen.c lib_fclose.c lib_fread.c lib_libfread.c lib_fseek.c \
-		   lib_ftell.c lib_fsetpos.c lib_fgetpos.c lib_fgetc.c lib_fgets.c \
-		   lib_gets.c lib_fwrite.c lib_libfwrite.c lib_fflush.c \
-		   lib_libflushall.c lib_libfflush.c lib_rdflush.c lib_wrflush.c \
-		   lib_fputc.c lib_puts.c lib_fputs.c lib_ungetc.c lib_vprintf.c \
-		   lib_fprintf.c lib_vfprintf.c lib_stdinstream.c lib_stdoutstream.c
-endif
-endif
-ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
-STDIO_SRCS += lib_dtoa.c
-endif
 
 STDLIB_SRCS = lib_abs.c lib_imaxabs.c lib_labs.c lib_llabs.c lib_rand.c lib_qsort.c
 
@@ -107,8 +86,9 @@ SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
 ROOTDEPPATH	= --dep-path .
+STDIODEPPATH = --dep-path stdio
 STRINGDEPPATH = --dep-path string
-VPATH = string
+VPATH = stdio:string
 
 BIN = liblib$(LIBEXT)
 
@@ -126,7 +106,7 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-	@$(MKDEP) $(ROOTDEPPATH) $(STRINGDEPPATH) \
+	@$(MKDEP) $(ROOTDEPPATH) $(STRINGDEPPATH) $(STDIODEPPATH) \
 	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
