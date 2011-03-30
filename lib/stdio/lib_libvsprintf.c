@@ -189,7 +189,7 @@ static const char g_nullstring[] = "(null)";
 /* Include floating point functions */
  
 #ifdef CONFIG_LIBC_FLOATINGPOINT
-#  include "lib_libdtoa.c"
+#  include "stdio/lib_libdtoa.c"
 #endif
 
 /****************************************************************************

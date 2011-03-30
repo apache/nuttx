@@ -1,7 +1,7 @@
-/************************************************************
- * lib/unistd/lib_sem.c
+/************************************************************************
+ * lib/misc/lib_filesem.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,15 +31,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
-
-#ifdef CONFIG_STDIO_BUFFERED_IO
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -49,55 +47,57 @@
 
 #include "lib_internal.h"
 
-/************************************************************
+#if CONFIG_STDIO_BUFFER_SIZE > 0
+
+/************************************************************************
  * Pre-processor Definitions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Private Data
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * Global Functions
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
+/************************************************************************
  * lib_sem_initialize
- ************************************************************/
+ ************************************************************************/
 
-void lib_sem_initialize(FILE *stream)
+void lib_sem_initialize(FAR struct file_struct *stream)
 {
   /* Initialize the LIB semaphore to one (to support one-at-
    * a-time access to private data sets.
    */
 
-  (void)sem_init(&stream->sem, 0, 1);
+  (void)sem_init(&stream->fs_sem, 0, 1);
 
-  stream->holder = -1;
-  stream->counts = 0;
+  stream->fs_holder = -1;
+  stream->fs_counts = 0;
 }
 
-/************************************************************
+/************************************************************************
  * lib_take_semaphore
- ************************************************************/
+ ************************************************************************/
 
-void lib_take_semaphore(FILE *stream)
+void lib_take_semaphore(FAR struct file_struct *stream)
 {
   pid_t my_pid = getpid();
 
   /* Do I already have the semaphore? */
 
-  if (stream->holder == my_pid)
+  if (stream->fs_holder == my_pid)
     {
       /* Yes, just increment the number of references that I have */
 
-      stream->counts++;
+      stream->fs_counts++;
     }
   else
     {
       /* Take the semaphore (perhaps waiting) */
 
-      while (sem_wait(&stream->sem) != 0)
+      while (sem_wait(&stream->fs_sem) != 0)
 	{
 	  /* The only case that an error should occr here is if
 	   * the wait was awakened by a signal.
@@ -106,40 +106,40 @@ void lib_take_semaphore(FILE *stream)
 	  ASSERT(*get_errno_ptr() == EINTR);
 	}
 
-      /* We have it.  Stake the claim and return */
+      /* We have it.  Claim the stak and return */
 
-      stream->holder = my_pid;
-      stream->counts = 1;
+      stream->fs_holder = my_pid;
+      stream->fs_counts = 1;
     }
 }
 
-/************************************************************
+/************************************************************************
  * lib_give_semaphore
- ************************************************************/
+ ************************************************************************/
 
-void lib_give_semaphore(FILE *stream)
+void lib_give_semaphore(FAR struct file_struct *stream)
 {
   pid_t my_pid = getpid();
 
-  /* I better be holding at least one count on the semaphore */
+  /* I better be holding at least one reference to the semaphore */
 
-  ASSERT(stream->holder == my_pid);
+  ASSERT(stream->fs_holder == my_pid);
 
   /* Do I hold multiple references to the semphore */
 
-  if (stream->counts > 1)
+  if (stream->fs_counts > 1)
     {
       /* Yes, just release one count and return */
 
-      stream->counts--;
+      stream->fs_counts--;
     }
   else
     {
       /* Nope, this is the last reference I have */
 
-      stream->holder = -1;
-      stream->counts = 0;
-      ASSERT(sem_post(&stream->sem) == 0);
+      stream->fs_holder = -1;
+      stream->fs_counts = 0;
+      ASSERT(sem_post(&stream->fs_sem) == 0);
     }
 }
-#endif /* CONFIG_STDIO_BUFFERED_IO */
+#endif /* CONFIG_STDIO_BUFFER_SIZE */

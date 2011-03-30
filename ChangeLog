@@ -1626,5 +1626,5 @@
 	* fs/fs_opendir.c: Correct an error that occurs when a file system is
 	  mounted in the root directory.  This was discovered while mounting
 	  the named app's /bin directory.
-
-
+	* lib/: Move all source files into a subdirectory of lib/ named after
+	  the header file in which the library function is prototyped.
