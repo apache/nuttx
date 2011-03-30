@@ -41,27 +41,16 @@ include string/Make.defs
 include math/Make.defs
 include net/Make.defs
 include time/Make.defs
+include libgen/Make.defs
 include queue/Make.defs
+include misc/Make.defs
 
 ASRCS = 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-MISC_SRCS = lib_init.c lib_filesem.c
-ifneq ($(CONFIG_NFILE_STREAMS),0)
-MISC_SRCS += lib_streamsem.c
-endif
-
-LIBGEN_SRCS = lib_basename.c lib_dirname.c
-
-REGEX_SRCS = lib_match.c
-
-CRC_SRCS = lib_crc32.c
-
-DBG_SRCS = lib_dbg.c lib_dumpbuffer.c
-
-CSRCS = $(MISC_SRCS) $(CTYPE_SRCS) $(STDIO_SRCS) $(STDLIB_SRCS) $(UNISTD_SRCS) \
-		  $(STRING_SRCS) $(MATH_SRCS) $(NET_SRCS) $(TIME_SRCS) $(LIBGEN_SRCS) \
-		  $(REGEX_SRCS) $(CRC_SRCS) $(QUEUE_SRCS) $(DBG_SRCS) 
+CSRCS = $(STDIO_SRCS) $(STDLIB_SRCS) $(UNISTD_SRCS) $(STRING_SRCS) \
+		  $(MATH_SRCS) $(NET_SRCS) $(TIME_SRCS) $(LIBGEN_SRCS) \
+		  $(QUEUE_SRCS) $(MISC_SRCS) $(REGEX_SRCS) $(CRC_SRCS) $(DBG_SRCS) 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
@@ -75,8 +64,10 @@ STRINGDEPPATH = --dep-path string
 MATHDEPPATH = --dep-path math
 NETDEPPATH = --dep-path net
 TIMEDEPPATH = --dep-path time
+LIBGENDEPPATH = --dep-path libgen
 QUEUEDEPPATH = --dep-path queue
-VPATH = stdio:stdlib:unistd:string:math:net:time:queue
+MISCDEPPATH = --dep-path misc
+VPATH = stdio:stdlib:unistd:string:math:net:time:libgen:queue:misc
 
 BIN = liblib$(LIBEXT)
 
@@ -96,7 +87,7 @@ $(BIN):	$(OBJS)
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(ROOTDEPPATH) $(STDIODEPPATH) $(STDLIBDEPPATH) \
 	  $(UNISTDDEPPATH) $(STRINGDEPPATH) $(MATHDEPPATH) $(NETDEPPATH) \
-	  $(TIMEDEPPATH) $(QUEUEDEPPATH) \
+	  $(TIMEDEPPATH) $(LIBGENDEPPATH) $(QUEUEDEPPATH) $(MISCDEPPATH) \
 	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 

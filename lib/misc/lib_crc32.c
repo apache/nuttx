@@ -1,9 +1,9 @@
 /************************************************************************************************
- * lib/unistd/lib_crc32.c
+ * lib/misc/lib_crc32.c
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *
  * The logic in this file was developed by Gary S. Brown:
  *

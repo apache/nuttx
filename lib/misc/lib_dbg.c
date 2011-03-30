@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/unistd/lib_dumpbuffer.c
+ * lib/misc/lib_dbg.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,92 +38,75 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <stdint.h>
+#include <stdarg.h>
 #include <debug.h>
 
-/****************************************************************************
- * Pre-processor definitions
- ****************************************************************************/
-
-/* Select the lowest level debug interface available */
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_ARCH_LOWPUTC
-#    define message(format, arg...) lib_lowprintf(format, ##arg)
-#  else
-#    define message(format, arg...) lib_rawprintf(format, ##arg)
-#  endif
-#else
-#  ifdef CONFIG_ARCH_LOWPUTC
-#    define message lib_lowprintf
-#  else
-#    define message lib_rawprintf
-#  endif
-#endif
+#include "lib_internal.h"
 
 /****************************************************************************
- * Public Functions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_dumpbuffer
+ * Name: dbg, lldbg, vdbg
  *
  * Description:
- *  Do a pretty buffer dump
+ *  If the cross-compiler's pre-processor does not support variable
+ * length arguments, then these additional APIs will be built.
  *
  ****************************************************************************/
 
-void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer, unsigned int buflen)
+#ifndef CONFIG_CPP_HAVE_VARARGS
+#ifdef CONFIG_DEBUG
+int dbg(const char *format, ...)
 {
-  int i, j, k;
+  va_list ap;
+  int     ret;
 
-  message("%s (%p):\n", msg, buffer);
-  for (i = 0; i < buflen; i += 32)
-    {
-      message("%04x: ", i);
-      for (j = 0; j < 32; j++)
-        {
-          k = i + j;
-
-          if (j == 16)
-            {
-              message(" ");
-            }
-
-          if (k < buflen)
-            {
-              message("%02x", buffer[k]);
-            }
-          else
-            {
-              message("  ");
-            }
-        }
-
-      message(" ");
-      for (j = 0; j < 32; j++)
-        {
-         k = i + j;
-
-          if (j == 16)
-            {
-              message(" ");
-            }
-
-          if (k < buflen)
-            {
-              if (buffer[k] >= 0x20 && buffer[k] < 0x7f)
-                {
-                  message("%c", buffer[k]);
-                }
-              else
-                {
-                  message(".");
-                }
-            }
-        }
-      message("\n");
-   }
+  va_start(ap, format);
+  ret = lib_rawvprintf(format, ap);
+  va_end(ap);
+  return ret;
 }
+
+#ifdef CONFIG_ARCH_LOWPUTC
+int lldbg(const char *format, ...)
+{
+  va_list ap;
+  int     ret;
+
+  va_start(ap, format);
+  ret = lib_lowvprintf(format, ap);
+  va_end(ap);
+  return ret;
+}
+#endif
+
+#ifdef CONFIG_DEBUG_VERBOSE
+int vdbg(const char *format, ...)
+{
+  va_list ap;
+  int     ret;
+
+  va_start(ap, format);
+  ret = lib_rawvprintf(format, ap);
+  va_end(ap);
+  return ret;
+}
+
+#ifdef CONFIG_ARCH_LOWPUTC
+int llvdbg(const char *format, ...)
+{
+  va_list ap;
+  int     ret;
+
+  va_start(ap, format);
+  ret = lib_lowvprintf(format, ap);
+  va_end(ap);
+  return ret;
+}
+#endif /* CONFIG_ARCH_LOWPUTC */
+#endif /* CONFIG_DEBUG_VERBOSE */
+#endif /* CONFIG_DEBUG */
+#endif /* CONFIG_CPP_HAVE_VARARGS */
