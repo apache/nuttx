@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_getcwd.c
+ * lib/unistd/lib_getoptindp.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,92 +39,35 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
-#include <errno.h>
-
-#include "lib_internal.h"
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Global Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Private Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getwcd
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: getoptindp
  *
  * Description:
- *   getcwd() function places the absolute pathname of the current working
- *   directory in the array pointed to by 'buf', and returns 'buf.' The
- *   pathname copied to the array shall contain no components that are
- *   symbolic links. The 'size' argument is the size in bytes of the
- *   character array pointed to by the 'buf' argument.
- *
- * Input Parmeters:
- *   buf - a pointer to the location in which the current working directory
- *     pathaname is returned.
- *   size - The size in bytes avaiable at 'buf'
- *
- * Returned Value:
- *   Upon successful completion, getcwd() returns the 'buf' argument.
- *   Otherwise, getcwd() returns a null pointer and sets errno to indicate
- *   the error:
- *
- *   EINVAL
- *     The 'size' argument is 0 or the 'buf' argument is NULL.
- *   ERANGE
- *     The size argument is greater than 0, but is smaller than the length
- *     of the currrent working directory pathname +1.
- *   EACCES
- *     Read or search permission was denied for a component of the pathname.
- *   ENOMEM
- *  Insufficient storage space is available. 
+ *   Returns a pointer to optind.  This function is only used for external
+ *   modules that need to access the base, global variable, optind.
  *
  ****************************************************************************/
 
-FAR char *getcwd(FAR char *buf, size_t size)
+int *getoptindp(void)
 {
-  char *pwd;
-
-  /* Verify input parameters */
-
-  if (!buf || !size)
-    {
-      errno = EINVAL;
-      return NULL;
-    }
-
-  /* If no working directory is defined, then default to the home directory */
-
-  pwd = getenv("PWD");
-  if (!pwd)
-    {
-      pwd = CONFIG_LIB_HOMEDIR;
-    }
-
-  /* Verify that the cwd will fit into the user-provided buffer */
-
-  if (strlen(pwd) + 1 > size)
-    {
-      errno = ERANGE;
-      return NULL;
-    }
-
-  /* Copy the cwd to the user buffer */
-
-  strcpy(buf, pwd);
-  sched_unlock();
-  return buf;
+  return &optind;
 }
-#endif /* CONFIG_NFILE_DESCRIPTORS && !CONFIG_DISABLE_ENVIRON */
+

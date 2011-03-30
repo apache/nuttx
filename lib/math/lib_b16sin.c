@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_etherntoa.c
+ * lib/math/lib_b16sin.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,33 +37,74 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <stdio.h>
+#include <fixedmath.h>
 
-#include <net/ethernet.h>
-#include <netinet/ether.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define b16_P225       0x0000399a
+#define b16_P405284735 0x000067c1
+#define b16_1P27323954 0x000145f3
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ether_ntoa
- *
- * Description:
- *   The ether_ntoa() function converts the Ethernet host address addr given
- *   in network byte order to a string in standard hex-digits-and-colons
- *   notation. The string is returned in a statically allocated buffer, which
- *   subsequent calls will overwrite.
- *
+ * Name: b16sin
+ * Ref: http://lab.polygonal.de/2007/07/18/fast-and-accurate-sinecosine-approximation/
  ****************************************************************************/
 
-char *ether_ntoa(const struct ether_addr *addr)
+b16_t b16sin(b16_t rad)
 {
-  static char buffer[20];
-  sprintf(buffer, "%02x:%02x:%02x:%02x:%02x:%02x",
-          addr->ether_addr_octet[0], addr->ether_addr_octet[1],
-          addr->ether_addr_octet[2], addr->ether_addr_octet[3],
-          addr->ether_addr_octet[4], addr->ether_addr_octet[5]);
-  return buffer;
+  b16_t tmp1;
+  b16_t tmp2;
+  b16_t tmp3;
+
+  /* Force angle into the good range */
+
+  if (rad < -b16PI)
+    {
+      rad += b16TWOPI;
+    }
+  else if (rad > b16PI)
+   {
+      rad -= b16TWOPI;
+   }
+
+  /* tmp1 = 1.27323954 * rad
+   * tmp2 = .405284735 * rad * rad
+   */
+
+
+  tmp1 = b16mulb16(b16_1P27323954, rad);
+  tmp2 = b16mulb16(b16_P405284735, b16sqr(rad));
+
+  if (rad < 0)
+    {
+       /* tmp3 = 1.27323954 * rad + .405284735 * rad * rad */
+
+       tmp3 = tmp1 + tmp2;
+    }
+  else
+    {
+       /* tmp3 = 1.27323954 * rad - 0.405284735 * rad * rad */
+
+       tmp3 = tmp1 - tmp2;
+    }
+
+  /* tmp1 = tmp3*tmp3 */
+
+  tmp1 = b16sqr(tmp3);
+  if (tmp3 < 0)
+    {
+      /* tmp1 = tmp3 * -tmp3 */
+
+      tmp1 = -tmp1;
+    }
+
+  /* Return sin = .225 * (tmp3 * (+/-tmp3) - tmp3) + tmp3 */
+
+  return b16mulb16(b16_P225, (tmp1 - tmp3)) + tmp3;
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/lib_dirname.c
+ * lib/unistd/lib_dirname.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

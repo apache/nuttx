@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/lib_dbg.c
+ * lib/unistd/lib_dbg.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

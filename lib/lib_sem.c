@@ -1,5 +1,5 @@
 /************************************************************
- * lib/lib_sem.c
+ * lib/unistd/lib_sem.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

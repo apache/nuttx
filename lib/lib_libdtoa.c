@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/lib_libdtoa.c
+ * lib/unistd/lib_libdtoa.c
  *
  * This file was ported to NuttX by Yolande Cates.
  *

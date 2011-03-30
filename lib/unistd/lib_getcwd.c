@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/unistd/lib_basename.c
+ * lib/unistd/lib_getcwd.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,93 +39,92 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <stdlib.h>
 #include <string.h>
-#include <libgen.h>
+#include <unistd.h>
+#include <errno.h>
+
+#include "lib_internal.h"
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_ENVIRON)
 
 /****************************************************************************
- * Private Data
+ * Definitions
  ****************************************************************************/
 
-static char g_retchar[2];
-
 /****************************************************************************
- * Global Functions
+ * Public Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Function: basename
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: getwcd
  *
  * Description:
- *   basename() extracts the filename component from a null-terminated
- *   pathname string. In the usual case, basename() returns the component
- *   following the final '/'. Trailing '/' characters are not counted as
- *   part of the pathname.
+ *   getcwd() function places the absolute pathname of the current working
+ *   directory in the array pointed to by 'buf', and returns 'buf.' The
+ *   pathname copied to the array shall contain no components that are
+ *   symbolic links. The 'size' argument is the size in bytes of the
+ *   character array pointed to by the 'buf' argument.
  *
- *   If path does not contain a slash, basename() returns a copy of path.
- *   If path is the string "/", then basename() returns the string "/". If
- *   path is a NULL pointer or points to an empty string, then basename()
- *   return the string ".".
+ * Input Parmeters:
+ *   buf - a pointer to the location in which the current working directory
+ *     pathaname is returned.
+ *   size - The size in bytes avaiable at 'buf'
  *
- *   basename() may modify the contents of path, so copies should be passed.
- *   basename() may return pointers to statically allocated memory which may
- *   be overwritten by subsequent calls.
+ * Returned Value:
+ *   Upon successful completion, getcwd() returns the 'buf' argument.
+ *   Otherwise, getcwd() returns a null pointer and sets errno to indicate
+ *   the error:
  *
- * Parameter:
- *   path The null-terminated string referring to the path to be decomposed
- *
- * Return:
- *   On success the filename component of the path is returned.
+ *   EINVAL
+ *     The 'size' argument is 0 or the 'buf' argument is NULL.
+ *   ERANGE
+ *     The size argument is greater than 0, but is smaller than the length
+ *     of the currrent working directory pathname +1.
+ *   EACCES
+ *     Read or search permission was denied for a component of the pathname.
+ *   ENOMEM
+ *  Insufficient storage space is available. 
  *
  ****************************************************************************/
 
-char *basename(char *path)
+FAR char *getcwd(FAR char *buf, size_t size)
 {
-  char *p;
-  int   len;
-  int   ch;
+  char *pwd;
 
-  /* Handle some corner cases */
+  /* Verify input parameters */
 
-  if (!path || *path == '\0')
+  if (!buf || !size)
     {
-      ch = '.';
-      goto out_retchar;
+      errno = EINVAL;
+      return NULL;
     }
 
-  /* Check for trailing slash characters */
+  /* If no working directory is defined, then default to the home directory */
 
-  len = strlen(path);
-  while (path[len-1] == '/')
+  pwd = getenv("PWD");
+  if (!pwd)
     {
-      /* Remove trailing '/' UNLESS this would make a zero length string */
-      if (len > 1)
-        {
-          path[len-1] = '\0';
-          len--;
-        }
-      else
-        {
-          ch = '/';
-          goto out_retchar;
-        }
+      pwd = CONFIG_LIB_HOMEDIR;
     }
 
-  /* Get the address of the last '/' which is not at the end of the path and,
-   * therefor, must be just before the beginning of the filename component.
-   */
+  /* Verify that the cwd will fit into the user-provided buffer */
 
-  p = strrchr(path, '/');
-  if (p)
+  if (strlen(pwd) + 1 > size)
     {
-      return p + 1;
+      errno = ERANGE;
+      return NULL;
     }
 
-  /* There is no '/' in the path */
+  /* Copy the cwd to the user buffer */
 
-  return path;
-
-out_retchar:
-  g_retchar[0] = ch;
-  g_retchar[1] = '\0';
-  return g_retchar;
+  strcpy(buf, pwd);
+  sched_unlock();
+  return buf;
 }
+#endif /* CONFIG_NFILE_DESCRIPTORS && !CONFIG_DISABLE_ENVIRON */

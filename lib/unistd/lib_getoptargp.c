@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_getoptindp.c
+ * lib/unistd/lib_getoptargp.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,16 +58,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getoptindp
+ * Name: getoptargp
  *
  * Description:
- *   Returns a pointer to optind.  This function is only used for external
- *   modules that need to access the base, global variable, optind.
+ *   Returns a pointer to optarg.  This function is only used for external
+ *   modules that need to access the base, global variable, optarg.
  *
  ****************************************************************************/
 
-int *getoptindp(void)
+FAR char **getoptargp(void)
 {
-  return &optind;
+  return &optarg;
 }
 

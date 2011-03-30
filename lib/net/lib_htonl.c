@@ -1,7 +1,7 @@
-/****************************************************************************
- * lib/lib_inetntoa.c
+/************************************************************
+ * lib/net/lib_ntohl.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,46 +31,38 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************/
 
-/****************************************************************************
+/************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************/
 
 #include <nuttx/config.h>
-#include <stdio.h>
+
+#include <stdint.h>
 #include <arpa/inet.h>
 
-/****************************************************************************
+/************************************************************
  * Global Functions
- ****************************************************************************/
+ ************************************************************/
 
-/****************************************************************************
- * Name: inet_ntoa
- *
- * Description:
- *   The inet_ntoa() function converts the Internet host address in given in
- *   network byte order to a string in standard numbers-and-dots notation.
- *   The string is returned in a statically allocated buffer, which subsequent
- *   calls will overwrite.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_CAN_PASS_STRUCTS
-FAR char *inet_ntoa(struct in_addr in)
+uint32_t htonl(uint32_t hl)
 {
-  static char buffer[18];
-  FAR char *ptr = (FAR char*)&in.s_addr;
-  sprintf(buffer, "%d.%d.%d.%d", ptr[0], ptr[1], ptr[2], ptr[3]);
-  return buffer;
-}
+#ifdef CONFIG_ENDIAN_BIG
+  return hl;
 #else
-FAR char *_inet_ntoa(in_addr_t in)
-{
-  static char buffer[18];
-  FAR char *ptr = (FAR char*)&in;
-  sprintf(buffer, "%d.%d.%d.%d", ptr[0], ptr[1], ptr[2], ptr[3]);
-  return buffer;
-}
+  return (( (hl) >> 24) |
+          (((hl) >>  8) & 0x0000ff00) |
+          (((hl) <<  8) & 0x00ff0000) |
+	  ( (hl) << 24));
 #endif
+}
 
+uint32_t ntohl(uint32_t nl)
+{
+#ifdef CONFIG_ENDIAN_BIG
+  return nl;
+#else
+  return htonl(nl);
+#endif
+}

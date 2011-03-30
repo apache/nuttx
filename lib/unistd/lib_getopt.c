@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/lib_getopt.c
+ * lib/unistd/lib_getopt.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

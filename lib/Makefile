@@ -36,7 +36,10 @@
 -include $(TOPDIR)/Make.defs
 include stdio/Make.defs
 include stdlib/Make.defs
+include unistd/Make.defs
 include string/Make.defs
+include math/Make.defs
+include net/Make.defs
 include time/Make.defs
 include queue/Make.defs
 
@@ -48,19 +51,6 @@ ifneq ($(CONFIG_NFILE_STREAMS),0)
 MISC_SRCS += lib_streamsem.c
 endif
 
-CTYPE_SRCS = 
-
-MATH_SRCS = lib_rint.c lib_fixedmath.c lib_b16sin.c lib_b16cos.c
-
-UNISTD_SRCS = lib_getopt.c lib_getoptargp.c lib_getoptindp.c lib_getoptoptp.c
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-ifneq ($(CONFIG_DISABLE_ENVIRON),y)
-UNISTD_SRCS +=  lib_chdir.c lib_getcwd.c
-endif
-endif
-
-NET_SRCS = lib_htons.c lib_htonl.c lib_inetntoa.c lib_etherntoa.c
-
 LIBGEN_SRCS = lib_basename.c lib_dirname.c
 
 REGEX_SRCS = lib_match.c
@@ -69,8 +59,8 @@ CRC_SRCS = lib_crc32.c
 
 DBG_SRCS = lib_dbg.c lib_dumpbuffer.c
 
-CSRCS = $(MISC_SRCS) $(CTYPE_SRCS) $(STDIO_SRCS) $(STDLIB_SRCS) $(STRING_SRCS) \
-		  $(TIME_SRCS) $(MATH_SRCS) $(UNISTD_SRCS) $(NET_SRCS) $(LIBGEN_SRCS) \
+CSRCS = $(MISC_SRCS) $(CTYPE_SRCS) $(STDIO_SRCS) $(STDLIB_SRCS) $(UNISTD_SRCS) \
+		  $(STRING_SRCS) $(MATH_SRCS) $(NET_SRCS) $(TIME_SRCS) $(LIBGEN_SRCS) \
 		  $(REGEX_SRCS) $(CRC_SRCS) $(QUEUE_SRCS) $(DBG_SRCS) 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
@@ -80,10 +70,13 @@ OBJS = $(AOBJS) $(COBJS)
 ROOTDEPPATH	= --dep-path .
 STDIODEPPATH = --dep-path stdio
 STDLIBDEPPATH = --dep-path stdlib
+UNISTDDEPPATH = --dep-path unistd
 STRINGDEPPATH = --dep-path string
+MATHDEPPATH = --dep-path math
+NETDEPPATH = --dep-path net
 TIMEDEPPATH = --dep-path time
 QUEUEDEPPATH = --dep-path queue
-VPATH = stdio:stdlib:string:time:queue
+VPATH = stdio:stdlib:unistd:string:math:net:time:queue
 
 BIN = liblib$(LIBEXT)
 
@@ -102,7 +95,8 @@ $(BIN):	$(OBJS)
 
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(ROOTDEPPATH) $(STDIODEPPATH) $(STDLIBDEPPATH) \
-	  $(STRINGDEPPATH) $(TIMEDEPPATH) $(QUEUEDEPPATH) \
+	  $(UNISTDDEPPATH) $(STRINGDEPPATH) $(MATHDEPPATH) $(NETDEPPATH) \
+	  $(TIMEDEPPATH) $(QUEUEDEPPATH) \
 	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 

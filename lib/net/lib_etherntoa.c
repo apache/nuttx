@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_getoptargp.c
+ * lib/net/lib_etherntoa.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,36 +38,32 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdio.h>
 
-#include <unistd.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
+#include <net/ethernet.h>
+#include <netinet/ether.h>
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getoptargp
+ * Name: ether_ntoa
  *
  * Description:
- *   Returns a pointer to optarg.  This function is only used for external
- *   modules that need to access the base, global variable, optarg.
+ *   The ether_ntoa() function converts the Ethernet host address addr given
+ *   in network byte order to a string in standard hex-digits-and-colons
+ *   notation. The string is returned in a statically allocated buffer, which
+ *   subsequent calls will overwrite.
  *
  ****************************************************************************/
 
-FAR char **getoptargp(void)
+char *ether_ntoa(const struct ether_addr *addr)
 {
-  return &optarg;
+  static char buffer[20];
+  sprintf(buffer, "%02x:%02x:%02x:%02x:%02x:%02x",
+          addr->ether_addr_octet[0], addr->ether_addr_octet[1],
+          addr->ether_addr_octet[2], addr->ether_addr_octet[3],
+          addr->ether_addr_octet[4], addr->ether_addr_octet[5]);
+  return buffer;
 }
-

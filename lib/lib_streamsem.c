@@ -1,5 +1,5 @@
 /************************************************************************
- * lib/ib_streamsem.c
+ * lib/unistd/lib_streamsem.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

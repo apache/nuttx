@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_b16sin.c
+ * lib/net/lib_inetntoa.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,74 +37,40 @@
  * Included Files
  ****************************************************************************/
 
-#include <fixedmath.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define b16_P225       0x0000399a
-#define b16_P405284735 0x000067c1
-#define b16_1P27323954 0x000145f3
+#include <nuttx/config.h>
+#include <stdio.h>
+#include <arpa/inet.h>
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: b16sin
- * Ref: http://lab.polygonal.de/2007/07/18/fast-and-accurate-sinecosine-approximation/
+ * Name: inet_ntoa
+ *
+ * Description:
+ *   The inet_ntoa() function converts the Internet host address in given in
+ *   network byte order to a string in standard numbers-and-dots notation.
+ *   The string is returned in a statically allocated buffer, which subsequent
+ *   calls will overwrite.
+ *
  ****************************************************************************/
 
-b16_t b16sin(b16_t rad)
+#ifdef CONFIG_CAN_PASS_STRUCTS
+FAR char *inet_ntoa(struct in_addr in)
 {
-  b16_t tmp1;
-  b16_t tmp2;
-  b16_t tmp3;
-
-  /* Force angle into the good range */
-
-  if (rad < -b16PI)
-    {
-      rad += b16TWOPI;
-    }
-  else if (rad > b16PI)
-   {
-      rad -= b16TWOPI;
-   }
-
-  /* tmp1 = 1.27323954 * rad
-   * tmp2 = .405284735 * rad * rad
-   */
-
-
-  tmp1 = b16mulb16(b16_1P27323954, rad);
-  tmp2 = b16mulb16(b16_P405284735, b16sqr(rad));
-
-  if (rad < 0)
-    {
-       /* tmp3 = 1.27323954 * rad + .405284735 * rad * rad */
-
-       tmp3 = tmp1 + tmp2;
-    }
-  else
-    {
-       /* tmp3 = 1.27323954 * rad - 0.405284735 * rad * rad */
-
-       tmp3 = tmp1 - tmp2;
-    }
-
-  /* tmp1 = tmp3*tmp3 */
-
-  tmp1 = b16sqr(tmp3);
-  if (tmp3 < 0)
-    {
-      /* tmp1 = tmp3 * -tmp3 */
-
-      tmp1 = -tmp1;
-    }
-
-  /* Return sin = .225 * (tmp3 * (+/-tmp3) - tmp3) + tmp3 */
-
-  return b16mulb16(b16_P225, (tmp1 - tmp3)) + tmp3;
+  static char buffer[18];
+  FAR char *ptr = (FAR char*)&in.s_addr;
+  sprintf(buffer, "%d.%d.%d.%d", ptr[0], ptr[1], ptr[2], ptr[3]);
+  return buffer;
 }
+#else
+FAR char *_inet_ntoa(in_addr_t in)
+{
+  static char buffer[18];
+  FAR char *ptr = (FAR char*)&in;
+  sprintf(buffer, "%d.%d.%d.%d", ptr[0], ptr[1], ptr[2], ptr[3]);
+  return buffer;
+}
+#endif
+
