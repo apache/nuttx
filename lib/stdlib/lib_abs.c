@@ -1,7 +1,7 @@
-/************************************************************
- * dq_addlast.c
+/************************************************************************
+ * lib/stdlib/lib_abs.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,44 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
- * Compilation Switches
- ************************************************************/
-
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
-#include <queue.h>
+#include <nuttx/config.h>
+#include <stdlib.h>
 
-/************************************************************
- * Public Functions
- ************************************************************/
+/************************************************************************
+ * Global Functions
+ ************************************************************************/
 
-/************************************************************
- * Name: dq_addlast
- *
- * Description
- *   dq_addlast adds 'node' to the end of 'queue'
- *
- ************************************************************/
-
-void dq_addlast(FAR dq_entry_t *node, dq_queue_t *queue)
+int abs(int j)
 {
-  node->flink = NULL;
-  node->blink = queue->tail;
-
-  if (!queue->head)
+  if (j < 0)
     {
-      queue->head = node;
-      queue->tail = node;
+      j = -j;
     }
-  else
-    {
-      queue->tail->flink = node;
-      queue->tail        = node;
-    }
+  return j;
 }
-

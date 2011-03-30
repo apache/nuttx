@@ -1,7 +1,7 @@
 /************************************************************
- * sq_rem.c
+ * lib/queue/sq_addlast.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,40 +44,29 @@
 #include <queue.h>
 
 /************************************************************
- * public Functions
+ * Public Functions
  ************************************************************/
 
 /************************************************************
- * Name: sq_rem
+ * Name: sq_addlast
  *
  * Description:
- *   sq_rem removes a 'node' for 'queue.'
- *
+ *   The sq_addlast function places the 'node' at the tail of
+ *   the 'queue'
  ************************************************************/
 
-void sq_rem(FAR sq_entry_t *node, sq_queue_t *queue)
+void sq_addlast(FAR sq_entry_t *node, sq_queue_t *queue)
 {
-  if (queue->head && node)
+  node->flink = NULL;
+  if (!queue->head)
     {
-      if (node == queue->head)
-        {
-          queue->head = node->flink;
-          if (node == queue->tail)
-            {
-              queue->tail = NULL;
-            }
-        }
-      else
-        {
-          FAR sq_entry_t *prev;
-          for(prev = (FAR sq_entry_t*)queue->head;
-              prev && prev->flink != node;
-              prev = prev->flink);
-
-          if (prev)
-            {
-              sq_remafter(prev, queue);
-            }
-        }
+      queue->head = node;
+      queue->tail = node;
+    }
+  else
+    {
+      queue->tail->flink = node;
+      queue->tail        = node;
     }
 }
+

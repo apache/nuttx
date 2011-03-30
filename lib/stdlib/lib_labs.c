@@ -1,7 +1,7 @@
-/************************************************************
- * dq_rem.c
+/************************************************************************
+ * lib/stdlib/lib_labs.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,54 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
- * Compilation Switches
- ************************************************************/
-
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
-#include <queue.h>
+#include <nuttx/config.h>
+#include <stdlib.h>
 
-/************************************************************
- * Public Functions
- ************************************************************/
+/************************************************************************
+ * Global Functions
+ ************************************************************************/
 
-/************************************************************
- * Name: dq_rem
- *
- * Descripton:
- *   dq_rem removes 'node' from 'queue'
- *
- ************************************************************/
-
-void dq_rem(FAR dq_entry_t *node, dq_queue_t *queue)
+long int labs(long int j)
 {
-  FAR dq_entry_t *prev = node->blink;
-  FAR dq_entry_t *next = node->flink;
-
-  if (!prev)
+  if (j < 0)
     {
-      queue->head = next;
+      j = -j;
     }
-  else 
-    {
-      prev->flink = next;
-    }
-
-  if (!next)
-    {
-      queue->tail = prev;
-    }
-  else 
-    {
-      next->blink = prev;
-    }
-
-  node->flink = NULL;
-  node->blink = NULL;
+  return j;
 }
-

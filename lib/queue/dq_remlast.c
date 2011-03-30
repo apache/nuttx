@@ -1,7 +1,7 @@
-/************************************************************************
- * lib/lib_abs.c
+/****************************************************************************
+ * lib/queue/dq_remlast.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,24 +31,48 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <inttypes.h>
+#include <queue.h>
 
-/************************************************************************
- * Global Functions
- ************************************************************************/
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-intmax_t imaxabs(intmax_t j)
+/***************************************************(************************
+ * Name: dq_remlast
+ *
+ * Description:
+ *   dq_remlast removes the last entry from 'queue'
+ *
+ ****************************************************************************/
+
+FAR dq_entry_t *dq_remlast(dq_queue_t *queue)
 {
-  if (j < 0)
+  FAR dq_entry_t *ret = queue->tail;
+
+  if (ret)
     {
-      j = -j;
+      FAR dq_entry_t *prev = ret->blink;
+      if (!prev)
+        {
+          queue->head = NULL;
+          queue->tail = NULL;
+        }
+      else
+        {
+          queue->tail = prev;
+          prev->flink = NULL;
+        }
+
+      ret->flink = NULL;
+      ret->blink = NULL;
     }
-  return j;
+
+  return ret;
 }
+

@@ -1,7 +1,7 @@
 /************************************************************************
- * lib/lib_abs.c
+ * lib/stdlib/lib_llabs.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,15 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 #include <stdlib.h>
 
 /************************************************************************
  * Global Functions
  ************************************************************************/
 
-int abs(int j)
+#ifdef CONFIG_HAVE_LONG_LONG
+long long int llabs(long long int j)
 {
   if (j < 0)
     {
@@ -52,3 +54,4 @@ int abs(int j)
     }
   return j;
 }
+#endif

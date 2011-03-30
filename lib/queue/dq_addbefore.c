@@ -1,7 +1,7 @@
-/************************************************************************
- * lib/lib_labs.c
+/****************************************************************************
+ * lib/queue/dq_addbefore.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,24 +31,39 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <stdlib.h>
+#include <queue.h>
 
-/************************************************************************
- * Global Functions
- ************************************************************************/
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-long int labs(long int j)
+/****************************************************************************
+ * Name: dq_addbefore
+ *
+ * Description:
+ *   dq_addbefore adds 'node' before 'next' in 'queue'
+ *
+ ****************************************************************************/
+
+void dq_addbefore(FAR dq_entry_t *next, FAR dq_entry_t *node,
+                  dq_queue_t *queue)
 {
-  if (j < 0)
+  if (!queue->head || next == queue->head)
     {
-      j = -j;
+      dq_addfirst(node, queue);
     }
-  return j;
+  else
+    {
+      FAR dq_entry_t *prev = next->blink;
+      node->flink = next;
+      node->blink = prev;
+      prev->flink = node;
+      next->blink = node;
+    }
 }

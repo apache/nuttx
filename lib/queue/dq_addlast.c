@@ -1,7 +1,7 @@
 /************************************************************
- * dq_addafter.c
+ * lib/queue/dq_addlast.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,27 +48,27 @@
  ************************************************************/
 
 /************************************************************
- * Name: dq_addafter
+ * Name: dq_addlast
  *
- * Description:
- *  dq_addafter function adds 'node' after 'qqqq' in the
- *  'queue.'
+ * Description
+ *   dq_addlast adds 'node' to the end of 'queue'
  *
  ************************************************************/
 
-void dq_addafter(FAR dq_entry_t *prev, FAR dq_entry_t *node,
-                 dq_queue_t *queue)
+void dq_addlast(FAR dq_entry_t *node, dq_queue_t *queue)
 {
-  if (!queue->head || prev == queue->tail)
+  node->flink = NULL;
+  node->blink = queue->tail;
+
+  if (!queue->head)
     {
-      dq_addlast(node, queue);
+      queue->head = node;
+      queue->tail = node;
     }
   else
     {
-      FAR dq_entry_t *next = prev->flink;
-      node->blink = prev;
-      node->flink = next;
-      next->blink = node;
-      prev->flink = node;
+      queue->tail->flink = node;
+      queue->tail        = node;
     }
 }
+

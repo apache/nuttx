@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_isleapyear.c
+ * lib/time/lib_daysbeforemonth.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <nuttx/time.h>
 
 /****************************************************************************
@@ -61,6 +64,11 @@
  * Public Variables
  ****************************************************************************/
 
+uint16_t g_daysbeforemonth[13] =
+{
+  0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
+};
+
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
@@ -74,15 +82,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_isleapyear
+ * Function:  clock_daysbeforemonth
  *
  * Description:
- *    Return true if the specified year is a leap year
+ *    Get the number of days that occurred before the beginning of the month.
  *
  ****************************************************************************/
 
-int clock_isleapyear(int year)
+int clock_daysbeforemonth(int month, bool leapyear)
 {
-  return year % 400 ? (year % 100 ? (year % 4 ? 0 : 1) : 0) : 1;
+  int retval = g_daysbeforemonth[month];
+  if (month >= 2 && leapyear)
+    {
+      retval++;
+    }
+  return retval;
 }
+
 

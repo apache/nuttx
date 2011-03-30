@@ -1,7 +1,7 @@
-/****************************************************************************
- * dq_remlast.c
+/************************************************************
+ * lib/queue/sq_addfirst.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,48 +31,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************/
 
-/****************************************************************************
+/************************************************************
+ * Compilation Switches
+ ************************************************************/
+
+/************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************/
 
 #include <queue.h>
 
-/****************************************************************************
+/************************************************************
  * Public Functions
- ****************************************************************************/
+ ************************************************************/
 
-/***************************************************(************************
- * Name: dq_remlast
+/************************************************************
+ * Name: sq_addfirst
  *
  * Description:
- *   dq_remlast removes the last entry from 'queue'
+ *   The sq_addfirst function places the 'node' at the head
+ *   of the 'queue'
  *
- ****************************************************************************/
+ ************************************************************/
 
-FAR dq_entry_t *dq_remlast(dq_queue_t *queue)
+void sq_addfirst(FAR sq_entry_t *node, sq_queue_t *queue)
 {
-  FAR dq_entry_t *ret = queue->tail;
-
-  if (ret)
+  node->flink = queue->head;
+  if (!queue->head)
     {
-      FAR dq_entry_t *prev = ret->blink;
-      if (!prev)
-        {
-          queue->head = NULL;
-          queue->tail = NULL;
-        }
-      else
-        {
-          queue->tail = prev;
-          prev->flink = NULL;
-        }
-
-      ret->flink = NULL;
-      ret->blink = NULL;
+      queue->tail = node;
     }
-
-  return ret;
+  queue->head = node;
 }
-

@@ -1,7 +1,7 @@
-/************************************************************************
- * lib/lib_llabs.c
+/************************************************************
+ * lib/queue/sq_remafter.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,27 +31,49 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ************************************************************/
 
-/************************************************************************
+/************************************************************
+ * Compilation Switches
+ ************************************************************/
+
+/************************************************************
  * Included Files
- ************************************************************************/
+ ************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <stdlib.h>
+#include <queue.h>
 
-/************************************************************************
- * Global Functions
- ************************************************************************/
+/************************************************************
+ * Public Functions
+ ************************************************************/
 
-#ifdef CONFIG_HAVE_LONG_LONG
-long long int llabs(long long int j)
+/************************************************************
+ * Name:
+ *
+ * Description:
+ *   sq_remafter removes the entry following 'node; from the
+ *   'queue'  Returns a reference to the removed entry.
+ *
+ ************************************************************/
+
+FAR sq_entry_t *sq_remafter(FAR sq_entry_t *node, sq_queue_t *queue)
 {
-  if (j < 0)
+  FAR sq_entry_t *ret = node->flink;
+  if (queue->head && ret)
     {
-      j = -j;
+      if (queue->tail == ret)
+        {
+          queue->tail = node;
+          node->flink = NULL;
+        }
+      else
+        {
+          node->flink = ret->flink;
+        }
+
+      ret->flink = NULL;
     }
-  return j;
+
+  return ret;
 }
-#endif
+

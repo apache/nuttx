@@ -1,7 +1,7 @@
 /************************************************************
- * sq_addafter.c
+ * lib/queue/dq_addafter.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,24 +48,27 @@
  ************************************************************/
 
 /************************************************************
- * Name: sq_addafter.c
+ * Name: dq_addafter
  *
  * Description:
- *  The sq_addafter function adds 'node' after 'prev' in the
+ *  dq_addafter function adds 'node' after 'qqqq' in the
  *  'queue.'
  *
  ************************************************************/
 
-void sq_addafter(FAR sq_entry_t *prev, FAR sq_entry_t *node,
-                 sq_queue_t *queue)
+void dq_addafter(FAR dq_entry_t *prev, FAR dq_entry_t *node,
+                 dq_queue_t *queue)
 {
   if (!queue->head || prev == queue->tail)
     {
-      sq_addlast(node, queue);
+      dq_addlast(node, queue);
     }
   else
     {
-      node->flink = prev->flink;
+      FAR dq_entry_t *next = prev->flink;
+      node->blink = prev;
+      node->flink = next;
+      next->blink = node;
       prev->flink = node;
     }
 }

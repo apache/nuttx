@@ -1,7 +1,7 @@
-/************************************************************
- * sq_addlast.c
+/************************************************************************
+ * lib/stdlib//lib_abs.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,42 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ************************************************************************/
 
-/************************************************************
- * Compilation Switches
- ************************************************************/
-
-/************************************************************
+/************************************************************************
  * Included Files
- ************************************************************/
+ ************************************************************************/
 
-#include <queue.h>
+#include <nuttx/config.h>
+#include <inttypes.h>
 
-/************************************************************
- * Public Functions
- ************************************************************/
+/************************************************************************
+ * Global Functions
+ ************************************************************************/
 
-/************************************************************
- * Name: sq_addlast
- *
- * Description:
- *   The sq_addlast function places the 'node' at the tail of
- *   the 'queue'
- ************************************************************/
-
-void sq_addlast(FAR sq_entry_t *node, sq_queue_t *queue)
+intmax_t imaxabs(intmax_t j)
 {
-  node->flink = NULL;
-  if (!queue->head)
+  if (j < 0)
     {
-      queue->head = node;
-      queue->tail = node;
+      j = -j;
     }
-  else
-    {
-      queue->tail->flink = node;
-      queue->tail        = node;
-    }
+  return j;
 }
-

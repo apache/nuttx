@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/lib_qsort.c
+ * lib/stdlib/lib_qsort.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Leveraged from:

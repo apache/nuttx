@@ -1,7 +1,7 @@
 /************************************************************
- * sq_addfirst.c
+ * lib/queue/sq_addafter.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,20 +48,24 @@
  ************************************************************/
 
 /************************************************************
- * Name: sq_addfirst
+ * Name: sq_addafter.c
  *
  * Description:
- *   The sq_addfirst function places the 'node' at the head
- *   of the 'queue'
+ *  The sq_addafter function adds 'node' after 'prev' in the
+ *  'queue.'
  *
  ************************************************************/
 
-void sq_addfirst(FAR sq_entry_t *node, sq_queue_t *queue)
+void sq_addafter(FAR sq_entry_t *prev, FAR sq_entry_t *node,
+                 sq_queue_t *queue)
 {
-  node->flink = queue->head;
-  if (!queue->head)
+  if (!queue->head || prev == queue->tail)
     {
-      queue->tail = node;
+      sq_addlast(node, queue);
     }
-  queue->head = node;
+  else
+    {
+      node->flink = prev->flink;
+      prev->flink = node;
+    }
 }

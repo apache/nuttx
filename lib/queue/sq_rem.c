@@ -1,7 +1,7 @@
 /************************************************************
- * sq_remlast.c
+ * lib/queue/sq_rem.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,44 +44,40 @@
 #include <queue.h>
 
 /************************************************************
- * Public Functions
+ * public Functions
  ************************************************************/
 
 /************************************************************
- * Name: sq_remlast
+ * Name: sq_rem
  *
  * Description:
- *   Removes the last entry in a singly-linked queue.
+ *   sq_rem removes a 'node' for 'queue.'
  *
  ************************************************************/
 
-FAR sq_entry_t *sq_remlast(sq_queue_t *queue)
-{ 
-  FAR sq_entry_t *ret = queue->tail;
-
-  if (ret)
+void sq_rem(FAR sq_entry_t *node, sq_queue_t *queue)
+{
+  if (queue->head && node)
     {
-      if (queue->head == queue->tail)
+      if (node == queue->head)
         {
-          queue->head = NULL;
-          queue->tail = NULL;
+          queue->head = node->flink;
+          if (node == queue->tail)
+            {
+              queue->tail = NULL;
+            }
         }
       else
         {
           FAR sq_entry_t *prev;
-          for(prev = queue->head;
-              prev && prev->flink != ret;
+          for(prev = (FAR sq_entry_t*)queue->head;
+              prev && prev->flink != node;
               prev = prev->flink);
 
           if (prev)
             {
-              prev->flink = NULL;
-              queue->tail = prev;
+              sq_remafter(prev, queue);
             }
         }
-
-      ret->flink = NULL;
     }
-
-  return ret;
-} 
+}

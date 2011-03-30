@@ -1,7 +1,7 @@
 /************************************************************
- * dq_addfirst.c
+ * lib/queue/sq_remfirst.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,27 +48,29 @@
  ************************************************************/
 
 /************************************************************
- * Name: dq_addfirst
+ * Name: sq_remfirst
  *
  * Description:
- *  dq_addfirst affs 'node' at the beginning of 'queue'
+ *   sq_remfirst function removes the first entry from
+ *   'queue'
  *
  ************************************************************/
 
-void dq_addfirst(FAR dq_entry_t *node, dq_queue_t *queue)
+FAR sq_entry_t *sq_remfirst(sq_queue_t *queue)
 {
-  node->blink = NULL;
-  node->flink = queue->head;
+  FAR sq_entry_t *ret = queue->head;
 
-  if (!queue->head)
+  if (ret)
     {
-      queue->head = node;
-      queue->tail = node;
+      queue->head = ret->flink;
+      if (!queue->head)
+        {
+          queue->tail = NULL;
+        }
+
+      ret->flink = NULL;
     }
-  else
-    {
-      queue->head->blink = node;
-      queue->head = node;
-    }
+
+  return ret;
 }
 

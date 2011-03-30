@@ -1,7 +1,7 @@
-/****************************************************************************
- * lib/dq_addbefore.c
+/************************************************************
+ * lib/queue/dq_addfirst.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,39 +31,44 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************/
 
-/****************************************************************************
+/************************************************************
+ * Compilation Switches
+ ************************************************************/
+
+/************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************/
 
 #include <queue.h>
 
-/****************************************************************************
+/************************************************************
  * Public Functions
- ****************************************************************************/
+ ************************************************************/
 
-/****************************************************************************
- * Name: dq_addbefore
+/************************************************************
+ * Name: dq_addfirst
  *
  * Description:
- *   dq_addbefore adds 'node' before 'next' in 'queue'
+ *  dq_addfirst affs 'node' at the beginning of 'queue'
  *
- ****************************************************************************/
+ ************************************************************/
 
-void dq_addbefore(FAR dq_entry_t *next, FAR dq_entry_t *node,
-                  dq_queue_t *queue)
+void dq_addfirst(FAR dq_entry_t *node, dq_queue_t *queue)
 {
-  if (!queue->head || next == queue->head)
+  node->blink = NULL;
+  node->flink = queue->head;
+
+  if (!queue->head)
     {
-      dq_addfirst(node, queue);
+      queue->head = node;
+      queue->tail = node;
     }
   else
     {
-      FAR dq_entry_t *prev = next->blink;
-      node->flink = next;
-      node->blink = prev;
-      prev->flink = node;
-      next->blink = node;
+      queue->head->blink = node;
+      queue->head = node;
     }
 }
+

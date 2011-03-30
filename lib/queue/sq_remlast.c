@@ -1,7 +1,7 @@
 /************************************************************
- * dq_remfirst.c
+ * lib/queue/sq_remlast.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,35 +48,40 @@
  ************************************************************/
 
 /************************************************************
- * Name: dq_remfirst
+ * Name: sq_remlast
  *
  * Description:
- *   dq_remfirst removes 'node' from the head of 'queue'
+ *   Removes the last entry in a singly-linked queue.
  *
  ************************************************************/
 
-FAR dq_entry_t *dq_remfirst(dq_queue_t *queue)
-{
-  FAR dq_entry_t *ret = queue->head;
+FAR sq_entry_t *sq_remlast(sq_queue_t *queue)
+{ 
+  FAR sq_entry_t *ret = queue->tail;
 
   if (ret)
     {
-      FAR dq_entry_t *next = ret->flink;
-      if (!next)
+      if (queue->head == queue->tail)
         {
           queue->head = NULL;
           queue->tail = NULL;
         }
       else
         {
-          queue->head = next;
-          next->blink = NULL;
+          FAR sq_entry_t *prev;
+          for(prev = queue->head;
+              prev && prev->flink != ret;
+              prev = prev->flink);
+
+          if (prev)
+            {
+              prev->flink = NULL;
+              queue->tail = prev;
+            }
         }
 
       ret->flink = NULL;
-      ret->blink = NULL;
     }
 
   return ret;
-}
-
+} 
