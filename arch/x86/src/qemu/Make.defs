@@ -39,7 +39,7 @@ HEAD_ASRC	= qemu_head.S
 
 # Common x86 and i486 files
 
-CMN_ASRCS	= i486_utils.S
+CMN_ASRCS	= i486_utils.S up_syscall6.S
 CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 			  up_createstack.c up_mdelay.c up_udelay.c up_exit.c\
 			  up_initialize.c up_initialstate.c up_interruptcontext.c up_irq.c \
