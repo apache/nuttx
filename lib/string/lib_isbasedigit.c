@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/string.h
+ * lib/string/lib_isbasedigit.c
  *
- *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,66 +33,73 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_STRING_H
-#define __INCLUDE_STRING_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stddef.h>
+#include <stdbool.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "lib_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Name: lib_isbasedigit
+ *
+ * Description:
+ *   Given an ASCII character, ch, and a base (1-36) do two
+ *   things:  1) Determine if ch is a valid charcter, and 2)
+ *   convert ch to its binary value.
+ *
+ ****************************************************************************/
 
-EXTERN char  *strchr(const char *s, int c);
-EXTERN FAR char *strdup(const char *s);
-EXTERN const char *strerror(int);
-EXTERN size_t strlen(const char *);
-EXTERN size_t strnlen(const char *, size_t);
-EXTERN char  *strcat(char *, const char *);
-EXTERN char  *strncat(char *, const char *, size_t);
-EXTERN int    strcmp(const char *, const char *);
-EXTERN int    strncmp(const char *, const char *, size_t);
-EXTERN int    strcasecmp(const char *, const char *);
-EXTERN int    strncasecmp(const char *, const char *, size_t);
-EXTERN char  *strcpy(char *dest, const char *src);
-EXTERN char  *strncpy(char *, const char *, size_t);
-EXTERN char  *strpbrk(const char *, const char *);
-EXTERN char  *strchr(const char *, int);
-EXTERN char  *strrchr(const char *, int);
-EXTERN size_t strspn(const char *, const char *);
-EXTERN size_t strcspn(const char *, const char *);
-EXTERN char  *strstr(const char *, const char *);
-EXTERN char  *strtok(char *, const char *);
-EXTERN char  *strtok_r(char *, const char *, char **);
+bool lib_isbasedigit(int ch, int base, int *value)
+{
+  bool ret = false;
+  int  tmp = 0;
 
-EXTERN void  *memset(void *s, int c, size_t n);
-EXTERN void  *memcpy(void *dest, const void *src, size_t n);
-EXTERN int    memcmp(const void *s1, const void *s2, size_t n);
-EXTERN void  *memmove(void *dest, const void *src, size_t count);
+  if (base <= 10)
+    {
+      if (ch >= '0' && ch <= base + '0' - 1)
+        {
+          tmp = ch - '0';
+          ret = true;
+        }
+    }
+  else if (base <= 36)
+    {
+      if (ch >= '0' && ch <= '9')
+        {
+          tmp = ch - '0';
+          ret = true;
+        }
+      else if (ch >= 'a' && ch <= 'a' + base - 11)
+        {
+          tmp = ch - 'a' + 10;
+          ret = true;
+        }
+      else if (ch >= 'A' && ch <= 'A' + base - 11)
+        {
+          tmp = ch - 'A' + 10;
+          ret = true;
+        }
+    }
 
-#ifndef CONFIG_ARCH_BZERO
-# define bzero(s,n) (void)memset(s,0,n)
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+  if (value)
+    {
+      *value = tmp;
+    }
+  return ret;
 }
-#endif
-#endif /* __INCLUDE_STRING_H */
+
+

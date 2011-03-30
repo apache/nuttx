@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/string.h
+ * lib/string/lib_strtok.c
  *
- *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,66 +33,55 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_STRING_H
-#define __INCLUDE_STRING_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stddef.h>
+#include <string.h>
 
 /****************************************************************************
- * Definitions
+ * Private Data
+ ****************************************************************************/
+
+static char *g_saveptr = NULL;
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Function Prototypes
+ * Name: strtok
+ *
+ * Description:
+ *    The  strtok()  function  parses  a string into a
+ *    sequence of tokens.  On the first call to strtok() the
+ *    string to be parsed should be specified in 'str'.  In
+ *    each subsequent call that should parse the same string, 
+ *    'str' should be NULL.
+ *
+ *    The 'delim' argument specifies a set of characters that
+ *    delimit the tokens in the parsed string.  The caller
+ *    may specify different strings in delim in successive
+ *    calls that parse the same string.
+ *
+ *    Each call to strtok() returns a pointer to a null-
+ *    terminated string containing the next token. This
+ *    string  does not include the delimiting character.  If
+ *    no more tokens are found, strtok() returns NULL.
+ *
+ *    A sequence of two or more contiguous delimiter
+ *    characters in the parsed string is considered to be a
+ *    single delimiter. Delimiter characters at the start or
+ *    end of the string are ignored.  The tokens returned by
+ *    strtok() are always non-empty strings.
+ *
+ * Return
+ *    strtok() returns a pointer to the next token, or NULL
+ *    if there are no more tokens.
+ *
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-EXTERN char  *strchr(const char *s, int c);
-EXTERN FAR char *strdup(const char *s);
-EXTERN const char *strerror(int);
-EXTERN size_t strlen(const char *);
-EXTERN size_t strnlen(const char *, size_t);
-EXTERN char  *strcat(char *, const char *);
-EXTERN char  *strncat(char *, const char *, size_t);
-EXTERN int    strcmp(const char *, const char *);
-EXTERN int    strncmp(const char *, const char *, size_t);
-EXTERN int    strcasecmp(const char *, const char *);
-EXTERN int    strncasecmp(const char *, const char *, size_t);
-EXTERN char  *strcpy(char *dest, const char *src);
-EXTERN char  *strncpy(char *, const char *, size_t);
-EXTERN char  *strpbrk(const char *, const char *);
-EXTERN char  *strchr(const char *, int);
-EXTERN char  *strrchr(const char *, int);
-EXTERN size_t strspn(const char *, const char *);
-EXTERN size_t strcspn(const char *, const char *);
-EXTERN char  *strstr(const char *, const char *);
-EXTERN char  *strtok(char *, const char *);
-EXTERN char  *strtok_r(char *, const char *, char **);
-
-EXTERN void  *memset(void *s, int c, size_t n);
-EXTERN void  *memcpy(void *dest, const void *src, size_t n);
-EXTERN int    memcmp(const void *s1, const void *s2, size_t n);
-EXTERN void  *memmove(void *dest, const void *src, size_t count);
-
-#ifndef CONFIG_ARCH_BZERO
-# define bzero(s,n) (void)memset(s,0,n)
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+char *strtok(char *str, const char *delim)
+{
+  return strtok_r(str, delim, &g_saveptr);
 }
-#endif
-#endif /* __INCLUDE_STRING_H */

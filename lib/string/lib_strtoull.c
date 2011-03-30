@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/string.h
+ * /lib/string/lib_strtoull.c
  *
- *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,66 +33,68 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_STRING_H
-#define __INCLUDE_STRING_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#include <stddef.h>
+#include <stdlib.h>
+
+#include "lib_internal.h"
+
+#ifdef CONFIG_HAVE_LONG_LONG
 
 /****************************************************************************
- * Definitions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Name: strtoull
+ *
+ * Description:
+ *   The  strtol() function  converts  the initial part of the string in
+ *   nptr to a long unsigned integer value according to the given base, which
+ *   must be between 2 and 36 inclusive, or be the special value 0.
+ *
+ ****************************************************************************/
+ 
+unsigned long long strtoull(const char *nptr, char **endptr, int base)
+{
+  unsigned long long accum = 0;
+  int value;
 
-EXTERN char  *strchr(const char *s, int c);
-EXTERN FAR char *strdup(const char *s);
-EXTERN const char *strerror(int);
-EXTERN size_t strlen(const char *);
-EXTERN size_t strnlen(const char *, size_t);
-EXTERN char  *strcat(char *, const char *);
-EXTERN char  *strncat(char *, const char *, size_t);
-EXTERN int    strcmp(const char *, const char *);
-EXTERN int    strncmp(const char *, const char *, size_t);
-EXTERN int    strcasecmp(const char *, const char *);
-EXTERN int    strncasecmp(const char *, const char *, size_t);
-EXTERN char  *strcpy(char *dest, const char *src);
-EXTERN char  *strncpy(char *, const char *, size_t);
-EXTERN char  *strpbrk(const char *, const char *);
-EXTERN char  *strchr(const char *, int);
-EXTERN char  *strrchr(const char *, int);
-EXTERN size_t strspn(const char *, const char *);
-EXTERN size_t strcspn(const char *, const char *);
-EXTERN char  *strstr(const char *, const char *);
-EXTERN char  *strtok(char *, const char *);
-EXTERN char  *strtok_r(char *, const char *, char **);
+  if (nptr)
+    {
+      /* Skip leading spaces */
 
-EXTERN void  *memset(void *s, int c, size_t n);
-EXTERN void  *memcpy(void *dest, const void *src, size_t n);
-EXTERN int    memcmp(const void *s1, const void *s2, size_t n);
-EXTERN void  *memmove(void *dest, const void *src, size_t count);
+      lib_skipspace(&nptr);
 
-#ifndef CONFIG_ARCH_BZERO
-# define bzero(s,n) (void)memset(s,0,n)
-#endif
+      /* Check for unspecified base */
 
-#undef EXTERN
-#if defined(__cplusplus)
+      base = lib_checkbase(base, &nptr);
+
+      /* Accumulate each "digit" */
+
+      while (lib_isbasedigit(*nptr, base, &value))
+        {
+            accum = accum*base + value;
+            nptr++;
+        }
+
+      /* Return the final pointer to the unused value */
+
+      if (endptr)
+        {
+          *endptr = (char *)nptr;
+        }
+    }
+   return accum;
 }
 #endif
-#endif /* __INCLUDE_STRING_H */
+

@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/string.h
+ * lib/string/lib_strchr.c
  *
- *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,66 +33,35 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_STRING_H
-#define __INCLUDE_STRING_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stddef.h>
+#include <string.h>
 
 /****************************************************************************
- * Definitions
+ * Global Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Global Function Prototypes
- ****************************************************************************/
+/* The strchr() function returns a pointer to the first
+ * occurrence of the character c in the string s.
+ */
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+char *strchr(const char *s, int c)
+{
+  if (s)
+    {
+      for (; *s; s++)
+        {
+          if (*s == c)
+            {
+              return (char*)s;
+            }
+        }
+    }
 
-EXTERN char  *strchr(const char *s, int c);
-EXTERN FAR char *strdup(const char *s);
-EXTERN const char *strerror(int);
-EXTERN size_t strlen(const char *);
-EXTERN size_t strnlen(const char *, size_t);
-EXTERN char  *strcat(char *, const char *);
-EXTERN char  *strncat(char *, const char *, size_t);
-EXTERN int    strcmp(const char *, const char *);
-EXTERN int    strncmp(const char *, const char *, size_t);
-EXTERN int    strcasecmp(const char *, const char *);
-EXTERN int    strncasecmp(const char *, const char *, size_t);
-EXTERN char  *strcpy(char *dest, const char *src);
-EXTERN char  *strncpy(char *, const char *, size_t);
-EXTERN char  *strpbrk(const char *, const char *);
-EXTERN char  *strchr(const char *, int);
-EXTERN char  *strrchr(const char *, int);
-EXTERN size_t strspn(const char *, const char *);
-EXTERN size_t strcspn(const char *, const char *);
-EXTERN char  *strstr(const char *, const char *);
-EXTERN char  *strtok(char *, const char *);
-EXTERN char  *strtok_r(char *, const char *, char **);
-
-EXTERN void  *memset(void *s, int c, size_t n);
-EXTERN void  *memcpy(void *dest, const void *src, size_t n);
-EXTERN int    memcmp(const void *s1, const void *s2, size_t n);
-EXTERN void  *memmove(void *dest, const void *src, size_t count);
-
-#ifndef CONFIG_ARCH_BZERO
-# define bzero(s,n) (void)memset(s,0,n)
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+  return NULL;
 }
-#endif
-#endif /* __INCLUDE_STRING_H */
+
