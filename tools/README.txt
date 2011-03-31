@@ -31,16 +31,38 @@ mkconfig.c
   into include/nuttx/config.h.  config.h is a another version of the
   NuttX configuration that can be included by C files.
 
+mksyscall.c
+
+  This is C file that is used to build mksyscall program.  The mksyscall
+  program is used during the initial NuttX build by the logic in the top-
+  level syscall/ directory.
+
+  If you build NuttX as a separately compiled, monolithic kernel and separate
+  applications, then there is a syscall layer that is used to get from the
+  user application space to the NuttX kernel space.  In the user application
+  "proxies" for each of the kernel functions are provided.  The proxies have
+  the same function signature as the kernel function, but only execute a
+  system call.
+
+  Within the kernel, there are "stubs" for each of the system calls.  The
+  stubs receive the marshalled system call data, and perform the actually
+  kernel function call (in kernel-mode) on behalf of the proxy function.
+
+  Information about the stubs and proxies is maintained in a comma separated
+  value (CSV) file in the syscall/ directory.  The mksyscall program will
+  accept this CVS file as input and generate all of the required proxy or
+  stub files as output.  See syscall/README.txt for additonal information.
+
+Makefile.host
+
+  This is the makefile that is used to make the mkconfig program from
+  the mkconfig.c C file or the mksyscall program from the mksyscall.c file.
+
 mkromfsimg.sh
 
   This script may be used to automate the generate of a ROMFS file system
   image.  It accepts an rcS script "template" and generates and image that
   may be mounted under /etc in the NuttX pseudo file system.
-
-Makefile.mkconfig
-
-  This is the makefile that is used to make the mkconfig program from
-  the mkconfig.c C file.
 
 mkdeps.sh
 mknulldeps.sh

@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <limits.h>
 #include <semaphore.h>
 #include <errno.h>

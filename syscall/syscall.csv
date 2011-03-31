@@ -104,6 +104,7 @@
 "seekdir","dirent.h","void","FAR DIR*","off_t"
 "select","sys/select.h","int","int","FAR fd_set*","FAR fd_set*","FAR fd_set*","FAR struct timeval*"
 "sem_close","semaphore.h","int","FAR sem_t*"
+"sem_destroy","semaphore.h","int","FAR sem_t*"
 "sem_open","semaphore.h","FAR sem_t*","FAR const char*","int","..."
 "sem_post","semaphore.h","int","FAR sem_t*"
 "sem_trywait","semaphore.h","int","FAR sem_t*"

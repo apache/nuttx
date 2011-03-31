@@ -33,4 +33,4 @@
 #
 ############################################################################
 
-SEM_SRCS = sem_init.c sem_getvalue.c sem_destroy.c
+SEM_SRCS = sem_init.c sem_getvalue.c

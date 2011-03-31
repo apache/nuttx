@@ -1,7 +1,7 @@
 ############################################################################
-# Makefile.host
+# syscall/proxies/Make.defs
 #
-#   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,23 +33,4 @@
 #
 ############################################################################
 
-all: mkconfig mksyscall
-default: mkconfig mksyscall
-.PHONY: clean
-
-# Add CFLAGS=-g on the make command line build debug versions
-
-CFLAGS = -O2 -Wall
-
-# mkconfig - Convert a .config file into a C config.h file
-
-mkconfig: mkconfig.c
-	@gcc $(CFLAGS) -o mkconfig mkconfig.c
-
-# mksyscall - Convert a CSV file into syscall stubs and proxies
-
-mksyscall: mksyscall.c
-	@gcc $(CFLAGS) -o mksyscall mksyscall.c
-
-clean:
-	@rm -f mkconfig mksyscall mkconfig.exe mksyscall.exe *~
+PROXY_SRCS := ${shell ls *.c}

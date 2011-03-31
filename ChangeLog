@@ -1632,4 +1632,6 @@
 	  from sched/ to lib/pthread where they more appropriately belong.
 	* sched/ and lib/semaphore/:  Move some semaphore-related interfaces
 	  from sched/ to lib/pthread where they more appropriately belong.
-	* syscall/: The beginnings of an options syscall interface.
+	* syscall/: The beginnings of an optional syscall kernal interface.
+	* tools/mksyscall.c:  Add a tool that will auto-generate syscall proxies
+	  and stubs from a comma-separated-value (CSV) data file.

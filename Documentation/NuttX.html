@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 28, 2011</p>
+      <p>Last Updated: March 30, 2011</p>
     </td>
   </tr>
 </table>
@@ -2176,6 +2176,18 @@ nuttx-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       of the nuttx source tree
     * apps/namedapp/binfs.c: Create a tiny filesystem that can be used
       to show the internal named apps under /bin.
+    * fs/fs_opendir.c: Correct an error that occurs when a file system is
+      mounted in the root directory.  This was discovered while mounting
+      the named app's /bin directory.
+    * lib/: Move all source files into a subdirectory of lib/ named after
+      the header file in which the library function is prototyped.
+    * sched/ and lib/pthread/:  Move pthread attribute-related interfaces
+      from sched/ to lib/pthread where they more appropriately belong.
+    * sched/ and lib/semaphore/:  Move some semaphore-related interfaces
+      from sched/ to lib/pthread where they more appropriately belong.
+    * syscall/: The beginnings of an optional syscall kernel interface.
+    * tools/mksyscall.c:  Add a tool that will auto-generate syscall proxies
+      and stubs from a comma-separated-value (CSV) data file.
 
 apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
