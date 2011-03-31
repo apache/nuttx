@@ -227,7 +227,8 @@ static void generate_proxy(int nparms)
   int i;
 
   fprintf(stream, "/* Auto-generated %s proxy file -- do not edit */\n\n", g_parm[NAME_INDEX]);
-  fprintf(stream, "#include <%s>\n\n", g_parm[HEADER_INDEX]);
+  fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
+  fprintf(stream, "#include <syscall.h>\n\n");
 
   fprintf(stream, "%s %s(", g_parm[RETTYPE_INDEX], g_parm[NAME_INDEX]);
 
