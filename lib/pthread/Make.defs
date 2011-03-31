@@ -1,7 +1,7 @@
 ############################################################################
-# Makefile.mkconfig
+# lib/pthread/Make.defs
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,17 @@
 #
 ############################################################################
 
-all: mkconfig
-default: mkconfig
+PTHREAD_SRCS = pthread_attrinit.c pthread_attrdestroy.c \
+		  pthread_attrsetschedpolicy.c pthread_attrgetschedpolicy.c \
+		  pthread_attrsetinheritsched.c pthread_attrgetinheritsched.c \
+		  pthread_attrsetstacksize.c pthread_attrgetstacksize.c \
+		  pthread_attrsetschedparam.c pthread_attrgetschedparam.c \
+		  pthread_barrierattrinit.c pthread_barrierattrdestroy.c \
+		  pthread_barrierattrgetpshared.c pthread_barrierattrsetpshared.c \
+		  pthread_condattrinit.c pthread_condattrdestroy.c \
+		  pthread_mutexattrinit.c pthread_mutexattrdestroy.c \
+		  pthread_mutexattrgetpshared.c pthread_mutexattrsetpshared.c
 
-mkconfig: mkconfig.c
-	@gcc -O2 -Wall -o mkconfig mkconfig.c
-
-clean:
-	@rm -f mkconfig mkconfig.exe *~
+ifeq ($(CONFIG_MUTEX_TYPES),y)
+PTHREAD_SRCS += pthread_mutexattrsettype.c pthread_mutexattrgettype.c
+endif

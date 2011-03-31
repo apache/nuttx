@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_condattrdestroy.c
+ * lib/pthread/pthread_attrgetschedpolicy.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,47 +37,69 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
+#include <sys/types.h>
 #include <pthread.h>
+#include <string.h>
 #include <debug.h>
 #include <errno.h>
-#include "pthread_internal.h"
 
 /****************************************************************************
- * Global Functions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_condattr_destroy
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  pthread_attr_getschedpolicy
  *
  * Description:
- *   Operations on condition variable attributes
+ *   Obtain the scheduling algorithm attribute.
  *
  * Parameters:
- *   None
+ *   attr
+ *   policy
  *
  * Return Value:
- *   None
+ *   0 if successful.  Otherwise, an error code.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_condattr_destroy(FAR pthread_condattr_t *attr)
+int pthread_attr_getschedpolicy(FAR pthread_attr_t *attr, int *policy)
 {
-  int ret = OK;
+  int ret;
 
-  sdbg("attr=0x%p\n", attr);
+  sdbg("attr=0x%p policy=0x%p\n", attr, policy);
 
-  if (!attr)
+  if (!attr || !policy)
     {
       ret = EINVAL;
+    }
+  else
+    {
+      *policy = attr->policy;
+      ret = OK;
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
-
-
-

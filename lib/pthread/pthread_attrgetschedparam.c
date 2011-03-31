@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_attrinit.c
+ * lib/pthread/pthread_attrgetschedparam.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,10 +41,9 @@
 
 #include <pthread.h>
 #include <string.h>
+#include <sched.h>
 #include <debug.h>
 #include <errno.h>
-
-#include "pthread_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -71,43 +70,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_init
+ * Function:  pthread_attr_getschedparam
  *
  * Description:
- *   Initializes a thread attributes object (attr) with
- *   default values for all of the individual attributes
- *   used by a given implementation.
  *
  * Parameters:
  *   attr
+ *   param
  *
  * Return Value:
- *   0 on success, otherwise an error number
+ *   0 if successful.  Otherwise, an error code.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_attr_init(FAR pthread_attr_t *attr)
+int pthread_attr_getschedparam(FAR pthread_attr_t *attr,
+                               FAR struct sched_param *param)
 {
-  int ret = OK;
+  int ret;
 
-  sdbg("attr=0x%p\n", attr);
-  if (!attr)
+  sdbg("attr=0x%p param=0x%p\n", attr, param);
+
+  if (!attr || !param)
     {
-      ret = ENOMEM;
+      ret = EINVAL;
     }
   else
     {
-      /* Set the child thread priority to be the default
-       * priority. Set the child stack size to some arbitrary
-       * default value.
-       */
-
-      memcpy(attr, &g_default_pthread_attr, sizeof(pthread_attr_t));
+      param->sched_priority = attr->priority;
+      ret = OK;
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
+
+
 

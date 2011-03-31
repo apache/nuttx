@@ -1628,3 +1628,8 @@
 	  the named app's /bin directory.
 	* lib/: Move all source files into a subdirectory of lib/ named after
 	  the header file in which the library function is prototyped.
+	* sched/ and lib/pthread/:  Move pthread attribute-related interfaces
+	  from sched/ to lib/pthread where they more appropriately belong.
+	* sched/ and lib/semaphore/:  Move some semaphore-related interfaces
+	  from sched/ to lib/pthread where they more appropriately belong.
+	* syscall/: The beginnings of an options syscall interface.

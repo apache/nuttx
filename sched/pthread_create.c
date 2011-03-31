@@ -47,7 +47,9 @@
 #include <debug.h>
 #include <errno.h>
 #include <queue.h>
+
 #include <nuttx/kmalloc.h>
+#include <nuttx/pthread.h>
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
@@ -69,13 +71,7 @@
 
 /* Default pthread attributes */
 
-FAR pthread_attr_t g_default_pthread_attr =
-{
-  PTHREAD_STACK_DEFAULT,    /* stacksize */
-  PTHREAD_DEFAULT_PRIORITY, /* priority */
-  SCHED_RR,                 /* policy */
-  PTHREAD_EXPLICIT_SCHED,   /* inheritsched */
-};
+pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
 
 /****************************************************************************
  * Private Variables

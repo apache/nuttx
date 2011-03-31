@@ -38,6 +38,8 @@ include stdio/Make.defs
 include stdlib/Make.defs
 include unistd/Make.defs
 include string/Make.defs
+include pthread/Make.defs
+include semaphore/Make.defs
 include math/Make.defs
 include net/Make.defs
 include time/Make.defs
@@ -49,8 +51,9 @@ ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = $(STDIO_SRCS) $(STDLIB_SRCS) $(UNISTD_SRCS) $(STRING_SRCS) \
-		  $(MATH_SRCS) $(NET_SRCS) $(TIME_SRCS) $(LIBGEN_SRCS) \
-		  $(QUEUE_SRCS) $(MISC_SRCS) $(REGEX_SRCS) $(CRC_SRCS) $(DBG_SRCS) 
+		  $(PTHREAD_SRCS) $(SEM_SRCS) $(MATH_SRCS) $(NET_SRCS) \
+		  $(TIME_SRCS) $(LIBGEN_SRCS) $(QUEUE_SRCS) $(MISC_SRCS) \
+		  $(REGEX_SRCS) $(CRC_SRCS) $(DBG_SRCS) 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
@@ -61,13 +64,15 @@ STDIODEPPATH = --dep-path stdio
 STDLIBDEPPATH = --dep-path stdlib
 UNISTDDEPPATH = --dep-path unistd
 STRINGDEPPATH = --dep-path string
+PTHREADDEPPATH = --dep-path pthread
+SEMDEPPATH = --dep-path semaphore
 MATHDEPPATH = --dep-path math
 NETDEPPATH = --dep-path net
 TIMEDEPPATH = --dep-path time
 LIBGENDEPPATH = --dep-path libgen
 QUEUEDEPPATH = --dep-path queue
 MISCDEPPATH = --dep-path misc
-VPATH = stdio:stdlib:unistd:string:math:net:time:libgen:queue:misc
+VPATH = stdio:stdlib:unistd:string:pthread:semaphore:math:net:time:libgen:queue:misc
 
 BIN = liblib$(LIBEXT)
 
@@ -86,8 +91,9 @@ $(BIN):	$(OBJS)
 
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(ROOTDEPPATH) $(STDIODEPPATH) $(STDLIBDEPPATH) \
-	  $(UNISTDDEPPATH) $(STRINGDEPPATH) $(MATHDEPPATH) $(NETDEPPATH) \
-	  $(TIMEDEPPATH) $(LIBGENDEPPATH) $(QUEUEDEPPATH) $(MISCDEPPATH) \
+	  $(UNISTDDEPPATH) $(STRINGDEPPATH) $(PTHREADDEPPATH) $(SEMDEPPATH) \
+	  $(MATHDEPPATH) $(NETDEPPATH) $(TIMEDEPPATH) $(LIBGENDEPPATH) \
+	  $(QUEUEDEPPATH) $(MISCDEPPATH) \
 	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_mutexattrsettype.c
+ * lib/pthread/pthread_attrgetstacksize.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,13 +37,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <sys/types.h>
 #include <pthread.h>
+#include <string.h>
+#include <debug.h>
 #include <errno.h>
-
-#include "pthread_internal.h"
-
-#ifdef CONFIG_MUTEX_TYPES
 
 /****************************************************************************
  * Definitions
@@ -62,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -70,31 +68,39 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pthread_mutexattr_settype
+ * Function:  pthread_attr_getstacksize
  *
  * Description:
- *   Set the mutex type in the mutex attributes.
  *
  * Parameters:
- *   attr - The mutex attributes in which to set the mutex type.
- *   type - The mutex type value to set.
+ *   attr
+ *   stacksize
  *
  * Return Value:
- *   0, if the mutex type was successfully set in 'attr', or
- *   EINVAL, if 'attr' is NULL or 'type' unrecognized.
+ *   0 if successful.  Otherwise, an error code.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
+int pthread_attr_getstacksize(FAR pthread_attr_t *attr, FAR long *stacksize)
 {
-  if (attr && type >= PTHREAD_MUTEX_NORMAL && type <= PTHREAD_MUTEX_RECURSIVE)
+  int ret;
+
+  sdbg("attr=0x%p stacksize=0x%p\n", attr, stacksize);
+
+  if (!stacksize)
     {
-      attr->type = type;
-      return OK;
+      ret = EINVAL;
     }
-  return EINVAL;
+  else
+    {
+      *stacksize = attr->stacksize;
+      ret = OK;
+    }
+
+  sdbg("Returning %d\n", ret);
+  return ret;
 }
 
-#endif /* CONFIG_MUTEX_TYPES */
+

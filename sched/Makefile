@@ -100,22 +100,12 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 MQUEUE_SRCS	+= mq_notify.c
 endif
 
-PTHREAD_SRCS	= pthread_attrinit.c pthread_attrdestroy.c \
-		  pthread_attrsetschedpolicy.c pthread_attrgetschedpolicy.c \
-		  pthread_attrsetinheritsched.c pthread_attrgetinheritsched.c \
-		  pthread_attrsetstacksize.c pthread_attrgetstacksize.c \
-		  pthread_attrsetschedparam.c pthread_attrgetschedparam.c \
-		  pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c \
+PTHREAD_SRCS = pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c \
 		  pthread_yield.c pthread_getschedparam.c pthread_setschedparam.c \
-		  pthread_mutexattrinit.c pthread_mutexattrdestroy.c \
-		  pthread_mutexattrgetpshared.c pthread_mutexattrsetpshared.c \
 		  pthread_mutexinit.c pthread_mutexdestroy.c \
 		  pthread_mutexlock.c pthread_mutextrylock.c pthread_mutexunlock.c \
 		  pthread_condinit.c pthread_conddestroy.c \
-		  pthread_condattrinit.c pthread_condattrdestroy.c \
 		  pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c \
-		  pthread_barrierattrinit.c pthread_barrierattrdestroy.c \
-		  pthread_barrierattrgetpshared.c pthread_barrierattrsetpshared.c \
 		  pthread_barrierinit.c pthread_barrierdestroy.c pthread_barrierwait.c \
 		  pthread_cancel.c pthread_setcancelstate.c \
 		  pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c pthread_keydelete.c \
@@ -124,14 +114,9 @@ PTHREAD_SRCS	= pthread_attrinit.c pthread_attrdestroy.c \
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 PTHREAD_SRCS	+= pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
 endif
-ifeq ($(CONFIG_MUTEX_TYPES),y)
-PTHREAD_SRCS	+= pthread_mutexattrsettype.c pthread_mutexattrgettype.c
-endif
 
-SEM_SRCS	= sem_initialize.c sem_init.c sem_destroy.c\
-		  sem_open.c sem_close.c sem_unlink.c \
-		  sem_wait.c sem_trywait.c sem_post.c sem_getvalue.c \
-		  sem_findnamed.c
+SEM_SRCS	= sem_initialize.c sem_open.c sem_close.c sem_unlink.c \
+		  sem_wait.c sem_trywait.c sem_post.c sem_findnamed.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 SEM_SRCS	+= sem_waitirq.c
 endif

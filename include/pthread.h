@@ -1,5 +1,5 @@
 /********************************************************************************
- * pthread.h
+ * include/pthread.h
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************/
 
-#ifndef __PTHREAD_H
-#define __PTHREAD_H
+#ifndef __INCLUDE_PTHREAD_H
+#define __INCLUDE_PTHREAD_H
 
 /********************************************************************************
  * Included Files
@@ -147,9 +147,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/*----------------------------------------------------------*
-  PTHREAD-SPECIFIC TYPES
- *----------------------------------------------------------*/
+/* pthread-specific types */
 
 typedef int             pthread_key_t;
 typedef FAR void       *pthread_addr_t;
@@ -393,5 +391,5 @@ EXTERN int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 }
 #endif
 
-#endif /* __PTHREAD_H */
+#endif /* __INCLUDE_PTHREAD_H */
 

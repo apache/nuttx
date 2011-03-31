@@ -1,7 +1,8 @@
 /****************************************************************************
- * sched/pthread_mutexattrsetpshared.c
+ * include/nuttx/pthread.h
+ * Non-standard, NuttX-specific pthread-related declarations.
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,74 +34,52 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_PTHREAD_H
+#define __INCLUDE_NUTTX_PTHREAD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <pthread.h>
-#include <errno.h>
-#include <debug.h>
-
-#include "pthread_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-Processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
+/* Default pthread attribute initializer */
 
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  pthread_mutexattr_setpshared
- *
- * Description:
- *    Set pshared  mutex attribute.
- *
- * Parameters:
- *    attr
- *    pshared
- *
- * Return Value:
- *   0 if successful.  Otherwise, an error code.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-int pthread_mutexattr_setpshared(FAR pthread_mutexattr_t *attr, int pshared)
-{
-  int ret = OK;
-
-  sdbg("attr=0x%p pshared=%d\n", attr, pshared);
-
-  if (!attr || (pshared != 0 && pshared != 1))
-    {
-      ret = EINVAL;
-    }
-  else
-    {
-      attr->pshared = pshared;
-    }
-
-  sdbg("Returning %d\n", ret);
-  return ret;
+#define PTHREAD_ATTR_INITIALIZER \
+{ \
+  PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+  PTHREAD_DEFAULT_PRIORITY, /* priority */ \
+  SCHED_RR,                 /* policy */ \
+  PTHREAD_EXPLICIT_SCHED,   /* inheritsched */ \
 }
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Default pthread attributes (see sched/pthread_create.c) */
+
+extern pthread_attr_t g_default_pthread_attr;
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __INCLUDE_NUTTX_PTHREAD_H */

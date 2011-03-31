@@ -1,7 +1,7 @@
 /********************************************************************************
- * sched/pthread_barrierattrinit.c
+ * lib/pthread/pthread_barrierattrdestroy.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,15 +68,16 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function: pthread_barrierattr_init
+ * Function: pthread_barrierattr_destroy
  *
  * Description:
- *   The pthread_barrierattr_init() function will initialize a barrier attribute
- *   object attr with the default value for all of the attributes defined by the
- *   implementation.
+ *   The pthread_barrierattr_destroy() function will destroy a barrier attributes
+ *   object.  A destroyed attr attributes object can be reinitialized using
+ *   pthread_barrierattr_init(); the results of otherwise referencing the object
+ *   after it has been destroyed are undefined.
  *
  * Parameters:
- *   attr - barrier attributes to be initialized.
+ *   attr - barrier attributes to be destroyed.
  *
  * Return Value:
  *   0 (OK) on success or EINVAL if attr is invalid.
@@ -85,7 +86,7 @@
  *
  ********************************************************************************/
 
-int pthread_barrierattr_init(FAR pthread_barrierattr_t *attr)
+int pthread_barrierattr_destroy(FAR pthread_barrierattr_t *attr)
 {
   int ret = OK;
 

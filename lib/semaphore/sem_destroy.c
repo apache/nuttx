@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sem_init.c
+ * lib/semaphore/sem_destroy.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <limits.h>
 #include <semaphore.h>
-
-#include "sem_internal.h"
+#include <errno.h>
 
 /****************************************************************************
  * Definitions
@@ -70,22 +67,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sem_init
+ * Function: sem_destroy
  *
  * Description:
- *   This function initializes the UNAMED semaphore sem. Following a
- *   successful call to sem_init(), the semaophore may be used in subsequent
- *   calls to sem_wait(), sem_post(), and sem_trywait().  The semaphore
- *   remains usable until it is destroyed.
+ *   This function is used to destroy the un-named semaphore indicated by
+ *   'sem'.  Only a semaphore that was created using sem_init() may be
+ *   destroyed using sem_destroy(); the effect of calling sem_destroy() with
+ *   a named semaphore is undefined.  The effect of subsequent use of the
+ *   semaphore sem is undefined until sem is re-initialized by another call
+ *   to sem_init().
  *
- *   Only sem itself may be used for performing synchronization. The result
- *   of referring to copies of sem in calls to sem_wait(), sem_trywait(),
- *   sem_post(), and sem_destroy() is undefined.
+ *   The effect of destroying a semaphore upon which other processes are
+ *   currently blocked is undefined.
  *
  * Parameters:
- *   sem - Semaphore to be initialized
- *   pshared - Process sharing (not used)
- *   value - Semaphore initialization value
+ *   sem - Semaphore to be destroyed.
  *
  * Return Value:
  *   0 (OK), or -1 (ERROR) if unsuccessful.
@@ -94,22 +90,35 @@
  *
  ****************************************************************************/
 
-int sem_init (FAR sem_t *sem, int pshared, unsigned int value)
+int sem_destroy (FAR sem_t *sem)
 {
-  int ret = ERROR;
+  /* Assure a valid semaphore is specified */
 
-  if (sem && value <= SEM_VALUE_MAX)
+  if (sem)
     {
-      sem->semcount     = (int16_t)value;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
-      sem->hlist.flink  = NULL;
-#endif
-      sem->hlist.holder = NULL;
-      sem->hlist.counts = 0;
-#endif
-      ret = OK;
-    }
+      /* There is really no particular action that we need
+       * take to destroy a semaphore.  We will just reset
+       * the count to some reasonable value (1) and release
+       * ownership.
+       *
+       * Check if other threads are waiting on the semaphore.
+       * In this case, the behavior is undefined.  We will:
+       * leave the count unchanged but still return OK.
+       */
 
-  return ret;
+      if (sem->semcount >= 0)
+        {
+          sem->semcount = 1;
+        }
+
+      /* Release holders of the semaphore */
+
+      sem_destroyholder(sem);
+      return OK;
+    }
+  else
+    {
+	  errno = -EINVAL;
+	  return ERROR;
+    }
 }

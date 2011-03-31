@@ -199,7 +199,7 @@ all: $(BIN)
 
 # Build the mkconfig tool used to create include/nuttx/config.h
 tools/mkconfig:
-	@$(MAKE) -C tools -f Makefile.mkconfig TOPDIR="$(TOPDIR)"  mkconfig
+	@$(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkconfig
 
 # Create the include/nuttx/config.h file
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig
@@ -353,7 +353,7 @@ subdir_clean:
 			$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" clean ; \
 		fi \
 	done
-	@$(MAKE) -C tools -f Makefile.mkconfig TOPDIR="$(TOPDIR)" clean
+	@$(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" clean
 	@$(MAKE) -C mm -f Makefile.test TOPDIR="$(TOPDIR)" clean
 ifeq ($(CONFIG_BUILD_2PASS),y)
 	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" clean

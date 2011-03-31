@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_attrgetschedparam.c
+ * lib/pthread/pthread_mutexattrdestroy.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,8 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <string.h>
-#include <sched.h>
-#include <debug.h>
 #include <errno.h>
-#include "pthread_internal.h"
+#include <debug.h>
 
 /****************************************************************************
  * Definitions
@@ -71,13 +68,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_getschedparam
+ * Function:  pthread_mutexattr_destroy
  *
  * Description:
+ *    Destroy mutex attributes.
  *
  * Parameters:
- *   attr
- *   param
+ *    attr
+ *    pshared
  *
  * Return Value:
  *   0 if successful.  Otherwise, an error code.
@@ -86,26 +84,21 @@
  *
  ****************************************************************************/
 
-int pthread_attr_getschedparam(FAR pthread_attr_t *attr,
-                               FAR struct sched_param *param)
+int pthread_mutexattr_destroy(FAR pthread_mutexattr_t *attr)
 {
-  int ret;
+  int ret = OK;
 
-  sdbg("attr=0x%p param=0x%p\n", attr, param);
+  sdbg("attr=0x%p\n", attr);
 
-  if (!attr || !param)
+  if (!attr)
     {
       ret = EINVAL;
     }
   else
     {
-      param->sched_priority = attr->priority;
-      ret = OK;
+      attr->pshared = 0;
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
-
-
-

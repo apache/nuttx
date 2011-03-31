@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread_internal.h
+ * lib/pthread/pthread_attrdestroy.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,104 +33,76 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_PTHREAD_INTERNAL_H
-#define __SCHED_PTHREAD_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <pthread.h>
-
-#include <nuttx/compiler.h>
+#include <string.h>
+#include <debug.h>
+#include <errno.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Type Declarations
+ * Private Type Declarations
  ****************************************************************************/
 
-/* The following defines an entry in the pthread logic's
- * local data set.  Note that this structure is used to
- * implemented a singly linked list.  This structure
- * is used (instead of, say, a binary search tree) because
- * the data set will be searched using the pid as
- * a key -- a process IDs will always be created in a
- * montonically increasing fashion.
- */
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
 
-struct join_s 
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  pthread_attr_destroy
+ *
+ * Description:
+ *    An attributes object can be deleted when it is no longer
+ *     needed.
+ *
+ * Parameters:
+ *   attr
+ *
+ * Return Value:
+ *   0 meaning success
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int pthread_attr_destroy(FAR pthread_attr_t *attr)
 {
-  FAR struct join_s *next;       /* Implements link list */
-  uint8_t        crefs;          /* Reference count */
-  bool           started;        /* true: pthread started. */
-  bool           detached;       /* true: pthread_detached'ed */
-  bool           terminated;     /* true: detach'ed+exit'ed */
-  pthread_t      thread;         /* Includes pid */
-  sem_t          exit_sem;       /* Implements join */
-  sem_t          data_sem;       /* Implements join */
-  pthread_addr_t exit_value;     /* Returned data */
+  int ret;
 
-};
-typedef struct join_s join_t;
+  sdbg("attr=0x%p\n", attr);
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
+  if (!attr)
+    {
+      ret = EINVAL;
+    }
+  else
+    {
+      memset(attr, 0, sizeof(pthread_attr_t));
+      ret = OK;
+    }
 
-/* This is the head of a private singly linked list.  It
- * is used to retain information about the spawned threads.
- */
-
-extern FAR join_t *g_pthread_head;
-extern FAR join_t *g_pthread_tail;
-
-/* Mutually exclusive access to this data set is enforced with
- * the following (un-named) semaphore.
- */
-
-extern sem_t g_join_semaphore;
-
-/* This keys track of the number of global keys that have been
- * allocated.
- */
-
-extern uint8_t g_pthread_num_keys;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-EXTERN void weak_function pthread_initialize(void);
-EXTERN int                pthread_completejoin(pid_t pid, FAR void *exit_value);
-EXTERN void               pthread_destroyjoin(FAR join_t *pjoin);
-EXTERN FAR join_t        *pthread_findjoininfo(pid_t pid);
-EXTERN int                pthread_givesemaphore(sem_t *sem);
-EXTERN FAR join_t        *pthread_removejoininfo(pid_t pid);
-EXTERN int                pthread_takesemaphore(sem_t *sem);
-
-#ifdef CONFIG_MUTEX_TYPES
-EXTERN int                pthread_mutexattr_verifytype(int type);
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+  sdbg("Returning %d\n", ret);
+  return ret;
 }
-#endif
 
-#endif /* __SCHED_PTHREAD_INTERNAL_H */
 

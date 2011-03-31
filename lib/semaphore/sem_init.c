@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_mutexattrgetpshared.c
+ * lib/sem/sem_init.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
+#include <limits.h>
+#include <semaphore.h>
 #include <errno.h>
-#include <debug.h>
-
-#include "pthread_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -70,37 +68,47 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_mutexattr_getpshared
+ * Function: sem_init
  *
  * Description:
- *    Get pshared mutex attribute.
+ *   This function initializes the UNAMED semaphore sem. Following a
+ *   successful call to sem_init(), the semaophore may be used in subsequent
+ *   calls to sem_wait(), sem_post(), and sem_trywait().  The semaphore
+ *   remains usable until it is destroyed.
+ *
+ *   Only sem itself may be used for performing synchronization. The result
+ *   of referring to copies of sem in calls to sem_wait(), sem_trywait(),
+ *   sem_post(), and sem_destroy() is undefined.
  *
  * Parameters:
- *    attr
- *    pshared
+ *   sem - Semaphore to be initialized
+ *   pshared - Process sharing (not used)
+ *   value - Semaphore initialization value
  *
  * Return Value:
- *   0 if successful.  Otherwise, an error code.
+ *   0 (OK), or -1 (ERROR) if unsuccessful.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_mutexattr_getpshared(FAR pthread_mutexattr_t *attr, FAR int *pshared)
+int sem_init (FAR sem_t *sem, int pshared, unsigned int value)
 {
-  int ret = OK;
-
-  sdbg("attr=0x%p pshared=0x%p\n", attr, pshared);
-
-  if (!attr || !pshared)
+  if (sem && value <= SEM_VALUE_MAX)
     {
-      ret = EINVAL;
+      sem->semcount     = (int16_t)value;
+#ifdef CONFIG_PRIORITY_INHERITANCE
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
+      sem->hlist.flink  = NULL;
+#endif
+      sem->hlist.holder = NULL;
+      sem->hlist.counts = 0;
+#endif
+      return OK;
     }
   else
     {
-      *pshared = attr->pshared;
+	  errno = -EINVAL;
+	  return ERROR;
     }
-
-  sdbg("Returning %d\n", ret);
-  return ret;
 }

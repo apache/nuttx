@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_attrsetstacksize.c
+ * lib/pthread/pthread_mutexattrsetpshared.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,8 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <string.h>
-#include <debug.h>
 #include <errno.h>
-
-#include "pthread_internal.h"
+#include <debug.h>
 
 /****************************************************************************
  * Definitions
@@ -71,13 +68,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_setstacksize
+ * Function:  pthread_mutexattr_setpshared
  *
  * Description:
+ *    Set pshared  mutex attribute.
  *
  * Parameters:
- *   attr
- *   stacksize
+ *    attr
+ *    pshared
  *
  * Return Value:
  *   0 if successful.  Otherwise, an error code.
@@ -86,23 +84,21 @@
  *
  ****************************************************************************/
 
-int pthread_attr_setstacksize(FAR pthread_attr_t *attr, long stacksize)
+int pthread_mutexattr_setpshared(FAR pthread_mutexattr_t *attr, int pshared)
 {
-  int ret;
+  int ret = OK;
 
-  sdbg("attr=0x%p stacksize=%ld\n", attr, stacksize);
+  sdbg("attr=0x%p pshared=%d\n", attr, pshared);
 
-  if (!attr || stacksize < PTHREAD_STACK_MIN)
+  if (!attr || (pshared != 0 && pshared != 1))
     {
       ret = EINVAL;
     }
   else
     {
-      attr->stacksize = stacksize;
-      ret = OK;
+      attr->pshared = pshared;
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
-

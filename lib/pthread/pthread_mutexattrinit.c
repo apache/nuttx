@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_mutexattrdestroy.c
+ * lib/pthread/pthread_mutexattrinit.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "pthread_internal.h"
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -70,14 +68,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_mutexattr_destroy
+ * Function:  pthread_mutexattr_init
  *
  * Description:
- *    Destroy mutex attributes.
+ *    Create mutex attributes.
  *
  * Parameters:
  *    attr
- *    pshared
  *
  * Return Value:
  *   0 if successful.  Otherwise, an error code.
@@ -86,7 +83,7 @@
  *
  ****************************************************************************/
 
-int pthread_mutexattr_destroy(FAR pthread_mutexattr_t *attr)
+int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
 {
   int ret = OK;
 
@@ -99,6 +96,9 @@ int pthread_mutexattr_destroy(FAR pthread_mutexattr_t *attr)
   else
     {
       attr->pshared = 0;
+#ifdef CONFIG_MUTEX_TYPES
+      attr->type    = PTHREAD_MUTEX_DEFAULT;
+#endif
     }
 
   sdbg("Returning %d\n", ret);

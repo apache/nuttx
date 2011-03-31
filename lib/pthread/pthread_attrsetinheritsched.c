@@ -1,7 +1,7 @@
 /****************************************************************************
- * pthread_attrgetschedpolicy.c
+ * lib/pthread/pthread_attrsetinheritsched.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,12 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
 #include <pthread.h>
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
-#include "pthread_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -69,10 +70,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_getschedpolicy
+ * Function:  pthread_attr_setinheritsched
  *
  * Description:
- *   Obtain the scheduling algorithm attribute.
+ *   Indicate whether the scheduling info in the pthread
+ *   attributes will be used or if the thread will
+ *   inherit the properties of the parent.
  *
  * Parameters:
  *   attr
@@ -85,22 +88,26 @@
  *
  ****************************************************************************/
 
-int pthread_attr_getschedpolicy(FAR pthread_attr_t *attr, int *policy)
+int pthread_attr_setinheritsched(FAR pthread_attr_t *attr,
+                                 int inheritsched)
 {
   int ret;
 
-  sdbg("attr=0x%p policy=0x%p\n", attr, policy);
+  sdbg("inheritsched=%d\n", inheritsched);
 
-  if (!attr || !policy)
+  if (!attr ||
+      (inheritsched != PTHREAD_INHERIT_SCHED &&
+       inheritsched != PTHREAD_EXPLICIT_SCHED))
     {
       ret = EINVAL;
     }
   else
     {
-      *policy = attr->policy;
+      attr->inheritsched = (uint8_t)inheritsched;
       ret = OK;
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
+

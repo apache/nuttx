@@ -1,7 +1,7 @@
 /****************************************************************************
- * pthread_mutexattrinit.c
+ * lib/pthread/pthread_condattrinit.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,52 +40,30 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <errno.h>
 #include <debug.h>
-
-#include "pthread_internal.h"
+#include <errno.h>
 
 /****************************************************************************
- * Definitions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  pthread_mutexattr_init
+ * Function:  pthread_condattr_init
  *
  * Description:
- *    Create mutex attributes.
+ *   Operations on condition variable attributes
  *
  * Parameters:
- *    attr
+ *   None
  *
  * Return Value:
- *   0 if successful.  Otherwise, an error code.
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
+int pthread_condattr_init(FAR pthread_condattr_t *attr)
 {
   int ret = OK;
 
@@ -95,14 +73,13 @@ int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
     {
       ret = EINVAL;
     }
-  else
+  else 
     {
-      attr->pshared = 0;
-#ifdef CONFIG_MUTEX_TYPES
-      attr->type    = PTHREAD_MUTEX_DEFAULT;
-#endif
+      *attr = 0;
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
+
+

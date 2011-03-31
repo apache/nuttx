@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_condattrinit.c
+ * lib/pthread/pthread_attrsetschedparam.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,45 +40,67 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
+#include <string.h>
+#include <sched.h>
 #include <debug.h>
 #include <errno.h>
-#include "pthread_internal.h"
 
 /****************************************************************************
- * Global Functions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_condattr_init
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  pthread_attr_setschedparam
  *
  * Description:
- *   Operations on condition variable attributes
  *
  * Parameters:
- *   None
+ *   attr
+ *   param
  *
  * Return Value:
- *   None
+ *   0 if successful.  Otherwise, an error code.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_condattr_init(FAR pthread_condattr_t *attr)
+int pthread_attr_setschedparam(FAR pthread_attr_t *attr,
+			       FAR const struct sched_param *param)
 {
-  int ret = OK;
+  int ret;
 
-  sdbg("attr=0x%p\n", attr);
+  sdbg("attr=0x%p param=0x%p\n", attr, param);
 
-  if (!attr)
+  if (!attr || !param)
     {
       ret = EINVAL;
     }
-  else 
+  else
     {
-      *attr = 0;
+      attr->priority = (short)param->sched_priority;
+      ret = OK;
     }
-
   sdbg("Returning %d\n", ret);
   return ret;
 }

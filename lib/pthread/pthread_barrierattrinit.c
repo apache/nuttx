@@ -1,7 +1,7 @@
 /********************************************************************************
- * sched/pthread_barrierattrgetpshared.c
+ * lib/pthread/pthread_barrierattrinit.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,34 +68,34 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Function: pthread_barrierattr_getpshared
+ * Function: pthread_barrierattr_init
  *
  * Description:
- *   The pthread_barrierattr_getpshared() function will obtain the value of the
- *   process-shared attribute from the attributes object referenced by attr.
+ *   The pthread_barrierattr_init() function will initialize a barrier attribute
+ *   object attr with the default value for all of the attributes defined by the
+ *   implementation.
  *
  * Parameters:
- *   attr - barrier attributes to be queried.
- *   pshared - the location to stored the current value of the pshared attribute.
+ *   attr - barrier attributes to be initialized.
  *
  * Return Value:
- *   0 (OK) on success or EINVAL if either attr or pshared is invalid.
+ *   0 (OK) on success or EINVAL if attr is invalid.
  *
  * Assumptions:
  *
  ********************************************************************************/
 
-int pthread_barrierattr_getpshared(FAR const pthread_barrierattr_t *attr, FAR int *pshared)
+int pthread_barrierattr_init(FAR pthread_barrierattr_t *attr)
 {
   int ret = OK;
 
-  if (!attr || !pshared)
+  if (!attr)
     {
       ret = EINVAL;
     }
   else
     {
-      *pshared = attr->pshared;
+      attr->pshared = PTHREAD_PROCESS_PRIVATE;
     }
   return ret;
 }

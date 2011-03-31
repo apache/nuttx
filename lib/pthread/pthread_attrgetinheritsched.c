@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_attrsetinheritsched.c
+ * lib/pthread/pthread_attrgetinheritsched.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <pthread.h>
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
-
-#include "pthread_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -72,16 +69,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_setinheritsched
+ * Function:  pthread_attr_getinheritsched
  *
  * Description:
- *   Indicate whether the scheduling info in the pthread
+ *   Report whether the scheduling info in the pthread
  *   attributes will be used or if the thread will
  *   inherit the properties of the parent.
  *
  * Parameters:
  *   attr
- *   policy
+ *   inheritsched
  *
  * Return Value:
  *   0 if successful.  Otherwise, an error code.
@@ -90,26 +87,25 @@
  *
  ****************************************************************************/
 
-int pthread_attr_setinheritsched(FAR pthread_attr_t *attr,
-                                 int inheritsched)
+int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
+                                 FAR int *inheritsched)
 {
   int ret;
 
-  sdbg("inheritsched=%d\n", inheritsched);
+  sdbg("attr=0x%p inheritsched=0x%p\n", attr, inheritsched);
 
-  if (!attr ||
-      (inheritsched != PTHREAD_INHERIT_SCHED &&
-       inheritsched != PTHREAD_EXPLICIT_SCHED))
+  if (!attr || !inheritsched)
     {
       ret = EINVAL;
     }
   else
     {
-      attr->inheritsched = (uint8_t)inheritsched;
+      *inheritsched = (int)attr->inheritsched;
       ret = OK;
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
+
 

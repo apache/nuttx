@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_attrgetinheritsched.c
+ * lib/pthread/pthread_mutexattrgettype.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <pthread.h>
-#include <string.h>
-#include <debug.h>
 #include <errno.h>
-#include "pthread_internal.h"
+
+#ifdef CONFIG_MUTEX_TYPES
 
 /****************************************************************************
  * Definitions
@@ -62,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -70,43 +68,31 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_getinheritsched
+ * Function: pthread_mutexattr_gettype
  *
  * Description:
- *   Report whether the scheduling info in the pthread
- *   attributes will be used or if the thread will
- *   inherit the properties of the parent.
+ *   Return the mutex type from the mutex attributes.
  *
  * Parameters:
- *   attr
- *   inheritsched
+ *   attr - The mutex attributes to query
+ *   type - Location to return the mutex type
  *
  * Return Value:
- *   0 if successful.  Otherwise, an error code.
+ *   0, if the mutex type was successfully return in 'type', or
+ *   EINVAL, if any NULL pointers provided.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
-                                 FAR int *inheritsched)
+int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type)
 {
-  int ret;
-
-  sdbg("attr=0x%p inheritsched=0x%p\n", attr, inheritsched);
-
-  if (!attr || !inheritsched)
+  if (attr && type)
     {
-      ret = EINVAL;
+      *type = attr->type;
+      return 0;
     }
-  else
-    {
-      *inheritsched = (int)attr->inheritsched;
-      ret = OK;
-    }
-
-  sdbg("Returning %d\n", ret);
-  return ret;
+  return EINVAL;
 }
 
-
+#endif /* CONFIG_MUTEX_TYPES */

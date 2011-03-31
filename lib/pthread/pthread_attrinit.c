@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_mutexattrgettype.c
+ * lib/pthread/pthread_attrinit.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <pthread.h>
+#include <string.h>
+#include <debug.h>
 #include <errno.h>
 
-#include "pthread_internal.h"
-
-#ifdef CONFIG_MUTEX_TYPES
+#include <nuttx/pthread.h>
 
 /****************************************************************************
  * Definitions
@@ -62,7 +63,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -70,31 +71,43 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pthread_mutexattr_gettype
+ * Function:  pthread_attr_init
  *
  * Description:
- *   Return the mutex type from the mutex attributes.
+ *   Initializes a thread attributes object (attr) with
+ *   default values for all of the individual attributes
+ *   used by a given implementation.
  *
  * Parameters:
- *   attr - The mutex attributes to query
- *   type - Location to return the mutex type
+ *   attr
  *
  * Return Value:
- *   0, if the mutex type was successfully return in 'type', or
- *   EINVAL, if any NULL pointers provided.
+ *   0 on success, otherwise an error number
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type)
+int pthread_attr_init(FAR pthread_attr_t *attr)
 {
-  if (attr && type)
+  int ret = OK;
+
+  sdbg("attr=0x%p\n", attr);
+  if (!attr)
     {
-      *type = attr->type;
-      return 0;
+      ret = ENOMEM;
     }
-  return EINVAL;
+  else
+    {
+      /* Set the child thread priority to be the default
+       * priority. Set the child stack size to some arbitrary
+       * default value.
+       */
+
+      memcpy(attr, &g_default_pthread_attr, sizeof(pthread_attr_t));
+    }
+
+  sdbg("Returning %d\n", ret);
+  return ret;
 }
 
-#endif /* CONFIG_MUTEX_TYPES */

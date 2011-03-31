@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_attrdestroy.c
+ * lib/pthread/pthread_mutexattrsettype.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <pthread.h>
-#include <string.h>
-#include <debug.h>
 #include <errno.h>
-#include "pthread_internal.h"
+
+#ifdef CONFIG_MUTEX_TYPES
 
 /****************************************************************************
  * Definitions
@@ -62,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -70,40 +68,31 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  pthread_attr_destroy
+ * Function: pthread_mutexattr_settype
  *
  * Description:
- *    An attributes object can be deleted when it is no longer
- *     needed.
+ *   Set the mutex type in the mutex attributes.
  *
  * Parameters:
- *   attr
+ *   attr - The mutex attributes in which to set the mutex type.
+ *   type - The mutex type value to set.
  *
  * Return Value:
- *   0 meaning success
+ *   0, if the mutex type was successfully set in 'attr', or
+ *   EINVAL, if 'attr' is NULL or 'type' unrecognized.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_attr_destroy(FAR pthread_attr_t *attr)
+int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
 {
-  int ret;
-
-  sdbg("attr=0x%p\n", attr);
-
-  if (!attr)
+  if (attr && type >= PTHREAD_MUTEX_NORMAL && type <= PTHREAD_MUTEX_RECURSIVE)
     {
-      ret = EINVAL;
+      attr->type = type;
+      return OK;
     }
-  else
-    {
-      memset(attr, 0, sizeof(pthread_attr_t));
-      ret = OK;
-    }
-
-  sdbg("Returning %d\n", ret);
-  return ret;
+  return EINVAL;
 }
 
-
+#endif /* CONFIG_MUTEX_TYPES */

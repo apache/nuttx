@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sem_getvalue.c
+ * lib/semaphore/sem_getvalue.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,7 @@
 #include <nuttx/config.h>
 
 #include <semaphore.h>
-
-#include "sem_internal.h"
+#include <errno.h>
 
 /****************************************************************************
  * Definitions
@@ -95,13 +94,14 @@
 
 int sem_getvalue(FAR sem_t *sem, FAR int *sval)
 {
-  int ret = ERROR;
-
   if (sem && sval)
     {
       *sval = sem->semcount;
-      ret = OK;
+      return OK;
     }
-
-  return ret;
+  else
+    {
+	  errno = -EINVAL;
+	  return ERROR;
+    }
 }

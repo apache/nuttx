@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sem_destroy.c
+ * lib/pthread/pthread_condattrdestroy.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,86 +39,44 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
-
-#include "sem_internal.h"
+#include <pthread.h>
+#include <debug.h>
+#include <errno.h>
 
 /****************************************************************************
- * Definitions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function: sem_destroy
+ * Function:  pthread_condattr_destroy
  *
  * Description:
- *   This function is used to destroy the un-named semaphore indicated by
- *   'sem'.  Only a semaphore that was created using sem_init() may be
- *   destroyed using sem_destroy(); the effect of calling sem_destroy() with
- *   a named semaphore is undefined.  The effect of subsequent use of the
- *   semaphore sem is undefined until sem is re-initialized by another call
- *   to sem_init().
- *
- *   The effect of destroying a semaphore upon which other processes are
- *   currently blocked is undefined.
+ *   Operations on condition variable attributes
  *
  * Parameters:
- *   sem - Semaphore to be destroyed.
+ *   None
  *
  * Return Value:
- *   0 (OK), or -1 (ERROR) if unsuccessful.
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int sem_destroy (FAR sem_t *sem)
+int pthread_condattr_destroy(FAR pthread_condattr_t *attr)
 {
-  int ret = ERROR;
+  int ret = OK;
 
-  /* Assure a valid semaphore is specified */
+  sdbg("attr=0x%p\n", attr);
 
-  if (sem)
+  if (!attr)
     {
-      /* There is really no particular action that we need
-       * take to destroy a semaphore.  We will just reset
-       * the count to some reasonable value (1) and release
-       * ownership.
-       *
-       * Check if other threads are waiting on the semaphore.
-       * In this case, the behavior is undefined.  We will:
-       * leave the count unchanged but still return OK.
-       */
-
-      if (sem->semcount >= 0)
-        {
-          sem->semcount = 1;
-        }
-
-      /* Release holders of the semaphore */
-
-      sem_destroyholder(sem);
-      ret = OK;
+      ret = EINVAL;
     }
 
+  sdbg("Returning %d\n", ret);
   return ret;
 }
+
+
+
