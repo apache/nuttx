@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 23, 2011</p>
+      <p>Last Updated: April 1, 2011</p>
     </td>
   </tr>
 </table>
@@ -57,11 +57,12 @@
     <a href="#DirStructMm">2.11 nuttx/mm/</a><br>
     <a href="#DirStructNet">2.12 nuttx/net</a><br>
     <a href="#DirStructSched">2.13 nuttx/sched/</a><br>
-    <a href="#DirStructTools">2.14 nuttx/tools/</a><br>
-    <a href="#topmakefile">2.15 nuttx/Makefile</a>
-    <a href="#DirStructNetUtils">2.16 apps/netutils</a><br>
-    <a href="#DirStructNshLib">2.17 apps/nshlib</a><br>
-    <a href="#DirStructExamples">2.18 apps/examples/</a><br>
+    <a href="#DirStructSyscall">2.14 nuttx/syscall/</a><br>
+    <a href="#DirStructTools">2.15 nuttx/tools/</a><br>
+    <a href="#topmakefile">2.16 nuttx/Makefile</a>
+    <a href="#DirStructNetUtils">2.17 apps/netutils</a><br>
+    <a href="#DirStructNshLib">2.18 apps/nshlib</a><br>
+    <a href="#DirStructExamples">2.19 apps/examples/</a><br>
   </ul>
   <a href="#configandbuild">3.0 Configuring and Building</a>
   <ul>
@@ -234,6 +235,9 @@
 |   |-- <a href="#DirStructSched">sched</a>/
 |   |   |-- Makefile
 |   |   `-- <i>(sched source files)</i>
+|   |-- <a href="#DirStructSysCall">syscall</a>/
+|   |   |-- Makefile
+|   |   `-- <i>(syscall source files)</i>
 |   `-- <a href="#DirStructTools">tools</a>/
 |       `-- <i>(miscellaneous scripts and programs)</i>
 `- apps
@@ -320,7 +324,8 @@
 |   |-- arch.h
 |   |-- irq.h
 |   |-- types.h
-|   `-- limits.h
+|   |-- limits.h
+|   `-- syscall.h
 `-- src/
     |--<i>&lt;chip-name&gt;</i>/
     |  `-- <i>(chip-specific source files)</i>
@@ -377,7 +382,7 @@
   <li>
     <code>include/irq.h</code>:
     This file needs to define some architecture specific functions (usually
-    inline if the compiler supports inlining) and structure.  These include:
+    inline if the compiler supports inlining) and some structures.  These include:
     <ul>
       <li>
         <code>struct xcptcontext</code>:
@@ -390,6 +395,57 @@
       <li>
         <code>void irqrestore(irqstate_t flags)</code>:
         Used to restore interrupt enables to the same state as before <code>irqsave()</code> was called.
+      </li>
+    </ul>
+    <p>
+      This file must also define <code>NR_IRQS</code>, the total number of IRQs supported
+       by the board.
+    </p>
+  </li>
+  <li>
+    <code>include/syscall.h</code>:
+    This file needs to define some architecture specific functions (usually
+    inline if the compiler supports inlining) to support software interrupts
+    or <i>syscall</i>s that can be used all from user-mode applications into
+    kernel-mode NuttX functions.
+    This directory must always be provided to prevent compilation errors.
+    However, it need only contain valid function declarations if the architecture
+    supports the <code>CONFIG_NUTTX_KERNEL</code> configuration.
+    <ul>
+      <li>
+        <code>uintptr_t sys_call0(unsigned int nbr)</code>:
+        <code>nbr</code> is one of the system call numbers that can be found in <code>include/sys/syscall.h</code>.
+        This function will perform a system call with no (additional) parameters.
+      </li>
+      <li>
+        <code>uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)</code>:
+        <code>nbr</code> is one of the system call numbers that can be found in <code>include/sys/syscall.h</code>.
+        This function will perform a system call with one (additional) parameter.
+      </li>
+      <li>
+        <code>uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1, uintptr_t parm2)</code>:
+        <code>nbr</code> is one of the system call numbers that can be found in <code>include/sys/syscall.h</code>.
+        This function will perform a system call with two (additional) parameters.
+      </li>
+      <li>
+        <code>uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1, uintptr_t parm2, uintptr_t parm3)</code>:
+        <code>nbr</code> is one of the system call numbers that can be found in <code>include/sys/syscall.h</code>.
+        This function will perform a system call with three (additional) parameters.
+      </li>
+      <li>
+        <code>uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1, uintptr_t parm2, uintptr_t parm3, uintptr_t parm4)</code>:
+        <code>nbr</code> is one of the system call numbers that can be found in <code>include/sys/syscall.h</code>.
+        This function will perform a system call with four (additional) parameters.
+      </li>
+      <li>
+        <code>uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1, uintptr_t parm2, uintptr_t parm3, uintptr_t parm4, uintptr_t parm5)</code>:
+        <code>nbr</code> is one of the system call numbers that can be found in <code>include/sys/syscall.h</code>.
+        This function will perform a system call with five (additional) parameters.
+      </li>
+      <li>
+        <code>uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1, uintptr_t parm2, uintptr_t parm3, uintptr_t parm4, uintptr_t parm5, uintptr_t parm6)</code>:
+        <code>nbr</code> is one of the system call numbers that can be found in <code>include/sys/syscall.h</code>.
+        This function will perform a system call with six (additional) parameters.
       </li>
     </ul>
     <p>
@@ -909,7 +965,15 @@ include/
   The files forming core of the NuttX RTOS reside here.
 </p>
 
-<h2>2.14 <a name="DirStructTools">nuttx/tools</a></h2>
+<h2>2.14 <a name="DirStructSyscall">nuttx/syscall</a></h2>
+<p>
+  If NuttX is built as a separately compiled kernel (with CONFIG_NUTTX_KERNEL=y),
+  then the contents of this directory are built.
+  This directory holds a syscall interface that can be used for communication
+  between user-mode applications and the kernel-mode RTOS.
+</p>
+
+<h2>2.15 <a name="DirStructTools">nuttx/tools</a></h2>
 <p>
   This directory holds a collection of tools and scripts to simplify
   configuring, building and maintaining NuttX.
@@ -931,14 +995,14 @@ tools/
 `-- zipme
 </pre></ul>
 
-<h2>2.15 <a name="topmakefile">nuttx/Makefile</a></h2>
+<h2>2.16 <a name="topmakefile">nuttx/Makefile</a></h2>
 <p>
   The top-level <code>Makefile</code> in the <code>${TOPDIR}</code> directory contains all of the top-level control
   logic to build NuttX.
   Use of this <code>Makefile</code> to build NuttX is described <a href="#buildingnuttx">below</a>.
 </p>
 
-<h2>2.16 <a name="DirStructNetUtils">apps/netutils</a></h2>
+<h2>2.17 <a name="DirStructNetUtils">apps/netutils</a></h2>
 <p>
   This directory contains most of the network applications.
   Some of these are original with NuttX (like tftpc and dhcpd) and others were leveraged from the uIP-1.0 apps directory.
@@ -980,12 +1044,12 @@ netutils/
 `-- <i>(netutils common files)</i>
 </pre></ul>
 
-<h2>2.17 <a name="DirStructNshLib">apps/nshlib</a></h2>
+<h2>2.18 <a name="DirStructNshLib">apps/nshlib</a></h2>
 <p>
   This directory contains for the core of the NuttShell (NSH) application.
 </p>
 
-<h2>2.18 <a name="DirStructExamples">apps/examples</a></h2>
+<h2>2.19 <a name="DirStructExamples">apps/examples</a></h2>
 <p>
   Example and test programs to build against.
 </p>
@@ -2790,6 +2854,15 @@ build
   <li>
     <code>CONFIG_ARCH_LOWPUTC</code>: architecture supports low-level, boot
     time console output
+  </li>
+  <li>
+    <code>CONFIG_NUTTX_KERNEL</code>:
+      With most MCUs, NuttX is built as a flat, single executable image
+      containing the NuttX RTOS along with all application code.
+      The RTOS code and the application run in the same address space and at the same kernel-mode privileges.
+      If this option is selected, NuttX will be built separately as a monolithic, kernel-mode module and the applications
+      can be added as a separately built, user-mode module.
+      In this a system call layer will be built to support the user- to kernel-mode interface to the RTOS.
   </li>
   <li>
     <code>CONFIG_MM_REGIONS</code>: If the architecture includes multiple
