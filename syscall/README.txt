@@ -88,8 +88,9 @@ The format of the CVS file for each line is:
 
   Field 1: Function name
   Field 2: The header file that contains the function prototype
-  Field 3: The type of function return value.
-  Field 4 - N+4: The type of each of the N formal parameters of the function
+  Field 3: Condition for compilation
+  Field 4: The type of function return value.
+  Field 5 - N+5: The type of each of the N formal parameters of the function
 
 Auto-Generated Files
 ====================
