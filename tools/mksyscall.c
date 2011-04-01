@@ -65,8 +65,10 @@
  ****************************************************************************/
 
 static bool g_debug;
+static bool g_inline;
 static char g_line[LINESIZE+1];
 static char g_parm[MAX_FIELDS][MAX_PARMSIZE];
+static FILE *g_stubstream;
 
 /****************************************************************************
  * Private Functions
@@ -204,13 +206,104 @@ static int parse_csvline(char *ptr)
   return nparms;
 }
 
+static bool is_vararg(const char *type, int index, int nparms)
+{
+  if (strcmp(type,"...") == 0)
+    {
+      if (index != (nparms-1))
+        {
+          fprintf(stderr, "... is not the last in the argument list\n");
+          exit(11);
+        }
+      return true;
+    }
+  return false;
+}
+
+static bool is_union(const char *type)
+{
+  return (strncmp(type,"union", 5) == 0);
+}
+
+static const char *check_funcptr(const char *type)
+{
+  const char *str = strstr(type,"(*)");
+  if (str)
+    {
+      return str + 2;
+    }
+  return NULL;
+}
+
+static const char *check_array(const char *type)
+{
+  const char *str = strchr(type, '[');
+  if (str)
+    {
+      return str;
+    }
+  return NULL;
+}
+
+static void print_formalparm(FILE *stream, const char *argtype, int parmno)
+{
+  const char *part2;
+  int len;
+
+  /* Function pointers and array formal parameter types are a little more work */
+
+  if ((part2 = check_funcptr(argtype)) != NULL || (part2 = check_array(argtype)) != NULL)
+    {
+      len = part2 - argtype;
+      (void)fwrite(argtype, 1, len, stream);
+      fprintf(stream, "parm%d%s", parmno, part2);
+    }
+  else
+    {
+      fprintf(stream, "%s parm%d", argtype, parmno);
+    }
+}
+
+static void get_formalparmtype(const char *arg, char *formal)
+{
+  char *ptr = strchr(arg,'|');
+  if (ptr)
+    {
+      /* The formal parm type is a pointer to everything up to the '|' */
+
+      while (*arg != '|')
+        {
+          *formal++ = *arg++;
+        }
+      *formal   = '\0';
+    }
+  else
+    {
+      strncpy(formal, arg, MAX_PARMSIZE);
+    }
+}
+
+static void get_actualparmtype(const char *arg, char *actual)
+{
+  char *ptr = strchr(arg,'|');
+  if (ptr)
+    {
+      ptr++;
+      strncpy(actual, ptr, MAX_PARMSIZE);
+    }
+  else
+    {
+      strncpy(actual, arg, MAX_PARMSIZE);
+    }
+}
+
 static FILE *open_proxy(void)
 {
-  char filename[MAX_PARMSIZE+4];
+  char filename[MAX_PARMSIZE+10];
   FILE *stream;
 
-  snprintf(filename, MAX_PARMSIZE+3, "%s.c", g_parm[NAME_INDEX]);
-  filename[MAX_PARMSIZE+3] = '\0';
+  snprintf(filename, MAX_PARMSIZE+9, "PROXY_%s.c", g_parm[NAME_INDEX]);
+  filename[MAX_PARMSIZE+9] = '\0';
 
   stream = fopen(filename, "w");
   if (stream == NULL)
@@ -224,11 +317,16 @@ static FILE *open_proxy(void)
 static void generate_proxy(int nparms)
 {
   FILE *stream = open_proxy();
+  char formal[MAX_PARMSIZE];
   int i;
+
+  /* Generate "up-front" information, include correct header files */
 
   fprintf(stream, "/* Auto-generated %s proxy file -- do not edit */\n\n", g_parm[NAME_INDEX]);
   fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
   fprintf(stream, "#include <syscall.h>\n\n");
+
+  /* Generate the function definition that matches standard function prototype */
 
   fprintf(stream, "%s %s(", g_parm[RETTYPE_INDEX], g_parm[NAME_INDEX]);
 
@@ -240,59 +338,103 @@ static void generate_proxy(int nparms)
     {
       for (i = 0; i < nparms; i++)
         {
+          get_formalparmtype(g_parm[PARM1_INDEX+i], formal);
           if (i > 0)
             {
-              fprintf(stream, ", %s parm%d", g_parm[PARM1_INDEX+i], i+1);
+              fprintf(stream, ", ");
             }
-          else
-            {
-              fprintf(stream, "%s parm%d", g_parm[PARM1_INDEX+i], i+1);
-            }
+          print_formalparm(stream, formal, i+1);
         }
+    }
+  fprintf(stream, ")\n{\n");
+
+  /* Generate the system call.  Functions that do not return or return void are special cases */
+
+  if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0)
+    {
+      fprintf(stream, "  (void)sys_call%d(", nparms);
+    }
+  else
+    {
+      fprintf(stream, "  return (%s)sys_call%d(", g_parm[RETTYPE_INDEX], nparms);
     }
 
-  fprintf(stream, ")\n{\n");
-  fprintf(stream, "  return (%s)sys_call%d(", g_parm[RETTYPE_INDEX], nparms);
+  /* Create the parameter list with the matching types.  The first parametr is always the syscall number. */
+
+  fprintf(stream, "(unsigned int)SYS_%s", g_parm[NAME_INDEX]);
+
   for (i = 0; i < nparms; i++)
     {
-      if (i > 0)
-        {
-          fprintf(stream, ", (uintptr_t)parm%d", i+1);
-        }
-      else
-        {
-          fprintf(stream, "(uintptr_t)parm%d", i+1);
-        }
+      fprintf(stream, ", (uintptr_t)parm%d", i+1);
     }
+
+  /* Handle the tail end of the function. */
+
   fprintf(stream, ");\n}\n");
   fclose(stream);
 }
 
 static FILE *open_stub(void)
 {
-  char filename[MAX_PARMSIZE+8];
-  FILE *stream;
-
-  snprintf(filename, MAX_PARMSIZE+7, "STUB_%s.c", g_parm[NAME_INDEX]);
-  filename[MAX_PARMSIZE+7] = '\0';
-
-  stream = fopen(filename, "w");
-  if (stream == NULL)
+  if (g_inline)
     {
-      fprintf(stderr, "Failed to open %s: %s\n", filename, strerror(errno));
-      exit(9);
+      if (!g_stubstream)
+        {
+          g_stubstream = fopen("STUB.h", "w");
+          if (g_stubstream == NULL)
+            {
+              fprintf(stderr, "Failed to open STUB.h: %s\n", strerror(errno));
+              exit(9);
+            }
+        }
+
+      return g_stubstream;
     }
-  return stream;
+  else
+    {
+      char filename[MAX_PARMSIZE+8];
+      FILE *stream;
+
+      snprintf(filename, MAX_PARMSIZE+7, "STUB_%s.c", g_parm[NAME_INDEX]);
+      filename[MAX_PARMSIZE+7] = '\0';
+
+      stream = fopen(filename, "w");
+      if (stream == NULL)
+        {
+          fprintf(stderr, "Failed to open %s: %s\n", filename, strerror(errno));
+          exit(9);
+        }
+      return stream;
+    }
+}
+
+static void stub_close(FILE *stream)
+{
+  if (!g_inline)
+    {
+      fclose(stream);
+    }
 }
 
 static void generate_stub(int nparms)
 {
   FILE *stream = open_stub();
+  char formal[MAX_PARMSIZE];
+  char actual[MAX_PARMSIZE];
   int i;
+  int j;
+
+  /* Generate "up-front" information, include correct header files */
 
   fprintf(stream, "/* Auto-generated %s stub file -- do not edit */\n\n", g_parm[0]);
+  fprintf(stream, "#include <stdint.h>\n");
   fprintf(stream, "#include <%s>\n\n", g_parm[HEADER_INDEX]);
+
+  /* Generate the function definition that matches standard function prototype */
+
   fprintf(stream, "uintptr_t STUB_%s(", g_parm[NAME_INDEX]);
+
+  /* Generate the formal parameter list.  A function received no parameters is a special case. */
 
   if (nparms <= 0)
     {
@@ -302,9 +444,27 @@ static void generate_stub(int nparms)
     {
       for (i = 0; i < nparms; i++)
         {
+          /* Treat the first argument in the list differently from the others..
+           * It does not need a comma before it.
+           */
+
           if (i > 0)
             {
-              fprintf(stream, ", uintptr_t parm%d", i+1);
+              /* Check for a variable number of arguments */
+
+              if (is_vararg(g_parm[PARM1_INDEX+i], i, nparms))
+                {
+                  /* Always receive six arguments in this case */
+
+                  for (j = i+1; j <=6; j++)
+                    {
+                      fprintf(stream, ", uintptr_t parm%d", j);
+                    }
+                }
+              else
+                {
+                  fprintf(stream, ", uintptr_t parm%d", i+1);
+                }
             }
           else
             {
@@ -312,27 +472,101 @@ static void generate_stub(int nparms)
             }
         }
     }
-
   fprintf(stream, ")\n{\n");
-  fprintf(stream, "  return (uintptr_t)%s(", g_parm[NAME_INDEX]);
+
+  /* Then call the proxied function.  Functions that have no return value are
+   * a special case.
+   */
+
+  if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0)
+    {
+      fprintf(stream, "  %s(", g_parm[NAME_INDEX]);
+    }
+  else
+    {
+      fprintf(stream, "  return (uintptr_t)%s(", g_parm[NAME_INDEX]);
+    }
+
+  /* The pass all of the system call parameters, casting to the correct type
+   * as necessary.
+   */
+
   for (i = 0; i < nparms; i++)
     {
+      /* Get the formal type of the parameter, and get the type that we
+       * actually have to cast to.  For example for a formal type like 'int parm[]'
+       * we have to cast the actual parameter to 'int*'.  The worst is a union
+       * type like 'union sigval' where we have to cast to (union sigval)((FAR void *)parm)
+       * -- Yech.
+       */
+
+     get_formalparmtype(g_parm[PARM1_INDEX+i], formal);
+     get_actualparmtype(g_parm[PARM1_INDEX+i], actual);
+
+      /* Treat the first argument in the list differently from the others..
+       * It does not need a comma before it.
+       */
+
       if (i > 0)
         {
-          fprintf(stream, ", (%s)parm%d", g_parm[PARM1_INDEX+i], i+1);
+          /* Check for a variable number of arguments */
+
+          if (is_vararg(actual, i, nparms))
+            {
+              /* Always pass six arguments */
+
+              for (j = i+1; j <=6; j++)
+                {
+                  fprintf(stream, ", parm%d", j);
+                }
+            }
+          else
+            {
+              if (is_union(formal))
+                {
+                  fprintf(stream, ", (%s)((%s)parm%d)", formal, actual, i+1);
+                }
+              else
+                {
+                  fprintf(stream, ", (%s)parm%d", actual, i+1);
+                }
+            }
         }
       else
         {
-          fprintf(stream, "(%s)parm%d", g_parm[PARM1_INDEX+i], i+1);
+          if (is_union(formal))
+            {
+              fprintf(stream, "(%s)((%s)parm%d)", formal, actual, i+1);
+            }
+          else
+            {
+              fprintf(stream, "(%s)parm%d",actual, i+1);
+            }
         }
     }
-  fprintf(stream, ");\n}\n");
-  fclose(stream);
+
+  /* Tail end of the function.  The the proxied function has no return
+   * value, just return zero (OK).
+   */
+
+  if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0)
+    {
+      fprintf(stream, ");\n  return 0;\n}\n");
+    }
+  else
+    {
+      fprintf(stream, ");\n}\n");
+    }
+  stub_close(stream);
 }
 
 static void show_usage(const char *progname)
 {
-  fprintf(stderr, "USAGE: %s [-p|s] <CSV file>\n", progname);
+  fprintf(stderr, "USAGE: %s [-p|s|i] <CSV file>\n\n", progname);
+  fprintf(stderr, "Where:\n\n");
+  fprintf(stderr, "\t-p : Generate proxies\n");
+  fprintf(stderr, "\t-s : Generate stubs\n");
+  fprintf(stderr, "\t-i : Generate proxies as static inline functions\n");
   exit(1);
 }
 
@@ -351,6 +585,7 @@ int main(int argc, char **argv, char **envp)
   /* Parse command line options */
 
   g_debug = false;
+  g_inline = false;
 
   while ((ch = getopt(argc, argv, ":dps")) > 0)
     {
@@ -366,6 +601,10 @@ int main(int argc, char **argv, char **envp)
 
           case 's' :
             proxies = false;
+            break;
+
+          case 'i' :
+            g_inline = true;
             break;
 
           case '?' :
@@ -423,7 +662,12 @@ int main(int argc, char **argv, char **envp)
         }
       else
         {
+          g_stubstream = NULL;
           generate_stub(nargs-3);
+          if (g_stubstream != NULL)
+            {
+              fclose(g_stubstream);
+            }
         }
     }
 

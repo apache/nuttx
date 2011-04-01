@@ -45,10 +45,10 @@ MISC_SRCS	= os_start.c os_bringup.c get_errno_ptr.c sched_garbage.c \
 
 TSK_SRCS	= task_create.c task_init.c task_setup.c task_activate.c \
 		  task_start.c task_delete.c task_deletecurrent.c task_restart.c \
-		  exit.c abort.c atexit.c getpid.c  \
-		  sched_addreadytorun.c sched_removereadytorun.c sched_addprioritized.c \
-		  sched_mergepending.c sched_addblocked.c sched_removeblocked.c \
-		  sched_free.c sched_gettcb.c sched_verifytcb.c sched_releasetcb.c
+		  exit.c atexit.c getpid.c sched_addreadytorun.c sched_removereadytorun.c \
+		  sched_addprioritized.c sched_mergepending.c sched_addblocked.c \
+		  sched_removeblocked.c sched_free.c sched_gettcb.c sched_verifytcb.c \
+		  sched_releasetcb.c
 
 SCHED_SRCS	= sched_setparam.c sched_setpriority.c sched_getparam.c \
 		  sched_setscheduler.c sched_getscheduler.c \

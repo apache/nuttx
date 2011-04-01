@@ -11,7 +11,7 @@ and the application run in the same address space and at the same kernel-
 mode privileges.  In order to exploit security features of certain
 processors, an alternative build model is also supported:  NuttX can
 be built separately as a monolithic, kernel-mode module and the applications
-can be add as a separately built, user-mode module.
+can be added as a separately built, user-mode module.
 
 The syscall layer provided in this directory serves as the communication
 layer from the user-mode application into the kernel-mode RTOS.  The

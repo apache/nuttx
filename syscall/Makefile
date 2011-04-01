@@ -60,7 +60,7 @@ VPATH = proxies:stubs
 BIN1 = libproxies$(LIBEXT)
 BIN2 = libstubs$(LIBEXT)
 
-all: $(BIN)
+all: $(BIN1) $(BIN2)
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -88,7 +88,7 @@ depend: .depend
 $(MKSYSCALL):
 	@$(MAKE) -C $(TOPDIR)/tools -f Makefile.host mksyscall
 
-.context: $(MKSYSCALL)
+.context: $(MKSYSCALL) syscall.csv
 	@(cd proxies; $(MKSYSCALL) -p $(CSVFILE);)
 	@(cd stubs; $(MKSYSCALL) -s $(CSVFILE);)
 	@touch $@

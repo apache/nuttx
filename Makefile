@@ -76,18 +76,42 @@ APPDIR		:= ${shell if [ -r $(CONFIG_APPS_DIR)/Makefile ]; then echo "$(CONFIG_AP
 
 PCODE_DIR	:= ${shell if [ -r pcode/Makefile ]; then echo "pcode"; fi}
 
-# All add-on directories
+# All add-on directories.
+#
+# NUTTX_ADDONS is the list of directories built into the NuttX kernel.
+# USER_ADDONS is the list of directories that will be built into the user application
 
-ADDON_DIRS	:= $(PCODE_DIR) $(NX_DIR) $(APPDIR)
+NUTTX_ADDONS	:= $(PCODE_DIR) $(NX_DIR)
+USER_ADDONS		:=
 
-# FSDIRS depend on file descriptor support; NONFSDIRS do not
-#   (except for parts of FSDIRS).  We will exclude FSDIRS
-#   from the build if file descriptor support is disabled
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+USER_ADDONS		+= $(APPDIR)
+else
+NUTTX_ADDONS	+= $(APPDIR)
+endif
 
-NONFSDIRS	= sched lib $(ARCH_SRC) mm $(ADDON_DIRS)
+# Lists of build directories.
+#
+# FSDIRS depend on file descriptor support; NONFSDIRS do not (except for parts
+#   of FSDIRS).  We will exclude FSDIRS from the build if file descriptor
+#   support is disabled
+# CONTEXTDIRS include directories that have special, one-time pre-build
+#   requirements.  Normally this includes things like auto-generation of
+#   configuration specific files or creation of configurable symbolic links
+# USERDIRS - When NuttX is build is a monolithic kernel, this provides the
+#   list of directories that must be built
+
+NONFSDIRS	= sched lib $(ARCH_SRC) mm $(NUTTX_ADDONS)
 FSDIRS		= fs drivers binfmt
 NETFSDIRS	= fs drivers
 CONTEXTDIRS	= $(APPDIR)
+USERDIRS	=
+
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+NONFSDIRS	+= syscall
+CONTEXTDIRS	+= syscall
+USERDIRS	+= syscall $(USER_ADDONS)
+endif
 
 ifeq ($(CONFIG_NX),y)
 NONFSDIRS	+= graphics
@@ -133,62 +157,78 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 EXTRA_OBJS	+= $(CONFIG_PASS1_OBJECT)
 endif
 
-# LINKLIBS is the list of NuttX libraries that is passed to the
-#   processor-specific Makefile to build the final target.
+# NUTTXLIBS is the list of NuttX libraries that is passed to the
+#   processor-specific Makefile to build the final NuttX target.
 #   Libraries in FSDIRS are excluded if file descriptor support
 #   is disabled.
+# USERLIBS is the list of libraries used to build the final user-space
+#   application
 
-LINKLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
+NUTTXLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
 		  lib/liblib$(LIBEXT)
+USERLIBS	=
+
+# Add libraries for syscall support.
+
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+NUTTXLIBS	+= syscall/libstubs$(LIBEXT)
+USERLIBS	+= syscall/libproxies$(LIBEXT)
+endif
 
 # Add libraries for network support.  CXX, CXXFLAGS, and COMPILEXX must
 # be defined in Make.defs for this to work!
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-LINKLIBS	+= libxx/liblibxx$(LIBEXT)
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+USERLIBS	+= libxx/liblibxx$(LIBEXT)
+else
+NUTTXLIBS	+= libxx/liblibxx$(LIBEXT)
+endif
 endif
 
-# Add library for application support
-# Always compile the framework which includes exec_namedapp if users
-# or nuttX applications are to be included.
+# Add library for application support.
 
 ifneq ($(APPDIR),)
-LINKLIBS	+= $(APPDIR)/libapps$(LIBEXT)
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+USERLIBS	+= $(APPDIR)/libapps$(LIBEXT)
+else
+NUTTXLIBS	+= $(APPDIR)/libapps$(LIBEXT)
+endif
 endif
 
 # Add libraries for network support
 
 ifeq ($(CONFIG_NET),y)
-LINKLIBS	+= net/libnet$(LIBEXT)
+NUTTXLIBS	+= net/libnet$(LIBEXT)
 endif
 
 # Add libraries for file system support
 
 ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
-LINKLIBS	+= fs/libfs$(LIBEXT)
+NUTTXLIBS	+= fs/libfs$(LIBEXT)
 endif
 ifeq ($(CONFIG_NET),y)
-LINKLIBS	+= drivers/libdrivers$(LIBEXT)
+NUTTXLIBS	+= drivers/libdrivers$(LIBEXT)
 endif
 else
-LINKLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) binfmt/libbinfmt$(LIBEXT)
+NUTTXLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) binfmt/libbinfmt$(LIBEXT)
 endif
 
 # Add libraries for Pascall P-Code
 
 ifneq ($(PCODE_DIR),)
-LINKLIBS	+= $(PCODE_DIR)/libpcode$(LIBEXT)
+NUTTXLIBS	+= $(PCODE_DIR)/libpcode$(LIBEXT)
 endif
 
 # Add libraries for the NX graphics sub-system
 
 ifneq ($(NX_DIR),)
-LINKLIBS	+= $(NX_DIR)/libnx$(LIBEXT)
+NUTTXLIBS	+= $(NX_DIR)/libnx$(LIBEXT)
 endif
 
 ifeq ($(CONFIG_NX),y)
-LINKLIBS        += graphics/libgraphics$(LIBEXT)
+NUTTXLIBS        += graphics/libgraphics$(LIBEXT)
 endif
 
 # This is the name of the final target
@@ -287,6 +327,12 @@ pcode/libpcode$(LIBEXT): context
 graphics/libgraphics$(LIBEXT): context
 	@$(MAKE) -C graphics TOPDIR="$(TOPDIR)" libgraphics$(LIBEXT)
 
+syscall/libstubs$(LIBEXT): context
+	@$(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT)
+
+syscall/libproxies$(LIBEXT): context
+	@$(MAKE) -C syscall TOPDIR="$(TOPDIR)" libproxies$(LIBEXT)
+
 # If the 2 pass build option is selected, then this pass1 target is
 # configured be build a extra link object. This is assumed to be an
 # incremental (relative) link object, but could be a static library
@@ -311,11 +357,11 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 		echo "ERROR: No Makefile in CONFIG_PASS1_BUILDIR"; \
 		exit 1; \
 	fi
-	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(LINKLIBS)" "$(ARCH_SRC)/$(CONFIG_PASS1_OBJECT)"
+	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(NUTTXLIBS)" "$(ARCH_SRC)/$(CONFIG_PASS1_OBJECT)"
 endif
 
-$(BIN):	context depend $(LINKLIBS) pass1
-	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" $(BIN)
+$(BIN):	context depend $(NUTTXLIBS) $(USERLIBS) pass1
+	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(NUTTXLIBS)" $(BIN)
 	@if [ -w /tftpboot ] ; then \
 		cp -f $(TOPDIR)/$@ /tftpboot/$@.${CONFIG_ARCH}; \
 	fi
