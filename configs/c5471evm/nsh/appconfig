@@ -35,20 +35,20 @@
 
 # Path to example in apps/examples containing the user_start entry point
 
-CONFIGURED_APPS += examples/nsh=.built_always
+CONFIGURED_APPS += examples/nsh
 
 # NSH library
 
-CONFIGURED_APPS += nshlib=.built_always
+CONFIGURED_APPS += nshlib
 
 # Networking support
 
 ifeq ($(CONFIG_NET),y)
-CONFIGURED_APPS += netutils/uiplib=.built_always
-CONFIGURED_APPS += netutils/dhcpc=.built_always
-CONFIGURED_APPS += netutils/resolv=.built_always
-CONFIGURED_APPS += netutils/tftpc=.built_always
-CONFIGURED_APPS += netutils/webclient=.built_always
+CONFIGURED_APPS += netutils/uiplib
+CONFIGURED_APPS += netutils/dhcpc
+CONFIGURED_APPS += netutils/resolv
+CONFIGURED_APPS += netutils/tftpc
+CONFIGURED_APPS += netutils/webclient
 endif
 
 
