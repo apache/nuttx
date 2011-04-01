@@ -35,12 +35,12 @@
 
 # Path to example in apps/examples containing the user_start entry point
 
-CONFIGURED_APPS += examples/uip=.built_always
+CONFIGURED_APPS += examples/uip
 
 
 # Networking support
 
-CONFIGURED_APPS += netutils/uiplib=.built_always
-CONFIGURED_APPS += netutils/dhcpc=.built_always
-CONFIGURED_APPS += netutils/resolv=.built_always
-CONFIGURED_APPS += netutils/webserver=.built_always
+CONFIGURED_APPS += netutils/uiplib
+CONFIGURED_APPS += netutils/dhcpc
+CONFIGURED_APPS += netutils/resolv
+CONFIGURED_APPS += netutils/webserver

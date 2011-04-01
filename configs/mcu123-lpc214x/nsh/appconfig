@@ -35,9 +35,9 @@
 
 # Path to example in apps/examples containing the user_start entry point
 
-CONFIGURED_APPS += examples/nsh=.built_always
+CONFIGURED_APPS += examples/nsh
 
 # The NSH library
 
-CONFIGURED_APPS += nshlib=.built_always
+CONFIGURED_APPS += nshlib
 
