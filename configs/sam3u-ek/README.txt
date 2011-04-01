@@ -308,6 +308,11 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  knsh:
+    This is identical to the nsh configuration below except that NuttX
+    is built as a kernel-mode, monolithic module and the user applications
+    are built separately.
+
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables both the serial and telnetd NSH interfaces.
@@ -320,3 +325,4 @@ Where <subdir> is one of the following:
     This configuration directory, performs a simple OS test using
     examples/ostest.  By default, this project assumes that you are
     using the DFU bootloader.
+
