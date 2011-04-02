@@ -50,7 +50,7 @@
 
 #define errno *get_errno_ptr()
 #ifndef CONFIG_NUTTX_KERNEL
-#  define set_errno(e) do { errno = (int)(a); } while (0)
+#  define set_errno(e) do { errno = (int)(e); } while (0)
 #  define get_errno(e) errno
 #endif
 
