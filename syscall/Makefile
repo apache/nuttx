@@ -53,8 +53,8 @@ SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
 ROOTDEPPATH	= --dep-path .
-PROXYDEPPATH = --dep-path stdio
-STUBDEPPATH = --dep-path stdlib
+PROXYDEPPATH = --dep-path proxies
+STUBDEPPATH = --dep-path stubs
 VPATH = proxies:stubs
 
 BIN1 = libproxies$(LIBEXT)
@@ -107,3 +107,4 @@ distclean: clean
 	@rm -f proxies/*.c stubs/*.c
 
 -include Make.dep
+

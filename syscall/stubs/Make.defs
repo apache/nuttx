@@ -33,4 +33,6 @@
 #
 ############################################################################
 
-STUB_SRCS := ${shell ls stubs/*.c 2>/dev/null}
+STUB_SRCS := ${shell cd stubs; ls *.c 2>/dev/null }
+
+

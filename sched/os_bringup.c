@@ -57,10 +57,24 @@
 #ifdef CONFIG_BUILTIN_APP_START
 # include "apps/apps.h"
 #endif
+#ifdef CONFIG_NUTTX_KERNEL
+# include "arch/board/user_map.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* If NuttX is built as a separately compiled module, then the the header
+ * file should contain the address of the user module entry point.  If not
+ * then the default entry point is user_start.
+ */
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_USER_ENTRYPOINT)
+#  define USER_ENTRYPOINT (main_t)CONFIG_USER_ENTRYPOINT
+#else
+#  define USER_ENTRYPOINT user_start
+#endif
 
 /****************************************************************************
  * Private Types
@@ -104,8 +118,8 @@
  *   And the main application entry point.  This may be one of two different
  *   symbols:
  *
- *   - user_start:  This is the default entry point used for all of the
- *                  examples.
+ *   - USER_ENTRYPOINT: This is the default entry point used for all of the
+ *                  example code in apps/examples.
  *   - CONFIG_BUILTIN_APP_START: The system can also be configured to start
  *                  custom applications at however CONFIG_BUILTIN_APP_START
  *                  is defined in the NuttX start-up file.
@@ -157,11 +171,11 @@ int os_bringup(void)
   
   init_taskid = exec_namedapp(CONFIG_BUILTIN_APP_START, argv);
 #else
-  /* Start the default application at user_start() */
+  /* Start the default application at USER_ENTRYPOINT() */
 
   init_taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
                             CONFIG_USERMAIN_STACKSIZE,
-                            (main_t)user_start, (const char **)NULL);
+                            (main_t)USER_ENTRYPOINT, (const char **)NULL);
 #endif
   ASSERT(init_taskid != ERROR);
   return OK;

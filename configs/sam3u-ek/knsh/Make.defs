@@ -117,7 +117,7 @@ LDNXFLATFLAGS = -e main -s 2048
 
 OBJEXT = .o
 LIBEXT = .a
-EXEEXT =
+EXEEXT = .elf
 
 ifneq ($(CROSSDEV),arm-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs

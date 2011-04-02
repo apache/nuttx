@@ -339,7 +339,9 @@ syscall/libproxies$(LIBEXT): context
 # (archive); some modification to this Makefile would be required if
 # CONFIG_PASS1_OBJECT is an archive.
 
-pass1:
+pass1deps: context depend $(USERLIBS)
+
+pass1: pass1deps
 ifeq ($(CONFIG_BUILD_2PASS),y)
 	@if [ -z "$(CONFIG_PASS1_OBJECT)" ]; then \
 		echo "ERROR: CONFIG_PASS1_OBJECT not defined"; \
@@ -357,10 +359,12 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 		echo "ERROR: No Makefile in CONFIG_PASS1_BUILDIR"; \
 		exit 1; \
 	fi
-	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(NUTTXLIBS)" "$(ARCH_SRC)/$(CONFIG_PASS1_OBJECT)"
+	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(NUTTXLIBS)" USERLIBS="$(USERLIBS)" "$(ARCH_SRC)/$(CONFIG_PASS1_OBJECT)"
 endif
 
-$(BIN):	context depend $(NUTTXLIBS) $(USERLIBS) pass1
+pass2deps: context depend $(NUTTXLIBS)
+
+pass2: pass2deps
 	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(NUTTXLIBS)" $(BIN)
 	@if [ -w /tftpboot ] ; then \
 		cp -f $(TOPDIR)/$@ /tftpboot/$@.${CONFIG_ARCH}; \
@@ -380,6 +384,13 @@ endif
 ifeq ($(CONFIG_RAW_BINARY),y)
 	@$(OBJCOPY) $(OBJCOPYARGS) -O binary $(NUTTX)$(EXEEXT) $(NUTTX)$(EXEEXT).bin
 endif
+
+# In the normal case, all pass1 and pass2 dependencies are created then pass1
+# and pass2 targets are built.  However, in some cases, you may need to build
+# pass1 depenencies and pass1 first, then build pass2 dependencies and pass2.
+# in that case, execute 'make pass1 pass2' from the command line.
+
+$(BIN): pass1deps pass2deps pass1 pass2
 
 # This is a helper target that will rebuild NuttX and download it to the
 # target system in one step.  It will generate an error an error if the

@@ -208,6 +208,13 @@ CONFIG_RAW_BINARY=y
 CONFIG_HAVE_LIBM=n
 
 #
+# Setup for a two-pass build
+#
+CONFIG_BUILD_2PASS=y
+CONFIG_PASS1_BUILDIR=configs/sam3u-ek/kernel
+CONFIG_PASS1_OBJECT=
+
+#
 # General OS setup
 #
 # CONFIG_APPS_DIR - Identifies the relative path to the directory
