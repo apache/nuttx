@@ -38,10 +38,10 @@
 ASRCS		= 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-MISC_SRCS	= os_start.c os_bringup.c get_errno_ptr.c sched_garbage.c \
-		  sched_setupstreams.c sched_getfiles.c sched_getsockets.c sched_getstreams.c \
-		  sched_setupidlefiles.c sched_setuptaskfiles.c sched_setuppthreadfiles.c \
-		  sched_releasefiles.c
+MISC_SRCS	= os_start.c os_bringup.c errno_getptr.c errno_get.c errno_set.c \
+		  sched_garbage.c sched_setupstreams.c sched_getfiles.c sched_getsockets.c \
+		  sched_getstreams.c sched_setupidlefiles.c sched_setuptaskfiles.c \
+		  sched_setuppthreadfiles.c sched_releasefiles.c
 
 TSK_SRCS	= task_create.c task_init.c task_setup.c task_activate.c \
 		  task_start.c task_delete.c task_deletecurrent.c task_restart.c \
@@ -80,12 +80,10 @@ CLOCK_SRCS	= clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c \
 SIGNAL_SRCS	= sig_initialize.c \
 		  sig_action.c sig_procmask.c sig_pending.c sig_suspend.c \
 		  sig_kill.c sig_queue.c sig_waitinfo.c sig_timedwait.c \
-		  sig_emptyset.c sig_fillset.c sig_addset.c sig_delset.c \
-		  sig_ismember.c sig_findaction.c \
-		  sig_allocatependingsigaction.c sig_releasependingsigaction.c \
-                  sig_unmaskpendingsignal.c sig_removependingsignal.c \
-		  sig_releasependingsignal.c sig_lowest.c sig_mqnotempty.c \
-		  sig_cleanup.c sig_received.c sig_deliver.c
+		  sig_findaction.c sig_allocatependingsigaction.c \
+		  sig_releasependingsigaction.c sig_unmaskpendingsignal.c \
+		  sig_removependingsignal.c sig_releasependingsignal.c sig_lowest.c \
+		  sig_mqnotempty.c sig_cleanup.c sig_received.c sig_deliver.c
 
 MQUEUE_SRCS	= mq_open.c mq_close.c mq_unlink.c mq_send.c mq_timedsend.c\
 		  mq_sndinternal.c mq_receive.c mq_timedreceive.c mq_rcvinternal.c \

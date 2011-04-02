@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_readdirr.c
+ * lib/misc/lib_readdirr.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,8 @@
 #include <string.h>
 #include <dirent.h>
 #include <errno.h>
+
 #include <nuttx/fs.h>
-#include "fs_internal.h"
 
 /****************************************************************************
  * Private Functions
@@ -87,11 +87,13 @@ int readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
 {
   struct dirent *tmp;
 
-  *get_errno_ptr() = 0;
+  /* NOTE: The following use or errno is *not* thread-safe */
+
+  set_errno(0);
   tmp = readdir(dirp);
   if (!tmp)
     {
-       int error = *get_errno_ptr();
+       int error = get_errno();
        if (!error)
           {
             if (result)

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sig_addset.c
+ * fs/fs_telldir.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,26 +37,17 @@
  * Included Files
  ****************************************************************************/
 
-#include <signal.h>
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <dirent.h>
+#include <errno.h>
+
+#include <nuttx/fs.h>
+#include <nuttx/dirent.h>
 
 /****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -64,36 +55,37 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigaddset
+ * Name: telldir
  *
  * Description:
- *   This function adds the signal specified by signo to the signal set
- *   specified by set.
+ *   The telldir() function returns the current location
+ *   associated with the directory stream dirp.
  *
- * Parameters:
- *   set - Signal set to add signal to
- *   signo - Signal to add
+ * Inputs:
+ *   dirp -- An instance of type DIR created by a previous
+ *     call to opendir();
  *
- * Return Value:
- *   0 (OK), or -1 (ERROR) if the signal number is invalid.
+ * Return:
+ *   On success, the telldir() function returns the current
+ *   location in the directory stream.  On error, -1 is
+ *   returned, and errno is set appropriately.
  *
- * Assumptions:
+ *   EBADF - Invalid directory stream descriptor dir
  *
  ****************************************************************************/
 
-int sigaddset(FAR sigset_t *set, int signo)
+off_t telldir(FAR DIR *dirp)
 {
-  int ret = ERROR;
+  struct fs_dirent_s *idir = (struct fs_dirent_s *)dirp;
 
-  /* Verify the signal */
-
-  if (GOOD_SIGNO(signo))
+  if (!idir || !idir->fd_root)
     {
-      /* Add the signal to the set */
-
-      *set |= SIGNO2SET(signo);
-      ret = OK;
+      *get_errno_ptr() = EBADF;
+      return (off_t)-1;
     }
 
-  return ret;
+  /* Just return the current position */
+
+  return idir->fd_position;
 }
+

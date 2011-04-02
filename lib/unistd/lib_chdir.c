@@ -173,7 +173,7 @@ int chdir(FAR const char *path)
   return OK;
 
 errout:
-  errno = err;
+  set_errno(err);
   return ERROR;
 }
 #endif /* CONFIG_NFILE_DESCRIPTORS && !CONFIG_DISABLE_ENVIRON */

@@ -382,7 +382,11 @@ Below is a guide to the available README files in the NuttX source tree:
  |   `- README.txt
  |- graphics/
  |   `- README.txt
+ |- lib/
+ |   `- README.txt
  |- libxx/
+ |   `- README.txt
+ |- syscall/
  |   `- README.txt
  `- tools/
      `- README.txt

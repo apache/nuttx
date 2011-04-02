@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sig_emptyset.c
+ * sched/errno_get.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,26 +37,20 @@
  * Included Files
  ****************************************************************************/
 
-#include <signal.h>
+#include <nuttx/config.h>
+
+#include <errno.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
+#undef get_errno_ptr
+#undef get_errno
+#undef errno
 
 /****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -64,24 +58,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigemptyset
+ * Function:  get_errno
  *
  * Description:
- *   This function initializes the signal set specified by set such that all
- *   signals are excluded.
+ *   Return the value of the thread specific errno.  This function is only
+ *   intended to provide a mechanism for user-mode programs to get the
+ *   thread-specific errno value.  It is #define'd to the symbol errno in
+ *   include/errno.h.
  *
  * Parameters:
- *   set - Signal set to initalize
+ *   None
  *
  * Return Value:
- *   0 (OK), or -1 (ERROR) if the signal set cannot be initialized.
+ *   The current value of the thread specific errno.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int sigemptyset(FAR sigset_t *set)
+int get_errno(void)
 {
-  *set = NULL_SIGNAL_SET;
-  return OK;
+  return *get_errno_ptr();
 }
+
+

@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/stdio/lib_rawoutstream.c
+ * lib/signal/sig_fillset.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,62 +37,52 @@
  * Included Files
  ****************************************************************************/
 
-#include <unistd.h>
-#include <errno.h>
-#include "lib_internal.h"
+#include <signal.h>
 
 /****************************************************************************
- * Private Functions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rawoutstream_putc
- ****************************************************************************/
-
-static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
-{
-  FAR struct lib_rawoutstream_s *rthis = (FAR struct lib_rawoutstream_s *)this;
-  char buffer = ch;
-  if (this && rthis->fd >= 0)
-    {
-      int nwritten;
-      do
-        {
-          nwritten = write(rthis->fd, &buffer, 1);
-          if (nwritten == 1)
-            {
-              this->nput++;
-            }
-        }
-      while (nwritten < 0 && get_errno() == EINTR);
-    }
-}
-
-/****************************************************************************
- * Public Functions
+ * Private Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_rawoutstream
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Publics Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: sigfillset
  *
  * Description:
- *   Initializes a stream for use with a file descriptor.
+ *   This function initializes the signal set specified by set such that all
+ *   signals are included.
  *
- * Input parameters:
- *   rawoutstream - User allocated, uninitialized instance of struct
- *                  lib_rawoutstream_s to be initialized.
- *   fd           - User provided file/socket descriptor (must have been opened
- *                  for write access).
+ * Parameters:
+ *   set - Signal set to initalize
  *
- * Returned Value:
- *   None (User allocated instance initialized).
+ * Return Value:
+ *   0 (OK), or -1 (ERROR) if the signal set cannot be initialized.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-void lib_rawoutstream(FAR struct lib_rawoutstream_s *rawoutstream, int fd)
+int sigfillset(FAR sigset_t *set)
 {
-  rawoutstream->public.put  = rawoutstream_putc;
-  rawoutstream->public.nput = 0;
-  rawoutstream->fd          = fd;
+  *set = ALL_SIGNAL_SET;
+  return OK;
 }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/get_errno_ptr.c
+ * sched/errno_getptr.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,10 @@
 #include <errno.h>
 #include <nuttx/arch.h>
 #include "os_internal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #undef get_errno_ptr
 #undef errno

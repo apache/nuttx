@@ -119,7 +119,7 @@ int fseek(FAR FILE *stream, long int offset, int whence)
 
   if (!stream)
     {
-      errno = EBADF;
+      set_errno(EBADF);
       return ERROR;
     }
 #endif

@@ -139,7 +139,7 @@ EXTERN int    sched_rr_get_interval(pid_t pid, struct timespec *interval);
 
 EXTERN int    sched_lock(void);
 EXTERN int    sched_unlock(void);
-EXTERN int32_t sched_lockcount(void);
+EXTERN int    sched_lockcount(void);
 
 /* If instrumentation of the scheduler is enabled, then some outboard logic
  * must provide the following interfaces.

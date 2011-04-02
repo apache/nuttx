@@ -99,11 +99,13 @@ FAR char *getcwd(FAR char *buf, size_t size)
 
   /* Verify input parameters */
 
+#ifdef CONFIG_DEBUG
   if (!buf || !size)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return NULL;
     }
+#endif
 
   /* If no working directory is defined, then default to the home directory */
 
@@ -117,7 +119,7 @@ FAR char *getcwd(FAR char *buf, size_t size)
 
   if (strlen(pwd) + 1 > size)
     {
-      errno = ERANGE;
+      set_errno(ERANGE);
       return NULL;
     }
 

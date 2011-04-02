@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sig_fillset.c
+ * lib/signal/sig_ismember.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@
 #include <signal.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -60,28 +60,42 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Publics Functioins
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigfillset
+ * Function: sigismember
  *
  * Description:
- *   This function initializes the signal set specified by set such that all
- *   signals are included.
+ *   This function tests whether the signal specified by signo is a member
+ *   of the set specified by set.
  *
  * Parameters:
- *   set - Signal set to initalize
+ *   set - Signal set to test
+ *   signo - Signal to test for
  *
  * Return Value:
- *   0 (OK), or -1 (ERROR) if the signal set cannot be initialized.
+ *   1 (true), if the specified signal is a member of the set,
+ *   0 (OK or FALSE), if it is not, or
+ *  -1 (ERROR) if the signal number is invalid.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int sigfillset(FAR sigset_t *set)
+int sigismember(FAR const sigset_t *set, int signo)
 {
-  *set = ALL_SIGNAL_SET;
-  return OK;
+  int ret = ERROR;
+
+  /* Verify the signal */
+
+  if (GOOD_SIGNO(signo))
+    {
+      /* Check if the signal is in the set */
+
+      ret = ((*set & SIGNO2SET(signo)) != 0);
+    }
+
+  return ret;
 }
+

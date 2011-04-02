@@ -103,7 +103,7 @@ void lib_take_semaphore(FAR struct file_struct *stream)
 	   * the wait was awakened by a signal.
 	   */
 
-	  ASSERT(*get_errno_ptr() == EINTR);
+	  ASSERT(get_errno() == EINTR);
 	}
 
       /* We have it.  Claim the stak and return */

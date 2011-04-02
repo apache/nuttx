@@ -274,35 +274,69 @@ static void print_formalparm(FILE *stream, const char *argtype, int parmno)
 
 static void get_formalparmtype(const char *arg, char *formal)
 {
-  char *ptr = strchr(arg,'|');
-  if (ptr)
-    {
-      /* The formal parm type is a pointer to everything up to the '|' */
+  /* The formal parm type is a pointer to everything up to the first'|' (or
+   * the end of the string if there is no '|' in the type description).
+   */
 
-      while (*arg != '|')
-        {
-          *formal++ = *arg++;
-        }
-      *formal   = '\0';
-    }
-  else
+  while (*arg != '|' && *arg != '\0')
     {
-      strncpy(formal, arg, MAX_PARMSIZE);
+      *formal++ = *arg++;
     }
+  *formal   = '\0';
 }
 
 static void get_actualparmtype(const char *arg, char *actual)
 {
-  char *ptr = strchr(arg,'|');
-  if (ptr)
+  const char *pstart = strchr(arg,'|');
+  if (pstart)
     {
-      ptr++;
-      strncpy(actual, ptr, MAX_PARMSIZE);
+      /* The actual parameter type starts after the '|' */
+
+      pstart++;
     }
   else
     {
-      strncpy(actual, arg, MAX_PARMSIZE);
+      /* The actual parameter is the same as the formal parameter
+       * at starts at the beginning of the type string.
+       */
+
+      pstart = arg;
     }
+
+  /* The actual parm type is a pointer to everything up to the next '|' (or
+   * the end of the string if there is no '|' in the type description).
+   */
+
+  while (*pstart != '|' && *pstart != '\0')
+    {
+      *actual++ = *pstart++;
+    }
+  *actual   = '\0';
+}
+
+static void get_fieldname(const char *arg, char *fieldname)
+{
+  char *pactual = strchr(arg,'|');
+  char *pstart;
+
+  if (pactual)
+    {
+      /* The actual parameter type starts after the '|' */
+
+      pactual++;
+      pstart = strchr(pactual,'|');
+      if (pstart)
+        {
+          /* The fieldname is everything past the second '|' to the end of the string */
+
+          pstart++;
+          strncpy(fieldname, pstart, MAX_PARMSIZE);
+          return;
+        }
+    }
+
+  fprintf(stderr, "%d: Missing union fieldname: %s\n", g_lineno, arg);
+  exit(15);
 }
 
 static FILE *open_proxy(void)
@@ -326,6 +360,7 @@ static void generate_proxy(int nparms)
 {
   FILE *stream = open_proxy();
   char formal[MAX_PARMSIZE];
+  char fieldname[MAX_PARMSIZE];
   bool bvarargs = false;
   int nformal;
   int nactual;
@@ -444,7 +479,22 @@ static void generate_proxy(int nparms)
 
   for (i = 0; i < nactual; i++)
     {
-      fprintf(stream, ", (uintptr_t)parm%d", i+1);
+      /* Is the parameter a union member */
+
+      if (i < nparms && is_union(g_parm[PARM1_INDEX+i]))
+        {
+          /* Then we will have to pick a field name that can be cast to a
+           * uintptr_t.  There probably should be some error handling here
+           * to catch the case where the fieldname was not supplied.
+           */
+
+          get_fieldname(g_parm[PARM1_INDEX+i], fieldname);
+          fprintf(stream, ", (uintptr_t)parm%d.%s", i+1, fieldname);          
+        }
+      else
+        {
+          fprintf(stream, ", (uintptr_t)parm%d", i+1);
+        }
     }
 
   /* Handle the tail end of the function. */

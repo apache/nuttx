@@ -92,6 +92,22 @@ The format of the CVS file for each line is:
   Field 4: The type of function return value.
   Field 5 - N+5: The type of each of the N formal parameters of the function
 
+Each type field has a format as follows:
+
+  type name:
+        For all simpler types
+  formal type | actual type: 
+        For array types where the form of the formal (eg. int parm[2])
+        differs from the type of actual passed parameter (eg. int*).  This
+        is necessary because you cannot do simple casts to array types.
+  formal type | union member actual type | union member fieldname:
+        A similar situation exists for unions.  For example, the formal
+        parameter type union sigval -- You cannot cast a uintptr_t to
+        a union sigval, but you can cast to the type of one of the union
+        member types when passing the actua paramter.  Similarly, we
+        cannot cast a union sigval to a uinptr_t either.  Rather, we need
+        to cast a specific union member fieldname to uintptr_t.
+
 Auto-Generated Files
 ====================
 
@@ -104,7 +120,7 @@ database.  Here the following definition is used:
           call into a syscall, marshalling all of the system call parameters
           as necessary.
 
-  STUB  - Another tiny bit of code that executes within the NuttX kernel
+  Stub  - Another tiny bit of code that executes within the NuttX kernel
           that is used to map a software interrupt received by the kernel to
           a kernel function call. The stubs receive the marshalled system
           call data, and perform the actually kernel function call (in

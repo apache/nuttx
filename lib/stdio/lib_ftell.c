@@ -107,7 +107,7 @@ long ftell(FAR FILE *stream)
 
   if (!stream)
     {
-      errno = EBADF;
+      set_errno(EBADF);
       return ERROR;
     }
 

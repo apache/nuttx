@@ -99,7 +99,7 @@ int ungetc(int c, FAR FILE *stream)
   if ((stream && stream->fs_filedes < 0) ||
       ((stream->fs_oflags & O_RDOK) == 0))
     {
-      errno = EBADF;
+      set_errno(EBADF);
       return EOF;
     }
 
@@ -114,7 +114,7 @@ int ungetc(int c, FAR FILE *stream)
   else
 #endif
     {
-      errno = ENOMEM;
+      set_errno(ENOMEM);
       return EOF;
     }
 }

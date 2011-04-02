@@ -96,7 +96,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
 
   if (!stream || (stream->fs_oflags & O_WROK) == 0)
     {
-      *get_errno_ptr() = EBADF;
+      set_errno(EBADF);
       goto errout;
     }
 

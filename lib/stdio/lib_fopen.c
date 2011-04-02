@@ -230,7 +230,7 @@ errout_with_sem:
   stream_semgive(slist);
 
 errout:
-  *get_errno_ptr() = err;
+  set_errno(err);
   return NULL;
 }
 

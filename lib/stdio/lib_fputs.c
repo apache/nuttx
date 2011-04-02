@@ -100,7 +100,7 @@ int fputs(FAR const char *s, FAR FILE *stream)
 
   if (!s)
     {
-      *get_errno_ptr() = EINVAL;
+      set_errno(EINVAL);
     }
   else
     {

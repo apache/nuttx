@@ -114,7 +114,7 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
 
   if (stream->fs_filedes < 0 || (stream->fs_oflags & O_WROK) == 0)
     {
-      *get_errno_ptr() = EBADF;
+      set_errno(EBADF);
       return ERROR;
     }
 

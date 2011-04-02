@@ -78,7 +78,7 @@ void stream_semtake(FAR struct streamlist *list)
        * the wait was awakened by a signal.
        */
 
-      ASSERT(*get_errno_ptr() == EINTR);
+      ASSERT(get_errno() == EINTR);
     }
 }
 

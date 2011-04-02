@@ -60,7 +60,7 @@ int fileno(FAR FILE *stream)
 
   if (ret < 0)
     {
-      errno = EBADF;
+      set_errno(EBADF);
       return ERROR;
     }
   return ret;

@@ -145,7 +145,7 @@ double_t strtod(const char *str, char **endptr)
 
   if (num_digits == 0)
     {
-      errno = ERANGE;
+      set_errno(ERANGE);
       return 0.0;
     }
 
@@ -193,7 +193,7 @@ double_t strtod(const char *str, char **endptr)
   if (exponent < __DBL_MIN_EXP__ ||
       exponent > __DBL_MAX_EXP__)
     {
-      errno = ERANGE;
+      set_errno(ERANGE);
       return infinite;
     }
 
@@ -219,8 +219,15 @@ double_t strtod(const char *str, char **endptr)
       p10 *= p10;
     }
 
-  if (!is_real(number)) errno = ERANGE;
-  if (endptr) *endptr = p;
+  if (!is_real(number))
+    {
+      set_errno(ERANGE);
+    }
+
+  if (endptr)
+    {
+      *endptr = p;
+    }
 
   return number;
 }

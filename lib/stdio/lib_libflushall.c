@@ -121,7 +121,7 @@ int lib_flushall(FAR struct streamlist *list)
                     * to flush all of the buffered write data.  Return EOF on failure.
                     */
 
-                   lasterrno = *get_errno_ptr();
+                   lasterrno = get_errno();
                    ret = ERROR;
                  }
              }
@@ -131,6 +131,9 @@ int lib_flushall(FAR struct streamlist *list)
 
   /* If any flush failed, return that last failed flush */
 
-  *get_errno_ptr() = lasterrno;
+  if (ret != OK)
+    {
+      set_errno(lasterrno);
+    }
   return ret;
 }

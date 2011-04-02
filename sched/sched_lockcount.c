@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sched_lockcount.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,10 +75,11 @@
  * Name: sched_lockcount
  *
  * Description:
- *   This function returns the current value of the lockcount.
- *   If zero, preemption is enabled; if non-zero, this value
- *   indicates the number of times that osTask() has been
- *   called on this thread of execution.
+ *   This function returns the current value of the lockcount. If zero,
+ *   pre-emption is enabled; if non-zero, this value indicates the number
+ *   of times that sched_lock() has been called on this thread of
+ *   execution.  sched_unlock() will have to called that many times from
+ *   this thread in order to re-enable pre-emption.
  *
  * Inputs:
  *   None
@@ -88,8 +89,9 @@
  *
  ************************************************************************/
 
-int32_t sched_lockcount(void)
+int sched_lockcount(void)
 {
    _TCB *rtcb = (_TCB*)g_readytorun.head;
-   return (int32_t)rtcb->lockcount;
+   return (int)rtcb->lockcount;
 }
+

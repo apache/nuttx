@@ -109,7 +109,7 @@ int sem_init (FAR sem_t *sem, int pshared, unsigned int value)
     }
   else
     {
-	  errno = -EINVAL;
+      set_errno(EINVAL);
 	  return ERROR;
     }
 }

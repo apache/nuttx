@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sig_ismember.c
+ * sched/errno_set.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,26 +37,20 @@
  * Included Files
  ****************************************************************************/
 
-#include <signal.h>
+#include <nuttx/config.h>
+
+#include <errno.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
+#undef get_errno_ptr
+#undef set_errno
+#undef errno
 
 /****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -64,37 +58,26 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: sigismember
+ * Function:  set_errno
  *
  * Description:
- *   This function tests whether the signal specified by signo is a member
- *   of the set specified by set.
+ *   Set the value of the thread specific errno.  This function is only
+ *   intended to provide a mechanism for user-mode programs to set the
+ *   thread-specific errno value.
  *
  * Parameters:
- *   set - Signal set to test
- *   signo - Signal to test for
+ *   errcode - The thread specific errno will be set to this error code value.
  *
  * Return Value:
- *   1 (true), if the specified signal is a member of the set,
- *   0 (OK or FALSE), if it is not, or
- *  -1 (ERROR) if the signal number is invalid.
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int sigismember(FAR const sigset_t *set, int signo)
+void set_errno(int errcode)
 {
-  int ret = ERROR;
-
-  /* Verify the signal */
-
-  if (GOOD_SIGNO(signo))
-    {
-      /* Check if the signal is in the set */
-
-      ret = ((*set & SIGNO2SET(signo)) != 0);
-    }
-
-  return ret;
+  *get_errno_ptr() = errcode;
 }
+
+

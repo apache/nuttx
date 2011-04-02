@@ -96,7 +96,7 @@ int lib_rdflush(FAR FILE *stream)
 {
   if (!stream)
     {
-      *get_errno_ptr() = EBADF;
+      set_errno(EBADF);
       return ERROR;
     }
 

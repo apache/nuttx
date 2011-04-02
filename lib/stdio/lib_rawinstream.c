@@ -66,7 +66,7 @@ static int rawinstream_getc(FAR struct lib_instream_s *this)
               return ch;
             }
         }
-      while (nwritten < 0 && errno == EINTR);
+      while (nwritten < 0 && get_errno() == EINTR);
     }
 
   return EOF;
