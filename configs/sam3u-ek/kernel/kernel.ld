@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam3u-ek/knsh/ld.script
+ * configs/sam3u-ek/kernal/kernel.ld
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -42,7 +42,7 @@
  *
  * For MPU support, the kernel-mode NuttX section is assumed to be 64Kb of
  * FLASH and 4Kb of SRAM.  That, of course, can be optimized as needed (See
- * also configs/sam3u-ek/kernel/kernel.ld.
+ * also configs/sam3u-ek/knsh/ld.script
  */
 
 MEMORY
@@ -63,7 +63,7 @@ MEMORY
 }
 
 OUTPUT_ARCH(arm)
-ENTRY(_stext)
+ENTRY(user_start)
 SECTIONS
 {
 	.text : {
@@ -80,7 +80,7 @@ SECTIONS
 		*(.gcc_except_table)
 		*(.gnu.linkonce.r.*)
 		_etext = ABSOLUTE(.);
-	} > kflash
+	} > uflash
 
 	_eronly = ABSOLUTE(.);
 
@@ -90,17 +90,17 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > ksram1 AT > kflash
+	} > usram1 AT > uflash
 
 	.ARM.extab : {
 		*(.ARM.extab*)
-	} >ksram1
+	} >usram1
 
 	.ARM.exidx : {
 		__exidx_start = ABSOLUTE(.);
 		*(.ARM.exidx*)
 		__exidx_end = ABSOLUTE(.);
-	} >ksram1
+	} >usram1
 
 	.bss : {
 		_sbss = ABSOLUTE(.);
@@ -108,7 +108,7 @@ SECTIONS
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	} > ksram1
+	} > usram1
 
 	/* Stabs debugging sections.	*/
 
