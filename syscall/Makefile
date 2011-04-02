@@ -97,7 +97,9 @@ context: .context
 
 clean:
 	@rm -f $(BIN1) $(BIN2) *~ .*.swp
+ifneq ($(OBJECT),)
 	@rm -f proxies/*$(OBJEXT) stubs/*$(OBJEXT)
+endif
 	$(call CLEAN)
 
 distclean: clean

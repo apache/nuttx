@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/sched_getprioritymax.c
+ * lib/mqueue/mq_getattr.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-
-#include "os_internal.h"
+#include <mqueue.h>
+#include <nuttx/mqueue.h>
 
 /************************************************************************
  * Definitions
@@ -60,10 +59,6 @@
  ************************************************************************/
 
 /************************************************************************
- * Private Function Prototypes
- ************************************************************************/
-
-/************************************************************************
  * Private Functions
  ************************************************************************/
 
@@ -72,31 +67,38 @@
  ************************************************************************/
 
 /************************************************************************
- * Name:  ched_get_priority_max
+ * Function:  mq_getattr
  *
  * Description:
- *   This function returns the value of the highest possible
- *   task priority for a specified scheduling policy.
+ *   This functions gets status information and attributes
+ *   associated with the specified message queue.
  *
- * Inputs:
- *   policy - Scheduling policy requested.
+ * Parameters:
+ *   mqdes - Message queue descriptor
+ *   mq_stat - Buffer in which to return attributes
  *
  * Return Value:
- *   The maximum priority value or -1 (ERROR)
- *   (errno is not set)
+ *   0 (OK) if attributes provided, -1 (ERROR) otherwise.
  *
  * Assumptions:
  *
  ************************************************************************/
 
-int sched_get_priority_max(int policy)
+int mq_getattr(mqd_t mqdes, struct mq_attr *mq_stat)
 {
-  if (policy != SCHED_FIFO && policy != SCHED_RR)
+  int ret = ERROR;
+
+  if (mqdes && mq_stat)
     {
-      return ERROR;
+      /* Return the attributes */
+
+      mq_stat->mq_maxmsg  = mqdes->msgq->maxmsgs;
+      mq_stat->mq_msgsize = mqdes->msgq->maxmsgsize;
+      mq_stat->mq_flags   = mqdes->oflags;
+      mq_stat->mq_curmsgs = mqdes->msgq->nmsgs;
+
+      ret = OK;
     }
-  else
-    {
-      return SCHED_PRIORITY_MAX;
-    }
+
+  return ret;
 }

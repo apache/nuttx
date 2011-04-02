@@ -218,6 +218,11 @@ static bool is_vararg(const char *type, int index, int nparms)
           fprintf(stderr, "%d: ... is not the last in the argument list\n", g_lineno);
           exit(11);
         }
+      else if (nparms < 2)
+        {
+          fprintf(stderr, "%d: Need one parameter before ...\n", g_lineno);
+          exit(14);
+        }
       return true;
     }
   return false;
@@ -321,12 +326,31 @@ static void generate_proxy(int nparms)
 {
   FILE *stream = open_proxy();
   char formal[MAX_PARMSIZE];
+  bool bvarargs = false;
+  int nformal;
+  int nactual;
   int i;
 
   /* Generate "up-front" information, include correct header files */
 
   fprintf(stream, "/* Auto-generated %s proxy file -- do not edit */\n\n", g_parm[NAME_INDEX]);
   fprintf(stream, "#include <nuttx/config.h>\n");
+
+  /* Does this function have a variable number of parameters?  If so then the
+   * final parameter type will be encoded as "..."
+   */
+
+  if (is_vararg(g_parm[PARM1_INDEX+nparms-1], nparms-1, nparms))
+    {
+      nformal = nparms-1;
+      bvarargs = true;
+      fprintf(stream, "#include <stdarg.h>\n");
+    }
+  else
+    {
+      nformal = nparms;
+    }
+
   fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
   fprintf(stream, "#include <syscall.h>\n\n");
 
@@ -339,15 +363,26 @@ static void generate_proxy(int nparms)
 
   fprintf(stream, "%s %s(", g_parm[RETTYPE_INDEX], g_parm[NAME_INDEX]);
 
-  if (nparms <= 0)
+  /* Generate the formal parameter list */
+
+  if (nformal <= 0)
     {
       fprintf(stream, "void");
     }
   else
     {
-      for (i = 0; i < nparms; i++)
+      for (i = 0; i < nformal; i++)
         {
+          /* The formal and actual parameter types may be encoded.. extra the
+           * formal parameter type.
+           */
+
           get_formalparmtype(g_parm[PARM1_INDEX+i], formal);
+
+          /* Arguments after the first must be separated from the preceding
+           * parameter with a comma.
+           */
+
           if (i > 0)
             {
               fprintf(stream, ", ");
@@ -355,24 +390,59 @@ static void generate_proxy(int nparms)
           print_formalparm(stream, formal, i+1);
         }
     }
-  fprintf(stream, ")\n{\n");
 
-  /* Generate the system call.  Functions that do not return or return void are special cases */
+  /* Handle the end of the formal parameter list */
 
-  if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0)
+  if (bvarargs)
     {
-      fprintf(stream, "  (void)sys_call%d(", nparms);
+       fprintf(stream, ", ...)\n{\n");
+
+       /* Get parm variables .. some from the parameter list and others from
+        * the varargs.
+        */
+
+       if (nparms < 7)
+         {
+           fprintf(stream, "  va_list ap;\n");
+           for (i = nparms; i < 7; i++)
+             {
+               fprintf(stream, "  uintptr_t parm%d;\n", i);
+             }
+
+           fprintf(stream, "\n  va_start(ap, parm%d);\n", nparms-1);
+           for (i = nparms; i < 7; i++)
+             {
+               fprintf(stream, "  parm%d = va_arg(ap, uintptr_t);\n", i);
+             }
+           fprintf(stream, "  va_end(ap);\n\n");
+         }
     }
   else
     {
-      fprintf(stream, "  return (%s)sys_call%d(", g_parm[RETTYPE_INDEX], nparms);
+      fprintf(stream, ")\n{\n");
     }
 
-  /* Create the parameter list with the matching types.  The first parametr is always the syscall number. */
+  /* Generate the system call.  Functions that do not return or return void
+   * are special cases.
+   */
+
+  nactual = bvarargs ? 6 : nparms;
+  if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0)
+    {
+      fprintf(stream, "  (void)sys_call%d(", nactual);
+    }
+  else
+    {
+      fprintf(stream, "  return (%s)sys_call%d(", g_parm[RETTYPE_INDEX], nactual);
+    }
+
+  /* Create the parameter list with the matching types.  The first parameter
+   * is always the syscall number.
+   */
 
   fprintf(stream, "(unsigned int)SYS_%s", g_parm[NAME_INDEX]);
 
-  for (i = 0; i < nparms; i++)
+  for (i = 0; i < nactual; i++)
     {
       fprintf(stream, ", (uintptr_t)parm%d", i+1);
     }
@@ -455,6 +525,10 @@ static void generate_stub(int nparms)
 
   /* Generate the function definition that matches standard function prototype */
 
+  if (g_inline)
+    {
+      fprintf(stream, "static inline ");
+    }
   fprintf(stream, "uintptr_t STUB_%s(", g_parm[NAME_INDEX]);
 
   /* Generate the formal parameter list.  A function received no parameters is a special case. */
@@ -479,7 +553,7 @@ static void generate_stub(int nparms)
                 {
                   /* Always receive six arguments in this case */
 
-                  for (j = i+1; j <=6; j++)
+                  for (j = i+1; j <= 6; j++)
                     {
                       fprintf(stream, ", uintptr_t parm%d", j);
                     }

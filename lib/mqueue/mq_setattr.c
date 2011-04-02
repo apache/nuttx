@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/mq_getattr.c
+ * lib/mqueue/mq_setattr.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,18 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>         /* va_list */
-#include <unistd.h>
-#include <string.h>
-#include <assert.h>
+#include <fcntl.h>          /* O_NONBLOCK */
 #include <mqueue.h>
-#include <sched.h>
-#include <debug.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/arch.h>
-#include "os_internal.h"
-#include "sig_internal.h"
-#include "mq_internal.h"
+
+#include <nuttx/mqueue.h>
 
 /************************************************************************
  * Definitions
@@ -77,36 +69,48 @@
  ************************************************************************/
 
 /************************************************************************
- * Function:  mq_getattr
+ * Function:  mq_setattr
  *
  * Description:
- *   This functions gets status information and attributes
- *   associated with the specified message queue.
+ *   This function sets the attributes associated with the
+ *   specified message queue "mqdes."  Only the "O_NONBLOCK"
+ *   bit of the "mq_flags" can be changed.
+ *
+ *   If "oldstat" is non-null, mq_setattr() will store the
+ *   previous message queue attributes at that location (just
+ *   as would have been returned by mq_getattr()).
  *
  * Parameters:
  *   mqdes - Message queue descriptor
- *   mq_stat - Buffer in which to return attributes
+ *   mq_stat - New attributes
+ *   oldstate - Old attributes
  *
  * Return Value:
- *   0 (OK) if attributes provided, -1 (ERROR) otherwise.
+ *   0 (OK) if attributes are set successfully, otherwise
+ *   -1 (ERROR).
  *
  * Assumptions:
  *
  ************************************************************************/
 
-int mq_getattr(mqd_t mqdes, struct mq_attr *mq_stat)
+int mq_setattr(mqd_t mqdes, const struct mq_attr *mq_stat,
+               struct mq_attr *oldstat)
 {
   int ret = ERROR;
 
   if (mqdes && mq_stat)
     {
-      /* Return the attributes */
+      /* Return the attributes if so requested */
 
-      mq_stat->mq_maxmsg  = mqdes->msgq->maxmsgs;
-      mq_stat->mq_msgsize = mqdes->msgq->maxmsgsize;
-      mq_stat->mq_flags   = mqdes->oflags;
-      mq_stat->mq_curmsgs = mqdes->msgq->nmsgs;
+      if (oldstat)
+        {
+          (void)mq_getattr(mqdes, oldstat);
+        }
 
+      /* Set the new value of the O_NONBLOCK flag. */
+
+      mqdes->oflags = ((mq_stat->mq_flags & O_NONBLOCK) |
+                       (mqdes->oflags & (~O_NONBLOCK)));
       ret = OK;
     }
 

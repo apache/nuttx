@@ -53,7 +53,6 @@ TSK_SRCS	= task_create.c task_init.c task_setup.c task_activate.c \
 SCHED_SRCS	= sched_setparam.c sched_setpriority.c sched_getparam.c \
 		  sched_setscheduler.c sched_getscheduler.c \
 		  sched_yield.c sched_rrgetinterval.c sched_foreach.c \
-		  sched_getprioritymax.c sched_getprioritymin.c \
 		  sched_lock.c sched_unlock.c sched_lockcount.c
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 SCHED_SRCS	+= sched_reprioritize.c 
@@ -88,11 +87,9 @@ SIGNAL_SRCS	= sig_initialize.c \
 		  sig_releasependingsignal.c sig_lowest.c sig_mqnotempty.c \
 		  sig_cleanup.c sig_received.c sig_deliver.c
 
-MQUEUE_SRCS	= mq_open.c mq_close.c mq_unlink.c \
-		  mq_send.c mq_timedsend.c mq_sndinternal.c \
-		  mq_receive.c mq_timedreceive.c mq_rcvinternal.c \
-		  mq_setattr.c mq_getattr.c mq_initialize.c mq_descreate.c \
-		  mq_findnamed.c mq_msgfree.c mq_msgqfree.c
+MQUEUE_SRCS	= mq_open.c mq_close.c mq_unlink.c mq_send.c mq_timedsend.c\
+		  mq_sndinternal.c mq_receive.c mq_timedreceive.c mq_rcvinternal.c \
+		  mq_initialize.c mq_descreate.c mq_findnamed.c mq_msgfree.c mq_msgqfree.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 MQUEUE_SRCS	+= mq_waitirq.c
 endif

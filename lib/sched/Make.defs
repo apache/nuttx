@@ -1,5 +1,5 @@
 ############################################################################
-# lib/stdlib/Make.defs
+# lib/sched/Make.defs
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,6 +33,6 @@
 #
 ############################################################################
 
-STDLIB_SRCS = lib_abs.c lib_abort.c lib_imaxabs.c lib_labs.c lib_llabs.c \
-		  lib_rand.c lib_qsort.c
+SCHED_SRCS = sched_getprioritymax.c sched_getprioritymin.c
+
 

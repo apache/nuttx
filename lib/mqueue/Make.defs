@@ -1,5 +1,5 @@
 ############################################################################
-# lib/stdlib/Make.defs
+# lib/mqueue/Make.defs
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,6 +33,7 @@
 #
 ############################################################################
 
-STDLIB_SRCS = lib_abs.c lib_abort.c lib_imaxabs.c lib_labs.c lib_llabs.c \
-		  lib_rand.c lib_qsort.c
+ifneq ($(CONFIG_DISABLE_MQUEUE),y)
+MQUEUE_SRCS	= mq_setattr.c mq_getattr.c
+endif
 

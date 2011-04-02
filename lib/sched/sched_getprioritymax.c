@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/mq_setattr.c
+ * lib/sched/sched_getprioritymax.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <fcntl.h>          /* O_NONBLOCK */
-#include <mqueue.h>
-#include "mq_internal.h"
+#include <nuttx/arch.h>
 
 /************************************************************************
  * Definitions
@@ -60,6 +58,10 @@
  ************************************************************************/
 
 /************************************************************************
+ * Private Function Prototypes
+ ************************************************************************/
+
+/************************************************************************
  * Private Functions
  ************************************************************************/
 
@@ -68,50 +70,31 @@
  ************************************************************************/
 
 /************************************************************************
- * Function:  mq_setattr
+ * Name:  ched_get_priority_max
  *
  * Description:
- *   This function sets the attributes associated with the
- *   specified message queue "mqdes."  Only the "O_NONBLOCK"
- *   bit of the "mq_flags" can be changed.
+ *   This function returns the value of the highest possible
+ *   task priority for a specified scheduling policy.
  *
- *   If "oldstat" is non-null, mq_setattr() will store the
- *   previous message queue attributes at that location (just
- *   as would have been returned by mq_getattr()).
- *
- * Parameters:
- *   mqdes - Message queue descriptor
- *   mq_stat - New attributes
- *   oldstate - Old attributes
+ * Inputs:
+ *   policy - Scheduling policy requested.
  *
  * Return Value:
- *   0 (OK) if attributes are set successfully, otherwise
- *   -1 (ERROR).
+ *   The maximum priority value or -1 (ERROR)
+ *   (errno is not set)
  *
  * Assumptions:
  *
  ************************************************************************/
 
-int mq_setattr(mqd_t mqdes, const struct mq_attr *mq_stat,
-               struct mq_attr *oldstat)
+int sched_get_priority_max(int policy)
 {
-  int ret = ERROR;
-
-  if (mqdes && mq_stat)
+  if (policy != SCHED_FIFO && policy != SCHED_RR)
     {
-      /* Return the attributes if so requested */
-
-      if (oldstat)
-        {
-          (void)mq_getattr(mqdes, oldstat);
-        }
-
-      /* Set the new value of the O_NONBLOCK flag. */
-
-      mqdes->oflags = ((mq_stat->mq_flags & O_NONBLOCK) |
-                       (mqdes->oflags & (~O_NONBLOCK)));
-      ret = OK;
+      return ERROR;
     }
-
-  return ret;
+  else
+    {
+      return SCHED_PRIORITY_MAX;
+    }
 }

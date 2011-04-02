@@ -51,6 +51,8 @@
 #include <sched.h>
 #include <signal.h>
 
+#include <nuttx/mqueue.h>
+
 #if CONFIG_MQ_MAXMSGSIZE > 0
 
 /****************************************************************************
@@ -100,43 +102,6 @@ struct mqmsg
   uint8_t      mail[MQ_MAX_BYTES]; /* Message data            */
 };
 typedef struct mqmsg mqmsg_t;
-
-/* This structure defines a message queue */
-
-struct mq_des; /* forward reference */
-
-struct msgq_s
-{
-  FAR struct msgq_s *flink;   /* Forward link to next message queue */
-  sq_queue_t   msglist;       /* Prioritized message list */
-  int16_t      maxmsgs;       /* Maximum number of messages in the queue */
-  int16_t      nmsgs;         /* Number of message in the queue */
-  int16_t      nconnect;      /* Number of connections to message queue */
-  int16_t      nwaitnotfull;  /* Number tasks waiting for not full */
-  int16_t      nwaitnotempty; /* Number tasks waiting for not empty */
-  uint8_t      maxmsgsize;    /* Max size of message in message queue */
-  bool         unlinked;      /* true if the msg queue has been unlinked */
-#ifndef CONFIG_DISABLE_SIGNALS
-  FAR struct mq_des *ntmqdes; /* Notification: Owning mqdes (NULL if none) */
-  pid_t        ntpid;         /* Notification: Receiving Task's PID */
-  int          ntsigno;       /* Notification: Signal number */
-  union sigval ntvalue;       /* Notification: Signal value */
-#endif
-  char         name[1];       /* Start of the queue name */
-};
-
-#define SIZEOF_MQ_HEADER ((int)(((msgq_t*)NULL)->name))
-
-/* This describes the message queue descriptor that is held in the
- * task's TCB
- */
-
-struct mq_des
-{
-  FAR struct mq_des *flink;   /* Forward link to next message descriptor */
-  FAR msgq_t  *msgq;          /* Pointer to associated message queue */
-  int          oflags;        /* Flags set when message queue was opened */
-};
 
 /****************************************************************************
  * Global Variables

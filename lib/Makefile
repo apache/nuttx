@@ -37,9 +37,11 @@
 include stdio/Make.defs
 include stdlib/Make.defs
 include unistd/Make.defs
+include sched/Make.defs
 include string/Make.defs
 include pthread/Make.defs
 include semaphore/Make.defs
+include mqueue/Make.defs
 include math/Make.defs
 include net/Make.defs
 include time/Make.defs
@@ -50,10 +52,10 @@ include misc/Make.defs
 ASRCS = 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = $(STDIO_SRCS) $(STDLIB_SRCS) $(UNISTD_SRCS) $(STRING_SRCS) \
-		  $(PTHREAD_SRCS) $(SEM_SRCS) $(MATH_SRCS) $(NET_SRCS) \
-		  $(TIME_SRCS) $(LIBGEN_SRCS) $(QUEUE_SRCS) $(MISC_SRCS) \
-		  $(REGEX_SRCS) $(CRC_SRCS) $(DBG_SRCS) 
+CSRCS = $(STDIO_SRCS) $(STDLIB_SRCS) $(UNISTD_SRCS)  $(SCHED_SRCS) \
+		  $(STRING_SRCS) $(PTHREAD_SRCS) $(SEM_SRCS) $(MQUEUE_SRCS) \
+		  $(MATH_SRCS) $(NET_SRCS) $(TIME_SRCS) $(LIBGEN_SRCS) \
+		  $(QUEUE_SRCS) $(MISC_SRCS) $(REGEX_SRCS) $(CRC_SRCS) $(DBG_SRCS) 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
@@ -63,16 +65,18 @@ ROOTDEPPATH	= --dep-path .
 STDIODEPPATH = --dep-path stdio
 STDLIBDEPPATH = --dep-path stdlib
 UNISTDDEPPATH = --dep-path unistd
+SCHEDDEPPATH = --dep-path sched
 STRINGDEPPATH = --dep-path string
 PTHREADDEPPATH = --dep-path pthread
 SEMDEPPATH = --dep-path semaphore
+MQDEPPATH = --dep-path mqueue
 MATHDEPPATH = --dep-path math
 NETDEPPATH = --dep-path net
 TIMEDEPPATH = --dep-path time
 LIBGENDEPPATH = --dep-path libgen
 QUEUEDEPPATH = --dep-path queue
 MISCDEPPATH = --dep-path misc
-VPATH = stdio:stdlib:unistd:string:pthread:semaphore:math:net:time:libgen:queue:misc
+VPATH = stdio:stdlib:unistd:sched:string:pthread:semaphore:mqueue:math:net:time:libgen:queue:misc
 
 BIN = liblib$(LIBEXT)
 
@@ -91,9 +95,9 @@ $(BIN):	$(OBJS)
 
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(ROOTDEPPATH) $(STDIODEPPATH) $(STDLIBDEPPATH) \
-	  $(UNISTDDEPPATH) $(STRINGDEPPATH) $(PTHREADDEPPATH) $(SEMDEPPATH) \
-	  $(MATHDEPPATH) $(NETDEPPATH) $(TIMEDEPPATH) $(LIBGENDEPPATH) \
-	  $(QUEUEDEPPATH) $(MISCDEPPATH) \
+	  $(UNISTDDEPPATH) $(SCHEDDEPPATH) $(STRINGDEPPATH) $(PTHREADDEPPATH) \
+	  $(SEMDEPPATH) $(MQDEPPATH) $(MATHDEPPATH) $(NETDEPPATH) $(TIMEDEPPATH) \
+	  $(LIBGENDEPPATH) $(QUEUEDEPPATH) $(MISCDEPPATH) \
 	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 

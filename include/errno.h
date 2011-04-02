@@ -1,7 +1,7 @@
 /************************************************************************
  * include/errno.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,10 @@
 /* Convenience/compatibility definition */
 
 #define errno *get_errno_ptr()
+#ifndef CONFIG_NUTTX_KERNEL
+#  define set_errno(e) do { errno = (int)(a); } while (0)
+#  define get_errno(e) errno
+#endif
 
 /* Definitions of error numbers and the string that would be
  * returned by strerror().
@@ -317,9 +321,20 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Return a pointer to the thread specifid errno */
+/* Return a pointer to the thread specifid errno.  NOTE:  When doing a
+ * kernel-/user-mode build, this function can only be used within the
+ * kernel-mode space.
+ *
+ * In the user-mode space, set_errno() and get_errno() are always available,
+ * either as macros or via syscalls.
+ */
 
 EXTERN FAR int *get_errno_ptr(void);
+
+#ifdef CONFIG_NUTTX_KERNEL
+EXTERN void set_errno(int errcode);
+EXTERN int  get_errno(void);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

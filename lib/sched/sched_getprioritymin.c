@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/sched_getprioritymin.c
+ * lib/sched/sched_getprioritymin.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-
-#include "os_internal.h"
 
 /************************************************************************
  * Definitions
