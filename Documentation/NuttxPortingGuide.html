@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: April 1, 2011</p>
+      <p>Last Updated: April 3, 2011</p>
     </td>
   </tr>
 </table>
@@ -2034,7 +2034,7 @@ extern void up_ledoff(int led);
 <ul>
   <li>
     <p>
-    <b><code>include/nuttx/i2c.h</code></b>.
+    <b><code>include/nuttx/i2c/i2c.h</code></b>.
     All structures and APIs needed to work with I2C drivers are provided in this header file.
     </p>
   </li>
@@ -2790,7 +2790,7 @@ build
   Two-pass Build Options.
   If the 2 pass build option is selected, then these options configure the make system build a extra link object.
   This link object is assumed to be an incremental (relative) link object, but could be a static library (archive)
-  (some modification to this Makefile would be required if CONFIG_PASS1_OBJECT is an archive).
+  (some modification to this Makefile would be required if CONFIG_PASS1_TARGET generates an archive).
   Pass 1 1ncremental (relative) link objects should be put into the processor-specific source directory 
   where other link objects will be created - ff the pass1 obect is an archive, it could	go anywhere.
 </p>
@@ -2805,15 +2805,27 @@ build
 </p>
 <ul>
   <li>
-    <code>CONFIG_PASS1_OBJECT</code>: The name of the first pass object.
+    <p>
+      <code>CONFIG_PASS1_TARGET</code>: The name of the first pass build target.
+    </p>
   </li>
   <li><code>CONFIG_PASS1_BUILDIR</code>:
-  The path, relative to the top NuttX build directory to directory that contains the Makefile to build the first pass object.
-  The Makefile must support the following targets:
-  <ul>
-    <li>The special target <code>arch/$(CONFIG_ARCH)/src/$(CONFIG_PASS1_OBJECT)</code>, and</li>
-    <li>The usual depend, clean, and distclean targets.</li>
-  </ul>
+    <p>
+      The path, relative to the top NuttX build directory to directory that contains the Makefile to build the first pass object.
+      The Makefile must support the following targets:
+    </p>
+    <p>
+      <ul>
+        <li>The special target <code>CONFIG_PASS1_TARGET</code> (if defined), and</li>
+        <li>The usual depend, clean, and distclean targets.</li>
+      </ul>
+    </p>
+  </li>
+  <li>
+    <code>CONFIG_PASS1_OBJECT</code>: May be used to include an extra, pass1 object into the final link.
+    This would probably be the object generated from the <code>CONFIG_PASS1_TARGET</code>. 
+    It may be available at link time in the <code>arch/&lt;architecture&gt;/src</code> directory.
+  </li>
 </ul>
 
 <h2>General OS setup</h2>
