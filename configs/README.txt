@@ -211,8 +211,8 @@ defconfig -- This is a configuration file similar to the Linux
 	options configure the make system build a extra link object. This link object
 	is assumed to be an incremental (relative) link object, but could be a static
 	library (archive) (some modification to this Makefile would be required if
-	CONFIG_PASS1_OBJECT is an archive). Pass 1 1ncremental (relative) link objects
-	should be put into the processor-specific source directory (where other
+	CONFIG_PASS1_TARGET generates an archive). Pass 1 1ncremental (relative) link
+	objects	should be put into the processor-specific source directory (where other
 	link objects will be created).  If the pass1 obect is an archive, it could
 	go anywhere.
 
@@ -220,12 +220,18 @@ defconfig -- This is a configuration file similar to the Linux
 
 	When the two pass build option is enabled, the following also apply:
 
-		CONFIG_PASS1_OBJECT - The name of the first pass object.
+		CONFIG_PASS1_TARGET - The name of the first pass build target.  This
+		  can be specific build target, a special build target (all, default, etc.)
+		  or may just be left undefined.
 		CONFIG_PASS1_BUILDIR - The path, relative to the top NuttX build
 		  directory to directory that contains the Makefile to build the
 		  first pass object.  The Makefile must support the following targets:
-		  - The special target arch/$(CONFIG_ARCH)/src/$(CONFIG_PASS1_OBJECT)
+		  - The special target CONFIG_PASS1_TARGET (if defined)
 		  - and the usual depend, clean, and distclean targets.
+		CONFIG_PASS1_OBJECT - May be used to include an extra, pass1 object
+		  into the final link.  This would probably be the object generated
+		  from the CONFIG_PASS1_TARGET.  It may be available at link time
+		  in the arch/<architecture>/src directory.
 
 	General OS setup
 

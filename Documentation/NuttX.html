@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 30, 2011</p>
+      <p>Last Updated: April 3, 2011</p>
     </td>
   </tr>
 </table>
@@ -2188,11 +2188,28 @@ nuttx-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * syscall/: The beginnings of an optional syscall kernel interface.
     * tools/mksyscall.c:  Add a tool that will auto-generate syscall proxies
       and stubs from a comma-separated-value (CSV) data file.
+    * arch/arm/src/cortexm3/mpu.h: Add a header file describing the Cortex-M3
+      MPU registers.
+    * Numerous modifications to the build system.  Various people have reported
+      build problems since the re-organization and release of NuttX-6.0.  I am
+      unable to replicate the build problems in my environment, but the changes
+      have be incorporated in hope of correcting the build issues in other
+      environments.
+    * drivers/i2c/st_lis331dl.c:  I2C-based driver for the LIS331DL MEMS
+      motion sensor.  Contributed by Uros Platise.
+    * Makefile: The NuttX build system  will now supported building NuttX as two
+      separately linked images: (1) a kernel-mode RTOS image, and (2) a user-
+      mode application image that communicates to the RTOS kernel via system
+      calls.  A lot more still must be done.
 
 apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * Creation of auto-generated header files now occurs during the context
       build phase.
+    * Added sdcard insert and eject, nsh command '?' and some code remarks
+    * Renamed nuttapp to namedapp
+    * namedapp/binfs.c -- Create a tiny filesystem that can be used
+      to show the internal named apps under /bin.
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

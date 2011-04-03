@@ -94,6 +94,13 @@ include mtd/Make.defs
 ROOTDEPPATH	= --dep-path .
 MTDDEPPATH	= --dep-path mtd
 
+ifeq ($(CONFIG_I2C),y)
+include i2c/Make.defs
+ROOTDEPPATH	= --dep-path .
+I2CDEPPATH	= --dep-path i2c
+CFLAGS		+= ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/i2c}
+endif
+
 ASRCS		= $(SERIAL_ASRCS) $(NET_ASRCS) $(PIPE_ASRCS) $(USBDEV_ASRCS) \
 			  $(USBHOST_ASRCS) $(MMCSD_ASRCS) $(LCD_ASRCS) $(BCH_ASRCS) \
 			  $(MTD_ASRCS)

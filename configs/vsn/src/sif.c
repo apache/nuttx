@@ -70,7 +70,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c.h>
 #include <semaphore.h>
 
 #include <stdio.h>
@@ -80,6 +80,7 @@
 #include <errno.h>
 
 #include "vsn.h"
+#include <nuttx/i2c/st_lis331dl.h>
 
 
 /****************************************************************************
@@ -272,23 +273,6 @@ int sif_gpios_unlock(vsn_sif_state_t peripheral)
 }
 
 
-/****************************************************************************
- * ST LIS331DL
- ****************************************************************************/ 
-
-void st_lis331dl_open(void)
-{
-}
-
-
-void st_lis331dl_config(void)
-{
-}
-
-
-void st_lis331dl_getreadings(void)
-{
-}
 
 
 /****************************************************************************
@@ -518,7 +502,32 @@ int sif_main(int argc, char *argv[])
             STM32_TIM_SETCOMPARE(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, val);
             return 0;
         }
-        else if (!strcmp(argv[1], "c")) {
+        else if (!strcmp(argv[1], "i2c") && argc == 3) {
+            int val = atoi(argv[2]);
+            struct st_lis331dl_dev_s * lis = st_lis331dl_init(vsn_sif.i2c1, val);
+
+            if (lis) {
+                struct st_lis331dl_vector_s * a;
+                int i;
+                
+                /* Sample some values */
+                
+                for (i=0; i<20; i++) {
+                    if ( (a = st_lis331dl_getreadings(lis)) ) 
+                        printf("%d %d %d\n", a->x, a->y, a->z);
+                    else {
+                        printf("Readings errno %d\n", errno);
+                        break;
+                    }
+                    fflush(stdout);
+                    usleep(100000);
+                }
+                
+                st_lis331dl_deinit(lis);
+            }
+            else printf("Exit point: errno=%d\n", errno);
+
+            return 0;
         }
     }
 

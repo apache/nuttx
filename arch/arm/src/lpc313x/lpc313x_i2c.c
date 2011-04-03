@@ -50,7 +50,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c.h>
 
 #include <arch/irq.h>
 #include <arch/board/board.h>

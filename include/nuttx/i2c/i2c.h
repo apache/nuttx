@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/i2c.h
+ * include/nuttx/i2c/i2c.h
  *
  *   Copyright(C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NUTTX_I2C_H
-#define __NUTTX_I2C_H
+#ifndef __INCLUDE_NUTTX_I2C_I2C_H
+#define __INCLUDE_NUTTX_I2C_I2C_H
 
 /****************************************************************************
  * Included Files
@@ -75,6 +75,7 @@
 
 #define I2C_M_READ           0x0001          /* read data, from slave to master */
 #define I2C_M_TEN            0x0002          /* ten bit address */
+#define I2C_M_NORESTART      0x0080          /* message should not begin with (re-)start of transfer */
 
 /* Access macros */
 
@@ -182,6 +183,28 @@
  ****************************************************************************/
 
 #define I2C_READ(d,b,l) ((d)->ops->read(d,b,l))
+
+/****************************************************************************
+ * Name: I2C_WRITEREAD
+ *
+ * Description:
+ *   Send a block of data on I2C using the previously selected I2C
+ *   frequency and slave address, followed by restarted read access. 
+ *   It provides a convenient wrapper to the transfer function.
+ *
+ * Input Parameters:
+ *   dev -    Device-specific state data
+ *   wbuffer - A pointer to the read-only buffer of data to be written to device
+ *   wbuflen - The number of bytes to send from the buffer
+ *   rbuffer - A pointer to a buffer of data to receive the data from the device
+ *   rbuflen - The requested number of bytes to be read
+ *
+ * Returned Value:
+ *   0: success, <0: A negated errno
+ *
+ ****************************************************************************/
+
+#define I2C_WRITEREAD(d,wb,wl,rb,rl) ((d)->ops->writeread(d,wb,wl,rb,rl))
 
 /****************************************************************************
  * Name: I2C_TRANSFER
@@ -307,4 +330,4 @@ EXTERN int up_i2cuninitialize(FAR struct i2c_dev_s * dev);
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __NUTTX_I2C_H */
+#endif /* __INCLUDE_NUTTX_I2C_I2C_H */

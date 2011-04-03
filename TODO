@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 16 2011)
+NuttX TODO List (Last updated April 2 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -19,7 +19,7 @@ nuttx/
   (1)  Documentation (Documentation/)
   (5)  Build system / Toolchains
   (7)  Linux/Cywgin simulation (arch/sim)
-  (3)  ARM (arch/arm/)
+  (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/i.MX (arch/arm/src/imx/)
@@ -611,6 +611,14 @@ o ARM (arch/arm/)
                of the context save and restore logic.
   Status:      Open
   Priority:    Low
+
+  Description: The ARM interrupt handling (arch/arm/src/arm/up_vectors.S) returns
+               using 'ldmia   sp, {r0-r15}^'  My understanding is that this works
+               fine because everything is in kernel-mode.  In an operating model
+               where applications run in user mode and interrupts/traps run in
+               kernel-mode, I think that there is a problem with this.
+  Status:      Open
+  Priority:    Low until I get around to implement security for the ARM platform.
 
 o ARM/C5471 (arch/arm/src/c5471/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

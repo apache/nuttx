@@ -67,6 +67,8 @@ all: $(TOPDIR)/nuttx_user.elf $(TOPDIR)/User.map $(BOARD_INCLUDE)/user_map.h
 
 nuttx_user.elf:
 	@echo "LD:  nuttx_user.elf"
+	echo "USER_LDLIBS: $(USER_LDLIBS)"
+	echo "USER_LIBPATHS: $(USER_LIBPATHS)"
 	@$(LD) -o $@ $(USER_LDFLAGS) $(USER_LIBPATHS) --start-group $(USER_LDLIBS) --end-group $(USER_LIBGCC) 
 
 $(TOPDIR)/nuttx_user.elf: nuttx_user.elf

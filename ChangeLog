@@ -1642,5 +1642,14 @@
 	  unable to replicate the build problems in my environment, but the changes
 	  have be incorporated in hope of correcting the build issues in other
 	  environments.
+	* drivers/i2c/st_lis331dl.c:  I2C-based driver for the LIS331DL MEMS
+	  motion sensor.  Contributed by Uros Platise.
+	* Makefile: The NuttX build system  will now supported building NuttX as two
+	  separately linked images: (1) a kernel-mode RTOS image, and (2) a user-
+	  mode application image that communicates to the RTOS kernel via system
+	  calls.  A lot more still must be done.
+
+
+
  
 

@@ -153,7 +153,6 @@ CLEANDIRS	+= net
 # be created).  If the pass1 obect is an archive, it could go anywhere.
 
 ifeq ($(CONFIG_BUILD_2PASS),y)
-#EXTRA_OBJS	= $(TOPDIR)/$(CONFIG_PASS1_BUILDIR)/$(CONFIG_PASS1_OBJECT)
 EXTRA_OBJS	+= $(CONFIG_PASS1_OBJECT)
 endif
 
@@ -168,11 +167,12 @@ NUTTXLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEX
 		  lib/liblib$(LIBEXT)
 USERLIBS	=
 
-# Add libraries for syscall support.
+# Add libraries for syscall support.  The C library will be needed by
+# both the kernel- and user-space builds.
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 NUTTXLIBS	+= syscall/libstubs$(LIBEXT)
-USERLIBS	+= syscall/libproxies$(LIBEXT)
+USERLIBS	+= syscall/libproxies$(LIBEXT) lib/liblib$(LIBEXT)
 endif
 
 # Add libraries for network support.  CXX, CXXFLAGS, and COMPILEXX must
@@ -334,19 +334,17 @@ syscall/libproxies$(LIBEXT): context
 	@$(MAKE) -C syscall TOPDIR="$(TOPDIR)" libproxies$(LIBEXT)
 
 # If the 2 pass build option is selected, then this pass1 target is
-# configured be build a extra link object. This is assumed to be an
-# incremental (relative) link object, but could be a static library
-# (archive); some modification to this Makefile would be required if
-# CONFIG_PASS1_OBJECT is an archive.
+# configured to built before the pass2 target.  This pass1 target may, as an
+# example, build an extra link object (CONFIG_PASS1_OBJECT) which may be an
+# incremental (relative) link object, but could be a static library (archive);
+# some modification to this Makefile would be required if CONFIG_PASS1_OBJECT
+# is an archive.  Exactly what is performed during pass1 or what it generates
+# is unknown to this makefule unless CONFIG_PASS1_OBJECT is defined.
 
 pass1deps: context depend $(USERLIBS)
 
 pass1: pass1deps
 ifeq ($(CONFIG_BUILD_2PASS),y)
-	@if [ -z "$(CONFIG_PASS1_OBJECT)" ]; then \
-		echo "ERROR: CONFIG_PASS1_OBJECT not defined"; \
-		exit 1; \
-	fi
 	@if [ -z "$(CONFIG_PASS1_BUILDIR)" ]; then \
 		echo "ERROR: CONFIG_PASS1_BUILDIR not defined"; \
 		exit 1; \
@@ -359,7 +357,7 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 		echo "ERROR: No Makefile in CONFIG_PASS1_BUILDIR"; \
 		exit 1; \
 	fi
-	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(NUTTXLIBS)" USERLIBS="$(USERLIBS)" "$(ARCH_SRC)/$(CONFIG_PASS1_OBJECT)"
+	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(NUTTXLIBS)" USERLIBS="$(USERLIBS)" "$(CONFIG_PASS1_TARGET)"
 endif
 
 pass2deps: context depend $(NUTTXLIBS)
