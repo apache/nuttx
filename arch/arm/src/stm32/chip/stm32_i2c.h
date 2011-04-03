@@ -102,7 +102,7 @@
 #define I2C_CR2_FREQ_SHIFT      (0)       /* Bits 5-0: Peripheral Clock Frequency */
 #define I2C_CR2_FREQ_MASK       (0x3f << I2C_CR2_FREQ_SHIFT)
 #define I2C_CR2_ITERREN         (1 << 8)  /* Bit 8: Error Interrupt Enable */
-#define I2C_CR2_ITEVTEN         (1 << 9)  /* Bit 9: Event Interrupt Enable */
+#define I2C_CR2_ITEVFEN         (1 << 9)  /* Bit 9: Event Interrupt Enable */
 #define I2C_CR2_ITBUFEN         (1 << 10) /* Bit 10: Buffer Interrupt Enable */
 #define I2C_CR2_DMAEN           (1 << 11) /* Bit 11: DMA Requests Enable */
 #define I2C_CR2_LAST            (1 << 12) /* Bit 12: DMA Last Transfer */
@@ -135,6 +135,7 @@
 #define I2C_SR1_BTF             (1 << 2)  /* Bit 2: Byte Transfer Finished */
 #define I2C_SR1_ADD10           (1 << 3)  /* Bit 3: 10-bit header sent (Master mode) */
 #define I2C_SR1_STOPF           (1 << 4)  /* Bit 4: Stop detection (Slave mode) */
+                                          /* Bit 5: Reserved */
 #define I2C_SR1_RXNE            (1 << 6)  /* Bit 6: Data Register not Empty (receivers) */
 #define I2C_SR1_TXE             (1 << 7)  /* Bit 7: Data Register Empty (transmitters) */
 #define I2C_SR1_BERR            (1 << 8)  /* Bit 8: Bus Error */
@@ -142,8 +143,11 @@
 #define I2C_SR1_AF              (1 << 10) /* Bit 10: Acknowledge Failure */
 #define I2C_SR1_OVR             (1 << 11) /* Bit 11: Overrun/Underrun */
 #define I2C_SR1_PECERR          (1 << 12) /* Bit 12: PEC Error in reception */
+                                          /* Bit 13: Reserved */
 #define I2C_SR1_TIMEOUT         (1 << 14) /* Bit 14: Timeout or Tlow Error */
 #define I2C_SR1_SMBALERT        (1 << 15) /* Bit 15: SMBus Alert */
+
+#define I2C_SR1_ERRORMASK       (I2C_SR1_BERR|I2C_SR1_ARLO|I2C_SR1_AF|I2C_SR1_OVR|I2C_SR1_PECERR)
 
 /* Status register 2 */
 
