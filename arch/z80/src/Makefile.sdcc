@@ -1,7 +1,7 @@
 ############################################################################
 # arch/z80/src/Makefile.sdcc
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -139,7 +139,7 @@ libarch$(LIBEXT): up_mem.h asm_mem.h $(OBJS)
 # This builds the libboard library in the board/ subdirectory 
 
 board/libboard$(LIBEXT):
-	$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
+	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
 # This target builds the final executable
 

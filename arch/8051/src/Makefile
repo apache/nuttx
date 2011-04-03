@@ -37,7 +37,7 @@
 
 CFLAGS		+= -I$(TOPDIR)/sched
 ASFLAGS		= -x -j -g -l -s -p
-CPPFLAGS	= $(ARCHINCLUDES) $(ARCHDEFINES) -D__ASSEMBLY__
+CPPFLAGS	= $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -D__ASSEMBLY__
 
 SSRCS		= 
 ASRCS		= $(SSRCS:.S=$(ASMEXT))
@@ -165,7 +165,7 @@ $(SDCCLIBDIR)/libmysdcc.lib: $(SDCCLIBDIR)/libsdcc.lib
 # This builds the libboard library in the board/ subdirectory 
 
 board/libboard$(LIBEXT):
-	$(MAKE) -C board TOPDIR=$(TOPDIR) libboard$(LIBEXT)
+	$(MAKE) -C board TOPDIR=$(TOPDIR) libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
 # This target builds the final executable
 
@@ -194,7 +194,7 @@ up_irqtest.ihx: $(TESTOBJS)
 	$(CC) $(LDFLAGS) -L. $(SDCCPATH) $(TESTLINKOBJS) $(TESTOBJS) $(TESTEXTRAOBJS) $(SDCCLIBS) -o $@
 
 irqtest:
-	$(MAKE) TOPDIR=../../.. up_irqtest.ihx
+	@$(MAKE) TOPDIR=../../.. up_irqtest.ihx
 
 # Build dependencies
 

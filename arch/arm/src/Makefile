@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/Makefile
 #
-#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,7 @@ libarch$(LIBEXT): $(OBJS)
 	done ; )
 
 board/libboard$(LIBEXT):
-	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
+	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
 nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx"
