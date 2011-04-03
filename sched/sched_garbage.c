@@ -38,8 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdlib.h>
+#include <nuttx/kmalloc.h>
 
 #include "os_internal.h"
 
@@ -111,7 +110,7 @@ void sched_garbagecollection(void)
 
       if (address)
         {
-          free(address);
+          kfree(address);
         }
     }
 }

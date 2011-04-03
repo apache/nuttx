@@ -106,7 +106,7 @@ endif
 # USERDIRS - When NuttX is build is a monolithic kernel, this provides the
 #   list of directories that must be built
 
-NONFSDIRS	= sched $(ARCH_SRC) mm $(NUTTX_ADDONS)
+NONFSDIRS	= sched $(ARCH_SRC) $(NUTTX_ADDONS)
 FSDIRS		= fs drivers binfmt
 NETFSDIRS	= fs drivers
 CONTEXTDIRS	= $(APPDIR)
@@ -115,9 +115,9 @@ USERDIRS	=
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 NONFSDIRS	+= syscall
 CONTEXTDIRS	+= syscall
-USERDIRS	+= syscall lib $(USER_ADDONS)
+USERDIRS	+= syscall lib mm $(USER_ADDONS)
 else
-NONFSDIRS	+= lib
+NONFSDIRS	+= lib mm
 endif
 
 ifeq ($(CONFIG_NX),y)
@@ -175,16 +175,18 @@ endif
 # USERLIBS is the list of libraries used to build the final user-space
 #   application
 
-NUTTXLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) mm/libmm$(LIBEXT) \
-		  lib/liblib$(LIBEXT)
+NUTTXLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) lib/liblib$(LIBEXT)
 USERLIBS	=
 
 # Add libraries for syscall support.  The C library will be needed by
-# both the kernel- and user-space builds.
+# both the kernel- and user-space builds.  For now, the memory manager (mm)
+# is placed in user space (only).
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 NUTTXLIBS	+= syscall/libstubs$(LIBEXT)
-USERLIBS	+= syscall/libproxies$(LIBEXT) lib/liblib$(LIBEXT)
+USERLIBS	+= syscall/libproxies$(LIBEXT) lib/liblib$(LIBEXT) mm/libmm$(LIBEXT)
+else
+NUTTXLIBS	+= mm/libmm$(LIBEXT)
 endif
 
 # Add libraries for network support.  CXX, CXXFLAGS, and COMPILEXX must
@@ -332,11 +334,6 @@ graphics/libgraphics$(LIBEXT): context
 syscall/libstubs$(LIBEXT): context
 	@$(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT) EXTRADEFINES=$(KDEFINE)
 
-# Still need to think about this one
-
-mm/libmm$(LIBEXT): context
-	@$(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT)
-
 # Possible user-mode builds
 
 lib/liblib$(LIBEXT): context
@@ -344,6 +341,9 @@ lib/liblib$(LIBEXT): context
 
 libxx/liblibxx$(LIBEXT): context
 	@$(MAKE) -C libxx TOPDIR="$(TOPDIR)" liblibxx$(LIBEXT)
+
+mm/libmm$(LIBEXT): context
+	@$(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT) EXTRADEFINES=$(KDEFINE)
 
 $(APPDIR)/libapps$(LIBEXT): context
 	@$(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)" libapps$(LIBEXT)

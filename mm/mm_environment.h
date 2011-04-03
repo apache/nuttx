@@ -114,7 +114,7 @@ extern void mm_addregion(FAR void *heapstart, size_t heapsize);
 # define mvdbg(format, arg...) printf(format, ##arg)
 
 #else
-# define mm_errno (*get_errno_ptr())
+# define mm_errno get_errno()
 #endif
 
 /****************************************************************************

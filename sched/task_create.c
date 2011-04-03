@@ -38,11 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sched.h>
 #include <errno.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
+
 #include "os_internal.h"
 #include "env_internal.h"
 
@@ -121,10 +125,10 @@ int task_create(const char *name, int priority,
 
   /* Allocate a TCB for the new task. */
 
-  tcb = (FAR _TCB*)kzmalloc(sizeof(_TCB));
+  tcb = (FAR _TCB*)kzalloc(sizeof(_TCB));
   if (!tcb)
     {
-      *get_errno_ptr() = ENOMEM;
+      errno = ENOMEM;
       return ERROR;
     }
 

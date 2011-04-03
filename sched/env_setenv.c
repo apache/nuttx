@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/env_setenv.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,9 @@
 #include <stdio.h>
 #include <sched.h>
 #include <string.h>
-#include <stdlib.h>
 #include <errno.h>
+
+#include <nuttx/kmalloc.h>
 
 #include "os_internal.h"
 #include "env_internal.h"
@@ -156,7 +157,7 @@ int setenv(const char *name, const char *value, int overwrite)
   if (envp)
     {
       int        alloc = envp->ev_alloc;
-      environ_t *tmp   = (environ_t*)realloc(envp, SIZEOF_ENVIRON_T(alloc + varlen));
+      environ_t *tmp   = (environ_t*)krealloc(envp, SIZEOF_ENVIRON_T(alloc + varlen));
       if (!tmp)
         {
           ret = ENOMEM;
@@ -169,7 +170,7 @@ int setenv(const char *name, const char *value, int overwrite)
     }
   else
     {
-      envp = (environ_t*)malloc(SIZEOF_ENVIRON_T(varlen));
+      envp = (environ_t*)kmalloc(SIZEOF_ENVIRON_T(varlen));
       if (!envp)
         {
           ret = ENOMEM;
@@ -196,7 +197,7 @@ int setenv(const char *name, const char *value, int overwrite)
 errout_with_lock:
   sched_unlock();
 errout:
-  *get_errno_ptr() = ret;
+  errno = ret;
   return ERROR;
 }
 

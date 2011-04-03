@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/kmalloc.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,21 +63,28 @@ extern "C" {
 # include <stdlib.h>
 # define kmalloc(s) malloc(s)
 #else
-KMALLOC_EXTERN FAR void  *kmalloc(size_t);
+KMALLOC_EXTERN FAR void *kmalloc(size_t);
 #endif
 
-#ifndef CONFIG_ARCH_KZMALLOC
+#ifndef CONFIG_ARCH_KZALLOC
 # include <stdlib.h>
-# define kzmalloc(s) zalloc(s)
+# define kzalloc(s) zalloc(s)
 #else
-KMALLOC_EXTERN FAR void  *kzalloc(size_t);
+KMALLOC_EXTERN FAR void *kzalloc(size_t);
+#endif
+
+#ifndef CONFIG_ARCH_KREALLOC
+# include <stdlib.h>
+# define krealloc(p,s) realloc(p,s)
+#else
+KMALLOC_EXTERN FAR void *krealloc(FAR void*, size_t);
 #endif
 
 #ifndef CONFIG_ARCH_KFREE
 # include <stdlib.h>
 # define kfree(p) free(p)
 #else
-KMALLOC_EXTERN void   kfree(FAR void*);
+KMALLOC_EXTERN void kfree(FAR void*);
 #endif
 
 /* Functions defined in os_list.c *******************************************/

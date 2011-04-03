@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/env_unsetenv.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,9 @@
 
 #include <sched.h>
 #include <string.h>
-#include <stdlib.h>
 #include <errno.h>
+
+#include <nuttx/kmalloc.h>
 
 #include "os_internal.h"
 #include "env_internal.h"
@@ -109,7 +110,7 @@ int unsetenv(const char *name)
       /* Reallocate the new environment buffer */
 
       alloc = envp->ev_alloc;
-      tmp   = (environ_t*)realloc(envp, SIZEOF_ENVIRON_T(alloc));
+      tmp   = (environ_t*)krealloc(envp, SIZEOF_ENVIRON_T(alloc));
       if (!tmp)
         {
           ret = ENOMEM;
@@ -127,7 +128,7 @@ int unsetenv(const char *name)
 errout_with_lock:
   sched_unlock();
 errout:
-  *get_errno_ptr() = ret;
+  errno = ret;
   return ERROR;
 }
 

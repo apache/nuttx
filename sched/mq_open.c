@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/mq_open.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -157,7 +157,7 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
                * of the message queue name+1.
                */
 
-              msgq = (FAR msgq_t*)kzmalloc(SIZEOF_MQ_HEADER + namelen + 1);
+              msgq = (FAR msgq_t*)kzalloc(SIZEOF_MQ_HEADER + namelen + 1);
               if (msgq)
                 {
                   /* Create a message queue descriptor for the TCB */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/env_dup.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,9 @@
 #include <sched.h>
 #include <string.h>
 #include <errno.h>
+
+#include <nuttx/kmalloc.h>
+
 #include "os_internal.h"
 #include "env_internal.h"
 
@@ -101,7 +104,7 @@ int env_dup(FAR _TCB *ptcb)
           /* Yes..The parent task has an environment, duplicate it */
 
           size_t envlen =  parent->envp->ev_alloc;
-          envp          = (environ_t*)malloc(SIZEOF_ENVIRON_T( envlen ));
+          envp          = (environ_t*)kmalloc(SIZEOF_ENVIRON_T( envlen ));
           if (!envp)
             {
               ret = -ENOMEM;

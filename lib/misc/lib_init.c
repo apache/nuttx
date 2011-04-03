@@ -1,7 +1,7 @@
 /************************************************************
- * lib_init.c
+ * lib/misc/lib_init.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,12 +37,16 @@
  * Included Files
  ************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <nuttx/kmalloc.h>
+
 #include <nuttx/fs.h>
 #include <nuttx/lib.h>
+
 #include "lib_internal.h"
 
 /************************************************************
@@ -79,7 +83,7 @@ void weak_const_function lib_initialize(void)
 FAR struct streamlist *lib_alloclist(void)
 {
   FAR struct streamlist *list;
-  list = (FAR struct streamlist*)kzmalloc(sizeof(struct streamlist));
+  list = (FAR struct streamlist*)zalloc(sizeof(struct streamlist));
   if (list)
     {
       int i;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread_create.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -262,7 +262,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Allocate a TCB for the new task. */
 
-  ptcb = (FAR _TCB*)kzmalloc(sizeof(_TCB));
+  ptcb = (FAR _TCB*)kzalloc(sizeof(_TCB));
   if (!ptcb)
     {
       return ENOMEM;
@@ -283,7 +283,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Allocate a detachable structure to support pthread_join logic */
 
-  pjoin = (FAR join_t*)kzmalloc(sizeof(join_t));
+  pjoin = (FAR join_t*)kzalloc(sizeof(join_t));
   if (!pjoin)
     {
       sched_releasetcb(ptcb);

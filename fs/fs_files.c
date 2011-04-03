@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_files.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <assert.h>
 #include <sched.h>
 #include <errno.h>
+
 #include <nuttx/fs.h>
 #include <nuttx/kmalloc.h>
 
@@ -157,7 +158,7 @@ void files_initialize(void)
 FAR struct filelist *files_alloclist(void)
 {
   FAR struct filelist *list;
-  list = (FAR struct filelist*)kzmalloc(sizeof(struct filelist));
+  list = (FAR struct filelist*)kzalloc(sizeof(struct filelist));
   if (list)
     {
        /* Start with a reference count of one */

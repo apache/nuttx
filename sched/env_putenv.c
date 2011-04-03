@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/env_putenv.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,9 @@
 
 #include <sched.h>
 #include <string.h>
-#include <stdlib.h>
 #include <errno.h>
+
+#include <nuttx/kmalloc.h>
 
 /****************************************************************************
  * Private Data
@@ -106,11 +107,12 @@ int putenv(FAR const char *string)
       *pequal = '\0';
       ret = setenv(pname, pequal+1, TRUE);
     }
-  free(pname);
+
+  kfree(pname);
   return ret;
 
 errout:
-  *get_errno_ptr() = ret;
+  errno = ret;
   return ERROR;
 }
 

@@ -93,7 +93,7 @@ int up_create_stack(_TCB *tcb, size_t stack_size)
 
    if (!tcb->stack_alloc_ptr)
      {
-       tcb->stack_alloc_ptr = (uint32_t*)kzmalloc(stack_size);
+       tcb->stack_alloc_ptr = (uint32_t*)kzalloc(stack_size);
      }
 
    if (tcb->stack_alloc_ptr)

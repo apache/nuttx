@@ -121,7 +121,7 @@ void net_initialize(void)
 FAR struct socketlist *net_alloclist(void)
 {
   FAR struct socketlist *list;
-  list = (FAR struct socketlist*)kzmalloc(sizeof(struct socketlist));
+  list = (FAR struct socketlist*)kzalloc(sizeof(struct socketlist));
   if (list)
     {
        /* Start with a reference count of one */

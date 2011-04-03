@@ -1,7 +1,7 @@
 /****************************************************************************
  * eched/env_dupenv.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,9 @@
 
 #include <sys/types.h>
 #include <sched.h>
-#include <stdlib.h>
+
+#include <nuttx/kmalloc.h>
+
 #include "os_internal.h"
 
 /****************************************************************************
@@ -91,7 +93,7 @@ FAR environ_t *dupenv(FAR _TCB *ptcb)
       /* Yes..The parent task has an environment, duplicate it */
 
       size_t envlen =  ptcb->envp->ev_alloc
-      envp          = (environ_t*)malloc(SIZEOF_ENVIRON_T( envlen ));
+      envp          = (environ_t*)kmalloc(SIZEOF_ENVIRON_T( envlen ));
       if (envp)
         {
           envp->ev_crefs = 1;
@@ -99,6 +101,7 @@ FAR environ_t *dupenv(FAR _TCB *ptcb)
           memcmp( envp->ev_env, ptcb->envp->ev_env, envlen );
         }
     }
+
   sched_unlock();
   return envp;
 }
