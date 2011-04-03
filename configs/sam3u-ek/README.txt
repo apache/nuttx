@@ -306,12 +306,25 @@ can be selected as follow:
 	cd -
 	. ./setenv.sh
 
-Where <subdir> is one of the following:
+Before sourcing the setenv.sh file above, you should examine it and perform
+edits as necessary so that BUILDROOT_BIN is the correct path to the directory
+than holds your toolchain binaries.
+
+And then build NuttX by simply typing the following.  At the conclusion of
+the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+
+	make
+
+The <subdir> that is provided above as an argument to the tools/configure.sh
+must be is one of the following:
 
   knsh:
     This is identical to the nsh configuration below except that NuttX
     is built as a kernel-mode, monolithic module and the user applications
-    are built separately.
+    are built separately.  This build requires a special make command; not
+    just 'make' but make with the following two arguments:
+
+	make pass1 pass2
 
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The

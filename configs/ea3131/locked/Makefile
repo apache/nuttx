@@ -77,7 +77,7 @@ PASS1_LIBGCC	= "${shell $(CC) -print-libgcc-file-name}"
 
 # Targets:
 
-all: locked.r
+all: $(PASS1_SRCDIR)/locked.r
 
 .PHONY:	depend clean distclean
 

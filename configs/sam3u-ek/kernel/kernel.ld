@@ -64,6 +64,7 @@ MEMORY
 
 OUTPUT_ARCH(arm)
 ENTRY(user_start)
+EXTERN(user_start)
 SECTIONS
 {
 	.text : {
