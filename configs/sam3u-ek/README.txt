@@ -324,7 +324,13 @@ must be is one of the following:
     are built separately.  This build requires a special make command; not
     just 'make' but make with the following two arguments:
 
-	make pass1 pass2
+	    make pass1 pass2
+
+    This is required because in the normal case (just 'make'), make will
+    create all dependencies then execute the pass1 and pass2 targets.  But
+    this example, pass2 depends on auto-generatd files produced during pass1.
+    This specall make command ('make pass1 pass2') will make the dependencies
+    separately for each pass.
 
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
