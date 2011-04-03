@@ -101,7 +101,7 @@ endif
 # USERDIRS - When NuttX is build is a monolithic kernel, this provides the
 #   list of directories that must be built
 
-NONFSDIRS	= sched lib $(ARCH_SRC) mm $(NUTTX_ADDONS)
+NONFSDIRS	= sched $(ARCH_SRC) mm $(NUTTX_ADDONS)
 FSDIRS		= fs drivers binfmt
 NETFSDIRS	= fs drivers
 CONTEXTDIRS	= $(APPDIR)
@@ -110,7 +110,9 @@ USERDIRS	=
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 NONFSDIRS	+= syscall
 CONTEXTDIRS	+= syscall
-USERDIRS	+= syscall $(USER_ADDONS)
+USERDIRS	+= syscall lib $(USER_ADDONS)
+else
+NONFSDIRS	+= lib
 endif
 
 ifeq ($(CONFIG_NX),y)
@@ -120,28 +122,33 @@ endif
 
 # CLEANDIRS are the directories that will clean in.  These are
 #   all directories that we know about.
-# MAKEDIRS are the directories in which we will build targets
+# KERNDEPDIRS are the directories in which we will build target dependencies.
+#   If NuttX and applications are built separately (CONFIG_NUTTX_KERNEL),
+#   then this holds only the directories containing kernel files.
+# USERDEPDIRS. If NuttX and applications are built separately (CONFIG_NUTTX_KERNEL),
+#   then this holds only the directories containing user files.
 
-CLEANDIRS	= $(NONFSDIRS) $(FSDIRS)
-MAKEDIRS	= $(NONFSDIRS)
+CLEANDIRS	= $(NONFSDIRS) $(FSDIRS) $(USERDIRS)
+KERNDEPDIRS	= $(NONFSDIRS)
+USERDEPDIRS	= $(USERDIRS)
 
-# Add file system directories to MAKEDIRS (they are already in CLEANDIRS)
+# Add file system directories to KERNDEPDIRS (they are already in CLEANDIRS)
 
 ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifeq ($(CONFIG_NET),y)
 ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
-MAKEDIRS	+= fs
+KERNDEPDIRS	+= fs
 endif
-MAKEDIRS	+= drivers
+KERNDEPDIRS	+= drivers
 endif
 else
-MAKEDIRS	+= $(FSDIRS)
+KERNDEPDIRS	+= $(FSDIRS)
 endif
 
-# Add networking directories to MAKEDIRS and CLEANDIRS
+# Add networking directories to KERNDEPDIRS and CLEANDIRS
 
 ifeq ($(CONFIG_NET),y)
-MAKEDIRS	+= net
+KERNDEPDIRS	+= net
 endif
 CLEANDIRS	+= net
 
@@ -341,7 +348,7 @@ syscall/libproxies$(LIBEXT): context
 # is an archive.  Exactly what is performed during pass1 or what it generates
 # is unknown to this makefule unless CONFIG_PASS1_OBJECT is defined.
 
-pass1deps: context depend $(USERLIBS)
+pass1deps: context pass1dep $(USERLIBS)
 
 pass1: pass1deps
 ifeq ($(CONFIG_BUILD_2PASS),y)
@@ -360,7 +367,7 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 	@$(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(NUTTXLIBS)" USERLIBS="$(USERLIBS)" "$(CONFIG_PASS1_TARGET)"
 endif
 
-pass2deps: context depend $(NUTTXLIBS)
+pass2deps: context pass2dep $(NUTTXLIBS)
 
 pass2: pass2deps
 	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(NUTTXLIBS)" $(BIN)
@@ -397,10 +404,17 @@ $(BIN): pass1deps pass2deps pass1 pass2
 download: $(BIN)
 	$(call DOWNLOAD, $<)
 
-depend: context
-	@for dir in $(MAKEDIRS) ; do \
+pass1dep: context
+	@for dir in $(USERDEPDIRS) ; do \
 		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" depend ; \
 	done
+
+pass2dep: context
+	@for dir in $(KERNDEPDIRS) ; do \
+		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" depend ; \
+	done
+
+depend: pass1dep pass2dep
 
 subdir_clean:
 	@for dir in $(CLEANDIRS) ; do \

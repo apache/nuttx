@@ -61,6 +61,7 @@ BIN1 = libproxies$(LIBEXT)
 BIN2 = libstubs$(LIBEXT)
 
 all: $(BIN1) $(BIN2)
+.PHONY: context depend clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -88,12 +89,13 @@ depend: .depend
 $(MKSYSCALL):
 	@$(MAKE) -C $(TOPDIR)/tools -f Makefile.host mksyscall
 
-.context: $(MKSYSCALL) syscall.csv
+.context: syscall.csv
+	echo "Rebuilding stubs and proxies"
 	@(cd proxies; $(MKSYSCALL) -p $(CSVFILE);)
 	@(cd stubs; $(MKSYSCALL) -s $(CSVFILE);)
 	@touch $@
 
-context: .context
+context: $(MKSYSCALL) .context
 
 clean:
 	@rm -f $(BIN1) $(BIN2) *~ .*.swp
