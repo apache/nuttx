@@ -1,7 +1,7 @@
 #!/bin/bash
-# tools/incdir.sh
+# tools/define.sh
 #
-#   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,11 +32,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+#
 # Handle command line options
+#
 
 progname=$0
 wintool=n
-usage="USAGE: $progname [-w] [-d] [-l] [-h] <compiler-path> <dir1> [<dir2> [<dir3> ...]]"
+usage="USAGE: $progname [-w] [-d] [-l] [-h] <compiler-path> <def1>[=val1] [<def2>[=val2] [<def3>[=val3] ...]]"
 advice="Try '$progname -h' for more information"
 
 while [ ! -z "$1" ]; do 
@@ -48,16 +50,20 @@ while [ ! -z "$1" ]; do
 		wintool=y
 		;;
 	-h )
-		echo "$progname is a tool for flexible generation of include path arguments for a"
-		echo "variety of different compilers in a variety of compilation environments"
+		echo "$progname is a tool for flexible generation of command line pre-processor"
+		echo "definitions arguments for a variety of diffent compilers in a variety of"
+		echo "compilation environments"
 		echo ""
 		echo $usage
 		echo ""
 		echo "Where:"
 		echo "	<compiler-path>"
 		echo "		The full path to your compiler"
-		echo "	<dir1> [<dir2> [<dir3> ...]]"
-		echo "		A list of include directories"
+		echo "	<def1> <def2> [<def3> ..."
+		echo "		A list of pre-preprocesser variable names to be defind."
+		echo "	[=val1] [=val2] [=val3]"
+		echo "		optional values to be assigned to each pre-processor variable."
+		echo "		If not supplied, the variable will be defined with no explicit value."
 		echo "	-w"
 		echo "		The compiler is a Windows native tool and requires Windows"
 		echo "		style pathnames like C:\\Program Files"
@@ -73,7 +79,7 @@ done
 
 ccpath=$1
 shift
-dirlist=$@
+varlist=$@
 
 if [ -z "$ccpath" ]; then
 	echo "Missing compiler path"
@@ -82,42 +88,40 @@ if [ -z "$ccpath" ]; then
 	exit 1
 fi
 
-if [ -z "$dirlist" ]; then
-	echo "Missing include directory list"
+if [ -z "$varlist" ]; then
+	echo "Missing definition list"
 	echo $usage
 	echo $advice
 	exit 1
 fi
 
 #
-# Most compilers support CFLAG options like '-I<dir>' to add include
-# file header paths.  Some (like the Zilog tools), do not.  This script
-# makes the selection of header file paths compiler independent.
+# Most compilers support CFLAG options like '-D<defn>' to add pre-processor
+# variable defintions.  Some (like the Zilog tools), do not.  This script
+# makes the selection of pre-processor definitions compiler independent.
 #
 # Below are all known compiler names (as found in the config/*/*/Make.defs
 # files).  If a new compiler is used that has some unusual syntax, then
 # additional logic needs to be added to this file.
 #
 #   NAME                        Syntax
-#   $(CROSSDEV)gcc              -I<dir1> -I<dir2> -I<dir3> ...
-#   sdcc                        -I<dir2> -I<dir2> -I<dir3> ...
-#   $(ZDSBINDIR)/ez8cc.exe      -usrinc:'<dir1>:<dir2>:<dir3>:...`
-#   $(ZDSBINDIR)/zneocc.exe     -usrinc:'<dir1>:<dir2>:<dir3>:...`
-#   $(ZDSBINDIR)/ez80cc.exe     -usrinc:'<dir1>:<dir2>:<dir3>:...`
+#   $(CROSSDEV)gcc              -D<def1> -D<def2> -D<def3> ...
+#   sdcc                        -D<def2> -D<def2> -D<def3> ...
+#   $(ZDSBINDIR)/ez8cc.exe      -define:<def1> -define:<def2> -define:<def3> ...
+#   $(ZDSBINDIR)/zneocc.exe     -define:<def1> -define:<def2> -define:<def3> ...
+#   $(ZDSBINDIR)/ez80cc.exe     -define:<def1> -define:<def2> -define:<def3> ...
 #
-# Furthermore, just to make matters more difficult, with Windows based
-# toolchains, we have to use the full windows-style paths to the header
-# files.
-
 os=`uname -o 2>/dev/null || echo "Other"`
 
+#
 # Let's assume that all GCC compiler paths contain the string gcc and
 # no non-GCC compiler pathes include this substring
-
+#
 gcc=`echo $ccpath | grep gcc`
 sdcc=`echo $ccpath | grep sdcc`
 
 if [ "X$os" = "XCygwin" ]; then
+	#
 	# We can treat Cygwin native toolchains just like Linux native
 	# toolchains in the Linux.  Let's assume:
 	# 1. GCC or SDCC are the only possible Cygwin native compilers
@@ -125,26 +129,28 @@ if [ "X$os" = "XCygwin" ]; then
 	#    on the command line (wintool=y)
 
 	if [ -z "$gcc" -a -z "$sdcc" ]; then
-	
+		#
 		# Not GCC or SDCC, must be Windows native
-		windows=yes
+		#
 		compiler=`cygpath -u "$ccpath"`
 	else
 		if [ "X$wintool" == "Xy" ]; then
-	
+			#
 			# It is a native GCC or SDCC compiler
-			windows=yes
+			#
 			compiler=`cygpath -u "$ccpath"`
 		else
+			#
 			# GCC or SDCC and not for Windows
-			windows=no
+			#
 			compiler="$ccpath"
 		fi
 	fi
 else
+	#
 	# Otherwise, we must be in a Linux environment where there are
 	# only Linux native toolchains
-	windows=no
+	#
 	compiler="$ccpath"
 fi
 exefile=`basename "$compiler"`
@@ -153,7 +159,7 @@ exefile=`basename "$compiler"`
 # a special output format as well as special paths
 
 if [ "X$exefile" = "Xez8cc.exe" -o "X$exefile" = "Xzneocc.exe" -o "X$exefile" = "Xez80cc.exe" ]; then
-	fmt=userinc
+	fmt=define
 else
 	fmt=std
 fi
@@ -161,50 +167,57 @@ fi
 # Now process each directory in the directory list
 
 unset response
-for dir in $dirlist; do
+for vardef in $varlist; do
 
-	# Verify that the include directory exists
+	varname=`echo $vardef | cut -d'=' -f1`
+	varvalue=`echo $vardef | cut -d'=' -f2`
 
-	if [ ! -d $dir ]; then
-		echo "Include path '$dir' does not exist"
-		echo $showusage
-		exit 1
-	fi
+    # Handle the output depending on if there is a value for the variable or not
 
-	# Check if the path needs to be extended for Windows-based tools under Cygwin
+	if [ -z "$varvalue" ]; then
 
-	if [ "X$windows" = "Xyes" ]; then
-		path=`cygpath -w $dir`
-	else
-		path=$dir
-	fi
+		# Handle the output using the selected format
 
-	# Handle the output using the selected format
+		if [ "X$fmt" = "Xdefine" ]; then
+			# Treat the first definition differently
 
-	if [ "X$fmt" = "Xuserinc" ]; then
-		# Treat the first directory differently
-
-		if [ -z "$response" ]; then
-			response="-usrinc:'"$path
+			if [ -z "$response" ]; then
+				response="-define:"$varname
+			else
+				response=$response" -define:$varname"
+			fi
 		else
-			response=$response":$path"
+			# Treat the first definition differently
+
+			if [ -z "$response" ]; then
+				response=-D$varname
+			else
+				response=$response" -D$varname"
+			fi
 		fi
 	else
-		# Treat the first directory differently
 
-		if [ -z "$response" ]; then
-			response=-I$path
+		# Handle the output using the selected format
+
+		if [ "X$fmt" = "Xdefine" ]; then
+			# Treat the first definition differently
+
+			if [ -z "$response" ]; then
+				response="-define:'"$varname=$varvalue
+			else
+				response=$response" -define:$varname=$varvalue"
+			fi
 		else
-			response=$response" -I$path"
+			# Treat the first definition differently
+
+			if [ -z "$response" ]; then
+				response=-D$varname=$varvalue
+			else
+				response=$response" -D$varname=$varvalue"
+			fi
 		fi
 	fi
 done
-
-if [ "X$fmt" = "Xuserinc" ]; then
-	response=$response"'"
-else
-	response=\"$response\"
-fi
 
 echo $response
 

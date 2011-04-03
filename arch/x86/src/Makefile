@@ -97,7 +97,7 @@ libarch$(LIBEXT): $(OBJS)
 	done ; )
 
 board/libboard$(LIBEXT):
-	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
+	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
 nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx$(EXEEXT)"

@@ -1,7 +1,7 @@
 ############################################################################
 # arch/z16/src/Makefile
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ WARCHSRCDIR	= $(ARCHSRCDIR)
 USRINCLUDES	= -I$(TOPDIR)/sched -I$(ARCHSRCDIR) -I$(ARCHSRCDIR)/common
 endif
 INCLUDES	= $(ARCHSTDINCLUDES) $(USRINCLUDES)
-CFLAGS		= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES)
+CFLAGS		= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
 CPPFLAGS	+= -I$(ARCHSRCDIR)
 ifeq ($(COMPILER),zneocc.exe)
 LDFLAGS 	= @"${shell cygpath -w $(ARCHSRCDIR)/nuttx.linkcmd}"
@@ -93,7 +93,7 @@ libarch$(LIBEXT): $(OBJS)
 	done ; )
 
 board/libboard$(LIBEXT):
-	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
+	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
 ifeq ($(COMPILER),zneocc.exe)
 nuttx.linkcmd: $(LINKCMDTEMPLATE)

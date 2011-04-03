@@ -46,13 +46,38 @@
  * Definitions
  ************************************************************************/
 
-/* Convenience/compatibility definition */
+/* Convenience/compatibility definition.
+ *
+ * For a flat, all kernel-mode build, the error can be read and written
+ * from all code using a simple pointer.
+ */
 
-#define errno *get_errno_ptr()
 #ifndef CONFIG_NUTTX_KERNEL
+
+#  define errno *get_errno_ptr()
 #  define set_errno(e) do { errno = (int)(e); } while (0)
 #  define get_errno(e) errno
-#endif
+
+#else
+
+/* We doing separate user-/kernel-mode builds, then the errno has to be
+ * a little differently. In kernel-mode, the TCB errno value can still be
+ * read and written using a pointer.
+ */
+
+#ifdef __KERNEL__
+#  define errno *get_errno_ptr()
+#else
+
+/* But in user-mode, the errno can only be read using the name 'errno'.
+ * The non-standard API set_errno() must be explicity be used from user-
+ * mode code in order to set the errno value.
+ */
+
+#  define errno get_errno()
+
+#endif /* __KERNEL__ */
+#endif /* CONFIG_NUTTX_KERNEL */
 
 /* Definitions of error numbers and the string that would be
  * returned by strerror().

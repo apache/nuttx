@@ -52,6 +52,11 @@ else
   NUTTX		= $(TOPDIR)/nuttx
 endif
 
+# This define is passed as EXTRADEFINES for kernel-mode builds.  It is also passed
+# during PASS1 (but not PASS2) context and depend targets.
+
+KDEFINE		= ${shell $(TOPDIR)/tools/define.sh $(CC) __KERNEL__}
+
 # Process architecture and board-specific directories
 
 ARCH_DIR	= arch/$(CONFIG_ARCH)
@@ -280,7 +285,7 @@ dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(
 
 context: check_context include/nuttx/config.h dirlinks
 	@for dir in $(CONTEXTDIRS) ; do \
-		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" context ; \
+		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" context; \
 	done
 
 clean_context:
@@ -298,8 +303,41 @@ check_context:
 		exit 1 ; \
 	fi
 
+# Possible kernel-mode builds
+
 sched/libsched$(LIBEXT): context
-	@$(MAKE) -C sched TOPDIR="$(TOPDIR)" libsched$(LIBEXT)
+	@$(MAKE) -C sched TOPDIR="$(TOPDIR)" libsched$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+$(ARCH_SRC)/libarch$(LIBEXT): context
+	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+net/libnet$(LIBEXT): context
+	@$(MAKE) -C net TOPDIR="$(TOPDIR)" libnet$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+fs/libfs$(LIBEXT): context
+	@$(MAKE) -C fs TOPDIR="$(TOPDIR)" libfs$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+drivers/libdrivers$(LIBEXT): context
+	@$(MAKE) -C drivers TOPDIR="$(TOPDIR)" libdrivers$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+binfmt/libbinfmt$(LIBEXT): context
+	@$(MAKE) -C binfmt TOPDIR="$(TOPDIR)" libbinfmt$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+pcode/libpcode$(LIBEXT): context
+	@$(MAKE) -C pcode TOPDIR="$(TOPDIR)" libpcode$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+graphics/libgraphics$(LIBEXT): context
+	@$(MAKE) -C graphics TOPDIR="$(TOPDIR)" libgraphics$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+syscall/libstubs$(LIBEXT): context
+	@$(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+# Still need to think about this one
+
+mm/libmm$(LIBEXT): context
+	@$(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT)
+
+# Possible user-mode builds
 
 lib/liblib$(LIBEXT): context
 	@$(MAKE) -C lib TOPDIR="$(TOPDIR)" liblib$(LIBEXT)
@@ -307,35 +345,8 @@ lib/liblib$(LIBEXT): context
 libxx/liblibxx$(LIBEXT): context
 	@$(MAKE) -C libxx TOPDIR="$(TOPDIR)" liblibxx$(LIBEXT)
 
-$(ARCH_SRC)/libarch$(LIBEXT): context
-	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT)
-
-mm/libmm$(LIBEXT): context
-	@$(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT)
-
-net/libnet$(LIBEXT): context
-	@$(MAKE) -C net TOPDIR="$(TOPDIR)" libnet$(LIBEXT)
-
-fs/libfs$(LIBEXT): context
-	@$(MAKE) -C fs TOPDIR="$(TOPDIR)" libfs$(LIBEXT)
-
-drivers/libdrivers$(LIBEXT): context
-	@$(MAKE) -C drivers TOPDIR="$(TOPDIR)" libdrivers$(LIBEXT)
-
 $(APPDIR)/libapps$(LIBEXT): context
 	@$(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)" libapps$(LIBEXT)
-
-binfmt/libbinfmt$(LIBEXT): context
-	@$(MAKE) -C binfmt TOPDIR="$(TOPDIR)" libbinfmt$(LIBEXT)
-
-pcode/libpcode$(LIBEXT): context
-	@$(MAKE) -C pcode TOPDIR="$(TOPDIR)" libpcode$(LIBEXT)
-
-graphics/libgraphics$(LIBEXT): context
-	@$(MAKE) -C graphics TOPDIR="$(TOPDIR)" libgraphics$(LIBEXT)
-
-syscall/libstubs$(LIBEXT): context
-	@$(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT)
 
 syscall/libproxies$(LIBEXT): context
 	@$(MAKE) -C syscall TOPDIR="$(TOPDIR)" libproxies$(LIBEXT)
@@ -370,7 +381,7 @@ endif
 pass2deps: context pass2dep $(NUTTXLIBS)
 
 pass2: pass2deps
-	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(NUTTXLIBS)" $(BIN)
+	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(NUTTXLIBS)" EXTRADEFINES=$(KDEFINE) $(BIN)
 	@if [ -w /tftpboot ] ; then \
 		cp -f $(TOPDIR)/$@ /tftpboot/$@.${CONFIG_ARCH}; \
 	fi
@@ -411,7 +422,7 @@ pass1dep: context
 
 pass2dep: context
 	@for dir in $(KERNDEPDIRS) ; do \
-		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" depend ; \
+		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" EXTRADEFINES=$(KDEFINE) depend; \
 	done
 
 depend: pass1dep pass2dep
