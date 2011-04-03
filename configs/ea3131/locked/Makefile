@@ -93,7 +93,7 @@ ld-locked.inc: mklocked.sh $(TOPDIR)/.config
 # is available to link against.
 
 $(PASS1_LIBBOARD):
-	@$(MAKE) -C $(TOPDIR)/configs/ea3131/src TOPDIR="$(TOPDIR)" libboard$(LIBEXT)
+	@$(MAKE) -C $(TOPDIR)/configs/ea3131/src TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
 # Create the locked.r file containing all of the code (except the start-up code)
 # that needs to lie in the locked text region.
