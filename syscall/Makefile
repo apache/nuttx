@@ -40,6 +40,8 @@ include stubs/Make.defs
 MKSYSCALL = "$(TOPDIR)/tools/mksyscall$(EXEEXT)"
 CSVFILE = "$(TOPDIR)/syscall/syscall.csv"
 
+STUB_SRCS += stub_lookup.c
+
 ASRCS = 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 

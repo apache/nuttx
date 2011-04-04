@@ -42,15 +42,18 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Reserve the first system calls for platform-specific usage */
+/* Reserve the first system calls for platform-specific usage if so
+ * configured.
+ */
 
 #ifndef CONFIG_CONFIG_SYS_RESERVED
-#  define CONFIG_SYS_RESERVED          (32)
+#  define CONFIG_SYS_RESERVED          (0)
 #endif
 
 /* System call numbers
@@ -89,7 +92,7 @@
 
 /* The following can be individually enabled */
 
-#ifdef CONFIG_SCHED_ATEXT
+#ifdef CONFIG_SCHED_ATEXIT
 #  define SYS_atexit                   __SYS_atexit
 #  define __SYS_waitpaid               (__SYS_atexit+1)
 #else
@@ -302,8 +305,27 @@
  * Public Type Definitions
  ****************************************************************************/
 
+/* This is the union of all possible stub function types */
+
+union syscall_stubfunc_u
+{
+  uintptr_t (*stub0)(unsigned int nbr);
+  uintptr_t (*stub1)(unsigned int nbr, uintptr_t parm1);
+  uintptr_t (*stub2)(unsigned int nbr, uintptr_t parm1, uintptr_t parm2);
+  uintptr_t (*stub3)(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                                       uintptr_t parm3);
+  uintptr_t (*stub4)(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                                       uintptr_t parm3, uintptr_t parm4);
+  uintptr_t (*stub5)(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                                       uintptr_t parm3, uintptr_t parm4,
+                                       uintptr_t parm5);
+  uintptr_t (*stub6)(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                                       uintptr_t parm3, uintptr_t parm4,
+                                       uintptr_t parm5, uintptr_t parm6);
+};
+
 /****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -312,6 +334,18 @@ extern "C" {
 #else
 #define EXTERN extern
 #endif
+
+/* Stub lookup tables.  Each table is indexed by the system call numbers
+ * defined above.  Given the system call number, the corresponding entry in
+ * these tables describes how to call the stub dispatch function.
+ */
+
+EXTERN const union syscall_stubfunc_u *g_stublookup[SYS_nsyscalls];
+EXTERN const uint8_t                   g_stubnparms[SYS_nsyscalls];
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

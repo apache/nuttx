@@ -49,7 +49,7 @@
 
 #include "os_internal.h"
 
-#ifdef CONFIG_SCHED_ATEXT
+#ifdef CONFIG_SCHED_ATEXiT
 
 /************************************************************************
  * Definitions
@@ -111,6 +111,6 @@ int atexit(void (*func)(void))
   return ret;
 }
 
-#endif /* CONFIG_SCHED_ATEXT */
+#endif /* CONFIG_SCHED_ATEXIT */
 
 
