@@ -115,7 +115,7 @@ endif
 endif
 CSRCS		+= $(SERIAL_CSRCS) $(NET_CSRCS) $(PIPE_CSRCS) $(USBDEV_CSRCS) \
 			   $(USBHOST_CSRCS) $(MMCSD_CSRCS) $(LCD_CSRCS) $(BCH_CSRCS) \
-			   $(MTD_CSRCS)
+			   $(MTD_CSRCS) $(I2C_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
@@ -123,7 +123,7 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN			= libdrivers$(LIBEXT)
 
-VPATH		= serial:net:pipes:usbdev:usbhost:mmcsd:lcd:bch:mtd
+VPATH		= serial:net:pipes:usbdev:usbhost:mmcsd:lcd:bch:mtd:i2c
 
 all:	$(BIN)
 
@@ -141,7 +141,7 @@ $(BIN):	$(OBJS)
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(ROOTDEPPATH) $(SERIALDEPPATH) $(NETDEPPATH) $(PIPEDEPPATH) \
 	  $(USBDEVDEPPATH) $(USBHOSTDEPPATH) $(MMCSDDEPPATH) $(LCDDEPPATH) \
-	  $(BCHDEPPATH) $(MTDDEPPATH) \
+	  $(BCHDEPPATH) $(MTDDEPPATH) $(I2CDEPPATH)\
 	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 

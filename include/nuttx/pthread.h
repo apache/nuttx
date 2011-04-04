@@ -43,6 +43,7 @@
 
 #include <nuttx/config.h>
 #include <pthread.h>
+#include <sched.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -62,7 +63,9 @@
  * Public Data
  ****************************************************************************/
 
-/* Default pthread attributes (see sched/pthread_create.c) */
+/* Default pthread attributes (see sched/pthread_create.c).  This global
+ * can only be shared within the kernel- or within the user- address space.
+ */
 
 extern pthread_attr_t g_default_pthread_attr;
 
