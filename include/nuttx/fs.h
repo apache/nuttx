@@ -346,13 +346,13 @@ EXTERN int files_addreflist(FAR struct filelist *list);
 EXTERN int files_releaselist(FAR struct filelist *list);
 EXTERN int files_dup(FAR struct file *filep1, FAR struct file *filep2);
 
-/* fs_filedup.c **************************************************************/
+/* fs_filedup.c *************************************************************/
 
 /* Dupicate a file descriptor using any value greater than or equal to minfd */
 
 EXTERN int file_dup(int fd, int minfd);
 
-/* fs_filedup2.c *************************************************************/
+/* fs_filedup2.c ************************************************************/
 
 /* This alternative naming is used when dup could operate on both file and
  * socket descritors to avoid drawing unused socket support into the link.
@@ -364,25 +364,23 @@ EXTERN int file_dup2(int fd1, int fd2);
 #  define file_dup2(fd1, fd2) dup2(fd1, fd2)
 #endif
 
-/* fs_openblockdriver.c ******************************************************/
+/* fs_openblockdriver.c *****************************************************/
 
 EXTERN int open_blockdriver(FAR const char *pathname, int mountflags,
                             FAR struct inode **ppinode);
 
-/* fs_closeblockdriver.c *****************************************************/
+/* fs_closeblockdriver.c ****************************************************/
 
 EXTERN int close_blockdriver(FAR struct inode *inode);
 #endif
 
-/* lib_fopen.c **************************************************************/
+/* fs_fdopen.c **************************************************************/
 
 /* Used by the OS to clone stdin, stdout, stderr */
 
 #if CONFIG_NFILE_STREAMS > 0
-EXTERN FAR struct file_struct *lib_fdopen(int fd,
-                                          const char *mode,
-                                          FAR struct filelist *flist,
-                                          FAR struct streamlist *slist);
+typedef struct _TCB _TCB;
+EXTERN FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR _TCB *tcb);
 #endif
 
 /* lib_fflush.c *************************************************************/

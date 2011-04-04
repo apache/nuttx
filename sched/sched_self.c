@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sched_gettcb.c
+ * sched/sched_self.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,40 +66,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_gettcb
+ * Name: sched_self
  *
  * Description:
- *   Given a task ID, this function will return
- *   the a pointer to the corresponding TCB (or NULL if there
- *   is no such task ID).
+ *   Return the current threads TCB.  Basically, this function just wraps the
+ *   head of the ready-to-run list and manages access to the TCB from outside
+ *   of the sched/ sub-directory.
  *
  ****************************************************************************/
 
-FAR _TCB *sched_gettcb(pid_t pid)
+FAR _TCB *sched_self(void)
 {
-  FAR _TCB *ret = NULL;
-  int hash_ndx;
-
-  /* Verify that the PID is within range */
-
-  if (pid >= 0 )
-    {
-      /* Get the hash_ndx associated with the pid */
-
-      hash_ndx = PIDHASH(pid);
-
-      /* Verify that the correct TCB was found. */
-
-      if (pid == g_pidhash[hash_ndx].pid)
-        {
-          /* Return the TCB associated with this pid (if any) */
-
-          ret = g_pidhash[hash_ndx].tcb;
-        }
-    }
-
-  /* Return the TCB. */
-
-  return ret;
+  return (FAR _TCB*)g_readytorun.head;
 }
+
 

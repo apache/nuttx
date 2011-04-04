@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched_setupstreams.c
  *
- *   Copyright (C) 2007-2008, 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
+#include <fcntl.h>
+
 #include <nuttx/fs.h>
 #include <nuttx/net.h>
 #include <nuttx/lib.h>
@@ -65,14 +67,14 @@ int sched_setupstreams(FAR _TCB *tcb)
        * The following logic depends on the fact that the library
        * layer will allocate FILEs in order.
        *
-       * fd = 0 is stdin
-       * fd = 1 is stdout
-       * fd = 2 is stderr
+       * fd = 0 is stdin  (read-only)
+       * fd = 1 is stdout (write-only, append)
+       * fd = 2 is stderr (write-only, append)
        */
 
-      (void)lib_fdopen(0, "r", tcb->filelist, tcb->streams);
-      (void)lib_fdopen(1, "w", tcb->filelist, tcb->streams);
-      (void)lib_fdopen(2, "w", tcb->filelist, tcb->streams);
+      (void)fs_fdopen(0, O_RDONLY,       tcb);
+      (void)fs_fdopen(1, O_WROK|O_CREAT, tcb);
+      (void)fs_fdopen(2, O_WROK|O_CREAT, tcb);
     }
 
   return OK;

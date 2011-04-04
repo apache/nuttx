@@ -311,6 +311,10 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/* TCB helpers */
+
+EXTERN FAR _TCB *sched_self(void);
+
 /* File system helpers */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0

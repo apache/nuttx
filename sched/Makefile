@@ -53,7 +53,7 @@ TSK_SRCS	= task_create.c task_init.c task_setup.c task_activate.c \
 SCHED_SRCS	= sched_setparam.c sched_setpriority.c sched_getparam.c \
 		  sched_setscheduler.c sched_getscheduler.c \
 		  sched_yield.c sched_rrgetinterval.c sched_foreach.c \
-		  sched_lock.c sched_unlock.c sched_lockcount.c
+		  sched_lock.c sched_unlock.c sched_lockcount.c sched_self.c
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 SCHED_SRCS	+= sched_reprioritize.c 
 endif
