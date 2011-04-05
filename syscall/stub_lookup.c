@@ -76,10 +76,10 @@ extern uintptr_t STUB_sem_post(uintptr_t parm1);
 extern uintptr_t STUB_sem_trywait(uintptr_t parm1);
 extern uintptr_t STUB_sem_unlink(uintptr_t parm1);
 extern uintptr_t STUB_sem_wait(uintptr_t parm1);
-extern uintptr_t (uintptr_t parm1);
-extern uintptr_t (uintptr_t parm1, uintptr_t parm2, uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
-extern uintptr_t (uintptr_t parm1);
-extern uintptr_t (uintptr_t parm1);
+extern uintptr_t STUB_set_errno(uintptr_t parm1);
+extern uintptr_t STUB_task_create(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
+extern uintptr_t STUB_task_delete(uintptr_t parm1);
+extern uintptr_t STUB_task_restart(uintptr_t parm1);
 extern uintptr_t STUB_up_assert(uintptr_t parm1, uintptr_t parm2);
 extern uintptr_t STUB_up_assert_code(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3);
 
@@ -149,6 +149,9 @@ extern uintptr_t STUB_seekdir(uintptr_t parm1, uintptr_t parm2);
 extern uintptr_t STUB_stat(uintptr_t parm1, uintptr_t parm2);
 extern uintptr_t STUB_statfs(uintptr_t parm1, uintptr_t parm2);
 extern uintptr_t STUB_telldir(uintptr_t parm1);
+
+extern uintptr_t STUB_fs_fdopen(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3);
+extern uintptr_t STUB_sched_getstreams(void);
 
 extern uintptr_t STUB_fsync(uintptr_t parm1);
 extern uintptr_t STUB_mkdir(uintptr_t parm1, uintptr_t parm2);
@@ -239,18 +242,18 @@ extern uintptr_t STUB_socket(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3);
 const union syscall_stubfunc_u *g_stublookup[SYS_nsyscalls] =
 {
 #  undef STUB_LOOKUP1
-#  define STUB_LOOKUP1(n,p) p
+#  define STUB_LOOKUP1(n,p) (union syscall_stubfunc_u *)p
 #  undef STUB_LOOKUP
-#  define STUB_LOOKUP(n,p)  , p
+#  define STUB_LOOKUP(n,p)  , (union syscall_stubfunc_u *)p
 #  include "stub_lookup.h"
 };
 
 const uint8_t g_stubnparms[SYS_nsyscalls] =
 {
 #  undef STUB_LOOKUP1
-#  define STUB_LOOKUP1(n,p) { n }
+#  define STUB_LOOKUP1(n,p) n
 #  undef STUB_LOOKUP
-#  define STUB_LOOKUP(n,p)  , { n }
+#  define STUB_LOOKUP(n,p)  , n
 #  include "stub_lookup.h"
 };
 

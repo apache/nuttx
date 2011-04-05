@@ -193,18 +193,28 @@
 #  define SYS_stat                     (__SYS_filedesc+13)
 #  define SYS_statfs                   (__SYS_filedesc+14)
 #  define SYS_telldir                  (__SYS_filedesc+15)
-#  if !defined(CONFIG_DISABLE_MOUNTPOINT)
-#    define SYS_fsync                  (__SYS_filedesc+16)
-#    define SYS_mkdir                  (__SYS_filedesc+17)
-#    define SYS_mount                  (__SYS_filedesc+18)
-#    define SYS_rename                 (__SYS_filedesc+19)
-#    define SYS_rmdir                  (__SYS_filedesc+20)
-#    define SYS_umount                 (__SYS_filedesc+21)
-#    define SYS_unlink                 (__SYS_filedesc+22)
-#    define __SYS_pthread              (__SYS_filedesc+23)
+
+#  if CONFIG_NFILE_STREAMS > 0
+#    define SYS_fs_fdopen              (__SYS_filedesc+16)
+#    define SYS_sched_getstreams       (__SYS_filedesc+17)
+#    define __SYS_mountpoint           (__SYS_filedesc+18)
 #  else
-#    define __SYS_pthread              (__SYS_filedesc+16)
+#    define __SYS_mountpoint           (__SYS_filedesc+16)
 #  endif
+
+#  if !defined(CONFIG_DISABLE_MOUNTPOINT)
+#    define SYS_fsync                  (__SYS_mountpoint+0)
+#    define SYS_mkdir                  (__SYS_mountpoint+1)
+#    define SYS_mount                  (__SYS_mountpoint+2)
+#    define SYS_rename                 (__SYS_mountpoint+3)
+#    define SYS_rmdir                  (__SYS_mountpoint+4)
+#    define SYS_umount                 (__SYS_mountpoint+5)
+#    define SYS_unlink                 (__SYS_mountpoint+6)
+#    define __SYS_pthread              (__SYS_mountpoint+7)
+#  else
+#    define __SYS_pthread              __SYS_mountpoint
+#  endif
+
 #else
 #  define __SYS_pthread                __SYS_filedesc
 #endif
@@ -241,6 +251,7 @@
 #  define SYS_pthread_setspecific      (__SYS_pthread+26)
 #  define SYS_pthread_testcancel       (__SYS_pthread+27)
 #  define SYS_pthread_yield            (__SYS_pthread+28)
+
 #  ifndef CONFIG_DISABLE_SIGNAL
 #    define SYS_pthread_cond_timedwait (__SYS_pthread+29)
 #    define SYS_pthread_kill           (__SYS_pthread+30)
@@ -249,6 +260,7 @@
 #  else
 #    define __SYS_mqueue               (__SYS_pthread+29)
 #  endif
+
 #else
 #  define __SYS_mqueue                 __SYS_pthread
 #endif

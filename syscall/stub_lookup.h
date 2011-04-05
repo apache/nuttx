@@ -150,6 +150,12 @@ STUB_LOOKUP(3, STUB_up_assert_code)             /* SYS_up_assert_code */
   STUB_LOOKUP(2, STUB_stat)                     /* SYS_stat */
   STUB_LOOKUP(2, STUB_statfs)                   /* SYS_statfs */
   STUB_LOOKUP(1, STUB_telldir)                  /* SYS_telldir */
+
+#  if CONFIG_NFILE_STREAMS > 0
+    STUB_LOOKUP(3, STUB_fs_fdopen)              /* SYS_fs_fdopen */
+    STUB_LOOKUP(0, STUB_sched_getstreams)       /* SYS_sched_getstreams */
+#endif
+
 #  if !defined(CONFIG_DISABLE_MOUNTPOINT)
     STUB_LOOKUP(1, STUB_fsync)                  /* SYS_fsync */
     STUB_LOOKUP(2, STUB_mkdir)                  /* SYS_mkdir */

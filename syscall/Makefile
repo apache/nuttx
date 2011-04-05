@@ -92,7 +92,6 @@ $(MKSYSCALL):
 	@$(MAKE) -C $(TOPDIR)/tools -f Makefile.host mksyscall
 
 .context: syscall.csv
-	echo "Rebuilding stubs and proxies"
 	@(cd proxies; $(MKSYSCALL) -p $(CSVFILE);)
 	@(cd stubs; $(MKSYSCALL) -s $(CSVFILE);)
 	@touch $@
