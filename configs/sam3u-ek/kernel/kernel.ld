@@ -70,8 +70,14 @@ EXTERN(user_start)
 # Currently, the plan is that the memory manager will reside in user-space
 # but be usable both by kernel- and user-space code
 
+EXTERN(mm_initialize)
+EXTERN(mm_addregion)
+EXTERN(mm_trysemaphore)
+EXTERN(mm_givesemaphore)
+
 EXTERN(malloc)
 EXTERN(realloc)
+EXTERN(zalloc)
 EXTERN(free)
 
 OUTPUT_ARCH(arm)

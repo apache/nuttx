@@ -88,14 +88,20 @@ $(BOARD_INCLUDE)/user_map.h: $(TOPDIR)/User.map
 	@echo "/* General memory map */" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_ENTRYPOINT    0x`grep \" user_start$\" $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define CONFIG_USER_DATASOURCE    0x`grep \" _eronly$\" $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define CONFIG_USER_DATADESTSTART 0x`grep \" _sdata$\"  $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define CONFIG_USER_DATADESTEND   0x`grep \" _edata$\"  $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_DATASOURCE    0x`grep \" _eronly$\"    $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_DATADESTSTART 0x`grep \" _sdata$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_DATADESTEND   0x`grep \" _edata$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "/* Memory manager entry points */" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_MMINIT        0x`grep \" mm_initialize$\"    $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_MMADDREGION   0x`grep \" mm_addregion$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_TRYSEM        0x`grep \" mm_trysemaphore$\"  $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_GIVSEM        0x`grep \" mm_givesemaphore$\" $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_MALLOC        0x`grep \" malloc$\"  $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_REALLOC       0x`grep \" realloc$\" $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_ZALLOC        0x`grep \" zalloc$\"  $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_FREE          0x`grep \" free$\"    $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#endif /* __ARCH_BOARD_USER_MAP_H */" >> $(BOARD_INCLUDE)/user_map.h

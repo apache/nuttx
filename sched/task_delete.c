@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task_delete.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include  <nuttx/config.h>
+#include <nuttx/config.h>
 
-#include  <sys/types.h>
-#include  <sched.h>
-#include  "os_internal.h"
+#include <sys/types.h>
+#include <stdlib.h>
+#include <sched.h>
+
+#include "os_internal.h"
 #ifndef CONFIG_DISABLE_SIGNALS
 # include "sig_internal.h"
 #endif

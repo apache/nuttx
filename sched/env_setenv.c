@@ -42,6 +42,7 @@
 #ifndef CONFIG_DISABLE_ENVIRON
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sched.h>
 #include <string.h>
 #include <errno.h>

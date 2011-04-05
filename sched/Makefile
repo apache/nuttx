@@ -134,6 +134,8 @@ endif
 
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
+KMM_SRCS	= kmm_kmalloc.c kmm_kzalloc.c kmm_krealloc.c kmm_kfree.c
+
 CSRCS		= $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS) $(TIME_SRCS) \
 		  $(SEM_SRCS) $(TIMER_SRCS) $(WORK_SRCS) $(PGFILL_SRCS) $(IRQ_SRCS)
 
@@ -152,6 +154,10 @@ endif
 ifneq ($(CONFIG_DISABLE_ENVIRON),y)
 CSRCS		+= $(ENV_SRCS)
 endif
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CSRCS		+= $(KMM_SRCS)
+endif
+
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

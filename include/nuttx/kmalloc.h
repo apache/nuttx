@@ -43,12 +43,16 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#ifndef CONFIG_NUTTX_KERNEL
+#  include <stdlib.h>
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
 
 #undef KMALLOC_EXTERN
@@ -59,32 +63,29 @@ extern "C" {
 # define KMALLOC_EXTERN extern
 #endif
 
-#ifndef CONFIG_ARCH_KMALLOC
-# include <stdlib.h>
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* For a monolithic, kernel-mode NuttX build.  Special allocators must be
+ * used.  Otherwise, the standard allocators prototyped in stdlib.h may
+ * be used for both the kernel- and user-mode objects.
+ */
+
+#ifndef CONFIG_NUTTX_KERNEL
+
 # define kmalloc(s) malloc(s)
-#else
-KMALLOC_EXTERN FAR void *kmalloc(size_t);
-#endif
-
-#ifndef CONFIG_ARCH_KZALLOC
-# include <stdlib.h>
 # define kzalloc(s) zalloc(s)
-#else
-KMALLOC_EXTERN FAR void *kzalloc(size_t);
-#endif
-
-#ifndef CONFIG_ARCH_KREALLOC
-# include <stdlib.h>
 # define krealloc(p,s) realloc(p,s)
-#else
-KMALLOC_EXTERN FAR void *krealloc(FAR void*, size_t);
-#endif
-
-#ifndef CONFIG_ARCH_KFREE
-# include <stdlib.h>
 # define kfree(p) free(p)
+
 #else
+
+KMALLOC_EXTERN FAR void *kmalloc(size_t);
+KMALLOC_EXTERN FAR void *kzalloc(size_t);
+KMALLOC_EXTERN FAR void *krealloc(FAR void*, size_t);
 KMALLOC_EXTERN void kfree(FAR void*);
+
 #endif
 
 /* Functions defined in os_list.c *******************************************/
