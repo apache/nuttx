@@ -41,7 +41,6 @@
 
 #include <sys/select.h>
 
-#include <stdlib.h>
 #include <string.h>
 #include <poll.h>
 #include <time.h>
@@ -49,6 +48,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 
 #include "fs_internal.h"
@@ -111,7 +111,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   /* Allocate the descriptor list for poll() */
 
-  pollset = (struct pollfd *)zalloc(nfds * sizeof(struct pollfd));
+  pollset = (struct pollfd *)kzalloc(nfds * sizeof(struct pollfd));
   if (!pollset)
     {
       errno = ENOMEM;
@@ -208,7 +208,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
         }
     }
 
-  free(pollset);
+  kfree(pollset);
   return ret;
 }
 

@@ -175,7 +175,7 @@ endif
 # USERLIBS is the list of libraries used to build the final user-space
 #   application
 
-NUTTXLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT) lib/liblib$(LIBEXT)
+NUTTXLIBS	= sched/libsched$(LIBEXT) $(ARCH_SRC)/libarch$(LIBEXT)
 USERLIBS	=
 
 # Add libraries for syscall support.  The C library will be needed by
@@ -183,10 +183,10 @@ USERLIBS	=
 # is placed in user space (only).
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
-NUTTXLIBS	+= syscall/libstubs$(LIBEXT)
-USERLIBS	+= syscall/libproxies$(LIBEXT) lib/liblib$(LIBEXT) mm/libmm$(LIBEXT)
+NUTTXLIBS	+= syscall/libstubs$(LIBEXT) lib/libklib$(LIBEXT)
+USERLIBS	+= syscall/libproxies$(LIBEXT) lib/libulib$(LIBEXT) mm/libmm$(LIBEXT)
 else
-NUTTXLIBS	+= mm/libmm$(LIBEXT)
+NUTTXLIBS	+= mm/libmm$(LIBEXT) lib/liblib$(LIBEXT)
 endif
 
 # Add libraries for network support.  CXX, CXXFLAGS, and COMPILEXX must
@@ -246,6 +246,7 @@ NUTTXLIBS        += graphics/libgraphics$(LIBEXT)
 endif
 
 # This is the name of the final target
+
 BIN		= nuttx$(EXEEXT)
 
 all: $(BIN)
@@ -256,28 +257,34 @@ tools/mkconfig:
 	@$(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkconfig
 
 # Create the include/nuttx/config.h file
+
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig
 	tools/mkconfig $(TOPDIR) > include/nuttx/config.h
 
 # link the arch/<arch-name>/include dir to include/arch
+
 include/arch: Make.defs
 	@$(DIRLINK) $(TOPDIR)/$(ARCH_DIR)/include include/arch
 
 # Link the configs/<board-name>/include dir to include/arch/board
+
 include/arch/board: include/arch Make.defs include/arch
 	@$(DIRLINK) $(TOPDIR)/$(BOARD_DIR)/include include/arch/board
 
 # Link the configs/<board-name>/src dir to arch/<arch-name>/src/board
+
 $(ARCH_SRC)/board: Make.defs
 	@$(DIRLINK) $(TOPDIR)/$(BOARD_DIR)/src $(ARCH_SRC)/board
 
 # Link arch/<arch-name>/include/<chip-name> to arch/<arch-name>/include/chip
+
 $(ARCH_SRC)/chip: Make.defs
 ifneq ($(CONFIG_ARCH_CHIP),)
 	@$(DIRLINK) $(TOPDIR)/$(ARCH_SRC)/$(CONFIG_ARCH_CHIP) $(ARCH_SRC)/chip
 endif
 
 # Link arch/<arch-name>/src/<chip-name> to arch/<arch-name>/src/chip
+
 include/arch/chip: include/arch Make.defs
 ifneq ($(CONFIG_ARCH_CHIP),)
 	@$(DIRLINK) $(TOPDIR)/$(ARCH_INC)/$(CONFIG_ARCH_CHIP) include/arch/chip
@@ -306,6 +313,9 @@ check_context:
 	fi
 
 # Possible kernel-mode builds
+
+lib/libklib$(LIBEXT): context
+	@$(MAKE) -C lib TOPDIR="$(TOPDIR)" libklib$(LIBEXT) EXTRADEFINES=$(KDEFINE)
 
 sched/libsched$(LIBEXT): context
 	@$(MAKE) -C sched TOPDIR="$(TOPDIR)" libsched$(LIBEXT) EXTRADEFINES=$(KDEFINE)
@@ -336,8 +346,8 @@ syscall/libstubs$(LIBEXT): context
 
 # Possible user-mode builds
 
-lib/liblib$(LIBEXT): context
-	@$(MAKE) -C lib TOPDIR="$(TOPDIR)" liblib$(LIBEXT)
+lib/libulib$(LIBEXT): context
+	@$(MAKE) -C lib TOPDIR="$(TOPDIR)" libulib$(LIBEXT)
 
 libxx/liblibxx$(LIBEXT): context
 	@$(MAKE) -C libxx TOPDIR="$(TOPDIR)" liblibxx$(LIBEXT)
@@ -350,6 +360,11 @@ $(APPDIR)/libapps$(LIBEXT): context
 
 syscall/libproxies$(LIBEXT): context
 	@$(MAKE) -C syscall TOPDIR="$(TOPDIR)" libproxies$(LIBEXT)
+
+# Possible non-kernel builds
+
+lib/liblib$(LIBEXT): context
+	@$(MAKE) -C lib TOPDIR="$(TOPDIR)" liblib$(LIBEXT)
 
 # If the 2 pass build option is selected, then this pass1 target is
 # configured to built before the pass2 target.  This pass1 target may, as an

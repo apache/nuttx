@@ -39,8 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <string.h>
+
+#include "lib_internal.h"
 
 /************************************************************************
  * Global Functions
@@ -51,7 +52,7 @@ FAR char *strdup(const char *s)
   FAR char *news = NULL;
   if (s)
     {
-      news = (FAR char*)malloc(strlen(s) + 1);
+      news = (FAR char*)lib_malloc(strlen(s) + 1);
       if (news)
         {
           strcpy(news, s);

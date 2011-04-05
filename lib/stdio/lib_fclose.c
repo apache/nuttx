@@ -39,11 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+
+#include "lib_internal.h"
 
 /****************************************************************************
  * Global Functions
@@ -68,7 +69,7 @@ int fclose(FAR FILE *stream)
 
       if (stream->fs_bufstart)
         {
-          free(stream->fs_bufstart);
+          lib_free(stream->fs_bufstart);
         }
 
       /* Clear the whole structure */

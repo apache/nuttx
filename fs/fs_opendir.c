@@ -39,13 +39,13 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <stdbool.h>
 #include <dirent.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 #include <nuttx/dirent.h>
 
@@ -235,7 +235,7 @@ FAR DIR *opendir(FAR const char *path)
    * container.
    */
 
-  dir = (FAR struct fs_dirent_s *)zalloc(sizeof(struct fs_dirent_s));
+  dir = (FAR struct fs_dirent_s *)kzalloc(sizeof(struct fs_dirent_s));
   if (!dir)
     {
       /* Insufficient memory to complete the operation.*/
@@ -306,7 +306,7 @@ FAR DIR *opendir(FAR const char *path)
   /* Nasty goto's make error handling simpler */
 
 errout_with_direntry:
-  free(dir);
+  kfree(dir);
 
 errout_with_semaphore:
   inode_semgive();

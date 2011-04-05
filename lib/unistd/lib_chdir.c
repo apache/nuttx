@@ -164,7 +164,7 @@ int chdir(FAR const char *path)
 
   alloc = strdup(oldpwd);  /* kludge needed because environment is realloc'ed */
   setenv("OLDPWD", alloc, TRUE);
-  free(alloc);
+  lib_free(alloc);
 
   /* Set the cwd to the input 'path' */
 

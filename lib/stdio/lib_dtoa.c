@@ -45,9 +45,10 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+
+#include "lib_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -142,7 +143,7 @@ static Bigint *Balloc(int k)
   else
     {
       x = 1 << k;
-      rv = (Bigint *) malloc(sizeof(Bigint) + (x - 1) * sizeof(long));
+      rv = (Bigint *)lib_malloc(sizeof(Bigint) + (x - 1) * sizeof(long));
       rv->k = k;
       rv->maxwds = x;
     }

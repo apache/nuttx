@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_registerreserve.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <errno.h>
+
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 
 #include "fs_internal.h"
@@ -89,7 +90,7 @@ static void inode_namecpy(char *dest, const char *src)
 static FAR struct inode *inode_alloc(const char *name)
 {
   int namelen = inode_namelen(name);
-  FAR struct inode *node = (FAR struct inode*)zalloc(FSNODE_SIZE(namelen));
+  FAR struct inode *node = (FAR struct inode*)kzalloc(FSNODE_SIZE(namelen));
   if (node)
     {
       inode_namecpy(node->i_name, name);

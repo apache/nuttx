@@ -80,7 +80,9 @@ QUEUEDEPPATH = --dep-path queue
 MISCDEPPATH = --dep-path misc
 VPATH = stdio:stdlib:unistd:sched:string:pthread:semaphore:signal:mqueue:math:net:time:libgen:queue:misc
 
-BIN = liblib$(LIBEXT)
+UBIN = libulib$(LIBEXT)
+KBIN = libklib$(LIBEXT)
+BIN  = liblib$(LIBEXT)
 
 all: $(BIN)
 
@@ -95,6 +97,22 @@ $(BIN):	$(OBJS)
 		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
 
+ifneq ($(BIN),$(UBIN))
+.userlib:
+	@$(MAKE) $(UBIN) BIN=$(UBIN) TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
+	@touch .userlib
+
+$(UBIN): kclean .userlib
+endif
+
+ifneq ($(BIN),$(KBIN))
+.kernlib:
+	@$(MAKE) $(KBIN) BIN=$(KBIN) TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
+	@touch .kernlib
+
+$(KBIN): uclean .kernlib
+endif
+
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(ROOTDEPPATH) $(STDIODEPPATH) $(STDLIBDEPPATH) \
 	  $(UNISTDDEPPATH) $(SCHEDDEPPATH) $(STRINGDEPPATH) $(PTHREADDEPPATH) \
@@ -105,7 +123,15 @@ $(BIN):	$(OBJS)
 
 depend: .depend
 
-clean:
+uclean:
+	@rm -f $(UBIN) .userlib *~ .*.swp
+	$(call CLEAN)
+
+kclean:
+	@rm -f $(KBIN) .kernlib *~ .*.swp
+	$(call CLEAN)
+
+clean: uclean kclean
 	@rm -f $(BIN) *~ .*.swp
 	$(call CLEAN)
 

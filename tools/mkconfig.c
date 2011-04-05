@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/mkconfig.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -287,6 +287,15 @@ int main(int argc, char **argv, char **envp)
   printf("#if CONFIG_NFILE_STREAMS == 0\n");
   printf("# undef CONFIG_STDIO_BUFFER_SIZE\n");
   printf("# define CONFIG_STDIO_BUFFER_SIZE 0\n");
+  printf("#endif\n\n");
+  printf("/* We are building a kernel version of the C library, then some user-space features\n");
+  printf(" * need to be disabled\n");
+  printf(" */\n\n");
+  printf("#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)\n");
+  printf("# undef CONFIG_STDIO_BUFFER_SIZE\n");
+  printf("# define CONFIG_STDIO_BUFFER_SIZE 0\n");
+  printf("# undef CONFIG_NUNGET_CHARS\n");
+  printf("# define CONFIG_NUNGET_CHARS 0\n");
   printf("#endif\n\n");
   printf("/* If the maximum message size is zero, then we assume that message queues\n");
   printf(" * support should be disabled\n");

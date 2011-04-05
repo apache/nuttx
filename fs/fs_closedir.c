@@ -39,10 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <dirent.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 #include <nuttx/dirent.h>
 
@@ -134,17 +134,17 @@ int closedir(FAR DIR *dirp)
 
   /* Then release the container */
 
-  free(idir);
+  kfree(idir);
   return OK;
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 errout_with_inode:
   inode_release(inode);
-  free(idir);
+  kfree(idir);
 #endif
 
 errout:
-  *get_errno_ptr() = ret;
+  errno = ret;
   return ERROR;
 }
 

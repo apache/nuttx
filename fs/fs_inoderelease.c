@@ -39,8 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <errno.h>
+
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 
 #include "fs_internal.h"
@@ -95,7 +96,7 @@ void inode_release(FAR struct inode *node)
         {
            inode_semgive();
            inode_free(node->i_child);
-           free(node);
+           kfree(node);
         }
       else
         {

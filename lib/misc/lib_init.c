@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
@@ -83,7 +82,7 @@ void weak_const_function lib_initialize(void)
 FAR struct streamlist *lib_alloclist(void)
 {
   FAR struct streamlist *list;
-  list = (FAR struct streamlist*)zalloc(sizeof(struct streamlist));
+  list = (FAR struct streamlist*)lib_zalloc(sizeof(struct streamlist));
   if (list)
     {
       int i;

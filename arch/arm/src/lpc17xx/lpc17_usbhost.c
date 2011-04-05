@@ -2596,7 +2596,7 @@ FAR struct usbhost_driver_s *usbhost_initialize(int controller)
   /* Initialize user-configurable request/descriptor transfer buffers */
 
   buffer = (uint8_t *)LPC17_TBFREE_BASE;
-  for (i = 0; i < CONFIG_USBHOST_NEDS; i++)
+  for (i = 0; i < CONFIG_USBHOST_TDBUFFERS; i++)
     {
       /* Put the TD buffer in a free list */
 

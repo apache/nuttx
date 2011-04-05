@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs_inode.c
+ * fs/fs_inode.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -179,7 +179,7 @@ void inode_semtake(void)
        * the wait was awakened by a signal.
        */
 
-      ASSERT(*get_errno_ptr() == EINTR);
+      ASSERT(errno == EINTR);
     }
 }
 
@@ -308,7 +308,7 @@ void inode_free(FAR struct inode *node)
     {
       inode_free(node->i_peer);
       inode_free(node->i_child);
-      free(node);
+      kfree(node);
     }
 }
 

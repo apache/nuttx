@@ -40,12 +40,12 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <semaphore.h>
 #include <fcntl.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 
 /****************************************************************************
@@ -145,7 +145,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR _TCB *tcb)
 
           /* Allocate the IO buffer */
 
-          stream->fs_bufstart = malloc(CONFIG_STDIO_BUFFER_SIZE);
+          stream->fs_bufstart = kmalloc(CONFIG_STDIO_BUFFER_SIZE);
           if (!stream)
             {
               err = ENOMEM;

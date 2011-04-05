@@ -1,7 +1,7 @@
 /****************************************************************************
  * lib/lib_internal.h
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <semaphore.h>
+
 #include <nuttx/streams.h>
 
 /****************************************************************************
@@ -57,10 +58,35 @@
 # define CONFIG_LIB_HOMEDIR "/"
 #endif
 
+/* If C std I/O buffering is not supported, then we don't need its semaphore
+ * protection.
+ */
+
 #if CONFIG_STDIO_BUFFER_SIZE <= 0
-# define lib_sem_initialize(s)
-# define lib_take_semaphore(s)
-# define lib_give_semaphore(s)
+#  define lib_sem_initialize(s)
+#  define lib_take_semaphore(s)
+#  define lib_give_semaphore(s)
+#endif
+
+/* The NuttX C library an be build in two modes: (1) as a standard, C-libary
+ * that can be used by normal, user-space applications, or (2) as a special,
+ * kernel-mode C-library only used within the OS.  If NuttX is not being
+ * built as separated kernel- and user-space modules, then only the first
+ * mode is supported.
+ */
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
+#  include <nuttx/kmalloc.h>
+#  define lib_malloc(s)    kmalloc(s)
+#  define lib_zalloc(s)    kzalloc(s)
+#  define lib_realloc(p,s) krealloc(p,s)
+#  define lib_free(p)      kfree(p)
+#else
+#  include <stdlib.h>
+#  define lib_malloc(s)    malloc(s)
+#  define lib_zalloc(s)    zalloc(s)
+#  define lib_realloc(p,s) realloc(p,s)
+#  define lib_free(p)      free(p)
 #endif
 
 #define LIB_BUFLEN_UNKNOWN INT_MAX

@@ -39,8 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <errno.h>
+
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 
 #include "fs_internal.h"
@@ -144,7 +145,7 @@ int inode_remove(const char *path)
           /* And delete it now -- recursively to delete all of its children */
 
           inode_free(node->i_child);
-          free(node);
+          kfree(node);
           return OK;
         }
     }
