@@ -62,13 +62,14 @@ MEMORY
     sram2 (rwx) : ORIGIN = 0x20080000, LENGTH = 16K
 }
 
-# Force user_start into the link.  This is the application entry point
+/* Force user_start into the link.  This is the application entry point */
 
 EXTERN(user_start)
 
-# Make sure that the critical memory management functions are in user-space.
-# Currently, the plan is that the memory manager will reside in user-space
-# but be usable both by kernel- and user-space code
+/* Make sure that the critical memory management functions are in user-space.
+ * Currently, the plan is that the memory manager will reside in user-space
+ * but be usable both by kernel- and user-space code
+ */
 
 EXTERN(mm_initialize)
 EXTERN(mm_addregion)

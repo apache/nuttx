@@ -96,8 +96,8 @@ $(BOARD_INCLUDE)/user_map.h: $(TOPDIR)/User.map
 	@echo "" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_MMINIT        0x`grep \" mm_initialize$\"    $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_MMADDREGION   0x`grep \" mm_addregion$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define CONFIG_USER_TRYSEM        0x`grep \" mm_trysemaphore$\"  $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define CONFIG_USER_GIVSEM        0x`grep \" mm_givesemaphore$\" $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_MMTRYSEM      0x`grep \" mm_trysemaphore$\"  $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_MMGIVESEM     0x`grep \" mm_givesemaphore$\" $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_MALLOC        0x`grep \" malloc$\"  $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_REALLOC       0x`grep \" realloc$\" $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
