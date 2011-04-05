@@ -81,7 +81,15 @@ extern "C" {
 
 #define ST_LIS331DL_HP_FILTER_RESET 0x23
 
-#define ST_LIS331DL_STATUS_REG      0x27
+#define ST_LIS331DL_STATUS_REG      0x27    /* Status Register */
+#define ST_LIS331DL_SR_ZYXOR        0x80    /* OR'ed X,Y and Z data over-run  */
+#define ST_LIS331DL_SR_ZOR          0x40    /* individual data over-run ... */
+#define ST_LIS331DL_SR_YOR          0x20
+#define ST_LIS331DL_SR_XOR          0x10
+#define ST_LIS331DL_SR_ZYXDA        0x08    /* OR'ed X,Y and Z data available */
+#define ST_LIS331DL_SR_ZDA          0x04    /* individual data available ... */
+#define ST_LIS331DL_SR_YDA          0x02
+#define ST_LIS331DL_SR_XDA          0x01
 
 #define ST_LIS331DL_OUT_X           0x29
 #define ST_LIS331DL_OUT_Y           0x2B
@@ -141,9 +149,9 @@ EXTERN int st_lis331dl_setconversion(struct st_lis331dl_dev_s * dev, bool full, 
 
 /** Get precision
  * 
- * \return Precision of 1 LSB in terms of unit [g]
+ * \return Precision of 1 LSB in terms of unit [mg]
  **/
-EXTERN float st_lis331dl_getprecision(struct st_lis331dl_dev_s * dev);
+EXTERN int st_lis331dl_getprecision(struct st_lis331dl_dev_s * dev);
 
 /** Get sample rate 
  * 
@@ -154,7 +162,9 @@ EXTERN int st_lis331dl_getsamplerate(struct st_lis331dl_dev_s * dev);
 /** Get readings, updates internal data structure
  * 
  * \param dev Device to LIS331DL device structure
- * \return Ptr to vector acceleration [x,y,z] on success, or NULL on error with errno set
+ * \return Ptr to vector acceleration [x,y,z] on success, or NULL on error with errno set.
+ *   If data is not yet ready to be read from the LIS331 then errno is set to EAGAIN otherwise
+ *   errno is set by I2C_TRANSFER().
  */
 EXTERN const struct st_lis331dl_vector_s * st_lis331dl_getreadings(struct st_lis331dl_dev_s * dev);
 

@@ -107,7 +107,7 @@ int st_lis331dl_access(struct st_lis331dl_dev_s * dev, uint8_t subaddr, uint8_t 
         return ERROR;
     }
 
-    subaddr |= 0x80;
+    if (length > 1) subaddr |= 0x80;
     
     /* Create message and send */
     
@@ -135,9 +135,7 @@ int st_lis331dl_access(struct st_lis331dl_dev_s * dev, uint8_t subaddr, uint8_t 
 
 int st_lis331dl_readregs(struct st_lis331dl_dev_s * dev)
 {
-    if (st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, 3) == ERROR) return ERROR;    
-    
-    printf("CR1=%2x, CR2=%2x, CR3=%2x\n", dev->cr1, dev->cr2, dev->cr3 );
+    if (st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, 3) != 3) return ERROR;
     return OK;
 }
 
@@ -173,7 +171,7 @@ struct st_lis331dl_dev_s * st_lis331dl_init(struct i2c_dev_s * i2c, uint16_t add
         
             /* Copy LIS331DL registers to our private structure and power-up device */
             
-            if ( st_lis331dl_readregs(dev)==OK && st_lis331dl_powerup(dev)==OK) {
+            if (st_lis331dl_readregs(dev)==OK && st_lis331dl_powerup(dev)==OK) {
       
                 /* Normal exit point */
                 errno = 0;
@@ -201,7 +199,7 @@ int st_lis331dl_deinit(struct st_lis331dl_dev_s * dev)
 {
     ASSERT(dev);
     
-//  st_lis331dl_powerdown(dev);
+    st_lis331dl_powerdown(dev);
     free(dev);
     
     return OK;
@@ -212,17 +210,22 @@ int st_lis331dl_powerup(struct st_lis331dl_dev_s * dev)
 {
     dev->cr1 = ST_LIS331DL_CR1_PD |
         ST_LIS331DL_CR1_ZEN | ST_LIS331DL_CR1_YEN | ST_LIS331DL_CR1_XEN;
+    dev->cr2 = 0;
+    dev->cr3 = 0;
         
-    st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -1);    
-    return OK;
+    if (st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -3) == 3) return OK;
+    return ERROR;
 }
 
 
 int st_lis331dl_powerdown(struct st_lis331dl_dev_s * dev)
 {
     dev->cr1 = ST_LIS331DL_CR1_ZEN | ST_LIS331DL_CR1_YEN | ST_LIS331DL_CR1_XEN;
+    dev->cr2 = 0;
+    dev->cr3 = 0;
         
-    return st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -1);
+    if (st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -3) == 3) return OK;
+    return ERROR;
 }
 
 
@@ -232,16 +235,16 @@ int st_lis331dl_setconversion(struct st_lis331dl_dev_s * dev, bool full, bool fa
         (full ? ST_LIS331DL_CR1_FS : 0) | (fast ? ST_LIS331DL_CR1_DR : 0) |
         ST_LIS331DL_CR1_ZEN | ST_LIS331DL_CR1_YEN | ST_LIS331DL_CR1_XEN;
         
-    st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -1);    
-    return OK;
+    if (st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -1) == 1) return OK;
+    return ERROR;
 }
 
 
-float st_lis331dl_getprecision(struct st_lis331dl_dev_s * dev)
+int st_lis331dl_getprecision(struct st_lis331dl_dev_s * dev)
 {
     if (dev->cr1 & ST_LIS331DL_CR1_FS)
-        return 9.0/127.0;   /* ~9g full scale */
-    return 2.0/127.0;       /* ~2g full scale */
+        return 9200/127;   /* typ. 9.2g full scale */
+    return 2300/127;       /* typ. 2.3g full scale */
 }
 
 
@@ -255,14 +258,22 @@ int st_lis331dl_getsamplerate(struct st_lis331dl_dev_s * dev)
 
 const struct st_lis331dl_vector_s * st_lis331dl_getreadings(struct st_lis331dl_dev_s * dev)
 {
-    uint8_t retval[5];
+    uint8_t retval[7];
 
     ASSERT(dev);
     
-    if (st_lis331dl_access(dev, ST_LIS331DL_OUT_X, retval, 5) == 5) {    
-        dev->a.x = retval[0];
-        dev->a.y = retval[2];
-        dev->a.z = retval[4];
+    if (st_lis331dl_access(dev, ST_LIS331DL_STATUS_REG, retval, 7) == 7) {
+    
+        /* If result is not yet ready, return NULL */
+        
+        if ( !(retval[0] & ST_LIS331DL_SR_ZYXDA) ) {
+            errno = EAGAIN;
+            return NULL;
+        }
+            
+        dev->a.x = retval[2];
+        dev->a.y = retval[4];
+        dev->a.z = retval[6];
         return &dev->a;
     }
     

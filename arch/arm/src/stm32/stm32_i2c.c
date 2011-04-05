@@ -89,6 +89,7 @@
  * Private Types
  ************************************************************************************/
 
+#define I2C_FLAGS   0x8000  /* RxNE and TxE enabled */
 
 /** I2C Device Private Data
  */
@@ -263,6 +264,7 @@ static inline uint32_t stm32_i2c_getstatus(FAR struct stm32_i2c_priv_s *priv)
 /************************************************************************************
  * Interrupt Service Routines
  ************************************************************************************/
+
 //DEBUG TO BE CLEANED
 //#define NON_ISR
 
@@ -273,9 +275,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 #ifdef NON_ISR
     static uint32_t isr_count = 0;
     static uint32_t old_status = 0xFFFF;
-
     isr_count++;
-    
+
     if (old_status != status) {
         printf("status = %8x, count=%d\n", status, isr_count); fflush(stdout);
         old_status = status;
@@ -298,10 +299,12 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
             0 :
             ((priv->msgv->addr << 1) | (priv->flags & I2C_M_READ))
         );
+                
+        /* Set ACK for receive mode */
         
-        /* Enable RxNE and TxE buffers */
-        
-        stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_ITBUFEN);
+        if (priv->dcnt > 1 && (priv->flags & I2C_M_READ) ) {            
+            stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_ACK);
+        }
         
         /* Increment to next pointer and decrement message count */
         
@@ -313,28 +316,27 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
     
     else if (status & I2C_SR1_ADD10) {
         /* \todo Finish 10-bit mode addressing */
+        
     }
     
         /* Was address sent, continue with ether sending or reading data */
     
     else if ( !(priv->flags & I2C_M_READ) && 
                (status & (I2C_SR1_ADDR | I2C_SR1_TXE)) ) {
-
+               
         if (--priv->dcnt >= 0) {   /* Send a byte */
 #ifdef NON_ISR
             printf("Send byte: %2x\n", *priv->ptr);
 #endif
-            stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET, *priv->ptr++);
+            stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET, *priv->ptr++); 
         }
     }
     
     else if ( (priv->flags & I2C_M_READ) && (status & I2C_SR1_ADDR) ) {
 
-        /* Acknowledge bytes if there is more than one to be received */
+        /* Enable RxNE and TxE buffers in order to receive one or multiple bytes */
         
-        if (priv->dcnt > 1) {            
-            stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_ACK);
-        }
+        stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_ITBUFEN);
     }
 
         /* More bytes to read */
@@ -356,8 +358,20 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
                 stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_ACK, 0);  
             }
         }
+            
     }
     
+    /* Do we have more bytes to send, enable/disable buffer interrupts
+     * (these ISRs could be replaced by DMAs)
+     */
+     
+    if (priv->dcnt>0) {
+        stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_ITBUFEN);
+    }
+    else if (priv->dcnt==0 ) {
+        stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_ITBUFEN, 0);  
+    }
+
     
     /* Was last byte received or sent? 
      */
@@ -383,6 +397,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
                 priv->flags = priv->msgv->flags;
                 priv->msgv++;
                 priv->msgc--;
+                stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_ITBUFEN);    // Restart this ISR!
             }
             else {
                 stm32_i2c_sendstart(priv);
@@ -392,7 +407,6 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 #ifdef NON_ISR
             printf("stop2: status = %8x\n", status);
 #endif
-            stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_ITBUFEN, 0);
             stm32_i2c_sendstop(priv);
             sem_post( &priv->sem_isr );
             priv->msgv = NULL;              /* mark that we have stopped with this transaction */
@@ -596,6 +610,9 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
      * found in the local status variable.
      */
     
+//  inst->priv->status = 0;
+//  printf("isr_count = %d\n", isr_count); fflush(stdout);
+    
     stm32_i2c_sendstart(inst->priv);
         
 #ifdef NON_ISR   
@@ -607,13 +624,20 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
     } 
     while( sem_trywait( &((struct stm32_i2c_inst_s *)dev)->priv->sem_isr ) != 0 );
 #else
+#if 1
     /* Wait for an ISR, if there was a timeout, fetch latest status to get the BUSY flag */
 
     if (stm32_i2c_sem_waitisr(dev) == ERROR) {
         status = stm32_i2c_getstatus(inst->priv);
     }
     else status = inst->priv->status & 0xFFFF;  /* clear SR2 (BUSY flag) as we've done successfully */
-#endif        
+#else
+    do {
+        printf("%x, %d\n", inst->priv->status, isr_count );
+    } 
+    while( sem_trywait( &inst->priv->sem_isr ) != 0 );
+#endif
+#endif
 
     if (status & I2C_SR1_BERR) {        /* Bus Error */
         status_errno = EIO;
@@ -636,6 +660,8 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
     else if (status & (I2C_SR2_BUSY<<16) ) {    /* I2C Bus is for some reason busy */
         status_errno = EBUSY;
     }
+    
+//  printf("end_count = %d, dcnt=%d\n", isr_count, inst->priv->dcnt); fflush(stdout);
     
     stm32_i2c_sem_post(dev);
     

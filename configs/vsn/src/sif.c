@@ -512,15 +512,16 @@ int sif_main(int argc, char *argv[])
                 
                 /* Sample some values */
                 
-                for (i=0; i<20; i++) {
-                    if ( (a = st_lis331dl_getreadings(lis)) ) 
+                for (i=0; i<200000; i++) {
+                    if ( (a = st_lis331dl_getreadings(lis)) ) {
                         printf("%d %d %d\n", a->x, a->y, a->z);
-                    else {
+                    }
+                    else if (errno != 11) {
                         printf("Readings errno %d\n", errno);
                         break;
                     }
                     fflush(stdout);
-                    usleep(100000);
+                    usleep(10000);
                 }
                 
                 st_lis331dl_deinit(lis);
