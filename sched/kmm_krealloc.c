@@ -90,7 +90,8 @@ typedef FAR void *(*krealloc_t)(FAR void*, size_t);
  *   This is a simple redirection to the user-space realloc() function.
  *
  * Parameters:
- *   None
+ *   oldmem - The old memory allocated
+ *   size   - Size (in bytes) of the new memory region to be re-allocated.
  *
  * Return Value:
  *   The address of the re-allocated memory (NULL on failure to re-allocate)

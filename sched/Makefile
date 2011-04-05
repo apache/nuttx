@@ -134,7 +134,8 @@ endif
 
 IRQ_SRCS	= irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
-KMM_SRCS	= kmm_kmalloc.c kmm_kzalloc.c kmm_krealloc.c kmm_kfree.c
+KMM_SRCS	= kmm_initialize.c kmm_addregion.c kmm_semaphore.c \
+		  kmm_kmalloc.c kmm_kzalloc.c kmm_krealloc.c kmm_kfree.c
 
 CSRCS		= $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS) $(TIME_SRCS) \
 		  $(SEM_SRCS) $(TIMER_SRCS) $(WORK_SRCS) $(PGFILL_SRCS) $(IRQ_SRCS)

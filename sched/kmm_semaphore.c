@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/sched_free.c
+ * sched/kmm_semaphore.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,33 +38,47 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <queue.h>
-#include <assert.h>
-
 #include <nuttx/kmalloc.h>
-#include <nuttx/arch.h>
-#include <nuttx/wqueue.h>
-#include "os_internal.h"
+
+#ifdef CONFIG_NUTTX_KERNEL
+
+/* This logic is all tentatively and, hopefully, will grow in usability.
+ * For now, the kernel-mode build uses the memory manager that is
+ * provided in the user-space build.  That is awkward but reasonable for
+ * the current level of support:  At present, only memory protection is
+ * provided.  Kernel-mode code may call into user-mode code, but not
+ * vice-versa.  So hosting the memory manager in user-space allows the
+ * memory manager to be shared in both kernel- and user-mode spaces.
+ *
+ * In the longer run, if an MMU is support that can provide virtualized
+ * memory, then some SLAB memory manager will be required in kernel-space
+ * with some kind of brk() system call to obtain mapped heap space.
+ *
+ * In the current build model, the user-space module is built first. The
+ * file user_map.h is generated in the first pass and contains the
+ * addresses of the memory manager needed in this file:
+ */
+
+#include <arch/board/user_map.h>
 
 /************************************************************************
- * Definitions
+ * Pre-processor definition
  ************************************************************************/
 
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
+/* These values are obtained from user_map.h */
+
+#define KTRYSEMAPHORE()  ((kmtrysemaphore_t) CONFIG_USER_MMTRYSEM )()
+#define KGIVESEMAPHORE() ((kmgivesemaphore_t)CONFIG_USER_MMGIVESEM)()
 
 /************************************************************************
- * Global Variables
+ * Private Types
  ************************************************************************/
 
-/************************************************************************
- * Private Variables
- ************************************************************************/
+typedef int  (*kmtrysemaphore_t)(void);
+typedef void (*kmgivesemaphore_t)(void);
 
 /************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ************************************************************************/
 
 /************************************************************************
@@ -72,44 +86,55 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sched_free
+ * Function:  kmm_trysemaphore
  *
  * Description:
- *   This function performs deallocations that the operating system may
- *   need to make.  This special interface to free is used to handling
- *   corner cases where the operating system may have to perform
- *   deallocations from within an interrupt handler.
+ *   This is a simple redirection to the user-space mm_trysemaphore()
+ *   function.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   OK on success; a negated errno on failure
+ *
+ * Assumptions:
+ *   1. mm_trysemaphore() resides in user-space
+ *   2. The address of the user space mm_trysemaphore() is provided in
+ *      user_map.h
+ *   3. The user-space mm_semaphore() is callable from kernel-space.
  *
  ************************************************************************/
 
-void sched_free(FAR void *address)
+int kmm_trysemaphore(void)
 {
-  /* Check if this is an attempt to deallocate memory from
-   * an exception handler.  If this function is called from the
-   * IDLE task, then we must have exclusive access to the memory
-   * manager to do this.
-   */
-
-  if (up_interrupt_context() || kmm_trysemaphore() != 0)
-    {
-      /* Yes.. Delay the deallocation until a more appropriate time. */
-
-      irqstate_t saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)address, (sq_queue_t*)&g_delayeddeallocations);
-
-      /* Signal the worker thread that is has some clean up to do */
-
-#ifdef CONFIG_SCHED_WORKQUEUE
-      work_signal();
-#endif
-      irqrestore(saved_state);
-    }
-  else
-    {
-      /* No.. just deallocate the memory now. */
-
-      kfree(address);
-      kmm_givesemaphore();
-    }
+  return KTRYSEMAPHORE();
 }
 
+/************************************************************************
+ * Function:  kmm_givesemaphore
+ *
+ * Description:
+ *   This is a simple redirection to the user-space mm_givesemaphore()
+ *   function.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   OK on success; a negated errno on failure
+ *
+ * Assumptions:
+ *   1. mm_givesemaphore() resides in user-space
+ *   2. The address of the user space mm_givesemaphore() is provided in
+ *      user_map.h
+ *   3. The user-space mm_semaphore() is callable from kernel-space.
+ *
+ ************************************************************************/
+
+void kmm_givesemaphore(void)
+{
+  KGIVESEMAPHORE();
+}
+
+#endif /* CONFIG_NUTTX_KERNEL */

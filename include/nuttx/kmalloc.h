@@ -41,10 +41,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 
 #ifndef CONFIG_NUTTX_KERNEL
 #  include <stdlib.h>
+#  include <nuttx/mm.h>
 #endif
 
 /****************************************************************************
@@ -74,12 +76,22 @@ extern "C" {
 
 #ifndef CONFIG_NUTTX_KERNEL
 
-# define kmalloc(s) malloc(s)
-# define kzalloc(s) zalloc(s)
-# define krealloc(p,s) realloc(p,s)
-# define kfree(p) free(p)
+# define kmm_initialize(h,s)    mm_initialize(h,s)
+# define kmm_addregion(h,s)     mm_addregion(h,s)
+# define kmm_trysemaphore(h,s)  mm_trysemaphore(h,s)
+# define kmm_givesemaphore(h,s) mm_givesemaphore(h,s)
+
+# define kmalloc(s)             malloc(s)
+# define kzalloc(s)             zalloc(s)
+# define krealloc(p,s)          realloc(p,s)
+# define kfree(p)               free(p)
 
 #else
+
+KMALLOC_EXTERN void kmm_initialize(FAR void *heap_start, size_t heap_size);
+KMALLOC_EXTERN void kmm_addregion(FAR void *heapstart, size_t heapsize);
+KMALLOC_EXTERN int kmm_trysemaphore(void);
+KMALLOC_EXTERN void kmm_givesemaphore(void);
 
 KMALLOC_EXTERN FAR void *kmalloc(size_t);
 KMALLOC_EXTERN FAR void *kzalloc(size_t);

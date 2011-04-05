@@ -102,7 +102,7 @@ typedef void (*kfree_t)(FAR void *);
  *
  ************************************************************************/
 
-void free(FAR void *mem)
+void kfree(FAR void *mem)
 {
   return KFREE(mem);
 }

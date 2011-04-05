@@ -47,8 +47,9 @@
 #include  <nuttx/fs.h>
 #include  <nuttx/net.h>
 #include  <nuttx/lib.h>
-#include  <nuttx/mm.h>
+#include  <nuttx/kmalloc.h>
 #include  <nuttx/init.h>
+
 #include  "os_internal.h"
 #include  "sig_internal.h"
 #include  "wd_internal.h"
@@ -295,10 +296,10 @@ void os_start(void)
     FAR void *heap_start;
     size_t heap_size;
     up_allocate_heap(&heap_start, &heap_size);
-    mm_initialize(heap_start, heap_size);
+    kmm_initialize(heap_start, heap_size);
   }
 #else
-  mm_initialize((void*)CONFIG_HEAP_BASE, CONFIG_HEAP_SIZE);
+  kmm_initialize((void*)CONFIG_HEAP_BASE, CONFIG_HEAP_SIZE);
 #endif
 
   /* Initialize the interrupt handling subsystem (if included) */
@@ -460,10 +461,10 @@ void os_start(void)
        * possible because if the IDLE thread is running, no other task is!
        */
 
-      if (mm_trysemaphore() == 0)
+      if (kmm_trysemaphore() == 0)
         {
           sched_garbagecollection();
-          mm_givesemaphore();
+          kmm_givesemaphore();
         }
 #endif
 

@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/sched_free.c
+ * sched/kmm_initialize.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,33 +38,45 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <queue.h>
-#include <assert.h>
-
 #include <nuttx/kmalloc.h>
-#include <nuttx/arch.h>
-#include <nuttx/wqueue.h>
-#include "os_internal.h"
+
+#ifdef CONFIG_NUTTX_KERNEL
+
+/* This logic is all tentatively and, hopefully, will grow in usability.
+ * For now, the kernel-mode build uses the memory manager that is
+ * provided in the user-space build.  That is awkward but reasonable for
+ * the current level of support:  At present, only memory protection is
+ * provided.  Kernel-mode code may call into user-mode code, but not
+ * vice-versa.  So hosting the memory manager in user-space allows the
+ * memory manager to be shared in both kernel- and user-mode spaces.
+ *
+ * In the longer run, if an MMU is support that can provide virtualized
+ * memory, then some SLAB memory manager will be required in kernel-space
+ * with some kind of brk() system call to obtain mapped heap space.
+ *
+ * In the current build model, the user-space module is built first. The
+ * file user_map.h is generated in the first pass and contains the
+ * addresses of the memory manager needed in this file:
+ */
+
+#include <arch/board/user_map.h>
 
 /************************************************************************
- * Definitions
+ * Pre-processor definition
  ************************************************************************/
 
-/************************************************************************
- * Private Type Declarations
- ************************************************************************/
+/* This value is obtained from user_map.h */
+
+#define KINITIALIZE(h,s) ((kminitialize_t)CONFIG_USER_MMINIT)(h,s)
 
 /************************************************************************
- * Global Variables
+ * Private Types
  ************************************************************************/
 
-/************************************************************************
- * Private Variables
- ************************************************************************/
+typedef void (*kminitialize_t)(FAR void*, size_t);
 
 /************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ************************************************************************/
 
 /************************************************************************
@@ -72,44 +84,30 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sched_free
+ * Function:  kmm_initialize
  *
  * Description:
- *   This function performs deallocations that the operating system may
- *   need to make.  This special interface to free is used to handling
- *   corner cases where the operating system may have to perform
- *   deallocations from within an interrupt handler.
+ *   This is a simple redirection to the user-space mm_initialize()
+ *   function.
+ *
+ * Parameters:
+ *   heap_start - Address of the beginning of the (initial) memory region
+ *   heap_size  - The size (in bytes) if the (initial) memory region.
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *   1. mm_initialize() resides in user-space
+ *   2. The address of the user space mm_initialize() is provided in
+ *      user_map.h
+ *   3. The user-space mm_initialize() is callable from kernel-space.
  *
  ************************************************************************/
 
-void sched_free(FAR void *address)
+void kmm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  /* Check if this is an attempt to deallocate memory from
-   * an exception handler.  If this function is called from the
-   * IDLE task, then we must have exclusive access to the memory
-   * manager to do this.
-   */
-
-  if (up_interrupt_context() || kmm_trysemaphore() != 0)
-    {
-      /* Yes.. Delay the deallocation until a more appropriate time. */
-
-      irqstate_t saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)address, (sq_queue_t*)&g_delayeddeallocations);
-
-      /* Signal the worker thread that is has some clean up to do */
-
-#ifdef CONFIG_SCHED_WORKQUEUE
-      work_signal();
-#endif
-      irqrestore(saved_state);
-    }
-  else
-    {
-      /* No.. just deallocate the memory now. */
-
-      kfree(address);
-      kmm_givesemaphore();
-    }
+  return KINITIALIZE(heap_start, heap_size);
 }
 
+#endif /* CONFIG_NUTTX_KERNEL */

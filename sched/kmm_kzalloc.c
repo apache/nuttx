@@ -90,7 +90,7 @@ typedef FAR void *(*kzalloc_t)(size_t);
  *   This is a simple redirection to the user-space zalloc() function.
  *
  * Parameters:
- *   None
+ *   size - Size (in bytes) of the memory region to be allocated.
  *
  * Return Value:
  *   The address of the allocated memory (NULL on failure to allocate)
