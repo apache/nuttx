@@ -340,6 +340,16 @@ CONFIG_SCHED_WORKSTACKSIZE=1024
 CONFIG_SIG_SIGWORK=4
 
 #
+# These NSH commands are (temporarily) disable because more support is needed
+# for these commands to work with CONFIG_NUTTX_KERNEL
+#
+CONFIG_NSH_DISABLE_MKRD=y
+CONFIG_NSH_DISABLE_MKFATFS=y
+CONFIG_NSH_DISABLE_LOSETUP=y
+CONFIG_NSH_DISABLE_DD=y
+CONFIG_NSH_DISABLE_PS=y
+
+#
 # The following can be used to disable categories of
 # APIs supported by the OS.  If the compiler supports
 # weak functions, then it should not be necessary to
