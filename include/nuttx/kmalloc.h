@@ -78,8 +78,8 @@ extern "C" {
 
 # define kmm_initialize(h,s)    mm_initialize(h,s)
 # define kmm_addregion(h,s)     mm_addregion(h,s)
-# define kmm_trysemaphore(h,s)  mm_trysemaphore(h,s)
-# define kmm_givesemaphore(h,s) mm_givesemaphore(h,s)
+# define kmm_trysemaphore()     mm_trysemaphore()
+# define kmm_givesemaphore()    mm_givesemaphore()
 
 # define kmalloc(s)             malloc(s)
 # define kzalloc(s)             zalloc(s)

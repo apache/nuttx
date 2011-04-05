@@ -43,6 +43,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 #include <nuttx/lib.h>
 

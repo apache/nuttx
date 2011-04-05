@@ -39,12 +39,13 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <assert.h>
 #include <semaphore.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
+
 #include "fs_internal.h"
 
 /****************************************************************************
