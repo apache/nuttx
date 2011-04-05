@@ -43,6 +43,8 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
+
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -117,10 +119,10 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-  mm_addregion((FAR void*)SAM3U_INTSRAM1_BASE, CONFIG_SAM3U_SRAM1_SIZE);
+  kmm_addregion((FAR void*)SAM3U_INTSRAM1_BASE, CONFIG_SAM3U_SRAM1_SIZE);
 
 #if CONFIG_MM_REGIONS > 2
-  mm_addregion((FAR void*)SAM3U_NFCSRAM_BASE, CONFIG_SAM3U_NFCSRAM_SIZE);
+  kmm_addregion((FAR void*)SAM3U_NFCSRAM_BASE, CONFIG_SAM3U_NFCSRAM_SIZE);
 #endif
 }
 #endif
