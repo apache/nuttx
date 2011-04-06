@@ -2,7 +2,7 @@
 ###########################################################################
 # configs/ea3131/locked/mklocked.sh
 #
-#   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -163,7 +163,6 @@ fi
 
 echo "EXTERN(mm_initialize)" >>ld-locked.inc
 echo "EXTERN(irq_initialize)" >>ld-locked.inc
-#echo "EXTERN(user_initialize)" >>ld-locked.inc
 echo "EXTERN(wd_initialize)" >>ld-locked.inc
 
 answer=$(checkconfig CONFIG_DISABLE_CLOCK)

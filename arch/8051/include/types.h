@@ -67,20 +67,20 @@
  * long long and double are not supported.
  */
 
-typedef char               _int8_t;
+typedef signed char        _int8_t;
 typedef unsigned char      _uint8_t;
 
-typedef int                _int16_t;
+typedef signed int         _int16_t;
 typedef unsigned int       _uint16_t;
 
-typedef long               _int32_t;
+typedef signed long        _int32_t;
 typedef unsigned long      _uint32_t;
 
 /* For SDCC, a Generic pointer is 3 bytes in length with the
  * first byte holding data space information.
  */
 
-typedef long               _intptr_t;
+typedef signed long        _intptr_t;
 typedef unsigned long      _uintptr_t;
 
 /* This is the size of the interrupt state save returned by

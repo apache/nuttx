@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/init.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,9 +66,8 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* These are functions that must be supplied by the application */
+/* This entry point must be supplied by the application */
 
-EXTERN void   weak_function user_initialize(void);
 EXTERN int    user_start(int argc, char *argv[]);
 
 /* Functions contained in os_task.c *****************************************/

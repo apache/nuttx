@@ -1648,6 +1648,12 @@
 	  separately linked images: (1) a kernel-mode RTOS image, and (2) a user-
 	  mode application image that communicates to the RTOS kernel via system
 	  calls.  A lot more still must be done.
+	* user_initialize(): Eliminated the user_initialize() initialization hook.
+	  It is difficult to maintain and redundant:  Board level initialization
+	  an up_initialize() provide the same kind of capability.
+	* arch/*/include/*/type.h: On some compilers, char defaults as unsigned.
+	  Explicitly add signed to integer types if signed is what is required.
+
 
 
 

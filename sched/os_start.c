@@ -311,18 +311,6 @@ void os_start(void)
       irq_initialize();
     }
 
-  /* Provide an access point to initialize any user-specific logic very
-   * early in the initialization sequence. Note that user_ininitialize()
-   * is called only if it is provided in the link.
-   */
-
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (user_initialize != NULL)
-#endif
-    {
-      user_initialize();
-    }
-
   /* Initialize the watchdog facility (if included in the link) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
