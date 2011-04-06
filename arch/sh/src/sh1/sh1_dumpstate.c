@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/sh1/sh1_assert.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,7 @@ static void sh1_stackdump(uint32_t sp, uint32_t stack_base)
 
 static inline void sh1_registerdump(void)
 {
-  uint32_t *ptr = current_regs;
+  uint32_t *ptr = (uint32_t*)current_regs;
 
   /* Are user registers available from interrupt processing? */
 

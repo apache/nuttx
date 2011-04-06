@@ -84,6 +84,8 @@ FAR chipreg_t *up_doirq(uint8_t irq, FAR chipreg_t *regs)
 #else
   if (irq < NR_IRQS)
     {
+       FAR chipreg_t *savestate;
+
        /* Indicate that we have entered IRQ processing logic */
 
        IRQ_ENTER(irq, regs);

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/avr32/up_doirq.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,6 +76,8 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC(OSERR_ERREXCEPTION);
 #else
+  uint32_t *savestate;
+
   /* Nested interrupts are not supported in this implementation.  If you want
    * implemented nested interrupts, you would have to (1) change the way that
    * current regs is handled and (2) the design associated with
@@ -86,7 +88,7 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
    * current_regs is also used to manage interrupt level context switches.
    */
 
-  DEBUGASSERT(current_regs == NULL);
+  savestate    = (uint32_t*)current_regs;
   current_regs = regs;
 
   /* Deliver the IRQ */
@@ -101,9 +103,12 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
 
   regs = current_regs;
 
-  /* Indicate that we are no long in an interrupt handler */
+  /* Restore the previous value of current_regs.  NULL would indicate that
+   * we are no longer in an interrupt handler.  It will be non-NULL if we
+   * are returning from a nested interrupt.
+   */
 
-  current_regs = NULL;
+  current_regs = savestate;
 #endif
   up_ledoff(LED_INIRQ);
   return regs;

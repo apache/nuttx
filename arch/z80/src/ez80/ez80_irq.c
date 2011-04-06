@@ -57,7 +57,7 @@
  * structure.  If is non-NULL only during interrupt processing.
  */
 
-chipreg_t *current_regs;
+volatile chipreg_t *current_regs;
 
 /****************************************************************************
  * Private Data

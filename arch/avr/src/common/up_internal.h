@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/common/up_internal.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@
  * state from the TCB.
  */
 
-#define up_savestate(regs)    up_copystate(regs, current_regs)
+#define up_savestate(regs)    up_copystate(regs, (uint32_t*)current_regs)
 #define up_restorestate(regs) (current_regs = regs)
 
 /****************************************************************************
@@ -91,7 +91,7 @@ typedef void (*up_vector_t)(void);
  * interrupt processing.
  */
 
-extern uint32_t *current_regs;
+extern volatile uint32_t *current_regs;
 
 /* This is the beginning of heap as provided from up_head.S.
  * This is the first address in DRAM after the loaded

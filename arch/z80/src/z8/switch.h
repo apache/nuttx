@@ -2,7 +2,7 @@
  * arch/z80/src/z8/switch.h
  * arch/z80/src/chip/switch.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,7 @@
     g_z8irqstate.state = Z8_IRQSTATE_NONE; \
   } while (0)
 
-/* IN_INTERRUPT returns true if the system is current operating in the interrupt
+/* IN_INTERRUPT returns true if the system is currently operating in the interrupt
  * context.  IN_INTERRUPT is the inline equivalent of up_interrupt_context().
  */
 
@@ -114,8 +114,15 @@
 
 /* The following macro is used when the system enters interrupt handling logic */
 
+#define IRQ_SAVE(irq, regs)      savestate    = (FAR chipreg_t *)current_regs;
+#define IRQ_ENTER(irq, regs)     current_regs = (regs)
+
+/* The following macro is used when the system exits interrupt handling logic */
+
 #define IRQ_ENTER(irq, regs) \
   do { \
+    savestate.state    = g_z8irqstate.state; \
+    savestate.regs     = g_z8irqstate.regs; \
     g_z8irqstate.state = Z8_IRQSTATE_ENTRY; \
     g_z8irqstate.regs  = (regs); \
     up_maskack_irq(irq); \
@@ -125,7 +132,8 @@
 
 #define IRQ_LEAVE(irq) \
   do { \
-    g_z8irqstate.state = Z8_IRQSTATE_NONE; \
+    g_z8irqstate.state = savestate.state; \
+    g_z8irqstate.regs  = savestate.regs; \
     up_enable_irq(irq); \
   } while (0)
 

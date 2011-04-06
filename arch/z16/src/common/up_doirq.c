@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_doirq.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,31 +88,37 @@ FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs)
 #else
   if ((unsigned)irq < NR_IRQS)
     {
-       /* Current regs non-zero indicates that we are processing
-        * an interrupt; current_regs is also used to manage
-        * interrupt level context switches.
-        */
+      FAR chipreg_t *savestate;
 
-       current_regs = regs;
+      /* Current regs non-zero indicates that we are processing
+       * an interrupt; current_regs is also used to manage
+       * interrupt level context switches.
+       */
 
-       /* Mask and acknowledge the interrupt */
+      savestate    = (uint32_t*)current_regs;
+      current_regs = regs;
 
-       up_maskack_irq(irq);
+      /* Mask and acknowledge the interrupt */
 
-       /* Deliver the IRQ */
+      up_maskack_irq(irq);
 
-       irq_dispatch(irq, regs);
+      /* Deliver the IRQ */
 
-       /* Indicate that we are no long in an interrupt handler */
+      irq_dispatch(irq, regs);
 
-       ret          = current_regs;
-       current_regs = NULL;
+      /* Restore the previous value of current_regs.  NULL would indicate that
+       * we are no longer in an interrupt handler.  It will be non-NULL if we
+       * are returning from a nested interrupt.
+       */
 
-       /* Unmask the last interrupt (global interrupts are still
-        * disabled.
-        */
+      ret          = current_regs;
+      current_regs = savestate;
 
-       up_enable_irq(irq);
+      /* Unmask the last interrupt (global interrupts are still
+       * disabled.
+       */
+
+      up_enable_irq(irq);
     }
   up_ledoff(LED_INIRQ);
 #endif

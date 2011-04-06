@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc214x/lpc214x_irq.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@
  * Public Data
  ****************************************************************************/
 
-uint32_t *current_regs;
+volatile uint32_t *current_regs;
 
 /****************************************************************************
  * Private Data

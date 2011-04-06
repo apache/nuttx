@@ -80,7 +80,7 @@ void up_savestate(uint32_t *regs)
   
   /* First, just copy all of the registers */
 
-  up_copystate(regs, current_regs);
+  up_copystate(regs, (uint32_t*)current_regs);
 
   /* The RES_SP and REG_SS values will not be saved by the interrupt handling
    * logic if there is no change in privilege level.  In that case, we will

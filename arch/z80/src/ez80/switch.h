@@ -2,7 +2,7 @@
  * arch/z80/src/ez80/switch.h
  * arch/z80/src/chip/switch.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@
 
 #define INIT_IRQCONTEXT()        current_regs = NULL
 
-/* IN_INTERRUPT returns true if the system is current operating in the interrupt
+/* IN_INTERRUPT returns true if the system is currently operating in the interrupt
  * context.  IN_INTERRUPT is the inline equivalent of up_interrupt_context().
  */
 
@@ -69,11 +69,15 @@
 
 /* The following macro is used when the system enters interrupt handling logic */
 
-#define IRQ_ENTER(irq, regs)     current_regs = (regs)
+#define IRQ_ENTER(irq, regs) \
+  do { \
+    savestate    = (FAR chipreg_t *)current_regs; \
+    current_regs = (regs); \
+  } while (0)
 
 /* The following macro is used when the system exits interrupt handling logic */
 
-#define IRQ_LEAVE(irq)           current_regs = NULL
+#define IRQ_LEAVE(irq)           current_regs = savestate
 
 /* The following macro is used to sample the interrupt state (as a opaque handle) */
 
@@ -81,11 +85,11 @@
 
 /* Save the current IRQ context in the specified TCB */
 
-#define SAVE_IRQCONTEXT(tcb)     ez80_copystate((tcb)->xcp.regs, current_regs)
+#define SAVE_IRQCONTEXT(tcb)     ez80_copystate((tcb)->xcp.regs, (FAR chipreg_t*)current_regs)
 
 /* Set the current IRQ context to the state specified in the TCB */
 
-#define SET_IRQCONTEXT(tcb)      ez80_copystate(current_regs, (tcb)->xcp.regs)
+#define SET_IRQCONTEXT(tcb)      ez80_copystate((FAR chipreg_t*)current_regs, (tcb)->xcp.regs)
 
 /* Save the user context in the specified TCB.  User context saves can be simpler
  * because only those registers normally saved in a C called need be stored.
@@ -116,7 +120,7 @@
  * If is non-NULL only during interrupt processing.
  */
 
-extern chipreg_t *current_regs;
+extern volatile chipreg_t *current_regs;
 #endif
 
 /************************************************************************************
@@ -133,19 +137,19 @@ extern "C" {
 
 /* Defined in ez80_copystate.c */
 
-EXTERN void ez80_copystate(chipreg_t *dest, const chipreg_t *src);
+EXTERN void ez80_copystate(FAR chipreg_t *dest, FAR const chipreg_t *src);
 
 /* Defined in ez80_saveusercontext.asm */
 
-EXTERN int ez80_saveusercontext(chipreg_t *regs);
+EXTERN int ez80_saveusercontext(FAR chipreg_t *regs);
 
 /* Defined in ez80_restorecontext.asm */
 
-EXTERN void ez80_restorecontext(chipreg_t *regs);
+EXTERN void ez80_restorecontext(FAR chipreg_t *regs);
 
 /* Defined in ez80_sigsetup.c */
 
-EXTERN void ez80_sigsetup(_TCB *tcb, sig_deliver_t sigdeliver, chipreg_t *regs);
+EXTERN void ez80_sigsetup(FAR _TCB *tcb, sig_deliver_t sigdeliver, chipreg_t *regs);
 
 /* Defined in ez80_registerdump.c */
 

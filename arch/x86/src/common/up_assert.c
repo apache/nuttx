@@ -198,7 +198,7 @@ static void up_dumpstate(void)
 
   if (current_regs != NULL)
     {
-      up_registerdump(current_regs);
+      up_registerdump((uint32_t*)current_regs);
 	}
 }
 #else

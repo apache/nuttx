@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_internal.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@
 /* Macros for portability */
 
 #define IN_INTERRUPT             (current_regs != NULL)
-#define SAVE_IRQCONTEXT(tcb)     up_copystate((tcb)->xcp.regs, current_regs)
+#define SAVE_IRQCONTEXT(tcb)     up_copystate((tcb)->xcp.regs, (FAR chipreg_t*)current_regs)
 #define SET_IRQCONTEXT(tcb)      do { current_regs = (tcb)->xcp.regs; } while (0)
 #define SAVE_USERCONTEXT(tcb)    up_saveusercontext((tcb)->xcp.regs)
 #define RESTORE_USERCONTEXT(tcb) up_restoreusercontext((tcb)->xcp.regs)
@@ -98,7 +98,7 @@ typedef void (*up_vector_t)(void);
  * interrupt processing.
  */
 
-extern FAR chipreg_t *current_regs;
+extern voltile FAR chipreg_t *current_regs;
 #endif
 
 /****************************************************************************

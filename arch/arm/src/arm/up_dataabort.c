@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/arm/up_dataabort.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,13 +103,19 @@
 void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 {
   FAR _TCB *tcb = (FAR _TCB *)g_readytorun.head;
+#ifdef CONFIG_PAGING
+   uint32_t *savestate;
 
   /* Save the saved processor context in current_regs where it can be accessed
    * for register dumps and possibly context switching.
    */
 
+
+  savestate    = (uint32_t*)current_regs;
+#endif
   current_regs = regs;
 
+#ifdef CONFIG_PAGING
   /* In the NuttX on-demand paging implementation, only the read-only, .text
    * section is paged.  However, the ARM compiler generated PC-relative data
    * fetches from within the .text sections.  Also, it is customary to locate
@@ -162,12 +168,16 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 
   pg_miss();
 
-  /* Indicate that we are no longer in an interrupt handler */
+  /* Restore the previous value of current_regs.  NULL would indicate that
+   * we are no longer in an interrupt handler.  It will be non-NULL if we
+   * are returning from a nested interrupt.
+   */
 
-  current_regs = NULL;
+  current_regs = savestate;
   return;
 
 segfault:
+#endif
   lldbg("Data abort. PC: %08x FAR: %08x FSR: %08x\n", regs[REG_PC], far, fsr);
   PANIC(OSERR_ERREXCEPTION);
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_initialize.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@
  * interrupt processing.
  */
 
-FAR chipreg_t *current_regs;
+volatile FAR chipreg_t *current_regs;
 
 /****************************************************************************
  * Private Types

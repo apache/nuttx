@@ -2,7 +2,7 @@
  * arch/avr/src/at32uc3_/at32uc3_irq.c
  * arch/avr/src/chip/at32uc3_irq.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@ extern uint32_t avr32_int3;
  * Public Data
  ****************************************************************************/
 
-uint32_t *current_regs;
+volatile uint32_t *current_regs;
 
 /****************************************************************************
  * Private Types

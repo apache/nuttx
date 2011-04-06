@@ -81,7 +81,7 @@
  * a referenced is passed to get the state from the TCB.
  */
 
-#define up_savestate(regs)    up_copystate(regs, current_regs)
+#define up_savestate(regs)    up_copystate(regs, (uint8_t*)current_regs)
 #define up_restorestate(regs) (current_regs = regs)
 
 /****************************************************************************

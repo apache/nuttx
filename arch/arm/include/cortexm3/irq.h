@@ -156,6 +156,13 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 
+/* Disable IRQs */
+
+static inline void irqdisable(void)
+{
+  __asm__ __volatile__ ("\tcpsid  i\n");
+}
+
 /* Save the current primask state & disable IRQs */
 
 static inline irqstate_t irqsave(void)
@@ -174,6 +181,13 @@ static inline irqstate_t irqsave(void)
      :
      : "memory");
   return primask;
+}
+
+/* Enable IRQs */
+
+static inline void irqenable(void)
+{
+  __asm__ __volatile__ ("\tcpsie  i\n");
 }
 
 /* Restore saved primask state */
