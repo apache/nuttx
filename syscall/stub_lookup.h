@@ -125,10 +125,12 @@ STUB_LOOKUP(3, STUB_up_assert_code)             /* SYS_up_assert_code */
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0 
   STUB_LOOKUP(1, STUB_close)                    /* SYS_close */
   STUB_LOOKUP(3, STUB_ioctl)                    /* SYS_ioctl */
-  STUB_LOOKUP(3, STUB_poll)                     /* SYS_poll */
   STUB_LOOKUP(3, STUB_read)                     /* SYS_read */
-  STUB_LOOKUP(5, STUB_select)                   /* SYS_select */
   STUB_LOOKUP(3, STUB_write)                    /* SYS_write */
+#  ifndef CONFIG_DISABLE_POLL
+  STUB_LOOKUP(3, STUB_poll)                     /* SYS_poll */
+  STUB_LOOKUP(5, STUB_select)                   /* SYS_select */
+#  endif
 #endif
 
 /* The following are defined if file descriptors are enabled */
@@ -197,7 +199,6 @@ STUB_LOOKUP(3, STUB_up_assert_code)             /* SYS_up_assert_code */
   STUB_LOOKUP(3, STUB_pthread_setschedparam)    /* SYS_pthread_setschedparam */
   STUB_LOOKUP(2, STUB_pthread_setschedprio)     /* SYS_pthread_setschedprio */
   STUB_LOOKUP(2, STUB_pthread_setspecific)      /* SYS_pthread_setspecific */
-  STUB_LOOKUP(0, STUB_pthread_testcancel)       /* SYS_pthread_testcancel */
   STUB_LOOKUP(0, STUB_pthread_yield)            /* SYS_pthread_yield */
 #  ifndef CONFIG_DISABLE_SIGNAL
     STUB_LOOKUP(3, STUB_pthread_cond_timedwait) /* SYS_pthread_cond_timedwait */

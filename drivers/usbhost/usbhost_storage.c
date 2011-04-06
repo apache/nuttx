@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_storage.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
@@ -72,7 +73,7 @@
 #endif
 
 /* If the create() method is called by the USB host device driver from an
- * interrupt handler, then it will be unable to call malloc() in order to
+ * interrupt handler, then it will be unable to call kmalloc() in order to
  * allocate a new class instance.  If the create() method is called from the
  * interrupt level, then class instances must be pre-allocated.
  */
@@ -378,11 +379,11 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
   FAR struct usbhost_state_s *priv;
 
   /* We are not executing from an interrupt handler so we can just call
-   * malloc() to get memory for the class instance.
+   * kmalloc() to get memory for the class instance.
    */
 
   DEBUGASSERT(!up_interrupt_context());
-  priv = (FAR struct usbhost_state_s *)malloc(sizeof(struct usbhost_state_s));
+  priv = (FAR struct usbhost_state_s *)kmalloc(sizeof(struct usbhost_state_s));
   uvdbg("Allocated: %p\n", priv);;
   return priv;
 }
@@ -427,7 +428,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *class)
    */
 
   uvdbg("Freeing: %p\n", class);;
-  free(class);
+  kfree(class);
 }
 #endif
 

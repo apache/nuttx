@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_setup.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 
 #include "bch_internal.h"
@@ -92,7 +93,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
 
   /* Allocate the BCH state structure */
 
-  bch = (FAR struct bchlib_s*)zalloc(sizeof(struct bchlib_s));
+  bch = (FAR struct bchlib_s*)kzalloc(sizeof(struct bchlib_s));
   if (!bch)
     {
       fdbg("Failed to allocate BCH structure\n");
@@ -141,7 +142,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
 
   /* Allocate the sector I/O buffer */
 
-  bch->buffer = (FAR uint8_t *)malloc(bch->sectsize);
+  bch->buffer = (FAR uint8_t *)kmalloc(bch->sectsize);
   if (!bch->buffer)
     {
       fdbg("Failed to allocate sector buffer\n");
@@ -153,6 +154,6 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
   return OK;
 
 errout_with_bch:
-  free(bch);
+  kfree(bch);
   return ret;
 }

@@ -52,6 +52,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 #if CONFIG_DEBUG
 #  include <nuttx/arch.h>
@@ -150,7 +151,7 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
 
   /* Allocate a private structure to manage the pipe */
 
-  dev = (struct pipe_dev_s *)malloc(sizeof(struct pipe_dev_s));
+  dev = (struct pipe_dev_s *)kmalloc(sizeof(struct pipe_dev_s));
   if (dev)
     {
       /* Initialize the private structure */
@@ -172,7 +173,7 @@ void pipecommon_freedev(FAR struct pipe_dev_s *dev)
    sem_destroy(&dev->d_bfsem);
    sem_destroy(&dev->d_rdsem);
    sem_destroy(&dev->d_wrsem);
-   free(dev);
+   kfree(dev);
 }
 
 /****************************************************************************
@@ -209,7 +210,7 @@ int pipecommon_open(FAR struct file *filep)
 
   if (dev->d_refs == 0)
     {
-      dev->d_buffer = (uint8_t*)malloc(CONFIG_DEV_PIPE_SIZE);
+      dev->d_buffer = (uint8_t*)kmalloc(CONFIG_DEV_PIPE_SIZE);
       if (!dev->d_buffer)
         {
           (void)sem_post(&dev->d_bfsem);
@@ -330,7 +331,7 @@ int pipecommon_close(FAR struct file *filep)
     {
       /* Yes... deallocate the buffer */
 
-      free(dev->d_buffer);
+      kfree(dev->d_buffer);
       dev->d_buffer = NULL;
 
       /* And reset all counts and indices */

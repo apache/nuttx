@@ -2,7 +2,7 @@
  * drivers/mtd/at45db.c
  * Driver for SPI-based AT45DB161D (16Mbit)
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/ioctl.h>
 #include <nuttx/spi.h>
@@ -826,7 +827,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
    * to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct at45db_dev_s *)malloc(sizeof(struct at45db_dev_s));
+  priv = (FAR struct at45db_dev_s *)kmalloc(sizeof(struct at45db_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure */
@@ -893,6 +894,6 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
 
 errout:
   at45db_unlock(priv);
-  free(priv);
+  kfree(priv);
   return NULL;
 }

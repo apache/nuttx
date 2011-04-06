@@ -2,7 +2,7 @@
  * drivers/mtd/m25px.c
  * Driver for SPI-based M25P1 (128Kbit), M25P64 (64Mbit), and M25P128 (128Mbit) FLASH
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/ioctl.h>
 #include <nuttx/spi.h>
 #include <nuttx/mtd.h>
@@ -673,7 +674,7 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
    * to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct m25p_dev_s *)malloc(sizeof(struct m25p_dev_s));
+  priv = (FAR struct m25p_dev_s *)kmalloc(sizeof(struct m25p_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure */
@@ -697,7 +698,7 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
           fdbg("Unrecognized\n");
-          free(priv);
+          kfree(priv);
           priv = NULL;
         }
     }

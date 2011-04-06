@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_teardown.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 
 #include "bch_internal.h"
@@ -102,11 +103,11 @@ int bchlib_teardown(FAR void *handle)
 
   if (bch->buffer)
     {
-      free(bch->buffer);
+      kfree(bch->buffer);
     }
 
   sem_destroy(&bch->sem);
-  free(bch);
+  kfree(bch);
   return OK;
 }
 

@@ -58,6 +58,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 #include <nuttx/fat.h>
 #include <nuttx/dirent.h>
@@ -286,7 +287,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
    * file.
    */
 
-  ff = (struct fat_file_s *)zalloc(sizeof(struct fat_file_s));
+  ff = (struct fat_file_s *)kzalloc(sizeof(struct fat_file_s));
   if (!ff)
     {
       ret = -ENOMEM;
@@ -295,7 +296,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
 
   /* Create a file buffer to support partial sector accesses */
 
-  ff->ff_buffer = (uint8_t*)malloc(fs->fs_hwsectorsize);
+  ff->ff_buffer = (uint8_t*)kmalloc(fs->fs_hwsectorsize);
   if (!ff->ff_buffer)
     {
       ret = -ENOMEM;
@@ -344,7 +345,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
       ssize_t offset = (ssize_t)fat_seek(filep, ff->ff_size, SEEK_SET);
       if (offset < 0)
         {
-          free(ff);
+          kfree(ff);
           return (int)offset;
         }
     }
@@ -356,7 +357,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
    */
 
 errout_with_struct:
-  free(ff);
+  kfree(ff);
 
 errout_with_semaphore:
   fat_semgive(fs);
@@ -402,12 +403,12 @@ static int fat_close(FAR struct file *filep)
 
   if (ff->ff_buffer)
     {
-      free(ff->ff_buffer);
+      kfree(ff->ff_buffer);
     }
 
   /* Then free the file structure itself. */
 
-  free(ff);
+  kfree(ff);
   filep->f_priv = NULL;
   return ret;
 }
@@ -1491,7 +1492,7 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
 
   /* Create an instance of the mountpt state structure */
 
-  fs = (struct fat_mountpt_s *)zalloc(sizeof(struct fat_mountpt_s));
+  fs = (struct fat_mountpt_s *)kzalloc(sizeof(struct fat_mountpt_s));
   if (!fs)
     {
       return -ENOMEM;
@@ -1513,7 +1514,7 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
   if (ret != 0)
     {
       sem_destroy(&fs->fs_sem);
-      free(fs);
+      kfree(fs);
       return ret;
     }
 
@@ -1581,9 +1582,9 @@ static int fat_unbind(void *handle, FAR struct inode **blkdriver)
 
       if (fs->fs_buffer)
         {
-          free(fs->fs_buffer);
+          kfree(fs->fs_buffer);
         }
-      free(fs);
+      kfree(fs);
     }
 
   fat_semgive(fs);

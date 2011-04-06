@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/loop.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 
 /****************************************************************************
@@ -377,7 +378,7 @@ int losetup(const char *devname, const char *filename, uint16_t sectsize,
 
   /* Allocate a loop device structure */
 
-  dev = (FAR struct loop_struct_s *)zalloc(sizeof(struct loop_struct_s));
+  dev = (FAR struct loop_struct_s *)kzalloc(sizeof(struct loop_struct_s));
   if (!dev)
     {
       return -ENOMEM;
@@ -437,7 +438,7 @@ int losetup(const char *devname, const char *filename, uint16_t sectsize,
 errout_with_fd:
   close(dev->fd);
 errout_with_dev:
-  free(dev);
+  kfree(dev);
   return ret;
 }
 
@@ -500,6 +501,6 @@ int loteardown(const char *devname)
       (void)close(dev->fd);
     }
 
-  free(dev);
+  kfree(dev);
   return ret;
 }

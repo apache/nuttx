@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/ramdisk.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 #include <nuttx/ramdisk.h>
 
@@ -305,7 +306,7 @@ int romdisk_register(int minor, uint8_t *buffer, uint32_t nsectors,
 
   /* Allocate a ramdisk device structure */
 
-  dev = (struct rd_struct_s *)malloc(sizeof(struct rd_struct_s));
+  dev = (struct rd_struct_s *)kmalloc(sizeof(struct rd_struct_s));
   if (dev)
     {
       /* Initialize the ramdisk device structure */
@@ -327,7 +328,7 @@ int romdisk_register(int minor, uint8_t *buffer, uint32_t nsectors,
       if (ret < 0)
         {
           fdbg("register_blockdriver failed: %d\n", -ret);
-          free(dev);
+          kfree(dev);
         }
     }
   return ret;

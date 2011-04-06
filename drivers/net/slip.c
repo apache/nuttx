@@ -186,7 +186,7 @@ struct slip_driver_s
  ****************************************************************************/
 
  /* We really should get rid of CONFIG_SLIP_NINTERFACES and, instead,
-  * malloc() new interface instances as needed.
+  * kmalloc() new interface instances as needed.
   */
 
 static struct slip_driver_s g_slip[CONFIG_SLIP_NINTERFACES];

@@ -52,6 +52,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 #include <nuttx/ioctl.h>
 #include <nuttx/clock.h>
@@ -2891,7 +2892,7 @@ static void mmcsd_hwuninitialize(FAR struct mmcsd_state_s *priv)
     {
       mmcsd_removed(priv);
       SDIO_RESET(priv->dev);
-      free(priv);
+      kfree(priv);
     }
 }
 
@@ -2932,7 +2933,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
 
   /* Allocate a MMC/SD state structure */
 
-  priv = (FAR struct mmcsd_state_s *)malloc(sizeof(struct mmcsd_state_s));
+  priv = (FAR struct mmcsd_state_s *)kmalloc(sizeof(struct mmcsd_state_s));
   if (priv)
     {
       /* Initialize the MMC/SD state structure */
@@ -3010,6 +3011,6 @@ errout_with_hwinit:
 #endif
   mmcsd_hwuninitialize(priv);
 errout_with_alloc:
-  free(priv);
+  kfree(priv);
   return ret;
 }

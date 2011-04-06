@@ -53,6 +53,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
@@ -490,7 +491,7 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
   FAR struct usbhost_state_s *priv;
 
   DEBUGASSERT(!up_interrupt_context());
-  priv = (FAR struct usbhost_state_s *)malloc(sizeof(struct usbhost_state_s));
+  priv = (FAR struct usbhost_state_s *)kmalloc(sizeof(struct usbhost_state_s));
   uvdbg("Allocated: %p\n", priv);;
   return priv;
 }
@@ -513,12 +514,10 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *class)
 {
   DEBUGASSERT(class != NULL);
 
-  /* Free the class instance (calling sched_free() in case we are executing
-   * from an interrupt handler.
-   */
+  /* Free the class instance. */
 
   uvdbg("Freeing: %p\n", class);;
-  free(class);
+  kfree(class);
 }
 
 /****************************************************************************

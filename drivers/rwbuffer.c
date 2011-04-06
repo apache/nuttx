@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/rwbuffer.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/rwbuffer.h>
 
@@ -425,10 +426,10 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
   if (rwb->wrmaxblocks > 0)
     {
       allocsize     = rwb->wrmaxblocks * rwb->blocksize;
-      rwb->wrbuffer = malloc(allocsize);
+      rwb->wrbuffer = kmalloc(allocsize);
       if (!rwb->wrbuffer)
         {
-          fdbg("Write buffer malloc(%d) failed\n", allocsizee);
+          fdbg("Write buffer kmalloc(%d) failed\n", allocsizee);
           return -ENOMEM;
         }
     }
@@ -453,10 +454,10 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
   if (rwb->rhmaxblocks > 0)
     {
       allocsize     = rwb->rhmaxblocks * rwb->blocksize;
-      rwb->rhbuffer = malloc(allocsize);
+      rwb->rhbuffer = kmalloc(allocsize);
       if (!rwb->rhbuffer)
         {
-          fdbg("Read-ahead buffer malloc(%d) failed\n", allocsize);
+          fdbg("Read-ahead buffer kmalloc(%d) failed\n", allocsize);
           return -ENOMEM;
         }
     }
@@ -477,7 +478,7 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
   sem_destroy(&rwb->wrsem);
   if (rwb->wrbuffer)
     {
-      free(rwb->wrbuffer);
+      kfree(rwb->wrbuffer);
     }
 #endif
 
@@ -485,7 +486,7 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
   sem_destroy(&rwb->rhsem);
   if (rwb->rhbuffer)
     {
-      free(rwb->rhbuffer);
+      kfree(rwb->rhbuffer);
     }
 #endif
 }

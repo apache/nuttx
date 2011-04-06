@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_storage.c
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -72,6 +72,7 @@
 #include <queue.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs.h>
 #include <nuttx/usb/usb.h>
@@ -531,9 +532,9 @@ static int usbstrg_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_
 
   /* Pre-allocate all endpoints... the endpoints will not be functional
    * until the SET CONFIGURATION request is processed in usbstrg_setconfig.
-   * This is done here because there may be calls to malloc and the SET
+   * This is done here because there may be calls to kmalloc and the SET
    * CONFIGURATION processing probably occurrs within interrupt handling
-   * logic where malloc calls will fail.
+   * logic where kmalloc calls will fail.
    */
 
   /* Pre-allocate the IN bulk endpoint */
@@ -1477,7 +1478,7 @@ int usbstrg_configure(unsigned int nluns, void **handle)
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct usbstrg_alloc_s*)malloc(sizeof(struct usbstrg_alloc_s));
+  alloc = (FAR struct usbstrg_alloc_s*)kmalloc(sizeof(struct usbstrg_alloc_s));
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_ALLOCDEVSTRUCT), 0);
@@ -1497,7 +1498,7 @@ int usbstrg_configure(unsigned int nluns, void **handle)
 
   /* Allocate the LUN table */
 
-  priv->luntab = (struct usbstrg_lun_s*)malloc(priv->nluns*sizeof(struct usbstrg_lun_s));
+  priv->luntab = (struct usbstrg_lun_s*)kmalloc(priv->nluns*sizeof(struct usbstrg_lun_s));
   if (!priv->luntab)
     {
       ret = -ENOMEM;
@@ -1638,7 +1639,7 @@ int usbstrg_bindlun(FAR void *handle, FAR const char *drvrpath,
 
   if (!priv->iobuffer)
     {
-      priv->iobuffer = (uint8_t*)malloc(geo.geo_sectorsize);
+      priv->iobuffer = (uint8_t*)kmalloc(geo.geo_sectorsize);
       if (!priv->iobuffer)
         {
           usbtrace(TRACE_CLSERROR(USBSTRG_TRACEERR_ALLOCIOBUFFER), geo.geo_sectorsize);
@@ -1891,13 +1892,13 @@ void usbstrg_uninitialize(FAR void *handle)
     {
       usbstrg_lununinitialize(&priv->luntab[i]);
     }
-  free(priv->luntab);
+  kfree(priv->luntab);
 
   /* Release the I/O buffer */
 
   if (priv->iobuffer)
     {
-      free(priv->iobuffer);
+      kfree(priv->iobuffer);
     }
 
   /* Uninitialize and release the driver structure */
@@ -1905,5 +1906,5 @@ void usbstrg_uninitialize(FAR void *handle)
   pthread_mutex_destroy(&priv->mutex);
   pthread_cond_destroy(&priv->cond);
 
-  free(priv);
+  kfree(priv);
 }

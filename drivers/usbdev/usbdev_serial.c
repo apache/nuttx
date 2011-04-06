@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_serial.c
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * This logic emulates the Prolific PL2303 serial/USB converter
@@ -53,6 +53,7 @@
 #include <queue.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
 #include <nuttx/usb/usb.h>
@@ -1300,9 +1301,9 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
 
   /* Pre-allocate all endpoints... the endpoints will not be functional
    * until the SET CONFIGURATION request is processed in usbclass_setconfig.
-   * This is done here because there may be calls to malloc and the SET
+   * This is done here because there may be calls to kmalloc and the SET
    * CONFIGURATION processing probably occurrs within interrupt handling
-   * logic where malloc calls will fail.
+   * logic where kmalloc calls will fail.
    */
 
   /* Pre-allocate the IN interrupt endpoint */
@@ -2163,7 +2164,7 @@ int usbdev_serialinitialize(int minor)
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct usbser_alloc_s*)malloc(sizeof(struct usbser_alloc_s));
+  alloc = (FAR struct usbser_alloc_s*)kmalloc(sizeof(struct usbser_alloc_s));
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCDEVSTRUCT), 0);
@@ -2244,6 +2245,6 @@ int usbdev_serialinitialize(int minor)
 errout_with_class:
   usbdev_unregister(&drvr->drvr);
 errout_with_alloc:
-  free(alloc);
+  kfree(alloc);
   return ret;
 }

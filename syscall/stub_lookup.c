@@ -190,7 +190,6 @@ extern uintptr_t STUB_pthread_setcancelstate(uintptr_t parm1, uintptr_t parm2);
 extern uintptr_t STUB_pthread_setschedparam(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3);
 extern uintptr_t STUB_pthread_setschedprio(uintptr_t parm1, uintptr_t parm2);
 extern uintptr_t STUB_pthread_setspecific(uintptr_t parm1, uintptr_t parm2);
-extern uintptr_t STUB_pthread_testcancel(void);
 extern uintptr_t STUB_pthread_yield(void);
 
 extern uintptr_t STUB_pthread_cond_timedwait(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3);

@@ -123,17 +123,30 @@ endif
 
 depend: .depend
 
+# Clean Targets:
+# Clean user-mode temporary files (retaining the UBIN binary)
+
 uclean:
-	@rm -f $(UBIN) .userlib *~ .*.swp
-	$(call CLEAN)
+ifneq ($(OBJEXT),)
+	@( if [ -f .userlib ]; then rm -f *$(OBJEXT); fi )
+endif
+	@rm -f .userlib *~ .*.swp
+
+# Clean kernel-mode temporary files (retaining the KBIN binary)
 
 kclean:
-	@rm -f $(KBIN) .kernlib *~ .*.swp
-	$(call CLEAN)
+ifneq ($(OBJEXT),)
+	@( if [ -f .kernlib ]; then rm -f *$(OBJEXT); fi )
+endif
+	@rm -f .kernlib *~ .*.swp
+
+# Really clean everything
 
 clean: uclean kclean
-	@rm -f $(BIN) *~ .*.swp
+	@rm -f $(BIN) $(UBIN) $(KBIN) *~ .*.swp
 	$(call CLEAN)
+
+# Deep clean -- removes all traces of the configuration
 
 distclean: clean
 	@rm -f Make.dep .depend

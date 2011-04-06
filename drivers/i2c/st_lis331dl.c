@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <stdio.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/i2c/st_lis331dl.h>
  
 /************************************************************************************
@@ -152,7 +153,7 @@ struct st_lis331dl_dev_s * st_lis331dl_init(struct i2c_dev_s * i2c, uint16_t add
     ASSERT(i2c);
     ASSERT(address);
     
-    if ( (dev = malloc( sizeof(struct st_lis331dl_dev_s) )) == NULL )
+    if ( (dev = kmalloc( sizeof(struct st_lis331dl_dev_s) )) == NULL )
         return NULL;
         
     memset(dev, 0, sizeof(struct st_lis331dl_dev_s));
@@ -189,7 +190,7 @@ struct st_lis331dl_dev_s * st_lis331dl_init(struct i2c_dev_s * i2c, uint16_t add
     }
 
     /* Error exit */
-    free(dev);
+    kfree(dev);
     errno = retval;
     return NULL;
 }
@@ -200,7 +201,7 @@ int st_lis331dl_deinit(struct st_lis331dl_dev_s * dev)
     ASSERT(dev);
     
     st_lis331dl_powerdown(dev);
-    free(dev);
+    kfree(dev);
     
     return OK;
 }

@@ -168,11 +168,15 @@
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0 
 #  define SYS_close                    (__SYS_descriptors+0)
 #  define SYS_ioctl                    (__SYS_descriptors+1)
-#  define SYS_poll                     (__SYS_descriptors+2)
-#  define SYS_read                     (__SYS_descriptors+3)
-#  define SYS_select                   (__SYS_descriptors+4)
-#  define SYS_write                    (__SYS_descriptors+5)
-#  define __SYS_filedesc               (__SYS_descriptors+6)
+#  define SYS_read                     (__SYS_descriptors+2)
+#  define SYS_write                    (__SYS_descriptors+3)
+#  ifndef CONFIG_DISABLE_POLL
+#    define SYS_poll                   (__SYS_descriptors+4)
+#    define SYS_select                 (__SYS_descriptors+5)
+#    define __SYS_filedesc             (__SYS_descriptors+6)
+#  else
+#    define __SYS_filedesc             (__SYS_descriptors+4)
+#  endif
 #else
 #  define __SYS_filedesc               __SYS_descriptors
 #endif
@@ -252,16 +256,15 @@
 #  define SYS_pthread_setschedparam    (__SYS_pthread+24)
 #  define SYS_pthread_setschedprio     (__SYS_pthread+25)
 #  define SYS_pthread_setspecific      (__SYS_pthread+26)
-#  define SYS_pthread_testcancel       (__SYS_pthread+27)
-#  define SYS_pthread_yield            (__SYS_pthread+28)
+#  define SYS_pthread_yield            (__SYS_pthread+27)
 
 #  ifndef CONFIG_DISABLE_SIGNAL
-#    define SYS_pthread_cond_timedwait (__SYS_pthread+29)
-#    define SYS_pthread_kill           (__SYS_pthread+30)
-#    define SYS_pthread_sigmask        (__SYS_pthread+31)
-#    define __SYS_mqueue               (__SYS_pthread+32)
+#    define SYS_pthread_cond_timedwait (__SYS_pthread+28)
+#    define SYS_pthread_kill           (__SYS_pthread+29)
+#    define SYS_pthread_sigmask        (__SYS_pthread+30)
+#    define __SYS_mqueue               (__SYS_pthread+31)
 #  else
-#    define __SYS_mqueue               (__SYS_pthread+29)
+#    define __SYS_mqueue               (__SYS_pthread+28)
 #  endif
 
 #else

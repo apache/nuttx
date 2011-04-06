@@ -49,6 +49,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
 #include <nuttx/ioctl.h>
 #include <nuttx/mtd.h>
@@ -468,7 +469,7 @@ int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
 
   /* Allocate a ramdisk device structure */
 
-  dev = (struct ftl_struct_s *)malloc(sizeof(struct ftl_struct_s));
+  dev = (struct ftl_struct_s *)kmalloc(sizeof(struct ftl_struct_s));
   if (dev)
     {
       /* Initialize the ramdisk device structure */
@@ -484,18 +485,18 @@ int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           fdbg("MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
-          free(dev);
+          kfree(dev);
           return ret;
         }
 
       /* Allocate one, in-memory erase block buffer */
 
 #ifdef CONFIG_FS_WRITABLE
-      dev->eblock  = (FAR uint8_t *)malloc(dev->geo.erasesize);
+      dev->eblock  = (FAR uint8_t *)kmalloc(dev->geo.erasesize);
       if (!dev->eblock)
         {
           fdbg("Failed to allocate an erase block buffer\n");
-          free(dev);
+          kfree(dev);
           return -ENOMEM;
         }
 #endif
@@ -525,7 +526,7 @@ int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           fdbg("rwb_initialize failed: %d\n", ret);
-          free(dev);
+          kfree(dev);
           return ret;
         }
 #endif
@@ -540,7 +541,7 @@ int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           fdbg("register_blockdriver failed: %d\n", -ret);
-          free(dev);
+          kfree(dev);
         }
     }
   return ret;
