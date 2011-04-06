@@ -2,7 +2,7 @@
  * arch/arm/src/lpc313x/lpc313x_irq.c
  * arch/arm/src/chip/lpc313x_irq.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,7 @@
  * Public Data
  ****************************************************************************/
 
-uint32_t *current_regs;
+volatile uint32_t *current_regs;
 
 /****************************************************************************
  * Private Data

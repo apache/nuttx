@@ -1,7 +1,7 @@
 /**************************************************************************
  * up_internal.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@
  * interrupt.
  */
 
-extern uint8_t g_irqtos;
+extern volatile uint8_t g_irqtos;
 
 /* Registers are saved in the following global array during
  * interrupt processing.  If a context switch is performed

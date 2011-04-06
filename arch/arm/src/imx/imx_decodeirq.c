@@ -2,7 +2,7 @@
  * arch/arm/src/imx/imx_decodeirq.c
  * arch/arm/src/chip/imx_decodeirq.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,7 @@ void up_decodeirq(uint32_t* regs)
   current_regs = regs;
   PANIC(OSERR_ERREXCEPTION);
 #else
+  uint32_t* savestate;
   uint32_t regval;
   int irq;
 
@@ -85,6 +86,7 @@ void up_decodeirq(uint32_t* regs)
    * current_regs is also used to manage interrupt level context switches.
    */
 
+  savestate    = (uint32_t*)current_regs;
   current_regs = regs;
 
   /* Loop while there are pending interrupts to be processed */
@@ -124,8 +126,11 @@ void up_decodeirq(uint32_t* regs)
     }
   while (irq < NR_IRQS);
 
-  /* Indicate that we are no longer in an interrupt handler */
+  /* Restore the previous value of current_regs.  NULL would indicate that
+   * we are no longer in an interrupt handler.  It will be non-NULL if we
+   * are returning from a nested interrupt.
+   */
 
-  current_regs = NULL;
+  current_regs = savestate;
 #endif
 }

@@ -72,7 +72,7 @@ static inline void up_idtinit(void);
  * Public Data
  ****************************************************************************/
 
-uint32_t *current_regs;
+volatile uint32_t *current_regs;
 
 /****************************************************************************
  * Private Data

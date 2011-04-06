@@ -86,6 +86,8 @@ static void idt_outb(uint8_t val, uint16_t addr)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 static uint32_t *common_handler(int irq, uint32_t *regs)
 {
+  uint32_t *savestate;
+
   up_ledon(LED_INIRQ);
 
   /* Nested interrupts are not supported in this implementation.  If you want
@@ -98,7 +100,7 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
    * current_regs is also used to manage interrupt level context switches.
    */
 
-  DEBUGASSERT(current_regs == NULL);
+  savestate    = (uint32_t*)current_regs;
   current_regs = regs;
 
   /* Deliver the IRQ */
@@ -111,11 +113,14 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = current_regs;
+  regs = (uint32_t*)current_regs;
 
-  /* Indicate that we are no long in an interrupt handler */
+  /* Restore the previous value of current_regs.  NULL would indicate that
+   * we are no longer in an interrupt handler.  It will be non-NULL if we
+   * are returning from a nested interrupt.
+   */
 
-  current_regs = NULL;
+  current_regs = savestate;
   return regs;
 }
 #endif

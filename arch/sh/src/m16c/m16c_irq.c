@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/m16c/m16c_irq.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@
  * structure.  If is non-NULL only during interrupt processing.
  */
 
-uint32_t *current_regs; /* Actually a pointer to the beginning of a uint8_t array */
+volatile uint32_t *current_regs; /* Actually a pointer to the beginning of a uint8_t array */
 
 /****************************************************************************
  * Private Data

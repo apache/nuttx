@@ -102,6 +102,8 @@ void up_decodeirq(uint32_t *regs)
 
       if ((unsigned)irq < NR_IRQS)
         {
+          uint32_t* savestate;
+
           /* Mask and acknowledge the interrupt */
 
           up_maskack_irq(irq);
@@ -110,15 +112,19 @@ void up_decodeirq(uint32_t *regs)
            * current_regs is also used to manage interrupt level context switches.
            */
 
+          savestate    = (uint32_t*)current_regs;
           current_regs = regs;
 
           /* Deliver the IRQ */
 
           irq_dispatch(irq, regs);
 
-          /* Indicate that we are no longer in an interrupt handler */
+          /* Restore the previous value of current_regs.  NULL would indicate that
+           * we are no longer in an interrupt handler.  It will be non-NULL if we
+           * are returning from a nested interrupt.
+           */
 
-          current_regs = NULL;
+          current_regs = savestate;
 
           /* Unmask the last interrupt (global interrupts are still
            * disabled).

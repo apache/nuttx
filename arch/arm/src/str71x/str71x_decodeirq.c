@@ -1,7 +1,7 @@
 /********************************************************************************
  * arch/arm/src/str71x/str71x_decodeirq.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,11 +108,13 @@ void up_decodeirq(uint32_t *regs)
 
   if (irq < NR_IRQS)
     {
+      uint32_t* savestate;
+
       /* Current regs non-zero indicates that we are processing an interrupt;
        * current_regs is also used to manage interrupt level context switches.
        */
 
-      DEBUGASSERT(current_regs == NULL);
+      savestate     = (uint32_t*)current_regs;
       current_regs = regs;
 
       /* Mask and acknowledge the interrupt */
@@ -123,9 +125,12 @@ void up_decodeirq(uint32_t *regs)
 
       irq_dispatch(irq, regs);
 
-      /* Indicate that we are no long in an interrupt handler */
+      /* Restore the previous value of current_regs.  NULL would indicate that
+       * we are no longer in an interrupt handler.  It will be non-NULL if we
+       * are returning from a nested interrupt.
+       */
 
-      current_regs = NULL;
+      current_regs = savestate;
 
       /* Unmask the last interrupt (global interrupts are still disabled) */
 

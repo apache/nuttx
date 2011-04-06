@@ -57,7 +57,20 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
 
+#undef SYSCALL_INTERRUPTIBLE
+#if defined(CONFIG_NUTTX_KERNEL)
+#  if CONFIG_ARCH_INTERRUPTSTACK > 3
+#    warning "CONFIG_ARCH_INTERRUPTSTACK and CONFIG_NUTTX_KERNEL are incompatible"
+#    warning "options as currently implemented.  Interrupts will have to be disabled"
+#    warning "during SYScall processing to avoid un-handled nested interrupts"
+#  else
+#    define SYSCALL_INTERRUPTIBLE 1
+#  endif
+#endif
+
+/* Debug ********************************************************************/
 /* Debug output from this file may interfere with context switching!  To get
  * debug output you must enabled the following in your NuttX configuration:
  *
@@ -115,6 +128,12 @@ static inline void dispatch_syscall(uint32_t *regs)
        */
 
       int index = cmd - CONFIG_SYS_RESERVED;
+
+      /* Enable interrupts while the SYSCALL executes */
+
+#ifdef SYSCALL_INTERRUPTIBLE
+      irqenable();
+#endif
 
       /* Call the correct stub for each SYS call, based on the number of parameters */
 
@@ -177,6 +196,10 @@ static inline void dispatch_syscall(uint32_t *regs)
                  cmd, g_stubnparms[index]);
           break;
         }
+
+#ifdef SYSCALL_INTERRUPTIBLE
+      irqdisable();
+#endif
     }
 
   /* Set up the return vaue.  First, check if a context switch occurred. 

@@ -1,7 +1,7 @@
 /************************************************************************
  * up_irqtest.c
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,10 +68,10 @@ typedef void (*vector_t)(void);
  * Public Variables
  ************************************************************************/
 
-bool    g_irqtest;
-uint8_t g_irqtos;
+bool g_irqtest;
+volatile uint8_t g_irqtos;
 uint8_t g_irqregs[REGS_SIZE];
-int     g_nirqs;
+int g_nirqs;
 FAR struct xcptcontext *g_irqcontext; 
 
 /************************************************************************

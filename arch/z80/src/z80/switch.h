@@ -2,7 +2,7 @@
  * arch/z80/src/z80/switch.h
  * arch/z80/src/chip/switch.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,11 +68,15 @@
 
 /* The following macro is used when the system enters interrupt handling logic */
 
-#define IRQ_ENTER(irq, regs)     current_regs = (regs)
+#define IRQ_ENTER(irq, regs) \
+  do { \
+    savestate    = (FAR chipreg_t *)current_regs; \
+    current_regs = (regs); \
+  } while (0)
 
 /* The following macro is used when the system exits interrupt handling logic */
 
-#define IRQ_LEAVE(irq)           current_regs = NULL
+#define IRQ_LEAVE(irq)           current_regs = savestate
 
 /* The following macro is used to sample the interrupt state (as a opaque handle) */
 
@@ -80,11 +84,11 @@
 
 /* Save the current IRQ context in the specified TCB */
 
-#define SAVE_IRQCONTEXT(tcb)     z80_copystate((tcb)->xcp.regs, current_regs)
+#define SAVE_IRQCONTEXT(tcb)     z80_copystate((tcb)->xcp.regs, (FAR chipreg_t*)current_regs)
 
 /* Set the current IRQ context to the state specified in the TCB */
 
-#define SET_IRQCONTEXT(tcb)      z80_copystate(current_regs, (tcb)->xcp.regs)
+#define SET_IRQCONTEXT(tcb)      z80_copystate((FAR chipreg_t*)current_regs, (tcb)->xcp.regs)
 
 /* Save the user context in the specified TCB.  User context saves can be simpler
  * because only those registers normally saved in a C called need be stored.
@@ -103,16 +107,19 @@
 #define _REGISTER_DUMP()         z80_registerdump()
 
 /************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
  * Public Variables
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during
- * interrupt processing.
+/* This holds a references to the current interrupt level register storage structure.
+ * If is non-NULL only during interrupt processing.
  */
 
-extern chipreg_t *current_regs;
+extern volatile chipreg_t *current_regs;
 #endif
 
 /************************************************************************************

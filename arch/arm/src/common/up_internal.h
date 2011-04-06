@@ -82,11 +82,11 @@
  */
 
 #ifdef CONFIG_ARCH_CORTEXM3
-#  define up_savestate(regs)    up_copystate(regs, current_regs)
+#  define up_savestate(regs)    up_copystate(regs, (uint32_t*)current_regs)
 #  define up_restorestate(regs) (current_regs = regs)
 #else
-#  define up_savestate(regs)    up_copystate(regs, current_regs)
-#  define up_restorestate(regs) up_copystate(current_regs, regs)
+#  define up_savestate(regs)    up_copystate(regs, (uint32_t*)current_regs)
+#  define up_restorestate(regs) up_copystate((uint32_t*)current_regs, regs)
 #endif
 
 /****************************************************************************
@@ -107,7 +107,7 @@ typedef void (*up_vector_t)(void);
  * interrupt processing.
  */
 
-extern uint32_t *current_regs;
+extern volatile uint32_t *current_regs;
 
 /* This is the beginning of heap as provided from up_head.S.
  * This is the first address in DRAM after the loaded
