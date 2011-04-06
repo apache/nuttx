@@ -64,7 +64,7 @@
                                      /* Vector  1: Reset (not handler as an IRQ) */
 #define LPC17_IRQ_NMI            (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
 #define LPC17_IRQ_HARDFAULT      (3) /* Vector  3: Hard fault */
-#define LPC17_IRQ_MPU            (4) /* Vector  4: Memory management (MPU) */
+#define LPC17_IRQ_MEMFAULT       (4) /* Vector  4: Memory management (MPU) */
 #define LPC17_IRQ_BUSFAULT       (5) /* Vector  5: Bus fault */
 #define LPC17_IRQ_USAGEFAULT     (6) /* Vector  6: Usage fault */
 #define LPC17_IRQ_SVCALL        (11) /* Vector 11: SVC call */

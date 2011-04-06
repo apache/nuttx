@@ -2,7 +2,7 @@
  * arch/arm/src/lpc17xx/lpc17_vectors.S
  * arch/arm/src/chip/lpc17_vectors.S
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,15 +58,15 @@
  * 0x1000:7fff - End of CPU SRAM and end of heap (1st region)
  */
 
-#define IDLE_STACK      (_ebss+CONFIG_IDLETHREAD_STACKSIZE)
-#define HEAP_BASE       (_ebss+CONFIG_IDLETHREAD_STACKSIZE)
+#define IDLE_STACK		(_ebss+CONFIG_IDLETHREAD_STACKSIZE)
+#define HEAP_BASE		(_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 
 /* The Cortex-M3 return from interrupt is unusual.  We provide the following special
  * address to the BX instruction.  The particular value also forces a return to
  * thread mode and covers state from the main stack point, the MSP (vs. the MSP).
  */
 
-#define EXC_RETURN      0xfffffff9
+#define EXC_RETURN		0xfffffff9
 
 /************************************************************************************************
  * Global Symbols
@@ -91,8 +91,8 @@
 	.macro	HANDLER, label, irqno
 	.thumb_func
 \label:
-	mov	r0, #\irqno
-	b	lpc17_common
+	mov		r0, #\irqno
+	b		lpc17_common
 	.endm
 
 /************************************************************************************************
@@ -128,39 +128,39 @@ lpc17_vectors:
 
 /* External Interrupts */
 
-	.word	lpc17_wdt		/* Vector 16+0:  Watchdog timer */
-	.word	lpc17_tmr0		/* Vector 16+1:  Timer 0 */
-	.word	lpc17_tmr1		/* Vector 16+2:  Timer 1 */
-	.word	lpc17_tmr2		/* Vector 16+3:  Timer 2 */
-	.word	lpc17_tmr3		/* Vector 16+4:  Timer 3 */
-	.word	lpc17_uart0		/* Vector 16+5:  UART 0 */
-	.word	lpc17_uart1		/* Vector 16+6:  UART 1 */
-	.word	lpc17_uart2		/* Vector 16+7:  UART 2 */
-	.word	lpc17_uart3		/* Vector 16+8:  UART 3 */
-	.word	lpc17_pwm1		/* Vector 16+9:  PWM */
-	.word	lpc17_i2c0		/* Vector 16+10: I2C 0 */
-	.word	lpc17_i2c1		/* Vector 16+11: I2C 1 */
-	.word	lpc17_i2c2		/* Vector 16+12: I2C 2 */
-	.word	lpc17_spif		/* Vector 16+13: SPI */
-	.word	lpc17_ssp0		/* Vector 16+14: SSP 0 */
-	.word	lpc17_ssp1		/* Vector 16+15: SSP 1 */
-	.word	lpc17_pll0		/* Vector 16+16: PLL 0 */
-	.word	lpc17_rtc		/* Vector 16+17: Real time clock */
-	.word	lpc17_eint0		/* Vector 16+18: External interrupt 0 */
-	.word	lpc17_eint1		/* Vector 16+19: External interrupt 1 */
-	.word	lpc17_eint2		/* Vector 16+20: External interrupt 2 */
-	.word	lpc17_eint3		/* Vector 16+21: External interrupt 3 */
-	.word	lpc17_adc		/* Vector 16+22: A/D Converter */
-	.word	lpc17_bod		/* Vector 16+23: Brown Out detect */
-	.word	lpc17_usb		/* Vector 16+24: USB */
-	.word	lpc17_can		/* Vector 16+25: CAN */
-	.word	lpc17_gpdma		/* Vector 16+26: GPDMA */
-	.word	lpc17_i2s		/* Vector 16+27: I2S */
-	.word	lpc17_eth		/* Vector 16+28: Ethernet */
+	.word	lpc17_wdt			/* Vector 16+0:  Watchdog timer */
+	.word	lpc17_tmr0			/* Vector 16+1:  Timer 0 */
+	.word	lpc17_tmr1			/* Vector 16+2:  Timer 1 */
+	.word	lpc17_tmr2			/* Vector 16+3:  Timer 2 */
+	.word	lpc17_tmr3			/* Vector 16+4:  Timer 3 */
+	.word	lpc17_uart0			/* Vector 16+5:  UART 0 */
+	.word	lpc17_uart1			/* Vector 16+6:  UART 1 */
+	.word	lpc17_uart2			/* Vector 16+7:  UART 2 */
+	.word	lpc17_uart3			/* Vector 16+8:  UART 3 */
+	.word	lpc17_pwm1			/* Vector 16+9:  PWM */
+	.word	lpc17_i2c0			/* Vector 16+10: I2C 0 */
+	.word	lpc17_i2c1			/* Vector 16+11: I2C 1 */
+	.word	lpc17_i2c2			/* Vector 16+12: I2C 2 */
+	.word	lpc17_spif			/* Vector 16+13: SPI */
+	.word	lpc17_ssp0			/* Vector 16+14: SSP 0 */
+	.word	lpc17_ssp1			/* Vector 16+15: SSP 1 */
+	.word	lpc17_pll0			/* Vector 16+16: PLL 0 */
+	.word	lpc17_rtc			/* Vector 16+17: Real time clock */
+	.word	lpc17_eint0			/* Vector 16+18: External interrupt 0 */
+	.word	lpc17_eint1			/* Vector 16+19: External interrupt 1 */
+	.word	lpc17_eint2			/* Vector 16+20: External interrupt 2 */
+	.word	lpc17_eint3			/* Vector 16+21: External interrupt 3 */
+	.word	lpc17_adc			/* Vector 16+22: A/D Converter */
+	.word	lpc17_bod			/* Vector 16+23: Brown Out detect */
+	.word	lpc17_usb			/* Vector 16+24: USB */
+	.word	lpc17_can			/* Vector 16+25: CAN */
+	.word	lpc17_gpdma			/* Vector 16+26: GPDMA */
+	.word	lpc17_i2s			/* Vector 16+27: I2S */
+	.word	lpc17_eth			/* Vector 16+28: Ethernet */
 	.word	lpc17_ritint		/* Vector 16+29: Repetitive Interrupt Timer */
-	.word	lpc17_mcpwm		/* Vector 16+30: Motor Control PWM */
-	.word	lpc17_qei		/* Vector 16+31: Quadrature Encoder */
-	.word	lpc17_pll1		/* Vector 16+32: PLL 1 */
+	.word	lpc17_mcpwm			/* Vector 16+30: Motor Control PWM */
+	.word	lpc17_qei			/* Vector 16+31: Quadrature Encoder */
+	.word	lpc17_pll1			/* Vector 16+32: PLL 1 */
 	.word	lpc17_usbact		/* Vector 16+33: USB Activity Interrupt */
 	.word	lpc17_canact		/* Vector 16+34: CAN Activity Interrupt */
 	.size	lpc17_vectors, .-lpc17_vectors
@@ -170,55 +170,55 @@ lpc17_vectors:
  ************************************************************************************************/
 
 	.text
-        .type   handlers, function
-        .thumb_func
+	.type	handlers, function
+	.thumb_func
 handlers:
-	HANDLER	lpc17_reserved, LPC17_IRQ_RESERVED	/* Unexpected/reserved vector */
-	HANDLER lpc17_nmi, LPC17_IRQ_NMI		/* Vector  2: Non-Maskable Interrupt (NMI) */
-	HANDLER lpc17_hardfault, LPC17_IRQ_HARDFAULT	/* Vector  3: Hard fault */
-	HANDLER lpc17_mpu, LPC17_IRQ_MPU		/* Vector  4: Memory management (MPU) */
-	HANDLER lpc17_busfault, LPC17_IRQ_BUSFAULT	/* Vector  5: Bus fault */
-	HANDLER lpc17_usagefault, LPC17_IRQ_USAGEFAULT	/* Vector  6: Usage fault */
-	HANDLER lpc17_svcall, LPC17_IRQ_SVCALL		/* Vector 11: SVC call */
-	HANDLER lpc17_dbgmonitor, LPC17_IRQ_DBGMONITOR	/* Vector 12: Debug Monitor */
-	HANDLER lpc17_pendsv, LPC17_IRQ_PENDSV		/* Vector 14: Penable system service request */
-	HANDLER lpc17_systick, LPC17_IRQ_SYSTICK	/* Vector 15: System tick */
+	HANDLER	lpc17_reserved, LPC17_IRQ_RESERVED		/* Unexpected/reserved vector */
+	HANDLER	lpc17_nmi, LPC17_IRQ_NMI				/* Vector  2: Non-Maskable Interrupt (NMI) */
+	HANDLER	lpc17_hardfault, LPC17_IRQ_HARDFAULT	/* Vector  3: Hard fault */
+	HANDLER	lpc17_mpu, LPC17_IRQ_MEMFAULT			/* Vector  4: Memory management (MPU) */
+	HANDLER	lpc17_busfault, LPC17_IRQ_BUSFAULT		/* Vector  5: Bus fault */
+	HANDLER	lpc17_usagefault, LPC17_IRQ_USAGEFAULT	/* Vector  6: Usage fault */
+	HANDLER	lpc17_svcall, LPC17_IRQ_SVCALL			/* Vector 11: SVC call */
+	HANDLER	lpc17_dbgmonitor, LPC17_IRQ_DBGMONITOR	/* Vector 12: Debug Monitor */
+	HANDLER	lpc17_pendsv, LPC17_IRQ_PENDSV			/* Vector 14: Penable system service request */
+	HANDLER	lpc17_systick, LPC17_IRQ_SYSTICK		/* Vector 15: System tick */
 
-	HANDLER lpc17_wdt, LPC17_IRQ_WDT		/* Vector 16+0:  Watchdog timer */
-	HANDLER lpc17_tmr0, LPC17_IRQ_TMR0		/* Vector 16+1:  Timer 0 */
-	HANDLER lpc17_tmr1, LPC17_IRQ_TMR1 		/* Vector 16+2:  Timer 1 */
-	HANDLER lpc17_tmr2, LPC17_IRQ_TMR2 		/* Vector 16+3:  Timer 2 */
-	HANDLER lpc17_tmr3, LPC17_IRQ_TMR3 		/* Vector 16+4:  Timer 3 */
-	HANDLER lpc17_uart0, LPC17_IRQ_UART0 		/* Vector 16+5:  UART 0 */
-	HANDLER lpc17_uart1, LPC17_IRQ_UART1		/* Vector 16+6:  UART 1 */
-	HANDLER lpc17_uart2, LPC17_IRQ_UART2		/* Vector 16+7:  UART 2 */
-	HANDLER lpc17_uart3, LPC17_IRQ_UART3		/* Vector 16+8:  UART 3 */
-	HANDLER lpc17_pwm1, LPC17_IRQ_PWM1		/* Vector 16+9:  PWM 1 */
-	HANDLER lpc17_i2c0, LPC17_IRQ_I2C0		/* Vector 16+10: I2C 0 */
-	HANDLER lpc17_i2c1, LPC17_IRQ_I2C1		/* Vector 16+11: I2C 1 */
-	HANDLER lpc17_i2c2, LPC17_IRQ_I2C2 		/* Vector 16+12: I2C 2 */
-	HANDLER lpc17_spif, LPC17_IRQ_SPIF		/* Vector 16+13: SPI */
-	HANDLER lpc17_ssp0, LPC17_IRQ_SSP0		/* Vector 16+14: SSP 0 */
-	HANDLER lpc17_ssp1, LPC17_IRQ_SSP1 		/* Vector 16+15: SSP 1 */
-	HANDLER lpc17_pll0, LPC17_IRQ_PLL0		/* Vector 16+16: PLL 0 */
-	HANDLER lpc17_rtc, LPC17_IRQ_RTC		/* Vector 16+17: Real time clock */
-	HANDLER lpc17_eint0, LPC17_IRQ_EINT0		/* Vector 16+18: External interrupt 0 */
-	HANDLER lpc17_eint1, LPC17_IRQ_EINT1		/* Vector 16+19: External interrupt 1 */
-	HANDLER lpc17_eint2, LPC17_IRQ_EINT2 		/* Vector 16+20: External interrupt 2 */
-	HANDLER lpc17_eint3, LPC17_IRQ_EINT3		/* Vector 16+21: External interrupt 3 */
-	HANDLER lpc17_adc, LPC17_IRQ_ADC 		/* Vector 16+22: A/D Converter */
-	HANDLER lpc17_bod, LPC17_IRQ_BOD		/* Vector 16+23: Brown Out detect */
-	HANDLER lpc17_usb, LPC17_IRQ_USB		/* Vector 16+24: USB */
-	HANDLER lpc17_can, LPC17_IRQ_CAN		/* Vector 16+25: CAN */
-	HANDLER lpc17_gpdma, LPC17_IRQ_GPDMA		/* Vector 16+26: GPDMA */
-	HANDLER lpc17_i2s, LPC17_IRQ_I2S		/* Vector 16+27: I2S */
-	HANDLER lpc17_eth, LPC17_IRQ_ETH		/* Vector 16+28: Ethernet */
-	HANDLER lpc17_ritint, LPC17_IRQ_RITINT		/* Vector 16+29: Repetitive Interrupt Timer */
-	HANDLER lpc17_mcpwm, LPC17_IRQ_MCPWM 		/* Vector 16+30: Motor Control PWM */
-	HANDLER lpc17_qei, LPC17_IRQ_QEI 		/* Vector 16+31: Quadrature Encoder */
-	HANDLER lpc17_pll1, LPC17_IRQ_PLL1		/* Vector 16+32: PLL 1 */
-	HANDLER lpc17_usbact, LPC17_IRQ_USBACT		/* Vector 16+33: USB Activity Interrupt */
-	HANDLER lpc17_canact, LPC17_IRQ_CANACT  	/* Vector 16+34: CAN Activity Interrupt */
+	HANDLER	lpc17_wdt, LPC17_IRQ_WDT				/* Vector 16+0:  Watchdog timer */
+	HANDLER	lpc17_tmr0, LPC17_IRQ_TMR0				/* Vector 16+1:  Timer 0 */
+	HANDLER	lpc17_tmr1, LPC17_IRQ_TMR1 				/* Vector 16+2:  Timer 1 */
+	HANDLER	lpc17_tmr2, LPC17_IRQ_TMR2 				/* Vector 16+3:  Timer 2 */
+	HANDLER	lpc17_tmr3, LPC17_IRQ_TMR3 				/* Vector 16+4:  Timer 3 */
+	HANDLER	lpc17_uart0, LPC17_IRQ_UART0 			/* Vector 16+5:  UART 0 */
+	HANDLER	lpc17_uart1, LPC17_IRQ_UART1			/* Vector 16+6:  UART 1 */
+	HANDLER	lpc17_uart2, LPC17_IRQ_UART2			/* Vector 16+7:  UART 2 */
+	HANDLER	lpc17_uart3, LPC17_IRQ_UART3			/* Vector 16+8:  UART 3 */
+	HANDLER	lpc17_pwm1, LPC17_IRQ_PWM1				/* Vector 16+9:  PWM 1 */
+	HANDLER	lpc17_i2c0, LPC17_IRQ_I2C0				/* Vector 16+10: I2C 0 */
+	HANDLER	lpc17_i2c1, LPC17_IRQ_I2C1				/* Vector 16+11: I2C 1 */
+	HANDLER	lpc17_i2c2, LPC17_IRQ_I2C2 				/* Vector 16+12: I2C 2 */
+	HANDLER	lpc17_spif, LPC17_IRQ_SPIF				/* Vector 16+13: SPI */
+	HANDLER	lpc17_ssp0, LPC17_IRQ_SSP0				/* Vector 16+14: SSP 0 */
+	HANDLER	lpc17_ssp1, LPC17_IRQ_SSP1 				/* Vector 16+15: SSP 1 */
+	HANDLER	lpc17_pll0, LPC17_IRQ_PLL0				/* Vector 16+16: PLL 0 */
+	HANDLER	lpc17_rtc, LPC17_IRQ_RTC				/* Vector 16+17: Real time clock */
+	HANDLER	lpc17_eint0, LPC17_IRQ_EINT0			/* Vector 16+18: External interrupt 0 */
+	HANDLER	lpc17_eint1, LPC17_IRQ_EINT1			/* Vector 16+19: External interrupt 1 */
+	HANDLER	lpc17_eint2, LPC17_IRQ_EINT2 			/* Vector 16+20: External interrupt 2 */
+	HANDLER	lpc17_eint3, LPC17_IRQ_EINT3			/* Vector 16+21: External interrupt 3 */
+	HANDLER	lpc17_adc, LPC17_IRQ_ADC 				/* Vector 16+22: A/D Converter */
+	HANDLER	lpc17_bod, LPC17_IRQ_BOD				/* Vector 16+23: Brown Out detect */
+	HANDLER	lpc17_usb, LPC17_IRQ_USB				/* Vector 16+24: USB */
+	HANDLER	lpc17_can, LPC17_IRQ_CAN				/* Vector 16+25: CAN */
+	HANDLER	lpc17_gpdma, LPC17_IRQ_GPDMA			/* Vector 16+26: GPDMA */
+	HANDLER	lpc17_i2s, LPC17_IRQ_I2S				/* Vector 16+27: I2S */
+	HANDLER	lpc17_eth, LPC17_IRQ_ETH				/* Vector 16+28: Ethernet */
+	HANDLER	lpc17_ritint, LPC17_IRQ_RITINT			/* Vector 16+29: Repetitive Interrupt Timer */
+	HANDLER	lpc17_mcpwm, LPC17_IRQ_MCPWM 			/* Vector 16+30: Motor Control PWM */
+	HANDLER	lpc17_qei, LPC17_IRQ_QEI 				/* Vector 16+31: Quadrature Encoder */
+	HANDLER	lpc17_pll1, LPC17_IRQ_PLL1				/* Vector 16+32: PLL 1 */
+	HANDLER	lpc17_usbact, LPC17_IRQ_USBACT			/* Vector 16+33: USB Activity Interrupt */
+	HANDLER	lpc17_canact, LPC17_IRQ_CANACT			/* Vector 16+34: CAN Activity Interrupt */
 
 /* Common IRQ handling logic.  On entry here, the stack is like the following:
  *
@@ -257,13 +257,13 @@ lpc17_common:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	ldr		sp, =g_intstackbase
-	str		r1, [sp, #-4]!			/* Save the MSP on the interrupt stack */
-	bl		up_doirq				/* R0=IRQ, R1=register save (msp) */
-	ldr		r1, [sp, #+4]!			/* Recover R1=main stack pointer */
+	str		r1, [sp, #-4]!				/* Save the MSP on the interrupt stack */
+	bl		up_doirq					/* R0=IRQ, R1=register save (msp) */
+	ldr		r1, [sp, #+4]!				/* Recover R1=main stack pointer */
 #else
-	mov		sp, r1					/* We are using the main stack pointer */
-	bl		up_doirq				/* R0=IRQ, R1=register save (msp) */
-	mov		r1, sp					/* Recover R1=main stack pointer */
+	mov		sp, r1						/* We are using the main stack pointer */
+	bl		up_doirq					/* R0=IRQ, R1=register save (msp) */
+	mov		r1, sp						/* Recover R1=main stack pointer */
 #endif
 
 	/* On return from up_doirq, R0 will hold a pointer to register context
@@ -271,8 +271,8 @@ lpc17_common:
 	 * as current stack pointer, then things are relatively easy.
 	 */
 
-	cmp		r0, r1					/* Context switch? */
-	beq		1f						/* Branch if no context switch */
+	cmp		r0, r1						/* Context switch? */
+	beq		1f							/* Branch if no context switch */
 
 	/* We are returning with a pending context switch.  This case is different
 	 * because in this case, the register save structure does not lie on the
@@ -280,34 +280,34 @@ lpc17_common:
 	 * values to the stack.
 	 */
 
-	add	r1, r0, #SW_XCPT_SIZE		/* R1=Address of HW save area in reg array */
-	ldmia	r1, {r4-r11}			/* Fetch eight registers in HW save area */
-	ldr	r1, [r0, #(4*REG_SP)]		/* R1=Value of SP before interrupt */
-	stmdb	r1!, {r4-r11}			/* Store eight registers in HW save area */
-	ldmia	r0, {r2-r11}			/* Recover R4-R11 + 2 temp values */
-	b		2f						/* Re-join common logic */
+	add		r1, r0, #SW_XCPT_SIZE		/* R1=Address of HW save area in reg array */
+	ldmia	r1, {r4-r11}				/* Fetch eight registers in HW save area */
+	ldr		r1, [r0, #(4*REG_SP)]	/* R1=Value of SP before interrupt */
+	stmdb	r1!, {r4-r11}				/* Store eight registers in HW save area */
+	ldmia	r0, {r2-r11}				/* Recover R4-R11 + 2 temp values */
+	b		2f							/* Re-join common logic */
 
 	/* We are returning with no context switch.  We simply need to "unwind"
 	 * the same stack frame that we created
 	 */
 1:
-	ldmia	r1!, {r2-r11}			/* Recover R4-R11 + 2 temp values */
+	ldmia	r1!, {r2-r11}				/* Recover R4-R11 + 2 temp values */
 2:
-	msr		msp, r1					/* Recover the return MSP value */
+	msr		msp, r1						/* Recover the return MSP value */
 
 	/* Restore the interrupt state.  Preload r14 with the special return
 	 * value first (so that the return actually occurs with interrupts
 	 * still disabled).
 	 */
 
-	ldr		r14, =EXC_RETURN		/* Load the special value */
-	msr		primask, r3				/* Restore interrupts */
+	ldr		r14, =EXC_RETURN			/* Load the special value */
+	msr		primask, r3					/* Restore interrupts */
 
 	/* Always return with R14 containing the special value that will: (1)
 	 * return to thread mode, and (2) continue to use the MSP
 	 */
 
-	bx		r14						/* And return */
+	bx		r14							/* And return */
 	.size	handlers, .-handlers
 
 /************************************************************************************************
@@ -319,13 +319,13 @@ lpc17_common:
  ************************************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-        .bss
-        .global g_intstackbase
-        .align  4
+	.bss
+	.global	g_intstackbase
+	.align	4
 up_interruptstack:
-        .skip   (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
 g_intstackbase:
-        .size   up_interruptstack, .-up_interruptstack
+	.size	up_interruptstack, .-up_interruptstack
 #endif
 
 /************************************************************************************************
@@ -342,10 +342,10 @@ g_intstackbase:
  * end of memory.  See g_heapbase below.
  */
 
-        .globl  g_heapbase
-        .type   g_heapbase, object
+	.globl	g_heapbase
+	.type	g_heapbase, object
 g_heapbase:
-        .word   HEAP_BASE
-        .size   g_heapbase, .-g_heapbase
+	.word	HEAP_BASE
+	.size	g_heapbase, .-g_heapbase
 
-        .end
+	.end

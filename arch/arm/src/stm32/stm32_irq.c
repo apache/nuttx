@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_irq.c
  * arch/arm/src/chip/stm32_irq.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,7 +134,7 @@ static void stm32_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: stm32_nmi, stm32_mpu, stm32_busfault, stm32_usagefault, stm32_pendsv,
+ * Name: stm32_nmi, stm32_busfault, stm32_usagefault, stm32_pendsv,
  *       stm32_dbgmonitor, stm32_pendsv, stm32_reserved
  *
  * Description:
@@ -149,14 +149,6 @@ static int stm32_nmi(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! NMI received\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-static int stm32_mpu(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! MPU interrupt received\n");
   PANIC(OSERR_UNEXPECTEDISR);
   return 0;
 }
@@ -245,7 +237,7 @@ static int stm32_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
   else
     {
        *regaddr = NVIC_SYSHCON;
-       if (irq == STM32_IRQ_MPU)
+       if (irq == STM32_IRQ_MEMFAULT)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }
@@ -339,11 +331,22 @@ void up_irqinitialize(void)
 /* up_prioritize_irq(STM32_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 
+  /* If the MPU is enabled, then attach and enable the Memory Management
+   * Fault handler.
+   */
+
+#ifdef CONFIG_CORTEXM3_MPU
+  irq_attach(STM32_IRQ_MEMFAULT, up_memfault);
+  up_enable_irq(STM32_IRQ_MEMFAULT);
+#endif
+
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
   irq_attach(STM32_IRQ_NMI, stm32_nmi);
-  irq_attach(STM32_IRQ_MPU, stm32_mpu);
+#ifndef CONFIG_CORTEXM3_MPU
+  irq_attach(STM32_IRQ_MEMFAULT, up_memfault);
+#endif
   irq_attach(STM32_IRQ_BUSFAULT, stm32_busfault);
   irq_attach(STM32_IRQ_USAGEFAULT, stm32_usagefault);
   irq_attach(STM32_IRQ_PENDSV, stm32_pendsv);
@@ -449,7 +452,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq >= STM32_IRQ_MPU && irq < NR_IRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
+  DEBUGASSERT(irq >= STM32_IRQ_MEMFAULT && irq < NR_IRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
   if (irq < STM32_IRQ_INTERRUPTS)
     {

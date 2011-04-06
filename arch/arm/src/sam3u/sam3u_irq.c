@@ -2,7 +2,7 @@
  * arch/arm/src/sam3u/sam3u_irq.c
  * arch/arm/src/chip/sam3u_irq.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,7 +124,7 @@ static void sam3u_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: sam3u_nmi, sam3u_mpu, sam3u_busfault, sam3u_usagefault, sam3u_pendsv,
+ * Name: sam3u_nmi, sam3u_busfault, sam3u_usagefault, sam3u_pendsv,
  *       sam3u_dbgmonitor, sam3u_pendsv, sam3u_reserved
  *
  * Description:
@@ -139,14 +139,6 @@ static int sam3u_nmi(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! NMI received\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-static int sam3u_mpu(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! MPU interrupt received\n");
   PANIC(OSERR_UNEXPECTEDISR);
   return 0;
 }
@@ -225,7 +217,7 @@ static int sam3u_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
   else
     {
        *regaddr = NVIC_SYSHCON;
-       if (irq == SAM3U_IRQ_MPU)
+       if (irq == SAM3U_IRQ_MEMFAULT)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }
@@ -305,11 +297,22 @@ void up_irqinitialize(void)
 /* up_prioritize_irq(SAM3U_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 
+  /* If the MPU is enabled, then attach and enable the Memory Management
+   * Fault handler.
+   */
+
+#ifdef CONFIG_CORTEXM3_MPU
+  irq_attach(SAM3U_IRQ_MEMFAULT, up_memfault);
+  up_enable_irq(SAM3U_IRQ_MEMFAULT);
+#endif
+
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
   irq_attach(SAM3U_IRQ_NMI, sam3u_nmi);
-  irq_attach(SAM3U_IRQ_MPU, sam3u_mpu);
+#ifndef CONFIG_CORTEXM3_MPU
+  irq_attach(SAM3U_IRQ_MEMFAULT, up_memfault);
+#endif
   irq_attach(SAM3U_IRQ_BUSFAULT, sam3u_busfault);
   irq_attach(SAM3U_IRQ_USAGEFAULT, sam3u_usagefault);
   irq_attach(SAM3U_IRQ_PENDSV, sam3u_pendsv);
@@ -439,7 +442,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq >= SAM3U_IRQ_MPU && irq < SAM3U_IRQ_NIRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
+  DEBUGASSERT(irq >= SAM3U_IRQ_MEMFAULT && irq < SAM3U_IRQ_NIRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
   if (irq < SAM3U_IRQ_EXTINT)
     {
