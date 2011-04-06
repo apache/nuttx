@@ -37,8 +37,8 @@
 
 CONFIGURED_APPS += examples/thttpd
 
-
 # Networking support
 
 CONFIGURED_APPS += netutils/uiplib
 CONFIGURED_APPS += netutils/thttpd
+
