@@ -72,17 +72,17 @@
  *   float  - 32-bits
  */
 
-typedef char               _int8_t;
+typedef signed char        _int8_t;
 typedef unsigned char      _uint8_t;
 
-typedef short              _int16_t;
+typedef signed short       _int16_t;
 typedef unsigned short     _uint16_t;
 
-typedef int                _int24_t;
+typedef signed int         _int24_t;
 typedef unsigned int       _uint24_t;
 #define __INT24_DEFINED
 
-typedef long               _int32_t;
+typedef signed long        _int32_t;
 typedef unsigned long      _uint32_t;
 
 /* A pointer is 2 or 3 bytes, depending upon if the ez80 is in z80
@@ -93,10 +93,10 @@ typedef unsigned long      _uint32_t;
  */
 
 #ifdef CONFIG_EZ80_Z80MODE
-typedef short              _intptr_t;
+typedef signed short       _intptr_t;
 typedef unsigned short     _uintptr_t;
 #else
-typedef int                _intptr_t;
+typedef signed int         _intptr_t;
 typedef unsigned int       _uintptr_t;
 #endif
 

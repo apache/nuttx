@@ -65,22 +65,22 @@
  * int is 16-bits and long is 32-bits 
  */
 
-typedef char               _int8_t;
+typedef signed char        _int8_t;
 typedef unsigned char      _uint8_t;
 
-typedef int                _int16_t;
+typedef signed int         _int16_t;
 typedef unsigned int       _uint16_t;
 
-typedef long               _int32_t;
+typedef signed long        _int32_t;
 typedef unsigned long      _uint32_t;
 
-typedef long long          _int64_t;
+typedef signed long long   _int64_t;
 typedef unsigned long long _uint64_t;
 #define __INT64_DEFINED
 
 /* A pointer is 2 bytes */
 
-typedef unsigned int       _intptr_t;
+typedef signed int         _intptr_t;
 typedef unsigned int       _uintptr_t;
 
 /* This is the size of the interrupt state save returned by
