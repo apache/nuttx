@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: April 5, 2011</p>
+      <p>Last Updated: April 6, 2011</p>
     </td>
   </tr>
 </table>
@@ -2997,6 +2997,17 @@ build
   <li>
     <code>CONFIG_SIG_SIGWORK</code>: The signal number that will be used to wake-up
     the worker thread.  Default: 4
+  </li>
+</ul>
+
+<p>
+ Kernel build options:
+</p>
+<ul>
+  <li>
+    <code>CONFIG_NUTTX_KERNEL</code>: Builds NuttX as a separately compiled kernel.
+  </li>
+    <code>CONFIG_SYS_RESERVED</code>: Reserved system call values for use by architecture-specific logic.
   </li>
 </ul>
 
