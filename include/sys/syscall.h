@@ -42,7 +42,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdint.h>
+
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -52,7 +55,7 @@
  * configured.
  */
 
-#ifndef CONFIG_CONFIG_SYS_RESERVED
+#ifndef CONFIG_SYS_RESERVED
 #  define CONFIG_SYS_RESERVED          (0)
 #endif
 
@@ -308,32 +311,38 @@
 #  define SYS_sendto                   (__SYS_network+8)
 #  define SYS_setsockopt               (__SYS_network+9)
 #  define SYS_socket                   (__SYS_network+10)
-#  define SYS_nsyscalls                (__SYS_network+11)
+#  define SYS_maxsyscall               (__SYS_network+11)
 #else
-#  define SYS_nsyscalls                __SYS_network
+#  define SYS_maxsyscall               __SYS_network
 #endif
+
+/* Note that the reported number of system calls does *NOT* include the
+ * architecture-specific system calls.  If the "real" total is required,
+ * use SYS_maxsyscall.
+ */
+
+#define SYS_nsyscalls                  (SYS_maxsyscall-CONFIG_SYS_RESERVED)
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
 /* This is the union of all possible stub function types */
 
 union syscall_stubfunc_u
 {
-  uintptr_t (*stub0)(unsigned int nbr);
-  uintptr_t (*stub1)(unsigned int nbr, uintptr_t parm1);
-  uintptr_t (*stub2)(unsigned int nbr, uintptr_t parm1, uintptr_t parm2);
-  uintptr_t (*stub3)(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
-                                       uintptr_t parm3);
-  uintptr_t (*stub4)(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
-                                       uintptr_t parm3, uintptr_t parm4);
-  uintptr_t (*stub5)(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
-                                       uintptr_t parm3, uintptr_t parm4,
-                                       uintptr_t parm5);
-  uintptr_t (*stub6)(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
-                                       uintptr_t parm3, uintptr_t parm4,
-                                       uintptr_t parm5, uintptr_t parm6);
+  uintptr_t (*stub0)(void);
+  uintptr_t (*stub1)(uintptr_t parm1);
+  uintptr_t (*stub2)(uintptr_t parm1, uintptr_t parm2);
+  uintptr_t (*stub3)(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3);
+  uintptr_t (*stub4)(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3,
+                     uintptr_t parm4);
+  uintptr_t (*stub5)(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3,
+                     uintptr_t parm4, uintptr_t parm5);
+  uintptr_t (*stub6)(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3,
+                     uintptr_t parm4, uintptr_t parm5, uintptr_t parm6);
 };
 
 /****************************************************************************
@@ -352,8 +361,8 @@ extern "C" {
  * these tables describes how to call the stub dispatch function.
  */
 
-EXTERN const union syscall_stubfunc_u *g_stublookup[SYS_nsyscalls];
-EXTERN const uint8_t                   g_stubnparms[SYS_nsyscalls];
+EXTERN const union syscall_stubfunc_u g_stublookup[SYS_nsyscalls];
+EXTERN const uint8_t                  g_stubnparms[SYS_nsyscalls];
 
 /****************************************************************************
  * Public Functions
@@ -364,5 +373,6 @@ EXTERN const uint8_t                   g_stubnparms[SYS_nsyscalls];
 }
 #endif
 
+#endif /* __ASSEMBLY__ */
 #endif /* __INCLUDE_SYS_SYSCALL_H */
 

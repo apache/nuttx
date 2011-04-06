@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/cortexm3/up_fullcontextrestore.S
+ * arch/arm/src/cortexm3/svcall.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,63 +33,62 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_COMMON_CORTEXM_SVCALL_H
+#define __ARCH_ARM_SRC_COMMON_CORTEXM_SVCALL_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/irq.h>
 
-#include "nvic.h"
-#include "svcall.h"
-
-/************************************************************************************
- * Preprocessor Definitions
- ************************************************************************************/
+#ifdef CONFIG_NUTTX_KERNEL
+#  include <syscall.h>
+#endif
 
 /************************************************************************************
- * Global Symbols
+ * Pre-processor Definitions
  ************************************************************************************/
 
-	.syntax	unified
-	.thumb
-	.file	"up_fullcontextrestore.S"
+/* Configuration ********************************************************************/
+/* This logic uses three system calls {0,1,2} for context switching.  The first three
+ * syscall values must be reserved.
+ */
+
+#ifdef CONFIG_NUTTX_KERNEL
+#  ifndef CONFIG_SYS_RESERVED
+#    error "CONFIG_SYS_RESERVED must be defined to the value 3"
+#  elif CONFIG_SYS_RESERVED != 3
+#    error "CONFIG_SYS_RESERVED must have the value 3"
+#  endif
+#endif
+
+/* Cortex M3 system calls ***********************************************************/
+
+/* SYS call 0:
+ *
+ * int up_saveusercontext(uint32_t *saveregs);
+ */
+
+#define SYS_save_context    (0)
+
+/* SYS call 1:
+ *
+ * void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
+ */
+
+#define SYS_restore_context (1)
+
+/* SYS call 1:
+ *
+ * void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ */
+
+#define SYS_switch_context  (2)
 
 /************************************************************************************
- * Macros
+ * Inline Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-/**************************************************************************
- * Name: up_fullcontextrestore
- *
- * Description:
- *   Restore the current thread context.  Full prototype is:
- *
- *   void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
- *
- * Return:
- *   None
- *
- **************************************************************************/
-
-	.thumb_func
-	.globl	up_fullcontextrestore
-	.type	up_fullcontextrestore, function
-up_fullcontextrestore:
-
-	/* Perform the System call with R0=1 and R1=regs */
-
-	mov		r1, r0						/* R1: regs */
-	mov		r0, #SYS_restore_context	/* R0: restore context */
-	svc		0							/* Force synchronous SVCall (or Hard Fault) */
-
-	/* This call should not return */
-
-	bx		lr							/* Unnecessary ... will not return */
-	.size	up_fullcontextrestore, .-up_fullcontextrestore
-	.end
+#endif  /* __ARCH_ARM_SRC_COMMON_CORTEXM_SVCALL_H */
 

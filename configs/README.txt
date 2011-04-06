@@ -49,18 +49,18 @@ following characteristics:
 
 
 	<board-name>
-        |-- README.txt
+	|-- README.txt
 	|-- include/
 	|   `-- (board-specific header files)
 	|-- src/
 	|   |-- Makefile
 	|   `-- (board-specific source files)
-        |-- <config1-dir>
+	|-- <config1-dir>
 	|   |-- Make.defs
 	|   |-- defconfig
 	|   |-- appconfig*
 	|   `-- setenv.sh
-        |-- <config2-dir>
+	|-- <config2-dir>
 	|   |-- Make.defs
 	|   |-- defconfig
 	|   |-- appconfig*
@@ -119,7 +119,7 @@ defconfig -- This is a configuration file similar to the Linux
 
     (1) as a makefile fragment included in other makefiles, and
     (2) to generate include/nuttx/config.h which is included by
-        most C files in the system.
+		most C files in the system.
 
   The following variables are recognized by the build (you may
   also include architecture/board-specific settings).
@@ -172,7 +172,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  application to link with NuttX.  Default: ../apps This symbol must be assigned
 		  to the path to the application build directory *relative* to
 		  the NuttX top build direcory. If you had an application
-          directory and the NuttX directory each in separate directory
+		  directory and the NuttX directory each in separate directory
 		  trees like this:
 
 		  build
@@ -335,6 +335,11 @@ defconfig -- This is a configuration file similar to the Linux
 		  thread.  Default: CONFIG_IDLETHREAD_STACKSIZE.
 		CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
 		  the worker thread.  Default: 4
+
+	Kernel build options:
+		CONFIG_NUTTX_KERNEL - Builds NuttX as a separately compiled kernel.
+		CONFIG_SYS_RESERVED - Reserved system call values for use
+		  by architecture-specific logic.
 
     OS setup related to on-demand paging:
 
@@ -755,43 +760,43 @@ defconfig -- This is a configuration file similar to the Linux
 
     USB host controller driver
       CONFIG_USBHOST
-        Enables USB host support
+		Enables USB host support
       CONFIG_USBHOST_NPREALLOC
-        Number of pre-allocated class instances
+		Number of pre-allocated class instances
       CONFIG_USBHOST_BULK_DISABLE
-        On some architectures, selecting this setting will reduce driver size
-        by disabling bulk endpoint support
+		On some architectures, selecting this setting will reduce driver size
+		by disabling bulk endpoint support
       CONFIG_USBHOST_INT_DISABLE
-        On some architectures, selecting this setting will reduce driver size
-        by disabling interrupt endpoint support
+		On some architectures, selecting this setting will reduce driver size
+		by disabling interrupt endpoint support
       CONFIG_USBHOST_ISOC_DISABLE
-        On some architectures, selecting this setting will reduce driver size
-        by disabling isochronous endpoint support
+		On some architectures, selecting this setting will reduce driver size
+		by disabling isochronous endpoint support
 
     USB host HID class driver. Requires CONFIG_USBHOST=y,
       CONFIG_USBHOST_INT_DISABLE=n, CONFIG_NFILE_DESCRIPTORS > 0,
       CONFIG_SCHED_WORKQUEUE=y, and CONFIG_DISABLE_SIGNALS=n.
  
       CONFIG_HIDKBD_POLLUSEC
-        Device poll rate in microseconds. Default: 100 milliseconds.
+		Device poll rate in microseconds. Default: 100 milliseconds.
       CONFIG_HIDKBD_DEFPRIO
-        Priority of the polling thread.  Default: 50.
+		Priority of the polling thread.  Default: 50.
       CONFIG_HIDKBD_STACKSIZE
-        Stack size for polling thread.  Default: 1024
+		Stack size for polling thread.  Default: 1024
       CONFIG_HIDKBD_BUFSIZE
-        Scancode buffer size.  Default: 64.
+		Scancode buffer size.  Default: 64.
       CONFIG_HIDKBD_NPOLLWAITERS
-        If the poll() method is enabled, this defines the maximum number
-        of threads that can be waiting for keyboard events.  Default: 2.
+		If the poll() method is enabled, this defines the maximum number
+		of threads that can be waiting for keyboard events.  Default: 2.
       CONFIG_HIDKBD_RAWSCANCODES
-        If set to y no conversion will be made on the raw keyboard scan
-        codes.  Default: ASCII conversion.
+		If set to y no conversion will be made on the raw keyboard scan
+		codes.  Default: ASCII conversion.
       CONFIG_HIDKBD_ALLSCANCODES'
-        If set to y all 231 possible scancodes will be converted to
-        something.  Default:  104 key US keyboard.
+		If set to y all 231 possible scancodes will be converted to
+		something.  Default:  104 key US keyboard.
       CONFIG_HIDKBD_NODEBOUNCE
-        If set to y normal debouncing is disabled.  Default: 
-        Debounce enabled (No repeat keys).
+		If set to y normal debouncing is disabled.  Default: 
+		Debounce enabled (No repeat keys).
 
     USB host mass storage class driver. Requires CONFIG_USBHOST=y,
       CONFIG_USBHOST_BULK_DISABLE=n, CONFIG_NFILE_DESCRIPTORS > 0,

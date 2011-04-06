@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/cortexm3/up_svcall.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,19 +45,30 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <nuttx/sched.h>
 
-#include "os_internal.h"
+#ifdef CONFIG_NUTTX_KERNEL
+#  include <syscall.h>
+#endif
+
+#include "svcall.h"
 #include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Debug output from this file may interfere with context switching! */
+/* Debug output from this file may interfere with context switching!  To get
+ * debug output you must enabled the following in your NuttX configuration:
+ *
+ * CONFIG_DEBUG and CONFIG_DEBUG_SCHED
+ *
+ * And you must explicitly define DEBUG_SVCALL below:
+ */
 
 #undef DEBUG_SVCALL         /* Define to debug SVCall */
 #ifdef DEBUG_HARDFAULTS
-# define svcdbg(format, arg...) lldbg(format, ##arg)
+# define svcdbg(format, arg...) slldbg(format, ##arg)
 #else
 # define svcdbg(x...)
 #endif
@@ -73,6 +84,118 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_svcall
+ *
+ * Description:
+ *   This is SVCall exception handler that performs context switching
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NUTTX_KERNEL
+static inline void dispatch_syscall(uint32_t *regs)
+{
+  uint32_t  cmd  = regs[REG_R0];
+  FAR _TCB *rtcb = sched_self();
+  uintptr_t ret  = (uintptr_t)ERROR;
+
+  /* Verify the the SYS call number is within range */
+
+  if (cmd < SYS_maxsyscall)
+    {
+      /* Report error and return ERROR */
+
+      slldbg("ERROR: Bad SYS call: %d\n", cmd);
+    }
+  else
+    {
+      /* The index into the syscall table is offset by the number of architecture-
+       * specific reserved entries at the beginning of the SYS call number space.
+       */
+
+      int index = cmd - CONFIG_SYS_RESERVED;
+
+      /* Call the correct stub for each SYS call, based on the number of parameters */
+
+      svcdbg("Calling stub%d at %p\n", index, g_stubloopkup[index].stub0);
+
+      switch (g_stubnparms[index])
+        {
+        /* No parameters */
+
+        case 0:
+          ret = g_stublookup[index].stub0();
+          break;
+
+        /* Number of parameters: 1 */
+
+        case 1:
+          ret = g_stublookup[index].stub1(regs[REG_R1]);
+          break;
+
+        /* Number of parameters: 2 */
+
+        case 2:
+          ret = g_stublookup[index].stub2(regs[REG_R1], regs[REG_R2]);
+          break;
+
+         /* Number of parameters: 3 */
+
+       case 3:
+          ret = g_stublookup[index].stub3(regs[REG_R1], regs[REG_R2],
+                                          regs[REG_R3]);
+          break;
+
+         /* Number of parameters: 4 */
+
+       case 4:
+          ret = g_stublookup[index].stub4(regs[REG_R1], regs[REG_R2],
+                                          regs[REG_R3], regs[REG_R4]);
+          break;
+
+        /* Number of parameters: 5 */
+
+        case 5:
+          ret = g_stublookup[index].stub5(regs[REG_R1], regs[REG_R2],
+                                          regs[REG_R3], regs[REG_R4],
+                                          regs[REG_R5]);
+          break;
+
+        /* Number of parameters: 6 */
+
+        case 6:
+          ret = g_stublookup[index].stub6(regs[REG_R1], regs[REG_R2],
+                                          regs[REG_R3], regs[REG_R4],
+                                          regs[REG_R5], regs[REG_R6]);
+          break;
+
+        /* Unsupported number of paramters. Report error and return ERROR */
+
+        default:
+          slldbg("ERROR: Bad SYS call %d number parameters %d\n",
+                 cmd, g_stubnparms[index]);
+          break;
+        }
+    }
+
+  /* Set up the return vaue.  First, check if a context switch occurred. 
+   * In this case, regs will no longer be the same as current_regs.  In
+   * the case of a context switch, we will have to save the return value
+   * in the TCB where it can be returned later when the task is restarted.
+   */
+
+  if (regs != current_regs)
+    {
+      regs = rtcb->xcp.regs;
+    }
+
+  /* Then return the result in R0 */
+
+  svcdbg("Return value regs: %p value: %d\n", regs, ret);
+  regs[REG_R0] = (uint32_t)ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -91,16 +214,12 @@ int up_svcall(int irq, FAR void *context)
   uint32_t *regs   = (uint32_t*)context;
 
   DEBUGASSERT(regs && regs == current_regs);
-  DEBUGASSERT(regs[REG_R1] != 0);
 
-  /* The SVCall software interrupt is called with R0 = SVC command and R1 = 
-   * the TCB register save area.
+  /* The SVCall software interrupt is called with R0 = system call command
+   * and R1..R7 =  variable number of arguments depending on the system call.
    */
 
-  svcdbg("Command: %d regs: %p R1: %08x R2: %08x\n",
-         regs[REG_R0], regs, regs[REG_R1], regs[REG_R2]);
-
-  svcdbg("SVCall Entry:\n");
+  svcdbg("SVCALL Entry: regs: %p cmd: %d\n", regs, regs[REG_R0]);
   svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
@@ -113,32 +232,33 @@ int up_svcall(int irq, FAR void *context)
 
   switch (regs[REG_R0])
     {
-      /* R0=0:  This is a save context command:
+      /* R0=SYS_save_context:  This is a save context command:
        *
        *   int up_saveusercontext(uint32_t *saveregs);
        *
        * At this point, the following values are saved in context:
        *
-       *   R0 = 0
+       *   R0 = SYS_save_context
        *   R1 = saveregs
        *
        * In this case, we simply need to copy the current regsters to the
        * save regiser space references in the saved R1 and return.
        */
 
-      case 0:
+      case SYS_save_context:
         {
+          DEBUGASSERT(regs[REG_R1] != 0);
           memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
         }
         break;
 
-      /* R0=1: This a restore context command:
+      /* R0=SYS_restore_context: This a restore context command:
        *
        *   void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
        *
        * At this point, the following values are saved in context:
        *
-       *   R0 = 1
+       *   R0 = SYS_restore_context
        *   R1 = restoreregs
        *
        * In this case, we simply need to set current_regs to restore register
@@ -147,13 +267,14 @@ int up_svcall(int irq, FAR void *context)
        * the return to the saved context referenced in R1.
        */
 
-      case 1:
+      case SYS_restore_context:
         {
+          DEBUGASSERT(regs[REG_R1] != 0);
           current_regs = (uint32_t*)regs[REG_R1];
         }
         break;
 
-      /* R0=2: This a switch context command:
+      /* R0=SYS_switch_context: This a switch context command:
        *
        *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
        *
@@ -169,28 +290,45 @@ int up_svcall(int irq, FAR void *context)
        * contents of R2.
        */
 
-      case 2:
+      case SYS_switch_context:
         {
-          DEBUGASSERT(regs[REG_R2] != 0);
+          DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
           memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
           current_regs = (uint32_t*)regs[REG_R2];
         }
         break;
 
-        
+      /* This is not an architecture-specify system call.  If NuttX is built
+       * as a standalone kernel with a system call interface, then all of the
+       * additional system calls must be handled as in the default case.
+       */
+
       default:
-        PANIC(OSERR_INTERNAL);
+#ifdef CONFIG_NUTTX_KERNEL
+        dispatch_syscall(regs);
+#else
+        slldbg("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
+#endif
         break;
     }
-    
-  svcdbg("SVCall Return:\n");
-  svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         current_regs[REG_R0],  current_regs[REG_R1],  current_regs[REG_R2],  current_regs[REG_R3],
-         current_regs[REG_R4],  current_regs[REG_R5],  current_regs[REG_R6],  current_regs[REG_R7]);
-  svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
-         current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
-  svcdbg("  PSR=%08x\n", current_regs[REG_XPSR]);
+
+  /* Report what happened.  That might difficult in the case of a context switch */
+
+  if (regs != current_regs)
+    {
+      svcdbg("SVCall Return: Context switch!\n");
+      svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+             current_regs[REG_R0],  current_regs[REG_R1],  current_regs[REG_R2],  current_regs[REG_R3],
+             current_regs[REG_R4],  current_regs[REG_R5],  current_regs[REG_R6],  current_regs[REG_R7]);
+      svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+             current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
+             current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
+      svcdbg("  PSR=%08x\n", current_regs[REG_XPSR]);
+    }
+  else
+    {
+      svcdbg("SVCall Return: %d\n", regs[REG_R0]);
+    }
 
   return OK;
 }

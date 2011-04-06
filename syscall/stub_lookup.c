@@ -239,12 +239,12 @@ extern uintptr_t STUB_socket(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3);
  * these tables describes how to call the stub dispatch function.
  */
 
-const union syscall_stubfunc_u *g_stublookup[SYS_nsyscalls] =
+const union syscall_stubfunc_u g_stublookup[SYS_nsyscalls] =
 {
 #  undef STUB_LOOKUP1
-#  define STUB_LOOKUP1(n,p) (union syscall_stubfunc_u *)p
+#  define STUB_LOOKUP1(n,p) (union syscall_stubfunc_u)p
 #  undef STUB_LOOKUP
-#  define STUB_LOOKUP(n,p)  , (union syscall_stubfunc_u *)p
+#  define STUB_LOOKUP(n,p)  , (union syscall_stubfunc_u)p
 #  include "stub_lookup.h"
 };
 

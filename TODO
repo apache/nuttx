@@ -10,7 +10,7 @@ nuttx/
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
- (15) Network (net/, drivers/net)
+ (15)  Network (net/, drivers/net)
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (5)  Libraries (lib/)
  (13)  File system/Generic drivers (fs/, drivers/)
@@ -514,7 +514,15 @@ o Build system
   Status:      Open.  This may not be a real issue.  I have not seen this
                happen lately so it may have nothing to do with GCC.
   Priority:    High if you are using NX and a newer compiler.
-               
+
+  Description: It has been reported to me that in some environments, the int8_t
+               type is unsigned (0-255).  The uint8_t type is based on type char
+               and char may or may not be treated as a signed value by your compiler.
+               Two options:  (1) in arch/<cpu>/include/<cpu>/types.h, try typedef'ing
+               int8_t as 'signed char', (2) for GCC, you should be able to add the
+               compiler option -fsigned-char to your CFLAGS in Make.defs.
+  Status:      Open
+  Priority:    Medium
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

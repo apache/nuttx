@@ -45,7 +45,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdint.h>
+
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -60,6 +63,8 @@
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /* SWI with SYS_ call number and no parameters */
 
@@ -221,7 +226,6 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C" {
@@ -233,7 +237,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif
 
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_INCLUDE_ARM_SYSCALL_H */
 
