@@ -127,7 +127,7 @@ static void lpc17_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: lpc17_nmi, lpc17_mpu, lpc17_busfault, lpc17_usagefault, lpc17_pendsv,
+ * Name: lpc17_nmi, lpc17_busfault, lpc17_usagefault, lpc17_pendsv,
  *       lpc17_dbgmonitor, lpc17_pendsv, lpc17_reserved
  *
  * Description:
@@ -142,14 +142,6 @@ static int lpc17_nmi(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! NMI received\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-static int lpc17_mpu(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! MPU interrupt received\n");
   PANIC(OSERR_UNEXPECTEDISR);
   return 0;
 }
@@ -233,7 +225,7 @@ static int lpc17_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
   else
     {
        *regaddr = NVIC_SYSHCON;
-       if (irq == LPC17_IRQ_MPU)
+       if (irq == LPC17_IRQ_MEMFAULT)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }
@@ -312,11 +304,22 @@ void up_irqinitialize(void)
 /* up_prioritize_irq(LPC17_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 
+  /* If the MPU is enabled, then attach and enable the Memory Management
+   * Fault handler.
+   */
+
+#ifdef CONFIG_CORTEXM3_MPU
+  irq_attach(LPC17_IRQ_MEMFAULT, up_memfault);
+  up_enable_irq(LPC17_IRQ_MEMFAULT);
+#endif
+
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
   irq_attach(LPC17_IRQ_NMI, lpc17_nmi);
-  irq_attach(LPC17_IRQ_MPU, lpc17_mpu);
+#ifndef CONFIG_CORTEXM3_MPU
+  irq_attach(LPC17_IRQ_MEMFAULT, up_memfault);
+#endif
   irq_attach(LPC17_IRQ_BUSFAULT, lpc17_busfault);
   irq_attach(LPC17_IRQ_USAGEFAULT, lpc17_usagefault);
   irq_attach(LPC17_IRQ_PENDSV, lpc17_pendsv);
@@ -449,7 +452,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq >= LPC17_IRQ_MPU && irq < LPC17_IRQ_NIRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
+  DEBUGASSERT(irq >= LPC17_IRQ_MEMFAULT && irq < LPC17_IRQ_NIRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
   if (irq < LPC17_IRQ_EXTINT)
     {

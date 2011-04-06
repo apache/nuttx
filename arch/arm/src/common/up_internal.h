@@ -181,6 +181,7 @@ extern void up_lowputs(const char *str);
 extern uint32_t *up_doirq(int irq, uint32_t *regs);
 extern int  up_svcall(int irq, FAR void *context);
 extern int  up_hardfault(int irq, FAR void *context);
+extern int  up_memfault(int irq, FAR void *context);
 
 #else /* CONFIG_ARCH_CORTEXM3 */
 

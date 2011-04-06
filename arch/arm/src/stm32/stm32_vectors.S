@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_vectors.S
  * arch/arm/src/chip/stm32_vectors.S
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,8 +91,8 @@
 	.macro	HANDLER, label, irqno
 	.thumb_func
 \label:
-	mov	r0, #\irqno
-	b	stm32_common
+	mov		r0, #\irqno
+	b		stm32_common
 	.endm
 
 /************************************************************************************
@@ -265,19 +265,19 @@ stm32_vectors:
  ************************************************************************************/
 
 	.text
-        .type   handlers, function
-        .thumb_func
+	.type	handlers, function
+	.thumb_func
 handlers:
 	HANDLER	stm32_reserved, STM32_IRQ_RESERVED		/* Unexpected/reserved vector */
-	HANDLER stm32_nmi, STM32_IRQ_NMI				/* Vector  2: Non-Maskable Interrupt (NMI) */
-	HANDLER stm32_hardfault, STM32_IRQ_HARDFAULT	/* Vector  3: Hard fault */
-	HANDLER stm32_mpu, STM32_IRQ_MPU				/* Vector  4: Memory management (MPU) */
-	HANDLER stm32_busfault, STM32_IRQ_BUSFAULT		/* Vector  5: Bus fault */
-	HANDLER stm32_usagefault, STM32_IRQ_USAGEFAULT	/* Vector  6: Usage fault */
-	HANDLER stm32_svcall, STM32_IRQ_SVCALL			/* Vector 11: SVC call */
-	HANDLER stm32_dbgmonitor, STM32_IRQ_DBGMONITOR	/* Vector 12: Debug Monitor */
-	HANDLER stm32_pendsv, STM32_IRQ_PENDSV			/* Vector 14: Penable system service request */
-	HANDLER stm32_systick, STM32_IRQ_SYSTICK		/* Vector 15: System tick */
+	HANDLER	stm32_nmi, STM32_IRQ_NMI				/* Vector  2: Non-Maskable Interrupt (NMI) */
+	HANDLER	stm32_hardfault, STM32_IRQ_HARDFAULT	/* Vector  3: Hard fault */
+	HANDLER	stm32_mpu, STM32_IRQ_MEMFAULT			/* Vector  4: Memory management (MPU) */
+	HANDLER	stm32_busfault, STM32_IRQ_BUSFAULT		/* Vector  5: Bus fault */
+	HANDLER	stm32_usagefault, STM32_IRQ_USAGEFAULT	/* Vector  6: Usage fault */
+	HANDLER	stm32_svcall, STM32_IRQ_SVCALL			/* Vector 11: SVC call */
+	HANDLER	stm32_dbgmonitor, STM32_IRQ_DBGMONITOR	/* Vector 12: Debug Monitor */
+	HANDLER	stm32_pendsv, STM32_IRQ_PENDSV			/* Vector 14: Penable system service request */
+	HANDLER	stm32_systick, STM32_IRQ_SYSTICK		/* Vector 15: System tick */
 
 #ifdef CONFIG_STM32_CONNECTIVITY_LINE
 	HANDLER	stm32_wwdg, STM32_IRQ_WWDG 				/* Vector 16+0:  Window Watchdog interrupt */
@@ -502,13 +502,13 @@ stm32_common:
  ************************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-        .bss
-        .global g_intstackbase
-        .align  4
+	.bss
+	.global	g_intstackbase
+	.align	4
 up_interruptstack:
-        .skip   (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
 g_intstackbase:
-        .size   up_interruptstack, .-up_interruptstack
+	.size	up_interruptstack, .-up_interruptstack
 #endif
 
 /************************************************************************************
@@ -525,10 +525,11 @@ g_intstackbase:
  * end of memory.  See g_heapbase below.
  */
 
-        .globl  g_heapbase
-        .type   g_heapbase, object
+	.globl	g_heapbase
+	.type	g_heapbase, object
 g_heapbase:
-        .long   _ebss+CONFIG_IDLETHREAD_STACKSIZE
-        .size   g_heapbase, .-g_heapbase
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
+	.size	g_heapbase, .-g_heapbase
 
-        .end
+	.end
+

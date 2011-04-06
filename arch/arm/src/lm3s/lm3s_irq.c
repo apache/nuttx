@@ -2,7 +2,7 @@
  * arch/arm/src/lm3s/lm3s_irq.c
  * arch/arm/src/chip/lm3s_irq.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,7 +128,7 @@ static void lm3s_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: lm3s_nmi, lm3s_mpu, lm3s_busfault, lm3s_usagefault, lm3s_pendsv,
+ * Name: lm3s_nmi, lm3s_busfault, lm3s_usagefault, lm3s_pendsv,
  *       lm3s_dbgmonitor, lm3s_pendsv, lm3s_reserved
  *
  * Description:
@@ -143,14 +143,6 @@ static int lm3s_nmi(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! NMI received\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return 0;
-}
-
-static int lm3s_mpu(int irq, FAR void *context)
-{
-  (void)irqsave();
-  dbg("PANIC!!! MPU interrupt received\n");
   PANIC(OSERR_UNEXPECTEDISR);
   return 0;
 }
@@ -234,7 +226,7 @@ static int lm3s_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
   else
     {
        *regaddr = NVIC_SYSHCON;
-       if (irq == LM3S_IRQ_MPU)
+       if (irq == LM3S_IRQ_MEMFAULT)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }
@@ -324,11 +316,22 @@ void up_irqinitialize(void)
 /* up_prioritize_irq(LM3S_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 
+  /* If the MPU is enabled, then attach and enable the Memory Management
+   * Fault handler.
+   */
+
+#ifdef CONFIG_CORTEXM3_MPU
+  irq_attach(LM3S_IRQ_MEMFAULT, up_memfault);
+  up_enable_irq(LM3S_IRQ_MEMFAULT);
+#endif
+
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
   irq_attach(LM3S_IRQ_NMI, lm3s_nmi);
-  irq_attach(LM3S_IRQ_MPU, lm3s_mpu);
+#ifndef CONFIG_CORTEXM3_MPU
+  irq_attach(LM3S_IRQ_MEMFAULT, up_memfault);
+#endif
   irq_attach(LM3S_IRQ_BUSFAULT, lm3s_busfault);
   irq_attach(LM3S_IRQ_USAGEFAULT, lm3s_usagefault);
   irq_attach(LM3S_IRQ_PENDSV, lm3s_pendsv);
@@ -434,7 +437,7 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq >= LM3S_IRQ_MPU && irq < NR_IRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
+  DEBUGASSERT(irq >= LM3S_IRQ_MEMFAULT && irq < NR_IRQS && (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
   if (irq < LM3S_IRQ_INTERRUPTS)
     {

@@ -137,7 +137,6 @@ static inline int open_mountpoint(FAR struct inode *inode,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
 static void open_pseudodir(FAR struct inode *inode, FAR struct fs_dirent_s *dir)
 {
   /* We have a valid psuedo-filesystem node.  Take two references on the
@@ -155,7 +154,6 @@ static void open_pseudodir(FAR struct inode *inode, FAR struct fs_dirent_s *dir)
   DIRENT_SETPSUEDONODE(dir->fd_flags);
 #endif
 }
-#endif
 
 /****************************************************************************
  * Public Functions

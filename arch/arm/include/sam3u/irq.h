@@ -1,7 +1,7 @@
 /****************************************************************************************
  * arch/arm/include/sam3u/irq.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,7 @@
                                      /* Vector  1: Reset (not handler as an IRQ) */
 #define SAM3U_IRQ_NMI            (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
 #define SAM3U_IRQ_HARDFAULT      (3) /* Vector  3: Hard fault */
-#define SAM3U_IRQ_MPU            (4) /* Vector  4: Memory management (MPU) */
+#define SAM3U_IRQ_MEMFAULT       (4) /* Vector  4: Memory management (MPU) */
 #define SAM3U_IRQ_BUSFAULT       (5) /* Vector  5: Bus fault */
 #define SAM3U_IRQ_USAGEFAULT     (6) /* Vector  6: Usage fault */
 #define SAM3U_IRQ_SVCALL        (11) /* Vector 11: SVC call */
