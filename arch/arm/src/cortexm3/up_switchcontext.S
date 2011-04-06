@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/cortexm3/up_switchcontext.S
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,9 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
+
 #include "nvic.h"
+#include "svcall.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -49,9 +51,9 @@
  * Global Symbols
  ************************************************************************************/
 
-	.syntax		unified
+	.syntax	unified
 	.thumb
-	.file		"up_switchcontext.S"
+	.file	"up_switchcontext.S"
 
 /************************************************************************************
  * Macros
@@ -76,20 +78,20 @@
  **************************************************************************/
 
 	.thumb_func
-	.globl		up_switchcontext
-	.type		up_switchcontext, function
+	.globl	up_switchcontext
+	.type	up_switchcontext, function
 up_switchcontext:
 
 	/* Perform the System call with R0=1, R1=saveregs, R2=restoreregs */
 
-	mov	r2, r1			/* R2: restoreregs */
-	mov	r1, r0			/* R1: saveregs */
-	mov	r0, #2			/* R0: 2 means context switch */
-	svc	0			/* Force synchronous SVCall (or Hard Fault) */
+	mov		r2, r1					/* R2: restoreregs */
+	mov		r1, r0					/* R1: saveregs */
+	mov		r0, #SYS_switch_context	/* R0: context switch */
+	svc		0						/* Force synchronous SVCall (or Hard Fault) */
 
 	/* This call should not return */
 
-	bx	lr			/* Unnecessary ... will not return */
-	.size		up_switchcontext, .-up_switchcontext
+	bx		lr						/* Unnecessary ... will not return */
+	.size	up_switchcontext, .-up_switchcontext
 	.end
 
