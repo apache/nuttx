@@ -61,6 +61,7 @@ else
 endif
 
 ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-builtin
+#ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-builtin -fno-stack-protector
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES =

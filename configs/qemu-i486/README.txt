@@ -137,7 +137,11 @@ FAQ
 ===
 
 Q: I get the following error message, "undefined reference to '__stack_chk_fail'"
-A: Add -fno-stack-protector to ARCHCPUFLAGS in you Make.defs file.
+A: Add -fno-stack-protector to ARCHCPUFLAGS in you Make.defs file.  Switch the
+   commenting on the following two lines in the Make.defs file:
+
+   ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-builtin
+   #ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-builtin -fno-stack-protector
 
 Configurations
 ==============
