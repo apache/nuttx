@@ -54,28 +54,30 @@
 
 /* PSR bits */
 
-#define MODE_MASK       0x0000001f
-#define USR26_MODE      0x00000000
-#define FIQ26_MODE      0x00000001
-#define IRQ26_MODE      0x00000002
-#define SVC26_MODE      0x00000003
-#define USR_MODE        0x00000010
-#define FIQ_MODE        0x00000011
-#define IRQ_MODE        0x00000012
-#define SVC_MODE        0x00000013
-#define ABT_MODE        0x00000017
-#define UND_MODE        0x0000001b
-#define MODE32_BIT      0x00000010
-#define SYSTEM_MODE     0x0000001f
-#define PSR_T_BIT       0x00000020
-#define PSR_F_BIT       0x00000040
-#define PSR_I_BIT       0x00000080
-#define PSR_J_BIT       0x01000000
-#define PSR_Q_BIT       0x08000000
-#define PSR_V_BIT       0x10000000
-#define PSR_C_BIT       0x20000000
-#define PSR_Z_BIT       0x40000000
-#define PSR_N_BIT       0x80000000
+#define MODE_MASK       0x0000001f /* Bits 0-4: Mode bits */
+#  define USR26_MODE    0x00000000 /*   26-bit User mode */
+#  define FIQ26_MODE    0x00000001 /*   26-bit FIQ mode */
+#  define IRQ26_MODE    0x00000002 /*   26-bit IRQ mode */
+#  define SVC26_MODE    0x00000003 /*   26-bit Supervisor mode */
+#  define MODE32_BIT    0x00000010 /*   Bit 4: 32-bit mode */
+#  define USR_MODE      0x00000010 /*   32-bit User mode */
+#  define FIQ_MODE      0x00000011 /*   32-bit FIQ mode */
+#  define IRQ_MODE      0x00000012 /*   32-bit IRQ mode */
+#  define SVC_MODE      0x00000013 /*   32-bit Supervisor mode */
+#  define ABT_MODE      0x00000017 /*   32-bit Abort mode */
+#  define UND_MODE      0x0000001b /*   32-bit Undefined mode */
+#  define SYSTEM_MODE   0x0000001f /*   32-bit System mode */
+#define PSR_T_BIT       0x00000020 /* Bit 5: Thumb state */
+#define PSR_F_BIT       0x00000040 /* Bit 6: FIQ disable */
+#define PSR_I_BIT       0x00000080 /* Bit 7: IRQ disable */
+                                   /* Bits 8-23: Reserved */
+#define PSR_J_BIT       0x01000000 /* Bit 24: Jazelle state bit */
+                                   /* Bits 25-26: Reserved */
+#define PSR_Q_BIT       0x08000000 /* Bit 27: Sticky overflow */
+#define PSR_V_BIT       0x10000000 /* Bit 28: Overflow */
+#define PSR_C_BIT       0x20000000 /* Bit 29: Carry/Borrow/Extend */
+#define PSR_Z_BIT       0x40000000 /* Bit 30: Zero */
+#define PSR_N_BIT       0x80000000 /* Bit 31: Negative/Less than */
 
 /* CR1 bits (CP#15 CR1) */
 
