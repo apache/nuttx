@@ -340,6 +340,12 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 #endif
     }
 
+  /* Mark this task as a pthread (this setting will be needed in
+   * task_schedsetup() when up_initial_state() is called.
+   */
+
+  ptcb->flags |= TCB_FLAG_TTYPE_PTHREAD;
+
   /* Initialize the task control block */
 
   status  = task_schedsetup(ptcb, priority, pthread_start,
@@ -351,10 +357,6 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
       sched_free(pjoin);
       return EBUSY;
     }
-
-  /* Mark this task as a pthread */
-
-  ptcb->flags |= TCB_FLAG_TTYPE_PTHREAD;
 
   /* Configure the TCB for a pthread receiving on parameter
    * passed by value

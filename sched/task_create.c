@@ -67,11 +67,126 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Name: thread_create
+ *
+ * Description:
+ *   This function creates and activates a new thread of the specified type
+ *   with a specified priority and returns its system-assigned ID.  It is the
+ *   internal, commn implementation of task_create() and kernel_thread().  See
+ *   comments with task_create() for further information.
+ *
+ * Input Parameters:
+ *   name       - Name of the new task
+ *   type       - Type of the new task
+ *   priority   - Priority of the new task
+ *   stack_size - size (in bytes) of the stack needed
+ *   entry      - Entry point of a new task
+ *   arg        - A pointer to an array of input parameters.
+ *                Up to  CONFIG_MAX_TASK_ARG parameters may
+ *                be provided.  If fewer than CONFIG_MAX_TASK_ARG
+ *                parameters are passed, the list should be
+ *                terminated with a NULL argv[] value.
+ *                If no parameters are required, argv may be
+ *                NULL.
+ *
+ * Return Value:
+ *   Returns the non-zero process ID of the new task or ERROR if memory is
+ *   insufficient or the task cannot be created.  The errno will be set to
+ *   indicate the nature of the error (always ENOMEM).
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_CUSTOM_STACK
+static int thread_create(const char *name, uint8_t type, int priority,
+                         int stack_size, main_t entry, const char **argv)
+#else
+static int thread_create(const char *name, uint8_t type, int priority,
+                         main_t entry, const char **argv)
+#endif
+{
+  FAR _TCB *tcb;
+  pid_t pid;
+  int ret;
+
+  /* Allocate a TCB for the new task. */
+
+  tcb = (FAR _TCB*)kzalloc(sizeof(_TCB));
+  if (!tcb)
+    {
+      goto errout;
+    }
+
+  /* Associate file descriptors with the new task */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+  ret = sched_setuptaskfiles(tcb);
+  if (ret != OK)
+    {
+      goto errout_with_tcb;
+    }
+#endif
+
+  /* Clone the parent's task environment */
+
+  (void)env_dup(tcb);
+
+  /* Allocate the stack for the TCB */
+
+#ifndef CONFIG_CUSTOM_STACK
+  ret = up_create_stack(tcb, stack_size);
+  if (ret != OK)
+    {
+      goto errout_with_tcb;
+    }
+#endif
+
+  /* Mark the type of this thread (this setting will be needed in
+   * task_schedsetup() when up_initial_state() is called.
+   */
+
+  tcb->flags |= type;
+
+  /* Initialize the task control block */
+
+  ret = task_schedsetup(tcb, priority, task_start, entry);
+  if (ret != OK)
+    {
+      goto errout_with_tcb;
+    }
+
+  /* Setup to pass parameters to the new task */
+
+  (void)task_argsetup(tcb, name, argv);
+
+  /* Get the assigned pid before we start the task */
+
+  pid = (int)tcb->pid;
+
+  /* Activate the task */
+
+  ret = task_activate(tcb);
+  if (ret != OK)
+    {
+      dq_rem((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
+      goto errout_with_tcb;
+    }
+
+  return pid;
+
+errout_with_tcb:
+  sched_releasetcb(tcb);
+
+errout:
+  errno = ENOMEM;
+  return ERROR;
+}
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -105,9 +220,9 @@
  *                NULL.
  *
  * Return Value:
- *   Returns the non-zero process ID of the new task or
- *   ERROR if memory is insufficient or the task cannot be
- *   created (errno is not set).
+ *   Returns the non-zero process ID of the new task or ERROR if memory is
+ *   insufficient or the task cannot be created.  The errno will be set to
+ *   indicate the nature of the error (always ENOMEM).
  *
  ****************************************************************************/
 
@@ -119,70 +234,41 @@ int task_create(const char *name, int priority,
                 main_t entry, const char *argv[])
 #endif
 {
-  FAR _TCB *tcb;
-  int status;
-  pid_t pid;
-
-  /* Allocate a TCB for the new task. */
-
-  tcb = (FAR _TCB*)kzalloc(sizeof(_TCB));
-  if (!tcb)
-    {
-      errno = ENOMEM;
-      return ERROR;
-    }
-
-  /* Associate file descriptors with the new task */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-  if (sched_setuptaskfiles(tcb) != OK)
-    {
-      sched_releasetcb(tcb);
-      return ERROR;
-    }
+#ifndef CONFIG_CUSTOM_STACK
+  return thread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size, entry, argv);
+#else
+  return thread_create(name, TCB_FLAG_TTYPE_TASK, priority, entry, argv);
 #endif
+}
 
-  /* Clone the parent's task environment */
-
-  (void)env_dup(tcb);
-
-  /* Allocate the stack for the TCB */
+/****************************************************************************
+ * Name: kernel_thread
+ *
+ * Description:
+ *   This function creates and activates a kernel thread task with kernel-
+ *   mode privileges.  It is identical to task_create() except that it
+ *   configures the newly started thread to run in kernel model.
+ *
+ * Input Parameters:
+ *   (same as task_create())
+ *
+ * Return Value:
+ *   (same as task_create())
+ *
+ ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-  status = up_create_stack(tcb, stack_size);
-  if (status != OK)
-    {
-      sched_releasetcb(tcb);
-      return ERROR;
-    }
+int kernel_thread(const char *name, int priority,
+                  int stack_size, main_t entry, const char *argv[])
+#else
+int kernel_thread(const char *name, int priority,
+                  main_t entry, const char *argv[])
 #endif
-
-  /* Initialize the task control block */
-
-  status = task_schedsetup(tcb, priority, task_start, entry);
-  if (status != OK)
-    {
-      sched_releasetcb(tcb);
-      return ERROR;
-    }
-
-  /* Setup to pass parameters to the new task */
-
-  (void)task_argsetup(tcb, name, argv);
-
-  /* Get the assigned pid before we start the task */
-
-  pid = (int)tcb->pid;
-
-  /* Activate the task */
-
-  status = task_activate(tcb);
-  if (status != OK)
-    {
-      dq_rem((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
-      sched_releasetcb(tcb);
-      return ERROR;
-    }
-
-  return pid;
+{
+#ifndef CONFIG_CUSTOM_STACK
+  return thread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size, entry, argv);
+#else
+  return thread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, entry, argv);
+#endif
 }
+

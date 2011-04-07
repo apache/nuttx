@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: April 6, 2011</p>
+      <p>Last Updated: April 7, 2011</p>
     </td>
   </tr>
 </table>
@@ -1217,14 +1217,23 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <p><b>Prototype</b>: <code>void up_initial_state(FAR _TCB *tcb);</code></p>
 
 <p><b>Description</b>.
-  A new thread is being started and a new TCB
-  has been created. This function is called to initialize
-  the processor specific portions of the new TCB.
+  A new thread is being started and a new TCB has been created.
+  This function is called to initialize the processor specific portions of the new TCB.
 </p>
 <p>
-  This function must setup the initial architecture registers
-  and/or  stack so that execution will begin at tcb->start
-  on the next context switch.
+  This function must setup the initial architecture registers and/or stack so that execution
+  will begin at tcb->start on the next context switch.
+</p>
+<p>
+  This function may also need to set up processor registers so that the new thread executes
+  with the correct privileges.
+  If <code>CONFIG_NUTTX_KERNEL</code> has been selected in the NuttX configuration,
+  then special initialization may need to be performed depending on the task type specified
+  in the TCB's flags field:
+  Kernel threads will require kernel-mode privileges;
+  User tasks and pthreads should have only user-mode privileges.
+  If <code>CONFIG_NUTTX_KERNEL</code> has <i>not</i> been selected,
+  then all threads should have kernel-mode privileges.
 </p>
 
 <h3><a name="upcreatestack">4.1.4 <code>up_create_stack()</code></a></h3>

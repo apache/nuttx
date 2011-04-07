@@ -141,9 +141,9 @@ int os_bringup(void)
 #ifdef CONFIG_PAGING
   svdbg("Starting paging thread\n");
 
-  g_pgworker = TASK_CREATE("pgfill", CONFIG_PAGING_DEFPRIO,
-                           CONFIG_PAGING_STACKSIZE,
-                           (main_t)pg_worker, (const char **)NULL);
+  g_pgworker = KERNEL_THREAD("pgfill", CONFIG_PAGING_DEFPRIO,
+                             CONFIG_PAGING_STACKSIZE,
+                             (main_t)pg_worker, (const char **)NULL);
   ASSERT(g_pgworker != ERROR);
 #endif
 
@@ -152,9 +152,9 @@ int os_bringup(void)
 #ifdef CONFIG_SCHED_WORKQUEUE
   svdbg("Starting worker thread\n");
 
-  g_worker = TASK_CREATE("work", CONFIG_SCHED_WORKPRIORITY,
-                         CONFIG_SCHED_WORKSTACKSIZE,
-                         (main_t)work_thread, (const char **)NULL);
+  g_worker = KERNEL_THREAD("work", CONFIG_SCHED_WORKPRIORITY,
+                           CONFIG_SCHED_WORKSTACKSIZE,
+                           (main_t)work_thread, (const char **)NULL);
   ASSERT(g_worker != ERROR);
 #endif
 

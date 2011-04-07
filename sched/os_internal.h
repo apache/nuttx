@@ -106,6 +106,18 @@ enum os_crash_codes_e
 # define sched_releasefiles(t)      (OK)
 #endif
 
+/* One processor family supported by NuttX has a single, fixed hardware stack.
+ * That is the 8051 family.  So for that family only, there is a variant form
+ * of kernel_thread() that does not take a stack size parameter.  The following
+ * helper macro is provided to work around the ugliness of that exception.
+ */
+
+#ifndef CONFIG_CUSTOM_STACK
+#  define KERNEL_THREAD(n,p,s,e,a)   task_create(n,p,s,e,a)
+#else
+#  define KERNEL_THREAD(n,p,s,e,a)   task_create(n,p,e,a)
+#endif
+
 /* A more efficient ways to access the errno */
 
 #define SET_ERRNO(e) \
@@ -254,7 +266,13 @@ extern int  task_schedsetup(FAR _TCB *tcb, int priority, start_t start,
                             main_t main);
 extern int  task_argsetup(FAR _TCB *tcb, const char *name, const char *argv[]);
 extern int  task_deletecurrent(void);
-
+#ifndef CONFIG_CUSTOM_STACK
+extern int  kernel_thread(const char *name, int priority,
+                          int stack_size, main_t entry, const char *argv[]);
+#else
+extern int  kernel_thread(const char *name, int priority,
+                          main_t entry, const char *argv[]);
+#endif
 extern bool sched_addreadytorun(FAR _TCB *rtrtcb);
 extern bool sched_removereadytorun(FAR _TCB *rtrtcb);
 extern bool sched_addprioritized(FAR _TCB *newTcb, DSEG dq_queue_t *list);

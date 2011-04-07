@@ -287,6 +287,7 @@ void os_start(void)
 
   /* Initialize the processor-specific portion of the TCB */
 
+  g_idletcb.flags = TCB_FLAG_TTYPE_KERNEL;
   up_initial_state(&g_idletcb);
 
   /* Initialize the memory manager */

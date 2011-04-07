@@ -67,7 +67,7 @@
 /* One processor family supported by NuttX has a single, fixed hardware stack.
  * That is the 8051 family.  So for that family only, there is a variant form
  * of task_create() that does not take a stack size parameter.  The following
- * helper macro is provided to work around the ugliness of that exception.
+ * helper macros are provided to work around the ugliness of that exception.
  */
 
 #ifndef CONFIG_CUSTOM_STACK

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task_setup.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -202,6 +202,7 @@ static inline void task_dupdspace(FAR _TCB *tcb)
  *   priority   - Priority of the new task
  *   entry      - Entry point of a new task
  *   main       - Application start point of the new task
+ *   type       - Type of the new thread: task, pthread, or kernel thread
  *
  * Return Value:
  *   OK on success; ERROR on failure.

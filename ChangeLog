@@ -1657,10 +1657,5 @@
 	  (usually called current_regs) should be marked volatile; Added general
 	  capability to support nested interrupts (not fully realized for all
 	  architectures).
-
-
-
-
-
- 
+	* sched/task_create.c: Add support for starting kernel-mode thread.
 
