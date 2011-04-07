@@ -151,11 +151,11 @@ int sched_releasetcb(FAR _TCB *tcb)
         }
 #endif
 
-      /* Release command line arguments that were allocated
-       * for task start/re-start.
+      /* Release command line arguments that were allocated for task
+       * start/re-start.
        */
 
-      if ((tcb->flags & TCB_FLAG_PTHREAD) == 0)
+      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_TASK)
         {
           for (i = 1; i < CONFIG_MAX_TASK_ARGS+1 && tcb->argv[i]; i++)
             {

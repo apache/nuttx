@@ -66,10 +66,14 @@
 
 /* Values for the _TCB flags flag bits */
 
-#define TCB_FLAG_PTHREAD        0x0001 /* Thread is a pthread */
-#define TCB_FLAG_NONCANCELABLE  0x0002 /* Pthread is non-cancelable */
-#define TCB_FLAG_CANCEL_PENDING 0x0004 /* Pthread cancel is pending */
-#define TCB_FLAG_ROUND_ROBIN    0x0008 /* Round robin sched enabled */
+#define TCB_FLAG_TTYPE_SHIFT     (0)      /* Bits 0-1: thread type */
+#define TCB_FLAG_TTYPE_MASK      (3 << TCB_FLAG_TTYPE_SHIFT)
+#  define TCB_FLAG_TTYPE_TASK    (0 << TCB_FLAG_TTYPE_SHIFT) /* Normal user task */
+#  define TCB_FLAG_TTYPE_PTHREAD (1 << TCB_FLAG_TTYPE_SHIFT) /* User pthread */
+#  define TCB_FLAG_TTYPE_KERNEL  (2 << TCB_FLAG_TTYPE_SHIFT) /* Kernel thread */
+#define TCB_FLAG_NONCANCELABLE   (1 << 2) /* Bit 2: Pthread is non-cancelable */
+#define TCB_FLAG_CANCEL_PENDING  (1 << 3) /* Bit 3: Pthread cancel is pending */
+#define TCB_FLAG_ROUND_ROBIN     (1 << 4) /* Bit 4: Round robin sched enabled */
 
 /********************************************************************************
  * Global Type Definitions

@@ -91,7 +91,9 @@
 
 void exit(int status)
 {
+#if CONFIG_NFILE_STREAMS > 0 || defined(CONFIG_SCHED_WAITPID) || defined(CONFIG_SCHED_ATEXIT)
   _TCB *tcb = (_TCB*)g_readytorun.head;
+#endif
 
   /* Only the lower 8 bits of the exit status are used */
 

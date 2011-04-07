@@ -101,7 +101,7 @@ uint8_t *up_doirq(int irq, uint8_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = current_regs;
+  regs = (uint8_t*)current_regs;
 
   /* Restore the previous value of current_regs.  NULL would indicate that
    * we are no longer in an interrupt handler.  It will be non-NULL if we

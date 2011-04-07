@@ -354,7 +354,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Mark this task as a pthread */
 
-  ptcb->flags |= TCB_FLAG_PTHREAD;
+  ptcb->flags |= TCB_FLAG_TTYPE_PTHREAD;
 
   /* Configure the TCB for a pthread receiving on parameter
    * passed by value
