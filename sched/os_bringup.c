@@ -48,6 +48,7 @@
 
 #include <nuttx/init.h>
 
+#include "os_internal.h"
 #ifdef CONFIG_PAGING
 # include "pg_internal.h"
 #endif

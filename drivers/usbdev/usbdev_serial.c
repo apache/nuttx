@@ -255,8 +255,7 @@ struct usbser_dev_s
   uint8_t config;                     /* Configuration number */
   uint8_t nwrq;                       /* Number of queue write requests (in reqlist)*/
   uint8_t nrdq;                       /* Number of queue read requests (in epbulkout) */
-  uint8_t open      : 1;              /* 1: Driver has been opened */
-  uint8_t rxenabled : 1;              /* 1: UART RX "interrupts" enabled */
+  bool    rxenabled;                  /* true: UART RX "interrupts" enabled */
   uint8_t linest[7];                  /* Fake line status */
   int16_t rxhead;                     /* Working head; used when rx int disabled */
 
@@ -1883,9 +1882,6 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
       return -ENOTCONN;
     }
 
-  /* Mark the device as opened */
-
-  priv->open = 1;
   return OK;
 }
 
@@ -1903,9 +1899,6 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
 
 static void usbser_shutdown(FAR struct uart_dev_s *dev)
 {
-  FAR struct usbser_dev_s *priv;
-  irqstate_t flags;
-
   usbtrace(USBSER_CLASSAPI_SHUTDOWN, 0);
 
   /* Sanity check */
@@ -1914,29 +1907,8 @@ static void usbser_shutdown(FAR struct uart_dev_s *dev)
   if (!dev || !dev->priv)
     {
        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
-       return;
     }
 #endif
-
-  /* Extract reference to private data */
-
-  priv  = (FAR struct usbser_dev_s*)dev->priv;
-  flags = irqsave();
-
-#if CONFIG_DEBUG
-  if (!priv->open)
-    {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALREADYCLOSED), 0);
-      irqrestore(flags);
-      return;
-    }
-#endif
-
-  /* Make sure that we are disconnected from the host */
-
-  usbclass_resetconfig(priv);
-  priv->open = 0;
-  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -2038,7 +2010,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
 
           /* RX "interrupts are no longer disabled */
 
-          priv->rxenabled = 1;
+          priv->rxenabled = true;
         }
     }
 
@@ -2057,7 +2029,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
        */
 
       priv->rxhead    = serdev->recv.head;
-      priv->rxenabled = 0;
+      priv->rxenabled = false;
     }
   irqrestore(flags);
 }

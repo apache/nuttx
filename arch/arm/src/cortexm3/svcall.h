@@ -79,7 +79,7 @@
 
 #define SYS_restore_context (1)
 
-/* SYS call 1:
+/* SYS call 2:
  *
  * void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
  */

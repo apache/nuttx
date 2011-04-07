@@ -1658,4 +1658,8 @@
 	  capability to support nested interrupts (not fully realized for all
 	  architectures).
 	* sched/task_create.c: Add support for starting kernel-mode thread.
+	* drivers/usbdev/usbdev_serial.c: Fix reported by Sheref Younan.  USB
+	  was being reset after serial driver was closed.  As a result, you could
+	  no reopen the serial driver.
+
 

@@ -113,9 +113,9 @@ enum os_crash_codes_e
  */
 
 #ifndef CONFIG_CUSTOM_STACK
-#  define KERNEL_THREAD(n,p,s,e,a)   task_create(n,p,s,e,a)
+#  define KERNEL_THREAD(n,p,s,e,a)   kernel_thread(n,p,s,e,a)
 #else
-#  define KERNEL_THREAD(n,p,s,e,a)   task_create(n,p,e,a)
+#  define KERNEL_THREAD(n,p,s,e,a)   kernel_thread(n,p,e,a)
 #endif
 
 /* A more efficient ways to access the errno */

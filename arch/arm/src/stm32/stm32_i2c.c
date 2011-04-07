@@ -221,16 +221,15 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
          * Duty: t_low / t_high = 1
          */
         stm32_i2c_putreg(priv, STM32_I2C_CCR_OFFSET, STM32_BOARD_HCLK/200000);
-        stm32_i2c_putreg(priv, STM32_I2C_TRISE_OFFSET, 1 + STM32_BOARD_HCLK/1000000);
+        stm32_i2c_putreg(priv, STM32_I2C_TRISE_OFFSET, STM32_BOARD_HCLK/1000000 + 1);
     }
     else {
     
         /* Speed: 400 kHz 
-         * Risetime: 1000 ns ??? \todo check rise time for 400 kHz devices
          * Duty: t_low / t_high = 2
          */
         stm32_i2c_putreg(priv, STM32_I2C_CCR_OFFSET, STM32_BOARD_HCLK/1200000);
-        stm32_i2c_putreg(priv, STM32_I2C_TRISE_OFFSET, 1 + STM32_BOARD_HCLK/1000000); 
+        stm32_i2c_putreg(priv, STM32_I2C_TRISE_OFFSET, 300*(STM32_BOARD_HCLK / 1000000)/1000 + 1); 
     }
         
     /* Restore state */
@@ -594,26 +593,26 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
     uint32_t    status = 0;
     int         status_errno = 0;
     
-    ASSERT(count);
+    extern void up_waste(void);
     
-    /* The semaphore already ensures that I2C is ours, since we do not yet support
-     * non-blocking operation.
+    ASSERT(count);
+                  
+    /* wait as stop might still be in progress 
+     * 
+     * \todo GET RID OF THIS PERFORMANCE LOSS and for() loop
      */
-     
+    for (; stm32_i2c_getreg(inst->priv, STM32_I2C_CR1_OFFSET) & I2C_CR1_STOP; ) up_waste();
+    
+    /* Old transfers are done */
     inst->priv->msgv    = msgs;
     inst->priv->msgc    = count;
-    
+        
+    /* Set clock (on change it toggles I2C_CR1_PE !) */
     stm32_i2c_setclock(inst->priv, inst->frequency);
-     
-    /* Trigger start condition, then the process moves into the ISR, 
-     * waiting again for the samaphore ... the resulting status is 
-     * found in the local status variable.
-     */
-    
-//  inst->priv->status = 0;
-//  printf("isr_count = %d\n", isr_count); fflush(stdout);
-    
+
+    /* Trigger start condition, then the process moves into the ISR */
     stm32_i2c_sendstart(inst->priv);
+    
         
 #ifdef NON_ISR   
     do {
