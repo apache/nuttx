@@ -101,7 +101,7 @@ typedef void (*up_vector_t)(void);
  * structure.  If is non-NULL only during interrupt processing.
  */
 
-extern uint8_t *current_regs;
+extern volatile uint8_t *current_regs;
 
 /* This is the beginning of heap as provided from processor-specific logic.
  * This is the first address in RAM after the loaded program+bss+idle stack.
