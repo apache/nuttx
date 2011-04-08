@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/sam3u_mpuinit.c
+ * arch/arm/src/cortexm3/up_mpu.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,26 +38,30 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/board/user_map.h>
-#include "mpu.h"
 
-#ifndef CONFIG_NUTTX_KERNEL
+#include <stdint.h>
+
+#include "mpu.h"
+#include "up_internal.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef MAX
-#  define MAX(a,b) a > b ? a : b
-#endif
-
-#ifndef MIN
-#  define MIN(a,b) a < b ? a : b
-#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* This set represents the set of disabled memory sub-regions.  A bit set
+ * corresponds to a disabled sub-region; the LS bit corresponds to the first
+ * region.  The array is indexed by the number of subregions:  0 means no sub-
+ * regions (0xff), and 0 means all subregions but one (0x00).
+ */
+
+static void uint8_t g_regionmap[9] = 
+{
+  0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01, 0x00
+};
 
 /****************************************************************************
  * Private Functions
@@ -68,42 +72,83 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_mpuinitialize
+ * Name: mpu_log2regionsize
  *
  * Description:
- *   Configure the MPU to permit user-space access to only restricted SAM3U
- *   resources.
+ *   Determine the smallest value of l2size (log base 2 size) such that the
+ *   following is true:
+ *
+ *   size <= (1 << l2size)
  *
  ****************************************************************************/
 
-void sam3u_mpuinitialize(void)
+uint8_t mpu_log2regionsize(size_t size)
 {
-  uintptr_t datastart = MIN(ONFIG_USER_DATADESTSTART, CONFIG_USER_BSSSTART);
-  uintptr_t dataend   = MAX(ONFIG_USER_DATADESTEND,   CONFIG_USER_BSSEND);
+  /* The minimum permitted region size is 16 bytes (log2(16) = 4. */
 
-  DEBUGASSERT(CONFIG_USER_TEXTEND >= CONFIG_USER_TEXTSTART && dataend >= datastart);
-
-	@echo "#define C     0x`grep \" _stext\"       $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define        0x`grep \" _etext$\"      $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define CONFIG_USER_DATASOURCE    0x`grep \" _eronly$\"    $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define C 0x`grep \" _sdata$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define CONFIG_USER_   0x`grep \" _edata$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define       0x`grep \" _sbss\"       $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define CONFIG_USER_        0x`grep \" _ebss$\"      $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-
-  /* Show MPU information */
-
-  mpu_showtype();
-
-  /* Configure user flash and SRAM space */
-
-  mpu_userflash(0, CONFIG_USER_TEXTSTART, CONFIG_USER_TEXTEND - CONFIG_USER_TEXTSTART);
-  mpu_userintsram(1, datastart, dataend - datastart);
-
-  /* Then enable the MPU */
-
-  mpu_control(true, false, true);
+  uint32_t l2size;
+  for (l2size = 4; l2size < 32 && size > (1 << l2size); size++);
+  return l2size;
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+/****************************************************************************
+ * Name: mpu_subregion
+ *
+ * Description:
+ *   Given the size of the (1) memory to be mapped and (2) the log2 size
+ *   of the mapping to use, determine the minimal sub-region set to span
+ *   that memory region.
+ *
+ * Assumption:
+ *   l2size has the same properties as the return value from
+ *   mpu_log2regionsize()
+ *
+ ****************************************************************************/
+
+uint32_t mpu_subregion(size_t size, uint8_t l2size)
+{
+  unsigned int nsrs
+  uint32_t     asize;
+  uint32_t     mask;
+
+  /* Eight subregions are support.  The representation is as an 8-bit
+   * value with the LS bit corresponding to subregion 0.  A bit is set
+   * to disable the sub-region.
+   *
+   * l2size: Log2 of the actual region size is <= (1 << l2size);
+   */
+
+  DEBUGASSERT(lsize > 3 && size <= (1 << l2size));
+
+  /* Examples with l2size = 12:
+   *
+   *         Shifted Adjusted        Number      Sub-Region
+   * Size    Mask    Size      Shift Sub-Regions Bitset
+   * 0x1000  0x01ff  0x1000    9     8           0x00
+   * 0x0c00  0x01ff  0x0c00    9     6           0x03
+   * 0x0c40  0x01ff  0x0e00    9     7           0x01
+   */
+
+  if (l2size < 32)
+    {
+      mask  = ((1 << lsize)-1) >> 3; /* Shifted mask */
+    }
+
+  /* The 4Gb region size is a special case */
+
+  else
+    {
+      /* NOTE: There is no way to represent a 4Gb region size in the 32-bit
+       * input.
+       */
+
+      mask = 0x1fffffff;             /* Shifted mask */
+    }
+
+  asize = (size + mask) & ~mask; /* Adjusted size */
+  nsrs  = asize >> (lsize-3);    /* Number of subregions */
+  return g_regionmap[nsrs];
+}
+
+
 
