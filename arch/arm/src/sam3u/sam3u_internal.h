@@ -463,6 +463,22 @@ EXTERN void sam3u_userspace(void);
 
 #ifndef CONFIG_NUTTX_KERNEL
 EXTERN void sam3u_mpuinitialize(void);
+#else
+#  define sam3u_mpuinitialize()
+#endif
+
+/****************************************************************************
+ * Name: sam3u_mpuheap
+ *
+ * Description:
+ *  Map a heap region.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NUTTX_KERNEL
+EXTERN void sam3u_mpuheap(uintptr_t start, size_t size);
+#else
+#  define sam3u_mpuheap(start,size)
 #endif
 
 /************************************************************************************

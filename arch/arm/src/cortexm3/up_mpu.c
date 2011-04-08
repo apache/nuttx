@@ -58,10 +58,14 @@
  * regions (0xff), and 0 means all subregions but one (0x00).
  */
 
-static void uint8_t g_regionmap[9] = 
+static const void uint8_t g_regionmap[9] = 
 {
   0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01, 0x00
 };
+
+/* The next available region number */
+
+static uint8_t g_region;
 
 /****************************************************************************
  * Private Functions
@@ -70,6 +74,24 @@ static void uint8_t g_regionmap[9] =
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: mpu_allocregion
+ *
+ * Description:
+ *   Allocate the next region
+ *
+ * Assumptions:
+ *   - Regions are never deallocated
+ *   - Regions are only allocated early in initialization, so nothing
+ *     special is require;
+ *
+ ****************************************************************************/
+
+unsigned int mpu_allocregion(void)
+{
+  return (unsigned int)g_region++;
+}
 
 /****************************************************************************
  * Name: mpu_log2regionsize

@@ -50,6 +50,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "sam3u_internal.h"
 
 /****************************************************************************
  * Private Definitions
@@ -102,9 +103,17 @@
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
+  size_t size = CONFIG_DRAM_END - g_heapbase;
+
+  /* Return the heap settings */
+
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_heapbase;
-  *heap_size = CONFIG_DRAM_END - g_heapbase;
+  *heap_size  = size;
+
+  /* Allow access to the heap memory */
+
+   sam3u_mpuheap((uintptr_)g_heapbase, size);
 }
 
 /************************************************************************
@@ -119,10 +128,22 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
+  /* Add the region */
+
   kmm_addregion((FAR void*)SAM3U_INTSRAM1_BASE, CONFIG_SAM3U_SRAM1_SIZE);
+
+  /* Allow access to the heap memory */
+
+  sam3u_mpuheap(SAM3U_INTSRAM1_BASE, CONFIG_SAM3U_SRAM1_SIZE)
+
+  /* Add the region */
 
 #if CONFIG_MM_REGIONS > 2
   kmm_addregion((FAR void*)SAM3U_NFCSRAM_BASE, CONFIG_SAM3U_NFCSRAM_SIZE);
+
+  /* Allow access to the heap memory */
+
+  sam3u_mpuheap(SAM3U_NFCSRAM_BASE, CONFIG_SAM3U_NFCSRAM_SIZE)
 #endif
 }
 #endif
