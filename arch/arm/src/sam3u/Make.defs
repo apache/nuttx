@@ -48,6 +48,12 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c up_createstack.c \
 		  up_sigdeliver.c up_unblocktask.c up_usestack.c up_doirq.c \
 		  up_hardfault.c up_svcall.c
 
+# Configuration-dependent common files
+
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CHIP_CSRCS	+= up_mpu.c
+endif
+
 # Required SAM3U files
 
 CHIP_ASRCS	= 

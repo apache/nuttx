@@ -40,6 +40,17 @@
  * Included Files
  ************************************************************************************/
 
+#include <nuttx/config.h>
+
+#ifndef __ASSEMBLY__
+#  include <sys/types.h>
+#  include <stdint.h>
+#  include <stdbool.h>
+#  include <debug.h>
+
+#  include "up_arch.h"
+#endif
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -96,8 +107,8 @@
 #define MPU_RASR_ATTR_SHIFT     (21)      /* Bits 19-21: TEX Address Permisson */
 #define MPU_RASR_ATTR__MASK     (7 << MPU_RASR_ATTR_SHIFT)
 #define MPU_RASR_S              (1 << 18) /* Bit 18: Shareable */
-#define MPU_RASR_C              (1 << 17) /* Bit 17: C Address Permission */
-#define MPU_RASR_B              (1 << 16) /* Bit 16: B Address Permission */
+#define MPU_RASR_C              (1 << 17) /* Bit 17: Cacheable */
+#define MPU_RASR_B              (1 << 16) /* Bit 16: Bufferable */
 #define MPU_RASR_AP_SHIFT       (24)      /* Bits 24-26: Access permission */
 #define MPU_RASR_AP_MASK        (7 << MPU_RASR_AP_SHIFT)
 #  define MPU_RASR_AP_NONO      (0 << MPU_RASR_AP_SHIFT) /* P:None U:None */
@@ -105,11 +116,375 @@
 #  define MPU_RASR_AP_RWRO      (2 << MPU_RASR_AP_SHIFT) /* P:RW   U:RO   */
 #  define MPU_RASR_AP_RWRW      (3 << MPU_RASR_AP_SHIFT) /* P:RW   U:RW   */
 #  define MPU_RASR_AP_RONO      (5 << MPU_RASR_AP_SHIFT) /* P:RO   U:None */
-#  define MPU_RASR_AP_RORO      (6 << MPU_RASR_AP_SHIFT) /* P:R0   U:RO   */
+#  define MPU_RASR_AP_RORO      (6 << MPU_RASR_AP_SHIFT) /* P:RO   U:RO   */
 #define MPU_RASR_XN             (1 << 28) /* Bit 28: Instruction access disable */
+
+/************************************************************************************
+ * Global Function Prototypes
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: mpu_log2regionsize
+ *
+ * Description:
+ *   Determine the smallest value of l2size (log base 2 size) such that the
+ *   following is true:
+ *
+ *   size <= (1 << l2size)
+ *
+ ****************************************************************************/
+
+EXTERN uint8_t mpu_log2regionsize(size_t size);
+
+/****************************************************************************
+ * Name: mpu_subregion
+ *
+ * Description:
+ *   Given the size of the (1) memory to be mapped and (2) the log2 size
+ *   of the mapping to use, determine the minimal sub-region set to span
+ *   that memory region.
+ *
+ * Assumption:
+ *   l2size has the same properties as the return value from
+ *   mpu_log2regionsize()
+ *
+ ****************************************************************************/
+
+EXTERN uint32_t mpu_subregion(size_t size, uint8_t l2size);
 
 /************************************************************************************
  * Inline Functions
  ************************************************************************************/
 
+/****************************************************************************
+ * Name: mpu_showtype
+ *
+ * Description:
+ *   Show the characteristics of the MPU
+ *
+ ****************************************************************************/
+
+static inline void mpu_showtype(void)
+{
+#ifdef CONFIG_DEBUG
+  uint32_t regval = getreg32(MPU_TYPE);
+  dbg("%s MPU Regions: data=%d instr=%d\n",
+      (regval & MPU_TYPE_SEPARATE) != 0 ? "Separate" : "Unified",
+      (regval & MPU_TYPE_DREGION_MASK) >> MPU_TYPE_DREGION_SHIFT,
+      (regval & MPU_TYPE_IREGION_MASK) >> MPU_TYPE_IREGION_SHIFT,
+#endif
+}
+
+/****************************************************************************
+ * Name: mpu_control
+ *
+ * Description:
+ *   Configure and enable (or disable) the MPU
+ *
+ ****************************************************************************/
+
+static inline void mpu_control(bool enable, bool hfnmiena, bool privdefena)
+{
+  uint32_t regval = 0;
+
+  if (enable)
+    {
+      regval |= MPU_CTRL_ENABLE; /* Enable the MPU */
+
+      if (hfnmiena)
+        {
+           regval |= MPU_CTRL_HFNMIENA; /* Enable MPU during hard fault, NMI, and FAULTMAS */
+        }
+
+      if (privdefena)
+        {
+          regval |= MPU_CTRL_PRIVDEFENA; /* Enable privileged access to default memory map */
+        }
+    }
+
+  putreg32(regval, MPU_CTRL);
+}
+
+/****************************************************************************
+ * Name: mpu_userflash
+ *
+ * Description:
+ *   Configure a region for user program flash
+ *
+ ****************************************************************************/
+
+static inline void mpu_userflash(int region, uintptr_t base, size_t size)
+{
+  uint32_t regval;
+  uint8_t  l2size;
+  uint8_t  subregions;
+
+  /* Select the region */
+
+  putreg32(region, MPU_RNR);
+
+  /* Select the region base address */
+
+  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
+
+  /* Select the region size and the sub-region map */
+
+  l2size     = mpu_log2regionsize(size);
+  subregions = mpu_subregion(size, l2size);
+
+  /* The configure the region */
+
+  regval = MPU_RASR_ENABLE                              | /* Enable region */
+           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
+           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
+           MPU_RASR_C                                   | /* Cacheable     */
+           MPU_RASR_AP_RORO;                              /* P:RO   U:RO   */
+  putreg32(regval, MPU_RASR);
+}
+
+/****************************************************************************
+ * Name: mpu_privflash
+ *
+ * Description:
+ *   Configure a region for privileged program flash
+ *
+ ****************************************************************************/
+
+static inline void mpu_privflash(int region, uintptr_t base, size_t size)
+{
+  uint32_t regval;
+  uint8_t  l2size;
+  uint8_t  subregions;
+
+  /* Select the region */
+
+  putreg32(region, MPU_RNR);
+
+  /* Select the region base address */
+
+  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
+
+  /* Select the region size and the sub-region map */
+
+  l2size     = mpu_log2regionsize(size);
+  subregions = mpu_subregion(size, l2size);
+
+  /* The configure the region */
+
+  regval = MPU_RASR_ENABLE                              | /* Enable region */
+           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
+           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
+           MPU_RASR_C                                   | /* Cacheable     */
+           MPU_RASR_AP_RONO;                              /* P:RO   U:None */
+  putreg32(regval, MPU_RASR);
+}
+
+/****************************************************************************
+ * Name: mpu_userintsram
+ *
+ * Description:
+ *   Configure a region as user internal SRAM
+ *
+ ****************************************************************************/
+
+static inline void mpu_userintsram(int region, uintptr_t base, size_t size)
+{
+  uint32_t regval;
+  uint8_t  l2size;
+  uint8_t  subregions;
+
+  /* Select the region */
+
+  putreg32(region, MPU_RNR);
+
+  /* Select the region base address */
+
+  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
+
+  /* Select the region size and the sub-region map */
+
+  l2size     = mpu_log2regionsize(size);
+  subregions = mpu_subregion(size, l2size);
+
+  /* The configure the region */
+
+  regval = MPU_RASR_ENABLE                              | /* Enable region */
+           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
+           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
+           MPU_RASR_S                                   | /* Shareable     */
+           MPU_RASR_C                                   | /* Cacheable     */
+           MPU_RASR_AP_RWRW;                              /* P:RW   U:RW   */
+  putreg32(regval, MPU_RASR);
+}
+
+/****************************************************************************
+ * Name: mpu_privintsram
+ *
+ * Description:
+ *   Configure a region as privileged internal SRAM
+ *
+ ****************************************************************************/
+
+static inline void mpu_privintsram(int region, uintptr_t base, size_t size)
+{
+  uint32_t regval;
+  uint8_t  l2size;
+  uint8_t  subregions;
+
+  /* Select the region */
+
+  putreg32(region, MPU_RNR);
+
+  /* Select the region base address */
+
+  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
+
+  /* Select the region size and the sub-region map */
+
+  l2size     = mpu_log2regionsize(size);
+  subregions = mpu_subregion(size, l2size);
+
+  /* The configure the region */
+
+  regval = MPU_RASR_ENABLE                              | /* Enable region */
+           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
+           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
+           MPU_RASR_S                                   | /* Shareable     */
+           MPU_RASR_C                                   | /* Cacheable     */
+           MPU_RASR_AP_RWNO;                              /* P:RW   U:None */
+  putreg32(regval, MPU_RASR);
+}
+
+/****************************************************************************
+ * Name: mpu_userextsram
+ *
+ * Description:
+ *   Configure a region as user external SRAM
+ *
+ ****************************************************************************/
+
+static inline void mpu_userextsram(int region, uintptr_t base, size_t size)
+{
+  uint32_t regval;
+  uint8_t  l2size;
+  uint8_t  subregions;
+
+  /* Select the region */
+
+  putreg32(region, MPU_RNR);
+
+  /* Select the region base address */
+
+  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
+
+  /* Select the region size and the sub-region map */
+
+  l2size     = mpu_log2regionsize(size);
+  subregions = mpu_subregion(size, l2size);
+
+  /* The configure the region */
+
+  regval = MPU_RASR_ENABLE                              | /* Enable region */
+           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
+           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
+           MPU_RASR_S                                   | /* Shareable     */
+           MPU_RASR_C                                   | /* Cacheable     */
+           MPU_RASR_B                                   | /* Bufferable    */
+           MPU_RASR_AP_RWRW;                              /* P:RW   U:RW   */
+  putreg32(regval, MPU_RASR);
+}
+
+/****************************************************************************
+ * Name: mpu_privextsram
+ *
+ * Description:
+ *   Configure a region as privileged external SRAM
+ *
+ ****************************************************************************/
+
+static inline void mpu_privextsram(int region, uintptr_t base, size_t size)
+{
+  uint32_t regval;
+  uint8_t  l2size;
+  uint8_t  subregions;
+
+  /* Select the region */
+
+  putreg32(region, MPU_RNR);
+
+  /* Select the region base address */
+
+  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
+
+  /* Select the region size and the sub-region map */
+
+  l2size     = mpu_log2regionsize(size);
+  subregions = mpu_subregion(size, l2size);
+
+  /* The configure the region */
+
+  regval = MPU_RASR_ENABLE                              | /* Enable region */
+           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
+           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
+           MPU_RASR_S                                   | /* Shareable     */
+           MPU_RASR_C                                   | /* Cacheable     */
+           MPU_RASR_B                                   | /* Bufferable    */
+           MPU_RASR_AP_RWNO;                              /* P:RW   U:None */
+  putreg32(regval, MPU_RASR);
+}
+
+/****************************************************************************
+ * Name: mpu_peripheral
+ *
+ * Description:
+ *   Configure a region as privileged periperal address space
+ *
+ ****************************************************************************/
+
+static inline void mpu_peripheral(int region, uintptr_t base, size_t size)
+{
+  uint32_t regval;
+  uint8_t  l2size;
+  uint8_t  subregions;
+
+  /* Select the region */
+
+  putreg32(region, MPU_RNR);
+
+  /* Select the region base address */
+
+  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
+
+  /* Select the region size and the sub-region map */
+
+  l2size     = mpu_log2regionsize(size);
+  subregions = mpu_subregion(size, l2size);
+
+  /* The configure the region */
+
+  regval = MPU_RASR_ENABLE                              | /* Enable region */
+           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
+           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
+           MPU_RASR_S                                   | /* Shareable     */
+           MPU_RASR_B                                   | /* Bufferable    */
+           MPU_RASR_AP_RWNO;                              /* P:RW   U:None */
+  putreg32(regval, MPU_RASR);
+}
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif  /* __ASSEMBLY__ */
 #endif  /* __ARCH_ARM_SRC_COMMON_CORTEXM_MPU_H */
+
