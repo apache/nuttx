@@ -99,8 +99,28 @@ void up_initial_state(_TCB *tcb)
   /* Initialize the initial exception register context structure */
 
   memset(xcp, 0, sizeof(struct xcptcontext));
+
+  /* Set the initial stack pointer to the "base" of the allocated stack */
+
   xcp->regs[REG_SP] = (uint32_t)tcb->adj_stack_ptr;
+
+  /* Save the task entry point */
+
   xcp->regs[REG_PC] = (uint32_t)tcb->start;
+
+  /* Set supervisor- or user-mode, depending on how NuttX is configured and
+   * what kind of thread is being started.  Disable FIQs in any event
+   *
+   * If the kernel build is not selected, then all threads run in
+   * supervisor-mode.
+   */
+
+#ifdef CONFIG_NUTTX_KERNEL
+#  error "Missing logic for the CONFIG_NUTTX_KERNEL build"
+#endif
+
+  /* Enable or disable interrupts, based on user configuration */
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   xcp->regs[REG_SR] = up_getsr() | 0x000000f0;
 #else

@@ -104,6 +104,17 @@ void up_initial_state(_TCB *tcb)
   xcp->regs[REG_CS]      = up_getcs();
   xcp->regs[REG_SS]      = up_getss();
 
+  /* Set supervisor- or user-mode, depending on how NuttX is configured and
+   * what kind of thread is being started.  Disable FIQs in any event
+   *
+   * If the kernel build is not selected, then all threads run in
+   * supervisor-mode.
+   */
+
+#ifdef CONFIG_NUTTX_KERNEL
+#  error "Missing logic for the CONFIG_NUTTX_KERNEL build"
+#endif
+
   /* Enable or disable interrupts, based on user configuration.  If the IF
    * bit is set, maskable interrupts will be enabled.
    */
