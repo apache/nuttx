@@ -90,6 +90,8 @@ $(BOARD_INCLUDE)/user_map.h: $(TOPDIR)/User.map
 	@echo "/* General memory map */" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_ENTRYPOINT    0x`grep \" user_start$\" $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_TEXTSTART     0x`grep \" _stext\"       $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_TEXTEND       0x`grep \" _etext$\"      $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_DATASOURCE    0x`grep \" _eronly$\"    $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_DATADESTSTART 0x`grep \" _sdata$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_DATADESTEND   0x`grep \" _edata$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
