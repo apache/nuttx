@@ -308,9 +308,9 @@ sam3u_common:
 	 */
 1:
 #ifdef CONFIG_NUTTX_KERNEL 
-	ldmia	r0, {r2-r11,r14}		/* Recover R4-R11, r14 + 2 temp values */
+	ldmia	r1!, {r2-r11,r14}		/* Recover R4-R11, r14 + 2 temp values */
 #else
-	ldmia	r0, {r2-r11}			/* Recover R4-R11 + 2 temp values */
+	ldmia	r1!, {r2-r11}			/* Recover R4-R11 + 2 temp values */
 #endif
 2:
 #ifdef CONFIG_NUTTX_KERNEL
