@@ -134,9 +134,9 @@ int os_bringup(void)
 #endif
   int init_taskid;
 
-  /* Start the page fill worker thread that will resolve page faults.
-   * This should always be the first thread started because it may
-   * have to resolve page faults in other threads
+  /* Start the page fill worker kernel thread that will resolve page faults.
+   * This should always be the first thread started because it may have to
+   * resolve page faults in other threads
    */
 
 #ifdef CONFIG_PAGING
@@ -148,7 +148,9 @@ int os_bringup(void)
   ASSERT(g_pgworker != ERROR);
 #endif
 
-  /* Start the worker thread that will perform misc garbage clean-up */
+  /* Start the worker thread that will serve as the device driver "bottom-
+   * half" and will perform misc garbage clean-up.
+   */
 
 #ifdef CONFIG_SCHED_WORKQUEUE
   svdbg("Starting worker thread\n");
@@ -160,7 +162,8 @@ int os_bringup(void)
 #endif
 
   /* Once the operating system has been initialized, the system must be
-   * started by spawning the user init thread of execution.
+   * started by spawning the user init thread of execution.  This is the
+   * first user-mode thead.
    */
 
   svdbg("Starting init thread\n");

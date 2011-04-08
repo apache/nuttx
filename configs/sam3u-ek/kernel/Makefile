@@ -93,6 +93,8 @@ $(BOARD_INCLUDE)/user_map.h: $(TOPDIR)/User.map
 	@echo "#define CONFIG_USER_DATASOURCE    0x`grep \" _eronly$\"    $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_DATADESTSTART 0x`grep \" _sdata$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "#define CONFIG_USER_DATADESTEND   0x`grep \" _edata$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_BSSSTART      0x`grep \" _sbss\"       $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
+	@echo "#define CONFIG_USER_BSSEND        0x`grep \" _ebss$\"      $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "/* Memory manager entry points */" >> $(BOARD_INCLUDE)/user_map.h
 	@echo "" >> $(BOARD_INCLUDE)/user_map.h

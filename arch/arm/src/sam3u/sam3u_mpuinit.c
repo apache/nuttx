@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_start.c
- * arch/arm/src/chip/sam3u_start.c
+ * arch/arm/src/common/sam3u_mpuinit.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,18 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/board/user_map.h>
 
-#include <stdint.h>
-#include <assert.h>
-#include <debug.h>
-
-#include <nuttx/init.h>
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "sam3u_internal.h"
+#ifndef CONFIG_NUTTX_KERNEL
 
 /****************************************************************************
  * Private Definitions
@@ -61,101 +51,26 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: sam3u_mpuinitialize
  *
  * Description:
- *   This is the reset entry point.
+ *   Configure the MPU to permit user-space access to only restricted SAM3U
+ *   resources.
  *
  ****************************************************************************/
 
-void __start(void)
+void sam3u_mpuinitialize(void)
 {
-  const uint32_t *src;
-  uint32_t *dest;
-
-  /* Configure the uart so that we can get debug output as soon as possible */
-
-  sam3u_clockconfig();
-  sam3u_lowsetup();
-  showprogress('A');
-
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (dest = &_sbss; dest < &_ebss; )
-    {
-      *dest++ = 0;
-    }
-  showprogress('B');
-
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
-
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-  showprogress('C');
-
-  /* Perform early serial initialization */
-
-#ifdef CONFIG_USE_EARLYSERIALINIT
-  up_earlyserialinit();
-#endif
-  showprogress('D');
-
-  /* For the case of the separate user-/kernel-space build, perform whatever
-   * platform specific initialization of the user memory is required.
-   * Normally this just means initializing the user space .data and .bss
-   * segements.
-   */
-
-#ifndef CONFIG_NUTTX_KERNEL
-  sam3u_userspace();
-#endif
-
-  /* Initialize onboard resources */
-
-  sam3u_boardinitialize();
-  showprogress('E');
-
-  /* Then start NuttX */
-
-  showprogress('\r');
-  showprogress('\n');
-  os_start();
-
-  /* Shouldn't get here */
-
-  for(;;);
+# warning "Not implemented"
 }
+
+#endif /* CONFIG_NUTTX_KERNEL */
+

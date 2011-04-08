@@ -105,6 +105,9 @@ endif
 #   configuration specific files or creation of configurable symbolic links
 # USERDIRS - When NuttX is build is a monolithic kernel, this provides the
 #   list of directories that must be built
+# OTHERDIRS - These are directories that are not built but probably should
+#   be cleaned to prevent garbarge from collecting in them when changing
+#   configurations.
 
 NONFSDIRS	= sched $(ARCH_SRC) $(NUTTX_ADDONS)
 FSDIRS		= fs drivers binfmt
@@ -118,11 +121,14 @@ CONTEXTDIRS	+= syscall
 USERDIRS	+= syscall lib mm $(USER_ADDONS)
 else
 NONFSDIRS	+= lib mm
+OTHERDIRS	+= syscall $(USER_ADDONS)
 endif
 
 ifeq ($(CONFIG_NX),y)
 NONFSDIRS	+= graphics
 CONTEXTDIRS	+= graphics
+else
+OTHERDIRS	+= graphics
 endif
 
 # CLEANDIRS are the directories that will clean in.  These are
@@ -133,7 +139,7 @@ endif
 # USERDEPDIRS. If NuttX and applications are built separately (CONFIG_NUTTX_KERNEL),
 #   then this holds only the directories containing user files.
 
-CLEANDIRS	= $(NONFSDIRS) $(FSDIRS) $(USERDIRS)
+CLEANDIRS	= $(NONFSDIRS) $(FSDIRS) $(USERDIRS) $(OTHERDIRS)
 KERNDEPDIRS	= $(NONFSDIRS)
 USERDEPDIRS	= $(USERDIRS)
 

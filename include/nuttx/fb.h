@@ -315,4 +315,39 @@ struct fb_vtable_s
 #endif
 };
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: up_fbinitialize, up_fbuninitialize, up_fbgetvplane
+ *
+ * Description:
+ *   If an architecture supports a framebuffer, then it must provide APIs
+ *   to access the framebuffer as follows:
+ *
+ *   up_fbinitialize   - Initialize the framebuffer video hardware
+ *   up_fbgetvplane    - Return a a reference to the framebuffer object for
+ *                       the specified video plane.  Most OSDs support
+ *                       multiple planes of video.
+ *   up_fbuninitialize - Unitialize the framebuffer support
+ *
+ ***************************************************************************/
+
+EXTERN int up_fbinitialize(void);
+EXTERN FAR struct fb_vtable_s *up_fbgetvplane(int vplane);
+EXTERN void fb_uninitialize(void);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* _INCLUDE_NUTTX_FB_H */

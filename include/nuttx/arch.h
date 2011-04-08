@@ -434,7 +434,6 @@ EXTERN void up_enable_irq(int irq);
 EXTERN void up_disable_irq(int irq);
 #endif
 
-
 /****************************************************************************
  * Name: up_prioritize_irq
  *
@@ -461,51 +460,6 @@ EXTERN int up_prioritize_irq(int irq, int priority);
 
 EXTERN void up_mdelay(unsigned int milliseconds);
 EXTERN void up_udelay(useconds_t microseconds);
-
-/****************************************************************************
- * Name: up_fbinitialize, up_fbuninitialize, up_fbgetvplane
- *
- * Description:
- *   If an architecture supports a framebuffer, then it must provide APIs
- *   to access the framebuffer as follows:
- *
- *   up_fbinitialize   - Initialize the framebuffer video hardware
- *   up_fbgetvplane    - Return a a reference to the framebuffer object for
- *                       the specified video plane.  Most OSDs support
- *                       multiple planes of video.
- *   up_fbuninitialize - Unitialize the framebuffer support
- *
- ***************************************************************************/
-
-struct fb_vtable_s; /* See nuttx/fb.h */
-
-EXTERN int up_fbinitialize(void);
-EXTERN FAR struct fb_vtable_s *up_fbgetvplane(int vplane);
-EXTERN void fb_uninitialize(void);
-
-/****************************************************************************
- * Name: up_lcdinitialize, up_lcdgetdev, up_lcduninitialize
- *
- * Description:
- *   If an architecture supports a parallel or serial LCD, then it must
- *   provide APIs to access the LCD as follows:
- *
- *   up_lcdinitialize   - Initialize the LCD video hardware.  The initial
- *                        state of the LCD is fully initialized, display
- *                        memory cleared, and the LCD ready to use, but with
- *                        the power setting at 0 (full off).
- *   up_lcdgetdev       - Return a a reference to the LCD object for
- *                        the specified LCD.  This allows support for
- *                        multiple LCD devices.
- *   up_lcduninitialize - Unitialize the LCD support
- *
- ***************************************************************************/
-
-struct lcd_dev_s; /* See nuttx/lcd.h */
-
-EXTERN int up_lcdinitialize(void);
-EXTERN FAR struct lcd_dev_s *up_lcdgetdev(int lcddev);
-EXTERN void up_lcduninitialize(void);
 
 /****************************************************************************
  * These are standard interfaces that are exported by the OS

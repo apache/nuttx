@@ -57,6 +57,10 @@ CHIP_CSRCS	= sam3u_allocateheap.c sam3u_clockconfig.c sam3u_gpioirq.c \
 
 # Configuration-dependent SAM3U files
 
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CHIP_CSRCS	+= sam3u_userspace.c sam3u_mpuinit.c
+endif
+
 ifeq ($(CONFIG_SAM3U_DMA),y)
 CHIP_CSRCS	+= sam3u_dmac.c
 endif
@@ -64,3 +68,4 @@ endif
 ifeq ($(CONFIG_SAM3U_HSMCI),y)
 CHIP_CSRCS	+= sam3u_hsmci.c
 endif
+
