@@ -403,7 +403,8 @@ handlers:
 	HANDLER	stm32_dma2ch45, STM32_IRQ_DMA2CH45		/* Vector 16+59: DMA2 Channel 4&5 global interrupt */
 #endif
 
-/* Common IRQ handling logic.  On entry here, the stack is like the following:
+/* Common IRQ handling logic.  On entry here, the return stack is on either
+ * the PSP or the MSP and looks like the following:
  *
  *      REG_XPSR
  *      REG_R15
@@ -414,18 +415,38 @@ handlers:
  *      REG_R1
  * MSP->REG_R0
  *
- * and R0 contains the IRQ number
+ * And
+ *      R0 contains the IRQ number
+ *      R14 Contains the EXC_RETURN value
+ *      We are in handler mode and the current SP is the MSP
  */
 
 stm32_common:
 
 	/* Complete the context save */
 
+#ifdef CONFIG_NUTTX_KERNEL 
+	/* The EXC_RETURN value will be 0xfffffff9 (privileged thread) or 0xfffffff1
+	 * (handler mode) if the state is on the MSP.  It can only be on the PSP if
+	 * EXC_RETURN is 0xfffffffd (unprivileged thread)
+	 */
+
+	adds	r2, r14, #3				/* If R14=0xfffffffd, then r2 == 0 */
+	ite		ne						/* Next two instructions are condition */
+	mrsne	r1, msp					/* R1=The main stack pointer */
+	mrseq	r1, psp					/* R1=The process stack pointer */
+#else
 	mrs		r1, msp					/* R1=The main stack pointer */
-	mov		r2, r1					/* R2=Copy of the main stack pointer */
-	add		r2, #HW_XCPT_SIZE		/* R2=MSP before the interrupt was taken */
+#endif
+
+	mov		r2, r1					/* R2=Copy of the main/process stack pointer */
+	add		r2, #HW_XCPT_SIZE		/* R2=MSP/PSP before the interrupt was taken */
 	mrs		r3, primask				/* R3=Current PRIMASK setting */
+#ifdef CONFIG_NUTTX_KERNEL 
+	stmdb	r1!, {r2-r11,r14}		/* Save the remaining registers plus the SP value */
+#else
 	stmdb	r1!, {r2-r11}			/* Save the remaining registers plus the SP value */
+#endif
 
 	/* Disable interrupts, select the stack to use for interrupt handling
 	 * and call up_doirq to handle the interrupt
@@ -438,7 +459,7 @@ stm32_common:
 	 * Otherwise, we will re-use the main stack for interrupt level processing.
 	 */
 
-#ifdef CONFIG_ARCH_INTERRUPTSTACK
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
 	ldr		sp, =g_intstackbase
 	str		r1, [sp, #-4]!			/* Save the MSP on the interrupt stack */
 	bl		up_doirq				/* R0=IRQ, R1=register save (msp) */
@@ -467,23 +488,45 @@ stm32_common:
 	ldmia	r1, {r4-r11}			/* Fetch eight registers in HW save area */
 	ldr	r1, [r0, #(4*REG_SP)]		/* R1=Value of SP before interrupt */
 	stmdb	r1!, {r4-r11}			/* Store eight registers in HW save area */
+#ifdef CONFIG_NUTTX_KERNEL 
+	ldmia	r0, {r2-r11,r14}		/* Recover R4-R11, r14 + 2 temp values */
+#else
 	ldmia	r0, {r2-r11}			/* Recover R4-R11 + 2 temp values */
+#endif
 	b		2f						/* Re-join common logic */
 
 	/* We are returning with no context switch.  We simply need to "unwind"
 	 * the same stack frame that we created
 	 */
 1:
-	ldmia	r1!, {r2-r11}			/* Recover R4-R11 + 2 temp values */
+#ifdef CONFIG_NUTTX_KERNEL 
+	ldmia	r0, {r2-r11,r14}		/* Recover R4-R11, r14 + 2 temp values */
+#else
+	ldmia	r0, {r2-r11}			/* Recover R4-R11 + 2 temp values */
+#endif
 2:
+#ifdef CONFIG_NUTTX_KERNEL
+	/* The EXC_RETURN value will be 0xfffffff9 (privileged thread) or 0xfffffff1
+	 * (handler mode) if the state is on the MSP.  It can only be on the PSP if
+	 * EXC_RETURN is 0xfffffffd (unprivileged thread)
+	 */
+
+	adds	r0, r14, #3				/* If R14=0xfffffffd, then r0 == 0 */
+	ite		ne						/* Next two instructions are condition */
+	msrne	msp, r1					/* R1=The main stack pointer */
+	msreq	psp, r1					/* R1=The process stack pointer */
+#else
 	msr		msp, r1					/* Recover the return MSP value */
 
-	/* Restore the interrupt state.  Preload r14 with the special return
-	 * value first (so that the return actually occurs with interrupts
-	 * still disabled).
+	/* Preload r14 with the special return value first (so that the return
+	 * actually occurs with interrupts still disabled).
 	 */
 
 	ldr		r14, =EXC_RETURN		/* Load the special value */
+#endif
+
+    /* Restore the interrupt state */
+
 	msr		primask, r3				/* Restore interrupts */
 
 	/* Always return with R14 containing the special value that will: (1)

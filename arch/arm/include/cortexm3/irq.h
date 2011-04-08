@@ -55,42 +55,49 @@
 
 /* IRQ Stack Frame Format: */
 
-/* On entry into an IRQ, the hardware automatically saves the following
- * registers on the stack in this (address) order:
- */
-
-#define REG_XPSR            (17) /* xPSR */
-#define REG_R15             (16) /* R15 = PC */
-#define REG_R14             (15) /* R14 = LR */
-#define REG_R12             (14) /* R12 */
-#define REG_R3              (13) /* R3 */
-#define REG_R2              (12) /* R2 */
-#define REG_R1              (11) /* R1 */
-#define REG_R0              (10) /* R0 */
-
-#define HW_XCPT_REGS        (8)
-#define HW_XCPT_SIZE        (4 * HW_XCPT_REGS)
-
 /* The following additional registers are stored by the interrupt handling
  * logic.
  */
 
-#define REG_R11             (9) /* R11 */
-#define REG_R10             (8) /* R10 */
-#define REG_R9              (7) /* R9 */
-#define REG_R8              (6) /* R8 */
-#define REG_R7              (5) /* R7 */
-#define REG_R6              (4) /* R6 */
-#define REG_R5              (3) /* R5 */
-#define REG_R4              (2) /* R4 */
-#define REG_PRIMASK         (1) /* PRIMASK */
-#define REG_R13             (0) /* R13 = SP at time of interrupt */
+#define REG_R13             (0)  /* R13 = SP at time of interrupt */
+#define REG_PRIMASK         (1)  /* PRIMASK */
+#define REG_R4              (2)  /* R4 */
+#define REG_R5              (3)  /* R5 */
+#define REG_R6              (4)  /* R6 */
+#define REG_R7              (5)  /* R7 */
+#define REG_R8              (6)  /* R8 */
+#define REG_R9              (7)  /* R9 */
+#define REG_R10             (8)  /* R10 */
+#define REG_R11             (9)  /* R11 */
 
-#define SW_XCPT_REGS        (10)
+#ifdef CONFIG_NUTTX_KERNEL
+#  define REG_EXC_RETURN    (10) /* EXC_RETURN */
+#  define SW_XCPT_REGS      (11)
+#else
+#  define SW_XCPT_REGS      (10)
+#endif
 #define SW_XCPT_SIZE        (4 * SW_XCPT_REGS)
+
+/* On entry into an IRQ, the hardware automatically saves the following
+ * registers on the stack in this (address) order:
+ */
+
+#define REG_R0              (SW_XCPT_REGS+0) /* R0 */
+#define REG_R1              (SW_XCPT_REGS+1) /* R1 */
+#define REG_R2              (SW_XCPT_REGS+2) /* R2 */
+#define REG_R3              (SW_XCPT_REGS+3) /* R3 */
+#define REG_R12             (SW_XCPT_REGS+4) /* R12 */
+#define REG_R14             (SW_XCPT_REGS+5) /* R14 = LR */
+#define REG_R15             (SW_XCPT_REGS+6) /* R15 = PC */
+#define REG_XPSR            (SW_XCPT_REGS+7) /* xPSR */
+
+#define HW_XCPT_REGS        (8)
+#define HW_XCPT_SIZE        (4 * HW_XCPT_REGS)
 
 #define XCPTCONTEXT_REGS    (HW_XCPT_REGS + SW_XCPT_REGS)
 #define XCPTCONTEXT_SIZE    (HW_XCPT_SIZE + SW_XCPT_SIZE)
+
+/* Alternate register names */
 
 #define REG_A1              REG_R0
 #define REG_A2              REG_R1
