@@ -133,6 +133,16 @@ extern "C" {
 #endif
 
 /****************************************************************************
+ * Name: mpu_allocregion
+ *
+ * Description:
+ *  Allocate the next region
+ *
+ ****************************************************************************/
+
+EXTERN unsigned int mpu_allocregion(void);
+
+/****************************************************************************
  * Name: mpu_log2regionsize
  *
  * Description:
@@ -222,11 +232,12 @@ static inline void mpu_control(bool enable, bool hfnmiena, bool privdefena)
  *
  ****************************************************************************/
 
-static inline void mpu_userflash(int region, uintptr_t base, size_t size)
+static inline void mpu_userflash(uintptr_t base, size_t size)
 {
-  uint32_t regval;
-  uint8_t  l2size;
-  uint8_t  subregions;
+  unsigned int region = mpu_allocregion();
+  uint32_t     regval;
+  uint8_t      l2size;
+  uint8_t      subregions;
 
   /* Select the region */
 
@@ -259,15 +270,16 @@ static inline void mpu_userflash(int region, uintptr_t base, size_t size)
  *
  ****************************************************************************/
 
-static inline void mpu_privflash(int region, uintptr_t base, size_t size)
+static inline void mpu_privflash(uintptr_t base, size_t size)
 {
-  uint32_t regval;
-  uint8_t  l2size;
-  uint8_t  subregions;
+  unsigned int region = mpu_allocregion();
+  uint32_t     regval;
+  uint8_t      l2size;
+  uint8_t      subregions;
 
   /* Select the region */
 
-  putreg32(region, MPU_RNR);
+  putreg32(mpu_allocregion(), MPU_RNR);
 
   /* Select the region base address */
 
@@ -296,11 +308,12 @@ static inline void mpu_privflash(int region, uintptr_t base, size_t size)
  *
  ****************************************************************************/
 
-static inline void mpu_userintsram(int region, uintptr_t base, size_t size)
+static inline void mpu_userintsram(uintptr_t base, size_t size)
 {
-  uint32_t regval;
-  uint8_t  l2size;
-  uint8_t  subregions;
+  unsigned int region = mpu_allocregion();
+  uint32_t     regval;
+  uint8_t      l2size;
+  uint8_t      subregions;
 
   /* Select the region */
 
@@ -334,11 +347,12 @@ static inline void mpu_userintsram(int region, uintptr_t base, size_t size)
  *
  ****************************************************************************/
 
-static inline void mpu_privintsram(int region, uintptr_t base, size_t size)
+static inline void mpu_privintsram(uintptr_t base, size_t size)
 {
-  uint32_t regval;
-  uint8_t  l2size;
-  uint8_t  subregions;
+  unsigned int region = mpu_allocregion();
+  uint32_t     regval;
+  uint8_t      l2size;
+  uint8_t      subregions;
 
   /* Select the region */
 
@@ -372,11 +386,12 @@ static inline void mpu_privintsram(int region, uintptr_t base, size_t size)
  *
  ****************************************************************************/
 
-static inline void mpu_userextsram(int region, uintptr_t base, size_t size)
+static inline void mpu_userextsram(uintptr_t base, size_t size)
 {
-  uint32_t regval;
-  uint8_t  l2size;
-  uint8_t  subregions;
+  unsigned int region = mpu_allocregion();
+  uint32_t     regval;
+  uint8_t      l2size;
+  uint8_t      subregions;
 
   /* Select the region */
 
@@ -411,11 +426,12 @@ static inline void mpu_userextsram(int region, uintptr_t base, size_t size)
  *
  ****************************************************************************/
 
-static inline void mpu_privextsram(int region, uintptr_t base, size_t size)
+static inline void mpu_privextsram(uintptr_t base, size_t size)
 {
-  uint32_t regval;
-  uint8_t  l2size;
-  uint8_t  subregions;
+  unsigned int region = mpu_allocregion();
+  uint32_t     regval;
+  uint8_t      l2size;
+  uint8_t      subregions;
 
   /* Select the region */
 
@@ -450,11 +466,12 @@ static inline void mpu_privextsram(int region, uintptr_t base, size_t size)
  *
  ****************************************************************************/
 
-static inline void mpu_peripheral(int region, uintptr_t base, size_t size)
+static inline void mpu_peripheral(uintptr_t base, size_t size)
 {
-  uint32_t regval;
-  uint8_t  l2size;
-  uint8_t  subregions;
+  unsigned int region = mpu_allocregion();
+  uint32_t     regval;
+  uint8_t      l2size;
+  uint8_t      subregions;
 
   /* Select the region */
 
@@ -476,7 +493,9 @@ static inline void mpu_peripheral(int region, uintptr_t base, size_t size)
            ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
            MPU_RASR_S                                   | /* Shareable     */
            MPU_RASR_B                                   | /* Bufferable    */
-           MPU_RASR_AP_RWNO;                              /* P:RW   U:None */
+           MPU_RASR_AP_RWNO                             | /* P:RW   U:None */
+           MPU_RASR_XN                                  | /* Instruction access disable */
+
   putreg32(regval, MPU_RASR);
 }
 

@@ -97,12 +97,25 @@ void sam3u_mpuinitialize(void)
 
   /* Configure user flash and SRAM space */
 
-  mpu_userflash(0, CONFIG_USER_TEXTSTART, CONFIG_USER_TEXTEND - CONFIG_USER_TEXTSTART);
-  mpu_userintsram(1, datastart, dataend - datastart);
+  mpu_userflash(CONFIG_USER_TEXTSTART, CONFIG_USER_TEXTEND - CONFIG_USER_TEXTSTART);
+  mpu_userintsram(datastart, dataend - datastart);
 
   /* Then enable the MPU */
 
   mpu_control(true, false, true);
+}
+
+/****************************************************************************
+ * Name: sam3u_mpuheap
+ *
+ * Description:
+ *  Map a heap region (probably needs to extension to handle external SRAM).
+ *
+ ****************************************************************************/
+
+void sam3u_mpuheap(uintptr_t start, size_t size)
+{
+  mpu_userintsram(start, size);
 }
 
 #endif /* CONFIG_NUTTX_KERNEL */
