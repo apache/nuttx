@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sam3u/sam3u_internal.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -436,6 +436,34 @@ EXTERN void sam3u_clockconfig(void);
  ************************************************************************************/
 
 EXTERN void sam3u_lowsetup(void);
+
+/****************************************************************************
+ * Name: sam3u_userspace
+ *
+ * Description:
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segements.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NUTTX_KERNEL
+EXTERN void sam3u_userspace(void);
+#endif
+
+/****************************************************************************
+ * Name: sam3u_mpuinitialize
+ *
+ * Description:
+ *   Configure the MPU to permit user-space access to only restricted SAM3U
+ *   resources.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NUTTX_KERNEL
+EXTERN void sam3u_mpuinitialize(void);
+#endif
 
 /************************************************************************************
  * Name: sam3u_gpioirqinitialize
