@@ -110,7 +110,7 @@ void up_initial_state(_TCB *tcb)
     }
 #endif
 
-  /* Set supervisor- or user-mode, depending on how NuttX is configured nd
+  /* Set supervisor- or user-mode, depending on how NuttX is configured and
    * what kind of thread is being started.  Disable FIQs in any event
    */
 

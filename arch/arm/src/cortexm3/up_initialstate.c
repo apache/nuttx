@@ -47,7 +47,9 @@
 
 #include "up_internal.h"
 #include "up_arch.h"
+
 #include "psr.h"
+#include "exc_return.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -122,6 +124,28 @@ void up_initial_state(_TCB *tcb)
 #ifdef CONFIG_NXFLAT
   tcb->entry.main = (main_t)((uint32_t)tcb->entry.main | 1);
 #endif
+#endif
+
+  /* Set privileged- or unprivileged-mode, depending on how NuttX is
+   * configured and what kind of thread is being started.
+   *
+   * If the kernel build is not selected, then all threads run in
+   * privileged thread mode.
+   */
+
+#ifdef CONFIG_NUTTX_KERNEL
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+    {
+      /* It is a kernel thread.. set privileged thread mode */
+
+      xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
+    }
+  else
+    {
+      /* It is a normal task or a pthread.  Set user mode */
+
+      xcp->regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
+    }
 #endif
 
   /* Enable or disable interrupts, based on user configuration */
