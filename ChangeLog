@@ -1661,5 +1661,8 @@
 	* drivers/usbdev/usbdev_serial.c: Fix reported by Sheref Younan.  USB
 	  was being reset after serial driver was closed.  As a result, you could
 	  no reopen the serial driver.
+	* configs/lpcxpresso-lpc1768: Add a board configuration for the Embedded
+	  Artists LPCXpresso LPC1768 board.
+
 
 
