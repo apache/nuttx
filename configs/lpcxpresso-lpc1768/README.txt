@@ -215,6 +215,60 @@ Code Red IDE
   /cygdrive/c/nxp/lpcxpreeso_3.6/bin, and
   /cygdrive/c/nxp/lpcxpreeso_3.6/Tools/bin
 
+  Command Line Flash Programming
+  ------------------------------
+
+  If using LPCLink as your debug connection, first of all boot the LPC-Link using
+  the script:
+
+    bin\Scripts\bootLPCXpresso type
+
+  where type = winusb for Windows XP, or type = hid for Windows Vista / 7.
+
+  Now run the flash programming utility with the following options
+
+    flash_utility wire -ptarget -flash-load[-exec]=filename [-load-base=base_address]
+
+  Where flash_utility is one of:
+
+    crt_emu_lpc11_13 (for LPC11xx or LPC13xx parts)
+    crt_emu_cm3_nxp (for LPC17xx parts)
+    crt_emu_a7_nxp (for LPC21/22/23/24 parts)
+    crt_emu_a9_nxp (for LPC31/32 and LPC29xx parts)
+    crt_emu_cm3_lmi (for TI Stellaris LM3S parts
+
+  wire is one of:
+
+    (empty) (for Red Probe+, Red Probe, RDB1768v1, or TI Stellaris evaluation boards)
+    -wire=hid (for RDB1768v2 without upgraded firmware)
+    -wire=winusb (for RDB1768v2 with upgraded firmware)
+    -wire=winusb (for LPC-Link on Windows XP)
+    -wire=hid (for LPC-Link on Windows Vista/ Windows 7)
+
+  target is the target chip name. For example LPC1343, LPC1114/301, LPC1768 etc.
+
+  filename is the file to flash program. It may be an executable (axf) or a binary
+  (bin) file. If using a binary file, the base_address must be specified.
+
+  base_address is the base load address when flash programming a binary file. It
+  should be specified as a hex value with a leading 0x.
+
+  Note:
+  - flash-load will leave the processor in a stopped state
+  - flash-load-exec will start execution of application as soon as download has
+    completed.
+
+  Examples
+    To load the executable file app.axf and start it executing on an LPC1758
+	target using Red Probe, use the following command line:
+
+      crt_emu_cm3_nxp -pLPC1758 -flash-load-exec=app.axf
+
+    To load the binary file binary.bin to address 0x1000 to an LPC1343 target
+	using LPC-Link on Windows XP, use the following command line:
+
+      crt_emu_lpc11_13_nxp -wire=hid -pLPC1343 -flash-load=binary.bin -load-base=0x1000
+
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
