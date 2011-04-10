@@ -114,29 +114,24 @@ GNU Toolchain Options
   1. The CodeSourcery GNU toolchain,
   2. The devkitARM GNU toolchain,
   3. The NuttX buildroot Toolchain (see below).
-  4. LPCXpresso Code Red IDE.
 
   All testing has been conducted using the NuttX buildroot toolchain.  However,
-  the make system is setup to default to use the Code Red toolchain.  To use
-  the CodeSourcery, devkitARM, or buildoor toolchain, you simply need add one
-  of the following configuration options to your .config (or defconfig) file:
+  the make system is setup to default to use the devkitARM toolchain.  To use
+  the CodeSourcery or devkitARM toolchain, you simply need add one of the
+  following configuration options to your .config (or defconfig) file:
 
     CONFIG_LPC17_CODESOURCERYW=y   : CodeSourcery under Windows
     CONFIG_LPC17_CODESOURCERYL=y   : CodeSourcery under Linux
     CONFIG_LPC17_DEVKITARM=y       : devkitARM under Windows
     CONFIG_LPC17_BUILDROOT=y       : NuttX buildroot under Linux or Cygwin (default)
-    CONFIG_LPC17_CODEREDW=y        : Code Red under Windows
-    CONFIG_LPC17_CODEREDL=y        : Code Red under Linux
 
-  If you are not using CONFIG_LPC17_CODEREDL, then you may also have to modify
+  If you are not using CONFIG_LPC17_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
-  NOTE: the CodeSourcery (for Windows), devkitARM, and Code Red (for Windows) are
-  Windows native toolchains. The CodeSourcey (for Linux), NuttX buildroot and
-  Code Red (for Linux) toolchains are Linux native toolchains (The buildroot may
-  also be built as a Cygwin native toolchain which behaves the same as a Linux
-  native toolchain in that environement).  There are several limitations to using
-  a Windows based toolchain in a Cygwin environment.  The three biggest are:
+  NOTE: the CodeSourcery (for Windows)and devkitARM are Windows native toolchains.
+  The CodeSourcey (for Linux) and NuttX buildroot toolchains are Cygwin and/or
+  Linux native toolchains. There are several limitations to using a Windows based
+  toolchain in a Cygwin environment.  The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
      performed automatically in the Cygwin makefiles using the 'cygpath' utility
@@ -182,43 +177,18 @@ Code Red IDE
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project (There is a simple RIDE project
   in the RIDE subdirectory).
-
-  Code Red IDE
-  ------------
-
-  Code Red is a Eclipse-based that is highly tuned from the LPCxxx MCUs.  You
-  can download Code Red free at http://lpcxpresso.code-red-tech.com (registration
-  required).
-
-  Execute-Only Build
-  ------------------
-
-  You should be able configure Eclipse to simply load the NuttX executable built
-  outside of Code Red: Files->import->C/C++->C/C++ Executable.
   
   Makefile Build
   --------------
-
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
   simply use the NuttX makefile to build the system.  That is almost for free
   under Linux.  Under Windows, you will need to set up the "Cygwin GCC" empty
   makefile project in order to work with Windows (Google for "Eclipse Cygwin" -
   there is a lot of help on the internet).
 
-  Import makefile project: Files->import->C/C++ Project->
-  Hmmm.. I don't see the Makefile project in the Code Red menus???
-
-  Cygwin Makefile Build
-  ---------------------
-
-  I don't know how to do this
-
   Native Build
   ------------
-
-  I should be possible to build NuttX as a "normal" IDE project.  I do not
-  know of anyone who has been successful doing that and I would not recommend
-  trying.  But here are a few tips before you start such an effort:
+  Here are a few tips before you start that effort:
 
   1) Select the toolchain that you will be using in your .config file
   2) Start the NuttX build at least one time from the Cygwin command line
@@ -231,6 +201,19 @@ Code Red IDE
 
   Startup files will probably cause you some headaches.  The NuttX startup file
   is arch/arm/src/lpc17x/lpc17_vectors.S.
+
+  Using Code Red GNU Tools from Cygwin
+  ------------------------------------
+
+  Under Cygwin, the Code Red command line tools (e.g., arm-non-eabi-gcc) cannot
+  be executed because the they only have execut privileges for Administrators.  I
+  worked around this by:
+  
+  Opening a native Cygwin RXVT as Administrator (Right click, "Run as administrator"),
+  then executing 'chmod 755 *.exe' in the following directories:
+
+  /cygdrive/c/nxp/lpcxpreeso_3.6/bin, and
+  /cygdrive/c/nxp/lpcxpreeso_3.6/Tools/bin
 
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^
