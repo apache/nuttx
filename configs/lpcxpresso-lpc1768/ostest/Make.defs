@@ -65,12 +65,12 @@ ifeq ($(CONFIG_LPC17_CODEREDW),y)
   # CodeSourcery under Windows
   CROSSDEV = arm-none-eabi-
   WINTOOL = y
-  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -D__NEWLIB__
 endif
 ifeq ($(CONFIG_LPC17_CODEREDL),y)
   # CodeSourcery under Linux
   CROSSDEV = arm-none-eabi-
-  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -D__NEWLIB__
   MAXOPTIMIZATION = -O2
 endif
 
