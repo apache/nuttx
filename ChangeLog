@@ -1602,7 +1602,7 @@
 	* apps/vsn: Move all VSN apps to apps/vsn.
 	* nuttx/examples moved to apps/examples
 
-6.1 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+6.1 2011-04-11 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/include/lpc17xx/irq.h and arch/arm/src/lpc17xx/lpc17_gpio*.c:
 	  Fix several bugs in the GPIO interrupt logic.  Submited by
@@ -1663,6 +1663,8 @@
 	  no reopen the serial driver.
 	* configs/lpcxpresso-lpc1768: Add a board configuration for the Embedded
 	  Artists LPCXpresso LPC1768 board.
+
+6.2 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
 
 

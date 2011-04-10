@@ -981,6 +981,11 @@ configs/lm3s6965-ek
     an ARM Cortex-M3 MCU, the Luminary/TI LM3S6965. This OS is built with the
     arm-elf toolchain*.  STATUS:  This port is complete and mature.
 
+configs/lpcxpresso-lpc1768
+    Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
+    is based on the NXP LPC1768.  The Code Red toolchain is used by default.
+    STATUS:  Under development.
+
 configs/m68322evb
     This is a work in progress for the venerable m68322evb board from
     Motorola. This OS is also built with the arm-elf toolchain*.  STATUS:

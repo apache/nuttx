@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 6, 2011</p>
+      <p>Last Updated: April 10, 2011</p>
     </td>
   </tr>
 </table>
@@ -349,6 +349,14 @@
   <td>
     <p>
       <li>On-demand paging.</li>
+    </p>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>May be built either as an open, flat embedded RTOS or as a separtely built, secure micro-kernel with a system call interface.</li>
     </p>
 </tr>
 
@@ -807,67 +815,74 @@
   </tr>
 </table>
 
-<p><b>nuttx-6.0 Release Notes</b>:
+<p><b>nuttx-6.1 Release Notes</b>:
 
 <p>
-  The 67<sup>th</sup> release of NuttX, Version 6.0, was made on March 21, 2011 and is available for download from the
+  The 68<sup>th</sup> release of NuttX, Version 6.1, was made on April 10, 2011 and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
   These unreleased changes are listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  The version number of this release was bumped from 5.19 to 6.0.
-  A change in the major revision number is used to reflect an incompatibility with previous versions.
-  In this release, the NuttX core OS functionality has been separated from NuttX application-related functionality.
-  These are provided as separate tarballs:
-</p>
-<ul>
-  <li><code>nuttx-6.0.tar.gz</code>, and</li>
-  <li><code>apps-6.0.tar.gz</code></li>
-</ul>
-<p>
-  The purpose of this separation is both to better organize and modularize the NuttX source tree,
-  but also to provide better support for incorporation of end-user applications with Nuttx.
-</p>
-<p>
-  The incompatibily results from the changes to the board configuration logic needed to supported the separable application. 
-  The major changes to the configuration include:
-</p>
-<ul>
-  <li><code>CONFIG_APPS_DIR</code> - This should not, typically be set.
-    The default is <code>../apps</code>. 
-    This should only be set if you have a custom, product-specific application directory in some different location.
-  </li>
-  <li><code>appconfig</code> - Each board configuration now requires a new file called <code>appconfig</code>.
-    As its name suggests, this file provides new configuration information needed by the logic in <code>../apps</code>.
-  </li>
-</ul>
-<p>
-  In addition to this major reorganization in the directory structure, this release also includes some important extensions to existing features and
-  some important bugfixes.
-  These include:
+  The 6.0 release introduced a detach-able application environment to build applications outside of the NuttX source tree.
+  The primary purpose of this release is to correct numerous build problems introduced by that architectural change:
 </p>
 <ul>
   <li>
-    The SLIP driver was been well debugged and significantly re-designed.
-    Now you can have an Ethernet connection to you board even if you have no Ethernet hardware.
-    How cool is that?
+    In many newer environments, NuttX produced strange Makefile errors but built correctly in older environments.
+    A fix provided by Rafael Norinha was incorporated and is reported to fix those build problems.
   </li>
   <li>
-    The QEMU i486 port is now functional.
-    It has also been reported to work on the <a href="http://bifferos.bizhat.com/">Bifferboard</a>.
+    The <code>apps/</code> directory build system would not handle Windows-native toolchains due to obscure path formatting issues.
   </li>
   <li>
-    And extensions to the uIP driver interface, and
+    And other problems as detailed in the change log.
   </li>
-  <li>
-    Bug fixes to <code>fopen()</code> and STM32 GPIO configuration
-  </li>
-  <li>
 </ul>
+
 <p>
-  Please see the ChangeLog for details.
+  Many additional changes were made in the 6.1 release for another major architectural change:
+  NuttX will now build as a seperately linked micro-kernel.
+  In this build option the RTOS builds as a kernel, applications build separtate and interface with kernel via system calls.
+  Applications run in user mode and kernel logic users in kernel-mode.
+  This provides a secure environment for NuttX.
+  This feature is fully coded in NuttX-6.1, but has not been tested due to higher priority tasks that have arisen.
+</p>
+<p>
+  Related to this change, support for the Cortex-M3 memory protection unit (MPU) has been integrated with the NuttX kernel build to provide an even higher level of security.
+</p>
+<p><small>
+  NOTE: This kernel build is an option; the default build configuration is still the standard, flat, unsecured RTOS as in previous releases.
+</small></p>
+<p>
+  Additional new features in this release:
+</p>
+<ul>
+  <li>
+    Support for LPC17xx GPIO interrupts (with much support from Decio Renno).
+  </li>
+  <li>
+    Basic timer support for STM32 (Contributed by Uros Platise)
+  </li>
+  <li>
+    A binfs file system.
+	This is a tiny psuedo file system that lets named appliations to be viewed and accessed in NSH under the <code>/bin</code> directory.
+  </li>
+  <li>
+    An I2C-based driver for the LIS331DL MEMS motion sensor (Contributed by Uros Platise).
+  </li>
+  <li>
+    A board configuration for the Embedded Artists LPCXpresso LPC1768 board.
+  </li>
+  <li>
+    The <code>user_initialize()</code> interface has been removed.
+  </li>
+</ul>
+
+<p>
+  And several bugfix are included.
+  This includes chagnes associated with SD drivers, openddir(), signed 8-bit types (<code>int8_t</code>), and USB serial device.  See the ChangeLog for details.
 </p>
 
 <table width ="100%">
@@ -1321,6 +1336,9 @@
         <li>
           The LPC1766-sTK board from <a href="http://www.olimex.com/">Olimex</a> (LPC1766).
         </li>
+        <li>
+          The Embedded Artists base board with NXP LPCXpresso LPC1768.
+        </li>
       </ul>
     </p>
     <p>
@@ -1384,6 +1402,15 @@
           </li>
           <li>
             The NuttX-5.17 released added support for low-speed USB devicers, interrupt endpoints, and a <i>USB host HID keyboard class driver</i>.
+          </li>
+        </ul>
+      </p>
+      <p>
+        <b>Embedded Artists base board with NXP LPCXpresso LPC1768</b>.
+        <ul>
+          <li>
+             An initial board configuration is included in NuttX-6.1.
+             However, certain Code Red download issues have not yet been resolved and the port has not yet been tested.
           </li>
         </ul>
       </p>
@@ -2068,94 +2095,7 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.0 2011-03-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * lib/lib_fopen() -- fopen() was not returning the correct errno value
-      when the underlying open() failed.
-    * include/net/uip/uip-arch.h -- The uIP interface has been extended
-      slightly so that drivers can be concurrenly filling and sending
-      packet buffers.  This capability was needed by the SLIP driver.
-    * drivers/net/slip.c -- Several corrections and some re-design of
-      of the driver.
-    * apps/ChangeLog.txt -- the apps/ directory now has its own ChangeLog.
-    * configs/vsn:
-      - IDLE LED blinking fix
-      - Added board power off function
-    * arch/arm/src/stm32/stm32_gpio.c and stm32_internal.h -- Fixed
-      PullUp/Down Input Configuration.
-    * arch/arm/src/lpc17xx/lpc17_serial.h -- Now supports Auto-RTS and
-      Auto-CTS modes.  This is needed to support SLIP.
-    * drivers/net/slip.c -- SLIP is now basically functional on the
-      LPC17xx with some caveats as described in the TODO list under
-      LPC17xx.
-    * arch/x86/include/i486/irq.h -- Fix irqrestore() macro... it was not
-      correctly re-enabling interrupts.
-    * arch/x86/src - Fix numerous problems with i486/QEMU context
-      switching.  Basically, the logic was missing the cases to handle
-      the differing stack frames when a priority change occurs and when
-      no priority change occurs.
-    * configs/qemu-i486/ostest and nsh -- The QEMU i486 port is complete.
-      it now passes the OS test and supports the NuttShell (NSH).
-    * misc/drivers -- Created a new directory to hold non-BSD licensed
-      drivers that may be added into NuttX via an installation script.
-    * drivers/usbhost/usbhost_rtl8187.c -- A decision was made to
-      incorporate code taken from the Linux kernel.  That changes the
-      licensing on this module to GPL.  To avoid licensing contamination,
-      this driver was moved to misc/drivers/rtl8187x *prior* to adding
-      and of the GPL log.  There is an INSTALL.sh script at the location
-      where the GPL driver(s) can be re-installed into the NuttX source
-      tree.  By re-installing the driver, you agree to the GPL licsensing
-      and all of its implications.
-    * Makefile, apps/Makefile, tools/configure.sh -- add logic to copy
-      configs/&lt;board&gt;/&lt;config&gt;/appdir to apps/.config and to simply the
-      application configuration logic.
-    * examples/nsh and apps/nshlib - Move the core NuttShell (NSH) logic
-      out of the exemples directory and into the apps/directory where
-      it belongs.
-    * apps/Makefile and configs/*/appconfig - Use '=' as the delimiter
-      instead of '/' so that sub-directories in apps/ can be used.
-    * apps/vsn - Move all VSN apps to apps/vsn.
-    * nuttx/examples moved to apps/examples
-
-apps-6.0 2011-03-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * README.txt -- README cosmetics
-    * hello/ -- hello world minor changes
-    * Makefile -- Makefile cosmetics (I am slowly adding the Darjeeling JVM)
-    * Make.defs -- New file adds common make definitions for applications.
-    * hello/Makefile -- Now uses new Make.defs definitions.  Added README.txt.
-    * apps/poweroff -- New application to turn off board power.
-
-pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * Updated to use standard C99 types in stdint.h and
-      stdbool.h.  This change was necessary for compatibility
-      with NuttX-5.0 (any beyond).
-
-buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
-
-    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
-    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
-      arm926
-    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
-    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
-      GDB 6.8 won't build because the tarbal was released with -Werror enabled and
-      the build stops on the first warning.
-    * Add support for Freescale m9s12x using binutils 2.18 and gcc 3.3.6 and
-      patches available from http://www.msextra.com/tools courtesy of James
-      Cortina.  Add configs/m9x12x-defconfig-3.3.6.
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<ul><pre>
-nuttx-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.1 2011-04-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * arch/arm/include/lpc17xx/irq.h and arch/arm/src/lpc17xx/lpc17_gpio*.c:
       Fix several bugs in the GPIO interrupt logic.  Submited by
@@ -2210,8 +2150,14 @@ nuttx-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       (usually called current_regs) should be marked volatile; Added general
       capability to support nested interrupts (not fully realized for all
       architectures).
+    * sched/task_create.c: Add support for starting kernel-mode thread.
+    * drivers/usbdev/usbdev_serial.c: Fix reported by Sheref Younan.  USB
+      was being reset after serial driver was closed.  As a result, you could
+      no reopen the serial driver.
+    * configs/lpcxpresso-lpc1768: Add a board configuration for the Embedded
+      Artists LPCXpresso LPC1768 board.
 
-apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+apps-6.1 2011-04-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * Creation of auto-generated header files now occurs during the context
       build phase.
@@ -2219,6 +2165,41 @@ apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * Renamed nuttapp to namedapp
     * namedapp/binfs.c -- Create a tiny filesystem that can be used
       to show the internal named apps under /bin.
+    * Numerous fixes to build system required to support building with native
+      Windows toolchain.
+
+pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * Updated to use standard C99 types in stdint.h and
+      stdbool.h.  This change was necessary for compatibility
+      with NuttX-5.0 (any beyond).
+
+buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
+
+    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
+    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
+      arm926
+    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
+    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
+      GDB 6.8 won't build because the tarbal was released with -Werror enabled and
+      the build stops on the first warning.
+    * Add support for Freescale m9s12x using binutils 2.18 and gcc 3.3.6 and
+      patches available from http://www.msextra.com/tools courtesy of James
+      Cortina.  Add configs/m9x12x-defconfig-3.3.6.
+</pre></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<ul><pre>
+nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
