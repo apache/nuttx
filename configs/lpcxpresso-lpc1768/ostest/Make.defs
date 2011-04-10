@@ -61,6 +61,18 @@ ifeq ($(CONFIG_LPC17_BUILDROOT),y)
   ARCHCPUFLAGS = -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
   MAXOPTIMIZATION = -Os
 endif
+ifeq ($(CONFIG_LPC17_CODEREDW),y)
+  # CodeSourcery under Windows
+  CROSSDEV = arm-none-eabi-
+  WINTOOL = y
+  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+endif
+ifeq ($(CONFIG_LPC17_CODEREDL),y)
+  # CodeSourcery under Linux
+  CROSSDEV = arm-none-eabi-
+  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  MAXOPTIMIZATION = -O2
+endif
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
