@@ -1789,7 +1789,7 @@ change:
 
     * In many newer environments, NuttX produced strange Makefile errors
       but built correctly in older environments.  A fix provided by
-      Rafael Norinha was incorporated and is reported to fix those build
+      Rafael Noronha was incorporated and is reported to fix those build
       problems.
     * The apps/ directory build system would not handle Windows-native
       toolchains due to obscure path formatting issues.
