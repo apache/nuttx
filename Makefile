@@ -44,14 +44,6 @@ DIRLINK		= $(TOPDIR)/tools/link.sh
 DIRUNLINK	= $(TOPDIR)/tools/unlink.sh
 endif
 
-# This is the final executable
-
-ifeq ($(WINTOOL),y)
-  NUTTX		= "${shell cygpath -w $(TOPDIR)/nuttx}"
-else
-  NUTTX		= $(TOPDIR)/nuttx
-endif
-
 # This define is passed as EXTRADEFINES for kernel-mode builds.  It is also passed
 # during PASS1 (but not PASS2) context and depend targets.
 
@@ -251,7 +243,7 @@ ifeq ($(CONFIG_NX),y)
 NUTTXLIBS        += graphics/libgraphics$(LIBEXT)
 endif
 
-# This is the name of the final target
+# This is the name of the final target (relative to the top level directorty)
 
 BIN		= nuttx$(EXEEXT)
 
@@ -404,22 +396,22 @@ pass2deps: context pass2dep $(NUTTXLIBS)
 pass2: pass2deps
 	@$(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(NUTTXLIBS)" EXTRADEFINES=$(KDEFINE) $(BIN)
 	@if [ -w /tftpboot ] ; then \
-		cp -f $(TOPDIR)/$@ /tftpboot/$@.${CONFIG_ARCH}; \
+		cp -f $(BIN) /tftpboot/$(BIN).${CONFIG_ARCH}; \
 	fi
 ifeq ($(CONFIG_RRLOAD_BINARY),y)
-	@$(TOPDIR)/tools/mkimage.sh --Prefix $(CROSSDEV) $(TOPDIR)/$@ $(TOPDIR)/$@.rr
+	@$(TOPDIR)/tools/mkimage.sh --Prefix $(CROSSDEV) $(BIN) $(BIN).rr
 	@if [ -w /tftpboot ] ; then \
-		cp -f $(TOPDIR)/$@.rr /tftpboot/$@.rr.${CONFIG_ARCH}; \
+		cp -f $(BIN).rr /tftpboot/$\(BIN).rr.$(CONFIG_ARCH); \
 	fi
 endif
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
-	@$(OBJCOPY) $(OBJCOPYARGS) -O ihex $(NUTTX)$(EXEEXT) $(NUTTX)$(EXEEXT).ihx
+	@$(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) $(BIN).ihx
 endif
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
-	@$(OBJCOPY) $(OBJCOPYARGS) -O srec $(NUTTX)$(EXEEXT) $(NUTTX)$(EXEEXT).srec
+	@$(OBJCOPY) $(OBJCOPYARGS) -O srec $(BIN) $(BIN).srec
 endif
 ifeq ($(CONFIG_RAW_BINARY),y)
-	@$(OBJCOPY) $(OBJCOPYARGS) -O binary $(NUTTX)$(EXEEXT) $(NUTTX)$(EXEEXT).bin
+	@$(OBJCOPY) $(OBJCOPYARGS) -O binary $(BIN) $(BIN).bin
 endif
 
 # In the normal case, all pass1 and pass2 dependencies are created then pass1
