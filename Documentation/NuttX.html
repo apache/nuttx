@@ -867,7 +867,7 @@
   </li>
   <li>
     A binfs file system.
-	This is a tiny psuedo file system that lets named appliations to be viewed and accessed in NSH under the <code>/bin</code> directory.
+    This is a tiny psuedo file system that lets named appliations to be viewed and accessed in NSH under the <code>/bin</code> directory.
   </li>
   <li>
     An I2C-based driver for the LIS331DL MEMS motion sensor (Contributed by Uros Platise).
@@ -2198,6 +2198,12 @@ buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
 
 <ul><pre>
 nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * arch/arm/src/lpc17xx/lpc17_gpioint.c: Correct errors in logic that maps
+      and IRQ number into a register bit number.
+    * Makefile: Fix an error introduced in the top-level Makefile in NuttX-6.1.
+      This error only shows up if you have a /tftpboot directory.  Then the 
+      make will fail with an obscure error about not being able to stat pass2.
 
 apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
