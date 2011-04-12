@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/ntosd-dm320/ostest/ld.script
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	}
 
-	_eronly = ABSOLUTE(.);		/* See below                    */
+	_eronly = ABSOLUTE(.);
 	. = ALIGN(4096);
 
 	.data : {
@@ -62,13 +62,14 @@ SECTIONS
 		_edata = ABSOLUTE(.);
 	}
 
-	.bss : {			/* BSS				*/
+	.bss : {
 		_sbss = ABSOLUTE(.);
 		*(.bss)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
 	}
-					/* Stabs debugging sections.	*/
+
+	/* Stabs debugging sections. */
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }

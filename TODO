@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 2 2011)
+NuttX TODO List (Last updated April 12 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -17,7 +17,7 @@ nuttx/
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
-  (5)  Build system / Toolchains
+  (4)  Build system / Toolchains
   (7)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
@@ -505,24 +505,6 @@ o Build system
                something like the GNUWin32 tools (coreutils+make+grep+sed+uname).
   Status:      Open
   Priority:    Low
-
-  Decription:  Build of NX fails with gcc-4.2.2.  When generating C files using
-               arm-elf-gcc -E, the CPP fails when using -isystem.  Works fine with
-               older compilers.  My work around for now is to use an older compiler
-               for the CPP definition in the configuration Make.defs file, do
-               make context, restore the original Make.defs, and then make.
-  Status:      Open.  This may not be a real issue.  I have not seen this
-               happen lately so it may have nothing to do with GCC.
-  Priority:    High if you are using NX and a newer compiler.
-
-  Description: It has been reported to me that in some environments, the int8_t
-               type is unsigned (0-255).  The uint8_t type is based on type char
-               and char may or may not be treated as a signed value by your compiler.
-               Two options:  (1) in arch/<cpu>/include/<cpu>/types.h, try typedef'ing
-               int8_t as 'signed char', (2) for GCC, you should be able to add the
-               compiler option -fsigned-char to your CFLAGS in Make.defs.
-  Status:      Open
-  Priority:    Medium
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

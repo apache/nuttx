@@ -6,7 +6,7 @@
  *
  * This is part of the NuttX RTOS and based on the LPC2148 port:
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,11 +87,11 @@ SECTIONS
 		*(.ARM.extab*)
 	} > RAM
 
+	__exidx_start = ABSOLUTE(.);
 	.ARM.exidx : {
-		__exidx_start = ABSOLUTE(.);
 		*(.ARM.exidx*)
-		__exidx_end = ABSOLUTE(.);
 	} > RAM
+	__exidx_end = ABSOLUTE(.);
 	
 
 /* .bss section which is initialized by 0 */
