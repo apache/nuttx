@@ -66,7 +66,7 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > flash
 
-	_eronly = ABSOLUTE(.);		/* See below                    */
+	_eronly = ABSOLUTE(.);
 
 	.data : {
 		_sdata = ABSOLUTE(.);
@@ -80,20 +80,21 @@ SECTIONS
 		*(.ARM.extab*)
 	} >sram
 
+	__exidx_start = ABSOLUTE(.);
 	.ARM.exidx : {
-		__exidx_start = ABSOLUTE(.);
 		*(.ARM.exidx*)
-		__exidx_end = ABSOLUTE(.);
 	} >sram
+	__exidx_end = ABSOLUTE(.);
 
-	.bss : {			/* BSS				*/
+	.bss : {
 		_sbss = ABSOLUTE(.);
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
 	} > sram
-					/* Stabs debugging sections.	*/
+
+	/* Stabs debugging sections. */
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }
