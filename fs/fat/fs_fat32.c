@@ -2092,9 +2092,9 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
 {
   struct fat_mountpt_s *fs;
   struct fat_dirinfo_s  dirinfo;
-  uint16_t              date;
+  uint16_t              fatdate;
   uint16_t              date2;
-  uint16_t              time;
+  uint16_t              fattime;
   uint8_t               attribute;
   int                   ret;
 
@@ -2174,12 +2174,12 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
 
   /* Times */
 
-  date              = DIR_GETWRTDATE(dirinfo.fd_entry);
-  time              = DIR_GETWRTTIME(dirinfo.fd_entry);
-  buf->st_mtime     = fat_fattime2systime(time, date);
+  fatdate           = DIR_GETWRTDATE(dirinfo.fd_entry);
+  fattime           = DIR_GETWRTTIME(dirinfo.fd_entry);
+  buf->st_mtime     = fat_fattime2systime(fattime, fatdate);
 
   date2             = DIR_GETLASTACCDATE(dirinfo.fd_entry);
-  if (date == date2)
+  if (fatdate == date2)
     {
       buf->st_atime = buf->st_mtime;
     }
@@ -2188,9 +2188,9 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
       buf->st_atime = fat_fattime2systime(0, date2);
     }
 
-  date              = DIR_GETCRDATE(dirinfo.fd_entry);
-  time              = DIR_GETCRTIME(dirinfo.fd_entry);
-  buf->st_ctime     = fat_fattime2systime(time, date);
+  fatdate           = DIR_GETCRDATE(dirinfo.fd_entry);
+  fattime           = DIR_GETCRTIME(dirinfo.fd_entry);
+  buf->st_ctime     = fat_fattime2systime(fattime, fatdate);
 
   ret = OK;
 

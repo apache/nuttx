@@ -179,6 +179,10 @@ typedef int16_t      blksize_t;
 typedef unsigned int socklen_t;
 typedef uint16_t     sa_family_t;
 
+/* Used for system times in clock ticks */
+
+typedef uint32_t     clock_t;
+
 /* The type useconds_t shall be an unsigned integer type capable of storing
  * values at least in the range [0, 1000000]. The type suseconds_t shall be
  * a signed integer type capable of storing values at least in the range

@@ -296,9 +296,9 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
  *
  ****************************************************************************/
 
-struct tm *gmtime_r(const time_t *clock, struct tm *result)
+struct tm *gmtime_r(const time_t *timer, struct tm *result)
 {
-  time_t time;
+  time_t epoch;
   time_t jdn;
   int    year;
   int    month;
@@ -309,21 +309,21 @@ struct tm *gmtime_r(const time_t *clock, struct tm *result)
 
   /* Get the seconds since the EPOCH */
 
-  time = *clock;
-  sdbg("clock=%d\n", (int)time);
+  epoch = *timer;
+  sdbg("timer=%d\n", (int)epoch);
 
   /* Convert to days, hours, minutes, and seconds since the EPOCH */
 
-  jdn   = time / SEC_PER_DAY;
-  time -= SEC_PER_DAY * jdn;
+  jdn    = epoch / SEC_PER_DAY;
+  epoch -= SEC_PER_DAY * jdn;
 
-  hour  = time / SEC_PER_HOUR;
-  time -= SEC_PER_HOUR * hour;
+  hour   = epoch / SEC_PER_HOUR;
+  epoch -= SEC_PER_HOUR * hour;
 
-  min   = time / SEC_PER_MIN;
-  time -= SEC_PER_MIN * min;
+  min    = epoch / SEC_PER_MIN;
+  epoch -= SEC_PER_MIN * min;
 
-  sec   = time;
+  sec    = epoch;
 
   sdbg("hour=%d min=%d sec=%d\n",
        (int)hour, (int)min, (int)sec);

@@ -49,15 +49,22 @@
  * Pre-processor Definitions
  ********************************************************************************/
 
-/* Clock tick of the system (frequency Hz).  The default value is 100Hz, but this
- * default setting can be overridden by defining the clock interval in
- * milliseconds as CONFIG_MSEC_PER_TICK in the board configuration file.
+/* Clock tick of the system (frequency Hz).  
+ *
+ * NOTE: This symbolic name CLK_TCK has been removed from the standard.  It is
+ * replaced with CLOCKS_PER_SEC.  Both are defined here.
+ *
+ * The default value is 100Hz, but this default setting can be overridden by
+ * defining the clock interval in milliseconds as CONFIG_MSEC_PER_TICK in the
+ * board configuration file.
  */
 
 #ifdef CONFIG_MSEC_PER_TICK
-# define CLK_TCK (1000/CONFIG_MSEC_PER_TICK)
+# define CLK_TCK        (1000/CONFIG_MSEC_PER_TICK)
+# define CLOCKS_PER_SEC (1000/CONFIG_MSEC_PER_TICK)
 #else
-# define CLK_TCK (100)
+# define CLK_TCK        (100)
+# define CLOCKS_PER_SEC (100)
 #endif
 
 /* This is the only clock_id supported by the "Clock and Timer
@@ -141,14 +148,18 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+EXTERN clock_t clock(void);
+
 EXTERN int clock_settime(clockid_t clockid, const struct timespec *tp);
 EXTERN int clock_gettime(clockid_t clockid, struct timespec *tp);
 EXTERN int clock_getres(clockid_t clockid, struct timespec *res);
 
 EXTERN time_t mktime(const struct tm *tp);
-EXTERN struct tm *gmtime(const time_t *clock);
-EXTERN struct tm *gmtime_r(const time_t *clock, struct tm *result);
+EXTERN struct tm *gmtime(const time_t *timer);
+EXTERN struct tm *gmtime_r(const time_t *timer, struct tm *result);
 EXTERN size_t strftime(char *s, size_t max, const char *format, const struct tm *tm);
+
+EXTERN time_t time(time_t *tloc);
 
 EXTERN int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timerid);
 EXTERN int timer_delete(timer_t timerid);

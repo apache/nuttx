@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __SYS_MMAN_H
-#define __SYS_MMAN_H
+#ifndef __INCLUDE_SYS_TIME_H
+#define __INCLUDE_SYS_TIME_H
 
 /****************************************************************************
  * Included Files
@@ -71,4 +71,4 @@ EXTERN int gettimeofday(struct timeval *tp, FAR void *tzp);
 }
 #endif
 
-#endif /* __SYS_MMAN_H */
+#endif /* __INCLUDE_SYS_TIME_H */

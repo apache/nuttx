@@ -1895,8 +1895,8 @@ int  fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 int fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 {
   uint8_t  *direntry;
-  uint32_t  time;
-  int     ret;
+  uint32_t  fattime;
+  int       ret;
 
   /* Set up the directory entry */
 
@@ -1924,11 +1924,11 @@ int fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
   /* ARCHIVE attribute, write time, creation time */
   DIR_PUTATTRIBUTES(dirinfo->fd_entry, FATATTR_ARCHIVE);
  
-  time = fat_systime2fattime();
-  DIR_PUTWRTTIME(dirinfo->fd_entry, time & 0xffff);
-  DIR_PUTCRTIME(dirinfo->fd_entry, time & 0xffff);
-  DIR_PUTWRTDATE(dirinfo->fd_entry, time >> 16);
-  DIR_PUTCRDATE(dirinfo->fd_entry, time >> 16);
+  fattime = fat_systime2fattime();
+  DIR_PUTWRTTIME(dirinfo->fd_entry, fattime & 0xffff);
+  DIR_PUTCRTIME(dirinfo->fd_entry, fattime & 0xffff);
+  DIR_PUTWRTDATE(dirinfo->fd_entry, fattime >> 16);
+  DIR_PUTCRDATE(dirinfo->fd_entry, fattime >> 16);
 
   fs->fs_dirty = true;
   return OK;
