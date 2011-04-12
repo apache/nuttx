@@ -1671,7 +1671,7 @@
 	* Makefile: Fix an error introduced in the top-level Makefile in NuttX-6.1.
 	  This error only shows up if you have a /tftpboot directory.  Then the 
 	  make will fail with an obscure error about not being able to stat pass2.
-
-
+	* configs/lpcxpresso-lpc1768/nsh: Add an NSH configuration for the
+	  LPCXpresso board.
 
 
