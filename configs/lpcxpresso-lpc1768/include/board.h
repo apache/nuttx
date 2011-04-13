@@ -146,7 +146,7 @@
 /* Pin Description                  Connector On Board       Base Board
  * -------------------------------- --------- -------------- ---------------------
  * P0[0]/RD1/TXD3/SDA1               J6-9     I2C E2PROM SDA TXD3/SDA1
- * P0[1]/TD1/RXD3/SCL                J6-10                   RXD2/SCL1
+ * P0[1]/TD1/RXD3/SCL                J6-10                   RXD3/SCL1
  * P0[2]/TXD0/AD0[7]                 J6-21    
  * P0[3]/RXD0/AD0[6]                 J6-22    
  * P0[4]/I2SRX-CLK/RD2/CAP2.0        J6-38                   CAN_RX2
@@ -168,14 +168,16 @@
  * P0[23]/AD0[0]/I2SRX_CLK/CAP3[0]   J6-15                   AD0.0
  * P0[24]/AD0[1]/I2SRX_WS/CAP3[1]    J6-16                   AD0.1
  * P0[25]/AD0[2]/I2SRX_SDA/TXD3      J6-17                   AD0.2
- * P0[26]/AD0[3]/AOUT/RXD3           J6-18                   AD0.3/AOUT
+ * P0[26]/AD0[3]/AOUT/RXD3           J6-18                   AD0.3/AOUT / RGB LED
  * P0[27]/SDA0/USB_SDA               J6-25                   
  * P0[28]/SCL0                       J6-26                   
  * P0[29]/USB_D+                     J6-37                   USB_D+
  * P0[30]/USB_D-                     J6-36                   USB_D-
  */
 
+#define GPIO_UART3_TXD     GPIO_UART3_TXD_1
 #define GPIO_I2C1_SDA      GPIO_I2C1_SDA_1
+#define GPIO_UART3_RXD     GPIO_UART3_RXD_1
 #define GPIO_I2C1_SCL      GPIO_I2C1_SCL_1
 #define GPIO_SSP1_SCK      GPIO_SSP1_SCK_1
 #define GPIO_UART2_TXD     GPIO_UART2_TXD_1
@@ -216,8 +218,8 @@
 #define GPIO_ENET_MDC      GPIO_ENET_MDC_1
 #define GPIO_ENET_MDIO     GPIO_ENET_MDIO_1
 
-/* P2[0]/PWM1.1/TXD1                 J6-42                   PWM1.1
- * P2[1]/PWM1.2/RXD1                 J6-43                   PWM1.2
+/* P2[0]/PWM1.1/TXD1                 J6-42                   PWM1.1 / RGB LED / RS422 RX
+ * P2[1]/PWM1.2/RXD1                 J6-43                   PWM1.2 / RGB LED / RS422 RX
  * P2[2]/PWM1.3/CTS1/TRACEDATA[3]    J6-44                   PWM1.3
  * P2[3]/PWM1.4/DCD1/TRACEDATA[2]    J6-45                   PWM1.4
  * P2[4]/PWM1.5/DSR1/TRACEDATA[1]    J6-46                   PWM1.5

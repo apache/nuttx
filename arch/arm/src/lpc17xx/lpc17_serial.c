@@ -141,12 +141,12 @@ static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 #endif
 #ifdef CONFIG_LPC17_UART2
-static char g_uart2rxbuffer[CONFIG_UART1_RXBUFSIZE];
-static char g_uart2txbuffer[CONFIG_UART1_TXBUFSIZE];
+static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
+static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 #endif
 #ifdef CONFIG_LPC17_UART3
-static char g_uart3rxbuffer[CONFIG_UART1_RXBUFSIZE];
-static char g_uart3txbuffer[CONFIG_UART1_TXBUFSIZE];
+static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
+static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 #endif
 
 /* This describes the state of the LPC17xx uart0 port. */
@@ -694,7 +694,7 @@ static inline void lpc17_uart2config(uint32_t clkdiv)
   /* Step 2: Enable clocking on UART */
 
   regval = getreg32(LPC17_SYSCON_PCLKSEL1);
-  regval &= ~SYSCON_PCLKSEL0_UART2_MASK;
+  regval &= ~SYSCON_PCLKSEL1_UART2_MASK;
   regval |= (clkdiv << SYSCON_PCLKSEL1_UART2_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
 
@@ -722,7 +722,7 @@ static inline void lpc17_uart3config(uint32_t clkdiv)
   /* Step 2: Enable clocking on UART */
 
   regval = getreg32(LPC17_SYSCON_PCLKSEL1);
-  regval &= ~SYSCON_PCLKSEL0_UART3_MASK;
+  regval &= ~SYSCON_PCLKSEL1_UART3_MASK;
   regval |= (clkdiv << SYSCON_PCLKSEL1_UART3_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
 

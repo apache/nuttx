@@ -1673,5 +1673,16 @@
 	  make will fail with an obscure error about not being able to stat pass2.
 	* configs/lpcxpresso-lpc1768/nsh: Add an NSH configuration for the
 	  LPCXpresso board.
+	* configs/*/ld.script: Removed 'sh_link not set for section .ARM.edix' for
+	  a few of the builds.  In you have this warning, it can be removed with the
+	  following change to the ld.script file:
+	  
+		+ __exidx_start = ABSOLUTE(.);
+		.ARM.exidx : {
+		-     __exidx_start = ABSOLUTE(.);
+		      *(.ARM.exidx*)
+		-     __exidx_end = ABSOLUTE(.);
+		} >sram
+		+  __exidx_end = ABSOLUTE(.);
 
 

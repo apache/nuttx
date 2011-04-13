@@ -23,7 +23,7 @@ LCPXpresso LPC1768 Board
   -------------------------------- --------- -------------- ---------------------
 
   P0[0]/RD1/TXD3/SDA1               J6-9     I2C E2PROM SDA TXD3/SDA1
-  P0[1]/TD1/RXD3/SCL                J6-10                   RXD2/SCL1
+  P0[1]/TD1/RXD3/SCL                J6-10                   RXD3/SCL1
   P0[2]/TXD0/AD0[7]                 J6-21    
   P0[3]/RXD0/AD0[6]                 J6-22    
   P0[4]/I2SRX-CLK/RD2/CAP2.0        J6-38                   CAN_RX2
@@ -45,7 +45,7 @@ LCPXpresso LPC1768 Board
   P0[23]/AD0[0]/I2SRX_CLK/CAP3[0]   J6-15                   AD0.0
   P0[24]/AD0[1]/I2SRX_WS/CAP3[1]    J6-16                   AD0.1
   P0[25]/AD0[2]/I2SRX_SDA/TXD3      J6-17                   AD0.2
-  P0[26]/AD0[3]/AOUT/RXD3           J6-18                   AD0.3/AOUT
+  P0[26]/AD0[3]/AOUT/RXD3           J6-18                   AD0.3/AOUT / RGB LED
   P0[27]/SDA0/USB_SDA               J6-25                   
   P0[28]/SCL0                       J6-26                   
   P0[29]/USB_D+                     J6-37                   USB_D+
@@ -76,8 +76,8 @@ LCPXpresso LPC1768 Board
   P1[30]/VBUS/AD0[4]                J6-19                   AD0.4
   P1[31]/SCK1/AD0[5]                J6-20                   AD0.5
 
-  P2[0]/PWM1.1/TXD1                 J6-42                   PWM1.1
-  P2[1]/PWM1.2/RXD1                 J6-43                   PWM1.2
+  P2[0]/PWM1.1/TXD1                 J6-42                   PWM1.1 / RGB LED / RS422 RX
+  P2[1]/PWM1.2/RXD1                 J6-43                   PWM1.2 / OLED voltage / RGB LED
   P2[2]/PWM1.3/CTS1/TRACEDATA[3]    J6-44                   PWM1.3
   P2[3]/PWM1.4/DCD1/TRACEDATA[2]    J6-45                   PWM1.4
   P2[4]/PWM1.5/DSR1/TRACEDATA[1]    J6-46                   PWM1.5
@@ -321,44 +321,30 @@ LEDs
 
   - configs/lpcxpresso-lpc1768/src/up_leds.c - LED control logic.
 
-  The LPCXpresso has 3 LEDs... two on the Babel CAN board and a "heartbeat" LED."
-  The LEDs on the Babel CAN board are capabl of OFF/GREEN/RED/AMBER status.
-  In normal usage, the two LEDs on the Babel CAN board would show CAN status, but if
-  CONFIG_ARCH_LEDS is defined, these LEDs will be controlled as follows for NuttX
-  debug functionality (where NC means "No Change").
+  The LPCXpresso LPC1768 has a single LEDs (there are more on the Embedded Artists
+  base board, but those are not controlled by NuttX).  Usage this single LED by NuttX
+  is as follows:
 
-  During the boot phases.  LED1 and LED2 will show boot status.
+  - The LED is not illuminated until the LPCXpresso completes initialization.
+  
+    If the LED is stuck in the OFF state, this means that the LPCXpresso did not 
+	complete intialization.
 
-                                          /* LED1   LED2   HEARTBEAT */
-    #define LED_STARTED                0  /* OFF    OFF    OFF */
-    #define LED_HEAPALLOCATE           1  /* GREEN  OFF    OFF */
-    #define LED_IRQSENABLED            2  /* OFF    GREEN  OFF */
-    #define LED_STACKCREATED           3  /* OFF    OFF    OFF */
+  - Each time the OS enters an interrupt (or a signal) it will turn the LED OFF and
+    restores its previous stated upon return from the interrupt (or signal).
 
-    #define LED_INIRQ                  4  /*  NC     NC    ON  (momentary) */
-    #define LED_SIGNAL                 5  /*  NC     NC    ON  (momentary) */
-    #define LED_ASSERTION              6  /*  NC     NC    ON  (momentary) */
-    #define LED_PANIC                  7  /*  NC     NC    ON  (0.5Hz flashing) */
-    #undef  LED_IDLE                      /* Sleep mode indication not supported */
+	The normal state, after initialization will be a dull glow.  The brightness of
+	the glow will be inversely related to the proportion of time spent within interrupt
+	handling logic.  The glow may decrease in brightness when the system is very
+	busy handling device interrupts and increase in brightness as the system becomes
+	idle.
 
-  After the system is booted, this logic will no longer use LEDs 1 and 2.  They
-  are then available for use the application software using lpc17_led1() and
-  lpc17_led2():
+	Stuck in the OFF state suggests that that the system never completed
+	initialization;  Stuck in the ON state would indicated that the system
+	intialialized, but is not takint interrupts.
 
-    enum lpc17_ledstate_e
-    {
-      LPC17_LEDSTATE_OFF   = 0,
-      LPC17_LEDSTATE_GREEN = 1,
-      LPC17_LEDSTATE_RED   = 2,
-      LPC17_LEDSTATE_AMBER = (LPC17_LEDSTATE_GREEN|LPC17_LEDSTATE_RED),
-    };
-
-    EXTERN void lpc17_led1(enum lpc17_ledstate_e state);
-    EXTERN void lpc17_led2(enum lpc17_ledstate_e state);
-
-  The heartbeat LED is illuminated during all interrupt and signal procressing.
-  Normally, it will glow dimly to inicate that the LPC17xx is taking interrupts.
-  On an assertion PANIC, it will flash at 1Hz.
+  - If a fatal assertion or a fatal unhandled exception occurs, the LED will flash
+    strongly as a slow, 1Hz rate.
 
 LPCXpresso Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

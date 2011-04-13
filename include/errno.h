@@ -346,7 +346,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Return a pointer to the thread specifid errno.  NOTE:  When doing a
+/* Return a pointer to the thread specific errno.  NOTE:  When doing a
  * kernel-/user-mode build, this function can only be used within the
  * kernel-mode space.
  *

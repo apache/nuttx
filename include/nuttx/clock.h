@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/clock.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,15 +96,24 @@
 #define TICK2DSEC(tick)       (((tick)+(TICK_PER_DSEC/2))/TICK_PER_DSEC) /* Rounds */
 #define TICK2SEC(tick)        (((tick)+(TICK_PER_SEC/2))/TICK_PER_SEC)   /* Rounds */
 
-
 /****************************************************************************
  * Global Data
  ****************************************************************************/
 
 /* Access to raw system clock ***********************************************/
+/* Direct access to the system timer/counter is supported only if (1) the
+ * system clock is not disabled and (2) the executation environement has 
+ * direct access to kernel global data.
+ *
+ * The code in this execution context can access the kernel global data
+ * directly if:  (1) this is an un-protected, non-kernel build, or (2)
+ * this code is being built for execution within the kernel.
+ */
 
-#ifndef CONFIG_DISABLE_CLOCK
+#if !defined(CONFIG_DISABLE_CLOCK) && \
+   (!defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__))
 extern volatile uint32_t g_system_timer;
+#define os_systime32() g_system_timer
 #endif
 
 /****************************************************************************
@@ -120,6 +129,15 @@ extern volatile uint32_t g_system_timer;
 extern "C" {
 #else
 #define EXTERN extern
+#endif
+
+/* If direct access to the system timer/counter is not supported (see above),
+ * then the value can be obtained via os_systime32 through a system call.
+ */
+
+#if !defined(CONFIG_DISABLE_CLOCK) && \
+     defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+EXTERN uint32_t os_systime32(void);
 #endif
 
 #undef EXTERN

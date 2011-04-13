@@ -54,9 +54,11 @@ SCHED_SRCS	= sched_setparam.c sched_setpriority.c sched_getparam.c \
 		  sched_setscheduler.c sched_getscheduler.c \
 		  sched_yield.c sched_rrgetinterval.c sched_foreach.c \
 		  sched_lock.c sched_unlock.c sched_lockcount.c sched_self.c
+
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 SCHED_SRCS	+= sched_reprioritize.c 
 endif
+
 ifeq ($(CONFIG_SCHED_WAITPID),y)
 SCHED_SRCS	+= sched_waitpid.c
 endif
@@ -73,9 +75,14 @@ TIME_SRCS	= sched_processtimer.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 TIME_SRCS	+= sleep.c usleep.c
 endif
+
 CLOCK_SRCS	= clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c \
 		  clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c \
 		  clock_gettimeofday.c
+
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CLOCK_SRCS	+= clock_systime32.c
+endif
 
 SIGNAL_SRCS	= sig_initialize.c \
 		  sig_action.c sig_procmask.c sig_pending.c sig_suspend.c \
@@ -88,9 +95,11 @@ SIGNAL_SRCS	= sig_initialize.c \
 MQUEUE_SRCS	= mq_open.c mq_close.c mq_unlink.c mq_send.c mq_timedsend.c\
 		  mq_sndinternal.c mq_receive.c mq_timedreceive.c mq_rcvinternal.c \
 		  mq_initialize.c mq_descreate.c mq_findnamed.c mq_msgfree.c mq_msgqfree.c
+
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 MQUEUE_SRCS	+= mq_waitirq.c
 endif
+
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 MQUEUE_SRCS	+= mq_notify.c
 endif
@@ -106,15 +115,18 @@ PTHREAD_SRCS = pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c \
 		  pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c pthread_keydelete.c \
 		  pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c \
 		  pthread_removejoininfo.c pthread_once.c pthread_setschedprio.c
+
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 PTHREAD_SRCS	+= pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
 endif
 
 SEM_SRCS	= sem_initialize.c sem_destroy.c sem_open.c sem_close.c sem_unlink.c \
 		  sem_wait.c sem_trywait.c sem_post.c sem_findnamed.c
+
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 SEM_SRCS	+= sem_waitirq.c
 endif
+
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 SEM_SRCS	+= sem_holder.c
 endif
@@ -143,18 +155,23 @@ CSRCS		= $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS) $(TIME_SRCS) \
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
 CSRCS		+= $(CLOCK_SRCS)
 endif
+
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 CSRCS		+= $(PTHREAD_SRCS)
 endif
+
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CSRCS		+= $(SIGNAL_SRCS)
 endif
+
 ifneq ($(CONFIG_DISABLE_MQUEUE),y)
 CSRCS		+= $(MQUEUE_SRCS)
 endif
+
 ifneq ($(CONFIG_DISABLE_ENVIRON),y)
 CSRCS		+= $(ENV_SRCS)
 endif
+
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CSRCS		+= $(KMM_SRCS)
 endif

@@ -44,34 +44,32 @@ echo "  - LPC17xx"
 echo ""
 echo "You will need to edit this is any of the above are false"
 
-# This is the default install location for binaries on Linux
-#BINDIR=/usr/local/LPCXpresso/bin/dfu-util
-
 # This is the default install location for binaries on Windows (note that this
-# path could change with the Code Red version number
-BINDIR=/cygdrive/c/nxp/lpcxpresso_3.6/bin
+# path could change with the Code Red version number)
+BINDIR="/cygdrive/c/nxp/lpcxpresso_3.6/bin"
+if [ ! -d "${BINDIR}" ]; then
+	echo "Directory ${BINDIR} does not exist"
+	exit 1
+fi
 
-# This is the default install location for DFUAPP.exe on Windows
-DFUAPP="$BINDIR/DFUAPP.exe"
+# This is the relative path to the booLPCXpresso utility
+BOOTLPC="Scripts/bootLPCXpresso.cmd"
+if [ ! -x "${BINDIR}/$BOOTLPC" ]; then
+	echo "No executable at ${BINDIR}/${BOOTLPC}"
+	exit 1
+fi
 
-# ROM image for resetting LPC-Link
-# ROM=LPCXpressoWIN.enc # WinUSB
-# ROM=LPCXpressoFS.enc # Win2000
-# ROM=LPCXpressoFS.enc # WinXP
-# ROM=LPCXpressoFS.enc # Win2003
-# ROM=LPCXpressoHS.enc # WinVista
-ROM=LPCXpressoHS.enc # Win7
+# BOOTLPC_ARG=winusb # WinXP
+BOOTLPC_ARG=hid      # Win7
 
-ROMPATH=`cygpath -w "$BINDIR/$ROM"`
+# FLASHUTIL="crt_emu_lpc11_13" # for LPC11xx or LPC13xx parts)
+FLASHUTIL="crt_emu_cm3_nxp"  # for LPC17xx parts
+# FLASHUTIL="crt_emu_a7_nxp"   # for LPC21/22/23/24 parts)
+# FLASHUTIL="crt_emu_a9_nxp"   # for LPC31/32 and LPC29xx parts)
+# FLASHUTIL="crt_emu_cm3_lmi"  # for TI Stellaris LM3S parts
 
-# FLASHUTIL="$BINDIR/crt_emu_lpc11_13" # for LPC11xx or LPC13xx parts)
-FLASHUTIL="$BINDIR/crt_emu_cm3_nxp"  # for LPC17xx parts
-# FLASHUTIL="$BINDIR/crt_emu_a7_nxp"   # for LPC21/22/23/24 parts)
-# FLASHUTIL="$BINDIR/crt_emu_a9_nxp"   # for LPC31/32 and LPC29xx parts)
-# FLASHUTIL="$BINDIR/crt_emu_cm3_lmi"  # for TI Stellaris LM3S parts
-
-if [ ! -x "$FLASHUTIL" ]; then
-	echo "No executable file at ${FLASHUTIL}"
+if [ ! -x "${BINDIR}/${FLASHUTIL}" ]; then
+	echo "No executable file at ${BINDIR}/${FLASHUTIL}"
 	exit 1
 fi
 
@@ -79,10 +77,9 @@ fi
 # WIRE="-wire=hi"     # for RDB1768v2 without upgraded firmware)
 # WIRE="-wire=winusb" # for RDB1768v2 with upgraded firmware)
 # WIRE="-wire=winusb" # for LPC-Link on Windows XP)
-WIRE="-wire=hid"      # for LPC-Link on Windows Vista/ Windows 7)
+WIRE="-wire=hid"      # for LPC-Link on Windows Vista/Windows 7)
 
 TARGET=LPC1768
-#TARGET=NXP_dir_part_LPC17
 
 # The nuttx directory must be provided as an argument
 
@@ -115,13 +112,15 @@ else
 		mv ${NUTTX}/nuttx ${NUTTX}/nuttx.axf
 	fi
 fi
+NUTTXPATH=`cygpath -w "${NUTTX}/nuttx.axf"`
 
 # First of all boot the LPC-Link using the script:
 
-#${DFUAPP} /f ${ROMPATH} /tl 250 dfuapp.log
+cd ${BINDIR} || \
+	{ echo "Failed to CD to ${BINDIR}"; exit 1; }
+./${BOOTLPC} ${BOOTLPC_ARG} || \
+	{ echo "'${BOOTLPC} ${BOOTLPC_ARG}' Failed"; }
 
 # Then program the FLASH
 
-#${FLASHUTIL} ${WIRE} -p${TARGET} -flash-load="${NUTTX}/nuttx.axf"
-${FLASHUTIL} -p${TARGET} -flash-load="${NUTTX}/nuttx.axf"
-
+./${FLASHUTIL} ${WIRE} -p${TARGET} -flash-load-exec="${NUTTXPATH}"
