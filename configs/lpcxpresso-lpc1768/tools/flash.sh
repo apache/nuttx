@@ -35,14 +35,19 @@
 ####################################################################################
 
 USAGE="$0 <nuttx-path>"
-echo "Assumptions:"
+
+echo "############################################################################"
+echo "# Assumptions:"
+echo "#"
+echo "#   - Windows 7"
+echo "#   - LPCXpresso 3.6 installed at /cygdrive/c/nxp/lpcxpresso_3.6"
+echo "#   - AXF image built with Code Red"
+echo "#   - LPC1768"
+echo "#"
+echo "# You will need to edit this is any of the above are false"
+echo "#"
+echo "############################################################################"
 echo ""
-echo "  - Windows 7"
-echo "  - LPCXpresso 4.6 installed at /cygdrive/c/nxp/lpcxpresso_3.6"
-echo "  - AXF image built with Code Red"
-echo "  - LPC17xx"
-echo ""
-echo "You will need to edit this is any of the above are false"
 
 # This is the default install location for binaries on Windows (note that this
 # path could change with the Code Red version number)
@@ -120,6 +125,21 @@ cd ${BINDIR} || \
 	{ echo "Failed to CD to ${BINDIR}"; exit 1; }
 ./${BOOTLPC} ${BOOTLPC_ARG} || \
 	{ echo "'${BOOTLPC} ${BOOTLPC_ARG}' Failed"; }
+
+echo ""
+echo "Wait a bit"
+echo "5..."
+sleep 1
+echo "4..."
+sleep 1
+echo "3..."
+sleep 1
+echo "2..."
+sleep 1
+echo "1..."
+sleep 1
+echo "0..."
+echo ""
 
 # Then program the FLASH
 

@@ -50,7 +50,10 @@ export TOOLCHAIN_BIN="/usr/local/LPCXpresso/tools/bin"
 # This the Cygwin path to the LPCXpresso 3.6 install location under Windows
 #export TOOLCHAIN_BIN="/cygdrive/c/nxp/lpcxpresso_3.6/Tools/bin"
 
+# This is the path to the LPCXpression tool subdirectory
+export LPCTOOL_DIR="${WD}/configs/lpcxpresso-lpc1768/tools"
+
 # Add the path to the toolchain to the PATH varialble
-export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+export PATH="${TOOLCHAIN_BIN}:${LPCTOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"

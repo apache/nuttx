@@ -64,7 +64,7 @@
 # CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
 #   cause a 100 second delay during boot-up.  This 100 second delay
 #   serves no purpose other than it allows you to calibrate
-#   CONFIG_BOARD_LOOPSPERMSEC.  You simply use a stop watch to measure
+# CONFIG_BOARD_LOOPSPERMSEC.  You simply use a stop watch to measure
 #   the 100 second delay then adjust CONFIG_BOARD_LOOPSPERMSEC until
 #   the delay actually is 100 seconds.
 # CONFIG_ARCH_DMA - Support DMA initialization
@@ -685,6 +685,7 @@ CONFIG_EXAMPLE_UIP_DHCPC=n
 
 #
 # Settings for examples/nettest
+#
 # CONFIG_EXAMPLE_NETTEST_SERVER - The target board can act
 #   as either the client side or server side of the test
 # CONFIG_EXAMPLE_NETTEST_PERFORMANCE - If set, then the
