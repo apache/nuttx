@@ -203,7 +203,7 @@ static uart_dev_t g_uart1port =
   {
     .size   = CONFIG_UART1_TXBUFSIZE,
     .buffer = g_uart1txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart1priv,
 };
@@ -233,7 +233,7 @@ static uart_dev_t g_uart2port =
   {
     .size   = CONFIG_UART2_TXBUFSIZE,
     .buffer = g_uart2txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
 };
@@ -263,7 +263,7 @@ static uart_dev_t g_uart3port =
   {
     .size   = CONFIG_UART3_TXBUFSIZE,
     .buffer = g_uart3txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart3priv,
 };
