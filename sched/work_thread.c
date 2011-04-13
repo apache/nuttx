@@ -152,7 +152,7 @@ int work_thread(int argc, char *argv[])
            * zero.  Therefore a delay of zero will always execute immediately.
            */
 
-          elapsed = g_system_timer - work->qtime;
+          elapsed = clock_systimer() - work->qtime;
           if (elapsed >= work->delay)
             {
               /* Remove the ready-to-execute work from the list */

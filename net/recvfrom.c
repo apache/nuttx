@@ -415,7 +415,7 @@ static uint16_t recvfrom_tcpinterrupt(struct uip_driver_s *dev, void *conn,
              */
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-            pstate->rf_starttime = g_system_timer;
+            pstate->rf_starttime = clock_systimer();
 #endif
         }
 
@@ -679,7 +679,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
 
   pstate->rf_sock      = psock;
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  pstate->rf_starttime = g_system_timer;
+  pstate->rf_starttime = clock_systimer();
 #endif
 }
 #endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */

@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/clock_gettime.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
        * as appropriate.
        */
 
-      msecs = MSEC_PER_TICK * (g_system_timer - g_tickbias);
+      msecs = MSEC_PER_TICK * (clock_systimer() - g_tickbias);
 
       sdbg("msecs = %d g_tickbias=%d\n",
            (int)msecs, (int)g_tickbias);

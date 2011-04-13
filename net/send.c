@@ -290,7 +290,7 @@ static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
           /* Update the send time */
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-          pstate->snd_time = g_system_timer;
+          pstate->snd_time = clock_systimer();
 #endif
         }
     }
@@ -463,7 +463,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
           /* Update the initial time for calculating timeouts */
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-          state.snd_time        = g_system_timer;
+          state.snd_time        = clock_systimer();
 #endif
           /* Set up the callback in the connection */
 

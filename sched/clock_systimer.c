@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock_systime32.c
+ * sched/clock_systimer.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -49,7 +49,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef os_systime32
+#undef clock_systimer
 
 /****************************************************************************
  * Private Data
@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  os_systime32
+ * Function:  clock_systimer
  *
  * Description:
  *   Return the current value of the system timer counter
@@ -75,7 +75,7 @@
  *
  ****************************************************************************/
 
-uint32_t os_systime32(void)
+uint32_t clock_systimer(void)
 {
   return g_system_timer;
 }

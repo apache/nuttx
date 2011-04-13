@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/work_queue.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,9 +112,9 @@ int work_queue(struct work_s *work, worker_t worker, FAR void *arg, uint32_t del
 
   /* First, initialize the work structure */
 
-  work->worker = worker;         /* Work callback */
-  work->arg    = arg;            /* Callback argument */
-  work->delay  = delay;          /* Delay until work performed */
+  work->worker = worker;           /* Work callback */
+  work->arg    = arg;              /* Callback argument */
+  work->delay  = delay;            /* Delay until work performed */
 
   /* Now, time-tag that entry and put it in the work queue.  This must be
    * done with interrupts disabled.  This permits this function to be called
@@ -122,9 +122,9 @@ int work_queue(struct work_s *work, worker_t worker, FAR void *arg, uint32_t del
    */
 
   flags        = irqsave();
-  work->qtime  = g_system_timer; /* Time work queued */
+  work->qtime  = clock_systimer(); /* Time work queued */
   dq_addlast((FAR dq_entry_t *)work, &g_work);
-  work_signal();                 /* Wake up the worker thread */
+  work_signal();                   /* Wake up the worker thread */
   irqrestore(flags);
   return OK;
 }

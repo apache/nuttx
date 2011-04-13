@@ -2,7 +2,7 @@
  * sched/pg_worker.c
  * Page fill worker thread implementation.
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -407,7 +407,7 @@ static inline bool pg_startfill(void)
        */
 
 #ifdef CONFIG_PAGING_TIMEOUT_TICKS
-      g_starttime = g_system_timer;
+      g_starttime = clock_systimer();
 #endif
 
       /* Return and wait to be signaled for the next event -- the fill completion
@@ -613,7 +613,7 @@ int pg_worker(int argc, char *argv[])
           else
             {
               lldbg("Timeout!\n");
-              ASSERT(g_system_timer - g_starttime < CONFIG_PAGING_TIMEOUT_TICKS);
+              ASSERT(clock_systimer() - g_starttime < CONFIG_PAGING_TIMEOUT_TICKS);
             }
 #endif
         }

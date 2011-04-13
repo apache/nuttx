@@ -113,7 +113,7 @@
 #if !defined(CONFIG_DISABLE_CLOCK) && \
    (!defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__))
 extern volatile uint32_t g_system_timer;
-#define os_systime32() g_system_timer
+#define clock_systimer() g_system_timer
 #endif
 
 /****************************************************************************
@@ -132,12 +132,12 @@ extern "C" {
 #endif
 
 /* If direct access to the system timer/counter is not supported (see above),
- * then the value can be obtained via os_systime32 through a system call.
+ * then the value can be obtained via clock_systimer through a system call.
  */
 
 #if !defined(CONFIG_DISABLE_CLOCK) && \
      defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
-EXTERN uint32_t os_systime32(void);
+EXTERN uint32_t clock_systimer(void);
 #endif
 
 #undef EXTERN

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/enc28j60.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -658,7 +658,7 @@ static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
 static int enc_waitbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
                         uint8_t bits, uint8_t value)
 {
-  uint32_t start = g_system_timer;
+  uint32_t start = clock_systimer();
   uint32_t elapsed;
   uint8_t  rddata;
 
@@ -669,7 +669,7 @@ static int enc_waitbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
       /* Read the byte from the requested banked register */
 
       rddata  = enc_rdbreg(priv, ctrlreg);
-      elapsed = g_system_timer - start;
+      elapsed = clock_systimer() - start;
     }
   while ((rddata & bits) != value || elapsed > ENC_POLLTIMEOUT);
   return (rddata & bits) == value ? -ETIMEDOUT : OK;

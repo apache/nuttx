@@ -81,7 +81,7 @@ CLOCK_SRCS	= clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c \
 		  clock_gettimeofday.c
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
-CLOCK_SRCS	+= clock_systime32.c
+CLOCK_SRCS	+= clock_systimer.c
 endif
 
 SIGNAL_SRCS	= sig_initialize.c \

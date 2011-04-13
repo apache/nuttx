@@ -1095,7 +1095,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
    * the TRANSFER state when the card completes the WRITE operation.
    */
 
-  starttime = g_system_timer;
+  starttime = clock_systimer();
   do
     {
       /* Get the current R1 status from the card */
@@ -1138,7 +1138,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
        * time... we can't stay in this loop forever!
        */
 
-      elapsed = g_system_timer - starttime;
+      elapsed = clock_systimer() - starttime;
     }
   while (elapsed < TICK_PER_SEC);
   return -ETIMEDOUT;
@@ -2476,7 +2476,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
    * but not MMC
    */
 
-  start   = g_system_timer;
+  start   = clock_systimer();
   elapsed = 0;
   do
     {
@@ -2620,7 +2620,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 #endif
       /* Check the elapsed time.  We won't keep trying this forever! */
 
-      elapsed = g_system_timer - start;
+      elapsed = clock_systimer() - start;
     }
   while( elapsed < TICK_PER_SEC ); /* On successful reception while 'breaks', see above. */
 

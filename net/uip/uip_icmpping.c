@@ -118,7 +118,7 @@ struct icmp_ping_s
 
 static inline int ping_timeout(struct icmp_ping_s *pstate)
 {
-  uint32_t elapsed =  g_system_timer - pstate->png_time;
+  uint32_t elapsed =  clock_systimer() - pstate->png_time;
   if (elapsed >= pstate->png_ticks)
     {
       return TRUE;
@@ -329,7 +329,7 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
   state.png_sent   = false;            /* ECHO request not yet sent */
 
   save             = uip_lock();
-  state.png_time   = g_system_timer;
+  state.png_time   = clock_systimer();
 
   /* Set up the callback */
 

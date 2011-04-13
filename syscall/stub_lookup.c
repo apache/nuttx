@@ -107,7 +107,7 @@ extern uintptr_t STUB_usleep(uintptr_t parm1);
  * NuttX configuration.
  */
 
-extern uintptr_t STUB_os_systime32(void);
+extern uintptr_t STUB_clock_systimer(void);
 extern uintptr_t STUB_clock_getres(uintptr_t parm1, uintptr_t parm2);
 extern uintptr_t STUB_clock_gettime(uintptr_t parm1, uintptr_t parm2);
 extern uintptr_t STUB_clock_settime(uintptr_t parm1, uintptr_t parm2);

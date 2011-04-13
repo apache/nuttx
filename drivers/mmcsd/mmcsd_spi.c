@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_spi.c
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,8 +122,8 @@
 #define MMCSD_DELAY_1SEC             (CLK_TCK      + 1)
 #define MMCSD_DELAY_10SEC            (10 * CLK_TCK + 1)
 
-#define ELAPSED_TIME(t)              (g_system_timer-(t))
-#define START_TIME                   (g_system_timer)
+#define ELAPSED_TIME(t)              (clock_systimer()-(t))
+#define START_TIME                   (clock_systimer())
 
 /* SD read timeout: ~100msec, Write Time out ~250ms.  Units of clock ticks */
 

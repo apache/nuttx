@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_timeo.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@
 int net_timeo(uint32_t start_time, socktimeo_t timeo)
 {
   uint32_t timeo_ticks =  DSEC2TICK(timeo);
-  uint32_t elapsed     =  g_system_timer - start_time;
+  uint32_t elapsed     =  clock_systimer() - start_time;
 
   if (elapsed >= timeo_ticks)
     {
