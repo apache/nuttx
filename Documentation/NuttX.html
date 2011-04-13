@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 10, 2011</p>
+      <p>Last Updated: April 13, 2011</p>
     </td>
   </tr>
 </table>
@@ -2204,6 +2204,26 @@ nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * Makefile: Fix an error introduced in the top-level Makefile in NuttX-6.1.
       This error only shows up if you have a /tftpboot directory.  Then the 
       make will fail with an obscure error about not being able to stat pass2.
+    * configs/lpcxpresso-lpc1768/nsh: Add an NSH configuration for the
+      LPCXpresso board.
+    * configs/*/ld.script: Removed 'sh_link not set for section .ARM.edix' for
+      a few of the builds.  In you have this warning, it can be removed with the
+      following change to the ld.script file:
+      
+        + __exidx_start = ABSOLUTE(.);
+        .ARM.exidx : {
+        -     __exidx_start = ABSOLUTE(.);
+              *(.ARM.exidx*)
+        -     __exidx_end = ABSOLUTE(.);
+        } >sram
+        +  __exidx_end = ABSOLUTE(.);
+
+    * arch/arm/src/lpc17xx: Correct some typos/bugs in configuration of LPC17xx
+      UART2 and UART3.
+    * nuttx/clock.h: Replace all references to the global variable g_system_timer
+      with clock_systemtimer() (currently just a macro that that returns g_system_timer).
+    * lin/string/strrch.c: Would fail if the searched-for character were the first
+      character in the string.
 
 apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

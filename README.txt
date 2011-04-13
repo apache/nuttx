@@ -51,6 +51,39 @@ Download and Unpack:
   match the various instructions in the documentation and some scripts
   in the source tree.
 
+Semi-Optional apps/ package.
+
+  All NuttX libraries and example code used to be in included within
+  the NuttX source tree.  As of NuttX-6.0, this application code was
+  moved into a separate tarball, the apps tarball.  If you are just
+  beginning with NuttX, then you will want to download the versioned
+  apps tarball along with the NuttX tarball.  If you already have your
+  own product application directory, then you may not need the apps
+  tarball.
+
+  It is call "Semi-optional" because if you don't have some apps/
+  directory, NuttX will *fail* to build!
+
+  Download the unpack the apps tarball in the same directly where you
+  unpacked the NuttX tarball.  After you unpack the apps tarball, you
+  will have a new directory called apps-versioin (where the version
+  should exactly match the version of the NuttX tarball).  Again, you
+  might want to rename the directory to simply apps/ to match what
+  you read in the documentation
+  
+  After unpacking the apps tarball, you will have two directories side
+  by side like this:
+  
+             |
+        +----+----+
+        |         |
+      nuttx/     apps/
+
+  This is important because the NuttX build will expect to find the
+  apps directory in that (default) location.  )That default location
+  can be changed by editting your NuttX configuration file, but that
+  is another story).
+
 Installation Directories with Spaces in the Path
 
   The nuttx build directory should reside in a path that contains no

@@ -54,7 +54,7 @@ char *strrchr(const char *s, int c)
   if (s)
     {
       const char *p = &s[strlen(s) - 1];
-      for (; p > s; p--)
+      for (; p >= s; p--)
         {
           if (*p == c)
             {
