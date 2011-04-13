@@ -54,7 +54,7 @@
 
 #define BOARD_XTAL_FREQUENCY        (12000000)            /* XTAL oscillator frequency */
 #define BOARD_OSCCLK_FREQUENCY      BOARD_XTAL_FREQUENCY  /* Main oscillator frequency */
-#define BOARD_RTCCLK_FREQUENCY      (32000)               /* RTC oscillator frequency */
+#define BOARD_RTCCLK_FREQUENCY      (32768)               /* RTC oscillator frequency */
 #define BOARD_INTRCOSC_FREQUENCY    (4000000)             /* Internal RC oscillator frequency */
 
 /* This is the clock setup we configure for:
