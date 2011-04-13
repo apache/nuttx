@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_serial.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -595,7 +595,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
 }
 
 /************************************************************************************
- * Name: lpc17_uart0config, uart1config, uart2config, nad uart3config
+ * Name: lpc17_uart0config, uart1config, uart2config, and uart3config
  *
  * Descrption:
  *   Configure the UART.  UART0/1/2/3 peripherals are configured using the following
@@ -1283,6 +1283,7 @@ void up_earlyserialinit(void)
 #endif
   up_disableuartint(&g_uart0priv, NULL);
 #endif
+
 #ifdef CONFIG_LPC17_UART1
   g_uart1priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART1_BAUD);
 #ifndef CONFIG_UART1_SERIAL_CONSOLE
@@ -1290,6 +1291,7 @@ void up_earlyserialinit(void)
 #endif
   up_disableuartint(&g_uart1priv, NULL);
 #endif
+
 #ifdef CONFIG_LPC17_UART2
   g_uart2priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART2_BAUD);
 #ifndef CONFIG_UART2_SERIAL_CONSOLE
@@ -1297,6 +1299,7 @@ void up_earlyserialinit(void)
 #endif
   up_disableuartint(&g_uart2priv, NULL);
 #endif
+
 #ifdef CONFIG_LPC17_UART3
   g_uart3priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART3_BAUD);
 #ifndef CONFIG_UART3_SERIAL_CONSOLE

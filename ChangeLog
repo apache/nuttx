@@ -1685,4 +1685,7 @@
 		} >sram
 		+  __exidx_end = ABSOLUTE(.);
 
+	* arch/arm/src/lpc17xx: Correct some typos/bugs in configuration of LPC17xx
+	  UART2 and UART3.
+
 
