@@ -1,7 +1,7 @@
 /**************************************************************************
  * arch/arm/src/lpc17xx/lpc17_lowputc.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -340,7 +340,7 @@ void lpc17_lowsetup(void)
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
   lpc17_configgpio(GPIO_UART1_TXD);
   lpc17_configgpio(GPIO_UART1_RXD);
-#ifdef CONFIG_UART0_FLOWCONTROL
+#ifdef CONFIG_UART1_FLOWCONTROL
   lpc17_configgpio(GPIO_UART1_CTS);
   lpc17_configgpio(GPIO_UART1_DCD);
   lpc17_configgpio(GPIO_UART1_DSR);
