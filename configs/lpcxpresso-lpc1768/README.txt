@@ -538,6 +538,24 @@ selected as follow:
 
 Where <subdir> is one of the following:
 
+  nsh:
+    Configures the NuttShell (nsh) located at examples/nsh.  The
+    Configuration enables both the serial and telnet NSH interfaces.
+    Support for the board's SPI-based MicroSD card is included
+    (but not passing tests as of this writing).
+
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.
+
+	NOTE: The OSTest runs on the LPCXpresso if it is not installed
+	on the base board (using an add-on MAX232 RS232 driver connected
+	to:
+
+      P0[0]/RD1/TXD3/SDA1  J6-9
+      P0[1]/TD1/RXD3/SCL   J6-10
+
+	I suspect that this test does not run on with the base board
+	attached because OSTest blasts out a lot of serial data and
+	overruns the FTDI chip before it has a chance to establish the
+	connection with the host.
