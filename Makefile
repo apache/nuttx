@@ -258,6 +258,7 @@ $(TOPDIR)/.version:
 	@if [ ! -f .version ]; then \
 		echo "No .version file found, creating one"; \
 		tools/version.sh -v 0.0 -b 0 .version; \
+		chmod 755 .version; \
 	fi
 
 # Create the include/nuttx/version.h file

@@ -124,6 +124,7 @@ if [ ! -x "${VERSIONSH}" ]; then
 fi
 ${VERSIONSH} -v ${VERSION} ${NUTTX}/.version || \
 	{ echo "${VERSIONSH} failed"; cat ${NUTTX}/.version; exit 1; }
+chmod 755 ${NUTTX}/.version
 
 # Perform a full clean for the distribution
 
