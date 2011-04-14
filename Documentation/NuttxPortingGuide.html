@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: April 7, 2011</p>
+      <p>Last Updated: April 14, 2011</p>
     </td>
   </tr>
 </table>
@@ -981,7 +981,11 @@ include/
 <ul><pre>
 tools/
 |-- Makefile.host
+|-- README.txt
 |-- configure.sh
+|-- cfgparser.c
+|-- cfgparser.h
+|-- define.sh
 |-- incdir.sh
 |-- indent.sh
 |-- link.sh
@@ -990,10 +994,18 @@ tools/
 |-- mkimage.sh
 |-- mknulldeps.sh
 |-- mkromfsimg.sh
+|-- mksyscall.c
+|-- mkversion.c
 |-- unlink.sh
+|-- version.sh
 |-- winlink.sh
-`-- zipme
+`-- zipme.sh
 </pre></ul>
+
+<p>
+  Refer to the README file in the <code>tools</code> directory for more information about the individual files.
+  Some of these tools are discussed below as well in the discussion of <a href="#configandbuild">configuring and building</a> NuttX.
+</p>
 
 <h2>2.16 <a name="topmakefile">nuttx/Makefile</a></h2>
 <p>
@@ -1105,12 +1117,57 @@ netutils/
 <p>
   And if <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/appconfig</code>
   exists and your application directory is not in the standard loction (<config>../apps</config>),
-  then you should also specify the location of the application directory on the +command line like:
+  then you should also specify the location of the application directory on the command line like:
 </p>
 <ul><pre>
   cd tools
   ./configure.sh -a &lt;app-dir&gt; <i>&lt;board-name&gt;</i></i>[/<i>&lt;config-dir&gt;</i>]
 </pre></ul>
+
+<p>
+  <b>Version Files</b>.
+  The NuttX build expects to find a version file located in the top-level NuttX build directory.
+  That version file is called <code>.version</code>.
+  The correct version file is installed in each versioned NuttX released.
+  However, if you are working from an SVN snapshot, then there will be no version file.
+  If there is no version file, the top-level <code>Makefile</code> will create a dummy <code>.version</code> file on the first make.
+  This dummy version file will contain all zeroes for version information.
+  If that is not what you want, they you should run the <code>version.sh</code> script to create a better <code>.version</code> file.
+</p>
+
+<p>
+  You can get help information from the <code>version.sh</code> script using the <code>-h</code> option.
+  For example:
+</p>
+<ul><pre>
+$ tools/version.sh -h
+tools/version.sh is a tool for generation of proper version files for the NuttX build
+
+USAGE: tools/version.sh [-d|-h] [-b build] -v &lt;major.minor&gt; &lt;outfile-path&gt;
+
+Where:
+        -d
+                Enable script debug
+        -h
+                show this help message and exit
+        -v &lt;major.minor&gt;
+                The NuttX version number expressed a major and minor number separated
+                by a period
+        &lt;outfile-path&gt;
+                The full path to the version file to be created
+</pre></ul>
+
+<p>
+  As an example, the following command will generate a version file for version 6.1 using the current SVN revision number:
+</p>
+<ul><pre>
+tools/version.h -v 6.1 .version
+</pre></ul>
+
+<p>
+  The <code>.version</code> file is also used during the build process to create a C header file at <code>include/nuttx/version.h</code> that contains the same version information.
+  That version file may be used by your C applications for, as an example, reporting version information.
+</p>
 
 <p>
   <b>Additional Configuration Steps</b>.
@@ -1154,7 +1211,8 @@ The system can be re-made subsequently by just typing <code>make</code>.
   These additional steps include:
 </p>
 <ul>
-  <li>Auto-generating the file <code>include/nuttx/config.</code> using the <code>${TOPDIR}/.config</code> file.
+  <li>Auto-generating the file <code>include/nuttx/config.h</code> using the <code>${TOPDIR}/.config</code> file.
+  <li>Auto-generating the file <code>include/nuttx/version.h</code> using the <code>${TOPDIR}/.version</code> file.
   <li>Creating a link to <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch</code>.
   <li>Creating a link to <code>${TOPDIR}/configs/</code><i>&lt;board-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch/board</code>.
   <li>Creating a link to <code>${TOPDIR}/configs/</code><i>&lt;board-name&gt;</i><code>/src</code> at <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</code>
