@@ -117,10 +117,13 @@ ln -sf ../ChangeLog ChangeLog.txt
 # Write a version file into the NuttX directoy.  The syntax of file is such that it
 # may be sourced by a bash script or included by a Makefile.
 
-echo "#!/bin/bash" >${NUTTX}/.version
-echo "" >>${NUTTX}/.version
-echo "CONFIG_NUTTX_VERSION=\"${VERSION}\"" >>${NUTTX}/.version
-chmod 755 ${NUTTX}/.version
+VERSIONSH=${NUTTX}/tools/version.sh
+if [ ! -x "${VERSIONSH}" ]; then
+	echo "No executable script was found at: ${VERSIONSH}"
+	exit 1
+fi
+${VERSIONSH} -v ${VERSION} ${NUTTX}/.version || \
+	{ echo "${VERSIONSH} failed"; cat ${NUTTX}/.version; exit 1; }
 
 # Perform a full clean for the distribution
 

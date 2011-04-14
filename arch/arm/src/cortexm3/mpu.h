@@ -190,7 +190,7 @@ static inline void mpu_showtype(void)
   dbg("%s MPU Regions: data=%d instr=%d\n",
       (regval & MPU_TYPE_SEPARATE) != 0 ? "Separate" : "Unified",
       (regval & MPU_TYPE_DREGION_MASK) >> MPU_TYPE_DREGION_SHIFT,
-      (regval & MPU_TYPE_IREGION_MASK) >> MPU_TYPE_IREGION_SHIFT,
+      (regval & MPU_TYPE_IREGION_MASK) >> MPU_TYPE_IREGION_SHIFT);
 #endif
 }
 

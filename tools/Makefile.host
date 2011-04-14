@@ -33,18 +33,23 @@
 #
 ############################################################################
 
-all: mkconfig mksyscall
+all: mkconfig mkversion mksyscall
 default: mkconfig mksyscall
 .PHONY: clean
 
 # Add CFLAGS=-g on the make command line build debug versions
 
-CFLAGS = -O2 -Wall
+CFLAGS = -O2 -Wall -I.
 
 # mkconfig - Convert a .config file into a C config.h file
 
-mkconfig: mkconfig.c
-	@gcc $(CFLAGS) -o mkconfig mkconfig.c
+mkconfig: mkconfig.c cfgparser.c
+	@gcc $(CFLAGS) -o mkconfig mkconfig.c cfgparser.c
+
+# mkversion - Convert a .version file into a C version.h file
+
+mkversion: mkconfig.c cfgparser.c
+	@gcc $(CFLAGS) -o mkversion mkversion.c cfgparser.c
 
 # mksyscall - Convert a CSV file into syscall stubs and proxies
 

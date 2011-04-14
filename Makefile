@@ -251,6 +251,20 @@ all: $(BIN)
 .PHONY: context clean_context check_context subdir_clean clean subdir_distclean distclean
 
 # Build the mkconfig tool used to create include/nuttx/config.h
+tools/mkversion:
+	@$(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkversion
+
+$(TOPDIR)/.version:
+	@if [ ! -f .version ]; then \
+		echo "No .version file found, creating one"; \
+		tools/version.sh -v 0.0 -b 0 .version; \
+	fi
+
+# Create the include/nuttx/version.h file
+include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion
+	tools/mkversion $(TOPDIR) > include/nuttx/version.h
+
+# Build the mkconfig tool used to create include/nuttx/config.h
 tools/mkconfig:
 	@$(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkconfig
 
@@ -290,7 +304,7 @@ endif
 
 dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip
 
-context: check_context include/nuttx/config.h dirlinks
+context: check_context include/nuttx/config.h include/nuttx/version.h dirlinks
 	@for dir in $(CONTEXTDIRS) ; do \
 		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" context; \
 	done
