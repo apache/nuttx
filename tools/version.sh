@@ -57,8 +57,7 @@ while [ ! -z "$1" ]; do
 		VERSION=$1
 		;;
 	-h )
-		echo "$progname is a tool for flexible generation of include path arguments for a"
-		echo "variety of different compilers in a variety of compilation environments"
+		echo "$0 is a tool for generation of proper version files for the NuttX build"
 		echo ""
 		echo $USAGE
 		echo ""

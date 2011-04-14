@@ -17,19 +17,32 @@ configure.sh
   target board.  See configs/README.txt or Documentation/NuttxPortingGuide.html
   for a description of how to configure NuttX with this script.
 
-mkconfig.c
+mkconfig.c, cfgparser.c, and cfgparser.h
 
   This is C file that is used to build mkconfig program.  The mkconfig
   program is used during the initial NuttX build.
 
   When you configure NuttX, you will copy a configuration file called .config
-  into the top level NuttX directory (See configs/README.txt or
+  in the top level NuttX directory (See configs/README.txt or
   Documentation/NuttxPortingGuide.html).  The first time you make NuttX,
   the top-level makefile will build the mkconfig executable from mkconfig.c
-  (using Makefile.mkconfig).  The top-level Makefile will then execute the
+  (using Makefile.host).  The top-level Makefile will then execute the
   mkconfig program to convert the .config file in the top level directory
   into include/nuttx/config.h.  config.h is a another version of the
   NuttX configuration that can be included by C files.
+
+mkversion.c, cfgparser.c, and cfgparser.h
+
+  This is C file that is used to build mkversion program.  The mkversion
+  program is used during the initial NuttX build.
+
+  When you build NuttX there should be a version file called .version in
+  the top level NuttX directory (See Documentation/NuttxPortingGuide.html).
+  The first time you make NuttX, the top-level makefile will build th
+  mkversion executable from mkversion.c (using Makefile.host).  The top-
+  level Makefile will then execute the mkversion program to convert the
+  .version file in the top level directory into include/nuttx/version.h.
+  version.h provides version information that can be included by C files.
 
 mksyscall.c
 
@@ -56,7 +69,8 @@ mksyscall.c
 Makefile.host
 
   This is the makefile that is used to make the mkconfig program from
-  the mkconfig.c C file or the mksyscall program from the mksyscall.c file.
+  the mkconfig.c C file, the mkversion program from the mkconfig.c C file,
+  or the mksyscall program from the mksyscall.c file.
 
 mkromfsimg.sh
 
@@ -80,7 +94,13 @@ mknulldeps.sh
     MKDEP = $(TOPDIR)/tools/mknulldeps.sh
 
   The mknulldeps.sh is a stub script that does essentially nothing.
-  
+
+define.sh
+
+  Different compilers have different conventions for specifying pre-
+  processor definitions on the compiler command line.  This bash
+  script allows the build system to create create command line definitions
+  without concern for the particular compiler in use.
 
 incdir.sh
 
