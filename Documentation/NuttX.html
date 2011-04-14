@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 13, 2011</p>
+      <p>Last Updated: April 14, 2011</p>
     </td>
   </tr>
 </table>
@@ -2222,8 +2222,10 @@ nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       UART2 and UART3.
     * nuttx/clock.h: Replace all references to the global variable g_system_timer
       with clock_systemtimer() (currently just a macro that that returns g_system_timer).
-    * lin/string/strrch.c: Would fail if the searched-for character were the first
+=   * lib/string/strrch.c: Would fail if the searched-for character were the first
       character in the string.
+    * tools/version.sh and mkversion.c: Tools to manage a NuttX version number
+      file
 
 apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2246,6 +2248,7 @@ buildroot-1.10 2011-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
     * toolchain/nxflat/nxflat.mk and Makefile - Fix include paths.
     * toolchain/gcc/3.3.6 - Added a patch to fixed compilation error on Ubuntu
       9.10.
+    * toolchain/nxflat/Makefile - Correct static library link order.
 
 </pre></ul>
 

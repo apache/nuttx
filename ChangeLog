@@ -1689,8 +1689,9 @@
 	  UART2 and UART3.
 	* nuttx/clock.h: Replace all references to the global variable g_system_timer
 	  with clock_systemtimer() (currently just a macro that that returns g_system_timer).
-	* lin/string/strrch.c: Would fail if the searched-for character were the first
+	* lib/string/strrch.c: Would fail if the searched-for character were the first
 	  character in the string.
-
+	* tools/version.sh and mkversion.c: Tools to manage a NuttX version number
+	  file
 
 
