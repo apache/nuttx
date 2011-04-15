@@ -159,10 +159,20 @@
 /* PHYs *********************************************************************/
 /* Select PHY-specific values.  Add more PHYs as needed. */
 
-#ifdef CONFIG_PHY_KS8721
+#if defined(CONFIG_PHY_KS8721)
 #  define LPC17_PHYNAME      "KS8721"
 #  define LPC17_PHYID1       MII_PHYID1_KS8721
 #  define LPC17_PHYID2       MII_PHYID2_KS8721
+#  define LPC17_HAVE_PHY     1
+#elif defined(CONFIG_PHY_DP83848C)
+#  define LPC17_PHYNAME      "DP83848C"
+#  define LPC17_PHYID1       MII_PHYID1_DP83848C
+#  define LPC17_PHYID2       MII_PHYID2_DP83848C
+#  define LPC17_HAVE_PHY     1
+#elif defined(CONFIG_PHY_LAN8720)
+#  define LPC17_PHYNAME      "LAN8720"
+#  define LPC17_PHYID1       MII_PHYID1_LAN8720
+#  define LPC17_PHYID2       MII_PHYID2_LAN8720
 #  define LPC17_HAVE_PHY     1
 #else
 #  warning "No PHY specified!"
@@ -1763,8 +1773,7 @@ static inline int lpc17_phyautoneg(uint8_t phyaddr)
       /* Check if auto-negotiation has completed */
 
       phyreg = lpc17_phyread(phyaddr, MII_MSR);
-      if ((phyreg & (MII_MSR_LINKSTATUS | MII_MSR_ANEGCOMPLETE)) == 
-          (MII_MSR_LINKSTATUS | MII_MSR_ANEGCOMPLETE))
+      if ((phyreg & MII_MSR_ANEGCOMPLETE) != 0)
         {
           /* Yes.. return success */
 
@@ -1832,13 +1841,23 @@ static int lpc17_phymode(uint8_t phyaddr, uint8_t mode)
 
   for (timeout = MII_BIG_TIMEOUT; timeout > 0; timeout--)
     {
-      phyreg = lpc17_phyread(phyaddr, MII_MSR);
-      if (phyreg & MII_MSR_LINKSTATUS)
+#ifdef CONFIG_PHY_DP83848C
+      phyreg = lpc17_phyread(phyaddr, MII_DP83848C_STS);
+      if ((phyreg & 0x0001) != 0)
         {
           /* Yes.. return success */
 
           return OK;
         }
+#else
+      phyreg = lpc17_phyread(phyaddr, MII_MSR);
+      if ((phyreg & MII_MSR_LINKSTATUS) != 0)
+        {
+          /* Yes.. return success */
+
+          return OK;
+        }
+#endif
     }
 
   ndbg("Link failed. MSR: %04x\n", phyreg);
@@ -1895,16 +1914,19 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         */
 
        phyreg = (unsigned int)lpc17_phyread(phyaddr, MII_PHYID1);
+       nvdbg("Addr: %d PHY ID1: %04x\n", phyaddr, phyreg);
+
        if (phyreg == LPC17_PHYID1)
         {
           phyreg = lpc17_phyread(phyaddr, MII_PHYID2);
+          nvdbg("Addr: %d PHY ID2: %04x\n", phyaddr, phyreg);
+
           if (phyreg  == LPC17_PHYID2)
             {
               break;
             }
         }
     }
-  nvdbg("phyaddr: %d\n", phyaddr);
 
   /* Check if the PHY device address was found */
 
@@ -1912,8 +1934,10 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
     {
       /* Failed to find PHY at any location */
 
+      ndbg("No PHY detected\n");
       return -ENODEV;
     }
+  nvdbg("phyaddr: %d\n", phyaddr);
 
   /* Save the discovered PHY device address */
 
@@ -1973,7 +1997,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
 
   /* Check configuration */
 
-#ifdef CONFIG_PHY_KS8721
+#if defined(CONFIG_PHY_KS8721)
   phyreg = lpc17_phyread(phyaddr, MII_KS8721_10BTCR);
 
   switch (phyreg & KS8721_10BTCR_MODE_MASK)
@@ -1993,9 +2017,78 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         priv->lp_mode = LPC17_100BASET_FD;
         break;
       default:
-        dbg("Unrecognized mode: %04x\n", phyreg);
+        ndbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
+#elif defined(CONFIG_PHY_DP83848C)
+  phyreg = lpc17_phyread(phyaddr, MII_DP83848C_STS);
+
+  /* Configure for full/half duplex mode and speed */
+
+  switch (phyreg & 0x0006)
+    {
+      case 0x0000:
+        priv->lp_mode = LPC17_100BASET_HD;
+        break;
+      case 0x0002:
+        priv->lp_mode = LPC17_10BASET_HD;
+        break;
+      case 0x0004:
+        priv->lp_mode = LPC17_100BASET_FD;
+        break;
+      case 0x0006:
+        priv->lp_mode = LPC17_10BASET_FD;
+        break;
+      default:
+        ndbg("Unrecognized mode: %04x\n", phyreg);
+        return -ENODEV;
+    }
+#elif defined(CONFIG_PHY_LAN8720)
+  {
+    uint16_t advertise;
+    uint16_t lpa;
+
+    up_udelay(500);
+    advertise = lpc17_phyread(phyaddr, MII_ADVERTISE);
+    lpa       = lpc17_phyread(phyaddr, MII_LPA);
+
+    /* Check for 100BASETX full duplex */
+
+    if ((advertise & MII_ADVERTISE_100BASETXFULL) != 0 &&
+        (lpa & MII_LPA_100BASETXFULL) != 0)
+      {
+        priv->lp_mode = LPC17_100BASET_FD;
+      }
+
+    /* Check for 100BASETX half duplex */
+
+    else if ((advertise & MII_ADVERTISE_100BASETXHALF) != 0 &&
+        (lpa & MII_LPA_100BASETXHALF) != 0)
+      {
+        priv->lp_mode = LPC17_100BASET_HD;
+      }
+
+    /* Check for 10BASETX full duplex */
+
+    else if ((advertise & MII_ADVERTISE_10BASETXFULL) != 0 &&
+        (lpa & MII_LPA_10BASETXFULL) != 0)
+      {
+        priv->lp_mode = LPC17_10BASET_FD;
+      }
+
+    /* Check for 10BASETX half duplex */
+
+    else if ((advertise & MII_ADVERTISE_10BASETXHALF) != 0 &&
+        (lpa & MII_LPA_10BASETXHALF) != 0)
+      {
+        priv->lp_mode = LPC17_10BASET_HD;
+      }
+    else
+      {
+        ndbg("Unrecognized mode: %04x\n", phyreg);
+        return -ENODEV;
+      }
+  }
 #else
 #  warning "PHY Unknown: speed and duplex are bogus"
 #endif

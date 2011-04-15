@@ -110,6 +110,33 @@
 #define MII_KS8721_INTCS             0x1b      /* Interrupt control/status register */
 #define MII_KS8721_10BTCR            0x1f      /* 10BASE-TX PHY control register */
 
+/* National Semiconductor DP83848C PHY Extended Registers */
+
+#define MII_DP83848C_STS             0x10      /* Status Register */
+#define MII_DP83848C_MICR            0x11      /* MII Interrupt Control Register */
+#define MII_DP83848C_MISR            0x12      /* MII Interrupt Status Register */
+#define MII_DP83848C_FCSCR           0x14      /* False Carrier Sense Counter */
+#define MII_DP83848C_RECR            0x15      /* Receive Error Counter */
+#define MII_DP83848C_PCSR            0x16      /* PCS Sublayer Config. and Status */
+#define MII_DP83848C_RBR             0x17      /* RMII and Bypass Register */
+#define MII_DP83848C_LEDCR           0x18      /* LED Direct Control Register */
+#define MII_DP83848C_PHYCR           0x19      /* PHY Control Register */
+#define MII_DP83848C_10BTSCR         0x1a      /* 10Base-T Status/Control Register */
+#define MII_DP83848C_CDCTRL1         0x1b      /* CD Test Control and BIST Extens */
+#define MII_DP83848C_EDCR            0x1d      /* Energy Detect Control Register */
+
+/* SMSC LAN8720 PHY Extended Registers */
+
+#define MII_LAN8720_REV              0x10      /* Silicon Revision Register */
+#define MII_LAN8720_MCSR             0x11      /* Mode Control/Status Register */
+#define MII_LAN8720_MODES            0x12      /* Special modes */
+#define MII_LAN8720_SECR             0x1a      /* Symbol Error Counter Register */
+#define MII_LAN8720_CSIR             0x1b      /* Control / Status Indicator Register */
+#define MII_LAN8720_SITC             0x1c      /* Special Internal Testability Controls */
+#define MII_LAN8720_ISR              0x1d      /* Interrupt Source Register */
+#define MII_LAN8720_IMR              0x1e      /* Interrupt Mask Register */
+#define MII_LAN8720_SCSR             0x1f      /* PHY Special Control/Status Register */
+
 /* GMII */
 
 #define GMII_MCR                     MII_MCR         /* GMII management control */
@@ -240,6 +267,18 @@
 
 #define DP83840_PHYADDR_DUPLEX       (1 << 7)
 #define DP83840_PHYADDR_SPEED        (1 << 6)
+
+/* National Semiconductor DP83848C ******************************************/
+/* DP83848C MII ID1/2 register bits */
+
+#define MII_PHYID1_DP83848C          0x2000    /* ID1 value for DP83848C */
+#define MII_PHYID2_DP83848C          0x5c90    /* ID2 value for DP83848C */
+
+/* SMSC LAN8720 *************************************************************/
+/* SMSC LAN8720 MII ID1/2 register bits */
+
+#define MII_PHYID1_LAN8720           0x0007    /* ID1 value for LAN8720 */
+#define MII_PHYID2_LAN8720           0xc0f1    /* ID2 value for LAN8720 */
 
 /* Am79c874-specific register bit settings **********************************/
 /* Am79c874 MII ID1/2 register bits */
