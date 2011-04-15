@@ -70,8 +70,13 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs.h>
-#include <nuttx/i2c/i2c.h>
 #include <semaphore.h>
+#include <nuttx/clock.h>
+#include <nuttx/time.h>
+#include <nuttx/rtc.h>
+
+#include <nuttx/i2c/i2c.h>
+#include <nuttx/i2c/st_lis331dl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,7 +85,7 @@
 #include <errno.h>
 
 #include "vsn.h"
-#include <nuttx/i2c/st_lis331dl.h>
+
 
 
 /****************************************************************************
@@ -297,10 +302,7 @@ int sif_anout_init(void)
 {
     vsn_sif.tim3 = stm32_tim_init(3);
     vsn_sif.tim8 = stm32_tim_init(8);
-    
-    vsn_sif.i2c1 = up_i2cinitialize(1);
-    vsn_sif.i2c2 = up_i2cinitialize(2);
-    
+        
     if (!vsn_sif.tim3 || !vsn_sif.tim8) return ERROR;
     
     // Use the TIM3 as PWM modulated analogue output
@@ -318,11 +320,14 @@ int sif_anout_init(void)
     STM32_TIM_ENABLEINT(vsn_sif.tim8, 0);
     
     STM32_TIM_SETPERIOD(vsn_sif.tim8, 4096);
-    STM32_TIM_SETCOMPARE(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, 0);
+    STM32_TIM_SETCOMPARE(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, 5000);
     
     STM32_TIM_SETCLOCK(vsn_sif.tim8, 36e6);
     STM32_TIM_SETMODE(vsn_sif.tim8, STM32_TIM_MODE_UP);
     STM32_TIM_SETCHANNEL(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
+
+    vsn_sif.i2c1 = up_i2cinitialize(1);
+    vsn_sif.i2c2 = up_i2cinitialize(2);
 
     return OK;
 }
@@ -470,7 +475,7 @@ int sif_init(void)
     
     sif_gpios_reset();
     if ( sif_anout_init() != OK ) return -1;
-    
+
     /* If everything is okay, register the driver */
     
     (void)register_driver("/dev/sif0", &devsif_fops, 0666, NULL);
@@ -502,27 +507,40 @@ int sif_main(int argc, char *argv[])
             STM32_TIM_SETCOMPARE(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, val);
             return 0;
         }
+        else if (!strcmp(argv[1], "time") && argc == 3) {
+            int val = atoi(argv[2]);
+            up_rtc_settime(val);
+        }
         else if (!strcmp(argv[1], "i2c") && argc == 3) {
             int val = atoi(argv[2]);
-            struct st_lis331dl_dev_s * lis = st_lis331dl_init(vsn_sif.i2c1, val);
+            
+            I2C_SETFREQUENCY(vsn_sif.i2c2, 100000);
+            
+            struct st_lis331dl_dev_s * lis = st_lis331dl_init(vsn_sif.i2c2, val);
 
             if (lis) {
                 struct st_lis331dl_vector_s * a;
                 int i;
+                uint32_t time_stamp = clock_systimer();
+                
+                /* Set to 400 Hz : 3 = 133 Hz/axis */
+                
+                st_lis331dl_setconversion(lis, false, true);
                 
                 /* Sample some values */
                 
-                for (i=0; i<200000; i++) {
+                for (i=0; i<1000; ) {
                     if ( (a = st_lis331dl_getreadings(lis)) ) {
+                        i++;
                         printf("%d %d %d\n", a->x, a->y, a->z);
                     }
                     else if (errno != 11) {
                         printf("Readings errno %d\n", errno);
                         break;
                     }
-                    fflush(stdout);
-                    usleep(10000);
                 }
+                
+                printf("Time diff = %d\n", clock_systimer() - time_stamp);
                 
                 st_lis331dl_deinit(lis);
             }
@@ -533,6 +551,7 @@ int sif_main(int argc, char *argv[])
     }
 
     fprintf(stderr, "%s:\tinit\n\tgpio\tA B\n\tpwr\tval\n", argv[0]);
-    fprintf(stderr, "test = %.8x, test irq = %.8x\n", test, test_irq);
+    fprintf(stderr, "time = %d / %d, time = %d\n", 
+        up_rtc_gettime(), up_rtc_getclock(), time(NULL) );
     return -1;
 }

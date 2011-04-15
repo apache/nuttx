@@ -49,19 +49,6 @@
  * Pro-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* Access to raw system clock ***********************************************/
-/* The system timer/counter is supported only if (1) the system clock is not
- * disabled and (2) we are not configured to use a hardware periodic timer
- * for system time.
- */
-
-#undef __HAVE_SYSTEM_COUNTER
-#if !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_PTIMER)
-#  define __HAVE_SYSTEM_COUNTER 1
-#else
-#  define __HAVE_SYSTEM_COUNTER 0
-#endif
-
 /* Efficient, direct access to OS global timer variables will be supported
  * if the execution environment has direct access to kernel global data.
  * The code in this execution context can access the kernel global data
@@ -157,10 +144,6 @@ extern volatile uint32_t g_uptime;
  * Global Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Global Function Prototypes
- ****************************************************************************/
-
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C" {
@@ -168,14 +151,45 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Indirect access to the system time is required if (1) we are using a
- * hardware periodic timer, OR (2) the execution environment does not have
- * direct access to kernel global data
- */
+/****************************************************************************
+ * Function:  clock_systimer
+ *
+ * Description:
+ *   Return the current value of the system timer counter.  Indirect access
+ *   to the system timer counter is required through this function if (1) we
+ *   are using a hardware periodic timer, OR (2) the execution environment
+ *   does not have direct access to kernel global data
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   The current value of the system timer counter
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
 
 #if defined(CONFIG_PTIMER) || !__HAVE_KERNEL_GLOBALS
 EXTERN uint32_t clock_systimer(void);
 #endif
+
+/****************************************************************************
+ * Function:  clock_uptime
+ *
+ * Description:
+ *   Return the current value of the system timer counter, which is only
+ *   enabled when system is in active mode.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   The current value of the system time counter
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
 
 #if defined(CONFIG_UPTIME) && !__HAVE_KERNEL_GLOBALS
 EXTERN time_t clock_uptime(void);

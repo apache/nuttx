@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/clock_initialize.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,15 +53,15 @@
  * Definitions
  ****************************************************************************/
 
+/* Standard time definitions (in units of seconds) */
+
 #define SEC_PER_MIN  ((time_t)60)
 #define SEC_PER_HOUR ((time_t)60 * SEC_PER_MIN)
 #define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
 
-#if __HAVE_SYSTEM_COUNTER
-#  define incr_systimer() g_system_timer++
-#else
-#  define incr_systimer()
-#endif
+/* Defined just so the uptime counter and system timer look similar */
+
+#define incr_systimer() g_system_timer++
 
 /****************************************************************************
  * Private Type Declarations
@@ -79,9 +79,7 @@
  * Public Variables
  ****************************************************************************/
 
-#if __HAVE_SYSTEM_COUNTER
 volatile clock_t g_system_timer = 0;
-#endif
 
 #if CONFIG_UPTIME
 volatile time_t  g_uptime       = 0;
@@ -155,23 +153,39 @@ static inline void incr_uptime(void)
 void clock_initialize(void)
 {
   time_t jdn;
+#ifdef CONFIG_PTIMER
+  bool rtc_enabled = false;
+#endif
 
-  /* Initialize the real time close */
+  /* Initialize the real time close (this should be un-nesssary except on a
+   * restart).
+   */
 
-#if __HAVE_SYSTEM_COUNTER
   g_system_timer = 0;
+#ifdef CONFIG_UPTIME
+  g_uptime = 0;
+#endif
+
+  /* Do we have hardware periodic timer support? */
+
+#ifdef CONFIG_RTC
+  if (up_rtcinitialize() == OK)
+    {
+	  rtc_enabled = true;
+	}
 #endif
 
   /* Get the EPOCH-relative julian date from the calendar year,
    * month, and date
    */
 
-#ifndef CONFIG_PTIMER
-  jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH,
-                           CONFIG_START_DAY);
-#else /* use UTC as starting date */
-  jdn = clock_calendar2utc(1970, 1, 1);
+#ifdef CONFIG_PTIMER
+  if (!rtc_enabled)
 #endif
+    {
+      jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH,
+                               CONFIG_START_DAY);
+    }
 
   /* Set the base time as seconds into this julian day. */
 

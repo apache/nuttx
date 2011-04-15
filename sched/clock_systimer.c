@@ -40,9 +40,12 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <nuttx/clock.h>
 
-#if __HAVE_SYSTEM_COUNTER && !defined(clock_systimer) /* See nuttx/clock.h */
+#include <nuttx/clock.h>
+#include <nuttx/ptimer.h>
+#include <nuttx/time.h>
+
+#if !defined(clock_systimer) /* See nuttx/clock.h */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -74,8 +77,24 @@
 
 uint32_t clock_systimer(void)
 {
+  /* Fetch the g_system_timer value from timer hardware, if available */
+
+#ifdef CONFIG_PTIMER
+
+  /* Check if the periodic timer is initialized
+   *
+   * Note that the unit of the g_system_timer and and up_rtc_getclock() must
+   * be the same in order.
+   */
+
+  if (g_rtc_enabled)
+    {
+	  up_rtc_getclock();
+	}
+#endif
+
   return g_system_timer;
 }
 
-#endif /* __HAVE_SYSTEM_COUNTER */
+#endif /* !clock_systtimer */
 

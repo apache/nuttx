@@ -43,13 +43,11 @@
 #include <nuttx/clock.h>
 #include <nuttx/time.h>
 
-#if !defined(CONFIG_DISABLE_CLOCK) && defined(CONFIG_UPTIME)
+#if !defined(CONFIG_DISABLE_CLOCK) && defined(CONFIG_UPTIME) && !defined(clock_uptime)
      
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#undef clock_uptime
 
 /****************************************************************************
  * Private Data
@@ -78,7 +76,16 @@
 
 time_t clock_uptime(void)
 {
-  return g_uptime;
+#ifdef CONFIG_PTIMER
+  if (g_rtc_enabled)
+    {
+      return up_rtc_gettime();
+	}
+  else
+#endif
+    {
+      return g_uptime;
+	}
 }
 
 #endif /* CONFIG_DISABLE_CLOCK && CONFIG_UPTIME */

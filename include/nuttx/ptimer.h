@@ -42,53 +42,37 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-
 #include <time.h>
 #include <stdint.h>
 #include <stdbool.h>
+
+#include <nuttx/clock.h>
+
+#ifdef CONFIG_PTIMER
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-/* Access macros ************************************************************/
-
-/* Clock manipulation macros ************************************************/
+#define RTC_CLOCKS_PER_SEC      16384
+#define RTC_CLOCKS_SHIFT        14
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* The type of the periodic timer callback function */
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
 
-typedef void (*ptimer_handler_t)(FAR void *arg);
-
-/* The periodic timer vtable */
-
-struct ptimer_dev_s;
-struct ptimer_ops_s
-{
-  int (*trigger)(FAR struct ptimer_dev_s *dev, FAR void *arg);
-  int (*add)(FAR struct ptimer_dev_s *dev, FAR void *arg, clock_t period);
-  int (*set)(FAR struct ptimer_dev_s *dev, FAR void *arg, clock_t period);
-  int (*clear)(FAR struct ptimer_dev_s *dev, FAR void *arg);
-  clock_t (*remainder)(FAR struct ptimer_dev_s *dev, FAR void *arg);
-  clock_t (*overrun)(FAR struct ptimer_dev_s *dev, FAR void *arg);
-  int (*exec)(FAR struct ptimer_dev_s *dev, clock_t timeout);
-};
-
-/* PTIMER private data.  This structure only defines the initial fields of the
- * structure visible to the SPI client.  The specific implementation may 
- * add additional, device specific fields
+/* Variable determines the state of the RTC module.
+ *
+ * After initialization value is set to 'true' if RTC starts successfully.
+ * The value can be changed to false also during operation if RTC for
+ * some reason fails.
  */
 
-struct ptimer_dev_s
-{
-  FAR const struct ptimer_ops_s *ops;
-};
+extern volatile bool g_rtc_enabled;
 
 /****************************************************************************
  * Public Functions
@@ -103,21 +87,36 @@ extern "C" {
 #endif
 
 /****************************************************************************
- * Name: up_ptimerinitialize
+ * Name: up_rtcinitialize
  *
  * Description:
- *   Initialize the periodic timer interface. This function may be called to
- *   obtian multiple instances of the interface
+ *   Initialize the periodic timer interface. This function is called once
+ *    from the clock_initialize() function.
  *
  * Returned Value:
- *   Valid peridic timer device structre reference on succcess; a NULL on failure
+ *   Returns OK if RTC has successfully started, otherwise ERROR.
  *
  ****************************************************************************/
 
-EXTERN FAR struct ptimer_dev_s *up_ptimerinitialize(void);
+EXTERN int up_rtcinitialize(void);
+EXTERN int up_rtcinitialize(void);
+
+EXTERN clock_t up_rtc_getclock(void);
+EXTERN void up_rtc_setclock(clock_t clock);
+
+EXTERN time_t up_rtc_gettime(void);
+EXTERN void up_rtc_settime(time_t time);
+
+EXTERN clock_t up_rtc_setalarm(clock_t atclock);
+
+/* This callback is provided by the clock module and called by the RTC ISR */
+
+EXTERN void clock_rtcalarmcb(clock_t clock);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+
+#endif /* CONFIG_PTIMER */
 #endif /* __INCLUDE_NUTTX_PTIMER_H */

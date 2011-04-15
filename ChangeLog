@@ -1693,5 +1693,8 @@
 	  character in the string.
 	* tools/version.sh and mkversion.c: Tools to manage a NuttX version number
 	  file
+	* sched/clock_uptime() and lib/time/lib_time.c: Add support for 1 second uptime
+	  interface.
+
 
 

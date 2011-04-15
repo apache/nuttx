@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <debug.h>
 #include <arch/board/board.h>
+#include <stdio.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -50,6 +51,7 @@
 #include "stm32_rcc.h"
 #include "stm32_flash.h"
 #include "stm32_internal.h"
+#include "stm32_waste.h"
 
 /****************************************************************************
  * Definitions
@@ -58,11 +60,7 @@
 #define HSERDY_TIMEOUT 256
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /* Put all RCC registers in reset state */
@@ -99,6 +97,7 @@ static inline void rcc_reset(void)
 
   putreg32(0, STM32_RCC_CIR);               /* Disable all interrupts */
 }
+
 
 static inline void rcc_enableahb(void)
 {
@@ -140,6 +139,7 @@ static inline void rcc_enableahb(void)
 
   putreg32(regval, STM32_RCC_AHBENR);   /* Enable peripherals */
 }
+
 
 static inline void rcc_enableapb1(void)
 {
@@ -292,6 +292,7 @@ static inline void rcc_enableapb1(void)
   putreg32(regval, STM32_RCC_APB1ENR);
 }
 
+
 static inline void rcc_enableapb2(void)
 {
   uint32_t regval;
@@ -373,17 +374,14 @@ static inline void rcc_enableapb2(void)
   putreg32(regval, STM32_RCC_APB2ENR);
 }
 
-/****************************************************************************
- * Name: stm32_stdclockconfig
- *
- * Description:
- *   Called to set clocking based on standard definitions in board.h.
- *   NOTE:  This logic would need to be extended if you need to select low-
- *   power clocking modes!
- *
- ****************************************************************************/
 
 #if !defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
+
+/** Called to change to new clock based on settings in board.h
+ * 
+ *  NOTE:  This logic would need to be extended if you need to select low-
+ *  power clocking modes!
+ **/
 static inline void stm32_stdclockconfig(void)
 {
   uint32_t regval;
@@ -471,18 +469,9 @@ static inline void stm32_stdclockconfig(void)
 }
 #endif
 
-/****************************************************************************
- * Global Functions
- ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_clockconfig
- *
- * Description:
- *   Called to change to new clock based on settings in board.h.
- *   NOTE:  This logic needs to be extended so that we can selected low-power
- *   clocking modes as well!
- *
+ * Public Functions
  ****************************************************************************/
 
 void stm32_clockconfig(void)
@@ -510,4 +499,24 @@ void stm32_clockconfig(void)
   rcc_enableahb();
   rcc_enableapb2();
   rcc_enableapb1();
+}
+
+
+/**
+ * \todo Check for LSE good timeout and return with -1,
+ *   possible ISR optimization? or at least ISR should be cough in case of failure
+ */
+void stm32_rcc_enablelse(void)
+{
+    /* Enable LSE */
+    modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_LSEON);
+
+    /* We could wait for ISR here ... */
+    while( !(getreg16(STM32_RCC_BDCR) & RCC_BDCR_LSERDY) ) up_waste();
+    
+    /* Select LSE as RTC Clock Source */
+    modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
+    
+    /* Enable Clock */
+    modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);    
 }
