@@ -107,6 +107,9 @@ STUB_LOOKUP(3, STUB_up_assert_code)             /* SYS_up_assert_code */
   STUB_LOOKUP(2, STUB_clock_gettime)            /* SYS_clock_gettime */
   STUB_LOOKUP(2, STUB_clock_settime)            /* SYS_clock_settime */
   STUB_LOOKUP(2, STUB_gettimeofday)             /* SYS_gettimeofday */
+#  ifdef CONFIG_UPTIME
+  STUB_LOOKUP(0, STUB_clock_uptime)             /* SYS_clock_uptime */
+#  endif
 #endif
 
 /* The following are defined only if POSIX timers are supported */

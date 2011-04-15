@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock_systimer.c
+ * sched/clock_uptime.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,12 +41,15 @@
 
 #include <stdint.h>
 #include <nuttx/clock.h>
+#include <nuttx/time.h>
 
-#if __HAVE_SYSTEM_COUNTER && !defined(clock_systimer) /* See nuttx/clock.h */
-
+#if !defined(CONFIG_DISABLE_CLOCK) && defined(CONFIG_UPTIME)
+     
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#undef clock_uptime
 
 /****************************************************************************
  * Private Data
@@ -57,25 +60,25 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_systimer
+ * Function:  clock_uptime
  *
  * Description:
- *   Return the current value of the system timer counter
+ *   Return the current value of the system timer counter, which is only
+ *   enabled when system is in active mode.
  *
  * Parameters:
  *   None
  *
  * Return Value:
- *   The current value of the system timer counter
+ *   The current value of the system time counter
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-uint32_t clock_systimer(void)
+time_t clock_uptime(void)
 {
-  return g_system_timer;
+  return g_uptime;
 }
 
-#endif /* __HAVE_SYSTEM_COUNTER */
-
+#endif /* CONFIG_DISABLE_CLOCK && CONFIG_UPTIME */

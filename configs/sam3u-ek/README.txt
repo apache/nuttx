@@ -332,6 +332,17 @@ must be is one of the following:
     This specall make command ('make pass1 pass2') will make the dependencies
     separately for each pass.
 
+	At there end of the build, there four files will top-level build
+	directory:
+
+	nuttx_user.elf	- The pass1 ELF file
+	nuttx			- The pass2 ELF file
+	nuttx_user.ihx	- The pass1 Intel HEX format file
+	nuttx.ihx		- The pass2 Intel HEX file
+
+	The J-Link program will except files in .hex, .mot, .srec, and .bin
+	formats.
+
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables both the serial and telnetd NSH interfaces.

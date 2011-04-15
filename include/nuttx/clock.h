@@ -41,13 +41,42 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
+#include <time.h>
 
 /****************************************************************************
  * Pro-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* Access to raw system clock ***********************************************/
+/* The system timer/counter is supported only if (1) the system clock is not
+ * disabled and (2) we are not configured to use a hardware periodic timer
+ * for system time.
+ */
 
-/* Timing constants */
+#undef __HAVE_SYSTEM_COUNTER
+#if !defined(CONFIG_DISABLE_CLOCK) && !defined(CONFIG_PTIMER)
+#  define __HAVE_SYSTEM_COUNTER 1
+#else
+#  define __HAVE_SYSTEM_COUNTER 0
+#endif
+
+/* Efficient, direct access to OS global timer variables will be supported
+ * if the execution environment has direct access to kernel global data.
+ * The code in this execution context can access the kernel global data
+ * directly if:  (1) this is an un-protected, non-kernel build, or (2)
+ * this code is being built for execution within the kernel.
+ */
+
+#undef __HAVE_KERNEL_GLOBALS
+#if !defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__)
+#  define __HAVE_KERNEL_GLOBALS 1
+#else
+#  define __HAVE_KERNEL_GLOBALS 0
+#endif
+
+/* Timing constants *********************************************************/
 
 #define NSEC_PER_SEC          1000000000
 #define USEC_PER_SEC             1000000
@@ -100,20 +129,28 @@
  * Global Data
  ****************************************************************************/
 
+#if !defined(CONFIG_DISABLE_CLOCK)
+
 /* Access to raw system clock ***********************************************/
 /* Direct access to the system timer/counter is supported only if (1) the
- * system clock is not disabled and (2) the executation environement has 
- * direct access to kernel global data.
- *
- * The code in this execution context can access the kernel global data
- * directly if:  (1) this is an un-protected, non-kernel build, or (2)
- * this code is being built for execution within the kernel.
+ * system timer counter is available (i.e., we are not configured to use
+ * a hardware periodic timer), and (2) the execution environment has direct
+ * access to kernel global data
  */
 
-#if !defined(CONFIG_DISABLE_CLOCK) && \
-   (!defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__))
+#if !defined(CONFIG_PTIMER) && __HAVE_KERNEL_GLOBALS
 extern volatile uint32_t g_system_timer;
 #define clock_systimer() g_system_timer
+#endif
+
+/* System uptime (in seconds) is only supported by periodic timer hardware */
+
+#if defined(CONFIG_UPTIME)
+extern volatile uint32_t g_uptime;
+
+#if __HAVE_KERNEL_GLOBALS
+#  define clock_uptime() g_uptime
+#endif
 #endif
 
 /****************************************************************************
@@ -131,13 +168,17 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* If direct access to the system timer/counter is not supported (see above),
- * then the value can be obtained via clock_systimer through a system call.
+/* Indirect access to the system time is required if (1) we are using a
+ * hardware periodic timer, OR (2) the execution environment does not have
+ * direct access to kernel global data
  */
 
-#if !defined(CONFIG_DISABLE_CLOCK) && \
-     defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+#if defined(CONFIG_PTIMER) || !__HAVE_KERNEL_GLOBALS
 EXTERN uint32_t clock_systimer(void);
+#endif
+
+#if defined(CONFIG_UPTIME) && !__HAVE_KERNEL_GLOBALS
+EXTERN time_t clock_uptime(void);
 #endif
 
 #undef EXTERN
@@ -145,4 +186,5 @@ EXTERN uint32_t clock_systimer(void);
 }
 #endif
 
+#endif /* !CONFIG_DISABLE_CLOCK */
 #endif /* __NUTTX_CLOCK_H */

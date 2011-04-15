@@ -71,6 +71,18 @@ nuttx_user.elf:
 $(TOPDIR)/nuttx_user.elf: nuttx_user.elf
 	@echo "LD: nuttx_user.elf"
 	@cp -a nuttx_user.elf $(TOPDIR)/nuttx_user.elf
+ifeq ($(CONFIG_INTELHEX_BINARY),y)
+	@echo "CP: nuttx_user.ihx"
+	@$(OBJCOPY) $(OBJCOPYARGS) -O ihex nuttx_user.elf $(TOPDIR)/nuttx_user.ihx
+endif
+ifeq ($(CONFIG_MOTOROLA_SREC),y)
+	@echo "CP: nuttx_user.srec"
+	@$(OBJCOPY) $(OBJCOPYARGS) -O srec nuttx_user.elf $(TOPDIR)/nuttx_user.srec
+endif
+ifeq ($(CONFIG_RAW_BINARY),y)
+	@echo "CP: nuttx_user.bin"
+	@$(OBJCOPY) $(OBJCOPYARGS) -O binary nuttx_user.elf $(TOPDIR)/nuttx_user.bin
+endif
 
 $(TOPDIR)/User.map: nuttx_user.elf
 	@echo "MK: User.map"

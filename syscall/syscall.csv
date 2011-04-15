@@ -6,6 +6,7 @@
 "clock_getres","time.h","!defined(CONFIG_DISABLE_CLOCK)","int","clockid_t","struct timespec*"
 "clock_gettime","time.h","!defined(CONFIG_DISABLE_CLOCK)","int","clockid_t","struct timespec*"
 "clock_settime","time.h","!defined(CONFIG_DISABLE_CLOCK)","int","clockid_t","const struct timespec*"
+"clock_uptime","nuttx/clock.h","!defined(CONFIG_DISABLE_CLOCK) && defined(CONFIG_UPTIME)","time_t"
 "close","unistd.h","CONFIG_NSOCKET_DESCRIPTORS > 0 || CONFIG_NFILE_DESCRIPTORS > 0","int","int"
 "closedir","dirent.h","CONFIG_NFILE_DESCRIPTORS > 0","int","FAR DIR*"
 "connect","sys/socket.h","CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)","int","int","FAR const struct sockaddr*","socklen_t"

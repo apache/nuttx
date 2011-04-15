@@ -112,6 +112,7 @@ extern uintptr_t STUB_clock_getres(uintptr_t parm1, uintptr_t parm2);
 extern uintptr_t STUB_clock_gettime(uintptr_t parm1, uintptr_t parm2);
 extern uintptr_t STUB_clock_settime(uintptr_t parm1, uintptr_t parm2);
 extern uintptr_t STUB_gettimeofday(uintptr_t parm1, uintptr_t parm2);
+extern uintptr_t STUB_clock_uptime(void);
 
 /* The following are defined only if POSIX timers are supported */
 

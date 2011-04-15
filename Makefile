@@ -414,18 +414,22 @@ pass2: pass2deps
 		cp -f $(BIN) /tftpboot/$(BIN).${CONFIG_ARCH}; \
 	fi
 ifeq ($(CONFIG_RRLOAD_BINARY),y)
+	@echo "MK: $(BIN).rr"
 	@$(TOPDIR)/tools/mkimage.sh --Prefix $(CROSSDEV) $(BIN) $(BIN).rr
 	@if [ -w /tftpboot ] ; then \
 		cp -f $(BIN).rr /tftpboot/$\(BIN).rr.$(CONFIG_ARCH); \
 	fi
 endif
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
+	@echo "CP: $(BIN).ihx"
 	@$(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) $(BIN).ihx
 endif
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
+	@echo "CP: $(BIN).srec"
 	@$(OBJCOPY) $(OBJCOPYARGS) -O srec $(BIN) $(BIN).srec
 endif
 ifeq ($(CONFIG_RAW_BINARY),y)
+	@echo "CP: $(BIN).bin"
 	@$(OBJCOPY) $(OBJCOPYARGS) -O binary $(BIN) $(BIN).bin
 endif
 

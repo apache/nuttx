@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock_systimer.c
+ * lib/time/lib_time.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,10 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <time.h>
+
 #include <nuttx/clock.h>
 
-#if __HAVE_SYSTEM_COUNTER && !defined(clock_systimer) /* See nuttx/clock.h */
+#if !defined(CONFIG_DISABLE_CLOCK) && defined(CONFIG_UPTIME)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -51,31 +52,39 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
+ 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_systimer
+ * Function:  time
  *
  * Description:
- *   Return the current value of the system timer counter
+ *   Return the current system up-time.
  *
  * Parameters:
- *   None
+ *   The tloc  argument points to an area where the return value is 
+ *   also stored. If tloc is a null pointer, no value is stored.
  *
  * Return Value:
- *   The current value of the system timer counter
- *
- * Assumptions:
+ *   The current system up time
  *
  ****************************************************************************/
 
-uint32_t clock_systimer(void)
+time_t time(time_t *tloc)
 {
-  return g_system_timer;
+  /* Get the current uptime from the system */
+
+  time_t uptime = clock_uptime();
+
+  /* Return the uptime */
+
+  if (tloc)
+    {
+	  *tloc = uptime;
+	}
+  return uptime;
 }
 
-#endif /* __HAVE_SYSTEM_COUNTER */
-
+#endif /* !CONFIG_DISABLE_CLOCK && CONFIG_UPTIME */

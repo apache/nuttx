@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/rtc.h
+ * include/nuttx/ptimer.h
  *
  *   Copyright(C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_RTC_H
-#define __INCLUDE_NUTTX_RTC_H
+#ifndef __INCLUDE_NUTTX_PTIMER_H
+#define __INCLUDE_NUTTX_PTIMER_H
 
 /****************************************************************************
  * Included Files
@@ -62,32 +62,32 @@
  * Public Types
  ****************************************************************************/
 
-/* The type of the RTC callback function */
+/* The type of the periodic timer callback function */
 
-typedef void (*rtc_handler_t)(FAR void *arg);
+typedef void (*ptimer_handler_t)(FAR void *arg);
 
-/* The RTC vtable */
+/* The periodic timer vtable */
 
-struct rtc_dev_s;
-struct rtc_ops_s
+struct ptimer_dev_s;
+struct ptimer_ops_s
 {
-  int (*trigger)(FAR struct rtc_dev_s *dev, FAR void *arg);
-  int (*add)(FAR struct rtc_dev_s *dev, FAR void *arg, clock_t period);
-  int (*set)(FAR struct rtc_dev_s *dev, FAR void *arg, clock_t period);
-  int (*clear)(FAR struct rtc_dev_s *dev, FAR void *arg);
-  clock_t (*remainder)(FAR struct rtc_dev_s *dev, FAR void *arg);
-  clock_t (*overrun)(FAR struct rtc_dev_s *dev, FAR void *arg);
-  int (*exec)(FAR struct rtc_dev_s *dev, clock_t timeout);
+  int (*trigger)(FAR struct ptimer_dev_s *dev, FAR void *arg);
+  int (*add)(FAR struct ptimer_dev_s *dev, FAR void *arg, clock_t period);
+  int (*set)(FAR struct ptimer_dev_s *dev, FAR void *arg, clock_t period);
+  int (*clear)(FAR struct ptimer_dev_s *dev, FAR void *arg);
+  clock_t (*remainder)(FAR struct ptimer_dev_s *dev, FAR void *arg);
+  clock_t (*overrun)(FAR struct ptimer_dev_s *dev, FAR void *arg);
+  int (*exec)(FAR struct ptimer_dev_s *dev, clock_t timeout);
 };
 
-/* RTC private data.  This structure only defines the initial fields of the
+/* PTIMER private data.  This structure only defines the initial fields of the
  * structure visible to the SPI client.  The specific implementation may 
  * add additional, device specific fields
  */
 
-struct rtc_dev_s
+struct ptimer_dev_s
 {
-  FAR const struct rtc_ops_s *ops;
+  FAR const struct ptimer_ops_s *ops;
 };
 
 /****************************************************************************
@@ -103,22 +103,21 @@ extern "C" {
 #endif
 
 /****************************************************************************
- * Name: up_rtcinitialize
+ * Name: up_ptimerinitialize
  *
  * Description:
- *   Initialize the RTC interface. This function may be called to obtain
- *   multiple instances of the interface
+ *   Initialize the periodic timer interface. This function may be called to
+ *   obtian multiple instances of the interface
  *
  * Returned Value:
- *   Valid RTC device structre reference on succcess; a NULL on failure
+ *   Valid peridic timer device structre reference on succcess; a NULL on failure
  *
  ****************************************************************************/
 
-EXTERN FAR struct rtc_dev_s *up_rtcinitialize(void);
-
+EXTERN FAR struct ptimer_dev_s *up_ptimerinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __INCLUDE_NUTTX_RTC_H */
+#endif /* __INCLUDE_NUTTX_PTIMER_H */
