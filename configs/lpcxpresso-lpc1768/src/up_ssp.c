@@ -113,8 +113,8 @@ void weak_function lpc17_sspinitialize(void)
    */
 
 #ifdef CONFIG_LPC17_SSP1
-  (void)lpc17_configgpio(GPIO_SD_CS);
-  (void)lpc17_configgpio(GPIO_SD_CD);
+  (void)lpc17_configgpio(LPCXPRESSO_SD_CS);
+  (void)lpc17_configgpio(LPCXPRESSO_SD_CD);
 #endif
 
   ssp_dumpgpio("lpc17_sspinitialize() Exit");
@@ -173,7 +173,7 @@ void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
     {
       /* Assert/de-assert the CS pin to the card */
 
-      (void)lpc17_gpiowrite(GPIO_SD_CS, !selected);
+      (void)lpc17_gpiowrite(LPCXPRESSO_SD_CS, !selected);
     }
 
   ssp_dumpgpio("lpc17_spi1select() Exit");
@@ -185,7 +185,7 @@ uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
     {
       /* Read the state of the card-detect bit */
 
-      if (lpc17_gpioread(GPIO_SD_CD) == 0)
+      if (lpc17_gpioread(LPCXPRESSO_SD_CD) == 0)
         {
           sspdbg("Returning SPI_STATUS_PRESENT\n");
           return SPI_STATUS_PRESENT;
