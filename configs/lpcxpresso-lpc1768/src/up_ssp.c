@@ -2,7 +2,7 @@
  * configs/lpcxpresso-lpc1768/src/up_ssp.c
  * arch/arm/src/board/up_ssp.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -107,7 +107,16 @@ void weak_function lpc17_sspinitialize(void)
   /* Configure the SPI-based microSD CS GPIO */
 
   ssp_dumpgpio("lpc17_sspinitialize() Entry)");
-#warning "Configure chip selects here"  
+
+  /* Configure card detect and chip select for the SD slot.  NOTE:  Jumper J55 must
+   * be set correctly for the SD slot chip select.
+   */
+
+#ifdef CONFIG_LPC17_SSP1
+  (void)lpc17_configgpio(GPIO_SD_CS);
+  (void)lpc17_configgpio(GPIO_SD_CD);
+#endif
+
   ssp_dumpgpio("lpc17_sspinitialize() Exit");
 }
 
@@ -140,11 +149,11 @@ void weak_function lpc17_sspinitialize(void)
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssp_dumpgpio("lpc17_spiselect() Entry");
+  ssp_dumpgpio("lpc17_spi0select() Entry");
 
 #warning "Assert CS here (false)"
 
-  ssp_dumpgpio("lpc17_spiselect() Exit");
+  ssp_dumpgpio("lpc17_spi0select() Exit");
 }
 
 uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -155,7 +164,37 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif
 
 #ifdef CONFIG_LPC17_SSP1
-# warning "SSP1 chip selects not known"
+void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  ssp_dumpgpio("lpc17_spi1select() Entry");
+
+  if (devid == SPIDEV_MMCSD)
+    {
+      /* Assert/de-assert the CS pin to the card */
+
+      (void)lpc17_gpiowrite(GPIO_SD_CS, !selected);
+    }
+
+  ssp_dumpgpio("lpc17_spi1select() Exit");
+}
+
+uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  if (devid == SPIDEV_MMCSD)
+    {
+      /* Read the state of the card-detect bit */
+
+      if (lpc17_gpioread(GPIO_SD_CD) == 0)
+        {
+          sspdbg("Returning SPI_STATUS_PRESENT\n");
+          return SPI_STATUS_PRESENT;
+        }
+    }
+
+  sspdbg("Returning zero\n");
+  return 0;
+}
 #endif
 
 #endif /* CONFIG_LPC17_SSP0 || CONFIG_LPC17_SSP1 */
