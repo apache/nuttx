@@ -69,6 +69,9 @@ CONFIGURED_APPS += vsn/ramtron
 # Provide UNIX style free
 CONFIGURED_APPS += vsn/free
 
+# Provide System Information Utilityu
+CONFIGURED_APPS += vsn/sysinfo
+
 # Provide JAVA Virtual Machine (the Darjeeling JVM)
 #CONFIGURED_APPS += vsn/jvm
 

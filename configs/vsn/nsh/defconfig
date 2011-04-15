@@ -161,8 +161,9 @@ CONFIG_STM32_I2C1=y
 CONFIG_STM32_I2C2=y
 CONFIG_STM32_USB=n
 CONFIG_STM32_CAN=n
-CONFIG_STM32_BKP=n
-CONFIG_STM32_PWR=n
+# Note that in order to enable RTC, BKP and PWR must be enabled
+CONFIG_STM32_BKP=y
+CONFIG_STM32_PWR=y
 CONFIG_STM32_DAC=n
 # APB2:
 CONFIG_STM32_ADC1=n
@@ -252,6 +253,11 @@ CONFIG_SSI_POLLWAIT=y
 # OS support for I2C
 #
 CONFIG_I2C=y
+
+#
+# OS support for hardware RTC
+#
+CONFIG_RTC=y
 
 #
 # General build options
@@ -870,3 +876,11 @@ CONFIG_APPS_DIR="../apps"
 
 # Provide /dev/ramX and then: mount -t binfs /dev/ram0 /bin
 CONFIG_APPS_BINDIR=y
+
+# Application configuration
+
+CONFIG_APPS_DIR="../apps"
+
+# Application configuration
+
+CONFIG_APPS_DIR="../apps"

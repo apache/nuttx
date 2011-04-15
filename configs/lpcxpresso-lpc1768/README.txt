@@ -8,6 +8,7 @@ Contents
 ^^^^^^^^
 
   LCPXpresso LPC1768 Board
+  Jumpers
   Development Environment
   GNU Toolchain Options
   NuttX buildroot Toolchain
@@ -96,6 +97,13 @@ LCPXpresso LPC1768 Board
 
   P4[28]/RX-MCLK/MAT2.0/TXD3        PAD15                   N/A
   P4[29]/TX-MCLK/MAT2.1/RXD3        PAD16                   N/A
+
+Jumpers
+^^^^^^^
+
+  There are many jumpers on the base board.  A usable combination is the
+  default jumper settings WITH the two J54 jumpers both removed.  Those
+  jumpers are for ISP support and will cause the board to reset.
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
