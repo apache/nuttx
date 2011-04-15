@@ -57,8 +57,8 @@
 
 #ifdef CONFIG_ARCH_BOARD_LPCXPRESSO
 #  define CONFIG_NSH_HAVEUSBDEV 1
-#  ifdef CONFIG_LPC17_SSP0
-#    define CONFIG_NSH_HAVEMMCSD  1
+#  ifdef CONFIG_LPC17_SSP1
+#    define CONFIG_NSH_HAVEMMCSD 1
 #  else
 #    undef CONFIG_NSH_HAVEMMCSD
 #  endif
@@ -71,13 +71,13 @@
 /* Do we have SPI support for MMC/SD? */
 
 #ifdef CONFIG_NSH_HAVEMMCSD
-#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
-#    error "The LPCXpresso MMC/SD is on SSP0"
+#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 1
+#    error "The LPCXpresso MMC/SD is on SSP1"
 #    undef CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO 0
+#    define CONFIG_NSH_MMCSDSPIPORTNO 1
 #  endif
 #  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "The LPCXpresso MMC/SD is only one slot (0)"
+#    error "The LPCXpresso MMC/SD has only one slot (0)"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif

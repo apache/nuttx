@@ -1,14 +1,14 @@
 README
 ^^^^^^
 
-README for NuttX port to the Embedded Artists' LPCXpresso base board with
+README for NuttX port to the Embedded Artists' base board with the NXP
 the LPCXpresso daughter board.
 
 Contents
 ^^^^^^^^
 
   LCPXpresso LPC1768 Board
-  Jumpers
+  Embedded Artist's Base Board
   Development Environment
   GNU Toolchain Options
   NuttX buildroot Toolchain
@@ -98,12 +98,33 @@ LCPXpresso LPC1768 Board
   P4[28]/RX-MCLK/MAT2.0/TXD3        PAD15                   N/A
   P4[29]/TX-MCLK/MAT2.1/RXD3        PAD16                   N/A
 
+Embedded Artist's Base Board
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Jumpers
-^^^^^^^
+-------
 
   There are many jumpers on the base board.  A usable combination is the
   default jumper settings WITH the two J54 jumpers both removed.  Those
   jumpers are for ISP support and will cause the board to reset.
+
+  To use the SD, J55 must be set to provide chip select PIO1_11 signal as
+  the SD slot chip select.
+
+SD Slot
+-------
+
+       Base-board  J4/J6 LPC1768
+  SD   Signal      Pin   Pin
+  ---  ----------- ----- --------
+  CS   PIO1_11*     55   P2.2
+  DIN  PIO0_9-MOSI   5   P0.9 MOSI1
+  DOUT PIO0_8-MISO   6   P0.8 MISO1
+  CLK  PIO2_11-SCK   7   P0.9 SCK1
+  CD   PIO2_10      52   P2.11
+
+  *J55 must be set to provide chip select PIO1_11 signal as the SD slot
+   chip select.
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^

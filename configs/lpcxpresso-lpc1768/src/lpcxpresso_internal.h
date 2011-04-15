@@ -134,6 +134,25 @@
  * P4[28]/RX-MCLK/MAT2.0/TXD3        PAD15                   N/A
  * P4[29]/TX-MCLK/MAT2.1/RXD3        PAD16                   N/A
  */
+ 
+/* SD Slot
+ *
+ *      Base-board  J4/J6 LPC1768
+ * SD   Signal      Pin   Pin
+ * ---  ----------- ----- --------
+ * CS   PIO1_11*     55   P2.2        (See GPIO_SD_CS)
+ * DIN  PIO0_9-MOSI   5   P0.9 MOSI1  (See GPIO_SSP1_MOSI in lpc17_internal.h)
+ * DOUT PIO0_8-MISO   6   P0.8 MISO1  (See GPIO_SSP1_MISO in lpc17_internal.h)
+ * CLK  PIO2_11-SCK   7   P0.9 SCK1   (See GPIO_SSP1_SCK in board.h)
+ * CD   PIO2_10      52   P2.11       (See GPIO_SD_CD)
+ */
+
+#define GPIO_SD_CS   (GPIO_OUTPUT  | GPIO_VALUE_ONE | GPIO_PORT2 | GPIO_PIN2)
+#ifdef CONFIG_GPIO_IRQ
+#  define GPIO_SD_CD (GPIO_INTBOTH | GPIO_PULLUP    | GPIO_PORT2 | GPIO_PIN11)
+#else
+#  define GPIO_SD_CD (GPIO_INPUT   | GPIO_PULLUP    | GPIO_PORT2 | GPIO_PIN11)
+#endif
 
 /************************************************************************************
  * Public Types
