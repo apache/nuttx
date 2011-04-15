@@ -188,6 +188,8 @@ CONFIG_UART3_2STOP=0
 # LPC17xx specific PHY/Ethernet device driver settings
 #
 # CONFIG_PHY_KS8721 - Selects Micrel KS8721 PHY
+# CONFIG_PHY_DP83848C - Selects National Semiconductor DP83848C PHY
+# CONFIG_PHY_LAN8720 - Selects SMSC LAN8720 PHY
 # CONFIG_PHY_AUTONEG - Enable auto-negotion
 # CONFIG_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
 # CONFIG_PHY_FDUPLEX - Select full (vs. half) duplex
@@ -203,7 +205,9 @@ CONFIG_UART3_2STOP=0
 # CONFIG_NET_MULTICAST - Enable receipt of multicast (and unicast) frames.
 #   Automatically set if CONFIG_NET_IGMP is selected.
 #
-CONFIG_PHY_KS8721=y
+CONFIG_PHY_KS8721=n
+CONFIG_PHY_DP83848C=n
+CONFIG_PHY_LAN8720=y
 CONFIG_PHY_AUTONEG=y
 CONFIG_PHY_SPEED100=n
 CONFIG_PHY_FDUPLEX=y
