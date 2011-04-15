@@ -46,6 +46,19 @@
 #include "chip.h"
 #include "chip/stm32_tim.h"
 
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
 /************************************************************************************
  * Public Types
@@ -155,9 +168,16 @@ struct stm32_tim_ops_s {
  ************************************************************************************/
 
 /** Power-up timer and get its structure */
-FAR struct stm32_tim_dev_s * stm32_tim_init(int timer);
+EXTERN FAR struct stm32_tim_dev_s * stm32_tim_init(int timer);
 
 /** Power-down timer, mark it as unused */
-int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev);
+EXTERN int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev);
 
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_TIM_H */

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_rtc.h
+ * arch/arm/src/stm32/stm32_pwr.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
@@ -33,48 +33,58 @@
  *
  ************************************************************************************/
 
-/************************************************************************************
- * Included Files
- ************************************************************************************/
-
-#ifndef __ARCH_ARM_SRC_STM32_STM32_RTC_H
-#define __ARCH_ARM_SRC_STM32_STM32_RTC_H
+/** \file
+ *  \author Uros Platise
+ *  \brief STM32 Power
+ *  
+ * \addtogroup STM32_PWR
+ * \{
+ */
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
-#include "chip.h"
-#include "chip/stm32_rtc.h"
-#include "chip/stm32_bkp.h"
+#include <stdint.h>
+#include <errno.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+#include "up_arch.h"
+#include "stm32_pwr.h"
 
-#define STM32_RTC_PRESCALER_SECOND      32767   /** Default prescaler to get a second base */
-#define STM32_RTC_PRESCALER_MIN         1       /** Maximum speed of 16384 Hz */
 
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+#if defined(CONFIG_STM32_PWR)
 
 /************************************************************************************
- * Public Functions
+ * Private Functions
  ************************************************************************************/
 
-/** Set alarm output pin */
-EXTERN void stm32_rtc_settalarmpin(bool activate);
-
-
-/** \} */
-#undef EXTERN
-#if defined(__cplusplus)
+static inline uint16_t stm32_pwr_getreg(uint8_t offset)
+{
+    return getreg32(STM32_PWR_BASE + offset);
 }
-#endif
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_RTC_H */
+
+
+static inline void stm32_pwr_putreg(uint8_t offset, uint16_t value)
+{
+    putreg32(value, STM32_PWR_BASE + offset);
+}
+
+
+static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint16_t setbits)
+{
+    modifyreg32(STM32_PWR_BASE + offset, clearbits, setbits);
+}
+
+
+
+/************************************************************************************
+ * Public Function - Initialization
+ ************************************************************************************/
+
+void stm32_pwr_enablebkp(void)
+{
+    stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, PWR_CR_DBP);
+}
+
+
+#endif // defined(CONFIG_STM32_PWR)
+/** \} */

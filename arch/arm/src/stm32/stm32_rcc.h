@@ -46,7 +46,7 @@
 #include "chip/stm32_rcc.h"
 
 /************************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -59,6 +59,10 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
 /* This symbol references the Cortex-M3 vector table (as positioned by the the linker
  * script, ld.script or ld.script.dfu.  The standard location for the vector table is
  * at the beginning of FLASH at address 0x0800:0000.  If we are using the STMicro DFU
@@ -68,25 +72,26 @@ extern "C" {
 
 extern uint32_t stm32_vectors[];	/* See stm32_vectors.S */
 
+
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
 
-/************************************************************************************
- * Name: stm32_clockconfig
- *
- * Description:
- *   Called to change to new clock based on settings in board.h
- *
- ************************************************************************************/
-
+/** Called to change to new clock based on settings in board.h
+ * 
+ *   NOTE:  This logic needs to be extended so that we can selected low-power
+ *   clocking modes as well!
+ **/
 EXTERN void stm32_clockconfig(void);
+
+/** Enable LSE Clock
+ **/
+EXTERN void stm32_rcc_enablelse(void);
+
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_RRC_H */
-

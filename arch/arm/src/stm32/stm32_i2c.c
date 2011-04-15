@@ -66,6 +66,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/i2c/i2c.h>
+#include <nuttx/kmalloc.h>
 #include <arch/board/board.h>
 
 #include <sys/types.h>
@@ -81,6 +82,7 @@
 
 #include "stm32_rcc.h"
 #include "stm32_i2c.h"
+#include "stm32_waste.h"
 
 
 #if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C2)
@@ -88,8 +90,6 @@
 /************************************************************************************
  * Private Types
  ************************************************************************************/
-
-#define I2C_FLAGS   0x8000  /* RxNE and TxE enabled */
 
 /** I2C Device Private Data
  */
@@ -593,8 +593,6 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
     uint32_t    status = 0;
     int         status_errno = 0;
     
-    extern void up_waste(void);
-    
     ASSERT(count);
                   
     /* wait as stop might still be in progress 
@@ -789,7 +787,7 @@ FAR struct i2c_dev_s * up_i2cinitialize(int port)
     
     /* Allocate instance */
     
-    if ( !(inst = malloc( sizeof(struct stm32_i2c_inst_s) )) ) return NULL;
+    if ( !(inst = kmalloc( sizeof(struct stm32_i2c_inst_s) )) ) return NULL;
         
     /* initialize instance */
         
@@ -831,7 +829,7 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
         
     if ( --((struct stm32_i2c_inst_s *)dev)->priv->refs ) {
         irqrestore(irqs);
-        free(dev);
+        kfree(dev);
         return OK;
     }
     
@@ -845,7 +843,7 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
 
     stm32_i2c_sem_destroy( (struct i2c_dev_s *)dev );
         
-    free(dev);
+    kfree(dev);
     return OK;
 }
 
