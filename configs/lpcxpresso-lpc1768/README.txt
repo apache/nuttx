@@ -125,6 +125,17 @@ SD Slot
 
   *J55 must be set to provide chip select PIO1_11 signal as the SD slot
    chip select.
+ 
+  Base-board          J4/J6 LPC1768
+  Signal              Pin   Pin
+  ------------------- ----- --------
+  PIO0_6-USB_CONNECT* 23    P0.21
+  USB_DM              36    USB_D-
+  USB_DP              37    USB_D+
+  PIO0_3-VBUS_SENSE   39    P0.5
+
+  *J14 must be set to permit GPIO control of the USB connect pin
+   J23 is associated the LEDs used for USB support
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^

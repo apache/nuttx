@@ -97,7 +97,7 @@ void up_ledinit(void)
 {
   /* Configure all LED GPIO lines */
 
-  lpc17_configgpio(GPIO_LED);
+  lpc17_configgpio(LPCXPRESSO_LED);
   g_ncstate = true;
 }
 
@@ -125,7 +125,7 @@ void up_ledon(int led)
 	  return;
 	}
 
-  lpc17_gpiowrite(GPIO_LED, off);
+  lpc17_gpiowrite(LPCXPRESSO_LED, off);
 }
 
 /****************************************************************************
@@ -151,7 +151,7 @@ void up_ledoff(int led)
 	  return;
 	}
 
-  lpc17_gpiowrite(GPIO_LED, off);
+  lpc17_gpiowrite(LPCXPRESSO_LED, off);
 }
 
 #endif /* CONFIG_ARCH_LEDS */
