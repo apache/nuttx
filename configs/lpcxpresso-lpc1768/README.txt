@@ -126,16 +126,39 @@ SD Slot
   *J55 must be set to provide chip select PIO1_11 signal as the SD slot
    chip select.
  
+ USB Device
+ ----------
+ 
   Base-board          J4/J6 LPC1768
   Signal              Pin   Pin
   ------------------- ----- --------
   PIO0_6-USB_CONNECT* 23    P0.21
   USB_DM              36    USB_D-
   USB_DP              37    USB_D+
-  PIO0_3-VBUS_SENSE   39    P0.5
+  PIO0_3-VBUS_SENSE** 39    P0.5
 
   *J14 must be set to permit GPIO control of the USB connect pin
+ **J12 must be set to permit GPIO control of the USB vbus sense pin
    J23 is associated the LEDs used for USB support
+
+  Here is a more detailed pin mapping:
+
+  ---------------------------------------------+------+-----------------------------------------------
+                    LPCXpresso                 | J4/6 |            Base Board
+  ---------------------------------------------|      |-----------------------------------------------
+  LPC1768                        Signal        |      | Signal             Connection
+  ------------------------------ --------------+------+------------------- ---------------------------
+  P0.29/USB-D+                   P0[29]/USB-D+ |  37  | USB_DP             USB D+
+  P0.30/USB-D-                   P0[30]/USB-D- |  36  | USB_DM             USB D-
+  P1.18/USB-UP-LED/PWM1.1/CAP1.0 PAD1          | N/A  | N/A                N/A
+  P1.30/VBUS/AD0.4               P1[30]        |  19  | PIO1_3             (Not used on board)
+  P2.9/USB-CONNECT/RXD2*         PAD19         | N/A  | N/A                N/A
+  ------------------------------ --------------+------+------------------- ---------------------------
+  P0.21/RI1/RD1                  P0[21]        |  23  | PIO0_6-USB_CONNECT VBUS via J14 and transistor
+  P0.5/I2SRX-WS/TD2/CAP2.1       P0[5]         |  39  | PIO0_3-VBUS_SENSE  VBUS via J12
+  ------------------------------ --------------+------+------------------- ---------------------------
+
+  *P2.9 Connect to a transistor driven USB-D+ pullup on the LPCXpresso board.
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -304,12 +327,12 @@ Code Red IDE
 
   Examples
     To load the executable file app.axf and start it executing on an LPC1758
-	target using Red Probe, use the following command line:
+    target using Red Probe, use the following command line:
 
       crt_emu_cm3_nxp -pLPC1758 -flash-load-exec=app.axf
 
     To load the binary file binary.bin to address 0x1000 to an LPC1343 target
-	using LPC-Link on Windows XP, use the following command line:
+    using LPC-Link on Windows XP, use the following command line:
 
       crt_emu_lpc11_13_nxp -wire=hid -pLPC1343 -flash-load=binary.bin -load-base=0x1000
 
@@ -411,20 +434,20 @@ LEDs
   - The LED is not illuminated until the LPCXpresso completes initialization.
   
     If the LED is stuck in the OFF state, this means that the LPCXpresso did not 
-	complete intialization.
+    complete intialization.
 
   - Each time the OS enters an interrupt (or a signal) it will turn the LED OFF and
     restores its previous stated upon return from the interrupt (or signal).
 
-	The normal state, after initialization will be a dull glow.  The brightness of
-	the glow will be inversely related to the proportion of time spent within interrupt
-	handling logic.  The glow may decrease in brightness when the system is very
-	busy handling device interrupts and increase in brightness as the system becomes
-	idle.
+    The normal state, after initialization will be a dull glow.  The brightness of
+    the glow will be inversely related to the proportion of time spent within interrupt
+    handling logic.  The glow may decrease in brightness when the system is very
+    busy handling device interrupts and increase in brightness as the system becomes
+    idle.
 
-	Stuck in the OFF state suggests that that the system never completed
-	initialization;  Stuck in the ON state would indicated that the system
-	intialialized, but is not takint interrupts.
+    Stuck in the OFF state suggests that that the system never completed
+    initialization;  Stuck in the ON state would indicated that the system
+    intialialized, but is not takint interrupts.
 
   - If a fatal assertion or a fatal unhandled exception occurs, the LED will flash
     strongly as a slow, 1Hz rate.
@@ -432,164 +455,166 @@ LEDs
 LPCXpresso Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
-	   be set to:
+  General Architecture Settings:
 
-	   CONFIG_ARCH=arm
+    CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
+     be set to:
 
-	CONFIG_ARCH_family - For use in C code:
+       CONFIG_ARCH=arm
 
-	   CONFIG_ARCH_ARM=y
+    CONFIG_ARCH_family - For use in C code:
 
-	CONFIG_ARCH_architecture - For use in C code:
+       CONFIG_ARCH_ARM=y
 
-	   CONFIG_ARCH_CORTEXM3=y
+    CONFIG_ARCH_architecture - For use in C code:
 
-	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
+       CONFIG_ARCH_CORTEXM3=y
 
-	   CONFIG_ARCH_CHIP=lpc17xx
+    CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-	CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
-	   chip:
+       CONFIG_ARCH_CHIP=lpc17xx
 
-	   CONFIG_ARCH_CHIP_LPC1768=y
+    CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
+       chip:
 
-	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
-	   hence, the board that supports the particular chip or SoC.
+       CONFIG_ARCH_CHIP_LPC1768=y
 
-	   CONFIG_ARCH_BOARD=lpcxpresso-lpc1768
+    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+       hence, the board that supports the particular chip or SoC.
 
-	CONFIG_ARCH_BOARD_name - For use in C code
+       CONFIG_ARCH_BOARD=lpcxpresso-lpc1768
 
-	   CONFIG_ARCH_BOARD_LPCEXPRESSO=y
+    CONFIG_ARCH_BOARD_name - For use in C code
 
-	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
-	   of delay loops
+       CONFIG_ARCH_BOARD_LPCEXPRESSO=y
 
-	CONFIG_ENDIAN_BIG - define if big endian (default is little
-	   endian)
+    CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
+       of delay loops
 
-	CONFIG_DRAM_SIZE - Describes the installed DRAM (CPU SRAM in this case):
+    CONFIG_ENDIAN_BIG - define if big endian (default is little
+       endian)
 
-	   CONFIG_DRAM_SIZE=(32*1024) (32Kb)
+    CONFIG_DRAM_SIZE - Describes the installed DRAM (CPU SRAM in this case):
 
-	   There is an additional 32Kb of SRAM in AHB SRAM banks 0 and 1.
+       CONFIG_DRAM_SIZE=(32*1024) (32Kb)
 
-	CONFIG_DRAM_START - The start address of installed DRAM
+       There is an additional 32Kb of SRAM in AHB SRAM banks 0 and 1.
 
-	   CONFIG_DRAM_START=0x10000000
+    CONFIG_DRAM_START - The start address of installed DRAM
 
-	CONFIG_DRAM_END - Last address+1 of installed RAM
+       CONFIG_DRAM_START=0x10000000
 
-	   CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
+    CONFIG_DRAM_END - Last address+1 of installed RAM
 
-	CONFIG_ARCH_IRQPRIO - The LPC17xx supports interrupt prioritization
+       CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 
-	   CONFIG_ARCH_IRQPRIO=y
+    CONFIG_ARCH_IRQPRIO - The LPC17xx supports interrupt prioritization
 
-	CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
-	   have LEDs
+       CONFIG_ARCH_IRQPRIO=y
 
-	CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
-	   stack. If defined, this symbol is the size of the interrupt
-	    stack in bytes.  If not defined, the user task stacks will be
-	  used during interrupt handling.
+    CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
+       have LEDs
 
-	CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
+    CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
+       stack. If defined, this symbol is the size of the interrupt
+       stack in bytes.  If not defined, the user task stacks will be
+       used during interrupt handling.
 
-	CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
+    CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
-	CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
-	   cause a 100 second delay during boot-up.  This 100 second delay
-	   serves no purpose other than it allows you to calibratre
-	   CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
-	   the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
-	   the delay actually is 100 seconds.
+    CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 
-	Individual subsystems can be enabled:
-	  CONFIG_LPC17_MAINOSC=y
-	  CONFIG_LPC17_PLL0=y
-	  CONFIG_LPC17_PLL1=n
-	  CONFIG_LPC17_ETHERNET=n
-	  CONFIG_LPC17_USBHOST=n
-	  CONFIG_LPC17_USBOTG=n
-	  CONFIG_LPC17_USBDEV=n
-	  CONFIG_LPC17_UART0=y
-	  CONFIG_LPC17_UART1=n
-	  CONFIG_LPC17_UART2=n
-	  CONFIG_LPC17_UART3=n
-	  CONFIG_LPC17_CAN1=n
-	  CONFIG_LPC17_CAN2=n
-	  CONFIG_LPC17_SPI=n
-	  CONFIG_LPC17_SSP0=n
-	  CONFIG_LPC17_SSP1=n
-	  CONFIG_LPC17_I2C0=n
-	  CONFIG_LPC17_I2C1=n
-	  CONFIG_LPC17_I2S=n
-	  CONFIG_LPC17_TMR0=n
-	  CONFIG_LPC17_TMR1=n
-	  CONFIG_LPC17_TMR2=n
-	  CONFIG_LPC17_TMR3=n
-	  CONFIG_LPC17_RIT=n
-	  CONFIG_LPC17_PWM=n
-	  CONFIG_LPC17_MCPWM=n
-	  CONFIG_LPC17_QEI=n
-	  CONFIG_LPC17_RTC=n
-	  CONFIG_LPC17_WDT=n
-	  CONFIG_LPC17_ADC=n
-	  CONFIG_LPC17_DAC=n
-	  CONFIG_LPC17_GPDMA=n
-	  CONFIG_LPC17_FLASH=n
+    CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
+       cause a 100 second delay during boot-up.  This 100 second delay
+       serves no purpose other than it allows you to calibratre
+       CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
+       the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
+       the delay actually is 100 seconds.
+
+    Individual subsystems can be enabled:
+      CONFIG_LPC17_MAINOSC=y
+      CONFIG_LPC17_PLL0=y
+      CONFIG_LPC17_PLL1=n
+      CONFIG_LPC17_ETHERNET=n
+      CONFIG_LPC17_USBHOST=n
+      CONFIG_LPC17_USBOTG=n
+      CONFIG_LPC17_USBDEV=n
+      CONFIG_LPC17_UART0=y
+      CONFIG_LPC17_UART1=n
+      CONFIG_LPC17_UART2=n
+      CONFIG_LPC17_UART3=n
+      CONFIG_LPC17_CAN1=n
+      CONFIG_LPC17_CAN2=n
+      CONFIG_LPC17_SPI=n
+      CONFIG_LPC17_SSP0=n
+      CONFIG_LPC17_SSP1=n
+      CONFIG_LPC17_I2C0=n
+      CONFIG_LPC17_I2C1=n
+      CONFIG_LPC17_I2S=n
+      CONFIG_LPC17_TMR0=n
+      CONFIG_LPC17_TMR1=n
+      CONFIG_LPC17_TMR2=n
+      CONFIG_LPC17_TMR3=n
+      CONFIG_LPC17_RIT=n
+      CONFIG_LPC17_PWM=n
+      CONFIG_LPC17_MCPWM=n
+      CONFIG_LPC17_QEI=n
+      CONFIG_LPC17_RTC=n
+      CONFIG_LPC17_WDT=n
+      CONFIG_LPC17_ADC=n
+      CONFIG_LPC17_DAC=n
+      CONFIG_LPC17_GPDMA=n
+      CONFIG_LPC17_FLASH=n
 
   LPC17xx specific device driver settings
 
-	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
-	   console and ttys0 (default is the UART0).
-	CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
-	   This specific the size of the receive buffer
-	CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
-	   being sent.  This specific the size of the transmit buffer
-	CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
-	CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
-	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-	CONFIG_UARTn_2STOP - Two stop bits
+    CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
+       console and ttys0 (default is the UART0).
+    CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+       This specific the size of the receive buffer
+    CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+       being sent.  This specific the size of the transmit buffer
+    CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
+    CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
+    CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+    CONFIG_UARTn_2STOP - Two stop bits
 
   LPC17xx specific PHY/Ethernet device driver settings.  These setting
   also require CONFIG_NET and CONFIG_LPC17_ETHERNET.
 
-	CONFIG_PHY_KS8721 - Selects Micrel KS8721 PHY
-	CONFIG_PHY_AUTONEG - Enable auto-negotion
-	CONFIG_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
-	CONFIG_PHY_FDUPLEX - Select full (vs. half) duplex
+    CONFIG_PHY_KS8721 - Selects Micrel KS8721 PHY
+    CONFIG_PHY_AUTONEG - Enable auto-negotion
+    CONFIG_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
+    CONFIG_PHY_FDUPLEX - Select full (vs. half) duplex
 
     CONFIG_NET_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
-	CONFIG_NET_NTXDESC - Configured number of Tx descriptors. Default: 18
-	CONFIG_NET_NRXDESC - Configured number of Rx descriptors. Default: 18
-	CONFIG_NET_PRIORITY - Ethernet interrupt priority.  The is default is
-	  the higest priority.
-	CONFIG_NET_WOL - Enable Wake-up on Lan (not fully implemented).
-	CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
-	  CONFIG_DEBUG.
-	CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
-	  Also needs CONFIG_DEBUG.
-	CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
-	CONFIG_NET_MULTICAST - Enable receipt of multicast (and unicast) frames.
+    CONFIG_NET_NTXDESC - Configured number of Tx descriptors. Default: 18
+    CONFIG_NET_NRXDESC - Configured number of Rx descriptors. Default: 18
+    CONFIG_NET_PRIORITY - Ethernet interrupt priority.  The is default is
+      the higest priority.
+    CONFIG_NET_WOL - Enable Wake-up on Lan (not fully implemented).
+    CONFIG_NET_REGDEBUG - Enabled low level register debug.  Also needs
+      CONFIG_DEBUG.
+    CONFIG_NET_DUMPPACKET - Dump all received and transmitted packets.
+      Also needs CONFIG_DEBUG.
+    CONFIG_NET_HASH - Enable receipt of near-perfect match frames.
+    CONFIG_NET_MULTICAST - Enable receipt of multicast (and unicast) frames.
       Automatically set if CONFIG_NET_IGMP is selected.
 
   LPC17xx USB Device Configuration
 
-	CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
-	  Handle USB Start-Of-Frame events. 
-	  Enable reading SOF from interrupt handler vs. simply reading on demand.
-	  Probably a bad idea... Unless there is some issue with sampling the SOF
-	  from hardware asynchronously.
-	CONFIG_LPC17_USBDEV_EPFAST_INTERRUPT
-	  Enable high priority interrupts.  I have no idea why you might want to
-	  do that
-	CONFIG_LPC17_USBDEV_NDMADESCRIPTORS
-	  Number of DMA descriptors to allocate in SRAM.
-	CONFIG_LPC17_USBDEV_DMA
-	  Enable lpc17xx-specific DMA support
+    CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
+      Handle USB Start-Of-Frame events. 
+      Enable reading SOF from interrupt handler vs. simply reading on demand.
+      Probably a bad idea... Unless there is some issue with sampling the SOF
+      from hardware asynchronously.
+    CONFIG_LPC17_USBDEV_EPFAST_INTERRUPT
+      Enable high priority interrupts.  I have no idea why you might want to
+      do that
+    CONFIG_LPC17_USBDEV_NDMADESCRIPTORS
+      Number of DMA descriptors to allocate in SRAM.
+    CONFIG_LPC17_USBDEV_DMA
+      Enable lpc17xx-specific DMA support
 
   LPC17xx USB Host Configuration (the LPCXpresso does not support USB Host)
 
@@ -614,10 +639,10 @@ Configurations
 Each LPCXpresso configuration is maintained in a sudirectory and can be
 selected as follow:
 
-	cd tools
-	./configure.sh lpcxpresso-lpc1768/<subdir>
-	cd -
-	. ./setenv.sh
+    cd tools
+    ./configure.sh lpcxpresso-lpc1768/<subdir>
+    cd -
+    . ./setenv.sh
 
 Where <subdir> is one of the following:
 
@@ -627,31 +652,40 @@ Where <subdir> is one of the following:
     Support for the board's SPI-based MicroSD card is included
     (but not passing tests as of this writing).
 
+	NOTE: At present, the value for the SD SPI frequency is too
+	high and the SD will failing.  Setting that frequency to 400000
+	removes the problem. TODO:  Tune this frequency to some optimal
+	value.
+
   ostest:
     This configuration directory, performs a simple OS test using
     apps/examples/ostest.
 
-	NOTE: The OSTest runs on the LPCXpresso if it is not installed
-	on the base board (using an add-on MAX232 RS232 driver connected
-	to:
+    NOTE: The OSTest runs on the LPCXpresso if it is not installed
+    on the base board (using an add-on MAX232 RS232 driver connected
+    to:
 
       P0[0]/RD1/TXD3/SDA1  J6-9
       P0[1]/TD1/RXD3/SCL   J6-10
 
-	I suspect that this test does not run on with the base board
-	attached because OSTest blasts out a lot of serial data and
-	overruns the FTDI chip before it has a chance to establish the
-	connection with the host.
+    I suspect that this test does not run on with the base board
+    attached because OSTest blasts out a lot of serial data and
+    overruns the FTDI chip before it has a chance to establish the
+    connection with the host.
 
   thttpd:
     This builds the THTTPD web server example using the THTTPD and
     the apps/examples/thttpd application.
 
-	NOTE:  You will need to build the NXFLAT toolchain as described
-	above in order to use this example.
+    NOTE:  You will need to build the NXFLAT toolchain as described
+    above in order to use this example.
 
   usbstorage:
     This configuration directory exercises the USB mass storage
     class driver at apps/examples/usbstorage.  See apps/examples/README.txt
     for more information.
 
+	NOTE: At present, the value for the SD SPI frequency is too
+	high and the SD will failing.  Setting that frequency to 400000
+	removes the problem. TODO:  Tune this frequency to some optimal
+	value.
