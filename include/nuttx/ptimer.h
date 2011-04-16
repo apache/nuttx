@@ -42,20 +42,9 @@
 
 #include <nuttx/config.h>
 
-#include <time.h>
-#include <stdint.h>
-#include <stdbool.h>
-
-#include <nuttx/clock.h>
-
-#ifdef CONFIG_PTIMER
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define RTC_CLOCKS_PER_SEC      16384
-#define RTC_CLOCKS_SHIFT        14
 
 /****************************************************************************
  * Public Types
@@ -64,15 +53,6 @@
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
-
-/* Variable determines the state of the RTC module.
- *
- * After initialization value is set to 'true' if RTC starts successfully.
- * The value can be changed to false also during operation if RTC for
- * some reason fails.
- */
-
-extern volatile bool g_rtc_enabled;
 
 /****************************************************************************
  * Public Functions
@@ -86,37 +66,10 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Name: up_rtcinitialize
- *
- * Description:
- *   Initialize the periodic timer interface. This function is called once
- *    from the clock_initialize() function.
- *
- * Returned Value:
- *   Returns OK if RTC has successfully started, otherwise ERROR.
- *
- ****************************************************************************/
-
-EXTERN int up_rtcinitialize(void);
-EXTERN int up_rtcinitialize(void);
-
-EXTERN clock_t up_rtc_getclock(void);
-EXTERN void up_rtc_setclock(clock_t clock);
-
-EXTERN time_t up_rtc_gettime(void);
-EXTERN void up_rtc_settime(time_t time);
-
-EXTERN clock_t up_rtc_setalarm(clock_t atclock);
-
-/* This callback is provided by the clock module and called by the RTC ISR */
-
-EXTERN void clock_rtcalarmcb(clock_t clock);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* CONFIG_PTIMER */
 #endif /* __INCLUDE_NUTTX_PTIMER_H */

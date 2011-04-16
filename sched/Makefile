@@ -78,13 +78,10 @@ endif
 
 CLOCK_SRCS	= clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c \
 		  clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c \
-		  clock_gettimeofday.c
+		  clock_gettimeofday.c clock_systimer.c
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
-CLOCK_SRCS	+= clock_systimer.c
 ifeq ($(CONFIG_UPTIME),y)
 CLOCK_SRCS	+= clock_uptime.c
-endif
 endif
 
 SIGNAL_SRCS	= sig_initialize.c \

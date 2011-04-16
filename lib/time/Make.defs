@@ -34,4 +34,4 @@
 ############################################################################
 
 TIME_SRCS = lib_mktime.c lib_gmtime.c lib_gmtimer.c lib_strftime.c \
-		  lib_calendar2utc.c lib_daysbeforemonth.c lib_isleapyear.c
+		  lib_calendar2utc.c lib_daysbeforemonth.c lib_isleapyear.c lib_time.c

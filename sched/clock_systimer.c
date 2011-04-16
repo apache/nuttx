@@ -42,7 +42,7 @@
 #include <stdint.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/ptimer.h>
+#include <nuttx/rtc.h>
 #include <nuttx/time.h>
 
 #if !defined(clock_systimer) /* See nuttx/clock.h */
@@ -79,17 +79,17 @@ uint32_t clock_systimer(void)
 {
   /* Fetch the g_system_timer value from timer hardware, if available */
 
-#ifdef CONFIG_PTIMER
+#ifdef CONFIG_RTC
 
   /* Check if the periodic timer is initialized
    *
    * Note that the unit of the g_system_timer and and up_rtc_getclock() must
-   * be the same in order.
+   * be the same in order (must have same [unit]) to allow smooth transitions.
    */
 
   if (g_rtc_enabled)
     {
-	  up_rtc_getclock();
+//	  return up_rtc_getclock();
 	}
 #endif
 

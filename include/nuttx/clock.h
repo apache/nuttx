@@ -125,19 +125,18 @@
  * access to kernel global data
  */
 
-#if !defined(CONFIG_PTIMER) && __HAVE_KERNEL_GLOBALS
+#if __HAVE_KERNEL_GLOBALS
 extern volatile uint32_t g_system_timer;
-#define clock_systimer() g_system_timer
+extern volatile uint32_t g_uptime;
 #endif
 
-/* System uptime (in seconds) is only supported by periodic timer hardware */
+#if !defined(CONFIG_RTC) && __HAVE_KERNEL_GLOBALS
+#define clock_systimer() g_system_timer
 
 #if defined(CONFIG_UPTIME)
-extern volatile uint32_t g_uptime;
-
-#if __HAVE_KERNEL_GLOBALS
-#  define clock_uptime() g_uptime
+#define clock_uptime()   g_uptime
 #endif
+
 #endif
 
 /****************************************************************************
@@ -170,7 +169,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-#if defined(CONFIG_PTIMER) || !__HAVE_KERNEL_GLOBALS
+#if defined(CONFIG_RTC) || !__HAVE_KERNEL_GLOBALS
 EXTERN uint32_t clock_systimer(void);
 #endif
 

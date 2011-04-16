@@ -46,6 +46,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/time.h>
+#include <nuttx/rtc.h>
 
 #include "clock_internal.h"
 
@@ -152,10 +153,7 @@ static inline void incr_uptime(void)
 
 void clock_initialize(void)
 {
-  time_t jdn;
-#ifdef CONFIG_PTIMER
-  bool rtc_enabled = false;
-#endif
+  time_t jdn = 0;
 
   /* Initialize the real time close (this should be un-nesssary except on a
    * restart).
@@ -169,18 +167,13 @@ void clock_initialize(void)
   /* Do we have hardware periodic timer support? */
 
 #ifdef CONFIG_RTC
-  if (up_rtcinitialize() == OK)
-    {
-	  rtc_enabled = true;
-	}
-#endif
+  up_rtcinitialize();
 
   /* Get the EPOCH-relative julian date from the calendar year,
    * month, and date
    */
 
-#ifdef CONFIG_PTIMER
-  if (!rtc_enabled)
+  if (g_rtc_enabled==false)
 #endif
     {
       jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH,

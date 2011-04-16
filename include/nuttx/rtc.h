@@ -1,8 +1,8 @@
 /****************************************************************************
- * sched/clock_uptime.c
+ * include/nuttx/rtc.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright(C) 2011 Uros Platise. All rights reserved.
+ *   Author: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,15 +23,18 @@
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
  * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
  * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING,
  * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
  * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
  * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * LIABILITY, OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+#ifndef __INCLUDE_NUTTX_RTC_H
+#define __INCLUDE_NUTTX_RTC_H
 
 /****************************************************************************
  * Included Files
@@ -40,53 +43,76 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <nuttx/clock.h>
-#include <nuttx/time.h>
-#include <nuttx/rtc.h>
+#include <stdbool.h>
 
-#if !defined(CONFIG_DISABLE_CLOCK) && defined(CONFIG_UPTIME) && !defined(clock_uptime)
-     
+#include <nuttx/clock.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define RTC_CLOCKS_PER_SEC      16384
+#define RTC_CLOCKS_SHIFT        14
+
 /****************************************************************************
- * Private Data
+ * Public Types
  ****************************************************************************/
+
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
+
+/* Variable determines the state of the RTC module.
+ *
+ * After initialization value is set to 'true' if RTC starts successfully.
+ * The value can be changed to false also during operation if RTC for
+ * some reason fails.
+ */
+
+extern volatile bool g_rtc_enabled;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
- * Function:  clock_uptime
+ * Name: up_rtcinitialize
  *
  * Description:
- *   Return the current value of the system timer counter, which is only
- *   enabled when system is in active mode.
+ *   Initialize the periodic timer interface. This function is called once
+ *   from the clock_initialize() function.
  *
- * Parameters:
- *   None
- *
- * Return Value:
- *   The current value of the system time counter
- *
- * Assumptions:
+ * Returned Value:
+ *   Returns OK if RTC has successfully started, otherwise ERROR.
  *
  ****************************************************************************/
 
-time_t clock_uptime(void)
-{
-#ifdef CONFIG_RTC
-  if (g_rtc_enabled)
-    {
-      return up_rtc_gettime();
-	}
-  else
-#endif
-    {
-      return g_uptime;
-	}
-}
+EXTERN int up_rtcinitialize(void);
+EXTERN int up_rtcinitialize(void);
 
-#endif /* CONFIG_DISABLE_CLOCK && CONFIG_UPTIME */
+EXTERN clock_t up_rtc_getclock(void);
+EXTERN void up_rtc_setclock(clock_t clock);
+
+EXTERN time_t up_rtc_gettime(void);
+EXTERN void up_rtc_settime(time_t time);
+
+EXTERN clock_t up_rtc_setalarm(clock_t atclock);
+
+/* This callback is provided by the clock module and called by the RTC ISR */
+
+EXTERN void clock_rtcalarmcb(clock_t clock);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __INCLUDE_NUTTX_RTC_H */
