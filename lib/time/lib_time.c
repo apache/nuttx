@@ -39,11 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <sys/time.h>
 #include <time.h>
 
-#include <nuttx/clock.h>
-
-#if !defined(CONFIG_DISABLE_CLOCK) && defined(CONFIG_UPTIME)
+#ifndef CONFIG_DISABLE_CLOCK
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,30 +60,50 @@
  * Function:  time
  *
  * Description:
- *   Return the current system up-time.
+ *   Get the current calendar time as a time_t object.  The function returns
+ *   this value, and if the argument is not a null pointer, the value is also
+ *   set to the object pointed by tloc.
+ *
+ *   Note that this function is just a thin wrapper around gettimeofday()
+ *   and is provided for compatibility.  gettimeofday() is the preffered way
+ *   to obtain system time.
  *
  * Parameters:
- *   The tloc  argument points to an area where the return value is 
- *   also stored. If tloc is a null pointer, no value is stored.
+ *   Pointer to an object of type time_t, where the time value is stored.
+ *   Alternativelly, this parameter can be a null pointer, in which case the
+ *   parameter is not used, but a time_t object is still returned by the
+ *   function.
  *
  * Return Value:
- *   The current system up time
+ *   The current calendar time as a time_t object.  If the argument is not
+ *   a null pointer, the return value is the same as the one stored in the
+ *   location pointed by the argument.
+ *
+ *   If the function could not retrieve the calendar time, it returns a -1
+ *   value.
  *
  ****************************************************************************/
 
 time_t time(time_t *tloc)
 {
+  struct timeval tp;
+  int ret;
+
   /* Get the current uptime from the system */
 
-  time_t uptime = clock_uptime();
-
-  /* Return the uptime */
-
-  if (tloc)
+  ret = gettimeofday(&tp, NULL);
+  if (ret == OK)
     {
-	  *tloc = uptime;
+      /* Return the seconds since the epoch */
+
+      if (tloc)
+        {
+          *tloc = tp.tv_sec;
+        }
+      return tp.tv_sec;
 	}
-  return uptime;
+
+  return (time_t)ERROR;
 }
 
-#endif /* !CONFIG_DISABLE_CLOCK && CONFIG_UPTIME */
+#endif /* !CONFIG_DISABLE_CLOCK */

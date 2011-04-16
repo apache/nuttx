@@ -182,6 +182,29 @@ o Binary loaders (binfmt/)
   Status:      Open
   Priority:    Low
 
+  Description: Windows build issue.  Almost all configurations that use NXFLAT have
+               the linker script specified like this:
+
+               NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat.ld -no-check-sections
+
+
+               That will not work for windows-based tools because they require Windows
+               style paths.  The solution is to do something like this:
+
+               if ($(WINTOOL)y)
+                 NXFLATLDSCRIPT=${cygpath -w $(TOPDIR)/binfmt/libnxflat/gnu-nxflat.ld}
+               else
+                 NXFLATLDSCRIPT=$(TOPDIR)/binfmt/libnxflat/gnu-nxflat.ld
+               endif
+               
+               Then use
+               
+               NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T"$(NXFLATLDSCRIPT)" -no-check-sections
+               
+  Status:      Open
+  Priority:    There are too many references like the above.  They will have
+               to get fixed as needed for Windows native tool builds.
+
 o Network (net/, drivers/net)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

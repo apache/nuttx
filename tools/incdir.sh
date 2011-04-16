@@ -36,7 +36,7 @@
 
 progname=$0
 wintool=n
-usage="USAGE: $progname [-w] [-d] [-l] [-h] <compiler-path> <dir1> [<dir2> [<dir3> ...]]"
+usage="USAGE: $progname [-w] [-d] [-h] <compiler-path> <dir1> [<dir2> [<dir3> ...]]"
 advice="Try '$progname -h' for more information"
 
 while [ ! -z "$1" ]; do 
@@ -193,17 +193,15 @@ for dir in $dirlist; do
 		# Treat the first directory differently
 
 		if [ -z "$response" ]; then
-			response=-I$path
+			response=-I\"$path\"
 		else
-			response=$response" -I$path"
+			response=$response" -I\"$path\""
 		fi
 	fi
 done
 
 if [ "X$fmt" = "Xuserinc" ]; then
 	response=$response"'"
-else
-	response=\"$response\"
 fi
 
 echo $response
