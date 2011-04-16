@@ -779,15 +779,15 @@ Where <subdir> is one of the following:
 
   hidkbd:
     This configuration directory, performs a simple test of the USB host
-    HID keyboard class driver using the test logic in examples/hidkbd.
+    HID keyboard class driver using the test logic in apps/examples/hidkbd.
 
   nettest:
     This configuration directory may be used to enable networking using the
-    LPC17xx's Ethernet controller. It uses examples/nettest to excercise the
+    LPC17xx's Ethernet controller. It uses apps/examples/nettest to excercise the
     TCP/IP network.
 
   nsh:
-    Configures the NuttShell (nsh) located at examples/nsh.  The
+    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
     Support for the board's SPI-based MicroSD card is included
     (but not passing tests as of this writing).
@@ -798,7 +798,7 @@ Where <subdir> is one of the following:
 
   ostest:
     This configuration directory, performs a simple OS test using
-    examples/ostest.
+    apps/examples/ostest.
 
   slip-httpd:
     This configuration is identical to the thttpd configuration except that
@@ -851,15 +851,15 @@ Where <subdir> is one of the following:
 
  thttpd:
     This builds the THTTPD web server example using the THTTPD and
-    the examples/thttpd application.
+    the apps/examples/thttpd application.
 
   usbserial:
     This configuration directory exercises the USB serial class
-    driver at examples/usbserial.  See examples/README.txt for
+    driver at apps/examples/usbserial.  See apps/examples/README.txt for
     more information.
 
   usbstorage:
     This configuration directory exercises the USB mass storage
-    class driver at examples/usbstorage.  See examples/README.txt for
-    more information.
+    class driver at apps/examples/usbstorage.  See apps/examples/README.txt
+    for more information.
 
