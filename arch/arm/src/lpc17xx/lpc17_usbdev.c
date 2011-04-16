@@ -1921,7 +1921,6 @@ static inline void lpc17_ep0setup(struct lpc17_usbdev_s *priv)
 
 static inline void lpc17_ep0dataoutinterrupt(struct lpc17_usbdev_s *priv)
 {
-  struct lpc17_ep_s *ep0;
   uint32_t pktlen;
 
   /* Copy new setup packet into setup buffer */
@@ -1969,7 +1968,6 @@ static inline void lpc17_ep0dataoutinterrupt(struct lpc17_usbdev_s *priv)
       lpc17_epstall(&priv->eplist[LPC17_EP0_IN].ep, false);
       lpc17_epstall(&priv->eplist[LPC17_EP0_OUT].ep, false);
     }
-  return;
 }
 
 /*******************************************************************************
