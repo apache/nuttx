@@ -579,14 +579,14 @@ selected as follow:
 Where <subdir> is one of the following:
 
   nsh:
-    Configures the NuttShell (nsh) located at examples/nsh.  The
+    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
     Support for the board's SPI-based MicroSD card is included
     (but not passing tests as of this writing).
 
   ostest:
     This configuration directory, performs a simple OS test using
-    examples/ostest.
+    apps/examples/ostest.
 
 	NOTE: The OSTest runs on the LPCXpresso if it is not installed
 	on the base board (using an add-on MAX232 RS232 driver connected
@@ -599,3 +599,13 @@ Where <subdir> is one of the following:
 	attached because OSTest blasts out a lot of serial data and
 	overruns the FTDI chip before it has a chance to establish the
 	connection with the host.
+
+  thttpd:
+    This builds the THTTPD web server example using the THTTPD and
+    the apps/examples/thttpd application.
+
+  usbstorage:
+    This configuration directory exercises the USB mass storage
+    class driver at apps/examples/usbstorage.  See apps/examples/README.txt
+    for more information.
+
