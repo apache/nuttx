@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_dup2.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTOR > 0
+#if CONFIG_NFILE_DESCRIPTORS > 0
 int net_dup2(int sockfd1, int sockfd2)
 #else
 int dup2(int sockfd1, int sockfd2)

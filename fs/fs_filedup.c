@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_filedup.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <errno.h>
 
 #include <nuttx/fs.h>
+
 #include "fs_internal.h"
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -109,7 +110,7 @@ int file_dup(int fildes, int minfd)
   if (fildes2 < 0)
     {
       errno = EMFILE;
-       inode_release(list->fl_files[fildes].f_inode);
+      inode_release(list->fl_files[fildes].f_inode);
       return ERROR;
     }
   return fildes2;

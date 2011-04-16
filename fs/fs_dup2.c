@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_dup2.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <unistd.h>
 #include <sched.h>
 #include <errno.h>
@@ -79,7 +80,7 @@ int dup2(int fildes1, int fildes2)
 
   if ((unsigned int)fildes1 >= CONFIG_NFILE_DESCRIPTORS)
     {
-      /* Not a vailid file descriptor.  Did we get a valid socket descriptor? */
+      /* Not a valid file descriptor.  Did we get a valid socket descriptor? */
 
       if ((unsigned int)fildes1 < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_filedup2.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <unistd.h>
 #include <sched.h>
 #include <errno.h>
+
 #include "fs_internal.h"
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
@@ -109,8 +110,8 @@ int dup2(int fildes1, int fildes2)
 
   if ((unsigned int)fildes2 >= CONFIG_NFILE_DESCRIPTORS)
     {
-        errno = EBADF;
-        return ERROR;
+      errno = EBADF;
+      return ERROR;
     }
 
   return files_dup(&list->fl_files[fildes1], &list->fl_files[fildes2]);

@@ -177,7 +177,7 @@ EXTERN int net_dup(int sockfd, int minsd);
  * this function (when both file and socket descriptors are supported)
  */
 
-#if CONFIG_NFILE_DESCRIPTOR > 0
+#if CONFIG_NFILE_DESCRIPTORS > 0
 EXTERN int net_dup2(int sockfd1, int sockfd2);
 #else
 #  define net_dup2(sockfd1, sockfd2) dup2(sockfd1, sockfd2)

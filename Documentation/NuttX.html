@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 14, 2011</p>
+      <p>Last Updated: April 15, 2011</p>
     </td>
   </tr>
 </table>
@@ -2222,10 +2222,16 @@ nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       UART2 and UART3.
     * nuttx/clock.h: Replace all references to the global variable g_system_timer
       with clock_systemtimer() (currently just a macro that that returns g_system_timer).
-=   * lib/string/strrch.c: Would fail if the searched-for character were the first
+    * lib/string/strrch.c: Would fail if the searched-for character were the first
       character in the string.
     * tools/version.sh and mkversion.c: Tools to manage a NuttX version number
       file
+    * sched/clock_uptime() and lib/time/lib_time.c: Add support for 1 second uptime
+      interface.
+    * net/net_dup2.c and include/nuttx/net.h: The conditional compilation for
+      '#if CONFIG_NFILE_DESCRIPTOR > 0' was wrong in both of these files.  It should
+      be '#if CONFIG_NFILE_DESCRIPTORS > 0'.  This causes a dup2() failure in THTTPD
+      and a failure to get a CGI page.  The consequence can be a very serious bug!
 
 apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
