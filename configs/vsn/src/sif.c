@@ -514,9 +514,9 @@ int sif_main(int argc, char *argv[])
         else if (!strcmp(argv[1], "i2c") && argc == 3) {
             int val = atoi(argv[2]);
             
-            I2C_SETFREQUENCY(vsn_sif.i2c2, 100000);
+            I2C_SETFREQUENCY(vsn_sif.i2c1, 100000);
             
-            struct st_lis331dl_dev_s * lis = st_lis331dl_init(vsn_sif.i2c2, val);
+            struct st_lis331dl_dev_s * lis = st_lis331dl_init(vsn_sif.i2c1, val);
 
             if (lis) {
                 struct st_lis331dl_vector_s * a;
