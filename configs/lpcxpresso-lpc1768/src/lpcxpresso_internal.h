@@ -154,13 +154,29 @@
 #  define LPCXPRESSO_SD_CD (GPIO_INPUT   | GPIO_PULLUP    | GPIO_PORT2 | GPIO_PIN11)
 #endif
 
-/* Base-board          J4/J6 LPC1768
- * Signal              Pin   Pin
- * ------------------- ----- --------
- * PIO0_6-USB_CONNECT* 23    P0.21
- * USB_DM              36    USB_D-
- * USB_DP              37    USB_D+
- * PIO0_3-VBUS_SENSE   39    P0.5
+/* USB:
+ *
+ *   Base-board          J4/J6 LPC1768
+ *   Signal              Pin   Pin
+ *   ------------------- ----- --------
+ *   USB_DM              36    P0.30/USB-D-
+ *   USB_DP              37    P0.29/USB-D+
+ *   N/C                 N/C   P1.18/USB-UP-LED/PWM1.1/CAP1.0
+ *   PIO1_3 (not used)   19    P1.30/VBUS/AD0.4
+ *   N/C                 N/C   P2.9/USB-CONNECT/RXD2 (See Notes)
+ *   ------------------- ----- --------
+ *   PIO0_6-USB_CONNECT* 23    P0.21/RI1/RD1
+ *   PIO0_3-VBUS_SENSE   39    P0.5/I2SRX-WS/TD2/CAP2.1
+ *
+ * Noes:
+ * - The standard USB CONNECT (P0.9) provides USB D+ pullup on board the
+ *   LPCXpresso card; it should be un-necessary to use the based board
+ *   version of the pullup.
+ * - J14 must be set to permit GPIO control of the base board USB connect
+ *   pin
+ * - The standard VBUS (P1.30) is not connected.
+ * - J12 must be set to permit GPIO control of the USB vbus sense pin
+ * - The standard USB LED (P1.18) is not connected.
  */
 
 #define LPCXPRESSO_USB_CONNECT (GPIO_OUTPUT  | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN21)

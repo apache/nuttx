@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/lpcxpresso-lpc1768/src/up_usbstrg.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Configure and register the LPC17xx MMC/SD SPI block driver.
