@@ -29,10 +29,10 @@ LCPXpresso LPC1768 Board
   P0[3]/RXD0/AD0[6]                 J6-22    
   P0[4]/I2SRX-CLK/RD2/CAP2.0        J6-38                   CAN_RX2
   P0[5]/I2SRX-WS/TD2/CAP2.1         J6-39                   CAN_TX2
-  P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     J6-8                    SSEL1
-  P0[7]/I2STX_CLK/SCK1/MAT2[1]      J6-7                    SCK1
+  P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     J6-8                    SSEL1, OLED CS
+  P0[7]/I2STX_CLK/SCK1/MAT2[1]      J6-7                    SCK1, OLED SCK
   P0[8]/I2STX_WS/MISO1/MAT2[2]      J6-6                    MISO1
-  P0[9]/I2STX_SDA/MOSI1/MAT2[3]     J6-5                    MOSI1
+  P0[9]/I2STX_SDA/MOSI1/MAT2[3]     J6-5                    MOSI1, OLED data in
   P0[10]                            J6-40                   TXD2/SDA2
   P0[11]                            J6-41                   RXD2/SCL2
   P0[15]/TXD1/SCK0/SCK              J6-13                   TXD1/SCK0
@@ -84,7 +84,7 @@ LCPXpresso LPC1768 Board
   P2[4]/PWM1.5/DSR1/TRACEDATA[1]    J6-46                   PWM1.5
   P2[5]/PWM1[6]/DTR1/TRACEDATA[0]   J6-47                   PWM1.6
   P2[6]/PCAP1[0]/RI1/TRACECLK       J6-48    
-  P2[7]/RD2/RTS1                    J6-49    
+  P2[7]/RD2/RTS1                    J6-49                   OLED command/data
   P2[8]/TD2/TXD2                    J6-50    
   P2[9]/USB_CONNECT/RXD2            PAD19   USB Pullup      N/A
   P2[10]/EINT0/NMI                  J6-51    
@@ -126,8 +126,8 @@ SD Slot
   *J55 must be set to provide chip select PIO1_11 signal as the SD slot
    chip select.
  
- USB Device
- ----------
+USB Device
+----------
  
   Base-board          J4/J6 LPC1768
   Signal              Pin   Pin
@@ -159,6 +159,65 @@ SD Slot
   ------------------------------ --------------+------+------------------- ---------------------------
 
   *P2.9 Connect to a transistor driven USB-D+ pullup on the LPCXpresso board.
+
+96x64 White OLED with I2C/SPI interface
+---------------------------------------
+  The OLED display can be connected either to the SPI-bus or the I2C-bus.
+
+  Jumper Settings:
+
+    - For the SPI interface (default), insert jumpers in J42, J43, J45 pin1-2
+      and J46 pin 1-2.
+    - For I2C interface, insert jumpers in J45 pin 2-3, J46 pin 2-3 and J47.
+
+    In either case insert a jumper in J44 in order to allow PIO1_10 to control
+    the OLED-voltage.
+
+  Jumper Signal Control:
+
+    J42: Short: SPI Open: I2C (Default: inserted)
+
+    J44: Allow control of OLED voltage (Default: inserted)
+
+      PIO1_10-------->J44 ---------->FAN5331
+
+    Common Reset:
+
+      PIO0_0-RESET ---------------> RES#
+
+    J43: Select OLED chip select
+    J58: For embed (Default: not inserted)
+
+      PIO0_2--------------->J43 ---->CS#
+      PIO2_7--------->J58 ->J43 ---->D/C#
+      PIO0_8-MISO --------^
+
+    J45: Select SPI or I2C clock (Default: SPI clock)
+
+      PIO2_11-SCK---->J45 ----------> D0
+      PIO0_4-SCL------------^
+
+    J46: Select serial data input (Default: SPI MOSI)
+
+      PIO0_9-MOSI---->J46 ----------> D1
+      I2C_SDA---------------^
+
+    J47: Allow I2C bi-directional communications (Default: SPI unidirectional)
+
+      PIO0_5-SDA---->J47 ----------> D2
+
+    LPCXpresso Signals
+
+      ----------------------------+-------+-------------- ----------------------------------------
+      LPC1758 Pin                 | J4/6  | Base Board    Description
+      ----------------------------+-------+-------------- ----------------------------------------
+      P2.1/PWM1.2/RXD1            |  43   | PIO1_10       FAN5331 Power Control (SHDN#)
+      RESET_N                     |   4   | PIO0_0-RESET  OLED reset (RES#) -- Resets EVERYTHING
+      P0.6/I2SRX-SDA/SSEL1/MAT2.0 |   8   | PIO0_2        OLED chip select (CS#)
+      P2.7/RD2/RTS1               |  49   | PIO2_7        OLED command/data (D/C#)
+      P0.7/I2STX-CLK/SCK1/MAT2.1  |   7   | PIO2_11-SCK   OLED clock (D0)
+      P0.9/I2STX-SDA/MOSI1/MAT2.3 |   5   | PIO0_9-MOSI   OLED data in (D1)
+      ----------------------------+-------+-------------- ----------------------------------------
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^

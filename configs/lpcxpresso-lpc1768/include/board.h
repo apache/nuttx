@@ -151,10 +151,10 @@
  * P0[3]/RXD0/AD0[6]                 J6-22    
  * P0[4]/I2SRX-CLK/RD2/CAP2.0        J6-38                   CAN_RX2
  * P0[5]/I2SRX-WS/TD2/CAP2.1         J6-39                   CAN_TX2
- * P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     J6-8                    SSEL1
- * P0[7]/I2STX_CLK/SCK1/MAT2[1]      J6-7                    SCK1
+ * P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     J6-8                    SSEL1, OLED CS
+ * P0[7]/I2STX_CLK/SCK1/MAT2[1]      J6-7                    SCK1, OLED SCK
  * P0[8]/I2STX_WS/MISO1/MAT2[2]      J6-6                    MISO1
- * P0[9]/I2STX_SDA/MOSI1/MAT2[3]     J6-5                    MOSI1
+ * P0[9]/I2STX_SDA/MOSI1/MAT2[3]     J6-5                    MOSI1, OLED data in
  * P0[10]                            J6-40                   TXD2/SDA2
  * P0[11]                            J6-41                   RXD2/SCL2
  * P0[15]/TXD1/SCK0/SCK              J6-13                   TXD1/SCK0
@@ -219,13 +219,13 @@
 #define GPIO_ENET_MDIO     GPIO_ENET_MDIO_1
 
 /* P2[0]/PWM1.1/TXD1                 J6-42                   PWM1.1 / RGB LED / RS422 RX
- * P2[1]/PWM1.2/RXD1                 J6-43                   PWM1.2 / RGB LED / RS422 RX
+ * P2[1]/PWM1.2/RXD1                 J6-43                   PWM1.2 / OLED voltage / RGB LED / RS422 RX
  * P2[2]/PWM1.3/CTS1/TRACEDATA[3]    J6-44                   PWM1.3
  * P2[3]/PWM1.4/DCD1/TRACEDATA[2]    J6-45                   PWM1.4
  * P2[4]/PWM1.5/DSR1/TRACEDATA[1]    J6-46                   PWM1.5
  * P2[5]/PWM1[6]/DTR1/TRACEDATA[0]   J6-47                   PWM1.6
  * P2[6]/PCAP1[0]/RI1/TRACECLK       J6-48    
- * P2[7]/RD2/RTS1                    J6-49    
+ * P2[7]/RD2/RTS1                    J6-49                   OLED command/data
  * P2[8]/TD2/TXD2                    J6-50    
  * P2[9]/USB_CONNECT/RXD2            PAD19   USB Pullup      N/A
  * P2[10]/EINT0/NMI                  J6-51    

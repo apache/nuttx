@@ -147,11 +147,11 @@
  * CD   PIO2_10      52   P2.11       (See LPCXPRESSO_SD_CD)
  */
 
-#define LPCXPRESSO_SD_CS (GPIO_OUTPUT  | GPIO_VALUE_ONE | GPIO_PORT2 | GPIO_PIN2)
+#define LPCXPRESSO_SD_CS (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT2 | GPIO_PIN2)
 #ifdef CONFIG_GPIO_IRQ
-#  define LPCXPRESSO_SD_CD (GPIO_INTBOTH | GPIO_PULLUP    | GPIO_PORT2 | GPIO_PIN11)
+#  define LPCXPRESSO_SD_CD (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN11)
 #else
-#  define LPCXPRESSO_SD_CD (GPIO_INPUT   | GPIO_PULLUP    | GPIO_PORT2 | GPIO_PIN11)
+#  define LPCXPRESSO_SD_CD (GPIO_INPUT   | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN11)
 #endif
 
 /* USB:
@@ -179,12 +179,29 @@
  * - The standard USB LED (P1.18) is not connected.
  */
 
-#define LPCXPRESSO_USB_CONNECT (GPIO_OUTPUT  | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN21)
+#define LPCXPRESSO_USB_CONNECT (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN21)
 #ifdef CONFIG_GPIO_IRQ
-#  define LPCXPRESSO_USB_VBUSSENSE (GPIO_INTBOTH | GPIO_PULLUP    | GPIO_PORT0 | GPIO_PIN5)
+#  define LPCXPRESSO_USB_VBUSSENSE (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN5)
 #else
-#  define LPCXPRESSO_USB_VBUSSENSE (GPIO_INPUT   | GPIO_PULLUP    | GPIO_PORT0 | GPIO_PIN5)
+#  define LPCXPRESSO_USB_VBUSSENSE (GPIO_INPUT   | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN5)
 #endif
+
+/* 96x64 White OLED with I2C/SPI interface
+ *
+ *  ----------------------------+-------+-------------- -----------------------------
+ *  LPC1758 Pin                 | J4/6  | Base Board    Description
+ *  ----------------------------+-------+-------------- -----------------------------
+ *  P2.1/PWM1.2/RXD1            |  43   | PIO1_10       FAN5331 Power Control (SHDN#)
+ *  P0.6/I2SRX-SDA/SSEL1/MAT2.0 |   8   | PIO0_2        OLED chip select (CS#)
+ *  P2.7/RD2/RTS1               |  49   | PIO2_7        OLED command/data (D/C#)
+ *  P0.7/I2STX-CLK/SCK1/MAT2.1  |   7   | PIO2_11-SCK   OLED clock (D0)
+ *  P0.9/I2STX-SDA/MOSI1/MAT2.3 |   5   | PIO0_9-MOSI   OLED data in (D1)
+ *  ----------------------------+-------+-------------- -----------------------------
+ */
+
+#define LPCXPRESSO_OLED_POWER (GPIO_OUTPUT | GPIO_VALUE_ONE  | GPIO_PORT2 | GPIO_PIN1)
+#define LPCXPRESSO_OLED_CS    (GPIO_OUTPUT | GPIO_VALUE_ONE  | GPIO_PORT0 | GPIO_PIN6)
+#define LPCXPRESSO_OLED_DC    (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN7)
 
 /************************************************************************************
  * Public Types
