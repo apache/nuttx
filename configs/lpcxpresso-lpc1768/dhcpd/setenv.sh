@@ -1,5 +1,5 @@
-############################################################################
-# configs/ez80f910200zco/dhcpd/appconfig
+#!/bin/bash
+# configs/lpcxpresso-lpc1768/dhcpd/setenv.sh
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -31,13 +31,29 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
-# Path to example in apps/examples containing the user_start entry point
+if [ "$(basename $0)" = "setenv.sh" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-CONFIGURED_APPS += examples/dhcpd
+if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
-# Networking support
+WD=`pwd`
 
-CONFIGURED_APPS += netutils/dhcpd
-CONFIGURED_APPS += netutils/uiplib
+# This is where the buildroot might reside on a Linux or Cygwin system
+# export TOOLCHAIN_BIN="${WD}/../buildroot/build_arm_nofpu/staging_dir/bin"
+
+# This is the default install location for Code Red on Linux
+export TOOLCHAIN_BIN="/usr/local/LPCXpresso/tools/bin"
+
+# This the Cygwin path to the LPCXpresso 3.6 install location under Windows
+#export TOOLCHAIN_BIN="/cygdrive/c/nxp/lpcxpresso_3.6/Tools/bin"
+
+# This is the path to the LPCXpression tool subdirectory
+export LPCTOOL_DIR="${WD}/configs/lpcxpresso-lpc1768/tools"
+
+# Add the path to the toolchain to the PATH varialble
+export PATH="${TOOLCHAIN_BIN}:${LPCTOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
+
+echo "PATH : ${PATH}"

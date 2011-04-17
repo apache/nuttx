@@ -650,6 +650,11 @@ selected as follow:
 
 Where <subdir> is one of the following:
 
+  dhcpd:
+    This builds the DCHP server using the apps/examples/dhcpd application
+    (for execution from FLASH.) See apps/examples/README.txt for information
+    about the dhcpd example.
+
   nsh:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
