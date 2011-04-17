@@ -615,7 +615,11 @@ LPCXpresso Configuration Options
       Number of DMA descriptors to allocate in SRAM.
     CONFIG_LPC17_USBDEV_DMA
       Enable lpc17xx-specific DMA support
-
+    CONFIG_LPC17_USBDEV_NOVBUS
+      Define if the hardware implementation does not support the VBUS signal
+    CONFIG_LPC17_USBDEV_NOLED
+      Define if the hardware  implementation does not support the LED output
+ 
   LPC17xx USB Host Configuration (the LPCXpresso does not support USB Host)
 
     CONFIG_USBHOST_OHCIRAM_SIZE
@@ -653,25 +657,13 @@ Where <subdir> is one of the following:
     (but not passing tests as of this writing).
 
 	NOTE: At present, the value for the SD SPI frequency is too
-	high and the SD will failing.  Setting that frequency to 400000
+	high and the SD will fail.  Setting that frequency to 400000
 	removes the problem. TODO:  Tune this frequency to some optimal
 	value.
 
   ostest:
     This configuration directory, performs a simple OS test using
     apps/examples/ostest.
-
-    NOTE: The OSTest runs on the LPCXpresso if it is not installed
-    on the base board (using an add-on MAX232 RS232 driver connected
-    to:
-
-      P0[0]/RD1/TXD3/SDA1  J6-9
-      P0[1]/TD1/RXD3/SCL   J6-10
-
-    I suspect that this test does not run on with the base board
-    attached because OSTest blasts out a lot of serial data and
-    overruns the FTDI chip before it has a chance to establish the
-    connection with the host.
 
   thttpd:
     This builds the THTTPD web server example using the THTTPD and
@@ -686,6 +678,6 @@ Where <subdir> is one of the following:
     for more information.
 
 	NOTE: At present, the value for the SD SPI frequency is too
-	high and the SD will failing.  Setting that frequency to 400000
+	high and the SD will fail.  Setting that frequency to 400000
 	removes the problem. TODO:  Tune this frequency to some optimal
 	value.
