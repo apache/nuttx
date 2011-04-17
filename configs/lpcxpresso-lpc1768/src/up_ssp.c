@@ -115,6 +115,14 @@ void weak_function lpc17_sspinitialize(void)
 #ifdef CONFIG_LPC17_SSP1
   (void)lpc17_configgpio(LPCXPRESSO_SD_CS);
   (void)lpc17_configgpio(LPCXPRESSO_SD_CD);
+
+  /* Configure chip select for the OLED. For the SPI interface, insert jumpers in
+   * J42, J43, J45 pin1-2 and J46 pin 1-2.
+   */
+
+#ifdef CONFIG_NX_LCDDRIVER
+  (void)lpc17_configgpio(LPCXPRESSO_OLED_CS);
+#endif
 #endif
 
   ssp_dumpgpio("lpc17_sspinitialize() Exit");
@@ -175,7 +183,14 @@ void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 
       (void)lpc17_gpiowrite(LPCXPRESSO_SD_CS, !selected);
     }
+#ifdef CONFIG_NX_LCDDRIVER
+  else if (devid == SPIDEV_DISPLAY)
+    {
+      /* Assert the CS pin to the OLED display */
 
+      (void)lpc17_gpiowrite(LPCXPRESSO_OLED_CS, !selected);
+    }
+#endif
   ssp_dumpgpio("lpc17_spi1select() Exit");
 }
 

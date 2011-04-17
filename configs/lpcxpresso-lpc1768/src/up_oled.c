@@ -1,8 +1,8 @@
 /****************************************************************************
- * config/lm3s6965-ek/src/up_oled.c
+ * config/lpcxpresso-lpc1768/src/up_oled.c
  * arch/arm/src/board/up_oled.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,13 +48,22 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/p14201.h>
 
-#include "lm3s_internal.h"
-#include "lm3s6965ek_internal.h"
+#include "lpc17_internal.h"
+#include "lpcxpresso_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* This module is only built if CONFIG_NX_LCDDRIVER is selected.  In this
+ * case, it would be an error if SSP1 is not also enabled.
+ */
 
+#ifndef CONFIG_LPC17_SSP1
+#  error "The OLED driver required CONFIG_LPC17_SSP1 in the configuration"
+#endif
+
+/* Debug ********************************************************************/
 /* Define the CONFIG_LCD_RITDEBUG to enable detailed debug output (stuff you
  * would never want to see unless you are debugging this file).
  *
@@ -72,8 +81,8 @@
 
 #ifdef CONFIG_LCD_RITDEBUG
 #  define ritdbg(format, arg...)  vdbg(format, ##arg)
-#  define oleddc_dumpgpio(m) lm3s_dumpgpio(OLEDDC_GPIO, m)
-#  define oledcs_dumpgpio(m) lm3s_dumpgpio(OLEDCS_GPIO, m)
+#  define oleddc_dumpgpio(m) lm3s_dumpgpio(LPCXPRESSO_OLED_POWER, m)
+#  define oledcs_dumpgpio(m) lm3s_dumpgpio(LPCXPRESSO_OLED_CS, m)
 #else
 #  define ritdbg(x...)
 #  define oleddc_dumpgpio(m)
@@ -97,22 +106,24 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   FAR struct spi_dev_s *spi;
   FAR struct lcd_dev_s *dev;
 
-  /* Configure the OLED GPIOs */
-
-  oledcs_dumpgpio("up_nxdrvinit: After OLEDCS setup");
+  /* Configure the OLED GPIOs. For the SPI interface, insert jumpers in J42,
+   * J43, J45 pin1-2 and J46 pin 1-2.
+   */
+ 
+  oledcs_dumpgpio("up_nxdrvinit: After OLED CS setup");
   oleddc_dumpgpio("up_nxdrvinit: On entry");
 
-  lm3s_configgpio(OLEDDC_GPIO); /* PC7: OLED display data/control select (D/Cn) */
-  lm3s_configgpio(OLEDEN_GPIO); /* PC6: Enable +15V needed by OLED (EN+15V) */
+  (void)lpc17_configgpio(LPCXPRESSO_OLED_POWER); /* OLED 11V power */
+  (void)lpc17_configgpio(LPCXPRESSO_OLED_DC);    /* OLED Command/Data */
 
-  oleddc_dumpgpio("up_nxdrvinit: After OLEDDC/EN setup");
+  oleddc_dumpgpio("up_nxdrvinit: After OLED Power/DC setup");
 
   /* Get the SSI port (configure as a Freescale SPI port) */
 
-  spi = up_spiinitialize(0);
+  spi = up_spiinitialize(1);
   if (!spi)
     {
-      glldbg("Failed to initialize SSI port 0\n");
+      glldbg("Failed to initialize SSI port 1\n");
     }
   else
     {
@@ -121,11 +132,11 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
       dev = rit_initialize(spi, devno);
       if (!dev)
         {
-          glldbg("Failed to bind SSI port 0 to OLED %d: %d\n", devno);
+          glldbg("Failed to bind SSI port 1 to OLED %d: %d\n", devno);
         }
      else
         {
-          gllvdbg("Bound SSI port 0 to OLED %d\n", devno);
+          gllvdbg("Bound SSI port 1 to OLED %d\n", devno);
 
           /* And turn the OLED on (CONFIG_LCD_MAXPOWER should be 1) */
 
