@@ -140,6 +140,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
 
           /* And turn the OLED on (CONFIG_LCD_MAXPOWER should be 1) */
 
+          (void)lpc17_gpiowrite(LPCXPRESSO_OLED_POWER, true);
           (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
           return dev;
         }
@@ -176,7 +177,7 @@ int lm3s_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
     {
       /* Set GPIO to 1 for data, 0 for command */
 
-      lm3s_gpiowrite(OLEDDC_GPIO, !cmd);
+      (void)lpc17_gpiowrite(LPCXPRESSO_OLED_DC, !cmd);
       return OK;
     }
   return -ENODEV;
