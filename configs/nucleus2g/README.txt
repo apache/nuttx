@@ -432,6 +432,10 @@ Nucleus 2G Configuration Options
 	  Number of DMA descriptors to allocate in SRAM.
 	CONFIG_LPC17_USBDEV_DMA
 	  Enable lpc17xx-specific DMA support
+    CONFIG_LPC17_USBDEV_NOVBUS
+      Define if the hardware implementation does not support the VBUS signal
+    CONFIG_LPC17_USBDEV_NOLED
+      Define if the hardware  implementation does not support the LED output
 
   LPC17xx USB Host Configuration (the Nucleus2G does not support USB Host)
 

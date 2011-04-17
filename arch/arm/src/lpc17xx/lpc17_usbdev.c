@@ -3176,9 +3176,13 @@ void up_usbinitialize(void)
   /* Step 3: Configure I/O pins */
 
   usbdev_dumpgpio();
+#ifndef CONFIG_LPC17_USBDEV_NOVBUS
   lpc17_configgpio(GPIO_USB_VBUS);    /* VBUS status input */
+#endif
   lpc17_configgpio(GPIO_USB_CONNECT); /* SoftConnect control signal */
+#ifndef CONFIG_LPC17_USBDEV_NOLED
   lpc17_configgpio(GPIO_USB_UPLED);   /* GoodLink LED control signal */
+#endif
   lpc17_configgpio(GPIO_USB_DP);      /* Positive differential data */
   lpc17_configgpio(GPIO_USB_DM);      /* Negative differential data */
   usbdev_dumpgpio();
