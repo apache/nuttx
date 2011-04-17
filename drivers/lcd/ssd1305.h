@@ -134,7 +134,7 @@
 #  define SSD1305_MSTRCONFIG_EXTVCC 0x8e /*   Data 1: Select external Vcc */
 #define SSD1305_DISPONDIM           0xac /* 0xac: Display ON in dim mode */
 #define SSD1305_DISPOFF             0xae /* 0xae: Display OFF (sleep mode) */
-#define SSD1305_DISPPN              0xaf /* 0xaf: Display ON in normal mode*/
+#define SSD1305_DISPON              0xaf /* 0xaf: Display ON in normal mode */
 #define SSD1305_SETPAGESTART        0xb0 /* 0xb0-b7: Set page start address */
 #  define SSD1305_PAGESTART_MASK    0x07
 #define SSD1305_SETCOMNORMAL        0xc0 /* 0xc0: Set COM output, normal mode */
@@ -146,6 +146,7 @@
 #  define SSD1305_DCLKDIV_SHIFT     (0)  /*   Data 1, Bits 0-3: DCLK divide ratio/frequency*/
 #  define SSD1305_DCLKDIV_MASK      0x0f
 #  define SSD1305_DCLKFREQ_SHIFT    (4)  /*   Data 1, Bits 4-7: DCLK divide oscillator frequency */
+#  define SSD1305_DCLKFREQ_MASK     0xf0
 #define SSD1305_SETCOLORMODE        0xd8 /* 0xd:  Set area color and low power display modes */
 #  define SSD1305_COLORMODE_MONO    0x00 /*   Data 1, Bits 4-5: 00=monochrome */
 #  define SSD1305_COLORMODE_COLOR   0x30 /*   Data 1, Bits 4-5: 11=area color enable */
@@ -155,7 +156,7 @@
 #  define SSD1305_PHASE1_SHIFT      (0)  /*   Data 1, Bits 0-3: Phase 1 period of up to 15 DCLK clocks */
 #  define SSD1305_PHASE1_MASK       0x0f
 #  define SSD1305_PHASE2_SHIFT      (4)  /*   Data 1, Bits 4-7: Phase 2 period of up to 15 DCLK clocks */
-#  define SSD1305_PHASE2_MASK       0x0f
+#  define SSD1305_PHASE2_MASK       0xf0
 #define SSD1305_SETCOMCONFIG        0xda /* 0xda: Set COM configuration */
 #  define SSD1305_COMCONFIG_SEQ     0x02 /*   Data 1, Bit 4: 0=Sequential COM pin configuration */
 #  define SSD1305_COMCONFIG_ALT     0x12 /*   Data 1, Bit 4: 1=Alternative COM pin configuration */

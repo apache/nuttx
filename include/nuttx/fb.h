@@ -53,9 +53,10 @@
 
 /* Monochrome Formats *******************************************************/
 
-#define FB_FMT_Y4          0         /* BPP=4, 4-bit uncompressed greyscale */
-#define FB_FMT_Y8          1         /* BPP=8, 8-bit uncompressed greyscale */
-#define FB_FMT_Y16         2         /* BPP=16, 16-bit uncompressed greyscale */
+#define FB_FMT_Y1          0         /* BPP=4, monochrome */
+#define FB_FMT_Y4          1         /* BPP=4, 4-bit uncompressed greyscale */
+#define FB_FMT_Y8          2         /* BPP=8, 8-bit uncompressed greyscale */
+#define FB_FMT_Y16         3         /* BPP=16, 16-bit uncompressed greyscale */
 #define FB_FMT_GREY        FB_FMT_Y8 /* BPP=8 */
 #define FB_FMT_Y800        FB_FMT_Y8 /* BPP=8 */
 
@@ -65,7 +66,7 @@
 
 /* Standard RGB */
 
-#define FB_FMT_RGB1        3           /* BPP=1 */
+#define FB_FMT_RGB1        FB_FMT_Y1   /* BPP=1 */
 #define FB_FMT_RGB4        4           /* BPP=4 */
 #define FB_FMT_RGB8        5           /* BPP=8 RGB palette index */
 #define FB_FMT_RGB8_332    6           /* BPP=8  R=3, G=3, B=2 */
