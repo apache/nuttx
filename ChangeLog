@@ -1699,5 +1699,5 @@
 	  '#if CONFIG_NFILE_DESCRIPTOR > 0' was wrong in both of these files.  It should
 	  be '#if CONFIG_NFILE_DESCRIPTORS > 0'.  This causes a dup2() failure in THTTPD
 	  and a failure to get a CGI page.  The consequence can be a very serious bug!
-	* configs/lpcxpresso-lpc1768/usbstorage and thttpd: Add an USB storage and THTTPD
-	  configurations for the NXP LPCXpresso board.
+	* configs/lpcxpresso-lpc1768/usbstorage, thttpd, and dhcpd: Add an USB storage,
+      THTTPD web server, and DHCP server configurations for the NXP LPCXpresso board.

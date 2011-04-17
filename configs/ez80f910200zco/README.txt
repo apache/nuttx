@@ -64,7 +64,7 @@ available:
 dhcpd:
     This builds the DCHP server using the examples/dhcpd application
     (for execution from FLASH.) See examples/README.txt for information
-    about ostest.
+    about the dhcpd example.
 
 httpd:
     This builds the uIP web server example using the examples/uip application

@@ -327,6 +327,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
+ |   |- lpcxpresso-lpc1768/
+ |   |   `- README.txt
  |   |- m68332evb/
  |   |   |- include/README.txt
  |   |   `- src/README.txt

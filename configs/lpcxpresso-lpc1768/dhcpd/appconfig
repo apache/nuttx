@@ -1,5 +1,5 @@
 ############################################################################
-# configs/ez80f910200zco/dhcpd/appconfig
+# configs/lpcxpresso-lpc1768/dhcpd/appconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
