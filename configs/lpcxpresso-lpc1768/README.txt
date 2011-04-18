@@ -123,6 +123,8 @@ SD Slot
   CLK  PIO2_11-SCK   7   P0.9 SCK1
   CD   PIO2_10      52   P2.11
 
+  These jumper settings are required:
+
   *J55 must be set to provide chip select PIO1_11 signal as the SD slot
    chip select.
  
@@ -136,6 +138,9 @@ USB Device
   USB_DM              36    USB_D-
   USB_DP              37    USB_D+
   PIO0_3-VBUS_SENSE** 39    P0.5
+
+  These jumper settings are listed for information only.  They are *not*
+  required for use with NuttX and LPCXpresso.
 
   *J14 must be set to permit GPIO control of the USB connect pin
  **J12 must be set to permit GPIO control of the USB vbus sense pin
