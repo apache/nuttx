@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 15, 2011</p>
+      <p>Last Updated: April 18, 2011</p>
     </td>
   </tr>
 </table>
@@ -2232,6 +2232,12 @@ nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       '#if CONFIG_NFILE_DESCRIPTOR > 0' was wrong in both of these files.  It should
       be '#if CONFIG_NFILE_DESCRIPTORS > 0'.  This causes a dup2() failure in THTTPD
       and a failure to get a CGI page.  The consequence can be a very serious bug!
+    * configs/lpcxpresso-lpc1768/usbstorage, thttpd, and dhcpd: Add an USB storage,
+      THTTPD web server, and DHCP server configurations for the NXP LPCXpresso board.
+    * drivers/lcd/ug-9664hswag01.c and ssd1305.h: Add support for Univision UG-9664HSWAG01
+      OLED with Solomon Systech SD1305 LCD controller.
+    * configs/lpcxpresso-lpc1668/nx: Add a NX graphics configuration for the LPCXPRESO
+      board.
 
 apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

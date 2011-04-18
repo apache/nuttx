@@ -105,21 +105,21 @@ extern "C" {
  *
  * Description:
  *   Initialize the UG-9664HSWAG01 video hardware.  The initial state of the
- *   OLED is fully initialized, display memory cleared, and the OLED ready to
- *   use, but with the power setting at 0 (full off == sleep mode).
+ *   OLED is fully initialized, display memory cleared, and the OLED ready
+ *   to use, but with the power setting at 0 (full off == sleep mode).
  *
  * Input Parameters:
  *
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 throuh CONFIG_UG9664HSWAG01_NINTERFACES-1.
+ *   devno - A value in the range of 0 through CONFIG_UG9664HSWAG01_NINTERFACES-1.
  *     This allows support for multiple OLED devices.
  *
  * Returned Value:
  *
- *   On success, this function returns a reference to the LCD object for the specified
- *   OLED.  NULL is returned on any failure.
+ *   On success, this function returns a reference to the LCD object for
+ *   the specified OLED.  NULL is returned on any failure.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 struct lcd_dev_s; /* see nuttx/lcd.h */
 struct spi_dev_s; /* see nuttx/spi.h */

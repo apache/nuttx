@@ -151,7 +151,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   return NULL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name:  lpc17_ssp1cmddata
  *
  * Description:
@@ -172,7 +172,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int lpc17_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
@@ -203,12 +203,12 @@ int lpc17_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
  * Returned Value:
  *   None
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_UG9664HSWAG01_POWER
 void ug_power(unsigned int devno, bool on)
 {
-  gllvdbg("on: \n", on ? "TRUE" : "FALSE");
+  gllvdbg("power %s\n", on ? "ON" : "OFF");
   (void)lpc17_gpiowrite(LPCXPRESSO_OLED_POWER, on);
 }
 #endif

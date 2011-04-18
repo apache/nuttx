@@ -189,7 +189,7 @@
 
 /* The size of the shadow frame buffer */
 
-#define UG_FBSIZE       (UG_XRES * (UG_XRES >> 3))
+#define UG_FBSIZE       (UG_STRIDE * UG_YRES)
 
 /* Debug ******************************************************************************/
 
@@ -215,14 +215,14 @@ struct ug_dev_s
 
   FAR struct spi_dev_s *spi;
   uint8_t contrast;
-  bool powered;
+  uint8_t powered;
 
  /* The SSD1305 does not support reading from the display memory in SPI mode.
-  * Since there is 1 BPP and access is byte-by-byte, it is necessary to kee
+  * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep
   * a shadow copy of the framebuffer memory.
   */
 
-  uint8_t fb[UG_XRES >> 3][UG_YRES];
+  uint8_t fb[UG_FBSIZE];
 };
 
 /**************************************************************************************
@@ -291,7 +291,7 @@ static inline void up_clear(FAR struct ug_dev_s  *priv);
  * if there are multiple LCD devices, they must each have unique run buffers.
  */
 
-static uint8_t g_runbuffer[UG_XRES >> 8];
+static uint8_t g_runbuffer[UG_STRIDE];
 
 /* This structure describes the overall LCD video controller */
 
@@ -339,6 +339,35 @@ static struct ug_dev_s g_ugdev =
 /**************************************************************************************
  * Private Functions
  **************************************************************************************/
+
+/**************************************************************************************
+ * Name:  ug_powerstring
+ *
+ * Description:
+ *   Convert the power setting to a string.
+ *
+ **************************************************************************************/
+
+
+static inline FAR const char *ug_powerstring(uint8_t power)
+{
+  if (power == UG_POWER_OFF)
+    {
+      return "OFF";
+    }
+  else if (power == UG_POWER_DIM)
+    {
+      return "DIM";
+    }
+  else if (power == UG_POWER_ON)
+    {
+      return "ON";
+    }
+  else
+    {
+      return "ERROR";
+    }
+}
 
 /**************************************************************************************
  * Function: ug_select
@@ -460,14 +489,14 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   /* Verify that some portion of the run remains on the display */
 
-  if (pixlen <= 0 || row >  UG_YRES)
+  if (pixlen <= 0 || row > UG_YRES)
     {
       return OK;
     }
 
   /* Update the shadow frame buffer memory */
 
-  fbptr   = &priv->fb[0][row];
+  fbptr   = &priv->fb[row * UG_STRIDE];
   pixelno = 0;
   endcol  = col + pixlen;
 
@@ -475,7 +504,7 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
     {
       /* Point to the byte to be modified */
 
-      FAR uint8_t *ptr = &fbptr[i >> 8];
+      FAR uint8_t *ptr = &fbptr[i >> 3];
 
       /* Set or clear the corresponding bit */
 
@@ -555,7 +584,7 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
  **************************************************************************************/
 
 static int ug_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                       size_t npixels)
+                     size_t npixels)
 {
   /* Because of this line of code, we will only be able to support a single UG device */
 
@@ -577,13 +606,16 @@ static int ug_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       pixlen = (int)UG_XRES - (int)col;
     }
 
-   /* Fetch the data from the shadow frame buffer memory */
+  /* Verify that some portion of the run is actually the display */
 
-  fbptr = &priv->fb[0][row];
+  if (pixlen <= 0 || row > UG_YRES)
+    {
+      return -EINVAL;
+    }
 
-  /* Then transfer all of the data */
+  /* Then transfer the display data from the shadow frame buffer memory */
 
-  fbptr   = &priv->fb[0][row];
+  fbptr   = &priv->fb[row * UG_STRIDE];
   pixelno = 0;
   endcol  = col + pixlen;
   *buffer = 0;
@@ -662,8 +694,8 @@ static int ug_getpower(struct lcd_dev_s *dev)
 {
   struct ug_dev_s *priv = (struct ug_dev_s *)dev;
   DEBUGASSERT(priv);
-  gvdbg("powered: %s\n", priv->powered ? "TRUE" : "FALSE");
-  return priv->powered ? 1 : 0;
+  gvdbg("powered: %s\n", ug_powerstring(priv->powered));
+  return priv->powered;
 }
 
 /**************************************************************************************
@@ -679,16 +711,14 @@ static int ug_setpower(struct lcd_dev_s *dev, int power)
 {
   struct ug_dev_s *priv = (struct ug_dev_s *)dev;
 
-  gvdbg("power: %s powered: %s\n",
-         power != 0 ? "TRUE" : "FALSE",
-         priv->powered != 0 ? "TRUE" : "FALSE");
-
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
+  gvdbg("power: %s powered: %s\n",
+        ug_powerstring(power), ug_powerstring(priv->powered));
 
   /* Select and lock the device */
 
   ug_select(priv->spi);
-  if (power <= 0)
+  if (power <= UG_POWER_OFF)
     {
       /* Turn the display off */
 
@@ -697,26 +727,27 @@ static int ug_setpower(struct lcd_dev_s *dev, int power)
       /* Remove power to the device */
 
       ug_power(0, false);
-      priv->powered = false;
+      priv->powered = UG_POWER_OFF;
     }
   else
     {
       /* Turn the display on, dim or normal */
 
-      if (power == 1)
+      if (power == UG_POWER_DIM)
         {
           (void)SPI_SEND(priv->spi, SSD1305_DISPONDIM); /* Display on, dim mode */
         }
-      else /* if (power > 1) */
+      else /* if (power > UG_POWER_DIM) */
         {
           (void)SPI_SEND(priv->spi, SSD1305_DISPON);    /* Display on, normal mode */
+          power = UG_POWER_ON;
         }
       (void)SPI_SEND(priv->spi, SSD1305_DISPRAM);       /* Resume to RAM content display */
 
       /* Restore power to the device */
 
       ug_power(0, true);
-      priv->powered = true;
+      priv->powered = power;
     }
   ug_deselect(priv->spi);
 
@@ -823,7 +854,7 @@ static inline void up_clear(FAR struct ug_dev_s  *priv)
 
        for (j = 0; j < 8; j++, row++)
          {
-           (void)SPI_SNDBLOCK(priv->spi, &priv->fb[0][row], UG_XRES >> 3);
+           (void)SPI_SNDBLOCK(priv->spi, &priv->fb[row * UG_STRIDE], UG_STRIDE);
          }
     }
 
@@ -837,12 +868,23 @@ static inline void up_clear(FAR struct ug_dev_s  *priv)
  **************************************************************************************/
 
 /**************************************************************************************
- * Name:  up_oledinitialize
+ * Name:  ug_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the UG-9664HSWAG01 video hardware.  The initial state of the
+ *   OLED is fully initialized, display memory cleared, and the OLED ready to
+ *   use, but with the power setting at 0 (full off == sleep mode).
+ *
+ * Input Parameters:
+ *
+ *   spi - A reference to the SPI driver instance.
+ *   devno - A value in the range of 0 through CONFIG_UG9664HSWAG01_NINTERFACES-1.
+ *     This allows support for multiple OLED devices.
+ *
+ * Returned Value:
+ *
+ *   On success, this function returns a reference to the LCD object for the specified
+ *   OLED.  NULL is returned on any failure.
  *
  **************************************************************************************/
 

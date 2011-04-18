@@ -140,7 +140,8 @@ USB Device
   PIO0_3-VBUS_SENSE** 39    P0.5
 
   These jumper settings are listed for information only.  They are *not*
-  required for use with NuttX and LPCXpresso.
+  required for use with NuttX and LPCXpresso.  The configurable pins
+  (P0.21 and P0.5) are not used!
 
   *J14 must be set to permit GPIO control of the USB connect pin
  **J12 must be set to permit GPIO control of the USB vbus sense pin
@@ -163,7 +164,7 @@ USB Device
   P0.5/I2SRX-WS/TD2/CAP2.1       P0[5]         |  39  | PIO0_3-VBUS_SENSE  VBUS via J12
   ------------------------------ --------------+------+------------------- ---------------------------
 
-  *P2.9 Connect to a transistor driven USB-D+ pullup on the LPCXpresso board.
+  *P2.9 connects to a transistor driven USB-D+ pullup on the LPCXpresso board.
 
 96x64 White OLED with I2C/SPI interface
 ---------------------------------------
@@ -719,6 +720,9 @@ Where <subdir> is one of the following:
     (for execution from FLASH.) See apps/examples/README.txt for information
     about the dhcpd example.
 
+    Jumpers: Nothing special.  Use the default base board jumper
+    settings.
+
   nsh:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
@@ -730,9 +734,28 @@ Where <subdir> is one of the following:
 	removes the problem. TODO:  Tune this frequency to some optimal
 	value.
 
+    Jumpers: J55 must be set to provide chip select PIO1_11 signal as
+    the SD slot chip select.
+
+  nx:
+    And example using the NuttX graphics system (NX).  This example
+    uses the UG-9664HSWAG01 driver.
+
+    Jumpers:  There are several jumper settings needed by the OLED.
+    All are the default settings:
+    
+    J42: Close to select the SPI interface (Default: closed)
+    J43: Close to support OLED command/data select (Default: closed)
+    J44: Close to allow control of OLED voltage (Default: closed)
+    J45: Close to select SPI clock (Default: closed)
+    J46: Close SPI data input (MOSI) (Default:closed)
+
   ostest:
     This configuration directory, performs a simple OS test using
     apps/examples/ostest.
+ 
+    Jumpers: Nothing special.  Use the default base board jumper
+    settings.
 
   thttpd:
     This builds the THTTPD web server example using the THTTPD and
@@ -740,6 +763,9 @@ Where <subdir> is one of the following:
 
     NOTE:  You will need to build the NXFLAT toolchain as described
     above in order to use this example.
+
+    Jumpers: Nothing special.  Use the default base board jumper
+    settings.
 
   usbstorage:
     This configuration directory exercises the USB mass storage
@@ -750,3 +776,7 @@ Where <subdir> is one of the following:
 	high and the SD will fail.  Setting that frequency to 400000
 	removes the problem. TODO:  Tune this frequency to some optimal
 	value.
+ 
+    Jumpers: J55 must be set to provide chip select PIO1_11 signal as
+    the SD slot chip select.
+
