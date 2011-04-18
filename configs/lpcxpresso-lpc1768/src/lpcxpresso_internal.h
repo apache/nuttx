@@ -168,14 +168,18 @@
  *   PIO0_6-USB_CONNECT* 23    P0.21/RI1/RD1
  *   PIO0_3-VBUS_SENSE   39    P0.5/I2SRX-WS/TD2/CAP2.1
  *
- * Noes:
+ * Notes:
  * - The standard USB CONNECT (P0.9) provides USB D+ pullup on board the
  *   LPCXpresso card; it should be un-necessary to use the based board
  *   version of the pullup.
- * - J14 must be set to permit GPIO control of the base board USB connect
- *   pin
- * - The standard VBUS (P1.30) is not connected.
- * - J12 must be set to permit GPIO control of the USB vbus sense pin
+ * - No changes to jumper settings are required.  There are few USB-
+ *   related jumpers on the based board, but none are required:
+ *   - J14 must be set to permit GPIO control of the base board USB
+ *     connect pin. NOT USED
+ *   - J12 must be set to permit GPIO control of the USB vbus sense pin
+ * - The standard VBUS (P1.30) is not connected.  As a consequence, the
+ *   USB driver will not correctly respond to USB insertion or removal
+ *   events.
  * - The standard USB LED (P1.18) is not connected.
  */
 

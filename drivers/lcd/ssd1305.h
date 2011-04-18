@@ -100,7 +100,7 @@
 #  define SSD1305_SETBANK14(c)      (c << 2)  /* Data 4, Bits 2-3: Bank 14 color */
 #  define SSD1305_SETBANK15(c)      (c << 4)  /* Data 4, Bits 4-5: Bank 15 color */
 #  define SSD1305_SETBANK16(c)      (c << 6)  /* Data 4, Bits 6-7: Bank 16 color */
-#define SSD1305_SETBANKCOLOR1       0x93      /* 0x93: Set bank 17-32 color */
+#define SSD1305_SETBANKCOLOR2       0x93      /* 0x93: Set bank 17-32 color */
 #  define SSD1305_SETBANK17(c)      (c)       /* Data 1, Bits 0-1: Bank 17 color */
 #  define SSD1305_SETBANK18(c)      (c << 2)  /* Data 1, Bits 2-3: Bank 18 color */
 #  define SSD1305_SETBANK19(c)      (c << 4)  /* Data 1, Bits 4-5: Bank 19 color */

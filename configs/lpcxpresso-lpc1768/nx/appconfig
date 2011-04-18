@@ -1,7 +1,7 @@
 ############################################################################
-# graphics/nxfonts/Make.defs
+# configs/lpcxpresso-lpc1768/nx/appconfig
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,7 @@
 #
 ############################################################################
 
-NXFONTS_ASRCS	=
-NXFCONV_CSRC	= nxfonts_convert_1bpp.c nxfonts_convert_2bpp.c \
-		  nxfonts_convert_4bpp.c nxfonts_convert_8bpp.c \
-		  nxfonts_convert_16bpp.c nxfonts_convert_24bpp.c \
-		  nxfonts_convert_32bpp.c
-NXFONTS_CSRCS	= nxfonts_bitmaps.c nxfonts_getfont.c $(NXFCONV_CSRC)
+# Path to example in apps/examples containing the user_start entry point
+
+CONFIGURED_APPS += examples/nx
+

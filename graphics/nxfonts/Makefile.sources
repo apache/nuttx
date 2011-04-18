@@ -36,6 +36,10 @@
 -include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
 
+ifeq ($(NXFONTS_BITSPERPIXEL),1)
+NXFONTS_SUFFIX	:= _1bpp
+CONV_CSRC	:= nxfonts_convert_1bpp.c
+endif
 ifeq ($(NXFONTS_BITSPERPIXEL),2)
 NXFONTS_SUFFIX	:= _2bpp
 CONV_CSRC	:= nxfonts_convert_2bpp.c

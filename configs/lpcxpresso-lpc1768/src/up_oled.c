@@ -46,7 +46,7 @@
 
 #include <nuttx/spi.h>
 #include <nuttx/lcd/lcd.h>
-#include <nuttx/lcd/p14201.h>
+#include <nuttx/lcd/ug-9664hswag01.h>
 
 #include "lpc17_internal.h"
 #include "lpcxpresso_internal.h"
@@ -60,11 +60,15 @@
  */
 
 #ifndef CONFIG_LPC17_SSP1
-#  error "The OLED driver required CONFIG_LPC17_SSP1 in the configuration"
+#  error "The OLED driver requires CONFIG_LPC17_SSP1 in the configuration"
+#endif
+
+#ifndef CONFIG_UG9664HSWAG01_POWER
+#  error "This logic requires CONFIG_UG9664HSWAG01_POWER in the configuration"
 #endif
 
 /* Debug ********************************************************************/
-/* Define the CONFIG_LCD_RITDEBUG to enable detailed debug output (stuff you
+/* Define the CONFIG_LCD_UGDEBUG to enable detailed debug output (stuff you
  * would never want to see unless you are debugging this file).
  *
  * Verbose debug must also be enabled
@@ -76,15 +80,15 @@
 #endif
 
 #ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_LCD_RITDEBUG
+#  undef CONFIG_LCD_UGDEBUG
 #endif
 
-#ifdef CONFIG_LCD_RITDEBUG
-#  define ritdbg(format, arg...)  vdbg(format, ##arg)
-#  define oleddc_dumpgpio(m) lm3s_dumpgpio(LPCXPRESSO_OLED_POWER, m)
-#  define oledcs_dumpgpio(m) lm3s_dumpgpio(LPCXPRESSO_OLED_CS, m)
+#ifdef CONFIG_LCD_UGDEBUG
+#  define ugdbg(format, arg...)  vdbg(format, ##arg)
+#  define oleddc_dumpgpio(m)     lpc17_dumpgpio(LPCXPRESSO_OLED_POWER, m)
+#  define oledcs_dumpgpio(m)     lpc17_dumpgpio(LPCXPRESSO_OLED_CS, m)
 #else
-#  define ritdbg(x...)
+#  define ugdbg(x...)
 #  define oleddc_dumpgpio(m)
 #  define oledcs_dumpgpio(m)
 #endif
@@ -129,7 +133,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
     {
       /* Bind the SSI port to the OLED */
 
-      dev = rit_initialize(spi, devno);
+      dev = ug_initialize(spi, devno);
       if (!dev)
         {
           glldbg("Failed to bind SSI port 1 to OLED %d: %d\n", devno);
@@ -138,10 +142,9 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
         {
           gllvdbg("Bound SSI port 1 to OLED %d\n", devno);
 
-          /* And turn the OLED on (CONFIG_LCD_MAXPOWER should be 1) */
+          /* And turn the OLED on (dim) */
 
-          (void)lpc17_gpiowrite(LPCXPRESSO_OLED_POWER, true);
-          (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
+          (void)dev->setpower(dev, UG_POWER_DIM);
           return dev;
         }
     }
@@ -149,7 +152,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
 }
 
 /******************************************************************************
- * Name:  lm3s_spicmddata
+ * Name:  lpc17_ssp1cmddata
  *
  * Description:
  *   Set or clear the SD1329 D/Cn bit to select data (true) or command
@@ -171,7 +174,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
  *
  ******************************************************************************/
 
-int lm3s_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int lpc17_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
   if (devid == SPIDEV_DISPLAY)
     {
@@ -182,3 +185,30 @@ int lm3s_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
     }
   return -ENODEV;
 }
+
+/****************************************************************************
+ * Name:  ug_power
+ *
+ * Description:
+ *   If the hardware supports a controllable OLED a power supply, this
+ *   interface should be provided.  It may be called by the driver to turn
+ *   the OLED power on and off as needed.
+ *
+ * Input Parameters:
+ *
+ *   devno - A value in the range of 0 throuh CONFIG_UG9664HSWAG01_NINTERFACES-1.
+ *     This allows support for multiple OLED devices.
+ *   on - true:turn power on, false: turn power off.
+ *
+ * Returned Value:
+ *   None
+ *
+ **************************************************************************************/
+
+#ifdef CONFIG_UG9664HSWAG01_POWER
+void ug_power(unsigned int devno, bool on)
+{
+  gllvdbg("on: \n", on ? "TRUE" : "FALSE");
+  (void)lpc17_gpiowrite(LPCXPRESSO_OLED_POWER, on);
+}
+#endif

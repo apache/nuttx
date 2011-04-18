@@ -307,7 +307,7 @@ static int skel_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
  * Name:  skel_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on. On
+ *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
  *   backlit LCDs, this setting may correspond to the backlight setting.
  *
  **************************************************************************************/

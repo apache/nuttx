@@ -48,8 +48,8 @@ ifeq ($(CONFIG_LCD_NOKIA6100),y)
   LCD_CSRCS = nokia6100.c
 endif
 
-ifeq ($(CONFIG_LCD_UG9664HSWAG0),y)
-  LCD_CSRCS = ug-9664hswag0.c
+ifeq ($(CONFIG_LCD_UG9664HSWAG01),y)
+  LCD_CSRCS = ug-9664hswag01.c
 endif
 
 endif
