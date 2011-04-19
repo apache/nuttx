@@ -249,7 +249,7 @@ LEDs
     #define LED_INIRQ                  4  /*  NC     NC    ON  (momentary) */
     #define LED_SIGNAL                 5  /*  NC     NC    ON  (momentary) */
     #define LED_ASSERTION              6  /*  NC     NC    ON  (momentary) */
-    #define LED_PANIC                  7  /*  NC     NC    ON  (0.5Hz flashing) */
+    #define LED_PANIC                  7  /*  NC     NC    ON  (2Hz flashing) */
     #undef  LED_IDLE                      /* Sleep mode indication not supported */
 
   After the system is booted, this logic will no longer use LEDs 1 and 2.  They
@@ -269,7 +269,7 @@ LEDs
 
   The heartbeat LED is illuminated during all interrupt and signal procressing.
   Normally, it will glow dimly to inicate that the LPC17xx is taking interrupts.
-  On an assertion PANIC, it will flash at 1Hz.
+  On an assertion PANIC, it will flash at 2Hz.
 
 Nucleus 2G Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

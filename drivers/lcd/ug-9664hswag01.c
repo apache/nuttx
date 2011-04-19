@@ -92,13 +92,13 @@
  */
 
 #ifndef CONFIG_UG9664HSWAG01_SPIMODE
-#  define CONFIG_UG9664HSWAG01_SPIMODE SPIDEV_MODE2
+#  define CONFIG_UG9664HSWAG01_SPIMODE SPIDEV_MODE0
 #endif
 
 /* SPI frequency */
 
 #ifndef CONFIG_UG9664HSWAG01_FREQUENCY
-#  define CONFIG_UG9664HSWAG01_FREQUENCY SPIDEV_MODE2
+#  define CONFIG_UG9664HSWAG01_FREQUENCY 3500000
 #endif
 
 /* CONFIG_UG9664HSWAG01_NINTERFACES determines the number of physical interfaces
@@ -160,8 +160,8 @@
 
 /* Color is 1bpp monochrome with leftmost column contained in bits 0  */
 
-#if defined(CONFIG_NX_DISABLE_1BPP) || !defined(CONFIG_NX_PACKEDMSFIRST)
-#  warning "1-bit, big-endian pixel support needed"
+#ifdef CONFIG_NX_DISABLE_1BPP
+#  warning "1 bit-per-pixel support needed"
 #endif
 
 /* Color Properties *******************************************************************/
@@ -182,14 +182,19 @@
 #define UG_BPP          1
 #define UG_COLORFMT     FB_FMT_Y1
 
-/* Bytes per visible and actual device row */
+/* Bytes per logical row andactual device row */
 
-#define UG_STRIDE       (UG_XRES >> 3)
-#define UG_DEV_STRIDE   (UG_DEV_XRES >> 3)
+#define UG_XSTRIDE      (UG_XRES >> 3) /* Pixels arrange "horizontally for user" */
+#define UG_YSTRIDE      (UG_YRES >> 3) /* But actual device arrangement is "vertical" */
 
 /* The size of the shadow frame buffer */
 
-#define UG_FBSIZE       (UG_STRIDE * UG_YRES)
+#define UG_FBSIZE       (UG_XRES * UG_YSTRIDE)
+
+/* Bit helpers */
+
+#define LS_BIT          (1 << 0)
+#define MS_BIT          (1 << 7)
 
 /* Debug ******************************************************************************/
 
@@ -291,7 +296,7 @@ static inline void up_clear(FAR struct ug_dev_s  *priv);
  * if there are multiple LCD devices, they must each have unique run buffers.
  */
 
-static uint8_t g_runbuffer[UG_STRIDE];
+static uint8_t g_runbuffer[UG_XSTRIDE];
 
 /* This structure describes the overall LCD video controller */
 
@@ -468,11 +473,11 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   FAR struct ug_dev_s *priv = &g_ugdev;
   FAR uint8_t *fbptr;
+  FAR uint8_t *ptr;
   uint8_t devcol;
-  uint8_t startcol;
-  uint8_t endcol;
+  uint8_t fbmask;
   uint8_t page;
-  uint8_t pixelno;
+  uint8_t usrmask;
   uint8_t i;
   int     pixlen;
 
@@ -494,44 +499,80 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
       return OK;
     }
 
-  /* Update the shadow frame buffer memory */
-
-  fbptr   = &priv->fb[row * UG_STRIDE];
-  pixelno = 0;
-  endcol  = col + pixlen;
-
-  for (i = col; i < endcol; i++)
-    {
-      /* Point to the byte to be modified */
-
-      FAR uint8_t *ptr = &fbptr[i >> 3];
-
-      /* Set or clear the corresponding bit */
-
-      uint8_t mask = (1 << (i & 7));
-      if ((*buffer & (1 << pixelno)) != 0)
-        {
-          *ptr |= mask;
-        }
-      else
-        {
-          *ptr &= ~mask;
-        }
-
-      /* Increment to the next source pixel */
-
-      if (++pixelno >= 8)
-        {
-          buffer++;
-          pixelno = 0;
-        }
-    }
-
   /* Get the page number.  The range of 64 lines is divided up into eight
-   * pages or 8 lines each.
+   * pages of 8 lines each.
    */
 
   page = row >> 3;
+
+  /* Update the shadow frame buffer memory. First determine the pixel
+   * position in the frame buffer memory.  Pixels are organized like
+   * this:
+   *
+   *  --------+---+---+---+---+-...-+-----+
+   *  Segment | 0 | 1 | 2 | 3 | ... | 131 |
+   *  --------+---+---+---+---+-...-+-----+
+   *  Bit 0   |   | X |   |   |     |     |
+   *  Bit 1   |   | X |   |   |     |     |
+   *  Bit 2   |   | X |   |   |     |     |
+   *  Bit 3   |   | X |   |   |     |     |
+   *  Bit 4   |   | X |   |   |     |     |
+   *  Bit 5   |   | X |   |   |     |     |
+   *  Bit 6   |   | X |   |   |     |     |
+   *  Bit 7   |   | X |   |   |     |     | 
+   *  --------+---+---+---+---+-...-+-----+
+   *
+   * So, in order to draw a white, horizontal line, at row 45. we
+   * would have to modify all of the bytes in page 45/8 = 5.  We
+   * would have to set bit 45%8 = 5 in every byte in the page.
+   */
+
+  fbmask  = 1 << (row & 7);
+  fbptr   = &priv->fb[page * UG_XRES + col];
+  ptr     = fbptr;
+#ifdef CONFIG_NX_PACKEDMSFIRST
+  usrmask = MS_BIT;
+#else
+  usrmask = LS_BIT;
+#endif
+
+  for (i = 0; i < pixlen; i++)
+    {
+      /* Set or clear the corresponding bit */
+
+      if ((*buffer & usrmask) != 0)
+        {
+          *ptr++ |= fbmask;
+        }
+      else
+        {
+          *ptr++ &= ~fbmask;
+        }
+
+      /* Inc/Decrement to the next source pixel */
+
+#ifdef CONFIG_NX_PACKEDMSFIRST
+      if (usrmask == LS_BIT)
+        {
+          buffer++;
+          usrmask = MS_BIT;
+        }
+      else
+        {
+          usrmask >>= 1;
+        }
+#else
+      if (usrmask == MS_BIT)
+        {
+          buffer++;
+          usrmask = LS_BIT;
+        }
+      else
+        {
+          usrmask <<= 1;
+        }
+#endif
+    }
 
   /* Offset the column position to account for smaller horizontal
    * display range.
@@ -559,9 +600,7 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   /* Then transfer all of the data */
 
-  startcol = col >> 3;
-  endcol   = (col + pixlen + 7) >> 3;
-  (void)SPI_SNDBLOCK(priv->spi, &fbptr[startcol], endcol - startcol + 1);
+  (void)SPI_SNDBLOCK(priv->spi, fbptr, pixlen);
 
   /* Unlock and de-select the device */
 
@@ -589,9 +628,10 @@ static int ug_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   /* Because of this line of code, we will only be able to support a single UG device */
 
   FAR struct ug_dev_s *priv = &g_ugdev;
-  uint8_t *fbptr;
-  uint8_t endcol;
-  uint8_t pixelno;
+  FAR uint8_t *fbptr;
+  uint8_t page;
+  uint8_t fbmask;
+  uint8_t usrmask;
   uint8_t i;
   int     pixlen;
 
@@ -614,33 +654,77 @@ static int ug_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
     }
 
   /* Then transfer the display data from the shadow frame buffer memory */
+  /* Get the page number.  The range of 64 lines is divided up into eight
+   * pages of 8 lines each.
+   */
 
-  fbptr   = &priv->fb[row * UG_STRIDE];
-  pixelno = 0;
-  endcol  = col + pixlen;
+  page = row >> 3;
+
+  /* Update the shadow frame buffer memory. First determine the pixel
+   * position in the frame buffer memory.  Pixels are organized like
+   * this:
+   *
+   *  --------+---+---+---+---+-...-+-----+
+   *  Segment | 0 | 1 | 2 | 3 | ... | 131 |
+   *  --------+---+---+---+---+-...-+-----+
+   *  Bit 0   |   | X |   |   |     |     |
+   *  Bit 1   |   | X |   |   |     |     |
+   *  Bit 2   |   | X |   |   |     |     |
+   *  Bit 3   |   | X |   |   |     |     |
+   *  Bit 4   |   | X |   |   |     |     |
+   *  Bit 5   |   | X |   |   |     |     |
+   *  Bit 6   |   | X |   |   |     |     |
+   *  Bit 7   |   | X |   |   |     |     | 
+   *  --------+---+---+---+---+-...-+-----+
+   *
+   * So, in order to draw a white, horizontal line, at row 45. we
+   * would have to modify all of the bytes in page 45/8 = 5.  We
+   * would have to set bit 45%8 = 5 in every byte in the page.
+   */
+
+  fbmask  = 1 << (row & 7);
+  fbptr   = &priv->fb[page * UG_XRES + col];
+#ifdef CONFIG_NX_PACKEDMSFIRST
+  usrmask = MS_BIT;
+#else
+  usrmask = LS_BIT;
+#endif
+
   *buffer = 0;
-  
-  for (i = col; i < endcol; i++)
+  for (i = 0; i < pixlen; i++)
     {
-      /* Point to the byte to be modified */
-
-      uint8_t *ptr = &fbptr[i >> 8];
-
       /* Set or clear the corresponding bit */
-
-      if ((*ptr & (1 << (i & 7))) != 0)
+      
+      uint8_t byte = *fbptr++;
+      if ((byte & fbmask) != 0)
         {
-          *buffer |= (1 << pixelno);
+          *buffer |= usrmask;
         }
 
-      /* Increment to the next source pixel */
+      /* Inc/Decrement to the next destination pixel */
 
-      if (++pixelno >= 8)
+#ifdef CONFIG_NX_PACKEDMSFIRST
+      if (usrmask == LS_BIT)
         {
-          pixelno = 0;
           buffer++;
-          *buffer = 0;
+          usrmask = MS_BIT;
         }
+      else
+        {
+          usrmask >>= 1;
+        }
+#else
+      if (usrmask == MS_BIT)
+        {
+          buffer++;
+         *buffer = 0;
+          usrmask = LS_BIT;
+        }
+      else
+        {
+          usrmask <<= 1;
+        }
+#endif
     }
 
   return OK;
@@ -820,9 +904,8 @@ static int ug_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 static inline void up_clear(FAR struct ug_dev_s  *priv)
 {
   FAR struct spi_dev_s *spi  = priv->spi;
-  int row;
+  int page;
   int i;
-  int j;
 
   /* Clear the framebuffer */
 
@@ -834,7 +917,7 @@ static inline void up_clear(FAR struct ug_dev_s  *priv)
 
   /* Go through all 8 pages */
 
-  for (row = 0, i = 0; i < 8; i++)
+  for (page = 0, i = 0; i < 8; i++)
     {
       /* Select command transfer */
 
@@ -842,20 +925,17 @@ static inline void up_clear(FAR struct ug_dev_s  *priv)
 
       /* Set the starting position for the run */
 
-      (void)SPI_SEND(priv->spi, SSD1305_SETPAGESTART+i); /* Set the page start */
-      (void)SPI_SEND(priv->spi, SSD1305_SETCOLL);        /* Set the low column=0 */
-      (void)SPI_SEND(priv->spi, SSD1305_SETCOLH);        /* Set the high column=0 */
+      (void)SPI_SEND(priv->spi, SSD1305_SETPAGESTART+i);
+      (void)SPI_SEND(priv->spi, SSD1305_SETCOLL + (UG_XOFFSET & 0x0f));
+      (void)SPI_SEND(priv->spi, SSD1305_SETCOLH + (UG_XOFFSET >> 4));
 
       /* Select data transfer */
 
       SPI_CMDDATA(spi, SPIDEV_DISPLAY, false);
 
-       /* Then transfer all of the data */
+       /* Then transfer all 96 columns of data */
 
-       for (j = 0; j < 8; j++, row++)
-         {
-           (void)SPI_SNDBLOCK(priv->spi, &priv->fb[row * UG_STRIDE], UG_STRIDE);
-         }
+       (void)SPI_SNDBLOCK(priv->spi, &priv->fb[page * UG_XRES], UG_XRES);
     }
 
   /* Unlock and de-select the device */
@@ -918,7 +998,7 @@ FAR struct lcd_dev_s *ug_initialize(FAR struct spi_dev_s *spi, unsigned int devn
   (void)SPI_SEND(spi, SSD1305_SETCOLL + 2);       /* Set low column address */
   (void)SPI_SEND(spi, SSD1305_SETCOLH + 2);       /* Set high column address */
   (void)SPI_SEND(spi, SSD1305_SETSTARTLINE+0);    /* Display start set */
-  (void)SPI_SEND(spi, SSD1305_SCROLL_STOP);       /* Stop horzontal scroll */
+  (void)SPI_SEND(spi, SSD1305_SCROLL_STOP);       /* Stop horizontal scroll */
   (void)SPI_SEND(spi, SSD1305_SETCONTRAST);       /* Set contrast control register */
   (void)SPI_SEND(spi, 0x32);                      /* Data 1: Set 1 of 256 contrast steps */
   (void)SPI_SEND(spi, SSD1305_SETBRIGHTNESS);     /* Brightness for color bank */
@@ -941,6 +1021,7 @@ FAR struct lcd_dev_s *ug_initialize(FAR struct spi_dev_s *spi, unsigned int devn
   (void)SPI_SEND(spi, SSD1305_COLORMODE_MONO | SSD1305_POWERMODE_LOW);
   (void)SPI_SEND(spi, SSD1305_SETPRECHARGE);      /* Set pre-charge period */
   (void)SPI_SEND(spi, 15 << SSD1305_PHASE2_SHIFT | 1 << SSD1305_PHASE1_SHIFT);
+  (void)SPI_SEND(spi, SSD1305_SETCOMCONFIG);      /* Set COM configuration */
   (void)SPI_SEND(spi, SSD1305_COMCONFIG_ALT);     /* Data 1, Bit 4: 1=Alternative COM pin configuration */
   (void)SPI_SEND(spi, SSD1305_SETVCOMHDESEL);     /* Set VCOMH deselect level */
   (void)SPI_SEND(spi, SSD1305_VCOMH_x7p7);        /* Data 1: ~0.77 x Vcc  */

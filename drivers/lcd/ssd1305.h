@@ -118,7 +118,7 @@
 #  define SSD1305_SETBANK31(c)      (c << 4)  /* Data 4, Bits 4-5: Bank 31 color */
 #  define SSD1305_SETBANK32(c)      (c << 6)  /* Data 4, Bits 6-7: Bank 32 color */
 #define SSD1305_MAPCOL0             0xa0 /* 0xa0: Column address 0 is mapped to SEG0 */
-#define SSD1305_MAPCOL131           0xa1 /* 0xa1: Column address 131 is mapped to SEG0*/
+#define SSD1305_MAPCOL131           0xa1 /* 0xa1: Column address 131 is mapped to SEG0 */
 #define SSD1305_DISPRAM             0xa4 /* 0xa4: Resume to RAM content display */
 #define SSD1305_DISPENTIRE          0xa5 /* 0xa5: Entire display ON */
 #define SSD1305_DISPNORMAL          0xa6 /* 0xa6: Normal display */

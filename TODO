@@ -483,6 +483,7 @@ o Graphics subystem (graphics/)
                not certain if these are consequences of the 4bpp logic or if these
                are anomalies that have always been in NX, but are only visible
                now at the low resolution of the p14201 LCD (128x96).
+               Update: Same defects in the LPCXpresso a 1bpp (96x64).
   Status:      Open
   Priority:    Low (unless you need the p13201 then it is certainly higher).
 
