@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/i2c/st_lis331dl.c
+ * drivers/sensors/st_lis331dl.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *
@@ -47,7 +47,7 @@
 #include <stdio.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/i2c/st_lis331dl.h>
+#include <nuttx/sensors/st_lis331dl.h>
  
 /************************************************************************************
  * Private Data Types

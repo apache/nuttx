@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/i2c/st_lis331dl.h
+ * include/nuttx/sensors/st_lis331dl.h
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *
@@ -39,12 +39,11 @@
  *  \brief ST LIS331DL I2C Device Driver
  **/ 
 
-#ifndef __INCLUDE_NUTTX_I2C_ST_LIS331DL_H
-#define __INCLUDE_NUTTX_I2C_ST_LIS331DL_H
+#ifndef __INCLUDE_NUTTX_SENSORS_ST_LIS331DL_H
+#define __INCLUDE_NUTTX_SENSORS_ST_LIS331DL_H
 
-#include <nuttx/i2c/i2c.h>
+#include <nuttx/i2c.h>
 #include <stdbool.h>
-
 
 /************************************************************************************
  * Pre-Processor Declarations
@@ -176,5 +175,5 @@ EXTERN const struct st_lis331dl_vector_s * st_lis331dl_getreadings(struct st_lis
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_I2C_ST_LIS331DL_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_ST_LIS331DL_H */
 

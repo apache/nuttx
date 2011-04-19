@@ -75,8 +75,8 @@
 #include <nuttx/time.h>
 #include <nuttx/rtc.h>
 
-#include <nuttx/i2c/i2c.h>
-#include <nuttx/i2c/st_lis331dl.h>
+#include <nuttx/i2c.h>
+#include <nuttx/sensors/st_lis331dl.h>
 
 #include <stdio.h>
 #include <stdlib.h>

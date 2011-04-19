@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/i2c/i2c.h
+ * include/nuttx/i2c.h
  *
  *   Copyright(C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_I2C_I2C_H
-#define __INCLUDE_NUTTX_I2C_I2C_H
+#ifndef __INCLUDE_NUTTX_I2C_H
+#define __INCLUDE_NUTTX_I2C_H
 
 /****************************************************************************
  * Included Files
@@ -330,4 +330,4 @@ EXTERN int up_i2cuninitialize(FAR struct i2c_dev_s * dev);
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __INCLUDE_NUTTX_I2C_I2C_H */
+#endif /* __INCLUDE_NUTTX_I2C_H */

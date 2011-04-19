@@ -161,6 +161,10 @@ EXTERN FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch);
  *
  ****************************************************************************/
 
+EXTERN int nxf_convert_1bpp(FAR uint8_t *dest, uint16_t height,
+                            uint16_t width, uint16_t stride,
+                            FAR const struct nx_fontbitmap_s *bm,
+                            nxgl_mxpixel_t color);
 EXTERN int nxf_convert_2bpp(FAR uint8_t *dest, uint16_t height,
                             uint16_t width, uint16_t stride,
                             FAR const struct nx_fontbitmap_s *bm,

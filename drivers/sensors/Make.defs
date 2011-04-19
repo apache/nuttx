@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/i2c/Make.defs
+# drivers/sensors/Make.defs
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,10 +33,12 @@
 #
 ############################################################################
 
-I2C_ASRCS  =
-I2C_CSRCS  = 
+SENSOR_ASRCS  =
+SENSOR_CSRCS = 
+
+# These drivers depend on I2C support
 
 ifeq ($(CONFIG_I2C),y)
-I2C_CSRCS  += st_lis331dl.c
+SENSOR_CSRCS += st_lis331dl.c
 endif
 

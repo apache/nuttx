@@ -3,7 +3,7 @@
  *
  *   Author: David Hewson
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/i2c/i2c.h>
+#include <nuttx/i2c.h>
 
 #include <arch/irq.h>
 #include <arch/board/board.h>

@@ -41,7 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/i2c/i2c.h>
+#include <nuttx/i2c.h>
 
 #include "chip.h"
 #include "chip/stm32_i2c.h"

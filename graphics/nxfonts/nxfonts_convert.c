@@ -65,10 +65,7 @@
 #  define NXF_PIXELMASK           0x01
 #  define NXF_SCALEX(x)           ((x) >> 3)
 #  define NXF_PIXEL_T             uint8_t
-#  define NXF_MULTIPIXEL(p)       ((uint8_t)(p) << 7 | (uint8_t)(p) << 6 | \
-                                   (uint8_t)(p) << 5 | (uint8_t)(p) << 4 | \
-                                   (uint8_t)(p) << 3 | (uint8_t)(p) << 2 | \
-                                   (uint8_t)(p) << 1 | (p))
+#  define NXF_MULTIPIXEL(p)       ((p) ? 0xff : 0x00)
 
 #elif NXFONTS_BITSPERPIXEL == 2
 
