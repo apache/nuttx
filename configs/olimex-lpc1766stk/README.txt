@@ -337,7 +337,7 @@ LEDs
   - ON/OFF toggles means that various events are happening.
   - GLowing: LED2 is turned on and off on every interrupt so even timer interrupts
     should cause LED2 to glow faintly in the normal case.
-  - Flashing. If the LED2 is flashing at about 0.5Hz, that means that a crash
+  - Flashing. If the LED2 is flashing at about 2Hz, that means that a crash
     has occurred.  If CONFIG_ARCH_STACKDUMP=y, you will get some diagnostic
     information on the console to help debug what happened.
 

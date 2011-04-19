@@ -515,7 +515,7 @@ LEDs
     intialialized, but is not takint interrupts.
 
   - If a fatal assertion or a fatal unhandled exception occurs, the LED will flash
-    strongly as a slow, 1Hz rate.
+    strongly as a slow, 2Hz rate.
 
 LPCXpresso Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
