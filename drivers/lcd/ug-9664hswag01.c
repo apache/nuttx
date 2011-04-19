@@ -296,7 +296,7 @@ static inline void up_clear(FAR struct ug_dev_s  *priv);
  * if there are multiple LCD devices, they must each have unique run buffers.
  */
 
-static uint8_t g_runbuffer[UG_XSTRIDE];
+static uint8_t g_runbuffer[UG_XSTRIDE+1];
 
 /* This structure describes the overall LCD video controller */
 
@@ -701,12 +701,16 @@ static int ug_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
           *buffer |= usrmask;
         }
 
-      /* Inc/Decrement to the next destination pixel */
+      /* Inc/Decrement to the next destination pixel. Hmmmm. It looks like
+       * this logic could write past the end of the user buffer.  Revisit
+       * this!
+       */
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
       if (usrmask == LS_BIT)
         {
           buffer++;
+         *buffer = 0;
           usrmask = MS_BIT;
         }
       else
