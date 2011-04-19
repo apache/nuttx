@@ -65,7 +65,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/i2c/i2c.h>
+#include <nuttx/i2c.h>
 #include <nuttx/kmalloc.h>
 #include <arch/board/board.h>
 
