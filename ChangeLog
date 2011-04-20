@@ -1705,4 +1705,7 @@
 	  OLED with Solomon Systech SD1305 LCD controller.
 	* configs/lpcxpresso-lpc1668/nx: Add a NX graphics configuration for the LPCXPRESO
 	  board.
+	* graphics/nxglib/nxglib_nonintersecting.c: Fix some single bit errors in
+	  calculation of non-intersecting regions.  This was causing an anomoaly
+	  in examples/nx in column 0.
 

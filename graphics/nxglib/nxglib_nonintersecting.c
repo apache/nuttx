@@ -88,6 +88,43 @@ void nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
   /* Then return the four rectangles representing the regions NON included
    * in the intersection.  Some of these rectangles may be invalid (zero
    * area), but those can be picked off using nxgl_nullrect()
+   *
+   *  rect1.pt1
+   *   +-------------------------+
+   *   |         rect2.pt1       |
+   *   |         int.pt1         |
+   *   |         +-------------------------+
+   *   |         |               |         |
+   *   |         |               |         |
+   *   +-------------------------+         |
+   *             |               rect1.pt2 |
+   *             |               int.pt2   |
+   *             +-------------------------+
+   *                                       rect2.pt2
+   *             rect1.pt1
+   *             +-------------------------+
+   *   rect2.pt1 |int.pt1                  |
+   *   +---------+---------------+         |
+   *   |         |               |         |
+   *   |         |               |         |
+   *   |         |               |int.pt2  |
+   *   |         +---------------+---------+
+   *   |                         |         rect1.pt2
+   *   +-------------------------+
+   *                             rect2.pt2
+   *   rect2.pt1
+   *   +-------------------------+
+   *   |         rect1.pt1       |
+   *   |         int.pt1         |
+   *   |         +-------------------------+
+   *   |         |               |         |
+   *   |         |               |         |
+   *   |         |               |         |
+   *   +---------+---------------+         |
+   *             |               rect2.pt2 |
+   *             |               int.pt2   |
+   *             +-------------------------+
+   *                                       rect1.pt2
    */
 
   result[NX_TOP_NDX].pt1.x    = rect1->pt1.x;
@@ -100,14 +137,14 @@ void nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
   result[NX_BOTTOM_NDX].pt2.x = rect1->pt2.x;
   result[NX_BOTTOM_NDX].pt2.y = rect1->pt2.y;
 
-  result[NX_LEFT_NDX].pt1.x   = rect1->pt1.x + 1;
+  result[NX_LEFT_NDX].pt1.x   = rect1->pt1.x;
   result[NX_LEFT_NDX].pt1.y   = intersection.pt1.y;
-  result[NX_LEFT_NDX].pt2.x   = intersection.pt1.x;
+  result[NX_LEFT_NDX].pt2.x   = intersection.pt1.x - 1;
   result[NX_LEFT_NDX].pt2.y   = intersection.pt2.y;
 
-  result[NX_RIGHT_NDX].pt1.x  = intersection.pt2.x;
+  result[NX_RIGHT_NDX].pt1.x  = intersection.pt2.x + 1;
   result[NX_RIGHT_NDX].pt1.y  = intersection.pt1.y;
-  result[NX_RIGHT_NDX].pt2.x  = rect1->pt2.x - 1;
+  result[NX_RIGHT_NDX].pt2.x  = rect1->pt2.x;
   result[NX_RIGHT_NDX].pt2.y  = intersection.pt2.y;
 }
 
