@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock_uptime.c
+ * sched/clock_getutc.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -44,7 +44,7 @@
 #include <nuttx/time.h>
 #include <nuttx/rtc.h>
 
-#if !defined(CONFIG_DISABLE_CLOCK) && defined(CONFIG_UPTIME) && !defined(clock_uptime)
+#if !defined(CONFIG_DISABLE_CLOCK) && defined(CONFIG_SYSTEM_UTC) && !defined(clock_getutc)
      
 /****************************************************************************
  * Pre-processor Definitions
@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  clock_uptime
+ * Function:  clock_getutc
  *
  * Description:
  *   Return the current value of the system timer counter, which is only
@@ -75,7 +75,7 @@
  *
  ****************************************************************************/
 
-time_t clock_uptime(void)
+time_t clock_getutc(void)
 {
 #ifdef CONFIG_RTC
   if (g_rtc_enabled)
@@ -85,8 +85,8 @@ time_t clock_uptime(void)
   else
 #endif
     {
-      return g_uptime;
+      return g_system_utc;
 	}
 }
 
-#endif /* CONFIG_DISABLE_CLOCK && CONFIG_UPTIME */
+#endif /* CONFIG_DISABLE_CLOCK && CONFIG_SYSTEM_UTC */

@@ -127,14 +127,14 @@
 
 #if __HAVE_KERNEL_GLOBALS
 extern volatile uint32_t g_system_timer;
-extern volatile uint32_t g_uptime;
+extern volatile uint32_t g_system_utc;
 #endif
 
 #if !defined(CONFIG_RTC) && __HAVE_KERNEL_GLOBALS
 #define clock_systimer() g_system_timer
 
-#if defined(CONFIG_UPTIME)
-#define clock_uptime()   g_uptime
+#if defined(CONFIG_SYSTEM_UTC)
+#define clock_getutc()   g_system_utc
 #endif
 
 #endif
@@ -174,7 +174,7 @@ EXTERN uint32_t clock_systimer(void);
 #endif
 
 /****************************************************************************
- * Function:  clock_uptime
+ * Function:  clock_getutc
  *
  * Description:
  *   Return the current value of the system timer counter, which is only
@@ -190,8 +190,8 @@ EXTERN uint32_t clock_systimer(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_UPTIME) && !__HAVE_KERNEL_GLOBALS
-EXTERN time_t clock_uptime(void);
+#if defined(CONFIG_SYSTEM_UTC) && !__HAVE_KERNEL_GLOBALS
+EXTERN time_t clock_getutc(void);
 #endif
 
 #undef EXTERN

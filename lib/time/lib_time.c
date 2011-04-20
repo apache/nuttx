@@ -89,7 +89,7 @@ time_t time(time_t *tloc)
   struct timeval tp;
   int ret;
 
-  /* Get the current uptime from the system */
+  /* Get the current time from the system */
 
   ret = gettimeofday(&tp, NULL);
   if (ret == OK)

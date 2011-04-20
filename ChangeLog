@@ -1693,7 +1693,7 @@
 	  character in the string.
 	* tools/version.sh and mkversion.c: Tools to manage a NuttX version number
 	  file
-	* sched/clock_uptime() and lib/time/lib_time.c: Add support for 1 second uptime
+	* sched/clock_getutc() and lib/time/lib_time.c: Add support for 1 second UTC
 	  interface.
 	* net/net_dup2.c and include/nuttx/net.h: The conditional compilation for
 	  '#if CONFIG_NFILE_DESCRIPTOR > 0' was wrong in both of these files.  It should

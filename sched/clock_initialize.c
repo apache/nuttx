@@ -60,7 +60,7 @@
 #define SEC_PER_HOUR ((time_t)60 * SEC_PER_MIN)
 #define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
 
-/* Defined just so the uptime counter and system timer look similar */
+/* Defined just so the UTC counter and system counter/timer look similar */
 
 #define incr_systimer() g_system_timer++
 
@@ -82,8 +82,8 @@
 
 volatile clock_t g_system_timer = 0;
 
-#if CONFIG_UPTIME
-volatile time_t  g_uptime       = 0;
+#if CONFIG_SYSTEM_UTC
+volatile time_t  g_system_utc   = 0;
 #endif
 
 struct timespec  g_basetime     = {0,0};
@@ -94,10 +94,10 @@ uint32_t         g_tickbias     = 0;
  **************************************************************************/
 
 /* This variable is used to count ticks and to increment the one-second
- * uptime variable.
+ * UTC variable.
  */
 
-#if CONFIG_UPTIME
+#if CONFIG_SYSTEM_UTC
 #if TICK_PER_SEC > 32767
 static uint32_t g_tickcount = 0;
 #elif TICK_PER_SEC > 255
@@ -105,7 +105,7 @@ static uint16_t g_tickcount = 0;
 #else
 static uint8_t  g_tickcount = 0;
 #endif
-#endif /* CONFIG_UPTIME */
+#endif /* CONFIG_SYSTEM_UTC */
 
 /**************************************************************************
  * Private Functions
@@ -120,19 +120,19 @@ static uint8_t  g_tickcount = 0;
  *
  ****************************************************************************/
 
-#if CONFIG_UPTIME
-static inline void incr_uptime(void)
+#if CONFIG_SYSTEM_UTC
+static inline void incr_utc(void)
 {
   g_tickcount++;
   
   if (g_tickcount >= TICK_PER_SEC)
     {
-      g_uptime++;
+      g_system_utc++;
       g_tickcount -= TICK_PER_SEC;
     }
 }
 #else
-#  define incr_uptime()
+#  define incr_utc()
 #endif
 
 /****************************************************************************
@@ -160,8 +160,8 @@ void clock_initialize(void)
    */
 
   g_system_timer = 0;
-#ifdef CONFIG_UPTIME
-  g_uptime = 0;
+#ifdef CONFIG_SYSTEM_UTC
+  g_system_utc   = 0;
 #endif
 
   /* Do we have hardware periodic timer support? */
@@ -206,7 +206,7 @@ void clock_timer(void)
 
   incr_systimer();
 
-  /* Increment the per-second uptime counter */
+  /* Increment the per-second UTC counter */
 
-  incr_uptime();
+  incr_utc();
 }
