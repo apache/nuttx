@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/st_lis331dl.h
+ * include/nuttx/wireless/chipcon_cc1101.h
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *
@@ -36,13 +36,16 @@
 
 /** \file
  *  \author Uros Platise
- *  \brief ST LIS331DL I2C Device Driver
+ *  \brief Chipcon CC1101 Device Driver
  **/ 
 
-#ifndef __INCLUDE_NUTTX_SENSORS_ST_LIS331DL_H
-#define __INCLUDE_NUTTX_SENSORS_ST_LIS331DL_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_CHIPCON_CC1101_H
+#define __INCLUDE_NUTTX_WIRELESS_CHIPCON_CC1101_H
 
-#include <nuttx/i2c.h>
+#include <nuttx/config.h>
+#include <nuttx/spi.h>
+
+#include <stdint.h>
 #include <stdbool.h>
 
 /************************************************************************************
@@ -64,81 +67,47 @@ extern "C" {
  * Public Data Types
  ************************************************************************************/
 
-struct st_lis331dl_dev_s;
-
-struct st_lis331dl_vector_s {
-    int8_t  x, y, z;
-};
+struct chipcon_cc1101_dev_s;
 
 
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
 
-/** Initialize ST LIS331DL Chip
+/** Initialize Chipcon CC1101 Chip
  * 
- * \param i2c I2C Device Structure
- * \param address I2C Address of the proposed device
- * \return Pointer to newly allocated ST LIS331DL structure or NULL on error with errno set.
+ * \param spi SPI Device Structure
+ * \return Pointer to newly allocated CC1101 structure or NULL on error with errno set.
  * 
  * Possible errno as set by this function on error:
- *  - ENODEV: When device addressed on given address is not compatible or it is not a LIS331DL
- *  - EFAULT: When there is no device at given address.
+ *  - ENODEV: When device addressed is not compatible or it is not a CC1101
+ *  - EFAULT: When there is no device
  *  - EBUSY: When device is already addressed by other device driver (not yet supported by low-level driver)
  **/
-EXTERN struct st_lis331dl_dev_s * st_lis331dl_init(struct i2c_dev_s * i2c, uint16_t address);
+EXTERN struct chipcon_cc1101_dev_s * chipcon_cc1101_init(struct spi_dev_s * spi);
 
-/** Deinitialize ST LIS331DL Chip
+/** Deinitialize Chipcon CC1101 Chip
  * 
- * \param dev Device to LIS331DL device structure, as returned by the st_lis331dl_init()
+ * \param dev Device to CC1101 device structure, as returned by the chipcon_cc1101_init()
  * \return OK On success
  * 
  **/
-EXTERN int st_lis331dl_deinit(struct st_lis331dl_dev_s * dev);
+EXTERN int chipcon_cc1101_deinit(struct chipcon_cc1101_dev_s * dev);
 
 /** Power up device, start conversion */
-EXTERN int st_lis331dl_powerup(struct st_lis331dl_dev_s * dev);
+EXTERN int chipcon_cc1101_powerup(struct chipcon_cc1101_dev_s * dev);
 
 /** Power down device, stop conversion */
-EXTERN int st_lis331dl_powerdown(struct st_lis331dl_dev_s * dev);
+EXTERN int chipcon_cc1101_powerdown(struct chipcon_cc1101_dev_s * dev);
 
-/** Configure conversion 
- * 
- * \param dev Device to LIS331DL device structure
- * \param full When set, range of [-9g, 9g] is selected, otherwise [-2g, +2g]
- * \param fast When set, conversion operates at 400 Hz, otherwise at 100 Hz
- * \return OK on success or errno is set
- **/
-EXTERN int st_lis331dl_setconversion(struct st_lis331dl_dev_s * dev, bool full, bool fast);
-
-/** Get precision
- * 
- * \return Precision of 1 LSB in terms of unit [mg]
- **/
-EXTERN int st_lis331dl_getprecision(struct st_lis331dl_dev_s * dev);
-
-/** Get sample rate 
- * 
- * \return Sample rate in unit of [Hz]
- **/
-EXTERN int st_lis331dl_getsamplerate(struct st_lis331dl_dev_s * dev);
-
-/** Get readings, updates internal data structure
- * 
- * \param dev Device to LIS331DL device structure
- * \return Ptr to vector acceleration [x,y,z] on success, or NULL on error with errno set.
- *   If data is not yet ready to be read from the LIS331 then errno is set to EAGAIN otherwise
- *   errno is set by I2C_TRANSFER().
- */
-EXTERN const struct st_lis331dl_vector_s * st_lis331dl_getreadings(struct st_lis331dl_dev_s * dev);
-
+/** Set Multi Purpose Output Function */
+EXTERN int chipcon_cc1101_setgdo(struct chipcon_cc1101_dev_s * dev, uint8_t pin, uint8_t function);
 
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
-
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_SENSORS_ST_LIS331DL_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_CHIPCON_CC1101_H */
 

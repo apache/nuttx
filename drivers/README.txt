@@ -31,6 +31,10 @@ ramdisk.c
 	a block driver that can be mounted as a files system.  See
 	include/nuttx/ramdisk.h.
 
+rwbuffer.c
+	A facility that can be use by any block driver in-order to add
+	writing buffering and read-ahead buffering.
+
 Subdirectories of this directory:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -65,6 +69,9 @@ net/
 pipes/
 	FIFO and named pipe drivers.  Standard interfaces are declared
 	in include/unistd.h
+
+sensors/
+	Drivers for various sensors
 
 serial/
 	Front-ends character drivers for chip-specific UARTs.  This provide

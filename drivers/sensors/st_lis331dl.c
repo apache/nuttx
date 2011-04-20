@@ -48,6 +48,42 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/sensors/st_lis331dl.h>
+
+/************************************************************************************
+ * LIS331DL Internal Registers
+ ************************************************************************************/
+
+#define ST_LIS331DL_WHOAMI          0x0F    /* who am I register */
+#define ST_LIS331DL_WHOAMI_VALUE    0x3B    /* Valid result is 0x3B */
+
+#define ST_LIS331DL_CTRL_REG1       0x20
+#define ST_LIS331DL_CR1_DR          0x80    /* Data-rate selection 0: 100 Hz, 1: 400 Hz */
+#define ST_LIS331DL_CR1_PD          0x40    /* Active Mode (1) / Power-down (0) */
+#define ST_LIS331DL_CR1_FS          0x20    /* Full Scale (1) +-9g or Normal Scale (0) +-2g */
+#define ST_LIS331DL_CR1_ST          0x18    /* Self test enable */
+#define ST_LIS331DL_CR1_ZEN         0x04    /* Z-Axis Enable */
+#define ST_LIS331DL_CR1_YEN         0x02    /* Y-Axis Enable */
+#define ST_LIS331DL_CR1_XEN         0x01    /* X-Axis Enable */
+
+#define ST_LIS331DL_CTRL_REG2       0x21
+#define ST_LIS331DL_CTRL_REG3       0x22
+
+#define ST_LIS331DL_HP_FILTER_RESET 0x23
+
+#define ST_LIS331DL_STATUS_REG      0x27    /* Status Register */
+#define ST_LIS331DL_SR_ZYXOR        0x80    /* OR'ed X,Y and Z data over-run  */
+#define ST_LIS331DL_SR_ZOR          0x40    /* individual data over-run ... */
+#define ST_LIS331DL_SR_YOR          0x20
+#define ST_LIS331DL_SR_XOR          0x10
+#define ST_LIS331DL_SR_ZYXDA        0x08    /* OR'ed X,Y and Z data available */
+#define ST_LIS331DL_SR_ZDA          0x04    /* individual data available ... */
+#define ST_LIS331DL_SR_YDA          0x02
+#define ST_LIS331DL_SR_XDA          0x01
+
+#define ST_LIS331DL_OUT_X           0x29
+#define ST_LIS331DL_OUT_Y           0x2B
+#define ST_LIS331DL_OUT_Z           0x2D
+
  
 /************************************************************************************
  * Private Data Types
