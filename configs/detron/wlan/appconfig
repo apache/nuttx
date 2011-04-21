@@ -37,3 +37,7 @@
 
 CONFIGURED_APPS += examples/wlan
 
+# Networking support
+
+CONFIGURED_APPS += netutils/uiplib
+
