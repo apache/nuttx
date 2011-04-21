@@ -51,8 +51,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/chipcon_cc1101.h>
 
-#include <nuttx/ptimer.h>
-
 
 /************************************************************************************
  * Chipcon CC1101 Internal Registers

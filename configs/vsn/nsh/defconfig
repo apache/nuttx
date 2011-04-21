@@ -255,9 +255,24 @@ CONFIG_SSI_POLLWAIT=y
 CONFIG_I2C=y
 
 #
+# OS support for various wireless chipsets such as 
+#  - Chipcon CC1101 operating in bands 300-400, 800-900 MHz
+#  - Chipcon CC2500 operating in band of 2 GHz
+#
+# Note: this has (at the moment) nothing to do with WIFI
+#
+CONFIG_WIRELESS=y
+
+#
 # OS support for hardware RTC
 #
 CONFIG_RTC=y
+CONFIG_SYSTEM_UTC=y
+
+#
+# OS support for events
+#
+CONFIG_EVENT=y
 
 #
 # General build options
@@ -876,6 +891,10 @@ CONFIG_APPS_DIR="../apps"
 
 # Provide /dev/ramX and then: mount -t binfs /dev/ram0 /bin
 CONFIG_APPS_BINDIR=y
+
+# Application configuration
+
+CONFIG_APPS_DIR="../apps"
 
 # Application configuration
 
