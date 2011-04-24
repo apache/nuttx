@@ -135,7 +135,7 @@ static int ftl_open(FAR struct inode *inode)
 }
 
 /****************************************************************************
- * Name: ftl_closel
+ * Name: ftl_close
  *
  * Description: close the block device
  *
@@ -450,9 +450,14 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
  * Description:
  *   Initialize to provide a block driver wrapper around an MTD interface
  *
+ * Input Parameters:
+ *   minor - The minor device number.  The MTD block device will be
+ *      registered as as /dev/mtdblockN where N is the minor number.
+ *   mtd - The MTD device that supports the FLASH interface.
+ *
  ****************************************************************************/
 
-int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
+int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
 {
   struct ftl_struct_s *dev;
   char devname[16];
@@ -467,12 +472,12 @@ int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
     }
 #endif
 
-  /* Allocate a ramdisk device structure */
+  /* Allocate a FTL device structure */
 
   dev = (struct ftl_struct_s *)kmalloc(sizeof(struct ftl_struct_s));
   if (dev)
     {
-      /* Initialize the ramdisk device structure */
+      /* Initialize the FTL device structure */
 
       dev->mtd = mtd;
 
@@ -535,7 +540,7 @@ int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
 
       snprintf(devname, 16, "/dev/mtdblock%d", minor);
 
-      /* Inode private data is a reference to the ramdisk device stgructure */
+      /* Inode private data is a reference to the FTL device structure */
 
       ret = register_blockdriver(devname, &g_bops, 0, dev);
       if (ret < 0)

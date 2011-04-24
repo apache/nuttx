@@ -198,7 +198,7 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
       case MTDIOC_GEOMETRY:
         {
           FAR struct mtd_geometry_s *geo = (FARstruct mtd_geometry_s *)arg;
-          if (ppv)
+          if (geo)
             {
               /* Populate the geometry structure with information need to know
                * the capacity and how to access the device.
@@ -234,7 +234,7 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
-      case MTDIOC_BULKERASE
+      case MTDIOC_BULKERASE:
         {
 	        /* Erase the entire device */
 
@@ -258,9 +258,10 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  * Name: skel_initialize
  *
  * Description:
- *   Create an initialize MTD device instance.  MTD devices are not registered
- *   in the file system, but are created as instances that can be bound to
- *   other functions (such as a block or character driver front end).
+ *   Create and initialize an MTD device instance.  MTD devices are not
+ *   registered in the file system, but are created as instances that can
+ *   be bound to other functions (such as a block or character driver front
+ *   end).
  *
  ****************************************************************************/
 

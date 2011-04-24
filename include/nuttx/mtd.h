@@ -138,11 +138,30 @@ extern "C" {
  * Description:
  *   Initialize to provide a block driver wrapper around an MTD interface
  *
+ * Input Parameters:
+ *   minor - The minor device number.  The MTD block device will be
+ *      registered as as /dev/mtdblockN where N is the minor number.
+ *   mtd - The MTD device that supports the FLASH interface.
+ *
  ****************************************************************************/
 
-EXTERN int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd);
+EXTERN int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
 
-/************************************************************************************
+/****************************************************************************
+ * Name: rammtd_initialize
+ *
+ * Description:
+ *   Create and initialize a RAM MTD device instance.
+ *
+ * Input Parameters:
+ *   start - Address of the beginning of the allocated RAM regions.
+ *   size  - The size in bytes of the allocated RAM region.
+ *
+ ****************************************************************************/
+
+EXTERN FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size);
+
+/****************************************************************************
  * Name: m25p_initialize
  *
  * Description:
@@ -150,11 +169,11 @@ EXTERN int ftl_initialize(int minor, uint8_t *buffer, FAR struct mtd_dev_s *mtd)
  *   in the file system, but are created as instances that can be bound to
  *   other functions (such as a block or character driver front end).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 EXTERN FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: at45db_initialize
  *
  * Description:
@@ -162,7 +181,7 @@ EXTERN FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
  *   in the file system, but are created as instances that can be bound to
  *   other functions (such as a block or character driver front end).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 EXTERN FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *dev);
 

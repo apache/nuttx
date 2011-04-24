@@ -1708,4 +1708,7 @@
 	* graphics/nxglib/nxglib_nonintersecting.c: Fix some single bit errors in
 	  calculation of non-intersecting regions.  This was causing an anomoaly
 	  in examples/nx in column 0.
+	* drivers/mtd/rammtd.c: Added a RAM based MTD driver.  This RAM driver simulates
+	  FLASH and is useful for testing purposes.
+
 

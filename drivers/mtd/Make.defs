@@ -1,5 +1,6 @@
 ############################################################################
 # drivers/mtd/Make.defs
+# This driver supports a block of RAM as a NuttX MTD device
 #
 #   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,4 +35,4 @@
 ############################################################################
 
 MTD_ASRCS  =
-MTD_CSRCS  = ftl.c m25px.c at45db.c ramtron.c 
+MTD_CSRCS  = ftl.c m25px.c at45db.c ramtron.c rammtd.c
