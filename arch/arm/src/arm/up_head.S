@@ -177,7 +177,7 @@
  * to the base address of the section containing both.
  */
 
-#ifndef CONFIG_ARCH_LOWVECTORS
+#ifdef CONFIG_ARCH_LOWVECTORS
 	.macro	mksection, section, pgtable
 	bic	\section, \pgtable, #0x000ff000
 	.endm
@@ -305,7 +305,6 @@ __start:
 
 #endif /* CONFIG_PAGING */
 #endif /* CONFIG_ARCH_ROMPGTABLE */
-
 
 	/* The following logic will set up the ARM920/ARM926 for normal operation.
 	 *

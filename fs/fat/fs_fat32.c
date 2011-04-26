@@ -216,6 +216,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
       if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
         {
           /* Already exists -- can't create it exclusively */
+
           ret = -EEXIST;
           goto errout_with_semaphore;
         }
@@ -251,7 +252,6 @@ static int fat_open(FAR struct file *filep, const char *relpath,
         }
 
       /* fall through to finish the file open operations */
-
     }
   else if (ret == -ENOENT)
     {

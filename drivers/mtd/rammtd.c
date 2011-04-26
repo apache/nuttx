@@ -44,7 +44,9 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/ioctl.h>
 #include <nuttx/mtd.h>
 
@@ -316,7 +318,7 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
 
   /* Create an instance of the RAM MTD device state structure */
 
-  priv = (FAR struct ram_dev_s *)kzmalloc(sizeof(struct ram_dev_s));
+  priv = (FAR struct ram_dev_s *)kmalloc(sizeof(struct ram_dev_s));
   if (!priv)
     {
       fdbg("Failed to allocate the RAM MTD state structure\n");

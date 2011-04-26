@@ -1706,9 +1706,13 @@
 	* configs/lpcxpresso-lpc1668/nx: Add a NX graphics configuration for the LPCXPRESO
 	  board.
 	* graphics/nxglib/nxglib_nonintersecting.c: Fix some single bit errors in
-	  calculation of non-intersecting regions.  This was causing an anomoaly
+	  calculation of non-intersecting regions.  This was causing an anomaly
 	  in examples/nx in column 0.
 	* drivers/mtd/rammtd.c: Added a RAM based MTD driver.  This RAM driver simulates
 	  FLASH and is useful for testing purposes.
+	* arch/arm/src/arm/up_head.S: Fix backward conditional compilation.  This cause
+	  the configs/mx1ads configuration to fail to build but does not appear to affect
+	  any other ARM9 build.
+
 
 
