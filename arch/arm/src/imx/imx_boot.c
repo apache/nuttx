@@ -117,7 +117,7 @@ extern void imx_boardinitialize(void);
 
 static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
 {
-  uint32_t *pgtable = (uint32_t*)PGTABLE_VBASE;
+  uint32_t *pgtable = (uint32_t*)PGTABLE_BASE_VADDR;
   uint32_t  index   = vaddr >> 20;
 
   /* Save the page table entry */
