@@ -63,6 +63,7 @@ CSRCS		+= fs_mount.c fs_umount.c fs_fsync.c fs_unlink.c fs_rename.c \
 		   fs_mkdir.c fs_rmdir.c
 include fat/Make.defs
 include romfs/Make.defs
+include nxffs/Make.defs
 endif
 endif
 
@@ -73,8 +74,8 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libfs$(LIBEXT)
 
-SUBDIRS		= fat romfs
-VPATH		= fat:romfs
+SUBDIRS		= fat romfs nxffs
+VPATH		= fat:romfs:nxffs
 
 all:	$(BIN)
 
@@ -90,7 +91,8 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-	@$(MKDEP) --dep-path . --dep-path fat --dep-path romfs $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@$(MKDEP) --dep-path . $(FATDEPPATH) $(ROMFSDEPPATH) $(NXFFSDEPPATH) \
+		$(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend

@@ -1,7 +1,7 @@
 ############################################################################
-# Make.defs
+# fs/nxffs/Make.defs
 #
-#   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,18 +33,12 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_FS_FAT),y)
-# Files required for FAT file system support
-
+ifeq ($(CONFIG_FS_NXFFS),y)
 ASRCS +=
-CSRCS += fs_fat32.c fs_fat32attrib.c fs_fat32util.c
-
-# Files required for mkfatfs utility function
-
-ASRCS +=
-CSRCS += fs_mkfatfs.c fs_configfat.c fs_writefat.c
+CSRCS += nxffs_block.c nxffs_blockstats.c nxffs_cache.c \
+		nxffs_initialize.c nxffs_inode.c nxffs_reformat.c nxffs_util.c
 
 # Argument for dependency checking
 
-FATDEPPATH = --dep-path fat
+NXFFSDEPPATH = --dep-path nxffs
 endif
