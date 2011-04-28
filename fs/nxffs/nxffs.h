@@ -73,14 +73,14 @@
  *   n   4*n     --+--------------+
  *                 |BBBBBBBBBBBBBB| Logic block header
  *                 |IIIIIIIIIIIIII| Inodes begin with a inode header
- *                 |DDDDDDDDDDDDD| Data block containing inode data block
+ *                 |DDDDDDDDDDDDDD| Data block containing inode data block
  *                 | (Inode Data) |
  *       4*n+1   --+--------------+
  *                 |BBBBBBBBBBBBBB| Logic block header
  *                 |DDDDDDDDDDDDDD| Inodes may consist of multiple data blocks
  *                 | (Inode Data) |
  *                 |IIIIIIIIIIIIII| Next inode header
- *                 |             | Possibly a few unused bytes at the end of a block
+ *                 |              | Possibly a few unused bytes at the end of a block
  *       4*n+2   --+--------------+
  *                 |BBBBBBBBBBBBBB| Logic block header
  *                 |DDDDDDDDDDDDDD|
@@ -141,7 +141,6 @@
  * 6. The clean-up process occurs only during a write when the free FLASH
  *    memory at the end of the FLASH is exhausted.  Thus, occasionally, file
  *    writing may take a long time.
- *
  */
 
 /* Values for logical block state.  Basically, there are only two, perhaps
@@ -703,7 +702,7 @@ extern int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name
  * - nxffs_open() and nxffs_close() are defined in nxffs_open.c
  * - nxffs_ioctl() is defined in nxffs_ioctl.c
  * - nxffs_opendir(), nxffs_readdir(), and nxffs_rewindir() are defined in
- *   nxffs_dir.c
+ *   nxffs_dirent.c
  * - nxffs_stat() and nxffs_statfs() are defined in nxffs_stat.c
  * - nxffs_unlink() is defined nxffs_unlink.c
  *

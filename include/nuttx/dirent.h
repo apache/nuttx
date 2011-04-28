@@ -105,6 +105,17 @@ struct fs_binfsdir_s
   unsigned int fb_index;               /* Index to the next named entry point */
 };
 #endif
+
+#ifdef CONFIG_FS_NXFFS
+/* NXFFS is the tiny NuttX wear-leveling FLASH file system.  The state value is
+ * the offset in FLASH memory to the next inode entry.
+ */
+
+struct fs_nxffsdir_s
+{
+  off_t nx_offset;                     /* Offset to the next inode */
+};
+#endif
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 struct fs_dirent_s
@@ -153,7 +164,10 @@ struct fs_dirent_s
 #ifdef CONFIG_APPS_BINDIR
       struct fs_binfsdir_s  binfs;
 #endif
+#ifdef CONFIG_FS_NXFFS
+      struct fs_nxffsdir_s  nxffs;
 #endif
+#endif /* !CONFIG_DISABLE_MOUNTPOINT */
    } u;
 
   /* In any event, this the actual struct dirent that is returned by readdir */

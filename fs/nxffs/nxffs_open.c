@@ -289,6 +289,10 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
 
 /****************************************************************************
  * Name: nxffs_freeofile
+ *
+ * Description:
+ *   Free resources held by an open file.
+ *
  ****************************************************************************/
 
 static inline void nxffs_freeofile(FAR struct nxffs_ofile_s *ofile)
