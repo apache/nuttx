@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 20, 2011</p>
+      <p>Last Updated: April 28, 2011</p>
     </td>
   </tr>
 </table>
@@ -2241,8 +2241,13 @@ nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * graphics/nxglib/nxglib_nonintersecting.c: Fix some single bit errors in
       calculation of non-intersecting regions.  This was causing an anomoaly
       in examples/nx in column 0.
+    * drivers/mtd/rammtd.c: Added a RAM based MTD driver.  This RAM driver simulates
+      FLASH and is useful for testing purposes.
+    * arch/arm/src/arm/up_head.S: Fix backward conditional compilation.  This cause
+      the configs/mx1ads configuration to fail to build but does not appear to affect
+      any other ARM9 build.
 
-apps-6.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+apps-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2258,12 +2263,17 @@ buildroot-1.10 2011-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
       .exe files).  That is probably not usable for most NuttX targets.
       Instead, you should use this i486-elf-gcc to generate true ELF binaries
       under Cygwin.
-    * Makefile - Alter copy arguements to avoid permissions problems when
+    * Makefile - Alter copy arguments to avoid permissions problems when
       copying NuttX header files.
     * toolchain/nxflat/nxflat.mk and Makefile - Fix include paths.
     * toolchain/gcc/3.3.6 - Added a patch to fixed compilation error on Ubuntu
       9.10.
     * toolchain/nxflat/Makefile - Correct static library link order.
+    * configs/arm920t-defconfig-4.3.3 - Enable support for NXFLAT tools.
+    * toolchain/binutils/2.21 and toolchain/gcc/4.5.2 - Add support for GCC
+      4.5.2 with binutils 2.21.
+    * configs/cortex-eabi-defconfig-4.5.2 - Add a configuration to build a
+      GCC 4.5.2 EABI ARM toolchain for the Cortex-M3.
 
 </pre></ul>
 
