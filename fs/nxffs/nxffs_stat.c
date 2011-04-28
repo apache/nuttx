@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/nxffs/nxffs_util.c
+ * fs/nxffs/nxffs_stat.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,7 +41,16 @@
 
 #include <nuttx/config.h>
 
+#include <sys/stat.h>
+#include <sys/statfs.h>
+
 #include <string.h>
+#include <fcntl.h>
+#include <assert.h>
+#include <debug.h>
+
+#include <nuttx/fs.h>
+#include <nuttx/mtd.h>
 
 #include "nxffs.h"
 
@@ -66,42 +75,112 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxffs_rdle16
+ * Name: nxffs_statfs
  *
- * Description:
- *   Get a (possibly unaligned) 16-bit little endian value.
- *
- * Input Parameters:
- *   val - A pointer to the first byte of the little endian value.
- *
- * Returned Values:
- *   A uint16_t representing the whole 16-bit integer value
+ * Description: Return filesystem statistics
  *
  ****************************************************************************/
 
-uint16_t nxffs_rdle16(const uint8_t *val)
+int nxffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 {
-  return (uint16_t)val[1] << 8 | (uint16_t)val[0];
+  FAR struct nxffs_volume_s *volume;
+  int ret;
+
+  fvdbg("Entry\n");
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the NuttX inode structure */
+
+  volume = mountpt->i_private;
+  ret = sem_wait(&volume->exclsem);
+  if (ret != OK)
+    {
+      goto errout;
+    }
+
+  /* Fill in the statfs info */
+#warning "Need f_bfree, f_bavail, f_files, f_ffree calculation"
+
+  memset(buf, 0, sizeof(struct statfs));
+  buf->f_type    = NXFFS_MAGIC;
+  buf->f_bsize   = volume->geo.blocksize;
+  buf->f_blocks  = volume->geo.neraseblocks * volume->blkper;
+  buf->f_namelen = volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR - SIZEOF_NXFFS_INODE_HDR;
+  ret            = OK;
+
+  sem_post(&volume->exclsem);
+errout:
+  return ret;
 }
 
 /****************************************************************************
- * Name: nxffs_rdle32
+ * Name: nxffs_stat
  *
- * Description:
- *   Get a (possibly unaligned) 32-bit little endian value.
- *
- * Input Parameters:
- *   val - A pointer to the first byte of the little endian value.
- *
- * Returned Values:
- *   A uint32_t representing the whole 32-bit integer value
+ * Description: Return information about a file or directory
  *
  ****************************************************************************/
 
-uint32_t nxffs_rdle32(const uint8_t *val)
+int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
+               FAR struct stat *buf)
 {
- /* Little endian means LS halfword first in byte stream */
+  FAR struct nxffs_volume_s *volume;
+  struct nxffs_entry_s entry;
+  int ret;
 
-  return (uint32_t)nxffs_rdle16(&val[2]) << 16 | (uint32_t)nxffs_rdle16(val);
+  fvdbg("Entry\n");
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private && buf);
+
+  /* Get the mountpoint private data from the NuttX inode structure */
+
+  volume = mountpt->i_private;
+  ret = sem_wait(&volume->exclsem);
+  if (ret != OK)
+    {
+      goto errout;
+    }
+
+  /* Initialize the return stat instance */
+
+  memset(buf, 0, sizeof(struct stat));
+  buf->st_blksize = volume->geo.blocksize;
+  buf->st_blocks  = entry.datlen / (volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR);
+
+  /* The requested directory must be the volume-relative "root" directory */
+
+  if (relpath && relpath[0] != '\0')
+    {
+      /* Not the top directory.. find the NXFFS inode with this name */
+
+      ret = nxffs_findinode(volume, relpath, &entry);
+      if (ret < 0)
+        {
+          fdbg("Inode '%s' not found: %d\n", -ret);
+          goto errout_with_semaphore;
+        }
+
+      buf->st_mode    = S_IFREG|S_IXOTH|S_IXGRP|S_IXUSR;
+      buf->st_size    = entry.datlen;
+      buf->st_atime   = entry.utc;
+      buf->st_mtime   = entry.utc;
+      buf->st_ctime   = entry.utc;
+    }
+  else
+    {
+      /* It's a read/execute-only directory name */
+
+      buf->st_mode   = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR|S_IXOTH|S_IXGRP|S_IXUSR;
+    }
+
+  ret = OK;
+
+errout_with_semaphore:
+  sem_post(&volume->exclsem);
+errout:
+  return ret;
 }
-

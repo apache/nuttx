@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/nxffs/nxffs_util.c
+ * fs/nxffs/nxffs_unlink.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -42,6 +42,12 @@
 #include <nuttx/config.h>
 
 #include <string.h>
+#include <errno.h>
+#include <assert.h>
+#include <debug.h>
+
+#include <nuttx/fs.h>
+#include <nuttx/mtd.h>
 
 #include "nxffs.h"
 
@@ -66,42 +72,113 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxffs_rdle16
+ * Name: nxffs_rminode
  *
  * Description:
- *   Get a (possibly unaligned) 16-bit little endian value.
+ *   Remove an inode from FLASH.  This is the internal implementation of
+ *   the file system unlinke operation.
  *
  * Input Parameters:
- *   val - A pointer to the first byte of the little endian value.
+ *   volume - Describes the NXFFS volume.
+ *   name - the name of the inode to be deleted.
  *
- * Returned Values:
- *   A uint16_t representing the whole 16-bit integer value
+ * Returned Value:
+ *   Zero is returned if the inode is successfully deleted.  Otherwise, a
+ *   negated errno value is returned indicating the nature of the failure.
  *
  ****************************************************************************/
 
-uint16_t nxffs_rdle16(const uint8_t *val)
+int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
 {
-  return (uint16_t)val[1] << 8 | (uint16_t)val[0];
+  FAR struct nxffs_ofile_s *ofile;
+  FAR struct nxffs_inode_s *inode;
+  struct nxffs_entry_s entry;
+  int ret;
+
+  /* Check if the file is open */
+
+  ofile = nxffs_findofile(name);
+  if (ofile)
+    {
+      /* We can't remove the inode if it is open */
+
+      fdbg("Inode is open\n");
+      return -EBUSY;
+    }
+
+  /* Find the NXFFS inode */
+
+  ret = nxffs_findinode(volume, name, &entry);
+  if (ret < 0)
+    {
+      fdbg("Inode '%s' not found\n");
+      return ret;
+    }
+
+  /* Set the position to the FLASH offset of the file header (nxffs_findinode
+   * should have left the block in the cache).
+   */
+
+  nxffs_ioseek(volume, entry.hoffset);
+
+  /* Make sure the the block is in the cache */
+
+  ret = nxffs_rdcache(volume, volume->ioblock, 1);
+  if (ret < 0)
+    {
+      fdbg("Failed to read data into cache: %d\n", ret);
+      return ret;
+    }
+
+  /* Change the file status... it is no longer valid */
+
+  inode = (FAR struct nxffs_inode_s *)&volume->cache[volume->iooffset];
+  inode->state = INODE_STATE_DELETED;
+
+  /* Then write the cached block back to FLASH */
+
+  ret = nxffs_wrcache(volume, volume->ioblock, 1);
+  if (ret < 0)
+    {
+      fdbg("Failed to read data into cache: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
- * Name: nxffs_rdle32
+ * Name: nxffs_unlink
  *
- * Description:
- *   Get a (possibly unaligned) 32-bit little endian value.
- *
- * Input Parameters:
- *   val - A pointer to the first byte of the little endian value.
- *
- * Returned Values:
- *   A uint32_t representing the whole 32-bit integer value
+ * Description: Remove a file
  *
  ****************************************************************************/
 
-uint32_t nxffs_rdle32(const uint8_t *val)
+int nxffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 {
- /* Little endian means LS halfword first in byte stream */
+  FAR struct nxffs_volume_s *volume;
+  int ret;
 
-  return (uint32_t)nxffs_rdle16(&val[2]) << 16 | (uint32_t)nxffs_rdle16(val);
+  fvdbg("Entry\n");
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the NuttX inode structure */
+
+  volume = mountpt->i_private;
+  ret = sem_wait(&volume->exclsem);
+  if (ret != OK)
+    {
+      goto errout;
+    }
+
+  /* Then remove the NXFFS inode */
+
+  ret = nxffs_rminode(volume, relpath);
+  
+  sem_post(&volume->exclsem);
+errout:
+  return ret;
 }
-

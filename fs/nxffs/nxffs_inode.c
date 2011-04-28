@@ -325,7 +325,7 @@ int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
  ****************************************************************************/
 
 int nxffs_findinode(FAR struct nxffs_volume_s *volume, FAR const char *name,
-                    struct nxffs_entry_s *entry)
+                    FAR struct nxffs_entry_s *entry)
 {
   off_t offset;
   int ret;
@@ -364,9 +364,9 @@ int nxffs_findinode(FAR struct nxffs_volume_s *volume, FAR const char *name,
       /* Discard this entry and try the next one.  Here we set the
        * next offset using the raw data length as the offset
        * increment.  This is, of course, not accurate because it
-       * does not account for the data headers that inclose the
+       * does not account for the data headers that enclose the
        * data.  But it is guaranteed to be less than or equal to
-       * the correct offset and, hence, better then seraching
+       * the correct offset and, hence, better then searching
        * byte-for-byte.
        */
 

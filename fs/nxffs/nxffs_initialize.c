@@ -103,10 +103,6 @@ const struct mountpt_operations nxffs_operations =
  * Public Variables
  ****************************************************************************/
 
-/* A singly-linked list of open files */
-
-struct nxffs_ofile_s *g_ofiles;
-
 /* The magic number that appears that the beginning of each NXFFS (logical)
  * block
  */
@@ -229,9 +225,14 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd, off_t start, off_t nblocks)
 #endif
     }
 
-  /* Return success */
+  /* Get the file system limits */
 
-  return OK;
+  ret = nxffs_limits(volume);
+  if (ret == OK)
+    {
+      return OK;
+    }
+  fdbg("Failed to calculate file system limits: %d\n", -ret);
 
 errout_with_iobuffer:
   kfree(volume->cache);
@@ -267,6 +268,135 @@ errout:
 
 int nxffs_limits(FAR struct nxffs_volume_s *volume)
 {
-#warning "Missing Logic"
+  FAR struct nxffs_entry_s entry;
+  off_t block;
+  off_t offset;
+  bool noinodes = false;
+  int nerased;
+  int ret;
+
+  /* Get the offset to the first valid block on the FLASH */
+
+  block = 0;
+  ret = nxffs_validblock(volume, &block);
+  if (ret < 0)
+    {
+      fdbg("Failed to find a valid block: %d\n", -ret);
+      return ret;
+    }
+
+  /* Then find the first valid inode in or beyond the first valid block */
+
+  offset = block * volume->geo.blocksize;
+  ret = nxffs_nextentry(volume, offset, &entry);
+  if (ret < 0)
+    {
+      /* The value -ENOENT is special.  This simply means that the FLASH
+       * was searched to the end and no valid inode was found... the file
+       * system is empty (or, in more perverse cases, all inodes are
+       * deleted or corrupted).
+       */
+
+      if (ret != -ENOENT)
+        {
+          fdbg("nxffs_nextentry failed: %d\n", -ret);
+          return ret;
+        }
+
+      /* Set a flag the just indicates that no inodes were found.  Later,
+       * we will set the location of the first inode to be the same as
+       * the location of the free FLASH region.
+       */
+
+      fvdbg("No inodes found\n");
+      noinodes = true;
+    }
+  else
+    {
+      /* Save the offset to the first inode */
+
+      volume->inoffset = entry.hoffset;
+      fvdbg("First inode at offset %d\n", volume->inoffset);
+
+      /* Discard this entry and set the next offset using the rw data
+       * length as the offset increment.  This is, of course, not accurate
+       * because it does not account for the data headers that enclose the
+       * data.  But it is guaranteed to be less than or equal to the
+       * correct offset and, hence, better then searching byte-for-byte.
+       */
+
+      offset = entry.doffset + entry.datlen;
+      nxffs_freeentry(&entry);
+    }
+
+  /* Now, search for the last valid entry */
+
+  if (!noinodes)
+    {
+      while ((ret = nxffs_nextentry(volume, offset, &entry)) == OK)
+        {
+          /* Discard the entry and guess the next offset (see comments above). */
+
+          offset = entry.doffset + entry.datlen;
+          nxffs_freeentry(&entry);    
+        }
+      fvdbg("Last inode before offset %d\n", offset);
+    }
+
+  /* No inodes were found after this offset.  Now search for a block of
+   * erased flash.
+   */
+
+  nxffs_ioseek(volume, offset);
+  nerased = 0;
+  for (;;)
+    {
+      int ch = nxffs_getc(volume);
+      if (ch < 0)
+        {
+          /* Failed to read the next byte... this could mean that the FLASH
+           * is full?
+           */
+
+          fvdbg("nxffs_getc failed: %d\n", -ch);
+          return ch;
+        }
+
+      /* Check for another erased byte */
+
+      else if (ch == CONFIG_NXFFS_ERASEDSTATE)
+        {
+          /* If we have encountered NXFFS_NERASED number of consecutive
+           * erased bytes, then presume we have reached the end of valid
+           * data.
+           */
+
+          if (++nerased >= NXFFS_NERASED)
+            {
+              /* Okay.. we have a long stretch of erased FLASH in a valid
+               * FLASH block.  Let's say that this is the beginning of
+               * the free FLASH region.
+               */
+
+              volume->froffset = offset;
+              fvdbg("Free FLASH region begins at offset: %d\n", volume->froffset);
+              if (noinodes)
+                {
+                  volume->inoffset = offset;
+                  fvdbg("First inode at offset %d\n", volume->inoffset);
+                }
+              return OK;
+            }
+        }
+      else
+        {
+          offset += nerased + 1;
+          nerased = 0;
+        }
+    }
+
+  /* Won't get here */
+
+  return OK;
 }
 

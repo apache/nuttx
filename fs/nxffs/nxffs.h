@@ -169,14 +169,6 @@
 #define NXFFS_MAGICSIZE	          4
 
 /* Internal definitions *****************************************************/
-/* Values for volume flags */
-
-#define VOL_FLAGS_WRITER          (1 << 0) /* Only one writer of the volune */
-
-#define VOL_FLAGS_SET(p,f)        ((p)->flags &= ~(f))
-#define VOL_FLAGS_CLEAR(p,f)      ((p)->flags |= (f))
-#define VOL_FLAGS_TEST(p,f)       (((p)->flags & (f)) == 0)
-
 /* If we encounter this number of erased bytes, we assume that all of the
  * flash beyond this point is erased.
  */
@@ -309,10 +301,6 @@ struct nxffs_blkstats_s
  * Public Variables
  ****************************************************************************/
 
-/* A singly-linked list of open files */
-
-extern struct nxffs_ofile_s *g_ofiles;
-
 /* The magic number that appears that the beginning of each NXFFS (logical)
  * block
  */
@@ -417,6 +405,28 @@ extern uint32_t nxffs_rdle32(const uint8_t *val);
  ****************************************************************************/
 
 extern int nxffs_rdcache(FAR struct nxffs_volume_s *volume, off_t block,
+                         uint8_t nblocks);
+
+/****************************************************************************
+ * Name: nxffs_wrcache
+ *
+ * Description:
+ *   Write one or more logical blocks from the volume cache memory.
+ *
+ * Input Parameters:
+ *   volume - Describes the current volume
+ *   block  - The first logical block to write
+ *   nblocks - The number of logical blocks to be write.
+ *
+ * Returned Value:
+ *   Negated errnos are returned only in the case of MTD reported failures.
+ *   Nothing in the volume data itself will generate errors.
+ *
+ * Defined in nxffs_cache.c
+ *
+ ****************************************************************************/
+
+extern int nxffs_wrcache(FAR struct nxffs_volume_s *volume, off_t block,
                          uint8_t nblocks);
 
 /****************************************************************************
@@ -553,7 +563,7 @@ extern int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
 
 extern int nxffs_findinode(FAR struct nxffs_volume_s *volume,
                            FAR const char *name,
-                           struct nxffs_entry_s *entry);
+                           FAR struct nxffs_entry_s *entry);
 
 /****************************************************************************
  * Name: nxffs_verifyblock
@@ -643,6 +653,46 @@ extern int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
  ****************************************************************************/
 
 extern int nxffs_reformat(FAR struct nxffs_volume_s *volume);
+
+/****************************************************************************
+ * Name: nxffs_findofile
+ *
+ * Description:
+ *   Search the list of already opened files to see if the inode of this
+ *   name is one of the opened files.
+ *
+ * Input Parameters:
+ *   name - The name of the inode to check.
+ *
+ * Returned Value:
+ *   If an inode of this name is found in the list of opened inodes, then
+ *   a reference to the open file structure is returned.  NULL is returned
+ *   otherwise.
+ *
+ * Defined in nxffs_open.c
+ *
+ ****************************************************************************/
+
+extern FAR struct nxffs_ofile_s *nxffs_findofile(FAR const char *name);
+
+/****************************************************************************
+ * Name: nxffs_rminode
+ *
+ * Description:
+ *   Remove an inode from FLASH.  This is the internal implementation of
+ *   the file system unlinke operation.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume.
+ *   name - the name of the inode to be deleted.
+ *
+ * Returned Value:
+ *   Zero is returned if the inode is successfully deleted.  Otherwise, a
+ *   negated errno value is returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+extern int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name);
 
 /****************************************************************************
  * Standard mountpoint operation methods

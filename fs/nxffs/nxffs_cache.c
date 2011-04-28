@@ -116,6 +116,32 @@ int nxffs_rdcache(FAR struct nxffs_volume_s *volume, off_t block,
 }
 
 /****************************************************************************
+ * Name: nxffs_wrcache
+ *
+ * Description:
+ *   Write one or more logical blocks from the volume cache memory.
+ *
+ * Input Parameters:
+ *   volume - Describes the current volume
+ *   block  - The first logical block to write
+ *   nblocks - The number of logical blocks to be write.
+ *
+ * Returned Value:
+ *   Negated errnos are returned only in the case of MTD reported failures.
+ *   Nothing in the volume data itself will generate errors.
+ *
+ * Defined in nxffs_cache.c
+ *
+ ****************************************************************************/
+
+int nxffs_wrcache(FAR struct nxffs_volume_s *volume, off_t block,
+                  uint8_t nblocks)
+{
+#warning "Missing logic"
+  return OK;
+}
+
+/****************************************************************************
  * Name: nxffs_ioseek
  *
  * Description:
