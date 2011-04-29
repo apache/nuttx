@@ -2246,6 +2246,9 @@ nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * arch/arm/src/arm/up_head.S: Fix backward conditional compilation.  This cause
       the configs/mx1ads configuration to fail to build but does not appear to affect
       any other ARM9 build.
+    * fs/nxffs: Adding a tiny, wear-leveling FLASH file system for NuttX.  This
+      file system is intended to be small and will have some limitations.  The
+      implementation is incomplete on initial checkin.
 
 apps-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2272,8 +2275,8 @@ buildroot-1.10 2011-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
     * configs/arm920t-defconfig-4.3.3 - Enable support for NXFLAT tools.
     * toolchain/binutils/2.21 and toolchain/gcc/4.5.2 - Add support for GCC
       4.5.2 with binutils 2.21.
-    * configs/cortex-eabi-defconfig-4.5.2 - Add a configuration to build a
-      GCC 4.5.2 EABI ARM toolchain for the Cortex-M3.
+    * configs/arm920t-eabi-defconfig-4.5.2 - Add a configuration to build a
+      GCC 4.5.2 EABI ARM toolchain for the ARM920.
 
 </pre></ul>
 
