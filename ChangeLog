@@ -1713,6 +1713,9 @@
 	* arch/arm/src/arm/up_head.S: Fix backward conditional compilation.  This cause
 	  the configs/mx1ads configuration to fail to build but does not appear to affect
 	  any other ARM9 build.
+	* fs/nxffs: Adding a tiny, wear-leveling FLASH file system for NuttX.  This
+	  file system is intended to be small and will have some limitations.  The
+ 	  implementation is incomplete on initial checkin.
 
 
 
