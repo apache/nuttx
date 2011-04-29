@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/nxffs/nxffs_blockstats.c
+ * fs/nxffs/nxffs_write.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -42,8 +42,12 @@
 #include <nuttx/config.h>
 
 #include <string.h>
+#include <fcntl.h>
+#include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
+#include <nuttx/fs.h>
 #include <nuttx/mtd.h>
 
 #include "nxffs.h"
@@ -53,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -69,85 +73,75 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxffs_blockstats
+ * Name: nxffs_write
  *
  * Description:
- *   Analyze the NXFFS volume.  This operation must be performed when the
- *   volume is first mounted in order to detect if the volume has been
- *   formatted and contains a usable NXFFS file system.
- *
- * Input Parameters:
- *   volume - Describes the current NXFFS volume.
- *   stats  - On return, will hold nformation describing the state of the
- *     volume.
- *
- * Returned Value:
- *   Negated errnos are returned only in the case of MTD reported failures.
- *   Nothing in the volume data itself will generate errors.
+ *   This is an implementation of the NuttX standard file system write
+ *   method.
  *
  ****************************************************************************/
 
-int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
-                     FAR struct nxffs_blkstats_s *stats)
+ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
 {
-  FAR uint8_t *bptr;     /* Pointer to next block data */
-  off_t eblock;          /* Erase block number */
-  int lblock;            /* Logical block index */
-  int ret;
+  FAR struct nxffs_volume_s *volume;
+  FAR struct nxffs_wrfile_s *wrfile;
+  ssize_t ret;
 
-  /* Process each erase block */
+  fvdbg("Write %d bytes to offset %d\n", buflen, filep->f_pos);
 
-  memset(stats, 0, sizeof(struct nxffs_blkstats_s));
+  /* Sanity checks */
 
-  for (eblock = 0; eblock < volume->geo.neraseblocks; eblock++)
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+
+  /* Recover the open file state from the struct file instance */
+
+  wrfile = (FAR struct nxffs_wrfile_s *)filep->f_priv;
+
+  /* Recover the volume state from the open file */
+
+  volume = (FAR struct nxffs_volume_s *)filep->f_inode->i_private;
+  DEBUGASSERT(volume != NULL);
+
+  /* Get exclusive access to the volume.  Note that the volume exclsem
+   * protects the open file list.
+   */
+
+  ret = sem_wait(&volume->exclsem);
+  if (ret != OK)
     {
-      /* Read the full erase block */
-
-      volume->ioblock  = eblock * volume->blkper;
-      volume->iooffset = 0;
-      ret = nxffs_rdcache(volume, volume->ioblock, volume->blkper);
-      if (ret < 0)
-        {
-          fdbg("Failed to read erase block %d: %d\n", eblock, -ret);
-          return ret;
-        }
-
-      /* Process each logical block */
-
-      for (bptr = volume->cache, lblock = 0;
-           lblock < volume->blkper;
-           bptr += volume->geo.blocksize, lblock++)
-        {
-          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)bptr;
-
-          /* Collect statistics */
-
-          stats->nblocks++;
-          if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0)
-            {
-              stats->nunformat++;
-            }
-          else if (blkhdr->state == BLOCK_STATE_BAD)
-            {
-              stats->nbad++;
-            }
-          else if (blkhdr->state == BLOCK_STATE_GOOD)
-            {
-             stats-> ngood++;
-            }
-          else
-            {
-              stats->ncorrupt++;
-            }
-        }
+      ret = -errno;
+      fdbg("sem_wait failed: %d\n", ret);
+      goto errout;
     }
 
-  fdbg("Number blocks:        %d\n", stats->nblocks);
-  fdbg("  Good blocks:        %d\n", stats->ngood);
-  fdbg("  Bad blocks:         %d\n", stats->nbad);
-  fdbg("  Unformatted blocks: %d\n", stats->nunformat);
-  fdbg("  Corrupt blocks:     %d\n", stats->ncorrupt);
-  return OK;
+  /* Check if the file was opened with write access */
+
+#ifdef CONFIG_DEBUG
+  if ((wrfile->ofile.mode & O_WROK) == 0)
+    {
+      fdbg("File not open for write access\n");
+      ret = -EACCES;
+      goto errout_with_semaphore;
+    }
+#endif
+
+  /* Seek to the current file offset */
+
+  nxffs_ioseek(volume, wrfile->dathdr + wrfile->wrlen);
+
+  /* Write data to that file offset */
+
+  ret = nxffs_wrdata(volume, (FAR const uint8_t*)buffer, buflen);
+  if (ret > 0)
+    {
+      /* Update the file offset */
+
+      filep->f_pos += ret;
+    }
+#warning "Add check for block full"
+
+errout_with_semaphore:
+  sem_post(&volume->exclsem);
+errout:
+  return ret;
 }
-
-

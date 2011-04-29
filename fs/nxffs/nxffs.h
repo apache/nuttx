@@ -50,19 +50,11 @@
 #include <semaphore.h>
 
 #include <nuttx/mtd.h>
+#include <nuttx/nxffs.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-#ifndef CONFIG_NXFFS_ERASEDSTATE
-#  define CONFIG_NXFFS_ERASEDSTATE 0xff
-#endif
-
-#if CONFIG_NXFFS_ERASEDSTATE != 0xff && CONFIG_NXFFS_ERASEDSTATE != 0x00
-#  error "CONFIG_NXFFS_ERASEDSTATE must be either 0x00 or 0xff"
-#endif
-
 /* NXFFS Definitions ********************************************************/
 /* General NXFFS organization.  The following example assumes 4 logical
  * blocks per FLASH erase block.  The actual relationship is determined by
@@ -141,6 +133,10 @@
  * 6. The clean-up process occurs only during a write when the free FLASH
  *    memory at the end of the FLASH is exhausted.  Thus, occasionally, file
  *    writing may take a long time.
+ * 7. Another limitation is that there can be only a single NXFFS volume
+ *    mounted at any time.  This has to do with the fact that we bind to
+ *    an MTD driver (instead of a block driver) and bypass all of the normal
+ *    mount operations.
  */
 
 /* Values for logical block state.  Basically, there are only two, perhaps
@@ -149,19 +145,25 @@
  * BLOCK_STATE_GOOD - The block is not known to be bad.
  * BLOCK_STATE_BAD  - An error was found on the block and it is marked bad.
  * Other values     - The block is bad and has an invalid state.
+ *
+ * Care is taken so that the GOOD to BAD transition only involves burning
+ * bits from the erased to non-erased state.
  */
 
-#define BLOCK_STATE_GOOD          CONFIG_NXFFS_ERASEDSTATE
-#define BLOCK_STATE_BAD           0xaa
+#define BLOCK_STATE_GOOD          (CONFIG_NXFFS_ERASEDSTATE ^ 0x44)
+#define BLOCK_STATE_BAD           (CONFIG_NXFFS_ERASEDSTATE ^ 0x55)
 
 /* Values for NXFFS inode state.  Similar there are 2 (maybe 3) inode states:
  *
  * INODE_STATE_FILE    - The inode is a valid usuable, file
  * INODE_STATE_DELETED - The inode has been deleted.
+ *
+ * Care is taken so that the GOOD to BAD transition only involves burning
+ * bits from the erased to non-erased state.
  */
 
-#define INODE_STATE_FILE          CONFIG_NXFFS_ERASEDSTATE
-#define INODE_STATE_DELETED       0x55
+#define INODE_STATE_FILE          (CONFIG_NXFFS_ERASEDSTATE ^ 0x22)
+#define INODE_STATE_DELETED       (CONFIG_NXFFS_ERASEDSTATE ^ 0xaa)
 
 /* Number of bytes in an the NXFFS magic sequences */
 
@@ -315,6 +317,18 @@ extern const uint8_t g_inodemagic[NXFFS_MAGICSIZE];
  */
 
 extern const uint8_t g_datamagic[NXFFS_MAGICSIZE];
+
+/* If CONFIG_NXFSS_PREALLOCATED is defined, then this is the single, pre-
+ * allocated NXFFS volume instance.
+ */
+
+#ifdef CONFIG_NXFSS_PREALLOCATED
+extern struct nxffs_volume_s g_volume;
+#endif
+
+/* A singly-linked list of open files */
+
+extern struct nxffs_ofile_s *g_ofiles;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -474,12 +488,14 @@ extern int nxffs_getc(FAR struct nxffs_volume_s *volume);
  *
  * Description:
  *   Read a sequence of data bytes from the FLASH memory.  This function
- *   allows the data in the formatted FLASH blocks to be read as a continuous\
+ *   allows the data in the formatted FLASH blocks to be read as a continuous
  *   byte stream, skipping over bad blocks and block headers as necessary.
  *
  * Input Parameters:
  *   volume - Describes the NXFFS volume.  The paramters ioblock and iooffset
  *     in the volume structure determine the behavior of nxffs_getc().
+ *   buffer - A pointer to memory to receive the data read from FLASH.
+ *   buflen - The maximum number of bytes to read from FLASH.
  *
  * Returned Value:
  *   The number of bytes read is returned on success.  Otherwise, a negated
@@ -491,6 +507,29 @@ extern int nxffs_getc(FAR struct nxffs_volume_s *volume);
 
 extern ssize_t nxffs_rddata(FAR struct nxffs_volume_s *volume,
                             FAR uint8_t *buffer, size_t buflen);
+
+/****************************************************************************
+ * Name: nxffs_wrdata
+ *
+ * Description:
+ *   Write a sequence of data bytes into volume cache memory.  Nothing is
+ *   actually written to FLASH!  This function allows the data in the formatted
+ *   FLASH blocks to be read as a continuous byte stream, skipping over bad 
+ *   blocks and block headers as necessary.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume.
+ *   buffer - A pointer to memory to containing the data to write to FLASH.
+ *   buflen - The maximum number of bytes to write to FLASH.
+ *
+ * Returned Value:
+ *   The number of bytes written is returned on success.  Otherwise, a negated
+ *   errno indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+extern ssize_t nxffs_wrdata(FAR struct nxffs_volume_s *volume,
+                            FAR const uint8_t *buffer, size_t buflen);
 
 /****************************************************************************
  * Name: nxffs_freeentry
@@ -700,9 +739,12 @@ extern int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name
  *   See include/nuttx/fs.h
  *
  * - nxffs_open() and nxffs_close() are defined in nxffs_open.c
+ * - nxffs_read() is defined in nxffs_read.c
+ * - nxffs_write() is defined in nxffs_write.c
  * - nxffs_ioctl() is defined in nxffs_ioctl.c
  * - nxffs_opendir(), nxffs_readdir(), and nxffs_rewindir() are defined in
  *   nxffs_dirent.c
+ * - nxffs_bind() and nxffs_unbind() are defined in nxffs_initialize.c
  * - nxffs_stat() and nxffs_statfs() are defined in nxffs_stat.c
  * - nxffs_unlink() is defined nxffs_unlink.c
  *

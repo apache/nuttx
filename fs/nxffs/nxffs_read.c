@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/nxffs/nxffs_blockstats.c
+ * fs/nxffs/nxffs_read.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -42,8 +42,12 @@
 #include <nuttx/config.h>
 
 #include <string.h>
+#include <fcntl.h>
+#include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
+#include <nuttx/fs.h>
 #include <nuttx/mtd.h>
 
 #include "nxffs.h"
@@ -53,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,89 +69,106 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxffs_blockstats
+ * Name: nxffs_rdseek
  *
  * Description:
- *   Analyze the NXFFS volume.  This operation must be performed when the
- *   volume is first mounted in order to detect if the volume has been
- *   formatted and contains a usable NXFFS file system.
+ *   Seek to the file position before read or write access.  Note that the
+ *   simplier nxffs_ioseek() cannot be used for this purpose.  File offsets
+ *   are not easily mapped to FLASH offsets due to intervening block and
+ *   data headers.
  *
  * Input Parameters:
- *   volume - Describes the current NXFFS volume.
- *   stats  - On return, will hold nformation describing the state of the
- *     volume.
- *
- * Returned Value:
- *   Negated errnos are returned only in the case of MTD reported failures.
- *   Nothing in the volume data itself will generate errors.
+ *   volume - Describes the current volume
+ *   entry  - Describes the open inode
+ *   fpos   - The desired file position
  *
  ****************************************************************************/
 
-int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
-                     FAR struct nxffs_blkstats_s *stats)
+static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
+                            FAR struct nxffs_entry_s *entry,
+                            off_t fpos)
 {
-  FAR uint8_t *bptr;     /* Pointer to next block data */
-  off_t eblock;          /* Erase block number */
-  int lblock;            /* Logical block index */
-  int ret;
-
-  /* Process each erase block */
-
-  memset(stats, 0, sizeof(struct nxffs_blkstats_s));
-
-  for (eblock = 0; eblock < volume->geo.neraseblocks; eblock++)
-    {
-      /* Read the full erase block */
-
-      volume->ioblock  = eblock * volume->blkper;
-      volume->iooffset = 0;
-      ret = nxffs_rdcache(volume, volume->ioblock, volume->blkper);
-      if (ret < 0)
-        {
-          fdbg("Failed to read erase block %d: %d\n", eblock, -ret);
-          return ret;
-        }
-
-      /* Process each logical block */
-
-      for (bptr = volume->cache, lblock = 0;
-           lblock < volume->blkper;
-           bptr += volume->geo.blocksize, lblock++)
-        {
-          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)bptr;
-
-          /* Collect statistics */
-
-          stats->nblocks++;
-          if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0)
-            {
-              stats->nunformat++;
-            }
-          else if (blkhdr->state == BLOCK_STATE_BAD)
-            {
-              stats->nbad++;
-            }
-          else if (blkhdr->state == BLOCK_STATE_GOOD)
-            {
-             stats-> ngood++;
-            }
-          else
-            {
-              stats->ncorrupt++;
-            }
-        }
-    }
-
-  fdbg("Number blocks:        %d\n", stats->nblocks);
-  fdbg("  Good blocks:        %d\n", stats->ngood);
-  fdbg("  Bad blocks:         %d\n", stats->nbad);
-  fdbg("  Unformatted blocks: %d\n", stats->nunformat);
-  fdbg("  Corrupt blocks:     %d\n", stats->ncorrupt);
-  return OK;
+#warning "Missing Logic"
+  return 0;
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+/****************************************************************************
+ * Name: nxffs_read
+ *
+ * Description:
+ *   This is an implementation of the NuttX standard file system read
+ *   method.
+ *
+ ****************************************************************************/
+
+ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+{
+  FAR struct nxffs_volume_s *volume;
+  FAR struct nxffs_ofile_s *ofile;
+  ssize_t ret;
+
+  fvdbg("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
+
+  /* Recover the open file state from the struct file instance */
+
+  ofile = (FAR struct nxffs_ofile_s *)filep->f_priv;
+
+  /* Recover the volume state from the open file */
+
+  volume = (FAR struct nxffs_volume_s *)filep->f_inode->i_private;
+  DEBUGASSERT(volume != NULL);
+
+  /* Get exclusive access to the volume.  Note that the volume exclsem
+   * protects the open file list.
+   */
+
+  ret = sem_wait(&volume->exclsem);
+  if (ret != OK)
+    {
+      ret = -errno;
+      fdbg("sem_wait failed: %d\n", ret);
+      goto errout;
+    }
+
+  /* Check if the file was opened with read access */
+
+  if ((ofile->mode & O_RDOK) == 0)
+    {
+      fdbg("File not open for read access\n");
+      ret = -EACCES;
+      goto errout_with_semaphore;
+    }
+
+  /* Seek to the current file offset */
+
+  ret = nxffs_rdseek(volume, &ofile->entry, filep->f_pos);
+  if (ret < 0)
+    {
+      fdbg("nxffs_fwseek failed: %d\n", -ret);
+      ret = -EACCES;
+      goto errout_with_semaphore;
+    }
+
+  /* Read data from that file offset */
+
+  ret = nxffs_rddata(volume, (FAR uint8_t *)buffer, buflen);
+  if (ret > 0)
+    {
+      /* Update the file offset */
+
+      filep->f_pos += ret;
+    }
+
+errout_with_semaphore:
+  sem_post(&volume->exclsem);
+errout:
+  return ret;
+}
 

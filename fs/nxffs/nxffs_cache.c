@@ -95,7 +95,7 @@ int nxffs_rdcache(FAR struct nxffs_volume_s *volume, off_t block,
 
   /* Check if the requested data is already in the cache */
 
-  if (block != volume->cblock || nblocks <= volume->ncached)
+  if (block != volume->cblock || nblocks > volume->ncached)
     {
       /* Read the specified blocks into cache */
 
@@ -229,12 +229,14 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume)
  *
  * Description:
  *   Read a sequence of data bytes from the FLASH memory.  This function
- *   allows the data in the formatted FLASH blocks to be read as a continuous\
+ *   allows the data in the formatted FLASH blocks to be read as a continuous
  *   byte stream, skipping over bad blocks and block headers as necessary.
  *
  * Input Parameters:
  *   volume - Describes the NXFFS volume.  The paramters ioblock and iooffset
  *     in the volume structure determine the behavior of nxffs_getc().
+ *   buffer - A pointer to memory to receive the data read from FLASH.
+ *   buflen - The maximum number of bytes to read from FLASH.
  *
  * Returned Value:
  *   The number of bytes read is returned on success.  Otherwise, a negated
@@ -267,3 +269,29 @@ ssize_t nxffs_rddata(FAR struct nxffs_volume_s *volume,
   return buflen;
 }
 
+/****************************************************************************
+ * Name: nxffs_wrdata
+ *
+ * Description:
+ *   Write a sequence of data bytes into volume cache memory.  Nothing is
+ *   actually written to FLASH!  This function allows the data in the formatted
+ *   FLASH blocks to be read as a continuous byte stream, skipping over bad 
+ *   blocks and block headers as necessary.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume.
+ *   buffer - A pointer to memory to containing the data to write to FLASH.
+ *   buflen - The maximum number of bytes to write to FLASH.
+ *
+ * Returned Value:
+ *   The number of bytes written is returned on success.  Otherwise, a negated
+ *   errno indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+ssize_t nxffs_wrdata(FAR struct nxffs_volume_s *volume,
+                     FAR const uint8_t *buffer, size_t buflen)
+{
+#warning "Missing Logic"
+  return -ENOSYS;
+}

@@ -168,20 +168,22 @@ static ssize_t ram_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
 {
   FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
   off_t offset;
+  off_t maxblock;
   size_t nbytes;
 
   DEBUGASSERT(dev && buf);
 
   /* Don't let the read exceed the size of the ram buffer */
 
-  if (startblock >= priv->nblocks)
+  maxblock = priv->nblocks * CONFIG_RAMMTD_BLKPER;
+  if (startblock >= maxblock)
     {
       return 0;
     }
 
-  if (startblock + nblocks >= priv->nblocks)
+  if (startblock + nblocks > maxblock)
     {
-      nblocks = priv->nblocks - nblocks;
+      nblocks = maxblock - startblock;
     }
 
   /* Get the offset corresponding to the first block and the size
@@ -201,25 +203,27 @@ static ssize_t ram_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
  * Name: ram_bwrite
  ****************************************************************************/
 
-static ssize_t ram_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                           FAR const uint8_t *buf)
+static ssize_t ram_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                          size_t nblocks, FAR const uint8_t *buf)
 {
   FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
   off_t offset;
+  off_t maxblock;
   size_t nbytes;
 
   DEBUGASSERT(dev && buf);
 
   /* Don't let the write exceed the size of the ram buffer */
 
-  if (startblock >= priv->nblocks)
+  maxblock = priv->nblocks * CONFIG_RAMMTD_BLKPER;
+  if (startblock >= maxblock)
     {
       return 0;
     }
 
-  if (startblock + nblocks >= priv->nblocks)
+  if (startblock + nblocks > maxblock)
     {
-      nblocks = priv->nblocks - nblocks;
+      nblocks = maxblock - startblock;
     }
 
   /* Get the offset corresponding to the first block and the size

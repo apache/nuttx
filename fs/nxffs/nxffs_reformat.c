@@ -95,7 +95,7 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
   memset(volume->cache, CONFIG_NXFFS_ERASEDSTATE, volume->geo.erasesize);
   for (blkptr = volume->cache, i = 0;
        i < volume->blkper;
-       blkptr += SIZEOF_NXFFS_BLOCK_HDR, i++)
+       blkptr += volume->geo.blocksize, i++)
     {
       FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)blkptr;
       memcpy(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE);
@@ -121,7 +121,7 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
       nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->cache);
       if (nxfrd != volume->blkper)
         {
-          fdbg("Write erase block %d failed: %d\n", alignedblock, nxfrd);
+          fdbg("Write erase block %d failed: %d\n", lblock, nxfrd);
           return -EIO;
         }
     }
@@ -176,7 +176,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
       modified = false;
       for (blkptr = volume->cache, i = 0;
            i < volume->blkper;
-           blkptr += SIZEOF_NXFFS_BLOCK_HDR, i++)
+           blkptr += volume->geo.blocksize, i++)
         {
           FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)blkptr;
 
@@ -184,7 +184,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
 
           bad = false;
           if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0 ||
-              blkhdr->state == BLOCK_STATE_GOOD)
+              blkhdr->state != BLOCK_STATE_GOOD)
             {
               bad = true;;
             }
@@ -228,7 +228,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
       nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->cache);
       if (nxfrd != volume->blkper)
         {
-          fdbg("Write erase block %d failed: %d\n", alignedblock, nxfrd);
+          fdbg("Write erase block %d failed: %d\n", lblock, nxfrd);
           return -EIO;
         }
     }

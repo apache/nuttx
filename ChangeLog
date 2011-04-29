@@ -1715,7 +1715,6 @@
 	  any other ARM9 build.
 	* fs/nxffs: Adding a tiny, wear-leveling FLASH file system for NuttX.  This
 	  file system is intended to be small and will have some limitations.  The
- 	  implementation is incomplete on initial checkin.
-
-
-
+	  implementation is incomplete on initial checkin.
+	* apps/examples/nxffs and configs/sim/nxffs:  Add a test a a configuration that
+	  will be used to verify NXFFS.

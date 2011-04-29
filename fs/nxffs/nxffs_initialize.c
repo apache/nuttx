@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -119,6 +120,14 @@ const uint8_t g_inodemagic[NXFFS_MAGICSIZE] = { 'I', 'n', 'o', 'd' };
 
 const uint8_t g_datamagic[NXFFS_MAGICSIZE] = { 'D', 'a', 't', 'a' };
 
+/* If CONFIG_NXFSS_PREALLOCATED is defined, then this is the single, pre-
+ * allocated NXFFS volume instance.
+ */
+
+#ifdef CONFIG_NXFSS_PREALLOCATED
+struct nxffs_volume_s g_volume;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -135,18 +144,30 @@ const uint8_t g_datamagic[NXFFS_MAGICSIZE] = { 'D', 'a', 't', 'a' };
  *
  * Input Parameters:
  *   mtd - The MTD device that supports the FLASH interface.
- *   start - The first block of the file system begins at this block number
- *     in the FLASH
- *   nblocks - This number of blocks is set aside for the file system.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int nxffs_initialize(FAR struct mtd_dev_s *mtd, off_t start, off_t nblocks)
+int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 {
   FAR struct nxffs_volume_s *volume;
   struct nxffs_blkstats_s stats;
   off_t threshold;
   int ret;
+
+  /* If CONFIG_NXFSS_PREALLOCATED is defined, then this is the single, pre-
+   * allocated NXFFS volume instance.
+   */
+
+#ifdef CONFIG_NXFSS_PREALLOCATED
+
+  volume = &g_volume;
+  memset(volume, 0, sizeof(struct nxffs_volume_s));
+
+#else
 
   /* Allocate a NXFFS volume structure */
 
@@ -156,6 +177,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd, off_t start, off_t nblocks)
       ret = -ENOMEM;
       goto errout;
     }
+#endif
 
   /* Initialize the NXFFS volume structure */
 
@@ -175,7 +197,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd, off_t start, off_t nblocks)
 
   /* Allocate one, in-memory erase block buffer */
 
-  volume->cache  = (FAR uint8_t *)kmalloc(volume->geo.erasesize);
+  volume->cache = (FAR uint8_t *)kmalloc(volume->geo.erasesize);
   if (!volume->cache)
     {
       fdbg("Failed to allocate an erase block buffer\n");
@@ -238,7 +260,6 @@ errout_with_iobuffer:
   kfree(volume->cache);
 errout_with_volume:
   kfree(volume);
-errout:
   return ret;
 }
 
@@ -400,3 +421,60 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
   return OK;
 }
 
+/****************************************************************************
+ * Name: nxffs_bind
+ *
+ * Description:
+ *   This function implements a portion of the mount operation. Normmally,
+ *   the bind() method allocates and initializes the mountpoint private data
+ *   then binds the blockdriver inode to the filesystem private data.  The
+ *   final binding of the private data (containing the blockdriver) to the
+ *   mountpoint is performed by mount().
+ *
+ *   For the NXFFS, this sequence is quite different for the following
+ *   reasons:
+ *
+ *   1. A block driver is not used.  Instead, an MTD instance was provided
+ *      to nxfs_initialize prior to mounting.  So, in this sense, the NXFFS
+ *      file system is already bound.
+ *
+ *   2. Since the volume was already bound to the MTD driver, all allocations
+ *      and initializations have already been performed.  Essentially, all
+ *      mount operations have been bypassed and now we just need to provide
+ *      the pre-allocated volume instance.
+ *
+ *   3. The tricky thing is that there is no mechanism to associate multiple
+ *      NXFFS volumes to the multiple volumes bound to different MTD drivers.
+ *      Hence, the limitation of a single NXFFS volume.
+ *
+ ****************************************************************************/
+
+int nxffs_bind(FAR struct inode *blkdriver, FAR const void *data,
+               FAR void **handle)
+{
+#ifndef CONFIG_NXFSS_PREALLOCATED
+#  error "No design to support dynamic allocation of volumes"
+#else
+
+  /* If CONFIG_NXFSS_PREALLOCATED is defined, then this is the single, pre-
+   * allocated NXFFS volume instance.
+   */
+
+  DEBUGASSERT(g_volume.cache);
+  *handle = &g_volume;
+#endif
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nxffs_unbind
+ *
+ * Description: This implements the filesystem portion of the umount
+ *   operation.
+ *
+ ****************************************************************************/
+
+int nxffs_unbind(FAR void *handle, FAR struct inode **blkdriver)
+{
+  return g_ofiles ? -EBUSY : OK;
+}

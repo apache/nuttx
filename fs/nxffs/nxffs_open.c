@@ -65,13 +65,13 @@
  * Public Variables
  ****************************************************************************/
 
+/* A singly-linked list of open files */
+
+struct nxffs_ofile_s *g_ofiles;
+
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
-
-/* A singly-linked list of open files */
-
-static struct nxffs_ofile_s *g_ofiles;
 
 /****************************************************************************
  * Private Functions

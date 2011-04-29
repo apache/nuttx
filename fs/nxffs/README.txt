@@ -92,3 +92,9 @@ that you should be aware before opting to use NXFFS:
 6. The clean-up process occurs only during a write when the free FLASH
    memory at the end of the FLASH is exhausted.  Thus, occasionally, file
    writing may take a long time.
+
+7. Another limitation is that there can be only a single NXFFS volume
+   mounted at any time.  This has to do with the fact that we bind to
+   an MTD driver (instead of a block driver) and bypass all of the normal
+   mount operations.
+
