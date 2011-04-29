@@ -41,8 +41,10 @@
 
 #include <sys/mount.h>
 #include <string.h>
-#include <debug.h>
 #include <errno.h>
+#include <assert.h>
+#include <debug.h>
+
 #include <nuttx/fs.h>
 
 #ifdef CONFIG_APPS_BINDIR
@@ -62,6 +64,23 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* In the canonical case, a file system is bound to a block driver.  However,
+ * some less typical cases a block driver is not required.  Examples are
+ * pseudo file systems (like BINFS) and MTD file systems (like NXFFS).
+ *
+ * These file systems all require block drivers:
+ */
+
+#if defined(CONFIG_FS_FAT) || defined(CONFIG_FS_ROMFS)
+#  define BDFS_SUPPORT 1
+#endif
+
+/* These file systems do not require block drivers */
+
+#if defined(CONFIG_FS_NXFFS) || defined(CONFIG_APPS_BINDIR)
+#  define NONBDFS_SUPPORT
+#endif
 
 /****************************************************************************
  * Private Types
@@ -69,14 +88,15 @@
 
 struct fsmap_t
 {
-  const char                      *fs_filesystemtype;
-  const struct mountpt_operations *fs_mops;
+  FAR const char                      *fs_filesystemtype;
+  FAR const struct mountpt_operations *fs_mops;
 };
 
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
 
+#ifdef BDFS_SUPPORT
 #ifdef CONFIG_FS_FAT
 extern const struct mountpt_operations fat_operations;
 #endif
@@ -84,7 +104,7 @@ extern const struct mountpt_operations fat_operations;
 extern const struct mountpt_operations romfs_operations;
 #endif
 
-static const struct fsmap_t g_fsmap[] =
+static const struct fsmap_t g_bdfsmap[] =
 {
 #ifdef CONFIG_FS_FAT
     { "vfat", &fat_operations },
@@ -92,11 +112,26 @@ static const struct fsmap_t g_fsmap[] =
 #ifdef CONFIG_FS_ROMFS
     { "romfs", &romfs_operations },
 #endif
+    { NULL,   NULL },
+};
+#endif /* BDFS_SUPPORT*/
+
+#ifdef NONBDFS_SUPPORT
+#ifdef CONFIG_FS_NXFFS
+extern const struct mountpt_operations nxffs_operations;
+#endif
+
+static const struct fsmap_t g_nonbdfsmap[] =
+{
+#ifdef CONFIG_FS_NXFFS
+    { "nxffs", &nxffs_operations },
+#endif
 #ifdef CONFIG_APPS_BINDIR
     { "binfs", &binfs_operations },
 #endif
     { NULL,   NULL },
 };
+#endif /* NONBDFS_SUPPORT */
 
 /****************************************************************************
  * Public Variables
@@ -114,10 +149,12 @@ static const struct fsmap_t g_fsmap[] =
  *
  ****************************************************************************/
 
-static FAR const struct mountpt_operations *mount_findfs(const char *filesystemtype )
+#if defined(BDFS_SUPPORT) || defined(NONBDFS_SUPPORT)
+static FAR const struct mountpt_operations *
+mount_findfs(FAR const struct fsmap_t *fstab, FAR const char *filesystemtype)
 {
-  const struct fsmap_t *fsmap;
-  for (fsmap = g_fsmap; fsmap->fs_filesystemtype; fsmap++)
+  FAR const struct fsmap_t *fsmap;
+  for (fsmap = fstab; fsmap->fs_filesystemtype; fsmap++)
     {
       if (strcmp(filesystemtype, fsmap->fs_filesystemtype) == 0)
         {
@@ -126,6 +163,7 @@ static FAR const struct mountpt_operations *mount_findfs(const char *filesystemt
     }
   return NULL;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -159,7 +197,10 @@ int mount(const char *source, const char *target,
           const char *filesystemtype, unsigned long mountflags,
           const void *data)
 {
-  FAR struct inode *blkdrvr_inode;
+#if defined(BDFS_SUPPORT) || defined(NONBDFS_SUPPORT)
+#ifdef BDFS_SUPPORT
+  FAR struct inode *blkdrvr_inode = NULL;
+#endif
   FAR struct inode *mountpt_inode;
   FAR const struct mountpt_operations *mops;
   void *fshandle;
@@ -168,33 +209,42 @@ int mount(const char *source, const char *target,
 
   /* Verify required pointer arguments */
 
-  if (!source || !target || !filesystemtype)
+  DEBUGASSERT(target && filesystemtype);
+
+  /* Find the specified filesystem.  Try the block driver file systems first */
+
+#ifdef BDFS_SUPPORT
+  if ((mops = mount_findfs(g_bdfsmap, filesystemtype)) != NULL)
     {
-      errcode = EFAULT;
-      goto errout;
+      /* Make sure that a block driver argument was provided */
+
+      DEBUGASSERT(source);
+
+      /* Find the block driver */
+
+      status = find_blockdriver(source, mountflags, &blkdrvr_inode);
+      if (status < 0)
+        {
+           fdbg("Failed to find block driver %s\n", source);
+           errcode = -status;
+           goto errout;
+        }
     }
-
-  /* Find the specified filesystem */
-
-  mops = mount_findfs(filesystemtype);
-  if (!mops)
+  else
+#endif /* BDFS_SUPPORT */
+#ifdef NONBDFS_SUPPORT
+  if ((mops = mount_findfs(g_nonbdfsmap, filesystemtype)) != NULL)
     {
-      fdbg("Failed to find filsystem %s\n", filesystemtype);
+    }
+  else
+#endif /* NONBDFS_SUPPORT */
+    {
+      fdbg("Failed to find file system %s\n", filesystemtype);
       errcode = ENODEV;
       goto errout;
     }
 
-  /* Find the inode of the block driver indentified by 'source' */
-
-  status = find_blockdriver(source, mountflags, &blkdrvr_inode);
-  if (status < 0)
-    {
-       fdbg("Failed to find block driver %s\n", source);
-       errcode = -status;
-       goto errout;
-    }
-
-  /* Insert a dummy node -- we need to hold the inode semaphore
+   /* Insert a dummy node -- we need to hold the inode semaphore
    * to do this because we will have a momentarily bad structure.
    */
 
@@ -227,11 +277,22 @@ int mount(const char *source, const char *target,
 
   /* Increment reference count for the reference we pass to the file system */
 
-  blkdrvr_inode->i_crefs++;
+#ifdef BDFS_SUPPORT
+#ifdef NONBDFS_SUPPORT
+  if (blkdrvr_inode)
+#endif
+    {
+      blkdrvr_inode->i_crefs++;
+    }
+#endif
 
   /* On failure, the bind method returns -errorcode */
 
+#ifdef BDFS_SUPPORT
   status = mops->bind(blkdrvr_inode, data, &fshandle);
+#else
+  status = mops->bind(NULL, data, &fshandle);
+#endif
   if (status != 0)
   {
       /* The inode is unhappy with the blkdrvr for some reason.  Back out
@@ -240,7 +301,14 @@ int mount(const char *source, const char *target,
        */
 
       fdbg("Bind method failed: %d\n", status);
-      blkdrvr_inode->i_crefs--;
+#ifdef BDFS_SUPPORT
+#ifdef NONBDFS_SUPPORT
+      if (blkdrvr_inode)
+#endif
+        {
+          blkdrvr_inode->i_crefs--;
+        }
+#endif
       errcode = -status;
       goto errout_with_mountpt;
   }
@@ -262,7 +330,14 @@ int mount(const char *source, const char *target,
   * that will persist until umount() is called.
   */
 
-  inode_release(blkdrvr_inode);
+#ifdef BDFS_SUPPORT
+#ifdef NONBDFS_SUPPORT
+  if (blkdrvr_inode)
+#endif
+    {
+      inode_release(blkdrvr_inode);
+    }
+#endif
   return OK;
 
   /* A lot of goto's!  But they make the error handling much simpler */
@@ -271,18 +346,38 @@ errout_with_mountpt:
   mountpt_inode->i_crefs = 0;
   inode_remove(target);
   inode_semgive();
-  inode_release(blkdrvr_inode);
+#ifdef BDFS_SUPPORT
+#ifdef NONBDFS_SUPPORT
+  if (blkdrvr_inode)
+#endif
+    {
+       inode_release(blkdrvr_inode);
+    }
+#endif
   inode_release(mountpt_inode);
   goto errout;
 
 errout_with_semaphore:
   inode_semgive();
-  inode_release(blkdrvr_inode);
+#ifdef BDFS_SUPPORT
+#ifdef NONBDFS_SUPPORT
+  if (blkdrvr_inode)
+#endif
+    {
+      inode_release(blkdrvr_inode);
+    }
+#endif
 
 errout:
   errno = errcode;
   return ERROR;
+
+#else
+  fdbg("No filesystems enabled\n");
+  ernno = ENOSYS;
+  return error;
+#endif /* BDFS_SUPPORT || NONBDFS_SUPPORT */
 }
 
-#endif /* Need at least one filesystem */
+#endif /* CONFIG_FS_READABLE */
 

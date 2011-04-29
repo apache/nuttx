@@ -157,8 +157,9 @@
  *
  * INODE_STATE_FILE    - The inode is a valid usuable, file
  * INODE_STATE_DELETED - The inode has been deleted.
+ * Other values        - The inode is bad and has an invalid state.
  *
- * Care is taken so that the GOOD to BAD transition only involves burning
+ * Care is taken so that the VALID to DELETED transition only involves burning
  * bits from the erased to non-erased state.
  */
 

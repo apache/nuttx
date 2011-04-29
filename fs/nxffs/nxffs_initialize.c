@@ -182,6 +182,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   /* Initialize the NXFFS volume structure */
 
   volume->mtd = mtd;
+  sem_init(&volume->exclsem, 0, 1);
 
   /* Get the volume geometry. (casting to uintptr_t first eliminates
    * complaints on some architectures where the sizeof long is different
