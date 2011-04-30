@@ -310,7 +310,7 @@ static inline int nxffs_namerased(FAR struct nxffs_volume_s *volume,
     {
       /* This is where we will put the name */
 
-      wrfile->ofile.entry.hoffset = nxffs_iotell(volume);
+      wrfile->ofile.entry.noffset = nxffs_iotell(volume);
     }
   return ret;
 }
@@ -375,7 +375,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
            * until the new file is successfully written.
            */
 
-          truncate = true;
+          truncate = true;          
         }
 
       /* The file exists and we were not asked to truncate (and recreate) it.
@@ -435,6 +435,15 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   wrfile->ofile.entry.utc = time(NULL);
   wrfile->truncate        = truncate;
 
+  /* Save a copy of the inode name. */
+
+  wrfile->ofile.entry.name = strdup(name);
+  if (!wrfile->ofile.entry.name)
+    {
+      ret = -ENOMEM;
+      goto errout_with_ofile;
+    }
+
   /* Allocate FLASH memory for the file and set up for the write.
    *
    * Loop until the inode header is configured or until a failure occurs.
@@ -472,7 +481,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
       if (ret != -ENOSPC || packed)
         {
           fdbg("Failed to find inode header memory: %d\n", -ret);
-          goto errout_with_ofile;
+          goto errout_with_name;
         }
 
       /* -ENOSPC is a special case..  It means that the volume is full.
@@ -483,7 +492,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
       if (ret < 0)
         {
           fdbg("Failed to pack the volume: %d\n", -ret);
-          goto errout_with_ofile;
+          goto errout_with_name;
         }
               
       /* After packing the volume, froffset will be updated to point to the
@@ -527,7 +536,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
       if (ret != -ENOSPC || packed)
         {
           fdbg("Failed to find inode name memory: %d\n", -ret);
-          goto errout_with_ofile;
+          goto errout_with_name;
         }
 
       /* -ENOSPC is a special case..  It means that the volume is full.
@@ -538,7 +547,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
       if (ret < 0)
         {
           fdbg("Failed to pack the volume: %d\n", -ret);
-          goto errout_with_ofile;
+          goto errout_with_name;
         }
               
       /* After packing the volume, froffset will be updated to point to the
@@ -561,6 +570,8 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   *ppofile = &wrfile->ofile;
   return OK;
 
+errout_with_name:
+  kfree(wrfile->ofile.entry.name);
 errout_with_ofile:
 #ifndef CONFIG_NXFSS_PREALLOCATED
   kfree(wrfile);
@@ -739,7 +750,7 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
       goto errout;
     }
 
-  if (wrfile->truncate)
+  if (wrfile->truncate && wrfile->ofile.entry.name)
     {
       fvdbg("Removing old file: %s\n", wrfile->ofile.entry.name);
 

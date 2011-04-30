@@ -388,25 +388,32 @@ static inline ssize_t nxffs_wrappend(FAR struct nxffs_volume_s *volume,
 
       memcpy(&volume->cache[offset], buffer, nbytestowrite);
 
+      /* Increment the number of bytes written to the data block */
+
+      wrfile->datlen += nbytestowrite;
+
       /* Re-calculate the CRC */
 
-      wrfile->crc = crc32(&volume->cache[offset], nbytestowrite);
+      offset = volume->iooffset + SIZEOF_NXFFS_DATA_HDR;
+      wrfile->crc = crc32(&volume->cache[offset], wrfile->datlen);
 
       /* And write the partial write block to FLASH -- unless the data
        * block is full.  In that case, the block will be written below.
        */
-
-      ret = nxffs_wrcache(volume, volume->ioblock, 1);
-      if (ret < 0)
+ 
+      if (nbytesleft > 0)
         {
-          fdbg("nxffs_wrcache failed: %d\n", -ret);
-          return ret;
+          ret = nxffs_wrcache(volume, volume->ioblock, 1);
+          if (ret < 0)
+            {
+              fdbg("nxffs_wrcache failed: %d\n", -ret);
+              return ret;
+            }
         }
     }
 
-  /* Calculate the number of bytes remaining in data block */
+  /* Check if the data block is now full */
 
-  nbytesleft = maxsize - nbytestowrite;
   if (nbytesleft <= 0)
     {
       /* The data block is full, write the block to FLASH */
@@ -441,6 +448,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
 {
   FAR struct nxffs_volume_s *volume;
   FAR struct nxffs_wrfile_s *wrfile;
+  ssize_t nbytesleft;
   ssize_t nbyteswritten;
   int ret;
 
@@ -484,7 +492,8 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
    * error occurs)
    */
 
-  while (buflen > 0)
+  nbytesleft = buflen;
+  while (nbytesleft > 0)
     {
       /* Have we already allocated the data block? */
 
@@ -493,7 +502,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
           /* No, allocate the data block now */
 
           wrfile->datlen = 0;
-          ret = nxffs_wralloc(volume, wrfile, buflen);
+          ret = nxffs_wralloc(volume, wrfile, nbytesleft);
           if (ret < 0)
             {
               fdbg("Failed to allocate a data block: %d\n", -ret);
@@ -510,7 +519,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
       ret = nxffs_reverify(volume, wrfile);
       if (ret < 0)
         {
-          fdbg("Failed to verify FLASH a data block: %d\n", -ret);
+          fdbg("Failed to verify FLASH data block: %d\n", -ret);
           goto errout_with_semaphore;
         }
 
@@ -518,17 +527,22 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
        * block to flash.
        */
 
-      nbyteswritten = nxffs_wrappend(volume, wrfile, buffer, buflen);
+      nbyteswritten = nxffs_wrappend(volume, wrfile, buffer, nbytesleft);
       if (nbyteswritten < 0)
         {
-          fdbg("Failed to append to FLASH a data block: %d\n", -ret);
+          fdbg("Failed to append to FLASH to a data block: %d\n", -ret);
           goto errout_with_semaphore;
         }
 
       /* Decrement the number of bytes remaining to be written */
  
-      buflen -= nbyteswritten;
+      nbytesleft -= nbyteswritten;
     }
+
+  /* Success.. return the number of bytes written */
+
+  ret           = buflen;
+  filep->f_pos  = wrfile->datlen;
 
 errout_with_semaphore:
   sem_post(&volume->exclsem);
@@ -574,13 +588,11 @@ errout:
 
 int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size)
 {
-  off_t offset;
   int ret;
 
   /* Seek to the beginning of the free FLASH region */
 
-  offset = volume->froffset;
-  nxffs_ioseek(volume, offset);
+  nxffs_ioseek(volume, volume->froffset);
 
   /* Check for a seek past the end of the volume */
 
@@ -591,9 +603,15 @@ int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size)
       return -ENOSPC;
     }
 
+  /* Skip over block headers */
+
+  if (volume->iooffset < SIZEOF_NXFFS_BLOCK_HDR)
+    {
+      volume->iooffset = SIZEOF_NXFFS_BLOCK_HDR;
+    }
+
   /* Make sure that there is space there to hold the entire object */
 
-  DEBUGASSERT(volume->iooffset >= SIZEOF_NXFFS_BLOCK_HDR);
   if (volume->iooffset + size > volume->geo.blocksize)
     {
       /* We will need to skip to the next block.  But first, check if we are
@@ -619,16 +637,14 @@ int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size)
           fdbg("No more valid blocks\n");
           return ret;
         }
-
       volume->iooffset = SIZEOF_NXFFS_BLOCK_HDR;
-      offset           = volume->ioblock * volume->geo.blocksize + SIZEOF_NXFFS_BLOCK_HDR;
     }
 
   /* Update the pointer to the first next free FLASH memory -- reserving this
    * block of memory.
    */
 
-  volume->froffset = offset + size;
+  volume->froffset = nxffs_iotell(volume) + size;
   return OK;
 }
 
@@ -744,8 +760,8 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
           return ret;
         }
 
-      volume->iooffset = size;
-      volume->froffset = volume->ioblock * volume->geo.blocksize + size;
+      volume->iooffset = SIZEOF_NXFFS_BLOCK_HDR;
+      volume->froffset = volume->ioblock * volume->geo.blocksize + SIZEOF_NXFFS_BLOCK_HDR;
     }
 
   /* Return -ENOSPC if there is no erased memory left in the volume for
@@ -804,13 +820,30 @@ int nxffs_wrblkhdr(FAR struct nxffs_volume_s *volume,
 
   /* After the block has been successfully written to flash, update the inode
    * statistics and reset the write state.
+   *
+   * volume:
+   *   froffset - The offset the next free FLASH region.  Set to just after
+   *     the inode data block that we just wrote.  This is where we will
+   *     begin the search for the next inode header or data block.
+   */
+
+  volume->froffset = (wrfile->doffset + wrfile->datlen + SIZEOF_NXFFS_DATA_HDR);
+
+  /* wrfile->file.entry:
+   *   datlen:  Total file length accumulated so far.  When the file is
+   *     closed, this will hold the file length.
+   *   doffset: Offset to the first data block.  Only the offset to the
+   *     first data block is saved.
    */
 
   wrfile->ofile.entry.datlen += wrfile->datlen;
-  if (wrfile->ofile.entry.doffset)
+  if (wrfile->ofile.entry.doffset == 0)
     {
       wrfile->ofile.entry.doffset = wrfile->doffset;
     }
+
+  /* Return success */
+
   ret = OK;
 
 errout:
