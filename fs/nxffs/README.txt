@@ -1,3 +1,16 @@
+NXFFS README
+^^^^^^^^^^^^
+
+This README file contains information about the implemenation of the NuttX
+wear-leveling FLASH file system, NXFFS.
+
+Contents:
+
+  General NXFFS organization
+  General operation
+  Headers
+  NXFFS Limitations
+
 General NXFFS organization
 ==========================
 

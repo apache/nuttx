@@ -415,6 +415,9 @@ Below is a guide to the available README files in the NuttX source tree:
  |- examples/
  |   |- pashello/README.txt
  |   `- README.txt
+ |- fs/
+ |   `- nxffs/
+ |       `- README.txt
  |- graphics/
  |   `- README.txt
  |- lib/
