@@ -64,11 +64,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Private Data
  ****************************************************************************/
 
+/* Since we are limited to a single file opened for writing, it makes sense
+ * to pre-allocate the write state structure.
+ */
+
+#ifdef CONFIG_NXFSS_PREALLOCATED
+static struct nxffs_wrfile_s g_wrfile;
+#endif
+
 /****************************************************************************
- * Private Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -124,8 +132,7 @@ static inline int nxffs_hdrpos(FAR struct nxffs_volume_s *volume,
     {
       /* Save the offset to the FLASH region reserved for the inode header */
 
-      wrfile->ofile.entry.hoffset = 
-        volume->ioblock * volume->geo.blocksize + volume->iooffset;
+      wrfile->ofile.entry.hoffset = nxffs_iotell(volume);
     }
   return OK;
 }
@@ -180,8 +187,7 @@ static inline int nxffs_nampos(FAR struct nxffs_volume_s *volume,
     {
       /* Save the offset to the FLASH region reserved for the inode name */
 
-      wrfile->ofile.entry.noffset = 
-        volume->ioblock * volume->geo.blocksize + volume->iooffset;
+      wrfile->ofile.entry.noffset = nxffs_iotell(volume);
     }
   return OK;
 }
@@ -242,8 +248,7 @@ static inline int nxffs_hdrerased(FAR struct nxffs_volume_s *volume,
     {
       /* This is where we will put the header */
 
-      wrfile->ofile.entry.hoffset =
-        volume->ioblock * volume->geo.blocksize + volume->iooffset;
+      wrfile->ofile.entry.hoffset = nxffs_iotell(volume);
     }
   return ret;
 }
@@ -305,8 +310,7 @@ static inline int nxffs_namerased(FAR struct nxffs_volume_s *volume,
     {
       /* This is where we will put the name */
 
-      wrfile->ofile.entry.hoffset =
-        volume->ioblock * volume->geo.blocksize + volume->iooffset;
+      wrfile->ofile.entry.hoffset = nxffs_iotell(volume);
     }
   return ret;
 }
@@ -412,12 +416,17 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
    * that includes additional information to support the write operation.
    */
 
+#ifdef CONFIG_NXFSS_PREALLOCATED
+  wrfile = &g_wrfile;
+  memset(wrfile, 0, sizeof(struct nxffs_wrfile_s));
+#else
   wrfile = (FAR struct nxffs_wrfile_s *)kzalloc(sizeof(struct nxffs_wrfile_s));
   if (!wrfile)
     {
       ret = -ENOMEM;
       goto errout;
     }
+#endif
 
   /* Initialize the open file state structure */
 
@@ -553,7 +562,9 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   return OK;
 
 errout_with_ofile:
+#ifndef CONFIG_NXFSS_PREALLOCATED
   kfree(wrfile);
+#endif
 errout:
   return ret;
 }
@@ -672,10 +683,20 @@ static inline void nxffs_freeofile(FAR struct nxffs_volume_s *volume,
           volume->ofiles = ofile->flink;
         }
 
-      /* Then free the open file */
+      /* Release the open file entry */
 
       nxffs_freeentry(&ofile->entry);
-      kfree(ofile);
+ 
+      /* Then free the open file container (unless this the pre-alloated
+       * write-only open file container)
+       */
+
+#ifdef CONFIG_NXFSS_PREALLOCATED
+      if ((FAR struct nxffs_wrfile_s*)ofile != &g_wrfile)
+#endif
+        {
+          kfree(ofile);
+        }
     }
   else
     {

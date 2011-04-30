@@ -191,8 +191,9 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
 
           else
             {
-              good = nxffs_erased(&blkptr[SIZEOF_NXFFS_BLOCK_HDR],
-                                  volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR);
+              size_t blocksize = volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR;
+              size_t erasesize = nxffs_erased(&blkptr[SIZEOF_NXFFS_BLOCK_HDR], blocksize);
+              good = (blocksize == erasesize);
             }
 
           /* If the block is bad, attempt to re-write the block header indicating

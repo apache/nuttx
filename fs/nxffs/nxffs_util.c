@@ -153,26 +153,29 @@ void nxffs_wrle32(uint8_t *dest, uint32_t val)
  * Name: nxffs_erased
  *
  * Description:
- *   Check if the block of memory if in the erased state.
+ *   Check if a block of memory is in the erased state.
  *
  * Input Parameters:
  *   buffer - Address of the start of the memory to check.
  *   buflen - The number of bytes to check.
  *
  * Returned Values:
- *   true: memory is erased; false: memory is not erased
+ *   The number of erased bytes found at the beginning of the memory region.
  *
  ****************************************************************************/
 
-bool nxffs_erased(FAR const uint8_t *buffer, size_t buflen)
+size_t nxffs_erased(FAR const uint8_t *buffer, size_t buflen)
 {
-  for (; buflen; buflen--)
+  size_t nerased = 0;
+
+  for (; nerased < buflen; nerased++)
     {
       if (*buffer != CONFIG_NXFFS_ERASEDSTATE)
         {
-          return false;
+          break;
         }
       buffer++;
     }
-  return true;
+
+  return nerased;
 }

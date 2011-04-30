@@ -177,6 +177,16 @@
 
 #define NXFFS_NERASED             128
 
+/* Quasi-standard definitions */
+
+#ifndef MIN
+#  define MIN(a,b) (a < b ? a : b)
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) (a > b ? a : b)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -211,10 +221,9 @@ struct nxffs_data_s
 {
   uint8_t                   magic[4];  /* 0-3: Magic number for valid data */
   uint8_t                   crc[4];    /* 4-7: CRC32 */
-  uint8_t                   datlen[4]; /* 8-11: Length of data in bytes */
-                                       /* 12-: Variable length data follows */
+  uint8_t                   datlen[2]; /* 8-9: Length of data in bytes */
 };
-#define SIZEOF_NXFFS_DATA_HDR 12
+#define SIZEOF_NXFFS_DATA_HDR 10
 
 /* This is an in-memory representation of the NXFFS inode as extracted from
  * FLASH and with additional state information.
@@ -251,14 +260,12 @@ struct nxffs_wrfile_s
   struct nxffs_ofile_s      ofile;
 
   /* The following fields are required to support the current write
-   * operation.  Note that the size of the current block can be determined
-   * from (wroffset - dathdr - SIZEOF_NXFFS_DATA_HDR).  Basic write
-   * operation:
+   * operation.
    *
    * 1. Inode header location determined (but not yet written).
    * 2. Block header location determined (but not yet written).
    * 3. Check FLASH memory to make sure that it is erased.
-   * 4. As data is written, wrlen is updated and the data is written to FLASH.
+   * 4. As data is written, datlen is updated and the data is written to FLASH.
    * 5. If the end of the FLASH block is encountered, the data block CRC is
    *    calculated and the block header is also written to flash.
    * 6. When the file is closed, the final, partial data block is written to
@@ -269,8 +276,9 @@ struct nxffs_wrfile_s
    */
 
   bool                      truncate;   /* Delete a file of the same name */
-  uint16_t                  wrlen;      /* Number of bytes written in data block */
-  off_t                     dathdr;     /* FLASH offset to the current data header */
+  uint16_t                  datlen;     /* Number of bytes written in data block */
+  off_t                     doffset;    /* FLASH offset to the current data header */
+  uint32_t                  crc;        /* Accumulated data block CRC */
 };
 
 /* This structure represents the overall state of on NXFFS instance. */
@@ -396,6 +404,8 @@ extern uint16_t nxffs_rdle16(FAR const uint8_t *val);
  * Returned Values:
  *   None
  *
+ * Defined in nxffs_util.c
+ *
  ****************************************************************************/
 
 extern void nxffs_wrle16(uint8_t *dest, uint16_t val);
@@ -431,6 +441,8 @@ extern uint32_t nxffs_rdle32(FAR const uint8_t *val);
  * Returned Value:
  *   None
  *
+ * Defined in nxffs_util.c
+ *
  ****************************************************************************/
 
 extern void nxffs_wrle32(uint8_t *dest, uint32_t val);
@@ -439,20 +451,20 @@ extern void nxffs_wrle32(uint8_t *dest, uint32_t val);
  * Name: nxffs_erased
  *
  * Description:
- *   Check if the block of memory if in the erased state.
+ *   Check if a block of memory is in the erased state.
  *
  * Input Parameters:
  *   buffer - Address of the start of the memory to check.
  *   buflen - The number of bytes to check.
  *
  * Returned Values:
- *   true: memory is erased; false: memory is not erased
+ *   The number of erased bytes found at the beginning of the memory region.
  *
  * Defined in nxffs_util.c
  *
  ****************************************************************************/
 
-extern bool nxffs_erased(FAR const uint8_t *buffer, size_t buflen);
+extern size_t nxffs_erased(FAR const uint8_t *buffer, size_t buflen);
 
 /****************************************************************************
  * Name: nxffs_rdcache
@@ -516,6 +528,24 @@ extern int nxffs_wrcache(FAR struct nxffs_volume_s *volume, off_t block,
  ****************************************************************************/
 
 extern void nxffs_ioseek(FAR struct nxffs_volume_s *volume, off_t offset);
+
+/****************************************************************************
+ * Name: nxffs_iotell
+ *
+ * Description:
+ *   Report the current position.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *
+ * Returned Value:
+ *   The offset from the beginning of FLASH to the current seek position.
+ *
+ * Defined in nxffs_cache.c
+ *
+ ****************************************************************************/
+
+extern off_t nxffs_iotell(FAR struct nxffs_volume_s *volume);
 
 /****************************************************************************
  * Name: nxffs_getc

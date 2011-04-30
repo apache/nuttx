@@ -43,6 +43,7 @@
 
 #include <string.h>
 #include <fcntl.h>
+#include <crc32.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -56,17 +57,372 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* When we allocate FLASH for a new inode data block, we will require that
+ * space is available to hold this minimum number of data bytes in addition
+ * to the size of the data block headeer.
+ */
+
+#define NXFFS_MINDATA 16
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+ 
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxffs_hdrpos
+ *
+ * Description:
+ *   Find a valid location for the data block header.  A valid location will
+ *   have these properties:
+ *
+ *   1. It will lie in the free flash region.
+ *   2. It will have enough contiguous memory to hold the entire header
+ *      PLUS some meaningful amount of data (NXFFS_MINDATA).
+ *   3. The memory at this location will be fully erased.
+ *
+ *   This function will only perform the checks of 1) and 2).
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *   wrfile - Contains the current guess for the header position.  On
+ *     successful return, this field will hold the selected header
+ *     position.
+ *   size - The minimum size of the current write.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned indicating the nature of the failure.  Of special interest
+ *   the return error of -ENOSPC which means that the FLASH volume is
+ *   full and should be repacked.
+ *
+ *   On successful return the following are also valid:
+ *
+ *     wrfile->doffset - Flash offset to candidate header position
+ *     volume->ioblock - Read/write block number of the block containing the
+ *       header position
+ *     volume->iooffset - The offset in the block to the candidate header
+ *       position.
+ *     volume->froffset - Updated offset to the first free FLASH block.
+ *
+ ****************************************************************************/
+
+static inline int nxffs_hdrpos(FAR struct nxffs_volume_s *volume,
+                               FAR struct nxffs_wrfile_s *wrfile,
+                               size_t size)
+{
+  int ret;
+
+  /* Reserve memory for the object */
+
+  ret = nxffs_wrreserve(volume, SIZEOF_NXFFS_DATA_HDR + size);
+  if (ret == OK)
+    {
+      /* Save the offset to the FLASH region reserved for the inode header */
+
+      wrfile->doffset = nxffs_iotell(volume);
+    }
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nxffs_hdrerased
+ *
+ * Description:
+ *   Find a valid location for the data block header.  A valid location will
+ *   have these properties:
+ *
+ *   1. It will lie in the free flash region.
+ *   2. It will have enough contiguous memory to hold the entire header
+ *      PLUS some meaningful amount of data (NXFFS_MINDATA).
+ *   3. The memory at this location will be fully erased.
+ *
+ *   This function will only perform the check 3). On entry it assumes:
+ *
+ *     volume->ioblock  - Read/write block number of the block containing the
+ *       header position
+ *     volume->iooffset - The offset in the block to the candidate header
+ *       position.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *   wrfile - Contains the current guess for the header position.  On
+ *     successful return, this field will hold the selected header
+ *     position.
+ *   size - The minimum size of the current write.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned indicating the nature of the failure.  Of special interest
+ *   the return error of -ENOSPC which means that the FLASH volume is
+ *   full and should be repacked.
+ *
+ *   On successful return the following are also valid:
+ *
+ *     wrfile->doffset - Flash offset to candidate header position
+ *     volume->ioblock - Read/write block number of the block containing the
+ *       header position
+ *     volume->iooffset - The offset in the block to the candidate header
+ *       position.
+ *     volume->froffset - Updated offset to the first free FLASH block.
+ *
+ ****************************************************************************/
+
+static inline int nxffs_hdrerased(FAR struct nxffs_volume_s *volume,
+                                  FAR struct nxffs_wrfile_s *wrfile,
+                                  size_t size)
+{
+  int ret;
+
+  /* Find a valid location to save the inode header */
+  
+  ret = nxffs_wrverify(volume, SIZEOF_NXFFS_DATA_HDR + size);
+  if (ret == OK)
+    {
+      /* This is where we will put the header */
+
+      wrfile->doffset = nxffs_iotell(volume);
+    }
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxffs_wralloc
+ *
+ * Description:
+ *   Allocate FLASH memory for the data block.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *   wrfile - Describes the open file to be written.
+ *   size   - Size of the current write operation.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+static inline int nxffs_wralloc(FAR struct nxffs_volume_s *volume,
+                                FAR struct nxffs_wrfile_s *wrfile,
+                                size_t size)
+{
+  bool packed;
+  int ret;
+
+  /* Allocate FLASH memory for the data block.
+   *
+   * Loop until the data block header is configured or until a failure
+   * occurs. Note that nothing is written to FLASH.  The data block header
+   * is not written until either (1) the file is closed, or (2) the data
+   * region is fully populated.
+   */
+
+  packed = false;
+  for (;;)
+    {
+      size_t mindata = MIN(NXFFS_MINDATA, size);
+
+      /* File a valid location to position the data block.  Start with
+       * the first byte in the free FLASH region.
+       */
+
+      ret = nxffs_hdrpos(volume, wrfile, mindata);
+      if (ret == OK)
+        {
+          /* Find a region of memory in the block that is fully erased */
+
+          ret = nxffs_hdrerased(volume, wrfile, mindata);
+          if (ret == OK)
+            {
+              /* Valid memory for the data block was found.  Return success. */
+
+              return OK;
+            }
+        }
+
+      /* If no valid memory is found searching to the end of the volume,
+       * then -ENOSPC will be returned.  Other errors are not handled.
+       */
+
+      if (ret != -ENOSPC || packed)
+        {
+          fdbg("Failed to find inode header memory: %d\n", -ret);
+          return -ENOSPC;
+        }
+
+      /* -ENOSPC is a special case..  It means that the volume is full.
+       * Try to pack the volume in order to free up some space.
+       */
+
+      ret = nxffs_pack(volume);
+      if (ret < 0)
+        {
+          fdbg("Failed to pack the volume: %d\n", -ret);
+          return ret;
+        }
+              
+      /* After packing the volume, froffset will be updated to point to the
+       * new free flash region.  Try again.
+       */
+               
+      packed = true;
+    }
+
+  /* Can't get here */
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nxffs_reverify
+ *
+ * Description:
+ *   Verify that the partial flash data block in the volume cache is valid.
+ *   On entry, this function assumes:
+ *
+ *   volume->ioblock  - Read/write block number of the block containing the
+ *     data block.
+ *   volume->iooffset - The offset in the block to the data block.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *   wrfile - Describes the open file to be written.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+static inline int nxffs_reverify(FAR struct nxffs_volume_s *volume,
+                                FAR struct nxffs_wrfile_s *wrfile)
+{
+  uint32_t crc;
+  off_t offset;
+
+  if (wrfile->datlen > 0)
+    {
+      /* Get the offset to the start of the data */
+
+      offset = volume->iooffset + SIZEOF_NXFFS_DATA_HDR;
+      DEBUGASSERT(offset + wrfile->datlen < volume->geo.blocksize);
+
+      /* Calculate the CRC of the partial data block */
+
+      crc = crc32(&volume->cache[offset], wrfile->datlen);
+
+      /* It must match the previoulsy calculated CRC value */
+
+      if (crc != wrfile->crc)
+        {
+          fdbg("CRC failure\n");
+          return -EIO;
+        }
+    }
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nxffs_wrappend
+ *
+ * Description:
+ *   Append FLASH data to the data block.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *   wrfile - Describes the open file to be written.
+ *   buffer - Address of buffer of data to be written.
+ *   buflen - The number of bytes remaimining to be written
+ *
+ * Returned Value:
+ *   The number of bytes written is returned on success.  Otherwise, a
+ *   negated errno value is returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+static inline ssize_t nxffs_wrappend(FAR struct nxffs_volume_s *volume,
+                                     FAR struct nxffs_wrfile_s *wrfile,
+                                     FAR const char *buffer, size_t buflen)
+{
+  ssize_t maxsize;
+  size_t nbytestowrite;
+  ssize_t nbytesleft;
+  off_t offset;
+  int ret;
+
+  /* Get the offset to the start of unwritten data */
+
+  offset = volume->iooffset + wrfile->datlen + SIZEOF_NXFFS_DATA_HDR;
+
+  /* Determine that maximum amount of data that can be written to this
+   * block.
+   */
+
+  maxsize = volume->geo.blocksize - offset;
+  DEBUGASSERT(maxsize > 0);
+
+  /* But don't try to write over any unerased bytes */
+
+  maxsize = nxffs_erased(&volume->cache[offset], maxsize);
+
+  /* Write as many bytes as we can into the data buffer */
+
+  nbytestowrite = MIN(maxsize, buflen);
+  nbytesleft    = maxsize - nbytestowrite;
+
+  if (nbytestowrite > 0)
+    {
+      /* Copy the data into the volume write cache */
+
+      memcpy(&volume->cache[offset], buffer, nbytestowrite);
+
+      /* Re-calculate the CRC */
+
+      wrfile->crc = crc32(&volume->cache[offset], nbytestowrite);
+
+      /* And write the partial write block to FLASH -- unless the data
+       * block is full.  In that case, the block will be written below.
+       */
+
+      ret = nxffs_wrcache(volume, volume->ioblock, 1);
+      if (ret < 0)
+        {
+          fdbg("nxffs_wrcache failed: %d\n", -ret);
+          return ret;
+        }
+    }
+
+  /* Calculate the number of bytes remaining in data block */
+
+  nbytesleft = maxsize - nbytestowrite;
+  if (nbytesleft <= 0)
+    {
+      /* The data block is full, write the block to FLASH */
+
+      ret = nxffs_wrblkhdr(volume, wrfile);
+      if (ret < 0)
+        {
+          fdbg("nxffs_wrblkdhr failed: %d\n", -ret);
+          return ret;
+        }
+    }
+
+  /* Return the number of bytes written to FLASH this time */
+
+  return nbytestowrite;
+}
 
 /****************************************************************************
  * Public Functions
@@ -85,7 +441,8 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
 {
   FAR struct nxffs_volume_s *volume;
   FAR struct nxffs_wrfile_s *wrfile;
-  ssize_t ret;
+  ssize_t nbyteswritten;
+  int ret;
 
   fvdbg("Write %d bytes to offset %d\n", buflen, filep->f_pos);
 
@@ -116,29 +473,62 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
 
   /* Check if the file was opened with write access */
 
-#ifdef CONFIG_DEBUG
   if ((wrfile->ofile.mode & O_WROK) == 0)
     {
       fdbg("File not open for write access\n");
       ret = -EACCES;
       goto errout_with_semaphore;
     }
-#endif
 
-  /* Seek to the current file offset */
+  /* Loop until we successfully appended all of the data to the file (or an
+   * error occurs)
+   */
 
-  nxffs_ioseek(volume, wrfile->dathdr + wrfile->wrlen);
-
-  /* Write data to that file offset */
-
-  ret = nxffs_wrdata(volume, (FAR const uint8_t*)buffer, buflen);
-  if (ret > 0)
+  while (buflen > 0)
     {
-      /* Update the file offset */
+      /* Have we already allocated the data block? */
 
-      filep->f_pos += ret;
+      if (wrfile->doffset == 0)
+        {
+          /* No, allocate the data block now */
+
+          wrfile->datlen = 0;
+          ret = nxffs_wralloc(volume, wrfile, buflen);
+          if (ret < 0)
+            {
+              fdbg("Failed to allocate a data block: %d\n", -ret);
+              goto errout_with_semaphore;
+            }
+        }
+
+      /* Seek to the FLASH block containing the data block */
+
+      nxffs_ioseek(volume, wrfile->doffset);
+
+      /* Verify that the FLASH data that was previously written is still intact */
+
+      ret = nxffs_reverify(volume, wrfile);
+      if (ret < 0)
+        {
+          fdbg("Failed to verify FLASH a data block: %d\n", -ret);
+          goto errout_with_semaphore;
+        }
+
+      /* Append the data to the end of the data block and write the updated
+       * block to flash.
+       */
+
+      nbyteswritten = nxffs_wrappend(volume, wrfile, buffer, buflen);
+      if (nbyteswritten < 0)
+        {
+          fdbg("Failed to append to FLASH a data block: %d\n", -ret);
+          goto errout_with_semaphore;
+        }
+
+      /* Decrement the number of bytes remaining to be written */
+ 
+      buflen -= nbyteswritten;
     }
-#warning "Add check for block full"
 
 errout_with_semaphore:
   sem_post(&volume->exclsem);
@@ -387,7 +777,46 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
 int nxffs_wrblkhdr(FAR struct nxffs_volume_s *volume,
                    FAR struct nxffs_wrfile_s *wrfile)
 {
-#warning "Missing logic"
-  return -ENOSYS;
+  FAR struct nxffs_data_s *dathdr;
+  int ret;
+
+  /* Write the dat block header to memory */
+
+  nxffs_ioseek(volume, wrfile->doffset);
+  dathdr = (FAR struct nxffs_data_s *)&volume->cache[volume->iooffset];
+  memcpy(dathdr->magic, g_datamagic, NXFFS_MAGICSIZE);
+  nxffs_wrle32(dathdr->crc, 0);
+  nxffs_wrle16(dathdr->datlen, wrfile->datlen);
+
+  /* Update the entire data block CRC (including the header) */
+
+  wrfile->crc = crc32(&volume->cache[volume->iooffset], wrfile->datlen + SIZEOF_NXFFS_DATA_HDR);
+  nxffs_wrle32(dathdr->crc, wrfile->crc);
+
+  /* And write the data block to FLASH */
+
+  ret = nxffs_wrcache(volume, volume->ioblock, 1);
+  if (ret < 0)
+    {
+      fdbg("nxffs_wrcache failed: %d\n", -ret);
+      goto errout;
+    }
+
+  /* After the block has been successfully written to flash, update the inode
+   * statistics and reset the write state.
+   */
+
+  wrfile->ofile.entry.datlen += wrfile->datlen;
+  if (wrfile->ofile.entry.doffset)
+    {
+      wrfile->ofile.entry.doffset = wrfile->doffset;
+    }
+  ret = OK;
+
+errout:
+  wrfile->crc     = 0;
+  wrfile->doffset = 0;
+  wrfile->datlen  = 0;
+  return ret;
 }
 

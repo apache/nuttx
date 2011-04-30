@@ -167,6 +167,25 @@ void nxffs_ioseek(FAR struct nxffs_volume_s *volume, off_t offset)
 }
 
 /****************************************************************************
+ * Name: nxffs_iotell
+ *
+ * Description:
+ *   Report the current position.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *
+ * Returned Value:
+ *   The offset from the beginning of FLASH to the current seek position.
+ *
+ ****************************************************************************/
+
+off_t nxffs_iotell(FAR struct nxffs_volume_s *volume)
+{
+  return volume->ioblock * volume->geo.blocksize + volume->iooffset;
+}
+
+/****************************************************************************
  * Name: nxffs_getc
  *
  * Description:
