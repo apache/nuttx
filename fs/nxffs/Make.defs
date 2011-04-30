@@ -37,8 +37,8 @@ ifeq ($(CONFIG_FS_NXFFS),y)
 ASRCS +=
 CSRCS += nxffs_block.c nxffs_blockstats.c nxffs_cache.c nxffs_dirent.c \
 		 nxffs_initialize.c nxffs_inode.c nxffs_ioctl.c nxffs_open.c \
-		 nxffs_read.c nxffs_reformat.c nxffs_stat.c nxffs_unlink.c \
-		 nxffs_util.c nxffs_write.c
+		 nxffs_pack.c nxffs_read.c nxffs_reformat.c nxffs_stat.c \
+		 nxffs_unlink.c nxffs_util.c nxffs_write.c
 
 # Argument for dependency checking
 

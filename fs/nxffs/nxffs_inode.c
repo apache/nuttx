@@ -93,7 +93,7 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   struct nxffs_inode_s inode;
   uint32_t ecrc;
   uint32_t crc;
-  int namelen;
+  int namlen;
   int ret;
 
   DEBUGASSERT(volume && entry);
@@ -119,7 +119,8 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   /* Copy the packed header into the user-friendly buffer */
 
   entry->hoffset = offset;
-  entry->doffset = offset + inode.doffset;
+  entry->noffset = nxffs_rdle32(inode.noffs);
+  entry->doffset = nxffs_rdle32(inode.doffs);
   entry->utc     = nxffs_rdle32(inode.utc);
   entry->datlen  = nxffs_rdle32(inode.datlen);
 
@@ -132,34 +133,27 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
 
   /* Allocate memory to hold the variable-length file name */
 
-  namelen = (int)inode.doffset - (int)inode.noffset;
-  if (namelen < 0)
-    {
-      fdbg("Bad offsets, name: %d data: %d\n", inode.noffset, inode.doffset);
-      return -EIO;
-    }
-
-  entry->name = (FAR char *)kmalloc(namelen+1);
+  entry->name = (FAR char *)kmalloc(inode.namlen + 1);
   if (!entry->name)
     {
-      fdbg("Failed to allocate name, namelen: %d\n", namelen);
+      fdbg("Failed to allocate name, namlen: %d\n", inode.namlen);
       return -ENOMEM;
     }
   
   /* Read the file name from the expected offset in FLASH */
 
-  nxffs_ioseek(volume, offset + inode.noffset);
-  ret = nxffs_rddata(volume, (FAR uint8_t*)entry->name, namelen);
+  nxffs_ioseek(volume, entry->noffset);
+  ret = nxffs_rddata(volume, (FAR uint8_t*)entry->name, namlen);
   if (ret < 0)
     {
       fdbg("Failed to read inode, offset %d: %d\n", offset, -ret);
       return -EIO;
     }
-  entry->name[namelen] = '\0';
+  entry->name[namlen] = '\0';
 
   /* Finish the CRC calculation and verify the entry */
 
-  crc = crc32part(entry->name, namelen, crc);
+  crc = crc32part((FAR const uint8_t *)entry->name, namlen, crc);
   if (crc != ecrc)
     {
       fdbg("CRC entry: %08x CRC calculated: %08x\n", ecrc, crc);
@@ -332,7 +326,7 @@ int nxffs_findinode(FAR struct nxffs_volume_s *volume, FAR const char *name,
   int ret;
 
   /* Start with the first valid inode that was discovered when the volume
-   * was created (or modified after the last cleanup).
+   * was created (or modified after the last file system re-packing).
    */
 
   offset = volume->inoffset;

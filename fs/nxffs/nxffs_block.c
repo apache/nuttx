@@ -105,7 +105,7 @@ int nxffs_verifyblock(FAR struct nxffs_volume_s *volume, off_t block)
 
   /* Check if the block has a magic number (meaning that it is not
    * erased) and that it is valid (meaning that it is not marked
-   * for cleanup)
+   * for deletion)
    */
 
   blkhdr = (FAR struct nxffs_block_s *)volume->cache;
@@ -147,7 +147,7 @@ int nxffs_validblock(struct nxffs_volume_s *volume, off_t *block)
 
   /* Loop for each possible block or until a valid block is found */
 
-  for (i = *block; i < volume->geo.neraseblocks * volume->blkper; i++)
+  for (i = *block; i < volume->nblocks; i++)
     {
       /* Loop until we find a valid block */
 
@@ -161,6 +161,10 @@ int nxffs_validblock(struct nxffs_volume_s *volume, off_t *block)
         }
     }
 
+  /* ENOSPC is special return value that means that there is no further,
+   * valid blocks left in the volume.
+   */
+
   fdbg("No valid block found\n");
-  return -ENOENT;
+  return -ENOSPC;
 }

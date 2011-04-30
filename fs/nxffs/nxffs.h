@@ -61,7 +61,7 @@
  * the FLASH geometry reported by the MTD driver.
  *
  * ERASE LOGICAL                   Inodes begin with a inode header.  inode may
- * BLOCK BLOCK       CONTENTS      be marked as "deleted," pending clean-up.
+ * BLOCK BLOCK       CONTENTS      be marked as "deleted," pending re-packing.
  *   n   4*n     --+--------------+
  *                 |BBBBBBBBBBBBBB| Logic block header
  *                 |IIIIIIIIIIIIII| Inodes begin with a inode header
@@ -95,7 +95,7 @@
  *   supporting wear leveling by using all FLASH blocks equally.
  *
  *   When the FLASH becomes full (no more space at the end of the FLASH), a
- *   clean-up operation must be performed:  All inodes marked deleted are
+ *   re-packing operation must be performed:  All inodes marked deleted are
  *   finally removed and the remaining inodes are packed at the beginning of
  *   the FLASH.  Allocations then continue at the freed FLASH memory at the
  *   end of the FLASH.
@@ -130,7 +130,7 @@
  *    string providing some illusion of directories.
  * 5. Files may be opened for reading or for writing, but not both: The O_RDWR
  *    open flag is not supported.
- * 6. The clean-up process occurs only during a write when the free FLASH
+ * 6. The re-packing process occurs only during a write when the free FLASH
  *    memory at the end of the FLASH is exhausted.  Thus, occasionally, file
  *    writing may take a long time.
  * 7. Another limitation is that there can be only a single NXFFS volume
@@ -175,7 +175,7 @@
  * flash beyond this point is erased.
  */
 
-#define NXFFS_NERASED         128
+#define NXFFS_NERASED             128
 
 /****************************************************************************
  * Public Types
@@ -185,8 +185,8 @@
 
 struct nxffs_block_s
 {
-  uint8_t                magic[4];  /* 0-3: Magic number for valid block */
-  uint8_t                state;     /* 4: Block state: See BLOCK_STATE_* */
+  uint8_t                   magic[4];  /* 0-3: Magic number for valid block */
+  uint8_t                   state;     /* 4: Block state: See BLOCK_STATE_* */
 };
 #define SIZEOF_NXFFS_BLOCK_HDR 5
 
@@ -194,25 +194,25 @@ struct nxffs_block_s
 
 struct nxffs_inode_s
 {
-  uint8_t                magic[4];  /* 0-3: Magic number for valid inode */
-  uint8_t                state;     /* 4: Inode state: See INODE_STATE_* */
-  uint8_t                noffset;   /* 5: Offset to the file name from the header */
-  uint8_t                doffset;   /* 5: Offset to data from file header */
-  uint8_t                utc[4];    /* 7-9: Creation time */
-  uint8_t                crc[4];    /* 10-13: CRC32 */
-  uint8_t                datlen[4]; /* 14-17: Length of data in bytes */
-                                    /* 18-: Variable length file name follows */
+  uint8_t                   magic[4];  /* 0-3: Magic number for valid inode */
+  uint8_t                   state;     /* 4: Inode state: See INODE_STATE_* */
+  uint8_t                   namlen;    /* 5: Length of the inode name */
+  uint8_t                   noffs[4];  /* 6-9: FLASH offset to the file name */
+  uint8_t                   doffs[4];  /* 10-13: FLASH offset to the first data block */
+  uint8_t                   utc[4];    /* 14-17: Creation time */
+  uint8_t                   crc[4];    /* 18-21: CRC32 */
+  uint8_t                   datlen[4]; /* 22-25: Length of data in bytes */
 };
-#define SIZEOF_NXFFS_INODE_HDR 18
+#define SIZEOF_NXFFS_INODE_HDR 26
 
 /* This structure defines each packed NXFFS data header on the FLASH media */
 
 struct nxffs_data_s
 {
-  uint8_t                magic[4];  /* 0-3: Magic number for valid data */
-  uint8_t                crc[4];    /* 4-7: CRC32 */
-  uint8_t                datlen[4]; /* 8-11: Length of data in bytes */
-                                    /* 12-: Variable length data follows */
+  uint8_t                   magic[4];  /* 0-3: Magic number for valid data */
+  uint8_t                   crc[4];    /* 4-7: CRC32 */
+  uint8_t                   datlen[4]; /* 8-11: Length of data in bytes */
+                                       /* 12-: Variable length data follows */
 };
 #define SIZEOF_NXFFS_DATA_HDR 12
 
@@ -222,29 +222,12 @@ struct nxffs_data_s
 
 struct nxffs_entry_s
 {
-  off_t                  hoffset;   /* Offset to the inode on the media */
-  off_t                  doffset;   /* Offset to the data on the media */
-  FAR char              *name;      /* inode name */
-  uint32_t               utc;       /* Time stamp */
-  uint32_t               datlen;    /* Length of inode data */
-};
-
-/* This structure represents the overall state of on NXFFS instance. */
-
-struct nxffs_volume_s
-{
-  FAR struct mtd_dev_s  *mtd;       /* Supports FLASH access */
-  sem_t                  exclsem;   /* Used to assure thread-safe access */
-  struct mtd_geometry_s  geo;       /* Device geometry */
-  uint8_t                wrbusy: 1; /* 1: Volume open for writing */
-  uint8_t                blkper;    /* R/W blocks per erase block */
-  uint8_t                ncached;   /* Number of blocks in cache */
-  uint16_t               iooffset;  /* Next offset in read/write access (in ioblock) */
-  off_t                  inoffset;  /* Offset to the first valid inode header */
-  off_t                  froffset;  /* Offset to the first free byte */
-  off_t                  ioblock;   /* Current block number being accessed */
-  off_t                  cblock;    /* Starting block number in cache */
-  FAR uint8_t           *cache;     /* Allocated erase block */
+  off_t                     hoffset;   /* FLASH offset to the inode header */
+  off_t                     noffset;   /* FLASH offset to the inode name */
+  off_t                     doffset;   /* FLASH offset to the first data header */
+  FAR char                 *name;      /* inode name */
+  uint32_t                  utc;       /* Time stamp */
+  uint32_t                  datlen;    /* Length of inode data */
 };
 
 /* This structure describes the state of one open file.  This structure
@@ -253,10 +236,10 @@ struct nxffs_volume_s
 
 struct nxffs_ofile_s
 {
-  struct nxffs_ofile_s  *flink;     /* Supports a singly linked list */
-  int16_t                crefs;     /* Reference count */
-  mode_t                 mode;      /* Open mode */
-  struct nxffs_entry_s   entry;     /* Describes the NXFFS inode entry */
+  struct nxffs_ofile_s     *flink;     /* Supports a singly linked list */
+  int16_t                   crefs;     /* Reference count */
+  mode_t                    mode;      /* Open mode */
+  struct nxffs_entry_s      entry;     /* Describes the NXFFS inode entry */
 };
 
 /* A file opened for writing require some additional information */
@@ -265,7 +248,7 @@ struct nxffs_wrfile_s
 {
   /* The following fields provide the common open file information. */
 
-  struct nxffs_ofile_s   ofile;
+  struct nxffs_ofile_s      ofile;
 
   /* The following fields are required to support the current write
    * operation.  Note that the size of the current block can be determined
@@ -279,24 +262,46 @@ struct nxffs_wrfile_s
    * 5. If the end of the FLASH block is encountered, the data block CRC is
    *    calculated and the block header is also written to flash.
    * 6. When the file is closed, the final, partial data block is written to
-   *    FLASH in the same way.  The final file size is determined, the header
+   *    FLASH in the same way. Any previously identified file with the same
+   *    name is deleted.  The final file size is determined, the header
    *    CRC is calculated, and the inode header is written to FLASH, completing
    *    the write operation.
    */
 
-  uint16_t              wrlen;      /* Number of bytes written in data block */
-  off_t                 dathdr;     /* FLASH offset to the current data header */
+  bool                      truncate;   /* Delete a file of the same name */
+  uint16_t                  wrlen;      /* Number of bytes written in data block */
+  off_t                     dathdr;     /* FLASH offset to the current data header */
+};
+
+/* This structure represents the overall state of on NXFFS instance. */
+
+struct nxffs_volume_s
+{
+  FAR struct mtd_dev_s     *mtd;       /* Supports FLASH access */
+  sem_t                     exclsem;   /* Used to assure thread-safe access */
+  struct mtd_geometry_s     geo;       /* Device geometry */
+  uint8_t                   wrbusy: 1; /* 1: Volume open for writing */
+  uint8_t                   blkper;    /* R/W blocks per erase block */
+  uint8_t                   ncached;   /* Number of blocks in cache */
+  uint16_t                  iooffset;  /* Next offset in read/write access (in ioblock) */
+  off_t                     inoffset;  /* Offset to the first valid inode header */
+  off_t                     froffset;  /* Offset to the first free byte */
+  off_t                     nblocks;   /* Number of R/W blocks on volume */
+  off_t                     ioblock;   /* Current block number being accessed */
+  off_t                     cblock;    /* Starting block number in cache */
+  FAR struct nxffs_ofile_s *ofiles;    /* A singly-linked list of open files */
+  FAR uint8_t              *cache;     /* Allocated erase block */
 };
 
 /* This structure describes the state of the blocks on the NXFFS volume */
 
 struct nxffs_blkstats_s
 {
-  off_t                 nblocks;    /* Total number of FLASH blocks */
-  off_t                 ngood;      /* Number of good FLASH blocks found */
-  off_t                 nbad;       /* Number of well-formatted FLASH blocks marked as bad */
-  off_t                 nunformat;  /* Number of unformatted FLASH blocks */
-  off_t                 ncorrupt;   /* Number of blocks with correupted format info */
+  off_t                     nblocks;    /* Total number of FLASH blocks */
+  off_t                     ngood;      /* Number of good FLASH blocks found */
+  off_t                     nbad;       /* Number of well-formatted FLASH blocks marked as bad */
+  off_t                     nunformat;  /* Number of unformatted FLASH blocks */
+  off_t                     ncorrupt;   /* Number of blocks with correupted format info */
 };
 
 /****************************************************************************
@@ -327,10 +332,6 @@ extern const uint8_t g_datamagic[NXFFS_MAGICSIZE];
 extern struct nxffs_volume_s g_volume;
 #endif
 
-/* A singly-linked list of open files */
-
-extern struct nxffs_ofile_s *g_ofiles;
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -345,10 +346,11 @@ extern struct nxffs_ofile_s *g_ofiles;
  *
  *   The first, lower limit must be recalculated: (1) initially, (2)
  *   whenever the first inode is deleted, or (3) whenever inode is moved
- *   as part of the clean-up operation.
+ *   as part of the file system packing operation.
  *
  *   The second, upper limit must be (1) incremented whenever new file
- *   data is written, or (2) recalculated as part of the clean-up operation.
+ *   data is written, or (2) recalculated as part of the file system packing
+ *   operation.
  *
  * Input Parameters:
  *   volume - Identifies the NXFFS volume
@@ -379,7 +381,24 @@ extern int nxffs_limits(FAR struct nxffs_volume_s *volume);
  *
  ****************************************************************************/
 
-extern uint16_t nxffs_rdle16(const uint8_t *val);
+extern uint16_t nxffs_rdle16(FAR const uint8_t *val);
+
+/****************************************************************************
+ * Name: nxffs_wrle16
+ *
+ * Description:
+ *   Put a (possibly unaligned) 16-bit little endian value.
+ *
+ * Input Parameters:
+ *   dest - A pointer to the first byte to save the little endian value.
+ *   val - The 16-bit value to be saved.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+extern void nxffs_wrle16(uint8_t *dest, uint16_t val);
 
 /****************************************************************************
  * Name: nxffs_rdle32
@@ -397,7 +416,43 @@ extern uint16_t nxffs_rdle16(const uint8_t *val);
  *
  ****************************************************************************/
 
-extern uint32_t nxffs_rdle32(const uint8_t *val);
+extern uint32_t nxffs_rdle32(FAR const uint8_t *val);
+
+/****************************************************************************
+ * Name: nxffs_wrle32
+ *
+ * Description:
+ *   Put a (possibly unaligned) 32-bit little endian value.
+ *
+ * Input Parameters:
+ *   dest - A pointer to the first byte to save the little endian value.
+ *   val - The 32-bit value to be saved.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+extern void nxffs_wrle32(uint8_t *dest, uint32_t val);
+
+/****************************************************************************
+ * Name: nxffs_erased
+ *
+ * Description:
+ *   Check if the block of memory if in the erased state.
+ *
+ * Input Parameters:
+ *   buffer - Address of the start of the memory to check.
+ *   buflen - The number of bytes to check.
+ *
+ * Returned Values:
+ *   true: memory is erased; false: memory is not erased
+ *
+ * Defined in nxffs_util.c
+ *
+ ****************************************************************************/
+
+extern bool nxffs_erased(FAR const uint8_t *buffer, size_t buflen);
 
 /****************************************************************************
  * Name: nxffs_rdcache
@@ -701,6 +756,7 @@ extern int nxffs_reformat(FAR struct nxffs_volume_s *volume);
  *   name is one of the opened files.
  *
  * Input Parameters:
+ *   volume - Describes the NXFFS volume.
  *   name - The name of the inode to check.
  *
  * Returned Value:
@@ -712,8 +768,115 @@ extern int nxffs_reformat(FAR struct nxffs_volume_s *volume);
  *
  ****************************************************************************/
 
-extern FAR struct nxffs_ofile_s *nxffs_findofile(FAR const char *name);
+extern FAR struct nxffs_ofile_s *nxffs_findofile(FAR struct nxffs_volume_s *volume,
+                                                 FAR const char *name);
 
+/****************************************************************************
+ * Name: nxffs_wrreserve
+ *
+ * Description:
+ *   Find a valid location for a file system object of 'size'.  A valid
+ *   location will have these properties:
+ *
+ *   1. It will lie in the free flash region.
+ *   2. It will have enough contiguous memory to hold the entire object
+ *   3. The memory at this location will be fully erased.
+ *
+ *   This function will only perform the checks of 1) and 2).  The
+ *   end-of-filesystem offset, froffset, is update past this memory which,
+ *   in effect, reserves the memory.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *   size - The size of the object to be reserved.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned indicating the nature of the failure.  Of special interest
+ *   the return error of -ENOSPC which means that the FLASH volume is
+ *   full and should be repacked.
+ *
+ *   On successful return the following are also valid:
+ *
+ *   volume->ioblock - Read/write block number of the block containing the
+ *     candidate oject position
+ *   volume->iooffset - The offset in the block to the candidate object
+ *     position.
+ *   volume->froffset - Updated offset to the first free FLASH block after
+ *     the reserved memory.
+ *
+ *
+ * Defined in nxffs_write.c
+ *
+ ****************************************************************************/
+
+extern int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size);
+
+/****************************************************************************
+ * Name: nxffs_wrverify
+ *
+ * Description:
+ *   Find a valid location for the object.  A valid location will have
+ *   these properties:
+ *
+ *   1. It will lie in the free flash region.
+ *   2. It will have enough contiguous memory to hold the entire header
+ *      (excluding the file name which may lie in the next block).
+ *   3. The memory at this location will be fully erased.
+ *
+ *   This function will only perform the check 3). On entry it assumes the
+ *   following settings (left by nxffs_wrreserve()):
+ *
+ *   volume->ioblock - Read/write block number of the block containing the
+ *     candidate oject position
+ *   volume->iooffset - The offset in the block to the candidate object
+ *     position.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *   size - The size of the object to be verifed.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned indicating the nature of the failure.  Of special interest
+ *   the return error of -ENOSPC which means that the FLASH volume is
+ *   full and should be repacked.
+ *
+ *   On successful return the following are also valid:
+ *
+ *   volume->ioblock - Read/write block number of the block containing the
+ *     verified object position
+ *   volume->iooffset - The offset in the block to the verified object
+ *     position.
+ *   volume->froffset - Updated offset to the first free FLASH block.
+ *
+ ****************************************************************************/
+
+extern int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size);
+
+/****************************************************************************
+ * Name: nxffs_wrblkhdr
+ *
+ * Description:
+ *   Write the block header information.  This is done (1) whenever the end-
+ *   block is encountered and (2) also when the file is closed in order to
+ *   flush the final block of data to FLASH.
+ *
+ * Input Parameters:
+ *   volume - Describes the state of the NXFFS volume
+ *   wrfile - Describes the state of the open file
+ *
+ * Returned Value:
+ *   Zero is returned on success; Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ * Defined in nxffs_write.c
+ *
+ ****************************************************************************/
+
+extern int nxffs_wrblkhdr(FAR struct nxffs_volume_s *volume,
+                          FAR struct nxffs_wrfile_s *wrfile);
+                               
 /****************************************************************************
  * Name: nxffs_rminode
  *
@@ -732,6 +895,24 @@ extern FAR struct nxffs_ofile_s *nxffs_findofile(FAR const char *name);
  ****************************************************************************/
 
 extern int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name);
+
+/****************************************************************************
+ * Name: nxffs_pack
+ *
+ * Description:
+ *   Pack and re-write the filesystem in order to free up memory at the end
+ *   of FLASH.
+ *
+ * Input Parameters:
+ *   volume - The volume to be packed.
+ *
+ * Returned Values:
+ *   Zero on success; Otherwise, a negated errno value is returned to
+ *   indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+extern int nxffs_pack(FAR struct nxffs_volume_s *volume);
 
 /****************************************************************************
  * Standard mountpoint operation methods

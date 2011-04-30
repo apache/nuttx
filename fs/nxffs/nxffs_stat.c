@@ -107,7 +107,7 @@ int nxffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = NXFFS_MAGIC;
   buf->f_bsize   = volume->geo.blocksize;
-  buf->f_blocks  = volume->geo.neraseblocks * volume->blkper;
+  buf->f_blocks  = volume->nblocks;
   buf->f_namelen = volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR - SIZEOF_NXFFS_INODE_HDR;
   ret            = OK;
 

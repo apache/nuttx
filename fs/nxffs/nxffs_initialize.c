@@ -206,9 +206,12 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
       goto errout_with_volume;
     }
 
-  /* Get the number of R/W blocks per erase block */
+  /* Get the number of R/W blocks per erase block and the total number o
+   * R/W blocks
+   */
 
-  volume->blkper = volume->geo.erasesize / volume->geo.blocksize;
+  volume->blkper  = volume->geo.erasesize / volume->geo.blocksize;
+  volume->nblocks = volume->geo.neraseblocks * volume->blkper;
   DEBUGASSERT((off_t)volume->blkper * volume->geo.blocksize == volume->geo.erasesize);
 
   /* Check if there is a valid NXFFS file system on the flash */
@@ -274,10 +277,11 @@ errout_with_volume:
  *
  *   The first, lower limit must be recalculated: (1) initially, (2)
  *   whenever the first inode is deleted, or (3) whenever inode is moved
- *   as part of the clean-up operation.
+ *   as part of the file system packing operation.
  *
  *   The second, upper limit must be (1) incremented whenever new file
- *   data is written, or (2) recalculated as part of the clean-up operation.
+ *   data is written, or (2) recalculated as part of the file system packing
+ *   operation.
  *
  * Input Parameters:
  *   volume - Identifies the NXFFS volume
@@ -477,5 +481,9 @@ int nxffs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
 int nxffs_unbind(FAR void *handle, FAR struct inode **blkdriver)
 {
-  return g_ofiles ? -EBUSY : OK;
+#ifndef CONFIG_NXFSS_PREALLOCATED
+#  error "No design to support dynamic allocation of volumes"
+#else
+  return g_volume.ofiles ? -EBUSY : OK;
+#endif
 }

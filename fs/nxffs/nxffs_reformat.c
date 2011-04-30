@@ -148,12 +148,10 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
 static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
 {
   FAR uint8_t *blkptr;   /* Pointer to next block data */
-  FAR uint8_t *datptr;   /* Pointer to next data byte */
   off_t eblock;          /* Erase block number */
   off_t lblock;          /* Logical block number */
   ssize_t nxfrd;         /* Number of blocks transferred */
-  uint16_t blkndx;       /* Logical block data index */
-  bool bad;              /* TRUE: block is bad */
+  bool good;             /* TRUE: block is good */
   bool modified;         /* TRUE: The erase block has been modified */
   int i;
 
@@ -182,32 +180,19 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
 
           /* Check block header */
 
-          bad = false;
+          good = true;
           if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0 ||
               blkhdr->state != BLOCK_STATE_GOOD)
             {
-              bad = true;;
+              good = false;
             }
 
           /* Check that block data is erased */
 
           else
             {
-              /* Check every byte in the block payload */
-
-              for (blkndx = SIZEOF_NXFFS_BLOCK_HDR, datptr = &blkptr[blkndx];
-                   blkndx < volume->geo.blocksize;
-                   blkndx++)
-                {
-                  /* If the data byte is not in the erased state, then the block is bad */
-
-                  uint8_t byte = *datptr++;
-                  if (byte != CONFIG_NXFFS_ERASEDSTATE)
-                    {
-                      bad = true;
-                      break;
-                    }
-                }
+              good = nxffs_erased(&blkptr[SIZEOF_NXFFS_BLOCK_HDR],
+                                  volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR);
             }
 
           /* If the block is bad, attempt to re-write the block header indicating
@@ -215,7 +200,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
            * possible, depending upon failure modes.
            */
 
-          if (bad)
+          if (!good)
             {
               memcpy(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE);
               blkhdr->state = BLOCK_STATE_BAD;

@@ -97,7 +97,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
 
   /* Check if the file is open */
 
-  ofile = nxffs_findofile(name);
+  ofile = nxffs_findofile(volume, name);
   if (ofile)
     {
       /* We can't remove the inode if it is open */

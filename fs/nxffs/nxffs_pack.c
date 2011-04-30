@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/nxffs/nxffs_util.c
+ * fs/nxffs/nxffs_pack.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,7 +41,7 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
+#include <errno.h>
 
 #include "nxffs.h"
 
@@ -66,113 +66,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxffs_rdle16
+ * Name: nxffs_pack
  *
  * Description:
- *   Get a (possibly unaligned) 16-bit little endian value.
+ *   Pack and re-write the filesystem in order to free up memory at the end
+ *   of FLASH.
  *
  * Input Parameters:
- *   val - A pointer to the first byte of the little endian value.
- *
- * Returned Value:
- *   A uint16_t representing the whole 16-bit integer value
- *
- ****************************************************************************/
-
-uint16_t nxffs_rdle16(FAR const uint8_t *val)
-{
-  return (uint16_t)val[1] << 8 | (uint16_t)val[0];
-}
-
-/****************************************************************************
- * Name: nxffs_wrle16
- *
- * Description:
- *   Put a (possibly unaligned) 16-bit little endian value.
- *
- * Input Parameters:
- *   dest - A pointer to the first byte to save the little endian value.
- *   val - The 16-bit value to be saved.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void nxffs_wrle16(uint8_t *dest, uint16_t val)
-{
-  dest[0] = val & 0xff; /* Little endian means LS byte first in byte stream */
-  dest[1] = val >> 8;
-}
-
-/****************************************************************************
- * Name: nxffs_rdle32
- *
- * Description:
- *   Get a (possibly unaligned) 32-bit little endian value.
- *
- * Input Parameters:
- *   val - A pointer to the first byte of the little endian value.
- *
- * Returned Value:
- *   A uint32_t representing the whole 32-bit integer value
- *
- ****************************************************************************/
-
-uint32_t nxffs_rdle32(FAR const uint8_t *val)
-{
- /* Little endian means LS halfword first in byte stream */
-
-  return (uint32_t)nxffs_rdle16(&val[2]) << 16 | (uint32_t)nxffs_rdle16(val);
-}
-
-/****************************************************************************
- * Name: nxffs_wrle32
- *
- * Description:
- *   Put a (possibly unaligned) 32-bit little endian value.
- *
- * Input Parameters:
- *   dest - A pointer to the first byte to save the little endian value.
- *   val - The 32-bit value to be saved.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void nxffs_wrle32(uint8_t *dest, uint32_t val)
-{
-  /* Little endian means LS halfword first in byte stream */
-
-  nxffs_wrle16(dest, (uint16_t)(val & 0xffff));
-  nxffs_wrle16(dest+2, (uint16_t)(val >> 16));
-}
-
-/****************************************************************************
- * Name: nxffs_erased
- *
- * Description:
- *   Check if the block of memory if in the erased state.
- *
- * Input Parameters:
- *   buffer - Address of the start of the memory to check.
- *   buflen - The number of bytes to check.
+ *   volume - The volume to be packed.
  *
  * Returned Values:
- *   true: memory is erased; false: memory is not erased
+ *   Zero on success; Otherwise, a negated errno value is returned to
+ *   indicate the nature of the failure.
  *
  ****************************************************************************/
 
-bool nxffs_erased(FAR const uint8_t *buffer, size_t buflen)
+int nxffs_pack(FAR struct nxffs_volume_s *volume)
 {
-  for (; buflen; buflen--)
-    {
-      if (*buffer != CONFIG_NXFFS_ERASEDSTATE)
-        {
-          return false;
-        }
-      buffer++;
-    }
-  return true;
+# warning "Missing logic"
+  return -ENOSYS;
 }

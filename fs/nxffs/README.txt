@@ -6,7 +6,7 @@ actual relationship is determined by the FLASH geometry reported by the MTD
 driver.
 
 ERASE LOGICAL                   Inodes begin with a inode header.  inode may
-BLOCK BLOCK       CONTENTS      be marked as "deleted," pending clean-up.
+BLOCK BLOCK       CONTENTS      be marked as "deleted," pending re-packing.
   n   4*n     --+--------------+
                 |BBBBBBBBBBBBBB| Logic block header
                 |IIIIIIIIIIIIII| Inodes begin with a inode header
@@ -42,7 +42,7 @@ General operation
   supporting wear leveling by using all FLASH blocks equally.
 
   When the FLASH becomes full (no more space at the end of the FLASH), a
-  clean-up operation must be performed:  All inodes marked deleted are
+  re-packing operation must be performed:  All inodes marked deleted are
   finally removed and the remaining inodes are packed at the beginning of
   the FLASH.  Allocations then continue at the freed FLASH memory at the
   end of the FLASH.
@@ -89,7 +89,7 @@ that you should be aware before opting to use NXFFS:
 5. Files may be opened for reading or for writing, but not both: The O_RDWR
    open flag is not supported.
 
-6. The clean-up process occurs only during a write when the free FLASH
+6. The re-packing process occurs only during a write when the free FLASH
    memory at the end of the FLASH is exhausted.  Thus, occasionally, file
    writing may take a long time.
 
