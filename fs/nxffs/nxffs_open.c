@@ -820,7 +820,7 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
     {
       /* Write the block with the inode header */
 
-      ret = nxffs_wrcache(volume, volume->ioblock, 1);
+      ret = nxffs_wrcache(volume);
       if (ret < 0)
         {
           fdbg("Failed to write inode header block %d: %d\n", volume->ioblock, -ret);
@@ -842,7 +842,7 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
   /* Finally, copy the inode name to the cache and write the inode name block */
 
   memcpy(&volume->cache[namoffset], wrfile->ofile.entry.name, namlen);
-  ret = nxffs_wrcache(volume, volume->ioblock, 1);
+  ret = nxffs_wrcache(volume);
   if (ret < 0)
     {
       fdbg("Failed to write inode header block %d: %d\n", volume->ioblock, -ret);

@@ -403,7 +403,7 @@ static inline ssize_t nxffs_wrappend(FAR struct nxffs_volume_s *volume,
  
       if (nbytesleft > 0)
         {
-          ret = nxffs_wrcache(volume, volume->ioblock, 1);
+          ret = nxffs_wrcache(volume);
           if (ret < 0)
             {
               fdbg("nxffs_wrcache failed: %d\n", -ret);
@@ -811,7 +811,7 @@ int nxffs_wrblkhdr(FAR struct nxffs_volume_s *volume,
 
   /* And write the data block to FLASH */
 
-  ret = nxffs_wrcache(volume, volume->ioblock, 1);
+  ret = nxffs_wrcache(volume);
   if (ret < 0)
     {
       fdbg("nxffs_wrcache failed: %d\n", -ret);

@@ -496,19 +496,15 @@ extern int nxffs_rdcache(FAR struct nxffs_volume_s *volume, off_t block,
  *
  * Input Parameters:
  *   volume - Describes the current volume
- *   block  - The first logical block to write
- *   nblocks - The number of logical blocks to be write.
  *
  * Returned Value:
  *   Negated errnos are returned only in the case of MTD reported failures.
- *   Nothing in the volume data itself will generate errors.
  *
  * Defined in nxffs_cache.c
  *
  ****************************************************************************/
 
-extern int nxffs_wrcache(FAR struct nxffs_volume_s *volume, off_t block,
-                         uint8_t nblocks);
+extern int nxffs_wrcache(FAR struct nxffs_volume_s *volume);
 
 /****************************************************************************
  * Name: nxffs_ioseek
@@ -593,29 +589,6 @@ extern int nxffs_getc(FAR struct nxffs_volume_s *volume);
 
 extern ssize_t nxffs_rddata(FAR struct nxffs_volume_s *volume,
                             FAR uint8_t *buffer, size_t buflen);
-
-/****************************************************************************
- * Name: nxffs_wrdata
- *
- * Description:
- *   Write a sequence of data bytes into volume cache memory.  Nothing is
- *   actually written to FLASH!  This function allows the data in the formatted
- *   FLASH blocks to be read as a continuous byte stream, skipping over bad 
- *   blocks and block headers as necessary.
- *
- * Input Parameters:
- *   volume - Describes the NXFFS volume.
- *   buffer - A pointer to memory to containing the data to write to FLASH.
- *   buflen - The maximum number of bytes to write to FLASH.
- *
- * Returned Value:
- *   The number of bytes written is returned on success.  Otherwise, a negated
- *   errno indicating the nature of the failure.
- *
- ****************************************************************************/
-
-extern ssize_t nxffs_wrdata(FAR struct nxffs_volume_s *volume,
-                            FAR const uint8_t *buffer, size_t buflen);
 
 /****************************************************************************
  * Name: nxffs_freeentry

@@ -137,7 +137,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
 
   /* Then write the cached block back to FLASH */
 
-  ret = nxffs_wrcache(volume, volume->ioblock, 1);
+  ret = nxffs_wrcache(volume);
   if (ret < 0)
     {
       fdbg("Failed to read data into cache: %d\n", ret);
