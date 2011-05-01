@@ -783,13 +783,18 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
   int namlen;
   int ret;
 
-  /* Write the final file block header */
+  /* Is there an unfinalized write data? */
 
-  ret = nxffs_wrblkhdr(volume, wrfile);
-  if (ret < 0)
+  if (wrfile->datlen > 0)
     {
-      fdbg("Failed to write the final block of the file: %d\n", -ret);
-      goto errout;
+      /* Yes.. Write the final file block header */
+
+      ret = nxffs_wrblkhdr(volume, wrfile);
+      if (ret < 0)
+        {
+          fdbg("Failed to write the final block of the file: %d\n", -ret);
+          goto errout;
+        }
     }
 
   if (wrfile->truncate && wrfile->ofile.entry.name)
@@ -832,16 +837,16 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
   /* Initialize the inode header */
 
   inode = (FAR struct nxffs_inode_s *)&volume->cache[volume->iooffset];
-  memcmp(inode->magic, g_inodemagic, NXFFS_MAGICSIZE);
+  memcpy(inode->magic, g_inodemagic, NXFFS_MAGICSIZE);
 
   inode->state  = CONFIG_NXFFS_ERASEDSTATE;
   inode->namlen = namlen;
 
-  nxffs_wrle32(inode->noffs, wrfile->ofile.entry.noffset);
-  nxffs_wrle32(inode->doffs, wrfile->ofile.entry.doffset);
-  nxffs_wrle32(inode->utc,   wrfile->ofile.entry.utc);
-  nxffs_wrle32(inode->crc,   0);
-  nxffs_wrle32(inode->noffs, wrfile->ofile.entry.datlen);
+  nxffs_wrle32(inode->noffs,  wrfile->ofile.entry.noffset);
+  nxffs_wrle32(inode->doffs,  wrfile->ofile.entry.doffset);
+  nxffs_wrle32(inode->utc,    wrfile->ofile.entry.utc);
+  nxffs_wrle32(inode->crc,    0);
+  nxffs_wrle32(inode->datlen, wrfile->ofile.entry.datlen);
 
   /* Calculate the CRC */
 
@@ -850,7 +855,7 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
 
   /* Finish the inode header */
 
-  inode->state  = INODE_STATE_FILE;
+  inode->state = INODE_STATE_FILE;
   nxffs_wrle32(inode->crc, crc);
 
   /* Are the inode header and the inode name in the same block?  Normally,

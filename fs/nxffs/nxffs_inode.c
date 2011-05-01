@@ -133,10 +133,11 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
 
   /* Allocate memory to hold the variable-length file name */
 
-  entry->name = (FAR char *)kmalloc(inode.namlen + 1);
+  namlen = inode.namlen;
+  entry->name = (FAR char *)kmalloc(namlen + 1);
   if (!entry->name)
     {
-      fdbg("Failed to allocate name, namlen: %d\n", inode.namlen);
+      fdbg("Failed to allocate name, namlen: %d\n", namlen);
       return -ENOMEM;
     }
   
@@ -281,6 +282,12 @@ int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
 
           else 
             {
+              /* The the FLASH offset where we found the matching magic number */
+
+              offset = nxffs_iotell(volume) - NXFFS_MAGICSIZE;
+
+              /* Try to extract the inode header from that position */
+
               ret = nxffs_rdentry(volume, offset, entry);
               if (ret == OK)
                 {
@@ -351,7 +358,7 @@ int nxffs_findinode(FAR struct nxffs_volume_s *volume, FAR const char *name,
 
       else if (strcmp(name, entry->name) == 0)
         {
-          /* Yes, return success with the entry data in 'enty' */
+          /* Yes, return success with the entry data in 'entry' */
 
           return OK;
         }

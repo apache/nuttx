@@ -127,7 +127,7 @@ static int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
 
   ecrc = nxffs_rdle32(blkhdr.crc);
 
-  nxffs_wrle16(blkhdr.crc, 0);
+  nxffs_wrle32(blkhdr.crc, 0);
   crc = crc32((FAR const uint8_t *)&blkhdr, SIZEOF_NXFFS_DATA_HDR);
   crc = crc32part(&volume->cache[doffset], dlen, crc);
   if (crc != ecrc)

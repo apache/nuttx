@@ -44,6 +44,7 @@
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
+#include <crc32.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/ioctl.h>
@@ -59,6 +60,15 @@
  * Private Types
  ****************************************************************************/
 
+struct nxffs_blkinfo_s
+{
+  struct mtd_geometry_s geo;
+  FAR uint8_t *buffer;
+  off_t nblocks;
+  off_t block;
+  off_t offset;
+};
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -66,6 +76,195 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxffs_analyzeinode
+ *
+ * Description:
+ *   Analyze one candidate inode found in the block.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
+static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
+                                         int offset)
+{
+  FAR struct nxffs_inode_s inode;
+  off_t nextblock;
+  uint8_t  state;
+  uint32_t noffs;
+  uint32_t doffs;
+  uint32_t utc;
+  uint32_t ecrc;
+  uint32_t datlen;
+  uint32_t crc;
+  size_t   spaceleft;
+
+  /* Verify that there is space for an inode header remaining in the block */
+
+  if (offset + SIZEOF_NXFFS_INODE_HDR > blkinfo->geo.blocksize)
+    {
+      /* No.. then this can't be an inode header */
+
+      return ERROR;
+    }
+
+  /* Unpack the header */
+
+  memcpy(&inode, &blkinfo->buffer[offset], SIZEOF_NXFFS_INODE_HDR);
+  noffs  = nxffs_rdle32(inode.noffs);
+  doffs  = nxffs_rdle32(inode.doffs);
+  utc    = nxffs_rdle32(inode.utc);
+  ecrc   = nxffs_rdle32(inode.crc);
+  datlen = nxffs_rdle32(inode.datlen);
+
+  /* Misc. sanity checks */
+
+  if (noffs < blkinfo->offset + offset + SIZEOF_NXFFS_BLOCK_HDR)
+    {
+      /* The name begins before the inode header.  This can't can't be
+       * a real inode header (or it is a corrupted one).
+       */
+
+      return ERROR;
+    }
+  
+
+  /* Can we verify the inode?  We need to have the inode name in the same
+   * block to do that (or get access to the next block)
+   */
+
+  if (doffs < blkinfo->offset + offset + SIZEOF_NXFFS_BLOCK_HDR)
+    {
+      /* The first data block begins before the inode header.  This can't can't
+       * be a real inode header (or it is a corrupted one).
+       */
+
+      return ERROR;
+    }
+
+   spaceleft = (blkinfo->nblocks - blkinfo->block) * blkinfo->geo.blocksize;
+   spaceleft -= (offset + SIZEOF_NXFFS_BLOCK_HDR);
+   if (datlen > spaceleft)
+     {
+       /* The data length is greater than what would fit in the rest of FLASH
+        * (even ignoring block and data header sizes.
+        */
+
+       return ERROR;
+     }
+
+  /* The name begins after the inode header.  Does it begin in this block? */
+
+  nextblock = blkinfo->offset + blkinfo->geo.blocksize;
+  if (noffs > nextblock)
+    {
+      /* Not than we cannot verify the inode header */
+
+      fdbg("  Block %d:%d: Unverifiable inode, datlen: %d\n",
+           blkinfo->block, offset, datlen);
+      return ERROR;
+    }
+
+  /* The name begins in this block.  Does it also end in this block? */
+
+  if (noffs + inode.namlen > nextblock)
+    {
+      /* No..  Assume that this is not an inode. */
+
+       return ERROR;
+    }
+
+  /* Calculate the CRC */
+
+  state       = inode.state;
+  inode.state = CONFIG_NXFFS_ERASEDSTATE;
+  nxffs_wrle32(inode.crc, 0);
+
+  crc = crc32((FAR const uint8_t *)&inode, SIZEOF_NXFFS_INODE_HDR);
+  crc = crc32part(&blkinfo->buffer[noffs - blkinfo->offset], inode.namlen, crc);
+
+  if (crc != ecrc)
+   {
+      fdbg("  Block %d:%d: Potential inode with bad CRC, datlen: %d\n",
+           blkinfo->block, offset, datlen);
+      return ERROR;
+   }
+
+  /* If must be a good header */
+
+  if (state = INODE_STATE_FILE)
+    {
+      fdbg("  Block %d:%d: Verified FILE inode, datlen: %d\n",
+           blkinfo->block, offset, datlen);
+    }
+  else if (state = INODE_STATE_DELETED)
+    {
+      fdbg("  Block %d:%d: Verified DELETED inode, datlen: %d\n",
+           blkinfo->block, offset, datlen);
+    }
+  else
+    {
+      fdbg("  Block %d:%d: Verified inode with CORRUPTED state, datlen: %d\n",
+           blkinfo->block, offset, datlen);
+    }
+  return noffs + inode.namlen - offset;
+}
+#endif
+
+/****************************************************************************
+ * Name: nxffs_analyzedata
+ *
+ * Description:
+ *   Analyze one candidate inode found in the block.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
+static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
+                                        int offset)
+{
+  struct nxffs_data_s dathdr;
+  uint32_t ecrc;
+  uint16_t datlen;
+  uint32_t crc;
+
+  /* Copy and unpack the data block header */
+
+  memcpy(&dathdr, &blkinfo->buffer[offset], SIZEOF_NXFFS_DATA_HDR);
+  ecrc   = nxffs_rdle32(dathdr.crc);
+  datlen = nxffs_rdle16(dathdr.datlen);
+
+  /* Sanity checks */
+
+  if (offset + SIZEOF_NXFFS_DATA_HDR + datlen > blkinfo->geo.blocksize)
+    {
+      /* Data does not fit in within the block, this can't be a data block */
+
+      return ERROR;
+    }
+
+  /* Calculate the CRC */
+
+  nxffs_wrle32(dathdr.crc, 0);
+
+  crc = crc32((FAR const uint8_t *)&dathdr, SIZEOF_NXFFS_DATA_HDR);
+  crc = crc32part(&blkinfo->buffer[blkinfo->offset + SIZEOF_NXFFS_DATA_HDR], datlen, crc);
+
+  if (crc != ecrc)
+   {
+      fdbg("  Block %d:%d: Potential data block with bad CRC, datlen: %d\n",
+           blkinfo->block, offset, datlen);
+      return ERROR;
+   }
+
+  /* If must be a good header */
+
+  fdbg("  Block %d:%d: Verified data block, datlen: %d\n",
+       blkinfo->block, offset, datlen);
+  return SIZEOF_NXFFS_DATA_HDR + datlen;
+}
+#endif
 
 /****************************************************************************
  * Name: nxffs_analyze
@@ -76,29 +275,78 @@
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
-static inline void nxffs_analyze(FAR uint8_t *buffer, size_t buflen, off_t blockno)
+static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
 {
   FAR struct nxffs_block_s *blkhdr;
+  ssize_t nbytes;
+  int hdrndx;
+  int datndx;
+  int inndx;
+  int nerased;
+  int i;
 
   /* Verify that there is a header on the block */
 
-  blkhdr = (FAR struct nxffs_block_s *)buffer;
+  blkhdr = (FAR struct nxffs_block_s *)blkinfo->buffer;
   if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0)
     {
-      fdbg("Block %d: ERROR -- no header\n", blockno);
-    }
-  else if (blkhdr->state == BLOCK_STATE_GOOD)
-    {
-      fdbg("Block %d: GOOD\n", blockno);
+      fdbg("  Block %d:0: ERROR -- no header\n", blkinfo->block);
     }
   else if (blkhdr->state == BLOCK_STATE_BAD)
     {
-      fdbg("Block %d: BAD\n", blockno);
+      fdbg("  Block %d:0: BAD\n", blkinfo->block);
     }
-  else
+  else if (blkhdr->state != BLOCK_STATE_GOOD)
     {
-      fdbg("Block %d: ERROR -- bad state\n", blockno);
+      fdbg("  Block %d:0: ERROR -- bad state\n", blkinfo->block);
     }
+
+  /* Serach for Inode and data block headers.  */
+
+  inndx = 0;
+  datndx = 0;
+
+  for (i = SIZEOF_NXFFS_BLOCK_HDR; i < blkinfo->geo.blocksize; i++)
+    {
+      uint8_t ch = blkinfo->buffer[i];
+
+      if (ch == CONFIG_NXFFS_ERASEDSTATE)
+        {
+          nerased++;
+        }
+      else if (ch == g_inodemagic[inndx])
+        {
+          inndx++;
+          datndx = 0;
+
+          if (inndx == NXFFS_MAGICSIZE)
+            {
+              hdrndx = i - NXFFS_MAGICSIZE + 1;
+              nbytes = nxffs_analyzeinode(blkinfo, hdrndx);
+              if (nbytes > 0)
+                {
+                  i = hdrndx + nbytes;
+                }
+            }
+        }
+      else if (ch == g_datamagic[datndx])
+        {
+          datndx++;
+          inndx = 0;
+
+          if (datndx == NXFFS_MAGICSIZE)
+            {
+              hdrndx = i - NXFFS_MAGICSIZE + 1;
+              nbytes = nxffs_analyzedata(blkinfo, hdrndx);
+              nbytes = nxffs_analyzeinode(blkinfo, hdrndx);
+              if (nbytes > 0)
+                {
+                  i = hdrndx + nbytes;
+                }
+            }
+        }
+    }
+
 }
 #endif
 
@@ -125,10 +373,7 @@ static inline void nxffs_analyze(FAR uint8_t *buffer, size_t buflen, off_t block
 int nxffs_dump(FAR struct mtd_dev_s *mtd)
 {
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
-  struct mtd_geometry_s geo;
-  FAR uint8_t *buffer;
-  off_t nblocks;
-  off_t block;
+  struct nxffs_blkinfo_s blkinfo;
   int ret;
 
   /* Get the volume geometry. (casting to uintptr_t first eliminates
@@ -136,7 +381,8 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd)
    * from the size of a pointer).
    */
 
-  ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
+  memset(&blkinfo, 0, sizeof(struct nxffs_blkinfo_s));
+  ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&blkinfo.geo));
   if (ret < 0)
     {
       fdbg("MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", -ret);
@@ -145,8 +391,8 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd)
 
   /* Allocate a buffer to hold one block */
 
-  buffer = (FAR uint8_t *)kmalloc(geo.blocksize);
-  if (!buffer)
+  blkinfo.buffer = (FAR uint8_t *)kmalloc(blkinfo.geo.blocksize);
+  if (!blkinfo.buffer)
     {
       fdbg("Failed to allocate block cache\n");
       ret = -ENOMEM;
@@ -155,25 +401,30 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd)
 
   /* Now read every block on the device */
 
-  nblocks = geo.erasesize * geo.neraseblocks / geo.blocksize;
-  for (block = 0; block < nblocks; block++)
+  fdbg("NXFFS Dump:\n");
+  blkinfo.nblocks = blkinfo.geo.erasesize * blkinfo.geo.neraseblocks / blkinfo.geo.blocksize;
+
+  for (blkinfo.block = 0, blkinfo.offset = 0;
+       blkinfo.block < blkinfo.nblocks;
+       blkinfo.block++, blkinfo.offset += blkinfo.geo.blocksize)
     {
       /* Read the next block */
 
-      ret = MTD_BREAD(mtd, block, 1, buffer);
+      ret = MTD_BREAD(mtd, blkinfo.block, 1, blkinfo.buffer);
       if (ret < 0)
         {
-          fdbg("Failed to read block %d\n", block);
+          fdbg("Failed to read block %d\n", blkinfo.block);
           goto errout_with_block;
         }
 
       /* Analyze the block */
 
-      nxffs_analyze(buffer, geo.blocksize, block);
+      nxffs_analyze(&blkinfo);
     }
+  fdbg("%d blocks analyzed\n", blkinfo.nblocks);
 
 errout_with_block:
-  kfree(buffer);
+  kfree(blkinfo.buffer);
 errout:
   return ret;
 
