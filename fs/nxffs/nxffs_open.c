@@ -340,11 +340,25 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
    * in FLASH, only a single file may be extending the FLASH region.
    */
 
-  if (volume->wrbusy)
+  ret = sem_wait(&volume->wrsem);
+  if (ret != OK)
     {
-      fdbg("There is already a file writer\n");
-      ret = -ENOSYS;
+      fdbg("sem_wait failed: %d\n", ret);
+      ret = -errno;
       goto errout;
+    }
+
+  /* Get exclusive access to the volume.  Note that the volume exclsem
+   * protects the open file list.  Note that exclsem is ALWAYS taken
+   * after wrsem to avoid deadlocks.
+   */
+
+  ret = sem_wait(&volume->exclsem);
+  if (ret != OK)
+    {
+      fdbg("sem_wait failed: %d\n", ret);
+      ret = -errno;
+      goto errout_with_wrsem;
     }
 
   /* Check if the file exists */
@@ -360,7 +374,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
         {
           fdbg("File exists, can't create O_EXCL\n");
           ret = -EEXIST;
-          goto errout;
+          goto errout_with_exclsem;
         }
 
       /* Were we asked to truncate the file?  NOTE: Don't truncate the
@@ -386,7 +400,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
         {
           fdbg("File %s exists and we were not asked to truncate it\n");
           ret = -ENOSYS;
-          goto errout;
+          goto errout_with_exclsem;
         }
     }
 
@@ -398,7 +412,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
     {
       fdbg("Not asked to create the file\n");
       ret = -ENOENT;
-      goto errout;
+      goto errout_with_exclsem;
     }
 
   /* Make sure that the length of the file name will fit in a uint8_t */
@@ -408,7 +422,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
     {
       fdbg("Name is too long: %d\n", namlen);
       ret = -EINVAL;
-      goto errout;
+      goto errout_with_exclsem;
     }
 
   /* Yes.. Create a new structure that will describe the state of this open
@@ -424,7 +438,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   if (!wrfile)
     {
       ret = -ENOMEM;
-      goto errout;
+      goto errout_with_exclsem;
     }
 #endif
 
@@ -563,11 +577,13 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   volume->ofiles      = &wrfile->ofile;
 
   /* Indicate that the volume is open for writing and return the open file
-   * instance.
+   * instance.  Releasing exclsem allows other readers while the write is
+   * in progress.  But wrsem is still held for this open file, preventing
+   * any further writers until this inode is closed.s
    */
 
-  volume->wrbusy = 1;
   *ppofile = &wrfile->ofile;
+  sem_post(&volume->exclsem);
   return OK;
 
 errout_with_name:
@@ -576,6 +592,11 @@ errout_with_ofile:
 #ifndef CONFIG_NXFSS_PREALLOCATED
   kfree(wrfile);
 #endif
+
+errout_with_exclsem:
+  sem_post(&volume->exclsem);
+errout_with_wrsem:
+  sem_post(&volume->wrsem);
 errout:
   return ret;
 }
@@ -595,6 +616,18 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
   FAR struct nxffs_ofile_s *ofile;
   int ret;
 
+  /* Get exclusive access to the volume.  Note that the volume exclsem
+   * protects the open file list.
+   */
+
+  ret = sem_wait(&volume->exclsem);
+  if (ret != OK)
+    {
+      fdbg("sem_wait failed: %d\n", ret);
+      ret = -errno;
+      goto errout;
+    }
+
   /* Check if the file has already been opened (for reading) */
 
   ofile = nxffs_findofile(volume, name);
@@ -607,7 +640,8 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
       if ((ofile->mode & O_WROK) != 0)
         {
           fdbg("File is open for writing\n");
-          return -ENOSYS;
+          ret = -ENOSYS;
+          goto errout_with_exclsem;
         }
 
       /* Just increment the reference count on the ofile */
@@ -629,7 +663,8 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
       if (!ofile)
         {
           fdbg("ofile allocation failed\n");
-          return -ENOMEM;
+          ret = -ENOMEM;
+          goto errout_with_exclsem;
         }
 
       /* Initialize the open file state structure */
@@ -643,8 +678,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
       if (ret != OK)
         {
           fdbg("Inode '%s' not found: %d\n", name, -ret);
-          kfree(ofile);
-          return ret;
+          goto errout_with_ofile;
         }
 
       /* Add the open file structure to the head of the list of open files */
@@ -656,7 +690,15 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
   /* Return the open file state structure */
 
   *ppofile = ofile;
+  sem_post(&volume->exclsem);
   return OK;
+
+errout_with_ofile:
+  kfree(ofile);
+errout_with_exclsem:
+  sem_post(&volume->exclsem);
+errout:
+  return ret;
 }
 
 /****************************************************************************
@@ -851,7 +893,7 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
   /* The volume is now available for other writers */
 
 errout:
-  volume->wrbusy = 0;
+  sem_post(&volume->wrsem);
   return ret;
 }
 
@@ -926,18 +968,6 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
   volume = (FAR struct nxffs_volume_s*)filep->f_inode->i_private;
   DEBUGASSERT(volume != NULL);
 
-  /* Get exclusive access to the volume.  Note that the volume exclsem
-   * protects the open file list.
-   */
-
-  ret = sem_wait(&volume->exclsem);
-  if (ret != OK)
-    {
-      ret = -errno;
-      fdbg("sem_wait failed: %d\n", ret);
-      goto errout;
-    }
-
 #ifdef CONFIG_FILE_MODE
 #  warning "Missing check for privileges based on inode->i_mode"
 #endif
@@ -949,13 +979,12 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
    * extension is supported.
    */
 
-   switch (mode & (O_WROK|O_RDOK))
+   switch (oflags & (O_WROK|O_RDOK))
      {
        case 0:
        default:
          fdbg("One of O_WRONLY/O_RDONLY must be provided\n");
-         ret = -EINVAL;
-         goto errout_with_semaphore;
+         return -EINVAL;
 
        case O_WROK:
          ret = nxffs_wropen(volume, relpath, mode, &ofile);
@@ -967,18 +996,15 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
 
        case O_WROK|O_RDOK:
          fdbg("O_RDWR is not supported\n");
-         ret = -ENOSYS;
-         goto errout_with_semaphore;
+         return -ENOSYS;
      }
 
-  /* Save open-specific state in filep->f_priv */
+  /* Save the reference to the open-specific state in filep->f_priv */
 
-  filep->f_priv = ofile;
-  ret = OK;
-
-errout_with_semaphore:
-  sem_post(&volume->exclsem);
-errout:
+  if (ret == OK)
+    {
+      filep->f_priv = ofile;
+    }
   return ret;
 }
 

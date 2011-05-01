@@ -10,6 +10,8 @@ Contents:
   General operation
   Headers
   NXFFS Limitations
+  Multiple Writers
+  Things to Do
 
 General NXFFS organization
 ==========================
@@ -111,3 +113,41 @@ that you should be aware before opting to use NXFFS:
    an MTD driver (instead of a block driver) and bypass all of the normal
    mount operations.
 
+Multiple Writers
+================
+
+As mentioned in the limitations above, there can be only one file opened
+for writing at a time.  If one thread has a file opened for writing and
+another thread attempts to open a file for writing, then that second
+thread will be blocked and will have to wait for the first thread to
+close the file.
+
+Such behavior may or may not be a problem for your application, depending
+(1) how long the first thread keeps the file open for writing and (2) how
+critical the behavior of the second thread is.  Note that writing to FLASH
+can always trigger a major FLASH reorganization and, hence, there is no
+way to guarantee the first condition: The first thread may have the file
+open for a long time even if it only intends to write a small amount.
+
+Also note that a deadlock condition would occur if the SAME thread
+attempted to open two files for writing.  The thread would would be
+blocked waiting for itself to close the first file.
+
+Things to Do
+============
+
+- The implementation is not yet finished.  It needs at, a minimum,
+  completion of the file system packing logic.  It is not usuable without
+  that feature.
+- The statfs() implementation is minimal.  It whould have some calcuation
+  of the f_bfree, f_bavail, f_files, f_ffree return values.
+- There are too many allocs and frees.  More structures may need to be
+  pre-allocated.
+- The file name is always extracted and held in allocated, variable-length
+  memory.  The file name is not used during reading and eliminating the
+  file name in the entry structure would improve performance.
+- There is a big inefficient in reading.  On each read, the logic searches
+  for the read position from the beginning of the file each time.  This
+  may be necessary whenever an lseek() is done, but not in general.  Read
+  performance could be improved by keeping FLASH offset and read positional
+  information in the read open file structure.

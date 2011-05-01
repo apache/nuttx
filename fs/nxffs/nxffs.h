@@ -259,21 +259,7 @@ struct nxffs_wrfile_s
 
   struct nxffs_ofile_s      ofile;
 
-  /* The following fields are required to support the current write
-   * operation.
-   *
-   * 1. Inode header location determined (but not yet written).
-   * 2. Block header location determined (but not yet written).
-   * 3. Check FLASH memory to make sure that it is erased.
-   * 4. As data is written, datlen is updated and the data is written to FLASH.
-   * 5. If the end of the FLASH block is encountered, the data block CRC is
-   *    calculated and the block header is also written to flash.
-   * 6. When the file is closed, the final, partial data block is written to
-   *    FLASH in the same way. Any previously identified file with the same
-   *    name is deleted.  The final file size is determined, the header
-   *    CRC is calculated, and the inode header is written to FLASH, completing
-   *    the write operation.
-   */
+  /* The following fields are required to support the write operation */
 
   bool                      truncate;   /* Delete a file of the same name */
   uint16_t                  datlen;     /* Number of bytes written in data block */
@@ -287,8 +273,8 @@ struct nxffs_volume_s
 {
   FAR struct mtd_dev_s     *mtd;       /* Supports FLASH access */
   sem_t                     exclsem;   /* Used to assure thread-safe access */
+  sem_t                     wrsem;     /* Enforces single writer restriction */
   struct mtd_geometry_s     geo;       /* Device geometry */
-  uint8_t                   wrbusy: 1; /* 1: Volume open for writing */
   uint8_t                   blkper;    /* R/W blocks per erase block */
   uint8_t                   ncached;   /* Number of blocks in cache */
   uint16_t                  iooffset;  /* Next offset in read/write access (in ioblock) */

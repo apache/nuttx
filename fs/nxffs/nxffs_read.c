@@ -61,6 +61,12 @@
  * Public Types
  ****************************************************************************/
 
+struct nxffs_blkentry_s
+{
+  off_t     hoffset;  /* Offset to the block data header */
+  uint16_t  datlen;   /* Length of data following the header */
+};
+
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
@@ -88,7 +94,7 @@
  ****************************************************************************/
 
 static int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
-                          FAR size_t *datlen)
+                          FAR uint16_t *datlen)
 {
   struct nxffs_data_s blkhdr;
   uint32_t ecrc;
@@ -154,7 +160,7 @@ static int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
  ****************************************************************************/
 
 int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
-                    FAR size_t *datlen)
+                    FAR struct nxffs_blkentry_s *blkentry)
 {
   int nmagic;
   int ch;
@@ -164,6 +170,13 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
   /* Seek to the first FLASH offset provided by the caller. */
 
   nxffs_ioseek(volume, offset);
+
+  /* Skip the block header */
+
+  if (volume->iooffset < SIZEOF_NXFFS_BLOCK_HDR)
+    {
+      volume->iooffset = SIZEOF_NXFFS_BLOCK_HDR;
+    }
 
   /* Then begin searching */
   
@@ -222,7 +235,15 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
 
           else 
             {
-              ret = nxffs_rdblkhdr(volume, offset, datlen);
+              /* The offset to the header must be 4 bytes before the current
+               * FLASH seek location.
+               */
+
+              blkentry->hoffset = nxffs_iotell(volume) - 4;
+
+              /* Read the block header and verify the block at that address */
+
+              ret = nxffs_rdblkhdr(volume, blkentry->hoffset, &blkentry->datlen);
               if (ret == OK)
                 {
                   fdbg("Found a valid fileheader\n");
@@ -261,31 +282,42 @@ static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
                             FAR struct nxffs_entry_s *entry,
                             off_t fpos)
 {
-  size_t datlen = 0;
-  size_t blklen = 0;
+  struct nxffs_blkentry_s blkentry;
+  size_t datstart;
+  size_t datend;
   off_t offset = fpos;
   int ret;
 
   /* Loop until we read the data block containing the desired position */
 
+  datend = 0;
   do
     {
-      /* Get the data offset at the start of the next data block */
+      /* Find the next the next data block */
 
-      datlen += blklen;
-
-      /* Get the length of the next data block */
-
-      ret = nxffs_nextblock(volume, offset, &blklen);
+      ret = nxffs_nextblock(volume, offset, &blkentry);
       if (ret < 0)
         {
           fdbg("nxffs_nextblock failed: %d\n", -ret);
           return ret;
         }
-    }
-  while (datlen <= fpos && datlen + blklen > fpos);
+ 
+      /* Get the range of data offses for this data block */
 
-  volume->iooffset += (fpos - datlen);
+      datstart  = datend;
+      datend   += blkentry.datlen;
+
+      /* Protect against reading past the end of the file */
+
+       /* Offset to search for the the next data block */
+
+       offset += blkentry.hoffset + SIZEOF_NXFFS_DATA_HDR + blkentry.datlen;
+    }
+  while (datend <= fpos);
+
+  /* Return the offset to the data within the current data block */
+
+  nxffs_ioseek(volume, blkentry.hoffset + SIZEOF_NXFFS_DATA_HDR + fpos - datstart);
   return OK;
 }
 
@@ -343,12 +375,23 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
       goto errout_with_semaphore;
     }
 
+  /* Don't seek past the end of the file */
+
+  if (filep->f_pos >= ofile->entry.datlen)
+    {
+      /* Return end-of-file */
+
+      filep->f_pos = ofile->entry.datlen;
+      ret = 0;
+      goto errout_with_semaphore;
+    }
+
   /* Seek to the current file offset */
 
   ret = nxffs_rdseek(volume, &ofile->entry, filep->f_pos);
   if (ret < 0)
     {
-      fdbg("nxffs_fwseek failed: %d\n", -ret);
+      fdbg("nxffs_rdseek failed: %d\n", -ret);
       ret = -EACCES;
       goto errout_with_semaphore;
     }

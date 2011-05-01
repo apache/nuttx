@@ -96,6 +96,24 @@ extern "C" {
 
 EXTERN int nxffs_initialize(FAR struct mtd_dev_s *mtd);
 
+/****************************************************************************
+ * Name: nxffs_dump
+ *
+ * Description:
+ *   Dump a summary of the contents of an NXFFS file system.  CONFIG_DEBUG
+ *   and CONFIG_DEBUG_FS must be enabled for this function to do anything.
+ *
+ * Input Parameters:
+ *   mtd - The MTD device that provides the interface to NXFFS-formatted media.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+EXTERN int nxffs_dump(FAR struct mtd_dev_s *mtd);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
