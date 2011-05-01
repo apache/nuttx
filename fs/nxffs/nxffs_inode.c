@@ -291,7 +291,7 @@ int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
               ret = nxffs_rdentry(volume, offset, entry);
               if (ret == OK)
                 {
-                  fdbg("Found a valid fileheader\n");
+                  fvdbg("Found a valid fileheader, offset: %d\n", offset);
                   return OK;
                 }
 

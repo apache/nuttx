@@ -146,11 +146,11 @@ static int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
  * Name: nxffs_nextblock
  *
  * Description:
- *   Search for the next valid data block starting at the provided FLASH offset.
+ *   Search for the next valid data block starting at the provided
+ *   FLASH offset.
  *
  * Input Parameters:
  *   volume - Describes the NXFFS volume.
- *   offset - The FLASH memory offset to begin searching.
  *   datlen  - A memory location to return the data block length.
  *  
  * Returned Value:
@@ -246,7 +246,8 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
               ret = nxffs_rdblkhdr(volume, blkentry->hoffset, &blkentry->datlen);
               if (ret == OK)
                 {
-                  fdbg("Found a valid fileheader\n");
+                  fvdbg("Found a valid data block, offset: %d datlen: %d\n",
+                        blkentry->hoffset, blkentry->datlen);
                   return OK;
                 }
 
@@ -285,15 +286,21 @@ static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
   struct nxffs_blkentry_s blkentry;
   size_t datstart;
   size_t datend;
-  off_t offset = fpos;
+  off_t offset;
   int ret;
+
+  /* The initial FLASH offset will be the offset to first data block of
+   * the inode
+   */
+
+  offset = entry->doffset;
 
   /* Loop until we read the data block containing the desired position */
 
   datend = 0;
   do
     {
-      /* Find the next the next data block */
+      /* Check if the next data block contains the sought after file position */
 
       ret = nxffs_nextblock(volume, offset, &blkentry);
       if (ret < 0)
@@ -302,16 +309,14 @@ static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
           return ret;
         }
  
-      /* Get the range of data offses for this data block */
+      /* Get the range of data offsets for this data block */
 
       datstart  = datend;
       datend   += blkentry.datlen;
 
-      /* Protect against reading past the end of the file */
+      /* Offset to search for the the next data block */
 
-       /* Offset to search for the the next data block */
-
-       offset += blkentry.hoffset + SIZEOF_NXFFS_DATA_HDR + blkentry.datlen;
+      offset = blkentry.hoffset + SIZEOF_NXFFS_DATA_HDR + blkentry.datlen;
     }
   while (datend <= fpos);
 

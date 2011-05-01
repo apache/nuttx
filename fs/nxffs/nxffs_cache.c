@@ -102,8 +102,8 @@ int nxffs_rdcache(FAR struct nxffs_volume_s *volume, off_t block,
       nxfrd = MTD_BREAD(volume->mtd, block, nblocks, volume->cache);
       if (nxfrd != nblocks)
         {
-          fdbg("Read block %d-%d failed: %d\n",
-               block, block + nblocks - 1, nxfrd);
+          fvdbg("Read block %d-%d failed: %d\n",
+                block, block + nblocks - 1, nxfrd);
           return -EIO;
         }
 
