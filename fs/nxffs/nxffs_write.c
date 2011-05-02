@@ -482,7 +482,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
 
   /* Check if the file was opened with write access */
 
-  if ((wrfile->ofile.mode & O_WROK) == 0)
+  if ((wrfile->ofile.oflags & O_WROK) == 0)
     {
       fdbg("File not open for write access\n");
       ret = -EACCES;
@@ -495,7 +495,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
 
   for (total = 0; total < buflen; )
     {
-      remaining = buflen- total;
+      remaining = buflen - total;
 
       /* Have we already allocated the data block? */
 
@@ -620,7 +620,7 @@ int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size)
        * already at the final block.
        */
  
-      if (volume->ioblock + 1 >= volume->geo.neraseblocks)
+      if (volume->ioblock + 1 >= volume->nblocks)
         {
           /* Return -ENOSPC to indicate that the volume is full */
 

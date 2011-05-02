@@ -325,7 +325,7 @@ static inline int nxffs_namerased(FAR struct nxffs_volume_s *volume,
  ****************************************************************************/
 
 static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
-                               FAR const char *name, mode_t mode,
+                               FAR const char *name, mode_t oflags,
                                FAR struct nxffs_ofile_s **ppofile)
 {
   FAR struct nxffs_wrfile_s *wrfile;
@@ -370,7 +370,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
        * exclusively.
        */
 
-      if ((mode & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
+      if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
         {
           fdbg("File exists, can't create O_EXCL\n");
           ret = -EEXIST;
@@ -382,7 +382,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
        * we will not re-create the file unless O_CREAT is also specified.
        */
 
-      else if ((mode & (O_CREAT|O_TRUNC)) == (O_CREAT|O_TRUNC))
+      else if ((oflags & (O_CREAT|O_TRUNC)) == (O_CREAT|O_TRUNC))
         {
           /* Just schedule the removal the file and fall through to re-create it.
            * Note that the old file of the same name will not actually be removed
@@ -408,7 +408,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
    * it).  Now, make sure that we were asked to created it.
    */
 
-  if ((mode & O_CREAT) == 0)
+  if ((oflags & O_CREAT) == 0)
     {
       fdbg("Not asked to create the file\n");
       ret = -ENOENT;
@@ -445,7 +445,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   /* Initialize the open file state structure */
 
   wrfile->ofile.crefs     = 1;
-  wrfile->ofile.mode      = O_WROK;
+  wrfile->ofile.oflags    = oflags;
   wrfile->ofile.entry.utc = time(NULL);
   wrfile->truncate        = truncate;
 
@@ -637,7 +637,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
        * Limitation:  Files cannot be open both for reading and writing.
        */
 
-      if ((ofile->mode & O_WROK) != 0)
+      if ((ofile->oflags & O_WROK) != 0)
         {
           fdbg("File is open for writing\n");
           ret = -ENOSYS;
@@ -669,8 +669,8 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
 
       /* Initialize the open file state structure */
 
-      ofile->crefs = 1;
-      ofile->mode  = O_RDOK;
+      ofile->crefs  = 1;
+      ofile->oflags = O_RDOK;
 
       /* Find the file on this volume associated with this file name */
 
@@ -1011,7 +1011,7 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
          return -EINVAL;
 
        case O_WROK:
-         ret = nxffs_wropen(volume, relpath, mode, &ofile);
+         ret = nxffs_wropen(volume, relpath, oflags, &ofile);
          break;
 
        case O_RDOK:
@@ -1088,7 +1088,7 @@ int nxffs_close(FAR struct file *filep)
 
       /* Handle special finalization of the write operation. */
 
-      if (ofile->mode == O_WROK)
+      if ((ofile->oflags & O_WROK) != 0)
         {
           ret = nxffs_wrclose(volume, (FAR struct nxffs_wrfile_s *)ofile);
         }

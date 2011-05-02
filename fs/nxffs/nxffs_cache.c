@@ -234,7 +234,20 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume)
 
       if (volume->iooffset >= volume->geo.blocksize)
         {
-          volume->ioblock++;
+          /* Check for attempt to read past the end of FLASH */
+
+          off_t nextblock = volume->ioblock + 1;
+          if (nextblock >= volume->nblocks)
+            {
+              fdbg("End of FLASH encountered\n");
+              return -ENOSPC;
+            }
+
+          /* Set up the seek to the data just after the header in the
+           * next block.
+           */
+           
+          volume->ioblock  = nextblock;
           volume->iooffset = SIZEOF_NXFFS_BLOCK_HDR;
         }
 
@@ -251,7 +264,7 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume)
           return ret;
         }
     }
-  while (ret == -ENOENT);
+  while (ret != OK);
 
   /* Return the the character at this offset.  Note that on return,
    * iooffset could point to the byte outside of the current block.
@@ -260,49 +273,4 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume)
   ret = (int)volume->cache[volume->iooffset];
   volume->iooffset++;
   return ret;
-}
-
-/****************************************************************************
- * Name: nxffs_rddata
- *
- * Description:
- *   Read a sequence of data bytes from the FLASH memory.  This function
- *   allows the data in the formatted FLASH blocks to be read as a continuous
- *   byte stream, skipping over bad blocks and block headers as necessary.
- *
- * Input Parameters:
- *   volume - Describes the NXFFS volume.  The paramters ioblock and iooffset
- *     in the volume structure determine the behavior of nxffs_getc().
- *   buffer - A pointer to memory to receive the data read from FLASH.
- *   buflen - The maximum number of bytes to read from FLASH.
- *
- * Returned Value:
- *   The number of bytes read is returned on success.  Otherwise, a negated
- *   errno indicating the nature of the failure.
- *
- ****************************************************************************/
-
-ssize_t nxffs_rddata(FAR struct nxffs_volume_s *volume,
-                     FAR uint8_t *buffer, size_t buflen)
-{
-  size_t nbytes;
-  int ch;
-
-  for (nbytes = buflen; nbytes > 0; nbytes--)
-    {
-      /* Read the next character (which could be in the next block) */
-
-      ch = nxffs_getc(volume);
-      if (ch < 0)
-        {
-          fdbg("Failed to read byte: %d\n", -ch);
-          return ch;
-        }
-
-      /* Add the next character to the user buffer */
-
-      *buffer++ = (uint8_t)ch;
-    }
-
-  return buflen;
 }

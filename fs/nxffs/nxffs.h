@@ -247,7 +247,7 @@ struct nxffs_ofile_s
 {
   struct nxffs_ofile_s     *flink;     /* Supports a singly linked list */
   int16_t                   crefs;     /* Reference count */
-  mode_t                    mode;      /* Open mode */
+  mode_t                    oflags;    /* Open mode */
   struct nxffs_entry_s      entry;     /* Describes the NXFFS inode entry */
 };
 
@@ -550,31 +550,6 @@ extern off_t nxffs_iotell(FAR struct nxffs_volume_s *volume);
  ****************************************************************************/
 
 extern int nxffs_getc(FAR struct nxffs_volume_s *volume);
-
-/****************************************************************************
- * Name: nxffs_rddata
- *
- * Description:
- *   Read a sequence of data bytes from the FLASH memory.  This function
- *   allows the data in the formatted FLASH blocks to be read as a continuous
- *   byte stream, skipping over bad blocks and block headers as necessary.
- *
- * Input Parameters:
- *   volume - Describes the NXFFS volume.  The paramters ioblock and iooffset
- *     in the volume structure determine the behavior of nxffs_getc().
- *   buffer - A pointer to memory to receive the data read from FLASH.
- *   buflen - The maximum number of bytes to read from FLASH.
- *
- * Returned Value:
- *   The number of bytes read is returned on success.  Otherwise, a negated
- *   errno indicating the nature of the failure.
- *
- * Defined in nxffs_cache.c
- *
- ****************************************************************************/
-
-extern ssize_t nxffs_rddata(FAR struct nxffs_volume_s *volume,
-                            FAR uint8_t *buffer, size_t buflen);
 
 /****************************************************************************
  * Name: nxffs_freeentry

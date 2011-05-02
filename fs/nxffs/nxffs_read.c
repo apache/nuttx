@@ -102,22 +102,23 @@ static int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
   uint32_t crc;
   uint16_t doffset;
   uint16_t dlen;
-  int ret;
 
   /* Read the header at the FLASH offset */
 
   nxffs_ioseek(volume, offset);
-  ret = nxffs_rddata(volume, (FAR uint8_t *)&blkhdr, SIZEOF_NXFFS_DATA_HDR);
-  if (ret < 0)
-    {
-      fdbg("Failed to read data block header, offset %d: %d\n", offset, -ret);
-      return -EIO;
-    }
   doffset = volume->iooffset;
+  memcpy(&blkhdr, &volume->cache[doffset], SIZEOF_NXFFS_DATA_HDR);
 
   /* Extract the data length */
 
   dlen = nxffs_rdle16(blkhdr.datlen);
+
+  /* Get the offset to the beginning of the data */
+
+  doffset += SIZEOF_NXFFS_DATA_HDR;
+
+  /* Make sure that all of the data fits within the block */
+
   if ((uint32_t)doffset + (uint32_t)dlen > (uint32_t)volume->geo.blocksize)
     {
       fdbg("Data length=%d is unreasonable at offset=%d\n", dlen, doffset);
@@ -131,6 +132,7 @@ static int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
   nxffs_wrle32(blkhdr.crc, 0);
   crc = crc32((FAR const uint8_t *)&blkhdr, SIZEOF_NXFFS_DATA_HDR);
   crc = crc32part(&volume->cache[doffset], dlen, crc);
+
   if (crc != ecrc)
     {
       fdbg("CRC failure\n");
@@ -349,7 +351,6 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   ssize_t total;
   size_t available;
   size_t readsize;
-  ssize_t nread;
   int ret;
 
   fvdbg("Read %d bytes from offset %d\n", buflen, filep->f_pos);
@@ -381,7 +382,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
   /* Check if the file was opened with read access */
 
-  if ((ofile->mode & O_RDOK) == 0)
+  if ((ofile->oflags & O_RDOK) == 0)
     {
       fdbg("File not open for read access\n");
       ret = -EACCES;
@@ -426,17 +427,12 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
       /* Read data from that file offset */
 
-      nread = nxffs_rddata(volume, (FAR uint8_t *)&buffer[total], readsize);
-      if (nread < 0)
-        {
-          ret = nread;
-          goto errout_with_semaphore;          
-        }
+      memcpy(&buffer[total], &volume->cache[volume->iooffset], readsize);
 
       /* Update the file offset */
 
-      filep->f_pos += nread;
-      total       += nread;
+      filep->f_pos += readsize;
+      total        += readsize;
     }
 
   sem_post(&volume->exclsem);

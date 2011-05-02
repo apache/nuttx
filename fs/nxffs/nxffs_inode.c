@@ -102,12 +102,7 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   /* Read the header at the FLASH offset */
 
   nxffs_ioseek(volume, offset);
-  ret = nxffs_rddata(volume, (FAR uint8_t *)&inode, SIZEOF_NXFFS_INODE_HDR);
-  if (ret < 0)
-    {
-      fdbg("Failed to read inode, offset %d: %d\n", offset, -ret);
-      return -EIO;
-    }
+  memcpy(&inode, &volume->cache[volume->iooffset], SIZEOF_NXFFS_INODE_HDR);
 
   /* Check if the file is marked as deleted. */
 
@@ -141,15 +136,24 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
       return -ENOMEM;
     }
   
-  /* Read the file name from the expected offset in FLASH */
+  /* Seek to the expected location of the name in FLASH */
 
   nxffs_ioseek(volume, entry->noffset);
-  ret = nxffs_rddata(volume, (FAR uint8_t*)entry->name, namlen);
+
+  /* Make sure that the block is in memory (the name may not be in the
+   * same block as the inode header.
+   */
+ 
+  ret = nxffs_rdcache(volume, volume->ioblock, 1);
   if (ret < 0)
     {
-      fdbg("Failed to read inode, offset %d: %d\n", offset, -ret);
-      return -EIO;
+      fdbg("nxffsx_rdcache failed: %d\n", -ret);
+      return ret;
     }
+
+  /* Read the file name from the expected offset in FLASH */
+
+  memcpy(entry->name, &volume->cache[volume->iooffset], namlen);
   entry->name[namlen] = '\0';
 
   /* Finish the CRC calculation and verify the entry */
@@ -350,7 +354,7 @@ int nxffs_findinode(FAR struct nxffs_volume_s *volume, FAR const char *name,
       ret = nxffs_nextentry(volume, offset, entry);
       if (ret < 0)
         {
-          fdbg("No inode found: %d\n", -ret);
+          fvdbg("No inode found: %d\n", -ret);
           return ret;
         }
 
