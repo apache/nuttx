@@ -193,12 +193,12 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
 
   /* If must be a good header */
 
-  if (state = INODE_STATE_FILE)
+  if (state == INODE_STATE_FILE)
     {
       fdbg("  Block %d:%d: Verified FILE inode, datlen: %d\n",
            blkinfo->block, offset, datlen);
     }
-  else if (state = INODE_STATE_DELETED)
+  else if (state == INODE_STATE_DELETED)
     {
       fdbg("  Block %d:%d: Verified DELETED inode, datlen: %d\n",
            blkinfo->block, offset, datlen);
@@ -249,7 +249,7 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
   nxffs_wrle32(dathdr.crc, 0);
 
   crc = crc32((FAR const uint8_t *)&dathdr, SIZEOF_NXFFS_DATA_HDR);
-  crc = crc32part(&blkinfo->buffer[blkinfo->offset + SIZEOF_NXFFS_DATA_HDR], datlen, crc);
+  crc = crc32part(&blkinfo->buffer[offset + SIZEOF_NXFFS_DATA_HDR], datlen, crc);
 
   if (crc != ecrc)
    {

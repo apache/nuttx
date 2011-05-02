@@ -702,15 +702,15 @@ errout:
 }
 
 /****************************************************************************
- * Name: nxffs_freeofile
+ * Name: nxffs_remofile
  *
  * Description:
- *   Free resources held by an open file.
+ *   Remove an entry from the open file list.
  *
  ****************************************************************************/
 
-static inline void nxffs_freeofile(FAR struct nxffs_volume_s *volume,
-                                   FAR struct nxffs_ofile_s *ofile)
+static inline void nxffs_remofile(FAR struct nxffs_volume_s *volume,
+                                  FAR struct nxffs_ofile_s *ofile)
 {
   FAR struct nxffs_ofile_s *prev;
   FAR struct nxffs_ofile_s *curr;
@@ -735,25 +735,37 @@ static inline void nxffs_freeofile(FAR struct nxffs_volume_s *volume,
         {
           volume->ofiles = ofile->flink;
         }
-
-      /* Release the open file entry */
-
-      nxffs_freeentry(&ofile->entry);
- 
-      /* Then free the open file container (unless this the pre-alloated
-       * write-only open file container)
-       */
-
-#ifdef CONFIG_NXFSS_PREALLOCATED
-      if ((FAR struct nxffs_wrfile_s*)ofile != &g_wrfile)
-#endif
-        {
-          kfree(ofile);
-        }
     }
   else
     {
       fdbg("ERROR: Open inode %p not found\n", ofile);
+    }
+}
+
+/****************************************************************************
+ * Name: nxffs_freeofile
+ *
+ * Description:
+ *   Free resources held by an open file.
+ *
+ ****************************************************************************/
+
+static inline void nxffs_freeofile(FAR struct nxffs_volume_s *volume,
+                                   FAR struct nxffs_ofile_s *ofile)
+{
+  /* Release the open file entry */
+
+  nxffs_freeentry(&ofile->entry);
+ 
+  /* Then free the open file container (unless this the pre-alloated
+   * write-only open file container)
+   */
+
+#ifdef CONFIG_NXFSS_PREALLOCATED
+  if ((FAR struct nxffs_wrfile_s*)ofile != &g_wrfile)
+#endif
+    {
+      kfree(ofile);
     }
 }
 
@@ -796,6 +808,13 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
           goto errout;
         }
     }
+
+  /* Truncation is implemented by writing the new file, then deleting the
+   * older version of the file.  Note that we removed the entry from the
+   * open file list earlier in the close sequence; this will prevent the
+   * open file check from failing when we remove the old version of the
+   * file.
+   */
 
   if (wrfile->truncate && wrfile->ofile.entry.name)
     {
@@ -1059,16 +1078,22 @@ int nxffs_close(FAR struct file *filep)
   ret = OK;
   if (ofile->crefs == 1)
     {
-      /* Decrementing the reference count would take it zero.  Handle
-       * finalization of the write operation.
+      /* Decrementing the reference count would take it zero.
+       *
+       * Remove the entry from the open file list.  We do this early
+       * to avoid some chick-and-egg problems with file truncation.
        */
+
+      nxffs_remofile(volume, ofile);
+
+      /* Handle special finalization of the write operation. */
 
       if (ofile->mode == O_WROK)
         {
           ret = nxffs_wrclose(volume, (FAR struct nxffs_wrfile_s *)ofile);
         }
 
-      /* Delete the open file state structure */
+      /* Release all resouces held by the open file */
 
       nxffs_freeofile(volume, ofile);
     }

@@ -65,6 +65,7 @@ struct nxffs_blkentry_s
 {
   off_t     hoffset;  /* Offset to the block data header */
   uint16_t  datlen;   /* Length of data following the header */
+  uint16_t  foffset;  /* Offset to start of data */
 };
 
 /****************************************************************************
@@ -273,17 +274,18 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
  *   data headers.
  *
  * Input Parameters:
- *   volume - Describes the current volume
- *   entry  - Describes the open inode
- *   fpos   - The desired file position
+ *   volume   - Describes the current volume
+ *   entry    - Describes the open inode
+ *   fpos     - The desired file position
+ *   blkentry - Describes the block entry that we are positioned in
  *
  ****************************************************************************/
 
 static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
                             FAR struct nxffs_entry_s *entry,
-                            off_t fpos)
+                            off_t fpos,
+                            FAR struct nxffs_blkentry_s *blkentry)
 {
-  struct nxffs_blkentry_s blkentry;
   size_t datstart;
   size_t datend;
   off_t offset;
@@ -302,7 +304,7 @@ static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
     {
       /* Check if the next data block contains the sought after file position */
 
-      ret = nxffs_nextblock(volume, offset, &blkentry);
+      ret = nxffs_nextblock(volume, offset, blkentry);
       if (ret < 0)
         {
           fdbg("nxffs_nextblock failed: %d\n", -ret);
@@ -312,17 +314,18 @@ static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
       /* Get the range of data offsets for this data block */
 
       datstart  = datend;
-      datend   += blkentry.datlen;
+      datend   += blkentry->datlen;
 
       /* Offset to search for the the next data block */
 
-      offset = blkentry.hoffset + SIZEOF_NXFFS_DATA_HDR + blkentry.datlen;
+      offset = blkentry->hoffset + SIZEOF_NXFFS_DATA_HDR + blkentry->datlen;
     }
   while (datend <= fpos);
 
   /* Return the offset to the data within the current data block */
 
-  nxffs_ioseek(volume, blkentry.hoffset + SIZEOF_NXFFS_DATA_HDR + fpos - datstart);
+  blkentry->foffset = fpos - datstart;
+  nxffs_ioseek(volume, blkentry->hoffset + SIZEOF_NXFFS_DATA_HDR + blkentry->foffset);
   return OK;
 }
 
@@ -342,7 +345,12 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 {
   FAR struct nxffs_volume_s *volume;
   FAR struct nxffs_ofile_s *ofile;
-  ssize_t ret;
+  struct nxffs_blkentry_s blkentry;
+  ssize_t total;
+  size_t available;
+  size_t readsize;
+  ssize_t nread;
+  int ret;
 
   fvdbg("Read %d bytes from offset %d\n", buflen, filep->f_pos);
 
@@ -380,40 +388,63 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
       goto errout_with_semaphore;
     }
 
-  /* Don't seek past the end of the file */
+  /* Loop until all bytes have been read */
 
-  if (filep->f_pos >= ofile->entry.datlen)
+  for (total = 0; total < buflen; )
     {
-      /* Return end-of-file */
+      /* Don't seek past the end of the file */
 
-      filep->f_pos = ofile->entry.datlen;
-      ret = 0;
-      goto errout_with_semaphore;
-    }
+      if (filep->f_pos >= ofile->entry.datlen)
+        {
+          /* Return the partial read */
 
-  /* Seek to the current file offset */
+          filep->f_pos = ofile->entry.datlen;
+          break;
+        }
 
-  ret = nxffs_rdseek(volume, &ofile->entry, filep->f_pos);
-  if (ret < 0)
-    {
-      fdbg("nxffs_rdseek failed: %d\n", -ret);
-      ret = -EACCES;
-      goto errout_with_semaphore;
-    }
+      /* Seek to the current file offset */
 
-  /* Read data from that file offset */
+      ret = nxffs_rdseek(volume, &ofile->entry, filep->f_pos, &blkentry);
+      if (ret < 0)
+        {
+          fdbg("nxffs_rdseek failed: %d\n", -ret);
+          ret = -EACCES;
+          goto errout_with_semaphore;
+        }
 
-  ret = nxffs_rddata(volume, (FAR uint8_t *)buffer, buflen);
-  if (ret > 0)
-    {
+      /* How many bytes are available at this offset */
+
+      available = blkentry.datlen - blkentry.foffset;
+
+      /* Don't read more than we need to */
+
+      readsize = buflen - total;
+      if (readsize > available)
+        {
+          readsize = available;
+        }
+
+      /* Read data from that file offset */
+
+      nread = nxffs_rddata(volume, (FAR uint8_t *)&buffer[total], readsize);
+      if (nread < 0)
+        {
+          ret = nread;
+          goto errout_with_semaphore;          
+        }
+
       /* Update the file offset */
 
-      filep->f_pos += ret;
+      filep->f_pos += nread;
+      total       += nread;
     }
+
+  sem_post(&volume->exclsem);
+  return total;
 
 errout_with_semaphore:
   sem_post(&volume->exclsem);
 errout:
-  return ret;
+  return (ssize_t)ret;
 }
 

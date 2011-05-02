@@ -392,6 +392,8 @@ o Libraries (lib/)
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  NOTE:  The NXFFS file system has its own TODO list at nuttx/fs/nxffs/README.txt
+
   Description: Implement chmod(), truncate().
   Status:      Open
   Priority:    Low

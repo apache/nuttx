@@ -448,8 +448,9 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
 {
   FAR struct nxffs_volume_s *volume;
   FAR struct nxffs_wrfile_s *wrfile;
-  ssize_t nbytesleft;
-  ssize_t nbyteswritten;
+  ssize_t remaining;
+  ssize_t nwritten;
+  ssize_t total;
   int ret;
 
   fvdbg("Write %d bytes to offset %d\n", buflen, filep->f_pos);
@@ -492,9 +493,10 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
    * error occurs)
    */
 
-  nbytesleft = buflen;
-  while (nbytesleft > 0)
+  for (total = 0; total < buflen; )
     {
+      remaining = buflen- total;
+
       /* Have we already allocated the data block? */
 
       if (wrfile->doffset == 0)
@@ -502,7 +504,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
           /* No, allocate the data block now */
 
           wrfile->datlen = 0;
-          ret = nxffs_wralloc(volume, wrfile, nbytesleft);
+          ret = nxffs_wralloc(volume, wrfile, remaining);
           if (ret < 0)
             {
               fdbg("Failed to allocate a data block: %d\n", -ret);
@@ -527,8 +529,8 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
        * block to flash.
        */
 
-      nbyteswritten = nxffs_wrappend(volume, wrfile, buffer, nbytesleft);
-      if (nbyteswritten < 0)
+      nwritten = nxffs_wrappend(volume, wrfile, &buffer[total], remaining);
+      if (nwritten < 0)
         {
           fdbg("Failed to append to FLASH to a data block: %d\n", -ret);
           goto errout_with_semaphore;
@@ -536,12 +538,12 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
 
       /* Decrement the number of bytes remaining to be written */
  
-      nbytesleft -= nbyteswritten;
+      total += nwritten;
     }
 
   /* Success.. return the number of bytes written */
 
-  ret           = buflen;
+  ret           = total;
   filep->f_pos  = wrfile->datlen;
 
 errout_with_semaphore:
