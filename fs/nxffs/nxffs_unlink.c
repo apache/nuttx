@@ -102,7 +102,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
     {
       /* We can't remove the inode if it is open */
 
-      fdbg("Inode is open\n");
+      fdbg("Inode '%s' is open\n", name);
       return -EBUSY;
     }
 
@@ -111,7 +111,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   ret = nxffs_findinode(volume, name, &entry);
   if (ret < 0)
     {
-      fdbg("Inode '%s' not found\n");
+      fdbg("Inode '%s' not found\n", name);
       return ret;
     }
 

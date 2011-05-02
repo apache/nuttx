@@ -82,8 +82,10 @@
  *     information.
  *
  * Returned Value:
- *   Zero on success.  Otherwise, a negater errno value is returned
+ *   Zero on success.  Otherwise, a negated errno value is returned
  *   indicating the nature of the failure.
+ *
+ *   On return, the 
  *
  ****************************************************************************/
 
@@ -93,6 +95,7 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   struct nxffs_inode_s inode;
   uint32_t ecrc;
   uint32_t crc;
+  uint8_t state;
   int namlen;
   int ret;
 
@@ -104,11 +107,15 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   nxffs_ioseek(volume, offset);
   memcpy(&inode, &volume->cache[volume->iooffset], SIZEOF_NXFFS_INODE_HDR);
 
-  /* Check if the file is marked as deleted. */
+  /* Check if the file state is recognized. */
 
-  if (inode.state != INODE_STATE_FILE)
+  state = inode.state;
+  if (state != INODE_STATE_FILE && state != INODE_STATE_DELETED)
     {
-      return -ENOENT;
+      /* This can't be a valid inode.. don't bother with the rest */
+
+      ret = -ENOENT;
+      goto errout_no_offset;
     }
  
   /* Copy the packed header into the user-friendly buffer */
@@ -133,7 +140,8 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   if (!entry->name)
     {
       fdbg("Failed to allocate name, namlen: %d\n", namlen);
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto errout_no_offset;
     }
   
   /* Seek to the expected location of the name in FLASH */
@@ -148,7 +156,7 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   if (ret < 0)
     {
       fdbg("nxffsx_rdcache failed: %d\n", -ret);
-      return ret;
+      goto errout_with_name;
     }
 
   /* Read the file name from the expected offset in FLASH */
@@ -162,10 +170,45 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   if (crc != ecrc)
     {
       fdbg("CRC entry: %08x CRC calculated: %08x\n", ecrc, crc);
-      nxffs_freeentry(entry);
-      return -EIO;
+      ret = -EIO;
+      goto errout_with_name;
     }
+
+  /* We have a good inode header.. but it still could a deleted file.
+   * Check the file state.
+   */
+
+  if (state != INODE_STATE_FILE)
+    {
+      /* It is a deleted file.  But still, the data offset and the
+       * start size is good so we can use this information to advance
+       * further in FLASH memory and reduce the search time.
+       */
+
+      offset = entry->doffset + entry->datlen + SIZEOF_NXFFS_DATA_HDR;
+      nxffs_freeentry(entry);
+      ret = -ENOENT;
+      goto errout;
+    }
+
+  /* Everything is good.. leave the offset pointing to the valid inode
+   * header.
+   */
+
   return OK;
+
+  /* On errors where we are suspicious of the validity of the inode header,
+   * we need to increment the file position to just after the "good" magic
+   * word.
+   */
+
+errout_with_name:
+  nxffs_freeentry(entry);
+errout_no_offset:
+  offset += NXFFS_MAGICSIZE;
+errout:
+  nxffs_ioseek(volume, offset);
+  return ret;
 }
 
 /****************************************************************************
