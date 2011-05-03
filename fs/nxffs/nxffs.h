@@ -285,7 +285,6 @@ struct nxffs_volume_s
   sem_t                     wrsem;     /* Enforces single writer restriction */
   struct mtd_geometry_s     geo;       /* Device geometry */
   uint8_t                   blkper;    /* R/W blocks per erase block */
-  uint8_t                   ncached;   /* Number of blocks in cache */
   uint16_t                  iooffset;  /* Next offset in read/write access (in ioblock) */
   off_t                     inoffset;  /* Offset to the first valid inode header */
   off_t                     froffset;  /* Offset to the first free byte */
@@ -293,8 +292,8 @@ struct nxffs_volume_s
   off_t                     ioblock;   /* Current block number being accessed */
   off_t                     cblock;    /* Starting block number in cache */
   FAR struct nxffs_ofile_s *ofiles;    /* A singly-linked list of open files */
-  FAR uint8_t              *cache;     /* Allocated erase block */
-  FAR uint8_t              *pack;      /* Extra I/O block buffer to support packing */
+  FAR uint8_t              *cache;     /* On cached erase block for general I/O */
+  FAR uint8_t              *pack;      /* A full erase block to support packing */
 };
 
 /* This structure describes the state of the blocks on the NXFFS volume */
@@ -466,12 +465,11 @@ extern size_t nxffs_erased(FAR const uint8_t *buffer, size_t buflen);
  * Name: nxffs_rdcache
  *
  * Description:
- *   Read one or more logical blocks into the volume cache memory.
+ *   Read one I/O block into the volume cache memory.
  *
  * Input Parameters:
  *   volume - Describes the current volume
  *   block  - The first logical block to read
- *   nblocks - The number of logical blocks to be read.
  *
  * Returned Value:
  *   Negated errnos are returned only in the case of MTD reported failures.
@@ -481,8 +479,7 @@ extern size_t nxffs_erased(FAR const uint8_t *buffer, size_t buflen);
  *
  ****************************************************************************/
 
-extern int nxffs_rdcache(FAR struct nxffs_volume_s *volume, off_t block,
-                         uint8_t nblocks);
+extern int nxffs_rdcache(FAR struct nxffs_volume_s *volume, off_t block);
 
 /****************************************************************************
  * Name: nxffs_wrcache

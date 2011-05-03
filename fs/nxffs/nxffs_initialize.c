@@ -181,7 +181,8 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 
   /* Initialize the NXFFS volume structure */
 
-  volume->mtd = mtd;
+  volume->mtd    = mtd;
+  volume->cblock = (off_t)-1;
   sem_init(&volume->exclsem, 0, 1);
   sem_init(&volume->wrsem, 0, 1);
 
@@ -197,9 +198,9 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
       goto errout_with_volume;
     }
 
-  /* Allocate one, in-memory erase block buffer */
+  /* Allocate one I/O block buffer to general files system access */
 
-  volume->cache = (FAR uint8_t *)kmalloc(volume->geo.erasesize);
+  volume->cache = (FAR uint8_t *)kmalloc(volume->geo.blocksize);
   if (!volume->cache)
     {
       fdbg("Failed to allocate an erase block buffer\n");
@@ -207,12 +208,12 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
       goto errout_with_volume;
     }
 
-  /* Pre-allocate one additional I/O block buffer to support filesystem
-   * packing.  This buffer is not needed often, but is best to have pre-
-   * allocated and in-place.
+  /* Pre-allocate one, full, in-memory erase block.  This is needed for filesystem
+   * packing (but is useful in other places as well). This buffer is not needed
+   * often, but is best to have pre-allocated and in-place.
    */
 
-  volume->pack = (FAR uint8_t *)kmalloc(volume->geo.blocksize);
+  volume->pack = (FAR uint8_t *)kmalloc(volume->geo.erasesize);
   if (!volume->pack)
     {
       fdbg("Failed to allocate an I/O block buffer\n");

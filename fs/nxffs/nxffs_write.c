@@ -703,10 +703,10 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
     {
       /* Make sure that the block is in memory */
  
-      ret = nxffs_rdcache(volume, volume->ioblock, 1);
+      ret = nxffs_rdcache(volume, volume->ioblock);
       if (ret < 0)
         {
-          fdbg("nxffsx_rdcache failed: %d\n", -ret);
+          fdbg("Failed to read block %d: %d\n", volume->ioblock, -ret);
           return ret;
         }
 

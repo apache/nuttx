@@ -73,12 +73,11 @@
  * Name: nxffs_rdcache
  *
  * Description:
- *   Read one or more logical blocks into the volume block cache memory.
+ *   Read one I/O block into the volume block cache memory.
  *
  * Input Parameters:
  *   volume - Describes the current volume
  *   block  - The first logical block to read
- *   nblocks - The number of logical blocks to be read.
  *
  * Returned Value:
  *   Negated errnos are returned only in the case of MTD reported failures.
@@ -86,31 +85,26 @@
  *
  ****************************************************************************/
 
-int nxffs_rdcache(FAR struct nxffs_volume_s *volume, off_t block,
-                  uint8_t nblocks)
+int nxffs_rdcache(FAR struct nxffs_volume_s *volume, off_t block)
 {
   size_t nxfrd;
 
-  DEBUGASSERT(nblocks <= volume->blkper);
-
   /* Check if the requested data is already in the cache */
 
-  if (block != volume->cblock || nblocks > volume->ncached)
+  if (block != volume->cblock)
     {
       /* Read the specified blocks into cache */
 
-      nxfrd = MTD_BREAD(volume->mtd, block, nblocks, volume->cache);
-      if (nxfrd != nblocks)
+      nxfrd = MTD_BREAD(volume->mtd, block, 1, volume->cache);
+      if (nxfrd != 1)
         {
-          fvdbg("Read block %d-%d failed: %d\n",
-                block, block + nblocks - 1, nxfrd);
+          fvdbg("Read block %d failed: %d\n", block, nxfrd);
           return -EIO;
         }
 
       /* Remember what is in the cache */
 
       volume->cblock  = block;
-      volume->ncached = nblocks;
     }
   return OK;
 }
@@ -133,31 +127,18 @@ int nxffs_wrcache(FAR struct nxffs_volume_s *volume)
 {
   size_t nxfrd;
 
-  /* Check if there are blocks in the cache */
+  /* Write the current block from the cache */
 
-  if (volume->ncached > 0)
+  nxfrd = MTD_BWRITE(volume->mtd, volume->cblock, 1, volume->cache);
+  if (nxfrd != 1)
     {
-      /* Read the specified blocks into cache */
-
-      nxfrd = MTD_BWRITE(volume->mtd, volume->cblock, volume->ncached,
-                         volume->cache);
-      if (nxfrd != volume->ncached)
-        {
-          fdbg("Write block %d-%d failed: %d\n",
-               volume->cblock, volume->cblock + volume->ncached - 1, nxfrd);
-          return -EIO;
-        }
-
-      /* Write was successful */
-
-      return OK;
+      fdbg("Write block %d failed: %d\n", volume->cblock, nxfrd);
+      return -EIO;
     }
 
-  /* Probably won't get here because there is almost always something in
-   * the cache
-   */
+  /* Write was successful */
 
-  return -EINVAL;
+  return OK;
 }
 
 /****************************************************************************

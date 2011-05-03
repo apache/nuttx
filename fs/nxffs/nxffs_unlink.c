@@ -123,7 +123,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
 
   /* Make sure the the block is in the cache */
 
-  ret = nxffs_rdcache(volume, volume->ioblock, 1);
+  ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)
     {
       fdbg("Failed to read data into cache: %d\n", ret);

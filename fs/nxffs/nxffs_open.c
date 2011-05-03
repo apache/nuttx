@@ -841,10 +841,11 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
    */
 
   nxffs_ioseek(volume, wrfile->ofile.entry.hoffset);
-  ret = nxffs_rdcache(volume, volume->ioblock, 1);
+  ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)
     {
-      fdbg("Failed to read inode header block %d: %d\n", volume->ioblock, -ret);
+      fdbg("Failed to read inode header block %d: %d\n",
+           volume->ioblock, -ret);
       goto errout;
     }
 
@@ -889,7 +890,8 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
       ret = nxffs_wrcache(volume);
       if (ret < 0)
         {
-          fdbg("Failed to write inode header block %d: %d\n", volume->ioblock, -ret);
+          fdbg("Failed to write inode header block %d: %d\n",
+               volume->ioblock, -ret);
           goto errout;
         }
 
@@ -897,10 +899,11 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
 
       volume->ioblock  = namblock;
       volume->iooffset = namoffset;
-      ret = nxffs_rdcache(volume, volume->ioblock, 1);
+      ret = nxffs_rdcache(volume, volume->ioblock);
       if (ret < 0)
         {
-          fdbg("Failed to read inode name block %d: %d\n", volume->ioblock, -ret);
+          fdbg("Failed to read inode name block %d: %d\n",
+               volume->ioblock, -ret);
           goto errout;
         }
     }
@@ -911,7 +914,8 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
   ret = nxffs_wrcache(volume);
   if (ret < 0)
     {
-      fdbg("Failed to write inode header block %d: %d\n", volume->ioblock, -ret);
+      fdbg("Failed to write inode header block %d: %d\n",
+           volume->ioblock, -ret);
     }
   
   /* The volume is now available for other writers */

@@ -152,7 +152,7 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
    * same block as the inode header.
    */
  
-  ret = nxffs_rdcache(volume, volume->ioblock, 1);
+  ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)
     {
       fdbg("nxffsx_rdcache failed: %d\n", -ret);

@@ -42,6 +42,7 @@
 #include <nuttx/config.h>
 
 #include <string.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/mtd.h>
@@ -91,7 +92,7 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
                      FAR struct nxffs_blkstats_s *stats)
 {
   FAR uint8_t *bptr;     /* Pointer to next block data */
-  off_t eblock;          /* Erase block number */
+  off_t ioblock;         /* I/O block number */
   int lblock;            /* Logical block index */
   int ret;
 
@@ -99,22 +100,20 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
 
   memset(stats, 0, sizeof(struct nxffs_blkstats_s));
 
-  for (eblock = 0; eblock < volume->geo.neraseblocks; eblock++)
+  for (ioblock = 0; ioblock < volume->nblocks; ioblock += volume->blkper)
     {
       /* Read the full erase block */
 
-      volume->ioblock  = eblock * volume->blkper;
-      volume->iooffset = 0;
-      ret = nxffs_rdcache(volume, volume->ioblock, volume->blkper);
-      if (ret < 0)
+      ret = MTD_BREAD(volume->mtd, ioblock, volume->blkper, volume->pack);
+      if (ret < volume->blkper)
         {
-          fdbg("Failed to read erase block %d: %d\n", eblock, -ret);
+          fdbg("Failed to read erase block %d: %d\n", ioblock / volume->blkper, -ret);
           return ret;
         }
 
       /* Process each logical block */
 
-      for (bptr = volume->cache, lblock = 0;
+      for (bptr = volume->pack, lblock = 0;
            lblock < volume->blkper;
            bptr += volume->geo.blocksize, lblock++)
         {

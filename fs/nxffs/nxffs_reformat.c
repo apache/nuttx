@@ -92,8 +92,8 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
 
   /* Create an image of one properly formatted erase sector */
 
-  memset(volume->cache, CONFIG_NXFFS_ERASEDSTATE, volume->geo.erasesize);
-  for (blkptr = volume->cache, i = 0;
+  memset(volume->pack, CONFIG_NXFFS_ERASEDSTATE, volume->geo.erasesize);
+  for (blkptr = volume->pack, i = 0;
        i < volume->blkper;
        blkptr += volume->geo.blocksize, i++)
     {
@@ -118,7 +118,7 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
       /* Write the formatted image to the erase block */
 
       lblock = eblock * volume->blkper;
-      nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->cache);
+      nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->pack);
       if (nxfrd != volume->blkper)
         {
           fdbg("Write erase block %d failed: %d\n", lblock, nxfrd);
@@ -162,7 +162,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
       /* Read the entire erase block */
 
       lblock = eblock * volume->blkper;
-      nxfrd  = MTD_BREAD(volume->mtd, lblock, volume->blkper, volume->cache);
+      nxfrd  = MTD_BREAD(volume->mtd, lblock, volume->blkper, volume->pack);
       if (nxfrd != volume->blkper)
         {
           fdbg("Read erase block %d failed: %d\n", lblock, nxfrd);
@@ -172,7 +172,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
       /* Process each logical block */
 
       modified = false;
-      for (blkptr = volume->cache, i = 0;
+      for (blkptr = volume->pack, i = 0;
            i < volume->blkper;
            blkptr += volume->geo.blocksize, i++)
         {
@@ -211,7 +211,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
 
       /* If the erase block was modified, then re-write it */
 
-      nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->cache);
+      nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->pack);
       if (nxfrd != volume->blkper)
         {
           fdbg("Write erase block %d failed: %d\n", lblock, nxfrd);
