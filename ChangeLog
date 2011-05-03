@@ -1718,3 +1718,6 @@
 	  implementation is incomplete on initial checkin.
 	* apps/examples/nxffs and configs/sim/nxffs:  Add a test a a configuration that
 	  will be used to verify NXFFS.
+	* fs/fat/fs_fat32.c and fs_fat32util.c: Incorpated two bugs with fixed provided
+	  by Sheref Younan.  Thanks!
+

@@ -649,7 +649,8 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
       goto errout_with_buffer;
     }
 
-  if (fat_checkbootrecord(fs) != OK)
+  ret = fat_checkbootrecord(fs);
+  if (ret != OK)
     {
       /* The contents of sector 0 is not a boot record.  It could be a
        * partition, however.  Assume it is a partition and get the offset
@@ -683,7 +684,8 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
 
       /* Check if this is a boot record */
 
-      if (fat_checkbootrecord(fs) != OK)
+      ret = fat_checkbootrecord(fs);
+      if (ret != OK)
         {
           fdbg("No valid MBR\n");
           goto errout_with_buffer;

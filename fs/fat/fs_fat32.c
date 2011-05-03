@@ -1179,7 +1179,7 @@ static int fat_sync(FAR struct file *filep)
        * in the sector using the saved directory index.
        */
 
-      direntry = &fs->fs_buffer[ff->ff_dirindex * 32];
+      direntry = &fs->fs_buffer[(ff->ff_dirindex & DIRSEC_NDXMASK(fs)) * 32];
 
       /* Set the archive bit, set the write time, and update
        * anything that may have* changed in the directory
