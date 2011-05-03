@@ -70,75 +70,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxffs_rdblkhdr
- *
- * Description:
- *   Read the dataa block header at this offset.  Called only from nxffs_nextblock().
- *
- * Input Parameters:
- *   volume - Describes the current volume.
- *   offset - The byte offset from the beginning of FLASH where the data block
- *     header is expected.
- *   datlen  - A memory location to return the data block length.
- *
- * Returned Value:
- *   Zero on success.  Otherwise, a negater errno value is returned
- *   indicating the nature of the failure.
- *
- ****************************************************************************/
-
-static int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
-                          FAR uint16_t *datlen)
-{
-  struct nxffs_data_s blkhdr;
-  uint32_t ecrc;
-  uint32_t crc;
-  uint16_t doffset;
-  uint16_t dlen;
-
-  /* Read the header at the FLASH offset */
-
-  nxffs_ioseek(volume, offset);
-  doffset = volume->iooffset;
-  memcpy(&blkhdr, &volume->cache[doffset], SIZEOF_NXFFS_DATA_HDR);
-
-  /* Extract the data length */
-
-  dlen = nxffs_rdle16(blkhdr.datlen);
-
-  /* Get the offset to the beginning of the data */
-
-  doffset += SIZEOF_NXFFS_DATA_HDR;
-
-  /* Make sure that all of the data fits within the block */
-
-  if ((uint32_t)doffset + (uint32_t)dlen > (uint32_t)volume->geo.blocksize)
-    {
-      fdbg("Data length=%d is unreasonable at offset=%d\n", dlen, doffset);
-      return -EIO;
-    }
- 
-  /* Extract the expected CRC and calculate the CRC of the data block */
-
-  ecrc = nxffs_rdle32(blkhdr.crc);
-
-  nxffs_wrle32(blkhdr.crc, 0);
-  crc = crc32((FAR const uint8_t *)&blkhdr, SIZEOF_NXFFS_DATA_HDR);
-  crc = crc32part(&volume->cache[doffset], dlen, crc);
-
-  if (crc != ecrc)
-    {
-      fdbg("CRC failure\n");
-      return -EIO;
-    }
-
-  /* Looks good! Return the data length and success */
-
-  *datlen = dlen;
-  return OK;
-}
-
-/****************************************************************************
  * Name: nxffs_rdseek
  *
  * Description:
@@ -436,5 +367,75 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
 
   return -ENOENT;
 }
+
+/****************************************************************************
+ * Name: nxffs_rdblkhdr
+ *
+ * Description:
+ *   Read and verify the data block header at the specified offset.
+ *
+ * Input Parameters:
+ *   volume - Describes the current volume.
+ *   offset - The byte offset from the beginning of FLASH where the data block
+ *     header is expected.
+ *   datlen  - A memory location to return the data block length.
+ *
+ * Returned Value:
+ *   Zero on success.  Otherwise, a negated errno value is returned
+ *   indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
+                   FAR uint16_t *datlen)
+{
+  struct nxffs_data_s blkhdr;
+  uint32_t ecrc;
+  uint32_t crc;
+  uint16_t doffset;
+  uint16_t dlen;
+
+  /* Read the header at the FLASH offset */
+
+  nxffs_ioseek(volume, offset);
+  doffset = volume->iooffset;
+  memcpy(&blkhdr, &volume->cache[doffset], SIZEOF_NXFFS_DATA_HDR);
+
+  /* Extract the data length */
+
+  dlen = nxffs_rdle16(blkhdr.datlen);
+
+  /* Get the offset to the beginning of the data */
+
+  doffset += SIZEOF_NXFFS_DATA_HDR;
+
+  /* Make sure that all of the data fits within the block */
+
+  if ((uint32_t)doffset + (uint32_t)dlen > (uint32_t)volume->geo.blocksize)
+    {
+      fdbg("Data length=%d is unreasonable at offset=%d\n", dlen, doffset);
+      return -EIO;
+    }
+ 
+  /* Extract the expected CRC and calculate the CRC of the data block */
+
+  ecrc = nxffs_rdle32(blkhdr.crc);
+
+  nxffs_wrle32(blkhdr.crc, 0);
+  crc = crc32((FAR const uint8_t *)&blkhdr, SIZEOF_NXFFS_DATA_HDR);
+  crc = crc32part(&volume->cache[doffset], dlen, crc);
+
+  if (crc != ecrc)
+    {
+      fdbg("CRC failure\n");
+      return -EIO;
+    }
+
+  /* Looks good! Return the data length and success */
+
+  *datlen = dlen;
+  return OK;
+}
+
 
 

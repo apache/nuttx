@@ -109,7 +109,7 @@ int nxffs_verifyblock(FAR struct nxffs_volume_s *volume, off_t block)
    */
 
   blkhdr = (FAR struct nxffs_block_s *)volume->cache;
-  if (memcmp(blkhdr->magic, g_blockmagic, 4) == 0 &&
+  if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) == 0 &&
       blkhdr->state == BLOCK_STATE_GOOD)
     {
       /* The block is valid */

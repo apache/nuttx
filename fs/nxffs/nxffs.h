@@ -783,28 +783,6 @@ extern FAR struct nxffs_ofile_s *nxffs_findofile(FAR struct nxffs_volume_s *volu
 extern int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size);
 
 /****************************************************************************
- * Name: nxffs_nextblock
- *
- * Description:
- *   Search for the next valid data block starting at the provided
- *   FLASH offset.
- *
- * Input Parameters:
- *   volume - Describes the NXFFS volume.
- *   datlen  - A memory location to return the data block length.
- *  
- * Returned Value:
- *   Zero is returned on success. Otherwise, a negated errno is returned
- *   that indicates the nature of the failure.
- *
- * Defined in nxffs_read.c
- *
- ****************************************************************************/
-
-extern int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
-                           FAR struct nxffs_blkentry_s *blkentry);
-
-/****************************************************************************
  * Name: nxffs_wrverify
  *
  * Description:
@@ -870,7 +848,52 @@ extern int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size);
 
 extern int nxffs_wrblkhdr(FAR struct nxffs_volume_s *volume,
                           FAR struct nxffs_wrfile_s *wrfile);
-                               
+
+/****************************************************************************
+ * Name: nxffs_nextblock
+ *
+ * Description:
+ *   Search for the next valid data block starting at the provided
+ *   FLASH offset.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume.
+ *   datlen  - A memory location to return the data block length.
+ *  
+ * Returned Value:
+ *   Zero is returned on success. Otherwise, a negated errno is returned
+ *   that indicates the nature of the failure.
+ *
+ * Defined in nxffs_read.c
+ *
+ ****************************************************************************/
+
+extern int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
+                           FAR struct nxffs_blkentry_s *blkentry);
+
+/****************************************************************************
+ * Name: nxffs_rdblkhdr
+ *
+ * Description:
+ *   Read and verify the data block header at the specified offset.
+ *
+ * Input Parameters:
+ *   volume - Describes the current volume.
+ *   offset - The byte offset from the beginning of FLASH where the data block
+ *     header is expected.
+ *   datlen  - A memory location to return the data block length.
+ *
+ * Returned Value:
+ *   Zero on success.  Otherwise, a negated errno value is returned
+ *   indicating the nature of the failure.
+ *
+ * Defined in nxffs_read.c
+ *
+ ****************************************************************************/
+
+extern int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
+                          FAR uint16_t *datlen);
+
 /****************************************************************************
  * Name: nxffs_rminode
  *

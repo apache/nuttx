@@ -715,7 +715,7 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
       iooffset = volume->iooffset;
       nerased  = 0;
 
-      for (i = volume->iooffset; i <= volume->geo.blocksize - size; i++)
+      for (i = volume->iooffset; i < volume->geo.blocksize; i++)
         {
           /* Is this byte erased? */
 
@@ -745,7 +745,7 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
           else
             {
               nerased  = 0;
-              iooffset = volume->iooffset + 1;
+              iooffset = i + 1;
             }
         }
 
