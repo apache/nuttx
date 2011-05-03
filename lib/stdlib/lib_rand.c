@@ -1,7 +1,7 @@
 /************************************************************
  * lib/stdlib/lib_rand.c
  *
- *   Copyright (C) 2007,l 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,8 +48,8 @@
  * Definitions
  ************************************************************/
 
-#ifndef RND_ORDER
-#define RND_ORDER 1
+#ifndef CONFIG_LIB_RAND_ORDER
+#define CONFIG_LIB_RAND_ORDER 1
 #endif
 
 /* Values needed by the random number generator */
@@ -64,9 +64,9 @@
 #define RND3_CONSTK3 616087
 #define RND3_CONSTP  997783
 
-#if RND_ORDER == 1
+#if CONFIG_LIB_RAND_ORDER == 1
 # define RND_CONSTP RND1_CONSTP
-#elif RND_ORDER == 2
+#elif CONFIG_LIB_RAND_ORDER == 2
 # define RND_CONSTP RND2_CONSTP
 #else
 # define RND_CONSTP RND3_CONSTP
@@ -82,9 +82,9 @@
 
 static unsigned int nrand(unsigned int nLimit);
 static double_t frand1(void);
-#if (RND_ORDER > 1)
+#if (CONFIG_LIB_RAND_ORDER > 1)
 static double_t frand2(void);
-#if (RND_ORDER > 2)
+#if (CONFIG_LIB_RAND_ORDER > 2)
 static double_t frand3(void);
 #endif
 #endif
@@ -106,37 +106,17 @@ static double_t frand3(void);
  ************************************************************/
 
 static unsigned long g_nRandInt1;
-#if (RND_ORDER > 1)
+#if (CONFIG_LIB_RAND_ORDER > 1)
 static unsigned long g_nRandInt2;
-#if (RND_ORDER > 2)
+#if (CONFIG_LIB_RAND_ORDER > 2)
 static unsigned long g_nRandInt3;
 #endif
 #endif
 
 /************************************************************
- * Function:  srand, rand
+ * Private Functions
  ************************************************************/
-
-void srand(unsigned int seed)
-{
-  g_nRandInt1 = seed;
-#if (RND_ORDER > 1)
-  g_nRandInt2 = seed;
-  (void)frand1();
-#if (RND_ORDER > 2)
-  g_nRandInt3 = seed;
-  (void)frand2();
-#endif
-#endif
-
-} /* end srand */
-
-int rand(void)
-{
-  return (int)nrand(32768);
-
-} /* end rand */
-
+ 
 static unsigned int nrand(unsigned int nLimit)
 {
   unsigned long nResult;
@@ -146,9 +126,9 @@ static unsigned int nrand(unsigned int nLimit)
   do {
 
     /* Get a random integer in the requested range */
-#if (RND_ORDER == 1)
+#if (CONFIG_LIB_RAND_ORDER == 1)
     fRatio = frand1();
-#elif (RND_ORDER == 2)
+#elif (CONFIG_LIB_RAND_ORDER == 2)
     fRatio = frand2();
 #else
     fRatio = frand3();
@@ -176,7 +156,7 @@ static double_t frand1(void)
 
 } /* end frand */
 
-#if (RND_ORDER > 1)
+#if (CONFIG_LIB_RAND_ORDER > 1)
 static double_t frand2(void)
 {
   unsigned long nRandInt;
@@ -192,8 +172,8 @@ static double_t frand2(void)
 
 } /* end frand */
 
-#if (RND_ORDER > 2)
-static double_t frand(void)
+#if (CONFIG_LIB_RAND_ORDER > 2)
+static double_t frand3(void)
 {
   unsigned long nRandInt;
 
@@ -210,3 +190,31 @@ static double_t frand(void)
 } /* end frand */
 #endif
 #endif
+
+/************************************************************
+ * Public Functions
+ ************************************************************/
+/************************************************************
+ * Function:  srand, rand
+ ************************************************************/
+
+void srand(unsigned int seed)
+{
+  g_nRandInt1 = seed;
+#if (CONFIG_LIB_RAND_ORDER > 1)
+  g_nRandInt2 = seed;
+  (void)frand1();
+#if (CONFIG_LIB_RAND_ORDER > 2)
+  g_nRandInt3 = seed;
+  (void)frand2();
+#endif
+#endif
+
+} /* end srand */
+
+int rand(void)
+{
+  return (int)nrand(32768);
+
+} /* end rand */
+

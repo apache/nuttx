@@ -61,13 +61,6 @@
  * Public Types
  ****************************************************************************/
 
-struct nxffs_blkentry_s
-{
-  off_t     hoffset;  /* Offset to the block data header */
-  uint16_t  datlen;   /* Length of data following the header */
-  uint16_t  foffset;  /* Offset to start of data */
-};
-
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
@@ -143,127 +136,6 @@ static int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
 
   *datlen = dlen;
   return OK;
-}
-
-/****************************************************************************
- * Name: nxffs_nextblock
- *
- * Description:
- *   Search for the next valid data block starting at the provided
- *   FLASH offset.
- *
- * Input Parameters:
- *   volume - Describes the NXFFS volume.
- *   datlen  - A memory location to return the data block length.
- *  
- * Returned Value:
- *   Zero is returned on success. Otherwise, a negated errno is returned
- *   that indicates the nature of the failure.
- *
- ****************************************************************************/
-
-int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
-                    FAR struct nxffs_blkentry_s *blkentry)
-{
-  int nmagic;
-  int ch;
-  int nerased;
-  int ret;
-
-  /* Seek to the first FLASH offset provided by the caller. */
-
-  nxffs_ioseek(volume, offset);
-
-  /* Skip the block header */
-
-  if (volume->iooffset < SIZEOF_NXFFS_BLOCK_HDR)
-    {
-      volume->iooffset = SIZEOF_NXFFS_BLOCK_HDR;
-    }
-
-  /* Then begin searching */
-  
-  nerased = 0;
-  nmagic  = 0;
-
-  for (;;)
-    {
-      /* Read the next character */
-
-      ch = nxffs_getc(volume);
-      if (ch < 0)
-        {
-          fvdbg("nxffs_getc failed: %d\n", -ch);
-          return ch;
-        }
-
-      /* Check for another erased byte */
-
-      else if (ch == CONFIG_NXFFS_ERASEDSTATE)
-        {
-          /* If we have encountered NXFFS_NERASED number of consecutive
-           * erased bytes, then presume we have reached the end of valid
-           * data.
-           */
-
-          if (++nerased >= NXFFS_NERASED)
-            {
-              fvdbg("No entry found\n");
-              return -ENOENT;
-            }
-        }
-      else
-        {
-          nerased = 0;
-
-          /* Check for the magic sequence indicating the start of an NXFFS
-           * data block or start of the next inode. There is the possibility
-           * of this magic sequnce occurring in FLASH data.  However, the
-           * data block CRC should distinguish between real NXFFS data blocks
-           * headers and such false alarms.
-           */
-
-          if (ch != g_datamagic[nmagic])
-            {
-              nmagic = 0;
-            }
-          else if (nmagic < NXFFS_MAGICSIZE - 1)
-            {
-              nmagic++;
-            }
-
-          /* We have found the magic sequence in the FLASH data that may
-           * indicate the beginning of an NXFFS data block.
-           */
-
-          else 
-            {
-              /* The offset to the header must be 4 bytes before the current
-               * FLASH seek location.
-               */
-
-              blkentry->hoffset = nxffs_iotell(volume) - 4;
-
-              /* Read the block header and verify the block at that address */
-
-              ret = nxffs_rdblkhdr(volume, blkentry->hoffset, &blkentry->datlen);
-              if (ret == OK)
-                {
-                  fvdbg("Found a valid data block, offset: %d datlen: %d\n",
-                        blkentry->hoffset, blkentry->datlen);
-                  return OK;
-                }
-
-              /* False alarm.. keep looking */
-
-              nmagic = 0;
-            }
-        }
-    }
-
-  /* We won't get here, but to keep some compilers happy: */
-
-  return -ENOENT;
 }
 
 /****************************************************************************
@@ -443,4 +315,126 @@ errout_with_semaphore:
 errout:
   return (ssize_t)ret;
 }
+
+/****************************************************************************
+ * Name: nxffs_nextblock
+ *
+ * Description:
+ *   Search for the next valid data block starting at the provided
+ *   FLASH offset.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume.
+ *   datlen  - A memory location to return the data block length.
+ *  
+ * Returned Value:
+ *   Zero is returned on success. Otherwise, a negated errno is returned
+ *   that indicates the nature of the failure.
+ *
+ ****************************************************************************/
+
+int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
+                    FAR struct nxffs_blkentry_s *blkentry)
+{
+  int nmagic;
+  int ch;
+  int nerased;
+  int ret;
+
+  /* Seek to the first FLASH offset provided by the caller. */
+
+  nxffs_ioseek(volume, offset);
+
+  /* Skip the block header */
+
+  if (volume->iooffset < SIZEOF_NXFFS_BLOCK_HDR)
+    {
+      volume->iooffset = SIZEOF_NXFFS_BLOCK_HDR;
+    }
+
+  /* Then begin searching */
+  
+  nerased = 0;
+  nmagic  = 0;
+
+  for (;;)
+    {
+      /* Read the next character */
+
+      ch = nxffs_getc(volume);
+      if (ch < 0)
+        {
+          fvdbg("nxffs_getc failed: %d\n", -ch);
+          return ch;
+        }
+
+      /* Check for another erased byte */
+
+      else if (ch == CONFIG_NXFFS_ERASEDSTATE)
+        {
+          /* If we have encountered NXFFS_NERASED number of consecutive
+           * erased bytes, then presume we have reached the end of valid
+           * data.
+           */
+
+          if (++nerased >= NXFFS_NERASED)
+            {
+              fvdbg("No entry found\n");
+              return -ENOENT;
+            }
+        }
+      else
+        {
+          nerased = 0;
+
+          /* Check for the magic sequence indicating the start of an NXFFS
+           * data block or start of the next inode. There is the possibility
+           * of this magic sequnce occurring in FLASH data.  However, the
+           * data block CRC should distinguish between real NXFFS data blocks
+           * headers and such false alarms.
+           */
+
+          if (ch != g_datamagic[nmagic])
+            {
+              nmagic = 0;
+            }
+          else if (nmagic < NXFFS_MAGICSIZE - 1)
+            {
+              nmagic++;
+            }
+
+          /* We have found the magic sequence in the FLASH data that may
+           * indicate the beginning of an NXFFS data block.
+           */
+
+          else 
+            {
+              /* The offset to the header must be 4 bytes before the current
+               * FLASH seek location.
+               */
+
+              blkentry->hoffset = nxffs_iotell(volume) - 4;
+
+              /* Read the block header and verify the block at that address */
+
+              ret = nxffs_rdblkhdr(volume, blkentry->hoffset, &blkentry->datlen);
+              if (ret == OK)
+                {
+                  fvdbg("Found a valid data block, offset: %d datlen: %d\n",
+                        blkentry->hoffset, blkentry->datlen);
+                  return OK;
+                }
+
+              /* False alarm.. keep looking */
+
+              nmagic = 0;
+            }
+        }
+    }
+
+  /* We won't get here, but to keep some compilers happy: */
+
+  return -ENOENT;
+}
+
 

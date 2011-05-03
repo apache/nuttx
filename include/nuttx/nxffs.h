@@ -59,6 +59,10 @@
 #  error "CONFIG_NXFFS_ERASEDSTATE must be either 0x00 or 0xff"
 #endif
 
+#ifndef CONFIG_NXFFS_PACKTHRESHOLD
+#  define CONFIG_NXFFS_PACKTHRESHOLD 32
+#endif
+
 /* At present, only a single pre-allocated NXFFS volume is supported.  This
  * is because here can be only a single NXFFS volume mounted at any time.
  * This has to do with the fact that we bind to an MTD driver (instead of a

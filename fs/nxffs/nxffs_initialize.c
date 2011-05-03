@@ -207,6 +207,19 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
       goto errout_with_volume;
     }
 
+  /* Pre-allocate one additional I/O block buffer to support filesystem
+   * packing.  This buffer is not needed often, but is best to have pre-
+   * allocated and in-place.
+   */
+
+  volume->pack = (FAR uint8_t *)kmalloc(volume->geo.blocksize);
+  if (!volume->pack)
+    {
+      fdbg("Failed to allocate an I/O block buffer\n");
+      ret = -ENOMEM;
+      goto errout_with_cache;
+    }
+
   /* Get the number of R/W blocks per erase block and the total number o
    * R/W blocks
    */
@@ -221,7 +234,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   if (ret < 0)
     {
       fdbg("Failed to collect block statistics: %d\n", -ret);
-      goto errout_with_iobuffer;
+      goto errout_with_buffer;
     }
 
   /* If the proportion of good blocks is low or the proportion of unformatted
@@ -237,7 +250,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           fdbg("Failed to reformat the volume: %d\n", -ret);
-          goto errout_with_iobuffer;
+          goto errout_with_buffer;
         }
 
       /* Get statistics on the re-formatted volume */
@@ -247,7 +260,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           fdbg("Failed to collect block statistics: %d\n", -ret);
-          goto errout_with_iobuffer;
+          goto errout_with_buffer;
         }
 #endif
     }
@@ -261,7 +274,9 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
     }
   fdbg("Failed to calculate file system limits: %d\n", -ret);
 
-errout_with_iobuffer:
+errout_with_buffer:
+  kfree(volume->pack);
+errout_with_cache:
   kfree(volume->cache);
 errout_with_volume:
   kfree(volume);

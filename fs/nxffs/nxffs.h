@@ -239,6 +239,15 @@ struct nxffs_entry_s
   uint32_t                  datlen;    /* Length of inode data */
 };
 
+/* This structure describes int in-memory representation of the data block */
+
+struct nxffs_blkentry_s
+{
+  off_t                     hoffset;  /* Offset to the block data header */
+  uint16_t                  datlen;   /* Length of data following the header */
+  uint16_t                  foffset;  /* Offset to start of data */
+};
+
 /* This structure describes the state of one open file.  This structure
  * is protected by the volume semaphore.
  */
@@ -285,6 +294,7 @@ struct nxffs_volume_s
   off_t                     cblock;    /* Starting block number in cache */
   FAR struct nxffs_ofile_s *ofiles;    /* A singly-linked list of open files */
   FAR uint8_t              *cache;     /* Allocated erase block */
+  FAR uint8_t              *pack;      /* Extra I/O block buffer to support packing */
 };
 
 /* This structure describes the state of the blocks on the NXFFS volume */
@@ -769,12 +779,33 @@ extern FAR struct nxffs_ofile_s *nxffs_findofile(FAR struct nxffs_volume_s *volu
  *   volume->froffset - Updated offset to the first free FLASH block after
  *     the reserved memory.
  *
- *
  * Defined in nxffs_write.c
  *
  ****************************************************************************/
 
 extern int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size);
+
+/****************************************************************************
+ * Name: nxffs_nextblock
+ *
+ * Description:
+ *   Search for the next valid data block starting at the provided
+ *   FLASH offset.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume.
+ *   datlen  - A memory location to return the data block length.
+ *  
+ * Returned Value:
+ *   Zero is returned on success. Otherwise, a negated errno is returned
+ *   that indicates the nature of the failure.
+ *
+ * Defined in nxffs_read.c
+ *
+ ****************************************************************************/
+
+extern int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
+                           FAR struct nxffs_blkentry_s *blkentry);
 
 /****************************************************************************
  * Name: nxffs_wrverify
@@ -813,6 +844,8 @@ extern int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size);
  *   volume->iooffset - The offset in the block to the verified object
  *     position.
  *   volume->froffset - Updated offset to the first free FLASH block.
+ *
+ * Defined in nxffs_write.c
  *
  ****************************************************************************/
 
