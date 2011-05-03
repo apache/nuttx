@@ -63,6 +63,10 @@
 #  define CONFIG_NXFFS_PACKTHRESHOLD 32
 #endif
 
+#ifndef CONFIG_NXFFS_MAXNAMLEN
+#  define CONFIG_NXFFS_MAXNAMLEN 255
+#endif
+
 /* At present, only a single pre-allocated NXFFS volume is supported.  This
  * is because here can be only a single NXFFS volume mounted at any time.
  * This has to do with the fact that we bind to an MTD driver (instead of a

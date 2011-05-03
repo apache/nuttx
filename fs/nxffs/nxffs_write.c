@@ -57,13 +57,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* When we allocate FLASH for a new inode data block, we will require that
- * space is available to hold this minimum number of data bytes in addition
- * to the size of the data block headeer.
- */
-
-#define NXFFS_MINDATA 16
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -798,7 +791,7 @@ int nxffs_wrblkhdr(FAR struct nxffs_volume_s *volume,
   FAR struct nxffs_data_s *dathdr;
   int ret;
 
-  /* Write the dat block header to memory */
+  /* Write the data block header to memory */
 
   nxffs_ioseek(volume, wrfile->doffset);
   dathdr = (FAR struct nxffs_data_s *)&volume->cache[volume->iooffset];

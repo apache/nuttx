@@ -418,7 +418,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   /* Make sure that the length of the file name will fit in a uint8_t */
 
   namlen = strlen(name);
-  if (namlen > UINT8_MAX)
+  if (namlen > CONFIG_NXFFS_MAXNAMLEN)
     {
       fdbg("Name is too long: %d\n", namlen);
       ret = -EINVAL;
@@ -785,14 +785,9 @@ static inline void nxffs_freeofile(FAR struct nxffs_volume_s *volume,
  *
  ****************************************************************************/
 
-static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
-                         FAR struct nxffs_wrfile_s *wrfile)
+static inline int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
+                                FAR struct nxffs_wrfile_s *wrfile)
 {
-  FAR struct nxffs_inode_s *inode;
-  off_t namblock;
-  uint16_t namoffset;
-  uint32_t crc;
-  int namlen;
   int ret;
 
   /* Is there an unfinalized write data? */
@@ -828,96 +823,10 @@ static int nxffs_wrclose(FAR struct nxffs_volume_s *volume,
         }
     }
 
-  /* Write the inode header to FLASH.  First get the block where we will
-   * write the file name.
-   */
+  /* Write the inode header to FLASH */
 
-  nxffs_ioseek(volume, wrfile->ofile.entry.noffset);
-  namblock  = volume->ioblock;
-  namoffset = volume->iooffset;
+  ret = nxffs_wrinode(volume, &wrfile->ofile.entry);
 
-  /* Now seek to the inode header position and assure that it is in the
-   * volume cache.
-   */
-
-  nxffs_ioseek(volume, wrfile->ofile.entry.hoffset);
-  ret = nxffs_rdcache(volume, volume->ioblock);
-  if (ret < 0)
-    {
-      fdbg("Failed to read inode header block %d: %d\n",
-           volume->ioblock, -ret);
-      goto errout;
-    }
-
-  /* Get the length of the inode name */
-
-  namlen = strlen(wrfile->ofile.entry.name);
-  DEBUGASSERT(namlen < UINT8_MAX); /* This was verified earlier */
-
-  /* Initialize the inode header */
-
-  inode = (FAR struct nxffs_inode_s *)&volume->cache[volume->iooffset];
-  memcpy(inode->magic, g_inodemagic, NXFFS_MAGICSIZE);
-
-  inode->state  = CONFIG_NXFFS_ERASEDSTATE;
-  inode->namlen = namlen;
-
-  nxffs_wrle32(inode->noffs,  wrfile->ofile.entry.noffset);
-  nxffs_wrle32(inode->doffs,  wrfile->ofile.entry.doffset);
-  nxffs_wrle32(inode->utc,    wrfile->ofile.entry.utc);
-  nxffs_wrle32(inode->crc,    0);
-  nxffs_wrle32(inode->datlen, wrfile->ofile.entry.datlen);
-
-  /* Calculate the CRC */
-
-  crc = crc32((FAR const uint8_t *)inode, SIZEOF_NXFFS_INODE_HDR);
-  crc = crc32part((FAR const uint8_t *)wrfile->ofile.entry.name, namlen, crc);
-
-  /* Finish the inode header */
-
-  inode->state = INODE_STATE_FILE;
-  nxffs_wrle32(inode->crc, crc);
-
-  /* Are the inode header and the inode name in the same block?  Normally,
-   * they will be in the same block.  However, they could potentially be
-   * far apart due to intervening bad blocks.
-   */
-
-  if (volume->ioblock != namblock)
-    {
-      /* Write the block with the inode header */
-
-      ret = nxffs_wrcache(volume);
-      if (ret < 0)
-        {
-          fdbg("Failed to write inode header block %d: %d\n",
-               volume->ioblock, -ret);
-          goto errout;
-        }
-
-      /* Make sure the that block containing the inode name is in the cache */
-
-      volume->ioblock  = namblock;
-      volume->iooffset = namoffset;
-      ret = nxffs_rdcache(volume, volume->ioblock);
-      if (ret < 0)
-        {
-          fdbg("Failed to read inode name block %d: %d\n",
-               volume->ioblock, -ret);
-          goto errout;
-        }
-    }
-
-  /* Finally, copy the inode name to the cache and write the inode name block */
-
-  memcpy(&volume->cache[namoffset], wrfile->ofile.entry.name, namlen);
-  ret = nxffs_wrcache(volume);
-  if (ret < 0)
-    {
-      fdbg("Failed to write inode header block %d: %d\n",
-           volume->ioblock, -ret);
-    }
-  
   /* The volume is now available for other writers */
 
 errout:
@@ -1114,3 +1023,131 @@ int nxffs_close(FAR struct file *filep)
 errout:
   return ret;
 }
+
+/****************************************************************************
+ * Name: nxffs_wrinode
+ *
+ * Description:
+ *   Write the inode header and inode file name to FLASH.  This is done in
+ *   two contexts:
+ *
+ *   1. When an inode is closed, or
+ *   2. As part of the file system packing logic when an inode is moved.
+ *
+ * Input parameters
+ *   volume - Describes the NXFFS volume
+ *   entry  - Describes the indoe header to write
+ *
+ * Returned Value:
+ *   Zero is returned on success; Otherwise, a negated errno value is returned
+ *   indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+int nxffs_wrinode(FAR struct nxffs_volume_s *volume, FAR struct nxffs_entry_s *entry)
+{
+  FAR struct nxffs_inode_s *inode;
+  off_t namblock;
+  uint16_t namoffset;
+  uint32_t crc;
+  int namlen;
+  int ret;
+
+  /* Write the inode header to FLASH.  First get the block where we will
+   * write the file name.
+   */
+
+  nxffs_ioseek(volume, entry->noffset);
+  namblock  = volume->ioblock;
+  namoffset = volume->iooffset;
+
+  /* Now seek to the inode header position and assure that it is in the
+   * volume cache.
+   */
+
+  nxffs_ioseek(volume, entry->hoffset);
+  ret = nxffs_rdcache(volume, volume->ioblock);
+  if (ret < 0)
+    {
+      fdbg("Failed to read inode header block %d: %d\n",
+           volume->ioblock, -ret);
+      goto errout;
+    }
+
+  /* Get the length of the inode name */
+
+  namlen = strlen(entry->name);
+  DEBUGASSERT(namlen < CONFIG_NXFFS_MAXNAMLEN); /* This was verified earlier */
+
+  /* Initialize the inode header */
+
+  inode = (FAR struct nxffs_inode_s *)&volume->cache[volume->iooffset];
+  memcpy(inode->magic, g_inodemagic, NXFFS_MAGICSIZE);
+
+  inode->state  = CONFIG_NXFFS_ERASEDSTATE;
+  inode->namlen = namlen;
+
+  nxffs_wrle32(inode->noffs,  entry->noffset);
+  nxffs_wrle32(inode->doffs,  entry->doffset);
+  nxffs_wrle32(inode->utc,    entry->utc);
+  nxffs_wrle32(inode->crc,    0);
+  nxffs_wrle32(inode->datlen, entry->datlen);
+
+  /* Calculate the CRC */
+
+  crc = crc32((FAR const uint8_t *)inode, SIZEOF_NXFFS_INODE_HDR);
+  crc = crc32part((FAR const uint8_t *)entry->name, namlen, crc);
+
+  /* Finish the inode header */
+
+  inode->state = INODE_STATE_FILE;
+  nxffs_wrle32(inode->crc, crc);
+
+  /* Are the inode header and the inode name in the same block?  Normally,
+   * they will be in the same block.  However, they could potentially be
+   * far apart due to intervening bad blocks.
+   */
+
+  if (volume->ioblock != namblock)
+    {
+      /* Write the block with the inode header */
+
+      ret = nxffs_wrcache(volume);
+      if (ret < 0)
+        {
+          fdbg("Failed to write inode header block %d: %d\n",
+               volume->ioblock, -ret);
+          goto errout;
+        }
+
+      /* Make sure the that block containing the inode name is in the cache */
+
+      volume->ioblock  = namblock;
+      volume->iooffset = namoffset;
+      ret = nxffs_rdcache(volume, volume->ioblock);
+      if (ret < 0)
+        {
+          fdbg("Failed to read inode name block %d: %d\n",
+               volume->ioblock, -ret);
+          goto errout;
+        }
+    }
+
+  /* Finally, copy the inode name to the cache and write the inode name block */
+
+  memcpy(&volume->cache[namoffset], entry->name, namlen);
+  ret = nxffs_wrcache(volume);
+  if (ret < 0)
+    {
+      fdbg("Failed to write inode header block %d: %d\n",
+           volume->ioblock, -ret);
+    }
+  
+  /* The volume is now available for other writers */
+
+errout:
+  sem_post(&volume->wrsem);
+  return ret;
+}
+
+

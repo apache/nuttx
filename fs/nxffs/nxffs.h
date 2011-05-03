@@ -170,6 +170,14 @@
 
 #define NXFFS_MAGICSIZE	          4
 
+/* When we allocate FLASH for a new inode data block, we will require that
+ * space is available to hold this minimum number of data bytes in addition
+ * to the size of the data block headeer.
+ */
+
+#define NXFFS_MINDATA             16
+
+
 /* Internal definitions *****************************************************/
 /* If we encounter this number of erased bytes, we assume that all of the
  * flash beyond this point is erased.
@@ -180,11 +188,11 @@
 /* Quasi-standard definitions */
 
 #ifndef MIN
-#  define MIN(a,b) (a < b ? a : b)
+#  define MIN(a,b)                (a < b ? a : b)
 #endif
 
 #ifndef MAX
-#  define MAX(a,b) (a > b ? a : b)
+#  define MAX(a,b)                (a > b ? a : b)
 #endif
 
 /****************************************************************************
@@ -741,6 +749,29 @@ extern int nxffs_reformat(FAR struct nxffs_volume_s *volume);
 
 extern FAR struct nxffs_ofile_s *nxffs_findofile(FAR struct nxffs_volume_s *volume,
                                                  FAR const char *name);
+
+/****************************************************************************
+ * Name: nxffs_wrinode
+ *
+ * Description:
+ *   Write the inode header and inode file name to FLASH.  This is done in
+ *   two contexts:
+ *
+ *   1. When an inode is closed, or
+ *   2. As part of the file system packing logic when an inode is moved.
+ *
+ * Input parameters
+ *   volume - Describes the NXFFS volume
+ *   entry  - Describes the indoe header to write
+ *
+ * Returned Value:
+ *   Zero is returned on success; Otherwise, a negated errno value is returned
+ *   indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+extern int nxffs_wrinode(FAR struct nxffs_volume_s *volume,
+                         FAR struct nxffs_entry_s *entry);
 
 /****************************************************************************
  * Name: nxffs_wrreserve
