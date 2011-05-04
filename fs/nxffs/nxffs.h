@@ -555,6 +555,8 @@ extern off_t nxffs_iotell(FAR struct nxffs_volume_s *volume);
  * Input Parameters:
  *   volume - Describes the NXFFS volume.  The paramters ioblock and iooffset
  *     in the volume structure determine the behavior of nxffs_getc().
+ *   reserve - If less than this much space is available at the end of the
+ *     block, then skip to the next block.
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno indicating the
@@ -564,7 +566,7 @@ extern off_t nxffs_iotell(FAR struct nxffs_volume_s *volume);
  *
  ****************************************************************************/
 
-extern int nxffs_getc(FAR struct nxffs_volume_s *volume);
+extern int nxffs_getc(FAR struct nxffs_volume_s *volume, uint16_t reserve);
 
 /****************************************************************************
  * Name: nxffs_freeentry

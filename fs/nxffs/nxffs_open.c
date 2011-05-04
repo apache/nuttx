@@ -745,7 +745,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
       ret = nxffs_findinode(volume, name, &ofile->entry);
       if (ret != OK)
         {
-          fdbg("Inode '%s' not found: %d\n", name, -ret);
+          fvdbg("Inode '%s' not found: %d\n", name, -ret);
           goto errout_with_ofile;
         }
 

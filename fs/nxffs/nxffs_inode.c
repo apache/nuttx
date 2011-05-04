@@ -282,7 +282,7 @@ int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
     {
       /* Read the next character */
 
-      ch = nxffs_getc(volume);
+      ch = nxffs_getc(volume, SIZEOF_NXFFS_INODE_HDR - nmagic);
       if (ch < 0)
         {
           fvdbg("nxffs_getc failed: %d\n", -ch);

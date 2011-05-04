@@ -99,7 +99,9 @@ int nxffs_verifyblock(FAR struct nxffs_volume_s *volume, off_t block)
   ret = nxffs_rdcache(volume, block);
   if (ret < 0)
     {
-      fdbg("Failed to read data into cache: %d\n", ret);
+      /* Perhaps we are at the end of the media */
+
+      fvdbg("Failed to read data into cache: %d\n", ret);
       return ret;
     }
 
@@ -109,15 +111,29 @@ int nxffs_verifyblock(FAR struct nxffs_volume_s *volume, off_t block)
    */
 
   blkhdr = (FAR struct nxffs_block_s *)volume->cache;
-  if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) == 0 &&
-      blkhdr->state == BLOCK_STATE_GOOD)
+  if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) == 0)
     {
-      /* The block is valid */
+       /* This does appear to be a block */
 
-      return OK;
+      if (blkhdr->state == BLOCK_STATE_GOOD)
+        {
+          /* The block is valid */
+
+          return OK;
+        }
+      else if (blkhdr->state == BLOCK_STATE_BAD)
+        {
+          /* -ENOENT is a special indication that this is a properly marked
+           * bad block
+           */
+
+          return -ENOENT;
+        }
     }
 
-  return -ENOENT;
+  /* Whatever is here where a block header should be is invalid */
+
+  return -EINVAL;
 }
 
 /****************************************************************************

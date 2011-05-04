@@ -73,6 +73,7 @@ struct nxffs_blkinfo_s
   off_t nblocks;
   off_t block;
   off_t offset;
+  bool verbose;
 };
 
 /****************************************************************************
@@ -170,7 +171,10 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
     {
       /* Not than we cannot verify the inode header */
 
-      fdbg(g_format, blkinfo->block, offset, "INODE", "UNVERFD", datlen);
+      if (blkinfo->verbose)
+        {
+          fdbg(g_format, blkinfo->block, offset, "INODE", "UNVERFD", datlen);
+        }
       return ERROR;
     }
 
@@ -202,11 +206,17 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
 
   if (state == INODE_STATE_FILE)
     {
-      fdbg(g_format, blkinfo->block, offset, "INODE", "OK     ", datlen);
+      if (blkinfo->verbose)
+        {
+          fdbg(g_format, blkinfo->block, offset, "INODE", "OK     ", datlen);
+        }
     }
   else if (state == INODE_STATE_DELETED)
     {
-      fdbg(g_format, blkinfo->block, offset, "INODE", "DELETED", datlen);
+      if (blkinfo->verbose)
+        {
+          fdbg(g_format, blkinfo->block, offset, "INODE", "DELETED", datlen);
+        }
     }
   else
     {
@@ -266,7 +276,10 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
 
   /* If must be a good header */
 
-  fdbg(g_format, blkinfo->block, offset, "DATA ", "OK     ", datlen);
+  if (blkinfo->verbose)
+    {
+      fdbg(g_format, blkinfo->block, offset, "DATA ", "OK     ", datlen);
+    }
   return SIZEOF_NXFFS_DATA_HDR + datlen;
 }
 #endif
@@ -303,8 +316,11 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
       size_t nerased = nxffs_erased(blkinfo->buffer + SIZEOF_NXFFS_BLOCK_HDR, datsize);
       if (nerased == datsize)
         {
-          fdbg(g_format, blkinfo->block, 0, "BLOCK", "ERASED ",
-               blkinfo->geo.blocksize);
+          if (blkinfo->verbose)
+            {
+              fdbg(g_format, blkinfo->block, 0, "BLOCK", "ERASED ",
+                   blkinfo->geo.blocksize);
+            }
           return;
         }
 #if 0 /* Too much output, to little information */
@@ -384,7 +400,9 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
  *   and CONFIG_DEBUG_FS must be enabled for this function to do anything.
  *
  * Input Parameters:
- *   mtd - The MTD device that provides the interface to NXFFS-formatted media.
+ *   mtd - The MTD device that provides the interface to NXFFS-formatted
+ *     media.
+ *   verbose - FALSE: only show errors
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -392,7 +410,7 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
  *
  ****************************************************************************/
 
-int nxffs_dump(FAR struct mtd_dev_s *mtd)
+int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
 {
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
   struct nxffs_blkinfo_s blkinfo;
@@ -407,16 +425,20 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd)
   ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&blkinfo.geo));
   if (ret < 0)
     {
-      fdbg("MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", -ret);
+      fdbg("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", -ret);
       goto errout;
     }
+
+  /* Save the verbose output indication */
+
+  blkinfo.verbose = verbose;
 
   /* Allocate a buffer to hold one block */
 
   blkinfo.buffer = (FAR uint8_t *)kmalloc(blkinfo.geo.blocksize);
   if (!blkinfo.buffer)
     {
-      fdbg("Failed to allocate block cache\n");
+      fdbg("ERROR: Failed to allocate block cache\n");
       ret = -ENOMEM;
       goto errout;
     }
@@ -436,7 +458,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd)
       ret = MTD_BREAD(mtd, blkinfo.block, 1, blkinfo.buffer);
       if (ret < 0)
         {
-          fdbg("Failed to read block %d\n", blkinfo.block);
+          fdbg("ERROR: Failed to read block %d\n", blkinfo.block);
           goto errout_with_block;
         }
 

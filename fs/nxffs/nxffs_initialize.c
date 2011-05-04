@@ -394,7 +394,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
   nerased = 0;
   for (;;)
     {
-      int ch = nxffs_getc(volume);
+      int ch = nxffs_getc(volume, 1);
       if (ch < 0)
         {
           /* Failed to read the next byte... this could mean that the FLASH

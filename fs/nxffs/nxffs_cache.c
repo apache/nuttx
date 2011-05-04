@@ -196,6 +196,8 @@ off_t nxffs_iotell(FAR struct nxffs_volume_s *volume)
  * Input Parameters:
  *   volume - Describes the NXFFS volume.  The paramters ioblock and iooffset
  *     in the volume structure determine the behavior of nxffs_getc().
+ *   reserve - If less than this much space is available at the end of the
+ *     block, then skip to the next block.
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno indicating the
@@ -203,24 +205,26 @@ off_t nxffs_iotell(FAR struct nxffs_volume_s *volume)
  *   
  ****************************************************************************/
 
-int nxffs_getc(FAR struct nxffs_volume_s *volume)
+int nxffs_getc(FAR struct nxffs_volume_s *volume, uint16_t reserve)
 {
   int ret;
 
+  DEBUGASSERT(reserve > 0);
+
   /* Loop to skip over bad blocks */
- 
+
   do
     {
-      /* Check if we have read past the current block */
+      /* Check if we have the reserve amount at the end of the current block */
 
-      if (volume->iooffset >= volume->geo.blocksize)
+      if (volume->iooffset + reserve > volume->geo.blocksize)
         {
           /* Check for attempt to read past the end of FLASH */
 
           off_t nextblock = volume->ioblock + 1;
           if (nextblock >= volume->nblocks)
             {
-              fdbg("End of FLASH encountered\n");
+              fvdbg("End of FLASH encountered\n");
               return -ENOSPC;
             }
 
@@ -241,7 +245,7 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume)
       ret = nxffs_verifyblock(volume, volume->ioblock);
       if (ret < 0 && ret != -ENOENT)
         {
-          fdbg("Failed to read valid data into cache: %d\n", ret);
+          fvdbg("Failed to read valid data into cache: %d\n", ret);
           return ret;
         }
     }

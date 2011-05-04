@@ -112,7 +112,9 @@ EXTERN int nxffs_initialize(FAR struct mtd_dev_s *mtd);
  *   and CONFIG_DEBUG_FS must be enabled for this function to do anything.
  *
  * Input Parameters:
- *   mtd - The MTD device that provides the interface to NXFFS-formatted media.
+ *   mtd - The MTD device that provides the interface to NXFFS-formatted
+ *     media.
+ *   verbose - FALSE: only show errors
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -120,7 +122,7 @@ EXTERN int nxffs_initialize(FAR struct mtd_dev_s *mtd);
  *
  ****************************************************************************/
 
-EXTERN int nxffs_dump(FAR struct mtd_dev_s *mtd);
+EXTERN int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose);
 
 #undef EXTERN
 #ifdef __cplusplus

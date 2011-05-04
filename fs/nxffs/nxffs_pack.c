@@ -550,6 +550,7 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
       pack->dest.blkpos    = 0;
     }
 
+  volume->froffset = nxffs_packtell(volume, pack);
   return OK;
 }
 
@@ -791,8 +792,9 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
        pack->dest.fpos   += xfrlen; /* Destination data offsets */
        pack->dest.blkpos += xfrlen;
        pack->dest.blklen += xfrlen; /* Destination data block size */
-       volume->iooffset  += xfrlen; /* Source I/O block offset */
        pack->iooffset    += xfrlen; /* Destination I/O block offset */
+       volume->iooffset  += xfrlen; /* Source I/O block offset */
+       volume->froffset  += xfrlen; /* Free FLASH offset */
 
        /* Now, either the (1) src block has been fully transferred, (2) all
         * of the source data has been transferred, or (3) the the destination
@@ -896,7 +898,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
 
           /* Yes.. find the next data block in the source input stream. */
 
-          offset = pack->src.blkoffset + SIZEOF_NXFFS_BLOCK_HDR + pack->src.blklen;
+          offset = pack->src.blkoffset + SIZEOF_NXFFS_DATA_HDR + pack->src.blklen;
           ret    = nxffs_nextblock(volume, offset, &blkentry);
           if (ret < 0)
             {
@@ -1000,7 +1002,8 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
    * nxffs_startpos() that the inode header will fit at hoffset.
    */
 
-  pack.iooffset += SIZEOF_NXFFS_INODE_HDR;
+  pack.iooffset   += SIZEOF_NXFFS_INODE_HDR;
+  volume->froffset = nxffs_packtell(volume, &pack);
 
   /* Then pack all erase blocks starting with the erase block that contains
    * the ioblock and through the final erase block on the FLASH.
