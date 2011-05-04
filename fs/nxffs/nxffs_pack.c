@@ -782,7 +782,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
        /* Transfer the smaller of the two amounts data */
 
        uint16_t xfrlen = MIN(srclen, destlen);
-       nxffs_ioseek(volume, pack->src.blkoffset + pack->src.blkpos);
+       nxffs_ioseek(volume, pack->src.blkoffset + SIZEOF_NXFFS_DATA_HDR + pack->src.blkpos);
        memcpy(&pack->iobuffer[pack->iooffset], &volume->cache[volume->iooffset], xfrlen);
 
        /* Increment counts and offset for this data transfer */
