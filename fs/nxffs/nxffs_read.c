@@ -344,7 +344,7 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
                * FLASH seek location.
                */
 
-              blkentry->hoffset = nxffs_iotell(volume) - 4;
+              blkentry->hoffset = nxffs_iotell(volume) - NXFFS_MAGICSIZE;
 
               /* Read the block header and verify the block at that address */
 
@@ -356,8 +356,11 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
                   return OK;
                 }
 
-              /* False alarm.. keep looking */
+              /* False alarm.. Restore the volume cache position (that was
+               * destroyed by nxfs_rdblkhdr()) and keep looking.
+               */
 
+              nxffs_ioseek(volume, blkentry->hoffset + NXFFS_MAGICSIZE);
               nmagic = 0;
             }
         }

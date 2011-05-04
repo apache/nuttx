@@ -475,7 +475,14 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
           return -ENOSPC;
         }
 
-      /* Yes.. reserve space for the inode name (but don't write it yet) */
+      /* Yes.. Write the inode name to the volume packing buffer now, but do
+       * not free the name string memory yet; it will be needed later to\
+       * calculate the header CRC.
+       */
+
+      memcpy(&volume->pack[pack->iooffset], pack->dest.entry.name, namlen);
+
+      /* Reserve space for the inode name  */
 
       pack->dest.entry.noffset = nxffs_packtell(volume, pack);
       pack->iooffset += namlen;
@@ -548,7 +555,9 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
  * Name: nxffs_wrinodehdr
  *
  * Description:
- *   Write the destination inode header to FLASH.
+ *   Write the destination inode header (only) to FLASH.  Note that the inode
+ *   name has already been written to FLASH (thus greatly simplifying the
+ *   the complexity of this operation).
  *
  * Input Parameters:
  *   volume - The volume to be packed
@@ -565,64 +574,38 @@ static int nxffs_wrinodehdr(FAR struct nxffs_volume_s *volume,
 {
   FAR struct nxffs_inode_s *inode;
   off_t ioblock;
-  off_t namblock;
   uint16_t iooffset;
-  uint16_t namoffset;
   uint32_t crc;
   int namlen;
-  int ret;
 
-  /* Get positions corresponding to the inode header and inode name positions */
+  /* Get seek positions corresponding to the inode header location */
 
   ioblock   = nxffs_getblock(volume, pack->dest.entry.hoffset);
   iooffset  = nxffs_getoffset(volume, pack->dest.entry.hoffset, ioblock);
 
-  namblock  = nxffs_getblock(volume, pack->dest.entry.noffset);
-  namoffset = nxffs_getoffset(volume, pack->dest.entry.noffset, namblock);
-
   /* The inode header is not written until all of the inode data has been
-   * packed into its new location.  As a result, there are three possibilities:
+   * packed into its new location.  As a result, there are two possibilities:
    *
    * 1. The inode header lies in the current, unwritten erase block,
    * 2. The inode header resides in an earlier erase block and has already
-   *    been written to FLASH, but the inode name resides within the erase
-   *    block and has not been written to FLASH, or
-   * 3. The inode header resides in an earlier erase block and has already
-   *    been written to FLASH (most likely case for files larger than an
-   *    erase block).
+   *    been written to FLASH.
    *
-   * Case 2 & 3: Does the inode header reside in a block before the beginning
+   * Recall that the inode name has already been written to FLASH.  If that
+   * were not the case, then there would be other complex possibilities.
+   *
+   * Case 2: Does the inode header reside in a block before the beginning
    * of the current erase block?
    */
 
   if (ioblock < pack->block0)
     {
-      /* Does the inode name also reside in a block before the beginning of
-       * the current erase block?
+      /* Case 2:  The inode header lies in an earlier erase block that has
+       * already been written to FLASH.  In this case, if we are very
+       * careful, we can just use the standard routine to write the inode
+       * header that is called during the normal file close operation:
        */
 
-      if (namblock < pack->block0)
-        {
-          /* Yes.. this is case 3:  Both the inode block header and the inode
-           * name lie in an earlier erase block that has already been written
-           * to FLASH.  In this case, if we are very careful, we can just use
-           * the standard routine to write the inode header that is called
-           * during the normal file close operation:
-           */
-
-          ret = nxffs_wrinode(volume, &pack->dest.entry);
-          return ret;
-        }
-      else
-        {
-          /* Case 2:  The inode header lies in an earlier erase block that
-           * has been written to FLASH but the inode name is in the cache and
-           * still unwritten.
-           */
-
-#warning "Missing logic"
-return -ENOSYS;
-        }
+      return nxffs_wrinode(volume, &pack->dest.entry);
     }
 
   /* Cases 1:  Both the inode header and name are in the unwritten cache memory. */
@@ -656,11 +639,6 @@ return -ENOSYS;
   inode->state = INODE_STATE_FILE;
   nxffs_wrle32(inode->crc, crc);
 
-  /* Write the inode name */
-
-  namoffset += (namblock - pack->block0) * volume->geo.blocksize;
-  memcpy(&volume->pack[namoffset], pack->dest.entry.name, namlen);
-
   /* Reset the dest inode information */
 
   nxffs_freeentry(&pack->dest.entry);
@@ -692,14 +670,14 @@ static void nxffs_wrdathdr(FAR struct nxffs_volume_s *volume,
   uint16_t iooffset;
   uint32_t crc;
 
-  /* Get the offset in the block corresponding to the location of the inode
-   * header.  NOTE:  This must lie in the same block as we currently have
+  /* Get the offset in the block corresponding to the location of the data
+   * block header.  NOTE:  This must lie in the same block as we currently have
    * buffered.
    */
 
-  ioblock  = nxffs_getblock(volume, pack->dest.entry.hoffset);
-  iooffset = nxffs_getoffset(volume, pack->dest.entry.hoffset, ioblock);
-  DEBUGASSERT(ioblock == pack->ioblock);
+  ioblock  = nxffs_getblock(volume, pack->dest.blkoffset);
+  iooffset = nxffs_getoffset(volume, pack->dest.blkoffset, ioblock);
+  DEBUGASSERT(pack->dest.blkoffset && ioblock == pack->ioblock);
 
   /* Write the data block header to memory */
 
@@ -915,7 +893,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
 
           /* Yes.. find the next data block in the source input stream. */
 
-          offset = pack->src.blkoffset + pack->src.blklen;
+          offset = pack->src.blkoffset + SIZEOF_NXFFS_BLOCK_HDR + pack->src.blklen;
           ret    = nxffs_nextblock(volume, offset, &blkentry);
           if (ret < 0)
             {
@@ -1082,12 +1060,25 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
               }
          }
 
+      /* We now have an in-memory image of how we want this erase block to
+       * appear. Now it is safe to erase the block.
+       */
+
+      ret = MTD_ERASE(volume->mtd, eblock, 1);
+      if (ret < 0)
+        {
+          fdbg("Failed to erase block %d [%d]: %d\n",
+               eblock, pack.block0, -ret);
+          goto errout_with_pack;
+        }
+
       /* Write the packed I/O block to FLASH */
 
       ret = MTD_BWRITE(volume->mtd, pack.block0, volume->blkper, volume->pack);
       if (ret < 0)
         {
-          fdbg("Failed to write erase block %d: %d\n", eblock, -ret);
+          fdbg("Failed to write erase block %d [%]: %d\n",
+               eblock, pack.block0, -ret);
           goto errout_with_pack;
         }
     }

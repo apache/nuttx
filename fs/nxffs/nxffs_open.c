@@ -111,7 +111,7 @@ static struct nxffs_wrfile_s g_wrfile;
  *
  *   On successful return the following are also valid:
  *
- *     wrfile->ofile.entry.hoffset - Flash offset to candidate header position
+ *     wrfile->ofile.entry.hoffset - FLASH offset to candidate header position
  *     volume->ioblock - Read/write block number of the block containing the
  *       header position
  *     volume->iooffset - The offset in the block to the candidate header
@@ -165,7 +165,7 @@ static inline int nxffs_hdrpos(FAR struct nxffs_volume_s *volume,
  *
  *   On successful return the following are also valid:
  *
- *     wrfile->ofile.entry.noffset - Flash offset to candidate name position
+ *     wrfile->ofile.entry.noffset - FLASH offset to candidate name position
  *     volume->ioblock - Read/write block number of the block containing the
  *       name position
  *     volume->iooffset - The offset in the block to the candidate name
@@ -227,7 +227,7 @@ static inline int nxffs_nampos(FAR struct nxffs_volume_s *volume,
  *
  *   On successful return the following are also valid:
  *
- *     wrfile->ofile.entry.hoffset - Flash offset to candidate header position
+ *     wrfile->ofile.entry.hoffset - FLASH offset to candidate header position
  *     volume->ioblock - Read/write block number of the block containing the
  *       header position
  *     volume->iooffset - The offset in the block to the candidate header
@@ -288,7 +288,7 @@ static inline int nxffs_hdrerased(FAR struct nxffs_volume_s *volume,
  *
  *   On successful return the following are also valid:
  *
- *     wrfile->ofile.entry.noffset - Flash offset to candidate name position
+ *     wrfile->ofile.entry.noffset - FLASH offset to candidate name position
  *     volume->ioblock - Read/write block number of the block containing the
  *       name position
  *     volume->iooffset - The offset in the block to the candidate name
@@ -312,6 +312,63 @@ static inline int nxffs_namerased(FAR struct nxffs_volume_s *volume,
 
       wrfile->ofile.entry.noffset = nxffs_iotell(volume);
     }
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxffs_wrname
+ *
+ * Description:
+ *   Write the inode name to cache at the position verified by
+ *   nxffs_namerased().
+ *
+ *   On entry it assumes:
+ *
+ *     entry->noffset - FLASH offset to final name position
+ *     volume->ioblock  - Read/write block number of the block containing the
+ *       name position
+ *     volume->iooffset - The offset in the block to the candidate name
+ *       position.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *   entry - Describes the entry to be written. 
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+static inline int nxffs_wrname(FAR struct nxffs_volume_s *volume,
+                               FAR struct nxffs_entry_s *entry,
+                               int namlen)
+{
+  int ret;
+
+  /* Seek to the inode name position and assure that it is in the volume
+   * cache.
+   */
+
+  nxffs_ioseek(volume, entry->noffset);
+  ret = nxffs_rdcache(volume, volume->ioblock);
+  if (ret < 0)
+    {
+      fdbg("Failed to read inode name block %d: %d\n",
+           volume->ioblock, -ret);
+      return ret;
+    }
+
+  /* Copy the inode name to the volume cache and write the inode name block */
+
+  memcpy(&volume->cache[volume->iooffset], entry->name, namlen);
+  ret = nxffs_wrcache(volume);
+  if (ret < 0)
+    {
+      fdbg("Failed to write inode header block %d: %d\n",
+           volume->ioblock, -ret);
+    }
+
   return ret;
 }
 
@@ -517,8 +574,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
     }
 
   /* Loop until the inode name is configured or until a failure occurs.
-   * Note that nothing is written to FLASH.  The inode name is not
-   * written until the file is closed.
+   * Note that nothing is written to FLASH. 
    */
 
   for (;;)
@@ -535,8 +591,20 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
           ret = nxffs_namerased(volume, wrfile, namlen);
           if (ret == OK)
             {
-              /* Valid memory for the inode header was found.  Break out of
-               * the loop.
+              /* Valid memory for the inode header was found.  Write the
+               * inode name to this location.
+               */
+
+              ret = nxffs_wrname(volume, &wrfile->ofile.entry, namlen);
+              if (ret < 0)
+                {
+                  fdbg("Failed to write the inode name: %d\n", -ret);
+                  goto errout_with_name;
+                }
+
+              /* Then just break out of the loop reporting success.  Note
+               * that the alllocated inode name string is retained; it
+               * will be needed later to calculate the inode CRC.
                */
 
               break;
@@ -1028,11 +1096,13 @@ errout:
  * Name: nxffs_wrinode
  *
  * Description:
- *   Write the inode header and inode file name to FLASH.  This is done in
- *   two contexts:
+ *   Write the inode header (only to FLASH.  This is done in two contexts:
  *
  *   1. When an inode is closed, or
  *   2. As part of the file system packing logic when an inode is moved.
+ *
+ * Note that in either case, the inode name has already been written to
+ * FLASH.
  *
  * Input parameters
  *   volume - Describes the NXFFS volume
@@ -1044,25 +1114,16 @@ errout:
  *
  ****************************************************************************/
 
-int nxffs_wrinode(FAR struct nxffs_volume_s *volume, FAR struct nxffs_entry_s *entry)
+int nxffs_wrinode(FAR struct nxffs_volume_s *volume,
+                  FAR struct nxffs_entry_s *entry)
 {
   FAR struct nxffs_inode_s *inode;
-  off_t namblock;
-  uint16_t namoffset;
   uint32_t crc;
   int namlen;
   int ret;
 
-  /* Write the inode header to FLASH.  First get the block where we will
-   * write the file name.
-   */
-
-  nxffs_ioseek(volume, entry->noffset);
-  namblock  = volume->ioblock;
-  namoffset = volume->iooffset;
-
-  /* Now seek to the inode header position and assure that it is in the
-   * volume cache.
+  /* Seek to the inode header position and assure that it is in the volume
+   * cache.
    */
 
   nxffs_ioseek(volume, entry->hoffset);
@@ -1103,46 +1164,15 @@ int nxffs_wrinode(FAR struct nxffs_volume_s *volume, FAR struct nxffs_entry_s *e
   inode->state = INODE_STATE_FILE;
   nxffs_wrle32(inode->crc, crc);
 
-  /* Are the inode header and the inode name in the same block?  Normally,
-   * they will be in the same block.  However, they could potentially be
-   * far apart due to intervening bad blocks.
-   */
+  /* Write the block with the inode header */
 
-  if (volume->ioblock != namblock)
-    {
-      /* Write the block with the inode header */
-
-      ret = nxffs_wrcache(volume);
-      if (ret < 0)
-        {
-          fdbg("Failed to write inode header block %d: %d\n",
-               volume->ioblock, -ret);
-          goto errout;
-        }
-
-      /* Make sure the that block containing the inode name is in the cache */
-
-      volume->ioblock  = namblock;
-      volume->iooffset = namoffset;
-      ret = nxffs_rdcache(volume, volume->ioblock);
-      if (ret < 0)
-        {
-          fdbg("Failed to read inode name block %d: %d\n",
-               volume->ioblock, -ret);
-          goto errout;
-        }
-    }
-
-  /* Finally, copy the inode name to the cache and write the inode name block */
-
-  memcpy(&volume->cache[namoffset], entry->name, namlen);
   ret = nxffs_wrcache(volume);
   if (ret < 0)
     {
       fdbg("Failed to write inode header block %d: %d\n",
            volume->ioblock, -ret);
     }
-  
+
   /* The volume is now available for other writers */
 
 errout:

@@ -81,7 +81,6 @@ struct nxffs_blkinfo_s
 
 static const char g_hdrformat[] = "  BLOCK:OFFS  TYPE  STATE   LENGTH\n";
 static const char g_format[]    = "  %5d:%-5d %s %s %5d\n";
-static const char g_blkformat[] = "--%5d:%-5d %s %s %5d\n";
 
 /****************************************************************************
  * Private Functions
@@ -292,7 +291,7 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
   blkhdr = (FAR struct nxffs_block_s *)blkinfo->buffer;
   if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0)
     {
-      fdbg(g_blkformat, blkinfo->block, 0, "BLOCK", "NO FRMT",
+      fdbg(g_format, blkinfo->block, 0, "BLOCK", "NO FRMT",
            blkinfo->geo.blocksize);
     }
   else if (blkhdr->state == BLOCK_STATE_GOOD)
@@ -301,24 +300,26 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
       size_t nerased = nxffs_erased(blkinfo->buffer + SIZEOF_NXFFS_BLOCK_HDR, datsize);
       if (nerased == datsize)
         {
-          fdbg(g_blkformat, blkinfo->block, 0, "BLOCK", "ERASED ",
+          fdbg(g_format, blkinfo->block, 0, "BLOCK", "ERASED ",
                blkinfo->geo.blocksize);
           return;
         }
+#if 0 /* Too much output, to little information */
       else
         {
-          fdbg(g_blkformat, blkinfo->block, 0, "BLOCK", "IN USE ",
+          fdbg(g_format, blkinfo->block, 0, "BLOCK", "IN USE ",
                blkinfo->geo.blocksize);
         }
+#endif
     }
   else if (blkhdr->state == BLOCK_STATE_BAD)
     {
-      fdbg(g_blkformat, blkinfo->block, 0, "BLOCK", "BAD    ",
+      fdbg(g_format, blkinfo->block, 0, "BLOCK", "BAD    ",
            blkinfo->geo.blocksize);
     }
   else
     {
-      fdbg(g_blkformat, blkinfo->block, 0, "BLOCK", "CORRUPT",
+      fdbg(g_format, blkinfo->block, 0, "BLOCK", "CORRUPT",
            blkinfo->geo.blocksize);
     }
 
@@ -342,8 +343,9 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
               nbytes = nxffs_analyzeinode(blkinfo, hdrndx);
               if (nbytes > 0)
                 {
-                  i = hdrndx + nbytes;
+                  i = hdrndx + nbytes - 1;
                 }
+              inndx = 0;
             }
         }
       else if (ch == g_datamagic[datndx])
@@ -355,11 +357,11 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
             {
               hdrndx = i - NXFFS_MAGICSIZE + 1;
               nbytes = nxffs_analyzedata(blkinfo, hdrndx);
-              nbytes = nxffs_analyzeinode(blkinfo, hdrndx);
               if (nbytes > 0)
                 {
-                  i = hdrndx + nbytes;
+                  i = hdrndx + nbytes - 1;
                 }
+              datndx = 0;
             }
         }
     }

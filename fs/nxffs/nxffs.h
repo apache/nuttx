@@ -754,11 +754,13 @@ extern FAR struct nxffs_ofile_s *nxffs_findofile(FAR struct nxffs_volume_s *volu
  * Name: nxffs_wrinode
  *
  * Description:
- *   Write the inode header and inode file name to FLASH.  This is done in
- *   two contexts:
+ *   Write the inode header (only to FLASH.  This is done in two contexts:
  *
  *   1. When an inode is closed, or
  *   2. As part of the file system packing logic when an inode is moved.
+ *
+ * Note that in either case, the inode name has already been written to
+ * FLASH.
  *
  * Input parameters
  *   volume - Describes the NXFFS volume
