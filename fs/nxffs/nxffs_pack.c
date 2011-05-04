@@ -450,6 +450,8 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
     {
       DEBUGASSERT(pack->iooffset + SIZEOF_NXFFS_INODE_HDR <= volume->geo.blocksize);
       pack->dest.entry.hoffset = nxffs_packtell(volume, pack);
+      memset(&pack->iobuffer[pack->iooffset], CONFIG_NXFFS_ERASEDSTATE,
+             SIZEOF_NXFFS_INODE_HDR);
       pack->iooffset += SIZEOF_NXFFS_INODE_HDR;
     }
 
@@ -480,7 +482,7 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
        * calculate the header CRC.
        */
 
-      memcpy(&volume->pack[pack->iooffset], pack->dest.entry.name, namlen);
+      memcpy(&pack->iobuffer[pack->iooffset], pack->dest.entry.name, namlen);
 
       /* Reserve space for the inode name  */
 
@@ -688,7 +690,7 @@ static void nxffs_wrdathdr(FAR struct nxffs_volume_s *volume,
 
   /* Update the entire data block CRC (including the header) */
 
-  crc = crc32(&volume->cache[volume->iooffset], pack->dest.blklen + SIZEOF_NXFFS_DATA_HDR);
+  crc = crc32(&pack->iobuffer[iooffset], pack->dest.blklen + SIZEOF_NXFFS_DATA_HDR);
   nxffs_wrle32(dathdr->crc, crc);
 
   /* Setup state to allocate the next data block */
@@ -788,6 +790,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
        pack->src.blkpos  += xfrlen;
        pack->dest.fpos   += xfrlen; /* Destination data offsets */
        pack->dest.blkpos += xfrlen;
+       pack->dest.blklen += xfrlen; /* Destination data block size */
        volume->iooffset  += xfrlen; /* Source I/O block offset */
        pack->iooffset    += xfrlen; /* Destination I/O block offset */
 
@@ -948,6 +951,7 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
   off_t iooffset;
   off_t eblock;
   off_t block;
+  bool packed;
   int i;
   int ret;
 
@@ -1002,11 +1006,15 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
    * the ioblock and through the final erase block on the FLASH.
    */
 
+  packed = false;
   for (eblock = pack.ioblock / volume->blkper;
        eblock < volume->geo.neraseblocks;
        eblock++)
     {
-      /* Read the erase block into the pack buffer. */
+      /* Read the erase block into the pack buffer.  We need to do this even
+       * if we are overwriting the entire block so that we skip over
+       * previously marked bad blocks.
+       */
 
       pack.block0 = eblock * volume->blkper;
       ret = MTD_BREAD(volume->mtd, pack.block0, volume->blkper, volume->pack);
@@ -1030,26 +1038,55 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
               {
                 /* Set the I/O position.  Note on the first time we get
                  * pack.iooffset will hold the offset in the first I/O block
-                 * to the first inode header.
+                 * to the first inode header.  After that, it will always
+                 * refer to the first byte after the block header.
                  */
 
                 pack.ioblock = block;
 
-                /* Check if this is a valid block (it will be valid for the
-                 * first block.
+                /* If this is not a valid block or if we have already
+                 * finished packing the valid inode entries, then just fall
+                 * through, reset the FLASH memory to the erase state, and
+                 * write the reset values to FLASH.  (The first block that
+                 * we want to process will always be valid -- we have
+                 * already verified that).
                  */
 
-                if (nxffs_packvalid(&pack))
+                if (!packed && nxffs_packvalid(&pack))
                   {
                      /* Yes.. pack data into this block */
 
                      ret = nxffs_packblock(volume, &pack);
                      if (ret < 0)
                        {
-                         fdbg("Failed to pack into block %d: %d\n",
-                              block, ret);
-                         goto errout_with_pack;
+                         /* The error -ENOSPC is a special value that simply
+                          * means that there is nothing further to be packed.
+                          */
+
+                         if (ret == -ENOSPC)
+                           {
+                             packed = true;
+                           }
+                         else
+                           {
+                             /* Otherwise, something really bad happened */
+
+                             fdbg("Failed to pack into block %d: %d\n",
+                                  block, ret);
+                             goto errout_with_pack;
+                           }
                        }
+                   }
+
+                 /* Set any unused portion at the end of the block to the
+                  * erased state.
+                  */
+
+                 if (pack.iooffset < volume->geo.blocksize)
+                   {
+                     memset(&pack.iobuffer[pack.iooffset],
+                            CONFIG_NXFFS_ERASEDSTATE,
+                            volume->geo.blocksize - pack.iooffset);
                    }
 
                  /* Next time we get here, pack.iooffset will point to the

@@ -194,7 +194,7 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
 
   if (crc != ecrc)
    {
-      fdbg(g_format, blkinfo->block, offset, "INODE", "CRC    ", datlen);
+      fdbg(g_format, blkinfo->block, offset, "INODE", "CRC BAD", datlen);
       return ERROR;
    }
 
@@ -212,7 +212,10 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
     {
       fdbg(g_format, blkinfo->block, offset, "INODE", "CORRUPT", datlen);
     }
-  return noffs + inode.namlen - offset;
+
+  /* Return the block-relative offset to the next byte after the inode name */
+
+  return noffs + inode.namlen - offset - blkinfo->offset;
 }
 #endif
 
@@ -257,7 +260,7 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
 
   if (crc != ecrc)
    {
-      fdbg(g_format, blkinfo->block, offset, "DATA ", "CRC    ", datlen);
+      fdbg(g_format, blkinfo->block, offset, "DATA ", "CRC BAD", datlen);
       return ERROR;
    }
 

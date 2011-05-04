@@ -151,3 +151,6 @@ Things to Do
   may be necessary whenever an lseek() is done, but not in general.  Read
   performance could be improved by keeping FLASH offset and read positional
   information in the read open file structure.
+- Fault tolerance must be improved.  We need to be absolutely certain that
+  any FLASH errors do not cause the file system to behavior incorrectly.
+

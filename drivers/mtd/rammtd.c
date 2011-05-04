@@ -127,13 +127,6 @@ static int ram_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks
 
   DEBUGASSERT(dev);
 
-  /* Convert the erase block to a logical block and the number of blocks
-   * in logical block numbers
-   */
-
-  startblock *= CONFIG_RAMMTD_BLKPER;
-  nblocks    *= CONFIG_RAMMTD_BLKPER;
-
   /* Don't let the erase exceed the size of the ram buffer */
 
   if (startblock >= priv->nblocks)
@@ -141,10 +134,17 @@ static int ram_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks
       return 0;
     }
 
-  if (startblock + nblocks >= priv->nblocks)
+  if (startblock + nblocks > priv->nblocks)
     {
-      nblocks = priv->nblocks - nblocks;
+      nblocks = priv->nblocks - startblock;
     }
+
+  /* Convert the erase block to a logical block and the number of blocks
+   * in logical block numbers
+   */
+
+  startblock *= CONFIG_RAMMTD_BLKPER;
+  nblocks    *= CONFIG_RAMMTD_BLKPER;
 
   /* Get the offset corresponding to the first block and the size
    * corresponding to the number of blocks.
