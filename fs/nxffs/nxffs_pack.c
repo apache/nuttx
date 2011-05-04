@@ -208,6 +208,10 @@ static inline off_t nxffs_mediacheck(FAR struct nxffs_volume_s *volume,
   off_t froffset;
   int ret;
 
+  /* Initialize the packing structure to all zero */
+
+  memset(pack, 0, sizeof(struct nxffs_pack_s));
+
   /* Find the FLASH offset to the first valid block */
 
   volume->ioblock = 0;
@@ -233,7 +237,7 @@ static inline off_t nxffs_mediacheck(FAR struct nxffs_volume_s *volume,
     {
       /* No valid entries on the media -- Return offset zero */
 
-     return -ENOSPC;
+     return 0;
     }
 
   /* Okay.. the start block and first entry have been found */
@@ -461,7 +465,7 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
        */
 
       namlen = strlen(pack->dest.entry.name);
-      if (pack->iooffset + namlen < volume->geo.blocksize)
+      if (pack->iooffset + namlen > volume->geo.blocksize)
         {
           /* No.. that inode name will not fit in this block. Return an
            * indication that we are at the end of the block and try again
@@ -488,7 +492,7 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
        */
 
       mindata = MIN(NXFFS_MINDATA, pack->dest.entry.datlen);
-      if (pack->iooffset + SIZEOF_NXFFS_DATA_HDR + mindata < volume->geo.blocksize)
+      if (pack->iooffset + SIZEOF_NXFFS_DATA_HDR + mindata > volume->geo.blocksize)
         {
           /* No.. return an indication that we are at the end of the block
            * and try again later.
@@ -500,13 +504,43 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
       /* Yes.. reserve space for the data block header */
 
       pack->dest.entry.doffset = nxffs_packtell(volume, pack);
-      pack->iooffset += SIZEOF_NXFFS_DATA_HDR;
+      pack->iooffset          += SIZEOF_NXFFS_DATA_HDR;
+
+      /* Initialize the output data stream to start with the first data block */
+
+      pack->dest.blkoffset     = pack->dest.entry.doffset;
+      pack->dest.blklen        = 0;
+      pack->dest.blkpos        = 0;
     }
 
-  /* Initialize the output data stream to start with the first data block */
+  /* State 4:  Starting a new block.  Verify that there is space in the current
+   * block for another (minimal sized) block
+   */
 
-  pack->dest.blkoffset = pack->dest.entry.doffset;
-  pack->dest.blkpos    = 0;
+  if (pack->dest.blkoffset == 0)
+    {
+      /* Will the data block header plus a minimal amount of data fit in this
+       * block? (or the whole file if the file is very small).
+       */
+
+      mindata = MIN(NXFFS_MINDATA, pack->dest.entry.datlen);
+      if (pack->iooffset + SIZEOF_NXFFS_DATA_HDR + mindata > volume->geo.blocksize)
+        {
+          /* No.. return an indication that we are at the end of the block
+           * and try again later.
+           */
+
+          return -ENOSPC;
+        }
+
+      /* Yes.. reserve space for the data block header */
+
+      pack->dest.blkoffset = nxffs_packtell(volume, pack);
+      pack->iooffset      += SIZEOF_NXFFS_DATA_HDR;
+      pack->dest.blklen    = 0;
+      pack->dest.blkpos    = 0;
+    }
+
   return OK;
 }
 
@@ -711,7 +745,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
 
   /* Are we currently processing a block from the source stream? */
 
-  if (pack->src.blkoffset)
+  if (pack->src.blkoffset == 0)
     {
       /* No.. setup the source stream */
 
@@ -724,14 +758,29 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
     }
 
   /* We enter here on a new block every time, so we always have to setup
-   * the dest data stream.
+   * the dest data stream.  There should never be data block allocated at
+   * this point in time.
    */
+
+  DEBUGASSERT(pack->dest.blkoffset == 0 && pack->dest.blkpos == 0);
 
   ret = nxffs_destsetup(volume, pack);
   if (ret < 0)
     {
-      fdbg("Failed to configure the dest stream: %d\n", -ret);
-      return ret;
+      /* -ENOSPC is a special return value which simply means that all of the
+       * has been used up to the end.  We need to return OK in this case and
+       * resume at the next block.
+       */
+
+      if (ret == -ENOSPC)
+        {
+          return OK;
+        }
+      else
+        {
+          fdbg("Failed to configure the dest stream: %d\n", -ret);
+          return ret;
+        }
     }
 
   /* Loop, transferring data from the source block to the destination pack
@@ -743,7 +792,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
     {
        /* Determine how much data is available in the dest pack buffer */
 
-       uint16_t destlen = volume->geo.blocksize - pack->dest.blkpos;
+       uint16_t destlen = volume->geo.blocksize - pack->iooffset;
 
        /* Dermined how much data is available in the src data block */
 
@@ -755,15 +804,21 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
        nxffs_ioseek(volume, pack->src.blkoffset + pack->src.blkpos);
        memcpy(&pack->iobuffer[pack->iooffset], &volume->cache[volume->iooffset], xfrlen);
 
+       /* Increment counts and offset for this data transfer */
+
+       pack->src.fpos    += xfrlen; /* Source data offsets */
+       pack->src.blkpos  += xfrlen;
+       pack->dest.fpos   += xfrlen; /* Destination data offsets */
+       pack->dest.blkpos += xfrlen;
+       volume->iooffset  += xfrlen; /* Source I/O block offset */
+       pack->iooffset    += xfrlen; /* Destination I/O block offset */
+
        /* Now, either the (1) src block has been fully transferred, (2) all
-        * of the source data has been transferred, of (3) the the destination
+        * of the source data has been transferred, or (3) the the destination
         * block is full, .. or all three.
         *
         * Check if all of the bytes in the source inode have been transferred.
         */
-
-       pack->src.fpos   += xfrlen;
-       pack->src.blkpos += xfrlen;
 
        if (pack->src.fpos >= pack->src.entry.datlen)
          {
@@ -777,7 +832,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
            /* Find the next valid source inode */
 
            offset = pack->src.blkoffset + pack->src.blklen;
-           ret = nxffs_nextentry(volume, offset, &pack->src.entry);
+           ret    = nxffs_nextentry(volume, offset, &pack->src.entry);
            if (ret < 0)
              {
                /* No more valid inode entries.  Just return an end-of-flash error
@@ -797,9 +852,15 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
 
            /* Setup the dest stream */
 
+           pack->dest.entry.hoffset = 0;
+           pack->dest.entry.noffset = 0;
+           pack->dest.entry.doffset = 0;
            pack->dest.entry.name    = pack->src.entry.name;
            pack->dest.entry.utc     = pack->src.entry.utc;
            pack->dest.entry.datlen  = pack->src.entry.datlen;
+           pack->dest.blkoffset     = 0;
+           pack->dest.blklen        = 0;
+           pack->dest.blkpos        = 0;
            pack->src.entry.name     = NULL;
 
            /* Is there sufficient space at the end of the I/O block to hold
@@ -815,16 +876,37 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
                return OK;
              }
  
+           /* Set the current inode header off to the current position and reserve
+            * the memory.
+            */
+
            pack->dest.entry.hoffset = nxffs_packtell(volume, pack);
+           pack->iooffset          += SIZEOF_NXFFS_INODE_HDR;
+
+           /* Then configure the destination stream */
+
            ret = nxffs_destsetup(volume, pack);
            if (ret < 0)
              {
-               return ret;
+               /* -ENOSPC is a special return value which simply means that all of the
+                * has been used up to the end.  We need to return OK in this case and
+                * resume at the next block.
+                */
+
+               if (ret == -ENOSPC)
+                 {
+                   return OK;
+                 }
+               else
+                 {
+                   fdbg("Failed to configure the dest stream: %d\n", -ret);
+                   return ret;
+                 }
              }
          }
 
       /* Not at the end of the source data stream.  Check if we are at the
-       * end of the current data block.
+       * end of the current source data block.
        */
 
       else if (pack->src.blkpos >= pack->src.blklen)
@@ -833,7 +915,8 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
 
           /* Yes.. find the next data block in the source input stream. */
 
-          ret = nxffs_nextblock(volume, offset, &blkentry);
+          offset = pack->src.blkoffset + pack->src.blklen;
+          ret    = nxffs_nextblock(volume, offset, &blkentry);
           if (ret < 0)
             {
               fdbg("Failed to find next data block: %d\n", -ret);
@@ -848,10 +931,6 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
         }
 
      /* Check if the destination block is full */
-
-     pack->dest.fpos   += xfrlen;
-     pack->dest.blkpos += xfrlen;
-     pack->iooffset    += xfrlen;
 
      if (pack->iooffset >= volume->geo.blocksize)
        {
