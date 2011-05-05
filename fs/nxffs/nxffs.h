@@ -779,6 +779,26 @@ extern FAR struct nxffs_ofile_s *nxffs_findofile(FAR struct nxffs_volume_s *volu
                                                  FAR const char *name);
 
 /****************************************************************************
+ * Name: nxffs_findwriter
+ *
+ * Description:
+ *   Search the list of already opened files and return the open file
+ *   instance for the write.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume.
+ *
+ * Returned Value:
+ *   If there is an active writer of the volume, its open file instance is
+ *   returned.  NULL is returned otherwise.
+ *
+ * Defined in nxffs_open.c
+ *
+ ****************************************************************************/
+
+extern FAR struct nxffs_wrfile_s *nxffs_findwriter(FAR struct nxffs_volume_s *volume);
+
+/****************************************************************************
  * Name: nxffs_wrinode
  *
  * Description:
@@ -792,7 +812,29 @@ extern FAR struct nxffs_ofile_s *nxffs_findofile(FAR struct nxffs_volume_s *volu
  *
  * Input parameters
  *   volume - Describes the NXFFS volume
- *   entry  - Describes the indoe header to write
+ *   entry  - Describes the inode header to write
+ *
+ * Returned Value:
+ *   Zero is returned on success; Otherwise, a negated errno value is returned
+ *   indicating the nature of the failure.
+ *
+ * Defined in nxffs_open.c
+ *
+ ****************************************************************************/
+
+extern int nxffs_wrinode(FAR struct nxffs_volume_s *volume,
+                         FAR struct nxffs_entry_s *entry);
+
+/****************************************************************************
+ * Name: nxffs_updateinode
+ *
+ * Description:
+ *   The packing logic has moved an inode.  Check if any open files are using
+ *   this inode and, if so, move the data in the open file structure as well.
+ *
+ * Input parameters
+ *   volume - Describes the NXFFS volume
+ *   entry  - Describes the new inode entry
  *
  * Returned Value:
  *   Zero is returned on success; Otherwise, a negated errno value is returned
@@ -800,8 +842,8 @@ extern FAR struct nxffs_ofile_s *nxffs_findofile(FAR struct nxffs_volume_s *volu
  *
  ****************************************************************************/
 
-extern int nxffs_wrinode(FAR struct nxffs_volume_s *volume,
-                         FAR struct nxffs_entry_s *entry);
+extern int nxffs_updateinode(FAR struct nxffs_volume_s *volume,
+                           FAR struct nxffs_entry_s *entry);
 
 /****************************************************************************
  * Name: nxffs_wrreserve

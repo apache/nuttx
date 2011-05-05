@@ -622,6 +622,7 @@ static int nxffs_wrinodehdr(FAR struct nxffs_volume_s *volume,
   uint16_t iooffset;
   uint32_t crc;
   int namlen;
+  int ret;
 
   /* Get seek positions corresponding to the inode header location */
 
@@ -683,6 +684,16 @@ static int nxffs_wrinodehdr(FAR struct nxffs_volume_s *volume,
 
   inode->state = INODE_STATE_FILE;
   nxffs_wrle32(inode->crc, crc);
+
+  /* If any open files reference this inode, then update the open file
+   * state.
+   */
+
+  ret = nxffs_updateinode(volume, &pack->dest.entry);
+  if (ret < 0)
+    {
+      fdbg("Failed to update inode info: %s\n", -ret);
+    }
 
   /* Reset the dest inode information */
 
@@ -963,6 +974,37 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
 }
 
 /****************************************************************************
+ * Name: nxffs_packwriter
+ *
+ * Description:
+ *   There is a write in progress at the time that the volume is packed.
+ *   This is the normal case because it is the write failures that trigger
+ *   the packing operation to begin with.
+ *
+ *   Writing is performed at the end of the free FLASH region and this
+ *   implemenation is restricted to a single writer.  The new inode is not
+ *   written to FLASH until the the writer is closed and so will not be
+ *   found by nxffs_packblock().
+ *
+ * Input Parameters:
+ *   volume - The volume to be packed
+ *   pack   - The volume packing state structure.
+ *
+ * Returned Values:
+ *   Zero on success; Otherwise, a negated errno value is returned to
+ *   indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+static inline int nxffs_packwriter(FAR struct nxffs_volume_s *volume,
+                                   FAR struct nxffs_pack_s *pack,
+                                   FAR struct nxffs_wrfile_s *wrfile)
+{
+#warning "Missing logic"
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -985,6 +1027,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
 int nxffs_pack(FAR struct nxffs_volume_s *volume)
 {
   struct nxffs_pack_s pack;
+  FAR struct nxffs_wrfile_s *wrfile;
   off_t iooffset;
   off_t eblock;
   off_t block;
@@ -1011,6 +1054,8 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
    */
 
   packed = false;
+  wrfile = NULL;
+
   ret = nxffs_startpos(volume, &pack, &iooffset);
   if (ret < 0)
     {
@@ -1028,9 +1073,18 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
 
           if (iooffset + CONFIG_NXFFS_TAILTHRESHOLD < volume->froffset)
             {
-               /* Setting 'packed' to true will supress all packing operations */
+               /* Setting 'packed' to true will supress normal inode packing
+                * operation.
+                */
 
                packed = true;
+
+               /* Writing is performed at the end of the free FLASH region.
+                * If we are not packing files, we could still need to pack
+                * the partially written file at the end of FLASH.
+                */
+
+               wrfile = nxffs_findwriter(volume);
              }
 
           /* Otherwise return OK.. meaning that there is nothing more we can
@@ -1108,28 +1162,76 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
                  * already verified that).
                  */
 
-                if (!packed && nxffs_packvalid(&pack))
+                if (nxffs_packvalid(&pack))
                   {
-                     /* Yes.. pack data into this block */
+                    /* Have we finished packing inodes? */
 
-                     ret = nxffs_packblock(volume, &pack);
-                     if (ret < 0)
-                       {
-                         /* The error -ENOSPC is a special value that simply
-                          * means that there is nothing further to be packed.
-                          */
+                    if (!packed)
+                      {
+                         DEBUGASSERT(wrfile == NULL);
 
-                         if (ret == -ENOSPC)
+                         /* Pack inode data into this block */
+
+                         ret = nxffs_packblock(volume, &pack);
+                         if (ret < 0)
                            {
-                             packed = true;
+                             /* The error -ENOSPC is a special value that simply
+                              * means that there is nothing further to be packed.
+                              */
+
+                             if (ret == -ENOSPC)
+                               {
+                                 packed = true;
+
+                                 /* Writing is performed at the end of the free
+                                  * FLASH region and this implemenation is restricted
+                                  * to a single writer.  The new inode is not
+                                  * written to FLASH until the the writer is closed
+                                  * and so will not be found by nxffs_packblock().
+                                  */
+
+                                 wrfile = nxffs_findwriter(volume);
+                               }
+                             else
+                               {
+                                 /* Otherwise, something really bad happened */
+
+                                 fdbg("Failed to pack into block %d: %d\n",
+                                      block, ret);
+                                 goto errout_with_pack;
+                               }
                            }
-                         else
-                           {
-                             /* Otherwise, something really bad happened */
+                       }
 
-                             fdbg("Failed to pack into block %d: %d\n",
-                                  block, ret);
-                             goto errout_with_pack;
+                     /* If all of the "normal" inodes have been packed, then check if
+                      * we need to the current, in-progress write operation.
+                      */
+
+                     if (wrfile)
+                       {
+                         DEBUGASSERT(packed == true);
+
+                         /* Pack write data into this block */
+
+                         ret = nxffs_packwriter(volume, &pack, wrfile);
+                         if (ret < 0)
+                           {
+                             /* The error -ENOSPC is a special value that simply
+                              * means that there is nothing further to be packed.
+                              */
+
+                             if (ret == -ENOSPC)
+                               {
+                                 wrfile = NULL;
+                               }
+                             else
+                               {
+                                 /* Otherwise, something really bad happened */
+
+                                 fdbg("Failed to pack into block %d: %d\n",
+                                      block, ret);
+                                 goto errout_with_pack;
+                               }
                            }
                        }
                    }

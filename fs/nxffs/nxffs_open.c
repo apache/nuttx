@@ -946,6 +946,35 @@ FAR struct nxffs_ofile_s *nxffs_findofile(FAR struct nxffs_volume_s *volume,
 }
 
 /****************************************************************************
+ * Name: nxffs_findwriter
+ *
+ * Description:
+ *   Search the list of already opened files and return the open file
+ *   instance for the write.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume.
+ *
+ * Returned Value:
+ *   If there is an active writer of the volume, its open file instance is
+ *   returned.  NULL is returned otherwise.
+ *
+ ****************************************************************************/
+
+FAR struct nxffs_wrfile_s *nxffs_findwriter(FAR struct nxffs_volume_s *volume)
+{
+  /* We can tell if the write is in-use because it will have an allocated
+   * name attached.
+   */
+
+#ifdef CONFIG_NXFSS_PREALLOCATED
+  return g_wrfile.ofile.entry.name != NULL ? &g_wrfile : NULL;
+#else
+#  error "Missing implementation"
+#endif
+}
+
+/****************************************************************************
  * Name: nxffs_open
  *
  * Description:
@@ -1106,7 +1135,7 @@ errout:
  *
  * Input parameters
  *   volume - Describes the NXFFS volume
- *   entry  - Describes the indoe header to write
+ *   entry  - Describes the inode header to write
  *
  * Returned Value:
  *   Zero is returned on success; Otherwise, a negated errno value is returned
@@ -1180,4 +1209,39 @@ errout:
   return ret;
 }
 
+/****************************************************************************
+ * Name: nxffs_updateinode
+ *
+ * Description:
+ *   The packing logic has moved an inode.  Check if any open files are using
+ *   this inode and, if so, move the data in the open file structure as well.
+ *
+ * Input parameters
+ *   volume - Describes the NXFFS volume
+ *   entry  - Describes the new inode entry
+ *
+ * Returned Value:
+ *   Zero is returned on success; Otherwise, a negated errno value is returned
+ *   indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+int nxffs_updateinode(FAR struct nxffs_volume_s *volume,
+                      FAR struct nxffs_entry_s *entry)
+{
+  FAR struct nxffs_ofile_s *ofile;
+
+  /* Find the open inode structure matching this name */
+
+  ofile = nxffs_findofile(volume, entry->name);
+  if (ofile)
+    {
+      /* Yes.. the file is open.  Update the FLASH offsets to inode headers */
+
+      ofile->entry.hoffset = entry->hoffset;
+      ofile->entry.noffset = entry->noffset;
+      ofile->entry.doffset = entry->doffset;
+    }
+  return OK;
+}
 
