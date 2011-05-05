@@ -59,12 +59,30 @@
 #  error "CONFIG_NXFFS_ERASEDSTATE must be either 0x00 or 0xff"
 #endif
 
+/* Don't bother trying to pack things closer together than this. */
+
 #ifndef CONFIG_NXFFS_PACKTHRESHOLD
 #  define CONFIG_NXFFS_PACKTHRESHOLD 32
 #endif
 
+/* This is how big an inode name is permitted to be. */
+
 #ifndef CONFIG_NXFFS_MAXNAMLEN
 #  define CONFIG_NXFFS_MAXNAMLEN 255
+#endif
+
+/* Clean-up can either mean packing files together toward the end of the file
+ * or, if file are deleted at the end of the file, clean up can simply mean
+ * erasing the end of FLASH memory so that it can be re-used again.  However,
+ * doing this can also harm the life of the FLASH part because it can mean
+ * that the tail end of the FLASH is re-used too often.
+ *
+ * This threshold determines if/when it is worth erased the tail end of FLASH
+ * and making it available for re-use (and possible over-wear).
+ */
+
+#ifndef CONFIG_NXFFS_TAILTHRESHOLD
+#  define CONFIG_NXFFS_TAILTHRESHOLD (8*1024)
 #endif
 
 /* At present, only a single pre-allocated NXFFS volume is supported.  This

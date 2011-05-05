@@ -136,9 +136,6 @@ blocked waiting for itself to close the first file.
 Things to Do
 ============
 
-- The implementation is not yet finished.  It needs at, a minimum,
-  completion of the file system packing logic.  It is not usuable without
-  that feature.
 - The statfs() implementation is minimal.  It whould have some calcuation
   of the f_bfree, f_bavail, f_files, f_ffree return values.
 - There are too many allocs and frees.  More structures may need to be
@@ -153,4 +150,11 @@ Things to Do
   information in the read open file structure.
 - Fault tolerance must be improved.  We need to be absolutely certain that
   any FLASH errors do not cause the file system to behavior incorrectly.
+- Wear leveling could be improved as well.  Files are re-packed at the front
+  of FLASH as part of the clean-up operation.  However, that means the files
+  that are not modified often become fixed in place at the beginning of
+  FLASH.  This reduces the size of the pool moving files at the end of the
+  FLASH.  As the file system becomes more filled with fixed files at the
+  front of the device, the level of wear on the blocks at the end of the
+  FLASH increases.
 

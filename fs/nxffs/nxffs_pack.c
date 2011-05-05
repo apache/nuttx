@@ -258,19 +258,24 @@ static inline off_t nxffs_mediacheck(FAR struct nxffs_volume_s *volume,
  * Input Parameters:
  *   volume - The volume to be packed
  *   pack   - The volume packing state structure.
- *   offset - location to return the pointer to first valid inode header.
+ *   froffset - On input, this is the location where we should be searching
+ *     for the location to begin packing.  If -ENOSPC is returned -- meaning
+ *     that the FLASH --  then no packing can be performed. In this case
+ *     (only) , then the free flash offset is returned through this location.
  *
  * Returned Values:
  *   Zero on success; Otherwise, a negated errno value is returned to
- *   indicate the nature of the failure.
+ *   indicate the nature of the failure.  If -ENOSPC is returned then the
+ *   free FLASH offset is also returned.
  *
  ****************************************************************************/
 
 static inline int nxffs_startpos(FAR struct nxffs_volume_s *volume,
                                  FAR struct nxffs_pack_s *pack,
-                                 off_t offset)
+                                 off_t *froffset)
 {
   struct nxffs_blkentry_s blkentry;
+  off_t offset = *froffset;
   off_t wasted;
   off_t nbytes;
   int ret;
@@ -352,6 +357,7 @@ static inline int nxffs_startpos(FAR struct nxffs_volume_s *volume,
                 * the end-of-flash indication.
                 */
 
+               *froffset = volume->froffset;
                return -ENOSPC;
             }
 
@@ -365,9 +371,11 @@ static inline int nxffs_startpos(FAR struct nxffs_volume_s *volume,
       if (ret < 0)
         {
           /* No more valid inode entries.  Just return an end-of-flash error
-           * indication.
+           * indication.  However, there could be many deleted inodes; set
+           * volume->froffset to indicate the true free FLASH position.
            */
 
+          *froffset = offset;
           return -ENOSPC;
         }
     }
@@ -975,14 +983,43 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
    * begin the packing operation.
    */
 
-  ret = nxffs_startpos(volume, &pack, iooffset);
+  packed = false;
+  ret = nxffs_startpos(volume, &pack, &iooffset);
   if (ret < 0)
     {
       /* This is a normal situation if the volume is full */
 
       if (ret == -ENOSPC)
         {
-          return OK;
+          /* In the case where the volume is full, nxffs_startpos() will
+           * recalculate the free FLASH offset and store in in iooffset.  There
+           * may be deleted files at the end of FLASH.  In this case, we don't
+           * have to pack any files, we simply have to erase FLASH at the end.
+           * But don't do this unless there is some particularly big FLASH
+           * savings (otherwise, we risk wearing out these final blocks).
+           */
+
+          if (iooffset + CONFIG_NXFFS_TAILTHRESHOLD < volume->froffset)
+            {
+               /* Yes... we can recover CONFIG_NXFFS_TAILTHRESHOLD bytes */
+
+               pack.ioblock     = nxffs_getblock(volume, iooffset);
+               pack.iooffset    = nxffs_getoffset(volume, iooffset, pack.ioblock);
+               volume->froffset = iooffset;
+
+               /* Setting packed to true will supress all packing operations */
+
+               packed           = true;
+             }
+
+          /* Otherwise return OK.. meaning that there is nothing more we can
+           * do to recover FLASH space.
+           */
+
+          else
+            {
+              return OK;
+            }
         }
       else
         {
@@ -990,26 +1027,27 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
           return ret;
         }
     }
+  else
+    {
+      /* Otherwise, begin pack at this src/dest block combination.  Initialize
+       * ioblock and iooffset with the position of the first inode header.
+       */
 
-  /* Otherwise, begin pack at this src/dest block combination.  Initialize
-   * ioblock and iooffset with the position of the first inode header.
-   */
+      pack.ioblock  = nxffs_getblock(volume, pack.dest.entry.hoffset);
+      pack.iooffset = nxffs_getoffset(volume, pack.dest.entry.hoffset, pack.ioblock);
 
-  pack.ioblock  = nxffs_getblock(volume, pack.dest.entry.hoffset);
-  pack.iooffset = nxffs_getoffset(volume, pack.dest.entry.hoffset, pack.ioblock);
+      /* Reserve space for the inode header.  Note we are guaranteed by
+       * nxffs_startpos() that the inode header will fit at hoffset.
+       */
 
-  /* Reserve space for the inode header.  Note we are guaranteed by
-   * nxffs_startpos() that the inode header will fit at hoffset.
-   */
-
-  pack.iooffset   += SIZEOF_NXFFS_INODE_HDR;
-  volume->froffset = nxffs_packtell(volume, &pack);
+      pack.iooffset   += SIZEOF_NXFFS_INODE_HDR;
+      volume->froffset = nxffs_packtell(volume, &pack);
+    }
 
   /* Then pack all erase blocks starting with the erase block that contains
    * the ioblock and through the final erase block on the FLASH.
    */
 
-  packed = false;
   for (eblock = pack.ioblock / volume->blkper;
        eblock < volume->geo.neraseblocks;
        eblock++)
