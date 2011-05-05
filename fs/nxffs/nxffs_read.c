@@ -327,10 +327,23 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
 
           if (ch != g_datamagic[nmagic])
             {
-              nmagic = 0;
+              /* Ooops... this is the not the right character for the magic
+               * Sequence.  Check if we need to restart or to cancel the sequence:
+               */
+
+              if (ch == g_datamagic[0])
+                {
+                  nmagic = 1;
+                }
+              else
+                {
+                  nmagic = 0;
+                }
             }
           else if (nmagic < NXFFS_MAGICSIZE - 1)
             {
+              /* We have one more character in the magic sequence */
+
               nmagic++;
             }
 
