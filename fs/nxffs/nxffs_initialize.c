@@ -361,14 +361,9 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
       volume->inoffset = entry.hoffset;
       fvdbg("First inode at offset %d\n", volume->inoffset);
 
-      /* Discard this entry and set the next offset using the rw data
-       * length as the offset increment.  This is, of course, not accurate
-       * because it does not account for the data headers that enclose the
-       * data.  But it is guaranteed to be less than or equal to the
-       * correct offset and, hence, better then searching byte-for-byte.
-       */
+      /* Discard this entry and set the next offset. */
 
-      offset = entry.doffset + entry.datlen;
+      offset = nxffs_inodeend(volume, &entry);
       nxffs_freeentry(&entry);
     }
 
@@ -378,9 +373,9 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
     {
       while ((ret = nxffs_nextentry(volume, offset, &entry)) == OK)
         {
-          /* Discard the entry and guess the next offset (see comments above). */
+          /* Discard the entry and guess the next offset. */
 
-          offset = entry.doffset + entry.datlen;
+          offset = nxffs_inodeend(volume, &entry);
           nxffs_freeentry(&entry);    
         }
       fvdbg("Last inode before offset %d\n", offset);

@@ -101,6 +101,12 @@ static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
    */
 
   offset = entry->doffset;
+  if (offset == 0)
+    {
+      /* Zero length files will have no data blocks */
+
+      return -ENOSPC;
+    }
 
   /* Loop until we read the data block containing the desired position */
 

@@ -181,11 +181,11 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   if (state != INODE_STATE_FILE)
     {
       /* It is a deleted file.  But still, the data offset and the
-       * start size is good so we can use this information to advance
+       * start size are good so we can use this information to advance
        * further in FLASH memory and reduce the search time.
        */
 
-      offset = entry->doffset + entry->datlen + SIZEOF_NXFFS_DATA_HDR;
+      offset = nxffs_inodeend(volume, entry);
       nxffs_freeentry(entry);
       ret = -ENOENT;
       goto errout;
@@ -432,7 +432,7 @@ int nxffs_findinode(FAR struct nxffs_volume_s *volume, FAR const char *name,
        * byte-for-byte.
        */
 
-      offset = entry->doffset + entry->datlen;
+      offset = nxffs_inodeend(volume, entry);
       nxffs_freeentry(entry);
     }
 
@@ -440,3 +440,61 @@ int nxffs_findinode(FAR struct nxffs_volume_s *volume, FAR const char *name,
 
   return -ENOENT;
 }
+
+/****************************************************************************
+ * Name: nxffs_inodeend
+ *
+ * Description:
+ *   Return an *approximiate* FLASH offset to end of the inode data.  The
+ *   returned value is guaranteed to be be less then or equal to the offset
+ *   of the thing-of-interest in FLASH.  Parsing for interesting things
+ *   can begin at that point.
+ *
+ *   Assumption:  The inode header has been verified by the caller and is
+ *   known to contain valid data.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *   entry  - Describes the inode.
+ *
+ * Returned Value:
+ *   A FLASH offset to the (approximate) end of the inode data.  No errors
+ *   are detected.
+ *
+ ****************************************************************************/
+
+off_t nxffs_inodeend(FAR struct nxffs_volume_s *volume,
+                     FAR struct nxffs_entry_s *entry)
+{
+  /* A zero length file will have no data blocks */
+
+  if (entry->doffset)
+    {
+      /* This is the maximum size of one data block */
+
+      uint16_t maxsize = volume->geo.blocksize - SIZEOF_NXFFS_DATA_HDR;
+
+      /* This is the minimum number of blocks require to span all of the
+       * inode data.  One additional block could possibly be required -- we
+       * could make this accurate by looking at the size of the first, perhaps
+       * partial, data block.
+       */
+
+      off_t minblocks = (entry->datlen + maxsize - 1) / maxsize;
+
+      /* And this is our best, simple guess at the end of the inode data */
+
+      return entry->doffset + entry->datlen + minblocks * SIZEOF_NXFFS_DATA_HDR;
+    }
+
+  /* Otherwise, return an offset that accounts only for the inode header and
+   * the inode name.
+   */
+
+  /* All valid inodes will have a name associated with them */
+
+  DEBUGASSERT(entry->noffset);
+  return entry->noffset + strlen(entry->name);
+}
+
+

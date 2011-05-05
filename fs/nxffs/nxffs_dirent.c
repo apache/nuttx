@@ -166,14 +166,9 @@ int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
       dir->fd_dir.d_type = DTYPE_FILE;
       strncpy(dir->fd_dir.d_name, entry.name, NAME_MAX+1);
 
-      /* Discard this entry and set the next offset using the rw data
-       * length as the offset increment.  This is, of course, not accurate
-       * because it does not account for the data headers that enclose the
-       * data.  But it is guaranteed to be less than or equal to the
-       * correct offset and, hence, better then searching byte-for-byte.
-       */
+      /* Discard this entry and set the next offset. */
 
-      dir->u.nxffs.nx_offset = entry.doffset + entry.datlen;
+      dir->u.nxffs.nx_offset = nxffs_inodeend(volume, &entry);
       nxffs_freeentry(&entry);
       ret = OK;
     }

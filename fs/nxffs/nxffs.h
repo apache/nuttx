@@ -177,7 +177,6 @@
 
 #define NXFFS_MINDATA             16
 
-
 /* Internal definitions *****************************************************/
 /* If we encounter this number of erased bytes, we assume that all of the
  * flash beyond this point is erased.
@@ -639,6 +638,33 @@ extern int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
 extern int nxffs_findinode(FAR struct nxffs_volume_s *volume,
                            FAR const char *name,
                            FAR struct nxffs_entry_s *entry);
+
+/****************************************************************************
+ * Name: nxffs_inodeend
+ *
+ * Description:
+ *   Return an *approximiate* FLASH offset to end of the inode data.  The
+ *   returned value is guaranteed to be be less then or equal to the offset
+ *   of the thing-of-interest in FLASH.  Parsing for interesting things
+ *   can begin at that point.
+ *
+ *   Assumption:  The inode header has been verified by the caller and is
+ *   known to contain valid data.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume
+ *   entry  - Describes the inode.
+ *
+ * Returned Value:
+ *   A FLASH offset to the (approximate) end of the inode data.  No errors
+ *   are detected.
+ *
+ * Defined in nxffs_inode.c
+ *
+ ****************************************************************************/
+
+extern off_t nxffs_inodeend(FAR struct nxffs_volume_s *volume,
+                            FAR struct nxffs_entry_s *entry);
 
 /****************************************************************************
  * Name: nxffs_verifyblock

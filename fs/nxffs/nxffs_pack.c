@@ -399,7 +399,8 @@ static inline int nxffs_startpos(FAR struct nxffs_volume_s *volume,
  * Input Parameters:
  *   volume - The volume to be packed
  *   pack   - The volume packing state structure.
- *   offset - FLASH offset to the data block header
+ *   offset - FLASH offset to the data block header (will be zero for zero-
+ *     files.
  *
  * Returned Values:
  *   Zero on success; Otherwise, a negated errno value is returned to
@@ -410,22 +411,27 @@ static inline int nxffs_startpos(FAR struct nxffs_volume_s *volume,
 static int nxffs_srcsetup(FAR struct nxffs_volume_s *volume,
                           FAR struct nxffs_pack_s *pack, off_t offset)
 {
-  int ret;
-
-  /* No, start with the first data block */
+  /* Start with the first data block */
 
   pack->src.blkoffset = offset;
   pack->src.blkpos    = 0;
 
-  /* Seek to the data block header, read and verify the block header */
+  /* Zero-length files have no valid data block offset */
 
-  ret = nxffs_rdblkhdr(volume, offset, &pack->src.blklen);
-  if (ret < 0)
+  if (offset > 0)
     {
-      fdbg("Failed to verify the data block header: %d\n", -ret);
+      /* Seek to the data block header, read and verify the block header */
+
+      int ret = nxffs_rdblkhdr(volume, offset, &pack->src.blklen);
+      if (ret < 0)
+        {
+          fdbg("Failed to verify the data block header: %d\n", -ret);
+        }
+      return ret;
     }
 
-  return ret;
+  DEBUGASSERT(pack->src.entry.datlen == 0);
+  return OK;
 }
 
 /****************************************************************************
@@ -449,6 +455,7 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
 {
   size_t mindata;
   int    namlen;
+  int    ret;
 
   /* The destination can be in one of three of states:
    *
@@ -516,66 +523,77 @@ static int nxffs_destsetup(FAR struct nxffs_volume_s *volume,
 
   /* State 3: Inode header not-written, inode name written.  Still need the position
    * of the first data block.
+   *
+   * Deal with the special case where the source inode is a zero length file
+   * with no data blocks to be transferred.
    */
 
-  if (pack->dest.entry.doffset == 0)
+  if (pack->src.entry.doffset > 0)
     {
-      /* Will the data block header plus a minimal amount of data fit in this
-       * block? (or the whole file if the file is very small).
-       */
-
-      mindata = MIN(NXFFS_MINDATA, pack->dest.entry.datlen);
-      if (pack->iooffset + SIZEOF_NXFFS_DATA_HDR + mindata > volume->geo.blocksize)
+      if (pack->dest.entry.doffset == 0)
         {
-          /* No.. return an indication that we are at the end of the block
-           * and try again later.
+          /* Will the data block header plus a minimal amount of data fit in this
+           * block? (or the whole file if the file is very small).
            */
 
-          return -ENOSPC;
+          mindata = MIN(NXFFS_MINDATA, pack->dest.entry.datlen);
+          if (pack->iooffset + SIZEOF_NXFFS_DATA_HDR + mindata > volume->geo.blocksize)
+            {
+              /* No.. return an indication that we are at the end of the block
+               * and try again later.
+               */
+
+              ret = -ENOSPC;
+             goto errout;
+           }
+
+          /* Yes.. reserve space for the data block header */
+
+          pack->dest.entry.doffset = nxffs_packtell(volume, pack);
+          pack->iooffset          += SIZEOF_NXFFS_DATA_HDR;
+
+          /* Initialize the output data stream to start with the first data block */
+
+          pack->dest.blkoffset     = pack->dest.entry.doffset;
+          pack->dest.blklen        = 0;
+          pack->dest.blkpos        = 0;
         }
 
-      /* Yes.. reserve space for the data block header */
-
-      pack->dest.entry.doffset = nxffs_packtell(volume, pack);
-      pack->iooffset          += SIZEOF_NXFFS_DATA_HDR;
-
-      /* Initialize the output data stream to start with the first data block */
-
-      pack->dest.blkoffset     = pack->dest.entry.doffset;
-      pack->dest.blklen        = 0;
-      pack->dest.blkpos        = 0;
-    }
-
-  /* State 4:  Starting a new block.  Verify that there is space in the current
-   * block for another (minimal sized) block
-   */
-
-  if (pack->dest.blkoffset == 0)
-    {
-      /* Will the data block header plus a minimal amount of data fit in this
-       * block? (or the whole file if the file is very small).
+      /* State 4:  Starting a new block.  Verify that there is space in the current
+       * block for another (minimal sized) block
        */
 
-      mindata = MIN(NXFFS_MINDATA, pack->dest.entry.datlen);
-      if (pack->iooffset + SIZEOF_NXFFS_DATA_HDR + mindata > volume->geo.blocksize)
+      if (pack->dest.blkoffset == 0)
         {
-          /* No.. return an indication that we are at the end of the block
-           * and try again later.
+          /* Will the data block header plus a minimal amount of data fit in this
+           * block? (or the whole file if the file is very small).
            */
 
-          return -ENOSPC;
+          mindata = MIN(NXFFS_MINDATA, pack->dest.entry.datlen);
+          if (pack->iooffset + SIZEOF_NXFFS_DATA_HDR + mindata > volume->geo.blocksize)
+            {
+              /* No.. return an indication that we are at the end of the block
+               * and try again later.
+               */
+
+              ret = -ENOSPC;
+              goto errout;
+           }
+
+          /* Yes.. reserve space for the data block header */
+
+          pack->dest.blkoffset = nxffs_packtell(volume, pack);
+          pack->iooffset      += SIZEOF_NXFFS_DATA_HDR;
+          pack->dest.blklen    = 0;
+          pack->dest.blkpos    = 0;
         }
-
-      /* Yes.. reserve space for the data block header */
-
-      pack->dest.blkoffset = nxffs_packtell(volume, pack);
-      pack->iooffset      += SIZEOF_NXFFS_DATA_HDR;
-      pack->dest.blklen    = 0;
-      pack->dest.blkpos    = 0;
     }
 
+  ret = OK;
+
+errout:
   volume->froffset = nxffs_packtell(volume, pack);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -806,19 +824,22 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
        /* Transfer the smaller of the two amounts data */
 
        uint16_t xfrlen = MIN(srclen, destlen);
-       nxffs_ioseek(volume, pack->src.blkoffset + SIZEOF_NXFFS_DATA_HDR + pack->src.blkpos);
-       memcpy(&pack->iobuffer[pack->iooffset], &volume->cache[volume->iooffset], xfrlen);
+       if (xfrlen > 0)
+         {
+           nxffs_ioseek(volume, pack->src.blkoffset + SIZEOF_NXFFS_DATA_HDR + pack->src.blkpos);
+           memcpy(&pack->iobuffer[pack->iooffset], &volume->cache[volume->iooffset], xfrlen);
 
-       /* Increment counts and offset for this data transfer */
+           /* Increment counts and offset for this data transfer */
 
-       pack->src.fpos    += xfrlen; /* Source data offsets */
-       pack->src.blkpos  += xfrlen;
-       pack->dest.fpos   += xfrlen; /* Destination data offsets */
-       pack->dest.blkpos += xfrlen;
-       pack->dest.blklen += xfrlen; /* Destination data block size */
-       pack->iooffset    += xfrlen; /* Destination I/O block offset */
-       volume->iooffset  += xfrlen; /* Source I/O block offset */
-       volume->froffset  += xfrlen; /* Free FLASH offset */
+           pack->src.fpos    += xfrlen; /* Source data offsets */
+           pack->src.blkpos  += xfrlen;
+           pack->dest.fpos   += xfrlen; /* Destination data offsets */
+           pack->dest.blkpos += xfrlen;
+           pack->dest.blklen += xfrlen; /* Destination data block size */
+           pack->iooffset    += xfrlen; /* Destination I/O block offset */
+           volume->iooffset  += xfrlen; /* Source I/O block offset */
+           volume->froffset  += xfrlen; /* Free FLASH offset */
+         }
 
        /* Now, either the (1) src block has been fully transferred, (2) all
         * of the source data has been transferred, or (3) the the destination
@@ -839,7 +860,9 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
            /* Find the next valid source inode */
 
            offset = pack->src.blkoffset + pack->src.blklen;
-           ret    = nxffs_nextentry(volume, offset, &pack->src.entry);
+           memset(&pack->src, 0, sizeof(struct nxffs_packstream_s));
+
+           ret = nxffs_nextentry(volume, offset, &pack->src.entry);
            if (ret < 0)
              {
                /* No more valid inode entries.  Just return an end-of-flash error
@@ -859,16 +882,11 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
 
            /* Setup the dest stream */
 
-           pack->dest.entry.hoffset = 0;
-           pack->dest.entry.noffset = 0;
-           pack->dest.entry.doffset = 0;
-           pack->dest.entry.name    = pack->src.entry.name;
-           pack->dest.entry.utc     = pack->src.entry.utc;
-           pack->dest.entry.datlen  = pack->src.entry.datlen;
-           pack->dest.blkoffset     = 0;
-           pack->dest.blklen        = 0;
-           pack->dest.blkpos        = 0;
-           pack->src.entry.name     = NULL;
+           memset(&pack->dest, 0, sizeof(struct nxffs_packstream_s));
+           pack->dest.entry.name   = pack->src.entry.name;
+           pack->dest.entry.utc    = pack->src.entry.utc;
+           pack->dest.entry.datlen = pack->src.entry.datlen;
+           pack->src.entry.name    = NULL;
 
            /* Is there sufficient space at the end of the I/O block to hold
             * the inode header?
@@ -883,14 +901,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
                return OK;
              }
  
-           /* Set the current inode header off to the current position and reserve
-            * the memory.
-            */
-
-           pack->dest.entry.hoffset = nxffs_packtell(volume, pack);
-           pack->iooffset          += SIZEOF_NXFFS_INODE_HDR;
-
-           /* Then configure the destination stream */
+           /* Configure the destination stream */
 
            ret = nxffs_destsetup(volume, pack);
            if (ret < 0)
