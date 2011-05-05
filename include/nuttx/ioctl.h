@@ -97,6 +97,9 @@
 #define FIOC_REFORMAT   _FIOC(0x0002)     /* IN:  None
                                            * OUT: None
                                            */
+#define FIOC_OPTIMIZE   _FIOC(0x0003)     /* IN:  None
+                                           * OUT: None
+                                           */
 
 /* NuttX file system ioctl definitions */
 

@@ -108,7 +108,7 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       goto errout;
     }
 
-  /* Only a reformat command is supported */
+  /* Only a reformat and optimize commands are supported */
 
   if (cmd == FIOC_REFORMAT)
     {
@@ -126,12 +126,22 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* Re-format the volume -- all is lost */
 
       ret = nxffs_reformat(volume);
-      goto errout_with_semaphore;
     }
 
-  /* No other commands supported */
+  else if (cmd == FIOC_OPTIMIZE)
+    {
+      fvdbg("Optimize command\n");
 
-  ret = -ENOTTY;
+      /* Pack the volume */
+
+      ret = nxffs_pack(volume);
+    }
+  else
+    {
+      /* No other commands supported */
+
+      ret = -ENOTTY;
+    }
 
 errout_with_semaphore:
   sem_post(&volume->exclsem);
