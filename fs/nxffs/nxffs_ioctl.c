@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/fs.h>
+#include <nuttx/ioctl.h>
 #include <nuttx/mtd.h>
 
 #include "nxffs.h"
@@ -82,6 +83,7 @@
 int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct nxffs_volume_s *volume;
+  int ret;
 
   fvdbg("cmd: %d arg: %08lx\n", cmd, arg);
 
@@ -94,7 +96,45 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   volume = filep->f_inode->i_private;
   DEBUGASSERT(volume != NULL);
 
-  /* No ioctl commands yet supported */
+  /* Get exclusive access to the volume.  Note that the volume exclsem
+   * protects the open file list.
+   */
 
-  return -ENOTTY;
+  ret = sem_wait(&volume->exclsem);
+  if (ret != OK)
+    {
+      ret = -errno;
+      fdbg("sem_wait failed: %d\n", ret);
+      goto errout;
+    }
+
+  /* Only a reformat command is supported */
+
+  if (cmd == FIOC_REFORMAT)
+    {
+      fvdbg("Reformat command\n");
+
+      /* We cannot reformat the volume if there are any open inodes */
+
+      if (volume->ofiles)
+        {
+          fdbg("Open files\n");
+          ret = -EBUSY;
+          goto errout_with_semaphore;
+        }
+
+      /* Re-format the volume -- all is lost */
+
+      ret = nxffs_reformat(volume);
+      goto errout_with_semaphore;
+    }
+
+  /* No other commands supported */
+
+  ret = -ENOTTY;
+
+errout_with_semaphore:
+  sem_post(&volume->exclsem);
+errout:
+  return ret;
 }

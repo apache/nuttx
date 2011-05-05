@@ -94,17 +94,21 @@
                                            *      return (void*) base address
                                            *      of file
                                            */
+#define FIOC_REFORMAT   _FIOC(0x0002)     /* IN:  None
+                                           * OUT: None
+                                           */
+
 /* NuttX file system ioctl definitions */
 
 #define _DIOCVALID(c)   (_IOC_TYPE(c)==_DIOCBASE)
 #define _DIOC(nr)       _IOC(_DIOCBASE,nr)
 
-#define DIOC_GETPRIV    _DIOC(0x0001)     /* IN: Location to return handle (void **)
+#define DIOC_GETPRIV    _DIOC(0x0001)     /* IN:  Location to return handle (void **)
                                            * OUT: Reference to internal data
                                            *      structure.  May have a reference
                                            *      incremented.
                                            */
-#define DIOC_RELPRIV    _DIOC(0x0003)     /* IN: None
+#define DIOC_RELPRIV    _DIOC(0x0003)     /* IN:  None
                                            * OUT: None, reference obtained by
                                            *      FIOC_GETPRIV released.
                                            */
