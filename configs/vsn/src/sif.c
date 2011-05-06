@@ -508,8 +508,9 @@ int sif_main(int argc, char *argv[])
             return 0;
         }
         else if (!strcmp(argv[1], "time") && argc == 3) {
-            int val = atoi(argv[2]);
-            up_rtc_settime(val);
+            struct timespec t_set;
+            t_set.tv_sec = atoi(argv[2]);
+            clock_settime(CLOCK_REALTIME, &t_set);
         }
         else if (!strcmp(argv[1], "i2c") && argc == 3) {
             int val = atoi(argv[2]);
@@ -551,7 +552,13 @@ int sif_main(int argc, char *argv[])
     }
 
     fprintf(stderr, "%s:\tinit\n\tgpio\tA B\n\tpwr\tval\n", argv[0]);
-    fprintf(stderr, "time = %d / %d, time = %d\n", 
-        up_rtc_gettime(), up_rtc_getclock(), time(NULL) );
+    
+    struct timespec t_active;
+    clock_gettime(CLOCK_ACTIVETIME, &t_active);
+    
+    fprintf(stderr, "rtc time = %u / %u, active = %u / %u, time / systick = %u / %u\n", 
+        up_rtc_gettime(), up_rtc_getclock(),
+        t_active.tv_sec, t_active.tv_nsec,
+        time(NULL), clock_systimer() );
     return -1;
 }

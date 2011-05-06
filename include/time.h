@@ -60,28 +60,37 @@
  */
 
 #ifdef CONFIG_MSEC_PER_TICK
-# define CLK_TCK        (1000/CONFIG_MSEC_PER_TICK)
-# define CLOCKS_PER_SEC (1000/CONFIG_MSEC_PER_TICK)
+# define CLK_TCK           (1000/CONFIG_MSEC_PER_TICK)
+# define CLOCKS_PER_SEC    (1000/CONFIG_MSEC_PER_TICK)
 #else
-# define CLK_TCK        (100)
-# define CLOCKS_PER_SEC (100)
+# define CLK_TCK           (100)
+# define CLOCKS_PER_SEC    (100)
 #endif
 
 /* This is the only clock_id supported by the "Clock and Timer
  * Functions."
  */
 
-#define CLOCK_REALTIME 0
+#define CLOCK_REALTIME     0
+
+/* Non-standard. Returns active UTC time, which is disabled during
+ * power down modes. Unit is 1 second.
+ */
+
+#ifdef CONFIG_RTC
+#  define CLOCK_ACTIVETIME 1
+#endif
+
 #define CLOCK_ABSTIME
 
 /* This is a flag that may be passed to the timer_settime() function */
 
-#define TIMER_ABSTIME 1
+#define TIMER_ABSTIME      1
 
 /* Local time is the same as gmtime in this implementation */
 
-#define localtime(c)     gmtime(c)
-#define localtime_r(c,r) gmtime_r(c,r)
+#define localtime(c)       gmtime(c)
+#define localtime_r(c,r)   gmtime_r(c,r)
 
 /********************************************************************************
  * Global Type Declarations

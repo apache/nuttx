@@ -80,10 +80,6 @@ CLOCK_SRCS	= clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c \
 		  clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c \
 		  clock_gettimeofday.c clock_systimer.c
 
-ifeq ($(CONFIG_SYSTEM_UTC),y)
-CLOCK_SRCS	+= clock_getutc.c
-endif
-
 SIGNAL_SRCS	= sig_initialize.c \
 		  sig_action.c sig_procmask.c sig_pending.c sig_suspend.c \
 		  sig_kill.c sig_queue.c sig_waitinfo.c sig_timedwait.c \

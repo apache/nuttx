@@ -1725,3 +1725,7 @@
 
 6.3 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* Remove clock_getutc().  It is replaces with clock_gettime(CLOCK_ACTIVETIME).
+	  Add other RTC related changes provided by Uros Platise.
+
+

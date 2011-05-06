@@ -83,17 +83,21 @@ uint32_t clock_systimer(void)
 
   /* Check if the periodic timer is initialized
    *
-   * Note that the unit of the g_system_timer and and up_rtc_getclock() must
-   * be the same in order (must have same [unit]) to allow smooth transitions.
+   * Note that the unit of the g_system_timer and and up_rtc_getclock() do
+   * not have the same unit.
    */
 
   if (g_rtc_enabled)
     {
-//	  return up_rtc_getclock();
+	  return up_rtc_getclock();
 	}
 #endif
 
+#ifndef CONFIG_SYSTEM_UTC
   return g_system_timer;
+#else
+  return g_system_utc * TICK_PER_SEC + g_tickcount;
+#endif
 }
 
 #endif /* !clock_systtimer */

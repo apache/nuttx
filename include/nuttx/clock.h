@@ -128,15 +128,18 @@
 #if __HAVE_KERNEL_GLOBALS
 extern volatile uint32_t g_system_timer;
 extern volatile uint32_t g_system_utc;
-#endif
 
-#if !defined(CONFIG_RTC) && __HAVE_KERNEL_GLOBALS
+#if TICK_PER_SEC > 32767
+extern volatile uint32_t g_tickcount;
+#elif TICK_PER_SEC > 255
+extern volatile uint16_t g_tickcount;
+#else
+extern volatile uint8_t  g_tickcount;
+#endif
+#endif /* __HAVE_KERNEL_GLOBALS */
+
+#if !defined(CONFIG_SYSTEM_UTC) && __HAVE_KERNEL_GLOBALS
 #define clock_systimer() g_system_timer
-
-#if defined(CONFIG_SYSTEM_UTC)
-#define clock_getutc()   g_system_utc
-#endif
-
 #endif
 
 /****************************************************************************
@@ -171,27 +174,6 @@ extern "C" {
 
 #if defined(CONFIG_RTC) || !__HAVE_KERNEL_GLOBALS
 EXTERN uint32_t clock_systimer(void);
-#endif
-
-/****************************************************************************
- * Function:  clock_getutc
- *
- * Description:
- *   Return the current value of the system timer counter, which is only
- *   enabled when system is in active mode.
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   The current value of the system time counter
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SYSTEM_UTC) && !__HAVE_KERNEL_GLOBALS
-EXTERN time_t clock_getutc(void);
 #endif
 
 #undef EXTERN

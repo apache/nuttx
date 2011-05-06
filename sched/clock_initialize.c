@@ -60,9 +60,13 @@
 #define SEC_PER_HOUR ((time_t)60 * SEC_PER_MIN)
 #define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
 
-/* Defined just so the UTC counter and system counter/timer look similar */
+/* Macro to increment the system timer -- or not */
 
-#define incr_systimer() g_system_timer++
+#ifndef CONFIG_SYSTEM_UTC
+#  define incr_systimer() g_system_timer++
+#else
+#  define incr_systimer()
+#endif
 
 /****************************************************************************
  * Private Type Declarations
@@ -80,14 +84,13 @@
  * Public Variables
  ****************************************************************************/
 
-volatile clock_t g_system_timer = 0;
-
 #if CONFIG_SYSTEM_UTC
 volatile time_t  g_system_utc   = 0;
-#endif
-
+#else
+volatile clock_t g_system_timer = 0;
 struct timespec  g_basetime     = {0,0};
 uint32_t         g_tickbias     = 0;
+#endif
 
 /**************************************************************************
  * Private Variables
@@ -99,11 +102,11 @@ uint32_t         g_tickbias     = 0;
 
 #if CONFIG_SYSTEM_UTC
 #if TICK_PER_SEC > 32767
-static uint32_t g_tickcount = 0;
+volatile uint32_t g_tickcount = 0;
 #elif TICK_PER_SEC > 255
-static uint16_t g_tickcount = 0;
+volatile uint16_t g_tickcount = 0;
 #else
-static uint8_t  g_tickcount = 0;
+volatile uint8_t  g_tickcount = 0;
 #endif
 #endif /* CONFIG_SYSTEM_UTC */
 
@@ -153,32 +156,39 @@ static inline void incr_utc(void)
 
 void clock_initialize(void)
 {
+#ifndef CONFIG_SYSTEM_UTC
   time_t jdn = 0;
+#endif
 
   /* Initialize the real time close (this should be un-nesssary except on a
    * restart).
    */
 
-  g_system_timer = 0;
 #ifdef CONFIG_SYSTEM_UTC
   g_system_utc   = 0;
+#else
+  g_system_timer = 0;
 #endif
 
-  /* Do we have hardware periodic timer support? */
+  /* Do we have hardware RTC support? */
 
 #ifdef CONFIG_RTC
+
+#ifndef CONFIG_SYSTEM_UTC
+#  error In order to support hardware RTC system must have set the CONFIG_SYSTEM_UTC=y
+#endif
+
   up_rtcinitialize();
+#endif
+
+#ifndef CONFIG_SYSTEM_UTC
 
   /* Get the EPOCH-relative julian date from the calendar year,
    * month, and date
    */
 
-  if (g_rtc_enabled==false)
-#endif
-    {
-      jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH,
-                               CONFIG_START_DAY);
-    }
+  jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH,
+                           CONFIG_START_DAY);
 
   /* Set the base time as seconds into this julian day. */
 
@@ -188,6 +198,7 @@ void clock_initialize(void)
   /* These is no time bias from this time. */
 
   g_tickbias = 0;
+#endif
 }
 
 /****************************************************************************

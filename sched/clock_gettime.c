@@ -38,6 +38,7 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/rtc.h>
 
 #include <stdint.h>
 #include <time.h>
@@ -95,17 +96,13 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
   sdbg("clock_id=%d\n", clock_id);
 
-  /* Only CLOCK_REALTIME is supported */
+  /* CLOCK_REALTIME - POSIX demands this to be present. This is the wall
+   * time clock.
+   */
 
-  if (clock_id != CLOCK_REALTIME)
+  if (clock_id == CLOCK_REALTIME && tp)
     {
-      sdbg("Returning ERROR\n");
-
-      *get_errno_ptr() = EINVAL;
-      ret = ERROR;
-    }
-  else
-    {
+#ifndef CONFIG_SYSTEM_UTC
       /* Get the elapsed time since power up (in milliseconds) biased
        * as appropriate.
        */
@@ -142,9 +139,45 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
       tp->tv_sec  = (time_t)secs;
       tp->tv_nsec = (long)nsecs;
+      
+#else   /* if CONFIG_SYSTEM_UTC=y */
+
+#ifdef CONFIG_RTC
+      if (g_rtc_enabled)
+        {
+          tp->tv_sec  = up_rtc_gettime();
+          tp->tv_nsec = (up_rtc_getclock() & (RTC_CLOCKS_PER_SEC-1) ) * (1000000000/TICK_PER_SEC);
+        }
+      else
+#endif
+        {
+          tp->tv_sec  = g_system_utc;
+          tp->tv_nsec = g_tickcount * (1000000000/TICK_PER_SEC);
+        }
+#endif
 
       sdbg("Returning tp=(%d,%d)\n",
            (int)tp->tv_sec, (int)tp->tv_nsec);
+    }
+
+ /* CLOCK_ACTIVETIME is non-standard. Returns active UTC time, which is
+  * disabled during power down modes. Unit is 1 second.
+  */
+
+#ifdef CONFIG_RTC
+  else if (clock_id == CLOCK_ACTIVETIME && g_rtc_enabled && tp)
+    {
+      tp->tv_sec  = g_system_utc;
+      tp->tv_nsec = g_tickcount * (1000000000/TICK_PER_SEC);
+    }
+#endif
+
+  else
+    {
+      sdbg("Returning ERROR\n");
+
+      errno = EINVAL;
+      ret = ERROR;
     }
 
   return ret;
