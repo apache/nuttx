@@ -91,7 +91,8 @@
       <a href="#updisableirq">4.1.16 <code>up_disable_irq()</code></a><br>
       <a href="#upenableirq">4.1.17 <code>up_enable_irq()</code></a><br>
       <a href="#upprioritizeirq">4.1.18 <code>up_prioritize_irq()</code></a></br>
-      <a href="#upputc">4.1.19 <code>up_putc()</code></a>
+      <a href="#upputc">4.1.19 <code>up_putc()</code></a></br>
+      <a href="#systemtime">4.1.20 System Time and Clock</a>
     </ul>
     <a href="#exports">4.2 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
@@ -1640,6 +1641,90 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <p><b>Description</b>.
   This is a debug interface exported by the architecture-specific logic.
   Output one character on the console
+</p>
+
+<h3><a name="systemtime">4.1.20 System Time and Clock</a></h3>
+
+<h4>4.1.20.1 UTC Time Representation</h4>
+<p>
+  To enable UTC time representation use option:
+</p>
+<ul><pre>
+CONFIG_SYSTEM_UTC=y
+</pre></ul>
+<p>
+  which adds the following variables:
+</p>
+<ul>
+  <li><code>g_system_utc</code> (seconds, 4 bytes)</li>
+  <li><code>g_tickcount</code> (timer ticks, 1-2 bytes typically)</li>
+</ul>
+<p>
+  and replaces:
+</p>
+<ul>
+  <li><code>g_system_timer</code>(4 bytes)</li>
+  <li><code>g_basetime</code>(8 bytes)</li>
+  <li><code>g_tickbias</code>(4 bytes)</li>
+</ul>
+<p>
+  Otherwise internal time is computed from 32-bit running tick timer
+  <code>g_systemtimer</code> the start date <code>g_basetime</code> and time offset the <code>g_tickbias</code>.
+</p>
+
+<h4>4.1.20.2 Hardware</h4>
+<p>
+  To enable hardware module use option:
+<p>
+<ul><pre>
+CONFIG_RTC=y
+</pre></ul>
+<p>
+  which requires the following three base functions to read time:
+</p>
+<ul>
+  <li><code>up_rtcinitialize()</code></li>
+  <li><code>up_rtc_gettime()</code>. UTC time in seconds.</li>
+  <li><code>up_rtc_getclock()</code>. Replacement for <code>g_system_tick</code></li>
+</ul>
+<p>
+  This module depends on <code>CONFIG_SYSTEM_UTC=y</code>.
+</p>
+
+<h4>4.1.20.3 System Tick and Time</h4>
+<p>
+  The system tick is represented by, when <code>CONFIG_SYSTEM_UTC=n</code>:
+</p>
+<ul>
+  <li><code>g_system_timer</code></li>
+</ul>
+<p>
+  or, when <code>CONFIG_SYSTEM_UTC=y</code>
+</p>
+<ul>
+  <li><code>g_tickcount</code></li>
+  <li><code>g_system_utc</code></li>
+</ul>
+<p>
+  Running at rate of system base timer, used for time-slicing, and so forth.
+</p>
+<p>
+  If hardware RTC is present (<code>CONFIG_RTC</code>) and enabled, then after successful
+  initiliazation variables are overriden by calls to <code>up_rtc_getclock()</code> which is
+  running continously even in power-down modes.
+</p>
+<p>
+  In the case of <code>CONFIG_RTC</code> is set the <code>g_tickcount</code> and <code>g_system_utc</code> keep
+  counting at rate of a system timer, which however, is disabled in power-down
+  mode. By comparing this time and RTC (actual time) one may determine the
+  actual system active time. To retrieve that variable use:
+</p>
+<ul><pre>
+  <li><code>clock_gettime(CLOCK_ACTIVETIME, tp)</code>
+</pre></ul>
+<p>
+  If the <code>CLOCK_ACTIVETIME</code> time is never set it will serve as power-up time
+  minus all deep sleeps.
 </p>
 
 <h2><a name="exports">4.2 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
