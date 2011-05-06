@@ -103,7 +103,8 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
       /* We can't remove the inode if it is open */
 
       fdbg("Inode '%s' is open\n", name);
-      return -EBUSY;
+      ret = -EBUSY;
+      goto errout;
     }
 
   /* Find the NXFFS inode */
@@ -112,7 +113,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   if (ret < 0)
     {
       fdbg("Inode '%s' not found\n", name);
-      return ret;
+      goto errout;
     }
 
   /* Set the position to the FLASH offset of the file header (nxffs_findinode
@@ -127,7 +128,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   if (ret < 0)
     {
       fdbg("Failed to read data into cache: %d\n", ret);
-      return ret;
+      goto errout_with_entry;
     }
 
   /* Change the file status... it is no longer valid */
@@ -141,10 +142,12 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   if (ret < 0)
     {
       fdbg("Failed to read data into cache: %d\n", ret);
-      return ret;
     }
 
-  return OK;
+errout_with_entry:
+  nxffs_freeentry(&entry);
+errout:
+  return ret;
 }
 
 /****************************************************************************
