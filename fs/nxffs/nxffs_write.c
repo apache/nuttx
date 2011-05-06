@@ -102,7 +102,7 @@
  *
  *   On successful return the following are also valid:
  *
- *     wrfile->doffset - Flash offset to candidate header position
+ *     wrfile->doffset - Flash offset to candidate data block header position
  *     volume->ioblock - Read/write block number of the block containing the
  *       header position
  *     volume->iooffset - The offset in the block to the candidate header
@@ -122,11 +122,13 @@ static inline int nxffs_hdrpos(FAR struct nxffs_volume_s *volume,
   ret = nxffs_wrreserve(volume, SIZEOF_NXFFS_DATA_HDR + size);
   if (ret == OK)
     {
-      /* Save the offset to the FLASH region reserved for the inode header */
+      /* Save the offset to the FLASH region reserved for the data block
+       * header
+       */
 
       wrfile->doffset = nxffs_iotell(volume);
     }
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -163,7 +165,7 @@ static inline int nxffs_hdrpos(FAR struct nxffs_volume_s *volume,
  *
  *   On successful return the following are also valid:
  *
- *     wrfile->doffset - Flash offset to candidate header position
+ *     wrfile->doffset - Flash offset to candidate data block header position
  *     volume->ioblock - Read/write block number of the block containing the
  *       header position
  *     volume->iooffset - The offset in the block to the candidate header
@@ -183,7 +185,7 @@ static inline int nxffs_hdrerased(FAR struct nxffs_volume_s *volume,
   ret = nxffs_wrverify(volume, SIZEOF_NXFFS_DATA_HDR + size);
   if (ret == OK)
     {
-      /* This is where we will put the header */
+      /* This is where we will put the data block header */
 
       wrfile->doffset = nxffs_iotell(volume);
     }

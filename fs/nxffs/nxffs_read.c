@@ -416,10 +416,20 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
   uint32_t crc;
   uint16_t doffset;
   uint16_t dlen;
+  int ret;
+
+  /* Make sure the the block containing the data block header is in the cache */
+
+  nxffs_ioseek(volume, offset);
+  ret = nxffs_rdcache(volume, volume->ioblock);
+  if (ret < 0)
+    {
+      fvdbg("Failed to read data into cache: %d\n", ret);
+      return ret;
+    }
 
   /* Read the header at the FLASH offset */
 
-  nxffs_ioseek(volume, offset);
   doffset = volume->iooffset;
   memcpy(&blkhdr, &volume->cache[doffset], SIZEOF_NXFFS_DATA_HDR);
 

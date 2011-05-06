@@ -134,7 +134,7 @@ static inline int nxffs_hdrpos(FAR struct nxffs_volume_s *volume,
 
       wrfile->ofile.entry.hoffset = nxffs_iotell(volume);
     }
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -189,7 +189,7 @@ static inline int nxffs_nampos(FAR struct nxffs_volume_s *volume,
 
       wrfile->ofile.entry.noffset = nxffs_iotell(volume);
     }
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

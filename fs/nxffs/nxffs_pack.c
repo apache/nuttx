@@ -610,7 +610,7 @@ errout:
  *
  * Returned Values:
  *   Zero on success; Otherwise, a negated errno value is returned to
- *   indicate the nature of the failure.
+ *   indicate the nature of the failure (not used).
  *
  ****************************************************************************/
 
@@ -651,55 +651,60 @@ static int nxffs_wrinodehdr(FAR struct nxffs_volume_s *volume,
        * header that is called during the normal file close operation:
        */
 
-      return nxffs_wrinode(volume, &pack->dest.entry);
+      ret = nxffs_wrinode(volume, &pack->dest.entry);
     }
-
-  /* Cases 1:  Both the inode header and name are in the unwritten cache memory. */
-  /* Initialize the inode header */
-
-  iooffset += (ioblock - pack->block0) * volume->geo.blocksize;
-  inode     = (FAR struct nxffs_inode_s *)&volume->pack[iooffset];
-  memcpy(inode->magic, g_inodemagic, NXFFS_MAGICSIZE);
-
-  nxffs_wrle32(inode->noffs,  pack->dest.entry.noffset);
-  nxffs_wrle32(inode->doffs,  pack->dest.entry.doffset);
-  nxffs_wrle32(inode->utc,    pack->dest.entry.utc);
-  nxffs_wrle32(inode->crc,    0);
-  nxffs_wrle32(inode->datlen, pack->dest.entry.datlen);
-
-  /* Get the length of the inode name */
-
-  namlen = strlen(pack->dest.entry.name);
-  DEBUGASSERT(namlen < CONFIG_NXFFS_MAXNAMLEN);
-
-  inode->state  = CONFIG_NXFFS_ERASEDSTATE;
-  inode->namlen = namlen;
-
-  /* Calculate the CRC */
-
-  crc = crc32((FAR const uint8_t *)inode, SIZEOF_NXFFS_INODE_HDR);
-  crc = crc32part((FAR const uint8_t *)pack->dest.entry.name, namlen, crc);
-
-  /* Finish the inode header */
-
-  inode->state = INODE_STATE_FILE;
-  nxffs_wrle32(inode->crc, crc);
-
-  /* If any open files reference this inode, then update the open file
-   * state.
-   */
-
-  ret = nxffs_updateinode(volume, &pack->dest.entry);
-  if (ret < 0)
+  else
     {
-      fdbg("Failed to update inode info: %s\n", -ret);
+      /* Cases 1:  Both the inode header and name are in the unwritten cache
+       * memory.
+       *
+       * Initialize the inode header.
+       */
+
+      iooffset += (ioblock - pack->block0) * volume->geo.blocksize;
+      inode     = (FAR struct nxffs_inode_s *)&volume->pack[iooffset];
+      memcpy(inode->magic, g_inodemagic, NXFFS_MAGICSIZE);
+
+      nxffs_wrle32(inode->noffs,  pack->dest.entry.noffset);
+      nxffs_wrle32(inode->doffs,  pack->dest.entry.doffset);
+      nxffs_wrle32(inode->utc,    pack->dest.entry.utc);
+      nxffs_wrle32(inode->crc,    0);
+      nxffs_wrle32(inode->datlen, pack->dest.entry.datlen);
+
+      /* Get the length of the inode name */
+
+      namlen = strlen(pack->dest.entry.name);
+      DEBUGASSERT(namlen < CONFIG_NXFFS_MAXNAMLEN);
+
+      inode->state  = CONFIG_NXFFS_ERASEDSTATE;
+      inode->namlen = namlen;
+
+      /* Calculate the CRC */
+
+      crc = crc32((FAR const uint8_t *)inode, SIZEOF_NXFFS_INODE_HDR);
+      crc = crc32part((FAR const uint8_t *)pack->dest.entry.name, namlen, crc);
+
+      /* Finish the inode header */
+
+      inode->state = INODE_STATE_FILE;
+      nxffs_wrle32(inode->crc, crc);
+
+      /* If any open files reference this inode, then update the open file
+       * state.
+       */
+
+      ret = nxffs_updateinode(volume, &pack->dest.entry);
+      if (ret < 0)
+        {
+          fdbg("Failed to update inode info: %s\n", -ret);
+        }
     }
 
   /* Reset the dest inode information */
 
   nxffs_freeentry(&pack->dest.entry);
   memset(&pack->dest, 0, sizeof(struct nxffs_packstream_s));
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

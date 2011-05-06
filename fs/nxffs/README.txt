@@ -11,6 +11,7 @@ Contents:
   Headers
   NXFFS Limitations
   Multiple Writers
+  ioctls
   Things to Do
 
 General NXFFS organization
@@ -133,6 +134,16 @@ Also note that a deadlock condition would occur if the SAME thread
 attempted to open two files for writing.  The thread would would be
 blocked waiting for itself to close the first file.
 
+ioctls
+======
+
+The file system supports to ioctls:
+
+FIOC_REFORMAT:  Will force the flash to be erased and a fresh, empty
+  NXFFS file system to be written on it.
+FIOC_OPTIMIZE:  Will force immediate repacking of the file system.  This
+  will increase the amount of wear on the FLASH if you use this!
+
 Things to Do
 ============
 
@@ -150,7 +161,7 @@ Things to Do
   information in the read open file structure.
 - Fault tolerance must be improved.  We need to be absolutely certain that
   any FLASH errors do not cause the file system to behavior incorrectly.
-- Wear leveling could be improved as well.  Files are re-packed at the front
+- Wear leveling might be improved (?).  Files are re-packed at the front
   of FLASH as part of the clean-up operation.  However, that means the files
   that are not modified often become fixed in place at the beginning of
   FLASH.  This reduces the size of the pool moving files at the end of the
