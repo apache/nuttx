@@ -67,6 +67,10 @@
 #  define CONFIG_RAMMTD_ERASESTATE 0xff
 #endif
 
+#if CONFIG_RAMMTD_ERASESTATE != 0xff && CONFIG_RAMMTD_ERASESTATE != 0x00
+#  error "Unsupported value for CONFIG_RAMMTD_ERASESTATE"
+#endif
+
 #if CONFIG_RAMMTD_BLOCKSIZE > CONFIG_RAMMTD_ERASESIZE
 #  error "Must have CONFIG_RAMMTD_BLOCKSIZE <= CONFIG_RAMMTD_ERASESIZE"
 #endif
@@ -97,6 +101,18 @@ struct ram_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+/* The RAM MTD driver may be useful just as it is, but another good use of
+ * the RAM MTD driver is as a FLASH simulation -- to support testing of FLASH
+ * based logic without having FLASH.  CONFIG_RAMMTD_FLASHSIM will add some
+ * extra logic to improve the level of FLASH simulation.
+ */
+
+#define ram_read(dest, src, len) memcpy(dest, src, len)
+#ifdef CONFIG_RAMMTD_FLASHSIM
+static void *ram_write(FAR void *dest, FAR const void *src, size_t len);
+#else
+#  define ram_write(dest, src, len) memcpy(dest, src, len)
+#endif
 
 /* MTD driver methods */
 
@@ -114,6 +130,55 @@ static int ram_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ram_write
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMMTD_FLASHSIM
+static void *ram_write(FAR void *dest, FAR const void *src, size_t len)
+{
+  FAR uint8_t       *pout = (FAR uint8_t *)dest;
+  FAR const uint8_t *pin  = (FAR const uint8_t *)src;
+
+  while (len-- > 0)
+    {
+      /* Get the source and destination values */
+
+      uint8_t oldvalue = *pout;
+      uint8_t srcvalue = *pin++;
+      uint8_t newvalue;
+
+      /* Get the new destination value, accounting for bits that cannot be
+       * changes because they are not in the erased state.
+       */
+
+#if CONFIG_RAMMTD_ERASESTATE == 0xff
+      newvalue = oldvalue & srcvalue; /* We can only clear bits */
+#else /* CONFIG_RAMMTD_ERASESTATE == 0x00 */
+      newvalue = oldvalue | srcvalue; /* We can only set bits */
+#endif
+
+      /* Report any attempt to change the value of bits that are not in the
+       *  erased state.
+       */
+
+#ifdef CONFIG_DEBUG
+      if (newvalue != srcvalue)
+        {
+          dbg("ERROR: Bad write: source=%02x dest=%02x result=%02x\n",
+              srcvalue, oldvalue, newvalue);
+        }
+#endif
+
+      /* Write the modified value to simulated FLASH */
+
+      *pout++ = newvalue;
+    }
+
+  return dest;
+}
+#endif
 
 /****************************************************************************
  * Name: ram_erase
@@ -195,7 +260,7 @@ static ssize_t ram_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
 
   /* Then read the data frp, RAM */
 
-  memcpy(buf, &priv->start[offset], nbytes);
+  ram_read(buf, &priv->start[offset], nbytes);
   return nblocks;
 }
 
@@ -235,7 +300,7 @@ static ssize_t ram_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Then write the data to RAM */
 
-  memcpy(&priv->start[offset], buf, nbytes);
+  ram_write(&priv->start[offset], buf, nbytes);
   return nblocks;
 }
 

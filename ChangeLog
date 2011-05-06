@@ -1664,7 +1664,7 @@
 	* configs/lpcxpresso-lpc1768: Add a board configuration for the Embedded
 	  Artists LPCXpresso LPC1768 board.
 
-6.2 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+6.2 2011-05-06 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/src/lpc17xx/lpc17_gpioint.c: Correct errors in logic that maps
 	  and IRQ number into a register bit number.
@@ -1720,4 +1720,8 @@
 	  will be used to verify NXFFS.
 	* fs/fat/fs_fat32.c and fs_fat32util.c: Incorpated two bugs with fixed provided
 	  by Sheref Younan.  Thanks!
+	* fs/nxffs: After a couple of weeks of testing and bug fixes, NXFSS appears
+	  stable and functional.
+
+6.3 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 

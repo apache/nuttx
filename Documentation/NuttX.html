@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 28, 2011</p>
+      <p>Last Updated: May 6, 2011</p>
     </td>
   </tr>
 </table>
@@ -424,6 +424,13 @@
   <td><br></td>
   <td>
     <p>
+      <li>NXFFS. the NuttX wear-leveling FLASH file system.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <li>Generic driver for SPI-based MMC/SD/SDH cards.</li>
     </p>
 </tr>
@@ -528,6 +535,13 @@
   <td>
     <p>
       <li><i>FTL</i>.  Simple <i>F</i>lash <i>T</i>ranslation <i>L</i>ayer support file systems on FLASH.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>NXFFS. the NuttX wear-leveling FLASH file system.</li>
     </p>
 </tr>
 <tr>
@@ -815,74 +829,45 @@
   </tr>
 </table>
 
-<p><b>nuttx-6.1 Release Notes</b>:
+<p><b>nuttx-6.2 Release Notes</b>:
 
 <p>
-  The 68<sup>th</sup> release of NuttX, Version 6.1, was made on April 10, 2011 and is available for download from the
+  The 69<sup>th</sup> release of NuttX, Version 6.2, was made on May 6, 2011 and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
-  These unreleased changes are listed <a href="#pendingchanges">here</a>.
+  These unreleased changes are also listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  The 6.0 release introduced a detach-able application environment to build applications outside of the NuttX source tree.
-  The primary purpose of this release is to correct numerous build problems introduced by that architectural change:
-</p>
-<ul>
-  <li>
-    In many newer environments, NuttX produced strange Makefile errors but built correctly in older environments.
-    A fix provided by Rafael Noronha was incorporated and is reported to fix those build problems.
-  </li>
-  <li>
-    The <code>apps/</code> directory build system would not handle Windows-native toolchains due to obscure path formatting issues.
-  </li>
-  <li>
-    And other problems as detailed in the change log.
-  </li>
-</ul>
-
-<p>
-  Many additional changes were made in the 6.1 release for another major architectural change:
-  NuttX will now build as a seperately linked micro-kernel.
-  In this build option the RTOS builds as a kernel, applications build separtate and interface with kernel via system calls.
-  Applications run in user mode and kernel logic users in kernel-mode.
-  This provides a secure environment for NuttX.
-  This feature is fully coded in NuttX-6.1, but has not been tested due to higher priority tasks that have arisen.
-</p>
-<p>
-  Related to this change, support for the Cortex-M3 memory protection unit (MPU) has been integrated with the NuttX kernel build to provide an even higher level of security.
-</p>
-<p><small>
-  NOTE: This kernel build is an option; the default build configuration is still the standard, flat, unsecured RTOS as in previous releases.
-</small></p>
-<p>
-  Additional new features in this release:
+  The 6.2 NuttX release includes several new features:
 </p>
 <ul>
   <li>
-    Support for LPC17xx GPIO interrupts (with much support from Decio Renno).
+    NXFFS: The obvious new feature is NXFFS, the NuttX wear-leveling FLASH file system.
+    This new file system is intended to be small for the MCU usage and has some limitations.
+    No formal documentation of NXFFS yet exists.
+    See the <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/nuttx/fs/nxffs/README.txt?view=log"><code>fs/nxffs/README.txt</code></a>
+    file for more details.
   </li>
   <li>
-    Basic timer support for STM32 (Contributed by Uros Platise)
+    Support for NXP LPCXpresso LPC1768 board on the Embedded Artists base board.
+    The Code Red toolchain is supported under either Linux or Windows.
+    Verifed configurations include DHCPD, the NuttShell (NSH), NuttX graphis (NX), the NuttX OS test, THTTPD, and USB mass storage device.
   </li>
   <li>
-    A binfs file system.
-    This is a tiny psuedo file system that lets named appliations to be viewed and accessed in NSH under the <code>/bin</code> directory.
+    Support for the Univision UG-9664HSWAG01 OLED with Solomon Systech SD1305 LCD controller.
   </li>
   <li>
-    An I2C-based driver for the LIS331DL MEMS motion sensor (Contributed by Uros Platise).
+    A new RAM MTD driver with FLASH simulation capability.
   </li>
   <li>
-    A board configuration for the Embedded Artists LPCXpresso LPC1768 board.
-  </li>
-  <li>
-    The <code>user_initialize()</code> interface has been removed.
+    A <code>version.h</code> file is now automatically generated so that C code can now be version-aware.
   </li>
 </ul>
-
 <p>
-  And several bugfix are included.
-  This includes chagnes associated with SD drivers, openddir(), signed 8-bit types (<code>int8_t</code>), and USB serial device.  See the ChangeLog for details.
+  In addition to these new feature, several important bugfixes are included in this release correcting problems with
+  <code>dup2()</code>, LPC17xx GPIO interrupts, LPC17xx UART2/3, the FAT file system, build issues, and <code>strrch()</code>.
+  See the ChangeLog for more details.
 </p>
 
 <table width ="100%">
@@ -1342,7 +1327,7 @@
       </ul>
     </p>
     <p>
-      The Nucleus 2G and the mbed boards feature the NXP LPC1768 MCU;
+      The Nucleus 2G boar, the mbed board, and the LPCXpresso all feature the NXP LPC1768 MCU;
       the Olimex LPC1766-STK board features an LPC1766.
       All use a GNU arm-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
     </p>
@@ -1352,8 +1337,9 @@
         The following summarizes the features that has been developed and verified on individual LPC17xx-based boards.
         These features should, however, be common and available for all LPC17xx-based boards.
       </p>
-      <p>
-        <b>Nucleus2G LPC1768</b>.
+      <ol>
+        <li>
+        <p><b>Nucleus2G LPC1768</b></p>
         <ul>
           <li>
             Some initial files for the LPC17xx family were released in NuttX 5.6, but
@@ -1374,8 +1360,9 @@
         However, due to some technical reasons, neither the SPI nor the USB device drivers are fully verified.
         (Although they have since been verfiied on other platforms; this needs to be revisited on the Nucleus2G).
       </p>
-      <p>
-        <b>mbed LPC1768</b>.
+      </li>
+      <li>
+        <p><b>mbed LPC1768</b></p>
         <ul>
           <li>
             Support for the mbed board was contributed by Dave Marples and released in NuttX-5.11.
@@ -1385,8 +1372,9 @@
       <p>
         This port includes a NuttX OS test configuration (see <code>apps/examples/ostest</code>).
       </p>
-      <p>
-        <b>Olimex LPC1766-STK</b>.
+      </li>
+      <li>
+        <p><b>Olimex LPC1766-STK</b></p>
         <ul>
           <li>
             Support for that Olimex-LPC1766-STK board was added to NuttX 5.13.
@@ -1405,16 +1393,7 @@
           </li>
         </ul>
       </p>
-      <p>
-        <b>Embedded Artists base board with NXP LPCXpresso LPC1768</b>.
-        <ul>
-          <li>
-             An initial board configuration is included in NuttX-6.1.
-             However, certain Code Red download issues have not yet been resolved and the port has not yet been tested.
-          </li>
-        </ul>
-      </p>
-      <p>
+      <ul><p>
         Verified configurations are now available for the NuttX OS test,
         for the NuttShell with networking and microSD support(NSH, see the <a href="ttp://www.nuttx.org/NuttShell.html">NSH User Guide</a>),
         for the NuttX network test, for the <a href="http://acme.com/software/thttpd">THTTPD</a> webserver,
@@ -1422,16 +1401,25 @@
         Support for the USB host mass storage device can optionally be configured for the NSH example.
         A driver for the <i>Nokia 6100 LCD</i> and an NX graphics configuration for the Olimex LPC1766-STK have been added.
         However, neither the LCD driver nor the NX configuration have been verified as of the the NuttX-5.17 release.
-      </p>
+      </p></ul>
+      </li>
+      <li>
+        <p><b>Embedded Artists base board with NXP LPCXpresso LPC1768</b></p>
+        <ul>
+           An fully verified board configuration is included in NuttX-6.2.
+           The Code Red toolchain is supported under either Linux or Windows.
+           Verifed configurations include DHCPD, the NuttShell (NSH), NuttX graphis (NX), the NuttX OS test, THTTPD, and USB mass storage device.
+        </ul>
+      </li>
+      </ol>
       <p>
         <b>Development Environments:</b>
         1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin
-        with Windows native toolchain (CodeSourcery or devkitARM).  A DIY toolchain for Linux
+        with Windows native toolchain (CodeSourcery devkitARM or Code Red).  A DIY toolchain for Linux
         or Cygwin is provided by the NuttX
         <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a>
         package.
       </p>
-     </ul>
    </td>
 </tr>
 <tr>
@@ -2095,109 +2083,7 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.1 2011-04-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * arch/arm/include/lpc17xx/irq.h and arch/arm/src/lpc17xx/lpc17_gpio*.c:
-      Fix several bugs in the GPIO interrupt logic.  Submited by
-      Decio Renno.
-    * Initialization for the CONFIG_APPS_DIR is now supported during the
-      earlier, 'context' build phase.
-    * arch/arm/src/lpc17_gpioint.c: Finish coding of the LPC17xx GPIO
-      interrupt logic.
-    * net/netdev_unregister.c: Add capability to un-register a network
-      device.
-    * drivers/mmcsd/mmcsd_sdio.c: extra effort to correctly handle cases
-      without the SDcard (but one issue still exists in STM32)
-    * arch/arm/src/stm32/stm32_tim.*: Added basic timer support TIM1..TIM8
-      with output PWMs and interrupt logic
-    * config/vsn/src: added basic support for Sensor Interface (GPIO and
-      PWM Power Output, and the sif utility program)
-    * fs/: Reorgnize header so that file systems can be built outside
-      of the nuttx source tree
-    * apps/namedapp/binfs.c: Create a tiny filesystem that can be used
-      to show the internal named apps under /bin.
-    * fs/fs_opendir.c: Correct an error that occurs when a file system is
-      mounted in the root directory.  This was discovered while mounting
-      the named app's /bin directory.
-    * lib/: Move all source files into a subdirectory of lib/ named after
-      the header file in which the library function is prototyped.
-    * sched/ and lib/pthread/:  Move pthread attribute-related interfaces
-      from sched/ to lib/pthread where they more appropriately belong.
-    * sched/ and lib/semaphore/:  Move some semaphore-related interfaces
-      from sched/ to lib/pthread where they more appropriately belong.
-    * syscall/: The beginnings of an optional syscall kernel interface.
-    * tools/mksyscall.c:  Add a tool that will auto-generate syscall proxies
-      and stubs from a comma-separated-value (CSV) data file.
-    * arch/arm/src/cortexm3/mpu.h: Add a header file describing the Cortex-M3
-      MPU registers.
-    * Numerous modifications to the build system.  Various people have reported
-      build problems since the re-organization and release of NuttX-6.0.  I am
-      unable to replicate the build problems in my environment, but the changes
-      have be incorporated in hope of correcting the build issues in other
-      environments.
-    * drivers/i2c/st_lis331dl.c:  I2C-based driver for the LIS331DL MEMS
-      motion sensor.  Contributed by Uros Platise.
-    * Makefile: The NuttX build system  will now supported building NuttX as two
-      separately linked images: (1) a kernel-mode RTOS image, and (2) a user-
-      mode application image that communicates to the RTOS kernel via system
-      calls.  A lot more still must be done.
-    * user_initialize(): Eliminated the user_initialize() initialization hook.
-      It is difficult to maintain and redundant:  Board level initialization
-      an up_initialize() provide the same kind of capability.
-    * arch/*/include/*/type.h: On some compilers, char defaults as unsigned.
-      Explicitly add signed to integer types if signed is what is required.
-    * arch/*: For all architectures -- Global register state save structure
-      (usually called current_regs) should be marked volatile; Added general
-      capability to support nested interrupts (not fully realized for all
-      architectures).
-    * sched/task_create.c: Add support for starting kernel-mode thread.
-    * drivers/usbdev/usbdev_serial.c: Fix reported by Sheref Younan.  USB
-      was being reset after serial driver was closed.  As a result, you could
-      no reopen the serial driver.
-    * configs/lpcxpresso-lpc1768: Add a board configuration for the Embedded
-      Artists LPCXpresso LPC1768 board.
-
-apps-6.1 2011-04-10 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * Creation of auto-generated header files now occurs during the context
-      build phase.
-    * Added sdcard insert and eject, nsh command '?' and some code remarks
-    * Renamed nuttapp to namedapp
-    * namedapp/binfs.c -- Create a tiny filesystem that can be used
-      to show the internal named apps under /bin.
-    * Numerous fixes to build system required to support building with native
-      Windows toolchain.
-
-pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * Updated to use standard C99 types in stdint.h and
-      stdbool.h.  This change was necessary for compatibility
-      with NuttX-5.0 (any beyond).
-
-buildroot-1.9 2011-02-10 &lt;spudmonkey@racsa.co.cr&gt;
-
-    * configs/arm926t-defconfig-4.3.3: update arm926t-defconfig-4.2.4
-    * configs/arm926t-defconfig-nxflat: NXFLAT-only configuration for
-      arm926
-    * toolchain/gdb/gdb.mk - Remove ncurses dependency from gdb_target target.
-    * toolchain/gdb/gdb.mk - Added --disable-werror to GDB configuration line.
-      GDB 6.8 won't build because the tarbal was released with -Werror enabled and
-      the build stops on the first warning.
-    * Add support for Freescale m9s12x using binutils 2.18 and gcc 3.3.6 and
-      patches available from http://www.msextra.com/tools courtesy of James
-      Cortina.  Add configs/m9x12x-defconfig-3.3.6.
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<ul><pre>
-nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.2 2011-05-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * arch/arm/src/lpc17xx/lpc17_gpioint.c: Correct errors in logic that maps
       and IRQ number into a register bit number.
@@ -2215,7 +2101,7 @@ nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
         -     __exidx_start = ABSOLUTE(.);
               *(.ARM.exidx*)
         -     __exidx_end = ABSOLUTE(.);
-        } >sram
+        } &gt;sram
         +  __exidx_end = ABSOLUTE(.);
 
     * arch/arm/src/lpc17xx: Correct some typos/bugs in configuration of LPC17xx
@@ -2229,8 +2115,8 @@ nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * sched/clock_getutc() and lib/time/lib_time.c: Add support for 1 second UTC
       interface.
     * net/net_dup2.c and include/nuttx/net.h: The conditional compilation for
-      '#if CONFIG_NFILE_DESCRIPTOR > 0' was wrong in both of these files.  It should
-      be '#if CONFIG_NFILE_DESCRIPTORS > 0'.  This causes a dup2() failure in THTTPD
+      '#if CONFIG_NFILE_DESCRIPTOR &gt; 0' was wrong in both of these files.  It should
+      be '#if CONFIG_NFILE_DESCRIPTORS &gt; 0'.  This causes a dup2() failure in THTTPD
       and a failure to get a CGI page.  The consequence can be a very serious bug!
     * configs/lpcxpresso-lpc1768/usbstorage, thttpd, and dhcpd: Add an USB storage,
       THTTPD web server, and DHCP server configurations for the NXP LPCXpresso board.
@@ -2239,7 +2125,7 @@ nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * configs/lpcxpresso-lpc1668/nx: Add a NX graphics configuration for the LPCXPRESO
       board.
     * graphics/nxglib/nxglib_nonintersecting.c: Fix some single bit errors in
-      calculation of non-intersecting regions.  This was causing an anomoaly
+      calculation of non-intersecting regions.  This was causing an anomaly
       in examples/nx in column 0.
     * drivers/mtd/rammtd.c: Added a RAM based MTD driver.  This RAM driver simulates
       FLASH and is useful for testing purposes.
@@ -2249,17 +2135,30 @@ nuttx-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * fs/nxffs: Adding a tiny, wear-leveling FLASH file system for NuttX.  This
       file system is intended to be small and will have some limitations.  The
       implementation is incomplete on initial checkin.
+    * apps/examples/nxffs and configs/sim/nxffs:  Add a test a a configuration that
+      will be used to verify NXFFS.
+    * fs/fat/fs_fat32.c and fs_fat32util.c: Incorpated two bugs with fixed provided
+      by Sheref Younan.  Thanks!
+    * fs/nxffs: After a couple of weeks of testing and bug fixes, NXFSS appears
+      stable and functional.
 
-apps-6.2 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+apps-6.2 2011-05-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+    * apps/examples/nxffs:  Add a test a a configuration that will be used to
+      verify NXFFS.
 
-buildroot-1.10 2011-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
+pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * Updated to use standard C99 types in stdint.h and
+      stdbool.h.  This change was necessary for compatibility
+      with NuttX-5.0 (any beyond).
+
+buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 
     * Add patch submitted by Dimiter Georgiev to work around problems in building
       GDB 6.8 with versions of Cygwin &gt; 1.7.
     * configs/i486-defconfig-4.3.3 - Builds an i486 cross development toolchain
-      using gcc 4.3.3.  Why would you want such a thing?  On Linux, of course,
+      using gcc 4.3.3.  Why wouldyou want such a thing?  On Linux, of course,
       such a thing is not needed because you can use the installed GCC to build
       i486 ELF binaries.  But that will not work under Cygwin!  The Cygwin
       toolchain (and probably MinGW), build DOS MZ format executables (i.e.,
@@ -2276,8 +2175,25 @@ buildroot-1.10 2011-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
     * toolchain/binutils/2.21 and toolchain/gcc/4.5.2 - Add support for GCC
       4.5.2 with binutils 2.21.
     * configs/arm920t-eabi-defconfig-4.5.2 - Add a configuration to build a
-      GCC 4.5.2 EABI ARM toolchain for the ARM920.
+      GCC 4.5.2 EABI ARM toolchain for the ARM920t.
+</pre></ul>
 
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="pendingchanges">Unreleased Changes</a>
+  </td>
+  </tr>
+</table>
+
+<ul><pre>
+nuttx-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+apps-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+buildroot-1.11 2011-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
 </pre></ul>
 
 <table width ="100%">
