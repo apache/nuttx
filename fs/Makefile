@@ -46,13 +46,15 @@ endif
 else
 CSRCS		+= fs_open.c fs_close.c fs_read.c fs_write.c fs_ioctl.c \
 		   fs_poll.c fs_select.c fs_lseek.c fs_dup.c fs_filedup.c \
-		   fs_dup2.c fs_fcntl.c fs_filedup2.c fs_mmap.c fs_opendir.c \
-		   fs_closedir.c fs_stat.c fs_readdir.c fs_seekdir.c fs_rewinddir.c \
-		   fs_files.c fs_inode.c fs_inodefind.c fs_inodereserve.c  \
-		   fs_statfs.c fs_inoderemove.c fs_registerdriver.c fs_unregisterdriver.c \
+		   fs_dup2.c fs_fcntl.c fs_filedup2.c fs_opendir.c fs_closedir.c \
+		   fs_stat.c fs_readdir.c fs_seekdir.c fs_rewinddir.c fs_files.c \
+		   fs_inode.c fs_inodefind.c fs_inodereserve.c  fs_statfs.c \
+		   fs_inoderemove.c fs_registerdriver.c fs_unregisterdriver.c \
 		   fs_inodeaddref.c fs_inoderelease.c
 CSRCS		+= fs_registerblockdriver.c fs_unregisterblockdriver.c \
 		   fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
+
+include mmap/Make.defs
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
 CSRCS		+= fs_fdopen.c 
@@ -74,8 +76,8 @@ OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libfs$(LIBEXT)
 
-SUBDIRS		= fat romfs nxffs
-VPATH		= fat:romfs:nxffs
+SUBDIRS		= mmap fat romfs nxffs
+VPATH		= mmap:fat:romfs:nxffs
 
 all:	$(BIN)
 
@@ -91,7 +93,7 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-	@$(MKDEP) --dep-path . $(FATDEPPATH) $(ROMFSDEPPATH) $(NXFFSDEPPATH) \
+	@$(MKDEP) --dep-path . $(MMAPDEPPATH) $(FATDEPPATH) $(ROMFSDEPPATH) $(NXFFSDEPPATH) \
 		$(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 

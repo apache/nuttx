@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_mmap.c
+ * fs/mmap/fs_mmap.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,25 +57,30 @@
  *
  * Description:
  *   NuttX operates in a flat open address space.  Therefore, it generally
- *   does not require mmap() functionality.  There is one one exception:
- *   mmap() is the API that is used to support direct access to random
- *   access media under the following very restrictive conditions:
+ *   does not require mmap() functionality.  There are two exceptions:
  *
- *   1. The filesystem supports the FIOC_MMAP ioctl command.  Any file system
- *      that maps files contiguously on the media should support this ioctl.
- *      (vs. file system that scatter files over the media in non-contiguous
- *      sectors).  As of this writing, ROMFS is the only file system that
- *      meets this requirement.
- *   2. The underly block driver supports the BIOC_XIPBASE ioctl command
- *      that maps the underlying media to a randomly accessible address. At
- *      present, only the RAM/ROM disk driver does this.
+ *   1. mmap() is the API that is used to support direct access to random
+ *     access media under the following very restrictive conditions:
+ *
+ *     a. The filesystem supports the FIOC_MMAP ioctl command.  Any file
+ *        system that maps files contiguously on the media should support
+ *        this ioctl. (vs. file system that scatter files over the media
+ *        in non-contiguous sectors).  As of this writing, ROMFS is the
+ *        only file system that meets this requirement.
+ *     b. The underlying block driver supports the BIOC_XIPBASE ioctl
+ *        command that maps the underlying media to a randomly accessible
+ *        address. At  present, only the RAM/ROM disk driver does this.
+ *
+ *   2. If CONFIG_FS_RAMMAP is defined in the configuration, then mmap() will
+ *      support simulation of memory mapped files by copying files whole
+ *      into RAM.
  *
  * Parameters:
  *   start   A hint at where to map the memory -- ignored.  The address
- *           of the underlying media is fixed and cannot be re-mapped withou
+ *           of the underlying media is fixed and cannot be re-mapped without
  *           MMU support.
- *   length  The length of the mapping -- ignored.  The entire underlying
- *           media is always accessible.
+ *   length  The length of the mapping.  For exception #1 above, this length
+ *           ignored:  The entire underlying media is always accessible.
  *   prot    See the PROT_* definitions in sys/mman.h.
  *           PROT_NONE      - Will cause an error
  *           PROT_READ      - PROT_WRITE and PROT_EXEC also assumed
@@ -98,9 +103,9 @@
  *   fd      file descriptor of the backing file -- required.
  *   offset  The offset into the file to map
  *
- * Return:
- *   On success, mmap() returns a pointer to the mapped area. 
- *   On error, the value MAP_FAILED is returned, and errno is set appropriately.
+ * Returned Value:
+ *   On success, mmap() returns a pointer to the mapped area. On error, the
+ *   value MAP_FAILED is returned, and errno is set appropriately.
  *
  *     ENOSYS
  *       Returned if any of the unsupported mmap() features are attempted
@@ -155,8 +160,14 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
   ret = ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
   if (ret < 0)
     {
-      fdbg("ioctl(FIOC_MMAP) failed: %d\n", errno);
-      goto errout;
+#ifdef CONFIG_FS_RAMMAP
+      ret = rammap(fd, length, offset, &addr);
+      if (ret < 0)
+#endif
+        {
+          fdbg("ioctl(FIOC_MMAP) failed: %d\n", errno);
+          goto errout;
+        }
     }
 
   /* Return the offset address */
@@ -171,4 +182,3 @@ errout_with_ret:
 errout:
   return MAP_FAILED;
 }
-
