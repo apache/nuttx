@@ -74,6 +74,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/time.h>
 #include <nuttx/rtc.h>
+#include <nuttx/progmem.h>
 
 #include <nuttx/i2c.h>
 #include <nuttx/sensors/st_lis331dl.h>
@@ -512,6 +513,36 @@ int sif_main(int argc, char *argv[])
             t_set.tv_sec = atoi(argv[2]);
             clock_settime(CLOCK_REALTIME, &t_set);
         }
+        else if (!strcmp(argv[1], "free") ) {
+            uint16_t page = 0, stpage = 0xFFFF;
+            int status;
+            do {
+                status = up_progmem_ispageerased(page++);
+                
+                /* Is this beginning of new free space section */
+                if (status == 0) {
+                    if (stpage == 0xFFFF) stpage = page-1;
+                }
+                else if (status != 0) {
+                    if (stpage != 0xFFFF) {
+                        printf("Free Range:\t%d\t-\t%d\n", stpage, page-2);
+                        stpage = 0xFFFF;
+                    }
+                }
+            }
+            while (status >= 0);
+        }
+        else if (!strcmp(argv[1], "erase") && argc == 3 ) {
+            int page = atoi(argv[2]);
+            printf("Erase result: %d\n", up_progmem_erasepage(page) );
+        }
+        else if (!strcmp(argv[1], "flash") && argc == 3 ) {
+            uint16_t page = atoi(argv[2]);
+            uint32_t addr = page * up_progmem_pagesize(page);
+            
+            printf("Write result: %d (writing to address %xh)\n", 
+                up_progmem_write( addr, "Test", 4 ), addr);
+        }
         else if (!strcmp(argv[1], "i2c") && argc == 3) {
             int val = atoi(argv[2]);
             
@@ -520,7 +551,7 @@ int sif_main(int argc, char *argv[])
             struct st_lis331dl_dev_s * lis = st_lis331dl_init(vsn_sif.i2c1, val);
 
             if (lis) {
-                struct st_lis331dl_vector_s * a;
+                const struct st_lis331dl_vector_s * a;
                 int i;
                 uint32_t time_stamp = clock_systimer();
                 

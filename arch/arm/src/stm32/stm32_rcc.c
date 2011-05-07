@@ -413,8 +413,8 @@ static inline void stm32_stdclockconfig(void)
     /* Enable FLASH prefetch buffer and 2 wait states */
 
     regval  = getreg32(STM32_FLASH_ACR);
-    regval &= ~ACR_LATENCY_MASK;
-    regval |= (ACR_LATENCY_2|ACR_PRTFBE);
+    regval &= ~FLASH_ACR_LATENCY_MASK;
+    regval |= (FLASH_ACR_LATENCY_2|FLASH_ACR_PRTFBE);
     putreg32(regval, STM32_FLASH_ACR);
 
     /* Set the HCLK source/divider */

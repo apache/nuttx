@@ -117,8 +117,8 @@ defconfig -- This is a configuration file similar to the Linux
 
   This configuration file will be used at build time:
 
-    (1) as a makefile fragment included in other makefiles, and
-    (2) to generate include/nuttx/config.h which is included by
+	(1) as a makefile fragment included in other makefiles, and
+	(2) to generate include/nuttx/config.h which is included by
 		most C files in the system.
 
   The following variables are recognized by the build (you may
@@ -189,19 +189,19 @@ defconfig -- This is a configuration file similar to the Linux
 		  file must support the following targets:
 
 		  - libapps$(LIBEXT) (usually libapps.a). libapps.a is a static
-		    library ( an archive) that contains all of application object
-		    files.
+			library ( an archive) that contains all of application object
+			files.
 		  - clean. Do whatever is appropriate to clean the application
-		    directories for a fresh build.
+			directories for a fresh build.
 		  - distclean. Clean everthing -- auto-generated files, symbolic
-		    links etc. -- so that the directory contents are the same as
-		    the contents in your configuration management system.
-		    This is only done when you change the NuttX configuration.
+			links etc. -- so that the directory contents are the same as
+			the contents in your configuration management system.
+			This is only done when you change the NuttX configuration.
 		  - depend. Make or update the application build dependencies.
 
 		  When this application is invoked it will receive the setting TOPDIR like:
 
-		    $(MAKE) -C $(CONFIG_APPS_DIR) TOPDIR="$(TOPDIR)" <target>
+			$(MAKE) -C $(CONFIG_APPS_DIR) TOPDIR="$(TOPDIR)" <target>
 
 		  TOPDIR is the full path to the NuttX directory. It can be used, for
 		  example, to include makefile fragments (e.g., .config or Make.defs)
@@ -341,14 +341,14 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_SYS_RESERVED - Reserved system call values for use
 		  by architecture-specific logic.
 
-    OS setup related to on-demand paging:
+	OS setup related to on-demand paging:
 
 		CONFIG_PAGING - If set =y in your configation file, this setting will
 		  enable the on-demand paging feature as described in
 		  http://www.nuttx.org/NuttXDemandPaging.html.
 
-    If CONFIG_PAGING is selected, then you will probabaly need CONFIG_BUILD_2PASS to
-    correctly position the code and the following configuration options also apply:
+	If CONFIG_PAGING is selected, then you will probabaly need CONFIG_BUILD_2PASS to
+	correctly position the code and the following configuration options also apply:
 
 		CONFIG_PAGING_PAGESIZE - The size of one managed page.  This must
 		  be a value supported by the processor's memory management unit.
@@ -408,9 +408,9 @@ defconfig -- This is a configuration file similar to the Linux
 		  number if microseconds, then a fatal error will be declared.
 		  Default: No timeouts monitored.
 
-	    Some architecture-specific settings.  Defaults are architecture specific.
-	    If you don't know what you are doing, it is best to leave these undefined
-	    and try the system defaults:
+		Some architecture-specific settings.  Defaults are architecture specific.
+		If you don't know what you are doing, it is best to leave these undefined
+		and try the system defaults:
  
 		CONFIG_PAGING_VECPPAGE - This the physical address of the page in
 		  memory to be mapped to the vector address.
@@ -448,7 +448,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  in bytes into the FLASH device where the NuttX binary image is located.
 		  Default: 0
 	CONFIG_PAGING_SPIPORT - If CONFIG_PAGING_M25PX CONFIG_PAGING_AT45DB is
- 	      defined and the device has multiple SPI busses (ports), then this
+ 		  defined and the device has multiple SPI busses (ports), then this
 		  configuration should be set to indicate which SPI port the device is
 		  connected. Default: 0
 
@@ -518,6 +518,27 @@ defconfig -- This is a configuration file similar to the Linux
 	Filesystem configuration
 		CONFIG_FS_FAT - Enable FAT filesystem support
 		CONFIG_FAT_SECTORSIZE - Max supported sector size
+		CONFIG_FS_NXFFS: Enable NuttX FLASH file system (NXFF) support.
+		CONFIG_NXFFS_ERASEDSTATE: The erased state of FLASH. 
+		  This must have one of the values of 0xff or 0x00.
+		  Default: 0xff.
+		CONFIG_NXFFS_PACKTHRESHOLD: When packing flash file data,
+		  don't both with file chunks smaller than this number of data bytes.
+		  Default: 32.
+		CONFIG_NXFFS_MAXNAMLEN: The maximum size of an NXFFS file name.
+		  Default: 255.
+		CONFIG_NXFFS_PACKTHRESHOLD: When packing flash file data,
+		  don't both with file chunks smaller than this number of data bytes.
+		  Default: 32.
+		CONFIG_NXFFS_TAILTHRESHOLD: clean-up can either mean
+		  packing files together toward the end of the file or, if file are
+		  deleted at the end of the file, clean up can simply mean erasing
+		  the end of FLASH memory so that it can be re-used again.  However,
+		  doing this can also harm the life of the FLASH part because it can
+		  mean that the tail end of the FLASH is re-used too often. This
+		  threshold determines if/when it is worth erased the tail end of FLASH
+		  and making it available for re-use (and possible over-wear).
+		  Default: 8192.
 		CONFIG_FS_ROMFS - Enable ROMFS filesystem support
 
 	SPI driver
@@ -732,12 +753,12 @@ defconfig -- This is a configuration file similar to the Linux
 		  Many URLs use ~username to indicate a user's home directory. thttpd
  		  provides two options for mapping this construct to an  actual filename.
 		  1) Map ~username to <prefix>/username. This is the recommended choice.
-		    Each user gets a subdirectory in the main web tree, and the tilde
-		    construct points there. The prefix could be something like "users",
-		    or it could be empty.
+			Each user gets a subdirectory in the main web tree, and the tilde
+			construct points there. The prefix could be something like "users",
+			or it could be empty.
 		  2) Map ~username to <user's homedir>/<postfix>. The postfix would be
-		    the name of a subdirectory off of the user's actual home dir,
-		    something like "public_html".
+			the name of a subdirectory off of the user's actual home dir,
+			something like "public_html".
 		  You can also leave both options undefined, and thttpd will not do
 		  anything special about tildes. Enabling both options is an error.
 		  Typical values, if they're defined, are "users" for
@@ -758,49 +779,49 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_USBDEV_TRACE - Enables USB tracing for debug
 		CONFIG_USBDEV_TRACE_NRECORDS - Number of trace entries to remember
 
-    USB host controller driver
-      CONFIG_USBHOST
+	USB host controller driver
+	  CONFIG_USBHOST
 		Enables USB host support
-      CONFIG_USBHOST_NPREALLOC
+	  CONFIG_USBHOST_NPREALLOC
 		Number of pre-allocated class instances
-      CONFIG_USBHOST_BULK_DISABLE
+	  CONFIG_USBHOST_BULK_DISABLE
 		On some architectures, selecting this setting will reduce driver size
 		by disabling bulk endpoint support
-      CONFIG_USBHOST_INT_DISABLE
+	  CONFIG_USBHOST_INT_DISABLE
 		On some architectures, selecting this setting will reduce driver size
 		by disabling interrupt endpoint support
-      CONFIG_USBHOST_ISOC_DISABLE
+	  CONFIG_USBHOST_ISOC_DISABLE
 		On some architectures, selecting this setting will reduce driver size
 		by disabling isochronous endpoint support
 
-    USB host HID class driver. Requires CONFIG_USBHOST=y,
-      CONFIG_USBHOST_INT_DISABLE=n, CONFIG_NFILE_DESCRIPTORS > 0,
-      CONFIG_SCHED_WORKQUEUE=y, and CONFIG_DISABLE_SIGNALS=n.
+	USB host HID class driver. Requires CONFIG_USBHOST=y,
+	  CONFIG_USBHOST_INT_DISABLE=n, CONFIG_NFILE_DESCRIPTORS > 0,
+	  CONFIG_SCHED_WORKQUEUE=y, and CONFIG_DISABLE_SIGNALS=n.
  
-      CONFIG_HIDKBD_POLLUSEC
+	  CONFIG_HIDKBD_POLLUSEC
 		Device poll rate in microseconds. Default: 100 milliseconds.
-      CONFIG_HIDKBD_DEFPRIO
+	  CONFIG_HIDKBD_DEFPRIO
 		Priority of the polling thread.  Default: 50.
-      CONFIG_HIDKBD_STACKSIZE
+	  CONFIG_HIDKBD_STACKSIZE
 		Stack size for polling thread.  Default: 1024
-      CONFIG_HIDKBD_BUFSIZE
+	  CONFIG_HIDKBD_BUFSIZE
 		Scancode buffer size.  Default: 64.
-      CONFIG_HIDKBD_NPOLLWAITERS
+	  CONFIG_HIDKBD_NPOLLWAITERS
 		If the poll() method is enabled, this defines the maximum number
 		of threads that can be waiting for keyboard events.  Default: 2.
-      CONFIG_HIDKBD_RAWSCANCODES
+	  CONFIG_HIDKBD_RAWSCANCODES
 		If set to y no conversion will be made on the raw keyboard scan
 		codes.  Default: ASCII conversion.
-      CONFIG_HIDKBD_ALLSCANCODES'
+	  CONFIG_HIDKBD_ALLSCANCODES'
 		If set to y all 231 possible scancodes will be converted to
 		something.  Default:  104 key US keyboard.
-      CONFIG_HIDKBD_NODEBOUNCE
+	  CONFIG_HIDKBD_NODEBOUNCE
 		If set to y normal debouncing is disabled.  Default: 
 		Debounce enabled (No repeat keys).
 
-    USB host mass storage class driver. Requires CONFIG_USBHOST=y,
-      CONFIG_USBHOST_BULK_DISABLE=n, CONFIG_NFILE_DESCRIPTORS > 0,
-      and CONFIG_SCHED_WORKQUEUE=y
+	USB host mass storage class driver. Requires CONFIG_USBHOST=y,
+	  CONFIG_USBHOST_BULK_DISABLE=n, CONFIG_NFILE_DESCRIPTORS > 0,
+	  and CONFIG_SCHED_WORKQUEUE=y
 
 	USB serial device class driver
 		CONFIG_USBSER
@@ -937,175 +958,175 @@ Supported Boards
 ^^^^^^^^^^^^^^^^
 
 configs/avr32dev1
-    This is a port of NuttX to the Atmel AVR32DEV1 board.  That board is
-    based on the Atmel AT32UC3B0256 MCU and uses a specially patched
-    version of the GNU toolchain:  The patches provide support for the
-    AVR32 family.  That patched GNU toolchain is available only from the
-    Atmel website.  STATUS: the ostest configuration is functional, but
+	This is a port of NuttX to the Atmel AVR32DEV1 board.  That board is
+	based on the Atmel AT32UC3B0256 MCU and uses a specially patched
+	version of the GNU toolchain:  The patches provide support for the
+	AVR32 family.  That patched GNU toolchain is available only from the
+	Atmel website.  STATUS: the ostest configuration is functional, but
 	there are issues with the NSH configuration (thought to be a hardware
 	configuration issue, but that has not been confirmed).
 
 configs/c5471evm
-    This is a port to the Spectrum Digital C5471 evaluation board.  The
-    TMS320C5471 is a dual core processor from TI with an ARM7TDMI general
-    purpose processor and a c54 DSP.  It is also known as TMS320DA180 or just DA180. 
-    NuttX runs on the ARM core and is built with a GNU arm-elf toolchain*.
-    This port is complete, verified, and included in the NuttX release.
+	This is a port to the Spectrum Digital C5471 evaluation board.  The
+	TMS320C5471 is a dual core processor from TI with an ARM7TDMI general
+	purpose processor and a c54 DSP.  It is also known as TMS320DA180 or just DA180. 
+	NuttX runs on the ARM core and is built with a GNU arm-elf toolchain*.
+	This port is complete, verified, and included in the NuttX release.
 
 configs/demo9s12ne64
-    Feescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
-    port uses the m9s12x GCC toolchain.  STATUS:  Under development.
+	Feescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
+	port uses the m9s12x GCC toolchain.  STATUS:  Under development.
 
 configs/ea3131
-    Embedded Artists EA3131 Development bard.  This board is based on the 
-    an NXP LPC3131 MCU. This OS is built with the arm-elf toolchain*.
-    STATUS:  This port is complete and mature.
+	Embedded Artists EA3131 Development bard.  This board is based on the 
+	an NXP LPC3131 MCU. This OS is built with the arm-elf toolchain*.
+	STATUS:  This port is complete and mature.
 
 configs/eagle100
-    Micromint Eagle-100 Development board.  This board is based on the 
-    an ARM Cortex-M3 MCU, the Luminary LM3S6918. This OS is built with the
-    arm-elf toolchain*.  STATUS:  This port is complete and mature.
+	Micromint Eagle-100 Development board.  This board is based on the 
+	an ARM Cortex-M3 MCU, the Luminary LM3S6918. This OS is built with the
+	arm-elf toolchain*.  STATUS:  This port is complete and mature.
 
 configs/ez80f0910200kitg
-    ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
-    development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
-    tools.  The development environment is Cygwin under WinXP.
+	ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200kitg
+	development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
+	tools.  The development environment is Cygwin under WinXP.
 
 configs/ez80f0910200zco
-    ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200zco
-    development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
-    tools.  The development environment is Cygwin under WinXP.
+	ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200zco
+	development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
+	tools.  The development environment is Cygwin under WinXP.
 
 configs/lm3s6965-ek
-    Stellaris LM3S6965 Evaluation Kit.  This board is based on the 
-    an ARM Cortex-M3 MCU, the Luminary/TI LM3S6965. This OS is built with the
-    arm-elf toolchain*.  STATUS:  This port is complete and mature.
+	Stellaris LM3S6965 Evaluation Kit.  This board is based on the 
+	an ARM Cortex-M3 MCU, the Luminary/TI LM3S6965. This OS is built with the
+	arm-elf toolchain*.  STATUS:  This port is complete and mature.
 
 configs/lpcxpresso-lpc1768
-    Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
-    is based on the NXP LPC1768.  The Code Red toolchain is used by default.
-    STATUS:  Under development.
+	Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
+	is based on the NXP LPC1768.  The Code Red toolchain is used by default.
+	STATUS:  Under development.
 
 configs/m68322evb
-    This is a work in progress for the venerable m68322evb board from
-    Motorola. This OS is also built with the arm-elf toolchain*.  STATUS:
+	This is a work in progress for the venerable m68322evb board from
+	Motorola. This OS is also built with the arm-elf toolchain*.  STATUS:
 	This port was never completed.
 
 configs/mbed
-    The configurations in this directory support the mbed board (http://mbed.org)
-    that features the NXP LPC1768 microcontroller. This OS is also built
-    with the arm-elf toolchain*.  STATUS:  Contributed.
+	The configurations in this directory support the mbed board (http://mbed.org)
+	that features the NXP LPC1768 microcontroller. This OS is also built
+	with the arm-elf toolchain*.  STATUS:  Contributed.
 
 configs/mcu123-lpc214x
-    This port is for the NXP LPC2148 as provided on the mcu123.com
-    lpc214x development board. This OS is also built with the arm-elf
-    toolchain*.  The port supports serial, timer0, spi, and usb.
+	This port is for the NXP LPC2148 as provided on the mcu123.com
+	lpc214x development board. This OS is also built with the arm-elf
+	toolchain*.  The port supports serial, timer0, spi, and usb.
 
 configs/mx1ads
-    This is a port to the Motorola MX1ADS development board.  That board
-    is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.
-    STATUS:  This port is nearly code complete but still under development
-    (work is stalled until I devote time to the Micromint Eagle-100)
+	This is a port to the Motorola MX1ADS development board.  That board
+	is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.
+	STATUS:  This port is nearly code complete but still under development
+	(work is stalled until I devote time to the Micromint Eagle-100)
 
 configs/ne64badge
-    Future Electronics Group NE64 /PoE Badge board based on the
-    MC9S12NE64 hcs12 cpu.  This port uses the m9s12x GCC toolchain.
-    STATUS:  Under development.
+	Future Electronics Group NE64 /PoE Badge board based on the
+	MC9S12NE64 hcs12 cpu.  This port uses the m9s12x GCC toolchain.
+	STATUS:  Under development.
 
 configs/ntosd-dm320
-    This port uses the Neuros OSD v1.0 Dev Board with a GNU arm-elf
-    toolchain*: see
-    
-      http://wiki.neurostechnology.com/index.php/OSD_1.0_Developer_Home
+	This port uses the Neuros OSD v1.0 Dev Board with a GNU arm-elf
+	toolchain*: see
+	
+	  http://wiki.neurostechnology.com/index.php/OSD_1.0_Developer_Home
  
-    There are some differences between the Dev Board and the currently
-    available commercial v1.0 Boards.  See
-    
-      http://wiki.neurostechnology.com/index.php/OSD_Developer_Board_v1
+	There are some differences between the Dev Board and the currently
+	available commercial v1.0 Boards.  See
+	
+	  http://wiki.neurostechnology.com/index.php/OSD_Developer_Board_v1
 
-    NuttX operates on the ARM9EJS of this dual core processor.
-    STATUS: This port is code complete, verified, and included in the
-    NuttX 0.2.1 release.
+	NuttX operates on the ARM9EJS of this dual core processor.
+	STATUS: This port is code complete, verified, and included in the
+	NuttX 0.2.1 release.
 
 configs/nucleus2g
-    This port uses the Nucleus 2G board (with Babel CAN board).  This board
-    features an NXP LPC1768 processor.  See the 2G website (http://www.2g-eng.com/)
-    for more information about the Nucleus 2G.
+	This port uses the Nucleus 2G board (with Babel CAN board).  This board
+	features an NXP LPC1768 processor.  See the 2G website (http://www.2g-eng.com/)
+	for more information about the Nucleus 2G.
 
 configs/olimex-lpc1766stk
-    This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain* under
-    Linux or Cygwin.  STATUS: under development.
+	This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain* under
+	Linux or Cygwin.  STATUS: under development.
 
 configs/olimex-lpc2378
-    This port uses the Olimex-lpc2378 board and a GNU arm-elf toolchain* under
-    Linux or Cygwin.  STATUS: ostest and NSH configurations available.
+	This port uses the Olimex-lpc2378 board and a GNU arm-elf toolchain* under
+	Linux or Cygwin.  STATUS: ostest and NSH configurations available.
 
 configs/olimex-lpc2378
-    This port for the NXP LPC2378 was contributed by Rommel Marcelo.
+	This port for the NXP LPC2378 was contributed by Rommel Marcelo.
 
 configs/olimex-strp711
-    This port uses the Olimex STR-P711 board and a GNU arm-elf toolchain* under
+	This port uses the Olimex STR-P711 board and a GNU arm-elf toolchain* under
 	Linux or Cygwin. See the http://www.olimex.com/dev/str-p711.html" for
 	further information. STATUS: Coding for the basic port -- serial console
 	and system timer -- is complete but untested to problems I am having using
 	OpenOCD with a wiggler clone JTAG.
 
 configs/pjrc-8051
-    8051 Microcontroller.  This port uses the PJRC 87C52 development system
-    and the SDCC toolchain.   This port is not quite ready for prime time.
+	8051 Microcontroller.  This port uses the PJRC 87C52 development system
+	and the SDCC toolchain.   This port is not quite ready for prime time.
 
 configs/sim
-    A user-mode port of NuttX to the x86 Linux platform is available.
-    The purpose of this port is primarily to support OS feature development.
-    This port does not support interrupts or a real timer (and hence no
-    round robin scheduler)  Otherwise, it is complete.
+	A user-mode port of NuttX to the x86 Linux platform is available.
+	The purpose of this port is primarily to support OS feature development.
+	This port does not support interrupts or a real timer (and hence no
+	round robin scheduler)  Otherwise, it is complete.
 
-    NOTE: This target will not run on Cygwin probably for many reasons but
-    first off because it uses some of the same symbols as does cygwin.dll.
+	NOTE: This target will not run on Cygwin probably for many reasons but
+	first off because it uses some of the same symbols as does cygwin.dll.
 
 configs/skp16c26
-    Renesas M16C processor on the Renesas SKP16C26 StarterKit.  This port
-    uses the GNU m32c toolchain.
+	Renesas M16C processor on the Renesas SKP16C26 StarterKit.  This port
+	uses the GNU m32c toolchain.
 
 configs/stm3210e-evel
-    STMicro STM3210E-EVAL development board based on the STMicro STM32F103ZET6
-    microcontroller (ARM Cortex-M3).  This port uses the GNU Cortex-M3
-    toolchain.
+	STMicro STM3210E-EVAL development board based on the STMicro STM32F103ZET6
+	microcontroller (ARM Cortex-M3).  This port uses the GNU Cortex-M3
+	toolchain.
 
 configs/us7032evb1
-    This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
-    STATUS:  Work has just began on this port.
+	This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
+	STATUS:  Work has just began on this port.
 
 configs/vsn
-    ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
+	ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
 	STMicro STM32F103RET6.  Contributed by Uros Platise.
 
 configs/xtrs
-    TRS80 Model 3.  This port uses a vintage computer based on the Z80.
-    An emulator for this computer is available to run TRS80 programs on a 
-    linux platform (http://www.tim-mann.org/xtrs.html).
+	TRS80 Model 3.  This port uses a vintage computer based on the Z80.
+	An emulator for this computer is available to run TRS80 programs on a 
+	linux platform (http://www.tim-mann.org/xtrs.html).
 
 configs/z16f2800100zcog
-    z16f Microcontroller.  This port use the Zilog z16f2800100zcog
-    development kit and the Zilog ZDS-II Windows command line tools.  The
-    development environment is Cygwin under WinXP.
+	z16f Microcontroller.  This port use the Zilog z16f2800100zcog
+	development kit and the Zilog ZDS-II Windows command line tools.  The
+	development environment is Cygwin under WinXP.
 
 configs/z80sim
-    z80 Microcontroller.  This port uses a Z80 instruction set simulator.
-    That simulator can be found in the NuttX SVN at
-    http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/misc/sims/z80sim.
-    This port also uses the SDCC toolchain (http://sdcc.sourceforge.net/")
-    (verified with version 2.6.0).
+	z80 Microcontroller.  This port uses a Z80 instruction set simulator.
+	That simulator can be found in the NuttX SVN at
+	http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/misc/sims/z80sim.
+	This port also uses the SDCC toolchain (http://sdcc.sourceforge.net/")
+	(verified with version 2.6.0).
 
 configs/z8encore000zco
-    z8Encore! Microcontroller.  This port use the Zilog z8encore000zco
-    development kit, Z8F6403 part, and the Zilog ZDS-II Windows command line
-    tools.  The development environment is Cygwin under WinXP.
+	z8Encore! Microcontroller.  This port use the Zilog z8encore000zco
+	development kit, Z8F6403 part, and the Zilog ZDS-II Windows command line
+	tools.  The development environment is Cygwin under WinXP.
 
 configs/z8f64200100kit
-    z8Encore! Microcontroller.  This port use the Zilog z8f64200100kit
-    development kit, Z8F6423 part, and the Zilog ZDS-II Windows command line
-    tools.  The development environment is Cygwin under WinXP.
+	z8Encore! Microcontroller.  This port use the Zilog z8f64200100kit
+	development kit, Z8F6423 part, and the Zilog ZDS-II Windows command line
+	tools.  The development environment is Cygwin under WinXP.
 
 Other ports for the for the TI TMS320DM270, M683222 and for MIPS are in various
 states of progress

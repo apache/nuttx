@@ -139,7 +139,7 @@ EXTERN const char *namedapp_getname(int index);
  *
  ****************************************************************************/
 
-EXTERN int exec_namedapp(FAR const char *appname, FAR const char *argv[]);
+EXTERN int exec_namedapp(FAR const char *appname, FAR const char **argv);
 
 #undef EXTERN
 #if defined(__cplusplus)

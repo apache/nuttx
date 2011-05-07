@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 19 2011)
+NuttX TODO List (Last updated May 6, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -14,7 +14,7 @@ nuttx/
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (5)  Libraries (lib/)
  (13)  File system/Generic drivers (fs/, drivers/)
-  (2)  Graphics subystem (graphics/)
+  (1)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (4)  Build system / Toolchains
@@ -23,7 +23,7 @@ nuttx/
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/i.MX (arch/arm/src/imx/)
-  (4)  ARM/LPC17xx (arch/arm/src/lpc17xx/)
+  (3)  ARM/LPC17xx (arch/arm/src/lpc17xx/)
   (7)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (2)  ARM/LPC313x (arch/arm/src/lpc313x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
@@ -53,6 +53,8 @@ o Task/Scheduler (sched/)
 
   Description: atexit() supports registration of one function called on exit().
                Should task_delete() also cause atexit() function to be called?
+               Update: atexit() is only built into the system if CONFIG_SCHED_ATEXT
+               is defined in the configuration.
   Status:      Open
   Priority:    Low, task_delete() is non-standard and its behavior is
                unspecified.
@@ -64,6 +66,9 @@ o Task/Scheduler (sched/)
   Description: Implement sys/wait.h and functions.  Consider implementing wait,
                waitpid, waitid.  At present, a parent has no information about
                child tasks.
+               Update: A simple but usable version of waitpid() has been included.
+               This version is not compliant with all specifications and can be
+               enabled with CONFIG_SCHED_WAITPID. 
   Status:      Open
   Priority:    Low
 
@@ -182,7 +187,7 @@ o Binary loaders (binfmt/)
   Status:      Open
   Priority:    Low
 
-  Description: Windows build issue.  Almost all configurations that use NXFLAT have
+  Description: Windows build issue.  Some of the configurations that use NXFLAT have
                the linker script specified like this:
 
                NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat.ld -no-check-sections
@@ -226,7 +231,7 @@ o Network (net/, drivers/net)
   Priority:    Medium, The feature is not important, but it is important
                for NuttX to resolve the architectural issues.
 
-  Description: Sendoto() and multiple network interface support:
+  Description: sendto() and multiple network interface support:
                When polled, would have to assure that the destination IP
                is on the subnet served by the polling driver.
   Status:      Open
@@ -457,7 +462,7 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Low
 
-  Description: Time stamping is no implemented in the NuttX FA file system.
+  Description: Time stamping is not implemented in the NuttX FA file system.
                See the following functions in fs/fat/fs_fat32util.c:
                fat_systime2fattime() and fat_fattime2systime()
   Status:      Open
@@ -465,14 +470,6 @@ o File system / Generic drivers (fs/, drivers/)
 
 o Graphics subystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Description: If CONFIG_NX is enabled, the build fails the first time
-               saying that there is "No rule to make target..." for one of the
-               auto-generated graphics files.  This is a nuisance, but if you
-               simply build again (with the source files already auto-generated)
-               the problem does not reoccur.
-  Status:      Open
-  Priority:    Low, the work-around is simple
 
   Description: Testing of all APIs is not complete.  See
                http://nuttx.sourceforge.net/NXGraphicsSubsystem.html#testcoverage
@@ -662,10 +659,10 @@ o ARM/DM320 (arch/arm/src/dm320/)
 o ARM/i.MX (arch/arm/src/imx/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Description: The basic port of the i.MX1 architecuture is underway.  The port
+  Description: The basic port of the i.MX1 architecuture was never finished.  The port
                is incomplete (as of this writing, is still lacks a timer, interrupt
                decoding, USB, network) and untested.
-  Status:      Open (and in work)
+  Status:      Open
   Priority:    Medium (high if you need i.MX1/L support)
 
   Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
@@ -696,14 +693,6 @@ o ARM/LPC17xx (arch/arm/src/lpc17xx/)
                nothing is visible on the display.
   Status:      Open
   Priority:    Medium-Low (unless you need the display on the LPC1766STK!)
-
-  Description: SLIP (Configuration olimex-lpc1766stk/slip-httpd) only works with VERBOSE
-               debug disabled.  For some reason, certain debug statements hang(?).
-               Also, this example does not use UART1's hardware flow control.  UART1
-               hardware flow control is partially implemented but does not behave as
-               expected.  Hardware flow control needs a little more work.
-  Status:      Open
-  Priority:    Low
 
 o ARM/LPC214x (arch/arm/src/lpc214x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

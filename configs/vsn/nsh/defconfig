@@ -522,8 +522,10 @@ CONFIG_PREALLOC_TIMERS=4
 #
 # CONFIG_FS_FAT - Enable FAT filesystem support
 # CONFIG_FAT_SECTORSIZE - Max supported sector size
+# CONFIG_FS_NXFFS - Enable NX Flash File System
 # CONFIG_FS_ROMFS - Enable ROMFS filesystem support
 CONFIG_FS_FAT=y
+CONFIG_FS_NXFFS=y
 CONFIG_FS_ROMFS=y
 
 #
@@ -891,15 +893,3 @@ CONFIG_APPS_DIR="../apps"
 
 # Provide /dev/ramX and then: mount -t binfs /dev/ram0 /bin
 CONFIG_APPS_BINDIR=y
-
-# Application configuration
-
-CONFIG_APPS_DIR="../apps"
-
-# Application configuration
-
-CONFIG_APPS_DIR="../apps"
-
-# Application configuration
-
-CONFIG_APPS_DIR="../apps"

@@ -49,7 +49,7 @@
 
 #include "os_internal.h"
 
-#ifdef CONFIG_SCHED_ATEXiT
+#ifdef CONFIG_SCHED_ATEXIT
 
 /************************************************************************
  * Definitions

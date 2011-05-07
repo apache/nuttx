@@ -78,8 +78,8 @@ void sysclock_select_hsi(void)
     
     // Set FLASH prefetch buffer and 1 wait state
     regval  = getreg32(STM32_FLASH_ACR);
-    regval &= ~ACR_LATENCY_MASK;
-    regval |= (ACR_LATENCY_1|ACR_PRTFBE);
+    regval &= ~FLASH_ACR_LATENCY_MASK;
+    regval |= (FLASH_ACR_LATENCY_1|FLASH_ACR_PRTFBE);
     putreg32(regval, STM32_FLASH_ACR);
      
     // Set the HCLK source/divider

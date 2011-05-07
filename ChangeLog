@@ -1727,5 +1727,7 @@
 
 	* Remove clock_getutc().  It is replaces with clock_gettime(CLOCK_ACTIVETIME).
 	  Add other RTC related changes provided by Uros Platise.
+	* arch/arm/src/stm32/stm32_flash.c: Add support for access to on-chp STM32
+	  FLASH; beginning of integration with NXFFS (Uros Platise).
 
 

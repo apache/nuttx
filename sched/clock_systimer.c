@@ -89,7 +89,7 @@ uint32_t clock_systimer(void)
 
   if (g_rtc_enabled)
     {
-	  return up_rtc_getclock();
+//	  return up_rtc_getclock();
 	}
 #endif
 
