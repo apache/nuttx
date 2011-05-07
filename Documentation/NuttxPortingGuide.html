@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: April 14, 2011</p>
+      <p>Last Updated: May 6, 2011</p>
     </td>
   </tr>
 </table>
@@ -886,6 +886,9 @@ fs/
 |-- fat/
 |   |-- Make.defs
 |   `-- <i>(fat file system source files)</i>
+|-- nxffs/
+|   |-- Make.defs
+|   `-- <i>(NXFFS file system source files)</i>
 |-- romfs/
 |   |-- Make.defs
 |   `-- <i>(romfs file system source files)</i>
@@ -1949,7 +1952,8 @@ extern void up_ledoff(int led);
   NuttX supports the standard <code>mount()</code> command that allows
   a block driver to be bound to a mountpoint within the pseudo file system
   and to a file system.
-  At present, NuttX supports only the VFAT file system.
+  At present, NuttX supports the standard VFAT and ROMFS file systems and
+  well as a special, wear-leveling NuttX FLASH File System (NXFFS).
 </p>
 
 <p><b>Comparison to Linux</b>
@@ -3120,7 +3124,7 @@ build
   <li>
     <code>CONFIG_NXFLAT</code>: Enable support for the NXFLAT binary format.
     This format will support execution of NuttX binaries located
-    in a ROMFS filesystem (see <code>apps/examples/nxflat</code>).
+    in a ROMFS file system (see <code>apps/examples/nxflat</code>).
   </li>
   <li>
     <code>CONFIG_SCHED_WORKQUEUE</code>: Create a dedicated "worker" thread to
@@ -3435,13 +3439,46 @@ build
 <h2>File Systems</h2>
 <ul>
   <li>
-    <code>CONFIG_FS_FAT</code>: Enable FAT filesystem support.
+    <code>CONFIG_FS_FAT</code>: Enable FAT file system support.
   </li>
   <li>
     <code>CONFIG_FAT_SECTORSIZE</code>: Max supported sector size.
   </li>
   <li>
-    <code>CONFIG_FS_ROMFS</code>: Enable ROMFS filesystem support
+    <code>CONFIG_FS_NXFFS</code>: Enable NuttX FLASH file system (NXFF) support.
+  </li>
+  <li>
+    <code>CONFIG_NXFFS_ERASEDSTATE</code>: The erased state of FLASH. 
+    This must have one of the values of <code>0xff</code> or <code>0x00</code>.
+    Default: <code>0xff</code>.
+  </li>
+  <li>
+    <code>CONFIG_NXFFS_PACKTHRESHOLD</code>: When packing flash file data,
+    don't both with file chunks smaller than this number of data bytes.
+    Default: 32.
+  </li>
+  <li>
+    <code>CONFIG_NXFFS_MAXNAMLEN</code>: The maximum size of an NXFFS file name.
+    Default: 255.
+  </li>
+  <li>
+    <code>CONFIG_NXFFS_PACKTHRESHOLD</code>: When packing flash file data,
+    don't both with file chunks smaller than this number of data bytes.
+    Default: 32.
+  </li>
+  <li>
+    <code>CONFIG_NXFFS_TAILTHRESHOLD</code>: clean-up can either mean
+    packing files together toward the end of the file or, if file are
+    deleted at the end of the file, clean up can simply mean erasing
+    the end of FLASH memory so that it can be re-used again.  However,
+    doing this can also harm the life of the FLASH part because it can
+    mean that the tail end of the FLASH is re-used too often. This
+    threshold determines if/when it is worth erased the tail end of FLASH
+    and making it available for re-use (and possible over-wear).
+    Default: 8192.
+  </li>
+  <li>
+    <code>CONFIG_FS_ROMFS</code>: Enable ROMFS file system support
   </li>
 </ul>
 
