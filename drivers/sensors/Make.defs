@@ -39,6 +39,6 @@ SENSOR_CSRCS =
 # These drivers depend on I2C support
 
 ifeq ($(CONFIG_I2C),y)
-SENSOR_CSRCS += st_lis331dl.c
+SENSOR_CSRCS += lis331dl.c
 endif
 

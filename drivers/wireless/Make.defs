@@ -37,5 +37,5 @@ WIRELESS_ASRCS  =
 WIRELESS_CSRCS  = 
 
 ifeq ($(CONFIG_WIRELESS),y)
-WIRELESS_CSRCS  += chipcon_cc1101.c
+WIRELESS_CSRCS  += cc1101.c
 endif

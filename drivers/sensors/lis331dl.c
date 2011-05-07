@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/st_lis331dl.c
+ * drivers/sensors/lis331dl.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *
@@ -47,7 +47,7 @@
 #include <stdio.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/sensors/st_lis331dl.h>
+#include <nuttx/sensors/lis331dl.h>
 
 /************************************************************************************
  * LIS331DL Internal Registers
@@ -89,11 +89,11 @@
  * Private Data Types
  ************************************************************************************/
 
-struct st_lis331dl_dev_s {
+struct lis331dl_dev_s {
     struct i2c_dev_s *          i2c;
     
     uint8_t                     address;
-    struct st_lis331dl_vector_s a;
+    struct lis331dl_vector_s a;
     uint8_t                     cr1;
     uint8_t                     cr2;    
     uint8_t                     cr3;
@@ -112,7 +112,7 @@ struct st_lis331dl_dev_s {
  * \param length when >0 it denotes read access, when <0 it denotes write access of -length
  * \return OK on success or errno is set.
  **/
-int st_lis331dl_access(struct st_lis331dl_dev_s * dev, uint8_t subaddr, uint8_t *buf, int length)
+int lis331dl_access(struct lis331dl_dev_s * dev, uint8_t subaddr, uint8_t *buf, int length)
 {
     uint16_t flags = 0;
     int      retval;
@@ -170,9 +170,9 @@ int st_lis331dl_access(struct st_lis331dl_dev_s * dev, uint8_t subaddr, uint8_t 
 }
 
 
-int st_lis331dl_readregs(struct st_lis331dl_dev_s * dev)
+int lis331dl_readregs(struct lis331dl_dev_s * dev)
 {
-    if (st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, 3) != 3) return ERROR;
+    if (lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, 3) != 3) return ERROR;
     return OK;
 }
 
@@ -181,24 +181,24 @@ int st_lis331dl_readregs(struct st_lis331dl_dev_s * dev)
  * Public Functions
  ****************************************************************************/
 
-struct st_lis331dl_dev_s * st_lis331dl_init(struct i2c_dev_s * i2c, uint16_t address)
+struct lis331dl_dev_s * lis331dl_init(struct i2c_dev_s * i2c, uint16_t address)
 {
-    struct st_lis331dl_dev_s * dev;
+    struct lis331dl_dev_s * dev;
     uint8_t retval;
     
     ASSERT(i2c);
     ASSERT(address);
     
-    if ( (dev = kmalloc( sizeof(struct st_lis331dl_dev_s) )) == NULL )
+    if ( (dev = kmalloc( sizeof(struct lis331dl_dev_s) )) == NULL )
         return NULL;
         
-    memset(dev, 0, sizeof(struct st_lis331dl_dev_s));
+    memset(dev, 0, sizeof(struct lis331dl_dev_s));
     dev->i2c     = i2c;
     dev->address = address;
     
     /* Probe device */
     
-    if (st_lis331dl_access(dev, ST_LIS331DL_WHOAMI, &retval, 1) > 0) {
+    if (lis331dl_access(dev, ST_LIS331DL_WHOAMI, &retval, 1) > 0) {
     
         /* Check chip identification, in the future several more compatible parts
          * may be added here.
@@ -208,7 +208,7 @@ struct st_lis331dl_dev_s * st_lis331dl_init(struct i2c_dev_s * i2c, uint16_t add
         
             /* Copy LIS331DL registers to our private structure and power-up device */
             
-            if (st_lis331dl_readregs(dev)==OK && st_lis331dl_powerup(dev)==OK) {
+            if (lis331dl_readregs(dev)==OK && lis331dl_powerup(dev)==OK) {
       
                 /* Normal exit point */
                 errno = 0;
@@ -232,52 +232,52 @@ struct st_lis331dl_dev_s * st_lis331dl_init(struct i2c_dev_s * i2c, uint16_t add
 }
 
 
-int st_lis331dl_deinit(struct st_lis331dl_dev_s * dev)
+int lis331dl_deinit(struct lis331dl_dev_s * dev)
 {
     ASSERT(dev);
     
-    st_lis331dl_powerdown(dev);
+    lis331dl_powerdown(dev);
     kfree(dev);
     
     return OK;
 }
 
 
-int st_lis331dl_powerup(struct st_lis331dl_dev_s * dev)
+int lis331dl_powerup(struct lis331dl_dev_s * dev)
 {
     dev->cr1 = ST_LIS331DL_CR1_PD |
         ST_LIS331DL_CR1_ZEN | ST_LIS331DL_CR1_YEN | ST_LIS331DL_CR1_XEN;
     dev->cr2 = 0;
     dev->cr3 = 0;
         
-    if (st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -3) == 3) return OK;
+    if (lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -3) == 3) return OK;
     return ERROR;
 }
 
 
-int st_lis331dl_powerdown(struct st_lis331dl_dev_s * dev)
+int lis331dl_powerdown(struct lis331dl_dev_s * dev)
 {
     dev->cr1 = ST_LIS331DL_CR1_ZEN | ST_LIS331DL_CR1_YEN | ST_LIS331DL_CR1_XEN;
     dev->cr2 = 0;
     dev->cr3 = 0;
         
-    if (st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -3) == 3) return OK;
+    if (lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -3) == 3) return OK;
     return ERROR;
 }
 
 
-int st_lis331dl_setconversion(struct st_lis331dl_dev_s * dev, bool full, bool fast)
+int lis331dl_setconversion(struct lis331dl_dev_s * dev, bool full, bool fast)
 {
     dev->cr1 = ST_LIS331DL_CR1_PD | 
         (full ? ST_LIS331DL_CR1_FS : 0) | (fast ? ST_LIS331DL_CR1_DR : 0) |
         ST_LIS331DL_CR1_ZEN | ST_LIS331DL_CR1_YEN | ST_LIS331DL_CR1_XEN;
         
-    if (st_lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -1) == 1) return OK;
+    if (lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, -1) == 1) return OK;
     return ERROR;
 }
 
 
-int st_lis331dl_getprecision(struct st_lis331dl_dev_s * dev)
+int lis331dl_getprecision(struct lis331dl_dev_s * dev)
 {
     if (dev->cr1 & ST_LIS331DL_CR1_FS)
         return 9200/127;   /* typ. 9.2g full scale */
@@ -285,7 +285,7 @@ int st_lis331dl_getprecision(struct st_lis331dl_dev_s * dev)
 }
 
 
-int st_lis331dl_getsamplerate(struct st_lis331dl_dev_s * dev)
+int lis331dl_getsamplerate(struct lis331dl_dev_s * dev)
 {   
     if (dev->cr1 & ST_LIS331DL_CR1_DR)
         return 400;
@@ -293,13 +293,13 @@ int st_lis331dl_getsamplerate(struct st_lis331dl_dev_s * dev)
 }
 
 
-const struct st_lis331dl_vector_s * st_lis331dl_getreadings(struct st_lis331dl_dev_s * dev)
+const struct lis331dl_vector_s * lis331dl_getreadings(struct lis331dl_dev_s * dev)
 {
     uint8_t retval[7];
 
     ASSERT(dev);
     
-    if (st_lis331dl_access(dev, ST_LIS331DL_STATUS_REG, retval, 7) == 7) {
+    if (lis331dl_access(dev, ST_LIS331DL_STATUS_REG, retval, 7) == 7) {
     
         /* If result is not yet ready, return NULL */
         

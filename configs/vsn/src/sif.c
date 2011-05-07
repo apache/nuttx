@@ -77,7 +77,7 @@
 #include <nuttx/progmem.h>
 
 #include <nuttx/i2c.h>
-#include <nuttx/sensors/st_lis331dl.h>
+#include <nuttx/sensors/lis331dl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -285,7 +285,7 @@ int sif_gpios_unlock(vsn_sif_state_t peripheral)
  * Analog Outputs
  ****************************************************************************/ 
  
-static volatile int test = 0, test_irq;
+static volatile int test = 0, teirq;
 
 
 static int sif_anout_isr(int irq, void *context)
@@ -293,7 +293,7 @@ static int sif_anout_isr(int irq, void *context)
     STM32_TIM_ACKINT(vsn_sif.tim8, 0);
 
     test++;
-    test_irq = irq;
+    teirq = irq;
     
     return OK;
 }
@@ -531,10 +531,12 @@ int sif_main(int argc, char *argv[])
                 }
             }
             while (status >= 0);
+            return 0;
         }
         else if (!strcmp(argv[1], "erase") && argc == 3 ) {
             int page = atoi(argv[2]);
             printf("Erase result: %d\n", up_progmem_erasepage(page) );
+            return 0;
         }
         else if (!strcmp(argv[1], "flash") && argc == 3 ) {
             uint16_t page = atoi(argv[2]);
@@ -542,27 +544,28 @@ int sif_main(int argc, char *argv[])
             
             printf("Write result: %d (writing to address %xh)\n", 
                 up_progmem_write( addr, "Test", 4 ), addr);
+            return 0;
         }
         else if (!strcmp(argv[1], "i2c") && argc == 3) {
             int val = atoi(argv[2]);
             
             I2C_SETFREQUENCY(vsn_sif.i2c1, 100000);
             
-            struct st_lis331dl_dev_s * lis = st_lis331dl_init(vsn_sif.i2c1, val);
+            struct lis331dl_dev_s * lis = lis331dl_init(vsn_sif.i2c1, val);
 
             if (lis) {
-                const struct st_lis331dl_vector_s * a;
+                const struct lis331dl_vector_s * a;
                 int i;
                 uint32_t time_stamp = clock_systimer();
                 
                 /* Set to 400 Hz : 3 = 133 Hz/axis */
                 
-                st_lis331dl_setconversion(lis, false, true);
+                lis331dl_setconversion(lis, false, true);
                 
                 /* Sample some values */
                 
                 for (i=0; i<1000; ) {
-                    if ( (a = st_lis331dl_getreadings(lis)) ) {
+                    if ( (a = lis331dl_getreadings(lis)) ) {
                         i++;
                         printf("%d %d %d\n", a->x, a->y, a->z);
                     }
@@ -574,7 +577,7 @@ int sif_main(int argc, char *argv[])
                 
                 printf("Time diff = %d\n", clock_systimer() - time_stamp);
                 
-                st_lis331dl_deinit(lis);
+                lis331dl_deinit(lis);
             }
             else printf("Exit point: errno=%d\n", errno);
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/chipcon_cc1101.c
+ * drivers/wireless/cc1101.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *
@@ -49,7 +49,7 @@
 #include <stdio.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/wireless/chipcon_cc1101.h>
+#include <nuttx/wireless/cc1101.h>
 
 
 /************************************************************************************
@@ -351,7 +351,7 @@
  * Private Data Types
  ************************************************************************************/
 
-struct chipcon_c1101_rfsettings_s {
+struct c1101_rfsettings_s {
 	uint8_t FSCTRL1;    /* Frequency synthesizer control. */
 	uint8_t IOCFG0;     /* GDO0 output pin configuration */
 	uint8_t FSCTRL0;    /* Frequency synthesizer control. */
@@ -389,9 +389,9 @@ struct chipcon_c1101_rfsettings_s {
 	uint8_t PKTLEN;     /* Packet length. */
 };
 
-struct chipcon_cc1101_dev_s {
+struct cc1101_dev_s {
     struct spi_dev_s *                  spi;
-    struct chipcon_c1101_rfsettings_s * settings;
+    struct c1101_rfsettings_s * settings;
     
 };
 
@@ -408,7 +408,7 @@ struct chipcon_cc1101_dev_s {
  * \param length when >0 it denotes read access, when <0 it denotes write access of -length
  * \return OK on success or errno is set.
  **/
-int chipcon_cc1101_access(struct chipcon_cc1101_dev_s * dev, uint8_t subaddr, uint8_t *buf, int length)
+int cc1101_access(struct cc1101_dev_s * dev, uint8_t subaddr, uint8_t *buf, int length)
 {
     return 0;
 }
@@ -427,7 +427,7 @@ int chipcon_cc1101_access(struct chipcon_cc1101_dev_s * dev, uint8_t subaddr, ui
  *    its callback, and it is up to peripheral to find, whether the cause
  *    of EXTI ISR was itself.
  **/
-void chipcon_cc1101_eventcb(void)
+void cc1101_eventcb(void)
 {
 }
 
@@ -436,7 +436,7 @@ void chipcon_cc1101_eventcb(void)
  * Public Functions
  ****************************************************************************/
 
-struct chipcon_cc1101_dev_s * chipcon_cc1101_init(struct spi_dev_s * spi)
+struct cc1101_dev_s * cc1101_init(struct spi_dev_s * spi)
 {
     /* Powerup or wake-up, if it was previously set into some power-down state */
 
@@ -452,7 +452,7 @@ struct chipcon_cc1101_dev_s * chipcon_cc1101_init(struct spi_dev_s * spi)
 }
 
 
-int chipcon_cc1101_deinit(struct chipcon_cc1101_dev_s * dev)
+int cc1101_deinit(struct cc1101_dev_s * dev)
 {
     /* Power down chip, possibly in some inactive state */
 
@@ -460,55 +460,55 @@ int chipcon_cc1101_deinit(struct chipcon_cc1101_dev_s * dev)
 }
 
 
-int chipcon_cc1101_setgdo(struct chipcon_cc1101_dev_s * dev, uint8_t pin, uint8_t function)
+int cc1101_setgdo(struct cc1101_dev_s * dev, uint8_t pin, uint8_t function)
 {
     return 0;
 }
 
 
-int chipcon_cc1101_setrf(struct chipcon_cc1101_dev_s * dev, uint32_t frequency, int modulation)
+int cc1101_setrf(struct cc1101_dev_s * dev, uint32_t frequency, int modulation)
 {
     return 0;
 }
 
 
-int chipcon_cc1101_read(struct chipcon_cc1101_dev_s * dev, uint8_t * data, size_t size)
+int cc1101_read(struct cc1101_dev_s * dev, uint8_t * data, size_t size)
 {
     return 0;
 }
 
 
-int chipcon_cc1101_write(struct chipcon_cc1101_dev_s * dev, const uint8_t * data, size_t size)
+int cc1101_write(struct cc1101_dev_s * dev, const uint8_t * data, size_t size)
 {
     return 0;
 }
 
 
-int chipcon_cc1101_listen(struct chipcon_cc1101_dev_s * dev)
+int cc1101_listen(struct cc1101_dev_s * dev)
 {
     return 0;
 }
 
 
-int chipcon_cc1101_send(struct chipcon_cc1101_dev_s * dev)
+int cc1101_send(struct cc1101_dev_s * dev)
 {
     return 0;
 }
 
 
-int chipcon_cc1101_idle(struct chipcon_cc1101_dev_s * dev)
+int cc1101_idle(struct cc1101_dev_s * dev)
 {
     return 0;
 }
 
 
-int chipcon_cc1101_powerup(struct chipcon_cc1101_dev_s * dev)
+int cc1101_powerup(struct cc1101_dev_s * dev)
 {
     return 0;
 }
 
 
-int chipcon_cc1101_powerdown(struct chipcon_cc1101_dev_s * dev)
+int cc1101_powerdown(struct cc1101_dev_s * dev)
 {
     return 0;
 }
