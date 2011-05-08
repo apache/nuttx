@@ -44,6 +44,9 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <semaphore.h>
+
 #ifdef CONFIG_FS_RAMMAP
 
 /****************************************************************************
@@ -68,11 +71,27 @@
 
 struct fs_rammap_s
 {
+  struct fs_rammap_s *flink;    /* Implements a singly linked list */
+  FAR void           *addr;     /* Start of allocated memory */
+  size_t              length;   /* Length of region */
+  off_t               offset;   /* File offset */
+};
+
+/* This structure defines all "mapped" files */
+
+struct fs_allmaps_s
+{
+  sem_t               exclsem;  /* Provides exclusive access the list */
+  struct fs_rammap_s *maps;     /* List of mapped files */
 };
 
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
+
+/* This is the list of all mapped files */
+
+extern struct fs_allmaps_s g_rammaps;
 
 /****************************************************************************
  * Public Function Prototypes

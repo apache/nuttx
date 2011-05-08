@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+
+#include <unistd.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -78,8 +80,123 @@
 
 int rammap(int fd, size_t length, off_t offset, FAR void **addr)
 {
-#warning "Missing logic"
-  return -ENOSYS;
+  FAR struct fs_rammap_s *rammap;
+  FAR uint8_t *alloc;
+  FAR uint8_t *rdbuffer;
+  ssize_t nread;
+  off_t fpos;
+  int err;
+  int ret;
+
+  /* There is a major design flaw that I have not yet thought of fix for:
+   * The goal is to have a single region of memory that represents a single
+   * file and can be shared by many threads.  That is, given a filename a
+   * thread should be able to open the file, get a file descriptor, and
+   * call mmap() to get a memory region.  Different file descriptors opened
+   * with the same file path should get the same memory region when mapped.
+   *
+   * The design flaw is that I don't have sufficient knowledge to know that
+   * these different file descriptors map to the same file.  So, for the time
+   * being, a new memory region is created each time that rammap() is called.
+   * Not very useful!
+   */
+
+  /* Allocate a region of memory of the specified size */
+
+  alloc = (FAR uint8_t *)kmalloc(sizeof(struct fs_rammap_s) + length);
+  if (!alloc)
+    {
+      fdbg("Region allocation failed, length: %d\n", (int)length);
+      err = ENOMEM;
+      goto errout;
+    }
+
+  /* Initialize the region */
+
+  rammap         = (FAR struct fs_rammap_s *)alloc;
+  memset(rammap, 0, sizeof(struct fs_rammap_s));
+  rammap->addr   = alloc + sizeof(struct fs_rammap_s);
+  rammap->length = length;
+  rammap->offset = offset;
+
+  /* Seek to the specified file offset */
+
+  fpos = lseek(fd, offset,  SEEK_SET);
+  if (fpos == (off_t)-1)
+    {
+      /* Seek failed... errno has already been set, but EINVAL is probably
+       * the correct response.
+       */
+
+      fdbg("Seek to position %d failed\n", (int)offset);
+      err = ENOMEM;
+      goto errout_with_region;
+    }
+
+  /* Read the file data into the memory region */
+
+  rdbuffer = rammap->addr;
+  while (length > 0)
+    {
+      nread = read(fd, rdbuffer, length);
+      if (nread < 0)
+        {
+           /* Handle the special case where the read was interrupted by a
+            * signal.
+            */
+
+           if (nread != EINTR)
+             {
+               /* All other read errors are bad.  errno is already set.
+                * (but maybe should be forced to EINVAL?)
+                */
+
+               fdbg("Read failed: %d\n", (int)offset);
+               goto errout_with_errno;
+             }
+
+           /* Check for end of file. */
+
+           if (nread == 0)
+             {
+               break;
+             }
+
+           /* Increment number of bytes read */
+
+           rdbuffer += nread;
+           length   -= nread;
+        }
+    }
+
+  /* Zero any memory beyond the amount read from the file */
+
+  memset(rdbuffer, 0, length);
+
+  /* Add the buffer to the list of regions */
+
+#warning "Missing semaphore initialization"
+  ret = sem_wait(g_rammaps.exclsem);
+  if (ret < 0)
+    {
+      goto errout_with_errno;
+    }
+
+  rammap->flink  = g_rammaps.head;
+  g_rammaps.head = rammap;
+
+  sem_post(g_rammaps.exclsem);
+  return rammap->addr;
+
+errout_with_region:
+  kfree(alloc);
+errout:
+  errno = err;
+  return MAP_FAILED;
+
+errout_with_errno:
+  kfree(alloc)
+  returm MAP_FAILED;
 }
 
 #endif /* CONFIG_FS_RAMMAP */

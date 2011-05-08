@@ -105,10 +105,73 @@
  *
  ****************************************************************************/
 
-int munmap(FART void *start, size_t length)
+int munmap(FAR void *start, size_t length)
 {
-#warning "Missing logic"
-  return MAP_FAILED;
+  FAR struct fs_rammap_s *prev;
+  FAR struct fs_rammap_s *curr;
+  FAR void *newaddr;
+  int ret;
+  int err;
+
+  /* Find a region containing this start and length in the list of regions */
+
+#warning "Missing semaphore initialization"
+  ret = sem_wait(g_rammaps.exclsem);
+  if (ret < 0)
+    {
+      return ERROR;
+    }
+
+  /* Seach the list of regions */
+
+  for (prev = NULL, curr = g_rammaps.head; prev = curr, curr = curr->flink)
+    {
+      /* Does this region include any part of the specified range? */
+
+      if ((uintptr_t)start < (uintptr_t)curr->addr + curr->length &&
+          (uintptr_t)start + length >= (uintptr_t)curr->addr)
+        {
+          break;
+        }
+    }
+
+  /* Did we find the region */
+
+  if (!curr)
+    {
+      fdbg("Region not found\n");
+      err = EINVAL;
+      goto errout_with_semaphore;
+    }
+
+  /* There is not yet any support for freeing memory at the beginning of the
+   * region or for increasing the size of the mapped region.
+   */
+
+  if (start != curr->addr || length > curr->length)
+    {
+      fdbg("Unmapping at offset/Extending not supported\n");
+      err = ENOSYS;
+      goto errout_with_semaphore;
+    }
+
+  /* Otherwise, we can simply realloc the region.  Since we are reducing
+   * the size of the region, this should not change the start addres.
+   */
+
+  if (length < curr->length)
+    {
+      newaddr = realloc(curr->addr, length);
+      DEBUGASSERT(newaddr == curr->addr);
+    }
+
+  sem_post(g_rammaps.exclsem);
+  return OK;
+
+errout_with_semaphore:
+  sem_post(g_rammaps.exclsem);
+  errno = err;
+  return ERROR;
 }
 
 #endif /* CONFIG_FS_RAMMAP */
