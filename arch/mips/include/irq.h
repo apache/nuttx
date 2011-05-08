@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/include/syscall.h
+ * arch/mips/include/irq.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,22 +34,30 @@
  ****************************************************************************/
 
 /* This file should never be included directed but, rather, only indirectly
- * through include/syscall.h or include/sys/sycall.h
+ * through nuttx/irq.h
  */
 
-#ifndef __ARCH_AVR_INCLUDE_SYSCALL_H
-#define __ARCH_AVR_INCLUDE_SYSCALL_H
+#ifndef __ARCH_MIPS_INCLUDE_IRQ_H
+#define __ARCH_MIPS_INCLUDE_IRQ_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include AVR architecture-specific syscall macros */
+/* Include NuttX-specific IRQ definitions */
 
-#ifdef CONFIG_ARCH_AVR32
-# include <arch/avr32/syscall.h>
-#else
-# include <arch/avr/syscall.h>
+#include <nuttx/irq.h>
+
+/* Include chip-specific IRQ definitions (including IRQ numbers) */
+
+#include <arch/chip/irq.h>
+
+/* Include AVR architecture-specific IRQ definitions (including register
+ * save structure and irqsave()/irqrestore() macros
+ */
+
+#ifdef CONFIG_ARCH_MIPS32
+# include <arch/mips32/irq.h>
 #endif
 
 /****************************************************************************
@@ -59,6 +67,8 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Inline functions
@@ -72,7 +82,6 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C" {
@@ -84,7 +93,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif
 
-#endif /* __ARCH_AVR_INCLUDE_SYSCALL_H */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_MIPS_INCLUDE_IRQ_H */
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/include/syscall.h
+ * arch/mips/include/limits.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,58 +33,50 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through include/syscall.h or include/sys/sycall.h
- */
-
-#ifndef __ARCH_AVR_INCLUDE_SYSCALL_H
-#define __ARCH_AVR_INCLUDE_SYSCALL_H
+#ifndef __ARCH_MIPS_INCLUDE_LIMITS_H
+#define __ARCH_MIPS_INCLUDE_LIMITS_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include AVR architecture-specific syscall macros */
-
-#ifdef CONFIG_ARCH_AVR32
-# include <arch/avr32/syscall.h>
-#else
-# include <arch/avr/syscall.h>
-#endif
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#define CHAR_BIT    8
+#define SCHAR_MIN   0x80
+#define SCHAR_MAX   0x7f
+#define UCHAR_MAX   0xff
 
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
+/* These could be different on machines where char is unsigned */
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
+#define CHAR_MIN    SCHAR_MIN
+#define CHAR_MAX    SCHAR_MAX
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+#define SHRT_MIN    0x8000
+#define SHRT_MAX    0x7fff
+#define USHRT_MAX   0xffff
 
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+#define INT_MIN     0x80000000
+#define INT_MAX     0x7fffffff
+#define UINT_MAX    0xffffffff
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-#endif
+/* These change on 32-bit and 64-bit platforms */
 
-#endif /* __ARCH_AVR_INCLUDE_SYSCALL_H */
+#define LONG_MAX    0x80000000
+#define LONG_MIN    0x7fffffff
+#define ULONG_MAX   0xffffffff
+
+#define LLONG_MAX   0x8000000000000000
+#define LLONG_MIN   0x7fffffffffffffff
+#define ULLONG_MAX  0xffffffffffffffff
+
+/* A pointer is 4 bytes */
+
+#define PTR_MIN     0x80000000
+#define PTR_MAX     0x7fffffff
+#define UPTR_MAX    0xffffffff
+
+#endif /* __ARCH_MIPS_INCLUDE_LIMITS_H */
 

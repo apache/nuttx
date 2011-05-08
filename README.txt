@@ -360,6 +360,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
+ |   |- pcblogic-pic32mx/
+ |   |   `- README.txt
  |   |- pjrc-8051/
  |   |   |- include/README.txt
  |   |   |- src/README.txt

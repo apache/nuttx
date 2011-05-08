@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/avr/include/syscall.h
+ * arch/mips/include/arch.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,35 +33,29 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through include/syscall.h or include/sys/sycall.h
+/* This file should never be included directed but, rather,
+ * only indirectly through nuttx/arch.h
  */
 
-#ifndef __ARCH_AVR_INCLUDE_SYSCALL_H
-#define __ARCH_AVR_INCLUDE_SYSCALL_H
+#ifndef __ARCH_MIPS_INCLUDE_ARCH_H
+#define __ARCH_MIPS_INCLUDE_ARCH_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include AVR architecture-specific syscall macros */
-
-#ifdef CONFIG_ARCH_AVR32
-# include <arch/avr32/syscall.h>
-#else
-# include <arch/avr/syscall.h>
-#endif
+#include <nuttx/config.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Inline functions
  ****************************************************************************/
 
 /****************************************************************************
- * Inline functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -72,7 +66,6 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C" {
@@ -84,7 +77,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif
 
-#endif /* __ARCH_AVR_INCLUDE_SYSCALL_H */
+#endif /* __ARCH_MIPS_INCLUDE_ARCH_H */
 

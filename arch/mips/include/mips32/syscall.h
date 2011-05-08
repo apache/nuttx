@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/include/syscall.h
+ * arch/mips/include/mips32/syscall.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,31 +37,24 @@
  * through include/syscall.h or include/sys/sycall.h
  */
 
-#ifndef __ARCH_AVR_INCLUDE_SYSCALL_H
-#define __ARCH_AVR_INCLUDE_SYSCALL_H
+#ifndef __ARCH_MIPS_INCLUDE_MIPS32_SYSCALL_H
+#define __ARCH_MIPS_INCLUDE_MIPS32_SYSCALL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include AVR architecture-specific syscall macros */
-
-#ifdef CONFIG_ARCH_AVR32
-# include <arch/avr32/syscall.h>
-#else
-# include <arch/avr/syscall.h>
-#endif
+#include <nuttx/config.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-Processor Definitions
  ****************************************************************************/
+
+#define SYS_syscall 0x80
 
 /****************************************************************************
  * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Inline functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -80,11 +73,66 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/* SWI with SYS_ call number and six parameters */
+
+EXTERN uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
+                           uintptr_t parm2, uintptr_t parm3,
+                           uintptr_t parm4, uintptr_t parm5,
+                           uintptr_t parm6);
+
+/* SWI with SYS_ call number and no parameters */
+
+static inline uintptr_t sys_call0(unsigned int nbr)
+{
+  return sys_call6(nbr, 0, 0, 0, 0, 0, 0);
+}
+
+/* SWI with SYS_ call number and one parameter */
+
+static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
+{
+  return sys_call6(nbr, parm1, 0, 0, 0, 0, 0);
+}
+
+/* SWI with SYS_ call number and two parameters */
+
+static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2)
+{
+  return sys_call6(nbr, parm1, parm2, 0, 0, 0, 0);
+}
+
+/* SWI with SYS_ call number and three parameters */
+
+static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3)
+{
+  return sys_call6(nbr, parm1, parm2, parm3, 0, 0, 0);
+}
+
+/* SWI with SYS_ call number and four parameters */
+
+static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4)
+{
+  return sys_call6(nbr, parm1, parm2, parm3, parm4, 0, 0);
+}
+
+/* SWI with SYS_ call number and five parameters */
+
+static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4, uintptr_t parm5)
+{
+  return sys_call6(nbr, parm1, parm2, parm3, parm4, parm5, 0);
+}
+
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 #endif
 
-#endif /* __ARCH_AVR_INCLUDE_SYSCALL_H */
+#endif /* __ARCH_MIPS_INCLUDE_MIPS32_SYSCALL_H */
 
