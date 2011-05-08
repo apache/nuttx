@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 6, 2011</p>
+      <p>Last Updated: May 8, 2011</p>
     </td>
   </tr>
 </table>
@@ -3479,6 +3479,11 @@ build
   </li>
   <li>
     <code>CONFIG_FS_ROMFS</code>: Enable ROMFS file system support
+  </li>
+  <li>
+    <code>CONFIG_FS_RAMMAP</code>: For file systems that do not support
+    XIP, this option will enable a limited form of memory mapping that is
+    implemented by copying whole files into memory.
   </li>
 </ul>
 

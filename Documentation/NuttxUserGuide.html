@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: December 13, 2009</p>
+      <p>Last Updated: May 8, 2011</p>
     </td>
   </tr>
 </table>
@@ -747,10 +747,10 @@ interface of the same name.
     priority of the calling task is set.
   </li>
   <li>
-    <I>policy</I>. Scheduling policy requested (either SCHED_FIFO or SCHED_RR).
+    <I>policy</I>. Scheduling policy requested (either <code>SCHED_FIFO</code> or <code>SCHED_RR</code>).
   </li>
   <li>
-    <code>param<code>. A structure whose member sched_priority is the
+    <code>param</code>. A structure whose member sched_priority is the
     integer priority. The range of valid priority numbers is from
     SCHED_PRIORITY_MIN through SCHED_PRIORITY_MAX.
   </li>
@@ -1213,7 +1213,7 @@ of the same name.
 <p>
 <b>Description:</b> This function removes the message queue named
 by &quot;mqName.&quot; If one or more tasks have the message queue
-open when mq_unlink() is called, removal of the message queue
+open when <code>mq_unlink()</code> is called, removal of the message queue
 is postponed until all references to the message queue have been
 closed.
 <p>
@@ -1341,7 +1341,7 @@ interface of the same name.
 </p>
 <p>
   If the message queue is full, and the timeout has already expired by the time
-  of the call, <code>mq_timedsend()<code> returns immediately.
+  of the call, <code>mq_timedsend()</code> returns immediately.
 </p>
 <p>
   <b>Input Parameters:</b> 
@@ -1483,8 +1483,8 @@ interface of the same name.
   priority that has waited the longest will be unblocked.
 </p>
 <p>
-  <code>mq_timedreceive()</code> behaves just like <code>mq_receive()<code>, except
-  that if the queue is empty and the <code>O_NONBLOCK<c/ode> flag is not enabled
+  <code>mq_timedreceive()</code> behaves just like <code>mq_receive()</code>, except
+  that if the queue is empty and the <code>O_NONBLOCK</code> flag is not enabled
   for the message queue description, then <code>abstime</code> points to a structure
   which specifies a ceiling on the time for which the call will block.
   This ceiling is an absolute timeout in seconds and nanoseconds since the Epoch
@@ -2681,7 +2681,7 @@ VxWorks provides the following comparable interface:
   the location referenced by <code>timerid</code>, a timer ID of type timer_t used to identify
   the timer in timer requests.
   This timer ID is unique until the timer is deleted.
-  The particular clock, <code>clock_id<code>, is defined in <code>&lt;time.h&gt;<code>.
+  The particular clock, <code>clock_id</code>, is defined in <code>&lt;time.h&gt;</code>.
   The timer whose ID is returned will be in a disarmed state upon return from
   <code>timer_create()</code>.
 </p>
@@ -4425,7 +4425,7 @@ interface of the same name.
 <p>
   The policy parameter may have the value <code>SCHED_FIFO</code> or <code>SCHED_RR</code>
   (<code>SCHED_OTHER</code> and <code>SCHED_SPORADIC</code>, in particular, are not supported).
-  The <code>SCHED_FIFO</code> and <code>SCHED_RR<code> policies will have a single
+  The <code>SCHED_FIFO</code> and <code>SCHED_RR</code> policies will have a single
   scheduling parameter, <code>sched_priority</code>.
 </p>
 <p>
@@ -4502,8 +4502,8 @@ interface of the same name.
   <li>
     <code>policy</code>.
     The new scheduling policy of the thread.
-    Either <code>SCHED_FIFO</code> or <code>SCHED_RR<code>.
-    <code>SCHED_OTHER<code> and <code>SCHED_SPORADIC<code> are not supported.
+    Either <code>SCHED_FIFO</code> or <code>SCHED_RR</code>.
+    <code>SCHED_OTHER</code> and <code>SCHED_SPORADIC</code> are not supported.
   </li>
   <li>
     <code>param</code>.
@@ -5141,7 +5141,7 @@ interface of the same name.
 <b>Input Parameters:</b>
 <p>
 <ul>
-  <li><code>param<code>.</li>
+  <li><code>mutex</code>.</li>
 </ul>
 <p>
 <b>Returned Values:</b>
@@ -6233,7 +6233,7 @@ interface of the same name.
 </p>
 <ul>
   <li><code>CONFIG_NET_TCPBACKLOG</code>
-  Incoming connections pend in a backlog until <code>accept()</cod> is called.
+  Incoming connections pend in a backlog until <code>accept()</code> is called.
   The size of the backlog is selected when <code>listen()</code> is called.</li>
 </ul>
 <p>
@@ -6505,7 +6505,7 @@ void  *memmove(void *dest, const void *src, size_t count);
     <li><code>pathname</code>.
       The full path to the FIFO instance to attach to or to create (if not already created).
     </li>
-    <li><code>mode<code>.
+    <li><code>mode</code>.
       Ignored for now
     </li>
   </ul>
@@ -6599,26 +6599,132 @@ struct fat_format_s
 
 <h3><a name="mmapxip">2.11.9 <code>mmap()</code> and eXecute In Place (XIP)</a></h3>
 <p>
-  NuttX operates in a flat open address space.
-  Therefore, it generally does not require <code>mmap()</code> functionality.
-  There is one one exception:
-  <code>mmap()</code> is the API that is used to support direct access to random
-  access media under the following very restrictive conditions:
-  <ol>
-    <li>
-      The file-system supports the <code>FIOC_MMAP</code> ioctl command.
-      Any file system that maps files contiguously on the media should support this
-      <code>ioctl</code> command.
-      By comparison, most file system scatter files over the media in non-contiguous
-      sectors.  As of this writing, ROMFS is the only file system that meets this requirement.
-    </li>
-    <li>
-      The underlying block driver supports the <code>BIOC_XIPBASE</code> <code>ioctl</code> command
-      that maps the underlying media to a randomly accessible address.
-       At present, only the RAM/ROM disk driver does this.
-    </li>
-  </ol>
+  NuttX operates in a flat open address space and is focused on MCUs that do
+  support Memory Management Units (MMUs).  Therefore, NuttX generally does not
+  require <code>mmap()</code> functionality and the MCUs generally cannot support true
+  memory-mapped files.
 </p>
+<p>
+  However, memory mapping of files is the mechanism used by NXFLAT, the NuttX
+  tiny binary format, to get files into memory in order to execute them.
+  <code>mmap()</code> support is therefore required to support NXFLAT. 
+  There are two conditions where <code>mmap()</code> can be supported:
+</p>
+<ol type="1">
+  <li>
+    <p>
+      <code>mmap()</code> can be used to support <i>eXecute In Place</i> (XIP) on random access media
+       under the following very restrictive conditions:
+    </p>
+    <ol type="a">
+      <li>
+        <p>
+          The file-system supports the <code>FIOC_MMAP</code> ioctl command.
+          Any file system that maps files contiguously on the media should support this
+          <code>ioctl</code> command.
+          By comparison, most file system scatter files over the media in non-contiguous
+          sectors.  As of this writing, ROMFS is the only file system that meets this requirement.
+        </p>
+      </li>
+      <li>
+        <p>
+          The underlying block driver supports the <code>BIOC_XIPBASE</code> <code>ioctl</code> command
+          that maps the underlying media to a randomly accessible address.
+           At present, only the RAM/ROM disk driver does this.
+        </p>
+      </li>
+    </ol>
+    <p>
+       Some limitations of this approach are as follows:
+    <p>
+    <ol type="a">
+      <li>
+        <p>
+          Since no real mapping occurs, all of the file contents are &quot;mapped&quot; into memory.
+        </p>
+      </li>
+      <li>
+        <p>
+          All mapped files are read-only.
+        </p>
+      </li>
+      <li>
+        <p>
+          There are no access privileges.
+        </p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>
+      If <code>CONFIG_FS_RAMMAP</code> is defined in the configuration, then <code>mmap()</code> will
+      support simulation of memory mapped files by copying files whole into RAM.
+      These copied files have some of the properties of standard memory mapped files.
+      There are many, many exceptions exceptions, however.
+      Some of these include:
+    </p>
+    <ol type="a">
+      <li>
+        <p>
+          The goal is to have a single region of memory that represents a single
+          file and can be shared by many threads.  That is, given a filename a
+          thread should be able to open the file, get a file descriptor, and
+          call <code>mmap()</code> to get a memory region.  Different file descriptors opened
+          with the same file path should get the same memory region when mapped.
+        </p>
+        <p>
+          The limitation in the current design is that there is insufficient
+          knowledge to know that these different file descriptors correspond to
+          the same file.  So, for the time being, a new memory region is created
+          each time that <code>rammmap()</code> is called. Not very useful!
+        </p>
+      </li>
+      <li>
+        <p>
+          The entire mapped portion of the file must be present in memory.
+          Since it is assumed the the MCU does not have an MMU, on-demanding
+          paging in of file blocks cannot be supported. Since the while mapped
+          portion of the file must be present in memory, there are limitations
+          in the size of files that may be memory mapped (especially on MCUs
+          with no significant RAM resources).
+        </p>
+      </li>
+      <li>
+        <p>
+          All mapped files are read-only.  You can write to the in-memory image,
+          but the file contents will not change.
+        </p>
+      </li>
+      <li>
+        <p>
+          There are no access privileges.
+        </p>
+      </li>
+      <li>
+        <p>
+          Since there are no processes in NuttX, all <code>mmap()</code> and <code>munmap()</code>
+          operations have immediate, global effects.  Under Linux, for example,
+          <code>munmap()</code> would eliminate only the mapping with a process; the mappings
+          to the same file in other processes would not be effected.
+        </p>
+      </li>
+      <li>
+        <p>
+          Like true mapped file, the region will persist after closing the file
+          descriptor.  However, at present, these ram copied file regions are
+          <i>not</i> automatically &quot;unmapped&quot; (i.e., freed) when a thread is terminated.
+          This is primarily because it is not possible to know how many users
+          of the mapped region there are and, therefore, when would be the
+          appropriate time to free the region (other than when munmap is called).
+        </p>
+        <p>
+          NOTE: Note, if the design limitation of a) were solved, then it would be
+          easy to solve exception d) as well.
+        </p>
+      </li>
+    </ol>
+  </li>
+</ol>
 
 <h3><a name="mmap">2.11.9.1 <code>mmap</code></a></h3>
 <p>
@@ -6952,7 +7058,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
   To accept connections, a socket is first created with <code>socket()</code>, a
   willingness to accept incoming connections and a queue limit for incoming
   connections are specified with <code>listen()</code>, and then the connections are
-  accepted with <code>accept()</code>. The <code>listen()</coe> call applies only to sockets of
+  accepted with <code>accept()</code>. The <code>listen()</code> call applies only to sockets of
   type <code>SOCK_STREAM</code> or <code>SOCK_SEQPACKET</code>.
 </p>
 <p>
@@ -7280,11 +7386,11 @@ Those socket APIs are discussed in the following paragraphs.</p>
   <b>Input Parameters:</b>
 </p>
 <ul>
-  <li><code>sockfd</code>: Socket descriptor of socket
-  <li><code>level</code>: Protocol level to set the option
-  <li><code>option</code>: identifies the option to set
-  <li><code>value</code>: Points to the argument value
-  <li><code>value_len</code>: The length of the argument value
+  <li><code>sockfd</code>: Socket descriptor of socket</li>
+  <li><code>level</code>: Protocol level to set the option</li>
+  <li><code>option</code>: identifies the option to set</li>
+  <li><code>value</code>: Points to the argument value</li>
+  <li><code>value_len</code>: The length of the argument value</li>
 </ul>
 <p>
   <b>Returned Values:</b>
@@ -7337,17 +7443,17 @@ Those socket APIs are discussed in the following paragraphs.</p>
   SOL_SOCKET.
 </p>
 <p>
-  See <code>sys/socket.h</code>for a complete list of values for the <code>option</code> argument.
+  See <code>sys/socket.h</code> for a complete list of values for the <code>option</code> argument.
 </p>
 <p>
   <b>Input Parameters:</b>
 </p>
 <ul>
-  <li><code>sockfd    Socket descriptor of socket
-  <li><code>level     Protocol level to set the option
-  <li><code>option    identifies the option to get
-  <li><code>value     Points to the argument value
-  <li><code>value_len The length of the argument value
+  <li><code>sockfd</code>: Socket descriptor of socket
+  <li><code>level</code>: Protocol level to set the option
+  <li><code>option</code>: Identifies the option to get
+  <li><code>value</code>:  Points to the argument value
+  <li><code>value_len</code>: The length of the argument value
 </ul>
 <p>
   <b>Returned Values:</b>
@@ -7364,7 +7470,7 @@ Those socket APIs are discussed in the following paragraphs.</p>
     The <code>option</code> is not supported by the protocol.</li>
   <li><code>NOTSOCK</code>.
     The <code>sockfd</code> argument does not refer to a socket.</li>
-  <li><code>NOBUFS
+  <li><code>NOBUFS</code>.
     Insufficient resources are available in the system to complete the call.</li>
 </ul>
 

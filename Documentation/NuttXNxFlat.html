@@ -10,7 +10,7 @@
     <td>
       <h1><big><font color="#3c34ec"><i>NXFLAT</i></font></big></h1>
       <h2><font color="#dc143c">&gt;&gt;&gt; Under Construction &lt;&lt;&lt;</font></h2>
-      <p>Last Updated: March 20, 2011</p>
+      <p>Last Updated: May 8, 2011</p>
     </td>
   </tr>
 </table>
@@ -193,10 +193,12 @@
 <a name="limitations"><h2>1.3 Limitations</h2></a>
 
 <ul>
-  <li><b>ROMFS Only</b>.
-    The initial NXFLAT release will work only with executable modules residing on a ROMFS
-    file system.
+  <li><b>ROMFS (or RAM maps) Only</b>.
+    The initial NXFLAT release will work only with wither (1) executable modules residing on a ROMFS
+    file system, or (2) executables provided on other file systems provided that <code>CONFIG_FS_RAMMAP</code>
+    is defined.
     That is because the loader depends on the capability to <code>mmap()</code> the code segment.
+    See the <a href="NuttxUserGuide.html#mmapxip">NuttX User Guide</a> for further information.
     NUTTX does not provide any general kind of file mapping capability.
     In fact, <i>true </i>file mapping is only possible with RTOSs and MCUs that provide an MMU<sup>1</sup>
     and only ROMFS supports that kind of XIP execution from FLASH.
