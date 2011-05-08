@@ -540,6 +540,9 @@ defconfig -- This is a configuration file similar to the Linux
 		  and making it available for re-use (and possible over-wear).
 		  Default: 8192.
 		CONFIG_FS_ROMFS - Enable ROMFS filesystem support
+		CONFIG_FS_RAMMAP - For file systems that do not support XIP, this
+		  option will enable a limited form of memory mapping that is
+		  implemented by copying whole files into memory.
 
 	SPI driver
 		CONFIG_SPI_OWNBUS - Set if there is only one active device

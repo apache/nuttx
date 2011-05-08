@@ -64,25 +64,31 @@
  * blocks of a file.
  *
  * This copied file has many of the properties of a standard memory mapped
- * file except for all of the file must be present in memory.  This limits
- * the size of files that may be memory mapped (especially on MCUs with
- * no significant RAM resources).
+ * file except:
+ *
+ * - All of the file must be present in memory.  This limits the size of
+ *   files that may be memory mapped (especially on MCUs with no significant
+ *   RAM resources).
+ * - All mapped files are read-only.  You can write to the in-memory image,
+ *   but the file contents will not change.
+ * - There are not access privileges.
  */
 
 struct fs_rammap_s
 {
-  struct fs_rammap_s *flink;    /* Implements a singly linked list */
-  FAR void           *addr;     /* Start of allocated memory */
-  size_t              length;   /* Length of region */
-  off_t               offset;   /* File offset */
+  struct fs_rammap_s *flink;       /* Implements a singly linked list */
+  FAR void           *addr;        /* Start of allocated memory */
+  size_t              length;      /* Length of region */
+  off_t               offset;      /* File offset */
 };
 
 /* This structure defines all "mapped" files */
 
 struct fs_allmaps_s
 {
-  sem_t               exclsem;  /* Provides exclusive access the list */
-  struct fs_rammap_s *maps;     /* List of mapped files */
+  bool                initialized; /* True: This structure has been initialized */
+  sem_t               exclsem;     /* Provides exclusive access the list */
+  struct fs_rammap_s *head;        /* List of mapped files */
 };
 
 /****************************************************************************
@@ -96,6 +102,22 @@ extern struct fs_allmaps_s g_rammaps;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rammap_initialize
+ *
+ * Description:
+ *   Verified that this capability has been initialized.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+extern void rammap_initialize(void);
 
 /****************************************************************************
  * Name: rammmap
@@ -122,7 +144,7 @@ extern struct fs_allmaps_s g_rammaps;
  *
  ****************************************************************************/
 
-extern int rammap(int fd, size_t length, off_t offset, FAR void **addr);
+extern FAR void *rammap(int fd, size_t length, off_t offset);
 
 #endif /* CONFIG_FS_RAMMAP */
 #endif /* __FS_MMAP_RAMMAP_H */

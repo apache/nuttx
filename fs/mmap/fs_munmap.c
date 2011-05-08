@@ -44,9 +44,13 @@
 
 #include <stdint.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
+
 #include "fs_internal.h"
+#include "fs_rammap.h"
 
 #ifdef CONFIG_FS_RAMMAP
 
@@ -60,8 +64,8 @@
  * Description:
  *
  *   munmap() system call deletes mappings for the specified address range.
- *   The region is also automatically unmapped when the process is terminated.
- *   On the other hand, closing the file descriptor does not unmap the region.
+ *   All memory starting with 'start' and continuing for a length of 'length'
+ *   bytes are removed.
  *
  *   NuttX operates in a flat open address space.  Therefore, it generally
  *   does not require mmap() and, hence, munmap functionality.  There are
@@ -96,8 +100,7 @@
  *           simplified munmap() implementation, the *must* be the start
  *           address of the memory region (the same address returned by
  *           mmap()).
- *   length  The length region to be umapped.  Ignored.  The entire underlying
- *           media is always freed.
+ *   length  The length region to be umapped.
  *
  * Returned Value:
  *   On success, munmap() returns 0, on failure -1, and errno is set
@@ -110,13 +113,14 @@ int munmap(FAR void *start, size_t length)
   FAR struct fs_rammap_s *prev;
   FAR struct fs_rammap_s *curr;
   FAR void *newaddr;
+  unsigned int offset;
   int ret;
   int err;
 
   /* Find a region containing this start and length in the list of regions */
 
-#warning "Missing semaphore initialization"
-  ret = sem_wait(g_rammaps.exclsem);
+  rammap_initialize();
+  ret = sem_wait(&g_rammaps.exclsem);
   if (ret < 0)
     {
       return ERROR;
@@ -124,7 +128,7 @@ int munmap(FAR void *start, size_t length)
 
   /* Seach the list of regions */
 
-  for (prev = NULL, curr = g_rammaps.head; prev = curr, curr = curr->flink)
+  for (prev = NULL, curr = g_rammaps.head; curr; prev = curr, curr = curr->flink)
     {
       /* Does this region include any part of the specified range? */
 
@@ -144,32 +148,63 @@ int munmap(FAR void *start, size_t length)
       goto errout_with_semaphore;
     }
 
-  /* There is not yet any support for freeing memory at the beginning of the
-   * region or for increasing the size of the mapped region.
+  /* Get the offset from the beginning of the region and the actual number
+   * of bytes to "unmap".  All mappings must extend to the end of the region.
+   * There is no support for free a block of memory but leaving a block of
+   * memory at the end.  This is a consequence of using realloc() to
+   * simulate the unmapping.
    */
 
-  if (start != curr->addr || length > curr->length)
+  offset = start - curr->addr;
+  if (offset + length < curr->length)
     {
-      fdbg("Unmapping at offset/Extending not supported\n");
+      fdbg("Cannot umap without unmapping to the end\n");
       err = ENOSYS;
       goto errout_with_semaphore;
     }
 
-  /* Otherwise, we can simply realloc the region.  Since we are reducing
-   * the size of the region, this should not change the start addres.
+  /* Okay.. the region is beging umapped to the end.  Make sure the length
+   * indicates that.
    */
 
-  if (length < curr->length)
+  length = curr->length - offset;
+
+  /* Are we unmapping the entire region (offset == 0)? */
+
+  if (length >= curr->length)
     {
-      newaddr = realloc(curr->addr, length);
-      DEBUGASSERT(newaddr == curr->addr);
+      /* Yes.. remove the mapping from the list */
+
+      if (prev)
+        {
+          prev->flink = curr->flink;
+        }
+      else
+        {
+          g_rammaps.head = curr->flink;
+        }
+
+      /* Then free the region */
+
+      kfree(curr);
     }
 
-  sem_post(g_rammaps.exclsem);
+  /* No.. We have been asked to "unmap' only a portion of the memory
+   * (offset > 0).
+   */
+
+  else
+    {
+      newaddr = krealloc(curr->addr, sizeof(struct fs_rammap_s) + length);
+      DEBUGASSERT(newaddr == (FAR void*)(curr->addr));
+      curr->length = length;
+    }
+
+  sem_post(&g_rammaps.exclsem);
   return OK;
 
 errout_with_semaphore:
-  sem_post(g_rammaps.exclsem);
+  sem_post(&g_rammaps.exclsem);
   errno = err;
   return ERROR;
 }

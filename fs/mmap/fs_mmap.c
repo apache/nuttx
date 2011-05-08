@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include "fs_internal.h"
+#include "fs_rammap.h"
 
 /****************************************************************************
  * Global Functions
@@ -135,16 +136,15 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       (flags & (MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS|MAP_DENYWRITE)) != 0)
     {
       fdbg("Unsupported options, prot=%x flags=%04x\n", prot, flags);
-      ret = ENOSYS;
-      goto errout_with_ret;
+      errno = ENOSYS;
+      return MAP_FAILED;
     }
 
-  if (length == 0 ||
-      (flags & MAP_SHARED) == 0)
+  if (length == 0 || (flags & MAP_SHARED) == 0)
     {
       fdbg("Invalid options, lengt=%d flags=%04x\n", length, flags);
-      ret = EINVAL;
-      goto errout_with_ret;
+      errno = EINVAL;
+      return MAP_FAILED;
     }
 #endif
 
@@ -161,24 +161,14 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
   if (ret < 0)
     {
 #ifdef CONFIG_FS_RAMMAP
-      ret = rammap(fd, length, offset, &addr);
-      if (ret < 0)
+      return rammap(fd, length, offset);
+#else
+      fdbg("ioctl(FIOC_MMAP) failed: %d\n", errno);
+      return MAP_FAILED;
 #endif
-        {
-          fdbg("ioctl(FIOC_MMAP) failed: %d\n", errno);
-          goto errout;
-        }
     }
 
   /* Return the offset address */
 
   return (void*)(((uint8_t*)addr) + offset);
-
-#ifdef CONFIG_DEBUG
-errout_with_ret:
-  errno = ret;
-#endif
-
-errout:
-  return MAP_FAILED;
 }

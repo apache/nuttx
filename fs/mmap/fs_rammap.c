@@ -40,18 +40,54 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/mman.h>
 
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
+
 #include "fs_internal.h"
+#include "fs_rammap.h"
 
 #ifdef CONFIG_FS_RAMMAP
 
 /****************************************************************************
+ * Global Data
+ ****************************************************************************/
+
+/* This is the list of all mapped files */
+
+struct fs_allmaps_s g_rammaps;
+
+/****************************************************************************
  * Global Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rammap_initialize
+ *
+ * Description:
+ *   Verified that this capability has been initialized.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void rammap_initialize(void)
+{
+  if (!g_rammaps.initialized)
+    {
+      sem_init(&g_rammaps.exclsem, 0, 1);
+      g_rammaps.initialized = true;
+    }
+}
 
 /****************************************************************************
  * Name: rammmap
@@ -78,9 +114,9 @@
  *
  ****************************************************************************/
 
-int rammap(int fd, size_t length, off_t offset, FAR void **addr)
+FAR void *rammap(int fd, size_t length, off_t offset)
 {
-  FAR struct fs_rammap_s *rammap;
+  FAR struct fs_rammap_s *map;
   FAR uint8_t *alloc;
   FAR uint8_t *rdbuffer;
   ssize_t nread;
@@ -113,11 +149,11 @@ int rammap(int fd, size_t length, off_t offset, FAR void **addr)
 
   /* Initialize the region */
 
-  rammap         = (FAR struct fs_rammap_s *)alloc;
-  memset(rammap, 0, sizeof(struct fs_rammap_s));
-  rammap->addr   = alloc + sizeof(struct fs_rammap_s);
-  rammap->length = length;
-  rammap->offset = offset;
+  map         = (FAR struct fs_rammap_s *)alloc;
+  memset(map, 0, sizeof(struct fs_rammap_s));
+  map->addr   = alloc + sizeof(struct fs_rammap_s);
+  map->length = length;
+  map->offset = offset;
 
   /* Seek to the specified file offset */
 
@@ -135,7 +171,7 @@ int rammap(int fd, size_t length, off_t offset, FAR void **addr)
 
   /* Read the file data into the memory region */
 
-  rdbuffer = rammap->addr;
+  rdbuffer = map->addr;
   while (length > 0)
     {
       nread = read(fd, rdbuffer, length);
@@ -175,18 +211,18 @@ int rammap(int fd, size_t length, off_t offset, FAR void **addr)
 
   /* Add the buffer to the list of regions */
 
-#warning "Missing semaphore initialization"
-  ret = sem_wait(g_rammaps.exclsem);
+  rammap_initialize();
+  ret = sem_wait(&g_rammaps.exclsem);
   if (ret < 0)
     {
       goto errout_with_errno;
     }
 
-  rammap->flink  = g_rammaps.head;
-  g_rammaps.head = rammap;
+  map->flink  = g_rammaps.head;
+  g_rammaps.head = map;
 
-  sem_post(g_rammaps.exclsem);
-  return rammap->addr;
+  sem_post(&g_rammaps.exclsem);
+  return map->addr;
 
 errout_with_region:
   kfree(alloc);
@@ -195,8 +231,8 @@ errout:
   return MAP_FAILED;
 
 errout_with_errno:
-  kfree(alloc)
-  returm MAP_FAILED;
+  kfree(alloc);
+  return MAP_FAILED;
 }
 
 #endif /* CONFIG_FS_RAMMAP */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/mman.h
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,12 @@ extern "C" {
 
 EXTERN FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
                       int fd, off_t offset);
-#define munmap(start, length)
+
+#ifdef CONFIG_FS_RAMMAP
+EXTERN int munmap(FAR void *start, size_t length);
+#else
+#  define munmap(start, length)
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
