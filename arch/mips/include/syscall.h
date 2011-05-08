@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/include/syscall.h
+ * arch/mips/include/syscall.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,19 +37,17 @@
  * through include/syscall.h or include/sys/sycall.h
  */
 
-#ifndef __ARCH_AVR_INCLUDE_SYSCALL_H
-#define __ARCH_AVR_INCLUDE_SYSCALL_H
+#ifndef __ARCH_MIPS_INCLUDE_SYSCALL_H
+#define __ARCH_MIPS_INCLUDE_SYSCALL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include AVR architecture-specific syscall macros */
+/* Include MIPS architecture-specific syscall macros */
 
-#ifdef CONFIG_ARCH_AVR32
-# include <arch/avr32/syscall.h>
-#else
-# include <arch/avr/syscall.h>
+#ifdef CONFIG_ARCH_MIPS32
+# include <arch/mips32/syscall.h>
 #endif
 
 /****************************************************************************
@@ -86,5 +84,5 @@ extern "C" {
 #endif
 #endif
 
-#endif /* __ARCH_AVR_INCLUDE_SYSCALL_H */
+#endif /* __ARCH_MIPS_INCLUDE_SYSCALL_H */
 
