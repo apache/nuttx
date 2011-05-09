@@ -1731,3 +1731,5 @@
 	  FLASH; beginning of integration with NXFFS (Uros Platise).
 	* arch/mips: Added directory structure for PIC32 support
 	* configs/pcblogic-pic32mx:  Add directory structure for PCB Logic PIC32MX board
+	* apps/include:  Move include/apps to apps/include.  A symbolic link is created at
+	  build time
