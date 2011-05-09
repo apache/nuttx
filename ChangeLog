@@ -1729,5 +1729,5 @@
 	  Add other RTC related changes provided by Uros Platise.
 	* arch/arm/src/stm32/stm32_flash.c: Add support for access to on-chp STM32
 	  FLASH; beginning of integration with NXFFS (Uros Platise).
-
-
+	* arch/mips: Added directory structure for PIC32 support
+	* configs/pcblogic-pic32mx:  Add directory structure for PCB Logic PIC32MX board
