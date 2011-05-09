@@ -1,6 +1,7 @@
 ############################################################################
 # Makefile
 #
+#
 #   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
@@ -274,12 +275,19 @@ tools/mkconfig:
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig
 	tools/mkconfig $(TOPDIR) > include/nuttx/config.h
 
-# link the arch/<arch-name>/include dir to include/arch
+# Link the apps/include directory to include/apps
+
+include/apps: Make.defs
+ifneq ($(APPDIR),)
+	@$(DIRLINK) $(APPDIR)/include include/apps
+endif
+
+# Link the arch/<arch-name>/include directory to include/arch
 
 include/arch: Make.defs
 	@$(DIRLINK) $(TOPDIR)/$(ARCH_DIR)/include include/arch
 
-# Link the configs/<board-name>/include dir to include/arch/board
+# Link the configs/<board-name>/include directory to include/arch/board
 
 include/arch/board: include/arch Make.defs include/arch
 	@$(DIRLINK) $(TOPDIR)/$(BOARD_DIR)/include include/arch/board
@@ -303,7 +311,7 @@ ifneq ($(CONFIG_ARCH_CHIP),)
 	@$(DIRLINK) $(TOPDIR)/$(ARCH_INC)/$(CONFIG_ARCH_CHIP) include/arch/chip
 endif
 
-dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip
+dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip include/apps
 
 context: check_context include/nuttx/config.h include/nuttx/version.h dirlinks
 	@for dir in $(CONTEXTDIRS) ; do \
@@ -317,6 +325,7 @@ clean_context:
 	@$(DIRUNLINK) include/arch
 	@$(DIRUNLINK) $(ARCH_SRC)/board
 	@$(DIRUNLINK) $(ARCH_SRC)/chip
+	@$(DIRUNLINK) include/apps
 
 check_context:
 	@if [ ! -e ${TOPDIR}/.config -o ! -e ${TOPDIR}/Make.defs ]; then \
