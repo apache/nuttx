@@ -268,7 +268,9 @@ include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig
 
 include/apps: Make.defs
 ifneq ($(APPDIR),)
-	@$(DIRLINK) $(TOPDIR)/$(APPDIR)/include include/apps
+	@if [ -d $(TOPDIR)/$(APPDIR)/include ]; then \
+		$(DIRLINK) $(TOPDIR)/$(APPDIR)/include include/apps; \
+	fi
 endif
 
 # Link the arch/<arch-name>/include directory to include/arch
