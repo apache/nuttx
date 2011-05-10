@@ -37,3 +37,6 @@
 
 CONFIGURED_APPS += examples/pashello
 
+# Path to the Pascal p-code runtime interpreter module
+
+CONFIGURED_APPS += interpreters/pcode
