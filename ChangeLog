@@ -1733,3 +1733,5 @@
 	* configs/pcblogic-pic32mx:  Add directory structure for PCB Logic PIC32MX board
 	* apps/include:  Move include/apps to apps/include.  A symbolic link is created at
 	  build time
+	* Makefile: Removed support for Pascal pcode interpreter.  Support for that
+	  interpreter has been moved to apps/interpreter/Makefile.

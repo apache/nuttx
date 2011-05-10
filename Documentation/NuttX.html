@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 6, 2011</p>
+      <p>Last Updated: May 10, 2011</p>
     </td>
   </tr>
 </table>
@@ -2189,9 +2189,28 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
+    * Remove clock_getutc().  It is replaces with clock_gettime(CLOCK_ACTIVETIME).
+      Add other RTC related changes provided by Uros Platise.
+    * arch/arm/src/stm32/stm32_flash.c: Add support for access to on-chp STM32
+      FLASH; beginning of integration with NXFFS (Uros Platise).
+    * arch/mips: Added directory structure for PIC32 support
+    * configs/pcblogic-pic32mx:  Add directory structure for PCB Logic PIC32MX board
+    * apps/include:  Move include/apps to apps/include.  A symbolic link is created at
+      build time
+    * Makefile: Removed support for Pascal pcode interpreter.  Support for that
+      interpreter has been moved to apps/interpreter/Makefile.
+
 apps-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-pascal-2.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+    * apps/interpreter: Add a directory to hold interpreters.  The Pascal add-
+      on module now installs and builds under this directory.
+
+pascal-3.0 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * nuttx/:  The Pascal add-on module now installs and builds under the
+      apps/interpreters directory.  This means that the pascal-2.1 module is
+      incompatible with will all releases of NuttX prior to nuttx-6.0 where the 
+      apps/ module was introduced.
 
 buildroot-1.11 2011-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
 </pre></ul>

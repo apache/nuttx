@@ -1,7 +1,6 @@
 ############################################################################
 # Makefile
 #
-#
 #   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
@@ -70,16 +69,12 @@ CONFIG_APPS_DIR	= ../apps
 endif
 APPDIR		:= ${shell if [ -r $(CONFIG_APPS_DIR)/Makefile ]; then echo "$(CONFIG_APPS_DIR)"; fi}
 
-# The Pascal p-code add-on directory
-
-PCODE_DIR	:= ${shell if [ -r pcode/Makefile ]; then echo "pcode"; fi}
-
 # All add-on directories.
 #
 # NUTTX_ADDONS is the list of directories built into the NuttX kernel.
 # USER_ADDONS is the list of directories that will be built into the user application
 
-NUTTX_ADDONS	:= $(PCODE_DIR) $(NX_DIR)
+NUTTX_ADDONS	:= $(NX_DIR)
 USER_ADDONS		:=
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
@@ -228,12 +223,6 @@ else
 NUTTXLIBS	+= fs/libfs$(LIBEXT) drivers/libdrivers$(LIBEXT) binfmt/libbinfmt$(LIBEXT)
 endif
 
-# Add libraries for Pascall P-Code
-
-ifneq ($(PCODE_DIR),)
-NUTTXLIBS	+= $(PCODE_DIR)/libpcode$(LIBEXT)
-endif
-
 # Add libraries for the NX graphics sub-system
 
 ifneq ($(NX_DIR),)
@@ -356,9 +345,6 @@ drivers/libdrivers$(LIBEXT): context
 
 binfmt/libbinfmt$(LIBEXT): context
 	@$(MAKE) -C binfmt TOPDIR="$(TOPDIR)" libbinfmt$(LIBEXT) EXTRADEFINES=$(KDEFINE)
-
-pcode/libpcode$(LIBEXT): context
-	@$(MAKE) -C pcode TOPDIR="$(TOPDIR)" libpcode$(LIBEXT) EXTRADEFINES=$(KDEFINE)
 
 graphics/libgraphics$(LIBEXT): context
 	@$(MAKE) -C graphics TOPDIR="$(TOPDIR)" libgraphics$(LIBEXT) EXTRADEFINES=$(KDEFINE)
