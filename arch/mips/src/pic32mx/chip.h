@@ -47,6 +47,401 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
+#if defined(CONFIG_ARCH_CHIP_PIC32MX320F032H)
+#  define CHIP_PIC32MX3     1
+#  undef  CHIP_PIC32MX4
+#  define CHIP_NPINS        64  /* Package PT, MR */
+#  define CHIP_MHZ          40
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 32
+#  define CHIP_DATAMEM_KB   8
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     0
+#  define CHIP_NUSBDMACHAN  0
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX320F064H)
+#  define CHIP_PIC32MX3     1
+#  undef  CHIP_PIC32MX4
+#  define CHIP_NPINS        64  /* Package PT, MR */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 64
+#  define CHIP_DATAMEM_KB   16
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     0
+#  define CHIP_NUSBDMACHAN  0
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX320F128H)
+#  define CHIP_PIC32MX3     1
+#  undef  CHIP_PIC32MX4
+#  define CHIP_NPINS        64  /* Package PT, MR */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 128
+#  define CHIP_DATAMEM_KB   16
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     0
+#  define CHIP_NUSBDMACHAN  0
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX340F128H)
+#  define CHIP_PIC32MX3     1
+#  undef  CHIP_PIC32MX4
+#  define CHIP_NPINS        64  /* Package PT, MR */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 128
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  0
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX340F256H)
+#  define CHIP_PIC32MX3     1
+#  undef  CHIP_PIC32MX4
+#  define CHIP_NPINS        64  /* Package PT, MR */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 256
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  0
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX340F512H)
+#  define CHIP_PIC32MX3     1
+#  undef  CHIP_PIC32MX4
+#  define CHIP_NPINS        64  /* Package PT, MR */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 512
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  0
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX320F128L)
+#  define CHIP_PIC32MX3     1
+#  undef  CHIP_PIC32MX4
+#  define CHIP_NPINS        100 /* Package PT=100 BG=121 */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 128
+#  define CHIP_DATAMEM_KB   16
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     0
+#  define CHIP_NUSBDMACHAN  0
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX340F128L)
+#  undef  CHIP_PIC32MX3
+#  define CHIP_PIC32MX4     1
+#  define CHIP_NPINS        100 /* Package PT=100 BG=121 */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 128
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  0
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX360F256L)
+#  undef  CHIP_PIC32MX3
+#  define CHIP_PIC32MX4     1
+#  define CHIP_NPINS        100 /* Package PT=100 BG=121 */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 256
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  0
+#  define CHIP_VREG
+#  define CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX360F512L)
+#  undef  CHIP_PIC32MX3
+#  define CHIP_PIC32MX4     1
+#  define CHIP_NPINS        100 /* Package PT=100 BG=121 */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 512
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  0
+#  define CHIP_VREG
+#  define CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX420F032H)
+#  undef  CHIP_PIC32MX3
+#  define CHIP_PIC32MX4     1
+#  define CHIP_NPINS        64  /* Package PT, MR */
+#  define CHIP_MHZ          40
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 32
+#  define CHIP_DATAMEM_KB   8
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     0
+#  define CHIP_NUSBDMACHAN  2
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         1
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX440F128H)
+#  undef  CHIP_PIC32MX3
+#  define CHIP_PIC32MX4     1
+#  define CHIP_NPINS        64  /* Package PT, MR */
+#  define CHIP_MHZ          40
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 128
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  2
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         1
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX440F256H)
+#  undef  CHIP_PIC32MX3
+#  define CHIP_PIC32MX4     1
+#  define CHIP_NPINS        64  /* Package PT, MR */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 256
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  2
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         1
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX440F512H)
+#  undef  CHIP_PIC32MX3
+#  define CHIP_PIC32MX4     1
+#  define CHIP_NPINS        64  /* Package PT, MR */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 512
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  2
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         1
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX440F128L)
+#  undef  CHIP_PIC32MX3
+#  define CHIP_PIC32MX4     1
+#  define CHIP_NPINS        100 /* Package PT=100 BG=121 */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 128
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  2
+#  define CHIP_VREG
+#  undef  CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX460F256L)
+#  undef  CHIP_PIC32MX3
+#  define CHIP_PIC32MX4     1
+#  define CHIP_NPINS        100 /* Package PT=100 BG=121 */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 256
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  2
+#  define CHIP_VREG
+#  define CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#elif defined(CONFIG_ARCH_CHIP_PIC32MX460F512L)
+#  undef  CHIP_PIC32MX3
+#  define CHIP_PIC32MX4     1
+#  define CHIP_NPINS        100 /* Package PT=100 BG=121 */
+#  define CHIP_MHZ          80
+#  define CHIP_BOOTFLASH_KB 12
+#  define CHIP_PROGFLASH_KB 512
+#  define CHIP_DATAMEM_KB   32
+#  define CHIP_NTIMERS      5
+#  define CHIP_NCAPTURE     5
+#  define CHIP_NCOMPARE     5
+#  define CHIP_NDMACHAN     4
+#  define CHIP_NUSBDMACHAN  2
+#  define CHIP_VREG
+#  define CHIP_TRACE
+#  define CHIP_NEUARTS      2
+#  define CHIP_NSPI         2
+#  define CHIP_NI2C         2
+#  define CHIP_NADC10       16
+#  define CHIP_NCOMPARATORS 2
+#  define CHIP_PMP
+#  define CHIP_PSP
+#  define CHIP_JTAH
+#else
+#  error "Unrecognized PIC32 device
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
