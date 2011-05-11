@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include "chip.h"
 #include "pic32mx-memorymap.h"
 
 /************************************************************************************
