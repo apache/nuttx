@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 8, 2011</p>
+      <p>Last Updated: May 11, 2011</p>
     </td>
   </tr>
 </table>
@@ -1215,11 +1215,13 @@ The system can be re-made subsequently by just typing <code>make</code>.
   These additional steps include:
 </p>
 <ul>
-  <li>Auto-generating the file <code>include/nuttx/config.h</code> using the <code>${TOPDIR}/.config</code> file.
-  <li>Auto-generating the file <code>include/nuttx/version.h</code> using the <code>${TOPDIR}/.version</code> file.
-  <li>Creating a link to <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch</code>.
-  <li>Creating a link to <code>${TOPDIR}/configs/</code><i>&lt;board-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch/board</code>.
-  <li>Creating a link to <code>${TOPDIR}/configs/</code><i>&lt;board-name&gt;</i><code>/src</code> at <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</code>
+  <li>Auto-generating the file <code>include/nuttx/config.h</code> using the <code>${TOPDIR}/.config</code> file.</li>
+  <li>Auto-generating the file  <code>${TOPDIR}/.version</code> with version 0.0 if one does not exist.</li>
+  <li>Auto-generating the file <code>include/nuttx/version.h</code> using the <code>${TOPDIR}/.version</code> file.</li>
+  <li>Creating a link to <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch</code>.</li>
+  <li>Creating a link to <code>${TOPDIR}/configs/</code><i>&lt;board-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch/board</code>.</li>
+  <li>Creating a link to <code>${TOPDIR}/configs/</code><i>&lt;board-name&gt;</i><code>/src</code> at <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</code></li>
+  <li>Creating a link to <code>${APPDIR}/include</code> at <code>${TOPDIR}/include/apps</code></li>
   <li>Creating make dependencies.
 </ul>
 
