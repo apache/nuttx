@@ -156,9 +156,9 @@ if [ -z "$cc" ]; then
 fi
 
 if [ -z "$files" ]; then
-  echo "No files specified"
-  show_usage
-  exit 2
+  # Don't report an error -- this happens normally in some configurations
+  echo "# No files specified for dependency generataion"
+  exit 0
 fi
 
 # Check if this compiler generates Cygwin/Linux paths or Windows paths

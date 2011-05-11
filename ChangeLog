@@ -1735,3 +1735,5 @@
 	  build time
 	* Makefile: Removed support for Pascal pcode interpreter.  Support for that
 	  interpreter has been moved to apps/interpreter/Makefile.
+	* tools/mkdep.sh: Should not report an error if there are no files on the command
+	  line.  This happens normally in certain configurations.
