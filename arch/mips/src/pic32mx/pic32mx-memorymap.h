@@ -151,7 +151,7 @@
 
 /* Interrupt Register Base Address */
 
-#define PIC32MX_INTCON_K1BASE     (PIC32MX_SFR_K1BASE + 0x00081000)
+#define PIC32MX_INT_K1BASE        (PIC32MX_SFR_K1BASE + 0x00081000)
 
 /* Bus Matrix Register Base Address */
 
