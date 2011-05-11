@@ -63,6 +63,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -86,6 +87,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -109,6 +111,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -132,6 +135,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -155,6 +159,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -178,6 +183,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -201,6 +207,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -224,6 +231,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -247,6 +255,7 @@
 #  define CHIP_VREG
 #  define CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -270,6 +279,7 @@
 #  define CHIP_VREG
 #  define CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -293,6 +303,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         1
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -316,6 +327,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         1
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -339,6 +351,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         1
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -362,6 +375,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         1
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -385,6 +399,7 @@
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -408,6 +423,7 @@
 #  define CHIP_VREG
 #  define CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
@@ -431,6 +447,7 @@
 #  define CHIP_VREG
 #  define CHIP_TRACE
 #  define CHIP_NEUARTS      2
+#  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
