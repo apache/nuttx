@@ -485,11 +485,14 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 {
     struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
     uint16_t base = priv->base;
+    irqstate_t flags;
     uint8_t ier;
 
+    flags = irqsave();
     ier = inb(base+COM_IER);
     if (enable) {
         ier |= COM_IER_TEI;
+        outb(base+COM_IER, ier);
 
         /* Fake a TX interrupt here by just calling uart_xmitchars() with
          * interrupts disabled (note this may recurse).
@@ -499,8 +502,9 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     }
     else {
         ier &= ~COM_IER_TEI;
+        outb(base+COM_IER, ier);
     }
-    outb(base+COM_IER, ier);
+    irqrestore(flags);
 }
 
 /****************************************************************************
