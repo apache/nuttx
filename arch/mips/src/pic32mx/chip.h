@@ -58,7 +58,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     0
+#  define CHIP_NDMACH       0
 #  define CHIP_NUSBDMACHAN  0
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -82,7 +82,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     0
+#  define CHIP_NDMACH       0
 #  define CHIP_NUSBDMACHAN  0
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -106,7 +106,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     0
+#  define CHIP_NDMACH       0
 #  define CHIP_NUSBDMACHAN  0
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -130,7 +130,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -154,7 +154,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -178,7 +178,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -202,7 +202,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     0
+#  define CHIP_NDMACH       0
 #  define CHIP_NUSBDMACHAN  0
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -226,7 +226,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -250,7 +250,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
 #  define CHIP_VREG
 #  define CHIP_TRACE
@@ -274,7 +274,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
 #  define CHIP_VREG
 #  define CHIP_TRACE
@@ -298,7 +298,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     0
+#  define CHIP_NDMACH       0
 #  define CHIP_NUSBDMACHAN  2
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -322,7 +322,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -346,7 +346,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -370,7 +370,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -394,7 +394,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
 #  define CHIP_VREG
 #  undef  CHIP_TRACE
@@ -418,7 +418,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
 #  define CHIP_VREG
 #  define CHIP_TRACE
@@ -442,7 +442,7 @@
 #  define CHIP_NTIMERS      5
 #  define CHIP_NCAPTURE     5
 #  define CHIP_NCOMPARE     5
-#  define CHIP_NDMACHAN     4
+#  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
 #  define CHIP_VREG
 #  define CHIP_TRACE
