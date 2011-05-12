@@ -249,6 +249,10 @@ static inline int usbhost_classbind(FAR struct usbhost_driver_s *drvr,
           ret = CLASS_CONNECT(devclass, configdesc, desclen, funcaddr);
           if (ret != OK)
             {
+              /* On failures, call the class disconnect method which
+               * should then free the allocated devclass instance.
+               */
+
               udbg("CLASS_CONNECT failed: %d\n", ret);
               CLASS_DISCONNECTED(devclass);
             }

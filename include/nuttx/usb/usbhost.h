@@ -113,6 +113,10 @@
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
+ *   NOTE that the class instance remains valid upon return with a failure.  It is
+ *   the responsibility of the higher level enumeration logic to call
+ *   CLASS_DISCONNECTED to free up the class driver resources.
+ *
  * Assumptions:
  *   - This function is probably called on the same thread that called the driver
  *     enumerate() method. This function will *not* be called from an interrupt

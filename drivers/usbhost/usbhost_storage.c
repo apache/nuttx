@@ -937,6 +937,10 @@ static void usbhost_destroy(FAR void *arg)
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
+ *   NOTE that the class instance remains valid upon return with a failure.  It is
+ *   the responsibility of the higher level enumeration logic to call
+ *   CLASS_DISCONNECTED to free up the class driver resources.
+ *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
@@ -1306,14 +1310,6 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
           priv->crefs--;
           usbhost_givesem(&priv->exclsem);
         }
-    }
-
-  /* Disconnect on any errors detected during volume initialization */
-
-  if (ret != OK)
-    {
-      udbg("ERROR! Aborting: %d\n", ret);
-      usbhost_destroy(priv);
     }
 
   return ret;
