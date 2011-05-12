@@ -1,7 +1,7 @@
 /************************************************************************************
  * drivers/serial/serial.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -169,7 +169,7 @@ static void uart_putxmitchar(FAR uart_dev_t *dev, int ch)
       nexthead = 0;
     }
 
-  for(;;)
+  for (;;)
     {
       if (nexthead != dev->xmit.tail)
         {
@@ -271,7 +271,7 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t
 
       uart_putxmitchar(dev, ch);
 
-     /* If this is the console, then we should replace LF with LF-CR */
+      /* If this is the console, then we should replace LF with LF-CR */
 
       if (dev->isconsole && ch == '\n')
         {

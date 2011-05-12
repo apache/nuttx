@@ -1,7 +1,7 @@
 ############################################################################
-# drivers/net/Make.defs
+# arch/rgmp/src/Makefile
 #
-#   Copyright (C) 2007, 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,24 +33,61 @@
 #
 ############################################################################
 
-NET_ASRCS  =
-NET_CSRCS  =
+-include $(TOPDIR)/Make.defs
 
-ifeq ($(CONFIG_NET),y)
-ifeq ($(CONFIG_NET_DM90x0),y)
-NET_CSRCS  += dm90x0.c
-endif
-ifeq ($(CONFIG_NET_CS89x0),y)
-NET_CSRCS  += cs89x0.c
-endif
-ifeq ($(CONFIG_NET_ENC28J60),y)
-NET_CSRCS  += enc28j60.c
-endif
-ifeq ($(CONFIG_NET_VNET),y)
-NET_CSRCS  += vnet.c
-endif
-ifeq ($(CONFIG_NET_SLIP),y)
-NET_CSRCS  += slip.c
-endif
-endif
 
+CFLAGS		+= -I$(TOPDIR)/sched -I$(TOPDIR)/fs
+
+ASRCS		= sigentry.S
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
+CSRCS		= nuttx.c rgmp.c bridge.c com.c
+COBJS		= $(CSRCS:.c=$(OBJEXT))
+
+SRCS		= $(ASRCS) $(CSRCS)
+OBJS		= $(AOBJS) $(COBJS)
+
+LDFLAGS		+= -T$(RGMPLKSCPT)
+LDPATHS		= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
+LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
+LDPATHS		+= -L$(RGMPLIBDIR)
+LDLIBS		+= -lrgmp -lm -ltest /usr/lib/gcc/$(shell gcc -dumpmachine)/$(shell gcc -dumpversion)/libgcc.a
+
+all: libarch$(LIBEXT)
+.PHONY: clean distclean depend
+
+$(AOBJS): %$(OBJEXT): %.S
+	$(call ASSEMBLE, $<, $@)
+
+$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
+
+# The architecture-specific library
+libarch$(LIBEXT): $(OBJS)
+	@( for obj in $(OBJS) ; do \
+		$(call ARCHIVE, $@, $${obj}); \
+	done ; )
+
+# Generate the final NuttX binary by linking the host-specific objects with the NuttX
+# specific objects (with munged names)
+
+nuttx$(EXEEXT):
+	@echo "LD:  nuttx$(EXEEXT)"
+	@$(LD) $(LDFLAGS) $(LDPATHS) --start-group $(LDLIBS) --end-group -o $(TOPDIR)/$@
+	@$(OBJDUMP) -S $(TOPDIR)/$@ > $(TOPDIR)/nuttx.asm
+	@$(NM) -n $(TOPDIR)/$@ > $(TOPDIR)/nuttx.sym
+	@$(OBJCOPY) -S -O binary $(TOPDIR)/$@ nuttx.img
+
+.depend: Makefile $(SRCS)
+	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
+
+depend: .depend
+
+clean:
+	@rm -f libarch$(LIBEXT) *~ .*.swp
+	$(call CLEAN)
+
+distclean: clean
+	@rm -f Make.dep .depend
+
+-include Make.dep

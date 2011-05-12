@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/cs89x0.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -551,7 +551,7 @@ static inline FAR struct cs89x0_driver_s *cs89x0_mapirq(int irq)
           return g_cs89x0[i];
         }
     }
-  return NULL'
+  return NULL;
 }
 #endif
 

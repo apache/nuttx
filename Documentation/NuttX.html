@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 10, 2011</p>
+      <p>Last Updated: May 12, 2011</p>
     </td>
   </tr>
 </table>
@@ -2199,6 +2199,16 @@ nuttx-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       build time
     * Makefile: Removed support for Pascal pcode interpreter.  Support for that
       interpreter has been moved to apps/interpreter/Makefile.
+    * tools/mkdep.sh: Should not report an error if there are no files on the command
+      line.  This happens normally in certain configurations.
+    * drivers/usbhost: Sheref Younan reported an error in the error handling when
+      connection to a USB device fails.  In certain fail cases, the logic would try
+      to free the device class instance twice, the first was okay, but the second
+      caused a crash.
+    * graphics/nxbe/nxbe_colormap.c: Fix error noted by Bassem Fahmy.  The function
+      nxbe_colormap was change to nxbe_configure... apparently "search-and-replace"
+      error. This error was not noticed before because most NX platforms do not use
+      colormapping.
 
 apps-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2206,6 +2216,11 @@ apps-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       on module now installs and builds under this directory.
     * apps/interpreter/ficl: Added logic to build Ficl (the "Forth Inspired
       Command Language").  See http://ficl.sourceforge.net/.
+    * apps/netutils/dhcpc, dhcpcd, and tftp.  If these directories are included
+      in the configuration but CONFIG_NET_UDP is disable (which is not very wise),
+      then a make error occurs because tools/mkdep.sh is called with no files.
+    * system/free: Move Uros' custom free command from vsn/free
+    * system/install: Add a new install command submitted by Uros Platise.
 
 pascal-3.0 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

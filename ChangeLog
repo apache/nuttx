@@ -1737,3 +1737,11 @@
 	  interpreter has been moved to apps/interpreter/Makefile.
 	* tools/mkdep.sh: Should not report an error if there are no files on the command
 	  line.  This happens normally in certain configurations.
+	* drivers/usbhost: Sheref Younan reported an error in the error handling when
+	  connection to a USB device fails.  In certain fail cases, the logic would try
+	  to free the device class instance twice, the first was okay, but the second
+	  caused a crash.
+	* graphics/nxbe/nxbe_colormap.c: Fix error noted by Bassem Fahmy.  The function
+	  nxbe_colormap was change to nxbe_configure... apparently "search-and-replace"
+	  error. This error was not noticed before because most NX platforms do not use
+	  colormapping.

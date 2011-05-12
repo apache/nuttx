@@ -1,8 +1,10 @@
-############################################################################
-# drivers/net/Make.defs
+#!/bin/bash
+# config/rgmp/default/setenv.sh
 #
-#   Copyright (C) 2007, 2010 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Copyright (C) 2011 Yu Qiang. All rights reserved.
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Authors: Yu Qiang <yuq825@gmail.com>
+#            Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,26 +33,15 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
-NET_ASRCS  =
-NET_CSRCS  =
+if [ "$(basename $0)" = "setenv.sh" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-ifeq ($(CONFIG_NET),y)
-ifeq ($(CONFIG_NET_DM90x0),y)
-NET_CSRCS  += dm90x0.c
-endif
-ifeq ($(CONFIG_NET_CS89x0),y)
-NET_CSRCS  += cs89x0.c
-endif
-ifeq ($(CONFIG_NET_ENC28J60),y)
-NET_CSRCS  += enc28j60.c
-endif
-ifeq ($(CONFIG_NET_VNET),y)
-NET_CSRCS  += vnet.c
-endif
-ifeq ($(CONFIG_NET_SLIP),y)
-NET_CSRCS  += slip.c
-endif
-endif
+if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
 
+#export NUTTX_BIN=
+#export PATH=${NUTTX_BIN}:/sbin:/usr/sbin:${PATH_ORIG}
+
+echo "PATH : ${PATH}"
