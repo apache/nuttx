@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/stdbool.h
+ * arch/rgmp/include/stdbool.h
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,20 +33,17 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_STDBOOL_H
-#define __INCLUDE_STDBOOL_H
+#ifndef __ARCH_RGMP_INCLUDE_STDBOOL_H
+#define __ARCH_RGMP_INCLUDE_STDBOOL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#ifdef CONFIG_ARCH_STDBOOL_H
-#  include <arch/stdbool.h>
-#else
-#  include <nuttx/compiler.h>
-#  include <stdint.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,7 +58,9 @@
  * use _Bool8 as the underlying type.
  */
 
+#ifndef CONFIG_ARCH_RGMP
 #define bool  _Bool8
+#endif
 #define true  1
 #define false 0
 
@@ -83,7 +82,8 @@
  * as the underlying type.
  */
 
+#ifndef CONFIG_ARCH_RGMP
 typedef uint8_t _Bool8;
+#endif
 
-#endif /* CONFIG_ARCH_STDBOOL_H */
-#endif /* __INCLUDE_STDBOOL_H */
+#endif /* __ARCH_RGMP_INCLUDE_STDBOOL_H */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/stdbool.h
+ * arch/rgmp/include/math.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,57 +33,33 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_STDBOOL_H
-#define __INCLUDE_STDBOOL_H
+#ifndef __ARCH_RGMP_INCLUDE_MATH_H
+#define __ARCH_RGMP_INCLUDE_MATH_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+/****************************************************************************
+ * Type Definitions
+ ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STDBOOL_H
-#  include <arch/stdbool.h>
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
 #else
-#  include <nuttx/compiler.h>
-#  include <stdint.h>
+#define EXTERN extern
+#endif
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <rgmp/math.h>
 
-/* bool, true, and false must be provided as macros so that they can be
- * redefined by the application if necessary.
- *
- * NOTE: Under C99 'bool' is required to be defined to be the intrinsic type
- * _Bool.  However, in this NuttX context, we need backward compatibility
- * to pre-C99 standards where _Bool is not an intrinsic type.  Hence, we
- * use _Bool8 as the underlying type.
- */
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 
-#define bool  _Bool8
-#define true  1
-#define false 0
-
-#define __bool_true_false_are_defined 1
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* A byte is the smallest address memory element (at least in architectures
- * that do not support bit banding).  The requirement is only that type _Bool
- * be large enough to hold the values 0 and 1.  We select uint8_t to minimize
- * the RAM footprint of the executable.
- *
- * NOTE: We can't actually define the type _Bool here.  Under C99 _Bool is
- * an intrinsic type and cannot be the target of a typedef.  However, in this
- * NuttX context, we also need backward compatibility to pre-C99 standards
- * where _Bool is not an intrinsic type.  We work around this by using _Bool8
- * as the underlying type.
- */
-
-typedef uint8_t _Bool8;
-
-#endif /* CONFIG_ARCH_STDBOOL_H */
-#endif /* __INCLUDE_STDBOOL_H */
+#endif /* __ARCH_RGMP_INCLUDE_MATH_H */

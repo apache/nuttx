@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/stdint.h
+ * arch/rgmp/include/stdint.h
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,21 +33,18 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_STDINT_H
-#define __INCLUDE_STDINT_H
+#ifndef __ARCH_RGMP_INCLUDE_STDINTL_H
+#define __ARCH_RGMP_INCLUDE_STDINTL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#ifdef CONFIG_ARCH_STDBOOL_H
-#  include <arch/stdbool.h>
-#else
-#  include <nuttx/compiler.h>
-#  include <arch/types.h>
-#  include <limits.h>
+#include <arch/types.h>
+#include <limits.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -63,7 +60,7 @@
 #define INT16_MAX           0x7fff
 #define UINT16_MAX          0xffff
 
-#ifdef __INT24_DEFINED
+#ifdef __INT64_DEFINED
 #  define INT24_MIN         0x800000
 #  define INT24_MAX         0x7fffff
 #  define UINT24_MAX        0xffffff
@@ -89,7 +86,7 @@
 #define INT16_LEASTN_MAX    0x7fff
 #define UINT16_LEASTN_MAX   0xffff
 
-#ifdef __INT24_DEFINED
+#ifdef __INT64_DEFINED
 #  define INT24_LEASTN_MIN  0x800000
 #  define INT24_LEASTN_MAX  0x7fffff
 #  define UINT24_LEASTN_MAX 0xffffff
@@ -115,7 +112,7 @@
 #define INT16_FASTN_MAX     0x7fff
 #define UINT16_FASTN_MAX    0xffff
 
-#ifdef __INT24_DEFINED
+#ifdef __INT64_DEFINED
 #  define INT24_FASTN_MIN   0x800000
 #  define INT24_FASTN_MAX   0x7fffff
 #  define UINT24_FASTN_MAX  0xffffff
@@ -210,6 +207,9 @@
  * provided by their toolchain header files.
  */
 
+#ifdef CONFIG_ARCH_RGMP
+#include <rgmp/types.h>
+#else
 typedef _int8_t      int8_t;
 typedef _uint8_t     uint8_t;
 
@@ -228,6 +228,8 @@ typedef _uint32_t    uint32_t;
 typedef _int64_t     int64_t;
 typedef _uint64_t    uint64_t;
 #endif
+
+#endif /* CONFIG_ARCH_RGMP */
 
 /* Minimum-width integer types */
 
@@ -279,8 +281,10 @@ typedef _uint64_t    uint_fast64_t;
 
 /* Integer types capable of holding object pointers */
 
+#ifndef CONFIG_ARCH_RGMP
 typedef _intptr_t    intptr_t;
 typedef _uintptr_t   uintptr_t;
+#endif
 
 /* Greatest-width integer types */
 
@@ -292,5 +296,4 @@ typedef _int32_t     intmax_t;
 typedef _uint32_t    uintmax_t;
 #endif
 
-#endif /* CONFIG_ARCH_STDBOOL_H */
-#endif /* __INCLUDE_STDINT_H */
+#endif /* __ARCH_RGMP_INCLUDE_STDINTL_H */

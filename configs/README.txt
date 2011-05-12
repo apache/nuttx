@@ -485,6 +485,11 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_ARCH_STRNCPY, CONFIG_ARCH_STRLEN, CONFIG_ARCH_STRNLEN
 		CONFIG_ARCH_BZERO
 
+		The architecture may provide custom versions of certain
+		standard header files:
+
+		CONFIG_ARCH_MATH_H, CONFIG_ARCH_STDBOOL_H, CONFIG_ARCH_STDINT_H
+
 	Sizes of configurable things (0 disables)
 
 		CONFIG_MAX_TASKS - The maximum number of simultaneously

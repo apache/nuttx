@@ -3369,8 +3369,7 @@ build
 <h2>Allow for architecture optimized implementations</h2>
 
 <p>
-  The architecture can provide optimized versions of the
-  following to improve system performance.
+  The architecture can provide optimized versions of the following to improve system performance.
 </p>
 
 <ul>
@@ -3379,6 +3378,12 @@ build
   <code>CONFIG_ARCH_MEMSET</code>, <code>CONFIG_ARCH_STRCMP</code>, <code>CONFIG_ARCH_STRCPY</code>,
   <code>CONFIG_ARCH_STRNCPY</code>, <code>CONFIG_ARCH_STRLEN</code>, <code>CONFIG_ARCH_STRNLEN</code>,
   <code>CONFIG_ARCH_BZERO</code>
+</p>
+<p>
+  The architecture may provide custom versions of certain standard header files:
+</p>
+<p>
+  <code>CONFIG_ARCH_MATH_H</code>, <code>CONFIG_ARCH_STDBOOL_H</code>, <code>CONFIG_ARCH_STDINT_H</code>
 </p>
 </ul>
 

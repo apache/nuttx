@@ -40,6 +40,12 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#ifdef CONFIG_ARCH_MATH_H
+#  include <arch/math.h>
+#else
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
@@ -60,4 +66,5 @@ extern "C" {
 }
 #endif
 
+#endif /* CONFIG_ARCH_MATH_H */
 #endif /* __INCLUDE_MATH_H */
