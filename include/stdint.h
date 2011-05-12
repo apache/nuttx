@@ -42,8 +42,8 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ARCH_STDBOOL_H
-#  include <arch/stdbool.h>
+#ifdef CONFIG_ARCH_STDINT_H
+#  include <arch/stdint.h>
 #else
 #  include <nuttx/compiler.h>
 #  include <arch/types.h>

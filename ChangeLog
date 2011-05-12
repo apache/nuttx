@@ -1745,3 +1745,8 @@
 	  nxbe_colormap was change to nxbe_configure... apparently "search-and-replace"
 	  error. This error was not noticed before because most NX platforms do not use
 	  colormapping.
+	* arch/rgmp and configs/rgmp.  Add architecture support and build
+	  configuration for RGMP.  RGMP is a project for running GPOS and
+	  RTOS simultaneously on multi-processor platforms. See
+	  http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
+	  information about RGMP.
