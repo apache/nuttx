@@ -160,16 +160,16 @@
 #  define DEVCFG1_FCKSM_NONE      (2 << DEVCFG1_FCKSM_SHIFT) /* Clock switching and FSCM are disabled */
 #define DEVCFG1_WDTPS_SHIFT       (16)      /* Bits 16-20: WDT postscaler select */
 #define DEVCFG1_WDTPS_MASK        (31 << DEVCFG1_WDTPS_SHIFT)
-#  define DEVCFG1_WDTPS_1         (0 << DEVCFG1_WDTPS_SHIFT) /* 1:1 */
-#  define DEVCFG1_WDTPS_2         (1 << DEVCFG1_WDTPS_SHIFT) /* 1:2 */
-#  define DEVCFG1_WDTPS_4         (2 << DEVCFG1_WDTPS_SHIFT) /* 1:4 */
-#  define DEVCFG1_WDTPS_8         (3 << DEVCFG1_WDTPS_SHIFT) /* 1:8 */
-#  define DEVCFG1_WDTPS_16        (4 << DEVCFG1_WDTPS_SHIFT) /* 1:16 */
-#  define DEVCFG1_WDTPS_32        (5 << DEVCFG1_WDTPS_SHIFT) /* 1:32 */
-#  define DEVCFG1_WDTPS_64        (6 << DEVCFG1_WDTPS_SHIFT) /* 1:64 */
-#  define DEVCFG1_WDTPS_128       (7 << DEVCFG1_WDTPS_SHIFT) /* 1:128 */
-#  define DEVCFG1_WDTPS_256       (8 << DEVCFG1_WDTPS_SHIFT) /* 1:256 */
-#  define DEVCFG1_WDTPS_512       (9 << DEVCFG1_WDTPS_SHIFT) /* 1:512 */
+#  define DEVCFG1_WDTPS_1         (0 << DEVCFG1_WDTPS_SHIFT)  /* 1:1 */
+#  define DEVCFG1_WDTPS_2         (1 << DEVCFG1_WDTPS_SHIFT)  /* 1:2 */
+#  define DEVCFG1_WDTPS_4         (2 << DEVCFG1_WDTPS_SHIFT)  /* 1:4 */
+#  define DEVCFG1_WDTPS_8         (3 << DEVCFG1_WDTPS_SHIFT)  /* 1:8 */
+#  define DEVCFG1_WDTPS_16        (4 << DEVCFG1_WDTPS_SHIFT)  /* 1:16 */
+#  define DEVCFG1_WDTPS_32        (5 << DEVCFG1_WDTPS_SHIFT)  /* 1:32 */
+#  define DEVCFG1_WDTPS_64        (6 << DEVCFG1_WDTPS_SHIFT)  /* 1:64 */
+#  define DEVCFG1_WDTPS_128       (7 << DEVCFG1_WDTPS_SHIFT)  /* 1:128 */
+#  define DEVCFG1_WDTPS_256       (8 << DEVCFG1_WDTPS_SHIFT)  /* 1:256 */
+#  define DEVCFG1_WDTPS_512       (9 << DEVCFG1_WDTPS_SHIFT)  /* 1:512 */
 #  define DEVCFG1_WDTPS_1024      (10 << DEVCFG1_WDTPS_SHIFT) /* 1:1024 */
 #  define DEVCFG1_WDTPS_2048      (11 << DEVCFG1_WDTPS_SHIFT) /* 1:2048 */
 #  define DEVCFG1_WDTPS_4096      (12 << DEVCFG1_WDTPS_SHIFT) /* 1:4096 */
