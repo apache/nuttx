@@ -89,9 +89,11 @@
 
 int clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
+#ifndef CONFIG_SYSTEM_UTC
   uint32_t msecs;
   uint32_t secs;
   uint32_t nsecs;
+#endif
   int ret = OK;
 
   sdbg("clock_id=%d\n", clock_id);

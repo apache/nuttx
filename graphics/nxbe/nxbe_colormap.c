@@ -80,7 +80,7 @@
  ****************************************************************************/
 
 #if CONFIG_FB_CMAP
-int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
+int nxbe_colormap(FAR NX_DRIVERTYPE *dev)
 {
   struct fb_cmap_s cmap;
   uint8_t *alloc;
