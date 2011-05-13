@@ -147,7 +147,7 @@
 
 /* Reset Control Register Base Address */
 
-#define PIC32MX_RCON_K1BASE       (PIC32MX_SFR_K1BASE + 0x0000f600)
+#define PIC32MX_RESET_K1BASE      (PIC32MX_SFR_K1BASE + 0x0000f600)
 
 /* Interrupt Register Base Address */
 
