@@ -65,23 +65,16 @@
 
 /* Device configuration word 3 */
 
-#define DEVCFG3_USERID(n)         (1 << (n))
-#define DEVCFG3_USERID0           (1 << 0)  /* Bit 0:  xx */
-#define DEVCFG3_USERID1           (1 << 1)  /* Bit 1:  xx */
-#define DEVCFG3_USERID2           (1 << 2)  /* Bit 2:  xx */
-#define DEVCFG3_USERID3           (1 << 3)  /* Bit 3:  xx */
-#define DEVCFG3_USERID4           (1 << 4)  /* Bit 4:  xx */
-#define DEVCFG3_USERID5           (1 << 5)  /* Bit 5:  xx */
-#define DEVCFG3_USERID6           (1 << 6)  /* Bit 6:  xx */
-#define DEVCFG3_USERID7           (1 << 7)  /* Bit 7:  xx */
-#define DEVCFG3_USERID8           (1 << 8)  /* Bit 8:  xx */
-#define DEVCFG3_USERID9           (1 << 9)  /* Bit 9:  xx */
-#define DEVCFG3_USERID10          (1 << 10) /* Bit 10: xx */
-#define DEVCFG3_USERID11          (1 << 11) /* Bit 11: xx */
-#define DEVCFG3_USERID12          (1 << 12) /* Bit 12: xx */
-#define DEVCFG3_USERID13          (1 << 13) /* Bit 13: xx */
-#define DEVCFG3_USERID14          (1 << 14) /* Bit 14: xx */
-#define DEVCFG3_USERID15          (1 << 15) /* Bit 15: xx */
+#define DEVCFG3_USERID_SHIFT      (0)       /* Bits 0-15: User-defined, readable via ICSP™ and JTAG */
+#define DEVCFG3_USERID_MASK       (0xffff << DEVCFG3_USERID_SHIFT)
+#define DEVCFG3_FSRSSEL_SHIFT     (16)      /* Bits 16-18: SRS select */
+#define DEVCFG3_FSRSSEL_MASK      (7 << DEVCFG3_FSRSSEL_SHIFT)
+#define DEVCFG3_FMIIEN            (1 << 24) /* Bit 24: Ethernet MII enable */
+#define DEVCFG3_FETHIO            (1 << 25) /* Bit 25: Ethernet I/O pin selection */
+#define DEVCFG3_FCANIO            (1 << 26) /* Bit 26: CAN I/O pin selection */
+#define DEVCFG3_FSCM1IO           (1 << 29) /* Bit 29: SCM1 pin C selection */
+#define DEVCFG3_FUSBIDIO          (1 << 30) /* Bit 30: USB USBID selection */
+#define DEVCFG3_FVBUSIO           (1 << 31) /* Bit 31: USB VBUSON selection */
 
 /* Device configuration word 2 */
 
@@ -131,20 +124,20 @@
 
 #define DEVCFG1_FNOSC_SHIFT       (0)       /* Bits 0-2: Oscillator xelection */
 #define DEVCFG1_FNOSC_MASK        (7 << DEVCFG1_FNOSC_SHIFT)
-#  define DEVCFG1_FNOSC_ FRC      (0 << DEVCFG1_FNOSC_SHIFT) /* FRC oscillator */
-#  define DEVCFG1_FNOSC_ FRCPLL   (1 << DEVCFG1_FNOSC_SHIFT) /* FRC w/PLL module */
-#  define DEVCFG1_FNOSC_ POSC     (2 << DEVCFG1_FNOSC_SHIFT) /* Primary oscillator */
-#  define DEVCFG1_FNOSC_ POSCPLL  (3 << DEVCFG1_FNOSC_SHIFT) /* Primary oscillator w/PLL */
-#  define DEVCFG1_FNOSC_ SOSC     (4 << DEVCFG1_FNOSC_SHIFT) /* Secondary oscillator */
-#  define DEVCFG1_FNOSC_ LPRC     (5 << DEVCFG1_FNOSC_SHIFT) /* Low power RC oscillator */
-#  define DEVCFG1_FNOSC_ FRCDIV   (7 << DEVCFG1_FNOSC_SHIFT) /* FRC oscillator with FRCDIV */
+#  define DEVCFG1_FNOSC_FRC       (0 << DEVCFG1_FNOSC_SHIFT) /* FRC oscillator */
+#  define DEVCFG1_FNOSC_FRCPLL    (1 << DEVCFG1_FNOSC_SHIFT) /* FRC w/PLL module */
+#  define DEVCFG1_FNOSC_POSC      (2 << DEVCFG1_FNOSC_SHIFT) /* Primary oscillator */
+#  define DEVCFG1_FNOSC_POSCPLL   (3 << DEVCFG1_FNOSC_SHIFT) /* Primary oscillator w/PLL */
+#  define DEVCFG1_FNOSC_SOSC      (4 << DEVCFG1_FNOSC_SHIFT) /* Secondary oscillator */
+#  define DEVCFG1_FNOSC_LPRC      (5 << DEVCFG1_FNOSC_SHIFT) /* Low power RC oscillator */
+#  define DEVCFG1_FNOSC_FRCDIV    (7 << DEVCFG1_FNOSC_SHIFT) /* FRC oscillator with FRCDIV */
 #define DEVCFG1_FSOSCEN           (1 << 5)  /* Bit 5: Secondary oscillator (sosc) enable bit */
 #define DEVCFG1_IESO              (1 << 7)  /* Bit 7: Internal external switch over */
 #define DEVCFG1_POSCMOD_SHIFT     (8)       /* Bits 8-9: Primary oscillator (posc) configuration */
 #define DEVCFG1_POSCMOD_MASK      (3 << DEVCFG1_POSCMOD_SHIFT)
-#  define DEVCFG1_POSCMOD_ EC     (0 << DEVCFG1_POSCMOD_SHIFT) /* EC mode */
-#  define DEVCFG1_POSCMOD_ XT     (1 << DEVCFG1_POSCMOD_SHIFT) /* XT mode */
-#  define DEVCFG1_POSCMOD_ HS     (2 << DEVCFG1_POSCMOD_SHIFT) /* HS mode */
+#  define DEVCFG1_POSCMOD_EC      (0 << DEVCFG1_POSCMOD_SHIFT) /* EC mode */
+#  define DEVCFG1_POSCMOD_XT      (1 << DEVCFG1_POSCMOD_SHIFT) /* XT mode */
+#  define DEVCFG1_POSCMOD_HS      (2 << DEVCFG1_POSCMOD_SHIFT) /* HS mode */
 #  define DEVCFG1_POSCMOD_DIS     (3 << DEVCFG1_POSCMOD_SHIFT) /* Primary Oscillator disabled */
 #define DEVCFG1_OSCIOFNC          (1 << 10) /* Bit 10: CLKO (clock-out) enable configuration */
 #define DEVCFG1_FPBDIV_SHIFT      (12)      /* Bits 12-13: Peripheral bus clock divisor default value */
@@ -181,24 +174,23 @@
 #  define DEVCFG1_WDTPS_262144    (18 << DEVCFG1_WDTPS_SHIFT) /* 1:262144 */
 #  define DEVCFG1_WDTPS_524288    (19 << DEVCFG1_WDTPS_SHIFT) /* 1:524288 */
 #  define DEVCFG1_WDTPS_1048576   (20 << DEVCFG1_WDTPS_SHIFT) /* 1:1048576 */
+#define DEVCFG1_WINDIS            (1 << 22) /* Bit 22: Windowed watchdog timer enable */
 #define DEVCFG1_FWDTEN            (1 << 23) /* Bit 23: WDT enable */
 
 /* Device configuration word 0 */
 
+#define PWP_CODE(a)               (((~((a) >> 12)) - 1) & 0xff)
 
-#define DEVCFG0_DEBUG_SHIFT       (0)      /* Bits 0-1: xx */
+#define DEVCFG0_DEBUG_SHIFT       (0)       /* Bits 0-1: Background debugger enable */
 #define DEVCFG0_DEBUG_MASK        (3 << DEVCFG0_DEBUG_SHIFT)
-#define DEVCFG0_ICESEL            (1 << 3)  /* Bit 3:  xx */
-#define DEVCFG0_PWP12             (1 << 12) /* Bit 12:  xx */
-#define DEVCFG0_PWP13             (1 << 13) /* Bit 13:  xx */
-#define DEVCFG0_PWP14             (1 << 14) /* Bit 14:  xx */
-#define DEVCFG0_PWP15             (1 << 15) /* Bit 15:  xx */
-#define DEVCFG0_PWP16             (1 << 16) /* Bit 16:  xx */
-#define DEVCFG0_PWP17             (1 << 17) /* Bit 17:  xx */
-#define DEVCFG0_PWP18             (1 << 18) /* Bit 18:  xx */
-#define DEVCFG0_PWP19             (1 << 19) /* Bit 19:  xx */
-#define DEVCFG0_BWP               (1 << 24) /* Bit 24:  xx */
-#define DEVCFG0_CP                (1 << 28) /* Bit 28:  xx */
+#define DEVCFG0_ICESEL            (1 << 3)  /* Bit 3: ICE/debugger channel select */
+#define DEVCFG0_PWP_SHIFT         (12)      /* Bits 12-19: Program flash write-protect */
+#define DEVCFG0_PWP_MASK          (0xff << DEVCFG0_PWP_SHIFT)
+#  define DEVCFG0_PWP_DISABLE     (0xff << DEVCFG0_PWP_SHIFT)
+#  define DEVCFG0_PWP(code)       ((code) << DEVCFG0_PWP_SHIFT) /* See PWP_CODE above */
+#define DEVCFG0_BWP               (1 << 24) /* Bit 24: Boot flash write-protect */
+#define DEVCFG0_CP                (1 << 28) /* Bit 28: Code-protect */
+#define DEVCFG0_SIGN              (1 << 31) /* Bit 31: Signature */
 
 /****************************************************************************
  * Public Types
