@@ -937,10 +937,6 @@ static void usbhost_destroy(FAR void *arg)
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
  *
- *   NOTE that the class instance remains valid upon return with a failure.  It is
- *   the responsibility of the higher level enumeration logic to call
- *   CLASS_DISCONNECTED to free up the class driver resources.
- *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
@@ -1288,28 +1284,33 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
       usbhost_takesem(&priv->exclsem);
       DEBUGASSERT(priv->crefs >= 2);
 
+      /* Decrement the reference count */
+
+      priv->crefs--;
+
       /* Handle a corner case where (1) open() has been called so the
-       * reference count is > 2, but the device has been disconnected.
+       * reference count was > 2, but the device has been disconnected.
        * In this case, the class instance needs to persist until close()
        * is called.
        */
 
-      if (priv->crefs <= 2 && priv->disconnected)
+      if (priv->crefs <= 1 && priv->disconnected)
         {
-          /* We don't have to give the semaphore because it will be
-           * destroyed when usb_destroy is called.
+          /* The will cause the enumeration logic to disconnect
+           * the class driver.
            */
-  
+
           ret = -ENODEV;
         }
-      else
-        {
-          /* Ready for normal operation as a block device driver */
 
-          uvdbg("Successfully initialized\n");
-          priv->crefs--;
-          usbhost_givesem(&priv->exclsem);
-        }
+      /* Release the semaphore... there is a race condition here.
+       * Decrementing the reference count and releasing the semaphore
+       * allows usbhost_destroy() to execute (on the worker thread);
+       * the class driver instance could get destoryed before we are
+       * ready to handle it!
+       */
+
+       usbhost_givesem(&priv->exclsem);
     }
 
   return ret;
@@ -1670,6 +1671,10 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
  *   returned indicating the nature of the failure
+ *
+ *   NOTE that the class instance remains valid upon return with a failure.  It is
+ *   the responsibility of the higher level enumeration logic to call
+ *   CLASS_DISCONNECTED to free up the class driver resources.
  *
  * Assumptions:
  *   - This function will *not* be called from an interrupt handler.
