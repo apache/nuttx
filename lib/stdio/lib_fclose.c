@@ -50,14 +50,53 @@
  * Global Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: fclose
+ *
+ * Description
+ *   The fclose() function will flush the stream pointed to by stream
+ *   (writing any buffered output data using lib_fflush()) and close the
+ *   underlying file descriptor.
+ *
+ * Returned Value:
+ *   Upon successful completion 0 is returned. Otherwise, EOF is returned
+ *   and the global variable errno is set to indicate the error. In either
+ *   case any further access (including another call to fclose()) to the
+ *   stream results in undefined behaviour.
+ *
+ ****************************************************************************/
+
 int fclose(FAR FILE *stream)
 {
-  int ret = OK;
+  int err = EINVAL;
+  int ret = ERROR;
+
+  /* Verify that a stream was provided. */
+
   if (stream)
     {
+      /* Flush the stream */
+
+      ret = lib_fflush(stream, true);
+      err = errno;
+
+      /* Close the underlying file descriptor */
+
       if (stream->fs_filedes > 0)
         {
-          ret = close(stream->fs_filedes);
+          /* Close the file and save the return status */
+
+          int status = close(stream->fs_filedes);
+
+          /* If close() returns an error but flush() did not then make
+           * sure that we return the close() error condition.
+           */
+
+          if (ret == 0)
+            {
+              ret = status;
+              err = errno;
+            }
         }
 
 #if CONFIG_STDIO_BUFFER_SIZE > 0
@@ -65,7 +104,7 @@ int fclose(FAR FILE *stream)
 
       sem_destroy(&stream->fs_sem);
 
-      /* release the buffer */
+      /* Release the buffer */
 
       if (stream->fs_bufstart)
         {
@@ -90,6 +129,18 @@ int fclose(FAR FILE *stream)
       stream->fs_filedes = -1;
     }
 
-  return ret;
+  /* On an error, reset the errno to the first error encountered and return
+   * EOF.
+   */
+
+  if (ret != OK)
+    {
+      set_errno(err);
+      return EOF;
+    }
+
+  /* Return success */
+
+  return OK;
 }
 

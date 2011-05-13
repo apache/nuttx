@@ -1750,3 +1750,5 @@
 	  RTOS simultaneously on multi-processor platforms. See
 	  http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
 	  information about RGMP.
+	* lib/stdio/lib_fclose.c: Must flush all buffered data when the file is closed.
+	  Instead, it was discarding the buffered data.
