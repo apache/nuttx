@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 12, 2011</p>
+      <p>Last Updated: May 13, 2011</p>
     </td>
   </tr>
 </table>
@@ -2209,6 +2209,13 @@ nuttx-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       nxbe_colormap was change to nxbe_configure... apparently "search-and-replace"
       error. This error was not noticed before because most NX platforms do not use
       colormapping.
+    * arch/rgmp and configs/rgmp.  Add architecture support and build
+      configuration for RGMP.  RGMP is a project for running GPOS and
+      RTOS simultaneously on multi-processor platforms. See
+      http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
+      information about RGMP.
+    * lib/stdio/lib_fclose.c: Must flush all buffered data when the file is closed.
+      Instead, it was discarding the buffered data.
 
 apps-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2221,6 +2228,11 @@ apps-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       then a make error occurs because tools/mkdep.sh is called with no files.
     * system/free: Move Uros' custom free command from vsn/free
     * system/install: Add a new install command submitted by Uros Platise.
+    * examples/rgmpp.  Add a placeholder for an RGMP build example.
+      RGMP is a project for running GPOS and RTOS simultaneously on
+      multi-processor platforms. See http://rgmp.sourceforge.net/wiki/index.php/Main_Page
+      for further information about RGMP.  NOTE:  This is an empty example
+      on initial check-in.
 
 pascal-3.0 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
