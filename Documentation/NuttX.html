@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 13, 2011</p>
+      <p>Last Updated: May 14, 2011</p>
     </td>
   </tr>
 </table>
@@ -2216,6 +2216,13 @@ nuttx-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       information about RGMP.
     * lib/stdio/lib_fclose.c: Must flush all buffered data when the file is closed.
       Instead, it was discarding the buffered data.
+    * lib/stdio: All output stream logic was modified to support CONFIG_STDIO_LINEBUFFER.
+      If standard C buffered I/O is enabled (CONFIG_STDIO_BUFFER_SIZE > 0), then this
+      option may be added to force automatic, line-oriented flushing the output buffer
+      for putc(), fputc(), putchar(), puts(), fputs(), printf() fprintf(), and vfprintf().
+      When a newline is encountered in the output string, the output buffer will be
+      flushed.  This (slightly) increases the NuttX footprint but supports the kind of
+      behavior that people expect for printf.
 
 apps-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2228,7 +2235,7 @@ apps-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       then a make error occurs because tools/mkdep.sh is called with no files.
     * system/free: Move Uros' custom free command from vsn/free
     * system/install: Add a new install command submitted by Uros Platise.
-    * examples/rgmpp.  Add a placeholder for an RGMP build example.
+    * examples/rgmp.  Add a placeholder for an RGMP build example.
       RGMP is a project for running GPOS and RTOS simultaneously on
       multi-processor platforms. See http://rgmp.sourceforge.net/wiki/index.php/Main_Page
       for further information about RGMP.  NOTE:  This is an empty example

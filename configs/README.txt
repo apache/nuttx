@@ -506,10 +506,11 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_STDIO_LINEBUFFER - If standard C buffered I/O is enabled
 		  (CONFIG_STDIO_BUFFER_SIZE > 0), then this option may be added
 		  to force automatic, line-oriented flushing the output buffer
-		  for printf() fprintf(), and vfprintf().  When a newline is
-		  encountered in the format string, the output buffer will be
-		  flushed.  This (slightly) increases the NuttX footprint but
- 		  supports the kind of behavior that people expect for printf.
+		  for putc(), fputc(), putchar(), puts(), fputs(), printf(),
+          fprintf(), and vfprintf().  When a newline is encountered in
+          the output string, the output buffer will be flushed.  This
+          (slightly) increases the NuttX footprint but supports the kind
+          of behavior that people expect for printf().
 		CONFIG_NUNGET_CHARS - Number of characters that can be
 		  buffered by ungetc() (Only if CONFIG_NFILE_STREAMS > 0)
 		CONFIG_PREALLOC_MQ_MSGS - The number of pre-allocated message
