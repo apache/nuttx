@@ -1,7 +1,7 @@
 /****************************************************************************
- * lib/stdio/lib_lowoutstream.c
+ * lib/stdio/lib_libnoflush.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,56 +39,65 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ARCH_LOWPUTC
-
+#include <stdbool.h>
 #include <stdio.h>
+#include <fcntl.h>
 #include <errno.h>
-#include <nuttx/arch.h>
+
+#include <nuttx/fs.h>
 
 #include "lib_internal.h"
 
+#ifdef CONFIG_STDIO_LINEBUFFER
+
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lowoutstream_putc
- ****************************************************************************/
-
-static void lowoutstream_putc(FAR struct lib_outstream_s *this, int ch)
-{
-  if (this && up_putc(ch) != EOF)
-    {
-      this->nput++;
-    }
-}
-
-/****************************************************************************
- * Public Functions
+ * Private Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_lowoutstream
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lib_noflush
  *
  * Description:
- *   Initializes a stream for use with low-level, architecture-specific I/O.
+ *  lib_noflush() provides a common, dummy flush method for output streams
+ *  that are not flushable.  Only used if CONFIG_STDIO_LINEBUFFER is selected.
  *
- * Input parameters:
- *   lowoutstream - User allocated, uninitialized instance of struct
- *                  lib_lowoutstream_s to be initialized.
- *
- * Returned Value:
- *   None (User allocated instance initialized).
+ * Return:
+ *  Always returns OK
  *
  ****************************************************************************/
 
-void lib_lowoutstream(FAR struct lib_outstream_s *stream)
+int lib_noflush(FAR struct lib_outstream_s *this)
 {
-  stream->put   = lowoutstream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
-  stream->flush = lib_noflush;
-#endif
-  stream->nput  = 0;
+  return OK;
 }
 
-#endif /* CONFIG_ARCH_LOWPUTC */
+#endif /* CONFIG_STDIO_LINEBUFFER */
+

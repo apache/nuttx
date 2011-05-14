@@ -60,6 +60,18 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 }
 
 /****************************************************************************
+ * Name: stdoutstream_flush
+ ****************************************************************************/
+
+#if defined(CONFIG_STDIO_LINEBUFFER) && CONFIG_STDIO_BUFFER_SIZE > 0
+int stdoutstream_flush(FAR struct lib_outstream_s *this)
+{
+  FAR struct lib_stdoutstream_s *sthis = (FAR struct lib_stdoutstream_s *)this;
+  return lib_fflush(sthis->stream, true);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -83,9 +95,16 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 void lib_stdoutstream(FAR struct lib_stdoutstream_s *stdoutstream,
                    FAR FILE *stream)
 {
-  stdoutstream->public.put  = stdoutstream_putc;
-  stdoutstream->public.nput = 0;
-  stdoutstream->stream      = stream;
+  stdoutstream->public.put   = stdoutstream_putc;
+#ifdef CONFIG_STDIO_LINEBUFFER
+#if CONFIG_STDIO_BUFFER_SIZE > 0
+  stdoutstream->public.flush = stdoutstream_flush;
+#else
+  stdoutstream->public.flush = lib_noflush;
+#endif
+#endif
+  stdoutstream->public.nput  = 0;
+  stdoutstream->stream       = stream;
 }
 
 

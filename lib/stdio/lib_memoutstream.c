@@ -82,10 +82,13 @@ static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 void lib_memoutstream(FAR struct lib_memoutstream_s *memoutstream,
                       FAR char *bufstart, int buflen)
 {
-  memoutstream->public.put  = memoutstream_putc;
-  memoutstream->public.nput = 0;          /* Will be buffer index */
-  memoutstream->buffer      = bufstart;   /* Start of buffer */
-  memoutstream->buflen      = buflen - 1; /* Save space for null terminator */
+  memoutstream->public.put   = memoutstream_putc;
+#ifdef CONFIG_STDIO_LINEBUFFER
+  memoutstream->public.flush = lib_noflush;
+#endif
+  memoutstream->public.nput  = 0;          /* Will be buffer index */
+  memoutstream->buffer       = bufstart;   /* Start of buffer */
+  memoutstream->buflen       = buflen - 1; /* Save space for null terminator */
 }
 
 

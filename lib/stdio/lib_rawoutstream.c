@@ -91,8 +91,11 @@ static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 
 void lib_rawoutstream(FAR struct lib_rawoutstream_s *rawoutstream, int fd)
 {
-  rawoutstream->public.put  = rawoutstream_putc;
-  rawoutstream->public.nput = 0;
-  rawoutstream->fd          = fd;
+  rawoutstream->public.put   = rawoutstream_putc;
+#ifdef CONFIG_STDIO_LINEBUFFER
+  rawoutstream->public.flush = lib_noflush;
+#endif
+  rawoutstream->public.nput  = 0;
+  rawoutstream->fd           = fd;
 }
 

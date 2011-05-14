@@ -110,10 +110,16 @@ extern void  stream_semtake(FAR struct streamlist *list);
 extern void  stream_semgive(FAR struct streamlist *list);
 #endif
 
+/* Defined in lib_libnoflush.c */
+
+#ifdef CONFIG_STDIO_LINEBUFFER
+extern int lib_noflush(FAR struct lib_outstream_s *this);
+#endif
+
 /* Defined in lib_libsprintf.c */
 
-extern int lib_sprintf (FAR struct lib_outstream_s *obj,
-                        const char *fmt, ...);
+extern int lib_sprintf(FAR struct lib_outstream_s *obj,
+                       const char *fmt, ...);
 
 /* Defined lib_libvsprintf.c */
 

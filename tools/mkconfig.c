@@ -184,6 +184,13 @@ int main(int argc, char **argv, char **envp)
   printf("# undef CONFIG_NUNGET_CHARS\n");
   printf("# define CONFIG_NUNGET_CHARS 0\n");
   printf("#endif\n\n");
+  printf("/* If no standard C buffered I/O is not supported, then line-oriented buffering\n");
+  printf(" * cannot be supported.\n");
+  printf(" */\n\n");
+  printf("#if CONFIG_STDIO_BUFFER_SIZE == 0\n");
+  printf("# undef CONFIG_STDIO_LINEBUFFER\n");
+  printf("# define CONFIG_STDIO_LINEBUFFER 0\n");
+  printf("#endif\n\n");
   printf("/* If the maximum message size is zero, then we assume that message queues\n");
   printf(" * support should be disabled\n");
   printf(" */\n\n");

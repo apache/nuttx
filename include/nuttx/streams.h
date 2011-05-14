@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/streams.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,20 +56,24 @@
 struct lib_instream_s;
 struct lib_outstream_s;
 
-typedef int (*lib_getc_t)(FAR struct lib_instream_s *this);
+typedef int  (*lib_getc_t)(FAR struct lib_instream_s *this);
 typedef void (*lib_putc_t)(FAR struct lib_outstream_s *this, int ch);
+typedef int  (*lib_flush_t)(FAR struct lib_outstream_s *this);
 
 struct lib_instream_s
 {
-  lib_getc_t get;                 /* Pointer to function to get one character */
-  int        nget;                /* Total number of characters gotten.  Written
+  lib_getc_t  get;                /* Pointer to function to get one character */
+  int         nget;               /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
 };
 
 struct lib_outstream_s
 {
-  lib_putc_t put;                 /* Pointer to function to put one character */
-  int        nput;                /* Total number of characters put.  Written
+  lib_putc_t  put;                /* Pointer to function to put one character */
+#ifdef CONFIG_STDIO_LINEBUFFER
+  lib_flush_t flush;              /* Pointer to function flush buffered characters */
+#endif
+  int         nput;               /* Total number of characters put.  Written
                                    * by put method, readable by user */
 };
 

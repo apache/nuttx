@@ -1127,7 +1127,20 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
       if (*src != '%')
         {
+           /* Output the character */
+
            obj->put(obj, *src);
+
+           /* Flush the buffer if a newline is encountered */
+
+#ifdef CONFIG_STDIO_LINEBUFFER
+           if (*src == '\n')
+             {
+               (void)obj->flush(obj);
+             }
+#endif
+           /* Process the next character in the format */
+
            continue;
         }
 

@@ -55,7 +55,7 @@
  * Name: lowinstream_getc
  ****************************************************************************/
 
-static int lowinstream_getc(FAR struct lib_outstream_s *this)
+static int lowinstream_getc(FAR struct lib_instream_s *this)
 {
   if (this && up_getc(ch) != EOF)
     {
@@ -82,7 +82,7 @@ static int lowinstream_getc(FAR struct lib_outstream_s *this)
  *
  ****************************************************************************/
 
-void lib_lowinstream(FAR struct lib_outstream_s *stream)
+void lib_lowinstream(FAR struct lib_instream_s *stream)
 {
   stream->get  = lowinstream_getc;
   stream->nget = 0;

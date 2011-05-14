@@ -72,7 +72,10 @@ static void nulloutstream_putc(FAR struct lib_outstream_s *this, int ch)
 
 void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream)
 {
-  nulloutstream->put  = nulloutstream_putc;
-  nulloutstream->nput = 0;
+  nulloutstream->put   = nulloutstream_putc;
+#ifdef CONFIG_STDIO_LINEBUFFER
+  nulloutstream->flush = lib_noflush;
+#endif
+  nulloutstream->nput  = 0;
 }
 

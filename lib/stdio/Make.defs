@@ -51,6 +51,11 @@ STDIO_SRCS += lib_fopen.c lib_fclose.c lib_fread.c lib_libfread.c lib_fseek.c \
 		   lib_fprintf.c lib_vfprintf.c lib_stdinstream.c lib_stdoutstream.c
 endif
 endif
+
 ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
 STDIO_SRCS += lib_dtoa.c
+endif
+
+ifeq ($(CONFIG_STDIO_LINEBUFFER),y)
+STDIO_SRCS += lib_libnoflush.c
 endif
