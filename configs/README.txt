@@ -1093,15 +1093,15 @@ configs/pjrc-8051
 
 configs/rgmp
 
-  RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for 
-  running GPOS and RTOS simultaneously on multi-processor platforms. You can
-  port your favorite RTOS to RGMP together with an unmodified Linux to form a
-  hybrid operating system. This makes your application able to use both RTOS
-  and GPOS feathures.
+    RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for 
+    running GPOS and RTOS simultaneously on multi-processor platforms. You can
+    port your favorite RTOS to RGMP together with an unmodified Linux to form a
+    hybrid operating system. This makes your application able to use both RTOS
+   and GPOS features.
 
-  See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
+    See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further information
+    about RGMP.
 
-information about RGMP.
 configs/sim
 	A user-mode port of NuttX to the x86 Linux platform is available.
 	The purpose of this port is primarily to support OS feature development.
