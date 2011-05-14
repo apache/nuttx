@@ -246,6 +246,17 @@ arch/m68322
     A work in progress.
     STATUS:  Stalled for the time being.
 
+arch/rgmp
+
+    RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project
+    for running GPOS and RTOS simultaneously on multi-processor platforms.
+    You can port your favorite RTOS to RGMP together with an unmodified
+    Linux to form a hybrid operating system. This makes your application
+    able to use both RTOS and GPOS features.
+
+    See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
+    information about RGMP.
+
 arch/sh - SuperH and related Hitachi/Renesas microcontrollers
 
     arch/sh/include and arch/sh/src/common
@@ -300,14 +311,3 @@ arch/z80 - ZiLOG 8-bit microcontrollers
 
     arch/z80/include/ez80 and arch/z80/src/ez80
         ZiLOG ez80 Acclaim! Microcontroller
-
-The following architecture directories are deprecated.  They have been
-replaced by the logic in arm/arm and will deleted at some point in the
-future.
-
-arch/c5471
-    Replaced with arch/arm/include/c5471 and arch/arm/src/c5471
-
-arch/dm320
-    Replaced with arch/arm/include/dm320 and arch/arm/src/dm320
-

@@ -366,6 +366,10 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
+ |   |- rgmp/
+ |   |   |- include/README.txt
+ |   |   |- src/README.txt
+ |   |   `- README.txt
  |   |- qemu-i486/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
