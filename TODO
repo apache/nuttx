@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated May 6, 2011)
+NuttX TODO List (Last updated May 14, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -12,7 +12,7 @@ nuttx/
   (5)  Binary loaders (binfmt/)
  (15)  Network (net/, drivers/net)
   (2)  USB (drivers/usbdev, drivers/usbhost)
-  (5)  Libraries (lib/)
+  (6)  Libraries (lib/)
  (13)  File system/Generic drivers (fs/, drivers/)
   (1)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
@@ -370,6 +370,22 @@ o Libraries (lib/)
   Status:      Open
   Priority:    Low (unless you are using mixed C-buffered I/O with fgets and
                fgetc, for example).
+
+  Description: if CONFIG_STDIO_LINEBUFFER is defined, then fputs() should flush
+               the buffer on each newline encountered in the input stream.  At
+               present, it does not flush at all!  This is because fputs() is
+               based on fwrite() which handles binary data.
+
+               I suppose one could easily check if the last character is '\n'
+               and then flush in fputs() for that case. But that is imperfect
+               logic. It would work for the most frequent cases like puts("abcdef\n")
+               but not in all cases. For example, puts("abc\ndef") should flush
+               "abc\n" to output but keep "def" buffered. I can't get that behavior
+               using lib_fwrite() to implement fputs() (unless lib_fwrite were
+               extended to handle binary or text data with newlines).
+  Status:      Open
+  Priority:    Low (unless you doing lots of puts or fputs output and the
+               current buffer handling does not meet your needs).
 
   Description: Need some minimal termios support... at a minimum, enough to
                switch between raw and "normal" modes to support behavior like

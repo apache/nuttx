@@ -108,19 +108,20 @@ int fputs(FAR const char *s, FAR FILE *stream)
 
       ntowrite = strlen(s);
       if (ntowrite == 0)
-	{
-	  nput = 0;
-	}
+        {
+          nput = 0;
+        }
       else
-	{
-	  /* Write the string */
+        {
+          /* Write the string */
 
-	  nwritten = lib_fwrite(s, ntowrite, stream);
-	  if (nwritten > 0)
-	    {
-	      nput = nwritten;
-	    }
-	}
+          nwritten = lib_fwrite(s, ntowrite, stream);
+          if (nwritten > 0)
+            {
+              nput = nwritten;
+            }
+        }
     }
+
   return nput;
 }

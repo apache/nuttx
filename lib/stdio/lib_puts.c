@@ -84,31 +84,46 @@
  * Name: puts
  *
  * Description:
- *   puts() writes the string s and a trailing newline to
- *   stdout.
+ *   puts() writes the string s and a trailing newline to stdout.
+ *
  ****************************************************************************/
 
 int puts(FAR const char *s)
 {
+  FILE *stream = stdout;
   int nwritten;
   int nput = EOF;
 
   /* Write the string (the next two steps must be atomic) */
 
-  lib_take_semaphore(stdout);
+  lib_take_semaphore(stream);
 
   /* Write the string without its trailing '\0' */
 
-  nwritten = fputs(s, stdout);
+  nwritten = fputs(s, stream);
   if (nwritten > 0)
     {
       /* Followed by a newline */
+
       char newline = '\n';
-      if (lib_fwrite(&newline, 1, stdout) > 0)
+      if (lib_fwrite(&newline, 1, stream) > 0)
         {
           nput = nwritten + 1;
+
+          /* Flush the buffer after the newline is output */
+
+#ifdef CONFIG_STDIO_LINEBUFFER
+          {
+            int ret = lib_fflush(stream, true);
+            if (ret < 0)
+              {
+                nput = EOF;
+              }
+          }
+#endif
         }
     }
+
   lib_give_semaphore(stdout);
   return nput;
 }

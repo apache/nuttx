@@ -1136,6 +1136,8 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 #ifdef CONFIG_STDIO_LINEBUFFER
            if (*src == '\n')
              {
+               /* Should return an error on a failure to flush */
+
                (void)obj->flush(obj);
              }
 #endif
