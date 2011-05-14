@@ -87,14 +87,17 @@
 int fputc(int c, FAR FILE *stream)
 {
   unsigned char buf = (unsigned char)c;
-  if (lib_fwrite(&buf, 1, stream) > 0)
+  int ret;
+
+  ret = lib_fwrite(&buf, 1, stream);
+  if (ret > 0)
     {
       /* Flush the buffer if a newline is output */
 
 #ifdef CONFIG_STDIO_LINEBUFFER
       if (c == '\n')
         {
-          int ret = lib_fflush(stream, true);
+          ret = lib_fflush(stream, true);
           if (ret < 0)
             {
               return EOF;

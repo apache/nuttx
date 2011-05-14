@@ -93,6 +93,7 @@ int puts(FAR const char *s)
   FILE *stream = stdout;
   int nwritten;
   int nput = EOF;
+  int ret;
 
   /* Write the string (the next two steps must be atomic) */
 
@@ -106,20 +107,19 @@ int puts(FAR const char *s)
       /* Followed by a newline */
 
       char newline = '\n';
-      if (lib_fwrite(&newline, 1, stream) > 0)
+      ret = lib_fwrite(&newline, 1, stream);
+      if (ret > 0)
         {
           nput = nwritten + 1;
 
           /* Flush the buffer after the newline is output */
 
 #ifdef CONFIG_STDIO_LINEBUFFER
-          {
-            int ret = lib_fflush(stream, true);
-            if (ret < 0)
-              {
-                nput = EOF;
-              }
-          }
+          ret = lib_fflush(stream, true);
+          if (ret < 0)
+            {
+              nput = EOF;
+            }
 #endif
         }
     }

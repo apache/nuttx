@@ -93,35 +93,62 @@
 int fputs(FAR const char *s, FAR FILE *stream)
 {
   int ntowrite;
-  int nwritten;
-  int nput = EOF;
+  int nput;
+  int ret;
 
   /* Make sure that a string was provided. */
 
+#ifdef CONFIG_DEBUG /* Most parameter checking is disabled if DEBUG is off */
   if (!s)
     {
       set_errno(EINVAL);
+      return EOF;
     }
-  else
+#endif
+
+  /* Get the length of the string. */
+
+  ntowrite = strlen(s);
+  if (ntowrite == 0)
     {
-      /* Get the length of the string. */
+      return 0;
+    }
 
-      ntowrite = strlen(s);
-      if (ntowrite == 0)
+  /* Write the string */
+
+#ifdef CONFIG_STDIO_LINEBUFFER
+  nput = ntowrite;
+  while (ntowrite-- > 0)
+    {
+      ret = lib_fwrite(s, 1, stream);
+      if (ret <= 0)
         {
-          nput = 0;
+          return EOF;
         }
-      else
-        {
-          /* Write the string */
 
-          nwritten = lib_fwrite(s, ntowrite, stream);
-          if (nwritten > 0)
+      /* Flush the buffer if a newline was put to the buffer */
+
+      if (*s == '\n')
+        {
+          ret = lib_fflush(stream, true);
+          if (ret < 0)
             {
-              nput = nwritten;
+              return EOF;
             }
         }
+
+      /* Set up for the next lib_fwrite() */
+
+      s++;
     }
 
   return nput;
+#else
+  nput = lib_fwrite(s, ntowrite, stream);
+  if (nput < 0)
+    {
+      return EOF
+    }
+  return nput;
+#endif
 }
