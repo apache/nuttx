@@ -56,18 +56,18 @@
 #  define CHIP_PROGFLASH_KB 32
 #  define CHIP_DATAMEM_KB   8
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       0
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -80,18 +80,18 @@
 #  define CHIP_PROGFLASH_KB 64
 #  define CHIP_DATAMEM_KB   16
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       0
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -104,18 +104,18 @@
 #  define CHIP_PROGFLASH_KB 128
 #  define CHIP_DATAMEM_KB   16
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       0
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -128,18 +128,18 @@
 #  define CHIP_PROGFLASH_KB 128
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -152,18 +152,18 @@
 #  define CHIP_PROGFLASH_KB 256
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -176,18 +176,18 @@
 #  define CHIP_PROGFLASH_KB 512
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -200,18 +200,18 @@
 #  define CHIP_PROGFLASH_KB 128
 #  define CHIP_DATAMEM_KB   16
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       0
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -224,18 +224,18 @@
 #  define CHIP_PROGFLASH_KB 128
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -248,18 +248,18 @@
 #  define CHIP_PROGFLASH_KB 256
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  define CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -272,18 +272,18 @@
 #  define CHIP_PROGFLASH_KB 512
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  define CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -296,18 +296,18 @@
 #  define CHIP_PROGFLASH_KB 32
 #  define CHIP_DATAMEM_KB   8
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       0
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         1
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -320,18 +320,18 @@
 #  define CHIP_PROGFLASH_KB 128
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         1
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -344,18 +344,18 @@
 #  define CHIP_PROGFLASH_KB 256
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         1
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -368,18 +368,18 @@
 #  define CHIP_PROGFLASH_KB 512
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         1
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -392,18 +392,18 @@
 #  define CHIP_PROGFLASH_KB 128
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  undef  CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -416,18 +416,18 @@
 #  define CHIP_PROGFLASH_KB 256
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  define CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
@@ -440,18 +440,18 @@
 #  define CHIP_PROGFLASH_KB 512
 #  define CHIP_DATAMEM_KB   32
 #  define CHIP_NTIMERS      5
-#  define CHIP_NCAPTURE     5
-#  define CHIP_NCOMPARE     5
+#  define CHIP_NIC          5
+#  define CHIP_NOC          5
 #  define CHIP_NDMACH       4
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_VREG
+#  define CHIP_CVR
 #  define CHIP_TRACE
 #  define CHIP_NEUARTS      2
 #  define CHIP_UARTFIFOD    4
 #  define CHIP_NSPI         2
 #  define CHIP_NI2C         2
 #  define CHIP_NADC10       16
-#  define CHIP_NCOMPARATORS 2
+#  define CHIP_NCM          2
 #  define CHIP_PMP
 #  define CHIP_PSP
 #  define CHIP_JTAH
