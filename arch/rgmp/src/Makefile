@@ -76,6 +76,7 @@ nuttx$(EXEEXT):
 	@$(OBJDUMP) -S $(TOPDIR)/$@ > $(TOPDIR)/nuttx.asm
 	@$(NM) -n $(TOPDIR)/$@ > $(TOPDIR)/nuttx.sym
 	@$(OBJCOPY) -S -O binary $(TOPDIR)/$@ nuttx.img
+	@cp nuttx.img $(TOPDIR)/kernel.img
 
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
@@ -84,6 +85,7 @@ nuttx$(EXEEXT):
 depend: .depend
 
 clean:
+	@rm $(TOPDIR)/kernel.img nuttx.img 
 	@rm -f libarch$(LIBEXT) *~ .*.swp
 	$(call CLEAN)
 
