@@ -123,7 +123,7 @@
 
 /* Parallel Master Register Base Address */
 
-#  define PCI32MX_PMSTR_K1BASE      (PIC32MX_SFR_K1BASE + 0x00007000)
+#  define PCI32MX_PMP_K1BASE        (PIC32MX_SFR_K1BASE + 0x00007000)
 
 /* ADC Register Base Addresses */
 

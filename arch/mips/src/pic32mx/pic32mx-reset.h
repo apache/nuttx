@@ -56,7 +56,7 @@
 #define PIC32MX_RESET_RSWRST_OFFSET    0x0010 /* Software reset register */
 #define PIC32MX_RESET_RSWRSTCLR_OFFSET 0x0014 /* RSWRST clear register */
 #define PIC32MX_RESET_RSWRSTSET_OFFSET 0x0018 /* RSWRST set register */
-#define PIC32MX_RESET_RSWRSTINV_OFFSET 0x001c /* RSWRST nvert register */
+#define PIC32MX_RESET_RSWRSTINV_OFFSET 0x001c /* RSWRST invert register */
 
 /* Register Addresses *******************************************************/
 

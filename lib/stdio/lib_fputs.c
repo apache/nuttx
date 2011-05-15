@@ -84,12 +84,56 @@
 
 /****************************************************************************
  * Name: fputs
+ *
+ * Description:
+ *   fputs() writes the string s to stream, without its trailing '\0'.
+ *
  ****************************************************************************/
 
-/* fputs() writes the string s to stream, without its
- * trailing '\0'.
- */
+#ifdef CONFIG_STDIO_LINEBUFFER
+int fputs(FAR const char *s, FAR FILE *stream)
+{
+  int nput;
+  int ret;
 
+  /* Make sure that a string was provided. */
+
+#ifdef CONFIG_DEBUG /* Most parameter checking is disabled if DEBUG is off */
+  if (!s)
+    {
+      set_errno(EINVAL);
+      return EOF;
+    }
+#endif
+
+  /* Write the string.  Loop until the null terminator is encountered */
+
+  for (nput = 0; *s; nput++, s++)
+    {
+      /* Write the next character to the stream buffer */
+
+      ret = lib_fwrite(s, 1, stream);
+      if (ret <= 0)
+        {
+          return EOF;
+        }
+
+      /* Flush the buffer if a newline was writen to the buffer */
+
+      if (*s == '\n')
+        {
+          ret = lib_fflush(stream, true);
+          if (ret < 0)
+            {
+              return EOF;
+            }
+        }
+    }
+
+  return nput;
+}
+
+#else
 int fputs(FAR const char *s, FAR FILE *stream)
 {
   int ntowrite;
@@ -116,39 +160,11 @@ int fputs(FAR const char *s, FAR FILE *stream)
 
   /* Write the string */
 
-#ifdef CONFIG_STDIO_LINEBUFFER
-  nput = ntowrite;
-  while (ntowrite-- > 0)
-    {
-      ret = lib_fwrite(s, 1, stream);
-      if (ret <= 0)
-        {
-          return EOF;
-        }
-
-      /* Flush the buffer if a newline was put to the buffer */
-
-      if (*s == '\n')
-        {
-          ret = lib_fflush(stream, true);
-          if (ret < 0)
-            {
-              return EOF;
-            }
-        }
-
-      /* Set up for the next lib_fwrite() */
-
-      s++;
-    }
-
-  return nput;
-#else
   nput = lib_fwrite(s, ntowrite, stream);
   if (nput < 0)
     {
       return EOF
     }
   return nput;
-#endif
 }
+#endif
