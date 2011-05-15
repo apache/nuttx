@@ -1723,11 +1723,11 @@
 	* fs/nxffs: After a couple of weeks of testing and bug fixes, NXFSS appears
 	  stable and functional.
 
-6.3 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+6.3 2011-05-15 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Remove clock_getutc().  It is replaces with clock_gettime(CLOCK_ACTIVETIME).
 	  Add other RTC related changes provided by Uros Platise.
-	* arch/arm/src/stm32/stm32_flash.c: Add support for access to on-chp STM32
+	* arch/arm/src/stm32/stm32_flash.c: Add support for access to on-chip STM32
 	  FLASH; beginning of integration with NXFFS (Uros Platise).
 	* arch/mips: Added directory structure for PIC32 support
 	* configs/pcblogic-pic32mx:  Add directory structure for PCB Logic PIC32MX board
@@ -1755,7 +1755,9 @@
 	* lib/stdio: All output stream logic was modified to support CONFIG_STDIO_LINEBUFFER.
 	  If standard C buffered I/O is enabled (CONFIG_STDIO_BUFFER_SIZE > 0), then this
 	  option may be added to force automatic, line-oriented flushing the output buffer
-	  for putc(), fputc(), putchar(), puts(), fputs(), printf() fprintf(), and vfprintf().
+	  for putc(), fputc(), putchar(), puts(), fputs(), printf(), fprintf(), and vfprintf().
 	  When a newline is encountered in the output string, the output buffer will be
 	  flushed.  This (slightly) increases the NuttX footprint but supports the kind of
 	  behavior that people expect for printf.
+
+6.4 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>

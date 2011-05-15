@@ -138,7 +138,6 @@ int fputs(FAR const char *s, FAR FILE *stream)
 {
   int ntowrite;
   int nput;
-  int ret;
 
   /* Make sure that a string was provided. */
 
@@ -163,7 +162,7 @@ int fputs(FAR const char *s, FAR FILE *stream)
   nput = lib_fwrite(s, ntowrite, stream);
   if (nput < 0)
     {
-      return EOF
+      return EOF;
     }
   return nput;
 }
