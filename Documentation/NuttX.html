@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 14, 2011</p>
+      <p>Last Updated: May 15, 2011</p>
     </td>
   </tr>
 </table>
@@ -829,15 +829,33 @@
   </tr>
 </table>
 
-<p><b>nuttx-6.2 Release Notes</b>:
-
+<p><b>nuttx-6.3 Release Notes</b>:
 <p>
-  The 69<sup>th</sup> release of NuttX, Version 6.2, was made on May 6, 2011 and is available for download from the
+  The 70<sup>th</sup> release of NuttX, Version 6.3, was made on May 15, 2011 and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
   These unreleased changes are also listed <a href="#pendingchanges">here</a>.
 </p>
+<p>
+  The release of NuttX-6.3 follows only a nines days after the release of version 6.2.
+  This special back-to-back release was made so that the current released version of
+  NuttX will correspond to the initial release from the RGMP project.
+</p>
+<p>
+  This release adds architecture support and build configuration for RGMP.
+  RGMP is a project for running GPOS and RTOS simultaneously on multi-processor platforms.
+  See the <a href="http://rgmp.sourceforge.net/wiki/index.php/Main_Page">RGMP Wiki</a> for further information about RGMP.
+</p>
+<p>
+  This release also includes support for STM32 FLASH, build improvements, and initial, incomplete support for the MicroChip PIC32MX MCU.
+  Bug fixes are included for some build problems, USB host class driver error handling, NX graphics color mapping, and problems with C standard I/O buffer flushing.
+  See the ChangeLog for further details.
+</p>
+<p>
+  Release notes for version 6.2 are retained because they are still relevant.
+</p>
+<p><b>nuttx-6.2 Release Notes</b>:
 <p>
   The 6.2 NuttX release includes several new features:
 </p>
@@ -1425,25 +1443,40 @@
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Intel 8052 Microcontroller</b>
+    <b>Atmel AVR32</b>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
     <p>
-      <b>PJRC 87C52 Development Board</b>.
-      This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system
-      and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain under Linux or Cygwin.
+      <b>AV32DEV1</b>.
+      This port uses the www.mcuzone.com AVRDEV1 board based on the Atmel AT32UC3B0256 MCU.
+      This port requires a special GNU avr32 toolchain available from atmel.com website.
+      This is a windows native toolchain and so can be used only under Cygwin on Windows.
     </p>
     <ul>
       <p>
        <b>STATUS:</b>
-        This port is complete but not stable with timer interrupts enabled.
-        There seems to be some issue when the stack pointer enters into the indirect IRAM
-        address space during interrupt handling.
-        This architecture has not been built in some time will likely have some compilation
-        problems because of SDCC compiler differences.
+         This port is has completed all basic development, but there is more that needs to be done.
+         All code is complete for the basic NuttX port including header files for all AT32UC3* peripherals.
+         The untested AVR32 code was present in the 5.12 release of NuttX.
+         Since then, the basic RTOS port has solidified:
+         <ul>
+           <li>
+             The port successfully passes the NuttX OS test (apps/examples/ostest).
+           </li>
+           <li>
+             A NuttShell (NSH) configuration is in place (see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
+             Testing of that configuration has been postponed (because it got bumped by the Olimex LPC1766-STK port).
+             Current Status: I think I have a hardware problem with my serial port setup.
+             There is a good chance that the NSH port is complete and functional, but I am not yet able to demonstrate that.
+             At present, I get nothing coming in the serial RXD line (probably because the pins are configured wrong or I have the MAX232 connected wrong).
+           </li>
+         </ul>
+         The basic, port (including the verified apps/examples/ostest configuration) was be released in NuttX-5.13.
+         A complete port will include drivers for additional AVR32 UC3 devices -- like SPI and USB --- and will be available in a later release,
+         time permitting.
       </p>
     </ul>
   </td>
@@ -1451,32 +1484,7 @@
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Intel 80486 (i486) Microprocessor</b>
-  </td>
-</tr>
-<tr>
-  <td><br></td>
-  <td>
-    <p>
-      <b>QEMU/Bifferboard i486</b>.
-      This port uses the <a href="http://wiki.qemu.org/Main_Page">QEMU</a> i486 and the native
-      Linux, Cywgin, MinGW the GCC toolchain under Linux or Cygwin.
-    </p>
-    <ul>
-      <p>
-       <b>STATUS:</b>
-         The basic port was code-complete in NuttX-5.19 and verifed in NuttX-6.0.
-         The port was verified using the OS and NuttShell (NSH) examples under QEMU.
-         The port is reported to be functional on the <a href="http://bifferos.bizhat.com">Bifferboard</a> as well.
-         This is a great, stable starting point for anyone interest in fleshing out the x86 port!
-      </p>
-    </ul>
-  </td>
-</tr>
-<tr>
-  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
-  <td bgcolor="#5eaee1">
-    <b>Frescale M68HSC12</b>
+    <b>Freescale M68HSC12</b>
   </td>
 </tr>
 <tr>
@@ -1512,40 +1520,106 @@
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <b>Atmel AVR32</b>
+    <b>Intel 8052 Microcontroller</b>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
     <p>
-      <b>AV32DEV1</b>.
-      This port uses the www.mcuzone.com AVRDEV1 board based on the Atmel AT32UC3B0256 MCU.
-      This port requires a special GNU avr32 toolchain available from atmel.com website.
-      This is a windows native toolchain and so can be used only under Cygwin on Windows.
+      <b>PJRC 87C52 Development Board</b>.
+      This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system
+      and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain under Linux or Cygwin.
     </p>
     <ul>
       <p>
        <b>STATUS:</b>
-         This port is has completed all basic development, but there is more that needs to be done.
-         All code is complete for the basic NuttX port including header files for all AT32UC3* peripherals.
-         The untested AVR32 code was present in the 5.12 release of NuttX.
-         Since then, the basic RTOS port has solidified:
-         <ul>
-           <li>
-             The port successfully passes the NuttX OS test (apps/examples/ostest).
-           </li>
-           <li>
-             A NuttShell (NSH) configuration is in place (see the <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
-             Testing of that configuration has been postponed (because it got bumped by the Olimex LPC1766-STK port).
-             Current Status: I think I have a hardware problem with my serial port setup.
-             There is a good chance that the NSH port is complete and functional, but I am not yet able to demonstrate that.
-             At present, I get nothing coming in the serial RXD line (probably because the pins are configured wrong or I have the MAX232 connected wrong).
-           </li>
-         </ul>
-         The basic, port (including the verified apps/examples/ostest configuration) was be released in NuttX-5.13.
-         A complete port will include drivers for additional AVR32 UC3 devices -- like SPI and USB --- and will be available in a later release,
-         time permitting.
+        This port is complete but not stable with timer interrupts enabled.
+        There seems to be some issue when the stack pointer enters into the indirect IRAM
+        address space during interrupt handling.
+        This architecture has not been built in some time will likely have some compilation
+        problems because of SDCC compiler differences.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Intel 80x86</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>QEMU/Bifferboard i486</b>.
+      This port uses the <a href="http://wiki.qemu.org/Main_Page">QEMU</a> i486 and the native
+      Linux, Cywgin, MinGW the GCC toolchain under Linux or Cygwin.
+    </p>
+    <ul>
+      <p>
+       <b>STATUS:</b>
+         The basic port was code-complete in NuttX-5.19 and verifed in NuttX-6.0.
+         The port was verified using the OS and NuttShell (NSH) examples under QEMU.
+         The port is reported to be functional on the <a href="http://bifferos.bizhat.com">Bifferboard</a> as well.
+         This is a great, stable starting point for anyone interest in fleshing out the x86 port!
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>RGMP</b>.
+      RGMP stands for RTOS and GPOS on Multi-Processor.
+      RGMP is a project for  running GPOS and RTOS simultaneously on multi-processor platforms
+      You can port your favorite RTOS to RGMP together with an unmodified Linux to form a hybrid operating system.
+      This makes your application able to use both RTOS and GPOS features.
+    </p>
+    <p>
+      See the <a href="http://rgmp.sourceforge.net/wiki/index.php/Main_Page">RGMP Wiki</a> for further information about RGMP.
+    </p>
+    <ul>
+      <p>
+       <b>STATUS:</b>
+         This initial port of NuttX to RGMP was provided in NuttX-6.3.
+         This initial RGP port provides only minimal driver support and does not use the native NuttX interrupt system.
+         This is a great, stable starting point for anyone interest in working with NuttX under RGMP!
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>MicroChip PIC32 (MIPS)</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>PIC32MX460F512L</b>.
+      A port of NuttX to the PIC32MX460F512L is underway.
+      This port uses the PIC32MX board from PCB Logic Design Co.
+      The board is a very simple -- little more than a carrier for the PIC32 MCU plus voltage regulation, debug interface, and an OTG connector.
+    </p>
+    <p>
+      <b>Development Environment:</b>
+      This port uses the <i>LITE</i> version of the PIC32MX toolchain available
+      for download from the <a href="http://www.microchip.com">MicroChip</a> website.
+    </p>
+    <ul>
+      <p>
+       <b>STATUS:</b>
+       This port is in its very earliest stages -- most just header file development.
+       Stay tuned for future releases including verified PIC32 support.
       </p>
     </ul>
   </td>
@@ -1751,26 +1825,12 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
     <ul>
   </td>
 </tr>
-<tr>
-  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
-  <td bgcolor="#5eaee1">
-    <b>Other ports</b>
-  </td>
-</tr>
-<tr>
-  <td><br></td>
-  <td>
-    <p>
-      There are partial ports for the TI TMS320DM270 and for MIPS.
-    </p>
-   </td>
-</tr>
 </table></center>
 
 <blockquote>* A highly modified <a href="http://buildroot.uclibc.org/">buildroot</a>
 is available that may be used to build a NuttX-compatible ELF toolchain under
-Linux or Cygwin.  Configurations are available in that buildroot to support ARM,
-m68k, m68hc11, m68hc12, and SuperH ports.</blockquote>
+Linux or Cygwin.  Configurations are available in that buildroot to support ARM, Cortex-M3,
+avr, m68k, m68hc11, m68hc12, m9s12, blackfin, m32c, h8, and SuperH ports.</blockquote>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -2142,10 +2202,64 @@ nuttx-6.2 2011-05-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * fs/nxffs: After a couple of weeks of testing and bug fixes, NXFSS appears
       stable and functional.
 
+nuttx-6.3 2011-05-15 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * Remove clock_getutc().  It is replaces with clock_gettime(CLOCK_ACTIVETIME).
+      Add other RTC related changes provided by Uros Platise.
+    * arch/arm/src/stm32/stm32_flash.c: Add support for access to on-chip STM32
+      FLASH; beginning of integration with NXFFS (Uros Platise).
+    * arch/mips: Added directory structure for PIC32 support
+    * configs/pcblogic-pic32mx:  Add directory structure for PCB Logic PIC32MX board
+    * apps/include:  Move include/apps to apps/include.  A symbolic link is created at
+      build time
+    * Makefile: Removed support for Pascal pcode interpreter.  Support for that
+      interpreter has been moved to apps/interpreter/Makefile.
+    * tools/mkdep.sh: Should not report an error if there are no files on the command
+      line.  This happens normally in certain configurations.
+    * drivers/usbhost: Sheref Younan reported an error in the error handling when
+      connection to a USB device fails.  In certain fail cases, the logic would try
+      to free the device class instance twice, the first was okay, but the second
+      caused a crash.
+    * graphics/nxbe/nxbe_colormap.c: Fix error noted by Bassem Fahmy.  The function
+      nxbe_colormap was change to nxbe_configure... apparently "search-and-replace"
+      error. This error was not noticed before because most NX platforms do not use
+      colormapping.
+    * arch/rgmp and configs/rgmp.  Add architecture support and build
+      configuration for RGMP.  RGMP is a project for running GPOS and
+      RTOS simultaneously on multi-processor platforms. See
+      http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
+      information about RGMP.
+    * lib/stdio/lib_fclose.c: Must flush all buffered data when the file is closed.
+      Instead, it was discarding the buffered data.
+    * lib/stdio: All output stream logic was modified to support CONFIG_STDIO_LINEBUFFER.
+      If standard C buffered I/O is enabled (CONFIG_STDIO_BUFFER_SIZE > 0), then this
+      option may be added to force automatic, line-oriented flushing the output buffer
+      for putc(), fputc(), putchar(), puts(), fputs(), printf(), fprintf(), and vfprintf().
+      When a newline is encountered in the output string, the output buffer will be
+      flushed.  This (slightly) increases the NuttX footprint but supports the kind of
+      behavior that people expect for printf.
+
 apps-6.2 2011-05-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * apps/examples/nxffs:  Add a test a a configuration that will be used to
       verify NXFFS.
+
+apps-6.3 2011-05-15 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * apps/interpreter: Add a directory to hold interpreters.  The Pascal add-
+      on module now installs and builds under this directory.
+    * apps/interpreter/ficl: Added logic to build Ficl (the "Forth Inspired
+      Command Language").  See http://ficl.sourceforge.net/.
+    * apps/netutils/dhcpc, dhcpcd, and tftp.  If these directories are included
+      in the configuration but CONFIG_NET_UDP is disable (which is not very wise),
+      then a make error occurs because tools/mkdep.sh is called with no files.
+    * system/free: Move Uros' custom free command from vsn/free
+    * system/install: Add a new install command submitted by Uros Platise.
+    * examples/rgmp.  Add a placeholder for an RGMP build example.
+      RGMP is a project for running GPOS and RTOS simultaneously on
+      multi-processor platforms. See http://rgmp.sourceforge.net/wiki/index.php/Main_Page
+      for further information about RGMP.  NOTE:  This is an empty example
+      on initial check-in.
 
 pascal-2.0 2009-12-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2187,59 +2301,9 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.4 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * Remove clock_getutc().  It is replaces with clock_gettime(CLOCK_ACTIVETIME).
-      Add other RTC related changes provided by Uros Platise.
-    * arch/arm/src/stm32/stm32_flash.c: Add support for access to on-chp STM32
-      FLASH; beginning of integration with NXFFS (Uros Platise).
-    * arch/mips: Added directory structure for PIC32 support
-    * configs/pcblogic-pic32mx:  Add directory structure for PCB Logic PIC32MX board
-    * apps/include:  Move include/apps to apps/include.  A symbolic link is created at
-      build time
-    * Makefile: Removed support for Pascal pcode interpreter.  Support for that
-      interpreter has been moved to apps/interpreter/Makefile.
-    * tools/mkdep.sh: Should not report an error if there are no files on the command
-      line.  This happens normally in certain configurations.
-    * drivers/usbhost: Sheref Younan reported an error in the error handling when
-      connection to a USB device fails.  In certain fail cases, the logic would try
-      to free the device class instance twice, the first was okay, but the second
-      caused a crash.
-    * graphics/nxbe/nxbe_colormap.c: Fix error noted by Bassem Fahmy.  The function
-      nxbe_colormap was change to nxbe_configure... apparently "search-and-replace"
-      error. This error was not noticed before because most NX platforms do not use
-      colormapping.
-    * arch/rgmp and configs/rgmp.  Add architecture support and build
-      configuration for RGMP.  RGMP is a project for running GPOS and
-      RTOS simultaneously on multi-processor platforms. See
-      http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
-      information about RGMP.
-    * lib/stdio/lib_fclose.c: Must flush all buffered data when the file is closed.
-      Instead, it was discarding the buffered data.
-    * lib/stdio: All output stream logic was modified to support CONFIG_STDIO_LINEBUFFER.
-      If standard C buffered I/O is enabled (CONFIG_STDIO_BUFFER_SIZE > 0), then this
-      option may be added to force automatic, line-oriented flushing the output buffer
-      for putc(), fputc(), putchar(), puts(), fputs(), printf() fprintf(), and vfprintf().
-      When a newline is encountered in the output string, the output buffer will be
-      flushed.  This (slightly) increases the NuttX footprint but supports the kind of
-      behavior that people expect for printf.
-
-apps-6.3 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * apps/interpreter: Add a directory to hold interpreters.  The Pascal add-
-      on module now installs and builds under this directory.
-    * apps/interpreter/ficl: Added logic to build Ficl (the "Forth Inspired
-      Command Language").  See http://ficl.sourceforge.net/.
-    * apps/netutils/dhcpc, dhcpcd, and tftp.  If these directories are included
-      in the configuration but CONFIG_NET_UDP is disable (which is not very wise),
-      then a make error occurs because tools/mkdep.sh is called with no files.
-    * system/free: Move Uros' custom free command from vsn/free
-    * system/install: Add a new install command submitted by Uros Platise.
-    * examples/rgmp.  Add a placeholder for an RGMP build example.
-      RGMP is a project for running GPOS and RTOS simultaneously on
-      multi-processor platforms. See http://rgmp.sourceforge.net/wiki/index.php/Main_Page
-      for further information about RGMP.  NOTE:  This is an empty example
-      on initial check-in.
+apps-6.4 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-3.0 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
