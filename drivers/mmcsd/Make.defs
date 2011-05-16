@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/mmcsd/Make.defs
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,14 @@
 #
 ############################################################################
 
-MMCSD_ASRCS  =
-MMCSD_CSRCS  = mmcsd_sdio.c mmcsd_spi.c mmcsd_debug.c
+# Include MMC/SD drivers
+
+CSRCS += mmcsd_sdio.c mmcsd_spi.c mmcsd_debug.c
+
+# Include MMC/SD driver build support
+
+DEPPATH += --dep-path mmcsd
+VPATH += :mmcsd
+CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/mmcsd}
+
 

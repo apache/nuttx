@@ -33,12 +33,15 @@
 #
 ############################################################################
 
-SENSOR_ASRCS  =
-SENSOR_CSRCS = 
-
+# Include sensor drivers
 # These drivers depend on I2C support
 
 ifeq ($(CONFIG_I2C),y)
-SENSOR_CSRCS += lis331dl.c
+  CSRCS += lis331dl.c
 endif
 
+# Include sensor driver build support
+
+DEPPATH += --dep-path sensors
+VPATH += :sensors
+CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/sensors}

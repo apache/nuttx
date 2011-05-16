@@ -2,7 +2,9 @@
  * arch/arm/src/stm32/stm32_gpio.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *           Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -221,6 +223,28 @@ EXTERN void stm32_gpiowrite(uint32_t pinset, bool value);
 EXTERN bool stm32_gpioread(uint32_t pinset);
 
 /************************************************************************************
+ * Name: stm32_gpiosetevent
+ *
+ * Description:
+ *   Sets/clears GPIO based event and interrupt triggers.
+ * 
+ * Limitations:
+ *   Presently single gpio can configured on the same EXTI line.
+ * 
+ * Parameters:
+ *  - pinset: gpio pin configuration
+ *  - rising/falling edge: enables
+ *  - event:  generate event when set
+ *  - func:   when non-NULL, generate interrupt
+ * 
+ * Returns: 
+ *  True when GPIO Event/Interrupt generation is successfully configured.
+ ************************************************************************************/
+
+EXTERN bool stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge, 
+                       bool event, void (*func)(void));
+
+/************************************************************************************
  * Function:  stm32_dumpgpio
  *
  * Description:
@@ -236,14 +260,16 @@ EXTERN int stm32_dumpgpio(uint32_t pinset, const char *msg);
 
 
 /************************************************************************************
- * Function:  stm32_gpio_remap
+ * Function:  stm32_gpioinit
  *
  * Description:
- *   Based on configuration within the .config file, remap positions of alternative
- *   functions. Typically called from stm32_start().
+ *   Based on configuration within the .config file, it does:
+ *    - Remaps positions of alternative functions. 
+ * 
+ * Typically called from stm32_start().
  ************************************************************************************/
 
-EXTERN void stm32_gpio_remap(void);
+EXTERN void stm32_gpioinit(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -152,7 +152,9 @@
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests
+ *   nbits - The number of bits requests.
+ *           If value is greater > 0 then it implies MSB first
+ *           If value is below < 0, then it implies LSB first with -nbits
  *
  * Returned Value:
  *   none
@@ -349,7 +351,8 @@ enum spi_dev_e
   SPIDEV_MMCSD,     /* Select SPI MMC/SD device */
   SPIDEV_FLASH,     /* Select SPI FLASH device */
   SPIDEV_ETHERNET,  /* Select SPI ethernet device */
-  SPIDEV_DISPLAY    /* Select SPI LCD/OLED display device */
+  SPIDEV_DISPLAY,   /* Select SPI LCD/OLED display device */
+  SPIDEV_WIRELESS   /* Select SPI Wireless device */
 };
 
 /* Certain SPI devices may required differnt clocking modes */

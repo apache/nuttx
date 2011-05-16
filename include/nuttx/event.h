@@ -125,7 +125,7 @@ typedef struct event_s event_t;
  * 
  * \return Valid structure or NULL on error with errno set.
  */
-event_t * event_create( void * base );
+event_t * event_create(void * base);
 
 /** Delete unused instance of Events. A call to this function also destroys
  *  all bindings. 
@@ -133,16 +133,20 @@ event_t * event_create( void * base );
  * \param events Pointer to a structure as returned by event_create()
  * \return 0 On success or -1 on error.
  */
-int event_delete( event_t *events );
+int event_delete(event_t *events);
 
 /** Post an event, equal to period = 0 
+ * 
+ * In case of connected events, those are called prior calling
+ * the given event. Since the event is called last on the list
+ * it may serve as an acknowledgement mechanism.
  * 
  * \param events Pointer to a structure as returned by event_create()
  * \param event   Callback to be called
  * \param arg     Optional argument to be passed to the event.
  * \return 0 On success or -1 on error.
  */ 
-int event_post( event_t *events, event_callback_t event, void *arg );
+int event_post(event_t *events, event_callback_t event, void *arg);
 
 /** Trigger an event without calling it but may trigger connected events 
  *
@@ -151,7 +155,23 @@ int event_post( event_t *events, event_callback_t event, void *arg );
  * \param arg     Optional argument to be passed to the event.
  * \return 0 On success or -1 on error.
  */ 
-int event_signal( event_t *events, event_callback_t event, void *arg );
+int event_signal(event_t *events, event_callback_t event, void *arg);
+
+/** Calls all connected events only immediately.
+ *
+ * \param events Pointer to a structure as returned by event_create()
+ * \param event   Callback to be called
+ * \param arg     Optional argument to be passed to the event.
+ * \return 0 On success or -1 on error.
+ */ 
+int event_call(event_t *events, event_callback_t event, void *arg);
+
+/** Are there any connections to given event
+ * \param events Pointer to a structure as returned by event_create()
+ * \param event   Callback to be called
+ * \return 1 When empty otherwise 0
+ */
+int event_isempty(event_t *events, event_callback_t event);
 
 /** Start timer with given period 
  * 
@@ -161,7 +181,7 @@ int event_signal( event_t *events, event_callback_t event, void *arg );
  * \param period  Time to first occurence.
  * \return 0 On success or -1 on error.
  */
-int event_start( event_t *events, event_callback_t event, void *arg, clock_t period );
+int event_start(event_t *events, event_callback_t event, void *arg, clock_t period);
 
 /** Stop timer, matches only those with equal event and arg.
  * 
@@ -170,7 +190,7 @@ int event_start( event_t *events, event_callback_t event, void *arg, clock_t per
  * \param arg     Optional argument to be passed to the event.
  * \return 0 On success or -1 on error.
  */
-int event_stop( event_t *events, event_callback_t event, void *arg );
+int event_stop(event_t *events, event_callback_t event, void *arg);
 
 /** Stop all timers related to the same event callback 
  * 
@@ -178,7 +198,7 @@ int event_stop( event_t *events, event_callback_t event, void *arg );
  * \param event   Callback to be called
  * \return 0 On success or -1 on error.
  */
-int event_stopall( event_t *events, event_callback_t event );
+int event_stopall(event_t *events, event_callback_t event);
 
 /** Get present time of given timer 
  * 
@@ -187,7 +207,7 @@ int event_stopall( event_t *events, event_callback_t event );
  * \param arg     Optional argument to be passed to the event.
  * \return 0 On success or -1 on error.
  */
-clock_t event_gettime( event_t *events, event_callback_t event, void *arg );
+clock_t event_gettime(event_t *events, event_callback_t event, void *arg);
 
 /** Bind two events 
  * 
@@ -225,7 +245,8 @@ int event_disconnectall(event_t *dest_events, event_callback_t dest_event);
  * \param timeout Time to wait for a callback to be served.
  * \return Remaining time.
  * */
-clock_t event_handle( event_t *events, clock_t timeout );
+clock_t event_handle(event_t *events, clock_t timeout);
+
 
 #undef EXTERN
 #if defined(__cplusplus)

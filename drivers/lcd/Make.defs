@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/lcd/Make.defs
 #
-#   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,24 +33,28 @@
 #
 ############################################################################
 
-LCD_ASRCS =
-LCD_CSRCS =
-
 # Don't build anything if there is no NX support for LCD drivers
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
 
+# Include LCD drivers
+
 ifeq ($(CONFIG_LCD_P14201),y)
-  LCD_CSRCS = p14201.c
+  CSRCS += p14201.c
 endif
 
 ifeq ($(CONFIG_LCD_NOKIA6100),y)
-  LCD_CSRCS = nokia6100.c
+  CSRCS += nokia6100.c
 endif
 
 ifeq ($(CONFIG_LCD_UG9664HSWAG01),y)
-  LCD_CSRCS = ug-9664hswag01.c
+  CSRCS += ug-9664hswag01.c
 endif
 
+# Include LCD driver build support
+
+DEPPATH += --dep-path lcd
+VPATH += :lcd
+CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/lcd}
 endif
 

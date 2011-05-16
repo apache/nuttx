@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/bch/Make.defs
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,20 @@
 #
 ############################################################################
 
-BCH_ASRCS  =
-BCH_CSRCS  = bchlib_setup.c bchlib_teardown.c bchlib_read.c bchlib_write.c \
-             bchlib_cache.c bchlib_sem.c bchdev_register.c bchdev_unregister.c \
-	     bchdev_driver.c
+ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
+ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 
+# Include BCH driver
+
+CSRCS += bchlib_setup.c bchlib_teardown.c bchlib_read.c bchlib_write.c \
+		 bchlib_cache.c bchlib_sem.c bchdev_register.c bchdev_unregister.c \
+		 bchdev_driver.c
+
+# Include BCH driver build support
+
+DEPPATH += --dep-path bch
+VPATH += :bch
+CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/bch}
+
+endif
+endif

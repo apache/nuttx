@@ -39,87 +39,41 @@ ifeq ($(WINTOOL),y)
 INCDIROPT = -w
 endif
 
-ROOTDEPPATH = --dep-path .
+DEPPATH = --dep-path .
+ASRCS =
+CSRCS =
+VPATH = .
 
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
+# Include support for various drivers.  Each Make.defs file will add its
+# files to the source file list, add its DEPPATH info, and will add
+# the appropriate paths to the VPATH variable
+
 include serial/Make.defs
-SERIALDEPPATH = --dep-path serial
-endif
-
-ifeq ($(CONFIG_NET),y)
 include net/Make.defs
-NETDEPPATH = --dep-path net
-endif
-
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 include pipes/Make.defs
-PIPEDEPPATH = --dep-path pipes
-endif
-
-ifeq ($(CONFIG_USBDEV),y)
 include usbdev/Make.defs
-USBDEVDEPPATH = --dep-path usbdev
-CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/usbdev}
-endif
-
-ifeq ($(CONFIG_USBHOST),y)
 include usbhost/Make.defs
-USBHOSTDEPPATH = --dep-path usbhost
-CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/usbhost}
-endif
-
 include mmcsd/Make.defs
-MMCSDDEPPATH = --dep-path mmcsd
-CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/mmcsd}
-
 include lcd/Make.defs
-LCDDEPPATH = --dep-path lcd
-CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/lcd}
-
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 include bch/Make.defs
-BCHDEPPATH = --dep-path bch
-CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/bch}
-endif
-endif
-
 include mtd/Make.defs
-MTDDEPPATH = --dep-path mtd
-
 include sensors/Make.defs
-SENSORSDEPPATH = --dep-path sensors
-CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/sensors}
-
-ifeq ($(CONFIG_WIRELESS),y)
 include wireless/Make.defs
-WIRELESSDEPPATH = --dep-path wireless
-CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/wireless}
-endif
 
-ASRCS		= $(SERIAL_ASRCS) $(NET_ASRCS) $(PIPE_ASRCS) $(USBDEV_ASRCS) \
-			  $(USBHOST_ASRCS) $(MMCSD_ASRCS) $(LCD_ASRCS) $(BCH_ASRCS) \
-			  $(MTD_ASRCS) $(SENSOR_ASRCS) $(WIRELESS_ASRCS)
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-
-CSRCS		=
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-CSRCS		+= dev_null.c dev_zero.c loop.c  can.c
+  CSRCS += dev_null.c dev_zero.c loop.c  can.c
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-CSRCS		+= ramdisk.c rwbuffer.c
+  CSRCS += ramdisk.c rwbuffer.c
 endif
 endif
-CSRCS		+= $(SERIAL_CSRCS) $(NET_CSRCS) $(PIPE_CSRCS) $(USBDEV_CSRCS) \
-			   $(USBHOST_CSRCS) $(MMCSD_CSRCS) $(LCD_CSRCS) $(BCH_CSRCS) \
-			   $(MTD_CSRCS) $(SENSOR_CSRCS) $(WIRELESS_CSRCS)
+
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
 BIN			= libdrivers$(LIBEXT)
-
-VPATH		= serial:net:pipes:usbdev:usbhost:mmcsd:lcd:bch:mtd:sensors:wireless
 
 all:	$(BIN)
 
@@ -135,10 +89,7 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-	@$(MKDEP) $(ROOTDEPPATH) $(SERIALDEPPATH) $(NETDEPPATH) $(PIPEDEPPATH) \
-	  $(USBDEVDEPPATH) $(USBHOSTDEPPATH) $(MMCSDDEPPATH) $(LCDDEPPATH) \
-	  $(BCHDEPPATH) $(MTDDEPPATH) $(SENSORSDEPPATH) $(WIRELESSDEPPATH) \
-	  $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@$(MKDEP) $(DEPPATH) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend

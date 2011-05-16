@@ -33,9 +33,15 @@
 #
 ############################################################################
 
-WIRELESS_ASRCS  =
-WIRELESS_CSRCS  = 
-
 ifeq ($(CONFIG_WIRELESS),y)
-WIRELESS_CSRCS  += cc1101.c
+
+# Include wireless drivers
+
+CSRCS += cc1101.c ISM1_868MHzGFSK100kbps.c ISM2_905MHzGFSK250kbps.c
+
+# Include wireless build support
+
+DEPPATH += --dep-path wireless/cc1101
+VPATH += :wireless/cc1101
+CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/wireless/cc1101}
 endif

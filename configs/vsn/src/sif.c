@@ -79,6 +79,9 @@
 #include <nuttx/i2c.h>
 #include <nuttx/sensors/lis331dl.h>
 
+#include <nuttx/spi.h>
+#include <nuttx/wireless/cc1101.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -86,7 +89,7 @@
 #include <errno.h>
 
 #include "vsn.h"
-
+#include "stm32_gpio.h"
 
 
 /****************************************************************************
@@ -181,6 +184,8 @@ struct vsn_sif_s {
     
     struct i2c_dev_s    * i2c1;
     struct i2c_dev_s    * i2c2;
+    
+    struct spi_dev_s    * spi2;
     
     sem_t               exclusive_access;
 };
@@ -329,6 +334,8 @@ int sif_anout_init(void)
 
     vsn_sif.i2c1 = up_i2cinitialize(1);
     vsn_sif.i2c2 = up_i2cinitialize(2);
+    
+    vsn_sif.spi2 = up_spiinitialize(2);
 
     return OK;
 }
@@ -489,6 +496,8 @@ int sif_init(void)
  * Provides direct access to the sensor connector, readings, and diagnostic.
  **/
  
+extern void cc1101_eventcb(void);
+ 
 int sif_main(int argc, char *argv[])
 {
     if (argc >= 2) {	
@@ -582,6 +591,43 @@ int sif_main(int argc, char *argv[])
             else printf("Exit point: errno=%d\n", errno);
 
             return 0;
+        }
+        else if (!strcmp(argv[1], "cc")) {
+            struct cc1101_dev_s * cc;
+            uint8_t buf[64];
+            int sta;
+            
+            cc = cc1101_init(vsn_sif.spi2, CC1101_PIN_GDO0, GPIO_CC1101_GDO0,
+                &cc1101_rfsettings_ISM1_868MHzGFSK100kbps);
+                
+            if (cc) {
+            
+                /* Work-around: enable falling edge, event and interrupt */
+                stm32_gpiosetevent(GPIO_CC1101_GDO0, false, true, true, cc1101_eventcb);
+            
+                /* Enable clock to ARM PLL, allowing to speed-up to 72 MHz */
+                cc1101_setgdo(cc, CC1101_PIN_GDO2, CC1101_GDO_CLK_XOSC3);
+                
+                cc1101_setchannel(cc, 0);   /* AV Test Hex, receive on that channel */
+                cc1101_receive(cc);          /* Enter RX mode */
+                while(1) 
+                {
+                    fflush(stdout);
+                    sta = cc1101_read(cc, buf, 64);
+                    if (sta > 0) {
+                        printf("Received %d bytes: rssi=%d [dBm], LQI=%d (CRC %s)\n", 
+                            sta, cc1101_calcRSSIdBm(buf[sta-2]), buf[sta-1]&0x7F,
+                            (buf[sta-1]&0x80)?"OK":"BAD");
+                            
+                        cc1101_write(cc, buf, 61);
+                        cc1101_send(cc);
+                        
+                        printf("Packet send back\n");
+                            
+                        cc1101_receive(cc);
+                    }
+                }
+            }
         }
     }
 

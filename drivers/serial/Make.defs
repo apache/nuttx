@@ -33,12 +33,18 @@
 #
 ############################################################################
 
-SERIAL_ASRCS	=
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-SERIAL_CSRCS	= serial.c serialirq.c lowconsole.c
+
+# Include serial drivers
+
+CSRCS += serial.c serialirq.c lowconsole.c
+
 ifeq ($(CONFIG_16550_UART),y)
-SERIAL_CSRCS	+= uart_16550.c
+  CSRCS += uart_16550.c
 endif
-else
-SERIAL_CSRCS	= 
+
+# Include serial build support
+
+DEPPATH += --dep-path serial
+VPATH += :serial
 endif

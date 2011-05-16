@@ -189,8 +189,10 @@ struct lis331dl_dev_s * lis331dl_init(struct i2c_dev_s * i2c, uint16_t address)
     ASSERT(i2c);
     ASSERT(address);
     
-    if ( (dev = kmalloc( sizeof(struct lis331dl_dev_s) )) == NULL )
+    if ( (dev = kmalloc( sizeof(struct lis331dl_dev_s) )) == NULL ) {
+        errno = ENOMEM;
         return NULL;
+    }
         
     memset(dev, 0, sizeof(struct lis331dl_dev_s));
     dev->i2c     = i2c;

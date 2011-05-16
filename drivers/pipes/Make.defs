@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/pipes/Make.defs
 #
-#   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,14 @@
 #
 ############################################################################
 
-PIPE_ASRCS  =
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-PIPE_CSRCS	= pipe.c fifo.c pipe_common.c
-else
-PIPE_CSRCS	= 
+
+# Include pipe driver
+
+CSRCS += pipe.c fifo.c pipe_common.c
+
+# Include pipe build support
+
+DEPPATH += --dep-path pipes
+VPATH += :pipes
 endif
