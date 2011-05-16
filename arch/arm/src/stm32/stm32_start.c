@@ -85,7 +85,7 @@ void __start(void)
 
   stm32_clockconfig();
   stm32_lowsetup();
-  stm32_gpio_remap();
+  stm32_gpioinit();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be

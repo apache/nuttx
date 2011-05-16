@@ -1289,9 +1289,9 @@ static void spi_portinitialize(FAR struct stm32_spidev_s *priv)
 FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   FAR struct stm32_spidev_s *priv = NULL;
-  irqstate_t flags;
 
-  flags = irqsave();
+  irqstate_t flags = irqsave();
+  
 #ifdef CONFIG_STM32_SPI1
   if (port == 1)
     {
@@ -1300,16 +1300,6 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       /* Select SPI1 */
 
       priv = &g_spi1dev;
-
-      /* Handle pin mapping */
-
-      mapr = getreg32(STM32_AFIO_MAPR);
-#ifdef CONFIG_STM32_SPI1_REMAP
-      mapr |= AFIO_MAPR_SPI1_REMAP;
-#else
-      mapr &= ~AFIO_MAPR_SPI1_REMAP;
-#endif
-      putreg32(mapr, STM32_AFIO_MAPR);
 
       /* Configure SPI1 pins: SCK, MISO, and MOSI */
 
@@ -1330,6 +1320,12 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       priv = &g_spi2dev;
 
+      /* Configure SPI2 pins: SCK, MISO, and MOSI */
+
+      stm32_configgpio(GPIO_SPI2_SCK);
+      stm32_configgpio(GPIO_SPI2_MISO);
+      stm32_configgpio(GPIO_SPI2_MOSI);
+
       /* Set up default configuration: Master, 8-bit, etc. */
 
       spi_portinitialize(priv);
@@ -1342,12 +1338,6 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       /* Select SPI3 */
 
       priv = &g_spi3dev;
-
-      /* Handle pin mapping */
-
-#ifdef CONFIG_STM32_SPI3_REMAP
-#  error "Available only in connectivity devices"
-#endif
 
       /* Configure SPI3 pins: SCK, MISO, and MOSI */
 
