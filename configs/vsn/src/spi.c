@@ -58,6 +58,7 @@
 #include "chip.h"
 #include "stm32_gpio.h"
 #include "stm32_internal.h"
+#include "stm32_waste.h"
 #include "vsn.h"
 
 
@@ -98,11 +99,13 @@ void weak_function stm32_spiinitialize(void)
    *       Configurations of SPI pins is performed in stm32_spi.c.
    *       Here, we only initialize chip select pins unique to the board architecture.
    */
+   
+#ifdef CONFIG_STM32_SPI2
+    stm32_configgpio(GPIO_CC1101_CS);
+#endif
 
 #ifdef CONFIG_STM32_SPI3
-
-  // Configure the SPI-based FRAM CS GPIO
-  stm32_configgpio(GPIO_FRAM_CS);
+    stm32_configgpio(GPIO_FRAM_CS);
 #endif
 }
 
@@ -147,7 +150,18 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+    spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+    
+    if (devid == SPIDEV_WIRELESS) {
+    
+        stm32_gpiowrite(GPIO_CC1101_CS, !selected);
+
+        /* Wait for MISO to go low, indicates that Quart has stabilized */
+        if (selected) {
+            while( stm32_gpioread(GPIO_SPI2_MISO) ) up_waste();
+        }
+        
+    }
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
