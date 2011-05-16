@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/mips/include/mips32/irq.h
+ * arch/mips/src/common/up_arch.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,70 +33,57 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_MIPS_INCLUDE_MIPS32_IRQ_H
-#define __ARCH_MIPS_INCLUDE_MIPS32_IRQ_H
+#ifndef ___ARCH_ARM_SRC_COMMON_UP_ARCH_H
+#define ___ARCH_ARM_SRC_COMMON_UP_ARCH_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#ifndef __ASSEMBLY__
+# include <stdint.h>
+#endif
+
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Lots of missing logic here */
-
-#define XCPTCONTEXT_REGS 1
-
 /****************************************************************************
- * Public Types
+ * Inline Functions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-struct xcptcontext
-{
-  /* The following function pointer is non-NULL if there are pending signals
-   * to be processed.
-   */
-
-#ifndef CONFIG_DISABLE_SIGNALS
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-#endif
-
-  /* Register save area */
-
-  uint32_t regs[XCPTCONTEXT_REGS];
-};
-
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
+# define getreg8(a)           (*(volatile uint8_t *)(a))
+# define putreg8(v,a)         (*(volatile uint8_t *)(a) = (v))
+# define getreg16(a)          (*(volatile uint16_t *)(a))
+# define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
+# define getreg32(a)          (*(volatile uint32_t *)(a))
+# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef __cplusplus
+#undef EXTERN
+#if defined(__cplusplus)
 #define EXTERN extern "C"
 extern "C" {
 #else
 #define EXTERN extern
 #endif
 
+/* Atomic modification of registers */
+
+EXTERN void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
+EXTERN void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
+EXTERN void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+
 #undef EXTERN
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
 
-#endif /* __ASSEMBLY */
-#endif /* __ARCH_MIPS_INCLUDE_MIPS32_IRQ_H */
-
+#endif /* __ASSEMBLY__ */
+#endif  /* ___ARCH_ARM_SRC_COMMON_UP_ARCH_H */

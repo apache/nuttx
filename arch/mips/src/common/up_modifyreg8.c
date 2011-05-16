@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/include/mips32/irq.h
+ * arch/mips/src/common/up_modifyreg8.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,70 +33,53 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_MIPS_INCLUDE_MIPS32_IRQ_H
-#define __ARCH_MIPS_INCLUDE_MIPS32_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <debug.h>
+
+#include <arch/irq.h>
+#include <nuttx/arch.h>
+
+#include "up_arch.h"
+
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Lots of missing logic here */
-
-#define XCPTCONTEXT_REGS 1
-
 /****************************************************************************
- * Public Types
+ * Private Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-struct xcptcontext
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: modifyreg8
+ *
+ * Description:
+ *   Atomically modify the specified bits in a memory mapped register
+ *
+ ****************************************************************************/
+
+void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits)
 {
-  /* The following function pointer is non-NULL if there are pending signals
-   * to be processed.
-   */
+  irqstate_t flags;
+  uint8_t    regval;
 
-#ifndef CONFIG_DISABLE_SIGNALS
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-#endif
-
-  /* Register save area */
-
-  uint32_t regs[XCPTCONTEXT_REGS];
-};
-
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+  flags   = irqsave();
+  regval  = getreg8(addr);
+  regval &= ~clearbits;
+  regval |= setbits;
+  putreg8(regval, addr);
+  irqrestore(flags);
 }
-#endif
-
-#endif /* __ASSEMBLY */
-#endif /* __ARCH_MIPS_INCLUDE_MIPS32_IRQ_H */
-
