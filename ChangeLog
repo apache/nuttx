@@ -1761,3 +1761,6 @@
 	  behavior that people expect for printf.
 
 6.4 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* lib/drivers/cc1101: Add initial, functional CC1101 wireless driver
+	  (contributed by Uros Platise)
