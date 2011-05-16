@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pcblogic-pic32mx/src/pcblogic_internal.h
+ * configs/pcblogic-pic32mx/src/pcblogic-internal.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -66,6 +66,30 @@
 extern "C" {
 #else
 #define EXTERN extern
+#endif
+
+/************************************************************************************
+ * Name: pic32mx_spiinitialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the PCB Logic board.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2)
+EXTERN void weak_function pic32mx_spiinitialize(void);
+#endif
+
+/************************************************************************************
+ * Name: pic32mx_ledinit
+ *
+ * Description:
+ *   Configure on-board LEDs if LED support has been selected.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+EXTERN void pic32mx_ledinit(void);
 #endif
 
 #undef EXTERN
