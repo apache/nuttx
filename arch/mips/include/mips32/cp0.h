@@ -45,6 +45,42 @@
 /********************************************************************************************
  * Pre-Processor Definitions
  ********************************************************************************************/
+/* CP0 Register Addresses *******************************************************************/
+
+#ifdef __ASSEMBLY__
+#  define MIPS32_CP0_INDEX1         $0,0   /* Index into the TLB array */
+#  define MIPS32_CP0_RANDOM1        $1,0   /* Randomly generated index into the TLB array */
+#  define MIPS32_CP0_ENTRYLO01      $2,0   /* LS TLB entry for even-numbered pages */
+#  define MIPS32_CP0_ENTRYLO11      $3,0   /* LS TLB entry for odd-numbered pages */
+#  define MIPS32_CP0_CONTEXT2       $4,0   /* Page table address */
+#  define MIPS32_CP0_PAGEMASK1      $5,0   /* Variable page sizes in TLB entries */
+#  define MIPS32_CP0_WIRED1         $6,0   /* umber of fixed (“wired”) TLB entries */
+#  define MIPS32_CP0_BADVADDR       $8,0   /* Address of most recent exception */
+#  define MIPS32_CP0_COUNT          $9,0   /* Processor cycle count */
+#  define MIPS32_CP0_ENTRYHI1       $10,0  /* High-order portion of the TLB entry */
+#  define MIPS32_CP0_COMPARE        $11,0  /* Timer interrupt control */
+#  define MIPS32_CP0_STATUS         $12,0  /* Processor status and control */
+#  define MIPS32_CP0_CAUSE          $13,0  /* Cause of last general exception */
+#  define MIPS32_CP0_EPC            $14,0  /* Program counter at last exception */
+#  define MIPS32_CP0_PRID           $15,0  /* Processor identification and revision */
+#  define MIPS32_CP0_CONFIG         $16,0  /* Configuration register */
+#  define MIPS32_CP0_CONFIG1        $16,1  /* Configuration register 1 */
+#  define MIPS32_CP0_CONFIG2        $16,2  /* Configuration register 3 */
+#  define MIPS32_CP0_CONFIG3        $16,2  /* Configuration register 3 */
+#  define MIPS32_CP0_LLADDR         $17,0  /* Load linked address */
+#  define MIPS32_CP0_WATCHLO2       $18,0  /* LS Watchpoint address */
+#  define MIPS32_CP0_WATCHHI2       $19,0  /* MS Watchpoint address and mask */
+#  define MIPS32_CP0_DEBUG3         $23,0  /* Debug control and exception status */
+#  define MIPS32_CP0_DEPC3          $24,0  /* Program counter at last debug exception */
+#  define MIPS32_CP0_ERRCTL         $26,0  /* Controls access data CACHE instruction */
+#  define MIPS32_CP0_TAGLO          $28,0  /* LS portion of cache tag interface */
+#  define MIPS32_CP0_DATALO         $28,1  /* LS portion of cache tag interface */
+#  define MIPS32_CP0_TAGHI          $29,0  /* MS portion of cache tag interface */
+#  define MIPS32_CP0_DATAHI         $29,1  /* MS portion of cache tag interface */
+#  define MIPS32_CP0_ERROREPC2      $30,0  /* Program counter at last error */
+#  define MIPS32_CP0_DESAVE3        $31,0  /* Debug handler scratchpad register */
+#endif
+
 /* CP0 Registers ****************************************************************************/
 
 /* Register Number: 0 Sel: 0 Name: Index

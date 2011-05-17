@@ -9,14 +9,14 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *	notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
+ *	notice, this list of conditions and the following disclaimer in
+ *	the documentation and/or other materials provided with the
+ *	distribution.
  * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ *	used to endorse or promote products derived from this software
+ *	without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,66 +32,197 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-
-/* The PIC32MX460F512L has 512Kb of FLASH beginning at KSEG0 address
- * 0x9d00:0000 and 32Kb of SRAM at KSEG0 address 0x8000:0000.
- */
+/* Memory Regions ***********************************************************/
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x9d000000, LENGTH = 512K
-    sram (rwx) : ORIGIN = 0x80000000, LENGTH = 32K
+	/* The PIC32MX460F512L has 512Kb of program FLASH at physical address
+	 * 0x1d000000 but is always accessed at KSEG0 address 0x9d00:0000
+	 */
+	
+	kseg0_progmem  (rx) : ORIGIN = 0x9d000000, LENGTH = 512K
+
+	/* The PIC32MX460F512L has 12Kb of boot FLASH at physical address
+	 * 0x1fc00000.  The initial reset vector is in KSEG1, but all other
+	 * accesses are in KSEG0.
+	 *
+	 *   REGION        PHYSICAL   KSEG   SIZE
+	 *   DESCRIPTION   START ADDR        (BYTES)
+	 *   ------------- ---------- ------ ---------------
+	 *   Reset         0x1fc00000 KSEG1  896
+	 *   BEV exception 0x1fc00380 KSEG1  256
+	 *   DBG exception 0x1fc00480 KSEG1  16
+	 *   Startup logic 0x1fc00490 KSEG0  4096-896-256-16
+	 *   Exceptions    0x1fc01000 KSEG0  4096
+	 *   Debug code    0x1fc02000 KSEG1  4096-16
+	 *   DEVCFG3-0     0x1fc02ff0 KSEG1  16
+	 */
+
+	kseg1_reset    (rx) : ORIGIN = 0xbfc00000, LENGTH = 896
+	kseg1_bevexcpt (rx) : ORIGIN = 0xbfc00380, LENGTH = 256
+	kseg1_dbgexcpt (rx) : ORIGIN = 0xbfc00480, LENGTH = 16
+	kseg0_bootmem  (rx) : ORIGIN = 0x9fc00490, LENGTH = 4096-1168
+	kseg0_exptmem  (rx) : ORIGIN = 0x9fc01000, LENGTH = 4096
+	kseg1_dbgcode  (rx) : ORIGIN = 0xbfc02000, LENGTH = 4096-16
+	kseg1_devcfg    (r) : ORIGIN = 0xbfc02ff0, LENGTH = 16
+
+	/* The PIC32MX460F512L has 32Kb of data memory at physical address
+	 * 0x00000000.  Since the PIC32MX has no data cache, this memory is
+	 * always accessed through KSEG1.
+	 */
+
+	kseg1_datamem (w!x) : ORIGIN = 0xa0000000, LENGTH = 32K
 }
 
-OUTPUT_ARCH(mips)
-ENTRY(_stext)
+OUTPUT_FORMAT("elf32-tradlittlemips")
+OUTPUT_ARCH(pic32mx)
+ENTRY(__start)
+
 SECTIONS
 {
-	.text : {
-		_stext = ABSOLUTE(.);
+	/* Boot FLASH sections */
+
+	.reset :
+	{
+		*(.reset)
+	} > kseg1_reset
+
+	.bev_excp :
+	{
+		*(.bev_excp)
+	} > kseg1_bevexcpt
+
+	.dbg_excpt = ORIGIN(kseg1_dbgexcpt);
+
+	.start :
+	{
+		*(.start)
+	} > kseg0_bootmem
+
+	.vectors :
+	{
 		*(.vectors)
-		*(.text .text.*)        
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)        
+	} > kseg0_exptmem
+
+	.dbg_code = ORIGIN(kseg1_dbgcode);
+
+	.devcfg :
+	{
+		*(.devcfg)
+	} > kseg1_devcfg
+
+	/* Program FLASH sections */
+
+	.text :
+	{
+		_stext = ABSOLUTE(.);
+		*(.text .text.*)		
+		*(.stub)		
+		KEEP (*(.text.*personality*))
 		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
+		*(.gnu.warning)
+		*(.mips16.fn.*)
+		*(.mips16.call.*)
+
+		/* Read-only data is included in the text section */
+
+		*(.rodata .rodata.*)		
+		*(.rodata1)
 		*(.gnu.linkonce.r.*)
+
+		/* Small initialized constant global and static data */
+	
+		*(.sdata2 .sdata2.*)
+		*(.gnu.linkonce.s2.*)
+
+		/* Uninitialized constant global and static data */
+
+		*(.sbss2 .sbss2.*)
+		*(.gnu.linkonce.sb2.*)
 		_etext = ABSOLUTE(.);
-	} > flash
+	} > kseg0_progmem
 
-	_eronly = ABSOLUTE(.);
+	/* Initialization data begins here in progmem */
 
-	.data : {
+	_data_loaddr = LOADADDR(.data);
+
+	.eh_frame_hdr : { *(.eh_frame_hdr) }
+	.eh_frame : ONLY_IF_RO { KEEP (*(.eh_frame)) }
+
+	/* RAM functions are positioned at the beginning of RAM so that
+	 * they can be guaranteed to satisfy the 2Kb alignment requirement.
+	 */
+
+	.ramfunc ALIGN(2K) :
+	{
+		_sramfunc =  ABSOLUTE(.);
+		*(.ramfunc	.ramfunc.*)
+		_eramfunc =  ABSOLUTE(.);
+	} > kseg1_datamem AT > kseg0_progmem
+
+	_ramfunc_loadaddr = LOADADDR(.ramfunc);
+	_ramfunc_sizeof = SIZEOF(.ramfunc);
+	_bmxdkpba_address = _sramfunc - ORIGIN(kseg1_datamem) ;
+	_bmxdudba_address = LENGTH(kseg1_datamem) ;
+	_bmxdupba_address = LENGTH(kseg1_datamem) ;
+
+	.dbg_data (NOLOAD) :
+	{
+		. += (DEFINED (_DEBUGGER) ? 0x200 : 0x0);
+	} > kseg1_datamem
+
+	.data :
+	{
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
+		KEEP (*(.gnu.linkonce.d.*personality*))
+		*(.data1)
+	} > kseg1_datamem AT > kseg0_progmem
+
+	.eh_frame : ONLY_IF_RW { KEEP (*(.eh_frame)) }
+	_gp = ALIGN(16) + 0x7FF0 ;
+
+	.got :
+	{
+		*(.got.plt) *(.got)
+	} > kseg1_datamem AT > kseg0_progmem
+
+	.sdata :
+	{
+		*(.sdata .sdata.* .gnu.linkonce.s.*)
+	} > kseg1_datamem AT > kseg0_progmem
+
+	.lit8 :
+	{
+		*(.lit8)
+	} > kseg1_datamem AT > kseg0_progmem
+
+	.lit4 :
+	{
+		*(.lit4)
 		_edata = ABSOLUTE(.);
-	} > sram AT > flash
+	} >kseg1_datamem AT>kseg0_progmem
 
-	.ARM.extab : {
-		*(.ARM.extab*)
-	} >sram
-
-	__exidx_start = ABSOLUTE(.);
-	.ARM.exidx : {
-		*(.ARM.exidx*)
-	} >sram
-	__exidx_end = ABSOLUTE(.);
-
-	.bss : {
+	.sbss :
+	{
 		_sbss = ABSOLUTE(.);
+		*(.dynsbss)
+		*(.sbss .sbss.* .gnu.linkonce.sb.*)
+		*(.scommon)
+	} >kseg1_datamem
+
+	.bss :
+	{
+		*(.dynbss)
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
-	} > sram
+	} > kseg1_datamem
 
-	/* Stabs debugging sections. */
+	/* Stabs debugging sections */
+
 	.stab 0 : { *(.stab) }
 	.stabstr 0 : { *(.stabstr) }
 	.stab.excl 0 : { *(.stab.excl) }
@@ -99,9 +230,39 @@ SECTIONS
 	.stab.index 0 : { *(.stab.index) }
 	.stab.indexstr 0 : { *(.stab.indexstr) }
 	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
+
+	/* DWARF debug sections */
+	/* DWARF 1 */
+
+	.debug 0 : { *(.debug) }
+	.line 0 : { *(.line) }
+
+	/* GNU DWARF 1 extensions */
+
+	.debug_srcinfo 0 : { *(.debug_srcinfo) }
+	.debug_sfnames 0 : { *(.debug_sfnames) }
+
+	/* DWARF 1.1 and DWARF 2 */
+
 	.debug_aranges 0 : { *(.debug_aranges) }
+	.debug_pubnames 0 : { *(.debug_pubnames) }
+
+	/* DWARF 2 */
+
+	.debug_info 0 : { *(.debug_info .gnu.linkonce.wi.*) }
+	.debug_abbrev 0 : { *(.debug_abbrev) }
+	.debug_line 0 : { *(.debug_line) }
+	.debug_frame 0 : { *(.debug_frame) }
+	.debug_str 0 : { *(.debug_str) }
+	.debug_loc 0 : { *(.debug_loc) }
+	.debug_macinfo 0 : { *(.debug_macinfo) }
+
+	/* SGI/MIPS DWARF 2 extensions */
+
+	.debug_weaknames 0 : { *(.debug_weaknames) }
+	.debug_funcnames 0 : { *(.debug_funcnames) }
+	.debug_typenames 0 : { *(.debug_typenames) }
+	.debug_varnames 0 : { *(.debug_varnames) }
+
+	/DISCARD/ : { *(.note.GNU-stack) }
 }

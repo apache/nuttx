@@ -76,7 +76,7 @@ static inline irqstate_t cp0_getstatus(void)
     (
       "\t.set    push\n"
       "\t.set    noat\n"
-      "\t mfc0   %0,$12\n"         /* Get CP0 status register */
+      "\t mfc0   %0,$12\n"              /* Get CP0 status register */
       "\t.set    pop\n"
       : "=r" (status)
       :
@@ -107,11 +107,11 @@ static inline void cp0_putstatus(irqstate_t status)
       "\t.set    push\n"
       "\t.set    noat\n"
       "\t.set    noreorder\n"
-      "\tmtc0   %0,$12\n"          /* Set the status to the provided value */
-      "\tnop\n"                    /* MTC0 status hazard: */
-      "\tnop\n"                    /* Recommended spacing: 3 */
+      "\tmtc0   %0,$12\n"                /* Set the status to the provided value */
+      "\tnop\n"                          /* MTC0 status hazard: */
+      "\tnop\n"                          /* Recommended spacing: 3 */
       "\tnop\n"
-      "\tnop\n"                    /* Plus one for good measure */
+      "\tnop\n"                          /* Plus one for good measure */
       "\t.set    pop\n"
       : 
       : "r" (status)

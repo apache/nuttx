@@ -47,6 +47,27 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* CP0 Register Addresses ***************************************************/
+
+#ifdef __ASSEMBLY__
+#  define PIC32MX_CP0_HWRENA   $7,0   /* Enables access via RDHWR hardware registers */
+#  define PIC32MX_CP0_BADVADDR $8,0   /* Address of most recent exception */
+#  define PIC32MX_CP0_COUNT    $9,0   /* Processor cycle count */
+#  define PIC32MX_CP0_COMPARE  $11,0  /* Timer interrupt control */
+#  define PIC32MX_CP0_STATUS   $12,0  /* Processor status and control */
+#  define PIC32MX_CP0_INTCTL   $12,1  /* Interrupt system status and control */
+#  define PIC32MX_CP0_SRSCTL   $12,2  /* Shadow register set status and control */
+#  define PIC32MX_CP0_SRSMAP   $12,3  /* Maps from vectored interrupt to a shadow set */
+#  define PIC32MX_CP0_CAUSE    $13,0  /* Cause of last general exception */
+#  define PIC32MX_CP0_EPC      $14,0  /* Program counter at last exception */
+#  define PIC32MX_CP0_PRID     $15,0  /* Processor identification and revision */
+#  define PIC32MX_CP0_EBASE    $15,1  /* Exception vector base register */
+#  define PIC32MX_CP0_CONFIG   $16,0  /* Configuration register */
+#  define PIC32MX_CP0_CONFIG1  $16,1  /* Configuration register 1 */
+#  define PIC32MX_CP0_CONFIG2  $16,2  /* Configuration register 3 */
+#  define PIC32MX_CP0_CONFIG3  $16,3  /* Configuration register 3 */
+#endif
+
 /* CP0 Registers ************************************************************/
 
 /* Register Number: 0-6: Reserved
@@ -146,7 +167,7 @@
 #undef CP0_STATUS_KSU_SUPER
 #undef CP0_STATUS_KSU_USER
 
-/* Register Number: 12 Sel: x Name: IntCtl */
+/* Register Number: 12 Sel: 1 Name: IntCtl */
 
 #define CP0_CONFIG_VS_SHIFT         (5)       /* Bits 5-9: Vector spacing bits */
 #define CP0_CONFIG_VS_MASK          (0x1f << CP0_CONFIG_VS_SHIFT)
@@ -157,7 +178,7 @@
 #  define CP0_CONFIG_VS_256BYTES    (0x08 << CP0_CONFIG_VS_SHIFT)
 #  define CP0_CONFIG_VS_512BYTES    (0x10 << CP0_CONFIG_VS_SHIFT)
 
-/* Register Number: 12 Sel: x Name: SRSCtl */
+/* Register Number: 12 Sel: 2 Name: SRSCtl */
 
 #define CP0_SRSCTL_CSS_SHIFT        (0)       /* Bits 0-3: Current shadow bit set */
 #define CP0_SRSCTL_CSS_MASK         (15 << CP0_SRSCTL_CSS_SHIFT)
@@ -173,7 +194,7 @@
 #  define CP0_SRSCTL_HSS_2SETS      (1 << CP0_SRSCTL_HSS_SHIFT) /* Two shadow sets */
 #  define CP0_SRSCTL_HSS_4SETS      (3 << CP0_SRSCTL_HSS_SHIFT) /* Four shadow sets */
 
-/* Register Number: 12 Sel: x Name: SRSMap */
+/* Register Number: 12 Sel: 3 Name: SRSMap */
 
 #define CP0_SRSMAP_SSV0_SHIFT       (0)       /* Bits 0-3: Shadow set vector 0 */
 #define CP0_SRSMAP_SSV0_MASK        (15 << CP0_SRSMAP_SSV0_SHIFT) 
@@ -229,7 +250,7 @@
 #undef CP0_PRID_OPTIONS_SHIFT
 #undef CP0_PRID_OPTIONS_MASK
 
-/* Register Number: 15 Sel: x Name: EBASE */
+/* Register Number: 15 Sel: 1 Name: EBASE */
 
 #define CP_EBASE_CPUNUM_SHIFT      (0)        /* Bits 0-9: CPU number */
 #define CP_EBASE_CPUNUM_MASK       (0x3ff << CP_EBASE_CPUNUM_SHIFT)
