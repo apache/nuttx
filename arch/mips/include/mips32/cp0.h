@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/mips/src/mips32/mips32-cp0.h
+ * arch/mips/include/mips32/cp0.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_MIPS32_MIPS32_CP0_H
-#define __ARCH_MIPS_SRC_MIPS32_MIPS32_CP0_H
+#ifndef __ARCH_MIPS_INCLUDE_MIPS32_CP0_H
+#define __ARCH_MIPS_INCLUDE_MIPS32_CP0_H
 
 /********************************************************************************************
  * Included Files
@@ -178,15 +178,18 @@
 #define CP0_STATUS_KX               (1 << 7)  /* Bit 7: Enables 64-bit kernel address space (Not MIPS32) */
 #define CP0_STATUS_IM_SHIFT         (8)       /* Bits 8-15: Interrupt Mask */
 #define CP0_STATUS_IM_MASK          (0xff << CP0_STATUS_IM_SHIFT)
+#  define CP0_STATUS_IM_SWINTS      (0x03 << CP0_STATUS_IM_SHIFT) /* IM0-1 = Software interrupts */
 #  define CP0_STATUS_IM0            (0x01 << CP0_STATUS_IM_SHIFT)
 #  define CP0_STATUS_IM1            (0x02 << CP0_STATUS_IM_SHIFT)
+#  define CP0_STATUS_IM_HWINTS      (0x7c << CP0_STATUS_IM_SHIFT) /* IM2-6 = Hardware interrupts */
 #  define CP0_STATUS_IM2            (0x04 << CP0_STATUS_IM_SHIFT)
 #  define CP0_STATUS_IM3            (0x08 << CP0_STATUS_IM_SHIFT)
 #  define CP0_STATUS_IM4            (0x10 << CP0_STATUS_IM_SHIFT)
 #  define CP0_STATUS_IM5            (0x20 << CP0_STATUS_IM_SHIFT)
 #  define CP0_STATUS_IM6            (0x40 << CP0_STATUS_IM_SHIFT)
+#  define CP0_STATUS_IM_TIMER       (0x80 << CP0_STATUS_IM_SHIFT) /* IM7 = Hardware/Timer/Perf interrupts */
 #  define CP0_STATUS_IM7            (0x80 << CP0_STATUS_IM_SHIFT)
-#define CP0_STATUS_IMPL_SHIFT       (16)      /* Bits 16-17: Interrupt Mask */
+#define CP0_STATUS_IMPL_SHIFT       (16)      /* Bits 16-17: Implementation dependent */
 #define CP0_STATUS_IMPL_MASK        (3 << CP0_STATUS_IMPL_SHIFT)
 #define CP0_STATUS_NMI              (1 << 19) /* Bit 19: Reset exception due to an NMI */
 #define CP0_STATUS_SR               (1 << 20) /* Bit 20: Reset exception due to a Soft Reset */
@@ -532,4 +535,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MIPS_SRC_MIPS32_MIPS32_CP0_H */
+#endif /* __ARCH_MIPS_INCLUDE_MIPS32_CP0_H */

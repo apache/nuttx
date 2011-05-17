@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/pic32mx/pic32mx-cp0.h
+ * arch/mips/include/pic32mx/cp0.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CP0_H
-#define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CP0_H
+#ifndef __ARCH_MIPS_INCLUDE_PIC32MX_CP0_H
+#define __ARCH_MIPS_INCLUDE_PIC32MX_CP0_H
 
 /****************************************************************************
  * Included Files
@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "mips32-cp0.h"
+#include <arch/mips32/cp0.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -71,13 +71,13 @@
  *   exception
  * Compliance Level: Required.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  *
  * Register Number: 9 Sel: 0 Name: Count
  * Function: Processor cycle count
  * Compliance Level: Required.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  *
  * Register Number: 10 Reserved.
  * Compliance Level: Required for TLB-based MMU; Optional otherwise.
@@ -86,20 +86,20 @@
  * Function: Timer interrupt control
  * Compliance Level: Required.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  */
 
 /* Register Number: 12 Sel: 0 Name: Status
  * Function: Processor status and control
  * Compliance Level: Required.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  *   NOTES:
  *   1. The following are reserved bits in the PIC32: 
  *      CP0_STATUS_UX   Bit 5: Enables 64-bit user address space (Not MIPS32)
  *      CP0_STATUS_SX   Bit 6: Enables 64-bit supervisor address space (Not MIPS32)
  *      CP0_STATUS_KX   Bit 7: Enables 64-bit kernel address space (Not MIPS32)
- *      CP0_STATUS_IMPL Bits 16-17: Interrupt Mask
+ *      CP0_STATUS_IMPL Bits 16-17: Implementation dependent
  *      CP0_STATUS_TS   Bit 21: TLB detected match on multiple entries
  *      CP0_STATUS_PX   Bit 23: Enables 64-bit operations (Not MIPS32)
  *      CP0_STATUS_MX   Bit 24: Enables MDMX™ (Not MIPS32)
@@ -196,7 +196,7 @@
  * Function: Cause of last general exception
  * Compliance Level: Required.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  *   NOTES: The following bits are added in the PIC32: 
  */
  
@@ -208,14 +208,14 @@
  * Function: Program counter at last exception
  * Compliance Level: Required.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  */
 
 /* Register Number: 15 Sel: 0 Name: PRId
  * Function: Processor identification and revision
  * Compliance Level: Required.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  *   NOTE: Slightly different bit interpretations of some fields:
  */
 
@@ -240,7 +240,7 @@
  * Function: Configuration register
  * Compliance Level: Required.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  *   1. PIC32MX is always little-endian.
  *   2. Implementation specific bits defined.
  */
@@ -265,13 +265,13 @@
  * Function: Configuration register 1
  * Compliance Level: Required.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  *
  * Register Number: 16 Sel: 2 Name: Config2
  * Function: Configuration register 2
  * Compliance Level: Optional.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  */
 
 #undef CP0_CONFIG2_TBS_SHIFT
@@ -281,7 +281,7 @@
  * Function: Configuration register 3
  * Compliance Level: Optional.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  */
 
 #define CP0_CONFIG3_SP              (1 << 4)  /* Bit 4: Support page bit */
@@ -332,7 +332,7 @@
  * Function: Program counter at last EJTAG debug exception
  * Compliance Level: Optional.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  *
  * Register Number: 25-29 Reserved
  * Compliance Level: Recommended/Optional.
@@ -341,13 +341,13 @@
  * Function: Program counter at last error
  * Compliance Level: Required.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  *
  * Register Number: 31 Sel: 0 Name: DeSAVE
  * Function: EJTAG debug exception save register
  * Compliance Level: Optional.
  *
- *   See arch/mips/src/mips32/mips32-cp0.h
+ *   See arch/mips/include/mips32/cp0.h
  */
 
 /****************************************************************************
@@ -377,4 +377,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CP0_H */
+#endif /* __ARCH_MIPS_INCLUDE_PIC32MX_CP0_H */
