@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/include/mips32/irq.h
+ * arch/mips/src/mips32/up_irq.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,66 +33,95 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_MIPS_INCLUDE_MIPS32_IRQ_H
-#define __ARCH_MIPS_INCLUDE_MIPS32_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <arch/irq.h>
 #include <arch/types.h>
+#include <arch/mips32/cp0.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-
-/* Lots of missing logic here */
-
-#define XCPTCONTEXT_REGS 1
 
 /****************************************************************************
- * Public Types
+ * Private Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-struct xcptcontext
+/****************************************************************************
+ * Name: cp0_getstatus
+ *
+ * Description:
+ *   Disable interrupts
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline irqstate_t cp0_getstatus(void)
 {
-  /* The following function pointer is non-NULL if there are pending signals
-   * to be processed.
-   */
+  register irqstate_t status;
+  __asm__ __volatile__
+    (
+      "\t.set    push\n"
+      "\t.set    noat\n"
+      "\t mfc0   %0,$12\n"         /* Get CP0 status register */
+      "\t.set    pop\n"
+      : "=r" (status)
+      :
+      : "memory"
+    );
 
-#ifndef CONFIG_DISABLE_SIGNALS
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-#endif
-
-  /* Register save area */
-
-  uint32_t regs[XCPTCONTEXT_REGS];
-};
-
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
+  return status;
+}
 
 /****************************************************************************
- * Public Variables
+ * Name: cp0_putstatus
+ *
+ * Description:
+ *   Disable interrupts
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
+
+static inline void cp0_putstatus(irqstate_t status)
+{
+  __asm__ __volatile__
+    (
+      "\t.set    push\n"
+      "\t.set    noat\n"
+      "\t.set    noreorder\n"
+      "\tmtc0   %0,$12\n"          /* Set the status to the provided value */
+      "\tnop\n"                    /* MTC0 status hazard: */
+      "\tnop\n"                    /* Recommended spacing: 3 */
+      "\tnop\n"
+      "\tnop\n"                    /* Plus one for good measure */
+      "\t.set    pop\n"
+      : 
+      : "r" (status)
+      : "memory"
+    );
+}
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
  * Name: irqsave
@@ -108,13 +137,24 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN irqstate_t irqsave(void);
+irqstate_t irqsave(void)
+{
+  register irqstate_t status;
+  register irqstate_t ret;
+
+  status  = cp0_getstatus();       /* Get CP0 status */
+  ret     = status;                /* Save the status */
+  status &= ~CP0_STATUS_IM_MASK;   /* Clear all interrupt mask bits */
+  status |= CP0_STATUS_IM_SWINTS;  /* Keep S/W interrupts enabled */
+  cp0_putstatus(status);           /* Disable interrupts */
+  return ret;                      /* Return status before interrtupts disabled */
+}
 
 /****************************************************************************
  * Name: irqrestore
  *
  * Description:
- *   Restore the previous interrupt state (i.e., the one previously returned
+ *   Restore the previous interrutp state (i.e., the one previously returned
  *   by irqsave())
  *
  * Input Parameters:
@@ -125,13 +165,14 @@ EXTERN irqstate_t irqsave(void);
  *
  ****************************************************************************/
 
-EXTERN void irqrestore(irqstate_t irqtate);
+void irqrestore(irqstate_t irqstate)
+{
+  register irqstate_t status;
 
-#undef EXTERN
-#ifdef __cplusplus
+  status    = cp0_getstatus();      /* Get CP0 status */
+  status   &= ~CP0_STATUS_IM_MASK;  /* Clear all interrupt mask bits */
+  irqstate &= CP0_STATUS_IM_MASK;   /* Retain interrupt mask bits only */
+  status   |= irqstate;             /* Set new interrupt mask bits */
+  status   |= CP0_STATUS_IM_SWINTS; /* Make sure that S/W interrupts enabled */
+  cp0_putstatus(status);            /* Restore interrupt state */
 }
-#endif
-
-#endif /* __ASSEMBLY */
-#endif /* __ARCH_MIPS_INCLUDE_MIPS32_IRQ_H */
-

@@ -40,7 +40,7 @@ HEAD_ASRC =
 # Common MIPS files
 
 CMN_ASRCS = 
-CMN_CSRCS = up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
+CMN_CSRCS = up_irq.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
 
 # Required PIC32MX files
 
