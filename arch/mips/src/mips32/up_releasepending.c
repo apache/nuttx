@@ -40,7 +40,9 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
+#include <syscall.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
 
 #include "os_internal.h"

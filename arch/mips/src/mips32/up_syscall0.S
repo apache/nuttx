@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/mips32/up_sigdeliver.c
+ * arch/mips/src/mips32/up_syscall0.S
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,24 +39,18 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <sched.h>
-#include <syscall.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <arch/board/board.h>
-
-#include "os_internal.h"
-#include "up_internal.h"
-#include "up_arch.h"
-
-#ifndef CONFIG_DISABLE_SIGNALS
+#include <arch/mips32/registers.h>
+#include <arch/mips32/cp0.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Global Symbols
  ****************************************************************************/
+
+	.file	"up_syscall0.S"
+	.global sys_call0
+	.global sys_call1
+	.global sys_call2
+	.global sys_call3
 
 /****************************************************************************
  * Private Data
@@ -71,72 +65,30 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
+ * Name: up_syscall0, up_syscall1, up_syscall2, up_syscall3
  *
  * Description:
- *   This is the a signal handling trampoline.  When a signal action was
- *   posted.  The task context was mucked with and forced to branch to this
- *   location with interrupts disabled.
+ *   up_syscall0 - System call SYS_ argument and no additional parameters.
+ *   up_syscall1 - System call SYS_ argument and one additional parameter.
+ *   up_syscall2 - System call SYS_ argument and two additional parameters.
+ *   up_syscall3 - System call SYS_ argument and three additional parameters.
  *
  ****************************************************************************/
 
-void up_sigdeliver(void)
-{
-  _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  uint32_t regs[XCPTCONTEXT_REGS];
-  sig_deliver_t sigdeliver;
+	.text
+	.set	noreorder
+	.ent	sys_call0
+sys_call0:	/* r4 holds the syscall number */
+sys_call1:	/* r4 holds the syscall number, argument in r5 */
+sys_call2:	/* r4 holds the syscall number, arguments in r5 and r6 */
+sys_call3:	/* r4 holds the syscall number, arguments in r5, r6, and r7 */
 
-  /* Save the errno.  This must be preserved throughout the signal handling
-   * so that the user code final gets the correct errno value (probably
-   * EINTR).
-   */
-
-  int saved_errno = rtcb->pterrno;
-
-  up_ledon(LED_SIGNAL);
-
-  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  ASSERT(rtcb->xcp.sigdeliver != NULL);
-
-  /* Save the real return state on the stack. */
-
-  up_copystate(regs, rtcb->xcp.regs);
-  regs[REG_EPC]        = rtcb->xcp.saved_epc;
-  regs[REG_STATUS]     = rtcb->xcp.saved_status;
-
-  /* Get a local copy of the sigdeliver function pointer. We do this so that
-   * we can nullify the sigdeliver function pointer in the TCB and accept
-   * more signal deliveries while processing the current pending signals.
-   */
-
-  sigdeliver           = rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
-
-  /* Then restore the task interrupt state */
-
-  irqrestore((uint16_t)regs[REG_STATUS]);
-
-  /* Deliver the signals */
-
-  sigdeliver(rtcb);
-
-  /* Output any debug messages BEFORE restoring errno (because they may
-   * alter errno), then disable interrupts again and restore the original
-   * errno that is needed by the user logic (it is probably EINTR).
-   */
-
-  sdbg("Resuming\n");
-  (void)irqsave();
-  rtcb->pterrno = saved_errno;
-
-  /* Then restore the correct state for this thread of
-   * execution.
-   */
-
-  up_ledoff(LED_SIGNAL);
-  up_fullcontextrestore(regs);
-}
-
-#endif /* !CONFIG_DISABLE_SIGNALS */
-
+	.set	push
+	.set	noat
+	mfc0	t3, MIPS32_CP0_CAUSE	/* t3 = CP0 cause register */
+	ori		t3, (1 << 8)			/* Bit 8: Request software interrupt 0 */
+	.set	noreorder
+	mtc0	t3, MIPS32_CP0_CAUSE	/* Trigger the software interrupt */
+	nop								/* Delay slot */
+	j		ra						/* Return with result in v0 */
+	.end	sys_call0
