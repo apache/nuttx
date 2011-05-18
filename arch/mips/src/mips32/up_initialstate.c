@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/mips/src/mips32/up_irq.c
+ * arch/arm/src/cortexm3/up_initialstate.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,16 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <stdint.h>
+#include <string.h>
+
+#include <nuttx/arch.h>
 #include <arch/irq.h>
-#include <arch/types.h>
 #include <arch/mips32/cp0.h>
+
+#include "up_internal.h"
+#include "up_arch.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,55 +67,64 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: irqsave
+ * Name: up_initial_state
  *
  * Description:
- *   Save the current interrupt state and disable interrupts.
+ *   A new thread is being started and a new TCB
+ *   has been created. This function is called to initialize
+ *   the processor specific portions of the new TCB.
  *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Interrupt state prior to disabling interrupts.
+ *   This function must setup the intial architecture registers
+ *   and/or  stack so that execution will begin at tcb->start
+ *   on the next context switch.
  *
  ****************************************************************************/
 
-irqstate_t irqsave(void)
+void up_initial_state(_TCB *tcb)
 {
-  register irqstate_t status;
-  register irqstate_t ret;
+  struct xcptcontext *xcp = &tcb->xcp;
+  irqstate_t status;
 
-  status  = cp0_getstatus();       /* Get CP0 status */
-  ret     = status;                /* Save the status */
-  status &= ~CP0_STATUS_IM_MASK;   /* Clear all interrupt mask bits */
-  status |= CP0_STATUS_IM_SWINTS;  /* Keep S/W interrupts enabled */
-  cp0_putstatus(status);           /* Disable interrupts */
-  return ret;                      /* Return status before interrtupts disabled */
-}
+  /* Initialize the initial exception register context structure */
 
-/****************************************************************************
- * Name: irqrestore
- *
- * Description:
- *   Restore the previous interrutp state (i.e., the one previously returned
- *   by irqsave())
- *
- * Input Parameters:
- *   state - The interrupt state to be restored.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+  memset(xcp, 0, sizeof(struct xcptcontext));
 
-void irqrestore(irqstate_t irqstate)
-{
-  register irqstate_t status;
+  /* Save the initial stack pointer */
 
-  status    = cp0_getstatus();      /* Get CP0 status */
-  status   &= ~CP0_STATUS_IM_MASK;  /* Clear all interrupt mask bits */
-  irqstate &= CP0_STATUS_IM_MASK;   /* Retain interrupt mask bits only */
-  status   |= irqstate;             /* Set new interrupt mask bits */
+  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
+
+  /* Save the task entry point */
+
+  xcp->regs[REG_EPC]     = (uint32_t)tcb->start;
+  
+  /* If this task is running PIC, then set the PIC base register to the
+   * address of the allocated D-Space region.
+   */
+
+#ifdef CONFIG_PIC
+#  warning "Missing logic"
+#endif
+
+  /* Set privileged- or unprivileged-mode, depending on how NuttX is
+   * configured and what kind of thread is being started.
+   *
+   * If the kernel build is not selected, then all threads run in
+   * privileged thread mode.
+   */
+
+#ifdef CONFIG_NUTTX_KERNEL
+#  warning "Missing logic"
+#endif
+
+  /* Enable or disable interrupts, based on user configuration */
+
+  status = cp0_getstatus();
+# ifdef CONFIG_SUPPRESS_INTERRUPTS
+  status   &= ~CP0_STATUS_IM_MASK;  /* Disable all interrupts */
   status   |= CP0_STATUS_IM_SWINTS; /* Make sure that S/W interrupts enabled */
-  cp0_putstatus(status);            /* Restore interrupt state */
+#else
+  status   |= CP0_STATUS_IM_ALL;    /* Enable all interrupts */
+# endif
+  xcp->regs[REG_STATUS] = status;
 }
+

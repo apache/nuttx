@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/mips32/up_irq.c
+ * arch/mips/src/mips32/up_doirq.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,12 +39,23 @@
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
-#include <arch/types.h>
-#include <arch/mips32/cp0.h>
+#include <stdint.h>
+#include <assert.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -59,56 +70,54 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: irqsave
- *
- * Description:
- *   Save the current interrupt state and disable interrupts.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Interrupt state prior to disabling interrupts.
- *
- ****************************************************************************/
-
-irqstate_t irqsave(void)
+uint32_t *up_doirq(int irq, uint32_t *regs)
 {
-  register irqstate_t status;
-  register irqstate_t ret;
+  up_ledon(LED_INIRQ);
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC(OSERR_ERREXCEPTION);
+#else
+  uint32_t *savestate;
 
-  status  = cp0_getstatus();       /* Get CP0 status */
-  ret     = status;                /* Save the status */
-  status &= ~CP0_STATUS_IM_MASK;   /* Clear all interrupt mask bits */
-  status |= CP0_STATUS_IM_SWINTS;  /* Keep S/W interrupts enabled */
-  cp0_putstatus(status);           /* Disable interrupts */
-  return ret;                      /* Return status before interrtupts disabled */
-}
+  /* Nested interrupts are not supported in this implementation.  If you want
+   * implemented nested interrupts, you would have to (1) change the way that
+   * current regs is handled and (2) the design associated with
+   * CONFIG_ARCH_INTERRUPTSTACK.
+   */
 
-/****************************************************************************
- * Name: irqrestore
- *
- * Description:
- *   Restore the previous interrutp state (i.e., the one previously returned
- *   by irqsave())
- *
- * Input Parameters:
- *   state - The interrupt state to be restored.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
+   */
 
-void irqrestore(irqstate_t irqstate)
-{
-  register irqstate_t status;
+  savestate    = (uint32_t*)current_regs;
+  current_regs = regs;
 
-  status    = cp0_getstatus();      /* Get CP0 status */
-  status   &= ~CP0_STATUS_IM_MASK;  /* Clear all interrupt mask bits */
-  irqstate &= CP0_STATUS_IM_MASK;   /* Retain interrupt mask bits only */
-  status   |= irqstate;             /* Set new interrupt mask bits */
-  status   |= CP0_STATUS_IM_SWINTS; /* Make sure that S/W interrupts enabled */
-  cp0_putstatus(status);            /* Restore interrupt state */
+  /* Mask and acknowledge the interrupt */
+
+  up_maskack_irq(irq);
+
+  /* Deliver the IRQ */
+
+  irq_dispatch(irq, regs);
+
+  /* If a context switch occurred while processing the interrupt then
+   * current_regs may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
+
+  regs = (uint32_t*)current_regs;
+
+  /* Restore the previous value of current_regs.  NULL would indicate that
+   * we are no longer in an interrupt handler.  It will be non-NULL if we
+   * are returning from a nested interrupt.
+   */
+
+  current_regs = savestate;
+
+  /* Unmask the last interrupt (global interrupts are still disabled) */
+
+  up_enable_irq(irq);
+#endif
+  up_ledoff(LED_INIRQ);
+  return regs;
 }
