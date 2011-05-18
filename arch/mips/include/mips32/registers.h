@@ -62,7 +62,7 @@
 #define v0                 $2
 #define v1                 $3
 
-/* Argument registers:  First few parameters for a function */
+/* Argument registers:  First four parameters to a function */
 
 #define a0                 $4
 #define a1                 $5

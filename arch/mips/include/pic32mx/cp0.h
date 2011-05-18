@@ -136,23 +136,14 @@
 #undef CP0_STATUS_PX
 #undef CP0_STATUS_MX
 
-/*   2. The following field is of a different width
+/*   2. The following field is of a different width.  Apparently, it
+ *      excludes the software interrupt bits.
+ *
  *      CP0_STATUS_IM   Bits 8-15: Interrupt Mask
  *      Vs.
  *      CP0_STATUS_IPL  Bits 10-15: Interrupt priority level
  *                      Bitss 8-9 reserved
  */
-
-#undef CP0_STATUS_IM_SHIFT
-#undef CP0_STATUS_IM_MASK
-#undef CP0_STATUS_IM0
-#undef CP0_STATUS_IM1
-#undef CP0_STATUS_IM2
-#undef CP0_STATUS_IM3
-#undef CP0_STATUS_IM4
-#undef CP0_STATUS_IM5
-#undef CP0_STATUS_IM6
-#undef CP0_STATUS_IM7
 
 #define CP0_STATUS_IPL_SHIFT        (10)   /*  Bits 10-15: Interrupt priority level */
 #define CP0_STATUS_IPL_MASK         (0x3f << CP0_STATUS_IPL_SHIFT)

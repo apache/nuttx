@@ -216,7 +216,7 @@ __start:
 	 * initializing bus matrix registers.
 	 */
 
-#ifdef CONFIG_PIC32MX_RAMFUNCs
+#ifdef CONFIG_PIC32MX_RAMFUNCS
 	la		t1, _ramfunc_sizeof
 	beqz	t1, .Lnoramfuncs
 	nop

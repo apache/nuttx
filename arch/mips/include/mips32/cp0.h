@@ -225,6 +225,7 @@
 #  define CP0_STATUS_IM6            (0x40 << CP0_STATUS_IM_SHIFT)
 #  define CP0_STATUS_IM_TIMER       (0x80 << CP0_STATUS_IM_SHIFT) /* IM7 = Hardware/Timer/Perf interrupts */
 #  define CP0_STATUS_IM7            (0x80 << CP0_STATUS_IM_SHIFT)
+#  define CP0_STATUS_IM_ALL         (0xff << CP0_STATUS_IM_SHIFT)
 #define CP0_STATUS_IMPL_SHIFT       (16)      /* Bits 16-17: Implementation dependent */
 #define CP0_STATUS_IMPL_MASK        (3 << CP0_STATUS_IMPL_SHIFT)
 #define CP0_STATUS_NMI              (1 << 19) /* Bit 19: Reset exception due to an NMI */
