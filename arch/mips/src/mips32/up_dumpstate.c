@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/arm/up_dumpstate.c
+ * arch/mips/src/mips32/up_dumpstate.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
