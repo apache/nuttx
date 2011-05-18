@@ -44,7 +44,7 @@
  * Included Files
  ****************************************************************************/
 
-/* Include MIPS architecture-specific syscall macros */
+/* Include ARM architecture-specific syscall macros */
 
 #ifdef CONFIG_ARCH_MIPS32
 # include <arch/mips32/syscall.h>

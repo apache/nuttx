@@ -165,9 +165,6 @@ extern void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA
 extern void weak_function up_dmainitialize(void);
 #endif
-extern int  up_saveusercontext(uint32_t *saveregs);
-extern void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
-extern void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 extern void up_sigdeliver(void);
 extern int  up_timerisr(int irq, uint32_t *regs);
 extern void up_lowputc(char ch);

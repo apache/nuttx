@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/mips/src/mips32/up_reprioritizertr.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <sched.h>
+#include <syscall.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
