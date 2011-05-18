@@ -316,6 +316,13 @@ struct xcptcontext
 
 #ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
+
+  /* These additional register save locations are used to implement the
+   * signal delivery trampoline.
+   */
+
+  uint32_t saved_epc;    /* Trampoline PC */
+  uint32_t saved_status; /* Status with interrupts disabled. */
 #endif
 
   /* Register save area */

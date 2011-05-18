@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/mips/src/mips32/up_initialstate.c
+ *  arch/mips/src/mips32/up_unblocktask.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,16 +39,13 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <string.h>
-
+#include <sched.h>
+#include <debug.h>
 #include <nuttx/arch.h>
-#include <arch/irq.h>
-#include <arch/mips32/cp0.h>
 
+#include "os_internal.h"
+#include "clock_internal.h"
 #include "up_internal.h"
-#include "up_arch.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -67,64 +64,94 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_initial_state
+ * Name: up_unblock_task
  *
  * Description:
- *   A new thread is being started and a new TCB
- *   has been created. This function is called to initialize
- *   the processor specific portions of the new TCB.
+ *   A task is currently in an inactive task list
+ *   but has been prepped to execute.  Move the TCB to the
+ *   ready-to-run list, restore its context, and start execution.
  *
- *   This function must setup the intial architecture registers
- *   and/or  stack so that execution will begin at tcb->start
- *   on the next context switch.
+ * Inputs:
+ *   tcb: Refers to the tcb to be unblocked.  This tcb is
+ *     in one of the waiting tasks lists.  It must be moved to
+ *     the ready-to-run list and, if it is the highest priority
+ *     ready to run taks, executed.
  *
  ****************************************************************************/
 
-void up_initial_state(_TCB *tcb)
+void up_unblock_task(_TCB *tcb)
 {
-  struct xcptcontext *xcp = &tcb->xcp;
-  irqstate_t status;
+  /* Verify that the context switch can be performed */
 
-  /* Initialize the initial exception register context structure */
+  if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
+      (tcb->task_state > LAST_BLOCKED_STATE))
+    {
+      PANIC(OSERR_BADUNBLOCKSTATE);
+    }
+  else
+    {
+      _TCB *rtcb = (_TCB*)g_readytorun.head;
 
-  memset(xcp, 0, sizeof(struct xcptcontext));
+      /* Remove the task from the blocked task list */
 
-  /* Save the initial stack pointer */
+      sched_removeblocked(tcb);
 
-  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
+      /* Reset its timeslice.  This is only meaningful for round
+       * robin tasks but it doesn't here to do it for everything
+       */
 
-  /* Save the task entry point */
-
-  xcp->regs[REG_EPC]     = (uint32_t)tcb->start;
-  
-  /* If this task is running PIC, then set the PIC base register to the
-   * address of the allocated D-Space region.
-   */
-
-#ifdef CONFIG_PIC
-#  warning "Missing logic"
+#if CONFIG_RR_INTERVAL > 0
+      tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
 #endif
 
-  /* Set privileged- or unprivileged-mode, depending on how NuttX is
-   * configured and what kind of thread is being started.
-   *
-   * If the kernel build is not selected, then all threads run in
-   * privileged thread mode.
-   */
+      /* Add the task in the correct location in the prioritized
+       * g_readytorun task list
+       */
 
-#ifdef CONFIG_NUTTX_KERNEL
-#  warning "Missing logic"
-#endif
+      if (sched_addreadytorun(tcb))
+        {
+          /* The currently active task has changed! We need to do
+           * a context switch to the new task.
+           *
+           * Are we in an interrupt handler? 
+           */
 
-  /* Enable or disable interrupts, based on user configuration */
+          if (current_regs)
+            {
+              /* Yes, then we have to do things differently.
+               * Just copy the current_regs into the OLD rtcb.
+               */
 
-  status = cp0_getstatus();
-# ifdef CONFIG_SUPPRESS_INTERRUPTS
-  status   &= ~CP0_STATUS_IM_MASK;  /* Disable all interrupts */
-  status   |= CP0_STATUS_IM_SWINTS; /* Make sure that S/W interrupts enabled */
-#else
-  status   |= CP0_STATUS_IM_ALL;    /* Enable all interrupts */
-# endif
-  xcp->regs[REG_STATUS] = status;
+               up_savestate(rtcb->xcp.regs);
+
+              /* Restore the exception context of the rtcb at the (new) head 
+               * of the g_readytorun task list.
+               */
+
+              rtcb = (_TCB*)g_readytorun.head;
+
+              /* Then switch contexts */
+
+              up_restorestate(rtcb->xcp.regs);
+            }
+
+          /* No, then we will need to perform the user context switch */
+
+          else
+            {
+              /* Switch context to the context of the task at the head of the
+               * ready to run list.
+               */
+
+               _TCB *nexttcb = (_TCB*)g_readytorun.head;
+               up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
+
+              /* up_switchcontext forces a context switch to the task at the
+               * head of the ready-to-run list.  It does not 'return' in the
+               * normal sense.  When it does return, it is because the blocked
+               * task is again ready to run and has execution priority.
+               */
+           }
+        }
+    }
 }
-
