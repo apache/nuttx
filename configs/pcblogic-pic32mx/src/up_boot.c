@@ -1,6 +1,6 @@
 /************************************************************************************
  * configs/pcblogic-pic32mx/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+ * arch/mips/src/board/up_boot.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

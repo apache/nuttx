@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/mips/src/common/up_arch.h
+ * arch/mips/src/common/up_usestack.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,57 +33,90 @@
  *
  ****************************************************************************/
 
-#ifndef ___ARCH_MIPS_SRC_COMMON_UP_ARCH_H
-#define ___ARCH_MIPS_SRC_COMMON_UP_ARCH_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <sched.h>
+#include <debug.h>
+
+#include <nuttx/kmalloc.h>
+#include <nuttx/arch.h>
+
+#include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Inline Functions
+ * Private Function Prototypes
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-# define getreg8(a)           (*(volatile uint8_t *)(a))
-# define putreg8(v,a)         (*(volatile uint8_t *)(a) = (v))
-# define getreg16(a)          (*(volatile uint16_t *)(a))
-# define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32_t *)(a))
-# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
 
 /****************************************************************************
- * Public Function Prototypes
+ * Global Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Name: up_use_stack
+ *
+ * Description:
+ *   Setup up stack-related information in the TCB
+ *   using pre-allocated stack memory
+ *
+ *   The following TCB fields must be initialized:
+ *   adj_stack_size: Stack size after adjustment for hardware,
+ *     processor, etc.  This value is retained only for debug
+ *     purposes.
+ *   stack_alloc_ptr: Pointer to allocated stack
+ *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
+ *     initial value of the stack pointer.
+ *
+ * Inputs:
+ *   tcb: The TCB of new task
+ *   stack_size:  The allocated stack size.
+ *
+ ****************************************************************************/
 
-/* Atomic modification of registers */
+int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
+{
+  size_t top_of_stack;
+  size_t size_of_stack;
 
-EXTERN void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
-EXTERN void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
-EXTERN void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+  if (tcb->stack_alloc_ptr)
+    {
+      sched_free(tcb->stack_alloc_ptr);
+    }
 
-#undef EXTERN
-#if defined(__cplusplus)
+  /* Save the stack allocation */
+
+  tcb->stack_alloc_ptr = stack;
+
+  /* MIPS uses a push-down stack:  the stack grows
+   * toward loweraddresses in memory.  The stack pointer
+   * register, points to the lowest, valid work address
+   * (the "top" of the stack).  Items on the stack are
+   * referenced as positive word offsets from sp.
+   */
+
+  top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
+
+  /* The MIPS stack must be aligned at word (4 byte)
+   * boundaries. If necessary top_of_stack must be rounded
+   * down to the next boundary
+   */
+
+  top_of_stack &= ~3;
+  size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
+
+  /* Save the adjusted stack values in the _TCB */
+
+  tcb->adj_stack_ptr  = (uint32_t*)top_of_stack;
+  tcb->adj_stack_size = size_of_stack;
+
+  return OK;
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif  /* ___ARCH_MIPS_SRC_COMMON_UP_ARCH_H */

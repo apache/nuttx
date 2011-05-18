@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/arm/pic32mx-head.S
+ * arch/mips/src/pic32mx/pic32mx-head.S
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -79,7 +79,6 @@
 	.global halt
 
 	.global	__nmi_handler
-	.global	__do_reset
 	.global os_start
 
 /****************************************************************************
@@ -175,12 +174,6 @@ __start:
 	mtc0	t1, PIC32MX_CP0_SRSCTL	/* into SRSCtl PSS  */
 	wrpgpr	gp, gp					/* Set global pointer in PSS */
 	mtc0	t3, PIC32MX_CP0_SRSCTL	/* Restore SRSCtl */
-
-	/* Call the do_reset function */
-
-	la		t0, do_reset
-	jalr	t0
-	nop
 
 	/* Clear uninitialized data sections */
 
@@ -311,13 +304,6 @@ __start:
 	and		t0, t0, 0x00580000	/* Preserve SR, NMI, and BEV */
 	or		t0, t1, t0			/* Include Status.CEE (from UDI) */
 	mtc0	t0, PIC32MX_CP0_STATUS
-
-
-	/* Call the do_bootstrap function */
-
-	la		t0, do_bootstrap
-	jalr	t0
-	nop
 
 	/* Initialize Status BEV for normal exception vectors */
 
