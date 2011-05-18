@@ -121,21 +121,30 @@ extern void g_intstackbase;
  * following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
- *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
+ *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe
  *    that the value _sdata is the address of a uint32_t variable _data (it is
  *    not!).
  *  - We can recoved the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
 
-extern uint32_t _stext;           /* Start of .text */
-extern uint32_t _etext;           /* End_1 of .text + .rodata */
-extern const uint32_t _eronly;    /* End+1 of read only section (.text + .rodata) */
-extern uint32_t _sdata;           /* Start of .data */
-extern uint32_t _edata;           /* End+1 of .data */
-extern uint32_t _sbss;            /* Start of .bss */
-extern uint32_t _ebss;            /* End+1 of .bss */
-#endif
+extern uint32_t _stext;             /* Start of .text */
+extern uint32_t _etext;             /* End+1 of .text + .rodata */
+extern const uint32_t _data_loaddr; /* Start of .data in FLASH */
+extern uint32_t _sdata;             /* Start of .data */
+extern uint32_t _edata;             /* End+1 of .data */
+extern uint32_t _sbss;              /* Start of .bss */
+extern uint32_t _ebss;              /* End+1 of .bss */
+#ifdef CONFIG_PIC32MX_RAMFUNCS
+extern uint32_t _sramfunc;          /* Start of ramfuncs */
+extern uint32_t _eramfunc;          /* End+1 of ramfuncs */
+extern uint32_t _ramfunc_loadaddr;  /* Start of ramfuncs in FLASH */
+extern uint32_t _ramfunc_sizeof;    /* Size of ramfuncs */
+extern uint32_t _bmxdkpba_address;  /* BMX register setting */
+extern uint32_t _bmxdudba_address;  /* BMX register setting */
+extern uint32_t _bmxdupba_address;  /* BMX register setting */
+#endif /* CONFIG_PIC32MX_RAMFUNCS */
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Inline Functions
@@ -167,15 +176,13 @@ extern void up_lowputs(const char *str);
 
 extern uint32_t *up_doirq(int irq, uint32_t *regs);
 
-/* Defined in up_vectors.S */
+/* Defined in up_dumpstate.c */
 
-extern void up_vectorundefinsn(void);
-extern void up_vectorswi(void);
-extern void up_vectorprefetch(void);
-extern void up_vectordata(void);
-extern void up_vectoraddrexcptn(void);
-extern void up_vectorirq(void);
-extern void up_vectorfiq(void);
+#ifdef CONFIG_ARCH_STACKDUMP
+extern void up_dumpstate(void);
+#else
+#  define up_dumpstate()
+#endif
 
 /* Defined in up_allocateheap.c */
 
