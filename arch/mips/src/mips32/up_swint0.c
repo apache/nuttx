@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/cortexm3/up_svcall.c
+ * arch/mips/src/mips32/up_swint0.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,17 +41,13 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <syscall.h>
 #include <assert.h>
 #include <debug.h>
 
 #include <arch/irq.h>
 #include <nuttx/sched.h>
 
-#ifdef CONFIG_NUTTX_KERNEL
-#  include <syscall.h>
-#endif
-
-#include "svcall.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -76,14 +72,14 @@
  *
  * CONFIG_DEBUG and CONFIG_DEBUG_SCHED
  *
- * And you must explicitly define DEBUG_SVCALL below:
+ * And you must explicitly define DEBUG_SWINT0 below:
  */
 
-#undef DEBUG_SVCALL         /* Define to debug SVCall */
-#ifdef DEBUG_SVCALL
-# define svcdbg(format, arg...) slldbg(format, ##arg)
+#undef DEBUG_SWINT0         /* Define to debug SWInt */
+#ifdef DEBUG_SWINT0
+# define swidbg(format, arg...) slldbg(format, ##arg)
 #else
-# define svcdbg(x...)
+# define swidbg(x...)
 #endif
 
 /****************************************************************************
@@ -97,6 +93,38 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_registerdump
+ ****************************************************************************/
+
+#ifdef DEBUG_SWINT0
+static void up_registerdump(uint32_t *regs)
+{
+  swidbg("MFLO:%08x MFHI:%08x EPC:%08x STATUS:%08x\n",
+         regs[REG_MFLO], regs[REG_MFHI], regs[REG_EPC], regs[REG_STATUS]);
+  swidbg("AT:%08x V0:$08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
+         regs[REG_AT], regs[REG_V0], regs[REG_V1], regs[REG_A0],
+         regs[REG_A1], regs[REG_A2], regs[REG_A3]);
+  swidbg("T0:%08x T1:$08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x T7:%08x\n",
+         regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3],
+         regs[REG_T4], regs[REG_T5], regs[REG_T6], regs[REG_T7]);
+  swidbg("S0:%08x S1:$08x S2:%08x S3:%08x S4:%08x S5:%08x S6:%08x S7:%08x\n",
+         regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3],
+         regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
+#ifdef MIPS32_SAVE_GP
+  swidbg("T8:%08x T9:$08x GP:%08x SP:%08x FP:%08x RA:%08x\n",
+         regs[REG_T8], regs[REG_T9], regs[REG_GP], regs[REG_SP],
+         regs[REG_FP], regs[REG_RA]);
+#else
+  swidbg("T8:%08x T9:$08x SP:%08x FP:%08x RA:%08x\n",
+         regs[REG_T8], regs[REG_T9], regs[REG_SP], regs[REG_FP],
+         regs[REG_RA]);
+#endif
+}
+#else
+#  define up_registerdump(regs)
+#endif
 
 /****************************************************************************
  * Name: dispatch_syscall
@@ -123,8 +151,9 @@ static inline void dispatch_syscall(uint32_t *regs)
     }
   else
     {
-      /* The index into the syscall table is offset by the number of architecture-
-       * specific reserved entries at the beginning of the SYS call number space.
+      /* The index into the syscall table is offset by the number of
+       * architecture-specific reserved entries at the beginning of the
+       * SYS call number space.
        */
 
       int index = cmd - CONFIG_SYS_RESERVED;
@@ -135,9 +164,12 @@ static inline void dispatch_syscall(uint32_t *regs)
       irqenable();
 #endif
 
-      /* Call the correct stub for each SYS call, based on the number of parameters */
+      /* Call the correct stub for each SYS call, based on the number of
+       * parameters:  $5=parm1, $6=parm2, $7=parm3, $8=parm4, $9=parm5, and
+       * $10=parm6.
+       */
 
-      svcdbg("Calling stub%d at %p\n", index, g_stubloopkup[index].stub0);
+      swidbg("Calling stub%d at %p\n", index, g_stubloopkup[index].stub0);
 
       switch (g_stubnparms[index])
         {
@@ -150,43 +182,43 @@ static inline void dispatch_syscall(uint32_t *regs)
         /* Number of parameters: 1 */
 
         case 1:
-          ret = g_stublookup[index].stub1(regs[REG_R1]);
+          ret = g_stublookup[index].stub1(regs[REG_R5]);
           break;
 
         /* Number of parameters: 2 */
 
         case 2:
-          ret = g_stublookup[index].stub2(regs[REG_R1], regs[REG_R2]);
+          ret = g_stublookup[index].stub2(regs[REG_R5], regs[REG_R6]);
           break;
 
          /* Number of parameters: 3 */
 
        case 3:
-          ret = g_stublookup[index].stub3(regs[REG_R1], regs[REG_R2],
-                                          regs[REG_R3]);
+          ret = g_stublookup[index].stub3(regs[REG_R5], regs[REG_R6],
+                                          regs[REG_R7]);
           break;
 
          /* Number of parameters: 4 */
 
        case 4:
-          ret = g_stublookup[index].stub4(regs[REG_R1], regs[REG_R2],
-                                          regs[REG_R3], regs[REG_R4]);
+          ret = g_stublookup[index].stub4(regs[REG_R5], regs[REG_R6],
+                                          regs[REG_R7], regs[REG_R8]);
           break;
 
         /* Number of parameters: 5 */
 
         case 5:
-          ret = g_stublookup[index].stub5(regs[REG_R1], regs[REG_R2],
-                                          regs[REG_R3], regs[REG_R4],
-                                          regs[REG_R5]);
+          ret = g_stublookup[index].stub5(regs[REG_R5], regs[REG_R6],
+                                          regs[REG_R7], regs[REG_R8],
+                                          regs[REG_R9]);
           break;
 
         /* Number of parameters: 6 */
 
         case 6:
-          ret = g_stublookup[index].stub6(regs[REG_R1], regs[REG_R2],
-                                          regs[REG_R3], regs[REG_R4],
-                                          regs[REG_R5], regs[REG_R6]);
+          ret = g_stublookup[index].stub6(regs[REG_R5], regs[REG_R6],
+                                          regs[REG_R7], regs[REG_R8],
+                                          regs[REG_R9], regs[REG_R10]);
           break;
 
         /* Unsupported number of paramters. Report error and return ERROR */
@@ -215,7 +247,7 @@ static inline void dispatch_syscall(uint32_t *regs)
 
   /* Then return the result in R0 */
 
-  svcdbg("Return value regs: %p value: %d\n", regs, ret);
+  swidbg("Return value regs: %p value: %d\n", regs, ret);
   regs[REG_R0] = (uint32_t)ret;
 }
 #endif
@@ -225,64 +257,41 @@ static inline void dispatch_syscall(uint32_t *regs)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_svcall
+ * Name: up_swint0
  *
  * Description:
- *   This is SVCall exception handler that performs context switching
+ *   This is software interrupt 0 exception handler that performs context
+ *   switching and manages system calls
  *
  ****************************************************************************/
 
-int up_svcall(int irq, FAR void *context)
+int up_swint0(int irq, FAR void *context)
 {
-  uint32_t *regs   = (uint32_t*)context;
+  uint32_t *regs = (uint32_t*)context;
 
   DEBUGASSERT(regs && regs == current_regs);
 
-  /* The SVCall software interrupt is called with R0 = system call command
-   * and R1..R7 =  variable number of arguments depending on the system call.
+  /* Software interrupt 0 is invoked with REG_R4 = system call command and
+   * REG_R5..R10 =  variable number of arguments depending on the system call.
    */
 
-  svcdbg("SVCALL Entry: regs: %p cmd: %d\n", regs, regs[REG_R0]);
-  svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcdbg("  PSR=%08x\n", regs[REG_XPSR]);
+#ifdef DEBUG_SWINT0
+  swidbg("Entry: regs: %p cmd: %d\n", regs, regs[REG_R4]);
+  up_registerdump(regs);
+#endif
 
-  /* Handle the SVCall according to the command in R0 */
+  /* Handle the SWInt according to the command in $4 */
 
-  switch (regs[REG_R0])
+  switch (regs[REG_R4])
     {
-      /* R0=SYS_save_context:  This is a save context command:
-       *
-       *   int up_saveusercontext(uint32_t *saveregs);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_save_context
-       *   R1 = saveregs
-       *
-       * In this case, we simply need to copy the current regsters to the
-       * save regiser space references in the saved R1 and return.
-       */
-
-      case SYS_save_context:
-        {
-          DEBUGASSERT(regs[REG_R1] != 0);
-          memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
-        }
-        break;
-
-      /* R0=SYS_restore_context: This a restore context command:
+      /* R4=SYS_restore_context: This a restore context command:
        *
        *   void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
        *
        * At this point, the following values are saved in context:
        *
-       *   R0 = SYS_restore_context
-       *   R1 = restoreregs
+       *   R4 = SYS_restore_context
+       *   R5 = restoreregs
        *
        * In this case, we simply need to set current_regs to restore register
        * area referenced in the saved R1. context == current_regs is the normal
@@ -292,32 +301,32 @@ int up_svcall(int irq, FAR void *context)
 
       case SYS_restore_context:
         {
-          DEBUGASSERT(regs[REG_R1] != 0);
-          current_regs = (uint32_t*)regs[REG_R1];
+          DEBUGASSERT(regs[REG_R5] != 0);
+          current_regs = (uint32_t*)regs[REG_R5];
         }
         break;
 
-      /* R0=SYS_switch_context: This a switch context command:
+      /* R4=SYS_switch_context: This a switch context command:
        *
        *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
        *
        * At this point, the following values are saved in context:
        *
-       *   R0 = 1
-       *   R1 = saveregs
-       *   R2 = restoreregs
+       *   R4 = SYS_switch_context
+       *   R5 = saveregs
+       *   R6 = restoreregs
        *
-       * In this case, we do both: We save the context registers to the save
-       * register area reference by the saved contents of R1 and then set
+       * In this case, we save the context registers to the save register
+       * area reference by the saved contents of R5 and then set
        * current_regs to to the save register area referenced by the saved
-       * contents of R2.
+       * contents of R6.
        */
 
       case SYS_switch_context:
         {
-          DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-          memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
-          current_regs = (uint32_t*)regs[REG_R2];
+          DEBUGASSERT(regs[REG_R5] != 0 && regs[REG_R6] != 0);
+          memcpy((uint32_t*)regs[REG_R5], regs, XCPTCONTEXT_SIZE);
+          current_regs = (uint32_t*)regs[REG_R6];
         }
         break;
 
@@ -337,21 +346,17 @@ int up_svcall(int irq, FAR void *context)
 
   /* Report what happened.  That might difficult in the case of a context switch */
 
+#ifdef DEBUG_SWINT0
   if (regs != current_regs)
     {
-      svcdbg("SVCall Return: Context switch!\n");
-      svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             current_regs[REG_R0],  current_regs[REG_R1],  current_regs[REG_R2],  current_regs[REG_R3],
-             current_regs[REG_R4],  current_regs[REG_R5],  current_regs[REG_R6],  current_regs[REG_R7]);
-      svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
-             current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
-      svcdbg("  PSR=%08x\n", current_regs[REG_XPSR]);
+      swidbg("SWInt Return: Context switch!\n");
+      up_registerdump(current_regs);
     }
   else
     {
-      svcdbg("SVCall Return: %d\n", regs[REG_R0]);
+      swidbg("SWInt Return: %d\n", regs[REG_R2]);
     }
+#endif
 
   return OK;
 }
