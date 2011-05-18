@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/mips32/up_irq.c
+ * arch/mips/src/mips32/up_copystate.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,9 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <arch/irq.h>
-#include <arch/types.h>
-#include <arch/mips32/cp0.h>
+#include <stdint.h>
+
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,55 +61,26 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: irqsave
- *
- * Description:
- *   Save the current interrupt state and disable interrupts.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Interrupt state prior to disabling interrupts.
- *
+ * Name: up_copystate
  ****************************************************************************/
 
-irqstate_t irqsave(void)
-{
-  register irqstate_t status;
-  register irqstate_t ret;
+/* A little faster than most memcpy's */
 
-  status  = cp0_getstatus();       /* Get CP0 status */
-  ret     = status;                /* Save the status */
-  status &= ~CP0_STATUS_IM_MASK;   /* Clear all interrupt mask bits */
-  status |= CP0_STATUS_IM_SWINTS;  /* Keep S/W interrupts enabled */
-  cp0_putstatus(status);           /* Disable interrupts */
-  return ret;                      /* Return status before interrtupts disabled */
+void up_copystate(uint32_t *dest, uint32_t *src)
+{
+  int i;
+
+  /* In the Cortex-M3 model, the state is copied from the stack to the TCB,
+   * but only a reference is passed to get the state from the TCB.  So the
+   * following check avoids copying the TCB save area onto itself:
+   */
+
+  if (src != dest)
+    {
+      for (i = 0; i < XCPTCONTEXT_REGS; i++)
+        {
+          *dest++ = *src++;
+        }
+    }
 }
 
-/****************************************************************************
- * Name: irqrestore
- *
- * Description:
- *   Restore the previous interrutp state (i.e., the one previously returned
- *   by irqsave())
- *
- * Input Parameters:
- *   state - The interrupt state to be restored.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void irqrestore(irqstate_t irqstate)
-{
-  register irqstate_t status;
-
-  status    = cp0_getstatus();      /* Get CP0 status */
-  status   &= ~CP0_STATUS_IM_MASK;  /* Clear all interrupt mask bits */
-  irqstate &= CP0_STATUS_IM_MASK;   /* Retain interrupt mask bits only */
-  status   |= irqstate;             /* Set new interrupt mask bits */
-  status   |= CP0_STATUS_IM_SWINTS; /* Make sure that S/W interrupts enabled */
-  cp0_putstatus(status);            /* Restore interrupt state */
-}

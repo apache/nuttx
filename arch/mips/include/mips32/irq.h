@@ -67,51 +67,52 @@
 #define REG_MFLO_NDX        0
 #define REG_MFHI_NDX        1
 #define REG_EPC_NDX         2
+#define REG_STATUS_NDX      3
 
 /* General pupose registers */
 /* $0: Zero register does not need to be saved */
 /* $1: at_reg, assembler temporary */
 
-#define REG_R1_NDX          3
+#define REG_R1_NDX          4
 
 /* $2-$3 = v0-v1: Return value registers */
 
-#define REG_R2_NDX          4
-#define REG_R3_NDX          5
+#define REG_R2_NDX          5
+#define REG_R3_NDX          6
 
 /* $4-$7 = a0-a3: Argument registers */
 
-#define REG_R4_NDX          6
-#define REG_R5_NDX          7
-#define REG_R6_NDX          8
-#define REG_R7_NDX          9
+#define REG_R4_NDX          7
+#define REG_R5_NDX          8
+#define REG_R6_NDX          9
+#define REG_R7_NDX          10
 
 /* $8-$15 = t0-t7: Volatile registers */
 
-#define REG_R8_NDX          10
-#define REG_R9_NDX          11
-#define REG_R10_NDX         12
-#define REG_R11_NDX         13
-#define REG_R12_NDX         14
-#define REG_R13_NDX         15
-#define REG_R14_NDX         16
-#define REG_R15_NDX         17
+#define REG_R8_NDX          11
+#define REG_R9_NDX          12
+#define REG_R10_NDX         13
+#define REG_R11_NDX         14
+#define REG_R12_NDX         15
+#define REG_R13_NDX         16
+#define REG_R14_NDX         17
+#define REG_R15_NDX         18
 
 /* $16-$23 = s0-s7: Static registers */
 
-#define REG_R16_NDX         18
-#define REG_R17_NDX         19
-#define REG_R18_NDX         20
-#define REG_R19_NDX         21
-#define REG_R20_NDX         22
-#define REG_R21_NDX         23
-#define REG_R22_NDX         24
-#define REG_R23_NDX         25
+#define REG_R16_NDX         19
+#define REG_R17_NDX         20
+#define REG_R18_NDX         21
+#define REG_R19_NDX         22
+#define REG_R20_NDX         23
+#define REG_R21_NDX         24
+#define REG_R22_NDX         25
+#define REG_R23_NDX         26
 
 /* $24-25 = t8-t9: More Volatile registers */
 
-#define REG_R24_NDX         26
-#define REG_R25_NDX         27
+#define REG_R24_NDX         27
+#define REG_R25_NDX         28
 
 /* $26-$27 = ko-k1: Reserved for use in exeption handers.  These do not need
  * to be saved.
@@ -123,7 +124,21 @@
 
 #ifdef MIPS32_SAVE_GP
 
-#  define REG_R28_NDX       28
+#  define REG_R28_NDX       29
+
+/* $29 = sp:  The value of the stack pointer on return from the exception */
+
+#  define REG_R29_NDX       30
+
+/* $30 = either s8 or fp:  Depends if a frame pointer is used or not */
+
+#  define REG_R30_NDX       31
+
+/* $31 = ra: Return address */
+
+#  define REG_R31_NDX       32
+#  define XCPTCONTEXT_REGS  33
+#else
 
 /* $29 = sp:  The value of the stack pointer on return from the exception */
 
@@ -137,20 +152,6 @@
 
 #  define REG_R31_NDX       31
 #  define XCPTCONTEXT_REGS  32
-#else
-
-/* $29 = sp:  The value of the stack pointer on return from the exception */
-
-#  define REG_R29_NDX       28
-
-/* $30 = either s8 or fp:  Depends if a frame pointer is used or not */
-
-#  define REG_R30_NDX       29
-
-/* $31 = ra: Return address */
-
-#  define REG_R31_NDX       30
-#  define XCPTCONTEXT_REGS  31
 #endif
 #define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
@@ -163,6 +164,7 @@
 #  define REG_MFLO          (4*REG_MFLO_NDX)
 #  define REG_MFHI          (4*REG_MFHI_NDX)
 #  define REG_EPC           (4*REG_EPC_NDX)
+#  define REG_STATUS        (4*REG_STATUS_NDX)
 #  define REG_R1            (4*REG_R1_NDX)
 #  define REG_R2            (4*REG_R2_NDX)
 #  define REG_R3            (4*REG_R3_NDX)
@@ -198,6 +200,7 @@
 #  define REG_MFLO          REG_MFLO_NDX
 #  define REG_MFHI          REG_MFHI_NDX
 #  define REG_EPC           REG_EPC_NDX
+#  define REG_STATUS        REG_STATUS_NDX
 #  define REG_R1            REG_R1_NDX
 #  define REG_R2            REG_R2_NDX
 #  define REG_R3            REG_R3_NDX
@@ -323,6 +326,70 @@ struct xcptcontext
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: cp0_getstatus
+ *
+ * Description:
+ *   Disable interrupts
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline irqstate_t cp0_getstatus(void)
+{
+  register irqstate_t status;
+  __asm__ __volatile__
+    (
+      "\t.set    push\n"
+      "\t.set    noat\n"
+      "\t mfc0   %0,$12\n"              /* Get CP0 status register */
+      "\t.set    pop\n"
+      : "=r" (status)
+      :
+      : "memory"
+    );
+
+  return status;
+}
+
+/****************************************************************************
+ * Name: cp0_putstatus
+ *
+ * Description:
+ *   Disable interrupts
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void cp0_putstatus(irqstate_t status)
+{
+  __asm__ __volatile__
+    (
+      "\t.set    push\n"
+      "\t.set    noat\n"
+      "\t.set    noreorder\n"
+      "\tmtc0   %0,$12\n"                /* Set the status to the provided value */
+      "\tnop\n"                          /* MTC0 status hazard: */
+      "\tnop\n"                          /* Recommended spacing: 3 */
+      "\tnop\n"
+      "\tnop\n"                          /* Plus one for good measure */
+      "\t.set    pop\n"
+      : 
+      : "r" (status)
+      : "memory"
+    );
+}
 
 /****************************************************************************
  * Public Variables

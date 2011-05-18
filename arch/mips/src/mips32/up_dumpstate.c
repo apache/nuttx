@@ -117,8 +117,9 @@ static inline void up_registerdump(void)
 
   if (current_regs)
     {
-      lldbg("MFLO:%08x MFHI:%08x EPC:%08x\n",
-            current_regs[REG_MFLO], current_regs[REG_MFHI], current_regs[REG_EPC]);
+      lldbg("MFLO:%08x MFHI:%08x EPC:%08x STATUS:%08x\n",
+            current_regs[REG_MFLO], current_regs[REG_MFHI], current_regs[REG_EPC],
+            current_regs[REG_STATUS]);
       lldbg("AT:%08x V0:$08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
             current_regs[REG_AT], current_regs[REG_V0], current_regs[REG_V1],
             current_regs[REG_A0], current_regs[REG_A1], current_regs[REG_A2],
