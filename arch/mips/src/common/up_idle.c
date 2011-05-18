@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/mips/src/common/up_arch.h
+ *  arch/mips/src/common/up_idle.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,57 +33,57 @@
  *
  ****************************************************************************/
 
-#ifndef ___ARCH_MIPS_SRC_COMMON_UP_ARCH_H
-#define ___ARCH_MIPS_SRC_COMMON_UP_ARCH_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
+
+#include <nuttx/arch.h>
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Inline Functions
+ * Private Data
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-# define getreg8(a)           (*(volatile uint8_t *)(a))
-# define putreg8(v,a)         (*(volatile uint8_t *)(a) = (v))
-# define getreg16(a)          (*(volatile uint16_t *)(a))
-# define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32_t *)(a))
-# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_idle
+ *
+ * Description:
+ *   up_idle() is the logic that will be executed when their is no other
+ *   ready-to-run task.  This is processor idle time and will continue until
+ *   some interrupt occurs to cause a context switch from the idle task.
+ *
+ *   Processing in this state may be processor-specific. e.g., this is where
+ *   power management operations might be performed.
+ *
+ ****************************************************************************/
+
+void up_idle(void)
+{
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* If the system is idle and there are no timer interrupts, then process
+   * "fake" timer interrupts. Hopefully, something will wake up.
+   */
+
+  sched_process_timer();
 #else
-#define EXTERN extern
+
+  /* This would be an appropriate place to put some MCU-specific logig to
+   * sleep in a reduced power mode until an interrupt occurs to save power
+   */
 #endif
-
-/* Atomic modification of registers */
-
-EXTERN void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
-EXTERN void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
-EXTERN void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
-
-#undef EXTERN
-#if defined(__cplusplus)
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif  /* ___ARCH_MIPS_SRC_COMMON_UP_ARCH_H */

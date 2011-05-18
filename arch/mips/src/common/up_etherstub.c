@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/mips/src/common/up_arch.h
+ * arch/mips/src/common/up_etherstub.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,57 +33,54 @@
  *
  ****************************************************************************/
 
-#ifndef ___ARCH_MIPS_SRC_COMMON_UP_ARCH_H
-#define ___ARCH_MIPS_SRC_COMMON_UP_ARCH_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
+
+#include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Inline Functions
+ * Public Data
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-# define getreg8(a)           (*(volatile uint8_t *)(a))
-# define putreg8(v,a)         (*(volatile uint8_t *)(a) = (v))
-# define getreg16(a)          (*(volatile uint16_t *)(a))
-# define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32_t *)(a))
-# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-/* Atomic modification of registers */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-EXTERN void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
-EXTERN void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
-EXTERN void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+/****************************************************************************
+ * Name: up_netinitialize (stub)
+ *
+ * Description:
+ *   This is a stub version os up_netinitialize.  Normally, up_netinitialize
+ *   is defined in board/up_network.c for board-specific ethernet
+ *   implementations, or chip/xyx_ethernet.c for chip-specific ethernet
+ *   implementations.  The stub version here is used in the cornercase where
+ *   the network is enable yet there is no ethernet driver to be initialized.
+ *   In this case, up_initialize will still try to call up_netinitialize()
+ *   when one does not exist.  This cornercase would occur if, for example,
+ *   only a USB network interface is being used or perhaps if a SLIP is
+ *   being used).
+ *
+ *   In the long run, it might be better to have some kind of CONFIG_NO_ETHERNET
+ *   to suppress the call to up_netinitialize() in up_initialize().  Then
+ *   this stub would not be needed.
+ *
+ ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
+void up_netinitialize(void)
+{
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif  /* ___ARCH_MIPS_SRC_COMMON_UP_ARCH_H */
