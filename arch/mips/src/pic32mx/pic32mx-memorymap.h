@@ -43,13 +43,14 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
+#include "mips32-memorymap.h"
 
 /************************************************************************************
  * Pre-Processor Definitions
  ************************************************************************************/
 /* This memory may be valid for other chips as well, but I don't know that */
 
-#if defined(CHIP_PIC32MX3) || defined(CHIP_PIC32MX3)
+#if defined(CHIP_PIC32MX3) || defined(CHIP_PIC32MX4)
 
 /* Physical Memory Map **************************************************************/
 

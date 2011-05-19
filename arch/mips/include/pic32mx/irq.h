@@ -164,7 +164,7 @@
 #define PIC32MX_IRQSRC_DMA3   (128+51) /* Vector: 39, DMA Channel 3 */
 #define PIC32MX_IRQSRC_FCE    (128+56) /* Vector: 44, Flash Control Event */
 #define PIC32MX_IRQSRC_USB    (128+57) /* Vector: 45, USB */
-#define PIC32MX_IRQSRC1_FIRST (128+57)
+#define PIC32MX_IRQSRC1_LAST  (128+57)
 
 /****************************************************************************
  * Public Types
