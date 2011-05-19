@@ -218,6 +218,7 @@ extern void up_timerinit(void);
 /* Defined in up_irq.c */
 
 extern void up_maskack_irq(int irq);
+extern void up_clrpend_irq(int irq);
 
 /* Defined in board/up_leds.c */
 

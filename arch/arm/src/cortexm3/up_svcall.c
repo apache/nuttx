@@ -234,7 +234,7 @@ static inline void dispatch_syscall(uint32_t *regs)
 
 int up_svcall(int irq, FAR void *context)
 {
-  uint32_t *regs   = (uint32_t*)context;
+  uint32_t *regs = (uint32_t*)context;
 
   DEBUGASSERT(regs && regs == current_regs);
 
