@@ -54,6 +54,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+
+  /* Enable only software interrupts */
+
+# define INITIAL_STATUS (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_SWINTS)
+
+#else
+
+  /* Enable all interrupts */
+
+# define INITIAL_STATUS (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_ALL)
+
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -83,13 +97,16 @@
 void up_initial_state(_TCB *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
-  irqstate_t status;
 
   /* Initialize the initial exception register context structure */
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 
-  /* Save the initial stack pointer */
+  /* Save the initial stack pointer.  Hmmm.. the stack is set to the very
+   * beginning of the stack region.  Some functions may want to store data on
+   * the caller's stack and it might be good to reserve some space.  However,
+   * only the start function would do that and we have control over that one
+   */
 
   xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
 
@@ -118,13 +135,6 @@ void up_initial_state(_TCB *tcb)
 
   /* Enable or disable interrupts, based on user configuration */
 
-  status = cp0_getstatus();
-# ifdef CONFIG_SUPPRESS_INTERRUPTS
-  status   &= ~CP0_STATUS_IM_MASK;  /* Disable all interrupts */
-  status   |= CP0_STATUS_IM_SWINTS; /* Make sure that S/W interrupts enabled */
-#else
-  status   |= CP0_STATUS_IM_ALL;    /* Enable all interrupts */
-# endif
-  xcp->regs[REG_STATUS] = status;
+  xcp->regs[REG_STATUS] = INITIAL_STATUS;
 }
 
