@@ -95,17 +95,15 @@ typedef void (*up_vector_t)(void);
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during
- * interrupt processing.
+/* This holds a references to the current interrupt level register storage
+ * structure.  If is non-NULL only during interrupt processing.
  */
 
 extern volatile uint32_t *current_regs;
 
-/* This is the beginning of heap as provided from up_head.S.
- * This is the first address in DRAM after the loaded
- * program+bss+idle stack.  The end of the heap is
- * CONFIG_DRAM_END
+/* This is the beginning of heap as provided from up_head.S. This is the
+ * first address in DRAM after the loaded program+bss+idle stack.  The end
+ * of the heap is CONFIG_DRAM_END
  */
 
 extern uint32_t g_heapbase;
@@ -155,27 +153,22 @@ extern uint32_t _bmxdupba_address;  /* BMX register setting */
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+/* Common Functions *********************************************************/
+/* Common functions define in arch/mips/src/common.  These may be replaced
+ * with chip-specific functions of the same name if needed.  See also
+ * functions prototyped in include/nuttx/arch.h.
+ */
 
-/* Defined in files with the same name as the function */
+/* Context switching */
 
-extern void up_boot(void);
 extern void up_copystate(uint32_t *dest, uint32_t *src);
-extern void up_irqinitialize(void);
-#ifdef CONFIG_ARCH_DMA
-extern void weak_function up_dmainitialize(void);
-#endif
-extern void up_sigdeliver(void);
-extern int  up_timerisr(int irq, uint32_t *regs);
-extern void up_lowputc(char ch);
+
+/* Serial output */
+
 extern void up_puts(const char *str);
 extern void up_lowputs(const char *str);
 
-/* Two alternative interrupt handling functions */
-
-extern uint32_t *up_decodeirq(uint32_t *regs);
-extern uint32_t *up_doirq(int irq, uint32_t *regs);
-
-/* Defined in up_dumpstate.c */
+/* Debug */
 
 #ifdef CONFIG_ARCH_STACKDUMP
 extern void up_dumpstate(void);
@@ -183,7 +176,30 @@ extern void up_dumpstate(void);
 #  define up_dumpstate()
 #endif
 
-/* Defined in up_allocateheap.c */
+/* Common MIPS32 functions defined in arch/mips/src/MIPS32 */
+/* IRQs */
+
+extern uint32_t *up_doirq(int irq, uint32_t *regs);
+
+/* Signals */
+
+extern void up_sigdeliver(void);
+
+/* Chip-specific functions **************************************************/
+/* Chip specific functions defined in arch/mips/src/<chip> */
+/* IRQs */
+
+extern void up_irqinitialize(void);
+extern void up_maskack_irq(int irq);
+extern void up_clrpend_irq(int irq);
+
+/* DMA */
+
+#ifdef CONFIG_ARCH_DMA
+extern void weak_function up_dmainitialize(void);
+#endif
+
+/* Memory management */
 
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void);
@@ -191,8 +207,9 @@ void up_addregion(void);
 # define up_addregion()
 #endif
 
-/* Defined in up_serial.c */
+/* Serial output */
 
+extern void up_lowputc(char ch);
 #if CONFIG_NFILE_DESCRIPTORS > 0
 extern void up_earlyserialinit(void);
 extern void up_serialinit(void);
@@ -201,50 +218,19 @@ extern void up_serialinit(void);
 # define up_serialinit()
 #endif
 
-/* Defined in drivers/lowconsole.c */
-
-#ifdef CONFIG_DEV_LOWCONSOLE
-extern void lowconsole_init(void);
-#else
-# define lowconsole_init()
-#endif
-
-/* Defined in up_watchdog.c */
-
-extern void up_wdtinit(void);
-
-/* Defined in up_timerisr.c */
+/* System timer */
 
 extern void up_timerinit(void);
 
-/* Defined in up_irq.c */
-
-extern void up_maskack_irq(int irq);
-extern void up_clrpend_irq(int irq);
-
-/* Defined in board/up_leds.c */
-
-#ifdef CONFIG_ARCH_LEDS
-extern void up_ledinit(void);
-extern void up_ledon(int led);
-extern void up_ledoff(int led);
-#else
-# define up_ledinit()
-# define up_ledon(led)
-# define up_ledoff(led)
-#endif
-
-/* Defined in board/up_network.c for board-specific ethernet implementations,
- * or chip/xyx_ethernet.c for chip-specific ethernet implementations, or
- * common/up_etherstub.c for a cornercase where the network is enable yet
- * there is no ethernet driver to be initialized.
- */
+/* Network */
 
 #ifdef CONFIG_NET
 extern void up_netinitialize(void);
 #else
 # define up_netinitialize()
 #endif
+
+/* USB */
 
 #ifdef CONFIG_USBDEV
 extern void up_usbinitialize(void);
@@ -254,6 +240,19 @@ extern void up_usbuninitialize(void);
 # define up_usbuninitialize()
 #endif
 
-#endif /* __ASSEMBLY__ */
+/* Board-specific functions *************************************************/
+/* Board specific functions defined in config/<board>/src */
 
+/* LEDs */
+
+#ifdef CONFIG_ARCH_LEDS
+extern void up_ledon(int led);
+extern void up_ledoff(int led);
+#else
+# define up_ledinit()
+# define up_ledon(led)
+# define up_ledoff(led)
+#endif
+
+#endif /* __ASSEMBLY__ */
 #endif  /* __ARCH_MIPS_SRC_COMMON_UP_INTERNAL_H */

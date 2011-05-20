@@ -39,7 +39,7 @@ HEAD_ASRC = pic32mx-head.S
 
 # Common MIPS files
 
-CMN_ASRCS = up_syscall0.S up_inthandler.S up_bevhandler.S
+CMN_ASRCS = up_syscall0.S
 CMN_CSRCS = up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 			up_createstack.c up_doirq.c up_exit.c up_idle.c up_initialize.c \
 			up_initialstate.c up_interruptcontext.c up_irq.c up_lowputs.c \
@@ -61,7 +61,8 @@ endif
 # Required PIC32MX files
 
 CHIP_ASRCS =
-CHIP_CSRCS = pic32mx-irq.c pic32mx-timerisr.c
+CHIP_CSRCS = pic32mx-irq.c pic32mx-clockconfig.c pic32mx-lowconsole.c pic32mx-lowinit.c \
+			 pic32mx-serial.c pic32mx-timerisr.c
 
 # Configuration-dependent PIC32MX files
 

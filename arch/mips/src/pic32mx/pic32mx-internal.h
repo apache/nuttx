@@ -49,6 +49,7 @@
 
 #include "up_internal.h"
 #include "chip.h"
+#include "pic32mx-config.h"
 
 /************************************************************************************
  * Definitions
@@ -122,9 +123,7 @@ extern "C" {
  * Name: pic32mx_clockconfig
  *
  * Description:
- *   Called to initialize the PIC32MX.  This does whatever setup is needed to put the
- *   MCU in a usable state.  This includes the initialization of clocking using the
- *   settings in board.h.
+ *   Called to initialize the PIC32MX clocking using the settings in board.h.
  *
  ************************************************************************************/
 
@@ -134,13 +133,38 @@ EXTERN void pic32mx_clockconfig(void);
  * Name: pic32mx_lowsetup
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level initialization
- *   including setup of the console UART.  This UART done early so that the serial
- *   console is available for debugging very early in the boot sequence.
+ *   Performs low level initialization of the console UART.  This UART done early so
+ *   that the serial console is available for debugging very early in the boot sequence.
  *
  ************************************************************************************/
 
-EXTERN void pic32mx_lowsetup(void);
+EXTERN void pic32mx_consoleinit(void);
+
+/******************************************************************************
+ * Name: pic32mx_uartreset
+ *
+ * Description:
+ *   Reset a UART.
+ *
+ ******************************************************************************/
+
+#ifdef HAVE_UART_DEVICE
+EXTERN void pic32mx_uartreset(uintptr_t uart_base);
+#endif
+
+/******************************************************************************
+ * Name: pic32mx_uartconfigure
+ *
+ * Description:
+ *   Configure a UART as a RS-232 UART.
+ *
+ ******************************************************************************/
+
+#ifdef HAVE_UART_DEVICE
+EXTERN void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baud,
+                                  unsigned int parity, unsigned int nbits,
+								  bool stop2);
+#endif
 
 /************************************************************************************
  * Name: pic32mx_gpioirqinitialize
@@ -155,6 +179,28 @@ EXTERN void pic32mx_gpioirqinitialize(void);
 #else
 #  define pic32mx_gpioirqinitialize()
 #endif
+
+/************************************************************************************
+ * Name: pic32mx_boardinitialize
+ *
+ * Description:
+ *   This function must be provided by the board-specific logic in the  directory
+ *   configs/<board-name>/up_boot.c.
+ *
+ ************************************************************************************/
+
+EXTERN void pic32mx_boardinitialize(void);
+
+/************************************************************************************
+ * Name: up_decodeirq
+ *
+ * Description:
+ *   Called from assembly language logic when and interrrupt exception occurs.  This
+ *   function decodes and dispatches the interrupt.
+ *
+ ************************************************************************************/
+
+EXTERN uint32_t *up_decodeirq(uint32_t *regs);
 
 /************************************************************************************
  * Name: pic32mx_configgpio

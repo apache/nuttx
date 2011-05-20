@@ -40,8 +40,9 @@
 #include <nuttx/config.h>
 
 #include <arch/mips32/registers.h>
-#include <arch/mips32/cp0.h>
 #include <arch/pic32mx/cp0.h>
+
+#include "excptmacros.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,30 +72,61 @@
  * 4) Uninitialized data (.bss):
  *    Start:   _sbss
  *    End(+1): _ebss
+ *
+ * The following are placed outside of the "normal" memory segments -- mostly
+ * so that they do not have to be cleared on power up.
+ *
  * 5) Idle thread stack:
  *    Start:   _ebss
  *    End(+1): _ebss+CONFIG_IDLETHREAD_STACKSIZE
- * 6) Heap                       Range  
+ * 6) Optional interrupt stack
  *    Start:   _ebss+CONFIG_IDLETHREAD_STACKSIZE
+ *    End(+1): _ebss+CONFIG_IDLETHREAD_STACKSIZE+(CONFIG_ARCH_INTERRUPTSTACK & ~3)
+ * 6a) Heap (without interupt stack)
+ *    Start:   _ebss+CONFIG_IDLETHREAD_STACKSIZE
+ *    End(+1): to the end of memory
+ * 6b) Heap (with interupt stack)
+ *    Start:   _ebss+CONFIG_IDLETHREAD_STACKSIZE+(CONFIG_ARCH_INTERRUPTSTACK & ~3)
  *    End(+1): to the end of memory
  */
 
-#define PIC32MX_STACK_BASE _ebss
-#define PIC32MX_STACK_TOP  _ebss+CONFIG_IDLETHREAD_STACKSIZE-4
-#define PIC32MX_HEAP_BASE  _ebss+CONFIG_IDLETHREAD_STACKSIZE
+#define PIC32MX_STACK_BASE      _ebss
+#define PIC32MX_STACK_TOP       _ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#  define PIC32MX_INTSTACK_BASE PIC32MX_STACK_TOP
+#  define PIC32MX_INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+#  define PIC32MX_INTSTACK_TOP  PIC32MX_STACK_TOP+PIC32MX_INTSTACK_SIZE
+#  define PIC32MX_HEAP_BASE     PIC32MX_INTSTACK_TOP
+#else
+#  define PIC32MX_HEAP_BASE     PIC32MX_STACK_TOP
+#endif
 
 /****************************************************************************
  * Global Symbols
  ****************************************************************************/
 
 	.file	"pic32mx-head.S"
+
+	/* Exported symbols */
+
+	.globl	__reset
 	.global __start
 	.global halt
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	.global g_intstackbase
+	.global	g_nestlevel
+#endif
+	.global	g_heapbase
 
-	.global	nmi_handler
-	.global	bev_handler
-	.global	int_handler
+	/* Imported symbols */
+
 	.global os_start
+	.global	up_dobev
+	.global up_decodeirq
+#ifdef CONFIG_PIC32MX_NMIHANDLER
+	.global	up_donmi
+#endif
 
 /****************************************************************************
  * Name: __reset
@@ -112,7 +144,6 @@
  *
  ****************************************************************************/
 
-	.globl	__reset
 	.section .reset, "ax", @progbits
 	.set	noreorder
 	.ent	__reset
@@ -121,6 +152,52 @@ __reset:
 	jr		k0
 	nop
 	.end	__reset
+
+/****************************************************************************
+ * Name: _bev_exception
+ *
+ * Description:
+ *   Boot Exception Vector Handler.  Jumps to _bev_handler
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Does not return
+ *
+ ****************************************************************************/
+
+	.section .bev_excpt,"ax",@progbits
+	.set	noreorder
+	.ent	_bev_exception
+_bev_exception:
+	la		k0, _bev_handler
+	jr		k0
+	nop
+	.end _bev_exception
+
+/****************************************************************************
+ * Name: _int_exception
+ *
+ * Description:
+ *   Interrupt Exception Vector Handler.  Jumps to _int_handler
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Does not return
+ *
+ ****************************************************************************/
+
+	.section .int_excpt,"ax",@progbits
+	.set	noreorder
+	.ent	_int_exception
+_int_exception:
+	la		k0, _int_handler
+	jr		k0
+	nop
+	.end _int_exception
 
 /****************************************************************************
  * Name: __start
@@ -148,17 +225,19 @@ __start:
 	 * over to the NMI handler.
 	 */
 
+#ifdef CONFIG_PIC32MX_NMIHANDLER
 	mfc0	k0, $12				/* Load CP0 status register */
 	ext		k0, k0, 19, 1		/* Extract NMI bit */
 	beqz	k0, .Lnotnmi
 	nop
-	la		k0, nmi_handler
+	la		k0, _nmi_handler
 	jr		k0
 	nop
 
 	/* This is not an NMI */
 
 .Lnotnmi:
+#endif
 
 	/* Initialize the stack pointer */
 
@@ -331,12 +410,78 @@ __start:
 	 * necessary
 	 */
 
-	and		a0, a0, 0
-	and		a1, a1, 0
 	la		t0, __start_nuttx
 	jr		t0
 	nop
 	.end __start
+
+/****************************************************************************
+ * Name: _bev_handler
+ *
+ * Description:
+ *   BEV exception handler.  Calls up_dobev()
+ *
+ ****************************************************************************/
+
+	.section .bev_handler, "ax", @progbits
+	.set	noreorder
+	.ent	_bev_handler
+_bev_handler:
+	EXCPT_PROLOGUE t0			/* Save registers on stack, enable nested interrupts */
+	move	a0, sp				/* Pass register save structure as the parameter 1 */
+	USE_INTSTACK t0, t1, t2		/* Switch to the interrupt stack */
+	la		t0, up_dobev		/* Call up_dobev(regs) */
+	jalr	t0, ra
+	di							/* Disable interrupts */
+	RESTORE_STACK t0, t1		/* Undo the operations of USE_STACK */
+	EXCPT_EPILOGUE v0			/* Return to the context returned by up_dobev() */
+	.end	_bev_handler
+
+/****************************************************************************
+ * Name: _int_handler
+ *
+ * Description:
+ *   Interrupt exception handler.  Calls up_decodeirq()
+ *
+ ****************************************************************************/
+
+	.section .int_handler, "ax", @progbits
+	.set	noreorder
+	.ent	_int_handler
+_int_handler:
+	EXCPT_PROLOGUE t0			/* Save registers on stack, enable nested interrupts */
+	move	a0, sp				/* Pass register save structure as the parameter 1 */
+	USE_INTSTACK t0, t1, t2		/* Switch to the interrupt stack */
+	la		t0, up_decodeirq	/* Call up_decodeirq(regs) */
+	jalr	t0, ra
+	di							/* Disable interrupts */
+	RESTORE_STACK t0, t1		/* Undo the operations of USE_STACK */
+	EXCPT_EPILOGUE v0			/* Return to the context returned by up_decodeirq() */
+	.end	_int_handler
+
+/****************************************************************************
+ * Name: _nmi_handler
+ *
+ * Description:
+ *   NMI exception handler.  Calls up_donmi
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PIC32MX_NMIHANDLER
+	.section .nmi_handler, "ax", @progbits
+	.set	noreorder
+	.ent	_nmi_handler
+_nmi_handler:
+	EXCPT_PROLOGUE t0			/* Save registers on stack, enable nested interrupts */
+	move	a0, sp				/* Pass register save structure as the parameter 1 */
+	USE_INTSTACK t0, t1, t2		/* Switch to the interrupt stack */
+	la		t0, up_donmi		/* Call up_donmi(regs) */
+	jalr	t0, ra
+	di							/* Disable interrupts */
+	RESTORE_STACK t0, t1		/* Undo the operations of USE_STACK */
+	EXCPT_EPILOGUE v0			/* Return to the context returned by up_donmi() */
+	.end	_nmi_handler
+#endif
 
 /****************************************************************************
  * Name: __start_nuttx
@@ -356,19 +501,14 @@ __start:
 __start_nuttx:
 	/* Perform low level initialization */
 
-	jal	up_lowinit
+	la		t0, up_lowinit
+	jalr	t0, ra
 	nop
-
-	/* Perform early serial initialization */
-
-#ifdef CONFIG_USE_EARLYSERIALINIT
-	jal	up_earlyserialinit
-	nop
-#endif
 
 	/* Call os_start */
 
-	jal os_start
+	la		t0, os_start
+	jalr	t0, ra
 	nop
 
 	/* Just in case main returns, go into infinite loop */
@@ -379,15 +519,41 @@ halt:
 	nop
 	.end __start_nuttx
 
-	/* This global variable is unsigned int g_heapbase and is exported
-	 * here only because of its coupling to idle thread stack.
-	 */
+/****************************************************************************
+ * Global Data
+ ****************************************************************************/
+
+/* Interrupt stack variables */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+
+/* g_instackbase is a pointer to the final, aligned word of the interrupt
+ * stack.
+ */
+ 
+	.sdata
+	.type	g_intstackbase, object
+g_intstackbase:
+	.long	PIC32MX_INTSTACK_TOP-4
+	.size	g_intstackbase, .-g_intstackbase
+
+/* g_nextlevel is the exception nesting level... the interrupt stack is not
+ * available to nested exceptions.
+ */
+
+	.sbss
+	.type	g_nestlevel, object
+g_nestlevel:
+	.skip		4
+#endif
+
+/* This global variable is unsigned int g_heapbase and is exported here only
+ * because of its coupling to idle thread stack.
+ */
 
 	.sdata
-	.align	4
-	.globl	g_heapbase
 	.type	g_heapbase, object
 g_heapbase:
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
+	.long	PIC32MX_HEAP_BASE
 	.size	g_heapbase, .-g_heapbase
 
