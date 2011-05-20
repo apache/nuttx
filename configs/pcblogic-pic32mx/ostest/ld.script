@@ -48,18 +48,18 @@ MEMORY
 	 *
 	 *   REGION        PHYSICAL   KSEG   SIZE
 	 *   DESCRIPTION   START ADDR        (BYTES)
-	 *   ------------- ---------- ------ ---------------
+	 *   ------------- ---------- ------ ----------------------
 	 *   Exceptions:*
-	 *     Reset       0x1fc00000 KSEG1  512
-	 *     TLB Refill  0x1fc00200 KSEG1  256
-	 *     Cache Error 0x1fc00300 KSEG1  256
-	 *     Others      0x1fc00380 KSEG1  256
-	 *     Interrupt   0x1fc00400 KSEG1  128
-	 *     JTAG        0x1fc00480 KSEG1  16
-	 *   Startup logic 0x1fc00490 KSEG0  4096-896-256-16
-	 *   Exceptions    0x1fc01000 KSEG0  4096
-	 *   Debug code    0x1fc02000 KSEG1  4096-16
-	 *   DEVCFG3-0     0x1fc02ff0 KSEG1  16
+	 *     Reset       0x1fc00000 KSEG1  512         512
+	 *     TLB Refill  0x1fc00200 KSEG1  256         768
+	 *     Cache Error 0x1fc00300 KSEG1  128         896
+	 *     Others      0x1fc00380 KSEG1  128        1024 (1Kb)
+	 *     Interrupt   0x1fc00400 KSEG1  128        1152
+	 *     JTAG        0x1fc00480 KSEG1  16         1168
+	 *   Startup logic 0x1fc00490 KSEG0  4096-1168  4096 (4Kb)
+	 *   Exceptions    0x1fc01000 KSEG0  4096       8192 (8Kb)
+	 *   Debug code    0x1fc02000 KSEG1  4096-16   12272
+	 *   DEVCFG3-0     0x1fc02ff0 KSEG1  16        12288 (12Kb)
 	 *
 	 * Exceptions assme:
 	 *
@@ -70,9 +70,9 @@ MEMORY
 	 */
 
 	kseg1_reset    (rx) : ORIGIN = 0xbfc00000, LENGTH = 896
-	kseg1_bevexcpt (rx) : ORIGIN = 0xbfc00380, LENGTH = 256
-	kseg1_intexcpt (rx) : ORIGIN = 0xbfc00380, LENGTH = 128
-	kseg1_dbgexcpt (rx) : ORIGIN = 0xbfc00400, LENGTH = 128
+	kseg1_bevexcpt (rx) : ORIGIN = 0xbfc00380, LENGTH = 128
+	kseg1_intexcpt (rx) : ORIGIN = 0xbfc00400, LENGTH = 128
+	kseg1_dbgexcpt (rx) : ORIGIN = 0xbfc00480, LENGTH = 16
 	kseg0_bootmem  (rx) : ORIGIN = 0x9fc00490, LENGTH = 4096-1168
 	kseg0_excptmem (rx) : ORIGIN = 0x9fc01000, LENGTH = 4096
 	kseg1_dbgcode  (rx) : ORIGIN = 0xbfc02000, LENGTH = 4096-16
@@ -194,7 +194,7 @@ SECTIONS
 	/* RAM functions are positioned at the beginning of RAM so that
 	 * they can be guaranteed to satisfy the 2Kb alignment requirement.
 	 */
-
+/*
 	.ramfunc ALIGN(2K) :
 	{
 		_sramfunc =  ABSOLUTE(.);
@@ -207,7 +207,7 @@ SECTIONS
 	_bmxdkpba_address = _sramfunc - ORIGIN(kseg1_datamem) ;
 	_bmxdudba_address = LENGTH(kseg1_datamem) ;
 	_bmxdupba_address = LENGTH(kseg1_datamem) ;
-
+*/
 	.dbg_data (NOLOAD) :
 	{
 		. += (DEFINED (_DEBUGGER) ? 0x200 : 0x0);
