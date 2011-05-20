@@ -42,6 +42,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
+#  include <stdbool.h>
 #endif
 
 /****************************************************************************
@@ -190,7 +191,7 @@ extern void up_sigdeliver(void);
 /* IRQs */
 
 extern void up_irqinitialize(void);
-extern void up_maskack_irq(int irq);
+extern bool up_pending_irq(int irq);
 extern void up_clrpend_irq(int irq);
 
 /* DMA */

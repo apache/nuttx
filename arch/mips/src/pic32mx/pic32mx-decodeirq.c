@@ -133,9 +133,11 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
 
       irq = ((regval) & INT_INTSTAT_VEC_MASK) >> INT_INTSTAT_VEC_SHIFT;
       
-      /* Mask and acknowledge the interrupt */
+      /* Disable further interrupts from this source until the driver has
+       * cleared the pending interrupt sources.
+       */
 
-      up_maskack_irq(irq);
+      up_disable_irq(irq);
 
       /* Deliver the IRQ */
 

@@ -50,6 +50,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "pic32mx-config.h"
 #include "pic32mx-timer.h"
 #include "pic32mx-int.h"
 #include "pic32mx-internal.h"
@@ -57,20 +58,6 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_PIC32MX_T1PRIO
-#  define CONFIG_PIC32MX_T1PRIO (INT_CP0_MID_PRIORITY << 2)
-#endif
-
-#if CONFIG_PIC32MX_T1PRIO < 4
-#  error "CONFIG_PIC32MX_T1PRIO is too small"
-#endif
-
-#if CONFIG_PIC32MX_T1PRIO > 31
-#  error "CONFIG_PIC32MX_T1PRIO is too large"
-#endif
-
 /* Timer Setup **************************************************************/
 /* Select a timer prescale value.  Our goal is to select the timer MATCH
  * register value givent the board's periperhal clock frequency and the
@@ -135,6 +122,10 @@
 
 int up_timerisr(int irq, uint32_t *regs)
 {
+   /* Clear the pending timer interrupt */
+ 
+   putreg32(INT_T1, PIC32MX_INT_IFS0CLR);
+
    /* Process timer interrupt */
 
    sched_process_timer();

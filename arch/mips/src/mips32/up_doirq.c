@@ -91,9 +91,11 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
   savestate    = (uint32_t*)current_regs;
   current_regs = regs;
 
-  /* Mask and acknowledge the interrupt */
+  /* Disable further occurences of this interrupt (until the interrupt sources
+   * have been clear by the driver.
+   */
 
-  up_maskack_irq(irq);
+  up_disable_irq(irq);
 
   /* Deliver the IRQ */
 
