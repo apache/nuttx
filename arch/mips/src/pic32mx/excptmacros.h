@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/mips/src/mips32/mips32-excptmacros.h
+ * arch/mips/src/pic32mx/excptmacros.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_MIPS32_MIPS32_EXCPTMACROS_H
-#define __ARCH_MIPS_SRC_MIPS32_MIPS32_EXCPTMACROS_H
+#ifndef __ARCH_MIPS_SRC_PIC32MX_EXCPTMACROS_H
+#define __ARCH_MIPS_SRC_PIC32MX_EXCPTMACROS_H
 
 /********************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include <arch/irq.h>
-#include <arch/mips32/cp0.h>
+#include <arch/pic32mx/cp0.h>
 
 #ifdef __ASSEMBLY__
 
@@ -70,7 +70,7 @@
  * my_exception:
  *		EXCPT_PROLOGUE t0			- Save registers on stack, enable nested interrupts
  *		move a0, sp					- Pass register save structure as the parameter 1
- *		USE_INTSTACK, t0, t1, t2	- Switch to the interrupt stack
+ *		USE_INTSTACK t0, t1, t2		- Switch to the interrupt stack
  *		jal	handler					- Handle the exception IN=old regs OUT=new regs
  *		di							- Disable interrupts
  *		RESTORE_STACK t0, t1		- Undo the operations of USE_STACK
@@ -100,7 +100,8 @@
  *
  ********************************************************************************************/
 
-	.macro		EXCPT_PROLOGUE, tmp
+	.macro	EXCPT_PROLOGUE, tmp
+	.set	noat
 
 	/* Get the SP from the previous shadow set */
 
@@ -243,7 +244,8 @@
  *
  ********************************************************************************************/
 
-	.macro	EXCPT_EXIT, regs
+	.macro	EXCPT_EPILOGUE, regs
+	.set	noat
 
 	/* Since interrupts are disabled via di can now use k0 and k1 again.  Use k1 as the
 	 * pointer to the register save array.
@@ -407,4 +409,4 @@
 	.endm
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MIPS_SRC_MIPS32_MIPS32_EXCPTMACROS_H */
+#endif /* __ARCH_MIPS_SRC_PIC32MX_EXCPTMACROS_H */

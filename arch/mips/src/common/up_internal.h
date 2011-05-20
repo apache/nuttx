@@ -160,7 +160,6 @@ extern uint32_t _bmxdupba_address;  /* BMX register setting */
 
 extern void up_boot(void);
 extern void up_copystate(uint32_t *dest, uint32_t *src);
-extern void up_decodeirq(uint32_t *regs);
 extern void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA
 extern void weak_function up_dmainitialize(void);
@@ -171,6 +170,9 @@ extern void up_lowputc(char ch);
 extern void up_puts(const char *str);
 extern void up_lowputs(const char *str);
 
+/* Two alternative interrupt handling functions */
+
+extern uint32_t *up_decodeirq(uint32_t *regs);
 extern uint32_t *up_doirq(int irq, uint32_t *regs);
 
 /* Defined in up_dumpstate.c */

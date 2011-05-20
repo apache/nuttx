@@ -78,7 +78,9 @@
 	.global __start
 	.global halt
 
-	.global	__nmi_handler
+	.global	nmi_handler
+	.global	bev_handler
+	.global	int_handler
 	.global os_start
 
 /****************************************************************************
@@ -320,52 +322,6 @@ __start:
 	jr		t0
 	nop
 	.end __start
-
-/****************************************************************************
- * Name: _bev_exception
- *
- * Description:
- *   Boot Exception Vector Handler.  Jumps to _bootstrap_exception_handler
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Does not return
- *
- ****************************************************************************/
-
-	.section .bev_handler,"ax",@progbits
-	.set	noreorder
-	.ent	_bev_exception
-_bev_exception:
-	la		k0, _bootstrap_exception_handler
-	jr		k0
-	nop
-	.end _bev_exception
-			
-/****************************************************************************
- * Name: _bev_exception
- *
- * Description:
- *   General Exception Vector Handler.  Jumps to _general_exception_handler
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Does not return
- *
- ****************************************************************************/
-
-	.section .gen_handler,"ax",@progbits
-	.set	noreorder
-	.ent	_gen_exception
-_gen_exception:
-	la		k0, _general_exception_context
-	jr		k0
-	nop
-	.end _gen_exception
 
 /****************************************************************************
  * Name: __start_nuttx
