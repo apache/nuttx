@@ -160,14 +160,14 @@
 
 /* Register Number: 12 Sel: 1 Name: IntCtl */
 
-#define CP0_CONFIG_VS_SHIFT         (5)       /* Bits 5-9: Vector spacing bits */
-#define CP0_CONFIG_VS_MASK          (0x1f << CP0_CONFIG_VS_SHIFT)
-#  define CP0_CONFIG_VS_0BYTES      (0x00 << CP0_CONFIG_VS_SHIFT)
-#  define CP0_CONFIG_VS_32BYTES     (0x01 << CP0_CONFIG_VS_SHIFT)
-#  define CP0_CONFIG_VS_64BYTES     (0x02 << CP0_CONFIG_VS_SHIFT)
-#  define CP0_CONFIG_VS_128BYTES    (0x04 << CP0_CONFIG_VS_SHIFT)
-#  define CP0_CONFIG_VS_256BYTES    (0x08 << CP0_CONFIG_VS_SHIFT)
-#  define CP0_CONFIG_VS_512BYTES    (0x10 << CP0_CONFIG_VS_SHIFT)
+#define CP0_INTCTL_VS_SHIFT         (5)       /* Bits 5-9: Vector spacing bits */
+#define CP0_INTCTL_VS_MASK          (0x1f << CP0_INTCTL_VS_SHIFT)
+#  define CP0_INTCTL_VS_0BYTES      (0x00 << CP0_INTCTL_VS_SHIFT)
+#  define CP0_INTCTL_VS_32BYTES     (0x01 << CP0_INTCTL_VS_SHIFT)
+#  define CP0_INTCTL_VS_64BYTES     (0x02 << CP0_INTCTL_VS_SHIFT)
+#  define CP0_INTCTL_VS_128BYTES    (0x04 << CP0_INTCTL_VS_SHIFT)
+#  define CP0_INTCTL_VS_256BYTES    (0x08 << CP0_INTCTL_VS_SHIFT)
+#  define CP0_INTCTL_VS_512BYTES    (0x10 << CP0_INTCTL_VS_SHIFT)
 
 /* Register Number: 12 Sel: 2 Name: SRSCtl */
 
