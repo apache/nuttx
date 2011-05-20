@@ -56,8 +56,7 @@ MEMORY
 	 *     Others      0x1fc00380 KSEG1  128        1024 (1Kb)
 	 *     Interrupt   0x1fc00400 KSEG1  128        1152
 	 *     JTAG        0x1fc00480 KSEG1  16         1168
-	 *   Startup logic 0x1fc00490 KSEG0  4096-1168  4096 (4Kb)
-	 *   Exceptions    0x1fc01000 KSEG0  4096       8192 (8Kb)
+	 *   Exceptions    0x1fc00490 KSEG0  8192-1168  8192 (4Kb)
 	 *   Debug code    0x1fc02000 KSEG1  4096-16   12272
 	 *   DEVCFG3-0     0x1fc02ff0 KSEG1  16        12288 (12Kb)
 	 *
@@ -73,8 +72,7 @@ MEMORY
 	kseg1_bevexcpt (rx) : ORIGIN = 0xbfc00380, LENGTH = 128
 	kseg1_intexcpt (rx) : ORIGIN = 0xbfc00400, LENGTH = 128
 	kseg1_dbgexcpt (rx) : ORIGIN = 0xbfc00480, LENGTH = 16
-	kseg0_bootmem  (rx) : ORIGIN = 0x9fc00490, LENGTH = 4096-1168
-	kseg0_excptmem (rx) : ORIGIN = 0x9fc01000, LENGTH = 4096
+	kseg0_bootmem  (rx) : ORIGIN = 0x9fc00490, LENGTH = 8192-1168
 	kseg1_dbgcode  (rx) : ORIGIN = 0xbfc02000, LENGTH = 4096-16
 	kseg1_devcfg    (r) : ORIGIN = 0xbfc02ff0, LENGTH = 16
 
@@ -89,9 +87,6 @@ MEMORY
 OUTPUT_FORMAT("elf32-tradlittlemips")
 OUTPUT_ARCH(pic32mx)
 ENTRY(__start)
-
-INPUT(up_inthandler.o);
-INPUT(up_bevhandler.o);
 
 SECTIONS
 {
@@ -135,16 +130,16 @@ SECTIONS
 
 	.start :
 	{
+		/* KSEG0 Reset startup logic */
+
 		*(.start)
-	} > kseg0_bootmem
 
-	 /* KSEG0 exception handlers */
+		/* KSEG0 exception handlers */
 
-	.excpt_handlers :
-	{
+		*(.nmi_handler)
 		*(.bev_handler)
 		*(.int_handler)
-	} > kseg0_excptmem
+	} > kseg0_bootmem
 
 	.dbg_code = ORIGIN(kseg1_dbgcode);
 
