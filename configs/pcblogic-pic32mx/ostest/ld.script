@@ -94,7 +94,7 @@ SECTIONS
 
 	.reset :
 	{
-		*(.reset)
+		KEEP (*(.reset))
 	} > kseg1_reset
 
 	/* Exception handlers.  The following is assumed:
@@ -118,12 +118,12 @@ SECTIONS
 
 	.bev_excpt :
 	{
-		*(.bev_excpt)
+		KEEP (*(.bev_excpt))
 	} > kseg1_bevexcpt
 
 	.int_excpt :
 	{
-		*(.int_excpt)
+		KEEP (*(.int_excpt))
 	} > kseg1_intexcpt
 
 	.dbg_excpt = ORIGIN(kseg1_dbgexcpt);
