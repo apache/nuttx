@@ -125,9 +125,6 @@ void up_irqinitialize(void)
 
   current_regs = NULL;
 
-  /* Attach processor exceptions */
-#warning "Missing logic"
-
   /* Initialize logic to support a second level of interrupt decoding for
    * IOPORT pins.
    */
@@ -242,6 +239,64 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
+ * Name: up_pending_irq
+ *
+ * Description:
+ *   Return true if the interrupt is pending and unmasked.
+ *
+ ****************************************************************************/
+
+bool up_pending_irq(int irq)
+{
+  uint32_t ifsaddr;
+  uint32_t iecaddr;
+  uint32_t regval;
+  int bitno;
+
+  /* Disable the interrupt by clearing the associated bit in the IEC and then
+   * acknowledge the interrupt by clearing the associated bit in the IFS
+   * register.  It is necessary to do this BEFORE lowering the interrupt
+   * priority level otherwise recursive interrupts would occur.
+   */
+
+  DEBUGASSERT(irq >= PIC32MX_IRQSRC0_FIRST && irq <= PIC32MX_IRQSRC1_LAST)
+  if (irq >= PIC32MX_IRQSRC0_FIRST)
+    {
+      if (irq <= PIC32MX_IRQSRC0_LAST)
+        {
+          /* Use IFS0 */
+
+          ifsaddr = PIC32MX_INT_IFS0;
+          iecaddr = PIC32MX_INT_IEC0;
+          bitno  -= PIC32MX_IRQSRC0_FIRST;
+        }
+      else if (irq <= PIC32MX_IRQSRC1_LAST)
+        {
+          /* Use IFS1 */
+
+          ifsaddr = PIC32MX_INT_IFS1;
+          iecaddr = PIC32MX_INT_IEC1;
+          bitno  -= PIC32MX_IRQSRC1_FIRST;
+        }
+      else
+        {
+          /* Value out of range.. just ignore */
+
+          return false;
+        }
+
+      /* Get the set of unmasked, pending interrupts.  Return true if the
+       * interrupt is pending and unmask.
+       */
+
+      regval = getreg32(ifsaddr) & getreg32(iecaddr);
+      return (regval & (1 << bitno)) != 0;
+    }
+
+  return false;
+}
+
+/****************************************************************************
  * Name: up_clrpend_irq
  *
  * Description:
@@ -287,62 +342,6 @@ void up_clrpend_irq(int irq)
       /* Disable then acknowledge interrupt */
 
       putreg32((1 << bitno), regaddr);
-    }
-}
-
-/****************************************************************************
- * Name: up_maskack_irq
- *
- * Description:
- *   Mask the IRQ and acknowledge it.  This could be done by calling
- *   up_disable_irq followed by up_clrpend_irq, but since these function is
- *   called from interrupt handling logic it is probably worth the improved
- *   performance by doing doing both here.
- *
- ****************************************************************************/
-
-void up_maskack_irq(int irq)
-{
-  uint32_t iecaddr;
-  uint32_t ifsaddr;
-  int bitno;
-
-  /* Disable the interrupt by clearing the associated bit in the IEC and then
-   * acknowledge the interrupt by clearing the associated bit in the IFS
-   * register.  It is necessary to do this BEFORE lowering the interrupt
-   * priority level otherwise recursive interrupts would occur.
-   */
-
-  DEBUGASSERT(irq >= PIC32MX_IRQSRC0_FIRST && irq <= PIC32MX_IRQSRC1_LAST)
-  if (irq >= PIC32MX_IRQSRC0_FIRST)
-    {
-      if (irq <= PIC32MX_IRQSRC0_LAST)
-        {
-          /* Use IEC0 and IFS0*/
-
-          iecaddr = PIC32MX_INT_IEC0CLR;
-          ifsaddr = PIC32MX_INT_IFS0CLR;
-          bitno  -= PIC32MX_IRQSRC0_FIRST;
-        }
-      else if (irq <= PIC32MX_IRQSRC1_LAST)
-        {
-          /* Use IEC1 and IFS1 */
-
-          iecaddr = PIC32MX_INT_IEC1CLR;
-          ifsaddr = PIC32MX_INT_IFS1CLR;
-          bitno  -= PIC32MX_IRQSRC1_FIRST;
-        }
-      else
-        {
-          /* Value out of range.. just ignore */
-
-          return;
-        }
-
-      /* Disable then acknowledge interrupt */
-
-      putreg32((1 << bitno), iecaddr);
-      putreg32((1 << bitno), ifsaddr);
     }
 }
 

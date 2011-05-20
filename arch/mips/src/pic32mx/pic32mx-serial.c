@@ -66,9 +66,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
 /* Some sanity checks *******************************************************/
-
 /* Is there at least one UART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_UART_DEVICE
@@ -123,19 +121,15 @@
 
 /* These values describe the set of enabled interrupts */
 
-#define IE_ERROR (1 << 0)
-#define IE_RX    (1 << 1)
-#define IE_TX    (1 << 2)
+#define IE_RX    (1 << 0)
+#define IE_TX    (1 << 1)
 
-#define ERROR_ENABLED(im) (((im) & IE_ERROR) != 0)
 #define RX_ENABLED(im)    (((im) & IE_RX) != 0)
 #define TX_ENABLED(im)    (((im) & IE_TX) != 0)
 
-#define ENABLE_ERROR(im)  do { (im) |= IE_ERROR; } while (0)
 #define ENABLE_RX(im)     do { (im) |= IE_RX; } while (0)
 #define ENABLE_TX(im)     do { (im) |= IE_TX; } while (0)
 
-#define DISABLE_ERROR(im) do { (im) &= ~IE_ERROR; } while (0)
 #define DISABLE_RX(im)    do { (im) &= ~IE_RX; } while (0)
 #define DISABLE_TX(im)    do { (im) &= ~IE_TX; } while (0)
 
@@ -173,6 +167,7 @@ static bool up_rxavailable(struct uart_dev_s *dev);
 static void up_send(struct uart_dev_s *dev, int ch);
 static void up_txint(struct uart_dev_s *dev, bool enable);
 static bool up_txready(struct uart_dev_s *dev);
+static bool up_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -191,7 +186,7 @@ struct uart_ops_s g_uart_ops =
   .send           = up_send,
   .txint          = up_txint,
   .txready        = up_txready,
-  .txempty        = up_txready,
+  .txempty        = up_txempty,
 };
 
 /* I/O buffers */
@@ -299,18 +294,31 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t valu
 
 static void up_restoreuartint(struct up_dev_s *priv, uint8_t im)
 {
-  /* Re-enable interrupts as for each "1" bit in imr */
+  irqstate_t flags;
 
-#warning "Missing logic"
+  /* Re-enable/re-disable interrupts corresponding to the state of bits in im */
+
+  flags = irqsave();
+  up_rxint(priv, RX_ENABLED(im));
+  up_txint(priv, TX_ENABLED(im));
+  irqrestore(flags);
 }
 
 /****************************************************************************
  * Name: up_disableuartint
  ****************************************************************************/
 
-static inline void up_disableuartint(struct up_dev_s *priv, uint8_t *imr)
+static void up_disableuartint(struct up_dev_s *priv, uint8_t *im)
 {
-#warning "Missing logic"
+  irqstate_t flags;
+
+  flags = irqsave();
+  if (im)
+   {
+     *im = priv->im;
+   }
+  up_restoreint(priv, 0);
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -349,7 +357,11 @@ static void up_shutdown(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 
-  /* Reset, disable interrupts, and disable Rx and Tx */
+  /* Disable interrupts */
+
+  up_disableuartint(priv, NULL);
+
+  /* Reset hardware and disable Rx and Tx */
 
   uart_reset(priv->uartbase);
 }
@@ -391,7 +403,13 @@ static int up_attach(struct uart_dev_s *dev)
 static void up_detach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_serialout(priv, AVR32_UART_IDR_OFFSET, 0xffffffff);
+  
+  /* Disable interrupts */
+
+  up_disableuartint(priv, NULL);
+
+  /* Dettach from the interrupt */
+
   irq_detach(priv->irq);
 }
 
@@ -443,11 +461,34 @@ static int up_interrupt(int irq, void *context)
     {
       handled = false;
 
-      /* Handle incoming, receive bytes (with or without timeout) */
+      /* Handle error interrupts.  This interrupt occurs when any of the
+       * following error conditions take place: 
+       *  - Parity error PERR (UxSTA bit 3) is detected 
+       *  - Framing Error FERR (UxSTA bit 2) is detected
+       *  - Overflow condition for the receive buffer OERR (UxSTA bit 1) occurs
+       */
 
-#warning "Missing logic"
+#ifdef CONFIG_DEBUG
+      if (up_pending_irq(priv->irqe))
         {
-           /* Received data ready... process incoming bytes */
+           /* Clear the pending error interrupt */
+
+           up_clrpend_irq(priv->irqe);
+           lldbg("ERROR: interrrupt STA: %08x\n",
+                 up_serialin(priv, PIC32MX_UART1_STA_OFFSET)
+           handled = true;
+        }
+#endif
+
+      /* Handle incoming, receive bytes */
+
+      if (up_pending_irq(priv->irqrx))
+        {
+            /* Clear the pending RX interrupt */
+
+            up_clrpend_irq(priv->irqrx);
+ 
+           /* Process incoming bytes */
 
            uart_recvchars(dev);
            handled = true;
@@ -455,15 +496,20 @@ static int up_interrupt(int irq, void *context)
 
       /* Handle outgoing, transmit bytes */
 
-#warning "Missing logic"
+      if (up_pending_irq(priv->irqtx))
         {
-           /* Transmit data regiser empty ... process outgoing bytes */
+            /* Clear the pending RX interrupt */
+
+            up_clrpend_irq(priv->irqtx);
+ 
+           /* Process outgoing bytes */
 
            uart_xmitchars(dev);
            handled = true;
         }
     }
-    return OK;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -519,16 +565,16 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 
-  /* Get the Rx byte */
-
-#warning "Missing logic"
-
   /* Return status information */
 
+  if (status)
+    {
+      *status = 0; /* We are not yet tracking serial errors */
+    }
 
   /* Then return the actual received byte */
 
-  return 0;
+  return  (int)(up_serialin(priv, PIC32MX_UART_RXREG_OFFSET) & UART_RXREG_MASK;
 }
 
 /****************************************************************************
@@ -542,7 +588,11 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  irqstate_t flags;
+  uint8_t im;
 
+  flags = irqsave();
+  im = priv->im;
   if (enable)
     {
       /* Receive an interrupt when their is anything in the Rx data register (or an Rx
@@ -550,17 +600,23 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-#  ifdef CONFIG_UART_ERRINTS
-#warning "Missing logic"
-#  else
-#warning "Missing logic"
-#  endif
+#ifdef CONFIG_DEBUG
+      up_enable_irq(priv->irqe);
+#endif
+      up_enable_irq(priv->irqtx);
+      ENABLE_RX(im);
 #endif
     }
   else
     {
-#warning "Missing logic"
+#ifdef CONFIG_DEBUG
+      up_disable_irq(priv->irqe);
+#endif
+      up_disable_irq(priv->irqtx);
+      DISABLE_RX(im);
     }
+  priv->im = im;
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -574,6 +630,17 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+
+  /* Return true is data is available in the receive data buffer */
+
+#define UART_STA_URXDA              (1 << 0)  /* Bit 0: Receive buffer data available */
+#define UART_STA_RIDLE              (1 << 4)  /* Bit 4: Receiver idle */
+#define                (1 << 8)  /* Bit 8: */
+#define               (1 << 9)  /* Bit 9: Transmit buffer full status */
+
+  /* Return TRUE if the Transmit shift register is empty */
+
+  return (up_serialin(priv, PIC32MX_UART_STA_OFFSET) & UART_STA_TRMT) != 0;
 
 #warning "Missing logic"
   return false;
@@ -590,7 +657,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-#warning "Missing logic"
+  up_serialout(priv, PIC32MX_UART_TXREG_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -605,14 +672,17 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   irqstate_t flags;
+  uint8_t im;
 
   flags = irqsave();
+  im = priv->im;
   if (enable)
     {
       /* Enable the TX interrupt */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-#warning "Missing logic"
+      up_enable_irq(priv->irqtx);
+      ENABLE_TX(im);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -625,8 +695,11 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-#warning "Missing logic"
+      up_disable_irq(priv->irqtx);
+      DISABLE_TX(im);
     }
+
+  priv->im = im;
   irqrestore(flags);
 }
 
@@ -642,8 +715,26 @@ static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 
-#warning "Missing logic"
-  return false;
+  /* Return TRUE if the Transmit buffer register is not full */
+
+  return (up_serialin(priv, PIC32MX_UART_STA_OFFSET) & UART_STA_UTXBF) == 0;
+}
+
+/****************************************************************************
+ * Name: up_txempty
+ *
+ * Description:
+ *   Return true if the tranmsit data register is empty
+ *
+ ****************************************************************************/
+
+static bool up_txempty(struct uart_dev_s *dev)
+{
+  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+
+  /* Return TRUE if the Transmit shift register is empty */
+
+  return (up_serialin(priv, PIC32MX_UART_STA_OFFSET) & UART_STA_UTRMT) != 0;
 }
 
 /****************************************************************************

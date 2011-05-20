@@ -58,17 +58,17 @@
 /* Select UART parameters for the selected console */
 
 #if defined(CONFIG_UART1_SERIAL_CONSOLE)
-#  define AVR32_CONSOLE_BASE     PIC32MX_UART1_K1BASE
-#  define AVR32_CONSOLE_BAUD     CONFIG_UART1_BAUD
-#  define AVR32_CONSOLE_BITS     CONFIG_UART1_BITS
-#  define AVR32_CONSOLE_PARITY   CONFIG_UART1_PARITY
-#  define AVR32_CONSOLE_2STOP    CONFIG_UART1_2STOP
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#  define AVR32_CONSOLE_BASE     PIC32MX_UART2_K1BASE
-#  define AVR32_CONSOLE_BAUD     CONFIG_UART2_BAUD
-#  define AVR32_CONSOLE_BITS     CONFIG_UART2_BITS
-#  define AVR32_CONSOLE_PARITY   CONFIG_UART2_PARITY
-#  define AVR32_CONSOLE_2STOP    CONFIG_UART2_2STOP
+#  define PIC32MX_CONSOLE_BASE     PIC32MX_UART1_K1BASE
+#  define PIC32MX_CONSOLE_BAUD     CONFIG_UART1_BAUD
+#  define PIC32MX_CONSOLE_BITS     CONFIG_UART1_BITS
+#  define PIC32MX_CONSOLE_PARITY   CONFIG_UART1_PARITY
+#  define PIC32MX_CONSOLE_2STOP    CONFIG_UART1_2STOP
+#elif defined(CONFIG_UART_SERIAL_CONSOLE)
+#  define PIC32MX_CONSOLE_BASE     PIC32MX_UART_K1BASE
+#  define PIC32MX_CONSOLE_BAUD     CONFIG_UART_BAUD
+#  define PIC32MX_CONSOLE_BITS     CONFIG_UART_BITS
+#  define PIC32MX_CONSOLE_PARITY   CONFIG_UART_PARITY
+#  define PIC32MX_CONSOLE_2STOP    CONFIG_UART_2STOP
 #else
 #  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
@@ -94,7 +94,7 @@
  ******************************************************************************/
 
 /******************************************************************************
- * Name: pic32mx_uartputreg
+ * Name: pic32mx_putreg
  *
  * Description:
  *   Write a value to a UART register
@@ -102,7 +102,7 @@
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-static inline void pic32mx_uartputreg(uintptr_t uart_base, unsigned int offset,
+static inline void pic32mx_putreg(uintptr_t uart_base, unsigned int offset,
                                       uint32_t value)
 {
   putreg32(value, uart_base + offset);
@@ -110,7 +110,7 @@ static inline void pic32mx_uartputreg(uintptr_t uart_base, unsigned int offset,
 #endif
 
 /******************************************************************************
- * Name: pic32mx_uartgetreg
+ * Name: pic32mx_getreg
  *
  * Description:
  *   Get a value from a UART register
@@ -118,7 +118,7 @@ static inline void pic32mx_uartputreg(uintptr_t uart_base, unsigned int offset,
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-static inline uint32_t pic32mx_uartgetreg(uintptr_t uart_base,
+static inline uint32_t pic32mx_getreg(uintptr_t uart_base,
                                           unsigned int offset)
 {
   return getreg32(uart_base + offset);
@@ -131,12 +131,49 @@ static inline uint32_t pic32mx_uartgetreg(uintptr_t uart_base,
  * Description:
  *   Configure the UART baud rate.
  *
+ *   With BRGH=0
+ *     BAUD = PBCLK / 16 / (BRG+1)
+ *     BRG  = PBCLK / 16 / BAUD - 1
+ *   With BRGH=1
+ *     BAUD = PBCLK / 4 / (BRG+1)
+ *     BRG  = PBCLK / 4 / BAUD - 1
+ *
+ *
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
 static void pic32mx_uartsetbaud(uintptr_t uart_base, uint32_t baudrate)
 {
-#warning "Missing logic"
+  uint32_t tmp;
+  uint32_t brg;
+  unsigned int mode;
+
+  /* We want the largest value of BRG divisor possible (for the best accuracy).
+   * Subject to BRG <= 65536.
+   */
+  
+  tmp = BOARD_PERIPHERAL_CLOCK / baudrate;
+
+  /* Try BRGH=1 first.  This will select the 4x divisor and will produce the
+   * larger BRG divisor, given all other things equal.
+   */
+
+  brg  = (tmp + 2) >> 2;
+  mode = PIC32MX_UART_MODESET_OFFSET;
+
+  if (brg > 65536)
+    {
+      /* Nope, too big.. try BRGH=1 */
+
+      brg  = (tmp + 8) >> 4;
+      mode = PIC32MX_UART_MODECLR_OFFSET;
+    }
+  DEBUGASSERT(brg <= 65536);
+
+  /* Set the BRG divisor */
+
+  pic32mx_putreg(uart_base, mode, UART_MODE_BRGH);
+  pic32mx_putreg(uart_base, PIC32MX_UART_BRG_OFFSET, brg);
 }
 #endif
 
@@ -148,14 +185,18 @@ static void pic32mx_uartsetbaud(uintptr_t uart_base, uint32_t baudrate)
  * Name: pic32mx_uartreset
  *
  * Description:
- *   Reset a UART.
+ *   Reset hardware and disable Rx and Tx.
  *
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
 void pic32mx_uartreset(uintptr_t uart_base)
 {
-#warning "Missing logic"
+  /* Doesn't reset the hardware... just shuts it down */
+
+  pic32mx_putreg(uart_base, PIC32MX_UART_STACLR_OFFSET,
+                 UART_STA_UTXEN | UART_STA_URXEN);
+  pic32mx_putreg(uart_base, PIC32MX_UART_MODECLR_OFFSET, UART_MODE_ON);
 }
 #endif
 
@@ -168,9 +209,65 @@ void pic32mx_uartreset(uintptr_t uart_base)
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baud,
+void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
                            unsigned int parity, unsigned int nbits, bool stop2)
 {
+  /* Clear mode and sta bits */
+
+  pic32mx_putreg(uart_base, PIC32MX_UART_MODECLR_OFFSET,
+                 UART_MODE_STSEL    | UART_MODE_PDSEL_MASK  | UART_MODE_BRGH   |
+                 UART_MODE_RXINV    | UART_MODE_WAKE        | UART_MODE_LPBACK |
+                 UART_MODE_UEN_MASK | UART_MODE_RTSMD       | UART_MODE_IREN   |
+                 UART_MODE_SIDL     | UART_MODE_ON);
+  pic32mx_putreg(uart_base, PIC32MX_UART_STACLR_OFFSET,
+                 UART_STA_UTXINV    | UART_STA_UTXISEL_MASK | UART_STA_URXISEL_RXBF);
+
+  /* Configure the FIFO interrupts */
+
+  pic32mx_putreg(uart_base, PIC32MX_UART_STASET_OFFSET,
+                 UART_STA_UTXISEL_TXBNF  | UART_STA_URXISEL_RECVD);
+
+  /* Configure word size and parity */
+
+  if (nbits == 9)
+    {
+      DEBUGASSERT(parity == 0);
+      pic32mx_putreg(uart_base, PIC32MX_UART_MODESET_OFFSET,
+                     UART_MODE_PDSEL_9NONE);
+    }
+  else
+    {
+      DEBUGASSERT(nbits == 8);
+      if (parity == 1)
+        {
+          pic32mx_putreg(uart_base, PIC32MX_UART_MODESET_OFFSET,
+                         UART_MODE_PDSEL_8ODD);
+        }
+      else if (parity == 2)
+        {
+          pic32mx_putreg(uart_base, PIC32MX_UART_MODESET_OFFSET,
+                         UART_MODE_PDSEL_8EVEN);
+        }
+    }
+
+  /* Configure 1 or 2 stop bits */
+
+  if (stop2)
+    {
+      pic32mx_putreg(uart_base, PIC32MX_UART_MODESET_OFFSET,
+                     UART_MODE_STSEL);
+    }
+
+  /* Set the BRG divisor */
+
+  pic32mx_uartsetbaud(uart_base, baudrate);
+
+  /* Enable the UART */
+
+  pic32mx_putreg(uart_base, PIC32MX_UART_MODESET_OFFSET,
+                 UART_STA_UTXEN | UART_STA_URXEN);
+  pic32mx_putreg(uart_base, PIC32MX_UART_MODESET_OFFSET,
+                 UART_MODE_ON);
 }
 #endif
 
@@ -186,7 +283,11 @@ void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baud,
 
 void pic32mx_consoleinit(void)
 {
-#warning "Missing logic"
+#ifdef HAVE_UART_DEVICE
+  pic32mx_uartconfigure(PIC32MX_CONSOLE_BASE, PIC32MX_CONSOLE_BAUD,
+                        PIC32MX_CONSOLE_PARITY, PIC32MX_CONSOLE_BITS,
+                        PIC32MX_CONSOLE_2STOP);
+#endif
 }
 
 /******************************************************************************
@@ -199,6 +300,12 @@ void pic32mx_consoleinit(void)
 
 void up_lowputc(char ch)
 {
-#warning "Missing logic"
+  /* Wait for the transmit buffer not full */
+
+  while ((pic32mx_getreg(PIC32MX_CONSOLE_BASE, PIC32MX_UART_STA_OFFSET) & UART_STA_UTXBF) != 0);
+
+  /* Then write the character to the TX data register */
+
+  pic32mx_putreg(PIC32MX_CONSOLE_BASE, PIC32MX_UART_TXREG_OFFSET, (uint32_t)ch);
 }
 

@@ -173,7 +173,7 @@ EXTERN void pic32mx_uartreset(uintptr_t uart_base);
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-EXTERN void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baud,
+EXTERN void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
                                   unsigned int parity, unsigned int nbits,
                                   bool stop2);
 #endif

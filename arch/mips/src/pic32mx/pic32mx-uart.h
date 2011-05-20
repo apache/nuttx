@@ -144,7 +144,7 @@
 #  define UART_STA_URXISEL_RXB4     (1 << UART_STA_URXISEL_SHIFT) /* RX buffer 1/2 */
 #  define UART_STA_URXISEL_RXB6     (2 << UART_STA_URXISEL_SHIFT) /* RX buffer 3/4 */
 #endif
-#define UART_STA_TRMT               (1 << 8)  /* Bit 8: Transmit shift register is empty */
+#define UART_STA_UTRMT              (1 << 8)  /* Bit 8: Transmit shift register is empty */
 #define UART_STA_UTXBF              (1 << 9)  /* Bit 9: Transmit buffer full status */
 #define UART_STA_UTXEN              (1 << 10) /* Bit 10: Transmit enable */
 #define UART_STA_UTXBRK             (1 << 11) /* Bit 11: Transmit break */
@@ -157,7 +157,7 @@
 #  define UART_STA_UTXISEL_TXBE     (2 << UART_STA_UTXISEL_SHIFT) /* TX buffer empty */
 #define UART_STA_ADDR_SHIFT         (16)      /* Bits:16-23: Automatic address mask */
 #define UART_STA_ADDR_MASK          (0xff << UART_STA_ADDR_SHIFT)
-#define UART_STA_ADM_EN             (1 << 24) /* Bit 14: Automatic address detect mode enable */
+#define UART_STA_ADM_EN             (1 << 24) /* Bit 24: Automatic address detect mode enable */
 
 /* UARTx transmit register */
 
