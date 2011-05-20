@@ -71,16 +71,14 @@
  **************************************************************************/
 
 /**************************************************************************
- * Name: up_lowinit
+ * Name: pic32mx_lowinit
  *
  * Description:
- *   This performs basic initialization of the USART used for the serial
- *   console.  Its purpose is to get the console output availabe as soon
- *   as possible.
+ *   This performs basic low-level initialization of the system.
  *
  **************************************************************************/
 
-void up_lowinit(void)
+void pic32mx_lowinit(void)
 {
   /* Initialize MCU clocking */
 

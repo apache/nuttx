@@ -120,10 +120,21 @@ extern "C" {
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: pic32mx_lowinit
+ *
+ * Description:
+ *   This performs basic low-level initialization of the system.
+ *
+ ************************************************************************************/
+
+EXTERN void pic32mx_lowinit(void);
+
+/************************************************************************************
  * Name: pic32mx_clockconfig
  *
  * Description:
- *   Called to initialize the PIC32MX clocking using the settings in board.h.
+ *   Called by pic32mx_lowinit to initialize the PIC32MX clocking using the settings
+ *   in board.h.
  *
  ************************************************************************************/
 
@@ -134,7 +145,8 @@ EXTERN void pic32mx_clockconfig(void);
  *
  * Description:
  *   Performs low level initialization of the console UART.  This UART done early so
- *   that the serial console is available for debugging very early in the boot sequence.
+ *   that the serial console is available for debugging very early in the boot
+ *   sequence.
  *
  ************************************************************************************/
 
@@ -163,7 +175,7 @@ EXTERN void pic32mx_uartreset(uintptr_t uart_base);
 #ifdef HAVE_UART_DEVICE
 EXTERN void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baud,
                                   unsigned int parity, unsigned int nbits,
-								  bool stop2);
+                                  bool stop2);
 #endif
 
 /************************************************************************************
@@ -192,15 +204,25 @@ EXTERN void pic32mx_gpioirqinitialize(void);
 EXTERN void pic32mx_boardinitialize(void);
 
 /************************************************************************************
- * Name: up_decodeirq
+ * Name: pic32mx_decodeirq
  *
  * Description:
- *   Called from assembly language logic when and interrrupt exception occurs.  This
+ *   Called from assembly language logic when an interrrupt exception occurs.  This
  *   function decodes and dispatches the interrupt.
  *
  ************************************************************************************/
 
-EXTERN uint32_t *up_decodeirq(uint32_t *regs);
+EXTERN uint32_t *pic32mx_decodeirq(uint32_t *regs);
+
+/************************************************************************************
+ * Name: pic32mx_dobev
+ *
+ * Description:
+ *   Called from assembly language logic on all other exceptions.
+ *
+ ************************************************************************************/
+
+EXTERN uint32_t *pic32mx_dobev(uint32_t *regs);
 
 /************************************************************************************
  * Name: pic32mx_configgpio

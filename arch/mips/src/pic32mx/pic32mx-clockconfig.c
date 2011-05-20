@@ -79,7 +79,8 @@
  * Name: pic32mx_clockconfig
  *
  * Description:
- *   Called to initialize the PIC32MX clocking using the settings in board.h.
+ *   Called by pic32mx_lowinitto initialize the PIC32MX clocking using the
+ *   settings in board.h.
  *
  **************************************************************************/
 
