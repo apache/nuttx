@@ -56,7 +56,7 @@
  ********************************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-	.global		g_stackbase
+	.global		g_intstackbase
 	.global		g_nestlevel
 #endif
 
@@ -255,9 +255,9 @@
 
 	/* Restore the floating point register state */
 
-	lw		k0, REG_MTLO(k1)
+	lw		k0, REG_MFLO(k1)
 	mtlo	k0
-	lw		k0, REG_MTHI(k1)
+	lw		k0, REG_MFHI(k1)
 	mthi	k0
 
 	/* Restore general purpose registers */
@@ -368,7 +368,8 @@
 	 * stack first.
 	 */
 
-	la		\tmp3, g_intstack
+	la		\tmp3, g_intstackbase
+	lw		\tmp, (\tmp3)
 	sw		sp, (\tmp3)
 	move	sp, \tmp3
 1:
