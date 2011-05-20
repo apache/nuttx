@@ -46,6 +46,19 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifdef CONFIG_PIC32MX_MVEC0
+#  error "Multi-vectors not supported"
+#  ifndef CONFIG_PIC32MX_EBASE
+#    error "EBASE address provided"  /* Should come from the linker script */
+#  endif
+#  ifndef CONFIG_PIC32MX_VECTORSPACING
+#    error "No vector spacing provided"
+#  endif
+#endif
+
+/* Linker memory organization ***********************************************/
 /* Data memory is organized as follows:
  *
  * 1) Possible space reserved for debug data
@@ -261,15 +274,17 @@ __start:
 
 	/* Initialize EBase register */
 
-	la		t1, _ebase_address
+#ifdef CONFIG_PIC32MX_MVEC
+	la		t1, CONFIG_PIC32MX_EBASE
 	mtc0	t1, PIC32MX_CP0_EBASE
 
 	/* Initialize IntCtl register */
 
-	la		t1, _vector_spacing
-	li		t2, 0				/* Clear t2 */
-	ins		t2, t1, 5, 5		/* Shift value to VS field */
+	li		t1, CONFIG_PIC32MX_VECTORSPACING
+	li		t2, 0
+	ins		t2, t1, CP0_INTCTL_VS_SHIFT, 5
 	mtc0	t2, PIC32MX_CP0_INTCTL
+#endif
 
 	/* Initialize CAUSE registers
 	 * - Enable counting of Count register (DC = 0)
@@ -296,17 +311,17 @@ __start:
 	 */
 
 	mfc0	t0, PIC32MX_CP0_CONFIG
-	ext		t1, t0, 22,1		/* Extract UDI from Config register */
-	sll		t1, t1, 17			/* Move UDI to Status.CEE location */
+	ext		t1, t0, 22,1			/* Extract UDI from Config register */
+	sll		t1, t1, 17				/* Move UDI to Status.CEE location */
 	mfc0	t0, PIC32MX_CP0_STATUS
-	and		t0, t0, 0x00580000	/* Preserve SR, NMI, and BEV */
-	or		t0, t1, t0			/* Include Status.CEE (from UDI) */
+	and		t0, t0, 0x00580000		/* Preserve SR, NMI, and BEV */
+	or		t0, t1, t0				/* Include Status.CEE (from UDI) */
 	mtc0	t0, PIC32MX_CP0_STATUS
 
 	/* Initialize Status BEV for normal exception vectors */
 
 	mfc0	t0, PIC32MX_CP0_STATUS
-	and		t0, t0, 0xffbfffff	# Clear BEV
+	and		t0, t0, ~CP0_STATUS_BEV	/* Clear BEV */
 	mtc0	t0, PIC32MX_CP0_STATUS
 
 	/* Start NuttX. We do this via a thunk in the text section so that
@@ -364,11 +379,11 @@ halt:
 	nop
 	.end __start_nuttx
 
-	/* This global variable is unsigned long g_heapbase and is exported
+	/* This global variable is unsigned int g_heapbase and is exported
 	 * here only because of its coupling to idle thread stack.
 	 */
 
-	.data
+	.sdata
 	.align	4
 	.globl	g_heapbase
 	.type	g_heapbase, object
