@@ -122,10 +122,10 @@
 	/* Imported symbols */
 
 	.global os_start
-	.global	up_dobev
-	.global up_decodeirq
+	.global	pic32mx_dobev
+	.global pic32mx_decodeirq
 #ifdef CONFIG_PIC32MX_NMIHANDLER
-	.global	up_donmi
+	.global	pic32mx_donmi
 #endif
 
 /****************************************************************************
@@ -419,7 +419,7 @@ __start:
  * Name: _bev_handler
  *
  * Description:
- *   BEV exception handler.  Calls up_dobev()
+ *   BEV exception handler.  Calls pic32mx_dobev()
  *
  ****************************************************************************/
 
@@ -427,14 +427,14 @@ __start:
 	.set	noreorder
 	.ent	_bev_handler
 _bev_handler:
-	EXCPT_PROLOGUE t0			/* Save registers on stack, enable nested interrupts */
-	move	a0, sp				/* Pass register save structure as the parameter 1 */
-	USE_INTSTACK t0, t1, t2		/* Switch to the interrupt stack */
-	la		t0, up_dobev		/* Call up_dobev(regs) */
+	EXCPT_PROLOGUE t0				/* Save registers on stack, enable nested interrupts */
+	move	a0, sp					/* Pass register save structure as the parameter 1 */
+	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
+	la		t0, pic32mx_dobev		/* Call up_dobev(regs) */
 	jalr	t0, ra
-	di							/* Disable interrupts */
-	RESTORE_STACK t0, t1		/* Undo the operations of USE_STACK */
-	EXCPT_EPILOGUE v0			/* Return to the context returned by up_dobev() */
+	di								/* Disable interrupts */
+	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
+	EXCPT_EPILOGUE v0				/* Return to the context returned by up_dobev() */
 	.end	_bev_handler
 
 /****************************************************************************
@@ -449,21 +449,21 @@ _bev_handler:
 	.set	noreorder
 	.ent	_int_handler
 _int_handler:
-	EXCPT_PROLOGUE t0			/* Save registers on stack, enable nested interrupts */
-	move	a0, sp				/* Pass register save structure as the parameter 1 */
-	USE_INTSTACK t0, t1, t2		/* Switch to the interrupt stack */
-	la		t0, up_decodeirq	/* Call up_decodeirq(regs) */
+	EXCPT_PROLOGUE t0				/* Save registers on stack, enable nested interrupts */
+	move	a0, sp					/* Pass register save structure as the parameter 1 */
+	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
+	la		t0, pic32mx_decodeirq	/* Call pic32mx_decodeirq(regs) */
 	jalr	t0, ra
-	di							/* Disable interrupts */
-	RESTORE_STACK t0, t1		/* Undo the operations of USE_STACK */
-	EXCPT_EPILOGUE v0			/* Return to the context returned by up_decodeirq() */
+	di								/* Disable interrupts */
+	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
+	EXCPT_EPILOGUE v0				/* Return to the context returned by pic32mx_decodeirq() */
 	.end	_int_handler
 
 /****************************************************************************
  * Name: _nmi_handler
  *
  * Description:
- *   NMI exception handler.  Calls up_donmi
+ *   NMI exception handler.  Calls pic32mx_donmi
  *
  ****************************************************************************/
 
@@ -472,14 +472,14 @@ _int_handler:
 	.set	noreorder
 	.ent	_nmi_handler
 _nmi_handler:
-	EXCPT_PROLOGUE t0			/* Save registers on stack, enable nested interrupts */
-	move	a0, sp				/* Pass register save structure as the parameter 1 */
-	USE_INTSTACK t0, t1, t2		/* Switch to the interrupt stack */
-	la		t0, up_donmi		/* Call up_donmi(regs) */
+	EXCPT_PROLOGUE t0				/* Save registers on stack, enable nested interrupts */
+	move	a0, sp					/* Pass register save structure as the parameter 1 */
+	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
+	la		t0, pic32mx_donmi		/* Call up_donmi(regs) */
 	jalr	t0, ra
-	di							/* Disable interrupts */
-	RESTORE_STACK t0, t1		/* Undo the operations of USE_STACK */
-	EXCPT_EPILOGUE v0			/* Return to the context returned by up_donmi() */
+	di								/* Disable interrupts */
+	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
+	EXCPT_EPILOGUE v0				/* Return to the context returned by pic32mx_donmi() */
 	.end	_nmi_handler
 #endif
 
@@ -501,7 +501,7 @@ _nmi_handler:
 __start_nuttx:
 	/* Perform low level initialization */
 
-	la		t0, up_lowinit
+	la		t0, pic32mx_lowinit
 	jalr	t0, ra
 	nop
 
