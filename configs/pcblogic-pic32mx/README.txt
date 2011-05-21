@@ -150,94 +150,83 @@ PIC32MX Configuration Options
 
     Individual subsystems can be enabled:
 
-       CONFIG_PIC32MX_WDT
-       CONFIG_PIC32MX_RTCC
-       CONFIG_PIC32MX_T2    /* Timer 1 is the system time and always enabled */
-       CONFIG_PIC32MX_T3
-       CONFIG_PIC32MX_T4
-       CONFIG_PIC32MX_T5
-       CONFIG_PIC32MX_IC1
-       CONFIG_PIC32MX_IC2
-       CONFIG_PIC32MX_IC3
-       CONFIG_PIC32MX_IC4
-       CONFIG_PIC32MX_IC5
-       CONFIG_PIC32MX_OC1
-       CONFIG_PIC32MX_OC2
-       CONFIG_PIC32MX_OC3
-       CONFIG_PIC32MX_OC4
-       CONFIG_PIC32MX_OC5
-       CONFIG_PIC32MX_I2C1
-       CONFIG_PIC32MX_I2C2
-       CONFIG_PIC32MX_SPI1
-       CONFIG_PIC32MX_SPI2
-       CONFIG_PIC32MX_UART1
-       CONFIG_PIC32MX_UART2
-       CONFIG_PIC32MX_PMP
-       CONFIG_PIC32MX_ADC
-       CONFIG_PIC32MX_CVR
-       CONFIG_PIC32MX_CM1
-       CONFIG_PIC32MX_CM2
-       CONFIG_PIC32MX_OSC
-       CONFIG_PIC32MX_DDP
-       CONFIG_PIC32MX_FLASH
-       CONFIG_PIC32MX_BMX
-       CONFIG_PIC32MX_DMA
-       CONFIG_PIC32MX_CHE
-       CONFIG_PIC32MX_USB
-       CONFIG_PIC32MX_IOPORTA
-       CONFIG_PIC32MX_IOPORTB
-       CONFIG_PIC32MX_IOPORTC
-       CONFIG_PIC32MX_IOPORTD
-       CONFIG_PIC32MX_IOPORTE
-       CONFIG_PIC32MX_IOPORTF
-       CONFIG_PIC32MX_IOPORTG
+       CONFIG_PIC32MX_WDT            - Watchdog timer
+       CONFIG_PIC32MX_T2             - Timer 2 (Timer 1 is the system time and always enabled)
+       CONFIG_PIC32MX_T3             - Timer 3
+       CONFIG_PIC32MX_T4             - Timer 4
+       CONFIG_PIC32MX_T5             - Timer 5
+       CONFIG_PIC32MX_IC1            - Input Capture 1
+       CONFIG_PIC32MX_IC2            - Input Capture 2
+       CONFIG_PIC32MX_IC3            - Input Capture 3
+       CONFIG_PIC32MX_IC4            - Input Capture 4
+       CONFIG_PIC32MX_IC5            - Input Capture 5
+       CONFIG_PIC32MX_OC1            - Output Compare 1
+       CONFIG_PIC32MX_OC2            - Output Compare 2
+       CONFIG_PIC32MX_OC3            - Output Compare 3
+       CONFIG_PIC32MX_OC4            - Output Compare 4
+       CONFIG_PIC32MX_OC5            - Output Compare 5
+       CONFIG_PIC32MX_I2C1           - I2C 1
+       CONFIG_PIC32MX_I2C2           - I2C 2
+       CONFIG_PIC32MX_SPI1           - SPI 1
+       CONFIG_PIC32MX_SPI2           - SPI 2
+       CONFIG_PIC32MX_UART1          - UART 1
+       CONFIG_PIC32MX_UART2          - UART 2
+       CONFIG_PIC32MX_ADC            - ADC 1
+       CONFIG_PIC32MX_PMP            - Parallel Master Port
+       CONFIG_PIC32MX_CM1            - Comparator 1
+       CONFIG_PIC32MX_CM2            - Comparator 2
+       CONFIG_PIC32MX_RTCC           - Real-Time Clock and Calendar
+       CONFIG_PIC32MX_DMA            - DMA
+       CONFIG_PIC32MX_FLASH          - FLASH
+       CONFIG_PIC32MX_USB            - USB
 
     The priority of interrupts may be specified.  The value ranage of
     priority is 4-31. The default (16) will be used if these any of these
     are undefined.
 
-       CONFIG_PIC32MX_WDTPRIO
-       CONFIG_PIC32MX_RTCCPRIO
-       CONFIG_PIC32MX_T1PRIO    /* System timer priority */
-       CONFIG_PIC32MX_T2PRIO
-       CONFIG_PIC32MX_T3PRIO
-       CONFIG_PIC32MX_T4PRIO
-       CONFIG_PIC32MX_T5PRIO
-       CONFIG_PIC32MX_IC1PRIO
-       CONFIG_PIC32MX_IC2PRIO
-       CONFIG_PIC32MX_IC3PRIO
-       CONFIG_PIC32MX_IC4PRIO
-       CONFIG_PIC32MX_IC5PRIO
-       CONFIG_PIC32MX_OC1PRIO
-       CONFIG_PIC32MX_OC2PRIO
-       CONFIG_PIC32MX_OC3PRIO
-       CONFIG_PIC32MX_OC4PRIO
-       CONFIG_PIC32MX_OC5PRIO
-       CONFIG_PIC32MX_I2C1PRIO
-       CONFIG_PIC32MX_I2C2PRIO
-       CONFIG_PIC32MX_SPI1PRIO
-       CONFIG_PIC32MX_SPI2PRIO
-       CONFIG_PIC32MX_UART1PRIO
-       CONFIG_PIC32MX_UART2PRIO
-       CONFIG_PIC32MX_PMPPRIO
-       CONFIG_PIC32MX_ADCPRIO
-       CONFIG_PIC32MX_CVRPRIO
-       CONFIG_PIC32MX_CM1PRIO
-       CONFIG_PIC32MX_CM2PRIO
-       CONFIG_PIC32MX_OSCPRIO
-       CONFIG_PIC32MX_DDPPRIO
-       CONFIG_PIC32MX_FLASHPRIO
-       CONFIG_PIC32MX_BMXPRIO
-       CONFIG_PIC32MX_DMAPRIO
-       CONFIG_PIC32MX_CHEPRIO
-       CONFIG_PIC32MX_USBPRIO
-       CONFIG_PIC32MX_IOPORTAPRIO
-       CONFIG_PIC32MX_IOPORTBPRIO
-       CONFIG_PIC32MX_IOPORTCPRIO
-       CONFIG_PIC32MX_IOPORTDPRIO
-       CONFIG_PIC32MX_IOPORTEPRIO
-       CONFIG_PIC32MX_IOPORTFPRIO
-       CONFIG_PIC32MX_IOPORTGPRIO
+       CONFIG_PIC32MX_CTPRIO         - Core Timer Interrupt
+       CONFIG_PIC32MX_CS0PRIO        - Core Software Interrupt 0
+       CONFIG_PIC32MX_CS1PRIO        - Core Software Interrupt 1
+       CONFIG_PIC32MX_INT0PRIO       - External Interrupt 0
+       CONFIG_PIC32MX_INT1PRIO       - External Interrupt 1
+       CONFIG_PIC32MX_INT2PRIO       - External Interrupt 2
+       CONFIG_PIC32MX_INT3PRIO       - External Interrupt 3
+       CONFIG_PIC32MX_INT4PRIO       - External Interrupt 4
+       CONFIG_PIC32MX_FSCMPRIO       - Fail-Safe Clock Monitor
+       CONFIG_PIC32MX_T1PRIO         - Timer 1 (System timer) priority
+       CONFIG_PIC32MX_T2PRIO         - Timer 2 priority
+       CONFIG_PIC32MX_T3PRIO         - Timer 3 priority
+       CONFIG_PIC32MX_T4PRIO         - Timer 4 priority
+       CONFIG_PIC32MX_T5PRIO         - Timer 5 priority
+       CONFIG_PIC32MX_IC1PRIO        - Input Capture 1
+       CONFIG_PIC32MX_IC2PRIO        - Input Capture 2
+       CONFIG_PIC32MX_IC3PRIO        - Input Capture 3
+       CONFIG_PIC32MX_IC4PRIO        - Input Capture 4
+       CONFIG_PIC32MX_IC5PRIO        - Input Capture 5
+       CONFIG_PIC32MX_OC1PRIO        - Output Compare 1
+       CONFIG_PIC32MX_OC2PRIO        - Output Compare 2
+       CONFIG_PIC32MX_OC3PRIO        - Output Compare 3
+       CONFIG_PIC32MX_OC4PRIO        - Output Compare 4
+       CONFIG_PIC32MX_OC5PRIO        - Output Compare 5
+       CONFIG_PIC32MX_I2C1PRIO       - I2C 1
+       CONFIG_PIC32MX_I2C2PRIO       - I2C 2
+       CONFIG_PIC32MX_SPI1PRIO       - SPI 1
+       CONFIG_PIC32MX_SPI2PRIO       - SPI 2
+       CONFIG_PIC32MX_UART1PRIO      - UART 1
+       CONFIG_PIC32MX_UART2PRIO      - UART 2
+       CONFIG_PIC32MX_CN             - Input Change Interrupt
+       CONFIG_PIC32MX_ADCPRIO        - ADC1 Convert Done
+       CONFIG_PIC32MX_PMPPRIO        - Parallel Master Port
+       CONFIG_PIC32MX_CM1PRIO        - Comparator 1
+       CONFIG_PIC32MX_CM2PRIO        - Comparator 2
+       CONFIG_PIC32MX_FSCMPRIO       - Fail-Safe Clock Monitor
+       CONFIG_PIC32MX_RTCCPRIO       - Real-Time Clock and Calendar
+       CONFIG_PIC32MX_DMA0PRIO       - DMA Channel 0
+       CONFIG_PIC32MX_DMA1PRIO       - DMA Channel 1
+       CONFIG_PIC32MX_DMA2PRIO       - DMA Channel 2
+       CONFIG_PIC32MX_DMA3PRIO       - DMA Channel 3
+       CONFIG_PIC32MX_FCEPRIO        - Flash Control Event
+       CONFIG_PIC32MX_USBPRIO        - USB
 
   PIC32MXx specific device driver settings
 
