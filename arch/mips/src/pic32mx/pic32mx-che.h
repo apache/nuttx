@@ -106,32 +106,41 @@
 /* Pre-fetch cache control register */
 
 
-#define CHE_CON_PFMWS_SHIFT       (0)       /* Bits 0-2: xx */
+#define CHE_CON_PFMWS_SHIFT       (0)       /* Bits 0-2: PFM access time (SYSCLK wait states) */
 #define CHE_CON_PFMWS_MASK        (7 << CHE_CON_PFMWS_SHIFT)
-#define CHE_CON_PREFEN_SHIFT      (4)       /* Bits 4-5: xx */
+#  define CHE_CON_PFMWS(n)        ((n) << CHE_CON_PFMWS_SHIFT) /* n wait states, n=0-7 */
+#define CHE_CON_PREFEN_SHIFT      (4)       /* Bits 4-5: Predictive pre-fetch cache enable */
 #define CHE_CON_PREFEN_MASK       (3 << CHE_CON_PREFEN_SHIFT)
-#define CHE_CON_DCSZ_SHIFT        (8)       /* Bits 8-9: xx */
+#  define CHE_CON_PREFEN_DISABLE  (0 << CHE_CON_PREFEN_SHIFT) /* Disable predictive pre-fetch cache */
+#  define CHE_CON_PREFEN_CACHE    (1 << CHE_CON_PREFEN_SHIFT) /* Enable for cacheable regions only */
+#  define CHE_CON_PREFEN_NONCACHE (2 << CHE_CON_PREFEN_SHIFT) /* Enable for non-cacheable regions only */
+#  define CHE_CON_PREFEN_ALL      (3 << CHE_CON_PREFEN_SHIFT) /* Enable for both regions */
+#define CHE_CON_DCSZ_SHIFT        (8)       /* Bits 8-9: Data cache size (lines) */
 #define CHE_CON_DCSZ_MASK         (3 << CHE_CON_DCSZ_SHIFT)
-#define CHE_CON_CHECOH            (1 << 16) /* Bit 16: xx */
+#  define CHE_CON_DCSZ_DISABLE    (0 << CHE_CON_DCSZ_SHIFT) /* Disable data caching */
+#  define CHE_CON_DCSZ_1LINE      (1 << CHE_CON_DCSZ_SHIFT) /* Enable with size of 1 line */
+#  define CHE_CON_DCSZ_2LINES     (2 << CHE_CON_DCSZ_SHIFT) /* Enable with size of 2 lines */
+#  define CHE_CON_DCSZ_4LINES     (3 << CHE_CON_DCSZ_SHIFT) /* Enable with size of 4 lines */
+#define CHE_CON_CHECOH            (1 << 16) /* Bit 16: Cache coherency setting */
 
 /* Pre-fetch cache access register */
 
-#define CHE_ACC_CHEIDX_SHIFT      (0)       /* Bits 0-3: xx */
+#define CHE_ACC_CHEIDX_SHIFT      (0)       /* Bits 0-3: Cache line index */
 #define CHE_ACC_CHEIDX_MASK       (15 << CHE_ACC_CHEIDX_SHIFT)
-#define CHE_ACC_CHEWEN            (1 << 31) /* Bit 31: xx */
+#define CHE_ACC_CHEWEN            (1 << 31) /* Bit 31: Cache access enable */
 
 /* Pre-fetch cache tag register */
 
-#define CHE_TAG_LTYPE             (1 << 1)  /* Bit 1:  xx */
-#define CHE_TAG_LLOCK             (1 << 2)  /* Bit 2:  xx */
-#define CHE_TAG_LVALID            (1 << 3)  /* Bit 3:  xx */
-#define CHE_TAG_LTAG_SHIFT        (4)       /* Bits 4-23: xx */
+#define CHE_TAG_LTYPE             (1 << 1)  /* Bit 1:  Line type */
+#define CHE_TAG_LLOCK             (1 << 2)  /* Bit 2:  Line lock */
+#define CHE_TAG_LVALID            (1 << 3)  /* Bit 3:  Line valid */
+#define CHE_TAG_LTAG_SHIFT        (4)       /* Bits 4-23: Line tag address */
 #define CHE_TAG_LTAG_MASK         (0x000fffff << CHE_TAG_LTAG_SHIFT)
-#define CHE_TAG_LTAGBOOT          (1 << 31) /* Bit 31: xx */
+#define CHE_TAG_LTAGBOOT          (1 << 31) /* Bit 31: Line tag address boot */
 
 /* Pre-fetch cache tag mask register */
 
-#define CHE_MSK_SHIFT             (5)       /* Bits 5-15: xx */
+#define CHE_MSK_SHIFT             (5)       /* Bits 5-15: Line mask */
 #define CHE_MSK_MASK              (0x7ff << CHE_MSK_SHIFT)
 
 /* Cache word 0-3 register  -- 32-bit cache line data */

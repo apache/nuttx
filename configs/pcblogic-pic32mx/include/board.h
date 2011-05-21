@@ -55,7 +55,7 @@
 #define BOARD_SOSC_FREQ        32768    /* Secondary OSC XTAL frequency (32.768KHz) */
 
 /* PLL configuration and resulting CPU clock.
- * CPU_CLOCK = ((POSC_XTAL / IDIV) * MULT) / ODIV
+ * CPU_CLOCK = ((POSC_FREQ / IDIV) * MULT) / ODIV
  */
 
 #define BOARD_PLL_IDIV         2        /* PLL input divider */
@@ -68,7 +68,7 @@
  * USB_CLOCK = ((POSC_XTAL / IDIV) * 24) / 2
  */
 
-#define BOARD_UPLL_IDIV        16 /*2*/ /* USB PLL divider (revisit) */
+#define BOARD_UPLL_IDIV        16       /* 2*/ /* USB PLL divider (revisit) */
 #define BOARD_USB_CLOCK        48000000 /* USB clock (8MHz / (2*48MHz/24)) */
 
 /* Peripheral clock is divided down from CPU clock.
