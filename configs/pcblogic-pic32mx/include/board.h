@@ -51,8 +51,8 @@
 /* Clocking *****************************************************************/
 /* Crystal frequencies */
 
-#define BOARD_POSC_XTAL        8000000  /* Primary OSC XTAL frequency (8MHz) */
-#define BOARD_SOSC_XTAL        32768    /* Secondary OSC XTAL frequency (32.768KHz) */
+#define BOARD_POSC_FREQ        8000000  /* Primary OSC XTAL frequency (8MHz) */
+#define BOARD_SOSC_FREQ        32768    /* Secondary OSC XTAL frequency (32.768KHz) */
 
 /* PLL configuration and resulting CPU clock.
  * CPU_CLOCK = ((POSC_XTAL / IDIV) * MULT) / ODIV
