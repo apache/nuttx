@@ -63,24 +63,24 @@
  * register value givent the board's periperhal clock frequency and the
  * desired system timer frequency:
  *
- *   TIMER1_MATCH = BOARD_PERIPHERAL_CLOCK / TIMER1_PRESCALE / CLOCKS_PER_SEC
+ *   TIMER1_MATCH = BOARD_PBCLOCK / TIMER1_PRESCALE / CLOCKS_PER_SEC
  *
  * We want the largest possible value for MATCH that is less than 65,535, the
  * maximum value for the 16-bit timer register:
  *
- *   TIMER1_PRESCALE >= BOARD_PERIPHERAL_CLOCK / CLOCKS_PER_SEC / 65535
+ *   TIMER1_PRESCALE >= BOARD_PBCLOCK / CLOCKS_PER_SEC / 65535
  *
  * Timer 1 does not have very many options for the perscaler value.  So we
  * can pick the best by brute force.  Example:
  *
- *   BOARD_PERIPHERAL_CLOCK = 40000000
+ *   BOARD_PBCLOCK = 40000000
  *   CLOCKS_PER_SEC         = 100
  *   OPTIMAL_PRESCALE       = 6
  *   TIMER1_PRESCALE        = 8
  *   TIMER1_MATCH           = 50,000
  */
  
-#define OPTIMAL_PRESCALE (BOARD_PERIPHERAL_CLOCK / CLOCKS_PER_SEC / 65535)
+#define OPTIMAL_PRESCALE (BOARD_PBCLOCK / CLOCKS_PER_SEC / 65535)
 #if OPTIMAL_PRESCALE <= 1
 #  define TIMER1_CON_TCKPS    TIMER1_CON_TCKPS_1
 #  define TIMER1_PRESCALE     1
@@ -97,7 +97,7 @@
 #  error "This timer frequency cannot be represented"
 #endif
 
-#define TIMER1_MATCH (BOARD_PERIPHERAL_CLOCK / TIMER1_PRESCALE / CLOCKS_PER_SEC)
+#define TIMER1_MATCH (BOARD_PBCLOCK / TIMER1_PRESCALE / CLOCKS_PER_SEC)
 
 /****************************************************************************
  * Private Types

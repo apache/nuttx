@@ -152,7 +152,7 @@ static void pic32mx_uartsetbaud(uintptr_t uart_base, uint32_t baudrate)
    * Subject to BRG <= 65536.
    */
   
-  tmp = BOARD_PERIPHERAL_CLOCK / baudrate;
+  tmp = BOARD_PBCLOCK / baudrate;
 
   /* Try BRGH=1 first.  This will select the 4x divisor and will produce the
    * larger BRG divisor, given all other things equal.

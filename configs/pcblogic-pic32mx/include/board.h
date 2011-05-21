@@ -49,9 +49,39 @@
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+/* Crystal frequencies */
 
-#define BOARD_CPU_CLOCK        80000000
-#define BOARD_PERIPHERAL_CLOCK 40000000
+#define BOARD_POSC_XTAL        8000000  /* Primary OSC XTAL frequency (8MHz) */
+#define BOARD_SOSC_XTAL        32768    /* Secondary OSC XTAL frequency (32.768KHz) */
+
+/* PLL configuration and resulting CPU clock.
+ * CPU_CLOCK = ((POSC_XTAL / IDIV) * MULT) / ODIV
+ */
+
+#define BOARD_PLL_IDIV         2        /* PLL input divider */
+#define BOARD_PLL_MULT         20       /* PLL multiplier */
+#define BOARD_PLL_ODIV         1        /* PLL output divider */
+
+#define BOARD_CPU_CLOCK        80000000 /* CPU clock (80MHz = 8MHz * 20 / 2) */
+
+/* USB PLL configuration.
+ * USB_CLOCK = ((POSC_XTAL / IDIV) * 24) / 2
+ */
+
+#define BOARD_UPLL_IDIV        16 /*2*/ /* USB PLL divider (revisit) */
+#define BOARD_USB_CLOCK        48000000 /* USB clock (8MHz / (2*48MHz/24)) */
+
+/* Peripheral clock is divided down from CPU clock.
+ * PBCLOCK = CPU_CLOCK / PBDIV
+ */
+
+#define BOARD_PBDIV            2        /* Peripheral clock divisor (PBDIV) */
+#define BOARD_PBCLOCK          40000000 /* Peripheral clock (PBCLK = 80MHz/2) */
+
+/* Watchdog pre-scaler (re-visit) */
+
+#define BOARD_WD_ENABLE        0        /* Watchdog is disabled */
+#define BOARD_WD_PRESCALER     8        /* Watchdog pre-scaler */
 
 /* LED definitions **********************************************************/
 
