@@ -154,4 +154,19 @@ int rtos_sem_down(void *sem)
     return sem_wait(sem);
 }
 
+void rtos_stop_running(void)
+{
+    extern void e1000_mod_exit(void);
+
+    cli();
+    
+#ifdef CONFIG_NET_E1000
+    e1000_mod_exit();
+#endif
+
+    while(1) {
+	asm volatile("hlt");
+    }
+}
+
 
