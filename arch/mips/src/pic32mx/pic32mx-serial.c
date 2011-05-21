@@ -145,6 +145,7 @@ struct up_dev_s
   uint8_t   irqe;      /* Error IRQ associated with this UART (for enable) */
   uint8_t   irqrx;     /* RX IRQ associated with this UART (for enable) */
   uint8_t   irqtx;     /* RX IRQ associated with this UART (for enable) */
+  uint8_t   irqprio;   /* Interrupt priority */
   uint8_t   ie;        /* Interrupts enabled */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (5, 6, 7 or 8) */
@@ -211,6 +212,7 @@ static struct up_dev_s g_uart1priv =
   .irqe           = PIC32MX_IRQSRC_U1E,
   .irqrx          = PIC32MX_IRQSRC_U1RX,
   .irqtx          = PIC32MX_IRQSRC_U1TX,
+  .irqprio        = CONFIG_PIC32MX_UART1PRIO,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
@@ -244,6 +246,7 @@ static struct up_dev_s g_uart2priv =
   .irqe           = PIC32MX_IRQSRC_U2E,
   .irqrx          = PIC32MX_IRQSRC_U2RX,
   .irqtx          = PIC32MX_IRQSRC_U2TX,
+  .irqprio        = CONFIG_PIC32MX_UART2PRIO,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
@@ -341,6 +344,9 @@ static int up_setup(struct uart_dev_s *dev)
                  priv->bits, priv->stopbits2);
 #endif
 
+  /* Set up the interrupt priority */
+
+  up_prioritize_irq(priv->irq, priv->irqprio);
   return OK;
 }
 

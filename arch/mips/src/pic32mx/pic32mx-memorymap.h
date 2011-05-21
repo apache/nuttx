@@ -176,7 +176,7 @@
 #  define PIC32MX_DMACH2_K1BASE     (PIC32MX_SFR_K1BASE + 0x000831e0)
 #  define PIC32MX_DMACH3_K1BASE     (PIC32MX_SFR_K1BASE + 0x000832a0)
 
-/* Prefetch Register Base Address */
+/* Prefetch Cache Register Base Address */
 
 #  define PIC32MX_CHE_K1BASE        (PIC32MX_SFR_K1BASE + 0x00084000)
 

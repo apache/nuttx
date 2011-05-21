@@ -59,28 +59,28 @@
  * Definitions
  ****************************************************************************/
 /* Timer Setup **************************************************************/
-/* Select a timer prescale value.  Our goal is to select the timer MATCH
- * register value givent the board's periperhal clock frequency and the
- * desired system timer frequency:
+/* Select a timer 1 prescale value.  Our goal is to select the timer MATCH
+ * register value given the board's SOSC clock frequency and the desired
+ * system timer frequency:
  *
- *   TIMER1_MATCH = BOARD_PBCLOCK / TIMER1_PRESCALE / CLOCKS_PER_SEC
+ *   TIMER1_MATCH = BOARD_SOSC_FREQ / TIMER1_PRESCALE / CLOCKS_PER_SEC
  *
  * We want the largest possible value for MATCH that is less than 65,535, the
  * maximum value for the 16-bit timer register:
  *
- *   TIMER1_PRESCALE >= BOARD_PBCLOCK / CLOCKS_PER_SEC / 65535
+ *   TIMER1_PRESCALE >= BOARD_SOSC_FREQ / CLOCKS_PER_SEC / 65535
  *
  * Timer 1 does not have very many options for the perscaler value.  So we
  * can pick the best by brute force.  Example:
  *
- *   BOARD_PBCLOCK = 40000000
+ *   BOARD_SOSC_FREQ        = 32768
  *   CLOCKS_PER_SEC         = 100
- *   OPTIMAL_PRESCALE       = 6
- *   TIMER1_PRESCALE        = 8
- *   TIMER1_MATCH           = 50,000
+ *   OPTIMAL_PRESCALE       = 1
+ *   TIMER1_PRESCALE        = 1
+ *   TIMER1_MATCH           = 328 -> 99.90 ticks/sec
  */
  
-#define OPTIMAL_PRESCALE (BOARD_PBCLOCK / CLOCKS_PER_SEC / 65535)
+#define OPTIMAL_PRESCALE (BOARD_SOSC_FREQ / CLOCKS_PER_SEC / 65535)
 #if OPTIMAL_PRESCALE <= 1
 #  define TIMER1_CON_TCKPS    TIMER1_CON_TCKPS_1
 #  define TIMER1_PRESCALE     1
@@ -97,7 +97,7 @@
 #  error "This timer frequency cannot be represented"
 #endif
 
-#define TIMER1_MATCH (BOARD_PBCLOCK / TIMER1_PRESCALE / CLOCKS_PER_SEC)
+#define TIMER1_MATCH (BOARD_SOSC_FREQ / TIMER1_PRESCALE / CLOCKS_PER_SEC)
 
 /****************************************************************************
  * Private Types
@@ -143,7 +143,7 @@ int up_timerisr(int irq, uint32_t *regs)
 
 void up_timerinit(void)
 {
-  /* Configure and enable TIMER1 -- source internal (TCS=0) */
+  /* Configure and enable TIMER1 -- source internal SOSC (TCS=0) */
 
   putreg32(TIMER1_CON_TCKPS, PIC32MX_TIMER1_CON);
   putreg32(0, PIC32MX_TIMER1_CNT);
