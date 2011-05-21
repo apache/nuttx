@@ -1764,3 +1764,9 @@
 
 	* lib/drivers/cc1101: Add initial, functional CC1101 wireless driver
 	  (contributed by Uros Platise)
+	* arch/mips and configs/pcblogic-pic32mx: The MicroChip PIC32MX port is now
+	  code complete and ready to begin testing.
+	* drivers/net/e1000.c/h: A PCI-based E1000 ethernet driver submitted
+	  by Yu Qiang.
+	* lib/net/lib_inetaddr.c: An implementatino of the inet_addr() function
+ 	 submitted y Yu Qiang.

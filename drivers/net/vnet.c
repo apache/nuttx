@@ -123,7 +123,6 @@ static int  vnet_uiptxpoll(struct uip_driver_s *dev);
 
 /* Interrupt handling */
 
-static void vnet_receive(FAR struct vnet_driver_s *vnet);
 static void vnet_txdone(FAR struct vnet_driver_s *vnet);
 
 /* Watchdog timer expirations */
@@ -250,7 +249,7 @@ static int vnet_uiptxpoll(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: vnet_receive
+ * Function: rtos_vnet_recv
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet

@@ -385,13 +385,28 @@ CONFIG_HEAP_BASE=
 CONFIG_HEAP_SIZE=
 
 
-#
+##########################################
 # RGMP specific configuration
+##########################################
+
+#
+# VNET
 #
 CONFIG_NET_VNET=y
 CONFIG_VNET_NINTERFACES=1
+
+#
+# Serial port
+#
 CONFIG_COM1=y
 CONFIG_COM2=y
 CONFIG_COM3=n
 CONFIG_COM4=n
-CONFIG_E1000=n
+
+#
+# E1000
+#
+CONFIG_NET_E1000=n
+CONFIG_E1000_N_TX_DESC=128
+CONFIG_E1000_N_RX_DESC=128
+CONFIG_E1000_BUFF_SIZE=0x800

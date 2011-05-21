@@ -85,6 +85,7 @@ void up_initialize(void)
     extern pidhash_t g_pidhash[];
     extern void up_register_bridges(void);
     extern void vnet_initialize(void);
+    extern void e1000_mod_init(void);
 
     // intialize the current_task to g_idletcb
     current_task = g_pidhash[PIDHASH(0)].tcb;
@@ -92,11 +93,18 @@ void up_initialize(void)
     // setup console
     up_register_bridges();
 
-    // setup net device
+#ifdef CONFIG_NET_VNET
+    // setup vnet device
     vnet_initialize();
+#endif
 
     // setup COM device
     up_serialinit();
+
+#ifdef CONFIG_NET_E1000
+    // setup e1000
+    e1000_mod_init();
+#endif
 
     // enable interrupt
     sti();
