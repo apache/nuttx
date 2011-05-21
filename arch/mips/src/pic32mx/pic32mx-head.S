@@ -42,6 +42,7 @@
 #include <arch/mips32/registers.h>
 #include <arch/pic32mx/cp0.h>
 
+#include "pic32mx-config.h"
 #include "excptmacros.h"
 
 /****************************************************************************
@@ -113,6 +114,7 @@
 	.globl	__reset
 	.global __start
 	.global halt
+	.global	devconfig
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.global g_intstackbase
 	.global	g_nestlevel
@@ -518,6 +520,33 @@ halt:
 	b	 1b
 	nop
 	.end __start_nuttx
+
+
+/****************************************************************************
+ * Device Configuration
+ ****************************************************************************/
+
+	.section .devcfg, "a"
+	.type	devconfig, object
+devconfig:
+devconfig3:
+	.long	CONFIG_PIC32MX_USERID << DEVCFG3_USERID_SHIFT | \
+			CONFIG_PIC32MX_SRSSEL << DEVCFG3_FSRSSEL_SHIFT | \
+			CONFIG_PIC32MX_USBIDO << 30 | \
+			CONFIG_PIC32MX_VBUSIO << 31
+
+devconfig2:
+	.long	CONFIG_PIC32MX_PLLIDIV  | CONFIG_PIC32MX_PLLMULT | \
+			CONFIG_PIC32MX_UPLLIDIV | DEVCFG2_FPLLODIV_DIV1  
+
+devconfig1:
+	.long	DEVCFG1_FNOSC_POSCPLL   |  DEVCFG1_POSCMOD_XT    | \
+			CONFIG_PIC32MX_PBDIV    | DEVCFG1_FCKSM_NONE     | \
+			CONFIG_PIC32MX_WDENABLE
+
+devconfig0:
+	.long	DEVCFG0_DEBUG_DISABLED  | DEVCFG0_PWP_DISABLE
+	.size	devconfig, .-devconfig
 
 /****************************************************************************
  * Global Data

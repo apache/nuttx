@@ -755,7 +755,9 @@ static bool up_txempty(struct uart_dev_s *dev)
 
 void up_earlyserialinit(void)
 {
-  /* Disable all UARTS */
+  /* Disable interrupts from all UARTS.  The console is enabled in
+   * pic32mx_consoleinit()
+   */
 
   up_disableuartint(TTYS0_DEV.priv, NULL);
 #ifdef TTYS1_DEV

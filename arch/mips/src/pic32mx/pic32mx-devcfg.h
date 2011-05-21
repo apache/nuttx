@@ -122,7 +122,7 @@
 
 /* Device configuration word 1 */
 
-#define DEVCFG1_FNOSC_SHIFT       (0)       /* Bits 0-2: Oscillator xelection */
+#define DEVCFG1_FNOSC_SHIFT       (0)       /* Bits 0-2: Oscillator selection */
 #define DEVCFG1_FNOSC_MASK        (7 << DEVCFG1_FNOSC_SHIFT)
 #  define DEVCFG1_FNOSC_FRC       (0 << DEVCFG1_FNOSC_SHIFT) /* FRC oscillator */
 #  define DEVCFG1_FNOSC_FRCPLL    (1 << DEVCFG1_FNOSC_SHIFT) /* FRC w/PLL module */
@@ -183,6 +183,8 @@
 
 #define DEVCFG0_DEBUG_SHIFT       (0)       /* Bits 0-1: Background debugger enable */
 #define DEVCFG0_DEBUG_MASK        (3 << DEVCFG0_DEBUG_SHIFT)
+#  define DEVCFG0_DEBUG_ENABLED   (2 << DEVCFG0_DEBUG_SHIFT)
+#  define DEVCFG0_DEBUG_DISABLED  (3 << DEVCFG0_DEBUG_SHIFT)
 #define DEVCFG0_ICESEL            (1 << 3)  /* Bit 3: ICE/debugger channel select */
 #define DEVCFG0_PWP_SHIFT         (12)      /* Bits 12-19: Program flash write-protect */
 #define DEVCFG0_PWP_MASK          (0xff << DEVCFG0_PWP_SHIFT)
