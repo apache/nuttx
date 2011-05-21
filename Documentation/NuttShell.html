@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: March 18, 2011</p>
+      <p>Last Updated: May 21, 2011</p>
     </td>
   </tr>
 </table>
@@ -603,7 +603,7 @@ mount -t vfat /dev/ram1 /tmp
         The behavior of this script depends upon three things:
         <ul>
           <li>The configuration settings then installed configuration.
-          <li>The <code>genromfs<code> tool (available from <a href="http://romfs.sourceforge.net">http://romfs.sourceforge.net</a>).
+          <li>The <code>genromfs</code> tool (available from <a href="http://romfs.sourceforge.net">http://romfs.sourceforge.net</a>).
           <li>The file <code>apps/nshlib/rcS.template</code>
 		    (OR, if <code>CONFIG_NSH_ARCHROMFS</code> is defined <code>include/arch/board/rcs.template</code>.
         </ul>
@@ -620,7 +620,7 @@ mount -t vfat /dev/ram1 /tmp
 <p>
   <b>NOTE</b>:
   <code>apps/nshlib/rcS.template</code> generates the standard, default <code>nsh_romfsimg.h</code> file.
-  If <code>CONFIG_NSH_ARCHROMFS<code> is defined in the NuttX configuration file, then a custom, board-specific <code>nsh_romfsimg.h</code> file residing in <code>configs/&lt;board&gt;/include</code> will be used.
+  If <code>CONFIG_NSH_ARCHROMFS</code> is defined in the NuttX configuration file, then a custom, board-specific <code>nsh_romfsimg.h</code> file residing in <code>configs/&lt;board&gt;/include</code> will be used.
   NOTE when the OS is configured, <code>include/arch/board</code> will be linked to <code>configs/&lt;board&gt;/include</code>.
 </p>
 <p>
@@ -985,21 +985,46 @@ help
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-ifconfig
+ifconfig [nic_name [ip_address]]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  Show the current configuration of the network, for example:
+  Two forms of the <code>ifconfig</code>command are supported:
 </p>
-<ul><pre>
+<ol>
+  <li>
+    <p>
+      With one or no arguments, <code>ifconfig</code> will shows the
+      current configuration of the network and, perhaps, the status of ethernet
+      device:
+    </p>
+    <ul><pre>
+ifconfig
+ifconfig [nic_name]
+</pre></ul>
+    <p>
+      As an example:
+    </p>
+    <ul><pre>
 nsh&gt; ifconfig
 eth0    HWaddr 00:18:11:80:10:06
         IPaddr:10.0.0.2 DRaddr:10.0.0.1 Mask:255.255.255.0
 </pre></ul>
-<p>
-  if uIP statistics are enabled (<code>CONFIG_NET_STATISTICS</code>), then
-  this command will also show the detailed state of uIP.
-</p>
+    <p>
+      If uIP statistics are enabled (<code>CONFIG_NET_STATISTICS</code>), then
+      this command will also show the detailed state of uIP.
+    </p>
+  </li>
+  <li>
+    <p>
+      If both the network interface name and an IP address are supplied as arguments,
+      then <code>ifconfig</code> will set the address of the ethernet device:
+    </p>
+    <ul><pre>
+ifconfig nic_name ip_address
+</pre><ul>
+  </li>
+</ol>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1631,7 +1656,7 @@ sh &lt;script-path&gt;
 <p>
   <b>Synopsis</b>.
   Execute the sequence of NSH commands in the file referred
-  to by <code>&lt;script-path&gt;.
+  to by <code>&lt;script-path&gt;</code>.
 </p>
 
 <table width ="100%">
@@ -1696,7 +1721,7 @@ unset &lt;name&gt;
 <p>
   <b>Synopsis</b>.
   Remove the value associated with the environment variable
-  <code>&lt;name&gt;.  Example:
+  <code>&lt;name&gt;</code>.  Example:
 </p>
 <ul><pre>
 nsh&gt; echo $foobar
