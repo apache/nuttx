@@ -1,4 +1,4 @@
-/**************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32/pic32mx-lowinit.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
@@ -31,58 +31,161 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
+#include <arch/pic32mx/cp0.h>
+
 #include "up_internal.h"
+#include "up_arch.h"
+
 #include "pic32mx-internal.h"
+#include "pic32mx-bmx.h"
+#include "pic32mx-che.h"
 
-/**************************************************************************
- * Private Definitions
- **************************************************************************/
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* Maximum Frequencies ******************************************************/
 
-/**************************************************************************
+#define MAX_FLASH_HZ     30000000 /* Maximum FLASH speed (Hz) */
+#define MAX_PBCLOCK      80000000 /* Max peripheral bus speed (Hz) */
+
+/* Sanity checks ************************************************************/
+
+/* Make sure that the selected clock parameters are sane */
+
+#define CALC_SYSCLOCK  (((BOARD_POSC_FREQ / BOARD_PLL_IDIV) * BOARD_PLL_MULT) / BOARD_PLL_ODIV)
+#if CALC_SYSCLOCK != BOARD_CPU_CLOCK
+#  error "Bad BOARD_CPU_CLOCK calculcation in board.h"
+#endif
+
+#define CALC_PBCLOCK  (CALC_SYSCLOCK / BOARD_PBDIV)
+#if CALC_PBCLOCK != BOARD_PBCLOCK
+#  error "Bad BOARD_PBCLOCK calculcation in board.h"
+#endif
+
+#if CALC_PBCLOCK > MAX_PBCLOCK
+#  error "PBCLOCK exceeds maximum value"
+#endif
+
+/****************************************************************************
  * Private Types
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Global Variables
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Variables
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
+ * Name: pic32mx_waitstates
+ *
+ * Description:
+ *   Configure the optimal number of FLASH wait states.
+ *
+ * Assumptions:
+ *   Interrupts are disabled.
+ *
+ ****************************************************************************/
+
+static inline void pic32mx_waitstates(void)
+{
+  unsigned int nwaits;
+  unsigned int residual;
+
+  /* Disable DRM wait states */
+
+  putreg32(BMX_CON_BMXWSDRM, PIC32MX_BMX_CONCLR);
+ 
+  /* Configure pre-fetch cache FLASH wait states */
+ 
+  residual = BOARD_CPU_CLOCK;
+  nwaits   = 0;
+
+  while(residual > MAX_FLASH_HZ)
+    {
+      nwaits++;
+      residual -= MAX_FLASH_HZ;
+    }
+  DEBUGASSERT(nwaits < 8);
+
+  /* Set the FLASH wait states -- clearing all other bits! */
+
+  putreg32(nwaits, PIC32MX_CHE_CON);
+}
+
+/****************************************************************************
+ * Name: pic32mx_cache
+ *
+ * Description:
+ *   Enable caching.
+ *
+ * Assumptions:
+ *   Interrupts are disabled.
+ *
+ ****************************************************************************/
+
+static inline void pic32mx_cache(void)
+{
+  register uint32_t regval;
+
+  /* Enable caching on all regions */
+
+  regval = getreg32(PIC32MX_CHE_CON);
+  regval |= CHE_CON_PREFEN_ALL;
+  putreg32(regval, PIC32MX_CHE_CON);
+ 
+  /* Enable cache on KSEG 0 in the CP0 CONFIG register*/
+
+  asm("\tmfc0 %0,$16,0\n" :  "=r"(regval));
+  regval &= ~CP0_CONFIG_K23_MASK;
+  regval |= CP0_CONFIG_K23_CACHEABLE;
+  asm("\tmtc0 %0,$16,0\n" : : "r" (regval));
+}
+
+/****************************************************************************
  * Public Functions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Name: pic32mx_lowinit
  *
  * Description:
  *   This performs basic low-level initialization of the system.
  *
- **************************************************************************/
+ * Assumptions:
+ *   Interrupts have not yet been enabled.
+ *
+ ****************************************************************************/
 
 void pic32mx_lowinit(void)
 {
-  /* Initialize MCU clocking */
+  /* Initialize FLASH wait states */
 
-  pic32mx_clockconfig();
+  pic32mx_waitstates();
+
+  /* Enable caching */
+
+  pic32mx_cache();;
 
   /* Initialize a console (probably a serial console) */
 

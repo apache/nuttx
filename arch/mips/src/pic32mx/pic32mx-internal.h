@@ -130,17 +130,6 @@ extern "C" {
 EXTERN void pic32mx_lowinit(void);
 
 /************************************************************************************
- * Name: pic32mx_clockconfig
- *
- * Description:
- *   Called by pic32mx_lowinit to initialize the PIC32MX clocking using the settings
- *   in board.h.
- *
- ************************************************************************************/
-
-EXTERN void pic32mx_clockconfig(void);
-
-/************************************************************************************
  * Name: pic32mx_lowsetup
  *
  * Description:
