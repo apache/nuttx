@@ -513,14 +513,13 @@ __start_nuttx:
 	jalr	t0, ra
 	nop
 
-	/* Just in case main returns, go into infinite loop */
+	/* Just in case main returns, go into an infinite loop */
 
 halt:
 1:
 	b	 1b
 	nop
 	.end __start_nuttx
-
 
 /****************************************************************************
  * Device Configuration
