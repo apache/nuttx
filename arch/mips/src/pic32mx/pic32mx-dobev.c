@@ -41,10 +41,13 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+
 #include <arch/board/board.h>
+#include <arch/pic32mx/cp0.h>
 
 #include "up_arch.h"
 #include "os_internal.h"

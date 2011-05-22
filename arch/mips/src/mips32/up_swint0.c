@@ -137,7 +137,7 @@ static void up_registerdump(uint32_t *regs)
 #ifdef CONFIG_NUTTX_KERNEL
 static inline void dispatch_syscall(uint32_t *regs)
 {
-  uint32_t  cmd  = regs[REG_R0];
+  uint32_t  cmd  = regs[REG_A0];
   FAR _TCB *rtcb = sched_self();
   uintptr_t ret  = (uintptr_t)ERROR;
 
@@ -182,43 +182,43 @@ static inline void dispatch_syscall(uint32_t *regs)
         /* Number of parameters: 1 */
 
         case 1:
-          ret = g_stublookup[index].stub1(regs[REG_R5]);
+          ret = g_stublookup[index].stub1(regs[REG_A1]);
           break;
 
         /* Number of parameters: 2 */
 
         case 2:
-          ret = g_stublookup[index].stub2(regs[REG_R5], regs[REG_R6]);
+          ret = g_stublookup[index].stub2(regs[REG_A1], regs[REG_A2]);
           break;
 
          /* Number of parameters: 3 */
 
        case 3:
-          ret = g_stublookup[index].stub3(regs[REG_R5], regs[REG_R6],
-                                          regs[REG_R7]);
+          ret = g_stublookup[index].stub3(regs[REG_A1], regs[REG_A2],
+                                          regs[REG_A3]);
           break;
 
          /* Number of parameters: 4 */
 
        case 4:
-          ret = g_stublookup[index].stub4(regs[REG_R5], regs[REG_R6],
-                                          regs[REG_R7], regs[REG_R8]);
+          ret = g_stublookup[index].stub4(regs[REG_A1], regs[REG_A2],
+                                          regs[REG_A3], regs[REG_T0]);
           break;
 
         /* Number of parameters: 5 */
 
         case 5:
-          ret = g_stublookup[index].stub5(regs[REG_R5], regs[REG_R6],
-                                          regs[REG_R7], regs[REG_R8],
-                                          regs[REG_R9]);
+          ret = g_stublookup[index].stub5(regs[REG_A1], regs[REG_A2],
+                                          regs[REG_A3], regs[REG_T0],
+                                          regs[REG_T1]);
           break;
 
         /* Number of parameters: 6 */
 
         case 6:
-          ret = g_stublookup[index].stub6(regs[REG_R5], regs[REG_R6],
-                                          regs[REG_R7], regs[REG_R8],
-                                          regs[REG_R9], regs[REG_R10]);
+          ret = g_stublookup[index].stub6(regs[REG_A1], regs[REG_A2],
+                                          regs[REG_A3], regs[REG_T0],
+                                          regs[REG_T1], regs[REG_T2]);
           break;
 
         /* Unsupported number of paramters. Report error and return ERROR */
@@ -245,10 +245,10 @@ static inline void dispatch_syscall(uint32_t *regs)
       regs = rtcb->xcp.regs;
     }
 
-  /* Then return the result in R0 */
+  /* Then return the result in v0 */
 
   swidbg("Return value regs: %p value: %d\n", regs, ret);
-  regs[REG_R0] = (uint32_t)ret;
+  regs[REG_v0] = (uint32_t)ret;
 }
 #endif
 
@@ -271,8 +271,9 @@ int up_swint0(int irq, FAR void *context)
 
   DEBUGASSERT(regs && regs == current_regs);
 
-  /* Software interrupt 0 is invoked with REG_R4 = system call command and
-   * REG_R5..R10 =  variable number of arguments depending on the system call.
+  /* Software interrupt 0 is invoked with REG_A0 (REG_R4) = system call
+   * command and REG_A1-3 and REG_T0-2 (REG_R5-10) = variable number of
+   * arguments depending on the system call.
    */
 
 #ifdef DEBUG_SWINT0
@@ -301,8 +302,8 @@ int up_swint0(int irq, FAR void *context)
 
       case SYS_restore_context:
         {
-          DEBUGASSERT(regs[REG_R5] != 0);
-          current_regs = (uint32_t*)regs[REG_R5];
+          DEBUGASSERT(regs[REG_A1] != 0);
+          current_regs = (uint32_t*)regs[REG_A1];
         }
         break;
 
@@ -324,9 +325,9 @@ int up_swint0(int irq, FAR void *context)
 
       case SYS_switch_context:
         {
-          DEBUGASSERT(regs[REG_R5] != 0 && regs[REG_R6] != 0);
-          memcpy((uint32_t*)regs[REG_R5], regs, XCPTCONTEXT_SIZE);
-          current_regs = (uint32_t*)regs[REG_R6];
+          DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
+          memcpy((uint32_t*)regs[REG_A1], regs, XCPTCONTEXT_SIZE);
+          current_regs = (uint32_t*)regs[REG_A2];
         }
         break;
 
@@ -339,7 +340,7 @@ int up_swint0(int irq, FAR void *context)
 #ifdef CONFIG_NUTTX_KERNEL
         dispatch_syscall(regs);
 #else
-        slldbg("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
+        slldbg("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
 #endif
         break;
     }
@@ -354,7 +355,7 @@ int up_swint0(int irq, FAR void *context)
     }
   else
     {
-      swidbg("SWInt Return: %d\n", regs[REG_R2]);
+      swidbg("SWInt Return: %d\n", regs[REG_V0]);
     }
 #endif
 

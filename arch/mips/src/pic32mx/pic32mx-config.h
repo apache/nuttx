@@ -484,6 +484,19 @@
 #  error "CONFIG_PIC32MX_USBPRIO is too large"
 #endif
 
+/* SYS calls ************************************************************************/
+/* SYS call 0 and 1 are defined for internal use by the PIC32MX port (see
+ * arch/mips/include/mips32/syscall.h
+ */
+
+#ifdef CONFIG_NUTTX_KERNEL
+#  if !defined(CONFIG_SYS_RESERVED) || CONFIG_SYS_RESERVED < 2
+#    error "CONFIG_SYS_RESERVED must be defined to be 2 for a kernel build"
+#  elif CONFIG_SYS_RESERVED > 2
+#    warning "CONFIG_SYS_RESERVED should be defined to be 2 for a kernel build"
+#  endif
+#endif
+
 /* UARTs ****************************************************************************/
 /* Don't enable UARTs not supported by the chip. */
 
