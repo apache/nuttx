@@ -1,5 +1,5 @@
-#!/bin/bash
-# configs/pcblogic-pic32mx/ostest/setenv.sh
+############################################################################
+# configs/pcblogic-pic32mx/tools/Makefile
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -31,27 +31,21 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+############################################################################
 
-if [ "$(basename $0)" = "setenv.sh" ] ; then
-  echo "You must source this script, not run it!" 1>&2
-  exit 1
-fi
+all: mkpichex
+default: mkpichex
+.PHONY: clean
 
-if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
+# Add CFLAGS=-g on the make command line to build debug versions
 
-WD=`pwd`
+CFLAGS = -O2 -Wall -I.
 
-# This the Cygwin path to the location where I installed the MicroChip
-# PIC32MX toolchain under windows.  This is *not* the default install
-# location so you will probably have to edit this.  You will also have
-# to edit this if you install a different version of if you install
-# the Linux PIC32MX toolchain as well
-export TOOLCHAIN_BIN="/cygdrive/c/MicroChip/mplabc32/v1.12/bin"
+# mkpichex - Convert nuttx.ihx to nuttx.hex
 
-# This is the path to the toosl subdirectory
-export PIC32TOOL_DIR="${WD}/configs/pcblogic-pic32mx/tools"
+mkconfig: mkpichex.c mkpichex.c
+	@gcc $(CFLAGS) -o mkpichex mkpichex.c
 
-# Add the path to the toolchain to the PATH varialble
-export PATH="${TOOLCHAIN_BIN}:${PIC32TOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
-
-echo "PATH : ${PATH}"
+clean:
+	@rm -f *.o *.a *~ .*.swp
+	@rm -f mkpichex mkpichex.exe

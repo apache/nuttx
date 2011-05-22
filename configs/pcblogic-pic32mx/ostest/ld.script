@@ -145,7 +145,7 @@ SECTIONS
 
 	.devcfg :
 	{
-		*(.devcfg)
+		KEEP (*(.devcfg))
 	} > kseg1_devcfg
 
 	/* Program FLASH sections */

@@ -12,6 +12,7 @@ Contents
   PIC32MX460F512L Pin Out
   MAX3232 Connection
   Toolchains
+  Loading NuttX with PICkit2
   PIC32MX Configuration Options
   Configurations
 
@@ -211,6 +212,54 @@ Toolchains
 
      If you have problems with the dependency build (for example, if you are not
      building on C:), then you may need to modify tools/mkdeps.sh
+
+Loading NuttX with PICkit2
+==========================
+
+  Intel Hex Forma Files:
+  ----------------------
+
+    When NuttX is built it will produce two files in the top-level NuttX
+    directory:
+
+    1) nuttx - This is an ELF file, and
+    2) nuttx.ihx - This is an Intel Hex format file.  This is controlled by
+       the setting CONFIG_INTELHEX_BINARY in the .config file.
+
+    The PICkit tool wants an Intel Hex format file to burn into FLASH.
+    However, there are two problems with the generated nutt.ihx:
+  
+    1) The tool expects Intel Hex format files to be named *.hex.  This
+       is not a significant issue.  However, just renaming the file to
+       nuttx.hex is *not* sufficient.  There is another problem:
+    2) The tool expects the nuttx.hex file to contain physical addresses.
+       But the nuttx.ihx file generated from the top-level make will have
+       address in the KSEG0 and KSEG1 regions.
+
+  tools/mkpichex:
+  ---------------
+
+    There is a simple tool in the configs/pcblogic-pic32mx/tools directory
+    that can be used to solve both issues with the nuttx.ihx file.  But,
+    first, you must build the the tools:
+
+      cd configs/pcblogic-pic32mx/tools
+      make
+
+    Now you will have an excecutable file call mkpichex (or mkpichex.exe on
+    Cygwin).  This program will take the nutt.ihx file as an input, it will
+    convert all of the KSEG0 and KSEG1 addresses to physical address, and
+    it will write the modified file as nuttx.hex.
+
+    To use this file, you need to do the following things:
+
+      . ./setenv.sh    # Source setenv.sh.  Among other this, this script
+                       # will add configs/pcblogic-pic32mx/tools to your
+                       # PATH variable
+      make             # Build nuttx and nuttx.ihx
+      mkpichex $PWD    # Convert nuttx.ihx to nuttx.hex.  $PWD is the path
+                       # to the top-level build directory.  It is the only
+                       # required input to mkpichex.
 
 PIC32MX Configuration Options
 =============================
