@@ -317,11 +317,12 @@
 
 /* Interrupt priority control register 0-11 */
 
-#define INT_CP0_MIN_PRIORITY         0     /* Disabled! */
-#define INT_CP0_MID_PRIORITY         4     /* Can be used as the default */
-#define INT_CP0_MAX_PRIORITY         7     /* Maximum priority */
-#define INT_CP0_MIN_SUBPRIORITY      0     /* Minimum sub-priority */
-#define INT_CP0_MAX_SUBPRIORITY      0     /* Maximum sub-priority */
+#define INT_ICP_DISABLED             0     /* Disabled! */
+#define INT_ICP_MIN_PRIORITY         1     /* Minimum (enabled) priority */
+#define INT_ICP_MID_PRIORITY         4     /* Can be used as the default */
+#define INT_ICP_MAX_PRIORITY         7     /* Maximum priority */
+#define INT_ICP_MIN_SUBPRIORITY      0     /* Minimum sub-priority */
+#define INT_ICP_MAX_SUBPRIORITY      0     /* Maximum sub-priority */
 
 #define INT_IPC0_CTIS_SHIFT          (0)   /* Bits 0-1, Vector: 0, Core Timer Interrupt */
 #define INT_IPC0_CTIS_MASK           (3 << INT_IPC0_CTIS_SHIFT)

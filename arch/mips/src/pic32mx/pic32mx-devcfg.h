@@ -75,6 +75,7 @@
 #define DEVCFG3_FSCM1IO           (1 << 29) /* Bit 29: SCM1 pin C selection */
 #define DEVCFG3_FUSBIDIO          (1 << 30) /* Bit 30: USB USBID selection */
 #define DEVCFG3_FVBUSIO           (1 << 31) /* Bit 31: USB VBUSON selection */
+#define DEVCFG3_UNUSED            0x18f80000 /* Bits 19-23, 27-28 */
 
 /* Device configuration word 2 */
 
@@ -119,6 +120,7 @@
 #  define DEVCFG2_FPLLODIV_DIV32  (5 << DEVCFG2_FPLLODIV_SHIFT)
 #  define DEVCFG2_FPLLODIV_DIV64  (6 << DEVCFG2_FPLLODIV_SHIFT)
 #  define DEVCFG2_FPLLODIV_DIV256 (7 << DEVCFG2_FPLLODIV_SHIFT)
+#define DEVCFG2_UNUSED            0xfff87888 /* Bits 3, 7, 11-14, 19-31 */
 
 /* Device configuration word 1 */
 
@@ -176,6 +178,7 @@
 #  define DEVCFG1_WDTPS_1048576   (20 << DEVCFG1_WDTPS_SHIFT) /* 1:1048576 */
 #define DEVCFG1_WINDIS            (1 << 22) /* Bit 22: Windowed watchdog timer enable */
 #define DEVCFG1_FWDTEN            (1 << 23) /* Bit 23: WDT enable */
+#define DEVCFG1_UNUSED            0xff200858 /* Bits 3-4, 6, 11, 21, 24-31 */
 
 /* Device configuration word 0 */
 
@@ -193,6 +196,7 @@
 #define DEVCFG0_BWP               (1 << 24) /* Bit 24: Boot flash write-protect */
 #define DEVCFG0_CP                (1 << 28) /* Bit 28: Code-protect */
 #define DEVCFG0_SIGN              (1 << 31) /* Bit 31: Signature */
+#define DEVCFG0_UNUSED            0x6ef00ff0 /* Bits 4-11, 20-23, 25-27, 29-30 */
 
 /****************************************************************************
  * Public Types

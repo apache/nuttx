@@ -102,7 +102,7 @@ void up_irqinitialize(void)
 
   for (irq = 0; irq < NR_IRQS; irq++)
     {
-      (void)up_prioritize_irq(irq, (INT_CP0_MID_PRIORITY << 2));
+      (void)up_prioritize_irq(irq, (INT_ICP_MID_PRIORITY << 2));
     }
   
   /* Set the CP0 cause IV bit meaning that the interrupt exception uses
