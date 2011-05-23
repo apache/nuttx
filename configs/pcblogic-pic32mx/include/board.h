@@ -68,7 +68,7 @@
  * USB_CLOCK = ((POSC_XTAL / IDIV) * 24) / 2
  */
 
-#define BOARD_UPLL_IDIV        16       /* 2*/ /* USB PLL divider (revisit) */
+#define BOARD_UPLL_IDIV        2        /* USB PLL divider (revisit) */
 #define BOARD_USB_CLOCK        48000000 /* USB clock (8MHz / (2*48MHz/24)) */
 
 /* Peripheral clock is divided down from CPU clock.
