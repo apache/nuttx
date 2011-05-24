@@ -61,8 +61,8 @@
  * setting that defaults to 100 (100 ticks per second = 10 MS interval).
  *
  * However, the AVR RTC does not support that default value well and so, we
- * will insist that default is over-ridden by CONFIG_TICKS_PER_MSEC in the
- * configuration file.  Further, we will insist that CONFIG_TICKS_PER_MSEC
+ * will insist that default is over-ridden by CONFIG_MSEC_PER_TICK in the
+ * configuration file.  Further, we will insist that CONFIG_MSEC_PER_TICK
  * have the value 8 (see reasoning below).
  */
 
