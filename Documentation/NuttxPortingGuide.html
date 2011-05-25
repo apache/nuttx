@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 11, 2011</p>
+      <p>Last Updated: May 25, 2011</p>
     </td>
   </tr>
 </table>
@@ -741,12 +741,44 @@
   as described <a href="#configuringnuttx">below</a>.
 </p>
 <ul>
+  <li><code>configs/avr32dev1</code>:
+    This is a port of NuttX to the Atmel AVR32DEV1 board.  That board is
+    based on the Atmel AT32UC3B0256 MCU and uses a specially patched
+    version of the GNU toolchain:  The patches provide support for the
+    AVR32 family.  That patched GNU toolchain is available only from the
+    Atmel website.  STATUS: This port is functional but very basic.  There
+    are configurations for NSH and the OS test.
+  </li>
+
   <li><code>configs/c5471evm</code>:
     This is a port to the Spectrum Digital C5471 evaluation board.  The
     C5471 is a dual core processor from TI with an ARM7TDMI general purpose
-    processor and a c54 SDP.  NuttX runs on the ARM core and is built with
-    with a GNU arm-elf toolchain* under Linux or Cygwin.
-    This port is complete, verified, and included in the NuttX release.
+    processor and a c54 DSP.  It is also known as TMS320DA180 or just DA180.
+    NuttX runs on the ARM core and is built with with a GNU arm-elf toolchain
+    under Linux or Cygwin. This port is complete and verified.
+  </li>
+
+  <li><code>configs/demo9s12ne64</code>:
+    Feescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
+    port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
+    is code complete but has not yet been verified.
+  </li>
+
+  <li><code>configs/detron</code>:
+    This is a  NuttX port to the Detron LPC1768 board from Decio Renno
+    (<a href="http://www.detroneletronica.com.br/">Detron Electronica</a>)
+  </li>
+
+  <li><code>configs/ea3131</code>:
+    Embedded Artists EA3131 Development bard.  This board is based on the 
+    an NXP LPC3131 MCU. This OS is built with the arm-elf toolchain.
+    STATUS:  This port is complete and mature.
+  </li>
+
+  <li><code>configs/eagle100</code>:
+    Micromint Eagle-100 Development board.  This board is based on the 
+    an ARM Cortex-M3 MCU, the Luminary LM3S6918. This OS is built with the
+    arm-elf toolchain.  STATUS:  This port is complete and mature.
   </li>
 
   <li><code>configs/ez80f0910200kitg</code>
@@ -755,9 +787,38 @@
     tools.  The development environment is Cygwin under WinXP.
   </li>
 
+  <li><code>configs/ez80f910200zco</code>:
+    ez80Acclaim! Microcontroller.  This port use the Zilog ez80f0910200zco
+    development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
+    tools.  The development environment is Cygwin under WinXP.
+  </li>
+
+  <li><code>configs/lm3s6965-ek</code>:
+    Stellaris LM3S6965 Evaluation Kit.  This board is based on the 
+    an ARM Cortex-M3 MCU, the Luminary/TI LM3S6965. This OS is built with the
+    arm-elf toolchain.  STATUS:  This port is complete and mature.
+  </li>
+
+  <li><code>configs/lm3s8962-ek</code>:
+    Stellaris LMS38962 Evaluation Kit. STATUS: contributed.
+  </li>
+
+  <li><code>configs/lpcxpresso-lpc1768</code>:
+    Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
+    is based on the NXP LPC1768.  The Code Red toolchain is used by default.
+    STATUS:  Under development.
+  </li>
+
   <li><code>configs/m68322evb</code>:
-    This is a work in progress for the venerable m68322evb board from
-    Motorola.
+    This is a partial port for the venerable m68322evb board from Motorola.
+    This port was never completed and there are no plans to complete.
+    It will probably just be removed from the source tree at some point.
+  </li>
+
+  <li><code>configs/mbed</code>:
+    The configurations in this directory support the mbed board (http://mbed.org)
+    that features the NXP LPC1768 microcontroller. This OS is also built
+    with the arm-elf toolchain.  STATUS:  Contributed.
   </li>
 
   <li><code>configs/mcu123-lpc214x</code>:
@@ -765,6 +826,20 @@
     lpc214x development board.
     This OS is also built with the arm-elf toolchain* under Linux or Cygwin.
     The port supports serial, timer0, spi, and usb.
+  </li>
+
+  <li><code>configs/mx1ads</code>:
+    This is a port to the Motorola MX1ADS development board.  That board
+    is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.
+    STATUS:  This port is nearly code complete but was never fully
+    integrated due to tool-related issues.
+  </li>
+
+  <li><code>configs/ne64badge</code>:
+    Future Electronics Group NE64 /PoE Badge board based on the
+    MC9S12NE64 hcs12 cpu.  This port uses the m9s12x GCC toolchain.
+    STATUS:  Under development.  The port is code-complete but has
+    not yet been fully tested.
   </li>
 
   <li><code>configs/ntosd-dm320</code>:
@@ -776,18 +851,72 @@
     NuttX 0.2.1 release.
   </li>
 
+  <li><code>configs/nucleus2g</code>:
+    This port uses the Nucleus 2G board (with Babel CAN board).
+    This board features an NXP LPC1768 processor.
+    See the <a href="http://www.2g-eng.com/">2G Engineering</a> website for more information about the Nucleus 2G.
+  </li>
+
+  <li><code>configs/olimex-lpc1766stk</code>:
+    This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain under
+    Linux or Cygwin.  STATUS: Complete and mature.
+  </li>
+
+  <li><code>configs/olimex-lpc2378</code>:
+	This port uses the Olimex-lpc2378 board and a GNU arm-elf toolchain under
+	Linux or Cygwin.  STATUS: ostest and NSH configurations available.
+  </li>
+
   <li><code>configs/olimex-strp711</code>:
     This port uses the Olimex STR-P711 board arm-elf toolchain* under Linux or Cygwin.
     See the <a href="http://www.olimex.com/dev/str-p711.html">Olimex</a> web site
     for further information.
-    STATUS: Coding for the basic port -- serial console and system timer -- is complete
-    but untested to problems I am having using OpenOCD with a wiggler clone JTAG.
+    STATUS: Configurations for the basic OS test and NSH are complete and verified.
+  </li>
+
+  <li><code>configs/pcblogic-pic32mx</code>:
+    This is the port of NuttX to the PIC32MX board from PCB Logic Design Co.
+    This board features the MicroChip PIC32MX460F512L.
+    The board is a very simple -- little more than a carrier for the PIC32
+    MCU plus voltage regulation, debug interface, and an OTG connector.
+    STATUS:  Code complete but testing has been stalled due to tool related problems
+    (PICkit 2 does not work with the PIC32).
   </li>
 
   <li><code>configs/pjrc-8051</code>:
     8051 Microcontroller.  This port uses the PJRC 87C52 development system
     and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain under Linux or Cygwin.
     This port is not quite ready for prime time.
+  </li>
+
+  <li><code>configs/qemu-i486</code>:
+    Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
+    hardwared (Google the Bifferboard).
+  </li>
+
+  <li><code>configs/rgmp</code>:
+    RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for 
+    running GPOS and RTOS simultaneously on multi-processor platforms. You can
+    port your favorite RTOS to RGMP together with an unmodified Linux to form a
+    hybrid operating system. This makes your application able to use both RTOS
+    and GPOS features.
+    See the <a href="http://rgmp.sourceforge.net/wiki/index.php/Main_Page">RGMP Wiki</a> for further information about RGMP.
+  </li>
+
+  <li><code>configs/sam3u-ek</code>:
+	The port of NuttX to the Atmel SAM3U-EK development board.
+  </li>
+
+  <li><code>configs/skp16c26</code>:
+	Renesas M16C processor on the Renesas SKP16C26 StarterKit.  This port
+	uses the GNU m32c toolchain.  STATUS:  The port is complete but untested
+    due to issues with compiler internal errors.
+  </li>
+
+  <li><code>configs/stm3210e-eval</code>:
+    STMicro STM3210E-EVAL development board based on the STMicro STM32F103ZET6
+    microcontroller (ARM Cortex-M3).  This port uses the GNU Cortex-M3
+    toolchain.
   </li>
 
   <li><code>configs/sim</code>:
@@ -807,6 +936,13 @@
     (which has very limited SH-1 support to begin with), or perhaps with the CMON debugger.
     At any rate, I have exhausted all of the energy that I am willing to put into this cool
     old processor for the time being.
+  </li>
+
+  <li><code>configs/vsn</code>:
+    ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
+    STMicro STM32F103RET6.  Contributed by Uros Platise.
+    See the <a href="http://isotel.eu/NetClamps/">Isotel</a> web site for further information
+    about the NetClamps board.
   </li>
 
   <li><code>configs/xtrs</code>:
@@ -837,6 +973,12 @@
   </li>
 
   <li><code>configs/z8encore000zco</code>
+    z8Encore! Microcontroller.  This port use the Zilog z8f64200100kit
+    development kit, Z8F6423 part, and the Zilog ZDS-II Windows command line
+    tools.  The development environment is Cygwin under WinXP.
+  </li>
+
+  <li><code>configs/z8f64200100kit</code>:
     z8Encore! Microcontroller.  This port use the Zilog z8f64200100kit
     development kit, Z8F6423 part, and the Zilog ZDS-II Windows command line
     tools.  The development environment is Cygwin under WinXP.
@@ -1650,7 +1792,87 @@ The system can be re-made subsequently by just typing <code>make</code>.
 
 <h3><a name="systemtime">4.1.20 System Time and Clock</a></h3>
 
-<h4>4.1.20.1 UTC Time Representation</h4>
+<h4>4.1.20.1 Basic System Timer</h4>
+
+<p><b>System Timer</b>
+  In most implementations, system time is provided by a timer interrupt.
+  That timer interrupt runs at rate determined by <code>CONFIG_MSEC_PER_TICKS</code> (default 10 or 100Hz).
+  The timer generates an interrupt each <code>CONFIG_MSEC_PER_TICKS</code> milliseconds and increments a counter called <code>g_system_timer</code>.
+  <code>g_system_timer</code> then provides a time-base for calculating <i>up-time</i> and elapsed time intervals in units of <code>CONFIG_MSEC_PER_TICKS</code>.
+</p>
+<p><b>System Timer Accuracy</b>
+  On many system, the exact timer interval specified by <code>CONFIG_MSEC_PER_TICKS</code> cannot be achieved due to limitations in frequencies or in dividers.
+  As a result, the time interval specified by <code>CONFIG_MSEC_PER_TICKS</code> may only be approximate and there may be small errors in the apparent <i>up-time</i> time.
+  These small errors, however, will accumulate over time and after a long period of time may have an unacceptably large error in the apparent <i>up-time</i> of the MCU.
+</p>
+  If the timer tick period generated by the hardware is not exactly <code>CONFIG_MSEC_PER_TICKS</code> <i>and</i> if there you require accurate up-time for the MCU, then there are measures that you can take:
+</p>
+<ul>
+  <li>
+    Perhaps you can adjust <code>CONFIG_MSEC_PER_TICKS</code> to a different value so that an exactly <code>CONFIG_MSEC_PER_TICKS</code> can be accomplished.
+  </li>
+  <li>
+    Or you can use a technique known as <i>Delta-Sigma Modulation</i>. (Suggested by Uros Platise).  Consider the example below.
+  </li>
+</ul>
+
+<p><b>Delta-Sigma Modulation Example</b>.
+  Consider this case:  The system timer is a count-up timer driven at 32.768KHz.
+  There are dividers that can be used, but a divider of one yields the highest accuracy.
+  This counter counts up until the count equals a match value, then a timer interrupt is generated.
+  The desire frequency is 100Hz (<code>CONFIG_MSEC_PER_TICKS</code> is 10).
+</p>
+<p>
+  This exact frequency of 100Hz cannot be obtained in this case.
+  In order to obtain that exact frequency a match value of 327.68 would have to be provided.
+  The closest integer value is 328 but the ideal match value is between 327 and 328.
+  The closest value, 328, would yield an actual timer frequency of 99.9Hz!
+  That will may cause significant timing errors in certain usages.
+</p>
+<p>
+  Use of Delta-Sigma Modulation can eliminate this error in the long run.
+  Consider this example implementation:
+</p>
+<ol>
+  <li>
+    Initially an accumulator is zero an the match value is programmed to 328:
+<ul><pre>
+accumulator = 0;
+match = 328;
+</pre></ul>
+  </li>
+  <li>
+    On each timer interrupt, accumulator is updated with difference that, in this reflects, 100* the error in interval that just passed.
+    So on the first timer interrupt, the accumulator would be updated like:
+<ul><pre>
+if (match == 328)
+  {
+    accumulator += 32; // 100*(328 - 327.68)
+  }
+else
+  {
+    accumulator -= 68; // (100*(327 - 327.68)
+  }
+</pre></ul>
+  </li>
+  <li>
+     And on that same timer interrupt a new match value would be programmed:
+<ul><pre>
+if (accumulator < 0)
+  {
+    match = 328;
+  }
+else
+  {
+    match = 327;
+  }
+</pre></ul>
+</ol>
+<p>
+  In this way, the timer interval is controlled from interrupt-to-interrupt to produce an average frequency of exactly 100Hz.
+</p>
+
+<h4>4.1.20.2 UTC Time Representation</h4>
 <p>
   To enable UTC time representation use option:
 </p>
@@ -2950,7 +3172,7 @@ build
   This link object is assumed to be an incremental (relative) link object, but could be a static library (archive)
   (some modification to this Makefile would be required if CONFIG_PASS1_TARGET generates an archive).
   Pass 1 1ncremental (relative) link objects should be put into the processor-specific source directory 
-  where other link objects will be created - ff the pass1 obect is an archive, it could	go anywhere.
+  where other link objects will be created - ff the pass1 obect is an archive, it could    go anywhere.
 </p>
 <ul>
   <li>
