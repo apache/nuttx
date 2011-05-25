@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 15, 2011</p>
+      <p>Last Updated: May 25, 2011</p>
     </td>
   </tr>
 </table>
@@ -1618,8 +1618,9 @@
     <ul>
       <p>
        <b>STATUS:</b>
-       This port is in its very earliest stages -- most just header file development.
-       Stay tuned for future releases including verified PIC32 support.
+       This port is code complete and has begun testing.
+       Testing is, unfortunately, delayed until I obtain some additional test equipment
+       (you can't use PICkit 2 with the PIC32; you need PICkit 3).
       </p>
     </ul>
   </td>
@@ -2304,7 +2305,22 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-6.4 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
+    * lib/drivers/cc1101: Add initial, functional CC1101 wireless driver
+      (contributed by Uros Platise)
+    * arch/mips and configs/pcblogic-pic32mx: The MicroChip PIC32MX port is now
+      code complete and ready to begin testing.  Unfortunately, it looks like
+      testing will be delayed due to tool issues (My PICkit 2 will not work the
+      the MPLAB debugger on PIC32; I will need to get a PICkit 3).
+    * drivers/net/e1000.c/h: A PCI-based E1000 ethernet driver submitted
+      by Yu Qiang.
+    * lib/net/lib_inetaddr.c: An implementatino of the inet_addr() function
+     submitted y Yu Qiang.
+
 apps-6.4 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * nshlib/nsh_netcmds.c: If a network device name and IP address are provided
+      with the ifconfig command, then this command will now set the network address.
+      (Contributed by Yu Qiang).
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

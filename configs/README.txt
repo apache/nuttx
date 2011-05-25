@@ -507,10 +507,10 @@ defconfig -- This is a configuration file similar to the Linux
 		  (CONFIG_STDIO_BUFFER_SIZE > 0), then this option may be added
 		  to force automatic, line-oriented flushing the output buffer
 		  for putc(), fputc(), putchar(), puts(), fputs(), printf(),
-          fprintf(), and vfprintf().  When a newline is encountered in
-          the output string, the output buffer will be flushed.  This
-          (slightly) increases the NuttX footprint but supports the kind
-          of behavior that people expect for printf().
+		  fprintf(), and vfprintf().  When a newline is encountered in
+		  the output string, the output buffer will be flushed.  This
+		  (slightly) increases the NuttX footprint but supports the kind
+		  of behavior that people expect for printf().
 		CONFIG_NUNGET_CHARS - Number of characters that can be
 		  buffered by ungetc() (Only if CONFIG_NFILE_STREAMS > 0)
 		CONFIG_PREALLOC_MQ_MSGS - The number of pre-allocated message
@@ -978,20 +978,24 @@ configs/avr32dev1
 	based on the Atmel AT32UC3B0256 MCU and uses a specially patched
 	version of the GNU toolchain:  The patches provide support for the
 	AVR32 family.  That patched GNU toolchain is available only from the
-	Atmel website.  STATUS: the ostest configuration is functional, but
-	there are issues with the NSH configuration (thought to be a hardware
-	configuration issue, but that has not been confirmed).
+	Atmel website.  STATUS: This port is functional but very basic.  There
+	are configurations for NSH and the OS test.
 
 configs/c5471evm
 	This is a port to the Spectrum Digital C5471 evaluation board.  The
 	TMS320C5471 is a dual core processor from TI with an ARM7TDMI general
 	purpose processor and a c54 DSP.  It is also known as TMS320DA180 or just DA180. 
 	NuttX runs on the ARM core and is built with a GNU arm-elf toolchain*.
-	This port is complete, verified, and included in the NuttX release.
+	This port is complete and verified.
 
 configs/demo9s12ne64
 	Feescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
-	port uses the m9s12x GCC toolchain.  STATUS:  Under development.
+	port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
+	is code complete but has not yet been verified.
+
+configs/detron
+	This is a port of NuttX port to the Detron LPC1768 board from Decio Renno
+	(http://www.detroneletronica.com.br/)
 
 configs/ea3131
 	Embedded Artists EA3131 Development bard.  This board is based on the 
@@ -1018,6 +1022,9 @@ configs/lm3s6965-ek
 	an ARM Cortex-M3 MCU, the Luminary/TI LM3S6965. This OS is built with the
 	arm-elf toolchain*.  STATUS:  This port is complete and mature.
 
+configs/lm3s8962-ek
+	Stellaris LMS38962 Evaluation Kit
+
 configs/lpcxpresso-lpc1768
 	Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
 	is based on the NXP LPC1768.  The Code Red toolchain is used by default.
@@ -1041,13 +1048,14 @@ configs/mcu123-lpc214x
 configs/mx1ads
 	This is a port to the Motorola MX1ADS development board.  That board
 	is based on the Freescale i.MX1 processor.  The i.MX1 is an ARM920T.
-	STATUS:  This port is nearly code complete but still under development
-	(work is stalled until I devote time to the Micromint Eagle-100)
+	STATUS:  This port is nearly code complete but was never fully
+	integrated due to tool-related issues.
 
 configs/ne64badge
 	Future Electronics Group NE64 /PoE Badge board based on the
 	MC9S12NE64 hcs12 cpu.  This port uses the m9s12x GCC toolchain.
-	STATUS:  Under development.
+	STATUS:  Under development.  The port is code-complete but has
+	not yet been fully tested.
 
 configs/ntosd-dm320
 	This port uses the Neuros OSD v1.0 Dev Board with a GNU arm-elf
@@ -1071,7 +1079,7 @@ configs/nucleus2g
 
 configs/olimex-lpc1766stk
 	This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain* under
-	Linux or Cygwin.  STATUS: under development.
+	Linux or Cygwin.  STATUS: Complete and mature.
 
 configs/olimex-lpc2378
 	This port uses the Olimex-lpc2378 board and a GNU arm-elf toolchain* under
@@ -1083,24 +1091,34 @@ configs/olimex-lpc2378
 configs/olimex-strp711
 	This port uses the Olimex STR-P711 board and a GNU arm-elf toolchain* under
 	Linux or Cygwin. See the http://www.olimex.com/dev/str-p711.html" for
-	further information. STATUS: Coding for the basic port -- serial console
-	and system timer -- is complete but untested to problems I am having using
-	OpenOCD with a wiggler clone JTAG.
+	further information.  STATUS: Configurations for the basic OS test and NSH
+	are complete and verified.
 
 configs/pjrc-8051
 	8051 Microcontroller.  This port uses the PJRC 87C52 development system
 	and the SDCC toolchain.   This port is not quite ready for prime time.
 
+configs/pcblogic-pic32mx
+	This is the port of NuttX to the PIC32MX board from PCB Logic Design Co.
+	This board features the MicroChip PIC32MX460F512L.
+	The board is a very simple -- little more than a carrier for the PIC32
+	MCU plus voltage regulation, debug interface, and an OTG connector.
+	STATUS:  Code complete but testing has been stalled due to tool related problems
+	(PICkit 2 does not work with the PIC32).
+
+confgis/qemu-i486
+	Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
+	hardwared (Google the Bifferboard).
+
 configs/rgmp
+	RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for 
+	running GPOS and RTOS simultaneously on multi-processor platforms. You can
+	port your favorite RTOS to RGMP together with an unmodified Linux to form a
+	hybrid operating system. This makes your application able to use both RTOS
+	and GPOS features.
 
-    RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for 
-    running GPOS and RTOS simultaneously on multi-processor platforms. You can
-    port your favorite RTOS to RGMP together with an unmodified Linux to form a
-    hybrid operating system. This makes your application able to use both RTOS
-   and GPOS features.
-
-    See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further information
-    about RGMP.
+	See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further information
+	about RGMP.
 
 configs/sim
 	A user-mode port of NuttX to the x86 Linux platform is available.
@@ -1111,9 +1129,13 @@ configs/sim
 	NOTE: This target will not run on Cygwin probably for many reasons but
 	first off because it uses some of the same symbols as does cygwin.dll.
 
+configs/sam3u-ek
+	The port of NuttX to the Atmel SAM3U-EK development board.
+
 configs/skp16c26
 	Renesas M16C processor on the Renesas SKP16C26 StarterKit.  This port
-	uses the GNU m32c toolchain.
+	uses the GNU m32c toolchain.  STATUS:  The port is complete but untested
+	due to issues with compiler internal errors.
 
 configs/stm3210e-evel
 	STMicro STM3210E-EVAL development board based on the STMicro STM32F103ZET6
@@ -1126,7 +1148,8 @@ configs/us7032evb1
 
 configs/vsn
 	ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
-	STMicro STM32F103RET6.  Contributed by Uros Platise.
+	STMicro STM32F103RET6.  Contributed by Uros Platise.  See
+	http://isotel.eu/NetClamps/
 
 configs/xtrs
 	TRS80 Model 3.  This port uses a vintage computer based on the Z80.
@@ -1154,9 +1177,6 @@ configs/z8f64200100kit
 	z8Encore! Microcontroller.  This port use the Zilog z8f64200100kit
 	development kit, Z8F6423 part, and the Zilog ZDS-II Windows command line
 	tools.  The development environment is Cygwin under WinXP.
-
-Other ports for the for the TI TMS320DM270, M683222 and for MIPS are in various
-states of progress
 
 Configuring NuttX
 ^^^^^^^^^^^^^^^^^
