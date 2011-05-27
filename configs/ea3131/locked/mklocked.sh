@@ -117,7 +117,7 @@ echo "EXTERN(up_vectoraddrexcptn)" >>ld-locked.inc
 
 echo "EXTERN(up_timerinit)" >>ld-locked.inc
 
-answer=$(checkconfig CONFIG_LPC313X_UART)
+answer=$(checkconfig CONFIG_LPC31XX_UART)
 if [ $answer = y ]; then
 	echo "EXTERN(up_earlyserialinit)" >>ld-locked.inc
 fi

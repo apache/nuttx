@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/ea3131/tools/lpchdr.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -219,7 +219,7 @@ static inline void writefile(int infd, int outfd, size_t len, size_t padlen)
 
 int main(int argc, char **argv, char **envp)
 {
-  struct lpc313x_header_s g_hdr;
+  struct lpc31_header_s g_hdr;
   struct stat buf;
   ssize_t nbytes;
   size_t padlen;
@@ -258,7 +258,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Initialize the header */
 
-  memset(&g_hdr, 0, sizeof(struct lpc313x_header_s));
+  memset(&g_hdr, 0, sizeof(struct lpc31_header_s));
   g_hdr.vector          = 0xea00001e;  /* b 0x11029080 */
   g_hdr.magic           = 0x41676d69;
 #if 1 /* CRC doesn't seem to be functional */
@@ -266,7 +266,7 @@ int main(int argc, char **argv, char **envp)
 #else
   g_hdr.imageType       = 0x0000000b;
 #endif
-  g_hdr.imageLength     = (buf.st_size + sizeof(struct lpc313x_header_s) + 511) & ~0x1ff;
+  g_hdr.imageLength     = (buf.st_size + sizeof(struct lpc31_header_s) + 511) & ~0x1ff;
 
   /* This is how much we must pad at the end of the binary image. */
 

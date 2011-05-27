@@ -58,7 +58,7 @@
 #    include <sys/mount.h>
 #    include <nuttx/sdio.h>
 #    include <nuttx/mmcsd.h>
-#    include "lpc313x_internal.h"
+#    include "lpc31_internal.h"
 #  endif
 #endif
 
@@ -85,8 +85,8 @@
 #    undef CONFIG_PAGING_SDSLOT
 #  endif
 #else
-   /* Add configuration for new LPC313X boards here */
-#  error "Unrecognized LPC313X board"
+   /* Add configuration for new LPC31XX boards here */
+#  error "Unrecognized LPC31XX board"
 #  undef CONFIG_PAGING_SDSLOT
 #  undef HAVE_SD
 #  undef HAVE_SPINOR
@@ -122,7 +122,7 @@
     * is not enabled.
     */
 
-#  if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_LPC313X_MCI)
+#  if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_LPC31XX_MCI)
 #    ifdef CONFIG_PAGING_SDSLOT
 #      error "Mountpoints and/or MCI disabled"
 #    endif
@@ -152,7 +152,7 @@
 
    /* Verify that SPI support is enabld */
 
-#ifndef CONFIG_LPC313X_SPI
+#ifndef CONFIG_LPC31XX_SPI
 #  error "SPI support is not enabled"
 #endif
 
@@ -219,7 +219,7 @@ static struct pg_source_s g_pgsrc;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc313x_initsrc()
+ * Name: lpc31_initsrc()
  *
  * Description:
  *  Initialize the source device that will support paging.
@@ -230,7 +230,7 @@ static struct pg_source_s g_pgsrc;
  ****************************************************************************/
 
 #if defined(CONFIG_PAGING_BINPATH)
-static inline void lpc313x_initsrc(void)
+static inline void lpc31_initsrc(void)
 {
 #ifdef CONFIG_PAGING_SDSLOT
   FAR struct sdio_dev_s *sdio;
@@ -287,7 +287,7 @@ static inline void lpc313x_initsrc(void)
 }
 
 #elif defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
-static inline void lpc313x_initsrc(void)
+static inline void lpc31_initsrc(void)
 {
   FAR struct spi_dev_s *spi;
 #ifdef CONFIG_DEBUG
@@ -339,7 +339,7 @@ static inline void lpc313x_initsrc(void)
 }
 
 #else
-#  define lpc313x_initsrc()
+#  define lpc31_initsrc()
 #endif
 
 /****************************************************************************
@@ -425,7 +425,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
 
   /* Perform initialization of the paging source device (if necessary) */
 
-  lpc313x_initsrc();
+  lpc31_initsrc();
 
   /* Create an offset into the binary image that corresponds to the 
    * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
@@ -448,7 +448,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
 
   /* Perform initialization of the paging source device (if necessary) */
 
-  lpc313x_initsrc();
+  lpc31_initsrc();
 
   /* Create an offset into the binary image that corresponds to the 
    * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
@@ -493,21 +493,21 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
 #endif /* CONFIG_PAGING_BLOCKINGFILL */
 
 /************************************************************************************
- * Name: lpc313x_pginitialize
+ * Name: lpc31_pginitialize
  *
  * Description:
  *   Set up mass storage device to support on demand paging.
  *
  ************************************************************************************/
 
-void weak_function lpc313x_pginitialize(void)
+void weak_function lpc31_pginitialize(void)
 {
   /* This initialization does nothing in this example setup.  But this function is
    * where you might, for example:
    *
    * - Initialize and configure a mass storage device to support on-demand paging.
    *   This might be, perhaps an SD card or NAND memory.  An SPI FLASH would probably
-   *   already have been configured by lpc313x_spiinitialize(void);
+   *   already have been configured by lpc31_spiinitialize(void);
    * - Set up resources to support up_fillpage() operation.  For example, perhaps the
    *   the text image is stored in a named binary file.  In this case, the virtual
    *   text addresses might map to offsets into that file.

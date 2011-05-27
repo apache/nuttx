@@ -45,12 +45,12 @@
 #include <debug.h>
 #include <errno.h>
 
-#ifdef CONFIG_LPC313X_MCI
+#ifdef CONFIG_LPC31XX_MCI
 #  include <nuttx/sdio.h>
 #  include <nuttx/mmcsd.h>
 #endif
 
-#include "lpc313x_internal.h"
+#include "lpc31_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -71,8 +71,9 @@
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #else
-   /* Add configuration for new LPC313X boards here */
-#  error "Unrecognized LPC313X board"
+   /* Add configuration for new LPC31XX boards here */
+
+#  error "Unrecognized LPC31XX board"
 #  undef CONFIG_NSH_HAVEUSBDEV
 #  undef CONFIG_NSH_HAVEMMCSD
 #endif
@@ -87,7 +88,7 @@
  * is not enabled.
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_LPC313X_MCI)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_LPC31XX_MCI)
 #  undef CONFIG_NSH_HAVEMMCSD
 #endif
 

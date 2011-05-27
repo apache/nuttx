@@ -44,8 +44,8 @@
 
 #include <nuttx/config.h>
 
-#include "lpc313x_cgu.h"
-#include "lpc313x_cgudrvr.h"
+#include "lpc31_cgu.h"
+#include "lpc31_cgudrvr.h"
 
 /****************************************************************************
  * Definitions
@@ -284,7 +284,7 @@
  * 11 - DOMAIN_SYSCLKO      FFAST             -                 -
  */
 
-const struct lpc313x_clkinit_s g_boardclks =
+const struct lpc31_clkinit_s g_boardclks =
 {
   /* Domain 0 (DOMAINID_SYS), Clocks 0 - 29, Fraction dividers 0-6 */
 
