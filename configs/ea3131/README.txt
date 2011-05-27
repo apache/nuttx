@@ -43,12 +43,12 @@ GNU Toolchain Options
   add one of the following configuration options to your .config (or defconfig)
   file:
 
-    CONFIG_LPC313X_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_LPC313X_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_LPC313X_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_LPC313X_BUILDROOT=y	    : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_LPC31XX_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_LPC31XX_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_LPC31XX_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_LPC31XX_BUILDROOT=y	    : NuttX buildroot under Linux or Cygwin (default)
 
-  If you are not using CONFIG_LPC313X_BUILDROOT, then you may also have to modify
+  If you are not using CONFIG_LPC31XX_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
   NOTE: the CodeSourcery (for Windows), devkitARM, and Raisonance toolchains are
@@ -117,13 +117,13 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/lpc313x,
+  3) Set up include pathes:  You will need include/, arch/arm/src/lpc31xx,
      arch/arm/src/common, arch/arm/src/cortexm3, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
 
   Startup files will probably cause you some headaches.  The NuttX startup file
-  is arch/arm/src/lpc313x/lpc313x_vectors.S.  With RIDE, I have to build NuttX
+  is arch/arm/src/lpc31xx/lpc31_vectors.S.  With RIDE, I have to build NuttX
   one time from the Cygwin command line in order to obtain the pre-built
   startup object needed by RIDE.
 
@@ -426,7 +426,7 @@ On-Demand Paging
 
   NOTE:  See the TODO list in the top-level directory:
   
-    "arch/arm/src/lpc313x/lpc313x_spi.c may or may not be functional.  It was
+    "arch/arm/src/lpc31xx/lpc31_spi.c may or may not be functional.  It was
      reported to be working, but I was unable to get it working with the
      Atmel at45dbxx serial FLASH driver."
 
@@ -549,27 +549,27 @@ ARM/EA3131-specific Configuration Options
 
   Individual subsystems can be enabled:
 
-	CONFIG_LPC313X_MCI, CONFIG_LPC313X_SPI, CONFIG_LPC313X_UART
+	CONFIG_LPC31XX_MCI, CONFIG_LPC31XX_SPI, CONFIG_LPC31XX_UART
 
   External memory available on the board (see also CONFIG_MM_REGIONS)
 
-	CONFIG_LPC313X_EXTSRAM0 - Select if external SRAM0 is present
-	CONFIG_LPC313X_EXTSRAM0HEAP - Select if external SRAM0 should be
+	CONFIG_LPC31XX_EXTSRAM0 - Select if external SRAM0 is present
+	CONFIG_LPC31XX_EXTSRAM0HEAP - Select if external SRAM0 should be
 	  configured as part of the NuttX heap.
-	CONFIG_LPC313X_EXTSRAM0SIZE - Size (in bytes) of the installed
+	CONFIG_LPC31XX_EXTSRAM0SIZE - Size (in bytes) of the installed
 	  external SRAM0 memory
-	CONFIG_LPC313X_EXTSRAM1 - Select if external SRAM1 is present
-	CONFIG_LPC313X_EXTSRAM1HEAP - Select if external SRAM1 should be
+	CONFIG_LPC31XX_EXTSRAM1 - Select if external SRAM1 is present
+	CONFIG_LPC31XX_EXTSRAM1HEAP - Select if external SRAM1 should be
 	  configured as part of the NuttX heap.
-	CONFIG_LPC313X_EXTSRAM1SIZE - Size (in bytes) of the installed
+	CONFIG_LPC31XX_EXTSRAM1SIZE - Size (in bytes) of the installed
 	  external SRAM1 memory
-	CONFIG_LPC313X_EXTSDRAM - Select if external SDRAM is present
-	CONFIG_LPC313X_EXTSDRAMHEAP - Select if external SDRAM should be
+	CONFIG_LPC31XX_EXTSDRAM - Select if external SDRAM is present
+	CONFIG_LPC31XX_EXTSDRAMHEAP - Select if external SDRAM should be
 	  configured as part of the NuttX heap.
-	CONFIG_LPC313X_EXTSDRAMSIZE - Size (in bytes) of the installed
+	CONFIG_LPC31XX_EXTSDRAMSIZE - Size (in bytes) of the installed
 	  external SDRAM memory
-	CONFIG_LPC313X_EXTNAND - Select if external NAND is present
-	CONFIG_LPC313X_EXTSDRAMSIZE - Size (in bytes) of the installed
+	CONFIG_LPC31XX_EXTNAND - Select if external NAND is present
+	CONFIG_LPC31XX_EXTSDRAMSIZE - Size (in bytes) of the installed
 	  external NAND memory
 
   LPC313X specific device driver settings

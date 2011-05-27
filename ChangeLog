@@ -1771,4 +1771,6 @@
 	* drivers/net/e1000.c/h: A PCI-based E1000 ethernet driver submitted
 	  by Yu Qiang.
 	* lib/net/lib_inetaddr.c: An implementatino of the inet_addr() function
- 	 submitted y Yu Qiang.
+	 submitted y Yu Qiang.
+	* arch/arm/src/lpc31xx and arch/arm/include/lpc31xx:  Renamed from lpc313x
+	  to make name space for other famiy members.

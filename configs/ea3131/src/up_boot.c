@@ -46,7 +46,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "lpc313x_internal.h"
+#include "lpc31_internal.h"
 #include "ea3131_internal.h"
 
 /************************************************************************************
@@ -62,43 +62,43 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc313x_boardinitialize
+ * Name: lpc31_boardinitialize
  *
  * Description:
- *   All LPC313X architectures must provide the following entry point.  This entry
+ *   All LPC31XX architectures must provide the following entry point.  This entry
  *   point is called early in the intitialization -- after all memory has been
  *   configured and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-void lpc313x_boardinitialize(void)
+void lpc31_boardinitialize(void)
 {
   /* Initialize configured, external memory resources */
 
-#ifdef CONFIG_LPC313X_EXTSDRAM
-  lpc313x_meminitialize();
+#ifdef CONFIG_LPC31XX_EXTSDRAM
+  lpc31_meminitialize();
 #endif
 
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * lpc313x_spiinitialize() has been brought into the link.
+   * lpc31_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_LPC313X_SPI)
-  if (lpc313x_spiinitialize)
+#if defined(CONFIG_LPC31XX_SPI)
+  if (lpc31_spiinitialize)
     {
-      lpc313x_spiinitialize();
+      lpc31_spiinitialize();
     }
 #endif
 
    /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-    * disabled, and 3) the weak function lpc313x_usbinitialize() has been brought
+    * disabled, and 3) the weak function lpc31_usbinitialize() has been brought
     * into the build.
     */
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_LPC313X_USB)
-  if (lpc313x_usbinitialize)
+#if defined(CONFIG_USBDEV) && defined(CONFIG_LPC31XX_USB)
+  if (lpc31_usbinitialize)
     {
-      lpc313x_usbinitialize();
+      lpc31_usbinitialize();
     }
 #endif
 
@@ -111,9 +111,9 @@ void lpc313x_boardinitialize(void)
   /* Set up mass storage device to support on demand paging */
 
 #if defined(CONFIG_PAGING)
-  if (lpc313x_pginitialize)
+  if (lpc31_pginitialize)
     {
-      lpc313x_pginitialize();
+      lpc31_pginitialize();
     }
 #endif
 }

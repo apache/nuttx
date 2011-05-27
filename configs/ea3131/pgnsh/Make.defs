@@ -37,23 +37,23 @@ include ${TOPDIR}/.config
 
 # Setup for the selected toolchain
 
-ifeq ($(CONFIG_LPC313X_CODESOURCERYW),y)
+ifeq ($(CONFIG_LPC31XX_CODESOURCERYW),y)
   # CodeSourcery under Windows
   CROSSDEV = arm-none-eabi-
   WINTOOL = y
   MAXOPTIMIZATION = -O2
 endif
-ifeq ($(CONFIG_LPC313X_CODESOURCERYL),y)
+ifeq ($(CONFIG_LPC31XX_CODESOURCERYL),y)
   # CodeSourcery under Linux
   CROSSDEV = arm-none-eabi-
   MAXOPTIMIZATION = -O2
 endif
-ifeq ($(CONFIG_LPC313X_DEVKITARM),y)
+ifeq ($(CONFIG_LPC31XX_DEVKITARM),y)
   # devkitARM under Windows
   CROSSDEV = arm-eabi-
   WINTOOL = y
 endif
-ifeq ($(CONFIG_LPC313X_BUILDROOT),y)
+ifeq ($(CONFIG_LPC31XX_BUILDROOT),y)
   # NuttX buildroot under Linux or Cygwin
   CROSSDEV = arm-elf-
   MAXOPTIMIZATION = -Os
@@ -121,7 +121,7 @@ OBJEXT = .o
 LIBEXT = .a
 EXEEXT =
 
-ifneq ($(CONFIG_LPC313X_BUILDROOT),y)
+ifneq ($(CONFIG_LPC31XX_BUILDROOT),y)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)

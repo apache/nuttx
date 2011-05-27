@@ -45,7 +45,7 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
-#include "lpc313x_ioconfig.h"
+#include "lpc31_ioconfig.h"
 
 /************************************************************************************
  * Definitions
@@ -79,39 +79,39 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc313x_meminitialize
+ * Name: lpc31_meminitialize
  *
  * Description:
  *   Initialize external memory resources (sram, sdram, nand, nor, etc.)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_LPC313X_EXTSDRAM
-extern void lpc313x_meminitialize(void);
+#ifdef CONFIG_LPC31XX_EXTSDRAM
+extern void lpc31_meminitialize(void);
 #endif
 
 /************************************************************************************
- * Name: lpc313x_spiinitialize
+ * Name: lpc31_spiinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the EA3131 board.
  *
  ************************************************************************************/
 
-extern void weak_function lpc313x_spiinitialize(void);
+extern void weak_function lpc31_spiinitialize(void);
 
 /************************************************************************************
- * Name: lpc313x_usbinitialize
+ * Name: lpc31_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins for the EA3131 board.
  *
  ************************************************************************************/
 
-extern void weak_function lpc313x_usbinitialize(void);
+extern void weak_function lpc31_usbinitialize(void);
 
 /************************************************************************************
- * Name: lpc313x_pginitialize
+ * Name: lpc31_pginitialize
  *
  * Description:
  *   Set up mass storage device to support on demand paging.
@@ -119,7 +119,7 @@ extern void weak_function lpc313x_usbinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_PAGING
-extern void weak_function lpc313x_pginitialize(void);
+extern void weak_function lpc31_pginitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

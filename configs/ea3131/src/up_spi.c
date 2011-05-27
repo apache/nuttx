@@ -2,7 +2,7 @@
  * configs/ea3131/src/up_spi.c
  * arch/arm/src/board/up_spi.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,12 +49,12 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "lpc313x_internal.h"
+#include "lpc31_internal.h"
 #include "ea3131_internal.h"
 
-#ifdef CONFIG_LPC313X_SPI
-#if 0 /* At present, EA3131 specific logic is hard-coded in the file lpc313x_spi.c
-       * in arch/arm/src/lpc313x */
+#ifdef CONFIG_LPC31XX_SPI
+#if 0 /* At present, EA3131 specific logic is hard-coded in the file lpc31_spi.c
+       * in arch/arm/src/lpc31xx */
 
 /************************************************************************************
  * Definitions
@@ -87,14 +87,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc313x_spiinitialize
+ * Name: lpc31_spiinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the EA3131 board.
  *
  ************************************************************************************/
 
-void weak_function lpc313x_spiinitialize(void)
+void weak_function lpc31_spiinitialize(void)
 {
   /* NOTE: Clocking for SPI has already been provided. Pin configuration is performed
    * on-the-fly, so no additional setup is required.
@@ -102,19 +102,19 @@ void weak_function lpc313x_spiinitialize(void)
 }
 
 /************************************************************************************
- * Name:  lpc313x_spiselect and lpc313x_spistatus
+ * Name:  lpc31_spiselect and lpc31_spistatus
  *
  * Description:
- *   The external functions, lpc313x_spiselect and lpc313x_spistatus must be
+ *   The external functions, lpc31_spiselect and lpc31_spistatus must be
  *   provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
  *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
- *   are provided by common LPC313X logic.  To use this common SPI logic on your
+ *   are provided by common LPC31XX logic.  To use this common SPI logic on your
  *   board:
  *
- *   1. Provide logic in lpc313x_boardinitialize() to configure SPI chip select
+ *   1. Provide logic in lpc31_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide lpc313x_spiselect() and lpc313x_spistatus() functions in your
+ *   2. Provide lpc31_spiselect() and lpc31_spistatus() functions in your
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   3. Add a calls to up_spiinitialize() in your low level application
@@ -126,17 +126,17 @@ void weak_function lpc313x_spiinitialize(void)
  *
  ************************************************************************************/
 
-void lpc313x_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void lpc31_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
-uint8_t lpc313x_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return SPI_STATUS_PRESENT;
 }
 
 #endif /* 0 */
-#endif /* CONFIG_LPC313X_SPI  */
+#endif /* CONFIG_LPC31XX_SPI  */
 

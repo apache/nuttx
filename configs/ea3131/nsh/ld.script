@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* The LPC3131 has 192Kb of ISRAM beginning at virtual address 0x1102:8000.
- * LPC313x boot ROM expects the boot image be compiled with entry point at
+ * LPC31xx boot ROM expects the boot image be compiled with entry point at
  * 0x1102:9000.  A 128b header will appear at this address (applied by
  * lpc313xImgCreator) and the executable code must begin at 0x1102:9080.
  */

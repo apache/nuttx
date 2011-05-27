@@ -44,7 +44,7 @@
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 # include <stdint.h>
-# include "lpc313x_cgudrvr.h"
+# include "lpc31_cgudrvr.h"
 #endif
 
 /************************************************************************************
@@ -131,16 +131,16 @@ extern "C" {
  * Public Function Prototypes
  ************************************************************************************/
 /************************************************************************************
- * Name: lpc313x_boardinitialize
+ * Name: lpc31_boardinitialize
  *
  * Description:
- *   All LPC313X architectures must provide the following entry point.  This entry
+ *   All LPC31XX architectures must provide the following entry point.  This entry
  *   point is called early in the intitialization -- after all memory has been
  *   configured and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-EXTERN void lpc313x_boardinitialize(void);
+EXTERN void lpc31_boardinitialize(void);
 
 /************************************************************************************
  * Button support.

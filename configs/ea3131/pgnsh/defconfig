@@ -50,13 +50,13 @@
 # CONFIG_ENDIAN_BIG - define if big endian (default is little endian)
 # CONFIG_BOARD_LOOPSPERMSEC - for delay loops
 # CONFIG_DRAM_SIZE - For most ARM9 architectures, this describes the
-#   size of installed DRAM.  For the LPC313X, it is used only to
+#   size of installed DRAM.  For the LPC31XX, it is used only to
 #   deterimine how to map the executable regions.  It is SDRAM size
 #   only if you are executing out of the external SDRAM; or it could
 #   be NOR FLASH size, external SRAM size, or internal SRAM size.
 # CONFIG_DRAM_START - The start address of DRAM (physical)
 # CONFIG_DRAM_VSTART - The startaddress of DRAM (virtual)
-# CONFIG_ARCH_IRQPRIO - The LPC313x supports interrupt prioritization
+# CONFIG_ARCH_IRQPRIO - The LPC31xx supports interrupt prioritization
 # CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
 #   stack. If defined, this symbol is the size of the interrupt
 #   stack in bytes.  If not defined, the user task stacks will be
@@ -76,7 +76,7 @@
 CONFIG_ARCH=arm
 CONFIG_ARCH_ARM=y
 CONFIG_ARCH_ARM926EJS=y
-CONFIG_ARCH_CHIP=lpc313x
+CONFIG_ARCH_CHIP=lpc31xx
 CONFIG_ARCH_CHIP_LPC3131=y
 CONFIG_ARCH_BOARD=ea3131
 CONFIG_ARCH_BOARD_EA3131=y
@@ -108,54 +108,54 @@ CONFIG_ARCH_ROMPGTABLE=n
 
 # Identify toolchain and linker options
 #
-CONFIG_LPC313X_CODESOURCERYW=n
-CONFIG_LPC313X_CODESOURCERYL=n
-CONFIG_LPC313X_DEVKITARM=n
-CONFIG_LPC313X_BUILDROOT=y
+CONFIG_LPC31XX_CODESOURCERYW=n
+CONFIG_LPC31XX_CODESOURCERYL=n
+CONFIG_LPC31XX_DEVKITARM=n
+CONFIG_LPC31XX_BUILDROOT=y
 
 #
 #  Individual subsystems can be enabled:
 #
-CONFIG_LPC313X_MCI=n
-CONFIG_LPC313X_SPI=y
-CONFIG_LPC313X_UART=y
+CONFIG_LPC31XX_MCI=n
+CONFIG_LPC31XX_SPI=y
+CONFIG_LPC31XX_UART=y
 
 #
 # Exernal memory available on the board (see also CONFIG_MM_REGIONS)
 #
-# CONFIG_LPC313X_EXTSRAM0 - Select if external SRAM0 is present
-# CONFIG_LPC313X_EXTSRAM0HEAP - Select if external SRAM0 should be
+# CONFIG_LPC31XX_EXTSRAM0 - Select if external SRAM0 is present
+# CONFIG_LPC31XX_EXTSRAM0HEAP - Select if external SRAM0 should be
 #   configured as part of the NuttX heap.
-# CONFIG_LPC313X_EXTSRAM0SIZE - Size (in bytes) of the installed
+# CONFIG_LPC31XX_EXTSRAM0SIZE - Size (in bytes) of the installed
 #   external SRAM0 memory
-# CONFIG_LPC313X_EXTSRAM1 - Select if external SRAM1 is present
-# CONFIG_LPC313X_EXTSRAM1HEAP - Select if external SRAM1 should be
+# CONFIG_LPC31XX_EXTSRAM1 - Select if external SRAM1 is present
+# CONFIG_LPC31XX_EXTSRAM1HEAP - Select if external SRAM1 should be
 #   configured as part of the NuttX heap.
-# CONFIG_LPC313X_EXTSRAM1SIZE - Size (in bytes) of the installed
+# CONFIG_LPC31XX_EXTSRAM1SIZE - Size (in bytes) of the installed
 #   external SRAM1 memory
-# CONFIG_LPC313X_EXTSDRAM - Select if external SDRAM is present
-# CONFIG_LPC313X_EXTSDRAMHEAP - Select if external SDRAM should be
+# CONFIG_LPC31XX_EXTSDRAM - Select if external SDRAM is present
+# CONFIG_LPC31XX_EXTSDRAMHEAP - Select if external SDRAM should be
 #   configured as part of the NuttX heap.
-# CONFIG_LPC313X_EXTSDRAMSIZE - Size (in bytes) of the installed
+# CONFIG_LPC31XX_EXTSDRAMSIZE - Size (in bytes) of the installed
 #   external SDRAM memory
-# CONFIG_LPC313X_EXTNAND - Select if external NAND is present
-# CONFIG_LPC313X_EXTSDRAMSIZE - Size (in bytes) of the installed
+# CONFIG_LPC31XX_EXTNAND - Select if external NAND is present
+# CONFIG_LPC31XX_EXTSDRAMSIZE - Size (in bytes) of the installed
 #   external NAND memory
 #
-CONFIG_LPC313X_EXTSRAM0=n
-CONFIG_LPC313X_EXTSRAM0HEAP=n
-CONFIG_LPC313X_EXTSRAM0SIZE=(128*1024)
-CONFIG_LPC313X_EXTSRAM1=n
-CONFIG_LPC313X_EXTSRAM1HEAP=n
-CONFIG_LPC313X_EXTSRAM1SIZE=(128*1024)
-CONFIG_LPC313X_EXTSDRAM=n
-CONFIG_LPC313X_EXTSDRAMHEAP=n
-CONFIG_LPC313X_EXTSDRAMSIZE=(64*1024*1024)
-CONFIG_LPC313X_EXTNAND=n
-CONFIG_LPC313X_EXTNANDSIZE=(64*1024*1024)
+CONFIG_LPC31XX_EXTSRAM0=n
+CONFIG_LPC31XX_EXTSRAM0HEAP=n
+CONFIG_LPC31XX_EXTSRAM0SIZE=(128*1024)
+CONFIG_LPC31XX_EXTSRAM1=n
+CONFIG_LPC31XX_EXTSRAM1HEAP=n
+CONFIG_LPC31XX_EXTSRAM1SIZE=(128*1024)
+CONFIG_LPC31XX_EXTSDRAM=n
+CONFIG_LPC31XX_EXTSDRAMHEAP=n
+CONFIG_LPC31XX_EXTSDRAMSIZE=(64*1024*1024)
+CONFIG_LPC31XX_EXTNAND=n
+CONFIG_LPC31XX_EXTNANDSIZE=(64*1024*1024)
 
 #
-# LPC313X specific device driver settings
+# LPC31XX specific device driver settings
 #
 # CONFIG_UART_SERIAL_CONSOLE - selects the UART for the
 #   console and ttys0
@@ -681,20 +681,20 @@ CONFIG_USBDEV_TRACE=n
 CONFIG_USBDEV_TRACE_NRECORDS=128
 
 #
-# LPC313X USB Configuration
+# LPC31XX USB Configuration
 #
-# CONFIG_LPC313X_GIO_USBATTACH
+# CONFIG_LPC31XX_GIO_USBATTACH
 #   GIO that detects USB attach/detach events
-# CONFIG_LPC313X_GIO_USBDPPULLUP
+# CONFIG_LPC31XX_GIO_USBDPPULLUP
 #   GIO 
 # CONFIG_DMA320_USBDEV_DMA
-#   Enable LPC313X-specific DMA support
+#   Enable LPC31XX-specific DMA support
 #
-CONFIG_LPC313X_GIO_USBATTACH=6
-CONFIG_LPC313X_GIO_USBDPPULLUP=17
-CONFIG_LPC313X_VENDORID=0xd320
-CONFIG_LPC313X_PRODUCTID=0x3211
-CONFIG_LPC313X_USBDEV_DMA=n
+CONFIG_LPC31XX_GIO_USBATTACH=6
+CONFIG_LPC31XX_GIO_USBDPPULLUP=17
+CONFIG_LPC31XX_VENDORID=0xd320
+CONFIG_LPC31XX_PRODUCTID=0x3211
+CONFIG_LPC31XX_USBDEV_DMA=n
 
 #
 # USB Serial Device Configuration
