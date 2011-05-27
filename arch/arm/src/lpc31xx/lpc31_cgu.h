@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/lpc31xx/lpc31_cgu.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -1455,6 +1455,11 @@
 /* NANDFLASH_CTRL_ECC_RESET_N_SOFT register, address 0x13004cc4 */
 
 #define CGU_NANDECCRST_RESET             (1 << 0)  /* Bit 0:  Reset for ECC clock domain of Nandflash Controller */
+
+/* NANDFLASH_CTRL_AES_RESET_N_SOFT register, address 0x13004cc8 (LPC3154 only) */
+
+#define CGU_NANDAECRST_RESET             (1 << 0)  /* Bit 0:  Reset for AES clock domain of
+Nandflash Controller */
 
 /* NANDFLASH_CTRL_NAND_RESET_N_SOFT register, address 0x13004ccc */
 
