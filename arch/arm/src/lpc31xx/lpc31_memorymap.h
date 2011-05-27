@@ -41,6 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "chip.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -50,37 +51,37 @@
 
 #define LPC31_FIRST_PSECTION         0x00000000 /* Beginning of the physical address space */
 #define LPC31_SHADOWSPACE_PSECTION   0x00000000 /* 0x00000000-0x00000fff: Shadow Area 4Kb */
-                                                  /* 0x00001000-0xff027fff: Reserved */
+                                                /* 0x00001000-0xff027fff: Reserved */
 #define LPC31_INTSRAM_PSECTION       0x11028000 /*                        Internal SRAM 0+1 192Kb */
 #  define LPC31_INTSRAM0_PADDR       0x11028000 /* 0x11028000-0x1103ffff: Internal SRAM 0 96Kb */
 #  define LPC31_INTSRAM1_PADDR       0x11040000 /* 0x11040000-0x11057fff: Internal SRAM 1 96Kb */
-                                                  /* 0x11058000-11ffffffff: Reserved */
+                                                /* 0x11058000-11ffffffff: Reserved */
 #define LPC31_INTSROM0_PSECTION      0x12000000 /* 0x12000000-0x1201ffff: Internal SROM 0 128Kb */
-                                                  /* 0x12020000-0x12ffffff: Reserved */
+                                                /* 0x12020000-0x12ffffff: Reserved */
 #define LPC31_APB01_PSECTION         0x13000000 /* 0x13000000-0x1300bfff: APB0 32Kb APB1 16Kb */
 #  define LPC31_APB0_PADDR           0x13000000 /* 0x13000000-0x13007fff: APB0 32Kb */
 #  define LPC31_APB1_PADDR           0x13008000 /* 0x13008000-0x1300bfff: APB1 16Kb */
-                                                  /* 0x1300c000-0x14ffffff: Reserved */
+                                                /* 0x1300c000-0x14ffffff: Reserved */
 #define LPC31_APB2_PSECTION          0x15000000 /* 0x15000000-0x15003fff: APB2 16Kb */
 #define LPC31_APB3_PSECTION          0x16000000 /* 0x16000000-0x160003ff: APB3 1Kb */
 #define LPC31_APB4MPMC_PSECTION      0x17000000 /*                        8Kb */
 #  define LPC31_APB4_PADDR           0x17000000 /* 0x17000000-0x17000fff: APB4 4Kb */
 #  define LPC31_MPMC_PADDR           0x17008000 /* 0x17008000-0x17008fff: MPMC cfg 4Kb */
-                                                  /* 0x17009000-0x17ffffff: Reserved */
+                                                /* 0x17009000-0x17ffffff: Reserved */
 #define LPC31_MCI_PSECTION           0x18000000 /* 0x18000000 0x180003ff: MCI/SD/SDIO 1Kb */
-                                                  /* 0x18000900-0x18ffffff: Reserved */
+                                                /* 0x18000900-0x18ffffff: Reserved */
 #define LPC31_USBOTG_PSECTION        0x19000000 /* 0x19000000-0x19000fff: USB OTG 4Kb */
-                                                  /* 0x19001000-0x1fffffff: Reserved */
+                                                /* 0x19001000-0x1fffffff: Reserved */
 #define LPC31_EXTSRAM_PSECTION       0x20000000 /*                        64-128Kb */
 #  define LPC31_EXTSRAM0_PADDR       0x20000000 /* 0x20000000-0x2001ffff: External SRAM 0 64-128Kb */
 #  define LPC31_EXTSRAM1_PADDR       0x20020000 /* 0x20020000-0x2003ffff: External SRAM 1 64-128Kb */
 #define LPC31_EXTSDRAM0_PSECTION     0x30000000 /* 0x30000000-0x37ffffff: External SDRAM 0 128Mb */
-                                                  /* 0x40000000-0x5fffffff: Reserved */
+                                                /* 0x40000000-0x5fffffff: Reserved */
 #define LPC31_INTC_PSECTION          0x60000000 /* 0x60000000-0x60000fff: Interrupt controller 4Kb */
-                                                  /* 0x60001000-0x6fffffff: Reserved */
+                                                /* 0x60001000-0x6fffffff: Reserved */
 #define LPC31_NAND_PSECTION          0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
-                                                  /* 0x70000800-0xffffffff: Reserved */
-#ifdef CONFIG_LPC31_EXTNAND                    /* End of the physical address space */
+                                                /* 0x70000800-0xffffffff: Reserved */
+#ifdef CONFIG_LPC31_EXTNAND                     /* End of the physical address space */
 #  define LPC31_LAST_PSECTION        (LPC31_NAND_PSECTION + (1 << 20))
 #else
 #  define LPC31_LAST_PSECTION        (LPC31_INTC_PSECTION + (1 << 20))
@@ -94,7 +95,7 @@
 #define LPC31_APB0_SYSCREG_OFFSET    0x00002800 /* SYSCREG block */
 #define LPC31_APB0_IOCONFIG_OFFSET   0x00003000 /* IOCONFIG */
 #define LPC31_APB0_GCU_OFFSET        0x00004000 /* GCU */
-                                    /* 0x00005000    Reserved */
+#define LPC31_APB0_OTP_OFFSET        0x00005000 /* USB OTG */
 #define LPC31_APB0_RNG_OFFSET        0x00006000 /* RNG */
 
 #define LPC31_APB1_TIMER0_OFFSET     0x00000000 /* TIMER0 */
@@ -107,21 +108,21 @@
 
 #define LPC31_APB2_PCM_OFFSET        0x00000000 /* PCM */
 #define LPC31_APB2_LCD_OFFSET        0x00000400 /* LCD */
-                                    /* 0x00000800    Reserved */
+                                  /* 0x00000800    Reserved */
 #define LPC31_APB2_UART_OFFSET       0x00001000 /* UART */
 #define LPC31_APB2_SPI_OFFSET        0x00002000 /* SPI */
-                                    /* 0x00003000    Reserved */
+                                  /* 0x00003000    Reserved */
 
 #define LPC31_APB3_I2SCONFIG_OFFSET  0x00000000 /* I2S System Configuration */
 #define LPC31_APB3_I2STX0_OFFSET     0x00000080 /* I2S TX0 */
 #define LPC31_APB3_I2STX1_OFFSET     0x00000100 /* I2S TX1 */
 #define LPC31_APB3_I2SRX0_OFFSET     0x00000180 /* I2S RX0 */
 #define LPC31_APB3_I2SRX1_OFFSET     0x00000200 /* I2S RX1 */
-                                    /* 0x00000280    Reserved */
+                                  /* 0x00000280    Reserved */
 
 #define LPC31_APB4_DMA_OFFSET        0x00000000 /* DMA */
 #define LPC31_APB4_NAND_OFFSET       0x00000800 /* NAND FLASH Controller */
-                                    /* 0x00001000    Reserved */
+                                  /* 0x00001000    Reserved */
 
 /* Sizes of memory regions in bytes */
 
@@ -141,12 +142,10 @@
 #define LPC31_INTC_SIZE             (4*1024)
 #define LPC31_NAND_SIZE             (2*1024)
 
-#if defined(CONFIG_ARCH_CHIP_LPC3131)
+#ifdef HAVE_INTSRAM1
 #  define LPC31_ISRAM_SIZE        (LPC31_INTSRAM0_SIZE+LPC31_INTSRAM1_SIZE)
-#elif defined(CONFIG_ARCH_CHIP_LPC3130)
-#  define LPC31_ISRAM_SIZE        LPC31_INTSRAM0_SIZE
 #else
-#  error "Unsupported LPC31XX architecture"
+#  define LPC31_ISRAM_SIZE        LPC31_INTSRAM0_SIZE
 #endif
 
 /* Convert size in bytes to number of sections (in Mb). */
@@ -234,7 +233,7 @@
 #  define LPC31_INTC_VSECTION        0x60000000 /* 0x60000000-0x60000fff: Interrupt controller 4Kb */
 #  define LPC31_NAND_VSECTION        0x70000000 /* 0x70000000-0x700007ff: NANDFLASH Ctrl 2Kb */
 #
-#  ifdef CONFIG_LPC31_EXTNAND                  /* End of the virtual address space */
+#  ifdef CONFIG_LPC31_EXTNAND                   /* End of the virtual address space */
 #    define LPC31_LAST_VSECTION      (LPC31_NAND_VSECTION + (1 << 20))
 #  else
 #    define LPC31_LAST_VSECTION      (LPC31_INTC_VSECTION + (1 << 20))
@@ -258,7 +257,8 @@
 
 /* Determine the address of the MMU page table.  We will try to place that page
  * table at the beginng of ISRAM0 if the vectors are at the high address, 0xffff:0000
- * or at the end of ISRAM1 (or ISRAM0 on a LPC3130) if the vectors are at 0x0000:0000
+ * or at the end of ISRAM1 (or ISRAM0 if ISRAM1 is not available in this architecture)
+ * if the vectors are at 0x0000:0000
  *
  * Or... the user may specify the address of the page table explicitly be defining
  * CONFIG_PGTABLE_VADDR and CONFIG_PGTABLE_PADDR in the configuration or board.h file.
@@ -307,10 +307,11 @@
 #    ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
 
        /* In this case, ISRAM0 will be shadowed at address 0x0000:0000.  The page
-        * table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if this is a LPC3130)
+        * table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if this is a ISRAM1 is
+        * not available in this architecture)
         */
 
-#      if CONFIG_ARCH_CHIP_LPC3131
+#      ifdef HAVE_INTSRAM1
 #          define PGTABLE_BASE_PADDR (LPC31_INTSRAM1_PADDR+LPC31_INTSRAM1_SIZE-PGTABLE_SIZE)
 #          define PGTABLE_BASE_VADDR (LPC31_INTSRAM1_VADDR+LPC31_INTSRAM1_SIZE-PGTABLE_SIZE)
 #      else
@@ -328,10 +329,10 @@
 #      endif
 #    else
 
-       /* Otherwise, ISRAM1 (or ISRAM0 for the LPC3130) will be mapped so that
-        * the end of the SRAM region will provide memory for the vectors.  The page
-        * table will then be places at the first 16Kb of ISRAM0 (which will be in
-        * the shadow memory region.
+       /* Otherwise, ISRAM1 (or ISRAM0 for the is ISRAM1 is not available in this
+        * architecture) will be mapped so that the end of the SRAM region will
+        * provide memory for the vectors.  The page table will then be places at
+        * the first 16Kb of ISRAM0 (which will be in the shadow memory region).
         */
 
 #      define PGTABLE_BASE_PADDR     LPC31_SHADOWSPACE_PSECTION
@@ -388,7 +389,7 @@
 #  define LPC31_VECTOR_VADDR      0x00000000
 #  define LPC31_VECTOR_VCOARSE    0x00000000
 #else  /* Vectors located at 0xffff:0000 -- this probably does not work */
-#  if CONFIG_ARCH_CHIP_LPC3131
+#  ifdef HAVE_INTSRAM1
 #    define LPC31_VECTOR_PADDR    (LPC31_INTSRAM1_PADDR+LPC31_INTSRAM1_SIZE-VECTOR_TABLE_SIZE)
 #    define LPC31_VECTOR_VSRAM    (LPC31_INTSRAM1_VADDR+LPC31_INTSRAM1_SIZE-VECTOR_TABLE_SIZE)
 #  else

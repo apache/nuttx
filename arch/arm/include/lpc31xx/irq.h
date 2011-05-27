@@ -67,7 +67,7 @@
 #define LPC31_IRQ_I2STX1   13 /* IRQ14: I2S1 Transmit */
 #define LPC31_IRQ_I2SRX0   14 /* IRQ15: I2S0 Receive */
 #define LPC31_IRQ_I2SRX1   15 /* IRQ16: I2S1 Receive */
-                                /* IRQ17: Reserved */
+                              /* IRQ17: Reserved */
 #define LPC31_IRQ_LCD      17 /* IRQ18: LCD Interface */
 #define LPC31_IRQ_SPISMS   18 /* IRQ19: SPI SMS */
 #define LPC31_IRQ_SPITX    19 /* IRQ20: SPI Transmit */

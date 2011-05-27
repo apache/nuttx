@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/lpc31xx/lpc31_dma.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,8 @@
  ************************************************************************************************/
 
 #include <nuttx/config.h>
+
+#include "chip.h"
 #include "lpc31_memorymap.h"
 
 /************************************************************************************************
@@ -68,19 +70,19 @@
 #define LPC31_DMACHAN10_OFFSET         0x140
 #define LPC31_DMACHAN11_OFFSET         0x160
 
-#define LPC31_DMACHAN_ALT_OFFSET(n)    (0x200+((n)*0x020))
+#define LPC31_DMACHAN_ALT_OFFSET(n)    (0x200+((n)*0x010))
 #define LPC31_DMACHAN0_ALT_OFFSET      0x200
-#define LPC31_DMACHAN1_ALT_OFFSET      0x220
-#define LPC31_DMACHAN2_ALT_OFFSET      0x240
-#define LPC31_DMACHAN3_ALT_OFFSET      0x260
-#define LPC31_DMACHAN4_ALT_OFFSET      0x280
-#define LPC31_DMACHAN5_ALT_OFFSET      0x2a0
-#define LPC31_DMACHAN6_ALT_OFFSET      0x2c0
-#define LPC31_DMACHAN7_ALT_OFFSET      0x2e0
-#define LPC31_DMACHAN8_ALT_OFFSET      0x300
-#define LPC31_DMACHAN9_ALT_OFFSET      0x320
-#define LPC31_DMACHAN10_ALT_OFFSET     0x340
-#define LPC31_DMACHAN11_ALT_OFFSET     0x360
+#define LPC31_DMACHAN1_ALT_OFFSET      0x210
+#define LPC31_DMACHAN2_ALT_OFFSET      0x220
+#define LPC31_DMACHAN3_ALT_OFFSET      0x230
+#define LPC31_DMACHAN4_ALT_OFFSET      0x240
+#define LPC31_DMACHAN5_ALT_OFFSET      0x250
+#define LPC31_DMACHAN6_ALT_OFFSET      0x260
+#define LPC31_DMACHAN7_ALT_OFFSET      0x270
+#define LPC31_DMACHAN8_ALT_OFFSET      0x280
+#define LPC31_DMACHAN9_ALT_OFFSET      0x290
+#define LPC31_DMACHAN10_ALT_OFFSET     0x2a0
+#define LPC31_DMACHAN11_ALT_OFFSET     0x2b0
 
 /* DMA channel virtual base addresses ***********************************************************/
 

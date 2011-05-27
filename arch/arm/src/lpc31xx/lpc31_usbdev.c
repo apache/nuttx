@@ -1,11 +1,12 @@
 /*******************************************************************************
  * arch/arm/src/lpc31xx/lpc31_usbdev.c
  *
- *   Author: Davide Hewson
+ *   Authors: David Hewson
+ *            Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Part of the NuttX OS and based, in part, on the LPC2148 USB driver:
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -396,8 +397,10 @@ static int  lpc31_epdisable(FAR struct usbdev_ep_s *ep);
 static FAR struct usbdev_req_s *lpc31_epallocreq(FAR struct usbdev_ep_s *ep);
 static void lpc31_epfreereq(FAR struct usbdev_ep_s *ep,
               FAR struct usbdev_req_s *);
+#ifdef CONFIG_ARCH_USBDEV_DMA
 static void *lpc31_epallocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes);
 static void lpc313_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf);
+#endif
 static int  lpc31_epsubmit(FAR struct usbdev_ep_s *ep,
               struct usbdev_req_s *req);
 static int  lpc31_epcancel(FAR struct usbdev_ep_s *ep,
