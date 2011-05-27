@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc31xx/chip.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,30 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+#if defined(CONFIG_ARCH_CHIP_LPC3130)
+#  undef  HAVE_INTSRAM1                  /* 96Kb internal SRAM */
+#  define LPC31_NDMACH   12              /* 12 DMA channels */
+#  undef  HAVE_AESENGINE                 /* No AES engine */
+#elif defined(CONFIG_ARCH_CHIP_LPC3131)
+#  define HAVE_INTSRAM1  1               /* 192Kb internal SRAM */
+#  define LPC31_NDMACH   12              /* 12 DMA channels */
+#  undef  HAVE_AESENGINE                 /* No AES engine */
+#elif defined(CONFIG_ARCH_CHIP_LPC3152)
+#  define HAVE_INTSRAM1  1               /* 192Kb internal SRAM */
+#  define LPC31_NDMACH   12              /* 12 DMA channels */
+#  undef  HAVE_AESENGINE                 /* No AES engine */
+#elif defined(CONFIG_ARCH_CHIP_LPC3152)
+#  define HAVE_INTSRAM1  1               /* 192Kb internal SRAM */
+#  define LPC31_NDMACH   12              /* 12 DMA channels */
+#  define HAVE_AESENGINE 1               /* AES engine */
+#  undef  HAVE_AESENGINE                 /* No AES engine */
+#else
+#  error "Unsupported LPC31XX architecture"
+#  undef  HAVE_INTSRAM1                  /* No INTSRAM1 */
+#  define LPC31_NDMACH   0               /* No DMA channels */
+#  undef  HAVE_AESENGINE                 /* No AES engine */
+#endif
 
 /************************************************************************************
  * Public Types

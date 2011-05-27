@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/lpc31xx/lpc31_usbotg.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -254,8 +254,8 @@
 #  define USBDEV_USBCMD_ITC16UF              (16 << USBDEV_USBCMD_ITC_SHIFT) /* 16 micro frames */
 #  define USBDEV_USBCMD_ITC32UF              (32 << USBDEV_USBCMD_ITC_SHIFT) /* 32 micro frames */
 #  define USBDEV_USBCMD_ITC64UF              (64 << USBDEV_USBCMD_ITC_SHIFT) /* 64 micro frames */
+#define USBDEV_USBCMD_ATDTW                  (1 << 14) /* Bit 14: Add dTD trip wire */
 #define USBDEV_USBCMD_SUTW                   (1 << 13) /* Bit 13: Setup trip wire */
-#define USBDEV_USBCMD_ATDTW                  (1 << 12) /* Bit 12: Add dTD trip wire */
 #define USBDEV_USBCMD_RST                    (1 << 1)  /* Bit 1:  1 Controller reset */
 #define USBDEV_USBCMD_RS                     (1 << 0)  /* Bit 0:  0 Run/Stop */
 
@@ -338,7 +338,7 @@
 
 /* Frame index register FRINDEX (address 0x1900014c) -- Host Mode */
 
-#define USBHOST_FRINDEX_FLI_SHIFT            (3)       /* Bits 3-(n+2): Frame list current index */
+#define USBHOST_FRINDEX_FLI_SHIFT            (3)       /* Bits 3-13: Frame list current index */
 #define USBHOST_FRINDEX_FLI_MASK(n)          (0x7ff << ((n)+USBHOST_FRINDEX_FLI_SHIFT-1)
 #define USBHOST_FRINDEX_CUFN_SHIFT           (0)       /* Bits 0-2: Current micro frame number */
 #define USBHOST_FRINDEX_CUFN_MASK            (7 << USBHOST_FRINDEX_CUFN_SHIFT)

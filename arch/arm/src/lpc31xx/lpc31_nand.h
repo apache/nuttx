@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/lpc31xx/lpc31_nand.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,17 @@
 #define LPC31_NAND_IRQSTATUS2_OFFSET    0x48 /* Interrrupt status register (second 32-bits) */
 #define LPC31_NAND_IRQMASK3_OFFSET      0x4c /* Interrupt mask register (second 32-bits) */
 #define LPC31_NAND_IRQSTATUSRAW2_OFFSET 0x50 /* Unmasked register status (second 32-bits) */
+#define LPC31_NAND_AESKEY1_OFFSET       0x54 /* First word of 128-bit AES key (LPC3154 only) */
+#define LPC31_NAND_AESKEY2_OFFSET       0x58 /* Second word of 128-bit AES key (LPC3154 only) */
+#define LPC31_NAND_AESKEY3_OFFSET       0x5c /* Third word of 128-bit AES key (LPC3154 only) */
+#define LPC31_NAND_AESKEY4_OFFSET       0x60 /* Fourth word of 128-bit AES key (LPC3154 only) */
+#define LPC31_NAND_AESIV1_OFFSET        0x64 /* First word of 128-bit initial AES value (LPC3154 only) */
+#define LPC31_NAND_AESIV2_OFFSET        0x68 /* Second word of 128-bit initial AES value (LPC3154 only) */
+#define LPC31_NAND_AESIV3_OFFSET        0x6c /* Third word of 128-bit initial AES value (LPC3154 only) */
+#define LPC31_NAND_AESIV4_OFFSET        0x70 /* Fourth word of 128-bit initial AES value (LPC3154 only) */
+#define LPC31_NAND_AESSTATE_OFFSET      0x74 /* Register to display AES state (LPC3154 only) */
 #define LPC31_NAND_ECCERRSTATUS_OFFSET  0x78 /* ECC error status register */
+#define LPC31_NAND_AESFROMAHB_OFFSET    0x7c /* Enable AES engine from AHB */
 
 /* NAND FLASH controller register (virtual) addresses *******************************************/
 
@@ -96,7 +106,17 @@
 #define LPC31_NAND_IRQSTATUS2           (LPC31_NAND_VBASE+LPC31_NAND_IRQSTATUS2_OFFSET)
 #define LPC31_NAND_IRQMASK3             (LPC31_NAND_VBASE+LPC31_NAND_IRQMASK3_OFFSET)
 #define LPC31_NAND_IRQSTATUSRAW2        (LPC31_NAND_VBASE+LPC31_NAND_IRQSTATUSRAW2_OFFSET)
+#define LPC31_NAND_AESKEY1              (LPC31_NAND_VBASE+LPC31_NAND_AESKEY1_OFFSET)
+#define LPC31_NAND_AESKEY2              (LPC31_NAND_VBASE+LPC31_NAND_AESKEY2_OFFSET)
+#define LPC31_NAND_AESKEY3              (LPC31_NAND_VBASE+LPC31_NAND_AESKEY3_OFFSET)
+#define LPC31_NAND_AESKEY4              (LPC31_NAND_VBASE+LPC31_NAND_AESKEY4_OFFSET)
+#define LPC31_NAND_AESIV1               (LPC31_NAND_VBASE+LPC31_NAND_AESIV1_OFFSET)
+#define LPC31_NAND_AESIV2               (LPC31_NAND_VBASE+LPC31_NAND_AESIV2_OFFSET)
+#define LPC31_NAND_AESIV3               (LPC31_NAND_VBASE+LPC31_NAND_AESIV3_OFFSET)
+#define LPC31_NAND_AESIV4               (LPC31_NAND_VBASE+LPC31_NAND_AESIV4_OFFSET)
+#define LPC31_NAND_AESSTATE             (LPC31_NAND_VBASE+LPC31_NAND_AESSTATE_OFFSET)
 #define LPC31_NAND_ECCERRSTATUS         (LPC31_NAND_VBASE+LPC31_NAND_ECCERRSTATUS_OFFSET)
+#define LPC31_NAND_AESFROMAHB           (LPC31_NAND_VBASE+LPC31_NAND_AESFROMAHB_OFFSET)
 
 /* NAND FLASH controller register bit definitions ***********************************************/
 /* NandIRQStatus1 register description (NandIRQStatus1, address 0x17000800) */
@@ -130,6 +150,9 @@
 #define NAND_IRQSTATUS1_RAM15ERR          (1 << 5)  /* Bit 5:  RAM 1 decoded with 5 error */
 #define NAND_IRQSTATUS1_RAM1UNCORR        (1 << 4)  /* Bit 4:  RAM 1 uncorrectable */
 
+#define NAND_IRQSTATUS1_RAM1AESDONE       (1 << 1)  /* Bit 1:  RAM 1 AES done (LPC3154 only) */
+#define NAND_IRQSTATUS1_RAM0AESDONE       (1 << 0)  /* Bit 0:  RAM 0 AES done (LPC3154 only) */
+
 /* NandIRQMask1 register description (NandIRQMask1, address 0x17000804) */
 
 #define NAND_IRQIRQMASK1_MNANDRYBN3       (1 << 31) /* Bit 31: mNAND_RYBN3 positive edge */
@@ -160,6 +183,9 @@
 #define NAND_IRQIRQMASK1_RAM14ERR         (1 << 6)  /* Bit 6:  RAM 1 decoded with 4 error */
 #define NAND_IRQIRQMASK1_RAM15ERR         (1 << 5)  /* Bit 5:  RAM 1 decoded with 5 error */
 #define NAND_IRQIRQMASK1_RAM1UNCORR       (1 << 4)  /* Bit 4:  RAM 1 uncorrectable */
+
+#define NAND_IRQIRQMASK1_RAM1AESDONE      (1 << 1)  /* Bit 1:  RAM 1 AES done (LPC3154 only) */
+#define NAND_IRQIRQMASK1_RAM0AESDONE      (1 << 0)  /* Bit 0:  RAM 0 AES done (LPC3154 only) */
 
 /* NandIRQStatusRaw1 register description (NandIRQStatusRaw1, address 0x17000808) */
 
@@ -192,6 +218,9 @@
 #define NAND_IRQSTATUSRAW1_RAM15ERR       (1 << 5)  /* Bit 5:  RAM 1 decoded with 5 error */
 #define NAND_IRQSTATUSRAW1_RAM1UNCORR     (1 << 4)  /* Bit 4:  RAM 1 uncorrectable */
 
+#define NAND_IRQSTATUSRAW1_RAM1AESDONE    (1 << 1)  /* Bit 1:  RAM 1 AES done (LPC3154 only) */
+#define NAND_IRQSTATUSRAW1_RAM0AESDONE    (1 << 0)  /* Bit 0:  RAM 0 AES done (LPC3154 only) */
+
 /* NandConfig register description (NandConfig, address 0x1700080c) */
 
 #define NAND_CONFIG_ECC_MODE              (1 << 12) /* Bit 12: ECC mode 0 */
@@ -209,6 +238,7 @@
 #  define NAND_CONFIG_LC_2WAITSTATES      (2 << NAND_CONFIG_LC_SHIFT)
 #define NAND_CONFIG_ES                    (1 << 4)  /* Bit 4:  Endianess setting */
 #define NAND_CONFIG_DE                    (1 << 3)  /* Bit 3:  DMA external enable */
+#define NAND_CONFIG_AO                    (1 << 2)  /* Bit 2:  AES on (LPC3154 only) */
 #define NAND_CONFIG_WD                    (1 << 1)  /* Bit 1:  Wide device */
 #define NAND_CONFIG_EC                    (1 << 0)  /* Bit 0:  ECC on */
 
@@ -355,13 +385,29 @@
 #define NAND_IRQSTATUSRAW2_RAM1BUSY       (1 << 1)  /* Bit 1:  RAM1 access while busy */
 #define NAND_IRQSTATUSRAW2_RAM0BUSY       (1 << 0)  /* Bit 0:  RAM0 access while busy */
 
-/* NandECCErrStatus register description (NandECCErrStatus, address 0x1700 0878) */
+/* First-fourth words of 128-bit AES key (32-bit values, no bit fields -- LPC3154 only) */
+/* First-fourth words of 128-bit initial AES value (32-bit values, no bit fields -- LPC3154 only) */
 
+/* Register to display AES state (LPC3154 only) */
+
+#define NAND_AESSTATE_SHIFT               (0)       /* Bits 0-1:  AES state */
+#define NAND_AESSTATE_MASK                (3 << NAND_AESSTATE_SHIFT)
+#  define NAND_AESSTATE_BUSY              (0 << NAND_AESSTATE_SHIFT) /* AES state machine busy */
+#  define NAND_AESSTATE_KEYSETUP          (1 << NAND_AESSTATE_SHIFT) /* AES key setup needed */
+#  define NAND_AESSTATE_IDLE              (3 << NAND_AESSTATE_SHIFT) /* AES module is IDLE */
+
+/* NandECCErrStatus register description (NandECCErrStatus, address 0x1700 0878) */
 
 #define NAND_ECCERRSTATUS_NERR1_SHIFT     (4)       /* Bits 4-7: Number of errors in RAM1 */
 #define NAND_ECCERRSTATUS_NERR1_MASK      (0x0f << NAND_ECCERRSTATUS_NERR1_SHIFT)
 #define NAND_ECCERRSTATUS_NERR0_SHIFT     (0)       /* Bits 0-3: Number of errors in RAM0 */
 #define NAND_ECCERRSTATUS_NERR0_MASK      (0x0f << NAND_ECCERRSTATUS_NERR0_SHIFT)
+
+/* Enable AES engine from AHB */
+
+#define NAND_AESFROMAHB_MODE              (1 << 7)  /* Bit 7:  Set AES from AHB mode */
+#define NAND_AESFROMAHB_DECRYPTRAM1       (1 << 1)  /* Bit 1:  Decrypt RAM1 */
+#define NAND_AESFROMAHB_DECRYPTRAM0       (1 << 0)  /* Bit 0:  Decrypt RAM0 */
 
 /************************************************************************************************
  * Public Types
