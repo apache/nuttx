@@ -40,6 +40,7 @@
  * Included Files
  **************************************************************************/
 
+#include <nuttx/config.h>
 #include <sys/types.h>
 #include <nuttx/irq.h>
 
@@ -64,7 +65,13 @@
 # define JB_PC  (5)
 #endif /* __ASSEMBLY__ */
 
-#define SIM_HEAP_SIZE (4*1024*1024)
+/* Size of the simulated heap */
+
+#if CONFIG_MM_SMALL
+#  define SIM_HEAP_SIZE (64*1024)
+#else
+#  define SIM_HEAP_SIZE (4*1024*1024)
+#endif
 
 /* These definitions characterize the compressed filesystem image */
 

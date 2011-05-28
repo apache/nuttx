@@ -81,5 +81,5 @@ static uint8_t sim_heap[SIM_HEAP_SIZE];
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
   *heap_start = sim_heap;
-  *heap_size = SIM_HEAP_SIZE;
+  *heap_size  = SIM_HEAP_SIZE;
 }

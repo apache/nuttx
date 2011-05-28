@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_initialize.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,7 +124,7 @@ void mm_initialize(FAR void *heapstart, size_t heapsize)
     }
 
   /* Initialize the malloc semaphore to one (to support one-at-
-   * a-time access to private data sets.
+   * a-time access to private data sets).
    */
 
   mm_seminitialize();
@@ -155,20 +155,29 @@ void mm_initialize(FAR void *heapstart, size_t heapsize)
 void mm_addregion(FAR void *heapstart, size_t heapsize)
 {
   FAR struct mm_freenode_s *node;
-  size_t heapbase;
-  size_t heapend;
+  uintptr_t heapbase;
+  uintptr_t heapend;
 #if CONFIG_MM_REGIONS > 1
   int IDX = g_nregions;
 #else
 # define IDX 0
 #endif
 
+  /* If the MCU handles wide addresses but the memory manager
+   * is configured for a small heap, then verify that the caller
+   * not doing something crazy.
+   */
+
+#if defined(CONFIG_MM_SMALL) && !defined(CONFIG_SMALL_MEMORY)
+  DEBUGASSERT(heapsize <= MMSIZE_MAX+1);
+#endif
+
   /* Adjust the provide heap start and size so that they are
    * both aligned with the MM_MIN_CHUNK size.
    */
 
-  heapbase = MM_ALIGN_UP((size_t)heapstart);
-  heapend  = MM_ALIGN_DOWN((size_t)heapstart + (size_t)heapsize);
+  heapbase = MM_ALIGN_UP((uintptr_t)heapstart);
+  heapend  = MM_ALIGN_DOWN((uintptr_t)heapstart + (uintptr_t)heapsize);
   heapsize = heapend - heapbase;
 
   mlldbg("Region %d: base=%p size=%u\n", IDX+1, heapstart, heapsize);

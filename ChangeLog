@@ -1548,7 +1548,7 @@
 	* sched/atexit.c and sched/exit.c: The atexit function is not frequently
 	  used.  In order to save a few bytes, it is now conditioned on
 	  CONFIG_SCHED_ATEXIT.  It your application is currently using atexit(),
-	  you will need to add CONFIG_SCHED_ATEXT to your configuration file.
+	  you will need to add CONFIG_SCHED_ATEXIT to your configuration file.
 	* drivers/net/slip.c: Add a SLIP driver (untested on initial check-in).
 	* configs/olimex-lpc1766stk/slip-httpd: An example that uses SLIP to
 	  provide a serial-port based THTTPD web server.
@@ -1770,7 +1770,22 @@
       the MPLAB debugger on PIC32; I will need to get a PICkit 3).
 	* drivers/net/e1000.c/h: A PCI-based E1000 ethernet driver submitted
 	  by Yu Qiang.
-	* lib/net/lib_inetaddr.c: An implementatino of the inet_addr() function
-	 submitted y Yu Qiang.
+	* lib/net/lib_inetaddr.c: An implementation of the inet_addr() function
+	  submitted by Yu Qiang.
 	* arch/arm/src/lpc31xx and arch/arm/include/lpc31xx:  Renamed from lpc313x
 	  to make name space for other famiy members.
+	* arch/arm/*/lpc31xx: Added support for the LPC315x family (untested).
+	* sched/task_exithook.c: Functionality performed when a task exits or is
+	  deleted has been moved to a common file task_exithook.c.  Now exit()
+	  functionality (like flushing I/O and calling registered atexit()
+	  functions, etc.) will be performed when a task is deleted as well.
+	* mm/:  Added support for CONFIG_MM_SMALL. Each memory allocation has a
+	  small allocation overhead.  The size of that overhead is normally
+	  determined by the "width" of the address support by the MCU.  MCUs
+	  that support 16-bit addressability have smaller overhead than devices
+	  that support 32-bit addressability.  However, there are many MCUs
+	  that support 32-bit addressability *but* have internal SRAM of size
+	  less than or equal to 64Kb.  In this case, CONFIG_MM_SMALL can be
+	  defined so that those MCUs will also benefit from the smaller, 16-
+	  bit-based allocation overhead.
+

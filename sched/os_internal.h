@@ -265,6 +265,7 @@ extern void task_start(void);
 extern int  task_schedsetup(FAR _TCB *tcb, int priority, start_t start,
                             main_t main);
 extern int  task_argsetup(FAR _TCB *tcb, const char *name, const char *argv[]);
+extern void task_exithook(FAR _TCB *tcb, int status);
 extern int  task_deletecurrent(void);
 #ifndef CONFIG_CUSTOM_STACK
 extern int  kernel_thread(const char *name, int priority,

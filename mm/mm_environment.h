@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_environment.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,6 +76,7 @@
 # define FAR                        /* Normally in compiler.h */
 # define CONFIG_CPP_HAVE_VARARGS 1  /* Normally in compiler.h */
 # define CONFIG_MM_REGIONS 2        /* Normally in config.h */
+# undef  CONFIG_MM_SMALL            /* Normally in config.h */
 # define CONFIG_CAN_PASS_STRUCTS 1  /* Normally in config.h */
 # undef  CONFIG_SMALL_MEMORY        /* Normally in config.h */
 

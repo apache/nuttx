@@ -261,6 +261,15 @@ defconfig -- This is a configuration file similar to the Linux
 		  regions of memory to allocate from, this specifies the
 		  number of memory regions that the memory manager must
 		  handle and enables the API mm_addregion(start, end);
+		CONFIG_MM_SMALL - Each memory allocation has a small allocation
+		  overhead.  The size of that overhead is normally determined by
+		  the "width" of the address support by the MCU.  MCUs that support
+		  16-bit addressability have smaller overhead than devices that
+		  support 32-bit addressability.  However, there are many MCUs
+		  that support 32-bit addressability *but* have internal SRAM
+		  of size less than or equal to 64Kb.  In this case, CONFIG_MM_SMALL
+		  can be defined so that those MCUs will also benefit from the
+		  smaller, 16-bit-based allocation overhead.
 		CONFIG_MSEC_PER_TICK - The default system timer is 100Hz
 		  or MSEC_PER_TICK=10.  This setting may be defined to
 		  inform NuttX that the processor hardware is providing

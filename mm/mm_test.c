@@ -41,6 +41,7 @@
 
 #define FAR
 #define CONFIG_MM_REGIONS 2
+#undef  CONFIG_MM_SMALL
 #define CONFIG_CAN_PASS_STRUCTS 1
 #undef  CONFIG_SMALL_MEMORY
 

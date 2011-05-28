@@ -1,7 +1,7 @@
 /************************************************************************
  * mm/mm_internal.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,24 @@
 /************************************************************************
  * Pre-processor Definitions
  ************************************************************************/
+/* Configuration ********************************************************/
+/* If the MCU has a small (16-bit) address capability, then we will use
+ * a smaller chunk header that contains 16-bit size/offset information.
+ * We will also use the smaller header on MCUs with wider addresses if
+ * CONFIG_MM_SMALL is selected.  This configuration is common with MCUs
+ * that have a large FLASH space, but only a tiny internal SRAM.
+ */
 
+#ifdef CONFIG_SMALL_MEMORY
+  /* If the MCU has a small addressing capability, then for the smaller
+   * chunk header.
+   */
+
+#  undef  CONFIG_MM_SMALL
+#  define CONFIG_MM_SMALL 1
+#endif
+
+/* Chunk Header Definitions *********************************************/
 /* These definitions define the characteristics of allocator
  *
  * MM_MIN_SHIFT is used to define MM_MIN_CHUNK.
@@ -61,7 +78,7 @@
  *   losses.
  */
 
-#ifdef CONFIG_SMALL_MEMORY
+#ifdef CONFIG_MM_SMALL
 # define MM_MIN_SHIFT      4  /* 16 bytes */
 # define MM_MAX_SHIFT     15  /* 32 Kb */
 #else
@@ -84,7 +101,7 @@
  * an allocated chunk.
  */
 
-#ifdef CONFIG_SMALL_MEMORY
+#ifdef CONFIG_MM_SMALL
 # define MM_ALLOC_BIT    0x8000
 #else
 # define MM_ALLOC_BIT    0x80000000
@@ -96,18 +113,30 @@
  * Public Types
  ************************************************************************/
 
+/* Determine the size of the chunk size/offset type */
+
+#ifdef CONFIG_MM_SMALL
+   typedef uint16_t mmsize_t;
+#  define MMSIZE_MAX 0xffff
+#else
+   typedef size_t mmsize_t;
+#  define MMSIZE_MAX SIZE_MAX
+#endif
+
 /* This describes an allocated chunk.  An allocated chunk is
- * distinguished from a free chunk by bit 31 of the 'precding'
- * chunk size.  If set, then this is an allocated chunk.
+ * distinguished from a free chunk by bit 15/31 of the 'preceding' chunk
+ * size.  If set, then this is an allocated chunk.
  */
 
 struct mm_allocnode_s
 {
-  size_t size;           /* Size of this chunk */
-  size_t preceding;      /* Size of the preceding chunk */
+  mmsize_t size;           /* Size of this chunk */
+  mmsize_t preceding;      /* Size of the preceding chunk */
 };
 
-#ifdef CONFIG_SMALL_MEMORY
+/* What is the size of the allocnode? */
+
+#ifdef CONFIG_MM_SMALL
 # define SIZEOF_MM_ALLOCNODE   4
 #else
 # define SIZEOF_MM_ALLOCNODE   8
@@ -120,18 +149,25 @@ struct mm_allocnode_s
 
 struct mm_freenode_s
 {
-  size_t size;                     /* Size of this chunk */
-  size_t preceding;                /* Size of the preceding chunk */
+  mmsize_t size;                   /* Size of this chunk */
+  mmsize_t preceding;              /* Size of the preceding chunk */
   FAR struct mm_freenode_s *flink; /* Supports a doubly linked list */
   FAR struct mm_freenode_s *blink;
 };
 
-#ifdef CONFIG_SMALL_MEMORY
-# define SIZEOF_MM_FREENODE     8
+/* Free is the size of the freenode */
+
+#ifdef CONFIG_MM_SMALL
+#  ifdef CONFIG_SMALL_MEMORY
+#     define SIZEOF_MM_FREENODE 8
+#  else
+#     define SIZEOF_MM_FREENODE 12
+#  endif
 #else
-# define SIZEOF_MM_FREENODE    16
+# define SIZEOF_MM_FREENODE     16
 #endif
-#define CHECK_FREENODE_SIZE    \
+
+#define CHECK_FREENODE_SIZE \
   DEBUGASSERT(sizeof(struct mm_freenode_s) == SIZEOF_MM_FREENODE)
 
 /* Normally defined in stdlib.h */

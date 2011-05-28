@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/exit.c
+ * sched/task_exithook.c
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,11 @@
 #include <unistd.h>
 #include <debug.h>
 #include <errno.h>
+
 #include <nuttx/fs.h>
+
 #include "os_internal.h"
+#include "sig_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -75,32 +78,80 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: exit
+ * Function: task_hook
  *
  * Description:
- *   The exit() function causes normal process termination and the value of
- *   status & 0377 to be returned to the parent.
+ *   This function implements some of the internal logic of exit() and
+ *   task_delete().  This function performs some cleanup and other actions
+ *   required when a task exists:
  *
- *   All functions registered with atexit() and on_exit() are called, in the
- *   reverse order of their registration.
+ *   - All open streams are flushed and closed.
+ *   - All functions registered with atexit() and on_exit() are called, in
+ *     the reverse order of their registration.
  *
- *   All open streams are flushed and closed.
+ *   When called from exit(), the tcb still resides at the head of the ready-
+ *   to-run list.  The following logic is safe because we will not be
+ *   returning from the exit() call.
+ *
+ *   When called from task_delete() we are operating on a different thread;
+ *   on the thread that called task_delete().  In this case, task_delete
+ *   will have already removed the tcb from the ready-to-run list to prevent
+ *   any further action on this task.
  *
  ****************************************************************************/
 
-void exit(int status)
+void task_exithook(FAR _TCB *tcb, int status)
 {
-  _TCB *tcb = (_TCB*)g_readytorun.head;
+  /* Inform the instrumentation layer that the task has stopped */
 
-  /* Only the lower 8-bits of status are used */
+  sched_note_stop(tcb);
 
-  status &= 0xff;
+  /* Flush all streams (File descriptors will be closed when
+   * the TCB is deallocated).
+   */
 
-  /* Perform common task termination logic */
+#if CONFIG_NFILE_STREAMS > 0
+  (void)lib_flushall(tcb->streams);
+#endif
 
-  task_exithook(tcb, status);
+  /* Deallocate anything left in the TCB's queues */
 
-  /* Then "really" exit.  Only the lower 8 bits of the exit status are used. */
+#ifndef CONFIG_DISABLE_SIGNALS
+  sig_cleanup(tcb); /* Deallocate Signal lists */
+#endif
 
-  _exit(status);
+  /* Wakeup any tasks waiting for this task to exit */
+
+#ifdef CONFIG_SCHED_WAITPID /* Experimental */
+  while (tcb->exitsem.semcount < 0)
+    {
+      /* "If more than one thread is suspended in waitpid() awaiting
+       *  termination of the same process, exactly one thread will return
+       *  the process status at the time of the target process termination." 
+       *  Hmmm.. what do we return to the others?
+       */
+
+      if (tcb->stat_loc)
+        {
+          *tcb->stat_loc = status << 8;
+           tcb->stat_loc = NULL;
+        }
+
+      /* Wake up the thread */
+
+      sem_post(&tcb->exitsem);
+    }
+#endif
+
+  /* If an exit function was registered, call it now.  NOTE:  In the case
+   * of task_delete(), the exit function will *not* be called on the thread
+   * execution of the task being deleted!
+   */
+
+#ifdef CONFIG_SCHED_ATEXIT
+  if (tcb->exitfunc)
+    {
+      (*tcb->exitfunc)();
+    }
+#endif
 }

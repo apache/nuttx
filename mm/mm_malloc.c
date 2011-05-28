@@ -199,6 +199,6 @@ FAR void *malloc(size_t size)
     }
 
   mm_givesemaphore();
-  mvdbg("Allocated %p\n", ret);
+  mvdbg("Allocated %p, size %d\n", ret, size);
   return ret;
 }

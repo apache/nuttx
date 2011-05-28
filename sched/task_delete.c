@@ -140,14 +140,9 @@ int task_delete(pid_t pid)
       PANIC(OSERR_BADDELETESTATE);
     }
 
-  saved_state = irqsave();
-
-  /* Inform the instrumentation layer that the task has stopped */
-
-  sched_note_stop(dtcb);
-
   /* Remove the task from the OS's tasks lists. */
 
+  saved_state = irqsave();
   dq_rem((FAR dq_entry_t*)dtcb, (dq_queue_t*)g_tasklisttable[dtcb->task_state].list);
   dtcb->task_state = TSTATE_TASK_INVALID;
   irqrestore(saved_state);
@@ -156,11 +151,12 @@ int task_delete(pid_t pid)
 
   sched_unlock();
 
-  /* Deallocate anything left in the TCB's queues */
+  /* Perform common task termination logic (flushing streams, calling
+   * functions registered by at_exit/on_exit, etc.).  I suppose EXIT_SUCCESS
+   * is an appropriate return value???
+   */
 
-#ifndef CONFIG_DISABLE_SIGNALS
-  sig_cleanup(dtcb); /* Deallocate Signal lists */
-#endif
+  task_exithook(dtcb, EXIT_SUCCESS);
 
   /* Deallocate its TCB */
 

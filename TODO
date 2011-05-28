@@ -1,11 +1,11 @@
-NuttX TODO List (Last updated May 14, 2011)
+NuttX TODO List (Last updated May 28, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
 
   (5)  Task/Scheduler (sched/)
   (1)  On-demand paging (sched/)
-  (2)  Memory Managment (mm/)
+  (1)  Memory Managment (mm/)
   (1)  Signals (sched/, arch/)
   (1)  pthreads (sched/)
   (1)  C++ Support
@@ -40,7 +40,7 @@ nuttx/
 apps/
 
   (5)  Network Utilities (apps/netutils/)
-  (4)  NuttShell (NSH) (apps/nshlib)
+  (5)  NuttShell (NSH) (apps/nshlib)
   (3)  Other Applications & Tests (apps/examples/)
 
 o Task/Scheduler (sched/)
@@ -51,13 +51,12 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Medium, required for good emulation of process/pthread model.
 
-  Description: atexit() supports registration of one function called on exit().
-               Should task_delete() also cause atexit() function to be called?
-               Update: atexit() is only built into the system if CONFIG_SCHED_ATEXT
-               is defined in the configuration.
+  Description: atexit() supports registration of only single function called on
+               exit().  It should support multiple functions registered by atexit()
+               or onexit() and these should be called in reverse order of
+               registration when the task exits.
   Status:      Open
-  Priority:    Low, task_delete() is non-standard and its behavior is
-               unspecified.
+  Priority:    Low
 
   Description: Implement sys/mman.h and functions
   Status:      Open
@@ -120,13 +119,6 @@ o Memory Managment (mm/)
   Status:      Open
   Priority:    Medium/Low, a good feature to prevent memory leaks but would
                have negative impact on memory usage and code size.
-
-  Description: Current logic adapts size_t for 16-bit address machines vs.
-               32-bit address machines.  But a small memory option should also
-               be provided so that the small offset option can be used with
-               32-bit machines that have small RAM memories (like the lpc2148)
-  Status:      Open
-  Priority:    High, a good feature enhancement.
 
 o Signals (sched/, arch/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -329,7 +321,7 @@ o Network (net/, drivers/net)
   Description: The interfaces used to leave/join IGMP multicast groups is non-standard.
                RFC3678 (IGMPv3) suggests ioctl() commands to do this (SIOCSIPMSFILTER) but
                also status that those APIs are historic.  NuttX implements these ioctl
-               commnands, but is non-standard because:  (1) It does not support IGMPv3, and
+               commands, but is non-standard because:  (1) It does not support IGMPv3, and
                (2) it looks up drivers by their device name (eg., "eth0") vs IP address.
 
                Linux uses setsockopt() to control multicast group membership using the
@@ -1195,6 +1187,13 @@ o NuttShell (NSH) (apps/nshlib)
                logic, it is like non-functional.
   Status:      Open
   Priority:    Med-High
+
+  Descripton:  The ifconfig command will not behave correctly is an interface
+               is provided and there are multiple interfaces.  It should only
+               show status for the single interface on the command line; it will
+               still show status for all interfaces.
+  Status:      Open
+  Priority:    Low (multiple network interfaces not fully supported yet anyway).
 
   Description: Add support to NSH to run NXFLAT programs from a ROMFS file system
   Status:      Open

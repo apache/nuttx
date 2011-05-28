@@ -137,7 +137,7 @@ typedef union entry_u entry_t;
  * (if registered via atexit()).
  */
 
-#ifdef CONFIG_SCHED_ATEXT
+#ifdef CONFIG_SCHED_ATEXIT
 typedef void (*exitfunc_t)(void);
 #endif
 
@@ -184,7 +184,7 @@ struct _TCB
   pid_t    pid;                          /* This is the ID of the thread        */
   start_t  start;                        /* Thread start function               */
   entry_t  entry;                        /* Entry Point into the thread         */
-#ifdef CONFIG_SCHED_ATEXT
+#ifdef CONFIG_SCHED_ATEXIT
   exitfunc_t exitfunc;                   /* Called if exit is called.           */
 #endif
 #ifdef CONFIG_SCHED_WAITPID /* Experimental */

@@ -94,7 +94,7 @@ FAR void *memalign(size_t alignment, size_t size)
    * The do not include SIZEOF_MM_ALLOCNODE.
    */
 
-  size      = MM_ALIGN_UP(size);   /* Make mutliples of our granule size */
+  size      = MM_ALIGN_UP(size);   /* Make multiples of our granule size */
   allocsize = size + 2*alignment;  /* Add double full alignment size */
 
   /* Then malloc that size */

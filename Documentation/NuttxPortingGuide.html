@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 25, 2011</p>
+      <p>Last Updated: May 28, 2011</p>
     </td>
   </tr>
 </table>
@@ -3261,6 +3261,17 @@ build
     regions of memory to allocate from, this specifies the
     number of memory regions that the memory manager must
     handle and enables the API mm_addregion(start, end);
+  </li>
+  <li>
+    <code>CONFIG_MM_SMALL</code>: Each memory allocation has a small allocation
+    overhead.  The size of that overhead is normally determined by
+    the &quot;width&quot; of the address support by the MCU.  MCUs that support
+    16-bit addressability have smaller overhead than devices that
+    support 32-bit addressability.  However, there are many MCUs
+    that support 32-bit addressability <i>but</i> have internal SRAM
+    of size less than or equal to 64Kb.  In this case, CONFIG_MM_SMALL
+    can be defined so that those MCUs will also benefit from the
+    smaller, 16-bit-based allocation overhead.
   </li>
   <li>
     <code>CONFIG_MSEC_PER_TICK</code>: The default system timer is 100Hz
