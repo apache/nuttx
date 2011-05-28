@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 25, 2011</p>
+      <p>Last Updated: May 28, 2011</p>
     </td>
   </tr>
 </table>
@@ -2313,8 +2313,24 @@ nuttx-6.4 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       the MPLAB debugger on PIC32; I will need to get a PICkit 3).
     * drivers/net/e1000.c/h: A PCI-based E1000 ethernet driver submitted
       by Yu Qiang.
-    * lib/net/lib_inetaddr.c: An implementatino of the inet_addr() function
-     submitted y Yu Qiang.
+    * lib/net/lib_inetaddr.c: An implementation of the inet_addr() function
+      submitted by Yu Qiang.
+    * arch/arm/src/lpc31xx and arch/arm/include/lpc31xx:  Renamed from lpc313x
+      to make name space for other famiy members.
+    * arch/arm/*/lpc31xx: Added support for the LPC315x family (untested).
+    * sched/task_exithook.c: Functionality performed when a task exits or is
+      deleted has been moved to a common file task_exithook.c.  Now exit()
+      functionality (like flushing I/O and calling registered atexit()
+      functions, etc.) will be performed when a task is deleted as well.
+    * mm/:  Added support for CONFIG_MM_SMALL. Each memory allocation has a
+      small allocation overhead.  The size of that overhead is normally
+      determined by the &quot;width&quot; of the address support by the MCU.  MCUs
+      that support 16-bit addressability have smaller overhead than devices
+      that support 32-bit addressability.  However, there are many MCUs
+      that support 32-bit addressability *but* have internal SRAM of size
+      less than or equal to 64Kb.  In this case, CONFIG_MM_SMALL can be
+      defined so that those MCUs will also benefit from the smaller, 16-
+      bit-based allocation overhead.
 
 apps-6.4 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
