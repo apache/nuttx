@@ -62,6 +62,7 @@ extern "C" {
 
 EXTERN char  *strchr(const char *s, int c);
 EXTERN FAR char *strdup(const char *s);
+EXTERN FAR char *strndup(FAR const char *s, size_t size);
 EXTERN const char *strerror(int);
 EXTERN size_t strlen(const char *);
 EXTERN size_t strnlen(const char *, size_t);

@@ -155,7 +155,7 @@ struct mm_freenode_s
   FAR struct mm_freenode_s *blink;
 };
 
-/* Free is the size of the freenode */
+/* What is the size of the freenode? */
 
 #ifdef CONFIG_MM_SMALL
 #  ifdef CONFIG_SMALL_MEMORY

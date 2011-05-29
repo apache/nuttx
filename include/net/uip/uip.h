@@ -535,8 +535,8 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
   (((in_addr_t)(addr1) & (in_addr_t)(mask)) == \
    ((in_addr_t)(addr2) & (in_addr_t)(mask)))
 #else
-extern bool uip_ipaddr_maskcmp(uip_addr_t addr1, uip_addr_t addr2,
-                               uip_addr_t mask);
+extern bool uip_ipaddr_maskcmp(uip_ipaddr_t addr1, uip_ipaddr_t addr2,
+                               uip_ipaddr_t mask);
 #endif
 
 /* Mask out the network part of an IP address.

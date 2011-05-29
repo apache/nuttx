@@ -1788,4 +1788,5 @@
 	  less than or equal to 64Kb.  In this case, CONFIG_MM_SMALL can be
 	  defined so that those MCUs will also benefit from the smaller, 16-
 	  bit-based allocation overhead.
+	* lib/string/lib_strndup.c: Add standard strndup() library function.
 
