@@ -37,8 +37,8 @@
 
 ifeq ($(CONFIG_NET),y)
 SOCK_ASRCS	=
-SOCK_CSRCS	= socket.c bind.c connect.c sendto.c recv.c recvfrom.c \
-		  net_sockets.c net_close.c net_dup.c net_dup2.c net_clone.c \
+SOCK_CSRCS	= bind.c connect.c getsockname.c recv.c recvfrom.c socket.c \
+		  sendto.c net_sockets.c net_close.c net_dup.c net_dup2.c net_clone.c \
 		  net_vfcntl.c
 
 ifeq ($(CONFIG_NET_TCP),y)

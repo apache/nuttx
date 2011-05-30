@@ -1789,4 +1789,5 @@
 	  defined so that those MCUs will also benefit from the smaller, 16-
 	  bit-based allocation overhead.
 	* lib/string/lib_strndup.c: Add standard strndup() library function.
-
+	* net/getsockname.c: Added standard getsockname() to return the local
+	  address associated with a socket.

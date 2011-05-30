@@ -196,6 +196,9 @@ EXTERN int setsockopt(int sockfd, int level, int option,
 EXTERN int getsockopt(int sockfd, int level, int option,
                       FAR void *value, FAR socklen_t *value_len);
 
+EXTERN int getsockname(int sockfd, FAR struct sockaddr *addr,
+                       FAR socklen_t *addrlen);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
