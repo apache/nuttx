@@ -125,6 +125,7 @@ EXTERN int    printf(const char *format, ...);
 EXTERN int    puts(FAR const char *s);
 EXTERN int    rename(FAR const char *oldpath, FAR const char *newpath);
 EXTERN int    sprintf(FAR char *buf, const char *format, ...);
+EXTERN int    asprintf (FAR char **ptr, const char *fmt, ...);
 EXTERN int    snprintf(FAR char *buf, size_t size, const char *format, ...);
 EXTERN int    sscanf(const char *buf, const char *fmt, ...);
 

@@ -1791,3 +1791,5 @@
 	* lib/string/lib_strndup.c: Add standard strndup() library function.
 	* net/getsockname.c: Added standard getsockname() to return the local
 	  address associated with a socket.
+	* lib/stdio/lib_asprintf.c: Add asprintf()
+
