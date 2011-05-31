@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/include/limits.h
+ * arch/avr/include/avr32/types.h
  *
  *   Copyright (C) 2010, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,24 +33,63 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_INCLUDE_LIMITS_H
-#define __ARCH_AVR_INCLUDE_LIMITS_H
+/* This file should never be included directed but, rather, only indirectly
+ * through stdint.h
+ */
+
+#ifndef __ARCH_AVR_INCLUDE_AVR32_TYPES_H
+#define __ARCH_AVR_INCLUDE_AVR32_TYPES_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Include AVR architecture-specific limits */
+/****************************************************************************
+ * Type Declarations
+ ****************************************************************************/
 
-#ifdef CONFIG_ARCH_AVR32
-# include <arch/avr32/limits.h>
-#else
-# include <arch/avr/limits.h>
-#endif
+#ifndef __ASSEMBLY__
 
-#endif /* __ARCH_AVR_INCLUDE_LIMITS_H */
+/* These are the sizes of the standard integer types.  NOTE that these type
+ * names have a leading underscore character.  This file will be included
+ * (indirectly) by include/stdint.h and typedef'ed to the final name without
+ * the underscore character.  This roundabout way of doings things allows
+ * the stdint.h to be removed from the include/ directory in the event that
+ * the user prefers to use the definitions provided by their toolchain header
+ * files
+ */
+
+typedef signed char        _int8_t;
+typedef unsigned char      _uint8_t;
+
+typedef signed short       _int16_t;
+typedef unsigned short     _uint16_t;
+
+typedef signed int         _int32_t;
+typedef unsigned int       _uint32_t;
+
+typedef signed long long   _int64_t;
+typedef unsigned long long _uint64_t;
+#define __INT64_DEFINED
+
+/* A pointer is 4 bytes */
+
+typedef signed int         _intptr_t;
+typedef unsigned int       _uintptr_t;
+
+/* This is the size of the interrupt state save returned by irqsave(). */
+
+typedef unsigned int       irqstate_t;
+
+#endif /* __ASSEMBLY__ */
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#endif /* __ARCH_AVR_INCLUDE_AVR32_TYPES_H */
 

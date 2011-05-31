@@ -189,11 +189,6 @@ static inline void irqrestore(irqstate_t flags)
     }
 }
 
-static inline void system_call3(unsigned int nbr, uintptr_t parm1,
-			                    uintptr_t parm2, uintptr_t parm3)
-{
-  /* To be provided */
-}
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
