@@ -1,7 +1,7 @@
-/****************************************************************************
- * arch/avr/include/types.h
+/************************************************************************************
+ * arch/avr/src/atmega/chip.h
  *
- *   Copyright (C) 2010, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,38 +31,45 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through stdint.h
- */
+#ifndef __ARCH_AVR_SRC_ATMEGA_CHIP_H
+#define __ARCH_AVR_SRC_ATMEGA_CHIP_H
 
-#ifndef __ARCH_AVR_INCLUDE_TYPES_H
-#define __ARCH_AVR_INCLUDE_TYPES_H
-
-/****************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************************/
 
-/* Include AVR architecture-specific types definitions */
+#include <nuttx/config.h>
 
-#ifdef CONFIG_ARCH_AVR32
-# include <arch/avr32/types.h>
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/* Define features for supported chip in the ATMEGA family */
+
+#if 0
 #else
-# include <arch/avr/types.h>
+#  error "Unsupported AVR chip"
 #endif
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+/* Include only the memory map.  Other chip hardware files should then include this
+ * file for the proper setup
+ */
 
-/****************************************************************************
- * Type Declarations
- ****************************************************************************/
+#include "atmega_memorymap.h"
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
 
-#endif /* __ARCH_AVR_INCLUDE_TYPES_H */
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+#endif /* __ARCH_AVR_SRC_ATMEGA_CHIP_H */
 

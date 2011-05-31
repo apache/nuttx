@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/avr/include/types.h
+ * arch/avr/include/avr/irq.h
  *
- *   Copyright (C) 2010, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,35 +34,104 @@
  ****************************************************************************/
 
 /* This file should never be included directed but, rather, only indirectly
- * through stdint.h
+ * through nuttx/irq.h
  */
 
-#ifndef __ARCH_AVR_INCLUDE_TYPES_H
-#define __ARCH_AVR_INCLUDE_TYPES_H
+#ifndef __ARCH_AVR_INCLUDE_AVR_IRQ_H
+#define __ARCH_AVR_INCLUDE_AVR_IRQ_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include AVR architecture-specific types definitions */
+#include <nuttx/irq.h>
+#include <arch/avr/avr.h>
 
-#ifdef CONFIG_ARCH_AVR32
-# include <arch/avr32/types.h>
-#else
-# include <arch/avr/types.h>
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/* Register state save array indices */
+ 
+#define REG_Rx           0 /* Just a placeholder */
+
+/* Size of the register state save array (in bytes?) */
+
+#define XCPTCONTEXT_REGS 1
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* This struct defines the way the registers are stored. */
+
+#ifndef __ASSEMBLY__
+struct xcptcontext
+{
+  /* The following function pointer is non-zero if there are pending signals
+   * to be processed.
+   */
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  void *sigdeliver; /* Actual type is sig_deliver_t */
+
+  /* These are saved copies of PC and SR used during signal processing.*/
+
+  uint16_t saved_pc;
+  uint8_t saved_sr;
+#endif
+
+  /* Register save area */
+
+  uint8_t regs[XCPTCONTEXT_REGS];
+};
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Inline functions
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+/* Save the current interrupt enable state & disable all interrupts */
+
+static inline irqstate_t irqsave(void)
+{
+  /* Needs to return the current interrupt state, then disable interrupts */
+#warning "Not implemented"
+  return 0
+}
+
+/* Restore saved interrupt state */
+
+static inline void irqrestore(irqstate_t flags)
+{
+  /* Based on the provided interrupt flags, conditionally enable interrupts */
+#warning "Not implemented"
+}
+#endif /* __ASSEMBLY__ */
+
 /****************************************************************************
- * Type Declarations
+ * Public Variables
  ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_AVR_INCLUDE_TYPES_H */
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+#endif
+
+#endif /* __ARCH_AVR_INCLUDE_AVR_IRQ_H */
 
