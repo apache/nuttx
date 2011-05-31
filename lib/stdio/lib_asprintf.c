@@ -101,6 +101,8 @@ int asprintf (FAR char **ptr, const char *fmt, ...)
   va_list ap;
   int     n;
 
+  DEBUGASSERT(ptr && fmt);
+
   /* First, use a nullstream to get the size of the buffer */
   
   lib_nulloutstream(&nulloutstream);
@@ -121,13 +123,19 @@ int asprintf (FAR char **ptr, const char *fmt, ...)
   lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream,
                    buf, nulloutstream.nput);
 
-  /* Then let lib_vsprintf do it real thing */
+  /* Then let lib_vsprintf do it's real thing */
 
   va_start(ap, fmt);
   n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public, fmt, ap);
   va_end(ap);
 
+  /* Terminate the string and return a pointer to the string to the caller.
+   * Hmmm.. looks like the memory would be stranded if lib_vsprintf() returned
+   * an error.  Does that ever happen?
+   */
+
   DEBUGASSERT(n < 0 || n == nulloutstream.nput);
   buf[nulloutstream.nput] = '\0';
+  *ptr = buf;
   return n;
 }
