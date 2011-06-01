@@ -1792,4 +1792,5 @@
 	* net/getsockname.c: Added standard getsockname() to return the local
 	  address associated with a socket.
 	* lib/stdio/lib_asprintf.c: Add asprintf()
-
+	* configs/olimex-lpc1766stk/ftpc:  Add a configuration to support
+	  testing of the FTP client shell.

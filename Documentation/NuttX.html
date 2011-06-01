@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 28, 2011</p>
+      <p>Last Updated: June 1, 2011</p>
     </td>
   </tr>
 </table>
@@ -2331,12 +2331,21 @@ nuttx-6.4 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       less than or equal to 64Kb.  In this case, CONFIG_MM_SMALL can be
       defined so that those MCUs will also benefit from the smaller, 16-
       bit-based allocation overhead.
+    * lib/string/lib_strndup.c: Add standard strndup() library function.
+    * net/getsockname.c: Added standard getsockname() to return the local
+      address associated with a socket.
+    * lib/stdio/lib_asprintf.c: Add asprintf()
+    * configs/olimex-lpc1766stk/ftpc:  Add a configuration to support
+      testing of the FTP client shell.
 
 apps-6.4 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * nshlib/nsh_netcmds.c: If a network device name and IP address are provided
       with the ifconfig command, then this command will now set the network address.
       (Contributed by Yu Qiang).
+    * netutils/ftpc: A library to support client-side FTP.
+    * examples/ftpc: A simple add-on to the NSH.  From NSH, you can start
+      this simple FTP shell to transfer files to/from a remote FTP server.
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

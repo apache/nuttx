@@ -781,6 +781,19 @@ sudirectory and can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  ftpc:
+    This is a simple FTP client shell used to exercise the capabilities
+    of the FTPC library (apps/netutils/ftpc).  This example is configured
+    to that it will only work as a "built-in" program that can be run from
+    NSH when CONFIG_NSH_BUILTIN_APPS is defined.
+
+    From NSH, the startup command line is then:
+
+      ftpc xx.xx.xx.xx[:pp]
+
+    where xx.xx.xx.xx is the IP address of the FTP server and pp is an
+    optional port number.
+
   hidkbd:
     This configuration directory, performs a simple test of the USB host
     HID keyboard class driver using the test logic in apps/examples/hidkbd.
@@ -853,7 +866,7 @@ Where <subdir> is one of the following:
     hardware flow control is partially implemented but does not behave as
     expected.  It needs a little more work.
 
- thttpd:
+  thttpd:
     This builds the THTTPD web server example using the THTTPD and
     the apps/examples/thttpd application.
 
