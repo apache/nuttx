@@ -86,10 +86,13 @@
 
 int fgetc(FAR FILE *stream)
 {
-  unsigned char c;
-  if (lib_fread(&c, 1, stream) > 0)
+  unsigned char ch;
+  ssize_t ret;
+
+  ret = lib_fread(&ch, 1, stream);
+  if (ret > 0)
     {
-      return c;
+      return ch;
     }
   else
     {

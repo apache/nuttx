@@ -99,7 +99,7 @@
 FAR char *gets(FAR char *s)
 {
   /* gets is ALMOST the same as fgets using stdin and no
-   * lenght limit (hence, the unsafeness of gets).  So let
+   * length limit (hence, the unsafeness of gets).  So let
    * fgets do most of the work.
    */
 
