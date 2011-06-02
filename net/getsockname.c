@@ -131,9 +131,9 @@ int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   /* Check if enough space has been provided for the full address */
 
 #ifdef CONFIG_NET_IPv6
-  if (addr->sa_family != AF_INET6 || *addrlen < sizeof(struct sockaddr_in6))
+  if (*addrlen < sizeof(struct sockaddr_in6))
 #else
-  if (addr->sa_family != AF_INET || *addrlen < sizeof(struct sockaddr_in))
+  if (*addrlen < sizeof(struct sockaddr_in))
 #endif
   {
     /* This function is supposed to return the partial address if

@@ -1794,3 +1794,6 @@
 	* lib/stdio/lib_asprintf.c: Add asprintf()
 	* configs/olimex-lpc1766stk/ftpc:  Add a configuration to support
 	  testing of the FTP client shell.
+	* fd/fs_fdopen.c and net/net_checksd.c: Add support so that fdopen may
+	  be used with socket descriptors.
+

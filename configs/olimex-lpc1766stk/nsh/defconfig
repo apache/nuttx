@@ -64,7 +64,7 @@
 # CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
 #   cause a 100 second delay during boot-up.  This 100 second delay
 #   serves no purpose other than it allows you to calibrate
-#   CONFIG_BOARD_LOOPSPERMSEC.  You simply use a stop watch to measure
+# CONFIG_BOARD_LOOPSPERMSEC.  You simply use a stop watch to measure
 #   the 100 second delay then adjust CONFIG_BOARD_LOOPSPERMSEC until
 #   the delay actually is 100 seconds.
 # CONFIG_ARCH_DMA - Support DMA initialization
@@ -350,12 +350,28 @@ CONFIG_SEM_NNESTPRIO=0
 CONFIG_FDCLONE_DISABLE=n
 CONFIG_FDCLONE_STDIO=n
 CONFIG_SDCLONE_DISABLE=y
-CONFIG_NXFLAT=n
 CONFIG_SCHED_WORKQUEUE=n
 CONFIG_SCHED_WORKPRIORITY=50
 CONFIG_SCHED_WORKPERIOD=(50*1000)
 CONFIG_SCHED_WORKSTACKSIZE=1024
 CONFIG_SIG_SIGWORK=4
+
+#
+# Settings for NXFLAT
+#
+# CONFIG_NXFLAT. Enable support for the NXFLAT binary format.
+#  This format will support execution of NuttX binaries located
+#  in a ROMFS filesystem (see examples/nxflat).
+# CONFIG_NXFLAT_DUMPBUFFER. Dump a most buffers that NXFFLAT deals
+#  with.  CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and
+#  CONFIG_DEBUG_BINFMT have to be defined or
+#  CONFIG_NXFLAT_DUMPBUFFER does nothing.
+# CONFIG_SYMTAB_ORDEREDBYNAME. Select if the system symbol table
+#  is ordered by symbol name
+#
+CONFIG_NXFLAT=y
+CONFIG_NXFLAT_DUMPBUFFER=n
+CONFIG_SYMTAB_ORDEREDBYNAME=y
 
 #
 # The following can be used to disable categories of
