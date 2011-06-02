@@ -372,12 +372,7 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
 
           if (ret < 0)
             {
-              int err =  errno;
-              if (err >= 0)
-                {
-                  err = ENOSYS;
-                }
-              ret = -err;
+              ret = -errno;
             }
           else
             {

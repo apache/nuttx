@@ -131,6 +131,14 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/* net_checksd.c *************************************************************/
+/* Check if the socket descriptor is valid for the provided TCB and if it
+ * supports the requested access.
+ */
+
+typedef struct _TCB _TCB; /* Forward reference */
+EXTERN int net_checksd(FAR _TCB *tcb, int fd, int oflags);
+
 /* net_sockets.c *************************************************************/
 /* There interfaces are called only from OS scheduling and iniialization logic
  * under sched/

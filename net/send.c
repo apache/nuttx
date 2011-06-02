@@ -415,7 +415,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags)
       goto errout;
     }
 
-  /* If this is a connected socket, then return ENOTCONN */
+  /* If this is an un-connected socket, then return ENOTCONN */
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {

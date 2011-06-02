@@ -47,10 +47,63 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs.h>
+#include <nuttx/net.h>
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: fs_checkfd
+ *
+ * Description:
+ *   Check if the file descriptor is valid for the provided TCB and if it
+ *   supports the requested access.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static inline int fs_checkfd(FAR _TCB *tcb, int fd, int oflags)
+{
+  FAR struct filelist *flist;
+  FAR struct inode    *inode;
+
+  /* Get the file list from the TCB */
+
+  flist = tcb->filelist;
+
+  /* Get the inode associated with the file descriptor.  This should
+   * normally be the case if fd >= 0.  But not in the case where the
+   * called attempts to explictly stdin with fdopen(0) but stdin has
+   * been closed.
+   */
+  
+  inode = flist->fl_files[fd].f_inode;
+  if (!inode)
+    {
+      /* No inode -- descriptor does not correspond to an open file */
+
+      return -ENOENT;
+    }
+
+  /* Make sure that the inode supports the requested access.  In
+   * the case of fdopen, we are not actually creating the file -- in
+   * particular w and w+ do not truncate the file and any files have
+   * already been created.
+   */
+
+  if (inode_checkflags(inode, oflags) != OK)
+    {
+      /* Cannot support the requested access */
+
+      return -EACCES;
+    }
+
+  /* Looks good to me */
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -58,13 +111,15 @@
 
 /****************************************************************************
  * Name: fs_fdopen
+ *
+ * Description:
+ *   This function does the core operations for fopen and fdopen.
+ *
  ****************************************************************************/
 
 FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR _TCB *tcb)
 {
-  FAR struct filelist   *flist;
   FAR struct streamlist *slist;
-  FAR struct inode      *inode;
   FAR FILE              *stream;
   int                    err = OK;
   int                    ret;
@@ -88,37 +143,55 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR _TCB *tcb)
       tcb = sched_self();
     }
 
-  /* Get the file and stream list from the TCB */
+  /* Verify that this is a valid file/socket descriptor and that the
+   * requested access can be support.
+   *
+   * Is this fd in the range of valid file descriptors?  Socket descriptors
+   * lie in a different range.
+   */
+ 
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+#endif
+    {
+      /* No.. If networking is enabled then this might be a socket
+       * descriptor.
+       */
 
-  flist = tcb->filelist;
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+      ret = net_checksd;
+#else
+      /* No networking... it is just a bad descriptor */
+
+      err = EBADF;
+      return ERROR;
+#endif
+    }
+
+  /* The descriptor is in a valid range to file descriptor... do the read */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  else
+    {
+      ret = fs_checkfd(tcb, fd, oflags);
+    }
+#endif
+
+  /* Do we have a good descriptor of some sort? */
+
+  if (ret < 0)
+    {
+      /* No... return the reported error */
+
+      err = -ret;
+      goto errout;
+    }
+
+  /* Get the stream list from the TCB */
+
   slist = tcb->streams;
 
-  /* Get the inode associated with the file descriptor.  This should
-   * normally be the case if fd >= 0.  But not in the case where the
-   * called attempts to explictly stdin with fdopen(0) but stdin has
-   * been closed.
-   */
-  
-  inode = flist->fl_files[fd].f_inode;
-  if (!inode)
-    {
-      err = ENOENT;
-      goto errout;
-    }
-
-  /* Make sure that the inode supports the requested access.  In
-   * the case of fdopen, we are not actually creating the file -- in
-   * particular w and w+ do not truncate the file and any files have
-   * already been created.
-   */
-
-  if (inode_checkflags(inode, oflags) != OK)
-    {
-      err = EACCES;
-      goto errout;
-    }
-
-  /* Find an unallocated FILE structure */
+  /* Find an unallocated FILE structure  in the stream list */
 
   ret = sem_wait(&slist->sl_sem);
   if (ret != OK)

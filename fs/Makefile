@@ -39,11 +39,28 @@ ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		=
+
+# If there are no file descriptors configured, then a small part of the
+# logic in this directory may still apply to socket descriptors
+
 ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
+
+# Socket descriptor support
+
 CSRCS		+= fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_poll.c fs_select.c
 endif
+
+# Support for network access using streams
+
+ifneq ($(CONFIG_NFILE_STREAMS),0)
+CSRCS		+= fs_fdopen.c 
+endif
+
 else
+
+# Common file/socket descriptor support
+
 CSRCS		+= fs_open.c fs_close.c fs_read.c fs_write.c fs_ioctl.c \
 		   fs_poll.c fs_select.c fs_lseek.c fs_dup.c fs_filedup.c \
 		   fs_dup2.c fs_fcntl.c fs_filedup2.c fs_opendir.c fs_closedir.c \
@@ -56,9 +73,13 @@ CSRCS		+= fs_registerblockdriver.c fs_unregisterblockdriver.c \
 
 include mmap/Make.defs
 
+# Stream support
+
 ifneq ($(CONFIG_NFILE_STREAMS),0)
 CSRCS		+= fs_fdopen.c 
 endif
+
+# Additional files required is mount-able file systems are supported
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 CSRCS		+= fs_mount.c fs_umount.c fs_fsync.c fs_unlink.c fs_rename.c \
