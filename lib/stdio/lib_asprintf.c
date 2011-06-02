@@ -99,18 +99,22 @@ int asprintf (FAR char **ptr, const char *fmt, ...)
   struct lib_memoutstream_s memoutstream;
   FAR char *buf;
   va_list ap;
-  int     n;
+  int     nbytes;
 
   DEBUGASSERT(ptr && fmt);
 
-  /* First, use a nullstream to get the size of the buffer */
+  /* First, use a nullstream to get the size of the buffer.  The number
+   * of bytes returned may or may not include the null terminator.
+   */
   
   lib_nulloutstream(&nulloutstream);
   va_start(ap, fmt);
-  n = lib_vsprintf((FAR struct lib_outstream_s *)&nulloutstream, fmt, ap);
+  nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&nulloutstream, fmt, ap);
   va_end(ap);
 
-  /* Then allocate a buffer to hold that number of characters */
+  /* Then allocate a buffer to hold that number of characters, adding one
+   * for the null terminator.
+   */
 
   buf = (FAR char *)malloc(nulloutstream.nput + 1);
   if (!buf)
@@ -118,24 +122,29 @@ int asprintf (FAR char **ptr, const char *fmt, ...)
       return ERROR;
     }
 
-  /* Initialize a memory stream to write into the allocated buffer */
+  /* Initialize a memory stream to write into the allocated buffer.  The
+   * memory stream will reserve one byte at the end of the buffer for the
+   * null terminator and will not report this in the number of output bytes.
+   */
 
   lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream,
-                   buf, nulloutstream.nput);
+                   buf, nulloutstream.nput + 1);
 
   /* Then let lib_vsprintf do it's real thing */
 
   va_start(ap, fmt);
-  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public, fmt, ap);
+  nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public, fmt, ap);
   va_end(ap);
 
-  /* Terminate the string and return a pointer to the string to the caller.
+  /* Return a pointer to the string to the caller.  NOTE: the memstream put()
+   * method has already added the NUL terminator to the end of the string (not
+   * included in the nput count).
+   *
    * Hmmm.. looks like the memory would be stranded if lib_vsprintf() returned
    * an error.  Does that ever happen?
    */
 
-  DEBUGASSERT(n < 0 || n == nulloutstream.nput);
-  buf[nulloutstream.nput] = '\0';
+  DEBUGASSERT(nbytes < 0 || nbytes == nulloutstream.nput);
   *ptr = buf;
-  return n;
+  return nbytes;
 }

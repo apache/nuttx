@@ -52,7 +52,7 @@ static int meminstream_getc(FAR struct lib_instream_s *this)
   FAR struct lib_meminstream_s *mthis = (FAR struct lib_meminstream_s *)this;
   int ret;
 
-  if (this && this->nget < mthis->buflen - 1)
+  if (this && this->nget < mthis->buflen)
     {
       ret = mthis->buffer[this->nget];
       this->nget++;

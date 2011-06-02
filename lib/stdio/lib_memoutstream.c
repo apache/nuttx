@@ -50,7 +50,13 @@
 static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
   FAR struct lib_memoutstream_s *mthis = (FAR struct lib_memoutstream_s *)this;
-  if (this && this->nput < mthis->buflen - 1)
+
+  /* If this will not overrun the buffer, then write the character to the
+   * buffer.  Not that buflen was pre-decremented when the stream was
+   * created so it is okay to write past the end of the buflen by one.
+   */
+
+  if (this && this->nput < mthis->buflen)
     {
       mthis->buffer[this->nput] = ch;
       this->nput++;
@@ -89,6 +95,7 @@ void lib_memoutstream(FAR struct lib_memoutstream_s *memoutstream,
   memoutstream->public.nput  = 0;          /* Will be buffer index */
   memoutstream->buffer       = bufstart;   /* Start of buffer */
   memoutstream->buflen       = buflen - 1; /* Save space for null terminator */
+  memoutstream->buffer[0]    = '\0';       /* Start with an empty string */
 }
 
 
