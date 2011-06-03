@@ -100,8 +100,7 @@ int sscanf(const char *buf, const char *fmt, ...)
   count = vsscanf((char*)buf, fmt, ap);
   va_end(ap);
   return count;
-
-} /* end sscanf */
+}
 
 /****************************************************************************
  * Function:  vsscanf
@@ -129,7 +128,9 @@ int vsscanf(char *buf, const char *s, va_list ap)
       /* Skip over white space */
 
       while (isspace(*s))
-        s++;
+        {
+          s++;
+        }
 
       /* Check for a conversion specifier */
 
@@ -144,19 +145,26 @@ int vsscanf(char *buf, const char *s, va_list ap)
               lvdbg("vsscanf: Processing %c\n", *s);
 
               if (strchr("dibouxcsefg%", *s))
-                break;
+                {
+                  break;
+                }
+
               if (*s == '*')
-                noassign = 1;
+                {
+                  noassign = 1;
+                }
               else if (*s == 'l' || *s == 'L')
-                lflag = 1;
-              else if (*s >= '1' && *s <= '9') {
-                for (tc = s; isdigit(*s); s++);
-                strncpy(tmp, tc, s - tc);
-                tmp[s - tc] = '\0';
-                width = atoi(tmp);
-                /* atob(&width, tmp, 10); */
-                s--;
-              }
+                {
+                  lflag = 1;
+                }
+              else if (*s >= '1' && *s <= '9')
+                {
+                  for (tc = s; isdigit(*s); s++);
+                  strncpy(tmp, tc, s - tc);
+                  tmp[s - tc] = '\0';
+                  width = atoi(tmp);
+                  s--;
+                }
             }
 
           /* Process %s:  String conversion */
@@ -166,11 +174,15 @@ int vsscanf(char *buf, const char *s, va_list ap)
               lvdbg("vsscanf: Performing string conversion\n");
 
               while (isspace(*buf))
-                buf++;
+                {
+                  buf++;
+                }
+
               if (!width)
                 {
                   width = strcspn(buf, spaces);
                 }
+
               if (!noassign)
                 {
                   tv = va_arg(ap, char*);
@@ -187,7 +199,10 @@ int vsscanf(char *buf, const char *s, va_list ap)
               lvdbg("vsscanf: Performing character conversion\n");
 
               if (!width)
-                width = 1;
+                {
+                  width = 1;
+                }
+
               if (!noassign)
                 {
                   tv = va_arg(ap, char*);
@@ -206,20 +221,30 @@ int vsscanf(char *buf, const char *s, va_list ap)
               /* Skip over any white space before the integer string */
 
               while (isspace(*buf))
-                buf++;
+                {
+                  buf++;
+                }
 
               /* The base of the integer conversion depends on the specific
                * conversion specification.
                */
 
               if (*s == 'd' || *s == 'u')
-                base = 10;
+                {
+                  base = 10;
+                }
               else if (*s == 'x')
-                base = 16;
+                {
+                  base = 16;
+                }
               else if (*s == 'o')
-                base = 8;
+                {
+                  base = 8;
+                }
               else if (*s == 'b')
-                base = 2;
+                {
+                  base = 2;
+                }
 
               /* Copy the integer string into a temporary working buffer. */
 
@@ -234,6 +259,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
                       width = strchr(buf, *(s + 1)) - buf;
                     }
                 }
+
               strncpy(tmp, buf, width);
               tmp[width] = '\0';
 
@@ -290,6 +316,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
                       width = strchr(buf, *(s + 1)) - buf;
                     }
                 }
+
               strncpy(tmp, buf, width);
               tmp[width] = '\0';
               buf += width;
@@ -333,6 +360,7 @@ int vsscanf(char *buf, const char *s, va_list ap)
             {
               count++;
             }
+
           width = noassign = lflag = 0;
           s++;
         }
@@ -342,12 +370,21 @@ int vsscanf(char *buf, const char *s, va_list ap)
       else
         {
           while (isspace(*buf))
-            buf++;
+            {
+              buf++;
+            }
+
           if (*s != *buf)
-            break;
+            {
+              break;
+            }
           else
-            s++, buf++;
+            {
+              s++;
+              buf++;
+            }
         }
     }
+
   return count;
 }

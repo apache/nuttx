@@ -787,12 +787,14 @@ Where <subdir> is one of the following:
     to that it will only work as a "built-in" program that can be run from
     NSH when CONFIG_NSH_BUILTIN_APPS is defined.
 
-    From NSH, the startup command line is then:
+    From NSH, the startup command sequence is then:
 
-      ftpc xx.xx.xx.xx[:pp]
+      mount -t vfat /dev/mmcsd0 /tmp # Mount the SD card at /tmp
+      cd /tmp                        # cd into the /tmp directory
+      ftpc xx.xx.xx.xx[:pp]          # Start the FTP client
 
     where xx.xx.xx.xx is the IP address of the FTP server and pp is an
-    optional port number.
+    optional port number (default is the standard FTP port number 21).
 
   hidkbd:
     This configuration directory, performs a simple test of the USB host
