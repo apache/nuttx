@@ -97,7 +97,10 @@ static const char g_erasetoeol[] = "\033[K";
 static inline int _lib_rawgetc(int fd)
 {
   char buffer;
-  if (read(fd, &buffer, 1) < 1)
+  ssize_t nread;
+
+  nread = read(fd, &buffer, 1);
+  if (nread < 1)
     {
       /* Return EOF if the end of file (0) or error (-1) occurs */
 
