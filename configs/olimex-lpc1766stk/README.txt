@@ -789,9 +789,11 @@ Where <subdir> is one of the following:
 
     From NSH, the startup command sequence is then:
 
-      mount -t vfat /dev/mmcsd0 /tmp # Mount the SD card at /tmp
-      cd /tmp                        # cd into the /tmp directory
-      ftpc xx.xx.xx.xx[:pp]          # Start the FTP client
+      nsh> mount -t vfat /dev/mmcsd0 /tmp # Mount the SD card at /tmp
+      nsh> cd /tmp                        # cd into the /tmp directory
+      nsh> ftpc xx.xx.xx.xx[:pp]          # Start the FTP client
+      nfc> login <name> <password>        # Log into the FTP server
+      nfc> help                           # See a list of FTP commands
 
     where xx.xx.xx.xx is the IP address of the FTP server and pp is an
     optional port number (default is the standard FTP port number 21).

@@ -159,12 +159,12 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR _TCB *tcb)
        */
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      ret = net_checksd;
+      ret = net_checksd(tcb, fd, oflags);
 #else
       /* No networking... it is just a bad descriptor */
 
       err = EBADF;
-      return ERROR;
+      goto errout;
 #endif
     }
 
@@ -243,6 +243,10 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR _TCB *tcb)
           return stream;
         }
     }
+
+  /* No free stream available.. report ENFILE */
+
+  err = ENFILE;
 
 #if CONFIG_STDIO_BUFFER_SIZE > 0
 errout_with_sem:
