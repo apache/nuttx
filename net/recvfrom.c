@@ -861,7 +861,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 {
   struct recvfrom_s       state;
   uip_lock_t              save;
-  int                     ret = OK;
+  int                     ret;
 
   /* Initialize the state structure.  This is done with interrupts
    * disabled because we don't want anything to happen until we
@@ -878,9 +878,24 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
   recvfrom_readahead(&state);
+
+  /* The default return value is the number of bytes that we just copied into
+   * the user buffer.  We will return this if the socket has become disconnected
+   * or if the user request was completely satisfied with data from the readahead
+   * buffers.
+   */
+   
+  ret = state.rf_recvlen;
+
+#else
+  /* Otherwise, the default return value of zero is used (only for the case
+   * where len == state.rf_buflen is zero).
+   */
+
+  ret = 0;
 #endif
 
-  /* Verify that the SOCK_STREAM has been or still is connected */
+  /* Verify that the SOCK_STREAM has been and still is connected */
 
   if (!_SS_ISCONNECTED(psock->s_flags))
     {
@@ -889,29 +904,17 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
        */
 
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
-      if (state.rf_recvlen <= 0)
+      if (ret <= 0)
+#endif
         {
-          /* Nothing was received.  The SOCK_STREAM must be re-connected in
-           * order to receive an additional data.
+          /* Nothing was previously received from the readahead buffers.
+           * The SOCK_STREAM must be (re-)connected in order to receive any
+           * additional data.
            */
 
           ret = -ENOTCONN;
         }
-      else
-        {
-          /* The socket is disconnected, but there is data in the read-ahead
-           * buffer.  The return value is the number of bytes read from the
-           * read-ahead buffer */
-
-          ret = state.rf_recvlen;
-        }
-#else
-      /* The SOCK_STREAM must be connected inorder to receive data. */
-
-      ret = -ENOTCONN;
-#endif
     }
-  else
 
   /* In general, this uIP-based implementation will not support non-blocking
    * socket operations... except in a few cases:  Here for TCP receive with read-ahead
@@ -919,31 +922,30 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * if no data was obtained from the read-ahead buffers.
    */
 
+  else
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
   if (_SS_ISNONBLOCK(psock->s_flags))
     {
-      /* Return OK if something was received; EGAIN if not */
+      /* Return the number of bytes read from the read-ahead buffer if
+       * something was received (already in 'ret'); EGAIN if not.
+       */
 
-      if (state.rf_recvlen <= 0)
+      if (ret <= 0)
         {
           /* Nothing was received */
 
           ret = -EAGAIN;
         }
-      else
-        {
-          /* The return value is the number of bytes read from the read-ahead buffer */
-
-          ret = state.rf_recvlen;
-        }
     }
 
   /* It is okay to block if we need to.  If there is space to receive anything
-   * more, then we will wait to receive the data.
+   * more, then we will wait to receive the data.  Otherwise return the number
+   * of bytes read from the read-ahead buffer (already in 'ret').
    */
 
-  else if (state.rf_buflen > 0)
+  else
 #endif
+  if (state.rf_buflen > 0)
     {
       struct uip_conn *conn = (struct uip_conn *)psock->s_conn;
 
@@ -977,7 +979,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   uip_unlock(save);
   recvfrom_uninit(&state);
-  return ret;
+  return (ssize_t)ret;
 }
 #endif /* CONFIG_NET_TCP */
 
