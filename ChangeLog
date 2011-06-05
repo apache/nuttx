@@ -1796,4 +1796,11 @@
 	  testing of the FTP client shell.
 	* fd/fs_fdopen.c and net/net_checksd.c: Add support so that fdopen may
 	  be used with socket descriptors.
+	* net/recvfrom.c: Fix an error found in receiving small files via FTP:
+	  The small file is received a buffered in the readahead buffer, then the
+	  socket is disconnected.  When the app calls recvfrom, the socket is
+	  already disconnected and the buffered data is stranded.  Now, recvfrom
+	  will continue to return success after the socket is disconnected until
+	  the readahead buffer is drained.
+
 

@@ -682,6 +682,13 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
   pstate->rf_starttime = clock_systimer();
 #endif
 }
+
+/* The only uninitialization that has to be performed is destroying the
+ * semaphore.
+ */
+
+#define recvfrom_uninit(s) sem_destroy(&(s)->rf_sem)
+
 #endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
 /****************************************************************************
@@ -705,10 +712,6 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
 static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 {
   int save_errno = errno; /* In case something we do changes it */
-
-  /* Release semaphore in the state structure */
-
-  sem_destroy(&pstate->rf_sem);
 
   /* Check for a error/timeout detected by the interrupt handler.  Errors are
    * signaled by negative errno values for the rcv length
@@ -783,8 +786,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   ret = uip_udpconnect(conn, NULL);
   if (ret < 0)
     {
-      uip_unlock(save);
-      return ret;
+      goto errout_with_state;
     }
 
   /* Set up the callback in the connection */
@@ -814,7 +816,6 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       uip_udpdisable(conn);
       uip_udpcallbackfree(conn, state.rf_cb);
-      uip_unlock(save);
       ret = recvfrom_result(ret, &state);
     }
   else
@@ -822,6 +823,9 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       ret = -EBUSY;
     }
 
+errout_with_state:
+  uip_unlock(save);
+  recvfrom_uninit(&state);
   return ret;
 }
 #endif /* CONFIG_NET_UDP */
@@ -859,15 +863,6 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   uip_lock_t              save;
   int                     ret = OK;
 
-  /* Verify that the SOCK_STREAM has been connected */
-
-  if (!_SS_ISCONNECTED(psock->s_flags))
-    {
-      /* The SOCK_STREAM must be connected in order to receive */
-
-      return -ENOTCONN;
-    }
-
   /* Initialize the state structure.  This is done with interrupts
    * disabled because we don't want anything to happen until we
    * are ready.
@@ -876,11 +871,47 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   save = uip_lock();
   recvfrom_init(psock, buf, len, infrom, &state);
 
+  /* Handle any any TCP data already buffered in a read-ahead buffer.  NOTE
+   * that there may be read-ahead data to be retrieved even after the
+   * socket has been disconnected.
+   */
+
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
-
-  /* Handle any any TCP data already buffered in a read-ahead buffer. */
-
   recvfrom_readahead(&state);
+#endif
+
+  /* Verify that the SOCK_STREAM has been or still is connected */
+
+  if (!_SS_ISCONNECTED(psock->s_flags))
+    {
+      /* Was any data transferred from the readahead buffer after we were
+       * disconnected?
+       */
+
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+      if (state.rf_recvlen <= 0)
+        {
+          /* Nothing was received.  The SOCK_STREAM must be re-connected in
+           * order to receive an additional data.
+           */
+
+          ret = -ENOTCONN;
+        }
+      else
+        {
+          /* The socket is disconnected, but there is data in the read-ahead
+           * buffer.  The return value is the number of bytes read from the
+           * read-ahead buffer */
+
+          ret = state.rf_recvlen;
+        }
+#else
+      /* The SOCK_STREAM must be connected inorder to receive data. */
+
+      ret = -ENOTCONN;
+#endif
+    }
+  else
 
   /* In general, this uIP-based implementation will not support non-blocking
    * socket operations... except in a few cases:  Here for TCP receive with read-ahead
@@ -888,6 +919,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * if no data was obtained from the read-ahead buffers.
    */
 
+#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
   if (_SS_ISNONBLOCK(psock->s_flags))
     {
       /* Return OK if something was received; EGAIN if not */
@@ -944,6 +976,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     }
 
   uip_unlock(save);
+  recvfrom_uninit(&state);
   return ret;
 }
 #endif /* CONFIG_NET_TCP */
