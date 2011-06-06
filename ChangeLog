@@ -212,7 +212,7 @@
 	* Provide support for multiple network devices
 	* Implement socket ioctl() calls to set addresses
 	* Added listen() and accept()
-	* Added DM90x0 ethernet driver
+	* Added DM90x0 Ethernet driver
 	* ARP timer is now built into the network layer
 	* Basic client functionality verified: TCP socket(), bind(), connect(), recv(), send().
 
@@ -275,7 +275,7 @@
 	* Added inet_ntoa() and ether_ntoa()
 	* Added netdev_foreach() to support traversal of registered network devices
 	* Added support for 'ifconfig' command to NSH (examples/nsh)
-	* Moved MAC and ethernet definitions to net/ethernet.h
+	* Moved MAC and Ethernet definitions to net/ethernet.h
 	* Fix sim and DM90x0 compilation errors introduced in 0.3.4
 	* Fixed errors in C5471 configuration files for examples/uip
 	* Modified DHCPC (netutils/dhcpc) so that it should work in environments where
@@ -848,7 +848,7 @@
 	* lib/lib_strstr.c:  Length of substring off by one causes false alarm
 	  sub-string matches.
 	* arch/arm/src/lm3s/lm3s_ethernet.c: Fix errors in LMS6918 FIFO length
-	  handling.  (1) The incorrect size of the ethernet header was being
+	  handling.  (1) The incorrect size of the Ethernet header was being
 	  subtracted on outgoing messages (4 vs 14), which caused outgoing messages to
 	  be a little too long.  (2) The size of incoming FIFO messages is 6 bytes
 	  larger than it expected (2 for the length and 4 for the FCS).  The unhandled
@@ -1010,7 +1010,7 @@
 	  The released pascal-2.0 will be the first version that contains the
 	  compatible changes.
 	* arch/arm/src/lm3s/lm3s_ethernet.c: Fixed an important bug in the LM3S
-	  ethernet driver:  If full packet is received, the packet-too-big check
+	  Ethernet driver:  If full packet is received, the packet-too-big check
 	  will fail because it needs to subtract 6 from the packet size (to
 	  account for the 2-byte packet length and the 4-byte packet FCS in the
 	  FIFO).
@@ -1098,7 +1098,7 @@
 
 5.5 2010-05-09 Gregory Nutt <spudmonkey@racsa.co.cr>
 
-	* drivers/net/enc28j60.c: Microchip ENC28J60 SPI ethernet chip driver.
+	* drivers/net/enc28j60.c: Microchip ENC28J60 SPI Ethernet chip driver.
 	  (untested on original check-in).
 	* configs/olimex-str7p11/nettest: examples/nettest configuration using
 	  the ENC28J60 driver on the Olimex STMicro STR-P711.
@@ -1334,7 +1334,7 @@
 5.14 2010-11-27 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* configs/olimex-lpc1766stk/nettest: Add examples/nettest configuration to
-	  verify the LPC17xx ethernet driver currently under development.
+	  verify the LPC17xx Ethernet driver currently under development.
 	* arch/arm/src/lpc17xx/lpc17xx_ethernet.c/.h: Began development of
 	  the LPC17xx Ethernet driver.  Driver in CVS functional after 2010-11-23.
 	* sched/timer_settime.c: Fix an error in set-up of a one-shot POSIX timer.  It
@@ -1760,7 +1760,7 @@
 	  flushed.  This (slightly) increases the NuttX footprint but supports the kind of
 	  behavior that people expect for printf.
 
-6.4 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+6.4 2011-06-06 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* lib/drivers/cc1101: Add initial, functional CC1101 wireless driver
 	  (contributed by Uros Platise)
@@ -1768,7 +1768,7 @@
 	  code complete and ready to begin testing.  Unfortunately, it looks like
       testing will be delayed due to tool issues (My PICkit 2 will not work the
       the MPLAB debugger on PIC32; I will need to get a PICkit 3).
-	* drivers/net/e1000.c/h: A PCI-based E1000 ethernet driver submitted
+	* drivers/net/e1000.c/h: A PCI-based E1000 Ethernet driver submitted
 	  by Yu Qiang.
 	* lib/net/lib_inetaddr.c: An implementation of the inet_addr() function
 	  submitted by Yu Qiang.
@@ -1802,5 +1802,10 @@
 	  already disconnected and the buffered data is stranded.  Now, recvfrom
 	  will continue to return success after the socket is disconnected until
 	  the readahead buffer is drained.
+	* olimex-lp1766stk/ftpc/defconfig: Many configurations have the MTU 
+	  (CONFIG_NET_BUFSIZE) set to very small numbers, less then the minimum
+	  MTU size that must be supported -- 576. This can cause problems in
+	  some networks:  CONFIG_NET_BUFSIZE should be set to at least 576 in
+	  all defconfig files.  This has only been fixed in this defconfig file.
 
-
+6.5 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
