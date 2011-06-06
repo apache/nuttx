@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 1, 2011</p>
+      <p>Last Updated: June 6, 2011</p>
     </td>
   </tr>
 </table>
@@ -503,7 +503,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Networking utilities (DHCP, SMTP, TELNET, TFTP, HTTP)</li>
+      <li>Networking utilities (DHCP server and client, SMTP client, TELNET client, FTP client, TFTP client, HTTP server and client)</li>
     </p>
 </tr>
 <tr>
@@ -829,63 +829,58 @@
   </tr>
 </table>
 
-<p><b>nuttx-6.3 Release Notes</b>:
+<p><b>nuttx-6.4 Release Notes</b>:
 <p>
-  The 70<sup>th</sup> release of NuttX, Version 6.3, was made on May 15, 2011 and is available for download from the
+  The 71<sup>st</sup> release of NuttX, Version 6.4, was made on June 6, 2011 and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
   These unreleased changes are also listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  The release of NuttX-6.3 follows only a nines days after the release of version 6.2.
-  This special back-to-back release was made so that the current released version of
-  NuttX will correspond to the initial release from the RGMP project.
-</p>
-<p>
-  This release adds architecture support and build configuration for RGMP.
-  RGMP is a project for running GPOS and RTOS simultaneously on multi-processor platforms.
-  See the <a href="http://rgmp.sourceforge.net/wiki/index.php/Main_Page">RGMP Wiki</a> for further information about RGMP.
-</p>
-<p>
-  This release also includes support for STM32 FLASH, build improvements, and initial, incomplete support for the MicroChip PIC32MX MCU.
-  Bug fixes are included for some build problems, USB host class driver error handling, NX graphics color mapping, and problems with C standard I/O buffer flushing.
-  See the ChangeLog for further details.
-</p>
-<p>
-  Release notes for version 6.2 are retained because they are still relevant.
-</p>
-<p><b>nuttx-6.2 Release Notes</b>:
-<p>
-  The 6.2 NuttX release includes several new features:
+  The 6.4 release includes several new features:
 </p>
 <ul>
-  <li>
-    NXFFS: The obvious new feature is NXFFS, the NuttX wear-leveling FLASH file system.
-    This new file system is intended to be small for the MCU usage and has some limitations.
-    No formal documentation of NXFFS yet exists.
-    See the <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/nuttx/fs/nxffs/README.txt?view=log"><code>fs/nxffs/README.txt</code></a>
-    file for more details.
+  <li><i>FTP Client</i>.
+    A new, full-featured FTP client is included in this release. 
+    This client may be used as a library for automated FTP or via an FTP client shell.
+    The FTP shell supports the following commands: <code>cd</code>, <code>chmod</code>, <code>get</code>, <code>help</code>, <code>idle</code>, <code>login</code>, <code>ls</code>, <code>quit</code>, <code>mkdir</code>, <code>noop</code>, <code>put</code> <code>pwd</code>, <code>rename</code>, <code>rhelp</code>, <code>rm</code>, <code>rmdir</code>, <code>size</code>, <code>time</code>, and <code>up</code>.
+    A configuration is available for the NXP LPC17xx to demonstrate this functionality.
   </li>
-  <li>
-    Support for NXP LPCXpresso LPC1768 board on the Embedded Artists base board.
-    The Code Red toolchain is supported under either Linux or Windows.
-    Verifed configurations include DHCPD, the NuttShell (NSH), NuttX graphis (NX), the NuttX OS test, THTTPD, and USB mass storage device.
+  <li><i>C1101 Wireless Driver</i>.
+    A functional C1101 wireless driver (contributed by Uros Platise)
   </li>
-  <li>
-    Support for the Univision UG-9664HSWAG01 OLED with Solomon Systech SD1305 LCD controller.
+  <li><i>E1000 Ethernet Driver</i>.
+    A PCI-based E1000 Ethernet driver (contributed by Yu Qiang)
   </li>
-  <li>
-    A new RAM MTD driver with FLASH simulation capability.
+  <li><i>C-Library Functions</i>.
+    New C library functions: <code>inet_addr()</code> (contributed by Yu Qiang), <code>strndup()</code>, and <code>asprintf()</code>.
   </li>
-  <li>
-    A <code>version.h</code> file is now automatically generated so that C code can now be version-aware.
+  <li><i>Smaller Memory Allocation Overhead</i>.
+    Reduced memory allocation overhead for MCUs with small heaps (&lt;64Kb).
+  </li>
+  <li><i>C Buffered I/O Integrated with Networking.</i>
+    <code>fdopen()</code> now works with socket descriptors allowing standard bufferedC functions to be used for network communications.
+  </li>
+  <li><i><code>iconfig</code> Extensions</i>.
+    The NSH <code>ifconfig</code> command can now be used to set or change the IP address (contributed by Yu Qiang)
   </li>
 </ul>
 <p>
-  In addition to these new feature, several important bugfixes are included in this release correcting problems with
-  <code>dup2()</code>, LPC17xx GPIO interrupts, LPC17xx UART2/3, the FAT file system, build issues, and <code>strrch()</code>.
-  See the ChangeLog for more details.
+  This release also includes some completed but untest functionality.
+</p>
+
+<ul>
+  <li><i>MicroChip PIC32MX Support</i>.
+    The MicroChip PIC32MX port is now code complete and ready to begin testing. 
+    Unfortunately, testing will be delayed due to tool issues.
+  </li>
+  <li><i>NXP LPC315x Support</i>.
+    Support for the NXP LPC315x MCUs.
+  </li>
+</ul>
+<p>
+  Additional miscellaneous enhancements and bug fixes to <code>task_delete()</code>, <code>recvfrom()</code>, and other changes as noted in the ChangeLog.
 </p>
 
 <table width ="100%">
@@ -1116,6 +1111,26 @@
           Support for <a href="NuttXDemandPaging.html">on-demand paging</a> has been developed for the EA3131.
       That support would all execute of a program in SPI FLASH by paging code sections out of SPI flash as needed.
       However, as of this writing, I have not had the opportunity to verify this new feature.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <b>NXP LPC315x</b>.
+    Support for the NXP LPC315x family has been incorporated into the code base as of NuttX-6.4.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+          The MCU support logic is present but as of this writing has not been verified on hardware.
+          Because of the high degree of compatibility between the LPC313x and LPC315x family, it
+          is very likely that the support is in place (or at least very close).
       </p>
     </ul>
   </td>
@@ -2144,123 +2159,62 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.2 2011-05-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.4 2011-06-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * arch/arm/src/lpc17xx/lpc17_gpioint.c: Correct errors in logic that maps
-      and IRQ number into a register bit number.
-    * Makefile: Fix an error introduced in the top-level Makefile in NuttX-6.1.
-      This error only shows up if you have a /tftpboot directory.  Then the 
-      make will fail with an obscure error about not being able to stat pass2.
-    * configs/lpcxpresso-lpc1768/nsh: Add an NSH configuration for the
-      LPCXpresso board.
-    * configs/*/ld.script: Removed 'sh_link not set for section .ARM.edix' for
-      a few of the builds.  In you have this warning, it can be removed with the
-      following change to the ld.script file:
-      
-        + __exidx_start = ABSOLUTE(.);
-        .ARM.exidx : {
-        -     __exidx_start = ABSOLUTE(.);
-              *(.ARM.exidx*)
-        -     __exidx_end = ABSOLUTE(.);
-        } &gt;sram
-        +  __exidx_end = ABSOLUTE(.);
+    * lib/drivers/cc1101: Add initial, functional CC1101 wireless driver
+      (contributed by Uros Platise)
+    * arch/mips and configs/pcblogic-pic32mx: The MicroChip PIC32MX port is now
+      code complete and ready to begin testing.  Unfortunately, it looks like
+      testing will be delayed due to tool issues (My PICkit 2 will not work the
+      the MPLAB debugger on PIC32; I will need to get a PICkit 3).
+    * drivers/net/e1000.c/h: A PCI-based E1000 ethernet driver submitted
+      by Yu Qiang.
+    * lib/net/lib_inetaddr.c: An implementation of the inet_addr() function
+      submitted by Yu Qiang.
+    * arch/arm/src/lpc31xx and arch/arm/include/lpc31xx:  Renamed from lpc313x
+      to make name space for other famiy members.
+    * arch/arm/*/lpc31xx: Added support for the LPC315x family (untested).
+    * sched/task_exithook.c: Functionality performed when a task exits or is
+      deleted has been moved to a common file task_exithook.c.  Now exit()
+      functionality (like flushing I/O and calling registered atexit()
+      functions, etc.) will be performed when a task is deleted as well.
+    * mm/:  Added support for CONFIG_MM_SMALL. Each memory allocation has a
+      small allocation overhead.  The size of that overhead is normally
+      determined by the "width" of the address support by the MCU.  MCUs
+      that support 16-bit addressability have smaller overhead than devices
+      that support 32-bit addressability.  However, there are many MCUs
+      that support 32-bit addressability *but* have internal SRAM of size
+      less than or equal to 64Kb.  In this case, CONFIG_MM_SMALL can be
+      defined so that those MCUs will also benefit from the smaller, 16-
+      bit-based allocation overhead.
+    * lib/string/lib_strndup.c: Add standard strndup() library function.
+    * net/getsockname.c: Added standard getsockname() to return the local
+      address associated with a socket.
+    * lib/stdio/lib_asprintf.c: Add asprintf()
+    * configs/olimex-lpc1766stk/ftpc:  Add a configuration to support
+      testing of the FTP client shell.
+    * fd/fs_fdopen.c and net/net_checksd.c: Add support so that fdopen may
+      be used with socket descriptors.
+    * net/recvfrom.c: Fix an error found in receiving small files via FTP:
+      The small file is received a buffered in the readahead buffer, then the
+      socket is disconnected.  When the app calls recvfrom, the socket is
+      already disconnected and the buffered data is stranded.  Now, recvfrom
+      will continue to return success after the socket is disconnected until
+      the readahead buffer is drained.
+    * olimex-lp1766stk/ftpc/defconfig: Many configurations have the MTU 
+      (CONFIG_NET_BUFSIZE) set to very small numbers, less then the minimum
+      MTU size that must be supported -- 576. This can cause problems in
+      some networks:  CONFIG_NET_BUFSIZE should be set to at least 576 in
+      all defconfig files.  This has only been fixed in this defconfig file.
 
-    * arch/arm/src/lpc17xx: Correct some typos/bugs in configuration of LPC17xx
-      UART2 and UART3.
-    * nuttx/clock.h: Replace all references to the global variable g_system_timer
-      with clock_systemtimer() (currently just a macro that that returns g_system_timer).
-    * lib/string/strrch.c: Would fail if the searched-for character were the first
-      character in the string.
-    * tools/version.sh and mkversion.c: Tools to manage a NuttX version number
-      file
-    * sched/clock_getutc() and lib/time/lib_time.c: Add support for 1 second UTC
-      interface.
-    * net/net_dup2.c and include/nuttx/net.h: The conditional compilation for
-      '#if CONFIG_NFILE_DESCRIPTOR &gt; 0' was wrong in both of these files.  It should
-      be '#if CONFIG_NFILE_DESCRIPTORS &gt; 0'.  This causes a dup2() failure in THTTPD
-      and a failure to get a CGI page.  The consequence can be a very serious bug!
-    * configs/lpcxpresso-lpc1768/usbstorage, thttpd, and dhcpd: Add an USB storage,
-      THTTPD web server, and DHCP server configurations for the NXP LPCXpresso board.
-    * drivers/lcd/ug-9664hswag01.c and ssd1305.h: Add support for Univision UG-9664HSWAG01
-      OLED with Solomon Systech SD1305 LCD controller.
-    * configs/lpcxpresso-lpc1668/nx: Add a NX graphics configuration for the LPCXPRESO
-      board.
-    * graphics/nxglib/nxglib_nonintersecting.c: Fix some single bit errors in
-      calculation of non-intersecting regions.  This was causing an anomaly
-      in examples/nx in column 0.
-    * drivers/mtd/rammtd.c: Added a RAM based MTD driver.  This RAM driver simulates
-      FLASH and is useful for testing purposes.
-    * arch/arm/src/arm/up_head.S: Fix backward conditional compilation.  This cause
-      the configs/mx1ads configuration to fail to build but does not appear to affect
-      any other ARM9 build.
-    * fs/nxffs: Adding a tiny, wear-leveling FLASH file system for NuttX.  This
-      file system is intended to be small and will have some limitations.  The
-      implementation is incomplete on initial checkin.
-    * apps/examples/nxffs and configs/sim/nxffs:  Add a test a a configuration that
-      will be used to verify NXFFS.
-    * fs/fat/fs_fat32.c and fs_fat32util.c: Incorpated two bugs with fixed provided
-      by Sheref Younan.  Thanks!
-    * fs/nxffs: After a couple of weeks of testing and bug fixes, NXFSS appears
-      stable and functional.
+apps-6.4 2011-06-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-nuttx-6.3 2011-05-15 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * Remove clock_getutc().  It is replaces with clock_gettime(CLOCK_ACTIVETIME).
-      Add other RTC related changes provided by Uros Platise.
-    * arch/arm/src/stm32/stm32_flash.c: Add support for access to on-chip STM32
-      FLASH; beginning of integration with NXFFS (Uros Platise).
-    * arch/mips: Added directory structure for PIC32 support
-    * configs/pcblogic-pic32mx:  Add directory structure for PCB Logic PIC32MX board
-    * apps/include:  Move include/apps to apps/include.  A symbolic link is created at
-      build time
-    * Makefile: Removed support for Pascal pcode interpreter.  Support for that
-      interpreter has been moved to apps/interpreter/Makefile.
-    * tools/mkdep.sh: Should not report an error if there are no files on the command
-      line.  This happens normally in certain configurations.
-    * drivers/usbhost: Sheref Younan reported an error in the error handling when
-      connection to a USB device fails.  In certain fail cases, the logic would try
-      to free the device class instance twice, the first was okay, but the second
-      caused a crash.
-    * graphics/nxbe/nxbe_colormap.c: Fix error noted by Bassem Fahmy.  The function
-      nxbe_colormap was change to nxbe_configure... apparently "search-and-replace"
-      error. This error was not noticed before because most NX platforms do not use
-      colormapping.
-    * arch/rgmp and configs/rgmp.  Add architecture support and build
-      configuration for RGMP.  RGMP is a project for running GPOS and
-      RTOS simultaneously on multi-processor platforms. See
-      http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
-      information about RGMP.
-    * lib/stdio/lib_fclose.c: Must flush all buffered data when the file is closed.
-      Instead, it was discarding the buffered data.
-    * lib/stdio: All output stream logic was modified to support CONFIG_STDIO_LINEBUFFER.
-      If standard C buffered I/O is enabled (CONFIG_STDIO_BUFFER_SIZE > 0), then this
-      option may be added to force automatic, line-oriented flushing the output buffer
-      for putc(), fputc(), putchar(), puts(), fputs(), printf(), fprintf(), and vfprintf().
-      When a newline is encountered in the output string, the output buffer will be
-      flushed.  This (slightly) increases the NuttX footprint but supports the kind of
-      behavior that people expect for printf.
-
-apps-6.2 2011-05-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * apps/examples/nxffs:  Add a test a a configuration that will be used to
-      verify NXFFS.
-
-apps-6.3 2011-05-15 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * apps/interpreter: Add a directory to hold interpreters.  The Pascal add-
-      on module now installs and builds under this directory.
-    * apps/interpreter/ficl: Added logic to build Ficl (the "Forth Inspired
-      Command Language").  See http://ficl.sourceforge.net/.
-    * apps/netutils/dhcpc, dhcpcd, and tftp.  If these directories are included
-      in the configuration but CONFIG_NET_UDP is disable (which is not very wise),
-      then a make error occurs because tools/mkdep.sh is called with no files.
-    * system/free: Move Uros' custom free command from vsn/free
-    * system/install: Add a new install command submitted by Uros Platise.
-    * examples/rgmp.  Add a placeholder for an RGMP build example.
-      RGMP is a project for running GPOS and RTOS simultaneously on
-      multi-processor platforms. See http://rgmp.sourceforge.net/wiki/index.php/Main_Page
-      for further information about RGMP.  NOTE:  This is an empty example
-      on initial check-in.
+    * nshlib/nsh_netcmds.c: If a network device name and IP address are provided
+      with the ifconfig command, then this command will now set the network address.
+      (Contributed by Yu Qiang).
+    * netutils/ftpc: A library to support client-side FTP.
+    * examples/ftpc: A simple add-on to the NSH.  From NSH, you can start
+      this simple FTP shell to transfer files to/from a remote FTP server.
 
 pascal-1.0 2011-05-15 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2303,49 +2257,9 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-6.4 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.5 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * lib/drivers/cc1101: Add initial, functional CC1101 wireless driver
-      (contributed by Uros Platise)
-    * arch/mips and configs/pcblogic-pic32mx: The MicroChip PIC32MX port is now
-      code complete and ready to begin testing.  Unfortunately, it looks like
-      testing will be delayed due to tool issues (My PICkit 2 will not work the
-      the MPLAB debugger on PIC32; I will need to get a PICkit 3).
-    * drivers/net/e1000.c/h: A PCI-based E1000 ethernet driver submitted
-      by Yu Qiang.
-    * lib/net/lib_inetaddr.c: An implementation of the inet_addr() function
-      submitted by Yu Qiang.
-    * arch/arm/src/lpc31xx and arch/arm/include/lpc31xx:  Renamed from lpc313x
-      to make name space for other famiy members.
-    * arch/arm/*/lpc31xx: Added support for the LPC315x family (untested).
-    * sched/task_exithook.c: Functionality performed when a task exits or is
-      deleted has been moved to a common file task_exithook.c.  Now exit()
-      functionality (like flushing I/O and calling registered atexit()
-      functions, etc.) will be performed when a task is deleted as well.
-    * mm/:  Added support for CONFIG_MM_SMALL. Each memory allocation has a
-      small allocation overhead.  The size of that overhead is normally
-      determined by the &quot;width&quot; of the address support by the MCU.  MCUs
-      that support 16-bit addressability have smaller overhead than devices
-      that support 32-bit addressability.  However, there are many MCUs
-      that support 32-bit addressability *but* have internal SRAM of size
-      less than or equal to 64Kb.  In this case, CONFIG_MM_SMALL can be
-      defined so that those MCUs will also benefit from the smaller, 16-
-      bit-based allocation overhead.
-    * lib/string/lib_strndup.c: Add standard strndup() library function.
-    * net/getsockname.c: Added standard getsockname() to return the local
-      address associated with a socket.
-    * lib/stdio/lib_asprintf.c: Add asprintf()
-    * configs/olimex-lpc1766stk/ftpc:  Add a configuration to support
-      testing of the FTP client shell.
-
-apps-6.4 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * nshlib/nsh_netcmds.c: If a network device name and IP address are provided
-      with the ifconfig command, then this command will now set the network address.
-      (Contributed by Yu Qiang).
-    * netutils/ftpc: A library to support client-side FTP.
-    * examples/ftpc: A simple add-on to the NSH.  From NSH, you can start
-      this simple FTP shell to transfer files to/from a remote FTP server.
+apps-6.5 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
