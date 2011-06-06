@@ -134,6 +134,18 @@
 
 #define UIP_REASS_MAXAGE (20*10) /* 20 seconds */
 
+/* Network drivers often receive packets with garbage at the end
+ * and are longer than the size of packet in the TCP header.  The
+ * following "fudge" factor increases the size of the I/O buffering
+ * by a small amount to allocate slightly oversize packets.  After
+ * receipt, the packet size will be chopped down to the size indicated
+ * in the TCP header.
+ */
+
+#ifndef CONFIG_NET_GUARDSIZE
+#  define CONFIG_NET_GUARDSIZE 2
+#endif
+
 /* ICMP configuration options */
 
 #if !defined(CONFIG_NET_ICMP) || defined(CONFIG_DISABLE_CLOCK)

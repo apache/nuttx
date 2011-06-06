@@ -53,6 +53,7 @@
 #include <nuttx/mii.h>
 
 #include <net/uip/uip.h>
+#include <net/uip/uipopt.h>
 #include <net/uip/uip-arp.h>
 #include <net/uip/uip-arch.h>
 
@@ -809,7 +810,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
        * imply that the packet is too big.
        */
  
-      /* else */ if (pktlen > CONFIG_NET_BUFSIZE+2)
+      /* else */ if (pktlen > CONFIG_NET_BUFSIZE + CONFIG_NET_GUARDSIZE)
         {
           nlldbg("Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
                  considx, prodidx, pktlen, *rxstat);

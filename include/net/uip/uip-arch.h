@@ -117,7 +117,7 @@ struct uip_driver_s
 #ifdef CONFIG_NET_MULTIBUFFER
   uint8_t *d_buf;
 #else
-  uint8_t d_buf[CONFIG_NET_BUFSIZE + 2];
+  uint8_t d_buf[CONFIG_NET_BUFSIZE + CONFIG_NET_GUARDSIZE];
 #endif
 
   /* d_appdata points to the location where application data can be read from
