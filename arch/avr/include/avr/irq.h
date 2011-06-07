@@ -93,21 +93,51 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 
+/* Read/write the SREG */
+
+static inline irqstate_t getsreg(void)
+{
+  irqstate_t sreg;
+  asm volatile ("in %0, __SREG__" : =r (sreg) :: );
+  return sreg;
+}
+
+static inline void putsreg(irqstate_t sreg)
+{
+  asm volatile ("out __SREG__, %s" : : "r" (sreg) : );
+}
+
+/* Interrupt enable/disable */
+
+static inline void irqenable()
+{
+  asm volatile ("sei" ::);
+}
+
+static inline void irqdisable()
+{
+  asm volatile ("cli" ::);
+}
+
 /* Save the current interrupt enable state & disable all interrupts */
 
 static inline irqstate_t irqsave(void)
 {
-  /* Needs to return the current interrupt state, then disable interrupts */
-#warning "Not implemented"
-  return 0
+  irqstate_t sreg;
+  asm volatile
+    (
+      "\tin %0, __SREG__\n"
+	  "\tcli\n
+	  : "=&r" (sreg) :: 
+	);
+  return sreg;
 }
 
 /* Restore saved interrupt state */
 
 static inline void irqrestore(irqstate_t flags)
 {
-  /* Based on the provided interrupt flags, conditionally enable interrupts */
-#warning "Not implemented"
+  asm volatile ("out __SREG__, %s" : : "r" (flags) : );
 }
 #endif /* __ASSEMBLY__ */
 
