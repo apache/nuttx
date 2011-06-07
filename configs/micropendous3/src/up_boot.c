@@ -47,8 +47,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "at90usb-internal.h"
-#include "micropendous3-internal.h"
+#include "at90usb_internal.h"
+#include "micropendous3_internal.h"
 
 /************************************************************************************
  * Definitions
