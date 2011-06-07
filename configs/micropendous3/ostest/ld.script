@@ -144,8 +144,6 @@ SECTIONS
 		_ebss = ABSOLUTE(.);
 	} > sram
 
-	.bss	SIZEOF(.data) + ADDR(.data) :
-
 	/* Global data not cleared after reset.	*/
 
 	.noinit			:
