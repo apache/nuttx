@@ -33,26 +33,30 @@
 #
 ############################################################################
 
+-include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
 -include chip/Make.defs
 
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(CONFIG_ARCH_AVR32),y)
 ARCH_SUBDIR	= avr32
+endif
 ifeq ($(CONFIG_ARCH_AVR),y)
 ARCH_SUBDIR	= avr
 endif
 
 ifeq ($(WINTOOL),y)
   NUTTX		= "${shell cygpath -w $(TOPDIR)/nuttx}"
-  INCLUDES	= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-		   -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}" \
-		   -I "${shell cygpath -w $(TOPDIR)/sched}"
+  INCLUDES	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
+  INCLUDES	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
+  INCLUDES	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
+  INCLUDES	+= -I "${shell cygpath -w $(TOPDIR)/sched}"
 else
-  NUTTX		= $(TOPDIR)/nuttx
-  INCLUDES	= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common \
-		   -I$(ARCH_SRCDIR)/$(ARCH_SUBDIR) -I$(TOPDIR)/sched
+  NUTTX		= "$(TOPDIR)/nuttx"
+  INCLUDES	+= -I "$(ARCH_SRCDIR)/chip"
+  INCLUDES	+= -I "$(ARCH_SRCDIR)/common"
+  INCLUDES	+= -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)"
+  INCLUDES	+= -I "$(TOPDIR)/sched"
 endif
 
 CPPFLAGS	+= $(INCLUDES)

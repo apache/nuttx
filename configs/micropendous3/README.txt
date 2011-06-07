@@ -139,6 +139,11 @@ NuttX buildroot Toolchain
      cd tools
      ./configure.sh micropendous3/<sub-dir>
 
+	 NOTE: you also must copy avr-libc header files into the NuttX include
+	 directory with command perhaps like:
+
+	 cp -a /cygdrive/c/WinAVR/include/avr include/.
+
   2. Download the latest buildroot package into <some-dir>
 
   3. unpack the buildroot tarball.  The resulting directory may
@@ -163,17 +168,33 @@ NuttX buildroot Toolchain
 avr-libc
 ^^^^^^^^
 
-Build Notes:
+Header Files
 
-  In any case, avr-libc is required.  http://www.nongnu.org/avr-libc/.
-  An snapshot of avr-lib is included in the WinAVR installation. For Linux
+  In any case, header files from avr-libc are required:  http://www.nongnu.org/avr-libc/.
+  A snapshot of avr-lib is included in the WinAVR installation. For Linux
   development platforms, avr-libc package is readily available (and would
   be installed in the apt-get command shown above).  But if you are using
   the NuttX buildroot configuration on Cygwin, then you will have to build
-  avr-libc from binaries.
+  get avr-libc from binaries.
 
-  Below are instructions for building avr-lib from fresh sources (I started
-  this before I realized at tha avr-lib is included in the WinAVR install):
+Header File Installation
+
+  The NuttX build will required that the AVR header files be available via
+  the NuttX include directory.  This can be accomplished by either copying
+  the avr-libc header files into the NuttX include directory:
+
+  cp -a <avr-libc-path>/include/avr <nuttx-path>/include/.
+
+  Or simply using a symbolic link:
+
+  ln -s <avr-libc-path>/include/avr <nuttx-path>/include/.
+
+Build Notes:
+
+  It may not necessary to have a built version of avr-lib; only header files
+  are required.  Bu if you choose to use the optimized libraru functions of
+  the flowing point library, then you may have to build avr-lib from sources.
+  Below are instructions for building avr-lib from fresh sources:
 
   1. Download the avr-libc package from: 
 
@@ -186,7 +207,8 @@ Build Notes:
      tar jxf avr-lib-1.7.1.tar.bz2
      cd avr-lib-1.7.1
 
-  3. Configure avr-lib.  Assuming that WinAVR is installed at
+  3. Configure avr-lib.  Assuming that WinAVR is installed at the following
+     location:
 
      export PATH=/cygdrive/c/WinAVR/bin:$PATH
      ./configure --build=`./config.guess` --host=avr
@@ -203,16 +225,6 @@ Build Notes:
   5. Install avr-lib.
 
      make install
-
-Include Path:
-
-  After configuration, the Make.def file installed in the top-level NuttX
-  directory will need to be modified to include the path to the where ever
-  the include/avr directory was installed (no other avr-libc header files
-  are needed).  For, for example, if WinAVR is installed at C:/WinAVR, the
-  AVR header files will be at C:/WinAVR/avr/include/avr
-
-  AVRLIBC_INCPATH=${cygpath -u "C:/WinAVR/avr/include/avr"}
 
 Micropendous3 Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -337,6 +349,10 @@ be selected as follow:
 	./configure.sh micropendous3/<subdir>
 	cd -
 	. ./setenv.sh
+
+NOTE: You must also copy avr-libc header files, perhaps like:
+
+	 cp -a /cygdrive/c/WinAVR/include/avr include/.
 
 Where <subdir> is one of the following:
 

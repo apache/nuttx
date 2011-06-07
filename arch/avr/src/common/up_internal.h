@@ -40,8 +40,16 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
+#endif
+
+#ifdef CONFIG_ARCH_AVR32
+# include "avr32_internal.h"
+#else
+# include "avr_internal.h"
 #endif
 
 /****************************************************************************
@@ -65,14 +73,6 @@
 # define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-/* Macros to handle saving and restore interrupt state.  The state is copied
- * from the stack to the TCB, but only a referenced is passed to get the 
- * state from the TCB.
- */
-
-#define up_savestate(regs)    up_copystate(regs, (uint32_t*)current_regs)
-#define up_restorestate(regs) (current_regs = regs)
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -86,21 +86,6 @@ typedef void (*up_vector_t)(void);
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during
- * interrupt processing.
- */
-
-extern volatile uint32_t *current_regs;
-
-/* This is the beginning of heap as provided from up_head.S.
- * This is the first address in DRAM after the loaded
- * program+bss+idle stack.  The end of the heap is
- * CONFIG_DRAM_END
- */
-
-extern uint32_t g_heapbase;
-
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
@@ -126,7 +111,8 @@ extern uint32_t _sdata;           /* Start of .data */
 extern uint32_t _edata;           /* End+1 of .data */
 extern uint32_t _sbss;            /* Start of .bss */
 extern uint32_t _ebss;            /* End+1 of .bss */
-#endif
+
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Inline Functions
@@ -141,20 +127,15 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 /* Defined in files with the same name as the function */
 
 extern void up_boot(void);
-extern void up_copystate(uint32_t *dest, uint32_t *src);
 extern void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA
 extern void weak_function up_dmainitialize(void);
 #endif
-extern int  up_saveusercontext(uint32_t *saveregs);
-extern void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
-extern void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 extern void up_sigdeliver(void);
 extern int  up_timerisr(int irq, uint32_t *regs);
 extern void up_lowputc(char ch);
 extern void up_puts(const char *str);
 extern void up_lowputs(const char *str);
-extern uint32_t *up_doirq(int irq, uint32_t *regs);
 
 /* Defined in common/up_allocateheap.c or chip/xxx_allocateheap.c */
 

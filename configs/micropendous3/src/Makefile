@@ -35,8 +35,6 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
-
 ASRCS		= 
 CSRCS		= up_boot.c
 
@@ -51,12 +49,23 @@ SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ifeq ($(CONFIG_ARCH_AVR32),y)
+ARCH_SUBDIR	= avr32
+endif
+ifeq ($(CONFIG_ARCH_AVR),y)
+ARCH_SUBDIR	= avr
+endif
+
 ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/mips32}"
+  CFLAGS	+= -I "${shell cygpath -w $(TOPDIR)/sched}"
+  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" 
+  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" 
+  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
 else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/mips32
+  CFLAGS	+= -I "$(TOPDIR)/sched"
+  CFLAGS	+= -I "$(ARCH_SRCDIR)/chip"
+  CFLAGS	+= -I "$(ARCH_SRCDIR)/common" 
+  CFLAGS	+= -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)"
 endif
 
 all: libboard$(LIBEXT)

@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/micropendous3/src/up_boot.c
- * arch/mips/src/board/up_boot.c
+ * arch/avr/src/at90usb/at90usb_config.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,60 +33,30 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_AVR_SRC_ATMEGA_ATMEGA_CONFIG_H
+#define __ARCH_AVR_SRC_ATMEGA_ATMEGA_CONFIG_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "at90usb_internal.h"
-#include "micropendous3_internal.h"
-
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
- * Private Functions
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
  ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: at90usb_boardinitialize
- *
- * Description:
- *   All AT90USB architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
- *
- ************************************************************************************/
+#endif /* __ARCH_AVR_SRC_ATMEGA_ATMEGA_CONFIG_H */
 
-void at90usb_boardinitialize(void)
-{
-  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function at90usb_spiinitialize() has been brought into the link.
-   */
-
-#if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
-  if (at90usb_spiinitialize)
-    {
-      at90usb_spiinitialize();
-    }
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  at90usb_ledinit();
-#endif
-}

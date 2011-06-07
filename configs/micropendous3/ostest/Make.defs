@@ -44,7 +44,6 @@ ifeq ($(CONFIG_AVR_WINAVR),y)
   MAXOPTIMIZATION = -O2
   ARCHCPUFLAGS = -mmcu=at90usb647
   LDFLAGS += -nostartfiles -nodefaultlibs
-  AVRLIBC_INCPATH=${cygpath -u "C:/WinAVR/avr/include/avr"}
 endif
 
 ifeq ($(CONFIG_AVR_LINUXGCC),y)
@@ -53,7 +52,6 @@ ifeq ($(CONFIG_AVR_LINUXGCC),y)
   MAXOPTIMIZATION = -O2
   ARCHCPUFLAGS = -mmcu=at90usb647
   LDFLAGS += -nostartfiles -nodefaultlibs
-  AVRLIBC_INCPATH= #Where?
 endif
 
 ifeq ($(CONFIG_AVR_BUILDROOT),y)
@@ -62,7 +60,6 @@ ifeq ($(CONFIG_AVR_BUILDROOT),y)
   MAXOPTIMIZATION = -O2
   ARCHCPUFLAGS = -mmcu=at90usb647
   LDFLAGS += -nostartfiles -nodefaultlibs
-  AVRLIBC_INCPATH= #Where?
 endif
 
 ifeq ($(WINTOOL),y)
@@ -70,13 +67,13 @@ ifeq ($(WINTOOL),y)
   DIRLINK = $(TOPDIR)/tools/winlink.sh
   DIRUNLINK = $(TOPDIR)/tools/unlink.sh
   MKDEP = $(TOPDIR)/tools/mknulldeps.sh
-  ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -I "${shell cygpath -w $(AVRLIBC_INCPATH)}"
+  ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = $(ARCHINCLUDES) -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script}"
 else
   # Linux/Cygwin-native toolchain 
   MKDEP = $(TOPDIR)/tools/mkdeps.sh
-  ARCHINCLUDES = -I. -isystem "$(TOPDIR)/include" -I "$(AVRLIBC_INCPATH)"
+  ARCHINCLUDES = -I. -isystem "$(TOPDIR)/include"
   ARCHXXINCLUDES =  $(ARCHINCLUDES) -isystem "$(TOPDIR)/include/cxx"
   ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
 endif
