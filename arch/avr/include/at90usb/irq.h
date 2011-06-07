@@ -104,23 +104,6 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-/* Save the current interrupt enable state & disable all interrupts */
-
-static inline irqstate_t irqsave(void)
-{
-  /* Needs to return the current interrupt state, then disable interrupts */
-#warning "Not implemented"
-  return 0
-}
-
-/* Restore saved interrupt state */
-
-static inline void irqrestore(irqstate_t flags)
-{
-  /* Based on the provided interrupt flags, conditionally enable interrupts */
-#warning "Not implemented"
-}
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
