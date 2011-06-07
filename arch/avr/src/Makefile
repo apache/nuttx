@@ -39,6 +39,8 @@
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(CONFIG_ARCH_AVR32),y)
 ARCH_SUBDIR	= avr32
+ifeq ($(CONFIG_ARCH_AVR),y)
+ARCH_SUBDIR	= avr
 endif
 
 ifeq ($(WINTOOL),y)
