@@ -46,7 +46,20 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-#define STACKBASE (_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
+/* Stack is allocated just after .bss and before the heap */
+
+#define STACKBASE (_ebss+CONFIG_IDLETHREAD_STACKSIZE-1)
+
+/* The RAMPZ register is only available for CPUs with more than 64Kb of FLASH.
+ * Only the AT90USB646, 647, 1286, and 1287 are supported by this file.
+ *
+ * - Support for the EPLMX instructions is assumed if RAMPZ is present
+ * - If RAMPZ is not present, support for LPMX is assumed
+ */
+
+#if defined(CONFIG_ARCH_CHIP_AT90USB1286) || defined(CONFIG_ARCH_CHIP_AT90USB1286)
+#  define HAVE_RAMPZ 1
+#endif
 
 /****************************************************************************
  * External Symbols
@@ -180,6 +193,7 @@ __start:
 
 	/* Copy initial global data values from FLASH into RAM */
 
+#ifdef HAVE_RAMPZ
 	ldi		r17, hi8(_edata)
 	ldi		r26, lo8(_sdata)
 	ldi		r27, hi8(_sdata)
@@ -197,6 +211,22 @@ __start:
 	cpi		r26, lo8(_edata)
 	cpc		r27, r17
 	brne	.Lcopyloop
+#else
+	ldi		r17, hi8(_edata)
+	ldi		r26, lo8(_sdata)
+	ldi		r27, hi8(_sdata)
+	ldi		r30, lo8(_eronly)
+	ldi		r31, hi8(_eronly)
+	rjmp	.Lcopystart
+
+.Lcopyloop:
+	lpm     r0, Z+
+	st      X+, r0
+.Lcopystart:
+	cpi     r26, lo8(_edata)
+	cpc     r27, r17
+	brne    .Lcopyloop
+#endif
 
 	/* Clear uninitialized data */
 
