@@ -32,20 +32,30 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-if [ "$(basename $0)" = "setenv.sh" ] ; then
+if [ "$(basename $0)" = "setenv.sh" ]; then
   echo "You must source this script, not run it!" 1>&2
   exit 1
 fi
 
-if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
-
 WD=`pwd`
+if [ ! -x "setenv.sh" ]; then
+  echo "This script must be executed from the toplevel NuttX build directory"
+  exit 1
+fi
+
+if [ -z "${PATH_ORIG}" ]; then
+  export PATH_ORIG="${PATH}"
+fi
 
 # This the Cygwin path to the location where I installed the WinAVR
 # toolchain under windows.  This is *not* the default install
 # location so you will probably have to edit this.  You will also have
 # to edit this if you install the Linux AVR toolchain as well
-export TOOLCHAIN_BIN="/cygdrive/c/WinAVR/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/WinAVR/bin"
+
+# This the Cygwin path to the location where I build the buildroot
+# toolchain.
+export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_avr/staging_dir/bin"
 
 # Add the path to the toolchain to the PATH varialble
 export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"

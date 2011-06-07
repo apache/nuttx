@@ -1,49 +1,30 @@
 README
 ^^^^^
 
-This is the README file for the port of NuttX to the Micropendous 3 board.
-This board is develepmend by http://code.google.com/p/opendous/.  The
-Micropendous 3 is based on an Atmel AT90USB646, 647, 1286 or 1287 MCU.
-NuttX was ported using the AT90USB647 version.  As of this writing,
-documentation for the Micropendous board is available here:
-http://code.google.com/p/micropendous/wiki/Micropendous3
+This is the README file for the port of NuttX to the Amber Web Server from
+SoC Robotics (http://www.soc-robotics.com/index.htm).  The
+Amber Web Server is based on an Atmel ATMega128.  As of this writing,
+documentation for the Amber Web Server board is available here:
+
+http://www.soc-robotics.com/product/Amber_Specs/Amber_Processor.html
+
+and
+
+http://www.soc-robotics.com/pdfs/Amber%201-5a%20Hardware%20Reference%20Guide.pdf
 
 Contents
 ^^^^^^^^
 
-  o Micropendous3 Features
+  o Amber Web Server Features
   o Toolchains
   o Windows Native Toolchains
   o NuttX buildroot Toolchain
   o avr-libc
-  o Micropendous3 Configuration Options
+  o Amber Web Server Configuration Options
   o Configurations
 
-Micropendous3 Features
-^^^^^^^^^^^^^^^^^^^^^^
-
-  o Based on the 64-pin USB AVR Microcontrollers: AT90USB646, AT90USB647,
-    AT90USB1286, or AT90USB1287.
-  o USB Full Speed (12Mbit/s)
-  o USB Device Mode (Host mode supported with AT90USBxx7 devices)
-  o 60kb (AT90USB64) or 120kb (AT90USB128) of available FLASH memory for
-    your programs (4kb(AT90USB64)/8kb(AT90USB128) used by USB bootloader -
-    stock Atmel or LUFA)
-  o 4 kbytes SRAM and 2 kbytes of EEPROM (AT90USB64) or 8 kbytes SRAM and 4
-    kbytes of EEPROM (AT90USB128)
-  o external SRAM is possible
-  o USB powered
-  o 16MHz crystal
-  o 48 General Purpose IO Pins (47 with external SRAM)
-  o Vcc=VBUS jumper selects whether USB VBUS or an external supply is used
-    to power the board
-  o RESET and HWB buttons to enable firmware loading over USB (no external
-    programmer required)
-  o HWB can be used as a user button
-  o USB-A Plug
-  o JTAG header
-  o Size LxWxH (including headers): 3.15" x 0.8" x 0.6" =~ 8cm x 2cm x 1.5cm
-  o Completely OpenHardware Design
+Amber Web Server Features
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Toolchains
 ^^^^^^^^^^
@@ -137,7 +118,7 @@ NuttX buildroot Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh micropendous3/<sub-dir>
+     ./configure.sh amber/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -214,7 +195,7 @@ Include Path:
 
   AVRLIBC_INCPATH=${cygpath -u "C:/WinAVR/avr/include/avr"}
 
-Micropendous3 Configuration Options
+Amber Web Server Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
@@ -228,30 +209,25 @@ Micropendous3 Configuration Options
 
 	CONFIG_ARCH_architecture - For use in C code:
 
-	   CONFIG_ARCH_AT90USB=y
+	   CONFIG_ARCH_ATMEGA=y
 
 	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-	   CONFIG_ARCH_CHIP=at90usb
+	   CONFIG_ARCH_CHIP=atmega
 
 	CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
-	   chip.  This should be exactly one of
+	   chip:
 
-	   CONFIG_ARCH_CHIP_AT90USB646=y
-	   CONFIG_ARCH_CHIP_AT90USB647=y
-	   CONFIG_ARCH_CHIP_AT90USB1286=y
-	   CONFIG_ARCH_CHIP_AT90USB1287=y
-
-	   Depending on which Micropendous3 version you have.
+	   CONFIG_ARCH_CHIP_ATMEGA128=y
 
 	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 	   hence, the board that supports the particular chip or SoC.
 
-	   CONFIG_ARCH_BOARD=micropendous3
+	   CONFIG_ARCH_BOARD=amber
 
 	CONFIG_ARCH_BOARD_name - For use in C code
 
-	   CONFIG_ARCH_BOARD_MICROPENOUS3=y
+	   CONFIG_ARCH_BOARD_AMBER=y
 
 	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
 	   of delay loops
@@ -261,7 +237,6 @@ Micropendous3 Configuration Options
 
 	CONFIG_DRAM_SIZE - Describes the installed DRAM.  One of:
 
-	   CONFIG_DRAM_SIZE=(4*1024) - (4Kb)
 	   CONFIG_DRAM_SIZE=(8*1024) - (8Kb)
 
 	CONFIG_DRAM_START - The start address of installed DRAM
@@ -293,28 +268,29 @@ Micropendous3 Configuration Options
 
 	Individual subsystems can be enabled:
 
-	  CONFIG_AVR_INT0=n
-	  CONFIG_AVR_INT1=n
-	  CONFIG_AVR_INT2=n
-	  CONFIG_AVR_INT3=n
-	  CONFIG_AVR_INT4=n
-	  CONFIG_AVR_INT5=n
-	  CONFIG_AVR_INT6=n
-	  CONFIG_AVR_INT7=n
-	  CONFIG_AVR_USBHOST=n
-	  CONFIG_AVR_USBDEV=n
-	  CONFIG_AVR_WDT=n
-	  CONFIG_AVR_TIMER0=n
-	  CONFIG_AVR_TIMER1=n
-	  CONFIG_AVR_TIMER2=n
-	  CONFIG_AVR_TIMER3=n
-	  CONFIG_AVR_SPI=n
-	  CONFIG_AVR_UART1=y
-	  CONFIG_AVR_ANACOMP=n
-	  CONFIG_AVR_ADC=n
-	  CONFIG_AVR_TWI=n
+	   CONFIG_AVR_INT0=n
+	   CONFIG_AVR_INT1=n
+	   CONFIG_AVR_INT2=n
+	   CONFIG_AVR_INT3=n
+	   CONFIG_AVR_INT4=n
+	   CONFIG_AVR_INT5=n
+	   CONFIG_AVR_INT6=n
+	   CONFIG_AVR_INT7=n
+	   CONFIG_AVR_USBHOST=n
+	   CONFIG_AVR_USBDEV=n
+	   CONFIG_AVR_WDT=n
+	   CONFIG_AVR_TIMER0=n
+	   CONFIG_AVR_TIMER1=n
+	   CONFIG_AVR_TIMER2=n
+	   CONFIG_AVR_TIMER3=n
+	   CONFIG_AVR_SPI=n
+	   CONFIG_AVR_UART0=y
+	   CONFIG_AVR_UART1=n
+	   CONFIG_AVR_ANACOMP=n
+	   CONFIG_AVR_ADC=n
+	   CONFIG_AVR_TWI=n
 
-  AT90USB specific device driver settings
+  ATMEGA specific device driver settings
 
 	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
 	   console and ttys0 (default is the UART0).
@@ -330,11 +306,11 @@ Micropendous3 Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Micropendous3 configuration is maintained in a sudirectory and can
+Each Amber Web Server configuration is maintained in a sudirectory and can
 be selected as follow:
 
 	cd tools
-	./configure.sh micropendous3/<subdir>
+	./configure.sh amber/<subdir>
 	cd -
 	. ./setenv.sh
 
