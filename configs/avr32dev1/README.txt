@@ -120,16 +120,25 @@ Development Environment
 GNU Toolchains
 ^^^^^^^^^^^^^^
 
-The build logic in these directories assume that you are using the GNU
-toolchain with the Atmel patches.  The patch file, pre-patched tool sources,
-and pre-built binaries are available from the Atmel website.
+Atmel Toolchain:
 
-  CONFIG_AVR32_AVRTOOLSW=y  # Use the windows version
-  CONFIG_AVR32_AVRTOOLSL=y  # Ue the Linux version
+  The build logic in these directories assume that you are using the GNU
+  toolchain with the Atmel patches.  The patch file, pre-patched tool
+  sources,and pre-built binaries are available from the Atmel website.
 
-NOTE: The NuttX builtroot cannot be used to build the AVR32 toolchain.
-This is because the Atmel patches that add support for the AVR32 are not
-included in the NuttX buildroot.
+    CONFIG_AVR32_AVRTOOLSW=y  # Use the windows version
+    CONFIG_AVR32_AVRTOOLSL=y  # Ue the Linux version
+
+  NOTE: The NuttX builtroot cannot be used to build the AVR32 toolchain.
+  This is because the Atmel patches that add support for the AVR32 are not
+  included in the NuttX buildroot.
+
+WinAVR:
+
+  Another option for use under Windows is WinAVR:
+  http://sourceforge.net/projects/winavr/files/.  WinAVR includes the
+  AVR32 toolchain as well as the AVR toolchain and various support
+  libraries and header files.
 
 IDEs
 ^^^^
