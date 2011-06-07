@@ -78,7 +78,7 @@ void at90usb_boardinitialize(void)
    * function at90usb_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_AT90USB_SPI1) || defined(CONFIG_AT90USB_SPI2)
+#if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
   if (at90usb_spiinitialize)
     {
       at90usb_spiinitialize();

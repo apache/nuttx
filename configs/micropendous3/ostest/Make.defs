@@ -38,19 +38,31 @@ include ${TOPDIR}/.config
 # Setup for the selected toolchain
 
 ifeq ($(CONFIG_AVR_WINAVR),y)
-  # WinAVR toolchain under Windows
+  # WinAVR toolchain under Windows/Cygwin
   CROSSDEV = avr-
   WINTOOL = y
   MAXOPTIMIZATION = -O2
-  ARCHCPUFLAGS = -mcu=at90usb647
+  ARCHCPUFLAGS = -mmcu=at90usb647
   LDFLAGS += -nostartfiles -nodefaultlibs
+  AVRLIBC_INCPATH=${cygpath -u "C:/WinAVR/avr/include/avr"}
 endif
+
 ifeq ($(CONFIG_AVR_LINUXGCC),y)
-  # GCC toolchain under Linx
+  # GCC toolchain under Linux
   CROSSDEV = avr-
   MAXOPTIMIZATION = -O2
-  ARCHCPUFLAGS = -mprocessor=elf32pic32mx -mno-float -mlong32 -membedded-data
+  ARCHCPUFLAGS = -mmcu=at90usb647
   LDFLAGS += -nostartfiles -nodefaultlibs
+  AVRLIBC_INCPATH= #Where?
+endif
+
+ifeq ($(CONFIG_AVR_BUILDROOT),y)
+  # NuttX buildroot GCC toolchain under Linux or Cygwin
+  CROSSDEV = avr-elf-
+  MAXOPTIMIZATION = -O2
+  ARCHCPUFLAGS = -mmcu=at90usb647
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  AVRLIBC_INCPATH= #Where?
 endif
 
 ifeq ($(WINTOOL),y)
@@ -58,14 +70,14 @@ ifeq ($(WINTOOL),y)
   DIRLINK = $(TOPDIR)/tools/winlink.sh
   DIRUNLINK = $(TOPDIR)/tools/unlink.sh
   MKDEP = $(TOPDIR)/tools/mknulldeps.sh
-  ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
-  ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
+  ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -I "${shell cygpath -w $(AVRLIBC_INCPATH)}"
+  ARCHXXINCLUDES = $(ARCHINCLUDES) -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script}"
 else
   # Linux/Cygwin-native toolchain 
   MKDEP = $(TOPDIR)/tools/mkdeps.sh
-  ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
-  ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
+  ARCHINCLUDES = -I. -isystem "$(TOPDIR)/include" -I "$(AVRLIBC_INCPATH)"
+  ARCHXXINCLUDES =  $(ARCHINCLUDES) -isystem "$(TOPDIR)/include/cxx"
   ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
 endif
 

@@ -76,7 +76,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-#if defined(CONFIG_AT90USB_SPI1) || defined(CONFIG_AT90USB_SPI2)
+#if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
 EXTERN void weak_function at90usb_spiinitialize(void);
 #endif
 
