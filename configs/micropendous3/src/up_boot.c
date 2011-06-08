@@ -63,7 +63,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: at90usb_boardinitialize
+ * Name: up_boardinitialize
  *
  * Description:
  *   All AT90USB architectures must provide the following entry point.  This entry
@@ -72,7 +72,7 @@
  *
  ************************************************************************************/
 
-void at90usb_boardinitialize(void)
+void up_boardinitialize(void)
 {
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
    * function at90usb_spiinitialize() has been brought into the link.

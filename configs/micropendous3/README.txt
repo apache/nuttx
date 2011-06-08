@@ -321,23 +321,23 @@ Micropendous3 Configuration Options
 	  CONFIG_AVR_TIMER2=n
 	  CONFIG_AVR_TIMER3=n
 	  CONFIG_AVR_SPI=n
-	  CONFIG_AVR_UART1=y
+	  CONFIG_AVR_USART1=y
 	  CONFIG_AVR_ANACOMP=n
 	  CONFIG_AVR_ADC=n
 	  CONFIG_AVR_TWI=n
 
   AT90USB specific device driver settings
 
-	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
-	   console and ttys0 (default is the UART0).
-	CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+	CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
+	   console and ttys0 (default is no serial console).
+	CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
 	   This specific the size of the receive buffer
-	CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+	CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
 	   being sent.  This specific the size of the transmit buffer
-	CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
-	CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
-	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-	CONFIG_UARTn_2STOP - Two stop bits
+	CONFIG_USARTn_BAUD - The configure BAUD of the USART.  Must be
+	CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
+	CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+	CONFIG_USARTn_2STOP - Two stop bits
 
 Configurations
 ^^^^^^^^^^^^^^
