@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr32/src/avr32/up_exceptions.S
+ * arch/avr/src/avr32/up_exceptions.S
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

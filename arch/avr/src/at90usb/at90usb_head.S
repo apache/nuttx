@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#define __AVR_ATmega128__
+
 #include <avr/io.h>
 #include <avr/sfr_defs.h>
 
@@ -83,7 +83,7 @@
 	.global	at90usb_int5		/* External interrupt request 5 */
 	.global	at90usb_int6		/* External interrupt request 6 */
 	.global	at90usb_int7		/* External interrupt request 7 */
-	.global	at90usb_pcint0		/* PCINT0 Pin Change Interrupt Request 0 */
+	.global	at90usb_pcint0		/* Pin Change Interrupt Request 0 */
 	.global	at90usb_usbgen		/* USB General USB General Interrupt request */
 	.global	at90usb_usbep		/* USB Endpoint/Pipe USB ENdpoint/Pipe Interrupt request */
 	.global	at90usb_wdt			/* Watchdog Time-out Interrupt */

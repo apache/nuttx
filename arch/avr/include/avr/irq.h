@@ -52,12 +52,46 @@
  ****************************************************************************/
 
 /* Register state save array indices */
- 
-#define REG_Rx           0 /* Just a placeholder */
 
-/* Size of the register state save array (in bytes?) */
+#define REG_SPH           0 /* Stack pointer on exception entry */
+#define REG_SPL           1
+#define REG_R27           2 /* r26-r27 */
+#define REG_R26           3
+#define REG_R31           4 /* r18-r31 */
+#define REG_R30           5
+#define REG_R29           6
+#define REG_R28           7
+#define REG_R25           8 /* r25 */
+#define REG_R23           9 /* r2-r23 */
+#define REG_R22          10
+#define REG_R21          11
+#define REG_R20          12
+#define REG_R19          13
+#define REG_R18          14
+#define REG_R17          15
+#define REG_R16          16
+#define REG_R15          17
+#define REG_R14          18
+#define REG_R13          19
+#define REG_R12          20
+#define REG_R11          21
+#define REG_R10          22
+#define REG_R9           23
+#define REG_R8           24
+#define REG_R7           25
+#define REG_R6           26
+#define REG_R5           27
+#define REG_R4           28
+#define REG_R3           29
+#define REG_R2           30
+#define REG_R1           31 /* r1 - the "zero" register */
+#define REG_SREG         32 /* Status register */
+#define REG_R0           33 /* r0 */
+#define REG_R24          34 /* r24 */
 
-#define XCPTCONTEXT_REGS 1
+/* Size of the register state save array (in bytes) */
+
+#define XCPTCONTEXT_REGS 35
 
 /****************************************************************************
  * Public Types

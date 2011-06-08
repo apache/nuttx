@@ -63,7 +63,7 @@
 #define AT90USB_IRQ_INT5     5  /* 0x000c External Interrupt Request 5 */
 #define AT90USB_IRQ_INT6     6  /* 0x000e External Interrupt Request 6 */
 #define AT90USB_IRQ_INT7     7  /* 0x0010 External Interrupt Request 7 */
-#define AT90USB_IRQ_PCINT0   8  /* 0x0012 PCINT0 Pin Change Interrupt Request 0 */
+#define AT90USB_IRQ_PCINT0   8  /* 0x0012 Pin Change Interrupt Request 0 */
 #define AT90USB_IRQ_USBGEN   9  /* 0x0014 USB General USB General Interrupt request */
 #define AT90USB_IRQ_USBEP   10  /* 0x0016 USB Endpoint/Pipe USB ENdpoint/Pipe Interrupt request */
 #define AT90USB_IRQ_WDT     11  /* 0x0018 Watchdog Time-out Interrupt */

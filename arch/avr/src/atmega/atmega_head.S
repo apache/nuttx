@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#define __AVR_ATmega128__
+
 #include <avr/io.h>
 #include <avr/sfr_defs.h>
 
