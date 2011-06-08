@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/avr/avr_internal.h
+ *  arch/avr/src/avr/up_releasepending.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,69 +33,99 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AVR_AVR_INTERNAL_H
-#define __ARCH_AVR_SRC_AVR_AVR_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif
+#include <nuttx/config.h>
+
+#include <sched.h>
+#include <debug.h>
+#include <nuttx/arch.h>
+
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macros to handle saving and restore interrupt state.  The state is copied
- * from the stack to the TCB, but only a referenced is passed to get the 
- * state from the TCB.
- */
-
-#define up_savestate(regs)    up_copystate(regs, (uint8_t*)current_regs)
-#define up_restorestate(regs) (current_regs = regs)
-
 /****************************************************************************
- * Public Types
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level register storage
- * structure.  If is non-NULL only during interrupt processing.
- */
-
-extern volatile uint8_t *current_regs;
-
-/* This is the beginning of heap as provided from up_head.S. This is the first
- * address in DRAM after the loaded program+bss+idle stack.  The end of the
- * heap is CONFIG_DRAM_END
- */
-
-extern uint8_t g_heapbase;
-
-#endif /* __ASSEMBLY__ */
-
-/****************************************************************************
- * Inline Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+/****************************************************************************
+ * Name: up_release_pending
+ *
+ * Description:
+ *   Release and ready-to-run tasks that have
+ *   collected in the pending task list.  This can call a
+ *   context switch if a new task is placed at the head of
+ *   the ready to run list.
+ *
+ ****************************************************************************/
 
-extern void up_copystate(uint8_t *dest, uint8_t *src);
-extern int  up_saveusercontext(uint8_t *saveregs);
-extern void up_fullcontextrestore(uint8_t *restoreregs) __attribute__ ((noreturn));
-extern void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
-extern uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
+void up_release_pending(void)
+{
+  _TCB *rtcb = (_TCB*)g_readytorun.head;
 
-#endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_AVR_SRC_AVR_AVR_INTERNAL_H */
+  slldbg("From TCB=%p\n", rtcb);
+
+  /* Merge the g_pendingtasks list into the g_readytorun task list */
+
+  /* sched_lock(); */
+  if (sched_mergepending())
+    {
+      /* The currently active task has changed!  We will need to
+       * switch contexts.  First check if we are operating in
+       * interrupt context:
+       */
+
+      if (current_regs)
+        {
+          /* Yes, then we have to do things differently.
+           * Just copy the current_regs into the OLD rtcb.
+           */
+
+           up_savestate(rtcb->xcp.regs);
+
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
+
+          rtcb = (_TCB*)g_readytorun.head;
+          slldbg("New Active Task TCB=%p\n", rtcb);
+
+          /* Then switch contexts */
+
+          up_restorestate(rtcb->xcp.regs);
+        }
+
+      /* No, then we will need to perform the user context switch */
+
+      else
+        {
+          /* Switch context to the context of the task at the head of the
+           * ready to run list.
+           */
+
+          _TCB *nexttcb = (_TCB*)g_readytorun.head;
+          up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
+
+          /* up_switchcontext forces a context switch to the task at the
+           * head of the ready-to-run list.  It does not 'return' in the
+           * normal sense.  When it does return, it is because the blocked
+           * task is again ready to run and has execution priority.
+           */
+        }
+    }
+}
 

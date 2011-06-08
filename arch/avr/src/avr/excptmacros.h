@@ -1,22 +1,22 @@
 /********************************************************************************************
  * arch/avr/src/avr/excptmacros.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *	Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *	Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *	notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
+ *	notice, this list of conditions and the following disclaimer in
+ *	the documentation and/or other materials provided with the
+ *	distribution.
  * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ *	used to endorse or promote products derived from this software
+ *	without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -104,30 +104,39 @@
  *		RESTORE_STACK rx, ry		- Undo the operations of USE_STACK
  *		
  *		EXCPT_EPILOGUE				- Return to the context returned by handler()
+ *		reti						- Return from interrupt
  *
  ********************************************************************************************/
-/****************************************************************************
- * Macros
- ****************************************************************************/
 
 /********************************************************************************************
  * Name: HANDLER
  *
  * Description:
- *   This macro provides the exception entry logic.  It simply saves one register on the
- *   stack (r24) and passes the IRQ number to to common logic (see EXCPT_PROLOGUE).
+ *	This macro provides the exception entry logic.  It is called with the PC already on the
+ *	stack.  It simply saves one register on the  stack (r24) and passes the IRQ number to 
+ *	common logic (see EXCPT_PROLOGUE).
  *
  * On Entry:
- *   sp - Points to the top of the stack
- *   Only the stack is available for storage
+ *	sp - Points to the top of the stack.  The PC is already on the stack.
+ *	Only the stack is available for storage
+ *
+ *	 PCL
+ *	 PCH
+ *	 --- <- SP
  *
  * At completion:
- *   Stack pointer is incremented by one, the saved r24 is on the stack, r24 now contains the
- *   IRQ number
+ *	Stack pointer is incremented by one, the saved r24 is on the stack, r24 now contains the
+ *	IRQ number
+ *
+ *	 PCL
+ *	 PCH
+ *	 R0
+ *	 --- <- SP
  *
  ********************************************************************************************/
 
-	.macro  HANDLER, label, irqno, common
+	.macro	HANDLER, label, irqno, common
+	.global	\label
 \label:
 	push	r24
 	ldi		r24, \irqno
@@ -138,20 +147,26 @@
  * Name: EXCPT_PROLOGUE
  *
  * Description:
- *   Provides the common "prologue" logic that should appear at the beginning of the exception
- *   handler.
+ *	Provides the common "prologue" logic that should appear at the beginning of the exception
+ *	handler.
  *
  * On Entry:
- *   r0 - has already been pushed onto the stack and now holds the IRQ number
- *   sp - Points to the top of the stack
- *   Only the stack is available for storage
+ *	r0 - has already been pushed onto the stack and now holds the IRQ number
+ *	sp - Points to the top of the stack
+ *	Only the stack is available for storage
+ *
+ *	 PCL
+ *	 PCH
+ *	 R0
+ *	 --- <- SP
  *
  * At completion:
- *   Register state is saved on the stack; All registers are available for usage except sp.
+ *	Register state is saved on the stack; All registers are available for usage except sp.
  *
  ********************************************************************************************/
 
 	.macro	EXCPT_PROLOGUE
+
 	/* Save R1 - The zero register (but might not be zero) */
 
 	push	r1
@@ -228,15 +243,16 @@
  * Name: EXCPT_EPILOGUE
  *
  * Description:
- *   Provides the "epilogue" logic that should appear at the end of every exception handler.
+ *	Provides the "epilogue" logic that should appear at the end of every exception handler.
  *
  * On input:
- *   sp points to the address of the register save area (just as left by EXCPT_PROLOGUE).
- *   All registers are available for use.
- *   Interrupts are disabled.
+ *	sp points to the address of the register save area (just as left by EXCPT_PROLOGUE).
+ *	All registers are available for use.
+ *	Interrupts are disabled.
  *
  * On completion:
- *   All registers restored
+ *	All registers restored except the PC which remains on the stack so that a return
+ *	via reti can be performed.
  *
  ********************************************************************************************/
 
@@ -312,16 +328,17 @@
  * Name: USER_SAVE
  *
  * Description:
- *   Similar to EXPCT_PROLOGUE except that (1) this saves values into a register save
- *   data structure instead of on the stack, (2) the pointer is in r26;r27, and (3)
- *   Call-used registers are not saved.
+ *	Similar to EXPCT_PROLOGUE except that (1) this saves values into a register save
+ *	data structure instead of on the stack, (2) the pointer is in r26;r27, and (3)
+ *	Call-used registers are not saved.
  *
  * On Entry:
- *   X [r26:r27] - Points to the register save structure.
- *   Interrupts are disabled.
+ *	X [r26:r27] - Points to the register save structure.
+ *	Return address is already on the stack (due to CALL or RCALL instruction)/.
+ *	Interrupts are disabled.
  *
  * At completion:
- *   Register state is saved on the stack; All registers are available for usage except sp.
+ *	Register state is saved on the stack; All registers are available for usage except sp.
  *
  ********************************************************************************************/
 
@@ -377,35 +394,59 @@
 	st		x+, r0
 
 	/* Skip R0 and r24 - These are scratch register and Call-used, "volatile" registers */
+
+	adiw	r26, 2		/* Two registers: r0, r24 */
+
+	/* Pop and save the return address */
+
+	pop		r0
+	st		x+, r0
+	pop		r0
+	st		x+, r0
 	.endm
 
 /********************************************************************************************
  * Name: TCB_RESTORE
  *
  * Description:
- *   Functionally equivalent to EXCPT_EPILOGUE excetp that register save area is not on the
- *   stack but is held in a data structure.
+ *	Functionally equivalent to EXCPT_EPILOGUE excetp that register save area is not on the
+ *	stack but is held in a data structure.
  *
  * On input:
- *   X [r26:r27] points to the data structure.
- *   All registers are available for use.
- *   Interrupts are disabled.
+ *	X [r26:r27] points to the data structure.
+ *	All registers are available for use.
+ *	Interrupts are disabled.
  *
  * On completion:
- *   All registers restored
+ *	All registers restored except for the PC with now resides at the top of the new stack
+ *  so that iret can be used to switch to the new context.
  *
  ********************************************************************************************/
 
 	.macro	TCB_RESTORE, regs
 
-	/* Fetch the new stack pointer and the saved values of X [r26:r27].  Save X on the new
-	 * stack where we can recover it later.
-	 */
+	/* Fetch the new stack pointer */
 
 	ld		r24, x+				/* Fetch stack pointer (post-incrementing) */
 	out		__SP_L__, r24
 	ld		r25, x+
 	out		__SP_H__, r25
+ 
+	/* Fetch the return address and save it at the bottom of the new stack so
+	 * that we can iret to switch contexts.
+	 */
+
+	movw	r28, r26			/* Get a pointer to the PCH/PCL storage location */
+	adiw	r28, REG_PCH
+	ld		r25, y+				/* Load PCH and PCL */
+	ld		r24, y+
+	push	r24					/* Push PCH and PCL on the stack */
+	push	r25
+
+	/* Then get value of X [r26:r27].  Save X on the new stack where we can
+	 * recover it later.
+	 */
+
 	ld		r25, x+				/* Fetch r26-r27 and save to the new stack */
 	ld		r24, x+
 	push	r24
@@ -466,7 +507,9 @@
 	ld		r0, x+
 	ld		r24, x+
 
-	/* Finally, recover X [r26-r27] from the the new stack */
+	/* Finally, recover X [r26-r27] from the the new stack.  The PC remains on the new
+	 * stack so that the user of this macro can return with iret.
+	 */
 
 	pop		r27
 	pop		r26
@@ -476,18 +519,18 @@
  * Name: USE_INTSTACK
  *
  * Description:
- *   Switch to the interrupt stack (if enabled in the configuration) and if the nesting level
- *   is equal to 0.  Increment the nesting level in any event.
+ *	Switch to the interrupt stack (if enabled in the configuration) and if the nesting level
+ *	is equal to 0.  Increment the nesting level in any event.
  *
  * On Entry:
- *   sp - Current value of the user stack pointer
- *   tmp1, tmp2, and tmp3 are registers that can be used temporarily.
- *   All interrupts should still be disabled.
+ *	sp - Current value of the user stack pointer
+ *	tmp1, tmp2, and tmp3 are registers that can be used temporarily.
+ *	All interrupts should still be disabled.
  *
  * At completion:
- *   If the nesting level is 0, then (1) the user stack pointer is saved at the base of the
- *   interrupt stack and sp points to the interrupt stack.
- *   The values of tmp1, tmp2, tmp3, and sp have been altered
+ *	If the nesting level is 0, then (1) the user stack pointer is saved at the base of the
+ *	interrupt stack and sp points to the interrupt stack.
+ *	The values of tmp1, tmp2, tmp3, and sp have been altered
  *
  ********************************************************************************************/
 
@@ -501,16 +544,16 @@
  * Name: RESTORE_STACK
  *
  * Description:
- *   Restore the user stack.  Not really.. actually only decrements the nesting level.  We
- *   always get the new stack pointer for the register save array.
+ *	Restore the user stack.  Not really.. actually only decrements the nesting level.  We
+ *	always get the new stack pointer for the register save array.
  *
  * On Entry:
- *   tmp1 and tmp2 are registers that can be used temporarily.
- *   All interrupts must be disabled.
+ *	tmp1 and tmp2 are registers that can be used temporarily.
+ *	All interrupts must be disabled.
  *
  * At completion:
- *   Current nesting level is decremented
- *   The values of tmp1 and  tmp2 have been altered
+ *	Current nesting level is decremented
+ *	The values of tmp1 and  tmp2 have been altered
  *
  ********************************************************************************************/
 

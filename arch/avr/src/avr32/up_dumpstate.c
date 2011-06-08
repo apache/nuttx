@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/avr/src/avr32/up_assert.c
+ * arch/avr/src/avr32/up_dumpstate.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,8 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
+#ifdef CONFIG_ARCH_STACKDUMP
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -60,23 +62,8 @@
  * selected.
  */
 
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lib_lowprintf
-#endif
-
-/* The following is just intended to keep some ugliness out of the mainline
- * code.  We are going to print the task name if:
- *
- *  CONFIG_TASK_NAME_SIZE > 0 &&     <-- The task has a name
- *  (defined(CONFIG_DEBUG)    ||     <-- And the debug is enabled (lldbg used)
- *   defined(CONFIG_ARCH_STACKDUMP)) <-- Or lib_lowprintf() is used
- */
-
-#undef CONFIG_PRINT_TASKNAME
-#if CONFIG_TASK_NAME_SIZE > 0 && (defined(CONFIG_DEBUG) || defined(CONFIG_ARCH_STACKDUMP))
-#  define CONFIG_PRINT_TASKNAME 1
-#endif
+#undef  lldbg
+#define lldbg lib_lowprintf
 
 /****************************************************************************
  * Private Data
@@ -107,7 +94,6 @@ static inline uint32_t up_getsp(void)
  * Name: up_stackdump
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
 static void up_stackdump(uint32_t sp, uint32_t stack_base)
 {
   uint32_t stack ;
@@ -120,15 +106,11 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
-#else
-# define up_stackdump()
-#endif
 
 /****************************************************************************
  * Name: up_registerdump
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
 static inline void up_registerdump(void)
 {
   /* Are user registers available from interrupt processing? */
@@ -136,32 +118,32 @@ static inline void up_registerdump(void)
   if (current_regs)
     {
       lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-	        0,
-			current_regs[REG_R0], current_regs[REG_R1],
-			current_regs[REG_R2], current_regs[REG_R3],
-			current_regs[REG_R4], current_regs[REG_R5],
- 			current_regs[REG_R6], current_regs[REG_R7]);
+            0,
+            current_regs[REG_R0], current_regs[REG_R1],
+            current_regs[REG_R2], current_regs[REG_R3],
+            current_regs[REG_R4], current_regs[REG_R5],
+            current_regs[REG_R6], current_regs[REG_R7]);
 
       lldbg("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-	        8,
-			current_regs[REG_R8],  current_regs[REG_R9],
-			current_regs[REG_R10], current_regs[REG_R11],
-			current_regs[REG_R12], current_regs[REG_R13],
- 			current_regs[REG_R14], current_regs[REG_R15]);
+            8,
+            current_regs[REG_R8],  current_regs[REG_R9],
+            current_regs[REG_R10], current_regs[REG_R11],
+            current_regs[REG_R12], current_regs[REG_R13],
+            current_regs[REG_R14], current_regs[REG_R15]);
 
       lldbg("SR: %08x\n", current_regs[REG_SR]);
     }
 }
-#else
-# define up_registerdump()
-#endif
+
+/****************************************************************************
+ * Name: _up_assert
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: up_dumpstate
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
-static void up_dumpstate(void)
+void up_dumpstate(void)
 {
   _TCB    *rtcb = (_TCB*)g_readytorun.head;
   uint32_t sp   = up_getsp();
@@ -255,82 +237,4 @@ static void up_dumpstate(void)
 
   up_registerdump();
 }
-#else
-# define up_dumpstate()
 #endif
-
-/****************************************************************************
- * Name: _up_assert
- ****************************************************************************/
-
-static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
-{
-  /* Are we in an interrupt handler or the idle task? */
-
-  if (current_regs || ((_TCB*)g_readytorun.head)->pid == 0)
-    {
-       (void)irqsave();
-        for(;;)
-          {
-#ifdef CONFIG_ARCH_LEDS
-            up_ledon(LED_PANIC);
-            up_mdelay(250);
-            up_ledoff(LED_PANIC);
-            up_mdelay(250);
-#endif
-          }
-    }
-  else
-    {
-      exit(errorcode);
-    }
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_assert
- ****************************************************************************/
-
-void up_assert(const uint8_t *filename, int lineno)
-{
-#ifdef CONFIG_PRINT_TASKNAME
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
-#endif
-
-  up_ledon(LED_ASSERTION);
-#ifdef CONFIG_PRINT_TASKNAME
-  lldbg("Assertion failed at file:%s line: %d task: %s\n",
-        filename, lineno, rtcb->name);
-#else
-  lldbg("Assertion failed at file:%s line: %d\n",
-        filename, lineno);
-#endif
-  up_dumpstate();
-  _up_assert(EXIT_FAILURE);
-}
-
-/****************************************************************************
- * Name: up_assert_code
- ****************************************************************************/
-
-void up_assert_code(const uint8_t *filename, int lineno, int errorcode)
-{
-#ifdef CONFIG_PRINT_TASKNAME
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
-#endif
-
-  up_ledon(LED_ASSERTION);
-#ifdef CONFIG_PRINT_TASKNAME
-  lldbg("Assertion failed at file:%s line: %d task: %s error code: %d\n",
-        filename, lineno, rtcb->name, errorcode);
-#else
-  lldbg("Assertion failed at file:%s line: %d error code: %d\n",
-        filename, lineno, errorcode);
-#endif
-  up_dumpstate();
-  _up_assert(errorcode);
-}
-

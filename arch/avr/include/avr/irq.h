@@ -89,9 +89,14 @@
 #define REG_R0           33 /* r0 */
 #define REG_R24          34 /* r24 */
 
+/* The program counter is automatically pushed when the interrupt occurs */
+
+#define REG_PCH          35 /* PC */
+#define REG_PCL          36
+
 /* Size of the register state save array (in bytes) */
 
-#define XCPTCONTEXT_REGS 35
+#define XCPTCONTEXT_REGS 37
 
 /****************************************************************************
  * Public Types
@@ -111,8 +116,9 @@ struct xcptcontext
 
   /* These are saved copies of PC and SR used during signal processing.*/
 
-  uint16_t saved_pc;
-  uint8_t saved_sr;
+  uint8_t saved_pcl;
+  uint8_t saved_pch;
+  uint8_t saved_sreg;
 #endif
 
   /* Register save area */

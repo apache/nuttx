@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/avr/avr_internal.h
+ * arch/avr/src/avr/up_doirq.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,69 +33,84 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AVR_AVR_INTERNAL_H
-#define __ARCH_AVR_SRC_AVR_AVR_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <assert.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macros to handle saving and restore interrupt state.  The state is copied
- * from the stack to the TCB, but only a referenced is passed to get the 
- * state from the TCB.
- */
-
-#define up_savestate(regs)    up_copystate(regs, (uint8_t*)current_regs)
-#define up_restorestate(regs) (current_regs = regs)
-
 /****************************************************************************
- * Public Types
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Private Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level register storage
- * structure.  If is non-NULL only during interrupt processing.
- */
-
-extern volatile uint8_t *current_regs;
-
-/* This is the beginning of heap as provided from up_head.S. This is the first
- * address in DRAM after the loaded program+bss+idle stack.  The end of the
- * heap is CONFIG_DRAM_END
- */
-
-extern uint8_t g_heapbase;
-
-#endif /* __ASSEMBLY__ */
-
 /****************************************************************************
- * Inline Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+uint8_t *up_doirq(uint8_t irq, uint8_t *regs)
+{
+  up_ledon(LED_INIRQ);
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC(OSERR_ERREXCEPTION);
+#else
+  uint8_t *savestate;
 
-extern void up_copystate(uint8_t *dest, uint8_t *src);
-extern int  up_saveusercontext(uint8_t *saveregs);
-extern void up_fullcontextrestore(uint8_t *restoreregs) __attribute__ ((noreturn));
-extern void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
-extern uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
+  /* Nested interrupts are not supported in this implementation.  If you want
+   * implemented nested interrupts, you would have to (1) change the way that
+   * current regs is handled and (2) the design associated with
+   * CONFIG_ARCH_INTERRUPTSTACK.
+   */
 
-#endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_AVR_SRC_AVR_AVR_INTERNAL_H */
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
+   */
+
+  savestate    = (uint8_t*)current_regs;
+  current_regs = regs;
+
+  /* Deliver the IRQ */
+
+  irq_dispatch((int)irq, (uint32_t*)regs);
+
+  /* If a context switch occurred while processing the interrupt then
+   * current_regs may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
+
+  regs = current_regs;
+
+  /* Restore the previous value of current_regs.  NULL would indicate that
+   * we are no longer in an interrupt handler.  It will be non-NULL if we
+   * are returning from a nested interrupt.
+   */
+
+  current_regs = savestate;
+#endif
+  up_ledoff(LED_INIRQ);
+  return regs;
+}
 
