@@ -39,15 +39,15 @@ HEAD_ASRC	= at90usb_head.S
 
 # Common AVR files
 
-CMN_ASRCS	= 
-CMN_CSRCS	= up_allocateheap.c up_createstack.c up_exit.c up_idle.c \
-			  up_initialize.c up_interruptcontext.c up_lowputs.c up_mdelay.c \
-			  up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c up_puts.c \
-			  up_releasestack.c up_udelay.c up_usestack.c
+CMN_ASRCS	= up_switchcontext.S
+CMN_CSRCS	= up_allocateheap.c up_copystate.c up_createstack.c up_exit.c \
+			  up_idle.c up_initialize.c up_interruptcontext.c up_lowputs.c \
+			  up_mdelay.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c \
+			  up_puts.c up_releasestack.c up_udelay.c up_usestack.c
 
 # Required aT90USB files
 
-CHIP_ASRCS	=
+CHIP_ASRCS	= at90usb_exceptions.S
 CHIP_CSRCS	= 
 
 # Configuration-dependent aT90USB files
