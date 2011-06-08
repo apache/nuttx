@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/avr/src/avr32/up_initialstate.c
+ * arch/avr/src/avr/up_irq.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,18 +38,33 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "at90usb_config.h"
 
-#include <sys/types.h>
 #include <stdint.h>
-#include <string.h>
+#include <errno.h>
+#include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <arch/irq.h>
+#include <avr/io.h>
 
-#include "up_internal.h"
 #include "up_arch.h"
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+volatile uint8_t *current_regs;
+
+/****************************************************************************
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,66 +80,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_initial_state
- *
- * Description:
- *   A new thread is being started and a new TCB has been created. This
- *   function is called to initialize the processor specific portions of the
- *   new TCB.
- *
- *   This function must setup the intial architecture registers and/or stack
- *   so that execution will begin at tcb->start  on the next context switch.
- *
+ * Name: up_irqinitialize
  ****************************************************************************/
 
-void up_initial_state(_TCB *tcb)
+void up_irqinitialize(void)
 {
-  struct xcptcontext *xcp = &tcb->xcp;
+  /* currents_regs is non-NULL only while processing an interrupt */
 
-  /* Initialize the initial exception register context structure.  Zeroing
-   * all registers is a good debug helper, but should not be necessary.
-   */
+  current_regs = NULL;
 
-#ifdef CONFIG_DEBUG
-  memset(xcp, 0, sizeof(struct xcptcontext));
-#else
-  /* No pending signal delivery */
+  /* Initialize GPIO interrupt facilities */
 
-  xcp->sigdeliver   = NULL;
-  
-  /* Clear the frame pointer and link register since this is the outermost
-   * frame.
-   */
-
-  xcp->regs[REG_R7] = 0;
-  xcp->regs[REG_LR] = 0;
+#ifdef CONFIG_AVR32_GPIOIRQ
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+  if (gpio_irqinitialize != NULL)
+#endif
+    {
+      gpio_irqinitialize();
+    }
 #endif
 
-  /* Set the initial stack pointer to the "base" of the allocated stack */
+  /* And finally, enable interrupts */
 
-  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
-
-  /* Save the task entry point */
-
-  xcp->regs[REG_PC]      = (uint32_t)tcb->start;
-
-  /* Set supervisor- or user-mode, depending on how NuttX is configured and
-   * what kind of thread is being started.  Disable FIQs in any event
-   *
-   * If the kernel build is not selected, then all threads run in
-   * supervisor-mode.
-   */
-
-#ifdef CONFIG_NUTTX_KERNEL
-#  error "Missing logic for the CONFIG_NUTTX_KERNEL build"
-#endif
-
-  /* Enable or disable interrupts, based on user configuration */
-
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_SR]    = avr32_sr() | AVR32_SR_GM_MASK;
-#else
-  xcp->regs[REG_SR]    = avr32_sr() & ~AVR32_SR_GM_MASK;
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  irqrestore(getsreg() | (1 << SREG_I));
 #endif
 }
-

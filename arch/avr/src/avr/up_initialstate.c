@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/avr/src/avr32/up_initialstate.c
+ * arch/avr/src/avr/up_initialstate.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@
 #include <string.h>
 
 #include <nuttx/arch.h>
+#include <arch/irq.h>
+#include <avr/io.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -85,46 +87,24 @@ void up_initial_state(_TCB *tcb)
    * all registers is a good debug helper, but should not be necessary.
    */
 
-#ifdef CONFIG_DEBUG
   memset(xcp, 0, sizeof(struct xcptcontext));
-#else
-  /* No pending signal delivery */
-
-  xcp->sigdeliver   = NULL;
-  
-  /* Clear the frame pointer and link register since this is the outermost
-   * frame.
-   */
-
-  xcp->regs[REG_R7] = 0;
-  xcp->regs[REG_LR] = 0;
-#endif
 
   /* Set the initial stack pointer to the "base" of the allocated stack */
 
-  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
+  xcp->regs[REG_SPH]   = (uint8_t)((uint16_t)tcb->adj_stack_ptr >> 8);
+  xcp->regs[REG_SPL]   = (uint8_t)((uint16_t)tcb->adj_stack_ptr & 0xff);
 
   /* Save the task entry point */
 
-  xcp->regs[REG_PC]      = (uint32_t)tcb->start;
-
-  /* Set supervisor- or user-mode, depending on how NuttX is configured and
-   * what kind of thread is being started.  Disable FIQs in any event
-   *
-   * If the kernel build is not selected, then all threads run in
-   * supervisor-mode.
-   */
-
-#ifdef CONFIG_NUTTX_KERNEL
-#  error "Missing logic for the CONFIG_NUTTX_KERNEL build"
-#endif
+  xcp->regs[REG_PCH]   = (uint8_t)((uint16_t)tcb->start >> 8);
+  xcp->regs[REG_PCL]   = (uint8_t)((uint16_t)tcb->start & 0xff);
 
   /* Enable or disable interrupts, based on user configuration */
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_SR]    = avr32_sr() | AVR32_SR_GM_MASK;
+  xcp->regs[REG_SREG]  = getsreg() & ~(1 << SREG_I);
 #else
-  xcp->regs[REG_SR]    = avr32_sr() & ~AVR32_SR_GM_MASK;
+  xcp->regs[REG_SREG]  = getsreg() | (1 << SREG_I);
 #endif
 }
 

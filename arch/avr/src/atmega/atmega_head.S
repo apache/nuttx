@@ -66,6 +66,7 @@
  ****************************************************************************/
 
 	.file	"up_nommuhead.S"
+	.global	__start			/* Entry point */
 	.global	_sbss			/* Start of .bss.  Defined by ld.script */
 	.global	_ebss			/* End of .bss.  Defined by ld.script */
 	.global	_sdata			/* Start of .data section in RAM */
@@ -242,9 +243,13 @@ __do_clear_bss:
 	cpc		r27, r17
 	brne	.Lclearloop
 
+	/* Perform any low-level initialization */
+
+	call	up_lowinit
+
 	/* Now start NuttX */
 
-	call	os_start		/* Start NuttX */
+	call	os_start
 	jmp		exit
 	.endfunc
 
