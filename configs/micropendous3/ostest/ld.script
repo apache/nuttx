@@ -119,6 +119,7 @@ SECTIONS
 		_stext = . ;
 		*(.vectors)
 		*(.init)
+		*(.handlers)
 		*(.text)
 		*(.text.*)
 		_etext = . ;
