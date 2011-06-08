@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
 #include <avr/io.h>
 #include <avr/sfr_defs.h>
 
@@ -186,6 +187,9 @@ __start:
 
 	/* Copy initial global data values from FLASH into RAM */
 
+    .global __do_copy_data;     /* Required to suppress dragging in logic from libgcc */
+__do_copy_data:
+
 #ifdef HAVE_RAMPZ
 	ldi		r17, hi8(_edata)
 	ldi		r26, lo8(_sdata)
@@ -222,6 +226,9 @@ __start:
 #endif
 
 	/* Clear uninitialized data */
+
+    .global __do_clear_bss;     /* Required to suppress dragging in logic from libgcc */
+__do_clear_bss:
 
 	ldi		r17, hi8(_ebss)
 	ldi		r26, lo8(_sbss)

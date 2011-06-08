@@ -129,6 +129,10 @@ up_fullcontextrestore:
 	/* Restore the context from the TCB saved registers */
 
 	TCB_RESTORE
+
+    /* And "return" to the new task. */
+
+    reti
     .endfunc
 	.end
 
