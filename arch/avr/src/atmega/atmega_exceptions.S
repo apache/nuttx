@@ -49,6 +49,7 @@
 
 	.file	"atmega_exceptions.S"
 	.global	up_doirq
+	.gloal	up_fullcontextrestore
 
 /********************************************************************************************
  * Macros
@@ -95,10 +96,60 @@
 	HANDLER	atmega_twi, ATMEGA_IRQ_TWI, excpt_common			/* TWI two-wire serial interface */
 	HANDLER	atmega_spmrdy, ATMEGA_IRQ_SPMRDY, excpt_common		/* Store program memory ready */
 
-/* Common exception handling logic. */
+/********************************************************************************************
+ * Name: excpt_common
+ *
+ * Description:
+ *   Exception Vector Handlers
+ *
+ * On Entry:
+ *	The return PC and the saved r24 is on the stack, r24 now contains the IRQ number
+ *
+ *	  PCL
+ *	  PCH
+ *	  R0
+ *	  --- <- SP
+ *
+ ********************************************************************************************/
 
 excpt_common:
-#warning "Missing Logic"
+	/* Save the remaining registers on the stack, preserving the IRQ number in r14 */
+
+	EXCPT_PROLOGUE
+
+	/* Call up_doirq with r24 = IRQ number, r22-23 = Pointer to the save structure.  The stack
+	 * pointer currently points to the save structure (or maybe the save struture -1 since
+	 * the push operation post-decrements -- need to REVISIT this).
+	 */
+
+	in		r16, __SP_L__			/* Get the save structure pointer in a Call-saved register pair */
+	in		r17, __SP_H__			/* (Careful, push post-decrements) */
+	movw	r22, r16				/* Pass register save structure as the parameter 2 */
+	USE_INTSTACK rx, ry, rz			/* Switch to the interrupt stack */
+	call	up_doirq				/* Dispatch the interrupt */
+	RESTORE_STACK rx, ry			/* - Undo the operations of USE_INTSTACK */
+
+	/* up_doiq returns with r24-r25 equal to the new save structure.  If no context
+	 * switch occurred, this will be the same as the value passed to it in r22-23.
+	 * But if a context switch occurs, then the returned value will point not at a
+	 * stack frame, but at a register save area inside of the new task's TCB.
+	 */
+
+	 cp		r16, r24
+	 cpc	r17, r25
+	 breq	.Lnoswitch
+
+	/* A context switch has occurred, jump to up_fullcontextrestore with r24, r25
+	 * equal to the address of the new register save ared.
+	 */
+
+	jmp	up_fullcontextrestore
+
+	/* No context switch occurred.. just return off the stack */
+
+.Lnoswitch:
+	EXCPT_EPILOGUE
+	reti
 
 /****************************************************************************************************
  *  Name: up_interruptstack

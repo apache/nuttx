@@ -96,13 +96,12 @@
  *		HANDLER IRQ_X, my_exception
  *		...
  * my_exception:
- *		EXCPT_PROLOGUE				- Save registers on stack, enable nested interrupts
+ *		EXCPT_PROLOGUE				- Save registers on stack
  *		in	r22, __SP_L__			- Pass register save structure as the parameter 2
  *		in	r23, __SP_H__			- (Careful, push post-decrements)
  *		USE_INTSTACK rx, ry, rz		- Switch to the interrupt stack
  *		call handler				- Handle the exception IN=old regs OUT=new regs
- *		RESTORE_STACK rx, ry		- Undo the operations of USE_STACK
- *		
+ *		RESTORE_STACK rx, ry		- Undo the operations of USE_INTSTACK
  *		EXCPT_EPILOGUE				- Return to the context returned by handler()
  *		reti						- Return from interrupt
  *
