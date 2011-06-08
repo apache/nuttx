@@ -164,7 +164,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
               current_regs[REG_PCL]   = (uint16_t)up_sigdeliver & 0xff;
               current_regs[REG_PCH]   = (uint16_t)up_sigdeliver >> 8;
-              current_regs[REG_SREG] |= (1 << SREG_I);
+              current_regs[REG_SREG] &= ~(1 << SREG_I);
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -198,7 +198,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.regs[REG_PCL]    = (uint16_t)up_sigdeliver & 0xff;
           tcb->xcp.regs[REG_PCH]    = (uint16_t)up_sigdeliver >> 8;
-          tcb->xcp.regs[REG_SREG]  |= (1 << SREG_I);
+          tcb->xcp.regs[REG_SREG]  &= ~(1 << SREG_I);
         }
 
       irqrestore(flags);

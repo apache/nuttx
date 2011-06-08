@@ -45,6 +45,28 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* USARTs ***************************************************************************/
+
+#undef HAVE_USART_DEVICE
+#if defined(CONFIG_AVR_USART0) || defined(CONFIG_AVR_USART0)
+#  define HAVE_USART_DEVICE 1
+#endif
+
+/* Is there a serial console?  There should be at most one defined.  It
+ * could be on any USARTn, n=0,1
+ */
+
+#if defined(CONFIG_USART0_SERIAL_CONSOLE) && defined(CONFIG_AVR_USART0)
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_AVR_USART1)
+#  undef CONFIG_USART0_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#else
+#  undef CONFIG_USART0_SERIAL_CONSOLE
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  undef HAVE_SERIAL_CONSOLE
+#endif
 
 /************************************************************************************
  * Public Types

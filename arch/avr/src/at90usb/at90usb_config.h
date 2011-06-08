@@ -45,6 +45,23 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* USARTs ***************************************************************************/
+
+#undef HAVE_USART_DEVICE
+#if defined(CONFIG_AVR_USART1)
+#  define HAVE_USART_DEVICE 1
+#endif
+
+/* Is there a serial console?  There should be at most one defined.  It
+ * could be on any USARTn (but n=1 only for the AT90USB).
+ */
+
+#if defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_AVR_USART1)
+#  define HAVE_SERIAL_CONSOLE 1
+#else
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  undef HAVE_SERIAL_CONSOLE
+#endif
 
 /************************************************************************************
  * Public Types

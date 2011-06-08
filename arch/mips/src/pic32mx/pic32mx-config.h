@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_LPC17XX_LPC17_PIC32_H
-#define __ARCH_MIPS_SRC_LPC17XX_LPC17_PIC32_H
+#ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_PIC32_H
+#define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_PIC32_H
 
 /************************************************************************************
  * Included Files
@@ -511,7 +511,7 @@
 /* Are any UARTs enabled? */
 
 #undef HAVE_UART_DEVICE
-#if defined(CONFIG_PIC32MX_UART1) || defined(CONFIG_LPC17_UART1)
+#if defined(CONFIG_PIC32MX_UART1) || defined(CONFIG_PIC32MX_UART1)
 #  define HAVE_UART_DEVICE 1
 #endif
 
@@ -522,7 +522,7 @@
 #if defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_PIC32MX_UART1)
 #  undef CONFIG_UART2_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_LPC17_UART2)
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_PIC32MX_UART2)
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
 #else
@@ -534,11 +534,11 @@
 /* Device Configuration *************************************************************/
 /* DEVCFG3 */
 
-#ifndef CONFIG_PIC32MX_USERID              /* User ID */
-#  define CONFIG_PIC32MX_USERID   0x584e   /* "NutX" */
+#ifndef CONFIG_PIC32MX_USERID               /* User ID */
+#  define CONFIG_PIC32MX_USERID   0x584e    /* "NutX" */
 #endif
 
-#ifndef CONFIG_PIC32MX_SRSSEL              /* Shadow register interrupt priority */
+#ifndef CONFIG_PIC32MX_SRSSEL               /* Shadow register interrupt priority */
 #  define CONFIG_PIC32MX_SRSSEL   INT_ICP_MIN_PRIORITY
 #endif
 
@@ -771,4 +771,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_MIPS_SRC_LPC17XX_LPC17_PIC32_H */
+#endif /* __ARCH_MIPS_SRC_PIC32MX_PIC32MX_PIC32_H */

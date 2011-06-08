@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/avr/src/avr32/up_initialstate.c
+ * arch/avr/src/common/up_assert.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,18 +39,35 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <stdint.h>
-#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 
-#include "up_internal.h"
 #include "up_arch.h"
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* The following is just intended to keep some ugliness out of the mainline
+ * code.  We are going to print the task name if:
+ *
+ *  CONFIG_TASK_NAME_SIZE > 0 &&     <-- The task has a name
+ *  (defined(CONFIG_DEBUG)    ||     <-- And the debug is enabled (lldbg used)
+ *   defined(CONFIG_ARCH_STACKDUMP)) <-- Or lib_lowprintf() is used
+ */
+
+#undef CONFIG_PRINT_TASKNAME
+#if CONFIG_TASK_NAME_SIZE > 0 && (defined(CONFIG_DEBUG) || defined(CONFIG_ARCH_STACKDUMP))
+#  define CONFIG_PRINT_TASKNAME 1
+#endif
 
 /****************************************************************************
  * Private Data
@@ -61,70 +78,77 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: _up_assert
+ ****************************************************************************/
+
+static void _up_assert(int errorcode) /* __attribute__ ((noreturn)) */
+{
+  /* Are we in an interrupt handler or the idle task? */
+
+  if (current_regs || ((_TCB*)g_readytorun.head)->pid == 0)
+    {
+       (void)irqsave();
+        for(;;)
+          {
+#ifdef CONFIG_ARCH_LEDS
+            up_ledon(LED_PANIC);
+            up_mdelay(250);
+            up_ledoff(LED_PANIC);
+            up_mdelay(250);
+#endif
+          }
+    }
+  else
+    {
+      exit(errorcode);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_initial_state
- *
- * Description:
- *   A new thread is being started and a new TCB has been created. This
- *   function is called to initialize the processor specific portions of the
- *   new TCB.
- *
- *   This function must setup the intial architecture registers and/or stack
- *   so that execution will begin at tcb->start  on the next context switch.
- *
+ * Name: up_assert
  ****************************************************************************/
 
-void up_initial_state(_TCB *tcb)
+void up_assert(const uint8_t *filename, int lineno)
 {
-  struct xcptcontext *xcp = &tcb->xcp;
+#ifdef CONFIG_PRINT_TASKNAME
+  _TCB *rtcb = (_TCB*)g_readytorun.head;
+#endif
 
-  /* Initialize the initial exception register context structure.  Zeroing
-   * all registers is a good debug helper, but should not be necessary.
-   */
-
-#ifdef CONFIG_DEBUG
-  memset(xcp, 0, sizeof(struct xcptcontext));
+  up_ledon(LED_ASSERTION);
+#ifdef CONFIG_PRINT_TASKNAME
+  lldbg("Assertion failed at file:%s line: %d task: %s\n",
+        filename, lineno, rtcb->name);
 #else
-  /* No pending signal delivery */
+  lldbg("Assertion failed at file:%s line: %d\n",
+        filename, lineno);
+#endif
+  up_dumpstate();
+  _up_assert(EXIT_FAILURE);
+}
 
-  xcp->sigdeliver   = NULL;
-  
-  /* Clear the frame pointer and link register since this is the outermost
-   * frame.
-   */
+/****************************************************************************
+ * Name: up_assert_code
+ ****************************************************************************/
 
-  xcp->regs[REG_R7] = 0;
-  xcp->regs[REG_LR] = 0;
+void up_assert_code(const uint8_t *filename, int lineno, int errorcode)
+{
+#ifdef CONFIG_PRINT_TASKNAME
+  _TCB *rtcb = (_TCB*)g_readytorun.head;
 #endif
 
-  /* Set the initial stack pointer to the "base" of the allocated stack */
-
-  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
-
-  /* Save the task entry point */
-
-  xcp->regs[REG_PC]      = (uint32_t)tcb->start;
-
-  /* Set supervisor- or user-mode, depending on how NuttX is configured and
-   * what kind of thread is being started.  Disable FIQs in any event
-   *
-   * If the kernel build is not selected, then all threads run in
-   * supervisor-mode.
-   */
-
-#ifdef CONFIG_NUTTX_KERNEL
-#  error "Missing logic for the CONFIG_NUTTX_KERNEL build"
-#endif
-
-  /* Enable or disable interrupts, based on user configuration */
-
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[REG_SR]    = avr32_sr() | AVR32_SR_GM_MASK;
+  up_ledon(LED_ASSERTION);
+#ifdef CONFIG_PRINT_TASKNAME
+  lldbg("Assertion failed at file:%s line: %d task: %s error code: %d\n",
+        filename, lineno, rtcb->name, errorcode);
 #else
-  xcp->regs[REG_SR]    = avr32_sr() & ~AVR32_SR_GM_MASK;
+  lldbg("Assertion failed at file:%s line: %d error code: %d\n",
+        filename, lineno, errorcode);
 #endif
+  up_dumpstate();
+  _up_assert(errorcode);
 }
 
