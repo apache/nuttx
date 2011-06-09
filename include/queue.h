@@ -51,7 +51,7 @@
 
 #define sq_next(p) ((p)->flink)
 #define dq_next(p) ((p)->flink)
-#define dq_prev(p) ((p)->prev)
+#define dq_prev(p) ((p)->blink)
 
 #define sq_empty(q) ((q)->head == NULL)
 #define dq_empty(q) ((q)->head == NULL)
