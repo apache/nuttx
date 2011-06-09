@@ -176,7 +176,7 @@ static inline uint32_t e1000_inl(struct e1000_dev *dev, int reg)
 
 /****************************** e1000 driver ********************************/
 
-static void e1000_reset(struct e1000_dev *dev)
+void e1000_reset(struct e1000_dev *dev)
 {
     uint32_t dev_control;
 
@@ -186,7 +186,7 @@ static void e1000_reset(struct e1000_dev *dev)
     dev_control |= (0<<2);   // GIOMD-bit (GIO Master Disable)
     dev_control |= (1<<3);   // LRST-bit (Link Reset)
     dev_control |= (1<<6);   // SLU-bit (Set Link Up)	
-    dev_control |= (1<<8);   // SPEED=2 (1000Mbps)
+    dev_control |= (2<<8);   // SPEED=2 (1000Mbps)
     dev_control |= (0<<11);  // FRCSPD-bit (Force Speed)
     dev_control |= (0<<12);  // FRCDPLX-bit (Force Duplex)
     dev_control |= (0<<20);  // ADVD3WUC-bit (Advertise D3 Wake Up Cap)
@@ -201,11 +201,12 @@ static void e1000_reset(struct e1000_dev *dev)
     e1000_outl(dev, E1000_CTRL, dev_control);
     dev_control &= ~(1<<26);  // clear RST-bit (Device Reset)
     e1000_outl(dev, E1000_CTRL, dev_control);	
-    up_mdelay(2000);
+    up_mdelay(10);
     e1000_outl(dev, E1000_CTRL_EXT, 0x001401C0);
+    e1000_outl(dev, E1000_IMC, 0xFFFFFFFF);
 }
 
-static void e1000_turn_on(struct e1000_dev *dev)
+void e1000_turn_on(struct e1000_dev *dev)
 {
     int	tx_control, rx_control;
     uint32_t ims = 0;
@@ -232,7 +233,7 @@ static void e1000_turn_on(struct e1000_dev *dev)
     e1000_outl(dev, E1000_IMS, ims);
 }
 
-static void e1000_turn_off(struct e1000_dev *dev)
+void e1000_turn_off(struct e1000_dev *dev)
 {
     int	tx_control, rx_control;
 
@@ -250,7 +251,7 @@ static void e1000_turn_off(struct e1000_dev *dev)
     e1000_outl(dev, E1000_IMC, 0xFFFFFFFF);
 }
 
-static void e1000_init(struct e1000_dev *dev)
+void e1000_init(struct e1000_dev *dev)
 {
     uint32_t rxd_phys, txd_phys, kmem_phys;
     uint32_t rx_control, tx_control;
@@ -885,7 +886,7 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 {
     uint32_t mmio_base, mmio_size;
     uint32_t pci_cmd, size;
-    int err, irq;
+    int err, irq, flags;
     void *kmem, *omem;
     struct e1000_dev *dev;
 
@@ -922,11 +923,16 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
     memcpy(dev->src_mac, (void *)(dev->io_mem_base+E1000_RA), 6);
 
     // get e1000 IRQ
-    irq = pci_read_irq(addr);
+    flags = 0;
+    irq = pci_enable_msi(addr);
+    if (irq == 0) {
+	irq = pci_read_irq(addr);
+	flags |= IDC_SHARE;
+    }
     dev->irq = irq;
     dev->int_desc.handler = e1000_interrupt_handler;
     dev->int_desc.dev_id = dev;
-    err = rgmp_request_irq(irq, &dev->int_desc, IDC_SHARE);
+    err = rgmp_request_irq(irq, &dev->int_desc, flags);
     if (err)
 	goto err0;
 
@@ -1014,7 +1020,6 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 void e1000_mod_init(void)
 {
     pci_probe_device(e1000_id_table, e1000_probe);
-    return 0;
 }
 
 void e1000_mod_exit(void)
