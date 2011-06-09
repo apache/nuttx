@@ -982,6 +982,10 @@ setenv.sh -- This is a script that you can include that will be installed at
 Supported Boards
 ^^^^^^^^^^^^^^^^
 
+configs/amber
+	This is placeholder for the SoC Robotics Amber Web Server that is based
+	on the Atmel AVR ATMega128 MCU.  There is not much there yet.
+
 configs/avr32dev1
 	This is a port of NuttX to the Atmel AVR32DEV1 board.  That board is
 	based on the Atmel AT32UC3B0256 MCU and uses a specially patched
@@ -1053,6 +1057,11 @@ configs/mcu123-lpc214x
 	This port is for the NXP LPC2148 as provided on the mcu123.com
 	lpc214x development board. This OS is also built with the arm-elf
 	toolchain*.  The port supports serial, timer0, spi, and usb.
+
+configs/micropendous3
+	This is a port to the Opendous Micropendous 3 board. This board may
+	be populated with either an AVR AT90USB646, 647, 1286, or 1287 MCU.
+	Support is configured for the AT90USB647.
 
 configs/mx1ads
 	This is a port to the Motorola MX1ADS development board.  That board
