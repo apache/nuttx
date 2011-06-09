@@ -10,15 +10,18 @@ and GPOS features.
 See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
 information about RGMP.
 
+The updated build instructions can be found at:
+http://rgmp.sourceforge.net/wiki/index.php/Documentation
+
 Ubuntu Build Instructions
 --------------------------
 Build requirements:
 Hardware: x86 PC
-Software: Ubuntu 10.04 or Ubuntu 10.10
+Software: Ubuntu 10.04, 10.10 or 11.04
 
 Run requirements:
 Hardware: multi-processor x86 PC
-Software: Ubuntu 10.04 or Ubuntu 10.10
+Software: Ubuntu 10.04, 10.10 or 11.04
 
 1. Download RGMP from the following URL:
 
@@ -66,7 +69,7 @@ Other Linux OS Build Instruction
 --------------------------------------
 Requirements:
 Hardware: multi-processor x86 PC
-Software: running Linux kernel 2.6.32 or 2.6.35 kernel
+Software: running Linux kernel 2.6.32, 2.6.35 or 2.6.38
 
 1. Get your running Linux kernel header under /usr/src/linux-headers-$(uname -r)
    directory.
