@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/common/up_createstack.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -97,9 +98,9 @@ int up_create_stack(_TCB *tcb, size_t stack_size)
    if (!tcb->stack_alloc_ptr)
      {
 #ifdef CONFIG_DEBUG
-       tcb->stack_alloc_ptr = (uint32_t*)zalloc(stack_size);
+       tcb->stack_alloc_ptr = (FAR void *)zalloc(stack_size);
 #else
-       tcb->stack_alloc_ptr = (uint32_t*)malloc(stack_size);
+       tcb->stack_alloc_ptr = (FAR void *)malloc(stack_size);
 #endif
      }
 
@@ -109,25 +110,25 @@ int up_create_stack(_TCB *tcb, size_t stack_size)
        size_t size_of_stack;
 
        /* The AVR32 uses a push-down stack:  the stack grows
-	* toward loweraddresses in memory.  The stack pointer
-	* register, points to the lowest, valid work address
-	* (the "top" of the stack).  Items on the stack are
-	* referenced as positive word offsets from sp.
-	*/
+        * toward loweraddresses in memory.  The stack pointer
+        * register, points to the lowest, valid work address
+        * (the "top" of the stack).  Items on the stack are
+        * referenced as positive word offsets from sp.
+        */
 
-       top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
+       top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 4;
 
        /* The AVR32 stack must be aligned at word (4 byte)
-	* boundaries. If necessary top_of_stack must be rounded
-	* down to the next boundary
-	*/
+        * boundaries. If necessary top_of_stack must be rounded
+        * down to the next boundary
+        */
 
        top_of_stack &= ~3;
-       size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
+       size_of_stack = top_of_stack - (size_t)tcb->stack_alloc_ptr + 4;
 
        /* Save the adjusted stack values in the _TCB */
 
-       tcb->adj_stack_ptr  = (uint32_t*)top_of_stack;
+       tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
        tcb->adj_stack_size = size_of_stack;
 
        up_ledon(LED_STACKCREATED);

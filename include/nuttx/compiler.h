@@ -99,7 +99,11 @@
 # define DSEG
 # define CODE
 
-#if defined(__m32c__)
+/* Handle cases where sizeof(int) is 16-bits, sizeof(long) is 32-bits, and
+ * pointers are 16-bits.
+ */
+
+#if defined(__m32c__) || defined(__AVR__)
 /* Select the small, 16-bit addressing model */
 
 # define  CONFIG_SMALL_MEMORY 1
@@ -111,6 +115,8 @@
 /* Pointers and int are the same size */
 
 # undef  CONFIG_PTR_IS_NOT_INT
+
+/* Handle cases where sizeof(int) may or may not be 16-bits  */
 
 #elif defined(__mc68hc1x__)
 /* Select the small, 16-bit addressing model */
