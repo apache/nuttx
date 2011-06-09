@@ -226,6 +226,16 @@ arch/avr
     This directory is dedicated to ports to the Atmel AVR (8-bit) and AVR32 (32-bit)
     MCU families.  STATUS:  Under development.
 
+    arch/avr/include/avr and arch/avr/src/avr
+      Common support for all 8-bit VR MCUs
+
+    arch/avr/include/atmega and arch/avr/src/atmega
+      Support specifically for the AVR ATMega family (specifically only for
+      the ATMega128 at the moment).
+
+    arch/avr/include/at90usb and arch/avr/src/at90usb
+      Support specifically for the AVR AT90USB646, 647, 1286, and 1287 family.
+
     arch/avr/include/avr32 and arch/avr/src/avr32
       Common support for all AVR32 MCUs
 
@@ -245,6 +255,15 @@ arch/hc
 arch/m68322
     A work in progress.
     STATUS:  Stalled for the time being.
+
+arch/mips
+    This directory is dedicated to ports to the MIPS family.
+
+    arch/mips/include/mips32 and arch/mips/src/mips32
+      Common support for all MIPS32 architectures
+
+    arch/mips/include/pic32mx and arch/mips/src/pic32mx
+      Support for all MicroChip PIC32MX architectures
 
 arch/rgmp
 

@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 6, 2011</p>
+      <p>Last Updated: June 8, 2011</p>
     </td>
   </tr>
 </table>
@@ -1455,6 +1455,53 @@
       </p>
    </td>
 </tr>
+
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Atmel AVR</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>ATMega128</b>.
+      This port of NuttX to the Amber Web Server from SoC Robotics
+      (http://www.soc-robotics.com/index.htm) is underway.  The Amber Web Server is
+      based on an Atmel ATMega128.
+    </p>
+    <ul>
+      <p>
+       <b>STATUS:</b>
+         This port a work in progress.  It is in the early stage at approximately code
+         complete but with no testing.  This port may be verified for the NuttX 6.5 release.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>AT9USB64x</b> and <b>AT9USB6128x</b>.
+      This port of NuttX to the Opendous Micropendous 3 board. The Micropendous3 is
+      may be populated with an AT90USB646, 647, 1286, or 1287.
+    </p>
+    <ul>
+      <p>
+       <b>STATUS:</b>
+         This port a work in progress.  It is in the early stage at approximately code
+         complete but with no testing.  This port may be verified for the NuttX 6.5 release.
+      </p>
+    </ul>
+  </td>
+</tr>
+
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
@@ -2258,6 +2305,20 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 
 <ul><pre>
 nuttx-6.5 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * arch/avr/src/avr and arch/avr/include/avr: Adds general support for
+      the Atmel 8-bit AVR family.
+    * arch/avr/src/atmega and arch/avr/include/atmega: Addes support for the
+      Atmel AVR ATMega family.
+    * arch/avr/src/at90usb and arch/avr/include/at90usb: Addes support for the
+      Atmel AVR AT90USB family.
+    * configs/micropendous3: Adds a board configuration for the Opendous
+      Micropendous 3 board.  This board may be populated with several different
+      members of the Atmel AVR AT90USB family.
+    * configs/amber: This is a placehold for the Atmel ATMega128 Amber Web
+      Server from SoC Robotics.  Not much present in this directory on initial
+      check-in.
+
 
 apps-6.5 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

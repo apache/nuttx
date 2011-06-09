@@ -1809,3 +1809,17 @@
 	  all defconfig files.  This has only been fixed in this defconfig file.
 
 6.5 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* arch/avr/src/avr and arch/avr/include/avr: Adds general support for
+	  the Atmel 8-bit AVR family.
+	* arch/avr/src/atmega and arch/avr/include/atmega: Addes support for the
+	  Atmel AVR ATMega family.
+	* arch/avr/src/at90usb and arch/avr/include/at90usb: Addes support for the
+	  Atmel AVR AT90USB family.
+	* configs/micropendous3: Adds a board configuration for the Opendous
+	  Micropendous 3 board.  This board may be populated with several different
+	  members of the Atmel AVR AT90USB family.
+	* configs/amber: This is a placehold for the Atmel ATMega128 Amber Web
+	  Server from SoC Robotics.  Not much present in this directory on initial
+	  check-in.
+
