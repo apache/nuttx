@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/avr/src/avr/up_doirq.c
+ * arch/avr/src/avr32/up_createstack.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,79 +38,100 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
+#include <sys/types.h>
 #include <stdint.h>
-#include <assert.h>
+#include <stdlib.h>
+#include <sched.h>
+#include <debug.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Name: up_create_stack
+ *
+ * Description:
+ *   Allocate a stack for a new thread and setup up stack-related
+ *  information in the TCB.
+ *
+ *   The following TCB fields must be initialized:
+ *   adj_stack_size: Stack size after adjustment for hardware, processor,
+ *     etc.  This value is retained only for debug purposes.
+ *   stack_alloc_ptr: Pointer to allocated stack
+ *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *     the stack pointer.
+ *
+ * Input Parameters:
+ *   tcb: The TCB of new task
+ *   stack_size:  The requested stack size.  At least this how much must be
+ *     allocated.
+ *
  ****************************************************************************/
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-uint8_t *up_doirq(uint8_t irq, uint8_t *regs)
+int up_create_stack(_TCB *tcb, size_t stack_size)
 {
-  up_ledon(LED_INIRQ);
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC(OSERR_ERREXCEPTION);
+  if (tcb->stack_alloc_ptr &&
+      tcb->adj_stack_size != stack_size)
+    {
+      sched_free(tcb->stack_alloc_ptr);
+      tcb->stack_alloc_ptr = NULL;
+    }
+
+   if (!tcb->stack_alloc_ptr)
+     {
+#ifdef CONFIG_DEBUG
+       tcb->stack_alloc_ptr = (FAR void *)zalloc(stack_size);
 #else
-  uint8_t *savestate;
-
-  /* Nested interrupts are not supported in this implementation.  If you want
-   * implemented nested interrupts, you would have to (1) change the way that
-   * current regs is handled and (2) the design associated with
-   * CONFIG_ARCH_INTERRUPTSTACK.
-   */
-
-  /* Current regs non-zero indicates that we are processing an interrupt;
-   * current_regs is also used to manage interrupt level context switches.
-   */
-
-  savestate    = (uint8_t*)current_regs;   /* Cast removes volatile attribute */
-  current_regs = regs;
-
-  /* Deliver the IRQ */
-
-  irq_dispatch((int)irq, (uint32_t*)regs);
-
-  /* If a context switch occurred while processing the interrupt then
-   * current_regs may have change value.  If we return any value different
-   * from the input regs, then the lower level will know that a context
-   * switch occurred during interrupt processing.
-   */
-
-  regs = (uint8_t*)current_regs;   /* Cast removes volatile attribute */
-
-  /* Restore the previous value of current_regs.  NULL would indicate that
-   * we are no longer in an interrupt handler.  It will be non-NULL if we
-   * are returning from a nested interrupt.
-   */
-
-  current_regs = savestate;
+       tcb->stack_alloc_ptr = (FAR void *)malloc(stack_size);
 #endif
-  up_ledoff(LED_INIRQ);
-  return regs;
-}
+     }
 
+   if (tcb->stack_alloc_ptr)
+     {
+       size_t top_of_stack;
+       size_t size_of_stack;
+
+       /* The AVR32 uses a push-down stack:  the stack grows toward lower
+	    * addresses in memory.  The stack pointer register, points to the
+		* lowest, valid work address (the "top" of the stack).  Items on
+		* the stack are referenced as positive word offsets from sp.
+        */
+
+       top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 4;
+
+       /* The AVR32 stack must be aligned at word (4 byte) boundaries. If
+	   * necessary top_of_stack must be rounded down to the next boundary
+        */
+
+       top_of_stack &= ~3;
+       size_of_stack = top_of_stack - (size_t)tcb->stack_alloc_ptr + 4;
+
+       /* Save the adjusted stack values in the _TCB */
+
+       tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
+       tcb->adj_stack_size = size_of_stack;
+
+       up_ledon(LED_STACKCREATED);
+       return OK;
+     }
+
+   return ERROR;
+}

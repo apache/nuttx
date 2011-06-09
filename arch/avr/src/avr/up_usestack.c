@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/avr/src/common/up_createstack.c
+ * arch/avr/src/avr/up_usestack.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,19 +38,15 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <sched.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
-#include <arch/board/board.h>
 
-#include "up_arch.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -66,74 +62,56 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_create_stack
+ * Name: up_use_stack
  *
  * Description:
- *   Allocate a stack for a new thread and setup
- *   up stack-related information in the TCB.
+ *   Setup up stack-related information in the TCB using pre-allocated stack
+ *   memory
  *
  *   The following TCB fields must be initialized:
- *   adj_stack_size: Stack size after adjustment for hardware,
- *     processor, etc.  This value is retained only for debug
- *     purposes.
+ *   adj_stack_size: Stack size after adjustment for hardware, processor,
+ *     etc.  This value is retained only for debug purposes.
  *   stack_alloc_ptr: Pointer to allocated stack
- *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
- *     initial value of the stack pointer.
+ *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *     the stack pointer.
  *
  * Inputs:
  *   tcb: The TCB of new task
- *   stack_size:  The requested stack size.  At least this much
- *     must be allocated.
+ *   stack_size:  The allocated stack size.
+ *
  ****************************************************************************/
 
-int up_create_stack(_TCB *tcb, size_t stack_size)
+int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 {
-  if (tcb->stack_alloc_ptr &&
-      tcb->adj_stack_size != stack_size)
+  size_t top_of_stack;
+  size_t size_of_stack;
+
+  if (tcb->stack_alloc_ptr)
     {
       sched_free(tcb->stack_alloc_ptr);
-      tcb->stack_alloc_ptr = NULL;
     }
 
-   if (!tcb->stack_alloc_ptr)
-     {
-#ifdef CONFIG_DEBUG
-       tcb->stack_alloc_ptr = (FAR void *)zalloc(stack_size);
-#else
-       tcb->stack_alloc_ptr = (FAR void *)malloc(stack_size);
-#endif
-     }
+  /* Save the stack allocation */
 
-   if (tcb->stack_alloc_ptr)
-     {
-       size_t top_of_stack;
-       size_t size_of_stack;
+  tcb->stack_alloc_ptr = stack;
 
-       /* The AVR32 uses a push-down stack:  the stack grows
-        * toward loweraddresses in memory.  The stack pointer
-        * register, points to the lowest, valid work address
-        * (the "top" of the stack).  Items on the stack are
-        * referenced as positive word offsets from sp.
-        */
+  /* The AVR uses a push-down stack:  the stack grows toward loweraddresses in
+   * memory.  The stack pointer register, points to the lowest, valid work
+   * address (the "top" of the stack).  Items on the stack are referenced as
+   * positive word offsets from sp.
+   */
 
-       top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 4;
+  top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 1;
 
-       /* The AVR32 stack must be aligned at word (4 byte)
-        * boundaries. If necessary top_of_stack must be rounded
-        * down to the next boundary
-        */
+  /* The AVR stack does not need to be aligned */
 
-       top_of_stack &= ~3;
-       size_of_stack = top_of_stack - (size_t)tcb->stack_alloc_ptr + 4;
+  size_of_stack = top_of_stack - (size_t)tcb->stack_alloc_ptr + 4;
 
-       /* Save the adjusted stack values in the _TCB */
+  /* Save the adjusted stack values in the _TCB */
 
-       tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
-       tcb->adj_stack_size = size_of_stack;
+  tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
+  tcb->adj_stack_size = size_of_stack;
 
-       up_ledon(LED_STACKCREATED);
-       return OK;
-     }
-
-   return ERROR;
+  return OK;
 }
+

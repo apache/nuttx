@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/common/up_usestack.c
+ * arch/avr/src/avr32/up_usestack.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -103,7 +103,7 @@ int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
    * referenced as positive word offsets from sp.
    */
 
-  top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
+  top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 4;
 
   /* The AVR32 stack must be aligned at word (4 byte)
    * boundaries. If necessary top_of_stack must be rounded
@@ -111,11 +111,11 @@ int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
    */
 
   top_of_stack &= ~3;
-  size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
+  size_of_stack = top_of_stack - (size_t)tcb->stack_alloc_ptr + 4;
 
   /* Save the adjusted stack values in the _TCB */
 
-  tcb->adj_stack_ptr  = (uint32_t*)top_of_stack;
+  tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
   tcb->adj_stack_size = size_of_stack;
 
   return OK;
