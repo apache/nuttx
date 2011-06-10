@@ -32,14 +32,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-if [ "$(basename $0)" = "setenv.sh" ]; then
+if [ "$_" = "$0" ] ; then
   echo "You must source this script, not run it!" 1>&2
   exit 1
 fi
 
 WD=`pwd`
 if [ ! -x "setenv.sh" ]; then
-  echo "This script must be executed from the toplevel NuttX build directory"
+  echo "This script must be executed from the top-level NuttX build directory"
   exit 1
 fi
 

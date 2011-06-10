@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 6, 2011)
+NuttX TODO List (Last updated June 10, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -17,7 +17,7 @@ nuttx/
   (1)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
-  (4)  Build system / Toolchains
+  (5)  Build system / Toolchains
   (7)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
@@ -525,6 +525,28 @@ o Build system
                something like the GNUWin32 tools (coreutils+make+grep+sed+uname).
   Status:      Open
   Priority:    Low
+
+  Descritpion: Logic in most setenv.sh files can create the following problem
+               on many platforms:
+
+                 $ . ./setenv.sh
+                 basename: invalid option -- 'b'
+                 Try `basename --help' for more information.
+
+               The problem is that $0 is the current running shell which may include
+               a dash in front:
+
+                 $ echo $0
+                 -bash
+
+               But often is just /bin/bash (and the problem does not occur.  The fix
+               is:
+
+                 -if [ "$(basename $0)" = "setenv.sh" ]; then
+                 +if [ "$_" = "$0" ] ; then
+  Status:      Open
+  Priority:    Low.  Use of setenv.sh is optional and most platforms do not have
+               this problem.  Scripts will be fixed one-at-a-time as is appropropriate.
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
