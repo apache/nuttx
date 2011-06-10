@@ -376,6 +376,25 @@ PIC32MX Configuration Options
        CONFIG_PIC32MX_FLASH          - FLASH
        CONFIG_PIC32MX_USB            - USB
 
+    PIC32MX Configuration Settings
+    DEVCFG0:
+      CONFIG_PIC32MX_DEBUGGER - Background Debugger Enable. Default 3 (disabled). The
+        value 2 enables.
+      CONFIG_PIC32MX_ICESEL - In-Circuit Emulator/Debugger Communication Channel Select
+        Default 1 (PG2)
+      CONFIG_PIC32MX_PROGFLASHWP  - Program FLASH write protect.  Default 0xff (disabled)
+      CONFIG_PIC32MX_BOOTFLASHWP - Default 1 (disabled)
+      CONFIG_PIC32MX_CODEWP - Default 1 (disabled)
+    DEVCFG1: (All settings determined by selections in board.h)
+    DEVCFG2: (All settings determined by selections in board.h)
+    DEVCFG3: 
+      CONFIG_PIC32MX_USBIDO - USB USBID Selection.  Default 1 if USB enabled
+        (USBID pin is controlled by the USB module), but 0 (GPIO) otherwise.
+      CONFIG_PIC32MX_VBUSIO - USB VBUSON Selection (Default 1 if USB enabled
+        (VBUSON pin is controlled by the USB module, but 0 (GPIO) otherwise.
+      CONFIG_PIC32MX_WDENABLE - Enabled watchdog on power up.  Default 0 (watchdog
+        can be enabled later by software).
+
     The priority of interrupts may be specified.  The value ranage of
     priority is 4-31. The default (16) will be used if these any of these
     are undefined.
