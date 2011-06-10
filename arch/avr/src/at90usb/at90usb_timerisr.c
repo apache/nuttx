@@ -151,15 +151,31 @@ void up_timerinit(void)
   OCR1AH = (uint8_t)((uint16_t)MATCH >> 8);
   OCR1AL = (uint8_t)((uint16_t)MATCH & 0xff);
 
-  /* Setup clock source and compare match behaviour. */
+  /* Setup clock source and compare match behaviour.
+   *
+   * TCRR1A:
+   *   COM1A 0:1 = 00  -> Normal port operation
+   *   COM1B 0:1 = 00  -> Normal port operation
+   *   COM1C 0:1 = 00  -> Normal port operation
+   *   WGM1  0:1 = 00  -> Clear Timer on Compare (CTC) modes of operation
+   */
 
-  TCCR1A = 0x08 | PRESCALE;
+  TCCR1A = 0;
+
+  /* TCCR1B:
+   *   ICNC1     = 0   -> Input Capture Noise Canceler disabled
+   *   ICES1     = 0   -> Input Capture Edge Select
+   *   WGM   2:3 = 01  -> Clear Timer on Compare (CTC) modes of operation
+   *   CS1   0:2 = xxx ->Selected pre-scaler.
+   */
+
+  TCCR1B = (1 << WGM12) | PRESCALE;
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(AT90USB_IRQ_T2COMPA, (xcpt_t)up_timerisr);
+  (void)irq_attach(AT90USB_IRQ_T1COMPA, (xcpt_t)up_timerisr);
 
   /* Enable the interrupt on compare match A */
 
-  TIMSK1 |= 0x10;
+  TIMSK1 |= (1 << OCIE1A);
 }
