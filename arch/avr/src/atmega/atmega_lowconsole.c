@@ -193,7 +193,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ATMEGA_USART0
+#ifdef CONFIG_AVR_USART0
 void usart0_reset(void)
 {
   /* Clear USART configuration */
@@ -214,7 +214,7 @@ void usart0_reset(void)
 }
 #endif
 
-#ifdef CONFIG_ATMEGA_USART1
+#ifdef CONFIG_AVR_USART1
 void usart1_reset(void)
 {
   /* Clear USART configuration */

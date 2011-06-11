@@ -63,6 +63,16 @@
 #  undef HAVE_SERIAL_CONSOLE
 #endif
 
+/* Determine which (if any) console driver to use */
+
+#if CONFIG_NFILE_DESCRIPTORS == 0 || defined(CONFIG_DEV_LOWCONSOLE) || !defined(HAVE_USART_DEVICE)
+#  undef CONFIG_USE_SERIALDRIVER
+#  undef CONFIG_USE_EARLYSERIALINIT
+#elif defined(CONFIG_DEV_CONSOLE) && CONFIG_NFILE_DESCRIPTORS > 0
+#  define CONFIG_USE_SERIALDRIVER 1
+#  define CONFIG_USE_EARLYSERIALINIT 1
+#endif
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
