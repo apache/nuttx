@@ -45,6 +45,7 @@
 
 #include <arch/irq.h>
 #include <arch/board/board.h>
+#include <avr/io.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -55,25 +56,13 @@
  * Private Definitions
  ******************************************************************************/
 
-/* Select USART parameters for the selected console -- there is only USART1 */
-
-#if defined(CONFIG_USART1_SERIAL_CONSOLE)
-#  define AVR_CONSOLE_BASE     AVR_USART1_BASE
-#  define AVR_CONSOLE_BAUD     CONFIG_USART1_BAUD
-#  define AVR_CONSOLE_BITS     CONFIG_USART1_BITS
-#  define AVR_CONSOLE_PARITY   CONFIG_USART1_PARITY
-#  define AVR_CONSOLE_2STOP    CONFIG_USART1_2STOP
-#else
-#  error "No CONFIG_USARTn_SERIAL_CONSOLE Setting"
-#endif
-
 /* Baud rate settings for normal and double speed settings  */
 
 #define AVR_NORMAL_UBRR1 \
-  (((BOARD_CPU_CLOCK / 16) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
+  ((((BOARD_CPU_CLOCK / 16) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
 
 #define AVR_DBLSPEED_UBRR1 \
-  (((BOARD_CPU_CLOCK / 8) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
+  ((((BOARD_CPU_CLOCK / 8) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
 
 /* Select normal or double speed baud settings.  This is a trade-off between the
  * sampling rate and the accuracy of the divisor for high baud rates.
@@ -89,34 +78,34 @@
  *     AVR_DBLSPEED_UBRR1 = 104 (rounded), actual baud = 9615
  */
  
-#undef HAVE_DOUBLE_SPEED
+#undef UART1_DOUBLE_SPEED
 #if BOARD_CPU_CLOCK <= 4000000
 #  if CONFIG_USART1_BAUD <= 9600
 #    define AVR_UBRR1 AVR_NORMAL_UBRR1
 #  else
 #    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
-#    define HAVE_DOUBLE_SPEED 1
+#    define UART1_DOUBLE_SPEED 1
 #  endif
 #elif BOARD_CPU_CLOCK <= 8000000
 #  if CONFIG_USART1_BAUD <= 19200
 #    define AVR_UBRR1 AVR_NORMAL_UBRR1
 #  else
 #    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
-#    define HAVE_DOUBLE_SPEED 1
+#    define UART1_DOUBLE_SPEED 1
 #  endif
 #elif BOARD_CPU_CLOCK <= 12000000
 #  if CONFIG_USART1_BAUD <= 28800
 #    define AVR_UBRR1 AVR_NORMAL_UBRR1
 #  else
 #    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
-#    define HAVE_DOUBLE_SPEED 1
+#    define UART1_DOUBLE_SPEED 1
 #  endif
 #else
 #  if CONFIG_USART1_BAUD <= 38400
 #    define AVR_UBRR1 AVR_NORMAL_UBRR1
 #  else
 #    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
-#    define HAVE_DOUBLE_SPEED 1
+#    define UART1_DOUBLE_SPEED 1
 #  endif
 #endif
 
@@ -155,7 +144,14 @@
 #ifdef HAVE_USART_DEVICE
 void usart1_reset(void)
 {
-# warning "Missing Logic"
+  UCSR1A = 0;
+  UCSR1B = 0;
+  UCSR1C = 0;
+
+  DDRD  &= ~(1 << 3);  
+  PORTD &= ~(1 << 2);
+        
+  UBRR1  = 0;
 }
 #endif
 
@@ -170,7 +166,62 @@ void usart1_reset(void)
 #ifdef HAVE_USART_DEVICE
 void usart1_configure(void)
 {
-# warning "Missing Logic"
+  uint8_t ucsr1b;
+  uint8_t ucsr1c;
+
+  /* Select normal or double speed. */
+
+#ifdef UART1_DOUBLE_SPEED
+  UCSR1A = (1 << U2X1);
+#else
+  UCSR1A = 0;
+#endif
+
+  /* Select baud, parity, nubmer of bits, stop bits, etc. */
+
+  ucsr1b = ((1 << TXEN1)  | (1 << RXEN1));
+  ucsr1c = 0;
+ 
+  /* Select parity */
+
+#if CONFIG_USART1_PARITY == 1
+  ucsr1c |= (UPM11 | UPM10); /* Odd parity */
+#else
+  ucsr1c |= UPM11;           /* Even parity */
+#endif
+
+  /* 1 or 2 stop bits */
+
+#if defined(CONFIG_USART1_2STOP) && CONFIG_USART1_2STOP > 0
+  ucsr1c |= USBS1;           /* Two stop bits */
+#endif
+
+  /* Word size */
+
+#if CONFIG_USART1_BITS == 5
+#elif CONFIG_USART1_BITS == 6
+  ucsr1c |= UCSZ10;
+#elif CONFIG_USART1_BITS == 7
+  ucsr1c |= UCSZ11;
+#elif CONFIG_USART1_BITS == 8
+  ucsr1c |= (UCSZ10 | UCSZ11);
+#elif CONFIG_USART1_BITS == 9
+  ucsr1c |= (UCSZ10 | UCSZ11);
+  ucsr1b |= UCSZ12;
+#else
+#  error "Unsupported word size"
+#endif
+  UCSR1B = ucsr1b;
+  UCSR1C = ucsr1c;
+
+  /* Configure pin */
+
+  DDRD  |= (1 << 3);  
+  PORTD |= (1 << 2);
+
+  /* Set the baud rate divisor */
+
+  UBRR1  = AVR_UBRR1;
 }
 #endif
 
@@ -202,7 +253,8 @@ void up_consoleinit(void)
 void up_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-# warning "Missing Logic"
+  while ((UCSR1A & (1 << UDRE1)) == 0);
+  UDR1 = ch;
 #endif
 }
 

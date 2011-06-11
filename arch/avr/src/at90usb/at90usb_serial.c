@@ -52,6 +52,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
+#include <avr/io.h>
 
 #include <arch/board/board.h>
 
@@ -346,23 +347,16 @@ static int usart1_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int usart1_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  /* Get the Rx byte.  The USART Rx interrupt flag is cleared by side effect
-   * when reading the received character.
-   */
-
-# warning "Missing logic"
-
   /* Return status information */
 
   if (status)
     {
-# warning "Missing logic"
+	  *status = (uint32_t)UCSR1A;
     }
 
   /* Then return the actual received byte */
 
-# warning "Missing logic"
-  return 0;
+  return UDR1;
 }
 
 /****************************************************************************
@@ -401,8 +395,7 @@ static void usart1_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool usart1_rxavailable(struct uart_dev_s *dev)
 {
-# warning "Missing logic"
-  return 0;
+  return (UCSR1A & (1 << RXC1)) != 0;
 }
 
 /****************************************************************************
@@ -415,8 +408,7 @@ static bool usart1_rxavailable(struct uart_dev_s *dev)
 
 static void usart1_send(struct uart_dev_s *dev, int ch)
 {
-# warning "Missing logic"
-  return 0;
+  UDR1 = ch;
 }
 
 /****************************************************************************
@@ -465,8 +457,7 @@ static void usart1_txint(struct uart_dev_s *dev, bool enable)
 
 static bool usart1_txready(struct uart_dev_s *dev)
 {
-# warning "Missing logic"
-  return 0;
+  return (UCSR1A & (1 << UDRE1)) != 0;
 }
 
 /****************************************************************************
