@@ -1,7 +1,7 @@
 /******************************************************************************
  * arch/avr/src/at90usb/at90usb_lowconsole.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,59 @@
 #  error "No CONFIG_USARTn_SERIAL_CONSOLE Setting"
 #endif
 
+/* Baud rate settings for normal and double speed settings  */
+
+#define AVR_NORMAL_UBRR1 \
+  (((BOARD_CPU_CLOCK / 16) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
+
+#define AVR_DBLSPEED_UBRR1 \
+  (((BOARD_CPU_CLOCK / 8) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
+
+/* Select normal or double speed baud settings.  This is a trade-off between the
+ * sampling rate and the accuracy of the divisor for high baud rates.
+ *
+ * As examples, consider:
+ *
+ *   BOARD_CPU_CLOCK=8MHz and BAUD=115200:
+ *     AVR_NORMAL_UBRR1 = 4 (rounded), actual baud = 125,000
+ *     AVR_DBLSPEED_UBRR1 = 9 (rounded), actual baud = 111,111
+ *
+ *   BOARD_CPU_CLOCK=8MHz and BAUD=9600:
+ *     AVR_NORMAL_UBRR1 = 52 (rounded), actual baud = 9615
+ *     AVR_DBLSPEED_UBRR1 = 104 (rounded), actual baud = 9615
+ */
+ 
+#undef HAVE_DOUBLE_SPEED
+#if BOARD_CPU_CLOCK <= 4000000
+#  if CONFIG_USART1_BAUD <= 9600
+#    define AVR_UBRR1 AVR_NORMAL_UBRR1
+#  else
+#    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
+#    define HAVE_DOUBLE_SPEED 1
+#  endif
+#elif BOARD_CPU_CLOCK <= 8000000
+#  if CONFIG_USART1_BAUD <= 19200
+#    define AVR_UBRR1 AVR_NORMAL_UBRR1
+#  else
+#    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
+#    define HAVE_DOUBLE_SPEED 1
+#  endif
+#elif BOARD_CPU_CLOCK <= 12000000
+#  if CONFIG_USART1_BAUD <= 28800
+#    define AVR_UBRR1 AVR_NORMAL_UBRR1
+#  else
+#    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
+#    define HAVE_DOUBLE_SPEED 1
+#  endif
+#else
+#  if CONFIG_USART1_BAUD <= 38400
+#    define AVR_UBRR1 AVR_NORMAL_UBRR1
+#  else
+#    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
+#    define HAVE_DOUBLE_SPEED 1
+#  endif
+#endif
+
 /******************************************************************************
  * Private Types
  ******************************************************************************/
@@ -88,26 +141,11 @@
  ******************************************************************************/
 
 /******************************************************************************
- * Name: usart_setbaudrate
- *
- * Description:
- *   Configure the USART baud rate.
- *
- ******************************************************************************/
-
-#ifdef HAVE_USART_DEVICE
-static void usart_setbaudrate(uintptr_t usart_base, uint32_t baudrate)
-{
-# warning "Missing logic"
-}
-#endif
-
-/******************************************************************************
  * Public Functions
  ******************************************************************************/
 
 /******************************************************************************
- * Name: usart_reset
+ * Name: usart1_reset
  *
  * Description:
  *   Reset a USART.
@@ -115,23 +153,22 @@ static void usart_setbaudrate(uintptr_t usart_base, uint32_t baudrate)
  ******************************************************************************/
 
 #ifdef HAVE_USART_DEVICE
-void usart_reset(uintptr_t usart_base)
+void usart1_reset(void)
 {
 # warning "Missing Logic"
 }
 #endif
 
 /******************************************************************************
- * Name: usart_configure
+ * Name: usart1_configure
  *
  * Description:
- *   Configure a USART as a RS-232 USART.
+ *   Configure USART1.
  *
  ******************************************************************************/
 
 #ifdef HAVE_USART_DEVICE
-void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
-                     unsigned int nbits, bool stop2)
+void usart1_configure(void)
 {
 # warning "Missing Logic"
 }
@@ -149,7 +186,9 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
 
 void up_consoleinit(void)
 {
-# warning "Missing Logic"
+#ifdef HAVE_SERIAL_CONSOLE
+  usart1_configure();
+#endif
 }
 
 /******************************************************************************

@@ -93,50 +93,48 @@
  ******************************************************************************/
 
 /******************************************************************************
- * Name: usart_setbaudrate
- *
- * Description:
- *   Configure the USART baud rate.
- *
- ******************************************************************************/
-
-#ifdef HAVE_USART_DEVICE
-static void usart_setbaudrate(uintptr_t usart_base, uint32_t baudrate)
-{
-# warning "Missing logic"
-}
-#endif
-
-/******************************************************************************
  * Public Functions
  ******************************************************************************/
 
-/******************************************************************************
- * Name: usart_reset
+/****************************************************************************
+ * Name: usart0_reset and usart1_reset
  *
  * Description:
- *   Reset a USART.
+ *   Reset USART0 or USART1.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-#ifdef HAVE_USART_DEVICE
-void usart_reset(uintptr_t usart_base)
+#ifdef CONFIG_ATMEGA_USART0
+void usart0_reset(void)
 {
 # warning "Missing logic"
 }
 #endif
 
-/******************************************************************************
- * Name: usart_configure
+#ifdef CONFIG_ATMEGA_USART1
+void usart1_reset(void)
+{
+# warning "Missing logic"
+}
+#endif
+
+/****************************************************************************
+ * Name: usart0_configure and usart1_configure
  *
  * Description:
- *   Configure a USART as a RS-232 USART.
+ *   Configure USART0 or USART1.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-#ifdef HAVE_USART_DEVICE
-void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
-                     unsigned int nbits, bool stop2)
+#ifdef CONFIG_AVR_USART0
+void usart0_configure(void)
+{
+# warning "Missing logic"
+}
+#endif
+
+#ifdef CONFIG_AVR_USART1
+void usart1_configure(void)
 {
 # warning "Missing logic"
 }
@@ -154,7 +152,13 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
 
 void up_consoleinit(void)
 {
-# warning "Missing logic"
+#ifdef HAVE_SERIAL_CONSOLE
+#  if defined(CONFIG_USART0_SERIAL_CONSOLE)
+  usart0_configure();
+#  elif defined(CONFIG_USART1_SERIAL_CONSOLE)
+  usart1_configure();
+#  endif
+#endif
 }
 
 /******************************************************************************
@@ -168,7 +172,11 @@ void up_consoleinit(void)
 void up_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-# warning "Missing logic"
+#  if defined(CONFIG_USART0_SERIAL_CONSOLE)
+#    warning "Missing logic"
+#  elif defined(CONFIG_USART1_SERIAL_CONSOLE)
+#    warning "Missing logic"
+#  endif
 #endif
 }
 
