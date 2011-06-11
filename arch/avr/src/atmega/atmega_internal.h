@@ -94,25 +94,26 @@ extern "C" {
 EXTERN void up_clkinitialize(void);
 
 /****************************************************************************
- * Name: usart_reset
+ * Name: usart0_reset and usart1_reset
  *
  * Description:
- *   Reset a USART.
+ *   Reset USART0 or USART1.
  *
  ****************************************************************************/
 
-EXTERN void usart_reset(uintptr_t usart_base);
+EXTERN void usart0_reset(void);
+EXTERN void usart1_reset(void);
 
 /****************************************************************************
- * Name: usart_configure
+ * Name: usart0_configure and usart1_configure
  *
  * Description:
- *   Configure a USART as a RS-232 UART.
+ *   Configure USART0 or USART1.
  *
  ****************************************************************************/
 
-void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
-                     unsigned int nbits, bool stop2);
+EXTERN void usart0_configure(void);
+EXTERN void usart1_configure(void);
 
 /****************************************************************************
  * Name: up_consoleinit

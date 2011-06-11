@@ -78,85 +78,60 @@
 
 #ifdef CONFIG_USE_SERIALDRIVER
 
-/* Which USART with be tty0/console and which tty1? */
-
 #if defined(CONFIG_USART1_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart1port     /* USART1 is console */
-#  define TTYS0_DEV       g_usart1port     /* USART1 is ttyS0 */
 #endif
+#define TTYS0_DEV         g_usart1port     /* USART1 is ttyS0 */
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct up_dev_s
-{
-  uintptr_t usartbase; /* Base address of USART registers */
-  uint32_t  baud;      /* Configured baud */
-  uint32_t  csr;       /* Saved channel status register contents */
-  uint8_t   irq;       /* IRQ associated with this USART */
-  uint8_t   parity;    /* 0=none, 1=odd, 2=even */
-  uint8_t   bits;      /* Number of bits (5, 6, 7 or 8) */
-  bool      stopbits2; /* true: Configure with 2 stop bits instead of 1 */
-};
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  up_setup(struct uart_dev_s *dev);
-static void up_shutdown(struct uart_dev_s *dev);
-static int  up_attach(struct uart_dev_s *dev);
-static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context);
-static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
-static void up_rxint(struct uart_dev_s *dev, bool enable);
-static bool up_rxavailable(struct uart_dev_s *dev);
-static void up_send(struct uart_dev_s *dev, int ch);
-static void up_txint(struct uart_dev_s *dev, bool enable);
-static bool up_txready(struct uart_dev_s *dev);
+static int  usart1_setup(struct uart_dev_s *dev);
+static void usart1_shutdown(struct uart_dev_s *dev);
+static int  usart1_attach(struct uart_dev_s *dev);
+static void usart1_detach(struct uart_dev_s *dev);
+static int  usart1_interrupt(int irq, void *context);
+static int  usart1_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int  usart1_receive(struct uart_dev_s *dev, uint32_t *status);
+static void usart1_rxint(struct uart_dev_s *dev, bool enable);
+static bool usart1_rxavailable(struct uart_dev_s *dev);
+static void usart1_send(struct uart_dev_s *dev, int ch);
+static void usart1_txint(struct uart_dev_s *dev, bool enable);
+static bool usart1_txready(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
 
-struct uart_ops_s g_uart_ops =
+struct uart_ops_s g_uart1_ops =
 {
-  .setup          = up_setup,
-  .shutdown       = up_shutdown,
-  .attach         = up_attach,
-  .detach         = up_detach,
-  .ioctl          = up_ioctl,
-  .receive        = up_receive,
-  .rxint          = up_rxint,
-  .rxavailable    = up_rxavailable,
-  .send           = up_send,
-  .txint          = up_txint,
-  .txready        = up_txready,
-  .txempty        = up_txready,
+  .setup          = usart1_setup,
+  .shutdown       = usart1_shutdown,
+  .attach         = usart1_attach,
+  .detach         = usart1_detach,
+  .ioctl          = usart1_ioctl,
+  .receive        = usart1_receive,
+  .rxint          = usart1_rxint,
+  .rxavailable    = usart1_rxavailable,
+  .send           = usart1_send,
+  .txint          = usart1_txint,
+  .txready        = usart1_txready,
+  .txempty        = usart1_txready,
 };
 
 /* I/O buffers */
 
-#ifdef CONFIG_AVR_USART1_RS232
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
-#endif
 
-/* This describes the state of the AVR32 USART1 port. */
+/* This describes the state of the AT90USB USART1 port. */
 
 #ifdef CONFIG_AVR_USART1_RS232
-static struct up_dev_s g_usart1priv =
-{
-  .usartbase      = AVR_USART1_BASE,
-  .baud           = CONFIG_USART1_BAUD,
-  .irq            = AVR_IRQ_USART1,
-  .parity         = CONFIG_USART1_PARITY,
-  .bits           = CONFIG_USART1_BITS,
-  .stopbits2      = CONFIG_USART1_2STOP,
-};
-
 static uart_dev_t g_usart1port =
 {
   .recv     =
@@ -169,8 +144,7 @@ static uart_dev_t g_usart1port =
     .size   = CONFIG_USART1_TXBUFSIZE,
     .buffer = g_usart1txbuffer,
    },
-  .ops      = &g_uart_ops,
-  .priv     = &g_usart1priv,
+  .ops      = &g_uart1_ops,
 };
 #endif
 
@@ -179,43 +153,25 @@ static uart_dev_t g_usart1port =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_serialin
+ * Name: usart1_restoreusartint
  ****************************************************************************/
 
-static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
+static void usart1_restoreusartint(uint8_t imr)
 {
 # warning "Missing logic"
 }
 
 /****************************************************************************
- * Name: up_serialout
+ * Name: usart1_disableusartint
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
+static inline void usart1_disableusartint(uint8_t *imr)
 {
 # warning "Missing logic"
 }
 
 /****************************************************************************
- * Name: up_restoreusartint
- ****************************************************************************/
-
-static void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
-{
-# warning "Missing logic"
-}
-
-/****************************************************************************
- * Name: up_disableusartint
- ****************************************************************************/
-
-static inline void up_disableusartint(struct up_dev_s *priv, uint32_t *imr)
-{
-# warning "Missing logic"
-}
-
-/****************************************************************************
- * Name: up_setup
+ * Name: usart1_setup
  *
  * Description:
  *   Configure the USART baud, bits, parity, etc. This method is called the
@@ -223,22 +179,20 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint32_t *imr)
  *
  ****************************************************************************/
 
-static int up_setup(struct uart_dev_s *dev)
+static int usart1_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 
-  /* Configure the USART as an RS-232 UART */
+  /* Configure the USART1 */
 
-  usart_configure(priv->usartbase, priv->baud, priv->parity,
-                  priv->bits, priv->stopbits2);
+  usart1_configure();
 #endif
 
   return OK;
 }
 
 /****************************************************************************
- * Name: up_shutdown
+ * Name: usart1_shutdown
  *
  * Description:
  *   Disable the USART.  This method is called when the serial
@@ -246,17 +200,15 @@ static int up_setup(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void up_shutdown(struct uart_dev_s *dev)
+static void usart1_shutdown(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-
   /* Reset, disable interrupts, and disable Rx and Tx */
 
-  usart_reset(priv->usartbase);
+  usart1_reset();
 }
 
 /****************************************************************************
- * Name: up_attach
+ * Name: usart1_attach
  *
  * Description:
  *   Configure the USART to operation in interrupt driven mode.  This method is
@@ -270,17 +222,17 @@ static void up_shutdown(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_attach(struct uart_dev_s *dev)
+static int usart1_attach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  /* Attach the USART1 IRQs */
 
-  /* Attach the IRQ */
-
-  return irq_attach(priv->irq, up_interrupt);
+  return irq_attach(AT90USB_IRQ_U1RX, usart1_interrupt);
+  return irq_attach(AT90USB_IRQ_U1DRE, usart1_interrupt);
+  return irq_attach(AT90USB_IRQ_U1TX, usart1_interrupt);
 }
 
 /****************************************************************************
- * Name: up_detach
+ * Name: usart1_detach
  *
  * Description:
  *   Detach USART interrupts.  This method is called when the serial port is
@@ -289,15 +241,21 @@ static int up_attach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void up_detach(struct uart_dev_s *dev)
+static void usart1_detach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  /* Disable USART1 interrupts */
+
 # warning "Missing logic"
-  irq_detach(priv->irq);
+
+  /* Detach USART1 interrupts */
+
+  return irq_deattach(AT90USB_IRQ_U1RX);
+  return irq_deattach(AT90USB_IRQ_U1DRE);
+  return irq_deattach(AT90USB_IRQ_U1TX);
 }
 
 /****************************************************************************
- * Name: up_interrupt
+ * Name: usart1_interrupt
  *
  * Description:
  *   This is the USART interrupt handler.  It will be invoked when an
@@ -308,26 +266,11 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int usart1_interrupt(int irq, void *context)
 {
-  struct uart_dev_s *dev = NULL;
-  struct up_dev_s   *priv;
-  uint32_t           csr;
+  uint8_t           csr;
   int                passes;
   bool               handled;
-
-#ifdef CONFIG_AVR_USART1_RS232
-  if (g_usart1priv.irq == irq)
-    {
-      dev = &g_usart1port;
-    }
-  else
-#endif
-    {
-      PANIC(OSERR_INTERNAL);
-    }
-  priv = (struct up_dev_s*)dev->priv;
-  DEBUGASSERT(priv);
 
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
@@ -363,27 +306,17 @@ static int up_interrupt(int irq, void *context)
 }
 
 /****************************************************************************
- * Name: up_ioctl
+ * Name: usart1_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
-static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
+static int usart1_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #if 0 /* Reserved for future growth */
-  struct inode      *inode;
-  struct uart_dev_s *dev;
-  struct up_dev_s   *priv;
-  int                ret = OK;
-
-  DEBUGASSERT(filep, filep->f_inode);
-  inode = filep->f_inode;
-  dev   = inode->i_private;
-
-  DEBUGASSERT(dev, dev->priv)
-  priv = (struct up_dev_s*)dev->priv;
+  int  ret = OK;
 
   switch (cmd)
     {
@@ -402,7 +335,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: up_receive
+ * Name: usart1_receive
  *
  * Description:
  *   Called (usually) from the interrupt level to receive one
@@ -411,10 +344,8 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, uint32_t *status)
+static int usart1_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-
   /* Get the Rx byte.  The USART Rx interrupt flag is cleared by side effect
    * when reading the received character.
    */
@@ -435,17 +366,15 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 }
 
 /****************************************************************************
- * Name: up_rxint
+ * Name: usart1_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
  *
  ****************************************************************************/
 
-static void up_rxint(struct uart_dev_s *dev, bool enable)
+static void usart1_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-
   if (enable)
     {
       /* Receive an interrupt when their is anything in the Rx data register (or an Rx
@@ -463,46 +392,43 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 }
 
 /****************************************************************************
- * Name: up_rxavailable
+ * Name: usart1_rxavailable
  *
  * Description:
  *   Return true if the receive register is not empty
  *
  ****************************************************************************/
 
-static bool up_rxavailable(struct uart_dev_s *dev)
+static bool usart1_rxavailable(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 # warning "Missing logic"
   return 0;
 }
 
 /****************************************************************************
- * Name: up_send
+ * Name: usart1_send
  *
  * Description:
  *   This method will send one byte on the USART.
  *
  ****************************************************************************/
 
-static void up_send(struct uart_dev_s *dev, int ch)
+static void usart1_send(struct uart_dev_s *dev, int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 # warning "Missing logic"
   return 0;
 }
 
 /****************************************************************************
- * Name: up_txint
+ * Name: usart1_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts
  *
  ****************************************************************************/
 
-static void up_txint(struct uart_dev_s *dev, bool enable)
+static void usart1_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   irqstate_t flags;
 
   flags = irqsave();
@@ -530,16 +456,15 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 }
 
 /****************************************************************************
- * Name: up_txready
+ * Name: usart1_txready
  *
  * Description:
  *   Return true if the tranmsit data register is empty
  *
  ****************************************************************************/
 
-static bool up_txready(struct uart_dev_s *dev)
+static bool usart1_txready(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 # warning "Missing logic"
   return 0;
 }
@@ -554,9 +479,7 @@ static bool up_txready(struct uart_dev_s *dev)
  * Description:
  *   Performs the low level USART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in up_consoleinit() and main clock iniialization
- *   performed in up_clkinitialize().
+ *   before up_serialinit.
  *
  ****************************************************************************/
 
@@ -564,16 +487,13 @@ void up_earlyserialinit(void)
 {
   /* Disable all USARTS */
 
-  up_disableusartint(TTYS0_DEV.priv, NULL);
-#ifdef TTYS1_DEV
-  up_disableusartint(TTYS1_DEV.priv, NULL);
-#endif
+  up_disableusartint(NULL);
 
   /* Configuration whichever one is the console */
 
 #ifdef HAVE_SERIAL_CONSOLE
   CONSOLE_DEV.isconsole = true;
-  up_setup(&CONSOLE_DEV);
+  usart1_setup(&CONSOLE_DEV);
 #endif
 }
 
@@ -613,8 +533,7 @@ void up_serialinit(void)
 int up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-  uint32_t imr;
+  uint8_t imr;
 
   up_disableusartint(priv, &imr);
 
