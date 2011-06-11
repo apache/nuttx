@@ -144,13 +144,19 @@
 #ifdef HAVE_USART_DEVICE
 void usart1_reset(void)
 {
+  /* Clear USART configuration */
+
   UCSR1A = 0;
   UCSR1B = 0;
   UCSR1C = 0;
 
-  DDRD  &= ~(1 << 3);  
+  /* Unconfigure pins */
+
+  DDRD  &= ~(1 << 3);
   PORTD &= ~(1 << 2);
-        
+
+  /* Unconfigure BAUD divisor */
+  
   UBRR1  = 0;
 }
 #endif
@@ -214,10 +220,20 @@ void usart1_configure(void)
   UCSR1B = ucsr1b;
   UCSR1C = ucsr1c;
 
-  /* Configure pin */
+  /* Pin Configuration: None necessary, Port D bits 2&3 are automatically
+   * configured:
+   *
+   *   Port D, Bit 2: RXD1, Receive Data (Data input pin for the USART1). When
+   *     the USART1 receiver is enabled this pin is configured as an input
+   *     regardless of the value of DDD2. When the USART forces this pin to
+   *     be an input, the pull-up can still be controlled by the PORTD2 bit.
+   *   Port D, Bit 3: TXD1, Transmit Data (Data output pin for the USART1).
+   *     When the USART1 Transmitter is enabled, this pin is configured as
+   *     an output regardless of the value of DDD3.
+   */
 
-  DDRD  |= (1 << 3);  
-  PORTD |= (1 << 2);
+  DDRD  |= (1 << 3);   /* Force Port D pin 3 to be an output */
+  PORTD |= (1 << 2);   /* Set pull-up on port D pin 2 */
 
   /* Set the baud rate divisor */
 

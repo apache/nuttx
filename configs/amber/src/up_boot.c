@@ -1,5 +1,6 @@
 /************************************************************************************
- * arch/avr/src/atmega/atmega_config.h
+ * configs/amber/src/up_boot.c
+ * arch/mips/src/board/up_boot.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,52 +34,60 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_ATMEGA_ATMEGA_CONFIG_H
-#define __ARCH_AVR_SRC_ATMEGA_ATMEGA_CONFIG_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-/* USARTs ***************************************************************************/
+#include <debug.h>
 
-#undef HAVE_USART_DEVICE
-#if defined(CONFIG_AVR_USART0) || defined(CONFIG_AVR_USART0)
-#  define HAVE_USART_DEVICE 1
-#endif
+#include <arch/board/board.h>
 
-/* Is there a serial console?  There should be at most one defined.  It
- * could be on any USARTn, n=0,1
- */
+#include "up_arch.h"
+#include "up_internal.h"
 
-#if defined(CONFIG_USART0_SERIAL_CONSOLE) && defined(CONFIG_AVR_USART0)
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  define HAVE_SERIAL_CONSOLE 1
-#elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_AVR_USART1)
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  define HAVE_SERIAL_CONSOLE 1
-#else
-#  undef CONFIG_USART0_SERIAL_CONSOLE
-#  undef CONFIG_USART1_SERIAL_CONSOLE
-#  undef HAVE_SERIAL_CONSOLE
-#endif
+#include "atmega_internal.h"
+#include "amber_internal.h"
 
 /************************************************************************************
- * Public Types
+ * Definitions
  ************************************************************************************/
 
 /************************************************************************************
- * Public Data
+ * Private Functions
  ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_AVR_SRC_ATMEGA_ATMEGA_CONFIG_H */
+/************************************************************************************
+ * Name: up_boardinitialize
+ *
+ * Description:
+ *   All ATMega architectures must provide the following entry point.  This entry
+ *   point is called early in the intitialization -- after all memory has been
+ *   configured and mapped but before any devices have been initialized.
+ *
+ ************************************************************************************/
 
+void up_boardinitialize(void)
+{
+  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
+   * function atmega_spiinitialize() has been brought into the link.
+   */
+
+#if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
+  if (atmega_spiinitialize)
+    {
+      atmega_spiinitialize();
+    }
+#endif
+
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  atmega_ledinit();
+#endif
+}

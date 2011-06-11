@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "at90usb_config.h"
 
 #include <stdint.h>
 #include <errno.h>

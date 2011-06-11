@@ -26,6 +26,19 @@ Contents
 Amber Web Server Features
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+   o  17.56MHz ATmega128 Atmel 8bit AVR RISC Processor
+   o  128Kbyte Flash
+   o  64Kbyte RAM
+   o  10BaseT Ethernet Port
+   o  High Speed Serial Port
+   o  8Ch 10bit Analog Input port
+   o  16 Digital IO ports
+   o  Expansion bus for daughter cards
+   o  LED status indicators
+   o  ISP Programming port
+   o  7-14VDC input
+   o  Power via Ethernet port
+
 Toolchains
 ^^^^^^^^^^
 
@@ -189,6 +202,7 @@ Build Notes:
      cd avr-lib-1.7.1
 
   3. Configure avr-lib.  Assuming that WinAVR is installed at the following
+     loction:
 
      export PATH=/cygdrive/c/WinAVR/bin:$PATH
      ./configure --build=`./config.guess` --host=avr
@@ -287,32 +301,29 @@ Amber Web Server Configuration Options
 	   CONFIG_AVR_INT5=n
 	   CONFIG_AVR_INT6=n
 	   CONFIG_AVR_INT7=n
-	   CONFIG_AVR_USBHOST=n
-	   CONFIG_AVR_USBDEV=n
-	   CONFIG_AVR_WDT=n
 	   CONFIG_AVR_TIMER0=n
 	   CONFIG_AVR_TIMER1=n
 	   CONFIG_AVR_TIMER2=n
 	   CONFIG_AVR_TIMER3=n
 	   CONFIG_AVR_SPI=n
-	   CONFIG_AVR_UART0=y
-	   CONFIG_AVR_UART1=n
-	   CONFIG_AVR_ANACOMP=n
+	   CONFIG_AVR_USART0=y
+	   CONFIG_AVR_USART1=n
 	   CONFIG_AVR_ADC=n
+	   CONFIG_AVR_ANACOMP=n
 	   CONFIG_AVR_TWI=n
 
   ATMEGA specific device driver settings
 
-	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
-	   console and ttys0 (default is the UART0).
-	CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+	CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
+	   console and ttys0 (default is the USART0).
+	CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
 	   This specific the size of the receive buffer
-	CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+	CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
 	   being sent.  This specific the size of the transmit buffer
-	CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
-	CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
-	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-	CONFIG_UARTn_2STOP - Two stop bits
+	CONFIG_USARTn_BAUD - The configure BAUD of the USART.  Must be
+	CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
+	CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+	CONFIG_USARTn_2STOP - Two stop bits
 
 Configurations
 ^^^^^^^^^^^^^^

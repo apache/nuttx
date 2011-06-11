@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/micropendous3/include/board.h
+ * configs/amber/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_MICROPENDOUS3_INCLUDE_BOARD_H
-#define __CONFIGS_MICROPENDOUS3_INCLUDE_BOARD_H
+#ifndef __CONFIGS_AMBER_INCLUDE_BOARD_H
+#define __CONFIGS_AMBER_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -90,4 +90,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_MICROPENDOUS3_INCLUDE_BOARD_H */
+#endif /* __CONFIGS_AMBER_INCLUDE_BOARD_H */

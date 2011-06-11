@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/micropendous3/include/board.h
- * include/arch/board/board.h
+ * configs/amber/src/pcblogic-internal.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_MICROPENDOUS3_INCLUDE_BOARD_H
-#define __CONFIGS_MICROPENDOUS3_INCLUDE_BOARD_H
+#ifndef __CONFIGS_AMBER_SRC_AMBER_INTERNAL_H
+#define __CONFIGS_AMBER_SRC_AMBER_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -47,21 +46,6 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-
-/* Clocking *****************************************************************/
-
-#define BOARD_CPU_CLOCK        8000000 /* 8MHz */
-
-/* LED definitions **********************************************************/
-
-#define LED_STARTED            0
-#define LED_HEAPALLOCATE       1
-#define LED_IRQSENABLED        2
-#define LED_STACKCREATED       3
-#define LED_INIRQ              4
-#define LED_SIGNAL             5
-#define LED_ASSERTION          6
-#define LED_PANIC              7
 
 /****************************************************************************
  * Public Types
@@ -84,10 +68,34 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/************************************************************************************
+ * Name: atmega_spiinitialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the Amber Web Server.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_AVR_SPI1) || defined(CONFIG_AVR_SPI2)
+EXTERN void weak_function atmega_spiinitialize(void);
+#endif
+
+/************************************************************************************
+ * Name: atmega_ledinit
+ *
+ * Description:
+ *   Configure on-board LEDs if LED support has been selected.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+EXTERN void atmega_ledinit(void);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_MICROPENDOUS3_INCLUDE_BOARD_H */
+#endif /* __CONFIGS_AMBER_SRC_AMBER_INTERNAL_H */
