@@ -317,7 +317,7 @@ static int ram_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
+          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -334,7 +334,7 @@ static int ram_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case MTDIOC_XIPBASE:
         {
-          FAR void **ppv = (FAR void**)arg;
+          FAR void **ppv = (FAR void**)((uintptr_t)arg);
           if (ppv)
             {
               /* Return (void*) base address of device memory */

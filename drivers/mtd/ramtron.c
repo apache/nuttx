@@ -160,7 +160,7 @@ struct ramtron_dev_s
 static struct ramtron_parts_s ramtron_parts[] =
 {
 	{
-		.size = 32*1024,
+		.size = 32L*1024L,
 		.addr_len = 2,
 		.id1 = 0x22,
 		.id2 = 0x00,
@@ -168,7 +168,7 @@ static struct ramtron_parts_s ramtron_parts[] =
 		.name = "FM25V02",
 	},
 	{
-		.size = 32*1024,
+		.size = 32L*1024L,
 		.addr_len = 2,
 		.id1 = 0x22,
 		.id2 = 0x01,
@@ -176,7 +176,7 @@ static struct ramtron_parts_s ramtron_parts[] =
 		.name = "FM25VN02",
 	},
 	{
-		.size = 64*1024,
+		.size = 64L*1024L,
 		.addr_len = 2,
 		.id1 = 0x23,
 		.id2 = 0x00,
@@ -184,7 +184,7 @@ static struct ramtron_parts_s ramtron_parts[] =
 		.name = "FM25V05",
 	},
 	{
-		.size = 64*1024,
+		.size = 64L*1024L,
 		.addr_len = 2,
 		.id1 = 0x23,
 		.id2 = 0x01,
@@ -192,7 +192,7 @@ static struct ramtron_parts_s ramtron_parts[] =
 		.name = "FM25VN05",
 	},
 	{
-		.size = 128*1024,
+		.size = 128L*1024L,
 		.addr_len = 3,
 		.id1 = 0x24,
 		.id2 = 0x00,
@@ -200,7 +200,7 @@ static struct ramtron_parts_s ramtron_parts[] =
 		.name = "FM25V10",
 	},
 	{
-		.size = 128*1024,
+		.size = 128L*1024L,
 		.addr_len = 3,
 		.id1 = 0x24,
 		.id2 = 0x01,
@@ -209,7 +209,7 @@ static struct ramtron_parts_s ramtron_parts[] =
 	},
 #ifdef CONFIG_RAMTRON_FRAM_NON_JEDEC
 	{
-		.size = 256*1024,
+		.size = 256L*1024L,
 		.addr_len = 3,
 		.id1 = 0xff,
 		.id2 = 0xff,
