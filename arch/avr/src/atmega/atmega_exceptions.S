@@ -49,7 +49,7 @@
 
 	.file	"atmega_exceptions.S"
 	.global	up_doirq
-	.gloal	up_fullcontextrestore
+	.global	up_fullcontextrestore
 
 /********************************************************************************************
  * Macros

@@ -58,10 +58,10 @@
 /* USART0 Baud rate settings for normal and double speed settings  */
 
 #define AVR_NORMAL_UBRR0 \
-  ((((BOARD_CPU_CLOCK / 16) + (CONFIG_USART0_BAUD / 2)) / (CONFIG_USART0_BAUD)) - 1)
+  (((((BOARD_CPU_CLOCK / 16) + (CONFIG_USART0_BAUD / 2)) / (CONFIG_USART0_BAUD)) - 1)
 
 #define AVR_DBLSPEED_UBRR0 \
-  ((((BOARD_CPU_CLOCK / 8) + (CONFIG_USART0_BAUD / 2)) / (CONFIG_USART0_BAUD)) - 1)
+  (((((BOARD_CPU_CLOCK / 8) + (CONFIG_USART0_BAUD / 2)) / (CONFIG_USART0_BAUD)) - 1)
 
 /* Select normal or double speed baud settings.  This is a trade-off between the
  * sampling rate and the accuracy of the divisor for high baud rates.
@@ -111,10 +111,10 @@
 /* USART1 Baud rate settings for normal and double speed settings  */
 
 #define AVR_NORMAL_UBRR1 \
-  (((BOARD_CPU_CLOCK / 16) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
+  ((((BOARD_CPU_CLOCK / 16) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
 
 #define AVR_DBLSPEED_UBRR1 \
-  (((BOARD_CPU_CLOCK / 8) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
+  ((((BOARD_CPU_CLOCK / 8) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
 
 /* Select normal or double speed baud settings.  This is a trade-off between the
  * sampling rate and the accuracy of the divisor for high baud rates.
@@ -196,27 +196,42 @@
 #ifdef CONFIG_ATMEGA_USART0
 void usart0_reset(void)
 {
+  /* Clear USART configuration */
+
   UCSR0A = 0;
   UCSR0B = 0;
   UCSR0C = 0;
 
-# warning "Missing logic"
+  /* Unconfigure pins (no action needed */
 
-  UBRR0  = 0;
+  DDRE  &= ~(1 << 1);
+  PORTE &= ~(1 << 0);
+
+  /* Unconfigure BAUD divisor */
+
+  UBRR0H = 0;
+  UBRR0L = 0;
 }
 #endif
 
 #ifdef CONFIG_ATMEGA_USART1
 void usart1_reset(void)
 {
+  /* Clear USART configuration */
+
   UCSR1A = 0;
   UCSR1B = 0;
   UCSR1C = 0;
 
-  DDRD  &= ~(1 << 3);  
+  /* Unconfigure pins */
+
+  DDRD  &= ~(1 << 3);
   PORTD &= ~(1 << 2);
-        
-  UBRR1  = 0;
+
+  /* Unconfigure BAUD divisor */
+
+  UBRR1H = 0;
+  UBRR1L = 0;
 }
 #endif
 
@@ -279,13 +294,28 @@ void usart0_configure(void)
   UCSR0B = ucsr0b;
   UCSR0C = ucsr0c;
 
-  /* Configure pin */
+  /* Pin Configuration: None necessary, Port E bits 0&1 are automatically
+   * configured:
+   *
+   * Port E, Bit 0: RXD0, USART0 Receive Pin. Receive Data (Data input pin
+   *   for the USART0). When the USART0 receiver is enabled this pin is
+   *   configured as an input regardless of the value of DDRE0. When the
+   *   USART0 forces this pin to be an input, a logical one in PORTE0 will
+   *   turn on the internal pull-up.
+   *
+   * Port E, Bit 1: TXD0, UART0 Transmit pin.
+   *
+   * REVISIT: According to table 41, TXD0 is also automatically configured.
+   * However, this is not explicitly stated in the text.
+   */
 
-#warning "Missing logic"
+  DDRE  |= (1 << 1);   /* Force Port E pin 1 to be an input */
+  PORTE |= (1 << 0);   /* Set pull-up on Port E pin 0 */
 
   /* Set the baud rate divisor */
 
-  UBRR0  = AVR_UBRR0;
+  UBRR0H = AVR_UBRR1 >> 8;
+  UBRR0L = AVR_UBRR1 & 0xff;
 }
 #endif
 
@@ -340,14 +370,25 @@ void usart1_configure(void)
   UCSR1B = ucsr1b;
   UCSR1C = ucsr1c;
 
-  /* Configure pin */
+  /* Pin Configuration: None necessary, Port D bits 2&3 are automatically
+   * configured:
+   *
+   *   Port D, Bit 2: RXD1, Receive Data (Data input pin for the USART1). When
+   *     the USART1 receiver is enabled this pin is configured as an input
+   *     regardless of the value of DDD2. When the USART forces this pin to
+   *     be an input, the pull-up can still be controlled by the PORTD2 bit.
+   *   Port D, Bit 3: TXD1, Transmit Data (Data output pin for the USART1).
+   *     When the USART1 Transmitter is enabled, this pin is configured as
+   *     an output regardless of the value of DDD3.
+   */
 
-  DDRD  |= (1 << 3);  
-  PORTD |= (1 << 2);
+  DDRD  |= (1 << 3);   /* Force Port D pin 3 to be an output */
+  PORTD |= (1 << 2);   /* Set pull-up on port D pin 2 */
 
   /* Set the baud rate divisor */
 
-  UBRR1  = AVR_UBRR1;
+  UBRR1H = AVR_UBRR1 >> 8;
+  UBRR1L = AVR_UBRR1 & 0xff;
 }
 #endif
 

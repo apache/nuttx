@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_AT90USB_AT90USB_CONFIG_H
-#define __ARCH_AVR_SRC_AT90USB_AT90USB_CONFIG_H
+#ifndef __ARCH_AVR_SRC_ATMEGA_ATMEGA_CONFIG_H
+#define __ARCH_AVR_SRC_ATMEGA_ATMEGA_CONFIG_H
 
 /************************************************************************************
  * Included Files
@@ -80,5 +80,5 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_AVR_SRC_AT90USB_AT90USB_CONFIG_H */
+#endif /* __ARCH_AVR_SRC_ATMEGA_ATMEGA_CONFIG_H */
 

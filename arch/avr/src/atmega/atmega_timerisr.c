@@ -177,5 +177,5 @@ void up_timerinit(void)
 
   /* Enable the interrupt on compare match A */
 
-  TIMSK1 |= (1 << OCIE1A);
+  TIMSK |= (1 << OCIE1A);
 }
