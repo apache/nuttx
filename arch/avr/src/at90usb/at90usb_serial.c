@@ -79,11 +79,6 @@
 
 #ifdef CONFIG_USE_SERIALDRIVER
 
-#if defined(CONFIG_USART1_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_usart1port     /* USART1 is console */
-#endif
-#define TTYS0_DEV         g_usart1port     /* USART1 is ttyS0 */
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -96,9 +91,10 @@ static int  usart1_setup(struct uart_dev_s *dev);
 static void usart1_shutdown(struct uart_dev_s *dev);
 static int  usart1_attach(struct uart_dev_s *dev);
 static void usart1_detach(struct uart_dev_s *dev);
-static int  usart1_interrupt(int irq, void *context);
+static int  usart1_rxinterrupt(int irq, void *context);
+static int  usart1_txinterrupt(int irq, void *context);
 static int  usart1_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  usart1_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  usart1_receive(struct uart_dev_s *dev, FAR unsigned int *status);
 static void usart1_rxint(struct uart_dev_s *dev, bool enable);
 static bool usart1_rxavailable(struct uart_dev_s *dev);
 static void usart1_send(struct uart_dev_s *dev, int ch);
@@ -132,7 +128,6 @@ static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 
 /* This describes the state of the AT90USB USART1 port. */
 
-#ifdef CONFIG_AVR_USART1_RS232
 static uart_dev_t g_usart1port =
 {
   .recv     =
@@ -147,7 +142,6 @@ static uart_dev_t g_usart1port =
    },
   .ops      = &g_uart1_ops,
 };
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -159,7 +153,13 @@ static uart_dev_t g_usart1port =
 
 static void usart1_restoreusartint(uint8_t imr)
 {
-# warning "Missing logic"
+  uint8_t regval;
+
+  regval  = UCSR1B;
+  regval &= ~((1 << RXCIE1) | (1 << TXCIE1) | (1 << UDRIE1));
+  imr    &=  ((1 << RXCIE1) | (1 << TXCIE1) | (1 << UDRIE1));
+  regval |= imr;
+  UCSR1B  = regval;
 }
 
 /****************************************************************************
@@ -168,7 +168,9 @@ static void usart1_restoreusartint(uint8_t imr)
 
 static inline void usart1_disableusartint(uint8_t *imr)
 {
-# warning "Missing logic"
+  uint8_t regval = UCSR1B;
+  *imr    = regval;
+  regval &= ~((1 << RXCIE1) | (1 << TXCIE1) | (1 << UDRIE1));
 }
 
 /****************************************************************************
@@ -225,11 +227,22 @@ static void usart1_shutdown(struct uart_dev_s *dev)
 
 static int usart1_attach(struct uart_dev_s *dev)
 {
-  /* Attach the USART1 IRQs */
+  /* Attach the USART1 IRQs:
+   *
+   * RX:  USART Receive Complete. Set when are unread data in the receive
+   *      buffer and cleared when the receive buffer is empty.
+   * TX:  USART Transmit Complete.  Set when the entire frame in the Transmit
+   *      Shift Register has been shifted out and there are no new data
+   *      currently present in the transmit buffer.
+   * DRE: USART Data Register Empty.  Indicates if the transmit buffer is ready
+   *      to receive new data: The buffer is empty, and therefore ready to be
+   *      written.
+   */
 
-  return irq_attach(AT90USB_IRQ_U1RX, usart1_interrupt);
-  return irq_attach(AT90USB_IRQ_U1DRE, usart1_interrupt);
-  return irq_attach(AT90USB_IRQ_U1TX, usart1_interrupt);
+  (void)irq_attach(AT90USB_IRQ_U1RX, usart1_rxinterrupt);
+  (void)irq_attach(AT90USB_IRQ_U1DRE, usart1_txinterrupt);
+//  (void)irq_attach(AT90USB_IRQ_U1TX, usart1_txinterrupt);
+  return OK;
 }
 
 /****************************************************************************
@@ -246,64 +259,65 @@ static void usart1_detach(struct uart_dev_s *dev)
 {
   /* Disable USART1 interrupts */
 
-# warning "Missing logic"
+  usart1_disableusartint(NULL);
 
   /* Detach USART1 interrupts */
 
-  return irq_deattach(AT90USB_IRQ_U1RX);
-  return irq_deattach(AT90USB_IRQ_U1DRE);
-  return irq_deattach(AT90USB_IRQ_U1TX);
+  (void)irq_detach(AT90USB_IRQ_U1RX);
+  (void)irq_detach(AT90USB_IRQ_U1DRE);
+//  (void)irq_detach(AT90USB_IRQ_U1TX);
 }
 
 /****************************************************************************
- * Name: usart1_interrupt
+ * Name: usart1_rxinterrupt
  *
  * Description:
- *   This is the USART interrupt handler.  It will be invoked when an
- *   interrupt received on the 'irq'  It should call uart_transmitchars or
- *   uart_receivechar to perform the appropriate data transfers.  The
- *   interrupt handling logic must be able to map the 'irq' number into the
- *   approprite uart_dev_s structure in order to call these functions.
+ *   This is the USART RX interrupt handler.  It will be invoked when an
+ *   RX interrupt received.  It will call uart_receivechar to perform the RX
+ *   data transfers.
  *
  ****************************************************************************/
 
-static int usart1_interrupt(int irq, void *context)
+static int usart1_rxinterrupt(int irq, void *context)
 {
-  uint8_t           csr;
-  int                passes;
-  bool               handled;
+  uint8_t ucsr1a = UCSR1A;
 
-  /* Loop until there are no characters to be transferred or,
-   * until we have been looping for a long time.
-   */
+  /* Handle incoming, receive bytes (with or without timeout) */
 
-  handled = true;
-  for (passes = 0; passes < 256 && handled; passes++)
+  if ((ucsr1a & (1 << RXC1)) != 0)
     {
-      handled = false;
+       /* Received data ready... process incoming bytes */
 
-# warning "Missing logic"
-      /* Handle incoming, receive bytes (with or without timeout) */
-
-# warning "Missing logic"
-        {
-           /* Received data ready... process incoming bytes */
-
-           uart_recvchars(dev);
-           handled = true;
-        }
-
-      /* Handle outgoing, transmit bytes */
-
-# warning "Missing logic"
-        {
-           /* Transmit data regiser empty ... process outgoing bytes */
-
-           uart_xmitchars(dev);
-           handled = true;
-        }
+       uart_recvchars(&g_usart1port);
     }
-    return OK;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: usart1_txinterrupt
+ *
+ * Description:
+ *   This is the USART TX interrupt handler.  It will be invoked when an
+ *   TX or DRE interrupt received.  It will call uart_xmitchars to perform
+ *   the TXdata transfers.
+ *
+ ****************************************************************************/
+
+static int usart1_txinterrupt(int irq, void *context)
+{
+  uint8_t ucsr1a = UCSR1A;
+
+  /* Handle outgoing, transmit bytes */
+
+  if ((ucsr1a & (1 << TXC1)) != 0)
+    {
+       /* Transmit data regiser empty ... process outgoing bytes */
+
+       uart_xmitchars(&g_usart1port);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -345,13 +359,13 @@ static int usart1_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int usart1_receive(struct uart_dev_s *dev, uint32_t *status)
+static int usart1_receive(struct uart_dev_s *dev, FAR unsigned int *status)
 {
   /* Return status information */
 
   if (status)
     {
-	  *status = (uint32_t)UCSR1A;
+	  *status = (FAR unsigned int)UCSR1A;
     }
 
   /* Then return the actual received byte */
@@ -369,19 +383,21 @@ static int usart1_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void usart1_rxint(struct uart_dev_s *dev, bool enable)
 {
+  /* Enable/disable RX interrupts:
+   *
+   * RX:  USART Receive Complete. Set when are unread data in the receive
+   *      buffer and cleared when the receive buffer is empty.
+   */
+
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
-       */
-
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-# warning "Missing logic"
+       UCSR1B |= (1 << RXCIE1);
 #endif
     }
   else
     {
-# warning "Missing logic"
+       UCSR1B &= ~(1 << RXCIE1);
     }
 }
 
@@ -423,26 +439,37 @@ static void usart1_txint(struct uart_dev_s *dev, bool enable)
 {
   irqstate_t flags;
 
+  /* Enable/disable TX interrupts:
+   *
+   * TX:  USART Transmit Complete.  Set when the entire frame in the Transmit
+   *      Shift Register has been shifted out and there are no new data
+   *      currently present in the transmit buffer.
+   * DRE: USART Data Register Empty.  Indicates if the transmit buffer is ready
+   *      to receive new data: The buffer is empty, and therefore ready to be
+   *      written.
+   */
+
   flags = irqsave();
   if (enable)
     {
       /* Set to receive an interrupt when the TX data register is empty */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-# warning "Missing logic"
+      UCSR1B |= (1 << UDRIE1);
+//    UCSR1B |= (1 << TXCIE1);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
        */
 
-      uart_xmitchars(dev);
+      uart_xmitchars(&g_usart1port);
 #endif
     }
   else
     {
       /* Disable the TX interrupt */
 
-# warning "Missing logic"
+      UCSR1B &= ~((1 << UDRIE1) | (1 << TXCIE1));
     }
   irqrestore(flags);
 }
@@ -478,13 +505,13 @@ void up_earlyserialinit(void)
 {
   /* Disable all USARTS */
 
-  up_disableusartint(NULL);
+  usart1_disableusartint(NULL);
 
   /* Configuration whichever one is the console */
 
 #ifdef HAVE_SERIAL_CONSOLE
-  CONSOLE_DEV.isconsole = true;
-  usart1_setup(&CONSOLE_DEV);
+  g_usart1port.isconsole = true;
+  usart1_setup(&g_usart1port);
 #endif
 }
 
@@ -502,15 +529,12 @@ void up_serialinit(void)
   /* Register the console */
 
 #ifdef HAVE_SERIAL_CONSOLE
-  (void)uart_register("/dev/console", &CONSOLE_DEV);
+  (void)uart_register("/dev/console", &g_usart1port);
 #endif
 
   /* Register all USARTs */
 
-  (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
-#ifdef TTYS1_DEV
-  (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
-#endif
+  (void)uart_register("/dev/ttyS0", &g_usart1port);
 }
 
 /****************************************************************************
@@ -526,7 +550,7 @@ int up_putc(int ch)
 #ifdef HAVE_SERIAL_CONSOLE
   uint8_t imr;
 
-  up_disableusartint(priv, &imr);
+  usart1_disableusartint(&imr);
 
   /* Check for LF */
 
@@ -538,7 +562,7 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
-  up_restoreusartint(priv, imr);
+  usart1_restoreusartint(imr);
 #endif
   return ch;
 }

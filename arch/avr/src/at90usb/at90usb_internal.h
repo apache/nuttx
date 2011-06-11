@@ -54,9 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Bit-encoded input to at90usb_configgpio() ********************************/
-# warning "Missing definitions"
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -94,6 +91,26 @@ extern "C" {
 EXTERN void up_clkinitialize(void);
 
 /****************************************************************************
+ * Name: usart1_reset
+ *
+ * Description:
+ *   Reset USART1.
+ *
+ ****************************************************************************/
+
+EXTERN void usart1_reset(void);
+
+/****************************************************************************
+ * Name: usart1_configure
+ *
+ * Description:
+ *   Configure USART1.
+ *
+ ****************************************************************************/
+
+EXTERN void usart1_configure(void);
+
+/****************************************************************************
  * Name: up_consoleinit
  *
  * Description:
@@ -115,36 +132,6 @@ EXTERN void up_consoleinit(void);
  ****************************************************************************/
 
 EXTERN void up_boardinitialize(void);
-
-/****************************************************************************
- * Name: at90usb_configgpio
- *
- * Description:
- *   Configure a GPIO pin based on bit-encoded description of the pin.
- *
- ****************************************************************************/
-
-EXTERN int at90usb_configgpio(uint16_t cfgset);
-
-/****************************************************************************
- * Name: at90usb_gpiowrite
- *
- * Description:
- *   Write one or zero to the selected GPIO pin
- *
- ****************************************************************************/
-
-EXTERN void at90usb_gpiowrite(uint16_t pinset, bool value);
-
-/****************************************************************************
- * Name: at90usb_gpioread
- *
- * Description:
- *   Read one or zero from the selected GPIO pin
- *
- ****************************************************************************/
-
-EXTERN bool at90usb_gpioread(uint16_t pinset);
 
 /****************************************************************************
  * Name: gpio_irqinitialize

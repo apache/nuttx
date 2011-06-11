@@ -69,7 +69,7 @@ typedef unsigned char      _uint8_t;
 typedef signed int         _int16_t;   /* int is 16-bits */
 typedef unsigned int       _uint16_t;
 
-typedef signed long         _int32_t;  /* long is 32-bits */
+typedef signed long        _int32_t;  /* long is 32-bits */
 typedef unsigned long      _uint32_t;
 
 typedef signed long long   _int64_t;   /* long long is 64-bits */
@@ -83,7 +83,7 @@ typedef unsigned int       _uintptr_t;
 
 /* This is the size of the interrupt state save returned by irqsave(). */
 
-typedef unsigned char       irqstate_t;
+typedef unsigned char      irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 

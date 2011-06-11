@@ -54,9 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Bit-encoded input to atmega_configgpio() ********************************/
-# warning "Missing definitions"
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -137,36 +134,6 @@ EXTERN void up_consoleinit(void);
  ****************************************************************************/
 
 EXTERN void up_boardinitialize(void);
-
-/****************************************************************************
- * Name: atmega_configgpio
- *
- * Description:
- *   Configure a GPIO pin based on bit-encoded description of the pin.
- *
- ****************************************************************************/
-
-EXTERN int atmega_configgpio(uint16_t cfgset);
-
-/****************************************************************************
- * Name: atmega_gpiowrite
- *
- * Description:
- *   Write one or zero to the selected GPIO pin
- *
- ****************************************************************************/
-
-EXTERN void atmega_gpiowrite(uint16_t pinset, bool value);
-
-/****************************************************************************
- * Name: atmega_gpioread
- *
- * Description:
- *   Read one or zero from the selected GPIO pin
- *
- ****************************************************************************/
-
-EXTERN bool atmega_gpioread(uint16_t pinset);
 
 /****************************************************************************
  * Name: gpio_irqinitialize
