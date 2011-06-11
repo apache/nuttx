@@ -52,6 +52,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial.h>
+#include <avr/io.h>
 
 #include <arch/board/board.h>
 
@@ -562,46 +563,32 @@ static int usart1_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_AVR_USART0
 static int usart0_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  /* Get the Rx byte.  The USART Rx interrupt flag is cleared by side effect
-   * when reading the received character.
-   */
-
-# warning "Missing logic"
-
   /* Return status information */
 
   if (status)
     {
-# warning "Missing logic"
+	  *status = (uint32_t)UCSR0A;
     }
 
   /* Then return the actual received byte */
 
-# warning "Missing logic"
-  return 0;
+  return UDR0;
 }
 #endif
 
 #ifdef CONFIG_AVR_USART1
 static int usart1_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  /* Get the Rx byte.  The USART Rx interrupt flag is cleared by side effect
-   * when reading the received character.
-   */
-
-# warning "Missing logic"
-
   /* Return status information */
 
   if (status)
     {
-# warning "Missing logic"
+	  *status = (uint32_t)UCSR1A;
     }
 
   /* Then return the actual received byte */
 
-# warning "Missing logic"
-  return 0;
+  return UDR1;
 }
 #endif
 
@@ -664,16 +651,14 @@ static void usart1_rxint(struct uart_dev_s *dev, bool enable)
 #ifdef CONFIG_AVR_USART0
 static bool usart0_rxavailable(struct uart_dev_s *dev)
 {
-# warning "Missing logic"
-  return 0;
+  return (UCSR0A & (1 << RXC0)) != 0;
 }
 #endif
 
 #ifdef CONFIG_AVR_USART1
 static bool usart1_rxavailable(struct uart_dev_s *dev)
 {
-# warning "Missing logic"
-  return 0;
+  return (UCSR1A & (1 << RXC1)) != 0;
 }
 #endif
 
@@ -688,16 +673,14 @@ static bool usart1_rxavailable(struct uart_dev_s *dev)
 #ifdef CONFIG_AVR_USART0
 static void usart0_send(struct uart_dev_s *dev, int ch)
 {
-# warning "Missing logic"
-  return 0;
+  UDR0 = ch;
 }
 #endif
 
 #ifdef CONFIG_AVR_USART0
 static void usart0_send(struct uart_dev_s *dev, int ch)
 {
-# warning "Missing logic"
-  return 0;
+  UDR1 = ch;
 }
 #endif
 
@@ -780,16 +763,14 @@ static void usart1_txint(struct uart_dev_s *dev, bool enable)
 #ifdef CONFIG_AVR_USART0
 static bool usart0_txready(struct uart_dev_s *dev)
 {
-# warning "Missing logic"
-  return 0;
+  return (UCSR0A & (1 << UDRE0)) != 0;
 }
 #endif
 
 #ifdef CONFIG_AVR_USART1
 static bool usart1_txready(struct uart_dev_s *dev)
 {
-# warning "Missing logic"
-  return 0;
+  return (UCSR1A & (1 << UDRE1)) != 0;
 }
 #endif
 
