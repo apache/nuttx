@@ -50,9 +50,10 @@
 
 /* Clocking *****************************************************************/
 
-#define BOARD_CPU_CLOCK        8000000 /* 8MHz */
+#define BOARD_CPU_CLOCK        16000000 /* F_CPU = 16MHz */
 
 /* LED definitions **********************************************************/
+/* The Micropendous 3 has no on-board LEDs */
 
 #define LED_STARTED            0
 #define LED_HEAPALLOCATE       1
@@ -62,6 +63,11 @@
 #define LED_SIGNAL             5
 #define LED_ASSERTION          6
 #define LED_PANIC              7
+
+/* Button definitions *******************************************************/
+/* SW1 = Connects to AT90USBxx RESET pin and is not available to software.
+ * SW2 = Connects (via a pull-up) to PE-2
+ */
 
 /****************************************************************************
  * Public Types
