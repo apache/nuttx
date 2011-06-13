@@ -123,35 +123,35 @@ static inline void up_registerdump(void)
 
   if (current_regs)
     {
-      lldbg("R%d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
+      lldbg("R%02d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
             0,
             current_regs[REG_R0],  current_regs[REG_R1],
             current_regs[REG_R2],  current_regs[REG_R3],
             current_regs[REG_R4],  current_regs[REG_R5],
             current_regs[REG_R6],  current_regs[REG_R7]);
 
-      lldbg("R%d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
+      lldbg("R%02d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
             8,
             current_regs[REG_R8],  current_regs[REG_R9],
             current_regs[REG_R10], current_regs[REG_R11],
             current_regs[REG_R12], current_regs[REG_R13],
             current_regs[REG_R14], current_regs[REG_R15]);
 
-      lldbg("R%d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
+      lldbg("R%02d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
             16,
             current_regs[REG_R16], current_regs[REG_R17],
             current_regs[REG_R18], current_regs[REG_R19],
             current_regs[REG_R20], current_regs[REG_R21],
             current_regs[REG_R22], current_regs[REG_R23]);
 
-      lldbg("R%d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
+      lldbg("R%02d: %02x %02x %02x %02x %02x %02x %02x %02x\n",
             24,
             current_regs[REG_R24], current_regs[REG_R25],
             current_regs[REG_R26], current_regs[REG_R27],
             current_regs[REG_R28], current_regs[REG_R29],
             current_regs[REG_R30], current_regs[REG_R31]);
 
-      lldbg("PC: %02x%02x SP: %02x%02x SREG: %02x\n",
+      lldbg("PC:  %02x%02x  SP: %02x%02x SREG: %02x\n",
             current_regs[REG_PCH], current_regs[REG_PCL],
             current_regs[REG_SPH], current_regs[REG_SPL],
             current_regs[REG_SREG]);
@@ -192,7 +192,7 @@ void up_dumpstate(void)
 
   /* Get the limits on the interrupt stack memory */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 0
   istackbase = (uint16_t)&g_intstackbase;
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
 

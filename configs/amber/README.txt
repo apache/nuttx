@@ -133,10 +133,10 @@ NuttX buildroot Toolchain
      cd tools
      ./configure.sh amber/<sub-dir>
 
-	 NOTE: you also must copy avr-libc header files into the NuttX include
-	 directory with command perhaps like:
+     NOTE: you also must copy avr-libc header files into the NuttX include
+     directory with command perhaps like:
 
-	 cp -a /cygdrive/c/WinAVR/include/avr include/.
+     cp -a /cygdrive/c/WinAVR/include/avr include/.
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -223,107 +223,107 @@ Build Notes:
 Amber Web Server Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
-	   be set to:
+    CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
+       be set to:
 
-	   CONFIG_ARCH=avr
+       CONFIG_ARCH=avr
 
-	CONFIG_ARCH_family - For use in C code:
+    CONFIG_ARCH_family - For use in C code:
 
-	   CONFIG_ARCH_AVR=y
+       CONFIG_ARCH_AVR=y
 
-	CONFIG_ARCH_architecture - For use in C code:
+    CONFIG_ARCH_architecture - For use in C code:
 
-	   CONFIG_ARCH_ATMEGA=y
+       CONFIG_ARCH_ATMEGA=y
 
-	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
+    CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-	   CONFIG_ARCH_CHIP=atmega
+       CONFIG_ARCH_CHIP=atmega
 
-	CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
-	   chip:
+    CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
+       chip:
 
-	   CONFIG_ARCH_CHIP_ATMEGA128=y
+       CONFIG_ARCH_CHIP_ATMEGA128=y
 
-	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
-	   hence, the board that supports the particular chip or SoC.
+    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+       hence, the board that supports the particular chip or SoC.
 
-	   CONFIG_ARCH_BOARD=amber
+       CONFIG_ARCH_BOARD=amber
 
-	CONFIG_ARCH_BOARD_name - For use in C code
+    CONFIG_ARCH_BOARD_name - For use in C code
 
-	   CONFIG_ARCH_BOARD_AMBER=y
+       CONFIG_ARCH_BOARD_AMBER=y
 
-	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
-	   of delay loops
+    CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
+       of delay loops
 
-	CONFIG_ENDIAN_BIG - define if big endian (default is little
-	   endian)
+    CONFIG_ENDIAN_BIG - define if big endian (default is little
+       endian)
 
-	CONFIG_DRAM_SIZE - Describes the installed DRAM.  One of:
+    CONFIG_DRAM_SIZE - Describes the installed DRAM.  One of:
 
-	   CONFIG_DRAM_SIZE=(8*1024) - (8Kb)
+       CONFIG_DRAM_SIZE=(8*1024) - (8Kb)
 
-	CONFIG_DRAM_START - The start address of installed DRAM
+    CONFIG_DRAM_START - The start address of installed DRAM
 
-	   CONFIG_DRAM_START=0x10000000
+       CONFIG_DRAM_START=0x10000000
 
-	CONFIG_DRAM_END - Last address+1 of installed RAM
+    CONFIG_DRAM_END - Last address+1 of installed RAM
 
-	   CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
+       CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 
-	CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
-	   have LEDs
+    CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
+       have LEDs
 
-	CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
-	   stack. If defined, this symbol is the size of the interrupt
-	    stack in bytes.  If not defined, the user task stacks will be
-	  used during interrupt handling.
+    CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
+       stack. If defined, this symbol is the size of the interrupt
+        stack in bytes.  If not defined, the user task stacks will be
+      used during interrupt handling.
 
-	CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
+    CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
-	CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
+    CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 
-	CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
-	   cause a 100 second delay during boot-up.  This 100 second delay
-	   serves no purpose other than it allows you to calibratre
-	   CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
-	   the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
-	   the delay actually is 100 seconds.
+    CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
+       cause a 100 second delay during boot-up.  This 100 second delay
+       serves no purpose other than it allows you to calibratre
+       CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
+       the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
+       the delay actually is 100 seconds.
 
-	Individual subsystems can be enabled:
+    Individual subsystems can be enabled:
 
-	   CONFIG_AVR_INT0=n
-	   CONFIG_AVR_INT1=n
-	   CONFIG_AVR_INT2=n
-	   CONFIG_AVR_INT3=n
-	   CONFIG_AVR_INT4=n
-	   CONFIG_AVR_INT5=n
-	   CONFIG_AVR_INT6=n
-	   CONFIG_AVR_INT7=n
-	   CONFIG_AVR_TIMER0=n
-	   CONFIG_AVR_TIMER1=n
-	   CONFIG_AVR_TIMER2=n
-	   CONFIG_AVR_TIMER3=n
-	   CONFIG_AVR_SPI=n
-	   CONFIG_AVR_USART0=y
-	   CONFIG_AVR_USART1=n
-	   CONFIG_AVR_ADC=n
-	   CONFIG_AVR_ANACOMP=n
-	   CONFIG_AVR_TWI=n
+       CONFIG_AVR_INT0=n
+       CONFIG_AVR_INT1=n
+       CONFIG_AVR_INT2=n
+       CONFIG_AVR_INT3=n
+       CONFIG_AVR_INT4=n
+       CONFIG_AVR_INT5=n
+       CONFIG_AVR_INT6=n
+       CONFIG_AVR_INT7=n
+       CONFIG_AVR_TIMER0=n
+       CONFIG_AVR_TIMER1=n
+       CONFIG_AVR_TIMER2=n
+       CONFIG_AVR_TIMER3=n
+       CONFIG_AVR_SPI=n
+       CONFIG_AVR_USART0=y
+       CONFIG_AVR_USART1=n
+       CONFIG_AVR_ADC=n
+       CONFIG_AVR_ANACOMP=n
+       CONFIG_AVR_TWI=n
 
   ATMEGA specific device driver settings
 
-	CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
-	   console and ttys0 (default is the USART0).
-	CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
-	   This specific the size of the receive buffer
-	CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
-	   being sent.  This specific the size of the transmit buffer
-	CONFIG_USARTn_BAUD - The configure BAUD of the USART.  Must be
-	CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
-	CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-	CONFIG_USARTn_2STOP - Two stop bits
+    CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
+       console and ttys0 (default is the USART0).
+    CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
+       This specific the size of the receive buffer
+    CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
+       being sent.  This specific the size of the transmit buffer
+    CONFIG_USARTn_BAUD - The configure BAUD of the USART.  Must be
+    CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
+    CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+    CONFIG_USARTn_2STOP - Two stop bits
 
 Configurations
 ^^^^^^^^^^^^^^
@@ -331,17 +331,19 @@ Configurations
 Each Amber Web Server configuration is maintained in a sudirectory and can
 be selected as follow:
 
-	cd tools
-	./configure.sh amber/<subdir>
-	cd -
-	. ./setenv.sh
+    cd tools
+    ./configure.sh amber/<subdir>
+    cd -
+    . ./setenv.sh
 
 NOTE: You must also copy avr-libc header files, perhaps like:
 
-	 cp -a /cygdrive/c/WinAVR/include/avr include/.
+     cp -a /cygdrive/c/WinAVR/include/avr include/.
 
 Where <subdir> is one of the following:
 
   ostest:
     This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
+    apps/examples/ostest.  NOTE:  The OS test is quite large.  In order
+    to get it to fit within AVR memory constraints, it will probably be
+    necessary to disable some OS features.
