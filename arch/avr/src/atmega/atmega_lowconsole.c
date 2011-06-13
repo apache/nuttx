@@ -55,7 +55,7 @@
  * Private Definitions
  ******************************************************************************/
 
-/* USART0 Baud rate settings for normal and double speed settings  */
+/* USART0 Baud rate settings for normal and double speed modes  */
 
 #define AVR_NORMAL_UBRR0 \
   (((((BOARD_CPU_CLOCK / 16) + (CONFIG_USART0_BAUD / 2)) / (CONFIG_USART0_BAUD)) - 1)
@@ -99,8 +99,15 @@
 #    define AVR_UBRR0 AVR_DBLSPEED_UBRR0
 #    define UART0_DOUBLE_SPEED 1
 #  endif
-#else
+#elif BOARD_CPU_CLOCK <= 16000000
 #  if CONFIG_USART0_BAUD <= 38400
+#    define AVR_UBRR0 AVR_NORMAL_UBRR0
+#  else
+#    define AVR_UBRR0 AVR_DBLSPEED_UBRR0
+#    define UART0_DOUBLE_SPEED 1
+#  endif
+#else
+#  if CONFIG_USART0_BAUD <= 57600
 #    define AVR_UBRR0 AVR_NORMAL_UBRR0
 #  else
 #    define AVR_UBRR0 AVR_DBLSPEED_UBRR0
@@ -108,7 +115,7 @@
 #  endif
 #endif
 
-/* USART1 Baud rate settings for normal and double speed settings  */
+/* USART1 Baud rate settings for normal and double speed modes  */
 
 #define AVR_NORMAL_UBRR1 \
   ((((BOARD_CPU_CLOCK / 16) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
@@ -152,8 +159,15 @@
 #    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
 #    define UART1_DOUBLE_SPEED 1
 #  endif
-#else
+#elif BOARD_CPU_CLOCK <= 16000000
 #  if CONFIG_USART1_BAUD <= 38400
+#    define AVR_UBRR1 AVR_NORMAL_UBRR1
+#  else
+#    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
+#    define UART1_DOUBLE_SPEED 1
+#  endif
+#else
+#  if CONFIG_USART1_BAUD <= 57600
 #    define AVR_UBRR1 AVR_NORMAL_UBRR1
 #  else
 #    define AVR_UBRR1 AVR_DBLSPEED_UBRR1

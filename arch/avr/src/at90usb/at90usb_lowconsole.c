@@ -56,7 +56,7 @@
  * Private Definitions
  ******************************************************************************/
 
-/* Baud rate settings for normal and double speed settings  */
+/* Baud rate settings for normal and double speed modes  */
 
 #define AVR_NORMAL_UBRR1 \
   ((((BOARD_CPU_CLOCK / 16) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
@@ -100,8 +100,15 @@
 #    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
 #    define UART1_DOUBLE_SPEED 1
 #  endif
-#else
+#elif BOARD_CPU_CLOCK <= 16000000
 #  if CONFIG_USART1_BAUD <= 38400
+#    define AVR_UBRR1 AVR_NORMAL_UBRR1
+#  else
+#    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
+#    define UART1_DOUBLE_SPEED 1
+#  endif
+#else
+#  if CONFIG_USART1_BAUD <= 57600
 #    define AVR_UBRR1 AVR_NORMAL_UBRR1
 #  else
 #    define AVR_UBRR1 AVR_DBLSPEED_UBRR1
@@ -156,8 +163,8 @@ void usart1_reset(void)
   PORTD &= ~(1 << 2);
 
   /* Unconfigure BAUD divisor */
-  
-  UBRR1  = 0;
+
+  UBRR1 = 0;
 }
 #endif
 
@@ -237,7 +244,7 @@ void usart1_configure(void)
 
   /* Set the baud rate divisor */
 
-  UBRR1  = AVR_UBRR1;
+  UBRR1 = AVR_UBRR1;
 }
 #endif
 
