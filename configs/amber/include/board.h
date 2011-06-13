@@ -51,8 +51,13 @@
 /* Clocking *****************************************************************/
 
 #define BOARD_CPU_CLOCK        14745600 /* F_CPU = 14.7456MHz */
+#define BOARD_TOSCK_CLOCK         32768 /* TOSC  = 32.768KHz */
 
 /* LED definitions **********************************************************/
+/* The Amber Web Server has a reset switch and four LEDs. The LEDs indicate
+ * the status of power, programming state, Ethernet link status and reset
+ * status (Active).  None are available for software use.
+ */
 
 #define LED_STARTED            0
 #define LED_HEAPALLOCATE       1
