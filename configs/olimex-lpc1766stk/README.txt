@@ -798,6 +798,13 @@ Where <subdir> is one of the following:
     where xx.xx.xx.xx is the IP address of the FTP server and pp is an
     optional port number (default is the standard FTP port number 21).
 
+    You may also want to define the following in your configuration file.
+    Otherwise, you will have not feeback about what is going on:
+ 
+      CONFIG_DEBUG=y
+      CONFIG_DEBUG_VERBOSE=y
+      CONFIG_DEBUG_FTPC=y
+
   hidkbd:
     This configuration directory, performs a simple test of the USB host
     HID keyboard class driver using the test logic in apps/examples/hidkbd.
