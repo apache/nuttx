@@ -58,10 +58,10 @@
 /* USART0 Baud rate settings for normal and double speed modes  */
 
 #define AVR_NORMAL_UBRR0 \
-  (((((BOARD_CPU_CLOCK / 16) + (CONFIG_USART0_BAUD / 2)) / (CONFIG_USART0_BAUD)) - 1)
+  ((((BOARD_CPU_CLOCK / 16) + (CONFIG_USART0_BAUD / 2)) / (CONFIG_USART0_BAUD)) - 1)
 
 #define AVR_DBLSPEED_UBRR0 \
-  (((((BOARD_CPU_CLOCK / 8) + (CONFIG_USART0_BAUD / 2)) / (CONFIG_USART0_BAUD)) - 1)
+  ((((BOARD_CPU_CLOCK / 8) + (CONFIG_USART0_BAUD / 2)) / (CONFIG_USART0_BAUD)) - 1)
 
 /* Select normal or double speed baud settings.  This is a trade-off between the
  * sampling rate and the accuracy of the divisor for high baud rates.
