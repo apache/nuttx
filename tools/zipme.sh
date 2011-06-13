@@ -106,13 +106,13 @@ find ${TRUNKDIR} -name '*~' -exec rm -f '{}' ';' || \
 find ${TRUNKDIR} -name '*.swp' -exec rm -f '{}' ';' || \
       { echo "Removal of VI garbage failed!" ; exit 1 ; }
 
-# Make sure that all of the necessary soft links are in place
+# Make sure that versioned copies of the certain files are in place
 
 cd ${NUTTX}/Documentation || \
    { echo "Failed to cd to ${NUTTX}/Documentation" ; exit 1 ; }
 
-ln -sf ../TODO TODO.txt
-ln -sf ../ChangeLog ChangeLog.txt
+cp -f ../TODO TODO.txt
+cp -f ../ChangeLog ChangeLog.txt
 
 # Write a version file into the NuttX directoy.  The syntax of file is such that it
 # may be sourced by a bash script or included by a Makefile.

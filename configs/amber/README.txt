@@ -41,80 +41,100 @@ Amber Web Server Features
    o  7-14VDC input
    o  Power via Ethernet port
 
-Pin Connections
-^^^^^^^^^^^^^^^
+Pin Connections (PCB Rev 1.5a)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   -------------------- -----------------------------
   ATMega128 Pinout     Amber board connection
   -------------------- -----------------------------
   (left)
-   1 PEN
-   2 PE0 RXD0/(PDI)
-   3 PE1 (TXD0/PDO)
-   4 PE2 (XCK0/AIN0)
-   5 PE3 (OC3A/AIN1)
-   6 PE4 (OC3B/INT4)
-   7 PE5 (OC3C/INT5)
-   8 PE6 (T3/INT6)
-   9 PE7 (ICP3/INT7)
-  10 PB0 (SS)
-  11 PB1 (SCK)
-  12 PB2 (MOSI)
-  13 PB3 (MISO)
-  14 PB4 (OC0)
-  15 PB5 (OC1A)
-  16 PB6 (OC1B)
+   1 PEN               Pulled-up
+   2 PE0 (RXD0/PDI)    MAX202ECWED T1IN or J7-1, ISP-PDI (via 74HC5053), J5-26
+   3 PE1 (TXD0/PDO)    MAX202ECWED A1OUT or J7-9, ISP-PDO (via 74HC5053), J5-25
+   4 PE2 (XCK0/AIN0)   MAX202ECWED T2IN, J5-24
+   5 PE3 (OC3A/AIN1)   MAX202ECWED A2OUT, J5-23
+   6 PE4 (OC3B/INT4)   J5-22
+   7 PE5 (OC3C/INT5)   J5-21, RTL8019AS INT 0, TP5 PE5
+   8 PE6 (T3/INT6)     J5-20
+   9 PE7 (ICP3/INT7)   J5-19
+  10 PB0 (SS)          Pull up of SS SPI master
+  11 PB1 (SCK)         J7-7, ISP_SCK (via 74HC4053) and AT45D011 SCK, J5-17
+  12 PB2 (MOSI)        AT45D011 SI. J5-16
+  13 PB3 (MISO)        AT45D011 SO, J5-15
+  14 PB4 (OC0)         AT45D011 CS\, J5-14
+  15 PB5 (OC1A)        J5-13
+  16 PB6 (OC1B)        J5-12
   (bottom)
-  17 PB7 (OC2/OC1C)
-  18 PG3/TOSC2
-  19 PG4/TOSC1
-  20 RESET
+  17 PB7 (OC2/OC1C)    J5-11
+  18 PG3/TOSC2         32.768KHz XTAL
+  19 PG4/TOSC1         32.768KHz XTAL
+  20 RESET             RESET
   21 VCC
-  22 GND
-  23 XTAL2
-  24 XTAL1
-  25 PD0 (SCL/INT0)
-  26 PD1 (SDA/INT1)
-  27 PD2 (RXD1/INT2)
-  28 PD3 (TXD1/INT3)
-  29 PD4 (ICP1)
-  30 PD5 (XCK1)
-  31 PD6 (T1)
-  32 PD7 (T2)
+  22 GND               GND
+  23 XTAL2             14.7456MHz XTAL
+  24 XTAL1             14.7456MHz XTAL
+  25 PD0 (SCL/INT0)    J5-10
+  26 PD1 (SDA/INT1)    J5-9
+  27 PD2 (RXD1/INT2)   J5-8, MAX488CSA RO (RS-485)
+  28 PD3 (TXD1/INT3)   J5-7, MAX488CSA DI (RS-485)
+  29 PD4 (ICP1)        J5-6
+  30 PD5 (XCK1)        J5-5
+  31 PD6 (T1)          J5-4
+  32 PD7 (T2)          J5-3
   (left)
-  48 PA3 (AD3)
-  47 PA4 (AD4)
-  46 PA5 (AD5)
-  45 PA6 (AD6)
-  44 PA7 (AD7)
-  43 PG2(ALE)
-  42 PC7 (A15)
-  41 PC6 (A14)
-  40 PC5 (A13)
-  39 PC4 (A12)
-  38 PC3 (A11)
-  37 PC2 (A10)
-  36 PC1 (A9)
-  35 PC0 (A8)
-  34 PG1(RD)
-  33 PG0(WR)
+  48 PA3 (AD3)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
+  47 PA4 (AD4)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
+  46 PA5 (AD5)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
+  45 PA6 (AD6)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
+  44 PA7 (AD7)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
+  43 PG2 (ALE)         J5-1, 74HC5730, 62246DLP-7, RTL8019AS
+  42 PC7 (A15)         TP4 A15, J5-27, 74HC5730
+  41 PC6 (A14)         J5-28, 74HC5730, 62246DLP-7, RTL8019AS
+  40 PC5 (A13)         J5-29, 74HC5730, 62246DLP-7, RTL8019AS
+  39 PC4 (A12)         J5-30, 74HC5730, 62246DLP-7, RTL8019AS
+  38 PC3 (A11)         J5-31, 74HC5730, 62246DLP-7, RTL8019AS
+  37 PC2 (A10)         J5-32, 74HC5730, 62246DLP-7, RTL8019AS
+  36 PC1 (A9)          J5-33, 74HC5730, 62246DLP-7, RTL8019AS
+  35 PC0 (A8)          J5-34, 74HC5730, 62246DLP-7, RTL8019AS
+  34 PG1 (RD)          TP2 RD\, J5-52, 62246DLP-7, RTL8019AS
+  33 PG0 (WR)          TP3 WR\, J5-51, 62246DLP-7, RTL8019AS
   (top)
   64 AVCC
-  63 GND
-  62 AREF
-  61 PF0 (ADC0)
-  60 PF1 (ADC1)
-  59 PF2 (ADC2)
-  58 PF3 (ADC3)
-  57 PF4 (ADC4/TCK)
-  56 PF5 (ADC5/TMS)
-  55 PF6 (ADC6/TDO)
-  54 PF7 (ADC7/TDI)
-  53 GND
+  63 GND               GND
+  62 AREF              (analog supply)
+  61 PF0 (ADC0)        J6-5, PDV-P9 Light Sensor
+  60 PF1 (ADC1)        J6-7, Thermister
+  59 PF2 (ADC2)        J6-9, MXA2500GL Dual Axis Accesserometer, AOUTX
+  58 PF3 (ADC3)        J6-11, MXA2500GL Dual Axis Accesserometer, AOUTY
+  57 PF4 (ADC4/TCK)    J6-13, MXA2500GL Dual Axis Accesserometer, TOUT
+  56 PF5 (ADC5/TMS)    J6-15
+  55 PF6 (ADC6/TDO)    J6-17
+  54 PF7 (ADC7/TDI)    J6-19
+  53 GND               GND
   52 VCC
-  51 PA0 (AD0)
-  50 PA1 (AD1)
-  49 PA2 (AD2)
+  51 PA0 (AD0)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
+  50 PA1 (AD1)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
+  49 PA2 (AD2)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
+
+Switches and Jumpers
+^^^^^^^^^^^^^^^^^^^^
+ISP/UART0
+  JP1 - DTE/DCE selection
+  JP2 - 
+  JP5 - 
+  J11 - STK500 Enable
+
+ADC
+  JP8 - 
+  JP9 - 
+
+Networking
+  JP10 - 
+
+RS-485
+  J8 - 
+  J9 - 
+  J10 - 
 
 Atmel AVRISP mkII Connection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -122,31 +142,47 @@ Atmel AVRISP mkII Connection
   ISP6PIN Header
   --------------
 
-        1  2
-  MISO  o  o VCC
-   SCK  o  o MOSI
-  RESET o  o GND
+         1  2
+   MISO  o  o VCC
+    SCK  o  o MOSI
+  RESET\ o  o GND
 
-  (JTAG10PIN Connector)
-  ---------------------
+  (ISP10PIN Connector)
+  ------------------- -------------------------
   
-      1  2
-  TCK o  o GND
-  TDO o  o VTref
-  TMS o  o nSRST
-      o  o (nTRST)
-  TDI o  o GND
+         1  2
+    MOSI o  o Vcc   - ISP-PDI: PE0/PDI/RX0 via 74HC5053
+     LED o  o GND   - ISP-PROG: J11/GND, to 74HC5053 and LED
+  RESET\ o  o GND   - to 74HC505
+    SCK  o  o GND   - ISP_SCK: SCK, PB0/SS\
+    MISO o  o GND   - ISP-PDO: PE1/PD0/TX0 via 74HC5053
 
-  JTAGICE mkII Connection to 10-pin Header
-  ------------------------------------------
+  Board Orientation
+
+    |
+    | +-----+
+    | + O O |
+    | + O O |
+    | + O O
+    | + O O |
+    | + O x | PIN 1
+    | +-----+
+    |
+
+  AVRISP mkII Connection to 10-pin Header
+  -------------------------------------------
   10PIN Header         6PIN Header
-  -------------------- ---------------------
-  Pin 1 TCK            Pin 3 SCK
-  Pin 2 GND            Pin 6 GND
-  Pin 3 TDO            Pin 1 MISO
-  Pin 4 VTref          Pin 2 Vcc
-  Pin 6 nSRT           Pin 5 Reset
-  Pin 9 TDI            Pin 4 MOSI
+  --------------------- ---------------------
+  Pin  1 MOSI           Pin 4 MOSI
+  Pin  2 Vcc            Pin 2 Vcc
+  Pin  3 LED                  Controlled via J11
+  Pin  4 GND            Pin 6 GND
+  Pin  5 RESET\         Pin 5 RESET\
+  Pin  6 GND                  N/C
+  Pin  7 SCK            Pin 3 SCK
+  Pin  8 GND                  N/C
+  Pin  9 MISO           Pin 1 MISO
+  Pin 10 GND                  N/C
 
 Toolchains
 ^^^^^^^^^^
