@@ -13,9 +13,9 @@ Contents
 
   o Micropendous3 Features
   o Pin Usage
-  o Serial Console
-  o Atmel mkII Connection
+  o Atmel AVRISP mkII Connection
   o DFU Bootloader
+  o Serial Console
   o Toolchains
   o Windows Native Toolchains
   o NuttX buildroot Toolchain
@@ -125,8 +125,8 @@ Pin Usage
   50 PA1 (AD1)                 J3-12 A1, 74AHC573 D1, CY7C1019D |O1 (Unpopulated)
   49 PA2 (AD2)                 J3-13 A2, 74AHC573 D2, CY7C1019D |O2 (Unpopulated)
 
-Atmel mkII Connection
-^^^^^^^^^^^^^^^^^^^^^
+Atmel AVRISP mkII Connection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   ISP6PIN Header
   --------------

@@ -16,6 +16,8 @@ Contents
 ^^^^^^^^
 
   o Amber Web Server Features
+  o Pin Connections
+  o Atmel AVRISP mkII Connection
   o Toolchains
   o Windows Native Toolchains
   o NuttX buildroot Toolchain
@@ -38,6 +40,113 @@ Amber Web Server Features
    o  ISP Programming port
    o  7-14VDC input
    o  Power via Ethernet port
+
+Pin Connections
+^^^^^^^^^^^^^^^
+
+  -------------------- -----------------------------
+  ATMega128 Pinout     Amber board connection
+  -------------------- -----------------------------
+  (left)
+   1 PEN
+   2 PE0 RXD0/(PDI)
+   3 PE1 (TXD0/PDO)
+   4 PE2 (XCK0/AIN0)
+   5 PE3 (OC3A/AIN1)
+   6 PE4 (OC3B/INT4)
+   7 PE5 (OC3C/INT5)
+   8 PE6 (T3/INT6)
+   9 PE7 (ICP3/INT7)
+  10 PB0 (SS)
+  11 PB1 (SCK)
+  12 PB2 (MOSI)
+  13 PB3 (MISO)
+  14 PB4 (OC0)
+  15 PB5 (OC1A)
+  16 PB6 (OC1B)
+  (bottom)
+  17 PB7 (OC2/OC1C)
+  18 PG3/TOSC2
+  19 PG4/TOSC1
+  20 RESET
+  21 VCC
+  22 GND
+  23 XTAL2
+  24 XTAL1
+  25 PD0 (SCL/INT0)
+  26 PD1 (SDA/INT1)
+  27 PD2 (RXD1/INT2)
+  28 PD3 (TXD1/INT3)
+  29 PD4 (ICP1)
+  30 PD5 (XCK1)
+  31 PD6 (T1)
+  32 PD7 (T2)
+  (left)
+  48 PA3 (AD3)
+  47 PA4 (AD4)
+  46 PA5 (AD5)
+  45 PA6 (AD6)
+  44 PA7 (AD7)
+  43 PG2(ALE)
+  42 PC7 (A15)
+  41 PC6 (A14)
+  40 PC5 (A13)
+  39 PC4 (A12)
+  38 PC3 (A11)
+  37 PC2 (A10)
+  36 PC1 (A9)
+  35 PC0 (A8)
+  34 PG1(RD)
+  33 PG0(WR)
+  (top)
+  64 AVCC
+  63 GND
+  62 AREF
+  61 PF0 (ADC0)
+  60 PF1 (ADC1)
+  59 PF2 (ADC2)
+  58 PF3 (ADC3)
+  57 PF4 (ADC4/TCK)
+  56 PF5 (ADC5/TMS)
+  55 PF6 (ADC6/TDO)
+  54 PF7 (ADC7/TDI)
+  53 GND
+  52 VCC
+  51 PA0 (AD0)
+  50 PA1 (AD1)
+  49 PA2 (AD2)
+
+Atmel AVRISP mkII Connection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  ISP6PIN Header
+  --------------
+
+        1  2
+  MISO  o  o VCC
+   SCK  o  o MOSI
+  RESET o  o GND
+
+  (JTAG10PIN Connector)
+  ---------------------
+  
+      1  2
+  TCK o  o GND
+  TDO o  o VTref
+  TMS o  o nSRST
+      o  o (nTRST)
+  TDI o  o GND
+
+  JTAGICE mkII Connection to 10-pin Header
+  ------------------------------------------
+  10PIN Header         6PIN Header
+  -------------------- ---------------------
+  Pin 1 TCK            Pin 3 SCK
+  Pin 2 GND            Pin 6 GND
+  Pin 3 TDO            Pin 1 MISO
+  Pin 4 VTref          Pin 2 Vcc
+  Pin 6 nSRT           Pin 5 Reset
+  Pin 9 TDI            Pin 4 MOSI
 
 Toolchains
 ^^^^^^^^^^
