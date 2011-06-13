@@ -198,32 +198,33 @@ void usart1_configure(void)
   /* Select parity */
 
 #if CONFIG_USART1_PARITY == 1
-  ucsr1c |= (UPM11 | UPM10); /* Odd parity */
+  ucsr1c |= ((1 << UPM11) | (1 << UPM10)); /* Odd parity */
 #else
-  ucsr1c |= UPM11;           /* Even parity */
+  ucsr1c |= (1 << UPM11);                  /* Even parity */
 #endif
 
   /* 1 or 2 stop bits */
 
 #if defined(CONFIG_USART1_2STOP) && CONFIG_USART1_2STOP > 0
-  ucsr1c |= USBS1;           /* Two stop bits */
+  ucsr1c |= (1 << USBS1);                  /* Two stop bits */
 #endif
 
   /* Word size */
 
 #if CONFIG_USART1_BITS == 5
 #elif CONFIG_USART1_BITS == 6
-  ucsr1c |= UCSZ10;
+  ucsr1c |= (1 << UCSZ10);
 #elif CONFIG_USART1_BITS == 7
-  ucsr1c |= UCSZ11;
+  ucsr1c |= (1 << UCSZ11);
 #elif CONFIG_USART1_BITS == 8
-  ucsr1c |= (UCSZ10 | UCSZ11);
+  ucsr1c |= ((1 << UCSZ10) | (1 << UCSZ11));
 #elif CONFIG_USART1_BITS == 9
-  ucsr1c |= (UCSZ10 | UCSZ11);
-  ucsr1b |= UCSZ12;
+  ucsr1c |= ((1 << UCSZ10) | (1 << UCSZ11));
+  ucsr1b |= (1 << UCSZ12);
 #else
 #  error "Unsupported word size"
 #endif
+
   UCSR1B = ucsr1b;
   UCSR1C = ucsr1c;
 
@@ -239,7 +240,7 @@ void usart1_configure(void)
    *     an output regardless of the value of DDD3.
    */
 
-  DDRD  |= (1 << 3);   /* Force Port D pin 3 to be an output */
+  DDRD  |= (1 << 3);   /* Force Port D pin 3 to be an output -- Shouldn't be necessary */
   PORTD |= (1 << 2);   /* Set pull-up on port D pin 2 */
 
   /* Set the baud rate divisor */
