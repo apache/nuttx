@@ -1,5 +1,5 @@
 ############################################################################
-# configs/amber/ostest/defconfig
+# configs/micropendous3/hello/defconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -55,7 +55,7 @@
 # CONFIG_ARCH_NOINTC - define if the architecture does not
 #   support an interrupt controller or otherwise cannot support
 #   APIs like up_enable_irq() and up_disable_irq().
-# CONFIG_ARCH_IRQPRIO - The ATMega128 does not support interrupt prioritization
+# CONFIG_ARCH_IRQPRIO - The AT90USB does not support interrupt prioritization
 # CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
 #   stack. If defined, this symbol is the size of the interrupt
 #   stack in bytes.  If not defined, the user task stacks will be
@@ -74,11 +74,11 @@
 #
 CONFIG_ARCH=avr
 CONFIG_ARCH_AVR=y
-CONFIG_ARCH_ATMEGA=y
-CONFIG_ARCH_CHIP=atmega
-CONFIG_ARCH_CHIP_ATMEGA128=y
-CONFIG_ARCH_BOARD=amber
-CONFIG_ARCH_BOARD_AMBER=y
+CONFIG_ARCH_AT90USB=y
+CONFIG_ARCH_CHIP=at90usb
+CONFIG_ARCH_CHIP_AT90USB647=y
+CONFIG_ARCH_BOARD=micropendous3
+CONFIG_ARCH_BOARD_MICROPENDOUS3=y
 CONFIG_BOARD_LOOPSPERMSEC=8079
 CONFIG_DRAM_SIZE=(4*1024)
 CONFIG_DRAM_START=0x800000
@@ -103,6 +103,7 @@ CONFIG_AVR_BUILDROOT=y
 #
 #  Individual subsystems can be enabled:
 #
+
 CONFIG_AVR_INT0=n
 CONFIG_AVR_INT1=n
 CONFIG_AVR_INT2=n
@@ -111,19 +112,21 @@ CONFIG_AVR_INT4=n
 CONFIG_AVR_INT5=n
 CONFIG_AVR_INT6=n
 CONFIG_AVR_INT7=n
+CONFIG_AVR_USBHOST=n
+CONFIG_AVR_USBDEV=n
+CONFIG_AVR_WDT=n
 CONFIG_AVR_TIMER0=n
 CONFIG_AVR_TIMER1=n
 CONFIG_AVR_TIMER2=n
 CONFIG_AVR_TIMER3=n
 CONFIG_AVR_SPI=n
-CONFIG_AVR_USART0=y
-CONFIG_AVR_USART1=n
-CONFIG_AVR_ADC=n
+CONFIG_AVR_USART1=y
 CONFIG_AVR_ANACOMP=n
+CONFIG_AVR_ADC=n
 CONFIG_AVR_TWI=n
 
 #
-# ATMega128 specific serial device driver settings
+# AT90USB specific serial device driver settings
 #
 # CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
 #   console and ttys0 (default is the USART1).
@@ -136,15 +139,7 @@ CONFIG_AVR_TWI=n
 # CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 # CONFIG_USARTn_2STOP - Two stop bits
 #
-CONFIG_USART0_SERIAL_CONSOLE=y
-CONFIG_USART0_TXBUFSIZE=256
-CONFIG_USART0_RXBUFSIZE=256
-CONFIG_USART0_BAUD=38400
-CONFIG_USART0_BITS=8
-CONFIG_USART0_PARITY=0
-CONFIG_USART0_2STOP=0
-
-CONFIG_USART1_SERIAL_CONSOLE=n
+CONFIG_USART1_SERIAL_CONSOLE=y
 CONFIG_USART1_TXBUFSIZE=256
 CONFIG_USART1_RXBUFSIZE=256
 CONFIG_USART1_BAUD=38400
@@ -790,7 +785,7 @@ CONFIG_EXAMPLES_USBSTRG_TRACEINTERRUPTS=n
 #
 # CONFIG_BOOT_RUNFROMFLASH - Some configurations support XIP
 #   operation from FLASH but must copy initialized .data sections to RAM.
-#   (should also be =n for the ATMega128 which always runs from flash)
+#   (should also be =n for the AT90USB which always runs from flash)
 # CONFIG_BOOT_COPYTORAM -  Some configurations boot in FLASH
 #   but copy themselves entirely into RAM for better performance.
 # CONFIG_CUSTOM_STACK - The up_ implementation will handle

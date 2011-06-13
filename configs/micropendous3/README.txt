@@ -15,6 +15,7 @@ Contents
   o Pin Usage
   o Serial Console
   o Atmel mkII Connection
+  o DFU Bootloader
   o Toolchains
   o Windows Native Toolchains
   o NuttX buildroot Toolchain
@@ -156,15 +157,20 @@ Atmel mkII Connection
   Pin 6 nSRT           Pin 5 Reset
   Pin 9 TDI            Pin 4 MOSI
 
-Connect your Micropendous board programmed with AVRISP firmware to another AVR using SPI (you can even connect to another USB AVR board to program its' bootloader):
+DFU Bootloader
+^^^^^^^^^^^^^^
 
-Micropendous	Target AVR
-PB4	RESET
-PB1(SCK)	SCK
-PB2(MOSI)	MOSI/PDI
-PB3(MISO)	MISO/PDO
-GND	GND+AGND
-Vcc	Vcc+AVcc
+There is also an DFU bootloader that resides in the upper 8Kb of FLASH
+(unless you ERASE the flash with with ICE).  You can enter this bootloader
+(if it is in FLASH) by:
+
+Holding both the SW1 (RESET) and SW2, then releasing SW1 while continuing
+to hold SW2.  SW2 connects to the PE2/HWB signal and causes a reset into
+the bootloader memory region.
+
+Then you can use FLIP to load code into FLASH (available at the Atmel Web
+Site).  The DFU USB driver for the DFU bootload is available in the usb
+subdirectory in the FLIP installation location.
 
 Serial Console
 ^^^^^^^^^^^^^^
@@ -281,10 +287,10 @@ NuttX buildroot Toolchain
      cd tools
      ./configure.sh micropendous3/<sub-dir>
 
-	 NOTE: you also must copy avr-libc header files into the NuttX include
-	 directory with command perhaps like:
+     NOTE: you also must copy avr-libc header files into the NuttX include
+     directory with command perhaps like:
 
-	 cp -a /cygdrive/c/WinAVR/include/avr include/.
+     cp -a /cygdrive/c/WinAVR/include/avr include/.
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -371,115 +377,115 @@ Build Notes:
 Micropendous3 Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
-	   be set to:
+    CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
+       be set to:
 
-	   CONFIG_ARCH=avr
+       CONFIG_ARCH=avr
 
-	CONFIG_ARCH_family - For use in C code:
+    CONFIG_ARCH_family - For use in C code:
 
-	   CONFIG_ARCH_AVR=y
+       CONFIG_ARCH_AVR=y
 
-	CONFIG_ARCH_architecture - For use in C code:
+    CONFIG_ARCH_architecture - For use in C code:
 
-	   CONFIG_ARCH_AT90USB=y
+       CONFIG_ARCH_AT90USB=y
 
-	CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
+    CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-	   CONFIG_ARCH_CHIP=at90usb
+       CONFIG_ARCH_CHIP=at90usb
 
-	CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
-	   chip.  This should be exactly one of
+    CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
+       chip.  This should be exactly one of
 
-	   CONFIG_ARCH_CHIP_AT90USB646=y
-	   CONFIG_ARCH_CHIP_AT90USB647=y
-	   CONFIG_ARCH_CHIP_AT90USB1286=y
-	   CONFIG_ARCH_CHIP_AT90USB1287=y
+       CONFIG_ARCH_CHIP_AT90USB646=y
+       CONFIG_ARCH_CHIP_AT90USB647=y
+       CONFIG_ARCH_CHIP_AT90USB1286=y
+       CONFIG_ARCH_CHIP_AT90USB1287=y
 
-	   Depending on which Micropendous3 version you have.
+       Depending on which Micropendous3 version you have.
 
-	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
-	   hence, the board that supports the particular chip or SoC.
+    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+       hence, the board that supports the particular chip or SoC.
 
-	   CONFIG_ARCH_BOARD=micropendous3
+       CONFIG_ARCH_BOARD=micropendous3
 
-	CONFIG_ARCH_BOARD_name - For use in C code
+    CONFIG_ARCH_BOARD_name - For use in C code
 
-	   CONFIG_ARCH_BOARD_MICROPENOUS3=y
+       CONFIG_ARCH_BOARD_MICROPENOUS3=y
 
-	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
-	   of delay loops
+    CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
+       of delay loops
 
-	CONFIG_ENDIAN_BIG - define if big endian (default is little
-	   endian)
+    CONFIG_ENDIAN_BIG - define if big endian (default is little
+       endian)
 
-	CONFIG_DRAM_SIZE - Describes the installed DRAM.  One of:
+    CONFIG_DRAM_SIZE - Describes the installed DRAM.  One of:
 
-	   CONFIG_DRAM_SIZE=(4*1024) - (4Kb)
-	   CONFIG_DRAM_SIZE=(8*1024) - (8Kb)
+       CONFIG_DRAM_SIZE=(4*1024) - (4Kb)
+       CONFIG_DRAM_SIZE=(8*1024) - (8Kb)
 
-	CONFIG_DRAM_START - The start address of installed DRAM
+    CONFIG_DRAM_START - The start address of installed DRAM
 
-	   CONFIG_DRAM_START=0x10000000
+       CONFIG_DRAM_START=0x10000000
 
-	CONFIG_DRAM_END - Last address+1 of installed RAM
+    CONFIG_DRAM_END - Last address+1 of installed RAM
 
-	   CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
+       CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 
-	CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
-	   have LEDs
+    CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
+       have LEDs
 
-	CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
-	   stack. If defined, this symbol is the size of the interrupt
-	    stack in bytes.  If not defined, the user task stacks will be
-	  used during interrupt handling.
+    CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
+       stack. If defined, this symbol is the size of the interrupt
+       stack in bytes.  If not defined, the user task stacks will be
+      used during interrupt handling.
 
-	CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
+    CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
-	CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
+    CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 
-	CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
-	   cause a 100 second delay during boot-up.  This 100 second delay
-	   serves no purpose other than it allows you to calibratre
-	   CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
-	   the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
-	   the delay actually is 100 seconds.
+    CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
+       cause a 100 second delay during boot-up.  This 100 second delay
+       serves no purpose other than it allows you to calibratre
+       CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
+       the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
+       the delay actually is 100 seconds.
 
-	Individual subsystems can be enabled:
+    Individual subsystems can be enabled:
 
-	  CONFIG_AVR_INT0=n
-	  CONFIG_AVR_INT1=n
-	  CONFIG_AVR_INT2=n
-	  CONFIG_AVR_INT3=n
-	  CONFIG_AVR_INT4=n
-	  CONFIG_AVR_INT5=n
-	  CONFIG_AVR_INT6=n
-	  CONFIG_AVR_INT7=n
-	  CONFIG_AVR_USBHOST=n
-	  CONFIG_AVR_USBDEV=n
-	  CONFIG_AVR_WDT=n
-	  CONFIG_AVR_TIMER0=n
-	  CONFIG_AVR_TIMER1=n
-	  CONFIG_AVR_TIMER2=n
-	  CONFIG_AVR_TIMER3=n
-	  CONFIG_AVR_SPI=n
-	  CONFIG_AVR_USART1=y
-	  CONFIG_AVR_ANACOMP=n
-	  CONFIG_AVR_ADC=n
-	  CONFIG_AVR_TWI=n
+      CONFIG_AVR_INT0=n
+      CONFIG_AVR_INT1=n
+      CONFIG_AVR_INT2=n
+      CONFIG_AVR_INT3=n
+      CONFIG_AVR_INT4=n
+      CONFIG_AVR_INT5=n
+      CONFIG_AVR_INT6=n
+      CONFIG_AVR_INT7=n
+      CONFIG_AVR_USBHOST=n
+      CONFIG_AVR_USBDEV=n
+      CONFIG_AVR_WDT=n
+      CONFIG_AVR_TIMER0=n
+      CONFIG_AVR_TIMER1=n
+      CONFIG_AVR_TIMER2=n
+      CONFIG_AVR_TIMER3=n
+      CONFIG_AVR_SPI=n
+      CONFIG_AVR_USART1=y
+      CONFIG_AVR_ANACOMP=n
+      CONFIG_AVR_ADC=n
+      CONFIG_AVR_TWI=n
 
   AT90USB specific device driver settings
 
-	CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
-	   console and ttys0 (default is no serial console).
-	CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
-	   This specific the size of the receive buffer
-	CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
-	   being sent.  This specific the size of the transmit buffer
-	CONFIG_USARTn_BAUD - The configure BAUD of the USART.  Must be
-	CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
-	CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-	CONFIG_USARTn_2STOP - Two stop bits
+    CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
+       console and ttys0 (default is no serial console).
+    CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
+       This specific the size of the receive buffer
+    CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
+       being sent.  This specific the size of the transmit buffer
+    CONFIG_USARTn_BAUD - The configure BAUD of the USART.  Must be
+    CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
+    CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+    CONFIG_USARTn_2STOP - Two stop bits
 
 Configurations
 ^^^^^^^^^^^^^^
@@ -487,17 +493,42 @@ Configurations
 Each Micropendous3 configuration is maintained in a sudirectory and can
 be selected as follow:
 
-	cd tools
-	./configure.sh micropendous3/<subdir>
-	cd -
-	. ./setenv.sh
+    cd tools
+    ./configure.sh micropendous3/<subdir>
+    cd -
+    . ./setenv.sh
 
 NOTE: You must also copy avr-libc header files, perhaps like:
 
-	 cp -a /cygdrive/c/WinAVR/include/avr include/.
+     cp -a /cygdrive/c/WinAVR/include/avr include/.
 
 Where <subdir> is one of the following:
 
+  hello:
+    The simple apps/examples/hello "Hello, World!" example.
+
+    FLASH/SRAM Requirements (as of 6/12/2011):
+
+      $ avr-elf-size nuttx
+       text    data     bss     dec     hex filename
+      31064    1075     449   32588    7f4c nuttx
+
+    Strings are in SRAM.
+
   ostest:
     This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
+    apps/examples/ostest. NOTE:  The OS test is quite large.  In order
+    to get it to fit within AVR memory constraints, it will probably be
+    necessary to disable some OS features.
+
+    As currently configured, This example will not fit into FLASH
+    or smaller AT90USB devices (or into the RAM of *any* AT90USB
+    devices).
+
+    FLASH/SRAM Requirements (as of 6/12/2011):
+
+      $ avr-elf-size nuttx
+       text    data   bss       dec    hex  filename
+      67386   15583   10414   93383   16cc7 nuttx
+
+    Strings are in SRAM.
