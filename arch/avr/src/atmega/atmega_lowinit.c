@@ -38,6 +38,7 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
+#include <avr/wdt.h>
 
 #include "atmega_config.h"
 #include "up_internal.h"
