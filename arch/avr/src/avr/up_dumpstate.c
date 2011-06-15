@@ -181,7 +181,7 @@ void up_dumpstate(void)
 
   if (rtcb->pid == 0)
     {
-      ustackbase = g_heapbase - 4;
+      ustackbase = g_heapbase - 1;
       ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
     }
   else
@@ -193,8 +193,8 @@ void up_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-  istackbase = (uint16_t)&g_intstackbase;
-  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
+  istackbase = (uint16_t)&g_intstackbase - 1;
+  istacksize = CONFIG_ARCH_INTERRUPTSTACK;
 
   /* Show interrupt stack info */
 

@@ -47,9 +47,9 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-/* Stack is allocated just after .bss and before the heap */
+/* Stack is allocated just after uninitialized data and just before the heap */
 
-#define STACKBASE (_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
+#define STACKBASE (_enoinit+CONFIG_IDLETHREAD_STACKSIZE-1)
 
 /* The RAMPZ register is only available for CPUs with more than 64Kb of FLASH.
  * At present, only the ATMega128 is supported so RAMPZ should always be
@@ -72,6 +72,7 @@
 	.global	_sdata			/* Start of .data section in RAM */
 	.global	_edata			/* End of .data section in RAM */
 	.global	_eronly			/* Start of .data section in FLASH */
+	.global	_enoinit		/* End of uninitilized data.  Defined by ld.script */
 	.global	up_lowinit		/* Perform low level initialization */
 	.global	os_start		/* NuttX entry point */
 
@@ -257,15 +258,14 @@ __do_clear_bss:
  * Heap Base
  ****************************************************************************/
 
-	/* This global variable is unsigned long g_heapbase and is
-	 * exported from here only because of its coupling to other
-	 * uses of _ebss in this file
+	/* This global variable is unsigned long g_heapbase and is exported from
+	 * here only because of its coupling to other uses of _enoinit in this file
 	 */
 
 	.data
 	.globl	g_heapbase
 	.type	g_heapbase, object
 g_heapbase:
-	.word	_ebss+CONFIG_IDLETHREAD_STACKSIZE
+	.word	_enoinit+CONFIG_IDLETHREAD_STACKSIZE
 	.size	g_heapbase, .-g_heapbase
 	.end
