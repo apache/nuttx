@@ -473,6 +473,20 @@ Micropendous3 Configuration Options
       CONFIG_AVR_ANACOMP=n
       CONFIG_AVR_ADC=n
       CONFIG_AVR_TWI=n
+ 
+  If the watchdog is enabled, this specifies the initial timeout.  Default
+  is maximum supported value.
+
+      CONFIG_WDTO_15MS
+      CONFIG_WDTO_30MS
+      CONFIG_WDTO_60MS
+      CONFIG_WDTO_120MS
+      CONFIG_WDTO_1250MS
+      CONFIG_WDTO_500MS
+      CONFIG_WDTO_1S
+      CONFIG_WDTO_2S
+      CONFIG_WDTO_4S
+      CONFIG_WDTO_8S
 
   AT90USB specific device driver settings
 
