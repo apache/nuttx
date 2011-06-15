@@ -199,7 +199,7 @@ void usart1_configure(void)
 
 #if CONFIG_USART1_PARITY == 1
   ucsr1c |= ((1 << UPM11) | (1 << UPM10)); /* Odd parity */
-#else
+#elif CONFIG_USART1_PARITY == 2
   ucsr1c |= (1 << UPM11);                  /* Even parity */
 #endif
 

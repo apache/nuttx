@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 10, 2011)
+NuttX TODO List (Last updated June 13, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -17,7 +17,7 @@ nuttx/
   (1)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
-  (5)  Build system / Toolchains
+  (4)  Build system / Toolchains
   (7)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
@@ -506,10 +506,6 @@ o Documentation (Documentation/)
 o Build system
   ^^^^^^^^^^^^
 
-  Description: configs/pjrc-8051 should be configs/pjrc-87c52
-  Status:      Open
-  Priority:    Low
-
   Description: Dependencies do not work correctly under configs/<board>/src
                (same as arch/<arch>/src/board).
   Status:      Open
@@ -526,7 +522,7 @@ o Build system
   Status:      Open
   Priority:    Low
 
-  Descritpion: Logic in most setenv.sh files can create the following problem
+  Description: Logic in most setenv.sh files can create the following problem
                on many platforms:
 
                  $ . ./setenv.sh
@@ -1225,7 +1221,7 @@ o NuttShell (NSH) (apps/nshlib)
   Status:      Open
   Priority:    Med-High
 
-  Descripton:  The ifconfig command will not behave correctly is an interface
+  Descripton:  The ifconfig command will not behave correctly if an interface
                is provided and there are multiple interfaces.  It should only
                show status for the single interface on the command line; it will
                still show status for all interfaces.
