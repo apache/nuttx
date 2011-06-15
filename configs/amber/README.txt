@@ -446,6 +446,7 @@ Amber Web Server Configuration Options
        CONFIG_AVR_INT5=n
        CONFIG_AVR_INT6=n
        CONFIG_AVR_INT7=n
+       CONFIG_AVR_WDT=n
        CONFIG_AVR_TIMER0=n
        CONFIG_AVR_TIMER1=n
        CONFIG_AVR_TIMER2=n
@@ -457,7 +458,21 @@ Amber Web Server Configuration Options
        CONFIG_AVR_ANACOMP=n
        CONFIG_AVR_TWI=n
 
-  ATMEGA specific device driver settings
+   If the watchdog is enabled, this specifies the initial timeout.  Default
+  is maximum supported value.
+
+      CONFIG_WDTO_15MS
+      CONFIG_WDTO_30MS
+      CONFIG_WDTO_60MS
+      CONFIG_WDTO_120MS
+      CONFIG_WDTO_1250MS
+      CONFIG_WDTO_500MS
+      CONFIG_WDTO_1S
+      CONFIG_WDTO_2S
+      CONFIG_WDTO_4S
+      CONFIG_WDTO_8S
+
+ ATMEGA specific device driver settings
 
     CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
        console and ttys0 (default is the USART0).

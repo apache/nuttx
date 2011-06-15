@@ -47,6 +47,28 @@
  * Private Definitions
  **************************************************************************/
 
+#if defined(CONFIG_WDTO_15MS)
+#  define WDTO_VALUE WDTO_15MS   
+#elif defined(CONFIG_WDTO_30MS)
+#  define WDTO_VALUE WDTO_30MS
+#elif defined(CONFIG_WDTO_60MS)
+#  define WDTO_VALUE WDTO_60MS
+#elif defined(CONFIG_WDTO_120MS)
+#  define WDTO_VALUE WDTO_120MS
+#elif defined(CONFIG_WDTO_1250MS)
+#  define WDTO_VALUE WDTO_250MS
+#elif defined(CONFIG_WDTO_500MS)
+#  define WDTO_VALUE WDTO_500MS
+#elif defined(CONFIG_WDTO_1S)
+#  define WDTO_VALUE WDTO_1S
+#elif defined(CONFIG_WDTO_2S)
+#  define WDTO_VALUE WDTO_2S
+#elif defined(CONFIG_WDTO_4S)
+#  define WDTO_VALUE WDTO_4S
+#else /* if defined(CONFIG_WDTO_8S) */
+#  define WDTO_VALUE WDTO_8S
+#endif
+
 /**************************************************************************
  * Private Types
  **************************************************************************/
@@ -68,6 +90,23 @@
  **************************************************************************/
 
 /**************************************************************************
+ * Name: up_wdtinit
+ *
+ * Description:
+ *   Initialize the watchdog per the NuttX configuration.
+ *
+ **************************************************************************/
+
+static inline void up_wdtinit(void)
+{
+#ifndef CONFIG_AVR_WDT
+  wdt_disable();
+#else
+  wdt_enable(WDTO_VALUE);
+#endif
+}
+
+/**************************************************************************
  * Public Functions
  **************************************************************************/
 
@@ -83,6 +122,10 @@
 
 void up_lowinit(void)
 {
+  /* Initialize the watchdog timer */
+
+  up_wdtinit();
+
   /* Initialize a console (probably a serial console) */
 
   up_consoleinit();
