@@ -57,26 +57,6 @@
  * Pre-processor Definitions
  ********************************************************************************************/
 
-#ifndef __SREG__
-#  define __SREG__ 0x3f
-#endif
-
-#ifndef __SP_H__
-#  define __SP_H__ 0x3e
-#endif
-
-#ifndef __SP_L__
-#  define __SP_L__ 0x3d
-#endif
-
-#ifndef __tmp_reg__
-#  define __tmp_reg__ r0
-#endif
-
-#ifndef __zero_reg__
-#  define __zero_reg__ r1
-#endif
-
 /********************************************************************************************
  * Global Symbols
  ********************************************************************************************/
@@ -97,8 +77,8 @@
  *		...
  * my_exception:
  *		EXCPT_PROLOGUE				- Save registers on stack
- *		in	r22, __SP_L__			- Pass register save structure as the parameter 2
- *		in	r23, __SP_H__			- (Careful, push post-decrements)
+ *		in	r22, _SFR_IO_ADDR(SPL)	- Pass register save structure as the parameter 2
+ *		in	r23, _SFR_IO_ADDR(SPH)	- (Careful, push post-decrements)
  *		USE_INTSTACK rx, ry, rz		- Switch to the interrupt stack
  *		call handler				- Handle the exception IN=old regs OUT=new regs
  *		RESTORE_STACK rx, ry		- Undo the operations of USE_INTSTACK
@@ -173,8 +153,8 @@
 
 	/* Save the status register on the stack */
 
-	in		r0, __SREG__	/* Save the status register */
-	cli						/* Disable interrupts */
+	in		r0, _SFR_IO_ADDR(SREG)	/* Save the status register */
+	cli								/* Disable interrupts */
 	push	r0
 
 	/* Save R1 -- the zero register (which may not be zero).  R1 must be zero for our purposes */
@@ -232,11 +212,11 @@
 	 * it was on entry into this macro.  We'll have to subtract to get that value.
 	 */
 
-	in		r26, __SP_L__
-	in		r27, __SP_H__
+	in		r26, _SFR_IO_ADDR(SPL)
+	in		r27, _SFR_IO_ADDR(SPH)
 	adiw	r26, XCPTCONTEXT_REGS
 
-	push	r26
+	push	r26				/* SPL then SPH */
 	push	r27
 	.endm
 
@@ -261,8 +241,8 @@
 
 	/* We don't need to restore the stack pointer */
 
-	pop		r27
-	pop		r26
+	pop		r27				/* Discard SPH */
+	pop		r26				/* Discard SPL */
 
 	/* Restore r26-r27 */
 
@@ -317,7 +297,7 @@
 	/* Restore the status register (probably enabling interrupts) */
 
 	pop		r0				/* Restore the status register */
-	out		__SREG__, r0
+	out		_SFR_IO_ADDR(SREG), r0
 
 	/* Finally, restore r0 and r24 - the scratch and IRQ number registers */
 
@@ -345,11 +325,11 @@
 
 	.macro	USER_SAVE
 
-	/* Save the current stack pointer. */
+	/* Save the current stack pointer (SPH then SPL). */
 
-	in		r24, __SP_L__
-	st		x+, r24
-	in		r25, __SP_H__
+	in		r25, _SFR_IO_ADDR(SPH)
+	st		x+, r25
+	in		r24, _SFR_IO_ADDR(SPL)
 	st		x+, r24
 
 	/* Skip over r26-r27 and r30-r31 - Call-used, "volatile" registers */
@@ -391,7 +371,7 @@
 
 	/* Save the status register (probably not necessary since interrupts are disabled) */
 
-	in		r0, __SREG__
+	in		r0, _SFR_IO_ADDR(SREG)
 	st		x+, r0
 
 	/* Skip R0 and r24 - These are scratch register and Call-used, "volatile" registers */
@@ -428,10 +408,10 @@
 
 	/* Fetch the new stack pointer */
 
-	ld		r24, x+				/* Fetch stack pointer (post-incrementing) */
-	out		__SP_L__, r24
-	ld		r25, x+
-	out		__SP_H__, r25
+	ld		r25, x+				/* Fetch stack pointer (post-incrementing) */
+	out		_SFR_IO_ADDR(SPH), r25		/* (SPH then SPL) */       
+	ld		r24, x+
+	out		_SFR_IO_ADDR(SPL), r24
  
 	/* Fetch the return address and save it at the bottom of the new stack so
 	 * that we can iret to switch contexts.
@@ -439,9 +419,9 @@
 
 	movw	r28, r26			/* Get a pointer to the PCH/PCL storage location */
 	adiw	r28, REG_PCH
-	ld		r25, y+				/* Load PCH and PCL */
+	ld		r25, y+				/* Load PCH (r25) and PCL (r24) */
 	ld		r24, y+
-	push	r24					/* Push PCH and PCL on the stack */
+	push	r24					/* Push PCH and PCL on the stack (PCL then PCH) */
 	push	r25
 
 	/* Then get value of X [r26:r27].  Save X on the new stack where we can
@@ -501,7 +481,7 @@
 	/* Restore the status register (probably enabling interrupts) */
 
 	ld		r0, x+
-	out		__SREG__, r0
+	out		_SFR_IO_ADDR(SREG), r0
 
 	/* Restore r0 and r241 - The scratch and IRQ number registers */
 

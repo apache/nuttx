@@ -122,8 +122,8 @@ excpt_common:
 	 * the push operation post-decrements -- need to REVISIT this).
 	 */
 
-	in		r16, __SP_L__			/* Get the save structure pointer in a Call-saved register pair */
-	in		r17, __SP_H__			/* (Careful, push post-decrements) */
+	in		r16, _SFR_IO_ADDR(SPL)	/* Get the save structure pointer in a Call-saved register pair */
+	in		r17, _SFR_IO_ADDR(SPH)	/* (Careful, push post-decrements) */
 	movw	r22, r16				/* Pass register save structure as the parameter 2 */
 	USE_INTSTACK rx, ry, rz			/* Switch to the interrupt stack */
 	call	up_doirq				/* Dispatch the interrupt */
