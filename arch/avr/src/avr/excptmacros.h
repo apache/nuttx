@@ -150,34 +150,36 @@
  *	handler.
  *
  * On Entry:
- *	r0 - has already been pushed onto the stack and now holds the IRQ number
+ *	r24 - has already been pushed onto the stack and now holds the IRQ number
  *	sp - Points to the top of the stack
  *	Only the stack is available for storage
  *
  *	 PCL
  *	 PCH
- *	 R0
+ *	 R24
  *	 --- <- SP
  *
  * At completion:
- *	Register state is saved on the stack; All registers are available for usage except sp.
+ *	Register state is saved on the stack; All registers are available for usage except sp and
+ *  r24 which still contains the IRQ number as set by the HANDLER macro.
  *
  ********************************************************************************************/
 
 	.macro	EXCPT_PROLOGUE
 
-	/* Save R1 - The zero register (but might not be zero) */
+	/* Save R0 -- the scratch register */
 
-	push	r1
+    push    r0
 
 	/* Save the status register on the stack */
 
-	in		r1, __SREG__	/* Save the status register */
+	in		r0, __SREG__	/* Save the status register */
 	cli						/* Disable interrupts */
-	push	r1
+	push	r0
 
-	/* R1 must be zero for our purposes */
+	/* Save R1 -- the zero register (which may not be zero).  R1 must be zero for our purposes */
 
+    push    r1
 	clr		r1
 
 	/* Save r2-r17 - Call-saved, "static" registers */
@@ -230,12 +232,12 @@
 	 * it was on entry into this macro.  We'll have to subtract to get that value.
 	 */
 
-	in		r24, __SP_L__
-	in		r25, __SP_H__
-	adiw	r24, XCPTCONTEXT_REGS
+	in		r26, __SP_L__
+	in		r27, __SP_H__
+	adiw	r26, XCPTCONTEXT_REGS
 
-	push	r24
-	push	r25
+	push	r26
+	push	r27
 	.endm
 
 /********************************************************************************************

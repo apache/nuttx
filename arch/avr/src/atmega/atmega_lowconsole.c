@@ -377,7 +377,7 @@ void usart1_configure(void)
 #elif CONFIG_USART1_BITS == 8
   ucsr1c |= ((1 << UCSZ10) | (1 << UCSZ11));
 #elif CONFIG_USART1_BITS == 9
-  ucsr1c |= (U(1 << CSZ10) | (1 << UCSZ11));
+  ucsr1c |= ((1 << CSZ10) | (1 << UCSZ11));
   ucsr1b |= (1 << UCSZ12);
 #else
 #  error "Unsupported word size"
