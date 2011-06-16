@@ -984,7 +984,8 @@ Supported Boards
 
 configs/amber
 	This is placeholder for the SoC Robotics Amber Web Server that is based
-	on the Atmel AVR ATMega128 MCU.  There is not much there yet.
+	on the Atmel AVR ATMega128 MCU.  There is not much there yet and what is
+	there is untested due to tool-related issues.
 
 configs/avr32dev1
 	This is a port of NuttX to the Atmel AVR32DEV1 board.  That board is
@@ -1159,6 +1160,11 @@ configs/stm3210e-evel
 	STMicro STM3210E-EVAL development board based on the STMicro STM32F103ZET6
 	microcontroller (ARM Cortex-M3).  This port uses the GNU Cortex-M3
 	toolchain.
+
+configs/teensy
+	This is theport of NuttX to the PJRC Teensy++ 2.0 board.  This board is
+	developed by http://pjrc.com/teensy/.  The Teensy++ 2.0 is based
+	on an Atmel AT90USB1286 MCU.
 
 configs/us7032evb1
 	This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.

@@ -424,9 +424,9 @@ Micropendous3 Configuration Options
        CONFIG_DRAM_SIZE=(4*1024) - (4Kb)
        CONFIG_DRAM_SIZE=(8*1024) - (8Kb)
 
-    CONFIG_DRAM_START - The start address of installed DRAM
+    CONFIG_DRAM_START - The start address of installed SRAM
 
-       CONFIG_DRAM_START=0x10000000
+       CONFIG_DRAM_START=0x800100
 
     CONFIG_DRAM_END - Last address+1 of installed RAM
 
