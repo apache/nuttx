@@ -521,11 +521,11 @@ Where <subdir> is one of the following:
   hello:
     The simple apps/examples/hello "Hello, World!" example.
 
-    FLASH/SRAM Requirements (as of 6/12/2011):
+    FLASH/SRAM Requirements (as of 6/16/2011):
 
       $ avr-elf-size nuttx
        text    data     bss     dec     hex filename
-      31064    1075     449   32588    7f4c nuttx
+      24816     978     308   26102    65f6 nuttx
 
     Strings are in SRAM.
 
