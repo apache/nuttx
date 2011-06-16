@@ -129,12 +129,13 @@ excpt_common:
 	 * the push operation post-decrements -- need to REVISIT this).
 	 */
 
-	in		r16, _SFR_IO_ADDR(SPL)	/* Get the save structure pointer in a Call-saved register pair */
-	in		r17, _SFR_IO_ADDR(SPH)	/* (Careful, push post-decrements) */
-	movw	r22, r16				/* Pass register save structure as the parameter 2 */
+	in		r28, _SFR_IO_ADDR(SPL)	/* Get the save structure pointer in a Call-saved register pair */
+	in		r29, _SFR_IO_ADDR(SPH)  /* Pointer can be obtained from the stack pointer */
+	adiw	r28, 1					/* Remembering that push post-decrements */
+	movw	r22, r28				/* Pass register save structure as the parameter 2 */
 	USE_INTSTACK rx, ry, rz			/* Switch to the interrupt stack */
 	call	up_doirq				/* Dispatch the interrupt */
-	RESTORE_STACK rx, ry			/* - Undo the operations of USE_INTSTACK */
+	RESTORE_STACK rx, ry			/* Undo the operations of USE_INTSTACK */
 
 	/* up_doiq returns with r24-r25 equal to the new save structure.  If no context
 	 * switch occurred, this will be the same as the value passed to it in r22-23.
@@ -142,8 +143,8 @@ excpt_common:
 	 * stack frame, but at a register save area inside of the new task's TCB.
 	 */
 
-	 cp		r16, r24
-	 cpc	r17, r25
+	 cp		r28, r24
+	 cpc	r29, r25
 	 breq	.Lnoswitch
 
 	/* A context switch has occurred, jump to up_fullcontextrestore with r24, r25
