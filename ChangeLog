@@ -1822,4 +1822,6 @@
 	* configs/amber: This is a placehold for the Atmel ATMega128 Amber Web
 	  Server from SoC Robotics.  Not much present in this directory on initial
 	  check-in.
+	* configs/teensy: Adds a board configuration for the PJRC Teensy++ 2.0 boar
+	  that features an Atmel AT90USB1286 MCU.
 

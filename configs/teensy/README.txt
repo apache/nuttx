@@ -1,188 +1,148 @@
 README
 ^^^^^
 
-This is the README file for the port of NuttX to the Amber Web Server from
-SoC Robotics (http://www.soc-robotics.com/index.htm).  The
-Amber Web Server is based on an Atmel ATMega128.  As of this writing,
-documentation for the Amber Web Server board is available here:
-
-http://www.soc-robotics.com/product/Amber_Specs/Amber_Processor.html
-
-and
-
-http://www.soc-robotics.com/pdfs/Amber%201-5a%20Hardware%20Reference%20Guide.pdf
+This is the README file for the port of NuttX to the PJRC Teensy++ 2.0 board.
+This board is developed by http://pjrc.com/teensy/.  The Teensy++ 2.0 is based
+on an Atmel AT90USB1286 MCU.
 
 Contents
 ^^^^^^^^
 
-  o Amber Web Server Features
-  o Pin Connections
-  o Atmel AVRISP mkII Connection
+  o Teensy++ 2.0 Features
+  o Pin Usage
+  o Halfkey Bootloader
+  o Serial Console
   o Toolchains
   o Windows Native Toolchains
   o NuttX buildroot Toolchain
   o avr-libc
-  o Amber Web Server Configuration Options
+  o Teensy++ Configuration Options
   o Configurations
 
-Amber Web Server Features
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Teensy++ 2.0 Features
+^^^^^^^^^^^^^^^^^^^^^
 
-   o  17.56MHz ATmega128 Atmel 8bit AVR RISC Processor
-   o  128Kbyte Flash
-   o  64Kbyte RAM
-   o  10BaseT Ethernet Port
-   o  High Speed Serial Port
-   o  8Ch 10bit Analog Input port
-   o  16 Digital IO ports
-   o  Expansion bus for daughter cards
-   o  LED status indicators
-   o  ISP Programming port
-   o  7-14VDC input
-   o  Power via Ethernet port
+  o Based on the 64-pin USB AVR Microcontroller AT90USB1286.
+  o USB Full Speed (12Mbit/s)
+  o USB Device Mode
+  o 120kbof available FLASH memory for programs.
+  o 8 kbytes SRAM and 4 kbytes of EEPROM 
+  o USB powered
+  o 16MHz crystal
+  o 48 General Purpose IO Pins
 
-Pin Connections (PCB Rev 1.5a)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Pin Usage
+^^^^^^^^^
 
-  -------------------- -----------------------------
-  ATMega128 Pinout     Amber board connection
-  -------------------- -----------------------------
+  AT90USB1286 TQFP64
+  -- ------------------------ ---------------------------------------------
+  PIN SIGNAL                  BOARD CONNECTION
+  -- ------------------------ ---------------------------------------------
   (left)
-   1 PEN               Pulled-up
-   2 PE0 (RXD0/PDI)    MAX202ECWED T1IN or J7-1, ISP-PDI (via 74HC5053), J5-26
-   3 PE1 (TXD0/PDO)    MAX202ECWED A1OUT or J7-9, ISP-PDO (via 74HC5053), J5-25
-   4 PE2 (XCK0/AIN0)   MAX202ECWED T2IN, J5-24
-   5 PE3 (OC3A/AIN1)   MAX202ECWED A2OUT, J5-23
-   6 PE4 (OC3B/INT4)   J5-22
-   7 PE5 (OC3C/INT5)   J5-21, RTL8019AS INT 0, TP5 PE5
-   8 PE6 (T3/INT6)     J5-20
-   9 PE7 (ICP3/INT7)   J5-19
-  10 PB0 (SS)          Pull up of SS SPI master
-  11 PB1 (SCK)         J7-7, ISP_SCK (via 74HC4053) and AT45D011 SCK, J5-17
-  12 PB2 (MOSI)        AT45D011 SI. J5-16
-  13 PB3 (MISO)        AT45D011 SO, J5-15
-  14 PB4 (OC0)         AT45D011 CS\, J5-14
-  15 PB5 (OC1A)        J5-13
-  16 PB6 (OC1B)        J5-12
+  1  (INT.6/AIN.0) PE6         Pad E6
+  2  (INT.7/AIN.1/UVcon) PE7   Pad E7
+  3  UVcc                      (Voltage circutry)
+  4  D-                        USB DP
+  5  D+                        USB DM
+  6  UGnd                      GND
+  7  UCap                      GND (via cap)
+  8  VBus                      USB VBUS
+  9  (IUID) PE3                N/C
+  10 (SS/PCINT0) PB0           Pad B0
+  11 (PCINT1/SCLK) PB1         Pad B1
+  12 (PDI/PCINT2/MOSI) PB2     Pad B2
+  13 (PDO/PCINT3/MISO) PB3     Pad1 B3
+  14 (PCINT4/OC.2A) PB4        Pad B4
+  15 (PCINT5/OC.1A) PB5        Pad B5
+  16 (PCINT6/OC.1B) PB6        Pad B6
   (bottom)
-  17 PB7 (OC2/OC1C)    J5-11
-  18 PG3/TOSC2         32.768KHz XTAL
-  19 PG4/TOSC1         32.768KHz XTAL
-  20 RESET             RESET
-  21 VCC
-  22 GND               GND
-  23 XTAL2             14.7456MHz XTAL
-  24 XTAL1             14.7456MHz XTAL
-  25 PD0 (SCL/INT0)    J5-10
-  26 PD1 (SDA/INT1)    J5-9
-  27 PD2 (RXD1/INT2)   J5-8, MAX488CSA RO (RS-485)
-  28 PD3 (TXD1/INT3)   J5-7, MAX488CSA DI (RS-485)
-  29 PD4 (ICP1)        J5-6
-  30 PD5 (XCK1)        J5-5
-  31 PD6 (T1)          J5-4
-  32 PD7 (T2)          J5-3
-  (left)
-  48 PA3 (AD3)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
-  47 PA4 (AD4)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
-  46 PA5 (AD5)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
-  45 PA6 (AD6)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
-  44 PA7 (AD7)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
-  43 PG2 (ALE)         J5-1, 74HC5730, 62246DLP-7, RTL8019AS
-  42 PC7 (A15)         TP4 A15, J5-27, 74HC5730
-  41 PC6 (A14)         J5-28, 74HC5730, 62246DLP-7, RTL8019AS
-  40 PC5 (A13)         J5-29, 74HC5730, 62246DLP-7, RTL8019AS
-  39 PC4 (A12)         J5-30, 74HC5730, 62246DLP-7, RTL8019AS
-  38 PC3 (A11)         J5-31, 74HC5730, 62246DLP-7, RTL8019AS
-  37 PC2 (A10)         J5-32, 74HC5730, 62246DLP-7, RTL8019AS
-  36 PC1 (A9)          J5-33, 74HC5730, 62246DLP-7, RTL8019AS
-  35 PC0 (A8)          J5-34, 74HC5730, 62246DLP-7, RTL8019AS
-  34 PG1 (RD)          TP2 RD\, J5-52, 62246DLP-7, RTL8019AS
-  33 PG0 (WR)          TP3 WR\, J5-51, 62246DLP-7, RTL8019AS
+  17 (PCINT7/OC.0A/OC.1C) PB7  Pad B7
+  18 (INT4/TOSC1) PE4          Pad E4
+  19 (INT.5/TOSC2) PE5         Pad E5
+  20 RESET                     Switch pulls to ground
+  21 VCC                       VCC
+  22 GND                       GND
+  23 XTAL2                     XTAL (16MHz)
+  24 XTAL1                     XTAL (16MHz)
+  25 (OC0B/SCL/INT0) PD0       Pad D0
+  26 (OC2B/SDA/INT1) PD1       Pad D1
+  27 (RXD1/INT2) PD2           Pad D2
+  28 (TXD1/INT3) PD3           Pad D3
+  29 (ICP1) PD4                Pad D4
+  30 (XCK1) PD5                Pad D5
+  31 (T1) PD6                  Pad D6, LED
+  32 (T0) PD7                  Pad D7
+  (right)
+  48 PA3 (AD3)                 Pad A3
+  47 PA4 (AD4)                 Pad A4
+  46 PA5 (AD5)                 Pad A5
+  45 PA6 (AD6)                 Pad A6
+  44 PA7 (AD7)                 Pad A7
+  43 PE2 (ALE/HWB)             Pad ALE (Pulled down)
+  42 PC7 (A15/IC.3/CLKO)       Pad C7
+  41 PC6 (A14/OC.3A)           Pad C6
+  40 PC5 (A13/OC.3B)           Pad C5
+  39 PC4 (A12/OC.3C)           Pad C4
+  38 PC3 (A11/T.3)             Pad C3
+  37 PC2 (A10)                 Pad C2
+  36 PC1 (A9)                  Pad C1
+  35 PC0 (A8)                  Pad C0
+  34 PE1 (RD)                  Pad E1
+  33 PE0 (WR)                  Pad E0
   (top)
-  64 AVCC
-  63 GND               GND
-  62 AREF              (analog supply)
-  61 PF0 (ADC0)        J6-5, PDV-P9 Light Sensor
-  60 PF1 (ADC1)        J6-7, Thermister
-  59 PF2 (ADC2)        J6-9, MXA2500GL Dual Axis Accesserometer, AOUTX
-  58 PF3 (ADC3)        J6-11, MXA2500GL Dual Axis Accesserometer, AOUTY
-  57 PF4 (ADC4/TCK)    J6-13, MXA2500GL Dual Axis Accesserometer, TOUT
-  56 PF5 (ADC5/TMS)    J6-15
-  55 PF6 (ADC6/TDO)    J6-17
-  54 PF7 (ADC7/TDI)    J6-19
-  53 GND               GND
-  52 VCC
-  51 PA0 (AD0)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
-  50 PA1 (AD1)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
-  49 PA2 (AD2)         J5-?, 74HC5730, 62246DLP-7, RTL8019AS
+  64 AVCC                      VCC
+  63 GND                       GND
+  62 AREF                      Pad Ref (Capacitor to ground)
+  61 PF0 (ADC0)                Pad F0
+  60 PF1 (ADC1)                Pad F1
+  59 PF2 (ADC2)                Pad F2
+  58 PF3 (ADC3)                Pad F3
+  57 PF4 (ADC4/TCK)            Pad F4
+  56 PF5 (ADC5/TMS)            Pad F5
+  55 PF6 (ADC6/TDO)            Pad F6
+  54 PF7 (ADC7/TDI)            Pad F7
+  53 GND                       GND
+  52 VCC                       VCC
+  51 PA0 (AD0)                 Pad A0
+  50 PA1 (AD1)                 Pad A1
+  49 PA2 (AD2)                 Pad A2
 
-Switches and Jumpers
-^^^^^^^^^^^^^^^^^^^^
-ISP/UART0
-  JP1 - DTE/DCE selection
-  JP2 - 
-  JP5 - 
-  J11 - STK500 Enable
+Halfkey Bootloader
+^^^^^^^^^^^^^^^^^^
 
-ADC
-  JP8 - 
-  JP9 - 
+o Download the Teensy application from http://pjrc.com/teensy/loader.html
+o Instructions are available for your OS at that places as well.
 
-Networking
-  JP10 - 
+Summary:
 
-RS-485
-  J8 - 
-  J9 - 
-  J10 - 
+1. Start Teensy
+2. Press button on the Teensy board
+3. Select a HEX file (File menu)
+4. Select "program" (Operations menu)
+5. Reboot (Operations menu).
 
-Atmel AVRISP mkII Connection
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Serial Console
+^^^^^^^^^^^^^^
 
-  ISP6PIN Header
-  --------------
+  A serial console is supported on an external MAX232/MAX3232 Connected
+  on PD2 and PD3:
 
-         1  2
-   MISO  o  o VCC
-    SCK  o  o MOSI
-  RESET\ o  o GND
+  Port D, Bit 2: RXD1, Receive Data (Data input pin for the USART1). When
+    the USART1 receiver is enabled this pin is configured as an input
+    regardless of the value of DDD2. When the USART forces this pin to
+    be an input, the pull-up can still be controlled by the PORTD2 bit.
+  Port D, Bit 3: TXD1, Transmit Data (Data output pin for the USART1).
+    When the USART1 Transmitter is enabled, this pin is configured as
+    an output regardless of the value of DDD3.
 
-  (ISP10PIN Connector)
-  ------------------- -------------------------
-  
-         1  2
-    MOSI o  o Vcc   - ISP-PDI: PE0/PDI/RX0 via 74HC5053
-     LED o  o GND   - ISP-PROG: J11/GND, to 74HC5053 and LED
-  RESET\ o  o GND   - to 74HC505
-    SCK  o  o GND   - ISP_SCK: SCK, PB0/SS\
-    MISO o  o GND   - ISP-PDO: PE1/PD0/TX0 via 74HC5053
+  AT90USB90128/64 TQFP64
+  -- ------------------------ ---------------------------------------------
+  PIN SIGNAL                  BOARD CONNECTION
+  -- ------------------------ ---------------------------------------------
+  27 (RXD1/INT2) PD2           Pad D2
+  28 (TXD1/INT3) PD3           Pad D3
 
-  Board Orientation
-
-    |
-    | +-----+
-    | + O O |
-    | + O O |
-    | + O O
-    | + O O |
-    | + O x | PIN 1
-    | +-----+
-    |
-
-  AVRISP mkII Connection to 10-pin Header
-  -------------------------------------------
-  10PIN Header         6PIN Header
-  --------------------- ---------------------
-  Pin  1 MOSI           Pin 4 MOSI
-  Pin  2 Vcc            Pin 2 Vcc
-  Pin  3 LED                  Controlled via J11
-  Pin  4 GND            Pin 6 GND
-  Pin  5 RESET\         Pin 5 RESET\
-  Pin  6 GND                  N/C
-  Pin  7 SCK            Pin 3 SCK
-  Pin  8 GND                  N/C
-  Pin  9 MISO           Pin 1 MISO
-  Pin 10 GND                  N/C
+  Plus Vcc and ground.
 
 Toolchains
 ^^^^^^^^^^
@@ -276,7 +236,7 @@ NuttX buildroot Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh amber/<sub-dir>
+     ./configure.sh Teensy++/<sub-dir>
 
      NOTE: you also must copy avr-libc header files into the NuttX include
      directory with command perhaps like:
@@ -347,7 +307,7 @@ Build Notes:
      cd avr-lib-1.7.1
 
   3. Configure avr-lib.  Assuming that WinAVR is installed at the following
-     loction:
+     location:
 
      export PATH=/cygdrive/c/WinAVR/bin:$PATH
      ./configure --build=`./config.guess` --host=avr
@@ -365,8 +325,8 @@ Build Notes:
 
      make install
 
-Amber Web Server Configuration Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Teensy++ Configuration Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
@@ -379,25 +339,25 @@ Amber Web Server Configuration Options
 
     CONFIG_ARCH_architecture - For use in C code:
 
-       CONFIG_ARCH_ATMEGA=y
+       CONFIG_ARCH_AT90USB=y
 
     CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-       CONFIG_ARCH_CHIP=atmega
+       CONFIG_ARCH_CHIP=at90usb
 
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
-       chip:
+       chip. 
 
-       CONFIG_ARCH_CHIP_ATMEGA128=y
+       CONFIG_ARCH_CHIP_AT90USB1286=y
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=amber
+       CONFIG_ARCH_BOARD=teensy
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_AMBER=y
+       CONFIG_ARCH_BOARD_TEENSY=y
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops
@@ -409,7 +369,7 @@ Amber Web Server Configuration Options
 
        CONFIG_DRAM_SIZE=(8*1024) - (8Kb)
 
-    CONFIG_DRAM_START - The start address of installed SRAM
+    CONFIG_DRAM_START - The start address of installed DRAM
 
        CONFIG_DRAM_START=0x800100
 
@@ -422,7 +382,7 @@ Amber Web Server Configuration Options
 
     CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
        stack. If defined, this symbol is the size of the interrupt
-        stack in bytes.  If not defined, the user task stacks will be
+       stack in bytes.  If not defined, the user task stacks will be
       used during interrupt handling.
 
     CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
@@ -438,27 +398,28 @@ Amber Web Server Configuration Options
 
     Individual subsystems can be enabled:
 
-       CONFIG_AVR_INT0=n
-       CONFIG_AVR_INT1=n
-       CONFIG_AVR_INT2=n
-       CONFIG_AVR_INT3=n
-       CONFIG_AVR_INT4=n
-       CONFIG_AVR_INT5=n
-       CONFIG_AVR_INT6=n
-       CONFIG_AVR_INT7=n
-       CONFIG_AVR_WDT=n
-       CONFIG_AVR_TIMER0=n
-       CONFIG_AVR_TIMER1=n
-       CONFIG_AVR_TIMER2=n
-       CONFIG_AVR_TIMER3=n
-       CONFIG_AVR_SPI=n
-       CONFIG_AVR_USART0=y
-       CONFIG_AVR_USART1=n
-       CONFIG_AVR_ADC=n
-       CONFIG_AVR_ANACOMP=n
-       CONFIG_AVR_TWI=n
-
-   If the watchdog is enabled, this specifies the initial timeout.  Default
+      CONFIG_AVR_INT0=n
+      CONFIG_AVR_INT1=n
+      CONFIG_AVR_INT2=n
+      CONFIG_AVR_INT3=n
+      CONFIG_AVR_INT4=n
+      CONFIG_AVR_INT5=n
+      CONFIG_AVR_INT6=n
+      CONFIG_AVR_INT7=n
+      CONFIG_AVR_USBHOST=n
+      CONFIG_AVR_USBDEV=n
+      CONFIG_AVR_WDT=n
+      CONFIG_AVR_TIMER0=n
+      CONFIG_AVR_TIMER1=n
+      CONFIG_AVR_TIMER2=n
+      CONFIG_AVR_TIMER3=n
+      CONFIG_AVR_SPI=n
+      CONFIG_AVR_USART1=y
+      CONFIG_AVR_ANACOMP=n
+      CONFIG_AVR_ADC=n
+      CONFIG_AVR_TWI=n
+ 
+  If the watchdog is enabled, this specifies the initial timeout.  Default
   is maximum supported value.
 
       CONFIG_WDTO_15MS
@@ -472,10 +433,10 @@ Amber Web Server Configuration Options
       CONFIG_WDTO_4S
       CONFIG_WDTO_8S
 
- ATMEGA specific device driver settings
+  AT90USB specific device driver settings
 
     CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
-       console and ttys0 (default is the USART0).
+       console and ttys0 (default is no serial console).
     CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
        This specific the size of the receive buffer
     CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
@@ -488,11 +449,11 @@ Amber Web Server Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Amber Web Server configuration is maintained in a sudirectory and can
+Each Teensy++ configuration is maintained in a sudirectory and can
 be selected as follow:
 
     cd tools
-    ./configure.sh amber/<subdir>
+    ./configure.sh teensy/<subdir>
     cd -
     . ./setenv.sh
 
@@ -502,8 +463,11 @@ NOTE: You must also copy avr-libc header files, perhaps like:
 
 Where <subdir> is one of the following:
 
+  hello:
+    The simple apps/examples/hello "Hello, World!" example.
+
   ostest:
     This configuration directory, performs a simple OS test using
-    apps/examples/ostest.  NOTE:  The OS test is quite large.  In order
+    apps/examples/ostest. NOTE:  The OS test is quite large.  In order
     to get it to fit within AVR memory constraints, it will probably be
     necessary to disable some OS features.
