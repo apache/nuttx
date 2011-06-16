@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 8, 2011</p>
+      <p>Last Updated: June 16, 2011</p>
     </td>
   </tr>
 </table>
@@ -1466,16 +1466,16 @@
   <td><br></td>
   <td>
     <p>
-      <b>ATMega128</b>.
+      <b>SoC Robotics ATMega128</b>.
       This port of NuttX to the Amber Web Server from SoC Robotics
-      (http://www.soc-robotics.com/index.htm) is underway.  The Amber Web Server is
+      (http://www.soc-robotics.com/index.htm) partially complete.  The Amber Web Server is
       based on an Atmel ATMega128.
     </p>
     <ul>
       <p>
        <b>STATUS:</b>
-         This port a work in progress.  It is in the early stage at approximately code
-         complete but with no testing.  This port may be verified for the NuttX 6.5 release.
+         Work on this port has stalled due to toolchain issues.  Complete, but untested
+         code for this port appears in the NuttX 6.5 release.
       </p>
     </ul>
   </td>
@@ -1488,15 +1488,40 @@
   <td><br></td>
   <td>
     <p>
-      <b>AT9USB64x</b> and <b>AT9USB6128x</b>.
+      <b>Micropendous 3 AT9USB64x</b> and <b>AT9USB6128x</b>.
       This port of NuttX to the Opendous Micropendous 3 board. The Micropendous3 is
-      may be populated with an AT90USB646, 647, 1286, or 1287.
+      may be populated with an AT90USB646, 647, 1286, or 1287.  I have only the AT90USB647
+      version for testing.  This version have very limited memory resources: 64Kb of
+      FLASH and 4Kb of SRAM.
     </p>
     <ul>
       <p>
        <b>STATUS:</b>
-         This port a work in progress.  It is in the early stage at approximately code
-         complete but with no testing.  This port may be verified for the NuttX 6.5 release.
+         The basic port was release in NuttX-6.5.  This basic port consists only of
+         a "Hello, World!!" example that demonstrates initialization of the OS,
+         creation of a simple task, and serial console output.  A complete OS
+         test configuration is also available, but this would have to be scaled
+         down quite a bit before it could be executed in the tiny AT90USB SRAM
+         memory.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>PRJC Teensy++ 2.0 AT9USB1286</b>.
+      This is a port of NuttX to the PJRC Teensy++ 2.0 board.
+      This board is developed by http://pjrc.com/teensy/. 
+      The Teensy++ 2.0 is based on an Atmel AT90USB1286 MCU.
+    </p>
+    <ul>
+      <p>
+       <b>STATUS:</b>
+         Work on the Teensy board is just beginning as of this writing.
+         However, because of the great similarity to the Micropendous board,
+         this port should be completed with only a small additional effort.
       </p>
     </ul>
   </td>
@@ -2318,9 +2343,12 @@ nuttx-6.5 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * configs/amber: This is a placehold for the Atmel ATMega128 Amber Web
       Server from SoC Robotics.  Not much present in this directory on initial
       check-in.
-
+    * configs/teensy: Adds a board configuration for the PJRC Teensy++ 2.0 boar
+      that features an Atmel AT90USB1286 MCU.
 
 apps-6.5 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * netutils/ftpc:  Simpflication and size reduction.
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
