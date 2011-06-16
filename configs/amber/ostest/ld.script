@@ -1,4 +1,4 @@
-/****************************************************************************
+/**************************************************************************************
  * configs/amber/ostest/ld.script
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
@@ -31,14 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
-/* Memory Regions ***********************************************************/
+ **************************************************************************************/
+/* Memory Regions *********************************************************************/
+/* -------------- ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
+ *                FLASH        | REGISTERS I/O       EXT I/O    ISRAM      | EEPROM
+ *                             |           REGISTERS REGISTERS             |
+ * -------------- ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
+ * ATMEGA128*     0x0000 128Kb | 0x0000 32 0x0020 64 0x0060 160 0x0100 4Kb | 0x0000 4Kb
+ * -------------- ------ ------+------- -- ------ -- ------ --- ------ ----+------- ---
+ * *Memory configuration A
+ */
 
 MEMORY
 {
 	flash    (rx) : ORIGIN = 0, LENGTH = 128K
-	sram   (rw!x) : ORIGIN = 0x800060, LENGTH = 0xffa0
-	eeprom (rw!x) : ORIGIN = 0x810000, LENGTH = 64K
+	sram   (rw!x) : ORIGIN = 0x800100, LENGTH = 4K
+	eeprom (rw!x) : ORIGIN = 0x810000, LENGTH = 4K
 }
 
 OUTPUT_FORMAT("elf32-avr","elf32-avr","elf32-avr")
