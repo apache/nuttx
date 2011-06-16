@@ -159,7 +159,7 @@
 
 	/* Save R1 -- the zero register (which may not be zero).  R1 must be zero for our purposes */
 
-    push    r1
+	push	r1
 	clr		r1
 
 	/* Save r2-r17 - Call-saved, "static" registers */
@@ -325,7 +325,12 @@
 
 	.macro	USER_SAVE
 
-	/* Save the current stack pointer (SPH then SPL). */
+	/* Pop the return address from the stack (PCH then PCL).  R18:19 are Call-used */
+
+	pop		r19			/* r19=PCH */
+	pop		r18			/* r18=PCL */
+
+	/* Save the current stack pointer  as it would be after the return(SPH then SPL). */
 
 	in		r25, _SFR_IO_ADDR(SPH)
 	st		x+, r25
@@ -341,9 +346,10 @@
 	st		x+, r29
 	st		x+, r28
 
-	/* Skip over r18-r27 - Call-used, "volatile" registers (r26-r27 have been skipped) */
+	/* Skip over r18-r27 - Call-used, "volatile" registers (r26-r27 have
+	 * already been skipped, r24 is saved elsewhere) */
 
-	adiw	r26, 8		/* Eight registers: r18-r25 */
+	adiw	r26, 7		/* Seven registers: r18-23, r25 */
 
 	/* Save r2-r17 - Call-saved, "static" registers */
 
@@ -378,12 +384,10 @@
 
 	adiw	r26, 2		/* Two registers: r0, r24 */
 
-	/* Pop and save the return address */
+	/* Save the return address that we have saved in r18:19*/
 
-	pop		r0
-	st		x+, r0
-	pop		r0
-	st		x+, r0
+	st		x+, r19		/* r19=PCH */
+	st		x+, r18		/* r18=PCL */
 	.endm
 
 /********************************************************************************************
@@ -400,13 +404,21 @@
  *
  * On completion:
  *	All registers restored except for the PC with now resides at the top of the new stack
- *  so that iret can be used to switch to the new context.
+ *	so that ret can be used to switch to the new context. (ret, not reti, becaue ret
+ * 	will preserve the restored interrupt state).
  *
  ********************************************************************************************/
 
 	.macro	TCB_RESTORE, regs
 
-	/* Fetch the new stack pointer */
+	/* X [r36:27] points to the resister save block.  Get an offset pointer to the PC in
+	 * Y [r28:29]
+	 */
+
+	movw	r28, r26			/* Get a pointer to the PCH/PCL storage location */
+	adiw	r28, REG_PCH
+
+	/* Fetch and set the new stack pointer */
 
 	ld		r25, x+				/* Fetch stack pointer (post-incrementing) */
 	out		_SFR_IO_ADDR(SPH), r25		/* (SPH then SPL) */       
@@ -414,23 +426,31 @@
 	out		_SFR_IO_ADDR(SPL), r24
  
 	/* Fetch the return address and save it at the bottom of the new stack so
-	 * that we can iret to switch contexts.
+	 * that we can iret to switch contexts.  The new stack is now:
+	 *
+	 *  PCL
+	 *  PCH
+	 *  --- <- SP
 	 */
 
-	movw	r28, r26			/* Get a pointer to the PCH/PCL storage location */
-	adiw	r28, REG_PCH
-	ld		r25, y+				/* Load PCH (r25) and PCL (r24) */
+	ld		r25, y+				/* Load PCH (r25) then PCL (r24) */
 	ld		r24, y+
 	push	r24					/* Push PCH and PCL on the stack (PCL then PCH) */
 	push	r25
 
 	/* Then get value of X [r26:r27].  Save X on the new stack where we can
-	 * recover it later.
+	 * recover it later.  The new stack is now:
+	 *
+	 *  PCL
+	 *  PCH
+	 *  R26
+	 *  R27
+	 *  --- <- SP
 	 */
 
 	ld		r25, x+				/* Fetch r26-r27 and save to the new stack */
 	ld		r24, x+
-	push	r24
+	push	r24					/* r26 then r27 */
 	push	r25
 
 	/* Restore r30-r31 - Call-used, "volatile" registers */
@@ -474,7 +494,7 @@
 	ld		r3, x+
 	ld		r2, x+
 
-	/* Restore r1 - The "scratch" register */
+	/* Restore r1 - zero register (which may not be zero) */
 
 	ld		r1, x+
 
@@ -483,16 +503,17 @@
 	ld		r0, x+
 	out		_SFR_IO_ADDR(SREG), r0
 
-	/* Restore r0 and r241 - The scratch and IRQ number registers */
+	/* Restore r0 and r24 - The scratch and IRQ number registers */
 
 	ld		r0, x+
 	ld		r24, x+
 
 	/* Finally, recover X [r26-r27] from the the new stack.  The PC remains on the new
-	 * stack so that the user of this macro can return with iret.
+	 * stack so that the user of this macro can return with ret (not reti, ret will
+	 * preserve the restored interrupt state).
 	 */
 
-	pop		r27
+	pop		r27					/* R27 then R26 */
 	pop		r26
 	.endm
 

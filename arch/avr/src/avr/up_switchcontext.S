@@ -86,9 +86,9 @@
 
 	.text
 	.globl	up_switchcontext
-    .func	up_switchcontext
+	.func	up_switchcontext
 up_switchcontext:
-	/* Use X ]r26:r27] to reference the save structure.  (X is Call-used) */
+	/* Use X [r26:r27] to reference the save structure.  (X is Call-used) */
 
 	movw	r26, r24
 
@@ -99,7 +99,7 @@ up_switchcontext:
 	/* Then fall through to do the full context restore with r24-r5 = restoreregs */
 
 	movw	r24, r22
-    .endfunc
+	.endfunc
 
 /****************************************************************************
  * Name: up_fullcontextrestore
@@ -120,7 +120,7 @@ up_switchcontext:
 
 	.text
 	.global	up_fullcontextrestore
-    .func   up_fullcontextrestore
+	.func	up_fullcontextrestore
 up_fullcontextrestore:
 	/* Use X ]r26:r27] to reference the restore structure.  */
 
@@ -130,9 +130,11 @@ up_fullcontextrestore:
 
 	TCB_RESTORE
 
-    /* And "return" to the new task. */
+	/* And "return" to the new task (using ret not reti so that the interrupt
+	 * state that we just restored will be preserved).
+	 */
 
-    reti
-    .endfunc
+	ret
+	.endfunc
 	.end
 
