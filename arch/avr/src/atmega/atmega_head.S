@@ -117,7 +117,7 @@
  ****************************************************************************/
 
 	.macro	vector name
-	rjmp	\name
+	jmp		\name
 	.endm
 
 /****************************************************************************
@@ -131,7 +131,7 @@
 	.section .vectors, "ax", @progbits
 	.func	vectortab
 vectortab:
-	rjmp	__start			/*  0: Vector 0 is the reset vector */
+	jmp		__start			/*  0: Vector 0 is the reset vector */
 	vector	atmega_int0		/*  1: External interrupt request 0 */
 	vector	atmega_int1		/*  2: External interrupt request 1 */
 	vector	atmega_int2		/*  3: External interrupt request 2 */
