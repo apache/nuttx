@@ -100,6 +100,7 @@ static bool usart1_rxavailable(struct uart_dev_s *dev);
 static void usart1_send(struct uart_dev_s *dev, int ch);
 static void usart1_txint(struct uart_dev_s *dev, bool enable);
 static bool usart1_txready(struct uart_dev_s *dev);
+static bool usart1_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
@@ -118,7 +119,7 @@ struct uart_ops_s g_uart1_ops =
   .send           = usart1_send,
   .txint          = usart1_txint,
   .txready        = usart1_txready,
-  .txempty        = usart1_txready,
+  .txempty        = usart1_txempty,
 };
 
 /* I/O buffers */
@@ -168,9 +169,12 @@ static void usart1_restoreusartint(uint8_t imr)
 
 static inline void usart1_disableusartint(uint8_t *imr)
 {
-  uint8_t regval = UCSR1B;
+  uint8_t regval;
+
+  regval  = UCSR1B;
   *imr    = regval;
   regval &= ~((1 << RXCIE1) | (1 << TXCIE1) | (1 << UDRIE1));
+  UCSR1B  = regval;
 }
 
 /****************************************************************************
@@ -308,9 +312,11 @@ static int usart1_txinterrupt(int irq, void *context)
 {
   uint8_t ucsr1a = UCSR1A;
 
-  /* Handle outgoing, transmit bytes */
+  /* Handle outgoing, transmit bytes when the transmit data buffer is empty.
+   * (There may still be data in the shift register).
+   */
 
-  if ((ucsr1a & (1 << TXC1)) != 0)
+  if ((ucsr1a & (1 << UDRE1)) != 0)
     {
        /* Transmit data regiser empty ... process outgoing bytes */
 
@@ -361,7 +367,7 @@ static int usart1_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int usart1_receive(struct uart_dev_s *dev, FAR unsigned int *status)
 {
-  /* Return status information */
+  /* Return status information (error bits will be cleared after reading UDR1) */
 
   if (status)
     {
@@ -471,6 +477,7 @@ static void usart1_txint(struct uart_dev_s *dev, bool enable)
 
       UCSR1B &= ~((1 << UDRIE1) | (1 << TXCIE1));
     }
+
   irqrestore(flags);
 }
 
@@ -485,6 +492,20 @@ static void usart1_txint(struct uart_dev_s *dev, bool enable)
 static bool usart1_txready(struct uart_dev_s *dev)
 {
   return (UCSR1A & (1 << UDRE1)) != 0;
+}
+
+/****************************************************************************
+ * Name: usart1_txempty
+ *
+ * Description:
+ *   Return true if the tranmsit data register and shift register are both
+ *   empty
+ *
+ ****************************************************************************/
+
+static bool usart1_txempty(struct uart_dev_s *dev)
+{
+  return (UCSR1A & (1 << TXC1)) != 0;
 }
 
 /****************************************************************************

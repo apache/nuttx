@@ -121,6 +121,7 @@ static bool usart0_rxavailable(struct uart_dev_s *dev);
 static void usart0_send(struct uart_dev_s *dev, int ch);
 static void usart0_txint(struct uart_dev_s *dev, bool enable);
 static bool usart0_txready(struct uart_dev_s *dev);
+static bool usart0_txempty(struct uart_dev_s *dev);
 #endif
 
 #ifdef CONFIG_AVR_USART1
@@ -137,6 +138,7 @@ static bool usart1_rxavailable(struct uart_dev_s *dev);
 static void usart1_send(struct uart_dev_s *dev, int ch);
 static void usart1_txint(struct uart_dev_s *dev, bool enable);
 static bool usart1_txready(struct uart_dev_s *dev);
+static bool usart1_txempty(struct uart_dev_s *dev);
 #endif
 
 /****************************************************************************
@@ -159,7 +161,7 @@ struct uart_ops_s g_usart0_ops =
   .send           = usart0_send,
   .txint          = usart0_txint,
   .txready        = usart0_txready,
-  .txempty        = usart0_txready,
+  .txempty        = usart0_txempty,
 };
 
 /* USART0 I/O buffers */
@@ -201,7 +203,7 @@ struct uart_ops_s g_usart1_ops =
   .send           = usart1_send,
   .txint          = usart1_txint,
   .txready        = usart1_txready,
-  .txempty        = usart1_txready,
+  .txempty        = usart1_txempty,
 };
 
 /* USART 1 I/O buffers */
@@ -268,18 +270,24 @@ static void usart1_restoreusartint(uint8_t imr)
 #ifdef CONFIG_AVR_USART0
 static inline void usart0_disableusartint(uint8_t *imr)
 {
-  uint8_t regval = UCSR0B;
+  uint8_t regval;
+
+  regval  = UCSR0B;
   *imr    = regval;
   regval &= ~((1 << RXCIE0) | (1 << TXCIE0) | (1 << UDRIE0));
+  UCSR0B  = regval;
 }
 #endif
 
 #ifdef CONFIG_AVR_USART1
 static inline void usart1_disableusartint(uint8_t *imr)
 {
-  uint8_t regval = UCSR1B;
+  uint8_t regval;
+
+  regval  = UCSR1B;
   *imr    = regval;
   regval &= ~((1 << RXCIE1) | (1 << TXCIE1) | (1 << UDRIE1));
+  UCSR0B  = regval;
 }
 #endif
 
@@ -505,9 +513,11 @@ static int usart0_txinterrupt(int irq, void *context)
 {
   uint8_t ucsr0a = UCSR0A;
 
-  /* Handle outgoing, transmit bytes */
+  /* Handle outgoing, transmit bytes when the transmit data buffer is empty.
+   * (There may still be data in the shift register).
+   */
 
-  if ((ucsr0a & (1 << TXC0)) != 0)
+  if ((ucsr0a & (1 << UDRE0)) != 0)
     {
        /* Transmit data regiser empty ... process outgoing bytes */
 
@@ -523,9 +533,11 @@ static int usart1_txinterrupt(int irq, void *context)
 {
   uint8_t ucsr1a = UCSR1A;
 
-  /* Handle outgoing, transmit bytes */
+  /* Handle outgoing, transmit bytes when the transmit data buffer is empty.
+   * (There may still be data in the shift register).
+   */
 
-  if ((ucsr1a & (1 << TXC1)) != 0)
+  if ((ucsr1a & (1 << UDRE1)) != 0)
     {
        /* Transmit data regiser empty ... process outgoing bytes */
 
@@ -773,6 +785,7 @@ static void usart0_txint(struct uart_dev_s *dev, bool enable)
 
       UCSR0B &= ~((1 << UDRIE0) | (1 << TXCIE0));
     }
+
   irqrestore(flags);
 }
 #endif
@@ -814,6 +827,7 @@ static void usart1_txint(struct uart_dev_s *dev, bool enable)
 
       UCSR1B &= ~((1 << UDRIE1) | (1 << TXCIE1));
     }
+
   irqrestore(flags);
 }
 #endif
@@ -837,6 +851,29 @@ static bool usart0_txready(struct uart_dev_s *dev)
 static bool usart1_txready(struct uart_dev_s *dev)
 {
   return (UCSR1A & (1 << UDRE1)) != 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: usart0/1_txempty
+ *
+ * Description:
+ *   Return true if the tranmsit data register and shift reqister are both
+ *   empty
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AVR_USART0
+static bool usart0_txempty(struct uart_dev_s *dev)
+{
+  return (UCSR0A & (1 << TXC0)) != 0;
+}
+#endif
+
+#ifdef CONFIG_AVR_USART1
+static bool usart1_txempty(struct uart_dev_s *dev)
+{
+  return (UCSR1A & (1 << TXC1)) != 0;
 }
 #endif
 
