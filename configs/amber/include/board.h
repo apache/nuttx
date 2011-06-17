@@ -49,9 +49,11 @@
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+/* Assume default CLKDIV8 fuse setting is overridden to CLKDIV1 */
 
-#define BOARD_CPU_CLOCK        14745600 /* F_CPU = 14.7456MHz */
-#define BOARD_TOSCK_CLOCK         32768 /* TOSC  = 32.768KHz */
+#define BOARD_XTAL_FREQ        14745600         /* 14.7456MHz crystal */
+#define BOARD_CPU_CLOCK        BOARD_XTAL_FREQ  /* F_CPU = 14.7456MHz */
+#define BOARD_TOSCK_CLOCK      32768            /* TOSC  = 32.768KHz */
 
 /* LED definitions **********************************************************/
 /* The Amber Web Server has a reset switch and four LEDs. The LEDs indicate

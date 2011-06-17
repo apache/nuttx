@@ -49,8 +49,10 @@
 /* Configuration ************************************************************/
 
 /* Clocking *****************************************************************/
+/* Assume default CLKDIV8 fuse setting is overridden to CLKDIV1 */
 
-#define BOARD_CPU_CLOCK        16000000 /* F_CPU = 16MHz */
+#define BOARD_XTAL_FREQ        16000000         /* 16MHz crystal */
+#define BOARD_CPU_CLOCK        BOARD_XTAL_FREQ  /* F_CPU = 16MHz */
 
 /* LED definitions **********************************************************/
 /* The Micropendous 3 has no on-board LEDs */
