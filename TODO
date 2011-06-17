@@ -29,7 +29,7 @@ nuttx/
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (4)  ARM/STM32 (arch/arm/src/stm32/)
-  (3)  AVR (arch/avr)
+  (2)  AVR (arch/avr)
   (0)  Intel x86 (arch/x86)
   (4)  8051 / MCS51 (arch/8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
@@ -881,19 +881,6 @@ o ARM/STM32 (arch/arm/src/stm32/)
 
 o AVR (arch/avr)
   ^^^^^^^^^^^^^^
-
-  Description:  The serial console for the Micropendous3 AT90USB is configured for
-                38400 BAUD.  However, I get serial output at more or less exactly 4800
-                BAUD (/8 less).  From what I can see the setup looks correct but I don't
-                have a compatible AVR emulator to check things out in detail.  I am
-                thinking that there is some fuse setting that divides the input clock
-                by 8??? but that is just a fantasy.
-                Update: No, something else is wrong; the Teensy AT90USB behaves in
-                exactly the same way.
-  Status:       Open
-  Priority:     Low.  Setting the terminal BAUD to 4800 solves the issues.  However,
-                I suspect that this means that there are other lurking timing issues
-                as well.
 
   Description:  There is a port for the Amber Web Server ATMega128, however this is
                 completely untested due to the lack to compatible, functional test

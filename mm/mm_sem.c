@@ -204,7 +204,7 @@ void mm_givesemaphore(void)
 
   /* I better be holding at least one reference to the semaphore */
 
-  ASSERT(g_holder == my_pid);
+  DEBUGASSERT(g_holder == my_pid);
 
   /* Do I hold multiple references to the semphore */
 

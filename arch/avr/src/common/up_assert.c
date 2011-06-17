@@ -69,6 +69,15 @@
 #  define CONFIG_PRINT_TASKNAME 1
 #endif
 
+/* If there is going to be stackdump output, then we should turn on output
+ * here unconditionally as well.
+ */
+
+#ifdef CONFIG_ARCH_STACKDUMP
+#  undef  lldbg
+#  define lldbg lib_lowprintf
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
