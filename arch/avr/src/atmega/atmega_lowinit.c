@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <avr/wdt.h>
+#include <avr/power.h>
 
 #include "atmega_config.h"
 #include "up_internal.h"
@@ -126,6 +127,10 @@ void up_lowinit(void)
   /* Initialize the watchdog timer */
 
   up_wdtinit();
+
+  /* Set the system clock divider to 1 */
+
+  clock_prescale_set(clock_div_1);
 
   /* Initialize a console (probably a serial console) */
 

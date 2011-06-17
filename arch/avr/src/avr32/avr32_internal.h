@@ -90,10 +90,55 @@ extern uint32_t g_heapbase;
 
 #ifndef __ASSEMBLY__
 
+/************************************************************************************
+ * Name:  up_copystate
+ *
+ * Description:
+ *   Copy the contents of a register state save structure from one location to
+ *   another.
+ *
+ ************************************************************************************/
+
 extern void up_copystate(uint32_t *dest, uint32_t *src);
+
+/************************************************************************************
+ * Name:  up_saveusercontext
+ *
+ * Description:
+ *   Save the register context of the currently executing (user) thread.
+ *
+ ************************************************************************************/
+
 extern int  up_saveusercontext(uint32_t *saveregs);
+
+/************************************************************************************
+ * Name:  up_fullcontextrestore
+ *
+ * Description:
+ *   Restore the full context of a saved thread/task.
+ *
+ ************************************************************************************/
+
 extern void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
+
+/************************************************************************************
+ * Name:  up_switchcontext
+ *
+ * Description:
+ *   Switch from one thread/task context to another.
+ *
+ ************************************************************************************/
+
 extern void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+
+/************************************************************************************
+ * Name:  up_doirq
+ *
+ * Description:
+ *   Dispatch an interrupt.
+ *
+ ************************************************************************************/
+
 extern uint32_t *up_doirq(int irq, uint32_t *regs);
 
 #endif /* __ASSEMBLY__ */

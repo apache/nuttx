@@ -54,6 +54,10 @@ ifeq ($(CONFIG_ARCH_STACKDUMP),y)
 CMN_CSRCS	+= up_dumpstate.c
 endif
 
+ifeq ($(CONFIG_AVR_SPI),y)
+CMN_CSRCS	+= up_spi.c
+endif
+
 # Required ATMEGA files
 
 CHIP_ASRCS	= atmega_exceptions.S

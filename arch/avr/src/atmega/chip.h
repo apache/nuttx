@@ -48,7 +48,7 @@
 
 /* Define features for supported chip in the ATMEGA family */
 
-#if 0
+#if 1
 #else
 #  error "Unsupported AVR chip"
 #endif
