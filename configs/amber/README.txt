@@ -502,8 +502,5 @@ NOTE: You must also copy avr-libc header files, perhaps like:
 
 Where <subdir> is one of the following:
 
-  ostest:
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.  NOTE:  The OS test is quite large.  In order
-    to get it to fit within AVR memory constraints, it will probably be
-    necessary to disable some OS features.
+  hello:
+    The simple apps/examples/hello "Hello, World!" example.

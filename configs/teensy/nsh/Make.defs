@@ -1,5 +1,5 @@
 ############################################################################
-# configs/amber/ostest/Make.defs
+# configs/teensy/nsh/Make.defs
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -42,7 +42,7 @@ ifeq ($(CONFIG_AVR_WINAVR),y)
   CROSSDEV = avr-
   WINTOOL = y
   MAXOPTIMIZATION = -O2
-  ARCHCPUFLAGS = -mmcu=atmega128
+  ARCHCPUFLAGS = -mmcu=at90usb1286
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
@@ -50,7 +50,7 @@ ifeq ($(CONFIG_AVR_LINUXGCC),y)
   # GCC toolchain under Linux
   CROSSDEV = avr-
   MAXOPTIMIZATION = -O2
-  ARCHCPUFLAGS = -mmcu=atmega128
+  ARCHCPUFLAGS = -mmcu=at90usb1286
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
@@ -58,7 +58,7 @@ ifeq ($(CONFIG_AVR_BUILDROOT),y)
   # NuttX buildroot GCC toolchain under Linux or Cygwin
   CROSSDEV = avr-elf-
   MAXOPTIMIZATION = -O2
-  ARCHCPUFLAGS = -mmcu=atmega128
+  ARCHCPUFLAGS = -mmcu=at90usb1286
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
@@ -69,13 +69,13 @@ ifeq ($(WINTOOL),y)
   MKDEP = $(TOPDIR)/tools/mknulldeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = $(ARCHINCLUDES) -w $(TOPDIR)/include/cxx}"
-  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nsh/ld.script}"
 else
   # Linux/Cygwin-native toolchain 
   MKDEP = $(TOPDIR)/tools/mkdeps.sh
   ARCHINCLUDES = -I. -isystem "$(TOPDIR)/include"
   ARCHXXINCLUDES =  $(ARCHINCLUDES) -isystem "$(TOPDIR)/include/cxx"
-  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/ostest/ld.script
+  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nsh/ld.script
 endif
 
 CC = $(CROSSDEV)gcc

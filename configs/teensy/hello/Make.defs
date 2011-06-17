@@ -42,7 +42,7 @@ ifeq ($(CONFIG_AVR_WINAVR),y)
   CROSSDEV = avr-
   WINTOOL = y
   MAXOPTIMIZATION = -O2
-  ARCHCPUFLAGS = -mmcu=at90usb647
+  ARCHCPUFLAGS = -mmcu=at90usb1286
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
@@ -50,7 +50,7 @@ ifeq ($(CONFIG_AVR_LINUXGCC),y)
   # GCC toolchain under Linux
   CROSSDEV = avr-
   MAXOPTIMIZATION = -O2
-  ARCHCPUFLAGS = -mmcu=at90usb647
+  ARCHCPUFLAGS = -mmcu=at90usb1286
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
@@ -58,7 +58,7 @@ ifeq ($(CONFIG_AVR_BUILDROOT),y)
   # NuttX buildroot GCC toolchain under Linux or Cygwin
   CROSSDEV = avr-elf-
   MAXOPTIMIZATION = -O2
-  ARCHCPUFLAGS = -mmcu=at90usb647
+  ARCHCPUFLAGS = -mmcu=at90usb1286
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 

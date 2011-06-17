@@ -528,21 +528,3 @@ Where <subdir> is one of the following:
       24816     978     308   26102    65f6 nuttx
 
     Strings are in SRAM.
-
-  ostest:
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest. NOTE:  The OS test is quite large.  In order
-    to get it to fit within AVR memory constraints, it will probably be
-    necessary to disable some OS features.
-
-    As currently configured, This example will not fit into FLASH
-    or smaller AT90USB devices (or into the RAM of *any* AT90USB
-    devices).
-
-    FLASH/SRAM Requirements (as of 6/12/2011):
-
-      $ avr-elf-size nuttx
-       text    data   bss       dec    hex  filename
-      67386   15583   10414   93383   16cc7 nuttx
-
-    Strings are in SRAM.

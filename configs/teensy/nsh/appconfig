@@ -1,5 +1,5 @@
-#!/bin/bash
-# configs/amber/ostest/setenv.sh
+############################################################################
+# configs/teensy/nsh/appconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -31,33 +31,24 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+############################################################################
 
-if [ "$_" = "$0" ] ; then
-  echo "You must source this script, not run it!" 1>&2
-  exit 1
-fi
+# Path to example in apps/examples containing the user_start entry point
 
-WD=`pwd`
-if [ ! -x "setenv.sh" ]; then
-  echo "This script must be executed from the top-level NuttX build directory"
-  exit 1
-fi
+CONFIGURED_APPS += examples/nsh
 
-if [ -z "${PATH_ORIG}" ]; then
-  export PATH_ORIG="${PATH}"
-fi
+# NSH library
 
-# This the Cygwin path to the location where I installed the WinAVR
-# toolchain under windows.  This is *not* the default install
-# location so you will probably have to edit this.  You will also have
-# to edit this if you install the Linux AVR toolchain as well
-#export TOOLCHAIN_BIN="/cygdrive/c/WinAVR/bin"
+CONFIGURED_APPS += nshlib
 
-# This the Cygwin path to the location where I build the buildroot
-# toolchain.
-export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_avr/staging_dir/bin"
+# Networking support
 
-# Add the path to the toolchain to the PATH varialble
-export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+ifeq ($(CONFIG_NET),y)
+CONFIGURED_APPS += netutils/uiplib
+CONFIGURED_APPS += netutils/dhcpc
+CONFIGURED_APPS += netutils/resolv
+CONFIGURED_APPS += netutils/tftpc
+CONFIGURED_APPS += netutils/webclient
+endif
 
-echo "PATH : ${PATH}"
+
