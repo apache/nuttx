@@ -142,7 +142,8 @@ Serial Console
   27 (RXD1/INT2) PD2           Pad D2
   28 (TXD1/INT3) PD3           Pad D3
 
-  Plus Vcc and ground.
+  Plus power and ground.  There are numerous ground points and both USB 5V
+  and Vcc are available.
 
 Toolchains
 ^^^^^^^^^^

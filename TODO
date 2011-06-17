@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 16, 2011)
+NuttX TODO List (Last updated June 17, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -888,6 +888,8 @@ o AVR (arch/avr)
                 have a compatible AVR emulator to check things out in detail.  I am
                 thinking that there is some fuse setting that divides the input clock
                 by 8??? but that is just a fantasy.
+                Update: No, something else is wrong; the Teensy AT90USB behaves in
+                exactly the same way.
   Status:       Open
   Priority:     Low.  Setting the terminal BAUD to 4800 solves the issues.  However,
                 I suspect that this means that there are other lurking timing issues
@@ -900,13 +902,16 @@ o AVR (arch/avr)
   Priority:     The priority might as well be low since there is nothing I can do about
                 it anyway.
 
-  Description:   There is a OS test configuratin for the Micropendous AT90USB at
-                configs/micropendous3.  However, as currently configured it will not
-                fit into the AT90USB memory.  Some tuning and scaling is required and
-                obviously this configuration is untested.
+  Description:  Many printf-intensive examples (such as the OS test) cannot be executed
+                on most AVR platforms.  The reason is because these tests/examples
+                generate a lot of string data.  The build system currently places all
+                string data in RAM and the string data can easily overflow the tiny
+                SRAMs on these parts.  A solution would be to put the string data
+                into the more abundant FLASH memory, but this would require modification
+                to the printf logic to access the strings from program memory.
   Status:       Open
-  Priority:     Low for me because the AT90USB647 is not a very interesting target to
-                me because of its limited memory capability./
+  Priority:     Low.  The AVR is probably not the architecuture that you want to use
+                for extensive string operations.
 
 o Intel x86 (arch/x86)
   ^^^^^^^^^^^^^^^^^^^^

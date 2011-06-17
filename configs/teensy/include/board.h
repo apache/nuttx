@@ -54,15 +54,15 @@
 
 /* LED definitions **********************************************************/
 /* The Teensy++ 2.0 has a single on-board LEDs connected to PortD, Pin 6 */
-
-#define LED_STARTED            0
-#define LED_HEAPALLOCATE       1
-#define LED_IRQSENABLED        2
-#define LED_STACKCREATED       3
-#define LED_INIRQ              4
-#define LED_SIGNAL             5
-#define LED_ASSERTION          6
-#define LED_PANIC              7
+                                     /* ON      OFF                 */
+#define LED_STARTED                0 /* OFF     ON  (never happens) */
+#define LED_HEAPALLOCATE           0 /* OFF     ON  (never happens) */
+#define LED_IRQSENABLED            0 /* OFF     ON  (never happens) */
+#define LED_STACKCREATED           1 /* ON      ON  (never happens) */
+#define LED_INIRQ                  2 /* OFF     NC  (momentary) */
+#define LED_SIGNAL                 2 /* OFF     NC  (momentary) */
+#define LED_ASSERTION              2 /* OFF     NC  (momentary) */
+#define LED_PANIC                  0 /* OFF     ON  (1Hz flashing) */
 
 /* Button definitions *******************************************************/
 /* SW1 = Connects to AT90USBxx RESET pin and is not available to software */
