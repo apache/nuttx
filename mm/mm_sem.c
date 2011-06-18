@@ -200,7 +200,9 @@ void mm_takesemaphore(void)
 
 void mm_givesemaphore(void)
 {
+#ifdef CONFIG_DEBUG
   pid_t my_pid = getpid();
+#endif
 
   /* I better be holding at least one reference to the semaphore */
 

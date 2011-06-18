@@ -147,18 +147,22 @@
 
 	.macro	EXCPT_PROLOGUE
 
-	/* Save R0 -- the scratch register */
+	/* Save R25  */
 
-    push    r0
+	push	r25
 
 	/* Save the status register on the stack */
 
-	in		r0, _SFR_IO_ADDR(SREG)	/* Save the status register */
-	cli								/* Disable interrupts */
+	in		r25, _SFR_IO_ADDR(SREG)	/* Save the status register */
+	cli								/* Disable interrupts (not necessary) */
+	ori		r25, (1 << SREG_I)		/* Interrupts re-enabled on restore */
+	push	r25
+
+	/* Save R0 -- the scratch register and the zero register (which may not be zero).  R1
+	 * must be zero for our purposes
+	 */
+
 	push	r0
-
-	/* Save R1 -- the zero register (which may not be zero).  R1 must be zero for our purposes */
-
 	push	r1
 	clr		r1
 
@@ -182,7 +186,7 @@
 	push	r17
 
 	/* Save r18-r27 - Call-used, "volatile" registers (r24 was saved by
-	 * HANDLER, r26-r27 saved later, out of sequence)
+	 * HANDLER, r15 was saved above, and r26-r27 saved later, out of sequence)
 	 */
 
 	push	r18
@@ -191,7 +195,6 @@
 	push	r21
 	push	r22
 	push	r23
-	push	r25
 
 	/* Save r28-r29 - Call-saved, "static" registers */
 
@@ -210,17 +213,17 @@
 
 	/* Finally, save the stack pointer.  BUT we want the value of the stack pointer as
 	 * it was just BEFORE the exception.  We'll have to add to get that value.
-     * The value to add is the size of the register save area including the bytes
-     * pushed by the interrupt handler (2), by the HANDLER macro (1), and the 32
-     * registers pushed above.  That is, the entire size of the register save structure
-     * MINUS two bytes for the stack pointer which has not yet been saved.
+	 * The value to add is the size of the register save area including the bytes
+	 * pushed by the interrupt handler (2), by the HANDLER macro (1), and the 32
+	 * registers pushed above.  That is, the entire size of the register save structure
+	 * MINUS two bytes for the stack pointer which has not yet been saved.
 	 */
 
 	in		r26, _SFR_IO_ADDR(SPL)
 	in		r27, _SFR_IO_ADDR(SPH)
 	adiw	r26, XCPTCONTEXT_REGS-2
 
-	push	r26				/* SPL then SPH */
+	push	r26					/* SPL then SPH */
 	push	r27
 	.endm
 
@@ -245,8 +248,8 @@
 
 	/* We don't need to restore the stack pointer */
 
-	pop		r27				/* Discard SPH */
-	pop		r26				/* Discard SPL */
+	pop		r27					/* Discard SPH */
+	pop		r26					/* Discard SPL */
 
 	/* Restore r26-r27 */
 
@@ -264,10 +267,9 @@
 	pop		r28
 
 	/* Restore r18-r27 - Call-used, "volatile" registers (r26-r27 already
-	 * restored, r24 will be restored later)
+	 * restored, r24 and r25 will be restored later)
 	 */
 
-	pop		r25
 	pop		r23
 	pop		r22
 	pop		r21
@@ -294,18 +296,20 @@
 	pop		r3
 	pop		r2
 
-	/* Restore r1 - the "zero" register  (that may not be zero) */
+	/* Restore r0 - the scratch register and  r1- the "zero" register (that may not be zero) */
 
 	pop		r1
+	pop		r0
 
 	/* Restore the status register (probably enabling interrupts) */
 
-	pop		r0				/* Restore the status register */
-	out		_SFR_IO_ADDR(SREG), r0
+	pop		r24					/* Restore the status register */
+	andi	r24, ~(1 << SREG_I)	/* but keeping interrupts disabled until the reti */
+	out		_SFR_IO_ADDR(SREG), r24
 
-	/* Finally, restore r0 and r24 - the scratch and IRQ number registers */
+	/* Finally, restore r24-r25 - the temporary and IRQ number registers */
 
-	pop		r0
+	pop		r25
 	pop		r24
 	.endm
 
@@ -351,9 +355,10 @@
 	st		x+, r28
 
 	/* Skip over r18-r27 - Call-used, "volatile" registers (r26-r27 have
-	 * already been skipped, r24 is saved elsewhere) */
+	 * already been skipped, r24 and r25 are saved elsewhere)
+	 */
 
-	adiw	r26, 7		/* Seven registers: r18-23, r25 */
+	adiw	r26, 6		/* Seven registers: r18-23 */
 
 	/* Save r2-r17 - Call-saved, "static" registers */
 
@@ -379,14 +384,18 @@
 	clr		r1
 	st		x+, r1
 
+	/* Skip over r0 -- the scratch register */
+
+	adiw	r26, 1
+
 	/* Save the status register (probably not necessary since interrupts are disabled) */
 
 	in		r0, _SFR_IO_ADDR(SREG)
 	st		x+, r0
 
-	/* Skip R0 and r24 - These are scratch register and Call-used, "volatile" registers */
+	/* Skip r24-r25 - These are scratch register and Call-used, "volatile" registers */
 
-	adiw	r26, 2		/* Two registers: r0, r24 */
+	adiw	r26, 2		/* Two registers: r24-r25 */
 
 	/* Save the return address that we have saved in r18:19*/
 
@@ -425,7 +434,7 @@
 	/* Fetch and set the new stack pointer */
 
 	ld		r25, x+				/* Fetch stack pointer (post-incrementing) */
-	out		_SFR_IO_ADDR(SPH), r25		/* (SPH then SPL) */       
+	out		_SFR_IO_ADDR(SPH), r25		/* (SPH then SPL) */
 	ld		r24, x+
 	out		_SFR_IO_ADDR(SPL), r24
  
@@ -468,10 +477,9 @@
 	ld		r28, x+
 
 	/* Restore r18-r27 - Call-used, "volatile" registers (r26-r27 have been
-	 * moved and r24 will be restore later)
+	 * moved and r24-r25 will be restore later)
 	 */
 
-	ld		r25, x+
 	ld		r23, x+
 	ld		r22, x+
 	ld		r21, x+
@@ -502,14 +510,18 @@
 
 	ld		r1, x+
 
-	/* Restore the status register (probably enabling interrupts) */
+	/* Restore r0 - the scratch register */
 
 	ld		r0, x+
-	out		_SFR_IO_ADDR(SREG), r0
 
-	/* Restore r0 and r24 - The scratch and IRQ number registers */
+	/* Restore the status register (probably re-enabling interrupts) */
 
-	ld		r0, x+
+	ld		r24, x+
+	out		_SFR_IO_ADDR(SREG), r24
+
+	/* Restore r24-r25 - The temporary and IRQ number registers */
+
+	ld		r25, x+
 	ld		r24, x+
 
 	/* Finally, recover X [r26-r27] from the the new stack.  The PC remains on the new
