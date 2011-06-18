@@ -415,7 +415,7 @@
 
 	.macro	TCB_RESTORE, regs
 
-	/* X [r36:27] points to the resister save block.  Get an offset pointer to the PC in
+	/* X [r36:27] points to the register save block.  Get an offset pointer to the PC in
 	 * Y [r28:29]
 	 */
 
