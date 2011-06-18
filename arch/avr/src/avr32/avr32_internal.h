@@ -102,16 +102,6 @@ extern uint32_t g_heapbase;
 extern void up_copystate(uint32_t *dest, uint32_t *src);
 
 /************************************************************************************
- * Name:  up_saveusercontext
- *
- * Description:
- *   Save the register context of the currently executing (user) thread.
- *
- ************************************************************************************/
-
-extern int  up_saveusercontext(uint32_t *saveregs);
-
-/************************************************************************************
  * Name:  up_fullcontextrestore
  *
  * Description:

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/avr/up_usestack.c
+ * arch/avr/src/avr/up_checkstack.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -41,14 +41,14 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <string.h>
 #include <sched.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/arch.h>
+#include <nuttx/arch.h> 
 
-#include "up_internal.h"
+#include "os_internal.h"
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
 
 /****************************************************************************
  * Private Types
@@ -63,63 +63,79 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_use_stack
+ * Name: up_check_stack
  *
  * Description:
- *   Setup up stack-related information in the TCB using pre-allocated stack
- *   memory
+ *   Determine (approximately) how much stack has been used be searching the
+ *   stack memory for a high water mark.  That is, the deepest level of the
+ *   stack that clobbered some recognizable marker in the stack memory.
  *
- *   The following TCB fields must be initialized:
- *   adj_stack_size: Stack size after adjustment for hardware, processor,
- *     etc.  This value is retained only for debug purposes.
- *   stack_alloc_ptr: Pointer to allocated stack
- *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
- *     the stack pointer.
+ * Input Parameters:
+ *   None
  *
- * Inputs:
- *   tcb: The TCB of new task
- *   stack_size:  The allocated stack size.
+ * Returned value:
+ *   The estimated amount of stack space used.
  *
  ****************************************************************************/
 
-int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
+size_t up_check_tcbstack(FAR _TCB *tcb)
 {
-  size_t top_of_stack;
+  FAR uint8_t *ptr;
+  size_t mark;
+  int i, j;
 
-  /* Is there already a stack allocated? */
-
-  if (tcb->stack_alloc_ptr)
-    {
-      /* Yes.. free it */
-
-      sched_free(tcb->stack_alloc_ptr);
-    }
-
-  /* Save the stack allocation */
-
-  tcb->stack_alloc_ptr = stack;
-
-  /* If stack debug is enabled, then fill the stack with a recognizable value
-   * that we can use later to test for high water marks.
+  /* The AVR uses a push-down stack:  the stack grows toward lower addresses
+   * in memory.  We need to start at the lowest address in the stack memory
+   * allocation and search to higher addresses.  The first byte we encounter
+   * that does not have the magic value is the high water mark.
    */
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
-   memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
+  for (ptr = (FAR uint8_t *)tcb->stack_alloc_ptr, mark = tcb->adj_stack_size;
+       *ptr == 0xaa && mark > 0;
+       ptr++, mark--);
+
+  /* If the stack is completely used, then this might mean that the stack
+   * overflowed from above (meaning that the stack is too small), or may
+   * have been overwritten from below meaning that some other stack or data
+   * structure overflowed.
+   *
+   * If you see returned values saying that the entire stack is being used
+   * then enable the following logic to see it there are unused areas in the
+   * middle of the stack.
+   */
+
+#if 0
+  if (mark + 16 > tcb->adj_stack_size)
+    {
+      ptr = (FAR uint8_t *)tcb->stack_alloc_ptr;
+      for (i = 0; i < tcb->adj_stack_size; i += 64)
+        {
+          for (j = 0; j < 64; j++)
+            {
+              int ch;
+              if (*ptr++ == 0xaa)
+                {
+                  ch = '.';
+                }
+              else
+                {
+                  ch = 'X';
+                }
+              up_putc(ch);
+             }
+          up_putc('\n');
+        }
+     }
 #endif
 
-  /* The AVR uses a push-down stack:  the stack grows toward loweraddresses in
-   * memory.  The stack pointer register, points to the lowest, valid work
-   * address (the "top" of the stack).  Items on the stack are referenced as
-   * positive word offsets from sp.
-   */
+  /* Return our guess about how much stack space was used */
 
-  top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 1;
-
-  /* Save the adjusted stack values in the _TCB */
-
-  tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
-  tcb->adj_stack_size = stack_size;
-
-  return OK;
+  return mark;
 }
 
+size_t up_check_stack(void)
+{
+  return up_check_tcbstack((FAR _TCB*)g_readytorun.head);
+}
+
+#endif /* CONFIG_DEBUG && CONFIG_DEBUG_STACK */

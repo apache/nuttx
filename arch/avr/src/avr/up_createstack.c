@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sched.h>
 #include <debug.h>
 
@@ -88,43 +89,58 @@
 
 int up_create_stack(_TCB *tcb, size_t stack_size)
 {
-  if (tcb->stack_alloc_ptr &&
-      tcb->adj_stack_size != stack_size)
+  /* Is there already a stack allocated of a different size? */
+
+  if (tcb->stack_alloc_ptr && tcb->adj_stack_size != stack_size)
     {
+      /* Yes.. free it */
+
       sched_free(tcb->stack_alloc_ptr);
       tcb->stack_alloc_ptr = NULL;
     }
 
+   /* Do we need to allocate a stack? */
+ 
    if (!tcb->stack_alloc_ptr)
      {
-#ifdef CONFIG_DEBUG
+       /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
+        * then create a zeroed stack to make stack dumps easier to trace.
+        */
+
+#if defined(CONFIG_DEBUG) && !defined(CONFIG_DEBUG_STACK)
        tcb->stack_alloc_ptr = (FAR void *)zalloc(stack_size);
 #else
        tcb->stack_alloc_ptr = (FAR void *)malloc(stack_size);
 #endif
      }
 
+   /* Did we successfully allocate a stack? */
+
    if (tcb->stack_alloc_ptr)
      {
        size_t top_of_stack;
-       size_t size_of_stack;
+
+       /* Yes.. If stack debug is enabled, then fill the stack with a
+        * recognizable value that we can use later to test for high
+        * water marks.
+        */
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+       memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
+#endif
 
        /* The AVR uses a push-down stack:  the stack grows toward lower
-	    * addresses in memory.  The stack pointer register, points to the
-		* lowest, valid work address (the "top" of the stack).  Items on the
-		* stack are referenced as positive word offsets from sp.
+        * addresses in memory.  The stack pointer register, points to the
+        * lowest, valid work address (the "top" of the stack).  Items on the
+        * stack are referenced as positive word offsets from sp.
         */
 
        top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 1;
 
-       /* The AVR stack does not have to be aligned */
-
-       size_of_stack = top_of_stack - (size_t)tcb->stack_alloc_ptr + 1;
-
        /* Save the adjusted stack values in the _TCB */
 
        tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
-       tcb->adj_stack_size = size_of_stack;
+       tcb->adj_stack_size = stack_size;
 
        up_ledon(LED_STACKCREATED);
        return OK;

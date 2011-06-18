@@ -242,6 +242,7 @@ int main(int argc, char **argv, char **envp)
   printf("# undef CONFIG_DEBUG_USB\n");
   printf("# undef CONFIG_DEBUG_GRAPHICS\n");
   printf("# undef CONFIG_DEBUG_GPIO\n");
+  printf("# undef CONFIG_DEBUG_STACK\n");
   printf("#endif\n\n");
   printf("#endif /* __INCLUDE_NUTTX_CONFIG_H */\n");
   fclose(stream);

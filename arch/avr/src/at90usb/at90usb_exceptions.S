@@ -148,7 +148,7 @@ excpt_common:
 	 breq	.Lnoswitch
 
 	/* A context switch has occurred, jump to up_fullcontextrestore with r24, r25
-	 * equal to the address of the new register save ared.
+	 * equal to the address of the new register save area.
 	 */
 
 	jmp	up_fullcontextrestore

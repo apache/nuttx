@@ -209,12 +209,16 @@
 	push	r27
 
 	/* Finally, save the stack pointer.  BUT we want the value of the stack pointer as
-	 * it was on entry into this macro.  We'll have to subtract to get that value.
+	 * it was just BEFORE the exception.  We'll have to add to get that value.
+     * The value to add is the size of the register save area including the bytes
+     * pushed by the interrupt handler (2), by the HANDLER macro (1), and the 32
+     * registers pushed above.  That is, the entire size of the register save structure
+     * MINUS two bytes for the stack pointer which has not yet been saved.
 	 */
 
 	in		r26, _SFR_IO_ADDR(SPL)
 	in		r27, _SFR_IO_ADDR(SPH)
-	adiw	r26, XCPTCONTEXT_REGS
+	adiw	r26, XCPTCONTEXT_REGS-2
 
 	push	r26				/* SPL then SPH */
 	push	r27
