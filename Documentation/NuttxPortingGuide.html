@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 28, 2011</p>
+      <p>Last Updated: June 18, 2011</p>
     </td>
   </tr>
 </table>
@@ -3208,17 +3208,37 @@ build
   </li>
 </ul>
 
-<h2>General OS setup</h2>
+<h2>Debug Options</h2>
+<p>
+ General Debug setup options are provided to (1) enable and control debug console output, (2) to build NuttX for use with a debugger, and (3) to enable specific debug features:
+ </p>
 <ul>
   <li>
-    <code>CONFIG_DEBUG</code>: enables built-in debug options
+    <code>CONFIG_DEBUG</code>: enables built-in debug options.
+    This includes more extensive parameter checking, debug assertions, and other debug logic.
+    This option is also necessary (but not sufficient) to enable debug console output;
+    Debug console output must also be enabled on a subsystem-by-subsystem basis as described below.
   </li>
   <li>
-    <code>CONFIG_DEBUG_VERBOSE</code>: enables verbose debug output
+    <code>CONFIG_DEBUG_VERBOSE</code>: If debug console output is enabled, the option enables more verbose debug output.
+    Ignored if <code>CONFIG_DEBUG</code> is not defined.
+    If only <code>CONFIG_DEBUG</code> then the only output will be errors, warnings, and critical information.
+    If <code>CONFIG_DEBUG_VERBOSE</code> is defined in addition, then general debug comments will also be included in the console output.
   </li>
   <li>
     <code>CONFIG_DEBUG_SYMBOLS</code>: build without optimization and with debug symbols (needed for use with a debugger).
+    This option has nothing to do with debug output.
   </li>
+  <li>
+    <code>CONFIG_DEBUG_STACK</code>: a few ports include logic to monitor stack usage.
+    If the NuttX port supports this option, it would be enabled with this option.
+    This option also requires <code>CONFIG_DEBUG</code> to enable general debug features.
+  </li>
+</ul>
+<p>
+  If debug features are enabled with <code>CONFIG_DEBUG</code> (and possibly <code>CONFIG_DEBUG_VERBOSE</code>), then debug console output can also be enabled on a subsystem-by-subsystem basis.
+  Below are debug subsystems that are generally available on all platforms:
+<ul>
   <li>
     <code>CONFIG_DEBUG_SCHED</code>: enable OS debug output (disabled by default)
   </li>
@@ -3243,6 +3263,24 @@ build
   <li>
     <code>CONFIG_DEBUG_GRAPHICS</code>: enable NX graphics debug output (disabled by default)
   </li>
+</ul>
+<p>
+  The following debug options may also be used with certain ports that support these features:
+</p>
+<ul>
+  <li>
+    <code>CONFIG_DEBUG_DMA</code>: enable DMA controller debug output (disabled by default)
+  </li>
+  <li>
+    <code>CONFIG_DEBUG_GPIO</code>: enable detail GPIO usage debug output (disabled by default)
+  </li>
+  <li>
+    <code>CONFIG_DEBUG_PAGING</code>: enable on-demand paging debug output (disabled by default)
+  </li>
+</ul>
+
+<h2>General OS setup</h2>
+<ul>
   <li>
     <code>CONFIG_ARCH_LOWPUTC</code>: architecture supports low-level, boot
     time console output
