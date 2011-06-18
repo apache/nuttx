@@ -142,8 +142,8 @@ void uart_recvchars(FAR uart_dev_t *dev)
       nexthead = 0;
     }
 
-  /* Loop putting characters into the receive buffer until eithe: (1) the buffer
-   * is full, or (2) there are not further characters to add.
+  /* Loop putting characters into the receive buffer until either: (1) the buffer
+   * is full, or (2) there are no further characters to add.
    */
 
   while (nexthead != dev->recv.tail && uart_rxavailable(dev))

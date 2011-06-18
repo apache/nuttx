@@ -122,7 +122,7 @@ up_switchcontext:
 	.global	up_fullcontextrestore
 	.func	up_fullcontextrestore
 up_fullcontextrestore:
-	/* Use X ]r26:r27] to reference the restore structure.  */
+	/* Use X [r26:r27] to reference the restore structure.  */
 
 	movw	r26, r24
 
