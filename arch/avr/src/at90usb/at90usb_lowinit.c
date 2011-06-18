@@ -101,9 +101,7 @@
 
 static inline void up_wdtinit(void)
 {
-#ifndef CONFIG_AVR_WDT
-  wdt_disable();
-#else
+#ifdef CONFIG_AVR_WDT
   wdt_enable(WDTO_VALUE);
 #endif
 }
@@ -124,13 +122,17 @@ static inline void up_wdtinit(void)
 
 void up_lowinit(void)
 {
-  /* Initialize the watchdog timer */
+  /* Disable the watchdog timer */
 
-  up_wdtinit();
+  wdt_disable();
 
   /* Set the system clock divider to 1 */
 
   clock_prescale_set(clock_div_1);
+
+  /* Initialize the watchdog timer */
+
+  up_wdtinit();
 
   /* Initialize a console (probably a serial console) */
 

@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+#  include <sys/types.h>
 #  include <stdint.h>
 #  include <stdbool.h>
 #endif
@@ -101,16 +102,6 @@ extern uint16_t g_heapbase;
  ************************************************************************************/
 
 extern void up_copystate(uint8_t *dest, uint8_t *src);
-
-/************************************************************************************
- * Name:  up_saveusercontext
- *
- * Description:
- *   Save the register context of the currently executing (user) thread.
- *
- ************************************************************************************/
-
-extern int  up_saveusercontext(uint8_t *saveregs);
 
 /************************************************************************************
  * Name:  up_fullcontextrestore
@@ -179,6 +170,26 @@ extern uint8_t avr_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
 extern int avr_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
+#endif
+
+/****************************************************************************
+ * Name: up_check_stack
+ *
+ * Description:
+ *   Determine (approximately) how much stack has been used be searching the
+ *   stack memory for a high water mark.  That is, the deepest level of the
+ *   stack that clobbered some recognizable marker in the stack memory.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned value:
+ *   The estimated amount of stack space used.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+extern size_t up_check_stack(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
