@@ -180,18 +180,21 @@ SD-ADP Pinout / SD Connection
 
 Teensy SPI Connection
 
+  -- ---- -- ------------------------- -------
   J2 NAME PIN NAME                     PAD
-   1 VIN
-   2 GND
-   3 3V3
-   4 NC
+  -- ---- -- ------------------------- -------
+   1 VIN  -- Connected to USB +RV
+   2 GND  -- Connected to USB GND
+   3 3V3  -- Not used                  ---
+   4 NC   -- Not used
    5 CS   10 (SS/PCINT0) PB0           Pad B0
    6 DI   12 (PDI/PCINT2/MOSI) PB2     Pad B2
    7 SCK  11 (PCINT1/SCLK) PB1         Pad B1
    8 DO   13 (PDO/PCINT3/MISO) PB3     Pad B3
-   9 IRQ
-  10 CD
-  11 WP
+   9 IRQ  -- Not used                  ---
+  10 CD   14 (PCINT4/OC.2A) PB4        Pad B4
+  11 WP   15 (PCINT5/OC.1A) PB5        Pad B5
+  -- ---- -- ------------------------- -------
 
 Toolchains
 ^^^^^^^^^^
@@ -494,6 +497,12 @@ Teensy++ Configuration Options
     CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
     CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
     CONFIG_USARTn_2STOP - Two stop bits
+
+  AT90USB specific USB device configuration
+
+    CONFIG_USB_DISABLE_PADREGULATOR
+    CONFIG_USB_LOWSPEED
+    CONFIG_USB_NOISYVBUS
 
 Configurations
 ^^^^^^^^^^^^^^
