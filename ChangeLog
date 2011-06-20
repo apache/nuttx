@@ -1824,4 +1824,7 @@
 	  check-in.
 	* configs/teensy: Adds a board configuration for the PJRC Teensy++ 2.0 boar
 	  that features an Atmel AT90USB1286 MCU.
-
+	* fs/fat: Offsets, sector numbers, etc. need to be off_t, not size_t.  size_t
+	  is intended to be the maximum size of a memory object, not a file offset. This
+	  does not make any difference except on systems (like the AVR) where size_t
+	  is only 16-bits.

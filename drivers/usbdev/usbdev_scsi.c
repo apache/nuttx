@@ -463,7 +463,7 @@ static inline int usbstrg_cmdread6(FAR struct usbstrg_dev_s *priv)
     {
       /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
 
-      priv->sector = (read6->mslba & SCSICMD_READ6_MSLBAMASK) << 16 | usbstrg_getbe16(read6->lslba);
+      priv->sector = (uint32_t)(read6->mslba & SCSICMD_READ6_MSLBAMASK) << 16 | (uint32_t)usbstrg_getbe16(read6->lslba);
 
       /* Verify that a block driver has been bound to the LUN */
 
@@ -519,7 +519,7 @@ static inline int usbstrg_cmdwrite6(FAR struct usbstrg_dev_s *priv)
     {
       /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
 
-      priv->sector = (write6->mslba & SCSICMD_WRITE6_MSLBAMASK) << 16 | usbstrg_getbe16(write6->lslba);
+      priv->sector = (uint32_t)(write6->mslba & SCSICMD_WRITE6_MSLBAMASK) << 16 | (uint32_t)usbstrg_getbe16(write6->lslba);
 
       /* Verify that a block driver has been bound to the LUN */
 

@@ -121,7 +121,7 @@ typedef double float64;
 
 typedef unsigned int mode_t;
 
-/* size_t is used for sizes of objects.
+/* size_t is used for sizes of memory objects.
  * ssize_t is used for a count of bytes or an error indication.
  */
 
@@ -161,14 +161,22 @@ typedef unsigned int id_t;
 /* blkcnt_t and off_t are signed integer types.
  *
  *   blkcnt_t is used for file block counts.
- *   off_t is used for file sizes.
+ *   off_t is used for file offsets and sizes.
+ *   fpos_t is used for file positions.
  *
- * Hence, both should be independent of processor architecture.
+ * Hence, all should be independent of processor architecture.
  */
 
 typedef uint32_t     blkcnt_t;
 typedef int32_t      off_t;
 typedef off_t        fpos_t;
+
+/* Large file versions */
+
+#ifdef CONFIG_HAVE_LONG_LONG
+typedef int64_t      off64_t;
+typedef int64_t      fpos64_t;
+#endif
 
 /* blksize_t is a signed integer value used for file block sizes */
 

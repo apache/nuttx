@@ -342,7 +342,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
 
   if ((oflags & (O_APPEND|O_WRONLY)) == (O_APPEND|O_WRONLY))
     {
-      ssize_t offset = (ssize_t)fat_seek(filep, ff->ff_size, SEEK_SET);
+      off_t offset = fat_seek(filep, ff->ff_size, SEEK_SET);
       if (offset < 0)
         {
           kfree(ff);
@@ -658,7 +658,7 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
       goto errout_with_semaphore;
     }
 
-  /* Check if the file size would exceed the range of size_t */
+  /* Check if the file size would exceed the range of off_t */
 
   if (ff->ff_size + buflen < ff->ff_size)
     {
@@ -860,7 +860,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
   int32_t               cluster;
-  ssize_t               position;
+  off_t                 position;
   unsigned int          clustersize;
   int                   ret;
 
@@ -1701,8 +1701,8 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
   struct fat_dirinfo_s  dirinfo;
   uint8_t     *direntry;
   uint8_t     *direntry2;
-  size_t       parentsector;
-  ssize_t      dirsector;
+  off_t        parentsector;
+  off_t        dirsector;
   int32_t      dircluster;
   uint32_t     parentcluster;
   uint32_t     crtime;
@@ -1955,7 +1955,7 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
 {
   struct fat_mountpt_s *fs;
   struct fat_dirinfo_s  dirinfo;
-  size_t                oldsector;
+  off_t                 oldsector;
   uint8_t              *olddirentry;
   uint8_t              *newdirentry;
   uint8_t               dirstate[32-11];

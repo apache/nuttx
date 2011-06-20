@@ -469,7 +469,7 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
 {
   struct romfs_mountpt_s *rm;
   struct romfs_file_s    *rf;
-  ssize_t                 position;
+  off_t                   position;
   int                     ret;
 
   fvdbg("Seek to offset: %d whence: %d\n", offset, whence);

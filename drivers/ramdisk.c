@@ -251,7 +251,7 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
 static int rd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 {
   struct rd_struct_s *dev ;
-  void **ppv = (void**)arg;
+  void **ppv = (void**)((uintptr_t)arg);
 
   fvdbg("Entry\n");
 

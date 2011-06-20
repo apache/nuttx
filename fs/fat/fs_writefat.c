@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_writefat.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -388,7 +388,7 @@ static inline int mkfatfs_writembr(FAR struct fat_format_s *fmt,
 static inline int mkfatfs_writefat(FAR struct fat_format_s *fmt,
                                    FAR struct fat_var_s *var)
 {
-  size_t offset = fmt->ff_rsvdseccount;
+  off_t offset = fmt->ff_rsvdseccount;
   int fatno;
   int sectno;
   int ret;
@@ -471,7 +471,7 @@ static inline int mkfatfs_writefat(FAR struct fat_format_s *fmt,
 static inline int mkfatfs_writerootdir(FAR struct fat_format_s *fmt,
                                        FAR struct fat_var_s *var)
 {
-  size_t offset = fmt->ff_rsvdseccount + fmt->ff_nfats * var->fv_nfatsects;
+  off_t offset = fmt->ff_rsvdseccount + fmt->ff_nfats * var->fv_nfatsects;
   int ret;
   int i;
 

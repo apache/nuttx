@@ -108,13 +108,13 @@
 struct statfs
 {
   uint32_t f_type;     /* Type of filesystem (see definitions above) */
+  size_t   f_namelen;  /* Maximum length of filenames */
   size_t   f_bsize;    /* Optimal block size for transfers */
-  size_t   f_blocks;   /* Total data blocks in the file system of this size */
-  size_t   f_bfree;    /* Free blocks in the file system */
-  size_t   f_bavail;   /* Free blocks avail to non-superuser */
-  size_t   f_files;    /* Total file nodes in the file system */
-  size_t   f_ffree;    /* Free file nodes in the file system */
-  uint32_t f_namelen;  /* Maximum length of filenames */
+  off_t    f_blocks;   /* Total data blocks in the file system of this size */
+  off_t    f_bfree;    /* Free blocks in the file system */
+  off_t    f_bavail;   /* Free blocks avail to non-superuser */
+  off_t    f_files;    /* Total file nodes in the file system */
+  off_t    f_ffree;    /* Free file nodes in the file system */
 };
 
 /****************************************************************************

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -516,13 +516,13 @@ struct fat_mountpt_s
   struct fat_file_s *fs_head;      /* A list to all files opened on this mountpoint */
 
   sem_t    fs_sem;                 /* Used to assume thread-safe access */
-  size_t   fs_hwsectorsize;        /* HW: Sector size reported by block driver*/
-  size_t   fs_hwnsectors;          /* HW: The number of sectors reported by the hardware */
-  size_t   fs_fatbase;             /* Logical block of start of filesystem (past resd sectors) */
-  size_t   fs_rootbase;            /* MBR: Cluster no. of 1st cluster of root dir */
-  size_t   fs_database;            /* Logical block of start data sectors */
-  size_t   fs_fsinfo;              /* MBR: Sector number of FSINFO sector */
-  size_t   fs_currentsector;       /* The sector number buffered in fs_buffer */
+  off_t    fs_hwsectorsize;        /* HW: Sector size reported by block driver*/
+  off_t    fs_hwnsectors;          /* HW: The number of sectors reported by the hardware */
+  off_t    fs_fatbase;             /* Logical block of start of filesystem (past resd sectors) */
+  off_t    fs_rootbase;            /* MBR: Cluster no. of 1st cluster of root dir */
+  off_t    fs_database;            /* Logical block of start data sectors */
+  off_t    fs_fsinfo;              /* MBR: Sector number of FSINFO sector */
+  off_t    fs_currentsector;       /* The sector number buffered in fs_buffer */
   uint32_t fs_nclusters;           /* Maximum number of data clusters */
   uint32_t fs_nfatsects;           /* MBR: Count of sectors occupied by one fat */
   uint32_t fs_fattotsec;           /* MBR: Total count of sectors on the volume */
@@ -554,11 +554,11 @@ struct fat_file_s
   uint8_t  ff_sectorsincluster;    /* Sectors remaining in cluster */
   uint16_t ff_dirindex;            /* Index into ff_dirsector to directory entry */
   uint32_t ff_currentcluster;      /* Current cluster being accessed */
-  size_t   ff_dirsector;           /* Sector containing the directory entry */
+  off_t    ff_dirsector;           /* Sector containing the directory entry */
   off_t    ff_size;                /* Size of the file in bytes */
-  size_t   ff_startcluster;        /* Start cluster of file on media */
-  size_t   ff_currentsector;       /* Current sector being operated on */
-  size_t   ff_cachesector;         /* Current sector in the file buffer */
+  off_t    ff_startcluster;        /* Start cluster of file on media */
+  off_t    ff_currentsector;       /* Current sector being operated on */
+  off_t    ff_cachesector;         /* Current sector in the file buffer */
   uint8_t *ff_buffer;              /* File buffer (for partial sector accesses) */
 };
 
@@ -615,16 +615,16 @@ EXTERN int    fat_checkmount(struct fat_mountpt_s *fs);
 /* low-level hardware access */
 
 EXTERN int    fat_hwread(struct fat_mountpt_s *fs, uint8_t *buffer,
-                         size_t sector, unsigned int nsectors);
+                         off_t sector, unsigned int nsectors);
 EXTERN int    fat_hwwrite(struct fat_mountpt_s *fs, uint8_t *buffer,
-                          size_t sector, unsigned int nsectors);
+                          off_t sector, unsigned int nsectors);
 
 /* Cluster / cluster chain access helpers */
 
-EXTERN ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32_t cluster);
-EXTERN ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno);
+EXTERN off_t  fat_cluster2sector(struct fat_mountpt_s *fs,  uint32_t cluster);
+EXTERN off_t  fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno);
 EXTERN int    fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
-                             size_t startsector);
+                             off_t startsector);
 EXTERN int    fat_removechain(struct fat_mountpt_s *fs, uint32_t cluster);
 EXTERN int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster);
 
@@ -648,15 +648,15 @@ EXTERN int    fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool dir
 /* Mountpoint and file buffer cache (for partial sector accesses) */
 
 EXTERN int    fat_fscacheflush(struct fat_mountpt_s *fs);
-EXTERN int    fat_fscacheread(struct fat_mountpt_s *fs, size_t sector);
+EXTERN int    fat_fscacheread(struct fat_mountpt_s *fs, off_t sector);
 EXTERN int    fat_ffcacheflush(struct fat_mountpt_s *fs, struct fat_file_s *ff);
-EXTERN int    fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, size_t sector);
+EXTERN int    fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, off_t sector);
 EXTERN int    fat_ffcacheinvalidate(struct fat_mountpt_s *fs, struct fat_file_s *ff);
 
 /* FSINFO sector support */
 
 EXTERN int    fat_updatefsinfo(struct fat_mountpt_s *fs);
-EXTERN int    fat_nfreeclusters(struct fat_mountpt_s *fs, size_t *pfreeclusters);
+EXTERN int    fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters);
 EXTERN int    fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff, off_t position);
 
 #undef EXTERN

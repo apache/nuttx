@@ -232,7 +232,7 @@ static int bch_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
 
   if (cmd == DIOC_GETPRIV)
     {
-      FAR struct bchlib_s **bchr = (FAR struct bchlib_s **)arg;
+      FAR struct bchlib_s **bchr = (FAR struct bchlib_s **)((uintptr_t)arg);
 
       bchlib_semtake(bch);
       if (!bchr && bch->refs < 255)

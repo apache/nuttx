@@ -792,7 +792,7 @@ int fat_checkmount(struct fat_mountpt_s *fs)
  *
  ****************************************************************************/
 
-int fat_hwread(struct fat_mountpt_s *fs, uint8_t *buffer,  size_t sector,
+int fat_hwread(struct fat_mountpt_s *fs, uint8_t *buffer,  off_t sector,
                unsigned int nsectors)
 {
   int ret = -ENODEV;
@@ -823,7 +823,7 @@ int fat_hwread(struct fat_mountpt_s *fs, uint8_t *buffer,  size_t sector,
  *
  ****************************************************************************/
 
-int fat_hwwrite(struct fat_mountpt_s *fs, uint8_t *buffer, size_t sector,
+int fat_hwwrite(struct fat_mountpt_s *fs, uint8_t *buffer, off_t sector,
                 unsigned int nsectors)
 {
   int ret = -ENODEV;
@@ -855,7 +855,7 @@ int fat_hwwrite(struct fat_mountpt_s *fs, uint8_t *buffer, size_t sector,
  *
  ****************************************************************************/
 
-ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32_t cluster )
+off_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32_t cluster )
 {
   cluster -= 2;
   if (cluster >= fs->fs_nclusters - 2)
@@ -874,7 +874,7 @@ ssize_t fat_cluster2sector(struct fat_mountpt_s *fs,  uint32_t cluster )
  *
  ****************************************************************************/
 
-ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
+off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
 {
   /* Verify that the cluster number is within range */
 
@@ -888,7 +888,7 @@ ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
         {
           case FSTYPE_FAT12 :
             {
-              size_t       fatsector;
+              off_t        fatsector;
               unsigned int fatoffset;
               unsigned int cluster;
               unsigned int fatindex;
@@ -959,7 +959,7 @@ ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
           case FSTYPE_FAT16 :
             {
               unsigned int fatoffset = 2 * clusterno;
-              size_t       fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
+              off_t        fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
               unsigned int fatindex  = fatoffset & SEC_NDXMASK(fs);
 
               if (fat_fscacheread(fs, fatsector) < 0)
@@ -973,7 +973,7 @@ ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
           case FSTYPE_FAT32 :
             {
               unsigned int fatoffset = 4 * clusterno;
-              size_t       fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
+              off_t        fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
               unsigned int fatindex  = fatoffset & SEC_NDXMASK(fs);
 
               if (fat_fscacheread(fs, fatsector) < 0)
@@ -990,7 +990,7 @@ ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
 
   /* There is no cluster information, or an error occured */
 
-  return (ssize_t)-EINVAL;
+  return (off_t)-EINVAL;
 }
 
 /****************************************************************************
@@ -1000,7 +1000,7 @@ ssize_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
  *
  ****************************************************************************/
 
-int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, size_t nextcluster)
+int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextcluster)
 {
   /* Verify that the cluster number is within range.  Zero erases the cluster. */
 
@@ -1014,7 +1014,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, size_t nextclus
         {
           case FSTYPE_FAT12 :
             {
-              size_t       fatsector;
+              off_t        fatsector;
               unsigned int fatoffset;
               unsigned int fatindex;
               uint8_t      value;
@@ -1101,7 +1101,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, size_t nextclus
           case FSTYPE_FAT16 :
             {
               unsigned int fatoffset = 2 * clusterno;
-              size_t       fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
+              off_t        fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
               unsigned int fatindex  = fatoffset & SEC_NDXMASK(fs);
 
               if (fat_fscacheread(fs, fatsector) < 0)
@@ -1116,7 +1116,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, size_t nextclus
           case FSTYPE_FAT32 :
             {
               unsigned int fatoffset = 4 * clusterno;
-              size_t       fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
+              off_t        fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
               unsigned int fatindex  = fatoffset & SEC_NDXMASK(fs);
 
               if (fat_fscacheread(fs, fatsector) < 0)
@@ -1202,7 +1202,7 @@ int fat_removechain(struct fat_mountpt_s *fs, uint32_t cluster)
 
 int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster)
 {
-  ssize_t  startsector;
+  off_t    startsector;
   uint32_t newcluster;
   uint32_t startcluster;
   int      ret;
@@ -1448,7 +1448,7 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
 int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
                      const char *path)
 {
-  size_t cluster;
+  off_t  cluster;
   uint8_t *direntry = NULL;
   char terminator;
   int ret;
@@ -1605,7 +1605,7 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 {
   int32_t cluster;
-  size_t  sector;
+  off_t   sector;
   uint8_t *direntry;
   uint8_t ch;
   int     ret;
@@ -1839,7 +1839,7 @@ int  fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 {
   unsigned int startcluster;
   uint32_t     writetime;
-  size_t       savesector;
+  off_t        savesector;
   int          ret;
 
   /* Get start cluster of the file to truncate */
@@ -1948,7 +1948,7 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory)
 {
   struct fat_dirinfo_s dirinfo;
   uint32_t  dircluster;
-  size_t  dirsector;
+  off_t   dirsector;
   int     ret;
 
   /* Find the directory entry referring to the entry to be deleted */
@@ -2172,7 +2172,7 @@ int fat_fscacheflush(struct fat_mountpt_s *fs)
  *
  ****************************************************************************/
 
-int fat_fscacheread(struct fat_mountpt_s *fs, size_t sector)
+int fat_fscacheread(struct fat_mountpt_s *fs, off_t sector)
 {
   int ret;
 
@@ -2251,7 +2251,7 @@ int fat_ffcacheflush(struct fat_mountpt_s *fs, struct fat_file_s *ff)
  *
  ****************************************************************************/
 
-int fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, size_t sector)
+int fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, off_t sector)
 {
   int ret;
 
@@ -2374,7 +2374,7 @@ int fat_updatefsinfo(struct fat_mountpt_s *fs)
  *
  ****************************************************************************/
 
-int fat_nfreeclusters(struct fat_mountpt_s *fs, size_t *pfreeclusters)
+int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
 {
   uint32_t nfreeclusters;
 
@@ -2391,7 +2391,7 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, size_t *pfreeclusters)
   nfreeclusters = 0;
   if (fs->fs_type == FSTYPE_FAT12)
     {
-      size_t sector;
+      off_t sector;
 
       /* Examine every cluster in the fat */
 
@@ -2409,7 +2409,7 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, size_t *pfreeclusters)
   else
     {
       unsigned int cluster;
-      size_t       fatsector;
+      off_t        fatsector;
       unsigned int offset;
       int          ret;
 

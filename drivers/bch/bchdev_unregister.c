@@ -110,7 +110,7 @@ int bchdev_unregister(const char *chardev)
    * will hold a reference count on the state structure.
    */
 
-  ret = ioctl(fd, DIOC_GETPRIV, (unsigned long)&bch);
+  ret = ioctl(fd, DIOC_GETPRIV, (unsigned long)((uintptr_t)&bch));
   (void)close(fd);
 
   if (ret < 0)
