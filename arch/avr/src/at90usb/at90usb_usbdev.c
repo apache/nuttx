@@ -2303,7 +2303,7 @@ static void avr_epfreereq(FAR struct usbdev_ep_s *ep,
 static void *avr_epallocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
 {
   usbtrace(TRACE_EPALLOCBUFFER, privep->ep.eplog);
-return malloc(bytes)}
+  return malloc(bytes)}
 #endif
 
 /*******************************************************************************
@@ -2314,7 +2314,7 @@ return malloc(bytes)}
  *
  *******************************************************************************/
 
-#ifdef CONFIG_AVR_USBDEV_DMA
+#ifdef CONFIG_ARCH_USBDEV_DMA
 static void avr_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 {
   usbtrace(TRACE_EPFREEBUFFER, privep->ep.eplog);
