@@ -126,7 +126,7 @@ void up_ledon(int led)
 
   switch (led)
     {
-	case 0:
+    case 0:
       /* The steady state is OFF */
 
       g_ncoff = true;
@@ -135,18 +135,18 @@ void up_ledon(int led)
       /* Turn the LED off */
 
       PORTD &= ~(1 << 6);
-	  break;
+      break;
 
-	case 1:
-      /* Turn the LED on */
+    case 1:
+      /* The steady state is ON */
 
       PORTD |= (1 << 6);
       g_ncoff = false;
-	  break;
+      break;
 
-	default:
-	  return;
-	}
+    default:
+      return;
+    }
 }
 
 /****************************************************************************
@@ -168,7 +168,7 @@ void up_ledoff(int led)
 
   switch (led)
     {
-	case 2:
+    case 2:
       /* If the "no-change" state is OFF, then turn the LED off */
 
       if (g_ncoff)
@@ -177,18 +177,18 @@ void up_ledoff(int led)
           break;
         }
 
-	  /* Otherwise, fall through to turn the LED ON */
+      /* Otherwise, fall through to turn the LED ON */
 
-	case 0:
-	case 1:
+    case 0:
+    case 1:
       /* Turn the LED on */
 
       PORTD |= (1 << 6);
-	  break;
+      break;
 
-	default:
-	  return;
-	}
+    default:
+      return;
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */
