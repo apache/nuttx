@@ -152,12 +152,11 @@ extern uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
  *      avr_spicmddata() function in your board-specific logic.  This functions will
  *      perform cmd/data selection operations using GPIOs in the way your board is
  *      configured.
- *   3. Add a call to up_spiinitialize() in your low level application
+ *   3. Add a call to at90usb_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
- *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
- *      the SPI MMC/SD driver).
+ *      SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
+ *      for example, will bind the SPI driver to the SPI MMC/SD driver).
  *
  ************************************************************************************/
 

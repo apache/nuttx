@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 17, 2011)
+NuttX TODO List (Last updated June 20, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -29,7 +29,7 @@ nuttx/
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (4)  ARM/STM32 (arch/arm/src/stm32/)
-  (2)  AVR (arch/avr)
+  (3)  AVR (arch/avr)
   (0)  Intel x86 (arch/x86)
   (4)  8051 / MCS51 (arch/8051/)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
@@ -899,6 +899,12 @@ o AVR (arch/avr)
   Status:       Open
   Priority:     Low.  The AVR is probably not the architecuture that you want to use
                 for extensive string operations.
+
+  Description:   An SPI driver and a USB device driver exist for the AT90USB (as well
+                 as a USB mass storage example).  However, this configuration is not
+                 fully debugged as of the NuttX-6.5 release.
+  Status:       Open
+  Priority:     Medium-High.
 
 o Intel x86 (arch/x86)
   ^^^^^^^^^^^^^^^^^^^^

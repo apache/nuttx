@@ -41,6 +41,12 @@ CSRCS		= up_boot.c
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS		+= up_leds.c
 endif
+ifeq ($(CONFIG_USBSTRG),y)
+CSRCS		+= up_usbstrg.c
+endif
+ifeq ($(CONFIG_AVR_SPI),y)
+CSRCS		+= up_spi.c
+endif
 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 COBJS		= $(CSRCS:.c=$(OBJEXT))
