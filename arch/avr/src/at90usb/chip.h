@@ -48,7 +48,34 @@
 
 /* Define features for supported chip in the ATMEGA family */
 
-#if 1
+#if defined(CONFIG_ARCH_CHIP_AT90USB646)
+#  define AVR_FLASH_SIZE  (64*1024)
+#  define AVR_SRAM_SIZE   (4*1024)
+#  define AVR_EEPROM_SIZE (2*1024)
+#  define HAVE_USBDEV     1
+#  undef  HAVE_USBHOST
+#  undef  HAVE_RAMPZ
+#elif defined(CONFIG_ARCH_CHIP_AT90USB647)
+#  define AVR_FLASH_SIZE  (64*1024)
+#  define AVR_SRAM_SIZE   (4*1024)
+#  define AVR_EEPROM_SIZE (2*1024)
+#  define HAVE_USBDEV     1
+#  define HAVE_USBHOST    1
+#  undef HAVE_RAMPZ
+#elif defined(CONFIG_ARCH_CHIP_AT90USB1286)
+#  define AVR_FLASH_SIZE  (128*1024)
+#  define AVR_SRAM_SIZE   (8*1024)
+#  define AVR_EEPROM_SIZE (4*1024)
+#  define HAVE_USBDEV     1
+#  undef  HAVE_USBHOST
+#  define HAVE_RAMPZ      1
+#elif defined(CONFIG_ARCH_CHIP_AT90USB1287)
+#  define AVR_FLASH_SIZE  (128*1024)
+#  define AVR_SRAM_SIZE   (8*1024)
+#  define AVR_EEPROM_SIZE (4*1024)
+#  define HAVE_USBDEV     1
+#  define HAVE_USBHOST    1
+#  define HAVE_RAMPZ      1
 #else
 #  error "Unsupported AVR chip"
 #endif

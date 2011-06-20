@@ -69,8 +69,7 @@ CHIP_CSRCS	= at90usb_lowconsole.c at90usb_lowinit.c at90usb_serial.c at90usb_tim
 
 # Configuration-dependent aT90USB files
 
-ifeq ($(CONFIG_AVR_GPIOIRQ),y)
-CHIP_CSRCS	+= 
+ifeq ($(CONFIG_AVR_USBDEV),y)
+CHIP_CSRCS      += at90usb_usbdev.c
 endif
-
 

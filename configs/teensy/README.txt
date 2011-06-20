@@ -12,6 +12,7 @@ Contents
   o Pin Usage
   o Halfkey Bootloader
   o Serial Console
+  o SD Connection
   o Toolchains
   o Windows Native Toolchains
   o NuttX buildroot Toolchain
@@ -51,7 +52,7 @@ Pin Usage
   10 (SS/PCINT0) PB0           Pad B0
   11 (PCINT1/SCLK) PB1         Pad B1
   12 (PDI/PCINT2/MOSI) PB2     Pad B2
-  13 (PDO/PCINT3/MISO) PB3     Pad1 B3
+  13 (PDO/PCINT3/MISO) PB3     Pad B3
   14 (PCINT4/OC.2A) PB4        Pad B4
   15 (PCINT5/OC.1A) PB5        Pad B5
   16 (PCINT6/OC.1B) PB6        Pad B6
@@ -144,6 +145,53 @@ Serial Console
 
   Plus power and ground.  There are numerous ground points and both USB 5V
   and Vcc are available.
+
+SD Connection
+^^^^^^^^^^^^^
+
+I have the SD-ADP SD/MMC Card Adaptor from www.gravitech.com
+(http://www.gravitech.us/sdcaad.html). Features: 
+
+  o On-board 3.3V regulator 
+  o Connect directly to 3.3V or 5.0V microcontroller 
+  o Card detect LED
+  o Includes 11-pin male header
+  o Board dimension: 2.0”x1.3”
+
+SD-ADP Pinout / SD Connection
+
+ -- ---- ----------- -------------------------------------------------------
+ J2 NAME SD CARD     DESCRIPTION
+ -- ---- ----------- -------------------------------------------------------
+  1 VIN   (reguator) Input power to the SD card (3.3V to 6.0V) 
+  2 GND   3,6,12,13  Common (Connects to the housing of the SD socket)
+  3 3V3   4 3.3V     Output voltage from the on-board 3.3V regulator (250mA) 
+  4 NC    9 NC       Connect to pin 9 on the SD card (not used in SPI mode) 
+  5 CS    1 DAT3/CS  Chip select *
+  6 DI    2 CMD/DI   Serial input data *
+  7 SCK   5 SCK      Serial clock *
+  8 DO    7 DAT0/DO  Serial output data 
+  9 IRQ   8 DAT1/IRQ Interrupt request, connect to pin 8 on the SD card (not used in SPI mode) 
+ 10 CD   10 CD       Card detect (active low) 
+ 11 WP   11 WP       Write protect
+ -- ---- ----------- -------------------------------------------------------
+
+  * Via a 74LCX245 level translator / buff
+
+Teensy SPI Connection
+
+  J2 NAME PIN NAME                     PAD
+   1 VIN
+   2 GND
+   3 3V3
+   4 NC
+   5 CS   10 (SS/PCINT0) PB0           Pad B0
+   6 DI   12 (PDI/PCINT2/MOSI) PB2     Pad B2
+   7 SCK  11 (PCINT1/SCLK) PB1         Pad B1
+   8 DO   13 (PDO/PCINT3/MISO) PB3     Pad B3
+   9 IRQ
+  10 CD
+  11 WP
 
 Toolchains
 ^^^^^^^^^^

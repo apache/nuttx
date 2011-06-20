@@ -179,66 +179,66 @@ struct lpc31_dtd_s
 };
 
 /* DTD nextdesc field*/
-#define DTD_NEXTDESC_INVALID		(1 << 0)	/* Bit 0     : Next Descriptor Invalid */
+#define DTD_NEXTDESC_INVALID         (1 << 0)    /* Bit 0     : Next Descriptor Invalid */
 
 /* DTD config field */
-#define DTD_CONFIG_LENGTH(n)		((n) << 16)	/* Bits 16-31 : Total bytes to transfer */
-#define DTD_CONFIG_IOC			(1 << 15)	/* Bit 15     : Interrupt on Completion */
-#define DTD_CONFIG_MULT_VARIABLE	(0 << 10)	/* Bits 10-11 : Number of packets executed per transacation descriptor (override) */
-#define DTD_CONFIG_MULT_NUM(n)		((n) << 10)
-#define DTD_CONFIG_ACTIVE		(1 << 7)	/* Bit 7      : Status Active */
-#define DTD_CONFIG_HALTED		(1 << 6)	/* Bit 6      : Status Halted */
-#define DTD_CONFIG_BUFFER_ERROR		(1 << 5)	/* Bit 6      : Status Buffer Error */
-#define DTD_CONFIG_TRANSACTION_ERROR	(1 << 3)	/* Bit 3      : Status Transaction Error */
+#define DTD_CONFIG_LENGTH(n)         ((n) << 16) /* Bits 16-31 : Total bytes to transfer */
+#define DTD_CONFIG_IOC               (1 << 15)   /* Bit 15     : Interrupt on Completion */
+#define DTD_CONFIG_MULT_VARIABLE     (0 << 10)   /* Bits 10-11 : Number of packets executed per transacation descriptor (override) */
+#define DTD_CONFIG_MULT_NUM(n)       ((n) << 10)
+#define DTD_CONFIG_ACTIVE            (1 << 7)    /* Bit 7      : Status Active */
+#define DTD_CONFIG_HALTED            (1 << 6)    /* Bit 6      : Status Halted */
+#define DTD_CONFIG_BUFFER_ERROR      (1 << 5)    /* Bit 6      : Status Buffer Error */
+#define DTD_CONFIG_TRANSACTION_ERROR (1 << 3)    /* Bit 3      : Status Transaction Error */
 
 /* This represents a queue head  - not these must be aligned to a 2048 byte boundary */
 struct lpc31_dqh_s
 {
-  uint32_t                capability;	/* Endpoint capability */
-  uint32_t                currdesc;	/* Current dTD pointer */
-  struct lpc31_dtd_s    overlay;	/* DTD overlay */
-  volatile uint32_t       setup[2];	/* Set-up buffer */
-  uint32_t                gap[4];	/* align to 64 bytes */
+  uint32_t                capability;  /* Endpoint capability */
+  uint32_t                currdesc;    /* Current dTD pointer */
+  struct lpc31_dtd_s      overlay;     /* DTD overlay */
+  volatile uint32_t       setup[2];    /* Set-up buffer */
+  uint32_t                gap[4];      /* align to 64 bytes */
 };
 
 /* DQH capability field */
-#define DQH_CAPABILITY_MULT_VARIABLE	(0 << 30)	/* Bits 30-31 : Number of packets executed per transaction descriptor */
-#define DQH_CAPABILITY_MULT_NUM(n)	((n) << 30)
-#define DQH_CAPABILITY_ZLT		(1 << 29)	/* Bit 29     : Zero Length Termination Select */
-#define DQH_CAPABILITY_MAX_PACKET(n)	((n) << 16)	/* Bits 16-29 : Maximum packet size of associated endpoint (<1024) */
-#define DQH_CAPABILITY_IOS		(1 << 15)	/* Bit 15     : Interrupt on Setup */
+#define DQH_CAPABILITY_MULT_VARIABLE (0 << 30)    /* Bits 30-31 : Number of packets executed per transaction descriptor */
+#define DQH_CAPABILITY_MULT_NUM(n)   ((n) << 30)
+#define DQH_CAPABILITY_ZLT           (1 << 29)    /* Bit 29     : Zero Length Termination Select */
+#define DQH_CAPABILITY_MAX_PACKET(n) ((n) << 16)  /* Bits 16-29 : Maximum packet size of associated endpoint (<1024) */
+#define DQH_CAPABILITY_IOS           (1 << 15)    /* Bit 15     : Interrupt on Setup */
 
 /* Endpoints ******************************************************************/
 
 /* Number of endpoints */
-#define LPC31_NLOGENDPOINTS        (4)          /* ep0-3 */
-#define LPC31_NPHYSENDPOINTS       (8)          /* x2 for IN and OUT */
+#define LPC31_NLOGENDPOINTS          (4)          /* ep0-3 */
+#define LPC31_NPHYSENDPOINTS         (8)          /* x2 for IN and OUT */
 
 /* Odd physical endpoint numbers are IN; even are OUT */
-#define LPC31_EPPHYIN(epphy)       (((epphy)&1)!=0)
-#define LPC31_EPPHYOUT(epphy)      (((epphy)&1)==0)
+#define LPC31_EPPHYIN(epphy)         (((epphy)&1)!=0)
+#define LPC31_EPPHYOUT(epphy)        (((epphy)&1)==0)
 
-#define LPC31_EPPHYIN2LOG(epphy)   (((uint8_t)(epphy)>>1)|USB_DIR_IN)
-#define LPC31_EPPHYOUT2LOG(epphy)  (((uint8_t)(epphy)>>1)|USB_DIR_OUT)
+#define LPC31_EPPHYIN2LOG(epphy)     (((uint8_t)(epphy)>>1)|USB_DIR_IN)
+#define LPC31_EPPHYOUT2LOG(epphy)    (((uint8_t)(epphy)>>1)|USB_DIR_OUT)
 
 /* Endpoint 0 is special... */
-#define LPC31_EP0_OUT		        (0)
-#define LPC31_EP0_IN		        (1)
+#define LPC31_EP0_OUT                (0)
+#define LPC31_EP0_IN                 (1)
 
 /* Each endpoint has somewhat different characteristics */
-#define LPC31_EPALLSET                (0xff)        /* All endpoints */
-#define LPC31_EPOUTSET                (0x55)        /* Even phy endpoint numbers are OUT EPs */
-#define LPC31_EPINSET                 (0xaa)        /* Odd endpoint numbers are IN EPs */
-#define LPC31_EPCTRLSET               (0x03)        /* EP0 IN/OUT are control endpoints */
-#define LPC31_EPINTRSET               (0xa8)        /* Interrupt endpoints */
-#define LPC31_EPBULKSET               (0xfc)        /* Bulk endpoints */
-#define LPC31_EPISOCSET               (0xfc)        /* Isochronous endpoints */
+#define LPC31_EPALLSET               (0xff)       /* All endpoints */
+#define LPC31_EPOUTSET               (0x55)       /* Even phy endpoint numbers are OUT EPs */
+#define LPC31_EPINSET                (0xaa)       /* Odd endpoint numbers are IN EPs */
+#define LPC31_EPCTRLSET              (0x03)       /* EP0 IN/OUT are control endpoints */
+#define LPC31_EPINTRSET              (0xa8)       /* Interrupt endpoints */
+#define LPC31_EPBULKSET              (0xfc)       /* Bulk endpoints */
+#define LPC31_EPISOCSET              (0xfc)       /* Isochronous endpoints */
 
 /* Maximum packet sizes for endpoints */
-#define LPC31_EP0MAXPACKET            (64)          /* EP0 max packet size (1-64) */
-#define LPC31_BULKMAXPACKET           (512)         /* Bulk endpoint max packet (8/16/32/64/512) */
-#define LPC31_INTRMAXPACKET           (1024)        /* Interrupt endpoint max packet (1 to 1024) */
-#define LPC31_ISOCMAXPACKET           (512)         /* Acutally 1..1023 */
+#define LPC31_EP0MAXPACKET           (64)         /* EP0 max packet size (1-64) */
+#define LPC31_BULKMAXPACKET          (512)        /* Bulk endpoint max packet (8/16/32/64/512) */
+#define LPC31_INTRMAXPACKET          (1024)       /* Interrupt endpoint max packet (1 to 1024) */
+#define LPC31_ISOCMAXPACKET          (512)        /* Acutally 1..1023 */
 
 /* The address of the endpoint control register */
 #define LPC31_USBDEV_ENDPTCTRL(epphy) (LPC31_USBDEV_ENDPTCTRL0 + ((epphy)>>1)*4)
@@ -246,12 +246,12 @@ struct lpc31_dqh_s
 /* Endpoint bit position in SETUPSTAT, PRIME, FLUSH, STAT, COMPLETE registers */
 #define LPC31_ENDPTSHIFT(epphy)      (LPC31_EPPHYIN(epphy) ? (16 + ((epphy) >> 1)) : ((epphy) >> 1))
 #define LPC31_ENDPTMASK(epphy)       (1 << LPC31_ENDPTSHIFT(epphy))
-#define LPC31_ENDPTMASK_ALL	        0x000f000f
+#define LPC31_ENDPTMASK_ALL          0x000f000f
 
 /* Request queue operations ****************************************************/
 
-#define lpc31_rqempty(ep)          ((ep)->head == NULL)
-#define lpc31_rqpeek(ep)           ((ep)->head)
+#define lpc31_rqempty(ep)            ((ep)->head == NULL)
+#define lpc31_rqpeek(ep)             ((ep)->head)
 
 /*******************************************************************************
  * Private Types
@@ -352,11 +352,12 @@ static inline void lpc31_chgbits(uint32_t mask, uint32_t val, uint32_t addr);
 
 static FAR struct lpc31_req_s *lpc31_rqdequeue(FAR struct lpc31_ep_s *privep);
 static bool       lpc31_rqenqueue(FAR struct lpc31_ep_s *privep,
-                    	   FAR struct lpc31_req_s *req);
+                    FAR struct lpc31_req_s *req);
 
 /* Low level data transfers and request operations *****************************/
 
-static inline void lpc31_writedtd(struct lpc31_dtd_s *dtd, const uint8_t *data, uint32_t nbytes);
+static inline void lpc31_writedtd(struct lpc31_dtd_s *dtd, const uint8_t *data,
+                     uint32_t nbytes);
 static inline void lpc31_queuedtd(uint8_t epphy, struct lpc31_dtd_s *dtd);
 static inline void lpc31_ep0xfer(uint8_t epphy, uint8_t *data, uint32_t nbytes);
 static void        lpc31_readsetup(uint8_t epphy, struct usb_ctrlreq_s *ctrl);
@@ -367,14 +368,17 @@ static void        lpc31_flushep(struct lpc31_ep_s *privep);
 
 static int         lpc31_progressep(struct lpc31_ep_s *privep);
 static inline void lpc31_abortrequest(struct lpc31_ep_s *privep,
-					struct lpc31_req_s *privreq, int16_t result);
-static void        lpc31_reqcomplete(struct lpc31_ep_s *privep, struct lpc31_req_s *privreq, int16_t result);
+                     struct lpc31_req_s *privreq, int16_t result);
+static void        lpc31_reqcomplete(struct lpc31_ep_s *privep,
+                     struct lpc31_req_s *privreq, int16_t result);
 
 static void        lpc31_cancelrequests(struct lpc31_ep_s *privep, int16_t status);
 
 /* Interrupt handling **********************************************************/
-static struct lpc31_ep_s *lpc31_epfindbyaddr(struct lpc31_usbdev_s *priv, uint16_t eplog);
-static void        lpc31_dispatchrequest(struct lpc31_usbdev_s *priv, const struct usb_ctrlreq_s *ctrl);
+static struct lpc31_ep_s *lpc31_epfindbyaddr(struct lpc31_usbdev_s *priv,
+                     uint16_t eplog);
+static void        lpc31_dispatchrequest(struct lpc31_usbdev_s *priv,
+                     const struct usb_ctrlreq_s *ctrl);
 static void        lpc31_ep0configure(struct lpc31_usbdev_s *priv);
 static void        lpc31_usbreset(struct lpc31_usbdev_s *priv);
 
@@ -399,7 +403,7 @@ static void lpc31_epfreereq(FAR struct usbdev_ep_s *ep,
               FAR struct usbdev_req_s *);
 #ifdef CONFIG_ARCH_USBDEV_DMA
 static void *lpc31_epallocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes);
-static void lpc313_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf);
+static void lpc31_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf);
 #endif
 static int  lpc31_epsubmit(FAR struct usbdev_ep_s *ep,
               struct usbdev_req_s *req);
@@ -407,8 +411,8 @@ static int  lpc31_epcancel(FAR struct usbdev_ep_s *ep,
               struct usbdev_req_s *req);
 static int  lpc31_epstall(FAR struct usbdev_ep_s *ep, bool resume);
 
-static FAR struct usbdev_ep_s *lcp313x_allocep(FAR struct usbdev_s *dev,
-					       uint8_t epno, bool in, uint8_t eptype);
+static FAR struct usbdev_ep_s *lpc31_allocep(FAR struct usbdev_s *dev,
+              uint8_t epno, bool in, uint8_t eptype);
 static void lpc31_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep);
 static int  lpc31_getframe(struct usbdev_s *dev);
 static int  lpc31_wakeup(struct usbdev_s *dev);
@@ -445,7 +449,7 @@ static const struct usbdev_epops_s g_epops =
 
 static const struct usbdev_ops_s g_devops =
 {
-  .allocep     = lcp313x_allocep,
+  .allocep     = lpc31_allocep,
   .freeep      = lpc31_freeep,
   .getframe    = lpc31_getframe,
   .wakeup      = lpc31_wakeup,
@@ -717,13 +721,13 @@ static void lpc31_readsetup(uint8_t epphy, struct usb_ctrlreq_s *ctrl)
     int i;
 
     do {
-	/* Set the trip wire */
-	lpc31_setbits(USBDEV_USBCMD_SUTW, LPC31_USBDEV_USBCMD);
+    /* Set the trip wire */
+    lpc31_setbits(USBDEV_USBCMD_SUTW, LPC31_USBDEV_USBCMD);
 
-	// copy the request...
-	for (i = 0; i < 8; i++)
-	    ((uint8_t *) ctrl)[i] = ((uint8_t *) dqh->setup)[i];
-	
+    /* copy the request... */
+    for (i = 0; i < 8; i++)
+        ((uint8_t *) ctrl)[i] = ((uint8_t *) dqh->setup)[i];
+    
     } while (!(lpc31_getreg(LPC31_USBDEV_USBCMD) & USBDEV_USBCMD_SUTW));
     
     /* Clear the trip wire */
@@ -747,7 +751,7 @@ static inline void lpc31_set_address(struct lpc31_usbdev_s *priv, uint16_t addre
   priv->paddrset = address != 0;
 
   lpc31_chgbits(USBDEV_DEVICEADDR_MASK, priv->paddr << USBDEV_DEVICEADDR_SHIFT, 
-		  LPC31_USBDEV_DEVICEADDR);
+                LPC31_USBDEV_DEVICEADDR);
 }
 
 /*******************************************************************************
@@ -761,11 +765,13 @@ static inline void lpc31_set_address(struct lpc31_usbdev_s *priv, uint16_t addre
 static void lpc31_flushep(struct lpc31_ep_s *privep)
 {
   uint32_t mask = LPC31_ENDPTMASK(privep->epphy);
-  do {
+  do
+    {
       lpc31_putreg (mask, LPC31_USBDEV_ENDPTFLUSH);
       while ((lpc31_getreg(LPC31_USBDEV_ENDPTFLUSH) & mask) != 0)
-	;
-  } while ((lpc31_getreg(LPC31_USBDEV_ENDPTSTATUS) & mask) != 0);
+      ;
+    }
+  while ((lpc31_getreg(LPC31_USBDEV_ENDPTSTATUS) & mask) != 0);
 }
 
 
@@ -795,19 +801,19 @@ static int lpc31_progressep(struct lpc31_ep_s *privep)
 
   if (privreq->req.len == 0)
     {
-	/* If the class driver is responding to a setup packet, then wait for the 
-	 * host to illicit thr response */
+    /* If the class driver is responding to a setup packet, then wait for the 
+     * host to illicit thr response */
 
-	if (privep->epphy == LPC31_EP0_IN && privep->dev->ep0state == EP0STATE_SETUP_OUT)
-	  lpc31_ep0state (privep->dev, EP0STATE_WAIT_NAK_IN);
-	else
-	  {
-	    if (LPC31_EPPHYIN(privep->epphy))
-		usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_EPINNULLPACKET), 0);
-	    else
-		usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_EPOUTNULLPACKET), 0);
-	  }
-	  
+    if (privep->epphy == LPC31_EP0_IN && privep->dev->ep0state == EP0STATE_SETUP_OUT)
+      lpc31_ep0state (privep->dev, EP0STATE_WAIT_NAK_IN);
+    else
+      {
+        if (LPC31_EPPHYIN(privep->epphy))
+        usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_EPINNULLPACKET), 0);
+        else
+        usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_EPOUTNULLPACKET), 0);
+      }
+      
       lpc31_reqcomplete(privep, lpc31_rqdequeue(privep), OK);
       return OK;
     }
@@ -843,8 +849,8 @@ static int lpc31_progressep(struct lpc31_ep_s *privep)
  *******************************************************************************/
 
 static inline void lpc31_abortrequest(struct lpc31_ep_s *privep,
-                                        struct lpc31_req_s *privreq,
-                                        int16_t result)
+                                      struct lpc31_req_s *privreq,
+                                      int16_t result)
 {
   usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_REQABORTED), (uint16_t)privep->epphy);
 
@@ -865,7 +871,8 @@ static inline void lpc31_abortrequest(struct lpc31_ep_s *privep,
  *
  *******************************************************************************/
 
-static void lpc31_reqcomplete(struct lpc31_ep_s *privep, struct lpc31_req_s *privreq, int16_t result)
+static void lpc31_reqcomplete(struct lpc31_ep_s *privep,
+                              struct lpc31_req_s *privreq, int16_t result)
 {
   /* If endpoint 0, temporarily reflect the state of protocol stalled
    * in the callback.
@@ -921,7 +928,7 @@ static void lpc31_cancelrequests(struct lpc31_ep_s *privep, int16_t status)
  *******************************************************************************/
 
 static struct lpc31_ep_s *lpc31_epfindbyaddr(struct lpc31_usbdev_s *priv,
-						 uint16_t eplog)
+                         uint16_t eplog)
 {
   struct lpc31_ep_s *privep;
   int i;
@@ -978,10 +985,10 @@ static void lpc31_dispatchrequest(struct lpc31_usbdev_s *priv,
 
   if (ret < 0)
     {
-	/* Stall on failure */
+      /* Stall on failure */
 
-	usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_DISPATCHSTALL), 0);
-	priv->stalled = true;
+      usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_DISPATCHSTALL), 0);
+      priv->stalled = true;
     }
 }
 
@@ -997,12 +1004,12 @@ static void lpc31_ep0configure(struct lpc31_usbdev_s *priv)
 {
   /* Enable ep0 IN and ep0 OUT */
   g_qh[LPC31_EP0_OUT].capability = (DQH_CAPABILITY_MAX_PACKET(CONFIG_USBDEV_EP0_MAXSIZE) |
-				      DQH_CAPABILITY_IOS |
-				      DQH_CAPABILITY_ZLT);
+                      DQH_CAPABILITY_IOS |
+                      DQH_CAPABILITY_ZLT);
 
   g_qh[LPC31_EP0_IN ].capability = (DQH_CAPABILITY_MAX_PACKET(CONFIG_USBDEV_EP0_MAXSIZE) |
-				      DQH_CAPABILITY_IOS |
-				      DQH_CAPABILITY_ZLT);
+                      DQH_CAPABILITY_IOS |
+                      DQH_CAPABILITY_ZLT);
   
   g_qh[LPC31_EP0_OUT].currdesc = DTD_NEXTDESC_INVALID;
   g_qh[LPC31_EP0_IN ].currdesc = DTD_NEXTDESC_INVALID;
@@ -1078,8 +1085,8 @@ static void lpc31_usbreset(struct lpc31_usbdev_s *priv)
 
   /* Enable Device interrupts */
   lpc31_putreg(USB_FRAME_INT | USB_ERROR_INT | 
-		 USBDEV_USBINTR_NAKE | USBDEV_USBINTR_SLE | USBDEV_USBINTR_URE | USBDEV_USBINTR_PCE | USBDEV_USBINTR_UE,
-		 LPC31_USBDEV_USBINTR);
+         USBDEV_USBINTR_NAKE | USBDEV_USBINTR_SLE | USBDEV_USBINTR_URE | USBDEV_USBINTR_PCE | USBDEV_USBINTR_UE,
+         LPC31_USBDEV_USBINTR);
 }
 
 /*******************************************************************************
@@ -1173,7 +1180,7 @@ static inline void lpc31_ep0setup(struct lpc31_usbdev_s *priv)
               (ctrl.type & USB_REQ_DIR_IN) == 0 || value != 0)
             {
               priv->stalled = true;
-	    }
+            }
           else
             {
               switch (ctrl.type & USB_REQ_RECIPIENT_MASK)
@@ -1183,15 +1190,15 @@ static inline void lpc31_ep0setup(struct lpc31_usbdev_s *priv)
                     usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EPGETSTATUS), 0);
                     privep = lpc31_epfindbyaddr(priv, index);
                     if (!privep)
-  		      {
+                      {
                         usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_BADEPGETSTATUS), 0);
                         priv->stalled = true;
                       }
                     else
                       {
-			if (privep->stalled)
-			  priv->ep0buf[0] = 1; /* Stalled */
-			else
+                        if (privep->stalled)
+                          priv->ep0buf[0] = 1; /* Stalled */
+                        else
                           priv->ep0buf[0] = 0; /* Not stalled */
                         priv->ep0buf[1] = 0;
   
@@ -1203,17 +1210,17 @@ static inline void lpc31_ep0setup(struct lpc31_usbdev_s *priv)
   
                 case USB_REQ_RECIPIENT_DEVICE:
                   {
-  		    if (index == 0)
+                    if (index == 0)
                       {
                         usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_DEVGETSTATUS), 0);
   
                         /* Features:  Remote Wakeup=YES; selfpowered=? */
   
                         priv->ep0buf[0] = (priv->selfpowered << USB_FEATURE_SELFPOWERED) |
-  			                (1 << USB_FEATURE_REMOTEWAKEUP);
+                              (1 << USB_FEATURE_REMOTEWAKEUP);
                         priv->ep0buf[1] = 0;
 
-			lpc31_ep0xfer(LPC31_EP0_IN, priv->ep0buf, 2);
+                        lpc31_ep0xfer(LPC31_EP0_IN, priv->ep0buf, 2);
                         lpc31_ep0state (priv, EP0STATE_SHORTWRITE);
                       }
                     else
@@ -1231,7 +1238,7 @@ static inline void lpc31_ep0setup(struct lpc31_usbdev_s *priv)
                     priv->ep0buf[1] = 0;
 
                     lpc31_ep0xfer(LPC31_EP0_IN, priv->ep0buf, 2);
-		    lpc31_ep0state (priv, EP0STATE_SHORTWRITE);
+                    lpc31_ep0state (priv, EP0STATE_SHORTWRITE);
                   }
                   break;
   
@@ -1263,7 +1270,6 @@ static inline void lpc31_ep0setup(struct lpc31_usbdev_s *priv)
                    (privep = lpc31_epfindbyaddr(priv, index)) != NULL)
             {
               lpc31_epstall(&privep->ep, true);
-  
               lpc31_ep0state (priv, EP0STATE_WAIT_NAK_IN);
             }
           else
@@ -1290,13 +1296,12 @@ static inline void lpc31_ep0setup(struct lpc31_usbdev_s *priv)
             }
           else if ((ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
             {
-             lpc31_dispatchrequest(priv, &ctrl);
+              lpc31_dispatchrequest(priv, &ctrl);
             }
           else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT && len == 0 &&
                    (privep = lpc31_epfindbyaddr(priv, index)) != NULL)
             {
-	      lpc31_epstall(&privep->ep, false);
-  
+              lpc31_epstall(&privep->ep, false);
               lpc31_ep0state (priv, EP0STATE_WAIT_NAK_IN);
             }
           else
@@ -1322,9 +1327,8 @@ static inline void lpc31_ep0setup(struct lpc31_usbdev_s *priv)
                * the completion of the status phase. */
   
               priv->paddr = ctrl.value[0];
-	      priv->paddrset = false;
-  
-	      lpc31_ep0state (priv, EP0STATE_WAIT_NAK_IN);
+              priv->paddrset = false;
+              lpc31_ep0state (priv, EP0STATE_WAIT_NAK_IN);
             }
           else
             {
@@ -1466,34 +1470,34 @@ static void lpc31_ep0complete(struct lpc31_usbdev_s *priv, uint8_t epphy)
     {
     case EP0STATE_DATA_IN:
       if (lpc31_rqempty(privep))
-	return;
+        return;
 
       if (lpc31_epcomplete (priv, epphy))
-	lpc31_ep0state (priv, EP0STATE_WAIT_NAK_OUT);
+        lpc31_ep0state (priv, EP0STATE_WAIT_NAK_OUT);
       break;
 
     case EP0STATE_DATA_OUT:
       if (lpc31_rqempty(privep))
-	return;
-	
+    return;
+    
       if (lpc31_epcomplete (priv, epphy))
-	lpc31_ep0state (priv, EP0STATE_WAIT_NAK_IN);
+        lpc31_ep0state (priv, EP0STATE_WAIT_NAK_IN);
       break;
-	
+    
     case EP0STATE_SHORTWRITE:
       lpc31_ep0state (priv, EP0STATE_WAIT_NAK_OUT);
       break;
-	
+    
     case EP0STATE_WAIT_STATUS_IN:
       lpc31_ep0state (priv, EP0STATE_IDLE);
 
       /* If we've received a SETADDRESS packet, then we set the address
        * now that the status phase has completed */
       if (! priv->paddrset && priv->paddr != 0)
-	{
-	  usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EP0INSETADDRESS), (uint16_t)priv->paddr);
-	  lpc31_set_address (priv, priv->paddr);
-	}
+        {
+          usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EP0INSETADDRESS), (uint16_t)priv->paddr);
+          lpc31_set_address (priv, priv->paddr);
+        }
       break;
 
     case EP0STATE_WAIT_STATUS_OUT:
@@ -1502,11 +1506,11 @@ static void lpc31_ep0complete(struct lpc31_usbdev_s *priv, uint8_t epphy)
 
     default:
 #ifdef CONFIG_DEBUG
-      DEBUGASSERT(priv->ep0state != EP0STATE_DATA_IN        &&
-		  priv->ep0state != EP0STATE_DATA_OUT       &&
-		  priv->ep0state != EP0STATE_SHORTWRITE     &&
-		  priv->ep0state != EP0STATE_WAIT_STATUS_IN &&
-		  priv->ep0state != EP0STATE_WAIT_STATUS_OUT);
+      DEBUGASSERT(priv->ep0state != EP0STATE_DATA_IN &&
+          priv->ep0state != EP0STATE_DATA_OUT        &&
+          priv->ep0state != EP0STATE_SHORTWRITE      &&
+          priv->ep0state != EP0STATE_WAIT_STATUS_IN  &&
+          priv->ep0state != EP0STATE_WAIT_STATUS_OUT);
 #endif
       priv->stalled = true;
       break;
@@ -1545,11 +1549,12 @@ static void lpc31_ep0nak(struct lpc31_usbdev_s *priv, uint8_t epphy)
     default:
 #ifdef CONFIG_DEBUG
       DEBUGASSERT(priv->ep0state != EP0STATE_WAIT_NAK_IN &&
-		  priv->ep0state != EP0STATE_WAIT_NAK_OUT);
+          priv->ep0state != EP0STATE_WAIT_NAK_OUT);
 #endif
       priv->stalled = true;
       break;
     }
+
   if (priv->stalled)
     {
       usbtrace(TRACE_DEVERROR(LPC31_TRACEERR_EP0SETUPSTALLED), priv->ep0state);
@@ -1567,14 +1572,13 @@ static void lpc31_ep0nak(struct lpc31_usbdev_s *priv, uint8_t epphy)
  *
  *******************************************************************************/
 
-bool
-lpc31_epcomplete(struct lpc31_usbdev_s *priv, uint8_t epphy)
+bool lpc31_epcomplete(struct lpc31_usbdev_s *priv, uint8_t epphy)
 {
   struct lpc31_ep_s  *privep  = &priv->eplist[epphy];
   struct lpc31_req_s *privreq = privep->head;
   struct lpc31_dtd_s *dtd     = &g_td[epphy];
 
-  if (privreq == NULL)		/* This shouldn't really happen */
+  if (privreq == NULL)        /* This shouldn't really happen */
   {
     if (LPC31_EPPHYOUT(privep->epphy))
       usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EPINQEMPTY), 0);
@@ -1656,7 +1660,7 @@ static int lpc31_usbinterrupt(int irq, FAR void *context)
 
       usbtrace(TRACE_INTEXIT(LPC31_TRACEINTID_USB), 0);
       return OK;
-  }
+    }
   
   if (disr & USBDEV_USBSTS_SLI)
     {
@@ -1669,19 +1673,19 @@ static int lpc31_usbinterrupt(int irq, FAR void *context)
       portsc1 = lpc31_getreg(LPC31_USBDEV_PORTSC1);
 
       if (portsc1 & USBDEV_PRTSC1_HSP)
-	priv->usbdev.speed = USB_SPEED_HIGH;
+        priv->usbdev.speed = USB_SPEED_HIGH;
       else
-	priv->usbdev.speed = USB_SPEED_FULL;
+        priv->usbdev.speed = USB_SPEED_FULL;
 
       if (portsc1 & USBDEV_PRTSC1_FPR)
         {
-	  /* FIXME: this occurs because of a J-to-K transition detected
-	   *         while the port is in SUSPEND state - presumambly this 
-	   *         is where the host is resuming the device?
-	   *
-	   *  - but do we need to "ack" the interrupt
-	   */
-	}
+          /* FIXME: this occurs because of a J-to-K transition detected
+           *         while the port is in SUSPEND state - presumambly this 
+           *         is where the host is resuming the device?
+           *
+           *  - but do we need to "ack" the interrupt
+           */
+        }
     }
   
 #ifdef CONFIG_LPC31_USBDEV_FRAME_INTERRUPT
@@ -1707,38 +1711,38 @@ static int lpc31_usbinterrupt(int irq, FAR void *context)
 
       if (mask)
         {
-	  // Clear any NAK interrupt and completion interrupts
-	  lpc31_putreg (mask, LPC31_USBDEV_ENDPTNAK);
-	  lpc31_putreg (mask, LPC31_USBDEV_ENDPTCOMPLETE);
-	  
-	  if (mask & LPC31_ENDPTMASK(0))
-	    lpc31_ep0complete(priv, 0);
-	  if (mask & LPC31_ENDPTMASK(1))
-	    lpc31_ep0complete(priv, 1);
-	  
-	  for (n = 1; n < LPC31_NLOGENDPOINTS; n++)
-	    {
-	      if (mask & LPC31_ENDPTMASK((n<<1)))
-		lpc31_epcomplete (priv, (n<<1));
-	      if (mask & LPC31_ENDPTMASK((n<<1)+1))
-		lpc31_epcomplete(priv, (n<<1)+1);
-	    }
-	}
+          /* Clear any NAK interrupt and completion interrupts */
+          lpc31_putreg (mask, LPC31_USBDEV_ENDPTNAK);
+          lpc31_putreg (mask, LPC31_USBDEV_ENDPTCOMPLETE);
+      
+          if (mask & LPC31_ENDPTMASK(0))
+            lpc31_ep0complete(priv, 0);
+          if (mask & LPC31_ENDPTMASK(1))
+            lpc31_ep0complete(priv, 1);
+      
+          for (n = 1; n < LPC31_NLOGENDPOINTS; n++)
+            {
+              if (mask & LPC31_ENDPTMASK((n<<1)))
+                lpc31_epcomplete (priv, (n<<1));
+              if (mask & LPC31_ENDPTMASK((n<<1)+1))
+                lpc31_epcomplete(priv, (n<<1)+1);
+            }
+        }
 
       /* Handle setup interrupts */
       uint32_t setupstat = lpc31_getreg(LPC31_USBDEV_ENDPTSETUPSTAT);
       if (setupstat)
         {
-	  /* Clear the endpoint complete CTRL OUT and IN when a Setup is received */
-	  lpc31_putreg (LPC31_ENDPTMASK(LPC31_EP0_IN) | LPC31_ENDPTMASK(LPC31_EP0_OUT), 
-			  LPC31_USBDEV_ENDPTCOMPLETE);
-	  
-	  if (setupstat & LPC31_ENDPTMASK(LPC31_EP0_OUT))
-	  {
-	    usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EP0SETUP), setupstat);
-	    lpc31_ep0setup(priv);
-	  }
-	}
+          /* Clear the endpoint complete CTRL OUT and IN when a Setup is received */
+          lpc31_putreg(LPC31_ENDPTMASK(LPC31_EP0_IN) | LPC31_ENDPTMASK(LPC31_EP0_OUT), 
+                       LPC31_USBDEV_ENDPTCOMPLETE);
+      
+          if (setupstat & LPC31_ENDPTMASK(LPC31_EP0_OUT))
+            {
+              usbtrace(TRACE_INTDECODE(LPC31_TRACEINTID_EP0SETUP), setupstat);
+              lpc31_ep0setup(priv);
+            }
+        }
     }
 
   if (disr & USBDEV_USBSTS_NAKI)
@@ -1746,16 +1750,17 @@ static int lpc31_usbinterrupt(int irq, FAR void *context)
       uint32_t pending = lpc31_getreg(LPC31_USBDEV_ENDPTNAK) & lpc31_getreg(LPC31_USBDEV_ENDPTNAKEN);
       if (pending)
         {
-	  /* We shouldn't see NAK interrupts except on Endpoint 0 */
-	  if (pending & LPC31_ENDPTMASK(0))
-	      lpc31_ep0nak(priv, 0);
-	  if (pending & LPC31_ENDPTMASK(1))
-	      lpc31_ep0nak(priv, 1);
-	}
-      
-      // clear the interrupts
+          /* We shouldn't see NAK interrupts except on Endpoint 0 */
+          if (pending & LPC31_ENDPTMASK(0))
+              lpc31_ep0nak(priv, 0);
+          if (pending & LPC31_ENDPTMASK(1))
+              lpc31_ep0nak(priv, 1);
+        }
+
+      /* Clear the interrupts */
       lpc31_putreg(pending, LPC31_USBDEV_ENDPTNAK);
     }
+
   usbtrace(TRACE_INTEXIT(LPC31_TRACEINTID_USB), 0);
   return OK;
 }
@@ -1788,19 +1793,19 @@ static int lpc31_epconfigure(FAR struct usbdev_ep_s *ep,
   usbtrace(TRACE_EPCONFIGURE, privep->epphy);
   DEBUGASSERT(desc->addr == ep->eplog);
 
-  // Initialise EP capabilities
+  /* Initialise EP capabilities */
   
   uint16_t maxsize = GETUINT16(desc->mxpacketsize);
   if ((desc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_ISOC)
     {
       g_qh[privep->epphy].capability = (DQH_CAPABILITY_MAX_PACKET(maxsize) |
-					DQH_CAPABILITY_IOS |
-					DQH_CAPABILITY_ZLT);
+                    DQH_CAPABILITY_IOS |
+                    DQH_CAPABILITY_ZLT);
     }
   else
     {
       g_qh[privep->epphy].capability = (DQH_CAPABILITY_MAX_PACKET(maxsize) |
-					DQH_CAPABILITY_ZLT);
+                    DQH_CAPABILITY_ZLT);
     }
 
   /* Setup Endpoint Control Register */
@@ -1813,11 +1818,11 @@ static int lpc31_epconfigure(FAR struct usbdev_ep_s *ep,
       /* Set the endpoint type */
       switch (desc->attr & USB_EP_ATTR_XFERTYPE_MASK)
         {
-	case USB_EP_ATTR_XFER_CONTROL: cfg |= USBDEV_ENDPTCTRL_TXT_CTRL; break;
-	case USB_EP_ATTR_XFER_ISOC:    cfg |= USBDEV_ENDPTCTRL_TXT_ISOC; break;
-	case USB_EP_ATTR_XFER_BULK:    cfg |= USBDEV_ENDPTCTRL_TXT_BULK; break;
-	case USB_EP_ATTR_XFER_INT:     cfg |= USBDEV_ENDPTCTRL_TXT_INTR; break;
-	}
+          case USB_EP_ATTR_XFER_CONTROL: cfg |= USBDEV_ENDPTCTRL_TXT_CTRL; break;
+          case USB_EP_ATTR_XFER_ISOC:    cfg |= USBDEV_ENDPTCTRL_TXT_ISOC; break;
+          case USB_EP_ATTR_XFER_BULK:    cfg |= USBDEV_ENDPTCTRL_TXT_BULK; break;
+          case USB_EP_ATTR_XFER_INT:     cfg |= USBDEV_ENDPTCTRL_TXT_INTR; break;
+        }
       lpc31_chgbits (0xFFFF0000, cfg, LPC31_USBDEV_ENDPTCTRL(privep->epphy));
     }
   else
@@ -1828,10 +1833,10 @@ static int lpc31_epconfigure(FAR struct usbdev_ep_s *ep,
       /* Set the endpoint type */
       switch (desc->attr & USB_EP_ATTR_XFERTYPE_MASK)
         {
-	case USB_EP_ATTR_XFER_CONTROL: cfg |= USBDEV_ENDPTCTRL_RXT_CTRL; break;
-	case USB_EP_ATTR_XFER_ISOC:    cfg |= USBDEV_ENDPTCTRL_RXT_ISOC; break;
-	case USB_EP_ATTR_XFER_BULK:    cfg |= USBDEV_ENDPTCTRL_RXT_BULK; break;
-	}
+          case USB_EP_ATTR_XFER_CONTROL: cfg |= USBDEV_ENDPTCTRL_RXT_CTRL; break;
+          case USB_EP_ATTR_XFER_ISOC:    cfg |= USBDEV_ENDPTCTRL_RXT_ISOC; break;
+          case USB_EP_ATTR_XFER_BULK:    cfg |= USBDEV_ENDPTCTRL_RXT_BULK; break;
+        }
       lpc31_chgbits (0x0000FFFF, cfg, LPC31_USBDEV_ENDPTCTRL(privep->epphy));
     }
 
@@ -1915,7 +1920,6 @@ static FAR struct usbdev_req_s *lpc31_epallocreq(FAR struct usbdev_ep_s *ep)
     }
 
   memset(privreq, 0, sizeof(struct lpc31_req_s));
-
   return &privreq->req;
 }
 
@@ -1940,7 +1944,6 @@ static void lpc31_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 #endif
 
   usbtrace(TRACE_EPFREEREQ, ((FAR struct lpc31_ep_s *)ep)->epphy);
-
   free(privreq);
 }
 
@@ -2030,14 +2033,14 @@ static int lpc31_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *r
       /* Add the new request to the request queue for the endpoint */
 
       if (LPC31_EPPHYIN(privep->epphy))
-	usbtrace(TRACE_INREQQUEUED(privep->epphy), privreq->req.len);
+        usbtrace(TRACE_INREQQUEUED(privep->epphy), privreq->req.len);
       else
-	usbtrace(TRACE_OUTREQQUEUED(privep->epphy), privreq->req.len);
+        usbtrace(TRACE_OUTREQQUEUED(privep->epphy), privreq->req.len);
 
       if (lpc31_rqenqueue(privep, privreq))
-      {
-	lpc31_progressep(privep);
-      }
+        {
+          lpc31_progressep(privep);
+        }
     }
 
   irqrestore(flags);
@@ -2128,7 +2131,7 @@ static int lpc31_epstall(FAR struct usbdev_ep_s *ep, bool resume)
  *******************************************************************************/
 
 /*******************************************************************************
- * Name: lcp313x_allocep
+ * Name: lpc31_allocep
  *
  * Description:
  *   Allocate an endpoint matching the parameters.
@@ -2143,7 +2146,7 @@ static int lpc31_epstall(FAR struct usbdev_ep_s *ep, bool resume)
  *
  *******************************************************************************/
 
-static FAR struct usbdev_ep_s *lcp313x_allocep(FAR struct usbdev_s *dev, uint8_t eplog,
+static FAR struct usbdev_ep_s *lpc31_allocep(FAR struct usbdev_s *dev, uint8_t eplog,
                                                bool in, uint8_t eptype)
 {
   FAR struct lpc31_usbdev_s *priv = (FAR struct lpc31_usbdev_s *)dev;
@@ -2498,7 +2501,7 @@ void up_usbinitialize(void)
   /* Program the controller to be the USB device controller */
 
   lpc31_putreg (USBDEV_USBMODE_SDIS | USBDEV_USBMODE_SLOM | USBDEV_USBMODE_CMDEVICE,
-		  LPC31_USBDEV_USBMODE);
+          LPC31_USBDEV_USBMODE);
 
   /* Disconnect device */
 
@@ -2653,4 +2656,3 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   g_usbdev.driver = NULL;
   return OK;
 }
-
