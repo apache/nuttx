@@ -1630,6 +1630,30 @@
 <tr>
   <td><br></td>
   <td>
+    <p><b>AVR-Specific Issues</b>.
+      The basic AVR port is solid and biggest issue for using AVR is its tiny SRAM memory and its Harvard architecture.
+      Because of the Harvard architecture, constant data that resides to flash is inaccessible using &quot;normal&quot; memory reads and writes (only SRAM data can be accessed &quot;normally&quot;).
+      Special AVR instructions are available for accessing data in FLASH, but these have not been integrated into the normal, general purpose OS.
+    </p>
+    <p>
+      Most NuttX test applications are console-oriented with lots of strings used for printf and debug output.
+      These strings are all stored in SRAM now due to these data accessing issues and even the smallest console-oriented applications can quickly fill a 4-8Kb memory.
+      So, in order for the AVR port to be useful, one of two things would need to be done:
+    </p>
+    <ol>
+      <li>
+        Don't use console applications that required lots of strings.
+        The basic AVR port is solid and your typical deeply embedded application should work fine.
+        Or,
+      </li>
+      <li>
+        Create a special version of printf that knows how to access strings that reside in FLASH (or EEPROM).
+      </li>
+    </ol>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
       <p>
         <b>Development Environments:</b>
         1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin with Windows native toolchain. 

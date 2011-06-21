@@ -210,13 +210,21 @@ extern void weak_function stm32_spiinitialize(void);
 
 extern void weak_function stm32_usbinitialize(void);
 
-
 /************************************************************************************
  * Init Power Module and set board system voltage
  ************************************************************************************/
 
 extern void board_power_init(void);
 
+/************************************************************************************
+ * Name: sysclock_select_hsi
+ *
+ * Description:
+ *   Selects internal HSI Clock, SYSCLK = 36 MHz, HCLK = 36 MHz.
+ *
+ ************************************************************************************/
+
+extern void sysclock_select_hsi(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_VSN_SRC_VSN_INTERNAL_H */
