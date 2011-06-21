@@ -1102,6 +1102,7 @@ static void avr_dispatchrequest(FAR const struct usb_ctrlreq_s *ctrl)
 
 static int avr_ep0configure(void)
 {
+  FAR struct avr_ep_s *privep = &g_usbdev.eplist[AVR_EP0];
   uint8_t regval;
 
   /* Configure endpoint 0 */
@@ -1120,6 +1121,16 @@ static int avr_ep0configure(void)
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_EP0CFGBAD), regval);
       return -EINVAL;
     }
+
+  /* Initialize the endpoint data structure.  Mark EP0 as an IN endpoint so
+   * that the submit() logic will know that any enqueue packets are to be
+   * sent.
+   */
+
+  memset(privep, 0, sizeof(struct avr_ep_s));
+  privep->ep.ops       = &g_epops;
+  privep->ep.maxpacket = AVR_CTRLEP_SIZE;
+  privep->epin         = 1;
 
   /* Enable OUT interrupts */
 
@@ -2090,6 +2101,7 @@ static int avr_geninterrupt(int irq, FAR void *context)
 static int avr_epconfigure(FAR struct usbdev_ep_s *ep,
                            FAR const struct usb_epdesc_s *desc, bool last)
 {
+  FAR struct avr_ep_s *privep = (FAR struct avr_ep_s *)ep;
   uint16_t maxpacket = GETUINT16(desc->mxpacketsize);
   uint8_t uecfg0x;
   uint8_t uecfg1x;
@@ -2097,7 +2109,7 @@ static int avr_epconfigure(FAR struct usbdev_ep_s *ep,
   uint8_t regval;
 
   usbtrace(TRACE_EPCONFIGURE, ep->eplog);
-  DEBUGASSERT(desc->addr == ep->eplog);
+  DEBUGASSERT(ep->eplog != 0 && desc->addr == ep->eplog);
 
   /* Configure the endpoint */
 
@@ -2133,16 +2145,18 @@ static int avr_epconfigure(FAR struct usbdev_ep_s *ep,
 
   if (USB_ISEPIN(desc->addr))
     {
+      DEBUGASSERT(privep->epin != 0);
       uecfg0x |= AVR_DIR_IN;
       ueienx   = (1 << RXOUTE);
+    }
+  else
+    {
+      DEBUGASSERT(privep->epin == 0);
     }
 
   /* Handle banking (this needs to be revisited... Always double bank?) */
 
-  if (ep->eplog != 0)
-    {
-      uecfg1x |= AVR_DOUBLE_BANK;
-    }
+  uecfg1x |= AVR_DOUBLE_BANK;
 
   /* Handle the maximum packet size */
 
@@ -2191,9 +2205,10 @@ static int avr_epconfigure(FAR struct usbdev_ep_s *ep,
       return -EINVAL;
     }
 
-  /* Reset endpoint status */
+  /* Save the new max packet size and reset endpoint status */
 
-  g_usbdev.stalled = false;
+  privep->ep.maxpacket = maxpacket;
+  privep->stalled      = 0;
 
   /* Enable interrupts as appropriate for this endpoint */
 
@@ -2518,6 +2533,7 @@ static FAR struct usbdev_ep_s *avr_allocep(FAR struct usbdev_s *dev,
                                            uint8_t epno, bool in,
                                            uint8_t eptype)
 {
+  FAR struct avr_ep_s *privep;
   irqstate_t flags;
   uint8_t epset = g_usbdev.epavail;
   uint8_t epmask;
@@ -2567,22 +2583,33 @@ static FAR struct usbdev_ep_s *avr_allocep(FAR struct usbdev_s *dev,
           epmask = 1 << epndx;
           if ((epset & epmask) != 0)
             {
+               /* Initialize the endpoint structure */
+
+               privep           = &g_usbdev.eplist[epndx];
+               memset(privep, 0, sizeof(struct avr_ep_s));
+
+               privep->ep.ops       = &g_epops;
+               privep->ep.eplog     = epndx;
+               privep->ep.maxpacket = (epndx == 1) ? 256 : 64;
+
                /* Mark the IN/OUT endpoint no longer available */
 
                g_usbdev.epavail &= ~epmask;
                if (in)
                  {
                    g_usbdev.epinset |= epmask;
+                   privep->epin      = 1;
                  }
                else
                  {
                    g_usbdev.epoutset |= epmask;
+                   privep->epin       = 0;
                  }
 
                /* And return the pointer to the standard endpoint structure */
 
                irqrestore(flags);
-               return &g_usbdev.eplist[epndx].ep;
+               return &privep->ep;
             }
         }
 
@@ -2716,8 +2743,6 @@ static int avr_pullup(struct usbdev_s *dev, bool enable)
 
 void up_usbinitialize(void)
 {
-  int i;
-
   usbtrace(TRACE_DEVINIT, 0);
 
   /* Shutdown the USB interface to put it in a known initial state */
@@ -2734,25 +2759,6 @@ void up_usbinitialize(void)
   g_usbdev.usbdev.ops = &g_devops;
   g_usbdev.usbdev.ep0 = &g_usbdev.eplist[AVR_EP0].ep;
   g_usbdev.epavail    = AVR_ALL_EPS & ~(1 << AVR_EP0);
-
-  /* Initialize the endpoint list */
-
-  for (i = 0; i < AVR_NENDPOINTS; i++)
-    {
-      /* Set endpoint operations, reference to driver structure (not really
-       * necessary because there is only one controller), and the physical
-       * endpoint number (which is just the index to the endpoint).
-       */
-
-      g_usbdev.eplist[i].ep.ops   = &g_epops;
-      g_usbdev.eplist[i].ep.eplog = i;
- 
-      /* The maximum packet size may depend on the endpoint.  Endpoint 1 has
-       * a larger maximum packet size than the other endpoints.
-       */
-
-       g_usbdev.eplist[i].ep.maxpacket = (i == 1) ? 256 : 64;
-    }
 
   /* Reset the interface to force re-enumeration */
 
