@@ -529,3 +529,10 @@ Where <subdir> is one of the following:
     apps/examples/ostest. NOTE:  The OS test is quite large.  In order
     to get it to fit within AVR memory constraints, it will probably be
     necessary to disable some OS features.
+
+  usbstorage:
+    This configuration directory exercises the USB mass storage
+    class driver at apps/examples/usbstorage.  See apps/examples/README.txt
+    for more information.  NOTE:  THIS CONFIGURATION HAS NOT YET BEEN
+    DEBUGGED AND DOES NOT WORK!!!  ISSUES:  (1) THE SPI DRIVER IS UNTESTED,
+    (2) THE USB DRIVER IS UNTESTED, AND (3) THE RAM USAGE MIGHT BE EXCESSIVE.

@@ -235,19 +235,21 @@
 
 #define FAT_MAXCLUST12 ((1 << 12) - 16)
 
-/* FAT16: For M$, the calculation is ((1 << 16) - 19). */
+/* FAT16: For M$, the calculation is ((1 << 16) - 19). (The uint32_t cast is
+ * needed for architectures where int is only 16 bits).
+ */
 
 #define FAT_MINCLUST16 (FAT_MAXCLUST12 + 1)
-#define FAT_MAXCLUST16 ((1 << 16) - 16)
+#define FAT_MAXCLUST16 (((uint32_t)1 << 16) - 16)
 
 /* FAT32: M$ reserves the MS 4 bits of a FAT32 FAT entry so only 18 bits are
- * available.  For M$, the calculation is ((1 << 28) - 19).
+ * available.  For M$, the calculation is ((1 << 28) - 19). (The uint32_t cast
+ * is needed for architectures where int is only 16 bits).
  */
 
 #define FAT_MINCLUST32  65524
 /* #define FAT_MINCLUST32  (FAT_MAXCLUST16 + 1) */
-#define FAT_MAXCLUST32  ((1 << 28) - 16)
-
+#define FAT_MAXCLUST32  (((uint32_t)1 << 28) - 16)
 
 /****************************************************************************
  * Access to data in raw sector data */
