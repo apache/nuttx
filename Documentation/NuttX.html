@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 20, 2011</p>
+      <p>Last Updated: June 21, 2011</p>
     </td>
   </tr>
 </table>
@@ -829,59 +829,97 @@
   </tr>
 </table>
 
-<p><b>nuttx-6.4 Release Notes</b>:
+<p><b>nuttx-6.5 Release Notes</b>:
 <p>
-  The 71<sup>st</sup> release of NuttX, Version 6.4, was made on June 6, 2011 and is available for download from the
+  The 72<sup>nd</sup> release of NuttX, Version 6.5, was made on June 21, 2011 and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
   These unreleased changes are also listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  The 6.4 release includes several new features:
+  The 6.5 release is all about support for the Atmel 8-bit AVR family.
+  I have been interested in the AVR family for some time but because of the
+  severe SRAM constraints and because of the availability of many tiny schedulers
+  for the AVR, it has not been &quot;on the radar screen.&quot;
+  However, I have recently become interested because of interest expressed by
+  members of the Nuttx forum and because of the availability of newer, larger
+  capacity AVR parts (that I don't have yet).
+</p>
+<p>
+  This release includes support for the following AVR boards.
+  As with any initial support for new architectures, there are some incomplete areas and a few caveats that need to be stated.
+  Here they are, ordered from the least to the most complete:
 </p>
 <ul>
-  <li><i>FTP Client</i>.
-    A new, full-featured FTP client is included in this release. 
-    This client may be used as a library for automated FTP or via an FTP client shell.
-    The FTP shell supports the following commands: <code>cd</code>, <code>chmod</code>, <code>get</code>, <code>help</code>, <code>idle</code>, <code>login</code>, <code>ls</code>, <code>quit</code>, <code>mkdir</code>, <code>noop</code>, <code>put</code> <code>pwd</code>, <code>rename</code>, <code>rhelp</code>, <code>rm</code>, <code>rmdir</code>, <code>size</code>, <code>time</code>, and <code>up</code>.
-    A configuration is available for the NXP LPC17xx to demonstrate this functionality.
+  <li>
+    <p><b>SoC Robotics Amber Web Server (ATMega128)</b>.
+      This port of NuttX to the Amber Web Server from
+      <a href="http://www.soc-robotics.com/index.htm">SoC Robotics</a>.
+      The Amber Web Server is based on an Atmel ATMega128 (128Kb FLASH but
+      only 4Kb of SRAM).
+    </p>
+    <p><b>STATUS</b>:
+      Work on this port has stalled due to toolchain issues.
+      It is complete, but untested.
+    </p>
+  <li>
+    <p><b>Micropendous 3 (AT9USB647)</b>.
+      This port of NuttX to the <a href="http://code.google.com/p/opendous/">Opendous</a>
+      Micropendous 3 board.
+      Micropendous3 may be populated with an AT90USB646, 647, 1286, or 1287.
+      I have only the AT90USB647 version for testing.
+      This version has very limited memory resources: 64Kb of FLASH and 4Kb of SRAM.
+    </p>
+    <p>
+    <p><b>STATUS</b>:
+      The basic port was released in NuttX-6.5.
+      This basic port consists only of a &quot;Hello, World!!&qquo; example
+      that demonstrates initialization of the OS, creation of a simple task,
+      and serial console output.
+      The tiny SRAM limits what you can do with the AT90USB647 (see issues below).
+    </p>
   </li>
-  <li><i>C1101 Wireless Driver</i>.
-    A functional C1101 wireless driver (contributed by Uros Platise)
-  </li>
-  <li><i>E1000 Ethernet Driver</i>.
-    A PCI-based E1000 Ethernet driver (contributed by Yu Qiang)
-  </li>
-  <li><i>C-Library Functions</i>.
-    New C library functions: <code>inet_addr()</code> (contributed by Yu Qiang), <code>strndup()</code>, and <code>asprintf()</code>.
-  </li>
-  <li><i>Smaller Memory Allocation Overhead</i>.
-    Reduced memory allocation overhead for MCUs with small heaps (&lt;64Kb).
-  </li>
-  <li><i>C Buffered I/O Integrated with Networking.</i>
-    <code>fdopen()</code> now works with socket descriptors allowing standard bufferedC functions to be used for network communications.
-  </li>
-  <li><i><code>iconfig</code> Extensions</i>.
-    The NSH <code>ifconfig</code> command can now be used to set or change the IP address (contributed by Yu Qiang)
+  <li>
+    <p><b>PJRC Teensy++ 2.0 (AT90USB1286)</b>.
+      This is a port of NuttX to the PJRC Teensy++ 2.0 board.
+      This board was developed by <a href="http://pjrc.com/teensy/">PJRC</a>.
+      The Teensy++ 2.0 is based on an Atmel AT90USB1286 MCU with 128Kb of FLASH and 8Kb of SRAM;
+      a little more room to move than the AT90USB647.
+    </p>
+    <p><b>STATUS</b>:
+      The basic port was released in NuttX-6.5.
+      This basic port consists of a &quot;Hello, World!!&quot; example and
+      also slightly simplified NuttShell (NSH) configuration (see the
+      <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
+    </p>
+    <p><b>Unfinished Stuff</b>.
+      An SPI driver and a USB device driver exist for the AT90USB as well as a USB mass storage configuration.
+      However, this configuration is not fully debugged as of the NuttX-6.5 release.
+    </p>
   </li>
 </ul>
-<p>
-  This release also includes some completed but untested functionality:
-</p>
 
-<ul>
-  <li><i>MicroChip PIC32MX Support</i>.
-    The MicroChip PIC32MX port is now code complete and ready to begin testing. 
-    Unfortunately, testing will be delayed due to tool issues.
-  </li>
-  <li><i>NXP LPC315x Support</i>.
-    Support for the NXP LPC315x MCUs.
-  </li>
-</ul>
-<p>
-  Additional miscellaneous enhancements and bug fixes to <code>task_delete()</code>, <code>recvfrom()</code>, and other changes as noted in the ChangeLog.
+<p><b>AVR-Specific Issues</b>.
+  The basic AVR port is solid and biggest issue for using AVR is its tiny SRAM memory and its Harvard architecture.
+  Because of the Harvard architecture, constant data that resides to flash is inaccessible using &quot;normal&quot; memory reads and writes (only SRAM data can be accessed &quot;normally&quot;).
+  Special AVR instructions are available for accessing data in FLASH, but these have not been integrated into the normal, general purpose OS.
 </p>
+<p>
+  Most NuttX test applications are console-oriented with lots of strings used for printf and debug output.
+  These strings are all stored in SRAM now due to these data accessing issues and even the smallest console-oriented applications can quickly fill a 4-8Kb memory.
+  So, in order for the AVR port to be useful, one of two things would need to be done:
+</p>
+<ol>
+  <li>
+    Don't use console applications that required lots of strings.
+    The basic AVR port is solid and your typical deeply embedded application should work fine.
+    Or,
+  </li>
+  <li>
+    Create a special version of printf that knows how to access strings that reside in FLASH (or EEPROM).
+  </li>
+</ol>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1548,8 +1586,8 @@
     <ul>
       <p>
        <b>STATUS:</b>
-         The basic port was release in NuttX-6.5.  This basic port consists only of
-         a "Hello, World!!" example that demonstrates initialization of the OS,
+         The basic port was released in NuttX-6.5.  This basic port consists only of
+         a &quot;Hello, World!!&quot; example that demonstrates initialization of the OS,
          creation of a simple task, and serial console output.
       </p>
     </ul>
@@ -1565,24 +1603,40 @@
     <p>
       <b>PJRC Teensy++ 2.0 AT9USB1286</b>.
       This is a port of NuttX to the PJRC Teensy++ 2.0 board.
-      This board is developed by <a href="http://pjrc.com/teensy/">PJRC</a>.
+      This board was developed by <a href="http://pjrc.com/teensy/">PJRC</a>.
       The Teensy++ 2.0 is based on an Atmel AT90USB1286 MCU.
     </p>
     <ul>
       <p>
        <b>STATUS:</b>
-         The basic port was release in NuttX-6.5.  This basic port consists of
-         a "Hello, World!!" example that demonstrates initialization of the OS,
-         creation of a simple task, and serial console output as well as a
+         The basic port was released in NuttX-6.5.  This basic port consists of
+         a &quot;Hello, World!!&quot; example that demonstrates initialization of the OS,
+         creation of a simple task, and serial console output as well as a somewhat
          simplified NuttShell (NSH) configuration (see the
          <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
       </p>
       <p>
-         An SPI driver and a USB device driver exist for the AT90USB (as well
-         as a USB mass storage example).  However, this configuration is not
+         An SPI driver and a USB device driver exist for the AT90USB as well
+         as a USB mass storage configureation.  However, this configuration is not
          fully debugged as of the NuttX-6.5 release.
       </p>
     </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+      <p>
+        <b>Development Environments:</b>
+        1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU toolchain, or 3) Cygwin with Windows native toolchain. 
+        All testing, however, has been performed using the Nuttx DIY toolchain for Linux  or Cygwin is provided by the NuttX
+        <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a> package.
+        As a result, that toolchain is recommended.
+      </p>
   </td>
 </tr>
 
@@ -2290,62 +2344,30 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.4 2011-06-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.5 2011-06-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * lib/drivers/cc1101: Add initial, functional CC1101 wireless driver
-      (contributed by Uros Platise)
-    * arch/mips and configs/pcblogic-pic32mx: The MicroChip PIC32MX port is now
-      code complete and ready to begin testing.  Unfortunately, it looks like
-      testing will be delayed due to tool issues (My PICkit 2 will not work the
-      the MPLAB debugger on PIC32; I will need to get a PICkit 3).
-    * drivers/net/e1000.c/h: A PCI-based E1000 ethernet driver submitted
-      by Yu Qiang.
-    * lib/net/lib_inetaddr.c: An implementation of the inet_addr() function
-      submitted by Yu Qiang.
-    * arch/arm/src/lpc31xx and arch/arm/include/lpc31xx:  Renamed from lpc313x
-      to make name space for other famiy members.
-    * arch/arm/*/lpc31xx: Added support for the LPC315x family (untested).
-    * sched/task_exithook.c: Functionality performed when a task exits or is
-      deleted has been moved to a common file task_exithook.c.  Now exit()
-      functionality (like flushing I/O and calling registered atexit()
-      functions, etc.) will be performed when a task is deleted as well.
-    * mm/:  Added support for CONFIG_MM_SMALL. Each memory allocation has a
-      small allocation overhead.  The size of that overhead is normally
-      determined by the "width" of the address support by the MCU.  MCUs
-      that support 16-bit addressability have smaller overhead than devices
-      that support 32-bit addressability.  However, there are many MCUs
-      that support 32-bit addressability *but* have internal SRAM of size
-      less than or equal to 64Kb.  In this case, CONFIG_MM_SMALL can be
-      defined so that those MCUs will also benefit from the smaller, 16-
-      bit-based allocation overhead.
-    * lib/string/lib_strndup.c: Add standard strndup() library function.
-    * net/getsockname.c: Added standard getsockname() to return the local
-      address associated with a socket.
-    * lib/stdio/lib_asprintf.c: Add asprintf()
-    * configs/olimex-lpc1766stk/ftpc:  Add a configuration to support
-      testing of the FTP client shell.
-    * fd/fs_fdopen.c and net/net_checksd.c: Add support so that fdopen may
-      be used with socket descriptors.
-    * net/recvfrom.c: Fix an error found in receiving small files via FTP:
-      The small file is received a buffered in the readahead buffer, then the
-      socket is disconnected.  When the app calls recvfrom, the socket is
-      already disconnected and the buffered data is stranded.  Now, recvfrom
-      will continue to return success after the socket is disconnected until
-      the readahead buffer is drained.
-    * olimex-lp1766stk/ftpc/defconfig: Many configurations have the MTU 
-      (CONFIG_NET_BUFSIZE) set to very small numbers, less then the minimum
-      MTU size that must be supported -- 576. This can cause problems in
-      some networks:  CONFIG_NET_BUFSIZE should be set to at least 576 in
-      all defconfig files.  This has only been fixed in this defconfig file.
+    * arch/avr/src/avr and arch/avr/include/avr: Adds general support for
+      the Atmel 8-bit AVR family.
+    * arch/avr/src/atmega and arch/avr/include/atmega: Adds support for the
+      Atmel AVR ATMega family.
+    * arch/avr/src/at90usb and arch/avr/include/at90usb: Adds support for the
+      Atmel AVR AT90USB family.
+    * configs/micropendous3: Adds a board configuration for the Opendous
+      Micropendous 3 board.  This board may be populated with several different
+      members of the Atmel AVR AT90USB family.
+    * configs/amber: This is a placehold for the Atmel ATMega128 Amber Web
+      Server from SoC Robotics.  Not much present in this directory on initial
+      check-in.
+    * configs/teensy: Adds a board configuration for the PJRC Teensy++ 2.0 board
+      that features an Atmel AT90USB1286 MCU.
+    * fs/fat: Offsets, sector numbers, etc. need to be off_t, not size_t.  size_t
+      is intended to be the maximum size of a memory object, not a file offset. This
+      does not make any difference except on systems (like the AVR) where size_t
+      is only 16-bits.
 
-apps-6.4 2011-06-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+apps-6.5 2011-06-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * nshlib/nsh_netcmds.c: If a network device name and IP address are provided
-      with the ifconfig command, then this command will now set the network address.
-      (Contributed by Yu Qiang).
-    * netutils/ftpc: A library to support client-side FTP.
-    * examples/ftpc: A simple add-on to the NSH.  From NSH, you can start
-      this simple FTP shell to transfer files to/from a remote FTP server.
+    * netutils/ftpc:  Simpflication and size reduction.
 
 pascal-1.0 2011-05-15 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2388,26 +2410,9 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-6.5 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.6 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * arch/avr/src/avr and arch/avr/include/avr: Adds general support for
-      the Atmel 8-bit AVR family.
-    * arch/avr/src/atmega and arch/avr/include/atmega: Addes support for the
-      Atmel AVR ATMega family.
-    * arch/avr/src/at90usb and arch/avr/include/at90usb: Addes support for the
-      Atmel AVR AT90USB family.
-    * configs/micropendous3: Adds a board configuration for the Opendous
-      Micropendous 3 board.  This board may be populated with several different
-      members of the Atmel AVR AT90USB family.
-    * configs/amber: This is a placehold for the Atmel ATMega128 Amber Web
-      Server from SoC Robotics.  Not much present in this directory on initial
-      check-in.
-    * configs/teensy: Adds a board configuration for the PJRC Teensy++ 2.0 boar
-      that features an Atmel AT90USB1286 MCU.
-
-apps-6.5 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * netutils/ftpc:  Simpflication and size reduction.
+apps-6.6 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
