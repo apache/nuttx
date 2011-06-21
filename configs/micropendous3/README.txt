@@ -196,6 +196,10 @@ Serial Console
 Toolchains
 ^^^^^^^^^^
 
+There are several toolchain options.  However, testing has been performed
+using *only* the NuttX buildroot toolchain described below.  Therefore,
+the NuttX buildroot toolchain is the recommended choice:
+
 Buildroot:
 
   There is a DIY buildroot version for the AVR boards here:
