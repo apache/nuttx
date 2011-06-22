@@ -1830,3 +1830,8 @@
 	  is only 16-bits.
 
 6.6 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* drivers/mtd/ramtron.c, net/net_checksd.c, fs/fs_fdopen.c, and include/nuttx/mii.h:
+	  Several structural changes made to get a clean compile under the ez80 ZDS-II
+      toolchain (no design changes).
+

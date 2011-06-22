@@ -396,15 +396,15 @@
 #define KS8721_INTCS_REMFAULTE       (1 << 9)  /* Bit 9:  Enable remote fault interrupt */
 #define KS8721_INTCS_LINKDOWNE       (1 << 10) /* Bit 10: Enable link down interrupt */
 #define KS8721_INTCS_LPACKE          (1 << 11) /* Bit 11: Enable link partner acknowldgement interrupt */
-#define KS8721_INTCS_PDFAULT         (1 << 12) /* Bit 12: Enable parallel detect fault interrupt */
+#define KS8721_INTCS_PDFAULTE        (1 << 12) /* Bit 12: Enable parallel detect fault interrupt */
 #define KS8721_INTCS_PGRCVDE         (1 << 13) /* Bit 13: Enable page received interrupt */
 #define KS8721_INTCS_RXERRE          (1 << 14) /* Bit 14: Enable receive error interrupt */
 #define KS8721_INTCS_JABBERE         (1 << 15) /* Bit 15: Enable Jabber Interrupt */
 
 /* KS8921 10BASE-TX PHY control register */
 
-#define KS8721_10BTCR_ xxx            (1 << 0)  /* Bit 0:  xxx */
-#define KS8721_10BTCR_ xxx            (1 << 1)  /* Bit 1:  xxx */
+#define KS8721_10BTCR_BIT0            (1 << 0)  /* Bit 0:  xxx */
+#define KS8721_10BTCR_BIT1            (1 << 1)  /* Bit 1:  xxx */
 #define KS8721_10BTCR_MODE_SHIFT      (2)       /* Bits 2-4:  Operation Mode Indication */
 #define KS8721_10BTCR_MODE_MASK       (7 << KS8721_10BTCR_MODE_SHIFT)
 #  define KS8721_10BTCR_MODE_ANEG     (0 << KS8721_10BTCR_MODE_SHIFT) /* Still in auto-negotiation */
@@ -414,15 +414,15 @@
 #  define KS8721_10BTCR_MODE_10BTFD   (5 << KS8721_10BTCR_MODE_SHIFT) /* 10BASE-T full duplex */
 #  define KS8721_10BTCR_MODE_100BTFD  (6 << KS8721_10BTCR_MODE_SHIFT) /* 100BASE-T full duplex */
 #  define KS8721_10BTCR_MODE_ISOLATE  (7 << KS8721_10BTCR_MODE_SHIFT) /* PHY/MII isolate */
-#define KS8721_10BTCR_ ISOLATE        (1 << 5)  /* Bit 5:  PHY isolate */
-#define KS8721_10BTCR_ PAUSE          (1 << 6)  /* Bit 6:  Enable pause */
-#define KS8721_10BTCR_ ANEGCOMP       (1 << 7)  /* Bit 7:  Auto-negotiation complete */
-#define KS8721_10BTCR_ JABBERE        (1 << 8)  /* Bit 8:  Enable Jabber */
-#define KS8721_10BTCR_ INTLVL         (1 << 9)  /* Bit 9:  Interrupt level */
-#define KS8721_10BTCR_ POWER          (1 << 10) /* Bit 10: Power saving */
-#define KS8721_10BTCR_ FORCE          (1 << 11) /* Bit 11: Force link */
-#define KS8721_10BTCR_ ENERGY         (1 << 12) /* Bit 12: Energy detect */
-#define KS8721_10BTCR_ PAIRSWAPD      (1 << 13) /* Bit 13: Pairswap disable */
+#define KS8721_10BTCR_ISOLATE         (1 << 5)  /* Bit 5:  PHY isolate */
+#define KS8721_10BTCR_PAUSE           (1 << 6)  /* Bit 6:  Enable pause */
+#define KS8721_10BTCR_ANEGCOMP        (1 << 7)  /* Bit 7:  Auto-negotiation complete */
+#define KS8721_10BTCR_JABBERE         (1 << 8)  /* Bit 8:  Enable Jabber */
+#define KS8721_10BTCR_INTLVL          (1 << 9)  /* Bit 9:  Interrupt level */
+#define KS8721_10BTCR_POWER           (1 << 10) /* Bit 10: Power saving */
+#define KS8721_10BTCR_FORCE           (1 << 11) /* Bit 11: Force link */
+#define KS8721_10BTCR_ENERGY          (1 << 12) /* Bit 12: Energy detect */
+#define KS8721_10BTCR_PAIRSWAPD       (1 << 13) /* Bit 13: Pairswap disable */
 
 /****************************************************************************
  * Type Definitions

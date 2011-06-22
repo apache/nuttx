@@ -159,7 +159,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR _TCB *tcb)
        */
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      ret = net_checksd(tcb, fd, oflags);
+      ret = net_checksd(fd, oflags);
 #else
       /* No networking... it is just a bad descriptor */
 

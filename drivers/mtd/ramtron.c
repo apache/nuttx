@@ -127,7 +127,8 @@
 struct ramtron_parts_s
 {
 	const char *name;
-	uint8_t     id1, id2;
+	uint8_t     id1;
+	uint8_t     id2;
 	uint32_t    size;
 	uint8_t     addr_len;
 	uint32_t	speed;
@@ -160,64 +161,69 @@ struct ramtron_dev_s
 static struct ramtron_parts_s ramtron_parts[] =
 {
 	{
-		.size = 32L*1024L,
-		.addr_len = 2,
-		.id1 = 0x22,
-		.id2 = 0x00,
-		.speed = 40000000,
-		.name = "FM25V02",
+		"FM25V02",                    /* name */
+		0x22,                         /* id1 */
+		0x00,                         /* id2 */
+		32L*1024L,                    /* size */
+		2,                            /* addr_len */
+		40000000                      /* speed */
 	},
 	{
-		.size = 32L*1024L,
-		.addr_len = 2,
-		.id1 = 0x22,
-		.id2 = 0x01,
-		.speed = 40000000,
-		.name = "FM25VN02",
+		"FM25VN02",                    /* name */
+		0x22,                          /* id1 */
+		0x01,                          /* id2 */
+		32L*1024L,                     /* size */
+		2,                             /* addr_len */
+		40000000                       /* speed */
 	},
 	{
-		.size = 64L*1024L,
-		.addr_len = 2,
-		.id1 = 0x23,
-		.id2 = 0x00,
-		.speed = 40000000,
-		.name = "FM25V05",
+		"FM25V05",                    /* name */
+		0x23,                         /* id1 */
+		0x00,                         /* id2 */
+		64L*1024L,                    /* size */
+		2,                            /* addr_len */
+		40000000                      /* speed */
 	},
 	{
-		.size = 64L*1024L,
-		.addr_len = 2,
-		.id1 = 0x23,
-		.id2 = 0x01,
-		.speed = 40000000,
-		.name = "FM25VN05",
+		"FM25VN05",                    /* name */
+		0x23,                          /* id1 */
+		0x01,                          /* id2 */
+		64L*1024L,                     /* size */
+		2,                             /* addr_len */
+		40000000                       /* speed */
 	},
 	{
-		.size = 128L*1024L,
-		.addr_len = 3,
-		.id1 = 0x24,
-		.id2 = 0x00,
-		.speed = 40000000,
-		.name = "FM25V10",
+		"FM25V10",                    /* name */
+		0x24,                         /* id1 */
+		0x00,                         /* id2 */
+		128L*1024L,                   /* size */
+		3,                            /* addr_len */
+		40000000                      /* speed */
 	},
 	{
-		.size = 128L*1024L,
-		.addr_len = 3,
-		.id1 = 0x24,
-		.id2 = 0x01,
-		.speed = 40000000,
-		.name = "FM25VN10",
+		"FM25VN10",                   /* name */
+		0x24,                         /* id1 */
+		0x01,                         /* id2 */
+		128L*1024L,                   /* size */
+		3,                            /* addr_len */
+		40000000                      /* speed */
 	},
 #ifdef CONFIG_RAMTRON_FRAM_NON_JEDEC
 	{
-		.size = 256L*1024L,
-		.addr_len = 3,
-		.id1 = 0xff,
-		.id2 = 0xff,
-		.speed = 40000000,
-		.name = "FM25H20",
+		"FM25H20",                    /* name */
+		0xff,                         /* id1 */
+		0xff,                         /* id2 */
+		256L*1024L,                   /* size */
+		3,                            /* addr_len */
+		40000000                      /* speed */
 	},
 	{
-		.name = NULL,
+		NULL,                         /* name */
+        0,                            /* id1 */
+        0,                            /* id2 */
+		0,                            /* size */
+        0,                            /* addr_len */
+        0                             /* speed */
 	}
 #endif
 };
