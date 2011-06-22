@@ -203,7 +203,7 @@ for vardef in $varlist; do
 			# Treat the first definition differently
 
 			if [ -z "$response" ]; then
-				response="-define:'"$varname=$varvalue
+				response="-define:"$varname=$varvalue
 			else
 				response=$response" -define:$varname=$varvalue"
 			fi
