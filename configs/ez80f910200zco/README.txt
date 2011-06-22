@@ -35,6 +35,19 @@ Version 4.11.0
    I submitted the bug to ZiLOG), but I have permanently worked around the
    above problem for all ZiLOG compiler.
 
+Version 5.1.1
+
+  On June 22, 2011 I verified that these configurations build successfully
+  with the 5.1.1 ZDS-II version.  All that is required to used ZDS-II is
+  to modify the Make.defs file so that the correct version is used.  That
+  version should also be changed in the (optional) setenv.sh file.
+
+  The above kludge for 4.11.0 is not required.
+
+  I had to make additional changes to the ZDS path in Make.defs (and also
+  in setenv.sh) when the 32-bit ZDS-II tools are installed on my 64-bit
+  Windows 7 system.
+  
 Other Versions
   If you use any version of ZDS-II other than 4.11.0 or if you install ZDS-II
   at any location other than the default location, you will have to modify
