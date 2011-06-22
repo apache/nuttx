@@ -486,7 +486,7 @@
 #define USBHID_KBDUSE_DOWN                0x5a /* Keyboard DownArrow */
 #define USBHID_KBDUSE_UP                  0x52 /* Keyboard UpArrow */
 #define USBHID_KBDUSE_KPDNUMLOCK          0x53 /* Keypad Num Lock and Clear */
-#define USBHID_KBDUSE_KPDCLEAR            0x53 /* Keypad Num Lock and Clear */
+#define USBHID_KBDUSE_KPDNUMLOCKCLEAR     0x53 /* Keypad Num Lock and Clear */
 #define USBHID_KBDUSE_KPDDIV              0x54 /* Keypad / */
 #define USBHID_KBDUSE_KPDMUL              0x55 /* Keypad * */
 #define USBHID_KBDUSE_KPDHMINUS           0x56 /* Keypad - */
@@ -603,7 +603,7 @@
 #define USBHID_KBDUSE_KPDMEMCLEAR         0xd2 /* Keypad Memory Clear */
 #define USBHID_KBDUSE_KPDMEMADD           0xd3 /* Keypad Memory Add */
 #define USBHID_KBDUSE_KPDMEMSUB           0xd4 /* Keypad Memory Subtract */
-#define USBHID_KBDUSE_KPDMEMADD           0xd5 /* Keypad Memory Multiply */
+#define USBHID_KBDUSE_KPDMEMMULT          0xd5 /* Keypad Memory Multiply */
 #define USBHID_KBDUSE_KPDMEMDIV           0xd6 /* Keypad Memory Divide */
 #define USBHID_KBDUSE_KPDPLUSMINUS        0xd7 /* Keypad +/- */
 #define USBHID_KBDUSE_KPDCLEAR            0xd8 /* Keypad Clear */
