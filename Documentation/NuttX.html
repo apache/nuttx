@@ -2216,6 +2216,47 @@ avr, m68k, m68hc11, m68hc12, m9s12, blackfin, m32c, h8, and SuperH ports.</block
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
+    <b>Wine + GNU <code>make</code> + Windows Native Toolchain</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      I've never tried this one, but I off the following reported by an ez80 user using the ZiLOG ZDS-II Windows-native toolchain:
+    </p>
+    <blockquote>
+      <p>
+         &quot;I've installed ZDS-II 5.1.1 (IDE for ez80-based boards) on wine (windows emulator for UNIX) and to my surprise, not many changes were needed to make SVN snapshot of Nuttx buildable...
+         I've tried nsh profile and build process completed successfully.
+         One remark is necessary: Nuttx makefiles for ez80 are referencing <code>cygpath</code> utility.
+         Wine provides similar thing called <code>winepath</code> which is compatible and offers compatible syntax.
+         To use that, <code>winepath</code> (which itself is a shell script) has to be copied as <code>cygpath</code> somewhere in <code>$PATH</code>, and edited as in following patch:
+       </p>
+       <ul><pre>
+# diff -u `which winepath` `which cygpath`
+--- /usr/bin/winepath 2011-05-02 16:00:40.000000000 +0200
++++ /usr/bin/cygpath 2011-06-22 20:57:27.199351255 +0200
+@@ -20,7 +20,7 @@
+#
+
+# determine the app Winelib library name
+-appname=`basename "$0" .exe`.exe
++appname=winepath.exe
+
+# first try explicit WINELOADER
+if [ -x "$WINELOADER" ]; then exec "$WINELOADER" "$appname" "$@"; fi
+</pre></ul>
+      <p>
+        &quot;Better solution would be replacing all <code>cygpath</code> references in  <code>Makefiles </code> with  <code>$(CONVPATH)</code> (or  <code>${CONVPATH}</code> in shell scripts) and setting <code>CONVPATH</code> to  <code>cygpath</code> or  <code>winepath</code> regarding to currently used environment.
+      </p>
+    </blockquote>
+  </td>
+</tr>
+
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
     <b>Other Environments?
     Windows Native <code>make</code> + Windows Native Toolchain?</b>
   </td>
