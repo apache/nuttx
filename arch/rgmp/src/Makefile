@@ -50,7 +50,7 @@ LDFLAGS		+= -T$(RGMPLKSCPT)
 LDPATHS		= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 LDPATHS		+= -L$(RGMPLIBDIR)
-LDLIBS		+= -lrgmp -lm -ltest /usr/lib/gcc/$(shell gcc -dumpmachine)/$(shell gcc -dumpversion)/libgcc.a
+LDLIBS		+= -lrgmp -lm -ltest $(shell gcc -print-libgcc-file-name)
 
 all: libarch$(LIBEXT)
 .PHONY: clean distclean depend
