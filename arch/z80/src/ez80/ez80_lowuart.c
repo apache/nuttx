@@ -106,7 +106,7 @@
 #  else
 #    define CONFIG_UART_PARITY 0
 #  endif
-#elif defined(CONFIG_UART0_SERIAL_CONSOLE)
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #  define ez80_inp(offs)       inp((EZ80_UART1_BASE+(offs)))
 #  define ez80_outp(offs.val)  outp((EZ80_UART1_BASE+(offs)), (val))
 #  define CONFIG_UART_BAUD     CONFIG_UART1_BAUD
