@@ -669,6 +669,7 @@ static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
 {
   FAR struct usb_ctrlreq_s *req = (FAR struct usb_ctrlreq_s *)priv->tbuffer;
   DEBUGASSERT(priv && priv->tbuffer);
+  int ret;
 
   /* Request maximum logical unit number.  NOTE: On an IN transaction, The
    * req and buffer pointers passed to DRVR_CTRLIN may refer to the same
@@ -680,7 +681,17 @@ static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
   req->type    = USB_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
   req->req     = USBSTRG_REQ_GETMAXLUN;
   usbhost_putle16(req->len, 1);
-  return DRVR_CTRLIN(priv->drvr, req, priv->tbuffer);
+
+  ret = DRVR_CTRLIN(priv->drvr, req, priv->tbuffer);
+  if (ret != OK)
+    {
+      /* Devices that do not support multiple LUNs may stall this command.
+       * On a failure, a single LUN is assumed.
+       */
+
+      *(priv->tbuffer) = 0;
+    }
+  return OK;
 }
 
 static inline int usbhost_testunitready(FAR struct usbhost_state_s *priv)
@@ -788,7 +799,7 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
           /* Save the capacity information */
 
           resp            = (FAR struct scsiresp_readcapacity10_s *)priv->tbuffer;
-          priv->nblocks   = usbhost_getbe32(resp->lba);
+          priv->nblocks   = usbhost_getbe32(resp->lba) + 1;
           priv->blocksize = usbhost_getbe32(resp->blklen);
 
           /* Receive the CSW */

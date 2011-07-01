@@ -1833,5 +1833,11 @@
 
 	* drivers/mtd/ramtron.c, net/net_checksd.c, fs/fs_fdopen.c, and include/nuttx/mii.h:
 	  Several structural changes made to get a clean compile under the ez80 ZDS-II
-      toolchain (no design changes).
+	  toolchain (no design changes).
+	* drivers/usbhost/usbhost_storage.c:  Incorpated bugfixes reported by Sheref H.
+	  Younan:  (1) Read capacity logic read largest block, not the number of blocks
+	  and was, therefore, off by one, and (2) Some devices stall of get Max LUN request
+	  if they support only a single LUN.  Logic now assumes a single LUN if the get
+	  Max LUN request fails.
+
 
