@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/ioctl.h
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
+/* General ioctl definitions ************************************************/
 /* Each NuttX ioctl commands are uint16_t's consisting of an 8-bit type
  * identifier and an 8-bit command number.  All comman type identifiers are
  * defined below:
@@ -68,23 +68,23 @@
 
 #define _IOC(type,nr)   ((type)|(nr))
 
-/* Terminal I/O ioctl commands */
+/* Terminal I/O ioctl commands **********************************************/
 
 #define _TIOCVALID(c)   (_IOC_TYPE(c)==_TIOCBASE)
 #define _TIOC(nr)       _IOC(_TIOCBASE,nr)
 
-#define TIOCSBRK        _TIOC(0x0001)     /* BSD compatibility */
-#define TIOCCBRK        _TIOC(0x0002)     /* " " "           " */
-#define TIOCSERGSTRUCT  _TIOC(0x0003)     /* Get up_dev_t for port */
+/* Terminal I/O IOCTL definitions are retained in tioctl.h */
 
-/* Watchdog driver ioctl commands */
+#include <nuttx/tioctl.h>
+
+/* Watchdog driver ioctl commands *******************************************/
 
 #define _WDIOCVALID(c)  (_IOC_TYPE(c)==_WDIOCBASE)
 #define _WDIOC(nr)      _IOC(_WDIOCBASE,nr)
 
 #define WDIOC_KEEPALIVE _WDIOC(0x0001)    /* Restart the watchdog timer */
 
-/* NuttX file system ioctl definitions */
+/* NuttX file system ioctl definitions **************************************/
 
 #define _FIOCVALID(c)   (_IOC_TYPE(c)==_FIOCBASE)
 #define _FIOC(nr)       _IOC(_FIOCBASE,nr)
@@ -101,7 +101,7 @@
                                            * OUT: None
                                            */
 
-/* NuttX file system ioctl definitions */
+/* NuttX file system ioctl definitions **************************************/
 
 #define _DIOCVALID(c)   (_IOC_TYPE(c)==_DIOCBASE)
 #define _DIOC(nr)       _IOC(_DIOCBASE,nr)
@@ -116,7 +116,7 @@
                                            *      FIOC_GETPRIV released.
                                            */
 
-/* NuttX block driver ioctl definitions */
+/* NuttX block driver ioctl definitions *************************************/
 
 #define _BIOCVALID(c)   (_IOC_TYPE(c)==_BIOCBASE)
 #define _BIOC(nr)       _IOC(_BIOCBASE,nr)
@@ -136,7 +136,8 @@
                                            * IN:  None
                                            * OUT: None (ioctl return value provides
                                            *      success/failure indication). */
-/* NuttX MTD driver ioctl definitions */
+
+/* NuttX MTD driver ioctl definitions ***************************************/
 
 #define _MTDIOCVALID(c)   (_IOC_TYPE(c)==_MTDIOCBASE)
 #define _MTDIOC(nr)       _IOC(_MTDIOCBASE,nr)
@@ -154,7 +155,7 @@
 #define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
                                            * OUT: None */
 
-/* NuttX ARP driver ioctl definitions (see netinet/arp.h) */
+/* NuttX ARP driver ioctl definitions (see netinet/arp.h) *******************/
 
 #define _ARPIOCVALID(c)   (_IOC_TYPE(c)==_ARPBASE)
 #define _ARPIOC(nr)       _IOC(_ARPBASE,nr)
