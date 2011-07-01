@@ -76,10 +76,15 @@ typedef signed long long   _int64_t;   /* long long is 64-bits */
 typedef unsigned long long _uint64_t;
 #define __INT64_DEFINED
 
-/* A pointer is 2 bytes */
+/* A (near) pointer is 2 bytes */
 
 typedef signed int         _intptr_t;
 typedef unsigned int       _uintptr_t;
+
+/* A FAR pointer is 4 bytes */
+
+typedef signed long        _int_farptr_t;
+typedef unsigned long      _uint_farptr_t;
 
 /* This is the size of the interrupt state save returned by irqsave(). */
 

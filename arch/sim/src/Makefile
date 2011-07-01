@@ -64,9 +64,15 @@ HOSTSRCS = up_stdio.c up_hostusleep.c
 ifeq ($(USEX),y)
   HOSTSRCS +=  up_x11framebuffer.c
 endif
+
 ifeq ($(CONFIG_FS_FAT),y)
 CSRCS += up_blockdevice.c up_deviceimage.c
 endif
+
+ifeq ($(CONFIG_ARCH_ROMGETC),y)
+CSRCS += up_romgetc.c
+endif
+
 ifeq ($(CONFIG_NET),y)
 CSRCS += up_uipdriver.c
 HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_BUFSIZE)
