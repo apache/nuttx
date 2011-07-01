@@ -124,7 +124,7 @@ extern int lib_sprintf(FAR struct lib_outstream_s *obj,
 /* Defined lib_libvsprintf.c */
 
 extern int lib_vsprintf(FAR struct lib_outstream_s *obj,
-                        const char *src, va_list ap);
+                        FAR const char *src, va_list ap);
 
 /* Defined lib_rawprintf.c */
 

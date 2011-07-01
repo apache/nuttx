@@ -282,6 +282,15 @@ typedef _uint64_t    uint_fast64_t;
 typedef _intptr_t    intptr_t;
 typedef _uintptr_t   uintptr_t;
 
+/* Some architectures support a FAR pointer which is larger then the normal
+ * (near) pointer
+ */
+
+#ifdef CONFIG_HAVE_FARPOINTER
+typedef _int_farptr_t    int_farptr_t;
+typedef _uint_farptr_t   uint_farptr_t;
+#endif
+
 /* Greatest-width integer types */
 
 #ifdef __INT64_DEFINED

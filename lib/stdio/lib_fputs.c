@@ -41,9 +41,14 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+
+#include <nuttx/arch.h>
+
 #include "lib_internal.h"
 
 /****************************************************************************
@@ -90,7 +95,53 @@
  *
  ****************************************************************************/
 
+#if defined(CONFIG_ARCH_ROMGETC)
+int fputs(FAR const char *s, FAR FILE *stream)
+{
+  int nput;
+  int ret;
+  char ch;
+
+  /* Make sure that a string was provided. */
+
+#ifdef CONFIG_DEBUG /* Most parameter checking is disabled if DEBUG is off */
+  if (!s)
+    {
+      set_errno(EINVAL);
+      return EOF;
+    }
+#endif
+
+  /* Write the string.  Loop until the null terminator is encountered */
+
+  for (nput = 0, ch = up_romgetc(s); ch; nput++, s++, ch = up_romgetc(s))
+    {
+      /* Write the next character to the stream buffer */
+
+      ret = lib_fwrite(&ch, 1, stream);
+      if (ret <= 0)
+        {
+          return EOF;
+        }
+
+      /* Flush the buffer if a newline was written to the buffer */
+
 #ifdef CONFIG_STDIO_LINEBUFFER
+      if (ch == '\n')
+        {
+          ret = lib_fflush(stream, true);
+          if (ret < 0)
+            {
+              return EOF;
+            }
+        }
+#endif
+    }
+
+  return nput;
+}
+
+#elif defined(CONFIG_STDIO_LINEBUFFER)
 int fputs(FAR const char *s, FAR FILE *stream)
 {
   int nput;
@@ -118,7 +169,7 @@ int fputs(FAR const char *s, FAR FILE *stream)
           return EOF;
         }
 
-      /* Flush the buffer if a newline was writen to the buffer */
+      /* Flush the buffer if a newline was written to the buffer */
 
       if (*s == '\n')
         {

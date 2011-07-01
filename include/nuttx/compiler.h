@@ -103,7 +103,7 @@
  * pointers are 16-bits.
  */
 
-#if defined(__m32c__) || defined(__AVR__)
+#if defined(__m32c__)
 /* Select the small, 16-bit addressing model */
 
 # define  CONFIG_SMALL_MEMORY 1
@@ -116,7 +116,24 @@
 
 # undef  CONFIG_PTR_IS_NOT_INT
 
-/* Handle cases where sizeof(int) may or may not be 16-bits  */
+#elif defined(__AVR__)
+/* Select the small, 16-bit addressing model */
+
+# define  CONFIG_SMALL_MEMORY 1
+
+/* Long and int are not the same size */
+
+# define  CONFIG_LONG_IS_NOT_INT 1
+
+/* Pointers and int are the same size */
+
+# undef  CONFIG_PTR_IS_NOT_INT
+
+/* Uses a 32-bit FAR pointer only from accessing data outside of the 16-bit
+ * data space.
+ */
+
+#  define CONFIG_HAVE_FARPOINTER 1
 
 #elif defined(__mc68hc1x__)
 /* Select the small, 16-bit addressing model */

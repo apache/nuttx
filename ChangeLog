@@ -1839,5 +1839,13 @@
 	  and was, therefore, off by one, and (2) Some devices stall of get Max LUN request
 	  if they support only a single LUN.  Logic now assumes a single LUN if the get
 	  Max LUN request fails.
+	* include/nuttx/arch.h, lib/stdio/lib_libvsprintf.c, lib/stdio/lib_fputs.c: Add
+	  a new configuration option to support extracting strings from FLASH or EEPROM
+	  or other memories where the string data cannot be accessed by simply de-referencing
+	  a string pointer.
+	* arch/sim/src/up_romgetc.c:  Used to test the basic logic to access strings
+	  without directly de-referencing a string pointer.
+	* arch/avr/src/avr/up_romget.c:  Used to access strings that lie in the first
+	  64Kb of FLASH.
 
 

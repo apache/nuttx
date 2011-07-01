@@ -489,15 +489,39 @@ defconfig -- This is a configuration file similar to the Linux
 		The architecture can provide optimized versions of the
 		following to improve system performance
 
-		CONFIG_ARCH_MEMCPY, CONFIG_ARCH_MEMCMP, CONFIG_ARCH_MEMMOVE
-		CONFIG_ARCH_MEMSET, CONFIG_ARCH_STRCMP, CONFIG_ARCH_STRCPY
-		CONFIG_ARCH_STRNCPY, CONFIG_ARCH_STRLEN, CONFIG_ARCH_STRNLEN
-		CONFIG_ARCH_BZERO
+		  CONFIG_ARCH_MEMCPY, CONFIG_ARCH_MEMCMP, CONFIG_ARCH_MEMMOVE
+		  CONFIG_ARCH_MEMSET, CONFIG_ARCH_STRCMP, CONFIG_ARCH_STRCPY
+		  CONFIG_ARCH_STRNCPY, CONFIG_ARCH_STRLEN, CONFIG_ARCH_STRNLEN
+		  CONFIG_ARCH_BZERO
 
 		The architecture may provide custom versions of certain
 		standard header files:
 
-		CONFIG_ARCH_MATH_H, CONFIG_ARCH_STDBOOL_H, CONFIG_ARCH_STDINT_H
+		  CONFIG_ARCH_MATH_H, CONFIG_ARCH_STDBOOL_H, CONFIG_ARCH_STDINT_H
+
+        CONFIG_ARCH_ROMGETC - In Harvard architectures, data accesses and
+          instruction accesses occur on different busses, perhaps
+          concurrently.  All data accesses are performed on the data bus
+          unless special machine instructions are used to read data
+          from the instruction address space.  Also, in the typical
+          MCU, the available SRAM data memory is much smaller that the
+          non-volatile FLASH instruction memory.  So if the application
+          requires many constant strings, the only practical solution may
+          be to store those constant strings in FLASH memory where they
+          can only be accessed using architecture-specific machine
+          instructions.
+
+          If CONFIG_ARCH_ROMGETC is defined, then the architecture logic
+          must export the function up_romgetc().  up_romgetc() will simply
+          read one byte of data from the instruction space.
+ 
+          If CONFIG_ARCH_ROMGETC, certain C stdio functions are effected:
+          (1) All format strings in printf, fprintf, sprintf, etc. are
+          assumed to lie in FLASH (string arguments for %s are still assumed
+          to reside in SRAM). And (2), the string argument to puts and fputs
+          is assumed to reside in FLASH.  Clearly, these assumptions may have
+          to modified for the particular needs of your environment.  There
+          is no "one-size-fits-all" solution for this problem.
 
 	Sizes of configurable things (0 disables)
 

@@ -44,6 +44,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <nuttx/arch.h>
+
 #include "lib_internal.h"
 
 /****************************************************************************
@@ -96,6 +98,33 @@ enum
 #define IS_NEGATE(f)             (((f) & FLAG_NEGATE) != 0)
 #define IS_SIGNED(f)             (((f) & (FLAG_SHOWPLUS|FLAG_NEGATE)) != 0)
 
+/* If CONFIG_ARCH_ROMGETC is defined, then it is assumed that the format
+ * string data cannot be accessed by simply de-referencing the format string
+ * pointer.  This might be in the case in Harvard architectures where string
+ * data might be stored in instruction space or if string data were stored
+ * on some media like EEPROM or external serial FLASH.  In all of these cases,
+ * string data has to be accessed indirectly using the architecture-supplied
+ * up_romgetc().  The following mechanisms attempt to make these different
+ * access methods indistinguishable in the following code.
+ *
+ * NOTE: It is assumed that string arguments for %s still reside in memory
+ * that can be directly accessed by de-referencing the string pointer.
+ */
+
+#ifdef CONFIG_ARCH_ROMGETC
+#  define FMT_TOP      ch = up_romgetc(src)         /* Loop initialization */
+#  define FMT_BOTTOM   src++, ch = up_romgetc(src)  /* Bottom of a loop */
+#  define FMT_CHAR     ch                           /* Access a character */
+#  define FMT_NEXT     src++; ch = up_romgetc(src)  /* Advance to the next character */
+#  define FMT_PREV     src--; ch = up_romgetc(src)  /* Backup to the previous character */
+#else
+#  define FMT_TOP                                   /* Loop initialization */
+#  define FMT_BOTTOM   src++                        /* Bottom of a loop */
+#  define FMT_CHAR     *src                         /* Access a character */
+#  define FMT_NEXT     src++                        /* Advance to the next character */
+#  define FMT_PREV     src--                        /* Backup to the previous character */
+#endif
+ 
 /****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
@@ -1111,30 +1140,33 @@ static void postjustify(FAR struct lib_outstream_s *obj, uint8_t fmt,
  * lib/stdio/lib_vsprintf
  ****************************************************************************/
 
-int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
+int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const char *src, va_list ap)
 {
-  char           *ptmp;
+  FAR char        *ptmp;
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
   int             width;
   int             trunc;
   uint8_t         fmt;
 #endif
   uint8_t         flags;
+#ifdef CONFIG_ARCH_ROMGETC
+  char            ch;
+#endif
 
-  for (; *src; src++)
+  for (FMT_TOP; FMT_CHAR; FMT_BOTTOM)
     {
       /* Just copy regular characters */
 
-      if (*src != '%')
+      if (FMT_CHAR != '%')
         {
            /* Output the character */
 
-           obj->put(obj, *src);
+           obj->put(obj, FMT_CHAR);
 
            /* Flush the buffer if a newline is encountered */
 
 #ifdef CONFIG_STDIO_LINEBUFFER
-           if (*src == '\n')
+           if (FMT_CHAR == '\n')
              {
                /* Should return an error on a failure to flush */
 
@@ -1148,7 +1180,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
       /* We have found a format specifier. Move past it. */
 
-      src++;
+      FMT_NEXT;
 
       /* Assume defaults */
 
@@ -1161,18 +1193,18 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
       /* Process each format qualifier. */
 
-      for (; *src; src++)
+      for (; FMT_CHAR; FMT_BOTTOM)
         {
           /* Break out of the loop when the format is known. */
 
-          if (strchr("diuxXpobeEfgGlLsc%", *src))
+          if (strchr("diuxXpobeEfgGlLsc%", FMT_CHAR))
             {
               break;
             }
 
           /* Check for left justification. */
 
-          else if (*src == '-')
+          else if (FMT_CHAR == '-')
             {
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
               fmt = FMT_LJUST;
@@ -1181,7 +1213,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
           /* Check for leading zero fill right justification. */
 
-          else if (*src == '0')
+          else if (FMT_CHAR == '0')
             {
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
               fmt = FMT_RJUST0;
@@ -1190,7 +1222,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 #if 0
           /* Center justification. */
 
-          else if (*src == '~')
+          else if (FMT_CHAR == '~')
             {
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
               fmt = FMT_CENTER;
@@ -1198,7 +1230,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
             }
 #endif
 
-          else if (*src == '*')
+          else if (FMT_CHAR == '*')
             {
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
               int value = va_arg(ap, int);
@@ -1217,17 +1249,29 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
           /* Check for field width */
 
-          else if (*src >= '1' && *src <= '9')
+          else if (FMT_CHAR >= '1' && FMT_CHAR <= '9')
             {
 #ifdef CONFIG_NOPRINTF_FIELDWIDTH
-              for (src++; (*src >= '0' && *src <= '9'); src++);
+              do
+                {
+                  FMT_NEXT;
+                }
+              while (FMT_CHAR >= '0' && FMT_CHAR <= '9');
 #else
               /* Accumulate the field width integer. */
 
-              int n = ((int)(*src)) - (int)'0';
-              for (src++; (*src >= '0' && *src <= '9'); src++)
+              int n = ((int)(FMT_CHAR)) - (int)'0';
+              for (;;)
                 {
-                  n = 10*n + (((int)(*src)) - (int)'0');
+                  FMT_NEXT;
+                  if (FMT_CHAR >= '0' && FMT_CHAR <= '9')
+                    {
+                      n = 10*n + (((int)(FMT_CHAR)) - (int)'0');
+                    }
+                  else
+                    {
+                      break;
+                    }
                 }
 
               if (IS_HASDOT(flags))
@@ -1241,12 +1285,12 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 #endif
               /* Back up to the last digit. */
 
-              src--;
+              FMT_PREV;
             }
 
           /* Check for a decimal point. */
 
-          else if (*src == '.')
+          else if (FMT_CHAR == '.')
             {
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
               SET_HASDOT(flags);
@@ -1255,14 +1299,14 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
           /* Check for leading plus sign. */
 
-          else if (*src == '+')
+          else if (FMT_CHAR == '+')
             {
               SET_SHOWPLUS(flags);
             }
 
           /* Check for alternate form. */
 
-          else if (*src == '#')
+          else if (FMT_CHAR == '#')
             {
               SET_ALTFORM(flags);
             }
@@ -1272,7 +1316,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
        * specification).
        */
 
-      if (*src == '%')
+      if (FMT_CHAR == '%')
         {
           obj->put(obj, '%');
           continue;
@@ -1280,7 +1324,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
       /* Check for the string format. */
 
-      if (*src == 's')
+      if (FMT_CHAR == 's')
         {
           /* Just concatenate the string into the output */
 
@@ -1300,7 +1344,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
       /* Check for the character output */
 
-      else if (*src == 'c')
+      else if (FMT_CHAR == 'c')
         {
           /* Just copy the character into the output. */
 
@@ -1311,27 +1355,28 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
       /* Check for the long long prefix. */
 
-      if (*src == 'L')
+      if (FMT_CHAR == 'L')
         {
            SET_LONGLONGPRECISION(flags);
-           ++src;
+           FMT_NEXT;
         }
-      else if (*src == 'l')
+      else if (FMT_CHAR == 'l')
         {
           SET_LONGPRECISION(flags);
-          if (*++src == 'l')
+          FMT_NEXT;
+          if (FMT_CHAR == 'l')
             {
               SET_LONGLONGPRECISION(flags);
-              ++src;
+              FMT_NEXT;
             }
         }
 
       /* Handle integer conversions */
 
-      if (strchr("diuxXpob", *src))
+      if (strchr("diuxXpob", FMT_CHAR))
         {
 #ifdef CONFIG_HAVE_LONG_LONG
-          if (IS_LONGLONGPRECISION(flags) && *src != 'p')
+          if (IS_LONGLONGPRECISION(flags) && FMT_CHAR != 'p')
             {
               long long lln;
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
@@ -1344,15 +1389,15 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 #ifdef CONFIG_NOPRINTF_FIELDWIDTH
               /* Output the number */
 
-              llutoascii(obj, *src, flags, (unsigned long long)lln);
+              llutoascii(obj, FMT_CHAR, flags, (unsigned long long)lln);
 #else
               /* Resolve sign-ness and format issues */
 
-              llfixup(*src, &flags, &lln);
+              llfixup(FMT_CHAR, &flags, &lln);
 
               /* Get the width of the output */
 
-              lluwidth = getllusize(*src, flags, lln);
+              lluwidth = getllusize(FMT_CHAR, flags, lln);
 
               /* Perform left field justification actions */
 
@@ -1360,7 +1405,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
               /* Output the number */
 
-              llutoascii(obj, *src, flags, (unsigned long long)lln);
+              llutoascii(obj, FMT_CHAR, flags, (unsigned long long)lln);
 
               /* Perform right field justification actions */
 
@@ -1370,7 +1415,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
           else
 #endif /* CONFIG_HAVE_LONG_LONG */
 #ifdef CONFIG_LONG_IS_NOT_INT
-          if (IS_LONGPRECISION(flags) && *src != 'p')
+          if (IS_LONGPRECISION(flags) && FMT_CHAR != 'p')
             {
               long ln;
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
@@ -1383,15 +1428,15 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 #ifdef CONFIG_NOPRINTF_FIELDWIDTH
               /* Output the number */
 
-              lutoascii(obj, *src, flags, (unsigned long)ln);
+              lutoascii(obj, FMT_CHAR, flags, (unsigned long)ln);
 #else
               /* Resolve sign-ness and format issues */
 
-              lfixup(*src, &flags, &ln);
+              lfixup(FMT_CHAR, &flags, &ln);
 
               /* Get the width of the output */
 
-              luwidth = getlusize(*src, flags, ln);
+              luwidth = getlusize(FMT_CHAR, flags, ln);
 
               /* Perform left field justification actions */
 
@@ -1399,7 +1444,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
               /* Output the number */
 
-              lutoascii(obj, *src, flags, (unsigned long)ln);
+              lutoascii(obj, FMT_CHAR, flags, (unsigned long)ln);
 
               /* Perform right field justification actions */
 
@@ -1409,7 +1454,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
           else
 #endif /* CONFIG_LONG_IS_NOT_INT */
 #ifdef CONFIG_PTR_IS_NOT_INT
-          if (*src == 'p')
+          if (FMT_CHAR == 'p')
             {
               void *p;
 #ifndef CONFIG_NOPRINTF_FIELDWIDTH
@@ -1426,11 +1471,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 #else
               /* Resolve sign-ness and format issues */
 
-              lfixup(*src, &flags, &ln);
+              lfixup(FMT_CHAR, &flags, &ln);
 
               /* Get the width of the output */
 
-              luwidth = getpsize(*src, flags, p);
+              luwidth = getpsize(FMT_CHAR, flags, p);
 
               /* Perform left field justification actions */
 
@@ -1459,15 +1504,15 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 #ifdef CONFIG_NOPRINTF_FIELDWIDTH
               /* Output the number */
 
-              utoascii(obj, *src, flags, (unsigned int)n);
+              utoascii(obj, FMT_CHAR, flags, (unsigned int)n);
 #else
               /* Resolve sign-ness and format issues */
 
-              fixup(*src, &flags, &n);
+              fixup(FMT_CHAR, &flags, &n);
 
               /* Get the width of the output */
 
-              uwidth = getusize(*src, flags, n);
+              uwidth = getusize(FMT_CHAR, flags, n);
 
               /* Perform left field justification actions */
 
@@ -1475,7 +1520,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
 
               /* Output the number */
 
-              utoascii(obj, *src, flags, (unsigned int)n);
+              utoascii(obj, FMT_CHAR, flags, (unsigned int)n);
 
               /* Perform right field justification actions */
 
@@ -1487,10 +1532,10 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, const char *src, va_list ap)
       /* Handle floating point conversions */
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
-      else if (strchr("eEfgG", *src))
+      else if (strchr("eEfgG", FMT_CHAR))
         {
           double dblval = va_arg(ap, double);
-          lib_dtoa(obj, *src, trunc, flags, dblval);
+          lib_dtoa(obj, FMT_CHAR, trunc, flags, dblval);
         }
 #endif
     }

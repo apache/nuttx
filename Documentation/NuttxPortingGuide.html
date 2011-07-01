@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: June 18, 2011</p>
+      <p>Last Updated: July 1, 2011</p>
     </td>
   </tr>
 </table>
@@ -3628,34 +3628,65 @@ build
 
 <ul>
   <li>
-    <code>CONFIG_NOPRINTF_FIELDWIDTH</code>: sprintf-related logic is a
+    <code>CONFIG_NOPRINTF_FIELDWIDTH</code>: <code>sprintf</code>-related logic is a
     little smaller if we do not support fieldwidthes
   </li>
   <li>
     <code>CONFIG_LIBC_FLOATINGPOINT</code>: By default, floating point
-    support in printf, sscanf, etc. is disabled.
+    support in <code>printf</code>, <code>sscanf</code>, etc. is disabled.
   </li>
 </ul>
 
 <h2>Allow for architecture optimized implementations</h2>
 
-<p>
-  The architecture can provide optimized versions of the following to improve system performance.
-</p>
-
 <ul>
-<p>
+<li>
+  The architecture can provide optimized versions of the following to improve system performance.
+</li>
+<ul><p>
   <code>CONFIG_ARCH_MEMCPY</code>, <code>CONFIG_ARCH_MEMCMP</code>, <code>CONFIG_ARCH_MEMMOVE</code>,
   <code>CONFIG_ARCH_MEMSET</code>, <code>CONFIG_ARCH_STRCMP</code>, <code>CONFIG_ARCH_STRCPY</code>,
   <code>CONFIG_ARCH_STRNCPY</code>, <code>CONFIG_ARCH_STRLEN</code>, <code>CONFIG_ARCH_STRNLEN</code>,
   <code>CONFIG_ARCH_BZERO</code>
-</p>
-<p>
+</p></ul>
+
+<li>
   The architecture may provide custom versions of certain standard header files:
-</p>
-<p>
+</li>
+<ul><p>
   <code>CONFIG_ARCH_MATH_H</code>, <code>CONFIG_ARCH_STDBOOL_H</code>, <code>CONFIG_ARCH_STDINT_H</code>
-</p>
+</p></ul>
+
+<li>
+  <p><code>CONFIG_ARCH_ROMGETC</code>:
+    There are cases where string data cannot be cannot be accessed by simply de-referencing a string pointer.
+    As examples:
+  </p>
+  <ul>
+    <li>
+      In Harvard architectures, data accesses and instruction accesses occur on different busses, perhaps concurrently.
+      All data accesses are performed on the data bus unless special machine instructions are used to read data from the instruction address space.
+      Also, in the typical MCU, the available SRAM data memory is much smaller that the non-volatile FLASH instruction memory.
+      So if the application requires many constant strings, the only practical solution may be to store those constant strings in FLASH memory where they can only be accessed using architecture-specific machine instructions.
+    </li>
+    <li>
+      A similar case is where strings are retained in &quot;external&quot; memory such as EEPROM or serial FLASH.
+      This case is similar only in that again special operations are required to obtain the string data;
+      it cannot be accessed directly from a string pointer.
+    </li>
+  </ul>
+  <p>
+    If <code>CONFIG_ARCH_ROMGETC</code> is defined, then the architecture-specific logic must export the function <code>up_romgetc()</code>.
+    <code>up_romgetc()</code> will simply read one byte of data from the instruction space.
+  </p>
+  <p>
+    If <code>CONFIG_ARCH_ROMGETC</code>, certain C stdio functions are effected:
+    (1) All format strings in <code>printf</code>, <code>fprintf</code>, <code>sprintf</code>, etc. are assumed to lie in FLASH
+    (string arguments for <code>%s</code> are still assumed to reside in SRAM).
+    And (2), the string argument to <code>puts</code> and <code>fputs</code> is assumed to reside in FLASH.
+    Clearly, these assumptions may have to modified for the particular needs of your environment.
+    There is no &quot;one-size-fits-all&quot; solution for this problem.
+  </p>
 </ul>
 
 <h2>Sizes of configurable things (0 disables)</h2>
