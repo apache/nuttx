@@ -1834,7 +1834,7 @@
 	* drivers/mtd/ramtron.c, net/net_checksd.c, fs/fs_fdopen.c, and include/nuttx/mii.h:
 	  Several structural changes made to get a clean compile under the ez80 ZDS-II
 	  toolchain (no design changes).
-	* drivers/usbhost/usbhost_storage.c:  Incorpated bugfixes reported by Sheref H.
+	* drivers/usbhost/usbhost_storage.c: Incorpated bugfixes reported by Sheref H.
 	  Younan:  (1) Read capacity logic read largest block, not the number of blocks
 	  and was, therefore, off by one, and (2) Some devices stall of get Max LUN request
 	  if they support only a single LUN.  Logic now assumes a single LUN if the get
@@ -1843,9 +1843,12 @@
 	  a new configuration option to support extracting strings from FLASH or EEPROM
 	  or other memories where the string data cannot be accessed by simply de-referencing
 	  a string pointer.
-	* arch/sim/src/up_romgetc.c:  Used to test the basic logic to access strings
+	* arch/sim/src/up_romgetc.c: Used to test the basic logic to access strings
 	  without directly de-referencing a string pointer.
-	* arch/avr/src/avr/up_romget.c:  Used to access strings that lie in the first
-	  64Kb of FLASH.
-
-
+	* arch/avr/src/avr/up_romget.c: Used to access strings that lie in the first
+	  64Kb of FLASH (But I still haven't figured out how to get strings to reside in
+	  FLASH without using the PROGMEM attribute).
+	* configs/teensy/src/up_spi.c: Correct reading of SD CD and WP pins (was reading
+	  the wrong register.  AVR SPI now appears to be functional.
+	* arch/avr/src/at90usb/at90usb_usbdev.c: Correct USB initialization.  Interrupts
+	  were being enabled BEFORE the interrupt handler was attached.

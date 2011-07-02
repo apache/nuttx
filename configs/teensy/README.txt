@@ -183,7 +183,7 @@ Teensy SPI Connection
   -- ---- -- ------------------------- -------
   J2 NAME PIN NAME                     PAD
   -- ---- -- ------------------------- -------
-   1 VIN  -- Connected to USB +RV
+   1 VIN  -- Connected to USB +5V
    2 GND  -- Connected to USB GND
    3 3V3  -- Not used                  ---
    4 NC   -- Not used

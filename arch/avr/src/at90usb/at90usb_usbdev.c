@@ -2745,24 +2745,12 @@ void up_usbinitialize(void)
 {
   usbtrace(TRACE_DEVINIT, 0);
 
-  /* Shutdown the USB interface to put it in a known initial state */
-
-  avr_usbshutdown();
-
-  /* Select USB device mode */
-
-  UHWCON |= (1 << UIMOD);
-
   /* Initialize the device state structure */
 
   memset(&g_usbdev, 0, sizeof(struct avr_usbdev_s));
   g_usbdev.usbdev.ops = &g_devops;
   g_usbdev.usbdev.ep0 = &g_usbdev.eplist[AVR_EP0].ep;
   g_usbdev.epavail    = AVR_ALL_EPS & ~(1 << AVR_EP0);
-
-  /* Reset the interface to force re-enumeration */
-
-  avr_usbreset();
 
   /* Attach USB controller general interrupt handler */
 
@@ -2779,6 +2767,20 @@ void up_usbinitialize(void)
       usbtrace(TRACE_DEVERROR(AVR_TRACEERR_IRQREGISTRATION), AT90USB_IRQ_USBEP);
       goto errout;
     }
+
+  /* Shutdown the USB interface to put it in a known initial state */
+
+  avr_usbshutdown();
+
+  /* Select USB device mode */
+
+  UHWCON |= (1 << UIMOD);
+
+  /* Reset the interface to force re-enumeration (the reset operation
+   * enables interrupts.
+   */
+
+  avr_usbreset();
 
   /* Set the VBUS pad */
 
