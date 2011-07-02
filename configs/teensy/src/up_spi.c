@@ -179,7 +179,7 @@ void  avr_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool select
 uint8_t avr_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   uint8_t ret = 0;
-  uint8_t regval = PORTB;
+  uint8_t regval = PINB;
 
   /* Both the CD and WP pins are pull high by the AT90USB and will be
    * grounded it a card is inserted or write protected.
