@@ -49,7 +49,7 @@
 #include <nuttx/mmcsd.h>
 #include <nuttx/usb/usbhost.h>
 
-#include "pic32mx_internal.h"
+#include "pic32mx-internal.h"
 #include "sure-internal.h"
 
 /****************************************************************************

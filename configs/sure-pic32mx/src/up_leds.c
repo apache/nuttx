@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "pic32mx_internal.h"
+#include "pic32mx-internal.h"
 #include "sure-internal.h"
 
 #ifdef CONFIG_ARCH_LEDS
