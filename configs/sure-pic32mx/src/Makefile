@@ -1,5 +1,5 @@
 ############################################################################
-# configs/pcblogic-pic32mx/src/Makefile
+# configs/sure-pic32mx/src/Makefile
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -38,10 +38,14 @@
 CFLAGS		+= -I$(TOPDIR)/sched
 
 ASRCS		= 
-CSRCS		= up_boot.c
+CSRCS		= up_boot.c up_spi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS		+= up_leds.c
+endif
+
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS		+= up_nsh.c
 endif
 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))

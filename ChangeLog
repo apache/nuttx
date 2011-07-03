@@ -1852,3 +1852,8 @@
 	  the wrong register.  AVR SPI now appears to be functional.
 	* arch/avr/src/at90usb/at90usb_usbdev.c: Correct USB initialization.  Interrupts
 	  were being enabled BEFORE the interrupt handler was attached.
+	* configs/sure-pic32mx:  Add a configuration for the Sure Electronics, "Advanced USB
+	  Storage Demo Board," Model DB-DP11215 (http://www.sureelectronics.net/goods.php?id=1168).
+	  This board features the MicroChip PIC32MX440F512H MCU. (Untested on initial
+	  check-in).
+

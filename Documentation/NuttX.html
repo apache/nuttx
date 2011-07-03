@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 21, 2011</p>
+      <p>Last Updated: July 3, 2011</p>
     </td>
   </tr>
 </table>
@@ -957,7 +957,7 @@
       <li><a href="#80x86">Intel 80x86</a> (2)</li>
     </ul>
   </li>
-  <li>MicroChip <a href="#pic32mips">PIC32</a> (MIPS) (1)</li>
+  <li>MicroChip <a href="#pic32mips">PIC32</a> (MIPS) (2)</li>
   <li>Renesas/Hitachi:
     <ul>
         <li><a href="#superh">Renesas/Hitachi SuperH</a> (1/2)</li>
@@ -1834,19 +1834,50 @@
       This port uses the PIC32MX board from PCB Logic Design Co.
       The board is a very simple -- little more than a carrier for the PIC32 MCU plus voltage regulation, debug interface, and an OTG connector.
     </p>
-    <p>
-      <b>Development Environment:</b>
-      This port uses the <i>LITE</i> version of the PIC32MX toolchain available
-      for download from the <a href="http://www.microchip.com">MicroChip</a> website.
-    </p>
     <ul>
       <p>
        <b>STATUS:</b>
        This port is code complete and has begun testing.
        Testing is, unfortunately, delayed until I obtain some additional test equipment
-       (you can't use PICkit 2 with the PIC32; you need PICkit 3).
+       (you can't use PICkit 2 with the PIC32; you need PICkit 3.  And, to make things worse,
+       my PICKit3 just hangs when I try to debug).
       </p>
     </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>PIC32MX440F512H</b>.
+	    This port uses the &quot;Advanced USB Storage Demo Board,&quot; Model DB-DP11215, from <a href="http://www.sureelectronics.net">Sure Electronics</a>.
+        This board features	the MicroChip PIC32MX440F512H.  See the <a href="http://www.sureelectronics.net/goods.php?id=1168">Sure website</a> for further	information about the DB-DP11215 board.
+    </p>
+    <ul>
+      <p>
+       <b>STATUS:</b>
+       This port is code complete and has begun testing.
+       I hope to use the on-board LEDs to work around the debug problems with the PCL Logic board (see above).
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>Development Environment:</b>
+      These ports uses the <i>LITE</i> version of the PIC32MX toolchain available
+      for download from the <a href="http://www.microchip.com">MicroChip</a> website.
+    </p>
   </td>
 </tr>
 <tr>
@@ -2477,7 +2508,36 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-6.6 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
+    * drivers/mtd/ramtron.c, net/net_checksd.c, fs/fs_fdopen.c, and include/nuttx/mii.h:
+      Several structural changes made to get a clean compile under the ez80 ZDS-II
+      toolchain (no design changes).
+    * drivers/usbhost/usbhost_storage.c: Incorpated bugfixes reported by Sheref H.
+      Younan:  (1) Read capacity logic read largest block, not the number of blocks
+      and was, therefore, off by one, and (2) Some devices stall of get Max LUN request
+      if they support only a single LUN.  Logic now assumes a single LUN if the get
+      Max LUN request fails.
+    * include/nuttx/arch.h, lib/stdio/lib_libvsprintf.c, lib/stdio/lib_fputs.c: Add
+      a new configuration option to support extracting strings from FLASH or EEPROM
+      or other memories where the string data cannot be accessed by simply de-referencing
+      a string pointer.
+    * arch/sim/src/up_romgetc.c: Used to test the basic logic to access strings
+      without directly de-referencing a string pointer.
+    * arch/avr/src/avr/up_romget.c: Used to access strings that lie in the first
+      64Kb of FLASH (But I still haven't figured out how to get strings to reside in
+      FLASH without using the PROGMEM attribute).
+    * configs/teensy/src/up_spi.c: Correct reading of SD CD and WP pins (was reading
+      the wrong register.  AVR SPI now appears to be functional.
+    * arch/avr/src/at90usb/at90usb_usbdev.c: Correct USB initialization.  Interrupts
+      were being enabled BEFORE the interrupt handler was attached.
+    * configs/sure-pic32mx:  Add a configuration for the Sure Electronics, "Advanced USB
+      Storage Demo Board," Model DB-DP11215 (http://www.sureelectronics.net/goods.php?id=1168).
+      This board features the MicroChip PIC32MX440F512H MCU. (Untested on initial
+      check-in).
+
 apps-6.6 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * Make.defs, namedapp/namedapp.c: Several structural changes made to get a
+      clean compile under the ez80 ZDS-II toolchain (no design changes).
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

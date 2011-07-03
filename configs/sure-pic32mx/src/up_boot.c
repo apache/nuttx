@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/pcblogic-pic32mx/src/up_boot.c
+ * configs/sure-pic32mx/src/up_boot.c
  * arch/mips/src/board/up_boot.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
@@ -48,7 +48,7 @@
 #include "up_internal.h"
 
 #include "pic32mx-internal.h"
-#include "pcblogic-internal.h"
+#include "sure-internal.h"
 
 /************************************************************************************
  * Definitions
@@ -78,7 +78,7 @@ void pic32mx_boardinitialize(void)
    * function pic32mx_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2)
+#if defined(CONFIG_PIC32MX_SPI2)
   if (pic32mx_spiinitialize)
     {
       pic32mx_spiinitialize();

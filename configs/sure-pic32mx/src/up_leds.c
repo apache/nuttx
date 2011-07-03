@@ -1,5 +1,6 @@
 /****************************************************************************
- * configs/pcblogic-pic32mx/src/pcblogic-internal.h
+ * configs/sure-pic32mx/src/up_leds.c
+ * arch/arm/src/board/up_leds.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,69 +34,106 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_PCBLOGIC_PIC32MX_SRC_PCBLOGIC_INTERNAL_H
-#define __CONFIGS_PCBLOGIC_PIC32MX_SRC_PCBLOGIC_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include <arch/board/board.h>
 
-#ifndef __ASSEMBLY__
+#include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
 
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-/************************************************************************************
- * Name: pic32mx_spiinitialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the PCB Logic board.
- *
- ************************************************************************************/
-
-#if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2)
-EXTERN void weak_function pic32mx_spiinitialize(void);
-#endif
-
-/************************************************************************************
- * Name: pic32mx_ledinit
- *
- * Description:
- *   Configure on-board LEDs if LED support has been selected.
- *
- ************************************************************************************/
+#include "pic32mx_internal.h"
+#include "sure-internal.h"
 
 #ifdef CONFIG_ARCH_LEDS
-EXTERN void pic32mx_ledinit(void);
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+/* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not
+ * controllable by software.  Four are controllable by software:
+ *
+ * D7  "USB"    Yellow  RD7 Low illuminates
+ * D8  "SD"     Yellow  RD6 Low illuminates
+ * D9  "Flash"  Yellow  RF0 Low illuminates
+ * D10 "Error"  Red     RF1 Low illuminates
+ *
+ *                           ON                  OFF
+ *                           USB SD  FLASH ERROR USB SD  FLASH ERROR
+ * LED_STARTED            0  OFF OFF OFF   OFF   --- --- ---   ---
+ * LED_HEAPALLOCATE       1  ON  OFF N/C   N/C   --- --- ---   ---
+ * LED_IRQSENABLED        2  OFF ON  N/C   N/C   --- --- ---   ---
+ * LED_STACKCREATED       3  ON  ON  N/C   N/C   --- --- ---   ---
+ * LED_INIRQ              4  N/C N/C ON    N/C   N/C N/C OFF   N/C
+ * LED_SIGNAL             4  N/C N/C ON    N/C   N/C N/C OFF   N/C
+ * LED_ASSERTION          4  N/C N/C ON    N/C   N/C N/C OFF   N/C
+ * LED_PANIC              5  N/C N/C N/C   ON    N/C N/C N/C   OFF
+ */
+
+/* Enables debug output from this file (needs CONFIG_DEBUG with
+ * CONFIG_DEBUG_VERBOSE too)
+ */
+
+#undef LED_DEBUG   /* Define to enable debug */
+#undef LED_VERBOSE /* Define to enable verbose debug */
+
+#ifdef LED_DEBUG
+#  define leddbg  lldbg
+#  ifdef LED_VERBOSE
+#    define ledvdbg lldbg
+#  else
+#    define ledvdbg(x...)
+#  endif
+#else
+#  undef LED_VERBOSE
+#  define leddbg(x...)
+#  define ledvdbg(x...)
 #endif
 
-#undef EXTERN
-#ifdef __cplusplus
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_ledinit
+ ****************************************************************************/
+
+void up_ledinit(void)
+{
+#warning "Missing logic"
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_PCBLOGIC_PIC32MX_SRC_PCBLOGIC_INTERNAL_H */
+/****************************************************************************
+ * Name: up_ledon
+ ****************************************************************************/
+
+void up_ledon(int led)
+{
+#warning "Missing logic"
+}
+
+/****************************************************************************
+ * Name: up_ledoff
+ ****************************************************************************/
+
+void up_ledoff(int led)
+{
+#warning "Missing logic"
+}
+#endif /* CONFIG_ARCH_LEDS */

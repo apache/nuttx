@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pcblogic-pic32mx/src/pcblogic-internal.h
+ * configs/sure-pic32mx/src/sure-internal.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_PCBLOGIC_PIC32MX_SRC_PCBLOGIC_INTERNAL_H
-#define __CONFIGS_PCBLOGIC_PIC32MX_SRC_PCBLOGIC_INTERNAL_H
+#ifndef __CONFIGS_SURE_PIC32MX_SRC_SURE_INTERNAL_H
+#define __CONFIGS_SURE_PIC32MX_SRC_SURE_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -46,6 +46,15 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+
+/* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not
+ * controllable by software.  Four are controllable by software:
+ *
+ * D7  "USB"    Yellow  RD7 Low illuminates
+ * D8  "SD"     Yellow  RD6 Low illuminates
+ * D9  "Flash"  Yellow  RF0 Low illuminates
+ * D10 "Error"  Red     RF1 Low illuminates
+ */
 
 /****************************************************************************
  * Public Types
@@ -76,7 +85,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-#if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2)
+#if defined(CONFIG_PIC32MX_SPI2)
 EXTERN void weak_function pic32mx_spiinitialize(void);
 #endif
 
@@ -98,4 +107,4 @@ EXTERN void pic32mx_ledinit(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_PCBLOGIC_PIC32MX_SRC_PCBLOGIC_INTERNAL_H */
+#endif /* __CONFIGS_SURE_PIC32MX_SRC_SURE_INTERNAL_H */
