@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pcblogic-pic32mx/tools/mkpichex.c
+ * configs/sure-pic32mx/tools/mkpichex.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

@@ -1,5 +1,5 @@
 ############################################################################
-# configs/pcblogic-pic32mx/src/Makefile
+# configs/sure-pic32mx/tools/Makefile
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,56 +33,19 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+all: mkpichex
+default: mkpichex
+.PHONY: clean
 
-CFLAGS		+= -I$(TOPDIR)/sched
+# Add CFLAGS=-g on the make command line to build debug versions
 
-ASRCS		= 
-CSRCS		= up_boot.c
+CFLAGS = -O2 -Wall -I.
 
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS		+= up_leds.c
-endif
+# mkpichex - Convert nuttx.ihx to nuttx.hex
 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
-
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
-
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/mips32}"
-else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/mips32
-endif
-
-all: libboard$(LIBEXT)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	@( for obj in $(OBJS) ; do \
-		$(call ARCHIVE, $@, $${obj}); \
-	done ; )
-
-.depend: Makefile $(SRCS)
-	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	@touch $@
-
-depend: .depend
+mkconfig: mkpichex.c mkpichex.c
+	@gcc $(CFLAGS) -o mkpichex mkpichex.c
 
 clean:
-	@rm -f libboard$(LIBEXT) *~ .*.swp
-	$(call CLEAN)
-
-distclean: clean
-	@rm -f Make.dep .depend
-
--include Make.dep
+	@rm -f *.o *.a *~ .*.swp
+	@rm -f mkpichex mkpichex.exe

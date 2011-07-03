@@ -1185,6 +1185,13 @@ configs/stm3210e-evel
 	microcontroller (ARM Cortex-M3).  This port uses the GNU Cortex-M3
 	toolchain.
 
+configs/sure-pic32mx
+	The "Advanced USB Storage Demo Board," Model DB-DP11215, from Sure
+	Electronics (http://www.sureelectronics.net/).  This board features
+	the MicroChip PIC32MX440F512H.  See also
+	http://www.sureelectronics.net/goods.php?id=1168 for further
+	information about the Sure DB-DP11215 board.
+
 configs/teensy
 	This is theport of NuttX to the PJRC Teensy++ 2.0 board.  This board is
 	developed by http://pjrc.com/teensy/.  The Teensy++ 2.0 is based

@@ -1,166 +1,115 @@
 configs/pic32mx README
 =====================
 
-This README file discusses the port of NuttX to the PIC32MX board from
-PCB Logic Design Co.  This board features the MicroChip PIC32MX460F512L.
-The board is a very simple -- little more than a carrier for the PIC32
-MCU plus voltage regulation, debug interface, and an OTG connector.
+This README file discusses the port of NuttX to the "Advanced USB Storage
+Demo Board," Model DB-DP11215, from Sure Electronics
+(http://www.sureelectronics.net/).  This board features the MicroChip
+PIC32MX440F512H.  See also http://www.sureelectronics.net/goods.php?id=1168
+for further information about the Sure DB-DP11215 board.
 
 Contents
 ========
 
-  PIC32MX460F512L Pin Out
-  MAX3232 Connection
+  PIC32MX440F512H Pin Out
   Toolchains
   Loading NuttX with PICkit2
   PIC32MX Configuration Options
   Configurations
 
-PIC32MX460F512L Pin Out
+PIC32MX440F512H Pin Out
 =======================
 
-  PIC32MX460F512L 100-Pin TQFP (USB) Pin Out.  The mapping to the pins on
-  the PCL Logic board are very simple, each pin is brought out to a connector
-  label with the PIC32MX460F512L pin number.
-
-  On board logic only manages power, crystal, and USB signals.
+  PIC32MX440F512H 64-Pin QFN (USB) Pin Out.
 
   LEFT SIDE, TOP-TO-BOTTOM (if pin 1 is in upper left)
-  PIN  NAME
-  ---- ----------------------------
-    1  RG15
-    2  Vdd
-    3  PMD5/RE5
-    4  PMD6/RE6
-    5  PMD7/RE7
-    6  T2CK/RC1
-    7  T3CK/RC2
-    8  T4CK/RC3
-    9  T5CK/SDI1/RC4
-   10  SCK2/PMA5/CN8/RG6
-   11  SDI2/PMA4/CN9/RG7
-   12  SDO2/PMA3/CN10/RG8
-   13  MCLR
-   14  SS2/PMA2/CN11/RG9
-   15  Vss
-   16  Vdd
-   17  TMS/RA0
-   18  INT1/RE8
-   19  INT2/RE9
-   20  AN5/C1IN+/VBUSON/CN7/RB5
-   21  AN4/C1IN-/CN6/RB4
-   22  AN3/C2IN+/CN5/RB3
-   23  AN2/C2IN-/CN4/RB2
-   24  PGEC1/AN1/CN3/RB1
-   25  PGED1/AN0/CN2/RB0
+  PIN  NAME                          SIGNAL         NOTES
+  ---- ----------------------------- -------------- -------------------------------
+    1  PMD5/RE5                      PMPD5          Display, JP1-12, DB4
+    2  PMD6/RE6                      PMPD6          Display, JP1-13, DB6
+    3  PMD7/RE7                      PMPD7          Display, JP1-14, DB7
+    4  SCK2/PMA5/CN8/RG6             SCK            SD connector SCK, FLASH (U1) SCK*
+    5  SDI2/PMA4/CN9/RG7             SDI            SD connector DO, FLASH (U1) SO*
+    6  SDO2/PMA3/CN10/RG8            SDO            SD connector DI, FLASH (U1) SI*
+    7  MCLR\                         PIC_MCLR       Pulled high, J7-1, ICSP
+    8  SS2/PMA2/CN11/RG9             UTIL_CS        FLASH (U1) CS*
+    9  Vss                                          Grounded
+   10  Vdd                           +3.3V          ---
+   11  AN5/C1IN+/Vbuson/CN7/RB5      Vbuson/AN5/RB5 To USB VBUS circuitry
+   12  AN4/C1IN-/CN6/RB4             SW_OK          SW3, Pull high, low means SW3 closed
+   13  AN3/C2IN+/CN5/RB3             SW_UP          SW1, Pull high, low means SW1 closed
+   14  AN2/C2IN-/CN4/RB2             SW_Down        SW2, Pull high, low means SW2 closed
+   15  PGEC1/AN1/Vref-/CVref-/CN3/   ADC_SENSE_SWITCHED_+VBUS To USB VBUS circuitry
+       RB1
+   16  PGED1/AN0/VREF+/CVREF+/PMA6/                     N/C            Not connected
+       CN2/RB0
+  *FLASH (U1, SOIOC) not populated
 
   BOTTOM SIDE, LEFT-TO-RIGHT (if pin 1 is in upper left)
-  PIN  NAME
-  ---- ----------------------------
-   26  PGEC2/AN6/OCFA/RB6
-   27  PGED2/AN7/RB7
-   28  VREF-/CVREF-/PMA7/RA9
-   29  VREF+/CVREF+/PMA6/RA10
-   30  AVdd
-   31  AVss
-   32  AN8/C1OUT/RB8
-   33  AN9/C2OUT/RB9
-   34  AN10/CVREFOUT/PMA13/RB10
-   35  AN11/PMA12/RB11
-   36  Vss
-   37  Vdd
-   38  TCK/RA1
-   39  U2RTS/RF13
-   40  U2CTS/RF12
-   41  AN12/PMA11/RB12
-   42  AN13/PMA10/RB13
-   43  AN14/PMALH/PMA1/RB14
-   44  AN15/OCFB/PMALL/PMA0/CN12/RB15
-   45  Vss
-   46  Vdd
-   47  U1CTS/CN20/RD14
-   48  U1RTS/CN21/RD15
-   49  U2RX/PMA9/CN17/RF4
-   50  U2TX/PMA8/CN18/RF5
+  PIN  NAME                          SIGNAL         NOTES
+  ---- ----------------------------- -------------- -------------------------------
+   17  PGEC2/AN6/OCFA/RB6            PIC_PGC2       J7-5, ICSP
+   18  PGED2/AN7/RB7                 PIC_PGD2       J7-4, ICSP
+   19  AVdd                          +3.3V          ---
+   20  AVss                                         Grounded
+   21  AN8/U2CTS/C1OUT/RB8           N/C            Not connected
+   22  AN9/C2OUT/PMA7/RB9            N/C            Not connected
+   23  TMS/AN10/CVREFOUT/PMA13/RB10  UTIL_WP        FLASH (U1) WP*
+   24  TDO/AN11/PMA12//RB11          SD_CS          SD connector CS
+   25  Vss                                          Grounded
+   26  Vdd                           +3.3V          ---
+   27  TCK/AN12/PMA11/RB12           SD_CD          SD connector CD
+   28  TDI/AN13/PMA10/RB13           SD_WD          SD connector WD
+   29  AN14/U2RTS/PMALH/PMA1/RB14    N/C            Not connected
+   30  AN15/OCFB/PMALL/PMA0/CN12/    PMPA0          Display, JP1-4, RS
+       RB15
+   31  SDA2/U2RX/PMA9/CN17/RF4       RXD2_MCU       J5 DB9 via RS232 driver
+   32  SCL2/U2TX/PMA8/CN18/RF5       TXD2_MCU       J5 DB9 via RS232 driver
+
+  *FLASH (U1, SOIOC) not populated
 
   RIGHT SIDE, TOP-TO-BOTTOM (if pin 1 is in upper left)
-  PIN  NAME
-  ---- ----------------------------
-   75  Vss
-   74  SOSCO/T1CK/CN0/RC14
-   73  SOSCI/CN1/RC13
-   72  SDO1/OC1/INT0/RD0
-   71  IC4/PMCS1/PMA14/RD11
-   70  SCK1/IC3/PMCS2/PMA15/RD10
-   69  SS1/IC2/RD9
-   68  RTCC/IC1/RD8
-   67  SDA1/INT4/RA15
-   66  SCL1/INT3/RA14
-   65  Vss
-   64  OSC2/CLKO/RC15
-   63  OSC1/CLKI/RC12
-   62  Vdd
-   61  TDO/RA5
-   60  TDI/RA4
-   59  SDA2/RA3
-   58  SCL2/RA2
-   57  D+/RG2
-   56  D-/RG3
-   55  VUSB
-   54  VBUS
-   53  U1TX/RF8
-   52  U1RX/RF2
-   51  USBID/RF3
+  PIN  NAME                          SIGNAL         NOTES
+  ---- ----------------------------- -------------- -------------------------------
+   48  SOSCO/T1CK/CN0/RC14           SOSCO          32.768KHz XTAL (Y1)
+   47  SOSCI/CN1/RC13                SOSCI          32.768KHz XTAL (Y1)
+   46  OC1/INT0/RD0                  PWM1           Used to control backlight level (K)
+   45  IC4/PMCS1/PMA14/INT4/RD11     PMPCS1         Display, JP1-6, E
+   44  SCL1/IC3/PMCS2/PMA15/INT3/    USB_OPT        USB PHY
+       RD10
+   43  U1CTS/SDA1/IC2/INT2/RD9       USB_OPTEN      USB PHY
+   42  RTCC/IC1/INT1/RD8             N/C            Not connected
+   41  Vss                                          Grounded
+   40  OSC2/CLKO/RC15                OSC2           20MHz XTAL (Y2)
+   39  OSC1/CLKI/RC12                OSC1           20MHz XTAL (Y2)
+   38  Vdd                           +3.3V          ---
+   37  D+/RG2                        APPS_D+        USB connectors via PHY
+   36  D-/RG3                        APPS_D-        USB connectors via PHY
+   35  Vusb                          +3.3V          ---
+   34  Vbus                          VBUS_DEVICE_MODE Display, USB Mini-B, USB Type A, JP1-1, +5V
+   33  USBID/RF3                     N/C            Not connected
 
   TOP SIDE, LEFT-TO-RIGHT (if pin 1 is in upper left)
-  PIN  NAME
-  ---- ----------------------------
-  100  PMD4/RE4
-   99  PMD3/RE3
-   98  PMD2/RE2
-   97  TRD0/RG13
-   96  TRD1/RG12
-   95  TRD2/RG14
-   94  PMD1/RE1
-   93  PMD0/RE0
-   92  TRD3/RA7
-   91  TRCLK/RA6
-   90  PMD8/RG0
-   89  PMD9/RG1
-   88  PMD10/RF1
-   87  PMD11/RF0
-   86  ENVREG
-   85  Vcap/Vddcore
-   84  PMD15/CN16/RD7
-   83  PMD14/CN15/RD6
-   82  PMRD/CN14/RD5
-   81  OC5/PMWR/CN13/RD4
-   80  PMD13/CN19/RD13
-   79  IC5/PMD12/RD12
-   78  OC4/RD3
-   77  OC3/RD2
-   76  OC2/RD1
+  PIN  NAME                          SIGNAL         NOTES
+  ---- ----------------------------- -------------- -------------------------------
+   64  PMPD4/RE4                     PMPD4          Display, JP1-11, DB4
+   63  PMPD3/RE3                     PMPD3          Display, JP1-10, DB3
+   62  PMPD2/RE2                     PMPD2          Display, JP1-9, DB2
+   61  PMPD1/RE1                     PMPD1          Display, JP1-8, DB1
+   60  PMPD0/RE0                     PMPD0          Display, JP1-7, DB0
+   59  RF1                           RF1            Low illuminates LED/R/ERR
+   58  RF0                           RF0            Low illuminates LED/Y/flash
+   57  ENVREG                        ENVREG         Pulled high
+   56  Vcap/Vddcore                  VDDCORE        Capactors to ground
+   55  CN16/RD7                      RD7            Low illuminates LED/Y/USB
+   54  CN15/RD6                      RD6            Low illuminates LED/Y/SD
+   53  PMRD/CN14/RD5                 PMPRD          Display, JP1-5, R/W
+   52  OC5/IC5/PMWR/CN13/RD4         N/C            Not connected
+   51  U1TX/OC4/RD3                  CP2102_RXD     J6-3, UART1 (also CP2102*)
+   50  U1RX/OC3/RD2                  CP2102_TXD     J6-2, UART1 (also CP2102*)
+   49  U1RTS/OC2/RD1                 PWM2           Used to control backlight level (Vo)
 
- Additional Signals available from the board:
+  *USB-to-UART bridge (U1, CP2102) not populated
 
-   PROGRAM CONNECTOR:  Vpp Vdd GND PGED1 PGEC1 NC PGED2 PGEC2
-   POWER POINTS:       +5Vin +3.3V AVdd AGND Vdd GND USB+5V
-
-MAX3232 Connection
-==================
-
-  I use a tiny, MAX3232 board that I got from the eBay made by NKC
-  Electronics (http://www.nkcelectronics.com/).  As of this writing, it
-  is also available here: http://www.nkcelectronics.com/rs232-to-ttl-3v--55v-convert232356.html
-
-  CTS -- Not connected
-  RTS -- Not connected
-  TX  -- Pin 53: U1TX/RF8
-  RX  -- Pin 52: U1RX/RF2
-  GND -- POWER POINT: GND
-  Vcc -- POWER POINT: Vdd (3.3V) -- Or P32_VBUS (+5V)
-         -- Or +5V from a USB PC port.
- 
 Toolchains
 ==========
 
@@ -243,11 +192,11 @@ Loading NuttX with PICkit2
   tools/mkpichex:
   ---------------
 
-    There is a simple tool in the configs/pcblogic-pic32mx/tools directory
+    There is a simple tool in the configs/sure-pic32mx/tools directory
     that can be used to solve both issues with the nuttx.ihx file.  But,
     first, you must build the the tools:
 
-      cd configs/pcblogic-pic32mx/tools
+      cd configs/sure-pic32mx/tools
       make
 
     Now you will have an excecutable file call mkpichex (or mkpichex.exe on
@@ -258,7 +207,7 @@ Loading NuttX with PICkit2
     To use this file, you need to do the following things:
 
       . ./setenv.sh    # Source setenv.sh.  Among other this, this script
-                       # will add configs/pcblogic-pic32mx/tools to your
+                       # will add configs/sure-pic32mx/tools to your
                        # PATH variable
       make             # Build nuttx and nuttx.ihx
       mkpichex $PWD    # Convert nuttx.ihx to nuttx.hex.  $PWD is the path
@@ -290,16 +239,16 @@ PIC32MX Configuration Options
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_PIC32MX460F512L=y
+       CONFIG_ARCH_CHIP_PIC32MX440F512H=y
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=pcblogic-pic32mx
+       CONFIG_ARCH_BOARD=sure-pic32mx
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_PCBLOGICPIC32MX=y
+       CONFIG_ARCH_BOARD_SUREPIC32MX=y
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops
@@ -367,7 +316,6 @@ PIC32MX Configuration Options
        CONFIG_PIC32MX_OC5            - Output Compare 5
        CONFIG_PIC32MX_I2C1           - I2C 1
        CONFIG_PIC32MX_I2C2           - I2C 2
-       CONFIG_PIC32MX_SPI1           - SPI 1
        CONFIG_PIC32MX_SPI2           - SPI 2
        CONFIG_PIC32MX_UART1          - UART 1
        CONFIG_PIC32MX_UART2          - UART 2
@@ -380,6 +328,7 @@ PIC32MX Configuration Options
        CONFIG_PIC32MX_FLASH          - FLASH
        CONFIG_PIC32MX_USBDEV         - USB device
        CONFIG_PIC32MX_USBHOST        - USB host
+
 
     PIC32MX Configuration Settings
     DEVCFG0:
@@ -430,7 +379,6 @@ PIC32MX Configuration Options
        CONFIG_PIC32MX_OC5PRIO        - Output Compare 5
        CONFIG_PIC32MX_I2C1PRIO       - I2C 1
        CONFIG_PIC32MX_I2C2PRIO       - I2C 2
-       CONFIG_PIC32MX_SPI1PRIO       - SPI 1
        CONFIG_PIC32MX_SPI2PRIO       - SPI 2
        CONFIG_PIC32MX_UART1PRIO      - UART 1
        CONFIG_PIC32MX_UART2PRIO      - UART 2
@@ -448,7 +396,9 @@ PIC32MX Configuration Options
        CONFIG_PIC32MX_FCEPRIO        - Flash Control Event
        CONFIG_PIC32MX_USBPRIO        - USB
 
-  PIC32MXx specific device driver settings
+  PIC32MXx specific device driver settings.  NOTE:  For the Sure board,
+  UART2 is brought out to the DB9 connector and serves as the serial
+  console.
 
     CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
        console and ttys0 (default is the UART0).
@@ -472,7 +422,7 @@ Each PIC32MX configuration is maintained in a sudirectory and can be
 selected as follow:
 
     cd tools
-    ./configure.sh pcblogic-pic32mx/<subdir>
+    ./configure.sh sure-pic32mx/<subdir>
     cd -
     . ./setenv.sh
 

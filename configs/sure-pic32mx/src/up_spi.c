@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/pcblogic-pic32mx/src/up_boot.c
- * arch/mips/src/board/up_boot.c
+ * configs/sure-pic32mx/src/up_ssp.c
+ * arch/arm/src/board/up_ssp.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,19 +40,42 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/spi.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "up_internal.h"
+#include "chip.h"
+#include "pic32mx_internal.h"
+#include "sure-internal.h"
 
-#include "pic32mx-internal.h"
-#include "pcblogic-internal.h"
+#if defined(CONFIG_PIC32MX_SPI2)
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+
+/* The following enable debug output from this file (needs CONFIG_DEBUG too).
+ * 
+ * CONFIG_SPI_DEBUG - Define to enable basic SPI debug
+ * CONFIG_SPI_VERBOSE - Define to enable verbose SPI debug
+ */
+
+#ifdef CONFIG_SPI_DEBUG
+#  define sspdbg  lldbg
+#  ifdef CONFIG_SPI_VERBOSE
+#    define sspvdbg lldbg
+#  else
+#    define sspvdbg(x...)
+#  endif
+#else
+#  undef CONFIG_SPI_VERBOSE
+#  define sspdbg(x...)
+#  define sspvdbg(x...)
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -63,31 +86,59 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: pic32mx_boardinitialize
+ * Name: pic32mx_sspinitialize
  *
  * Description:
- *   All PIC32MX architectures must provide the following entry point.  This entry
- *   point is called early in the intitialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   Called to configure SPI chip select GPIO pins for the Sure PIC32MX board.
  *
  ************************************************************************************/
 
-void pic32mx_boardinitialize(void)
+void weak_function pic32mx_sspinitialize(void)
 {
-  /* Configure SPI chip selects if 1) at least one SPI is enabled, and 2) the weak
-   * function pic32mx_spiinitialize() has been brought into the link.
-   */
+  /* Configure the SPI2 chip select GPIOs */
 
-#if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2)
-  if (pic32mx_spiinitialize)
-    {
-      pic32mx_spiinitialize();
-    }
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  pic32mx_ledinit();
+#ifdef CONFIG_PIC32MX_SPI2
+#  warning "Missing logic"
 #endif
 }
+
+/************************************************************************************
+ * Name:  pic32mx_spi2select and pic32mx_spi2status
+ *
+ * Description:
+ *   The external functions, pic32mx_spi2select and pic32mx_spi2status 
+ *   must be provided by board-specific logic.  They are implementations of the select
+ *   and status methods of the SPI interface defined by struct spi_ops_s (see
+ *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
+ *   are provided by common PIC32MX logic.  To use this common SPI logic on your
+ *   board:
+ *
+ *   1. Provide logic in pic32mx_boardinitialize() to configure SPI/SPI chip select
+ *      pins.
+ *   2. Provide pic32mx_spi2select() and pic32mx_spi2status() functions
+ *      in your board-specific logic.  These functions will perform chip selection
+ *      and status operations using GPIOs in the way your board is configured.
+ *   3. Add a calls to up_spiinitialize() in your low level application
+ *      initialization logic
+ *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *      SPI driver to higher level logic (e.g., calling 
+ *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
+ *      the SPI MMC/SD driver).
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_PIC32MX_SPI2
+void  pic32mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+#warning "Missing logic"
+}
+
+uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  sspdbg("Returning nothing\n");
+#warning "Missing logic"
+  return 0;
+}
+#endif
+#endif /* CONFIG_PIC32MX_SPI2 */
