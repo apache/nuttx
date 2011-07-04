@@ -425,8 +425,8 @@ static inline void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 static int up_setup(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-#ifdef CONFIG_SUPPRESS_UART_CONFIG
-  uint32_t uartdiv32;
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+  uint32_t usartdiv32;
   uint32_t mantissa;
   uint32_t fraction;
   uint32_t brr;
@@ -483,7 +483,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Configure hardware flow control -- Not yet supported */
 
-  up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
+  up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 
   /* Configure the USART Baud Rate.  The baud rate for the receiver and
    * transmitter (Rx and Tx) are both set to the same value as programmed
@@ -521,7 +521,7 @@ static int up_setup(struct uart_dev_s *dev)
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 #endif
 
-  /* Set up the cache interrupt enables value */
+  /* Set up the cached interrupt enables value */
 
   priv->ie    = 0;
   return OK;

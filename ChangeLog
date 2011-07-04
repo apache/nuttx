@@ -1856,4 +1856,15 @@
 	  Storage Demo Board," Model DB-DP11215 (http://www.sureelectronics.net/goods.php?id=1168).
 	  This board features the MicroChip PIC32MX440F512H MCU. (Untested on initial
 	  check-in).
+	* configs/stm3210e-eval/nsh2:  Add another NSH configuration for the STM32 with
+	  some different properties.
+	* CONFIG_NSH_CONDEV:  Add a configuration option to allow using a different character
+	  device (such a a different UART) for the NSH interface.  This allows, for example,
+	  debug output to come from the console device while using another device for NSH.
+	  There are some issues on initial check-in:  NuttX doesn't have termios and the
+	  console device has special properties that make using NSH awkward.  Examples:
+	  No CR-LF expansion, no character echoing, no command line editting.
+	* arch/arm/src/stm32/stm32_lowputc.c and stm32_serial.c.  Correct severl bugs
+	  involving serial port configuration.  These bugs are only critical if you
+	  are trying to using multiple UARTs on STM32.
 

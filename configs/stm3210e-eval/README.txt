@@ -430,13 +430,13 @@ Where <subdir> is one of the following:
     =========== ======================= ================================
                 nsh                     nsh2
     =========== ======================= ================================
-    Toolchain:  NuttX buildroot for     Codesourcery for Windows*
-                Linux or Cygwin*,**
+    Toolchain:  NuttX buildroot for     Codesourcery for Windows *
+                Linux or Cygwin *,**
     ----------- ----------------------- --------------------------------
     Loader:     DfuSe                   DfuSe
     ----------- ----------------------- --------------------------------
     Serial      Debug output: USART1    Debug output: USART1
-    Console:    NSH output:   USART1    NSH output:   USART2
+    Console:    NSH output:   USART1    NSH output:   USART2 ***
     ----------- ----------------------- --------------------------------
     I2C1        Disabled                Enabled
     =========== ======================= ================================
@@ -445,7 +445,12 @@ Where <subdir> is one of the following:
       to set up the correct PATH variable for whichever toolchain you
       may use.
    ** Since DfuSe is assumed, this configuration may only work under
-      Cygwin.
+      Cygwin without modification.
+  *** When any other device other than /dev/console is used for a user
+      interface, (1) linefeeds (\n) will not be expanded to carriage return
+      / linefeeds \r\n). You will need to configure your terminal program
+      to account for this. And (2) input is not automatically echoed so
+      you will have to turn local echo on.
 
   ostest:
   ------

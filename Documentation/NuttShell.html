@@ -2155,6 +2155,12 @@ nsh>
       This is useful, for example, to separate the NSH command line from the system console
       when the system console is used to provide debug output.
       Default:  <code>stdin</code> and <code>stdout</code> (probably &quot;<code>/dev/console</code>&quot;)
+      <ul><small>
+        NOTE: When any other device other than <code>/dev/console</code> is used for a user interface,
+        (1) linefeeds (<code>\n</code>) will not be expanded to carriage return / linefeeds (<code>\r\n</code>).
+        You will need to configure your terminal program to account for this.
+        And (2) input is not automatically echoed so you will have to turn local echo on.
+      </small></ul>
     </td>
   <tr>
     <td valign="top"><b><code>CONFIG_NSH_TELNET</code></b></td>
