@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: May 21, 2011</p>
+      <p>Last Updated: July 4, 2011</p>
     </td>
   </tr>
 </table>
@@ -2141,10 +2141,21 @@ nsh>
   <tr>
     <td valign="top"><b><code>CONFIG_NSH_CONSOLE</code></b></td>
     <td>
-      If <code>CONFIG_NSH_CONSOLE</code>is set to <i>y</i>, then a serial
+      If <code>CONFIG_NSH_CONSOLE</code> is set to <i>y</i>, then a serial
       console front-end is selected.
     </td>
   </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NSH_CONDEV</code></b></td>
+    <td>
+      If <code>CONFIG_NSH_CONSOLE</code> is set to <i>y</i>, then <code>CONFIG_NSH_CONDEV</code>
+      may also be set to select the serial device used to support the NSH console.
+      This should be set to the quoted name of a readable/write-able character driver such as:
+      <code>CONFIG_NSH_CONDEV=&quot;/dev/ttyS1&quot;</code>.
+      This is useful, for example, to separate the NSH command line from the system console
+      when the system console is used to provide debug output.
+      Default:  <code>stdin</code> and <code>stdout</code> (probably &quot;<code>/dev/console</code>&quot;)
+    </td>
   <tr>
     <td valign="top"><b><code>CONFIG_NSH_TELNET</code></b></td>
     <td>
