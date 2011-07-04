@@ -291,7 +291,7 @@ void stm32_lowsetup(void)
    */
 
 #ifdef CONFIG_STM32_USART2_REMAP
-  mapr |= ~AFIO_MAPR_USART2_REMAP;
+  mapr |= AFIO_MAPR_USART2_REMAP;
 #else
   mapr &= ~AFIO_MAPR_USART2_REMAP;
 #endif
