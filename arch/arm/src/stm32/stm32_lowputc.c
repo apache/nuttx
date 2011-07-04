@@ -162,9 +162,9 @@
 
 #define STM32_USARTDIV32 (STM32_APBCLOCK / (STM32_CONSOLE_BAUD >> 1))
 
-/* The mantissa is then usartdiv32 * 32:
+/* The mantissa is then usartdiv32 / 32:
  *
- *   mantissa = 32 * usartdiv32
+ *   mantissa = usartdiv32 / 32/
  *
  * Eg. usartdiv32=1250, mantissa = 39 
  */
@@ -247,7 +247,7 @@ void stm32_lowsetup(void)
   uint32_t cr;
 #endif
 
-  /* Enable the selected USARTs and configure GPIO pins need byed the
+  /* Enable the selected USARTs and configure GPIO pins need by the
    * the selected USARTs.  NOTE: The serial driver later depends on
    * this pin configuration -- whether or not a serial console is selected.
    *
