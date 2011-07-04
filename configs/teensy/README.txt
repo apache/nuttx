@@ -540,3 +540,9 @@ Where <subdir> is one of the following:
     for more information.  NOTE:  THIS CONFIGURATION HAS NOT YET BEEN
     DEBUGGED AND DOES NOT WORK!!!  ISSUES:  (1) THE SPI DRIVER IS UNTESTED,
     (2) THE USB DRIVER IS UNTESTED, AND (3) THE RAM USAGE MIGHT BE EXCESSIVE.
+
+    Update 7/11:  (1) The SPI/SD driver has been verified, however, (2) I
+    believe that the current teensy/usbstorage configuration uses too
+    much SRAM for the system to behave sanely.  A lower memory footprint
+    version of the mass storage driver will be required before this can
+    be debugged

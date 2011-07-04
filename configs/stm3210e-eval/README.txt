@@ -1,11 +1,11 @@
 README
-^^^^^^
+======
 
 This README discusses issues unique to NuttX configurations for the
 STMicro STM3210E-EVAL development board.
 
 Contents
-^^^^^^^^
+========
 
   - Development Environment
   - GNU Toolchain Options
@@ -17,7 +17,7 @@ Contents
   - Configurations
 
 Development Environment
-^^^^^^^^^^^^^^^^^^^^^^^
+=======================
 
   Either Linux or Cygwin on Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
@@ -26,7 +26,7 @@ Development Environment
   were used and those tools works only under Windows.
 
 GNU Toolchain Options
-^^^^^^^^^^^^^^^^^^^^^
+=====================
 
   The NuttX make system has been modified to support the following different
   toolchain options.
@@ -95,7 +95,7 @@ GNU Toolchain Options
   path or will get the wrong version of make.
 
 IDEs
-^^^^
+====
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project (There is a simple RIDE project
@@ -128,7 +128,7 @@ IDEs
   startup object needed by RIDE.
 
 NuttX buildroot Toolchain
-^^^^^^^^^^^^^^^^^^^^^^^^^
+=========================
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
@@ -165,7 +165,7 @@ NuttX buildroot Toolchain
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
 DFU
-^^^
+===
 
   The linker files in these projects can be configured to indicate that you
   will be loading code using STMicro built-in USB Device Firmware Upgrade (DFU)
@@ -194,7 +194,7 @@ DFU
   3. Start the DFU loader on the STM3210E-EVAL board.  You do this by
      resetting the board while holding the "Key" button.  Windows should
      recognize that the DFU loader has been installed.
-  3. Run the DFU SE program to load nutt.dfu into FLASH.
+  3. Run the DFU SE program to load nuttx.dfu into FLASH.
 
   What if the DFU loader is not in FLASH?  The loader code is available
   inside of the Demo dirctory of the USBLib ZIP file that can be downloaded
@@ -212,7 +212,7 @@ DFU
   a file called nuttx.dfu that you can use with the STMicro DFU SE program.
 
 LEDs
-^^^^
+====
 
 The STM3210E-EVAL board has four LEDs labeled LD1, LD2, LD3 and LD4 on the
 the board.  Usage of these LEDs is defined in include/board.h and src/up_leds.c.
@@ -238,7 +238,7 @@ They are encoded as follows:
 *** LED2 may also flicker normally if signals are processed.
 
 STM3210E-EVAL-specific Configuration Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+============================================
 
 	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
 	   be set to:
@@ -262,6 +262,11 @@ STM3210E-EVAL-specific Configuration Options
 
 	   CONFIG_ARCH_CHIP_STM32F103ZET6
 
+    CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG - Enables special STM32 clock
+       configuration features.
+
+       CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
+ 
 	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 	   hence, the board that supports the particular chip or SoC.
 
@@ -404,7 +409,7 @@ STM3210E-EVAL-specific Configuration Options
 	  4-bit transfer mode.
 
 Configurations
-^^^^^^^^^^^^^^
+==============
 
 Each STM3210E-EVAL configuration is maintained in a sudirectory and
 can be selected as follow:
@@ -416,25 +421,51 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
-  nsh:
-    Configures the NuttShell (nsh) located at examples/nsh.  The
-    Configuration enables both the serial and telnetd NSH interfaces.
+  nsh and nsh2:
+  ------------
+    Configure the NuttShell (nsh) located at examples/nsh.
+
+    Differences between the two NSH configurations:
+
+    =========== ======================= ================================
+                nsh                     nsh2
+    =========== ======================= ================================
+    Toolchain:  NuttX buildroot for     Codesourcery for Windows*
+                Linux or Cygwin*,**
+    ----------- ----------------------- --------------------------------
+    Loader:     DfuSe                   DfuSe
+    ----------- ----------------------- --------------------------------
+    Serial      Debug output: USART1    Debug output: USART1
+    Console:    NSH output:   USART1    NSH output:   USART2
+    ----------- ----------------------- --------------------------------
+    I2C1        Disabled                Enabled
+    =========== ======================= ================================
+
+    * You will probably need to modify nsh/setenv.sh or nsh2/setenv.sh
+      to set up the correct PATH variable for whichever toolchain you
+      may use.
+   ** Since DfuSe is assumed, this configuration may only work under
+      Cygwin.
 
   ostest:
+  ------
     This configuration directory, performs a simple OS test using
     examples/ostest.  By default, this project assumes that you are
     using the DFU bootloader.
 
   RIDE
+  ----
     This configuration builds a trivial bring-up binary.  It is
     useful only because it words with the RIDE7 IDE and R-Link debugger.
 
   usbserial:
+  ---------
     This configuration directory exercises the USB serial class
     driver at examples/usbserial.  See examples/README.txt for
     more information.
 
   usbstorage:
+  ----------
     This configuration directory exercises the USB mass storage
     class driver at examples/usbstorage.  See examples/README.txt for
     more information.

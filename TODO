@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 20, 2011)
+NuttX TODO List (Last updated July 3, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -903,6 +903,11 @@ o AVR (arch/avr)
   Description:   An SPI driver and a USB device driver exist for the AT90USB (as well
                  as a USB mass storage example).  However, this configuration is not
                  fully debugged as of the NuttX-6.5 release.
+                 Update 7/11:  (1) The SPI/SD driver has been verified, however, (2) I
+                 believe that the current teensy/usbstorage configuration uses too
+                 much SRAM for the system to behave sanely.  A lower memory footprint
+                 version of the mass storage driver will be required before this can
+                 be debugged
   Status:       Open
   Priority:     Medium-High.
 

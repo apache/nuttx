@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_serial.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -659,7 +659,7 @@ static int up_interrupt(int irq, void *context)
 
       /* Get the masked USART status and clear the pending interrupts. */
 
-      priv->sr = up_serialin(priv,  STM32_USART_SR_OFFSET);
+      priv->sr = up_serialin(priv, STM32_USART_SR_OFFSET);
 
       /* USART interrupts:
        *
