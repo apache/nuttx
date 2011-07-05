@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxtk/nxtk_bitmapwindow.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,7 @@
  ****************************************************************************/
 
 int nxtk_bitmapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
-                      FAR const void *src[CONFIG_NX_NPLANES],
+                      FAR const void **src,
                       FAR const struct nxgl_point_s *origin, unsigned int stride)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;

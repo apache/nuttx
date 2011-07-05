@@ -452,16 +452,27 @@ Where <subdir> is one of the following:
       to account for this. And (2) input is not automatically echoed so
       you will have to turn local echo on.
 
+  nx:
+  ---
+    And example using the NuttX graphics system (NX).  This example
+    uses the Nokia 6100 LCD driver.
+
+    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+
   ostest:
   ------
     This configuration directory, performs a simple OS test using
     examples/ostest.  By default, this project assumes that you are
     using the DFU bootloader.
 
+    CONFIG_STM32_BUILDROOT=y	  : NuttX buildroot under Linux or Cygwin
+
   RIDE
   ----
     This configuration builds a trivial bring-up binary.  It is
     useful only because it words with the RIDE7 IDE and R-Link debugger.
+
+    CONFIG_STM32_RAISONANCE=y     : Raisonance RIDE7 under Windows
 
   usbserial:
   ---------
@@ -469,8 +480,13 @@ Where <subdir> is one of the following:
     driver at examples/usbserial.  See examples/README.txt for
     more information.
 
+    CONFIG_STM32_BUILDROOT=y	  : NuttX buildroot under Linux or Cygwin
+
   usbstorage:
   ----------
     This configuration directory exercises the USB mass storage
     class driver at examples/usbstorage.  See examples/README.txt for
     more information.
+
+    CONFIG_STM32_BUILDROOT=y	  : NuttX buildroot under Linux or Cygwin
+

@@ -1867,4 +1867,5 @@
 	* arch/arm/src/stm32/stm32_lowputc.c and stm32_serial.c.  Correct severl bugs
 	  involving serial port configuration.  These bugs are only critical if you
 	  are trying to using multiple UARTs on STM32.
-
+	* configs/stm3210e-eval/src/up_lcd.c:  Add a driver for the STM3210E-EVAL's LCD.
+	* configs/stm3210e-eval/nx:  Add NX configuration for the STM3210E-EVAL.

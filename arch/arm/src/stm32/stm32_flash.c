@@ -160,7 +160,6 @@ int up_progmem_ispageerased(uint16_t page)
     uint32_t addr;
     uint16_t count;
     uint16_t bwritten = 0;
-    uint16_t hword;
 
     if (page >= STM32_FLASH_NPAGES)
         return -EFAULT;

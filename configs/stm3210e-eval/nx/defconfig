@@ -1,5 +1,5 @@
 ############################################################################
-# configs/stm3210e-eval/nsh2/defconfig
+# configs/stm3210e-eval/nx/defconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -325,6 +325,7 @@ CONFIG_HAVE_LIBM=n
 #CONFIG_APPS_DIR=
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
+CONFIG_DEBUG_GRAPHICS=n
 CONFIG_DEBUG_SYMBOLS=n
 CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=y
@@ -384,12 +385,12 @@ CONFIG_SYMTAB_ORDEREDBYNAME=y
 #   up waiting tasks.
 #
 CONFIG_DISABLE_CLOCK=n
-CONFIG_DISABLE_POSIX_TIMERS=n
+CONFIG_DISABLE_POSIX_TIMERS=y
 CONFIG_DISABLE_PTHREAD=n
 CONFIG_DISABLE_SIGNALS=n
 CONFIG_DISABLE_MQUEUE=n
-CONFIG_DISABLE_MOUNTPOINT=n
-CONFIG_DISABLE_ENVIRON=n
+CONFIG_DISABLE_MOUNTPOINT=y
+CONFIG_DISABLE_ENVIRON=y
 CONFIG_DISABLE_POLL=y
 
 #
@@ -455,8 +456,8 @@ CONFIG_ARCH_BZERO=n
 CONFIG_MAX_TASKS=16
 CONFIG_MAX_TASK_ARGS=4
 CONFIG_NPTHREAD_KEYS=4
-CONFIG_NFILE_DESCRIPTORS=8
-CONFIG_NFILE_STREAMS=8
+CONFIG_NFILE_DESCRIPTORS=12
+CONFIG_NFILE_STREAMS=12
 CONFIG_NAME_MAX=32
 CONFIG_STDIO_BUFFER_SIZE=256
 CONFIG_NUNGET_CHARS=2
@@ -467,13 +468,22 @@ CONFIG_PREALLOC_WDOGS=4
 CONFIG_PREALLOC_TIMERS=4
 
 #
+# Framebuffer driver options
+#
+CONFIG_FB_CMAP=n
+CONFIG_FB_HWCURSOR=n
+CONFIG_FB_HWCURSORIMAGE=n
+#CONFIG_FB_HWCURSORSIZE
+#CONFIG_FB_TRANSPARENCY
+
+#
 # Filesystem configuration
 #
 # CONFIG_FS_FAT - Enable FAT filesystem support
 # CONFIG_FAT_SECTORSIZE - Max supported sector size
 # CONFIG_FS_ROMFS - Enable ROMFS filesystem support
 #
-CONFIG_FS_FAT=y
+CONFIG_FS_FAT=n
 CONFIG_FS_ROMFS=n
 
 #
@@ -672,6 +682,104 @@ CONFIG_USBSTRG_VERSIONNO=0x0399
 CONFIG_USBSTRG_REMOVABLE=y
 
 #
+# Graphics related configuration settings
+#
+# CONFIG_NX
+#   Enables overall support for graphics library and NX
+# CONFIG_NX_MULTIUSER
+#   Configures NX in multi-user mode
+# CONFIG_NX_NPLANES
+#   Some YUV color formats requires support for multiple planes,
+#   one for each color component.  Unless you have such special
+#   hardware, this value should be undefined or set to 1
+# CONFIG_NX_DISABLE_1BPP, CONFIG_NX_DISABLE_2BPP,
+# CONFIG_NX_DISABLE_4BPP, CONFIG_NX_DISABLE_8BPP,
+# CONFIG_NX_DISABLE_16BPP, CONFIG_NX_DISABLE_24BPP, and
+# CONFIG_NX_DISABLE_32BPP
+#   NX supports a variety of pixel depths.  You can save some
+#   memory by disabling support for unused color depths.
+# CONFIG_NX_PACKEDMSFIRST
+#   If a pixel depth of less than 8-bits is used, then NX needs
+#   to know if the pixels pack from the MS to LS or from LS to MS
+# CONFIG_NX_LCDDRIVER
+#   By default, NX builds to use a framebuffer driver (see
+#   include/nuttx/fb.h). If this option is defined, NX will
+#   build to use an LCD driver (see include/nuttx/lcd/lcd.h).
+# CONFIG_LCD_MAXPOWER - The full-on power setting for an LCD device.
+# CONFIG_LCD_MAXCONTRAST - The maximum contrast value for an LCD device.
+# CONFIG_NX_MOUSE
+#   Build in support for mouse input
+# CONFIG_NX_KBD
+#   Build in support of keypad/keyboard input
+# CONFIG_NXTK_BORDERWIDTH
+#   Specifies with with of the border (in pixels) used with
+#   framed windows.  The default is 4.
+# CONFIG_NXTK_BORDERCOLOR1 and CONFIG_NXTK_BORDERCOLOR2
+#   Specify the colors of the border used with framed windows.
+#   CONFIG_NXTK_BORDERCOLOR2 is the shadow side color and so
+#   is normally darker.  The default is medium and dark grey,
+#   respectively
+# CONFIG_NXTK_AUTORAISE
+#   If set, a window will be raised to the top if the mouse position
+#   is over a visible portion of the window.  Default: A mouse
+#   button must be clicked over a visible portion of the window.
+# CONFIG_NXFONTS_CHARBITS
+#   The number of bits in the character set.  Current options are
+#   only 7 and 8.  The default is 7.
+# CONFIG_NXFONT_SANS
+#   At present, there is only one font.  But if there were were more,
+#   then this option would select the sans serif font.
+#
+# NX Multi-user only options:
+#
+# CONFIG_NX_BLOCKING
+#   Open the client message queues in blocking mode.  In this case,
+#   nx_eventhandler()  will not return until a message is received and processed.
+# CONFIG_NX_MXSERVERMSGS and CONFIG_NX_MXCLIENTMSGS
+#   Specifies the maximum number of messages that can fit in
+#   the message queues.  No additional resources are allocated, but
+#   this can be set to prevent flooding of the client or server with
+#   too many messages (CONFIG_PREALLOC_MQ_MSGS controls how many
+#   messages are pre-allocated).
+#
+CONFIG_NX=y
+CONFIG_NX_MULTIUSER=n
+CONFIG_NX_NPLANES=1
+CONFIG_NX_DISABLE_1BPP=y
+CONFIG_NX_DISABLE_2BPP=y
+CONFIG_NX_DISABLE_4BPP=y
+CONFIG_NX_DISABLE_8BPP=y
+CONFIG_NX_DISABLE_16BPP=n
+CONFIG_NX_DISABLE_24BPP=y
+CONFIG_NX_DISABLE_32BPP=y
+CONFIG_NX_PACKEDMSFIRST=n
+CONFIG_NX_LCDDRIVER=y
+CONFIG_LCD_MAXPOWER=1
+CONFIG_LCD_MAXCONTRAST=1
+CONFIG_NX_MOUSE=y
+CONFIG_NX_KBD=y
+#CONFIG_NXTK_BORDERWIDTH=4
+CONFIG_NXTK_BORDERCOLOR1=0xd69a
+CONFIG_NXTK_BORDERCOLOR2=0xad55
+CONFIG_NXTK_AUTORAISE=n
+CONFIG_NXFONT_SANS=y
+CONFIG_NXFONTS_CHARBITS=7
+CONFIG_NX_BLOCKING=y
+CONFIG_NX_MXSERVERMSGS=32
+CONFIG_NX_MXCLIENTMSGS=16
+
+#
+# STM3210E-EVAL LCD Hardware Configuration
+#
+# CONFIG_LCD_LANDSCAPE - Define for 320x240 display support.
+#   Default is 320x240 (this setting is informative only... not used).
+# CONFIG_LCD_PORTRAIT - Define for 240x320 display support.
+#   Default is 320x240.
+#
+CONFIG_LCD_LANDSCAPE=n
+CONFIG_LCD_PORTRAIT=y
+
+#
 # Settings for examples/uip
 #
 CONFIG_EXAMPLE_UIP_IPADDR=(10<<24|0<<16|0<<8|2)
@@ -788,6 +896,49 @@ CONFIG_EXAMPLES_USBSERIAL_TRACECLASS=n
 CONFIG_EXAMPLES_USBSERIAL_TRACETRANSFERS=n
 CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER=n
 CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=n
+
+#
+# Settings for examples/nx
+#
+# CONFIG_EXAMPLES_NX_VPLANE -- The plane to select from the frame-
+#   buffer driver for use in the test.  Default: 0
+# CONFIG_EXAMPLES_NX_DEVNO - The LCD device to select from the LCD
+#  driver for use in the test: Default: 0
+# CONFIG_EXAMPLES_NX_BGCOLOR -- The color of the background.  Default depends on
+#   CONFIG_EXAMPLES_NX_BPP.
+# CONFIG_EXAMPLES_NX_COLOR1 -- The color of window 1. Default depends on
+#   CONFIG_EXAMPLES_NX_BPP.
+# CONFIG_EXAMPLES_NX_COLOR2 -- The color of window 2. Default depends on
+#   CONFIG_EXAMPLES_NX_BPP.
+# CONFIG_EXAMPLES_NX_TBCOLOR -- The color of the toolbar. Default depends on
+#   CONFIG_EXAMPLES_NX_BPP.
+# CONFIG_EXAMPLES_NX_FONTCOLOR -- The color of the toolbar. Default depends on
+#   CONFIG_EXAMPLES_NX_BPP.
+# CONFIG_EXAMPLES_NX_BPP -- Pixels per pixel to use.  Valid options
+#   include 2, 4, 8, 16, 24, and 32.  Default is 32.
+# CONFIG_EXAMPLES_NX_RAWWINDOWS -- Use raw windows;  Default is to
+#   use pretty, framed NXTK windows with toolbars.
+# CONFIG_EXAMPLES_NX_STACKSIZE -- The stacksize to use when creating
+#   the NX server.  Default 2048
+# CONFIG_EXAMPLES_NX_CLIENTPRIO -- The client priority.  Default: 80
+# CONFIG_EXAMPLES_NX_SERVERPRIO -- The server priority.  Default: 120
+# CONFIG_EXAMPLES_NX_NOTIFYSIGNO -- The signal number to use with
+#   nx_eventnotify().  Default: 4
+#
+CONFIG_EXAMPLES_NX_VPLANE=0
+CONFIG_EXAMPLES_NX_DEVNO=0
+CONFIG_EXAMPLES_NX_BGCOLOR=0x0011
+CONFIG_EXAMPLES_NX_COLOR1=0xaedc
+CONFIG_EXAMPLES_NX_COLOR2=0xe7ff
+CONFIG_EXAMPLES_NX_TBCOLOR=0xd69a
+CONFIG_EXAMPLES_NX_FONTCOLOR=0x0000
+CONFIG_EXAMPLES_NX_BPP=16
+CONFIG_EXAMPLES_NX_RAWWINDOWS=n
+CONFIG_EXAMPLES_NX_STACKSIZE=2048
+CONFIG_EXAMPLES_NX_CLIENTPRIO=80
+CONFIG_EXAMPLES_NX_SERVERPRIO=120
+CONFIG_EXAMPLES_NX_NOTIFYSIGNO=4
+CONFIG_EXAMPLES_NX_EXTERNINIT=n
 
 #
 # Stack and heap information
