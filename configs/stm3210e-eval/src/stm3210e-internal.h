@@ -245,6 +245,27 @@ extern void stm32_selectsram(void);
  ************************************************************************************/
 
 extern void stm32_deselectsram(void);
+
+/************************************************************************************
+ * Name: stm32_selectlcd
+ *
+ * Description:
+ *   Initialize to the LCD
+ *
+ ************************************************************************************/
+
+extern void stm32_selectlcd(void);
+
+/************************************************************************************
+ * Name: stm32_deselectlcd
+ *
+ * Description:
+ *   Disable the LCD
+ *
+ ************************************************************************************/
+
+extern void stm32_deselectlcd(void);
+
 #endif /* CONFIG_STM32_FSMC */
 
 #endif /* __ASSEMBLY__ */

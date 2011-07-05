@@ -59,6 +59,7 @@
 /* Configuration **********************************************************************/
 /* Verify that all configuration requirements have been met */
 
+/* Debug ******************************************************************************/
 /* Define the following to enable register-level debug output */
 
 #undef CONFIG_LCD_SKELDEBUG
@@ -261,10 +262,7 @@ static int skel_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  /* When the SPI interfacee is used, the SD1329 controller does not support reading
-   * from GDDRAM.
-   */
-
+#warning "Missing logic"
   return -ENOSYS;
 }
 
@@ -316,6 +314,7 @@ static int skel_getpower(struct lcd_dev_s *dev)
 {
   struct skel_dev_s *priv = (struct skel_dev_s *)dev;
   gvdbg("power: %d\n", 0);
+#warning "Missing logic"
   return 0;
 }
 
@@ -336,6 +335,7 @@ static int skel_setpower(struct lcd_dev_s *dev, int power)
   DEBUGASSERT(power <= CONFIG_LCD_MAXPOWER);
 
   /* Set new power level */
+#warning "Missing logic"
 
   return OK;
 }
@@ -351,6 +351,7 @@ static int skel_setpower(struct lcd_dev_s *dev, int power)
 static int skel_getcontrast(struct lcd_dev_s *dev)
 {
   gvdbg("Not implemented\n");
+#warning "Missing logic"
   return -ENOSYS;
 }
 
@@ -365,6 +366,7 @@ static int skel_getcontrast(struct lcd_dev_s *dev)
 static int skel_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
   gvdbg("contrast: %d\n", contrast);
+#warning "Missing logic"
   return -ENOSYS;
 }
 
@@ -388,9 +390,12 @@ FAR struct lcd_dev_s *up_oledinitialize(FAR struct spi_dev_s *spi)
 
   /* Configure GPIO pins */
 #warning "Missing logic"
-  /* Enable clocking /
+
+  /* Enable clocking */
+#warning "Missing logic"
 
   /* Configure and enable LCD */
- 
-  return lcddev == 0 ? &g_lcddev.dev : NULL;
+ #warning "Missing logic"
+
+  return &g_lcddev.dev;
 }
