@@ -75,17 +75,19 @@
  * respectively.
  *
  * Pin Usage (per schematic)
- *                         FLASH   SRAM    NAND
- *   D[0..15]              [0..15] [0..15] [0..7]
- *   A[0..23]              [0..22] [0..18] [16,17]
- *   PSMC_NE3   PG10  OUT  ~CE     ---     ---
- *   PSMC_NBL0  PE0   OUT  ~BLE    ---     ---
- *   PSMC_NBL1  PE1   OUT  ~BHE    ---     ---
- *   PSMC_NE2   PG9   OUT  ---     ~E      ---
- *   PSMC_NWE   PD5   OUT  ~WE     ~W      ~W
- *   PSMC_NOE   PD4   OUT  ~OE     ~G      ~R
- *   PSMC_NWAIT PD6   IN   ---     R~B     ---
- *   PSMC_INT2  PG6*  IN   ---     ---     R~B
+ *
+ *                         FLASH   SRAM    NAND    LCD
+ *   D[0..15]              [0..15] [0..15] [0..7]  [0..15]
+ *   A[0..23]              [0..22] [0..18] [16,17] [0]
+ *   FSMC_NBL0  PE0   OUT  ~BLE    ---     ---     ---
+ *   FSMC_NBL1  PE1   OUT  ~BHE    ---     ---     ---
+ *   FSMC_NE2   PG9   OUT  ---     ~E      ---     ---
+ *   FSMC_NE3   PG10  OUT  ~CE     ---     ---     ---
+ *   FSMC_NE4   PG12  OUT  ---     ---     ---     ~CS
+ *   FSMC_NWE   PD5   OUT  ~WE     ~W      ~W      ~WR/SCL
+ *   FSMC_NOE   PD4   OUT  ~OE     ~G      ~R      ~RD
+ *   FSMC_NWAIT PD6   IN   ---     R~B     ---     ---
+ *   FSMC_INT2  PG6*  IN   ---     ---     R~B     ---
  *
  *   *JP7 will switch to PD6
  */
@@ -113,7 +115,7 @@ const uint16_t g_commonconfig[NCOMMON_CONFIG] =
   GPIO_NPS_D8,  GPIO_NPS_D9,  GPIO_NPS_D10, GPIO_NPS_D11,
   GPIO_NPS_D12, GPIO_NPS_D13, GPIO_NPS_D14, GPIO_NPS_D15,
 
-  /* NOE, NWE, NE3  */
+  /* NOE, NWE  */
 
   GPIO_NPS_NOE, GPIO_NPS_NWE
 };
@@ -121,16 +123,6 @@ const uint16_t g_commonconfig[NCOMMON_CONFIG] =
 /************************************************************************************
  * Private Data
  ************************************************************************************/
-
-/* GPIO configurations unique to SRAM  */
-
-static const uint16_t g_sramconfig[] =
-{
-  /* NE3, NBL0, NBL1,  */
-
-  GPIO_NPS_NE3, GPIO_NPS_NBL0, GPIO_NPS_NBL1
-};
-#define NSRAM_CONFIG (sizeof(g_sramconfig)/sizeof(uint16_t))
 
 /************************************************************************************
  * Private Functions

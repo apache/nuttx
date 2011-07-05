@@ -72,17 +72,18 @@
  * respectively.
  *
  * Pin Usage (per schematic)
- *                         FLASH   SRAM    NAND
- *   D[0..15]              [0..15] [0..15] [0..7]
- *   A[0..23]              [0..22] [0..18] [16,17]
- *   PSMC_NE3   PG10  OUT  ~CE     ---     ---
- *   PSMC_NBL0  PE0   OUT  ~BLE    ---     ---
- *   PSMC_NBL1  PE1   OUT  ~BHE    ---     ---
- *   PSMC_NE2   PG9   OUT  ---     ~E      ---
- *   PSMC_NWE   PD5   OUT  ~WE     ~W      ~W
- *   PSMC_NOE   PD4   OUT  ~OE     ~G      ~R
- *   PSMC_NWAIT PD6   IN   ---     R~B     ---
- *   PSMC_INT2  PG6*  IN   ---     ---     R~B
+ *                         FLASH   SRAM    NAND    LCD
+ *   D[0..15]              [0..15] [0..15] [0..7]  [0..15]
+ *   A[0..23]              [0..22] [0..18] [16,17] [0]
+ *   FSMC_NBL0  PE0   OUT  ~BLE    ---     ---     ---
+ *   FSMC_NBL1  PE1   OUT  ~BHE    ---     ---     ---
+ *   FSMC_NE2   PG9   OUT  ---     ~E      ---     ---
+ *   FSMC_NE3   PG10  OUT  ~CE     ---     ---     ---
+ *   FSMC_NE4   PG12  OUT  ---     ---     ---     ~CS
+ *   FSMC_NWE   PD5   OUT  ~WE     ~W      ~W      ~WR/SCL
+ *   FSMC_NOE   PD4   OUT  ~OE     ~G      ~R      ~RD
+ *   FSMC_NWAIT PD6   IN   ---     R~B     ---     ---
+ *   FSMC_INT2  PG6*  IN   ---     ---     R~B     ---
  *
  *   *JP7 will switch to PD6
  */
@@ -133,7 +134,7 @@ void stm32_selectsram(void)
   putreg32(FSMC_BTR_ADDSET(1)|FSMC_BTR_ADDHLD(1)|FSMC_BTR_DATAST(3)|FSMC_BTR_BUSTRUN(1)|
            FSMC_BTR_CLKDIV(1)|FSMC_BTR_DATLAT(2)|FSMC_BTR_ACCMODA, STM32_FSMC_BTR3);
 
-  putreg32(0xffffffff, STM32_FSMC_BCR3);
+  putreg32(0xffffffff, STM32_FSMC_BWTR3);
 
   /* Enable the bank */
 
