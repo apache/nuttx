@@ -189,32 +189,3 @@ void stm32_disablefsmc(void)
   regval &= ~RCC_AHBENR_FSMCEN;
   putreg32(regval, STM32_RCC_AHBENR);
 }
-
-/************************************************************************************
- * Name: stm32_deselectsram
- *
- * Description:
- *   Disable NOR FLASH
- *
- ************************************************************************************/
-
-void stm32_deselectsram(struct extmem_save_s *restore)
-{
-  /* Restore registers to their power up settings */
-
-  putreg32(0x000030d2, STM32_FSMC_BCR3);
-
-  /* Bank1 NOR/SRAM timing register configuration */
-
-  putreg32(0x0fffffff, STM32_FSMC_BTR3);
- 
-  /* Disable AHB clocking to the FSMC */
-
-  stm32_disableclocks();
-
-  /* Restore GPIOs */
-
-  stm32_restoregpios(restore);
-}
-
-

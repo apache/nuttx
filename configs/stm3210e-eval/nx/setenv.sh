@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/stm3210e-eval/nsh2/setenv.sh
+# configs/stm3210e-eval/nx/setenv.sh
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

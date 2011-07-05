@@ -77,6 +77,16 @@
 #  define CONFIG_LCD_MAXPOWER 1
 #endif
 
+/* Check orientation */
+
+#if defined(CONFIG_LCD_PORTRAIT)
+#  if defined(CONFIG_LCD_LANDSCAPE)
+#    error "Cannot define both portrait and landscape orientations"
+#  endif
+#elif !defined(CONFIG_LCD_LANDSCAPE)
+#  define CONFIG_LCD_LANDSCAPE 1
+#endif
+
 /* Define CONFIG_LCD_DEBUG to enable register-level debug output. Verbose debug must
  * also be enabled.
  */
