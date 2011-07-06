@@ -326,6 +326,7 @@ CONFIG_HAVE_LIBM=n
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_GRAPHICS=n
+CONFIG_DEBUG_LCD=n
 CONFIG_DEBUG_SYMBOLS=n
 CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=y
@@ -775,9 +776,13 @@ CONFIG_NX_MXCLIENTMSGS=16
 #   Default is 320x240 (this setting is informative only... not necessary).
 # CONFIG_LCD_PORTRAIT - Define for 240x320 display support.
 #   Default is 320x240.
+# CONFIG_LCD_BACKLIGHT - Define to support an adjustable backlight
+#   using timer 1.  The granularity of the settings is determined
+#   by CONFIG_LCD_MAXPOWER.  Requires CONFIG_STM32_TIM1.
 #
 CONFIG_LCD_LANDSCAPE=n
 CONFIG_LCD_PORTRAIT=y
+CONFIG_LCD_BACKLIGHT=n
 
 #
 # Settings for examples/uip

@@ -578,7 +578,7 @@ struct stm32_tim_priv_s stm32_tim7_priv = {
 
 #if STM32_NATIM > 0
 
-#if CONFIG_STM32_TIM7
+#if CONFIG_STM32_TIM1
 struct stm32_tim_priv_s stm32_tim1_priv = {
     .ops        = &stm32_tim_ops,
     .mode       = STM32_TIM_MODE_UNUSED,
