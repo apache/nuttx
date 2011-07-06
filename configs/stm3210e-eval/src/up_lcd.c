@@ -52,6 +52,8 @@
 #include <nuttx/lcd/lcd.h>
 
 #include "up_arch.h"
+#include "stm32.h"
+#include "stm32_internal.h"
 #include "stm3210e-internal.h"
 
 /**************************************************************************************
@@ -67,14 +69,17 @@
 
 /* Check power setting */
 
-#if !defined(CONFIG_LCD_MAXPOWER)
-#  define CONFIG_LCD_MAXPOWER 1
+#if !defined(CONFIG_LCD_MAXPOWER) || CONFIG_LCD_MAXPOWER < 1
+#  undef CONFIG_LCD_MAXPOWER
+#  ifdef CONFIG_LCD_BACKLIGHT
+#    define CONFIG_LCD_MAXPOWER 100
+#  else
+#    define CONFIG_LCD_MAXPOWER 1
+#  endif
 #endif
 
-#if CONFIG_LCD_MAXPOWER != 1
-#  warning "CONFIG_LCD_MAXPOWER exceeds supported maximum"
-#  undef CONFIG_LCD_MAXPOWER
-#  define CONFIG_LCD_MAXPOWER 1
+#if CONFIG_LCD_MAXPOWER > 255
+#  error "CONFIG_LCD_MAXPOWER must be less than 256 to fit in uint8_t"
 #endif
 
 /* Check orientation */
@@ -85,6 +90,21 @@
 #  endif
 #elif !defined(CONFIG_LCD_LANDSCAPE)
 #  define CONFIG_LCD_LANDSCAPE 1
+#endif
+
+/* Backlight */
+
+#ifdef CONFIG_LCD_BACKLIGHT
+#  ifndef CONFIG_STM32_TIM1
+#    error "CONFIG_STM32_TIM1 to use the LCD backlight controls"
+#  endif
+#  if CONFIG_LCD_MAXPOWER < 2
+#    warning "A larger value of CONFIG_LCD_MAXPOWER is recommended"
+#  endif
+#endif
+
+#if defined(CONFIG_STM32_TIM1_FULL_REMAP)
+#  error "PA8 cannot be configured as TIM1 CH1 with full remap"
 #endif
 
 /* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
@@ -233,6 +253,8 @@
 #define LCD_REG_193           0xc1
 #define LCD_REG_229           0xe5
 
+#define LCD_BL_TIMER_PERIOD   8999
+
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
@@ -263,8 +285,8 @@ struct stm3210e_dev_s
 
   /* Private LCD-specific information follows */
 
-  bool spfd5408b;   /* TRUE: LCD is SPFD5408B Controller */
-  bool powered;     /* TRUE: display on */
+  bool     spfd5408b;   /* TRUE: LCD is SPFD5408B Controller */
+  uint8_t  power;       /* Current power setting */
 };
 
 /**************************************************************************************
@@ -316,6 +338,11 @@ static int stm3210e_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
 static inline void stm3210e_lcdinitialize(void);
 static inline void stm3210e_lcdclear(void);
+#ifdef CONFIG_LCD_BACKLIGHT
+static void stm3210e_backlight(void);
+#else
+#  define stm3210e_backlight()
+#endif
 
 /**************************************************************************************
  * Private Data
@@ -489,9 +516,6 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
                        size_t npixels)
 {
   FAR const uint16_t *src = (FAR const uint16_t*)buffer;
-#ifndef CONFIG_LCD_LANDSCAPE
-  fb_coord_t tmp;
-#endif
   int i;
  
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -664,7 +688,7 @@ static int stm3210e_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno
 static int stm3210e_getpower(struct lcd_dev_s *dev)
 {
   gvdbg("power: %d\n", 0);
-  return g_lcddev.powered ? 1 : 0;
+  return g_lcddev.power;
 }
 
 /**************************************************************************************
@@ -683,17 +707,31 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
 
   /* Set new power level */
 
-  if (power)
+  if (power > 0)
     {
-      /* Turn the display on: 262K color and display ON */
+      uint32_t duty;
+
+      /* Caclulate the new backlight duty.  It is a faction of the timer1
+       * period based on the ration of the current power setting to the
+       * maximum power setting.
+       */
+
+      duty = ((uint32_t)LCD_BL_TIMER_PERIOD * (uint32_t)power) / CONFIG_LCD_MAXPOWER;
+      if (duty >= LCD_BL_TIMER_PERIOD)
+        {
+          duty = LCD_BL_TIMER_PERIOD - 1;
+        }
+      putreg16((uint16_t)duty, STM32_TIM1_CCR1);
+
+      /* Then turn the display on */
 
       stm3210e_writereg(LCD_REG_7, g_lcddev.spfd5408b ? 0x0112 : 0x0173);
-      g_lcddev.powered = true;
+      g_lcddev.power = power;
     }
   else
     {
       stm3210e_writereg(LCD_REG_7, 0); 
-      g_lcddev.powered = false;
+      g_lcddev.power = 0;
     }
 
   return OK;
@@ -949,6 +987,130 @@ static inline void stm3210e_lcdclear(void)
 }
 
 /**************************************************************************************
+ * Name:  stm3210e_backlight
+ *
+ * Description:
+ *   The LCD backlight is driven from PA8 which must be configured as TIM1
+ *   CH1.  TIM1 must then be configured to output a clock on PA8; the duty
+ *   of the clock determineds the backlight level.
+ *
+ **************************************************************************************/
+
+#ifdef CONFIG_LCD_BACKLIGHT
+static void stm3210e_backlight(void)
+{
+  uint16_t ccmr;
+  uint16_t ccer;
+  uint16_t cr2;
+
+  /* Configure PA8 as TIM1 CH1 output */
+
+  stm32_configgpio(GPIO_TIM1_CH1OUT);
+
+  /* Enabled timer 1 clocking */
+
+  modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM1EN);
+
+  /* Reset timer 1 */
+
+  modifyreg32(STM32_RCC_APB2RSTR, 0, RCC_APB2RSTR_TIM1RST);
+  modifyreg32(STM32_RCC_APB2RSTR, RCC_APB2RSTR_TIM1RST, 0);
+
+  /* Reset the Counter Mode and set the clock division */
+
+  putreg16(0, STM32_TIM1_CR1);
+
+  /* Set the Autoreload value */
+
+  putreg16(LCD_BL_TIMER_PERIOD, STM32_TIM1_ARR);
+
+  /* Set the Prescaler value */
+
+  putreg16(0, STM32_TIM1_PSC);
+
+  /* Reset the Repetition Counter value */
+
+  putreg16(0, STM32_TIM1_RCR);
+
+  /* Generate an update event to reload the Prescaler value immediatly */
+
+  putreg16(ATIM_EGR_UG, STM32_TIM1_EGR);
+
+  /* Disable the Channel 1 */
+
+  ccer  = getreg16(STM32_TIM1_CCER);
+  ccer &= ~ATIM_CCER_CC1E;
+  putreg16(ccer, STM32_TIM1_CCER);
+
+  /* Get the TIM1 CR2 register value */
+
+  cr2  = getreg16(STM32_TIM1_CR2);
+
+  /* Select the Output Compare Mode Bits */
+  
+  ccmr  = getreg16(STM32_TIM1_CCMR1);
+  ccmr &= ATIM_CCMR1_OC1M_MASK;
+  ccmr |= (ATIM_CCMR_MODE_PWM1 << ATIM_CCMR1_OC1M_SHIFT);
+
+  /* Set the capture compare register value (50% duty) */
+
+  g_lcddev.power = (CONFIG_LCD_MAXPOWER + 1) / 2;
+  putreg16((LCD_BL_TIMER_PERIOD + 1) / 2, STM32_TIM1_CCR1);
+
+  /* Select the output polarity level == LOW and enable */
+
+  ccer |= (ATIM_CCER_CC1E | ATIM_CCER_CC1P);
+
+  /* Reset the Output N Polarity level */
+
+  ccer &= ~(ATIM_CCER_CC1NP|ATIM_CCER_CC1NE);
+
+  /* Reset the Ouput Compare and Output Compare N IDLE State */
+
+  cr2 &= ~(ATIM_CR2_OIS1|ATIM_CR2_OIS1N);
+
+  /* Write the timer configuration */
+
+  putreg16(cr2, STM32_TIM1_CR2);
+  putreg16(ccmr, STM32_TIM1_CCMR1);
+  putreg16(ccer, STM32_TIM1_CCER);
+
+  /* Set the auto preload enable bit */
+
+  modifyreg16(STM32_TIM1_CR1, 0, ATIM_CR1_ARPE);
+    
+  /* Enable Backlight Timer */
+
+  ccer |= ATIM_CR1_CEN;
+  putreg16(ccer, STM32_TIM1_CCER);
+
+  /* Dump timer1 registers */
+
+  lcddbg("APB2ENR: %08x\n", getreg32(STM32_RCC_APB2ENR));
+  lcddbg("CR1:     %04x\n", getreg32(STM32_TIM1_CR1));
+  lcddbg("CR2:     %04x\n", getreg32(STM32_TIM1_CR2));
+  lcddbg("SMCR:    %04x\n", getreg32(STM32_TIM1_SMCR));
+  lcddbg("DIER:    %04x\n", getreg32(STM32_TIM1_DIER));
+  lcddbg("SR:      %04x\n", getreg32(STM32_TIM1_SR));
+  lcddbg("EGR:     %04x\n", getreg32(STM32_TIM1_EGR));
+  lcddbg("CCMR1:   %04x\n", getreg32(STM32_TIM1_CCMR1));
+  lcddbg("CCMR2:   %04x\n", getreg32(STM32_TIM1_CCMR2));
+  lcddbg("CCER:    %04x\n", getreg32(STM32_TIM1_CCER));
+  lcddbg("CNT:     %04x\n", getreg32(STM32_TIM1_CNT));
+  lcddbg("PSC:     %04x\n", getreg32(STM32_TIM1_PSC));
+  lcddbg("ARR:     %04x\n", getreg32(STM32_TIM1_ARR));
+  lcddbg("RCR:     %04x\n", getreg32(STM32_TIM1_RCR));
+  lcddbg("CCR1:    %04x\n", getreg32(STM32_TIM1_CCR1));
+  lcddbg("CCR2:    %04x\n", getreg32(STM32_TIM1_CCR2));
+  lcddbg("CCR3:    %04x\n", getreg32(STM32_TIM1_CCR3));
+  lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM1_CCR4));
+  lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM1_CCR4));
+  lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM1_CCR4));
+  lcddbg("DMAR:    %04x\n", getreg32(STM32_TIM1_DMAR));
+}
+#endif
+
+/**************************************************************************************
  * Public Functions
  **************************************************************************************/
 
@@ -978,6 +1140,10 @@ int up_lcdinitialize(void)
   /* Clear the display */
 
   stm3210e_lcdclear();
+
+  /* Configure the backlight */
+
+  stm3210e_backlight();
   return OK;
 }
 

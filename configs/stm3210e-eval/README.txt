@@ -414,6 +414,9 @@ STM3210E-EVAL-specific Configuration Options
 	  Default is 320x240 (this setting is informative only... not used).
 	CONFIG_LCD_PORTRAIT - Define for 240x320 display support.
 	  Default is 320x240.
+    CONFIG_LCD_BACKLIGHT - Define to support an adjustable backlight
+      using timer 1.  The granularity of the settings is determined
+      by CONFIG_LCD_MAXPOWER.  Requires CONFIG_STM32_TIM1.
 
 Configurations
 ==============
@@ -465,6 +468,7 @@ Where <subdir> is one of the following:
     uses the Nokia 6100 LCD driver.
 
     CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_LCD_PORTRAIT=y         : 240x320
 
   ostest:
   ------
