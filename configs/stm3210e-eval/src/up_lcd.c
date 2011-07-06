@@ -87,17 +87,18 @@
 #  define CONFIG_LCD_LANDSCAPE 1
 #endif
 
-/* Define CONFIG_LCD_DEBUG to enable register-level debug output. Verbose debug must
+/* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
  * also be enabled.
  */
 
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_VERBOSE
 #  undef CONFIG_DEBUG_GRAPHICS
+#  undef CONFIG_DEBUG_LCD
 #endif
 
 #ifndef CONFIG_DEBUG_VERBOSE
-#  undef CONFIG_LCD_DEBUG
+#  undef CONFIG_DEBUG_LCD
 #endif
 
 /* Display/Color Properties ***********************************************************/
@@ -234,10 +235,10 @@
 
 /* Debug ******************************************************************************/
 
-#ifdef CONFIG_LCD_DEBUG
-# define skeldbg(format, arg...)  vdbg(format, ##arg)
+#ifdef CONFIG_DEBUG_LCD
+# define lcddbg(format, arg...)  vdbg(format, ##arg)
 #else
-# define skeldbg(x...)
+# define lcddbg(x...)
 #endif
 
 /**************************************************************************************
@@ -276,6 +277,7 @@ static uint16_t stm3210e_readreg(uint8_t regaddr);
 static inline void stm3210e_gramselect(void);
 static inline void stm3210e_writegram(uint16_t rgbval);
 static inline uint16_t stm3210e_readgram(void);
+static void stm3210e_setcursor(uint16_t col, uint16_t row);
 
 /* LCD Data Transfer Methods */
 
@@ -458,14 +460,15 @@ static inline uint16_t stm3210e_readgram(void)
  * Name:  stm3210e_setcursor
  *
  * Description:
- *   Set the cursor position
+ *   Set the cursor position.  In landscape mode, the "column" is actually the physical
+ *   Y position and the "row" is the physical X position.
  *
  **************************************************************************************/
 
-static void stm3210e_setcursor(uint8_t col, uint16_t row)
+static void stm3210e_setcursor(uint16_t col, uint16_t row)
 {
-  stm3210e_writereg(LCD_REG_32, col);
-  stm3210e_writereg(LCD_REG_33, row);
+  stm3210e_writereg(LCD_REG_32, row); /* GRAM horizontal address */
+  stm3210e_writereg(LCD_REG_33, col); /* GRAM vertical address */
 }
 
 /**************************************************************************************
@@ -486,6 +489,9 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
                        size_t npixels)
 {
   FAR const uint16_t *src = (FAR const uint16_t*)buffer;
+#ifndef CONFIG_LCD_LANDSCAPE
+  fb_coord_t tmp;
+#endif
   int i;
  
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -496,27 +502,42 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
   /* Write the run to GRAM. */
 
 #ifdef CONFIG_LCD_LANDSCAPE
+  /* Convert coordinates -- Which edge of the display is the "top?" Here the edge
+   * with the simplest conversion is used.
+   */
+
+  col = (STM3210E_XRES-1) - col;
+
+  /* Set the cursor position */
+
   stm3210e_setcursor(col, row);
+
+  /* Then write the GRAM data, auto-decrementing X */
+
   stm3210e_gramselect();
   for (i = 0; i < npixels; i++)
     {
-      /* Write the next pixel to this position (autoincrements to the next column) */
+      /* Write the next pixel to this position (auto-decrements to the next column) */
 
       stm3210e_writegram(*src++);
     }
 #else /* CONFIG_LCD_PORTRAIT */
-    for (i = 0; i < npixels; i++)
-      {
-        /* Write the next pixel to this position */
+  /* Convert coordinates.  (Swap row and column.  This is done implicitly). */
 
-        stm3210e_setcursor(row, col);
-        stm3210e_gramselect();
-        stm3210e_writegram(*src++);
+  /* Then write the GRAM data, manually incrementing Y (which is col) */
 
-        /* Increment to next column (which is really a row in this configuration) */
+  for (i = 0; i < npixels; i++)
+    {
+      /* Write the next pixel to this position */
 
-        col++;
-      }
+      stm3210e_setcursor(row, col);
+      stm3210e_gramselect();
+      stm3210e_writegram(*src++);
+
+      /* Increment to next column */
+
+      col++;
+    }
 #endif
   return OK;
 }
@@ -550,29 +571,48 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   stm3210e_setcursor(col, row);
 
-  /* Read the run from GRAM. */
+  /* Read the run from GRAM. The LCD is configured so the X corresponds to rows and
+   * Y corresponds to columns. (0, STM3210E_XRES-1) is the upper left hand corner.  Y
+   * autodecrements.
+   */
 
 #ifdef CONFIG_LCD_LANDSCAPE
-    stm3210e_gramselect();
-    for (i = 0; i < npixels; i++)
-      {
-        /* Read the next pixel from this position (autoincrements to the next row) */
+  /* Convert coordinates -- Which edge of the display is the "top?" Here the edge
+   * with the simplest conversion is used.
+   */
 
-        *dest++ = stm3210e_readgram();
-      }
+  col = (STM3210E_XRES-1) - col;
+
+  /* Set the cursor position */
+
+  stm3210e_setcursor(col, row);
+
+  /* Then read the GRAM data, auto-decrementing Y */
+
+  stm3210e_gramselect();
+  for (i = 0; i < npixels; i++)
+    {
+      /* Read the next pixel from this position (autoincrements to the next row) */
+
+      *dest++ = stm3210e_readgram();
+    }
 #else /* CONFIG_LCD_PORTRAIT */
-    for (i = 0; i < npixels; i++)
-      {
-        /* Read the next pixel from this position */
+  /* Convert coordinates (Swap row and column.  This is done implicitly). */
 
-        stm3210e_gramselect();
-        *dest++ = stm3210e_readgram();
+  /* Then read the GRAM data, manually incrementing Y (which is col) */
 
-        /* Increment to next column */
+  for (i = 0; i < npixels; i++)
+    {
+      /* Read the next pixel from this position */
 
-        col++;
-        stm3210e_setcursor(col, row);
-      }
+      stm3210e_setcursor(row, col);
+      stm3210e_gramselect();
+      *dest++ = stm3210e_readgram();
+
+      /* Increment to next column */
+
+      col++;
+    }
 #endif
   return OK;
 }

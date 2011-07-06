@@ -408,6 +408,13 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
 	  4-bit transfer mode.
 
+  STM3210E-EVAL LCD Hardware Configuration
+
+	CONFIG_LCD_LANDSCAPE - Define for 320x240 display support.
+	  Default is 320x240 (this setting is informative only... not used).
+	CONFIG_LCD_PORTRAIT - Define for 240x320 display support.
+	  Default is 320x240.
+
 Configurations
 ==============
 

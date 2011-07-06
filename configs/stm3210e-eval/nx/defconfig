@@ -772,7 +772,7 @@ CONFIG_NX_MXCLIENTMSGS=16
 # STM3210E-EVAL LCD Hardware Configuration
 #
 # CONFIG_LCD_LANDSCAPE - Define for 320x240 display support.
-#   Default is 320x240 (this setting is informative only... not used).
+#   Default is 320x240 (this setting is informative only... not necessary).
 # CONFIG_LCD_PORTRAIT - Define for 240x320 display support.
 #   Default is 320x240.
 #
