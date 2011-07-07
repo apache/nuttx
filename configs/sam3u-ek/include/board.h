@@ -2,7 +2,7 @@
  * configs/sam3u-ek/include/board.h
  * include/arch/board/board.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,9 +160,8 @@ EXTERN void sam3u_boardinitialize(void);
  *
  * Description:
  *   up_buttoninit() must be called to initialize button resources.  After that,
- *   up_buttons() may be called to collect the state of all buttons.  up_buttons()
- *   returns an 8-bit bit set with each bit associated with a button.  See the
- *   BUTTON* definitions above for the meaning of each bit in the returned value.
+ *   up_buttons() may be called to collect the current state of all buttons or
+ *   up_irqbutton() may be called to register button interrupt handlers.
  *
  ************************************************************************************/
 
@@ -183,18 +182,18 @@ EXTERN void up_buttoninit(void);
 EXTERN uint8_t up_buttons(void);
 
 /************************************************************************************
- * Name: up_irqbutton1/2
+ * Name: up_irqbutton
  *
  * Description:
- *   These functions may be called to register an interrupt handler that will be
- *   called when BUTTON1/2 is depressed.  The previous interrupt handler value is
+ *   This function may be called to register an interrupt handler that will be
+ *   called when a button is depressed or released.  The ID value is one of the
+ *   BUTTON* definitions provided above. The previous interrupt handler address is
  *   returned (so that it may restored, if so desired).
  *
  ************************************************************************************/
 
 #ifdef CONFIG_GPIOA_IRQ
-EXTERN xcpt_t up_irqbutton1(xcpt_t irqhandler);
-EXTERN xcpt_t up_irqbutton2(xcpt_t irqhandler);
+EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */
 

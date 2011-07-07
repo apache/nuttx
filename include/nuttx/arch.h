@@ -532,6 +532,68 @@ EXTERN void sched_process_timer(void);
 EXTERN void irq_dispatch(int irq, FAR void *context);
 
 /****************************************************************************
+ * Board-specific button interfaces exported by the board-specific logic
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_buttoninit
+ *
+ * Description:
+ *   up_buttoninit() must be called to initialize button resources.  After
+ *   that, up_buttons() may be called to collect the current state of all
+ *   buttons or up_irqbutton() may be called to register button interrupt
+ *   handlers.
+ *
+ *   NOTE: This interface may or may not be supported by board-specific
+ *   logic.  If the board supports button interfaces, then CONFIG_ARCH_BUTTONS
+ *   will be defined.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_BUTTONS
+EXTERN void up_buttoninit(void);
+#endif
+
+/****************************************************************************
+ * Name: up_buttons
+ *
+ * Description:
+ *   After up_buttoninit() has been called, up_buttons() may be called to
+ *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
+ *   with each bit associated with a button.  The meaning of the each button
+ *   bit is board-specific.
+ *
+ *   NOTE: This interface may or may not be supported by board-specific
+ *   logic.  If the board supports button interfaces, then CONFIG_ARCH_BUTTONS
+ *   will be defined
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_BUTTONS
+EXTERN uint8_t up_buttons(void);
+#endif
+
+/****************************************************************************
+ * Name: up_irqbutton
+ *
+ * Description:
+ *   This function may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is a
+ *   button enumeration value that uniquely identifies a button resource.
+ *   The previous interrupt handler address is returned (so that it may
+ *   restored, if so desired).
+ *
+ *   NOTE: This interface may or may not be supported by board-specific
+ *   logic.  If the board supports button interfaces, then CONFIG_ARCH_BUTTONS
+ *   will be defined
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_BUTTONS
+EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
+#endif
+
+/****************************************************************************
  * Debug interfaces exported by the architecture-specific logic
  ****************************************************************************/
 
