@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam3u-ek/src/up_leds.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,11 +66,53 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_irqbuttonx
+ *
+ * Description:
+ *   This function implements the core of the up_irqbutton() logic.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_AVR32_GPIOIRQ) && \
+   (defined(CONFIG_AVR32DEV_BUTTON1_IRQ) || defined(CONFIG_AVR32DEV_BUTTON2_IRQ))
+static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler)
+{
+  xcpt_t oldhandler;
+  
+  /* Attach the handler */
+
+  gpio_irqattach(irq, irqhandler, &oldhandler);
+
+  /* Enable/disable the interrupt */
+
+  if (irqhandler)
+    {
+	  gpio_irqenable(irq);
+	}
+  else
+    {
+	  gpio_irqdisable(irq);
+	}
+
+  /* Return the old button handler (so that it can be restored) */
+
+  return oldhandler;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: up_buttoninit
+ *
+ * Description:
+ *   up_buttoninit() must be called to initialize button resources.  After
+ *   that, up_buttons() may be called to collect the current state of all
+ *   buttons or up_irqbutton() may be called to register button interrupt
+ *   handlers.
+ *
  ****************************************************************************/
 
 void up_buttoninit(void)
@@ -81,6 +123,13 @@ void up_buttoninit(void)
 
 /****************************************************************************
  * Name: up_buttons
+ *
+ * Description:
+ *   After up_buttoninit() has been called, up_buttons() may be called to
+ *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
+ *   with each bit associated with a button.  See the BUTTON* definitions
+ *   above for the meaning of each bit in the returned value.
+ *
  ****************************************************************************/
 
 uint8_t up_buttons(void)
@@ -94,71 +143,43 @@ uint8_t up_buttons(void)
 }
 
 /****************************************************************************
- * Name: up_irqbutton1
+ * Name: up_irqbutton
+ *
+ * Description:
+ *   This function may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is one
+ *   of the BUTTON* definitions provided above. The previous interrupt
+ *   handler address isreturned (so that it may restored, if so desired).
+ *
+ * Configuration Notes:
+ *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the
+ *   overall GPIO IRQ feature and CONFIG_AVR32_GPIOIRQSETA and/or
+ *   CONFIG_AVR32_GPIOIRQSETB must be enabled to select GPIOs to support
+ *   interrupts on.  For button support, bits 2 and 3 must be set in
+ *   CONFIG_AVR32_GPIOIRQSETB (PB2 and PB3).
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_AVR32_GPIOIRQ
-xcpt_t up_irqbutton1(xcpt_t irqhandler)
+xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
 {
 #ifdef CONFIG_AVR32DEV_BUTTON1_IRQ
-  xcpt_t oldhandler;
-
-  /* Attach the handler */
-
-  gpio_irqattach(GPIO_BUTTON1_IRQ, irqhandler, &oldhandler);
-
-  /* Enable/disable the interrupt */
-
-  if (irqhandler)
+  if (id == BUTTON1)
     {
-	  gpio_irqenable(GPIO_BUTTON1_IRQ);
-	}
+      return up_irqbuttonx(GPIO_BUTTON1_IRQ, irqhandler);
+    }
   else
-    {
-	  gpio_irqdisable(GPIO_BUTTON1_IRQ);
-	}
-
-  /* Return the old button handler (so that it can be restored) */
-
-  return oldhandler;
-#else
-  return NULL;
 #endif
-}
-#endif
-
-/****************************************************************************
- * Name: up_irqbutton2
- ****************************************************************************/
-
-#ifdef CONFIG_AVR32_GPIOIRQ
-xcpt_t up_irqbutton2(xcpt_t irqhandler)
-{
 #ifdef CONFIG_AVR32DEV_BUTTON2_IRQ
-  xcpt_t oldhandler;
-
-  /* Attach the handler */
-
-  gpio_irqattach(GPIO_BUTTON2_IRQ, irqhandler, &oldhandler);
-
-  /* Enable/disable the interrupt */
-
-  if (irqhandler)
+  if (id == BUTTON2)
     {
-	  gpio_irqenable(GPIO_BUTTON2_IRQ);
-	}
+      return up_irqbuttonx(GPIO_BUTTON2_IRQ, irqhandler);
+    }
   else
-    {
-	  gpio_irqdisable(GPIO_BUTTON2_IRQ);
-	}
-
-  /* Return the old button handler (so that it can be restored) */
-
-  return oldhandler;
-#else
-  return NULL;
 #endif
+    {
+      return NULL;
+    }
 }
 #endif
-
 #endif /* CONFIG_ARCH_BUTTONS */

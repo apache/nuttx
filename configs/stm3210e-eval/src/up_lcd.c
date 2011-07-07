@@ -709,6 +709,7 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
 
   if (power > 0)
     {
+#ifdef CONFIG_LCD_BACKLIGHT
       uint32_t duty;
 
       /* Caclulate the new backlight duty.  It is a faction of the timer1
@@ -722,7 +723,7 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
           duty = LCD_BL_TIMER_PERIOD - 1;
         }
       putreg16((uint16_t)duty, STM32_TIM1_CCR1);
-
+#endif
       /* Then turn the display on */
 
       stm3210e_writereg(LCD_REG_7, g_lcddev.spfd5408b ? 0x0112 : 0x0173);
