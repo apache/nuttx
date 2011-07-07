@@ -584,12 +584,13 @@ EXTERN uint8_t up_buttons(void);
  *   restored, if so desired).
  *
  *   NOTE: This interface may or may not be supported by board-specific
- *   logic.  If the board supports button interfaces, then CONFIG_ARCH_BUTTONS
- *   will be defined
+ *   logic.  If the board supports any button interfaces, then
+ *   CONFIG_ARCH_BUTTONS will be defined; If the board supports interrupt
+ *   buttons, then CONFIG_ARCH_IRQBUTTONS will also be defined.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_BUTTONS
+#ifdef CONFIG_ARCH_IRQBUTTONS
 EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 

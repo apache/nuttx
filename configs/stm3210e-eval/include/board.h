@@ -158,17 +158,27 @@
  * Joystick up     -- Connected to PG.15
  */
 
-#define BUTTON_WAKEUP  (1 << 0)
-#define BUTTON_TAMPER  (1 << 1)
-#define BUTTON_KEY     (1 << 2)
+#define BUTTON_WAKEUP     0
+#define BUTTON_TAMPER     1
+#define BUTTON_KEY        2
 
-#define JOYSTICK_SEL   (1 << 3)
-#define JOYSTICK_DOWN  (1 << 4)
-#define JOYSTICK_LEFT  (1 << 5)
-#define JOYSTICK_RIGHT (1 << 6)
-#define JOYSTICK_UP    (1 << 7)
+#define JOYSTICK_SEL      3
+#define JOYSTICK_DOWN     4
+#define JOYSTICK_LEFT     5
+#define JOYSTICK_RIGHT    6
+#define JOYSTICK_UP       7
 
-#define NUM_BUTTONS     8
+#define NUM_BUTTONS       8
+
+#define BUTTON_WAKEUP_BIT (1 << BUTTON_WAKEUP)
+#define BUTTON_TAMPER_BIT (1 << BUTTON_TAMPER)
+#define BUTTON_KEY_BIT    (1 << BUTTON_KEY)
+
+#define JOYSTICK_SEL_BIT  (1 << JOYSTICK_SEL)
+#define JOYSTICK_DOWN_BIT (1 << JOYSTICK_DOWN)
+#define JOYSTICK_LEFT_BIT (1 << JOYSTICK_LEFT)
+#define JOYSTICK_RIGH_BIT (1 << JOYSTICK_RIGHT)
+#define JOYSTICK_UP_BIT   (1 << JOYSTICK_UP)
 
 /************************************************************************************
  * Public Data
@@ -203,16 +213,31 @@ EXTERN void stm32_boardinitialize(void);
  * Button support.
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After that,
- *   up_buttons() may be called to collect the state of all buttons.  up_buttons()
- *   returns an 8-bit bit set with each bit associated with a button.  See the
- *   BUTTON_* and JOYSTICK_* definitions above for the meaning of each bit.
+ *   up_buttoninit() must be called to initialize button resources.  After
+ *   that, up_buttons() may be called to collect the current state of all
+ *   buttons or up_irqbutton() may be called to register button interrupt
+ *   handlers.
+ *
+ *   After up_buttoninit() has been called, up_buttons() may be called to
+ *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
+ *   with each bit associated with a button.  See the BUTTON_*_BIT and JOYSTICK_*_BIT
+ *   definitions in board.h for the meaning of each bit.
+ *
+ *   up_irqbutton() may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is a
+ *   button enumeration value that uniquely identifies a button resource. See the
+ *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of enumeration
+ *   value.  The previous interrupt handler address is returned (so that it may
+ *   restored, if so desired).
  *
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
 EXTERN void up_buttoninit(void);
 EXTERN uint8_t up_buttons(void);
+#ifdef CONFIG_ARCH_IRQBUTTONS
+EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
+#endif
 #endif
 
 #undef EXTERN

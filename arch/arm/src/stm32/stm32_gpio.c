@@ -35,10 +35,9 @@
  *
  ****************************************************************************/
 
-/** \file
- *  \author Gregory Nutt <spudmonkey@racsa.co.cr>
- *  \brief STM32 GPIO
- **/
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
@@ -55,7 +54,6 @@
 #include "stm32_exti.h"
 #include "stm32_rcc.h"
 #include "stm32_internal.h"
-
 
 /****************************************************************************
  * Private Data
@@ -87,15 +85,16 @@ static const uint32_t g_gpiobase[STM32_NGPIO_PORTS] =
 };
 
 #ifdef CONFIG_DEBUG
-static const char g_portchar[8] = { 
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' 
+static const char g_portchar[8] =
+{
+  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' 
 };
 #endif
 
-static void (*stm32_exti_callbacks[7])(void) = {
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL
+static xcpt_t stm32_exti_callbacks[7] =
+{
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
-
 
 /****************************************************************************
  * Private Functions
@@ -263,59 +262,87 @@ int stm32_gpio_configlock(uint32_t cfgset, bool altlock)
 
 int stm32_exti0_isr(int irq, void *context)
 {
-    putreg32(0x0001, STM32_EXTI_PR);
-    if (stm32_exti_callbacks[0]) stm32_exti_callbacks[0]();
-    return 0;
-}
+  int ret = OK;
 
+  putreg32(0x0001, STM32_EXTI_PR);
+  if (stm32_exti_callbacks[0])
+    {
+      ret = stm32_exti_callbacks[0](irq, context);
+    }
+  return ret;
+}
 
 int stm32_exti1_isr(int irq, void *context)
 {
-    putreg32(0x0002, STM32_EXTI_PR);
-    if (stm32_exti_callbacks[1]) stm32_exti_callbacks[1]();
-    return 0;
-}
+  int ret = OK;
 
+  putreg32(0x0002, STM32_EXTI_PR);
+  if (stm32_exti_callbacks[1])
+    {
+      ret = stm32_exti_callbacks[1](irq, context);
+    }
+  return ret;
+}
 
 int stm32_exti2_isr(int irq, void *context)
 {
-    putreg32(0x0004, STM32_EXTI_PR);
-    if (stm32_exti_callbacks[2]) stm32_exti_callbacks[2]();
-    return 0;
-}
+  int ret = OK;
 
+  putreg32(0x0004, STM32_EXTI_PR);
+  if (stm32_exti_callbacks[2])
+    {
+      ret = stm32_exti_callbacks[2](irq, context);
+    }
+  return ret;
+}
 
 int stm32_exti3_isr(int irq, void *context)
 {
-    putreg32(0x0008, STM32_EXTI_PR);
-    if (stm32_exti_callbacks[3]) stm32_exti_callbacks[3]();
-    return 0;
-}
+  int ret = OK;
 
+  putreg32(0x0008, STM32_EXTI_PR);
+  if (stm32_exti_callbacks[3])
+    {
+      ret = stm32_exti_callbacks[3](irq, context);
+    }
+  return ret;
+}
 
 int stm32_exti4_isr(int irq, void *context)
 {
-    putreg32(0x0010, STM32_EXTI_PR);
-    if (stm32_exti_callbacks[4]) stm32_exti_callbacks[4]();
-    return 0;
-}
+  int ret = OK;
 
+  putreg32(0x0010, STM32_EXTI_PR);
+  if (stm32_exti_callbacks[4])
+    {
+      ret = stm32_exti_callbacks[4](irq, context);
+    }
+  return ret;
+}
 
 int stm32_exti95_isr(int irq, void *context)
 {
-    putreg32(0x03E0, STM32_EXTI_PR);    /* ACK all pins, since we support just one */
-    if (stm32_exti_callbacks[5]) stm32_exti_callbacks[5]();
-    return 0;
-}
+  int ret = OK;
 
+  putreg32(0x03E0, STM32_EXTI_PR);    /* ACK all pins, since we support just one */
+  if (stm32_exti_callbacks[5])
+    {
+      ret = stm32_exti_callbacks[5](irq, context);
+    }
+  return ret;
+}
 
 int stm32_exti1510_isr(int irq, void *context)
 {
-    putreg32(0xFC00, STM32_EXTI_PR);    /* ACK all pins, since we support just one */
-    if (stm32_exti_callbacks[6]) stm32_exti_callbacks[6]();
-    return 0;
-}
+  int ret = OK;
 
+  putreg32(0xFC00, STM32_EXTI_PR);    /* ACK all pins, since we support just one */
+  if (stm32_exti_callbacks[6])
+    {
+      ret = stm32_exti_callbacks[6](irq, context);
+    }
+  return ret;
+}
 
 /****************************************************************************
  * Public Functions
@@ -546,16 +573,20 @@ bool stm32_gpioread(uint32_t pinset)
  *  - func:   when non-NULL, generate interrupt
  * 
  * Returns: 
- *  True when GPIO Event/Interrupt generation is successfully configured.
+ *  The previous value of the interrupt handler function pointer.  This value may,
+ *  for example, be used to restore the previous handler when multiple handlers are
+ *  used.
+ *
  ************************************************************************************/
 
-bool stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge, 
-                       bool event, void (*func)(void))
+xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge, 
+                          bool event, xcpt_t func)
 {
     uint32_t exti_isr = pinset & GPIO_PIN_MASK;
     uint32_t exti_bit = STM32_EXTI_BIT( exti_isr );
     int      intno;
     int      (*exti_hnd)(int irq, void *context);
+    xcpt_t   oldhandler = NULL;
     
     /* Set callback, single callback at the moment, but we could extend
      * that easily 
@@ -582,12 +613,9 @@ bool stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
         intno    = STM32_IRQ_EXTI1510;
     }
     
-    /* Check if previous and different instance exists? */
-    
-    if (func && stm32_exti_callbacks[exti_isr] &&
-        func != stm32_exti_callbacks[exti_isr]) 
-        return false;
+    /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
 
+    oldhandler = stm32_exti_callbacks[exti_isr];
     stm32_exti_callbacks[exti_isr] = func;
 
     /* Install external interrupt handlers */
@@ -614,8 +642,10 @@ bool stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
     
     modifyreg32(STM32_EXTI_EMR, event ? 0 : exti_bit, event ? exti_bit : 0);
     modifyreg32(STM32_EXTI_IMR, func ? 0 : exti_bit, func ? exti_bit : 0);
-        
-    return true;
+
+    /* Return the old IRQ handler */
+
+    return oldhandler;
 }
 
 /****************************************************************************

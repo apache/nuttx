@@ -73,7 +73,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_AVR32_GPIOIRQ) && \
+#if defined(CONFIG_AVR32_GPIOIRQ) && defined(CONFIG_ARCH_IRQBUTTONS) && \
    (defined(CONFIG_AVR32DEV_BUTTON1_IRQ) || defined(CONFIG_AVR32DEV_BUTTON2_IRQ))
 static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler)
 {
@@ -160,7 +160,7 @@ uint8_t up_buttons(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_AVR32_GPIOIRQ
+#if defined(CONFIG_AVR32_GPIOIRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
 {
 #ifdef CONFIG_AVR32DEV_BUTTON1_IRQ

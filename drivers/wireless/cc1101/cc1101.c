@@ -449,11 +449,11 @@ volatile int cc1101_interrupt = 0;
  *    its callback, and it is up to peripheral to find, whether the cause
  *    of EXTI ISR was itself.
  **/
-void cc1101_eventcb(void)
+
+int cc1101_eventcb(int irq, FAR void *context)
 {
     cc1101_interrupt++;
 }
-
 
 /****************************************************************************
  * Public Functions

@@ -431,6 +431,14 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  buttons:
+  --------
+
+    Uses apps/examples/buttons to exercise STM3210E-EVAL buttons and
+    button interrupts.
+ 
+    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+
   nsh and nsh2:
   ------------
     Configure the NuttShell (nsh) located at examples/nsh.

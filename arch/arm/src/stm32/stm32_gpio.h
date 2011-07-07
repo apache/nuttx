@@ -38,11 +38,15 @@
 #ifndef __ARCH_ARM_SRC_STM32_STM32_GPIO_H
 #define __ARCH_ARM_SRC_STM32_STM32_GPIO_H
 
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
 
 #include "chip.h"
 #include "chip/stm32_gpio.h"
-
 
 /************************************************************************************
  * Pre-Processor Declarations
@@ -58,9 +62,9 @@ extern "C" {
 #define EXTERN extern
 #endif
  
-    /* Bit-encoded input to stm32_configgpio() 
-    * These definitions could be replaced by 'enum' as a stm32_gpio_t data type. 
-    */
+/* Bit-encoded input to stm32_configgpio() 
+ * These definitions could be replaced by 'enum' as a stm32_gpio_t data type. 
+ */
 
 /* 16-bit Encoding:
  * OFFS SX.. VPPP BBBB
@@ -157,7 +161,6 @@ extern "C" {
 #define GPIO_PIN14                    (14 << GPIO_PIN_SHIFT)
 #define GPIO_PIN15                    (15 << GPIO_PIN_SHIFT)
 
-
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
@@ -175,7 +178,6 @@ extern "C" {
  *   OK on success
  *   ERROR on invalid port, or when pin is locked as ALT function.
  * 
- * \todo Auto Power Enable
  ************************************************************************************/
 
 EXTERN int stm32_configgpio(uint32_t cfgset);
@@ -197,7 +199,6 @@ EXTERN int stm32_configgpio(uint32_t cfgset);
  *  OK on success
  *  ERROR on invalid port
  *
- * \todo Auto Power Disable
  ************************************************************************************/
 
 EXTERN int stm32_unconfiggpio(uint32_t cfgset);
@@ -238,11 +239,14 @@ EXTERN bool stm32_gpioread(uint32_t pinset);
  *  - func:   when non-NULL, generate interrupt
  * 
  * Returns: 
- *  True when GPIO Event/Interrupt generation is successfully configured.
+ *  The previous value of the interrupt handler function pointer.  This value may,
+ *  for example, be used to restore the previous handler when multiple handlers are
+ *  used.
+ *
  ************************************************************************************/
 
-EXTERN bool stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge, 
-                       bool event, void (*func)(void));
+EXTERN xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge, 
+                                 bool event, xcpt_t func);
 
 /************************************************************************************
  * Function:  stm32_dumpgpio
@@ -257,7 +261,6 @@ EXTERN int stm32_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define stm32_dumpgpio(p,m)
 #endif
-
 
 /************************************************************************************
  * Function:  stm32_gpioinit
