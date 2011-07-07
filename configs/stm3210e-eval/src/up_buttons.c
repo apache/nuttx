@@ -53,10 +53,13 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+/* Pin configuration for each STM3210E-EVAL button.  This array is indexed by
+ * the BUTTON_* and JOYSTICK_* definitions in board.h
+ */
 
 static const uint16_t g_buttons[NUM_BUTTONS] =
 {
-  GPIO_BTN_WAKEUP, GPIO_BTN_TAMPER, GPIO_BTN_KEY,   GPIO_JOY_KEY,
+  GPIO_BTN_WAKEUP, GPIO_BTN_TAMPER, GPIO_BTN_KEY,   GPIO_JOY_SEL,
   GPIO_JOY_DOWN,   GPIO_JOY_LEFT,   GPIO_JOY_RIGHT, GPIO_JOY_UP
 };
 
@@ -70,6 +73,13 @@ static const uint16_t g_buttons[NUM_BUTTONS] =
 
 /****************************************************************************
  * Name: up_buttoninit
+ *
+ * Description:
+ *   up_buttoninit() must be called to initialize button resources.  After
+ *   that, up_buttons() may be called to collect the current state of all
+ *   buttons or up_irqbutton() may be called to register button interrupt
+ *   handlers.
+ *
  ****************************************************************************/
 
 void up_buttoninit(void)
@@ -110,4 +120,41 @@ uint8_t up_buttons(void)
   return ret;
 }
 
+/************************************************************************************
+ * Button support.
+ *
+ * Description:
+ *   up_buttoninit() must be called to initialize button resources.  After
+ *   that, up_buttons() may be called to collect the current state of all
+ *   buttons or up_irqbutton() may be called to register button interrupt
+ *   handlers.
+ *
+ *   After up_buttoninit() has been called, up_buttons() may be called to
+ *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
+ *   with each bit associated with a button.  See the BUTTON_*_BIT and JOYSTICK_*_BIT
+ *   definitions in board.h for the meaning of each bit.
+ *
+ *   up_irqbutton() may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is a
+ *   button enumeration value that uniquely identifies a button resource. See the
+ *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of enumeration
+ *   value.  The previous interrupt handler address is returned (so that it may
+ *   restored, if so desired).
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQBUTTONS
+xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
+{
+  xcpt_t oldhandler = NULL;
+
+  /* The following should be atomic */
+
+  if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
+    {
+      oldhandler = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler);
+    }
+  return oldhandler;
+}
+#endif
 #endif /* CONFIG_ARCH_BUTTONS */

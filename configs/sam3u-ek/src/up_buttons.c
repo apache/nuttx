@@ -74,7 +74,7 @@ static xcpt_t g_irqbutton2;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GPIOA_IRQ
+#if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler, xcpt_t *store)
 {
   xcpt_t oldhandler;
@@ -164,7 +164,7 @@ uint8_t up_buttons(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_GPIOA_IRQ
+#if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
 {
   if (id == BUTTON1)

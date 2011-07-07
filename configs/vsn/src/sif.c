@@ -496,7 +496,7 @@ int sif_init(void)
  * Provides direct access to the sensor connector, readings, and diagnostic.
  **/
  
-extern void cc1101_eventcb(void);
+extern int cc1101_eventcb(int irq, FAR void *context)
  
 int sif_main(int argc, char *argv[])
 {
