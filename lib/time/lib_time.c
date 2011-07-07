@@ -100,8 +100,9 @@ time_t time(time_t *tloc)
         {
           *tloc = tp.tv_sec;
         }
+
       return tp.tv_sec;
-	}
+    }
 
   return (time_t)ERROR;
 }
