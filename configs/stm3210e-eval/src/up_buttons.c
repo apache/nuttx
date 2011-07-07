@@ -109,11 +109,21 @@ uint8_t up_buttons(void)
 
   for (i = 0; i < NUM_BUTTONS; i++)
     {
-       /* A LOW value means that the key is pressed */
+       /* A LOW value means that the key is pressed for most keys.  The exception
+        * is the WAKEUP button.
+        */
 
-       if (!stm32_gpioread(g_buttons[i]))
+       bool released = stm32_gpioread(g_buttons[i]);
+       if (i == BUTTON_WAKEUP)
          {
-           ret |= (1 << i);
+           released = !released;
+         }
+
+       /* Accumulate the set of depressed (not released) keys */
+
+       if (!released)
+         {
+            ret |= (1 << i);
          }
     }
 

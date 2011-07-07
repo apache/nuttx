@@ -560,8 +560,10 @@ EXTERN void up_buttoninit(void);
  * Description:
  *   After up_buttoninit() has been called, up_buttons() may be called to
  *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  The meaning of the each button
- *   bit is board-specific.
+ *   with each bit associated with a button.  A bit set to "1" means that the
+ *   button is depressed; a bit set to "0" means that the button is released.
+ *   The correspondence of the each button bit and physical buttons is board-
+ *   specific.
  *
  *   NOTE: This interface may or may not be supported by board-specific
  *   logic.  If the board supports button interfaces, then CONFIG_ARCH_BUTTONS

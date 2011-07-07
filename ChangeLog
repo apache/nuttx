@@ -1869,3 +1869,9 @@
 	  are trying to using multiple UARTs on STM32.
 	* configs/stm3210e-eval/src/up_lcd.c:  Add a driver for the STM3210E-EVAL's LCD.
 	* configs/stm3210e-eval/nx:  Add NX configuration for the STM3210E-EVAL.
+	* configs/nuttx/arch.h (and arch/arm/src/stm32, configs/*/src/up_buttons.c):
+	  Standardize interfaces exported for button support and button interrupts.
+	* configs/stm3210e-eval/src/up_buttons.c - Add interrupting button support.
+	  Also fixes a few errors in STM3210E-EVAL button decoding.
+	* configs/stm3210e-eval/buttons: Add a configuration to exercise STM3210E-EVAL
+	  buttons.
