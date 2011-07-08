@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 3, 2011</p>
+      <p>Last Updated: July 8, 2011</p>
     </td>
   </tr>
 </table>
@@ -1854,8 +1854,8 @@
   <td>
     <p>
       <b>PIC32MX440F512H</b>.
-	    This port uses the &quot;Advanced USB Storage Demo Board,&quot; Model DB-DP11215, from <a href="http://www.sureelectronics.net">Sure Electronics</a>.
-        This board features	the MicroChip PIC32MX440F512H.  See the <a href="http://www.sureelectronics.net/goods.php?id=1168">Sure website</a> for further	information about the DB-DP11215 board.
+        This port uses the &quot;Advanced USB Storage Demo Board,&quot; Model DB-DP11215, from <a href="http://www.sureelectronics.net">Sure Electronics</a>.
+        This board features    the MicroChip PIC32MX440F512H.  See the <a href="http://www.sureelectronics.net/goods.php?id=1168">Sure website</a> for further    information about the DB-DP11215 board.
     </p>
     <ul>
       <p>
@@ -2533,11 +2533,42 @@ nuttx-6.6 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       Storage Demo Board," Model DB-DP11215 (http://www.sureelectronics.net/goods.php?id=1168).
       This board features the MicroChip PIC32MX440F512H MCU. (Untested on initial
       check-in).
+    * configs/stm3210e-eval/nsh2:  Add another NSH configuration for the STM32 with
+      some different properties.
+    * CONFIG_NSH_CONDEV:  Add a configuration option to allow using a different character
+      device (such a a different UART) for the NSH interface.  This allows, for example,
+      debug output to come from the console device while using another device for NSH.
+      There are some issues on initial check-in:  NuttX doesn't have termios and the
+      console device has special properties that make using NSH awkward.  Examples:
+      No CR-LF expansion, no character echoing, no command line editting.
+    * arch/arm/src/stm32/stm32_lowputc.c and stm32_serial.c.  Correct severl bugs
+      involving serial port configuration.  These bugs are only critical if you
+      are trying to using multiple UARTs on STM32.
+    * configs/stm3210e-eval/src/up_lcd.c:  Add a driver for the STM3210E-EVAL's LCD.
+    * configs/stm3210e-eval/nx:  Add NX configuration for the STM3210E-EVAL.
+    * configs/nuttx/arch.h (and arch/arm/src/stm32, configs/*/src/up_buttons.c):
+      Standardize interfaces exported for button support and button interrupts.
+    * configs/stm3210e-eval/src/up_buttons.c - Add interrupting button support.
+      Also fixes a few errors in STM3210E-EVAL button decoding.
+    * configs/stm3210e-eval/buttons: Add a configuration to exercise STM3210E-EVAL
+      buttons.
+    * arch/arm/src/stm32/stm32_gpio.c:  GPIO interrupt handling for pin
+      numbers were being aliased:  5-9 together and 10-15 together.  Extended
+      the logic to peform decoding of GPIO interrupts and unique dispatching
+      for all 16 pins.
+    * configs/stm3210e-eval/nxtext: Add a configuration for the apps/examples/nxtext
+      example.  This example focuses on placing text on the background while
+      pop-up windows occur.  Text should continue to update normally with or without
+      the popup windows present.
 
 apps-6.6 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * Make.defs, namedapp/namedapp.c: Several structural changes made to get a
       clean compile under the ez80 ZDS-II toolchain (no design changes).
+    * apps/examples/buttons: Add a test for the new standardized button interfaces
+    * apps/examples/nxtext: Add another NX graphics test.  This one focus on
+      placing text on the background while pop-up windows occur.  Text should
+      continue to update normally with or without the popup windows present.
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
