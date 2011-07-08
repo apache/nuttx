@@ -1875,3 +1875,11 @@
 	  Also fixes a few errors in STM3210E-EVAL button decoding.
 	* configs/stm3210e-eval/buttons: Add a configuration to exercise STM3210E-EVAL
 	  buttons.
+	* arch/arm/src/stm32/stm32_gpio.c:  GPIO interrupt handling for pin
+	  numbers were being aliased:  5-9 together and 10-15 together.  Extended
+	  the logic to peform decoding of GPIO interrupts and unique dispatching
+	  for all 16 pins.
+	* configs/stm3210e-eval/nxtext: Add a configuration for the apps/examples/nxtext
+	  example.  This example focuses on placing text on the background while
+	  pop-up windows occur.  Text should continue to update normally with or without
+	  the popup windows present.
