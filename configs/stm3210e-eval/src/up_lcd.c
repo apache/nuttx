@@ -520,7 +520,7 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
  
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcddbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Write the run to GRAM. */
@@ -588,7 +588,7 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
  
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
-  gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
+  lcddbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Set up to read the run. */
