@@ -91,10 +91,7 @@ static const char g_portchar[8] =
 };
 #endif
 
-static xcpt_t stm32_exti_callbacks[7] =
-{
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL
-};
+static xcpt_t stm32_exti_callbacks[16];
 
 /****************************************************************************
  * Private Functions
@@ -255,16 +252,20 @@ int stm32_gpio_configlock(uint32_t cfgset, bool altlock)
   return OK;
 }
 
-
 /****************************************************************************
  * Interrupt Service Routines - Dispatchers
  ****************************************************************************/
 
-int stm32_exti0_isr(int irq, void *context)
+static int stm32_exti0_isr(int irq, void *context)
 {
   int ret = OK;
 
+  /* Clear the pending interrupt */
+
   putreg32(0x0001, STM32_EXTI_PR);
+          
+  /* And dispatch the interrupt to the handler */
+          
   if (stm32_exti_callbacks[0])
     {
       ret = stm32_exti_callbacks[0](irq, context);
@@ -272,11 +273,16 @@ int stm32_exti0_isr(int irq, void *context)
   return ret;
 }
 
-int stm32_exti1_isr(int irq, void *context)
+static int stm32_exti1_isr(int irq, void *context)
 {
   int ret = OK;
 
+  /* Clear the pending interrupt */
+
   putreg32(0x0002, STM32_EXTI_PR);
+          
+  /* And dispatch the interrupt to the handler */
+          
   if (stm32_exti_callbacks[1])
     {
       ret = stm32_exti_callbacks[1](irq, context);
@@ -284,11 +290,16 @@ int stm32_exti1_isr(int irq, void *context)
   return ret;
 }
 
-int stm32_exti2_isr(int irq, void *context)
+static int stm32_exti2_isr(int irq, void *context)
 {
   int ret = OK;
 
+  /* Clear the pending interrupt */
+
   putreg32(0x0004, STM32_EXTI_PR);
+          
+  /* And dispatch the interrupt to the handler */
+          
   if (stm32_exti_callbacks[2])
     {
       ret = stm32_exti_callbacks[2](irq, context);
@@ -296,11 +307,16 @@ int stm32_exti2_isr(int irq, void *context)
   return ret;
 }
 
-int stm32_exti3_isr(int irq, void *context)
+static int stm32_exti3_isr(int irq, void *context)
 {
   int ret = OK;
 
+  /* Clear the pending interrupt */
+
   putreg32(0x0008, STM32_EXTI_PR);
+          
+  /* And dispatch the interrupt to the handler */
+          
   if (stm32_exti_callbacks[3])
     {
       ret = stm32_exti_callbacks[3](irq, context);
@@ -308,11 +324,16 @@ int stm32_exti3_isr(int irq, void *context)
   return ret;
 }
 
-int stm32_exti4_isr(int irq, void *context)
+static int stm32_exti4_isr(int irq, void *context)
 {
   int ret = OK;
 
+  /* Clear the pending interrupt */
+
   putreg32(0x0010, STM32_EXTI_PR);
+          
+  /* And dispatch the interrupt to the handler */
+          
   if (stm32_exti_callbacks[4])
     {
       ret = stm32_exti_callbacks[4](irq, context);
@@ -320,28 +341,52 @@ int stm32_exti4_isr(int irq, void *context)
   return ret;
 }
 
-int stm32_exti95_isr(int irq, void *context)
+static int stm32_exti_multiisr(int irq, void *context, int first, int last)
 {
+  uint32_t pr;
+  int pin;
   int ret = OK;
 
-  putreg32(0x03E0, STM32_EXTI_PR);    /* ACK all pins, since we support just one */
-  if (stm32_exti_callbacks[5])
+  /* Examine the state of each pin in the group */
+
+  pr = getreg32(STM32_EXTI_PR);
+          
+  /* And dispatch the interrupt to the handler */
+          
+  for (pin = first; pin <= last; pin++)
     {
-      ret = stm32_exti_callbacks[5](irq, context);
+      /* Is an interrupt pending on this pin? */
+
+      uint32_t mask = (1 << pin);
+      if ((pr & mask) != 0)
+        {
+          /* Clear the pending interrupt */
+
+          putreg32(mask, STM32_EXTI_PR);
+          
+          /* And dispatch the interrupt to the handler */
+          
+          if (stm32_exti_callbacks[pin])
+            {
+              int tmp = stm32_exti_callbacks[pin](irq, context);
+              if (tmp != OK)
+                {
+                  ret = tmp;
+                }
+            }
+        }
     }
   return ret;
 }
 
-int stm32_exti1510_isr(int irq, void *context)
+static int stm32_exti95_isr(int irq, void *context)
 {
-  int ret = OK;
+  return stm32_exti_multiisr(irq, context, 5, 9);
+}
 
-  putreg32(0xFC00, STM32_EXTI_PR);    /* ACK all pins, since we support just one */
-  if (stm32_exti_callbacks[6])
-    {
-      ret = stm32_exti_callbacks[6](irq, context);
-    }
-  return ret;
+static int stm32_exti1510_isr(int irq, void *context)
+{
+  return stm32_exti_multiisr(irq, context, 10, 15);
 }
 
 /****************************************************************************
@@ -582,70 +627,86 @@ bool stm32_gpioread(uint32_t pinset)
 xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge, 
                           bool event, xcpt_t func)
 {
-    uint32_t exti_isr = pinset & GPIO_PIN_MASK;
-    uint32_t exti_bit = STM32_EXTI_BIT( exti_isr );
-    int      intno;
-    int      (*exti_hnd)(int irq, void *context);
-    xcpt_t   oldhandler = NULL;
+  uint32_t pin = pinset & GPIO_PIN_MASK;
+  uint32_t exti = STM32_EXTI_BIT(pin);
+  int      irq;
+  xcpt_t   handler;
+  xcpt_t   oldhandler = NULL;
     
-    /* Set callback, single callback at the moment, but we could extend
-     * that easily 
-     */
+  /* Select the interrupt handler for this EXTI pin */
     
-    if (exti_isr < 5) {
-        intno    = exti_isr + STM32_IRQ_EXTI0;
-        switch(exti_isr) {
-            case 0: exti_hnd = stm32_exti0_isr; break;
-            case 1: exti_hnd = stm32_exti1_isr; break;
-            case 2: exti_hnd = stm32_exti2_isr; break;
-            case 3: exti_hnd = stm32_exti3_isr; break;
-            default:exti_hnd = stm32_exti4_isr; break;
+  if (pin < 5)
+    {
+      irq = pin + STM32_IRQ_EXTI0;
+      switch (pin)
+        {
+          case 0:
+            handler = stm32_exti0_isr;
+            break;
+          case 1:
+            handler = stm32_exti1_isr;
+            break;
+          case 2:
+            handler = stm32_exti2_isr;
+            break;
+          case 3:
+            handler = stm32_exti3_isr;
+            break;
+          default:
+            handler = stm32_exti4_isr;
+            break;
         }
     }
-    else if (exti_isr < 10) {
-        exti_isr = 5;
-        exti_hnd = stm32_exti95_isr;
-        intno    = STM32_IRQ_EXTI95;
+  else if (pin < 10)
+    {
+      irq     = STM32_IRQ_EXTI95;
+      handler = stm32_exti95_isr;
     }
-    else {
-        exti_isr = 6;
-        exti_hnd = stm32_exti1510_isr;
-        intno    = STM32_IRQ_EXTI1510;
+  else
+    {
+      irq     = STM32_IRQ_EXTI1510;
+      handler = stm32_exti1510_isr;
     }
     
-    /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
+  /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
 
-    oldhandler = stm32_exti_callbacks[exti_isr];
-    stm32_exti_callbacks[exti_isr] = func;
+  oldhandler = stm32_exti_callbacks[pin];
+  stm32_exti_callbacks[pin] = func;
 
-    /* Install external interrupt handlers */
+  /* Install external interrupt handlers */
     
-    if (func) {
-        irq_attach(intno, exti_hnd);
-        up_enable_irq(intno);
+  if (func)
+    {
+      irq_attach(irq, handler);
+      up_enable_irq(irq);
     }
-    else up_disable_irq(intno);
-    
-    /* Configure GPIO, enable EXTI line enabled if event or interrupt is enabled */
-    
-    if (event || func) 
-        pinset |= GPIO_EXTI;
-        
-    stm32_configgpio( pinset );
-    
-    /* Configure rising/falling edges */
-    
-    modifyreg32(STM32_EXTI_RTSR, risingedge ? 0 : exti_bit, risingedge ? exti_bit : 0);
-    modifyreg32(STM32_EXTI_FTSR, fallingedge ? 0 : exti_bit, fallingedge ? exti_bit : 0);
-    
-    /* Enable Events and Interrupts */
-    
-    modifyreg32(STM32_EXTI_EMR, event ? 0 : exti_bit, event ? exti_bit : 0);
-    modifyreg32(STM32_EXTI_IMR, func ? 0 : exti_bit, func ? exti_bit : 0);
+  else
+    {
+      up_disable_irq(irq);
+    }
 
-    /* Return the old IRQ handler */
+  /* Configure GPIO, enable EXTI line enabled if event or interrupt is enabled */
+    
+  if (event || func) 
+    {
+      pinset |= GPIO_EXTI;
+    }
+   
+  stm32_configgpio(pinset);
 
-    return oldhandler;
+  /* Configure rising/falling edges */
+
+  modifyreg32(STM32_EXTI_RTSR, risingedge ? 0 : exti, risingedge ? exti : 0);
+  modifyreg32(STM32_EXTI_FTSR, fallingedge ? 0 : exti, fallingedge ? exti : 0);
+
+  /* Enable Events and Interrupts */
+
+  modifyreg32(STM32_EXTI_EMR, event ? 0 : exti, event ? exti : 0);
+  modifyreg32(STM32_EXTI_IMR, func ? 0 : exti, func ? exti : 0);
+
+  /* Return the old IRQ handler */
+
+  return oldhandler;
 }
 
 /****************************************************************************
