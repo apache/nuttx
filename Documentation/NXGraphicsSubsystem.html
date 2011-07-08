@@ -400,15 +400,15 @@
 <h2>2.1 <a name="nxheaders">NX Header Files</a></h2>
 
 <ul><dl>
-  <dt><code>include/nuttx/nxglib.h
+  <dt><code>include/nuttx/nxglib.h</code>
     <dd>Describes the NXGLIB C interfaces
-  <dt><code>include/nuttx/nx.h
+  <dt><code>include/nuttx/nx.h</code>
     <dd>Describes the NX C interfaces
-  <dt><code>include/nutt/nxtk.h
+  <dt><code>include/nutt/nxtk.h</code>
     <dd>Describe the NXTOOLKIT C interfaces
-  <dt><code>include/nutt/nxfont.h
+  <dt><code>include/nutt/nxfont.h</code>
     <dd>Describe sthe NXFONT C interfaces
-  <dt><code>include/nuttx/nxwidgets.h
+  <dt><code>include/nuttx/nxwidgets.h</code>
     <dd>Will describe the NXWIDGETS classes (no longer planned)
 </dl></ul>
 
@@ -435,7 +435,7 @@
 </p>
 
 <p>
-  <code>nxgl_coord_t</b>
+  <code>nxgl_coord_t</code>.
   A given coordinate is limited to the screen height an width.  If either
   of those values exceed 32,767 pixels, then the following will have to need
   to change:
@@ -618,7 +618,7 @@ nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
   <b>Description:</b>
   Return the regions of rectangle <code>rect1</code> that do not intersect with
   <code>rect2</code>.  This will four rectangles, some of which may be
-  degenerate (and can be picked off with <a href="#nxglnullrect"><code>nxgl_nullrect()<code></a>).
+  degenerate (and can be picked off with <a href="#nxglnullrect"><code>nxgl_nullrect()</code></a>).
 </p>
 
 <h3>2.2.10 <a name="nxglrectoverlap"><code>nxgl_rectoverlap()</code></a></h3>
@@ -919,10 +919,10 @@ void (*kbdin)(NXWINDOW hwnd, uint8_t nch, FAR const uint8_t *ch, FAR void *arg);
   </dl></ul>
 </p>
 <p>
-  <b>Returned Value:</b> NOne
+  <b>Returned Value:</b> None
 </p>
 
-<h3>2.3.4 <a name="nxruninstance"><code>nx_runinstance()</code> (and <code>nx_run()<code> macro)</a></h3>
+<h3>2.3.4 <a name="nxruninstance"><code>nx_runinstance()</code> (and <code>nx_run()</code> macro)</a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nxglib.h&gt;
@@ -2539,7 +2539,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
     <dt><code>graphics/nxbe</code>
       <dd>This is the <i>back-end</i> of a tiny windowing system.
       It can be used with either of two front-ends to complete a windowing system (see
-      <code>nxmu</code> and <code>nxsu/<code> below).
+      <code>nxmu</code> and <code>nxsu</code> below).
       It contains most of the important window management logic:  clipping, window controls,
       window drawing, etc.
 
