@@ -472,8 +472,19 @@ Where <subdir> is one of the following:
 
   nx:
   ---
-    And example using the NuttX graphics system (NX).  This example
-    uses the Nokia 6100 LCD driver.
+    An example using the NuttX graphics system (NX).  This example
+    focuses on general window controls, movement, mouse and keyboard
+    input.
+
+    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_LCD_PORTRAIT=y         : 240x320
+
+  nxtext:
+  ------
+    Another example using the NuttX graphics system (NX).   This
+    example focuses on placing text on the background while pop-up
+    windows occur.  Text should continue to update normally with
+    or without the popup windows present.
 
     CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
     CONFIG_LCD_PORTRAIT=y         : 240x320
