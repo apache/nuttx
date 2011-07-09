@@ -967,8 +967,8 @@ CONFIG_EXAMPLES_NX_EXTERNINIT=n
 #   for, for example, SPI LCD/OLED devices.
 # CONFIG_EXAMPLES_NXTEXT_BMCACHE - The maximum number of characters that
 #   can be put in the background window.  Default is 128.
-# CONFIG_EXAMPLES_NXTEXT_GLCACHE - The maximum nuber of pre-rendered
-#   fonts that can be retained for the background window.
+# CONFIG_EXAMPLES_NXTEXT_GLCACHE - The maximum number of pre-rendered
+#   fonts that can be retained for the background window.  Default is 16.
 # CONFIG_EXAMPLES_NXTEXT_STACKSIZE -- The stacksize to use when creating
 #  the NX server.  Default 2048
 # CONFIG_EXAMPLES_NXTEXT_CLIENTPRIO -- The client priority.  Default: 100
@@ -987,7 +987,7 @@ CONFIG_EXAMPLES_NXTEXT_PUFONTCOLOR=0x001f
 CONFIG_EXAMPLES_NXTEXT_BPP=16
 CONFIG_EXAMPLES_NXTEXT_EXTERNINIT=n
 CONFIG_EXAMPLES_NXTEXT_BMCACHE=512
-CONFIG_EXAMPLES_NXTEXT_GLCACHE=128
+CONFIG_EXAMPLES_NXTEXT_GLCACHE=16
 CONFIG_EXAMPLES_NXTEXT_STACKSIZE=2048
 CONFIG_EXAMPLES_NXTEXT_CLIENTPRIO=80
 CONFIG_EXAMPLES_NXTEXT_SERVERPRIO=120
