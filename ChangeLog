@@ -1883,3 +1883,7 @@
 	  example.  This example focuses on placing text on the background while
 	  pop-up windows occur.  Text should continue to update normally with or without
 	  the popup windows present.
+	* arch/arm/src/common/up_checkstack.c:  ARM stack overflow checking submitted
+	  by Hal Glenn.
+	* arch/arm/src/lpc17xx: Changes to compile successfully with no serial console
+	  (also submitted by Hal Glenn).

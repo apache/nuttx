@@ -104,7 +104,7 @@ size_t up_check_tcbstack(FAR _TCB *tcb)
    */
 
 #if 0
-  if (mark + 16 > tcb->adj_stack_size)
+  if (mark + 16 > tcb->adj_stack_size/4)
     {
       int i, j;
 
