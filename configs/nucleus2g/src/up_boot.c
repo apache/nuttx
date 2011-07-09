@@ -67,7 +67,7 @@
  *
  * Description:
  *   All LPC17xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
@@ -105,5 +105,11 @@ void lpc17_boardinitialize(void)
 
 #ifdef CONFIG_ARCH_LEDS
   up_ledinit();
+#endif
+
+  /* Configure the relay outptus for use on the BMS master board */
+
+#ifdef CONFIG_ARCH_BOARD_NUCLEUS2G_BMS
+  up_relayinit();
 #endif
 }

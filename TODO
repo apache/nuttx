@@ -1292,4 +1292,13 @@ o Other Applications & Tests (apps/examples/)
   Status:      Open
   Priority:    Med
 
+  Description: The font caching logic in examples/nx is incomplete.  Fonts are
+               added to the cache, but never removed.  When the cache is full
+               it stops rendering.  This is not a problem for the examples/nx
+               code because it uses so few fonts, but if the logic were
+               leveraged for more general purposes, it would be a problem.
+  Status:      Open
+  Priority:    Low.  This is not really a problem becauses examples/nx works
+               fine with its bogus font caching.
+
 

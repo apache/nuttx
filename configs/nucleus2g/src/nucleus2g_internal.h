@@ -120,6 +120,11 @@
 
 #define NUCLEUS2G_MMCSD_CS           (GPIO_OUTPUT | GPIO_VALUE_ONE  |  GPIO_PORT0 | GPIO_PIN16)
 
+#define NUCLEUS_BMS_RELAY1  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN20)
+#define NUCLEUS_BMS_RELAY2  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN21)
+#define NUCLEUS_BMS_RELAY3  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN22)
+#define NUCLEUS_BMS_RELAY4  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN23)
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -143,6 +148,8 @@
  ************************************************************************************/
 
 extern void weak_function lpc17_sspinitialize(void);
+
+extern void up_relayinit(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_NUCLEUS2G_SRC_NUCLEUS2G_INTERNAL_H */

@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+#  include <sys/types.h>
 #  include <stdint.h>
 #endif
 
@@ -278,6 +279,29 @@ extern void up_usbuninitialize(void);
 #else
 # define up_usbinitialize()
 # define up_usbuninitialize()
+#endif
+
+/****************************************************************************
+ * Name: up_check_stack
+ *
+ * Description:
+ *   Determine (approximately) how much stack has been used be searching the
+ *   stack memory for a high water mark.  That is, the deepest level of the
+ *   stack that clobbered some recognizable marker in the stack memory.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned value:
+ *   The estimated amount of stack space used.
+ *
+ ****************************************************************************/
+
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+extern size_t up_check_stack(void);
+extern size_t up_check_tcbstack(FAR _TCB);
+extern size_t up_check_tcbstack_remain(FAR _TCB);
 #endif
 
 #endif /* __ASSEMBLY__ */

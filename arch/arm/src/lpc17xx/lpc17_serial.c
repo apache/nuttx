@@ -271,8 +271,166 @@ static uart_dev_t g_uart3port =
 
 /* Which UART with be tty0/console and which tty1? tty2? tty3? */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart0port      /* UART0=console */
+#ifdef HAVE_CONSOLE
+#  if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#    define CONSOLE_DEV     g_uart0port      /* UART0=console */
+#    define TTYS0_DEV       g_uart0port      /* UART0=ttyS0 */
+#    ifdef CONFIG_LPC17_UART1
+#      define TTYS1_DEV     g_uart1port      /* UART0=ttyS0;UART1=ttyS1 */
+#      ifdef CONFIG_LPC17_UART2
+#        define TTYS2_DEV   g_uart2port      /* UART0=ttyS0;UART1=ttyS1;UART2=ttyS2 */
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS3_DEV g_uart3port      /* UART0=ttyS0;UART1=ttyS1;UART2=ttyS2;UART3=ttyS3 */
+#        else
+#          undef TTYS3_DEV                   /* UART0=ttyS0;UART1=ttyS1;UART2=ttyS;No ttyS3 */
+#        endif
+#      else
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS2_DEV g_uart3port     /* UART0=ttyS0;UART1=ttyS1;UART3=ttys2;No ttyS3 */
+#        else
+#          undef TTYS2_DEV                  /* UART0=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#        undef TTYS3_DEV                    /* No ttyS3 */
+#      endif
+#    else
+#      ifdef CONFIG_LPC17_UART2
+#        define TTYS1_DEV   g_uart2port    /* UART0=ttyS0;UART2=ttyS1;No ttyS3 */
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS2_DEV g_uart3port    /* UART0=ttyS0;UART2=ttyS1;UART3=ttyS2;No ttyS3 */
+#        else
+#          undef TTYS2_DEV                 /* UART0=ttyS0;UART2=ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#        undef TTYS3_DEV                   /* No ttyS3 */
+#      else
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS1_DEV g_uart3port    /* UART0=ttyS0;UART3=ttyS1;No ttyS2;No ttyS3 */
+#        else
+#          undef TTYS1_DEV                 /* UART0=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#          undef TTYS2_DEV                  /* No ttyS2 */
+#        undef TTYS3_DEV                    /* No ttyS3 */
+#      endif
+#    endif
+#  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#    define CONSOLE_DEV     g_uart1port     /* UART1=console */
+#    define TTYS0_DEV       g_uart1port     /* UART1=ttyS0 */
+#    ifdef CONFIG_LPC17_UART
+#      define TTYS1_DEV     g_uart0port     /* UART1=ttyS0;UART0=ttyS1 */
+#      ifdef CONFIG_LPC17_UART2
+#        define TTYS2_DEV   g_uart2port     /* UART1=ttyS0;UART0=ttyS1;UART2=ttyS2 */
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS3_DEV g_uart3port     /* UART1=ttyS0;UART0=ttyS1;UART2=ttyS2;UART3=ttyS3 */
+#        else
+#          undef TTYS3_DEV                  /* UART1=ttyS0;UART0=ttyS1;UART2=ttyS;No ttyS3 */
+#        endif
+#      else
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS2_DEV g_uart3port     /* UART1=ttyS0;UART0=ttyS1;UART3=ttys2;No ttyS3 */
+#        else
+#          undef TTYS2_DEV                  /* UART1=ttyS0;UART0=ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#        undef TTYS3_DEV                    /* No ttyS3 */
+#      endif
+#    else
+#      ifdef CONFIG_LPC17_UART2
+#        define TTYS1_DEV   g_uart2port     /* UART1=ttyS0;UART2=ttyS1 */
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS2_DEV g_uart3port     /* UART1=ttyS0;UART2=ttyS1;UART3=ttyS2;No ttyS3 */
+#        else
+#          undef TTYS2_DEV                  /* UART1=ttyS0;UART2=ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#        undef TTYS3_DEV                    /* No ttyS3 */
+#      else
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS1_DEV   g_uart3port   /* UART1=ttyS0;UART3=ttyS1;No ttyS2;No ttyS3 */
+#        else
+#          undef TTYS1_DEV                  /* UART1=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#        undef TTYS2_DEV                    /* No ttyS2 */
+#        undef TTYS3_DEV                    /* No ttyS3 */
+#      endif
+#    endif
+#  elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#    define CONSOLE_DEV     g_uart2port     /* UART2=console */
+#    define TTYS0_DEV       g_uart2port     /* UART2=ttyS0 */
+#    ifdef CONFIG_LPC17_UART
+#      define TTYS1_DEV     g_uart0port     /* UART2=ttyS0;UART0=ttyS1 */
+#      ifdef CONFIG_LPC17_UART1
+#        define TTYS2_DEV   g_uart1port     /* UART2=ttyS0;UART0=ttyS1;UART1=ttyS2 */
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS3_DEV g_uart3port     /* UART2=ttyS0;UART0=ttyS1;UART1=ttyS2;UART3=ttyS3 */
+#        else
+#          undef TTYS3_DEV                  /* UART2=ttyS0;UART0=ttyS1;UART1=ttyS;No ttyS3 */
+#        endif
+#      else
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS2_DEV g_uart3port     /* UART2=ttyS0;UART0=ttyS1;UART3=ttys2;No ttyS3 */
+#        else
+#          undef TTYS2_DEV                  /* UART2=ttyS0;UART0=ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#        undef TTYS3_DEV                    /* No ttyS3 */
+#      endif
+#    else
+#      ifdef CONFIG_LPC17_UART1
+#        define TTYS1_DEV   g_uart1port    /* UART2=ttyS0;UART1=ttyS1 */
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS2_DEV g_uart3port    /* UART2=ttyS0;UART1=ttyS1;UART3=ttyS2 */
+#        else
+#          undef TTYS2_DEV                 /* UART2=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#        undef TTYS3_DEV                   /* No ttyS3 */
+#      else
+#        ifdef CONFIG_LPC17_UART3
+#          define TTYS1_DEV g_uart3port    /* UART2=ttyS0;UART3=ttyS1;No ttyS3 */
+#        else
+#          undef TTYS1_DEV                 /* UART2=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#        undef TTYS2_DEV                   /* No ttyS2 */
+#        undef TTYS3_DEV                   /* No ttyS3 */
+#      endif
+#    endif
+#  elif defined(CONFIG_UART3_SERIAL_CONSOLE)
+#    define CONSOLE_DEV     g_uart3port    /* UART3=console */
+#    define TTYS0_DEV       g_uart3port    /* UART3=ttyS0 */
+#    ifdef CONFIG_LPC17_UART
+#      define TTYS1_DEV     g_uart0port    /* UART3=ttyS0;UART0=ttyS1 */
+#      ifdef CONFIG_LPC17_UART1
+#        define TTYS2_DEV   g_uart1port    /* UART3=ttyS0;UART0=ttyS1;UART1=ttyS2 */
+#        ifdef CONFIG_LPC17_UART2
+#          define TTYS3_DEV g_uart2port    /* UART3=ttyS0;UART0=ttyS1;UART1=ttyS2;UART2=ttyS3 */
+#        else
+#          undef TTYS3_DEV                 /* UART3=ttyS0;UART0=ttyS1;UART1=ttyS;No ttyS3 */
+#        endif
+#      else
+#        ifdef CONFIG_LPC17_UART2
+#          define TTYS2_DEV g_uart2port    /* UART3=ttyS0;UART0=ttyS1;UART2=ttys2;No ttyS3 */
+#        else
+#          undef TTYS2_DEV                 /* UART3=ttyS0;UART0=ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#          undef TTYS3_DEV                 /* No ttyS3 */
+#      endif
+#    else
+#      ifdef CONFIG_LPC17_UART1
+#        define TTYS1_DEV   g_uart1port    /* UART3=ttyS0;UART1=ttyS1 */
+#        ifdef CONFIG_LPC17_UART2
+#          define TTYS2_DEV g_uart2port    /* UART3=ttyS0;UART1=ttyS1;UART2=ttyS2;No ttyS3 */
+#        else
+#          undef TTYS2_DEV                 /* UART3=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#        undef TTYS3_DEV                   /* No ttyS3 */
+#      else
+#        ifdef CONFIG_LPC17_UART2
+#          define TTYS1_DEV   g_uart2port  /* UART3=ttyS0;UART2=ttyS1;No ttyS3;No ttyS3 */
+#          undef TTYS3_DEV                 /* UART3=ttyS0;UART2=ttyS1;No ttyS2;No ttyS3 */
+#        else
+#          undef TTYS1_DEV                 /* UART3=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
+#        endif
+#        undef TTYS2_DEV                   /* No ttyS2 */
+#        undef TTYS3_DEV                   /* No ttyS3 */
+#      endif
+#    endif
+#  endif
+#else /* No console */
 #  define TTYS0_DEV       g_uart0port      /* UART0=ttyS0 */
 #  ifdef CONFIG_LPC17_UART1
 #    define TTYS1_DEV     g_uart1port      /* UART0=ttyS0;UART1=ttyS1 */
@@ -285,150 +443,32 @@ static uart_dev_t g_uart3port =
 #      endif
 #    else
 #      ifdef CONFIG_LPC17_UART3
-#        define TTYS2_DEV g_uart3port     /* UART0=ttyS0;UART1=ttyS1;UART3=ttys2;No ttyS3 */
+#        define TTYS2_DEV g_uart3port      /* UART0=ttyS0;UART1=ttyS1;UART3=ttys2;No ttyS3 */
 #      else
-#        undef TTYS2_DEV                  /* UART0=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
+#        undef TTYS2_DEV                   /* UART0=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
 #      endif
-#      undef TTYS3_DEV                    /* No ttyS3 */
+#      undef TTYS3_DEV                     /* No ttyS3 */
 #    endif
 #  else
 #    ifdef CONFIG_LPC17_UART2
-#      define TTYS1_DEV   g_uart2port    /* UART0=ttyS0;UART2=ttyS1;No ttyS3 */
+#      define TTYS1_DEV   g_uart2port     /* UART0=ttyS0;UART2=ttyS1;No ttyS3 */
 #      ifdef CONFIG_LPC17_UART3
-#        define TTYS2_DEV g_uart3port    /* UART0=ttyS0;UART2=ttyS1;UART3=ttyS2;No ttyS3 */
+#        define TTYS2_DEV g_uart3port     /* UART0=ttyS0;UART2=ttyS1;UART3=ttyS2;No ttyS3 */
 #      else
-#        undef TTYS2_DEV                 /* UART0=ttyS0;UART2=ttyS1;No ttyS2;No ttyS3 */
+#        undef TTYS2_DEV                  /* UART0=ttyS0;UART2=ttyS1;No ttyS2;No ttyS3 */
 #      endif
-#      undef TTYS3_DEV                   /* No ttyS3 */
+#      undef TTYS3_DEV                    /* No ttyS3 */
 #    else
 #      ifdef CONFIG_LPC17_UART3
-#        define TTYS1_DEV g_uart3port    /* UART0=ttyS0;UART3=ttyS1;No ttyS2;No ttyS3 */
+#        define TTYS1_DEV g_uart3port     /* UART0=ttyS0;UART3=ttyS1;No ttyS2;No ttyS3 */
 #      else
-#        undef TTYS1_DEV                 /* UART0=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
+#        undef TTYS1_DEV                  /* UART0=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
 #      endif
 #        undef TTYS2_DEV                  /* No ttyS2 */
 #      undef TTYS3_DEV                    /* No ttyS3 */
 #    endif
 #  endif
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart1port     /* UART1=console */
-#  define TTYS0_DEV       g_uart1port     /* UART1=ttyS0 */
-#  ifdef CONFIG_LPC17_UART
-#    define TTYS1_DEV     g_uart0port     /* UART1=ttyS0;UART0=ttyS1 */
-#    ifdef CONFIG_LPC17_UART2
-#      define TTYS2_DEV   g_uart2port     /* UART1=ttyS0;UART0=ttyS1;UART2=ttyS2 */
-#      ifdef CONFIG_LPC17_UART3
-#        define TTYS3_DEV g_uart3port     /* UART1=ttyS0;UART0=ttyS1;UART2=ttyS2;UART3=ttyS3 */
-#      else
-#        undef TTYS3_DEV                  /* UART1=ttyS0;UART0=ttyS1;UART2=ttyS;No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC17_UART3
-#        define TTYS2_DEV g_uart3port     /* UART1=ttyS0;UART0=ttyS1;UART3=ttys2;No ttyS3 */
-#      else
-#        undef TTYS2_DEV                  /* UART1=ttyS0;UART0=ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS3_DEV                    /* No ttyS3 */
-#    endif
-#  else
-#    ifdef CONFIG_LPC17_UART2
-#      define TTYS1_DEV   g_uart2port     /* UART1=ttyS0;UART2=ttyS1 */
-#      ifdef CONFIG_LPC17_UART3
-#        define TTYS2_DEV g_uart3port     /* UART1=ttyS0;UART2=ttyS1;UART3=ttyS2;No ttyS3 */
-#      else
-#        undef TTYS2_DEV                  /* UART1=ttyS0;UART2=ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS3_DEV                    /* No ttyS3 */
-#    else
-#      ifdef CONFIG_LPC17_UART3
-#        define TTYS1_DEV   g_uart3port   /* UART1=ttyS0;UART3=ttyS1;No ttyS2;No ttyS3 */
-#      else
-#        undef TTYS1_DEV                  /* UART1=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS2_DEV                    /* No ttyS2 */
-#      undef TTYS3_DEV                    /* No ttyS3 */
-#    endif
-#  endif
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart2port     /* UART2=console */
-#  define TTYS0_DEV       g_uart2port     /* UART2=ttyS0 */
-#  ifdef CONFIG_LPC17_UART
-#    define TTYS1_DEV     g_uart0port     /* UART2=ttyS0;UART0=ttyS1 */
-#    ifdef CONFIG_LPC17_UART1
-#      define TTYS2_DEV   g_uart1port     /* UART2=ttyS0;UART0=ttyS1;UART1=ttyS2 */
-#      ifdef CONFIG_LPC17_UART3
-#        define TTYS3_DEV g_uart3port     /* UART2=ttyS0;UART0=ttyS1;UART1=ttyS2;UART3=ttyS3 */
-#      else
-#        undef TTYS3_DEV                  /* UART2=ttyS0;UART0=ttyS1;UART1=ttyS;No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC17_UART3
-#        define TTYS2_DEV g_uart3port     /* UART2=ttyS0;UART0=ttyS1;UART3=ttys2;No ttyS3 */
-#      else
-#        undef TTYS2_DEV                  /* UART2=ttyS0;UART0=ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS3_DEV                    /* No ttyS3 */
-#    endif
-#  else
-#    ifdef CONFIG_LPC17_UART1
-#      define TTYS1_DEV   g_uart1port    /* UART2=ttyS0;UART1=ttyS1 */
-#      ifdef CONFIG_LPC17_UART3
-#        define TTYS2_DEV g_uart3port    /* UART2=ttyS0;UART1=ttyS1;UART3=ttyS2 */
-#      else
-#        undef TTYS2_DEV                 /* UART2=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS3_DEV                   /* No ttyS3 */
-#    else
-#      ifdef CONFIG_LPC17_UART3
-#        define TTYS1_DEV g_uart3port    /* UART2=ttyS0;UART3=ttyS1;No ttyS3 */
-#      else
-#        undef TTYS1_DEV                 /* UART2=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS2_DEV                   /* No ttyS2 */
-#      undef TTYS3_DEV                   /* No ttyS3 */
-#    endif
-#  endif
-#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart3port    /* UART3=console */
-#  define TTYS0_DEV       g_uart3port    /* UART3=ttyS0 */
-#  ifdef CONFIG_LPC17_UART
-#    define TTYS1_DEV     g_uart0port    /* UART3=ttyS0;UART0=ttyS1 */
-#    ifdef CONFIG_LPC17_UART1
-#      define TTYS2_DEV   g_uart1port    /* UART3=ttyS0;UART0=ttyS1;UART1=ttyS2 */
-#      ifdef CONFIG_LPC17_UART2
-#        define TTYS3_DEV g_uart2port    /* UART3=ttyS0;UART0=ttyS1;UART1=ttyS2;UART2=ttyS3 */
-#      else
-#        undef TTYS3_DEV                 /* UART3=ttyS0;UART0=ttyS1;UART1=ttyS;No ttyS3 */
-#      endif
-#    else
-#      ifdef CONFIG_LPC17_UART2
-#        define TTYS2_DEV g_uart2port    /* UART3=ttyS0;UART0=ttyS1;UART2=ttys2;No ttyS3 */
-#      else
-#        undef TTYS2_DEV                 /* UART3=ttyS0;UART0=ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#        undef TTYS3_DEV                 /* No ttyS3 */
-#    endif
-#  else
-#    ifdef CONFIG_LPC17_UART1
-#      define TTYS1_DEV   g_uart1port    /* UART3=ttyS0;UART1=ttyS1 */
-#      ifdef CONFIG_LPC17_UART2
-#        define TTYS2_DEV g_uart2port    /* UART3=ttyS0;UART1=ttyS1;UART2=ttyS2;No ttyS3 */
-#      else
-#        undef TTYS2_DEV                 /* UART3=ttyS0;UART1=ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS3_DEV                   /* No ttyS3 */
-#    else
-#      ifdef CONFIG_LPC17_UART2
-#        define TTYS1_DEV   g_uart2port  /* UART3=ttyS0;UART2=ttyS1;No ttyS3;No ttyS3 */
-#        undef TTYS3_DEV                 /* UART3=ttyS0;UART2=ttyS1;No ttyS2;No ttyS3 */
-#      else
-#        undef TTYS1_DEV                 /* UART3=ttyS0;No ttyS1;No ttyS2;No ttyS3 */
-#      endif
-#      undef TTYS2_DEV                   /* No ttyS2 */
-#      undef TTYS3_DEV                   /* No ttyS3 */
-#    endif
-#  endif
-#endif
+#endif /*HAVE_CONSOLE*/
 
 /************************************************************************************
  * Inline Functions
@@ -1354,10 +1394,11 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
+#ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
   uint32_t ier;
-
   up_disableuartint(priv, &ier);
+#endif
 
   /* Check for LF */
 
@@ -1369,7 +1410,10 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
+#ifdef HAVE_CONSOLE
   up_restoreuartint(priv, ier);
+#endif
+
   return ch;
 }
 

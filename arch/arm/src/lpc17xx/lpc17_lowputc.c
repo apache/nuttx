@@ -82,7 +82,7 @@
 #  define CONSOLE_BITS     CONFIG_UART3_BITS
 #  define CONSOLE_PARITY   CONFIG_UART3_PARITY
 #  define CONSOLE_2STOP    CONFIG_UART3_2STOP
-#else
+#elif defined(HAVE_CONSOLE)
 #  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
 
@@ -96,7 +96,7 @@
 #  define CONSOLE_LCR_WLS UART_LCR_WLS_7BIT
 #elif CONSOLE_BITS == 8
 #  define CONSOLE_LCR_WLS UART_LCR_WLS_8BIT
-#else
+#elif defined(HAVE_CONSOLE)
 #  error "Invalid CONFIG_UARTn_BITS setting for console "
 #endif
 
@@ -112,7 +112,7 @@
 #  define CONSOLE_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK1)
 #elif CONSOLE_PARITY == 4
 #  define CONSOLE_LCR_PAR (UART_LCR_PE|UART_LCR_PS_STICK0)
-#else
+#elif defined(HAVE_CONSOLE)
 #    error "Invalid CONFIG_UARTn_PARITY setting for CONSOLE"
 #endif
 
@@ -246,7 +246,7 @@
 
 void up_lowputc(char ch)
 {
-#ifdef HAVE_UART
+#if defined HAVE_UART && defined HAVE_CONSOLE
   /* Wait for the transmitter to be available */
 
   while ((getreg32(CONSOLE_BASE+LPC17_UART_LSR_OFFSET) & UART_LSR_THRE) == 0);
@@ -351,7 +351,6 @@ void lpc17_lowsetup(void)
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
   lpc17_configgpio(GPIO_UART2_TXD);
   lpc17_configgpio(GPIO_UART2_RXD);
-  irqrestore(flags);
 #elif defined(CONFIG_UART3_SERIAL_CONSOLE)
   lpc17_configgpio(GPIO_UART3_TXD);
   lpc17_configgpio(GPIO_UART3_RXD);
