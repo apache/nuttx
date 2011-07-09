@@ -279,8 +279,11 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
                   dptr++;
                 }
             }
-          line += stride;
         }
+
+      /* Advance to the beginning of the next line in the destination */
+
+      line += stride;
     }
 #endif
   return OK;

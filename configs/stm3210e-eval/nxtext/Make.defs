@@ -48,24 +48,27 @@ ifeq ($(CONFIG_STM32_CODESOURCERYW),y)
   CROSSDEV = arm-none-eabi-
   WINTOOL = y
   ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  MAXOPTIMIZATION = -O1
 endif
 ifeq ($(CONFIG_STM32_CODESOURCERYL),y)
   # CodeSourcery under Linux
   CROSSDEV = arm-none-eabi-
   ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-  MAXOPTIMIZATION = -O2
+  MAXOPTIMIZATION = -O1
 endif
 ifeq ($(CONFIG_STM32_DEVKITARM),y)
   # devkitARM under Windows
   CROSSDEV = arm-eabi-
   WINTOOL = y
   ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  MAXOPTIMIZATION = -O2
 endif
 ifeq ($(CONFIG_STM32_RAISONANCE),y)
   # Raisonance RIDE7 under Windows
   CROSSDEV = arm-none-eabi-
   WINTOOL = y
   ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  MAXOPTIMIZATION = -O2
 endif
 ifeq ($(CONFIG_STM32_BUILDROOT),y)
   # NuttX buildroot under Linux or Cygwin
@@ -82,7 +85,6 @@ ifeq ($(WINTOOL),y)
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nxtext/$(LDSCRIPT)}"
-  MAXOPTIMIZATION = -O2
 else
   # Linux/Cygwin-native toolchain 
   MKDEP = $(TOPDIR)/tools/mkdeps.sh

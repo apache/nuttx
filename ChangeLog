@@ -1887,3 +1887,6 @@
 	  by Hal Glenn.
 	* arch/arm/src/lpc17xx: Changes to compile successfully with no serial console
 	  (also submitted by Hal Glenn).
+	* graphics/nxfonts/nxfonts_convert.c:  Fixed a critical bug that caused
+	  when renderer some fonts with bits-per-pixel > 8
+
