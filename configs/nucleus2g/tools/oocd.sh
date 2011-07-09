@@ -1,16 +1,23 @@
 #!/bin/sh
 
 TOPDIR=$1
+CFGFILE=$2
 USAGE="$0 <TOPDIR> [-d]"
+
 if [ -z "${TOPDIR}" ]; then
 	echo "Missing argument"
 	echo $USAGE
 	exit 1
 fi
 
+if [ -z "${CFGFILE}" ]; then
+	echo "Using olimex.cfg"
+    CFGFILE=olimex.cfg
+fi
+
 OPENOCD_PATH="/cygdrive/c/OpenOCD/openocd-0.4.0/src"
 OPENOCD_EXE=openocd.exe
-OPENOCD_CFG="${TOPDIR}/configs/nucleus2g/tools/olimex.cfg"
+OPENOCD_CFG="${TOPDIR}/configs/nucleus2g/tools/${CFGFILE}"
 OPENOCD_ARGS="-f `cygpath -w ${OPENOCD_CFG}`"
 
 if [ "X$2" = "X-d" ]; then

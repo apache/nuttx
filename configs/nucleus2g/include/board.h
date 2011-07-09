@@ -198,6 +198,13 @@ enum lpc17_ledstate_e
 };
 #endif
 
+enum output_state
+{
+  RELAY_OPEN   = 0,
+  RELAY_CLOSED = 1,
+  RELAY_TOGGLE = 2,
+};
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
@@ -218,7 +225,7 @@ extern "C" {
  *
  * Description:
  *   All LPC17xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
@@ -236,6 +243,22 @@ EXTERN void lpc17_boardinitialize(void);
 #ifdef CONFIG_ARCH_LEDS
 EXTERN void lpc17_led1(enum lpc17_ledstate_e state);
 EXTERN void lpc17_led2(enum lpc17_ledstate_e state);
+#endif
+
+/************************************************************************************
+ * Name: nucleus_bms_relay 1-4
+ *
+ * Description:
+ * once booted these functions control the 4 isolated FET outputs from the
+ * master BMS controller
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_BOARD_NUCLEUS2G_BMS
+EXTERN void nucleus_bms_relay1(enum output_state state);
+EXTERN void nucleus_bms_relay2(enum output_state state);
+EXTERN void nucleus_bms_relay3(enum output_state state);
+EXTERN void nucleus_bms_relay4(enum output_state state);
 #endif
 
 #undef EXTERN
