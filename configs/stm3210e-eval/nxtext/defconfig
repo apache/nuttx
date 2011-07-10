@@ -962,6 +962,9 @@ CONFIG_EXAMPLES_NX_EXTERNINIT=n
 #   background window. Default depends on CONFIG_EXAMPLES_NXTEXT_BPP.
 # CONFIG_EXAMPLES_NXTEXT_BPP -- Pixels per pixel to use.  Valid options
 #   include 2, 4, 8, 16, 24, and 32.  Default is 32.
+# CONFIG_EXAMPLES_NXTEXT_NOGETRUN -- If your display is read-only OR if
+#   reading is not reliable, then select this configuration to avoid
+#   reading from the display.
 # CONFIG_EXAMPLES_NXTEXT_EXTERNINIT - The driver for the graphics device on
 #   this platform requires some unusual initialization.  This is the
 #   for, for example, SPI LCD/OLED devices.
@@ -985,6 +988,7 @@ CONFIG_EXAMPLES_NXTEXT_BGFONTCOLOR=0xffdf
 CONFIG_EXAMPLES_NXTEXT_PUCOLOR=0xfd20
 CONFIG_EXAMPLES_NXTEXT_PUFONTCOLOR=0x001f
 CONFIG_EXAMPLES_NXTEXT_BPP=16
+CONFIG_EXAMPLES_NXTEXT_NOGETRUN=y
 CONFIG_EXAMPLES_NXTEXT_EXTERNINIT=n
 CONFIG_EXAMPLES_NXTEXT_BMCACHE=512
 CONFIG_EXAMPLES_NXTEXT_GLCACHE=16

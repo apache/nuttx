@@ -499,6 +499,36 @@ static void stm3210e_setcursor(uint16_t col, uint16_t row)
 }
 
 /**************************************************************************************
+ * Name:  stm3210e_dumprun
+ *
+ * Description:
+ *   Dump the contexts of the run buffer:
+ *
+ *  run     - The buffer in containing the run read to be dumped
+ *  npixels - The number of pixels to dump
+ *
+ **************************************************************************************/
+
+#if 0 /* Sometimes useful */
+static void stm3210e_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
+{
+  int i, j;
+
+  lib_rawprintf("\n%s:\n", msg);
+  for (i = 0; i < npixels; i += 16)
+    {
+      up_putc(' ');
+      lib_rawprintf(" ");
+      for (j = 0; j < 16; j++)
+        {
+          lib_rawprintf(" %04x", *run++);
+        }
+      up_putc('\n');
+    }
+}
+#endif
+
+/**************************************************************************************
  * Name:  stm3210e_putrun
  *
  * Description:
@@ -591,14 +621,7 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   lcddbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  /* Set up to read the run. */
-
-  stm3210e_setcursor(col, row);
-
-  /* Read the run from GRAM. The LCD is configured so the X corresponds to rows and
-   * Y corresponds to columns. (0, STM3210E_XRES-1) is the upper left hand corner.  Y
-   * autodecrements.
-   */
+  /* Read the run from GRAM. */
 
 #ifdef CONFIG_LCD_LANDSCAPE
   /* Convert coordinates -- Which edge of the display is the "top?" Here the edge
@@ -638,6 +661,7 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       col++;
     }
 #endif
+
   return OK;
 }
 
