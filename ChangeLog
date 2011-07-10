@@ -1889,4 +1889,6 @@
 	  (also submitted by Hal Glenn).
 	* graphics/nxfonts/nxfonts_convert.c:  Fixed a critical bug that caused
 	  when renderer some fonts with bits-per-pixel > 8
-
+	* graphics/nxbe/nxbe_move.c: Fixed an error in the graphics move logic (This
+	  was a previously untested interface).  Basically, there is some confusion
+	  between use of (x,y) as a relative offset or as an absolute position.

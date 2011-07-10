@@ -89,12 +89,14 @@ static void nxbe_clipmovesrc(FAR struct nxbe_clipops_s *cops,
                              FAR const struct nxgl_rect_s *rect)
 {
   struct nxbe_move_s *info = (struct nxbe_move_s *)cops;
+  struct nxgl_point_s offset;
 
   if (info->offset.x != 0 || info->offset.y != 0)
     {
-      struct nxgl_rect_s dest;
-      nxgl_rectoffset(&dest, rect, info->offset.x, info->offset.y);
-      plane->moverectangle(&plane->pinfo, &dest, &info->offset);
+      offset.x = rect->pt1.x + info->offset.x;
+      offset.y = rect->pt1.y + info->offset.y;
+
+      plane->moverectangle(&plane->pinfo, rect, &offset);
     }
 }
 
@@ -156,7 +158,7 @@ static void nxbe_clipmovedest(FAR struct nxbe_clipops_s *cops,
         }
     }
 
-  /* Cip to determine what is inside the bounds */
+  /* Clip to determine what is inside the bounds */
 
   nxgl_rectoffset(&tmprect1, rect, -offset.x, -offset.y);
   nxgl_rectintersect(&src, &tmprect1, &dstdata->srcrect);
