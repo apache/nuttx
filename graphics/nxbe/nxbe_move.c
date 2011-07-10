@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_move.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -198,7 +198,6 @@ static void nxbe_clipmovedest(FAR struct nxbe_clipops_s *cops,
 void nxbe_move(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *rect,
                FAR const struct nxgl_point_s *offset)
 {
-  FAR const struct nxgl_rect_s *bounds = &wnd->bounds;
   struct nxbe_move_s info;
   int i;
 
@@ -229,30 +228,46 @@ void nxbe_move(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *rect
   info.offset.y      = offset->y;
   info.wnd           = wnd;
 
+  /* The clip order depends up the direction that the rectangle is being
+   * moved.
+   */
+ 
   if (offset->y < 0)
     {
+      /* Moving rectangle up */
+
       if (offset->x < 0)
         {
+          /* Moving to upper-left */
+
           info.order = NX_CLIPORDER_TLRB; /* Top-left-right-bottom */
         }
       else
         {
+          /* Moving to upper-right (or just up) */
+
           info.order = NX_CLIPORDER_TRLB;  /* Top-right-left-bottom */
         }
     }
   else
     {
+      /* Moving rectangle down (or just left/right) */
+
       if (offset->x < 0)
         {
+          /* Moving to lower-left */
+
           info.order = NX_CLIPORDER_BLRT; /* Bottom-left-right-top */
         }
       else
         {
+          /* Moving to lower-right */
+
           info.order = NX_CLIPORDER_BRLT; /* Bottom-right-left-top */
         }
     }
 
-  nxgl_rectintersect(&info.srcrect, bounds, &wnd->be->bkgd.bounds);
+  /* Then perform the move */
 
 #if CONFIG_NX_NPLANES > 1
   for (i = 0; i < wnd->be->vinfo.nplanes; i++)
