@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 8, 2011</p>
+      <p>Last Updated: July 11, 2011</p>
     </td>
   </tr>
 </table>
@@ -829,97 +829,74 @@
   </tr>
 </table>
 
-<p><b>nuttx-6.5 Release Notes</b>:
+<p><b>nuttx-6.6 Release Notes</b>:
 <p>
-  The 72<sup>nd</sup> release of NuttX, Version 6.5, was made on June 21, 2011 and is available for download from the
+  The 73<sup>5d</sup> release of NuttX, Version 6.6, was made on July 11, 2011 and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
+  Note that release consists of two tarballs:  <code>nuttx-6.6.tar.gz</code> and <code>apps-6.5.tar.gz</code>.
+  Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information)
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
   These unreleased changes are also listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  The 6.5 release is all about support for the Atmel 8-bit AVR family.
-  I have been interested in the AVR family for some time but because of the
-  severe SRAM constraints and because of the availability of many tiny schedulers
-  for the AVR, it has not been &quot;on the radar screen.&quot;
-  However, I have recently become interested because of interest expressed by
-  members of the Nuttx forum and because of the availability of newer, larger
-  capacity AVR parts (that I don't have yet).
-</p>
-<p>
-  This release includes support for the following AVR boards.
-  As with any initial support for new architectures, there are some incomplete areas and a few caveats that need to be stated.
-  Here they are, ordered from the least to the most complete:
+  The 6.6 release adds several smaller featurs but is mostly a bugfix release.
+  Bugfixes include
 </p>
 <ul>
   <li>
-    <p><b>SoC Robotics Amber Web Server (ATMega128)</b>.
-      This port of NuttX to the Amber Web Server from
-      <a href="http://www.soc-robotics.com/index.htm">SoC Robotics</a>.
-      The Amber Web Server is based on an Atmel ATMega128 (128Kb FLASH but
-      only 4Kb of SRAM).
-    </p>
-    <p><b>STATUS</b>:
-      Work on this port has stalled due to toolchain issues.
-      It is complete, but untested.
-    </p>
-  <li>
-    <p><b>Micropendous 3 (AT9USB647)</b>.
-      This port of NuttX to the <a href="http://code.google.com/p/opendous/">Opendous</a>
-      Micropendous 3 board.
-      Micropendous3 may be populated with an AT90USB646, 647, 1286, or 1287.
-      I have only the AT90USB647 version for testing.
-      This version has very limited memory resources: 64Kb of FLASH and 4Kb of SRAM.
-    </p>
-    <p>
-    <p><b>STATUS</b>:
-      The basic port was released in NuttX-6.5.
-      This basic port consists only of a &quot;Hello, World!!&qquo; example
-      that demonstrates initialization of the OS, creation of a simple task,
-      and serial console output.
-      The tiny SRAM limits what you can do with the AT90USB647 (see issues below).
-    </p>
+    Fixed several NX Graphics bugs: Rendering fonts at &gt;8 bits-per-pixel,
+    graphics move logic, and display artifacts that appear when a window is closed.
   </li>
   <li>
-    <p><b>PJRC Teensy++ 2.0 (AT90USB1286)</b>.
-      This is a port of NuttX to the PJRC Teensy++ 2.0 board.
-      This board was developed by <a href="http://pjrc.com/teensy/">PJRC</a>.
-      The Teensy++ 2.0 is based on an Atmel AT90USB1286 MCU with 128Kb of FLASH and 8Kb of SRAM;
-      a little more room to move than the AT90USB647.
-    </p>
-    <p><b>STATUS</b>:
-      The basic port was released in NuttX-6.5.
-      This basic port consists of a &quot;Hello, World!!&quot; example and
-      also slightly simplified NuttShell (NSH) configuration (see the
-      <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
-    </p>
-    <p><b>Unfinished Stuff</b>.
-      An SPI driver and a USB device driver exist for the AT90USB as well as a USB mass storage configuration.
-      However, this configuration is not fully debugged as of the NuttX-6.5 release.
-    </p>
+    Corrections to the USB host mass storage class driver
+  </li>
+  <li>
+    STM32 bugfixes: serial driver, GPIO interrupt handling
+  </li>
+  <li>
+    LPC17xx: Changes for a success compilation with no console.
+  </li>
+  <li>
+    Corrections to the Teensy AT90USB SD driver
+  </li>
+  <li>
+    Changes for a clean compilation under the ZDS-II toolchain.
   </li>
 </ul>
-
-<p><b>AVR-Specific Issues</b>.
-  The basic AVR port is solid and biggest issue for using AVR is its tiny SRAM memory and its Harvard architecture.
-  Because of the Harvard architecture, constant data that resides to flash is inaccessible using &quot;normal&quot; memory reads and writes (only SRAM data can be accessed &quot;normally&quot;).
-  Special AVR instructions are available for accessing data in FLASH, but these have not been integrated into the normal, general purpose OS.
-</p>
 <p>
-  Most NuttX test applications are console-oriented with lots of strings used for printf and debug output.
-  These strings are all stored in SRAM now due to these data accessing issues and even the smallest console-oriented applications can quickly fill a 4-8Kb memory.
-  So, in order for the AVR port to be useful, one of two things would need to be done:
+  Minor features include:
 </p>
-<ol>
+<ul>
   <li>
-    Don't use console applications that required lots of strings.
-    The basic AVR port is solid and your typical deeply embedded application should work fine.
-    Or,
+    Add logic to extract AVR <code>printf</code> strings from FLASH
+    (but there are still <code>printf</code> issues for that target)
   </li>
   <li>
-    Create a special version of printf that knows how to access strings that reside in FLASH (or EEPROM).
+    Added a configuration for the <a href="http://www.sureelectronics.net">Sure Electronics</a> PIC32MX board.
+    However, higher priority tasks have stopped work on that configuration.
   </li>
-</ol>
+  <li>
+    Added several new configurations for the <a href=" http://www.st.com/">STMicro</a> STM3210E-EVAL board.
+  </li>
+  <li>
+    Added support for the STM3210E-EVAL board: (1) LCD in either landscape or portrait mode, and (2) interrupting buttons.
+  </li>
+  <li>
+    Added a configuration option to use different serial ports for debug and for the NSH serial console
+    (there are some issues with CR-LF expansion and character echo if NSH is not run on the console).
+  </li>
+  <li>
+    Standardized the button press and button interrupt interfaces so that they are common across all boards.
+  </li>
+  <li>
+    Added a new graphics example that focuses on placing text on the background while pop-up windows occur.
+    Text should continue to update normally with or without the popup windows present.
+  </li>
+  <li>
+    Added ARM stack checking logic.
+  </li>
+</ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1855,13 +1832,14 @@
     <p>
       <b>PIC32MX440F512H</b>.
         This port uses the &quot;Advanced USB Storage Demo Board,&quot; Model DB-DP11215, from <a href="http://www.sureelectronics.net">Sure Electronics</a>.
-        This board features    the MicroChip PIC32MX440F512H.  See the <a href="http://www.sureelectronics.net/goods.php?id=1168">Sure website</a> for further    information about the DB-DP11215 board.
+        This board features the MicroChip PIC32MX440F512H.  See the <a href="http://www.sureelectronics.net/goods.php?id=1168">Sure website</a> for further    information about the DB-DP11215 board.
     </p>
     <ul>
       <p>
        <b>STATUS:</b>
        This port is code complete and has begun testing.
        I hope to use the on-board LEDs to work around the debug problems with the PCL Logic board (see above).
+       Update: Work on this board has stalled due to higher priority tasks.
       </p>
     </ul>
   </td>
@@ -2440,30 +2418,81 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.5 2011-06-21 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.6 2011-07-11 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * arch/avr/src/avr and arch/avr/include/avr: Adds general support for
-      the Atmel 8-bit AVR family.
-    * arch/avr/src/atmega and arch/avr/include/atmega: Adds support for the
-      Atmel AVR ATMega family.
-    * arch/avr/src/at90usb and arch/avr/include/at90usb: Adds support for the
-      Atmel AVR AT90USB family.
-    * configs/micropendous3: Adds a board configuration for the Opendous
-      Micropendous 3 board.  This board may be populated with several different
-      members of the Atmel AVR AT90USB family.
-    * configs/amber: This is a placehold for the Atmel ATMega128 Amber Web
-      Server from SoC Robotics.  Not much present in this directory on initial
-      check-in.
-    * configs/teensy: Adds a board configuration for the PJRC Teensy++ 2.0 board
-      that features an Atmel AT90USB1286 MCU.
-    * fs/fat: Offsets, sector numbers, etc. need to be off_t, not size_t.  size_t
-      is intended to be the maximum size of a memory object, not a file offset. This
-      does not make any difference except on systems (like the AVR) where size_t
-      is only 16-bits.
+    * drivers/mtd/ramtron.c, net/net_checksd.c, fs/fs_fdopen.c, and include/nuttx/mii.h:
+      Several structural changes made to get a clean compile under the ez80 ZDS-II
+      toolchain (no design changes).
+    * drivers/usbhost/usbhost_storage.c: Incorpated bugfixes reported by Sheref H.
+      Younan:  (1) Read capacity logic read largest block, not the number of blocks
+      and was, therefore, off by one, and (2) Some devices stall of get Max LUN request
+      if they support only a single LUN.  Logic now assumes a single LUN if the get
+      Max LUN request fails.
+    * include/nuttx/arch.h, lib/stdio/lib_libvsprintf.c, lib/stdio/lib_fputs.c: Add
+      a new configuration option to support extracting strings from FLASH or EEPROM
+      or other memories where the string data cannot be accessed by simply de-referencing
+      a string pointer.
+    * arch/sim/src/up_romgetc.c: Used to test the basic logic to access strings
+      without directly de-referencing a string pointer.
+    * arch/avr/src/avr/up_romget.c: Used to access strings that lie in the first
+      64Kb of FLASH (But I still haven't figured out how to get strings to reside in
+      FLASH without using the PROGMEM attribute).
+    * configs/teensy/src/up_spi.c: Correct reading of SD CD and WP pins (was reading
+      the wrong register.  AVR SPI now appears to be functional.
+    * arch/avr/src/at90usb/at90usb_usbdev.c: Correct USB initialization.  Interrupts
+      were being enabled BEFORE the interrupt handler was attached.
+    * configs/sure-pic32mx:  Add a configuration for the Sure Electronics, &quot;Advanced USB
+      Storage Demo Board,&quot; Model DB-DP11215 (http://www.sureelectronics.net/goods.php?id=1168).
+      This board features the MicroChip PIC32MX440F512H MCU. (Untested on initial
+      check-in).
+    * configs/stm3210e-eval/nsh2:  Add another NSH configuration for the STM32 with
+      some different properties.
+    * CONFIG_NSH_CONDEV:  Add a configuration option to allow using a different character
+      device (such a a different UART) for the NSH interface.  This allows, for example,
+      debug output to come from the console device while using another device for NSH.
+      There are some issues on initial check-in:  NuttX doesn't have termios and the
+      console device has special properties that make using NSH awkward.  Examples:
+      No CR-LF expansion, no character echoing, no command line editting.
+    * arch/arm/src/stm32/stm32_lowputc.c and stm32_serial.c.  Correct seversl bugs
+      involving serial port configuration.  These bugs are only critical if you
+      are trying to using multiple UARTs on STM32.
+    * configs/stm3210e-eval/src/up_lcd.c:  Add a driver for the STM3210E-EVAL's LCD.
+    * configs/stm3210e-eval/nx:  Add NX configuration for the STM3210E-EVAL.
+    * configs/nuttx/arch.h (and arch/arm/src/stm32, configs/*/src/up_buttons.c):
+      Standardize interfaces exported for button support and button interrupts.
+    * configs/stm3210e-eval/src/up_buttons.c:  Add interrupting button support.
+      Also fixes a few errors in STM3210E-EVAL button decoding.
+    * configs/stm3210e-eval/buttons: Add a configuration to exercise STM3210E-EVAL
+      buttons.
+    * arch/arm/src/stm32/stm32_gpio.c:  GPIO interrupt handling for pin
+      numbers were being aliased:  5-9 together and 10-15 together.  Extended
+      the logic to peform decoding of GPIO interrupts and unique dispatching
+      for all 16 pins.
+    * configs/stm3210e-eval/nxtext: Add a configuration for the apps/examples/nxtext
+      example.  This example focuses on placing text on the background while
+      pop-up windows occur.  Text should continue to update normally with or without
+      the popup windows present.
+    * arch/arm/src/common/up_checkstack.c:  ARM stack overflow checking submitted
+      by Hal Glenn.
+    * arch/arm/src/lpc17xx: Changes to compile successfully with no serial console
+      (also submitted by Hal Glenn).
+    * graphics/nxfonts/nxfonts_convert.c:  Fixed a critical bug that caused
+      when renderer some fonts with bits-per-pixel &gt 8
+    * graphics/nxbe/nxbe_move.c: Fixed an error in the graphics move logic (This
+      was a previously untested interface).  Basically, there is some confusion
+      between use of (x,y) as a relative offset or as an absolute position.
+    * graphics/nxbe/nxbe_close.c:  Fixed an important graphics system bug:
+      When a window is closed, the display was not being updated.  The old
+      window graphic was left on the display for a time.
 
-apps-6.5 2011-06-06 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+apps-6.6 2011-07-11 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * netutils/ftpc:  Simpflication and size reduction.
+    * Make.defs, namedapp/namedapp.c: Several structural changes made to get a
+      clean compile under the ez80 ZDS-II toolchain (no design changes).
+    * apps/examples/buttons: Add a test for the new standardized button interfaces
+    * apps/examples/nxtext: Add another NX graphics test.  This one focus on
+      placing text on the background while pop-up windows occur.  Text should
+      continue to update normally with or without the popup windows present.
 
 pascal-1.0 2011-05-15 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2506,69 +2535,9 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-6.6 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.7 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * drivers/mtd/ramtron.c, net/net_checksd.c, fs/fs_fdopen.c, and include/nuttx/mii.h:
-      Several structural changes made to get a clean compile under the ez80 ZDS-II
-      toolchain (no design changes).
-    * drivers/usbhost/usbhost_storage.c: Incorpated bugfixes reported by Sheref H.
-      Younan:  (1) Read capacity logic read largest block, not the number of blocks
-      and was, therefore, off by one, and (2) Some devices stall of get Max LUN request
-      if they support only a single LUN.  Logic now assumes a single LUN if the get
-      Max LUN request fails.
-    * include/nuttx/arch.h, lib/stdio/lib_libvsprintf.c, lib/stdio/lib_fputs.c: Add
-      a new configuration option to support extracting strings from FLASH or EEPROM
-      or other memories where the string data cannot be accessed by simply de-referencing
-      a string pointer.
-    * arch/sim/src/up_romgetc.c: Used to test the basic logic to access strings
-      without directly de-referencing a string pointer.
-    * arch/avr/src/avr/up_romget.c: Used to access strings that lie in the first
-      64Kb of FLASH (But I still haven't figured out how to get strings to reside in
-      FLASH without using the PROGMEM attribute).
-    * configs/teensy/src/up_spi.c: Correct reading of SD CD and WP pins (was reading
-      the wrong register.  AVR SPI now appears to be functional.
-    * arch/avr/src/at90usb/at90usb_usbdev.c: Correct USB initialization.  Interrupts
-      were being enabled BEFORE the interrupt handler was attached.
-    * configs/sure-pic32mx:  Add a configuration for the Sure Electronics, "Advanced USB
-      Storage Demo Board," Model DB-DP11215 (http://www.sureelectronics.net/goods.php?id=1168).
-      This board features the MicroChip PIC32MX440F512H MCU. (Untested on initial
-      check-in).
-    * configs/stm3210e-eval/nsh2:  Add another NSH configuration for the STM32 with
-      some different properties.
-    * CONFIG_NSH_CONDEV:  Add a configuration option to allow using a different character
-      device (such a a different UART) for the NSH interface.  This allows, for example,
-      debug output to come from the console device while using another device for NSH.
-      There are some issues on initial check-in:  NuttX doesn't have termios and the
-      console device has special properties that make using NSH awkward.  Examples:
-      No CR-LF expansion, no character echoing, no command line editting.
-    * arch/arm/src/stm32/stm32_lowputc.c and stm32_serial.c.  Correct severl bugs
-      involving serial port configuration.  These bugs are only critical if you
-      are trying to using multiple UARTs on STM32.
-    * configs/stm3210e-eval/src/up_lcd.c:  Add a driver for the STM3210E-EVAL's LCD.
-    * configs/stm3210e-eval/nx:  Add NX configuration for the STM3210E-EVAL.
-    * configs/nuttx/arch.h (and arch/arm/src/stm32, configs/*/src/up_buttons.c):
-      Standardize interfaces exported for button support and button interrupts.
-    * configs/stm3210e-eval/src/up_buttons.c - Add interrupting button support.
-      Also fixes a few errors in STM3210E-EVAL button decoding.
-    * configs/stm3210e-eval/buttons: Add a configuration to exercise STM3210E-EVAL
-      buttons.
-    * arch/arm/src/stm32/stm32_gpio.c:  GPIO interrupt handling for pin
-      numbers were being aliased:  5-9 together and 10-15 together.  Extended
-      the logic to peform decoding of GPIO interrupts and unique dispatching
-      for all 16 pins.
-    * configs/stm3210e-eval/nxtext: Add a configuration for the apps/examples/nxtext
-      example.  This example focuses on placing text on the background while
-      pop-up windows occur.  Text should continue to update normally with or without
-      the popup windows present.
-
-apps-6.6 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * Make.defs, namedapp/namedapp.c: Several structural changes made to get a
-      clean compile under the ez80 ZDS-II toolchain (no design changes).
-    * apps/examples/buttons: Add a test for the new standardized button interfaces
-    * apps/examples/nxtext: Add another NX graphics test.  This one focus on
-      placing text on the background while pop-up windows occur.  Text should
-      continue to update normally with or without the popup windows present.
+apps-6.7 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

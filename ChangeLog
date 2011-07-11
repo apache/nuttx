@@ -1829,7 +1829,7 @@
 	  does not make any difference except on systems (like the AVR) where size_t
 	  is only 16-bits.
 
-6.6 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+6.6 2011-07-11 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* drivers/mtd/ramtron.c, net/net_checksd.c, fs/fs_fdopen.c, and include/nuttx/mii.h:
 	  Several structural changes made to get a clean compile under the ez80 ZDS-II
@@ -1864,14 +1864,14 @@
 	  There are some issues on initial check-in:  NuttX doesn't have termios and the
 	  console device has special properties that make using NSH awkward.  Examples:
 	  No CR-LF expansion, no character echoing, no command line editting.
-	* arch/arm/src/stm32/stm32_lowputc.c and stm32_serial.c.  Correct severl bugs
+	* arch/arm/src/stm32/stm32_lowputc.c and stm32_serial.c.  Correct seversl bugs
 	  involving serial port configuration.  These bugs are only critical if you
 	  are trying to using multiple UARTs on STM32.
 	* configs/stm3210e-eval/src/up_lcd.c:  Add a driver for the STM3210E-EVAL's LCD.
 	* configs/stm3210e-eval/nx:  Add NX configuration for the STM3210E-EVAL.
 	* configs/nuttx/arch.h (and arch/arm/src/stm32, configs/*/src/up_buttons.c):
 	  Standardize interfaces exported for button support and button interrupts.
-	* configs/stm3210e-eval/src/up_buttons.c - Add interrupting button support.
+	* configs/stm3210e-eval/src/up_buttons.c:  Add interrupting button support.
 	  Also fixes a few errors in STM3210E-EVAL button decoding.
 	* configs/stm3210e-eval/buttons: Add a configuration to exercise STM3210E-EVAL
 	  buttons.
@@ -1895,3 +1895,5 @@
 	* graphics/nxbe/nxbe_close.c:  Fixed an important graphics system bug:
 	  When a window is closed, the display was not being updated.  The old
 	  window graphic was left on the display for a time.
+
+6.7 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
