@@ -35,6 +35,7 @@
 
 TOPDIR		:= ${shell pwd | sed -e 's/ /\\ /g'}
 -include ${TOPDIR}/.config
+-include ${TOPDIR}/.version
 -include ${TOPDIR}/Make.defs
 
 # Default tools
@@ -55,6 +56,14 @@ ARCH_DIR	= arch/$(CONFIG_ARCH)
 ARCH_SRC	= $(ARCH_DIR)/src
 ARCH_INC	= $(ARCH_DIR)/include
 BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
+
+# Version string (only if a non-zero version is specified)
+
+ifdef CONFIG_VERSION_STRING
+ifneq ($(CONFIG_VERSION_MAJOR),0)
+VERSION		= -$(CONFIG_VERSION_STRING)
+endif
+endif
 
 # Add-on directories.  These may or may not be in place in the
 # NuttX source tree (they must be specifically installed)
@@ -238,9 +247,10 @@ endif
 BIN		= nuttx$(EXEEXT)
 
 all: $(BIN)
-.PHONY: context clean_context check_context subdir_clean clean subdir_distclean distclean
+.PHONY: context clean_context check_context export subdir_clean clean subdir_distclean distclean
 
 # Build the mkconfig tool used to create include/nuttx/config.h
+
 tools/mkversion:
 	@$(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkversion
 
@@ -252,10 +262,12 @@ $(TOPDIR)/.version:
 	fi
 
 # Create the include/nuttx/version.h file
+
 include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion
 	tools/mkversion $(TOPDIR) > include/nuttx/version.h
 
 # Build the mkconfig tool used to create include/nuttx/config.h
+
 tools/mkconfig:
 	@$(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkconfig
 
@@ -454,6 +466,15 @@ pass2dep: context
 		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" EXTRADEFINES=$(KDEFINE) depend; \
 	done
 
+# The export target will package the NuttX libraries and header files into
+# an exportable package (These needs some extension for the KERNEL build;
+# it needs to receive USERLIBS and create a libuser.a).
+
+export: pass2deps
+	@tools/mkexport.sh -t "$(TOPDIR)" -a "$(CONFIG_ARCH)" -l "$(NUTTXLIBS)"
+
+# Housekeeping targets:  dependencies, cleaning, etc.
+
 depend: pass1dep pass2dep
 
 subdir_clean:
@@ -470,6 +491,7 @@ endif
 
 clean: subdir_clean
 	@rm -f $(BIN) nuttx.* mm_test *.map *~
+	@rm -f nuttx-export*
 
 subdir_distclean:
 	@for dir in $(CLEANDIRS) ; do \

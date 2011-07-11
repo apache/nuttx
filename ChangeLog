@@ -1897,3 +1897,7 @@
 	  window graphic was left on the display for a time.
 
 6.7 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* Makefile:  Added a export target that will bundle up all of the NuttX
+	  libraries, header files, and the startup object into an export-able
+	  tarball.

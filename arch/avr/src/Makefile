@@ -64,7 +64,7 @@ CFLAGS		+= $(INCLUDES)
 CXXFLAGS	+= $(INCLUDES)
 AFLAGS		+= $(INCLUDES)
 
-HEAD_AOBJ	= $(HEAD_ASRC:.S=$(OBJEXT))
+HEAD_OBJ	= $(HEAD_ASRC:.S=$(OBJEXT))
 
 ASRCS		= $(CHIP_ASRCS) $(CMN_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
@@ -96,7 +96,7 @@ VPATH		= chip:common:$(ARCH_SUBDIR)
 
 all: $(HEAD_OBJ) libarch$(LIBEXT)
 
-$(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %.S
+$(AOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
 $(COBJS): %$(OBJEXT): %.c
@@ -110,9 +110,9 @@ libarch$(LIBEXT): $(OBJS)
 board/libboard$(LIBEXT):
 	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
-nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
+nuttx: $(HEAD_OBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx"
-	@$(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(NUTTX)$(EXEEXT) $(HEAD_AOBJ) $(EXTRA_OBJS) \
+	@$(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(NUTTX)$(EXEEXT) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		--start-group $(LDLIBS) -lboard --end-group $(EXTRA_LIBS) $(LIBGCC)
 	@$(NM) $(NUTTX)$(EXEEXT) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
@@ -122,6 +122,18 @@ nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
 		$(OBJCOPY) $(OBJCOPYARGS) --adjust-section-vma=.vector=0x$$vflashstart $(NUTTX)$(EXEEXT) $(NUTTX).flashimage; \
 		mv $(NUTTX).flashimage $(NUTTX)$(EXEEXT); \
 	fi
+
+# This is part of the top-level export target
+
+export_head: board/libboard$(LIBEXT) $(HEAD_OBJ)
+	@if [ -d "$(EXPORT_DIR)/startup" ]; then \
+		cp -f $(HEAD_OBJ) "$(EXPORT_DIR)/startup"; \
+	 else \
+		echo "$(EXPORT_DIR)/startup does not exist"; \
+		exit 1; \
+	 fi
+
+# Dependencies
 
 .depend: Makefile chip/Make.defs $(SRCS)
 	@if [ -e board/Makefile ]; then \

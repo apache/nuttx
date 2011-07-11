@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 8, 2011)
+NuttX TODO List (Last updated July 12, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -17,7 +17,7 @@ nuttx/
   (1)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
-  (4)  Build system / Toolchains
+  (5)  Build system / Toolchains
   (7)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
@@ -544,6 +544,18 @@ o Build system
   Status:      Open
   Priority:    Low.  Use of setenv.sh is optional and most platforms do not have
                this problem.  Scripts will be fixed one-at-a-time as is appropropriate.
+
+  Description: The top-level Makefile 'export' target that will bundle up all of the
+               NuttX libraries, header files, and the startup object into an export-able
+               tarball. This target uses the tools/mkexport.sh script.  Issues:
+
+               1. This script assumes the host archiver ar may not be appropriate for
+                  non-GCC toolchains
+               2. For the kernel build, the user libriars should be built into some
+                  libuser.a.  The list of user libraries would have to accepted with
+                  some new argument, perhaps -u.
+  Status:      Open
+  Priority:    Low.
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -187,6 +187,16 @@ nuttx$(EXEEXT): pass1.ihx nuttx.ihx
 	@packihx nuttx.ihx > $(TOPDIR)/nuttx$(EXEEXT)
 	@cp -f nuttx.map $(TOPDIR)/.
 
+# This is part of the top-level export target
+
+export_head: uboard/libboard$(LIBEXT) p_head$(OBJEXT)
+	@if [ -d "$(EXPORT_DIR)/startup" ]; then \
+		cp -f up_head$(OBJEXT) "$(EXPORT_DIR)/startup"; \
+	 else \
+		echo "$(EXPORT_DIR)/startup does not exist"; \
+		exit 1; \
+	 fi
+
 # This target builds a test program to verify interrupt context switching.  irqtest is
 # a PHONY target that just sets upt the up_irqtest build correctly
 

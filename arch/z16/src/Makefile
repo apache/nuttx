@@ -53,7 +53,7 @@ LDFLAGS 	= @"${shell cygpath -w $(ARCHSRCDIR)/nuttx.linkcmd}"
 endif
 
 HEAD_ASRC	= $(HEAD_SSRC:.S=$(ASMEXT))
-HEAD_AOBJ	= $(HEAD_SSRC:.S=$(OBJEXT))
+HEAD_OBJ	= $(HEAD_SSRC:.S=$(OBJEXT))
 
 SSRCS		= $(CHIP_SSRCS) $(CMN_SSRCS)
 ASRCS		= $(SSRCS:.S=$(ASMEXT))
@@ -77,10 +77,10 @@ $(ASRCS) $(HEAD_ASRC): %$(ASMEXT): %.S
 	@cat $@.tmp | sed -e "s/^#/;/g" > $@
 	@rm $@.tmp
 
-$(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %$(ASMEXT)
+$(AOBJS) $(HEAD_OBJ): %$(OBJEXT): %$(ASMEXT)
 	$(call ASSEMBLE, $<, $@)
 else
-$(OBJS) $(HEAD_AOBJ): %$(OBJEXT): %.S
+$(OBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 endif
 
@@ -99,7 +99,7 @@ ifeq ($(COMPILER),zneocc.exe)
 nuttx.linkcmd: $(LINKCMDTEMPLATE)
 	@cp -f $(LINKCMDTEMPLATE) nuttx.linkcmd
 	@echo "\"${shell cygpath -w $(TOPDIR)/nuttx}\"= \\" >>nuttx.linkcmd
-	@echo "  \"${shell cygpath -w $(ARCHSRCDIR)/$(HEAD_AOBJ)}\", \\" >>nuttx.linkcmd
+	@echo "  \"${shell cygpath -w $(ARCHSRCDIR)/$(HEAD_OBJ)}\", \\" >>nuttx.linkcmd
 	@( for lib in $(LINKLIBS); do \
 		echo "  \"`cygpath -w $(TOPDIR)/$${lib}`\", \\" >>nuttx.linkcmd; \
 	done ; )
@@ -110,7 +110,7 @@ else
 nuttx.linkcmd:
 endif
 
-nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT) nuttx.linkcmd
+nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT) nuttx.linkcmd
 	@echo "LD:  nuttx.hex"
 	@$(LD) $(LDFLAGS)
 
@@ -120,6 +120,18 @@ nuttx$(EXEEXT): $(HEAD_AOBJ) board/libboard$(LIBEXT) nuttx.linkcmd
 	fi
 	@$(MKDEP) --dep-path chip --dep-path common $(CC) -- $(CFLAGS) -- $(DEPSRCS) >Make.dep
 	@touch $@
+
+# This is part of the top-level export target
+
+export_head: board/libboard$(LIBEXT) $(HEAD_OBJ)
+	@if [ -d "$(EXPORT_DIR)/startup" ]; then \
+		cp -f $(HEAD_OBJ) "$(EXPORT_DIR)/startup"; \
+	 else \
+		echo "$(EXPORT_DIR)/startup does not exist"; \
+		exit 1; \
+	 fi
+
+# Dependencies
 
 depend: .depend
 

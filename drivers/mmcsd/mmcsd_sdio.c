@@ -529,6 +529,7 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
    */
 
 #if defined(CONFIG_DEBUG) && defined (CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+  memset(&decoded, 0, sizeof(struct mmcsd_csd_s));
   decoded.csdstructure               =  csd[0] >> 30;
   decoded.mmcspecvers                = (csd[0] >> 26) & 0x0f;
   decoded.taac.timevalue             = (csd[0] >> 19) & 0x0f;
