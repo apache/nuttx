@@ -14,7 +14,7 @@ nuttx/
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (6)  Libraries (lib/)
  (13)  File system/Generic drivers (fs/, drivers/)
-  (2)  Graphics subystem (graphics/)
+  (1)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (4)  Build system / Toolchains
@@ -483,10 +483,6 @@ o Graphics subystem (graphics/)
                http://nuttx.sourceforge.net/NXGraphicsSubsystem.html#testcoverage
   Status:      Open
   Priority:    Medium
-
-  Description: When a window is closed, the display is not updated.
-  Status:      Open
-  Priority:    High
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^

@@ -104,7 +104,7 @@ void nxbe_closewindow(struct nxbe_window_s *wnd)
 
   if (wnd->above)
     {
-      /* Yes, now the window below that on is the window below
+      /* Yes, now the window below that one is the window below
        * the one being closed.
        */
 
@@ -126,5 +126,12 @@ void nxbe_closewindow(struct nxbe_window_s *wnd)
    */
 
   wnd->below->above = wnd->above;
+
+  /* Redraw the windows that were below us (and may now be exposed) */
+
+  nxbe_redrawbelow(be, wnd->below, &wnd->bounds);
+
+  /* Then discard the window structure */
+
   free(wnd);
 }

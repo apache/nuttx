@@ -1892,3 +1892,6 @@
 	* graphics/nxbe/nxbe_move.c: Fixed an error in the graphics move logic (This
 	  was a previously untested interface).  Basically, there is some confusion
 	  between use of (x,y) as a relative offset or as an absolute position.
+	* graphics/nxbe/nxbe_close.c:  Fixed an important graphics system bug:
+	  When a window is closed, the display was not being updated.  The old
+	  window graphic was left on the display for a time.
