@@ -1,7 +1,7 @@
 ############################################################################
 # arch/sh/src/Makefile
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
 
-HEAD_AOBJ	= $(HEAD_ASRC:.S=$(OBJEXT))
+HEAD_OBJ	= $(HEAD_ASRC:.S=$(OBJEXT))
 
 ASRCS		= $(CHIP_ASRCS) $(CMN_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
@@ -65,7 +65,7 @@ VPATH		= chip:common
 
 all: $(HEAD_OBJ) libarch$(LIBEXT)
 
-$(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %.S
+$(AOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
 $(COBJS): %$(OBJEXT): %.c
@@ -79,9 +79,9 @@ libarch$(LIBEXT): $(OBJS)
 board/libboard$(LIBEXT):
 	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
-nuttx: $(HEAD_AOBJ) board/libboard$(LIBEXT)
+nuttx: $(HEAD_OBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx"
-	@$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) -o $(TOPDIR)/$@ $(HEAD_AOBJ) \
+	@$(LD) --entry=__start $(LDFLAGS) $(LDPATHES) -L$(BOARDDIR) -o $(TOPDIR)/$@ $(HEAD_OBJ) \
 		--start-group $(LDLIBS) -lboard --end-group $(EXTRA_LIBS) $(LIBGCC)
 ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
 	@export flashloc=`$(OBJDUMP) --all-headers $(TOPDIR)/$@ | grep _eronly | cut -d' ' -f1`;  \
@@ -96,6 +96,18 @@ endif
 		$(OBJCOPY) --adjust-section-vma=.vector=0x$$vflashstart $(TOPDIR)/$@ $(TOPDIR)/$@.flashimage; \
 		mv $(TOPDIR)/$@.flashimage $(TOPDIR)/$@; \
 	fi
+
+# This is part of the top-level export target
+
+export_head: board/libboard$(LIBEXT) $(HEAD_OBJ)
+	@if [ -d "$(EXPORT_DIR)/startup" ]; then \
+		cp -f $(HEAD_OBJ) "$(EXPORT_DIR)/startup"; \
+	 else \
+		echo "$(EXPORT_DIR)/startup does not exist"; \
+		exit 1; \
+	 fi
+
+# Dependencies
 
 .depend: Makefile chip/Make.defs $(SRCS)
 	@if [ -e board/Makefile ]; then \

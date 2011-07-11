@@ -45,7 +45,7 @@ CPPFLAGS	+= -D__ASSEMBLY__
 
 # There should be one head source (.asm file)
 
-HEAD_AOBJ	= $(HEAD_ASRC:$(ASMEXT)=$(OBJEXT))
+HEAD_OBJ	= $(HEAD_ASRC:$(ASMEXT)=$(OBJEXT))
 
 # Assembly sources and objects
 
@@ -84,9 +84,9 @@ HEAP_BASE	= ${shell ./mkhpbase.sh}
 ############################################################################
 # Targets
 
-all: $(HEAD_AOBJ) libarch$(LIBEXT)
+all: $(HEAD_OBJ) libarch$(LIBEXT)
 
-$(AOBJS) $(HEAD_AOBJ): %$(OBJEXT): %$(ASMEXT)
+$(AOBJS) $(HEAD_OBJ): %$(OBJEXT): %$(ASMEXT)
 	$(call ASSEMBLE, $<, $@)
 
 $(COBJS): %$(OBJEXT): %.c
@@ -143,7 +143,7 @@ board/libboard$(LIBEXT):
 
 # This target builds the final executable
 
-pass1.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
+pass1.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_OBJ) board/libboard$(LIBEXT)
 	@echo "LD: pass1.ihx"
 	@echo "--" >pass1.lnk				# Non-interactive
 	@echo "-k $(BOARDDIR)" >>pass1.lnk		# Path to board library
@@ -168,15 +168,15 @@ endif
 	@echo "-m" >>pass1.lnk				# Generate a map file
 	@echo "-j" >>pass1.lnk				# Generate a symbol file
 	@echo "pass1.ihx" >>pass1.lnk			# Path to head object
-	@echo "$(HEAD_AOBJ)" >>pass1.lnk		# Path to head object
+	@echo "$(HEAD_OBJ)" >>pass1.lnk		# Path to head object
 	@echo "-e" >>pass1.lnk				# End of script
 	@$(LD) -f pass1.lnk
 	@rm -f up_mem.h asm_mem.h
-	@rm -f up_allocateheap$(OBJEXT) $(HEAD_AOBJ) libarch$(LIBEXT)
+	@rm -f up_allocateheap$(OBJEXT) $(HEAD_OBJ) libarch$(LIBEXT)
 	@$(MAKE) TOPDIR="$(TOPDIR)" libarch$(LIBEXT)
-	@$(MAKE) TOPDIR="$(TOPDIR)" $(HEAD_AOBJ)
+	@$(MAKE) TOPDIR="$(TOPDIR)" $(HEAD_OBJ)
 
-nuttx.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_AOBJ) board/libboard$(LIBEXT)
+nuttx.ihx: up_mem.h asm_mem.h $(SDCCLIBDIR)/myz80.lib $(HEAD_OBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx.ihx"
 	@echo "--" >nuttx.lnk				# Non-interactive
 	@echo "-k $(BOARDDIR)" >>nuttx.lnk		# Path to board library
@@ -201,7 +201,7 @@ endif
 	@echo "-m" >>nuttx.lnk				# Generate a map file
 	@echo "-j" >>nuttx.lnk				# Generate a symbol file
 	@echo "nuttx.ihx" >>nuttx.lnk			# Path to head object
-	@echo "$(HEAD_AOBJ)" >>nuttx.lnk		# Path to head object
+	@echo "$(HEAD_OBJ)" >>nuttx.lnk		# Path to head object
 	@echo "-e" >>nuttx.lnk				# End of script
 	@$(LD) -f nuttx.lnk
 
@@ -214,6 +214,16 @@ ifeq ($(EXEEXT),.cmd)
 else
 	@packihx nuttx.ihx > $(TOPDIR)/nuttx$(EXEEXT)
 endif
+
+# This is part of the top-level export target
+
+export_head: board/libboard$(LIBEXT) $(HEAD_OBJ)
+	@if [ -d "$(EXPORT_DIR)/startup" ]; then \
+		cp -f $(HEAD_OBJ) "$(EXPORT_DIR)/startup"; \
+	 else \
+		echo "$(EXPORT_DIR)/startup does not exist"; \
+		exit 1; \
+	 fi
 
 # Build dependencies
 

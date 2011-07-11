@@ -78,6 +78,12 @@ nuttx$(EXEEXT):
 	@$(OBJCOPY) -S -O binary $(TOPDIR)/$@ nuttx.img
 	@cp nuttx.img $(TOPDIR)/kernel.img
 
+# This is part of the top-level export target
+
+export_head:
+
+# Dependencies
+
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@

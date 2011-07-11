@@ -1,7 +1,7 @@
 ############################################################################
 # arch/sim/src/Makefile
 #
-#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -153,6 +153,12 @@ nuttx$(EXEEXT): cleanrel nuttx.rel $(HOSTOBJS)
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map
 	@rm -f nuttx.rel
+
+# This is part of the top-level export target
+
+export_head:
+
+# Dependencies
 
 .depend: Makefile $(SRCS)
 	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
