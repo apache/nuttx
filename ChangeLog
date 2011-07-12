@@ -1901,3 +1901,10 @@
 	* Makefile:  Added a export target that will bundle up all of the NuttX
 	  libraries, header files, and the startup object into an export-able
 	  tarball.
+	* arch/arm/src/lpc17xx/lpc17_can.h:  Correct some typos in the CAN
+	  register definitions.
+	* drivers/serial/serialirq.c:  Correct an error that can occur if the
+	  serial RX buffer becomes full.  Data is now discarded in that case;
+	  before, leaving data in the hardware would cause infinite interrupts
+	  one most MCUs since you must read the data in order to clear the
+	  interrupt.

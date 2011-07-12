@@ -1,7 +1,7 @@
 /************************************************************************************
  * drivers/serial/serialirq.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,8 +101,8 @@ void uart_xmitchars(FAR uart_dev_t *dev)
         }
     }
 
-  /* When all of the characters have been sent from the buffer
-   * disable the TX interrupt.
+  /* When all of the characters have been sent from the buffer disable the TX
+   * interrupt.
    */
 
   if (dev->xmit.head == dev->xmit.tail)
@@ -110,8 +110,8 @@ void uart_xmitchars(FAR uart_dev_t *dev)
       uart_disabletxint(dev);
     }
 
-  /* If any bytes were removed from the buffer, inform any waiters
-   * there there is space available.
+  /* If any bytes were removed from the buffer, inform any waiters there there is
+   * space available.
    */
 
   if (nbytes)
@@ -126,8 +126,8 @@ void uart_xmitchars(FAR uart_dev_t *dev)
  * Description:
  *   This function is called from the UART interrupt handler when an interrupt
  *   is received indicating that are bytes available in the receive fifo.  This
- *   function will add chars to head of receive buffer.  Driver read() logic will take
- *   characters from the tail of the buffer.
+ *   function will add chars to head of receive buffer.  Driver read() logic will
+ *   take characters from the tail of the buffer.
  *
  ************************************************************************************/
 
@@ -142,28 +142,41 @@ void uart_recvchars(FAR uart_dev_t *dev)
       nexthead = 0;
     }
 
-  /* Loop putting characters into the receive buffer until either: (1) the buffer
-   * is full, or (2) there are no further characters to add.
+  /* Loop putting characters into the receive buffer until either there are no
+   * further characters to available.
    */
 
-  while (nexthead != dev->recv.tail && uart_rxavailable(dev))
+  while (uart_rxavailable(dev))
     {
-      /* Add the character to the buffer */
+      char ch =  uart_receive(dev, &status);
+      
+      /* If the RX buffer becomes full, then the serial data is discarded.  This is
+       * necessary because on most serial hardware, you must read the data in order
+       * to clear the RX interrupt. An option on some hardware might be to simply
+       * disable RX interrupts until the RX buffer becomes non-FULL.  However, that
+       * would probably just cause the overrun to occur in hardware (unless it has
+       * some large internal buffering).
+       */
 
-      dev->recv.buffer[dev->recv.head] = uart_receive(dev, &status);
-      nbytes++;
-
-      /* Increment the head index */
-
-      dev->recv.head = nexthead;
-      if (++nexthead >= dev->recv.size)
+      if (nexthead != dev->recv.tail)
         {
-           nexthead = 0;
+          /* Add the character to the buffer */
+
+          dev->recv.buffer[dev->recv.head] = ch;
+          nbytes++;
+
+          /* Increment the head index */
+
+          dev->recv.head = nexthead;
+          if (++nexthead >= dev->recv.size)
+            {
+               nexthead = 0;
+            }
         }
     }
 
-  /* If any bytes were added to the buffer, inform any waiters
-   * there there is new incoming data available.
+  /* If any bytes were added to the buffer, inform any waiters there there is new
+   * incoming data available.
    */
 
   if (nbytes)
