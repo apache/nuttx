@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs_fat32.c
+ * fs/fat/fs_fat32.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -1179,7 +1179,7 @@ static int fat_sync(FAR struct file *filep)
        * in the sector using the saved directory index.
        */
 
-      direntry = &fs->fs_buffer[(ff->ff_dirindex & DIRSEC_NDXMASK(fs)) * 32];
+      direntry = &fs->fs_buffer[(ff->ff_dirindex & DIRSEC_NDXMASK(fs)) * DIR_SIZE];
 
       /* Set the archive bit, set the write time, and update
        * anything that may have* changed in the directory
@@ -1339,7 +1339,7 @@ static int fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
       /* Get a reference to the current directory entry */
 
-      dirindex = (dir->u.fat.fd_index & DIRSEC_NDXMASK(fs)) * 32;
+      dirindex = (dir->u.fat.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
       direntry = &fs->fs_buffer[dirindex];
 
       /* Has it reached to end of the directory */
@@ -1740,7 +1740,8 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
 
   /* What we want to see is for fat_finddirentry to fail with -ENOENT.
    * This error means that no failure occurred but that nothing exists
-   * with this name.
+   * with this name.  NOTE:  The name has already been set in dirinfo
+   * structure.
    */
 
   if (ret != -ENOENT)
@@ -1813,7 +1814,10 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
         }
     }
 
-  /* Now create the "." directory entry in the first directory slot */
+  /* Now create the "." directory entry in the first directory slot.  These
+   * are special directory entries and are not handled by the normal directory
+   * management routines.
+   */
 
   memset(&direntry[DIR_NAME], ' ', 8+3);
   direntry[DIR_NAME] = '.';
@@ -1827,11 +1831,11 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
 
   /* Create ".." directory entry in the second directory slot */
 
-  direntry2 = direntry + 32;
+  direntry2 = direntry + DIR_SIZE;
 
   /* So far, the two entries are nearly the same */
 
-  memcpy(direntry2, direntry, 32);
+  memcpy(direntry2, direntry, DIR_SIZE);
   direntry2[DIR_NAME+1] = '.';
 
   /* Now add the cluster information to both directory entries */
@@ -1849,7 +1853,7 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
   DIR_PUTFSTCLUSTLO(direntry2, parentcluster);
 
   /* Save the first sector of the directory cluster and re-read
-   *  the parentsector
+   * the parentsector
    */
 
   fs->fs_dirty = true;
@@ -1859,32 +1863,24 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
       goto errout_with_semaphore;
     }
 
-  /* Initialize the new entry directory entry in the parent directory */
+  /* Write the new entry directory entry in the parent directory */
 
-  direntry = dirinfo.fd_entry;
-  memset(direntry, 0, 32);
+  ret = fat_dirwrite(fs, &dirinfo, FATATTR_DIRECTORY, crtime);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
 
-  memcpy(direntry, dirinfo.fd_name, 8+3);
-#ifdef CONFIG_FLAT_LCNAMES
-  DIR_PUTNTRES(direntry, dirinfo.fd_ntflags);
-#endif
-  DIR_PUTATTRIBUTES(dirinfo.fd_entry, FATATTR_DIRECTORY);
-
-  /* Same creation time as for . and .. */
-
-  DIR_PUTCRTIME(dirinfo.fd_entry, crtime & 0xffff);
-  DIR_PUTWRTTIME(dirinfo.fd_entry, crtime & 0xffff);
-  DIR_PUTCRDATE(dirinfo.fd_entry, crtime >> 16);
-  DIR_PUTWRTDATE(dirinfo.fd_entry, crtime >> 16);
-
-  /* Set subdirectory start cluster */
+  /* Set subdirectory start cluster. We assume that fat_dirwrite() did not
+   * change the sector in the cache.
+   */
 
   DIR_PUTFSTCLUSTLO(dirinfo.fd_entry, dircluster);
   DIR_PUTFSTCLUSTHI(dirinfo.fd_entry, dircluster >> 16);
+  fs->fs_dirty = true;
 
   /* Now update the FAT32 FSINFO sector */
 
-  fs->fs_dirty = true;
   ret = fat_updatefsinfo(fs);
   if (ret < 0)
     {
@@ -1958,7 +1954,7 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
   off_t                 oldsector;
   uint8_t              *olddirentry;
   uint8_t              *newdirentry;
-  uint8_t               dirstate[32-11];
+  uint8_t               dirstate[DIR_SIZE-DIR_ATTRIBUTES];
   int                   ret;
 
   /* Sanity checks */
@@ -1988,26 +1984,23 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
       goto errout_with_semaphore;
     }
 
-  /* Save the information that will need to recover the
-   * directory sector and directory entry offset to the
-   * old directory.
+  /* One more check:  Make sure that the oldrelpath does not refer to the
+   * root directory.  We can't rename the root directory.
    */
 
-  olddirentry = dirinfo.fd_entry;
-
-  /* One more check:  Make sure that the oldrelpath does
-   * not refer to the root directory.  We can't rename the
-   * root directory.
-   */
-
-  if (!olddirentry)
+  if (!dirinfo.fd_entry)
     {
       ret = -EXDEV;
       goto errout_with_semaphore;
     }
 
+  /* Save the information that will need to recover the directory sector and
+   * directory entry offset to the old directory.
+   */
+
+  olddirentry = dirinfo.fd_entry;
   oldsector   = fs->fs_currentsector;
-  memcpy(dirstate, &olddirentry[DIR_ATTRIBUTES], 32-11);
+  memcpy(dirstate, &olddirentry[DIR_ATTRIBUTES], DIR_SIZE-DIR_ATTRIBUTES);
 
   /* No find the directory where we should create the newpath object */
 
@@ -2037,18 +2030,17 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
       goto errout_with_semaphore;
     }
 
-  /* Create the new directory entry */
+  /* Write the new directory entry */
 
   newdirentry = dirinfo.fd_entry;
-
-  memcpy(&newdirentry[DIR_ATTRIBUTES], dirstate, 32-11);
-  memcpy(&newdirentry[DIR_NAME], dirinfo.fd_name, 8+3);
-#ifdef CONFIG_FLAT_LCNAMES
-  DIR_PUTNTRES(newdirentry, dirinfo.fd_ntflags);
-#else
-  DIR_PUTNTRES(newdirentry, 0);
-#endif
+  memcpy(&newdirentry[DIR_ATTRIBUTES], dirstate, DIR_SIZE-DIR_ATTRIBUTES);
   fs->fs_dirty = true;
+  
+  ret = fat_dirnamewrite(fs, &dirinfo);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
 
   /* Now flush the new directory entry to disk and read the sector
    * containing the old directory entry.
@@ -2062,9 +2054,12 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
 
   /* Remove the old entry */
 
-  olddirentry[DIR_NAME] = DIR0_EMPTY;
-  fs->fs_dirty = true;
-
+  ret = fat_freedirentry(fs, olddirentry);
+  if (ret < 0)
+    {
+      goto errout_with_semaphore;
+    }
+  
   /* Write the old entry to disk and update FSINFO if necessary */
 
   ret = fat_updatefsinfo(fs);

@@ -773,13 +773,16 @@ EXTERN int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster);
 
 #define fat_createchain(fs) fat_extendchain(fs, 0)
 
-/* Help for traversing directory trees */
+/* Help for traversing directory trees and accessing directory entries */
 
 EXTERN int    fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir);
 EXTERN int    fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
                                const char *path);
+EXTERN int    fat_dirnamewrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+EXTERN int    fat_dirwrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
+                           uint8_t attributes, uint32_t fattime);
 EXTERN int    fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
-
+EXTERN int    fat_freedirentry(struct fat_mountpt_s *fs, FAR uint8_t *direntry);
 EXTERN int    fat_dirname2path(char *path, uint8_t *direntry);
 
 /* File creation and removal helpers */
