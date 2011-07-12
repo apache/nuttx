@@ -55,16 +55,23 @@
  * Private Types
  ****************************************************************************/
 
-/* On most larger then 8 bit archs this will need to be word aligned so
+/****************************************************************************
+ * Name: memset32
+ *
+ * On most larger then 8 bit archs this will need to be word aligned so
  * so maybe some checks should be put in place?
- */
+ *
+ ****************************************************************************/
 
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
 static void *memset32(void *s, uint32_t  c, size_t n)
 {
   uint32_t *p = (uint32_t *)s;
   while (n-- > 0) *p++ = c;
   return s;
 }
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/

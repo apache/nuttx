@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc17xx/lpc17_can.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -266,7 +266,7 @@
 #define CAN_MOD_SM                  (1 << 4)  /* Bit 4:  Sleep Mode */
 #define CAN_MOD_RPM                 (1 << 5)  /* Bit 5:  Receive Polarity Mode */
                                               /* Bit 6:  Reserved */
-#define CAN_MOD_TM                  (1 << 7)  /* Bit 7:  Test Mode
+#define CAN_MOD_TM                  (1 << 7)  /* Bit 7:  Test Mode */
                                               /* Bits 8-31: Reserved */
 /* Command bits */
 
@@ -411,7 +411,7 @@
 #define CAN_RFS_DLC_SHIFT           (16)      /* Bits 16-19: Message Data Length Code (DLC) */
 #define CAN_RFS_DLC_MASK            (15 << yy)
                                               /* Bits 20-29: Reserved */
-define CAN_RFS_RTR                  (1 << 30) /* Bit 30: Message Remote Transmission Request */
+#define CAN_RFS_RTR                 (1 << 30) /* Bit 30: Message Remote Transmission Request */
 #define CAN_RFS_FF                  (1 << 31) /* Bit 31: Message 29-bit vs 11-bit ID */
 
 /* Received Identifier */
