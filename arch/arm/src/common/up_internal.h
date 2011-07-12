@@ -159,23 +159,26 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 #ifndef __ASSEMBLY__
 
-/* Defined in files with the same name as the function */
+/* Low level initialization provided by board-level logic ******************/
 
 extern void up_boot(void);
+
+/* Context switching */
+
 extern void up_copystate(uint32_t *dest, uint32_t *src);
 extern void up_decodeirq(uint32_t *regs);
-extern void up_irqinitialize(void);
-#ifdef CONFIG_ARCH_DMA
-extern void weak_function up_dmainitialize(void);
-#endif
 extern int  up_saveusercontext(uint32_t *saveregs);
 extern void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
 extern void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+
+/* Signal handling **********************************************************/
+
 extern void up_sigdeliver(void);
-extern int  up_timerisr(int irq, uint32_t *regs);
-extern void up_lowputc(char ch);
-extern void up_puts(const char *str);
-extern void up_lowputs(const char *str);
+
+/* Interrupt handling *******************************************************/
+
+extern void up_irqinitialize(void);
+extern void up_maskack_irq(int irq);
 
 #ifdef CONFIG_ARCH_CORTEXM3
 
@@ -201,8 +204,6 @@ extern void up_undefinedinsn(uint32_t *regs);
 
 #endif /* CONFIG_ARCH_CORTEXM3 */
 
-/* Defined in up_vectors.S */
-
 extern void up_vectorundefinsn(void);
 extern void up_vectorswi(void);
 extern void up_vectorprefetch(void);
@@ -211,15 +212,16 @@ extern void up_vectoraddrexcptn(void);
 extern void up_vectorirq(void);
 extern void up_vectorfiq(void);
 
-/* Defined in up_allocateheap.c */
+/* System timer *************************************************************/
 
-#if CONFIG_MM_REGIONS > 1
-void up_addregion(void);
-#else
-# define up_addregion()
-#endif
+extern void up_timerinit(void);
+extern int  up_timerisr(int irq, uint32_t *regs);
 
-/* Defined in up_serial.c */
+/* Low level serial output **************************************************/
+
+extern void up_lowputc(char ch);
+extern void up_puts(const char *str);
+extern void up_lowputs(const char *str);
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 extern void up_earlyserialinit(void);
@@ -237,19 +239,25 @@ extern void lowconsole_init(void);
 # define lowconsole_init()
 #endif
 
-/* Defined in up_watchdog.c */
+/* DMA **********************************************************************/
+
+#ifdef CONFIG_ARCH_DMA
+extern void weak_function up_dmainitialize(void);
+#endif
+
+/* Memory management ********************************************************/
+
+#if CONFIG_MM_REGIONS > 1
+void up_addregion(void);
+#else
+# define up_addregion()
+#endif
+
+/* Watchdog timer ***********************************************************/
 
 extern void up_wdtinit(void);
 
-/* Defined in up_timerisr.c */
-
-extern void up_timerinit(void);
-
-/* Defined in up_irq.c */
-
-extern void up_maskack_irq(int irq);
-
-/* Defined in board/up_leds.c */
+/* LED interfaces provided by board-level logic *****************************/
 
 #ifdef CONFIG_ARCH_LEDS
 extern void up_ledinit(void);
@@ -261,9 +269,11 @@ extern void up_ledoff(int led);
 # define up_ledoff(led)
 #endif
 
+/* Networking ***************************************************************/
+
 /* Defined in board/up_network.c for board-specific ethernet implementations,
  * or chip/xyx_ethernet.c for chip-specific ethernet implementations, or
- * common/up_etherstub.c for a cornercase where the network is enable yet
+ * common/up_etherstub.c for a cornercase where the network is enabled yet
  * there is no ethernet driver to be initialized.
  */
 
@@ -272,6 +282,8 @@ extern void up_netinitialize(void);
 #else
 # define up_netinitialize()
 #endif
+
+/* USB **********************************************************************/
 
 #ifdef CONFIG_USBDEV
 extern void up_usbinitialize(void);
