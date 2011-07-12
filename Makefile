@@ -35,7 +35,6 @@
 
 TOPDIR		:= ${shell pwd | sed -e 's/ /\\ /g'}
 -include ${TOPDIR}/.config
--include ${TOPDIR}/.version
 -include ${TOPDIR}/Make.defs
 
 # Default tools
@@ -56,14 +55,6 @@ ARCH_DIR	= arch/$(CONFIG_ARCH)
 ARCH_SRC	= $(ARCH_DIR)/src
 ARCH_INC	= $(ARCH_DIR)/include
 BOARD_DIR	= configs/$(CONFIG_ARCH_BOARD)
-
-# Version string (only if a non-zero version is specified)
-
-ifdef CONFIG_VERSION_STRING
-ifneq ($(CONFIG_VERSION_MAJOR),0)
-VERSION		= -$(CONFIG_VERSION_STRING)
-endif
-endif
 
 # Add-on directories.  These may or may not be in place in the
 # NuttX source tree (they must be specifically installed)
@@ -467,11 +458,13 @@ pass2dep: context
 	done
 
 # The export target will package the NuttX libraries and header files into
-# an exportable package (These needs some extension for the KERNEL build;
-# it needs to receive USERLIBS and create a libuser.a).
+# an exportable package.  Caveats: (1) These needs some extension for the KERNEL
+# build; it needs to receive USERLIBS and create a libuser.a). (2) The logic
+# in tools/mkexport.sh only supports GCC and, for example, explicitly assumes
+# that the archiver is 'ar'
 
 export: pass2deps
-	@tools/mkexport.sh -t "$(TOPDIR)" -a "$(CONFIG_ARCH)" -l "$(NUTTXLIBS)"
+	@tools/mkexport.sh -t "$(TOPDIR)" -l "$(NUTTXLIBS)"
 
 # Housekeeping targets:  dependencies, cleaning, etc.
 

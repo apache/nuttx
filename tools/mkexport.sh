@@ -41,18 +41,13 @@
 
 # Get the input parameter list
 
-USAGE="USAGE: $0 [-d] -t <top-dir> -a <arch-dir> [-x <lib-ext>] -l \"lib1 [lib2 [lib3 ...]]\""
+USAGE="USAGE: $0 [-d] -t <top-dir> [-x <lib-ext>] -l \"lib1 [lib2 [lib3 ...]]\""
 unset TOPDIR
-unset ARCH
 unset LIBLIST
 LIBEXT=.a
 
 while [ ! -z "$1" ]; do
 	case $1 in
-		-a )
-			shift
-			ARCH=$1
-			;;
  		-d )
 			set -x
 			;;
@@ -83,7 +78,7 @@ done
 
 # Check arguments
 
-if [ -z "${TOPDIR}" -o -z "${ARCH}" -o -z "${LIBLIST}" ]; then
+if [ -z "${TOPDIR}" -o -z "${LIBLIST}" ]; then
 	echo "MK: Missing required arguments"
 	echo $USAGE
 	exit 1
@@ -91,19 +86,6 @@ fi
 
 if [ ! -d "${TOPDIR}" ]; then
 	echo "MK: Directory ${TOPDIR} does not exist"
-	exit 1
-fi
-
-if [ ! -f "${TOPDIR}/Make.defs" ]; then
-	echo "MK: File ${TOPDIR}/Make.defs does not exist"
-	exit 1
-fi
-
-ARCHSUBDIR="arch/${ARCH}/src"
-ARCHDIR="${TOPDIR}/${ARCHSUBDIR}"
-
-if [ ! -d "${ARCHDIR}" ]; then
-	echo "MK: Directory ${ARCHDIR} does not exist"
 	exit 1
 fi
 
@@ -137,6 +119,44 @@ rm -f "${EXPORTDIR}.tar.gz"
 mkdir "${EXPORTDIR}" || { echo "MK: 'mkdir ${EXPORTDIR}' failed"; exit 1; }
 mkdir "${EXPORTDIR}/startup" || { echo "MK: 'mkdir ${EXPORTDIR}/startup' failed"; exit 1; }
 mkdir "${EXPORTDIR}/libs" || { echo "MK: 'mkdir ${EXPORTDIR}/libs' failed"; exit 1; }
+mkdir "${EXPORTDIR}/build" || { echo "MK: 'mkdir ${EXPORTDIR}/build' failed"; exit 1; }
+
+# Verify that we have a Make.defs file.
+
+if [ ! -f "${TOPDIR}/Make.defs" ]; then
+	echo "MK: Directory ${TOPDIR}/Make.defs does not exist"
+	exit 1
+fi
+
+# Copy the Make.defs files, but disable windows path conversions
+
+grep -v "WINTOOL[ \t]*=[ \t]y" "${TOPDIR}/Make.defs"  > "${EXPORTDIR}/Make.defs"
+
+# Extract information from the Make.defs file.  A Makefile can do this best
+
+make -C "${TOPDIR}/tools" -f Makefile.export TOPDIR="${TOPDIR}" EXPORTDIR="${EXPORTDIR}"
+source "${EXPORTDIR}/makeinfo.sh"
+rm -f "${EXPORTDIR}/makeinfo.sh"
+rm -f "${EXPORTDIR}/Make.defs"
+
+# Verifty the build info that we got from makeinfo.sh
+
+if [ ! -d "${ARCHDIR}" ]; then
+	echo "MK: Directory ${ARCHDIR} does not exist"
+	exit 1
+fi
+
+if [ ! -f "${LDPATH}" ]; then
+	echo "MK: File ${LDPATH} does not exist"
+	exit 1
+fi
+
+# Copy the build info that we got from makeinfo.sh
+
+cp --preserve=all "${LDPATH}" "${EXPORTDIR}/build/." || \
+	{ echo "MK: cp ${LDPATH} failed"; exit 1; }
+echo "ARCHCFLAGS = ${ARCHCFLAGS}" >"${EXPORTDIR}/build/Make.defs"
+echo "ARCHCXXFLAGS = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
 
 # Copy the NuttX include directory (retaining attributes and following symbolic links)
 
@@ -170,7 +190,8 @@ for lib in ${LIBLIST}; do
 	# Copy the application library unmodified
 
 	if [ "X${libname}" = "Xlibapps" ]; then
-		cp --preserve=all "${TOPDIR}/${lib}" "${EXPORTDIR}/libs/."
+		cp --preserve=all "${TOPDIR}/${lib}" "${EXPORTDIR}/libs/." || \
+			{ echo "MK: cp ${TOPDIR}/${lib} failed"; exit 1; }
 	else
 
 		# Create a temporary directory and extract all of the objects there

@@ -31,6 +31,14 @@ mkconfig.c, cfgparser.c, and cfgparser.h
   into include/nuttx/config.h.  config.h is a another version of the
   NuttX configuration that can be included by C files.
 
+mkexport.sh and Makefile.export
+
+  These implement part of the top-level Makefile's 'export' target.  That
+  target will bundle up all of the NuttX libraries, header files, and the
+  startup object into an export-able, binary NuttX distribution.  The
+  Makefile.export is used only by the mkexport.sh script to parse out
+  options from the top-level Make.defs file.
+
 mkversion.c, cfgparser.c, and cfgparser.h
 
   This is C file that is used to build mkversion program.  The mkversion
