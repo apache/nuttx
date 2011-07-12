@@ -36,9 +36,11 @@
 include $(TOPDIR)/.config
 include $(EXPORTDIR)/Make.defs
 
+ifdef ARCHSCRIPT
 LDPATH = ${shell echo "$(ARCHSCRIPT)" | sed -e "s/^-T[ ]*//g"}
 LDNAME = ${shell basename ${LDPATH}}
 LDDIR = ${shell dirname ${LDPATH}}
+endif
 ARCHSUBDIR = "arch/$(CONFIG_ARCH)/src"
 ARCHDIR ="$(TOPDIR)/$(ARCHSUBDIR)"
 
@@ -51,9 +53,11 @@ $(EXPORTDIR)/makeinfo.sh: $(TOPDIR)/.config $(EXPORTDIR)/Make.defs
 	@echo "" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHSUBDIR=\"$(ARCHSUBDIR)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHDIR=\"$(ARCHDIR)\"" >> $(EXPORTDIR)/makeinfo.sh
+ifdef ARCHSCRIPT
 	@echo "LDNAME=\"$(LDNAME)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "LDDIR=\"$(LDDIR)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "LDPATH=\"$(LDPATH)\"" >> $(EXPORTDIR)/makeinfo.sh
+endif
 	@echo "ARCHCFLAGS=\"$(ARCHCFLAGS) $(ARCHCPUFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHCXXFLAGS=\"$(ARCHCXXFLAGS) $(ARCHCPUFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@chmod 755 $(EXPORTDIR)/makeinfo.sh

@@ -44,6 +44,36 @@ License for NuttX in general (authorship of individual files may vary):
  *
  *************************************************************************/
 
+FAT Long File Names
+^^^^^^^^^^^^^^^^^^^
+
+  NOTE:  If CONFIG_FAT_LFN is defined in your NuttX configuration file, then
+  there may be some legal, patent issues. The following was extracted from
+  the entry "File Allocation Table from Wikipedia, the free encyclopedia:
+
+    "On December 3, 2003 Microsoft announced it would be offering licenses
+     for use of its FAT specification and 'associated intellectual property',
+     at the cost of a US$0.25 royalty per unit sold, with a $250,000 maximum
+     royalty per license agreement.
+
+     o "U.S. Patent 5,745,902 (http://www.google.com/patents?vid=5745902) -
+        Method and system for accessing a file using file names having
+        different file name formats. ...
+     o "U.S. Patent 5,579,517 (http://www.google.com/patents?vid=5579517) -
+        Common name space for long and short filenames. ...
+     o "U.S. Patent 5,758,352 (http://www.google.com/patents?vid=5758352) -
+        Common name space for long and short filenames. ...
+     o "U.S. Patent 6,286,013 (http://www.google.com/patents?vid=6286013) -
+        Method and system for providing a common name space for long and
+        short file names in an operating system. ...
+ 
+    "Many technical commentators have concluded that these patents only cover
+     FAT implementations that include support for long filenames, and that
+     removable solid state media and consumer devices only using short names
+     would be unaffected. ..."
+ 
+  So you have been forewarned:  Use the long filename at your own risk!
+
 uIP
 ^^^
 
@@ -126,4 +156,3 @@ Documents/rss.gif
   * share alike – If you alter, transform, or build upon this work,
     you may distribute the resulting work only under the same or
     similar license to this one.
-

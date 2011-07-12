@@ -41,9 +41,10 @@
 
 # Get the input parameter list
 
-USAGE="USAGE: $0 [-d] -t <top-dir> [-x <lib-ext>] -l \"lib1 [lib2 [lib3 ...]]\""
+USAGE="USAGE: $0 [-d] [-z] -t <top-dir> [-x <lib-ext>] -l \"lib1 [lib2 [lib3 ...]]\""
 unset TOPDIR
 unset LIBLIST
+unset TGZ
 LIBEXT=.a
 
 while [ ! -z "$1" ]; do
@@ -62,6 +63,9 @@ while [ ! -z "$1" ]; do
  		-x )
 			shift
 			LIBEXT=$1
+			;;
+ 		-z )
+			TGZ=y
 			;;
 		-h )
 			echo $USAGE
@@ -113,8 +117,13 @@ if [ -d "${EXPORTDIR}" ]; then
 	rm -rf "${EXPORTDIR}"
 fi
 
+# Remove any possible previous results
+
 rm -f "${EXPORTDIR}.tar"
+rm -f "${EXPORTDIR}.zip"
 rm -f "${EXPORTDIR}.tar.gz"
+
+# Create the export directory and some of its subdirectories
 
 mkdir "${EXPORTDIR}" || { echo "MK: 'mkdir ${EXPORTDIR}' failed"; exit 1; }
 mkdir "${EXPORTDIR}/startup" || { echo "MK: 'mkdir ${EXPORTDIR}/startup' failed"; exit 1; }
@@ -139,22 +148,32 @@ source "${EXPORTDIR}/makeinfo.sh"
 rm -f "${EXPORTDIR}/makeinfo.sh"
 rm -f "${EXPORTDIR}/Make.defs"
 
-# Verifty the build info that we got from makeinfo.sh
+# Verify the build info that we got from makeinfo.sh
 
 if [ ! -d "${ARCHDIR}" ]; then
 	echo "MK: Directory ${ARCHDIR} does not exist"
 	exit 1
 fi
 
-if [ ! -f "${LDPATH}" ]; then
-	echo "MK: File ${LDPATH} does not exist"
-	exit 1
+# Is there a linker script in this configuration?
+
+if [ ! -z "${LDPATH}" ]; then
+
+	# Apparently so.  Verify that the script exists
+
+	if [ ! -f "${LDPATH}" ]; then
+		echo "MK: File ${LDPATH} does not exist"
+		exit 1
+	fi
+
+	# Copy the linker script
+
+	cp --preserve=all "${LDPATH}" "${EXPORTDIR}/build/." || \
+		{ echo "MK: cp ${LDPATH} failed"; exit 1; }
 fi
 
-# Copy the build info that we got from makeinfo.sh
+# Save the compilation options
 
-cp --preserve=all "${LDPATH}" "${EXPORTDIR}/build/." || \
-	{ echo "MK: cp ${LDPATH} failed"; exit 1; }
 echo "ARCHCFLAGS = ${ARCHCFLAGS}" >"${EXPORTDIR}/build/Make.defs"
 echo "ARCHCXXFLAGS = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
 
@@ -221,9 +240,14 @@ done
 
 cd "${TOPDIR}" || \
 	{ echo "MK: 'cd ${TOPDIR}' failed"; exit 1; }
-tar cvf "${EXPORTSUBDIR}.tar" "${EXPORTSUBDIR}" 1>/dev/null 2>&1
-gzip -f "${EXPORTSUBDIR}.tar"
+
+if [ "X${TGZ}" = "Xy" ]; then
+	tar cvf "${EXPORTSUBDIR}.tar" "${EXPORTSUBDIR}" 1>/dev/null 2>&1
+	gzip -f "${EXPORTSUBDIR}.tar"
+else
+	zip -r "${EXPORTSUBDIR}.zip" "${EXPORTSUBDIR}" 1>/dev/null 2>&1
+fi
 
 # Clean up after ourselves
 
-rm -rf "${EXPORTSUBDIR}"
+rm -rf "${EXPORTSUBDIR}" 
