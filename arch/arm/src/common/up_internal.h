@@ -293,6 +293,11 @@ extern void up_usbuninitialize(void);
 # define up_usbuninitialize()
 #endif
 
+/* CAN **********************************************************************/
+
+struct can_dev_s;  /* Forward reference */
+extern FAR struct can_dev_s *up_caninitialize(int port);
+
 /****************************************************************************
  * Name: up_check_stack
  *
