@@ -148,8 +148,8 @@
 #define PART_SIZE          12  /* 4@12: Partition size (in sectors) */
 
 /****************************************************************************
- * Each FAT directory entry is 32-bytes long.  The following define offsets
- * relative to the beginning of a directory entry.
+ * Each FAT "short" 8.3 file name directory entry is 32-bytes long.  The
+ * following define offsets relative to the beginning of a directory entry.
  */
 
 #define DIR_NAME            0 /* 11@ 0: NAME: 8 bytes + 3 byte extension */
@@ -191,6 +191,15 @@
 #define SEC_NSECTORS(f,n)   ((n) / (f)->fs_hwsectorsize)
 
 #define CLUS_NDXMASK(f)     ((f)->fs_fatsecperclus - 1)
+
+/****************************************************************************
+/* The FAT "long" file name directory entry */
+
+/* Sizes and limits */
+
+#define LDIR_MAXCHARS       255  /* Max unicode characters */
+#define LDIR_MAXLFNCHARS     13  /* Max unicode characters in one LFN */
+#define LDIR_MAXLFNS         20  /* Max number of LFNs */
 
 /****************************************************************************
  * File system types */

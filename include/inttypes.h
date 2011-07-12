@@ -40,6 +40,8 @@
  * Included Files
  ****************************************************************************/
  
+#include <stddef.h> /* for wchar_t */
+ 
 /* Notes from www.opengroup.org:
  *
  * "The <inttypes.h> header shall include the <stdint.h> header."
@@ -177,10 +179,8 @@ EXTERN imaxdiv_t imaxdiv(intmax_t, intmax_t);
 EXTERN intmax_t  strtoimax(const char *, char **, int);
 EXTERN uintmax_t strtoumax(const char *, char **, int);
 
-#if 0 /* No wchar_t */
 EXTERN intmax_t  wcstoimax(const wchar_t *, wchar_t **, int);
 EXTERN uintmax_t wcstoumax(const wchar_t *, wchar_t **, int);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

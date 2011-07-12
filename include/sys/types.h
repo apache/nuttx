@@ -103,6 +103,9 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/* Floating point types */
+
 typedef float  float32;
 #ifndef CONFIG_HAVE_DOUBLE
 typedef float  double_t;
@@ -157,6 +160,14 @@ typedef int          pid_t;
  */
 
 typedef unsigned int id_t;
+
+/* Signed integral type of the result of subtracting two pointers */
+
+typedef intptr_t     ptrdiff_t;
+
+/* Wide, 16-bit character types */
+
+typedef uint16_t     wchar_t;
 
 /* blkcnt_t and off_t are signed integer types.
  *

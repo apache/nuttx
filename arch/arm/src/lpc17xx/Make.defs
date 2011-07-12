@@ -57,8 +57,8 @@ endif
 # Required LPC17xx files
 
 CHIP_ASRCS	=
-CHIP_CSRCS	= lpc17_allocateheap.c lpc17_clockconfig.c lpc17_clrpend.c \
-		  lpc17_gpio.c lpc17_idle.c lpc17_irq.c lpc17_lowputc.c \
+CHIP_CSRCS	= lpc17_allocateheap.c lpc17_can.c lpc17_clockconfig.c \
+		  lpc17_clrpend.c lpc17_gpio.c lpc17_idle.c lpc17_irq.c lpc17_lowputc.c \
 		  lpc17_serial.c lpc17_spi.c lpc17_ssp.c lpc17_start.c lpc17_timerisr.c
 
 # Configuration-dependent LPC17xx files

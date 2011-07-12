@@ -296,6 +296,7 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 {
   FAR struct inode *inode = filep->f_inode;
   FAR uart_dev_t   *dev   = inode->i_private;
+  irqstate_t        flags;
   ssize_t           recvd = 0;
 
   /* Only one user can be accessing dev->recv.tail at once */
@@ -372,14 +373,17 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
 
       else
         {
-          /* Wait for some characters to be sent from the buffer
-           * with the TX interrupt re-enabled.
+          /* Wait for some characters to be sent from the buffer with the RX interrupt
+           * re-enabled.  Interrupts are disabled briefly to assure that the following
+           * operations are atomic.
            */
 
+          flags = irqsave();
           dev->recvwaiting = true;
           uart_enablerxint(dev);
           uart_takesem(&dev->recvsem);
           uart_disablerxint(dev);
+          irqrestore(flags);
         }
     }
 
