@@ -108,7 +108,7 @@ LDPATHS	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS = $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 
 all: up_head$(OBJEXT) libarch$(LIBEXT)
-.PHONY: clean distclean cleanrel depend
+.PHONY: export_head clean distclean cleanrel depend
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
