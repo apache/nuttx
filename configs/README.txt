@@ -564,6 +564,17 @@ defconfig -- This is a configuration file similar to the Linux
 	Filesystem configuration
 		CONFIG_FS_FAT - Enable FAT filesystem support
 		CONFIG_FAT_SECTORSIZE - Max supported sector size
+        CONFIG_FAT_LCNAME - Enable use of the NT-style upper/lower case 8.3
+          file name support.
+		CONFIG_FAT_LFN - Enable FAT long file names.  NOTE:  Microsoft claims
+          patents on FAT long file name technology.  Please read the
+          disclaimer in the top-level COPYING file and only enable this
+          feature if you understand these issues.
+        CONFIG_FAT_MAXFNAME - If CONFIG_FAT_LFN is defined, then the
+          default, maximum long file name is 255 bytes.  This can eat up
+          a lot of memory (especially stack space).  If you are willing
+          to live with some non-standard, short long file names, then
+          define this value.
 		CONFIG_FS_NXFFS: Enable NuttX FLASH file system (NXFF) support.
 		CONFIG_NXFFS_ERASEDSTATE: The erased state of FLASH. 
 		  This must have one of the values of 0xff or 0x00.
