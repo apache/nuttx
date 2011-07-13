@@ -2347,7 +2347,7 @@ int nxtk_bitmaptoolbar(NXTKWINDOW hfwnd,
   This structures provides the metrics for one glyph:
 </p>
 <ul><pre>
-struct nx_fontmetic_s
+struct nx_fontmetric_s
 {
   uint32_t stride   : 2;      /* Width of one font row in bytes */
   uint32_t width    : 6;      /* Width of the font in bits */
@@ -2364,7 +2364,7 @@ struct nx_fontmetic_s
 <ul><pre>
 struct nx_fontbitmap_s
 {
-  struct nx_fontmetic_s metric; /* Character metrics */
+  struct nx_fontmetric_s metric; /* Character metrics */
   FAR const uint8_t *bitmap;    /* Pointer to the character bitmap */
 };
 </pre></ul>
