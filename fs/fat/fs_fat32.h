@@ -732,9 +732,9 @@ struct fat_dirinfo_s
   /* The file/directory name */
 
 #ifdef CONFIG_FAT_LFN
-  uint8_t fd_lfname[LDIR_MAXFNAME]; /* Long filename */
+  uint8_t fd_lfname[LDIR_MAXFNAME+1]; /* Long filename with terminator */
 #endif
-  uint8_t fd_name[DIR_MAXFNAME];   /* Short 8.3 alias filename */
+  uint8_t fd_name[DIR_MAXFNAME];   /* Short 8.3 alias filename (no terminator) */
 
   /* NT flags are not used */
   
