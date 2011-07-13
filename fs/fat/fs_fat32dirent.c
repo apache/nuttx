@@ -701,6 +701,32 @@ static inline int fat_uniquealias(const char **path,
 #endif
 
 /****************************************************************************
+ * Name: fat_lfnchecksum
+ *
+ * Desciption:  Caculate the checksum of .
+ *
+ * Returned value:
+ *   OK - The alias is unique.
+ *   <0 - Otherwise an negated error is returned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FAT_LFN
+static uint8_t fat_lfnchecksum(const uint8_t *sfname)
+{
+  uint8_t sum = 0;
+  int i;
+
+  for (i = DIR_MAXFNAME; i; i--)
+    {
+      sum = ((sum & 1) << 7) + (sum >> 1) + *sfname++;
+	}
+
+  return sum;
+}
+#endif
+
+/****************************************************************************
  * Name: fat_path2dirname
  *
  * Desciption:  Convert a user filename into a properly formatted FAT
@@ -728,23 +754,6 @@ static int fat_path2dirname(const char **path, struct fat_dirinfo_s *dirinfo,
        */
 
       ret = fat_parselfname(path, dirinfo, terminator);
-      if (ret < 0)
-        {
-          /* Not a valid long file name */
-
-          return ret;
-        }
-
-      /* It is a valid long file name, create a quick short file name
-       * alias.
-       */
-
-      ret = fat_createalias(path, dirinfo);
-      DEBUGASSERT(ret == OK); /* This should never fail */
-
-      /* Make sure that the alias is unique */
-
-      ret = fat_uniquealias(path, dirinfo);
     }
 
   return ret;
@@ -756,12 +765,569 @@ static int fat_path2dirname(const char **path, struct fat_dirinfo_s *dirinfo,
 }
 
 /****************************************************************************
- * Name: fat_checkname
+ * Name: fat_findsfnentry
  *
- * Desciption: Given a path to something that may or may not be in the file
- *   system, return the directory entry of the item.
+ * Desciption: Find a short file name directory entry.
  *
  ****************************************************************************/
+
+static inline int fat_findsfnentry(struct fat_mountpt_s *fs,
+                                   struct fat_dirinfo_s *dirinfo)
+{
+  uint16_t diroffset;
+  uint8_t *direntry;
+  int      ret;
+
+  /* Search, beginning with the current sector, for a directory entry this
+   * the match shore name
+   */
+
+  for (;;)
+    {
+      /* Read the next sector into memory */
+
+      ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Get a pointer to the directory entry */
+
+      diroffset = DIRSEC_BYTENDX(fs, dirinfo->dir.fd_index);
+      direntry  = &fs->fs_buffer[diroffset];
+
+      /* Check if we are at the end of the directory */
+
+      if (direntry[DIR_NAME] == DIR0_ALLEMPTY)
+        {
+          return -ENOENT;
+        }
+
+      /* Check if we have found the directory entry that we are looking for */
+
+      if (direntry[DIR_NAME] != DIR0_EMPTY &&
+          !(DIR_GETATTRIBUTES(direntry) & FATATTR_VOLUMEID) &&
+          !memcmp(&direntry[DIR_NAME], dirinfo->fd_name, DIR_MAXFNAME) )
+        {
+          /* Yes.. Return success */
+
+          dirinfo->fd_seq.ds_sector  = fs->fs_currentsector;
+          dirinfo->fd_seq.ds_offset  = diroffset;
+#ifdef CONFIG_FAT_LFN
+          dirinfo->fd_seq.ds_cluster = dirinfo->dir.fd_currcluster;
+#endif
+
+          /* Position the last long file name directory entry at the same
+           * position.
+           */
+
+#ifdef CONFIG_FAT_LFN
+          dirinfo->fd_seq.ds_lfnsector  = dirinfo->fd_seq.ds_sector;
+          dirinfo->fd_seq.ds_lfnoffset  = dirinfo->fd_seq.ds_offset;
+          dirinfo->fd_seq.ds_lfncluster = dirinfo->fd_seq.ds_cluster;
+#endif
+         return OK;
+        }
+
+      /* No... get the next directory index and try again */
+
+      if (fat_nextdirentry(fs, &dirinfo->dir) != OK)
+        {
+          return -ENOENT;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: fat_cmplfnchunk
+ *
+ * Desciption:  There are 13 characters per LFN entry, broken up into three
+ *   chunks for characts 1-5, 6-11, and 12-13.  This function will perform
+ *   the comparison of a single chunk.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FAT_LFN
+static bool fat_cmplfnchunk(wchar_t *chunk, uint8_t *substr, int nchunk)
+{
+  uint8_t *ptr;
+  int i;
+
+  /* Check bytes 1-nchunk */
+
+  for (i = 0; i < nchunk; i++)
+    {
+      wchar_t wch;
+
+      /* If we encounter the NUL terminator in the name string, then it is
+       * a match -- return TRUE.
+       */
+
+      if (*substr == 0)
+        {
+          return true;
+        }
+
+      /* Get the next unicode character from the chunk.  We only handle ASCII.
+       * For ASCII, the upper byte should be zero and the lower should match
+       * the ASCII code.
+       */
+
+      wch = fat_getuint16(chunk);
+      if (wch & 0xff != (wchar_t)*substr)
+        {
+          return false;
+        }
+
+      /* Yes.. the characters match.  Try the next */
+
+      chunk++;
+      substr++;
+    }
+
+  /* All of the characters in the chunk match.. Return success */
+
+  return true;
+}
+#endif
+
+/****************************************************************************
+ * Name: fat_cmplfname
+ *
+ * Desciption: Given an LFN directory entry, compare a substring of the name
+ *   to a portion in the directory entry.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FAT_LFN
+static bool fat_cmplfname(uint8_t *direntry, uint8_t *substr)
+{
+  uint8_t *chunk;
+  int i;
+
+  /* Check bytes 1-5 */
+
+  chunk = LDIR_PTRWCHAR1_5(direntry);
+  if (fat_cmplfnchunk(chunk, substr, 5))
+    {
+      /* Check bytes 6-11 */
+
+      chunk = LDIR_PTRWCHAR6_11(direntry);
+      if (fat_cmplfnchunk(chunk, &substr[5], 6))
+        {
+          /* Check bytes 6-11 */
+
+          chunk = efine LDIR_WCHAR12_13;
+          return fat_cmplfnchunk(chunk, &substr[11], 2);
+        }
+    }
+
+  return false;
+}
+#endif
+
+/****************************************************************************
+ * Name: fat_findlfnentry
+ *
+ * Desciption: Find a sequence of long file name directory entries.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FAT_LFN
+static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
+                                   struct fat_dirinfo_s *dirinfo)
+{
+  uint16_t diroffset;
+  uint8_t *direntry;
+  uint8_t  lastseq;
+  uint8_t  seqno;
+  uint8_t  nfullentries;
+  uint8_t  nentries;
+  uint8_t  remainder;
+  uint8_t  cksum;
+  int      offset;
+  int      namelen;
+  int      ret;
+
+  /* Get the length of the long file name and make sure that it does
+   * not exceed the maximum.
+   */
+
+  namelen = strlen(dirinfo.fd_lfname);
+  if (namelen > LDIR_MAXFNAME)
+    {
+      return -EINVAL;
+    }
+
+  /* How many LFN directory entries are we expecting? */
+
+  nfullentries = namelen / LDIR_MAXLFNCHARS;
+  remainder    = namelen - nfullentries * LDIR_MAXLFNCHARS;
+  nentries     = nfullentries;
+  if (remainder > 0)
+    {
+      nentries++;
+    }
+  DEBUGASSERT(nentries > 0 && nentries <= LDIR_MAXLFNS);
+
+  /* This is the first sequency number we are looking for, the sequence
+   * number of the last LFN entry (remember that they appear in reverse
+   * order.. from last to first).
+   */
+
+  lastseq = LDIR_SEQ | nentries;
+  seqno   = lastseq;
+
+  /* Search, beginning with the current sector, for a directory entry this
+   * the match shore name
+   */
+
+  for (;;)
+    {
+      /* Read the next sector into memory */
+
+      ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Get a pointer to the directory entry */
+
+      diroffset = DIRSEC_BYTENDX(fs, dirinfo->dir.fd_index);
+      direntry  = &fs->fs_buffer[diroffset];
+
+      /* Check if we are at the end of the directory */
+
+      if (direntry[DIR_NAME] == DIR0_ALLEMPTY)
+        {
+          return -ENOENT;
+        }
+
+      /* Is this an LFN entry?  Does it have the sequence number we are
+       * looking for?
+       */
+
+      if (LDIR_GETATTRIBUTES(direntry) != LDDIR_LFNATTR) ||
+          LDIR_GETSEQ(direntry) != seqno);
+        {
+          /* No, restart the search at the next entry */
+
+          seqno = lastseq;
+          goto nextentry;
+        }
+
+      /* Yes.. If this is not the "last" LFN entry, then the checksum must
+       * also be the same.
+       */
+
+      if (seqno == lastseq)
+        {
+          /* Just save the checksum for subsequent checks */
+
+          cksum = LDIR_GETCHECKSUM(direntry);
+        }
+
+      /* Not the first entry in the sequence.  Does the checksum match the
+       * previous sequences?
+       */
+
+      else if (cksum != LDIR_GETCHECKSUM(direntry))
+        {
+          /* No, restart the search at the next entry */
+
+          seqno = lastseq;
+          goto nextentry;
+        }
+
+      /* Check if the name substring in this LFN matches the corresponding
+       * substring of the name we are looking for.
+       */
+
+      offset = ((seqno & LDIR0_SEQ_MASK) - 1) * LDIR_MAXLFNCHARS;
+      if (fat_cmplfname(direntry, &dirinfo.fd_lfname[offset]))
+        {
+          /* Yes.. it matches.  Check the sequence number.  Is this the
+           * "last" LFN entry (i.e., the one that appears first)?
+           */
+
+          if (seqno == lastseq)
+            {
+              /* Yes.. Save information about this LFN entry position */
+
+              dirinfo->fd_seq.ds_lfnsector  = fs->fs_currentsector;
+              dirinfo->fd_seq.ds_lfnoffset  = diroffset;
+              dirinfo->fd_seq.ds_lfncluster = dirinfo->dir.fd_currcluster;
+              seqno &= LDIR0_SEQ_MASK;
+            }
+
+          /* Is this the first sequence number (i.e., the LFN entry that
+           * will appear last)?
+           */
+
+          if (seqno == 1)
+            {
+              /* We have found all of the LFN entries.  The next directory
+               * entry should be the one containing the short file name
+               * alias and all of the meat about the file or directory.
+               */
+
+              if (fat_nextdirentry(fs, &dirinfo->dir) != OK)
+                {
+                  return -ENOENT;
+                }
+
+             /* Verify the checksum */
+
+             if (fat_lfnchecksum(dirinfo->fd_name) == cksum)
+               {
+                 /* Success! Save the position of the directory entry and
+                  * return success.
+                  */
+
+                 dirinfo->fd_seq.ds_sector  = fs->fs_currentsector;
+                 dirinfo->fd_seq.ds_offset  = diroffset;
+                 dirinfo->fd_seq.ds_cluster = dirinfo->dir.fd_currcluster;
+                 return OK;
+                }
+
+              /* Bad news.. reset and continue with this entry (which is
+               * probably not an LFN entry unless the file systen is
+               * seriously corrupted.
+               */
+
+              seqno = lastseq;
+              continue;
+            }
+
+          /* No.. there are more LFN entries to go.  Decrement the sequence
+           * number and check the next directory entry.
+           */
+
+          seqno--;
+        }
+      else
+        {
+          /* No.. the names do not match.  Restart the search at the next
+           * entry.
+           */
+
+          seqno = lastseq;
+        }
+
+      /* Continue at the next directory entry */
+ 
+next_entry:
+      if (fat_nextdirentry(fs, &dirinfo->dir) != OK)
+        {
+          return -ENOENT;
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: fat_allocatesfnentry
+ *
+ * Desciption: Find a free directory entry for a short file name entry.
+ *
+ ****************************************************************************/
+
+static inline int fat_allocatesfnentry(struct fat_mountpt_s *fs,
+                                       struct fat_dirinfo_s *dirinfo)
+{
+  uint16_t diroffset;
+  uint8_t *direntry;
+  uint8_t  ch;
+  int      ret;
+
+  for (;;)
+    {
+      /* Read the directory sector into fs_buffer */
+
+      ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
+      if (ret < 0)
+        {
+          /* Make sure that the return value is NOT -ENOSPC */
+
+          return -EIO;
+        }
+
+      /* Get a pointer to the entry at fd_index */
+
+      diroffset = (dirinfo->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+      direntry  = &fs->fs_buffer[diroffset];
+
+      /* Check if this directory entry is empty */
+
+      ch = direntry[DIR_NAME];
+      if (ch == DIR0_ALLEMPTY || ch == DIR0_EMPTY)
+        {
+          /* It is empty -- we have found a directory entry */
+
+          dirinfo->fd_seq.ds_sector  = fs->fs_currentsector;
+          dirinfo->fd_seq.ds_offset  = diroffset;
+#ifdef CONFIG_FAT_LFN
+          dirinfo->fd_seq.ds_cluster = dirinfo->dir.fd_currcluster;
+#endif
+
+          /* Set the "last" long file name offset to the same entry */
+
+#ifdef CONFIG_FAT_LFN
+          dirinfo->fd_seq.ds_lfnsector  = dirinfo->fd_seq.ds_sector;
+          dirinfo->fd_seq.ds_lfnoffset  = dirinfo->fd_seq.ds_offset;
+          dirinfo->fd_seq.ds_lfncluster = dirinfo->fd_seq.ds_cluster;
+#endif
+          return OK;
+        }
+
+      /* It is not empty try the next one */
+
+      ret = fat_nextdirentry(fs, &dirinfo->dir);
+      if (ret < 0)
+        {
+          /* This will return -ENOSPC if we have examined all of the
+           * directory entries without finding a free entry.
+           */
+
+          return ret;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: fat_allocatelfnentry
+ *
+ * Desciption: Find a sequence of free directory entries for a several long
+ *   and one short file name entry.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FAT_LFN
+static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
+                                       struct fat_dirinfo_s *dirinfo)
+{
+  uint16_t diroffset;
+  uint8_t *direntry;
+  uint8_t  nentries;
+  uint8_t  remainder;
+  uint8_t  needed;
+  int      namelen;
+  int      ret;
+
+  /* Get the length of the long file name and make sure that it does
+   * not exceed the maximum.
+   */
+
+  namelen = strlen(dirinfo->fd_lfname);
+  if (namelen > LDIR_MAXFNAME)
+    {
+      return -EINVAL;
+    }
+
+  /* How many LFN directory entries are we expecting? */
+
+  nentries   = namelen / LDIR_MAXLFNCHARS;
+  remainder  = namelen - nfullentries * LDIR_MAXLFNCHARS;
+  if (remainder > 0)
+    {
+      nentries++;
+    }
+  DEBUGASSERT(nentries > 0 && nentries <= LDIR_MAXLFNS);
+
+  /* Plus another for short file name entry that follows the sequence of LFN
+   * entries.
+   */
+
+  nentries++;
+
+  /* Now, search the directory looking for a sequence for free entries that
+   * long.
+   */
+
+  needed = nentries;
+  for (;;)
+    {
+      /* Read the directory sector into fs_buffer */
+
+      ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
+      if (ret < 0)
+        {
+          /* Make sure that the return value is NOT -ENOSPC */
+
+          return -EIO;
+        }
+
+      /* Get a pointer to the entry at fd_index */
+
+      diroffset = (dirinfo->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+      direntry  = &fs->fs_buffer[diroffset];
+
+      /* Check if this directory entry is empty */
+
+      ch = direntry[DIR_NAME];
+      if (ch == DIR0_ALLEMPTY || ch == DIR0_EMPTY)
+        {
+          /* It is empty -- we have found a directory entry.  Is this the
+           * "last" LFN entry (i.e., the one that occurs first)?
+           */
+
+          if (needed == nentries)
+            {
+              /* Yes.. remember the position of this entry */
+
+              dirinfo->fd_seq.ds_lfnsector  = fs->fs_currentsector;
+              dirinfo->fd_seq.ds_lfnoffset  = diroffset;
+              dirinfo->fd_seq.ds_lfncluster = dirinfo->dir.fd_currcluster;
+              }
+
+          /* Is this last entry we need (i.e., the entry for the short
+           * file name entry)?
+           */
+           
+          if (needed <= 1)
+            {
+              /* Yes.. remember the position of this entry and return
+               * success.
+               */
+
+              dirinfo->fd_seq.ds_sector  = fs->fs_currentsector;
+              dirinfo->fd_seq.ds_offset  = diroffset;
+              dirinfo->fd_seq.ds_cluster = dirinfo->dir.fd_currcluster;
+              return OK;
+            }
+
+          /* Otherwise, just decrement the number of directory entries
+           * needed and continue looking.
+           */
+
+          needed--;
+        }
+
+      /* The directory entry is not available */
+
+      else
+        {
+          /* Reset the search and continue looking */
+
+          needed = nentries;
+        }
+
+      /* Try the next directory entry */
+
+      ret = fat_nextdirentry(fs, &dirinfo->dir);
+      if (ret < 0)
+        {
+          /* This will return -ENOSPC if we have examined all of the
+           * directory entries without finding a free entry.
+           */
+
+          return ret;
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -779,21 +1345,20 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
                      const char *path)
 {
   off_t    cluster;
-  uint16_t diroffset;
-  uint8_t *direntry = NULL;
+  uint8_t *direntry;
   char     terminator;
   int      ret;
 
-  /* Initialize to traverse the chain.  Set it to the cluster of
-   * the root directory
+  /* Initialize to traverse the chain.  Set it to the cluster of the root
+   * directory
    */
 
   cluster = fs->fs_rootbase;
   if (fs->fs_type == FSTYPE_FAT32)
     {
-      /* For FAT32, the root directory is variable sized and is a
-       * cluster chain like any other directory.  fs_rootbase holds
-       * the first cluster of the root directory.
+      /* For FAT32, the root directory is variable sized and is a cluster
+       * chain like any other directory.  fs_rootbase holds the first
+       * cluster of the root directory.
        */
 
       dirinfo->dir.fd_startcluster = cluster;
@@ -815,8 +1380,8 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
   dirinfo->dir.fd_index = 0;
 
-  /* If no path was provided, then the root directory must be exactly
-   * what the caller is looking for.
+  /* If no path was provided, then the root directory must be exactly what
+   * the caller is looking for.
    */
 
   if (*path == '\0')
@@ -829,8 +1394,8 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
   for (;;)
     {
-      /* Convert the next the path segment name into the kind of
-       * name that we would see in the directory entry.
+      /* Convert the next the path segment name into the kind of name that
+       * we would see in the directory entry.
        */
 
       ret = fat_path2dirname(&path, dirinfo, &terminator);
@@ -843,65 +1408,46 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
           return ret;
         }
 
-      /* Now search the current directory entry for an entry with this
-       * matching name.
+      /* Is this a path segment a long or a short file.  Was a long file
+       * name parsed?
        */
 
-      for (;;)
+#ifdef CONFIG_FAT_LFN
+      if (dirinfo.fd_lfname[0] != '\0')
         {
-          /* Read the next sector into memory */
-
-          ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
-          if (ret < 0)
-            {
-              return ret;
-            }
-
-          /* Get a pointer to the directory entry */
-
-          diroffset = DIRSEC_BYTENDX(fs, dirinfo->dir.fd_index);
-          direntry  = &fs->fs_buffer[diroffset];
-
-          /* Check if we are at the end of the directory */
-
-          if (direntry[DIR_NAME] == DIR0_ALLEMPTY)
-            {
-              return -ENOENT;
-            }
-
-          /* Check if we have found the directory entry that we are looking for */
-
-          if (direntry[DIR_NAME] != DIR0_EMPTY &&
-              !(DIR_GETATTRIBUTES(direntry) & FATATTR_VOLUMEID) &&
-              !memcmp(&direntry[DIR_NAME], dirinfo->fd_name, DIR_MAXFNAME) )
-            {
-              /* Yes.. break out of the loop */
-
-              break;
-            }
-
-          /* No... get the next directory index and try again */
-
-          if (fat_nextdirentry(fs, &dirinfo->dir) != OK)
-            {
-              return -ENOENT;
-            }
+          /* Yes.. Search for the sequence of long file name directory
+           * entries.
+           */
+ 
+          ret = fat_findlfnentry(fs, dirinfo);
         }
 
-      /* We get here only if we have found a directory entry that matches
-       * the path element that we are looking for.
-       *
-       * If the terminator character in the path was the end of the string
+      /* No.. Search for the single short file name directory entry */
+
+      else
+#endif
+        {
+          ret = fat_findsfnentry(fs, dirinfo);
+        }
+
+      /* Did we find the directory entries? */
+
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* If the terminator character in the path was the end of the string
        * then we have successfully found the directory entry that describes
        * the path.
        */
 
       if (!terminator)
         {
-          /* Return the sector and offset to the matching directory entry */
+          /* Return success meaning that the description the matching
+           * directory entry is in dirinfo.
+           */
 
-          dirinfo->fd_seq.ds_sector = fs->fs_currentsector;
-          dirinfo->fd_seq.ds_offset = diroffset;
           return OK;
         }
 
@@ -910,6 +1456,7 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
        * the thing that we found is, indeed, a directory.
        */
 
+      direntry = &fs->fs_buffer[dirinfo->fd_seq.ds_offset];
       if (!(DIR_GETATTRIBUTES(direntry) & FATATTR_DIRECTORY))
         {
           /* Ooops.. we found something else */
@@ -942,115 +1489,117 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 {
   int32_t  cluster;
   off_t    sector;
-  uint16_t diroffset;
-  uint8_t *direntry;
-  uint8_t  ch;
   int      ret;
   int      i;
 
   /* Re-initialize directory object */
 
   cluster = dirinfo->dir.fd_startcluster;
-  if (cluster)
-    {
-     /* Cluster chain can be extended */
 
-      dirinfo->dir.fd_currcluster = cluster;
-      dirinfo->dir.fd_currsector  = fat_cluster2sector(fs, cluster);
-    }
-  else
-    {
-      /* Fixed size FAT12/16 root directory is at fixxed offset/size */
-
-      dirinfo->dir.fd_currsector = fs->fs_rootbase;
-    }
-  dirinfo->dir.fd_index = 0;
+  /* Loop until we successfully allocate the sequence of directory entries
+   * or until to fail to extend the directory cluster chain.
+   */
 
   for (;;)
     {
-      /* Read the directory sector into fs_buffer */
+      /* Can this cluster chain be extended */
 
-      ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
+      if (cluster)
+        {
+         /* Cluster chain can be extended */
+
+          dirinfo->dir.fd_currcluster = cluster;
+          dirinfo->dir.fd_currsector  = fat_cluster2sector(fs, cluster);
+        }
+      else
+        {
+          /* Fixed size FAT12/16 root directory is at fixxed offset/size */
+
+          dirinfo->dir.fd_currsector = fs->fs_rootbase;
+        }
+    dirinfo->dir.fd_index = 0;
+
+      /* Is this a path segment a long or a short file.  Was a long file
+       * name parsed?
+       */
+
+#ifdef CONFIG_FAT_LFN
+      if (dirinfo.fd_lfname[0] != '\0')
+        {
+          /* Yes.. Allocate for the sequence of long file name directory
+           * entries plus a short file name directory entry.
+           */
+ 
+          ret = fat_allocatelfnentry(fs, dirinfo);
+        }
+
+      /* No.. Allocate only a short file name directory entry */
+
+      else
+#endif
+        {
+          ret = fat_allocatesfnentry(fs, dirinfo);
+        }
+
+      /* Did we successfully allocate the directory entries?  If the error
+       * value is -ENOSPC, then we can try to extend the directory cluster
+       * (we can't handle other return values)
+       */
+
+      if (ret == OK || ret != -ENOSPC)
+        {
+          return ret;
+        }
+
+      /* If we get here, then we have reached the end of the directory table
+       * in this sector without finding a free directory entry.
+       *
+       * It this is a fixed size dirctory entry, then this is an error.
+       * Otherwise, we can try to extend the directory cluster chain to
+       * make space for the new directory entry.
+       */
+
+      if (!cluster)
+        {
+          /* The size is fixed */
+
+          return -ENOSPC;
+        }
+
+      /* Try to extend the cluster chain for this directory */
+
+      cluster = fat_extendchain(fs, dirinfo->dir.fd_currcluster);
+      if (cluster < 0)
+        {
+          return cluster;
+        }
+
+     /* Flush out any cached data in fs_buffer.. we are going to use
+      * it to initialize the new directory cluster.
+      */
+
+      ret = fat_fscacheflush(fs);
       if (ret < 0)
         {
           return ret;
         }
 
-      /* Get a pointer to the entry at fd_index */
+      /* Clear all sectors comprising the new directory cluster */
 
-      diroffset = (dirinfo->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
-      direntry  = &fs->fs_buffer[diroffset];
+      fs->fs_currentsector = fat_cluster2sector(fs, cluster);
+      memset(fs->fs_buffer, 0, fs->fs_hwsectorsize);
 
-      /* Check if this directory entry is empty */
-
-      ch = direntry[DIR_NAME];
-      if (ch == DIR0_ALLEMPTY || ch == DIR0_EMPTY)
+      sector = sector;
+      for (i = fs->fs_fatsecperclus; i; i--)
         {
-          /* It is empty -- we have found a directory entry */
-
-          dirinfo->fd_seq.ds_sector = fs->fs_currentsector;
-          dirinfo->fd_seq.ds_offset = diroffset;
-          return OK;
-        }
-
-      ret = fat_nextdirentry(fs, &dirinfo->dir);
-      if (ret < 0)
-        {
-          return ret;
+          ret = fat_hwwrite(fs, fs->fs_buffer, sector, 1);
+          if ( ret < 0)
+            {
+              return ret;
+            }
+          sector++;
         }
     }
-
-  /* If we get here, then we have reached the end of the directory table
-   * in this sector without finding a free directory enty.
-   *
-   * It this is a fixed size dirctory entry, then this is an error.
-   * Otherwise, we can try to extend the directory cluster chain to
-   * make space for the new directory entry.
-   */
-
-  if (!cluster)
-    {
-      /* The size is fixed */
-      return -ENOSPC;
-    }
-
-  /* Try to extend the cluster chain for this directory */
-
-  cluster = fat_extendchain(fs, dirinfo->dir.fd_currcluster);
-  if (cluster < 0)
-    {
-      return cluster;
-    }
-
- /* Flush out any cached data in fs_buffer.. we are going to use
-  * it to initialize the new directory cluster.
-  */
-
-  ret = fat_fscacheflush(fs);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Clear all sectors comprising the new directory cluster */
-
-  fs->fs_currentsector = fat_cluster2sector(fs, cluster);
-  memset(fs->fs_buffer, 0, fs->fs_hwsectorsize);
-
-  sector = sector;
-  for (i = fs->fs_fatsecperclus; i; i--)
-    {
-      ret = fat_hwwrite(fs, fs->fs_buffer, sector, 1);
-      if ( ret < 0)
-        {
-          return ret;
-        }
-      sector++;
-    }
-
-  dirinfo->fd_seq.ds_sector = fs->fs_currentsector;
-  dirinfo->fd_seq.ds_offset = 0;
-  return OK;
 }
 
 /****************************************************************************
@@ -1062,10 +1611,71 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
 int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
 {
+#ifdef CONFIG_FAT_LFN
+  uint16_t diroffset;
   uint8_t *direntry;
   int      ret;
 
-  /* Make sure that the sector containing the directory entry is in the
+  /* Set it to the cluster containing the "last" LFN entry (that appears
+   * first on the media).
+   */
+
+  dirinfo->dir.fd_startcluster = dirinfo->fd_seq.fd_lfncluster;
+  dirinfo->dir.fd_currcluster  = dirinfo->fd_seq.fd_lfnsector;
+  dirinfo->dir.fd_index        = dirinfo->fd_seq.fd_lfnoffset / DIR_SIZE;
+
+  /* Free all of the directory entries used for the sequence of long file name
+   * and for the single short file name entry.
+   */
+
+  for (;;)
+    {
+      /* Read the directory sector into the sector cache */
+
+      ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Get a pointer to the directory entry */
+
+      diroffset = (dirinfo->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+      direntry  = &fs->fs_buffer[diroffset];
+
+      /* Then mark the entry as deleted */
+
+      direntry[DIR_NAME] = DIR0_EMPTY;
+      fs->fs_dirty       = true;
+
+      /* Did we just free the single short file name entry? */
+
+      if (dirinfo->dir.fd_currsector == dirinfo->fd_seq.fd_sector &&
+          diroffset == dirinfo->fd_seq.fd_sector)
+        {
+          /* Yes.. then we are finished. flush anything remaining in the
+           * cache and return, probably successfully.
+           */
+
+          return fat_fscacheflush(fs);
+        }
+
+      /* There are moe entries to go.. Try the next directory entry */
+
+      ret = fat_nextdirentry(fs, &dirinfo->dir);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+#else
+  uint8_t *direntry;
+  int      ret;
+
+  /* Free the single short file name entry.
+   *
+   * Make sure that the sector containing the directory entry is in the
    * cache.
    */
 
@@ -1080,6 +1690,7 @@ int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
     }
 
   return ret;
+#endif
 }
 
 /****************************************************************************

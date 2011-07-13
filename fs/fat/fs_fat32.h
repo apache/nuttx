@@ -217,7 +217,7 @@
 # define LDIR_MAXLFNCHARS  13  /* Max unicode characters in one LFN entry */
 # define LDIR_MAXLFNS      20  /* Max number of LFN entries */
 
-/* LFN directory enty offsets */
+/* LFN directory entry offsets */
 
 # define LDIR_SEQ          0   /*  1@ 0: Sequence number */
 # define LDIR_WCHAR1_5     1   /* 10@ 1: File name characters 1-5 (5 Unicode characters) */
@@ -235,6 +235,10 @@
 # define LDIR0_E5          DIR0_E5       /* The actual value is 0xe5 */
 # define LDIR0_LAST        0x40          /* Last LFN in file name (appears first) */
 # define LDIR0_SEQ_MASK    0x1f          /* Mask for sequence number (1-20) */
+
+/* The LFN entry attribute */
+
+# define LDDIR_LFNATTR     0x0f
 #endif
 
 /****************************************************************************
@@ -333,10 +337,10 @@
 #define DIR_GETCRTTIMETENTH(p)    UBYTE_VAL(p,DIR_CRTTIMETENTH)
 
 #ifdef CONFIG_FAT_LFN
-# define LDIR_GETSEQ(p)           UBYTE_VAL(*p, LDIR_SEQ);
-# define LDIR_GETATTRIBUTES(p)    UBYTE_VAL(*p, LDIR_ATTRIBUTES);
-# define LDIR_GETNTRES(p)         UBYTE_VAL(*p, LDIR_NTRES);
-# define LDIR_GETCHECKSUM(p)      UBYTE_VAL(*p, LDIR_CHECKSUM);
+# define LDIR_GETSEQ(p)           UBYTE_VAL(*p,LDIR_SEQ);
+# define LDIR_GETATTRIBUTES(p)    UBYTE_VAL(*p,LDIR_ATTRIBUTES);
+# define LDIR_GETNTRES(p)         UBYTE_VAL(*p,LDIR_NTRES);
+# define LDIR_GETCHECKSUM(p)      UBYTE_VAL(*p,LDIR_CHECKSUM);
 #endif
 
 #define MBR_PUTSECPERCLUS(p,v)    UBYTE_PUT(p,BS_SECPERCLUS,v)
@@ -717,11 +721,13 @@ struct fat_dirseq_s
   uint16_t ds_lfnoffset;           /* Sector offset to last long file name entry */
 #endif
 
-  /* Sector numbers */
+  /* Sector and cluster numbers */
 
   off_t    ds_sector;              /* Sector of the short file name entry */
 #ifdef CONFIG_FAT_LFN
+  off_t    ds_cluster;             /* Cluster containing the short file name entry */
   off_t    ds_lfnsector;           /* Sector of the last long name entry */
+  off_t    ds_lfncluster;          /* Cluster containing the long file name entry */
 #endif
 };
 

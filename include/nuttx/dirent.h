@@ -78,9 +78,9 @@ struct fs_psuedodir_s
 
 struct fs_fatdir_s
 {
-  uint32_t     fd_startcluster;        /* Start cluster number of the directory */
-  uint32_t     fd_currcluster;         /* Current cluster number being read */
-  size_t       fd_currsector;          /* Current sector being read */
+  off_t        fd_startcluster;        /* Start cluster number of the directory */
+  off_t        fd_currcluster;         /* Current cluster number being read */
+  off_t        fd_currsector;          /* Current sector being read */
   unsigned int fd_index;               /* Current index of the directory entry to read */
 };
 #endif /* CONFIG_FS_FAT */
@@ -92,8 +92,8 @@ struct fs_fatdir_s
 
 struct fs_romfsdir_s
 {
-  uint32_t     fr_firstoffset;         /* Offset to the first entry in the directory */
-  uint32_t     fr_curroffset;          /* Current offset into the directory contents */
+  off_t        fr_firstoffset;         /* Offset to the first entry in the directory */
+  off_t        fr_curroffset;          /* Current offset into the directory contents */
 };
 #endif /* CONFIG_FS_ROMFS */
 

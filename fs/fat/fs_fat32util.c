@@ -1181,7 +1181,9 @@ int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster)
  * Name: fat_nextdirentry
  *
  * Desciption: Read the next directory entry from the sector in cache,
- *   reading the next sector(s) in the cluster as necessary.
+ *   reading the next sector(s) in the cluster as necessary.  This function
+ *   must return -ENOSPC if if fails because there are no further entries
+ *   available in the directory.
  *
  ****************************************************************************/
 
@@ -1221,7 +1223,7 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
                * the root directory.
                */
 
-              return ERROR;
+              return -ENOSPC;
             }
         }
       else
@@ -1250,7 +1252,8 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
               if (cluster < 2 || cluster >= fs->fs_nclusters)
                 {
                   /* No, we have probably reached the end of the cluster list */
-                  return ERROR;
+
+                  return -ENOSPC;
                 }
 
               /* Initialize for new cluster */
