@@ -148,8 +148,15 @@
 #define PART_SIZE          12  /* 4@12: Partition size (in sectors) */
 
 /****************************************************************************
- * Each FAT "short" 8.3 file name directory entry is 32-bytes long.  The
- * following define offsets relative to the beginning of a directory entry.
+ * Each FAT "short" 8.3 file name directory entry is 32-bytes long.
+ *
+ * Sizes and limits
+ */
+
+#define DIR_MAXFNAME      11  /* Max short name size is 8+3 = 11 */
+ 
+/* The following define offsets relative to the beginning of a directory
+ * entry.
  */
 
 #define DIR_NAME            0 /* 11@ 0: NAME: 8 bytes + 3 byte extension */
@@ -687,6 +694,37 @@ struct fat_file_s
   uint8_t *ff_buffer;              /* File buffer (for partial sector accesses) */
 };
 
+/* This structure holds the sequency of directory entries used by one
+ * file element (directory or file).  For short file names, this is
+ * single diretory entry.  But for long file names, the is a sequence
+ * of directory entries.  Long directory name entries appear in reverse
+ * order: Last, next-to-last, ..., first.  The "first" long file name
+ * directory is then following by the short directory name entry.  The
+ * short file name entry contains the real meat of the file data.
+ *
+ * So it takes the sector number and entry offset of the last long
+ * file name entry and of the short file name entry to define the
+ * sequence.  In the case of short file names, the sector number and
+ * offset will be the same.
+ */
+
+struct fat_dirseq_s
+{
+  /* Sector offsets */
+
+  uint16_t ds_offset;              /* Sector offset to short file name entry */
+#ifdef CONFIG_FAT_LFN
+  uint16_t ds_lfnoffset;           /* Sector offset to last long file name entry */
+#endif
+
+  /* Sector numbers */
+
+  off_t    ds_sector;              /* Sector of the short file name entry */
+#ifdef CONFIG_FAT_LFN
+  off_t    ds_lfnsector;           /* Sector of the last long name entry */
+#endif
+};
+
 /* This structure is used internally for describing directory entries */
 
 struct fat_dirinfo_s
@@ -694,10 +732,9 @@ struct fat_dirinfo_s
   /* The file/directory name */
 
 #ifdef CONFIG_FAT_LFN
-  uint8_t  fd_name[LDIR_MAXFNAME]; /* Filename -- directory format */
-#else
-  uint8_t  fd_name[8+3];           /* Filename -- directory format */
+  uint8_t fd_lfname[LDIR_MAXFNAME]; /* Long filename */
 #endif
+  uint8_t fd_name[DIR_MAXFNAME];   /* Short 8.3 alias filename */
 
   /* NT flags are not used */
   
@@ -705,16 +742,19 @@ struct fat_dirinfo_s
   uint8_t  fd_ntflags;             /* NTRes lower case flags */
 #endif
 
+  /* TRUE if this is the root directory */
+
+  bool     fd_root;
+
+  /* The following provides the sequence of directory entries used by the
+   * file or directory.
+   */
+
+  struct fat_dirseq_s fd_seq;      /* Directory sequence */
+
   /* This is part of the opendir, readdir, ... logic */
 
   struct fs_fatdir_s dir;          /* Used with opendir, readdir, etc. */
-
-  /* The following points the standard, short file name directory
-   * entry that contains the real meat of the file data.  Several
-   * 32-byte long fine name records may have preceded this.
-   */
-
-  uint8_t *fd_entry;               /* A pointer to the raw 32-byte entry */
 };
 
 /****************************************************************************
@@ -782,7 +822,7 @@ EXTERN int    fat_dirnamewrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *d
 EXTERN int    fat_dirwrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
                            uint8_t attributes, uint32_t fattime);
 EXTERN int    fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
-EXTERN int    fat_freedirentry(struct fat_mountpt_s *fs, FAR uint8_t *direntry);
+EXTERN int    fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq);
 EXTERN int    fat_dirname2path(char *path, uint8_t *direntry);
 
 /* File creation and removal helpers */

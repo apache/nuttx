@@ -154,7 +154,7 @@ static inline int fat_path2dirname(const char **path, struct fat_dirinfo_s *diri
 
     /* Initialized the name with all spaces */
 
-    memset(dirinfo->fd_name, ' ', 8+3);
+    memset(dirinfo->fd_name, ' ', DIR_MAXFNAME);
  
     /* Loop until the name is successfully parsed or an error occurs */
 
@@ -294,10 +294,11 @@ static inline int fat_path2dirname(const char **path, struct fat_dirinfo_s *diri
 int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
                      const char *path)
 {
-  off_t  cluster;
+  off_t    cluster;
+  uint16_t diroffset;
   uint8_t *direntry = NULL;
-  char terminator;
-  int ret;
+  char     terminator;
+  int      ret;
 
   /* Initialize to traverse the chain.  Set it to the cluster of
    * the root directory
@@ -336,7 +337,7 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
   if (*path == '\0')
     {
-      dirinfo->fd_entry = NULL;
+      dirinfo->fd_root = true;
       return OK;
     }
 
@@ -374,7 +375,8 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
           /* Get a pointer to the directory entry */
 
-          direntry = &fs->fs_buffer[DIRSEC_BYTENDX(fs, dirinfo->dir.fd_index)];
+          diroffset = DIRSEC_BYTENDX(fs, dirinfo->dir.fd_index);
+          direntry  = &fs->fs_buffer[diroffset];
 
           /* Check if we are at the end of the directory */
 
@@ -387,7 +389,7 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
           if (direntry[DIR_NAME] != DIR0_EMPTY &&
               !(DIR_GETATTRIBUTES(direntry) & FATATTR_VOLUMEID) &&
-              !memcmp(&direntry[DIR_NAME], dirinfo->fd_name, 8+3) )
+              !memcmp(&direntry[DIR_NAME], dirinfo->fd_name, DIR_MAXFNAME) )
             {
               /* Yes.. break out of the loop */
 
@@ -412,9 +414,10 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
       if (!terminator)
         {
-          /* Return the pointer to the matching directory entry */
+          /* Return the sector and offset to the matching directory entry */
 
-          dirinfo->fd_entry = direntry;
+          dirinfo->fd_seq.ds_sector = fs->fs_currentsector;
+          dirinfo->fd_seq.ds_offset = diroffset;
           return OK;
         }
 
@@ -453,12 +456,13 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
 int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 {
-  int32_t cluster;
-  off_t   sector;
+  int32_t  cluster;
+  off_t    sector;
+  uint16_t diroffset;
   uint8_t *direntry;
-  uint8_t ch;
-  int     ret;
-  int     i;
+  uint8_t  ch;
+  int      ret;
+  int      i;
 
   /* Re-initialize directory object */
 
@@ -480,8 +484,6 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
   for (;;)
     {
-      unsigned int dirindex;
-
       /* Read the directory sector into fs_buffer */
 
       ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
@@ -492,8 +494,8 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
       /* Get a pointer to the entry at fd_index */
 
-      dirindex = (dirinfo->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
-      direntry = &fs->fs_buffer[dirindex];
+      diroffset = (dirinfo->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+      direntry  = &fs->fs_buffer[diroffset];
 
       /* Check if this directory entry is empty */
 
@@ -502,7 +504,8 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
         {
           /* It is empty -- we have found a directory entry */
 
-          dirinfo->fd_entry = direntry;
+          dirinfo->fd_seq.ds_sector = fs->fs_currentsector;
+          dirinfo->fd_seq.ds_offset = diroffset;
           return OK;
         }
 
@@ -535,7 +538,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
       return cluster;
     }
 
- /* Flush out any cached date in fs_buffer.. we are going to use
+ /* Flush out any cached data in fs_buffer.. we are going to use
   * it to initialize the new directory cluster.
   */
 
@@ -561,7 +564,8 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
       sector++;
     }
 
-  dirinfo->fd_entry = fs->fs_buffer;
+  dirinfo->fd_seq.ds_sector = fs->fs_currentsector;
+  dirinfo->fd_seq.ds_offset = 0;
   return OK;
 }
 
@@ -570,17 +574,28 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
  *
  * Desciption:  Free the directory entry.
  *
- * Assumptions: (1) the directory enty is in the cache and (2) direntry
- *   points to the directory entry to be deleted.  This obvioulsy needs
- *   to be re-designed to support long file names!
- *
  ****************************************************************************/
 
-int fat_freedirentry(struct fat_mountpt_s *fs, FAR uint8_t *direntry)
+int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
 {
-  direntry[DIR_NAME] = DIR0_EMPTY;
-  fs->fs_dirty = true;
-  return OK;
+  uint8_t *direntry;
+  int      ret;
+
+  /* Make sure that the sector containing the directory entry is in the
+   * cache.
+   */
+
+  ret = fat_fscacheread(fs, seq->ds_sector);
+  if (ret == OK)
+    {
+      /* Then mark the entry as deleted */
+
+      direntry           = &fs->fs_buffer[seq->ds_offset];
+      direntry[DIR_NAME] = DIR0_EMPTY;
+      fs->fs_dirty       = true;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -703,9 +718,9 @@ int fat_dirname2path(char *path, uint8_t *direntry)
 
 int fat_dirnamewrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 {
-  uint8_t *direntry = dirinfo->fd_entry;
+  uint8_t *direntry = &fs->fs_buffer[dirinfo->fd_seq.ds_offset];
  
-  memcpy(&direntry[DIR_NAME], dirinfo->fd_name, 8+3);
+  memcpy(&direntry[DIR_NAME], dirinfo->fd_name, DIR_MAXFNAME);
 #ifdef CONFIG_FLAT_LCNAMES
   DIR_PUTNTRES(direntry, dirinfo->fd_ntflags);
 #else
@@ -732,7 +747,7 @@ int fat_dirwrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
   /* Initialize the 32-byte directory entry */
 
-  direntry = dirinfo->fd_entry;
+  direntry = &fs->fs_buffer[dirinfo->fd_seq.ds_offset];
   memset(direntry, 0, DIR_SIZE);
 
   /* Directory name info */
@@ -793,9 +808,9 @@ int fat_dircreate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 int fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory)
 {
   struct fat_dirinfo_s dirinfo;
-  uint32_t  dircluster;
-  off_t   dirsector;
-  int     ret;
+  uint32_t             dircluster;
+  uint8_t             *direntry;
+  int                  ret;
 
   /* Find the directory entry referring to the entry to be deleted */
 
@@ -809,7 +824,7 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory)
 
   /* Check if this is a FAT12/16 root directory */
 
-  if (dirinfo.fd_entry == NULL)
+  if (dirinfo.fd_root)
     {
       /* The root directory cannot be removed */
 
@@ -818,7 +833,8 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory)
 
   /* The object has to have write access to be deleted */
 
-  if ((DIR_GETATTRIBUTES(dirinfo.fd_entry) & FATATTR_READONLY) != 0)
+  direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+  if ((DIR_GETATTRIBUTES(direntry) & FATATTR_READONLY) != 0)
     {
       /* It is a read-only entry */
 
@@ -829,14 +845,13 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory)
    * entry to be deleted
    */
 
-  dirsector  = fs->fs_currentsector;
   dircluster =
-      ((uint32_t)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
-      DIR_GETFSTCLUSTLO(dirinfo.fd_entry);
+      ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
+      DIR_GETFSTCLUSTLO(direntry);
 
   /* Is this entry a directory? */
 
-  if (DIR_GETATTRIBUTES(dirinfo.fd_entry) & FATATTR_DIRECTORY)
+  if (DIR_GETATTRIBUTES(direntry) & FATATTR_DIRECTORY)
     {
       /* It is a sub-directory. Check if we are be asked to remove
        * a directory or a file.
@@ -903,7 +918,7 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory)
               return -ENOTEMPTY;
             }
 
-          /* Get the next directgory entry */
+          /* Get the next directory entry */
 
           ret = fat_nextdirentry(fs, &dirinfo.dir);
           if (ret < 0)
@@ -926,19 +941,9 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory)
         }
     }
 
-  /* Make sure that the directory containing the entry to be deleted is
-   * in the cache.
-   */
-
-  ret = fat_fscacheread(fs, dirsector);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
   /* Mark the directory entry 'deleted' */
 
-  ret = fat_freedirentry(fs, dirinfo.fd_entry);
+  ret = fat_freedirentry(fs, &dirinfo.fd_seq);
   if (ret < 0)
     {
       return ret;

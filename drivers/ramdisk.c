@@ -148,10 +148,12 @@ static ssize_t rd_read(FAR struct inode *inode, unsigned char *buffer,
 {
   struct rd_struct_s *dev;
 
-  fvdbg("sector: %d nsectors: %d sectorsize: %d\n");
-
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct rd_struct_s *)inode->i_private;
+
+  fvdbg("sector: %d nsectors: %d sectorsize: %d\n",
+        start_sector, dev->rd_sectsize, nsectors);
+
   if (start_sector < dev->rd_nsectors &&
       start_sector + nsectors <= dev->rd_nsectors)
     {
@@ -180,10 +182,12 @@ static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
 {
   struct rd_struct_s *dev;
 
-  fvdbg("sector: %d nsectors: %d sectorsize: %d\n");
-
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct rd_struct_s *)inode->i_private;
+
+  fvdbg("sector: %d nsectors: %d sectorsize: %d\n",
+        start_sector, dev->rd_sectsize, nsectors);
+
   if (!dev->rd_writeenabled)
     {
       return -EACCES;

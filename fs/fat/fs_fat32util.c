@@ -1273,7 +1273,8 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
  * Desciption: Truncate an existing file to zero length
  *
  * Assumptions:  The caller holds mountpoint semaphore, fs_buffer holds
- *   the directory entry, dirinfo refers to the current fs_buffer content.
+ *   the directory entry, the directory entry sector (fd_sector) is
+ *   currently in the sector cache.
  *
  ****************************************************************************/
 
@@ -1281,31 +1282,33 @@ int  fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 {
   unsigned int startcluster;
   uint32_t     writetime;
+  uint8_t     *direntry;
   off_t        savesector;
   int          ret;
 
   /* Get start cluster of the file to truncate */
 
+  direntry = &fs->fs_buffer[dirinfo->fd_seq.ds_offset];
   startcluster =
-      ((uint32_t)DIR_GETFSTCLUSTHI(dirinfo->fd_entry) << 16) |
-      DIR_GETFSTCLUSTLO(dirinfo->fd_entry);
+      ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
+      DIR_GETFSTCLUSTLO(direntry);
 
   /* Clear the cluster start value in the directory and set the file size
    * to zero.  This makes the file look empty but also have to dispose of
    * all of the clusters in the chain.
    */
 
-  DIR_PUTFSTCLUSTHI(dirinfo->fd_entry, 0);
-  DIR_PUTFSTCLUSTLO(dirinfo->fd_entry, 0);
-  DIR_PUTFILESIZE(dirinfo->fd_entry, 0);
+  DIR_PUTFSTCLUSTHI(direntry, 0);
+  DIR_PUTFSTCLUSTLO(direntry, 0);
+  DIR_PUTFILESIZE(direntry, 0);
 
   /* Set the ARCHIVE attribute and update the write time */
 
-  DIR_PUTATTRIBUTES(dirinfo->fd_entry, FATATTR_ARCHIVE);
+  DIR_PUTATTRIBUTES(direntry, FATATTR_ARCHIVE);
  
   writetime = fat_systime2fattime();
-  DIR_PUTWRTTIME(dirinfo->fd_entry, writetime & 0xffff);
-  DIR_PUTWRTDATE(dirinfo->fd_entry, writetime > 16);
+  DIR_PUTWRTTIME(direntry, writetime & 0xffff);
+  DIR_PUTWRTDATE(direntry, writetime > 16);
 
   /* This sector needs to be written back to disk eventually */
 

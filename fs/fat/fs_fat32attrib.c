@@ -63,6 +63,7 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
   struct fat_dirinfo_s  dirinfo;
   FAR struct inode     *inode;
   const char           *relpath = NULL;
+  uint8_t              *direntry;
   uint8_t               oldattributes;
   uint8_t               newattributes;
   int                   ret;
@@ -111,7 +112,7 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
 
   /* Make sure that we found some valid file or directory */
 
-  if (!dirinfo.fd_entry)
+  if (dirinfo.fd_root)
     {
       /* Ooops.. we found the root directory */
 
@@ -121,7 +122,8 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
 
   /* Get the current attributes */
 
-  oldattributes = DIR_GETATTRIBUTES(dirinfo.fd_entry);
+  direntry      = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+  oldattributes = DIR_GETATTRIBUTES(direntry);
   newattributes = oldattributes;
 
   /* Set or clear any bits as requested */
@@ -133,7 +135,7 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
 
   if (newattributes != oldattributes)
     {
-      DIR_PUTATTRIBUTES(dirinfo.fd_entry, newattributes);
+      DIR_PUTATTRIBUTES(direntry, newattributes);
       fs->fs_dirty = true;
       ret = fat_updatefsinfo(fs);
       if (ret != OK)

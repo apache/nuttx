@@ -160,6 +160,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
   struct inode         *inode;
   struct fat_mountpt_s *fs;
   struct fat_file_s    *ff;
+  uint8_t              *direntry;
   int                   ret;
 
   /* Sanity checks */
@@ -203,10 +204,12 @@ static int fat_open(FAR struct file *filep, const char *relpath,
 
       /* The name exists -- but is it a file or a directory? */
 
-      if (dirinfo.fd_entry == NULL ||
-         (DIR_GETATTRIBUTES(dirinfo.fd_entry) & FATATTR_DIRECTORY))
+      direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+      if (dirinfo.fd_root ||
+         (DIR_GETATTRIBUTES(direntry) & FATATTR_DIRECTORY))
         {
           /* It is a directory */
+
           ret = -EISDIR;
           goto errout_with_semaphore;
         }
@@ -227,7 +230,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
 
       /* Check if the caller has sufficient privileges to open the file */
 
-      readonly = ((DIR_GETATTRIBUTES(dirinfo.fd_entry) & FATATTR_READONLY) != 0);
+      readonly = ((DIR_GETATTRIBUTES(direntry) & FATATTR_READONLY) != 0);
       if (((oflags & O_WRONLY) != 0) && readonly)
         {
           ret = -EACCES;
@@ -273,6 +276,8 @@ static int fat_open(FAR struct file *filep, const char *relpath,
         }
 
       /* Fall through to finish the file open operation */
+      
+      direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
     }
   else
     {
@@ -316,12 +321,12 @@ static int fat_open(FAR struct file *filep, const char *relpath,
   /* File cluster/size info */
 
   ff->ff_startcluster     =
-    ((uint32_t)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
-      DIR_GETFSTCLUSTLO(dirinfo.fd_entry);
+    ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
+      DIR_GETFSTCLUSTLO(direntry);
 
   ff->ff_currentcluster   = ff->ff_startcluster;
   ff->ff_sectorsincluster = fs->fs_fatsecperclus;
-  ff->ff_size             = DIR_GETFILESIZE(dirinfo.fd_entry);
+  ff->ff_size             = DIR_GETFILESIZE(direntry);
 
   /* Attach the private date to the struct file instance */
 
@@ -1224,7 +1229,8 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct fs_dir
 {
   struct fat_mountpt_s *fs;
   struct fat_dirinfo_s  dirinfo;
-  int                     ret;
+  uint8_t              *direntry;
+  int                   ret;
 
   /* Sanity checks */
 
@@ -1250,10 +1256,11 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct fs_dir
     {
       goto errout_with_semaphore;
     }
+  direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
 
   /* Check if this is the root directory */
 
-  if (dirinfo.fd_entry == NULL)
+  if (dirinfo.fd_root)
     {
       /* Handle the FAT12/16/32 root directory using the values setup by
        * fat_finddirentry() above.
@@ -1267,7 +1274,7 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct fs_dir
 
   /* This is not the root directory.  Verify that it is some kind of directory */
 
-  else if ((DIR_GETATTRIBUTES(dirinfo.fd_entry) & FATATTR_DIRECTORY) == 0)
+  else if ((DIR_GETATTRIBUTES(direntry) & FATATTR_DIRECTORY) == 0)
     {
        /* The entry is not a directory */
        ret = -ENOTDIR;
@@ -1278,8 +1285,8 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct fs_dir
        /* The entry is a directory */
 
       dir->u.fat.fd_startcluster = 
-          ((uint32_t)DIR_GETFSTCLUSTHI(dirinfo.fd_entry) << 16) |
-                   DIR_GETFSTCLUSTLO(dirinfo.fd_entry);
+          ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
+                   DIR_GETFSTCLUSTLO(direntry);
       dir->u.fat.fd_currcluster  = dir->u.fat.fd_startcluster;
       dir->u.fat.fd_currsector   = fat_cluster2sector(fs, dir->u.fat.fd_currcluster);
       dir->u.fat.fd_index        = 2;
@@ -1819,7 +1826,7 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
    * management routines.
    */
 
-  memset(&direntry[DIR_NAME], ' ', 8+3);
+  memset(&direntry[DIR_NAME], ' ', DIR_MAXFNAME);
   direntry[DIR_NAME] = '.';
   DIR_PUTATTRIBUTES(direntry, FATATTR_DIRECTORY);
 
@@ -1875,8 +1882,9 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
    * change the sector in the cache.
    */
 
-  DIR_PUTFSTCLUSTLO(dirinfo.fd_entry, dircluster);
-  DIR_PUTFSTCLUSTHI(dirinfo.fd_entry, dircluster >> 16);
+  direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+  DIR_PUTFSTCLUSTLO(direntry, dircluster);
+  DIR_PUTFSTCLUSTHI(direntry, dircluster >> 16);
   fs->fs_dirty = true;
 
   /* Now update the FAT32 FSINFO sector */
@@ -1951,9 +1959,8 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
 {
   struct fat_mountpt_s *fs;
   struct fat_dirinfo_s  dirinfo;
-  off_t                 oldsector;
-  uint8_t              *olddirentry;
-  uint8_t              *newdirentry;
+  struct fat_dirseq_s   dirseq;
+  uint8_t              *direntry;
   uint8_t               dirstate[DIR_SIZE-DIR_ATTRIBUTES];
   int                   ret;
 
@@ -1988,7 +1995,7 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
    * root directory.  We can't rename the root directory.
    */
 
-  if (!dirinfo.fd_entry)
+  if (dirinfo.fd_root)
     {
       ret = -EXDEV;
       goto errout_with_semaphore;
@@ -1998,9 +2005,10 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
    * directory entry offset to the old directory.
    */
 
-  olddirentry = dirinfo.fd_entry;
-  oldsector   = fs->fs_currentsector;
-  memcpy(dirstate, &olddirentry[DIR_ATTRIBUTES], DIR_SIZE-DIR_ATTRIBUTES);
+  memcpy(&dirseq, &dirinfo.fd_seq, sizeof(struct fat_dirseq_s));
+  
+  direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+  memcpy(dirstate, &direntry[DIR_ATTRIBUTES], DIR_SIZE-DIR_ATTRIBUTES);
 
   /* No find the directory where we should create the newpath object */
 
@@ -2032,8 +2040,8 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
 
   /* Write the new directory entry */
 
-  newdirentry = dirinfo.fd_entry;
-  memcpy(&newdirentry[DIR_ATTRIBUTES], dirstate, DIR_SIZE-DIR_ATTRIBUTES);
+  direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+  memcpy(&direntry[DIR_ATTRIBUTES], dirstate, DIR_SIZE-DIR_ATTRIBUTES);
   fs->fs_dirty = true;
   
   ret = fat_dirnamewrite(fs, &dirinfo);
@@ -2042,19 +2050,9 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
       goto errout_with_semaphore;
     }
 
-  /* Now flush the new directory entry to disk and read the sector
-   * containing the old directory entry.
-   */
+  /* Remove the old entry (flushing the new directory entry to disk) */
 
-  ret = fat_fscacheread(fs, oldsector);
-  if (ret < 0)
-    {
-      goto errout_with_semaphore;
-    }
-
-  /* Remove the old entry */
-
-  ret = fat_freedirentry(fs, olddirentry);
+  ret = fat_freedirentry(fs, &dirseq);
   if (ret < 0)
     {
       goto errout_with_semaphore;
@@ -2090,6 +2088,7 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
   uint16_t              fatdate;
   uint16_t              date2;
   uint16_t              fattime;
+  uint8_t              *direntry;
   uint8_t               attribute;
   int                   ret;
 
@@ -2122,9 +2121,9 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
     }
 
   memset(buf, 0, sizeof(struct stat));
-  if (!dirinfo.fd_entry)
+  if (dirinfo.fd_root)
     {
-      /* It's directory name of mount point */
+      /* It's directory name of the mount point */
 
       buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR|S_IWOTH|S_IWGRP|S_IWUSR;
       ret = OK;
@@ -2133,7 +2132,8 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
 
   /* Get the FAT attribute and map it so some meaningful mode_t values */
 
-  attribute = DIR_GETATTRIBUTES(dirinfo.fd_entry);
+  direntry  = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+  attribute = DIR_GETATTRIBUTES(direntry);
   if ((attribute & FATATTR_VOLUMEID) != 0)
     {
       ret = -ENOENT;
@@ -2163,17 +2163,17 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
 
   /* File/directory size, access block size */
 
-  buf->st_size      = DIR_GETFILESIZE(dirinfo.fd_entry);
+  buf->st_size      = DIR_GETFILESIZE(direntry);
   buf->st_blksize   = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
   buf->st_blocks    = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
 
   /* Times */
 
-  fatdate           = DIR_GETWRTDATE(dirinfo.fd_entry);
-  fattime           = DIR_GETWRTTIME(dirinfo.fd_entry);
+  fatdate           = DIR_GETWRTDATE(direntry);
+  fattime           = DIR_GETWRTTIME(direntry);
   buf->st_mtime     = fat_fattime2systime(fattime, fatdate);
 
-  date2             = DIR_GETLASTACCDATE(dirinfo.fd_entry);
+  date2             = DIR_GETLASTACCDATE(direntry);
   if (fatdate == date2)
     {
       buf->st_atime = buf->st_mtime;
@@ -2183,8 +2183,8 @@ static int fat_stat(struct inode *mountpt, const char *relpath, struct stat *buf
       buf->st_atime = fat_fattime2systime(0, date2);
     }
 
-  fatdate           = DIR_GETCRDATE(dirinfo.fd_entry);
-  fattime           = DIR_GETCRTIME(dirinfo.fd_entry);
+  fatdate           = DIR_GETCRDATE(direntry);
+  fattime           = DIR_GETCRTIME(direntry);
   buf->st_ctime     = fat_fattime2systime(fattime, fatdate);
 
   ret = OK;

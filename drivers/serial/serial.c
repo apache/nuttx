@@ -163,12 +163,21 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
 
 static void uart_putxmitchar(FAR uart_dev_t *dev, int ch)
 {
-  int nexthead = dev->xmit.head + 1;
+  irqstate_t flags;
+  int nexthead;
+
+  /* Increment to see what the next head pointer will be.  We need to use the "next"
+   * head pointer to determine when the circular buffer would overrun
+   */
+ 
+  nexthead = dev->xmit.head + 1;
   if (nexthead >= dev->xmit.size)
     {
       nexthead = 0;
     }
 
+  /* Loop until we are able to add the character to the TX buffer */
+  
   for (;;)
     {
       if (nexthead != dev->xmit.tail)
@@ -179,8 +188,11 @@ static void uart_putxmitchar(FAR uart_dev_t *dev, int ch)
         }
       else
         {
-          /* Inform the interrupt level logic that we are waiting */
+          /* Inform the interrupt level logic that we are waiting.
+           * This and the following steps must be atomic.
+           */
 
+          flags = irqsave();
           dev->xmitwaiting = true;
 
           /* Wait for some characters to be sent from the buffer
@@ -192,6 +204,7 @@ static void uart_putxmitchar(FAR uart_dev_t *dev, int ch)
           uart_enabletxint(dev);
           uart_takesem(&dev->xmitsem);
           uart_disabletxint(dev);
+          irqrestore(flags);
         }
     }
 }
