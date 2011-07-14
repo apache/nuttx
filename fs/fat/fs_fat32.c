@@ -1314,6 +1314,7 @@ static int fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   uint8_t              *direntry;
   uint8_t               ch;
   uint8_t               attribute;
+  bool                  found;
   int                   ret = OK;
 
   /* Sanity checks */
@@ -1336,7 +1337,9 @@ static int fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   /* Read the next directory entry */
 
   dir->fd_dir.d_name[0] = '\0';
-  while (dir->u.fat.fd_currsector && dir->fd_dir.d_name[0] == '\0')
+  found = false;
+ 
+  while (dir->u.fat.fd_currsector && !found)
     {
       ret = fat_fscacheread(fs, dir->u.fat.fd_currsector);
       if (ret < 0)
@@ -1365,21 +1368,39 @@ static int fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
       /* No, is the current entry a valid entry? */
 
       attribute = DIR_GETATTRIBUTES(direntry);
+
+#ifdef CONFIG_FAT_LFN
+      if (ch != DIR0_EMPTY &&
+          ((attribute & FATATTR_VOLUMEID) == 0) ||
+           ((ch & LDIR0_LAST) != 0 && attribute == LDDIR_LFNATTR))
+#else
       if (ch != DIR0_EMPTY && (attribute & FATATTR_VOLUMEID) == 0)
+#endif
         {
-          /* Yes.. get the name from the directory info */
+          /* Yes.. get the name from the directory entry.  NOTE: For the case
+           * of the long file name entry, this will advance the several
+           * several directory entries.
+           */
 
-          (void)fat_dirname2path(dir->fd_dir.d_name, direntry);
-
-          /* And the file type */
-
-          if ((attribute & FATATTR_DIRECTORY) == 0)
+          ret = fat_dirname2path(dir, direntry);
+          if (ret == OK)
             {
-              dir->fd_dir.d_type = DTYPE_FILE;
-            }
-          else
-            {
-              dir->fd_dir.d_type = DTYPE_DIRECTORY;
+              /* The name was successfully extracted.  Now save the file type */
+
+              if ((attribute & FATATTR_DIRECTORY) == 0)
+                {
+                  dir->fd_dir.d_type = DTYPE_FILE;
+                }
+              else
+                {
+                  dir->fd_dir.d_type = DTYPE_DIRECTORY;
+                }
+
+              /* Mark the entry found.  We will set up the next directory index,
+               * and then exit with success.
+               */
+
+              found = true;
             }
         }
 
@@ -1981,7 +2002,9 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
       goto errout_with_semaphore;
     }
 
-  /* Find the directory entry for the oldrelpath */
+  /* Find the directory entry for the oldrelpath (there may be multiple
+   * directory entries if long file name support is enabled).
+   */
 
   ret = fat_finddirentry(fs, &dirinfo, oldrelpath);
   if (ret != OK)
@@ -2003,14 +2026,18 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
 
   /* Save the information that will need to recover the directory sector and
    * directory entry offset to the old directory.
+   *
+   * Save the positional information of the old directory entry.
    */
 
   memcpy(&dirseq, &dirinfo.fd_seq, sizeof(struct fat_dirseq_s));
-  
+
+  /* Save the non-name-related portion of the directory entry intact */
+
   direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
   memcpy(dirstate, &direntry[DIR_ATTRIBUTES], DIR_SIZE-DIR_ATTRIBUTES);
 
-  /* No find the directory where we should create the newpath object */
+  /* Now find the directory where we should create the newpath object */
 
   ret = fat_finddirentry(fs, &dirinfo, newrelpath);
   if (ret == OK)
@@ -2030,7 +2057,11 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
       goto errout_with_semaphore;
     }
 
-  /* Reserve a directory entry */
+  /* Reserve a directory entry. If long file name support is enabled, then
+   * this might, in fact, allocate a sequence of directory entries.  A side
+   * effect of fat_allocatedirentry() in either case is that it leaves the
+   * short file name entry in the sector cache.
+   */
 
   ret = fat_allocatedirentry(fs, &dirinfo);
   if (ret != OK)
@@ -2038,19 +2069,28 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
       goto errout_with_semaphore;
     }
 
-  /* Write the new directory entry */
+  /* Then write the new file name into the directory entry.  This, of course,
+   * may involve writing multiple directory entries if long file name
+   * support is enabled.  A side effect of fat_allocatedirentry() in either
+   * case is that it leaves the short file name entry in the sector cache.
+   */
 
-  direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
-  memcpy(&direntry[DIR_ATTRIBUTES], dirstate, DIR_SIZE-DIR_ATTRIBUTES);
-  fs->fs_dirty = true;
-  
   ret = fat_dirnamewrite(fs, &dirinfo);
   if (ret < 0)
     {
       goto errout_with_semaphore;
     }
 
-  /* Remove the old entry (flushing the new directory entry to disk) */
+  /* Copy the unchanged information into the new short file name entry. */
+
+  direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
+  memcpy(&direntry[DIR_ATTRIBUTES], dirstate, DIR_SIZE-DIR_ATTRIBUTES);
+  fs->fs_dirty = true;
+
+  /* Remove the old entry, flushing the new directory entry to disk.  If
+   * the old file name was a long file name, then multiple directory
+   * entries may be freed.
+   */
 
   ret = fat_freedirentry(fs, &dirseq);
   if (ret < 0)

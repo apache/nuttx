@@ -829,7 +829,7 @@ EXTERN int    fat_dirwrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirin
                            uint8_t attributes, uint32_t fattime);
 EXTERN int    fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 EXTERN int    fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq);
-EXTERN int    fat_dirname2path(char *path, uint8_t *direntry);
+EXTERN int    fat_dirname2path(struct fs_dirent_s *dir, uint8_t *direntry);
 
 /* File creation and removal helpers */
 
