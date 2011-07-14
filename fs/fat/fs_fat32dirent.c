@@ -541,8 +541,8 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
 
   /* First, let's decide what is name and what is extension */
 
-  len = strlen(dirinfo.fd_lfname);
-  ext = strrchr(dirinfo.fd_lfname, '.');
+  len = strlen((char*)dirinfo->fd_lfname);
+  ext = strrchr((char*)dirinfo->fd_lfname, '.');
   if (ext)
     {
       ptrdiff_t tmp;
@@ -551,7 +551,7 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
        * beginning of the string is then the name length.
        */
 
-      tmp       = ext - dirinfo.fd_lfname;
+      tmp       = ext - (char*)dirinfo->fd_lfname;
       namechars = tmp;
 
       /* And the rest, exluding the '.' is the extension. */
@@ -596,14 +596,14 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
        /* Use the extension as the name */
 
        DEBUGASSERT(ext && extchars > 0);
-       src      = ext;
-       ext      = NULL;
-       namechar = extchars;
-       extchars = 0;
+       src       = ext;
+       ext       = NULL;
+       namechars = extchars;
+       extchars  = 0;
     }
   else
     {
-       src      = dirinfo.fd_ldname;
+       src       = (char*)dirinfo->fd_lfname;
     }
 
   /* Then copy the name and extension, handling upper case conversions and
@@ -622,7 +622,22 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
       ch = *src++;
       if (ch == '\0')
         {
-          break;
+          /* This is the end of the source string. Do we need to add ~1.  We
+           * will do that if we were parsing the name part when the endo of
+           * string was encountered.
+           */
+
+          if (endndx == 6)
+            {
+              /* Write the ~1 at the end of the name */
+
+              dirinfo->fd_name[ndx++] = '~';
+              dirinfo->fd_name[ndx]   = '1';
+            }
+
+          /* In any event, we are done */
+
+          return OK;
         }
 
       /* Exclude those few characters included in long file names, but
@@ -655,7 +670,7 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
 
           namechars--;
 
-          /* Is it time to add ~1 to the string?  Will will do that if
+          /* Is it time to add ~1 to the string?  We will do that if
            * either (1) we have already added the maximum number of
            * characters to the short name, or (2) if there are no further
            * characters available in the name portion of the long name.
@@ -666,7 +681,7 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
               /* Write the ~1 at the end of the name */
 
               dirinfo->fd_name[ndx++] = '~';
-              dirinfo->fd_name[ndx++] = '1';
+              dirinfo->fd_name[ndx]   = '1';
 
               /* Then switch to the extension (if there is one) */
 
@@ -846,9 +861,8 @@ static inline int fat_findsfnentry(struct fat_mountpt_s *fs,
  ****************************************************************************/
 
 #ifdef CONFIG_FAT_LFN
-static bool fat_cmplfnchunk(wchar_t *chunk, const uint8_t *substr, int nchunk)
+static bool fat_cmplfnchunk(uint8_t *chunk, const uint8_t *substr, int nchunk)
 {
-  uint8_t *ptr;
   int i;
 
   /* Check bytes 1-nchunk */
@@ -871,15 +885,15 @@ static bool fat_cmplfnchunk(wchar_t *chunk, const uint8_t *substr, int nchunk)
        * the ASCII code.
        */
 
-      wch = fat_getuint16(chunk);
-      if (wch & 0xff != (wchar_t)*substr)
+      wch = (wchar_t)fat_getuint16((uint8_t*)chunk);
+      if ((wch & 0xff) != (wchar_t)*substr)
         {
           return false;
         }
 
       /* Yes.. the characters match.  Try the next */
 
-      chunk++;
+      chunk += sizeof(wchar_t);
       substr++;
     }
 
@@ -901,7 +915,6 @@ static bool fat_cmplfnchunk(wchar_t *chunk, const uint8_t *substr, int nchunk)
 static bool fat_cmplfname(const uint8_t *direntry, const uint8_t *substr)
 {
   uint8_t *chunk;
-  int i;
 
   /* Check bytes 1-5 */
 
@@ -954,7 +967,7 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
    * LDIR_MAXFNAME+1 we do not have to check the length of the string).
    */
 
-  namelen = strlen(dirinfo.fd_lfname);
+  namelen = strlen((char*)dirinfo->fd_lfname);
   DEBUGASSERT(namelen <= LDIR_MAXFNAME);
 
   /* How many LFN directory entries are we expecting? */
@@ -1007,12 +1020,12 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
        */
 
       if (LDIR_GETATTRIBUTES(direntry) != LDDIR_LFNATTR ||
-          LDIR_GETSEQ(direntry) != seqno);
+          LDIR_GETSEQ(direntry) != seqno)
         {
           /* No, restart the search at the next entry */
 
           seqno = lastseq;
-          goto nextentry;
+          goto next_entry;
         }
 
       /* Yes.. If this is not the "last" LFN entry, then the checksum must
@@ -1035,7 +1048,7 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
           /* No, restart the search at the next entry */
 
           seqno = lastseq;
-          goto nextentry;
+          goto next_entry;
         }
 
       /* Check if the name substring in this LFN matches the corresponding
@@ -1043,7 +1056,7 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
        */
 
       offset = ((seqno & LDIR0_SEQ_MASK) - 1) * LDIR_MAXLFNCHARS;
-      if (fat_cmplfname(direntry, &dirinfo.fd_lfname[offset]))
+      if (fat_cmplfname(direntry, &dirinfo->fd_lfname[offset]))
         {
           /* Yes.. it matches.  Check the sequence number.  Is this the
            * "last" LFN entry (i.e., the one that appears first)?
@@ -1210,6 +1223,7 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
   uint8_t  nentries;
   uint8_t  remainder;
   uint8_t  needed;
+  uint8_t  ch;
   int      namelen;
   int      ret;
 
@@ -1217,13 +1231,13 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
    * LDIR_MAXFNAME+1 we do not have to check the length of the string).
    */
 
-  namelen = strlen(dirinfo.fd_lfname);
+  namelen = strlen((char *)dirinfo->fd_lfname);
   DEBUGASSERT(namelen <= LDIR_MAXFNAME);
 
   /* How many LFN directory entries are we expecting? */
 
   nentries   = namelen / LDIR_MAXLFNCHARS;
-  remainder  = namelen - nfullentries * LDIR_MAXLFNCHARS;
+  remainder  = namelen - nentries * LDIR_MAXLFNCHARS;
   if (remainder > 0)
     {
       nentries++;
@@ -1452,7 +1466,7 @@ static inline int fat_getsfname(uint8_t *direntry, char *buffer,
  ****************************************************************************/
 
 #ifdef CONFIG_FAT_LFN
-static void fat_getlfnchunk(wchar_t *chunk, uint8_t *dest, int nchunk)
+static void fat_getlfnchunk(uint8_t *chunk, uint8_t *dest, int nchunk)
 {
   wchar_t wch;
   int i;
@@ -1466,9 +1480,9 @@ static void fat_getlfnchunk(wchar_t *chunk, uint8_t *dest, int nchunk)
        * the ASCII code.
        */
 
-      wch = fat_getuint16(chunk);
+      wch = (wchar_t)fat_getuint16(chunk);
       *dest++ = (uint8_t)(wch & 0xff);
-      chunk++;
+      chunk += sizeof(wchar_t);
     }
 }
 #endif
@@ -1483,7 +1497,7 @@ static void fat_getlfnchunk(wchar_t *chunk, uint8_t *dest, int nchunk)
  ****************************************************************************/
 
 #ifdef CONFIG_FAT_LFN
-static inline int fat_getlfname(struct fs_dirent_s *dir)
+static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *dir)
 {
   uint8_t  lfname[LDIR_MAXLFNCHARS];
   uint16_t diroffset;
@@ -1493,6 +1507,7 @@ static inline int fat_getlfname(struct fs_dirent_s *dir)
   uint8_t  checksum;
   int      tmp;
   int      nsrc;
+  int      ret;
   int      i;
 
   /* Get a reference to the current directory entry */
@@ -1544,8 +1559,6 @@ static inline int fat_getlfname(struct fs_dirent_s *dir)
           nsrc = LDIR_MAXLFNCHARS;
           if ((seqno & LDIR0_LAST) != 0)
             {
-              int len;
-
               /* Reduce the number of characters by the number of trailing
                * spaces.
                */
@@ -1566,27 +1579,27 @@ static inline int fat_getlfname(struct fs_dirent_s *dir)
                * terminator will fit).
                */
 
-              dir.d_name[offset+nsrc] = '\0';
+              dir->fd_dir.d_name[offset+nsrc] = '\0';
             }
 
           /* Then transfer the characters */
 
           for (i = 0; i < nsrc && offset+i < NAME_MAX; i++)
             {
-              dir.d_name[offset+i] = lfname[i];
+              dir->fd_dir.d_name[offset+i] = lfname[i];
             }
         }
 
       /* Read next directory entry */
 
-      if (fat_nextdirentry(fs, dir) != OK)
+      if (fat_nextdirentry(fs, &dir->u.fat) != OK)
         {
           return -ENOENT;
         }
 
       /* Make sure that the directory sector into the sector cache */
 
-      ret = fat_fscacheread(fs, dir->fd_currsector);
+      ret = fat_fscacheread(fs, dir->u.fat.fd_currsector);
       if (ret < 0)
         {
           return ret;
@@ -1608,7 +1621,7 @@ static inline int fat_getlfname(struct fs_dirent_s *dir)
            * found in the long file name entries.
            */
 
-          if (fat_lfnchecksum(dirinfo->fd_name) == checksum)
+          if (fat_lfnchecksum(direntry) == checksum)
             {
               /* Yes.. return success! */
 
@@ -1668,9 +1681,8 @@ static int fat_putsfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
  ****************************************************************************/
 
 #ifdef CONFIG_FAT_LFN
-static void fat_putlfnspaces(wchar_t *chunk, int nchunk)
+static void fat_putlfnspaces(uint8_t *chunk, int nchunk)
 {
-  uint16_t wch;
   int i;
 
   /* Initialize unicode characters 1-nchunk */
@@ -1679,8 +1691,8 @@ static void fat_putlfnspaces(wchar_t *chunk, int nchunk)
     {
       /* The write the unicode spzed character into the directory entry. */
 
-      fat_putuint16(chunk, (uint16_t)' ');
-      chunk++;
+      fat_putuint16((uint8_t *)chunk, (uint16_t)' ');
+      chunk += sizeof(wchar_t);
     }
 }
 #endif
@@ -1695,7 +1707,7 @@ static void fat_putlfnspaces(wchar_t *chunk, int nchunk)
  ****************************************************************************/
 
 #ifdef CONFIG_FAT_LFN
-static void fat_putlfnchunk(wchar_t *chunk, const uint8_t *src, int nchunk)
+static void fat_putlfnchunk(uint8_t *chunk, const uint8_t *src, int nchunk)
 {
   uint16_t wch;
   int i;
@@ -1712,7 +1724,7 @@ static void fat_putlfnchunk(wchar_t *chunk, const uint8_t *src, int nchunk)
 
       wch = (uint16_t)*src++;
       fat_putuint16(chunk, wch);
-      chunk++;
+      chunk += sizeof(wchar_t);
     }
 }
 #endif
@@ -1727,7 +1739,7 @@ static void fat_putlfnchunk(wchar_t *chunk, const uint8_t *src, int nchunk)
  ****************************************************************************/
 
 #ifdef CONFIG_FAT_LFN
-static int fat_putlfname((struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
+static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 {
   uint16_t diroffset;
   uint8_t *direntry;
@@ -1744,7 +1756,7 @@ static int fat_putlfname((struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinf
    * LDIR_MAXFNAME+1 we do not have to check the length of the string).
    */
 
-  namelen = strlen(dirinfo.fd_lfname);
+  namelen = strlen((char*)dirinfo->fd_lfname);
   DEBUGASSERT(namelen <= LDIR_MAXFNAME);
 
   /* How many LFN directory entries do we need to write? */
@@ -1776,8 +1788,8 @@ static int fat_putlfname((struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinf
 
   /* Set up the initial positional data */
 
-  dirinfo->dir.fd_currcluster  = dirinfo->ds_lfncluster;
-  dirinfo->dir.fd_currsector   = dirinfo->ds_lfnsector;
+  dirinfo->dir.fd_currcluster  = dirinfo->fd_seq.ds_lfncluster;
+  dirinfo->dir.fd_currsector   = dirinfo->fd_seq.ds_lfnsector;
 
   /* Make sure that the sector containing the "last" long file name entry
    * is in the sector cache (it probably is not).
@@ -1799,7 +1811,7 @@ static int fat_putlfname((struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinf
 
       /* Get a reference to the current directory entry */
 
-      diroffset = (dir->u.fat.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+      diroffset = (dirinfo->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
       direntry  = &fs->fs_buffer[diroffset];
 
       /* Is this the "last" LFN directory entry? */
@@ -1863,7 +1875,7 @@ static int fat_putlfname((struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinf
 
       /* Read next directory entry */
 
-      if (fat_nextdirentry(fs, dir) != OK)
+      if (fat_nextdirentry(fs, &dirinfo->dir) != OK)
         {
           return -ENOENT;
         }
@@ -2027,7 +2039,7 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
        */
 
 #ifdef CONFIG_FAT_LFN
-      if (dirinfo.fd_lfname[0] != '\0')
+      if (dirinfo->fd_lfname[0] != '\0')
         {
           /* Yes.. Search for the sequence of long file name directory
            * entries. NOTE: As a side effect, this function returns with
@@ -2139,7 +2151,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
        */
 
 #ifdef CONFIG_FAT_LFN
-      if (dirinfo.fd_lfname[0] != '\0')
+      if (dirinfo->fd_lfname[0] != '\0')
         {
           /* Yes.. Allocate for the sequence of long file name directory
            * entries plus a short file name directory entry.
@@ -2230,6 +2242,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
 {
 #ifdef CONFIG_FAT_LFN
+  struct fs_fatdir_s dir;
   uint16_t diroffset;
   uint8_t *direntry;
   int      ret;
@@ -2238,9 +2251,9 @@ int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
    * first on the media).
    */
 
-  dirinfo->dir.fd_startcluster = dirinfo->fd_seq.fd_lfncluster;
-  dirinfo->dir.fd_currcluster  = dirinfo->fd_seq.fd_lfnsector;
-  dirinfo->dir.fd_index        = dirinfo->fd_seq.fd_lfnoffset / DIR_SIZE;
+  dir.fd_startcluster = seq->ds_lfncluster;
+  dir.fd_currcluster  = seq->ds_lfnsector;
+  dir.fd_index        = seq->ds_lfnoffset / DIR_SIZE;
 
   /* Free all of the directory entries used for the sequence of long file name
    * and for the single short file name entry.
@@ -2250,7 +2263,7 @@ int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
     {
       /* Read the directory sector into the sector cache */
 
-      ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
+      ret = fat_fscacheread(fs, dir.fd_currsector);
       if (ret < 0)
         {
           return ret;
@@ -2258,7 +2271,7 @@ int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
 
       /* Get a pointer to the directory entry */
 
-      diroffset = (dirinfo->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+      diroffset = (dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
       direntry  = &fs->fs_buffer[diroffset];
 
       /* Then mark the entry as deleted */
@@ -2268,8 +2281,8 @@ int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
 
       /* Did we just free the single short file name entry? */
 
-      if (dirinfo->dir.fd_currsector == dirinfo->fd_seq.fd_sector &&
-          diroffset == dirinfo->fd_seq.fd_sector)
+      if (dir.fd_currsector == seq->ds_sector &&
+          diroffset == seq->ds_offset)
         {
           /* Yes.. then we are finished. flush anything remaining in the
            * cache and return, probably successfully.
@@ -2280,7 +2293,7 @@ int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
 
       /* There are moe entries to go.. Try the next directory entry */
 
-      ret = fat_nextdirentry(fs, &dirinfo->dir);
+      ret = fat_nextdirentry(fs, &dir);
       if (ret < 0)
         {
           return ret;
@@ -2320,20 +2333,30 @@ int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
  *
  ****************************************************************************/
 
-int fat_dirname2path(struct fs_dirent_s *dir, uint8_t *direntry)
+int fat_dirname2path(struct fat_mountpt_s *fs, struct fs_dirent_s *dir)
 {
+  uint16_t diroffset;
+  uint8_t *direntry;
 #ifdef CONFIG_FAT_LFN
-  uint8_t attribute = DIR_GETATTRIBUTES(direntry);
+  uint8_t attribute;
+#endif
+
+  /* Get a reference to the current directory entry */
+
+  diroffset = (dir->u.fat.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+  direntry = &fs->fs_buffer[diroffset];
 
   /* Does this entry refer to the last entry of a long file name? */
 
+#ifdef CONFIG_FAT_LFN
+  attribute = DIR_GETATTRIBUTES(direntry);
   if (((*direntry & LDIR0_LAST) != 0 && attribute == LDDIR_LFNATTR))
     {
       /* Yes.. Get the name from a sequence of long file name directory
        * entries.
        */
  
-      return fat_getlfname(dir);
+      return fat_getlfname(fs, dir);
     }
   else
 #endif
@@ -2358,10 +2381,12 @@ int fat_dirname2path(struct fs_dirent_s *dir, uint8_t *direntry)
 
 int fat_dirnamewrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 {
+#ifdef CONFIG_FAT_LFN
+  int ret;
+
   /* Is this a long file name? */
 
-#ifdef CONFIG_FAT_LFN
-  if (dirinfo.fd_lfname[0] != '\0')
+  if (dirinfo->fd_lfname[0] != '\0')
     {
       /* Write the sequence of long file name directory entries (this function
        * also creates the short file name alias).
@@ -2400,15 +2425,18 @@ int fat_dirnamewrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
 int fat_dirwrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
                  uint8_t attributes, uint32_t fattime)
 {
+#ifdef CONFIG_FAT_LFN
+  int ret;
+
   /* Does this directory entry have a long file name? */
 
-#ifdef CONFIG_FAT_LFN
-  if (dirinfo.fd_lfname[0] != '\0')
+  if (dirinfo->fd_lfname[0] != '\0')
     {
-      /* Yes.. write the long file name directory entries. (This function
-       * also creates the short file name alias). */
+      /* Write the sequence of long file name directory entries (this function
+       * also creates the short file name alias).
+       */
  
-      ret = fat_putsfdirentry(fs, dirinfo);
+      ret = fat_putlfname(fs, dirinfo);
       if (ret != OK)
         {
           return ret;
@@ -2419,7 +2447,6 @@ int fat_dirwrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
    * cache.  So we can just fall throught to write that directory entry, perhaps
    * using the short file name alias for the long file name.
    */
-
 #endif
 
   /* Put the short file name entry data */

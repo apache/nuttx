@@ -1371,8 +1371,8 @@ static int fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
 #ifdef CONFIG_FAT_LFN
       if (ch != DIR0_EMPTY &&
-          ((attribute & FATATTR_VOLUMEID) == 0) ||
-           ((ch & LDIR0_LAST) != 0 && attribute == LDDIR_LFNATTR))
+          ((attribute & FATATTR_VOLUMEID) == 0 ||
+           ((ch & LDIR0_LAST) != 0 && attribute == LDDIR_LFNATTR)))
 #else
       if (ch != DIR0_EMPTY && (attribute & FATATTR_VOLUMEID) == 0)
 #endif
@@ -1382,7 +1382,7 @@ static int fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
            * several directory entries.
            */
 
-          ret = fat_dirname2path(dir, direntry);
+          ret = fat_dirname2path(fs, dir);
           if (ret == OK)
             {
               /* The name was successfully extracted.  Now save the file type */

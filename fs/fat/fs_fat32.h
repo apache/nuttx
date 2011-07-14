@@ -337,10 +337,10 @@
 #define DIR_GETCRTTIMETENTH(p)    UBYTE_VAL(p,DIR_CRTTIMETENTH)
 
 #ifdef CONFIG_FAT_LFN
-# define LDIR_GETSEQ(p)           UBYTE_VAL(*p,LDIR_SEQ);
-# define LDIR_GETATTRIBUTES(p)    UBYTE_VAL(*p,LDIR_ATTRIBUTES);
-# define LDIR_GETNTRES(p)         UBYTE_VAL(*p,LDIR_NTRES);
-# define LDIR_GETCHECKSUM(p)      UBYTE_VAL(*p,LDIR_CHECKSUM);
+# define LDIR_GETSEQ(p)           UBYTE_VAL(p,LDIR_SEQ)
+# define LDIR_GETATTRIBUTES(p)    UBYTE_VAL(p,LDIR_ATTRIBUTES)
+# define LDIR_GETNTRES(p)         UBYTE_VAL(p,LDIR_NTRES)
+# define LDIR_GETCHECKSUM(p)      UBYTE_VAL(p,LDIR_CHECKSUM)
 #endif
 
 #define MBR_PUTSECPERCLUS(p,v)    UBYTE_PUT(p,BS_SECPERCLUS,v)
@@ -396,8 +396,8 @@
 
 #ifdef CONFIG_FAT_LFN
 # define LDIR_PTRWCHAR1_5(p)       UBYTE_PTR(p,LDIR_WCHAR1_5)
-# define LDIR_PTRWCHAR6_11(p)      UBYTE_PTR(p,DIR_WCHAR6_11)
-# define LDIR_PTRWCHAR12_13(p)     UBYTE_PTR(p,DIR_WCHAR12_13)
+# define LDIR_PTRWCHAR6_11(p)      UBYTE_PTR(p,LDIR_WCHAR6_11)
+# define LDIR_PTRWCHAR12_13(p)     UBYTE_PTR(p,LDIR_WCHAR12_13)
 #endif
 
 /* But for multi-byte values, the endian-ness of the target vs. the little
@@ -564,7 +564,7 @@
 #  define LDIR_GETWCHAR6(p)        UINT16_VAL(p,LDIR_WCHAR6_11)
 #  define LDIR_GETWCHAR7(p)        UINT16_VAL(p,LDIR_WCHAR6_11+2)
 #  define LDIR_GETWCHAR8(p)        UINT16_VAL(p,LDIR_WCHAR6_11+4)
-#  define LDIR_GETWCHAR8(p)        UINT16_VAL(p,LDIR_WCHAR6_11+6)
+#  define LDIR_GETWCHAR9(p)        UINT16_VAL(p,LDIR_WCHAR6_11+6)
 #  define LDIR_GETWCHAR10(p)       UINT16_VAL(p,LDIR_WCHAR6_11+8)
 #  define LDIR_GETWCHAR11(p)       UINT16_VAL(p,LDIR_WCHAR6_11+10)
 #  define LDIR_GETWCHAR12(p)       UINT16_VAL(p,LDIR_WCHAR12_13)
@@ -610,19 +610,19 @@
 # define DIR_PUTFILESIZE(p,v)      UINT32_PUT(p,DIR_FILESIZE,v)
 
 # ifdef CONFIG_FAT_LFN
-#  define LDIR_GETWCHAR1(p)        UINT16_PUT(p,LDIR_WCHAR1_5,v)
-#  define LDIR_GETWCHAR2(p)        UINT16_PUT(p,LDIR_WCHAR1_5+2,v)
-#  define LDIR_GETWCHAR3(p)        UINT16_PUT(p,LDIR_WCHAR1_5+4,v)
-#  define LDIR_GETWCHAR4(p)        UINT16_PUT(p,LDIR_WCHAR1_5+6,v)
-#  define LDIR_GETWCHAR5(p)        UINT16_PUT(p,LDIR_WCHAR1_5+8,v)
-#  define LDIR_GETWCHAR6(p)        UINT16_PUT(p,LDIR_WCHAR6_11,v)
-#  define LDIR_GETWCHAR7(p)        UINT16_PUT(p,LDIR_WCHAR6_11+2,v)
-#  define LDIR_GETWCHAR8(p)        UINT16_PUT(p,LDIR_WCHAR6_11+4,v)
-#  define LDIR_GETWCHAR8(p)        UINT16_PUT(p,LDIR_WCHAR6_11+6,v)
-#  define LDIR_GETWCHAR10(p)       UINT16_PUT(p,LDIR_WCHAR6_11+8,v)
-#  define LDIR_GETWCHAR11(p)       UINT16_PUT(p,LDIR_WCHAR6_11+10,v)
-#  define LDIR_GETWCHAR12(p)       UINT16_PUT(p,LDIR_WCHAR12_13,v)
-#  define LDIR_GETWCHAR13(p)       UINT16_PUT(p,LDIR_WCHAR12_13+2,v)
+#  define LDIR_PUTWCHAR1(p,v)      UINT16_PUT(p,LDIR_WCHAR1_5,v)
+#  define LDIR_PUTWCHAR2(p,v)      UINT16_PUT(p,LDIR_WCHAR1_5+2,v)
+#  define LDIR_PUTWCHAR3(p,v)      UINT16_PUT(p,LDIR_WCHAR1_5+4,v)
+#  define LDIR_PUTWCHAR4(p,v)      UINT16_PUT(p,LDIR_WCHAR1_5+6,v)
+#  define LDIR_PUTWCHAR5(p,v)      UINT16_PUT(p,LDIR_WCHAR1_5+8,v)
+#  define LDIR_PUTWCHAR6(p,v)      UINT16_PUT(p,LDIR_WCHAR6_11,v)
+#  define LDIR_PUTWCHAR7(p,v)      UINT16_PUT(p,LDIR_WCHAR6_11+2,v)
+#  define LDIR_PUTWCHAR8(p,v)      UINT16_PUT(p,LDIR_WCHAR6_11+4,v)
+#  define LDIR_PUTWCHAR9(p,v)      UINT16_PUT(p,LDIR_WCHAR6_11+6,v)
+#  define LDIR_PUTWCHAR10(p,v)     UINT16_PUT(p,LDIR_WCHAR6_11+8,v)
+#  define LDIR_PUTWCHAR11(p,v)     UINT16_PUT(p,LDIR_WCHAR6_11+10,v)
+#  define LDIR_PUTWCHAR12(p,v)     UINT16_PUT(p,LDIR_WCHAR12_13,v)
+#  define LDIR_PUTWCHAR13(p,v)     UINT16_PUT(p,LDIR_WCHAR12_13+2,v)
 # endif
 
 # define FSI_PUTLEADSIG(p,v)       UINT32_PUT(p,FSI_LEADSIG,v)
@@ -763,6 +763,16 @@ struct fat_dirinfo_s
   struct fs_fatdir_s dir;          /* Used with opendir, readdir, etc. */
 };
 
+/* Generic helper macros ****************************************************/
+
+#ifndef MIN
+#  define MIN(a,b) (a < b ? a : b)
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) (a > b ? a : b)
+#endif
+
 /****************************************************************************
  * Global Variables
  ****************************************************************************/
@@ -829,7 +839,7 @@ EXTERN int    fat_dirwrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirin
                            uint8_t attributes, uint32_t fattime);
 EXTERN int    fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 EXTERN int    fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq);
-EXTERN int    fat_dirname2path(struct fs_dirent_s *dir, uint8_t *direntry);
+EXTERN int    fat_dirname2path(struct fat_mountpt_s *fs, struct fs_dirent_s *dir);
 
 /* File creation and removal helpers */
 
