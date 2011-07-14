@@ -3764,7 +3764,7 @@ build
     <code>CONFIG_FAT_SECTORSIZE</code>: Max supported sector size.
   </li>
   <li>
-    <code>CONFIG_FAT_LCNAME</code>: Enable use of the NT-style upper/lower case 8.3 file name support.
+    <code>CONFIG_FAT_LCNAMES</code>: Enable use of the NT-style upper/lower case 8.3 file name support.
   </li>
   <li>
     <code>CONFIG_FAT_LFN</code>: Enable FAT long file names.
@@ -3775,6 +3775,7 @@ build
     <code>CONFIG_FAT_MAXFNAME</code>: If <code>CONFIG_FAT_LFN</code> is defined, then the default, maximum long file name is 255 bytes.
       This can eat up a lot of memory (especially stack space).
       If you are willing to live with some non-standard, short long file names, then define this value.
+      A good choice would be the same value as selected for CONFIG_NAME_MAX which will limit the visibility of longer file names anyway.
   </li>
   <li>
     <code>CONFIG_FS_NXFFS</code>: Enable NuttX FLASH file system (NXFF) support.
