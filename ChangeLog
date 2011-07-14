@@ -1908,5 +1908,12 @@
 	  before, leaving data in the hardware would cause infinite interrupts
 	  one most MCUs since you must read the data in order to clear the
 	  interrupt.
-	* arch/arm/src/lpc17xx/lpc17_can.c:  Added a CAN driver contributed by Lzyy.
+	* arch/arm/src/lpc17xx/lpc17_can.c:  Added a CAN driver contributed by
+	  Li Zhuoyi (Lzyy).
 	* include/stddefs.h and sys/types:  Added type wchar_t.
+	* fs/fat/fat_fat32dirent.c:  The configuration CONFIG_FAT_LCNAMES has
+	  been around for some time but never tested until now.  This setting
+	  will mimic the NT 8.3 file name behavior:  File names or extensions 
+	  may be all upper or all lower case (but not mixed).  If
+	  CONFIG_FAT_LCNAMES is not selected, all filenames are strictly upper
+	  case.

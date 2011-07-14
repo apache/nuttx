@@ -302,7 +302,7 @@ static inline int fat_parsesfname(const char **path,
 
               /* Clear lower case name bit in mask*/
 
-              ntlcenable &= FATNTRES_LCNAME;
+              ntlcenable &= ~FATNTRES_LCNAME;
             }
           else
             {
@@ -323,7 +323,7 @@ static inline int fat_parsesfname(const char **path,
 
               /* Clear lower case extension in mask */
 
-              ntlcenable &= FATNTRES_LCNAME;
+              ntlcenable &= ~FATNTRES_LCEXT;
             }
         }
 #endif
@@ -390,7 +390,7 @@ static inline int fat_parsesfname(const char **path,
 
               /* Set lower case extension bit */
 
-              ntlcfound |= FATNTRES_LCNAME;
+              ntlcfound |= FATNTRES_LCEXT;
             }
 #endif
 #endif /* CONFIG_FAT_LFN && !CONFIG_FAT_LCNAMES */
@@ -1649,7 +1649,7 @@ static int fat_putsfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
   uint8_t *direntry = &fs->fs_buffer[dirinfo->fd_seq.ds_offset];
  
   memcpy(&direntry[DIR_NAME], dirinfo->fd_name, DIR_MAXFNAME);
-#ifdef CONFIG_FLAT_LCNAMES
+#ifdef CONFIG_FAT_LCNAMES
   DIR_PUTNTRES(direntry, dirinfo->fd_ntflags);
 #else
   DIR_PUTNTRES(direntry, 0);
