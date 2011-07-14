@@ -812,10 +812,17 @@ CONFIG_NX_MXCLIENTMSGS=16
 #
 # STM3210E-EVAL LCD Hardware Configuration
 #
-# CONFIG_LCD_LANDSCAPE - Define for 320x240 display support.
-#   Default is 320x240 (this setting is informative only... not necessary).
-# CONFIG_LCD_PORTRAIT - Define for 240x320 display support.
-#   Default is 320x240.
+# CONFIG_LCD_LANDSCAPE - Define for 320x240 display "landscape"
+#   support. Default is this 320x240 "landscape" orientation
+#   (this setting is informative only... not used).
+# CONFIG_LCD_PORTRAIT - Define for 240x320 display "portrait"
+#   orientation support.  In this orientation, the STM3210E-EVAL's
+#   LCD ribbon cable is at the bottom of the display. Default is
+#   320x240 "landscape" orientation.
+# CONFIG_LCD_RPORTRAIT - Define for 240x320 display "reverse
+#   portrait" orientation support.  In this orientation, the
+#   STM3210E-EVAL's LCD ribbon cable is at the top of the display.
+#   Default is 320x240 "landscape" orientation.
 # CONFIG_LCD_BACKLIGHT - Define to support an adjustable backlight
 #   using timer 1.  The granularity of the settings is determined
 #   by CONFIG_LCD_MAXPOWER.  Requires CONFIG_STM32_TIM1.
