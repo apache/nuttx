@@ -986,7 +986,7 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
    * order.. from last to first).
    */
 
-  lastseq = LDIR_SEQ | nentries;
+  lastseq = LDIR0_LAST | nentries;
   seqno   = lastseq;
 
   /* Search, beginning with the current sector, for a directory entry this
@@ -1274,7 +1274,7 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
 
       /* Check if this directory entry is empty */
 
-      ch = direntry[DIR_NAME];
+      ch = LDIR_GETSEQ(direntry);
       if (ch == DIR0_ALLEMPTY || ch == DIR0_EMPTY)
         {
           /* It is empty -- we have found a directory entry.  Is this the
@@ -1288,7 +1288,7 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
               dirinfo->fd_seq.ds_lfnsector  = fs->fs_currentsector;
               dirinfo->fd_seq.ds_lfnoffset  = diroffset;
               dirinfo->fd_seq.ds_lfncluster = dirinfo->dir.fd_currcluster;
-              }
+            }
 
           /* Is this last entry we need (i.e., the entry for the short
            * file name entry)?
@@ -1790,6 +1790,7 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
   dirinfo->dir.fd_currcluster  = dirinfo->fd_seq.ds_lfncluster;
   dirinfo->dir.fd_currsector   = dirinfo->fd_seq.ds_lfnsector;
+  dirinfo->dir.fd_index        = dirinfo->fd_seq.ds_lfnoffset / DIR_SIZE;
 
   /* Make sure that the sector containing the "last" long file name entry
    * is in the sector cache (it probably is not).
@@ -1807,7 +1808,7 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
     {
       /* Get the string offset associated with the directory entry. */
 
-      offset = nentries * LDIR_MAXLFNCHARS;
+      offset = (nentries - 1) * LDIR_MAXLFNCHARS;
 
       /* Get a reference to the current directory entry */
 
