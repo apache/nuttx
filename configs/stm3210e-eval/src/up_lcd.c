@@ -85,8 +85,12 @@
 /* Check orientation */
 
 #if defined(CONFIG_LCD_PORTRAIT)
-#  if defined(CONFIG_LCD_LANDSCAPE)
-#    error "Cannot define both portrait and landscape orientations"
+#  if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RPORTRAIT)
+#    error "Cannot define both portrait and any other orientations"
+#  endif
+#elif defined(CONFIG_LCD_RPORTRAIT)
+#  if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_PORTRAIT)
+#    error "Cannot define both rportrait and any other orientations"
 #  endif
 #elif !defined(CONFIG_LCD_LANDSCAPE)
 #  define CONFIG_LCD_LANDSCAPE 1
@@ -575,7 +579,7 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
 
       stm3210e_writegram(*src++);
     }
-#else /* CONFIG_LCD_PORTRAIT */
+#elif defined(CONFIG_LCD_PORTRAIT)
   /* Convert coordinates.  (Swap row and column.  This is done implicitly). */
 
   /* Then write the GRAM data, manually incrementing Y (which is col) */
@@ -591,6 +595,28 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
       /* Increment to next column */
 
       col++;
+    }
+#else /* CONFIG_LCD_RPORTRAIT */
+  /* Convert coordinates.  (Swap row and column.  This is done implicitly).
+   * Which edge of the display is the "top"?
+   */
+
+  col = (STM3210E_XRES-1) - col;
+  row = (STM3210E_YRES-1) - row;
+  
+  /* Then write the GRAM data, manually incrementing Y (which is col) */
+
+  for (i = 0; i < npixels; i++)
+    {
+      /* Write the next pixel to this position */
+
+      stm3210e_setcursor(row, col);
+      stm3210e_gramselect();
+      stm3210e_writegram(*src++);
+
+      /* Decrement to next column */
+
+      col--;
     }
 #endif
   return OK;
@@ -643,7 +669,7 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
       *dest++ = stm3210e_readgram();
     }
-#else /* CONFIG_LCD_PORTRAIT */
+#elif defined(CONFIG_LCD_PORTRAIT)
   /* Convert coordinates (Swap row and column.  This is done implicitly). */
 
   /* Then read the GRAM data, manually incrementing Y (which is col) */
@@ -659,6 +685,28 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       /* Increment to next column */
 
       col++;
+    }
+#else /* CONFIG_LCD_RPORTRAIT */
+  /* Convert coordinates.  (Swap row and column.  This is done implicitly).
+   * Whic edge of the display is the "top"?
+   */
+
+  col = (STM3210E_XRES-1) - col;
+  row = (STM3210E_YRES-1) - row;
+  
+  /* Then write the GRAM data, manually incrementing Y (which is col) */
+
+  for (i = 0; i < npixels; i++)
+    {
+      /* Write the next pixel to this position */
+
+      stm3210e_setcursor(row, col);
+      stm3210e_gramselect();
+      *dest++ = stm3210e_readgram();
+
+      /* Decrement to next column */
+
+      col--;
     }
 #endif
 
