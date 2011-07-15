@@ -410,14 +410,14 @@ STM3210E-EVAL-specific Configuration Options
 
   STM3210E-EVAL LCD Hardware Configuration
 
-	CONFIG_LCD_LANDSCAPE - Define for 320x240 display "landscape"
+    CONFIG_LCD_LANDSCAPE - Define for 320x240 display "landscape"
       support. Default is this 320x240 "landscape" orientation
       (this setting is informative only... not used).
-	CONFIG_LCD_PORTRAIT - Define for 240x320 display "portrait"
+    CONFIG_LCD_PORTRAIT - Define for 240x320 display "portrait"
       orientation support.  In this orientation, the STM3210E-EVAL's
       LCD ribbon cable is at the bottom of the display. Default is
       320x240 "landscape" orientation.
-	CONFIG_LCD_RPORTRAIT - Define for 240x320 display "reverse
+    CONFIG_LCD_RPORTRAIT - Define for 240x320 display "reverse
       portrait" orientation support.  In this orientation, the
       STM3210E-EVAL's LCD ribbon cable is at the top of the display.
       Default is 320x240 "landscape" orientation.
@@ -484,7 +484,7 @@ Where <subdir> is one of the following:
     input.
 
     CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_LCD_PORTRAIT=y         : 240x320
+    CONFIG_LCD_RPORTRAIT=y        : 240x320 reverse portrait
 
   nxtext:
   ------
@@ -494,7 +494,7 @@ Where <subdir> is one of the following:
     or without the popup windows present.
 
     CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_LCD_PORTRAIT=y         : 240x320
+    CONFIG_LCD_RPORTRAIT=y        : 240x320 reverse portrait
 
   ostest:
   ------
