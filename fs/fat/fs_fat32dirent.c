@@ -863,38 +863,44 @@ static inline int fat_findsfnentry(struct fat_mountpt_s *fs,
 #ifdef CONFIG_FAT_LFN
 static bool fat_cmplfnchunk(uint8_t *chunk, const uint8_t *substr, int nchunk)
 {
-  int i;
+  wchar_t wch;
+  uint8_t ch;
+  int     i;
 
   /* Check bytes 1-nchunk */
 
   for (i = 0; i < nchunk; i++)
     {
-      wchar_t wch;
-
-      /* If we encounter the NUL terminator in the name string, then it is
-       * a match -- return TRUE.
+      /* Get the next character from the name string.  If we encounter the
+       * NUL terminator in the name string, then the rest of the characters
+       * in the directory should be spaces.
        */
 
       if (*substr == 0)
         {
-          return true;
+          ch = ' ';
+        }
+      else
+        {
+          ch = *substr++;
         }
 
-      /* Get the next unicode character from the chunk.  We only handle ASCII.
-       * For ASCII, the upper byte should be zero and the lower should match
-       * the ASCII code.
+      /* Get the next unicode character from the chunk.  We only handle
+       * ASCII. For ASCII, the upper byte should be zero and the lower
+       * should match the ASCII code.
        */
 
       wch = (wchar_t)fat_getuint16((uint8_t*)chunk);
-      if ((wch & 0xff) != (wchar_t)*substr)
+      if ((wch & 0xff) != (wchar_t)ch)
         {
           return false;
         }
 
-      /* Yes.. the characters match.  Try the next */
+      /* Yes.. the characters match.  Try the next character from the
+       * directory entry.
+       */
 
       chunk += sizeof(wchar_t);
-      substr++;
     }
 
   /* All of the characters in the chunk match.. Return success */
@@ -915,21 +921,39 @@ static bool fat_cmplfnchunk(uint8_t *chunk, const uint8_t *substr, int nchunk)
 static bool fat_cmplfname(const uint8_t *direntry, const uint8_t *substr)
 {
   uint8_t *chunk;
+  int offset;
+  int len;
+
+  /* How much of string do we have to compare? */
+
+  len = strlen(substr);
 
   /* Check bytes 1-5 */
 
   chunk = LDIR_PTRWCHAR1_5(direntry);
   if (fat_cmplfnchunk(chunk, substr, 5))
     {
-      /* Check bytes 6-11 */
+      /* Advance the string pointer.  Don't go past the end of the string. */
+
+      offset = MIN(5, len);
+
+      /* Check bytes 6-11 (or if offset == 0, verify that they are spaces) */
 
       chunk = LDIR_PTRWCHAR6_11(direntry);
-      if (fat_cmplfnchunk(chunk, &substr[5], 6))
+      if (fat_cmplfnchunk(chunk, &substr[offset], 6))
         {
-          /* Check bytes 12-13 */
+          /* Advance the string pointer.  Don't go past the end of the
+           * string.
+           */
+
+          offset = MIN(11, len);
+
+          /* Check bytes 12-13 (or if offset == 0, verify that they are
+           * spaces)
+           */
 
           chunk = LDIR_PTRWCHAR12_13(direntry);
-          return fat_cmplfnchunk(chunk, &substr[11], 2);
+          return fat_cmplfnchunk(chunk, &substr[offset], 2);
         }
     }
 
@@ -1088,18 +1112,31 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
                   return -ENOENT;
                 }
 
-             /* Verify the checksum */
+              /* Make sure that the directory entry is in the sector cache */
 
-             if (fat_lfnchecksum(dirinfo->fd_name) == checksum)
-               {
-                 /* Success! Save the position of the directory entry and
-                  * return success.
-                  */
+              ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
+              if (ret < 0)
+                {
+                  return ret;
+                }
 
-                 dirinfo->fd_seq.ds_sector  = fs->fs_currentsector;
-                 dirinfo->fd_seq.ds_offset  = diroffset;
-                 dirinfo->fd_seq.ds_cluster = dirinfo->dir.fd_currcluster;
-                 return OK;
+              /* Get a pointer to the directory entry */
+
+              diroffset = DIRSEC_BYTENDX(fs, dirinfo->dir.fd_index);
+              direntry  = &fs->fs_buffer[diroffset];
+
+              /* Verify the checksum */
+
+              if (fat_lfnchecksum(&direntry[DIR_NAME]) == checksum)
+                {
+                  /* Success! Save the position of the directory entry and
+                   * return success.
+                   */
+
+                  dirinfo->fd_seq.ds_sector  = fs->fs_currentsector;
+                  dirinfo->fd_seq.ds_offset  = diroffset;
+                  dirinfo->fd_seq.ds_cluster = dirinfo->dir.fd_currcluster;
+                  return OK;
                 }
 
               /* Bad news.. reset and continue with this entry (which is
@@ -1689,7 +1726,7 @@ static void fat_putlfnspaces(uint8_t *chunk, int nchunk)
 
   for (i = 0; i < nchunk; i++)
     {
-      /* The write the unicode spzed character into the directory entry. */
+      /* The write the unicode space character into the directory entry. */
 
       fat_putuint16((uint8_t *)chunk, (uint16_t)' ');
       chunk += sizeof(wchar_t);
@@ -1836,7 +1873,7 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
           if (remainder > 0)
             {
-              nbytes = MIN(8, remainder);
+              nbytes = MIN(6, remainder);
               fat_putlfnchunk(LDIR_PTRWCHAR6_11(direntry),
                               &dirinfo->fd_lfname[offset+5], nbytes);
               remainder -= nbytes;
@@ -2017,7 +2054,11 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
       return OK;
     }
 
-  /* Otherwise, loop until the path is found */
+  /* This is not the root directory */
+
+  dirinfo->fd_root = false;
+
+  /* Now loop until the directory entry corresponding to the path is found */
 
   for (;;)
     {
@@ -2141,7 +2182,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
         }
       else
         {
-          /* Fixed size FAT12/16 root directory is at fixxed offset/size */
+          /* Fixed size FAT12/16 root directory is at fixed offset/size */
 
           dirinfo->dir.fd_currsector = fs->fs_rootbase;
         }
