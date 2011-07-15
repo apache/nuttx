@@ -1385,7 +1385,31 @@ static int fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
           ret = fat_dirname2path(fs, dir);
           if (ret == OK)
             {
-              /* The name was successfully extracted.  Now save the file type */
+              /* The name was successfully extracted.  Re-read the
+               * attributes:  If this is long directory entry, then the
+               * attributes that we need will be the the final, short file
+               * name entry and not in the directory entry where we started
+               * looking for the file name.  We can be assured that, on
+               * success,  fat_dirname2path() will leave the short file name
+               * entry in the cache regardless of the kind of directory
+               * entry.  We simply have to re-read it to cover the the long
+               * file name case.
+               */
+
+#ifdef CONFIG_FAT_LFN
+
+              /* Get a reference to the current, short file name directory
+               * entry.
+               */
+
+              dirindex = (dir->u.fat.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+              direntry = &fs->fs_buffer[dirindex];
+
+              /* Then re-read the attributes from the short file name entry */
+
+              attribute = DIR_GETATTRIBUTES(direntry);
+#endif
+              /* Now get the file type from the directory attributes. */
 
               if ((attribute & FATATTR_DIRECTORY) == 0)
                 {

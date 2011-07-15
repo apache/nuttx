@@ -926,7 +926,7 @@ static bool fat_cmplfname(const uint8_t *direntry, const uint8_t *substr)
 
   /* How much of string do we have to compare? */
 
-  len = strlen(substr);
+  len = strlen((char*)substr);
 
   /* Check bytes 1-5 */
 
@@ -1540,9 +1540,9 @@ static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *di
   uint16_t diroffset;
   uint8_t *direntry;
   uint8_t  seqno;
+  uint8_t  rawseq;
   uint8_t  offset;
   uint8_t  checksum;
-  int      tmp;
   int      nsrc;
   int      ret;
   int      i;
@@ -1559,15 +1559,11 @@ static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *di
 
   /* Sanity check */
 
-  tmp = (seqno & LDIR0_SEQ_MASK);
-  if (tmp < 1 || tmp > LDIR_MAXLFNS)
+  rawseq = (seqno & LDIR0_SEQ_MASK);
+  if (rawseq < 1 || rawseq > LDIR_MAXLFNS)
     {
       return -EINVAL;
     }
-
-  /* Get the string offset associated with the "last" entry. */
-
-  offset = (tmp - 1) * LDIR_MAXLFNCHARS;
 
   /* Save the checksum value */
 
@@ -1577,6 +1573,10 @@ static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *di
 
   for (;;)
     {
+      /* Get the string offset associated with the "last" entry. */
+
+      offset = (rawseq - 1) * LDIR_MAXLFNCHARS;
+
       /* Will any of this file name fit into the destination buffer? */
 
       if (offset < NAME_MAX)
@@ -1649,7 +1649,7 @@ static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *di
 
       /* Get the next expected sequence number. */
 
-      seqno = (seqno & LDIR0_SEQ_MASK) - 1;
+      seqno = --rawseq;
       if (seqno < 1)
         {
           /* We just completed processing the "first" long file name entry
@@ -2293,9 +2293,9 @@ int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
    * first on the media).
    */
 
-  dir.fd_startcluster = seq->ds_lfncluster;
-  dir.fd_currcluster  = seq->ds_lfnsector;
-  dir.fd_index        = seq->ds_lfnoffset / DIR_SIZE;
+  dir.fd_currcluster = seq->ds_lfncluster;
+  dir.fd_currsector  = seq->ds_lfnsector;
+  dir.fd_index       = seq->ds_lfnoffset / DIR_SIZE;
 
   /* Free all of the directory entries used for the sequence of long file name
    * and for the single short file name entry.
@@ -2333,7 +2333,7 @@ int fat_freedirentry(struct fat_mountpt_s *fs, struct fat_dirseq_s *seq)
           return fat_fscacheflush(fs);
         }
 
-      /* There are moe entries to go.. Try the next directory entry */
+      /* There are more entries to go.. Try the next directory entry */
 
       ret = fat_nextdirentry(fs, &dir);
       if (ret < 0)
