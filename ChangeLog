@@ -1917,3 +1917,9 @@
 	  may be all upper or all lower case (but not mixed).  If
 	  CONFIG_FAT_LCNAMES is not selected, all filenames are strictly upper
 	  case.
+	* configs/stm3210e-eval/nsh2:  Console is back on UART1; Added
+	  examplex/nx as an NSH "built-in" command as a demonstration.
+	* fs/fat/fs_fat32dirent.c:  Fix an important bug in the directory
+	  allocation (fat_allocatedirentry()).  I looks like it could be
+	  initializing the wrong sectors! NOTE:  This function was in
+	  fs_fat32utils.c in earlier releases.

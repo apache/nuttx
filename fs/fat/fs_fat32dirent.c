@@ -2258,7 +2258,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
       fs->fs_currentsector = fat_cluster2sector(fs, cluster);
       memset(fs->fs_buffer, 0, fs->fs_hwsectorsize);
 
-      sector = sector;
+      sector = fs->fs_currentsector;
       for (i = fs->fs_fatsecperclus; i; i--)
         {
           ret = fat_hwwrite(fs, fs->fs_buffer, sector, 1);

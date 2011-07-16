@@ -529,16 +529,24 @@ CONFIG_FS_READAHEAD=n
 CONFIG_FS_WRITEBUFFER=n
 
 #
-# SDIO-based MMC/SD driver
+# STM32 SDIO-based MMC/SD driver
 #
-# CONFIG_SDIO_DMA
-#   SDIO driver supports DMA
+# CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
+#   and CONFIG_STM32_DMA2.
+# CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+# CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority. 
+#   Default:  Medium
+# CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
+#   4-bit transfer mode.
 # CONFIG_MMCSD_MMCSUPPORT
 #   Enable support for MMC cards
 # CONFIG_MMCSD_HAVECARDDETECT
 #   SDIO driver card detection is 100% accurate
 #
 CONFIG_SDIO_DMA=y
+#CONFIG_SDIO_PRI=128
+#CONFIG_SDIO_DMAPRIO
+#CONFIG_SDIO_WIDTH_D1_ONLY
 CONFIG_MMCSD_MMCSUPPORT=n
 CONFIG_MMCSD_HAVECARDDETECT=n
 
@@ -726,6 +734,9 @@ CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS=3
 #
 # Settings for apps/nshlib
 #
+# CONFIG_NSH_BUILTIN_APPS - Support external registered,
+#   "named" applications that can be executed from the NSH
+#   command line (see apps/README.txt for more information).
 # CONFIG_NSH_FILEIOSIZE - Size of a static I/O buffer
 # CONFIG_NSH_STRERROR - Use strerror(errno)
 # CONFIG_NSH_LINELEN - Maximum length of one command line
@@ -757,6 +768,7 @@ CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS=3
 # CONFIG_NSH_FATNSECTORS - FAT FS number of sectors
 # CONFIG_NSH_FATMOUNTPT - FAT FS mountpoint
 #
+CONFIG_NSH_BUILTIN_APPS=n
 CONFIG_NSH_FILEIOSIZE=512
 CONFIG_NSH_STRERROR=n
 CONFIG_NSH_LINELEN=64

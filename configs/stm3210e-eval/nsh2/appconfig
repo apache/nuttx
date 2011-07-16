@@ -37,5 +37,12 @@
 
 CONFIGURED_APPS += examples/nsh
 
+# The NSH applicatin library
+
 CONFIGURED_APPS += nshlib
+
+# The NX example configured as an NX built-in command
+
+CONFIGURED_APPS += examples/nx
+
 
