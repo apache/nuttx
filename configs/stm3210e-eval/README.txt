@@ -461,9 +461,16 @@ Where <subdir> is one of the following:
     Loader:     DfuSe                   DfuSe
     ----------- ----------------------- --------------------------------
     Serial      Debug output: USART1    Debug output: USART1
-    Console:    NSH output:   USART1    NSH output:   USART2 ***
+    Console:    NSH output:   USART1    NSH output:   USART1 ***
     ----------- ----------------------- --------------------------------
     I2C1        Disabled                Enabled
+    ----------- ----------------------- --------------------------------
+    Support for No                      Yes
+    Built-in
+    Apps
+    ----------- ----------------------- --------------------------------
+    Built-in    None                    apps/examples/nx
+    AppS
     =========== ======================= ================================
 
     * You will probably need to modify nsh/setenv.sh or nsh2/setenv.sh
