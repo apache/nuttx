@@ -74,7 +74,6 @@
 
 #if defined(CONFIG_SDIO_DMA) && !defined(CONFIG_STM32_DMA2)
 #  warning "CONFIG_SDIO_DMA support requires CONFIG_STM32_DMA2"
-#  undef CONFIG_SDIO_DMA
 #endif
 
 #ifndef CONFIG_SDIO_DMA
@@ -174,10 +173,16 @@
 #define SDIO_WAITALL_ICR   (SDIO_CMDDONE_ICR|SDIO_RESPDONE_ICR|\
                             SDIO_XFRDONE_ICR)
 
+/* Let's wait until we have both SDIO transfer complete and DMA complete. */
+
+#define SDIO_XFRDONE_FLAG  (1)
+#define SDIO_DMADONE_FLAG  (2)
+#define SDIO_ALLDONE       (3)
+
 /* Register logging support */
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-#  if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+#  ifdef CONFIG_SDIO_DMA
 #    define SAMPLENDX_BEFORE_SETUP  0
 #    define SAMPLENDX_BEFORE_ENABLE 1
 #    define SAMPLENDX_AFTER_SETUP   2
@@ -229,6 +234,7 @@ struct stm32_dev_s
 
   bool               widebus;    /* Required for DMA support */
 #ifdef CONFIG_SDIO_DMA
+  volatile uint8_t   xfrflags;   /* Used to synchronize SDIO and DMA completion events */
   bool               dmamode;    /* true: DMA mode transfer */
   DMA_HANDLE         dma;        /* Handle for DMA channel */
 #endif
@@ -275,7 +281,6 @@ static void stm32_setpwrctrl(uint32_t pwrctrl);
 static inline uint32_t stm32_getpwrctrl(void);
 
 /* DMA Helpers **************************************************************/
-
 
 #ifdef CONFIG_SDIO_XFRDEBUG
 static void stm32_sampleinit(void);
@@ -513,6 +518,9 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
   priv->waitmask   = waitmask;
+#ifdef CONFIG_SDIO_DMA
+  priv->xfrflags   = 0;
+#endif
   putreg32(priv->xfrmask | priv->waitmask, STM32_SDIO_MASK);
   irqrestore(flags);
 }
@@ -737,18 +745,24 @@ static void  stm32_dumpsamples(struct stm32_dev_s *priv)
 #ifdef CONFIG_SDIO_DMA
 static void stm32_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
-  /* FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)arg; */
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)arg;
+  DEBUGASSERT(priv->dmamode);
 
-  /* We don't really do anything at the completion of DMA.  The termination
-   * of the transfer is driven by the SDIO interrupts.
-   *
-   * In fact, we won't normally get the DMA callback at all!  The SDIO
-   * appears to handle the End-Of-Transfer interrupt first and it will can
-   * stm32_dmastop() which will disable and clear the interrupt that performs
-   * this callback.
+  /* The SDIO appears to handle the End-Of-Transfer interrupt first with the
+   * End-Of-DMA event occurring significantly later.
    */
 
   stm32_sample((struct stm32_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
+  
+  /* Then terminate the transfer (we should already have the SDIO transfer
+   * done interrupt.  If now, the transfer will appropriately time out.
+   */
+
+  priv->xfrflags |= SDIO_DMADONE_FLAG;
+  if (priv->xfrflags == SDIO_ALLDONE)
+    {
+      stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
+    }
 }
 #endif
 
@@ -1071,7 +1085,7 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
 
       /* Make sure that the DMA is stopped (it will be stopped automatically
        * on normal transfers, but not necessarily when the transfer terminates
-       * on an error condition.
+       * on an error condition).
        */
 
       stm32_dmastop(priv->dma);
@@ -1167,18 +1181,41 @@ static int stm32_interrupt(int irq, void *context)
                * half-full interrupt will be received.
                */
 
+              /* Was this transfer performed in DMA mode? */
+
 #ifdef CONFIG_SDIO_DMA
-              if (!priv->dmamode)
+              if (priv->dmamode)
+                {
+                  /* Yes.. Terminate the transfers only if the DMA has also
+                   * finished.
+                   */
+
+                  priv->xfrflags |= SDIO_XFRDONE_FLAG;
+                  if (priv->xfrflags == SDIO_ALLDONE)
+                    {
+                      stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
+                    }
+
+                  /* Otherwise, just disable futher transfer interrupts and
+                   * wait for the DMA complete event.
+                   */
+
+                  else
+                    {
+                      stm32_configxfrints(priv, 0);
+                    }
+                }
+              else
 #endif
                 {
                   /* Receive data from the RX FIFO */
 
                   stm32_recvfifo(priv);
+
+                  /* Then terminate the transfer */
+
+                  stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
                 }
-
-              /* Then terminate the transfer */
-
-              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
             }
 
           /* Handle data block send/receive CRC failure */
@@ -1309,6 +1346,10 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
   priv->waitevents = 0;      /* Set of events to be waited for */
   priv->waitmask   = 0;      /* Interrupt enables for event waiting */
   priv->wkupevent  = 0;      /* The event that caused the wakeup */
+#ifdef CONFIG_SDIO_DMA
+  priv->xfrflags   = 0;      /* Used to synchronize SDIO and DMA completion events */
+#endif
+
   wd_cancel(priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
@@ -1860,7 +1901,7 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
         }
       else if ((regval & SDIO_STA_CCRCFAIL) != 0)
         {
-          fdbg("ERROR: CRC failuret: %08x\n", regval);
+          fdbg("ERROR: CRC failure: %08x\n", regval);
           ret = -EIO;
         }
 #ifdef CONFIG_DEBUG
@@ -2147,7 +2188,10 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
   /* Disable event-related interrupts */
 
   stm32_configwaitints(priv, 0, 0, 0);
-  stm32_dumpsamples(priv);
+#ifdef CONFIG_SDIO_DMA
+  priv->xfrflags   = 0;
+#endif
+
   return wkupevent;
 }
 
