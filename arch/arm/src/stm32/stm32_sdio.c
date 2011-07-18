@@ -755,7 +755,7 @@ static void stm32_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg)
   stm32_sample((struct stm32_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
   
   /* Then terminate the transfer (we should already have the SDIO transfer
-   * done interrupt.  If now, the transfer will appropriately time out.
+   * done interrupt.  If not, the transfer will appropriately time out).
    */
 
   priv->xfrflags |= SDIO_DMADONE_FLAG;
