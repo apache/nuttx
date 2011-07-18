@@ -465,6 +465,12 @@ Where <subdir> is one of the following:
     ----------- ----------------------- --------------------------------
     I2C1        Disabled                Enabled
     ----------- ----------------------- --------------------------------
+    microSD     Yes                     Yes
+    Support
+    ----------- ----------------------- --------------------------------
+    FAT FS      CONFIG_FAT_LCNAME=y     CONFIG_FAT_LCNAME=y
+    Config      CONFIG_FAT_LFN=n        CONFIG_FAT_LFN=y ****
+    ----------- ----------------------- --------------------------------
     Support for No                      Yes
     Built-in
     Apps
@@ -483,6 +489,10 @@ Where <subdir> is one of the following:
       / linefeeds \r\n). You will need to configure your terminal program
       to account for this. And (2) input is not automatically echoed so
       you will have to turn local echo on.
+ **** Microsoft holds several patents related to the design of
+      long file names in the FAT file system.  Please refer to the
+      details in the top-level COPYING file.  Please do not use FAT
+      long file name unless you are familiar with these patent issues.
 
   nx:
   ---

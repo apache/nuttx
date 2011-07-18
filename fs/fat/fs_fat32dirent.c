@@ -105,6 +105,55 @@ enum fat_case_e
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_FAT_LFN
+static uint8_t fat_lfnchecksum(const uint8_t *sfname);
+#endif
+static inline int fat_parsesfname(const char **path,
+                                  struct fat_dirinfo_s *dirinfo,
+                                  char *terminator);
+#ifdef CONFIG_FAT_LFN
+static inline int fat_parselfname(const char **path,
+                                  struct fat_dirinfo_s *dirinfo,
+                                  char *terminator);
+static inline int fat_createalias(struct fat_dirinfo_s *dirinfo);
+static inline int fat_findalias(struct fat_mountpt_s *fs,
+                                struct fat_dirinfo_s *dirinfo);
+static inline int fat_uniquealias(struct fat_mountpt_s *fs,
+                                  struct fat_dirinfo_s *dirinfo);
+#endif
+static int fat_path2dirname(const char **path, struct fat_dirinfo_s *dirinfo,
+                            char *terminator);
+static int fat_findsfnentry(struct fat_mountpt_s *fs,
+                            struct fat_dirinfo_s *dirinfo);
+#ifdef CONFIG_FAT_LFN
+static bool fat_cmplfnchunk(uint8_t *chunk, const uint8_t *substr, int nchunk);
+static bool fat_cmplfname(const uint8_t *direntry, const uint8_t *substr);
+static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
+                                   struct fat_dirinfo_s *dirinfo);
+
+#endif
+static inline int fat_allocatesfnentry(struct fat_mountpt_s *fs,
+                                       struct fat_dirinfo_s *dirinfo);
+#ifdef CONFIG_FAT_LFN
+static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
+                                       struct fat_dirinfo_s *dirinfo);
+#endif
+static inline int fat_getsfname(uint8_t *direntry, char *buffer,
+                                unsigned int buflen);
+#ifdef CONFIG_FAT_LFN
+static void fat_getlfnchunk(uint8_t *chunk, uint8_t *dest, int nchunk);
+static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *dir);
+#endif
+static int fat_putsfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+#ifdef CONFIG_FAT_LFN
+static void fat_initlfname(uint8_t *chunk, int nchunk);
+static void fat_putlfnchunk(uint8_t *chunk, const uint8_t *src, int nchunk);
+static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
+#endif
+static int fat_putsfdirentry(struct fat_mountpt_s *fs,
+                             struct fat_dirinfo_s *dirinfo,
+                             uint8_t attributes, uint32_t fattime);
+
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
@@ -196,8 +245,8 @@ static uint8_t fat_lfnchecksum(const uint8_t *sfname)
  ****************************************************************************/
 
 static inline int fat_parsesfname(const char **path,
-                                   struct fat_dirinfo_s *dirinfo,
-                                   char *terminator)
+                                  struct fat_dirinfo_s *dirinfo,
+                                  char *terminator)
 {
 #ifdef CONFIG_FAT_LCNAMES
   unsigned int ntlcenable = FATNTRES_LCNAME | FATNTRES_LCEXT;
@@ -442,8 +491,8 @@ static inline int fat_parsesfname(const char **path,
 
 #ifdef CONFIG_FAT_LFN
 static inline int fat_parselfname(const char **path,
-                                   struct fat_dirinfo_s *dirinfo,
-                                   char *terminator)
+                                  struct fat_dirinfo_s *dirinfo,
+                                  char *terminator)
 {
   const char *node = *path;
   uint8_t ch;
@@ -719,10 +768,13 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
 #endif
 
 /****************************************************************************
- * Name: fat_uniquealias
+ * Name: fat_findalias
  *
  * Desciption:  Make sure that the short alias for the long file name is
- *   unique.  Modify the alias as necessary to assure uniqueness.
+ *   unique, ie., that there is no other
+ *
+ * NOTE: This function does not restore the directory entry that was in the
+ * sector cache
  *
  * Returned value:
  *   OK - The alias is unique.
@@ -731,11 +783,139 @@ static inline int fat_createalias(struct fat_dirinfo_s *dirinfo)
  ****************************************************************************/
 
 #ifdef CONFIG_FAT_LFN
-static inline int fat_uniquealias(const char **path,
+static inline int fat_findalias(struct fat_mountpt_s *fs,
+                                struct fat_dirinfo_s *dirinfo)
+{
+  struct fat_dirinfo_s tmpinfo;
+
+  /* Save the current directory info. */
+
+  memcpy(&tmpinfo, dirinfo, sizeof(struct fat_dirinfo_s));
+
+  /* Then re-initialize to the beginning of the current directory (skipping
+   * '.' and '..').
+   */
+
+  tmpinfo.dir.fd_startcluster = tmpinfo.dir.fd_currcluster;
+  tmpinfo.dir.fd_currsector   = tmpinfo.fd_seq.ds_startsector;
+  tmpinfo.dir.fd_index        = 2;
+
+  /* Search for the single short file name directory entry in this directory */
+
+  return fat_findsfnentry(fs, &tmpinfo);
+}
+#endif
+
+/****************************************************************************
+ * Name: fat_uniquealias
+ *
+ * Desciption:  Make sure that the short alias for the long file name is
+ *   unique, modifying the alias as necessary to assure uniqueness.
+ *
+ * NOTE: This function does not restore the directory entry that was in the
+ * sector cache
+ *
+ *   information upon return.
+ * Returned value:
+ *   OK - The alias is unique.
+ *   <0 - Otherwise an negated error is returned.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FAT_LFN
+static inline int fat_uniquealias(struct fat_mountpt_s *fs,
                                   struct fat_dirinfo_s *dirinfo)
 {
-#warning "Missing alias alias uniqueness logic"
-  return OK;
+  int tilde;
+  int lsdigit;
+  int ret;
+  int i;
+
+  /* Find the position of the tilde character in the short name.  The tilde
+   * can not occur in positions 0 or 7:
+   */
+
+  for (tilde = 1; tilde < 7 && dirinfo->fd_name[tilde] != '~'; tilde++);
+  if (tilde >= 7)
+    {
+      return -EINVAL;
+    }
+
+  /* The least significant number follows the digit (and must be '1') */
+
+  lsdigit = tilde + 1;
+  DEBUGASSERT(dirinfo->fd_name[lsdigit] == '1');
+
+  /* Search for the single short file name directory entry in this directory */
+
+  while ((ret = fat_findalias(fs, dirinfo)) == OK)
+    {
+      /* Adjust the numeric value after the '~' to make the file name unique */
+
+      for (i = lsdigit; i > 0; i--)
+        {
+          /* If we have backed up to the tilde position, then we have to move
+           * the tilde back one position.
+           */
+
+          if (i == tilde)
+            {
+              /* Is there space to back up the tilde? */
+
+              if (tilde <= 1)
+                {
+                  /* No.. then we cannot add the name to the directory.
+                   * What is the likelihood of that happening?
+                   */
+
+                  return -ENOSPC;
+                }
+
+              /* Back up the tilde and break out of the inner loop */
+
+              tilde--;
+              dirinfo->fd_name[tilde]   = '~';
+              dirinfo->fd_name[tilde+1] = '1';
+              break;
+            }
+
+          /* We are not yet at the tilde,.  Check if this digit has already
+           * reached its maximum value.
+           */
+
+          else if (dirinfo->fd_name[i] < '9')
+            {
+              /* No, it has not.. just increment the LS digit and break out of
+               * the inner loop.
+               */
+
+              dirinfo->fd_name[i]++;
+              break;
+            }
+
+          /* Yes.. Reset the digit to '0' and loop to adjust the digit before
+           * this one.
+           */
+
+          else
+            {
+              dirinfo->fd_name[i] = '0';
+            }
+        }
+    }
+
+  /* The while loop terminated because of an error; fat_findalias()
+   * returned something other than OK.  The only acceptable error is
+   * -ENOENT, meaning that the short file name directory does not
+   * exist in this directory.
+   */
+
+  if (ret == -ENOENT)
+    {
+      ret = OK;
+    }
+
+  return ret;
 }
 #endif
 
@@ -780,16 +960,29 @@ static int fat_path2dirname(const char **path, struct fat_dirinfo_s *dirinfo,
 /****************************************************************************
  * Name: fat_findsfnentry
  *
- * Desciption: Find a short file name directory entry.
+ * Desciption: Find a short file name directory entry.  Returns OK if the
+ *  directory exists; -ENOENT if it does not.
  *
  ****************************************************************************/
 
-static inline int fat_findsfnentry(struct fat_mountpt_s *fs,
-                                   struct fat_dirinfo_s *dirinfo)
+static int fat_findsfnentry(struct fat_mountpt_s *fs,
+                            struct fat_dirinfo_s *dirinfo)
 {
   uint16_t diroffset;
   uint8_t *direntry;
+#ifdef CONFIG_FAT_LFN
+  off_t    startsector;
+#endif
   int      ret;
+
+  /* Save the starting sector of the directory.  This is not really needed
+   * for short name entries, but this keeps things consistent with long
+   * file name entries..
+   */
+
+#ifdef CONFIG_FAT_LFN
+  startsector = dirinfo->dir.fd_currsector;
+#endif
 
   /* Search, beginning with the current sector, for a directory entry with
    * the matching short name
@@ -825,20 +1018,19 @@ static inline int fat_findsfnentry(struct fat_mountpt_s *fs,
         {
           /* Yes.. Return success */
 
-          dirinfo->fd_seq.ds_sector  = fs->fs_currentsector;
-          dirinfo->fd_seq.ds_offset  = diroffset;
+          dirinfo->fd_seq.ds_sector      = fs->fs_currentsector;
+          dirinfo->fd_seq.ds_offset      = diroffset;
 #ifdef CONFIG_FAT_LFN
-          dirinfo->fd_seq.ds_cluster = dirinfo->dir.fd_currcluster;
-#endif
+          dirinfo->fd_seq.ds_cluster     = dirinfo->dir.fd_currcluster;
+          dirinfo->fd_seq.ds_startsector = startsector;
 
           /* Position the last long file name directory entry at the same
            * position.
            */
 
-#ifdef CONFIG_FAT_LFN
-          dirinfo->fd_seq.ds_lfnsector  = dirinfo->fd_seq.ds_sector;
-          dirinfo->fd_seq.ds_lfnoffset  = dirinfo->fd_seq.ds_offset;
-          dirinfo->fd_seq.ds_lfncluster = dirinfo->fd_seq.ds_cluster;
+          dirinfo->fd_seq.ds_lfnsector   = dirinfo->fd_seq.ds_sector;
+          dirinfo->fd_seq.ds_lfnoffset   = dirinfo->fd_seq.ds_offset;
+          dirinfo->fd_seq.ds_lfncluster  = dirinfo->fd_seq.ds_cluster;
 #endif
          return OK;
         }
@@ -982,6 +1174,7 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
   uint8_t  nentries;
   uint8_t  remainder;
   uint8_t  checksum = 0;
+  off_t    startsector;
   int      offset;
   int      namelen;
   int      ret;
@@ -1013,6 +1206,12 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
 
   lastseq = LDIR0_LAST | nentries;
   seqno   = lastseq;
+
+  /* Save the starting sector of the directory.  This is needed later to
+   * re-scan the directory, looking duplicate short alias names.
+   */
+
+  startsector   = dirinfo->dir.fd_currsector;
 
   /* Search, beginning with the current sector, for a directory entry this
    * the match shore name
@@ -1091,9 +1290,10 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
             {
               /* Yes.. Save information about this LFN entry position */
 
-              dirinfo->fd_seq.ds_lfnsector  = fs->fs_currentsector;
-              dirinfo->fd_seq.ds_lfnoffset  = diroffset;
-              dirinfo->fd_seq.ds_lfncluster = dirinfo->dir.fd_currcluster;
+              dirinfo->fd_seq.ds_lfnsector   = fs->fs_currentsector;
+              dirinfo->fd_seq.ds_lfnoffset   = diroffset;
+              dirinfo->fd_seq.ds_lfncluster  = dirinfo->dir.fd_currcluster;
+              dirinfo->fd_seq.ds_startsector = startsector;
               seqno &= LDIR0_SEQ_MASK;
             }
 
@@ -1187,8 +1387,22 @@ static inline int fat_allocatesfnentry(struct fat_mountpt_s *fs,
 {
   uint16_t diroffset;
   uint8_t *direntry;
+#ifdef CONFIG_FAT_LFN
+  off_t    startsector;
+#endif
   uint8_t  ch;
   int      ret;
+
+  /* Save the sector number of the first sector of the directory.  We don't
+   * really need this for short file name entries; this is just done for
+   * consistency with the long file name logic.
+   */
+
+#ifdef CONFIG_FAT_LFN
+  startsector = dirinfo->dir.fd_currsector;
+#endif
+
+  /* Then search for a free short file name directory entry */
 
   for (;;)
     {
@@ -1214,18 +1428,17 @@ static inline int fat_allocatesfnentry(struct fat_mountpt_s *fs,
         {
           /* It is empty -- we have found a directory entry */
 
-          dirinfo->fd_seq.ds_sector  = fs->fs_currentsector;
-          dirinfo->fd_seq.ds_offset  = diroffset;
+          dirinfo->fd_seq.ds_sector       = fs->fs_currentsector;
+          dirinfo->fd_seq.ds_offset       = diroffset;
 #ifdef CONFIG_FAT_LFN
-          dirinfo->fd_seq.ds_cluster = dirinfo->dir.fd_currcluster;
-#endif
+          dirinfo->fd_seq.ds_cluster      = dirinfo->dir.fd_currcluster;
+          dirinfo->fd_seq.ds_startsector  = startsector;
 
           /* Set the "last" long file name offset to the same entry */
 
-#ifdef CONFIG_FAT_LFN
-          dirinfo->fd_seq.ds_lfnsector  = dirinfo->fd_seq.ds_sector;
-          dirinfo->fd_seq.ds_lfnoffset  = dirinfo->fd_seq.ds_offset;
-          dirinfo->fd_seq.ds_lfncluster = dirinfo->fd_seq.ds_cluster;
+          dirinfo->fd_seq.ds_lfnsector    = dirinfo->fd_seq.ds_sector;
+          dirinfo->fd_seq.ds_lfnoffset    = dirinfo->fd_seq.ds_offset;
+          dirinfo->fd_seq.ds_lfncluster   = dirinfo->fd_seq.ds_cluster;
 #endif
           return OK;
         }
@@ -1250,6 +1463,8 @@ static inline int fat_allocatesfnentry(struct fat_mountpt_s *fs,
  * Desciption: Find a sequence of free directory entries for a several long
  *   and one short file name entry.
  *
+ * On entry, dirinfo.dir refers to the first interesting entry the directory.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_FAT_LFN
@@ -1258,6 +1473,7 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
 {
   uint16_t diroffset;
   uint8_t *direntry;
+  off_t    startsector;
   uint8_t  nentries;
   uint8_t  remainder;
   uint8_t  needed;
@@ -1289,6 +1505,13 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
    */
 
   nentries++;
+
+  /* Save the sector number of the first sector of the directory.  We will
+   * need this later for re-scanning the directory to verify that a FAT file
+   * name is unique.
+   */
+
+  startsector = dirinfo->dir.fd_currsector;
 
   /* Now, search the directory looking for a sequence for free entries that
    * long.
@@ -1325,9 +1548,10 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
             {
               /* Yes.. remember the position of this entry */
 
-              dirinfo->fd_seq.ds_lfnsector  = fs->fs_currentsector;
-              dirinfo->fd_seq.ds_lfnoffset  = diroffset;
-              dirinfo->fd_seq.ds_lfncluster = dirinfo->dir.fd_currcluster;
+              dirinfo->fd_seq.ds_lfnsector    = fs->fs_currentsector;
+              dirinfo->fd_seq.ds_lfnoffset    = diroffset;
+              dirinfo->fd_seq.ds_lfncluster   = dirinfo->dir.fd_currcluster;
+              dirinfo->fd_seq.ds_startsector  = startsector;
             }
 
           /* Is this last entry we need (i.e., the entry for the short
@@ -1820,6 +2044,20 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
       return ret;
     }
 
+  /* Set up the initial positional data */
+
+  dirinfo->dir.fd_currcluster = dirinfo->fd_seq.ds_lfncluster;
+  dirinfo->dir.fd_currsector  = dirinfo->fd_seq.ds_lfnsector;
+  dirinfo->dir.fd_index       = dirinfo->fd_seq.ds_lfnoffset / DIR_SIZE;
+
+  /* Make sure that the alias is unique in this directory*/
+
+  ret = fat_uniquealias(fs, dirinfo);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Get the short file name checksum */
 
   checksum = fat_lfnchecksum(dirinfo->fd_name);
@@ -1827,12 +2065,6 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
   /* Setup the starting sequence number */
 
   seqno = LDIR0_LAST | nentries;
-
-  /* Set up the initial positional data */
-
-  dirinfo->dir.fd_currcluster  = dirinfo->fd_seq.ds_lfncluster;
-  dirinfo->dir.fd_currsector   = dirinfo->fd_seq.ds_lfnsector;
-  dirinfo->dir.fd_index        = dirinfo->fd_seq.ds_lfnoffset / DIR_SIZE;
 
   /* Make sure that the sector containing the "last" long file name entry
    * is in the sector cache (it probably is not).
@@ -2045,9 +2277,11 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
       dirinfo->dir.fd_currsector   = cluster;
     }
 
-  /* fd_index is the index into the current directory table */
+  /* fd_index is the index into the current directory table. Skipping over
+   * the '.' and '..' entries.
+   */
 
-  dirinfo->dir.fd_index = 0;
+  dirinfo->dir.fd_index = 2;
 
   /* If no path was provided, then the root directory must be exactly what
    * the caller is looking for.
@@ -2146,9 +2380,10 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
       /* Then restart scanning at the new directory */
 
-      dirinfo->dir.fd_currcluster = dirinfo->dir.fd_startcluster = cluster;
-      dirinfo->dir.fd_currsector  = fat_cluster2sector(fs, cluster);
-      dirinfo->dir.fd_index       = 2;
+      dirinfo->dir.fd_startcluster = cluster;
+      dirinfo->dir.fd_currcluster  = cluster;
+      dirinfo->dir.fd_currsector   = fat_cluster2sector(fs, cluster);
+      dirinfo->dir.fd_index        = 2;
     }
 }
 
@@ -2191,8 +2426,11 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
           dirinfo->dir.fd_currsector = fs->fs_rootbase;
         }
-    dirinfo->dir.fd_index = 0;
 
+      /* Skip over the '.' and '..' entries */
+
+      dirinfo->dir.fd_index = 2;
+ 
       /* Is this a path segment a long or a short file.  Was a long file
        * name parsed?
        */
@@ -2228,7 +2466,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
       /* If we get here, then we have reached the end of the directory table
        * in this sector without finding a free directory entry.
        *
-       * It this is a fixed size dirctory entry, then this is an error.
+       * It this is a fixed size directory entry, then this is an error.
        * Otherwise, we can try to extend the directory cluster chain to
        * make space for the new directory entry.
        */

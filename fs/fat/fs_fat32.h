@@ -728,6 +728,7 @@ struct fat_dirseq_s
   off_t    ds_cluster;             /* Cluster containing the short file name entry */
   off_t    ds_lfnsector;           /* Sector of the last long name entry */
   off_t    ds_lfncluster;          /* Cluster containing the long file name entry */
+  off_t    ds_startsector;         /* Starting sector of the directory */
 #endif
 };
 
