@@ -41,8 +41,9 @@ CONFIGURED_APPS += examples/nsh
 
 CONFIGURED_APPS += nshlib
 
-# The NX example configured as an NX built-in command
+# The NX and NXHELLO examples configured as an NX built-in commands
 
 CONFIGURED_APPS += examples/nx
+CONFIGURED_APPS += examples/nxhello
 
 
