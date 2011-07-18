@@ -263,6 +263,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
       if ((oflags & O_CREAT) == 0)
         {
           /* No.. then we fail with -ENOENT */
+
           ret = -ENOENT;
           goto errout_with_semaphore;
         }

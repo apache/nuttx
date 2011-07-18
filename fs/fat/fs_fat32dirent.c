@@ -239,9 +239,10 @@ static inline int fat_parsesfname(const char **path,
           return OK;
         }
 
-      /* Accept only the printable character set.  Note the first byte
-       * of the name could be 0x05 meaning that is it 0xe5, but this is
-       * not a printable character in this character in either case.
+      /* Accept only the printable character set (excluding space).  Note
+       * that the first byte of the name could be 0x05 meaning that is it
+       * 0xe5, but this is not a printable character in this character in
+       * either case.
        */
 
       else if (!isgraph(ch))
@@ -471,9 +472,9 @@ static inline int fat_parselfname(const char **path,
           return OK;
         }
 
-      /* Accept only the printable character set */
+      /* Accept only the printable character set (including space) */
 
-      else if (!isgraph(ch))
+      else if (!isprint(ch))
         {
           goto errout;
         }
@@ -871,14 +872,13 @@ static bool fat_cmplfnchunk(uint8_t *chunk, const uint8_t *substr, int nchunk)
 
   for (i = 0; i < nchunk; i++)
     {
-      /* Get the next character from the name string.  If we encounter the
-       * NUL terminator in the name string, then the rest of the characters
-       * in the directory should be spaces.
+      /* Get the next character from the name string (which might be the NUL
+       * terminating character).
        */
 
-      if (*substr == 0)
+      if (*substr == '\0')
         {
-          ch = ' ';
+          ch = '\0';
         }
       else
         {
@@ -896,9 +896,16 @@ static bool fat_cmplfnchunk(uint8_t *chunk, const uint8_t *substr, int nchunk)
           return false;
         }
 
-      /* Yes.. the characters match.  Try the next character from the
-       * directory entry.
+      /* The characters match.  If we just matched the NUL terminating
+       * character, then the strings match and we are finished.
        */
+
+      if (ch == '\0')
+        {
+          return true;
+        }
+
+      /* Try the next character from the directory entry. */
 
       chunk += sizeof(wchar_t);
     }
@@ -921,43 +928,45 @@ static bool fat_cmplfnchunk(uint8_t *chunk, const uint8_t *substr, int nchunk)
 static bool fat_cmplfname(const uint8_t *direntry, const uint8_t *substr)
 {
   uint8_t *chunk;
-  int offset;
   int len;
+  bool match;
 
-  /* How much of string do we have to compare? */
+  /* How much of string do we have to compare? (including the NUL
+   * terminator).
+   */
 
-  len = strlen((char*)substr);
+  len = strlen((char*)substr) + 1;
 
   /* Check bytes 1-5 */
 
   chunk = LDIR_PTRWCHAR1_5(direntry);
-  if (fat_cmplfnchunk(chunk, substr, 5))
+  match = fat_cmplfnchunk(chunk, substr, 5);
+  if (match)
     {
-      /* Advance the string pointer.  Don't go past the end of the string. */
+      /* Don't go past the end of the sub-string */
 
-      offset = MIN(5, len);
-
-      /* Check bytes 6-11 (or if offset == 0, verify that they are spaces) */
-
-      chunk = LDIR_PTRWCHAR6_11(direntry);
-      if (fat_cmplfnchunk(chunk, &substr[offset], 6))
+      if (len > 5)
         {
-          /* Advance the string pointer.  Don't go past the end of the
-           * string.
-           */
+          /* Check bytes 6-11 */
 
-          offset = MIN(11, len);
+          chunk = LDIR_PTRWCHAR6_11(direntry);
+          match = fat_cmplfnchunk(chunk, &substr[5], 6);
+          if (match)
+            {
+              /* Don't go past the end of the sub-string */
 
-          /* Check bytes 12-13 (or if offset == 0, verify that they are
-           * spaces)
-           */
+              if (len > 11)
+                {
+                  /* Check bytes 12-13 */
 
-          chunk = LDIR_PTRWCHAR12_13(direntry);
-          return fat_cmplfnchunk(chunk, &substr[offset], 2);
+                  chunk = LDIR_PTRWCHAR12_13(direntry);
+                  match = fat_cmplfnchunk(chunk, &substr[11], 2);
+                }
+            }
         }
     }
 
-  return false;
+  return match;
 }
 #endif
 
@@ -982,17 +991,19 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
   uint8_t  nfullentries;
   uint8_t  nentries;
   uint8_t  remainder;
-  uint8_t  checksum;
+  uint8_t  checksum = 0;
   int      offset;
   int      namelen;
   int      ret;
 
   /* Get the length of the long file name (size of the fd_lfname array is
    * LDIR_MAXFNAME+1 we do not have to check the length of the string).
+   * NOTE that the name length is incremented to include the NUL terminating
+   * character that must also be written to the directory entry. 
    */
 
-  namelen = strlen((char*)dirinfo->fd_lfname);
-  DEBUGASSERT(namelen <= LDIR_MAXFNAME);
+  namelen = strlen((char*)dirinfo->fd_lfname) + 1;
+  DEBUGASSERT(namelen <= LDIR_MAXFNAME+1);
 
   /* How many LFN directory entries are we expecting? */
 
@@ -1266,10 +1277,12 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
 
   /* Get the length of the long file name (size of the fd_lfname array is
    * LDIR_MAXFNAME+1 we do not have to check the length of the string).
+   * NOTE that the name length is incremented to include the NUL terminating
+   * character that must also be written to the directory entry. 
    */
 
-  namelen = strlen((char *)dirinfo->fd_lfname);
-  DEBUGASSERT(namelen <= LDIR_MAXFNAME);
+  namelen = strlen((char *)dirinfo->fd_lfname) + 1;
+  DEBUGASSERT(namelen <= LDIR_MAXFNAME+1);
 
   /* How many LFN directory entries are we expecting? */
 
@@ -1709,16 +1722,16 @@ static int fat_putsfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 }
 
 /****************************************************************************
- * Name: fat_putlfnspaces
+ * Name: fat_initlfname
  *
  * Desciption:  There are 13 characters per LFN entry, broken up into three
  *   chunks for characts 1-5, 6-11, and 12-13.  This function will put the
- *   space characters into one chunk.
+ *   0xffff characters into one chunk.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_FAT_LFN
-static void fat_putlfnspaces(uint8_t *chunk, int nchunk)
+static void fat_initlfname(uint8_t *chunk, int nchunk)
 {
   int i;
 
@@ -1726,9 +1739,9 @@ static void fat_putlfnspaces(uint8_t *chunk, int nchunk)
 
   for (i = 0; i < nchunk; i++)
     {
-      /* The write the unicode space character into the directory entry. */
+      /* The write the 16-bit 0xffff character into the directory entry. */
 
-      fat_putuint16((uint8_t *)chunk, (uint16_t)' ');
+      fat_putuint16((uint8_t *)chunk, (uint16_t)0xffff);
       chunk += sizeof(wchar_t);
     }
 }
@@ -1791,10 +1804,12 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
   /* Get the length of the long file name (size of the fd_lfname array is
    * LDIR_MAXFNAME+1 we do not have to check the length of the string).
+   * NOTE that the name length is incremented to include the NUL terminating
+   * character that must also be written to the directory entry. 
    */
 
-  namelen = strlen((char*)dirinfo->fd_lfname);
-  DEBUGASSERT(namelen <= LDIR_MAXFNAME);
+  namelen = strlen((char*)dirinfo->fd_lfname) + 1;
+  DEBUGASSERT(namelen <= LDIR_MAXFNAME+1);
 
   /* How many LFN directory entries do we need to write? */
 
@@ -1858,11 +1873,11 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
         {
           int nbytes;
 
-          /* Initialize the "last" directory entry name to all spaces */
+          /* Initialize the "last" directory entry name to all 0xffff */
 
-          fat_putlfnspaces(LDIR_PTRWCHAR1_5(direntry), 5);
-          fat_putlfnspaces(LDIR_PTRWCHAR6_11(direntry), 6);
-          fat_putlfnspaces(LDIR_PTRWCHAR12_13(direntry), 2);
+          fat_initlfname(LDIR_PTRWCHAR1_5(direntry), 5);
+          fat_initlfname(LDIR_PTRWCHAR6_11(direntry), 6);
+          fat_initlfname(LDIR_PTRWCHAR12_13(direntry), 2);
 
           /* Store the tail portion of the long file name in directory entry */
 

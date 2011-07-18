@@ -1923,3 +1923,8 @@
 	  allocation (fat_allocatedirentry()).  I looks like it could be
 	  initializing the wrong sectors! NOTE:  This function was in
 	  fs_fat32utils.c in earlier releases.
+	* arch/arm/src/stm32_sdio.c: Correct an important DMA-related bug;
+	  SDIO transfer completion events and DMA completion eventes were
+	  not being coordinated correctly.
+	* configs/stm3210e-eval/nsh2: Enable FAT long file name support
+
