@@ -678,7 +678,7 @@ void up_serialinit(void)
   /* Make sure that all UART interrupts are disabled */
 
   ez80_disableuartint(TTYS0_DEV.priv);
-#ifdef TTYS1DEV
+#ifdef TTYS1_DEV
   ez80_disableuartint(TTYS1_DEV.priv);
 #endif
 
@@ -729,7 +729,7 @@ void up_serialinit(void)
   (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
   (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
-#ifdef TTYS1DEV
+#ifdef TTYS1_DEV
   (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif
 }
