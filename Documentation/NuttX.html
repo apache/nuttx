@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 11, 2011</p>
+      <p>Last Updated: July 17, 2011</p>
     </td>
   </tr>
 </table>
@@ -417,7 +417,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>FAT12/16/32 filesystem support.</li>
+      <li>FAT12/16/32 filesystem support with optional FAT long file name support<small><sup>1</sup></small>.</li>
     </p>
 </tr>
 <tr>
@@ -449,6 +449,15 @@
       A new binary format call NXFLAT that can be used to 
       execute separately linked programs in place in a file system.
     </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p><small>
+      <sup>1</sup>
+      FAT long file name support may be subject to certain Microsoft patent restrictions if enabled.
+      See the top-level <code>COPYING</code> file for details.
+    </small></p>
 </tr>
 
 <tr>
@@ -2537,7 +2546,40 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-6.7 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
+    * Makefile:  Added a export target that will bundle up all of the NuttX
+      libraries, header files, and the startup object into an export-able
+      tarball.
+    * arch/arm/src/lpc17xx/lpc17_can.h:  Correct some typos in the CAN
+      register definitions.
+    * drivers/serial/serialirq.c:  Correct an error that can occur if the
+      serial RX buffer becomes full.  Data is now discarded in that case;
+      before, leaving data in the hardware would cause infinite interrupts
+      one most MCUs since you must read the data in order to clear the
+      interrupt.
+    * arch/arm/src/lpc17xx/lpc17_can.c:  Added a CAN driver contributed by
+      Li Zhuoyi (Lzyy).
+    * include/stddefs.h and sys/types:  Added type wchar_t.
+    * fs/fat/fat_fat32dirent.c:  The configuration CONFIG_FAT_LCNAMES has
+      been around for some time but never tested until now.  This setting
+      will mimic the NT 8.3 file name behavior:  File names or extensions 
+      may be all upper or all lower case (but not mixed).  If
+      CONFIG_FAT_LCNAMES is not selected, all filenames are strictly upper
+      case.
+    * configs/stm3210e-eval/nsh2:  Console is back on UART1; Added
+      examplex/nx as an NSH &quot;built-in&quot; command as a demonstration.
+    * fs/fat/fs_fat32dirent.c:  Fix an important bug in the directory
+      allocation (fat_allocatedirentry()).  I looks like it could be
+      initializing the wrong sectors! NOTE:  This function was in
+      fs_fat32utils.c in earlier releases.
+    * arch/arm/src/stm32_sdio.c: Correct an important DMA-related bug;
+      SDIO transfer completion events and DMA completion eventes were
+      not being coordinated correctly.
+    * configs/stm3210e-eval/nsh2: Enable FAT long file name support
+
 apps-6.7 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * apps/examples/nx and nxtext:  These examples can now be built as NSH
+      &quot;built-in&quot; commands.
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

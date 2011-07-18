@@ -941,28 +941,18 @@ static bool fat_cmplfname(const uint8_t *direntry, const uint8_t *substr)
 
   chunk = LDIR_PTRWCHAR1_5(direntry);
   match = fat_cmplfnchunk(chunk, substr, 5);
-  if (match)
+  if (match && len > 5)
     {
-      /* Don't go past the end of the sub-string */
+      /* Check bytes 6-11 */
 
-      if (len > 5)
+      chunk = LDIR_PTRWCHAR6_11(direntry);
+      match = fat_cmplfnchunk(chunk, &substr[5], 6);
+      if (match && len > 11)
         {
-          /* Check bytes 6-11 */
+          /* Check bytes 12-13 */
 
-          chunk = LDIR_PTRWCHAR6_11(direntry);
-          match = fat_cmplfnchunk(chunk, &substr[5], 6);
-          if (match)
-            {
-              /* Don't go past the end of the sub-string */
-
-              if (len > 11)
-                {
-                  /* Check bytes 12-13 */
-
-                  chunk = LDIR_PTRWCHAR12_13(direntry);
-                  match = fat_cmplfnchunk(chunk, &substr[11], 2);
-                }
-            }
+          chunk = LDIR_PTRWCHAR12_13(direntry);
+          match = fat_cmplfnchunk(chunk, &substr[11], 2);
         }
     }
 
