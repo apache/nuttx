@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: May 8, 2011</p>
+      <p>Last Updated: July 19, 2011</p>
     </td>
   </tr>
 </table>
@@ -247,11 +247,11 @@ paragraphs.
 <p>
 <b>Input Parameters:</b> 
   <ul>
-    <li><I>name</I>. Name of the new task</LI>
-    <li><I>priority</I>. Priority of the new task</LI>
-    <li><I>stack_size</I>. size (in bytes) of the stack needed</LI>
-    <li><I>entry</I>. Entry point of a new task</LI>
-    <li><I>argv</I>. A pointer to an array of input parameters.  Up to
+    <li><i>name</i>. Name of the new task</LI>
+    <li><i>priority</i>. Priority of the new task</LI>
+    <li><i>stack_size</i>. size (in bytes) of the stack needed</LI>
+    <li><i>entry</i>. Entry point of a new task</LI>
+    <li><i>argv</i>. A pointer to an array of input parameters.  Up to
        <code>CONFIG_MAX_TASK_ARG</code> parameters may be provided.
        If fewer than <code>CONFIG_MAX_TASK_ARG</code> parameters are
        passed, the list should be terminated with a NULL argv[] value.
@@ -314,13 +314,13 @@ VxWorks provides the following similar interface:
 <p>
 <b>Input Parameters:</b> 
   <ul>
-    <li><I>tcb</I>. Address of the new task's TCB
-    <li><I>name</I>. Name of the new task (not used)
-    <li><I>priority</I>. Priority of the new task
-    <li><I>stack</I>. Start of the pre-allocated stack
-    <li><I>stack_size</I>. size (in bytes) of the pre-allocated stack
-    <li><I>entry</I>. Entry point of a new task
-    <li><I>argv</I>. A pointer to an array of input parameters.  Up to
+    <li><i>tcb</i>. Address of the new task's TCB
+    <li><i>name</i>. Name of the new task (not used)
+    <li><i>priority</i>. Priority of the new task
+    <li><i>stack</i>. Start of the pre-allocated stack
+    <li><i>stack_size</i>. size (in bytes) of the pre-allocated stack
+    <li><i>entry</i>. Entry point of a new task
+    <li><i>argv</i>. A pointer to an array of input parameters.  Up to
        <code>CONFIG_MAX_TASK_ARG</code> parameters may be provided.
        If fewer than <code>CONFIG_MAX_TASK_ARG</code> parameters are
        passed, the list should be terminated with a NULL argv[] value.
@@ -378,7 +378,7 @@ scheduler.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>tcb</I>. The TCB for the task for the task (same as the
+<li><i>tcb</i>. The TCB for the task for the task (same as the
 task_init argument).
 </ul>
 
@@ -428,7 +428,7 @@ is the companion to task_create().
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>pid</I>. The task ID of the task to delete. An ID of
+<li><i>pid</i>. The task ID of the task to delete. An ID of
 zero signifies the calling task.
 </ul>
 
@@ -482,7 +482,7 @@ execute any function registered with atexit().
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>code</I>. (ignored)
+<li><i>code</i>. (ignored)
 </ul>
 
 <p>
@@ -505,7 +505,7 @@ And the UNIX interface:
   The NuttX exit() differs from ANSI exit() in the following ways:
 </p>
 <ul>
-<li>The <I>code</I> parameter is ignored.
+<li>The <i>code</i> parameter is ignored.
 </ul>
 
 <H3><a name="taskrestart">2.1.6 task_restart</a></H3>
@@ -525,7 +525,7 @@ it had when it was first started.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>pid</I>. The task ID of the task to delete. An ID of
+<li><i>pid</i>. The task ID of the task to delete. An ID of
 zero signifies the calling task.
 </ul>
 
@@ -556,7 +556,7 @@ VxWorks provides the following similar interface:
 <ul>
 <li>Restart of the currently running task is not supported.
 <li>The VxWorks description says that the ID, priority, etc. take
-the value that they had when the task was <I>terminated</I>.
+the value that they had when the task was <i>terminated</i>.
 </ul>
 
 <H3><a name="getpid">2.1.7 getpid</a></H3>
@@ -743,11 +743,11 @@ interface of the same name.
 <b>Input Parameters:</b> 
 <ul>
   <li>
-    <I>pid</I>. The task ID of the task. If pid is zero, the
+    <i>pid</i>. The task ID of the task. If pid is zero, the
     priority of the calling task is set.
   </li>
   <li>
-    <I>policy</I>. Scheduling policy requested (either <code>SCHED_FIFO</code> or <code>SCHED_RR</code>).
+    <i>policy</i>. Scheduling policy requested (either <code>SCHED_FIFO</code> or <code>SCHED_RR</code>).
   </li>
   <li>
     <code>param</code>. A structure whose member sched_priority is the
@@ -795,7 +795,7 @@ policy.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-  <li><I>pid</I>.
+  <li><i>pid</i>.
     The task ID of the task to query.
     If pid is zero, the calling task is queried.
   </LI>
@@ -863,7 +863,7 @@ possible task priority for a specified scheduling policy.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>policy</I>. Scheduling policy requested.
+<li><i>policy</i>. Scheduling policy requested.
 </ul>
 
 <p>
@@ -893,7 +893,7 @@ possible task priority for a specified scheduling policy.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>policy</I>. Scheduling policy requested.
+<li><i>policy</i>. Scheduling policy requested.
 </ul>
 
 <p>
@@ -930,9 +930,9 @@ interface of the same name.
   <b>Input Parameters:</b> 
 </p>
 <ul>
-<li><I>pid</I>. The task ID of the task. If pid is zero, the
+<li><i>pid</i>. The task ID of the task. If pid is zero, the
 priority of the calling task is returned.
-<li><I>interval</I>. A structure used to return the time slice.
+<li><i>interval</i>. A structure used to return the time slice.
 </ul>
 
 <p>
@@ -1105,27 +1105,27 @@ until it is closed by a successful call to mq_close().
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>mqName</I>. Name of the queue to open
-<li><I>oflags</I>. Open flags. These may be any combination of:
+<li><i>mqName</i>. Name of the queue to open
+<li><i>oflags</i>. Open flags. These may be any combination of:
 <ul>
-<li><I>O_RDONLY</I>. Open for read access.
-<li><I>O_WRONLY</I>. Open for write access.
-<li><I>O_RDWR</I>. Open for both read &amp; write access.
-<li><I>O_CREAT</I>. Create message queue if it does not already
+<li><i>O_RDONLY</i>. Open for read access.
+<li><i>O_WRONLY</i>. Open for write access.
+<li><i>O_RDWR</i>. Open for both read &amp; write access.
+<li><i>O_CREAT</i>. Create message queue if it does not already
 exist.
-<li><I>O_EXCL</I>. Name must not exist when opened.
-<li><I>O_NONBLOCK</I>. Don't wait for data.
+<li><i>O_EXCL</i>. Name must not exist when opened.
+<li><i>O_NONBLOCK</i>. Don't wait for data.
 </ul>
 
-<li><I>... Optional parameters</I>.
+<li><i>... Optional parameters</i>.
 When the O_CREAT flag is specified, POSIX requires that a third
 and fourth parameter be supplied:
 <ul>
-<li><I>mode</I>.  The mode parameter is of type mode_t.  In the POSIX
+<li><i>mode</i>.  The mode parameter is of type mode_t.  In the POSIX
 specification, this mode value provides file permission bits for the
 message queue.  This parameter is required but not used in the present
 implementation.
-<li><I>attr</I>.  A pointer to an mq_attr that is provided to initialize.
+<li><i>attr</i>.  A pointer to an mq_attr that is provided to initialize.
 the message queue.  If attr is NULL, then the messages queue is created
 with implementation-defined default message queue attributes.  If attr is
 non-NULL, then the message queue mq_maxmsg attribute is set to the
@@ -1172,13 +1172,13 @@ The mq_close() deallocates any system resources allocated by the
 system for use by this task for its message queue.
 <p>
 If the calling task has attached a notification request to the message
-queue via this <I>mqdes</I> (see mq_notify()), this attachment will be
+queue via this <i>mqdes</i> (see mq_notify()), this attachment will be
 removed and the message queue is available for another task to attach
 for notification.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>mqdes</I>. Message queue descriptor.
+<li><i>mqdes</i>. Message queue descriptor.
 </ul>
 
 <p>
@@ -1219,7 +1219,7 @@ closed.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>mqName</I>. Name of the message queue
+<li><i>mqName</i>. Name of the message queue
 </ul>
 
 <p>
@@ -1569,13 +1569,13 @@ registration.
 <p>
 <b>Input Parameters:</b>
 <ul>
-<li><I>mqdes</I>. Message queue descriptor
-<li><I>notification</I>. Real-time signal structure containing:
+<li><i>mqdes</i>. Message queue descriptor
+<li><i>notification</i>. Real-time signal structure containing:
 <ul>
-<li><I>sigev_notify</I>. Should be SIGEV_SIGNAL (but actually
+<li><i>sigev_notify</i>. Should be SIGEV_SIGNAL (but actually
 ignored)
-<li><I>sigev_signo</I>. The signo to use for the notification
-<li><I>sigev_value</I>. Value associated with the signal
+<li><i>sigev_signo</i>. The signo to use for the notification
+<li><i>sigev_value</i>. Value associated with the signal
 </ul>
 
 </ul>
@@ -1593,9 +1593,9 @@ Differences from the full POSIX implementation include:
 another task is waiting for the message queue to become non-empty.  This is
 inconsistent with the POSIX specification which states, &quot;If a process
 has registered for notification of message arrival at a message queue and
-some process is blocked in <I>mq_receive</I> waiting to receive a message
+some process is blocked in <i>mq_receive</i> waiting to receive a message
 when a message arrives at the queue, the arriving message shall satisfy the
-appropriate <I>mq_receive()</I> ... The resulting behavior is as if the
+appropriate <i>mq_receive()</i> ... The resulting behavior is as if the
 message queue remains empty, and no notification shall be sent.&quot;
 </ul>
 
@@ -1620,9 +1620,9 @@ would have been returned by mq_getattr()).
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>mqdes</I>. Message queue descriptor
-<li><I>mqStat</I>. New attributes
-<li><I>oldMqState</I>. Old attributes
+<li><i>mqdes</i>. Message queue descriptor
+<li><i>mqStat</i>. New attributes
+<li><i>oldMqState</i>. Old attributes
 </ul>
 
 <p>
@@ -1653,14 +1653,14 @@ attributes associated with the specified message queue.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>mqdes</I>. Message queue descriptor
-<li><I>mqStat</I>. Buffer in which to return attributes. The returned
+<li><i>mqdes</i>. Message queue descriptor
+<li><i>mqStat</i>. Buffer in which to return attributes. The returned
 attributes include:
 <ul>
-<li><I>mq_maxmsg</I>. Max number of messages in queue.
-<li><I>mq_msgsize</I>. Max message size.
-<li><I>mq_flags</I>. Queue flags.
-<li><I>mq_curmsgs</I>. Number of messages currently in queue.
+<li><i>mq_maxmsg</i>. Max number of messages in queue.
+<li><i>mq_msgsize</i>. Max message size.
+<li><i>mq_flags</i>. Queue flags.
+<li><i>mq_curmsgs</i>. Number of messages currently in queue.
 </ul>
 
 </ul>
@@ -1704,27 +1704,27 @@ interface of the same name.
   Proper use of semaphores avoids the issues of <code>sched_lock()</code>.
   However, consider the following example:
   <OL>
-    <li>Some low-priority task, <I>Task C</I>, acquires a semaphore in order to
+    <li>Some low-priority task, <i>Task C</i>, acquires a semaphore in order to
       get exclusive access to a protected resource.</li>
-    <li><I>Task C</I> is suspended to allow some high-priority task,</li>
-      <I>Task A</I>, to execute.</li>
-    <li><I>Task A</I> attempts to acquire the semaphore held by <I>Task C</I> and
-      gets blocked until <I>Task C</I> relinquishes the semaphore.</li>
-    <li><I>Task C</I> is allowed to execute again, but gets suspended by some
-      medium-priority <I>Task B</I>.</li>
+    <li><i>Task C</i> is suspended to allow some high-priority task,</li>
+      <i>Task A</i>, to execute.</li>
+    <li><i>Task A</i> attempts to acquire the semaphore held by <i>Task C</i> and
+      gets blocked until <i>Task C</i> relinquishes the semaphore.</li>
+    <li><i>Task C</i> is allowed to execute again, but gets suspended by some
+      medium-priority <i>Task B</i>.</li>
   </OL>
 <p>
-  At this point, the high-priority <I>Task A</I> cannot execute until
-  <I>Task B</I> (and possibly other medium-priority tasks) completes and until
-  <I>Task C</I> relinquishes the semaphore.  In effect, the high-priority task,
-  <I>Task A</I> behaves as though it were lower in priority than the
-  low-priority task, <I>Task C</I>!  This phenomenon is called <I>priority
-  inversion</I>.
+  At this point, the high-priority <i>Task A</i> cannot execute until
+  <i>Task B</i> (and possibly other medium-priority tasks) completes and until
+  <i>Task C</i> relinquishes the semaphore.  In effect, the high-priority task,
+  <i>Task A</i> behaves as though it were lower in priority than the
+  low-priority task, <i>Task C</i>!  This phenomenon is called <i>priority
+  inversion</i>.
 </p>
 <p>
-  Some operating systems avoid priority inversion by <I>automatically</I>
-  increasing the priority of the low-priority <I>Task C</I> (the operable
-  buzz-word for this behavior is <I>priority inheritance</I>).  NuttX
+  Some operating systems avoid priority inversion by <i>automatically</i>
+  increasing the priority of the low-priority <i>Task C</i> (the operable
+  buzz-word for this behavior is <i>priority inheritance</i>).  NuttX
   supports this behavior, but only if <code>CONFIG_PRIORITY_INHERITANCE</code>
   is defined in your OS configuration file.  If <code>CONFIG_PRIORITY_INHERITANCE</code>
   is not defined, then it is left to the designer to provide implementations
@@ -1819,9 +1819,10 @@ interface of the same name.
   <li><a href="#semclose">2.5.4 sem_close</a></li>
   <li><a href="#semunlink">2.5.5 sem_unlink</a></li>
   <li><a href="#semwait">2.5.6 sem_wait</a></li>
-  <li><a href="#semtrywait">2.5.7 sem_trywait</a></li>
-  <li><a href="#sempost">2.5.8 sem_post</a></li>
-  <li><a href="#semgetvalue">2.5.9 sem_getvalue</a></li>
+  <li><a href="#semtimedwait">2.5.7 sem_timedwait</a></li>
+  <li><a href="#semtrywait">2.5.8 sem_trywait</a></li>
+  <li><a href="#sempost">2.5.9 sem_post</a></li>
+  <li><a href="#semgetvalue">2.5.10 sem_getvalue</a></li>
 </ul>
 
 <H3><a name="seminit">2.5.1 sem_init</a></H3>
@@ -1839,16 +1840,16 @@ sem. Following a successful call to sem_init(), the semaphore
 may be used in subsequent calls to sem_wait(), sem_post(), and
 sem_trywait(). The semaphore remains usable until it is destroyed.
 <p>
-Only <I>sem</I> itself may be used for performing synchronization.  The
-result of referring to copies of <I>sem</I> in calls to <I>sem_wait()</I>,
-<I>sem_trywait()</I>, <I>sem_post()</I>, and <I>sem_destroy()</I>, is
+Only <i>sem</i> itself may be used for performing synchronization.  The
+result of referring to copies of <i>sem</i> in calls to <i>sem_wait()</i>,
+<i>sem_trywait()</i>, <i>sem_post()</i>, and <i>sem_destroy()</i>, is
 not defined.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>sem</I>. Semaphore to be initialized
-<li><I>pshared</I>. Process sharing (not used)
-<li><I>value</I>. Semaphore initialization value 
+<li><i>sem</i>. Semaphore to be initialized
+<li><i>pshared</i>. Process sharing (not used)
+<li><i>value</i>. Semaphore initialization value 
 </ul>
 
 <p>
@@ -1878,18 +1879,18 @@ Differences from the full POSIX implementation include:
 
 <p>
 <b>Description:</b> This function is used to destroy the un-named semaphore
-indicated by <I>sem</I>.  Only a semaphore that was created using
-<I>sem_init()</I> may be destroyed using <I>sem_destroy()</I>.  The effect
-of calling <I>sem_destroy()</I> with a named semaphore is undefined.  The
-effect of subsequent use of the semaphore <I>sem</I> is undefined until
-<I>sem</I> is re-initialized by another call to <I>sem_init()</I>.
+indicated by <i>sem</i>.  Only a semaphore that was created using
+<i>sem_init()</i> may be destroyed using <i>sem_destroy()</i>.  The effect
+of calling <i>sem_destroy()</i> with a named semaphore is undefined.  The
+effect of subsequent use of the semaphore <i>sem</i> is undefined until
+<i>sem</i> is re-initialized by another call to <i>sem_init()</i>.
 <p>
 The effect of destroying a semaphore upon which other tasks are currently
 blocked is undefined.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>sem</I>. Semaphore to be destroyed.
+<li><i>sem</i>. Semaphore to be destroyed.
 </ul>
 
 <p>
@@ -1928,27 +1929,27 @@ been no calls to sem_unlink()).
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>name</I>. Semaphore name
-<li><I>oflag</I>. Semaphore creation options. This may one of
+<li><i>name</i>. Semaphore name
+<li><i>oflag</i>. Semaphore creation options. This may one of
 the following bit settings:
 <ul>
-<li><I>oflag</I> = 0: Connect to the semaphore only if it already
+<li><i>oflag</i> = 0: Connect to the semaphore only if it already
 exists.
-<li><I>oflag</I> = O_CREAT: Connect to the semaphore if it exists,
+<li><i>oflag</i> = O_CREAT: Connect to the semaphore if it exists,
 otherwise create the semaphore.
-<li><I>oflag</I> = O_CREAT with O_EXCL (O_CREAT|O_EXCL): Create
+<li><i>oflag</i> = O_CREAT with O_EXCL (O_CREAT|O_EXCL): Create
 a new semaphore unless one of this name already exists.
 </ul>
 <li>... Optional parameters.
 NOTE:  When the O_CREAT flag is specified, POSIX requires that a third
 and fourth parameter be supplied:
 <ul>
-<li><I>mode</I>.  The mode parameter is of type mode_t.  
+<li><i>mode</i>.  The mode parameter is of type mode_t.  
 This parameter is required but not used in the present
 implementation.
-<li><I>value</I>.  The value parameter is type unsigned int.  The semaphore
-is created with an initial value of <I>value</I>.  Valid initial values for
-semaphores must be less than or equal to <I>SEM_VALUE_MAX</I> (defined in
+<li><i>value</i>.  The value parameter is type unsigned int.  The semaphore
+is created with an initial value of <i>value</i>.  Valid initial values for
+semaphores must be less than or equal to <i>SEM_VALUE_MAX</i> (defined in
 <CODE>include/limits.h</CODE>).
 </ul>
 </ul>
@@ -1995,7 +1996,7 @@ that another calling task has already locked.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>sem</I>. Semaphore descriptor
+<li><i>sem</i>. Semaphore descriptor
 </ul>
 
 <p>
@@ -2033,7 +2034,7 @@ sem_close().
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>name</I>. Semaphore name
+<li><i>name</i>. Semaphore name
 </ul>
 
 <p>
@@ -2078,7 +2079,7 @@ the lock or the call is interrupted by a signal.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>sem</I>. Semaphore descriptor.
+<li><i>sem</i>. Semaphore descriptor.
 </ul>
 
 <p>
@@ -2087,14 +2088,14 @@ the lock or the call is interrupted by a signal.
 <li>0 (OK), or -1 (ERROR) is unsuccessful
 </ul>
 <p>
-If <I>sem_wait</I> returns -1 (ERROR) then the cause of the failure
+If <i>sem_wait</i> returns -1 (ERROR) then the cause of the failure
 will be indicated by the thread-specific <a href="#ErrnoAccess"><code>errno</code></a>.
 The following lists the possible values for <a href="#ErrnoAccess"><code>errno</code></a>:
 <p>
 <ul>
-<li><I>EINVAL</I>:  Indicates that the <I>sem</I> input parameter is
+<li><i>EINVAL</i>:  Indicates that the <i>sem</i> input parameter is
 not valid.
-<li><I>EINTR</I>:  Indicates that the wait was interrupt by a signal
+<li><i>EINTR</i>:  Indicates that the wait was interrupt by a signal
 received by this task.  In this case, the semaphore has not be acquired.
 </ul>
 <p>
@@ -2103,7 +2104,76 @@ received by this task.  In this case, the semaphore has not be acquired.
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="semtrywait">2.5.7 sem_trywait</a></H3>
+<H3><a name="semtimedwait">2.5.7 sem_timedwait</a></H3>
+
+<p>
+<b>Function Prototype:</b> 
+<pre>
+    #include &lt;semaphore.h&gt;
+    #include &lt;time.h&gt;
+    int sem_wait ( sem_t *sem, const struct timespec *abstime);
+</pre>
+
+<p>
+<b>Description:</b> 
+  This function will lock the semaphore referenced by sem as in the <code>sem_wait()</code> function.
+  However, if the semaphore cannot be locked without waiting for another process or thread to unlock the semaphore by performing a <code>sem_post()</code> function, this wait will be terminated when the specified timeout expires.
+</p>
+  The timeout will expire when the absolute time specified by <code>abstime</code> passes, as measured by the clock on which timeouts are based (that is, when the value of that clock equals or exceeds abstime), or if the absolute time specified by abstime has already been passed at the time of the call.
+  This function attempts to lock the semaphore referenced by <code>sem</code>.
+  If the semaphore as already locked by another task, the calling task will not return until it either successfully acquires the lock or the call is interrupted by a signal.
+<p>
+<b>Input Parameters:</b> 
+<ul>
+  <li>
+    <i>sem</i>. Semaphore descriptor.
+  </li>
+  <li>
+    <i>abstime</i>. The absolute time to wait until a timeout is declared.
+  </li>
+</ul>
+
+<p>
+<b>Returned Values:</b> 
+<ul>
+<li>0 (OK), or -1 (ERROR) is unsuccessful
+</ul>
+<p>
+If <i>sem_wait</i> returns -1 (ERROR) then the cause of the failure
+will be indicated by the thread-specific <a href="#ErrnoAccess"><code>errno</code></a>.
+The following lists the possible values for <a href="#ErrnoAccess"><code>errno</code></a>:
+<p>
+<ul>
+</ul>
+  <li>
+    <code>EINVAL</code>:
+      Indicates that the <i>sem</i> input parameter is not valid or the
+      thread would have blocked, and the abstime parameter specified
+      a nanoseconds field value less than zero or greater than or
+      equal to 1000 million.
+  </li>
+  <li>
+    <code>ETIMEDOUT</code>:
+      The semaphore could not be locked before the specified timeout expired.
+  </li>
+  <li>
+    <code>EDEADLK</code>:
+      A deadlock condition was detected.
+  </li>
+  <li>
+    <code>EINTR</code>:
+      Indicates that the wait was interrupt by a signal received by this task.
+      In this case, the semaphore has not be acquired.
+  </li>
+</ul>
+<p>
+  <b>Assumptions/Limitations:</b>
+</p>
+<p>
+  <b>POSIX Compatibility:</b> Derived from IEEE Std 1003.1d-1999.
+</p>
+
+<H3><a name="semtrywait">2.5.8 sem_trywait</a></H3>
 
 <p>
 <b>Function Prototype:</b> 
@@ -2119,7 +2189,7 @@ returns without blocking.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>sem</I>. The semaphore descriptor
+<li><i>sem</i>. The semaphore descriptor
 </ul>
 
 <p>
@@ -2127,14 +2197,14 @@ returns without blocking.
 <ul>
 <li>0 (OK) or -1 (ERROR) if unsuccessful
 </ul>
-If <I>sem_wait</I> returns -1 (ERROR) then the cause of the failure
+If <i>sem_wait</i> returns -1 (ERROR) then the cause of the failure
 will be indicated by the thread-specific <a href="#ErrnoAccess"><code>errno</code></a>.
 The following lists the possible values for <a href="#ErrnoAccess"><code>errno</code></a>:
 <p>
 <ul>
-<li><I>EINVAL</I>:  Indicates that the <I>sem</I> input parameter is
+<li><i>EINVAL</i>:  Indicates that the <i>sem</i> input parameter is
 not valid.
-<li><I>EAGAIN</I>:  Indicates that the semaphore was not acquired.
+<li><i>EAGAIN</i>:  Indicates that the semaphore was not acquired.
 </ul>
 <p>
 
@@ -2144,7 +2214,7 @@ not valid.
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sempost">2.5.8 sem_post</a></H3>
+<H3><a name="sempost">2.5.9 sem_post</a></H3>
 
 <p>
 <b>Function Prototype:</b> 
@@ -2156,7 +2226,7 @@ interface of the same name.
 <p>
 <b>Description:</b> When a task has finished with a semaphore,
 it will call sem_post().  This function unlocks the semaphore referenced
-by <I>sem</I> by performing the semaphore unlock operation.
+by <i>sem</i> by performing the semaphore unlock operation.
 <p>
 If the semaphore value resulting from this operation is positive, then
 no tasks were blocked waiting for the semaphore to become unlocked;
@@ -2164,13 +2234,13 @@ The semaphore value is simply incremented.
 <p>
 If the value of the semaphore resulting from this operation is zero, then
 on of the tasks blocked waiting for the semaphore will be allowed to
-return successfully from its call to <I>sem_wait()</I>.
+return successfully from its call to <i>sem_wait()</i>.
 <p>
-<b>NOTE</b>:  <I>sem_post()</I> may be called from an interrupt handler.
+<b>NOTE</b>:  <i>sem_post()</i> may be called from an interrupt handler.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>sem</I>. Semaphore descriptor
+<li><i>sem</i>. Semaphore descriptor
 </ul>
 
 <p>
@@ -2187,7 +2257,7 @@ task is the one that is performing the unlock.
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="semgetvalue">2.5.9 sem_getvalue</a></H3>
+<H3><a name="semgetvalue">2.5.10 sem_getvalue</a></H3>
 
 <p>
 <b>Function Prototype:</b> 
@@ -2210,8 +2280,8 @@ number of tasks waiting for the semaphore.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>sem</I>. Semaphore descriptor
-<li><I>sval</I>. Buffer by which the value is returned
+<li><i>sem</i>. Semaphore descriptor
+<li><i>sval</i>. Buffer by which the value is returned
 </ul>
 
 <p>
@@ -2306,7 +2376,7 @@ has been started.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>wdog</I>. The watchdog ID to delete. This is actually a
+<li><i>wdog</i>. The watchdog ID to delete. This is actually a
 pointer to a watchdog structure.
 </ul>
 
@@ -2360,11 +2430,11 @@ wd_start() on a given watchdog ID has any effect.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>wdog</I>. Watchdog ID
-<li><I>delay</I>. Delay count in clock ticks
-<li><I>wdentry</I>. Function to call on timeout
-<li><I>argc</I>.  The number of uint32_t parameters to pass to wdentry.
-<li><I>...</I>. uint32_t size parameters to pass to wdentry
+<li><i>wdog</i>. Watchdog ID
+<li><i>delay</i>. Delay count in clock ticks
+<li><i>wdentry</i>. Function to call on timeout
+<li><i>argc</i>.  The number of uint32_t parameters to pass to wdentry.
+<li><i>...</i>. uint32_t size parameters to pass to wdentry
 </ul>
 
 <p>
@@ -2407,7 +2477,7 @@ level.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>wdog</I>. ID of the watchdog to cancel.
+<li><i>wdog</i>. ID of the watchdog to cancel.
 </ul>
 
 <p>
@@ -2495,7 +2565,7 @@ VxWorks provides the following comparable interface:
   <b>Returned Values:</b>
 </p>
 <p>
-  If successful, the <I>clock_settime()</I> function will return zero (<I>OK</I>).
+  If successful, the <i>clock_settime()</i> function will return zero (<i>OK</i>).
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
 <ul>
@@ -2523,7 +2593,7 @@ VxWorks provides the following comparable interface:
   <b>Returned Values:</b>
 </p>
 <p>
-  If successful, the <I>clock_gettime()</I> function will return zero (<I>OK</I>).
+  If successful, the <i>clock_gettime()</i> function will return zero (<i>OK</i>).
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
 <ul>
@@ -2551,7 +2621,7 @@ VxWorks provides the following comparable interface:
   <b>Returned Values:</b>
 </p>
 <p>
-  If successful, the <I>clock_getres()</I> function will return zero (<I>OK</I>).
+  If successful, the <i>clock_getres()</i> function will return zero (<i>OK</i>).
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
 <ul>
@@ -2579,7 +2649,7 @@ VxWorks provides the following comparable interface:
   <b>Returned Values:</b>
 </p>
 <p>
-  If successful, the <I>mktime()</I> function will return zero (<I>OK</I>).
+  If successful, the <i>mktime()</i> function will return zero (<i>OK</i>).
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
 <ul>
@@ -2611,7 +2681,7 @@ VxWorks provides the following comparable interface:
   <b>Returned Values:</b>
 </p>
 <p>
-  If successful, the <I>gmtime()</I> function will return the pointer to a statically
+  If successful, the <i>gmtime()</i> function will return the pointer to a statically
   defined instance of <code>struct tim</code>.
   Otherwise, a NULL will be returned to indicate the error:
 </p>
@@ -2651,7 +2721,7 @@ VxWorks provides the following comparable interface:
   <b>Returned Values:</b>
 </p>
 <p>
-  If successful, the <I>gmtime_r()</I> function will return the pointer, <code>result</code>,
+  If successful, the <i>gmtime_r()</i> function will return the pointer, <code>result</code>,
   provided by the caller.
   Otherwise, a NULL will be returned to indicate the error:
 </p>
@@ -2762,7 +2832,7 @@ VxWorks provides the following comparable interface:
   <b>Returned Values:</b>
 </p>
 <p>
-  If successful, the <I>timer_delete()</I> function will return zero (<I>OK</I>).
+  If successful, the <i>timer_delete()</i> function will return zero (<i>OK</i>).
   Otherwise, the function will return a value of -1 (ERROR) and set
   <a href="#ErrnoAccess"><code>errno</code></a> to indicate the error:
 </p>
@@ -2891,7 +2961,7 @@ VxWorks provides the following comparable interface:
   <b>Returned Values:</b>
 </p>
 <p>
-  If successful, the <I>timer_gettime()</I> function will return zero (<I>OK</I>).
+  If successful, the <i>timer_gettime()</i> function will return zero (<i>OK</i>).
   Otherwise, an non-zero error number will be returned to indicate the error:
 </p>
 <ul>
@@ -3054,7 +3124,7 @@ by set such that all signals are excluded.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>set</I>. Signal set to initialize.
+<li><i>set</i>. Signal set to initialize.
 </ul>
 
 <p>
@@ -3084,7 +3154,7 @@ by set such that all signals are included.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>set</I>. Signal set to initialize
+<li><i>set</i>. Signal set to initialize
 </ul>
 
 <p>
@@ -3114,8 +3184,8 @@ signo to the signal set specified by set.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>set</I>. Signal set to add signal to
-<li><I>signo</I>. Signal to add
+<li><i>set</i>. Signal set to add signal to
+<li><i>signo</i>. Signal to add
 </ul>
 
 <p>
@@ -3145,8 +3215,8 @@ by signo from the signal set specified by set.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>set</I>. Signal set to delete the signal from
-<li><I>signo</I>. Signal to delete
+<li><i>set</i>. Signal set to delete the signal from
+<li><i>signo</i>. Signal to delete
 </ul>
 
 <p>
@@ -3176,8 +3246,8 @@ by signo is a member of the set specified by set.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>set</I>. Signal set to test
-<li><I>signo</I>. Signal to test for
+<li><i>set</i>. Signal set to test
+<li><i>signo</i>. Signal to test for
 </ul>
 
 <p>
@@ -3212,12 +3282,12 @@ signal.
 The structure sigaction, used to describe an action to be taken, is defined
 to include the following members:
 <ul>
-<li><I>sa_u.sa_handler</I>.  A pointer to a signal-catching function.
-<li><I>sa_u.sa_sigaction</I>.  An alternative form for the signal catching
+<li><i>sa_u.sa_handler</i>.  A pointer to a signal-catching function.
+<li><i>sa_u.sa_sigaction</i>.  An alternative form for the signal catching
 function.
-<li><I>sa_mask</I>.  Additional set of signals to be blocked during
+<li><i>sa_mask</i>.  Additional set of signals to be blocked during
 execution of the signal-catching function.
-<li><I>sa_flags</I>:  Special flags to affect behavior of a signal.
+<li><i>sa_flags</i>:  Special flags to affect behavior of a signal.
 </ul>
 <p>
 If the argument act is not NULL, it points to a structure specifying the
@@ -3243,9 +3313,9 @@ sigaction().
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>sig</I>. Signal of interest
-<li><I>act</I>. Location of new handler
-<li><I>oact</I>. Location to store old handler
+<li><i>sig</i>. Signal of interest
+<li><i>act</i>. Location of new handler
+<li><i>oact</i>. Location to store old handler
 </ul>
 
 <p>
@@ -3290,19 +3360,19 @@ If sigprocmask() fails, the signal mask of the task is not changed.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>how</I>. How the signal mast will be changed:
+<li><i>how</i>. How the signal mast will be changed:
 <ul>
-<li><I>SIG_BLOCK</I>. The resulting set is the union of the
-current set and the signal set pointed to by the <I>set</I> input parameter.
-<li><I>SIG_UNBLOCK</I>. The resulting set is the intersection
+<li><i>SIG_BLOCK</i>. The resulting set is the union of the
+current set and the signal set pointed to by the <i>set</i> input parameter.
+<li><i>SIG_UNBLOCK</i>. The resulting set is the intersection
 of the current set and the complement of the signal set pointed
-to by the <I>set</I> input parameter.
-<li><I>SIG_SETMASK</I>. The resulting set is the signal set
-pointed to by the <I>set</I> input parameter.
+to by the <i>set</i> input parameter.
+<li><i>SIG_SETMASK</i>. The resulting set is the signal set
+pointed to by the <i>set</i> input parameter.
 </ul>
 
-<li><I>set</I>. Location of the new signal mask
-<li><I>oset</I>. Location to store the old signal mask
+<li><i>set</i>. Location of the new signal mask
+<li><i>oset</i>. Location to store the old signal mask
 </ul>
 
 <p>
@@ -3340,7 +3410,7 @@ is delivered more than once.&quot;
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>set</I>. The location to return the pending signal set.
+<li><i>set</i>. The location to return the pending signal set.
 </ul>
 
 <p>
@@ -3379,7 +3449,7 @@ resources (a very bad idea).
 <p>
 <b>Input Parameters:</b>
 <ul>
-<li><I>set</I>.  The value of the signal <b>mask</b> to use while
+<li><i>set</i>.  The value of the signal <b>mask</b> to use while
 suspended.
 </ul>
 
@@ -3418,8 +3488,8 @@ with a NULL timeout parameter. (see below).
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>set</I>.  The set of pending signals to wait for.
-<li><I>info</I>. The returned signal values
+<li><i>set</i>.  The set of pending signals to wait for.
+<li><i>info</i>. The returned signal values
 </ul>
 
 <p>
@@ -3461,19 +3531,19 @@ in the si_code member. The content of si_value is only meaningful
 if the signal was generated by sigqueue(). The following values
 for si_code are defined in signal.h:
 <ul>
-  <li><I>SI_USER</I>. Signal sent from kill, raise, or abort
-  <li><I>SI_QUEUE</I>. Signal sent from sigqueue
-  <li><I>SI_TIMER</I>. Signal is result of timer expiration
-  <li><I>SI_ASYNCIO</I>. Signal is the result of asynchronous IO completion 
-  <li><I>SI_MESGQ</I>. Signal generated by arrival of a message on an empty message queue.
+  <li><i>SI_USER</i>. Signal sent from kill, raise, or abort
+  <li><i>SI_QUEUE</i>. Signal sent from sigqueue
+  <li><i>SI_TIMER</i>. Signal is result of timer expiration
+  <li><i>SI_ASYNCIO</i>. Signal is the result of asynchronous IO completion 
+  <li><i>SI_MESGQ</i>. Signal generated by arrival of a message on an empty message queue.
 </ul>
 
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>set</I>.  The set of pending signals to wait for.
-<li><I>info</I>. The returned signal values
-<li><I>timeout</I>. The amount of time to wait
+<li><i>set</i>.  The set of pending signals to wait for.
+<li><i>info</i>. The returned signal values
+<li><i>timeout</i>. The amount of time to wait
 </ul>
 
 <p>
@@ -3496,7 +3566,7 @@ from si_code in a non-standard way).
 <li>POSIX states that &quot;If no signal is pending at the time of the
 call, the calling task shall be suspended until one or more signals
 in set become pending or until it is interrupted by an unblocked,
-<I>caught</I> signal.&quot;  The present implementation does not require
+<i>caught</i> signal.&quot;  The present implementation does not require
 that the unblocked signal be caught; the task will be resumed even if
 the unblocked signal is ignored.
 </ul>
@@ -3524,9 +3594,9 @@ is delivered more than once.&quot;
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>tid</I>. ID of the task to receive signal
-<li><I>signo</I>. Signal number
-<li><I>value</I>. Value to pass to task with signal
+<li><i>tid</i>. ID of the task to receive signal
+<li><i>signo</i>. Signal number
+<li><i>value</i>. Value to pass to task with signal
 </ul>
 
 <p>
@@ -3584,12 +3654,12 @@ be sent.
 <p>
 <b>Input Parameters:</b> 
 <ul>
-<li><I>pid</I>. The id of the task to receive the signal.
+<li><i>pid</i>. The id of the task to receive the signal.
   The POSIX <code>kill()</code> specification encodes process group
   information as zero and negative pid values.
   Only positive, non-zero values of pid are supported by this
   implementation. ID of the task to receive signal
-<li><I>signo</I>. The signal number to send.
+<li><i>signo</i>. The signal number to send.
   If signo is zero, no signal is sent, but all error checking is performed.
 </ul>
 
@@ -3766,8 +3836,8 @@ for all of the individual attributes used by the implementation.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_attr_init()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_attr_init()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -3798,8 +3868,8 @@ An attributes object can be deleted when it is no longer needed.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_attr_destroy()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_attr_destroy()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -3829,8 +3899,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_attr_setschedpolicy()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_attr_setschedpolicy()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -3860,8 +3930,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_attr_getschedpolicy()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_attr_getschedpolicy()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -3892,8 +3962,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_attr_getschedpolicy()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_attr_getschedpolicy()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -3924,8 +3994,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_attr_getschedparam()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_attr_getschedparam()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -3956,8 +4026,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_attr_setinheritsched()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_attr_setinheritsched()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -3988,8 +4058,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_attr_getinheritsched()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_attr_getinheritsched()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4019,8 +4089,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_attr_setstacksize()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_attr_setstacksize()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4050,8 +4120,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_attr_getstacksize()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_attr_getstacksize()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4089,8 +4159,8 @@ specify details about the kind of thread being created.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_create()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_create()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4122,8 +4192,8 @@ return value and completion status will not be requested.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_detach()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_detach()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4154,8 +4224,8 @@ A thread may terminate it's own execution.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_exit()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_exit()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4195,17 +4265,17 @@ immediately (when enable), interrupting the thread with its processing.</p>
 <b>Input Parameters:</b>
 <p>
 <ul>
-<li><I>thread</I>.
+<li><i>thread</i>.
 Identifies the thread to be canceled.</li>
 </ul>
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_cancel()</I> function will return zero (<I>OK</I>).
+If successful, the <i>pthread_cancel()</i> function will return zero (<i>OK</i>).
 Otherwise, an error number will be returned to indicate the error:
 <p>
 <ul>
-<li><I>ESRCH</I>.
+<li><i>ESRCH</i>.
 No thread could be found corresponding to that specified by the given thread ID.</li>
 </ul>
 <b>Assumptions/Limitations:</b>
@@ -4244,19 +4314,19 @@ cancellation state is set to PTHREAD_CANCEL_ENABLE.</p>
 <b>Input Parameters:</b>
 <p>
 <ul>
-<li><I>state</I> 
+<li><i>state</i> 
 New cancellation state.  One of PTHREAD_CANCEL_ENABLE or PTHREAD_CANCEL_DISABLE.<.li>
-<li><I>oldstate</I>.
+<li><i>oldstate</i>.
 Location to return the previous cancellation state.
 </ul>
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_setcancelstate()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be returned to indicate the error:
+If successful, the <i>pthread_setcancelstate()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be returned to indicate the error:
 <p>
 <ul>
-<li><I>ESRCH</I>.
+<li><i>ESRCH</i>.
 No thread could be found corresponding to that specified by the given thread ID.</li>
 </ul>
 <b>Assumptions/Limitations:</b>
@@ -4283,8 +4353,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_setcancelstate()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_setcancelstate()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4316,8 +4386,8 @@ the return value of the thread.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_join()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_join()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4349,8 +4419,8 @@ made available.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_yield()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_yield()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4381,8 +4451,8 @@ A thread may obtain a copy of its own thread handle.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_self()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_self()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4514,8 +4584,8 @@ interface of the same name.
   <b>Returned Values:</b>
 </p>
 <p>
-  If successful, the <I>pthread_setschedparam()</I> function will return
-  zero (<I>OK</I>).  Otherwise, an error number will be
+  If successful, the <i>pthread_setschedparam()</i> function will return
+  zero (<i>OK</i>).  Otherwise, an error number will be
   returned to indicate the error:
 </p>
 <ul>
@@ -4565,20 +4635,20 @@ interface of the same name.
 This function creates a thread-specific data key visible
 to all threads in the system.  Although the same key value
 may be used by different threads, the values bound to
-the key by <I>pthread_setspecific()</I> are maintained on a
+the key by <i>pthread_setspecific()</i> are maintained on a
 per-thread basis and persist for the life of the calling
 thread.
 <p>
-Upon key creation, the value <I>NULL</I> will be associated with
+Upon key creation, the value <i>NULL</i> will be associated with
 the new key in all active threads.  Upon thread
-creation, the value <I>NULL</I> will be associated with all
+creation, the value <i>NULL</i> will be associated with all
 defined keys in the new thread.
 <p>
 <b>Input Parameters:</b>
 <p>
 <ul>
-<li><I>key</I> is a pointer to the key to create.
-<li><I>destructor</I> is an optional destructor() function that may
+<li><i>key</i> is a pointer to the key to create.
+<li><i>destructor</i> is an optional destructor() function that may
 be associated with each key that is invoked when a
 thread exits.  However, this argument is ignored in
 the current implementation.
@@ -4586,17 +4656,17 @@ the current implementation.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_key_create()</I> function will
-store the newly created key value at *<I>key</I> and return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_key_create()</i> function will
+store the newly created key value at *<i>key</i> and return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
-<li><I>EAGAIN</I>.  The system lacked sufficient resources
+<li><i>EAGAIN</i>.  The system lacked sufficient resources
 to create another thread-specific data key, or the
 system-imposed limit on the total number of keys
-per task {<I>PTHREAD_KEYS_MAX</I>} has been exceeded
-<li><I>ENONMEM</I>  Insufficient memory exists to create the key.
+per task {<i>PTHREAD_KEYS_MAX</i>} has been exceeded
+<li><i>ENONMEM</i>  Insufficient memory exists to create the key.
 </ul>
 <b>Assumptions/Limitations:</b>
 <p>
@@ -4617,34 +4687,34 @@ interface of the same name.
 <p>
 <b>Description:</b>
 <p>
-The <I>pthread_setspecific()</I> function associates a thread-
+The <i>pthread_setspecific()</i> function associates a thread-
 specific value with a key obtained via a previous call
-to <I>pthread_key_create()</I>.  Different threads may bind
+to <i>pthread_key_create()</i>.  Different threads may bind
 different values to the same key.  These values are
 typically pointers to blocks of dynamically allocated
 memory that have been reserved for use by the calling
 thread.
 <p>
-The effect of calling <I>pthread_setspecific()</I> with a key value
-not obtained from <I>pthread_key_create()</I> or after a key has been
-deleted with <I>pthread_key_delete()</I> is undefined.
+The effect of calling <i>pthread_setspecific()</i> with a key value
+not obtained from <i>pthread_key_create()</i> or after a key has been
+deleted with <i>pthread_key_delete()</i> is undefined.
 <p>
 <b>Input Parameters:</b>
 <p>
 <ul>
-<li><I>key</I>.  The data key to set the binding for.
-<li><I>value</I>. The value to bind to the key.
+<li><i>key</i>.  The data key to set the binding for.
+<li><i>value</i>. The value to bind to the key.
 </ul>
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, <I>pthread_setspecific()</I> will return zero (<I>OK</I>).
+If successful, <i>pthread_setspecific()</i> will return zero (<i>OK</i>).
 Otherwise, an error number will be returned:
 <p>
 <ul>
-<li><I>ENOMEM</I>.  Insufficient memory exists to associate the value
+<li><i>ENOMEM</i>.  Insufficient memory exists to associate the value
 with the key.
-<li><I>EINVAL</I>.  The key value is invalid.
+<li><i>EINVAL</i>.  The key value is invalid.
 </ul>
 <p>
 <b>Assumptions/Limitations:</b>
@@ -4667,26 +4737,26 @@ destructor function.
 <p>
 <b>Description:</b>
 <p>
-The <I>pthread_getspecific()</I> function returns the value
+The <i>pthread_getspecific()</i> function returns the value
 currently bound to the specified key on behalf of the
 calling thread.
 <p>
-The effect of calling <I>pthread_getspecific()</I> with a key value
-not obtained from <I>pthread_key_create()</I> or after a key has been
-deleted with <I>pthread_key_delete()</I> is undefined.
+The effect of calling <i>pthread_getspecific()</i> with a key value
+not obtained from <i>pthread_key_create()</i> or after a key has been
+deleted with <i>pthread_key_delete()</i> is undefined.
 <p>
 <b>Input Parameters:</b>
 <p>
 <ul>
-<li><I>key</I>.  The data key to get the binding for.
+<li><i>key</i>.  The data key to get the binding for.
 </ul>
 <p>
 <b>Returned Values:</b>
 <p>
-The function <I>pthread_getspecific()</I> returns the thread-
+The function <i>pthread_getspecific()</i> returns the thread-
 specific data associated with the given key.  If no
 thread specific data is associated with the key, then
-the value <I>NULL</I> is returned.
+the value <i>NULL</i> is returned.
 <p>
 <b>Assumptions/Limitations:</b>
 <p>
@@ -4709,19 +4779,19 @@ destructor function.
 <b>Description:</b>
 <p>
 This POSIX function should delete a thread-specific data
-key previously returned by <I>pthread_key_create()</I>.  However,
+key previously returned by <i>pthread_key_create()</i>.  However,
 this function does nothing in the present implementation.
 <p>
 <b>Input Parameters:</b>
 <p>
 <ul>
-<li><I>key</I>.  The key to delete
+<li><i>key</i>.  The key to delete
 </ul>
 <p>
 <b>Returned Values:</b>
 <p>
 <ul>
-<li>Always returns <I>EINVAL</I>.
+<li>Always returns <i>EINVAL</i>.
 </ul>
 <p>
 <b>Assumptions/Limitations:</b>
@@ -4748,8 +4818,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutexattr_init()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_mutexattr_init()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4779,8 +4849,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutexattr_destroy()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_mutexattr_destroy()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4811,8 +4881,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutexattr_getpshared()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_mutexattr_getpshared()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4843,8 +4913,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutexattr_setpshared()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_mutexattr_setpshared()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4879,8 +4949,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutexattr_settype()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_mutexattr_settype()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4933,8 +5003,8 @@ returned to indicate the error:
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutexattr_settype()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_mutexattr_settype()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4964,8 +5034,8 @@ returned to indicate the error:
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutex_init()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_mutex_init()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -4995,8 +5065,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutex_destroy()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_mutex_destroy()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -5061,7 +5131,7 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutex_lock()</I> function will return zero (<I>OK</I>).
+If successful, the <i>pthread_mutex_lock()</i> function will return zero (<i>OK</i>).
 Otherwise, an error number will be returned to indicate the error:
 <p>
 <ul>
@@ -5101,7 +5171,7 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutex_trylock()</I> function will return zero (<I>OK</I>).
+If successful, the <i>pthread_mutex_trylock()</i> function will return zero (<i>OK</i>).
 Otherwise, an error number will be returned to indicate the error:
 <p>
 <ul>
@@ -5146,8 +5216,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_mutex_unlock()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_mutex_unlock()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -5178,8 +5248,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_condattr_init()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_condattr_init()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -5209,8 +5279,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_condattr_destroy()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_condattr_destroy()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -5240,8 +5310,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_cond_init()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_cond_init()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -5271,8 +5341,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_cond_destroy()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_cond_destroy()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -5302,8 +5372,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_cond_broadcast()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_cond_broadcast()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -5333,8 +5403,8 @@ interface of the same name.
 <p>
 <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_cond_signal()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_cond_signal()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
@@ -5364,8 +5434,8 @@ interface of the same name.
 <p>
   <b>Returned Values:</b>
 <p>
-If successful, the <I>pthread_cond_wait()</I> function will return
-zero (<I>OK</I>).  Otherwise, an error number will be
+If successful, the <i>pthread_cond_wait()</i> function will return
+zero (<i>OK</i>).  Otherwise, an error number will be
 returned to indicate the error:
 <p>
 <ul>
