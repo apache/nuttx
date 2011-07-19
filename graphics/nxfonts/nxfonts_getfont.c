@@ -59,6 +59,18 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_NXFONT_SANS23X27
+extern const struct nx_fontpackage_s g_sans23x27_package;
+#endif
+
+static FAR const struct nx_fontpackage_s *g_fontpackages[] =
+{
+#ifdef CONFIG_NXFONT_SANS23X27
+  &g_sans23x27_package,
+#endif
+  NULL
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -68,6 +80,43 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxf_findpackage
+ *
+ * Description:
+ *   Find the font package associated with the provided font ID.
+ *
+ * Input Parameters:
+ *   fontid:  Identifies the font set to get
+ *
+ ****************************************************************************/
+
+static FAR const struct nx_fontpackage_s *nxf_findpackage(enum nx_fontid_e fontid)
+{
+  FAR const struct nx_fontpackage_s **pkglist;
+  FAR const struct nx_fontpackage_s *package;
+
+  /* Handle the default font package */
+
+  if (fontid == FONTID_DEFAULT)
+   {
+     fontid = NXFONT_DEFAULT;
+   }
+
+  /* Then search for the font package with this ID */
+
+  for (pkglist = g_fontpackages; *pkglist; pkglist++)
+    {
+      package = *pkglist;
+      if (package->id == fontid)
+        {
+          return package;
+        }
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
  * Name: nxf_getglyphset
  *
  * Description:
@@ -75,36 +124,51 @@
  *   character encoding.
  *
  * Input Parameters:
- *   ch - character code
+ *   ch: character code
+ *   package: The selected font package
  *
  ****************************************************************************/
 
-static inline FAR const struct nx_fontset_s *nxf_getglyphset(uint16_t ch)
+static inline FAR const struct nx_fontset_s *
+  nxf_getglyphset(uint16_t ch, FAR const struct nx_fontpackage_s *package)
 {
+  FAR const struct nx_fontset_s *fontset;
+
+  /* Select the 7- or 8-bit font set */
+
   if (ch < 128)
     {
-      if (ch >= g_7bitfonts.first && ch < g_7bitfonts.first + g_7bitfonts.nchars)
-        {
-          return &g_7bitfonts;
-        }
-      gdbg("No bitmap for 7-bit code %d\n", ch);
+      /* Select the 7-bit font set */
+
+      fontset = package->font7;
     }
   else if (ch < 256)
     {
 #if CONFIG_NXFONTS_CHARBITS >= 8
-      if (ch >= g_8bitfonts.first && ch < g_8bitfonts.first + g_8bitfonts.nchars)
-        {
-          return &g_8bitfonts;
-        }
-      gdbg("No bitmap for 8-bit code %d\n", ch);
+      /* Select the 8-bit font set */
+
+      fontset = package->font8;
 #else
       gdbg("8-bit font support disabled: %d\n", ch);
+      return NULL;
 #endif
     }
   else
     {
+      /* Someday, perhaps 16-bit fonts will go here */
+
       gdbg("16-bit font not currently supported\n");
+      return NULL;
     }
+
+  /* Then verify that the character actually resides in the font */
+
+  if (ch >= fontset->first && ch < fontset->first +fontset->nchars)
+    {
+      return fontset;
+    }
+
+  gdbg("No bitmap for code %02x\n", ch);
   return NULL;
 }
 
@@ -125,7 +189,17 @@ static inline FAR const struct nx_fontset_s *nxf_getglyphset(uint16_t ch)
 
 FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid)
 {
-  return &g_fonts;
+  /* Find the font package associated with this font ID */
+
+  FAR const struct nx_fontpackage_s *package = nxf_findpackage(fontid);
+  if (package)
+    {
+      /* Found... return the font set metrics for this font package */
+
+      return package->metrics;
+    }
+
+  return NULL;
 }
 
 /****************************************************************************
@@ -143,12 +217,27 @@ FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid)
 FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch,
                                                 enum nx_fontid_e fontid)
 {
-  FAR const struct nx_fontset_s    *set = nxf_getglyphset(ch);
-  FAR const struct nx_fontbitmap_s *bm  = NULL;
+  /* Find the font package associated with this font ID */
 
-  if (set)
+  FAR const struct nx_fontpackage_s *package;
+  FAR const struct nx_fontset_s     *fontset;
+  FAR const struct nx_fontbitmap_s  *bm  = NULL;
+
+  /* Get the font package associated with the font ID */
+
+  package = nxf_findpackage(fontid);
+  if (package)
     {
-      bm = &set->bitmap[ch - set->first];
+      /* Now get the fontset from the package */
+
+      fontset = nxf_getglyphset(ch, package);
+      if (fontset)
+        {
+          /* Then get the bitmap from the font set */
+
+          bm = &fontset->bitmap[ch - fontset->first];
+        }
     }
+
   return bm;
 }

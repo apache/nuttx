@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxfonts/nxfonts_bitmap.h
+ * graphics/nxfonts/nxfonts_bitmaps.c
  *
  *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -46,10 +46,10 @@
 
 /* Pick the fontset */
 
-#ifdef CONFIG_NXFONT_SANS23X27
+#if NXFONTS_FONTID == 1
 #  include "nxfonts_sans23x27.h"
 #else
-#  include "nxfonts_sans23x27.h"
+#  error "No font ID specified"
 #endif
 
 /****************************************************************************
@@ -64,6 +64,7 @@
 static const uint8_t NXFONT_CONCAT(g_bitmap_,n)[] = NXFONT_CONCAT(NXFONT_BITMAP_,n)
 #define NXFONT_DEFMETRIC(n) \
   { NXFONT_CONCAT(NXFONT_METRICS_,n), NXFONT_CONCAT(g_bitmap_,n) }
+#define NXF_SYMNAME(a,b)  NXFONT_CONCAT(a,b)
 
 /****************************************************************************
  * Private Data
@@ -841,7 +842,7 @@ NXFONT_DEFBITMAP(255);
 #endif
 #endif
 
-static const struct nx_fontbitmap_s g_7bitmaps[NXFONT_N7BITFONTS] =
+static const struct nx_fontbitmap_s NXF_SYMNAME(NXFONTS_PREFIX,7bitmaps)[NXFONT_N7BITFONTS] =
 {
 #if NXFONT_MIN7BIT <= 0 && NXFONT_MAX7BIT >= 0
 NXFONT_DEFMETRIC(0),
@@ -1230,7 +1231,7 @@ NXFONT_DEFMETRIC(127),
 };
 
 #if CONFIG_NXFONTS_CHARBITS >= 8
-static const struct nx_fontbitmap_s g_8bitmaps[NXFONT_N8BITFONTS] =
+static const struct nx_fontbitmap_s NXF_SYMNAME(NXFONTS_PREFIX,8bitmaps)[NXFONT_N8BITFONTS] =
 {
 #if NXFONT_MIN8BIT <= 128 && NXFONT_MAX8BIT >= 128
 NXFONT_DEFMETRIC(128),
@@ -1619,32 +1620,42 @@ NXFONT_DEFMETRIC(255),
 };
 #endif
 
+static const struct nx_fontset_s NXF_SYMNAME(NXFONTS_PREFIX,7bitfonts) =
+{
+  NXFONT_MIN7BIT,                      /* First glyph code */
+  NXFONT_N7BITFONTS,                   /* Number of bitmap glyphs */
+  NXF_SYMNAME(NXFONTS_PREFIX,7bitmaps) /* List of glyphs */
+};
+
+#if CONFIG_NXFONTS_CHARBITS >= 8
+static const struct nx_fontset_s NXF_SYMNAME(NXFONTS_PREFIX,8bitfonts) =
+{
+  NXFONT_MIN8BIT,                      /* First glyph code */
+  NXFONT_N8BITFONTS,                   /* Number of bitmap glyphs */
+  NXF_SYMNAME(NXFONTS_PREFIX,8bitmaps) /* List of glyphs */
+};
+#endif
+
+static const struct nx_font_s NXF_SYMNAME(NXFONTS_PREFIX,fonts) =
+{
+  NXFONT_MAXHEIGHT,                    /* Max. height of a glyph in rows */
+  NXFONT_MAXWIDTH,                     /* Max. width of a glyph in pixels */
+  CONFIG_NXFONTS_CHARBITS,             /* Max number of bits per character code */
+  NXFONT_SPACEWIDTH,                   /* The width of a space in pixels */
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-struct nx_fontset_s g_7bitfonts =
+const struct nx_fontpackage_s NXF_SYMNAME(NXFONTS_PREFIX,package) =
 {
-  NXFONT_MIN7BIT,          /* First glyph code */
-  NXFONT_N7BITFONTS,       /* Number of bitmap glyphs */
-  g_7bitmaps               /* List of glyphs */
-};
-
+  NXFONT_ID,                               /* The font ID */
+  &NXF_SYMNAME(NXFONTS_PREFIX,fonts),      /* Font set metrics */
+  &NXF_SYMNAME(NXFONTS_PREFIX,7bitfonts)   /* Fonts for 7-bit encoding */
 #if CONFIG_NXFONTS_CHARBITS >= 8
-struct nx_fontset_s g_8bitfonts =
-{
-  NXFONT_MIN8BIT,          /* First glyph code */
-  NXFONT_N8BITFONTS,       /* Number of bitmap glyphs */
-  g_8bitmaps               /* List of glyphs */
-};
+  , &NXF_SYMNAME(NXFONTS_PREFIX,8bitfonts) /* Fonts for 8-bit encoding */
 #endif
-
-struct nx_font_s g_fonts =
-{
-  NXFONT_MAXHEIGHT,        /* Max. height of a glyph in rows */
-  NXFONT_MAXWIDTH,         /* Max. width of a glyph in pixels */
-  CONFIG_NXFONTS_CHARBITS, /* Max number of bits per character code */
-  NXFONT_SPACEWIDTH,       /* The width of a space in pixels */
 };
 
 /****************************************************************************

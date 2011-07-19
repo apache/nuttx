@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/nxfonts.h
  *
- *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,9 +64,9 @@
 
 enum nx_fontid_e
 {
-  FONTID_DEFAULT = 0          /* The default font */
+  FONTID_DEFAULT     = 0      /* The default font */
 #ifdef CONFIG_NXFONT_SANS23X27
-  , FONTID_SANS23X27          /* The 23x27 sans serif font */
+  , FONTID_SANS23X27 = 1      /* The 23x27 sans serif font */
 #endif
 };
 
@@ -116,11 +116,11 @@ struct nx_font_s
 
 struct nx_fontpackage_s
 {
-  uint8_t             id;      /* The font ID */
-  struct nx_font_s    metrics; /* Font set metrics */
-  struct nx_fontset_s font7;   /* Fonts for 7-bit encoding */
+  uint8_t id;                             /* The font ID */
+  FAR const struct nx_font_s    *metrics; /* Font set metrics */
+  FAR const struct nx_fontset_s *font7;   /* Fonts for 7-bit encoding */
 #if CONFIG_NXFONTS_CHARBITS >= 8
-  struct nx_fontset_s font8;   /* Fonts for 8-bit encoding */
+  FAR const struct nx_fontset_s *font8;   /* Fonts for 8-bit encoding */
 #endif
 };
 

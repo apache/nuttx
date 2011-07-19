@@ -36,54 +36,65 @@
 -include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
 
+ifdef NXFONTS_BITSPERPIXEL
 ifeq ($(NXFONTS_BITSPERPIXEL),1)
 NXFONTS_SUFFIX	:= _1bpp
-CONV_CSRC	:= nxfonts_convert_1bpp.c
+GEN_CSRC	:= nxfonts_convert_1bpp.c
 endif
 ifeq ($(NXFONTS_BITSPERPIXEL),2)
 NXFONTS_SUFFIX	:= _2bpp
-CONV_CSRC	:= nxfonts_convert_2bpp.c
+GEN_CSRC	:= nxfonts_convert_2bpp.c
 endif
 ifeq ($(NXFONTS_BITSPERPIXEL),4)
 NXFONTS_SUFFIX	:= _4bpp
-CONV_CSRC	:= nxfonts_convert_4bpp.c
+GEN_CSRC	:= nxfonts_convert_4bpp.c
 endif
 ifeq ($(NXFONTS_BITSPERPIXEL),8)
 NXFONTS_SUFFIX	:= _8bpp
-CONV_CSRC	:= nxfonts_convert_8bpp.c
+GEN_CSRC	:= nxfonts_convert_8bpp.c
 endif
 ifeq ($(NXFONTS_BITSPERPIXEL),16)
 NXFONTS_SUFFIX	:= _16bpp
-CONV_CSRC	:= nxfonts_convert_16bpp.c
+GEN_CSRC	:= nxfonts_convert_16bpp.c
 endif
 ifeq ($(NXFONTS_BITSPERPIXEL),24)
 NXFONTS_SUFFIX	:= _24bpp
-CONV_CSRC	:= nxfonts_convert_24bpp.c
+GEN_CSRC	:= nxfonts_convert_24bpp.c
 endif
 ifeq ($(NXFONTS_BITSPERPIXEL),32)
 NXFONTS_SUFFIX	:= _32bpp
-CONV_CSRC	:= nxfonts_convert_32bpp.c
+GEN_CSRC	:= nxfonts_convert_32bpp.c
 endif
 
+DEPENDENCY	:= nxfonts_convert.c
 CPPFLAGS	+= -DNXFONTS_BITSPERPIXEL=$(NXFONTS_BITSPERPIXEL)
 CPPFLAGS	+= -DNXFONTS_SUFFIX=$(NXFONTS_SUFFIX)
+endif
 
-CONV_TMP	= $(CONV_CSRC:.c=.i)
+ifdef NXFONTS_FONTID
+ifeq ($(NXFONTS_FONTID),1)
+NXFONTS_PREFIX	:= g_sans23x27_
+GEN_CSRC	= nxfonts_bitmaps_sans23x27.c
+endif
 
-GEN_CSRCS	= $(CONV_CSRC)
+DEPENDENCY	:= nxfonts_bitmaps.c
+CPPFLAGS	+= -DNXFONTS_FONTID=$(NXFONTS_FONTID)
+CPPFLAGS	+= -DNXFONTS_PREFIX=$(NXFONTS_PREFIX)
+endif
 
-all:	$(GEN_CSRCS)
+GEN_TMP	= $(GEN_CSRC:.c=.i)
+
+all:	$(GEN_CSRC)
 .PHONY : clean distclean
 
-$(CONV_CSRC) : nxfonts_convert.c
-ifneq ($(NXFONTS_BITSPERPIXEL),)
-	@$(call PREPROCESS, $<, $(CONV_TMP))
-	@cat $(CONV_TMP) | sed -e "/^#/d" >$@
-	@rm -f  $(CONV_TMP)
-endif
+$(GEN_CSRC) : $(DEPENDENCY)
+	@$(call PREPROCESS, $<, $(GEN_TMP))
+	@cat $(GEN_TMP) | sed -e "/^#/d" >$@
+	@rm -f  $(GEN_TMP)
 
 clean:
 	@rm -f *~ .*.swp *.i
 
 distclean: clean
 	@rm -f nxfonts_convert_*bpp.c
+	@rm -f nxfonts_bitmaps_*.c

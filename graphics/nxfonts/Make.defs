@@ -33,9 +33,17 @@
 #
 ############################################################################
 
-NXFONTS_ASRCS	=
-NXFCONV_CSRC	= nxfonts_convert_1bpp.c nxfonts_convert_2bpp.c \
+NXFCONV_ASRCS	=
+NXFCONV_CSRCS	= nxfonts_convert_1bpp.c nxfonts_convert_2bpp.c \
 		  nxfonts_convert_4bpp.c nxfonts_convert_8bpp.c \
 		  nxfonts_convert_16bpp.c nxfonts_convert_24bpp.c \
 		  nxfonts_convert_32bpp.c
-NXFONTS_CSRCS	= nxfonts_bitmaps.c nxfonts_getfont.c $(NXFCONV_CSRC)
+
+NXFSET_ASRCS	=
+NXFSET_CSRCS	=
+ifeq ($(CONFIG_NXFONT_SANS23X27),y)
+NXFSET_CSRCS	+= nxfonts_bitmaps_sans23x27.c
+endif
+
+NXFONTS_ASRCS	= $(NXFCONV_ASRCS) $(NXFSET_ASRCS)
+NXFONTS_CSRCS	= nxfonts_getfont.c $(NXFCONV_CSRCS) $(NXFSET_CSRCS)

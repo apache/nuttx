@@ -88,7 +88,7 @@ endif
 all:	mklibgraphics
 .PHONY : context depend clean distclean mklibgraphics gensources gen1bppsources \
 	 gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource \
-	 gen32bppsources
+	 gen32bppsources genfontsources
 
 gen1bppsources:
 	@$(MAKE) -C nxglib -f Makefile.sources TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=1 EXTRADEFINES=$(EXTRADEFINES)
@@ -118,7 +118,12 @@ gen32bppsources:
 	@$(MAKE) -C nxglib -f Makefile.sources TOPDIR=$(TOPDIR) NXGLIB_BITSPERPIXEL=32 EXTRADEFINES=$(EXTRADEFINES)
 	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_BITSPERPIXEL=32 EXTRADEFINES=$(EXTRADEFINES)
 
-gensources: gen1bppsources gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource gen32bppsources
+genfontsources:
+ifeq ($(CONFIG_NXFONT_SANS23X27),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=1 EXTRADEFINES=$(EXTRADEFINES)
+endif
+
+gensources: gen1bppsources gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource gen32bppsources genfontsources
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
