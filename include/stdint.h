@@ -167,7 +167,7 @@
 #define UINT64_C(x) x ## ULL
 #endif
 
-/* Macros for greatest-width integer constant expressions
+/* Macros for greatest-width integer constant expressions */
 
 #ifdef CONFIG_HAVE_LONG_LONG
 #  define INTMAX_C(x) x ## LL
