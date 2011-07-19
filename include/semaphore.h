@@ -92,6 +92,9 @@ typedef struct sem_s sem_t;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+/* Forward references needed by some prototypes */
+
+struct timespec; /* Defined in time.h */
 
 /* Counting Semaphore Interfaces (based on POSIX APIs) */
 
@@ -101,6 +104,8 @@ EXTERN FAR sem_t *sem_open(FAR const char *name, int oflag, ...);
 EXTERN int        sem_close(FAR sem_t *sem);
 EXTERN int        sem_unlink(FAR const char *name);
 EXTERN int        sem_wait(FAR sem_t *sem);
+EXTERN int        sem_timedwait(FAR sem_t *sem,
+                                FAR const struct timespec *abstime);
 EXTERN int        sem_trywait(FAR sem_t *sem);
 EXTERN int        sem_post(FAR sem_t *sem);
 EXTERN int        sem_getvalue(FAR sem_t *sem, FAR int *sval);

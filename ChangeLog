@@ -1927,4 +1927,4 @@
 	  SDIO transfer completion events and DMA completion eventes were
 	  not being coordinated correctly.
 	* configs/stm3210e-eval/nsh2: Enable FAT long file name support
-
+	* sched/sem_timedwait.c: Add the standard sem_timedwait() interface.
