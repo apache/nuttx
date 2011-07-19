@@ -775,7 +775,7 @@ CONFIG_USBSTRG_REMOVABLE=y
 # CONFIG_NXFONTS_CHARBITS
 #   The number of bits in the character set.  Current options are
 #   only 7 and 8.  The default is 7.
-# CONFIG_NXFONT_SANS
+# CONFIG_NXFONT_SANS23X27
 #   At present, there is only one font.  But if there were were more,
 #   then this option would select the sans serif font.
 #
@@ -811,7 +811,7 @@ CONFIG_NX_KBD=y
 CONFIG_NXTK_BORDERCOLOR1=0xd69a
 CONFIG_NXTK_BORDERCOLOR2=0xad55
 CONFIG_NXTK_AUTORAISE=n
-CONFIG_NXFONT_SANS=y
+CONFIG_NXFONT_SANS23X27=y
 CONFIG_NXFONTS_CHARBITS=7
 CONFIG_NX_BLOCKING=y
 CONFIG_NX_MXSERVERMSGS=32

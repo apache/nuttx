@@ -973,9 +973,10 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NXFONTS_CHARBITS
 		  The number of bits in the character set.  Current options are
 		  only 7 and 8.  The default is 7.
-		CONFIG_NXFONT_SANS
-		  At present, there is only one font.  But if there were were more,
-		  then this option would select the sans serif font.
+		CONFIG_NXFONT_SANS23X27
+		  At present, there is only one font, a 23x27 sans serif font.  But
+		  if there were were more, then this option would select that sans serif
+		  font.
 
 	NX Multi-user only options:
 
