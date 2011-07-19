@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: July 10, 2011</p>
+      <p>Last Updated: July 19, 2011</p>
     </td>
   </tr>
 </table>
@@ -2402,14 +2402,18 @@ struct nx_font_s
 #include &lt;nuttx/nxglib.h&gt;
 #include &lt;nuttx/nxfonts.h&gt;
 
-FAR const struct nx_font_s *nxf_getfontset(void);
+FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid);
 </pre></ul>
 <p>
   <b>Description:</b>
   Return information about the current font set.
 </p>
 <p>
-  <b>Input Parameters:</b> None
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>fontid</code>
+    <dd>Identifies the font set to get
+  </dl></ul>
 </p>
 <p>
   <b>Returned Value:</b>
@@ -2422,7 +2426,7 @@ FAR const struct nx_font_s *nxf_getfontset(void);
 #include &lt;nuttx/nxglib.h&gt;
 #include &lt;nuttx/nxfonts.h&gt;
 
-FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch);
+FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch, enum nx_fontid_e fontid);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -2431,8 +2435,10 @@ FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch);
 <p>
   <b>Input Parameters:</b>
   <ul><dl>
-    <dt><code></code>
+    <dt><code>ch</code>
     <dd>
+    <dt><code>fontid</code>
+    <dd>Identifies the font set to use
   </dl></ul>
 </p>
 <p>
@@ -2676,9 +2682,9 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
     <dt><code>CONFIG_NXFONTS_CHARBITS</code>:
       <dd>The number of bits in the character set.  Current options are
       only 7 and 8.  The default is 7.
-    <dt><code>CONFIG_NXFONT_SANS</code>:
-      <dd>At present, there is only one font.  But if there were were more,
-      then this option would select the sans serif font.
+    <dt><code>CONFIG_NXFONT_SANS23X27</code>:
+      <dd>At present, there is only one font, a 23x27 san serif font.
+      But if there were were more, then this option would select that sans serif font.
   </dl>
 </ul>
 
