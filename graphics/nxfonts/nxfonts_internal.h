@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxfonts/nxfonts_internal.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@
 
 /* Only font supported for now */
 
-#define CONFIG_NXFONT_SANS 1
+#define CONFIG_NXFONT_SANS23X27 1
 
 /****************************************************************************
  * Public Types

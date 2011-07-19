@@ -48,20 +48,37 @@
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
+/* Select the default font.  If no fonts are select, then a compilation error
+ * is likely down the road.
+ */
+
+#ifdef CONFIG_NXFONT_SANS23X27
+# define NXFONT_DEFAULT FONTID_SANS23X27
+#endif
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+/* Font IDs */
+
+enum nx_fontid_e
+{
+  FONTID_DEFAULT = 0          /* The default font */
+#ifdef CONFIG_NXFONT_SANS23X27
+  , FONTID_SANS23X27          /* The 23x27 sans serif font */
+#endif
+};
+
 /* This structures provides the metrics for one glyph */
 
 struct nx_fontmetric_s
 {
-  uint32_t stride   : 2;    /* Width of one font row in bytes */
-  uint32_t width    : 6;    /* Width of the font in bits */
-  uint32_t height   : 6;    /* Height of the font in rows */
-  uint32_t xoffset  : 6;    /* Top, left-hand corner X-offset in pixels */
-  uint32_t yoffset  : 6;    /* Top, left-hand corner y-offset in pixels */
+  uint32_t stride   : 2;      /* Width of one font row in bytes */
+  uint32_t width    : 6;      /* Width of the font in bits */
+  uint32_t height   : 6;      /* Height of the font in rows */
+  uint32_t xoffset  : 6;      /* Top, left-hand corner X-offset in pixels */
+  uint32_t yoffset  : 6;      /* Top, left-hand corner y-offset in pixels */
   uint32_t unused   : 6;
 };
 
@@ -70,7 +87,7 @@ struct nx_fontmetric_s
 struct nx_fontbitmap_s
 {
   struct nx_fontmetric_s metric; /* Character metrics */
-  FAR const uint8_t *bitmap;      /* Pointer to the character bitmap */
+  FAR const uint8_t *bitmap;     /* Pointer to the character bitmap */
 };
 
 /* This structure describes one contiguous grouping of glyphs that
@@ -80,19 +97,31 @@ struct nx_fontbitmap_s
 
 struct nx_fontset_s
 {
-  uint8_t  first;           /* First bitmap character code */
-  uint8_t  nchars;          /* Number of bitmap character codes */
+  uint8_t  first;             /* First bitmap character code */
+  uint8_t  nchars;            /* Number of bitmap character codes */
   FAR const struct nx_fontbitmap_s *bitmap;
 };
 
-/* This structure describes the overall fontset */
+/* This structure describes the overall metrics of the fontset */
 
 struct nx_font_s
 {
-  uint8_t  mxheight;        /* Max height of one glyph in rows */
-  uint8_t  mxwidth;         /* Max width of any glyph in pixels */
-  uint8_t  mxbits;          /* Max number of bits per character code */
-  uint8_t  spwidth;         /* The width of a space in pixels */
+  uint8_t  mxheight;          /* Max height of one glyph in rows */
+  uint8_t  mxwidth;           /* Max width of any glyph in pixels */
+  uint8_t  mxbits;            /* Max number of bits per character code */
+  uint8_t  spwidth;           /* The width of a space in pixels */
+};
+
+/* Finally, this structure defines everything about the font set */
+
+struct nx_fontpackage_s
+{
+  uint8_t             id;      /* The font ID */
+  struct nx_font_s    metrics; /* Font set metrics */
+  struct nx_fontset_s font7;   /* Fonts for 7-bit encoding */
+#if CONFIG_NXFONTS_CHARBITS >= 8
+  struct nx_fontset_s font8;   /* Fonts for 8-bit encoding */
+#endif
 };
 
 /****************************************************************************
@@ -118,11 +147,11 @@ extern "C" {
  *   Return information about the current font set
  *
  * Input Parameters:
- *   An instance of struct nx_font_s describing the font set.
+ *   fontid:  Identifies the font set to get
  *
  ****************************************************************************/
 
-EXTERN FAR const struct nx_font_s *nxf_getfontset(void);
+EXTERN FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid);
 
 /****************************************************************************
  * Name: nxf_getbitmap
@@ -131,14 +160,16 @@ EXTERN FAR const struct nx_font_s *nxf_getfontset(void);
  *   Return font bitmap information for the selected character encoding.
  *
  * Input Parameters:
- *   ch - character code
+ *   ch:      Character code
+ *   fontid:  Identifies the font set to use
  *
  * Returned Value:
  *   An instance of struct nx_fontbitmap_s describing the glyph.
  *
  ****************************************************************************/
 
-EXTERN FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch);
+EXTERN FAR const struct nx_fontbitmap_s *
+  nxf_getbitmap(uint16_t ch, enum nx_fontid_e fontid);
 
 /****************************************************************************
  * Name: nxf_convert_*bpp

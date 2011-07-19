@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxfonts/nxfonts_sans.h
+ * graphics/nxfonts/nxfonts_sans23x27.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __GRAPHICS_NXFONTS_NXFONTS_SANS_H
-#define __GRAPHICS_NXFONTS_NXFONTS_SANS_H
+#ifndef __GRAPHICS_NXFONTS_NXFONTS_SANS23X27_H
+#define __GRAPHICS_NXFONTS_NXFONTS_SANS23X27_H
 
 /****************************************************************************
  * Included Files
@@ -44,18 +44,22 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+/* Font ID */
+
+#define NXFONT_ID         FONTID_SANS23X27
+
 /* Ranges of 7-bit and 8-bit fonts */
 
-#define NXFONT_MIN7BIT 33
-#define NXFONT_MAX7BIT 126
+#define NXFONT_MIN7BIT    33
+#define NXFONT_MAX7BIT    126
 
-#define NXFONT_MIN8BIT 161
-#define NXFONT_MAX8BIT 255
+#define NXFONT_MIN8BIT    161
+#define NXFONT_MAX8BIT    255
 
 /* Maximum height and width of any glyph in the set */
 
-#define NXFONT_MAXHEIGHT 23
-#define NXFONT_MAXWIDTH  27
+#define NXFONT_MAXHEIGHT  23
+#define NXFONT_MAXWIDTH   27
 
 /* The width of a space */
 
@@ -852,5 +856,5 @@ extern "C" {
 }
 #endif
 
-#endif /* __GRAPHICS_NXFONTS_NXFONTS_SANS_H */
+#endif /* __GRAPHICS_NXFONTS_NXFONTS_SANS23X27_H */
 

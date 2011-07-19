@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxfonts/nxfonts_bitmap.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,10 @@
 
 /* Pick the fontset */
 
-#ifdef CONFIG_NXFONT_SANS
-#  include "nxfonts_sans.h"
+#ifdef CONFIG_NXFONT_SANS23X27
+#  include "nxfonts_sans23x27.h"
 #else
-#  include "nxfonts_sans.h"
+#  include "nxfonts_sans23x27.h"
 #endif
 
 /****************************************************************************

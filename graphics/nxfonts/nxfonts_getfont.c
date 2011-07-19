@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxfonts/nxfonts_getfont.h
+ * graphics/nxfonts/nxfonts_getfont.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,10 @@
 
 /****************************************************************************
  * Pre-Processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -115,11 +119,11 @@ static inline FAR const struct nx_fontset_s *nxf_getglyphset(uint16_t ch)
  *   Return information about the current font set
  *
  * Input Parameters:
- *   None
+ *   fontid:  Identifies the font set to get
  *
  ****************************************************************************/
 
-FAR const struct nx_font_s *nxf_getfontset(void)
+FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid)
 {
   return &g_fonts;
 }
@@ -131,11 +135,13 @@ FAR const struct nx_font_s *nxf_getfontset(void)
  *   Return font bitmap information for the selected character encoding.
  *
  * Input Parameters:
- *   ch - character code
+ *   ch:      Character code
+ *   fontid:  Identifies the font set to use
  *
  ****************************************************************************/
 
-FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch)
+FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch,
+                                                enum nx_fontid_e fontid)
 {
   FAR const struct nx_fontset_s    *set = nxf_getglyphset(ch);
   FAR const struct nx_fontbitmap_s *bm  = NULL;

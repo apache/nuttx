@@ -271,7 +271,9 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
   wd_delete(wdog);
 
   /* We are either returning success or an error detected by sem_wait()
-   * or the timeout detected by sem_timeout().
+   * or the timeout detected by sem_timeout().  The 'errno' value has
+   * been set appropriately by sem_wait() or sem_timeout() in those
+   * cases.
    */
 
   return ret;
