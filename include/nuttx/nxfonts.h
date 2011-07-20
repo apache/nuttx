@@ -43,6 +43,8 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+
+#include <nuttx/nx.h>
 #include <nuttx/nxglib.h>
 
 /****************************************************************************
@@ -116,11 +118,11 @@ struct nx_font_s
 
 struct nx_fontpackage_s
 {
-  uint8_t id;                             /* The font ID */
-  FAR const struct nx_font_s    *metrics; /* Font set metrics */
-  FAR const struct nx_fontset_s *font7;   /* Fonts for 7-bit encoding */
+  uint8_t id;                            /* The font ID */
+  FAR const struct nx_font_s    metrics; /* Font set metrics */
+  FAR const struct nx_fontset_s font7;   /* Fonts for 7-bit encoding */
 #if CONFIG_NXFONTS_CHARBITS >= 8
-  FAR const struct nx_fontset_s *font8;   /* Fonts for 8-bit encoding */
+  FAR const struct nx_fontset_s font8;   /* Fonts for 8-bit encoding */
 #endif
 };
 
@@ -141,17 +143,31 @@ extern "C" {
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxf_getfontset
+ * Name: nxf_getfonthandle
  *
  * Description:
- *   Return information about the current font set
+ *   Given a numeric font ID, return a handle that may be subsequently be
+ *   used to access the font data sets.
  *
  * Input Parameters:
  *   fontid:  Identifies the font set to get
  *
  ****************************************************************************/
 
-EXTERN FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid);
+EXTERN NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid);
+
+/****************************************************************************
+ * Name: nxf_getfontset
+ *
+ * Description:
+ *   Return information about the current font set
+ *
+ * Input Parameters:
+ *   handle:  A font handle previously returned by nxf_getfonthandle()
+ *
+ ****************************************************************************/
+
+EXTERN FAR const struct nx_font_s *nxf_getfontset(NXHANDLE handle);
 
 /****************************************************************************
  * Name: nxf_getbitmap
@@ -160,8 +176,8 @@ EXTERN FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid);
  *   Return font bitmap information for the selected character encoding.
  *
  * Input Parameters:
- *   ch:      Character code
- *   fontid:  Identifies the font set to use
+ *   handle:  A font handle previously returned by nxf_getfonthandle()
+ *   ch:      Character code whose bitmap is requested
  *
  * Returned Value:
  *   An instance of struct nx_fontbitmap_s describing the glyph.
@@ -169,7 +185,7 @@ EXTERN FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid);
  ****************************************************************************/
 
 EXTERN FAR const struct nx_fontbitmap_s *
-  nxf_getbitmap(uint16_t ch, enum nx_fontid_e fontid);
+  nxf_getbitmap(NXHANDLE handle, uint16_t ch);
 
 /****************************************************************************
  * Name: nxf_convert_*bpp

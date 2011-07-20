@@ -153,9 +153,10 @@
    <p>
      <ul>
         <i>2.5.1 <a href="#nxfontstypes"><code>NXFONTS Types()</code></a></i><br>
-        <i>2.5.2 <a href="#nxfgetfontset"><code>nxf_getfontset()</code></a></i><br>
-        <i>2.5.3 <a href="#nxfgetbitmap"><code>nxf_getbitmap()</code></a></i><br>
-        <i>2.5.4 <a href="#nxfconvertbpp"><code>nxf_convert_*bpp()</code></a></i>
+        <i>2.5.2 <a href="#nxfgetfonthandle"><code>nxf_getfonthandle()</code></a></i><br>
+        <i>2.5.3 <a href="#nxfgetfontset"><code>nxf_getfontset()</code></a></i><br>
+        <i>2.5.4 <a href="#nxfgetbitmap"><code>nxf_getbitmap()</code></a></i><br>
+        <i>2.5.5 <a href="#nxfconvertbpp"><code>nxf_convert_*bpp()</code></a></i>
      </ul>
    </p>
    <p>
@@ -2365,7 +2366,7 @@ struct nx_fontmetric_s
 struct nx_fontbitmap_s
 {
   struct nx_fontmetric_s metric; /* Character metrics */
-  FAR const uint8_t *bitmap;    /* Pointer to the character bitmap */
+  FAR const uint8_t *bitmap;     /* Pointer to the character bitmap */
 };
 </pre></ul>
 
@@ -2396,13 +2397,36 @@ struct nx_font_s
 };
 </pre></ul>
 
-<h3>2.5.2 <a name="nxfgetfontset"><code>nxf_getfontset()</code></a></h3>
+<h3>2.5.2 <a name="nxfgetfonthandle"><code>nxf_getfonthandle()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nxfonts.h&gt;
+
+NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Given a numeric font ID, return a handle that may be subsequently be used to access the font data sets.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>fontid</code>
+    <dd>Identifies the font set to use
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  A handle that may be subsequently be used to access the font data sets.
+</p>
+
+<h3>2.5.3 <a name="nxfgetfontset"><code>nxf_getfontset()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nxglib.h&gt;
 #include &lt;nuttx/nxfonts.h&gt;
 
-FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid);
+FAR const struct nx_font_s *nxf_getfontset(NXHANDLE handle);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -2411,8 +2435,8 @@ FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid);
 <p>
   <b>Input Parameters:</b>
   <ul><dl>
-    <dt><code>fontid</code>
-    <dd>Identifies the font set to get
+    <dt><code>handle</code>
+    <dd>A font handle previously returned by <code>nxf_getfonthandle()</code>.
   </dl></ul>
 </p>
 <p>
@@ -2420,13 +2444,13 @@ FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid);
   An instance of <code>struct nx_font_s</code> describing the font set.
 </p>
 
-<h3>2.5.3 <a name="nxfgetbitmap"><code>nxf_getbitmap()</code></a></h3>
+<h3>2.5.4 <a name="nxfgetbitmap"><code>nxf_getbitmap()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nxglib.h&gt;
 #include &lt;nuttx/nxfonts.h&gt;
 
-FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch, enum nx_fontid_e fontid);
+FAR const struct nx_fontbitmap_s *nxf_getbitmap(NXHANDLE handle, uint16_t ch);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -2436,9 +2460,9 @@ FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch, enum nx_fontid_e fo
   <b>Input Parameters:</b>
   <ul><dl>
     <dt><code>ch</code>
-    <dd>
-    <dt><code>fontid</code>
-    <dd>Identifies the font set to use
+    <dd>The char code for the requested bitmap.
+    <dt><code>handle</code>
+    <dd>A font handle previously returned by <code>nxf_getfonthandle()</code>.
   </dl></ul>
 </p>
 <p>
@@ -2446,7 +2470,7 @@ FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch, enum nx_fontid_e fo
   An instance of <code>struct nx_fontbitmap_s</code> describing the glyph.
 </p>
 
-<h3>2.5.4 <a name="nxfconvertbpp"><code>nxf_convert_*bpp()</code></a></h3>
+<h3>2.5.5 <a name="nxfconvertbpp"><code>nxf_convert_*bpp()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nxglib.h&gt;
@@ -2505,13 +2529,27 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
 
 <h2>2.6 <a name="samplecode">Sample Code</a></h2>
 
-<p><b><code>apps/examples/nx</code></b>.
+<p><b><code>apps/examples/nx*</code></b>.
   No sample code is provided in this document.
-  However, an example can be found in the NuttX source tree at <code>apps/examples/nx</code>.
-  That code is intended to test NX.
-  Since it is test code, it is designed to exercise functionality and does not necessarily
-  represent best NX coding practices.
+  However, examples can be found in the NuttX source tree at the follow locations:
+  That example code is intended to test NX.
+  Since it is test code, it is designed to exercise functionality and does not necessarily represent best NX coding practices.
 </p>
+<ul>
+  <li><code>apps/examples/nx</code>.
+    This is a test of windows, optionally with toolbars.
+    Two windows are created, re-sized, moved, raise lowered.
+    Simulated mouse and keyboard input is provided.
+  </li>
+  <li><code>apps/examples/nxhello</code>.
+    This is intended to be simplest NX test:
+    It simply displays the words &quot;Hello, World!&quot; centered on the display.
+  </li>
+  <li><code>apps/examples/nxtext</code>.
+    This illustrates how fonts may be managed to provide scrolling text windows.
+    Pop-up windows are included to verify the clipping and re-drawing of the text display.
+  </li>
+</ul>
 
 <p>
   In its current form, the NX graphics system provides a low level of graphics and window
@@ -2963,13 +3001,17 @@ make
 </tr>
 <tr>
   <td align="left" valign="top"><a href="#nxrequestbkgd"><code>nx_requestbkgd()</code></a></td>
-  <td><br></td>
-  <td align="center" bgcolor="lightgrey">NO</td>
+  <td>
+    Verified by <code>apps/examples/nxtext</code> and <code>apps/examples/nxhello</code>.
+  </td>
+  <td align="center" bgcolor="skyblue">YES</td>
 </tr>
 <tr>
   <td align="left" valign="top"><a href="#nxreleasebkgd"><code>nx_releasebkgd()</code></a></td>
-  <td><br></td>
-  <td align="center" bgcolor="lightgrey">NO</td>
+  <td>
+    Verified by <code>apps/examples/nxtext</code> and <code>apps/examples/nxhello</code>.
+  </td>
+  <td align="center" bgcolor="skyblue">YES</td>
 </tr>
 <tr>
   <td align="left" valign="top"><a href="#nxgetposition"><code>nx_getposition()</code></a></td>
@@ -3143,6 +3185,11 @@ make
   <th width="5%">Verified</th></tr>
 </tr>
 <tr>
+  <td align="left" valign="top"><a href="#nxfgetfonthandle"><code>nxf_getfonthandle()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
   <td align="left" valign="top"><a href="#nxfgetfontset"><code>nxf_getfontset()</code></a></td>
   <td><br></td>
   <td align="center" bgcolor="skyblue">YES</td>
@@ -3170,7 +3217,7 @@ make
 <tr>
   <td align="left" valign="top"><a href="#nxfconvertbpp"><code>nxf_convert_16bpp()</code></a></td>
   <td><br></td>
-  <td align="center" bgcolor="lightgrey">NO</td>
+  <td align="center" bgcolor="skyblue">YES</td>
 </tr>
 <tr>
   <td align="left" valign="top"><a href="#nxfconvertbpp"><code>nxf_convert_24bpp()</code></a></td>

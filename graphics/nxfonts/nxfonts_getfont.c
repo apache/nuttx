@@ -43,6 +43,7 @@
 #include <stddef.h>
 #include <debug.h>
 
+#include <nuttx/nx.h>
 #include <nuttx/nxfonts.h>
 
 #include "nxfonts_internal.h"
@@ -80,43 +81,6 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxf_findpackage
- *
- * Description:
- *   Find the font package associated with the provided font ID.
- *
- * Input Parameters:
- *   fontid:  Identifies the font set to get
- *
- ****************************************************************************/
-
-static FAR const struct nx_fontpackage_s *nxf_findpackage(enum nx_fontid_e fontid)
-{
-  FAR const struct nx_fontpackage_s **pkglist;
-  FAR const struct nx_fontpackage_s *package;
-
-  /* Handle the default font package */
-
-  if (fontid == FONTID_DEFAULT)
-   {
-     fontid = NXFONT_DEFAULT;
-   }
-
-  /* Then search for the font package with this ID */
-
-  for (pkglist = g_fontpackages; *pkglist; pkglist++)
-    {
-      package = *pkglist;
-      if (package->id == fontid)
-        {
-          return package;
-        }
-    }
-
-  return NULL;
-}
-
-/****************************************************************************
  * Name: nxf_getglyphset
  *
  * Description:
@@ -140,14 +104,14 @@ static inline FAR const struct nx_fontset_s *
     {
       /* Select the 7-bit font set */
 
-      fontset = package->font7;
+      fontset = &package->font7;
     }
   else if (ch < 256)
     {
 #if CONFIG_NXFONTS_CHARBITS >= 8
       /* Select the 8-bit font set */
 
-      fontset = package->font8;
+      fontset = &package->font8;
 #else
       gdbg("8-bit font support disabled: %d\n", ch);
       return NULL;
@@ -177,26 +141,66 @@ static inline FAR const struct nx_fontset_s *
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxf_getfontset
+ * Name: nxf_getfonthandle
  *
  * Description:
- *   Return information about the current font set
+ *   Given a numeric font ID, return a handle that may be subsequently be
+ *   used to access the font data sets.
  *
  * Input Parameters:
  *   fontid:  Identifies the font set to get
  *
  ****************************************************************************/
 
-FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid)
+NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid)
 {
+  FAR const struct nx_fontpackage_s **pkglist;
+  FAR const struct nx_fontpackage_s *package;
+
+  /* Handle the default font package */
+
+  if (fontid == FONTID_DEFAULT)
+   {
+     fontid = NXFONT_DEFAULT;
+   }
+
+  /* Then search for the font package with this ID */
+
+  for (pkglist = g_fontpackages; *pkglist; pkglist++)
+    {
+      package = *pkglist;
+      if (package->id == fontid)
+        {
+          return (NXHANDLE)package;
+        }
+    }
+
+  return (NXHANDLE)NULL;
+}
+
+/****************************************************************************
+ * Name: nxf_getfontset
+ *
+ * Description:
+ *   Return information about the current font set
+ *
+ * Input Parameters:
+ *   handle:  A font handle previously returned by nxf_getfonthandle
+ *
+ ****************************************************************************/
+
+FAR const struct nx_font_s *nxf_getfontset(NXHANDLE handle)
+{
+  FAR const struct nx_fontpackage_s *package =
+    (FAR const struct nx_fontpackage_s *)handle;
+
   /* Find the font package associated with this font ID */
 
-  FAR const struct nx_fontpackage_s *package = nxf_findpackage(fontid);
   if (package)
     {
       /* Found... return the font set metrics for this font package */
 
-      return package->metrics;
+      return &package->metrics;
     }
 
   return NULL;
@@ -209,23 +213,23 @@ FAR const struct nx_font_s *nxf_getfontset(enum nx_fontid_e fontid)
  *   Return font bitmap information for the selected character encoding.
  *
  * Input Parameters:
- *   ch:      Character code
- *   fontid:  Identifies the font set to use
+ *   handle:  A font handle previously returned by nxf_getfonthandle
+ *   ch:      Character code whose bitmap is requested
+ *
+ * Returned Value:
+ *   An instance of struct nx_fontbitmap_s describing the glyph.
  *
  ****************************************************************************/
 
-FAR const struct nx_fontbitmap_s *nxf_getbitmap(uint16_t ch,
-                                                enum nx_fontid_e fontid)
+FAR const struct nx_fontbitmap_s *nxf_getbitmap(NXHANDLE handle, uint16_t ch)
 {
-  /* Find the font package associated with this font ID */
-
-  FAR const struct nx_fontpackage_s *package;
+  FAR const struct nx_fontpackage_s *package =
+    (FAR const struct nx_fontpackage_s *)handle;
   FAR const struct nx_fontset_s     *fontset;
   FAR const struct nx_fontbitmap_s  *bm  = NULL;
 
-  /* Get the font package associated with the font ID */
+  /* Verify that the handle is a font package */
 
-  package = nxf_findpackage(fontid);
   if (package)
     {
       /* Now get the fontset from the package */

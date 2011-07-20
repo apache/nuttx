@@ -1928,3 +1928,8 @@
 	  not being coordinated correctly.
 	* configs/stm3210e-eval/nsh2: Enable FAT long file name support
 	* sched/sem_timedwait.c: Add the standard sem_timedwait() interface.
+	* graphics/nxfonts/nxfonts_getfont.c, nxfonts_bitmap.c,
+	  Makefile.source, and include/nuttx/nxfonts.h: Support for multiple
+	  fonts included.  A new interface, nxf_getfonthandle() takes a font
+	  ID and returns a handle that is now used at all other font interfaces
+	  to specify which of the multiple fonts to use.

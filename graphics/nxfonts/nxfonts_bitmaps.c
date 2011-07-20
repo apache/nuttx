@@ -1620,41 +1620,30 @@ NXFONT_DEFMETRIC(255),
 };
 #endif
 
-static const struct nx_fontset_s NXF_SYMNAME(NXFONTS_PREFIX,7bitfonts) =
-{
-  NXFONT_MIN7BIT,                      /* First glyph code */
-  NXFONT_N7BITFONTS,                   /* Number of bitmap glyphs */
-  NXF_SYMNAME(NXFONTS_PREFIX,7bitmaps) /* List of glyphs */
-};
-
-#if CONFIG_NXFONTS_CHARBITS >= 8
-static const struct nx_fontset_s NXF_SYMNAME(NXFONTS_PREFIX,8bitfonts) =
-{
-  NXFONT_MIN8BIT,                      /* First glyph code */
-  NXFONT_N8BITFONTS,                   /* Number of bitmap glyphs */
-  NXF_SYMNAME(NXFONTS_PREFIX,8bitmaps) /* List of glyphs */
-};
-#endif
-
-static const struct nx_font_s NXF_SYMNAME(NXFONTS_PREFIX,fonts) =
-{
-  NXFONT_MAXHEIGHT,                    /* Max. height of a glyph in rows */
-  NXFONT_MAXWIDTH,                     /* Max. width of a glyph in pixels */
-  CONFIG_NXFONTS_CHARBITS,             /* Max number of bits per character code */
-  NXFONT_SPACEWIDTH,                   /* The width of a space in pixels */
-};
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 const struct nx_fontpackage_s NXF_SYMNAME(NXFONTS_PREFIX,package) =
 {
-  NXFONT_ID,                               /* The font ID */
-  &NXF_SYMNAME(NXFONTS_PREFIX,fonts),      /* Font set metrics */
-  &NXF_SYMNAME(NXFONTS_PREFIX,7bitfonts)   /* Fonts for 7-bit encoding */
+  NXFONT_ID,                             /* The font ID */
+  {                                      /*  Font set metrics: */
+    NXFONT_MAXHEIGHT,                    /*   Max. height of a glyph in rows */
+    NXFONT_MAXWIDTH,                     /*   Max. width of a glyph in pixels */
+    CONFIG_NXFONTS_CHARBITS,             /*   Max number of bits per character code */
+    NXFONT_SPACEWIDTH,                   /*   The width of a space in pixels */
+  },
+  {                                      /* Fonts for 7-bit encoding */
+    NXFONT_MIN7BIT,                      /* First glyph code */
+    NXFONT_N7BITFONTS,                   /* Number of bitmap glyphs */
+    NXF_SYMNAME(NXFONTS_PREFIX,7bitmaps) /* List of glyphs */
+  }
 #if CONFIG_NXFONTS_CHARBITS >= 8
-  , &NXF_SYMNAME(NXFONTS_PREFIX,8bitfonts) /* Fonts for 8-bit encoding */
+, {                                      /* Fonts for 8-bit encoding */
+    NXFONT_MIN8BIT,                      /* First glyph code */
+    NXFONT_N8BITFONTS,                   /* Number of bitmap glyphs */
+    NXF_SYMNAME(NXFONTS_PREFIX,8bitmaps) /* List of glyphs */
+  }
 #endif
 };
 
