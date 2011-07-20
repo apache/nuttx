@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_internal.h
  *
- *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,7 +90,7 @@ extern "C" {
 #endif
 
 EXTERN void weak_function sem_initialize(void);
-EXTERN void               sem_waitirq(FAR _TCB *wtcb);
+EXTERN void               sem_waitirq(FAR _TCB *wtcb, int errcode);
 EXTERN FAR nsem_t        *sem_findnamed(const char *name);
 
 #ifdef CONFIG_PRIORITY_INHERITANCE

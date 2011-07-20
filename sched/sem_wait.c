@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_wait.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -171,16 +171,16 @@ int sem_wait(FAR sem_t *sem)
 #endif
           /* Add the TCB to the prioritized semaphore wait queue */
 
-          errno = 0;
+          errno = OK;
           up_block_task(rtcb, TSTATE_WAIT_SEM);
 
           /* When we resume at this point, either (1) the semaphore has been
            * assigned to this thread of execution, or (2) the semaphore wait
-           * has been interrupted by a signal.  We can detect the latter case
-           * be examining the errno value.
+           * has been interrupted by a signal or a timeout.  We can detect these
+           * latter cases be examining the errno value.
            *
-           * In the event that the semaphore wait was interrupt was interrupted
-           * by a signal, certain semaphore clean-up operations have already been
+           * In the event that the semaphore wait was interrupted by a signal or
+           * a timeout, certain semaphore clean-up operations have already been
            * performed (see sem_waitirq.c).  Specifically:
            *
            * - sem_canceled() was called to restore the priority of all threads
@@ -194,9 +194,9 @@ int sem_wait(FAR sem_t *sem)
            * race conditions.
            */
 
-          if (errno != EINTR)
+          if (errno != EINTR && errno != ETIMEDOUT)
             {
-              /* We hold the semaphore */
+              /* Not awakened by a signal or a timeout... We hold the semaphore */
 
               sem_addholder(sem);
               ret = OK;

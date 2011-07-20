@@ -73,15 +73,16 @@
  * Function:  sem_waitirq
  *
  * Description:
- *   This function is called when a signal is received by a
- *   task that is waiting on a semaphore.  According to the
- *   POSIX spec, "...the calling thread shall not return
- *   from the call to [sem_wait] until it either locks the
- *   semaphore or the call is interrupted by a signal."
+ *   This function is called when a signal is received by a task that is
+ *   waiting on a semaphore.  According to the POSIX spec, "...the calling
+ *   thread shall not return from the call to [sem_wait] until it either
+ *   locks the semaphore or the call is interrupted by a signal."
  *
  * Parameters:
- *   wtcb - A pointer to the TCB of the task that is waiting
- *      on a semphare, but has received a signal instead.
+ *   wtcb    - A pointer to the TCB of the task that is waiting on a
+ *             semphaphore, but has received a signal or timeout instead.
+ *   errcode - EINTR if the semaphore wait was awakened by a signal;
+ *             ETIMEDOUT if awakened by a timeout
  *
  * Return Value:
  *   None
@@ -90,7 +91,7 @@
  *
  ****************************************************************************/
 
-void sem_waitirq(FAR _TCB *wtcb)
+void sem_waitirq(FAR _TCB *wtcb, int errcode)
 {
   irqstate_t saved_state;
 
@@ -101,8 +102,8 @@ void sem_waitirq(FAR _TCB *wtcb)
 
   saved_state = irqsave();
 
-  /* It is possible that an interrupt/context switch beat us to the
-   * punch and already changed the task's state.
+  /* It is possible that an interrupt/context switch beat us to the punch
+   * and already changed the task's state.
    */
 
   if (wtcb->task_state == TSTATE_WAIT_SEM)
@@ -116,10 +117,10 @@ void sem_waitirq(FAR _TCB *wtcb)
 
       sem_canceled(wtcb, sem);
 
-      /* And increment the count on the semaphore.  This releases the
-       * count that was taken by sem_post().  This count decremented
-       * the semaphore count to negative and caused the thread to be
-       * blocked in the first place.
+      /* And increment the count on the semaphore.  This releases the count
+       * that was taken by sem_post().  This count decremented the semaphore
+       * count to negative and caused the thread to be blocked in the first
+       * place.
        */ 
 
       sem->semcount++;
@@ -130,7 +131,7 @@ void sem_waitirq(FAR _TCB *wtcb)
 
       /* Mark the errno value for the thread. */
 
-      wtcb->pterrno = EINTR;
+      wtcb->pterrno = errcode;
 
       /* Restart the task. */
 

@@ -117,10 +117,10 @@ PTHREAD_SRCS	+= pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
 endif
 
 SEM_SRCS	= sem_initialize.c sem_destroy.c sem_open.c sem_close.c sem_unlink.c \
-		  sem_wait.c sem_trywait.c sem_post.c sem_findnamed.c
+		  sem_wait.c sem_trywait.c sem_timedwait.c sem_post.c sem_findnamed.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-SEM_SRCS	+= sem_waitirq.c sem_timedwait.c
+SEM_SRCS	+= sem_waitirq.c
 endif
 
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)

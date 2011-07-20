@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_timedwait.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 
 #include "os_internal.h"
 #include "clock_internal.h"
+#include "sem_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -111,13 +112,9 @@ static void sem_timeout(int argc, uint32_t pid)
 
   if (wtcb && wtcb->task_state == TSTATE_WAIT_SEM)
     {
-      /* Mark the errno value for the thread. */
-
-      wtcb->pterrno = ETIMEDOUT;
-
-      /* Restart the task. */
-
-      up_unblock_task(wtcb);
+      /* Cancel the semaphore wait */
+ 
+      sem_waitirq(wtcb, ETIMEDOUT);
     }
 
   /* Interrupts may now be enabled. */

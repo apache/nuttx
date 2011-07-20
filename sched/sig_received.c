@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sig_received.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,9 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sched.h>
+#include <errno.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
@@ -377,7 +379,7 @@ int sig_received(FAR _TCB *stcb, siginfo_t *info)
 
          if (stcb->task_state == TSTATE_WAIT_SEM)
            {
-             sem_waitirq(stcb);
+             sem_waitirq(stcb, EINTR);
            }
 
          /* If the task is blocked waiting on a message queue, then that
