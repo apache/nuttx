@@ -1911,6 +1911,8 @@
 	* arch/arm/src/lpc17xx/lpc17_can.c:  Added a CAN driver contributed by
 	  Li Zhuoyi (Lzyy).
 	* include/stddefs.h and sys/types:  Added type wchar_t.
+	* fs/fat/fat_fat32dirent.c:  Move all FAT directory operations to this
+	  new file; Implement VFAT long file name support.
 	* fs/fat/fat_fat32dirent.c:  The configuration CONFIG_FAT_LCNAMES has
 	  been around for some time but never tested until now.  This setting
 	  will mimic the NT 8.3 file name behavior:  File names or extensions 
@@ -1933,3 +1935,5 @@
 	  fonts included.  A new interface, nxf_getfonthandle() takes a font
 	  ID and returns a handle that is now used at all other font interfaces
 	  to specify which of the multiple fonts to use.
+	* arch/arm/src/lpc17xx/lpc17_syscon.h: Fix typo (reported by Li Zhuoyi).
+
