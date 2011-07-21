@@ -171,7 +171,7 @@ int sem_wait(FAR sem_t *sem)
 #endif
           /* Add the TCB to the prioritized semaphore wait queue */
 
-          errno = OK;
+          errno = 0;
           up_block_task(rtcb, TSTATE_WAIT_SEM);
 
           /* When we resume at this point, either (1) the semaphore has been

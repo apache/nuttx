@@ -255,7 +255,7 @@ $(TOPDIR)/.version:
 # Create the include/nuttx/version.h file
 
 include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion
-	tools/mkversion $(TOPDIR) > include/nuttx/version.h
+	@tools/mkversion $(TOPDIR) > include/nuttx/version.h
 
 # Build the mkconfig tool used to create include/nuttx/config.h
 
@@ -265,7 +265,7 @@ tools/mkconfig:
 # Create the include/nuttx/config.h file
 
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig
-	tools/mkconfig $(TOPDIR) > include/nuttx/config.h
+	@tools/mkconfig $(TOPDIR) > include/nuttx/config.h
 
 # Link the apps/include directory to include/apps
 
