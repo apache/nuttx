@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 17, 2011</p>
+      <p>Last Updated: July 21, 2011</p>
     </td>
   </tr>
 </table>
@@ -2559,6 +2559,8 @@ nuttx-6.7 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * arch/arm/src/lpc17xx/lpc17_can.c:  Added a CAN driver contributed by
       Li Zhuoyi (Lzyy).
     * include/stddefs.h and sys/types:  Added type wchar_t.
+    * fs/fat/fat_fat32dirent.c:  Move all FAT directory operations to this
+      new file; Implement VFAT long file name support.
     * fs/fat/fat_fat32dirent.c:  The configuration CONFIG_FAT_LCNAMES has
       been around for some time but never tested until now.  This setting
       will mimic the NT 8.3 file name behavior:  File names or extensions 
@@ -2575,11 +2577,26 @@ nuttx-6.7 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       SDIO transfer completion events and DMA completion eventes were
       not being coordinated correctly.
     * configs/stm3210e-eval/nsh2: Enable FAT long file name support
+    * sched/sem_timedwait.c: Add the standard sem_timedwait() interface.
+    * graphics/nxfonts/nxfonts_getfont.c, nxfonts_bitmap.c,
+      Makefile.source, and include/nuttx/nxfonts.h: Support for multiple
+      fonts included.  A new interface, nxf_getfonthandle() takes a font
+      ID and returns a handle that is now used at all other font interfaces
+      to specify which of the multiple fonts to use.
+    * arch/arm/src/lpc17xx/lpc17_syscon.h: Fix typo (reported by Li Zhuoyi).
 
 apps-6.7 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * apps/examples/nx and nxtext:  These examples can now be built as NSH
       &quot;built-in&quot; commands.
+    * apps/examples/nxhello:  The simplest graphics example:  It just says
+      &quot;Hello, World!&quot; in the center of the display. This example can also be
+      built as an NSH &quot;built-in&quot; command.
+    * apps/examples/nx, ntext, and nxhello:  All updated to use the new
+      NuttX font interfaces.
+    * apps/examples/nximage:  Another super simple  graphics example:  It just puts
+      the NuttX logo in the center of the display. This example can also be
+      built as an NSH &quot;built-in&quot; command.
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
