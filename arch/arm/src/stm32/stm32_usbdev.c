@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_usbdev.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * References:
@@ -479,6 +479,8 @@ static int    stm32_selfpowered(struct usbdev_s *dev, bool selfpowered);
 
 static void   stm32_reset(struct stm32_usbdev_s *priv);
 static void   stm32_hwreset(struct stm32_usbdev_s *priv);
+static void   stm32_hwsetup(struct stm32_usbdev_s *priv);
+static void   stm32_hwshutdown(struct stm32_usbdev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -3310,32 +3312,12 @@ static void stm32_hwreset(struct stm32_usbdev_s *priv)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-/****************************************************************************
- * Name: up_usbinitialize
- * Description:
- *   Initialize the USB driver
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
+ * Name: stm32_hwsetup
  ****************************************************************************/
 
-void up_usbinitialize(void) 
+static void stm32_hwsetup(struct stm32_usbdev_s *priv)
 {
-  /* For now there is only one USB controller, but we will always refer to
-   * it using a pointer to make any future ports to multiple USB controllers
-   * easier.
-   */
-
-  struct stm32_usbdev_s *priv = &g_usbdev;
   int epno;
-
-  usbtrace(TRACE_DEVINIT, 0);
-  stm32_checksetup();
 
   /* Power the USB controller, put the USB controller into reset, disable
    * all USB interrupts
@@ -3408,6 +3390,63 @@ void up_usbinitialize(void)
 
   stm32_putreg(USB_CNTR_FRES, STM32_USB_CNTR);
   up_mdelay(5);
+}
+
+/****************************************************************************
+ * Name: stm32_hwshutdown
+ ****************************************************************************/
+
+static void stm32_hwshutdown(struct stm32_usbdev_s *priv)
+{
+  priv->usbdev.speed = USB_SPEED_UNKNOWN;
+
+  /* Disable all interrupts and force the USB controller into reset */ 
+
+  stm32_putreg(USB_CNTR_FRES, STM32_USB_CNTR);
+
+  /* Clear any pending interrupts */ 
+
+  stm32_putreg(0, STM32_USB_ISTR);
+
+  /* Disconnect the device / disable the pull-up */ 
+
+  stm32_usbpullup(&priv->usbdev, false);
+  
+  /* Power down the USB controller */
+
+  stm32_putreg(USB_CNTR_FRES|USB_CNTR_PDWN, STM32_USB_CNTR);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+/****************************************************************************
+ * Name: up_usbinitialize
+ * Description:
+ *   Initialize the USB driver
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_usbinitialize(void) 
+{
+  /* For now there is only one USB controller, but we will always refer to
+   * it using a pointer to make any future ports to multiple USB controllers
+   * easier.
+   */
+
+  struct stm32_usbdev_s *priv = &g_usbdev;
+
+  usbtrace(TRACE_DEVINIT, 0);
+  stm32_checksetup();
+
+  /* Power up the USB controller, but leave it in the reset state */
+
+  stm32_hwsetup(priv);
 
   /* Attach USB controller interrupt handlers.  The hardware will not be
    * initialized and interrupts will not be enabled until the class device
@@ -3456,7 +3495,15 @@ void up_usbuninitialize(void)
   struct stm32_usbdev_s *priv = &g_usbdev;
   irqstate_t flags;
 
+  flags = irqsave();
   usbtrace(TRACE_DEVUNINIT, 0);
+
+  /* Disable and detach the USB IRQs */
+
+  up_disable_irq(STM32_IRQ_USBHPCANTX);
+  up_disable_irq(STM32_IRQ_USBLPCANRX0);
+  irq_detach(STM32_IRQ_USBHPCANTX);
+  irq_detach(STM32_IRQ_USBLPCANRX0);
 
   if (priv->driver)
     {
@@ -3464,31 +3511,9 @@ void up_usbuninitialize(void)
       usbdev_unregister(priv->driver);
     }
 
-  flags = irqsave();
-  priv->usbdev.speed = USB_SPEED_UNKNOWN;
+  /* Put the hardware in an inactive state */
 
-  /* Disable and detach IRQs */
-
-  up_disable_irq(STM32_IRQ_USBHPCANTX);
-  up_disable_irq(STM32_IRQ_USBLPCANRX0);
-  irq_detach(STM32_IRQ_USBHPCANTX);
-  irq_detach(STM32_IRQ_USBLPCANRX0);
-
-  /* Disable all interrupts and force the USB controller into reset */ 
-
-  stm32_putreg(USB_CNTR_FRES, STM32_USB_CNTR);
-  
-  /* Clear any pending interrupts */ 
-
-  stm32_putreg(0, STM32_USB_ISTR);
-  
-  /* Disconnect the device / disable the pull-up */ 
-
-  stm32_usbpullup(&priv->usbdev, false);
-  
-  /* Power down the USB controller */
-
-  stm32_putreg(USB_CNTR_FRES|USB_CNTR_PDWN, STM32_USB_CNTR);
+  stm32_hwshutdown(priv);
   irqrestore(flags);
 }
 
@@ -3530,7 +3555,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   /* First hook up the driver */
 
-   priv->driver = driver;
+  priv->driver = driver;
 
   /* Then bind the class driver */
 
@@ -3570,9 +3595,10 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
  * Name: usbdev_unregister
  *
  * Description:
- *   Un-register usbdev class driver.If the USB device is connected to a USB host,
- *   it will first disconnect().  The driver is also requested to unbind() and clean
- *   up any device state, before this procedure finally returns.
+ *   Un-register usbdev class driver. If the USB device is connected to a
+ *   USB host, it will first disconnect().  The driver is also requested to
+ *   unbind() and clean up any device state, before this procedure finally
+ *   returns.
  *
  ****************************************************************************/
 
@@ -3584,6 +3610,8 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    */
 
   struct stm32_usbdev_s *priv = &g_usbdev;
+  irqstate_t flags;
+
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
 #ifdef CONFIG_DEBUG
@@ -3596,16 +3624,25 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   /* Unbind the class driver */
 
+  flags = irqsave();
   CLASS_UNBIND(driver, &priv->usbdev);
 
-  /* Disable USB controller interrupts */
+  /* Disable USB controller interrupts (but keep them attached) */
 
   up_disable_irq(STM32_IRQ_USBHPCANTX);
   up_disable_irq(STM32_IRQ_USBLPCANRX0);
 
+  /* Put the hardware in an inactive state.  Then bring the hardware back up
+   * in the reset state.
+   */
+
+  stm32_hwshutdown(priv);
+  stm32_hwsetup(priv);
+
   /* Unhook the driver */
 
   priv->driver = NULL;
+  irqrestore(flags);
   return OK;
 }
 

@@ -2,7 +2,7 @@
  * config/stm3210e_eval/src/up_nsh.c
  * arch/arm/src/board/up_nsh.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -190,7 +190,7 @@ int nsh_archinitialize(void)
       return -ENODEV;
     }
 
-  /* Now bind the SPI interface to the MMC/SD driver */
+  /* Now bind the SDIO interface to the MMC/SD driver */
 
   message("nsh_archinitialize: Bind SDIO to the MMC/SD driver, minor=%d\n",
           CONFIG_NSH_MMCSDMINOR);

@@ -45,5 +45,6 @@ CONFIGURED_APPS += nshlib
 
 CONFIGURED_APPS += examples/nx
 CONFIGURED_APPS += examples/nxhello
+CONFIGURED_APPS += examples/usbstorage
 
 

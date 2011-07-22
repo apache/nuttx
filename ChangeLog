@@ -1936,4 +1936,7 @@
 	  ID and returns a handle that is now used at all other font interfaces
 	  to specify which of the multiple fonts to use.
 	* arch/arm/src/lpc17xx/lpc17_syscon.h: Fix typo (reported by Li Zhuoyi).
+	* configs/stm3210e-eval/nsh2: Extended to support two new commands:
+	  'msconn' will connect the USB mass storage device; 'msdis' will
+	  disconnect the USB storage device.
 

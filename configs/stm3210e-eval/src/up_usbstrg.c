@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm3210e-eval/src/up_usbstrg.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Configure and register the STM32 MMC/SD SDIO block driver.
@@ -49,6 +49,8 @@
 #include <nuttx/mmcsd.h>
 
 #include "stm32_internal.h"
+
+/* There is nothing to do here if SDIO support is not selected. */
 
 #ifdef CONFIG_STM32_SDIO
 
@@ -107,6 +109,12 @@
 
 int usbstrg_archinitialize(void)
 {
+  /* If examples/usbstrg is built as an NSH command, then SD slot should
+   * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
+   * this case, there is nothing further to be done here.
+   */
+
+#ifndef CONFIG_EXAMPLES_USBSTRG_BUILTIN
   FAR struct sdio_dev_s *sdio;
   int ret;
 
@@ -124,7 +132,7 @@ int usbstrg_archinitialize(void)
       return -ENODEV;
     }
 
-  /* Now bind the SPI interface to the MMC/SD driver */
+  /* Now bind the SDIO interface to the MMC/SD driver */
 
   message("usbstrg_archinitialize: "
           "Bind SDIO to the MMC/SD driver, minor=%d\n",
@@ -147,6 +155,9 @@ int usbstrg_archinitialize(void)
    */
 
    sdio_mediachange(sdio, true);
+
+#endif /* CONFIG_EXAMPLES_USBSTRG_BUILTIN */
+
    return OK;
 }
 
