@@ -477,6 +477,7 @@ Where <subdir> is one of the following:
     ----------- ----------------------- --------------------------------
     Built-in    None                    apps/examples/nx
     Apps                                apps/examples/nxhello
+                                        apps/examples/usbstorage
     =========== ======================= ================================
 
     * You will probably need to modify nsh/setenv.sh or nsh2/setenv.sh

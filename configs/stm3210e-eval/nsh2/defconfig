@@ -321,12 +321,15 @@ CONFIG_HAVE_LIBM=n
 #  thread.  Default: CONFIG_IDLETHREAD_STACKSIZE.
 # CONFIG_SIG_SIGWORK - The signal number that will be used to wake-up
 #  the worker thread.  Default: 4
+# CONFIG_SCHED_WAITPID - Enable the waitpid() API
+# CONFIG_SCHED_ATEXIT - Enabled the atexit() API
 #
 #CONFIG_APPS_DIR=
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_GRAPHICS=n
 CONFIG_DEBUG_LCD=n
+CONFIG_DEBUG_USB=n
 CONFIG_DEBUG_SYMBOLS=n
 CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=y
@@ -352,6 +355,8 @@ CONFIG_SCHED_WORKPRIORITY=50
 CONFIG_SCHED_WORKPERIOD=(50*1000)
 CONFIG_SCHED_WORKSTACKSIZE=1024
 CONFIG_SIG_SIGWORK=4
+CONFIG_SCHED_WAITPID=y
+CONFIG_SCHED_ATEXIT=n
 
 #
 # Settings for NXFLAT
@@ -647,7 +652,7 @@ CONFIG_NET_RESOLV_ENTRIES=4
 # CONFIG_USBDEV_TRACE_NRECORDS
 #   Number of trace entries to remember
 #
-CONFIG_USBDEV=n
+CONFIG_USBDEV=y
 CONFIG_USBDEV_ISOCHRONOUS=n
 CONFIG_USBDEV_DUALSPEED=n
 CONFIG_USBDEV_SELFPOWERED=y
@@ -715,7 +720,7 @@ CONFIG_USBSER_TXBUFSIZE=512
 # CONFIG_USBSTRG_REMOVABLE
 #   Select if the media is removable
 #
-CONFIG_USBSTRG=n
+CONFIG_USBSTRG=y
 CONFIG_USBSTRG_EP0MAXPACKET=64
 CONFIG_USBSTRG_EPBULKOUT=2
 CONFIG_USBSTRG_EPBULKIN=5
@@ -1009,7 +1014,7 @@ CONFIG_EXAMPLES_NX_NOTIFYSIGNO=4
 CONFIG_EXAMPLES_NX_EXTERNINIT=n
 
 #
-# Settings for examples/nx
+# Settings for examples/nxhello
 #
 # CONFIG_EXAMPLES_NXHELLO_BUILTIN -- Build the NXHELLO example as a "built-in"
 #   that can be executed from the NSH command line    
@@ -1073,6 +1078,55 @@ CONFIG_EXAMPLES_NXIMAGE_YSCALEp5=n
 CONFIG_EXAMPLES_NXIMAGE_YSCALE1p5=y
 CONFIG_EXAMPLES_NXIMAGE_YSCALE2p0=n
 CONFIG_EXAMPLES_NXIMAGE_EXTERNINIT=n
+
+#
+# Settings for examples/usbstorage
+#
+# CONFIG_EXAMPLES_USBSTRG_BUILTIN
+#   This example can be built as two NSH "built-in" commands if this option
+#   is selection: 'msconn' will connect the USB mass storage device; 'msdis'
+#   will disconnect the USB storage device.
+# CONFIG_EXAMPLES_USBSTRG_NLUNS
+#    Defines the number of logical units (LUNs) exported by the USB storage
+#    driver.  Each LUN corresponds to one exported block driver (or partition
+#    of a block driver).  May be 1, 2, or 3.  Default is 1.
+# CONFIG_EXAMPLES_USBSTRG_DEVMINOR1
+#    The minor device number of the block driver for the first LUN. For
+#    example, N in /dev/mmcsdN.  Used for registering the block driver. Default
+#    is zero.
+# CONFIG_EXAMPLES_USBSTRG_DEVPATH1
+#    The full path to the registered block driver.  Default is "/dev/mmcsd0"
+#  CONFIG_EXAMPLES_USBSTRG_DEVMINOR2 and CONFIG_EXAMPLES_USBSTRG_DEVPATH2
+#    Similar parameters that would have to be provided if CONFIG_EXAMPLES_USBSTRG_NLUNS
+#    is 2 or 3.  No defaults.
+#  CONFIG_EXAMPLES_USBSTRG_DEVMINOR3 and CONFIG_EXAMPLES_USBSTRG_DEVPATH3
+#    Similar parameters that would have to be provided if CONFIG_EXAMPLES_USBSTRG_NLUNS
+#    is 3.  No defaults.
+#
+#  If CONFIG_USBDEV_TRACE is enabled (or CONFIG_DEBUG and CONFIG_DEBUG_USB), then
+#  the example code will also manage the USB trace output.  The amount of trace output
+#  can be controlled using:
+#
+#  CONFIG_EXAMPLES_USBSTRG_TRACEINIT
+#    Show initialization events
+#  CONFIG_EXAMPLES_USBSTRG_TRACECLASS
+#    Show class driver events
+#  CONFIG_EXAMPLES_USBSTRG_TRACETRANSFERS
+#    Show data transfer events
+#  CONFIG_EXAMPLES_USBSTRG_TRACECONTROLLER
+#    Show controller events
+#  CONFIG_EXAMPLES_USBSTRG_TRACEINTERRUPTS
+#    Show interrupt-related events.
+#
+CONFIG_EXAMPLES_USBSTRG_BUILTIN=y
+CONFIG_EXAMPLES_USBSTRG_NLUNS=1
+CONFIG_EXAMPLES_USBSTRG_DEVMINOR1=0
+CONFIG_EXAMPLES_USBSTRG_DEVPATH1="/dev/mmcsd0"
+CONFIG_EXAMPLES_USBSTRG_TRACEINIT=n
+CONFIG_EXAMPLES_USBSTRG_TRACECLASS=n
+CONFIG_EXAMPLES_USBSTRG_TRACETRANSFERS=n
+CONFIG_EXAMPLES_USBSTRG_TRACECONTROLLER=n
+CONFIG_EXAMPLES_USBSTRG_TRACEINTERRUPTS=n
 
 #
 # Stack and heap information
