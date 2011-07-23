@@ -1939,4 +1939,7 @@
 	* configs/stm3210e-eval/nsh2: Extended to support two new commands:
 	  'msconn' will connect the USB mass storage device; 'msdis' will
 	  disconnect the USB storage device.
-
+	* tools/bdf-converter.c.  This C file is used to build the bdf-converter
+	  program.  The bdf-converter program be used to convert fonts in Bitmap
+	  Distribution Format (BDF) into fonts that can be used in the NX graphics
+	  system.

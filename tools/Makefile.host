@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-all: mkconfig mkversion mksyscall
+all: mkconfig mkversion mksyscall bdf-converter
 default: mkconfig mksyscall
 .PHONY: clean
 
@@ -56,6 +56,12 @@ mkversion: mkconfig.c cfgparser.c
 mksyscall: mksyscall.c
 	@gcc $(CFLAGS) -o mksyscall mksyscall.c
 
+# mksyscall - Convert a CSV file into syscall stubs and proxies
+
+bdf-converter: bdf-converter.c
+	@gcc $(CFLAGS) -o bdf-converter bdf-converter.c
+
 clean:
 	@rm -f *.o *.a *~ .*.swp
-	@rm -f mkconfig mksyscall mkversion mkconfig.exe mksyscall.exe mkversion.exe
+	@rm -f mkconfig mksyscall mkversion bdf-converter
+	@rm -f mkconfig.exe mksyscall.exe mkversion.exe bdf-converter.exe

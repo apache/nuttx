@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: July 19, 2011</p>
+      <p>Last Updated: July 23, 2011</p>
     </td>
   </tr>
 </table>
@@ -178,14 +178,17 @@
     </ul>
   </p>
   <p>
-    <big><b>Appendix C</b> <a href="#testcoverage">NX Test Coverage</a></big>
+    <big><b>Appendix C</b> <a href="#installnewfonts">Installing New Fonts</a></big>
+  </p>
+  <p>
+    <big><b>Appendix D</b> <a href="#testcoverage">NX Test Coverage</a></big>
   </p>
     <ul>
-      <i><b>Table C.1:</b> <a href="#nxglibcoverage">NXGLIB API Test Coverage</a></i><br>
-      <i><b>Table C.2:</b> <a href="#nxcbcoverage">NX Server Callbacks Test Coverage</a></i><br>
-      <i><b>Table C.3:</b> <a href="#nxcoverage">NX API Test Coverage</a></i><br>
-      <i><b>Table C.4:</b> <a href="#nxtkcoverage">NXTK API Test Coverage</a></i><br>
-      <i><b>Table C.5:</b> <a href="#nxfontscoverage">NXFONTS API Test Coverage</a></i><br>
+      <i><b>Table D.1:</b> <a href="#nxglibcoverage">NXGLIB API Test Coverage</a></i><br>
+      <i><b>Table D.2:</b> <a href="#nxcbcoverage">NX Server Callbacks Test Coverage</a></i><br>
+      <i><b>Table D.3:</b> <a href="#nxcoverage">NX API Test Coverage</a></i><br>
+      <i><b>Table D.4:</b> <a href="#nxtkcoverage">NXTK API Test Coverage</a></i><br>
+      <i><b>Table D.5:</b> <a href="#nxfontscoverage">NXFONTS API Test Coverage</a></i><br>
     </ul>
   </td>
   </tr>
@@ -2729,7 +2732,185 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
     <td>
-      <h1>Appendix C <a name="testcoverage">NX Test Coverage</a></h1>
+      <h1>Appendix C <a name="installnewfonts">Installing New Fonts</a></h1>
+    </td>
+  </tr>
+</table>
+
+<p>
+  There is a tool called <i>bdf-converter</i> in the directory <code>tools/.</code>.
+  The <i>bdf-converter</i> program be used to convert fonts in Bitmap Distribution Format (BDF) into fonts that can be used in the NX graphics system.
+</p>
+<p>
+  Below are general instructions for creating and installing a new font in the NX graphic system:
+</p>
+<ol start="1">
+  <li>
+    <p>
+      Locate a font in BDF format,
+    </p>
+  </li>
+  <li>
+    <p>
+      Use the <i>bdf-converter</i> program to convert the BDF font to the NuttX font format.
+      This will result in a C header file containing defintions.
+      That header file should be installed at, for example, <code>graphics/nxfonts/nxfonts_myfont.h</code>.
+    </p>
+  </li>
+</ol>
+<p>
+  Create a new NuttX configuration variable.
+  For example, suppose you define the following variable: <code>CONFIG_NXFONT_MYFONT</code>.
+  Then you would need to:
+</p>
+<ol start="3">
+  <li>
+    <p>
+      Define <code>CONFIG_NXFONT_MYFONT=y</code> in your NuttX configuration file.
+    </p>
+  </li>
+</ol>
+<p>
+  A font ID number has to be assigned for each new font.
+  The font ID is defined in the file <code>include/nuttx/nxfonts.h</code>.
+  Those definitions have to be extended to support your new font.
+  Look at how the font ID enabled by <code>CONFIG_NXFONT_SANS23X27</code> is defined and add an ID for yournew font in a similar fashion:
+</p>
+<ol start="4">
+  <li>
+    <p>
+      <code>include/nuttx/nxfonts.h</code>. Add you new font as a possible system default font:
+    </p>
+    <ul></pre>
+#if defined(CONFIG_NXFONT_SANS23X27)
+# define NXFONT_DEFAULT FONTID_SANS23X27
+#elif defined(CONFIG_NXFONT_MYFONT)
+# define NXFONT_DEFAULT FONTID_MYFONT
+#endif
+</pre><ul>
+    <p>
+      Then define the actual font ID.
+      Make sure that the font ID value is unique:
+    </p>
+    <ul><pre>
+enum nx_fontid_e
+{
+  FONTID_DEFAULT     = 0      /* The default font */
+#ifdef CONFIG_NXFONT_SANS23X27
+  , FONTID_SANS23X27 = 1      /* The 23x27 sans serif font */
+#endif
+#ifdef CONFIG_NXFONT_MYFONT
+  , FONTID_MYFONT    = 2      /* My shiny, new font */
+#endif
+...
+</pre></ul>
+   </li>
+</ol>
+<p>
+  New Add the font to the NX build system.
+  There are several files that you have to modify to to this.
+  Look how the build system uses the font CONFIG_NXFONT_SANS23X27 for examaples:
+</p>
+<ol start="5">
+  <li>
+    <p>
+      <code>nuttx/graphics/Makefile</code>.
+      This file needs logic to auto-generate a C source file from the header file that you generated with the the <i>bdf-converter</i> program.
+      Notice <code>NXFONTS_FONTID=2</code>; this must be set to the same font ID value that you defined in the <code>include/nuttx/nxfonts.h</code> file.
+    </p>
+    <ul><pre>
+genfontsources:
+  ifeq ($(CONFIG_NXFONT_SANS23X27),y)
+      @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=1 EXTRADEFINES=$(EXTRADEFINES)
+  endif
+  ifeq ($(CONFIG_NXFONT_MYFONT),y)
+      @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRADEFINES=$(EXTRADEFINES)
+  endif
+</pre></ul>
+  </li>
+  <li>
+    <p>
+      <code>nuttx/graphics/nxfonts/Make.defs</code>.
+      Set the make variable <code>NXFSET_CSRCS</code>.
+      <code>NXFSET_CSRCS</code> determines the name of the font C file to build when <code>NXFONTS_FONTID=2</code>:
+    </p>
+    <ul><pre>
+ifeq ($(CONFIG_NXFONT_SANS23X27),y)
+NXFSET_CSRCS	+= nxfonts_bitmaps_sans23x27.c
+endif
+ifeq ($(CONFIG_NXFONT_MYFONT),y)
+NXFSET_CSRCS	+= nxfonts_bitmaps_myfont.c
+endif
+</pre></ul>
+  </li>
+  <li>
+    <p>
+      <code>nuttx/graphics/nxfonts/Makefile.sources</code>.
+      This is the Makefile used in step 5 that will actually generate the font C file.
+      So, given your </code>NXFONTS_FONTID=2</code>, it needs to determine a prefix to use for auto-generated variable and function names and (again) the name of the autogenerated file to create (this must be the same name that was used in <code>nuttx/graphics/nxfonts/Make.defs</code>):
+    </p>
+    <ul><pre>
+ifeq ($(NXFONTS_FONTID),1)
+NXFONTS_PREFIX	:= g_sans23x27_
+GEN_CSRC	= nxfonts_bitmaps_sans23x27.c
+endif
+ifeq ($(NXFONTS_FONTID),2)
+NXFONTS_PREFIX	:= g_myfont_
+GEN_CSRC	= nxfonts_bitmaps_myfont.c
+endif
+</pre></ul>
+  </li>
+  <li>
+    <p>
+      <code>graphics/nxfonts/nxfonts_bitmaps.c</code>.
+      This is the file that contains the generic font structures.
+      It is used as a &quot;template&qout; file by <code>nuttx/graphics/nxfonts/Makefile.sources </code>to create your customized font data set at build time.
+    </p>
+    <ul><pre>
+#if NXFONTS_FONTID == 1
+#  include "nxfonts_sans23x27.h"
+#elif NXFONTS_FONTID == 2
+#  include "nxfonts_myfont.h"
+#else
+#  error "No font ID specified"
+#endif
+</pre></ul>
+    <p>
+       Where <code>nxfonts_myfont.h<code> is the NuttX font file that we generated in
+       step 2 using the <i>bdf-converter</i> tool.
+  </p>
+  <li>
+    <p>
+      Finally, we need to extend the logic that does the run-time font lookups so that can find our new font.
+      The lookup function is <code>NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid)</code>.
+      The new font information needs to be added to data structures used by that function:
+    </p>
+    <ul><pre>
+#ifdef CONFIG_NXFONT_SANS23X27
+extern const struct nx_fontpackage_s g_sans23x27_package;
+#endif
+#ifdef CONFIG_NXFONT_MYFONT
+extern const struct nx_fontpackage_s g_myfont_package;
+#endif
+
+static FAR const struct nx_fontpackage_s *g_fontpackages[] =
+{
+#ifdef CONFIG_NXFONT_SANS23X27
+  &g_sans23x27_package,
+#endif
+#ifdef CONFIG_NXFONT_MYFONT
+  &g_myfont_package,
+#endif
+  NULL
+};
+</pre></ul>
+  </li>
+</ol>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1>Appendix D <a name="testcoverage">NX Test Coverage</a></h1>
     </td>
   </tr>
 </table>
@@ -2810,7 +2991,7 @@ make
   The following table describes the testing performed on each NX API:
 </p>
 
-<center><h2>Table C.1: <a name="nxglibcoverage">NXGLIB API Test Coverage</a></h2></center>
+<center><h2>Table D.1: <a name="nxglibcoverage">NXGLIB API Test Coverage</a></h2></center>
 <center><table border="1" width="80%">
 <tr>
   <th width="40%">Function</th>
@@ -2910,7 +3091,7 @@ make
 </table></center>
 
 
-<center><h2>Table C.2: <a name="nxcbcoverage">NX Server Callbacks Test Coverage</a></h2></center>
+<center><h2>Table D.2: <a name="nxcbcoverage">NX Server Callbacks Test Coverage</a></h2></center>
 <center><table border="1" width="80%">
 <tr>
   <th width="40%">Function</th>
@@ -2939,7 +3120,7 @@ make
 </tr>
 </table></center>
 
-<center><h2>Table C.3: <a name="nxcoverage">NX API Test Coverage</a></h2></center>
+<center><h2>Table D.3: <a name="nxcoverage">NX API Test Coverage</a></h2></center>
 <center><table border="1" width="80%">
 <tr>
   <th width="40%">Function</th>
@@ -3083,7 +3264,7 @@ make
 </table></center>
 
 
-<center><h2>Table C.4: <a name="nxtkcoverage">NXTK API Test Coverage</a></h2></center>
+<center><h2>Table D.4: <a name="nxtkcoverage">NXTK API Test Coverage</a></h2></center>
 <center><table border="1" width="80%">
 <tr>
   <th width="40%">Function</th>
@@ -3177,7 +3358,7 @@ make
 </tr>
 </table></center>
 
-<center><h2>Table C.5: <a name="nxfontscoverage">NXFONTS API Test Coverage</a></h2></center>
+<center><h2>Table D.5: <a name="nxfontscoverage">NXFONTS API Test Coverage</a></h2></center>
 <center><table border="1" width="80%">
 <tr>
   <th width="40%">Function</th>

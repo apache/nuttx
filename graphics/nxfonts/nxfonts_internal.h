@@ -54,10 +54,6 @@
 #  define CONFIG_NXFONTS_CHARBITS 7
 #endif
 
-/* Only font supported for now */
-
-#define CONFIG_NXFONT_SANS23X27 1
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
