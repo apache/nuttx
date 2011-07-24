@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: July 23, 2011</p>
+      <p>Last Updated: July 24, 2011</p>
     </td>
   </tr>
 </table>
@@ -332,7 +332,7 @@
   graphics memory).
   NX includes both a small-footprint, single user implementaton (NXSU) and a somewhat
   larger multi-user implentation (NXMU as described below).
-  Both conform to the same APIs as defined in <code>include/nuttx/nx.h</code> and, hence,
+  Both conform to the same APIs as defined in <code>include/nuttx/nx/nx.h</code> and, hence,
   are interchangable<sup>1</sup>.
   NX can be used without NXWIDGETS and without NXTOOLKIT for raw window displays.
 </p>
@@ -404,15 +404,15 @@
 <h2>2.1 <a name="nxheaders">NX Header Files</a></h2>
 
 <ul><dl>
-  <dt><code>include/nuttx/nxglib.h</code>
+  <dt><code>include/nuttx/nx/nxglib.h</code>
     <dd>Describes the NXGLIB C interfaces
-  <dt><code>include/nuttx/nx.h</code>
+  <dt><code>include/nuttx/nx/nx.h</code>
     <dd>Describes the NX C interfaces
   <dt><code>include/nutt/nxtk.h</code>
     <dd>Describe the NXTOOLKIT C interfaces
   <dt><code>include/nutt/nxfont.h</code>
     <dd>Describe sthe NXFONT C interfaces
-  <dt><code>include/nuttx/nxwidgets.h</code>
+  <dt><code>include/nuttx/nx/nxwidgets.h</code>
     <dd>Will describe the NXWIDGETS classes (no longer planned)
 </dl></ul>
 
@@ -422,7 +422,7 @@
   NXGL provides many APIs, some available for use internally by NX and
   others for use by applications as well.
   Only those APIs intended for application usage are documented here
-  See <code>include/nuttx/nxglib.h</code> for the full set of APIs;
+  See <code>include/nuttx/nx/nxglib.h</code> for the full set of APIs;
   those APIs might be of interest if you are rendering directly into
   framebuffer or LCD memory.
 </p>
@@ -512,7 +512,7 @@ struct nxgl_trapezoid_s
 <h3>2.2.1 <a name="nxglrgb2yuv"><code>nxgl_rgb2yuv()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_rgb2yuv(uint8_t r, uint8_t g, uint8_t b, uint8_t *y, uint8_t *u, uint8_t *v);
 </pre></ul>
 <p>
@@ -523,7 +523,7 @@ void nxgl_rgb2yuv(uint8_t r, uint8_t g, uint8_t b, uint8_t *y, uint8_t *u, uint8
 <h3>2.2.2 <a name="nxglyuv2rgb"><code>nxgl_yuv2rgb()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v, uint8_t *r, uint8_t *g, uint8_t *b);
 </pre></ul>
 <p>
@@ -534,7 +534,7 @@ void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v, uint8_t *r, uint8_t *g, uint8
 <h3>2.2.3 <a name="nxglrectcopy"><code>nxgl_rectcopy()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_rectcopy(FAR struct nxgl_rect_s *dest,
                    FAR const struct nxgl_rect_s *src);
 </pre></ul>
@@ -547,7 +547,7 @@ void nxgl_rectcopy(FAR struct nxgl_rect_s *dest,
 <h3>2.2.4 <a name="nxglrectoffset"><code>nxgl_rectoffset()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_rectoffset(FAR struct nxgl_rect_s *dest,
                      FAR const struct nxgl_rect_s *src,
                      nxgl_coord_t dx, nxgl_coord_t dy);
@@ -560,7 +560,7 @@ void nxgl_rectoffset(FAR struct nxgl_rect_s *dest,
 <h3>2.2.5 <a name="nxglvectoradd"><code>nxgl_vectoradd()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_vectoradd(FAR struct nxgl_point_s *dest,
                     FAR const struct nxgl_point_s *v1,
                     FAR const struct nxgl_point_s *v2);
@@ -573,7 +573,7 @@ void nxgl_vectoradd(FAR struct nxgl_point_s *dest,
 <h3>2.2.6 <a name="nxglvectorsubtract"><code>nxgl_vectorsubtract()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_vectsubtract(FAR struct nxgl_point_s *dest,
                        FAR const struct nxgl_point_s *v1,
                        FAR const struct nxgl_point_s *v2);
@@ -586,7 +586,7 @@ void nxgl_vectsubtract(FAR struct nxgl_point_s *dest,
 <h3>2.2.7 <a name="nxglrectintersect"><code>nxgl_rectintersect()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_rectintersect(FAR struct nxgl_rect_s *dest,
                         FAR const struct nxgl_rect_s *src1,
                         FAR const struct nxgl_rect_s *src2);
@@ -599,7 +599,7 @@ void nxgl_rectintersect(FAR struct nxgl_rect_s *dest,
 <h3>2.2.8 <a name="nxglrectunion"><code>nxgl_rectunion()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_rectunion(FAR struct nxgl_rect_s *dest,
                     FAR const struct nxgl_rect_s *src1,
                     FAR const struct nxgl_rect_s *src2);
@@ -613,7 +613,7 @@ void nxgl_rectunion(FAR struct nxgl_rect_s *dest,
 <h3>2.2.9 <a name="nxglnonintersecting"><code>nxgl_nonintersecting()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
                      FAR const struct nxgl_rect_s *rect1,
                      FAR const struct nxgl_rect_s *rect2);
@@ -628,7 +628,7 @@ nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
 <h3>2.2.10 <a name="nxglrectoverlap"><code>nxgl_rectoverlap()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 bool nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
                       FAR struct nxgl_rect_s *rect2);
 </pre></ul>
@@ -640,7 +640,7 @@ bool nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
 <h3>2.2.11 <a name="nxglrectinside"><code>nxgl_rectinside()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 bool nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
                      FAR const struct nxgl_point_s *pt);
 </pre></ul>
@@ -652,7 +652,7 @@ bool nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
 <h3>2.2.12 <a name="nxglrectsize"><code>nxgl_rectsize()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_rectsize(FAR struct nxgl_size_s *size,
                    FAR const struct nxgl_rect_s *rect);
 </pre></ul>
@@ -664,7 +664,7 @@ void nxgl_rectsize(FAR struct nxgl_size_s *size,
 <h3>2.2.13 <a name="nxglnullrect"><code>nxgl_nullrect()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 bool nxgl_nullrect(FAR const struct nxgl_rect_s *rect);
 </pre></ul>
 <p>
@@ -675,7 +675,7 @@ bool nxgl_nullrect(FAR const struct nxgl_rect_s *rect);
 <h3>2.2.14 <a name="nxglrunoffset"><code>nxgl_runoffset()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_runoffset(FAR struct nxgl_run_s *dest,
                     FAR const struct nxgl_run_s *src,
                     nxgl_coord_t dx, nxgl_coord_t dy);
@@ -688,7 +688,7 @@ void nxgl_runoffset(FAR struct nxgl_run_s *dest,
 <h3>2.2.15 <a name="nxglruncopy"><code>nxgl_runcopy()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_runcopy(FAR struct nxgl_run_s *dest,
                   FAR const struct nxgl_run_s *src);
 </pre></ul>
@@ -701,7 +701,7 @@ void nxgl_runcopy(FAR struct nxgl_run_s *dest,
 <h3>2.2.16 <a name="nxgltrapoffset"><code>nxgl_trapoffset()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_trapoffset(FAR struct nxgl_trapezoid_s *dest,
                      FAR const struct nxgl_trapezoid_s *src,
                      nxgl_coord_t dx, nxgl_coord_t dy);
@@ -714,7 +714,7 @@ void nxgl_trapoffset(FAR struct nxgl_trapezoid_s *dest,
 <h3>2.2.1 <a name="nxgltrapcopy"><code>nxgl_trapcopy()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 void nxgl_trapcopy(FAR struct nxgl_trapezoid_s *dest,
                    FAR const struct nxgl_trapezoid_s *src);
 </pre></ul>
@@ -727,7 +727,7 @@ void nxgl_trapcopy(FAR struct nxgl_trapezoid_s *dest,
 <h3>2.2.1 <a name="nxglcolorcopy"><code>nxgl_colorcopy</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
 nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES],
                const nxgl_mxpixel_t src[CONFIG_NX_NPLANES]);
 </pre></ul>
@@ -929,8 +929,8 @@ void (*kbdin)(NXWINDOW hwnd, uint8_t nch, FAR const uint8_t *ch, FAR void *arg);
 <h3>2.3.4 <a name="nxruninstance"><code>nx_runinstance()</code> (and <code>nx_run()</code> macro)</a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 #ifdef CONFIG_NX_MULTIUSER
 int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb);
@@ -970,8 +970,8 @@ int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb);
 <h3>2.3.5 <a name="nxconnectinstance"><code>nx_connectinstance()</code> (and <code>nx_connect()</code> macro)</a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 #ifdef CONFIG_NX_MULTIUSER
 NXHANDLE nx_connectinstance(FAR const char *svrmqname);
@@ -1024,8 +1024,8 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname);
 <h3>2.3.6 <a name="nxopen"><code>nx_open()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 #ifndef CONFIG_NX_MULTIUSER
 NXHANDLE nx_open(FAR struct fb_vtable_s *dev);
@@ -1061,8 +1061,8 @@ NXHANDLE nx_open(FAR struct fb_vtable_s *dev);
 <h3>2.3.7 <a name="nxdisconnect"><code>nx_disconnect()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 #ifdef CONFIG_NX_MULTIUSER
 void nx_disconnect(NXHANDLE handle);
@@ -1092,8 +1092,8 @@ void nx_disconnect(NXHANDLE handle);
 <h3>2.3.8 <a name="nxclose"><code>nx_close()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 #ifndef CONFIG_NX_MULTIUSER
 void nx_close(NXHANDLE handle);
@@ -1121,8 +1121,8 @@ void nx_close(NXHANDLE handle);
 <h3>2.3.9 <a name="nxeventhandler"><code>nx_eventhandler()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 #ifdef CONFIG_NX_MULTIUSER
 int nx_eventhandler(NXHANDLE handle);
@@ -1169,8 +1169,8 @@ int nx_eventhandler(NXHANDLE handle);
 <h3>2.3.10 <a name="nxeventnotify"><code>nx_eventnotify()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 #if defined(CONFIG_NX_MULTIUSER) && !defined(CONFIG_DISABLE_SIGNALS)
 int nx_eventnotify(NXHANDLE handle, int signo);
@@ -1215,8 +1215,8 @@ int nx_eventnotify(NXHANDLE handle, int signo);
 <h3>2.3.11 <a name="nxopenwindow"><code>nx_openwindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 NXWINDOW nx_openwindow(NXHANDLE handle,
                        FAR const struct nx_callback_s *cb,
@@ -1248,8 +1248,8 @@ NXWINDOW nx_openwindow(NXHANDLE handle,
 <h3>2.3.12 <a name="nxclosewindow"><code>nx_closewindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_closewindow(NXWINDOW hwnd);
 </pre></ul>
@@ -1276,8 +1276,8 @@ int nx_closewindow(NXWINDOW hwnd);
 <h3>2.3.13 <a name="nxrequestbkgd"><code>nx_requestbkgd()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_requestbkgd(NXHANDLE handle,
                    FAR const struct nx_callback_s *cb,
@@ -1348,8 +1348,8 @@ int nx_requestbkgd(NXHANDLE handle,
 <h3>2.3.14 <a name="nxreleasebkgd"><code>nx_releasebkgd()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_releasebkgd(NXWINDOW hwnd);
 </pre></ul>
@@ -1378,8 +1378,8 @@ int nx_releasebkgd(NXWINDOW hwnd);
 <h3>2.3.15 <a name="nxgetposition"><code>nx_getposition()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_getposition(NXWINDOW hwnd);
 </pre></ul>
@@ -1406,8 +1406,8 @@ int nx_getposition(NXWINDOW hwnd);
 <h3>2.3.16 <a name="nxsetposition"><code>nx_setposition()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_setposition(NXWINDOW hwnd, FAR struct nxgl_point_s *pos);
 </pre></ul>
@@ -1435,8 +1435,8 @@ int nx_setposition(NXWINDOW hwnd, FAR struct nxgl_point_s *pos);
 <h3>2.3.17 <a name="nxsetsize"><code>nx_setsize()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_setsize(NXWINDOW hwnd, FAR struct nxgl_size_s *size);
 </pre></ul>
@@ -1463,8 +1463,8 @@ int nx_setsize(NXWINDOW hwnd, FAR struct nxgl_size_s *size);
 <h3>2.3.18 <a name="nxraise"><code>nx_raise()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_raise(NXWINDOW hwnd);
 </pre></ul>
@@ -1491,8 +1491,8 @@ int nx_raise(NXWINDOW hwnd);
 <h3>2.3.19 <a name="nxlower"><code>nx_lower()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_lower(NXWINDOW hwnd);
 </pre></ul>
@@ -1519,8 +1519,8 @@ int nx_lower(NXWINDOW hwnd);
 <h3>2.3.20 <a name="nxfill"><code>nx_fill()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                    nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
@@ -1550,8 +1550,8 @@ int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 <h3>2.3.21 <a name="nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
                             FAR const struct nxgl_trapezoid_s *trap,
@@ -1584,8 +1584,8 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
 <h3>2.3.22 <a name="nxglrgb2yuv"><code>nx_setbgcolor()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_setbgcolor(NXHANDLE handle,
                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
@@ -1612,8 +1612,8 @@ int nx_setbgcolor(NXHANDLE handle,
 <h3>2.3.23 <a name="nxmove"><code>nx_move()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                    FAR const struct nxgl_point_s *offset);
@@ -1643,8 +1643,8 @@ int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 <h3>2.3.24 <a name="nxbitmap"><code>nx_bitmap()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
                      FAR const void *src[CONFIG_NX_NPLANES],
@@ -1685,8 +1685,8 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
 <h3>2.3.25 <a name="nxkbdin"><code>nx_kbdin()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 #ifdef CONFIG_NX_KBD
 int nx_kbdchin(NXHANDLE handle, uint8_t ch);
@@ -1708,8 +1708,8 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
 <h3>2.3.26 <a name="nxmousein"><code>nx_mousein()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
 
 #ifdef CONFIG_NX_MOUSE
 int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons);
@@ -1785,9 +1785,9 @@ typedef FAR void *NXTKWINDOW;
 <h3>2.4.2 <a name="nxtkopenwindow"><code>nxtk_openwindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
                            FAR const struct nx_callback_s *cb,
@@ -1819,9 +1819,9 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
 <h3>2.4.3 <a name="nxtkclosewindow"><code>nxtk_closewindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_closewindow(NXTKWINDOW hfwnd);
 </pre></ul>
@@ -1846,9 +1846,9 @@ int nxtk_closewindow(NXTKWINDOW hfwnd);
 <h3>2.4.4 <a name="nxtkgetposition"><code>nxtk_getposition()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_getposition(NXTKWINDOW hfwnd);
 </pre></ul>
@@ -1875,9 +1875,9 @@ int nxtk_getposition(NXTKWINDOW hfwnd);
 <h3>2.4.5 <a name="nxtksetposition"><code>nxtk_setposition()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_setposition(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *pos);
 </pre></ul>
@@ -1906,9 +1906,9 @@ int nxtk_setposition(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *pos);
 <h3>2.4.6 <a name="nxtksetsize"><code>nxtk_setsize()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_setsize(NXTKWINDOW hfwnd, FAR struct nxgl_size_s *size);
 </pre></ul>
@@ -1937,9 +1937,9 @@ int nxtk_setsize(NXTKWINDOW hfwnd, FAR struct nxgl_size_s *size);
 <h3>2.4.7 <a name="nxtkraise"><code>nxtk_raise()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_raise(NXTKWINDOW hfwnd);
 </pre></ul>
@@ -1968,9 +1968,9 @@ int nxtk_raise(NXTKWINDOW hfwnd);
 <h3>2.4.8 <a name="nxtklower"><code>nxtk_lower()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_lower(NXTKWINDOW hfwnd);
 </pre></ul>
@@ -1999,9 +1999,9 @@ int nxtk_lower(NXTKWINDOW hfwnd);
 <h3>2.4.9 <a name="nxtkfillwindow"><code>nxtk_fillwindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                     nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
@@ -2031,9 +2031,9 @@ int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
 <h3>2.4.10 <a name="nxtkfilltrapwindow"><code>nxtk_filltrapwindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
                         FAR const struct nxgl_trapezoid_s *trap,
@@ -2064,9 +2064,9 @@ int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
 <h3>2.4.11 <a name="nxtkmovewindow"><code>nxtk_movewindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                     FAR const struct nxgl_point_s *offset);
@@ -2097,9 +2097,9 @@ int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
 <h3>2.4.12 <a name="nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
                       FAR const struct nxgl_rect_s *dest,
@@ -2142,9 +2142,9 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
 <h3>2.4.13 <a name="nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
                      FAR const struct nx_callback_s *cb,
@@ -2177,9 +2177,9 @@ int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
 <h3>2.4.14 <a name="nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_closetoolbar(NXTKWINDOW hfwnd);
 </pre></ul>
@@ -2206,9 +2206,9 @@ int nxtk_closetoolbar(NXTKWINDOW hfwnd);
 <h3>2.4.15 <a name="nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                      nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
@@ -2238,9 +2238,9 @@ int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
 <h3>2.4.16 <a name="nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *trap,
                          nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
@@ -2270,9 +2270,9 @@ int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *tr
 <h3>2.4.17 <a name="nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                      FAR const struct nxgl_point_s *offset);
@@ -2304,9 +2304,9 @@ int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
 <h3>2.4.18 <a name="nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nx.h&gt;
-#include &lt;nuttx/nxtk.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
 
 int nxtk_bitmaptoolbar(NXTKWINDOW hfwnd,
                        FAR const struct nxgl_rect_s *dest,
@@ -2403,7 +2403,7 @@ struct nx_font_s
 <h3>2.5.2 <a name="nxfgetfonthandle"><code>nxf_getfonthandle()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxfonts.h&gt;
+#include &lt;nuttx/nx/nxfonts.h&gt;
 
 NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid);
 </pre></ul>
@@ -2426,8 +2426,8 @@ NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid);
 <h3>2.5.3 <a name="nxfgetfontset"><code>nxf_getfontset()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nxfonts.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxfonts.h&gt;
 
 FAR const struct nx_font_s *nxf_getfontset(NXHANDLE handle);
 </pre></ul>
@@ -2450,8 +2450,8 @@ FAR const struct nx_font_s *nxf_getfontset(NXHANDLE handle);
 <h3>2.5.4 <a name="nxfgetbitmap"><code>nxf_getbitmap()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nxfonts.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxfonts.h&gt;
 
 FAR const struct nx_fontbitmap_s *nxf_getbitmap(NXHANDLE handle, uint16_t ch);
 </pre></ul>
@@ -2476,8 +2476,8 @@ FAR const struct nx_fontbitmap_s *nxf_getbitmap(NXHANDLE handle, uint16_t ch);
 <h3>2.5.5 <a name="nxfconvertbpp"><code>nxf_convert_*bpp()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
-#include &lt;nuttx/nxglib.h&gt;
-#include &lt;nuttx/nxfonts.h&gt;
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxfonts.h&gt;
 
 int nxf_convert_2bpp(FAR uint8_t *dest, uint16_t height,
                      uint16_t width, uint16_t stride,
@@ -2595,7 +2595,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       When combined with the generic <i>back-end</i> (<code>nxbe</code>), it implements a
       single threaded, single user windowing system.
       The files in this directory present the window APIs described in
-      <code>include/nuttx/nx.h</code>.
+      <code>include/nuttx/nx/nx.h</code>.
       The single user front-end is selected when <code>CONFIG_NX_MULTIUSER</code> is not
       defined in the NuttX configuration file.
 
@@ -2604,7 +2604,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       When combined with the generic <i>back-end</i> (<code>nxbe</code>), it implements a
       multi-threaded, multi-user windowing system.
       The files in this directory present the window APIs described in
-      <code>include/nuttx/nx.h</code>.
+      <code>include/nuttx/nx/nx.h</code>.
       The multi-user front end includes a graphics server that executes on its own thread;
       multiple graphics clients then communicate with the server via a POSIX message
       queue to serialize window operations from many threads.
@@ -2614,13 +2614,13 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
     <dt><code>graphics/nxfonts</code>
       <dd>This is where the NXFONTS implementation resides.
       This is a relatively low-level set of charset set/glyph management APIs.
-      See <code>include/nuttx/nxfonts.h</code>.
+      See <code>include/nuttx/nx/nxfonts.h</code>.
 
     <dt><code>graphics/nxtk</code>
       <dd>This is where the NXTOOLKIT implementation resides.
       This toolkit is built on top of NX and works with either the single-user or
       multi-user NX version.
-      See <code>include/nuttx/nxtk.h</code>.
+      See <code>include/nuttx/nx/nxtk.h</code>.
 
     <dt><code>graphics/nxwidgets</code>
       <dd>At one time, I planned to put NXWIDGETS implementation here, but not anymore.
@@ -2737,17 +2737,29 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
   </tr>
 </table>
 
-<p>
+<p><b>The BDF Font Converter</b>.
   There is a tool called <i>bdf-converter</i> in the directory <code>tools/.</code>.
   The <i>bdf-converter</i> program be used to convert fonts in Bitmap Distribution Format (BDF) into fonts that can be used in the NX graphics system.
+  The BDF format most well known as a font format traditionally used for X-11 bitmap fonts.
 </p>
+<blockquote><small>
+  A Note about Font Copyrights:
+  My understanding is that the underlying bitmap font data for traditional fonts cannot be copyrighted (the same is not true for scalable fonts).
+  This is because a copyright covers only the form of delivery of the font and not the underlying font content and, at least for the traditional typefaces, the underlying font designs are ancient.
+  There could be issues, however, if you convert from modern, trademarked images.
+  However, remember that I am a programmer not an attorney and that my knowledge of font copyright issues is limited to what I glean by Googling.
+</small></blockquote>
 <p>
-  Below are general instructions for creating and installing a new font in the NX graphic system:
+  <b>Font Installation Steps</b>,
+  Below are general instructions for creating and installing a new font in the NX graphic system.
+  The first two steps only appy if you are using the BDF font converter program.
 </p>
 <ol start="1">
   <li>
     <p>
-      Locate a font in BDF format,
+      Locate a font in BDF format.
+      There are many good BDF bitmap fonts bundled with X-11.
+      See <a href="http://www.cl.cam.ac.uk/~mgk25/ucs-fonts.html">this link</a>, as an example, 
     </p>
   </li>
   <li>
@@ -2759,7 +2771,8 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
   </li>
 </ol>
 <p>
-  Create a new NuttX configuration variable.
+  The remaining steps apply however you managed to create the NuttX C font header file.
+  After you have your C font header file, the next thing to do is to create a new NuttX configuration variable to select the font.
   For example, suppose you define the following variable: <code>CONFIG_NXFONT_MYFONT</code>.
   Then you would need to:
 </p>
@@ -2772,14 +2785,14 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
 </ol>
 <p>
   A font ID number has to be assigned for each new font.
-  The font ID is defined in the file <code>include/nuttx/nxfonts.h</code>.
+  The font IDs are defined in the file <code>include/nuttx/nx/nxfonts.h</code>.
   Those definitions have to be extended to support your new font.
   Look at how the font ID enabled by <code>CONFIG_NXFONT_SANS23X27</code> is defined and add an ID for yournew font in a similar fashion:
 </p>
 <ol start="4">
   <li>
     <p>
-      <b><code>include/nuttx/nxfonts.h</code></b>. Add you new font as a possible system default font:
+      <b><code>include/nuttx/nx/nxfonts.h</code></b>. Add you new font as a possible system default font:
     </p>
     <ul><pre>
 #if defined(CONFIG_NXFONT_SANS23X27)
@@ -2816,7 +2829,7 @@ enum nx_fontid_e
     <p>
       <b><code>nuttx/graphics/Makefile</code></b>.
       This file needs logic to auto-generate a C source file from the header file that you generated with the the <i>bdf-converter</i> program.
-      Notice <code>NXFONTS_FONTID=2</code>; this must be set to the same font ID value that you defined in the <code>include/nuttx/nxfonts.h</code> file.
+      Notice <code>NXFONTS_FONTID=2</code>; this must be set to the same font ID value that you defined in the <code>include/nuttx/nx/nxfonts.h</code> file.
     </p>
     <ul><pre>
 genfontsources:
