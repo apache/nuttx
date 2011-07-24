@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nxfe.h
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@
 #include <mqueue.h>
 #include <semaphore.h>
 
-#include <nuttx/nx.h>
+#include <nuttx/nx/nx.h>
 
 #include "nxbe.h"
 

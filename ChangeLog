@@ -1943,3 +1943,5 @@
 	  program.  The bdf-converter program be used to convert fonts in Bitmap
 	  Distribution Format (BDF) into fonts that can be used in the NX graphics
 	  system.
+	* include/nuttx/nx:  Move all NX header files from include/nuttx to 
+	  include/nuttx/nx.

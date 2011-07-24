@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <nuttx/nxfonts.h>
+#include <nuttx/nx/nxfonts.h>
 
 #include "nxfonts_internal.h"
 

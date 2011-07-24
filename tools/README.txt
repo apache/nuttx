@@ -96,12 +96,12 @@ bdf-convert.c
     3. Define CONFIG_NXFONT_MYFONT=y in your NuttX configuration file.
 
   A font ID number has to be assigned for each new font.  The font ID
-  is defined in the file include/nuttx/nxfonts.h.  Those definitions
+  is defined in the file include/nuttx/nx/nxfonts.h.  Those definitions
   have to be extended to support your new font.  Look at how the font ID
   enabled by CONFIG_NXFONT_SANS23X27 is defined and add an ID for your
   new font in a similar fashion:
 
-    4. include/nuttx/nxfonts.h. Add you new font as a possible system
+    4. include/nuttx/nx/nxfonts.h. Add you new font as a possible system
        default font:
  
        #if defined(CONFIG_NXFONT_SANS23X27)
@@ -132,7 +132,7 @@ bdf-convert.c
        a C source file from the header file that you generated with the
        the bdf-converter program.  Notice NXFONTS_FONTID=2; this must be
        set to the same font ID value that you defined in the
-       include/nuttx/nxfonts.h file.
+       include/nuttx/nx/nxfonts.h file.
 
        genfontsources:
          ifeq ($(CONFIG_NXFONT_SANS23X27),y)

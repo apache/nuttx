@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/nxglib.h
+ * include/nuttx/nx/nxglib.h
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NXGLIB_H
-#define __INCLUDE_NUTTX_NXGLIB_H
+#ifndef __INCLUDE_NUTTX_NX_NXGLIB_H
+#define __INCLUDE_NUTTX_NX_NXGLIB_H
 
 /****************************************************************************
  * Included Files
@@ -552,4 +552,4 @@ EXTERN void nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES],
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_NXGLIB_H */
+#endif /* __INCLUDE_NUTTX_NX_NXGLIB_H */

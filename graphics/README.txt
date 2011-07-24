@@ -30,7 +30,7 @@ at the present, but here is the longer term roadmap:
   NX        - The tiny NuttX windowing system.  This includes both a small-footprint,
               single user implementaton (NXSU as described below) and a somewhat
               larger multi-user implentation (NXMU as described below).  Both
-              conform to the same APIs as defined in include/nuttx/nx.h and, hence,
+              conform to the same APIs as defined in include/nuttx/nx/nx.h and, hence,
               are more-or-less interchangable.  NX can be used without NXWIDGETS
               and without NXTOOLKIT for raw access to window memory.
   NXGLIB    - Low level graphics utilities and direct framebuffer rendering logic.
@@ -39,11 +39,11 @@ at the present, but here is the longer term roadmap:
 Related Header Files
 ^^^^^^^^^^^^^^^^^^^^
 
-include/nuttx/nxglib.h    -- Describes the NXGLIB C interfaces
-include/nuttx/nx.h        -- Describes the NX C interfaces
-include/nutt/nxtk.h       -- Describe the NXTOOLKIT C interfaces
-include/nutt/nxfont.h     -- Describe sthe NXFONT C interfaces
-include/nuttx/nxwidgets.h -- Will describe the NXWIDGETS classes (no longer planned)
+include/nuttx/nx/nxglib.h   -- Describes the NXGLIB C interfaces
+include/nuttx/nx/nx.h       -- Describes the NX C interfaces
+include/nuttx/nx/nxtk.h     -- Describe the NXTOOLKIT C interfaces
+include/nuttx/nx/nxfont.h   -- Describe sthe NXFONT C interfaces
+include/nuttx/nx/nxwidgets.h -- Will describe the NXWIDGETS classes (no longer planned)
 
 Directories
 ^^^^^^^^^^^
@@ -63,14 +63,14 @@ graphics/nxbe
 graphics/nxsu
   This is the NX single user "front end".  When combined with the generic "back-end"
   (nxbe), it implements a single thread, single user windowing system.  The files
-  in this directory present the window APIs described in include/nuttx/nx.h.  The
+  in this directory present the window APIs described in include/nuttx/nx/nx.h.  The
   single user front-end is selected when CONFIG_NX_MULTIUSER is not defined in the
   NuttX configuration file.
 
 graphics/nxmu
   This is the NX multi user "front end".  When combined with the generic "back-end"
   (nxbe), it implements a multi-threaded, multi-user windowing system.  The files
-  in this directory present the window APIs described in include/nuttx/nx.h.  The
+  in this directory present the window APIs described in include/nuttx/nx/nx.h.  The
   multi-user front end includes a graphics server that executes on its own thread;
   multiple graphics clients then communicate with the server via a POSIX message
   queue to serialize window operations from many threads. The multi-user front-end
@@ -78,12 +78,12 @@ graphics/nxmu
 
 graphics/nxfonts
   This is where the NXFONTS implementation resides.  This is a relatively low-
-  level set of charset set/glyph management APIs.  See include/nuttx/nxfonts.h
+  level set of charset set/glyph management APIs.  See include/nuttx/nx/nxfonts.h
 
 graphics/nxtk
   This is where the NXTOOLKIT implementation resides.  This toolkit is built on
   top of NX and works with either the single-user or multi-user NX version. See
-  include/nuttx/nxtk.h
+  include/nuttx/nx/nxtk.h
 
 graphics/nxwidgets
   At one time, I planned to put NXWIDGETS implementation here, but not anymore.
@@ -111,12 +111,12 @@ Installing New Fonts
     3. Define CONFIG_NXFONT_MYFONT=y in your NuttX configuration file.
 
   A font ID number has to be assigned for each new font.  The font ID
-  is defined in the file include/nuttx/nxfonts.h.  Those definitions
+  is defined in the file include/nuttx/nx/nxfonts.h.  Those definitions
   have to be extended to support your new font.  Look at how the font ID
   enabled by CONFIG_NXFONT_SANS23X27 is defined and add an ID for your
   new font in a similar fashion:
 
-    4. include/nuttx/nxfonts.h. Add you new font as a possible system
+    4. include/nuttx/nx/nxfonts.h. Add you new font as a possible system
        default font:
  
        #if defined(CONFIG_NXFONT_SANS23X27)
@@ -147,7 +147,7 @@ Installing New Fonts
        a C source file from the header file that you generated with the
        the bdf-converter program.  Notice NXFONTS_FONTID=2; this must be
        set to the same font ID value that you defined in the
-       include/nuttx/nxfonts.h file.
+       include/nuttx/nx/nxfonts.h file.
 
        genfontsources:
          ifeq ($(CONFIG_NXFONT_SANS23X27),y)

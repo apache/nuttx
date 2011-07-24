@@ -41,7 +41,7 @@
 
 #include <stdint.h>
 
-#include <nuttx/nxglib.h>
+#include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
 #include "nxfe.h"

@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxtk/nxtk_drawframe.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,9 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/nxglib.h>
-#include <nuttx/nx.h>
-#include <nuttx/nxtk.h>
+#include <nuttx/nx/nxglib.h>
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxtk.h>
 
 #include "nxfe.h"
 #include "nxtk_internal.h"

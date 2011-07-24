@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxglib/lcd/nxglib_fillrectangle.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 #include <stdint.h>
 
 #include <nuttx/lcd/lcd.h>
-#include <nuttx/nxglib.h>
+#include <nuttx/nx/nxglib.h>
 
 #include "nxglib_bitblit.h"
 #include "nxglib_fillrun.h"

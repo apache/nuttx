@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxtk/nxtk_internal.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/nxtk.h>
+#include <nuttx/nx/nxtk.h>
 #include "nxbe.h"
 #include "nxfe.h"
 

@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/nxtk.h
+ * include/nuttx/nx/nxtk.h
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NXTK_H
-#define __INCLUDE_NUTTX_NXTK_H
+#ifndef __INCLUDE_NUTTX_NX_NXTK_H
+#define __INCLUDE_NUTTX_NX_NXTK_H
 
 /****************************************************************************
  * Included Files
@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/nx.h>
+#include <nuttx/nx/nx.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -420,4 +420,4 @@ EXTERN int nxtk_bitmaptoolbar(NXTKWINDOW hfwnd,
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_NXTK_H */
+#endif /* __INCLUDE_NUTTX_NX_NXTK_H */

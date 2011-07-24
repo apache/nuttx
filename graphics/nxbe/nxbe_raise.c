@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_raise.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/nxglib.h>
+#include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
 #include "nxfe.h"

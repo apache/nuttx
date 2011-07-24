@@ -43,7 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/nx.h>
+#include <nuttx/nx/nx.h>
 #include "nxfe.h"
 
 /****************************************************************************

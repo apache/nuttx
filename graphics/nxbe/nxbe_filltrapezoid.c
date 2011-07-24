@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include <fixedmath.h>
-#include <nuttx/nxglib.h>
+#include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
 

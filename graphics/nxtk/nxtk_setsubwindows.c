@@ -44,7 +44,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/nx.h>
+#include <nuttx/nx/nx.h>
 #include "nxtk_internal.h"
 
 /****************************************************************************

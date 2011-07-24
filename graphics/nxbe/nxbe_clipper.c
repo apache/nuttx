@@ -44,7 +44,7 @@
 #include <stdlib.h>
 #include <debug.h>
 
-#include <nuttx/nxglib.h>
+#include <nuttx/nx/nxglib.h>
 #include "nxbe.h"
 
 /****************************************************************************

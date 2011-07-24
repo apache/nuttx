@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/nxfonts.h
+ * include/nuttx/nx/nxfonts.h
  *
  *   Copyright (C) 2008, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NXFONTS_H
-#define __INCLUDE_NUTTX_NXFONTS_H
+#ifndef __INCLUDE_NUTTX_NX_NXFONTS_H
+#define __INCLUDE_NUTTX_NX_NXFONTS_H
 
 /****************************************************************************
  * Included Files
@@ -44,8 +44,8 @@
 
 #include <stdint.h>
 
-#include <nuttx/nx.h>
-#include <nuttx/nxglib.h>
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -242,4 +242,4 @@ EXTERN int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_NXFONTS_H */
+#endif /* __INCLUDE_NUTTX_NX_NXFONTS_H */

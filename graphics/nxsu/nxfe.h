@@ -45,7 +45,7 @@
 #include <mqueue.h>
 #include <semaphore.h>
 
-#include <nuttx/nx.h>
+#include <nuttx/nx/nx.h>
 
 #include "nxbe.h"
 

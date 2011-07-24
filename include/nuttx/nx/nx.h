@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/nx.h
+ * include/nuttx/nx/nx.h
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_NX_H
-#define _INCLUDE_NUTTX_NX_H
+#ifndef _INCLUDE_NUTTX_NX_NX_H
+#define _INCLUDE_NUTTX_NX_NX_H
 
 /****************************************************************************
  * Included Files
@@ -45,7 +45,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/nxglib.h>
+#include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -710,5 +710,5 @@ EXTERN int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t b
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_NX_H */
+#endif /* _INCLUDE_NUTTX_NX_NX_H */
 

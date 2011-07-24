@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/nxfonts.h>
+#include <nuttx/nx/nxfonts.h>
 
 /****************************************************************************
  * Pre-processor definitions

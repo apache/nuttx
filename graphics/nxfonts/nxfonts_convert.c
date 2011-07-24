@@ -43,8 +43,8 @@
 #include <stddef.h>
 #include <debug.h>
 
-#include <nuttx/nxglib.h>
-#include <nuttx/nxfonts.h>
+#include <nuttx/nx/nxglib.h>
+#include <nuttx/nx/nxfonts.h>
 
 #include "nxfonts_internal.h"
 
