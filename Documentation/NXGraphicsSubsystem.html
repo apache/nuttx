@@ -2439,7 +2439,7 @@ FAR const struct nx_font_s *nxf_getfontset(NXHANDLE handle);
   <b>Input Parameters:</b>
   <ul><dl>
     <dt><code>handle</code>
-    <dd>A font handle previously returned by <code>nxf_getfonthandle()</code>.
+    <dd>A font handle previously returned by <a href="#nxfgetfonthandle"><code>nxf_getfonthandle()</code></a>.
   </dl></ul>
 </p>
 <p>
@@ -2465,7 +2465,7 @@ FAR const struct nx_fontbitmap_s *nxf_getbitmap(NXHANDLE handle, uint16_t ch);
     <dt><code>ch</code>
     <dd>The char code for the requested bitmap.
     <dt><code>handle</code>
-    <dd>A font handle previously returned by <code>nxf_getfonthandle()</code>.
+    <dd>A font handle previously returned by <a href="#nxfgetfonthandle"><code>nxf_getfonthandle()</code></a>.
   </dl></ul>
 </p>
 <p>
@@ -2882,7 +2882,8 @@ endif
   <li>
     <p>
       Finally, we need to extend the logic that does the run-time font lookups so that can find our new font.
-      The lookup function is <code>NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid)</code>.
+      The lookup function is <a href="#nxfgetfonthandle"><code>NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid)</code></a>.
+      Note that the lookup is based on the font ID that was defined in step 4.
       The new font information needs to be added to data structures used by that function:
     </p>
     <ul><pre>
