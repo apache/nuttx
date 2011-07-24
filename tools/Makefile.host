@@ -56,7 +56,7 @@ mkversion: mkconfig.c cfgparser.c
 mksyscall: mksyscall.c
 	@gcc $(CFLAGS) -o mksyscall mksyscall.c
 
-# mksyscall - Convert a CSV file into syscall stubs and proxies
+# bdf-converter - Converts a BDF font to the NuttX font format
 
 bdf-converter: bdf-converter.c
 	@gcc $(CFLAGS) -o bdf-converter bdf-converter.c

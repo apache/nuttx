@@ -42,7 +42,7 @@ apps/
 
   (5)  Network Utilities (apps/netutils/)
   (5)  NuttShell (NSH) (apps/nshlib)
-  (3)  Other Applications & Tests (apps/examples/)
+  (6)  Other Applications & Tests (apps/examples/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1310,4 +1310,34 @@ o Other Applications & Tests (apps/examples/)
   Priority:    Low.  This is not really a problem becauses examples/nx works
                fine with its bogus font caching.
 
+  Description: examples/nxtext.  Artifacts when the pop-up window is opened.
+               There are some artifacts that appear in the upper left hand
+               corner.  These seems to be related to window creation.  At
+               tiny artifact would not be surprising (the initial window
+               should like at (0,0) and be of size (1,1)), but sometimes
+               the artifact is larger.
+  Status:      Open
+  Priority:    Medium.
 
+  Description: USB Mass Storage Memory Leak.  When examples/usbstorage is
+               built as an NuttShell (NSH) built-in, there appears to be a
+               memory leak that occurs when a USB mass storage connection is
+               established and then torn down.  This leak is 608 bytes each
+               time:
+
+               NuttShell (NSH) NuttX-6.6
+               nsh> free
+                    total used free  largest
+               Mem: 59360 9536 49824 49824
+               nsh> msconn
+                    total used  free  largest
+               Mem: 59360 15296 44064 41712
+               nsh> msdis
+               nsh> free
+                    total used  free  largest
+               Mem: 59360 10144 49216 41712  <-- Leaked 608 bytes
+   Status:     Open
+   Priority:   Medium.  Obviously, this must be fixed.  However the USB 
+               Mass storage example is fine for supporting most development
+               needs even thought it does leak.
+ 

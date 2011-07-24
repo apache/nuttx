@@ -455,13 +455,13 @@ Where <subdir> is one of the following:
     =========== ======================= ================================
                 nsh                     nsh2
     =========== ======================= ================================
-    Toolchain:  NuttX buildroot for     Codesourcery for Windows *
-                Linux or Cygwin *,**
+    Toolchain:  NuttX buildroot for     Codesourcery for Windows (1)
+                Linux or Cygwin (1,2)
     ----------- ----------------------- --------------------------------
     Loader:     DfuSe                   DfuSe
     ----------- ----------------------- --------------------------------
     Serial      Debug output: USART1    Debug output: USART1
-    Console:    NSH output:   USART1    NSH output:   USART1 ***
+    Console:    NSH output:   USART1    NSH output:   USART1 (3)
     ----------- ----------------------- --------------------------------
     I2C1        Disabled                Enabled
     ----------- ----------------------- --------------------------------
@@ -469,7 +469,7 @@ Where <subdir> is one of the following:
     Support
     ----------- ----------------------- --------------------------------
     FAT FS      CONFIG_FAT_LCNAME=y     CONFIG_FAT_LCNAME=y
-    Config      CONFIG_FAT_LFN=n        CONFIG_FAT_LFN=y ****
+    Config      CONFIG_FAT_LFN=n        CONFIG_FAT_LFN=y (4)
     ----------- ----------------------- --------------------------------
     Support for No                      Yes
     Built-in
@@ -477,23 +477,37 @@ Where <subdir> is one of the following:
     ----------- ----------------------- --------------------------------
     Built-in    None                    apps/examples/nx
     Apps                                apps/examples/nxhello
-                                        apps/examples/usbstorage
+                                        apps/examples/usbstorage (5)
     =========== ======================= ================================
 
-    * You will probably need to modify nsh/setenv.sh or nsh2/setenv.sh
-      to set up the correct PATH variable for whichever toolchain you
-      may use.
-   ** Since DfuSe is assumed, this configuration may only work under
-      Cygwin without modification.
-  *** When any other device other than /dev/console is used for a user
-      interface, (1) linefeeds (\n) will not be expanded to carriage return
-      / linefeeds \r\n). You will need to configure your terminal program
-      to account for this. And (2) input is not automatically echoed so
-      you will have to turn local echo on.
- **** Microsoft holds several patents related to the design of
-      long file names in the FAT file system.  Please refer to the
-      details in the top-level COPYING file.  Please do not use FAT
-      long file name unless you are familiar with these patent issues.
+    (1) You will probably need to modify nsh/setenv.sh or nsh2/setenv.sh
+        to set up the correct PATH variable for whichever toolchain you
+        may use.
+    (2) Since DfuSe is assumed, this configuration may only work under
+        Cygwin without modification.
+    (3) When any other device other than /dev/console is used for a user
+        interface, (1) linefeeds (\n) will not be expanded to carriage return
+        / linefeeds \r\n). You will need to configure your terminal program
+        to account for this. And (2) input is not automatically echoed so
+        you will have to turn local echo on.
+    (4) Microsoft holds several patents related to the design of
+        long file names in the FAT file system.  Please refer to the
+        details in the top-level COPYING file.  Please do not use FAT
+        long file name unless you are familiar with these patent issues.
+    (5) When built as an NSH add-on command (CONFIG_EXAMPLES_USBSTRG_BUILTIN=y),
+        Caution should be used to assure that the SD drive is not in use when
+        the USB storage device is configured.  Specifically, the SD driver
+        should be unmounted like:
+
+        nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard # Card is mounted in NSH
+        ...
+        nsh> umount /mnd/sdcard                    # Unmount before connecting USB!!!
+        nsh> msconn                                # Connect the USB storage device
+        ...
+        nsh> msdis                                 # Disconnect USB storate device
+        nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard # Restore the mount
+
+        Failure to do this could result in corruption of the SD card format.
 
   nx:
   ---
