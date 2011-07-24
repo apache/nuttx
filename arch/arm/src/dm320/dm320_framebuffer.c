@@ -46,7 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/fb.h>
-#include <nuttx/nxglib.h>
+#include <nuttx/nx/nxglib.h>
 
 #include "up_arch.h"
 #include "dm320_memorymap.h"
