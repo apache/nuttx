@@ -200,10 +200,10 @@ Installing New Fonts
        Where nxfonts_myfont.h is the NuttX font file that we generated in
        step 2 using the bdf-converter tool.
 
-    9. Finally, we need to extend the logic that does the run-time font
-       lookups so that can find our new font.  The lookup function is
-       NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid).  The new
-       font information needs to be added to data structures used by
+    9. graphics/nxfonts/nxfonts_getfont.c.  Finally, we need to extend the
+       logic that does the run-time font lookups so that can find our new
+       font.  The lookup function is NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid).
+       The new font information needs to be added to data structures used by
        that function:
  
        #ifdef CONFIG_NXFONT_SANS23X27
