@@ -3622,9 +3622,15 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
     }
 #endif
 
-  /* Unbind the class driver */
+  /* Reset the hardware and cancel all requests.  All requests must be
+   * canceled while the class driver is still bound.
+   */
 
   flags = irqsave();
+  stm32_reset(priv);
+
+  /* Unbind the class driver */
+
   CLASS_UNBIND(driver, &priv->usbdev);
 
   /* Disable USB controller interrupts (but keep them attached) */
@@ -3633,7 +3639,8 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   up_disable_irq(STM32_IRQ_USBLPCANRX0);
 
   /* Put the hardware in an inactive state.  Then bring the hardware back up
-   * in the reset state.
+   * in the reset state (this is probably not necessary, the stm32_reset()
+   * call above was probably sufficient).
    */
 
   stm32_hwshutdown(priv);
