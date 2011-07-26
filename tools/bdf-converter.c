@@ -78,6 +78,12 @@ typedef struct glyphinfo_s
 {
   char *name;       /* Name for they glyph */
   int   encoding;   /* The Adobe Standard Encoding value */
+  int   dw_x0;      /* Width in x of the vector indicating
+                     * the position of the next glyph's origin
+                     * relative to the origin of this glyph */
+  int   dw_y0;      /* Width in y of the vector indicating
+                     * the position of the next glyph's origin
+                     * relative to the origin of this glyph */
   int   bb_w;       /* The width of the black pixels in x */
   int   bb_h;       /* The height of the black pixels in y */
   int   bb_x_off;   /* X displacement of the lower left corner
@@ -91,12 +97,12 @@ typedef struct glyphinfo_s
 
 typedef struct nx_fontmetric_s
 {
-  uint32_t stride   : 2;    /* Width of one font row in bytes */
+  uint32_t stride   : 3;    /* Width of one font row in bytes */
   uint32_t width    : 6;    /* Width of the font in bits */
   uint32_t height   : 6;    /* Height of the font in rows */
   uint32_t xoffset  : 6;    /* Top, left-hand corner X-offset in pixels */
   uint32_t yoffset  : 6;    /* Top, left-hand corner y-offset in pixels */
-  uint32_t unused   : 6;
+  uint32_t unused   : 5;
 } nx_fontmetric_t;
 
 /****************************************************************************
@@ -161,7 +167,7 @@ static void bdf_parseintline(char *line, unsigned int count, int *info)
 }
 
 /****************************************************************************
- * Name: bdf_printflyphinfo
+ * Name: bdf_printglyphinfo
  *
  * Description:
  *   Prints the information available for a glyph.
@@ -175,6 +181,8 @@ static void bdf_printglyphinfo(const glyphinfo_t *ginfo)
 {
   printf("NAME     = %s\n", ginfo->name);
   printf("ENCODING = %d\n", ginfo->encoding);
+  printf("DW_X0    = %d\n", ginfo->dw_x0);
+  printf("DW_Y0    = %d\n", ginfo->dw_y0);
   printf("BB_W     = %d\n", ginfo->bb_w);
   printf("BB_H     = %d\n", ginfo->bb_h);
   printf("BB_X_OFF = %d\n", ginfo->bb_x_off);
@@ -216,10 +224,10 @@ static void bdf_printnxmetricinfo(const nx_fontmetric_t *info)
  *   Obtains the information for an individual glyph. The BDF properties
  *   taken into account are:
  *     - ENCODING
+ *     - DWIDTH
  *     - BBX
  *   BDF properties ignored:
  *     - SWIDTH
- *     - DWIDTH
  *     - SWIDTH1
  *     - DWIDTH1
  *     - VVECTOR
@@ -254,6 +262,16 @@ static void bdf_getglyphinfo(FILE *file, glyphinfo_t *ginfo)
             {
               token = (char *)strtok_r(NULL, " ", &saveptr1);
               ginfo->encoding = atoi(token);
+            }
+            
+          /* DWIDTH information */
+          
+          if(strcmp(token, "DWIDTH") == 0)
+            {
+              token = (char *)strtok_r(NULL, " ", &saveptr1);
+              ginfo->dw_x0 = atoi(token);
+              token = (char *)strtok_r(NULL, " ", &saveptr1);
+              ginfo->dw_y0 = atoi(token);
             }
             
           /* BBX information */
@@ -389,12 +407,45 @@ static void bdf_printoutput(FILE *out,
       /* Glyph bitmap */
       
       fprintf(out, "#define NXFONT_BITMAP_%d {", ginfo->encoding);
-      int i;
+      int i, j;
       for (i = 0; i < ginfo->bb_h - 1; i++)
         {
-          fprintf(out, "0x%x, ", ginfo->bitmap[i]);
+          for (j = 1; j <= nxmetric->stride; j++)
+            {
+              int nxbyteoffset;
+              uint8_t  nxbyte = 0;
+              uint32_t tempbitmap = ginfo->bitmap[i];
+              
+              /* Get the next byte */
+              
+              nxbyteoffset = (nxmetric->stride - j) * 8;
+              nxbyte = (uint8_t)(tempbitmap >> nxbyteoffset);
+              fprintf(out, "0x%x, ", nxbyte);
+            }
         }
-      fprintf(out, "0x%x}\n", ginfo->bitmap[i]);
+      
+      /* Different behavior for the last bitmap */
+      
+      for (j = 1; j <= nxmetric->stride; j++)
+        {
+          int nxbyteoffset;
+          uint8_t  nxbyte = 0;
+          uint32_t tempbitmap = ginfo->bitmap[i];
+          
+          /* Get the next byte */
+          
+          nxbyteoffset = (nxmetric->stride - j) * 8;
+          nxbyte = (uint8_t)(tempbitmap >> nxbyteoffset);
+          
+          if (j == nxmetric->stride)
+            {
+              fprintf(out, "0x%x}\n", nxbyte);
+            }
+          else
+            {
+              fprintf(out, "0x%x, ", nxbyte);
+            }
+        }      
       
       fprintf(out, "\n");
     }
@@ -445,7 +496,15 @@ int main(int argc, char **argv)
     }
   
   /* Output file */
-  output = "out.txt";
+  if (argv[2])
+    {
+      output = argv[2];
+    }
+  else
+    {
+      output = "nxfonts_myfont.h";
+    }
+  
   out  = fopen(output, "w");
   
   if (out == NULL)
@@ -510,9 +569,12 @@ int main(int argc, char **argv)
                   
                   /* Glyph information:
                   *    ENCODING
+                  *    DWIDTH
                   *    BBX
                   */
                   ginfo.encoding = 0;
+                  ginfo.dw_x0    = 0;
+                  ginfo.dw_y0    = 0;
                   ginfo.bb_w     = 0;
                   ginfo.bb_h     = 0;
                   ginfo.bb_x_off = 0;
@@ -537,13 +599,24 @@ int main(int argc, char **argv)
                   nxmetric.width   = ginfo.bb_w;
                   nxmetric.height  = ginfo.bb_h;
                   nxmetric.xoffset = (-fbb_x_off) + ginfo.bb_x_off;
-                  nxmetric.yoffset = fbb_y + fbb_y_off - ginfo.bb_y_off;
+                  nxmetric.yoffset = fbb_y + fbb_y_off -
+                                     ginfo.bb_y_off - ginfo.bb_h;
 
 #ifdef DBG                  
                   bdf_printnxmetricinfo(&nxmetric);
 #endif /* DBG */
 
-                  bdf_printoutput(out, &ginfo, &nxmetric);
+                  /* The space (32) character is treated differently */
+
+                  if (ginfo.encoding == 32)
+                    {
+                      fprintf(out, "/* The width of a space */\n\n");
+                      fprintf(out, "#define NXFONT_SPACEWIDTH %d\n\n", ginfo.dw_x0);
+                    }
+                  else
+                    {
+                      bdf_printoutput(out, &ginfo, &nxmetric);
+                    }
                   
                   /* Free memory */
                   

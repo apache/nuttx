@@ -76,12 +76,12 @@ enum nx_fontid_e
 
 struct nx_fontmetric_s
 {
-  uint32_t stride   : 2;      /* Width of one font row in bytes */
+  uint32_t stride   : 3;      /* Width of one font row in bytes */
   uint32_t width    : 6;      /* Width of the font in bits */
   uint32_t height   : 6;      /* Height of the font in rows */
   uint32_t xoffset  : 6;      /* Top, left-hand corner X-offset in pixels */
   uint32_t yoffset  : 6;      /* Top, left-hand corner y-offset in pixels */
-  uint32_t unused   : 6;
+  uint32_t unused   : 5;
 };
 
 /* This structure binds the glyph metrics to the glyph bitmap */
