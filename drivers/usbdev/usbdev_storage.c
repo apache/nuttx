@@ -670,14 +670,6 @@ static void usbstrg_unbind(FAR struct usbdev_s *dev)
       usbstrg_resetconfig(priv);
       up_mdelay(50);
 
-      /* Free the bulk IN endpoint */
-
-      if (priv->epbulkin)
-        {
-          DEV_FREEEP(dev, priv->epbulkin);
-          priv->epbulkin = NULL;
-        }
-
       /* Free the pre-allocated control request */
 
       if (priv->ctrlreq != NULL)
@@ -721,6 +713,15 @@ static void usbstrg_unbind(FAR struct usbdev_s *dev)
               usbstrg_freereq(priv->epbulkin, reqcontainer->req);
             }
         }
+
+      /* Free the bulk IN endpoint */
+
+      if (priv->epbulkin)
+        {
+          DEV_FREEEP(dev, priv->epbulkin);
+          priv->epbulkin = NULL;
+        }
+
       irqrestore(flags);
     }
 }

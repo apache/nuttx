@@ -1945,3 +1945,10 @@
 	  system.
 	* include/nuttx/nx:  Move all NX header files from include/nuttx to 
 	  include/nuttx/nx.
+	* drivers/usbdev/usbdev_usbstorage.c and arch/arm/src/stm32/stm32_usbdev.c:
+	  Correct a memory leak when the USB mass storage driver is connected and
+	  then disconnected from the target.  The write requests were not being
+	  freed.  NOTE that the unregister logic in the STM32 needed to call
+      stm32_reset() in order to return the write requests to the USB mass
+      storage driver; it is possible that a similar but could exist for other
+      architectures.
