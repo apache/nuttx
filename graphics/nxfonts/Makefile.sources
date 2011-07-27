@@ -76,6 +76,22 @@ ifeq ($(NXFONTS_FONTID),1)
 NXFONTS_PREFIX	:= g_sans23x27_
 GEN_CSRC	= nxfonts_bitmaps_sans23x27.c
 endif
+ifeq ($(NXFONTS_FONTID),2)
+NXFONTS_PREFIX	:= g_sans28x37b_
+GEN_CSRC	= nxfonts_bitmaps_sans28x37b.c
+endif
+ifeq ($(NXFONTS_FONTID),3)
+NXFONTS_PREFIX	:= g_sans40x49b_
+GEN_CSRC	= nxfonts_bitmaps_sans40x49b.c
+endif
+ifeq ($(NXFONTS_FONTID),4)
+NXFONTS_PREFIX	:= g_serif27x38b_
+GEN_CSRC	= nxfonts_bitmaps_serif27x38b.c
+endif
+ifeq ($(NXFONTS_FONTID),5)
+NXFONTS_PREFIX	:= g_serif29x37_
+GEN_CSRC	= nxfonts_bitmaps_serif29x37.c
+endif
 
 DEPENDENCY	:= nxfonts_bitmaps.c
 CPPFLAGS	+= -DNXFONTS_FONTID=$(NXFONTS_FONTID)

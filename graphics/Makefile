@@ -122,6 +122,18 @@ genfontsources:
 ifeq ($(CONFIG_NXFONT_SANS23X27),y)
 	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=1 EXTRADEFINES=$(EXTRADEFINES)
 endif
+ifeq ($(CONFIG_NXFONT_SANS28X37B),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS40X49B),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=3 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SERIF27X38B),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=4 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SERIF29X37),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=5 EXTRADEFINES=$(EXTRADEFINES)
+endif
 
 gensources: gen1bppsources gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource gen32bppsources genfontsources
 

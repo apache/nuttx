@@ -58,6 +58,18 @@
 # define NXFONT_DEFAULT FONTID_SANS23X27
 #endif
 
+#if defined(CONFIG_NXFONT_SANS23X27)
+# define NXFONT_DEFAULT FONTID_SANS23X27
+#elif defined(CONFIG_NXFONT_SANS28X37B)
+# define NXFONT_DEFAULT FONTID_SANS28X37B
+#elif defined(CONFIG_NXFONT_SANS40X49B)
+# define NXFONT_DEFAULT FONTID_SANS40X49B
+#elif defined(CONFIG_NXFONT_SERIF27X38B)
+# define NXFONT_DEFAULT FONTID_SERIF27X38B
+#elif defined(CONFIG_NXFONT_SERIF29X37)
+# define NXFONT_DEFAULT FONTID_SERIF29X37
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -69,6 +81,18 @@ enum nx_fontid_e
   FONTID_DEFAULT     = 0      /* The default font */
 #ifdef CONFIG_NXFONT_SANS23X27
   , FONTID_SANS23X27 = 1      /* The 23x27 sans serif font */
+#endif
+#ifdef CONFIG_NXFONT_SANS28X37B
+  , FONTID_SANS28X37B = 2     /* The 28x37 sans bold font */
+#endif
+#ifdef CONFIG_NXFONT_SANS40X49B
+  , FONTID_SANS40X49B = 3     /* The 40x49 sans bold font */
+#endif
+#ifdef CONFIG_NXFONT_SERIF27X38B
+  , FONTID_SERIF27X38B = 4    /* The 27x38 serif bold font */
+#endif
+#ifdef CONFIG_NXFONT_SERIF29X37
+  , FONTID_SERIF29X37 = 5     /* The 29x37 serif font */
 #endif
 };
 

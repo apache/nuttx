@@ -53,6 +53,11 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+/*
+#define VERBOSE
+#define DBG
+*/
+ 
 // BDF Specification Version 2.2:
 // This version lifts the restriction on line length. In this version, the new
 // maximum length of a value of the type string is 65535 characters, and hence
@@ -90,7 +95,7 @@ typedef struct glyphinfo_s
                      * of the bitmap from origin 0 */
   int   bb_y_off;   /* Y displacement of the lower left corner
                      * of the bitmap from origin 0 */
-  uint32_t *bitmap; /* Hexadecimal data for the character bitmap */
+  uint64_t *bitmap; /* Hexadecimal data for the character bitmap */
 } glyphinfo_t;
 
 /* This structures provides the metrics for one glyph */
@@ -311,7 +316,7 @@ static void bdf_getglyphinfo(FILE *file, glyphinfo_t *ginfo)
 static void bdf_getglyphbitmap(FILE *file, glyphinfo_t *ginfo)
 {
   char line[BDF_MAX_LINE_LENGTH];
-  uint32_t *bitmap;
+  uint64_t *bitmap;
   bool readingbitmap;
   
   bitmap = ginfo->bitmap;
@@ -414,7 +419,7 @@ static void bdf_printoutput(FILE *out,
             {
               int nxbyteoffset;
               uint8_t  nxbyte = 0;
-              uint32_t tempbitmap = ginfo->bitmap[i];
+              uint64_t tempbitmap = ginfo->bitmap[i];
               
               /* Get the next byte */
               
@@ -430,7 +435,7 @@ static void bdf_printoutput(FILE *out,
         {
           int nxbyteoffset;
           uint8_t  nxbyte = 0;
-          uint32_t tempbitmap = ginfo->bitmap[i];
+          uint64_t tempbitmap = ginfo->bitmap[i];
           
           /* Get the next byte */
           
@@ -583,7 +588,7 @@ int main(int argc, char **argv)
                   
                   /* Glyph bitmap */
                   
-                  ginfo.bitmap = malloc(sizeof(uint32_t) * ginfo.bb_h);
+                  ginfo.bitmap = malloc(sizeof(uint64_t) * ginfo.bb_h);
                   bdf_getglyphbitmap(file, &ginfo);
                   
 #ifdef DBG
@@ -598,10 +603,28 @@ int main(int argc, char **argv)
                   nxmetric.stride  = stride;
                   nxmetric.width   = ginfo.bb_w;
                   nxmetric.height  = ginfo.bb_h;
-                  nxmetric.xoffset = (-fbb_x_off) + ginfo.bb_x_off;
+
+                  /* The NuttX font format does not support
+                   * negative X offsets. */
+                  
+                  if (ginfo.bb_x_off < 0)
+                    {
+                      nxmetric.xoffset = 0;
+                      printf("%s: ignoring negative x offset for "
+                             "glyph '%s' (%d)\n",
+                             argv[0],
+                             ginfo.name,
+                             ginfo.encoding);
+                    }
+                  else
+                    {
+                      nxmetric.xoffset = ginfo.bb_x_off;
+                    }
+                    
                   nxmetric.yoffset = fbb_y + fbb_y_off -
                                      ginfo.bb_y_off - ginfo.bb_h;
-
+                                     
+                  
 #ifdef DBG                  
                   bdf_printnxmetricinfo(&nxmetric);
 #endif /* DBG */

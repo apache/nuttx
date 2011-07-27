@@ -44,6 +44,18 @@ NXFSET_CSRCS	=
 ifeq ($(CONFIG_NXFONT_SANS23X27),y)
 NXFSET_CSRCS	+= nxfonts_bitmaps_sans23x27.c
 endif
+ifeq ($(CONFIG_NXFONT_SANS28X37B),y)
+NXFSET_CSRCS	+= nxfonts_bitmaps_sans28x37b.c
+endif
+ifeq ($(CONFIG_NXFONT_SANS40X49B),y)
+NXFSET_CSRCS	+= nxfonts_bitmaps_sans40x49b.c
+endif
+ifeq ($(CONFIG_NXFONT_SERIF27X38B),y)
+NXFSET_CSRCS	+= nxfonts_bitmaps_serif27x38b.c
+endif
+ifeq ($(CONFIG_NXFONT_SERIF29X37),y)
+NXFSET_CSRCS	+= nxfonts_bitmaps_serif29x37.c
+endif
 
 NXFONTS_ASRCS	= $(NXFCONV_ASRCS) $(NXFSET_ASRCS)
 NXFONTS_CSRCS	= nxfonts_getfont.c $(NXFCONV_CSRCS) $(NXFSET_CSRCS)

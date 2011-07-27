@@ -48,6 +48,14 @@
 
 #if NXFONTS_FONTID == 1
 #  include "nxfonts_sans23x27.h"
+#elif NXFONTS_FONTID == 2
+#  include "nxfonts_sans28x37b.h"
+#elif NXFONTS_FONTID == 3
+#  include "nxfonts_sans40x49b.h"
+#elif NXFONTS_FONTID == 4
+#  include "nxfonts_serif27x38b.h"
+#elif NXFONTS_FONTID == 5
+#  include "nxfonts_serif29x37.h"
 #else
 #  error "No font ID specified"
 #endif

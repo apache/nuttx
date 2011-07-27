@@ -63,11 +63,35 @@
 #ifdef CONFIG_NXFONT_SANS23X27
 extern const struct nx_fontpackage_s g_sans23x27_package;
 #endif
+#ifdef CONFIG_NXFONT_SANS28X37B
+extern const struct nx_fontpackage_s g_sans28x37b_package;
+#endif
+#ifdef CONFIG_NXFONT_SANS40X49B
+extern const struct nx_fontpackage_s g_sans40x49b_package;
+#endif
+#ifdef CONFIG_NXFONT_SERIF27X38B
+extern const struct nx_fontpackage_s g_serif27x38b_package;
+#endif
+#ifdef CONFIG_NXFONT_SERIF29X37
+extern const struct nx_fontpackage_s g_serif29x37_package;
+#endif
 
 static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 {
 #ifdef CONFIG_NXFONT_SANS23X27
   &g_sans23x27_package,
+#endif
+#ifdef CONFIG_NXFONT_SANS28X37B
+  &g_sans28x37b_package,
+#endif
+#ifdef CONFIG_NXFONT_SANS40X49B
+  &g_sans40x49b_package,
+#endif
+#ifdef CONFIG_NXFONT_SERIF27X38B
+  &g_serif27x38b_package,
+#endif
+#ifdef CONFIG_NXFONT_SERIF29X37
+  &g_serif29x37_package,
 #endif
   NULL
 };

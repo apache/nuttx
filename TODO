@@ -484,6 +484,15 @@ o Graphics subystem (graphics/)
   Status:      Open
   Priority:    Medium
 
+  Description: Font metric structure (in include/nuttx/nx/nxfont.h) should allow
+               negative X offsets. Negative x-offsets are necessary for certain
+               glyphs (and is very common in italic fonts).
+               For example Eth, icircumflex, idieresis, and oslash should have
+               offset=1 in the 40x49b font.
+  Status:      Open.  The problem is that the x-offset is an unsigned bitfield
+               in the current structure.
+  Priority:    Low.
+
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
