@@ -781,8 +781,20 @@ CONFIG_USBSTRG_REMOVABLE=y
 #   The number of bits in the character set.  Current options are
 #   only 7 and 8.  The default is 7.
 # CONFIG_NXFONT_SANS23X27
-#   At present, there is only one font.  But if there were were more,
-#   then this option would select the sans serif font.
+#   This option enables support for a small, 23x27 san serif font
+#   (font ID FONTID_SANS23X27 == 1)
+# CONFIG_NXFONT_SANS28X37B
+#   This option enables support for a medium, 28x37 san serif bold font
+#   (font ID FONTID_SANS28X37B == 2)
+# CONFIG_NXFONT_SANS40X49B
+#   This option enables support for a large, 40x49 san serif bold font
+#   (font ID FONTID_SANS40X49B == 3)
+# CONFIG_NXFONT_SERIF27X38B
+#   This option enables support for a medium, 27x38 bold font (with serifs)
+#   (font ID FONTID_SERIF27X38B == 4)
+# CONFIG_NXFONT_SERIF29X37
+#   This option enables support for a medium, 29x37 font (with serifs)
+#   (font ID FONTID_SERIF29X37 == 5)
 #
 # NX Multi-user only options:
 #
@@ -817,6 +829,10 @@ CONFIG_NXTK_BORDERCOLOR1=0xd69a
 CONFIG_NXTK_BORDERCOLOR2=0xad55
 CONFIG_NXTK_AUTORAISE=n
 CONFIG_NXFONT_SANS23X27=y
+CONFIG_NXFONT_SANS28X37B=y
+CONFIG_NXFONT_SANS40X49B=n
+CONFIG_NXFONT_SERIF27X38B=n
+CONFIG_NXFONT_SERIF29X37=n
 CONFIG_NXFONTS_CHARBITS=7
 CONFIG_NX_BLOCKING=y
 CONFIG_NX_MXSERVERMSGS=32
@@ -984,6 +1000,8 @@ CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=n
 #   CONFIG_EXAMPLES_NX_BPP.
 # CONFIG_EXAMPLES_NX_TBCOLOR -- The color of the toolbar. Default depends on
 #   CONFIG_EXAMPLES_NX_BPP.
+# CONFIG_EXAMPLES_NX_FONTID - Selects the font (see font ID numbers in
+#   include/nuttx/nx/nxfonts.h)
 # CONFIG_EXAMPLES_NX_FONTCOLOR -- The color of the toolbar. Default depends on
 #   CONFIG_EXAMPLES_NX_BPP.
 # CONFIG_EXAMPLES_NX_BPP -- Pixels per pixel to use.  Valid options
@@ -1004,6 +1022,7 @@ CONFIG_EXAMPLES_NX_BGCOLOR=0x0011
 CONFIG_EXAMPLES_NX_COLOR1=0xaedc
 CONFIG_EXAMPLES_NX_COLOR2=0xe7ff
 CONFIG_EXAMPLES_NX_TBCOLOR=0xd69a
+CONFIG_EXAMPLES_NX_FONTID=0
 CONFIG_EXAMPLES_NX_FONTCOLOR=0x0000
 CONFIG_EXAMPLES_NX_BPP=16
 CONFIG_EXAMPLES_NX_RAWWINDOWS=n
@@ -1024,6 +1043,8 @@ CONFIG_EXAMPLES_NX_EXTERNINIT=n
 #   driver for use in the test: Default: 0
 # CONFIG_EXAMPLES_NXHELLO_BGCOLOR -- The color of the background.  Default
 #   depends on CONFIG_EXAMPLES_NXHELLO_BPP.
+# CONFIG_EXAMPLES_NXHELLO_FONTID - Selects the font (see font ID numbers in
+#   include/nuttx/nx/nxfonts.h)
 # CONFIG_EXAMPLES_NXHELLO_FONTCOLOR -- The color of the fonts used in the
 #   background window. Default depends on CONFIG_EXAMPLES_NXHELLO_BPP.
 # CONFIG_EXAMPLES_NXHELLO_BPP -- Pixels per pixel to use.  Valid options
@@ -1038,6 +1059,7 @@ CONFIG_EXAMPLES_NXHELLO_BUILTIN=y
 CONFIG_EXAMPLES_NXHELLO_VPLANE=0
 CONFIG_EXAMPLES_NXHELLO_DEVNO=0
 CONFIG_EXAMPLES_NXHELLO_BGCOLOR=0x0011
+CONFIG_EXAMPLES_NXHELLO_FONTID=2
 CONFIG_EXAMPLES_NXHELLO_FONTCOLOR=0xffdf
 CONFIG_EXAMPLES_NXHELLO_BPP=16
 CONFIG_EXAMPLES_NXHELLO_EXTERNINIT=n
