@@ -179,7 +179,8 @@ static inline FAR const struct nx_fontset_s *
 NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid)
 {
   FAR const struct nx_fontpackage_s **pkglist;
-  FAR const struct nx_fontpackage_s *package;
+  FAR const struct nx_fontpackage_s  *package;
+  FAR const struct nx_fontpackage_s  *defpkg = NULL;
 
   /* Handle the default font package */
 
@@ -192,14 +193,31 @@ NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid)
 
   for (pkglist = g_fontpackages; *pkglist; pkglist++)
     {
+      /* Is this the package with the matching font ID? */
+
       package = *pkglist;
       if (package->id == fontid)
         {
+          /* Yes.. return a pointer to the package as the handle */
+
           return (NXHANDLE)package;
+        }
+ 
+      /* No.. is it the default font? */
+
+      else if (package->id == NXFONT_DEFAULT)
+        {
+          /* Yes.. save the pointer to the default font.  We will return the
+           * default font if the requested font cannot be found.
+           */
+
+          defpkg = package;
         }
     }
 
-  return (NXHANDLE)NULL;
+  /* Return a pointer to the default font as the handle. */
+
+  return (NXHANDLE)defpkg;
 }
 
 /****************************************************************************
