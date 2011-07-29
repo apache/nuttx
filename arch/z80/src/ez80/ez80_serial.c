@@ -210,7 +210,7 @@ static uart_dev_t g_uart1port =
     0,                      /* recv.head */
     0,                      /* recv.tail */
     CONFIG_UART1_RXBUFSIZE, /* recv.size */
-    g_uart0rxbuffer,        /* recv.buffer */
+    g_uart1rxbuffer,        /* recv.buffer */
   },
   &g_uart_ops,              /* ops */
   &g_uart1priv,             /* priv */
@@ -219,24 +219,24 @@ static uart_dev_t g_uart1port =
 
 /* Now, which one with be tty0/console and which tty1? */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE) && !defined(CONFIG_DISABLE_UART0)
+#if defined(CONFIG_UART0_SERIAL_CONSOLE) && !defined(CONFIG_UART0_DISABLE)
 # define CONSOLE_DEV     g_uart0port
 # define TTYS0_DEV       g_uart0port
 # if !defined(CONFIG_UART1_DISABLE)
 #   define TTYS1_DEV     g_uart1port
 # endif
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && !defined(CONFIG_DISABLE_UART1)
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && !defined(CONFIG_UART1_DISABLE)
 # define CONSOLE_DEV     g_uart1port
 # define TTYS0_DEV       g_uart1port
 # if !defined(CONFIG_UART0_DISABLE)
 #   define TTYS1_DEV     g_uart0port
 # endif
-#elif !defined(CONFIG_DISABLE_UART0)
+#elif !defined(CONFIG_UART0_DISABLE)
 # define TTYS0_DEV       g_uart0port
 # if !defined(CONFIG_UART1_DISABLE)
 #   define TTYS1_DEV     g_uart1port
 # endif
-#elif !defined(CONFIG_DISABLE_UART0)
+#elif !defined(CONFIG_UART0_DISABLE)
 # define TTYS0_DEV       g_uart1port
 #endif
 
