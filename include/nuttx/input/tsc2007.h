@@ -4,6 +4,11 @@
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
+ * References:
+ *   "1.2V to 3.6V, 12-Bit, Nanopower, 4-Wire Micro TOUCH SCREEN CONTROLLER
+ *    with I2C Interface," SBAS405A March 2007, Revised, March 2009, Texas
+ *    Instruments Incorporated
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -42,6 +47,8 @@
 
 #include <nuttx/config.h>
 #include <nuttx/i2c.h>
+
+#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_TSC2007)
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -89,4 +96,5 @@ EXTERN int tsc2007_register(FAR struct i2c_dev_s *dev, int minor);
 }
 #endif
 
+#endief /* CONFIG_INPUT && CONFIG_INPUT_TSC2007 */
 #endif /* __INCLUDE_NUTTX_INPUT_TSC2007_H */
