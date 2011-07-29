@@ -51,6 +51,7 @@
 
 /* TSC2007 Address */
 
+#define TSC2007_ADDRESS_MASK      (0xf8)    /* Bits 3-7: Invariant part of TSC2007 address */
 #define TSC2007_ADDRESS           (0x90)    /* Bits 3-7: Always set at '10010' */
 #define TSC2007_A1                (1 << 2)  /* Bit 2: A1 */
 #define TSC2007_A0                (1 << 1)  /* Bit 1: A1 */
@@ -71,7 +72,7 @@
 #  define TSC2007_CMD_FUNC_XPOS   (12 << TSC2007_CMD_FUNC_SHIFT) /* Measure X position */
 #  define TSC2007_CMD_FUNC_YPOS   (13 << TSC2007_CMD_FUNC_SHIFT) /* Measure Y position */
 #  define TSC2007_CMD_FUNC_Z1POS  (14 << TSC2007_CMD_FUNC_SHIFT) /* Measure Z1 position */
-#  define TSC2007_CMD_FUNC_Z2POS  (15 << TSC2007_CMD_FUNC_SHIFT) /*Measure Z2 positionn */
+#  define TSC2007_CMD_FUNC_Z2POS  (15 << TSC2007_CMD_FUNC_SHIFT) /* Measure Z2 positionn */
 #define TSC2007_CMD_PWRDN_SHIFT   (2)       /* Bits 2-3: Power-down bits */
 #define TSC2007_CMD_PWRDN_MASK    (3 << TSC2007_CMD_PWRDN_SHIFT)
 #  define TSC2007_CMD_PWRDN_IRQEN (0 << TSC2007_CMD_PWRDN_SHIFT)  /* 00: Power down between cycles; PENIRQ enabled */
@@ -90,6 +91,20 @@
 #define TSC2007_CMD_BYPASSMAV     (1 << 1)  /* Bit 1: 1: Bypass the onboard MAV filter */
 #define TSC2007_CMD_PU_50KOHM     (0)       /* Bit 0: 0: RIRQ = 50kOhm (default). */
 #define TSC2007_CMD_PU_90KOHM     (1 << 1)  /* Bit 0: 1: 1: RIRQ = 90kOhm */
+
+/********************************************************************************************
+ * Public Types
+ ********************************************************************************************/
+
+/* This structure describes the sampled TSC2007 data */
+
+struct tsc2007_sample_s
+{
+  uint16_t x;    /* X position */
+  uint16_t y;    /* Y position */
+  uint16_t z1;   /* Z1 position */
+  uint16_t z2;   /* Z2 position */
+};
 
 /********************************************************************************************
  * Public Function Prototypes

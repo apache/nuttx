@@ -60,6 +60,50 @@
 #  define CONFIG_TSC2007_NPOLLWAITERS 2
 #endif
 
+/* Check for some required settings.  This can save the user a lot of time
+ * in getting the right configuration.
+ */
+
+#ifndef CONFIG_I2C_TRANSFER
+#  error "CONFIG_I2C_TRANSFER is required in the I2C configuration"
+#endif
+
+#ifdef CONFIG_DISABLE_SIGNALS
+#  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
+#endif
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
+#endif
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* A reference to a structure of this type must be passed to the TSC2007
+ * driver.  This structure provides information about the configuration
+ * of the TSB2007 and provides some board-specific hooks.
+ *
+ * Memory for this structure is provided by the caller.  It is not copied
+ * by the driver and is presumed to persist while the driver is active.
+ */
+
+struct tsc2007_config_s
+{
+  /* Device characterization */
+
+  uint8_t  address;    /* 7-bit I2C address (only bits 0-6 used) */
+  uint16_t caldata;    /* Calibrated X plate resistance data */
+  uint32_t frequency;  /* I2C frequency */
+
+  /* IRQ/GPIO access callbacks */
+
+  int (*attach)(FAR struct tsc2007_config_s *state, xcpt_t isr);
+  int (*enable)(FAR struct tsc2007_config_s *state, bool enable);
+  int (*clear)(FAR struct tsc2007_config_s *state);
+  int (*pendown)(FAR struct tsc2007_config_s *state);
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -80,8 +124,9 @@ extern "C" {
  *   number
  *
  * Input Parameters:
- *   dev   - An I2C driver instance
- *   minor - The input device minor number
+ *   dev     - An I2C driver instance
+ *   config  - Persistant board configuration data
+ *   minor   - The input device minor number
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -89,12 +134,14 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int tsc2007_register(FAR struct i2c_dev_s *dev, int minor);
+EXTERN  int tsc2007_register(FAR struct i2c_dev_s *dev,
+                             FAR struct tsc2007_config_s *config,
+                             int minor);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endief /* CONFIG_INPUT && CONFIG_INPUT_TSC2007 */
+#endif /* CONFIG_INPUT && CONFIG_INPUT_TSC2007 */
 #endif /* __INCLUDE_NUTTX_INPUT_TSC2007_H */

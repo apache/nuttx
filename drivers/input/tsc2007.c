@@ -48,6 +48,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <semaphore.h>
 #include <poll.h>
@@ -60,6 +61,8 @@
 #include <nuttx/fs.h>
 #include <nuttx/i2c.h>
 #include <nuttx/input/tsc2007.h>
+
+#include "tsc2007.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -78,9 +81,11 @@
 
 struct tsc2007_dev_s
 {
-  uint8_t               crefs;  /* Number of times the device has been opened */
-  sem_t                 devsem;      /* Manages exclusive access to this structure */
-  FAR struct i2c_dev_s *i2c;         /* Saved I2C driver instance */
+  uint8_t               crefs;    /* Number of times the device has been opened */
+  sem_t                 devsem;   /* Manages exclusive access to this structure */
+
+  FAR struct tsc2007_config_s *config; /* Board configuration data */
+  FAR struct i2c_dev_s *i2c;      /* Saved I2C driver instance */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
@@ -95,6 +100,16 @@ struct tsc2007_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+#ifndef CONFIG_DISABLE_POLL
+static void tsc2007_pollnotify(FAR struct tsc2007_dev_s *priv,
+                               pollevent_t eventset);
+#endif
+static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd);
+static void tsc2007_sample(FAR struct tsc2007_dev_s *tsc,
+                           FAR struct tsc2007_sample_s *sample);
+static int tsc2007_interrupt(int irq, FAR void *context);
+
+/* Character driver methods */
 
 static int tsc2007_open(FAR struct file *filep);
 static int tsc2007_close(FAR struct file *filep);
@@ -131,7 +146,8 @@ static const struct file_operations tsc2007_fops =
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static void tsc2007_pollnotify(FAR struct tsc2007_dev_s *priv, pollevent_t eventset)
+static void tsc2007_pollnotify(FAR struct tsc2007_dev_s *priv,
+                               pollevent_t eventset)
 {
   int i;
 
@@ -152,6 +168,121 @@ static void tsc2007_pollnotify(FAR struct tsc2007_dev_s *priv, pollevent_t event
 #else
 #  define tsc2007_pollnotify(priv,event)
 #endif
+
+/****************************************************************************
+ * Name: tsc2007_transfer
+ ****************************************************************************/
+
+static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
+{
+   struct i2c_msg_s msg;
+   uint8_t data12[2];
+   int ret;
+
+  /* "A conversion/write cycle begins when the master issues the address
+   *  byte containing the slave address of the TSC2007, with the eighth bit
+   *  equal to a 0 (R/W = 0)... Once the eighth bit has been received...
+   *  the TSC2007 issues an acknowledge.
+   *
+   * "When the master receives the acknowledge bit from the TSC2007, the
+   *  master writes the command byte to the slave... After the command byte
+   *  is received by the slave, the slave issues another acknowledge bit.
+   *  The master then ends the write cycle by issuing a repeated START or a
+   *  STOP condition...
+   */
+
+   msg.addr   = priv->config->address; /* 7-bit address */
+   msg.flags  = 0;                     /* Write transaction, beginning with START */
+   msg.buffer = &cmd;                  /* Transfer from this address */
+   msg.length = 1;                     /* Send one byte following the address */
+ 
+   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
+   if (ret < 0)
+     {
+       idbg("I2C_TRANSFER failed: %d\n", ret);
+       return ret;
+     }
+
+  /* "The input multiplexer channel for the A/D converter is selected when
+   *  bits C3 through C0 are clocked in. If the selected channel is an X-,Y-,
+   *  or Z-position measurement, the appropriate drivers turn on once the
+   *  acquisition period begins.
+   *
+   * "... the input sample acquisition period starts on the falling edge of
+   *  SCL when the C0 bit of the command byte has been latched, and ends
+   *  when a STOP or repeated START condition has been issued. A/D conversion
+   *  starts immediately after the acquisition period...
+   *
+   * "For best performance, the I2C bus should remain in an idle state while
+   *  an A/D conversion is taking place. ... The master should wait for at
+   *  least 10ms before attempting to read data from the TSC2007...
+   */
+
+  usleep(10*1000);
+
+  /* "Data access begins with the master issuing a START condition followed
+   *  by the address byte ... with R/W = 1.
+   *
+   * "When the eighth bit has been received and the address matches, the
+   *  slave issues an acknowledge. The first byte of serial data then follows
+   *  (D11-D4, MSB first).
+   *
+   * "After the first byte has been sent by the slave, it releases the SDA line
+   *  for the master to issue an acknowledge.  The slave responds with the
+   *  second byte of serial data upon receiving the acknowledge from the master
+   *  (D3-D0, followed by four 0 bits). The second byte is followed by a NOT
+   *  acknowledge bit (ACK = 1) from the master to indicate that the last
+   *  data byte has been received...
+   */
+
+   msg.addr   = priv->config->address; /* 7-bit address */
+   msg.flags  = I2C_M_READ;            /* Read transaction, beginning with START */
+   msg.buffer = data12;                /* Transfer two this address */
+   msg.length = 2;                     /* Read two bytes following the address */
+ 
+   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
+   if (ret < 0)
+     {
+       idbg("I2C_TRANSFER failed: %d\n", ret);
+       return ret;
+     }
+
+   ret = (unsigned int)data12[0] << 4 | (unsigned int)data12[1];
+   ivdbg(&tsc->client->dev, "data: 0x%03x\n", ret);
+   return ret;
+}
+
+/****************************************************************************
+ * Name: tsc2007_sample
+ ****************************************************************************/
+
+static void tsc2007_sample(FAR struct tsc2007_dev_s *tsc,
+                           FAR struct tsc2007_sample_s *sample)
+{
+  /* ADC is on... Disable interrupts and read Y and X positions */
+
+  sample->y = tsc2007_transfer(tsc, (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_YPOS));
+  sample->x = tsc2007_transfer(tsc, (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_XPOS));
+
+  /* Read Z1 and Z2 positions */
+
+  sample->z1 = tsc2007_transfer(tsc, (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z1POS));
+  sample->z2 = tsc2007_transfer(tsc, (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z2POS));
+
+  /* Power down ADC and enable PENIRQ */
+
+  (void)tsc2007_transfer(tsc, (TSC2007_CMD_12BIT | TSC2007_CMD_PWRDN_IRQEN));
+}
+
+/****************************************************************************
+ * Name: tsc2007_interrupt
+ ****************************************************************************/
+
+static int tsc2007_interrupt(int irq, FAR void *context)
+{
+# warning "Missing logic"
+  return -ENOSYS;
+}
 
 /****************************************************************************
  * Name: tsc2007_open
@@ -475,8 +606,9 @@ errout:
  *   number
  *
  * Input Parameters:
- *   dev   - An I2C driver instance
- *   minor - The input device minor number
+ *   dev     - An I2C driver instance
+ *   config  - Persistant board configuration data
+ *   minor   - The input device minor number
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -484,14 +616,16 @@ errout:
  *
  ****************************************************************************/
 
-int tsc2007_register(FAR struct i2c_dev_s *dev, int minor)
+int tsc2007_register(FAR struct i2c_dev_s *dev,
+                     FAR struct tsc2007_config_s *config, int minor)
 {
   FAR struct tsc2007_dev_s *priv;
   char devname[DEV_NAMELEN];
   int ret;
 
   ivdbg("dev: %p minor: %d\n", dev, minor);
-  DEBUGASSERT(dev != NULL && minor > 0 && minor < 100);
+  DEBUGASSERT(dev != NULL && config != NULL && minor > 0 && minor < 100);
+  DEBUGASSERT((config->address & 0xfc) == 0x48);
 
   /* Create and initialize a TSC2007 device driver instance */
 
@@ -502,12 +636,34 @@ int tsc2007_register(FAR struct i2c_dev_s *dev, int minor)
       return -ENOMEM;
     }
 
-  /* Initialize a TSC2007 device driver instance */
+  /* Initialize the TSC2007 device driver instance */
 
-  priv->i2c = dev;
-  sem_init(&priv->devsem,  0, 1);
+  memset(priv, 0, sizeof(struct tsc2007_dev_s));
+  priv->i2c    = dev;             /* Save the I2C device handle */
+  priv->config = config;          /* Save the board configuration */
+  sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
 
-  /* Register the input device */
+  /* Attach the interrupt handler */
+
+  ret = config->attach(config, tsc2007_interrupt);
+  if (ret < 0)
+    {
+      idbg("Failed to attach interrupt\n");
+      goto errout_with_priv;
+    }
+
+  /* Power down the ADC and enable PENIRQ.  This is the normal state while
+   * waiting for a touch event.
+   */
+
+  ret = tsc2007_transfer(priv, (TSC2007_CMD_12BIT | TSC2007_CMD_PWRDN_IRQEN));
+  if (ret < 0)
+    {
+      idbg("tsc2007_transfer failed: %d\n", ret);
+      goto errout_with_priv;
+    }
+
+  /* Register the device as an input device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
   ivdbg("Registering %s\n", devname);
@@ -515,6 +671,21 @@ int tsc2007_register(FAR struct i2c_dev_s *dev, int minor)
   if (ret < 0)
     {
       idbg("register_driver() failed: %d\n", ret);
+      goto errout_with_priv;
     }
+
+  /* Enable the interrupt */
+
+  ret = config->enable(config, true);
+  if (ret < 0)
+    {
+      idbg("Failed enable interrupt\n");
+      goto errout_with_priv;
+    }
+  return ret;
+
+errout_with_priv:
+  sem_destroy(&priv->devsem);
+  kfree(priv);
   return ret;
 }
