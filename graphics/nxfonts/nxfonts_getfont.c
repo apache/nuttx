@@ -62,16 +62,20 @@
 
 /* SANS */
 
-#ifdef CONFIG_NXFONT_SANS22X29
-extern const struct nx_fontpackage_s g_sans22x29_package;
-#endif
-
 #ifdef CONFIG_NXFONT_SANS23X27
 extern const struct nx_fontpackage_s g_sans23x27_package;
 #endif
 
+#ifdef CONFIG_NXFONT_SANS22X29
+extern const struct nx_fontpackage_s g_sans22x29_package;
+#endif
+
 #ifdef CONFIG_NXFONT_SANS28X37
 extern const struct nx_fontpackage_s g_sans28x37_package;
+#endif
+
+#ifdef CONFIG_NXFONT_SANS39X48
+extern const struct nx_fontpackage_s g_sans39x48_package;
 #endif
 
 /* SANS-BOLD */

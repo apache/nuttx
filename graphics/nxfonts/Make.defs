@@ -44,16 +44,20 @@ NXFSET_CSRCS	=
 
 # SANS
 
-ifeq ($(CONFIG_NXFONT_SANS22X29),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans22x29.c
-endif
-
 ifeq ($(CONFIG_NXFONT_SANS23X27),y)
 NXFSET_CSRCS	+= nxfonts_bitmaps_sans23x27.c
 endif
 
+ifeq ($(CONFIG_NXFONT_SANS22X29),y)
+NXFSET_CSRCS	+= nxfonts_bitmaps_sans22x29.c
+endif
+
 ifeq ($(CONFIG_NXFONT_SANS28X37),y)
 NXFSET_CSRCS	+= nxfonts_bitmaps_sans28x37.c
+endif
+
+ifeq ($(CONFIG_NXFONT_SANS39X48),y)
+NXFSET_CSRCS	+= nxfonts_bitmaps_sans39x48.c
 endif
 
 # SANS-BOLD

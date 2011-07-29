@@ -1949,7 +1949,10 @@
 	  Correct a memory leak when the USB mass storage driver is connected and
 	  then disconnected from the target.  The write requests were not being
 	  freed.  NOTE that the unregister logic in the STM32 needed to call
-      stm32_reset() in order to return the write requests to the USB mass
-      storage driver; it is possible that a similar but could exist for other
-      architectures.
-    * graphics/nxfonts/nxfonts_*.h:  Add serverl new fonts
+	  stm32_reset() in order to return the write requests to the USB mass
+	  storage driver; it is possible that a similar but could exist for other
+	  architectures.
+	* graphics/nxfonts/nxfonts_*.h:  Add serveral more new fonts
+	* arch/z80/src/ez80/ez80_serial.c: Fix some errors in serial driver
+	  setup for UART1 (submitted by Paul Osmialowski).
+
