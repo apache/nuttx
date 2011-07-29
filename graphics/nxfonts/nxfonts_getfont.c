@@ -60,39 +60,121 @@
  * Private Data
  ****************************************************************************/
 
+/* SANS */
+
+#ifdef CONFIG_NXFONT_SANS22X29
+extern const struct nx_fontpackage_s g_sans22x29_package;
+#endif
+
 #ifdef CONFIG_NXFONT_SANS23X27
 extern const struct nx_fontpackage_s g_sans23x27_package;
 #endif
+
+#ifdef CONFIG_NXFONT_SANS28X37
+extern const struct nx_fontpackage_s g_sans28x37_package;
+#endif
+
+/* SANS-BOLD */
+
+#ifdef CONFIG_NXFONT_SANS22X29B
+extern const struct nx_fontpackage_s g_sans22x29b_package;
+#endif
+
 #ifdef CONFIG_NXFONT_SANS28X37B
 extern const struct nx_fontpackage_s g_sans28x37b_package;
 #endif
+
 #ifdef CONFIG_NXFONT_SANS40X49B
 extern const struct nx_fontpackage_s g_sans40x49b_package;
 #endif
-#ifdef CONFIG_NXFONT_SERIF27X38B
-extern const struct nx_fontpackage_s g_serif27x38b_package;
+
+/* SERIF */
+
+#ifdef CONFIG_NXFONT_SERIF22X29
+extern const struct nx_fontpackage_s g_serif22x29_package;
 #endif
+
 #ifdef CONFIG_NXFONT_SERIF29X37
 extern const struct nx_fontpackage_s g_serif29x37_package;
 #endif
 
+#ifdef CONFIG_NXFONT_SERIF38X48
+extern const struct nx_fontpackage_s g_serif38x48_package;
+#endif
+
+/* SERIF-BOLD */
+
+#ifdef CONFIG_NXFONT_SERIF22X28B
+extern const struct nx_fontpackage_s g_serif22x28b_package;
+#endif
+
+#ifdef CONFIG_NXFONT_SERIF27X38B
+extern const struct nx_fontpackage_s g_serif27x38b_package;
+#endif
+
+#ifdef CONFIG_NXFONT_SERIF38X49
+extern const struct nx_fontpackage_s g_serif38x49b_package;
+#endif
+
 static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 {
+
+/* SANS */
+
+#ifdef CONFIG_NXFONT_SANS22X29
+  &g_sans22x29_package,
+#endif
+
 #ifdef CONFIG_NXFONT_SANS23X27
   &g_sans23x27_package,
 #endif
+
+#ifdef CONFIG_NXFONT_SANS28X37
+  &g_sans28x37_package,
+#endif
+
+/* SANS-BOLD */
+
+#ifdef CONFIG_NXFONT_SANS22X29B
+  &g_sans22x29b_package,
+#endif
+
 #ifdef CONFIG_NXFONT_SANS28X37B
   &g_sans28x37b_package,
 #endif
+
 #ifdef CONFIG_NXFONT_SANS40X49B
   &g_sans40x49b_package,
 #endif
-#ifdef CONFIG_NXFONT_SERIF27X38B
-  &g_serif27x38b_package,
+
+/* SERIF */
+
+#ifdef CONFIG_NXFONT_SERIF22X29
+  &g_serif22x29_package,
 #endif
+
 #ifdef CONFIG_NXFONT_SERIF29X37
   &g_serif29x37_package,
 #endif
+
+#ifdef CONFIG_NXFONT_SERIF38X48
+  &g_serif38x48_package,
+#endif
+
+/* SERIF-BOLD */
+
+#ifdef CONFIG_NXFONT_SERIF22X28B
+  &g_serif22x28b_package,
+#endif
+
+#ifdef CONFIG_NXFONT_SERIF27X38B
+  &g_serif27x38b_package,
+#endif
+
+#ifdef CONFIG_NXFONT_SERIF38X49B
+  &g_serif38x49b_package,
+#endif
+
   NULL
 };
 

@@ -119,20 +119,67 @@ gen32bppsources:
 	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_BITSPERPIXEL=32 EXTRADEFINES=$(EXTRADEFINES)
 
 genfontsources:
-ifeq ($(CONFIG_NXFONT_SANS23X27),y)
+
+# SANS
+
+ifeq ($(CONFIG_NXFONT_SANS22X29),y)
 	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=1 EXTRADEFINES=$(EXTRADEFINES)
 endif
-ifeq ($(CONFIG_NXFONT_SANS28X37B),y)
+
+
+ifeq ($(CONFIG_NXFONT_SANS23X27),y)
 	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRADEFINES=$(EXTRADEFINES)
 endif
-ifeq ($(CONFIG_NXFONT_SANS40X49B),y)
+
+
+ifeq ($(CONFIG_NXFONT_SANS28X37),y)
 	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=3 EXTRADEFINES=$(EXTRADEFINES)
 endif
-ifeq ($(CONFIG_NXFONT_SERIF27X38B),y)
+
+# SANS-BOLD
+
+ifeq ($(CONFIG_NXFONT_SANS22X29B),y)
 	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=4 EXTRADEFINES=$(EXTRADEFINES)
 endif
-ifeq ($(CONFIG_NXFONT_SERIF29X37),y)
+
+ifeq ($(CONFIG_NXFONT_SANS28X37B),y)
 	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=5 EXTRADEFINES=$(EXTRADEFINES)
+endif
+
+ifeq ($(CONFIG_NXFONT_SANS40X49B),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=6 EXTRADEFINES=$(EXTRADEFINES)
+endif
+
+# SERIF
+
+ifeq ($(CONFIG_NXFONT_SERIF22X29),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=7 EXTRADEFINES=$(EXTRADEFINES)
+endif
+
+
+ifeq ($(CONFIG_NXFONT_SERIF29X37),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=8 EXTRADEFINES=$(EXTRADEFINES)
+endif
+
+
+ifeq ($(CONFIG_NXFONT_SERIF38X48),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=9 EXTRADEFINES=$(EXTRADEFINES)
+endif
+
+# SERIF-BOLD
+
+ifeq ($(CONFIG_NXFONT_SERIF22X28B),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=10 EXTRADEFINES=$(EXTRADEFINES)
+endif
+
+
+ifeq ($(CONFIG_NXFONT_SERIF27X38B),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=11 EXTRADEFINES=$(EXTRADEFINES)
+endif
+
+
+ifeq ($(CONFIG_NXFONT_SERIF38X49B),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=12 EXTRADEFINES=$(EXTRADEFINES)
 endif
 
 gensources: gen1bppsources gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource gen32bppsources genfontsources

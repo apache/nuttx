@@ -973,21 +973,43 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_NXFONTS_CHARBITS
 		  The number of bits in the character set.  Current options are
 		  only 7 and 8.  The default is 7.
-		CONFIG_NXFONT_SANS23X27:
-		  This option enables support for a small, 23x27 san serif font
-		  (font ID FONTID_SANS23X27 == 1)
-		CONFIG_NXFONT_SANS28X37B:
+
+		CONFIG_NXFONT_SANS22X29
+		  This option enables support for a small, 22x29 san serif font
+		  (font ID FONTID_SANS22X29 == 1).
+		CONFIG_NXFONT_SANS23X27
+		  This option enables support for a tiny, 23x27 san serif font
+		  (font ID FONTID_SANS23X27 == 2).
+		CONFIG_NXFONT_SANS28X37
+		  This option enables support for a medium, 28x37 san serif font
+		  (font ID FONTID_SANS28X37 == 3).
+		CONFIG_NXFONT_SANS22X29B
+		  This option enables support for a small, 22x29 san serif bold font
+		  (font ID FONTID_SANS22X29B == 4).
+		CONFIG_NXFONT_SANS28X37B
 		  This option enables support for a medium, 28x37 san serif bold font
-		  (font ID FONTID_SANS28X37B == 2)
-		CONFIG_NXFONT_SANS40X49B:
+		  (font ID FONTID_SANS28X37B == 5).
+		CONFIG_NXFONT_SANS40X49B
 		  This option enables support for a large, 40x49 san serif bold font
-		  (font ID FONTID_SANS40X49B == 3)
-		CONFIG_NXFONT_SERIF27X38B:
+		  (font ID FONTID_SANS40X49B == 6).
+		CONFIG_NXFONT_SERIF22X29
+		  This option enables support for a small, 22x29 font (with serifs)
+		  (font ID FONTID_SERIF22X29 == 7).
+		CONFIG_NXFONT_SERIF29X37
+		  This option enables support for a medium, 29x37 font (with serifs)
+		  (font ID FONTID_SERIF29X37 == 8).
+		CONFIG_NXFONT_SERIF38X48
+		  This option enables support for a large, 38x48 font (with serifs)
+		  (font ID FONTID_SERIF38X48 == 9).
+		CONFIG_NXFONT_SERIF22X28B
+		  This option enables support for a small, 27x38 bold font (with serifs)
+		  (font ID FONTID_SERIF22X28B == 10).
+		CONFIG_NXFONT_SERIF27X38B
 		  This option enables support for a medium, 27x38 bold font (with serifs)
-		  (font ID FONTID_SERIF27X38B == 4)
-		CONFIG_NXFONT_SERIF29X37:
- 		  This option enables support for a medium, 29x37 font (with serifs)
-		  (font ID FONTID_SERIF29X37 == 5)
+		  (font ID FONTID_SERIF27X38B == 11).
+		CONFIG_NXFONT_SERIF38X49B
+		  This option enables support for a large, 38x49 bold font (with serifs)
+		  (font ID FONTID_SERIF38X49B == 12).
 
 	NX Multi-user only options:
 

@@ -396,7 +396,18 @@ static void bdf_printoutput(FILE *out,
       
       /* Glyph general info */
       
-      fprintf(out, "/* %s (%d) */\n", ginfo->name, ginfo->encoding);
+      if (ginfo->bb_x_off < 0)
+        {
+          fprintf(out,
+                  "/* %s (%d) -- NOTE: Xoffset should be %d, not 0. */\n",
+                  ginfo->name,
+                  ginfo->encoding,
+                  ginfo->bb_x_off);
+        }
+      else
+        {
+          fprintf(out, "/* %s (%d) */\n", ginfo->name, ginfo->encoding);
+        }
       
       /* Glyph metrics */
       

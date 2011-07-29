@@ -47,15 +47,29 @@
 /* Pick the fontset */
 
 #if NXFONTS_FONTID == 1
-#  include "nxfonts_sans23x27.h"
+#  include "nxfonts_sans22x29.h"
 #elif NXFONTS_FONTID == 2
-#  include "nxfonts_sans28x37b.h"
+#  include "nxfonts_sans23x27.h"
 #elif NXFONTS_FONTID == 3
-#  include "nxfonts_sans40x49b.h"
+#  include "nxfonts_sans28x37.h"
 #elif NXFONTS_FONTID == 4
-#  include "nxfonts_serif27x38b.h"
+#  include "nxfonts_sans22x29b.h"
 #elif NXFONTS_FONTID == 5
+#  include "nxfonts_sans28x37b.h"
+#elif NXFONTS_FONTID == 6
+#  include "nxfonts_sans40x49b.h"
+#elif NXFONTS_FONTID == 7
+#  include "nxfonts_serif22x29.h"
+#elif NXFONTS_FONTID == 8
 #  include "nxfonts_serif29x37.h"
+#elif NXFONTS_FONTID == 9
+#  include "nxfonts_serif38x48.h"
+#elif NXFONTS_FONTID == 10
+#  include "nxfonts_serif22x28b.h"
+#elif NXFONTS_FONTID == 11
+#  include "nxfonts_serif27x38b.h"
+#elif NXFONTS_FONTID == 12
+#  include "nxfonts_serif38x49b.h"
 #else
 #  error "No font ID specified"
 #endif

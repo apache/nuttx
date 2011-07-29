@@ -72,25 +72,73 @@ CPPFLAGS	+= -DNXFONTS_SUFFIX=$(NXFONTS_SUFFIX)
 endif
 
 ifdef NXFONTS_FONTID
+
+# SANS
+
 ifeq ($(NXFONTS_FONTID),1)
+NXFONTS_PREFIX	:= g_sans22x29_
+GEN_CSRC	= nxfonts_bitmaps_sans22x29.c
+endif
+
+ifeq ($(NXFONTS_FONTID),2)
 NXFONTS_PREFIX	:= g_sans23x27_
 GEN_CSRC	= nxfonts_bitmaps_sans23x27.c
 endif
-ifeq ($(NXFONTS_FONTID),2)
+
+ifeq ($(NXFONTS_FONTID),3)
+NXFONTS_PREFIX	:= g_sans28x37_
+GEN_CSRC	= nxfonts_bitmaps_sans28x37.c
+endif
+
+# SANS-BOLD
+
+ifeq ($(NXFONTS_FONTID),4)
+NXFONTS_PREFIX	:= g_sans22x29b_
+GEN_CSRC	= nxfonts_bitmaps_sans22x29b.c
+endif
+
+ifeq ($(NXFONTS_FONTID),5)
 NXFONTS_PREFIX	:= g_sans28x37b_
 GEN_CSRC	= nxfonts_bitmaps_sans28x37b.c
 endif
-ifeq ($(NXFONTS_FONTID),3)
+
+ifeq ($(NXFONTS_FONTID),6)
 NXFONTS_PREFIX	:= g_sans40x49b_
 GEN_CSRC	= nxfonts_bitmaps_sans40x49b.c
 endif
-ifeq ($(NXFONTS_FONTID),4)
+
+# SERIF
+
+ifeq ($(NXFONTS_FONTID),7)
+NXFONTS_PREFIX	:= g_serif22x29_
+GEN_CSRC	= nxfonts_bitmaps_serif22x29.c
+endif
+
+ifeq ($(NXFONTS_FONTID),8)
+NXFONTS_PREFIX	:= g_serif29x37_
+GEN_CSRC	= nxfonts_bitmaps_serif29x37.c
+endif
+
+ifeq ($(NXFONTS_FONTID),9)
+NXFONTS_PREFIX	:= g_serif38x48_
+GEN_CSRC	= nxfonts_bitmaps_serif38x48.c
+endif
+
+# SERIF-BOLD
+
+ifeq ($(NXFONTS_FONTID),10)
+NXFONTS_PREFIX	:= g_serif22x28b_
+GEN_CSRC	= nxfonts_bitmaps_serif22x28b.c
+endif
+
+ifeq ($(NXFONTS_FONTID),11)
 NXFONTS_PREFIX	:= g_serif27x38b_
 GEN_CSRC	= nxfonts_bitmaps_serif27x38b.c
 endif
-ifeq ($(NXFONTS_FONTID),5)
-NXFONTS_PREFIX	:= g_serif29x37_
-GEN_CSRC	= nxfonts_bitmaps_serif29x37.c
+
+ifeq ($(NXFONTS_FONTID),12)
+NXFONTS_PREFIX	:= g_serif38x49b_
+GEN_CSRC	= nxfonts_bitmaps_serif38x49b.c
 endif
 
 DEPENDENCY	:= nxfonts_bitmaps.c
