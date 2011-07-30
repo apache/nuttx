@@ -121,7 +121,7 @@ struct tsc2007_config_s
    * pendown - Return the state of the pen down GPIO input
    */
 
-  int (*attach)(FAR struct tsc2007_config_s *state, xcpt_t isr);
+  int  (*attach)(FAR struct tsc2007_config_s *state, xcpt_t isr);
   void (*enable)(FAR struct tsc2007_config_s *state, bool enable);
   void (*clear)(FAR struct tsc2007_config_s *state);
   bool (*pendown)(FAR struct tsc2007_config_s *state);

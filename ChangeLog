@@ -1955,4 +1955,7 @@
 	* graphics/nxfonts/nxfonts_*.h:  Add serveral more new fonts
 	* arch/z80/src/ez80/ez80_serial.c: Fix some errors in serial driver
 	  setup for UART1 (submitted by Paul Osmialowski).
+	* drivers/input/tsc2007.c and include/nuttx/input/*:  Add a generic NuttX
+	  touchscreen interface.  Add a driver for the TI TSC2007 touchscreen
+	  controller.
 

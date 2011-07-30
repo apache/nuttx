@@ -114,7 +114,7 @@
  *
  ****************************************************************************/
 
-#define I2C_SETADDRESS(d,f,b) ((d)->ops->setaddress(d,f,b))
+#define I2C_SETADDRESS(d,a,n) ((d)->ops->setaddress(d,a,n))
 
 /****************************************************************************
  * Name: I2C_SETOWNADDRESS
@@ -140,7 +140,7 @@
  *
  ****************************************************************************/
 
-#define I2C_SETOWNADDRESS(d,f,b)  ((d)->ops->setownaddress(d,f,b))
+#define I2C_SETOWNADDRESS(d,a,n)  ((d)->ops->setownaddress(d,a,n))
 
 /****************************************************************************
  * Name: I2C_WRITE

@@ -67,6 +67,8 @@
 #include <nuttx/fs.h>
 #include <nuttx/i2c.h>
 #include <nuttx/wqueue.h>
+
+#include <nuttx/input/touchscreen.h>
 #include <nuttx/input/tsc2007.h>
 
 #include "tsc2007.h"
@@ -74,6 +76,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* Reference counting is partially implemented, but not needed in the
+ * current design.
+ */
+
+#undef CONFIG_TSC2007_REFCNT
+
 /* Driver support ***********************************************************/
 /* This format is used to construct the /dev/skel[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
@@ -85,11 +94,22 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+/* This describes the state of one contact */
+
+enum tsc2007_contact_3
+{
+  CONTACT_NONE = 0,   /* No contact */
+  CONTACT_DOWN,       /* First contact */
+  CONTACT_MOVE,       /* Same contact, possibly different position */
+  CONTACT_UP,         /* Contact lost */
+};
+
 /* This structure describes the results of one TSC2007 sample */
 
 struct tsc2007_sample_s
 {
-  bool     pendown;                    /* Pen down state */
+  uint8_t  contact;                    /* Contact state (see enum tsc2007_contact_e) */
   uint16_t x;                          /* Measured X position */
   uint16_t y;                          /* Measured Y position */
   uint16_t pressure;                   /* Calculated pressure */
@@ -102,8 +122,11 @@ struct tsc2007_dev_s
 #ifdef CONFIG_TSC2007_MULTIPLE
   FAR struct tsc2007_dev_s *flink;     /* Supports a singly linked list of drivers */
 #endif
+#ifdef CONFIG_TSC2007_REFCNT
   uint8_t crefs;                       /* Number of times the device has been opened */
+#endif
   uint8_t nwaiters;                    /* Number of threads waiting for TSC2007 data */
+  uint8_t id;                          /* Current touch point ID */
   volatile bool penchange;             /* An unreported event is buffered */
   sem_t devsem;                        /* Manages exclusive access to this structure */
   sem_t waitsem;                       /* Used to wait for the availability of data */
@@ -111,7 +134,7 @@ struct tsc2007_dev_s
   FAR struct tsc2007_config_s *config; /* Board configuration data */
   FAR struct i2c_dev_s *i2c;           /* Saved I2C driver instance */
   struct work_s work;                  /* Supports the interrupt handling "bottom half" */
-  struct tsc2007_sample_s sample;      /* Last sampled data */
+  struct tsc2007_sample_s sample;      /* Last sampled touch point data */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
@@ -251,6 +274,23 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
        */
 
       memcpy(sample, &priv->sample, sizeof(struct tsc2007_sample_s ));
+
+      /* Now manage state transitions */
+
+      if (sample->contact == CONTACT_UP)
+        {
+          /* Next.. no contract.  Increment the ID so that next contact will be unique */
+
+          priv->sample.contact = CONTACT_NONE;
+          priv->id++;
+        }
+      else if (sample->contact == CONTACT_DOWN)
+       {
+          /* First report -- next report will be a movement */
+
+         priv->sample.contact = CONTACT_MOVE;
+       }
+
       priv->penchange = false;
       ret = OK;
     }
@@ -455,9 +495,11 @@ static void tsc2007_worker(FAR void *arg)
 
   if (!pendown)
     {
-      /* Ignore the interrupt if the pen was already down */
+      /* Ignore the interrupt if the pen was already down (CONTACT_NONE == pen up and
+       * already reported.  CONTACT_UP == pen up, but not reported)
+       */
 
-      if (!priv->sample.pendown)
+      if (priv->sample.contact == CONTACT_NONE)
         {
           goto errout;
         }
@@ -556,8 +598,31 @@ static void tsc2007_worker(FAR void *arg)
 
   /* Note the availability of new measurements */
 
-  priv->sample.pendown = pendown;
-  priv->penchange      = true;
+  if (pendown)
+    {
+      /* If this is the first (acknowledged) pend down report, then report
+       * this as the first contact.  If contact == CONTACT_DOWN, it will be
+       * set to set to CONTACT_MOVE after the contact is first sampled.
+       */
+
+      if (priv->sample.contact != CONTACT_MOVE)
+        {
+          /* First contact */
+
+          priv->sample.contact = CONTACT_DOWN;
+        }
+    }
+  else /* if (priv->sample.contact != CONTACT_NONE) */
+    {
+      /* The pen is up.  NOTE: We know from a previous test, that this is a
+       * loss of contact condition.  This will be changed to CONTACT_NONE
+       * after the loss of contact is sampled.
+       */
+
+       priv->sample.contact = CONTACT_UP;
+    }
+    
+  priv->penchange = true;
 
   /* Notify any waiters that nes TSC2007 data is available */
 
@@ -626,6 +691,7 @@ static int tsc2007_interrupt(int irq, FAR void *context)
 
 static int tsc2007_open(FAR struct file *filep)
 {
+#ifdef CONFIG_TSC2007_REFCNT
   FAR struct inode         *inode;
   FAR struct tsc2007_dev_s *priv;
   uint8_t                   tmp;
@@ -659,17 +725,9 @@ static int tsc2007_open(FAR struct file *filep)
       goto errout_with_sem;
     }
 
-  /* Check if this is the first time that the driver has been opened. */
-
-  if (tmp == 1)
-    {
-      irqstate_t flags = irqsave();
-
-      /* Perform one time hardware initialization */
-
-#warning "Missing logic"
-      irqrestore(flags);
-    }
+  /* When the reference increments to 1, this is the first open event
+   * on the driver.. and an opportunity to do any one-time initialization.
+   */
 
   /* Save the new open count on success */
 
@@ -678,6 +736,9 @@ static int tsc2007_open(FAR struct file *filep)
 errout_with_sem:
   sem_post(&priv->devsem);
   return ret;
+#else
+  return OK;
+#endif
 }
 
 /****************************************************************************
@@ -686,6 +747,7 @@ errout_with_sem:
 
 static int tsc2007_close(FAR struct file *filep)
 {
+#ifdef CONFIG_TSC2007_REFCNT
   FAR struct inode         *inode;
   FAR struct tsc2007_dev_s *priv;
   int                       ret;
@@ -707,22 +769,18 @@ static int tsc2007_close(FAR struct file *filep)
       return -EINTR;
     }
 
-  /* Decrement the reference count unless it would decrement to zero */
-  if (priv->crefs > 1)
+  /* Decrement the reference count unless it would decrement a negative
+   * value.  When the count decrements to zero, there are no further
+   * open references to the driver.
+   */
+
+  if (priv->crefs >= 1)
     {
       priv->crefs--;
-      sem_post(&priv->devsem);
-      return OK;
     }
 
-  /* There are no more references to the port */
-
-  priv->crefs = 0;
-
-  /* Perform driver teardown */
-#warning "Missing logic"
-
   sem_post(&priv->devsem);
+#endif
   return OK;
 }
 
@@ -732,16 +790,30 @@ static int tsc2007_close(FAR struct file *filep)
 
 static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
-  FAR struct inode         *inode;
-  FAR struct tsc2007_dev_s *priv;
-  struct tsc2007_sample_s   sample;
-  int                       ret;
+  FAR struct inode          *inode;
+  FAR struct tsc2007_dev_s  *priv;
+  FAR struct touch_sample_s *report;
+  struct tsc2007_sample_s    sample;
+  int                        ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
   priv  = (FAR struct tsc2007_dev_s *)inode->i_private;
+
+  /* Verify that the caller has provided a buffer large enough to receive
+   * the touch data.
+   */
+
+  if (len < SIZEOF_TOUCH_SAMPLE_S(1))
+    {
+      /* We could provide logic to break up a touch report into segments and
+       * handle smaller reads... but why?
+       */
+
+      return -ENOSYS;
+    }
 
   /* Get exclusive access to the driver data structure */
 
@@ -785,7 +857,36 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
    * to the caller.
    */
 
-#warning "Missing logic"
+  report = (FAR struct touch_sample_s *)buffer;
+  memset(report, 0, SIZEOF_TOUCH_SAMPLE_S(1));
+  report->npoints            = 1;
+  report->point[0].id        = priv->id;
+  report->point[0].x         = sample.x;
+  report->point[0].y         = sample.y;
+  report->point[0].pressure  = sample.pressure;
+
+  /* Report the appropriate flags */
+
+  if (sample.contact == CONTACT_UP)
+    {
+      /* Pen is now up */
+
+      report->point[0].flags  = TOUCH_UP | TOUCH_ID_VALID | TOUCH_POS_VALID |TOUCH_PRESSURE_VALID;
+    }
+  else if (sample.contact == CONTACT_DOWN)
+    {
+      /* First contact */
+
+      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID |TOUCH_PRESSURE_VALID;
+    }
+  else /* if (sample->contact == CONTACT_MOVE) */
+    {
+      /* Movement of the same contact */
+
+      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID |TOUCH_PRESSURE_VALID;
+    }
+
+  ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
   sem_post(&priv->devsem);
@@ -824,7 +925,37 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      /* Add support for ioctl commands here */
+      case TSIOC_SETCALIB:  /* arg: Pointer to int calibration value */
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(priv->config != NULL && ptr != NULL);
+          priv->config->rxplate = *ptr;
+        }
+        break;
+
+      case TSIOC_GETCALIB:  /* arg: Pointer to int calibration value */
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          DEBUGASSERT(priv->config != NULL && ptr != NULL);
+          *ptr = priv->config->rxplate;
+        }
+        break;
+
+      case TSIOC_SETFREQUENCY:  /* arg: Pointer to uint32_t frequency value */
+        {
+          FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+          DEBUGASSERT(priv->config != NULL && ptr != NULL);
+          priv->config->frequency = I2C_SETFREQUENCY(priv->i2c, *ptr);
+        }
+        break;
+
+      case TSIOC_GETFREQUENCY:  /* arg: Pointer to uint32_t frequency value */
+        {
+          FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+          DEBUGASSERT(priv->config != NULL && ptr != NULL);
+          *ptr = priv->config->frequency;
+        }
+        break;
 
       default:
         ret = -ENOTTY;
@@ -995,6 +1126,19 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
   priv->config = config;          /* Save the board configuration */
   sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
+
+  /* Set the I2C frequency (saving the actual frequency) */
+
+  config->frequency = I2C_SETFREQUENCY(dev, config->frequency);
+
+  /* Set the I2C address and address size */
+
+  ret = I2C_SETADDRESS(dev, config->address, 7);
+  if (ret < 0)
+    {
+      idbg("I2C_SETADDRESS failed: %d\n", ret);
+      goto errout_with_priv;
+    }
 
   /* Make sure that interrupts are disabled */
 
