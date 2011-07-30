@@ -62,6 +62,10 @@
  *  - Be ready for IPMI
  **/
 
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -83,7 +87,6 @@
 #include "stm32_rcc.h"
 #include "stm32_i2c.h"
 #include "stm32_waste.h"
-
 
 #if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C2)
 
@@ -108,7 +111,6 @@ struct stm32_i2c_priv_s {
     uint32_t    status;
 };
 
-
 /** I2C Device, Instance
  */
 struct stm32_i2c_inst_s {
@@ -119,7 +121,6 @@ struct stm32_i2c_inst_s {
     int         address;
     uint16_t    flags;
 };
-
 
 /************************************************************************************
  * Private Data
@@ -139,7 +140,6 @@ struct stm32_i2c_priv_s stm32_i2c2_priv = {
 };
 #endif
 
-
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
@@ -150,13 +150,11 @@ static inline uint16_t stm32_i2c_getreg(FAR struct stm32_i2c_priv_s *priv, uint8
     return getreg16(priv->base + offset);
 }
 
-
 /** Put register value by offset */
 static inline void stm32_i2c_putreg(FAR struct stm32_i2c_priv_s *priv, uint8_t offset, uint16_t value)
 {
     putreg16(value, priv->base + offset);
 }
-
 
 /** Modify register value by offset */
 static inline void stm32_i2c_modifyreg(FAR struct stm32_i2c_priv_s *priv, uint8_t offset, uint16_t clearbits, uint16_t setbits)
@@ -164,14 +162,12 @@ static inline void stm32_i2c_modifyreg(FAR struct stm32_i2c_priv_s *priv, uint8_
     modifyreg16(priv->base + offset, clearbits, setbits);
 }
 
-
 void inline stm32_i2c_sem_wait(FAR struct i2c_dev_s *dev)
 {
     while( sem_wait( &((struct stm32_i2c_inst_s *)dev)->priv->sem_excl ) != 0 ) {
         ASSERT(errno == EINTR);
     }
 }
-
 
 int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
 {
@@ -181,12 +177,10 @@ int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
     return OK;
 }
 
-
 void inline stm32_i2c_sem_post(FAR struct i2c_dev_s *dev)
 {
     sem_post( &((struct stm32_i2c_inst_s *)dev)->priv->sem_excl );
 }
-
 
 void inline stm32_i2c_sem_init(FAR struct i2c_dev_s *dev)
 {
@@ -194,13 +188,11 @@ void inline stm32_i2c_sem_init(FAR struct i2c_dev_s *dev)
     sem_init( &((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, 0, 0);
 }
 
-
 void inline stm32_i2c_sem_destroy(FAR struct i2c_dev_s *dev)
 {
     sem_destroy( &((struct stm32_i2c_inst_s *)dev)->priv->sem_excl );
     sem_destroy( &((struct stm32_i2c_inst_s *)dev)->priv->sem_isr );
 }
-
 
 static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequency)
 {
@@ -238,19 +230,16 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
         stm32_i2c_putreg(priv, STM32_I2C_CR1_OFFSET, cr1);
 }
 
-
 static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
 {
     /* Disable ACK on receive by default and generate START */
     stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_ACK, I2C_CR1_START);
 }
 
-
 static inline void stm32_i2c_sendstop(FAR struct stm32_i2c_priv_s *priv)
 {
     stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_ACK, I2C_CR1_STOP);
 }
-
 
 static inline uint32_t stm32_i2c_getstatus(FAR struct stm32_i2c_priv_s *priv)
 {
@@ -258,7 +247,6 @@ static inline uint32_t stm32_i2c_getstatus(FAR struct stm32_i2c_priv_s *priv)
    status |= (stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET) << 16);
    return status;
 }
-
 
 /************************************************************************************
  * Interrupt Service Routines
@@ -425,8 +413,6 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
     priv->status = status;
     return OK;
 }
- 
-
 
 /* Decode ***************************************************************************/
 
@@ -443,7 +429,6 @@ static int stm32_i2c2_isr(int irq, void *context)
     return stm32_i2c_isr(&stm32_i2c2_priv);
 }
 #endif
-
 
 /************************************************************************************
  * Private Initialization and Deinitialization
@@ -511,7 +496,6 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
     return OK;
 }
 
-
 /** Shutdown the I2C hardware  */
 static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv)
 {
@@ -555,7 +539,6 @@ static int stm32_i2c_deinit(FAR struct stm32_i2c_priv_s *priv)
     return OK;
 }
 
-
 /************************************************************************************
  * Device Driver OPS - Blocking Type
  ************************************************************************************/
@@ -574,7 +557,6 @@ uint32_t stm32_i2c_setfrequency(FAR struct i2c_dev_s *dev, uint32_t frequency)
     return ((struct stm32_i2c_inst_s *)dev)->frequency;
 }
 
-
 int stm32_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 {
     stm32_i2c_sem_wait(dev);
@@ -585,7 +567,6 @@ int stm32_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
     stm32_i2c_sem_post(dev);
     return OK;
 }
-
 
 int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int count)
 {
@@ -666,7 +647,6 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
     return -status_errno;
 }
 
-  
 int stm32_i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen)
 {
     stm32_i2c_sem_wait(dev);   /* ensure that address or flags don't change meanwhile */
@@ -681,7 +661,6 @@ int stm32_i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen
     return stm32_i2c_process(dev, &msgv, 1);
 }
 
-
 int stm32_i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 {
     stm32_i2c_sem_wait(dev);   /* ensure that address or flags don't change meanwhile */
@@ -695,7 +674,6 @@ int stm32_i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
     
     return stm32_i2c_process(dev, &msgv, 1);
 }
-
 
 #ifdef CONFIG_I2C_WRITEREAD
 int stm32_i2c_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuflen,
@@ -722,7 +700,6 @@ int stm32_i2c_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int w
 }
 #endif
 
-
 #ifdef CONFIG_I2C_TRANSFER
 int stm32_i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int count)
 {
@@ -730,7 +707,6 @@ int stm32_i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, in
     return stm32_i2c_process(dev, msgs, count);
 }
 #endif
-
 
 /************************************************************************************
  * Device Structures, Instantiation
@@ -740,9 +716,9 @@ struct i2c_ops_s stm32_i2c_ops = {
     .setfrequency       = stm32_i2c_setfrequency,
     .setaddress         = stm32_i2c_setaddress,
     .write              = stm32_i2c_write,
-    .read               = stm32_i2c_read,
+    .read               = stm32_i2c_read
 #ifdef CONFIG_I2C_WRITEREAD
-    .writeread          = stm32_i2c_writeread
+  , .writeread          = stm32_i2c_writeread
 #endif
 #ifdef CONFIG_I2C_TRANSFER
   , .transfer           = stm32_i2c_transfer
@@ -752,7 +728,6 @@ struct i2c_ops_s stm32_i2c_ops = {
     .registercallback   = stm32_i2c_registercallback
 #endif
 };
-
 
 /************************************************************************************
  * Public Function - Initialization
