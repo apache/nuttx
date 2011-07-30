@@ -38,6 +38,11 @@
  *
  ********************************************************************************************/
 
+/* The TSC2007 is an analog interface circuit for a human interface touch screen device.
+ * All peripheral functions are controlled through the command byte and onboard state
+ * machines.
+ */
+
 #ifndef __DRIVERS_INPUT_TSC2007_H
 #define __DRIVERS_INPUT_TSC2007_H
 
@@ -95,16 +100,6 @@
 /********************************************************************************************
  * Public Types
  ********************************************************************************************/
-
-/* This structure describes the sampled TSC2007 data */
-
-struct tsc2007_sample_s
-{
-  uint16_t x;    /* X position */
-  uint16_t y;    /* Y position */
-  uint16_t z1;   /* Z1 position */
-  uint16_t z2;   /* Z2 position */
-};
 
 /********************************************************************************************
  * Public Function Prototypes

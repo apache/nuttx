@@ -87,7 +87,7 @@
  *   i2c_dev_s instance and will be used with all transfers.  Required.
  *
  * Input Parameters:
- *   dev -       Device-specific state data
+ *   dev       - Device-specific state data
  *   frequency - The I2C frequency requested
  *
  * Returned Value:
@@ -105,9 +105,9 @@
  *   i2c_dev_s instance and will be used with all transfers.  Required.
  *
  * Input Parameters:
- *   dev -     Device-specific state data
+ *   dev     - Device-specific state data
  *   address - The I2C slave address
- *   nbits -   The number of address bits provided (7 or 10)
+ *   nbits   - The number of address bits provided (7 or 10)
  *
  * Returned Value:
  *   Returns OK on success; a negated errno on failure.
@@ -129,10 +129,10 @@
  *   to handle reads and writes from a master.
  *
  * Input Parameters:
- *   dev -     Device-specific state data
+ *   dev     - Device-specific state data
  *   address - Our own slave address; If it is 0x00, then the device driver
  *             listens to general call
- *   nbits -   The number of address bits provided (7 or 10)
+ *   nbits   - The number of address bits provided (7 or 10)
  *
  * Returned Value:
  *   OK on valid address and if the same address has not been assigned
@@ -152,7 +152,7 @@
  *   and pend until this write completes. Required.
  *
  * Input Parameters:
- *   dev -    Device-specific state data
+ *   dev    - Device-specific state data
  *   buffer - A pointer to the read-only buffer of data to be written to device
  *   buflen - The number of bytes to send from the buffer
  *
@@ -173,7 +173,7 @@
  *   and pend until this read completes. Required.
  *
  * Input Parameters:
- *   dev -   Device-specific state data
+ *   dev    - Device-specific state data
  *   buffer - A pointer to a buffer of data to receive the data from the device
  *   buflen - The requested number of bytes to be read
  *
@@ -193,7 +193,7 @@
  *   It provides a convenient wrapper to the transfer function.
  *
  * Input Parameters:
- *   dev -    Device-specific state data
+ *   dev     - Device-specific state data
  *   wbuffer - A pointer to the read-only buffer of data to be written to device
  *   wbuflen - The number of bytes to send from the buffer
  *   rbuffer - A pointer to a buffer of data to receive the data from the device
@@ -216,8 +216,8 @@
  *   will be serialized and pend until this read completes. Optional.
  *
  * Input Parameters:
- *   dev -   Device-specific state data
- *   msgs - A pointer to a set of message descriptors
+ *   dev      - Device-specific state data
+ *   msgs     - A pointer to a set of message descriptors
  *   msgcount - The number of transfers to perform
  *
  * Returned Value:
@@ -261,10 +261,10 @@ struct i2c_ops_s
 
 struct i2c_msg_s
 {
-    uint16_t  addr;                  /* Slave address */
-    uint16_t  flags;                 /* See I2C_M_* definitions */
-    uint8_t  *buffer;
-    int       length;
+  uint16_t  addr;                  /* Slave address */
+  uint16_t  flags;                 /* See I2C_M_* definitions */
+  uint8_t  *buffer;
+  int       length;
 };
 
 /* I2C private data.  This structure only defines the initial fields of the
@@ -307,7 +307,6 @@ extern "C" {
  ****************************************************************************/
 
 EXTERN FAR struct i2c_dev_s *up_i2cinitialize(int port);
-
 
 /****************************************************************************
  * Name: up_i2cuninitialize

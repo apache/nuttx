@@ -38,6 +38,11 @@
  *
  ****************************************************************************/
 
+/* The TSC2007 is an analog interface circuit for a human interface touch
+ * screen device. All peripheral functions are controlled through the command
+ * byte and onboard state machines.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -50,6 +55,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
 #include <semaphore.h>
 #include <poll.h>
 #include <errno.h>
@@ -60,6 +66,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs.h>
 #include <nuttx/i2c.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/input/tsc2007.h>
 
 #include "tsc2007.h"
@@ -78,14 +85,33 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+/* This structure describes the results of one TSC2007 sample */
+
+struct tsc2007_sample_s
+{
+  bool     pendown;                    /* Pen down state */
+  uint16_t x;                          /* Measured X position */
+  uint16_t y;                          /* Measured Y position */
+  uint16_t pressure;                   /* Calculated pressure */
+};
+
+/* This structure describes the state of one TSC2007 driver instance */
 
 struct tsc2007_dev_s
 {
-  uint8_t               crefs;    /* Number of times the device has been opened */
-  sem_t                 devsem;   /* Manages exclusive access to this structure */
+#ifdef CONFIG_TSC2007_MULTIPLE
+  FAR struct tsc2007_dev_s *flink;     /* Supports a singly linked list of drivers */
+#endif
+  uint8_t crefs;                       /* Number of times the device has been opened */
+  uint8_t nwaiters;                    /* Number of threads waiting for TSC2007 data */
+  volatile bool penchange;             /* An unreported event is buffered */
+  sem_t devsem;                        /* Manages exclusive access to this structure */
+  sem_t waitsem;                       /* Used to wait for the availability of data */
 
   FAR struct tsc2007_config_s *config; /* Board configuration data */
-  FAR struct i2c_dev_s *i2c;      /* Saved I2C driver instance */
+  FAR struct i2c_dev_s *i2c;           /* Saved I2C driver instance */
+  struct work_s work;                  /* Supports the interrupt handling "bottom half" */
+  struct tsc2007_sample_s sample;      /* Last sampled data */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
@@ -93,20 +119,21 @@ struct tsc2007_dev_s
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  struct pollfd        *fds[CONFIG_TSC2007_NPOLLWAITERS];
+  struct pollfd *fds[CONFIG_TSC2007_NPOLLWAITERS];
 #endif
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-#ifndef CONFIG_DISABLE_POLL
-static void tsc2007_pollnotify(FAR struct tsc2007_dev_s *priv,
-                               pollevent_t eventset);
-#endif
+
+static void tsc2007_notify(FAR struct tsc2007_dev_s *priv);
+static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
+                          FAR struct tsc2007_sample_s *sample);
+static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
+                              FAR struct tsc2007_sample_s *sample);
 static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd);
-static void tsc2007_sample(FAR struct tsc2007_dev_s *tsc,
-                           FAR struct tsc2007_sample_s *sample);
+static void tsc2007_worker(FAR void *arg);
 static int tsc2007_interrupt(int irq, FAR void *context);
 
 /* Character driver methods */
@@ -114,7 +141,6 @@ static int tsc2007_interrupt(int irq, FAR void *context);
 static int tsc2007_open(FAR struct file *filep);
 static int tsc2007_close(FAR struct file *filep);
 static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len);
-static ssize_t tsc2007_write(FAR struct file *filep, FAR const char *buffer, size_t len);
 static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
 static int tsc2007_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
@@ -124,12 +150,14 @@ static int tsc2007_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
  * Private Data
  ****************************************************************************/
 
+/* This the the vtable that supports the character driver interface */
+
 static const struct file_operations tsc2007_fops =
 {
   tsc2007_open,    /* open */
   tsc2007_close,   /* close */
   tsc2007_read,    /* read */
-  tsc2007_write,   /* write */
+  0,               /* write */
   0,               /* seek */
   tsc2007_ioctl    /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
@@ -137,37 +165,176 @@ static const struct file_operations tsc2007_fops =
 #endif
 };
 
+/* If only a single TSC2007 device is supported, then the driver state
+ * structure may as well be pre-allocated.
+ */
+
+#ifndef CONFIG_TSC2007_MULTIPLE
+static struct tsc2007_dev_s g_tsc2007;
+
+/* Otherwise, we will need to maintain allocated driver instances in a list */
+
+#else
+static struct tsc2007_dev_s *g_tsc2007list;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tsc2007_pollnotify
+ * Name: tsc2007_notify
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
-static void tsc2007_pollnotify(FAR struct tsc2007_dev_s *priv,
-                               pollevent_t eventset)
+static void tsc2007_notify(FAR struct tsc2007_dev_s *priv)
 {
+#ifndef CONFIG_DISABLE_POLL
   int i;
+#endif
 
+  /* If there are threads waiting for read data, then signal one of them
+   * that the read data is available.
+   */
+
+  if (priv->nwaiters > 0)
+    {
+      /* After posting this semaphore, we need to exit because the TSC2007
+       * is no longer avaialable.
+       */
+
+      sem_post(&priv->waitsem); 
+    }
+
+  /* If there are threads waiting on poll() for TSC2007 data to become availabe,
+   * then wake them up now.  NOTE: we wake up all waiting threads because we
+   * do not know that they are going to do.  If they all try to read the data,
+   * then some make end up blocking after all.
+   */
+
+#ifndef CONFIG_DISABLE_POLL
   for (i = 0; i < CONFIG_TSC2007_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
       if (fds)
         {
-          fds->revents |= (fds->events & eventset);
-          if (fds->revents != 0)
-            {
-              ivdbg("Report events: %02x\n", fds->revents);
-              sem_post(fds->sem);
-            }
+          fds->revents |= POLLIN;
+          ivdbg("Report events: %02x\n", fds->revents);
+          sem_post(fds->sem);
         }
     }
-}
-#else
-#  define tsc2007_pollnotify(priv,event)
 #endif
+}
+
+/****************************************************************************
+ * Name: tsc2007_sample
+ ****************************************************************************/
+
+static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
+                          FAR struct tsc2007_sample_s *sample)
+{
+  irqstate_t flags;
+  int ret = -EAGAIN;
+
+  /* Interrupts me be disabled when this is called to (1) prevent posting
+   * of semphores from interrupt handlers, and (2) to prevent sampled data
+   * from changing until it has been reported.
+   */
+
+  flags = irqsave();
+
+  /* Is there new TSC2007 sample data available? */
+
+  if (priv->penchange)
+    {
+      /* Yes.. the state has changed in some way.  Return a copy of the
+       * sampled data.
+       */
+
+      memcpy(sample, &priv->sample, sizeof(struct tsc2007_sample_s ));
+      priv->penchange = false;
+      ret = OK;
+    }
+
+  irqrestore(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: tsc2007_waitsample
+ ****************************************************************************/
+
+static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
+                              FAR struct tsc2007_sample_s *sample)
+{
+  irqstate_t flags;
+  int ret;
+
+  /* Interrupts me be disabled when this is called to (1) prevent posting
+   * of semphores from interrupt handlers, and (2) to prevent sampled data
+   * from changing until it has been reported.
+   *
+   * In addition, we will also disable pre-emption to prevent other threads
+   * from getting control while we muck with the semaphores.
+   */
+
+  sched_lock();
+  flags = irqsave();
+
+  /* Now release the semaphore that manages mutually exclusive access to
+   * the device structure.  This may cause other tasks to become ready to
+   * run, but they cannot run yet because pre-emption is disabled.
+   */
+
+  sem_post(&priv->devsem);
+
+  /* Try to get the a sample... if we cannot, then wait on the semaphore
+   * that is posted when new sample data is availble.
+   */
+
+  while (tsc2007_sample(priv, sample) < 0)
+    {
+      /* Wait for a change in the TSC2007 state */
+ 
+      priv->nwaiters++;
+      ret = sem_wait(&priv->waitsem);
+      priv->nwaiters--;
+
+      if (ret < 0)
+        {
+          /* If we are awakened by a signal, then we need to return
+           * the failure now.
+           */
+
+          DEBUGASSERT(errno == EINTR);
+          ret = -EINTR;
+          goto errout;
+        }
+    }
+
+  /* Re-acquire the the semaphore that manages mutually exclusive access to
+   * the device structure.  We may have to wait here.  But we have our sample.
+   * Interrupts and pre-emption will be re-enabled while we wait.
+   */
+
+  ret = sem_wait(&priv->devsem);
+
+errout:
+  /* Then re-enable interrupts.  We might get interrupt here and there
+   * could be a new sample.  But no new threads will run because we still
+   * have pre-emption disabled.
+   */
+
+  irqrestore(flags);
+
+  /* Restore pre-emption.  We might get suspended here but that is okay
+   * because we already have our sample.  Note:  this means that if there
+   * were two threads reading from the TSC2007 for some reason, the data
+   * might be read out of order.
+   */
+
+  sched_unlock();
+  return ret;
+}
 
 /****************************************************************************
  * Name: tsc2007_transfer
@@ -247,31 +414,159 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
        return ret;
      }
 
-   ret = (unsigned int)data12[0] << 4 | (unsigned int)data12[1];
-   ivdbg(&tsc->client->dev, "data: 0x%03x\n", ret);
+   /* Get the MS 12 bits from the first byte and the remaining LS 4 bits from
+    * the second byte.
+    */
+
+   ret = (unsigned int)data12[0] << 4 | (unsigned int)data12[1] >> 4;
+   ivdbg(&tsc->client->dev, "data: 0x%04x\n", ret);
    return ret;
 }
 
 /****************************************************************************
- * Name: tsc2007_sample
+ * Name: tsc2007_worker
  ****************************************************************************/
 
-static void tsc2007_sample(FAR struct tsc2007_dev_s *tsc,
-                           FAR struct tsc2007_sample_s *sample)
+static void tsc2007_worker(FAR void *arg)
 {
-  /* ADC is on... Disable interrupts and read Y and X positions */
+  FAR struct tsc2007_dev_s    *priv = (FAR struct tsc2007_dev_s *)arg;
+  FAR struct tsc2007_config_s *config;   /* Convenience pointer */
+  bool                         pendown;  /* true: pend is down */
+  uint16_t                     x;        /* X position */
+  uint16_t                     y;        /* Y position */
+  uint16_t                     z1;       /* Z1 position */
+  uint16_t                     z2;       /* Z2 position */
+  uint32_t                     pressure; /* Measured pressure */
 
-  sample->y = tsc2007_transfer(tsc, (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_YPOS));
-  sample->x = tsc2007_transfer(tsc, (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_XPOS));
+  ASSERT(priv != NULL);
 
-  /* Read Z1 and Z2 positions */
+  /* Get a pointer the callbacks for convenience (and so the code is not so
+   * ugly).
+   */
 
-  sample->z1 = tsc2007_transfer(tsc, (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z1POS));
-  sample->z2 = tsc2007_transfer(tsc, (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z2POS));
+  config = priv->config;
+  DEBUGASSERT(config != NULL);
 
-  /* Power down ADC and enable PENIRQ */
+  /* Check for pen up or down by reading the PENIRQ GPIO. */
 
-  (void)tsc2007_transfer(tsc, (TSC2007_CMD_12BIT | TSC2007_CMD_PWRDN_IRQEN));
+  pendown = config->pendown(config);
+
+  /* Handle the change from pen down to pen up */
+
+  if (!pendown)
+    {
+      /* Ignore the interrupt if the pen was already down */
+
+      if (!priv->sample.pendown)
+        {
+          goto errout;
+        }
+    }
+  else
+    {
+      /* Handle all pen down events.  First, sample X, Y, Z1, and Z2 values.
+       *
+       * "A resistive touch screen operates by applying a voltage across a
+       *  resistor network and measuring the change in resistance at a given
+       *  point on the matrix where the screen is touched by an input (stylus,
+       *  pen, or finger). The change in the resistance ratio marks the location
+       *  on the touch screen.
+       *
+       * "The 4-wire touch screen panel works by applying a voltage across the
+       *  vertical or horizontal resistive network.  The A/D converter converts
+       *  the voltage measured at the point where the panel is touched. A measurement
+       *  of the Y position of the pointing device is made by connecting the X+
+       *  input to a data converter chip, turning on the Y+ and Y– drivers, and
+       *  digitizing the voltage seen at the X+ input ..."
+       *
+       * "... it is recommended that whenever the host writes to the TSC2007, the
+       *  master processor masks the interrupt associated to PENIRQ. This masking
+       *  prevents false triggering of interrupts when the PENIRQ line is disabled
+       *  in the cases previously listed."
+       */
+
+      y = tsc2007_transfer(priv,
+                          (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_YPOS));
+
+      /* "Voltage is then applied to the other axis, and the A/D converter
+       *  converts the voltage representing the X position on the screen. This
+       *  process provides the X and Y coordinates to the associated processor."
+       */
+
+      x = tsc2007_transfer(priv,
+                          (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_XPOS));
+
+      /* "... To determine pen or finger touch, the pressure of the touch must be
+       *  determined. ... There are several different ways of performing this
+       *  measurement. The TSC2007 supports two methods. The first method requires
+       *  knowing the X-plate resistance, the measurement of the X-position, and two
+       *  additional cross panel measurements (Z2 and Z1) of the touch screen."
+       *
+       *  Rtouch = Rxplate * (X / 4096)* (Z2/Z1 - 1)
+       *
+       * "The second method requires knowing both the X-plate and Y-plate
+       *  resistance, measurement of X-position and Y-position, and Z1 ..."
+       *
+       *  Rtouch = Rxplate * (X / 4096) * (4096/Z1 - 1) - Ryplate * (1 - Y/4096)
+       *
+       * Read Z1 and Z2 values.
+       */
+
+      z1 = tsc2007_transfer(priv,
+                           (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z1POS));
+      z2 = tsc2007_transfer(priv,
+                           (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z2POS));
+
+      /* Power down ADC and enable PENIRQ */
+
+     (void)tsc2007_transfer(priv,
+                           (TSC2007_CMD_12BIT | TSC2007_CMD_PWRDN_IRQEN));
+
+      /* Now calculate the pressure using the first method, reduced to:
+       *
+       * Rtouch = X * Rxplate *(Z2 - Z1) * / Z1 / 4096
+       */
+
+      if (z1 == 0)
+        {
+          idbg("Z1 zero\n");
+          goto errout;
+        }
+
+      pressure = (x * config->rxplate * (z2 - z1)) / z1;
+      pressure = (pressure + 2048) >> 12;
+
+      ivdbg("Position: (%d,%4d) pressure: %u z1/2: (%d,%d)\n"
+            x, y, pressure, z1, z2);
+
+      /* Ignore out of range caculcations */
+
+      if (pressure > 0x0fff)
+        {
+          idbg("Dropped out-of-range pressure: %d\n", pressure);
+          goto errout;
+        }
+
+      /* Save the measurements */
+
+      priv->sample.x        = x;
+      priv->sample.y        = y;
+      priv->sample.pressure = pressure;
+    }
+
+  /* Note the availability of new measurements */
+
+  priv->sample.pendown = pendown;
+  priv->penchange      = true;
+
+  /* Notify any waiters that nes TSC2007 data is available */
+
+  tsc2007_notify(priv);
+
+  /* Exit, re-enabling TSC2007 interrupts */
+
+errout:
+  config->enable(config, true);
 }
 
 /****************************************************************************
@@ -280,8 +575,49 @@ static void tsc2007_sample(FAR struct tsc2007_dev_s *tsc,
 
 static int tsc2007_interrupt(int irq, FAR void *context)
 {
-# warning "Missing logic"
-  return -ENOSYS;
+  FAR struct tsc2007_dev_s    *priv;
+  FAR struct tsc2007_config_s *config;
+  int                          ret;
+
+  /* Which TSC2007 device caused the interrupt? */
+
+#ifndef CONFIG_TSC2007_MULTIPLE
+  priv = &g_tsc2007;
+#else
+  for (priv = g_tsc2007list;
+       priv && priv->configs->irq != irq;
+       priv = priv->flink);
+
+  ASSERT(priv != NULL);
+#endif
+
+  /* Get a pointer the callbacks for convenience (and so the code is not so
+   * ugly).
+   */
+
+  config = priv->config;
+  DEBUGASSERT(config != NULL);
+
+  /* Disable further interrupts */
+
+  config->enable(config, false);
+
+  /* Transfer processing to the worker thread.  Since TSC2007 interrupts are
+   * disabled while the work is pending, no special action should be required
+   * to protected the work queue.
+   */
+
+  DEBUGASSERT(priv->work.worker == NULL);
+  ret = work_queue(&priv->work, tsc2007_worker, priv, 0);
+  if (ret != 0)
+    {
+      illdbg("Failed to queue work: %d\n", ret);
+    }
+
+  /* Clear any pending interrupts and return success */
+
+  config->clear(config);
+  return OK;
 }
 
 /****************************************************************************
@@ -398,6 +734,7 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
 {
   FAR struct inode         *inode;
   FAR struct tsc2007_dev_s *priv;
+  struct tsc2007_sample_s   sample;
   int                       ret;
 
   DEBUGASSERT(filep);
@@ -417,42 +754,42 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
       return -EINTR;
     }
 
-#warning "Not implemented"
+  /* Try to read sample data. */
 
-  sem_post(&priv->devsem);
-  return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: tsc2007_write
- ****************************************************************************/
-
-static ssize_t tsc2007_write(FAR struct file *filep, FAR const char *buffer, size_t len)
-{
-  FAR struct inode         *inode;
-  FAR struct tsc2007_dev_s *priv;
-  int                       ret;
-
-  DEBUGASSERT(filep);
-  inode = filep->f_inode;
-
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct tsc2007_dev_s *)inode->i_private;
-
-  /* Get exclusive access to the driver data structure */
-
-  ret = sem_wait(&priv->devsem);
+  ret = tsc2007_sample(priv, &sample);
   if (ret < 0)
     {
-      /* This should only happen if the wait was canceled by an signal */
+      /* Sample data is not available now.  We would ave to wait to get
+       * receive sample data.  If the user has specified the O_NONBLOCK
+       * option, then just return an error.
+       */
 
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
+      if (filep->f_oflags & O_NONBLOCK)
+        {
+          ret = -EAGAIN;
+          goto errout;
+       }
+
+      /* Wait for sample data */
+
+      ret = tsc2007_waitsample(priv, &sample);
+      if (ret < 0)
+        {
+          /* We might have been awakened by a signal */
+
+          goto errout;
+        }
     }
 
-#warning "Not implemented"
+  /* In any event, we now have sampled TSC2007 data that we can report
+   * to the caller.
+   */
+
+#warning "Missing logic"
+
+errout:
   sem_post(&priv->devsem);
-  return -ENOSYS;
+  return ret;
 }
 
 /****************************************************************************
@@ -533,6 +870,14 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   if (setup)
     {
+      /* Ignore waits that do not include POLLIN */
+
+      if ((fds->revents & POLLIN) == 0)
+        {
+          ret = -EDEADLK;
+          goto errout;
+        }
+
       /* This is a request to set up the poll.  Find an available
        * slot for the poll structure reference
        */
@@ -545,7 +890,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
             {
               /* Bind the poll structure and this slot */
 
-              priv->fds[i]  = fds;
+              priv->fds[i] = fds;
               fds->priv    = &priv->fds[i];
               break;
             }
@@ -558,24 +903,19 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
           goto errout;
         }
 
-      /* Should immediately notify on any of the requested events? */
-#warning "Missing logic"
+      /* Should we immediately notify on any of the requested events? */
 
-
+      if (priv->penchange)
+        {
+          tsc2007_notify(priv);
+        }
     }
   else if (fds->priv)
     {
       /* This is a request to tear down the poll. */
 
       struct pollfd **slot = (struct pollfd **)fds->priv;
-
-#ifdef CONFIG_DEBUG
-      if (!slot)
-        {
-          ret              = -EIO;
-          goto errout;
-        }
-#endif
+      DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */
 
@@ -621,20 +961,32 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
 {
   FAR struct tsc2007_dev_s *priv;
   char devname[DEV_NAMELEN];
+#ifdef CONFIG_TSC2007_MULTIPLE
+  irqstate_t flags;
+#endif
   int ret;
 
   ivdbg("dev: %p minor: %d\n", dev, minor);
+
+  /* Debug-only sanity checks */
+
   DEBUGASSERT(dev != NULL && config != NULL && minor > 0 && minor < 100);
   DEBUGASSERT((config->address & 0xfc) == 0x48);
+  DEBUGASSERT(config->attach != NULL && config->enable  != NULL
+              config->clear  != NULL && config->pendown != NULL);
 
   /* Create and initialize a TSC2007 device driver instance */
 
+#ifndef CONFIG_TSC2007_MULTIPLE
+  priv = &g_tsc2007;
+#else
   priv = (FAR struct tsc2007_dev_s *)kmalloc(sizeof(struct tsc2007_dev_s));
   if (!priv)
     {
       idbg("kmalloc(%d) failed\n", sizeof(struct tsc2007_dev_s));
       return -ENOMEM;
     }
+#endif
 
   /* Initialize the TSC2007 device driver instance */
 
@@ -642,6 +994,12 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
   priv->i2c    = dev;             /* Save the I2C device handle */
   priv->config = config;          /* Save the board configuration */
   sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
+  sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
+
+  /* Make sure that interrupts are disabled */
+
+  config->clear(config);
+  config->enable(config, false);
 
   /* Attach the interrupt handler */
 
@@ -667,6 +1025,7 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
   ivdbg("Registering %s\n", devname);
+
   ret = register_driver(devname, &tsc2007_fops, 0666, priv);
   if (ret < 0)
     {
@@ -674,18 +1033,37 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
       goto errout_with_priv;
     }
 
-  /* Enable the interrupt */
+  /* If multiple TSC2007 devices are supported, then we will need to add
+   * this new instance to a list of device instances so that it can be
+   * found by the interrupt handler based on the recieved IRQ number.
+   */
 
-  ret = config->enable(config, true);
-  if (ret < 0)
+#ifdef CONFIG_TSC2007_MULTIPLE
+  priv          = irqsave;
+  priv->flink   = g_tsc2007list;
+  g_tsc2007list = priv;
+  irqrestore(flags);
+#endif
+
+  /* Schedule work to perform the initial sampling and to set the data
+   * availability conditions.
+   */
+
+  ret = work_queue(&priv->work, tsc2007_worker, priv, 0);
+  if (ret != 0)
     {
-      idbg("Failed enable interrupt\n");
+      idbg("Failed to queue work: %d\n", ret);
       goto errout_with_priv;
     }
-  return ret;
+
+  /* And return success (?) */
+
+  return OK;
 
 errout_with_priv:
   sem_destroy(&priv->devsem);
+#ifdef CONFIG_TSC2007_MULTIPLE
   kfree(priv);
+#endif
   return ret;
 }

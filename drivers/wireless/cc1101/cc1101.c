@@ -452,7 +452,8 @@ volatile int cc1101_interrupt = 0;
 
 int cc1101_eventcb(int irq, FAR void *context)
 {
-    cc1101_interrupt++;
+  cc1101_interrupt++;
+  return OK;
 }
 
 /****************************************************************************
