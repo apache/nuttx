@@ -84,7 +84,7 @@
 #undef CONFIG_TSC2007_REFCNT
 
 /* Driver support ***********************************************************/
-/* This format is used to construct the /dev/skel[n] device driver path.  It
+/* This format is used to construct the /dev/input[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
 
@@ -99,16 +99,17 @@
 
 enum tsc2007_contact_3
 {
-  CONTACT_NONE = 0,   /* No contact */
-  CONTACT_DOWN,       /* First contact */
-  CONTACT_MOVE,       /* Same contact, possibly different position */
-  CONTACT_UP,         /* Contact lost */
+  CONTACT_NONE = 0,                    /* No contact */
+  CONTACT_DOWN,                        /* First contact */
+  CONTACT_MOVE,                        /* Same contact, possibly different position */
+  CONTACT_UP,                          /* Contact lost */
 };
 
 /* This structure describes the results of one TSC2007 sample */
 
 struct tsc2007_sample_s
 {
+  uint8_t  id;                         /* Sampled touch point ID */
   uint8_t  contact;                    /* Contact state (see enum tsc2007_contact_e) */
   uint16_t x;                          /* Measured X position */
   uint16_t y;                          /* Measured Y position */
@@ -279,7 +280,7 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
 
       if (sample->contact == CONTACT_UP)
         {
-          /* Next.. no contract.  Increment the ID so that next contact will be unique */
+          /* Next.. no contract.  Increment the ID so that next contact ID will be unique */
 
           priv->sample.contact = CONTACT_NONE;
           priv->id++;
@@ -621,7 +622,10 @@ static void tsc2007_worker(FAR void *arg)
 
        priv->sample.contact = CONTACT_UP;
     }
-    
+
+  /* Indicate the availability of new sample data for this ID */
+
+  priv->sample.id = priv->id;
   priv->penchange = true;
 
   /* Notify any waiters that nes TSC2007 data is available */
@@ -871,19 +875,19 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
     {
       /* Pen is now up */
 
-      report->point[0].flags  = TOUCH_UP | TOUCH_ID_VALID | TOUCH_POS_VALID |TOUCH_PRESSURE_VALID;
+      report->point[0].flags  = TOUCH_UP | TOUCH_ID_VALID;
     }
   else if (sample.contact == CONTACT_DOWN)
     {
       /* First contact */
 
-      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID |TOUCH_PRESSURE_VALID;
+      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID | TOUCH_PRESSURE_VALID;
     }
   else /* if (sample->contact == CONTACT_MOVE) */
     {
       /* Movement of the same contact */
 
-      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID |TOUCH_PRESSURE_VALID;
+      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID | TOUCH_PRESSURE_VALID;
     }
 
   ret = SIZEOF_TOUCH_SAMPLE_S(1);

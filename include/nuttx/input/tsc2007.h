@@ -113,7 +113,9 @@ struct tsc2007_config_s
 
   /* IRQ/GPIO access callbacks.  These operations all hidden behind
    * callbacks to isolate the TSC2007 driver from differences in GPIO
-   * interrupt handling by varying boards and MCUs.
+   * interrupt handling by varying boards and MCUs.  If possible,
+   * interrupts should be configured on both rising and falling edges
+   * so that contact and loss-of-contact events can be detected.
    *
    * attach  - Attach the TSC2007 interrupt handler to the GPIO interrupt
    * enable  - Enable or disable the GPIO interrupt
