@@ -1958,4 +1958,5 @@
 	* drivers/input/tsc2007.c and include/nuttx/input/*:  Add a generic NuttX
 	  touchscreen interface.  Add a driver for the TI TSC2007 touchscreen
 	  controller.
+	* graphics/nxglib/lcd and fb:  Add low level routines to set single pixels.
 

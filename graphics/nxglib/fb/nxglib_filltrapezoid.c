@@ -89,7 +89,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
   FAR struct fb_planeinfo_s *pinfo,
   FAR const struct nxgl_trapezoid_s *trap,
   FAR const struct nxgl_rect_s *bounds,
-  nxgl_mxpixel_t color)
+  NXGL_PIXEL_T color)
 {
   unsigned int stride;
   unsigned int width;

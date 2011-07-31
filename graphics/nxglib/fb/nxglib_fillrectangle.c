@@ -83,7 +83,9 @@
  ****************************************************************************/
 
 void NXGL_FUNCNAME(nxgl_fillrectangle,NXGLIB_SUFFIX)
-(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect, nxgl_mxpixel_t color)
+  (FAR struct fb_planeinfo_s *pinfo,
+   FAR const struct nxgl_rect_s *rect,
+   NXGL_PIXEL_T color)
 {
   FAR uint8_t *line;
   unsigned int width;

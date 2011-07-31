@@ -211,34 +211,66 @@ EXTERN void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v,
 /* Rasterizers **************************************************************/
 
 /****************************************************************************
+ * Name: nxgl_setpixel_*bpp
+ *
+ * Descripton:
+ *   Draw a single pixel in graphics memory memory at the given position and
+ *   with the given color.  This is equivalent to nxgl_fillrectangle_*bpp()
+ *   with a 1x1 rectangle but is more efficient.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_setpixel_1bpp(FAR NX_PLANEINFOTYPE *pinfo,
+                               FAR const struct nxgl_point_s *pos,
+                               uint8_t color);
+EXTERN void nxgl_setpixel_2bpp(FAR NX_PLANEINFOTYPE *pinfo,
+                               FAR const struct nxgl_point_s *pos,
+                               uint8_t color);
+EXTERN void nxgl_setpixel_4bpp(FAR NX_PLANEINFOTYPE *pinfo,
+                               FAR const struct nxgl_point_s *pos,
+                               uint8_t color);
+EXTERN void nxgl_setpixel_8bpp(FAR NX_PLANEINFOTYPE *pinfo,
+                               FAR const struct nxgl_point_s *pos,
+                               uint8_t color);
+EXTERN void nxgl_setpixel_16bpp(FAR NX_PLANEINFOTYPE *pinfo,
+                                FAR const struct nxgl_point_s *pos,
+                                uint16_t color);
+EXTERN void nxgl_setpixel_24bpp(FAR NX_PLANEINFOTYPE *pinfo,
+                                FAR const struct nxgl_point_s *pos,
+                                uint32_t color);
+EXTERN void nxgl_setpixel_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
+                                FAR const struct nxgl_point_s *pos,
+                                uint32_t color);
+
+/****************************************************************************
  * Name: nxgl_fillrectangle_*bpp
  *
  * Descripton:
- *   Fill a rectangle region in the framebuffer memory with a fixed color
+ *   Fill a rectangle region in the graphics memory with a fixed color
  *
  ****************************************************************************/
 
 EXTERN void nxgl_fillrectangle_1bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
-                                    nxgl_mxpixel_t color);
+                                    uint8_t color);
 EXTERN void nxgl_fillrectangle_2bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
-                                    nxgl_mxpixel_t color);
+                                    uint8_t color);
 EXTERN void nxgl_fillrectangle_4bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
-                                    nxgl_mxpixel_t color);
+                                    uint8_t color);
 EXTERN void nxgl_fillrectangle_8bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
-                                    nxgl_mxpixel_t color);
+                                    uint8_t color);
 EXTERN void nxgl_fillrectangle_16bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *rect,
-                                     nxgl_mxpixel_t color);
+                                     uint16_t color);
 EXTERN void nxgl_fillrectangle_24bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *rect,
-                                     nxgl_mxpixel_t color);
+                                     uint32_t color);
 EXTERN void nxgl_fillrectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_rect_s *rect,
-                                     nxgl_mxpixel_t color);
+                                     uint32_t color);
 
 /****************************************************************************
  * Name: nxglib_filltrapezoid_*bpp
@@ -253,31 +285,31 @@ EXTERN void nxgl_fillrectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
 EXTERN void nxgl_filltrapezoid_1bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_trapezoid_s *trap,
                                     FAR const struct nxgl_rect_s *bounds,
-                                    nxgl_mxpixel_t color);
+                                    uint8_t color);
 EXTERN void nxgl_filltrapezoid_2bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_trapezoid_s *trap,
                                     FAR const struct nxgl_rect_s *bounds,
-                                    nxgl_mxpixel_t color);
+                                    uint8_t color);
 EXTERN void nxgl_filltrapezoid_4bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_trapezoid_s *trap,
                                     FAR const struct nxgl_rect_s *bounds,
-                                    nxgl_mxpixel_t color);
+                                    uint8_t color);
 EXTERN void nxgl_filltrapezoid_8bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_trapezoid_s *trap,
                                     FAR const struct nxgl_rect_s *bounds,
-                                    nxgl_mxpixel_t color);
+                                    uint8_t color);
 EXTERN void nxgl_filltrapezoid_16bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_trapezoid_s *trap,
                                     FAR const struct nxgl_rect_s *bounds,
-                                    nxgl_mxpixel_t color);
+                                    uint16_t color);
 EXTERN void nxgl_filltrapezoid_24bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_trapezoid_s *trap,
                                      FAR const struct nxgl_rect_s *bounds,
-                                     nxgl_mxpixel_t color);
+                                     uint32_t color);
 EXTERN void nxgl_filltrapezoid_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      FAR const struct nxgl_trapezoid_s *trap,
                                      FAR const struct nxgl_rect_s *bounds,
-                                     nxgl_mxpixel_t color);
+                                     uint32_t color);
 
 /****************************************************************************
  * Name: nxgl_moverectangle_*bpp

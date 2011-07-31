@@ -35,6 +35,12 @@
 
 NXGLIB_ASRCS	=
 
+SETP1_CSRCS		= nxglib_setpixel_1bpp.c nxglib_setpixel_2bpp.c \
+		  nxglib_setpixel_4bpp.c
+
+SETP2_CSRCS		= nxglib_setpixel_8bpp.c nxglib_setpixel_16bpp.c \
+		  nxglib_setpixel_24bpp.c nxglib_setpixel_32bpp.c
+
 RFILL1_CSRCS	= nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c \
 		  nxglib_fillrectangle_4bpp.c
 
@@ -72,7 +78,8 @@ COLOR_CSRCS	= nxglib_colorcopy.c
 LCD_CSRCS	= 
 
 NXGLIB_CSRCS	= nxglib_rgb2yuv.c nxglib_yuv2rgb.c \
-		  $(RFILL1_CSRCS) $(RFILL2_CSRCS) $(TFILL1_CSRCS) $(TFILL2_CSRCS) \
-		  $(RMOVE1_CSRCS) $(RMOVE2_CSRCS) $(RCOPY1_CSRCS) $(RCOPY2_CSRCS) \
-		  $(RECT_CSRCS) $(TRAP_CSRCS) $(COLOR_CSRCS) $(LCD_CSRCS)
+		  $(SETP1_CSRCS) $(SETP2_CSRCS) $(RFILL1_CSRCS) $(RFILL2_CSRCS) \
+		  $(TFILL1_CSRCS) $(TFILL2_CSRCS) $(RMOVE1_CSRCS) $(RMOVE2_CSRCS) \
+		  $(RCOPY1_CSRCS) $(RCOPY2_CSRCS) $(RECT_CSRCS) $(TRAP_CSRCS) \
+		  $(COLOR_CSRCS) $(LCD_CSRCS)
 
