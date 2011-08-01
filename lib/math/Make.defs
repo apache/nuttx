@@ -33,5 +33,5 @@
 #
 ############################################################################
 
-MATH_SRCS = lib_rint.c lib_fixedmath.c lib_b16sin.c lib_b16cos.c
+MATH_SRCS = lib_rint.c lib_fixedmath.c lib_b16sin.c lib_b16cos.c lib_b16atan2.c
 

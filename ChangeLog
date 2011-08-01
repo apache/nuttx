@@ -1959,4 +1959,6 @@
 	  touchscreen interface.  Add a driver for the TI TSC2007 touchscreen
 	  controller.
 	* graphics/nxglib/lcd and fb:  Add low level routines to set single pixels.
+	* lib/math/lib_b16atan2.c:  Add a fixed precision atan2() function
+
 

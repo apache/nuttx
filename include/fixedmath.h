@@ -217,6 +217,7 @@ EXTERN ub16_t ub16divub16(ub16_t num, ub16_t denom);
 
 EXTERN b16_t b16sin(b16_t rad);
 EXTERN b16_t b16cos(b16_t rad);
+EXTERN b16_t b16atan2(b16_t y, b16_t x);
 
 #undef EXTERN
 #if defined(__cplusplus)
