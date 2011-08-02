@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: July 27 2011</p>
+      <p>Last Updated: August 2, 2011</p>
     </td>
   </tr>
 </table>
@@ -76,7 +76,8 @@
         <i>2.2.15 <a href="#nxglruncopy"><code>nxgl_runcopy()</code></a></i><br>
         <i>2.2.16 <a href="#nxgltrapoffset"><code>nxgl_trapoffset()</code></a></i><br>
         <i>2.2.17 <a href="#nxgltrapcopy"><code>nxgl_trapcopy()</code></a></i><br>
-        <i>2.2.18 <a href="#nxglcolorcopy"><code>nxgl_colorcopy</code></a></i>
+        <i>2.2.18 <a href="#nxglcolorcopy"><code>nxgl_colorcopy</code></a></i><br>
+        <i>2.2.19 <a href="#nxglsplitline"><code>nxgl_splitline</code></a></i>
       </ul>
      </p>
    <p>
@@ -113,11 +114,12 @@
         <i>2.3.19 <a href="#nxlower"><code>nx_lower()</code></a></i><br>
         <i>2.3.20 <a href="#nxfill"><code>nx_fill()</code></a></i><br>
         <i>2.3.21 <a href="#nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></i><br>
-        <i>2.3.22 <a href="#nxglrgb2yuv"><code>nx_setbgcolor()</code></a></i><br>
-        <i>2.3.23 <a href="#nxmove"><code>nx_move()</code></a></i><br>
-        <i>2.3.24 <a href="#nxbitmap"><code>nx_bitmap()</code></a></i><br>
-        <i>2.3.25 <a href="#nxkbdin"><code>nx_kbdin()</code></a></i><br>
-        <i>2.3.26 <a href="#nxmousein"><code>nx_mousein()</code></a></i><br>
+        <i>2.3.22 <a href="#nxdrawline"><code>nx_drawline()</code></a></i><br>
+        <i>2.3.23 <a href="#nxglrgb2yuv"><code>nx_setbgcolor()</code></a></i><br>
+        <i>2.3.24 <a href="#nxmove"><code>nx_move()</code></a></i><br>
+        <i>2.3.25 <a href="#nxbitmap"><code>nx_bitmap()</code></a></i><br>
+        <i>2.3.26 <a href="#nxkbdin"><code>nx_kbdin()</code></a></i><br>
+        <i>2.3.27 <a href="#nxmousein"><code>nx_mousein()</code></a></i><br>
      </ul>
    </p>
   </td>
@@ -137,14 +139,16 @@
         <i>2.4.8 <a href="#nxtklower"><code>nxtk_lower()</code></a></i><br>
         <i>2.4.9 <a href="#nxtkfillwindow"><code>nxtk_fillwindow()</code></a></i><br>
         <i>2.4.10 <a href="#nxtkfilltrapwindow"><code>nxtk_filltrapwindow()</code></a></i><br>
-        <i>2.4.11 <a href="#nxtkmovewindow"><code>nxtk_movewindow()</code></a></i><br>
-        <i>2.4.12 <a href="#nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></i><br>
-        <i>2.4.13 <a href="#nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></i><br>
-        <i>2.4.14 <a href="#nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></i><br>
-        <i>2.4.15 <a href="#nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></i><br>
-        <i>2.4.16 <a href="#nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></i><br>
-        <i>2.4.17 <a href="#nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></i><br>
-        <i>2.4.18 <a href="#nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></i>
+        <i>2.4.11 <a href="#nxtkdrawlinewindow"><code>nxtk_drawlinewindow()</code></a></i><br>
+        <i>2.4.12 <a href="#nxtkmovewindow"><code>nxtk_movewindow()</code></a></i><br>
+        <i>2.4.13 <a href="#nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></i><br>
+        <i>2.4.14 <a href="#nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></i><br>
+        <i>2.4.15 <a href="#nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></i><br>
+        <i>2.4.16 <a href="#nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></i><br>
+        <i>2.4.17 <a href="#nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></i><br>
+        <i>2.4.18 <a href="#nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></i><br>
+        <i>2.4.19 <a href="#nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></i><br>
+        <i>2.4.20 <a href="#nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></i>
      </ul>
    </p>
    <p>
@@ -711,7 +715,7 @@ void nxgl_trapoffset(FAR struct nxgl_trapezoid_s *dest,
   Offset the trapezoid position by the specified <code>dx</code>, <code>dy</code> values.
 </p>
 
-<h3>2.2.1 <a name="nxgltrapcopy"><code>nxgl_trapcopy()</code></a></h3>
+<h3>2.2.17 <a name="nxgltrapcopy"><code>nxgl_trapcopy()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -724,7 +728,7 @@ void nxgl_trapcopy(FAR struct nxgl_trapezoid_s *dest,
   assignments because some compilers are not good at that.
 </p>
 
-<h3>2.2.1 <a name="nxglcolorcopy"><code>nxgl_colorcopy</code></a></h3>
+<h3>2.2.18 <a name="nxglcolorcopy"><code>nxgl_colorcopy</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -737,6 +741,70 @@ nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES],
   other than hide all of the conditional compilation for planar colors
   in one place.
 </p>
+
+<h3>2.2.19 <a name="nxglsplitline"><code>nxgl_splitline</code></a></h3>
+
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+int nxgl_splitline(FAR struct nxgl_vector_s *vector, FAR struct nxgl_trapezoid_s *traps,
+                   FAR struct nxgl_rect_s *rect, nxgl_coord_t linewidth);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  In the general case, a line with width can be represented as a parallelogram with a triangle at the top and bottom.
+  Triangles and parallelograms are both degenerate versions of a trapeziod.
+  This function breaks a wide line into triangles and trapezoids. 
+  This function also detects other degenerate cases:
+</p>
+<ol>
+  <li>
+    If <code>y1 == y2</code> then the line is horizontal and is better represented as a rectangle.
+  </li>
+  <li>
+    If <code>x1 == x2</code> then the line is vertical and also better represented as a rectangle.
+  </li>
+  <li>
+    If the width of the line is 1, then there are no triangles at the top and bottome
+    (this may also be the case if the width is narrow and the line is near vertical).
+  </li>
+  <li>
+     If the line is oriented is certain angles, it may consist only of the upper and lower triangles with no trapezoid in between.
+     In this case, 3 trapezoids will be returned, but traps[1] will be  degenerate.
+  </li>
+</ol>
+<p>
+   <b>Input parameters</b>:
+<p>
+<ul><dl>
+   <dt><code>vector</code>
+     <dd>A pointer to the vector described the line to be drawn.
+   <dt><code>traps</code>
+     <dd>A pointer to a array of trapezoids (size 3).
+   <dt><code>rect</code>
+    <dd> A pointer to a rectangle.
+</dl></ul>
+<p>
+  <b>Returned value</b>:
+</p>
+<ul>
+  <p>
+    <code>0</code>: Line successfully broken up into three trapezoids. 
+    Values in <code>traps[0]</code>, <code>traps[1]</code>, and <code>traps[2]</code> are valid.
+  </p>
+  <p>
+    <code>1</code>: Line successfully represented by one trapezoid.
+    Value in <code>traps[1]</code> is valid.
+  </p>
+  <p>
+     <code>2</code>: Line successfully represented by one rectangle.
+     Value in <code>rect </code>is valid
+  </p>
+  <p>
+    <code>&lt;0</code>: On errors, a negated <code>errno</code> value is returned.
+  </p>
+  <p>
+</ul>
 
 <h2>2.3 <a name="nx2">NX</a></h2>
 
@@ -1581,7 +1649,43 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.22 <a name="nxglrgb2yuv"><code>nx_setbgcolor()</code></a></h3>
+<h3>2.3.22 <a name="nxdrawline"><code>nx_drawline()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+
+int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
+               nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Fill the specified trapezoidal region in the window with the specified color.
+  Fill the specified line in the window with the specified color.
+  This is simply a wrapper that uses <code>nxgl_splitline()</code> to break the line into
+  trapezoids and then calls <code>nx_filltrapezoid()</code> to render the line.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>hwnd</code>
+      <dd>The handle returned by <a href="#nxopenwindow"><code>nx_openwindow()</code></a>
+        or <a href="#nxrequestbkgd"><code>nx_requestbkgd()</code></a>
+    <dt><code>vector</code>
+      <dd>Describes the line to be drawn.
+    <dt><code>width</code>
+      <dd>The width of the line
+    <dt><code>color</code>
+      <dd>The color to use to fill the line
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.3.23 <a name="nxglrgb2yuv"><code>nx_setbgcolor()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1609,7 +1713,7 @@ int nx_setbgcolor(NXHANDLE handle,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.23 <a name="nxmove"><code>nx_move()</code></a></h3>
+<h3>2.3.24 <a name="nxmove"><code>nx_move()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1640,7 +1744,7 @@ int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.24 <a name="nxbitmap"><code>nx_bitmap()</code></a></h3>
+<h3>2.3.25 <a name="nxbitmap"><code>nx_bitmap()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1682,7 +1786,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.25 <a name="nxkbdin"><code>nx_kbdin()</code></a></h3>
+<h3>2.3.26 <a name="nxkbdin"><code>nx_kbdin()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1705,7 +1809,7 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.26 <a name="nxmousein"><code>nx_mousein()</code></a></h3>
+<h3>2.3.27 <a name="nxmousein"><code>nx_mousein()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2061,7 +2165,44 @@ int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.11 <a name="nxtkmovewindow"><code>nxtk_movewindow()</code></a></h3>
+<h3>2.4.11 <a name="nxtkdrawlinewindow"><code>nxtk_drawlinewindow()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
+
+int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
+                        nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Fill the specified trapezoidal region in the window with the specified color.
+  Fill the specified line in the window with the specified color.
+  This is simply a wrapper that uses <code>nxgl_splitline()</code> to break the line into
+  trapezoids and then calls <code>nxtk_filltrapwindow()</code> to render the line.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>hfwnd</code>
+      <dd>A handle previously returned by
+        <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a>.
+    <dt><code>vector</code>
+      <dd>Describes the line to be drawn.
+    <dt><code>width</code>
+      <dd>The width of the line
+    <dt><code>color</code>
+      <dd>The color to use to fill the line
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.4.12 <a name="nxtkmovewindow"><code>nxtk_movewindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2094,7 +2235,7 @@ int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.12 <a name="nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></h3>
+<h3>2.4.13 <a name="nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2139,7 +2280,7 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.13 <a name="nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></h3>
+<h3>2.4.14 <a name="nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2174,7 +2315,7 @@ int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.14 <a name="nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></h3>
+<h3>2.4.15 <a name="nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2203,7 +2344,7 @@ int nxtk_closetoolbar(NXTKWINDOW hfwnd);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.15 <a name="nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></h3>
+<h3>2.4.16 <a name="nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2235,7 +2376,7 @@ int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.16 <a name="nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></h3>
+<h3>2.4.17 <a name="nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2267,7 +2408,44 @@ int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *tr
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.17 <a name="nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></h3>
+<h3>2.4.18 <a name="nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
+
+int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
+                         nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Fill the specified line in the toolbar sub-window with the specified color.
+  This is simply a wrapper that uses <code>nxgl_splitline()</code> to break the line into
+  trapezoids and then calls <code>nxtk_filltraptoolbar()</code> to render the line.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>hfwnd</code>
+      <dd>A handle previously returned by
+        <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a>.
+    <dt><code>vector</code>
+      <dd>Describes the line to be drawn.
+    <dt><code>width</code>
+      <dd>The width of the line
+    <dt><code>color</code>
+      <dd>The color to use to fill the line
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.4.19 <a name="nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2301,7 +2479,7 @@ int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.18 <a name="nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></h3>
+<h3>2.4.20 <a name="nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -3139,8 +3317,12 @@ make
   <td><br></td>
   <td align="center" bgcolor="skyblue">YES</td>
 </tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglsplitline"><code>nxgl_splitline</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">PART</td>
+</tr>
 </table></center>
-
 
 <center><h2>Table D.2: <a name="nxcbcoverage">NX Server Callbacks Test Coverage</a></h2></center>
 <center><table border="1" width="80%">
@@ -3286,6 +3468,11 @@ make
   <td align="center" bgcolor="lightgrey">NO</td>
 </tr>
 <tr>
+  <td align="left" valign="top"><a href="#nxdrawline"><code>nx_drawline()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
   <td align="left" valign="top"><a href="#nxglrgb2yuv"><code>nx_setbgcolor()</code></a></td>
   <td><br></td>
   <td align="center" bgcolor="skyblue">YES</td>
@@ -3368,6 +3555,11 @@ make
   <td align="center" bgcolor="lightgrey">NO</td>
 </tr>
 <tr>
+  <td align="left" valign="top"><a href="#nxtkdrawlinewindow"><code>nxtk_drawlinewindow()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
   <td align="left" valign="top"><a href="#nxtkmovewindow"><code>nxtk_movewindow()</code></a></td>
   <td><br></td>
   <td align="center" bgcolor="lightgrey">NO</td>
@@ -3394,6 +3586,11 @@ make
 </tr>
 <tr>
   <td align="left" valign="top"><a href="#nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></td>
   <td><br></td>
   <td align="center" bgcolor="lightgrey">NO</td>
 </tr>
