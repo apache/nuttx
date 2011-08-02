@@ -33,7 +33,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  **************************************************************************************/
-
+/* This driver supports the following LCDs:
+ *
+ * 1. Ampire AM-240320LTNQW00H
+ * 2. Orise Tech SPFD5408B
+ * 3. RenesasSP R61580
+ *
+ * The driver dynamically selects the LCD based on the reported LCD ID value.
+ */
+ 
 /**************************************************************************************
  * Included Files
  **************************************************************************************/
@@ -258,6 +266,11 @@
 #define LCD_REG_229           0xe5
 
 #define LCD_BL_TIMER_PERIOD   8999
+
+/* LCD IDs */
+
+#define SPFD5408B_ID          0x5408
+#define R61580_ID             0x1580
 
 /* Debug ******************************************************************************/
 
@@ -848,9 +861,16 @@ static int stm3210e_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
 static inline void stm3210e_lcdinitialize(void)
 {
-  /* Check if the LCD is SPFD5408B Controller */
+  uint16_t id;
 
-  if (stm3210e_readreg(LCD_REG_0) == 0x5408)
+  /* Check if the LCD is Orise Tech SPFD5408B Controller (or the compatible RenesasSP
+   * R61580).
+   */
+
+  id = stm3210e_readreg(LCD_REG_0);
+  lcddbg("ID: %04x\n", id);
+
+  if (id == SPFD5408B_ID || id == R61580_ID)
     {
       g_lcddev.spfd5408b = true;
 
