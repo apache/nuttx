@@ -241,6 +241,30 @@ EXTERN int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
                                nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
+ * Name: nxtk_drawlinewindow
+ *
+ * Description:
+ *  Fill the specified line in the window with the specified color.  This
+ *  is simply a wrapper that uses nxgl_splitline() to break the line into
+ *  trapezoids and then calls nxtk_filltrapwindow() to render the line.
+ *
+ * Input Parameters:
+ *   hfwnd - The window handle returned by nxtk_openwindow
+ *   vector - Describes the line to be drawn
+ *   width  - The width of the line
+ *   color  - The color to use to fill the line
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_drawlinewindow(NXTKWINDOW hfwnd,
+                              FAR struct nxgl_vector_s *vector,
+                              nxgl_coord_t width,
+                              nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
  * Name: nxtk_movewindow
  *
  * Description:
@@ -363,6 +387,31 @@ EXTERN int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect
  ****************************************************************************/
 
 EXTERN int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *trap,
+                                nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
+ * Name: nxtk_drawlinetoolbar
+ *
+ * Description:
+ *  Fill the specified line in the toolbar sub-window with the specified
+ *  color.  This is simply a wrapper that uses nxgl_splitline() to break the
+ *  line into trapezoids and then calls nxtk_filltrapwindow() to render the
+ *  line.
+ *
+ * Input Parameters:
+ *   hfwnd - The window handle returned by nxtk_openwindow
+ *   vector - Describes the line to be drawn
+ *   width  - The width of the line
+ *   color  - The color to use to fill the line
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd,
+                                FAR struct nxgl_vector_s *vector,
+                                nxgl_coord_t width,
                                 nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************

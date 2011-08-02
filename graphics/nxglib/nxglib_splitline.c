@@ -75,7 +75,8 @@
  *   In the general case, a line with width can be represented as a
  *   parallelogram with a triangle at the top and bottom.  Triangles and
  *   parallelograms are both degenerate versions of a trapeziod.  This
- *   function breaks.  This function also detects other degenerate cases:
+ *   function breaks a wide line into triangles and trapezoids.  This
+ *   function also detects other degenerate cases:
  *
  *   1. If y1 == y2 then the line is horizontal and is better represented
  *      as a rectangle.
@@ -83,9 +84,9 @@
  *      as a rectangle.
  *   3. If the width of the line is 1, then there are no triangles at the
  *      top and bottome (this may also be the case if the width is narrow
- *      and the line is near vertical)
+ *      and the line is near vertical).
  *   4. If the line is oriented is certain angles, it may consist only of
- *      the upper and lower triangles with no trapezoid inbetween.  In
+ *      the upper and lower triangles with no trapezoid in between.  In
  *      this case, 3 trapezoids will be returned, but traps[1] will be
  *      degenerate.
  *

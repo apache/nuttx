@@ -1962,4 +1962,7 @@
 	* lib/math/lib_b16atan2.c:  Add a fixed precision atan2() function
 	* graphics/nxglib/nxglib_splitline.c: Add logic to divide a wide line into
 	  trapezoidal components.
+	* graphics/nxmu/nx_drawline.c, graphics/nxsu/nx_drawline.c,
+	  graphics/nxtk/nxtk_drawlinewindow.c, graphics/nxtk/nxtk_drawlinetoolbar.c:
+	  Add new line drawing interfaces (untested).
 
