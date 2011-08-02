@@ -146,6 +146,14 @@ struct nxgl_rect_s
   struct nxgl_point_s pt2; /* Lower, right-hand corner */
 };
 
+/* Describes a vector starting at pt1 and extending throug pt2 */
+
+struct nxgl_vector_s
+{
+  struct nxgl_point_s pt1; /* Start position */
+  struct nxgl_point_s pt2; /* End position */
+};
+
 /* Describes a run, i.e., a horizontal line.  Note that the start/end positions
  * have fractional precision.  This is necessary for good joining of trapezoids
  * when a more complex shape is decomposed into trapezoids
@@ -579,6 +587,49 @@ EXTERN void nxgl_trapcopy(FAR struct nxgl_trapezoid_s *dest,
 
 EXTERN void nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES],
                            const nxgl_mxpixel_t src[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
+ * Name: nxgl_splitline
+ *
+ * Description:
+ *   In the general case, a line with width can be represented as a
+ *   parallelogram with a triangle at the top and bottom.  Triangles and
+ *   parallelograms are both degenerate versions of a trapeziod.  This
+ *   function breaks.  This function also detects other degenerate cases:
+ *
+ *   1. If y1 == y2 then the line is horizontal and is better represented
+ *      as a rectangle.
+ *   2. If x1 == x2 then the line is vertical and also better represented
+ *      as a rectangle.
+ *   3. If the width of the line is 1, then there are no triangles at the
+ *      top and bottome (this may also be the case if the width is narrow
+ *      and the line is near vertical)
+ *   4. If the line is oriented is certain angles, it may consist only of
+ *      the upper and lower triangles with no trapezoid inbetween.  In
+ *      this case, 3 trapezoids will be returned, but traps[1] will be
+ *      degenerate.
+ *
+ * Input parameters:
+ *   vector - A pointer to the vector described the line to be drawn.
+ *   traps  - A pointer to a array of trapezoids (size 3).
+ *   rect   - A pointer to a rectangle.
+ *
+ * Returned value:
+ *   0: Line successfully broken up into three trapezoids.  Values in
+ *      traps[0], traps[1], and traps[2] are valid.
+ *   1: Line successfully represented by one trapezoid. Value in traps[1]
+ *      is valid.
+ *   2: Line successfully represented by one rectangle. Value in rect is
+ *      valid
+ *  <0: On errors, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+EXTERN int nxgl_splitline(FAR struct nxgl_vector_s *vector,
+                          FAR struct nxgl_trapezoid_s *traps,
+                          FAR struct nxgl_rect_s *rect,
+                          nxgl_coord_t linewidth);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

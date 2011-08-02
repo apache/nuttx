@@ -1960,5 +1960,6 @@
 	  controller.
 	* graphics/nxglib/lcd and fb:  Add low level routines to set single pixels.
 	* lib/math/lib_b16atan2.c:  Add a fixed precision atan2() function
-
+	* graphics/nxglib/nxglib_splitline.c: Add logic to divide a wide line into
+	  trapezoidal components.
 

@@ -77,7 +77,7 @@ COLOR_CSRCS	= nxglib_colorcopy.c
 
 LCD_CSRCS	= 
 
-NXGLIB_CSRCS	= nxglib_rgb2yuv.c nxglib_yuv2rgb.c \
+NXGLIB_CSRCS	= nxglib_rgb2yuv.c nxglib_yuv2rgb.c nxglib_splitline.c \
 		  $(SETP1_CSRCS) $(SETP2_CSRCS) $(RFILL1_CSRCS) $(RFILL2_CSRCS) \
 		  $(TFILL1_CSRCS) $(TFILL2_CSRCS) $(RMOVE1_CSRCS) $(RMOVE2_CSRCS) \
 		  $(RCOPY1_CSRCS) $(RCOPY2_CSRCS) $(RECT_CSRCS) $(TRAP_CSRCS) \
