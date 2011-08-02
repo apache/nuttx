@@ -1896,7 +1896,7 @@
 	  When a window is closed, the display was not being updated.  The old
 	  window graphic was left on the display for a time.
 
-6.7 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+6.7 2011-08-02 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* Makefile:  Added a export target that will bundle up all of the NuttX
 	  libraries, header files, and the startup object into an export-able
@@ -1966,3 +1966,4 @@
 	  graphics/nxtk/nxtk_drawlinewindow.c, graphics/nxtk/nxtk_drawlinetoolbar.c:
 	  Add new line drawing interfaces (untested).
 
+6.8 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>

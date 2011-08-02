@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 21, 2011</p>
+      <p>Last Updated: August 1, 2011</p>
     </td>
   </tr>
 </table>
@@ -655,6 +655,27 @@
       </li>
     </p>
 </tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Font management sub-system.</li>
+    </p>
+</tr>
+
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Input Devices</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Touchscreen, USB keyboard, GPIO-based buttons and keypads. </li>
+    </p>
+</tr>
 </table></center>
 
 <p>
@@ -838,74 +859,79 @@
   </tr>
 </table>
 
-<p><b>nuttx-6.6 Release Notes</b>:
+<p><b>nuttx-6.7 Release Notes</b>:
 <p>
-  The 73<sup>5d</sup> release of NuttX, Version 6.6, was made on July 11, 2011 and is available for download from the
+  The 74<sup>th</sup> release of NuttX, Version 6.7, was made on  August 2, 2011, 2011 and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that release consists of two tarballs:  <code>nuttx-6.6.tar.gz</code> and <code>apps-6.5.tar.gz</code>.
+  Note that release consists of two tarballs:  <code>nuttx-6.7.tar.gz</code> and <code>apps-6.7.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information)
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
   These unreleased changes are also listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  The 6.6 release adds several smaller featurs but is mostly a bugfix release.
-  Bugfixes include
+  Changes in this release are summarized below:
 </p>
 <ul>
   <li>
-    Fixed several NX Graphics bugs: Rendering fonts at &gt;8 bits-per-pixel,
-    graphics move logic, and display artifacts that appear when a window is closed.
+    <b>New OS APIs</b>:
+      Add the standard <code>sem_timedwait()</code> interface.
   </li>
   <li>
-    Corrections to the USB host mass storage class driver
+    <b>FAT File System</b>:
+      Adds (optional) support for VFAT long file names.
   </li>
   <li>
-    STM32 bugfixes: serial driver, GPIO interrupt handling
+    <b>USB</b>:
+      Now the mass storage device can be connected when needed and
+      disconnected when not needed (or re-connected as a different kind of
+      device).
   </li>
   <li>
-    LPC17xx: Changes for a success compilation with no console.
+    <b>Touchscreen Support</b>:
+      Defined a new NuttX touchscreen interface.
+      Added a driver for the TI TSC2007 touchscreen controller chip.
   </li>
   <li>
-    Corrections to the Teensy AT90USB SD driver
+    <b>NX Fonts</b>:
+      Add support for multiple fonts; developed a tool to
+      convert open source fonts into NuttX format; Converted and installed
+      nine new, high quality fontsets.
   </li>
   <li>
-    Changes for a clean compilation under the ZDS-II toolchain.
+    <b>NX Graphics</b>:
+      Add new NX APIs to support drawing of wide lines in any
+      orientation.  Added new low level routines to set individual pixel
+      more efficiently.
+  </li>
+  <li>
+    <b>Build system</b>:
+      Added a export target that will bundle up all of the
+      NuttX libraries, header files, and the startup object into an export-able tarball.
+  </li>
+  <li>
+    <b>LPC17xx</b>:
+      A CAN driver was contributed by Li Zhuoyi (Lzyy).
+  </li>
+  <li>
+    <b>STM32</b>:
+      New NX-related configurations to excercise text and graphic image displays.
+  </li>
+  <li>
+    <b>C Library</b>:
+      Added a fixed precision atan2() math function.
+  </li>
+  <li>
+    <b>Bugfixes</b>:
+      Serial RX overrun error, FAT upper/lower NT 8.3 name
+      handling fixed.  FAT directory allocation and initialization bug.
+      STM32 SDIO DMA race condition bug.  eZ80 UART1 serial driver errors
+      (Paul Osmialowski)
   </li>
 </ul>
 <p>
-  Minor features include:
+  See the <a href="#currentrelease">ChangeLog</a> for details.
 </p>
-<ul>
-  <li>
-    Add logic to extract AVR <code>printf</code> strings from FLASH
-    (but there are still <code>printf</code> issues for that target)
-  </li>
-  <li>
-    Added a configuration for the <a href="http://www.sureelectronics.net">Sure Electronics</a> PIC32MX board.
-    However, higher priority tasks have stopped work on that configuration.
-  </li>
-  <li>
-    Added several new configurations for the <a href=" http://www.st.com/">STMicro</a> STM3210E-EVAL board.
-  </li>
-  <li>
-    Added support for the STM3210E-EVAL board: (1) LCD in either landscape or portrait mode, and (2) interrupting buttons.
-  </li>
-  <li>
-    Added a configuration option to use different serial ports for debug and for the NSH serial console
-    (there are some issues with CR-LF expansion and character echo if NSH is not run on the console).
-  </li>
-  <li>
-    Standardized the button press and button interrupt interfaces so that they are common across all boards.
-  </li>
-  <li>
-    Added a new graphics example that focuses on placing text on the background while pop-up windows occur.
-    Text should continue to update normally with or without the popup windows present.
-  </li>
-  <li>
-    Added ARM stack checking logic.
-  </li>
-</ul>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -2437,81 +2463,97 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.6 2011-07-11 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.7 2011-08-02 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * drivers/mtd/ramtron.c, net/net_checksd.c, fs/fs_fdopen.c, and include/nuttx/mii.h:
-      Several structural changes made to get a clean compile under the ez80 ZDS-II
-      toolchain (no design changes).
-    * drivers/usbhost/usbhost_storage.c: Incorpated bugfixes reported by Sheref H.
-      Younan:  (1) Read capacity logic read largest block, not the number of blocks
-      and was, therefore, off by one, and (2) Some devices stall of get Max LUN request
-      if they support only a single LUN.  Logic now assumes a single LUN if the get
-      Max LUN request fails.
-    * include/nuttx/arch.h, lib/stdio/lib_libvsprintf.c, lib/stdio/lib_fputs.c: Add
-      a new configuration option to support extracting strings from FLASH or EEPROM
-      or other memories where the string data cannot be accessed by simply de-referencing
-      a string pointer.
-    * arch/sim/src/up_romgetc.c: Used to test the basic logic to access strings
-      without directly de-referencing a string pointer.
-    * arch/avr/src/avr/up_romget.c: Used to access strings that lie in the first
-      64Kb of FLASH (But I still haven't figured out how to get strings to reside in
-      FLASH without using the PROGMEM attribute).
-    * configs/teensy/src/up_spi.c: Correct reading of SD CD and WP pins (was reading
-      the wrong register.  AVR SPI now appears to be functional.
-    * arch/avr/src/at90usb/at90usb_usbdev.c: Correct USB initialization.  Interrupts
-      were being enabled BEFORE the interrupt handler was attached.
-    * configs/sure-pic32mx:  Add a configuration for the Sure Electronics, &quot;Advanced USB
-      Storage Demo Board,&quot; Model DB-DP11215 (http://www.sureelectronics.net/goods.php?id=1168).
-      This board features the MicroChip PIC32MX440F512H MCU. (Untested on initial
-      check-in).
-    * configs/stm3210e-eval/nsh2:  Add another NSH configuration for the STM32 with
-      some different properties.
-    * CONFIG_NSH_CONDEV:  Add a configuration option to allow using a different character
-      device (such a a different UART) for the NSH interface.  This allows, for example,
-      debug output to come from the console device while using another device for NSH.
-      There are some issues on initial check-in:  NuttX doesn't have termios and the
-      console device has special properties that make using NSH awkward.  Examples:
-      No CR-LF expansion, no character echoing, no command line editting.
-    * arch/arm/src/stm32/stm32_lowputc.c and stm32_serial.c.  Correct seversl bugs
-      involving serial port configuration.  These bugs are only critical if you
-      are trying to using multiple UARTs on STM32.
-    * configs/stm3210e-eval/src/up_lcd.c:  Add a driver for the STM3210E-EVAL's LCD.
-    * configs/stm3210e-eval/nx:  Add NX configuration for the STM3210E-EVAL.
-    * configs/nuttx/arch.h (and arch/arm/src/stm32, configs/*/src/up_buttons.c):
-      Standardize interfaces exported for button support and button interrupts.
-    * configs/stm3210e-eval/src/up_buttons.c:  Add interrupting button support.
-      Also fixes a few errors in STM3210E-EVAL button decoding.
-    * configs/stm3210e-eval/buttons: Add a configuration to exercise STM3210E-EVAL
-      buttons.
-    * arch/arm/src/stm32/stm32_gpio.c:  GPIO interrupt handling for pin
-      numbers were being aliased:  5-9 together and 10-15 together.  Extended
-      the logic to peform decoding of GPIO interrupts and unique dispatching
-      for all 16 pins.
-    * configs/stm3210e-eval/nxtext: Add a configuration for the apps/examples/nxtext
-      example.  This example focuses on placing text on the background while
-      pop-up windows occur.  Text should continue to update normally with or without
-      the popup windows present.
-    * arch/arm/src/common/up_checkstack.c:  ARM stack overflow checking submitted
-      by Hal Glenn.
-    * arch/arm/src/lpc17xx: Changes to compile successfully with no serial console
-      (also submitted by Hal Glenn).
-    * graphics/nxfonts/nxfonts_convert.c:  Fixed a critical bug that caused
-      when renderer some fonts with bits-per-pixel &gt 8
-    * graphics/nxbe/nxbe_move.c: Fixed an error in the graphics move logic (This
-      was a previously untested interface).  Basically, there is some confusion
-      between use of (x,y) as a relative offset or as an absolute position.
-    * graphics/nxbe/nxbe_close.c:  Fixed an important graphics system bug:
-      When a window is closed, the display was not being updated.  The old
-      window graphic was left on the display for a time.
+    * Makefile:  Added a export target that will bundle up all of the NuttX
+      libraries, header files, and the startup object into an export-able
+      tarball.
+    * arch/arm/src/lpc17xx/lpc17_can.h:  Correct some typos in the CAN
+      register definitions.
+    * drivers/serial/serialirq.c:  Correct an error that can occur if the
+      serial RX buffer becomes full.  Data is now discarded in that case;
+      before, leaving data in the hardware would cause infinite interrupts
+      one most MCUs since you must read the data in order to clear the
+      interrupt.
+    * arch/arm/src/lpc17xx/lpc17_can.c:  Added a CAN driver contributed by
+      Li Zhuoyi (Lzyy).
+    * include/stddefs.h and sys/types:  Added type wchar_t.
+    * fs/fat/fat_fat32dirent.c:  Move all FAT directory operations to this
+      new file; Implement VFAT long file name support.
+    * fs/fat/fat_fat32dirent.c:  The configuration CONFIG_FAT_LCNAMES has
+      been around for some time but never tested until now.  This setting
+      will mimic the NT 8.3 file name behavior:  File names or extensions 
+      may be all upper or all lower case (but not mixed).  If
+      CONFIG_FAT_LCNAMES is not selected, all filenames are strictly upper
+      case.
+    * configs/stm3210e-eval/nsh2:  Console is back on UART1; Added
+      examplex/nx as an NSH &quot;built-in&quot; command as a demonstration.
+    * fs/fat/fs_fat32dirent.c:  Fix an important bug in the directory
+      allocation (fat_allocatedirentry()).  I looks like it could be
+      initializing the wrong sectors! NOTE:  This function was in
+      fs_fat32utils.c in earlier releases.
+    * arch/arm/src/stm32_sdio.c: Correct an important DMA-related bug;
+      SDIO transfer completion events and DMA completion eventes were
+      not being coordinated correctly.
+    * configs/stm3210e-eval/nsh2: Enable FAT long file name support
+    * sched/sem_timedwait.c: Add the standard sem_timedwait() interface.
+    * graphics/nxfonts/nxfonts_getfont.c, nxfonts_bitmap.c,
+      Makefile.source, and include/nuttx/nxfonts.h: Support for multiple
+      fonts included.  A new interface, nxf_getfonthandle() takes a font
+      ID and returns a handle that is now used at all other font interfaces
+      to specify which of the multiple fonts to use.
+    * arch/arm/src/lpc17xx/lpc17_syscon.h: Fix typo (reported by Li Zhuoyi).
+    * configs/stm3210e-eval/nsh2: Extended to support two new commands:
+      'msconn' will connect the USB mass storage device; 'msdis' will
+      disconnect the USB storage device.
+    * tools/bdf-converter.c.  This C file is used to build the bdf-converter
+      program.  The bdf-converter program be used to convert fonts in Bitmap
+      Distribution Format (BDF) into fonts that can be used in the NX graphics
+      system.
+    * include/nuttx/nx:  Move all NX header files from include/nuttx to 
+      include/nuttx/nx.
+    * drivers/usbdev/usbdev_usbstorage.c and arch/arm/src/stm32/stm32_usbdev.c:
+      Correct a memory leak when the USB mass storage driver is connected and
+      then disconnected from the target.  The write requests were not being
+      freed.  NOTE that the unregister logic in the STM32 needed to call
+      stm32_reset() in order to return the write requests to the USB mass
+      storage driver; it is possible that a similar but could exist for other
+      architectures.
+    * graphics/nxfonts/nxfonts_*.h:  Add serveral more new fonts
+    * arch/z80/src/ez80/ez80_serial.c: Fix some errors in serial driver
+      setup for UART1 (submitted by Paul Osmialowski).
+    * drivers/input/tsc2007.c and include/nuttx/input/*:  Add a generic NuttX
+      touchscreen interface.  Add a driver for the TI TSC2007 touchscreen
+      controller.
+    * graphics/nxglib/lcd and fb:  Add low level routines to set single pixels.
+    * lib/math/lib_b16atan2.c:  Add a fixed precision atan2() function
+    * graphics/nxglib/nxglib_splitline.c: Add logic to divide a wide line into
+      trapezoidal components.
+    * graphics/nxmu/nx_drawline.c, graphics/nxsu/nx_drawline.c,
+      graphics/nxtk/nxtk_drawlinewindow.c, graphics/nxtk/nxtk_drawlinetoolbar.c:
+      Add new line drawing interfaces (untested).
 
-apps-6.6 2011-07-11 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+apps-6.7 2011-08-02 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * Make.defs, namedapp/namedapp.c: Several structural changes made to get a
-      clean compile under the ez80 ZDS-II toolchain (no design changes).
-    * apps/examples/buttons: Add a test for the new standardized button interfaces
-    * apps/examples/nxtext: Add another NX graphics test.  This one focus on
-      placing text on the background while pop-up windows occur.  Text should
-      continue to update normally with or without the popup windows present.
+    * apps/examples/nx and nxtext:  These examples can now be built as NSH
+      &quot;built-in&quot; commands.
+    * apps/examples/nxhello:  The simplest graphics example:  It just says
+      &quot;Hello, World!&quot; in the center of the display. This example can also be
+      built as an NSH &quot;built-in&quot; command.
+    * apps/examples/nx, ntext, and nxhello:  All updated to use the new
+      NuttX font interfaces.
+    * apps/examples/nximage:  Another super simple  graphics example:  It just puts
+      the NuttX logo in the center of the display. This example can also be
+      built as an NSH &quot;built-in&quot; command.
+    * apps/examples/usbstorage: Can now be built as two NSH &quot;built-in&quot; commands:
+      'msconn' will connect the USB mass storage device; 'msdis' will disconnect
+      the USB storage device.
+    * apps/examples/nx*:  All NX header files moved from nuttx/include/nuttx to 
+      nuttx/include/nuttx/nx.
+    * apps/examples/usbstorage: Added instrumentation to monitor memory usage
+      to check for memory leaks in the USB storage driver.
+    * apps/examples/nxhello/nxhello_bkgd.c:  Fix handling of allocated glyph
+      memory.
 
 pascal-1.0 2011-05-15 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2554,59 +2596,9 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-6.7 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.8 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * Makefile:  Added a export target that will bundle up all of the NuttX
-      libraries, header files, and the startup object into an export-able
-      tarball.
-    * arch/arm/src/lpc17xx/lpc17_can.h:  Correct some typos in the CAN
-      register definitions.
-    * drivers/serial/serialirq.c:  Correct an error that can occur if the
-      serial RX buffer becomes full.  Data is now discarded in that case;
-      before, leaving data in the hardware would cause infinite interrupts
-      one most MCUs since you must read the data in order to clear the
-      interrupt.
-    * arch/arm/src/lpc17xx/lpc17_can.c:  Added a CAN driver contributed by
-      Li Zhuoyi (Lzyy).
-    * include/stddefs.h and sys/types:  Added type wchar_t.
-    * fs/fat/fat_fat32dirent.c:  Move all FAT directory operations to this
-      new file; Implement VFAT long file name support.
-    * fs/fat/fat_fat32dirent.c:  The configuration CONFIG_FAT_LCNAMES has
-      been around for some time but never tested until now.  This setting
-      will mimic the NT 8.3 file name behavior:  File names or extensions 
-      may be all upper or all lower case (but not mixed).  If
-      CONFIG_FAT_LCNAMES is not selected, all filenames are strictly upper
-      case.
-    * configs/stm3210e-eval/nsh2:  Console is back on UART1; Added
-      examplex/nx as an NSH &quot;built-in&quot; command as a demonstration.
-    * fs/fat/fs_fat32dirent.c:  Fix an important bug in the directory
-      allocation (fat_allocatedirentry()).  I looks like it could be
-      initializing the wrong sectors! NOTE:  This function was in
-      fs_fat32utils.c in earlier releases.
-    * arch/arm/src/stm32_sdio.c: Correct an important DMA-related bug;
-      SDIO transfer completion events and DMA completion eventes were
-      not being coordinated correctly.
-    * configs/stm3210e-eval/nsh2: Enable FAT long file name support
-    * sched/sem_timedwait.c: Add the standard sem_timedwait() interface.
-    * graphics/nxfonts/nxfonts_getfont.c, nxfonts_bitmap.c,
-      Makefile.source, and include/nuttx/nxfonts.h: Support for multiple
-      fonts included.  A new interface, nxf_getfonthandle() takes a font
-      ID and returns a handle that is now used at all other font interfaces
-      to specify which of the multiple fonts to use.
-    * arch/arm/src/lpc17xx/lpc17_syscon.h: Fix typo (reported by Li Zhuoyi).
-
-apps-6.7 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * apps/examples/nx and nxtext:  These examples can now be built as NSH
-      &quot;built-in&quot; commands.
-    * apps/examples/nxhello:  The simplest graphics example:  It just says
-      &quot;Hello, World!&quot; in the center of the display. This example can also be
-      built as an NSH &quot;built-in&quot; command.
-    * apps/examples/nx, ntext, and nxhello:  All updated to use the new
-      NuttX font interfaces.
-    * apps/examples/nximage:  Another super simple  graphics example:  It just puts
-      the NuttX logo in the center of the display. This example can also be
-      built as an NSH &quot;built-in&quot; command.
+apps-6.8 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
