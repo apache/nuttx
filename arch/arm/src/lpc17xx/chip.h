@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc17xx/chip.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,8 +103,8 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1764)
 #  define LPC17_FLASH_SIZE      (128*1024) /* 128Kb */
 #  define LPC17_SRAM_SIZE       (32*1024)  /*  32Kb */
-#  define LPC17_CPUSRAM_SIZE    (32*1024)
-#  undef  LPC17_HAVE_BANK0         /* No AHB SRAM bank 0 */
+#  define LPC17_CPUSRAM_SIZE    (16*1024)
+#  define LPC17_HAVE_BANK0      1  /* Have AHB SRAM bank 0 */
 #  undef  LPC17_HAVE_BANK1         /* No AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  define LPC17_NUSBHOST        0  /* No USB host controller */
@@ -142,8 +142,8 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1756)
 #  define LPC17_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define LPC17_SRAM_SIZE       (32*1024)  /*  32Kb */
-#  define LPC17_CPUSRAM_SIZE    (32*1024)
-#  undef  LPC17_HAVE_BANK0         /* No AHB SRAM bank 0 */
+#  define LPC17_CPUSRAM_SIZE    (16*1024)
+#  define LPC17_HAVE_BANK0      1  /* No AHB SRAM bank 0 */
 #  undef  LPC17_HAVE_BANK1         /* No AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define LPC17_NUSBHOST        1  /* One USB host controller */
@@ -155,8 +155,8 @@
 #elif defined(CONFIG_ARCH_CHIP_LPC1754)
 #  define LPC17_FLASH_SIZE      (128*1024) /* 128Kb */
 #  define LPC17_SRAM_SIZE       (32*1024)  /*  32Kb */
-#  define LPC17_CPUSRAM_SIZE    (32*1024)
-#  undef  LPC17_HAVE_BANK0         /* No AHB SRAM bank 0 */
+#  define LPC17_CPUSRAM_SIZE    (16*1024)
+#  define  LPC17_HAVE_BANK0     1  /* Have AHB SRAM bank 0 */
 #  undef  LPC17_HAVE_BANK1         /* No AHB SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define LPC17_NUSBHOST        1  /* One USB host controller */
@@ -192,7 +192,7 @@
 #  define LPC17_NI2S            0  /* No I2S modules */
 #  define LPC17_NDAC            0  /* No DAC module */
 #else
-#  error "Unsupported STM32 chip"
+#  error "Unsupported LPC17xx chip"
 #endif
 
 /* Include only the memory map.  Other chip hardware files should then include this
