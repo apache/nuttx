@@ -518,6 +518,15 @@ Where <subdir> is one of the following:
     CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
     CONFIG_LCD_RPORTRAIT=y        : 240x320 reverse portrait
 
+  nxlines:
+  ------
+    Another example using the NuttX graphics system (NX).   This
+    example focuses on placing lines on the background in various
+    orientations.
+
+    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_LCD_RPORTRAIT=y        : 240x320 reverse portrait
+
   nxtext:
   ------
     Another example using the NuttX graphics system (NX).   This
@@ -525,8 +534,13 @@ Where <subdir> is one of the following:
     windows occur.  Text should continue to update normally with
     or without the popup windows present.
 
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_STM32_BUILDROOT=y	  : NuttX buildroot under Linux or Cygwin
     CONFIG_LCD_RPORTRAIT=y        : 240x320 reverse portrait
+
+    NOTE:  When I tried building this example with the CodeSourcery
+    tools, I got a hardfault inside of its libgcc.  I haven't
+    retested since then, but beware if you choose to change the
+    toolchain.
 
   ostest:
   ------

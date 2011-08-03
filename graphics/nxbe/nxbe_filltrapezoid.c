@@ -134,9 +134,9 @@ void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
   /* Create a bounding box that contains the trapezoid */
 
   remaining.pt1.x = b16toi(ngl_min(info.trap.top.x1, info.trap.bot.x1));
-  remaining.pt1.y = b16toi(info.trap.top.y);
+  remaining.pt1.y = info.trap.top.y;
   remaining.pt2.x = b16toi(ngl_max(info.trap.top.x2, info.trap.bot.x2));
-  remaining.pt2.y = b16toi(info.trap.bot.y);
+  remaining.pt2.y = info.trap.bot.y;
 
   /* Clip to any user specified clipping window */
 

@@ -89,7 +89,7 @@
 
 #define ngl_min(a,b)       ((a) < (b) ? (a) : (b))
 #define ngl_max(a,b)       ((a) > (b) ? (a) : (b))
-#define ngl_swap(a,b,t)    do { t = a; a = b; b = t; } while (0);
+#define ngl_swap(a,b,t)    do { t = a; a = b; b = t; } while (0)
 #define ngl_clipl(a,mn)    ((a) < (mn) ? (mn) : (a))
 #define ngl_clipr(a,mx)    ((a) > (mx) ? (mx) : (a))
 #define ngl_clip(a,mx,mn)  ((a) < (mn) ? (mn) : (a) > (mx) ? (mx) : (a))

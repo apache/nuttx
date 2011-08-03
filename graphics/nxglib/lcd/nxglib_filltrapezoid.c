@@ -191,12 +191,16 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)
 
   /* Fill the run buffer for the maximum run that we will need */
 
-  ix1    = ngl_clipl(b16toi(topx1), bounds->pt1.x);
-  ix2    = ngl_clipl(b16toi(topx2), bounds->pt2.x);
+  ix1    = b16toi(topx1);
+  ix1    = ngl_clipl(ix1, bounds->pt1.x);
+  ix2    = b16toi(topx2);
+  ix2    = ngl_clipr(ix2, bounds->pt2.x);
   ncols  = ix2 - ix1 + 1;
 
-  ix1    = ngl_clipl(b16toi(botx1), bounds->pt1.x);
-  ix2    = ngl_clipl(b16toi(botx2), bounds->pt2.x);
+  ix1    = b16toi(botx1);
+  ix1    = ngl_clipl(ix1, bounds->pt1.x);
+  ix2    = b16toi(botx2);
+  ix2    = ngl_clipr(ix2, bounds->pt2.x);
   botw   = ix2 - ix1 + 1;
 
   if (ncols < botw)
@@ -206,7 +210,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)
 
   NXGL_FUNCNAME(nxgl_fillrun,NXGLIB_SUFFIX)((NXGLIB_RUNTYPE*)pinfo->buffer, color, ncols);
 
-  /* Then fill the trapezoid line-by-line */
+  /* Then fill the trapezoid row-by-row */
 
   for (row = topy; row <= boty; row++)
     {
@@ -219,12 +223,14 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)
           ngl_swap(dx1dy, dx2dy, tmp);
         }
 
-      /* Convert the positions to integer and get the run width,
-       * clipping to fit within the bounding box.
+      /* Convert the positions to integer and get the run width, clipping to
+       * fit within the bounding box.
        */
 
-      ix1 = ngl_clipl(b16toi(topx1), bounds->pt1.x);
-      ix2 = ngl_clipl(b16toi(topx2), bounds->pt2.x);
+      ix1 = b16toi(topx1);
+      ix1 = ngl_clipl(ix1, bounds->pt1.x);
+      ix2 = b16toi(topx2);
+      ix2 = ngl_clipr(ix2, bounds->pt2.x);
 
       /* Handle some corner cases where we draw nothing.  Otherwise, we will
        * always draw at least one pixel.

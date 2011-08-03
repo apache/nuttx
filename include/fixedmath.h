@@ -101,16 +101,16 @@
 
 /* Conversions between b16 and b8 *****************************************/
 
-#define b8tob16(b)      ((b16_t)(b) << 8)
-#define ub8toub16(b)    ((ub16_t)(b) << 8)
+#define b8tob16(b)      (((b16_t)(b)) << 8)
+#define ub8toub16(b)    (((ub16_t)(b)) << 8)
 #define b16tob8(b)      (b8_t)(((b)+0x0080)>>8)
 #define ub16toub8(b)    (ub8_t)(((b)+0x0080)>>8)
 
 #ifdef CONFIG_HAVE_LONG_LONG
-#  define b8tob32(b)    ((b32_t)(b) << 24)
-#  define ub8toub32(b)  ((ub32_t)(b) << 24)
-#  define b16tob32(b)   ((b32_t)(b) << 16)
-#  define ub16toub32(b) ((ub32_t)(b) << 16)
+#  define b8tob32(b)    (((b32_t)(b)) << 24)
+#  define ub8toub32(b)  (((ub32_t)(b)) << 24)
+#  define b16tob32(b)   (((b32_t)(b)) << 16)
+#  define ub16toub32(b) (((ub32_t)(b)) << 16)
 #  define b32tob16(b)   (b16_t)(((b) + 0x0000000000008000)>>16)
 #  define ub32toub16(b) (ub16_t)(((b) + 0x0000000000008000)>>16)
 #  define b32tob8(b)    (b8_t)(((b) + 0x0000000000000080)>>8)
@@ -121,8 +121,8 @@
 /* Conversions */
 
 #define b8toi(a)        ((a) >> 8)              /* Conversion to integer */
-#define itob8(i)        ((b8_t)(i) << 8)        /* Conversion from integer */
-#define uitoub8(i)      ((ub8_t)(i) << 8)       /* Conversion from unsigned integer */
+#define itob8(i)        (((b8_t)(i)) << 8)      /* Conversion from integer */
+#define uitoub8(i)      (((ub8_t)(i)) << 8)     /* Conversion from unsigned integer */
 #define b8tof(b)        (((float)b)/256.0)      /* Conversion to float */
 #define ftob8(f)        (b8_t)(((f)*256.0))     /* Conversion from float */
 #define b8trunc(a)      ((a) & 0xff00)          /* Truncate to integer b8 */
@@ -152,8 +152,8 @@
 /* Conversions */
 
 #define b16toi(a)       ((a) >> 16)             /* Conversion to integer */
-#define itob16(i)       ((b16_t)(i) << 16)      /* Conversion from integer */
-#define uitoub16(i)     ((ub16_t)(i) << 16)     /* Conversion from unsigned integer */
+#define itob16(i)       (((b16_t)(i)) << 16)    /* Conversion from integer */
+#define uitoub16(i)     (((ub16_t)(i)) << 16)   /* Conversion from unsigned integer */
 #define b16tof(b)       (((float)b)/65536.0)    /* Conversion to float */
 #define ftob16(f)       (b16_t)(((f)*65536.0))  /* Conversion from float */
 #define b16trunc(a)     ((a) & 0xffff0000)      /* Truncate to integer */

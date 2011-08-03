@@ -121,6 +121,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
   b16_t xoffset;
   b16_t halfoffset;
   b16_t angle;
+  b16_t sinangle;
   b16_t b16x;
 
   /* First, check the linewidth */
@@ -193,12 +194,12 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
     {
       /* A line of width 1 is basically a single parallelogram of width 1 */
 
-      traps[1].top.x1 = line.pt1.x;
-      traps[1].top.x2 = line.pt1.x;
+      traps[1].top.x1 = itob16(line.pt1.x);
+      traps[1].top.x2 = traps[1].top.x1;
       traps[1].top.y  = line.pt1.y;
 
-      traps[1].bot.x1 = line.pt2.x;
-      traps[1].bot.x2 = line.pt2.x;
+      traps[1].bot.x1 = itob16(line.pt2.x);
+      traps[1].bot.x2 = traps[1].bot.x1;
       traps[1].bot.y  = line.pt2.y;
       return 1;
     }
@@ -219,20 +220,33 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
       iwidth  = line.pt1.x - line.pt2.x + 1;
     }
 
-  /* 
-   * Triangle height: linewidth * cosA
+  /* Triangle height: linewidth * cosA
    * Adjusted width:  triheight / sinA
    * X offset :  linewidth * linewidth / adjusted line width
    */
 
   angle        = b16atan2(itob16(iheight), itob16(iwidth));
   triheight    = b16toi(linewidth * b16cos(angle));
-  adjwidth     = b16divb16(itob16(linewidth), b16sin(angle));
-  xoffset      = itob16(linewidth * linewidth);
-  xoffset      = b16divb16(xoffset, adjwidth);
-
-  halfoffset   = (xoffset   >> 1);
   halfheight   = (triheight >> 1);
+
+  /* If the sine of the angle is tiny (i.e., the line is nearly horizontal),
+   * then we cannot compute the adjusted width.  In this case, just use
+   * the width of the line (not very good estimate -- need to revisit).
+   */
+
+  sinangle     =  b16sin(angle);
+  if (sinangle == 0)
+    {
+      adjwidth = itob16(iwidth);
+      xoffset  = adjwidth;
+    }
+  else
+    {
+      adjwidth = b16divb16(itob16(linewidth), sinangle);
+      xoffset  = itob16(linewidth * linewidth);
+      xoffset  = b16divb16(xoffset, adjwidth);
+    }
+  halfoffset   = (xoffset >> 1);
 
   /* Return the top triangle (if there is one).  NOTE that the horizontal
    * (z) positions are represented with 16 bits of fraction.  The vertical
@@ -256,7 +270,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           traps[0].bot.y  = iy;
 
           b16x = itob16(line.pt2.x) + halfoffset;
-          iy   = itob16(line.pt2.y) - halfheight;
+          iy   = line.pt2.y - halfheight;
 
           traps[2].top.x1 = b16x - adjwidth + b16ONE;
           traps[2].top.x2 = b16x;
@@ -270,7 +284,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           /* Line is going "south west" */
 
           b16x = itob16(line.pt1.x) + halfoffset;
-          iy   = itob16(line.pt1.y) + halfheight;
+          iy   = line.pt1.y + halfheight;
 
           traps[0].top.x1 = b16x - xoffset;
           traps[0].top.x2 = traps[0].top.x1;
@@ -280,7 +294,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           traps[0].bot.y  = iy;
 
           b16x = itob16(line.pt2.x) - halfoffset;
-          iy   = itob16(line.pt2.y) - halfheight;
+          iy   = line.pt2.y - halfheight;
 
           traps[2].top.x1 = b16x;
           traps[2].top.x2 = b16x + adjwidth - b16ONE;
