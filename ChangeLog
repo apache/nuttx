@@ -1967,3 +1967,8 @@
 	  Add new line drawing interfaces (untested).
 
 6.8 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
+	* arch/arm/src/lpc17xx/chip.h:  Fix some chip memory configuration errors
+	  for the LPC1764, LPC1756, and LPC1754 (submitted by Li Zhuoy (Lzzy))
+	* arch/arm/src/lpc17xx/lpc17_can.h:  Revised CAN driver submitted by
+	   Li Zhuoy (Lzzy).
