@@ -1971,4 +1971,4 @@
 	* arch/arm/src/lpc17xx/chip.h:  Fix some chip memory configuration errors
 	  for the LPC1764, LPC1756, and LPC1754 (submitted by Li Zhuoy (Lzzy))
 	* arch/arm/src/lpc17xx/lpc17_can.h:  Revised CAN driver submitted by
-	   Li Zhuoy (Lzzy).
+	   Li Zhuoy (Lzzy).  The driver now supports both CAN1 and CAN2.

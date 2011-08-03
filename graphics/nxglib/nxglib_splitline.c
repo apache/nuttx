@@ -112,15 +112,16 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
                    nxgl_coord_t linewidth)
 {
   struct nxgl_vector_s line;
-  struct nxgl_point_s pt;
   nxgl_coord_t iheight;
   nxgl_coord_t iwidth;
+  nxgl_coord_t iy;
   nxgl_coord_t triheight;
-  nxgl_coord_t adjwidth;
-  nxgl_coord_t xoffset;
-  nxgl_coord_t halfoffset;
   nxgl_coord_t halfheight;
+  b16_t adjwidth;
+  b16_t xoffset;
+  b16_t halfoffset;
   b16_t angle;
+  b16_t b16x;
 
   /* First, check the linewidth */
 
@@ -226,13 +227,17 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
 
   angle        = b16atan2(itob16(iheight), itob16(iwidth));
   triheight    = b16toi(linewidth * b16cos(angle));
-  adjwidth     = b16toi(b16divb16(itob16(linewidth), b16sin(angle)));
-  xoffset      = (linewidth * linewidth + (adjwidth >> 1)) / adjwidth;
+  adjwidth     = b16divb16(itob16(linewidth), b16sin(angle));
+  xoffset      = itob16(linewidth * linewidth);
+  xoffset      = b16divb16(xoffset, adjwidth);
 
   halfoffset   = (xoffset   >> 1);
   halfheight   = (triheight >> 1);
 
-  /* Return the top triangle (if there is one) */
+  /* Return the top triangle (if there is one).  NOTE that the horizontal
+   * (z) positions are represented with 16 bits of fraction.  The vertical
+   * (y) positions, on the other hand, are integer.
+   */
 
   if (triheight > 0)
     {
@@ -240,53 +245,53 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
         {
           /* Line is going "south east" */
 
-          pt.x = line.pt1.x - halfoffset;
-          pt.y = line.pt1.y + halfheight;
+          b16x = itob16(line.pt1.x) - halfoffset;
+          iy   = line.pt1.y + halfheight;
 
-          traps[0].top.x1 = pt.x + xoffset;
+          traps[0].top.x1 = b16x + xoffset;
           traps[0].top.x2 = traps[0].top.x1;
-          traps[0].top.y  = pt.y - triheight + 1;
-          traps[0].bot.x1 = pt.x;
-          traps[0].bot.x2 = pt.x + adjwidth - 1;
-          traps[0].bot.y  = pt.y;
+          traps[0].top.y  = iy - triheight + 1;
+          traps[0].bot.x1 = b16x;
+          traps[0].bot.x2 = b16x + adjwidth - b16ONE;
+          traps[0].bot.y  = iy;
 
-          pt.x = line.pt2.x + halfoffset;
-          pt.y = line.pt2.y - halfheight;
+          b16x = itob16(line.pt2.x) + halfoffset;
+          iy   = itob16(line.pt2.y) - halfheight;
 
-          traps[2].top.x1 = pt.x - adjwidth + 1;
-          traps[2].top.x2 = pt.x;
-          traps[2].top.y  = pt.y;
-          traps[2].bot.x1 = pt.x - xoffset;
+          traps[2].top.x1 = b16x - adjwidth + b16ONE;
+          traps[2].top.x2 = b16x;
+          traps[2].top.y  = iy;
+          traps[2].bot.x1 = b16x - xoffset;
           traps[2].bot.x2 = traps[2].bot.x1;
-          traps[2].bot.y  = pt.y + triheight - 1;
+          traps[2].bot.y  = iy + triheight - 1;
         }
       else
         {
           /* Line is going "south west" */
 
-          pt.x = line.pt1.x + halfoffset;
-          pt.y = line.pt1.y + halfheight;
+          b16x = itob16(line.pt1.x) + halfoffset;
+          iy   = itob16(line.pt1.y) + halfheight;
 
-          traps[0].top.x1 = pt.x - xoffset;
+          traps[0].top.x1 = b16x - xoffset;
           traps[0].top.x2 = traps[0].top.x1;
-          traps[0].top.y  = pt.y - triheight + 1;
-          traps[0].bot.x1 = pt.x - adjwidth + 1;
-          traps[0].bot.x2 = pt.x;
-          traps[0].bot.y  = pt.y;
+          traps[0].top.y  = iy - triheight + 1;
+          traps[0].bot.x1 = b16x - adjwidth + b16ONE;
+          traps[0].bot.x2 = b16x;
+          traps[0].bot.y  = iy;
 
-          pt.x = line.pt2.x - halfoffset;
-          pt.y = line.pt2.y - halfheight;
+          b16x = itob16(line.pt2.x) - halfoffset;
+          iy   = itob16(line.pt2.y) - halfheight;
 
-          traps[2].top.x1 = pt.x;
-          traps[2].top.x2 = pt.x + adjwidth - 1;
-          traps[2].top.y  = pt.y;
-          traps[2].bot.x1 = pt.x + xoffset;
+          traps[2].top.x1 = b16x;
+          traps[2].top.x2 = b16x + adjwidth - b16ONE;
+          traps[2].top.y  = iy;
+          traps[2].bot.x1 = b16x + xoffset;
           traps[2].bot.x2 = traps[2].bot.x1;
-          traps[2].bot.y  = pt.y + triheight - 1;
+          traps[2].bot.y  = iy + triheight - 1;
         }
 
       /* The center parallelogram is the horizontal edge of each triangle.
-       * Note the minor inefficency: that horizontal edge is drawn twice.
+       * Note the minor inefficency: that horizontal edges are drawn twice.
        */
 
       traps[1].top.x1 = traps[0].bot.x1;
@@ -304,11 +309,11 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
    * bottom.  Just return the center parallelogram.
    */
 
-  traps[1].top.x1 = line.pt1.x - halfoffset;
+  traps[1].top.x1 = itob16(line.pt1.x) - halfoffset;
   traps[1].top.x2 = traps[1].top.x1 + adjwidth - 1;
   traps[1].top.y  = line.pt1.y;
  
-  traps[1].bot.x1 = line.pt2.x - halfoffset;
+  traps[1].bot.x1 = itob16(line.pt2.x) -  halfoffset;
   traps[1].bot.x2 = traps[1].bot.x1 + adjwidth - 1;
   traps[1].bot.y  = line.pt2.y;
   return 1;

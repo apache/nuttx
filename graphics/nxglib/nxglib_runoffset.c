@@ -70,7 +70,7 @@
  * Name: nxgl_runoffset
  *
  * Description:
- *   Offset the run position by the specified dx, dy values.
+ *   Offset the run position by the specified (integer) dx, dy values.
  *
  ****************************************************************************/
 
@@ -79,7 +79,7 @@ void nxgl_runoffset(FAR struct nxgl_run_s *dest,
                     nxgl_coord_t dx, nxgl_coord_t dy)
 {
   b16_t b16dx = itob16(dx);
-  dest->x1  += b16dx;
-  dest->x2  += b16dx;
-  dest->y   += dy;
+  dest->x1    = src->x1 + b16dx;
+  dest->x2    = src->x2 + b16dx;
+  dest->y     = src->y  + dy;
 }

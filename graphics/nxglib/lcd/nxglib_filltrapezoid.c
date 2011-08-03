@@ -124,14 +124,23 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)
 
   /* Calculate the slope of the left and right side of the trapezoid */
 
-  dy    = boty - topy;
-  dx1dy = b16divi((botx1 - topx1), dy);
-  dx2dy = b16divi((botx2 - topx2), dy);
+  dy     = boty - topy;
+  dx1dy  = b16divi((botx1 - topx1), dy);
+  dx2dy  = b16divi((botx2 - topx2), dy);
 
   /* Perform vertical clipping */
 
   if (topy < bounds->pt1.y)
     {
+      /* Is the entire trapezoid "above" the clipping window? */
+
+      if (boty < bounds->pt1.y)
+        {
+          /* Yes.. then do nothing */
+
+          return;
+        }
+
       /* Calculate the x values for the new top run */
 
       dy      = bounds->pt1.y - topy;
@@ -145,6 +154,15 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)
 
   if (boty > bounds->pt2.y)
     {
+      /* Is the entire trapezoid "below" the clipping window? */
+
+      if (topy > bounds->pt2.y)
+        {
+          /* Yes.. then do nothing */
+
+          return;
+        }
+
       /* Calculate the x values for the new bottom run */
 
       dy      = boty - bounds->pt2.y;

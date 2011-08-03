@@ -115,8 +115,8 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
 
   /* Get the top run position and the number of rows to draw */
 
-  x1 = trap->top.x1;
-  x2 = trap->top.x2;
+  x1    = trap->top.x1;
+  x2    = trap->top.x2;
 
   /* Calculate the number of rows to render */
 
@@ -133,6 +133,15 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
 
   if (y1 < bounds->pt1.y)
     {
+      /* Is the entire trapezoid "above" the clipping window? */
+
+      if (y2 < bounds->pt1.y)
+        {
+          /* Yes.. then do nothing */
+
+          return;
+        }
+
       /* Calculate the x values for the new top run */
 
       int dy = bounds->pt1.y - y1;
@@ -147,6 +156,15 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
 
   if (y2 > bounds->pt2.y)
     {
+      /* Is the entire trapezoid "below" the clipping window? */
+
+      if (y1 > bounds->pt2.y)
+        {
+          /* Yes.. then do nothing */
+
+          return;
+        }
+
       /* Clip and re-calculate the number of rows to render */
 
       y2     = bounds->pt2.y;
