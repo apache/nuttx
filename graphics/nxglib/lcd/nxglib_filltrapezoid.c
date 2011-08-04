@@ -93,7 +93,6 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)
    NXGL_PIXEL_T color)
 {
   unsigned int ncols;
-  unsigned int dy;
   unsigned int topy;
   unsigned int boty;
   unsigned int row;
@@ -104,6 +103,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)
   b16_t        botx2;
   b16_t        dx1dy;
   b16_t        dx2dy;
+  int          dy;
   int          ix1;
   int          ix2;
 
@@ -172,13 +172,6 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)
       /* Clip the bottom row to render */
 
       boty    = bounds->pt2.y;
-    }
-
-  /* Break out now if it was completely clipped */
-
-  if (topy > boty)
-    {
-      return;
     }
 
   /* Handle the special case where the sides cross (as in an hourglass) */

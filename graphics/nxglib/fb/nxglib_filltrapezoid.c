@@ -201,7 +201,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
        * always draw at least one pixel.
        */
 
-      if (x1 > x2 || ix2 < bounds->pt1.x || ix1 > bounds->pt2.x)
+      if (x1 <= x2 && ix2 >= bounds->pt1.x && ix1 <= bounds->pt2.x)
         {
           /* Get a clipped copies of the starting and ending X positions.  This
            * clipped truncates "down" and gives the quantized pixel holding the
