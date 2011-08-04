@@ -16,12 +16,16 @@ http://rgmp.sourceforge.net/wiki/index.php/Documentation
 Ubuntu Build Instructions
 --------------------------
 Build requirements:
-Hardware: x86 PC
-Software: Ubuntu 10.04, 10.10 or 11.04
+  * x86 PC:
+  	Ubuntu 10.04, 10.10 or 11.04
+  * OMAP4430 pandaboard:
+	Ubuntu 11.04
 
 Run requirements:
-Hardware: multi-processor x86 PC
-Software: Ubuntu 10.04, 10.10 or 11.04
+  * multi-processor x86 PC:
+	Ubuntu 10.04, 10.10 or 11.04
+  * OMAP4430 pandaboard:
+	Ubuntu 11.04
 
 1. Download RGMP from the following URL:
 
@@ -45,12 +49,12 @@ Software: Ubuntu 10.04, 10.10 or 11.04
    $ sudo /usr/rgmp/setup
    $ exit
 
-4. Configure NuttX.  For example, for the RGMP NSH configuration, do the
+4. Configure NuttX.  For example, for the RGMP x86 NSH configuration, do the
    following:
 
    $ cd <nuttx-dir>
    $ cd tools
-   $ ./configure.sh rgmp/nsh
+   $ ./configure.sh rgmp/x86/nsh
    $ cd ..
 
 5. Build NuttX. Get the binary image at <nuttx-dir>/kernel.img.
@@ -68,8 +72,10 @@ Software: Ubuntu 10.04, 10.10 or 11.04
 Other Linux OS Build Instruction
 --------------------------------------
 Requirements:
-Hardware: multi-processor x86 PC
-Software: running Linux kernel 2.6.32, 2.6.35 or 2.6.38
+  * multi-processor x86 PC
+	running Linux kernel 2.6.32, 2.6.35 or 2.6.38
+  * OMAP4430 pandaboard
+	running Linux kernel 2.6.38
 
 1. Get your running Linux kernel header under /usr/src/linux-headers-$(uname -r)
    directory.

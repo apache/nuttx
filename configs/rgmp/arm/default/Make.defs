@@ -39,7 +39,7 @@ include ${TOPDIR}/.config
 
 RGMPLIBDIR := $(RGMP_INST_DIR)/lib
 RGMPINCDIR := $(RGMP_INST_DIR)/include
-RGMPLKSCPT := $(RGMP_INST_DIR)/etc/x86.ld
+RGMPLKSCPT := $(RGMP_INST_DIR)/etc/rgmp.ld
 
 HOSTOS			= ${shell uname -o}
 
@@ -49,12 +49,13 @@ else
   ARCHOPTIMIZATION	= -O2
 endif
 
-ARCHCPUFLAGS		= -fno-builtin -nostdinc -fno-stack-protector 
+ARCHCPUFLAGS		= -fno-builtin -nostdinc -fno-stack-protector -fno-omit-frame-pointer \
+                          -marm -march=armv7-a
 ARCHPICFLAGS		= -fpic
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES		=
 ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include -I$(RGMPINCDIR) \
-			  -I$(TOPDIR)/configs/rgmp/include
+			  -I$(TOPDIR)/configs/rgmp/include -I$(TOPDIR)/arch/rgmp/include/arm
 ARCHSCRIPT		=
 
 CROSSDEV		=
@@ -80,9 +81,6 @@ else
   EXEEXT		=
 endif
 
-ifeq ("${CONFIG_DEBUG_SYMBOLS}","y")
-  LDFLAGS		+= -g
-endif
 LDFLAGS                 += -nostdlib
 EXTRA_LIBS		= 
 
