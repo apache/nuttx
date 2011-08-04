@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/rgmp/include/irq.h
+ * arch/rgmp/src/arm/arch_nuttx.c
  *
  *   Copyright (C) 2011 Yu Qiang. All rights reserved.
  *   Author: Yu Qiang <yuq825@gmail.com>
@@ -37,40 +37,55 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RGMP_INCLUDE_IRQ_H
-#define __ARCH_RGMP_INCLUDE_IRQ_H
+#include <rgmp/mmu.h>
+#include <rgmp/string.h>
 
-#define NR_IRQS  0
+#include <arch/arch.h>
+#include <nuttx/sched.h>
+#include <os_internal.h>
 
-#ifndef __ASSEMBLY__
 
-#include <rgmp/spinlock.h>
-#include <arch/types.h>
-#include <rgmp/trap.h>
+void nuttx_arch_init(void)
+{
+    
+}
 
-struct xcptcontext {
+void nuttx_arch_exit(void)
+{
+
+}
+
+void up_initial_state(_TCB *tcb)
+{
     struct Trapframe *tf;
-    // for signal using
-    unsigned int save_eip;
-    unsigned int save_eflags;
-    void *sigdeliver;
-};
 
-void push_xcptcontext(struct xcptcontext *xcp);
-void pop_xcptcontext(struct xcptcontext *xcp);
-
-extern int nest_irq;
-
-static inline irqstate_t irqsave(void)
-{
-    return pushcli();
+    if (tcb->pid != 0) {
+	tf = (struct Trapframe *)tcb->adj_stack_ptr-1;
+	memset(tf, 0, sizeof(struct Trapframe));
+	tf->tf_cpsr = SVC_MOD;
+	tf->tf_pc = (uint32_t)tcb->start;
+	tcb->xcp.tf = tf;
+    }
 }
 
-static inline void irqrestore(irqstate_t flags)
+void push_xcptcontext(struct xcptcontext *xcp)
 {
-    popcli(flags);
+    xcp->save_eip = xcp->tf->tf_pc;
+    xcp->save_eflags = xcp->tf->tf_cpsr;
+
+    // set  interrupts disabled
+    xcp->tf->tf_pc = (uint32_t)up_sigentry;
+    xcp->tf->tf_cpsr |= CPSR_IF;
 }
 
-#endif /* !__ASSEMBLY__ */
+void pop_xcptcontext(struct xcptcontext *xcp)
+{
+    xcp->tf->tf_pc = xcp->save_eip;
+    xcp->tf->tf_cpsr = xcp->save_eflags;
+}
 
-#endif
+void raise(void)
+{
+
+}
+

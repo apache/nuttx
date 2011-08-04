@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/rgmp/include/com.h
+ * arch/rgmp/src/arm/sigentry.S
  *
  *   Copyright (C) 2011 Yu Qiang. All rights reserved.
  *   Author: Yu Qiang <yuq825@gmail.com>
@@ -37,23 +37,13 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RGMP_INCLUDE_COM_H
-#define __ARCH_RGMP_INCLUDE_COM_H
+	.globl up_sigentry
+up_sigentry:
+	sub	sp, sp, #68    @ 68 is the size of Trapframe
+	mov	r0, sp
+	bl	up_sigdeliver
+	add	sp, sp, #4     @ skip current_task
+	pop	{r0-r12, lr}
+	rfefd	sp!
 
-#define COM_SET_BAUD         1
-#define COM_SET_PARITY       2
-#define   COM_NO_PARITY      0
-#define   COM_ODD_PARITY     1
-#define   COM_EVEN_PARITY    3
-#define COM_SET_STOPBITS     3
-#define   COM_ONE_STOPBITS   0
-#define   COM_TWO_STOPBITS   1
-#define COM_SET_BITS         4
-#define   COM_8_BITS         3
-#define   COM_7_BITS         2
-#define   COM_6_BITS         1
-#define   COM_5_BITS         0
-
-void up_serialinit(void);
-
-#endif
+	

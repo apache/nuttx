@@ -34,13 +34,16 @@
 ############################################################################
 
 -include $(TOPDIR)/Make.defs
+include $(CONFIG_RGMP_SUBARCH)/Make.defs
 
+RGMP_ARCH_ASRCS := $(addprefix $(CONFIG_RGMP_SUBARCH)/,$(RGMP_ARCH_ASRCS))
+RGMP_ARCH_CSRCS := $(addprefix $(CONFIG_RGMP_SUBARCH)/,$(RGMP_ARCH_CSRCS))
 
 CFLAGS		+= -I$(TOPDIR)/sched -I$(TOPDIR)/fs
 
-ASRCS		= sigentry.S
+ASRCS		= $(RGMP_ARCH_ASRCS)
+CSRCS		= nuttx.c rgmp.c bridge.c $(RGMP_ARCH_CSRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= nuttx.c rgmp.c bridge.c com.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

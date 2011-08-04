@@ -37,8 +37,10 @@
  *
  ****************************************************************************/
 
-#include <rgmp/x86.h>
 #include <rgmp/trap.h>
+#include <rgmp/mmu.h>
+#include <rgmp/arch/arch.h>
+
 #include <nuttx/config.h>
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
@@ -66,7 +68,7 @@ void rtos_entry(void)
 
 void *rtos_get_page(void)
 {
-    return memalign(4096, 4096);
+    return memalign(PTMEMSIZE, PTMEMSIZE);
 }
 
 void rtos_free_page(void *page)
@@ -86,19 +88,15 @@ void rtos_enter_interrupt(struct Trapframe *tf)
 
 void rtos_exit_interrupt(struct Trapframe *tf)
 {
-    cli();
+    local_irq_disable();
     nest_irq--;
     if (!nest_irq) {
 	_TCB *rtcb = current_task;
 	_TCB *ntcb;
 
 	if (rtcb->xcp.sigdeliver) {
-	    rtcb->xcp.save_eip = tf->tf_eip;
-	    rtcb->xcp.save_eflags = tf->tf_eflags;
-
-	    // Then set up to the trampoline with interrupts disabled
-	    tf->tf_eip = (uint32_t)up_sigentry;
-	    tf->tf_eflags = 0;
+	    rtcb->xcp.tf = tf;
+	    push_xcptcontext(&rtcb->xcp);
 	}
 	ntcb = (_TCB*)g_readytorun.head;
 	// switch needed
@@ -156,16 +154,14 @@ int rtos_sem_down(void *sem)
 
 void rtos_stop_running(void)
 {
-    extern void e1000_mod_exit(void);
+    extern void nuttx_arch_exit(void);
 
-    cli();
-    
-#ifdef CONFIG_NET_E1000
-    e1000_mod_exit();
-#endif
+    local_irq_disable();
+
+    nuttx_arch_exit();
 
     while(1) {
-	asm volatile("hlt");
+	arch_hlt();
     }
 }
 

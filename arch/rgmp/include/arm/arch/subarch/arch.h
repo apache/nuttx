@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/rgmp/include/irq.h
+ * arch/rgmp/include/arm/arch/subarch/arch.h
  *
  *   Copyright (C) 2011 Yu Qiang. All rights reserved.
  *   Author: Yu Qiang <yuq825@gmail.com>
@@ -37,38 +37,20 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RGMP_INCLUDE_IRQ_H
-#define __ARCH_RGMP_INCLUDE_IRQ_H
-
-#define NR_IRQS  0
+#ifndef __RGMP_ARCH_SUBARCH_ARCH_H
+#define __RGMP_ARCH_SUBARCH_ARCH_H
 
 #ifndef __ASSEMBLY__
 
-#include <rgmp/spinlock.h>
-#include <arch/types.h>
-#include <rgmp/trap.h>
 
-struct xcptcontext {
-    struct Trapframe *tf;
-    // for signal using
-    unsigned int save_eip;
-    unsigned int save_eflags;
-    void *sigdeliver;
-};
-
-void push_xcptcontext(struct xcptcontext *xcp);
-void pop_xcptcontext(struct xcptcontext *xcp);
-
-extern int nest_irq;
-
-static inline irqstate_t irqsave(void)
+static inline void up_mdelay(uint32_t msec)
 {
-    return pushcli();
+    
 }
 
-static inline void irqrestore(irqstate_t flags)
+static inline void up_udelay(uint32_t usec)
 {
-    popcli(flags);
+    
 }
 
 #endif /* !__ASSEMBLY__ */

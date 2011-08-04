@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/rgmp/include/irq.h
+ * arch/rgmp/src/x86/arch_nuttx.c
  *
  *   Copyright (C) 2011 Yu Qiang. All rights reserved.
  *   Author: Yu Qiang <yuq825@gmail.com>
@@ -37,40 +37,70 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RGMP_INCLUDE_IRQ_H
-#define __ARCH_RGMP_INCLUDE_IRQ_H
+#include <rgmp/pmap.h>
+#include <rgmp/string.h>
+#include <rgmp/arch/fpu.h>
 
-#define NR_IRQS  0
+#include <arch/arch.h>
+#include <nuttx/sched.h>
+#include <os_internal.h>
 
-#ifndef __ASSEMBLY__
 
-#include <rgmp/spinlock.h>
-#include <arch/types.h>
-#include <rgmp/trap.h>
-
-struct xcptcontext {
-    struct Trapframe *tf;
-    // for signal using
-    unsigned int save_eip;
-    unsigned int save_eflags;
-    void *sigdeliver;
-};
-
-void push_xcptcontext(struct xcptcontext *xcp);
-void pop_xcptcontext(struct xcptcontext *xcp);
-
-extern int nest_irq;
-
-static inline irqstate_t irqsave(void)
+void nuttx_arch_init(void)
 {
-    return pushcli();
-}
+    extern void e1000_mod_init(void);
+    extern void up_serialinit(void);
 
-static inline void irqrestore(irqstate_t flags)
-{
-    popcli(flags);
-}
+    // setup COM device
+    up_serialinit();
 
-#endif /* !__ASSEMBLY__ */
-
+#ifdef CONFIG_NET_E1000
+    // setup e1000
+    e1000_mod_init();
 #endif
+
+}
+
+void nuttx_arch_exit(void)
+{
+    extern void e1000_mod_exit(void);
+
+#ifdef CONFIG_NET_E1000
+    e1000_mod_exit();
+#endif
+
+}
+
+void up_initial_state(_TCB *tcb)
+{
+    struct Trapframe *tf;
+
+    if (tcb->pid != 0) {
+	tf = (struct Trapframe *)tcb->adj_stack_ptr-1;
+	memset(tf, 0, sizeof(struct Trapframe));
+	tf->tf_fpu = rgmp_fpu_init_regs;
+	tf->tf_eflags = 0x00000202;
+	tf->tf_cs = GD_KT;
+	tf->tf_ds = GD_KD;
+	tf->tf_es = GD_KD;
+	tf->tf_eip = (uint32_t)tcb->start;
+	tcb->xcp.tf = tf;
+    }
+}
+
+void push_xcptcontext(struct xcptcontext *xcp)
+{
+    xcp->save_eip = xcp->tf->tf_eip;
+    xcp->save_eflags = xcp->tf->tf_eflags;
+
+    // set up signal entry with interrupts disabled
+    xcp->tf->tf_eip = (uint32_t)up_sigentry;
+    xcp->tf->tf_eflags = 0;
+}
+
+void pop_xcptcontext(struct xcptcontext *xcp)
+{
+    xcp->tf->tf_eip = xcp->save_eip;
+    xcp->tf->tf_eflags = xcp->save_eflags;
+}
+

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/rgmp/src/com.c
+ * arch/rgmp/src/x86/com.c
  *
  *   Copyright (C) 2011 Yu Qiang. All rights reserved.
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
@@ -57,7 +57,7 @@
 #include <arch/com.h>
 
 #include <rgmp/trap.h>
-#include <rgmp/console.h>
+#include <rgmp/arch/console.h>
 
 /****************************************************************************
  * Pre-processor Definitions

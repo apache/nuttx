@@ -207,29 +207,7 @@
  * provided by their toolchain header files.
  */
 
-#ifdef CONFIG_ARCH_RGMP
 #include <rgmp/types.h>
-#else
-typedef _int8_t      int8_t;
-typedef _uint8_t     uint8_t;
-
-typedef _int16_t     int16_t;
-typedef _uint16_t    uint16_t;
-
-#ifdef __INT24_DEFINED
-typedef _int24_t     int24_t;
-typedef _uint24_t    uint24_t;
-#endif
-
-typedef _int32_t     int32_t;
-typedef _uint32_t    uint32_t;
-
-#ifdef __INT64_DEFINED
-typedef _int64_t     int64_t;
-typedef _uint64_t    uint64_t;
-#endif
-
-#endif /* CONFIG_ARCH_RGMP */
 
 /* Minimum-width integer types */
 
