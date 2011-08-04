@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/rgmp/include/irq.h
+ * arch/rgmp/include/com.h
  *
  *   Copyright (C) 2011 Yu Qiang. All rights reserved.
  *   Author: Yu Qiang <yuq825@gmail.com>
@@ -37,40 +37,22 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RGMP_INCLUDE_IRQ_H
-#define __ARCH_RGMP_INCLUDE_IRQ_H
+#ifndef __ARCH_RGMP_INCLUDE_COM_H
+#define __ARCH_RGMP_INCLUDE_COM_H
 
-#define NR_IRQS  0
+#define COM_SET_BAUD         1
+#define COM_SET_PARITY       2
+#define   COM_NO_PARITY      0
+#define   COM_ODD_PARITY     1
+#define   COM_EVEN_PARITY    3
+#define COM_SET_STOPBITS     3
+#define   COM_ONE_STOPBITS   0
+#define   COM_TWO_STOPBITS   1
+#define COM_SET_BITS         4
+#define   COM_8_BITS         3
+#define   COM_7_BITS         2
+#define   COM_6_BITS         1
+#define   COM_5_BITS         0
 
-#ifndef __ASSEMBLY__
-
-#include <rgmp/spinlock.h>
-#include <arch/types.h>
-#include <rgmp/trap.h>
-
-struct xcptcontext {
-    struct Trapframe *tf;
-    // for signal using
-    unsigned int save_eip;
-    unsigned int save_eflags;
-    void *sigdeliver;
-};
-
-void push_xcptcontext(struct xcptcontext *xcp);
-void pop_xcptcontext(struct xcptcontext *xcp);
-
-extern int nest_irq;
-
-static inline irqstate_t irqsave(void)
-{
-    return pushcli();
-}
-
-static inline void irqrestore(irqstate_t flags)
-{
-    popcli(flags);
-}
-
-#endif /* !__ASSEMBLY__ */
 
 #endif

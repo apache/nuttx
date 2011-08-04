@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/rgmp/include/irq.h
+ * arch/rgmp/src/x86/sigentry.S
  *
  *   Copyright (C) 2011 Yu Qiang. All rights reserved.
  *   Author: Yu Qiang <yuq825@gmail.com>
@@ -37,40 +37,19 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RGMP_INCLUDE_IRQ_H
-#define __ARCH_RGMP_INCLUDE_IRQ_H
+	.globl up_sigentry
+up_sigentry:
+	subl $172, %esp    # 172 is the size of TrapFrame
+	pushl %esp
+	movl %esp, %eax
+	call up_sigdeliver
+	addl $8, %esp      # skip parameter and current_task
+	frstor 0(%esp)
+  	addl $108, %esp
+	popal
+	popl %es
+	popl %ds
+	addl $0x8, %esp # trapno and errcode
+	iret
 
-#define NR_IRQS  0
-
-#ifndef __ASSEMBLY__
-
-#include <rgmp/spinlock.h>
-#include <arch/types.h>
-#include <rgmp/trap.h>
-
-struct xcptcontext {
-    struct Trapframe *tf;
-    // for signal using
-    unsigned int save_eip;
-    unsigned int save_eflags;
-    void *sigdeliver;
-};
-
-void push_xcptcontext(struct xcptcontext *xcp);
-void pop_xcptcontext(struct xcptcontext *xcp);
-
-extern int nest_irq;
-
-static inline irqstate_t irqsave(void)
-{
-    return pushcli();
-}
-
-static inline void irqrestore(irqstate_t flags)
-{
-    popcli(flags);
-}
-
-#endif /* !__ASSEMBLY__ */
-
-#endif
+	

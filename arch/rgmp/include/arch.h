@@ -40,10 +40,12 @@
 #ifndef __RGMP_ARCH_ARCH_H
 #define __RGMP_ARCH_ARCH_H
 
+#include <arch/subarch/arch.h>
+
 #ifndef __ASSEMBLY__
 
 #include <nuttx/sched.h>
-#include <rgmp/hpet.h>
+
 
 struct up_wait {
     struct up_wait *next;
@@ -57,16 +59,6 @@ void up_sigentry(void);
 int up_register_bridge(char *name, int size);
 int up_unregister_bridge(char *name);
 
-static inline void up_mdelay(uint32_t msec)
-{
-    hpet_ndelay(msec*1000000);
-}
-
-static inline void up_udelay(uint32_t usec)
-{
-    hpet_udelay(usec*1000);
-}
-
-#endif
+#endif /* !__ASSEMBLY__ */
 
 #endif

@@ -1977,3 +1977,8 @@
 	  examples/nxlines.
 	* arch/graphics: Used apps/examples/nxlines to (finally) verify the NX
 	  trapezoid drawing functions and (wide) line drawing functions.
+	* arch/rgmp and configs/rgmp.  Yu Qiang has ported RGMP to the OMAP4430 (arm)
+	  pandaboard and release the new RGMP 0.3 version. The main changes are: (1)
+	  Separate configs/rgmp/x86 and configs/rgmp/arm configuration directory, and
+	  (2) Extract architecture dependent code in arch/rgmp/include and
+	  arch/rgmp/src into corresponding x86/ and arm/ directories.

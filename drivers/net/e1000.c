@@ -58,10 +58,10 @@
 #include <net/uip/uip-arch.h>
 
 #include <rgmp/pmap.h>
-#include <rgmp/pci.h>
 #include <rgmp/string.h>
-#include <rgmp/x86.h>
 #include <rgmp/stdio.h>
+#include <rgmp/arch/pci.h>
+#include <rgmp/memio.h>
 #include "e1000.h"
 
 /****************************************************************************

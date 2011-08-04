@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/rgmp/src/sigentry.S
+ * arch/rgmp/include/x86/arch/subarch/arch.h
  *
  *   Copyright (C) 2011 Yu Qiang. All rights reserved.
  *   Author: Yu Qiang <yuq825@gmail.com>
@@ -37,19 +37,24 @@
  *
  ****************************************************************************/
 
-	.globl up_sigentry
-up_sigentry:
-	subl $172, %esp    # 172 is the size of TrapFrame
-	pushl %esp
-	movl %esp, %eax
-	call up_sigdeliver
-	addl $8, %esp      # skip parameter and current_task
-	frstor 0(%esp)
-  	addl $108, %esp
-	popal
-	popl %es
-	popl %ds
-	addl $0x8, %esp # trapno and errcode
-	iret
+#ifndef __RGMP_ARCH_SUBARCH_ARCH_H
+#define __RGMP_ARCH_SUBARCH_ARCH_H
 
-	
+#ifndef __ASSEMBLY__
+
+#include <rgmp/arch/hpet.h>
+
+
+static inline void up_mdelay(uint32_t msec)
+{
+    hpet_ndelay(msec*1000000);
+}
+
+static inline void up_udelay(uint32_t usec)
+{
+    hpet_udelay(usec*1000);
+}
+
+#endif /* !__ASSEMBLY__ */
+
+#endif

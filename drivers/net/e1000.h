@@ -46,7 +46,7 @@
 
 #include <rgmp/types.h>
 #include <rgmp/trap.h>
-#include <rgmp/x86.h>
+#include <rgmp/arch/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions

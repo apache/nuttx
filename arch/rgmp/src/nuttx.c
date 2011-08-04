@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/rgmp/src/bridge.c
+ * arch/rgmp/src/nuttx.c
  *
  *   Copyright (C) 2011 Yu Qiang. All rights reserved.
  *   Author: Yu Qiang <yuq825@gmail.com>
@@ -39,12 +39,13 @@
 
 #include <rgmp/boot.h>
 #include <rgmp/pmap.h>
-#include <rgmp/x86.h>
 #include <rgmp/assert.h>
 #include <rgmp/spinlock.h>
-#include <rgmp/console.h>
 #include <rgmp/string.h>
-#include <rgmp/fpu.h>
+
+#include <rgmp/arch/arch.h>
+#include <rgmp/arch/console.h>
+
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
@@ -52,10 +53,10 @@
 #include <stdlib.h>
 #include <arch/irq.h>
 #include <arch/arch.h>
-#include <arch/com.h>
 #include <os_internal.h>
 
 _TCB *current_task = NULL;
+
 
 /**
  * This function is called in non-interrupt context
@@ -75,9 +76,7 @@ static inline void up_switchcontext(_TCB *ctcb, _TCB *ntcb)
 
     // start switch
     current_task = ntcb;
-    asm volatile ("int $0x40"
-		  ::"a"(ctcb?&ctcb->xcp.tf:NULL),
-		    "b"(ntcb->xcp.tf));
+    rgmp_context_switch(ctcb?&ctcb->xcp.tf:NULL, ntcb->xcp.tf);
 }
 
 void up_initialize(void)
@@ -85,7 +84,7 @@ void up_initialize(void)
     extern pidhash_t g_pidhash[];
     extern void up_register_bridges(void);
     extern void vnet_initialize(void);
-    extern void e1000_mod_init(void);
+    extern void nuttx_arch_init(void);
 
     // intialize the current_task to g_idletcb
     current_task = g_pidhash[PIDHASH(0)].tcb;
@@ -98,38 +97,15 @@ void up_initialize(void)
     vnet_initialize();
 #endif
 
-    // setup COM device
-    up_serialinit();
-
-#ifdef CONFIG_NET_E1000
-    // setup e1000
-    e1000_mod_init();
-#endif
+    nuttx_arch_init();
 
     // enable interrupt
-    sti();
+    local_irq_enable();
 }
 
 void up_idle(void)
 {
-    asm volatile("hlt");
-}
-
-void up_initial_state(_TCB *tcb)
-{
-    struct Trapframe *tf;
-
-    if (tcb->pid != 0) {
-	tf = (struct Trapframe *)tcb->adj_stack_ptr-1;
-	memset(tf, 0, sizeof(struct Trapframe));
-	tf->tf_fpu = rgmp_fpu_init_regs;
-	tf->tf_eflags = 0x00000202;
-	tf->tf_cs = GD_KT;
-	tf->tf_ds = GD_KD;
-	tf->tf_es = GD_KD;
-	tf->tf_eip = (uint32_t)tcb->start;
-	tcb->xcp.tf = tf;
-    }
+    arch_hlt();
 }
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
@@ -160,7 +136,7 @@ int up_create_stack(_TCB *tcb, size_t stack_size)
 
 	tcb->adj_stack_size  = adj_stack_size;
 	tcb->stack_alloc_ptr = stack_alloc_ptr;
-	tcb->adj_stack_ptr   = adj_stack_ptr;
+	tcb->adj_stack_ptr   = (void *)((unsigned int)adj_stack_ptr & ~7);
 	ret = OK;
     }
     return ret;
@@ -181,7 +157,7 @@ int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 
     tcb->adj_stack_size  = adj_stack_size;
     tcb->stack_alloc_ptr = stack;
-    tcb->adj_stack_ptr   = adj_stack_ptr;
+    tcb->adj_stack_ptr   = (void *)((unsigned int)adj_stack_ptr & ~7);
     return OK;
 }
 
@@ -472,12 +448,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 	// some non-running task.
 	else {
 	    tcb->xcp.sigdeliver = sigdeliver;
-	    tcb->xcp.save_eip = tcb->xcp.tf->tf_eip;
-	    tcb->xcp.save_eflags = tcb->xcp.tf->tf_eflags;
-
-	    // Then set up to the trampoline with interrupts disabled
-	    tcb->xcp.tf->tf_eip = (uint32_t)up_sigentry;
-	    tcb->xcp.tf->tf_eflags = 0;
+	    push_xcptcontext(&tcb->xcp);
         }
 
 	popcli(flags);
@@ -516,14 +487,13 @@ int up_prioritize_irq(int irq, int priority)
 void up_sigdeliver(struct Trapframe *tf)
 {
     sig_deliver_t sigdeliver;
-
-    tf->tf_eip = current_task->xcp.save_eip;
-    tf->tf_eflags = current_task->xcp.save_eflags;
+    
+    pop_xcptcontext(&current_task->xcp);
     sigdeliver = current_task->xcp.sigdeliver;
     current_task->xcp.sigdeliver = NULL;
-    sti();
+    local_irq_enable();
     sigdeliver(current_task);
-    cli();
+    local_irq_disable();
 }
 
 
