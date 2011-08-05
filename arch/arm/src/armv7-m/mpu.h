@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/cortexm3/mpu.h
+ * arch/arm/src/armv7-m/mpu.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

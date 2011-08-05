@@ -308,7 +308,7 @@ void up_irqinitialize(void)
    * Fault handler.
    */
 
-#ifdef CONFIG_CORTEXM3_MPU
+#ifdef CONFIG_ARMV7M_MPU
   irq_attach(LPC17_IRQ_MEMFAULT, up_memfault);
   up_enable_irq(LPC17_IRQ_MEMFAULT);
 #endif
@@ -317,7 +317,7 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_DEBUG
   irq_attach(LPC17_IRQ_NMI, lpc17_nmi);
-#ifndef CONFIG_CORTEXM3_MPU
+#ifndef CONFIG_ARMV7M_MPU
   irq_attach(LPC17_IRQ_MEMFAULT, up_memfault);
 #endif
   irq_attach(LPC17_IRQ_BUSFAULT, lpc17_busfault);

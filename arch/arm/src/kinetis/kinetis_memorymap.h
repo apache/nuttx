@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/kinetis/kinetis_memorymap.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@
 #  define KINETIS_APB0_BASE   0x40000000 /* -0x4007ffff: APB0 Peripherals */
 #  define KINETIS_APB1_BASE   0x40080000 /* -0x400fffff: APB1 Peripherals */
 #  define KINETIS_AHB_BASE    0x50000000 /* -0x501fffff: DMA Controller, Ethernet, and USB */
-#define KINETIS_CORTEXM3_BASE 0xe0000000 /* -0xe00fffff: (see cortexm3/nvic.h) */
+#define KINETIS_CORTEXM4_BASE 0xe0000000 /* -0xe00fffff: (see armv7-m/nvic.h) */
 #define KINETIS_SCS_BASE      0xe000e000
 #define KINETIS_DEBUGMCU_BASE 0xe0042000
 

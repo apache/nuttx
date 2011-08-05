@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/syscall.h
+ * arch/hc/include/syscall.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,20 +37,12 @@
  * through include/syscall.h or include/sys/sycall.h
  */
 
-#ifndef _ARCH_ARM_INCLUDE_SYSCALL_H
-#define _ARCH_ARM_INCLUDE_SYSCALL_H
+#ifndef _ARCH_HC_INCLUDE_SYSCALL_H
+#define _ARCH_HC_INCLUDE_SYSCALL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
-/* Include ARM architecture-specific syscall macros */
-
-#ifdef CONFIG_ARCH_CORTEXM3
-# include <arch/cortexm3/irq.h>
-#else
-# include <arch/arm/irq.h>
-#endif
 
 /****************************************************************************
  * Definitions
@@ -86,5 +78,5 @@ extern "C" {
 #endif
 #endif
 
-#endif /* _ARCH_ARM_INCLUDE_SYSCALL_H */
+#endif /* _ARCH_HC_INCLUDE_SYSCALL_H */
 

@@ -61,7 +61,7 @@
 #  define LPC17_APB0_BASE   0x40000000 /* -0x4007ffff: APB0 Peripherals */
 #  define LPC17_APB1_BASE   0x40080000 /* -0x400fffff: APB1 Peripherals */
 #  define LPC17_AHB_BASE    0x50000000 /* -0x501fffff: DMA Controller, Ethernet, and USB */
-#define LPC17_CORTEXM3_BASE 0xe0000000 /* -0xe00fffff: (see cortexm3/nvic.h) */
+#define LPC17_CORTEXM3_BASE 0xe0000000 /* -0xe00fffff: (see armv7-m/nvic.h) */
 #define LPC17_SCS_BASE      0xe000e000
 #define LPC17_DEBUGMCU_BASE 0xe0042000
 

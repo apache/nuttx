@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/cortexm3/up_schedulesigaction.c
+ * arch/arm/src/armv7-m/up_schedulesigaction.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,7 +164,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
               current_regs[REG_PC]      = (uint32_t)up_sigdeliver;
               current_regs[REG_PRIMASK] = 1;
-              current_regs[REG_XPSR]    = CORTEXM3_XPSR_T;
+              current_regs[REG_XPSR]    = ARMV7M_XPSR_T;
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -198,7 +198,7 @@ void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
           tcb->xcp.regs[REG_PRIMASK] = 1;
-          tcb->xcp.regs[REG_XPSR]    = CORTEXM3_XPSR_T;
+          tcb->xcp.regs[REG_XPSR]    = ARMV7M_XPSR_T;
         }
 
       irqrestore(flags);

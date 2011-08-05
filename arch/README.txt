@@ -144,8 +144,8 @@ arch/arm - ARM-based micro-controllers
     arch/arm/src/arm and arch/arm/include/arm
         Common ARM-specific logic
 
-    arch/arm/src/cortexm3 and arch/arm/include/cortexm3
-        Common Cortex-M3 logic
+    arch/arm/src/armv7-m and arch/arm/include/armv7-m
+        Common ARMv7-M logic (Cortex-M3 and Cortex-M4)
         
     arch/arm/include/c5471 and arch/arm/src/c5471
         TI TMS320C5471 (also called TMS320DM180 or just C5471).

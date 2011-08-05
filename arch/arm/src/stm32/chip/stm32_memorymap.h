@@ -125,7 +125,7 @@
 
 #define STM32_FSMC_BASE     0xa0000000
 
-/* Other registers -- see cortexm3/nvic.h for standard Cortex-M3 registers in this
+/* Other registers -- see armv7-m/nvic.h for standard Cortex-M3 registers in this
  * address range
  */
 

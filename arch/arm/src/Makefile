@@ -37,10 +37,14 @@
 -include chip/Make.defs
 
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(CONFIG_ARCH_CORTEXM3),y)
-ARCH_SUBDIR	= cortexm3
+ifeq ($(CONFIG_ARCH_CORTEXM3),y)   /* Cortex-M3 is ARMv7-M */
+ARCH_SUBDIR	= armv7-m
+else
+ifeq ($(CONFIG_ARCH_CORTEXM4),y)   /* Cortex-M4 is ARMv7E-M */
+ARCH_SUBDIR	= armv7-m
 else
 ARCH_SUBDIR	= arm
+endif
 endif
 
 ifeq ($(WINTOOL),y)

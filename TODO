@@ -630,7 +630,7 @@ o ARM (arch/arm/)
   Description: ARM interrupt handling performance could be improved in some
                ways. One easy way is to use a pointer to the context save
                area in current_regs instead of using up_copystate so much.
-               see handling of 'current_regs" in arch/arm/src/cortexm3/* for
+               see handling of 'current_regs" in arch/arm/src/armv7-m/* for
                examples of how this might be done.
                 Status:      Open
   Priority:    Low

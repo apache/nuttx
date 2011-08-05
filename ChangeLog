@@ -1986,4 +1986,8 @@
 	  Add a directory structure to support the port to the Kinesis KwikStik-K40.
 	  There is no real substance in the initial check-in; only the directory
 	  structure and skeleton files.
+	* arch/arm/include/armv7-m, arch/arm/src/armv7-m, etc.: Rename all cortexm3
+	  directories and files to armv7-m; Change name of of all CORTEXM3 constants
+	  to ARMV7M.  This is a major namespace change needed to cleanly support the
+	  ARM Cortex-M4 which is also in the ARMv7 M Series (specifically, ARMv7E-M).
 

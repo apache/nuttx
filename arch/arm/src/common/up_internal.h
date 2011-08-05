@@ -82,7 +82,7 @@
  * a referenced is passed to get the state from the TCB.
  */
 
-#ifdef CONFIG_ARCH_CORTEXM3
+#if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
 #  define up_savestate(regs)    up_copystate(regs, (uint32_t*)current_regs)
 #  define up_restorestate(regs) (current_regs = regs)
 #else
@@ -121,7 +121,7 @@ extern uint32_t g_heapbase;
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-#  ifdef CONFIG_ARCH_CORTEXM3
+#if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
 extern void g_intstackbase;
 #  else
 extern uint32_t g_userstack;
@@ -180,14 +180,14 @@ extern void up_sigdeliver(void);
 extern void up_irqinitialize(void);
 extern void up_maskack_irq(int irq);
 
-#ifdef CONFIG_ARCH_CORTEXM3
+#if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
 
 extern uint32_t *up_doirq(int irq, uint32_t *regs);
 extern int  up_svcall(int irq, FAR void *context);
 extern int  up_hardfault(int irq, FAR void *context);
 extern int  up_memfault(int irq, FAR void *context);
 
-#else /* CONFIG_ARCH_CORTEXM3 */
+#else /* CONFIG_ARCH_CORTEXM3 || CONFIG_ARCH_CORTEXM4 */
 
 extern void up_doirq(int irq, uint32_t *regs);
 #ifdef CONFIG_PAGING
@@ -202,7 +202,7 @@ extern void up_prefetchabort(uint32_t *regs);
 extern void up_syscall(uint32_t *regs);
 extern void up_undefinedinsn(uint32_t *regs);
 
-#endif /* CONFIG_ARCH_CORTEXM3 */
+#endif /* CONFIG_ARCH_CORTEXM3 || CONFIG_ARCH_CORTEXM4 */
 
 extern void up_vectorundefinsn(void);
 extern void up_vectorswi(void);

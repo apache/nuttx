@@ -7,8 +7,8 @@
 	<NodeC Path="..\..\..\arch\arm\src\stm32\stm32_serial.c" Header="stm32_serial.c" Marker="-1" OutputFile=".\stm32_serial.o" sate="0" />
 	<NodeC Path="..\..\..\arch\arm\src\stm32\stm32_start.c" Header="stm32_start.c" Marker="-1" OutputFile=".\stm32_start.o" sate="0" />
 	<NodeC Path=".\bigfatstub.c" Header="bigfatstub.c" Marker="-1" OutputFile=".\bigfatstub.o" sate="0" />
-	<NodeC Path="..\..\..\arch\arm\src\cortexm3\up_svcall.c" Header="up_svcall.c" Marker="-1" OutputFile=".\up_svcall.o" sate="0" />
-	<NodeC Path="..\..\..\arch\arm\src\cortexm3\up_hardfault.c" Header="up_hardfault.c" Marker="-1" OutputFile=".\up_hardfault.o" sate="0" />
+	<NodeC Path="..\..\..\arch\arm\src\armv7-m\up_svcall.c" Header="up_svcall.c" Marker="-1" OutputFile=".\up_svcall.o" sate="0" />
+	<NodeC Path="..\..\..\arch\arm\src\armv7-m\up_hardfault.c" Header="up_hardfault.c" Marker="-1" OutputFile=".\up_hardfault.o" sate="0" />
 	<NodeC Path="..\src\up_leds.c" Header="up_leds.c" Marker="-1" OutputFile=".\up_leds.o" sate="0" />
 	<NodeC Path="..\src\up_boot.c" Header="up_boot.c" Marker="-1" OutputFile=".\up_boot.o" sate="0" />
 	<NodeC Path="..\..\..\sched\irq_unexpectedisr.c" Header="irq_unexpectedisr.c" Marker="-1" OutputFile=".\irq_unexpectedisr.o" sate="0" />
@@ -21,7 +21,7 @@
 																																		
 				</Section>
 				<Section Header="Directories" >
-					<Property Header="IncDir" Value=".;C:\cygwin\home\Owner\projects\nuttx\nuttx\arch\arm\src\common;C:\cygwin\home\Owner\projects\nuttx\nuttx\arch\arm\src\cortexm3;C:\cygwin\home\Owner\projects\nuttx\nuttx\arch\arm\src\stm32;C:\cygwin\home\Owner\projects\nuttx\nuttx\include;C:\cygwin\home\Owner\projects\nuttx\nuttx\sched" Removable="1" />
+					<Property Header="IncDir" Value=".;C:\cygwin\home\Owner\projects\nuttx\nuttx\arch\arm\src\common;C:\cygwin\home\Owner\projects\nuttx\nuttx\arch\arm\src\armv7-m;C:\cygwin\home\Owner\projects\nuttx\nuttx\arch\arm\src\stm32;C:\cygwin\home\Owner\projects\nuttx\nuttx\include;C:\cygwin\home\Owner\projects\nuttx\nuttx\sched" Removable="1" />
 																									
 				</Section>
 																			

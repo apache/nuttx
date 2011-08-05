@@ -41,24 +41,24 @@ ifeq ($(CONFIG_KINETIS_CODESOURCERYW),y)
   # CodeSourcery under Windows
   CROSSDEV = arm-none-eabi-
   WINTOOL = y
-  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=soft
 endif
 ifeq ($(CONFIG_KINETIS_CODESOURCERYL),y)
   # CodeSourcery under Linux
   CROSSDEV = arm-none-eabi-
-  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=soft
   MAXOPTIMIZATION = -O2
 endif
 ifeq ($(CONFIG_KINETIS_DEVKITARM),y)
   # devkitARM under Windows
   CROSSDEV = arm-eabi-
   WINTOOL = y
-  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=soft
 endif
 ifeq ($(CONFIG_KINETIS_BUILDROOT),y)
   # NuttX buildroot under Linux or Cygwin
   CROSSDEV = arm-elf-
-  ARCHCPUFLAGS = -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
+  ARCHCPUFLAGS = -mtune=cortex-m4 -march=armv7e-m -mfloat-abi=soft
   MAXOPTIMIZATION = -Os
 endif
 

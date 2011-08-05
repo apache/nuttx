@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/cortexm3/up_hardfault.c
+ * arch/arm/src/armv7-m/up_sigdeliver.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,39 +40,25 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <string.h>
-#include <assert.h>
+#include <sched.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <arch/board/board.h>
 
-#include "up_arch.h"
 #include "os_internal.h"
-#include "nvic.h"
 #include "up_internal.h"
+#include "up_arch.h"
+
+#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Debug output from this file may interfere with context switching! */
-
-#undef DEBUG_HARDFAULTS         /* Define to debug hard faults */
-
-#ifdef DEBUG_HARDFAULTS
-# define hfdbg(format, arg...) lldbg(format, ##arg)
-#else
-# define hfdbg(x...)
-#endif
-
-#define INSN_SVC0        0xdf00 /* insn: svc 0 */
-
 /****************************************************************************
  * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -84,61 +70,73 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_hardfault
+ * Name: up_sigdeliver
  *
  * Description:
- *   This is Hard Fault exception handler.  It also catches SVC call
- *   exceptions that are performed in bad contexts.
+ *   This is the a signal handling trampoline.  When a signal action was
+ *   posted.  The task context was mucked with and forced to branch to this
+ *   location with interrupts disabled.
  *
  ****************************************************************************/
 
-int up_hardfault(int irq, FAR void *context)
+void up_sigdeliver(void)
 {
-  uint32_t *regs = (uint32_t*)context;
-  uint16_t *pc;
-  uint16_t insn;
+  _TCB  *rtcb = (_TCB*)g_readytorun.head;
+  uint32_t regs[XCPTCONTEXT_REGS];
+  sig_deliver_t sigdeliver;
 
-  /* Get the value of the program counter where the fault occurred */
+  /* Save the errno.  This must be preserved throughout the signal handling
+   * so that the user code final gets the correct errno value (probably
+   * EINTR).
+   */
 
-  pc = (uint16_t*)regs[REG_PC] - 1;
-  if ((void*)pc >= (void*)&_stext && (void*)pc < (void*)&_etext)
-    {
-      /* Fetch the instruction that caused the Hard fault */
+  int saved_errno = rtcb->pterrno;
 
-      insn = *pc;
-      hfdbg("  PC: %p INSN: %04x\n", pc, insn);
+  up_ledon(LED_SIGNAL);
 
-      /* If this was the instruction 'svc 0', then forward processing
-       * to the SVCall handler
-       */
+  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  ASSERT(rtcb->xcp.sigdeliver != NULL);
 
-      if (insn == INSN_SVC0)
-        {
-          hfdbg("Forward SVCall\n");
-          return up_svcall(irq, context);
-        }
-    }
+  /* Save the real return state on the stack. */
 
-  /* Dump some hard fault info */
+  up_copystate(regs, rtcb->xcp.regs);
+  regs[REG_PC]         = rtcb->xcp.saved_pc;
+  regs[REG_PRIMASK]    = rtcb->xcp.saved_primask;
+  regs[REG_XPSR]       = rtcb->xcp.saved_xpsr;
 
-  hfdbg("\nHard Fault:\n");
-  hfdbg("  IRQ: %d regs: %p\n", irq, regs);
-  hfdbg("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x\n",
-        getbasepri(), getprimask(), getipsr());
-  hfdbg("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x AFAULTS: %08x\n",
-        getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
-        getreg32(NVIC_DFAULTS), getreg32(NVIC_BFAULT_ADDR),
-        getreg32(NVIC_AFAULTS));
-  hfdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-        regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  hfdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-        regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  hfdbg("  PSR=%08x\n", regs[REG_XPSR]);
+  /* Get a local copy of the sigdeliver function pointer. We do this so that
+   * we can nullify the sigdeliver function pointer in the TCB and accept
+   * more signal deliveries while processing the current pending signals.
+   */
 
+  sigdeliver           = rtcb->xcp.sigdeliver;
+  rtcb->xcp.sigdeliver = NULL;
+
+  /* Then restore the task interrupt state */
+
+  irqrestore((uint16_t)regs[REG_PRIMASK]);
+
+  /* Deliver the signals */
+
+  sigdeliver(rtcb);
+
+  /* Output any debug messages BEFORE restoring errno (because they may
+   * alter errno), then disable interrupts again and restore the original
+   * errno that is needed by the user logic (it is probably EINTR).
+   */
+
+  sdbg("Resuming\n");
   (void)irqsave();
-  lldbg("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
-  PANIC(OSERR_UNEXPECTEDISR);
-  return OK;
+  rtcb->pterrno = saved_errno;
+
+  /* Then restore the correct state for this thread of
+   * execution.
+   */
+
+  up_ledoff(LED_SIGNAL);
+  up_fullcontextrestore(regs);
 }
+
+#endif /* !CONFIG_DISABLE_SIGNALS */
+

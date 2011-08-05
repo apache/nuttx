@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/cortexm3/syscall.h
+ * arch/arm/include/armv7-m/syscall.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -37,8 +37,8 @@
  * through include/syscall.h or include/sys/sycall.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_CORTEXM3_SYSCALL_H
-#define __ARCH_ARM_INCLUDE_CORTEXM3_SYSCALL_H
+#ifndef __ARCH_ARM_INCLUDE_ARMV7_M_SYSCALL_H
+#define __ARCH_ARM_INCLUDE_ARMV7_M_SYSCALL_H
 
 /****************************************************************************
  * Included Files
@@ -239,5 +239,5 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_INCLUDE_CORTEXM3_SYSCALL_H */
+#endif /* __ARCH_ARM_INCLUDE_ARMV7_M_SYSCALL_H */
 
