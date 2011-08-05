@@ -44,14 +44,6 @@
  * Included Files
  ****************************************************************************/
 
-/* Include ARM architecture-specific syscall macros */
-
-#ifdef CONFIG_ARCH_CORTEXM3
-# include <arch/cortexm3/syscall.h>
-#else
-# include <arch/arm/syscall.h>
-#endif
-
 /****************************************************************************
  * Definitions
  ****************************************************************************/

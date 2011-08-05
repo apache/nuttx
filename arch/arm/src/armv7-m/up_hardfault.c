@@ -1,7 +1,7 @@
 /****************************************************************************
- *  arch/arm/src/cortexm3/up_unblocktask.c
+ * arch/arm/src/armv7-m/up_hardfault.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,20 +39,40 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
+#include <stdint.h>
+#include <string.h>
+#include <assert.h>
 #include <debug.h>
-#include <nuttx/arch.h>
 
+#include <arch/irq.h>
+
+#include "up_arch.h"
 #include "os_internal.h"
-#include "clock_internal.h"
+#include "nvic.h"
 #include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Debug output from this file may interfere with context switching! */
+
+#undef DEBUG_HARDFAULTS         /* Define to debug hard faults */
+
+#ifdef DEBUG_HARDFAULTS
+# define hfdbg(format, arg...) lldbg(format, ##arg)
+#else
+# define hfdbg(x...)
+#endif
+
+#define INSN_SVC0        0xdf00 /* insn: svc 0 */
+
 /****************************************************************************
  * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -64,94 +84,61 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_unblock_task
+ * Name: up_hardfault
  *
  * Description:
- *   A task is currently in an inactive task list
- *   but has been prepped to execute.  Move the TCB to the
- *   ready-to-run list, restore its context, and start execution.
- *
- * Inputs:
- *   tcb: Refers to the tcb to be unblocked.  This tcb is
- *     in one of the waiting tasks lists.  It must be moved to
- *     the ready-to-run list and, if it is the highest priority
- *     ready to run taks, executed.
+ *   This is Hard Fault exception handler.  It also catches SVC call
+ *   exceptions that are performed in bad contexts.
  *
  ****************************************************************************/
 
-void up_unblock_task(_TCB *tcb)
+int up_hardfault(int irq, FAR void *context)
 {
-  /* Verify that the context switch can be performed */
+  uint32_t *regs = (uint32_t*)context;
+  uint16_t *pc;
+  uint16_t insn;
 
-  if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
-      (tcb->task_state > LAST_BLOCKED_STATE))
+  /* Get the value of the program counter where the fault occurred */
+
+  pc = (uint16_t*)regs[REG_PC] - 1;
+  if ((void*)pc >= (void*)&_stext && (void*)pc < (void*)&_etext)
     {
-      PANIC(OSERR_BADUNBLOCKSTATE);
-    }
-  else
-    {
-      _TCB *rtcb = (_TCB*)g_readytorun.head;
+      /* Fetch the instruction that caused the Hard fault */
 
-      /* Remove the task from the blocked task list */
+      insn = *pc;
+      hfdbg("  PC: %p INSN: %04x\n", pc, insn);
 
-      sched_removeblocked(tcb);
-
-      /* Reset its timeslice.  This is only meaningful for round
-       * robin tasks but it doesn't here to do it for everything
+      /* If this was the instruction 'svc 0', then forward processing
+       * to the SVCall handler
        */
 
-#if CONFIG_RR_INTERVAL > 0
-      tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
-#endif
-
-      /* Add the task in the correct location in the prioritized
-       * g_readytorun task list
-       */
-
-      if (sched_addreadytorun(tcb))
+      if (insn == INSN_SVC0)
         {
-          /* The currently active task has changed! We need to do
-           * a context switch to the new task.
-           *
-           * Are we in an interrupt handler? 
-           */
-
-          if (current_regs)
-            {
-              /* Yes, then we have to do things differently.
-               * Just copy the current_regs into the OLD rtcb.
-               */
-
-               up_savestate(rtcb->xcp.regs);
-
-              /* Restore the exception context of the rtcb at the (new) head 
-               * of the g_readytorun task list.
-               */
-
-              rtcb = (_TCB*)g_readytorun.head;
-
-              /* Then switch contexts */
-
-              up_restorestate(rtcb->xcp.regs);
-            }
-
-          /* No, then we will need to perform the user context switch */
-
-          else
-            {
-              /* Switch context to the context of the task at the head of the
-               * ready to run list.
-               */
-
-               _TCB *nexttcb = (_TCB*)g_readytorun.head;
-               up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
-
-              /* up_switchcontext forces a context switch to the task at the
-               * head of the ready-to-run list.  It does not 'return' in the
-               * normal sense.  When it does return, it is because the blocked
-               * task is again ready to run and has execution priority.
-               */
-           }
+          hfdbg("Forward SVCall\n");
+          return up_svcall(irq, context);
         }
     }
+
+  /* Dump some hard fault info */
+
+  hfdbg("\nHard Fault:\n");
+  hfdbg("  IRQ: %d regs: %p\n", irq, regs);
+  hfdbg("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x\n",
+        getbasepri(), getprimask(), getipsr());
+  hfdbg("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x AFAULTS: %08x\n",
+        getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
+        getreg32(NVIC_DFAULTS), getreg32(NVIC_BFAULT_ADDR),
+        getreg32(NVIC_AFAULTS));
+  hfdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+        regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+        regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+  hfdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+        regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+        regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  hfdbg("  PSR=%08x\n", regs[REG_XPSR]);
+
+  (void)irqsave();
+  lldbg("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
+  PANIC(OSERR_UNEXPECTEDISR);
+  return OK;
 }

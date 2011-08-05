@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/cortexm3/up_saveusercontext.S
+ * arch/arm/src/armv7-m/up_saveusercontext.S
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cortexm3/up_mpu.c
+ * arch/arm/src/armv7-m/up_mpu.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

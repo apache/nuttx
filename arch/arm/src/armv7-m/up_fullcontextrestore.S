@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/cortexm3/up_switchcontext.S
+ * arch/arm/src/armv7-m/up_fullcontextrestore.S
  *
- *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@
 #include "svcall.h"
 
 /************************************************************************************
- * Pre-processor Definitions
+ * Preprocessor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -53,7 +53,7 @@
 
 	.syntax	unified
 	.thumb
-	.file	"up_switchcontext.S"
+	.file	"up_fullcontextrestore.S"
 
 /************************************************************************************
  * Macros
@@ -64,13 +64,12 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_switchcontext
+ * Name: up_fullcontextrestore
  *
  * Description:
- *   Save the current thread context and restore the specified context.
- *   Full prototype is:
+ *   Restore the current thread context.  Full prototype is:
  *
- *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ *   void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
  *
  * Return:
  *   None
@@ -78,20 +77,19 @@
  ************************************************************************************/
 
 	.thumb_func
-	.globl	up_switchcontext
-	.type	up_switchcontext, function
-up_switchcontext:
+	.globl	up_fullcontextrestore
+	.type	up_fullcontextrestore, function
+up_fullcontextrestore:
 
-	/* Perform the System call with R0=1, R1=saveregs, R2=restoreregs */
+	/* Perform the System call with R0=1 and R1=regs */
 
-	mov		r2, r1					/* R2: restoreregs */
-	mov		r1, r0					/* R1: saveregs */
-	mov		r0, #SYS_switch_context	/* R0: context switch */
-	svc		0						/* Force synchronous SVCall (or Hard Fault) */
+	mov		r1, r0						/* R1: regs */
+	mov		r0, #SYS_restore_context	/* R0: restore context */
+	svc		0							/* Force synchronous SVCall (or Hard Fault) */
 
 	/* This call should not return */
 
-	bx		lr						/* Unnecessary ... will not return */
-	.size	up_switchcontext, .-up_switchcontext
+	bx		lr							/* Unnecessary ... will not return */
+	.size	up_fullcontextrestore, .-up_fullcontextrestore
 	.end
 

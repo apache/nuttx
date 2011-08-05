@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/cortexm3/up_sigdeliver.c
+ * arch/arm/src/armv7-m/up_doirq.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,21 +40,22 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <sched.h>
-#include <debug.h>
+#include <assert.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
+#include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
-#include "up_arch.h"
-
-#ifndef CONFIG_DISABLE_SIGNALS
 
 /****************************************************************************
  * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -69,74 +70,54 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_sigdeliver
- *
- * Description:
- *   This is the a signal handling trampoline.  When a signal action was
- *   posted.  The task context was mucked with and forced to branch to this
- *   location with interrupts disabled.
- *
- ****************************************************************************/
-
-void up_sigdeliver(void)
+uint32_t *up_doirq(int irq, uint32_t *regs)
 {
-  _TCB  *rtcb = (_TCB*)g_readytorun.head;
-  uint32_t regs[XCPTCONTEXT_REGS];
-  sig_deliver_t sigdeliver;
+  up_ledon(LED_INIRQ);
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC(OSERR_ERREXCEPTION);
+#else
+  uint32_t *savestate;
 
-  /* Save the errno.  This must be preserved throughout the signal handling
-   * so that the user code final gets the correct errno value (probably
-   * EINTR).
+  /* Nested interrupts are not supported in this implementation.  If you want
+   * implemented nested interrupts, you would have to (1) change the way that
+   * current regs is handled and (2) the design associated with
+   * CONFIG_ARCH_INTERRUPTSTACK.
    */
 
-  int saved_errno = rtcb->pterrno;
-
-  up_ledon(LED_SIGNAL);
-
-  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  ASSERT(rtcb->xcp.sigdeliver != NULL);
-
-  /* Save the real return state on the stack. */
-
-  up_copystate(regs, rtcb->xcp.regs);
-  regs[REG_PC]         = rtcb->xcp.saved_pc;
-  regs[REG_PRIMASK]    = rtcb->xcp.saved_primask;
-  regs[REG_XPSR]       = rtcb->xcp.saved_xpsr;
-
-  /* Get a local copy of the sigdeliver function pointer. We do this so that
-   * we can nullify the sigdeliver function pointer in the TCB and accept
-   * more signal deliveries while processing the current pending signals.
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
    */
 
-  sigdeliver           = rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
+  savestate     = (uint32_t*)current_regs;
+  current_regs = regs;
 
-  /* Then restore the task interrupt state */
+  /* Mask and acknowledge the interrupt */
 
-  irqrestore((uint16_t)regs[REG_PRIMASK]);
+  up_maskack_irq(irq);
 
-  /* Deliver the signals */
+  /* Deliver the IRQ */
 
-  sigdeliver(rtcb);
+  irq_dispatch(irq, regs);
 
-  /* Output any debug messages BEFORE restoring errno (because they may
-   * alter errno), then disable interrupts again and restore the original
-   * errno that is needed by the user logic (it is probably EINTR).
+  /* If a context switch occurred while processing the interrupt then
+   * current_regs may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
    */
 
-  sdbg("Resuming\n");
-  (void)irqsave();
-  rtcb->pterrno = saved_errno;
+  regs = (uint32_t*)current_regs;
 
-  /* Then restore the correct state for this thread of
-   * execution.
+  /* Restore the previous value of current_regs.  NULL would indicate that
+   * we are no longer in an interrupt handler.  It will be non-NULL if we
+   * are returning from a nested interrupt.
    */
 
-  up_ledoff(LED_SIGNAL);
-  up_fullcontextrestore(regs);
+  current_regs = savestate;
+
+  /* Unmask the last interrupt (global interrupts are still disabled) */
+
+  up_enable_irq(irq);
+#endif
+  up_ledoff(LED_INIRQ);
+  return regs;
 }
-
-#endif /* !CONFIG_DISABLE_SIGNALS */
-

@@ -301,7 +301,7 @@ void up_irqinitialize(void)
    * Fault handler.
    */
 
-#ifdef CONFIG_CORTEXM3_MPU
+#ifdef CONFIG_ARMV7M_MPU
   irq_attach(SAM3U_IRQ_MEMFAULT, up_memfault);
   up_enable_irq(SAM3U_IRQ_MEMFAULT);
 #endif
@@ -310,7 +310,7 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_DEBUG
   irq_attach(SAM3U_IRQ_NMI, sam3u_nmi);
-#ifndef CONFIG_CORTEXM3_MPU
+#ifndef CONFIG_ARMV7M_MPU
   irq_attach(SAM3U_IRQ_MEMFAULT, up_memfault);
 #endif
   irq_attach(SAM3U_IRQ_BUSFAULT, sam3u_busfault);

@@ -53,11 +53,11 @@
 #include <arch/chip/irq.h>
 
 /* Include ARM architecture-specific IRQ definitions (including register
- * save structure and irqsave()/irqrestore() macros
+ * save structure and irqsave()/irqrestore() macros)
  */
 
-#ifdef CONFIG_ARCH_CORTEXM3
-# include <arch/cortexm3/irq.h>
+#if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
+# include <arch/armv7-m/irq.h>
 #else
 # include <arch/arm/irq.h>
 #endif
