@@ -100,9 +100,9 @@ CONFIG_SAM3U_BUILDROOT=y
 #
 # Cortex-M3 features
 #
-# CONFIG_CORTEXM3_MPU - Enabled the MPU
+# CONFIG_ARMV7M_MPU - Enabled the MPU
 #
-CONFIG_CORTEXM3_MPU=y
+CONFIG_ARMV7M_MPU=y
 
 #
 #  Individual subsystems can be enabled:

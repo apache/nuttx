@@ -113,7 +113,7 @@ IDEs
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
   3) Set up include pathes:  You will need include/, arch/arm/src/lpc17xx,
-     arch/arm/src/common, arch/arm/src/cortexm3, and sched/.
+     arch/arm/src/common, arch/arm/src/armv7-m, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
 
