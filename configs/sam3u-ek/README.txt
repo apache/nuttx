@@ -295,6 +295,13 @@ SAM3U-EK-specific Configuration Options
 	CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 	CONFIG_U[S]ARTn_2STOP - Two stop bits
 
+  LCD Options.  Other than the standard LCD configuration options
+  (see configs/README.txt), the SAM3U-EK driver also supports:
+
+	CONFIG_LCD_PORTRAIT - Present the display in the standard 240x320
+	   "Portrait" orientation.  Default:  The display is rotated to
+	   support a 320x240 "Landscape" orientation.
+
 Configurations
 ^^^^^^^^^^^^^^
 

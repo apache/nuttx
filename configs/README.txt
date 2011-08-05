@@ -499,29 +499,29 @@ defconfig -- This is a configuration file similar to the Linux
 
 		  CONFIG_ARCH_MATH_H, CONFIG_ARCH_STDBOOL_H, CONFIG_ARCH_STDINT_H
 
-        CONFIG_ARCH_ROMGETC - In Harvard architectures, data accesses and
-          instruction accesses occur on different busses, perhaps
-          concurrently.  All data accesses are performed on the data bus
-          unless special machine instructions are used to read data
-          from the instruction address space.  Also, in the typical
-          MCU, the available SRAM data memory is much smaller that the
-          non-volatile FLASH instruction memory.  So if the application
-          requires many constant strings, the only practical solution may
-          be to store those constant strings in FLASH memory where they
-          can only be accessed using architecture-specific machine
-          instructions.
+		CONFIG_ARCH_ROMGETC - In Harvard architectures, data accesses and
+		  instruction accesses occur on different busses, perhaps
+		  concurrently.  All data accesses are performed on the data bus
+		  unless special machine instructions are used to read data
+		  from the instruction address space.  Also, in the typical
+		  MCU, the available SRAM data memory is much smaller that the
+		  non-volatile FLASH instruction memory.  So if the application
+		  requires many constant strings, the only practical solution may
+		  be to store those constant strings in FLASH memory where they
+		  can only be accessed using architecture-specific machine
+		  instructions.
 
-          If CONFIG_ARCH_ROMGETC is defined, then the architecture logic
-          must export the function up_romgetc().  up_romgetc() will simply
-          read one byte of data from the instruction space.
+		  If CONFIG_ARCH_ROMGETC is defined, then the architecture logic
+		  must export the function up_romgetc().  up_romgetc() will simply
+		  read one byte of data from the instruction space.
  
-          If CONFIG_ARCH_ROMGETC, certain C stdio functions are effected:
-          (1) All format strings in printf, fprintf, sprintf, etc. are
-          assumed to lie in FLASH (string arguments for %s are still assumed
-          to reside in SRAM). And (2), the string argument to puts and fputs
-          is assumed to reside in FLASH.  Clearly, these assumptions may have
-          to modified for the particular needs of your environment.  There
-          is no "one-size-fits-all" solution for this problem.
+		  If CONFIG_ARCH_ROMGETC, certain C stdio functions are effected:
+		  (1) All format strings in printf, fprintf, sprintf, etc. are
+		  assumed to lie in FLASH (string arguments for %s are still assumed
+		  to reside in SRAM). And (2), the string argument to puts and fputs
+		  is assumed to reside in FLASH.  Clearly, these assumptions may have
+		  to modified for the particular needs of your environment.  There
+		  is no "one-size-fits-all" solution for this problem.
 
 	Sizes of configurable things (0 disables)
 
@@ -564,19 +564,19 @@ defconfig -- This is a configuration file similar to the Linux
 	Filesystem configuration
 		CONFIG_FS_FAT - Enable FAT filesystem support
 		CONFIG_FAT_SECTORSIZE - Max supported sector size
-        CONFIG_FAT_LCNAMES - Enable use of the NT-style upper/lower case 8.3
-          file name support.
+		CONFIG_FAT_LCNAMES - Enable use of the NT-style upper/lower case 8.3
+		  file name support.
 		CONFIG_FAT_LFN - Enable FAT long file names.  NOTE:  Microsoft claims
-          patents on FAT long file name technology.  Please read the
-          disclaimer in the top-level COPYING file and only enable this
-          feature if you understand these issues.
-        CONFIG_FAT_MAXFNAME - If CONFIG_FAT_LFN is defined, then the
-          default, maximum long file name is 255 bytes.  This can eat up
-          a lot of memory (especially stack space).  If you are willing
-          to live with some non-standard, short long file names, then
-          define this value.  A good choice would be the same value as
-          selected for CONFIG_NAME_MAX which will limit the visibility
-          of longer file names anyway.
+		  patents on FAT long file name technology.  Please read the
+		  disclaimer in the top-level COPYING file and only enable this
+		  feature if you understand these issues.
+		CONFIG_FAT_MAXFNAME - If CONFIG_FAT_LFN is defined, then the
+		  default, maximum long file name is 255 bytes.  This can eat up
+		  a lot of memory (especially stack space).  If you are willing
+		  to live with some non-standard, short long file names, then
+		  define this value.  A good choice would be the same value as
+		  selected for CONFIG_NAME_MAX which will limit the visibility
+		  of longer file names anyway.
 		CONFIG_FS_NXFFS: Enable NuttX FLASH file system (NXFF) support.
 		CONFIG_NXFFS_ERASEDSTATE: The erased state of FLASH. 
 		  This must have one of the values of 0xff or 0x00.
@@ -670,6 +670,18 @@ defconfig -- This is a configuration file similar to the Linux
 		  control is managed outside of the 6100 driver so this value has no
 		  meaning to the driver.  Board-specific logic may place restrictions on
 		  this value.
+
+	Input Devices
+
+		CONFIG_INPUT
+		  Enables general support for input devices
+		CONFIG_INPUT_TSC2007
+		  If CONFIG_INPUT is selected, then this setting will enable building
+		  of the TI TSC2007 touchscreen driver.
+		CONFIG_TSC2007_MULTIPLE
+		  Normally only a single TI TSC2007 touchscreen is used.  But if
+		  there are multiple TSC2007 touchscreens, this setting will enable
+		  multiple touchscreens with the same driver.
 
 	ENC28J60 Ethernet Driver Configuration Settings:
 		CONFIG_NET_ENC28J60 - Enabled ENC28J60 support
@@ -886,6 +898,7 @@ defconfig -- This is a configuration file similar to the Linux
 	  and CONFIG_SCHED_WORKQUEUE=y
 
 	USB serial device class driver
+
 		CONFIG_USBSER
 		  Enable compilation of the USB serial driver
 		CONFIG_USBSER_EPINTIN
@@ -907,6 +920,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  Size of the serial receive/transmit buffers
 
 	USB Storage Device Configuration
+
 		CONFIG_USBSTRG
 		  Enable compilation of the USB storage driver
 		CONFIG_USBSTRG_EP0MAXPACKET
@@ -954,6 +968,12 @@ defconfig -- This is a configuration file similar to the Linux
 		  device.
 		CONFIG_LCD_MAXCONTRAST - The maximum contrast value for an
 		  LCD device.
+		CONFIG_LCD_LANDSCAPE, CONFIG_LCD_PORTRAIT, CONFIG_LCD_RLANDSCAPE,
+		  and CONFIG_LCD_RPORTRAIT - Some LCD drivers may support
+		  these options to present the display in landscape, portrait,
+		  reverse landscape, or reverse portrait orientations.  Check
+		  the README.txt file in each board configuration directory to
+		  see if any of these are supported by the board LCD logic.
 		CONFIG_NX_MOUSE
 		  Build in support for mouse input.
 		CONFIG_NX_KBD
