@@ -1982,3 +1982,8 @@
 	  Separate configs/rgmp/x86 and configs/rgmp/arm configuration directory, and
 	  (2) Extract architecture dependent code in arch/rgmp/include and
 	  arch/rgmp/src into corresponding x86/ and arm/ directories.
+	* arch/arm/src/kinetis, arch/arm/include/kinetis, configs/kwikstick-k40:
+	  Add a directory structure to support the port to the Kinesis KwikStik-K40.
+	  There is no real substance in the initial check-in; only the directory
+	  structure and skeleton files.
+
