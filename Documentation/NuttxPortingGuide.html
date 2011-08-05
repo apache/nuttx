@@ -3958,6 +3958,25 @@ build
   </li>
 </ul>
 
+<h3>Input Devices</h3>
+<ul>
+  <li>
+    <code>CONFIG_INPUT</code>:
+    Enables general support for input devices
+  </li>
+  <li>
+    <code>CONFIG_INPUT_TSC2007</code>:
+    If CONFIG_INPUT is selected, then this setting will enable building
+    of the TI TSC2007 touchscreen driver.
+  </li>
+  <li>
+    <code>CONFIG_TSC2007_MULTIPLE</code>:
+    Normally only a single TI TSC2007 touchscreen is used.  But if
+    there are multiple TSC2007 touchscreens, this setting will enable
+    multiple touchscreens with the same driver.
+  </li>
+</ul>
+
 <h3>ENC28J60 Ethernet Driver Configuration Settings</h3>
 <ul>
   <li>
@@ -4399,9 +4418,8 @@ build
 </p>
 
 <h2>Graphics related configuration settings</h3>
-<ul>
   <li>
-    <code>CONFIG_NX</code>
+    <code>CONFIG_NX</code>:
     Enables overall support for graphics library and NX
   </li>
 </ul>
@@ -4443,6 +4461,14 @@ build
   <li>
     <code>CONFIG_LCD_MAXCONTRAST</code>:
     The maximum contrast value for an LCD device.
+  </li>
+  <li>
+    <code>CONFIG_LCD_LANDSCAPE</code>, <code>CONFIG_LCD_PORTRAIT</code>,
+    <code>CONFIG_LCD_RLANDSCAPE</code>, and <code>CONFIG_LCD_RPORTRAIT</code>:
+    Some LCD drivers may support these options to present the display in
+    landscape, portrait, reverse landscape, or reverse portrait orientations.
+    Check the <code>README.txt</code> file in each board configuration directory to
+    see if any of these are supported by the board LCD logic.
   </li>
   <li>
     <code>CONFIG_NX_MOUSE</code>:

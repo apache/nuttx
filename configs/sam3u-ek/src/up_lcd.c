@@ -2,7 +2,7 @@
  * configs/sam3u-ek/src/up_lcd.c
  * arch/arm/src/board/up_lcd.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -168,12 +168,12 @@
 /* Graphics Capbilities ***************************************************************/
 
 /* LCD resolution: 320 (columns) by 240 (rows).  The physical dimensions of the device
- * are really 240 (columns) by 320 (rows), but unless CONFIG_SAM3U_240x320 is defined,
+ * are really 240 (columns) by 320 (rows), but unless CONFIG_LCD_PORTRAIT is defined,
  * we swap rows and columns in setcursor to make things behave nicer (there IS a
  * performance hit for this swap!).
  */
 
-#ifdef CONFIG_SAM3U_240x320
+#ifdef CONFIG_LCD_PORTRAIT
 #  define SAM3UEK_XRES         240
 #  define SAM3UEK_YRES         320
 #else
@@ -606,7 +606,7 @@ static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-#ifdef CONFIG_SAM3U_240x320
+#ifdef CONFIG_LCD_PORTRAIT
   /* Set up to write the run. */
 
   sam3u_setcursor(row, col);
@@ -672,7 +672,7 @@ static int sam3u_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-#ifdef CONFIG_SAM3U_240x320
+#ifdef CONFIG_LCD_PORTRAIT
   /* Set up to read the run */
 
   sam3u_setcursor(row, col);

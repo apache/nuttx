@@ -226,7 +226,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
    */
 
   angle        = b16atan2(itob16(iheight), itob16(iwidth));
-  triheight    = b16toi(linewidth * b16cos(angle));
+  triheight    = b16toi(linewidth * b16cos(angle) + b16HALF);
   halfheight   = (triheight >> 1);
 
   /* If the sine of the angle is tiny (i.e., the line is nearly horizontal),

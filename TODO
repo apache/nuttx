@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 12, 2011)
+NuttX TODO List (Last updated August 8, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -13,7 +13,7 @@ nuttx/
  (16)  Network (net/, drivers/net)
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (6)  Libraries (lib/)
- (13)  File system/Generic drivers (fs/, drivers/)
+ (10)  File system/Generic drivers (fs/, drivers/)
   (1)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -32,6 +32,7 @@ nuttx/
   (3)  AVR (arch/avr)
   (0)  Intel x86 (arch/x86)
   (4)  8051 / MCS51 (arch/8051/)
+  (1)  MIPS (arch/mips)
   (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
   (8)  z80/z8/ez80 (arch/z80/)
@@ -345,6 +346,7 @@ o Network (net/, drivers/net)
                and the packet was rejected.
   Status:      Open
   Priority:    Low... fix defconfig files as necessary.
+
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^
 
@@ -411,10 +413,6 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Low
 
-  Description: FAT: long file names
-  Status:      Open
-  Priority:    Medium
-
   Description: The CAN driver is untested.  Add a test for the CAN driver.
   Status:      Open
   Priority:    Medium
@@ -443,17 +441,6 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Medium-Low
 
-  Description: At present, mmap() only works with file descriptors associated
-               with a ROMFS file system.  Generalize this logic so that if
-               mmap is not supported by the file system or block driver, it
-               will allocate memory and copy the file into RAM.  This would
-               need some centralized logic so that the memory region would
-               be shared on later mmap()'s on the same inode.  Reference counting
-               would be required so that the multiply mmap()'ed region persists
-               until the last munmap().
-  Status:      Open
-  Priority:    Low
-
   Description: Block driver read-ahead buffer and write buffer support is
                implemented but not yet tested.
   Status:      Open
@@ -470,7 +457,7 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Low
 
-  Description: Time stamping is not implemented in the NuttX FA file system.
+  Description: Time stamping is not implemented in the NuttX FAT file system.
                See the following functions in fs/fat/fs_fat32util.c:
                fat_systime2fattime() and fat_fattime2systime()
   Status:      Open
@@ -660,6 +647,13 @@ o ARM (arch/arm/)
                This user context switching time could be improved by eliminating
                the SVCalls and developing assembly language implementations
                of the context save and restore logic.
+               Also, because interrupts are always disabled when the SVCall is
+               executed, the SVC goes to the hard fault handler where it must
+               be handled as a special case.  I recall seeing some controls
+               somewhere that will allow to suppress one hard fault.  I don't 
+               recall the control, but something like this should be used before
+               executing the SVCall so that it vectors directly to the SVC
+               handler.
   Status:      Open
   Priority:    Low
 
@@ -922,16 +916,22 @@ o AVR (arch/avr)
   Priority:     Low.  The AVR is probably not the architecuture that you want to use
                 for extensive string operations.
 
-  Description:   An SPI driver and a USB device driver exist for the AT90USB (as well
-                 as a USB mass storage example).  However, this configuration is not
-                 fully debugged as of the NuttX-6.5 release.
-                 Update 7/11:  (1) The SPI/SD driver has been verified, however, (2) I
-                 believe that the current teensy/usbstorage configuration uses too
-                 much SRAM for the system to behave sanely.  A lower memory footprint
-                 version of the mass storage driver will be required before this can
-                 be debugged
+  Description:  An SPI driver and a USB device driver exist for the AT90USB (as well
+                as a USB mass storage example).  However, this configuration is not
+                fully debugged as of the NuttX-6.5 release.
+                Update 7/11:  (1) The SPI/SD driver has been verified, however, (2) I
+                believe that the current teensy/usbstorage configuration uses too
+                much SRAM for the system to behave sanely.  A lower memory footprint
+                version of the mass storage driver will be required before this can
+                be debugged
   Status:       Open
   Priority:     Medium-High.
+
+  Description:  A complete port for the AVR32 is provided and has been partially
+                debugged.  There may still be some issues with the serial port
+                driver.
+  Status:       Open
+  Priority:     Medium
 
 o Intel x86 (arch/x86)
   ^^^^^^^^^^^^^^^^^^^^
@@ -974,6 +974,14 @@ o 8051 / MCS51 (arch/8051/)
   Status:      Open
   Priority:    Low -- only because there as so many other issues with 8051
 
+o MIPS (arch/mips)
+  ^^^^^^^^^^^^^^^^
+
+  Description: A port to the PIC32MX has been completed, but is pending debug.
+               Right now, there are some issues with intregating the PICKit 3
+               and MPLAB so I don't have capability to debug the port.
+  Status:      Open
+  Priority:    High
 
 o Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
