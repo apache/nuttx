@@ -49,77 +49,142 @@
  ************************************************************************************/
 
 /* Memory Map ***********************************************************************/
+/* The memory for the following parts is defined in Freescale document K40P144M100SF2RM */
 
-#define KINETIS_FLASH_BASE    0x00000000 /* -0x1fffffff: On-chip non-volatile memory */
-#define KINETIS_SRAM_BASE     0x10000000 /* -0x10007fff: On-chip SRAM (devices <=32Kb) */
-#define KINETIS_ROM_BASE      0x1fff0000 /* -0x1fffffff: 8Kb Boot ROM with flash services */
-#define KINETIS_AHBSRAM_BASE  0x20000000 /* -0x3fffffff: On-chip AHB SRAM (devices >32Kb) */
-#  define KINETIS_SRAM_BANK0  0x2007c000 /* -0x2007ffff: On-chip AHB SRAM Bank0 (devices >=32Kb) */
-#  define KINETIS_SRAM_BANK1  0x20080000 /* -0x2008ffff: On-chip AHB SRAM Bank1 (devices 64Kb) */
-#define KINETIS_GPIO_BASE     0x2009c000 /* -0x2009ffff: GPIO */
-#define KINETIS_APB_BASE      0x40000000 /* -0x5fffffff: APB Peripherals */
-#  define KINETIS_APB0_BASE   0x40000000 /* -0x4007ffff: APB0 Peripherals */
-#  define KINETIS_APB1_BASE   0x40080000 /* -0x400fffff: APB1 Peripherals */
-#  define KINETIS_AHB_BASE    0x50000000 /* -0x501fffff: DMA Controller, Ethernet, and USB */
-#define KINETIS_CORTEXM4_BASE 0xe0000000 /* -0xe00fffff: (see armv7-m/nvic.h) */
-#define KINETIS_SCS_BASE      0xe000e000
-#define KINETIS_DEBUGMCU_BASE 0xe0042000
+#if defined(CONFIG_ARCH_CHIP_MK40X128VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X128VMD100) \
+    defined(CONFIG_ARCH_CHIP_MK40X256VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X256VMD100) \
+    defined(CONFIG_ARCH_CHIP_MK40N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK40N512VMD100)
 
-/* AHB SRAM Bank sizes **************************************************************/
+# define KINETIS_FLASH_BASE     0x00000000 /* –0x0fffffff Program flash and read-
+                                            *             only data (Includes exception
+                                            *             vectors in first 1024 bytes) */
+# if !defined(CONFIG_ARCH_CHIP_MK40N512VLQ100) && !defined(CONFIG_ARCH_CHIP_MK40N512VMD100)
+#  define KINETIS_FLEXNVM_BASE  0x10000000 /* –0x13ffffff FlexNVM */
+#  define KINETIS_FLEXRAM_BASE  0x14000000 /* –0x17ffffff FlexRAM */
+# endif
+# define KINETIS_SRAML_BASE     0x18000000 /* –0x1fffffff SRAM_L: Lower SRAM
+                                            *             (ICODE/DCODE) */
+# define KINETIS_SRAMU_BASE     0x20000000 /* –0x200fffff SRAM_U: Upper SRAM bitband
+                                            *             region */
+                             /* 0x20100000  * –0x21ffffff Reserved */
+# define KINETIS_ALIAS1_BASE    0x22000000 /* –0x23ffffff Aliased to SRAM_U bitband */
+                             /* 0x24000000  * –0x3fffffff Reserved */
+# define KINETIS_BRIDGE0_BASE   0x40000000 /* –0x4007ffff Bitband region for peripheral
+                                            *             bridge 0 (AIPS-Lite0) */
+# define KINETIS_BRIDGE1_BASE   0x40080000 /* –0x400fffff Bitband region for peripheral
+                                            *             bridge 1 (AIPS-Lite1) */
+# define KINETIS_GPIOBB_BASE    0x400ff000 /* –0x400fffff Bitband region for general
+                                            *             purpose input/output (GPIO) */
+                             /* 0x40100000  * –0x41ffffff Reserved */
+# define KINETIS_ALIAS1_BASE    0x42000000 /* –0x43ffffff Aliased to peripheral bridge
+                                            *             (AIPS-Lite) and general purpose
+                                            *             input/output (GPIO) bitband */
+                             /* 0x40400000  * –0x5fffffff Reserved */
+# define KINETIS_FLEXBUS_WBBASE 0x60000000 /* –0x7fffffff FlexBus (External Memory -
+                                            *             Write-back) */
+# define KINETIS_FLEXBUS_WTBASE 0x80000000 /* –0x9fffffff FlexBus (External Memory -
+                                            *             Write-through) */
+# define KINETIS_FLEXBUS_NXBASE 0xa0000000 /* –0xdfffffff FlexBus (External Memory -
+                                            *             Non-executable) */
+# define KINETIS_PERIPH_BASE    0xe000000  /* –0xe00fffff Private peripherals */
+                             /* 0xe0100000  * –0xffffffff Reserved */
 
-#define KINETIS_BANK0_SIZE    (16*1024)  /* Size of AHB SRAM Bank0 (if present) */
-#define KINETIS_BANK1_SIZE    (16*1024)  /* Size of AHB SRAM Bank1 (if present) */
+/* Peripheral Bridge 0 Memory Map ***************************************************/
 
-/* APB0 Peripherals *****************************************************************/
+# define KINETIS_PBRIDGE0_BASE  0x40000000 /* Peripheral bridge 0 (AIPS-Lite 0) */
+# define KINETIS_XBAR_BASE      0x40004000 /* Crossbar switch */
+# define KINETIS_DMAC_BASE      0x40008000 /* DMA controller */
+# define KINETIS_DMADESC_BASE   0x40009000 /* DMA controller transfer control descriptors */
+# define KINETIS_FLEXBUS_BASE   0x4000c000 /* FlexBus */
+# define KINETIS_MPU_BASE       0x4000d000 /* MPU */
+# define KINETIS_FLASHC_BASE    0x4001f000 /* Flash memory controller */
+# define KINETIS_FLASH_BASE     0x40020000 /* Flash memory */
+# define KINETIS_DMAMUX0_BASE   0x40021000 /* DMA channel mutiplexer 0 */
+# define KINETIS_FLEXCAN0_BASE  0x40024000 /* FlexCAN 0 */
+# define KINETIS_SPI0_BASE      0x4002c000 /* SPI 0 */
+# define KINETIS_SPI1_BASE      0x4002d000 /* SPI 1 */
+# define KINETIS_I2S0_BASE      0x4002f000 /* I2S 0 */
+# define KINETIS_CRC_BASE       0x40032000 /* CRC */
+# define KINETIS_USBDCD_BASE    0x40035000 /* USB DCD */
+# define KINETIS_PDB_BASE       0x40036000 /* Programmable delay block */
+# define KINETIS_FTM0_BASE      0x40038000 /* FlexTimer 0 */
+# define KINETIS_FTM1_BASE      0x40039000 /* FlexTimer 1 */
+# define KINETIS_ADC0_BASE      0x4003b000 /* Analog-to-digital converter (ADC) 0 */
+# define KINETIS_RTC_BASE       0x4003d000 /* Real time clock */
+# define KINETIS_VBATR_BASE     0x4003e000 /* VBAT register file */
+# define KINETIS_LPTMR_BASE     0x40040000 /* Low power timer */
+# define KINETIS_SYSR_BASE      0x40041000 /* System register file */
+# define KINETIS_DRYICE_BASE    0x40042000 /* DryIce */
+# define KINETIS_DRYICESS_BASE  0x40043000 /* DryIce secure storage */
+# define KINETIS_TSI_BASE       0x40045000 /* Touch sense interface */
+# define KINETIS_SIMLP_BASE     0x40047000 /* SIM low-power logic */
+# define KINETIS_SIM_BASE       0x40048000 /* System integration module (SIM) */
+# define KINETIS_PAMUX_BASE     0x40049000 /* Port A multiplexing control */
+# define KINETIS_PBMUX_BASE     0x4004a000 /* Port B multiplexing control */
+# define KINETIS_PCMUX_BASE     0x4004b000 /* Port C multiplexing control */
+# define KINETIS_PDMUX_BASE     0x4004c000 /* Port D multiplexing control */
+# define KINETIS_PEMUX_BASE     0x4004d000 /* Port E multiplexing control */
+# define KINETIS_SWWDOG_BASE    0x40052000 /* Software watchdog */
+# define KINETIS_EXTWDOG_BASE   0x40061000 /* Software watchdog */
+# define KINETIS_CMT_BASE       0x40062000 /* Carrier modulator timer (CMT) */
+# define KINETIS_MCG_BASE       0x40064000 /* Multi-purpose Clock Generator (MCG) */
+# define KINETIS_OSC_BASE       0x40065000 /* System oscillator (OSC) */
+# define KINETIS_I2C0_BASE      0x40066000 /* I2C 0 */
+# define KINETIS_I2C1_BASE      0x40067000 /* I2C 1 */
+# define KINETIS_UART0_BASE     0x4006a000 /* UART0 */
+# define KINETIS_UART1_BASE     0x4006b000 /* UART1 */
+# define KINETIS_UART2_BASE     0x4006c000 /* UART2 */
+# define KINETIS_UART3_BASE     0x4006d000 /* UART3 */
+# define KINETIS_USBOTG_BASE    0x40072000 /* USB OTG FS/LS */
+# define KINETIS_CMP_BASE       0x40073000 /* Analog comparator (CMP) / 6-bit digital-to-analog converter (DAC) */
+# define KINETIS_VREF_BASE      0x40074000 /* Voltage reference (VREF) */
+# define KINETIS_LLWU_BASE      0x4007c000 /* Low-leakage wakeup unit (LLWU) */
+# define KINETIS_PMC_BASE       0x4007d000 /* Power management controller (PMC) */
+# define KINETIS_SMC_BASE       0x4007e000 /* System Mode controller (SMC) */
 
-#define KINETIS_WDT_BASE      0x40000000 /* -0x40003fff: Watchdog timer */
-#define KINETIS_TMR0_BASE     0x40004000 /* -0x40007fff: Timer 0 */
-#define KINETIS_TMR1_BASE     0x40008000 /* -0x4000bfff: Timer 1 */
-#define KINETIS_UART0_BASE    0x4000c000 /* -0x4000ffff: UART 0 */
-#define KINETIS_UART1_BASE    0x40010000 /* -0x40013fff: UART 1 */
-                                       /* -0x40017fff: Reserved */
-#define KINETIS_PWM1_BASE     0x40018000 /* -0x4001bfff: PWM 1 */
-#define KINETIS_I2C0_BASE     0x4001c000 /* -0x4001ffff: I2C 0 */
-#define KINETIS_SPI_BASE      0x40020000 /* -0x40023fff: SPI */
-#define KINETIS_RTC_BASE      0x40024000 /* -0x40027fff: RTC + backup registers */
-#define KINETIS_GPIOINT_BASE  0x40028000 /* -0x4002bfff: GPIO interrupts */
-#define KINETIS_PINCONN_BASE  0x4002c000 /* -0x4002ffff: Pin connect block */
-#define KINETIS_SSP1_BASE     0x40030000 /* -0x40033fff: SSP 1 */
-#define KINETIS_ADC_BASE      0x40034000 /* -0x40037fff: ADC */
-#define KINETIS_CANAFRAM_BASE 0x40038000 /* -0x4003bfff: CAN acceptance filter (AF) RAM */
-#define KINETIS_CANAF_BASE    0x4003c000 /* -0x4003ffff: CAN acceptance filter (AF) registers */
-#define KINETIS_CAN_BASE      0x40040000 /* -0x40043fff: CAN common registers */
-#define KINETIS_CAN1_BASE     0x40044000 /* -0x40047fff: CAN controller l */
-#define KINETIS_CAN2_BASE     0x40048000 /* -0x4004bfff: CAN controller 2 */
-                                       /* -0x4005bfff: Reserved */
-#define KINETIS_I2C1_BASE     0x4005c000 /* -0x4005ffff: I2C 1 */
-                                       /* -0x4007ffff: Reserved */
+/* Peripheral Bridge 1 Memory Map ***************************************************/
 
-/* APB1 Peripherals *****************************************************************/
+# define KINETIS_PBRIDGE1_BASE  0x40080000 /* Peripheral bridge 1 (AIPS-Lite 1) */
+# define KINETIS_FLEXCAN1_BASE  0x400a4000 /* FlexCAN 1 */
+# define KINETIS_SPI2_BASE      0x400ac000 /* SPI 2 */
+# define KINETIS_SDHC_BASE      0x400b1000 /* SDHC */
+# define KINETIS_FTM2_BASE      0x400b8000 /* FlexTimer 2 */
+# define KINETIS_ADC1_BASE      0x400bb000 /* Analog-to-digital converter (ADC) 1 */
+# define KINETIS_SEGLCD_BASE    0x400be000 /* Segment LCD */
+# define KINETIS_DAC0_BASE      0x400cc000 /* 12-bit digital-to-analog converter (DAC) 0 */
+# define KINETIS_DAC1_BASE      0x400cd000 /* 12-bit digital-to-analog converter (DAC) 1 */
+# define KINETIS_UART4_BASE     0x400ea000 /* UART4 */
+# define KINETIS_UART5_BASE     0x400eb000 /* UART5 */
+# define KINETIS_XBAR_BASE      0x400ff000 /* Not an AIPS-Lite slot. The 32-bit general
+                                             * purpose input/output module that shares the
+                                             * crossbar switch slave port with the AIPS-Lite
+                                             * is accessed at this address. */
 
-                                       /* -0x40087fff: Reserved */
-#define KINETIS_SSP0_BASE     0x40088000 /* -0x4008bfff: SSP 0 */
-#define KINETIS_DAC_BASE      0x4008c000 /* -0x4008ffff: DAC */
-#define KINETIS_TMR2_BASE     0x40090000 /* -0x40093fff: Timer 2 */
-#define KINETIS_TMR3_BASE     0x40094000 /* -0x40097fff: Timer 3 */
-#define KINETIS_UART2_BASE    0x40098000 /* -0x4009bfff: UART 2 */
-#define KINETIS_UART3_BASE    0x4009c000 /* -0x4009ffff: UART 3 */
-#define KINETIS_I2C2_BASE     0x400a0000 /* -0x400a3fff: I2C 2 */
-                                       /* -0x400a7fff: Reserved */
-#define KINETIS_I2S_BASE      0x400a8000 /* -0x400abfff: I2S */
-                                       /* -0x400affff: Reserved */
-#define KINETIS_RIT_BASE      0x400b0000 /* -0x400b3fff: Repetitive interrupt timer */
-                                       /* -0x400b7fff: Reserved */
-#define KINETIS_MCPWM_BASE    0x400b8000 /* -0x400bbfff: Motor control PWM */
-#define KINETIS_QEI_BASE      0x400bc000 /* -0x400bffff: Quadrature encoder interface */
-                                       /* -0x400fbfff: Reserved */
-#define KINETIS_SYSCON_BASE   0x400fc000 /* -0x400fffff: System control */
+/* Private Peripheral Bus (PPB) Memory Map ******************************************/
 
-/* AHB Peripherals ******************************************************************/
+# define KINETIS_ITM_BASE       0xe0000000 /* Instrumentation Trace Macrocell (ITM) */
+# define KINETIS_DWT_BASE       0xe0001000 /* Data Watchpoint and Trace (DWT) */
+# define KINETIS_FPB_BASE       0xe0002000 /* Flash Patch and Breakpoint (FPB) */
+# define KINETIS_SCS_BASE       0xe000e000 /* System Control Space (SCS) (for NVIC) */
+# define KINETIS_TPIU_BASE      0xe0040000 /* Trace Port Interface Unit (TPIU) */
+# define KINETIS_ETM_BASE       0xe0041000 /* Embedded Trace Macrocell (ETM) */
+# define KINETIS_ETB_BASE       0xe0042000 /* Embedded Trace Buffer (ETB) */
+# define KINETIS_TFUN_BASE      0xe0043000 /* Embedded Trace Funnel */
+# define KINETIS_MISC_BASE      0xe0080000 /* Miscellaneous Control Module (including ETB Almost Full) */
+# define KINETIS_ROMTAB_BASE    0xe00ff000 /* ROM Table - allows auto-detection of debug components */
+# define KINETIS_CRC_BASE       0xe00c0000 /* CRC */
+# define KINETIS_CRC_BASE       0xe00c0000 /* CRC */
+# define KINETIS_CRC_BASE       0xe00c0000 /* CRC */
+# define KINETIS_CRC_BASE       0xe00c0000 /* CRC */
 
-#define KINETIS_ETH_BASE      0x50000000 /* -0x50003fff: Ethernet controller */
-#define KINETIS_GPDMA_BASE    0x50004000 /* -0x50007fff: GPDMA controller */
-#define KINETIS_USB_BASE      0x5000c000 /* -0x5000cfff: USB controller */
+#else
+  /* The memory map for other parts is defined in other documents and may or may net
+   * be the same as above.  This error means that you have to look at the document and
+   * determine that for yourself.
+   */
+
+#  error "No memory map for this Kinetis part"
+#endif
 
 /************************************************************************************
  * Public Types
