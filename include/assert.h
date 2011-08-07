@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/assert.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,9 +50,9 @@
 /* Macro Name: ASSERT, ASSERTCODE, et al. */
 
 #undef ASSERT
-#undef ASSERTFILE
 #undef ASSERTCODE
 #undef DEBUGASSERT
+#undef PANIC
 
 #ifdef CONFIG_HAVE_FILENAME
 

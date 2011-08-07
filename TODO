@@ -14,7 +14,7 @@ nuttx/
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (6)  Libraries (lib/)
  (10)  File system/Generic drivers (fs/, drivers/)
-  (1)  Graphics subystem (graphics/)
+  (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (5)  Build system / Toolchains
@@ -481,6 +481,18 @@ o Graphics subystem (graphics/)
                in the current structure.
   Priority:    Low.
 
+  Description: In the kernel build mode (where NuttX is built as a monlithic
+               kernel and user code must trap into the protected kernel via
+               syscalls), the single user mode cannot be supported.  In this
+               built configuration, only the multiple user mode can be supported
+               with the NX server residing inside of the kernel space.  In
+               this case, most of the user end functions in graphics/nxmu
+               must be moved to lib/nx and those functions must be built into
+               libuser.a to be linked with the user-space code.
+  Status:      Open
+  Priority:    Low -- the kernel build configuration is not fully fielded
+               yet.
+
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -548,7 +560,7 @@ o Build system
 
                1. This script assumes the host archiver ar may not be appropriate for
                   non-GCC toolchains
-               2. For the kernel build, the user libriars should be built into some
+               2. For the kernel build, the user libraries should be built into some
                   libuser.a.  The list of user libraries would have to accepted with
                   some new argument, perhaps -u.
   Status:      Open
@@ -661,9 +673,13 @@ o ARM (arch/arm/)
                using 'ldmia   sp, {r0-r15}^'  My understanding is that this works
                fine because everything is in kernel-mode.  In an operating model
                where applications run in user mode and interrupts/traps run in
-               kernel-mode, I think that there is a problem with this.
+               kernel-mode, I think that there is a problem with this.  This would
+               like be a problem, for example, if for a kernel build where NuttX
+               is built as a monolithic, protected kernel and user mode programs
+               trap into the kernel.
   Status:      Open
-  Priority:    Low until I get around to implement security for the ARM platform.
+  Priority:    Low until I get around to implementng security or kernel mode for
+               the ARM platform.
 
 o ARM/C5471 (arch/arm/src/c5471/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
