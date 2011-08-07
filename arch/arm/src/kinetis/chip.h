@@ -74,7 +74,7 @@
 #    undef KINETIS_NCAN                      /* No CAN in 64-pin chips */
 #  endif
 #  define KINETIS_NI2S            1          /* One I2S module */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 25x8/29x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 25x8/29x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -119,7 +119,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            1          /* One I2S module */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -160,7 +160,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            1          /* One I2S module */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -200,7 +200,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            1          /* One I2S module */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 40x8/44x4)*/
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 40x8/44x4)*/
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -240,7 +240,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            1          /* One I2S module */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 40x8/44x4)*/
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 40x8/44x4)*/
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -282,7 +282,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            1          /* One I2S module */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 40x8/44x4)*/
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 40x8/44x4)*/
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -323,7 +323,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  define KINETIS_NADC12          1          /* One 12-channel ADC (ADC0)*/
 #  define KINETIS_NADC13          1          /* No 13-channel ADC (ADC1) */
@@ -366,7 +366,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  define KINETIS_NADC12          1          /* One 12-channel ADC (ADC0)*/
 #  define KINETIS_NADC13          1          /* No 13-channel ADC (ADC1) */
@@ -409,7 +409,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  define KINETIS_NADC12          1          /* One 12-channel ADC (ADC0)*/
 #  define KINETIS_NADC13          1          /* No 13-channel ADC (ADC1) */
@@ -452,7 +452,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  define KINETIS_NADC12          1          /* One 12-channel ADC (ADC0)*/
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -495,7 +495,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  define KINETIS_NADC12          1          /* One 12-channel ADC (ADC0)*/
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -538,7 +538,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  define KINETIS_NADC12          1          /* One 12-channel ADC (ADC0)*/
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -581,7 +581,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -624,7 +624,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -667,7 +667,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -710,7 +710,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -753,7 +753,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */
@@ -796,7 +796,7 @@
 #  define KINETIS_NSPI            3          /* Three SPI modules */
 #  define KINETIS_NCAN            2          /* Two CAN controllers */
 #  define KINETIS_NI2S            2          /* Two I2S modules */
-#  define KINETIS_NSEGLCD         1          /* One segment LCD interface (up to 36x8/40x4) */
+#  define KINETIS_NSLCD           1          /* One segment LCD interface (up to 36x8/40x4) */
 #  define KINETIS_NADC16          4          /* Four 16-bit ADC */
 #  undef  KINETIS_NADC12                     /* No 12-channel ADC */
 #  undef  KINETIS_NADC13                     /* No 13-channel ADC */

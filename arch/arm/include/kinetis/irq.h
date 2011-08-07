@@ -193,8 +193,8 @@
  */
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) \
-    defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) \
-    defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
+      defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) \
+      defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
 
 #  define KINETIS_IRQ_DMACH0      (16)  /* Vector 16: DMA channel 0 transfer complete */
 #  define KINETIS_IRQ_DMACH1      (17)  /* Vector 17: DMA channel 1 transfer complete */
@@ -291,8 +291,8 @@
 
 /* Note that the total number of IRQ numbers supported is equal to the number of
  * valid interrupt vectors.  This is wasteful in that certain tables are sized by
- * this value.  There are only 94 valid interrupts so, potentially the numver of
- * IRQs to could be reduced to 94.  However, equating IRQ numbers with vector numbers
+ * this value.  There are only 97 valid interrupts so, potentially the numver of
+ * IRQs to could be reduced to 97.  However, equating IRQ numbers with vector numbers
  * also simplifies operations on NVIC registers and (at least in my state of mind
  * now) seems to justify the waste.
  */
