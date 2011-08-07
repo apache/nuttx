@@ -155,7 +155,7 @@
 # define KINETIS_SDHC_BASE      0x400b1000 /* SDHC */
 # define KINETIS_FTM2_BASE      0x400b8000 /* FlexTimer 2 */
 # define KINETIS_ADC1_BASE      0x400bb000 /* Analog-to-digital converter (ADC) 1 */
-# define KINETIS_SEGLCD_BASE    0x400be000 /* Segment LCD */
+# define KINETIS_SLCD_BASE      0x400be000 /* Segment LCD */
 # define KINETIS_DAC0_BASE      0x400cc000 /* 12-bit digital-to-analog converter (DAC) 0 */
 # define KINETIS_DAC1_BASE      0x400cd000 /* 12-bit digital-to-analog converter (DAC) 1 */
 # define KINETIS_UART4_BASE     0x400ea000 /* UART4 */
@@ -185,8 +185,8 @@
  */
 
 #elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) \
-    defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) \
-    defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
+      defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) \
+      defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
 
 # define KINETIS_FLASH_BASE     0x00000000 /* –0x0fffffff Program flash and read-
                                             *             only data (Includes exception
