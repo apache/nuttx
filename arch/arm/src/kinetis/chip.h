@@ -301,7 +301,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60N256VLL100)
+#elif defined(CONFIG_ARCH_CHIP_MK60N256VLL100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
@@ -344,7 +344,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60X256VLL100)
+#elif defined(CONFIG_ARCH_CHIP_MK60X256VLL100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
@@ -387,7 +387,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60N512VLL100)
+#elif defined(CONFIG_ARCH_CHIP_MK60N512VLL100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (512*1024) /* 256Kb */
@@ -430,7 +430,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60N256VML100)
+#elif defined(CONFIG_ARCH_CHIP_MK60N256VML100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
@@ -473,7 +473,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60X256VML100)
+#elif defined(CONFIG_ARCH_CHIP_MK60X256VML100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
@@ -516,7 +516,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60N512VML100)
+#elif defined(CONFIG_ARCH_CHIP_MK60N512VML100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (512*1024) /* 256Kb */
@@ -559,7 +559,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60N256VLQ100)
+#elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
@@ -602,7 +602,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60X256VLQ100)
+#elif defined(CONFIG_ARCH_CHIP_MK60X256VLQ100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
@@ -645,7 +645,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60N512VLQ100)
+#elif defined(CONFIG_ARCH_CHIP_MK60N512VLQ100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (512*1024) /* 512Kb */
@@ -688,7 +688,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60N256VMD100)
+#elif defined(CONFIG_ARCH_CHIP_MK60N256VMD100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
@@ -731,7 +731,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60X256VMD100)
+#elif defined(CONFIG_ARCH_CHIP_MK60X256VMD100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
@@ -774,7 +774,7 @@
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
-#elif defined(MK60N512VMD100)
+#elif defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
 #  undef  KIENTIS_K40                        /* Not Kinetics K40 family */
 #  define KIENTIS_K60             1          /* Kinetis K60 family */
 #  define KINETIS_FLASH_SIZE      (512*1024) /* 512Kb */
