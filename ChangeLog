@@ -1990,4 +1990,12 @@
 	  directories and files to armv7-m; Change name of of all CORTEXM3 constants
 	  to ARMV7M.  This is a major namespace change needed to cleanly support the
 	  ARM Cortex-M4 which is also in the ARMv7 M Series (specifically, ARMv7E-M).
+	* sched/sig_initialize.c, sig_received.c, and mq_waitirq.c.  Fixed several
+	  critical bugs related to signal handling initialization and for signals
+	  the wake up tasks that are waiting to send or receive message queues.  In
+	  the first two files, errors would prevent proper allocation of signal-related
+	  structures from interrupt handlers.  In the second, there was missing
+	  "clean-up" logic after a signal occurred, leaving the message queue in
+	  a bad state and resulting in PANICs.  All are important.  (submitted by
+	  hkwilton).
 

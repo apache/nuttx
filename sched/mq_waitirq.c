@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/mq_waitirq.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,11 @@
 
 #include <sched.h>
 #include <errno.h>
+
 #include <nuttx/arch.h>
-#include "sem_internal.h"
+#include <nuttx/mqueue.h>
+
+#include "os_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -72,14 +75,13 @@
  * Function:  sem_waitirq
  *
  * Description:
- *   This function is called when a signal is received by a
- *   task that is waiting on a message queue -- either for a
- *   queue to becoming not full (on mq_send) or not empty
- *   (on mq_receive).
+ *   This function is called when a signal is received by a task that is
+ *   waiting on a message queue -- either for a queue to becoming not full
+ *   (on mq_send) or not empty (on mq_receive).
  *
  * Parameters:
- *   wtcb - A pointer to the TCB of the task that is waiting
- *      on a message queue, but has received a signal instead.
+ *   wtcb - A pointer to the TCB of the task that is waiting on a message
+ *          queue, but has received a signal instead.
  *
  * Return Value:
  *   None
@@ -90,22 +92,70 @@
 
 void mq_waitirq(FAR _TCB *wtcb)
 {
+  FAR msgq_t *msgq;
   irqstate_t saved_state;
 
-  /* Disable interrupts.  This is necessary because an
-   * interrupt handler may attempt to send a message while we are
-   * doing this.
+  /* Disable interrupts.  This is necessary because an interrupt handler may
+   * attempt to send a message while we are doing this.
    */
 
   saved_state = irqsave();
 
-  /* It is possible that an interrupt/context switch beat us to the
-   * punch and already changed the task's state.
+  /* It is possible that an interrupt/context switch beat us to the punch and
+   * already changed the task's state.  NOTE:  The operations within the if
+   * are safe because interrupts are always disabled with the msgwaitq,
+   * nwaitnotempty, and nwaitnotfull fields are modified.
    */
 
   if (wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
       wtcb->task_state == TSTATE_WAIT_MQNOTFULL)
     {
+      /* Get the message queue associated with the waiter from the TCB */
+
+      msgq = wtcb->msgwaitq;
+#ifdef CONFIG_DEBUG
+      if (!msgq)
+        {
+          /* In these states there must always be an associated message queue */
+
+          PANIC((uint32_t)OSERR_MQNOWAITER);
+        }
+#endif
+      wtcb->msgwaitq = NULL;
+
+      /* Decrement the count of waiters and cancel the wait */
+
+      if (wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY)
+        {
+#ifdef CONFIG_DEBUG
+          if (msgq->nwaitnotempty <= 0)
+            {
+              /* This state, there should be a positive, non-zero waiter
+               * count.
+               */
+
+               PANIC((uint32_t)OSERR_MQNONEMPTYCOUNT);
+
+            }
+#endif
+          msgq->nwaitnotempty--;
+        }
+      else
+        {
+#ifdef CONFIG_DEBUG
+          if (msgq->nwaitnotfull <= 0)
+            {
+              /* This state, there should be a positive, non-zero waiter
+               * count.
+               */
+
+               PANIC((uint32_t)OSERR_MQNOTFULLCOUNT);
+
+            }
+#endif
+          msgq->nwaitnotfull--;
+        }
+
       /* Mark the errno value for the thread. */
 
       wtcb->pterrno = EINTR;

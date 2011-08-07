@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sig_initialize.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -223,7 +223,7 @@ void sig_initialize(void)
                        NUM_PENDING_ACTIONS,
                        SIG_ALLOC_FIXED);
   g_sigpendingirqactionalloc =
-     sig_allocateblock(&g_sigpendingaction,
+     sig_allocateblock(&g_sigpendingirqaction,
                        NUM_PENDING_INT_ACTIONS,
                        SIG_ALLOC_IRQ);
   sig_allocateactionblock();

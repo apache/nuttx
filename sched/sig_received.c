@@ -178,12 +178,15 @@ static FAR sigpendq_t *sig_allocatependingsignal(void)
       /* Try to get the pending signal structure from the free list */
 
       sigpend = (FAR sigpendq_t*)sq_remfirst(&g_sigpendingsignal);
+      if (!sigpend)
+        {
+          /* If no pending signal structure is available in the free list,
+           * then try the special list of structures reserved for
+           * interrupt handlers
+           */
 
-      /* If so, then try the special list of structures reserved for
-       * interrupt handlers
-       */
-
-      sigpend = (FAR sigpendq_t*)sq_remfirst(&g_sigpendingirqsignal);
+          sigpend = (FAR sigpendq_t*)sq_remfirst(&g_sigpendingirqsignal);
+        }
     }
 
   /* If we were not called from an interrupt handler, then we are

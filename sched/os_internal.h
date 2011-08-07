@@ -67,6 +67,7 @@ enum os_crash_codes_e
   OSERR_NOIDLETASK,           /* There is no idle task */
   OSERR_MQNONEMPTYCOUNT,      /* Expected waiter for non-empty queue */
   OSERR_MQNOTFULLCOUNT,       /* Expected waiter for non-full queue */
+  OSERR_MQNOWAITER,           /* Expected a queue for the waiter */
   OSERR_BADWAITSEM,           /* Already waiting for a semaphore */
   OSERR_BADMSGTYPE,           /* Tried to free a bad message type */
   OSERR_FAILEDTOADDSIGNAL,    /* Failed to add pending signal */
