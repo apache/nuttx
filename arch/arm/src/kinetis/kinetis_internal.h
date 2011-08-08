@@ -49,6 +49,7 @@
 
 #include "up_internal.h"
 #include "chip.h"
+#include "kinetis_port.h"
 
 /************************************************************************************
  * Definitions
@@ -56,8 +57,178 @@
 
 /* Configuration ********************************************************************/
 
-/* Bit-encoded input to kinetis_configgpio() ******************************************/
-#warning "Missing logic"
+/* Bit-encoded input to kinetis_configgpio() ****************************************/
+/* General form (32-bits, only 20 bits are unused in the encoding):
+ *
+ * oooo mmmf iiii ---- ---- -ppp ---b bbbb
+ */
+
+/* Bits 25-31: 7 bits are used to encode the basic pin configuration:
+ *
+ * oooo mmm- ---- ---- ---- ---- ---- ----
+ * oooommm:
+ * |   `--- mmm: mode
+ * `------- oooo: options (may be combined)
+ */
+
+#define _GPIO_MODE_SHIFT        (25) /* Bits 25-27: Pin mode */
+#define _GPIO_MODE_MASK         (7 << _GPIO_MODE_SHIFT)
+#define _GPIO_OPTIONS_SHIFT     (28) /* Bits 28-31: Pin mode options */
+#define _GPIO_OPTIONS_MASK      (15 << _GPIO_OPTIONS_SHIFT)
+
+#define _GPIO_MODE_ANALOG       (0)  /* 000 Pin Disabled (Analog) */
+#define _GPIO_MODE_GPIO         (1)  /* 001 Alternative 1 (GPIO) */
+#define _GPIO_MODE_ALT2         (2)  /* 010 Alternative 2 */
+#define _GPIO_MODE_ALT3         (3)  /* 011 Alternative 3 */
+#define _GPIO_MODE_ALT4         (4)  /* 100 Alternative 4 */
+#define _GPIO_MODE_ALT5         (5)  /* 101 Alternative 5 */
+#define _GPIO_MODE_ALT6         (6)  /* 110 Alternative 6 */
+#define _GPIO_MODE_ALT7         (7)  /* 111 Alternative 7 */
+
+#define _GPIO_IO_MASK           (1)  /* xxx1 GPIO input/output mask */
+#define _GPIO_INPUT             (0)  /* xxx0 GPIO input */
+#define _GPIO_INPUT_PULLMASK    (6)  /* x11x Mask for pull-up or -down bits */
+#define _GPIO_INPUT_PULLENABLE  (2)  /* x010 Enables pull-up or -down */
+#define _GPIO_INPUT_PULLDOWN    (2)  /* x010 Input with internal pull-down resistor */
+#define _GPIO_INPUT_PULLUP      (6)  /* x110 Input with internal pull-up resistor */
+#define _GPIO_INPUT_FILTER_MASK (8)  /* 1xxx Mask to test if passive filter enabled */
+#define _GPIO_INPUT_FILTER      (8)  /* 1xx0 Input with passive filter enabled */
+
+#define _GPIO_OUTPUT            (1)  /* xxx1 GPIO output */
+#define _GPIO_OUTPUT_SLEW_MASK  (2)  /* xx1x Mask to test for slow slew rate */
+#define _GPIO_OUTPUT_FAST       (1)  /* xx01 Output with fast slew rate */
+#define _GPIO_OUTPUT_SLOW       (3)  /* xx11 Output with slow slew rate */
+#define _GPIO_OUTPUT_OD_MASK    (4)  /* x1xx Mask to test for open drain */
+#define _GPIO_OUTPUT_OPENDRAIN  (5)  /* x1x1 Output with open drain enabled */
+#define _GPIO_OUTPUT_DRIVE_MASK (4)  /* 1xxx Mask to test for high drive strengh */
+#define _GPIO_OUTPUT_LOWDRIVE   (1)  /* 0xx1 Output with low drive strength */
+#define _GPIO_OUTPUT_HIGHDRIVE  (9)  /* 1xx1 Output with high drive strength */
+
+#define GPIO_ANALOG             (_GPIO_MODE_ANALOG       << _GPIO_MODE_SHIFT)
+
+#define GPIO_INPUT              ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT            << _GPIO_OPTIONS_SHIFT))
+#define GPIO_PULLDOWN           ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLDOWN   << _GPIO_OPTIONS_SHIFT))
+#define GPIO_PULLDOWN           ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLUP     << _GPIO_OPTIONS_SHIFT))
+#define GPIO_FILTER             ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_FILTER     << _GPIO_OPTIONS_SHIFT))
+
+#define GPIO_OUTPUT             ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT           << _GPIO_OPTIONS_SHIFT))
+#define GPIO_FAST               ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_FAST      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_SLOW               ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_SLOW      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_OPENDRAIN          ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_LOWDRIVE  << _GPIO_OPTIONS_SHIFT))
+#define GPIO_LOWDRIVE           ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_OPENDRAIN << _GPIO_OPTIONS_SHIFT))
+#define GPIO_HIGHDRIVE          ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_HIGHDRIVE << _GPIO_OPTIONS_SHIFT))
+
+#define GPIO_ALT2               (_GPIO_MODE_ALT2         << _GPIO_MODE_SHIFT)
+#define GPIO_ALT3               (_GPIO_MODE_ALT3         << _GPIO_MODE_SHIFT)
+#define GPIO_ALT4               (_GPIO_MODE_ALT4         << _GPIO_MODE_SHIFT)
+#define GPIO_ALT5               (_GPIO_MODE_ALT5         << _GPIO_MODE_SHIFT)
+#define GPIO_ALT6               (_GPIO_MODE_ALT6         << _GPIO_MODE_SHIFT)
+#define GPIO_ALT7               (_GPIO_MODE_ALT7         << _GPIO_MODE_SHIFT)
+
+/* One bit is used to enable the digital filter:
+ *
+ * ---- ---f ---- ---- ---- ---- ---- ----
+ */
+
+#define GPIO_DIGFILTER          (1 << 24)  /* Bit 24: Enable digital filter */
+
+/* Four bits are used to incode DMA/interupt options:
+ *
+ * ---- ---- iiii ---- ---- ---- ---- ----
+ */
+
+#define _GPIO_INT_SHIFT         (20)
+#define _GPIO_INT_MASK          (15 << _GPIO_MODE_SHIFT)
+
+#define _GPIO_INTDMA_MASK       (1)  /* xxx1 DMA/interrupt mask */
+#define _GPIO_DMA               (0)  /* xxx0 DMA (vs interrupt) */
+#define _GPIO_DMA_EDGE_MASK     (6)  /* x11x Mask to test edge */
+#define _GPIO_DMA_RISING        (2)  /* x010 DMA Request on rising edge */
+#define _GPIO_DMA_FALLING       (4)  /* x100 DMA Request on falling edge */
+#define _GPIO_DMA_BOTH          (6)  /* x110 DMA Request on either edge */
+
+#define _GPIO_INTERRUPT         (1)  /* xxx1 Interrupt (vs DMA) */
+#define _GPIO_INT_ZERO          (1)  /* 0001 Interrupt when logic zero */
+#define _GPIO_INT_RISING        (3)  /* 0011 Interrupt on rising edge */
+#define _GPIO_INT_FALLING       (5)  /* 0101 Interrupt on falling edge */
+#define _GPIO_INT_BOTH          (7)  /* 0111 Interrupt on either edge */
+#define _GPIO_INT_BOTH          (9)  /* 1001 Interrupt when logic one */
+
+#define GPIO_DMA_RISING         (_GPIO_DMA_RISING  << _GPIO_MODE_SHIFT)
+#define GPIO_DMA_FALLING        (_GPIO_DMA_FALLING << _GPIO_MODE_SHIFT)
+#define GPIO_DMA_BOTH           (_GPIO_DMA_BOTH    << _GPIO_MODE_SHIFT)
+#define GPIO_INT_ZERO           (_GPIO_INT_ZERO    << _GPIO_MODE_SHIFT)
+#define GPIO_INT_RISING         (_GPIO_INT_RISING  << _GPIO_MODE_SHIFT)
+#define GPIO_INT_FALLING        (_GPIO_INT_FALLING << _GPIO_MODE_SHIFT)
+#define GPIO_INT_BOTH           (_GPIO_INT_BOTH    << _GPIO_MODE_SHIFT)
+#define GPIO_INT_ONE            (_GPIO_INT_BOTH    << _GPIO_MODE_SHIFT)
+
+/* Three bits are used to define the port number:
+ *
+ * oooo mmmf iiii ---- ---- -ppp ---b bbbb
+ */
+
+#define _GPIO_PORT_SHIFT        (8)  /* Bits 8-10: port number */
+#define _GPIO_PORT_MASK         (7 << _GPIO_PORT_SHIFT)
+
+#define GPIO_PORTA              (KINETIS_PORTA << _GPIO_PORT_SHIFT)
+#define GPIO_PORTB              (KINETIS_PORTB << _GPIO_PORT_SHIFT)
+#define GPIO_PORTC              (KINETIS_PORTC << _GPIO_PORT_SHIFT)
+#define GPIO_PORTD              (KINETIS_PORTD << _GPIO_PORT_SHIFT)
+#define GPIO_PORTE              (KINETIS_PORTE << _GPIO_PORT_SHIFT)
+
+
+/* Five bits are used to define the pin number:
+ *
+ * oooo mmmf iiii ---- ---- -ppp ---b bbbb
+ */
+
+#define _GPIO_PIN_SHIFT         (0)  /* Bits 0-4: port number */
+#define _GPIO_PIN_MASK          (31 << _GPIO_PIN_SHIFT)
+
+#define GPIO_PIN(n)             ((n) << _GPIO_PIN_SHIFT)
+#define GPIO_PIN0               (0 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN1               (1 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN2               (2 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN3               (3 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN4               (4 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN5               (5 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN6               (6 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN7               (7 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN8               (8 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN9               (9 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN10              (10 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN11              (11 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN12              (12 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN13              (13 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN14              (14 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN15              (15 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN16              (16 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN17              (17 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN18              (18 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN19              (19 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN20              (20 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN21              (21 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN22              (22 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN23              (23 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN24              (24 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN25              (25 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN26              (26 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN27              (27 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN28              (28 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN29              (29 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN30              (30 << _GPIO_PIN_SHIFT)
+#define GPIO_PIN31              (31 << _GPIO_PIN_SHIFT)
 
 /************************************************************************************
  * Public Types
@@ -161,7 +332,7 @@ EXTERN void kinetis_gpioirqinitialize(void);
  *
  ************************************************************************************/
 
-EXTERN int kinetis_configgpio(uint16_t cfgset);
+EXTERN int kinetis_configgpio(uint32_t cfgset);
 
 /************************************************************************************
  * Name: kinetis_gpiowrite
@@ -171,7 +342,7 @@ EXTERN int kinetis_configgpio(uint16_t cfgset);
  *
  ************************************************************************************/
 
-EXTERN void kinetis_gpiowrite(uint16_t pinset, bool value);
+EXTERN void kinetis_gpiowrite(uint32_t pinset, bool value);
 
 /************************************************************************************
  * Name: kinetis_gpioread
@@ -181,7 +352,7 @@ EXTERN void kinetis_gpiowrite(uint16_t pinset, bool value);
  *
  ************************************************************************************/
 
-EXTERN bool kinetis_gpioread(uint16_t pinset);
+EXTERN bool kinetis_gpioread(uint32_t pinset);
 
 /************************************************************************************
  * Name: kinetis_gpioirqenable
@@ -220,7 +391,7 @@ EXTERN void kinetis_gpioirqdisable(int irq);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO
-EXTERN int kinetis_dumpgpio(uint16_t pinset, const char *msg);
+EXTERN int kinetis_dumpgpio(uint32_t pinset, const char *msg);
 #else
 #  define kinetis_dumpgpio(p,m)
 #endif

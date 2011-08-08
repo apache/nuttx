@@ -124,11 +124,12 @@
 # define KINETIS_TSI_BASE       0x40045000 /* Touch sense interface */
 # define KINETIS_SIMLP_BASE     0x40047000 /* SIM low-power logic */
 # define KINETIS_SIM_BASE       0x40048000 /* System integration module (SIM) */
-# define KINETIS_PAMUX_BASE     0x40049000 /* Port A multiplexing control */
-# define KINETIS_PBMUX_BASE     0x4004a000 /* Port B multiplexing control */
-# define KINETIS_PCMUX_BASE     0x4004b000 /* Port C multiplexing control */
-# define KINETIS_PDMUX_BASE     0x4004c000 /* Port D multiplexing control */
-# define KINETIS_PEMUX_BASE     0x4004d000 /* Port E multiplexing control */
+# define KINETIS_PORT_BASE(n)   (0x40049000 + ((n) << 12))
+# define KINETIS_PORTA_BASE     0x40049000 /* Port A multiplexing control */
+# define KINETIS_PORTB_BASE     0x4004a000 /* Port B multiplexing control */
+# define KINETIS_PORTC_BASE     0x4004b000 /* Port C multiplexing control */
+# define KINETIS_PORTD_BASE     0x4004c000 /* Port D multiplexing control */
+# define KINETIS_PORTE_BASE     0x4004d000 /* Port E multiplexing control */
 # define KINETIS_SWWDOG_BASE    0x40052000 /* Software watchdog */
 # define KINETIS_EXTWDOG_BASE   0x40061000 /* External watchdog */
 # define KINETIS_CMT_BASE       0x40062000 /* Carrier modulator timer (CMT) */
@@ -248,11 +249,12 @@
 # define KINETIS_TSI_BASE       0x40045000 /* Touch sense interface */
 # define KINETIS_SIMLP_BASE     0x40047000 /* SIM low-power logic */
 # define KINETIS_SIM_BASE       0x40048000 /* System integration module (SIM) */
-# define KINETIS_PAMUX_BASE     0x40049000 /* Port A multiplexing control */
-# define KINETIS_PBMUX_BASE     0x4004a000 /* Port B multiplexing control */
-# define KINETIS_PCMUX_BASE     0x4004b000 /* Port C multiplexing control */
-# define KINETIS_PDMUX_BASE     0x4004c000 /* Port D multiplexing control */
-# define KINETIS_PEMUX_BASE     0x4004d000 /* Port E multiplexing control */
+# define KINETIS_PORT_BASE(n)   (0x40049000 + ((n) << 12))
+# define KINETIS_PORTA_BASE     0x40049000 /* Port A multiplexing control */
+# define KINETIS_PORTB_BASE     0x4004a000 /* Port B multiplexing control */
+# define KINETIS_PORTC_BASE     0x4004b000 /* Port C multiplexing control */
+# define KINETIS_PORTD_BASE     0x4004c000 /* Port D multiplexing control */
+# define KINETIS_PORTE_BASE     0x4004d000 /* Port E multiplexing control */
 # define KINETIS_SWWDOG_BASE    0x40052000 /* Software watchdog */
 # define KINETIS_EXTWDOG_BASE   0x40061000 /* External watchdog */
 # define KINETIS_CMT_BASE       0x40062000 /* Carrier modulator timer (CMT) */
