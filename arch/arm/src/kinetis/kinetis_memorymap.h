@@ -161,10 +161,16 @@
 # define KINETIS_DAC1_BASE      0x400cd000 /* 12-bit digital-to-analog converter (DAC) 1 */
 # define KINETIS_UART4_BASE     0x400ea000 /* UART4 */
 # define KINETIS_UART5_BASE     0x400eb000 /* UART5 */
-# define KINETIS_XBAR_BASE      0x400ff000 /* Not an AIPS-Lite slot. The 32-bit general
-                                             * purpose input/output module that shares the
-                                             * crossbar switch slave port with the AIPS-Lite
-                                             * is accessed at this address. */
+# define KINETIS_XBARSS_BASE    0x400ff000 /* Not an AIPS-Lite slot. The 32-bit general
+                                            * purpose input/output module that shares the
+                                            * crossbar switch slave port with the AIPS-Lite
+                                            * is accessed at this address. */
+# define KINETIS_GPIO_BASE(n)   (0x400ff000 + ((n) << 6))
+# define KINETIS_GPIOA_BASE     0x400ff000 /* GPIO PORTA registers */
+# define KINETIS_GPIOB_BASE     0x400ff040 /* GPIO PORTB registers */
+# define KINETIS_GPIOC_BASE     0x400ff080 /* GPIO PORTC registers */
+# define KINETIS_GPIOD_BASE     0x400ff0c0 /* GPIO PORTD registers */
+# define KINETIS_GPIOE_BASE     0x400ff100 /* GPIO PORTE registers */
 
 /* Private Peripheral Bus (PPB) Memory Map ******************************************/
 
@@ -287,10 +293,16 @@
 # define KINETIS_DAC1_BASE      0x400cd000 /* 12-bit digital-to-analog converter (DAC) 1 */
 # define KINETIS_UART4_BASE     0x400ea000 /* UART4 */
 # define KINETIS_UART5_BASE     0x400eb000 /* UART5 */
-# define KINETIS_XBAR_BASE      0x400ff000 /* Not an AIPS-Lite slot. The 32-bit general
-                                             * purpose input/output module that shares the
-                                             * crossbar switch slave port with the AIPS-Lite
-                                             * is accessed at this address. */
+# define KINETIS_XBARSS_BASE    0x400ff000 /* Not an AIPS-Lite slot. The 32-bit general
+                                            * purpose input/output module that shares the
+                                            * crossbar switch slave port with the AIPS-Lite
+                                            * is accessed at this address. */
+# define KINETIS_GPIO_BASE(n)   (0x400ff000 + ((n) << 6))
+# define KINETIS_GPIOA_BASE     0x400ff000 /* GPIO PORTA registers */
+# define KINETIS_GPIOB_BASE     0x400ff040 /* GPIO PORTB registers */
+# define KINETIS_GPIOC_BASE     0x400ff080 /* GPIO PORTC registers */
+# define KINETIS_GPIOD_BASE     0x400ff0c0 /* GPIO PORTD registers */
+# define KINETIS_GPIOE_BASE     0x400ff100 /* GPIO PORTE registers */
 
 /* Private Peripheral Bus (PPB) Memory Map ******************************************/
 
