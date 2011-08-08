@@ -289,7 +289,6 @@
 #endif
 
 /* Register Bit Definitions *********************************************************/
-
 /* UART Baud Rate Register High */
 
 #define UART_BDH_SBR_SHIFT           (0)       /* Bits 0-4: MS Bits 8-13 of the UART Baud Rate Bits */
@@ -402,42 +401,42 @@
 
 /* UART FIFO Parameters */
 
-#define UART_PFIFO_RXFIFOSIZE_SHIFT     (0)       /* Bits 0-2: Receive FIFO. Buffer Depth */
-#define UART_PFIFO_RXFIFOSIZE_MASK      (7 << UART_PFIFO_RXFIFOSIZE_SHIFT)
-#  define UART_PFIFO_RXFIFOSIZE_1       (0 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 1 */
-#  define UART_PFIFO_RXFIFOSIZE_4       (1 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 4 */
-#  define UART_PFIFO_RXFIFOSIZE_8       (2 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 8 */
-#  define UART_PFIFO_RXFIFOSIZE_16      (3 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 16 */
-#  define UART_PFIFO_RXFIFOSIZE_32      (4 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 32 */
-#  define UART_PFIFO_RXFIFOSIZE_16      (5 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 64 */
-#  define UART_PFIFO_RXFIFOSIZE_128     (6 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 128 */
-#define UART_PFIFO_RXFE                 (1 << 3)  /* Bit 3: Receive FIFO Enable */
-#define UART_PFIFO_TXFIFOSIZE_SHIFT     (4)       /* Bits 4-6: Transmit FIFO. Buffer Depth */
-#define UART_PFIFO_TXFIFOSIZE_MASK      (7 << UART_PFIFO_TXFIFOSIZE_SHIFT)
-#  define UART_PFIFO_TXFIFOSIZE_1       (0 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 1 */
-#  define UART_PFIFO_TXFIFOSIZE_4       (1 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 4 */
-#  define UART_PFIFO_TXFIFOSIZE_8       (2 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 8 */
-#  define UART_PFIFO_TXFIFOSIZE_16      (3 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 16 */
-#  define UART_PFIFO_TXFIFOSIZE_32      (4 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 32 */
-#  define UART_PFIFO_TXFIFOSIZE_16      (5 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 64 */
-#  define UART_PFIFO_TXFIFOSIZE_128     (6 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 128 */
-#define UART_PFIFO_TXFE                 (1 << 7)  /* Bit 7: Transmit FIFO Enable */
+#define UART_PFIFO_RXFIFOSIZE_SHIFT  (0)       /* Bits 0-2: Receive FIFO. Buffer Depth */
+#define UART_PFIFO_RXFIFOSIZE_MASK   (7 << UART_PFIFO_RXFIFOSIZE_SHIFT)
+#  define UART_PFIFO_RXFIFOSIZE_1    (0 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 1 */
+#  define UART_PFIFO_RXFIFOSIZE_4    (1 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 4 */
+#  define UART_PFIFO_RXFIFOSIZE_8    (2 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 8 */
+#  define UART_PFIFO_RXFIFOSIZE_16   (3 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 16 */
+#  define UART_PFIFO_RXFIFOSIZE_32   (4 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 32 */
+#  define UART_PFIFO_RXFIFOSIZE_16   (5 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 64 */
+#  define UART_PFIFO_RXFIFOSIZE_128  (6 << UART_PFIFO_RXFIFOSIZE_SHIFT) /* 128 */
+#define UART_PFIFO_RXFE              (1 << 3)  /* Bit 3: Receive FIFO Enable */
+#define UART_PFIFO_TXFIFOSIZE_SHIFT  (4)       /* Bits 4-6: Transmit FIFO. Buffer Depth */
+#define UART_PFIFO_TXFIFOSIZE_MASK   (7 << UART_PFIFO_TXFIFOSIZE_SHIFT)
+#  define UART_PFIFO_TXFIFOSIZE_1    (0 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 1 */
+#  define UART_PFIFO_TXFIFOSIZE_4    (1 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 4 */
+#  define UART_PFIFO_TXFIFOSIZE_8    (2 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 8 */
+#  define UART_PFIFO_TXFIFOSIZE_16   (3 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 16 */
+#  define UART_PFIFO_TXFIFOSIZE_32   (4 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 32 */
+#  define UART_PFIFO_TXFIFOSIZE_16   (5 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 64 */
+#  define UART_PFIFO_TXFIFOSIZE_128  (6 << UART_PFIFO_TXFIFOSIZE_SHIFT) /* 128 */
+#define UART_PFIFO_TXFE              (1 << 7)  /* Bit 7: Transmit FIFO Enable */
 
 /* UART FIFO Control Register */
 
-#define UART_CFIFO_RXUFE                (1 << 0)  /* Bit 0: Receive FIFO Underflow Interrupt Enable */
-#define UART_CFIFO_TXOFE                (1 << 1)  /* Bit 1: Transmit FIFO Overflow Interrupt Enable */
-                                                  /* Bits 2-5: Reserved */
-#define UART_CFIFO_RXFLUSH              (1 << 6)  /* Bit 6: Receive FIFO/Buffer Flush */
-#define UART_CFIFO_TXFLUSH              (1 << 7)  /* Bit 7: Transmit FIFO/Buffer Flush */
+#define UART_CFIFO_RXUFE             (1 << 0)  /* Bit 0: Receive FIFO Underflow Interrupt Enable */
+#define UART_CFIFO_TXOFE             (1 << 1)  /* Bit 1: Transmit FIFO Overflow Interrupt Enable */
+                                               /* Bits 2-5: Reserved */
+#define UART_CFIFO_RXFLUSH           (1 << 6)  /* Bit 6: Receive FIFO/Buffer Flush */
+#define UART_CFIFO_TXFLUSH           (1 << 7)  /* Bit 7: Transmit FIFO/Buffer Flush */
 
 /* UART FIFO Status Register */
 
-#define UART_SFIFO_RXUF                 (1 << 0)  /* Bit 0: Receiver Buffer Underflow Flag */
-#define UART_SFIFO_TXOF                 (1 << 1)  /* Bit 1: Transmitter Buffer Overflow Flag */
-                                                  /* Bits 2-5: Reserved */
-#define UART_SFIFO_RXEMPT               (1 << 6)  /* Bit 6: Receive Buffer/FIFO Empty */
-#define UART_SFIFO_TXEMPT               (1 << 7)  /* Bit 7: Transmit Buffer/FIFO Empty */
+#define UART_SFIFO_RXUF              (1 << 0)  /* Bit 0: Receiver Buffer Underflow Flag */
+#define UART_SFIFO_TXOF              (1 << 1)  /* Bit 1: Transmitter Buffer Overflow Flag */
+                                               /* Bits 2-5: Reserved */
+#define UART_SFIFO_RXEMPT            (1 << 6)  /* Bit 6: Receive Buffer/FIFO Empty */
+#define UART_SFIFO_TXEMPT            (1 << 7)  /* Bit 7: Transmit Buffer/FIFO Empty */
 
 /* UART FIFO Transmit Watermark.  8-bit watermark value. */
 /* UART FIFO Transmit Count. 8-bit count value */
@@ -446,53 +445,53 @@
 
 /* UART 7816 Control Register */
 
-#define UART_C7816_ISO7816E             (1 << 0)  /* Bit 0: ISO-7816 Functionality Enabled */
-#define UART_C7816_TTYPE                (1 << 1)  /* Bit 1: Transfer Type */
-#define UART_C7816_INIT                 (1 << 2)  /* Bit 2: Detect Initial Character */
-#define UART_C7816_ANACK                (1 << 3)  /* Bit 3: Generate NACK on Error */
-#define UART_C7816_ONACK                (1 << 4)  /* Bit 4: Generate NACK on Overflow */
-                                                  /* Bits 5-7: Reserved */
+#define UART_C7816_ISO7816E          (1 << 0)  /* Bit 0: ISO-7816 Functionality Enabled */
+#define UART_C7816_TTYPE             (1 << 1)  /* Bit 1: Transfer Type */
+#define UART_C7816_INIT              (1 << 2)  /* Bit 2: Detect Initial Character */
+#define UART_C7816_ANACK             (1 << 3)  /* Bit 3: Generate NACK on Error */
+#define UART_C7816_ONACK             (1 << 4)  /* Bit 4: Generate NACK on Overflow */
+                                               /* Bits 5-7: Reserved */
 
 /* UART 7816 Interrupt Enable Register */
 
-#define UART_IE7816_RXTE                (1 << 0)  /* Bit 0: Receive Threshold Exceeded Interrupt Enable */
-#define UART_IE7816_TXTE                (1 << 1)  /* Bit 1: Transmit Threshold Exceeded Interrupt Enable */
-#define UART_IE7816_GTVE                (1 << 2)  /* Bit 2: Guard Timer Violated Interrupt Enable */
-                                                  /* Bit 3: Reserved */
-#define UART_IE7816_INITDE              (1 << 4)  /* Bit 4: Initial Character Detected Interrupt Enable */
-#define UART_IE7816_BWTE                (1 << 5)  /* Bit 5: Block Wait Timer Interrupt Enable */
-#define UART_IE7816_CWTE                (1 << 6)  /* Bit 6: Character Wait Timer Interrupt Enable */
-#define UART_IE7816_WTE                 (1 << 7)  /* Bit 7: Wait Timer Interrupt Enable */
+#define UART_IE7816_RXTE             (1 << 0)  /* Bit 0: Receive Threshold Exceeded Interrupt Enable */
+#define UART_IE7816_TXTE             (1 << 1)  /* Bit 1: Transmit Threshold Exceeded Interrupt Enable */
+#define UART_IE7816_GTVE             (1 << 2)  /* Bit 2: Guard Timer Violated Interrupt Enable */
+                                               /* Bit 3: Reserved */
+#define UART_IE7816_INITDE           (1 << 4)  /* Bit 4: Initial Character Detected Interrupt Enable */
+#define UART_IE7816_BWTE             (1 << 5)  /* Bit 5: Block Wait Timer Interrupt Enable */
+#define UART_IE7816_CWTE             (1 << 6)  /* Bit 6: Character Wait Timer Interrupt Enable */
+#define UART_IE7816_WTE              (1 << 7)  /* Bit 7: Wait Timer Interrupt Enable */
 
 /* UART 7816 Interrupt Status Register */
 
-#define UART_IS7816_RXT                 (1 << 0)  /* Bit 0: Receive Threshold Exceeded Interrupt */
-#define UART_IS7816_TXT                 (1 << 1)  /* Bit 1: Transmit Threshold Exceeded Interrupt */
-#define UART_IS7816_GTV                 (1 << 2)  /* Bit 2: Guard Timer Violated Interrupt */
-                                                  /* Bit 3: Reserved */
-#define UART_IS7816_INITD               (1 << 4)  /* Bit 4: Initial Character Detected Interrupt */
-#define UART_IS7816_BWT                 (1 << 5)  /* Bit 5: Block Wait Timer Interrupt */
-#define UART_IS7816_CWT                 (1 << 6)  /* Bit 6: Character Wait Timer Interrupt */
-#define UART_IS7816_WT                  (1 << 7)  /* Bit 7: Wait Timer Interrupt */
+#define UART_IS7816_RXT              (1 << 0)  /* Bit 0: Receive Threshold Exceeded Interrupt */
+#define UART_IS7816_TXT              (1 << 1)  /* Bit 1: Transmit Threshold Exceeded Interrupt */
+#define UART_IS7816_GTV              (1 << 2)  /* Bit 2: Guard Timer Violated Interrupt */
+                                               /* Bit 3: Reserved */
+#define UART_IS7816_INITD            (1 << 4)  /* Bit 4: Initial Character Detected Interrupt */
+#define UART_IS7816_BWT              (1 << 5)  /* Bit 5: Block Wait Timer Interrupt */
+#define UART_IS7816_CWT              (1 << 6)  /* Bit 6: Character Wait Timer Interrupt */
+#define UART_IS7816_WT               (1 << 7)  /* Bit 7: Wait Timer Interrupt */
 
 /* UART 7816 Wait Parameter Register.  8-bit Wait Timer Interrupt value. */
 
 /* UART 7816 Wait Parameter Register */
 
-#define UART_WP7816T1_BWI_SHIFT         (0) /* Bit 0-3: Block Wait Time Integer(C7816[TTYPE] = 1) */
-#define UART_WP7816T1_BWI_MASK          (15 << UART_WP7816T1_BWI_SHIFT)
-#define UART_WP7816T1_CWI_SHIFT         (4) /* Bits 4-7: Character Wait Time Integer (C7816[TTYPE] = 1) */
-#define UART_WP7816T1_CWI_MASK          (15 << UART_WP7816T1_CWI_SHIFT)
+#define UART_WP7816T1_BWI_SHIFT      (0)       /* Bit 0-3: Block Wait Time Integer(C7816[TTYPE] = 1) */
+#define UART_WP7816T1_BWI_MASK       (15 << UART_WP7816T1_BWI_SHIFT)
+#define UART_WP7816T1_CWI_SHIFT      (4)       /* Bits 4-7: Character Wait Time Integer (C7816[TTYPE] = 1) */
+#define UART_WP7816T1_CWI_MASK       (15 << UART_WP7816T1_CWI_SHIFT)
 
 /* UART 7816 Wait N Register.  8-bit Guard Band value. */
 /* UART 7816 Wait FD Register. 8-bit FD Multiplier value. */
 
 /* UART 7816 Error Threshold Register */
 
-#define UART_ET7816_RXTHRESHOLD_SHIFT   (0) /* Bit 0-3: Receive NACK Threshold */
-#define UART_ET7816_RXTHRESHOLD_MASK    (15 << UART_ET7816_RXTHRESHOLD_SHIFT)
-#define UART_ET7816_TXTHRESHOLD_SHIFT   (4) /* Bits 4-7: Transmit NACK Threshold */
-#define UART_ET7816_TXTHRESHOLD_MASK    (15 << UART_ET7816_TXTHRESHOLD_MASK)
+#define UART_ET7816_RXTHRESH_SHIFT   (0)       /* Bit 0-3: Receive NACK Threshold */
+#define UART_ET7816_RXTHRESH_MASK    (15 << UART_ET7816_RXTHRESHOLD_SHIFT)
+#define UART_ET7816_TXTHRESH_SHIFT   (4)       /* Bits 4-7: Transmit NACK Threshold */
+#define UART_ET7816_TXTHRESH_MASK    (15 << UART_ET7816_TXTHRESHOLD_MASK)
 
 /* UART 7816 Transmit Length Register. 8-bit Transmit Length value */
 

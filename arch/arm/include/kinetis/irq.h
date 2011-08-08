@@ -286,7 +286,7 @@
 #  define KINETIS_IRQ_PORTB       (104) /* Vector 104: Pin detect port B */
 #  define KINETIS_IRQ_PORTC       (105) /* Vector 105: Pin detect port C */
 #  define KINETIS_IRQ_PORTD       (106) /* Vector 106: Pin detect port D */
-#  define KINETIS_IRQ_PORTD       (107) /* Vector 107: Pin detect port E */
+#  define KINETIS_IRQ_PORTE       (107) /* Vector 107: Pin detect port E */
                                         /* Vectors 108-119: Reserved */
 
 /* Note that the total number of IRQ numbers supported is equal to the number of
