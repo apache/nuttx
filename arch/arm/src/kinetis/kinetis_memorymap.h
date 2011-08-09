@@ -182,7 +182,7 @@
 # define KINETIS_ETM_BASE       0xe0041000 /* Embedded Trace Macrocell (ETM) */
 # define KINETIS_ETB_BASE       0xe0042000 /* Embedded Trace Buffer (ETB) */
 # define KINETIS_TFUN_BASE      0xe0043000 /* Embedded Trace Funnel */
-# define KINETIS_MISC_BASE      0xe0080000 /* Miscellaneous Control Module (including ETB Almost Full) */
+# define KINETIS_MCM_BASE       0xe0080000 /* Miscellaneous Control Module (including ETB Almost Full) */
 # define KINETIS_ROMTAB_BASE    0xe00ff000 /* ROM Table - allows auto-detection of debug components */
 
 /* K60 Family 
@@ -314,7 +314,7 @@
 # define KINETIS_ETM_BASE       0xe0041000 /* Embedded Trace Macrocell (ETM) */
 # define KINETIS_ETB_BASE       0xe0042000 /* Embedded Trace Buffer (ETB) */
 # define KINETIS_TFUN_BASE      0xe0043000 /* Embedded Trace Funnel */
-# define KINETIS_MISC_BASE      0xe0080000 /* Miscellaneous Control Module (including ETB Almost Full) */
+# define KINETIS_MCM_BASE       0xe0080000 /* Miscellaneous Control Module (including ETB Almost Full) */
 # define KINETIS_MMCAU_BASE     0xe0081000 /* Memory Mapped Cryptographic Acceleration Unit (MMCAU) */
 # define KINETIS_ROMTAB_BASE    0xe00ff000 /* ROM Table - allows auto-detection of debug components */
 
