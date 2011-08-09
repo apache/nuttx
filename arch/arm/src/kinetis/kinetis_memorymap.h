@@ -95,7 +95,7 @@
 
 /* Peripheral Bridge 0 Memory Map ***************************************************/
 
-# define KINETIS_PBRIDGE0_BASE  0x40000000 /* Peripheral bridge 0 (AIPS-Lite 0) */
+# define KINETIS_AIPS0_BASE     0x40000000 /* Peripheral bridge 0 (AIPS-Lite 0) */
 # define KINETIS_XBAR_BASE      0x40004000 /* Crossbar switch */
 # define KINETIS_DMAC_BASE      0x40008000 /* DMA controller */
 # define KINETIS_DMADESC_BASE   0x40009000 /* DMA controller transfer control descriptors */
@@ -150,7 +150,7 @@
 
 /* Peripheral Bridge 1 Memory Map ***************************************************/
 
-# define KINETIS_PBRIDGE1_BASE  0x40080000 /* Peripheral bridge 1 (AIPS-Lite 1) */
+# define KINETIS_AIPS1_BASE     0x40080000 /* Peripheral bridge 1 (AIPS-Lite 1) */
 # define KINETIS_FLEXCAN1_BASE  0x400a4000 /* FlexCAN 1 */
 # define KINETIS_SPI2_BASE      0x400ac000 /* SPI 2 */
 # define KINETIS_SDHC_BASE      0x400b1000 /* SDHC */
@@ -226,7 +226,7 @@
 
 /* Peripheral Bridge 0 Memory Map ***************************************************/
 
-# define KINETIS_PBRIDGE0_BASE  0x40000000 /* Peripheral bridge 0 (AIPS-Lite 0) */
+# define KINETIS_AIPS0_BASE     0x40000000 /* Peripheral bridge 0 (AIPS-Lite 0) */
 # define KINETIS_XBAR_BASE      0x40004000 /* Crossbar switch */
 # define KINETIS_DMAC_BASE      0x40008000 /* DMA controller */
 # define KINETIS_DMADESC_BASE   0x40009000 /* DMA controller transfer control descriptors */
@@ -281,7 +281,7 @@
 
 /* Peripheral Bridge 1 Memory Map ***************************************************/
 
-# define KINETIS_PBRIDGE1_BASE  0x40080000 /* Peripheral bridge 1 (AIPS-Lite 1) */
+# define KINETIS_AIPS1_BASE     0x40080000 /* Peripheral bridge 1 (AIPS-Lite 1) */
 # define KINETIS_RNGB_BASE      0x400a0000 /* Random number generator (RNGB) */
 # define KINETIS_FLEXCAN1_BASE  0x400a4000 /* FlexCAN 1 */
 # define KINETIS_SPI2_BASE      0x400ac000 /* DSPI 2 */

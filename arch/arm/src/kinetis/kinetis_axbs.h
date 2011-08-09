@@ -222,7 +222,7 @@
 #  define AXBS_CRS_ARB_FIXED          (0 << AXBS_CRS_ARB_SHIFT) /* Fixed priority */
 #  define AXBS_CRS_ARB_MASK           (1 << AXBS_CRS_ARB_SHIFT) /* Round-robin (rotating) priority */
                                                /* Bits 10-29:  Reserved */
-#define AXBS_CRS_HLP                  (1 < 30) /* Bit 30:  Halt low priority */
+#define AXBS_CRS_HLP                  (1 < 30) /* Bit 30: Halt low priority */
 #define AXBS_CRS_RO                   (1 < 31) /* Bit 31: Read only */
 
 /* Master General Purpose Control Register */
