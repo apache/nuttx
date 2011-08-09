@@ -130,8 +130,8 @@
 # define KINETIS_PORTC_BASE     0x4004b000 /* Port C multiplexing control */
 # define KINETIS_PORTD_BASE     0x4004c000 /* Port D multiplexing control */
 # define KINETIS_PORTE_BASE     0x4004d000 /* Port E multiplexing control */
-# define KINETIS_SWWDOG_BASE    0x40052000 /* Software watchdog */
-# define KINETIS_EXTWDOG_BASE   0x40061000 /* External watchdog */
+# define KINETIS_WDOG_BASE      0x40052000 /* Software watchdog */
+# define KINETIS_EWM_BASE       0x40061000 /* External watchdog */
 # define KINETIS_CMT_BASE       0x40062000 /* Carrier modulator timer (CMT) */
 # define KINETIS_MCG_BASE       0x40064000 /* Multi-purpose Clock Generator (MCG) */
 # define KINETIS_OSC_BASE       0x40065000 /* System oscillator (OSC) */
@@ -261,8 +261,8 @@
 # define KINETIS_PORTC_BASE     0x4004b000 /* Port C multiplexing control */
 # define KINETIS_PORTD_BASE     0x4004c000 /* Port D multiplexing control */
 # define KINETIS_PORTE_BASE     0x4004d000 /* Port E multiplexing control */
-# define KINETIS_SWWDOG_BASE    0x40052000 /* Software watchdog */
-# define KINETIS_EXTWDOG_BASE   0x40061000 /* External watchdog */
+# define KINETIS_WDOG_BASE      0x40052000 /* Software watchdog */
+# define KINETIS_EWM_BASE       0x40061000 /* External watchdog */
 # define KINETIS_CMT_BASE       0x40062000 /* Carrier modulator timer (CMT) */
 # define KINETIS_MCG_BASE       0x40064000 /* Multi-purpose Clock Generator (MCG) */
 # define KINETIS_OSC_BASE       0x40065000 /* System oscillator (XOSC) */
