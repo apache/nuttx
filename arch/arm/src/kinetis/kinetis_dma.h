@@ -531,66 +531,234 @@
 
 /* Register Bit Definitions *************************************************************************/
 
-/* Control Register */
-#define DMA_CR_
+/* Control Register (32-bit) */
+                                                    /* Bit 0:  Reserved */
+#define DMA_CR_EDBG                       (1 << 1)  /* Bit 1:  Enable debug */
+#define DMA_CR_ERCA                       (1 << 2)  /* Bit 2:  Enable round robin channel arbitration */
+                                                    /* Bit 3:  Reserved */
+#define DMA_CR_HOE                        (1 << 4)  /* Bit 4:  Halt on error */
+#define DMA_CR_HALT                       (1 << 5)  /* Bit 5:  Halt DMA operations */
+#define DMA_CR_CLM                        (1 << 6)  /* Bit 6:  Continuous link mode */
+#define DMA_CR_EMLM                       (1 << 7)  /* Bit 7:  Enable minor loop mapping */
+                                                    /* Bits 8-15: Reserved */
+#define DMA_CR_ECX                        (1 << 16) /* Bit 16: Error cancel transfer */
+#define DMA_CR_CX                         (1 << 17) /* Bit 17: Cancel transfer */
+                                                    /* Bits 18-31: Reserved */
 /* Error Status Register */
-#define DMA_ES_
-/* Enable Request Register */
-#define DMA_ERQ_
-/* Enable Error Interrupt Register */
-#define DMA_EEI_
-/* Clear Enable Error Interrupt Register */
-#define DMA_CEEI_
-/* Set Enable Error Interrupt Register */
-#define DMA_SEEI_
-/* Clear Enable Request Register */
-#define DMA_CERQ_
-/* Set Enable Request Register */
-#define DMA_SERQ_
-/* Clear DONE Status Bit Register */
-#define DMA_CDNE_
-/* Set START Bit Register */
-#define DMA_SSRT_
-/* Clear Error Register */
-#define DMA_CERR_
-/* Clear Interrupt Request Register */
-#define DMA_CINT_
-/* Interrupt Request Register */
-#define DMA_INT_
-/* Error Register */
-#define DMA_ERR_
-/* Hardware Request Status Register */
-#define DMA_HRS_
-/* Channel n Priority Register */
-#define DMA_DCHPRI_
 
-/* TCD Source Address */
-#define DMA_TCD_SADDR_
-/* TCD Signed Source Address Offset */
-#define DMA_TCD_SOFF_
-/* TCD Transfer Attributes */
-#define DMA_TCD_ATTR_
-/* TCD Minor Byte Count */
-#define DMA_TCD_NBYTES_
-/* TCD Last Source Address Adjustment */
-#define DMA_TCD_SLAST_
-/* TCD Destination Address */
-#define DMA_TCD_DADDR_
-/* TCD Signed Destination Address Offset */
-#define DMA_TCD_DOFF_
-/* TCD Current Minor Loop Link, Major Loop Count */
-#define DMA_TCD_CITER_
-/* TCD Last Destination Address Adjustment/Scatter Gather Address */
-#define DMA_TCD_DLASTSGA_
-/* TCD Control and Status */
-#define DMA_TCD_CSR_
- /* TCD Beginning Minor Loop Link, Major Loop Count */
-#define DMA_TCD_BITER_
+#define DMA_ES_DBE                        (1 << 0)  /* Bit 0:  Destination bus error */
+#define DMA_ES_SBE                        (1 << 1)  /* Bit 1:  Source bus error */
+#define DMA_ES_SGE                        (1 << 2)  /* Bit 2:  Scatter/gather configuration error */
+#define DMA_ES_NCE                        (1 << 3)  /* Bit 3:  NBYTES/CITER configuration error */
+#define DMA_ES_DOE                        (1 << 4)  /* Bit 4:  Destination offset error */
+#define DMA_ES_DAE                        (1 << 5)  /* Bit 5:  Destination address error */
+#define DMA_ES_SOE                        (1 << 6)  /* Bit 6:  Source offset error */
+#define DMA_ES_SAE                        (1 << 7)  /* Bit 7:  Source address error */
+#define DMA_ES_ERRCHN_SHIFT               (8)       /* Bits 8-11: Error channel number or cancelled channel number */
+#define DMA_ES_ERRCHN_MASK                (15 << DMA_ES_ERRCHN_SHIFT)
+                                                    /* Bits 12-13: Reserved */
+#define DMA_ES_CPE                        (1 << 14) /* Bit 14:  Channel priority error */
+                                                    /* Bit 15: Reserved */
+#define DMA_ES_ECX                        (1 << 16) /* Bit 16:  Transfer cancelled */
+                                                    /* Bits 17-30: Reserved */
+#define DMA_ES_VLD                        (1 << 31) /* Bit 31:  Logical OR of all ERR status bits */
+
+/* Enable Request Register, Enable Error Interrupt Register, Interrupt Request Register,  Error
+ * Register, Hardware Request Status Register common bit definitions (32-bit, except for Error
+ * Register which is 16-bit)
+ */
+
+#define DMA_REQ(n)                        (1 << (n)) /* Bit n: DMA Request n */
+#define DMA_REQ0                          (1 << 0)  /* Bit 0:  DMA Request 0 */
+#define DMA_REQ1                          (1 << 1)  /* Bit 1:  DMA Request 1 */
+#define DMA_REQ2                          (1 << 2)  /* Bit 2:  DMA Request 2 */
+#define DMA_REQ3                          (1 << 3)  /* Bit 3:  DMA Request 3 */
+#define DMA_REQ4                          (1 << 4)  /* Bit 4:  DMA Request 4 */
+#define DMA_REQ5                          (1 << 5)  /* Bit 5:  DMA Request 5 */
+#define DMA_REQ6                          (1 << 6)  /* Bit 6:  DMA Request 6 */
+#define DMA_REQ7                          (1 << 7)  /* Bit 7:  DMA Request 7 */
+#define DMA_REQ8                          (1 << 8)  /* Bit 8:  DMA Request 8 */
+#define DMA_REQ9                          (1 << 9)  /* Bit 9:  DMA Request 9 */
+#define DMA_REQ10                         (1 << 10) /* Bit 10: DMA Request 10 */
+#define DMA_REQ11                         (1 << 11) /* Bit 11: DMA Request 11 */
+#define DMA_REQ12                         (1 << 12) /* Bit 12: DMA Request 12 */
+#define DMA_REQ13                         (1 << 13) /* Bit 13: DMA Request 13 */
+#define DMA_REQ14                         (1 << 14) /* Bit 14: DMA Request 14 */
+#define DMA_REQ15                         (1 << 15) /* Bit 15: DMA Request 15 */
+                                                    /* Bits 16-31: Reserved */
+/* Clear Enable Error Interrupt Register (8-bit) */
+
+#define DMA_CEEI_SHIFT                    (0)       /* Bits 0-3: Clear enable error interrupt */
+#define DMA_CEEI_MASK                     (15 << DMA_CEEI_SHIFT)
+                                                    /* Bits 4-5: Reserved */
+#define DMA_CEEI_CAEE                     (1 << 6)  /* Bit 6:  Clear all enable error interrupts */
+#define DMA_CEEI_NOP                      (1 << 7)  /* Bit 7:  No operation */
+
+/* Set Enable Error Interrupt Register (8-bit) */
+
+#define DMA_SEEI_SHIFT                    (0)       /* Bits 0-3: Set enable error interrupt */
+#define DMA_SEEI_MASK                     (15 << DMA_SEEI_SHIFT)
+                                                    /* Bits 4-5: Reserved */
+#define DMA_SEEI_SAEE                     (1 << 6)  /* Bit 6:  Set all enable error interrupts */
+#define DMA_SEEI_NOP                      (1 << 7)  /* Bit 7:  No operation */
+
+/* Clear Enable Request Register (8-bit) */
+
+#define DMA_CERQ_SHIFT                    (0)       /* Bits 0-3: Clear enable request */
+#define DMA_CERQ_MASK                     (15 << DMA_CERQ_SHIFT)
+                                                    /* Bits 4-5: Reserved */
+#define DMA_CERQ_CAER                     (1 << 6)  /* Bit 6:  Clear all enable requests */
+#define DMA_CERQ_NOP                      (1 << 7)  /* Bit 7:  No operation */
+
+/* Set Enable Request Register (8-bit) */
+
+#define DMA_SERQ_SHIFT                    (0)       /* Bits 0-3: Set enable request */
+#define DMA_SERQ_MASK                     (15 << DMA_SERQ_SHIFT)
+                                                    /* Bits 4-5: Reserved */
+#define DMA_SERQ_SAER                     (1 << 6)  /* Bit 6:  Set all enable requests */
+#define DMA_SERQ_NOP                      (1 << 7)  /* Bit 7:  No operation */
+
+/* Clear DONE Status Bit Register (8-bit) */
+
+#define DMA_CDNE_SHIFT                    (0)       /* Bits 0-3: Clear DONE bit */
+#define DMA_CDNE_MASK                     (15 << DMA_CDNE_SHIFT)
+                                                    /* Bits 4-5: Reserved */
+#define DMA_CDNE_CADN                     (1 << 6)  /* Bit 6:  Clears all DONE bits */
+#define DMA_CDNE_NOP                      (1 << 7)  /* Bit 7:  No operation */
+
+/* Set START Bit Register (8-bit) */
+
+#define DMA_SSRT_SHIFT                    (0)       /* Bits 0-3: Set START bit */
+#define DMA_SSRT_MASK                     (15 << DMA_SSRT_SHIFT)
+                                                    /* Bits 4-5: Reserved */
+#define DMA_SSRT_SAST                     (1 << 6)  /* Bit 6:  Set all START bits (activates all channels) */
+#define DMA_SSRT_NOP                      (1 << 7)  /* Bit 7:  No operation */
+
+/* Clear Error Register (8-bit) */
+
+#define DMA_CERR_SHIFT                    (0)       /* Bits 0-3: Clear error indicator */
+#define DMA_CERR_MASK                     (15 << DMA_CERR_SHIFT)
+                                                    /* Bits 4-5: Reserved */
+#define DMA_CERR_CAEI                     (1 << 6)  /* Bit 6:  Clear all error indicators */
+#define DMA_CERR_NOP                      (1 << 7)  /* Bit 7:  No operation */
+
+/* Clear Interrupt Request Register (8-bit) */
+
+#define DMA_CINT_SHIFT                    (0)       /* Bits 0-3: Clear interrupt request */
+#define DMA_CINT_MASK                     (15 << DMA_CINT_SHIFT)
+                                                    /* Bits 4-5: Reserved */
+#define DMA_CINT_CAIR                     (1 << 6)  /* Bit 6:  Clear all interrupt requests */
+#define DMA_CINT_NOP                      (1 << 7)  /* Bit 7:  No operation */
+
+/* Channel n Priority Register (8-bit) */
+
+#define DMA_DCHPR_SHIFT                   (0)       /* Bits 0-3: Channel n arbitration priority */
+#define DMA_DCHPR_MASK                    (15 << DMA_DCHPR_SHIFT)
+                                                    /* Bits 4-5: Reserved */
+#define DMA_DCHPR_DPA                     (1 << 6)  /* Bit 6:  Disable preempt ability */
+#define DMA_DCHPR_ECP                     (1 << 7)  /* Bit 7:  Enable channel preemption */
 
 
-                (1 << nn)  /* Bit nn:  
-_SHIFT          (nn)       /* Bits nn-nn: 
-_MASK           (nn << nn)
+/* TCD Source Address.  32-bit address value. */
+/* TCD Signed Source Address Offset.  32-bit offset value. */
+
+/* TCD Transfer Attributes (16-bit) */
+
+#define DMA_TCD_ATTR_DSIZE_SHIFT          (0)       /* Bits 0-2: Destination data transfer size */
+#define DMA_TCD_ATTR_DSIZE_MASK           (7 << DMA_TCD_ATTR_DSIZE_SHIFT)
+#  define DMA_TCD_ATTR_DSIZE_8BIT         (0 << DMA_TCD_ATTR_DSIZE_SHIFT) /* 8-bit */
+#  define DMA_TCD_ATTR_DSIZE_16BIT        (1 << DMA_TCD_ATTR_DSIZE_SHIFT) /* 16-bit */
+#  define DMA_TCD_ATTR_DSIZE_32BIT        (2 << DMA_TCD_ATTR_DSIZE_SHIFT) /* 32-bit */
+#  define DMA_TCD_ATTR_DSIZE_16BYTE       (4 << DMA_TCD_ATTR_DSIZE_SHIFT) /* 16-byte */
+#define DMA_TCD_ATTR_DMOD_SHIFT           (3)       /* Bits 3-7: Destination address modulo */
+#define DMA_TCD_ATTR_DMOD_MASK            (31 << DMA_TCD_ATTR_DMOD_SHIFT)
+#define DMA_TCD_ATTR_SSIZE_SHIFT          (8)       /* Bits 8-10: Source data transfer size */
+#define DMA_TCD_ATTR_SSIZE_MASK           (7 << DMA_TCD_ATTR_SSIZE_SHIFT)
+#  define DMA_TCD_ATTR_SSIZE_8BIT         (0 << DMA_TCD_ATTR_SSIZE_SHIFT) /* 8-bit */
+#  define DMA_TCD_ATTR_SSIZE_16BIT        (1 << DMA_TCD_ATTR_SSIZE_SHIFT) /* 16-bit */
+#  define DMA_TCD_ATTR_SSIZE_32BIT        (2 << DMA_TCD_ATTR_SSIZE_SHIFT) /* 32-bit */
+#  define DMA_TCD_ATTR_SSIZE_16BYTE       (4 << DMA_TCD_ATTR_SSIZE_SHIFT) /* 16-byte */
+#define DMA_TCD_ATTR_SMOD_SHIFT           (11)      /* Bits 11-15: Source address modulo */
+#define DMA_TCD_ATTR_SMOD_MASK            (31 << DMA_TCD_ATTR_SMOD_SHIFT)
+
+/* TCD Minor Byte Count.
+ * Case 1: Minor Loop Disabled.  In this case, the register holds a simple 32-bit count value.
+ * Case 2: Minor Loop Enabled and Offset Disabled:
+ */
+
+#define DMA_TCD_NBYTES2_SHIFT             (0)       /* Bits 0-29: Minor byte transfer count */
+#define DMA_TCD_NBYTES2_MASK              (0x3fffffff)
+#define DMA_TCD_NBYTES_DMLOE              (1 << 30) /* Bit 30: Destination minor loop offset enable (Case 2&3) */
+#define DMA_TCD_NBYTES_SMLOE              (1 << 31) /* Bit 31: Source minor loop offset enable (Case 2&3) */
+
+/* Case 3: (Minor Loop and Offset Enabled): */
+
+#define DMA_TCD_NBYTES3_SHIFT             (0)       /* Bits 0-9: Minor byte transfer count */
+#define DMA_TCD_NBYTES3_MASK              (0x3ff << DMA_TCD_NBYTES3_SHIFT)
+#define DMA_TCD_NBYTES_MLOFF_SHIFT        (10)      /* Bits 10-29: Sign-extended address offset */
+#define DMA_TCD_NBYTES_MLOFF_MASK         (0xfffff << DMA_TCD_NBYTES_MLOFF_SHIFT)
+                                                    /* Bit 30: Same as Case 2 */
+                                                    /* Bit 31: Same as Case 2 */
+
+/* TCD Last Source Address Adjustment. 32-bit address value. */
+/* TCD Destination Address. 32-bit address value. */
+/* TCD Signed Destination Address Offset. 32-bit offset value. */
+
+/* TCD Current Minor Loop Link, Major Loop Count. 16-bit.
+ * Case 1:  Channel Linking Enabled:
+ */
+
+#define DMA_TCD_CITER1_SHIFT              (0)       /* Bits 0-8: Current major iteration count */
+#define DMA_TCD_CITER1_MASK               (0x1ff << DMA_TCD_CITER1_SHIFT)
+#define DMA_TCD_CITER1_LINKCH_SHIFT       (9)       /* Bits 9-12: Link channel number */
+#define DMA_TCD_CITER1_LINKCH_MASK        (15 << DMA_TCD_CITER1_LINKCH_SHIFT)
+                                                    /* Bits 13-14: Reserved */
+#define DMA_TCD_CITER_ELINK               (1 << 15) /* Bit 15: Enable channel-to-channel linking on minor-loop complete (Case 1&2) */
+
+/* Case 2:  Channel Linking Disabled: */
+
+#define DMA_TCD_CITER2_SHIFT              (0)       /* Bits 0-14: Current major iteration count */
+#define DMA_TCD_CITER2_MASK               (0x7fff << DMA_TCD_CITER2_SHIFT)
+                                                    /* Bits 15: Same as Case 1 */
+
+/* TCD Last Destination Address Adjustment/Scatter Gather Address. 32-bit address value. */
+
+/* TCD Control and Status (16-bit) */
+
+#define DMA_TCD_CSR_START                 (1 << 0)  /* Bit 0:  Channel start */
+#define DMA_TCD_CSR_INTMAJOR              (1 << 1)  /* Bit 1:  Enable an interrupt when major iteration count completes */
+#define DMA_TCD_CSR_INTHALF               (1 << 2)  /* Bit 2:  Enable an interrupt when major counter is half complete */
+#define DMA_TCD_CSR_DREQ                  (1 << 3)  /* Bit 3:  Disable request */
+#define DMA_TCD_CSR_ESG                   (1 << 4)  /* Bit 4:  Enable scatter/gather processing */
+#define DMA_TCD_CSR_MAJORELINK            (1 << 5)  /* Bit 5:  Enable channel-to-channel linking on major loop complete */
+#define DMA_TCD_CSR_ACTIVE                (1 << 6)  /* Bit 6:  Channel active */
+#define DMA_TCD_CSR_DONE                  (1 << 7)  /* Bit 7:  Channel done */
+#define DMA_TCD_CSR_MAJORLINKCH_SHIFT     (8)       /* Bits 8-11: Link channel number */
+#define DMA_TCD_CSR_MAJORLINKCH_MASK      (15 << DMA_TCD_CSR_MAJORLINKCH_SHIFT)
+                                                    /* Bits 12-13: Reserved */
+#define DMA_TCD_CSR_BWC_SHIFT             (14)      /* Bits 14-15: Bandwidth control */
+#define DMA_TCD_CSR_BWC_MASK              (3 << DMA_TCD_CSR_BWC_SHIFT)
+#  define DMA_TCD_CSR_BWC_NOSTALLS        (0 << DMA_TCD_CSR_BWC_SHIFT) /* No eDMA engine stalls */
+#  define DMA_TCD_CSR_BWC_4CYCLES         (2 << DMA_TCD_CSR_BWC_SHIFT) /* eDMA engine stalls 4 cycles after each R/W */
+#  define DMA_TCD_CSR_BWC_8CYCLES         (3 << DMA_TCD_CSR_BWC_SHIFT) /* eDMA engine stalls 8 cycles after each R/W */
+
+/* TCD Beginning Minor Loop Link, Major Loop Count (16-bit).
+ *
+ * Case 1: Channel Linking Enabled:
+ */
+
+#define DMA_TCD_BITER1_SHIFT              (0)       /* Bits 0-8: Starting major iteration count */
+#define DMA_TCD_BITER1_MASK               (0x1ff << DMA_TCD_BITER1_SHIFT)
+#define DMA_TCD_BITER1_LINKCH_SHIFT       (9)       /* Bits 9-12: Link channel number */
+#define DMA_TCD_BITER1_LINKCH_MASK        (15 << DMA_TCD_BITER1_LINKCH_SHIFT)
+                                                    /* Bits 13-14: Reserved */
+#define DMA_TCD_BITER_ELINK               (1 << 15) /* Bit 15: Enable channel-to-channel linking on minor-loop complete (Case 1&2) */
+
+/* Case 2: Channel Linking Disabled: */
+
+#define DMA_TCD_BITER2_SHIFT              (0)       /* Bits 0-14: Starting major iteration count */
+#define DMA_TCD_BITER2_MASK               (0x7fff << DMA_TCD_CITER2_SHIFT)
+                                                    /* Bits 15: Same as Case 1 */
 
 /****************************************************************************************************
  * Public Types
