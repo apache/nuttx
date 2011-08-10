@@ -239,10 +239,10 @@
 
 #define ADC_SC3_AVGS_SHIFT        (0)       /* Bits 0-1: Hardware average select */
 #define ADC_SC3_AVGS_MASK         (3 << ADC_SC3_AVGS_SHIFT)
-#  define ADC_SC3_AVGS_4SAMPLS    (0 << ADC_SC3_AVGS_SHIFT) /* 4 samples averaged */
-#  define ADC_SC3_AVGS_8SAMPLS    (1 << ADC_SC3_AVGS_SHIFT) /* 8 samples averaged */
-#  define ADC_SC3_AVGS_16SAMPLS   (2 << ADC_SC3_AVGS_SHIFT) /* 18 samples averaged */
-#  define ADC_SC3_AVGS_32SAMPLS   (3 << ADC_SC3_AVGS_SHIFT) /* 32 samples averaged */
+#  define ADC_SC3_AVGS_4SMPLS     (0 << ADC_SC3_AVGS_SHIFT) /* 4 samples averaged */
+#  define ADC_SC3_AVGS_8SMPLS     (1 << ADC_SC3_AVGS_SHIFT) /* 8 samples averaged */
+#  define ADC_SC3_AVGS_16SMPLS    (2 << ADC_SC3_AVGS_SHIFT) /* 18 samples averaged */
+#  define ADC_SC3_AVGS_32SMPLS    (3 << ADC_SC3_AVGS_SHIFT) /* 32 samples averaged */
 #define ADC_SC3_AVGE              (1 << 2)  /* Bit 2:  Hardware average enable */
 #define ADC_SC3_ADCO              (1 << 3)  /* Bit 3:  Continuous conversion enable */
                                             /* Bits 4-5: Reserved */
@@ -282,7 +282,9 @@
 #  define ADC_PGA_PGAG_16         (4 << ADC_PGA_PGAG_SHIFT)
 #  define ADC_PGA_PGAG_32         (5 << ADC_PGA_PGAG_SHIFT)
 #  define ADC_PGA_PGAG_64         (6 << ADC_PGA_PGAG_SHIFT)
-#define ADC_PGA_PGALP             (1 << 20) /* Bit 20:  PGA low-power mode control*/
+#ifdef KINETIS_K40
+#  define ADC_PGA_PGALP           (1 << 20) /* Bit 20:  PGA low-power mode control */
+#endif
                                             /* Bits 21-22: Reserved */
 #define ADC_PGA_PGAEN             (1 << 23) /* Bit 23:  PGA enable*/
                                             /* Bits 24-31: Reserved */

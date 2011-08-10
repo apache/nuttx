@@ -110,7 +110,7 @@
 # define KINETIS_I2S0_BASE      0x4002f000 /* I2S 0 */
 # define KINETIS_CRC_BASE       0x40032000 /* CRC */
 # define KINETIS_USBDCD_BASE    0x40035000 /* USB DCD */
-# define KINETIS_PDB_BASE       0x40036000 /* Programmable delay block */
+# define KINETIS_PDB0_BASE      0x40036000 /* Programmable delay block */
 # define KINETIS_PIT_BASE       0x40037000 /* Periodic interrupt timers (PIT) */
 # define KINETIS_FTM0_BASE      0x40038000 /* FlexTimer 0 */
 # define KINETIS_FTM1_BASE      0x40039000 /* FlexTimer 1 */
@@ -241,7 +241,7 @@
 # define KINETIS_I2S0_BASE      0x4002f000 /* I2S 0 */
 # define KINETIS_CRC_BASE       0x40032000 /* CRC */
 # define KINETIS_USBDCD_BASE    0x40035000 /* USB DCD */
-# define KINETIS_PDB_BASE       0x40036000 /* Programmable delay block */
+# define KINETIS_PDB0_BASE      0x40036000 /* Programmable delay block */
 # define KINETIS_PIT_BASE       0x40037000 /* Periodic interrupt timers (PIT) */
 # define KINETIS_FTM0_BASE      0x40038000 /* FlexTimer (FTM) 0 */
 # define KINETIS_FTM1_BASE      0x40039000 /* FlexTimer (FTM) 1 */
