@@ -88,8 +88,8 @@
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  define KINETIS_RTC             1          /* Real time clock */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  define KINETIS_NRTC            1          /* Real time clock */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -132,9 +132,9 @@
 #  define KINETIS_NVREF           1          /* Voltage reference */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -173,9 +173,9 @@
 #  define KINETIS_NVREF           1          /* Voltage reference */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -213,9 +213,9 @@
 #  define KINETIS_NVREF           1          /* Voltage reference */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -253,9 +253,9 @@
 #  define KINETIS_NVREF           1          /* Voltage reference */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -295,9 +295,9 @@
 #  define KINETIS_NVREF           1          /* Voltage reference */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -338,9 +338,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -381,9 +381,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -424,9 +424,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -467,9 +467,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -510,9 +510,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -553,9 +553,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -596,9 +596,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -639,9 +639,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -682,9 +682,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -725,9 +725,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -768,9 +768,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
@@ -811,9 +811,9 @@
 #  define KINETIS_NTIMERS20       4          /* Four 20 channel timers */
 #  define KINETIS_NTIMERS12       3          /* Three 12 channel timers */
 #  undef  KINETIS_NTIMERS20                  /* No 20 channel timers */
-#  define KINETIS_RTC             1          /* Real time clock */
+#  define KINETIS_NRTC            1          /* Real time clock */
 #  undef  KINETIS_NRNG                       /* No random number generator */
-#  undef  KINETIS_NENCRYPT                   /* No hardware encryption */
+#  undef  KINETIS_NMMCAU                     /* No hardware encryption */
 #  undef  KINETIS_NTAMPER                    /* No tamper detect */
 #  define KINETIS_NCRC            1          /* CRC */
 
