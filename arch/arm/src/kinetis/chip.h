@@ -58,7 +58,7 @@
 #  undef  KINETIS_MPU                        /* No memory protection unit */
 #  undef  KINETIS_EXTBUS                     /* No external bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  undef  KINETIS_NETHERNET                  /* No Ethernet controller */
+#  undef  KINETIS_NENET                      /* No Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -107,7 +107,7 @@
 #  undef  KINETIS_MPU                        /* No memory protection unit */
 #  undef  KINETIS_EXTBUS                     /* No external bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  undef  KINETIS_NETHERNET                  /* No Ethernet controller */
+#  undef  KINETIS_NENET                      /* No Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -148,7 +148,7 @@
 #  undef  KINETIS_MPU                        /* No memory protection unit */
 #  undef  KINETIS_EXTBUS                     /* No external bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  undef  KINETIS_NETHERNET                  /* No Ethernet controller */
+#  undef  KINETIS_NENET                      /* No Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -188,7 +188,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  undef  KINETIS_NETHERNET                  /* No Ethernet controller */
+#  undef  KINETIS_NENET                      /* No Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -228,7 +228,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  undef  KINETIS_NETHERNET                  /* No Ethernet controller */
+#  undef  KINETIS_NENET                      /* No Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -270,7 +270,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  undef  KINETIS_NETHERNET                  /* No Ethernet controller */
+#  undef  KINETIS_NENET                      /* No Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -311,7 +311,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -354,7 +354,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -397,7 +397,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -440,7 +440,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -483,7 +483,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -526,7 +526,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -569,7 +569,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -612,7 +612,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -655,7 +655,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -698,7 +698,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -741,7 +741,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
@@ -784,7 +784,7 @@
 #  define KINETIS_MPU             1          /* Memory protection unit */
 #  define KINETIS_EXTBUS          1          /* External bus interface */
 #  define KINETIS_NDMACH          16         /* Up to 16 DMA channels */
-#  define KINETIS_NETHERNET       1          /* One IEEE 1588 Ethernet controller */
+#  define KINETIS_NENET           1          /* One IEEE 1588 Ethernet controller */
 #  define KINETIS_NUSBHOST        1          /* One USB host controller */
 #  define KINETIS_NUSBOTG         1          /* With USB OTG controller */
 #  define KINETIS_NUSBDEV         1          /* One USB device controller */
