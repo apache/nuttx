@@ -104,7 +104,7 @@
 # define KINETIS_FMC_BASE       0x4001f000 /* Flash memory controller */
 # define KINETIS_FTFL_BASE      0x40020000 /* Flash memory */
 # define KINETIS_DMAMUX0_BASE   0x40021000 /* DMA channel mutiplexer 0 */
-# define KINETIS_FLEXCAN0_BASE  0x40024000 /* FlexCAN 0 */
+# define KINETIS_CAN0_BASE      0x40024000 /* FlexCAN 0 */
 # define KINETIS_SPI0_BASE      0x4002c000 /* SPI 0 */
 # define KINETIS_SPI1_BASE      0x4002d000 /* SPI 1 */
 # define KINETIS_I2S0_BASE      0x4002f000 /* I2S 0 */
@@ -121,7 +121,7 @@
 # define KINETIS_SYSR_BASE      0x40041000 /* System register file */
 # define KINETIS_DRYICE_BASE    0x40042000 /* DryIce */
 # define KINETIS_DRYICESS_BASE  0x40043000 /* DryIce secure storage */
-# define KINETIS_TSI_BASE       0x40045000 /* Touch sense interface */
+# define KINETIS_TSI0_BASE      0x40045000 /* Touch sense interface */
 # define KINETIS_SIMLP_BASE     0x40047000 /* SIM low-power logic */
 # define KINETIS_SIM_BASE       0x40048000 /* System integration module (SIM) */
 # define KINETIS_PORT_BASE(n)   (0x40049000 + ((n) << 12))
@@ -151,7 +151,7 @@
 /* Peripheral Bridge 1 Memory Map ***************************************************/
 
 # define KINETIS_AIPS1_BASE     0x40080000 /* Peripheral bridge 1 (AIPS-Lite 1) */
-# define KINETIS_FLEXCAN1_BASE  0x400a4000 /* FlexCAN 1 */
+# define KINETIS_CAN1_BASE      0x400a4000 /* FlexCAN 1 */
 # define KINETIS_SPI2_BASE      0x400ac000 /* SPI 2 */
 # define KINETIS_SDHC_BASE      0x400b1000 /* SDHC */
 # define KINETIS_FTM2_BASE      0x400b8000 /* FlexTimer 2 */
@@ -235,7 +235,7 @@
 # define KINETIS_FMC_BASE       0x4001f000 /* Flash memory controller */
 # define KINETIS_FTFL_BASE      0x40020000 /* Flash memory */
 # define KINETIS_DMAMUX0_BASE   0x40021000 /* DMA channel mutiplexer 0 */
-# define KINETIS_FLEXCAN0_BASE  0x40024000 /* FlexCAN 0 */
+# define KINETIS_CAN0_BASE      0x40024000 /* FlexCAN 0 */
 # define KINETIS_SPI0_BASE      0x4002c000 /* DSPI 0 */
 # define KINETIS_SPI1_BASE      0x4002d000 /* DSPI 1 */
 # define KINETIS_I2S0_BASE      0x4002f000 /* I2S 0 */
@@ -252,7 +252,7 @@
 # define KINETIS_SYSR_BASE      0x40041000 /* System register file */
 # define KINETIS_DRYICE_BASE    0x40042000 /* DryIce */
 # define KINETIS_DRYICESS_BASE  0x40043000 /* DryIce secure storage */
-# define KINETIS_TSI_BASE       0x40045000 /* Touch sense interface */
+# define KINETIS_TSI0_BASE      0x40045000 /* Touch sense interface */
 # define KINETIS_SIMLP_BASE     0x40047000 /* SIM low-power logic */
 # define KINETIS_SIM_BASE       0x40048000 /* System integration module (SIM) */
 # define KINETIS_PORT_BASE(n)   (0x40049000 + ((n) << 12))
@@ -283,7 +283,7 @@
 
 # define KINETIS_AIPS1_BASE     0x40080000 /* Peripheral bridge 1 (AIPS-Lite 1) */
 # define KINETIS_RNGB_BASE      0x400a0000 /* Random number generator (RNGB) */
-# define KINETIS_FLEXCAN1_BASE  0x400a4000 /* FlexCAN 1 */
+# define KINETIS_CAN1_BASE      0x400a4000 /* FlexCAN 1 */
 # define KINETIS_SPI2_BASE      0x400ac000 /* DSPI 2 */
 # define KINETIS_SDHC_BASE      0x400b1000 /* SDHC */
 # define KINETIS_FTM2_BASE      0x400b8000 /* FlexTimer 2 */

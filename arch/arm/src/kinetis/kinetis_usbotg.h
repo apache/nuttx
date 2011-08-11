@@ -146,66 +146,172 @@
 
 /* Register Bit Definitions *****************************************************************/
 
-/* Peripheral ID Register */
-#define KINETIS_USB_PERID_
-/* Peripheral ID Complement Register */
-#define KINETIS_USB_IDCOMP_
-/* Peripheral Revision Register */
-#define KINETIS_USB_REV_
-/* Peripheral Additional Info Register */
-#define KINETIS_USB_ADDINFO_
-/* OTG Interrupt Status Register */
-#define KINETIS_USB_OTGISTAT_
-/* OTG Interrupt Control Register */
-#define KINETIS_USB_OTGICR_
-/* OTG Status Register */
-#define KINETIS_USB_OTGSTAT_
-/* OTG Control Register */
-#define KINETIS_USB_OTGCTL_
-/* Interrupt Status Register */
-#define KINETIS_USB_ISTAT_
-/* Interrupt Enable Register */
-#define KINETIS_USB_INTEN_
-/* Error Interrupt Status Register */
-#define KINETIS_USB_ERRSTAT_
-/* Error Interrupt Enable Register */
-#define KINETIS_USB_ERREN_
-/* Status Register */
-#define KINETIS_USB_STAT_
-/* Control Register */
-#define KINETIS_USB_CTL_
-/* Address Register */
-#define KINETIS_USB_ADDR_
-/* BDT Page Register 1 */
-#define KINETIS_USB_BDTPAGE1_
-/* Frame Number Register Low */
-#define KINETIS_USB_FRMNUML_
-/* Frame Number Register High */
-#define KINETIS_USB_FRMNUMH_
-/* Token Register */
-#define KINETIS_USB_TOKEN_
-/* SOF Threshold Register */
-#define KINETIS_USB_SOFTHLD_
-/* BDT Page Register 2 */
-#define KINETIS_USB_BDTPAGE2_
-/* BDT Page Register 3 */
-#define KINETIS_USB_BDTPAGE3_
+/* Peripheral ID Register (8-bit) */
+                                              /* Bits 6-7: Reserved */
+#define USB_PERID_MASK              (0x3f)    /* Bits 0-5: Peripheral identification bits */
 
-/* Endpoint n Control Register */
-#define KINETIS_USB_ENDPT_
+/* Peripheral ID Complement Register (8-bit) */
+#define USB_IDCOMP_
+                                              /* Bits 6-7: Reserved */
+#define USB_IDCOMP_MASK             (0x3f)    /* Bits 0-5: Ones complement of peripheral identification bits */
 
-/* USB Control Register */
-#define KINETIS_USB_USBCTRL_
-/* USB OTG Observe Register */
-#define KINETIS_USB_OBSERVE_
-/* USB OTG Control Register */
-#define KINETIS_USB_CONTROL_
-/* USB Transceiver Control Register 0 */
-#define KINETIS_USB_USBTRC0_
+/* Peripheral Revision Register (8-bit revision number) */
 
-                (1 << nn)  /* Bit nn:  
-_SHIFT          (nn)       /* Bits nn-nn: 
-_MASK           (nn << nn)
+/* Peripheral Additional Info Register (8-bit) */
+
+#define USB_ADDINFO_IEHOST          (1 << 0)  /* Bit 0:  This bit is set if host mode is enabled */
+                                              /* Bits 1-2: Reserved */
+#define USB_ADDINFO_IRQNUM_SHIFT    (3)       /* Bits 3-7: Assigned Interrupt Request Number */
+#define USB_ADDINFO_IRQNUM_MASK     (31 << USB_ADDINFO_IRQNUM_SHIFT)
+
+/* OTG Interrupt Status Register(8-bit)  */
+
+#define USB_OTGISTAT_AVBUSCHG       (1 << 0)  /* Bit 0:  Change in VBUS is detected on an A device */
+                                              /* Bit 1:  Reserved */
+#define USB_OTGISTAT_B_SESS_CHG     (1 << 2)  /* Bit 2:  Change in VBUS is detected on a B device */
+#define USB_OTGISTAT_SESSVLDCHG     (1 << 3)  /* Bit 3:  Change in VBUS is detected */
+                                              /* Bit 4:  Reserved */
+#define USB_OTGISTAT_LINE_STATE_CHG (1 << 5)  /* Bit 5:  Change USB line state */
+#define USB_OTGISTAT_ONEMSEC        (1 << 6)  /* Bit 6:  Set when the 1 millisecond timer expires */
+#define USB_OTGISTAT_IDCHG          (1 << 7)  /* Bit 7:  Change in ID Signal from the USB connector */
+
+/* OTG Interrupt Control Register (8-bit) */
+
+#define USB_OTGICR_AVBUSEN          (1 << 0)  /* Bit 0:  A VBUS Valid interrupt enable */
+                                              /* Bit 1:  Reserved */
+#define USB_OTGICR_BSESSEN          (1 << 2)  /* Bit 2:  B Session END interrupt enable */
+#define USB_OTGICR_SESSVLDEN        (1 << 3)  /* Bit 3:  Session valid interrupt enable */
+                                              /* Bit 4:  Reserved */
+#define USB_OTGICR_LINESTATEEN      (1 << 5)  /* Bit 5:  Line State change interrupt enable */
+#define USB_OTGICR_ONEMSECEN        (1 << 6)  /* Bit 6:  1 millisecond interrupt enable */
+#define USB_OTGICR_IDEN             (1 << 7)  /* Bit 7:  ID interrupt enable */
+
+/* OTG Status Register (8-bit) */
+
+#define USB_OTGSTAT_AVBUSVLD        (1 << 0)  /* Bit 0:  A VBUS Valid */
+                                              /* Bit 1:  Reserved */
+#define USB_OTGSTAT_BSESSEND        (1 << 2)  /* Bit 2:  B Session END */
+#define USB_OTGSTAT_SESS_VLD        (1 << 3)  /* Bit 3:  Session valid */
+                                              /* Bit 4:  Reserved */
+#define USB_OTGSTAT_LINESTATESTABLE (1 << 5)  /* Bit 5:  OTGISTAT LINE_STATE_CHG bit stable */
+#define USB_OTGSTAT_ONEMSECEN       (1 << 6)  /* Bit 6:  Reserved for the 1msec count */
+#define USB_OTGSTAT_ID              (1 << 7)  /* Bit 7:  Current state of the ID pin on the USB connector */
+
+/* OTG Control Register (8-bit) */
+                                              /* Bits 0-1:  Reserved */
+#define USB_OTGCTL_OTGEN            (1 << 2)  /* Bit 2:  On-The-Go pullup/pulldown resistor enable */
+                                              /* Bit 3:  Reserved */
+#define USB_OTGCTL_DMLOW            (1 << 4)  /* Bit 4:  D- Data Line pull-down resistor enable */
+#define USB_OTGCTL_DPLOW            (1 << 5)  /* Bit 5:  D+ Data Line pull-down resistor enable */
+                                              /* Bit 6:  Reserved */
+#define USB_OTGCTL_DPHIGH           (1 << 7)  /* Bit 7: D+ Data Line pullup resistor enable */
+
+/* Interrupt Status Register Interrupt Enable Register (8-bit) */
+
+#define USB_INT_USBRST              (1 << 0)  /* Bit 0:  USB Module has decoded a valid USB reset */
+#define USB_INT_ERROR               (1 << 1)  /* Bit 1:  Any of the error conditions within the ERRSTAT register */
+#define USB_INT_SOFTOK              (1 << 2)  /* Bit 2:  USB Module received a Start Of Frame (SOF) token */
+#define USB_INT_TOKDNE              (1 << 3)  /* Bit 3:  Current token being processed has completed */
+#define USB_INT_SLEEP               (1 << 4)  /* Bit 4:  Constant idle on the USB bus for 3 milliseconds */
+#define USB_INT_RESUME              (1 << 5)  /* Bit 5:  Signal remote wake-up signaling */
+#define USB_INT_ATTACH              (1 << 6)  /* Bit 6:  Attach Interrupt */
+#define USB_INT_STALL               (1 << 7)  /* Bit 7:  Stall Interrupt */
+
+/* Error Interrupt Status Register and Error Interrupt Enable Register (8-bit) */
+
+#define USB_ERRSTAT_PIDERR          (1 << 0)  /* Bit 0:  This bit is set when the PID check field fails */
+#define USB_ERRSTAT_CRC5EOF         (1 << 1)  /* Bit 1:  Host data CRC error or End of frame errors */
+#define USB_ERRSTAT_CRC16           (1 << 2)  /* Bit 2:  Data packet is rejected due to a CRC16 error */
+#define USB_ERRSTAT_DFN8            (1 << 3)  /* Bit 3:  Data field received was not 8 bits in length */
+#define USB_ERRSTAT_BTOERR          (1 << 4)  /* Bit 4:  Bus turnaround timeout error occurred */
+#define USB_ERRSTAT_DMAERR          (1 << 5)  /* Bit 5:  DMA error */
+                                              /* Bit 6:  Reserved */
+#define USB_ERRSTAT_BTSERR          (1 << 7)  /* Bit 7:  Bit stuff error is detected */
+
+/* Status Register (8-bit) */
+
+                                              /* Bits 0-1:  Reserved */
+#define USB_STAT_ODD                (1 << 2)  /* Bit 2:  Last Buffer Descriptor was in the odd bank of the BDT */
+#define USB_STAT_TX                 (1 << 3)  /* Bit 3:  Transmit Indicator */
+#define USB_STAT_ENDP_SHIFT         (4)       /* Bits 4-7: Endpoint address that received or transmitted the token */
+#define USB_STAT_ENDP_MASK          (15 << USB_STAT_ENDP_SHIFT)
+
+/* Control Register (8-bit) */
+
+#define USB_CTL_USBENSOFEN          (1 << 0)  /* Bit 0:  USB Enable */
+#define USB_CTL_ODDRST              (1 << 1)  /* Bit 1:  Resets all the BDT ODD ping/pong bits to 0 */
+#define USB_CTL_RESUME              (1 << 2)  /* Bit 2:  Enables the USB Module to execute resume signaling */
+#define USB_CTL_HOSTMODEEN          (1 << 3)  /* Bit 3:  Enables the USB Module to operate in Host mode */
+#define USB_CTL_RESET               (1 << 4)  /* Bit 4:  Enables the USB Module to generate USB reset signaling */
+#define USB_CTL_TXSUSPENDTOKENBUSY  (1 << 5)  /* Bit 5:  USB Module is busy executing a USB token */
+#define USB_CTL_SE0                 (1 << 6)  /* Bit 6:  Live USB Single Ended Zero signal */
+#define USB_CTL_JSTATE              (1 << 7)  /* Bit 7:  Live USB differential receiver JSTATE signal */
+
+/* Address Register (8-bit) */
+
+#define USB_ADDR_LSEN               (1 << 7)  /* Bit 7:  Low Speed Enable bit */
+#define USB_ADDR_SHIFT              (0)       /* Bits 0-6: USB address */
+#define USB_ADDR_MASK               (0x7f << USB_ADDR_SHIFT)
+
+/* BDT Page Register 1 (8-bit) */
+                                              /* Bit 0:  Reserved */
+#define USB_BDTPAGE1_SHIFT          (1)       /* Bits 1-7: Address bits 9-15 of the BDT base address */
+#define USB_BDTPAGE1_MASK           (0x7f << USB_BDTPAGE1_SHIFT)
+
+/* Frame Number Register Low (8-bit, bits 0-7 of the 11 bit frame number) */
+/* Frame Number Register High (8-bit) */
+                                              /* Bits 3-7:  Reserved */
+#define USB_FRMNUMH_SHIFT           (0)       /* Bits 0-2: Bits 8-10 of the 11-bit frame number */
+#define USB_FRMNUMH_MASK            (7 << USB_FRMNUMH_SHIFT)
+
+/* Token Register (8-bit) */
+
+#define USB_TOKEN_ENDPT_SHIFT       (0)       /* Bits 0-3: Endpoint address for the token command */
+#define USB_TOKEN_ENDPT_MASK        (15 << USB_TOKEN_ENDPT_SHIFT)
+#define USB_TOKEN_PID_SHIFT         (4)       /* Bits 4-7: Token type executed by the USB Module */
+#define USB_TOKEN_PID_MASK          (15 << USB_TOKEN_PID_SHIFT)
+#  define USB_TOKEN_PID_OUT         (1 << USB_TOKEN_PID_SHIFT)  /* OUT Token */
+#  define USB_TOKEN_PID_IN          (9 << USB_TOKEN_PID_SHIFT)  /* IN Token */
+#  define USB_TOKEN_PID_SETUP       (13 << USB_TOKEN_PID_SHIFT) /* SETUP Token */
+
+/* SOF Threshold Register (8-bit count value) */
+/* BDT Page Register 2/3 (16 bit address in two 8-bit registers) */
+
+/* Endpoint n Control Register (8-bit) */
+
+#define USB_ENDPT_EPHSHK            (1 << 0)  /* Bit 0:  Enable handshaking during a transaction to the endpoint */
+#define USB_ENDPT_EPSTALL           (1 << 1)  /* Bit 1:  Endpoint is stalled */
+#define USB_ENDPT_EPTXEN            (1 << 2)  /* Bit 2:  Enable the endpoint for TX transfers */
+#define USB_ENDPT_EPRXEN            (1 << 3)  /* Bit 3:  Enable the endpoint for RX transfers */
+#define USB_ENDPT_EPCTLDIS          (1 << 4)  /* Bit 4:  Disable control (SETUP) transfers */
+                                              /* Bit 5:  Reserved */
+#define USB_ENDPT_RETRYDIS          (1 << 6)  /* Bit 6:  Disable host retry NAK'ed transactions (host EP0) */
+#define USB_ENDPT_HOSTWOHUB         (1 << 7)  /* Bit 7:  Allows the host to communicate to a low speed device (host EP0) */
+
+/* USB Control Register (8-bit) */
+                                              /* Bits 0-5:  Reserved */
+#define USB_USBCTRL_PDE             (1 << 6)  /* Bit 6:  Enables the weak pulldowns on the USB transceiver */
+#define USB_USBCTRL_SUSP            (1 << 7)  /* Bit 7:  Places the USB transceiver into the suspend state */
+
+/* USB OTG Observe Register (8-bit) */
+                                              /* Bits 0-3:  Reserved */
+#define USB_OBSERVE_DMPD            (1 << 4)  /* Bit 4:  D- Pull Down signal output from the USB OTG module */
+                                              /* Bit 5:  Reserved */
+#define USB_OBSERVE_DPPD            (1 << 6)  /* Bit 6:  D+ Pull Down signal output from the USB OTG module */
+#define USB_OBSERVE_DPPU            (1 << 7)  /* Bit 7:  D+ Pull Up signal output from the USB OTG module */
+
+/* USB OTG Control Register (8-bit) */
+                                              /* Bits 0-3:  Reserved */
+#define USB_CONTROL_DPPULLUPNONOTG  (1 << 4)  /* Bit 4:  Controls of the DP PULLUP in the USB OTG module */
+                                              /* Bits 5-7:  Reserved */
+/* USB Transceiver Control Register 0 (8-bit) */
+
+#define USB_USBTRC0_USBRESET        (1 << 7)  /* Bit 7:  USB reset */
+                                              /* Bit 6:  Reserved */
+#define USB_USBTRC0_USBRESMEN       (1 << 5)  /* Bit 5:  Asynchronous Resume Interrupt Enable */
+                                              /* Bits 2-4:  Reserved */
+#define USB_USBTRC0_SYNC_DET        (1 << 1)  /* Bit 1:  Synchronous USB Interrupt Detect */
+#define USB_USBTRC0_RESUME_INT      (1 << 0)  /* Bit 0:  USB Asynchronous Interrupt */
 
 /********************************************************************************************
  * Public Types
