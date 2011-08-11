@@ -141,7 +141,7 @@
 # define KINETIS_UART1_BASE     0x4006b000 /* UART1 */
 # define KINETIS_UART2_BASE     0x4006c000 /* UART2 */
 # define KINETIS_UART3_BASE     0x4006d000 /* UART3 */
-# define KINETIS_USBOTG_BASE    0x40072000 /* USB OTG FS/LS */
+# define KINETIS_USB0_BASE      0x40072000 /* USB OTG FS/LS */
 # define KINETIS_CMP_BASE       0x40073000 /* Analog comparator (CMP) / 6-bit digital-to-analog converter (DAC) */
 # define KINETIS_VREF_BASE      0x40074000 /* Voltage reference (VREF) */
 # define KINETIS_LLWU_BASE      0x4007c000 /* Low-leakage wakeup unit (LLWU) */
@@ -272,7 +272,7 @@
 # define KINETIS_UART1_BASE     0x4006b000 /* UART1 */
 # define KINETIS_UART2_BASE     0x4006c000 /* UART2 */
 # define KINETIS_UART3_BASE     0x4006d000 /* UART3 */
-# define KINETIS_USBOTG_BASE    0x40072000 /* USB OTG FS/LS */
+# define KINETIS_USB0_BASE      0x40072000 /* USB OTG FS/LS */
 # define KINETIS_CMP_BASE       0x40073000 /* Analog comparator (CMP) / 6-bit digital-to-analog converter (DAC) */
 # define KINETIS_VREF_BASE      0x40074000 /* Voltage reference (VREF) */
 # define KINETIS_LLWU_BASE      0x4007c000 /* Low-leakage wakeup unit (LLWU) */
