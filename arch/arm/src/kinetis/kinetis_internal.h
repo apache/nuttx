@@ -290,9 +290,9 @@ extern "C" {
  * Name: kinetis_clockconfig
  *
  * Description:
- *   Called to initialize the KINETIS.  This does whatever setup is needed to put the
- *   MCU in a usable state.  This includes the initialization of clocking using the
- *   settings in board.h.
+ *   Called to initialize the Kinetis chip.  This does whatever setup is needed to
+ *   put the  MCU in a usable state.  This includes the initialization of clocking
+ *   using the settings in board.h.
  *
  ************************************************************************************/
 
@@ -309,6 +309,16 @@ EXTERN void kinetis_clockconfig(void);
  ************************************************************************************/
 
 EXTERN void kinetis_lowsetup(void);
+
+/************************************************************************************
+ * Name: kinetis_wddisable
+ *
+ * Description:
+ *   Disable the watchdog timer
+ *
+ ************************************************************************************/
+
+EXTERN void kinetis_wddisable(void);
 
 /************************************************************************************
  * Name: kinetis_gpioirqinitialize

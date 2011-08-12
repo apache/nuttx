@@ -147,7 +147,35 @@ extern uint32_t _sdata;           /* Start of .data */
 extern uint32_t _edata;           /* End+1 of .data */
 extern uint32_t _sbss;            /* Start of .bss */
 extern uint32_t _ebss;            /* End+1 of .bss */
-#endif
+
+/* Sometimes, functions must be executed from RAM.  In this case, the following
+ * macro may be used (with GCC!) to specify a function that will execute from
+ * RAM.  For example,
+ *
+ *   int __ramfunc__ foo (void);
+ *   int __ramfunc__ foo (void) { return bar; }
+ *
+ * will create a function named foo that will execute from RAM.
+ */
+ 
+#ifdef CONFIG_BOOT_RAMFUNCS
+
+#  define __ramfunc__ __attribute__ ((section(".ramfunc")))
+
+/* Functions decleared in the .ramfunc section will be packaged together
+ * by the linker script and stored in FLASH.  During boot-up, the start
+ * logic must include logic to copy the RAM functions from their storage
+ * location in FLASH to their correct destination in SRAM.  The following
+ * following linker-defined values provide the information to copy the
+ * functions from flash to RAM.
+ */
+
+extern const uint32_t _framfuncs; /* Copy source address in FLASH */
+extern uint32_t _sramfuncs;       /* Copy destination start address in RAM */
+extern uint32_t _eramfuncs;       /* Copy destination start address in RAM */
+
+#endif /* CONFIG_BOOT_RAMFUNCS */
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Inline Functions

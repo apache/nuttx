@@ -822,6 +822,8 @@ CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=n
 #   (should also be =n for the KwikStik-K40 which always runs from flash)
 # CONFIG_BOOT_COPYTORAM -  Some configurations boot in FLASH
 #   but copy themselves entirely into RAM for better performance.
+# CONFIG_BOOT_RAMFUNCS - Other configurations may copy just some functions
+#   into RAM, either for better performance or for errata workarounds.
 # CONFIG_CUSTOM_STACK - The up_ implementation will handle
 #   all stack operations outside of the nuttx model.
 # CONFIG_STACK_POINTER - The initial stack pointer (arm7tdmi only)
@@ -839,6 +841,7 @@ CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=n
 #
 CONFIG_BOOT_RUNFROMFLASH=n
 CONFIG_BOOT_COPYTORAM=n
+CONFIG_BOOT_RAMFUNCS=y
 CONFIG_CUSTOM_STACK=n
 CONFIG_STACK_POINTER=
 CONFIG_IDLETHREAD_STACKSIZE=1024

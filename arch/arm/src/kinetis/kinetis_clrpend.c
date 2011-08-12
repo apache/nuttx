@@ -1,6 +1,6 @@
 /****************************************************************************
- * arch/arm/src/kinetis/kinetis_start.c
- * arch/arm/src/chip/kinetis_start.c
+ * arch/arm/src/kinetis/kinetis_clrpend.c
+ * arch/arm/src/chip/kinetis_clrpend.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,24 +40,14 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
-#include <debug.h>
+#include <arch/irq.h>
 
-#include <nuttx/init.h>
-#include <arch/board/board.h>
-
+#include "nvic.h"
 #include "up_arch.h"
-#include "up_internal.h"
-
 #include "kinetis_internal.h"
 
 /****************************************************************************
- * Private Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,110 +55,50 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
+ * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: kinetis_clrpend
  *
  * Description:
- *   This is the reset entry point.
+ *   Clear a pending interrupt at the NVIC.  This does not seem to be required
+ *   for most interrupts.  Don't know why... 
+ *
+ *   I keep it in a separate file so that it will not increase the footprint
+ *   on Kinetis platforms that do not need this function.
  *
  ****************************************************************************/
 
-void __start(void)
+void kinetis_clrpend(int irq)
 {
-  const uint32_t *src;
-  uint32_t *dest;
+  /* Check for external interrupt */
 
-  /* Disable the watchdog timer */
-
-  kinetis_wddisable();
-
-  /* Configure the uart so that we can get debug output as soon as possible */
-
-  kinetis_clockconfig();
-  kinetis_lowsetup();
-  showprogress('A');
-
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (dest = &_sbss; dest < &_ebss; )
+  if (irq >= KINETIS_IRQ_EXTINT)
     {
-      *dest++ = 0;
+      if (irq < (KINETIS_IRQ_EXTINT+32))
+        {
+          putreg32(1 << (irq - KINETIS_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
+        }
+      else if (irq < (KINETIS_IRQ_EXTINT+64))
+        {
+          putreg32(1 << (irq - KINETIS_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
+        }
+      else if (irq < (KINETIS_IRQ_EXTINT+96))
+        {
+          putreg32(1 << (irq - KINETIS_IRQ_EXTINT - 64), NVIC_IRQ64_95_CLRPEND);
+        }
+      else if (irq < NR_IRQS)
+        {
+          putreg32(1 << (irq - KINETIS_IRQ_EXTINT - 96), NVIC_IRQ96_127_CLRPEND);
+        }
     }
-  showprogress('B');
-
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
-
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-  showprogress('C');
-
-  /* Copy any necessary code sections from FLASH to RAM.  The correct
-   * destination in SRAM is geive by _sramfuncs and _eramfuncs.  The
-   * temporary location is in flash after the data initalization code
-   * at _framfuncs
-   */
-
-#ifndef CONFIG_BOOT_RAMFUNCS
-  for (src = &_framfuncs, dest = &_sramfuncs; dest < &_eramfuncs; )
-    {
-      *dest++ = *src++;
-    }
-#endif
-  showprogress('E');
- 
-
-  /* Perform early serial initialization */
-
-#ifdef CONFIG_USE_EARLYSERIALINIT
-  up_earlyserialinit();
-#endif
-  showprogress('F');
-
-  /* Initialize onboard resources */
-
-  kinetis_boardinitialize();
-  showprogress('G');
-  showprogress('\r');
-  showprogress('\n');
-
-  /* Show reset status */
-
-  dbg("Reset status: %02x:%02x\n", getreg8(KINETIS_SMC_SRSH), getreg8(KINETIS_SMC_SRSL));
-
-  /* Then start NuttX */
-
-  os_start();
-
-  /* Shouldn't get here */
-
-  for(;;);
 }
