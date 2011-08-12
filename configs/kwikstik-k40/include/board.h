@@ -84,7 +84,7 @@ extern "C" {
  * Public Function Prototypes
  ************************************************************************************/
 /************************************************************************************
- * Name: k40_boardinitialize
+ * Name: kinetis_boardinitialize
  *
  * Description:
  *   All STM32 architectures must provide the following entry point.  This entry point
@@ -93,7 +93,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void k40_boardinitialize(void);
+EXTERN void kinetis_boardinitialize(void);
 
 /************************************************************************************
  * Button support.

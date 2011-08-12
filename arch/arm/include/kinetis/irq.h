@@ -75,6 +75,8 @@
 
 /* External interrupts (vectors >= 16) */
 
+#define KINETIS_IRQ_EXTINT         (16)
+
 /* K40 Family ***********************************************************************
  *
  * The interrupt vectors  for the following parts is defined in Freescale document
@@ -184,7 +186,8 @@
  * now) seems to justify the waste.
  */
 
-#  define NR_IRQS                 (111) /* 111 vectors, 94 interrupts, 111 IRQ numbers */
+#  define NR_VECTORS              (111) /* 111 vectors */
+#  define NR_IRQS                 (111) /* 94 interrupts but 111 IRQ numbers */
 
 /* K60 Family ***********************************************************************
  *
@@ -297,8 +300,8 @@
  * now) seems to justify the waste.
  */
 
-#  define NR_IRQS                 (108)
-#  define NR_IRQS                 (111) /* 120 vectors, 97 interrupts, 108 IRQ numbers */
+#  define NR_VECTORS              (120) /* 120 vectors */
+#  define NR_IRQS                 (108) /* 97 interrupts but 108 IRQ numbers */
 
 #else
   /* The interrupt vectors for other parts are defined in other documents and may or
