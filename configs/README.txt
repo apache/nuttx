@@ -1052,6 +1052,8 @@ defconfig -- This is a configuration file similar to the Linux
 		  operation from FLASH but must copy initialized .data sections to RAM.
 		CONFIG_BOOT_COPYTORAM -  Some configurations boot in FLASH
 		  but copy themselves entirely into RAM for better performance.
+		CONFIG_BOOT_RAMFUNCS - Other configurations may copy just some functions
+		  into RAM, either for better performance or for errata workarounds.
 		CONFIG_STACK_POINTER - The initial stack pointer
 		CONFIG_IDLETHREAD_STACKSIZE - The size of the initial stack.
 		  This is the thread that (1) performs the inital boot of the system up
