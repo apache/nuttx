@@ -207,14 +207,14 @@
                                                 /* Bits 0-23: Reserved */
 #define SIM_SOPT6_RSTFLTSEL_SHIFT     (24)      /* Bits 24-28: Reset pin filter select */
 #define SIM_SOPT6_RSTFLTSEL_MASK      (31 << SIM_SOPT6_RSTFLTSEL_SHIFT)
-#   SIM_SOPT6_RSTFLTSEL(n)            (((n)-1) << SIM_SOPT6_RSTFLTSEL_SHIFT) /* Bux clock filter count n, n=1..32 */
+#   define SIM_SOPT6_RSTFLTSEL(n)     (((n)-1) << SIM_SOPT6_RSTFLTSEL_SHIFT) /* Bux clock filter count n, n=1..32 */
 #define SIM_SOPT6_RSTFLTEN_SHIFT      (29)      /* Bits 29-31: Reset pin filter enable */
 #define SIM_SOPT6_RSTFLTEN_MASK       (7 << SIM_SOPT6_RSTFLTEN_SHIFT)
 #define SIM_SOPT6_RSTFLTEN_DISABLED   (0 << SIM_SOPT6_RSTFLTEN_SHIFT) /* All filtering disabled */
-#  define SIM_SOPT6_RSTFLTEN_ BUSCLK1 (1 << SIM_SOPT6_RSTFLTEN_SHIFT) /* Bus clock filter enabled (normal); LPO clock filter enabled (stop) */
-#  define SIM_SOPT6_RSTFLTEN_ LPO1    (2 << SIM_SOPT6_RSTFLTEN_SHIFT) /* LPO clock filter enabled */
-#  define SIM_SOPT6_RSTFLTEN_ BUSCLK2 (3 << SIM_SOPT6_RSTFLTEN_SHIFT) /* Bus clock filter enabled (normal); All filtering disabled (stop) */
-#  define SIM_SOPT6_RSTFLTEN_ LPO2    (4 << SIM_SOPT6_RSTFLTEN_SHIFT) /* PO clock filter enabled (normal); All filtering disabled (stop) */
+#  define SIM_SOPT6_RSTFLTEN_BUSCLK1  (1 << SIM_SOPT6_RSTFLTEN_SHIFT) /* Bus clock filter enabled (normal); LPO clock filter enabled (stop) */
+#  define SIM_SOPT6_RSTFLTEN_LPO1     (2 << SIM_SOPT6_RSTFLTEN_SHIFT) /* LPO clock filter enabled */
+#  define SIM_SOPT6_RSTFLTEN_BUSCLK2  (3 << SIM_SOPT6_RSTFLTEN_SHIFT) /* Bus clock filter enabled (normal); All filtering disabled (stop) */
+#  define SIM_SOPT6_RSTFLTEN_LPO2     (4 << SIM_SOPT6_RSTFLTEN_SHIFT) /* PO clock filter enabled (normal); All filtering disabled (stop) */
 
 /* System Options Register 7 */
 
@@ -385,80 +385,80 @@
                                                 /* Bits 0-15: Reserved */
 #define SIM_CLKDIV1_OUTDIV4_SHIFT     (16)      /* Bits 16-19: Clock 4 output divider value */
 #define SIM_CLKDIV1_OUTDIV4_MASK      (15 << SIM_CLKDIV1_OUTDIV4_SHIFT)
-#  define SIM_CLKDIV1_OUTDIV4_DIV(n)  (((n)-1) << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by n, n=1..16 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV1    (0 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 1 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV2    (1 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 2 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV3    (2 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 3 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV4    (3 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 4 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV5    (4 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 5 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV6    (5 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 6 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV7    (6 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 7 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV8    (7 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 8 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV9    (8 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 9 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV10   (9 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 10 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV11   (10 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 11 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV12   (11 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 12 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV13   (12 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 13 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV14   (13 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 14 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV15   (14 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 15 */
-#  define SIM_CLKDIV1_OUTDIV4_DIV16   (15 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 16 */
+#  define SIM_CLKDIV1_OUTDIV4(n)      (((n)-1) << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by n, n=1..16 */
+#  define SIM_CLKDIV1_OUTDIV4_1       (0 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 1 */
+#  define SIM_CLKDIV1_OUTDIV4_2       (1 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 2 */
+#  define SIM_CLKDIV1_OUTDIV4_3       (2 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 3 */
+#  define SIM_CLKDIV1_OUTDIV4_4       (3 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 4 */
+#  define SIM_CLKDIV1_OUTDIV4_5       (4 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 5 */
+#  define SIM_CLKDIV1_OUTDIV4_6       (5 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 6 */
+#  define SIM_CLKDIV1_OUTDIV4_7       (6 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 7 */
+#  define SIM_CLKDIV1_OUTDIV4_8       (7 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 8 */
+#  define SIM_CLKDIV1_OUTDIV4_9       (8 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 9 */
+#  define SIM_CLKDIV1_OUTDIV4_10      (9 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 10 */
+#  define SIM_CLKDIV1_OUTDIV4_11      (10 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 11 */
+#  define SIM_CLKDIV1_OUTDIV4_12      (11 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 12 */
+#  define SIM_CLKDIV1_OUTDIV4_13      (12 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 13 */
+#  define SIM_CLKDIV1_OUTDIV4_14      (13 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 14 */
+#  define SIM_CLKDIV1_OUTDIV4_15      (14 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 15 */
+#  define SIM_CLKDIV1_OUTDIV4_16      (15 << SIM_CLKDIV1_OUTDIV4_SHIFT) /* Divide by 16 */
 #define SIM_CLKDIV1_OUTDIV3_SHIFT     (20)      /* Bits 20-23: Clock 3 output divider value */
 #define SIM_CLKDIV1_OUTDIV3_MASK      (15 << SIM_CLKDIV1_OUTDIV3_SHIFT)
-#  define SIM_CLKDIV1_OUTDIV3_DIV(n)  (((n)-1) << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by n, n=1..16 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV1    (0 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 1 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV2    (1 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 2 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV3    (2 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 3 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV4    (3 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 4 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV5    (4 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 5 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV6    (5 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 6 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV7    (6 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 7 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV8    (7 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 8 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV9    (8 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 9 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV10   (9 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 10 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV11   (10 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 11 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV12   (11 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 12 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV13   (12 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 13 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV14   (13 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 14 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV15   (14 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 15 */
-#  define SIM_CLKDIV1_OUTDIV3_DIV16   (15 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 16 */
+#  define SIM_CLKDIV1_OUTDIV3(n)      (((n)-1) << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by n, n=1..16 */
+#  define SIM_CLKDIV1_OUTDIV3_1       (0 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 1 */
+#  define SIM_CLKDIV1_OUTDIV3_2       (1 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 2 */
+#  define SIM_CLKDIV1_OUTDIV3_3       (2 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 3 */
+#  define SIM_CLKDIV1_OUTDIV3_4       (3 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 4 */
+#  define SIM_CLKDIV1_OUTDIV3_5       (4 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 5 */
+#  define SIM_CLKDIV1_OUTDIV3_6       (5 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 6 */
+#  define SIM_CLKDIV1_OUTDIV3_7       (6 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 7 */
+#  define SIM_CLKDIV1_OUTDIV3_8       (7 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 8 */
+#  define SIM_CLKDIV1_OUTDIV3_9       (8 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 9 */
+#  define SIM_CLKDIV1_OUTDIV3_10      (9 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 10 */
+#  define SIM_CLKDIV1_OUTDIV3_11      (10 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 11 */
+#  define SIM_CLKDIV1_OUTDIV3_12      (11 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 12 */
+#  define SIM_CLKDIV1_OUTDIV3_13      (12 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 13 */
+#  define SIM_CLKDIV1_OUTDIV3_14      (13 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 14 */
+#  define SIM_CLKDIV1_OUTDIV3_15      (14 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 15 */
+#  define SIM_CLKDIV1_OUTDIV3_16      (15 << SIM_CLKDIV1_OUTDIV3_SHIFT) /* Divide by 16 */
 #define SIM_CLKDIV1_OUTDIV2_SHIFT     (24)      /* Bits 24-27: Clock 2 output divider value */
 #define SIM_CLKDIV1_OUTDIV2_MASK      (15 << SIM_CLKDIV1_OUTDIV2_SHIFT)
-#  define SIM_CLKDIV1_OUTDIV2_DIV(n)  (((n)-1) << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by n, n=1..16 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV1    (0 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 1 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV2    (1 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 2 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV3    (2 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 3 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV4    (3 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 4 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV5    (4 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 5 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV6    (5 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 6 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV7    (6 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 7 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV8    (7 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 8 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV9    (8 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 9 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV10   (9 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 10 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV11   (10 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 11 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV12   (11 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 12 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV13   (12 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 13 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV14   (13 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 14 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV15   (14 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 15 */
-#  define SIM_CLKDIV1_OUTDIV2_DIV16   (15 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 16 */
+#  define SIM_CLKDIV1_OUTDIV2(n)      (((n)-1) << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by n, n=1..16 */
+#  define SIM_CLKDIV1_OUTDIV2_1       (0 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 1 */
+#  define SIM_CLKDIV1_OUTDIV2_2       (1 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 2 */
+#  define SIM_CLKDIV1_OUTDIV2_3       (2 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 3 */
+#  define SIM_CLKDIV1_OUTDIV2_4       (3 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 4 */
+#  define SIM_CLKDIV1_OUTDIV2_5       (4 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 5 */
+#  define SIM_CLKDIV1_OUTDIV2_6       (5 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 6 */
+#  define SIM_CLKDIV1_OUTDIV2_7       (6 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 7 */
+#  define SIM_CLKDIV1_OUTDIV2_8       (7 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 8 */
+#  define SIM_CLKDIV1_OUTDIV2_9       (8 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 9 */
+#  define SIM_CLKDIV1_OUTDIV2_10      (9 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 10 */
+#  define SIM_CLKDIV1_OUTDIV2_11      (10 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 11 */
+#  define SIM_CLKDIV1_OUTDIV2_12      (11 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 12 */
+#  define SIM_CLKDIV1_OUTDIV2_13      (12 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 13 */
+#  define SIM_CLKDIV1_OUTDIV2_14      (13 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 14 */
+#  define SIM_CLKDIV1_OUTDIV2_15      (14 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 15 */
+#  define SIM_CLKDIV1_OUTDIV2_16      (15 << SIM_CLKDIV1_OUTDIV2_SHIFT) /* Divide by 16 */
 #define SIM_CLKDIV1_OUTDIV1_SHIFT     (28)      /* Bits 28-31: Clock 1 output divider value */
 #define SIM_CLKDIV1_OUTDIV1_MASK      (15 << SIM_CLKDIV1_OUTDIV1_SHIFT)
-#  define SIM_CLKDIV1_OUTDIV1_DIV(n)  (((n)-1) << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by n, n=1..16 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV1    (0 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 1 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV2    (1 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 2 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV3    (2 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 3 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV4    (3 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 4 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV5    (4 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 5 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV6    (5 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 6 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV7    (6 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 7 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV8    (7 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 8 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV9    (8 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 9 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV10   (9 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 10 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV11   (10 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 11 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV12   (11 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 12 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV13   (12 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 13 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV14   (13 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 14 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV15   (14 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 15 */
-#  define SIM_CLKDIV1_OUTDIV1_DIV16   (15 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 16 */
+#  define SIM_CLKDIV1_OUTDIV1(n)      (((n)-1) << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by n, n=1..16 */
+#  define SIM_CLKDIV1_OUTDIV1_1       (0 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 1 */
+#  define SIM_CLKDIV1_OUTDIV1_2       (1 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 2 */
+#  define SIM_CLKDIV1_OUTDIV1_3       (2 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 3 */
+#  define SIM_CLKDIV1_OUTDIV1_4       (3 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 4 */
+#  define SIM_CLKDIV1_OUTDIV1_5       (4 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 5 */
+#  define SIM_CLKDIV1_OUTDIV1_6       (5 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 6 */
+#  define SIM_CLKDIV1_OUTDIV1_7       (6 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 7 */
+#  define SIM_CLKDIV1_OUTDIV1_8       (7 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 8 */
+#  define SIM_CLKDIV1_OUTDIV1_9       (8 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 9 */
+#  define SIM_CLKDIV1_OUTDIV1_10      (9 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 10 */
+#  define SIM_CLKDIV1_OUTDIV1_11      (10 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 11 */
+#  define SIM_CLKDIV1_OUTDIV1_12      (11 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 12 */
+#  define SIM_CLKDIV1_OUTDIV1_13      (12 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 13 */
+#  define SIM_CLKDIV1_OUTDIV1_14      (13 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 14 */
+#  define SIM_CLKDIV1_OUTDIV1_15      (14 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 15 */
+#  define SIM_CLKDIV1_OUTDIV1_16      (15 << SIM_CLKDIV1_OUTDIV1_SHIFT) /* Divide by 16 */
 
 /* System Clock Divider Register 2 */
 
