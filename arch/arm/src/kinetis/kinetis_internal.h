@@ -110,7 +110,7 @@
                                  (_GPIO_INPUT            << _GPIO_OPTIONS_SHIFT))
 #define GPIO_PULLDOWN           ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
                                  (_GPIO_INPUT_PULLDOWN   << _GPIO_OPTIONS_SHIFT))
-#define GPIO_PULLDOWN           ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
+#define GPIO_PULLUP             ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
                                  (_GPIO_INPUT_PULLUP     << _GPIO_OPTIONS_SHIFT))
 #define GPIO_FILTER             ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
                                  (_GPIO_INPUT_FILTER     << _GPIO_OPTIONS_SHIFT))
@@ -162,7 +162,7 @@
 #define _GPIO_INT_RISING        (3)  /* 0011 Interrupt on rising edge */
 #define _GPIO_INT_FALLING       (5)  /* 0101 Interrupt on falling edge */
 #define _GPIO_INT_BOTH          (7)  /* 0111 Interrupt on either edge */
-#define _GPIO_INT_BOTH          (9)  /* 1001 Interrupt when logic one */
+#define _GPIO_INT_ONE           (9)  /* 1001 Interrupt when logic one */
 
 #define GPIO_DMA_RISING         (_GPIO_DMA_RISING  << _GPIO_MODE_SHIFT)
 #define GPIO_DMA_FALLING        (_GPIO_DMA_FALLING << _GPIO_MODE_SHIFT)
@@ -171,7 +171,7 @@
 #define GPIO_INT_RISING         (_GPIO_INT_RISING  << _GPIO_MODE_SHIFT)
 #define GPIO_INT_FALLING        (_GPIO_INT_FALLING << _GPIO_MODE_SHIFT)
 #define GPIO_INT_BOTH           (_GPIO_INT_BOTH    << _GPIO_MODE_SHIFT)
-#define GPIO_INT_ONE            (_GPIO_INT_BOTH    << _GPIO_MODE_SHIFT)
+#define GPIO_INT_ONE            (_GPIO_INT_ONE     << _GPIO_MODE_SHIFT)
 
 /* Three bits are used to define the port number:
  *

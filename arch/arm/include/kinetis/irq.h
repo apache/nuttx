@@ -81,8 +81,8 @@
  * K40P144M100SF2RM
  */
 
-#if defined(CONFIG_ARCH_CHIP_MK40X128VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X128VMD100) \
-    defined(CONFIG_ARCH_CHIP_MK40X256VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X256VMD100) \
+#if defined(CONFIG_ARCH_CHIP_MK40X128VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X128VMD100) || \
+    defined(CONFIG_ARCH_CHIP_MK40X256VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X256VMD100) || \
     defined(CONFIG_ARCH_CHIP_MK40N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK40N512VMD100)
 
 #  define KINETIS_IRQ_DMACH0      (16)  /* Vector 16: DMA channel 0 transfer complete */
@@ -105,7 +105,7 @@
 #  define KINETIS_IRQ_MCM         (33)  /* Vector 33: MCM Normal interrupt */
 #  define KINETIS_IRQ_FLASHCC     (34)  /* Vector 34: Flash memory command complete */
 #  define KINETIS_IRQ_FLASHRC     (35)  /* Vector 35: Flash memory read collision */
-#  define KINETIS_IRQ_SMCLVD      (36)  /* Vector 36: Mode Ccntroller low-voltage
+#  define KINETIS_IRQ_SMCLVD      (36)  /* Vector 36: Mode Controller low-voltage
                                          *            detect, low-voltage warning */
 #  define KINETIS_IRQ_LLWU        (37)  /* Vector 37: LLWU Normal Low Leakage Wakeup */
 #  define KINETIS_IRQ_WDOG        (38)  /* Vector 38: Watchdog */
@@ -156,7 +156,7 @@
 #  define KINETIS_IRQ_PITCH1      (85)  /* Vector 85: PIT channel 1 */
 #  define KINETIS_IRQ_PITCH2      (86)  /* Vector 86: PIT channel 2 */
 #  define KINETIS_IRQ_PITCH3      (87)  /* Vector 87: PIT channel 3 */
-#  define KINETIS_IRQ_PDC         (88)  /* Vector 88: PDB */
+#  define KINETIS_IRQ_PDB         (88)  /* Vector 88: PDB */
 #  define KINETIS_IRQ_USBOTG      (89)  /* Vector 88: USB OTG */
 #  define KINETIS_IRQ_USBCD       (90)  /* Vector 90: USB charger detect */
                                         /* Vectors 91-94: Reserved */
@@ -172,7 +172,7 @@
 #  define KINETIS_IRQ_PORTB       (104) /* Vector 104: Pin detect port B */
 #  define KINETIS_IRQ_PORTC       (105) /* Vector 105: Pin detect port C */
 #  define KINETIS_IRQ_PORTD       (106) /* Vector 106: Pin detect port D */
-#  define KINETIS_IRQ_PORTD       (107) /* Vector 107: Pin detect port E */
+#  define KINETIS_IRQ_PORTE       (107) /* Vector 107: Pin detect port E */
                                         /* Vectors 108-109: Reserved */
 #  define KINETIS_IRQ_SWI         (110) /* Vector 110: Software interrupt */
 
@@ -192,8 +192,8 @@
  * K60P144M100SF2RM
  */
 
-#elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) \
-      defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) \
+#elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) || \
+      defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) || \
       defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
 
 #  define KINETIS_IRQ_DMACH0      (16)  /* Vector 16: DMA channel 0 transfer complete */
@@ -216,7 +216,7 @@
 #  define KINETIS_IRQ_MCM         (33)  /* Vector 33: MCM Normal interrupt */
 #  define KINETIS_IRQ_FLASHCC     (34)  /* Vector 34: Flash memory command complete */
 #  define KINETIS_IRQ_FLASHRC     (35)  /* Vector 35: Flash memory read collision */
-#  define KINETIS_IRQ_SMCLVD      (36)  /* Vector 36: Mode Ccntroller low-voltage
+#  define KINETIS_IRQ_SMCLVD      (36)  /* Vector 36: Mode Controller low-voltage
                                          *            detect, low-voltage warning */
 #  define KINETIS_IRQ_LLWU        (37)  /* Vector 37: LLWU Normal Low Leakage Wakeup */
 #  define KINETIS_IRQ_WDOG        (38)  /* Vector 38: Watchdog */
@@ -267,13 +267,13 @@
 #  define KINETIS_IRQ_PITCH1      (85)  /* Vector 85: PIT channel 1 */
 #  define KINETIS_IRQ_PITCH2      (86)  /* Vector 86: PIT channel 2 */
 #  define KINETIS_IRQ_PITCH3      (87)  /* Vector 87: PIT channel 3 */
-#  define KINETIS_IRQ_PDC         (88)  /* Vector 88: PDB */
+#  define KINETIS_IRQ_PDB         (88)  /* Vector 88: PDB */
 #  define KINETIS_IRQ_USBOTG      (89)  /* Vector 88: USB OTG */
 #  define KINETIS_IRQ_USBCD       (90)  /* Vector 90: USB charger detect */
 #  define KINETIS_IRQ_EMACTMR     (91)  /* Vector 91: Ethernet MAC IEEE 1588 timer interrupt */
 #  define KINETIS_IRQ_EMACTX      (92)  /* Vector 92: Ethernet MAC transmit interrupt */
 #  define KINETIS_IRQ_EMACRX      (93)  /* Vector 93: Ethernet MAC receive interrupt */
-#  define KINETIS_IRQ_EMACMISC    (95)  /* Vector 95: Ethernet MAC error and misc interrupt */
+#  define KINETIS_IRQ_EMACMISC    (94)  /* Vector 94: Ethernet MAC error and misc interrupt */
 #  define KINETIS_IRQ_I2S0        (95)  /* Vector 95: I2S0 */
 #  define KINETIS_IRQ_SDHC        (96)  /* Vector 96: SDHC */
 #  define KINETIS_IRQ_DAC0        (97)  /* Vector 97: DAC0 */

@@ -55,8 +55,8 @@
  * K40P144M100SF2RM
  */
 
-#if defined(CONFIG_ARCH_CHIP_MK40X128VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X128VMD100) \
-    defined(CONFIG_ARCH_CHIP_MK40X256VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X256VMD100) \
+#if defined(CONFIG_ARCH_CHIP_MK40X128VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X128VMD100) || \
+    defined(CONFIG_ARCH_CHIP_MK40X256VLQ100) || defined(CONFIG_ARCH_CHIP_MK40X256VMD100) || \
     defined(CONFIG_ARCH_CHIP_MK40N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK40N512VMD100)
 
 # define KINETIS_FLASH_BASE     0x00000000 /* –0x0fffffff Program flash and read-
@@ -71,7 +71,7 @@
 # define KINETIS_SRAMU_BASE     0x20000000 /* –0x200fffff SRAM_U: Upper SRAM bitband
                                             *             region */
                              /* 0x20100000  * –0x21ffffff Reserved */
-# define KINETIS_ALIAS1_BASE    0x22000000 /* –0x23ffffff Aliased to SRAM_U bitband */
+# define KINETIS_SALIAS_BASE    0x22000000 /* –0x23ffffff Aliased to SRAM_U bitband */
                              /* 0x24000000  * –0x3fffffff Reserved */
 # define KINETIS_BRIDGE0_BASE   0x40000000 /* –0x4007ffff Bitband region for peripheral
                                             *             bridge 0 (AIPS-Lite0) */
@@ -80,7 +80,7 @@
 # define KINETIS_GPIOBB_BASE    0x400ff000 /* –0x400fffff Bitband region for general
                                             *             purpose input/output (GPIO) */
                              /* 0x40100000  * –0x41ffffff Reserved */
-# define KINETIS_ALIAS1_BASE    0x42000000 /* –0x43ffffff Aliased to peripheral bridge
+# define KINETIS_PALIAS_BASE    0x42000000 /* –0x43ffffff Aliased to peripheral bridge
                                             *             (AIPS-Lite) and general purpose
                                             *             input/output (GPIO) bitband */
                              /* 0x44000000  * –0x5fffffff Reserved */
@@ -191,8 +191,8 @@
  * K60P144M100SF2RM
  */
 
-#elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) \
-      defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) \
+#elif defined(CONFIG_ARCH_CHIP_MK60N256VLQ100) || defined(CONFIG_ARCH_CHIP_MK60X256VLQ100) || \
+      defined(CONFIG_ARCH_CHIP_MK60N512VLQ100) || defined(CONFIG_ARCH_CHIP_MK60N256VMD100) || \
       defined(CONFIG_ARCH_CHIP_MK60X256VMD100) || defined(CONFIG_ARCH_CHIP_MK60N512VMD100)
 
 # define KINETIS_FLASH_BASE     0x00000000 /* –0x0fffffff Program flash and read-
@@ -207,7 +207,7 @@
 # define KINETIS_SRAMU_BASE     0x20000000 /* –0x200fffff SRAM_U: Upper SRAM bitband
                                             *             region */
                              /* 0x20100000  * –0x21ffffff Reserved */
-# define KINETIS_ALIAS1_BASE    0x22000000 /* –0x23ffffff Aliased to SRAM_U bitband */
+# define KINETIS_SALIAS_BASE    0x22000000 /* –0x23ffffff Aliased to SRAM_U bitband */
                              /* 0x24000000  * –0x3fffffff Reserved */
 # define KINETIS_BRIDGE0_BASE   0x40000000 /* –0x4007ffff Bitband region for peripheral
                                             *             bridge 0 (AIPS-Lite0) */
@@ -216,7 +216,7 @@
 # define KINETIS_GPIOBB_BASE    0x400ff000 /* –0x400fffff Bitband region for general
                                             *             purpose input/output (GPIO) */
                              /* 0x40100000  * –0x41ffffff Reserved */
-# define KINETIS_ALIAS1_BASE    0x42000000 /* –0x43ffffff Aliased to peripheral bridge
+# define KINETIS_PALIAS_BASE    0x42000000 /* –0x43ffffff Aliased to peripheral bridge
                                             *             (AIPS-Lite) and general purpose
                                             *             input/output (GPIO) bitband */
                              /* 0x44000000  * –0x5fffffff Reserved */

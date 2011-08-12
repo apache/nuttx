@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "kinetis_internal.h"
-#include "kwistik-internal.h"
+#include "kwikstik-internal.h"
 
 /****************************************************************************
  * Definitions
@@ -84,6 +84,10 @@
 
 /****************************************************************************
  * Name: up_ledinit
+ *
+ * Description:
+ *   Initialize LED GPIOs so that LEDs can be controlled.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS

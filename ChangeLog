@@ -1998,4 +1998,5 @@
 	  "clean-up" logic after a signal occurred, leaving the message queue in
 	  a bad state and resulting in PANICs.  All are important.  (submitted by
 	  hkwilton).
-
+	* arch/arm/src/kinetis:  Added header files defining all Kinetis registers
+	  and bit fields within all Kinetis registers.

@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "kinetis_internal.h"
-#include "kwikstick-internal.h"
+#include "kwikstik-internal.h"
 
 #if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
 

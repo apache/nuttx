@@ -50,14 +50,11 @@ GNU Toolchain Options
 
   1. The CodeSourcery GNU toolchain,
   2. The devkitARM GNU toolchain,
-  3. Raisonance GNU toolchain, or
-  4. The NuttX buildroot Toolchain (see below).
+  3. The NuttX buildroot Toolchain (see below).
 
-  All testing has been conducted using the NuttX buildroot toolchain.  However,
-  the make system is setup to default to use the devkitARM toolchain.  To use
-  the CodeSourcery, devkitARM or Raisonance GNU toolchain, you simply need to
-  add one of the following configuration options to your .config (or defconfig)
-  file:
+  All testing has been conducted using the CodeSourcery Windows toolchain.  To
+  use the devkitARM or the NuttX GNU toolchain, you simply need to change the
+  the following configuration options to your .config (or defconfig) file:
 
     CONFIG_KINETIS_CODESOURCERYW=y  : CodeSourcery under Windows
     CONFIG_KINETIS_CODESOURCERYL=y  : CodeSourcery under Linux
@@ -67,7 +64,7 @@ GNU Toolchain Options
   If you are not using CONFIG_KINETIS_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
-  NOTE: the CodeSourcery (for Windows), devkitARM, and Raisonance toolchains are
+  NOTE: the CodeSourcery (for Windows) and devkitARM toolchains are
   Windows native toolchains.  The CodeSourcey (for Linux) and NuttX buildroot
   toolchains are Cygwin and/or Linux native toolchains. There are several limitations
   to using a Windows based toolchain in a Cygwin environment.  The three biggest are:
@@ -151,6 +148,9 @@ NuttX buildroot Toolchain
   SourceForge download site (https://sourceforge.net/project/showfiles.php?group_id=189573).
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
+  NOTE:  The NuttX toolchain is an OABI toolchain (vs. the more common EABI)
+  and does not include optimizations for Cortex-M4 (ARMv7E-M).
+
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
@@ -180,7 +180,7 @@ NuttX buildroot Toolchain
 KwikStik-K40-specific Configuration Options
 ============================================
 
-	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
+	CONFIG_ARCH - Identifies the arch/ subdirectory.  This sould
 	   be set to:
 
 	   CONFIG_ARCH=arm
@@ -200,7 +200,7 @@ KwikStik-K40-specific Configuration Options
 	CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
 	   chip:
 
-	   CONFIG_ARCH_CHIP_K40X256VLQ100
+	   CONFIG_ARCH_CHIP_MK40X256VLQ100
 
 	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 	   hence, the board that supports the particular chip or SoC.
