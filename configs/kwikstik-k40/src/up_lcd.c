@@ -39,7 +39,16 @@
  **************************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <assert.h>
+#include <debug.h>
+
+#include <arch/board/board.h>
+
+#include "up_arch.h"
 #include "kwikstik-internal.h"
+
 
 /**************************************************************************************
  * Pre-processor Definitions
