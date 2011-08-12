@@ -58,8 +58,9 @@ endif
 
 CHIP_ASRCS	=
 #CHIP_CSRCS	= kinetis_allocateheap.c kinetis_can.c kinetis_clockconfig.c \
-#		  kinetis_clrpend.c kinetis_gpio.c kinetis_idle.c kinetis_irq.c kinetis_lowputc.c \
-#		  kinetis_serial.c kinetis_spi.c kinetis_ssp.c kinetis_start.c kinetis_timerisr.c
+#		  kinetis_clrpend.c kinetis_gpio.c kinetis_idle.c kinetis_lowputc.c \
+#		  kinetis_serial.c kinetis_spi.c kinetis_ssp.c kinetis_timerisr.c
+CHIP_CSRCS	= kinetis_irq.c kinetis_start.c
 
 # Configuration-dependent Kinetis files
 
