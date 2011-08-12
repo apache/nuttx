@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************************************
  * arch/arm/src/kinetis/kinetis_flexcan.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
@@ -31,24 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_FLEXCAN_H
 #define __ARCH_ARM_SRC_KINETIS_KINETIS_FLEXCAN_H
 
-/************************************************************************************
+/****************************************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************************************/
 
 #define KINETIS_CAN_MCR_OFFSET      0x0000 /* Module Configuration Register */
 #define KINETIS_CAN_CTRL1_OFFSET    0x0004 /* Control 1 Register */
@@ -86,7 +86,7 @@
 #define KINETIS_CAN_RXIMR14_OFFSET  0x08b8 /* R14 Individual Mask Registers */
 #define KINETIS_CAN_RXIMR15_OFFSET  0x08bc /* R15 Individual Mask Registers */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************************************/
 
 #define KINETIS_CAN0_MCR           (KINETIS_CAN0_BASE+KINETIS_CAN_MCR_OFFSET)
 #define KINETIS_CAN0_CTRL1         (KINETIS_CAN0_BASE+KINETIS_CAN_CTRL1_OFFSET)
@@ -124,60 +124,195 @@
 #define KINETIS_CAN0_RXIMR14       (KINETIS_CAN0_BASE+KINETIS_CAN_RXIMR14_OFFSET)
 #define KINETIS_CAN0_RXIMR15       (KINETIS_CAN0_BASE+KINETIS_CAN_RXIMR15_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************************************/
 
 /* Module Configuration Register */
-#define CAN_MCR_
+
+#define CAN_MCR_MAXMB_SHIFT        (0)       /* Bits 0-6: Number of the Last Message Buffer */
+#define CAN_MCR_MAXMB_MASK         (0x7f << CAN_MCR_MAXMB_SHIFT)
+                                             /* Bit 7:  Reserved */
+#define CAN_MCR_IDAM_SHIFT         (8)       /* Bits 8-9: ID Acceptance Mode */
+#define CAN_MCR_IDAM_MASK          (3 << CAN_MCR_IDAM_SHIFT)
+#  define CAN_MCR_IDAM_FMTA        (0 << CAN_MCR_IDAM_SHIFT) /* Format A: One full ID  */
+#  define CAN_MCR_IDAM_FMTB        (1 << CAN_MCR_IDAM_SHIFT) /* Format B: Two full (or partial) IDs */
+#  define CAN_MCR_IDAM_FMTC        (2 << CAN_MCR_IDAM_SHIFT) /* Format C: Four partial IDs */
+#  define CAN_MCR_IDAM_FMTD        (3 << CAN_MCR_IDAM_SHIFT) /* Format D: All frames rejected */
+                                             /* Bits 10-11: Reserved */
+#define CAN_MCR_AEN                (1 << 12) /* Bit 12: Abort Enable */
+#define CAN_MCR_LPRIOEN            (1 << 13) /* Bit 13: Local Priority Enable */
+                                             /* Bits 14-15: Reserved */
+#define CAN_MCR_IRMQ               (1 << 16) /* Bit 16: Individual Rx Masking and Queue Enable */
+#define CAN_MCR_SRXDIS             (1 << 17) /* Bit 17: Self Reception Disable */
+#define CAN_MCR_DOZE               (1 << 18) /* Bit 18: Doze Mode Enable */
+                                             /* Bit 19: Reserved */
+#define CAN_MCR_LPMACK             (1 << 20) /* Bit 20: Low Power Mode Acknowledge */
+#define CAN_MCR_WRNEN              (1 << 21) /* Bit 21: Warning Interrupt Enable */
+#define CAN_MCR_SLFWAK             (1 << 22) /* Bit 22: Self Wake Up */
+#define CAN_MCR_SUPV               (1 << 23) /* Bit 23: Supervisor Mode */
+#define CAN_MCR_FRZACK             (1 << 24) /* Bit 24: Freeze Mode Acknowledge */
+#define CAN_MCR_SOFTRST            (1 << 25) /* Bit 25: Soft Reset */
+#define CAN_MCR_WAKMSK             (1 << 26) /* Bit 26: Wake Up Interrupt Mask */
+#define CAN_MCR_NOTRDY             (1 << 27) /* Bit 27: FlexCAN Not Ready */
+#define CAN_MCR_HALT               (1 << 28) /* Bit 28: Halt FlexCAN */
+#define CAN_MCR_RFEN               (1 << 29) /* Bit 29: Rx FIFO Enable */
+#define CAN_MCR_FRZ                (1 << 30) /* Bit 30: Freeze Enable */
+#define CAN_MCR_MDIS               (1 << 31) /* Bit 31: Module Disable */
+
 /* Control 1 Register */
-#define CAN_CTRL1_
+
+#define CAN_CTRL1_ROPSEG_SHIFT     (0)       /* Bits 0-2: Propagation Segment */
+#define CAN_CTRL1_ROPSEG_MASK      (7 << CAN_CTRL1_ROPSEG_SHIFT)
+#define CAN_CTRL1_LOM              (1 << 3)  /* Bit 3:  Listen-Only Mode */
+#define CAN_CTRL1_LBUF             (1 << 4)  /* Bit 4:  Lowest Buffer Transmitted First */
+#define CAN_CTRL1_TSYN             (1 << 5)  /* Bit 5:  Timer Sync */
+#define CAN_CTRL1_BOFFREC          (1 << 6)  /* Bit 6:  Bus Off Recovery */
+#define CAN_CTRL1_SMP              (1 << 7)  /* Bit 7:  CAN Bit Sampling */
+                                             /* Bits 8-9: Reserved */
+#define CAN_CTRL1_RWRNMSK          (1 << 10) /* Bit 10: Rx Warning Interrupt Mask */
+#define CAN_CTRL1_TWRNMSK          (1 << 11) /* Bit 11: Tx Warning Interrupt Mask */
+#define CAN_CTRL1_LPB              (1 << 12) /* Bit 12: Loop Back Mode */
+#define CAN_CTRL1_CLKSRC           (1 << 13) /* Bit 13: CAN Engine Clock Source */
+#define CAN_CTRL1_ERRMSK           (1 << 14) /* Bit 14: Error Mask */
+#define CAN_CTRL1_BOFFMSK          (1 << 15) /* Bit 15: Bus Off Mask */
+#define CAN_CTRL1_PSEG2_SHIFT      (16)       /* Bits 16-18: Phase Segment 2 */
+#define CAN_CTRL1_PSEG2_MASK       (7 << CAN_CTRL1_PSEG2_SHIFT)
+#define CAN_CTRL1_PSEG1_SHIFT      (19)       /* Bits 19-21: Phase Segment 1 */
+#define CAN_CTRL1_PSEG1_MASK       (7 << CAN_CTRL1_PSEG1_SHIFT)
+#define CAN_CTRL1_RJW_SHIFT        (22)       /* Bits 22-23: Resync Jump Width */
+#define CAN_CTRL1_RJW_MASK         (3 << CAN_CTRL1_RJW_SHIFT)
+#define CAN_CTRL1_PRESDIV_SHIFT    (24)       /* Bits 24-31: Prescaler Division Factor */
+#define CAN_CTRL1_PRESDIV_MASK     (0xff << CAN_CTRL1_PRESDIV_SHIFT)
+
 /* Free Running Timer */
-#define CAN_TIMER_
-/* Rx Mailboxes Global Mask Register */
-#define CAN_RXMGMASK_
+
+#define CAN_TIMER_SHIFT            (0)       /* Bits 0-15: Timer value */
+#define CAN_TIMER_MASK             (0xffff << CAN_TIMER_SHIFT)
+                                             /* Bits 16-31: Reserved */
+/* Rx Mailboxes Global Mask Register (32 Rx Mailboxes Global Mask Bits) */
+
+#define CAN_RXMGMASK(n)            (1 << (n)) /* Bit n: Rx Mailboxe n Global Mask Bit */
+
 /* Rx 14 Mask Register */
-#define CAN_RX14MASK_
+
+#define CAN_RX14MASK(n)            (1 << (n)) /* Bit n: Rx Buffer 14 Mask Bit n */
+
 /* Rx 15 Mask Register */
-#define CAN_RX15MASK_
+
+#define CAN_RX15MASK(n)            (1 << (n)) /* Bit n: Rx Buffer 15 Mask Bit n */
+
 /* Error Counter */
-#define CAN_ECR_
+
+#define CAN_ECR_TXERRCNT_SHIFT     (0)       /* Bits 0-7: Transmit Error Counter */
+#define CAN_ECR_TXERRCNT_MASK      (0xff << CAN_ECR_TXERRCNT_SHIFT)
+#define CAN_ECR_RXERRCNT_SHIFT     (8)       /* Bits 8-15: Receive Error Counter */
+#define CAN_ECR_RXERRCNT_MASK      (0xff << CAN_ECR_RXERRCNT_SHIFT)
+                                             /* Bits 16-31: Reserved */
 /* Error and Status 1 Register */
-#define CAN_ESR1_
+
+#define CAN_ESR1_WAKINT            (1 << 0)  /* Bit 0:  Wake-Up Interrupt */
+#define CAN_ESR1_ERRINT            (1 << 1)  /* Bit 1:  Error Interrupt */
+#define CAN_ESR1_BOFFINT           (1 << 2)  /* Bit 2:  'Bus Off' Interrupt */
+#define CAN_ESR1_RX                (1 << 3)  /* Bit 3:  FlexCAN in Reception */
+#define CAN_ESR1_FLTCONF_SHIFT     (4)       /* Bits 4-5: Fault Confinement State */
+#define CAN_ESR1_FLTCONF_MASK      (3 << CAN_ESR1_FLTCONF_SHIFT)
+#  define CAN_ESR1_FLTCONF_ACTV    (0 << CAN_ESR1_FLTCONF_SHIFT) /* Error Active */
+#  define CAN_ESR1_FLTCONF_PASV    (1 << CAN_ESR1_FLTCONF_SHIFT) /* Error Passive */
+#  define CAN_ESR1_FLTCONF_OFF     (2 << CAN_ESR1_FLTCONF_SHIFT) /* Bus Off */
+#define CAN_ESR1_TX                (1 << 6)  /* Bit 6:  FlexCAN in Transmission */
+#define CAN_ESR1_IDLE              (1 << 7)  /* Bit 7:  CAN bus is in IDLE state */
+#define CAN_ESR1_RXWRN             (1 << 8)  /* Bit 8:  Rx Error Warning */
+#define CAN_ESR1_TXWRN             (1 << 9)  /* Bit 9:  TX Error Warning */
+#define CAN_ESR1_STFERR            (1 << 10) /* Bit 10: Stuffing Error */
+#define CAN_ESR1_FRMERR            (1 << 11) /* Bit 11: Form Error */
+#define CAN_ESR1_CRCERR            (1 << 12) /* Bit 12: Cyclic Redundancy Check Error */
+#define CAN_ESR1_ACKERR            (1 << 13) /* Bit 13: Acknowledge Error */
+#define CAN_ESR1_BIT0ERR           (1 << 14) /* Bit 14: Bit0 Error */
+#define CAN_ESR1_BIT1ERR           (1 << 15) /* Bit 15: Bit1 Error */
+#define CAN_ESR1_RWRNINT           (1 << 16) /* Bit 16: Rx Warning Interrupt Flag */
+#define CAN_ESR1_TWRNINT           (1 << 17) /* Bit 17: Tx Warning Interrupt Flag */
+#define CAN_ESR1_SYNCH             (1 << 18) /* Bit 18: CAN Synchronization Status */
+                                             /* Bits 19-31: Reserved */
 /* Interrupt Masks 2 Register */
-#define CAN_IMASK2_
+
+#define CAN_IMASK2(n)              (1 << (n)) /* Bit n: Buffer MBn Mask */
+
 /* Interrupt Masks 1 Register */
-#define CAN_IMASK1_
+
+#define CAN_IMASK1(n)              (1 << (n)) /* Bit n: Buffer MBn Mask */
+
 /* Interrupt Flags 2 Register */
-#define CAN_IFLAG2_
+
+#define CAN_IFLAG2(n)              (1 << (n)) /* Bit n: Buffer MBn Interrupt */
+
 /* Interrupt Flags 1 Register */
-#define CAN_IFLAG1_
+
+#define CAN_IFLAG1(n)              (1 << (n)) /* Bit n: Buffer MBn Interrupt, n=0..4,8..31 */
+
 /* Control 2 Register */
-#define CAN_CTRL2_
+                                             /* Bits 0-15: Reserved */
+#define CAN_CTRL2_EACEN            (1 << 16) /* Bit 16:  Entire Frame Arbitration Field Comparison Enable (Rx) */
+#define CAN_CTRL2_RRS              (1 << 17) /* Bit 17:  Remote Request Storing */
+#define CAN_CTRL2_MRP              (1 << 18) /* Bit 18:  Mailboxes Reception Priority */
+#define CAN_CTRL2_TASD_SHIFT       (19)      /* Bits 19-23: Tx Arbitration Start Delay */
+#define CAN_CTRL2_TASD_MASK        (31 << CAN_CTRL2_TASD_SHIFT)
+#define CAN_CTRL2_RFFN_SHIFT       (24)      /* Bits 24-27: Number of Rx FIFO Filters */
+#define CAN_CTRL2_RFFN_MASK        (15 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_8MB       (0 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_16MB      (1 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_24MB      (2 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_32MB      (3 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_40MB      (4 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_48MB      (5 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_56MB      (6 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_64MB      (7 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_72MB      (8 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_80MB      (9 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_88MB      (10 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_96MB      (11 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_104MB     (12 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_112MB     (13 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_120MB     (14 << CAN_CTRL2_RFFN_SHIFT)
+#  define CAN_CTRL2_RFFN_128MB     (15 << CAN_CTRL2_RFFN_SHIFT)
+#define CAN_CTRL2_WRMFRZ           (1 << 28) /* Bit 28: Write-Access to Memory in Freeze mode */
+                                             /* Bits 29-31: Reserved */
 /* Error and Status 2 Register */
-#define CAN_ESR2_
+                                             /* Bits 0-12: Reserved */
+#define CAN_ESR2_IMB               (1 << 13) /* Bit 13: Inactive Mailbox */
+#define CAN_ESR2_VPS               (1 << 14) /* Bit 14: Valid Priority Status */
+                                             /* Bit 15: Reserved */
+#define CAN_ESR2_VPS               (1 << 14) /* Bit 14: Valid Priority Status */
+#define CAN_ESR2_LPTM_SHIFT        (16)      /* Bits 16-22: Lowest Priority Tx Mailbox */
+#define CAN_ESR2_LPTM_MASK         (0x7f << CAN_ESR2_LPTM_SHIFT)
+                                             /* Bits 23-31: Reserved */
 /* CRC Register */
-#define CAN_CRCR_
-/* Rx FIFO Global Mask Register */
-#define CAN_RXFGMASK_
+                                             /* Bits 23-31: Reserved */
+#define CAN_CRCR_MBCRC_SHIFT       (16)      /* Bits 16-22: CRC Mailbox */
+#define CAN_CRCR_MBCRC_MASK        (0x7f << CAN_CRCR_MBCRC_SHIFT)
+                                             /* Bit 15: Reserved */
+#define CAN_CRCR_TXCRC_SHIFT       (0)       /* Bits 0-14: CRC Transmitted */
+#define CAN_CRCR_TXCRC_MASK        (0x7fff << CAN_CRCR_TXCRC_SHIFT)
+
+/* Rx FIFO Global Mask Register (32 Rx FIFO Global Mask Bits) */
+
 /* Rx FIFO Information Register */
-#define CAN_RXFIR_
+                                             /* Bits 9-31: Reserved */
+#define CAN_RXFIR_IDHIT_SHIFT      (0)       /* Bits 0-8: Identifier Acceptance Filter Hit Indicator */
+#define CAN_RXFIR_IDHIT_MASK       (0x1ff << CAN_RXFIR_IDHIT_SHIFT)
 
 /* Rn Individual Mask Registers */
-#define CAN_RXIMR_
 
-                (1 << nn)  /* Bit nn:  
-_SHIFT          (nn)       /* Bits nn-nn: 
-_MASK           (nn << nn)
+#define CAN_RXIMR(n)               (1 << (n)) /* Bit n: Individual Mask Bits */
 
-/************************************************************************************
+/****************************************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************************************/
 
-/************************************************************************************
+/****************************************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************************************/
 
-/************************************************************************************
+/****************************************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_FLEXCAN_H */
