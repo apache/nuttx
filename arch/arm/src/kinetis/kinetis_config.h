@@ -77,11 +77,11 @@
 
 /* Are any UARTs enabled? */
 
-#undef HAVE_UART
+#undef HAVE_UART_DEVICE
 #if defined(CONFIG_KINETIS_UART0) || defined(CONFIG_KINETIS_UART1) || \
     defined(CONFIG_KINETIS_UART2) || defined(CONFIG_KINETIS_UART3) || \
     defined(CONFIG_KINETIS_UART5)
-#  define HAVE_UART 1
+#  define HAVE_UART_DEVICE 1
 #endif
 
 /* Is there a serial console? There should be at most one defined.  It could be on

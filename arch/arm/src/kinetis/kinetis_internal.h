@@ -48,6 +48,7 @@
 #include <stdbool.h>
 
 #include "up_internal.h"
+#include "kinetis_config.h"
 #include "chip.h"
 #include "kinetis_port.h"
 

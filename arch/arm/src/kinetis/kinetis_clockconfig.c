@@ -49,6 +49,7 @@
 #include "kinetis_sim.h"
 #include "kinetis_fmc.h"
 #include "kinetis_llwu.h"
+#include "kinetis_pinmux.h"
 
 /****************************************************************************
  * Private Definitions
@@ -304,9 +305,9 @@ static inline void kinetis_traceconfig(void)
   regval |= SIM_SOPT2_TRACECLKSEL;
   putreg32(regval, KINETIS_SIM_SOPT2);
 
-  /* Enable the TRACE_CLKOUT pin function on PTA6 (alt7 function) */
+  /* Enable the TRACE_CLKOUT pin function on the configured pin */
 
-  kinetis_gpioconfig(GPIO_TRACE);
+  kinetis_gpioconfig(GPIO_TRACE_CLKOUT);
 }
 #else
 #  define kinetis_traceconfig()
@@ -333,7 +334,7 @@ static inline void kinetis_fbconfig(void)
 
   /* Enable the FB_CLKOUT function on PTC3 (alt5 function) */
 
-  kinetis_gpioconfig(GPIO_FBCLKOUT);
+  kinetis_gpioconfig(GPIO_FB_CLKOUT);
 }
 #else
 #  define kinetis_fbconfig()

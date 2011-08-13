@@ -98,6 +98,23 @@
 /* Button definitions ***************************************************************/
 
 
+/* Alternative pin resolution *******************************************************/
+/* If there are alternative configurations for various pins in the
+ * kinetis_k40pinmux.h header file, those alternative pins will be labeled with a
+ * suffix like _1, _2, etc.  The logic in this file must select the correct pin
+ * configuration for the board by defining a pin configuration (with no suffix) that
+ * maps to the correct alternative.
+ */
+#warning "Revisit:  This only only here to get a clean compiliation"
+#define GPIO_UART0_RX GPIO_UART0_RX_1
+#define GPIO_UART0_TX GPIO_UART0_TX_1
+#define GPIO_UART1_RX GPIO_UART1_RX_1
+#define GPIO_UART1_TX GPIO_UART1_TX_1
+#define GPIO_UART3_RX GPIO_UART3_RX_1
+#define GPIO_UART3_TX GPIO_UART3_TX_1
+#define GPIO_UART4_RX GPIO_UART4_RX_1
+#define GPIO_UART4_TX GPIO_UART4_TX_1
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
