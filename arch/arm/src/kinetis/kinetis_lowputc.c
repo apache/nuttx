@@ -50,6 +50,7 @@
 #include "kinetis_config.h"
 #include "kinetis_internal.h"
 #include "kinetis_uart.h"
+#include "kinetis_pinmux.h"
 
 /**************************************************************************
  * Private Definitions
@@ -143,7 +144,7 @@
 
 void up_lowputc(char ch)
 {
-#if defined HAVE_UART && defined HAVE_CONSOLE
+#if defined HAVE_UART_DEVICE && defined HAVE_CONSOLE
 # warning "Missing logic"
 #endif
 }
@@ -180,41 +181,40 @@ void up_lowputc(char ch)
 
 void kinetis_lowsetup(void)
 {
-#ifdef HAVE_UART
-  uint32_t regval;
-
-  /* Step 1: Enable power for all console UART and disable power for
-   * other UARTs
-   */
+#ifdef HAVE_UART_DEVICE
+  /* Step 1: Enable power for all enabled UARTs */
 
 # warning "Missing logic"
 
-  /* Step 2: Enable peripheral clocking for the console UART and disable
-   * clocking for all other UARTs
-   */
+  /* Step 2: Enable peripheral clocking for all enabled UARTs */
 
 # warning "Missing logic"
 
-  /* Configure UART pins for the selected CONSOLE */
+  /* Configure UART pins for the all enabled UARTs */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE)
-  kinetis_configgpio(GPIO_UART0_TXD);
-  kinetis_configgpio(GPIO_UART0_RXD);
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-  kinetis_configgpio(GPIO_UART1_TXD);
-  kinetis_configgpio(GPIO_UART1_RXD);
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-  kinetis_configgpio(GPIO_UART2_TXD);
-  kinetis_configgpio(GPIO_UART2_RXD);
-#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
-  kinetis_configgpio(GPIO_UART3_TXD);
-  kinetis_configgpio(GPIO_UART3_RXD);
-#elif defined(CONFIG_UART4_SERIAL_CONSOLE)
-  kinetis_configgpio(GPIO_UART3_TXD);
-  kinetis_configgpio(GPIO_UART3_RXD);
-#elif defined(CONFIG_UART5_SERIAL_CONSOLE)
-  kinetis_configgpio(GPIO_UART3_TXD);
-  kinetis_configgpio(GPIO_UART3_RXD);
+#ifdef CONFIG_KINETIS_UART0
+  kinetis_configgpio(GPIO_UART0_TX);
+  kinetis_configgpio(GPIO_UART0_RX);
+#endif
+#ifdef CONFIG_KINETIS_UART1
+  kinetis_configgpio(GPIO_UART1_TX);
+  kinetis_configgpio(GPIO_UART1_RX);
+#endif
+#ifdef CONFIG_KINETIS_UART2
+  kinetis_configgpio(GPIO_UART2_TX);
+  kinetis_configgpio(GPIO_UART2_RX);
+#endif
+#ifdef CONFIG_KINETIS_UART3
+  kinetis_configgpio(GPIO_UART3_TX);
+  kinetis_configgpio(GPIO_UART3_RX);
+#endif
+#ifdef CONFIG_KINETIS_UART4
+  kinetis_configgpio(GPIO_UART4_TX);
+  kinetis_configgpio(GPIO_UART4_RX);
+#endif
+#ifdef CONFIG_KINETIS_UART5
+  kinetis_configgpio(GPIO_UART5_TX);
+  kinetis_configgpio(GPIO_UART5_RX);
 #endif
 
   /* Configure the console (only) */
@@ -224,7 +224,7 @@ void kinetis_lowsetup(void)
   kinetis_uartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_PARITY,
                         CONSOLE_BITS, CONSOLE_2STOP);
 #endif
-#endif /* HAVE_UART */
+#endif /* HAVE_UART_DEVICE */
 }
 
 /******************************************************************************
