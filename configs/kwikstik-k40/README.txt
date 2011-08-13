@@ -254,55 +254,49 @@ KwikStik-K40-specific Configuration Options
 
   Individual subsystems can be enabled:
 
-  	CONFIG_KINETIS_UART0
-  	CONFIG_KINETIS_UART1
-  	CONFIG_KINETIS_UART2
-  	CONFIG_KINETIS_UART3
-  	CONFIG_KINETIS_UART4
-  	CONFIG_KINETIS_UART5
-  	CONFIG_KINETIS_ETHERNET (K60 only)
-  	CONFIG_KINETIS_RNGB (K60 only)
-    CONFIG_KINETIS_FLEXCAN0
-    CONFIG_KINETIS_FLEXCAN1
-    CONFIG_KINETIS_SPI0
-    CONFIG_KINETIS_SPI1
-    CONFIG_KINETIS_SPI2
-    CONFIG_KINETIS_I2C0
-    CONFIG_KINETIS_I2C1
-    CONFIG_KINETIS_I2S
-  	CONFIG_KINETIS_DAC0
-  	CONFIG_KINETIS_DAC1
-    CONFIG_KINETIS_ADC0
-    CONFIG_KINETIS_ADC1
-    CONFIG_KINETIS_CMP
-    CONFIG_KINETIS_VREF
-    CONFIG_KINETIS_SDHC
-    CONFIG_KINETIS_FTM0
-    CONFIG_KINETIS_FTM1
-    CONFIG_KINETIS_FTM2
-    CONFIG_KINETIS_LPTIMER
-    CONFIG_KINETIS_RTC
-    CONFIG_KINETIS_SLCD (K40 only)
-    CONFIG_KINETIS_EWM
-    CONFIG_KINETIS_CMT
-    CONFIG_KINETIS_USBOTG
-    CONFIG_KINETIS_USBDCD
-    CONFIG_KINETIS_LLWU
-    CONFIG_KINETIS_REGFILE
-    CONFIG_KINETIS_TSI
-    CONFIG_KINETIS_PORTA
-    CONFIG_KINETIS_PORTB
-    CONFIG_KINETIS_PORTC
-    CONFIG_KINETIS_PORTD
-    CONFIG_KINETIS_PORTE
-    CONFIG_KINETIS_FTFL
-    CONFIG_KINETIS_DMA
-    CONFIG_KINETIS_DMAMUX
-    CONFIG_KINETIS_CRC
-    CONFIG_KINETIS_PDB
-    CONFIG_KINETIS_PIT
-    CONFIG_KINETIS_FLEXBUS
-    CONFIG_KINETIS_MPU
+    CONFIG_KINETIS_TRACE    -- Enable trace clocking on power up.
+    CONFIG_KINETIS_FLEXBUS  -- Enable flexbus clocking on power up.
+  	CONFIG_KINETIS_UART0    -- Support UART0
+  	CONFIG_KINETIS_UART1    -- Support UART1
+  	CONFIG_KINETIS_UART2    -- Support UART2
+  	CONFIG_KINETIS_UART3    -- Support UART3
+  	CONFIG_KINETIS_UART4    -- Support UART4
+  	CONFIG_KINETIS_UART5    -- Support UART5
+  	CONFIG_KINETIS_ETHERNET -- Support Ethernet (K60 only)
+  	CONFIG_KINETIS_RNGB     -- Support the random number generator(K60 only)
+    CONFIG_KINETIS_FLEXCAN0 -- Support FlexCAN0
+    CONFIG_KINETIS_FLEXCAN1 -- Support FlexCAN1
+    CONFIG_KINETIS_SPI0     -- Support SPI0
+    CONFIG_KINETIS_SPI1     -- Support SPI1
+    CONFIG_KINETIS_SPI2     -- Support SPI2
+    CONFIG_KINETIS_I2C0     -- Support I2C0
+    CONFIG_KINETIS_I2C1     -- Support I2C1
+    CONFIG_KINETIS_I2S      -- Support I2S
+  	CONFIG_KINETIS_DAC0     -- Support DAC0
+  	CONFIG_KINETIS_DAC1     -- Support DAC1
+    CONFIG_KINETIS_ADC0     -- Support ADC0
+    CONFIG_KINETIS_ADC1     -- Support ADC1
+    CONFIG_KINETIS_CMP      -- Support CMP
+    CONFIG_KINETIS_VREF     -- Support VREF
+    CONFIG_KINETIS_SDHC     -- Support SD host controller
+    CONFIG_KINETIS_FTM0     -- Support FlexTimer 0
+    CONFIG_KINETIS_FTM1     -- Support FlexTimer 1
+    CONFIG_KINETIS_FTM2     -- Support FlexTimer 2
+    CONFIG_KINETIS_LPTIMER  -- Support the low power timer
+    CONFIG_KINETIS_RTC      -- Support RTC
+    CONFIG_KINETIS_SLCD     -- Support the segment LCD (K40 only)
+    CONFIG_KINETIS_EWM      -- Support the external watchdog
+    CONFIG_KINETIS_CMT      -- Support Carrier Modulator Transmitter
+    CONFIG_KINETIS_USBOTG   -- Support USB OTG (see also CONFIG_USBHOST and CONFIG_USBDEV)
+    CONFIG_KINETIS_USBDCD   -- Support the USB Device Charger Detection module
+    CONFIG_KINETIS_LLWU     -- Support the Low Leakage Wake-Up Unit
+    CONFIG_KINETIS_TSI      -- Support the touch screeen interface
+    CONFIG_KINETIS_FTFL     -- Support FLASH
+    CONFIG_KINETIS_DMA      -- Support DMA
+    CONFIG_KINETIS_CRC      -- Support CRC
+    CONFIG_KINETIS_PDB      -- Support the Programmable Delay Block
+    CONFIG_KINETIS_PIT      -- Support Programmable Interval Timers
+    CONFIG_ARMV7M_MPU       -- Support the MPU
 
   Kinetis K40 specific device driver settings
 
