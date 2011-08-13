@@ -69,20 +69,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -103,12 +89,6 @@ void __start(void)
 
   kinetis_wddisable();
 
-  /* Configure the uart so that we can get debug output as soon as possible */
-
-  kinetis_clockconfig();
-  kinetis_lowsetup();
-  showprogress('A');
-
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
@@ -117,7 +97,6 @@ void __start(void)
     {
       *dest++ = 0;
     }
-  showprogress('B');
 
   /* Move the intialized data section from his temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
@@ -129,7 +108,6 @@ void __start(void)
     {
       *dest++ = *src++;
     }
-  showprogress('C');
 
   /* Copy any necessary code sections from FLASH to RAM.  The correct
    * destination in SRAM is geive by _sramfuncs and _eramfuncs.  The
@@ -143,26 +121,28 @@ void __start(void)
       *dest++ = *src++;
     }
 #endif
-  showprogress('E');
- 
 
-  /* Perform early serial initialization */
+  /* Perform clock and Kinetis module initialization */
 
+  kinetis_clockconfig();
+
+  /* Configure the uart and perform early serial initialization so that we
+   * can get debug output as soon as possible.
+   */
+
+  kinetis_lowsetup();
 #ifdef CONFIG_USE_EARLYSERIALINIT
   up_earlyserialinit();
 #endif
-  showprogress('F');
 
-  /* Initialize onboard resources */
+  /* Initialize other on-board resources */
 
   kinetis_boardinitialize();
-  showprogress('G');
-  showprogress('\r');
-  showprogress('\n');
 
   /* Show reset status */
 
-  dbg("Reset status: %02x:%02x\n", getreg8(KINETIS_SMC_SRSH), getreg8(KINETIS_SMC_SRSL));
+  dbg("Reset status: %02x:%02x\n",
+      getreg8(KINETIS_SMC_SRSH), getreg8(KINETIS_SMC_SRSL));
 
   /* Then start NuttX */
 

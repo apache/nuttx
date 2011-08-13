@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/kwikstik-k40/include/board.h
+ * configs/twr-k60n512/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
@@ -51,21 +51,22 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* The Kwikstik-K40 has a 4MHz crystal on board */
+/* The K60 tower board uses a 50MHz external clock */
 
-#undef  BOARD_EXTCLOCK                      /* Crystal */
-#define BOARD_EXTAL_FREQ     4000000        /* 4MHz crystal frequency (REFCLK) */
+#define BOARD_EXTCLOCK       1              /* External clock */
+#define BOARD_EXTAL_FREQ     50000000       /* 50MHz Oscillator */
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
 
-/* PLL Configuration.  NOTE: Only even frequency crystals are supported that will
+/* PLL Configuration.  Either the external clock or crystal frequency is used to
+ * select the PRDIV value. Only reference clock frequencies are supported that will
  * produce a 2MHz reference clock to the PLL.
  *
- *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 4MHz/2 = 2MHz
+ *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 50MHz/25 = 2MHz
  *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*48 = 96MHz
  *   MCG Frequency:         PLLOUT = 96MHz
  */
 
-#define BOARD_PRDIV          2              /* PLL External Reference Divider */
+#define BOARD_PRDIV          25             /* PLL External Reference Divider */
 #define BOARD_VDIV           48             /* PLL VCO Divider (frequency multiplier) */
 
 #define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)

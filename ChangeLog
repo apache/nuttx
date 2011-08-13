@@ -2000,3 +2000,5 @@
 	  hkwilton).
 	* arch/arm/src/kinetis:  Added header files defining all Kinetis registers
 	  and bit fields within all Kinetis registers.
+	* configs/twr-k60n512:  This will (eventually) provide support for the Kinetis
+	  K60 Tower board.
