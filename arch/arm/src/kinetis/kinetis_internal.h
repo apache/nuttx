@@ -310,6 +310,32 @@ EXTERN void kinetis_clockconfig(void);
 
 EXTERN void kinetis_lowsetup(void);
 
+/******************************************************************************
+ * Name: kinetis_uartreset
+ *
+ * Description:
+ *   Reset a UART.
+ *
+ ******************************************************************************/
+
+#ifdef HAVE_UART_DEVICE
+EXTERN void kinetis_uartreset(uintptr_t uart_base);
+#endif
+
+/******************************************************************************
+ * Name: kinetis_uartconfigure
+ *
+ * Description:
+ *   Configure a UART as a RS-232 UART.
+ *
+ ******************************************************************************/
+
+#ifdef HAVE_UART_DEVICE
+EXTERN void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
+                                  unsigned int parity, unsigned int nbits,
+                                  bool stop2);
+#endif
+
 /************************************************************************************
  * Name: kinetis_wddisable
  *
