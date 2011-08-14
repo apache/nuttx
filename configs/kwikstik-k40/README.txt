@@ -300,16 +300,15 @@ KwikStik-K40-specific Configuration Options
 
   Kinetis K40 specific device driver settings
 
-	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn (n=1,2,3) or UART
-           m (m=4,5) for the console and ttys0 (default is the UART1).
+	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn (n=0..5) for the
+      console and ttys0 (default is the UART0).
 	CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
 	   This specific the size of the receive buffer
 	CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
 	   being sent.  This specific the size of the transmit buffer
-	CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
-	CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
+	CONFIG_UARTn_BAUD - The configure BAUD of the UART.
+	CONFIG_UARTn_BITS - The number of bits.  Must be either 8 or 8.
 	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-	CONFIG_UARTn_2STOP - Two stop bits
 
 	CONFIG_KINETIS_SPI_INTERRUPTS - Select to enable interrupt driven SPI
 	  support. Non-interrupt-driven, poll-waiting is recommended if the
