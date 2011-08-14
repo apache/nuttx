@@ -142,15 +142,14 @@ CONFIG_KINETIS_ADC3=n
 # K40X256VLQ100 specific serial device driver settings
 #
 # CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
-#   console and ttys0 (default is the UART1).
+#   console and ttys0 (default is the UART0).
 # CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
 #   This specific the size of the receive buffer
 # CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
 #   being sent.  This specific the size of the transmit buffer
-# CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
-# CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
+# CONFIG_UARTn_BAUD - The configure BAUD of the UART.
+# CONFIG_UARTn_BITS - The number of bits.  Must be either 8 or 9.
 # CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-# CONFIG_UARTn_2STOP - Two stop bits
 #
 CONFIG_UART1_SERIAL_CONSOLE=y
 CONFIG_UART2_SERIAL_CONSOLE=n
@@ -187,12 +186,6 @@ CONFIG_UART2_PARITY=0
 CONFIG_UART3_PARITY=0
 CONFIG_UART4_PARITY=0
 CONFIG_UART5_PARITY=0
-
-CONFIG_UART1_2STOP=0
-CONFIG_UART2_2STOP=0
-CONFIG_UART3_2STOP=0
-CONFIG_UART4_2STOP=0
-CONFIG_UART5_2STOP=0
 
 #
 # K40X256VLQ100 specific SSI device driver settings
