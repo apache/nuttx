@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/pic32mx/pic32mx-serial.c
+ * arch/mips/src/kinetis/kinetis_serial.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -58,10 +58,10 @@
 #include "up_internal.h"
 #include "os_internal.h"
 
-#include "pic32mx-config.h"
+#include "kinetis_config.h"
 #include "chip.h"
-#include "pic32mx-uart.h"
-#include "pic32mx-internal.h"
+#include "kinetis_uart.h"
+#include "kinetis_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -79,44 +79,148 @@
 
 #ifdef CONFIG_USE_SERIALDRIVER
 
-/* Which UART with be tty0/console and which tty1?  The console will always
+/* Which UART with be tty0/console and which tty1-4?  The console will always
  * be ttyS0.  If there is no console then will use the lowest numbered UART.
  */
 
-#ifdef HAVE_SERIAL_CONSOLE
-#  if defined(CONFIG_UART1_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart0port     /* UART1 is console */
-#    define TTYS0_DEV       g_uart0port     /* UART1 is ttyS0 */
-#    ifdef CONFIG_PIC32MX_UART2
-#      define TTYS1_DEV     g_uart1port     /* UART2 is ttyS1 */
-#    else
-#      undef  TTYS1_DEV                     /* No ttyS1 */
-#    endif
-#  elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart1port     /* UART2 is console */
-#    define TTYS0_DEV       g_uart1port     /* UART2 is ttyS0 */
-#    undef  TTYS1_DEV                       /* No ttyS1 */
-#  else
-#    error "I'm confused... Do we have a serial console or not?"
-#  endif
+/* First pick the console and ttys0.  This could be any of UART0-5 */
+
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart0port /* UART0 is console */
+#    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#    define UART0_ASSIGNED      1
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart1port /* UART1 is console */
+#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define UART1_ASSIGNED      1
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart2port /* UART2 is console */
+#    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
+#    define UART2_ASSIGNED      1
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart3port /* UART3 is console */
+#    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
+#    define UART3_ASSIGNED      1
+#elif defined(CONFIG_UART4_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart4port /* UART4 is console */
+#    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
+#    define UART4_ASSIGNED      1
+#elif defined(CONFIG_UART5_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart5port /* UART5 is console */
+#    define TTYS5_DEV           g_uart5port /* UART5 is ttyS0 */
 #else
-#  undef  CONSOLE_DEV                        /* No console */
-#  undef  CONFIG_UART1_SERIAL_CONSOLE
-#  undef  CONFIG_UART2_SERIAL_CONSOLE
-#  if defined(CONFIG_PIC32MX_UART1)
-#    define TTYS0_DEV       g_uart0port     /* UART1 is ttyS0 */
-#    ifdef CONFIG_PIC32MX_UART2
-#      define TTYS1_DEV     g_uart1port     /* UART2 is ttyS1 */
-#    else
-#      undef  TTYS1_DEV                     /* No ttyS1 */
-#    endif
-#  elif defined(CONFIG_PIC32MX_UART2)
-#    define TTYS0_DEV       g_uart1port     /* UART2 is ttyS0 */
-#    undef  TTYS1_DEV                       /* No ttyS1 */
-#  else
-#    undef  TTYS0_DEV
-#    undef  TTYS0_DEV
+#  undef CONSOLE_DEV                        /* No console */
+#  if defined(CONFIG_KINETIS_UART0)
+#    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#    define UART0_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART1)
+#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define UART1_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART2)
+#    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
+#    define UART2_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART3)
+#    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
+#    define UART3_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART4)
+#    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
+#    define UART4_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART5)
+#    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
+#    define UART5_ASSIGNED      1
 #  endif
+#endif
+
+/* Pick ttys1.  This could be any of UART0-5 excluding the console UART. */
+
+#if defined(CONFIG_KINETIS_UART0) && !defined(UART0_ASSIGNED)
+#  define TTYS1_DEV           g_uart0port /* UART0 is ttyS1 */
+#  define UART0_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS1_DEV           g_uart1port /* UART1 is ttyS1 */
+#  define UART1_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS1_DEV           g_uart2port /* UART2 is ttyS1 */
+#  define UART2_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#  define TTYS1_DEV           g_uart3port /* UART3 is ttyS1 */
+#  define UART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS1_DEV           g_uart4port /* UART4 is ttyS1 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS1_DEV           g_uart5port /* UART5 is ttyS1 */
+#  define UART5_ASSIGNED      1
+#endif
+
+/* Pick ttys2.  This could be one of UART1-5. It can't be UART0 because that
+ * was either assigned as ttyS0 or ttys1.  One of UART 1-5 could be the
+ * console.
+ */
+
+#if defined(CONFIG_KINETIS_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS2_DEV           g_uart1port /* UART1 is ttyS2 */
+#  define UART1_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS2_DEV           g_uart2port /* UART2 is ttyS2 */
+#  define UART2_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#  define TTYS2_DEV           g_uart3port /* UART3 is ttyS2 */
+#  define UART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS2_DEV           g_uart4port /* UART4 is ttyS2 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS2_DEV           g_uart5port /* UART5 is ttyS2 */
+#  define UART5_ASSIGNED      1
+#endif
+
+/* Pick ttys3. This could be one of UART2-5. It can't be UART0-1 because
+ * those have already been assigned to ttsyS0, 1, or 2.  One of
+ * UART 2-5 could be the console.
+ */
+
+#if defined(CONFIG_KINETIS_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS3_DEV           g_uart2port /* UART2 is ttyS3 */
+#  define UART2_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#  define TTYS3_DEV           g_uart3port /* UART3 is ttyS3 */
+#  define UART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS3_DEV           g_uart4port /* UART4 is ttyS3 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS3_DEV           g_uart5port /* UART5 is ttyS3 */
+#  define UART5_ASSIGNED      1
+#endif
+
+/* Pick ttys4. This could be one of UART3-5. It can't be UART0-2 because
+ * those have already been assigned to ttsyS0, 1, 2 or 3.  One of
+ * UART 3-5 could be the console.
+ */
+
+#if defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#  define TTYS4_DEV           g_uart3port /* UART3 is ttyS4 */
+#  define UART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS4_DEV           g_uart4port /* UART4 is ttyS4 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS4_DEV           g_uart5port /* UART5 is ttyS4 */
+#  define UART5_ASSIGNED      1
+#endif
+
+/* Pick ttys5. This could be one of UART4-5. It can't be UART0-3 because
+ * those have already been assigned to ttsyS0, 1, 2, 3 or 4.  One of
+ * UART 4-5 could be the console.
+ */
+
+#if defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS5_DEV           g_uart4port /* UART4 is ttyS5 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS5_DEV           g_uart5port /* UART5 is ttyS5 */
+#  define UART5_ASSIGNED      1
 #endif
 
 /* These values describe the set of enabled interrupts */
@@ -139,17 +243,17 @@
 
 struct up_dev_s
 {
-  uintptr_t uartbase; /* Base address of UART registers */
+  uintptr_t uartbase;  /* Base address of UART registers */
   uint32_t  baud;      /* Configured baud */
-  uint8_t   irq;       /* IRQ associated with this UART (for attachment) */
+  uint32_t  clock;     /* Clocking frequency of the UART module */
+#ifdef CONFIG_DEBUG
   uint8_t   irqe;      /* Error IRQ associated with this UART (for enable) */
-  uint8_t   irqrx;     /* RX IRQ associated with this UART (for enable) */
-  uint8_t   irqtx;     /* TX IRQ associated with this UART (for enable) */
+#endif
+  uint8_t   irqs;      /* Status IRQ associated with this UART (for enable) */
   uint8_t   irqprio;   /* Interrupt priority */
   uint8_t   ie;        /* Interrupts enabled */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
-  uint8_t   bits;      /* Number of bits (5, 6, 7 or 8) */
-  bool      stopbits2; /* true: Configure with 2 stop bits instead of 1 */
+  uint8_t   bits;      /* Number of bits (8 or 9) */
 };
 
 /****************************************************************************
@@ -160,7 +264,10 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context);
+#ifdef CONFIG_DEBUG
+static int  up_interrupte(int irq, void *context);
+#endif
+static int  up_interrupts(int irq, void *context);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -192,30 +299,80 @@ struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_PIC32MX_UART1
+#ifdef CONFIG_KINETIS_UART0
+static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
+static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
+#endif
+#ifdef CONFIG_KINETIS_UART1
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_PIC32MX_UART2
+#ifdef CONFIG_KINETIS_UART2
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 #endif
+#ifdef CONFIG_KINETIS_UART2
+static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
+static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
+#endif
+#ifdef CONFIG_KINETIS_UART2
+static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
+static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
+#endif
+#ifdef CONFIG_KINETIS_UART2
+static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
+static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
+#endif
 
-/* This describes the state of the AVR32 UART1 port. */
+/* This describes the state of the Kinetis UART0 port. */
 
-#ifdef CONFIG_PIC32MX_UART1
+#ifdef CONFIG_KINETIS_UART0
+static struct up_dev_s g_uart0priv =
+{
+  .uartbase       = KINETIS_UART0_BASE,
+  .clock          = BOARD_CORECLK_FREQ,
+  .baud           = CONFIG_UART0_BAUD,
+#ifdef CONFIG_DEBUG
+  .irqe           = KINETIS_IRQ_UART0E,
+#endif
+  .irqs           = KINETIS_IRQ_UART0S,
+  .irqprio        = CONFIG_KINETIS_UART0PRIO,
+  .parity         = CONFIG_UART0_PARITY,
+  .bits           = CONFIG_UART0_BITS,
+};
+
+static uart_dev_t g_uart0port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART0_RXBUFSIZE,
+    .buffer = g_uart0rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART0_TXBUFSIZE,
+    .buffer = g_uart0txbuffer,
+   },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart0priv,
+};
+#endif
+
+/* This describes the state of the Kinetis UART1 port. */
+
+#ifdef CONFIG_KINETIS_UART1
 static struct up_dev_s g_uart1priv =
 {
-  .uartbase       = PIC32MX_UART1_K1BASE,
+  .uartbase       = KINETIS_UART1_BASE,
+  .clock          = BOARD_CORECLK_FREQ,
   .baud           = CONFIG_UART1_BAUD,
-  .irq            = PIC32MX_IRQ_U1,
-  .irqe           = PIC32MX_IRQSRC_U1E,
-  .irqrx          = PIC32MX_IRQSRC_U1RX,
-  .irqtx          = PIC32MX_IRQSRC_U1TX,
-  .irqprio        = CONFIG_PIC32MX_UART1PRIO,
+#ifdef CONFIG_DEBUG
+  .irqe           = KINETIS_IRQ_UART1E,
+#endif
+  .irqs           = KINETIS_IRQ_UART1S,
+  .irqprio        = CONFIG_KINETIS_UART1PRIO,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
-  .stopbits2      = CONFIG_UART1_2STOP,
 };
 
 static uart_dev_t g_uart1port =
@@ -235,21 +392,21 @@ static uart_dev_t g_uart1port =
 };
 #endif
 
-/* This describes the state of the AVR32 UART2 port. */
+/* This describes the state of the Kinetis UART2 port. */
 
-#ifdef CONFIG_PIC32MX_UART2
+#ifdef CONFIG_KINETIS_UART2
 static struct up_dev_s g_uart2priv =
 {
-  .uartbase       = PIC32MX_UART2_K1BASE,
+  .uartbase       = KINETIS_UART2_BASE,
+  .clock          = BOARD_BUS_FREQ,
   .baud           = CONFIG_UART2_BAUD,
-  .irq            = PIC32MX_IRQ_U2,
-  .irqe           = PIC32MX_IRQSRC_U2E,
-  .irqrx          = PIC32MX_IRQSRC_U2RX,
-  .irqtx          = PIC32MX_IRQSRC_U2TX,
-  .irqprio        = CONFIG_PIC32MX_UART2PRIO,
+#ifdef CONFIG_DEBUG
+  .irqe           = KINETIS_IRQ_UART2E,
+#endif
+  .irqs           = KINETIS_IRQ_UART2S,
+  .irqprio        = CONFIG_KINETIS_UART2PRIO,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
-  .stopbits2      = CONFIG_UART2_2STOP,
 };
 
 static uart_dev_t g_uart2port =
@@ -269,6 +426,108 @@ static uart_dev_t g_uart2port =
 };
 #endif
 
+/* This describes the state of the Kinetis UART3 port. */
+
+#ifdef CONFIG_KINETIS_UART3
+static struct up_dev_s g_uart3priv =
+{
+  .uartbase       = KINETIS_UART3_BASE,
+  .clock          = BOARD_BUS_FREQ,
+  .baud           = CONFIG_UART3_BAUD,
+#ifdef CONFIG_DEBUG
+  .irqe           = KINETIS_IRQ_UART3E,
+#endif
+  .irqs           = KINETIS_IRQ_UART3S,
+  .irqprio        = CONFIG_KINETIS_UART3PRIO,
+  .parity         = CONFIG_UART3_PARITY,
+  .bits           = CONFIG_UART3_BITS,
+};
+
+static uart_dev_t g_uart3port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART3_RXBUFSIZE,
+    .buffer = g_uart3rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART3_TXBUFSIZE,
+    .buffer = g_uart3txbuffer,
+   },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart3priv,
+};
+#endif
+
+/* This describes the state of the Kinetis UART4 port. */
+
+#ifdef CONFIG_KINETIS_UART4
+static struct up_dev_s g_uart4priv =
+{
+  .uartbase       = KINETIS_UART4_BASE,
+  .clock          = BOARD_BUS_FREQ,
+  .baud           = CONFIG_UART4_BAUD,
+#ifdef CONFIG_DEBUG
+  .irqe           = KINETIS_IRQ_UART4E,
+#endif
+  .irqs           = KINETIS_IRQ_UART4S,
+  .irqprio        = CONFIG_KINETIS_UART4PRIO,
+  .parity         = CONFIG_UART4_PARITY,
+  .bits           = CONFIG_UART4_BITS,
+};
+
+static uart_dev_t g_uart4port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART4_RXBUFSIZE,
+    .buffer = g_uart4rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART4_TXBUFSIZE,
+    .buffer = g_uart4txbuffer,
+   },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart4priv,
+};
+#endif
+
+/* This describes the state of the Kinetis UART5 port. */
+
+#ifdef CONFIG_KINETIS_UART5
+static struct up_dev_s g_uart5priv =
+{
+  .uartbase       = KINETIS_UART5_BASE,
+  .clock          = BOARD_BUS_FREQ,
+  .baud           = CONFIG_UART5_BAUD,
+#ifdef CONFIG_DEBUG
+  .irqe           = KINETIS_IRQ_UART5E,
+#endif
+  .irqs           = KINETIS_IRQ_UART5S,
+  .irqprio        = CONFIG_KINETIS_UART5PRIO,
+  .parity         = CONFIG_UART5_PARITY,
+  .bits           = CONFIG_UART5_BITS,
+};
+
+static uart_dev_t g_uart5port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART5_RXBUFSIZE,
+    .buffer = g_uart5rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART5_TXBUFSIZE,
+    .buffer = g_uart5txbuffer,
+   },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart5priv,
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -277,18 +536,18 @@ static uart_dev_t g_uart2port =
  * Name: up_serialin
  ****************************************************************************/
 
-static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
+static inline uint8_t up_serialin(struct up_dev_s *priv, int offset)
 {
-  return getreg32(priv->uartbase + offset);
+  return getreg8(priv->uartbase + offset);
 }
 
 /****************************************************************************
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset, uint8_t value)
 {
-  putreg32(value, priv->uartbase + offset);
+  putreg8(value, priv->uartbase + offset);
 }
 
 /****************************************************************************
@@ -302,8 +561,7 @@ static void up_restoreuartint(struct up_dev_s *priv, uint8_t im)
   /* Re-enable/re-disable interrupts corresponding to the state of bits in im */
 
   flags = irqsave();
-  up_rxint(priv, RX_ENABLED(im));
-  up_txint(priv, TX_ENABLED(im));
+#warning "Missing logic"
   irqrestore(flags);
 }
 
@@ -340,13 +598,16 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Configure the UART as an RS-232 UART */
 
-  uart_configure(priv->uartbase, priv->baud, priv->parity,
-                 priv->bits, priv->stopbits2);
+  uart_configure(priv->uartbase, priv->baud, priv->clock, priv->parity,
+                 priv->bits);
 #endif
 
   /* Set up the interrupt priority */
 
-  up_prioritize_irq(priv->irq, priv->irqprio);
+  up_prioritize_irq(priv->irqs, priv->irqprio);
+#ifdef CONFIG_DEBUG
+  up_prioritize_irq(priv->irqe, priv->irqprio);
+#endif
   return OK;
 }
 
@@ -390,10 +651,19 @@ static void up_shutdown(struct uart_dev_s *dev)
 static int up_attach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  int ret;
 
-  /* Attach the IRQ */
+  /* Attach the IRQ(s) */
 
-  return irq_attach(priv->irq, up_interrupt);
+  ret = irq_attach(priv->irqs, up_interrupts);
+#ifdef CONFIG_DEBUG
+  if (ret == OK)
+    {
+      ret = irq_attach(priv->irqe, up_interrupte);
+    }
+#endif
+
+  return ret;
 }
 
 /****************************************************************************
@@ -414,16 +684,93 @@ static void up_detach(struct uart_dev_s *dev)
 
   up_disableuartint(priv, NULL);
 
-  /* Detach from the interrupt */
+  /* Detach from the interrupt(s) */
 
-  irq_detach(priv->irq);
+  irq_detach(priv->irqs);
+#ifdef CONFIG_DEBUG
+  irq_detach(priv->irqe);
+#endif
 }
 
 /****************************************************************************
- * Name: up_interrupt
+ * Name: up_interrupte
  *
  * Description:
- *   This is the UART interrupt handler.  It will be invoked when an
+ *   This is the UART error interrupt handler.  It will be invoked when an
+ *   interrupt received on the 'irq'
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG
+static int up_interrupte(int irq, void *context)
+{
+  struct uart_dev_s *dev = NULL;
+  struct up_dev_s   *priv;
+
+#ifdef CONFIG_KINETIS_UART0
+  if (g_uart0priv.irq == irqe)
+    {
+      dev = &g_uart0port;
+    }
+  else
+#endif
+#ifdef CONFIG_KINETIS_UART1
+  if (g_uart1priv.irq == irqe)
+    {
+      dev = &g_uart1port;
+    }
+  else
+#endif
+#ifdef CONFIG_KINETIS_UART2
+  if (g_uart2priv.irq == irqe)
+    {
+      dev = &g_uart2port;
+    }
+  else
+#endif
+#ifdef CONFIG_KINETIS_UART3
+  if (g_uart3priv.irq == irqe)
+    {
+      dev = &g_uart1port;
+    }
+  else
+#endif
+#ifdef CONFIG_KINETIS_UART4
+  if (g_uart4priv.irq == irqe)
+    {
+      dev = &g_uart1port;
+    }
+  else
+#endif
+#ifdef CONFIG_KINETIS_UART5
+  if (g_uart5priv.irq == irqe)
+    {
+      dev = &g_uart1port;
+    }
+  else
+#endif
+    {
+      PANIC(OSERR_INTERNAL);
+    }
+  priv = (struct up_dev_s*)dev->priv;
+  DEBUGASSERT(priv);
+
+  /* Handle error interrupts.  */
+#warning "Missing logic"
+
+  /* Clear the pending error interrupt */
+
+  up_clrpend_irq(priv->irqe); // Necessary?
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: up_interrupts
+ *
+ * Description:
+ *   This is the UART status interrupt handler.  It will be invoked when an
  *   interrupt received on the 'irq'  It should call uart_transmitchars or
  *   uart_receivechar to perform the appropriate data transfers.  The
  *   interrupt handling logic must be able to map the 'irq' number into the
@@ -431,24 +778,52 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int up_interrupts(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
   int                passes;
   bool               handled;
 
-#ifdef CONFIG_PIC32MX_UART1
-  if (g_uart1priv.irq == irq)
+#ifdef CONFIG_KINETIS_UART0
+  if (g_uart0priv.irq == irqe)
+    {
+      dev = &g_uart0port;
+    }
+  else
+#endif
+#ifdef CONFIG_KINETIS_UART1
+  if (g_uart1priv.irq == irqs)
     {
       dev = &g_uart1port;
     }
   else
 #endif
-#ifdef CONFIG_PIC32MX_UART2
-  if (g_uart2priv.irq == irq)
+#ifdef CONFIG_KINETIS_UART2
+  if (g_uart2priv.irq == irqs)
     {
       dev = &g_uart2port;
+    }
+  else
+#endif
+#ifdef CONFIG_KINETIS_UART3
+  if (g_uart3priv.irq == irqs)
+    {
+      dev = &g_uart1port;
+    }
+  else
+#endif
+#ifdef CONFIG_KINETIS_UART4
+  if (g_uart4priv.irq == irqs)
+    {
+      dev = &g_uart1port;
+    }
+  else
+#endif
+#ifdef CONFIG_KINETIS_UART5
+  if (g_uart5priv.irq == irqs)
+    {
+      dev = &g_uart1port;
     }
   else
 #endif
@@ -467,51 +842,32 @@ static int up_interrupt(int irq, void *context)
     {
       handled = false;
 
-      /* Handle error interrupts.  This interrupt occurs when any of the
-       * following error conditions take place: 
-       *  - Parity error PERR (UxSTA bit 3) is detected 
-       *  - Framing Error FERR (UxSTA bit 2) is detected
-       *  - Overflow condition for the receive buffer OERR (UxSTA bit 1) occurs
-       */
+      /* Check for a pending status interrupt */
 
-#ifdef CONFIG_DEBUG
-      if (up_pending_irq(priv->irqe))
+      if (up_pending_irq(priv->irqs))
         {
-           /* Clear the pending error interrupt */
+          /* Clear the pending status interrupt */
 
-           up_clrpend_irq(priv->irqe);
-           lldbg("ERROR: interrrupt STA: %08x\n",
-                 up_serialin(priv, PIC32MX_UART1_STA_OFFSET)
-           handled = true;
-        }
-#endif
+          up_clrpend_irq(priv->irqs); // Necessary?
 
-      /* Handle incoming, receive bytes */
+          /* Handle incoming, receive bytes */
 
-      if (up_pending_irq(priv->irqrx))
-        {
-            /* Clear the pending RX interrupt */
+#warning "Missing logic"
+            {
+              /* Process incoming bytes */
 
-            up_clrpend_irq(priv->irqrx);
- 
-           /* Process incoming bytes */
+              uart_recvchars(dev);
+              handled = true;
+            }
 
-           uart_recvchars(dev);
-           handled = true;
-        }
+          /* Handle outgoing, transmit bytes */
+#warning "Missing logic"
+            {
+              /* Process outgoing bytes */
 
-      /* Handle outgoing, transmit bytes */
-
-      if (up_pending_irq(priv->irqtx))
-        {
-            /* Clear the pending RX interrupt */
-
-            up_clrpend_irq(priv->irqtx);
- 
-           /* Process outgoing bytes */
-
-           uart_xmitchars(dev);
-           handled = true;
+              uart_xmitchars(dev);
+              handled = true;
+            }
         }
     }
 
@@ -580,7 +936,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 
   /* Then return the actual received byte */
 
-  return  (int)(up_serialin(priv, PIC32MX_UART_RXREG_OFFSET) & UART_RXREG_MASK;
+  return (int)up_serialin(priv, KINETIS_UART_D_OFFSET);
 }
 
 /****************************************************************************
@@ -609,7 +965,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 #ifdef CONFIG_DEBUG
       up_enable_irq(priv->irqe);
 #endif
-      up_enable_irq(priv->irqtx);
+      up_enable_irq(priv->irqs);
       ENABLE_RX(im);
 #endif
     }
@@ -618,9 +974,10 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 #ifdef CONFIG_DEBUG
       up_disable_irq(priv->irqe);
 #endif
-      up_disable_irq(priv->irqtx);
+      up_disable_irq(priv->irqs);
       DISABLE_RX(im);
     }
+
   priv->im = im;
   irqrestore(flags);
 }
@@ -637,9 +994,9 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 
-  /* Return true is data is available in the receive data buffer */
+  /* Return true if the receive data register is full */
 
-  return (up_serialin(priv, PIC32MX_UART_STA_OFFSET) & UART_STA_URXDA) != 0;
+  return (up_serialin(priv, KINETIS_UART_S1_OFFSET) & UART_S1_RDRF) != 0;
 }
 
 /****************************************************************************
@@ -653,7 +1010,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_serialout(priv, PIC32MX_UART_TXREG_OFFSET, (uint32_t)ch);
+  up_serialout(priv, KINETIS_UART_D_OFFSET, (uint8_t)ch);
 }
 
 /****************************************************************************
@@ -677,7 +1034,6 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       /* Enable the TX interrupt */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      up_enable_irq(priv->irqtx);
       ENABLE_TX(im);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
@@ -691,7 +1047,6 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-      up_disable_irq(priv->irqtx);
       DISABLE_TX(im);
     }
 
@@ -711,9 +1066,12 @@ static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 
-  /* Return TRUE if the Transmit buffer register is not full */
+  /* Return true if the transmit data register is "empty."  This state
+   * depends on the TX watermark setting and does not mean that the transmit
+   * buffer is really empty.
+   */
 
-  return (up_serialin(priv, PIC32MX_UART_STA_OFFSET) & UART_STA_UTXBF) == 0;
+  return (up_serialin(priv, KINETIS_UART_S1_OFFSET) & UART_S1_TDRE) != 0;
 }
 
 /****************************************************************************
@@ -728,9 +1086,9 @@ static bool up_txempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 
-  /* Return TRUE if the Transmit shift register is empty */
+  /* Return true if the transmit buffer/fifo is "empty." */
 
-  return (up_serialin(priv, PIC32MX_UART_STA_OFFSET) & UART_STA_UTRMT) != 0;
+  return (up_serialin(priv, KINETIS_UART_SFIFO_OFFSET) & UART_SFIFO_TXEMPT) != 0;
 }
 
 /****************************************************************************
@@ -758,6 +1116,18 @@ void up_earlyserialinit(void)
   up_disableuartint(TTYS0_DEV.priv, NULL);
 #ifdef TTYS1_DEV
   up_disableuartint(TTYS1_DEV.priv, NULL);
+#endif
+#ifdef TTYS2_DEV
+  up_disableuartint(TTYS2_DEV.priv, NULL);
+#endif
+#ifdef TTYS3_DEV
+  up_disableuartint(TTYS3_DEV.priv, NULL);
+#endif
+#ifdef TTYS4_DEV
+  up_disableuartint(TTYS4_DEV.priv, NULL);
+#endif
+#ifdef TTYS5_DEV
+  up_disableuartint(TTYS5_DEV.priv, NULL);
 #endif
 
   /* Configuration whichever one is the console */
@@ -791,6 +1161,18 @@ void up_serialinit(void)
 #ifdef TTYS1_DEV
   (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif
+#ifdef TTYS2_DEV
+  (void)uart_register("/dev/ttyS2", &TTYS2_DEV);
+#endif
+#ifdef TTYS3_DEV
+  (void)uart_register("/dev/ttyS3", &TTYS3_DEV);
+#endif
+#ifdef TTYS4_DEV
+  (void)uart_register("/dev/ttyS4", &TTYS4_DEV);
+#endif
+#ifdef TTYS5_DEV
+  (void)uart_register("/dev/ttyS5", &TTYS5_DEV);
+#endif
 }
 
 /****************************************************************************
@@ -805,7 +1187,7 @@ int up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-  uint32_t imr;
+  uint8_t imr;
 
   up_disableuartint(priv, &imr);
 

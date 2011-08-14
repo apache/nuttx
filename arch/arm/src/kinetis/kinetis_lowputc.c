@@ -50,6 +50,7 @@
 #include "kinetis_config.h"
 #include "kinetis_internal.h"
 #include "kinetis_uart.h"
+#include "kinetis_sim.h"
 #include "kinetis_pinmux.h"
 
 /**************************************************************************
@@ -60,55 +61,43 @@
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     KINETIS_UART0_BASE
+#  define CONSOLE_FREQ     BOARD_CORECLK_FREQ
 #  define CONSOLE_BAUD     CONFIG_UART0_BAUD
 #  define CONSOLE_BITS     CONFIG_UART0_BITS
 #  define CONSOLE_PARITY   CONFIG_UART0_PARITY
-#  define CONSOLE_2STOP    CONFIG_UART0_2STOP
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     KINETIS_UART1_BASE
+#  define CONSOLE_FREQ     BOARD_CORECLK_FREQ
 #  define CONSOLE_BAUD     CONFIG_UART1_BAUD
 #  define CONSOLE_BITS     CONFIG_UART1_BITS
 #  define CONSOLE_PARITY   CONFIG_UART1_PARITY
-#  define CONSOLE_2STOP    CONFIG_UART1_2STOP
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     KINETIS_UART2_BASE
+#  define CONSOLE_FREQ     BOARD_BUS_FREQ
 #  define CONSOLE_BAUD     CONFIG_UART2_BAUD
 #  define CONSOLE_BITS     CONFIG_UART2_BITS
 #  define CONSOLE_PARITY   CONFIG_UART2_PARITY
-#  define CONSOLE_2STOP    CONFIG_UART2_2STOP
 #elif defined(CONFIG_UART3_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     KINETIS_UART3_BASE
+#  define CONSOLE_FREQ     BOARD_BUS_FREQ
 #  define CONSOLE_BAUD     CONFIG_UART3_BAUD
 #  define CONSOLE_BITS     CONFIG_UART3_BITS
 #  define CONSOLE_PARITY   CONFIG_UART3_PARITY
-#  define CONSOLE_2STOP    CONFIG_UART3_2STOP
 #elif defined(CONFIG_UART4_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     KINETIS_UART4_BASE
+#  define CONSOLE_FREQ     BOARD_BUS_FREQ
 #  define CONSOLE_BAUD     CONFIG_UART4_BAUD
 #  define CONSOLE_BITS     CONFIG_UART4_BITS
 #  define CONSOLE_PARITY   CONFIG_UART4_PARITY
-#  define CONSOLE_2STOP    CONFIG_UART4_2STOP
 #elif defined(CONFIG_UART5_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     KINETIS_UART5_BASE
+#  define CONSOLE_FREQ     BOARD_BUS_FREQ
 #  define CONSOLE_BAUD     CONFIG_UART5_BAUD
 #  define CONSOLE_BITS     CONFIG_UART5_BITS
 #  define CONSOLE_PARITY   CONFIG_UART5_PARITY
-#  define CONSOLE_2STOP    CONFIG_UART5_2STOP
-#elif defined(HAVE_CONSOLE)
+#elif defined(HAVE_SERIAL_CONSOLE)
 #  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
-
-/* Get word length setting for the console */
-# warning "Missing logic"
-
-/* Get parity setting for the console */
-# warning "Missing logic"
-
-/* Get stop-bit setting for the console and UART0-3 */
-# warning "Missing logic"
-
-/* Select a divider to produce the UART CLK */
-# warning "Missing logic"
 
 /**************************************************************************
  * Private Types
@@ -144,8 +133,19 @@
 
 void up_lowputc(char ch)
 {
-#if defined HAVE_UART_DEVICE && defined HAVE_CONSOLE
-# warning "Missing logic"
+#if defined HAVE_UART_DEVICE && defined HAVE_SERIAL_CONSOLE
+
+  /* Wait until the transmit data register is "empty."  This state depends
+   * on the TX watermark setting and does not mean that the transmit buffer
+   * is really empty.  It just means that we can now add another character
+   * to the transmit buffer
+   */
+
+  while ((getreg8(CONSOLE_BASE+KINETIS_UART_S1_OFFSET) & UART_S1_TDRE) == 0);
+
+ /* Then write the character to the UART data register */
+
+  putreg8((uint8_t)ch, CONSOLE_BASE+KINETIS_UART_D_OFFSET);
 #endif
 }
 
@@ -182,13 +182,46 @@ void up_lowputc(char ch)
 void kinetis_lowsetup(void)
 {
 #ifdef HAVE_UART_DEVICE
-  /* Step 1: Enable power for all enabled UARTs */
+  uint32_t regval;
 
-# warning "Missing logic"
+  /* Enable peripheral clocking for all enabled UARTs.  Clocking for UARTs
+   * 0-3 is enabled in the SCGC4 register.
+   */
 
-  /* Step 2: Enable peripheral clocking for all enabled UARTs */
+#if defined(CONFIG_KINETIS_UART0) || defined(CONFIG_KINETIS_UART1) || \
+    defined(CONFIG_KINETIS_UART2) || defined(CONFIG_KINETIS_UART3)
 
-# warning "Missing logic"
+   regval = getreg32(KINETIS_SIM_SCGC4);
+#  ifdef CONFIG_KINETIS_UART0
+   regval |= SIM_SCGC4_UART0;
+#  endif
+#  ifdef CONFIG_KINETIS_UART1
+   regval |= SIM_SCGC4_UART1;
+#  endif
+#  ifdef CONFIG_KINETIS_UART2
+   regval |= SIM_SCGC4_UART2;
+#  endif
+#  ifdef CONFIG_KINETIS_UART3
+   regval |= SIM_SCGC4_UART3;
+#  endif
+   putreg32(regval, KINETIS_SIM_SCGC4);
+
+#endif
+
+  /* Clocking for UARTs 4-5 is enabled in the SCGC1 register. */
+
+#if defined(CONFIG_KINETIS_UART4) || defined(CONFIG_KINETIS_UART5)
+
+   regval = getreg32(KINETIS_SIM_SCGC4);
+#  ifdef CONFIG_KINETIS_UART4
+   regval |= SIM_SCGC1_UART4;
+#  endif
+#  ifdef CONFIG_KINETIS_UART5
+   regval |= SIM_SCGC1_UART5;
+#  endif
+   putreg32(regval, KINETIS_SIM_SCGC4);
+
+#endif
 
   /* Configure UART pins for the all enabled UARTs */
 
@@ -217,12 +250,14 @@ void kinetis_lowsetup(void)
   kinetis_configgpio(GPIO_UART5_RX);
 #endif
 
-  /* Configure the console (only) */
+  /* Configure the console (only) now.  Other UARTs will be configured
+   * when the serial driver is opened.
+   */
 
-#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+#if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
 
-  kinetis_uartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_PARITY,
-                        CONSOLE_BITS, CONSOLE_2STOP);
+  kinetis_uartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_FREQ,
+                        CONSOLE_PARITY, CONSOLE_BITS);
 #endif
 #endif /* HAVE_UART_DEVICE */
 }
@@ -238,7 +273,13 @@ void kinetis_lowsetup(void)
 #ifdef HAVE_UART_DEVICE
 void kinetis_uartreset(uintptr_t uart_base)
 {
-# warning "Missing logic"
+  uint8_t regval;
+
+  /* Just disable the transmitter and receiver */
+
+  regval = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
+  regval &= ~(UART_C2_RE|UART_C2_TE);
+  putreg8(regval, uart_base+KINETIS_UART_C2_OFFSET);
 }
 #endif
 
@@ -251,11 +292,103 @@ void kinetis_uartreset(uintptr_t uart_base)
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
-                           unsigned int parity, unsigned int nbits,
-                           bool stop2)
+void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
+                           uint32_t clock, unsigned int parity,
+                           unsigned int nbits)
 {
-# warning "Missing logic"
+  uint32_t sbr;
+  uint32_t brfa;
+  uint32_t tmp;
+  uint8_t  regval;
+
+  /* Disable the transmitter and receiver throughout the reconfiguration */
+
+  regval = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
+  regval &= ~(UART_C2_RE|UART_C2_TE);
+  putreg8(regval, uart_base+KINETIS_UART_C2_OFFSET);
+
+  /* Configure number of bits, stop bits and parity */
+
+  regval = 0;
+
+  /* Check for odd parity */
+
+  if (parity == 1)
+    {
+      regval |= (UART_C1_PE|UART_C1_PT); /* Enable + odd parity type */
+    }
+
+  /* Check for even parity */
+
+  else if (parity == 2)
+    {
+      regval |= UART_C1_PE;              /* Enable (even parity default) */
+    }
+
+  /* The only other option is no parity */
+
+  else
+    {
+      DEBUGASSERT(parity == 0);
+    }
+
+  /* Check for 9-bit operation */
+
+  if (nbits == 9)
+    {
+      regval |= UART_C1_M;
+    }
+  
+  /* The only other option is 8-bit operation */
+
+  else
+    {
+      DEBUGASSERT(nbits == 8);
+    }
+
+  putreg8(regval, uart_base+KINETIS_UART_C1_OFFSET);
+
+  /* Calculate baud settings (truncating) */
+
+  sbr = clock / (baud << 4);
+  DEBUGASSERT(sbr < 0x2000);
+        
+  /* Save the new baud divisor, retaining other bits in the UARTx_BDH
+   * register.
+   */
+
+  regval  = getreg8(uart_base+KINETIS_UART_BDH_OFFSET) & UART_BDH_SBR_MASK;
+  tmp     = sbr >> 8;
+  regval |= (((uint8_t)tmp) << UART_BDH_SBR_SHIFT) & UART_BDH_SBR_MASK;
+  putreg8(regval, uart_base+KINETIS_UART_BDH_OFFSET);
+
+  tmp    = sbr & 0xff;
+  putreg8(regval, uart_base+KINETIS_UART_BDL_OFFSET);
+    
+  /* Calculate a fractional divider to get closer to the requested baud.
+   * The fractional divider, BRFA, is a 5 bit fractional value that is
+   * logically added to the SBR:
+   *
+   *   UART baud rate = clock / (16 × (SBR + BRFD))
+   *
+   * The BRFA the remainder.  This will be a non-negative value since the SBR
+   * was calculated by truncation.
+   */
+
+  tmp  = clock - (sbr * (baud << 4));
+  brfa = (tmp << 5) / (baud << 4);
+    
+  /* Set the BRFA field (retaining other bits in the UARTx_C4 register) */
+
+  regval  = getreg8(uart_base+KINETIS_UART_C4_OFFSET) & UART_C4_BRFA_MASK;
+  regval |= ((uint8_t)brfa << UART_C4_BRFA_SHIFT) & UART_C4_BRFA_MASK;
+  putreg8(regval, uart_base+KINETIS_UART_C4_OFFSET);
+
+  /* Now we can re-enable the transmitter and receiver */
+
+  regval = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
+  regval |= (UART_C2_RE|UART_C2_TE);
+  putreg8(regval, uart_base+KINETIS_UART_C2_OFFSET);
 }
 #endif
 

@@ -332,9 +332,9 @@ EXTERN void kinetis_uartreset(uintptr_t uart_base);
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-EXTERN void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
-                                  unsigned int parity, unsigned int nbits,
-                                  bool stop2);
+EXTERN void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
+                                  uint32_t clock, unsigned int parity,
+                                  unsigned int nbits);
 #endif
 
 /************************************************************************************
