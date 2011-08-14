@@ -54,6 +54,7 @@
 #define KINETIS_PORTC              (2)
 #define KINETIS_PORTD              (3)
 #define KINETIS_PORTE              (4)
+#define KINETIS_NPORTS             (5)
 
 /* Register Offsets *****************************************************************/
 
