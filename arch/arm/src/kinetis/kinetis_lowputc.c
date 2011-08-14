@@ -226,28 +226,28 @@ void kinetis_lowsetup(void)
   /* Configure UART pins for the all enabled UARTs */
 
 #ifdef CONFIG_KINETIS_UART0
-  kinetis_configgpio(GPIO_UART0_TX);
-  kinetis_configgpio(GPIO_UART0_RX);
+  kinetis_pinconfig(PIN_UART0_TX);
+  kinetis_pinconfig(PIN_UART0_RX);
 #endif
 #ifdef CONFIG_KINETIS_UART1
-  kinetis_configgpio(GPIO_UART1_TX);
-  kinetis_configgpio(GPIO_UART1_RX);
+  kinetis_pinconfig(PIN_UART1_TX);
+  kinetis_pinconfig(PIN_UART1_RX);
 #endif
 #ifdef CONFIG_KINETIS_UART2
-  kinetis_configgpio(GPIO_UART2_TX);
-  kinetis_configgpio(GPIO_UART2_RX);
+  kinetis_pinconfig(PIN_UART2_TX);
+  kinetis_pinconfig(PIN_UART2_RX);
 #endif
 #ifdef CONFIG_KINETIS_UART3
-  kinetis_configgpio(GPIO_UART3_TX);
-  kinetis_configgpio(GPIO_UART3_RX);
+  kinetis_pinconfig(PIN_UART3_TX);
+  kinetis_pinconfig(PIN_UART3_RX);
 #endif
 #ifdef CONFIG_KINETIS_UART4
-  kinetis_configgpio(GPIO_UART4_TX);
-  kinetis_configgpio(GPIO_UART4_RX);
+  kinetis_pinconfig(PIN_UART4_TX);
+  kinetis_pinconfig(PIN_UART4_RX);
 #endif
 #ifdef CONFIG_KINETIS_UART5
-  kinetis_configgpio(GPIO_UART5_TX);
-  kinetis_configgpio(GPIO_UART5_RX);
+  kinetis_pinconfig(PIN_UART5_TX);
+  kinetis_pinconfig(PIN_UART5_RX);
 #endif
 
   /* Configure the console (only) now.  Other UARTs will be configured

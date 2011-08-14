@@ -392,11 +392,11 @@ void up_irqinitialize(void)
 #endif
 
   /* Initialize logic to support a second level of interrupt decoding for
-   * GPIO pins.
+   * configured pin interrupts.
    */
  
 #ifdef CONFIG_GPIO_IRQ
-  kinetis_gpioirqinitialize();
+  kinetis_pinirqinitialize();
 #endif
 
   /* And finally, enable interrupts */
@@ -429,14 +429,6 @@ void up_disable_irq(int irq)
       regval &= ~bit;
       putreg32(regval, regaddr);
     }
-#ifdef CONFIG_GPIO_IRQ
-  else
-    {
-      /* Maybe it is a (derived) GPIO IRQ */
-
-      kinetis_gpioirqdisable(irq);
-    }
-#endif
   kinetis_dumpnvic("disable", irq);
 }
 
@@ -462,14 +454,6 @@ void up_enable_irq(int irq)
       regval |= bit;
       putreg32(regval, regaddr);
     }
-#ifdef CONFIG_GPIO_IRQ
-  else
-    {
-      /* Maybe it is a (derived) GPIO IRQ */
-
-      kinetis_gpioirqenable(irq);
-    }
-#endif
   kinetis_dumpnvic("enable", irq);
 }
 
