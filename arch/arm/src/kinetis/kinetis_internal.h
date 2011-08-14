@@ -59,9 +59,9 @@
 /* Configuration ********************************************************************/
 
 /* Bit-encoded input to kinetis_configgpio() ****************************************/
-/* General form (32-bits, only 20 bits are unused in the encoding):
+/* General form (32-bits, only 22 bits are unused in the encoding):
  *
- * oooo mmmf iiii ---- ---- -ppp ---b bbbb
+ * oooo mmmv iiii fd-- ---- -ppp ---b bbbb
  */
 
 /* Bits 25-31: 7 bits are used to encode the basic pin configuration:
@@ -77,6 +77,8 @@
 #define _GPIO_OPTIONS_SHIFT     (28) /* Bits 28-31: Pin mode options */
 #define _GPIO_OPTIONS_MASK      (15 << _GPIO_OPTIONS_SHIFT)
 
+/* Port Modes */
+
 #define _GPIO_MODE_ANALOG       (0)  /* 000 Pin Disabled (Analog) */
 #define _GPIO_MODE_GPIO         (1)  /* 001 Alternative 1 (GPIO) */
 #define _GPIO_MODE_ALT2         (2)  /* 010 Alternative 2 */
@@ -86,24 +88,31 @@
 #define _GPIO_MODE_ALT6         (6)  /* 110 Alternative 6 */
 #define _GPIO_MODE_ALT7         (7)  /* 111 Alternative 7 */
 
-#define _GPIO_IO_MASK           (1)  /* xxx1 GPIO input/output mask */
-#define _GPIO_INPUT             (0)  /* xxx0 GPIO input */
-#define _GPIO_INPUT_PULLMASK    (6)  /* x11x Mask for pull-up or -down bits */
-#define _GPIO_INPUT_PULLENABLE  (2)  /* x010 Enables pull-up or -down */
+/* Options for all digital modes (Alternatives 1-7).  None of the digital
+ * options apply if the analog mode is selected.
+ */
+
+#define _GPIO_IO_MASK           (1)  /* xxx1 Digital input/output mask */
+#define _GPIO_INPUT             (0)  /* xxx0 Digital input */
+#define _GPIO_OUTPUT            (1)  /* xxx1 Digital output */
+
+#define _GPIO_INPUT_PULLMASK    (7)  /* x111 Mask for pull-up or -down bits */
 #define _GPIO_INPUT_PULLDOWN    (2)  /* x010 Input with internal pull-down resistor */
 #define _GPIO_INPUT_PULLUP      (6)  /* x110 Input with internal pull-up resistor */
-#define _GPIO_INPUT_FILTER_MASK (8)  /* 1xxx Mask to test if passive filter enabled */
-#define _GPIO_INPUT_FILTER      (8)  /* 1xx0 Input with passive filter enabled */
 
-#define _GPIO_OUTPUT            (1)  /* xxx1 GPIO output */
-#define _GPIO_OUTPUT_SLEW_MASK  (2)  /* xx1x Mask to test for slow slew rate */
+#define _GPIO_OUTPUT_SLEW_MASK  (3)  /* xx11 Mask to test for slow slew rate */
 #define _GPIO_OUTPUT_FAST       (1)  /* xx01 Output with fast slew rate */
 #define _GPIO_OUTPUT_SLOW       (3)  /* xx11 Output with slow slew rate */
-#define _GPIO_OUTPUT_OD_MASK    (4)  /* x1xx Mask to test for open drain */
+#define _GPIO_OUTPUT_OD_MASK    (5)  /* x1x1 Mask to test for open drain */
 #define _GPIO_OUTPUT_OPENDRAIN  (5)  /* x1x1 Output with open drain enabled */
-#define _GPIO_OUTPUT_DRIVE_MASK (4)  /* 1xxx Mask to test for high drive strengh */
+#define _GPIO_OUTPUT_DRIVE_MASK (9)  /* 1xx1 Mask to test for high drive strengh */
 #define _GPIO_OUTPUT_LOWDRIVE   (1)  /* 0xx1 Output with low drive strength */
 #define _GPIO_OUTPUT_HIGHDRIVE  (9)  /* 1xx1 Output with high drive strength */
+
+/* End-user pin modes and configurations.  Notes:  (1) None of the digital options
+ * are available for the analog mode, (2) digital settings may be combined (OR'ed)
+ * provided that input-only and output-only options are not intermixed.
+ */
 
 #define GPIO_ANALOG             (_GPIO_MODE_ANALOG       << _GPIO_MODE_SHIFT)
 
@@ -113,9 +122,6 @@
                                  (_GPIO_INPUT_PULLDOWN   << _GPIO_OPTIONS_SHIFT))
 #define GPIO_PULLUP             ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
                                  (_GPIO_INPUT_PULLUP     << _GPIO_OPTIONS_SHIFT))
-#define GPIO_FILTER             ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
-                                 (_GPIO_INPUT_FILTER     << _GPIO_OPTIONS_SHIFT))
-
 #define GPIO_OUTPUT             ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
                                  (_GPIO_OUTPUT           << _GPIO_OPTIONS_SHIFT))
 #define GPIO_FAST               ((_GPIO_MODE_GPIO        << _GPIO_MODE_SHIFT) | \
@@ -130,22 +136,153 @@
                                  (_GPIO_OUTPUT_HIGHDRIVE << _GPIO_OPTIONS_SHIFT))
 
 #define GPIO_ALT2               (_GPIO_MODE_ALT2         << _GPIO_MODE_SHIFT)
-#define GPIO_ALT3               (_GPIO_MODE_ALT3         << _GPIO_MODE_SHIFT)
-#define GPIO_ALT4               (_GPIO_MODE_ALT4         << _GPIO_MODE_SHIFT)
-#define GPIO_ALT5               (_GPIO_MODE_ALT5         << _GPIO_MODE_SHIFT)
-#define GPIO_ALT6               (_GPIO_MODE_ALT6         << _GPIO_MODE_SHIFT)
-#define GPIO_ALT7               (_GPIO_MODE_ALT7         << _GPIO_MODE_SHIFT)
+#define GPIO_ALT2_INPUT         ((_GPIO_MODE_ALT2        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT            << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT2_PULLDOWN      ((_GPIO_MODE_ALT2        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLDOWN   << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT2_PULLUP        ((_GPIO_MODE_ALT2        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLUP     << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT2_OUTPUT        ((_GPIO_MODE_ALT2        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT           << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT2_FAST          ((_GPIO_MODE_ALT2        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_FAST      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT2_SLOW          ((_GPIO_MODE_ALT2        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_SLOW      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT2_OPENDRAIN     ((_GPIO_MODE_ALT2        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_LOWDRIVE  << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT2_LOWDRIVE      ((_GPIO_MODE_ALT2        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_OPENDRAIN << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT2_HIGHDRIVE     ((_GPIO_MODE_ALT2        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_HIGHDRIVE << _GPIO_OPTIONS_SHIFT))
 
-/* One bit is used to enable the digital filter:
+#define GPIO_ALT3               (_GPIO_MODE_ALT3         << _GPIO_MODE_SHIFT)
+#define GPIO_ALT3_INPUT         ((_GPIO_MODE_ALT3        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT            << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT3_PULLDOWN      ((_GPIO_MODE_ALT3        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLDOWN   << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT3_PULLUP        ((_GPIO_MODE_ALT3        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLUP     << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT3_OUTPUT        ((_GPIO_MODE_ALT3        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT           << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT3_FAST          ((_GPIO_MODE_ALT3        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_FAST      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT3_SLOW          ((_GPIO_MODE_ALT3        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_SLOW      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT3_OPENDRAIN     ((_GPIO_MODE_ALT3        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_LOWDRIVE  << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT3_LOWDRIVE      ((_GPIO_MODE_ALT3        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_OPENDRAIN << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT3_HIGHDRIVE     ((_GPIO_MODE_ALT3        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_HIGHDRIVE << _GPIO_OPTIONS_SHIFT))
+
+#define GPIO_ALT4               (_GPIO_MODE_ALT4         << _GPIO_MODE_SHIFT)
+#define GPIO_ALT4_INPUT         ((_GPIO_MODE_ALT4        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT            << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT4_PULLDOWN      ((_GPIO_MODE_ALT4        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLDOWN   << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT4_PULLUP        ((_GPIO_MODE_ALT4        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLUP     << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT4_OUTPUT        ((_GPIO_MODE_ALT4        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT           << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT4_FAST          ((_GPIO_MODE_ALT4        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_FAST      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT4_SLOW          ((_GPIO_MODE_ALT4        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_SLOW      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT4_OPENDRAIN     ((_GPIO_MODE_ALT4        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_LOWDRIVE  << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT4_LOWDRIVE      ((_GPIO_MODE_ALT4        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_OPENDRAIN << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT4_HIGHDRIVE     ((_GPIO_MODE_ALT4        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_HIGHDRIVE << _GPIO_OPTIONS_SHIFT))
+
+#define GPIO_ALT5               (_GPIO_MODE_ALT5         << _GPIO_MODE_SHIFT)
+#define GPIO_ALT5_INPUT         ((_GPIO_MODE_ALT5        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT            << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT5_PULLDOWN      ((_GPIO_MODE_ALT5        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLDOWN   << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT5_PULLUP        ((_GPIO_MODE_ALT5        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLUP     << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT5_OUTPUT        ((_GPIO_MODE_ALT5        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT           << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT5_FAST          ((_GPIO_MODE_ALT5        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_FAST      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT5_SLOW          ((_GPIO_MODE_ALT5        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_SLOW      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT5_OPENDRAIN     ((_GPIO_MODE_ALT5        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_LOWDRIVE  << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT5_LOWDRIVE      ((_GPIO_MODE_ALT5        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_OPENDRAIN << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT5_HIGHDRIVE     ((_GPIO_MODE_ALT5        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_HIGHDRIVE << _GPIO_OPTIONS_SHIFT))
+
+#define GPIO_ALT6               (_GPIO_MODE_ALT6         << _GPIO_MODE_SHIFT)
+#define GPIO_ALT6_INPUT         ((_GPIO_MODE_ALT6        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT            << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT6_PULLDOWN      ((_GPIO_MODE_ALT6        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLDOWN   << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT6_PULLUP        ((_GPIO_MODE_ALT6        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLUP     << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT6_OUTPUT        ((_GPIO_MODE_ALT6        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT           << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT6_FAST          ((_GPIO_MODE_ALT6        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_FAST      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT6_SLOW          ((_GPIO_MODE_ALT6        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_SLOW      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT6_OPENDRAIN     ((_GPIO_MODE_ALT6        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_LOWDRIVE  << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT6_LOWDRIVE      ((_GPIO_MODE_ALT6        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_OPENDRAIN << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT6_HIGHDRIVE     ((_GPIO_MODE_ALT6        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_HIGHDRIVE << _GPIO_OPTIONS_SHIFT))
+
+#define GPIO_ALT7               (_GPIO_MODE_ALT7         << _GPIO_MODE_SHIFT)
+#define GPIO_ALT7_INPUT         ((_GPIO_MODE_ALT7        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT            << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT7_PULLDOWN      ((_GPIO_MODE_ALT7        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLDOWN   << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT7_PULLUP        ((_GPIO_MODE_ALT7        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_INPUT_PULLUP     << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT7_OUTPUT        ((_GPIO_MODE_ALT7        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT           << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT7_FAST          ((_GPIO_MODE_ALT7        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_FAST      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT7_SLOW          ((_GPIO_MODE_ALT7        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_SLOW      << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT7_OPENDRAIN     ((_GPIO_MODE_ALT7        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_LOWDRIVE  << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT7_LOWDRIVE      ((_GPIO_MODE_ALT7        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_OPENDRAIN << _GPIO_OPTIONS_SHIFT))
+#define GPIO_ALT7_HIGHDRIVE     ((_GPIO_MODE_ALT7        << _GPIO_MODE_SHIFT) | \
+                                 (_GPIO_OUTPUT_HIGHDRIVE << _GPIO_OPTIONS_SHIFT))
+
+/* The initial value for GPIO (Alternative 1 outputs):
  *
- * ---- ---f ---- ---- ---- ---- ---- ----
+ * ---- ---v ---- ---- ---- ---- ---- ----
+ *
+ * Passive Filter and digital filter enable are valid in all digital pin
+ * muxing modes.
  */
 
-#define GPIO_DIGFILTER          (1 << 24)  /* Bit 24: Enable digital filter */
+#define GPIO_OUTPUT_ONE         (1 << 24)  /* Bit 24: 1:Initial output value=1 */
+#define GPIO_OUTPUT_ZER0        (0)        /* Bit 24: 0:Initial output value=0 */
 
+/* One bit is used to enable the passive filter:
+ *
+ * ---- ---- ---- fd-- ---- ---- ---- ----
+ *
+ * Passive Filter and digital filter enable are valid in all digital pin
+ * muxing modes.
+ */
+
+#define GPIO_PASV_FILTER        (1 << 19)  /* Bit 19: Enable passive filter */
+#define GPIO_DIG_FILTER         (1 << 18)  /* Bit 18: Enable digital filter */
+ 
 /* Four bits are used to incode DMA/interupt options:
  *
  * ---- ---- iiii ---- ---- ---- ---- ----
+ *
+ * The pin interrupt configuration is valid in all digital pin muxing modes
+ * (restricted to inputs).
  */
 
 #define _GPIO_INT_SHIFT         (20)
@@ -370,6 +507,23 @@ EXTERN void kinetis_gpioirqinitialize(void);
  ************************************************************************************/
 
 EXTERN int kinetis_configgpio(uint32_t cfgset);
+
+/************************************************************************************
+ * Name: kinetis_configfilter
+ *
+ * Description:
+ *   Configure the digital filter associated with a port. The digital filter
+ *   capabilities of the PORT module are available in all digital pin muxing modes.
+ *
+ * Input parmeters:
+ *   port  - See KINETIS_PORTn definitions in kinetis_port.h
+ *   lpo   - true: Digital Filters are clocked by the bus clock
+ *           false: Digital Filters are clocked by the 1 kHz LPO clock
+ *   width - Filter Length
+ *
+ ************************************************************************************/
+
+EXTERN int kinetis_configfilter(unsigned int port, bool lpo, unsigned int width);
 
 /************************************************************************************
  * Name: kinetis_gpiowrite
