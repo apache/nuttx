@@ -57,18 +57,22 @@ endif
 # Required Kinetis files
 
 CHIP_ASRCS	=
-CHIP_CSRCS	= kinetis_clockconfig.c kinetis_clrpend.c kinetis_gpio.c \
-		  kinetis_idle.c kinetis_irq.c kinetis_lowputc.c kinetis_serial.c \
-		  kinetis_start.c kinetis_timerisr.c kinetis_wdog.c
+CHIP_CSRCS	= kinetis_clockconfig.c kinetis_clrpend.c kinetis_idle.c \
+		  kinetis_irq.c kinetis_lowputc.c kinetis_pin.c kinetis_pingpio.c \
+		  kinetis_serial.c kinetis_start.c kinetis_timerisr.c kinetis_wdog.c
 
 # Configuration-dependent Kinetis files
 
 ifeq ($(CONFIG_GPIO_IRQ),y)
-CHIP_CSRCS	+= kinetis_gpioint.c
+CHIP_CSRCS	+= kinetis_pinirq.c
+endif
+
+ifeq ($(CONFIG_KINETIS_DMA),y)
+CHIP_CSRCS	+= kinetis_pindma.c
 endif
 
 ifeq ($(CONFIG_DEBUG_GPIO),y)
-CHIP_CSRCS	+= kinetis_gpiodbg.c
+CHIP_CSRCS	+= kinetis_pindbg.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)

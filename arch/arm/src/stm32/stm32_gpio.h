@@ -229,9 +229,6 @@ EXTERN bool stm32_gpioread(uint32_t pinset);
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
  * 
- * Limitations:
- *   Presently single gpio can configured on the same EXTI line.
- * 
  * Parameters:
  *  - pinset: gpio pin configuration
  *  - rising/falling edge: enables

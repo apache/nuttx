@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/kinetis/kinetis_gpio.c
+ *  arch/arm/src/kinetis/kinetis_pin.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -70,14 +70,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kinetis_configgpio
+ * Name: kinetis_pinconfig
  *
  * Description:
- *   Configure a GPIO pin based on bit-encoded description of the pin.
+ *   Configure a PIN based on bit-encoded description of the pin.  NOTE that
+ *   DMA/interrupts are disabled at the initial PIN configuratin.
  *
  ****************************************************************************/
 
-int kinetis_configgpio(uint32_t cfgset)
+int kinetis_pinconfig(uint32_t cfgset)
 {
   uintptr_t    base;
   uint32_t     regval;
@@ -87,8 +88,8 @@ int kinetis_configgpio(uint32_t cfgset)
 
   /* Get the port number and pin number */
 
-  port = (cfgset & _GPIO_PORT_MASK) >> _GPIO_PORT_SHIFT;
-  pin  = (cfgset & _GPIO_PIN_MASK)  >> _GPIO_PIN_SHIFT;
+  port = (cfgset & _PIN_PORT_MASK) >> _PIN_PORT_SHIFT;
+  pin  = (cfgset & _PIN_MASK)      >> _PIN_SHIFT;
 
   DEBUGASSERT(port < KINETIS_NPORTS);
   if (port < KINETIS_NPORTS)
@@ -99,13 +100,13 @@ int kinetis_configgpio(uint32_t cfgset)
 
       /* Get the port mode */
 
-      mode = (cfgset & _GPIO_MODE_MASK)  >> _GPIO_MODE_SHIFT;
+      mode = (cfgset & _PIN_MODE_MASK)  >> _PIN_MODE_SHIFT;
 
       /* Special case analog port mode.  In this case, not of the digital
        * options are applicable.
        */
 
-      if (mode == _GPIO_MODE_ANALOG)
+      if (mode == _PIN_MODE_ANALOG)
         {
           /* Set the analog mode with all digital options zeroed */
 
@@ -117,44 +118,40 @@ int kinetis_configgpio(uint32_t cfgset)
           /* Configure the digital pin options */
 
           regval = (mode << PORT_PCR_MUX_SHIFT);
-          if ((cfgset & _GPIO_IO_MASK) == _GPIO_INPUT)
+          if ((cfgset & _PIN_IO_MASK) == _PIN_INPUT)
             {
               /* Handle input-only digital options */
               /* Check for pull-up or pull-down */
 
-
-              if ((cfgset & _GPIO_INPUT_PULLMASK) == _GPIO_INPUT_PULLDOWN)
+              if ((cfgset & _PIN_INPUT_PULLMASK) == _PIN_INPUT_PULLDOWN)
                 {
                   regval |= PORT_PCR_PE;
                 }
-              else if ((cfgset & _GPIO_INPUT_PULLMASK) == _GPIO_INPUT_PULLUP)
+              else if ((cfgset & _PIN_INPUT_PULLMASK) == _PIN_INPUT_PULLUP)
                 {
                   regval |= (PORT_PCR_PE | PORT_PCR_PS);
                 }
-
-# warning "Missing interrupt configuration logic"
-
             }
           else
             {
               /* Handle output-only digital options */
               /* Check for slow slew rate setting */
 
-              if ((cfgset & _GPIO_OUTPUT_SLEW_MASK) == _GPIO_OUTPUT_SLOW)
+              if ((cfgset & _PIN_OUTPUT_SLEW_MASK) == _PIN_OUTPUT_SLOW)
                 {
                   regval |= PORT_PCR_SRE;
                 }
 
               /* Check for open drain output */
 
-              if ((cfgset & _GPIO_OUTPUT_OD_MASK) == _GPIO_OUTPUT_OPENDRAIN)
+              if ((cfgset & _PIN_OUTPUT_OD_MASK) == _PIN_OUTPUT_OPENDRAIN)
                 {
                   regval |= PORT_PCR_ODE;
                 }
               
               /* Check for high drive output */
 
-              if ((cfgset & _GPIO_OUTPUT_DRIVE_MASK) == _GPIO_OUTPUT_HIGHDRIVE)
+              if ((cfgset & _PIN_OUTPUT_DRIVE_MASK) == _PIN_OUTPUT_HIGHDRIVE)
                 {
                   regval |= PORT_PCR_DSE;
                 }
@@ -164,7 +161,7 @@ int kinetis_configgpio(uint32_t cfgset)
            * is valid in all digital pin muxing modes.
            */
 
-          if ((cfgset & GPIO_PASV_FILTER) != 0)
+          if ((cfgset & PIN_PASV_FILTER) != 0)
             {
               regval |= PORT_PCR_PFE;
             }
@@ -178,7 +175,7 @@ int kinetis_configgpio(uint32_t cfgset)
            */
 
           regval = getreg32(base + KINETIS_PORT_DFER_OFFSET);
-          if ((cfgset & GPIO_DIG_FILTER) != 0)
+          if ((cfgset & PIN_DIG_FILTER) != 0)
             {
               regval |= (1 << pin);
             }
@@ -190,20 +187,20 @@ int kinetis_configgpio(uint32_t cfgset)
 
           /* Additional configuration for the case of Alternative 1 (GPIO) modes */
 
-          if (mode == _GPIO_MODE_GPIO)
+          if (mode == _PIN_MODE_GPIO)
             {
               /* Set the GPIO port direction */
 
               base   = KINETIS_GPIO_BASE(port);
               regval = getreg32(base + KINETIS_GPIO_PDDR_OFFSET);
-              if ((cfgset & _GPIO_IO_MASK) == _GPIO_INPUT)
+              if ((cfgset & _PIN_IO_MASK) == _PIN_INPUT)
                 {
                   /* Select GPIO input */
 
                   regval &= ~(1 << pin);
                   putreg32(regval, base + KINETIS_GPIO_PDDR_OFFSET);
                 }
-              else /* if ((cfgset & _GPIO_IO_MASK) == _GPIO_OUTPUT) */
+              else /* if ((cfgset & _PIN_IO_MASK) == _PIN_OUTPUT) */
                 {
                   /* Select GPIO input */
 
@@ -223,7 +220,7 @@ int kinetis_configgpio(uint32_t cfgset)
 }
 
 /************************************************************************************
- * Name: kinetis_configfilter
+ * Name: kinetis_pinfilter
  *
  * Description:
  *   Configure the digital filter associated with a port. The digital filter
@@ -237,7 +234,7 @@ int kinetis_configgpio(uint32_t cfgset)
  *
  ************************************************************************************/
 
-int kinetis_configfilter(unsigned int port, bool lpo, unsigned int width)
+int kinetis_pinfilter(unsigned int port, bool lpo, unsigned int width)
 {
   uintptr_t base;
   uint32_t  regval;
@@ -262,83 +259,3 @@ int kinetis_configfilter(unsigned int port, bool lpo, unsigned int width)
     }
   return -EINVAL;
 }
-
-/****************************************************************************
- * Name: kinetis_gpiowrite
- *
- * Description:
- *   Write one or zero to the selected GPIO pin
- *
- ****************************************************************************/
-
-void kinetis_gpiowrite(uint32_t pinset, bool value)
-{
-  uintptr_t    base;
-  unsigned int port;
-  unsigned int pin;
-
-  DEBUGASSERT((pinset & _GPIO_IO_MASK) == _GPIO_OUTPUT);
-
-  /* Get the port number and pin number */
-
-  port = (pinset & _GPIO_PORT_MASK) >> _GPIO_PORT_SHIFT;
-  pin  = (pinset & _GPIO_PIN_MASK)  >> _GPIO_PIN_SHIFT;
-
-  DEBUGASSERT(port < KINETIS_NPORTS);
-  if (port < KINETIS_NPORTS)
-    {
-      /* Get the base address of GPIO block for this port */
-
-      base = KINETIS_GPIO_BASE(port);
-
-      /* Set or clear the output */
-
-      if (value)
-        {
-          putreg32((1 << pin), base + KINETIS_GPIO_PSOR_OFFSET);
-        }
-      else
-        {
-          putreg32((1 << pin), base + KINETIS_GPIO_PCOR_OFFSET);
-        }
-    }
-}
-
-/****************************************************************************
- * Name: kinetis_gpioread
- *
- * Description:
- *   Read one or zero from the selected GPIO pin
- *
- ****************************************************************************/
-
-bool kinetis_gpioread(uint32_t pinset)
-{
-  uintptr_t    base;
-  uint32_t     regval;
-  unsigned int port;
-  unsigned int pin;
-  bool         ret = false;
-
-  DEBUGASSERT((pinset & _GPIO_IO_MASK) == _GPIO_INPUT);
-
-  /* Get the port number and pin number */
-
-  port = (pinset & _GPIO_PORT_MASK) >> _GPIO_PORT_SHIFT;
-  pin  = (pinset & _GPIO_PIN_MASK)  >> _GPIO_PIN_SHIFT;
-
-  DEBUGASSERT(port < KINETIS_NPORTS);
-  if (port < KINETIS_NPORTS)
-    {
-      /* Get the base address of GPIO block for this port */
-
-      base = KINETIS_GPIO_BASE(port);
-
-      /* return the state of the pin */
-
-      regval = getreg32(base + KINETIS_GPIO_PDIR_OFFSET);
-      ret    = ((regval & (1 << pin)) != 0);
-    }
-  return ret;
-}
-

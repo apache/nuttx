@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/kinetis/kinetis_start.c
- * arch/arm/src/chip/kinetis_start.c
+ *  arch/arm/src/kinetis/kinetis_pingpio.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -39,29 +38,26 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
-#include <assert.h>
-#include <debug.h>
-
-#include <nuttx/init.h>
 #include <arch/board/board.h>
+
+#include <assert.h>
+#include <errno.h>
+
+#include <nuttx/arch.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "kinetis_memorymap.h"
 #include "kinetis_internal.h"
+#include "kinetis_gpio.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -73,82 +69,83 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: kinetis_gpiowrite
  *
  * Description:
- *   This is the reset entry point.
+ *   Write one or zero to the selected GPIO pin
  *
  ****************************************************************************/
 
-void __start(void)
+void kinetis_gpiowrite(uint32_t pinset, bool value)
 {
-  const uint32_t *src;
-  uint32_t *dest;
+  uintptr_t    base;
+  unsigned int port;
+  unsigned int pin;
 
-  /* Disable the watchdog timer */
+  DEBUGASSERT((pinset & _PIN_MODE_MASK) == _PIN_MODE_GPIO);
+  DEBUGASSERT((pinset & _PIN_IO_MASK) == _PIN_OUTPUT);
 
-  kinetis_wddisable();
+  /* Get the port number and pin number */
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
+  port = (pinset & _PIN_PORT_MASK) >> _PIN_PORT_SHIFT;
+  pin  = (pinset & _PIN_MASK)      >> _PIN_SHIFT;
 
-  for (dest = &_sbss; dest < &_ebss; )
+  DEBUGASSERT(port < KINETIS_NPORTS);
+  if (port < KINETIS_NPORTS)
     {
-      *dest++ = 0;
+      /* Get the base address of GPIO block for this port */
+
+      base = KINETIS_GPIO_BASE(port);
+
+      /* Set or clear the output */
+
+      if (value)
+        {
+          putreg32((1 << pin), base + KINETIS_GPIO_PSOR_OFFSET);
+        }
+      else
+        {
+          putreg32((1 << pin), base + KINETIS_GPIO_PCOR_OFFSET);
+        }
     }
-
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
-
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-
-  /* Copy any necessary code sections from FLASH to RAM.  The correct
-   * destination in SRAM is geive by _sramfuncs and _eramfuncs.  The
-   * temporary location is in flash after the data initalization code
-   * at _framfuncs
-   */
-
-#ifndef CONFIG_BOOT_RAMFUNCS
-  for (src = &_framfuncs, dest = &_sramfuncs; dest < &_eramfuncs; )
-    {
-      *dest++ = *src++;
-    }
-#endif
-
-  /* Perform clock and Kinetis module initialization */
-
-  kinetis_clockconfig();
-
-  /* Configure the uart and perform early serial initialization so that we
-   * can get debug output as soon as possible.
-   */
-
-  kinetis_lowsetup();
-#ifdef CONFIG_USE_EARLYSERIALINIT
-  up_earlyserialinit();
-#endif
-
-  /* Initialize other on-board resources */
-
-  kinetis_boardinitialize();
-
-  /* Show reset status */
-
-  dbg("Reset status: %02x:%02x\n",
-      getreg8(KINETIS_SMC_SRSH), getreg8(KINETIS_SMC_SRSL));
-
-  /* Then start NuttX */
-
-  os_start();
-
-  /* Shouldn't get here */
-
-  for(;;);
 }
+
+/****************************************************************************
+ * Name: kinetis_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin
+ *
+ ****************************************************************************/
+
+bool kinetis_gpioread(uint32_t pinset)
+{
+  uintptr_t    base;
+  uint32_t     regval;
+  unsigned int port;
+  unsigned int pin;
+  bool         ret = false;
+
+  DEBUGASSERT((pinset & _PIN_MODE_MASK) == _PIN_MODE_GPIO);
+  DEBUGASSERT((pinset & _PIN_IO_MASK) == _PIN_INPUT);
+
+  /* Get the port number and pin number */
+
+  port = (pinset & _PIN_PORT_MASK) >> _PIN_PORT_SHIFT;
+  pin  = (pinset & _PIN_MASK)      >> _PIN_SHIFT;
+
+  DEBUGASSERT(port < KINETIS_NPORTS);
+  if (port < KINETIS_NPORTS)
+    {
+      /* Get the base address of GPIO block for this port */
+
+      base = KINETIS_GPIO_BASE(port);
+
+      /* return the state of the pin */
+
+      regval = getreg32(base + KINETIS_GPIO_PDIR_OFFSET);
+      ret    = ((regval & (1 << pin)) != 0);
+    }
+  return ret;
+}
+

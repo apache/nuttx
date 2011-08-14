@@ -107,16 +107,16 @@
  * maps to the correct alternative.
  */
 #warning "Revisit:  This only only here to get a clean compiliation"
-#define GPIO_UART0_RX GPIO_UART0_RX_1
-#define GPIO_UART0_TX GPIO_UART0_TX_1
-#define GPIO_UART1_RX GPIO_UART1_RX_1
-#define GPIO_UART1_TX GPIO_UART1_TX_1
-#define GPIO_UART3_RX GPIO_UART3_RX_1
-#define GPIO_UART3_TX GPIO_UART3_TX_1
-#define GPIO_UART4_RX GPIO_UART4_RX_1
-#define GPIO_UART4_TX GPIO_UART4_TX_1
-#define GPIO_UART5_RX GPIO_UART5_RX_1
-#define GPIO_UART5_TX GPIO_UART5_TX_1
+#define PIN_UART0_RX PIN_UART0_RX_1
+#define PIN_UART0_TX PIN_UART0_TX_1
+#define PIN_UART1_RX PIN_UART1_RX_1
+#define PIN_UART1_TX PIN_UART1_TX_1
+#define PIN_UART3_RX PIN_UART3_RX_1
+#define PIN_UART3_TX PIN_UART3_TX_1
+#define PIN_UART4_RX PIN_UART4_RX_1
+#define PIN_UART4_TX PIN_UART4_TX_1
+#define PIN_UART5_RX PIN_UART5_RX_1
+#define PIN_UART5_TX PIN_UART5_TX_1
 
 /************************************************************************************
  * Public Data
