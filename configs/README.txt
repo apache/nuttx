@@ -1127,6 +1127,10 @@ configs/ez80f0910200zco
 	development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
 	tools.  The development environment is Cygwin under WinXP.
 
+configs/kwikstik-k40.
+    Kinetis K40 Cortex-M4 MCU.  This port uses the FreeScale KwikStik-K40
+    development board.
+
 configs/lm3s6965-ek
 	Stellaris LM3S6965 Evaluation Kit.  This board is based on the 
 	an ARM Cortex-M3 MCU, the Luminary/TI LM3S6965. This OS is built with the
@@ -1268,6 +1272,10 @@ configs/teensy
 	This is theport of NuttX to the PJRC Teensy++ 2.0 board.  This board is
 	developed by http://pjrc.com/teensy/.  The Teensy++ 2.0 is based
 	on an Atmel AT90USB1286 MCU.
+
+configs/twr-k60n512
+    Kinetis K60 Cortex-M4 MCU.  This port uses the FreeScale TWR-K60N512
+    development board.
 
 configs/us7032evb1
 	This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.

@@ -298,6 +298,15 @@ KwikStik-K40-specific Configuration Options
     CONFIG_KINETIS_PIT      -- Support Programmable Interval Timers
     CONFIG_ARMV7M_MPU       -- Support the MPU
 
+  Kinetis interrupt prioritys (Default is the mid priority)
+
+    CONFIG_KINETIS_UART0PRIO
+    CONFIG_KINETIS_UART1PRIO
+    CONFIG_KINETIS_UART2PRIO
+    CONFIG_KINETIS_UART3PRIO
+    CONFIG_KINETIS_UART4PRIO
+    CONFIG_KINETIS_UART5PRIO
+
   Kinetis K40 specific device driver settings
 
 	CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn (n=0..5) for the
