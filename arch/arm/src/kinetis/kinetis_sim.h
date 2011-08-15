@@ -511,7 +511,7 @@
 #  define SIM_FCFG1_FSIZE_64KB        (4 << SIM_FCFG1_FSIZE_SHIFT)  /* 64KB program flash, 2KB protection region */
 #  define SIM_FCFG1_FSIZE_128KB       (6 << SIM_FCFG1_FSIZE_SHIFT)  /* 128KB program flash, 4KB protection region */
 #  define SIM_FCFG1_FSIZE_256KB       (8 << SIM_FCFG1_FSIZE_SHIFT)  /* 256KB program flash, 8KB protection region */
-#  define SIM_FCFG1_FSIZE_256KB       (12 << SIM_FCFG1_FSIZE_SHIFT) /* 512KB program flash, 16KB protection region */
+#  define SIM_FCFG1_FSIZE_512KB       (12 << SIM_FCFG1_FSIZE_SHIFT) /* 512KB program flash, 16KB protection region */
 #endif
 
 /* Flash Configuration Register 2 */
