@@ -149,6 +149,41 @@
 # undef CONFIG_UART4_FLOWCONTROL
 # undef CONFIG_UART5_FLOWCONTROL
 
+/* UART FIFO support is not fully implemented.
+ *
+ * NOTE:  UART0 has an 8-byte deep FIFO; the other UARTs have no FIFOs
+ * (1-deep).  There appears to be no way to know when the FIFO is not
+ * full (other than reading the FIFO length and comparing the FIFO count).
+ * Hence, the FIFOs are not used in this implementation and, as a result
+ * TDRE indeed mean that the single output buffer is available.
+ *
+ * Performance on UART0 could be improved by enabling the FIFO and by
+ * redesigning all of the FIFO status logic.
+ */
+
+#undef CONFIG_KINETIS_UARTFIFOS
+
+/* Default Priorities */
+
+#ifndef CONFIG_KINETIS_UART0PRIO
+#  define CONFIG_KINETIS_UART1PRIO NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+#ifndef CONFIG_KINETIS_UART1PRIO
+#  define CONFIG_KINETIS_UART2PRIO NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+#ifndef CONFIG_KINETIS_UART2PRIO
+#  define CONFIG_KINETIS_UART3PRIO NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+#ifndef CONFIG_KINETIS_UART3PRIO
+#  define CONFIG_KINETIS_UART4PRIO NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+#ifndef CONFIG_KINETIS_UART4PRIO
+#  define CONFIG_KINETIS_UART5PRIO NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+#ifndef CONFIG_KINETIS_UART5PRIO
+#  define CONFIG_KINETIS_UART6PRIO NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

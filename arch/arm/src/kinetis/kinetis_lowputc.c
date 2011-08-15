@@ -115,7 +115,13 @@
  * Private Variables
  **************************************************************************/
 
+/* This array maps an encoded FIFO depth (index) to the actual size of the
+ * FIFO (indexed value).  NOTE:  That there is no 8th value.
+ */
+
+#ifdef CONFIG_KINETIS_UARTFIFOS
 static uint8_t g_sizemap[8] = {1, 4, 8, 16, 32, 64, 128, 0};
+#endif
 
 /**************************************************************************
  * Private Functions
@@ -136,14 +142,32 @@ static uint8_t g_sizemap[8] = {1, 4, 8, 16, 32, 64, 128, 0};
 void up_lowputc(char ch)
 {
 #if defined HAVE_UART_DEVICE && defined HAVE_SERIAL_CONSOLE
+#ifdef CONFIG_KINETIS_UARTFIFOS
+  /* Wait until there is space in the TX FIFO:  Read the number of bytes
+   * currently in the FIFO and compare that to the size of the FIFO.  If
+   * there are fewer bytes in the FIFO than the size of the FIFO, then we
+   * are able to transmit.
+   */
 
-  /* Wait until the transmit data register is "empty."  This state depends
-   * on the TX watermark setting and does not mean that the transmit buffer
-   * is really empty.  It just means that we can now add another character
-   * to the transmit buffer
+#  error "Missing logic"
+#else
+  /* Wait until the transmit data register is "empty" (TDRE).  This state
+   * depends on the TX watermark setting and may not mean that the transmit
+   * buffer is truly empty.  It just means that we can now add another
+   * characterto the transmit buffer without exceeding the watermark.
+   *
+   * NOTE:  UART0 has an 8-byte deep FIFO; the other UARTs have no FIFOs
+   * (1-deep).  There appears to be no way to know when the FIFO is not
+   * full (other than reading the FIFO length and comparing the FIFO count).
+   * Hence, the FIFOs are not used in this implementation and, as a result
+   * TDRE indeed mean that the single output buffer is available.
+   *
+   * Performance on UART0 could be improved by enabling the FIFO and by
+   * redesigning all of the FIFO status logic.
    */
 
   while ((getreg8(CONSOLE_BASE+KINETIS_UART_S1_OFFSET) & UART_S1_TDRE) == 0);
+#endif
 
  /* Then write the character to the UART data register */
 
@@ -158,26 +182,6 @@ void up_lowputc(char ch)
  *   This performs basic initialization of the UART used for the serial
  *   console.  Its purpose is to get the console output availabe as soon
  *   as possible.
- *
- *   The UART0/1/2/3 peripherals are configured using the following registers:
- *   1. Power: In the PCONP register, set bits PCUART0/1/2/3.
- *      On reset, UART0 and UART 1 are enabled (PCUART0 = 1 and PCUART1 = 1)
- *      and UART2/3 are disabled (PCUART1 = 0 and PCUART3 = 0).
- *   2. Peripheral clock: In the PCLKSEL0 register, select PCLK_UART0 and
- *      PCLK_UART1; in the PCLKSEL1 register, select PCLK_UART2 and PCLK_UART3.
- *   3. Baud rate: In the LCR register, set bit DLAB = 1. This enables access
- *      to registers DLL and DLM for setting the baud rate. Also, if needed,
- *      set the fractional baud rate in the fractional divider 
- *   4. UART FIFO: Use bit FIFO enable (bit 0) in FCR register to
- *      enable FIFO.
- *   5. Pins: Select UART pins through the PINSEL registers and pin modes
- *      through the PINMODE registers. UART receive pins should not have
- *      pull-down resistors enabled.
- *   6. Interrupts: To enable UART interrupts set bit DLAB = 0 in the LCRF
- *      register. This enables access to IER. Interrupts are enabled
- *      in the NVIC using the appropriate Interrupt Set Enable register.
- *   7. DMA: UART transmit and receive functions can operate with the
- *      GPDMA controller.
  *
  **************************************************************************/
 
@@ -302,7 +306,9 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
   uint32_t     brfa;
   uint32_t     tmp;
   uint8_t      regval;
+#ifdef CONFIG_KINETIS_UARTFIFOS
   unsigned int depth;
+#endif
 
   /* Disable the transmitter and receiver throughout the reconfiguration */
 
@@ -387,10 +393,19 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
   regval |= ((uint8_t)brfa << UART_C4_BRFA_SHIFT) & UART_C4_BRFA_MASK;
   putreg8(regval, uart_base+KINETIS_UART_C4_OFFSET);
 
-  /* Set the FIFO watermarks */
+  /* Set the FIFO watermarks.
+   *
+   * NOTE:  UART0 has an 8-byte deep FIFO; the other UARTs have no FIFOs
+   * (1-deep).  There appears to be no way to know when the FIFO is not
+   * full (other than reading the FIFO length and comparing the FIFO count).
+   * Hence, the FIFOs are not used in this implementation and, as a result
+   * TDRE indeed mean that the single output buffer is available.
+   *
+   * Performance on UART0 could be improved by enabling the FIFO and by
+   * redesigning all of the FIFO status logic.
+   */
 
-  regval = getreg8(uart_base+KINETIS_UART_PFIFO_OFFSET);
-  
+#ifdef CONFIG_KINETIS_UARTFIFOS
   depth = g_sizemap[(regval & UART_PFIFO_RXFIFOSIZE_MASK) >> UART_PFIFO_RXFIFOSIZE_SHIFT];
   if (depth > 1)
     {
@@ -408,8 +423,15 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
   /* Enable RX and TX FIFOs */
 
   putreg8(UART_PFIFO_RXFE | UART_PFIFO_TXFE, uart_base+KINETIS_UART_PFIFO_OFFSET);
+#else
+  /* Set the watermarks to zero and disable the FIFOs */
 
-  /* Now we can re-enable the transmitter and receiver */
+  putreg8(0, uart_base+KINETIS_UART5_RWFIFO);
+  putreg8(0, uart_base+KINETIS_UART5_TWFIFO);
+  putreg8(0, uart_base+KINETIS_UART_PFIFO_OFFSET);
+#endif
+
+  /* Now we can (re-)enable the transmitter and receiver */
 
   regval = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
   regval |= (UART_C2_RE | UART_C2_TE);

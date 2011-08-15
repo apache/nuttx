@@ -280,23 +280,14 @@
 #define TSI_STATUS_ERROF15             (1 << 31) /* Bit 31: TouchSensing Error Flag 15 */
 
 /* Counter Register n.  Note:  These values are reversed in the K40 and K60
- * documentation.  I bet one is right and the other is wrong (I'd bet on the K40
- * document).
+ * documentation.  In the K40/K60 header files, however, CNTN1 is always the
+ * the field in the most significant bits.  Let's go with that.
  */
 
-#ifdef KINETIS_K40
-#  define TSI_CNTR_CNTN1_SHIFT         (0)       /* Bits 0-15: TouchSensing channel n-1 16-bit counter value */
-#  define TSI_CNTR_CNTN1_MASK          (0xffff << TSI_CNTR_CNTN1_SHIFT)
-#  define TSI_CNTR_CNTN_SHIFT          (16)      /* Bits 16-31: TouchSensing channel n 16-bit counter value */
-#  define TSI_CNTR_CNTN_MASK           (0xffff << TSI_CNTR_CNTN_SHIFT)
-#endif
-#ifdef KINETIS_K60
-#  warning "Revisit"
-#  define TSI_CNTR_CNTN_SHIFT          (0)      /* Bits 0-15: TouchSensing channel n 16-bit counter value */
-#  define TSI_CNTR_CNTN_MASK           (0xffff << TSI_CNTR_CNTN_SHIFT)
-#  define TSI_CNTR_CNTN1_SHIFT         (16)     /* Bits 16-31: TouchSensing channel n-1 16-bit counter value */
-#  define TSI_CNTR_CNTN1_MASK          (0xffff << TSI_CNTR_CNTN1_SHIFT)
-#endif
+#define TSI_CNTR_CNTN_SHIFT            (0)      /* Bits 0-15: TouchSensing channel n 16-bit counter value */
+#define TSI_CNTR_CNTN_MASK             (0xffff << TSI_CNTR_CNTN_SHIFT)
+#define TSI_CNTR_CNTN1_SHIFT           (16)     /* Bits 16-31: TouchSensing channel n-1 16-bit counter value */
+#define TSI_CNTR_CNTN1_MASK            (0xffff << TSI_CNTR_CNTN1_SHIFT)
 
 /* Channel n threshold register */
 

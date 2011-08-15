@@ -261,7 +261,9 @@ static bool up_rxavailable(struct uart_dev_s *dev);
 static void up_send(struct uart_dev_s *dev, int ch);
 static void up_txint(struct uart_dev_s *dev, bool enable);
 static bool up_txready(struct uart_dev_s *dev);
+#ifdef CONFIG_KINETIS_UARTFIFOS
 static bool up_txempty(struct uart_dev_s *dev);
+#endif
 
 /****************************************************************************
  * Private Variables
@@ -280,7 +282,11 @@ struct uart_ops_s g_uart_ops =
   .send           = up_send,
   .txint          = up_txint,
   .txready        = up_txready,
+#ifdef CONFIG_KINETIS_UARTFIFOS
   .txempty        = up_txempty,
+#else
+  .txempty        = up_txready,
+#endif
 };
 
 /* I/O buffers */
@@ -731,6 +737,8 @@ static int up_interrupte(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
+  uint8_t            s1;
+  uint8_t            regval;
 
 #ifdef CONFIG_KINETIS_UART0
   if (g_uart0priv.irq == irqe)
@@ -780,16 +788,22 @@ static int up_interrupte(int irq, void *context)
   priv = (struct up_dev_s*)dev->priv;
   DEBUGASSERT(priv);
 
-  /* Handle error interrupts.  */
-#warning "Missing logic"
+  /* Handle error interrupts.  This interrupt may be caused by:
+   *
+   * FE: Framing error. To clear FE, read S1 with FE set and then read the
+   *     UART data register (D).
+   * NF: Noise flag. To clear NF, read S1 and then read the UART data
+   *     register (D).
+   * PF: Parity error flag. To clear PF, read S1 and then read the UART data
+   *     register (D).
+   */
 
-  /* Clear the pending error interrupt */
-
-  up_clrpend_irq(priv->irqe); // Necessary?
-
+  regval = up_serialin(priv, KINETIS_UART_S1_OFFSET
+  lldbg("S1: %02x\n", regval);
+  regval = up_serialin(priv, KINETIS_UART_D_OFFSET
   return OK;
 }
-#endif
+#endif /* CONFIG_DEBUG */
 
 /****************************************************************************
  * Name: up_interrupts
@@ -809,11 +823,15 @@ static int up_interrupts(int irq, void *context)
   struct up_dev_s   *priv;
   int                passes;
   unsigned int       size;
+#ifdef CONFIG_KINETIS_UARTFIFOS
   unsigned int       count;
+#else
+  uint8_t            s1;
+#endif
   bool               handled;
 
 #ifdef CONFIG_KINETIS_UART0
-  if (g_uart0priv.irq == irqe)
+  if (g_uart0priv.irq == irqs)
     {
       dev = &g_uart0port;
     }
@@ -869,35 +887,66 @@ static int up_interrupts(int irq, void *context)
     {
       handled = false;
 
-      /* Check for a pending status interrupt */
+      /* Read status register 1 */
 
-      if (up_pending_irq(priv->irqs))
+#ifndef CONFIG_KINETIS_UARTFIFOS
+      s1 = up_serialin(priv, KINETIS_UART_S1_OFFSET);
+#endif
+
+      /* Handle incoming, receive bytes */
+
+#ifdef CONFIG_KINETIS_UARTFIFOS
+      /* Check the count of bytes in the RX FIFO */
+
+      count = up_serialin(priv, KINETIS_UART_RCFIFO_OFFSET);
+      if (count > 0)
+#else
+      /* Check if the receive data register is full (RDRF).  NOTE:  If
+       * FIFOS are enabled, this does not mean that the the FIFO is full,
+       * rather, it means that the the number of bytes in the RX FIFO has
+       * exceeded the watermark setting.  There may actually be RX data
+       * available!
+       *
+       * The RDRF status indication is cleared when the data is read from
+       * the RX data register.
+       */
+
+      if ((s1 & UART_S1_RDRF) != 0)
+#endif
         {
-          /* Clear the pending status interrupt */
+          /* Process incoming bytes */
 
-          up_clrpend_irq(priv->irqs); // Necessary?
+          uart_recvchars(dev);
+          handled = true;
+        }
 
-          /* Handle incoming, receive bytes */
+      /* Handle outgoing, transmit bytes */
 
-          count = up_serialin(priv, KINETIS_UART_RCFIFO_OFFSET);
-          if (count > 0)
-            {
-              /* Process incoming bytes */
+#ifdef CONFIG_KINETIS_UARTFIFOS
+      /* Read the number of bytes currently in the FIFO and compare that to
+       * the size of the FIFO.  If there are fewer bytes in the FIFO than
+       * the size of the FIFO, then we are able to transmit.
+       */
 
-              uart_recvchars(dev);
-              handled = true;
-            }
+#  error "Missing logic"
+#else
+      /* Check if the transmit data register is "empty."  NOTE:  If FIFOS
+       * are enabled, this does not mean that the the FIFO is empty, rather,
+       * it means that the the number of bytes in the TX FIFO is below the
+       * watermark setting.  There could actually be space for additional TX
+       * data.
+       *
+       * The TDRE status indication is cleared when the data is written to
+       * the TX data register.
+       */
 
-          /* Handle outgoing, transmit bytes */
+      if ((s1 & UART_S1_TDRE) != 0)
+#endif
+        {
+          /* Process outgoing bytes */
 
-          count = up_serialin(priv, KINETIS_UART_TCFIFO_OFFSET);
-          #warning "Missing logic"
-            {
-              /* Process outgoing bytes */
-
-              uart_xmitchars(dev);
-              handled = true;
-            }
+          uart_xmitchars(dev);
+          handled = true;
         }
     }
 
@@ -956,15 +1005,30 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  uint8_t s1;
+
+  /* Get error status information:
+   *
+   * FE: Framing error. To clear FE, read S1 with FE set and then read
+   *     read UART data register (D).
+   * NF: Noise flag. To clear NF, read S1 and then read the UART data
+   *     register (D).
+   * PF: Parity error flag. To clear PF, read S1 and then read the UART
+   *     data register (D).
+   */
+
+  s1 = up_serialin(priv, KINETIS_UART_S1_OFFSET);
 
   /* Return status information */
 
   if (status)
     {
-      *status = 0; /* We are not yet tracking serial errors */
+      *status = (uint32_t)s1;
     }
 
-  /* Then return the actual received byte */
+  /* Then return the actual received byte.  Reading S1 then D clears all
+   * RX errors.
+   */
 
   return (int)up_serialin(priv, KINETIS_UART_D_OFFSET);
 }
@@ -981,10 +1045,8 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   irqstate_t flags;
-  uint8_t ie;
 
   flags = irqsave();
-  ie = priv->ie;
   if (enable)
     {
       /* Receive an interrupt when their is anything in the Rx data register (or an Rx
@@ -998,8 +1060,8 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-#warning "Revisit:  How are errors enabled?  What is the IDLE receive interrupt.  I think I need it"
 #ifdef CONFIG_DEBUG
+#  warning "Revisit:  How are errors enabled?"
       priv->ie |= UART_C2_RIE;
 #else
       priv->ie |= UART_C2_RIE;
@@ -1007,7 +1069,6 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
       up_setuartint(priv);
     }
 
-  priv->ie = ie;
   irqrestore(flags);
 }
 
@@ -1022,12 +1083,23 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+#ifdef CONFIG_KINETIS_UARTFIFOS
   unsigned int count;
 
   /* Return true if there are any bytes in the RX FIFO */
 
   count = up_serialin(priv, KINETIS_UART_RCFIFO_OFFSET);
   return count > 0;
+#else
+  /* Return true if the receive data register is full (RDRF).  NOTE:  If
+   * FIFOS are enabled, this does not mean that the the FIFO is full,
+   * rather, it means that the the number of bytes in the RX FIFO has
+   * exceeded the watermark setting.  There may actually be RX data
+   * available!
+   */
+
+  return (up_serialin(priv, KINETIS_UART_S1_OFFSET) & UART_S1_RDRF) != 0;
+#endif
 }
 
 /****************************************************************************
@@ -1096,12 +1168,23 @@ static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 
-  /* Return true if the transmit data register is "empty."  This state
-   * depends on the TX watermark setting and does not mean that the transmit
-   * buffer is really empty.
+#ifdef CONFIG_KINETIS_UARTFIFOS
+  /* Read the number of bytes currently in the FIFO and compare that to the
+   * size of the FIFO.  If there are fewer bytes in the FIFO than the size
+   * of the FIFO, then we are able to transmit.
+   */
+
+#  error "Missing logic"
+#else
+  /* Return true if the transmit data register is "empty."  NOTE:  If
+   * FIFOS are enabled, this does not mean that the the FIFO is empty,
+   * rather, it means that the the number of bytes in the TX FIFO is
+   * below the watermark setting.  There may actually be space for
+   * additional TX data.
    */
 
   return (up_serialin(priv, KINETIS_UART_S1_OFFSET) & UART_S1_TDRE) != 0;
+#endif
 }
 
 /****************************************************************************
@@ -1112,6 +1195,7 @@ static bool up_txready(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_KINETIS_UARTFIFOS
 static bool up_txempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
@@ -1120,6 +1204,7 @@ static bool up_txempty(struct uart_dev_s *dev)
 
   return (up_serialin(priv, KINETIS_UART_SFIFO_OFFSET) & UART_SFIFO_TXEMPT) != 0;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
