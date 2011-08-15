@@ -40,8 +40,13 @@
 #include <arch/board/board.h>
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <debug.h>
+
 #include <nuttx/arch.h>
+
 #include "up_internal.h"
+#include "kinetis_port.h"
 
 #ifdef CONFIG_GPIO_IRQ
 
@@ -49,9 +54,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+/* The Kinetis port interrupt logic is very flexible and will program interrupts on
+ * most all pin events.  In order to keep the memory usage to a minimum, the NuttX
+ * port supports enabling interrupts on a per-port basis.
+ */
 
-#ifdndef CONFIG_KINESIS_NGPIOIRQS
-#  define CONFIG_KINESIS_NGPIOIRQS 8
+#if defined (CONFIG_KINETIS_PORTAINTS) || defined (CONFIG_KINETIS_PORTBINTS) || \
+    defined (CONFIG_KINETIS_PORTCINTS) || defined (CONFIG_KINETIS_PORTDINTS) || \
+    defined (CONFIG_KINETIS_PORTEINTS)
+#  undef HAVE_PORTINTS
 #endif
 
 /****************************************************************************
@@ -61,48 +72,197 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+/* Per pin port interrupt vectors.  NOTE:  Not all pins in each port
+ * correspond to externally available GPIOs.  However, I believe that the
+ * Kinesis will support interrupts even if the pin is not available as
+ * a GPIO. Hence, we need to support all 32 pins for each port.  To keep the
+ * memory usage at a minimum, the logic may be configure per port.
+ */
+
+#ifdef CONFIG_KINETIS_PORTAINTS
+static xcpt_t g_portaisrs[32];
+#endif
+#ifdef CONFIG_KINETIS_PORTBINTS
+static xcpt_t g_portbisrs[32];
+#endif
+#ifdef CONFIG_KINETIS_PORTCINTS
+static xcpt_t g_portcisrs[32];
+#endif
+#ifdef CONFIG_KINETIS_PORTDINTS
+static xcpt_t g_portdisrs[32];
+#endif
+#ifdef CONFIG_KINETIS_PORTEINTS
+static xcpt_t g_porteisrs[32];
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: kinetis_portinterrupt
+ *
+ * Description:
+ *   Common port interrupt handling.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_PORTINTS
+static int kinetis_portainterrupt(int irq, FAR void *context,
+                                  uintptr_t addr, xcpt_t **xcpt)
+{
+  uint32_t isfr = getreg32(addr);
+  int i;
+
+  /* Examine each pin in the port */
+
+  for (i = 0; i < 32 && isfr != 0; i++)
+    {
+      /* A bit set in the ISR means that an interrupt is pending for this
+       * pin.  If the pin is programmed for level sensitive inputs, then
+       * the interrupt handling logic MUST disable the interrupt (or cause
+       * the level to change) to prevent infinite interrupts.
+       */
+
+      uint32_t bit = (1 << i);
+      if ((isfr & bit )) != 0)
+        {
+          /* I think that bits may be set in the ISFR for DMA activities
+           * well.  So, no error is declared if there is no registered
+           * interrupt handler for the pin.
+           */
+
+          if (xcpt[i])
+            {
+              /* There is a registered interrupt handler... invoke it */
+
+              (void)xcpt[i](irq, context);
+            }
+
+          /* Writing a one to the ISFR register will clear the pending
+           * interrupt.  If pin is configured to generate a DMA request
+           * then the ISFR bit will be cleared automatically at the
+           * completion of the requested DMA transfer. If configured for
+           * a level sensitive interrupt and the pin remains asserted and
+           * the bit will set again immediately after it is cleared.
+           */
+
+          isfr &= ~bit;
+          putreg32(bit, addr);
+        }
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: kinetis_portXinterrupt
+ *
+ * Description:
+ *   Handle interrupts arriving on individual ports
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_PORTAINTS
+static int kinetis_portainterrupt(int irq, FAR void *context)
+{
+  return kinetis_portinterrupt(irq, context, KINETIS_PORTA_ISFR, g_portaisrs);
+}
+#endif
+#ifdef CONFIG_KINETIS_PORTBINTS
+static int kinetis_portbinterrupt(int irq, FAR void *context)
+{
+  return kinetis_portinterrupt(irq, context, KINETIS_PORTB_ISFR, g_portbisrs);
+}
+#endif
+#ifdef CONFIG_KINETIS_PORTCINTS
+static int kinetis_portcinterrupt(int irq, FAR void *context)
+{
+  return kinetis_portinterrupt(irq, context, KINETIS_PORTC_ISFR, g_portcisrs);
+}
+#endif
+#ifdef CONFIG_KINETIS_PORTDINTS
+static int kinetis_portdinterrupt(int irq, FAR void *context)
+{
+  return kinetis_portinterrupt(irq, context, KINETIS_PORTD_ISFR, g_portdisrs);
+}
+#endif
+#ifdef CONFIG_KINETIS_PORTEINTS
+static int kinetis_porteinterrupt(int irq, FAR void *context)
+{
+  return kinetis_portinterrupt(irq, context, KINETIS_PORTE_ISFR, g_porteisrs);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_pinirqinitialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_pinirqinitialize(void)
 {
-# warning "Missing logic"
+#ifdef CONFIG_KINETIS_PORTAINTS
+  (void)irq_attach(KINETIS_IRQ_PORTA, kinetis_portainterrupt);
+  putreg32(0xffffffff, KINETIS_PORTA_ISFR);
+  up_enable_irq(KINETIS_IRQ_PORTA);
+#endif
+#ifdef CONFIG_KINETIS_PORTBINTS
+  (void)irq_attach(KINETIS_IRQ_PORTB, kinetis_portbinterrupt);
+  putreg32(0xffffffff, KINETIS_PORTB_ISFR);
+  up_enable_irq(KINETIS_IRQ_PORTB);
+#endif
+#ifdef CONFIG_KINETIS_PORTCINTS
+  (void)irq_attach(KINETIS_IRQ_PORTC, kinetis_portcinterrupt);
+  putreg32(0xffffffff, KINETIS_PORTC_ISFR);
+  up_enable_irq(KINETIS_IRQ_PORTC);
+#endif
+#ifdef CONFIG_KINETIS_PORTDINTS
+  (void)irq_attach(KINETIS_IRQ_PORTD, kinetis_portdinterrupt);
+  putreg32(0xffffffff, KINETIS_PORTD_ISFR);
+  up_enable_irq(KINETIS_IRQ_PORTD);
+#endif
+#ifdef CONFIG_KINETIS_PORTEINTS
+  (void)irq_attach(KINETIS_IRQ_PORTE, kinetis_porteinterrupt);
+  putreg32(0xffffffff, KINETIS_PORTE_ISFR);
+  up_enable_irq(KINETIS_IRQ_PORTE);
+#endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_pinirqconfig
  *
  * Description:
- *   Sets/clears PIN and interrupt triggers.  On return PIN interrupts are always
- *   disabled.
+ *   Sets/clears PIN and interrupt triggers.  On return PIN interrupts are
+ *   always disabled.
  *
  * Parameters:
  *  - pinset:  Pin configuration
  *  - pinisr:  Pin interrupt service routine
  *
  * Returns:
- *   The previous value of the interrupt handler function pointer.  This value may,
- *   for example, be used to restore the previous handler when multiple handlers are
- *   used.
+ *   The previous value of the interrupt handler function pointer.  This
+ *   value may, for example, be used to restore the previous handler whe
+ *   multiple handlers are used.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 xcpt_t kinetis_pinirqconfig(uint32_t pinset, xcpt_t pinisr)
 {
+#ifdef HAVE_PORTINTS
+  xcpt_t     **table;
+  xcpt_t       oldisr;
+  irqstate_t   flags;
+  unsigned int port;
+  unsigned int pin;
 
   /* It only makes sense to call this function for input pins that are configured
    * as interrupts.
@@ -111,8 +271,54 @@ xcpt_t kinetis_pinirqconfig(uint32_t pinset, xcpt_t pinisr)
   DEBUGASSERT((pinset & _PIN_INTDMA_MASK) == _PIN_INTERRUPT);
   DEBUGASSERT((pinset & _PIN_IO_MASK) == _PIN_INPUT);
 
-# warning "Missing logic"
-   return NULL;
+  /* Get the port number and pin number */
+
+  port = (cfgset & _PIN_PORT_MASK) >> _PIN_PORT_SHIFT;
+  pin  = (cfgset & _PIN_MASK)      >> _PIN_SHIFT;
+
+  /* Get the table associated with this port */
+
+  DEBUGASSERT(port < KINETIS_NPORTS);
+  flags = irqsave();
+  switch (port)
+    {
+#ifdef CONFIG_KINETIS_PORTAINTS
+      case KINETIS_PORTA :
+        table = g_portaisrs;
+        break;
+#endif
+#ifdef CONFIG_KINETIS_PORTBINTS
+      case KINETIS_PORTB :
+        table = g_portbisrs;
+        break;
+#endif
+#ifdef CONFIG_KINETIS_PORTCINTS
+      case KINETIS_PORTC :
+        table = g_portcisrs;
+        break;
+#endif
+#ifdef CONFIG_KINETIS_PORTDINTS
+      case KINETIS_PORTD :
+        table = g_portdisrs;
+        break;
+#endif
+#ifdef CONFIG_KINETIS_PORTEINTS
+      case KINETIS_PORTE :
+        table = g_porteisrs;
+        break;
+#endif
+      default:
+        return NULL;
+    }
+
+   /* Get the old PIN ISR and set the new PIN ISR */
+
+   oldisr     = table[pin];
+   table[pin] = pinisr;
+
+   /* And return the old PIN isr address */
+
+   return oldisr;
 }
 
 /************************************************************************************
@@ -125,6 +331,7 @@ xcpt_t kinetis_pinirqconfig(uint32_t pinset, xcpt_t pinisr)
 
 void kinetis_pinirqenable(uint32_t pinset)
 {
+#ifdef HAVE_PORTINTS
   uintptr_t    base;
   uint32_t     regval;
   unsigned int port;
@@ -173,6 +380,7 @@ void kinetis_pinirqenable(uint32_t pinset)
 
       putreg32(regval, base + KINETIS_PORT_PCR_OFFSET(pin));
     }
+#endif
 }
 
 /************************************************************************************
@@ -185,6 +393,7 @@ void kinetis_pinirqenable(uint32_t pinset)
 
 void kinetis_pinirqdisable(uint32_t pinset)
 {
+#ifdef HAVE_PORTINTS
   uintptr_t    base;
   uint32_t     regval;
   unsigned int port;
@@ -206,6 +415,6 @@ void kinetis_pinirqdisable(uint32_t pinset)
       regval &= ~PORT_PCR_IRQC_MASK;
       putreg32(regval, base + KINETIS_PORT_PCR_OFFSET(pin));
     }
+#endif
 }
-
 #endif /* CONFIG_GPIO_IRQ */
