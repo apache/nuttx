@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/kwikstik-k40/src/up_buttons.c
+ * configs/twr-k60n512/src/up_buttons.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -42,13 +42,18 @@
 #include <stdint.h>
 
 #include <arch/board/board.h>
-#include "kwikstik-internal.h"
+#include "twrk60-internal.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+/* The TWR-K60N512 has user buttons (plus a reset button):
+ *
+ * 1. SW1 (IRQ0)   PTA19
+ * 2. SW2 (IRQ1)   PTE26
+ */
 
 /****************************************************************************
  * Private Data
@@ -75,7 +80,10 @@
 
 void up_buttoninit(void)
 {
-  /* The KwikStik-K40 board has no standard GPIO contact buttons */
+   /* Configure the two buttons as inputs */
+
+   kinetis_pinconfig(GPIO_SW1);
+   kinetis_pinconfig(GPIO_SW2);
 }
 
 /****************************************************************************
@@ -84,9 +92,19 @@ void up_buttoninit(void)
 
 uint8_t up_buttons(void)
 {
-  /* The KwikStik-K40 board has no standard GPIO contact buttons */
+  uint8_t ret = 0;
 
-  return 0;
+  if (kinetis_gpioread(GPIO_SW1))
+    {
+      ret |= BUTTON_SW1_BIT;
+    }
+
+  if (kinetis_gpioread(GPIO_SW2))
+    {
+      ret |= BUTTON_SW2_BIT;
+    }
+
+  return ret
 }
 
 /************************************************************************************
@@ -115,9 +133,36 @@ uint8_t up_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
 {
-  /* The KwikStik-K40 board has no standard GPIO contact buttons */
+  xcpt_t oldhandler = NULL;
+  uint32_t pinset;
 
-  return NULL;
+  /* Map the button id to the GPIO bit set. */
+
+  if (id == BUTTON_SW1)
+    {
+      pinset = GPIO_SW1;
+    }
+  else if (id == BUTTON_SW2)
+    {
+      pinset = GPIO_SW2;
+    }
+  else
+    {
+      return NULL;
+    }
+
+  /* The button has already been configured as an interrupting input (by
+   * up_buttoninit() above).
+   *
+   * Attach the new button handler.
+   */
+
+  oldhandler = knetis_pinirqattach(pinset, irqhandler);
+
+  /* Then make sure that interupts are enabled on the pin */
+
+  kinetis_pindmaenable(pinset);
+  return oldhandler;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

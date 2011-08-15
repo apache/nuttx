@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/twr-k60n512/include/board.h
- * include/arch/board/board.h
+ * configs/twr-k60n512/src/twrk60-internal.h
+ * arch/arm/src/board/twrk60-internal.n
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,98 +34,34 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __CONFIGS_TWR_K60N512_SRC_TWRK60_INTERNAL_H
+#define __CONFIGS_TWR_K60N512_SRC_TWRK60_INTERNAL_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
+#include <nuttx/compiler.h>
+#include <stdint.h>
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/* Clocking *************************************************************************/
-/* The K60 tower board uses a 50MHz external clock */
-
-#define BOARD_EXTCLOCK       1              /* External clock */
-#define BOARD_EXTAL_FREQ     50000000       /* 50MHz Oscillator */
-#define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
-
-/* PLL Configuration.  Either the external clock or crystal frequency is used to
- * select the PRDIV value. Only reference clock frequencies are supported that will
- * produce a 2MHz reference clock to the PLL.
- *
- *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 50MHz/25 = 2MHz
- *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*48 = 96MHz
- *   MCG Frequency:         PLLOUT = 96MHz
+/* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
+ * modules (others may support more -- in such case, the following must be
+ * expanded).
  */
 
-#define BOARD_PRDIV          25             /* PLL External Reference Divider */
-#define BOARD_VDIV           48             /* PLL VCO Divider (frequency multiplier) */
+#if KINETIS_NSPI < 1
+#  undef CONFIG_KINETIS_SPI1
+#  undef CONFIG_KINETIS_SPI2
+#elif KINETIS_NSPI < 2
+#  undef CONFIG_KINETIS_SPI2
+#endif
 
-#define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
-#define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV)
-#define BOARD_MCG_FREQ       BOARD_PLLOUT_FREQ
-
-/* SIM CLKDIV1 dividers */
-
-#define BOARD_OUTDIV1        1              /* Core        = MCG, 96MHz */
-#define BOARD_OUTDIV2        2              /* Bus         = MCG/2, 48MHz */
-#define BOARD_OUTDIV3        2              /* FlexBus     = MCG/2, 48MHz */
-#define BOARD_OUTDIV4        4              /* Flash clock = MCG/4, 24MHz */
-
-#define BOARD_CORECLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV1)
-#define BOARD_BUS_FREQ      (BOARD_MCG_FREQ / BOARD_OUTDIV2)
-#define BOARD_FLEXBUS_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV3)
-#define BOARD_FLASHCLK_FREQ (BOARD_MCG_FREQ / BOARD_OUTDIV4)
-
-/* LED definitions ******************************************************************/
-/* The TWR-K60N512 has four LEDs:
- *
- * 1. E1 / Orange LED   PTA11
- * 2. E2 / Yellow LED   PTA28
- * 3. E3 / Green LED    PTA29
- * 4  E4 / Blue LED     PTA10
- *
- * The 4 LEDs are encoded as follows:
- */
-
-#define LED_STARTED       0  /* LED1 */
-#define LED_HEAPALLOCATE  1  /* LED2 */
-#define LED_IRQSENABLED   2  /* LED1 + LED2 */
-#define LED_STACKCREATED  3  /* LED3 */
-#define LED_INIRQ         4  /* LED1 + LED3 */
-#define LED_SIGNAL        5  /* LED2 + LED3 */
-#define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
-#define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
-
-/* Button definitions ***************************************************************/
-/* The TWR-K60N512 has user buttons (plus a reset button):
- *
- * 1. SW1 (IRQ0)   PTA19
- * 2. SW2 (IRQ1)   PTE26
- */
-
-#define BUTTON_SW1        0
-#define BUTTON_SW2        1
-
-#define BUTTON_SW1_BIT    (1 << BUTTON_WAKEUP)
-#define BUTTON_SW2_BIT    (1 << BUTTON_TAMPER)
-
-/* Alternative pin resolution *******************************************************/
-/* If there are alternative configurations for various pins in the
- * kinetis_k60pinmux.h header file, those alternative pins will be labeled with a
- * suffix like _1, _2, etc.  The logic in this file must select the correct pin
- * configuration for the board by defining a pin configuration (with no suffix) that
- * maps to the correct alternative.
- */
-
+/* TWR-K60N512 GPIOs ****************************************************************/
 /* On-Board Connections
  * -------------------- ------------------------- -------- -------------------
  * FEATURE              CONNECTION                PORT/PIN PIN FUNCTION
@@ -172,11 +108,18 @@
  *                      TWRPI ID0 (J3 Pin 17)      ?        ADC1_DP1
  *                      TWRPI ID1 (J3 Pin 18)      ?        ADC1_SE16
  */
+ 
+#define GPIO_SD_CARDDETECT (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN28)
+#define GPIO_SD_WRPROTECT  (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN27)
+#define GPIO_SD_CARDON     (GPIO_HIGHDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTE | PIN6)
 
-#define PIN_UART5_RX  PIN_UART5_RX_2
-#define PIN_UART5_TX  PIN_UART5_TX_2
-#define PIN_I2C0_SDA  PIN_I2C0_SDA_3
-#define PIN_I2C0_SCL  PIN_I2C0_SCL_3
+#define GPIO_SW1           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTA | PIN19)
+#define GPIO_SW2           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN26)
+ 
+#define GPIO_LED1          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTA | PIN11)
+#define GPIO_LED2          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTA | PIN28)
+#define GPIO_LED3          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTA | PIN29)
+#define GPIO_LED4          (GPIO_LOWDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTA | PIN10)
 
 /* Connections via the General Purpose Tower Plug-in (TWRPI) Socket
  * -------------------- ------------------------- -------- -------------------
@@ -199,10 +142,6 @@
  *                      TWRPI GPIO3 (J5 Pin 18)    PTA19    PTA19
  *                      TWRPI GPIO4 (J5 Pin 19)    PTE26    PTE26
  */
-
-#define PIN_SPI2_SIN   PIN_SPI2_SIN_2
-#define PIN_SPI2_SOUT  PIN_SPI2_SOUT_2
-#define PIN_SPI2_SCK   PIN_SPI2_SCK_2
 
 /* Connections via the Tower Primary Connector Side A
  * --- -------------------- --------------------------------
@@ -321,69 +260,51 @@
  */
 
 /************************************************************************************
- * Public Data
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public data
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
 
 /************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-/************************************************************************************
- * Name: kinetis_boardinitialize
+ * Name: up_ledinit
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Initialize LED GPIOs so that LEDs can be controlled.
  *
  ************************************************************************************/
 
-EXTERN void kinetis_boardinitialize(void);
+#ifdef CONFIG_ARCH_LEDS
+extern void up_ledinit(void);
+#endif
 
 /************************************************************************************
- * Button support.
+ * Name: kinetis_spiinitialize
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
- *   handlers.
- *
- *   After up_buttoninit() has been called, up_buttons() may be called to
- *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON_*_BIT and JOYSTICK_*_BIT
- *   definitions in board.h for the meaning of each bit.
- *
- *   up_irqbutton() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
+ *   Called to configure SPI chip select GPIO pins for the TWR-K60N512 board.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_ARCH_BUTTONS
-EXTERN void up_buttoninit(void);
-EXTERN uint8_t up_buttons(void);
-#ifdef CONFIG_ARCH_IRQBUTTONS
-EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
-#endif
-#endif
+extern void weak_function kinetis_spiinitialize(void);
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
+/************************************************************************************
+ * Name: kinetis_usbinitialize
+ *
+ * Description:
+ *   Called to setup USB-related GPIO pins for the TWR-K60N512 board.
+ *
+ ************************************************************************************/
+
+extern void weak_function kinetis_usbinitialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif /* __CONFIGS_TWR_K60N512_SRC_TWRK60_INTERNAL_H */
+

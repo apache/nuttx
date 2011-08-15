@@ -18,6 +18,7 @@ Contents
     - Connections via the General Purpose Tower Plug-in (TWRPI) Socket
     - Connections via the Tower Primary Connector Side A
     - Connections via the Tower Primary Connector Side B
+  o LEDs
   o Development Environment
   o GNU Toolchain Options
   o IDEs
@@ -228,6 +229,32 @@ B78 EBI_D2               PTC13
 B79 EBI_D1               PTC14
 B80 EBI_D0               PTC15
 
+LEDs
+====
+
+The TWR-K60N100 board has four LEDs labeled D2..D4 on the board.  Usage of
+these LEDs is defined in include/board.h and src/up_leds.c.  They are encoded
+as follows:
+
+	SYMBOL				Meaning					LED1*	LED2	LED3	LED4
+	-------------------	-----------------------	-------	-------	-------	------
+	LED_STARTED			NuttX has been started	ON		OFF		OFF		OFF
+	LED_HEAPALLOCATE	Heap has been allocated	OFF		ON		OFF		OFF
+	LED_IRQSENABLED		Interrupts enabled		ON		ON		OFF		OFF
+	LED_STACKCREATED	Idle stack created		OFF		OFF		ON		OFF
+	LED_INIRQ			In an interrupt**		ON		N/C		N/C		OFF
+	LED_SIGNAL			In a signal handler***  N/C		ON		N/C		OFF
+	LED_ASSERTION		An assertion failed		ON		ON		N/C		OFF
+	LED_PANIC			The system has crashed	N/C		N/C		N/C		ON
+    LED_IDLE            STM32 is is sleep mode  (Optional, not used)
+
+  * If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
+    and these LEDs will give you some indication of where the failure was
+ ** The normal state is LED3 ON and LED1 faintly glowing.  This faint glow
+    is because of timer interupts that result in the LED being illuminated
+    on a small proportion of the time.
+*** LED2 may also flicker normally if signals are processed.
+
 Development Environment
 =======================
 
@@ -394,7 +421,7 @@ TWR-K60N512-specific Configuration Options
 	CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
 	   chip:
 
-	   CONFIG_ARCH_CHIP_MK60X256VLQ100
+	   CONFIG_ARCH_CHIP_MK60N512VMD100
 
 	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 	   hence, the board that supports the particular chip or SoC.

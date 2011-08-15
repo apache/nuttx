@@ -99,7 +99,6 @@ Connections via the Tower Primary Connector Side A
 --- -------------------- --------------------------------
 PIN NAME                 USAGE
 --- -------------------- --------------------------------
-
 A9  GPIO9 / CTS1         PTE10/UART_CTS
 A43 RXD1                 PTE9/UART_RX
 A44 TXD1                 PTE8/UART_TX
