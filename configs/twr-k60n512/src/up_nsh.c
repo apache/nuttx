@@ -1,6 +1,6 @@
 /****************************************************************************
- * configs/kwikstik-k40/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * config/twr-k60n512/src/up_nsh.c
+ * arch/arm/src/board/up_nsh.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -40,68 +40,100 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+#include <stdio.h>
 #include <debug.h>
+#include <errno.h>
 
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
- */
-
-#undef LED_DEBUG  /* Define to enable debug */
-
-#ifdef LED_DEBUG
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#ifdef CONFIG_KINETIS_SPI1
+#  include <nuttx/spi.h>
+#  include <nuttx/mtd.h>
 #endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifdef CONFIG_KINETIS_SDIO
+#  include <nuttx/sdio.h>
+#  include <nuttx/mmcsd.h>
+#endif
+
+#include "kinetis_internal.h"
 
 /****************************************************************************
- * Private Functions
+ * Pre-Processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* For now, don't build in any SPI1 support -- NSH is not using it */
+
+#undef CONFIG_KINETIS_SPI1
+
+/* PORT and SLOT number probably depend on the board configuration */
+
+#ifdef CONFIG_ARCH_BOARD_TWR_K60N512
+#  define CONFIG_NSH_HAVEUSBDEV 1
+#  define CONFIG_NSH_HAVEMMCSD  1
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#    error "Only one MMC/SD slot"
+#    undef CONFIG_NSH_MMCSDSLOTNO
+#  endif
+#  ifndef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
+#  endif
+#else
+   /* Add configuration for new Kinetis boards here */
+#  error "Unrecognized Kinetis board"
+#  undef CONFIG_NSH_HAVEUSBDEV
+#  undef CONFIG_NSH_HAVEMMCSD
+#endif
+
+/* Can't support USB features if USB is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef CONFIG_NSH_HAVEUSBDEV
+#endif
+
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
+ * is not enabled.
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_KINETIS_SDIO)
+#  undef CONFIG_NSH_HAVEMMCSD
+#endif
+
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
+#endif
+
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_DEBUG
+#    define message(...) lib_lowprintf(__VA_ARGS__)
+#  else
+#    define message(...) printf(__VA_ARGS__)
+#  endif
+#else
+#  ifdef CONFIG_DEBUG
+#    define message lib_lowprintf
+#  else
+#    define message printf
+#  endif
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: nsh_archinitialize
  *
  * Description:
- *   Initialize LED GPIOs so that LEDs can be controlled.
+ *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+int nsh_archinitialize(void)
 {
-  /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
+# warning "Missing logic"
+  return OK;
 }
-
-/****************************************************************************
- * Name: up_ledon
- ****************************************************************************/
-
-void up_ledon(int led)
-{
-  /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
-}
-
-/****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
-
-void up_ledoff(int led)
-{
-  /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
-}
-
-#endif /* CONFIG_ARCH_LEDS */

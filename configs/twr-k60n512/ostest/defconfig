@@ -1,5 +1,5 @@
 ############################################################################
-# configs/kwikstik-k40/ostest/defconfig
+# configs/twr-k60n512/ostest/defconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -52,7 +52,7 @@
 # CONFIG_DRAM_SIZE - Describes the installed DRAM.
 # CONFIG_DRAM_START - The start address of DRAM (physical)
 # CONFIG_DRAM_END - Last address+1 of installed RAM
-# CONFIG_ARCH_IRQPRIO - The K40X256VLQ100 supports interrupt prioritization
+# CONFIG_ARCH_IRQPRIO - The K60X512VMD100 supports interrupt prioritization
 # CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
 #   stack. If defined, this symbol is the size of the interrupt
 #   stack in bytes.  If not defined, the user task stacks will be
@@ -73,19 +73,12 @@ CONFIG_ARCH=arm
 CONFIG_ARCH_ARM=y
 CONFIG_ARCH_CORTEXM4=y
 CONFIG_ARCH_CHIP=kinetis
-CONFIG_ARCH_CHIP_MK40X256VLQ100=y
-CONFIG_ARCH_BOARD=kwikstik-k40
-CONFIG_ARCH_BOARD_KWIKSTIK_K40=y
+CONFIG_ARCH_CHIP_MK60N512VMD100=y
+CONFIG_ARCH_BOARD=twr-k60n512
+CONFIG_ARCH_BOARD_TWR_K60N512=y
 CONFIG_BOARD_LOOPSPERMSEC=5483
 CONFIG_DRAM_SIZE=0x18000000
-CONFIG_DRAM_START=0x00008000
-
-# define KINETIS_SRAML_BASE     0x18000000 /* –0x1fffffff SRAM_L: Lower SRAM
-
-#  define KINETIS_FLASH_SIZE      (256*1024) /* 256Kb */
-#  define KINETIS_FLEXMEM_SIZE    (256*1024) /* 256Kb */
-#  define KINETIS_SRAM_SIZE       (64*1024)  /* 32Kb */
-
+CONFIG_DRAM_START=0x00020000
 CONFIG_DRAM_END=(CONFIG_DRAM_START+CONFIG_DRAM_SIZE)
 CONFIG_ARCH_IRQPRIO=y
 CONFIG_ARCH_INTERRUPTSTACK=n

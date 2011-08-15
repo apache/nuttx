@@ -1985,7 +1985,7 @@
 	* arch/arm/src/kinetis, arch/arm/include/kinetis, configs/kwikstick-k40:
 	  Add a directory structure to support the port to the Kinesis KwikStik-K40.
 	  There is no real substance in the initial check-in; only the directory
-	  structure and skeleton files.
+	  structure and skeleton files (Code complete on 8/15/11).
 	* arch/arm/include/armv7-m, arch/arm/src/armv7-m, etc.: Rename all cortexm3
 	  directories and files to armv7-m; Change name of of all CORTEXM3 constants
 	  to ARMV7M.  This is a major namespace change needed to cleanly support the
@@ -2000,5 +2000,5 @@
 	  hkwilton).
 	* arch/arm/src/kinetis:  Added header files defining all Kinetis registers
 	  and bit fields within all Kinetis registers.
-	* configs/twr-k60n512:  This will (eventually) provide support for the Kinetis
-	  K60 Tower board.
+	* configs/twr-k60n512:  Add support for the Kinetis K60 Tower board
+	  (TWR-K60N512).

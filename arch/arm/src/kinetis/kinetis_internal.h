@@ -470,11 +470,15 @@ EXTERN void kinetis_pinirqinitialize(void);
 #endif
 
 /************************************************************************************
- * Name: kinetis_pinirqconfig
+ * Name: kinetis_pinirqattach
  *
  * Description:
- *   Sets/clears PIN and interrupt triggers.  On return PIN interrupts are always
- *   disabled.
+ *   Attach a pin interrupt handler.  The normal initalization sequence is:
+ *
+ *   1. Call kinetis_pinconfig() to configure the interrupting pin (pin interrupts
+ *      will be disabled.
+ *   2. Call kinetis_pinirqattach() to attach the pin interrupt handling function.
+ *   3. Call kinetis_pinirqenable() to enable interrupts on the pin.
  *
  * Parameters:
  *  - pinset:  Pin configuration
@@ -487,7 +491,7 @@ EXTERN void kinetis_pinirqinitialize(void);
  *
  ************************************************************************************/
 
-EXTERN xcpt_t kinetis_pinirqconfig(uint32_t pinset, xcpt_t pinisr);
+EXTERN xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr);
 
 /************************************************************************************
  * Name: kinetis_pinirqenable

@@ -1,9 +1,10 @@
 /****************************************************************************
- * configs/kwikstik-k40/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * configs/twr-k60n512/src/up_usbstrg.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *
+ * Configure and register the Kinetis MMC/SD block driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,68 +41,78 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <debug.h>
+#include <errno.h>
+
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
+
+#include "kinetis_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
- */
+/* Configuration ************************************************************/
 
-#undef LED_DEBUG  /* Define to enable debug */
-
-#ifdef LED_DEBUG
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#ifndef CONFIG_EXAMPLES_USBSTRG_DEVMINOR1
+#  define CONFIG_EXAMPLES_USBSTRG_DEVMINOR1 0
 #endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* SLOT number(s) could depend on the board configuration */
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef CONFIG_ARCH_BOARD_TWR_K60N512
+#  undef KINETIS_MMCSDSLOTNO
+#  define KINETIS_MMCSDSLOTNO 0
+#else
+   /* Add configuration for new Kinetis boards here */
+#  error "Unrecognized Kinetis board"
+#endif
+
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_DEBUG
+#    define message(...) lib_lowprintf(__VA_ARGS__)
+#    define msgflush()
+#  else
+#    define message(...) printf(__VA_ARGS__)
+#    define msgflush() fflush(stdout)
+#  endif
+#else
+#  ifdef CONFIG_DEBUG
+#    define message lib_lowprintf
+#    define msgflush()
+#  else
+#    define message printf
+#    define msgflush() fflush(stdout)
+#  endif
+#endif
+
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: usbstrg_archinitialize
  *
  * Description:
- *   Initialize LED GPIOs so that LEDs can be controlled.
+ *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+int usbstrg_archinitialize(void)
 {
-  /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
+  /* If examples/usbstrg is built as an NSH command, then SD slot should
+   * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
+   * this case, there is nothing further to be done here.
+   */
+
+#ifndef CONFIG_EXAMPLES_USBSTRG_BUILTIN
+#  warning "Missing logic"
+#endif /* CONFIG_EXAMPLES_USBSTRG_BUILTIN */
+
+   return OK;
 }
-
-/****************************************************************************
- * Name: up_ledon
- ****************************************************************************/
-
-void up_ledon(int led)
-{
-  /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
-}
-
-/****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
-
-void up_ledoff(int led)
-{
-  /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
-}
-
-#endif /* CONFIG_ARCH_LEDS */

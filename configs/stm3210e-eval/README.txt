@@ -215,7 +215,7 @@ LEDs
 ====
 
 The STM3210E-EVAL board has four LEDs labeled LD1, LD2, LD3 and LD4 on the
-the board.  Usage of these LEDs is defined in include/board.h and src/up_leds.c.
+board.  Usage of these LEDs is defined in include/board.h and src/up_leds.c.
 They are encoded as follows:
 
 	SYMBOL				Meaning					LED1*	LED2	LED3	LED4

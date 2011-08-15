@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/kwikstik-k40/ostest/ld.script
+ * configs/twr-k60n512/ostest/ld.script
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,14 +33,14 @@
  *
  ****************************************************************************/
 
-/* The K40X256VLQ100 has 256Kb of FLASH beginning at address 0x0000:0000 and
- * 32Kb of SRAM beginning at address 0x1800:0000.
+/* The K60N512VMD100 has 512Kb of FLASH beginning at address 0x0000:0000 and
+ * 128Kb of SRAM beginning at address 0x1800:0000.
  */
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x00000000, LENGTH = 256K
-    sram (rwx) : ORIGIN = 0x18000000, LENGTH = 32K
+    flash (rx) : ORIGIN = 0x00000000, LENGTH = 512K
+    sram (rwx) : ORIGIN = 0x18000000, LENGTH = 128K
 }
 
 OUTPUT_ARCH(arm)

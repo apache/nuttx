@@ -99,7 +99,7 @@
 # define KINETIS_XBAR_BASE      0x40004000 /* Crossbar switch */
 # define KINETIS_DMAC_BASE      0x40008000 /* DMA controller */
 # define KINETIS_DMADESC_BASE   0x40009000 /* DMA controller transfer control descriptors */
-# define KINETIS_FLEXBUS_BASE   0x4000c000 /* FlexBus */
+# define KINETIS_FLEXBUSC_BASE  0x4000c000 /* FlexBus controller */
 # define KINETIS_MPU_BASE       0x4000d000 /* MPU */
 # define KINETIS_FMC_BASE       0x4001f000 /* Flash memory controller */
 # define KINETIS_FTFL_BASE      0x40020000 /* Flash memory */
@@ -230,7 +230,7 @@
 # define KINETIS_XBAR_BASE      0x40004000 /* Crossbar switch */
 # define KINETIS_DMAC_BASE      0x40008000 /* DMA controller */
 # define KINETIS_DMADESC_BASE   0x40009000 /* DMA controller transfer control descriptors */
-# define KINETIS_FLEXBUS_BASE   0x4000c000 /* FlexBus */
+# define KINETIS_FLEXBUSC_BASE  0x4000c000 /* FlexBus controller */
 # define KINETIS_MPU_BASE       0x4000d000 /* MPU */
 # define KINETIS_FMC_BASE       0x4001f000 /* Flash memory controller */
 # define KINETIS_FTFL_BASE      0x40020000 /* Flash memory */
