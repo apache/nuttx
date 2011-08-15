@@ -591,7 +591,7 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *ie)
      *ie = priv->ie;
    }
 
-  up_restoreint(priv, 0);
+  up_restoreuartint(priv, 0);
   irqrestore(flags);
 }
 
@@ -611,8 +611,8 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Configure the UART as an RS-232 UART */
 
-  uart_configure(priv->uartbase, priv->baud, priv->clock, priv->parity,
-                 priv->bits);
+  kinetis_uartconfigure(priv->uartbase, priv->baud, priv->clock,
+                        priv->parity, priv->bits);
 #endif
 
   /* Make sure that all interrupts are disabled */
@@ -643,11 +643,11 @@ static void up_shutdown(struct uart_dev_s *dev)
 
   /* Disable interrupts */
 
-  up_restoreint(priv, 0);
+  up_restoreuartint(priv, 0);
 
   /* Reset hardware and disable Rx and Tx */
 
-  uart_reset(priv->uartbase);
+  kinetis_uartreset(priv->uartbase);
 }
 
 /****************************************************************************
@@ -709,7 +709,7 @@ static void up_detach(struct uart_dev_s *dev)
   
   /* Disable interrupts */
 
-  up_restoreint(priv, 0);
+  up_restoreuartint(priv, 0);
 #ifdef CONFIG_DEBUG
   up_disable_irq(priv->irqe);
 #endif
@@ -741,42 +741,42 @@ static int up_interrupte(int irq, void *context)
   uint8_t            regval;
 
 #ifdef CONFIG_KINETIS_UART0
-  if (g_uart0priv.irq == irqe)
+  if (g_uart0priv.irqe == irq)
     {
       dev = &g_uart0port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART1
-  if (g_uart1priv.irq == irqe)
+  if (g_uart1priv.irqe == irq)
     {
       dev = &g_uart1port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART2
-  if (g_uart2priv.irq == irqe)
+  if (g_uart2priv.irqe == irq)
     {
       dev = &g_uart2port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART3
-  if (g_uart3priv.irq == irqe)
+  if (g_uart3priv.irqe == irq)
     {
       dev = &g_uart1port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART4
-  if (g_uart4priv.irq == irqe)
+  if (g_uart4priv.irqe == irq)
     {
       dev = &g_uart1port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART5
-  if (g_uart5priv.irq == irqe)
+  if (g_uart5priv.irqe == irq)
     {
       dev = &g_uart1port;
     }
@@ -822,7 +822,6 @@ static int up_interrupts(int irq, void *context)
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
   int                passes;
-  unsigned int       size;
 #ifdef CONFIG_KINETIS_UARTFIFOS
   unsigned int       count;
 #else
@@ -831,35 +830,35 @@ static int up_interrupts(int irq, void *context)
   bool               handled;
 
 #ifdef CONFIG_KINETIS_UART0
-  if (g_uart0priv.irq == irqs)
+  if (g_uart0priv.irqs == irq)
     {
       dev = &g_uart0port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART1
-  if (g_uart1priv.irq == irqs)
+  if (g_uart1priv.irqs == irq)
     {
       dev = &g_uart1port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART2
-  if (g_uart2priv.irq == irqs)
+  if (g_uart2priv.irqs == irq)
     {
       dev = &g_uart2port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART3
-  if (g_uart3priv.irq == irqs)
+  if (g_uart3priv.irqs == irq)
     {
       dev = &g_uart1port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART4
-  if (g_uart4priv.irq == irqs)
+  if (g_uart4priv.irqs == irq)
     {
       dev = &g_uart1port;
     }
@@ -1228,21 +1227,21 @@ void up_earlyserialinit(void)
    * pic32mx_consoleinit()
    */
 
-  up_restoreint(TTYS0_DEV.priv, 0);
+  up_restoreuartint(TTYS0_DEV.priv, 0);
 #ifdef TTYS1_DEV
-  up_restoreint(TTYS1_DEV.priv, 0);
+  up_restoreuartint(TTYS1_DEV.priv, 0);
 #endif
 #ifdef TTYS2_DEV
-  up_restoreint(TTYS2_DEV.priv, 0);
+  up_restoreuartint(TTYS2_DEV.priv, 0);
 #endif
 #ifdef TTYS3_DEV
-  up_restoreint(TTYS3_DEV.priv, 0);
+  up_restoreuartint(TTYS3_DEV.priv, 0);
 #endif
 #ifdef TTYS4_DEV
-  up_restoreint(TTYS4_DEV.priv, 0);
+  up_restoreuartint(TTYS4_DEV.priv, 0);
 #endif
 #ifdef TTYS5_DEV
-  up_restoreint(TTYS5_DEV.priv, 0);
+  up_restoreuartint(TTYS5_DEV.priv, 0);
 #endif
 
   /* Configuration whichever one is the console */

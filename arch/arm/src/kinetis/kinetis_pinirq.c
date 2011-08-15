@@ -45,7 +45,10 @@
 
 #include <nuttx/arch.h>
 
+#include "up_arch.h"
 #include "up_internal.h"
+
+#include "kinetis_internal.h"
 #include "kinetis_port.h"
 
 #ifdef CONFIG_GPIO_IRQ
@@ -62,7 +65,7 @@
 #if defined (CONFIG_KINETIS_PORTAINTS) || defined (CONFIG_KINETIS_PORTBINTS) || \
     defined (CONFIG_KINETIS_PORTCINTS) || defined (CONFIG_KINETIS_PORTDINTS) || \
     defined (CONFIG_KINETIS_PORTEINTS)
-#  undef HAVE_PORTINTS
+#  define HAVE_PORTINTS 1
 #endif
 
 /****************************************************************************
@@ -108,8 +111,8 @@ static xcpt_t g_porteisrs[32];
  ****************************************************************************/
 
 #ifdef HAVE_PORTINTS
-static int kinetis_portainterrupt(int irq, FAR void *context,
-                                  uintptr_t addr, xcpt_t **xcpt)
+static int kinetis_portinterrupt(int irq, FAR void *context,
+                                uintptr_t addr, xcpt_t *isrtab)
 {
   uint32_t isfr = getreg32(addr);
   int i;
@@ -125,18 +128,18 @@ static int kinetis_portainterrupt(int irq, FAR void *context,
        */
 
       uint32_t bit = (1 << i);
-      if ((isfr & bit )) != 0)
+      if ((isfr & bit ) != 0)
         {
           /* I think that bits may be set in the ISFR for DMA activities
            * well.  So, no error is declared if there is no registered
            * interrupt handler for the pin.
            */
 
-          if (xcpt[i])
+          if (isrtab[i])
             {
               /* There is a registered interrupt handler... invoke it */
 
-              (void)xcpt[i](irq, context);
+              (void)isrtab[i](irq, context);
             }
 
           /* Writing a one to the ISFR register will clear the pending
@@ -258,7 +261,7 @@ void kinetis_pinirqinitialize(void)
 xcpt_t kinetis_pinirqconfig(uint32_t pinset, xcpt_t pinisr)
 {
 #ifdef HAVE_PORTINTS
-  xcpt_t     **table;
+  xcpt_t      *isrtab;
   xcpt_t       oldisr;
   irqstate_t   flags;
   unsigned int port;
@@ -273,8 +276,8 @@ xcpt_t kinetis_pinirqconfig(uint32_t pinset, xcpt_t pinisr)
 
   /* Get the port number and pin number */
 
-  port = (cfgset & _PIN_PORT_MASK) >> _PIN_PORT_SHIFT;
-  pin  = (cfgset & _PIN_MASK)      >> _PIN_SHIFT;
+  port = (pinset & _PIN_PORT_MASK) >> _PIN_PORT_SHIFT;
+  pin  = (pinset & _PIN_MASK)      >> _PIN_SHIFT;
 
   /* Get the table associated with this port */
 
@@ -284,27 +287,27 @@ xcpt_t kinetis_pinirqconfig(uint32_t pinset, xcpt_t pinisr)
     {
 #ifdef CONFIG_KINETIS_PORTAINTS
       case KINETIS_PORTA :
-        table = g_portaisrs;
+        isrtab = g_portaisrs;
         break;
 #endif
 #ifdef CONFIG_KINETIS_PORTBINTS
       case KINETIS_PORTB :
-        table = g_portbisrs;
+        isrtab = g_portbisrs;
         break;
 #endif
 #ifdef CONFIG_KINETIS_PORTCINTS
       case KINETIS_PORTC :
-        table = g_portcisrs;
+        isrtab = g_portcisrs;
         break;
 #endif
 #ifdef CONFIG_KINETIS_PORTDINTS
       case KINETIS_PORTD :
-        table = g_portdisrs;
+        isrtab = g_portdisrs;
         break;
 #endif
 #ifdef CONFIG_KINETIS_PORTEINTS
       case KINETIS_PORTE :
-        table = g_porteisrs;
+        isrtab = g_porteisrs;
         break;
 #endif
       default:
@@ -313,12 +316,15 @@ xcpt_t kinetis_pinirqconfig(uint32_t pinset, xcpt_t pinisr)
 
    /* Get the old PIN ISR and set the new PIN ISR */
 
-   oldisr     = table[pin];
-   table[pin] = pinisr;
+   oldisr      = isrtab[pin];
+   isrtab[pin] = pinisr;
 
    /* And return the old PIN isr address */
 
    return oldisr;
+#else
+   return NULL;
+#endif /* HAVE_PORTINTS */
 }
 
 /************************************************************************************
@@ -345,6 +351,10 @@ void kinetis_pinirqenable(uint32_t pinset)
   DEBUGASSERT(port < KINETIS_NPORTS);
   if (port < KINETIS_NPORTS)
     {
+      /* Get the base address of PORT block for this port */
+
+      base =  KINETIS_PORT_BASE(port);
+
       /* Modify the IRQC field of the port PCR register in order to enable
        * the interrupt.
        */
@@ -380,7 +390,7 @@ void kinetis_pinirqenable(uint32_t pinset)
 
       putreg32(regval, base + KINETIS_PORT_PCR_OFFSET(pin));
     }
-#endif
+#endif /* HAVE_PORTINTS */
 }
 
 /************************************************************************************
@@ -407,6 +417,10 @@ void kinetis_pinirqdisable(uint32_t pinset)
   DEBUGASSERT(port < KINETIS_NPORTS);
   if (port < KINETIS_NPORTS)
     {
+      /* Get the base address of PORT block for this port */
+
+      base =  KINETIS_PORT_BASE(port);
+
       /* Clear the IRQC field of the port PCR register in order to disable
        * the interrupt.
        */
@@ -415,6 +429,6 @@ void kinetis_pinirqdisable(uint32_t pinset)
       regval &= ~PORT_PCR_IRQC_MASK;
       putreg32(regval, base + KINETIS_PORT_PCR_OFFSET(pin));
     }
-#endif
+#endif /* HAVE_PORTINTS */
 }
 #endif /* CONFIG_GPIO_IRQ */
