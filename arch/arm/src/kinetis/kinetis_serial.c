@@ -223,20 +223,6 @@
 #  define UART5_ASSIGNED      1
 #endif
 
-/* These values describe the set of enabled interrupts */
-
-#define IE_RX    (1 << 0)
-#define IE_TX    (1 << 1)
-
-#define RX_ENABLED(im)    (((im) & IE_RX) != 0)
-#define TX_ENABLED(im)    (((im) & IE_TX) != 0)
-
-#define ENABLE_RX(im)     do { (im) |= IE_RX; } while (0)
-#define ENABLE_TX(im)     do { (im) |= IE_TX; } while (0)
-
-#define DISABLE_RX(im)    do { (im) &= ~IE_RX; } while (0)
-#define DISABLE_TX(im)    do { (im) &= ~IE_TX; } while (0)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -551,17 +537,37 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint8_t value
 }
 
 /****************************************************************************
+ * Name: up_setuartint
+ ****************************************************************************/
+
+static void up_setuartint(struct up_dev_s *priv)
+{
+  irqstate_t flags;
+  uint8_t regval;
+
+  /* Re-enable/re-disable interrupts corresponding to the state of bits in ie */
+
+  flags    = irqsave();
+  regval   = up_serialin(priv, KINETIS_UART_C2_OFFSET);
+  regval  &= ~UART_C2_ALLINTS;
+  regval  |= priv->ie;
+  up_serialout(priv, KINETIS_UART_C2_OFFSET, regval);
+  irqrestore(flags);
+}
+
+/****************************************************************************
  * Name: up_restoreuartint
  ****************************************************************************/
 
-static void up_restoreuartint(struct up_dev_s *priv, uint8_t im)
+static void up_restoreuartint(struct up_dev_s *priv, uint8_t ie)
 {
   irqstate_t flags;
 
-  /* Re-enable/re-disable interrupts corresponding to the state of bits in im */
+  /* Re-enable/re-disable interrupts corresponding to the state of bits in ie */
 
-  flags = irqsave();
-#warning "Missing logic"
+  flags    = irqsave();
+  priv->ie = ie & UART_C2_ALLINTS;
+  up_setuartint(priv);
   irqrestore(flags);
 }
 
@@ -569,15 +575,16 @@ static void up_restoreuartint(struct up_dev_s *priv, uint8_t im)
  * Name: up_disableuartint
  ****************************************************************************/
 
-static void up_disableuartint(struct up_dev_s *priv, uint8_t *im)
+static void up_disableuartint(struct up_dev_s *priv, uint8_t *ie)
 {
   irqstate_t flags;
 
   flags = irqsave();
-  if (im)
+  if (ie)
    {
-     *im = priv->im;
+     *ie = priv->ie;
    }
+
   up_restoreint(priv, 0);
   irqrestore(flags);
 }
@@ -601,6 +608,10 @@ static int up_setup(struct uart_dev_s *dev)
   uart_configure(priv->uartbase, priv->baud, priv->clock, priv->parity,
                  priv->bits);
 #endif
+
+  /* Make sure that all interrupts are disabled */
+
+  up_restoreuartint(priv, 0);
 
   /* Set up the interrupt priority */
 
@@ -626,7 +637,7 @@ static void up_shutdown(struct uart_dev_s *dev)
 
   /* Disable interrupts */
 
-  up_disableuartint(priv, NULL);
+  up_restoreint(priv, 0);
 
   /* Reset hardware and disable Rx and Tx */
 
@@ -653,7 +664,9 @@ static int up_attach(struct uart_dev_s *dev)
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   int ret;
 
-  /* Attach the IRQ(s) */
+  /* Attach and enable the IRQ(s).  The interrupts are (probably) still
+   * disabled in the C2 register.
+   */
 
   ret = irq_attach(priv->irqs, up_interrupts);
 #ifdef CONFIG_DEBUG
@@ -662,6 +675,14 @@ static int up_attach(struct uart_dev_s *dev)
       ret = irq_attach(priv->irqe, up_interrupte);
     }
 #endif
+
+  if (ret == 0)
+    {
+#ifdef CONFIG_DEBUG
+      up_enable_irq(priv->irqe);
+#endif
+      up_enable_irq(priv->irqs);
+    }
 
   return ret;
 }
@@ -682,7 +703,11 @@ static void up_detach(struct uart_dev_s *dev)
   
   /* Disable interrupts */
 
-  up_disableuartint(priv, NULL);
+  up_restoreint(priv, 0);
+#ifdef CONFIG_DEBUG
+  up_disable_irq(priv->irqe);
+#endif
+  up_disable_irq(priv->irqs);
 
   /* Detach from the interrupt(s) */
 
@@ -783,6 +808,8 @@ static int up_interrupts(int irq, void *context)
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
   int                passes;
+  unsigned int       size;
+  unsigned int       count;
   bool               handled;
 
 #ifdef CONFIG_KINETIS_UART0
@@ -852,7 +879,8 @@ static int up_interrupts(int irq, void *context)
 
           /* Handle incoming, receive bytes */
 
-#warning "Missing logic"
+          count = up_serialin(priv, KINETIS_UART_RCFIFO_OFFSET);
+          if (count > 0)
             {
               /* Process incoming bytes */
 
@@ -861,7 +889,9 @@ static int up_interrupts(int irq, void *context)
             }
 
           /* Handle outgoing, transmit bytes */
-#warning "Missing logic"
+
+          count = up_serialin(priv, KINETIS_UART_TCFIFO_OFFSET);
+          #warning "Missing logic"
             {
               /* Process outgoing bytes */
 
@@ -951,10 +981,10 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   irqstate_t flags;
-  uint8_t im;
+  uint8_t ie;
 
   flags = irqsave();
-  im = priv->im;
+  ie = priv->ie;
   if (enable)
     {
       /* Receive an interrupt when their is anything in the Rx data register (or an Rx
@@ -962,23 +992,22 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-#ifdef CONFIG_DEBUG
-      up_enable_irq(priv->irqe);
-#endif
-      up_enable_irq(priv->irqs);
-      ENABLE_RX(im);
+      priv->ie |= UART_C2_RIE;
+      up_setuartint(priv);
 #endif
     }
   else
     {
+#warning "Revisit:  How are errors enabled?  What is the IDLE receive interrupt.  I think I need it"
 #ifdef CONFIG_DEBUG
-      up_disable_irq(priv->irqe);
+      priv->ie |= UART_C2_RIE;
+#else
+      priv->ie |= UART_C2_RIE;
 #endif
-      up_disable_irq(priv->irqs);
-      DISABLE_RX(im);
+      up_setuartint(priv);
     }
 
-  priv->im = im;
+  priv->ie = ie;
   irqrestore(flags);
 }
 
@@ -993,10 +1022,12 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  unsigned int count;
 
-  /* Return true if the receive data register is full */
+  /* Return true if there are any bytes in the RX FIFO */
 
-  return (up_serialin(priv, KINETIS_UART_S1_OFFSET) & UART_S1_RDRF) != 0;
+  count = up_serialin(priv, KINETIS_UART_RCFIFO_OFFSET);
+  return count > 0;
 }
 
 /****************************************************************************
@@ -1025,16 +1056,15 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   irqstate_t flags;
-  uint8_t im;
 
   flags = irqsave();
-  im = priv->im;
   if (enable)
     {
       /* Enable the TX interrupt */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      ENABLE_TX(im);
+      priv->ie |= UART_C2_TIE;
+      up_setuartint(priv);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -1047,10 +1077,10 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-      DISABLE_TX(im);
+      priv->ie &= ~UART_C2_TIE;
+      up_setuartint(priv);
     }
 
-  priv->im = im;
   irqrestore(flags);
 }
 
@@ -1113,21 +1143,21 @@ void up_earlyserialinit(void)
    * pic32mx_consoleinit()
    */
 
-  up_disableuartint(TTYS0_DEV.priv, NULL);
+  up_restoreint(TTYS0_DEV.priv, 0);
 #ifdef TTYS1_DEV
-  up_disableuartint(TTYS1_DEV.priv, NULL);
+  up_restoreint(TTYS1_DEV.priv, 0);
 #endif
 #ifdef TTYS2_DEV
-  up_disableuartint(TTYS2_DEV.priv, NULL);
+  up_restoreint(TTYS2_DEV.priv, 0);
 #endif
 #ifdef TTYS3_DEV
-  up_disableuartint(TTYS3_DEV.priv, NULL);
+  up_restoreint(TTYS3_DEV.priv, 0);
 #endif
 #ifdef TTYS4_DEV
-  up_disableuartint(TTYS4_DEV.priv, NULL);
+  up_restoreint(TTYS4_DEV.priv, 0);
 #endif
 #ifdef TTYS5_DEV
-  up_disableuartint(TTYS5_DEV.priv, NULL);
+  up_restoreint(TTYS5_DEV.priv, 0);
 #endif
 
   /* Configuration whichever one is the console */

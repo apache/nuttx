@@ -146,7 +146,6 @@ struct up_dev_s
   uint8_t   irqrx;     /* RX IRQ associated with this UART (for enable) */
   uint8_t   irqtx;     /* TX IRQ associated with this UART (for enable) */
   uint8_t   irqprio;   /* Interrupt priority */
-  uint8_t   ie;        /* Interrupts enabled */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (5, 6, 7 or 8) */
   bool      stopbits2; /* true: Configure with 2 stop bits instead of 1 */

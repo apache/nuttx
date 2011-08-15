@@ -115,10 +115,12 @@
  * Private Variables
  **************************************************************************/
 
+static uint8_t g_sizemap[8] = {1, 4, 8, 16, 32, 64, 128, 0};
+
 /**************************************************************************
  * Private Functions
  **************************************************************************/
-
+ 
 /**************************************************************************
  * Public Functions
  **************************************************************************/
@@ -296,10 +298,11 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
                            uint32_t clock, unsigned int parity,
                            unsigned int nbits)
 {
-  uint32_t sbr;
-  uint32_t brfa;
-  uint32_t tmp;
-  uint8_t  regval;
+  uint32_t     sbr;
+  uint32_t     brfa;
+  uint32_t     tmp;
+  uint8_t      regval;
+  unsigned int depth;
 
   /* Disable the transmitter and receiver throughout the reconfiguration */
 
@@ -384,10 +387,32 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
   regval |= ((uint8_t)brfa << UART_C4_BRFA_SHIFT) & UART_C4_BRFA_MASK;
   putreg8(regval, uart_base+KINETIS_UART_C4_OFFSET);
 
+  /* Set the FIFO watermarks */
+
+  regval = getreg8(uart_base+KINETIS_UART_PFIFO_OFFSET);
+  
+  depth = g_sizemap[(regval & UART_PFIFO_RXFIFOSIZE_MASK) >> UART_PFIFO_RXFIFOSIZE_SHIFT];
+  if (depth > 1)
+    {
+      depth = (3 * depth) >> 2;
+    }
+  putreg8(depth , uart_base+KINETIS_UART5_RWFIFO);
+  
+  depth = g_sizemap[(regval & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT];
+  if (depth > 3)
+    {
+      depth = (depth >> 2);
+    }
+  putreg8(depth, uart_base+KINETIS_UART5_TWFIFO);
+  
+  /* Enable RX and TX FIFOs */
+
+  putreg8(UART_PFIFO_RXFE | UART_PFIFO_TXFE, uart_base+KINETIS_UART_PFIFO_OFFSET);
+
   /* Now we can re-enable the transmitter and receiver */
 
   regval = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
-  regval |= (UART_C2_RE|UART_C2_TE);
+  regval |= (UART_C2_RE | UART_C2_TE);
   putreg8(regval, uart_base+KINETIS_UART_C2_OFFSET);
 }
 #endif

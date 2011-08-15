@@ -320,6 +320,7 @@
 #define UART_C2_RIE                  (1 << 5)  /* Bit 5: Receiver Full Interrupt or DMA Transfer Enable */
 #define UART_C2_TCIE                 (1 << 6)  /* Bit 6: Transmission Complete Interrupt Enable */
 #define UART_C2_TIE                  (1 << 7)  /* Bit 7: Transmitter Interrupt or DMA Transfer Enable */
+#define UART_C2_ALLINTS              (0xf0)
 
 /* UART Status Register 1 */
 
