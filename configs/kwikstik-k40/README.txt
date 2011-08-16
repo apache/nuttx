@@ -349,7 +349,7 @@ KwikStik-K40-specific Configuration Options
   	CONFIG_KINETIS_UART3    -- Support UART3
   	CONFIG_KINETIS_UART4    -- Support UART4
   	CONFIG_KINETIS_UART5    -- Support UART5
-  	CONFIG_KINETIS_ETHERNET -- Support Ethernet (K60 only)
+  	CONFIG_KINETIS_ENET     -- Support Ethernet (K60 only)
   	CONFIG_KINETIS_RNGB     -- Support the random number generator(K60 only)
     CONFIG_KINETIS_FLEXCAN0 -- Support FlexCAN0
     CONFIG_KINETIS_FLEXCAN1 -- Support FlexCAN1

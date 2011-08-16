@@ -483,7 +483,7 @@ TWR-K60N512-specific Configuration Options
   	CONFIG_KINETIS_UART3    -- Support UART3
   	CONFIG_KINETIS_UART4    -- Support UART4
   	CONFIG_KINETIS_UART5    -- Support UART5
-  	CONFIG_KINETIS_ETHERNET -- Support Ethernet (K60 only)
+  	CONFIG_KINETIS_ENET     -- Support Ethernet (K60 only)
   	CONFIG_KINETIS_RNGB     -- Support the random number generator(K60 only)
     CONFIG_KINETIS_FLEXCAN0 -- Support FlexCAN0
     CONFIG_KINETIS_FLEXCAN1 -- Support FlexCAN1
@@ -528,6 +528,11 @@ TWR-K60N512-specific Configuration Options
     CONFIG_KINETIS_UART4PRIO
     CONFIG_KINETIS_UART5PRIO
 
+    CONFIG_KINETIS_EMACTMR_PRIO
+    CONFIG_KINETIS_EMACTX_PRIO
+    CONFIG_KINETIS_EMACRX_PRIO
+    CONFIG_KINETIS_EMACMISC_PRIO
+
   PIN Interrupt Support
 
     CONFIG_GPIO_IRQ          -- Enable pin interrtup support.  Also needs
@@ -550,23 +555,12 @@ TWR-K60N512-specific Configuration Options
 	CONFIG_UARTn_BITS - The number of bits.  Must be either 8 or 8.
 	CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
 
-  TWR-K60N512 LCD Hardware Configuration
+  Kenetis ethernet controller settings
 
-    CONFIG_LCD_LANDSCAPE - Define for 320x240 display "landscape"
-      support. Default is this 320x240 "landscape" orientation
-      (this setting is informative only... not used).
-    CONFIG_LCD_PORTRAIT - Define for 240x320 display "portrait"
-      orientation support.  In this orientation, the TWR-K60N512's
-      LCD ribbon cable is at the bottom of the display. Default is
-      320x240 "landscape" orientation.
-    CONFIG_LCD_RPORTRAIT - Define for 240x320 display "reverse
-      portrait" orientation support.  In this orientation, the
-      TWR-K60N512's LCD ribbon cable is at the top of the display.
-      Default is 320x240 "landscape" orientation.
-    CONFIG_LCD_BACKLIGHT - Define to support an adjustable backlight
-      using timer 1.  The granularity of the settings is determined
-      by CONFIG_LCD_MAXPOWER.  Requires CONFIG_KINETIS_TIM1.
-
+    CONFIG_ENET_NBUFFERS - Number of TX/RX buffers.  The size of one
+        buffer is determined by CONFIG_NET_BUFSIZE.  Default: 8
+    CONFIG_ENET_USEMII - Usee MII mode.  Default: RMII mode.
+ 
 Configurations
 ==============
 
