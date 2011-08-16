@@ -44,10 +44,6 @@
 /************************************************************************************************
  * Preprocessor Definitions
  ************************************************************************************************/
-# define KINETIS_FLASH_BASE     0x00000000 /* –0x0fffffff Program flash and read-
-  define KINETIS_SRAML_BASE     0000 /* –0x1fffffff SRAM_L: Lower SRAM
-                                            *             (ICODE/DCODE) */
-
 /* Memory Map:
  *
  * 0x0000:0000 - Beginning of FLASH. Address of vectors
