@@ -51,6 +51,7 @@
 #include "up_internal.h"
 
 #include "kinetis_internal.h"
+#include "kinetis_smc.h"
 
 /****************************************************************************
  * Private Definitions
@@ -122,12 +123,15 @@ void __start(void)
     }
 #endif
 
-  /* Perform clock and Kinetis module initialization */
+  /* Perform clock and Kinetis module initialization (This depends on
+   * RAM functions having been copied to RAM).
+   */
 
   kinetis_clockconfig();
 
   /* Configure the uart and perform early serial initialization so that we
-   * can get debug output as soon as possible.
+   * can get debug output as soon as possible (This depends on clock
+   * configuration).
    */
 
   kinetis_lowsetup();
