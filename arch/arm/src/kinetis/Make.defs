@@ -49,7 +49,7 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 		  up_doirq.c up_hardfault.c up_svcall.c up_checkstack.c
 
 ifeq ($(CONFIG_NET),y)
-ifneq ($(CONFIG_KINETIS_ETHERNET),y)
+ifneq ($(CONFIG_KINETIS_ENET),y)
 CMN_CSRCS	+= up_etherstub.c
 endif
 endif
@@ -88,7 +88,7 @@ CHIP_CSRCS	+= kinetis_dma.c
 endif
 
 ifeq ($(CONFIG_NET),y)
-ifeq ($(CONFIG_KINETIS_ETHERNET),y)
+ifeq ($(CONFIG_KINETIS_ENET),y)
 CHIP_CSRCS	+= kinetis_enet.c
 endif
 endif

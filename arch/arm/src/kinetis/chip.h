@@ -836,6 +836,7 @@
 #define NVIC_SYSH_PRIORITY_MIN     0xf0 /* All bits[7:4] set is minimum priority */
 #define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
 #define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
+#define NVIC_SYSH_PRIORITY_STEP    0x10 /* Steps between supported priority values */
 
 /************************************************************************************
  * Public Types

@@ -67,7 +67,7 @@
 # define CONFIG_skeleton_NINTERFACES 1
 #endif
 
-/* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
 #define skeleton_WDDELAY   (1*CLK_TCK)
 #define skeleton_POLLHSEC  (1*2)
@@ -355,7 +355,7 @@ static int skel_interrupt(int irq, FAR void *context)
 
   skel_receive(skel);
 
-  /* Check is a packet transmission just completed.  If so, call skel_txdone.
+  /* Check if a packet transmission just completed.  If so, call skel_txdone.
    * This may disable further Tx interrupts if there are no pending
    * tansmissions.
    */
@@ -504,7 +504,7 @@ static int skel_ifdown(struct uip_driver_s *dev)
   wd_cancel(skel->sk_txpoll);
   wd_cancel(skel->sk_txtimeout);
 
-  /* Put the the EMAC is its reset, non-operational state.  This should be
+  /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the skel_ifup() always
    * successfully brings the interface back up.
    */
@@ -649,13 +649,13 @@ int skel_initialize(int intf)
   DEBUGASSERT(inf < CONFIG_skeleton_NINTERFACES);
   priv = &g_skel[intf];
 
-   /* Check if a Ethernet chip is recognized at its I/O base */
+  /* Check if a Ethernet chip is recognized at its I/O base */
 
   /* Attach the IRQ to the driver */
 
   if (irq_attach(CONFIG_skeleton_IRQ, skel_interrupt))
     {
-      /* We could not attach the ISR to the the interrupt */
+      /* We could not attach the ISR to the interrupt */
 
       return -EAGAIN;
     }

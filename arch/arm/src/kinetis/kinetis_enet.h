@@ -433,9 +433,171 @@
                                                /* Bits 8-31: Reserved */
 /* Timer Compare Capture Register (32-bit compare value) */
 
+/* Buffer Descriptors ***********************************************************************/
+/* Endian-independent descriptor offsets */
+
+#define DESC_STATUS1_OFFSET         (0)
+#define DESC_LENGTH_OFFSET          (2)
+#define DESC_DATAPTR_OFFSET         (4)
+#define DESC_LEGACY_LEN             (8)
+
+#define DESC_STATUS2_OFFSET         (8)
+#define DESC_LENPROTO_OFFSET        (12)
+#define DESC_CHECKSUM_OFFSET        (14)
+#define DESC_BDU_OFFSET             (16)
+#define DESC_TIMESTAMP_OFFSET       (20)
+#define DESC_ENHANCED_LEN           (32)
+
+/* Legacy/Common TX Buffer Descriptor Bit Definitions.
+ *
+ *   The descriptors are represented by structures  Unfortunately, when the
+ *   structures are overlayed on the data, the bytes are reversed because
+ *   the underlying hardware writes the data in big-endian byte order.
+ */
+
+#ifdef CONFIG_ENDIAN_BIG
+#  define TXDESC_ABC                 (1 << 9)  /* Legacy */
+#  define TXDESC_TC                  (1 << 10) /* Common */
+#  define TXDESC_L                   (1 << 11) /* Common */
+#  define TXDESC_TO2                 (1 << 12) /* Common */
+#  define TXDESC_W                   (1 << 13) /* Common */
+#  define TXDESC_TO1                 (1 << 14) /* Common */
+#  define TXDESC_R                   (1 << 15) /* Common */
+#endif
+#  define TXDESC_ABC                 (1 << 1)  /* Legacy */
+#  define TXDESC_TC                  (1 << 2)  /* Common */
+#  define TXDESC_L                   (1 << 3)  /* Common */
+#  define TXDESC_TO2                 (1 << 4)  /* Common */
+#  define TXDESC_W                   (1 << 5)  /* Common */
+#  define TXDESC_TO1                 (1 << 6)  /* Common */
+#  define TXDESC_R                   (1 << 7)  /* Common */
+#endif
+
+/* Enhanced (only) TX Buffer Descriptor Bit Definitions */
+
+#ifdef CONFIG_ENDIAN_BIG
+#  define TXDESC_TSE                 (1 << 8)
+#  define TXDESC_OE                  (1 << 9) 
+#  define TXDESC_LCE                 (1 << 10) 
+#  define TXDESC_FE                  (1 << 11) 
+#  define TXDESC_EE                  (1 << 12)
+#  define TXDESC_UE                  (1 << 13)
+#  define TXDESC_TXE                 (1 << 15)
+
+#  define TXDESC_IINS                (1 << 27)
+#  define TXDESC_PINS                (1 << 28)
+#  define TXDESC_TS                  (1 << 29)
+#  define TXDESC_INT                 (1 << 30)
+
+#  define TXDESC_BDU                 (1 << 31)
+
+#else
+#  define TXDESC_IINS                (1 << 3)
+#  define TXDESC_PINS                (1 << 4)
+#  define TXDESC_TS                  (1 << 5)
+#  define TXDESC_INT                 (1 << 6)
+
+#  define TXDESC_TSE                 (1 << 16) 
+#  define TXDESC_OE                  (1 << 17) 
+#  define TXDESC_LCE                 (1 << 18) 
+#  define TXDESC_FE                  (1 << 19) 
+#  define TXDESC_EE                  (1 << 20)
+#  define TXDESC_UE                  (1 << 21)
+#  define TXDESC_TXE                 (1 << 23)
+
+#  define TXDESC_BDU                 (1 << 7)    
+#endif
+
+/* Legacy (and Common) RX Buffer Descriptor Bit Definitions */
+
+#ifdef CONFIG_ENDIAN_BIG
+#  define RXDESC_TR                  (1 << 0)
+#  define RXDESC_OV                  (1 << 1)
+#  define RXDESC_CR                  (1 << 2)
+#  define RXDESC_NO                  (1 << 4)
+#  define RXDESC_LG                  (1 << 5)
+#  define RXDESC_MC                  (1 << 6)
+#  define RXDESC_BC                  (1 << 7)
+#  define RXDESC_M                   (1 << 8)
+#  define RXDESC_L                   (1 << 11)
+#  define RXDESC_R02                 (1 << 12)
+#  define RXDESC_W                   (1 << 13)
+#  define RXDESC_R01                 (1 << 14)
+#  define RXDESC_E                   (1 << 15)
+#else
+#  define RXDESC_M                   (1 << 0)
+#  define RXDESC_L                   (1 << 3)
+#  define RXDESC_R02                 (1 << 4)
+#  define RXDESC_W                   (1 << 5)
+#  define RXDESC_R01                 (1 << 6)
+#  define RXDESC_E                   (1 << 7)
+#  define RXDESC_TR                  (1 << 8)
+#  define RXDESC_OV                  (1 << 9)
+#  define RXDESC_CR                  (1 << 10)
+#  define RXDESC_NO                  (1 << 12)
+#  define RXDESC_LG                  (1 << 13)
+#  define RXDESC_MC                  (1 << 14)
+#  define RXDESC_BC                  (1 << 15)
+#endif
+
+/* Enhanced (only) TX Buffer Descriptor Bit Definitions */
+
+#ifdef CONFIG_ENDIAN_BIG
+#  define RXDESC_FRAG                (1 << 0)
+#  define RXDESC_IPV6                (1 << 1)
+#  define RXDESC_VLAN                (1 << 2)
+#  define RXDESC_PCR                 (1 << 4)
+#  define RXDESC_ICE                 (1 << 5)
+#  define RXDESC_INT                 (1 << 23)
+#  define RXDESC_UC                  (1 << 24)
+#  define RXDESC_CE                  (1 << 25)
+#  define RXDESC_PE                  (1 << 26)
+#  define RXDESC_ME                  (1 << 31)
+
+#  define RXDESC_BDU                 (1 << 31)    
+#else
+#  define RXDESC_UC                  (1 << 0)
+#  define RXDESC_CE                  (1 << 1)
+#  define RXDESC_PE                  (1 << 2)
+#  define RXDESC_ME                  (1 << 7)
+#  define RXDESC_INT                 (1 << 15)
+#  define RXDESC_FRAG                (1 << 24)
+#  define RXDESC_IPV6                (1 << 25)
+#  define RXDESC_VLAN                (1 << 26)
+#  define RXDESC_PCR                 (1 << 28)
+#  define RXDESC_ICE                 (1 << 29)
+
+#  define RXDESC_BDU                 (1 << 7)
+#endif
+
 /********************************************************************************************
  * Public Types
  ********************************************************************************************/
+/* Buffer Descriptors ***********************************************************************/
+/* Legacy Buffer Descriptor */
+
+#ifdef CONFIG_ENET_ENHANCEDBD
+struct enet_desc_s
+{
+  uint16_t status1;     /* Control and status */
+  uint16_t length;      /* Data length */
+  uint8_t  *data;       /* Buffer address */
+  uint32_t status2;     /* Extended status */
+  uint16_t lenproto;    /* Header length + Protocol type */
+  uint16_t checksum;    /* Payload checksum */
+  uint32_t bdu;         /* BDU */
+  uint32_t timestamp;   /* Time stamp */
+  uint32_t reserved1;   /* unused */
+  uint32_t reserved2;   /* unused */
+}
+#else
+struct enet_desc_s
+{
+  uint16_t status1;     /* Control and status */
+  uint16_t length;      /* Data length */
+  uint8_t  *data;       /* Buffer address */
+};
+#endif
 
 /********************************************************************************************
  * Public Data
