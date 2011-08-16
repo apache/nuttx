@@ -82,8 +82,13 @@
 #define PIN_FTM0_CH1_1           (PIN_ALT3   | PIN_PORTA | PIN4)
 #define PIN_NMI                  (PIN_ALT7   | PIN_PORTA | PIN4)
 #define PIN_FTM0_CH2_1           (PIN_ALT3   | PIN_PORTA | PIN5)
-#define PIN_RMII0_RXER           (PIN_ALT4   | PIN_PORTA | PIN5)
-#define PIN_MII0_RXER            (PIN_ALT4   | PIN_PORTA | PIN5)
+#if 0
+#  define PIN_RMII0_RXER         (PIN_ALT4   | PIN_PORTA | PIN5)
+#  define PIN_MII0_RXER          (PIN_ALT4   | PIN_PORTA | PIN5)
+#else
+#  define PIN_RMII0_RXER         (GPIO_PULLDOWN | PIN_PORTA | PIN5)
+# define PIN_MII0_RXER           (GPIO_PULLDOWN | PIN_PORTA | PIN5)
+#endif
 #define PIN_CMP2_OUT_1           (PIN_ALT5   | PIN_PORTA | PIN5)
 #define PIN_I2S0_RX_BCLK_1       (PIN_ALT6   | PIN_PORTA | PIN5)
 #define PIN_JTAG_TRST            (PIN_ALT7   | PIN_PORTA | PIN5)

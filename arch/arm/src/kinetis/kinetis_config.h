@@ -163,7 +163,7 @@
 
 #undef CONFIG_KINETIS_UARTFIFOS
 
-/* Default Priorities */
+/* UART Default Interrupt Priorities */
 
 #ifndef CONFIG_KINETIS_UART0PRIO
 #  define CONFIG_KINETIS_UART0PRIO NVIC_SYSH_PRIORITY_DEFAULT
@@ -182,6 +182,27 @@
 #endif
 #ifndef CONFIG_KINETIS_UART5PRIO
 #  define CONFIG_KINETIS_UART5PRIO NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+
+/* Ethernet controller configuration */
+
+#ifndef CONFIG_ENET_NBUFFERS
+#  define CONFIG_ENET_NBUFFERS 8
+#endif
+
+/* EMAC Default Interrupt Priorities */
+
+#ifndef CONFIG_KINETIS_EMACTMR_PRIO
+#  define CONFIG_KINETIS_EMACTMR_PRIO  NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+#ifndef CONFIG_KINETIS_EMACTX_PRIO
+#  define CONFIG_KINETIS_EMACTX_PRIO   NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+#ifndef CONFIG_KINETIS_EMACRX_PRIO
+#  define CONFIG_KINETIS_EMACRX_PRIO   NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+#ifndef CONFIG_KINETIS_EMACMISC_PRIO
+#  define CONFIG_KINETIS_EMACMISC_PRIO NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
 /************************************************************************************

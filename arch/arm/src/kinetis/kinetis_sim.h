@@ -292,7 +292,7 @@
                                                 /* Bits 12-31: Reserved */
 /* System Clock Gating Control Register 2 */
 
-#ifdef KINETIS_K60
+#if defined(KINETIS_NENET) && KINETIS_NENET > 0
 #  define SIM_SCGC2_ENET              (1 << 0)  /* Bit 0:  ENET Clock Gate Control (K60) */
 #endif
                                                 /* Bits 1-11: Reserved */
@@ -301,6 +301,7 @@
                                                 /* Bits 14-31: Reserved */
 /* System Clock Gating Control Register 3 */
 
+#if defined(KINETIS_NRNG) && KINETIS_NRNG > 0
 #ifdef KINETIS_K60
 #  define SIM_SCGC3_RNGB              (1 << 0)  /* Bit 0:  RNGB Clock Gate Control (K60) */
 #endif
