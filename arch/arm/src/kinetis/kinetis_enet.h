@@ -159,25 +159,24 @@
 /* Register Bit Definitions *****************************************************************/
 
 /* Interrupt Event Register, Interrupt Mask Register */
-
-                                               /* Bit 31: Reserved */
-#define ENET_INT_BABR                (1 << 30) /* Bit 30: Babbling Receive Error */
-#define ENET_INT_BABT                (1 << 29) /* Bit 29: Babbling Transmit Error */
-#define ENET_INT_GRA                 (1 << 28) /* Bit 28: Graceful Stop Complete */
-#define ENET_INT_TXF                 (1 << 27) /* Bit 27: Transmit Frame Interrupt */
-#define ENET_INT_TXB                 (1 << 26) /* Bit 26: Transmit Buffer Interrupt */
-#define ENET_INT_RXF                 (1 << 25) /* Bit 25: Receive Frame Interrupt */
-#define ENET_INT_RXB                 (1 << 24) /* Bit 24: Receive Buffer Interrupt */
-#define ENET_INT_MII                 (1 << 23) /* Bit 23: MII Interrupt */
-#define ENET_INT_EBERR               (1 << 22) /* Bit 22: Ethernet Bus Error */
-#define ENET_INT_LC                  (1 << 21) /* Bit 21: Late Collision */
-#define ENET_INT_RL                  (1 << 20) /* Bit 20: Collision Retry Limit */
-#define ENET_INT_UN                  (1 << 19) /* Bit 19: Transmit FIFO underrun */
-#define ENET_INT_PLR                 (1 << 18) /* Bit 18: Payload receive error */
-#define ENET_INT_WAKEUP              (1 << 17) /* Bit 17: Node wake-up request indication */
-#define ENET_INT_TS_AVAIL            (1 << 16) /* Bit 16: Transmit timestamp available */
-#define ENET_INT_TS_TIMER            (1 << 15) /* Bit 15: Timestamp timer */
                                                /* Bits 0-14: Reserved */
+#define ENET_INT_TS_TIMER            (1 << 15) /* Bit 15: Timestamp timer */
+#define ENET_INT_TS_AVAIL            (1 << 16) /* Bit 16: Transmit timestamp available */
+#define ENET_INT_WAKEUP              (1 << 17) /* Bit 17: Node wake-up request indication */
+#define ENET_INT_PLR                 (1 << 18) /* Bit 18: Payload receive error */
+#define ENET_INT_UN                  (1 << 19) /* Bit 19: Transmit FIFO underrun */
+#define ENET_INT_RL                  (1 << 20) /* Bit 20: Collision Retry Limit */
+#define ENET_INT_LC                  (1 << 21) /* Bit 21: Late Collision */
+#define ENET_INT_EBERR               (1 << 22) /* Bit 22: Ethernet Bus Error */
+#define ENET_INT_MII                 (1 << 23) /* Bit 23: MII Interrupt */
+#define ENET_INT_RXB                 (1 << 24) /* Bit 24: Receive Buffer Interrupt */
+#define ENET_INT_RXF                 (1 << 25) /* Bit 25: Receive Frame Interrupt */
+#define ENET_INT_TXB                 (1 << 26) /* Bit 26: Transmit Buffer Interrupt */
+#define ENET_INT_TXF                 (1 << 27) /* Bit 27: Transmit Frame Interrupt */
+#define ENET_INT_GRA                 (1 << 28) /* Bit 28: Graceful Stop Complete */
+#define ENET_INT_BABT                (1 << 29) /* Bit 29: Babbling Transmit Error */
+#define ENET_INT_BABR                (1 << 30) /* Bit 30: Babbling Receive Error */
+                                               /* Bit 31: Reserved */
 /* Receive Descriptor Active Register */
                                                /* Bits 0-23: Reserved */
 #define ENET_RDAR                    (1 << 24) /* Bit 24: Receive descriptor active */
