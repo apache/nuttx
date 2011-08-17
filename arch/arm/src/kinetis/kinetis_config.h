@@ -190,6 +190,14 @@
 #  define CONFIG_ENET_NBUFFERS 8
 #endif
 
+#ifndef CONFIG_ENET_PHYADDR
+#  define CONFIG_ENET_PHYADDR 1
+#endif
+
+#ifndef CONFIG_ENET_NETHIFS
+# define CONFIG_ENET_NETHIFS 1
+#endif
+
 /* EMAC Default Interrupt Priorities */
 
 #ifndef CONFIG_KINETIS_EMACTMR_PRIO

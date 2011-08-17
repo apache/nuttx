@@ -560,6 +560,7 @@ TWR-K60N512-specific Configuration Options
     CONFIG_ENET_NBUFFERS - Number of TX/RX buffers.  The size of one
         buffer is determined by CONFIG_NET_BUFSIZE.  Default: 8
     CONFIG_ENET_USEMII - Usee MII mode.  Default: RMII mode.
+    CONFIG_ENET_PHYADDR - PHY address
  
 Configurations
 ==============

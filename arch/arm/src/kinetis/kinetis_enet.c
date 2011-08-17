@@ -50,6 +50,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/mii.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-arp.h>
@@ -66,16 +67,12 @@
  * Definitions
  ****************************************************************************/
 
-/* CONFIG_KINETIS_NETHIFS determines the number of physical interfaces
+/* CONFIG_ENET_NETHIFS determines the number of physical interfaces
  * that will be supported.
  */
 
-#ifndef CONFIG_KINETIS_NETHIFS
-# define CONFIG_KINETIS_NETHIFS 1
-#endif
-
-#ifdef CONFIG_ENET_LEGACYDESC
-#  error "Legacy descriptor types are not supported"
+#if CONFIG_ENET_NETHIFS != 1
+# error "CONFIG_ENET_NETHIFS must be one for now"
 #endif
 
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
@@ -86,7 +83,17 @@
 /* TX timeout = 1 minute */
 
 #define KINETIS_TXTIMEOUT (60*CLK_TCK)
-#define MII_TIMEOUT       (0x1ffff)
+#define MII_MAXPOLLS      (0x1ffff)
+#define LINK_WAITUS       (500*1000)
+
+/* PHY hardware specifics.  This was copied from the FreeScale code examples.
+ * this is a vendor specific register and bit settings.  I really should
+ * do the research and find out what this really is.
+ */
+
+#define PHY_STATUS         (0x1f)
+#define PHY_DUPLEX_STATUS  (4 << 2)
+#define PHY_SPEED_STATUS   (1 << 2)
 
 /* Estimate the hold time to use based on the peripheral (bus) clock.
  * BUS_FREQ = 48Mhz, hold time clocks = (2*48)/5 + 1 = 19.
@@ -141,7 +148,7 @@ struct kinetis_driver_s
  * Private Data
  ****************************************************************************/
 
-static struct kinetis_driver_s g_enet[CONFIG_KINETIS_NETHIFS];
+static struct kinetis_driver_s g_enet[CONFIG_ENET_NETHIFS];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -166,12 +173,6 @@ static int  kinetis_uiptxpoll(struct uip_driver_s *dev);
 static void kinetis_receive(FAR struct kinetis_driver_s *priv);
 static void kinetis_txdone(FAR struct kinetis_driver_s *priv);
 static int  kinetis_interrupt(int irq, FAR void *context);
-#if 0
-static int  kinetis_tmrinterrupt(int irq, FAR void *context);
-#endif
-static int  kinetis_txrinterrupt(int irq, FAR void *context);
-static int  kinetis_rxrinterrupt(int irq, FAR void *context);
-static int  kinetis_miscinterrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
@@ -424,40 +425,13 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: kinetis_tmrinterrupt
+ * Function: kinetis_interrupt
  *
  * Description:
- *   Ethernet MAC IEEE 1588 timer interrupt handler
- *
- * Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info (architecture-specific)
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *
- ****************************************************************************/
-#if 0
-static int kinetis_tmrinterrupt(int irq, FAR void *context)
-{
-  register FAR struct kinetis_driver_s *priv = &g_enet[0];
-
-  /* Get and clear interrupt status bits */
-
-  /* Handle interrupts according to status bit settings */
-#warning "Missing logic"
-
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Function: kinetis_txinterrupt
- *
- * Description:
- *   Ethernet MAC transmit interrupt handler
+ *   Three interrupt sources will vector this this function:
+ *   1. Ethernet MAC transmit interrupt handler
+ *   2. Ethernet MAC receive interrupt handler
+ *   3. 
  *
  * Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
@@ -470,82 +444,60 @@ static int kinetis_tmrinterrupt(int irq, FAR void *context)
  *
  ****************************************************************************/
 
-static int kinetis_txinterrupt(int irq, FAR void *context)
+static int kinetis_interrupt(int irq, FAR void *context)
 {
   register FAR struct kinetis_driver_s *priv = &g_enet[0];
+  uint32_t pending;
 
-  /* Get and clear interrupt status bits */
+  /* Get the set of unmasked, pending interrupt. */
 
-  /* Handle interrupts according to status bit settings */
-#warning "Missing logic"
+  pending = getreg32(KINETIS_ENET_EIR) & getreg32(KINETIS_ENET_EIMR);
 
-  /* Check if a packet transmission just completed.  If so, call kinetis_txdone.
-   * This may disable further Tx interrupts if there are no pending
-   * tansmissions.
-   */
+  /* Clear the pending interrupts */
 
-  kinetis_txdone(priv);
+  putreg32(pending, KINETIS_ENET_EIR);
 
-  return OK;
-}
+  /* Check for the receipt of a packet */
 
-/****************************************************************************
- * Function: kinetis_rxinterrupt
- *
- * Description:
- *   Hardware interrupt handler
- *
- * Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info (architecture-specific)
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *
- ****************************************************************************/
+  if ((pending & ENET_INT_RXF) != 0)
+    {
+      /* A packet has been received, call kinetis_receive() to handle the packet */
 
-static int kinetis_rxinterrupt(int irq, FAR void *context)
-{
-  register FAR struct kinetis_driver_s *priv = &g_enet[0];
+      kinetis_receive(priv);
+    }
 
-  /* Get and clear interrupt status bits */
+  /* Check if a packet transmission has completed */
 
-  /* Handle interrupts according to status bit settings */
-#warning "Missing logic"
+  if ((pending & ENET_INT_TXF) != 0)
+    {
+      /* The Tx has completed.  Mark the data pointer as NULL to indicate
+       * that the buffer is now free again.
+       */
+ 
+      g_txdesc->data = NULL;
 
-  /* Check if we received an incoming packet, if so, call kinetis_receive() */
+      /* Call kinetis_txdone to handle the end of transfer even.  NOTE that
+       * this may disable further Tx interrupts if there are no pending
+       * tansmissions.
+       */
 
-  kinetis_receive(priv);
-  return OK;
-}
+      kinetis_txdone(priv);
+    }
 
-/****************************************************************************
- * Function: kinetis_miscinterrupt
- *
- * Description:
- *   Ethernet MAC error and misc interrupt handler
- *
- * Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info (architecture-specific)
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *
- ****************************************************************************/
+  /* Check for errors */
 
-static int kinetis_miscinterrupt(int irq, FAR void *context)
-{
-  register FAR struct kinetis_driver_s *priv = &g_enet[0];
+  if (pending &
+      (ENET_INT_UN | ENET_INT_RL | ENET_INT_LC | ENET_INT_EBERR |
+       ENET_INT_BABT | ENET_INT_BABR))
+    {
+      /* An error has occurred. Reinitialize all buffers. */
 
-  /* Get and clear interrupt status bits */
+      kinetis_initbuffers();
+ 
+      /* Indicate that there have been empty receive buffers produced */
 
-  /* Handle interrupts according to status bit settings */
-#warning "Missing logic"
+      putreg32(ENET_RDAR, KINETIS_ENET_RDAR);
+    }
 
   return OK;
 }
@@ -881,7 +833,7 @@ static int kinetis_writemii(struct kinetis_driver_s *priv, uint8_t phyaddr,
 
   /* Wait for the transfer to complete */
 
-  for (timeout = 0; timeout < MII_TIMEOUT; timeout++)
+  for (timeout = 0; timeout < MII_MAXPOLLS; timeout++)
     {
       if ((getreg32(KINETIS_ENET_EIR) & ENET_INT_MII) != 0)
         {
@@ -891,7 +843,7 @@ static int kinetis_writemii(struct kinetis_driver_s *priv, uint8_t phyaddr,
 
   /* Check for a timeout */
 
-  if(timeout == MII_TIMEOUT) 
+  if(timeout == MII_MAXPOLLS) 
     {
       return -ETIMEDOUT;
     }
@@ -939,7 +891,7 @@ static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
 
   /* Wait for the transfer to complete */
 
-  for (timeout = 0; timeout < MII_TIMEOUT; timeout++)
+  for (timeout = 0; timeout < MII_MAXPOLLS; timeout++)
     {
       if ((getreg32(KINETIS_ENET_EIR) & ENET_INT_MII) != 0)
         {
@@ -949,7 +901,7 @@ static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
 
   /* Check for a timeout */
 
-  if(timeout == MII_TIMEOUT) 
+  if (timeout >= MII_MAXPOLLS) 
     {
       return -ETIMEDOUT;
     }
@@ -982,7 +934,82 @@ static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
 
 static inline void kinetis_initphy(struct kinetis_driver_s *priv)
 {
-#warning "Missing logic"
+  uint32_t rcr;
+  uint32_t tcr;
+  uint16_t phydata;
+
+  /* Loop (potentially infinitely?) until we successfully communicate with
+   * the PHY.
+   */
+
+  do
+    {
+      usleep(LINK_WAITUS);
+      phydata = 0xffff;
+      kinetis_readmii(priv, 0, CONFIG_ENET_PHYADDR, MII_PHYID1, &phydata);
+    }
+  while (phydata == 0xffff);
+
+  /* Start auto negotiation */
+
+  kinetis_writemii(priv, 0, CONFIG_ENET_PHYADDR, MII_MCR,
+                  (MII_MCR_ANRESTART | MII_MCR_ANENABLE));
+
+  /* Wait (potentially forever) for auto negotiation to complete */
+
+  do
+    {
+      usleep(LINK_WAITUS);
+      kinetis_readmii(0, CONFIG_ENET_PHYADDR, MII_MSR, &phydata);
+
+    }
+  while ((phydata & MII_MSR_ANEGCOMPLETE) == 0);
+
+  /* When we get here we have a link - Find the negotiated speed and duplex. */
+
+  phydata = 0;
+  kinetis_readmii(0, CONFIG_ENET_PHYADDR, PHY_STATUS, &phydata);
+
+  /* Set up the transmit and receive contrel registers based on the 
+   * configuration and the auto negotiation results.
+   */
+
+#if CONFIG_ENET_USEMII
+  rcr = ENET_RCR_MII_MODE | ENET_RCR_CRCFWD |
+        CONFIG_NET_BUFSIZE << ENET_RCR_MAX_FL_SHIFT;
+#else
+  rcr = ENET_RCR_RMII_MODE | ENET_RCR_CRCFWD |
+        CONFIG_NET_BUFSIZE << ENET_RCR_MAX_FL_SHIFT;
+#endif
+  tcr = 0
+
+  putreg32(rcr, KINETIS_ENET_RCR);
+  putreg32(tcr, KINETIS_ENET_TCR);
+  
+  /* Setup half or full duplex */
+
+  if ((phydata & PHY_DUPLEX_STATUS) != 0)
+    {
+      /* Full duplex */
+
+      tcr |= ENET_TCR_FDEN;
+    }
+  else
+    {
+      /* Half duplex */
+
+      rcr |= ENET_RCR_DRT;
+    }
+ 
+  if ((phydata & PHY_SPEED_STATUS) != 0)
+    {
+      /* 10Mbps */
+
+      ENET_RCR |= ENET_RCR_RMII_10T;
+    }
+
+  putreg32(rcr, KINETIS_ENET_RCR);
+  putreg32(tcr, KINETIS_ENET_TCR);
 }
 
 /****************************************************************************
@@ -1112,7 +1139,7 @@ int kinetis_initialize(int intf)
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(inf < CONFIG_KINETIS_NETHIFS);
+  DEBUGASSERT(inf < CONFIG_ENET_NETHIFS);
   priv = &g_enet[intf];
 
   /* Enable the ENET clock */
@@ -1192,7 +1219,7 @@ int kinetis_initialize(int intf)
 
   /* Attach the Ethernet MAC transmit interrupt handler */
 
-  if (irq_attach(KINETIS_IRQ_EMACTX, kinetis_txinterrupt))
+  if (irq_attach(KINETIS_IRQ_EMACTX, kinetis_interrupt))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -1201,7 +1228,7 @@ int kinetis_initialize(int intf)
 
   /* Attach the Ethernet MAC receive interrupt handler */
 
-  if (irq_attach(KINETIS_IRQ_EMACRX, kinetis_rxinterrupt))
+  if (irq_attach(KINETIS_IRQ_EMACRX, kinetis_interrupt))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -1210,12 +1237,19 @@ int kinetis_initialize(int intf)
 
   /* Attach the Ethernet MAC error and misc interrupt handler */
 
-  if (irq_attach(KINETIS_IRQ_EMACMISC, kinetis_miscinterrupt))
+  if (irq_attach(KINETIS_IRQ_EMACMISC, kinetis_interrupt))
     {
       /* We could not attach the ISR to the interrupt */
 
       return -EAGAIN;
     }
+
+  /* Clear the Individual and Group Address Hash registers */
+
+  putreg32(0, KINETIS_ENET_IALR);
+  putreg32(0, KINETIS_ENET_IAUR);
+  putreg32(0, KINETIS_ENET_GALR);
+  putreg32(0, KINETIS_ENET_GAUR);
 
   /* Configure the PHY */
 
