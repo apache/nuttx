@@ -320,7 +320,7 @@
 /* Receive FIFO Almost Empty Threshold */
 
 #define ENET_RAEM_SHIFT              (0)       /* Bits 0-7: Value of the receive FIFO almost empty threshold */
-#define ENET_RSEM_MASK               (0xff << ENET_RAEM_SHIFT)
+#define ENET_RAEM_MASK               (0xff << ENET_RAEM_SHIFT)
                                                /* Bits 8-31: Reserved */
 /* Receive FIFO Almost Full Threshold */
 
@@ -462,7 +462,7 @@
 #  define TXDESC_W                   (1 << 13) /* Common */
 #  define TXDESC_TO1                 (1 << 14) /* Common */
 #  define TXDESC_R                   (1 << 15) /* Common */
-#endif
+#else
 #  define TXDESC_ABC                 (1 << 1)  /* Legacy */
 #  define TXDESC_TC                  (1 << 2)  /* Common */
 #  define TXDESC_L                   (1 << 3)  /* Common */
@@ -489,7 +489,6 @@
 #  define TXDESC_INT                 (1 << 30)
 
 #  define TXDESC_BDU                 (1 << 31)
-
 #else
 #  define TXDESC_IINS                (1 << 3)
 #  define TXDESC_PINS                (1 << 4)
