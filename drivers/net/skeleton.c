@@ -163,7 +163,7 @@ static int skel_transmit(FAR struct skel_driver_s *skel)
 {
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
-   * must have assured that there is not transmission in progress.
+   * must have assured that there is no transmission in progress.
    */
 
   /* Increment statistics */

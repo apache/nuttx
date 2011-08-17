@@ -186,8 +186,11 @@
 
 /* Ethernet controller configuration */
 
-#ifndef CONFIG_ENET_NBUFFERS
-#  define CONFIG_ENET_NBUFFERS 8
+#ifndef CONFIG_ENET_NRXBUFFERS
+#  define CONFIG_ENET_NRXBUFFERS 6
+#endif
+#ifndef CONFIG_ENET_NTXBUFFERS
+#  define CONFIG_ENET_NTXBUFFERS 2
 #endif
 
 #ifndef CONFIG_ENET_PHYADDR
