@@ -302,7 +302,6 @@
 /* System Clock Gating Control Register 3 */
 
 #if defined(KINETIS_NRNG) && KINETIS_NRNG > 0
-#ifdef KINETIS_K60
 #  define SIM_SCGC3_RNGB              (1 << 0)  /* Bit 0:  RNGB Clock Gate Control (K60) */
 #endif
                                                 /* Bits 1-3: Reserved */
@@ -316,7 +315,7 @@
                                                 /* Bits 25-26: Reserved */
 #define SIM_SCGC3_ADC1                (1 << 27) /* Bit 27: ADC1 Clock Gate Control */
                                                 /* Bits 28-29: Reserved */
-#ifdef KINETIS_K40
+#if defined(KINETIS_NSLCD) && KINETIS_NSLCD > 0
 #  define SIM_SCGC3_SLCD              (1 << 30) /* Bit 30: Segment LCD Clock Gate Control (K40) */
 #endif
                                                 /* Bit 31: Reserved */
