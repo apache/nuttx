@@ -2004,4 +2004,6 @@
 	  (TWR-K60N512).
 	* drivers/can.c:  Fixe a semaphore overflow problem in the CAN driver
 	  (reported by Li Zhouy (Lzzy)).
+	* 8/18/2011: The basic port to the FreeScale Kinetics TWR-K60N512 board is
+	  now functional.
 

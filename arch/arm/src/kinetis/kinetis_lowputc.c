@@ -218,14 +218,14 @@ void kinetis_lowsetup(void)
 
 #if defined(CONFIG_KINETIS_UART4) || defined(CONFIG_KINETIS_UART5)
 
-   regval = getreg32(KINETIS_SIM_SCGC4);
+   regval = getreg32(KINETIS_SIM_SCGC1);
 #  ifdef CONFIG_KINETIS_UART4
    regval |= SIM_SCGC1_UART4;
 #  endif
 #  ifdef CONFIG_KINETIS_UART5
    regval |= SIM_SCGC1_UART5;
 #  endif
-   putreg32(regval, KINETIS_SIM_SCGC4);
+   putreg32(regval, KINETIS_SIM_SCGC1);
 
 #endif
 
@@ -371,7 +371,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
   regval |= (((uint8_t)tmp) << UART_BDH_SBR_SHIFT) & UART_BDH_SBR_MASK;
   putreg8(regval, uart_base+KINETIS_UART_BDH_OFFSET);
 
-  tmp    = sbr & 0xff;
+  regval  = sbr & 0xff;
   putreg8(regval, uart_base+KINETIS_UART_BDL_OFFSET);
     
   /* Calculate a fractional divider to get closer to the requested baud.
@@ -411,14 +411,14 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
     {
       depth = (3 * depth) >> 2;
     }
-  putreg8(depth , uart_base+KINETIS_UART5_RWFIFO);
+  putreg8(depth , uart_base+KINETIS_UART_RWFIFO_OFFSET);
   
   depth = g_sizemap[(regval & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT];
   if (depth > 3)
     {
       depth = (depth >> 2);
     }
-  putreg8(depth, uart_base+KINETIS_UART5_TWFIFO);
+  putreg8(depth, uart_base+KINETIS_UART_TWFIFO_OFFSET);
   
   /* Enable RX and TX FIFOs */
 
@@ -426,8 +426,8 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 #else
   /* Set the watermarks to zero and disable the FIFOs */
 
-  putreg8(0, uart_base+KINETIS_UART5_RWFIFO);
-  putreg8(0, uart_base+KINETIS_UART5_TWFIFO);
+  putreg8(0, uart_base+KINETIS_UART_RWFIFO_OFFSET);
+  putreg8(0, uart_base+KINETIS_UART_TWFIFO_OFFSET);
   putreg8(0, uart_base+KINETIS_UART_PFIFO_OFFSET);
 #endif
 
