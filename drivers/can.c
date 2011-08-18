@@ -50,6 +50,7 @@
 #include <string.h>
 #include <semaphore.h>
 #include <fcntl.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -443,7 +444,11 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
           do
             {
+              DEBUGASSERT(dev->cd_ntxwaiters < 255);
+              dev->cd_ntxwaiters++;
               ret = sem_wait(&fifo->cf_sem);
+              dev->cd_ntxwaiters--;
+
               if (ret < 0 && errno != EINTR)
                 {
                   ret = -errno;
@@ -750,9 +755,12 @@ int can_txdone(FAR struct can_dev_s *dev)
       /* Send the next message in the FIFO */
 
       ret = can_xmit(dev);
-      if (ret == OK)
+
+      /* Are there any threads waiting for space in the TX FIFO? */
+
+      if (ret == OK && dev->cd_ntxwaiters > 0)
         {
-          /* Inform any waiting threads that new xmit space is available */
+          /* Yes.. Inform them that new xmit space is available */
 
           ret = sem_post(&dev->cd_xmit.cf_sem);
         }

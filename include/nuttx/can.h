@@ -219,6 +219,7 @@ struct can_dev_s
 {
   uint8_t              cd_ocount;        /* The number of times the device has been opened */
   uint8_t              cd_npendrtr;      /* Number of pending RTR messages */
+  uint8_t              cd_ntxwaiters;    /* Number of threads waiting to enqueue a message */
   sem_t                cd_closesem;      /* Locks out new opens while close is in progress */
   sem_t                cd_recvsem;       /* Used to wakeup user waiting for space in cd_recv.buffer */
   struct can_fifo_s    cd_xmit;          /* Describes transmit FIFO */

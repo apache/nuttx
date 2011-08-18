@@ -2002,3 +2002,6 @@
 	  and bit fields within all Kinetis registers.
 	* configs/twr-k60n512:  Add support for the Kinetis K60 Tower board
 	  (TWR-K60N512).
+	* drivers/can.c:  Fixe a semaphore overflow problem in the CAN driver
+	  (reported by Li Zhouy (Lzzy)).
+
