@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 1, 2011</p>
+      <p>Last Updated: August 18, 2011</p>
     </td>
   </tr>
 </table>
@@ -953,6 +953,7 @@
       <li><a href="#arm920t">ARM920T</a> (1) </li>
       <li><a href="#arm926ejs">ARM926EJS</a> (3) </li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (10)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (2)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1555,6 +1556,69 @@
         package.
       </p>
    </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <a name="armcortexm4"><b>ARM Cortex-M4</b>.</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>FreeScale Kinetics K40</b>.
+      This port uses the Freescale Kinetis KwiStick K40.
+      Refer to the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=KWIKSTIK-K40">Freescale web site</a> for further information about this board.
+      The Kwikstik is used with the FreeScale Tower System (mostly just to provide a simple UART connection)
+    </p>
+    <p>
+      <b>STATUS:</b>
+      As of this writing, the basic port is complete but I accidentally locked my board during the initial bringup.
+      Further development is stalled unless I learn how to unlock the device (or unless I get another K40).
+      Additional work remaining includes, among other things: (1) complete the basic bring-up,
+      (2) bring up the NuttShell NSH, (3) develop support for the SDHC-based SD card, and
+      (4) develop support for USB host and device.
+      NOTE: most of these remaining tasks are shared with the K60 work described below.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>FreeScale Kinetics K60</b>.
+      This port uses the Freescale Kinetis TWR-K60N512 tower system.
+      Refer to the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=TWR-K60N512-KIT">Freescale web site</a> for further information about this board.
+      The TWR-K60N51 includes with the FreeScale Tower System which provides (among other things) a DBP UART connection.
+    </p>
+    <p>
+      <b>STATUS:</b>
+      As of this writing, the basic port is complete and passes the NuttX OS test.
+      Additional work remaining includes, among other things: (1) bring up the NuttShell NSH,
+      (2) integrate the Ethernet driver, (3) develop support for the SDHC-based SD card, and
+      (4) develop support for USB host and device.
+      NOTE: most of these remaining tasks are shared with the K40 work described above.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+  <p>
+    <b>Development Environments:</b>
+    1) Linux with native Linux GNU toolchain, 2) Cygwin with Cygwin GNU Cortex-M3 or 4toolchain, or 3) Cygwin with Windows native GNU Cortex-M3 or M4 toolchain (CodeSourcery or devkitARM).  A DIY toolchain for Linux or Cygwin is provided by the NuttX
+    <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a> package.
+    I use FreeScale's <i>CodeWarrior</i> IDE only to work with the JTAG debugger built into the boards.
+  </p>
+  </td>
 </tr>
 
 <tr>
@@ -2598,7 +2662,48 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-6.8 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
+    * arch/arm/src/lpc17xx/chip.h:  Fix some chip memory configuration errors
+      for the LPC1764, LPC1756, and LPC1754 (submitted by Li Zhuoy (Lzzy))
+    * arch/arm/src/lpc17xx/lpc17_can.h:  Revised CAN driver submitted by
+       Li Zhuoy (Lzzy).  The driver now supports both CAN1 and CAN2.
+    * arch/arm/sim/up_lcd.c: Add a simulated LCD driver.
+    * configs/stm3210e-eval/nxlines:  Added a configuration to build
+      examples/nxlines.
+    * arch/graphics: Used apps/examples/nxlines to (finally) verify the NX
+      trapezoid drawing functions and (wide) line drawing functions.
+    * arch/rgmp and configs/rgmp.  Yu Qiang has ported RGMP to the OMAP4430 (arm)
+      pandaboard and release the new RGMP 0.3 version. The main changes are: (1)
+      Separate configs/rgmp/x86 and configs/rgmp/arm configuration directory, and
+      (2) Extract architecture dependent code in arch/rgmp/include and
+      arch/rgmp/src into corresponding x86/ and arm/ directories.
+    * arch/arm/src/kinetis, arch/arm/include/kinetis, configs/kwikstick-k40:
+      Add a directory structure to support the port to the Kinesis KwikStik-K40.
+      There is no real substance in the initial check-in; only the directory
+      structure and skeleton files (Code complete on 8/15/11).
+    * arch/arm/include/armv7-m, arch/arm/src/armv7-m, etc.: Rename all cortexm3
+      directories and files to armv7-m; Change name of of all CORTEXM3 constants
+      to ARMV7M.  This is a major namespace change needed to cleanly support the
+      ARM Cortex-M4 which is also in the ARMv7 M Series (specifically, ARMv7E-M).
+    * sched/sig_initialize.c, sig_received.c, and mq_waitirq.c.  Fixed several
+      critical bugs related to signal handling initialization and for signals
+      the wake up tasks that are waiting to send or receive message queues.  In
+      the first two files, errors would prevent proper allocation of signal-related
+      structures from interrupt handlers.  In the second, there was missing
+      "clean-up" logic after a signal occurred, leaving the message queue in
+      a bad state and resulting in PANICs.  All are important.  (submitted by
+      hkwilton).
+    * arch/arm/src/kinetis:  Added header files defining all Kinetis registers
+      and bit fields within all Kinetis registers.
+    * configs/twr-k60n512:  Add support for the Kinetis K60 Tower board
+      (TWR-K60N512).
+    * drivers/can.c:  Fixe a semaphore overflow problem in the CAN driver
+      (reported by Li Zhouy (Lzzy)).
+    * 8/18/2011: The basic port to the FreeScale Kinetics TWR-K60N512 board is
+      now functional.
+
 apps-6.8 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * apps/examples/nxlines:  Added a test for NX line drawing capabilities.
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
