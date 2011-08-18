@@ -89,24 +89,24 @@
  *                      E2 / Yellow LED           PTA28    PTA28
  *                      E3 / Green LED            PTA29    PTA29
  *                      E4 / Blue LED             PTA10    PTA10
- * Potentiometer        Potentiometer (R71)        ?        ADC1_DM1
- * Accelerometer        I2C SDA                    PTD9     I2C0_SDA
- *                      I2C SCL                    PTD8     I2C0_SCL
- *                      IRQ                        PTD10    PTD10
- * Touch Pad / Segment  Electrode 0 (J3 Pin 3)     PTB0     TSI0_CH0
- * LCD TWRPI Socket     Electrode 1 (J3 Pin 5)     PTB1     TSI0_CH6
- *                      Electrode 2 (J3 Pin 7)     PTB2     TSI0_CH7
- *                      Electrode 3 (J3 Pin 8)     PTB3     TSI0_CH8
- *                      Electrode 4 (J3 Pin 9)     PTC0     TSI0_CH13
- *                      Electrode 5 (J3 Pin 10)    PTC1     TSI0_CH14
- *                      Electrode 6 (J3 Pin 11)    PTC2     TSI0_CH15
- *                      Electrode 7 (J3 Pin 12)    PTA4     TSI0_CH5
- *                      Electrode 8 (J3 Pin 13)    PTB16    TSI0_CH9
- *                      Electrode 9 (J3 Pin 14)    PTB17    TSI0_CH10
- *                      Electrode 10 (J3 Pin 15)   PTB18    TSI0_CH11
- *                      Electrode 11 (J3 Pin 16)   PTB19    TSI0_CH12
- *                      TWRPI ID0 (J3 Pin 17)      ?        ADC1_DP1
- *                      TWRPI ID1 (J3 Pin 18)      ?        ADC1_SE16
+ * Potentiometer        Potentiometer (R71)       ?        ADC1_DM1
+ * Accelerometer        I2C SDA                   PTD9     I2C0_SDA
+ *                      I2C SCL                   PTD8     I2C0_SCL
+ *                      IRQ                       PTD10    PTD10
+ * Touch Pad / Segment  Electrode 0 (J3 Pin 3)    PTB0     TSI0_CH0
+ * LCD TWRPI Socket     Electrode 1 (J3 Pin 5)    PTB1     TSI0_CH6
+ *                      Electrode 2 (J3 Pin 7)    PTB2     TSI0_CH7
+ *                      Electrode 3 (J3 Pin 8)    PTB3     TSI0_CH8
+ *                      Electrode 4 (J3 Pin 9)    PTC0     TSI0_CH13
+ *                      Electrode 5 (J3 Pin 10)   PTC1     TSI0_CH14
+ *                      Electrode 6 (J3 Pin 11)   PTC2     TSI0_CH15
+ *                      Electrode 7 (J3 Pin 12)   PTA4     TSI0_CH5
+ *                      Electrode 8 (J3 Pin 13)   PTB16    TSI0_CH9
+ *                      Electrode 9 (J3 Pin 14)   PTB17    TSI0_CH10
+ *                      Electrode 10 (J3 Pin 15)  PTB18    TSI0_CH11
+ *                      Electrode 11 (J3 Pin 16)  PTB19    TSI0_CH12
+ *                      TWRPI ID0 (J3 Pin 17)     ?        ADC1_DP1
+ *                      TWRPI ID1 (J3 Pin 18)     ?        ADC1_SE16
  */
  
 #define GPIO_SD_CARDDETECT (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN28)

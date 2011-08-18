@@ -18,6 +18,7 @@ Contents
     - Connections via the General Purpose Tower Plug-in (TWRPI) Socket
     - Connections via the Tower Primary Connector Side A
     - Connections via the Tower Primary Connector Side B
+    - TWR-SER Serial Board Connection
   o Development Environment
   o GNU Toolchain Options
   o IDEs
@@ -120,6 +121,30 @@ B48 SPI0_CLK             PTA15/SPI0_SCK
 B50 SCL1                 PTE1/I2C1_SCL
 B51 SDA1                 PTE0/I2C1_SDA
 B52 GPIO5 / SD_CARD_DET  PTA16
+
+TWR-SER Serial Board Connection
+===============================
+
+The serial board connects into the tower and then maps to the tower pins to
+yet other functions (see TWR-SER.pdf).
+
+For the serial port, the following jumpers are required:
+
+  J15: 1-2 (default)
+  J17: 1-2 (default)
+  J18: 1-2 (default)
+  J19: 1-2 (default)
+
+The two connections map as follows:
+
+  A41 RXD0  - Not connected
+  A42 TXD0  - Not connected
+  A43 RXD1  - ELE_RXD (connects indirectory to DB-9 connector J8)
+  A44 TXD1  - ELE_TXD (connects indirectory to DB-9 connector J8)
+
+Finally, we can conclude that
+
+  UART5 (PTE8/9) is associated with the DB9 connector
 
 Development Environment
 =======================
