@@ -63,7 +63,7 @@
  * Private Function Prototypes
  ****************************************************************************/
  
-static void __ramfunc__
+void __ramfunc__
 kinesis_setdividers(uint32_t div1, uint32_t div2, uint32_t div3, uint32_t div4);
 
 /****************************************************************************
@@ -96,50 +96,6 @@ static inline void kinesis_portclocks(void)
   regval |= (SIM_SCGC5_PORTA | SIM_SCGC5_PORTB | SIM_SCGC5_PORTC |
              SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
   putreg32(regval, KINETIS_SIM_SCGC5);
-}
-
-/****************************************************************************
- * Name: kinesis_setdividers
- *
- * Description:
- *  "This routine must be placed in RAM. It is a workaround for errata e2448.
- *   Flash prefetch must be disabled when the flash clock divider is changed.
- *   This cannot be performed while executing out of flash.  There must be a
- *   short delay after the clock dividers are changed before prefetch can be
- *   re-enabled."
- *
- ****************************************************************************/
-
-static void __ramfunc__
-kinesis_setdividers(uint32_t div1, uint32_t div2, uint32_t div3, uint32_t div4)
-{
-  uint32_t regval;
-  int i;
-
-  /* Save the current value of the Flash Access Protection Register */
-
-  regval = getreg32(KINETIS_FMC_PFAPR);
-  
-  /* Set M0PFD through M7PFD to 1 to disable prefetch */
-
-  putreg32(FMC_PFAPR_M7PFD | FMC_PFAPR_M6PFD | FMC_PFAPR_M5PFD |
-           FMC_PFAPR_M4PFD | FMC_PFAPR_M3PFD | FMC_PFAPR_M2PFD |
-           FMC_PFAPR_M1PFD | FMC_PFAPR_M0PFD,
-           KINETIS_FMC_PFAPR);
-
-  /* Set clock dividers to desired value */
-
-  putreg32(SIM_CLKDIV1_OUTDIV1(div1) | SIM_CLKDIV1_OUTDIV2(div2) |
-           SIM_CLKDIV1_OUTDIV3(div3) | SIM_CLKDIV1_OUTDIV4(div4),
-           KINETIS_SIM_CLKDIV1);
-
-  /* Wait for dividers to change */
-
-  for (i = 0 ; i < div4 ; i++);
-  
-  /* Re-store the saved value of FMC_PFAPR */
-
-  putreg32(regval, KINETIS_FMC_PFAPR);
 }
 
 /****************************************************************************
@@ -244,9 +200,9 @@ void kinetis_pllconfig(void)
    *
    * MCG         = PLL
    * Core        = MCG / BOARD_OUTDIV1
-   * bus         = MCG / BOARD_OUTDIV1
-   * FlexBus     = MCG / BOARD_OUTDIV1
-   * Flash clock = MCG/2 / BOARD_OUTDIV1
+   * bus         = MCG / BOARD_OUTDIV2
+   * FlexBus     = MCG / BOARD_OUTDIV3
+   * Flash clock = MCG / BOARD_OUTDIV4
    */
 
   kinesis_setdividers(BOARD_OUTDIV1, BOARD_OUTDIV2, BOARD_OUTDIV3, BOARD_OUTDIV4); 
@@ -371,4 +327,53 @@ void kinetis_clockconfig(void)
   kinetis_traceconfig();
   kinetis_fbconfig();
 }
+
+/****************************************************************************
+ * Name: kinesis_setdividers
+ *
+ * Description:
+ *  "This routine must be placed in RAM. It is a workaround for errata e2448.
+ *   Flash prefetch must be disabled when the flash clock divider is changed.
+ *   This cannot be performed while executing out of flash.  There must be a
+ *   short delay after the clock dividers are changed before prefetch can be
+ *   re-enabled."
+ *
+ * NOTE: This must have global scope only to prevent optimization logic from
+ *   inlining the function.
+ *
+ ****************************************************************************/
+
+void __ramfunc__
+kinesis_setdividers(uint32_t div1, uint32_t div2, uint32_t div3, uint32_t div4)
+{
+  uint32_t regval;
+  int i;
+
+  /* Save the current value of the Flash Access Protection Register */
+
+  regval = getreg32(KINETIS_FMC_PFAPR);
+  
+  /* Set M0PFD through M7PFD to 1 to disable prefetch */
+
+  putreg32(FMC_PFAPR_M7PFD | FMC_PFAPR_M6PFD | FMC_PFAPR_M5PFD |
+           FMC_PFAPR_M4PFD | FMC_PFAPR_M3PFD | FMC_PFAPR_M2PFD |
+           FMC_PFAPR_M1PFD | FMC_PFAPR_M0PFD,
+           KINETIS_FMC_PFAPR);
+
+  /* Set clock dividers to desired value */
+
+  putreg32(SIM_CLKDIV1_OUTDIV1(div1) | SIM_CLKDIV1_OUTDIV2(div2) |
+           SIM_CLKDIV1_OUTDIV3(div3) | SIM_CLKDIV1_OUTDIV4(div4),
+           KINETIS_SIM_CLKDIV1);
+
+  /* Wait for dividers to change */
+
+  for (i = 0 ; i < div4 ; i++);
+  
+  /* Re-store the saved value of FMC_PFAPR */
+
+  putreg32(regval, KINETIS_FMC_PFAPR);
+}
+
+
 
