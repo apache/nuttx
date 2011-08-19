@@ -1966,7 +1966,7 @@
 	  graphics/nxtk/nxtk_drawlinewindow.c, graphics/nxtk/nxtk_drawlinetoolbar.c:
 	  Add new line drawing interfaces (untested).
 
-6.8 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+6.8 2011-08-19 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/src/lpc17xx/chip.h:  Fix some chip memory configuration errors
 	  for the LPC1764, LPC1756, and LPC1754 (submitted by Li Zhuoy (Lzzy))
@@ -1983,7 +1983,7 @@
 	  (2) Extract architecture dependent code in arch/rgmp/include and
 	  arch/rgmp/src into corresponding x86/ and arm/ directories.
 	* arch/arm/src/kinetis, arch/arm/include/kinetis, configs/kwikstick-k40:
-	  Add a directory structure to support the port to the Kinesis KwikStik-K40.
+	  Add a directory structure to support the port to the Kinetis KwikStik-K40.
 	  There is no real substance in the initial check-in; only the directory
 	  structure and skeleton files (Code complete on 8/15/11).
 	* arch/arm/include/armv7-m, arch/arm/src/armv7-m, etc.: Rename all cortexm3
@@ -2002,12 +2002,17 @@
 	  and bit fields within all Kinetis registers.
 	* configs/twr-k60n512:  Add support for the Kinetis K60 Tower board
 	  (TWR-K60N512).
-	* drivers/can.c:  Fixe a semaphore overflow problem in the CAN driver
+	* drivers/can.c:  Fixed a semaphore overflow problem in the CAN driver
 	  (reported by Li Zhouy (Lzzy)).
 	* 8/18/2011: The basic port to the FreeScale Kinetics TWR-K60N512 board is
 	  now functional.
 	* confgs/twr-k60n512: Add Kinetics TWR-K60N512 NSH configuration.
 	* drivers/analog and include/nuttx/analog: Add ADC driver infrastructure
 	  and TI ADS1255 driver developed and submitted by Li Zhouy (Lzzy)).
-	* arch/arm/stm32/stm32_sdio.h and drvers/mmcsd/mmcsd.c:  Add logic to
-	  multiplex usage of the GPIO pins.
+	* arch/arm/stm32/stm32_sdio.h and drivers/mmcsd/mmcsd.c:  Add logic to
+	  multiplex usage of the GPIO pins (contributed by Uros Platise).
+	* configs/twr-k60n512/nsh:  Added and verified a NuttShell (NSH)
+	  configuration for the Freescale, Kinetis TWR-K60N512 board.
+
+6.9 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+

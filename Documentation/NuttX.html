@@ -874,11 +874,11 @@
   </tr>
 </table>
 
-<p><b>nuttx-6.7 Release Notes</b>:
+<p><b>nuttx-6.8 Release Notes</b>:
 <p>
-  The 74<sup>th</sup> release of NuttX, Version 6.7, was made on  August 2, 2011, 2011 and is available for download from the
+  The 75<sup>th</sup> release of NuttX, Version 6.8, was made on  August 19, 2011, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that release consists of two tarballs:  <code>nuttx-6.7.tar.gz</code> and <code>apps-6.7.tar.gz</code>.
+  Note that release consists of two tarballs:  <code>nuttx-6.8.tar.gz</code> and <code>apps-6.8.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information)
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
@@ -888,60 +888,28 @@
   Changes in this release are summarized below:
 </p>
 <ul>
-  <li>
-    <b>New OS APIs</b>:
-      Add the standard <code>sem_timedwait()</code> interface.
+  <li><b>FreeScale Kinetis Support</b>.
+    NuttX has been ported to run on the FreeScale Cortex-M4 &quot;Kinetis&quot; boards.
+    Two board ports are available for (1) the Kinetis KwikStik-K40 and
+    (2) the Kinetis TWR-K60N512 tower.
   </li>
-  <li>
-    <b>FAT File System</b>:
-      Adds (optional) support for VFAT long file names.
+  <li><b>RGMP 0.3</b>.
+    Support for RGMP 0.3.  This version of RGMP now runs on the OMAP4430 (arm)
+    pandaboard
   </li>
-  <li>
-    <b>USB</b>:
-      Now the mass storage device can be connected when needed and
-      disconnected when not needed (or re-connected as a different kind of
-      device).
+  <li><b>LPC17xx CAN driver</b>.
+    LPC17xx CAN driver extended to support both CAN1 and CAN2 (submitted by
+    Li Zhuoy (Lzzy)).  A Semaphore overflow problem was also corrected in the
+	CAN driver (reported by Li Zhouy (Lzzy)).
   </li>
-  <li>
-    <b>Touchscreen Support</b>:
-      Defined a new NuttX touchscreen interface.
-      Added a driver for the TI TSC2007 touchscreen controller chip.
+  <li><b>Signal-related bugfixes</b>.
+    Fixed several critical bugs related to signal handling initialization and
+    for signals the wake up tasks that are waiting to send or receive message
+    queues.Both are important (submitted by hkwilton).
   </li>
-  <li>
-    <b>NX Fonts</b>:
-      Add support for multiple fonts; developed a tool to
-      convert open source fonts into NuttX format; Converted and installed
-      nine new, high quality fontsets.
-  </li>
-  <li>
-    <b>NX Graphics</b>:
-      Add new NX APIs to support drawing of wide lines in any
-      orientation.  Added new low level routines to set individual pixel
-      more efficiently.
-  </li>
-  <li>
-    <b>Build system</b>:
-      Added a export target that will bundle up all of the
-      NuttX libraries, header files, and the startup object into an export-able tarball.
-  </li>
-  <li>
-    <b>LPC17xx</b>:
-      A CAN driver was contributed by Li Zhuoyi (Lzyy).
-  </li>
-  <li>
-    <b>STM32</b>:
-      New NX-related configurations to excercise text and graphic image displays.
-  </li>
-  <li>
-    <b>C Library</b>:
-      Added a fixed precision atan2() math function.
-  </li>
-  <li>
-    <b>Bugfixes</b>:
-      Serial RX overrun error, FAT upper/lower NT 8.3 name
-      handling fixed.  FAT directory allocation and initialization bug.
-      STM32 SDIO DMA race condition bug.  eZ80 UART1 serial driver errors
-      (Paul Osmialowski)
+  <li><b>ADC Infrastructure</b>.
+    Added a new ADC driver infrastructure and TI ADS1255 driver both
+    developed and submitted by Li Zhouy (Lzzy)).
   </li>
 </ul>
 <p>
@@ -1590,11 +1558,11 @@
     <p>
       <b>STATUS:</b>
       As of this writing, the basic port is complete but I accidentally locked my board during the initial bringup.
-      Further development is stalled unless I learn how to unlock the device (or unless I get another K40).
+      Further development is stalled unless I learn how to unlock the device (or until I get another K40).
       Additional work remaining includes, among other things: (1) complete the basic bring-up,
-      (2) bring up the NuttShell NSH, (3) develop support for the SDHC-based SD card, and
-      (4) develop support for USB host and device.
-      NOTE: most of these remaining tasks are shared with the K60 work described below.
+      (2) bring up the NuttShell NSH, (3) develop support for the SDHC-based SD card,
+      (4) develop support for USB host and device, and (2) develop an LCD driver.
+      NOTE: Some of these remaining tasks are shared with the K60 work described below.
     </p>
   </td>
 </tr>
@@ -1613,10 +1581,14 @@
     <p>
       <b>STATUS:</b>
       As of this writing, the basic port is complete and passes the NuttX OS test.
-      Additional work remaining includes, among other things: (1) bring up the NuttShell NSH,
-      (2) integrate the Ethernet driver, (3) develop support for the SDHC-based SD card, and
+      An additional, validated configuration exists for the NuttShell (NSH, see the
+      <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
+      And Ethernet driver also exists, but has not yet been integrated.
+      Additional work remaining includes: (1) integrate the Ethernet driver,
+      (3) develop support for the SDHC-based SD card, and
       (4) develop support for USB host and device.
-      NOTE: most of these remaining tasks are shared with the K40 work described above.
+      NOTE: Most of these remaining tasks (excluding the Ethernet driver) are the
+      same as the pending K40 tasks described above.
     </p>
   </td>
 </tr>
@@ -2542,97 +2514,57 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.7 2011-08-02 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.9 2011-08-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * Makefile:  Added a export target that will bundle up all of the NuttX
-      libraries, header files, and the startup object into an export-able
-      tarball.
-    * arch/arm/src/lpc17xx/lpc17_can.h:  Correct some typos in the CAN
-      register definitions.
-    * drivers/serial/serialirq.c:  Correct an error that can occur if the
-      serial RX buffer becomes full.  Data is now discarded in that case;
-      before, leaving data in the hardware would cause infinite interrupts
-      one most MCUs since you must read the data in order to clear the
-      interrupt.
-    * arch/arm/src/lpc17xx/lpc17_can.c:  Added a CAN driver contributed by
-      Li Zhuoyi (Lzyy).
-    * include/stddefs.h and sys/types:  Added type wchar_t.
-    * fs/fat/fat_fat32dirent.c:  Move all FAT directory operations to this
-      new file; Implement VFAT long file name support.
-    * fs/fat/fat_fat32dirent.c:  The configuration CONFIG_FAT_LCNAMES has
-      been around for some time but never tested until now.  This setting
-      will mimic the NT 8.3 file name behavior:  File names or extensions 
-      may be all upper or all lower case (but not mixed).  If
-      CONFIG_FAT_LCNAMES is not selected, all filenames are strictly upper
-      case.
-    * configs/stm3210e-eval/nsh2:  Console is back on UART1; Added
-      examplex/nx as an NSH &quot;built-in&quot; command as a demonstration.
-    * fs/fat/fs_fat32dirent.c:  Fix an important bug in the directory
-      allocation (fat_allocatedirentry()).  I looks like it could be
-      initializing the wrong sectors! NOTE:  This function was in
-      fs_fat32utils.c in earlier releases.
-    * arch/arm/src/stm32_sdio.c: Correct an important DMA-related bug;
-      SDIO transfer completion events and DMA completion eventes were
-      not being coordinated correctly.
-    * configs/stm3210e-eval/nsh2: Enable FAT long file name support
-    * sched/sem_timedwait.c: Add the standard sem_timedwait() interface.
-    * graphics/nxfonts/nxfonts_getfont.c, nxfonts_bitmap.c,
-      Makefile.source, and include/nuttx/nxfonts.h: Support for multiple
-      fonts included.  A new interface, nxf_getfonthandle() takes a font
-      ID and returns a handle that is now used at all other font interfaces
-      to specify which of the multiple fonts to use.
-    * arch/arm/src/lpc17xx/lpc17_syscon.h: Fix typo (reported by Li Zhuoyi).
-    * configs/stm3210e-eval/nsh2: Extended to support two new commands:
-      'msconn' will connect the USB mass storage device; 'msdis' will
-      disconnect the USB storage device.
-    * tools/bdf-converter.c.  This C file is used to build the bdf-converter
-      program.  The bdf-converter program be used to convert fonts in Bitmap
-      Distribution Format (BDF) into fonts that can be used in the NX graphics
-      system.
-    * include/nuttx/nx:  Move all NX header files from include/nuttx to 
-      include/nuttx/nx.
-    * drivers/usbdev/usbdev_usbstorage.c and arch/arm/src/stm32/stm32_usbdev.c:
-      Correct a memory leak when the USB mass storage driver is connected and
-      then disconnected from the target.  The write requests were not being
-      freed.  NOTE that the unregister logic in the STM32 needed to call
-      stm32_reset() in order to return the write requests to the USB mass
-      storage driver; it is possible that a similar but could exist for other
-      architectures.
-    * graphics/nxfonts/nxfonts_*.h:  Add serveral more new fonts
-    * arch/z80/src/ez80/ez80_serial.c: Fix some errors in serial driver
-      setup for UART1 (submitted by Paul Osmialowski).
-    * drivers/input/tsc2007.c and include/nuttx/input/*:  Add a generic NuttX
-      touchscreen interface.  Add a driver for the TI TSC2007 touchscreen
-      controller.
-    * graphics/nxglib/lcd and fb:  Add low level routines to set single pixels.
-    * lib/math/lib_b16atan2.c:  Add a fixed precision atan2() function
-    * graphics/nxglib/nxglib_splitline.c: Add logic to divide a wide line into
-      trapezoidal components.
-    * graphics/nxmu/nx_drawline.c, graphics/nxsu/nx_drawline.c,
-      graphics/nxtk/nxtk_drawlinewindow.c, graphics/nxtk/nxtk_drawlinetoolbar.c:
-      Add new line drawing interfaces (untested).
+    * arch/arm/src/lpc17xx/chip.h:  Fix some chip memory configuration errors
+      for the LPC1764, LPC1756, and LPC1754 (submitted by Li Zhuoy (Lzzy))
+    * arch/arm/src/lpc17xx/lpc17_can.h:  Revised CAN driver submitted by
+       Li Zhuoy (Lzzy).  The driver now supports both CAN1 and CAN2.
+    * arch/arm/sim/up_lcd.c: Add a simulated LCD driver.
+    * configs/stm3210e-eval/nxlines:  Added a configuration to build
+      examples/nxlines.
+    * arch/graphics: Used apps/examples/nxlines to (finally) verify the NX
+      trapezoid drawing functions and (wide) line drawing functions.
+    * arch/rgmp and configs/rgmp.  Yu Qiang has ported RGMP to the OMAP4430 (arm)
+      pandaboard and release the new RGMP 0.3 version. The main changes are: (1)
+      Separate configs/rgmp/x86 and configs/rgmp/arm configuration directory, and
+      (2) Extract architecture dependent code in arch/rgmp/include and
+      arch/rgmp/src into corresponding x86/ and arm/ directories.
+    * arch/arm/src/kinetis, arch/arm/include/kinetis, configs/kwikstick-k40:
+      Add a directory structure to support the port to the Kinetis KwikStik-K40.
+      There is no real substance in the initial check-in; only the directory
+      structure and skeleton files (Code complete on 8/15/11).
+    * arch/arm/include/armv7-m, arch/arm/src/armv7-m, etc.: Rename all cortexm3
+      directories and files to armv7-m; Change name of of all CORTEXM3 constants
+      to ARMV7M.  This is a major namespace change needed to cleanly support the
+      ARM Cortex-M4 which is also in the ARMv7 M Series (specifically, ARMv7E-M).
+    * sched/sig_initialize.c, sig_received.c, and mq_waitirq.c.  Fixed several
+      critical bugs related to signal handling initialization and for signals
+      the wake up tasks that are waiting to send or receive message queues.  In
+      the first two files, errors would prevent proper allocation of signal-related
+      structures from interrupt handlers.  In the second, there was missing
+      &quot;clean-up&quot; logic after a signal occurred, leaving the message queue in
+      a bad state and resulting in PANICs.  All are important.  (submitted by
+      hkwilton).
+    * arch/arm/src/kinetis:  Added header files defining all Kinetis registers
+      and bit fields within all Kinetis registers.
+    * configs/twr-k60n512:  Add support for the Kinetis K60 Tower board
+      (TWR-K60N512).
+    * drivers/can.c:  Fixe a semaphore overflow problem in the CAN driver
+      (reported by Li Zhouy (Lzzy)).
+    * 8/18/2011: The basic port to the FreeScale Kinetics TWR-K60N512 board is
+      now functional.
+    * confgs/twr-k60n512: Add Kinetics TWR-K60N512 NSH configuration.
+    * drivers/analog and include/nuttx/analog: Add ADC driver infrastructure
+      and TI ADS1255 driver developed and submitted by Li Zhouy (Lzzy)).
+    * arch/arm/stm32/stm32_sdio.h and drivers/mmcsd/mmcsd.c:  Add logic to
+      multiplex usage of the GPIO pins (contributed by Uros Platise).
+    * configs/twr-k60n512/nsh:  Added and verified a NuttShell (NSH)
+      configuration for the Freescale, Kinetis TWR-K60N512 board.
 
-apps-6.7 2011-08-02 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+apps-6.9 2011-08-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * apps/examples/nx and nxtext:  These examples can now be built as NSH
-      &quot;built-in&quot; commands.
-    * apps/examples/nxhello:  The simplest graphics example:  It just says
-      &quot;Hello, World!&quot; in the center of the display. This example can also be
-      built as an NSH &quot;built-in&quot; command.
-    * apps/examples/nx, ntext, and nxhello:  All updated to use the new
-      NuttX font interfaces.
-    * apps/examples/nximage:  Another super simple  graphics example:  It just puts
-      the NuttX logo in the center of the display. This example can also be
-      built as an NSH &quot;built-in&quot; command.
-    * apps/examples/usbstorage: Can now be built as two NSH &quot;built-in&quot; commands:
-      'msconn' will connect the USB mass storage device; 'msdis' will disconnect
-      the USB storage device.
-    * apps/examples/nx*:  All NX header files moved from nuttx/include/nuttx to 
-      nuttx/include/nuttx/nx.
-    * apps/examples/usbstorage: Added instrumentation to monitor memory usage
-      to check for memory leaks in the USB storage driver.
-    * apps/examples/nxhello/nxhello_bkgd.c:  Fix handling of allocated glyph
-      memory.
+    * apps/examples/nxlines:  Added a test for NX line drawing capabilities.
 
 pascal-1.0 2011-05-15 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
@@ -2675,53 +2607,9 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-6.8 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.9 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
-    * arch/arm/src/lpc17xx/chip.h:  Fix some chip memory configuration errors
-      for the LPC1764, LPC1756, and LPC1754 (submitted by Li Zhuoy (Lzzy))
-    * arch/arm/src/lpc17xx/lpc17_can.h:  Revised CAN driver submitted by
-       Li Zhuoy (Lzzy).  The driver now supports both CAN1 and CAN2.
-    * arch/arm/sim/up_lcd.c: Add a simulated LCD driver.
-    * configs/stm3210e-eval/nxlines:  Added a configuration to build
-      examples/nxlines.
-    * arch/graphics: Used apps/examples/nxlines to (finally) verify the NX
-      trapezoid drawing functions and (wide) line drawing functions.
-    * arch/rgmp and configs/rgmp.  Yu Qiang has ported RGMP to the OMAP4430 (arm)
-      pandaboard and release the new RGMP 0.3 version. The main changes are: (1)
-      Separate configs/rgmp/x86 and configs/rgmp/arm configuration directory, and
-      (2) Extract architecture dependent code in arch/rgmp/include and
-      arch/rgmp/src into corresponding x86/ and arm/ directories.
-    * arch/arm/src/kinetis, arch/arm/include/kinetis, configs/kwikstick-k40:
-      Add a directory structure to support the port to the Kinesis KwikStik-K40.
-      There is no real substance in the initial check-in; only the directory
-      structure and skeleton files (Code complete on 8/15/11).
-    * arch/arm/include/armv7-m, arch/arm/src/armv7-m, etc.: Rename all cortexm3
-      directories and files to armv7-m; Change name of of all CORTEXM3 constants
-      to ARMV7M.  This is a major namespace change needed to cleanly support the
-      ARM Cortex-M4 which is also in the ARMv7 M Series (specifically, ARMv7E-M).
-    * sched/sig_initialize.c, sig_received.c, and mq_waitirq.c.  Fixed several
-      critical bugs related to signal handling initialization and for signals
-      the wake up tasks that are waiting to send or receive message queues.  In
-      the first two files, errors would prevent proper allocation of signal-related
-      structures from interrupt handlers.  In the second, there was missing
-      "clean-up" logic after a signal occurred, leaving the message queue in
-      a bad state and resulting in PANICs.  All are important.  (submitted by
-      hkwilton).
-    * arch/arm/src/kinetis:  Added header files defining all Kinetis registers
-      and bit fields within all Kinetis registers.
-    * configs/twr-k60n512:  Add support for the Kinetis K60 Tower board
-      (TWR-K60N512).
-    * drivers/can.c:  Fixe a semaphore overflow problem in the CAN driver
-      (reported by Li Zhouy (Lzzy)).
-    * 8/18/2011: The basic port to the FreeScale Kinetics TWR-K60N512 board is
-      now functional.
-    * confgs/twr-k60n512: Add Kinetics TWR-K60N512 NSH configuration.
-    * drivers/analog and include/nuttx/analog: Add ADC driver infrastructure
-      and TI ADS1255 driver developed and submitted by Li Zhouy (Lzzy)).
-
-apps-6.8 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
-
-    * apps/examples/nxlines:  Added a test for NX line drawing capabilities.
+apps-6.9 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
