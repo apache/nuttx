@@ -108,7 +108,7 @@ static int adc_open(FAR struct file *filep)
 
     /* If the port is the middle of closing, wait until the close is finished */
 
-    if (sem_wait(&dev->cd_closesem) != OK)
+    if (sem_wait(&dev->ad_closesem) != OK)
     {
         ret = -errno;
     }
@@ -119,7 +119,7 @@ static int adc_open(FAR struct file *filep)
          * the device.
          */
 
-        tmp = dev->cd_ocount + 1;
+        tmp = dev->ad_ocount + 1;
         if (tmp == 0)
         {
             /* More than 255 opens; uint8_t overflows to zero */
@@ -135,26 +135,26 @@ static int adc_open(FAR struct file *filep)
                 /* Yes.. perform one time hardware initialization. */
 
                 irqstate_t flags = irqsave();
-                ret = dev->cd_ops->ao_setup(dev);
+                ret = dev->ad_ops->ao_setup(dev);
                 if (ret == OK)
                 {
                     /* Mark the FIFOs empty */
 
-                    dev->cd_recv.af_head = 0;
-                    dev->cd_recv.af_tail = 0;
+                    dev->ad_recv.af_head = 0;
+                    dev->ad_recv.af_tail = 0;
 
                     /* Finally, Enable the CAN RX interrupt */
 
-                    dev->cd_ops->ao_rxint(dev, true);
+                    dev->ad_ops->ao_rxint(dev, true);
 
                     /* Save the new open count on success */
 
-                    dev->cd_ocount = tmp;
+                    dev->ad_ocount = tmp;
                 }
                 irqrestore(flags);
             }
         }
-        sem_post(&dev->cd_closesem);
+        sem_post(&dev->ad_closesem);
     }
     return ret;
 }
@@ -175,7 +175,7 @@ static int adc_close(FAR struct file *filep)
     irqstate_t            flags;
     int                   ret = OK;
 
-    if (sem_wait(&dev->cd_closesem) != OK)
+    if (sem_wait(&dev->ad_closesem) != OK)
     {
         ret = -errno;
     }
@@ -185,25 +185,25 @@ static int adc_close(FAR struct file *filep)
          * decrement to 0, then uninitialize the driver.
          */
 
-        if (dev->cd_ocount > 1)
+        if (dev->ad_ocount > 1)
         {
-            dev->cd_ocount--;
-            sem_post(&dev->cd_closesem);
+            dev->ad_ocount--;
+            sem_post(&dev->ad_closesem);
         }
         else
         {
             /* There are no more references to the port */
 
-            dev->cd_ocount = 0;
+            dev->ad_ocount = 0;
 
 
             /* Free the IRQ and disable the ADC device */
 
             flags = irqsave();       /* Disable interrupts */
-            dev->cd_ops->ao_shutdown(dev);       /* Disable the ADC */
+            dev->ad_ops->ao_shutdown(dev);       /* Disable the ADC */
             irqrestore(flags);
 
-            sem_post(&dev->cd_closesem);
+            sem_post(&dev->ad_closesem);
         }
     }
     return ret;
@@ -220,7 +220,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
     size_t                nread;
     irqstate_t            flags;
     int                   ret   = 0;
-    int 					msglen;
+    int                   msglen;
 
     if (buflen % 5 ==0 )
         msglen=5;
@@ -237,10 +237,10 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
     if (buflen >= msglen)
     {
-        /* Interrupts must be disabled while accessing the cd_recv FIFO */
+        /* Interrupts must be disabled while accessing the ad_recv FIFO */
 
         flags = irqsave();
-        while (dev->cd_recv.af_head == dev->cd_recv.af_tail)
+        while (dev->ad_recv.af_head == dev->ad_recv.af_tail)
         {
             /* The receive FIFO is empty -- was non-blocking mode selected? */
 
@@ -252,9 +252,9 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
             /* Wait for a message to be received */
 
-			dev->cd_nrxwaiters++;
-            ret = sem_wait(&dev->cd_recv.af_sem);
-			dev->cd_nrxwaiters--;
+            dev->ad_nrxwaiters++;
+            ret = sem_wait(&dev->ad_recv.af_sem);
+            dev->ad_nrxwaiters--;
             if (ret < 0)
             {
                 ret = -errno;
@@ -262,14 +262,14 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
             }
         }
 
-        /* The cd_recv FIFO is not empty.  Copy all buffered data that will fit
+        /* The ad_recv FIFO is not empty.  Copy all buffered data that will fit
          * in the user buffer.
          */
 
         nread = 0;
         do
         {
-            FAR struct adc_msg_s *msg = &dev->cd_recv.af_buffer[dev->cd_recv.af_head];
+            FAR struct adc_msg_s *msg = &dev->ad_recv.af_buffer[dev->ad_recv.af_head];
 
             /* Will the next message in the FIFO fit into the user buffer? */
 
@@ -307,12 +307,12 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
             /* Increment the head of the circular message buffer */
 
-            if (++dev->cd_recv.af_head >= CONFIG_ADC_FIFOSIZE)
+            if (++dev->ad_recv.af_head >= CONFIG_ADC_FIFOSIZE)
             {
-                dev->cd_recv.af_head = 0;
+                dev->ad_recv.af_head = 0;
             }
         }
-        while (dev->cd_recv.af_head != dev->cd_recv.af_tail);
+        while (dev->ad_recv.af_head != dev->ad_recv.af_tail);
 
         /* All on the messages have bee transferred.  Return the number of bytes
          * that were read.
@@ -345,7 +345,7 @@ static int adc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     FAR struct adc_dev_s *dev   = inode->i_private;
     int               ret   = OK;
 
-    ret = dev->cd_ops->ao_ioctl(dev, cmd, arg);
+    ret = dev->ad_ops->ao_ioctl(dev, cmd, arg);
     return ret;
 }
 
@@ -355,7 +355,7 @@ static int adc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
 {
-    FAR struct adc_fifo_s *fifo = &dev->cd_recv;
+    FAR struct adc_fifo_s *fifo = &dev->ad_recv;
     int                    nexttail;
     int                    err = -ENOMEM;
 
@@ -382,8 +382,8 @@ int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
 
         fifo->af_tail = nexttail;
 
-		if(	dev->cd_nrxwaiters>0)
-			sem_post(&fifo->af_sem);
+        if(dev->ad_nrxwaiters>0)
+            sem_post(&fifo->af_sem);
         err = OK;
     }
     return err;
@@ -393,12 +393,12 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
 {
     /* Initialize the ADC device structure */
 
-    dev->cd_ocount = 0;
+    dev->ad_ocount = 0;
 
-    sem_init(&dev->cd_recv.af_sem, 0, 0);
-    sem_init(&dev->cd_closesem, 0, 1);
+    sem_init(&dev->ad_recv.af_sem, 0, 0);
+    sem_init(&dev->ad_closesem, 0, 1);
 
-    dev->cd_ops->ao_reset(dev);
+    dev->ad_ops->ao_reset(dev);
 
     return register_driver(path, &adc_fops, 0444, dev);
 }

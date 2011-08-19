@@ -72,6 +72,7 @@
 /************************************************************************************
  * Public Types
  ************************************************************************************/
+
 struct adc_msg_s
 {
   uint8_t      am_channel;               /* The 8-bit ADC Channel */
@@ -131,20 +132,20 @@ struct adc_ops_s
  * can_register() must allocate and initialize this structure.  The
  * calling logic need only set all fields to zero except:
  *
- *   The elements of 'cd_ops', and 'cd_priv'
+ *   The elements of 'ad_ops', and 'ad_priv'
  *
  * The common logic will initialize all semaphores.
  */
 
 struct adc_dev_s
 {
-  uint8_t              cd_ocount;        /* The number of times the device has been opened */
-  uint8_t              cd_nrxwaiters;    /* Number of threads waiting to enqueue a message */
-  sem_t                cd_closesem;      /* Locks out new opens while close is in progress */
-  sem_t                cd_recvsem;       /* Used to wakeup user waiting for space in cd_recv.buffer */
-  struct adc_fifo_s    cd_recv;          /* Describes receive FIFO */
-  const struct adc_ops_s *cd_ops;        /* Arch-specific operations */
-  void                *cd_priv;          /* Used by the arch-specific logic */
+  uint8_t              ad_ocount;        /* The number of times the device has been opened */
+  uint8_t              ad_nrxwaiters;    /* Number of threads waiting to enqueue a message */
+  sem_t                ad_closesem;      /* Locks out new opens while close is in progress */
+  sem_t                ad_recvsem;       /* Used to wakeup user waiting for space in ad_recv.buffer */
+  struct adc_fifo_s    ad_recv;          /* Describes receive FIFO */
+  const struct adc_ops_s *ad_ops;        /* Arch-specific operations */
+  void                *ad_priv;          /* Used by the arch-specific logic */
 };
 
 /************************************************************************************
