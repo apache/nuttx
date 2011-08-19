@@ -72,22 +72,21 @@ extern "C" {
 
 extern uint32_t stm32_vectors[];	/* See stm32_vectors.S */
 
-
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
 
-/** Called to change to new clock based on settings in board.h
+/* Called to change to new clock based on settings in board.h
  * 
- *   NOTE:  This logic needs to be extended so that we can selected low-power
- *   clocking modes as well!
- **/
+ * NOTE:  This logic needs to be extended so that we can selected low-power
+ * clocking modes as well!
+ */
+
 EXTERN void stm32_clockconfig(void);
 
-/** Enable LSE Clock
- **/
-EXTERN void stm32_rcc_enablelse(void);
+/* Enable LSE Clock */
 
+EXTERN void stm32_rcc_enablelse(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
