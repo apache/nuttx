@@ -1,7 +1,7 @@
 ############################################################################
-# drivers/Makefile
+# drivers/analog/Make.defs
 #
-#   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,74 +33,44 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+# Don't build anything if there is no support for analog devices
 
-ifeq ($(WINTOOL),y)
-INCDIROPT = -w
+# Check for DAC devices
+
+ifeq ($(CONFIG_DAC),y)
+
+# Include the common ADC character driver
+
+# Include DAC device drivers
+
 endif
 
-DEPPATH = --dep-path .
-ASRCS =
-CSRCS =
-VPATH = .
+# Check for ADC devices
 
-# Include support for various drivers.  Each Make.defs file will add its
-# files to the source file list, add its DEPPATH info, and will add
-# the appropriate paths to the VPATH variable
+ifeq ($(CONFIG_ADC),y)
 
-include analog/Make.defs
-include bch/Make.defs
-include input/Make.defs
-include lcd/Make.defs
-include mmcsd/Make.defs
-include mtd/Make.defs
-include net/Make.defs
-include pipes/Make.defs
-include sensors/Make.defs
-include serial/Make.defs
-include usbdev/Make.defs
-include usbhost/Make.defs
-include wireless/Make.defs
+# Include the common ADC character driver
 
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-  CSRCS += dev_null.c dev_zero.c loop.c  can.c
-ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-  CSRCS += ramdisk.c rwbuffer.c
+CSRCS += adc.c
+
+# Include ADC device drivers
+
+ifeq ($(CONFIG_ADC_ADS125X),y)
+  CSRCS += ads1255.c
 endif
 endif
 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+# Add analog driver build support (the nested if-then-else implements an OR)
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+ifeq ($(CONFIG_DAC),y)
+  DEPPATH += --dep-path analog
+  VPATH += :analog
+  CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/analog}
+else
+ifeq ($(CONFIG_ADC),y)
+  DEPPATH += --dep-path analog
+  VPATH += :analog
+  CFLAGS += ${shell $(TOPDIR)/tools/incdir.sh $(INCDIROPT) "$(CC)" $(TOPDIR)/drivers/analog}
+endif
+endif
 
-BIN			= libdrivers$(LIBEXT)
-
-all:	$(BIN)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-$(BIN):	$(OBJS)
-	@( for obj in $(OBJS) ; do \
-		$(call ARCHIVE, $@, $${obj}); \
-	done ; )
-
-.depend: Makefile $(SRCS)
-	@$(MKDEP) $(DEPPATH) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	@touch $@
-
-depend: .depend
-
-clean:
-	@rm -f $(BIN) *~ .*.swp
-	$(call CLEAN)
-
-distclean: clean
-	@rm -f Make.dep .depend
-
--include Make.dep
