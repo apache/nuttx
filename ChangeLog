@@ -2009,3 +2009,5 @@
 	* confgs/twr-k60n512: Add Kinetics TWR-K60N512 NSH configuration.
 	* drivers/analog and include/nuttx/analog: Add ADC driver infrastructure
 	  and TI ADS1255 driver developed and submitted by Li Zhouy (Lzzy)).
+	* arch/arm/stm32/stm32_sdio.h and drvers/mmcsd/mmcsd.c:  Add logic to
+	  multiplex usage of the GPIO pins.

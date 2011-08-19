@@ -55,6 +55,45 @@
  *   - Power up/down modes
  *   - Sequencing between states or add protection for correct termination of
  *     various different state (so that CC1101 does not block in case of improper use)
+ * 
+ * \par RSSI and LQI value interpretation
+ * 
+ * The LQI can be read from the LQI status register or it can be appended 
+ * to the received packet in the RX FIFO. LQI is a metric of the current 
+ * quality of the received signal. The LQI gives an estimate of how easily 
+ * a received signal can be demodulated by accumulating the magnitude of 
+ * the error between ideal constellations and the received signal over 
+ * the 64 symbols immediately following the sync word. LQI is best used 
+ * as a relative measurement of the link quality (a high value indicates 
+ * a better link than what a low value does), since the value is dependent 
+ * on the modulation format.
+ * 
+ * To simplify: If the received modulation is FSK or GFSK, the receiver 
+ * will measure the frequency of each "bit" and compare it with the 
+ * expected frequency based on the channel frequency and the deviation 
+ * and the measured frequency offset. If other modulations are used, the 
+ * error of the modulated parameter (frequency for FSK/GFSK, phase for 
+ * MSK, amplitude for ASK etc) will be measured against the expected 
+ * ideal value
+ * 
+ * RSSI (Received Signal Strength Indicator) is a signal strength 
+ * indication. It does not care about the "quality" or "correctness" of 
+ * the signal. LQI does not care about the actual signal strength, but 
+ * the signal quality often is linked to signal strength. This is because 
+ * a strong signal is likely to be less affected by noise and thus will 
+ * be seen as "cleaner" or more "correct" by the receiver.
+ * 
+ * There are four to five "extreme cases" that can be used to illustrate 
+ * how RSSI and LQI work:
+ *  1. A weak signal in the presence of noise may give low RSSI and low LQI.
+ *  2. A weak signal in "total" absence of noise may give low RSSI and high LQI.
+ *  3. Strong noise (usually coming from an interferer) may give high RSSI and low LQI.
+ *  4. A strong signal without much noise may give high RSSI and high LQI.
+ *  5. A very strong signal that causes the receiver to saturate may give 
+ *     high RSSI and low LQI.
+ * 
+ * Note that both RSSI and LQI are best used as relative measurements since 
+ * the values are dependent on the modulation format.
  **/ 
  
 #include <nuttx/config.h>

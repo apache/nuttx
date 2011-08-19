@@ -317,6 +317,12 @@ static int  stm32_interrupt(int irq, void *context);
 
 /* SDIO interface methods ***************************************************/
 
+/* Mutual exclusion */
+
+#ifdef CONFIG_SDIO_MUXBUS
+static int stm32_lock(FAR struct sdio_dev_s *dev, bool lock);
+#endif
+
 /* Initialization/setup */
 
 static void stm32_reset(FAR struct sdio_dev_s *dev);
@@ -380,6 +386,9 @@ struct stm32_dev_s g_sdiodev =
 {
   .dev =
   {
+#ifdef CONFIG_SDIO_MUXBUS
+    .lock             = stm32_lock,
+#endif
     .reset            = stm32_reset,
     .status           = stm32_status,
     .widebus          = stm32_widebus,
@@ -1312,6 +1321,35 @@ static int stm32_interrupt(int irq, void *context)
 /****************************************************************************
  * SDIO Interface Methods
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_lock
+ *
+ * Description:
+ *   Locks the bus. Function calls low-level multiplexed bus routines to
+ *   resolve bus requests and acknowledgment issues.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the SDIO device interface
+ *   lock   - TRUE to lock, FALSE to unlock.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SDIO_MUXBUS
+static int stm32_lock(FAR struct sdio_dev_s *dev, bool lock)
+{  
+  /* Single SDIO instance so there is only one possibility.  The multiplex
+   * bus is part of board support package.
+   */
+
+  stm32_muxbus_sdio_lock(lock);
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Name: stm32_reset
  *
@@ -2574,8 +2612,12 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
   /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable of
    * 8-bit wide bus operation but D4-D7 are not configured).
+   * 
+   * If bus is multiplexed then there is a custom bus configuration utility
+   * in the scope of the board support package.
    */
 
+#ifndef CONFIG_SDIO_MUXBUS
   stm32_configgpio(GPIO_SDIO_D0);
 #ifndef CONFIG_SDIO_WIDTH_D1_ONLY
   stm32_configgpio(GPIO_SDIO_D1);
@@ -2584,6 +2626,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 #endif
   stm32_configgpio(GPIO_SDIO_CK);
   stm32_configgpio(GPIO_SDIO_CMD);
+#endif
 
   /* Reset the card and assure that it is in the initial, unconfigured
    * state.

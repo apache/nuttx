@@ -311,6 +311,24 @@
 #define SDIO_ACMD53     (SDIO_ACMDIDX53|MMCSD_R5_RESPONSE |MMCSD_NODATAXFR)
 
 /****************************************************************************
+ * Name: SDIO_LOCK
+ *
+ * Description:
+ *   Lock/unlock the SDIO bus, preventing it from any other transaction
+ *   while locked.
+ *
+ * Input Parameters:
+ *   dev      - An instance of the SDIO device interface
+ *   state    - TRUE/FALSE
+ *
+ * Returned Value:
+ *   OK on success.
+ *
+ ****************************************************************************/
+
+#define SDIO_LOCK(dev,state)  ((dev)->lock(dev,state))
+
+/****************************************************************************
  * Name: SDIO_RESET
  *
  * Description:
@@ -755,6 +773,12 @@ struct sdio_dev_s
   /* See descriptions of each method in the access macros provided
    * above.
    */
+
+  /* Mutual exclusion */
+
+#ifdef CONFIG_SDIO_MUXBUS
+  int   (*lock)(FAR struct sdio_dev_s *dev, bool lock);
+#endif
 
   /* Initialization/setup */
 

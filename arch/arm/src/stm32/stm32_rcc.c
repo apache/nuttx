@@ -60,6 +60,22 @@
 #define HSERDY_TIMEOUT 256
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Activity reference count, showing inactivity after start-up.
+ * Device drivers increment this count using rcclock() and rccunlock()
+ * 
+ * If this value goes beyond the range [0, MAX_RCCs] indicates
+ * reference count leakage (asymetric number of locks vs. unlocks) and
+ * system enters permanent active state.
+ */
+
+#ifdef CONFIG_STM32_RCCLOCK
+static int stm32_rcclock_count = 0; 
+#endif
+ 
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -97,7 +113,6 @@ static inline void rcc_reset(void)
 
   putreg32(0, STM32_RCC_CIR);               /* Disable all interrupts */
 }
-
 
 static inline void rcc_enableahb(void)
 {
@@ -139,7 +154,6 @@ static inline void rcc_enableahb(void)
 
   putreg32(regval, STM32_RCC_AHBENR);   /* Enable peripherals */
 }
-
 
 static inline void rcc_enableapb1(void)
 {
@@ -292,7 +306,6 @@ static inline void rcc_enableapb1(void)
   putreg32(regval, STM32_RCC_APB1ENR);
 }
 
-
 static inline void rcc_enableapb2(void)
 {
   uint32_t regval;
@@ -374,14 +387,14 @@ static inline void rcc_enableapb2(void)
   putreg32(regval, STM32_RCC_APB2ENR);
 }
 
-
 #if !defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
-/** Called to change to new clock based on settings in board.h
+/* Called to change to new clock based on settings in board.h
  * 
- *  NOTE:  This logic would need to be extended if you need to select low-
- *  power clocking modes!
- **/
+ *   NOTE:  This logic would need to be extended if you need to select low-
+ *   power clocking modes!
+ */
+ 
 static inline void stm32_stdclockconfig(void)
 {
   uint32_t regval;
@@ -469,7 +482,6 @@ static inline void stm32_stdclockconfig(void)
 }
 #endif
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -501,22 +513,66 @@ void stm32_clockconfig(void)
   rcc_enableapb1();
 }
 
-
-/**
+/*
  * \todo Check for LSE good timeout and return with -1,
  *   possible ISR optimization? or at least ISR should be cough in case of failure
  */
+
 void stm32_rcc_enablelse(void)
 {
-    /* Enable LSE */
-    modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_LSEON);
+  /* Enable LSE */
 
-    /* We could wait for ISR here ... */
-    while( !(getreg16(STM32_RCC_BDCR) & RCC_BDCR_LSERDY) ) up_waste();
+  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_LSEON);
+
+  /* We could wait for ISR here ... */
+
+  while( !(getreg16(STM32_RCC_BDCR) & RCC_BDCR_LSERDY) ) up_waste();
     
-    /* Select LSE as RTC Clock Source */
-    modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
+  /* Select LSE as RTC Clock Source */
+
+  modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
     
-    /* Enable Clock */
-    modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);    
+  /* Enable Clock */
+
+  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);    
 }
+
+#ifdef CONFIG_STM32_RCCLOCK
+uint32_t stm32_rcclock(uint8_t domain_id)
+{
+  // THINK:
+  // maybe just shift domain_id into 32-bit or 64-bit register 
+  // and if there value of this var != 0, we are active...
+  // increment some variable, so it is possible to test leakage
+  // multiple locks or multiple unlocks
+    
+  if (stm32_rcclock_count >= 0)
+    {
+      stm32_rcclock_count++;
+      if (stm32_rcclock_count > 64)
+        {
+          stm32_rcclock_count = -1; /* capture error */
+        }
+    }
+    
+  return 0;
+}
+
+uint32_t stm32_rccunlock(uint8_t domain_id)
+{
+    if (stm32_rcclock_count > -1)
+      {
+        stm32_rcclock_count--;
+      }
+    return 0;
+}
+
+uint32_t stm32_setrccoptions(uint8_t domain_id, uint32_t options)
+{
+}
+
+int stm32_getrccactivity(void)
+{
+    return stm32_rcclock_count;
+}
+#endif

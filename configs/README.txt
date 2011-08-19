@@ -562,6 +562,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  for pipe and FIFO support
 
 	Filesystem configuration
+
 		CONFIG_FS_FAT - Enable FAT filesystem support
 		CONFIG_FAT_SECTORSIZE - Max supported sector size
 		CONFIG_FAT_LCNAMES - Enable use of the NT-style upper/lower case 8.3
@@ -604,6 +605,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  implemented by copying whole files into memory.
 
 	SPI driver
+
 		CONFIG_SPI_OWNBUS - Set if there is only one active device
 		  on the SPI bus.  No locking or SPI configuration will be performed.
 		  It is not necessary for clients to lock, re-configure, etc..
@@ -611,6 +613,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  (vs a recvblock() and sndblock ()methods)
 
 	SPI-based MMC/SD driver
+
 		CONFIG_MMCSD_NSLOTS - Number of MMC/SD slots supported by the
 		  driver. Default is one.
 		CONFIG_MMCSD_READONLY -  Provide read-only access.  Default is
@@ -618,17 +621,24 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_MMCSD_SPICLOCK - Maximum SPI clock to drive MMC/SD card.
 		  Default is 20MHz.
 
-	SDIO-based MMC/SD driver
-		CONFIG_FS_READAHEAD - Enable read-ahead buffering
-		CONFIG_FS_WRITEBUFFER - Enable write buffering
+	SDIO/SDHC driver:
+
 		CONFIG_SDIO_DMA - SDIO driver supports DMA
-		CONFIG_MMCSD_MMCSUPPORT - Enable support for MMC cards
-		CONFIG_MMCSD_HAVECARDDETECT - SDIO driver card detection is
-		  100% accurate
+		CONFIG_SDIO_MUXBUS - Set this SDIO interface if the SDIO interface
+		  or hardware resources are shared with other drivers.
 		CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
 		  4-bit transfer mode.
 
+	SDIO-based MMC/SD driver
+
+		CONFIG_FS_READAHEAD - Enable read-ahead buffering
+		CONFIG_FS_WRITEBUFFER - Enable write buffering
+		CONFIG_MMCSD_MMCSUPPORT - Enable support for MMC cards
+		CONFIG_MMCSD_HAVECARDDETECT - SDIO driver card detection is
+		  100% accurate
+
 	RiT P14201 OLED driver
+
 		CONFIG_LCD_P14201 - Enable P14201 support
 		CONFIG_P14201_SPIMODE - Controls the SPI mode
 		CONFIG_P14201_FREQUENCY - Define to use a different bus frequency
@@ -683,7 +693,17 @@ defconfig -- This is a configuration file similar to the Linux
 		  there are multiple TSC2007 touchscreens, this setting will enable
 		  multiple touchscreens with the same driver.
 
+	Analog Devices
+
+		CONFIG_DAC
+		  Enables general support for Digital-to-Analog conversion devices.
+		CONFIG_ADC
+		  Enables general support for Analog-to-Digital conversion devices.
+		CONFIG_ADC_ADS125X
+		  Adds support for the TI ADS 125x ADC.
+
 	ENC28J60 Ethernet Driver Configuration Settings:
+
 		CONFIG_NET_ENC28J60 - Enabled ENC28J60 support
 		CONFIG_ENC28J60_SPIMODE - Controls the SPI mode
 		CONFIG_ENC28J60_FREQUENCY - Define to use a different bus frequency
@@ -693,6 +713,7 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_ENC28J60_HALFDUPPLEX - Default is full duplex
 
 	Networking support via uIP
+
 		CONFIG_NET - Enable or disable all network features
 		CONFIG_NET_NOINTS --  CONFIG_NET_NOINT indicates that uIP not called from
 		  the interrupt level.  If CONFIG_NET_NOINTS is defined, critical sections
@@ -782,10 +803,12 @@ defconfig -- This is a configuration file similar to the Linux
 		  Default: 128
 
 	UIP Network Utilities
+
 		CONFIG_NET_DHCP_LIGHT - Reduces size of DHCP
 		CONFIG_NET_RESOLV_ENTRIES - Number of resolver entries
 
-	THTTPD:
+	THTTPD
+
 		CONFIG_THTTPD_PORT - THTTPD Server port number
 		CONFIG_THTTPD_IPADDR - Server IP address (no host name)
 		CONFIG_THTTPD_SERVER_ADDRESS - SERVER_ADDRESS: response
@@ -842,6 +865,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  and verify referrers.
 
 	USB device controller driver
+
 		CONFIG_USBDEV - Enables USB device support
 		CONFIG_USBDEV_ISOCHRONOUS - Build in extra support for isochronous
 		  endpoints
@@ -854,6 +878,7 @@ defconfig -- This is a configuration file similar to the Linux
 		CONFIG_USBDEV_TRACE_NRECORDS - Number of trace entries to remember
 
 	USB host controller driver
+
 	  CONFIG_USBHOST
 		Enables USB host support
 	  CONFIG_USBHOST_NPREALLOC
@@ -1073,7 +1098,9 @@ appconfig -- This is another configuration file that is specific to the
 
 setenv.sh -- This is a script that you can include that will be installed at
   the toplevel of the directory structure and can be sourced to set any
-  necessary environment variables.
+  necessary environment variables.  You will most likely have to customize the
+  default setenv.sh script in order for it to work correctly in your
+  environment.
 
 Supported Boards
 ^^^^^^^^^^^^^^^^
