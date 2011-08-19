@@ -424,10 +424,10 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 
   putreg8(UART_PFIFO_RXFE | UART_PFIFO_TXFE, uart_base+KINETIS_UART_PFIFO_OFFSET);
 #else
-  /* Set the watermarks to zero and disable the FIFOs */
+  /* Set the watermarks to one and disable the FIFOs */
 
-  putreg8(0, uart_base+KINETIS_UART_RWFIFO_OFFSET);
-  putreg8(0, uart_base+KINETIS_UART_TWFIFO_OFFSET);
+  putreg8(1, uart_base+KINETIS_UART_RWFIFO_OFFSET);
+  putreg8(1, uart_base+KINETIS_UART_TWFIFO_OFFSET);
   putreg8(0, uart_base+KINETIS_UART_PFIFO_OFFSET);
 #endif
 

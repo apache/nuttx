@@ -158,27 +158,27 @@
  * Joystick up     -- Connected to PG.15
  */
 
-#define BUTTON_WAKEUP     0
-#define BUTTON_TAMPER     1
-#define BUTTON_KEY        2
+#define BUTTON_WAKEUP      0
+#define BUTTON_TAMPER      1
+#define BUTTON_KEY         2
 
-#define JOYSTICK_SEL      3
-#define JOYSTICK_DOWN     4
-#define JOYSTICK_LEFT     5
-#define JOYSTICK_RIGHT    6
-#define JOYSTICK_UP       7
+#define JOYSTICK_SEL       3
+#define JOYSTICK_DOWN      4
+#define JOYSTICK_LEFT      5
+#define JOYSTICK_RIGHT     6
+#define JOYSTICK_UP        7
 
-#define NUM_BUTTONS       8
+#define NUM_BUTTONS        8
 
-#define BUTTON_WAKEUP_BIT (1 << BUTTON_WAKEUP)
-#define BUTTON_TAMPER_BIT (1 << BUTTON_TAMPER)
-#define BUTTON_KEY_BIT    (1 << BUTTON_KEY)
+#define BUTTON_WAKEUP_BIT  (1 << BUTTON_WAKEUP)
+#define BUTTON_TAMPER_BIT  (1 << BUTTON_TAMPER)
+#define BUTTON_KEY_BIT     (1 << BUTTON_KEY)
 
-#define JOYSTICK_SEL_BIT  (1 << JOYSTICK_SEL)
-#define JOYSTICK_DOWN_BIT (1 << JOYSTICK_DOWN)
-#define JOYSTICK_LEFT_BIT (1 << JOYSTICK_LEFT)
-#define JOYSTICK_RIGH_BIT (1 << JOYSTICK_RIGHT)
-#define JOYSTICK_UP_BIT   (1 << JOYSTICK_UP)
+#define JOYSTICK_SEL_BIT   (1 << JOYSTICK_SEL)
+#define JOYSTICK_DOWN_BIT  (1 << JOYSTICK_DOWN)
+#define JOYSTICK_LEFT_BIT  (1 << JOYSTICK_LEFT)
+#define JOYSTICK_RIGHT_BIT (1 << JOYSTICK_RIGHT)
+#define JOYSTICK_UP_BIT    (1 << JOYSTICK_UP)
 
 /************************************************************************************
  * Public Data

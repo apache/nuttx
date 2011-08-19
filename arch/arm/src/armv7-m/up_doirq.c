@@ -88,7 +88,7 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
    * current_regs is also used to manage interrupt level context switches.
    */
 
-  savestate     = (uint32_t*)current_regs;
+  savestate    = (uint32_t*)current_regs;
   current_regs = regs;
 
   /* Mask and acknowledge the interrupt */
