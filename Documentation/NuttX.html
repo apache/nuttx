@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 18, 2011</p>
+      <p>Last Updated: August 19, 2011</p>
     </td>
   </tr>
 </table>
@@ -674,6 +674,21 @@
   <td>
     <p>
       <li>Touchscreen, USB keyboard, GPIO-based buttons and keypads. </li>
+    </p>
+</tr>
+</table></center>
+
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Analog Devices</b>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Support for Analog-to-Digital converters.</li>
     </p>
 </tr>
 </table></center>
@@ -2700,6 +2715,9 @@ nuttx-6.8 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       (reported by Li Zhouy (Lzzy)).
     * 8/18/2011: The basic port to the FreeScale Kinetics TWR-K60N512 board is
       now functional.
+    * confgs/twr-k60n512: Add Kinetics TWR-K60N512 NSH configuration.
+    * drivers/analog and include/nuttx/analog: Add ADC driver infrastructure
+      and TI ADS1255 driver developed and submitted by Li Zhouy (Lzzy)).
 
 apps-6.8 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
