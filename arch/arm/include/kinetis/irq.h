@@ -75,7 +75,7 @@
 
 /* External interrupts (vectors >= 16) */
 
-#define KINETIS_IRQ_EXTINT         (16)
+#define KINETIS_IRQ_EXTINT        (16)
 
 /* K40 Family ***********************************************************************
  *

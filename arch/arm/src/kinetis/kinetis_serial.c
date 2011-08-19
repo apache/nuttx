@@ -682,7 +682,7 @@ static int up_attach(struct uart_dev_s *dev)
     }
 #endif
 
-  if (ret == 0)
+  if (ret == OK)
     {
 #ifdef CONFIG_DEBUG
       up_enable_irq(priv->irqe);
@@ -1300,9 +1300,9 @@ int up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-  uint8_t imr;
+  uint8_t ie;
 
-  up_disableuartint(priv, &imr);
+  up_disableuartint(priv, &ie);
 
   /* Check for LF */
 
@@ -1314,7 +1314,7 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
-  up_restoreuartint(priv, imr);
+  up_restoreuartint(priv, ie);
 #endif
   return ch;
 }
