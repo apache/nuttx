@@ -1,12 +1,10 @@
 /************************************************************************************
- * configs/vsn/src/boot.c
- * arch/arm/src/board/boot.c
+ * configs/vsn/include/muxbus.h
+ * include/arch/board/muxbus.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
- *   Copyright (c) 2011 Uros Platise. All rights reserved.
- *
- *   Authors: Gregory Nutt <spudmonkey@racsa.co.cr>
- *            Uros Platise <uros.platise@isotel.eu>
+ *   Copyright (C) 2011 Uros Platise. All rights reserved
+ * 
+ *   Authors: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,54 +35,50 @@
  *
  ************************************************************************************/
 
-/** \file
- *  \author Gregory Nutt, Uros Platise
- *  \brief VSN Button
- */
+#ifndef __ARCH_BOARD_MUXBUS_H
+#define __ARCH_BOARD_MUXBUS_H
 
-#include <debug.h>
-#include "vsn.h"
-
+#ifndef __ASSEMBLY__
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/** Initialize Board
- *
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
- *
- **/
+/**
+ * Initialization of the semaphore and initial bus state.
+ */
+void vsn_muxbus_init(void);
 
-void stm32_boardinitialize(void)
-{
-  /* Set start-up board voltage */
+/** 
+ * Simple Lock / Unlock Mechanism for the SDIO Interface
+ * 
+ * NOTE: This function is provided for the stm32_sdio driver.
+ */
+extern void stm32_muxbus_sdio_lock(bool lock);
 
-  board_power_init();
-  vsn_muxbus_init();
+/**
+ * Set PGA Gain of the Analog Devices AD8231 on bus shared with the 
+ * SDIO interface
+ * 
+ * \param gain sets the front-end gain as 2^{gain}, where gain = 0..7.
+ *   Setting gain outside that range shutdowns the front-end.
+ * 
+ * \return gain set or -1 if front end is put into shutdown.
+ */
+extern int vsn_muxbus_setpgagain(int gain);
 
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
-   */
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-  if (stm32_spiinitialize) stm32_spiinitialize();
-#endif
-
-   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-    * disabled, and 3) the weak function stm32_usbinitialize() has been brought
-    * into the build.
-    */
-
-#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
-  if (stm32_usbinitialize) stm32_usbinitialize();
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
-#endif
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif  /* __ARCH_BOARD_MUXBUS_H */

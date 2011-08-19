@@ -53,7 +53,7 @@ ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		= sysclock.c boot.c leds.c buttons.c spi.c \
-			  usbdev.c power.c sif.c
+			  usbdev.c power.c muxbus.c sif.c
 
 ifeq ($(CONFIG_USBSTRG),y)
 CSRCS		+= usbstrg.c

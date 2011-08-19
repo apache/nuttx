@@ -313,12 +313,12 @@ int sif_anout_init(void)
     
     // Use the TIM3 as PWM modulated analogue output
     
-    STM32_TIM_SETPERIOD(vsn_sif.tim3, 4096);
-    STM32_TIM_SETCOMPARE(vsn_sif.tim3, GPIO_OUT_PWM_TIM3_CH, 1024);
+    STM32_TIM_SETPERIOD(vsn_sif.tim3, 5);
+    STM32_TIM_SETCOMPARE(vsn_sif.tim3, GPIO_OUT_PWM_TIM3_CH, 3);
 
     STM32_TIM_SETCLOCK(vsn_sif.tim3, 36e6);
     STM32_TIM_SETMODE(vsn_sif.tim3, STM32_TIM_MODE_UP);
-    //STM32_TIM_SETCHANNEL(vsn_sif.tim3, GPIO_OUT_PWM_TIM3_CH, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
+    STM32_TIM_SETCHANNEL(vsn_sif.tim3, GPIO_OUT_PWM_TIM3_CH, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
     
     // Use the TIM8 to drive the upper power mosfet
     
@@ -330,7 +330,7 @@ int sif_anout_init(void)
     
     STM32_TIM_SETCLOCK(vsn_sif.tim8, 36e6);
     STM32_TIM_SETMODE(vsn_sif.tim8, STM32_TIM_MODE_UP);
-    STM32_TIM_SETCHANNEL(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
+    //STM32_TIM_SETCHANNEL(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
 
     vsn_sif.i2c1 = up_i2cinitialize(1);
     vsn_sif.i2c2 = up_i2cinitialize(2);
@@ -366,9 +366,77 @@ void sif_anref_init(void)
  * Analog Input Sampler Unit
  ****************************************************************************/ 
 
-
-void sif_anin_reset(void)
+#if 0
+/**
+ * Gain is set using the shared multiplexed bus with the SDIO card.
+ * The following rules apply for the SDcard:
+ * 
+ *  - CMD serial line always starts with 0 (start-bit) and ends with 1 (stop-bit)
+ *    The total length is always 48 bits protected by CRCs. When changing the 
+ *    gain, CMD must be seen as 1 on CK changes.
+ * 
+ *  - An alternative mechanism would be to use suspend/resume commands
+ * 
+ *  - If SDcard internal shift-register is 8-bit oriented there might be a need
+ *    to shift 7 dummy bits to properly detect invalid start of packet 
+ *    (with start bit set as 1) to invalidate bus transitions (in case CK 
+ *    is changing).
+ * 
+ * SDIO returns the bus in HiZ states, where CLK = 0, D = CMD = external pull-up
+ */
+int sif_anin_setgain(int gain)
 {
+    /* Shutdown the PGA and exit if gain is invalid */
+
+    stm32_gpiowrite(GPIO_PGIA_AEN, FALSE);
+    
+    if (gain < 0 || gain > 7)
+        return -1;
+    
+    sdio_gpio_request();
+    
+    /* If we have to set CLK = 1, made that first as D, CMD are 1 by pull-ups */
+    
+    if (gain & 2)
+        stm32_configgpio(GPIO_PGIA_A1_H);
+    else stm32_configgpio(GPIO_PGIA_A1_L);
+    
+    /* Set the D and CMD bits */
+    
+    if (gain & 1)
+        stm32_configgpio(GPIO_PGIA_A0_H);
+    else stm32_configgpio(GPIO_PGIA_A0_L);
+        
+    if (gain & 4)
+        stm32_configgpio(GPIO_PGIA_A2_H);
+    else stm32_configgpio(GPIO_PGIA_A2_L);
+    
+    /* Sample GAIN on rising edge */
+    
+    stm32_gpiowrite(GPIO_PGIA_AEN, TRUE);
+    
+    /* Release D and CMD pins to 1; however shorten rising edge actively */
+    
+    stm32_gpiowrite(GPIO_PGIA_A0_H, TRUE);
+    stm32_gpiowrite(GPIO_PGIA_A2_H, TRUE);
+    
+    stm32_unconfiggpio(GPIO_PGIA_A0_H);
+    stm32_unconfiggpio(GPIO_PGIA_A2_H);
+    
+    /* Release CLK by going down  */
+    
+    stm32_unconfiggpio(GPIO_PGIA_A1_L);    
+    
+    sdio_gpio_release();
+    
+    return gain;
+}
+#endif
+
+
+int sif_anin_reset(void)
+{
+    return OK;
 }
 
 
@@ -483,6 +551,7 @@ int sif_init(void)
     
     sif_gpios_reset();
     if ( sif_anout_init() != OK ) return -1;
+    if ( sif_anin_reset() != OK ) return -1;
 
     /* If everything is okay, register the driver */
     
@@ -514,7 +583,8 @@ int sif_main(int argc, char *argv[])
         }
         else if (!strcmp(argv[1], "pwr") && argc == 3) {
             int val = atoi(argv[2]);
-            STM32_TIM_SETCOMPARE(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, val);
+            //STM32_TIM_SETCOMPARE(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, val);
+            STM32_TIM_SETCOMPARE(vsn_sif.tim3, GPIO_OUT_PWM_TIM3_CH, val);
             return 0;
         }
         else if (!strcmp(argv[1], "time") && argc == 3) {
@@ -590,6 +660,14 @@ int sif_main(int argc, char *argv[])
             }
             else printf("Exit point: errno=%d\n", errno);
 
+            return 0;
+        }
+        else if (!strcmp(argv[1], "pga")) {
+            int gain = atoi(argv[2]);
+            
+            gain = vsn_muxbus_setpgagain(gain);
+
+            printf("Gain changed: %d\n", gain);
             return 0;
         }
         else if (!strcmp(argv[1], "cc")) {
