@@ -63,10 +63,6 @@
 
 /* Configuration ************************************************************/
 
-/* For now, don't build in any SPI1 support -- NSH is not using it */
-
-#undef CONFIG_KINETIS_SPI1
-
 /* PORT and SLOT number probably depend on the board configuration */
 
 #ifdef CONFIG_ARCH_BOARD_TWR_K60N512

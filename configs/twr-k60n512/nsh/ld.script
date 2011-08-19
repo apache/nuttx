@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/twr-k60n512/ostest/ld.script
+ * configs/twr-k60n512/nsh/ld.script
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

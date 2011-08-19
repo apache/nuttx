@@ -1,5 +1,5 @@
 ############################################################################
-# configs/twr-k60n512/ostest/defconfig
+# configs/twr-k60n512/nsh/defconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -410,7 +410,7 @@ CONFIG_START_DAY=21
 CONFIG_GREGORIAN_TIME=n
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
-CONFIG_DEV_LOWCONSOLE=y
+CONFIG_DEV_LOWCONSOLE=n
 CONFIG_MUTEX_TYPES=n
 CONFIG_PRIORITY_INHERITANCE=n
 CONFIG_SEM_PREALLOCHOLDERS=0
@@ -445,8 +445,8 @@ CONFIG_DISABLE_POSIX_TIMERS=n
 CONFIG_DISABLE_PTHREAD=n
 CONFIG_DISABLE_SIGNALS=n
 CONFIG_DISABLE_MQUEUE=n
-CONFIG_DISABLE_MOUNTPOINT=y
-CONFIG_DISABLE_ENVIRON=y
+CONFIG_DISABLE_MOUNTPOINT=n
+CONFIG_DISABLE_ENVIRON=n
 CONFIG_DISABLE_POLL=y
 
 #
@@ -566,8 +566,8 @@ CONFIG_PREALLOC_TIMERS=4
 #   option will enable a limited form of memory mapping that is
 #   implemented by copying whole files into memory.
 #
-CONFIG_FS_FAT=n
-CONFIG_FAT_LCNAMES=n
+CONFIG_FS_FAT=y
+CONFIG_FAT_LCNAMES=y
 CONFIG_FAT_LFN=n
 CONFIG_FAT_MAXFNAME=32
 CONFIG_FS_NXFFS=n
@@ -796,6 +796,9 @@ CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS=3
 #
 # Settings for apps/nshlib
 #
+# CONFIG_NSH_BUILTIN_APPS - Support external registered,
+#   "named" applications that can be executed from the NSH
+#   command line (see apps/README.txt for more information).
 # CONFIG_NSH_FILEIOSIZE - Size of a static I/O buffer
 # CONFIG_NSH_STRERROR - Use strerror(errno)
 # CONFIG_NSH_LINELEN - Maximum length of one command line
@@ -827,6 +830,7 @@ CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS=3
 # CONFIG_NSH_FATNSECTORS - FAT FS number of sectors
 # CONFIG_NSH_FATMOUNTPT - FAT FS mountpoint
 #
+CONFIG_NSH_BUILTIN_APPS=n
 CONFIG_NSH_FILEIOSIZE=512
 CONFIG_NSH_STRERROR=n
 CONFIG_NSH_LINELEN=64

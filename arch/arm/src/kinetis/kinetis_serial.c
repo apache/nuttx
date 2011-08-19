@@ -97,7 +97,7 @@
 #    define CONSOLE_DEV         g_uart2port /* UART2 is console */
 #    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
 #    define UART2_ASSIGNED      1
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart3port /* UART3 is console */
 #    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
 #    define UART3_ASSIGNED      1
@@ -154,7 +154,7 @@
 #endif
 
 /* Pick ttys2.  This could be one of UART1-5. It can't be UART0 because that
- * was either assigned as ttyS0 or ttys1.  One of UART 1-5 could be the
+ * was either assigned as ttyS0 or ttys1.  One of UART 1-5 could also be the
  * console.
  */
 
@@ -177,7 +177,7 @@
 
 /* Pick ttys3. This could be one of UART2-5. It can't be UART0-1 because
  * those have already been assigned to ttsyS0, 1, or 2.  One of
- * UART 2-5 could be the console.
+ * UART 2-5 could also be the console.
  */
 
 #if defined(CONFIG_KINETIS_UART2) && !defined(UART2_ASSIGNED)
@@ -196,7 +196,7 @@
 
 /* Pick ttys4. This could be one of UART3-5. It can't be UART0-2 because
  * those have already been assigned to ttsyS0, 1, 2 or 3.  One of
- * UART 3-5 could be the console.
+ * UART 3-5 could also be the console.
  */
 
 #if defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
@@ -212,7 +212,7 @@
 
 /* Pick ttys5. This could be one of UART4-5. It can't be UART0-3 because
  * those have already been assigned to ttsyS0, 1, 2, 3 or 4.  One of
- * UART 4-5 could be the console.
+ * UART 4-5 could also be the console.
  */
 
 #if defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
@@ -303,15 +303,15 @@ static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 #endif
-#ifdef CONFIG_KINETIS_UART2
+#ifdef CONFIG_KINETIS_UART3
 static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 #endif
-#ifdef CONFIG_KINETIS_UART2
+#ifdef CONFIG_KINETIS_UART4
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 #endif
-#ifdef CONFIG_KINETIS_UART2
+#ifdef CONFIG_KINETIS_UART5
 static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 #endif
@@ -737,7 +737,6 @@ static int up_interrupte(int irq, void *context)
 {
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
-  uint8_t            s1;
   uint8_t            regval;
 
 #ifdef CONFIG_KINETIS_UART0
@@ -764,21 +763,21 @@ static int up_interrupte(int irq, void *context)
 #ifdef CONFIG_KINETIS_UART3
   if (g_uart3priv.irqe == irq)
     {
-      dev = &g_uart1port;
+      dev = &g_uart3port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART4
   if (g_uart4priv.irqe == irq)
     {
-      dev = &g_uart1port;
+      dev = &g_uart4port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART5
   if (g_uart5priv.irqe == irq)
     {
-      dev = &g_uart1port;
+      dev = &g_uart5port;
     }
   else
 #endif
@@ -798,9 +797,9 @@ static int up_interrupte(int irq, void *context)
    *     register (D).
    */
 
-  regval = up_serialin(priv, KINETIS_UART_S1_OFFSET
+  regval = up_serialin(priv, KINETIS_UART_S1_OFFSET);
   lldbg("S1: %02x\n", regval);
-  regval = up_serialin(priv, KINETIS_UART_D_OFFSET
+  regval = up_serialin(priv, KINETIS_UART_D_OFFSET);
   return OK;
 }
 #endif /* CONFIG_DEBUG */
@@ -853,21 +852,21 @@ static int up_interrupts(int irq, void *context)
 #ifdef CONFIG_KINETIS_UART3
   if (g_uart3priv.irqs == irq)
     {
-      dev = &g_uart1port;
+      dev = &g_uart3port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART4
   if (g_uart4priv.irqs == irq)
     {
-      dev = &g_uart1port;
+      dev = &g_uart4port;
     }
   else
 #endif
 #ifdef CONFIG_KINETIS_UART5
   if (g_uart5priv.irq == irqs)
     {
-      dev = &g_uart1port;
+      dev = &g_uart5port;
     }
   else
 #endif
