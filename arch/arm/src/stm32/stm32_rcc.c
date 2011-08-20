@@ -63,18 +63,6 @@
  * Private Data
  ****************************************************************************/
 
-/* Activity reference count, showing inactivity after start-up.
- * Device drivers increment this count using rcclock() and rccunlock()
- * 
- * If this value goes beyond the range [0, MAX_RCCs] indicates
- * reference count leakage (asymetric number of locks vs. unlocks) and
- * system enters permanent active state.
- */
-
-#ifdef CONFIG_STM32_RCCLOCK
-static int stm32_rcclock_count = 0; 
-#endif
- 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -491,7 +479,7 @@ void stm32_clockconfig(void)
   /* Make sure that we are starting in the reset state */
 
   rcc_reset();
-  
+
 #if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
@@ -507,7 +495,7 @@ void stm32_clockconfig(void)
 #endif
 
   /* Enable peripheral clocking */
-  
+
   rcc_enableahb();
   rcc_enableapb2();
   rcc_enableapb1();
@@ -536,43 +524,3 @@ void stm32_rcc_enablelse(void)
 
   modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);    
 }
-
-#ifdef CONFIG_STM32_RCCLOCK
-uint32_t stm32_rcclock(uint8_t domain_id)
-{
-  // THINK:
-  // maybe just shift domain_id into 32-bit or 64-bit register 
-  // and if there value of this var != 0, we are active...
-  // increment some variable, so it is possible to test leakage
-  // multiple locks or multiple unlocks
-    
-  if (stm32_rcclock_count >= 0)
-    {
-      stm32_rcclock_count++;
-      if (stm32_rcclock_count > 64)
-        {
-          stm32_rcclock_count = -1; /* capture error */
-        }
-    }
-    
-  return 0;
-}
-
-uint32_t stm32_rccunlock(uint8_t domain_id)
-{
-    if (stm32_rcclock_count > -1)
-      {
-        stm32_rcclock_count--;
-      }
-    return 0;
-}
-
-uint32_t stm32_setrccoptions(uint8_t domain_id, uint32_t options)
-{
-}
-
-int stm32_getrccactivity(void)
-{
-    return stm32_rcclock_count;
-}
-#endif
