@@ -1,8 +1,12 @@
 /****************************************************************************
- *  arch/arm/src/stm32/stm32_idle.c
+ * arch/arm/src/stm32/stm32_rcc.c
+ *
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *   Author: Author: Uros Platise <uros.platise@isotel.eu>
+ *
+ * This file is part of NuttX:
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,33 +41,28 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/board/board.h>
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include "up_internal.h"
-#include "stm32_rcc.h"
+#include <stdint.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ****************************************************************************/
-
-/* Does the board support an IDLE LED to indicate that the board is in the
- * IDLE state?
- */
-
-#if defined(CONFIG_ARCH_LEDS) && defined(LED_IDLE)
-#  define BEGIN_IDLE() up_ledon(LED_IDLE)
-#  define END_IDLE()   up_ledoff(LED_IDLE)
-#else
-#  define BEGIN_IDLE()
-#  define END_IDLE()
-#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+/* Activity reference count, showing inactivity after start-up.
+ * Device drivers increment this count using rcclock() and rccunlock()
+ * 
+ * If this value goes beyond the range [0, MAX_RCCs] indicates
+ * reference count leakage (asymetric number of locks vs. unlocks) and
+ * system enters permanent active state.
+ */
+
+static int stm32_rcclock_count = 0; 
+ 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -72,48 +71,41 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_idle
- *
- * Description:
- *   up_idle() is the logic that will be executed when their is no other
- *   ready-to-run task.  This is processor idle time and will continue until
- *   some interrupt occurs to cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g., this is where
- *   power management operations might be performed.
- *
- ****************************************************************************/
-
-void up_idle(void)
+uint32_t stm32_rcclock(uint8_t domain_id)
 {
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts, then process
-   * "fake" timer interrupts. Hopefully, something will wake up.
-   */
-
-  sched_process_timer();
-#else
-
-#ifdef CONFIG_STM32_RCCLOCK
-
-  /* Decide, which power saving level can be obtained */
-
-  if (stm32_getrccactivity())
+  // THINK:
+  // maybe just shift domain_id into 32-bit or 64-bit register 
+  // and if there value of this var != 0, we are active...
+  // increment some variable, so it is possible to test leakage
+  // multiple locks or multiple unlocks
+    
+  if (stm32_rcclock_count >= 0)
     {
-	  /* Sleep mode */
+      stm32_rcclock_count++;
+      if (stm32_rcclock_count > 64)
+        {
+          stm32_rcclock_count = -1; /* capture error */
+        }
     }
-  else
-    {
-	  /* Stop mode */
-    }
-#endif
-
-  /* Sleep until an interrupt occurs to save power */
-
-  BEGIN_IDLE();
-  asm("WFI");
-  END_IDLE();
-#endif
+    
+  return 0;
 }
 
+uint32_t stm32_rccunlock(uint8_t domain_id)
+{
+  if (stm32_rcclock_count > -1)
+    {
+      stm32_rcclock_count--;
+    }
+  return 0;
+}
+
+uint32_t stm32_setrccoptions(uint8_t domain_id, uint32_t options)
+{
+  return 0;
+}
+
+int stm32_getrccactivity(void)
+{
+  return stm32_rcclock_count;
+}
