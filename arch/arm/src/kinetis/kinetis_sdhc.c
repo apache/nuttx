@@ -259,7 +259,7 @@ struct kinetis_sdhcregs_s
 
 struct kinetis_sampleregs_s
 {
-  struct kinetis_sdhcregs_s sdio;
+  struct kinetis_sdhcregs_s sdhc;
 #if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
   struct kinetis_dmaregs_s  dma;
 #endif
@@ -288,10 +288,12 @@ static void kinetis_sdhcdump(struct kinetis_sdhcregs_s *regs, const char *msg);
 static void kinetis_dumpsample(struct kinetis_dev_s *priv,
               struct kinetis_sampleregs_s *regs, const char *msg);
 static void kinetis_dumpsamples(struct kinetis_dev_s *priv);
+static void kinetis_showregs(struct kinetis_dev_s *priv, const char *msg);
 #else
 #  define   kinetis_sampleinit()
 #  define   kinetis_sample(priv,index)
 #  define   kinetis_dumpsamples(priv)
+#  define   kinetis_showregs(priv,msg)
 #endif
 
 #ifdef CONFIG_SDIO_DMA
@@ -555,28 +557,28 @@ static void kinetis_sampleinit(void)
 #ifdef CONFIG_SDIO_XFRDEBUG
 static void kinetis_sdhcsample(struct kinetis_sdhcregs_s *regs)
 {
-  regs->dsaddr    = (uint8_t)getreg32(KINETIS_SDHC_DSADDR);    /* DMA System Address Register */
-  regs->blkattr   = (uint8_t)getreg32(KINETIS_SDHC_BLKATTR);   /* Block Attributes Register */
-  regs->cmdarg    = (uint8_t)getreg32(KINETIS_SDHC_CMDARG);    /* Command Argument Register */
-  regs->xferty    = (uint8_t)getreg32(KINETIS_SDHC_XFERTYP);   /* Transfer Type Register */
-  regs->cmdrsp0   = (uint8_t)getreg32(KINETIS_SDHC_CMDRSP0);   /* Command Response 0 */
-  regs->cmdrsp1   = (uint8_t)getreg32(KINETIS_SDHC_CMDRSP1);   /* Command Response 1 */
-  regs->cmdrsp2   = (uint8_t)getreg32(KINETIS_SDHC_CMDRSP2);   /* Command Response 2 */
-  regs->cmdrsp3   = (uint8_t)getreg32(KINETIS_SDHC_CMDRSP3);   /* Command Response 3 */
-  regs->prsstat   = (uint8_t)getreg32(KINETIS_SDHC_PRSSTAT);   /* Present State Register */
-  regs->proctl    = (uint8_t)getreg32(KINETIS_SDHC_PROCTL);    /* Protocol Control Register */
-  regs->sysctl    = (uint8_t)getreg32(KINETIS_SDHC_SYSCTL);    /* System Control Register */
-  regs->irqstat   = (uint8_t)getreg32(KINETIS_SDHC_IRQSTAT);   /* Interrupt Status Register */
-  regs->irqstaten = (uint8_t)getreg32(KINETIS_SDHC_IRQSTATEN); /* Interrupt Status Enable Register */
-  regs->irqsigen  = (uint8_t)getreg32(KINETIS_SDHC_IRQSIGEN);  /* Interrupt Signal Enable Register */
-  regs->ac12err   = (uint8_t)getreg32(KINETIS_SDHC_AC12ERR);   /* Auto CMD12 Error Status Register */
-  regs->htcapblt  = (uint8_t)getreg32(KINETIS_SDHC_HTCAPBLT);  /* Host Controller Capabilities */
-  regs->wml       = (uint8_t)getreg32(KINETIS_SDHC_WML);       /* Watermark Level Register */
-  regs->admaes    = (uint8_t)getreg32(KINETIS_SDHC_ADMAES);    /* ADMA Error Status Register */
-  regs->adsaddr   = (uint8_t)getreg32(KINETIS_SDHC_ADSADDR);   /* ADMA System Address Register */
-  regs->vendor    = (uint8_t)getreg32(KINETIS_SDHC_VENDOR);    /* Vendor Specific Register */
-  regs->mmcboot   = (uint8_t)getreg32(KINETIS_SDHC_MMCBOOT);   /* MMC Boot Register */
-  regs->hostver   = (uint8_t)getreg32(KINETIS_SDHC_HOSTVER);   /* Host Controller Version */
+  regs->dsaddr    = getreg32(KINETIS_SDHC_DSADDR);    /* DMA System Address Register */
+  regs->blkattr   = getreg32(KINETIS_SDHC_BLKATTR);   /* Block Attributes Register */
+  regs->cmdarg    = getreg32(KINETIS_SDHC_CMDARG);    /* Command Argument Register */
+  regs->xferty    = getreg32(KINETIS_SDHC_XFERTYP);   /* Transfer Type Register */
+  regs->cmdrsp0   = getreg32(KINETIS_SDHC_CMDRSP0);   /* Command Response 0 */
+  regs->cmdrsp1   = getreg32(KINETIS_SDHC_CMDRSP1);   /* Command Response 1 */
+  regs->cmdrsp2   = getreg32(KINETIS_SDHC_CMDRSP2);   /* Command Response 2 */
+  regs->cmdrsp3   = getreg32(KINETIS_SDHC_CMDRSP3);   /* Command Response 3 */
+  regs->prsstat   = getreg32(KINETIS_SDHC_PRSSTAT);   /* Present State Register */
+  regs->proctl    = getreg32(KINETIS_SDHC_PROCTL);    /* Protocol Control Register */
+  regs->sysctl    = getreg32(KINETIS_SDHC_SYSCTL);    /* System Control Register */
+  regs->irqstat   = getreg32(KINETIS_SDHC_IRQSTAT);   /* Interrupt Status Register */
+  regs->irqstaten = getreg32(KINETIS_SDHC_IRQSTATEN); /* Interrupt Status Enable Register */
+  regs->irqsigen  = getreg32(KINETIS_SDHC_IRQSIGEN);  /* Interrupt Signal Enable Register */
+  regs->ac12err   = getreg32(KINETIS_SDHC_AC12ERR);   /* Auto CMD12 Error Status Register */
+  regs->htcapblt  = getreg32(KINETIS_SDHC_HTCAPBLT);  /* Host Controller Capabilities */
+  regs->wml       = getreg32(KINETIS_SDHC_WML);       /* Watermark Level Register */
+  regs->admaes    = getreg32(KINETIS_SDHC_ADMAES);    /* ADMA Error Status Register */
+  regs->adsaddr   = getreg32(KINETIS_SDHC_ADSADDR);   /* ADMA System Address Register */
+  regs->vendor    = getreg32(KINETIS_SDHC_VENDOR);    /* Vendor Specific Register */
+  regs->mmcboot   = getreg32(KINETIS_SDHC_MMCBOOT);   /* MMC Boot Register */
+  regs->hostver   = getreg32(KINETIS_SDHC_HOSTVER);   /* Host Controller Version */
 }
 #endif
 
@@ -598,7 +600,7 @@ static void kinetis_sample(struct kinetis_dev_s *priv, int index)
       kinetis_dmasample(priv->dma, &regs->dma);
     }
 #endif
-  kinetis_sdhcsample(&regs->sdio);
+  kinetis_sdhcsample(&regs->sdhc);
 }
 #endif
 
@@ -657,7 +659,7 @@ static void kinetis_dumpsample(struct kinetis_dev_s *priv,
       kinetis_dmadump(priv->dma, &regs->dma, msg);
     }
 #endif
-  kinetis_sdhcdump(&regs->sdio, msg);
+  kinetis_sdhcdump(&regs->sdhc, msg);
 }
 #endif
 
@@ -687,6 +689,30 @@ static void  kinetis_dumpsamples(struct kinetis_dev_s *priv)
     }
 #endif
   kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
+}
+#endif
+
+/****************************************************************************
+ * Name: kinetis_showregs
+ *
+ * Description:
+ *   Dump the current state of all registers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SDIO_XFRDEBUG
+static void kinetis_showregs(struct kinetis_dev_s *priv, const char *msg)
+{
+  struct kinetis_sampleregs_s regs;
+
+#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
+  if (priv->dmamode)
+    {
+      kinetis_dmasample(priv->dma, &regs.dma);
+    }
+#endif
+  kinetis_sdhcsample(&regs.sdhc);
+  kinetis_dumpsample(priv, &regs, msg);
 }
 #endif
 
@@ -1334,13 +1360,18 @@ static void kinetis_reset(FAR struct sdio_dev_s *dev)
 #warning "Missing logic"
 
   /* Poll bits CIHB and CDIHB bits of PRSSTAT to wait both bits are cleared. */
-#warning "Missing logic"
+
+  while ((getreg32(KINETIS_SDHC_PRSSTAT) & (SDHC_PRSSTAT_CIHB|SDHC_PRSSTAT_CDIHB)) != 0);
 
   /* Enable all status bits (these could not all be potential sources of
    * interrupts.
    */
 
   putreg32(SDHC_INT_ALL, KINETIS_SDHC_IRQSTATEN);
+
+  fvdbg("SYSCTL: %08x PRSSTAT: %08x IRQSTATEN: %08x\n",
+        getreg32(KINETIS_SDHC_SYSCTL), getreg32(KINETIS_SDHC_PRSSTAT),
+        getreg32(KINETIS_SDHC_IRQSTATEN));
 
   /* The next phase of the hardware reset would be to set the SYSCTRL INITA
    * bit to send 80 clock ticks for card to power up and then reset the card
@@ -2054,7 +2085,7 @@ static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     {
       if (--timeout <= 0)
         {
-          fdbg("ERROR: Timeout cmd: %08x events: %08x STA: %08x\n",
+          fdbg("ERROR: Timeout cmd: %08x events: %08x IRQSTAT: %08x\n",
                cmd, events, getreg32(KINETIS_SDHC_IRQSTAT));
 
           return -ETIMEDOUT;
@@ -2186,12 +2217,12 @@ static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t r
       regval = getreg32(KINETIS_SDHC_IRQSTAT);
       if (regval & SDHC_INT_CTOE)
         {
-          fdbg("ERROR: Timeout STA: %08x\n", regval);
+          fdbg("ERROR: Timeout IRQSTAT: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
       else if (regval & SDHC_INT_CCE)
         {
-          fdbg("ERROR: CRC fail STA: %08x\n", regval);
+          fdbg("ERROR: CRC fail IRQSTAT: %08x\n", regval);
           ret = -EIO;
         }
     }
@@ -2245,7 +2276,7 @@ static int kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t 
       regval = getreg32(KINETIS_SDHC_IRQSTAT);
       if (regval & SDHC_INT_CTOE)
         {
-          fdbg("ERROR: Timeout STA: %08x\n", regval);
+          fdbg("ERROR: Timeout IRQSTAT: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
 
@@ -2809,7 +2840,8 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
   regval = getreg32(KINETIS_SIM_SCGC3);
   regval |= SIM_SCGC3_SDHC;
   putreg32(regval, KINETIS_SIM_SCGC3);
-  
+  fvdbg("SIM_SCGC3: %08x\n", regval);
+
   /* In addition to the system clock, the SDHC module needs a clock for the
    * base for the external card clock.  There are four possible sources for
    * this clock, selected by the SIM's SOPT2 register:
@@ -2824,6 +2856,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
   regval &= ~SIM_SOPT2_SDHCSRC_MASK;
   regval |= SIM_SOPT2_SDHCSRC_CORE;
   putreg32(regval, KINETIS_SIM_SOPT2);
+  fvdbg("SIM_SOPT2: %08x\n", regval);
 
   /* Configure pins for 1 or 4-bit, wide-bus operation (the chip is capable
    * of 8-bit wide bus operation but D4-D7 are not configured).
@@ -2865,6 +2898,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
    */
 
   kinetis_reset(&priv->dev);
+  kinetis_showregs(priv, "After reset");
   return &g_sdhcdev.dev;
 }
 
