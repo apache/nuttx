@@ -84,6 +84,36 @@
 #define BOARD_FLEXBUS_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV3)
 #define BOARD_FLASHCLK_FREQ (BOARD_MCG_FREQ / BOARD_OUTDIV4)
 
+/* SDHC clocking ********************************************************************/
+
+/* SDCLK configurations corresponding to various modes of operation.   Formula is:
+ *
+ *   SDCLK  frequency = (base clock) / (prescaler * divisor)
+ *
+ * The SDHC module is always configure configured so that the core clock is the base
+ * clock.
+ */
+
+/* Identification mode:  400KHz = 96MHz / ( 16 * 15) */
+
+#define BOARD_SDHC_IDMODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV16
+#define BOARD_SDHC_IDMODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(15)
+
+/* MMC normal mode: 16MHz  = 96MHz / (2 * 3) */
+
+#define BOARD_SDHC_MMCMODE_PRESCALER  SDHC_SYSCTL_SDCLKFS_DIV2
+#define BOARD_SDHC_MMCMODE_DIVISOR    SDHC_SYSCTL_DVS_DIV(3)
+
+/* SD normal mode (1-bit): 16MHz  = 96MHz / (2 * 3) */
+
+#define BOARD_SDHC_SD1MODE_PRESCALER  SDHC_SYSCTL_SDCLKFS_DIV2
+#define BOARD_SDHC_SD1MODE_DIVISOR    SDHC_SYSCTL_DVS_DIV(3)
+
+/* SD normal mode (4-bit): 24MHz  = 96MHz / (2 * 2) */
+
+#define BOARD_SDHC_SD4MODE_PRESCALER  SDHC_SYSCTL_SDCLKFS_DIV2
+#define BOARD_SDHC_SD4MODE_DIVISOR    SDHC_SYSCTL_DVS_DIV(2)
+
 /* LED definitions ******************************************************************/
 /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
 
