@@ -45,22 +45,17 @@
 #include <debug.h>
 #include <errno.h>
 
-#ifdef CONFIG_KINETIS_SPI1
-#  include <nuttx/spi.h>
-#  include <nuttx/mtd.h>
-#endif
-
-#ifdef CONFIG_KINETIS_SDIO
+#ifdef CONFIG_KINETIS_SDHC
 #  include <nuttx/sdio.h>
 #  include <nuttx/mmcsd.h>
 #endif
 
 #include "kinetis_internal.h"
+#include "twrk60-internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
 /* Configuration ************************************************************/
 
 /* PORT and SLOT number probably depend on the board configuration */
@@ -69,7 +64,7 @@
 #  define CONFIG_NSH_HAVEUSBDEV 1
 #  define CONFIG_NSH_HAVEMMCSD  1
 #  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "Only one MMC/SD slot"
+#    error "Only one MMC/SD slot, slot 0"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #  endif
 #  ifndef CONFIG_NSH_MMCSDSLOTNO
@@ -88,16 +83,26 @@
 #  undef CONFIG_NSH_HAVEUSBDEV
 #endif
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
+/* Can't support MMC/SD features if mountpoints are disabled or if SDHC support
  * is not enabled.
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_KINETIS_SDIO)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_KINETIS_SDHC)
 #  undef CONFIG_NSH_HAVEMMCSD
 #endif
 
 #ifndef CONFIG_NSH_MMCSDMINOR
 #  define CONFIG_NSH_MMCSDMINOR 0
+#endif
+
+/* We expect to receive GPIO interrupts for card insertion events */
+
+#ifndef CONFIG_GPIO_IRQ
+#  error "CONFIG_GPIO_IRQ required for card detect interrupt"
+#endif
+
+#ifndef CONFIG_KINETIS_PORTEINTS
+#  error "CONFIG_KINETIS_PORTEINTS required for card detect interrupt"
 #endif
 
 /* Debug ********************************************************************/
@@ -117,6 +122,84 @@
 #endif
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This structure encapsulates the global variable used in this file and
+ * reduces the probability of name collistions.
+ */
+
+#ifdef CONFIG_NSH_HAVEMMCSD
+struct kinetis_nsh_s
+{
+  FAR struct sdio_dev_s *sdhc; /* SDIO driver handle */
+  bool inserted;               /* True: card is inserted */
+};
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_NSH_HAVEMMCSD
+static struct kinetis_nsh_s g_nsh;
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: kinetis_mediachange
+ ****************************************************************************/
+
+#ifdef CONFIG_NSH_HAVEMMCSD
+static void kinetis_mediachange(void)
+{
+  bool inserted;
+
+  /* Get the current value of the card detect pin.  This pin is pulled up on
+   * board.  So low means that a card is present.
+   */
+
+  inserted = !kinetis_gpioread(GPIO_SD_CARDDETECT);
+
+  /* Has the pin changed state? */
+
+  if (inserted != g_nsh.inserted)
+    {
+      /* Yes.. perform the appropriate action (this might need some debounce). */
+
+      g_nsh.inserted = inserted;
+      sdhc_mediachange(g_nsh.sdhc, inserted);
+
+      /* If the card has been inserted, then check if it is write protected
+       * aw well.
+       */
+
+      if (inserted)
+        {
+          sdhc_wrprotect(g_nsh.sdhc, !kinetis_gpioread(GPIO_SD_WRPROTECT));
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: kinetis_cdinterrupt
+ ****************************************************************************/
+
+#ifdef CONFIG_NSH_HAVEMMCSD
+static int kinetis_cdinterrupt(int irq, FAR void *context)
+{
+  /* All of the work is done by kinetis_mediachange() */
+
+  kinetis_mediachange();
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -130,6 +213,59 @@
 
 int nsh_archinitialize(void)
 {
-# warning "Missing logic"
+#ifdef CONFIG_NSH_HAVEMMCSD
+  int ret;
+
+  /* Configure GPIO pins.
+   *
+   * First CD power.  The initial state will provide SD power.
+   */
+
+  kinetis_pinconfig(GPIO_SD_CARDON);      /* Applies power to the card */
+
+  /* Attached the card detect interrupt (but don't enable it yet) */
+
+  kinetis_pinconfig(GPIO_SD_CARDDETECT);
+  kinetis_pinirqattach(GPIO_SD_CARDDETECT, kinetis_cdinterrupt);
+
+  /* Configure the write protect GPIO */
+
+  kinetis_pinconfig(GPIO_SD_WRPROTECT);
+
+  /* Mount the SDHC-based MMC/SD block driver */
+  /* First, get an instance of the SDHC interface */
+
+  message("nsh_archinitialize: Initializing SDHC slot %d\n",
+          CONFIG_NSH_MMCSDSLOTNO);
+
+  g_nsh.sdhc = sdhc_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  if (!g_nsh.sdhc)
+    {
+      message("nsh_archinitialize: Failed to initialize SDHC slot %d\n",
+              CONFIG_NSH_MMCSDSLOTNO);
+      return -ENODEV;
+    }
+
+  /* Now bind the SDHC interface to the MMC/SD driver */
+
+  message("nsh_archinitialize: Bind SDHC to the MMC/SD driver, minor=%d\n",
+          CONFIG_NSH_MMCSDMINOR);
+
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_nsh.sdhc);
+  if (ret != OK)
+    {
+      message("nsh_archinitialize: Failed to bind SDHC to the MMC/SD driver: %d\n", ret);
+      return ret;
+    }
+  message("nsh_archinitialize: Successfully bound SDHC to the MMC/SD driver\n");
+
+  /* Handle the initial card state */
+
+  kinetis_mediachange();
+
+  /* Enable CD interrupts to handle subsequent media changes */
+
+  kinetis_pinirqenable(GPIO_SD_CARDDETECT);
+#endif
   return OK;
 }

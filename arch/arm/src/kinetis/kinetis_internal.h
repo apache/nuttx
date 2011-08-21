@@ -216,6 +216,11 @@
 #define _PIN_INT_SHIFT         (20)
 #define _PIN_INT_MASK          (31 << _PIN_INT_SHIFT)
 
+#define _PIN_INTDMA_MASK       (3 << _PIN_INT_SHIFT)
+#define _PIN_INTDMA_NONE       (0 << _PIN_INT_SHIFT)
+#define _PIN_DMA               (1 << _PIN_INT_SHIFT)
+#define _PIN_INTERRUPT         (2 << _PIN_INT_SHIFT)
+
 #define PIN_DMA_RISING         (5  << _PIN_INT_SHIFT) /* 00101 DMA Request on rising edge */
 #define PIN_DMA_FALLING        (9  << _PIN_INT_SHIFT) /* 01001 DMA Request on falling edge */
 #define PIN_DMA_BOTH           (13 << _PIN_INT_SHIFT) /* 01101 DMA Request on either edge */
@@ -772,6 +777,67 @@ EXTERN void kinetis_dmadump(DMA_HANDLE handle, const struct kinetis_dmaregs_s *r
 #endif
 #endif
 
+/****************************************************************************
+ * Name: sdhc_initialize
+ *
+ * Description:
+ *   Initialize SDIO for operation.
+ *
+ * Input Parameters:
+ *   slotno - Not used.
+ *
+ * Returned Values:
+ *   A reference to an SDIO interface structure.  NULL is returned on failures.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SDHC
+struct sdio_dev_s;
+EXTERN FAR struct sdio_dev_s *sdhc_initialize(int slotno);
+#endif
+
+/****************************************************************************
+ * Name: sdhc_mediachange
+ *
+ * Description:
+ *   Called by board-specific logic -- posssible from an interrupt handler --
+ *   in order to signal to the driver that a card has been inserted or
+ *   removed from the slot
+ *
+ * Input Parameters:
+ *   dev        - An instance of the SDIO driver device state structure.
+ *   cardinslot - true is a card has been detected in the slot; false if a 
+ *                card has been removed from the slot.  Only transitions
+ *                (inserted->removed or removed->inserted should be reported)
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SDHC
+EXTERN void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
+#endif
+
+/****************************************************************************
+ * Name: sdio_wrprotect
+ *
+ * Description:
+ *   Called by board-specific logic to report if the card in the slot is
+ *   mechanically write protected.
+ *
+ * Input Parameters:
+ *   dev       - An instance of the SDIO driver device state structure.
+ *   wrprotect - true is a card is writeprotected.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SDHC
+EXTERN void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
+#endif
 #undef EXTERN
 #if defined(__cplusplus)
 }

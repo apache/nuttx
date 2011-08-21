@@ -172,8 +172,8 @@
 #    define SAMPLENDX_BEFORE_SETUP  0
 #    define SAMPLENDX_BEFORE_ENABLE 1
 #    define SAMPLENDX_AFTER_SETUP   2
-#    define SAMPLENDX_END_TRANSFER  3
-#    define SAMPLENDX_DMA_CALLBACK  4
+#    define SAMPLENDX_DMA_CALLBACK  3
+#    define SAMPLENDX_END_TRANSFER  4
 #    define DEBUG_NSAMPLES          5
 #  else
 #    define SAMPLENDX_BEFORE_SETUP  0
@@ -680,13 +680,13 @@ static void  kinetis_dumpsamples(struct kinetis_dev_s *priv)
     }
 #endif
   kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP], "After setup");
-  kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
 #if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
   if (priv->dmamode)
     {
       kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
     }
 #endif
+  kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
 }
 #endif
 
@@ -1037,10 +1037,6 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
 #ifdef CONFIG_SDIO_DMA
   if (priv->dmamode)
     {
-      /* DMA debug instrumentation */
-
-      kinetis_sample(priv, SAMPLENDX_END_TRANSFER);
-
       /* Make sure that the DMA is stopped (it will be stopped automatically
        * on normal transfers, but not necessarily when the transfer terminates
        * on an error condition).
@@ -1053,6 +1049,10 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
   /* Mark the transfer finished */
 
   priv->remaining = 0;
+
+  /* Debug instrumentation */
+
+  kinetis_sample(priv, SAMPLENDX_END_TRANSFER);
 
   /* Is a thread wait for these data transfer complete events? */
 
@@ -1780,29 +1780,30 @@ static void kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t a
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
-    case MMCSD_NO_RESPONSE:
-      regval |= SDHC_XFERTYP_RSPTYP_NONE;      /* No response */
+    case MMCSD_NO_RESPONSE:                /* No response */
+      regval |= SDHC_XFERTYP_RSPTYP_NONE;
       break;
 
-    case MMCSD_R1B_RESPONSE:
-      regval |= SDHC_XFERTYP_RSPTYP_LEN48BSY;  /* Response length 48, check busy */
+    case MMCSD_R1B_RESPONSE:              /* Response length 48, check busy & cmdindex*/
+      regval |= (SDHC_XFERTYP_RSPTYP_LEN48BSY | SDHC_XFERTYP_CICEN);
+      break;
     
-    case MMCSD_R1_RESPONSE:
-    case MMCSD_R3_RESPONSE:
+    case MMCSD_R1_RESPONSE:              /* Response length 48, check cmdindex */
+    case MMCSD_R6_RESPONSE:
+      regval |= (SDHC_XFERTYP_RSPTYP_LEN48 | SDHC_XFERTYP_CICEN);
+      break;
+
+    case MMCSD_R3_RESPONSE:              /* Response length 48 */
     case MMCSD_R4_RESPONSE:
     case MMCSD_R5_RESPONSE:
-    case MMCSD_R6_RESPONSE:
     case MMCSD_R7_RESPONSE:
-      regval |= SDHC_XFERTYP_RSPTYP_LEN48;     /* Response length 48 */
+      regval |= SDHC_XFERTYP_RSPTYP_LEN48;
       break;
 
-    case MMCSD_R2_RESPONSE:
-      regval |= SDHC_XFERTYP_RSPTYP_LEN136;    /* Response length 136 */
+    case MMCSD_R2_RESPONSE:              /* Response length 136 */
+      regval |= SDHC_XFERTYP_RSPTYP_LEN136;
       break;
     }
-
-# warning "Missing other settings?"
-  fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
 
   /* Enable DMA */
 
@@ -1815,16 +1816,11 @@ static void kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t a
     }
 #endif
 
-  /* Other bits (revisit -- these probably should not alway be set).
-   *
-   * CICEN=1: The SDHC will check the index field in the response to see if
-   *          it has the same value as the command index. If it is not, it
-   *          is reported as a command index error.
-   * Also... what about CMDTYP?
-   */
+  /* Other bits? What about CMDTYP? */
 
 #warning "Revisit"
-  regval |= SDHC_XFERTYP_CICEN;
+
+  fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
 
   /* Set the SDHC Argument value */
 
@@ -2093,9 +2089,6 @@ static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
 static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
 {
-#ifdef CONFIG_DEBUG
-  uint32_t respcmd;
-#endif
   uint32_t regval;
   int ret = OK;
 
@@ -2154,19 +2147,6 @@ static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32
           fdbg("ERROR: CRC failure: %08x\n", regval);
           ret = -EIO;
         }
-#ifdef CONFIG_DEBUG
-      else
-        {
-          /* Check response received is of desired command */
-
-          respcmd = getreg32(KINETIS_SDHC_RESPCMD);
-          if ((uint8_t)(respcmd & SDHC_RESPCMD_MASK) != (cmd & MMCSD_CMDIDX_MASK))
-            {
-              fdbg("ERROR: RESCMD=%02x CMD=%08x\n", respcmd, cmd);
-              ret = -EINVAL;
-            }
-        }
-#endif
     }
 
   /* Clear all pending message completion events and return the R1/R6 response */
@@ -2461,6 +2441,7 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
   priv->xfrflags   = 0;
 #endif
 
+  kinetis_dumpsamples(priv);
   return wkupevent;
 }
 
@@ -2789,7 +2770,7 @@ static void kinetis_callback(void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sdio_initialize
+ * Name: sdhc_initialize
  *
  * Description:
  *   Initialize SDIO for operation.
@@ -2802,7 +2783,7 @@ static void kinetis_callback(void *arg)
  *
  ****************************************************************************/
 
-FAR struct sdio_dev_s *sdio_initialize(int slotno)
+FAR struct sdio_dev_s *sdhc_initialize(int slotno)
 {
   uint32_t regval;
 
@@ -2888,7 +2869,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 }
 
 /****************************************************************************
- * Name: sdio_mediachange
+ * Name: sdhc_mediachange
  *
  * Description:
  *   Called by board-specific logic -- posssible from an interrupt handler --
@@ -2906,7 +2887,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
  *
  ****************************************************************************/
 
-void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
+void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   uint8_t cdstatus;
@@ -2951,7 +2932,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
  *
  ****************************************************************************/
 
-void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
+void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   irqstate_t flags;

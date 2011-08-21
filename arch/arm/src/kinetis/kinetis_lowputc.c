@@ -432,7 +432,8 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
    * RWFIFO[RXWATER] = 1:  RDRF will be set when the number of queues bytes
    *  (1 in this case) is greater than or equal to 1.
    * 
-  /* Set the watermarks to one and disable the FIFOs */
+   * Set the watermarks to one/zero and disable the FIFOs 
+   */
 
   putreg8(1, uart_base+KINETIS_UART_RWFIFO_OFFSET);
   putreg8(0, uart_base+KINETIS_UART_TWFIFO_OFFSET);

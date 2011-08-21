@@ -1,6 +1,6 @@
 /************************************************************************************
  * configs/twr-k60n512/src/twrk60-internal.h
- * arch/arm/src/board/twrk60-internal.n
+ * arch/arm/src/board/twrk60-internal.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -110,7 +110,7 @@
  */
  
 #define GPIO_SD_CARDDETECT (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN28)
-#define GPIO_SD_WRPROTECT  (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTE | PIN27)
+#define GPIO_SD_WRPROTECT  (GPIO_PULLUP | PIN_PORTE | PIN27)
 #define GPIO_SD_CARDON     (GPIO_HIGHDRIVE | GPIO_OUTPUT_ZER0 | PIN_PORTE | PIN6)
 
 #define GPIO_SW1           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTA | PIN19)
