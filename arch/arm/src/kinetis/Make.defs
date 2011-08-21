@@ -71,6 +71,10 @@ ifeq ($(CONFIG_DEBUG_GPIO),y)
 CHIP_CSRCS	+= kinetis_pindbg.c
 endif
 
+ifeq ($(CONFIG_KINETIS_SDHC),y)
+CHIP_CSRCS	+= kinetis_sdhc.c
+endif
+
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS	+= kinetis_usbdev.c
 endif

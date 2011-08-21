@@ -419,6 +419,8 @@ KwikStik-K40-specific Configuration Options
     CONFIG_KINETIS_UART4PRIO
     CONFIG_KINETIS_UART5PRIO
 
+    CONFIG_KINETIS_SDHC_PRIO
+
   PIN Interrupt Support
 
     CONFIG_GPIO_IRQ          -- Enable pin interrtup support.  Also needs

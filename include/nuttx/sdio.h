@@ -466,7 +466,7 @@
  * Name: SDIO_RECVSETUP
  *
  * Description:
- *   Setup hardware in preparation for data trasfer from the card in non-DMA
+ *   Setup hardware in preparation for data transfer from the card in non-DMA
  *   (interrupt driven mode).  This method will do whatever controller setup
  *   is necessary.  This would be called for SD memory just BEFORE sending
  *   CMD13 (SEND_STATUS), CMD17 (READ_SINGLE_BLOCK), CMD18
@@ -489,7 +489,7 @@
  * Name: SDIO_SENDSETUP
  *
  * Description:
- *   Setup hardware in preparation for data trasfer from the card.  This method
+ *   Setup hardware in preparation for data transfer from the card.  This method
  *   will do whatever controller setup is necessary.  This would be called
  *   for SD memory just AFTER sending CMD24 (WRITE_BLOCK), CMD25
  *   (WRITE_MULTIPLE_BLOCK), ... and before SDIO_SENDDATA is called.

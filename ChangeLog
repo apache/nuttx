@@ -2016,3 +2016,8 @@
 
 6.9 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* arch/arm/src/kinetis/kinetis_sdhc.c: SDHC driver for Kinetis parts.
+	  Initially check-in is just a crude port of the STM32 SDIO driver.
+	  Much more is needed.
+
+

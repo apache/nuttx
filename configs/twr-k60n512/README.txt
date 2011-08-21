@@ -561,6 +561,8 @@ TWR-K60N512-specific Configuration Options
     CONFIG_KINETIS_EMACRX_PRIO
     CONFIG_KINETIS_EMACMISC_PRIO
 
+    CONFIG_KINETIS_SDHC_PRIO
+
   PIN Interrupt Support
 
     CONFIG_GPIO_IRQ          -- Enable pin interrtup support.  Also needs

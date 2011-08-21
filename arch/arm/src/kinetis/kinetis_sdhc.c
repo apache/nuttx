@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_sdio.c
+ * arch/arm/src/kinetis/kinetis_sdhc.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,11 +60,12 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "stm32_internal.h"
-#include "stm32_dma.h"
-#include "stm32_sdio.h"
+#include "kinetis_internal.h"
+#include "kinetis_pinmux.h"
+#include "kinetis_sim.h"
+#include "kinetis_sdhc.h"
 
-#if CONFIG_STM32_SDIO
+#if CONFIG_KINETIS_SDHC
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -72,8 +73,8 @@
 
 /* Configuration ************************************************************/
 
-#if defined(CONFIG_SDIO_DMA) && !defined(CONFIG_STM32_DMA2)
-#  warning "CONFIG_SDIO_DMA support requires CONFIG_STM32_DMA2"
+#if defined(CONFIG_SDIO_DMA) && !defined(CONFIG_KINETIS_DMA)
+#  warning "CONFIG_SDIO_DMA support requires CONFIG_KINETIS_DMA"
 #endif
 
 #ifndef CONFIG_SDIO_DMA
@@ -84,100 +85,85 @@
 #  error "Callback support requires CONFIG_SCHED_WORKQUEUE"
 #endif
 
-#ifndef CONFIG_SDIO_PRI
-#  define CONFIG_SDIO_PRI        NVIC_SYSH_PRIORITY_DEFAULT
+#ifndef CONFIG_KINETIS_SDHC_PRIO
+#  define CONFIG_KINETIS_SDHC_PRIO NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
-#ifndef CONFIG_SDIO_DMAPRIO
-#  define CONFIG_SDIO_DMAPRIO    DMA_CCR_PRIMED
+#ifndef CONFIG_KINETIS_SDHC_DMAPRIO
+#  define CONFIG_KINETIS_SDHC_DMAPRIO    DMA_CCR_PRIMED
 #endif
 
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_VERBOSE)
 #  undef CONFIG_SDIO_XFRDEBUG
 #endif
 
-/* Friendly CLKCR bit re-definitions ****************************************/
-
-#define SDIO_CLKCR_RISINGEDGE    (0)
-#define SDIO_CLKCR_FALLINGEDGE   SDIO_CLKCR_NEGEDGE
-
-/* Mode dependent settings.  These depend on clock devisor settings that must
- * be defined in the board-specific board.h header file: SDIO_INIT_CLKDIV,
- * SDIO_MMCXFR_CLKDIV, and SDIO_SDXFR_CLKDIV.
+/* SDCLK frequencies corresponding to various modes of operation.  These
+ * values may be provided in either the NuttX configuration file or in
+ * the board.h file
+ *
+ * NOTE:  These settings are not currently used.  Since there are only four
+ * frequencies, it makes more sense to just "can" the fixed frequency prescaler
+ * and divider values.
  */
-  
-#define STM32_CLCKCR_INIT        (SDIO_INIT_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
-                                  SDIO_CLKCR_WIDBUS_D1)
-#define SDIO_CLKCR_MMCXFR        (SDIO_MMCXFR_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
-                                  SDIO_CLKCR_WIDBUS_D1)
-#define SDIO_CLCKR_SDXFR         (SDIO_SDXFR_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
-                                  SDIO_CLKCR_WIDBUS_D1)
-#define SDIO_CLCKR_SDWIDEXFR     (SDIO_SDXFR_CLKDIV|SDIO_CLKCR_RISINGEDGE|\
-                                  SDIO_CLKCR_WIDBUS_D4)
+
+#if CONFIG_KINETIS_SDHC_ABSFREQ
+#  ifndef CONFIG_KINETIS_IDMODE_FREQ
+#    define CONFIG_KINETIS_IDMODE_FREQ 400000    /* 400 KHz, ID mode */
+#  endif
+#  ifndef CONFIG_KINETIS_MMCXFR_FREQ
+#    define CONFIG_KINETIS_MMCXFR_FREQ 20000000  /* 20MHz MMC, normal clocking */
+#  endif
+#  ifndef CONFIG_KINETIS_SD1BIT_FREQ
+#    define CONFIG_KINETIS_SD1BIT_FREQ 20000000  /* 20MHz SD 1-bit, normal clocking */
+#  endif
+#  ifndef CONFIG_KINETIS_SD4BIT_FREQ
+#    define CONFIG_KINETIS_SD4BIT_FREQ 25000000  /* 25MHz SD 4-bit, normal clocking */
+#  endif
+#endif
+
+/* Friendly SYSCTRL bit re-definitions ****************************************/
 
 /* Timing */
 
-#define SDIO_CMDTIMEOUT          (100000)
-#define SDIO_LONGTIMEOUT         (0x7fffffff)
+#define SDHC_CMDTIMEOUT          (100000)
+#define SDHC_LONGTIMEOUT         (0x7fffffff)
 
-/* Big DTIMER setting */
+/* Big DVS setting.  Range is 0=SDCLK*213 through 14=SDCLK*227 */
 
-#define SDIO_DTIMER_DATATIMEOUT  (0x000fffff)
+#define SDHC_DVS_MAXTIMEOUT     (14)
+#define SDHC_DVS_DATATIMEOUT    (14)
 
 /* DMA CCR register settings */
 
-#define SDIO_RXDMA32_CONFIG      (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_32BITS|\
-                                  DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC)
-#define SDIO_TXDMA32_CONFIG      (CONFIG_SDIO_DMAPRIO|DMA_CCR_MSIZE_32BITS|\
-                                  DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC|DMA_CCR_DIR)
-
-/* FIFO sizes */
-
-#define SDIO_HALFFIFO_WORDS      (8)
-#define SDIO_HALFFIFO_BYTES      (8*4)
+#define SDHC_RXDMA32_CONFIG     (CONFIG_KINETIS_SDHC_DMAPRIO|DMA_CCR_MSIZE_32BITS|\
+                                 DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC)
+#define SDHC_TXDMA32_CONFIG     (CONFIG_KINETIS_SDHC_DMAPRIO|DMA_CCR_MSIZE_32BITS|\
+                                 DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC|DMA_CCR_DIR)
 
 /* Data transfer interrupt mask bits */
 
-#define SDIO_RECV_MASK     (SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|\
-                            SDIO_MASK_DATAENDIE|SDIO_MASK_RXOVERRIE|\
-                            SDIO_MASK_RXFIFOHFIE|SDIO_MASK_STBITERRIE)
-#define SDIO_SEND_MASK     (SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|\
-                            SDIO_MASK_DATAENDIE|SDIO_MASK_TXUNDERRIE|\
-                            SDIO_MASK_TXFIFOHEIE|SDIO_MASK_STBITERRIE)
-#define SDIO_DMARECV_MASK  (SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|\
-                            SDIO_MASK_DATAENDIE|SDIO_MASK_RXOVERRIE|\
-                            SDIO_MASK_STBITERRIE)
-#define SDIO_DMASEND_MASK  (SDIO_MASK_DCRCFAILIE|SDIO_MASK_DTIMEOUTIE|\
-                            SDIO_MASK_DATAENDIE|SDIO_MASK_TXUNDERRIE|\
-                            SDIO_MASK_STBITERRIE)
+#define SDHC_RECV_MASK     (SDHC_INT_BRR|SDHC_INT_DCE|SDHC_INT_DTOE|\
+                            SDHC_INT_DEBE)
+#define SDHC_SEND_MASK     (SDHC_INT_BWR|SDHC_INT_DCE|SDHC_INT_DTOE|\
+                            SDHC_INT_DEBE)
+#define SDHC_DMARECV_MASK  (SDHC_INT_DINT|DHC_INT_DCE|SDHC_INT_DTOE|\
+                            SDHC_INT_DEBE|SDHC_INT_DMAE)
+#define SDHC_DMASEND_MASK  (SDHC_INT_DINT|SDHC_INT_DCE|SDHC_INT_DTOE|\
+                            SDHC_INT_DEBE|SDHC_INT_DMAE)
 
 /* Event waiting interrupt mask bits */
 
-#define SDIO_CMDDONE_STA   (SDIO_STA_CMDSENT)
-#define SDIO_RESPDONE_STA  (SDIO_STA_CTIMEOUT|SDIO_STA_CCRCFAIL|\
-                            SDIO_STA_CMDREND)
-#define SDIO_XFRDONE_STA   (0)
+#define SDHC_CMDDONE_INTS  (SDHC_INT_CC)
+#define SDHC_RESPDONE_INTS (SDHC_INT_CCE|SDHC_INT_CTOE|SDHC_INT_CEBE|SDHC_INT_CIE)
+#define SDHC_XFDONE_INTS   (SDHC_INT_DCE|SDHC_INT_DTOE|SDHC_INT_DEBE)
 
-#define SDIO_CMDDONE_MASK  (SDIO_MASK_CMDSENTIE)
-#define SDIO_RESPDONE_MASK (SDIO_MASK_CCRCFAILIE|SDIO_MASK_CTIMEOUTIE|\
-                            SDIO_MASK_CMDRENDIE)
-#define SDIO_XFRDONE_MASK  (0)
-
-#define SDIO_CMDDONE_ICR   (SDIO_ICR_CMDSENTC)
-#define SDIO_RESPDONE_ICR  (SDIO_ICR_CTIMEOUTC|SDIO_ICR_CCRCFAILC|\
-                            SDIO_ICR_CMDRENDC)
-#define SDIO_XFRDONE_ICR   (SDIO_ICR_DATAENDC|SDIO_ICR_DCRCFAILC|\
-                            SDIO_ICR_DTIMEOUTC|SDIO_ICR_RXOVERRC|\
-                            SDIO_ICR_TXUNDERRC|SDIO_ICR_STBITERRC)
-
-#define SDIO_WAITALL_ICR   (SDIO_CMDDONE_ICR|SDIO_RESPDONE_ICR|\
-                            SDIO_XFRDONE_ICR)
+#define SDHC_WAITALL_INTS  (SDHC_CMDDONE_INTS|SDHC_RESPDONE_INTS|SDHC_XFDONE_INTS)
 
 /* Let's wait until we have both SDIO transfer complete and DMA complete. */
 
-#define SDIO_XFRDONE_FLAG  (1)
-#define SDIO_DMADONE_FLAG  (2)
-#define SDIO_ALLDONE       (3)
+#define SDHC_XFRDONE_FLAG  (1)
+#define SDHC_DMADONE_FLAG  (2)
+#define SDHC_ALLDONE       (3)
 
 /* Register logging support */
 
@@ -201,18 +187,18 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure defines the state of the STM32 SDIO interface */
+/* This structure defines the state of the Kinetis SDIO interface */
 
-struct stm32_dev_s
+struct kinetis_dev_s
 {
   struct sdio_dev_s  dev;        /* Standard, base SDIO interface */
   
-  /* STM32-specific extensions */
+  /* Kinetis-specific extensions */
   /* Event support */
 
   sem_t              waitsem;    /* Implements event waiting */
   sdio_eventset_t    waitevents; /* Set of events to be waited for */
-  uint32_t           waitmask;   /* Interrupt enables for event waiting */
+  uint32_t           waitints;   /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
   WDOG_ID            waitwdog;   /* Watchdog that handles event timeouts */
 
@@ -228,7 +214,7 @@ struct stm32_dev_s
 
   uint32_t          *buffer;     /* Address of current R/W buffer */
   size_t             remaining;  /* Number of bytes remaining in the transfer */
-  uint32_t           xfrmask;    /* Interrupt enables for data transfer */
+  uint32_t           xfrints;    /* Interrupt enables for data transfer */
 
   /* DMA data transfer support */
 
@@ -243,24 +229,39 @@ struct stm32_dev_s
 /* Register logging support */
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-struct stm32_sdioregs_s
+struct kinetis_sdhcregs_s
 {
-  uint8_t  power;
-  uint16_t clkcr;
-  uint16_t dctrl;
-  uint32_t dtimer;
-  uint32_t dlen;
-  uint32_t dcount;
-  uint32_t sta;
-  uint32_t mask;
-  uint32_t fifocnt;
+  /* All read-able SDHC registers */
+
+  uint32_t dsaddr;    /* DMA System Address Register */
+  uint32_t blkattr;   /* Block Attributes Register */
+  uint32_t cmdarg;    /* Command Argument Register */
+  uint32_t xferty;    /* Transfer Type Register */
+  uint32_t cmdrsp0;   /* Command Response 0 */
+  uint32_t cmdrsp1;   /* Command Response 1 */
+  uint32_t cmdrsp2;   /* Command Response 2 */
+  uint32_t cmdrsp3;   /* Command Response 3 */
+  uint32_t prsstat;   /* Present State Register */
+  uint32_t proctl;    /* Protocol Control Register */
+  uint32_t sysctl;    /* System Control Register */
+  uint32_t irqstat;   /* Interrupt Status Register */
+  uint32_t irqstaten; /* Interrupt Status Enable Register */
+  uint32_t irqsigen;  /* Interrupt Signal Enable Register */
+  uint32_t ac12err;   /* Auto CMD12 Error Status Register */
+  uint32_t htcapblt;  /* Host Controller Capabilities */
+  uint32_t wml;       /* Watermark Level Register */
+  uint32_t admaes;    /* ADMA Error Status Register */
+  uint32_t adsaddr;   /* ADMA System Address Register */
+  uint32_t vendor;    /* Vendor Specific Register */
+  uint32_t mmcboot;   /* MMC Boot Register */
+  uint32_t hostver;   /* Host Controller Version */
 };
 
-struct stm32_sampleregs_s
+struct kinetis_sampleregs_s
 {
-  struct stm32_sdioregs_s sdio;
+  struct kinetis_sdhcregs_s sdio;
 #if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
-  struct stm32_dmaregs_s  dma;
+  struct kinetis_dmaregs_s  dma;
 #endif
 };
 #endif
@@ -271,149 +272,149 @@ struct stm32_sampleregs_s
 
 /* Low-level helpers ********************************************************/
 
-static void stm32_takesem(struct stm32_dev_s *priv);
-#define     stm32_givesem(priv) (sem_post(&priv->waitsem))
-static inline void stm32_setclkcr(uint32_t clkcr);
-static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
+static void kinetis_takesem(struct kinetis_dev_s *priv);
+#define     kinetis_givesem(priv) (sem_post(&priv->waitsem))
+static void kinetis_configwaitints(struct kinetis_dev_s *priv, uint32_t waitints,
               sdio_eventset_t waitevents, sdio_eventset_t wkupevents);
-static void stm32_configxfrints(struct stm32_dev_s *priv, uint32_t xfrmask);
-static void stm32_setpwrctrl(uint32_t pwrctrl);
-static inline uint32_t stm32_getpwrctrl(void);
+static void kinetis_configxfrints(struct kinetis_dev_s *priv, uint32_t xfrints);
 
 /* DMA Helpers **************************************************************/
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-static void stm32_sampleinit(void);
-static void stm32_sdiosample(struct stm32_sdioregs_s *regs);
-static void stm32_sample(struct stm32_dev_s *priv, int index);
-static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg);
-static void stm32_dumpsample(struct stm32_dev_s *priv,
-              struct stm32_sampleregs_s *regs, const char *msg);
-static void stm32_dumpsamples(struct stm32_dev_s *priv);
+static void kinetis_sampleinit(void);
+static void kinetis_sdhcsample(struct kinetis_sdhcregs_s *regs);
+static void kinetis_sample(struct kinetis_dev_s *priv, int index);
+static void kinetis_sdhcdump(struct kinetis_sdhcregs_s *regs, const char *msg);
+static void kinetis_dumpsample(struct kinetis_dev_s *priv,
+              struct kinetis_sampleregs_s *regs, const char *msg);
+static void kinetis_dumpsamples(struct kinetis_dev_s *priv);
 #else
-#  define   stm32_sampleinit()
-#  define   stm32_sample(priv,index)
-#  define   stm32_dumpsamples(priv)
+#  define   kinetis_sampleinit()
+#  define   kinetis_sample(priv,index)
+#  define   kinetis_dumpsamples(priv)
 #endif
 
 #ifdef CONFIG_SDIO_DMA
-static void stm32_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg);
+static void kinetis_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg);
 #endif
 
 /* Data Transfer Helpers ****************************************************/
 
-static uint8_t stm32_log2(uint16_t value);
-static void stm32_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl);
-static void stm32_datadisable(void);
-static void stm32_sendfifo(struct stm32_dev_s *priv);
-static void stm32_recvfifo(struct stm32_dev_s *priv);
-static void stm32_eventtimeout(int argc, uint32_t arg);
-static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent);
-static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupevent);
+static uint8_t kinetis_log2(uint16_t value);
+static void kinetis_dataconfig(unsigned int blocksize, unsigned int nblocks,
+                               unsigned int timeout);
+static void kinetis_datadisable(void);
+static void kinetis_sendfifo(struct kinetis_dev_s *priv);
+static void kinetis_recvfifo(struct kinetis_dev_s *priv);
+static void kinetis_eventtimeout(int argc, uint32_t arg);
+static void kinetis_endwait(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent);
+static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent);
 
 /* Interrupt Handling *******************************************************/
 
-static int  stm32_interrupt(int irq, void *context);
+static int  kinetis_interrupt(int irq, void *context);
 
 /* SDIO interface methods ***************************************************/
 
 /* Mutual exclusion */
 
 #ifdef CONFIG_SDIO_MUXBUS
-static int stm32_lock(FAR struct sdio_dev_s *dev, bool lock);
+static int kinetis_lock(FAR struct sdio_dev_s *dev, bool lock);
 #endif
 
 /* Initialization/setup */
 
-static void stm32_reset(FAR struct sdio_dev_s *dev);
-static uint8_t stm32_status(FAR struct sdio_dev_s *dev);
-static void stm32_widebus(FAR struct sdio_dev_s *dev, bool enable);
-static void stm32_clock(FAR struct sdio_dev_s *dev,
+static void kinetis_reset(FAR struct sdio_dev_s *dev);
+static uint8_t kinetis_status(FAR struct sdio_dev_s *dev);
+static void kinetis_widebus(FAR struct sdio_dev_s *dev, bool enable);
+#if CONFIG_KINETIS_SDHC_ABSFREQ
+static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency);
+#endif
+static void kinetis_clock(FAR struct sdio_dev_s *dev,
               enum sdio_clock_e rate);
-static int  stm32_attach(FAR struct sdio_dev_s *dev);
+static int  kinetis_attach(FAR struct sdio_dev_s *dev);
 
 /* Command/Status/Data Transfer */
 
-static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static void kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
-static int  stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+static int  kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
               size_t nbytes);
-static int  stm32_sendsetup(FAR struct sdio_dev_s *dev,
+static int  kinetis_sendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, uint32_t nbytes);
-static int  stm32_cancel(FAR struct sdio_dev_s *dev);
+static int  kinetis_cancel(FAR struct sdio_dev_s *dev);
 
-static int  stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
-static int  stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
+static int  kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rshort);
-static int  stm32_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t rlong[4]);
-static int  stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rshort);
-static int  stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  kinetis_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rnotimpl);
 
 /* EVENT handler */
 
-static void stm32_waitenable(FAR struct sdio_dev_s *dev,
+static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
               sdio_eventset_t eventset);
 static sdio_eventset_t
-            stm32_eventwait(FAR struct sdio_dev_s *dev, uint32_t timeout);
-static void stm32_callbackenable(FAR struct sdio_dev_s *dev,
+            kinetis_eventwait(FAR struct sdio_dev_s *dev, uint32_t timeout);
+static void kinetis_callbackenable(FAR struct sdio_dev_s *dev,
               sdio_eventset_t eventset);
-static int  stm32_registercallback(FAR struct sdio_dev_s *dev,
+static int  kinetis_registercallback(FAR struct sdio_dev_s *dev,
               worker_t callback, void *arg);
 
 /* DMA */
 
 #ifdef CONFIG_SDIO_DMA
-static bool stm32_dmasupported(FAR struct sdio_dev_s *dev);
-static int  stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
+static bool kinetis_dmasupported(FAR struct sdio_dev_s *dev);
+static int  kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
-static int  stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
+static int  kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, size_t buflen);
 #endif
 
 /* Initialization/uninitialization/reset ************************************/
 
-static void stm32_callback(void *arg);
-static void stm32_default(void);
+static void kinetis_callback(void *arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-struct stm32_dev_s g_sdiodev =
+struct kinetis_dev_s g_sdhcdev =
 {
   .dev =
   {
 #ifdef CONFIG_SDIO_MUXBUS
-    .lock             = stm32_lock,
+    .lock             = kinetis_lock,
 #endif
-    .reset            = stm32_reset,
-    .status           = stm32_status,
-    .widebus          = stm32_widebus,
-    .clock            = stm32_clock,
-    .attach           = stm32_attach,
-    .sendcmd          = stm32_sendcmd,
-    .recvsetup        = stm32_recvsetup,
-    .sendsetup        = stm32_sendsetup,
-    .cancel           = stm32_cancel,
-    .waitresponse     = stm32_waitresponse,
-    .recvR1           = stm32_recvshortcrc,
-    .recvR2           = stm32_recvlong,
-    .recvR3           = stm32_recvshort,
-    .recvR4           = stm32_recvnotimpl,
-    .recvR5           = stm32_recvnotimpl,
-    .recvR6           = stm32_recvshortcrc,
-    .recvR7           = stm32_recvshort,
-    .waitenable       = stm32_waitenable,
-    .eventwait        = stm32_eventwait,
-    .callbackenable   = stm32_callbackenable,
-    .registercallback = stm32_registercallback,
+    .reset            = kinetis_reset,
+    .status           = kinetis_status,
+    .widebus          = kinetis_widebus,
+    .clock            = kinetis_clock,
+    .attach           = kinetis_attach,
+    .sendcmd          = kinetis_sendcmd,
+    .recvsetup        = kinetis_recvsetup,
+    .sendsetup        = kinetis_sendsetup,
+    .cancel           = kinetis_cancel,
+    .waitresponse     = kinetis_waitresponse,
+    .recvR1           = kinetis_recvshortcrc,
+    .recvR2           = kinetis_recvlong,
+    .recvR3           = kinetis_recvshort,
+    .recvR4           = kinetis_recvnotimpl,
+    .recvR5           = kinetis_recvnotimpl,
+    .recvR6           = kinetis_recvshortcrc,
+    .recvR7           = kinetis_recvshort,
+    .waitenable       = kinetis_waitenable,
+    .eventwait        = kinetis_eventwait,
+    .callbackenable   = kinetis_callbackenable,
+    .registercallback = kinetis_registercallback,
 #ifdef CONFIG_SDIO_DMA
-    .dmasupported     = stm32_dmasupported,
-    .dmarecvsetup     = stm32_dmarecvsetup,
-    .dmasendsetup     = stm32_dmasendsetup,
+    .dmasupported     = kinetis_dmasupported,
+    .dmarecvsetup     = kinetis_dmarecvsetup,
+    .dmasendsetup     = kinetis_dmasendsetup,
 #endif
   },
 };
@@ -421,7 +422,7 @@ struct stm32_dev_s g_sdiodev =
 /* Register logging support */
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-static struct stm32_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
+static struct kinetis_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
 #endif
 
 /****************************************************************************
@@ -432,7 +433,7 @@ static struct stm32_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
  * Low-level Helpers
  ****************************************************************************/
 /****************************************************************************
- * Name: stm32_takesem
+ * Name: kinetis_takesem
  *
  * Description:
  *   Take the wait semaphore (handling false alarm wakeups due to the receipt
@@ -446,7 +447,7 @@ static struct stm32_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
  *
  ****************************************************************************/
 
-static void stm32_takesem(struct stm32_dev_s *priv)
+static void kinetis_takesem(struct kinetis_dev_s *priv)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -461,50 +462,14 @@ static void stm32_takesem(struct stm32_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: stm32_setclkcr
- *
- * Description:
- *   Modify oft-changed bits in the CLKCR register.  Only the following bit-
- *   fields are changed:
- *
- *   CLKDIV, PWRSAV, BYPASS, WIDBUS, NEGEDGE, and HWFC_EN
- *
- * Input Parameters:
- *   clkcr - A new CLKCR setting for the above mentions bits (other bits
- *           are ignored.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void stm32_setclkcr(uint32_t clkcr)
-{
-  uint32_t regval = getreg32(STM32_SDIO_CLKCR);
-    
-  /* Clear CLKDIV, PWRSAV, BYPASS, WIDBUS, NEGEDGE, HWFC_EN bits */
-
-  regval &= ~(SDIO_CLKCR_CLKDIV_MASK|SDIO_CLKCR_PWRSAV|SDIO_CLKCR_BYPASS|
-              SDIO_CLKCR_WIDBUS_MASK|SDIO_CLKCR_NEGEDGE|SDIO_CLKCR_HWFC_EN);
-
-  /* Replace with user provided settings */
-
-  clkcr  &=  (SDIO_CLKCR_CLKDIV_MASK|SDIO_CLKCR_PWRSAV|SDIO_CLKCR_BYPASS|
-              SDIO_CLKCR_WIDBUS_MASK|SDIO_CLKCR_NEGEDGE|SDIO_CLKCR_HWFC_EN);
-  regval |=  clkcr;
-  putreg32(regval, STM32_SDIO_CLKCR);
-  fvdbg("CLKCR: %08x\n", getreg32(STM32_SDIO_CLKCR));
-}
-
-/****************************************************************************
- * Name: stm32_configwaitints
+ * Name: kinetis_configwaitints
  *
  * Description:
  *   Enable/disable SDIO interrupts needed to suport the wait function
  *
  * Input Parameters:
  *   priv       - A reference to the SDIO device state structure
- *   waitmask   - The set of bits in the SDIO MASK register to set
+ *   waitints   - The set of bits in the SDIO MASK register to set
  *   waitevents - Waited for events
  *   wkupevent  - Wake-up events
  *
@@ -513,7 +478,7 @@ static inline void stm32_setclkcr(uint32_t clkcr)
  *
  ****************************************************************************/
 
-static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
+static void kinetis_configwaitints(struct kinetis_dev_s *priv, uint32_t waitints,
                                  sdio_eventset_t waitevents,
                                  sdio_eventset_t wkupevent)
 {
@@ -526,82 +491,38 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
   flags = irqsave();
   priv->waitevents = waitevents;
   priv->wkupevent  = wkupevent;
-  priv->waitmask   = waitmask;
+  priv->waitints   = waitints;
 #ifdef CONFIG_SDIO_DMA
   priv->xfrflags   = 0;
 #endif
-  putreg32(priv->xfrmask | priv->waitmask, STM32_SDIO_MASK);
+  putreg32(priv->xfrints | priv->waitints | SDHC_INT_CINT,
+           KINETIS_SDHC_IRQSIGEN);
   irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: stm32_configxfrints
+ * Name: kinetis_configxfrints
  *
  * Description:
  *   Enable SDIO interrupts needed to support the data transfer event
  *
  * Input Parameters:
  *   priv    - A reference to the SDIO device state structure
- *   xfrmask - The set of bits in the SDIO MASK register to set
+ *   xfrints - The set of bits in the SDIO MASK register to set
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void stm32_configxfrints(struct stm32_dev_s *priv, uint32_t xfrmask)
+static void kinetis_configxfrints(struct kinetis_dev_s *priv, uint32_t xfrints)
 {
   irqstate_t flags;
   flags = irqsave();
-  priv->xfrmask = xfrmask;
-  putreg32(priv->xfrmask | priv->waitmask, STM32_SDIO_MASK);
+  priv->xfrints = xfrints;
+  putreg32(priv->xfrints | priv->waitints | SDHC_INT_CINT,
+           KINETIS_SDHC_IRQSIGEN);
   irqrestore(flags);
-}
-
-/****************************************************************************
- * Name: stm32_setpwrctrl
- *
- * Description:
- *   Change the PWRCTRL field of the SDIO POWER register to turn the SDIO
- *   ON or OFF
- *
- * Input Parameters:
- *   clkcr - A new PWRCTRL setting
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void stm32_setpwrctrl(uint32_t pwrctrl)
-{
-  uint32_t regval;
-
-  regval  = getreg32(STM32_SDIO_POWER);
-  regval &= ~SDIO_POWER_PWRCTRL_MASK;
-  regval |= pwrctrl;
-  putreg32(regval, STM32_SDIO_POWER);
-}
-
-/****************************************************************************
- * Name: stm32_getpwrctrl
- *
- * Description:
- *   Return the current value of the  the PWRCTRL field of the SDIO POWER
- *   register.  This function can be used to see the the SDIO is power ON
- *   or OFF
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   The current value of the  the PWRCTRL field of the SDIO POWER register.
- *
- ****************************************************************************/
-
-static inline uint32_t stm32_getpwrctrl(void)
-{
-  return getreg32(STM32_SDIO_POWER) & SDIO_POWER_PWRCTRL_MASK;
 }
 
 /****************************************************************************
@@ -609,7 +530,7 @@ static inline uint32_t stm32_getpwrctrl(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_sampleinit
+ * Name: kinetis_sampleinit
  *
  * Description:
  *   Setup prior to collecting DMA samples
@@ -617,14 +538,14 @@ static inline uint32_t stm32_getpwrctrl(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-static void stm32_sampleinit(void)
+static void kinetis_sampleinit(void)
 {
-  memset(g_sampleregs, 0xff, DEBUG_NSAMPLES * sizeof(struct stm32_sampleregs_s));
+  memset(g_sampleregs, 0xff, DEBUG_NSAMPLES * sizeof(struct kinetis_sampleregs_s));
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_sdiosample
+ * Name: kinetis_sdhcsample
  *
  * Description:
  *   Sample SDIO registers
@@ -632,22 +553,35 @@ static void stm32_sampleinit(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-static void stm32_sdiosample(struct stm32_sdioregs_s *regs)
+static void kinetis_sdhcsample(struct kinetis_sdhcregs_s *regs)
 {
-  regs->power   = (uint8_t)getreg32(STM32_SDIO_POWER);
-  regs->clkcr   = (uint16_t)getreg32(STM32_SDIO_CLKCR);
-  regs->dctrl   = (uint16_t)getreg32(STM32_SDIO_DCTRL);
-  regs->dtimer  = getreg32(STM32_SDIO_DTIMER);
-  regs->dlen    = getreg32(STM32_SDIO_DLEN);
-  regs->dcount  = getreg32(STM32_SDIO_DCOUNT);
-  regs->sta     = getreg32(STM32_SDIO_STA);
-  regs->mask    = getreg32(STM32_SDIO_MASK);
-  regs->fifocnt = getreg32(STM32_SDIO_FIFOCNT);
+  regs->dsaddr    = (uint8_t)getreg32(KINETIS_SDHC_DSADDR);    /* DMA System Address Register */
+  regs->blkattr   = (uint8_t)getreg32(KINETIS_SDHC_BLKATTR);   /* Block Attributes Register */
+  regs->cmdarg    = (uint8_t)getreg32(KINETIS_SDHC_CMDARG);    /* Command Argument Register */
+  regs->xferty    = (uint8_t)getreg32(KINETIS_SDHC_XFERTYP);   /* Transfer Type Register */
+  regs->cmdrsp0   = (uint8_t)getreg32(KINETIS_SDHC_CMDRSP0);   /* Command Response 0 */
+  regs->cmdrsp1   = (uint8_t)getreg32(KINETIS_SDHC_CMDRSP1);   /* Command Response 1 */
+  regs->cmdrsp2   = (uint8_t)getreg32(KINETIS_SDHC_CMDRSP2);   /* Command Response 2 */
+  regs->cmdrsp3   = (uint8_t)getreg32(KINETIS_SDHC_CMDRSP3);   /* Command Response 3 */
+  regs->prsstat   = (uint8_t)getreg32(KINETIS_SDHC_PRSSTAT);   /* Present State Register */
+  regs->proctl    = (uint8_t)getreg32(KINETIS_SDHC_PROCTL);    /* Protocol Control Register */
+  regs->sysctl    = (uint8_t)getreg32(KINETIS_SDHC_SYSCTL);    /* System Control Register */
+  regs->irqstat   = (uint8_t)getreg32(KINETIS_SDHC_IRQSTAT);   /* Interrupt Status Register */
+  regs->irqstaten = (uint8_t)getreg32(KINETIS_SDHC_IRQSTATEN); /* Interrupt Status Enable Register */
+  regs->irqsigen  = (uint8_t)getreg32(KINETIS_SDHC_IRQSIGEN);  /* Interrupt Signal Enable Register */
+  regs->ac12err   = (uint8_t)getreg32(KINETIS_SDHC_AC12ERR);   /* Auto CMD12 Error Status Register */
+  regs->htcapblt  = (uint8_t)getreg32(KINETIS_SDHC_HTCAPBLT);  /* Host Controller Capabilities */
+  regs->wml       = (uint8_t)getreg32(KINETIS_SDHC_WML);       /* Watermark Level Register */
+  regs->admaes    = (uint8_t)getreg32(KINETIS_SDHC_ADMAES);    /* ADMA Error Status Register */
+  regs->adsaddr   = (uint8_t)getreg32(KINETIS_SDHC_ADSADDR);   /* ADMA System Address Register */
+  regs->vendor    = (uint8_t)getreg32(KINETIS_SDHC_VENDOR);    /* Vendor Specific Register */
+  regs->mmcboot   = (uint8_t)getreg32(KINETIS_SDHC_MMCBOOT);   /* MMC Boot Register */
+  regs->hostver   = (uint8_t)getreg32(KINETIS_SDHC_HOSTVER);   /* Host Controller Version */
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_sample
+ * Name: kinetis_sample
  *
  * Description:
  *   Sample SDIO/DMA registers
@@ -655,21 +589,21 @@ static void stm32_sdiosample(struct stm32_sdioregs_s *regs)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-static void stm32_sample(struct stm32_dev_s *priv, int index)
+static void kinetis_sample(struct kinetis_dev_s *priv, int index)
 {
-  struct stm32_sampleregs_s *regs = &g_sampleregs[index];
+  struct kinetis_sampleregs_s *regs = &g_sampleregs[index];
 #if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
   if (priv->dmamode)
     {
-      stm32_dmasample(priv->dma, &regs->dma);
+      kinetis_dmasample(priv->dma, &regs->dma);
     }
 #endif
-  stm32_sdiosample(&regs->sdio);
+  kinetis_sdhcsample(&regs->sdio);
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_sdiodump
+ * Name: kinetis_sdhcdump
  *
  * Description:
  *   Dump one register sample
@@ -677,23 +611,36 @@ static void stm32_sample(struct stm32_dev_s *priv, int index)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg)
+static void kinetis_sdhcdump(struct kinetis_sdhcregs_s *regs, const char *msg)
 {
-  fdbg("SDIO Registers: %s\n", msg);
-  fdbg("  POWER[%08x]: %08x\n", STM32_SDIO_POWER,   regs->power);
-  fdbg("  CLKCR[%08x]: %08x\n", STM32_SDIO_CLKCR,   regs->clkcr);
-  fdbg("  DCTRL[%08x]: %08x\n", STM32_SDIO_DCTRL,   regs->dctrl);
-  fdbg(" DTIMER[%08x]: %08x\n", STM32_SDIO_DTIMER,  regs->dtimer);
-  fdbg("   DLEN[%08x]: %08x\n", STM32_SDIO_DLEN,    regs->dlen);
-  fdbg(" DCOUNT[%08x]: %08x\n", STM32_SDIO_DCOUNT,  regs->dcount);
-  fdbg("    STA[%08x]: %08x\n", STM32_SDIO_STA,     regs->sta);
-  fdbg("   MASK[%08x]: %08x\n", STM32_SDIO_MASK,    regs->mask);
-  fdbg("FIFOCNT[%08x]: %08x\n", STM32_SDIO_FIFOCNT, regs->fifocnt);
+  fdbg("SDHC Registers: %s\n", msg);
+  fdbg("   DSADDR[%08x]: %08x\n", KINETIS_SDHC_DSADDR,    regs->dsaddr);
+  fdbg("  BLKATTR[%08x]: %08x\n", KINETIS_SDHC_BLKATTR,   regs->blkattr);
+  fdbg("   CMDARG[%08x]: %08x\n", KINETIS_SDHC_CMDARG,    regs->cmdarg);
+  fdbg("   XFERTY[%08x]: %08x\n", KINETIS_SDHC_XFERTYP,   regs->xferty);
+  fdbg("  CMDRSP0[%08x]: %08x\n", KINETIS_SDHC_CMDRSP0,   regs->cmdrsp0);
+  fdbg("  CMDRSP1[%08x]: %08x\n", KINETIS_SDHC_CMDRSP1,   regs->cmdrsp1);
+  fdbg("  CMDRSP2[%08x]: %08x\n", KINETIS_SDHC_CMDRSP2,   regs->cmdrsp2);
+  fdbg("  CMDRSP3[%08x]: %08x\n", KINETIS_SDHC_CMDRSP3,   regs->cmdrsp3);
+  fdbg("  PRSSTAT[%08x]: %08x\n", KINETIS_SDHC_PRSSTAT,   regs->prsstat);
+  fdbg("   PROCTL[%08x]: %08x\n", KINETIS_SDHC_PROCTL,    regs->proctl);
+  fdbg("   SYSCTL[%08x]: %08x\n", KINETIS_SDHC_SYSCTL,    regs->sysctl);
+  fdbg("  IRQSTAT[%08x]: %08x\n", KINETIS_SDHC_IRQSTAT,   regs->irqstat);
+  fdbg("IRQSTATEN[%08x]: %08x\n", KINETIS_SDHC_IRQSTATEN, regs->irqstaten);
+  fdbg(" IRQSIGEN[%08x]: %08x\n", KINETIS_SDHC_IRQSIGEN,  regs->irqsigen);
+  fdbg("  AC12ERR[%08x]: %08x\n", KINETIS_SDHC_AC12ERR,   regs->ac12err);
+  fdbg(" HTCAPBLT[%08x]: %08x\n", KINETIS_SDHC_HTCAPBLT,  regs->htcapblt);
+  fdbg("      WML[%08x]: %08x\n", KINETIS_SDHC_WML,       regs->wml);
+  fdbg("   ADMAES[%08x]: %08x\n", KINETIS_SDHC_ADMAES,    regs->admaes);
+  fdbg("  ADSADDR[%08x]: %08x\n", KINETIS_SDHC_ADSADDR,   regs->adsaddr);
+  fdbg("   VENDOR[%08x]: %08x\n", KINETIS_SDHC_VENDOR,    regs->vendor);
+  fdbg("  MMCBOOT[%08x]: %08x\n", KINETIS_SDHC_MMCBOOT,   regs->mmcboot);
+  fdbg("  HOSTVER[%08x]: %08x\n", KINETIS_SDHC_HOSTVER,   regs->hostver);
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_dumpsample
+ * Name: kinetis_dumpsample
  *
  * Description:
  *   Dump one register sample
@@ -701,21 +648,21 @@ static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-static void stm32_dumpsample(struct stm32_dev_s *priv,
-                             struct stm32_sampleregs_s *regs, const char *msg)
+static void kinetis_dumpsample(struct kinetis_dev_s *priv,
+                             struct kinetis_sampleregs_s *regs, const char *msg)
 {
 #if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
   if (priv->dmamode)
     {
-      stm32_dmadump(priv->dma, &regs->dma, msg);
+      kinetis_dmadump(priv->dma, &regs->dma, msg);
     }
 #endif
-  stm32_sdiodump(&regs->sdio, msg);
+  kinetis_sdhcdump(&regs->sdio, msg);
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_dumpsamples
+ * Name: kinetis_dumpsamples
  *
  * Description:
  *   Dump all sampled register data
@@ -723,28 +670,28 @@ static void stm32_dumpsample(struct stm32_dev_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-static void  stm32_dumpsamples(struct stm32_dev_s *priv)
+static void  kinetis_dumpsamples(struct kinetis_dev_s *priv)
 {
-  stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP], "Before setup");
+  kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP], "Before setup");
 #if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
   if (priv->dmamode)
     {
-      stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
+      kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
     }
 #endif
-  stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP], "After setup");
-  stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
+  kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP], "After setup");
+  kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
 #if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
   if (priv->dmamode)
     {
-      stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
+      kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
     }
 #endif
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_dmacallback
+ * Name: kinetis_dmacallback
  *
  * Description:
  *   Called when SDIO DMA completes
@@ -752,25 +699,25 @@ static void  stm32_dumpsamples(struct stm32_dev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static void stm32_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg)
+static void kinetis_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)arg;
+  FAR struct kinetis_dev_s *priv = (FAR struct kinetis_dev_s *)arg;
   DEBUGASSERT(priv->dmamode);
 
   /* The SDIO appears to handle the End-Of-Transfer interrupt first with the
    * End-Of-DMA event occurring significantly later.
    */
 
-  stm32_sample((struct stm32_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
+  kinetis_sample((struct kinetis_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
   
   /* Then terminate the transfer (we should already have the SDIO transfer
    * done interrupt.  If not, the transfer will appropriately time out).
    */
 
-  priv->xfrflags |= SDIO_DMADONE_FLAG;
-  if (priv->xfrflags == SDIO_ALLDONE)
+  priv->xfrflags |= SDHC_DMADONE_FLAG;
+  if (priv->xfrflags == SDHC_ALLDONE)
     {
-      stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
+      kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
     }
 }
 #endif
@@ -780,7 +727,7 @@ static void stm32_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_log2
+ * Name: kinetis_log2
  *
  * Description:
  *   Take (approximate) log base 2 of the provided number (Only works if the
@@ -788,7 +735,7 @@ static void stm32_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg)
  *
  ****************************************************************************/
 
-static uint8_t stm32_log2(uint16_t value)
+static uint8_t kinetis_log2(uint16_t value)
 {
   uint8_t log2 = 0;
 
@@ -810,61 +757,61 @@ static uint8_t stm32_log2(uint16_t value)
 }
 
 /****************************************************************************
- * Name: stm32_dataconfig
+ * Name: kinetis_dataconfig
  *
  * Description:
  *   Configure the SDIO data path for the next data transfer
  *
  ****************************************************************************/
 
-static void stm32_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl)
+static void kinetis_dataconfig(unsigned int blocksize, unsigned int nblocks,
+                               unsigned int timeout)
 {
   uint32_t regval = 0;
 
-  /* Enable data path */
+  /* Set the data timeout value in the SDHC_SYSCTL field to the selected value */
 
-  putreg32(timeout, STM32_SDIO_DTIMER); /* Set DTIMER */
-  putreg32(dlen,    STM32_SDIO_DLEN);   /* Set DLEN */
+  regval  = getreg32(KINETIS_SDHC_SYSCTL);
+  regval &= ~SDHC_SYSCTL_DVS_MASK;
+  regval |= timeout << SDHC_SYSCTL_DVS_SHIFT;
+  putreg32(regval, KINETIS_SDHC_SYSCTL);
 
-  /* Configure DCTRL DTDIR, DTMODE, and DBLOCKSIZE fields and set the DTEN
-   * field
+  /* Set the block size and count in the SDHC_BLKATTR register.  The block size
+   * is only valid for multiple block transfers.
    */
 
-  regval  =  getreg32(STM32_SDIO_DCTRL);
-  regval &= ~(SDIO_DCTRL_DTDIR|SDIO_DCTRL_DTMODE|SDIO_DCTRL_DBLOCKSIZE_MASK);
-  dctrl  &=  (SDIO_DCTRL_DTDIR|SDIO_DCTRL_DTMODE|SDIO_DCTRL_DBLOCKSIZE_MASK);
-  regval |=  (dctrl|SDIO_DCTRL_DTEN);
-  putreg32(regval, STM32_SDIO_DCTRL);
+  regval = blocksize << SDHC_BLKATTR_SIZE_SHIFT |
+           nblocks   << SDHC_BLKATTR_CNT_SHIFT;
+  putreg32(regval, KINETIS_SDHC_BLKATTR);
 }
 
 /****************************************************************************
- * Name: stm32_datadisable
+ * Name: kinetis_datadisable
  *
  * Description:
- *   Disable the the SDIO data path setup by stm32_dataconfig() and
+ *   Disable the the SDIO data path setup by kinetis_dataconfig() and
  *   disable DMA.
  *
  ****************************************************************************/
 
-static void stm32_datadisable(void)
+static void kinetis_datadisable(void)
 {
   uint32_t regval;
 
-  /* Disable the data path */
+  /* Set the data timeout value in the SDHC_SYSCTL field to the maximum value */
 
-  putreg32(SDIO_DTIMER_DATATIMEOUT, STM32_SDIO_DTIMER); /* Reset DTIMER */
-  putreg32(0,                       STM32_SDIO_DLEN);   /* Reset DLEN */
+  regval  = getreg32(KINETIS_SDHC_SYSCTL);
+  regval &= ~SDHC_SYSCTL_DVS_MASK;
+  regval |= SDHC_DVS_MAXTIMEOUT << SDHC_SYSCTL_DVS_SHIFT;
+  putreg32(regval, KINETIS_SDHC_SYSCTL);
 
-  /* Reset DCTRL DTEN, DTDIR, DTMODE, DMAEN, and DBLOCKSIZE fields */
+  /* Set the block size to zero (no transfer) */
 
-  regval  = getreg32(STM32_SDIO_DCTRL);
-  regval &= ~(SDIO_DCTRL_DTEN|SDIO_DCTRL_DTDIR|SDIO_DCTRL_DTMODE|
-              SDIO_DCTRL_DMAEN|SDIO_DCTRL_DBLOCKSIZE_MASK);
-  putreg32(regval, STM32_SDIO_DCTRL);
+  putreg32(0, KINETIS_SDHC_BLKATTR);
 }
 
 /****************************************************************************
- * Name: stm32_sendfifo
+ * Name: kinetis_sendfifo
  *
  * Description:
  *   Send SDIO data in interrupt mode
@@ -877,7 +824,7 @@ static void stm32_datadisable(void)
  *
  ****************************************************************************/
 
-static void stm32_sendfifo(struct stm32_dev_s *priv)
+static void kinetis_sendfifo(struct kinetis_dev_s *priv)
 {
   union
   {
@@ -885,10 +832,12 @@ static void stm32_sendfifo(struct stm32_dev_s *priv)
     uint8_t  b[2];
   } data;
 
-  /* Loop while there is more data to be sent and the RX FIFO is not full */
+  /* Loop while there is more data to be sent, waiting for buffer write
+   * ready (BWR)
+   */
 
   while (priv->remaining > 0 &&
-         (getreg32(STM32_SDIO_STA) & SDIO_STA_TXFIFOF) == 0)
+         (getreg32(KINETIS_SDHC_IRQSTAT) & SDHC_INT_BWR) == 0)
     {
       /* Is there a full word remaining in the user buffer? */
 
@@ -921,12 +870,12 @@ static void stm32_sendfifo(struct stm32_dev_s *priv)
 
        /* Put the word in the FIFO */
 
-       putreg32(data.w, STM32_SDIO_FIFO);
+       putreg32(data.w, KINETIS_SDHC_DATPORT);
     }
 }
 
 /****************************************************************************
- * Name: stm32_recvfifo
+ * Name: kinetis_recvfifo
  *
  * Description:
  *   Receive SDIO data in interrupt mode
@@ -939,7 +888,7 @@ static void stm32_sendfifo(struct stm32_dev_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_recvfifo(struct stm32_dev_s *priv)
+static void kinetis_recvfifo(struct kinetis_dev_s *priv)
 {
   union
   {
@@ -947,16 +896,16 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
     uint8_t  b[2];
   } data;
 
-  /* Loop while there is space to store the data and there is more
-   * data available in the RX FIFO.
+  /* Loop while there is space to store the data, waiting for buffer read
+   * ready (BWR)
    */
 
   while (priv->remaining > 0 &&
-         (getreg32(STM32_SDIO_STA) & SDIO_STA_RXDAVL) != 0)
+         (getreg32(KINETIS_SDHC_IRQSTAT) & SDHC_INT_BRR) != 0)
     {
       /* Read the next word from the RX FIFO */
 
-      data.w = getreg32(STM32_SDIO_FIFO);
+      data.w = getreg32(KINETIS_SDHC_DATPORT);
       if (priv->remaining >= sizeof(uint32_t))
         {
           /* Transfer the whole word to the user buffer */
@@ -984,7 +933,7 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: stm32_eventtimeout
+ * Name: kinetis_eventtimeout
  *
  * Description:
  *   The watchdog timeout setup when the event wait start has expired without
@@ -1002,9 +951,9 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_eventtimeout(int argc, uint32_t arg)
+static void kinetis_eventtimeout(int argc, uint32_t arg)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)arg;
 
   DEBUGASSERT(argc == 1 && priv != NULL);
   DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0);
@@ -1015,13 +964,13 @@ static void stm32_eventtimeout(int argc, uint32_t arg)
     {
       /* Yes.. wake up any waiting threads */
 
-      stm32_endwait(priv, SDIOWAIT_TIMEOUT);
+      kinetis_endwait(priv, SDIOWAIT_TIMEOUT);
       flldbg("Timeout: remaining: %d\n", priv->remaining);
     }
 }
 
 /****************************************************************************
- * Name: stm32_endwait
+ * Name: kinetis_endwait
  *
  * Description:
  *   Wake up a waiting thread if the waited-for event has occurred.
@@ -1038,7 +987,7 @@ static void stm32_eventtimeout(int argc, uint32_t arg)
  *
  ****************************************************************************/
 
-static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
+static void kinetis_endwait(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent)
 {
   /* Cancel the watchdog timeout */
 
@@ -1046,15 +995,15 @@ static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
 
   /* Disable event-related interrupts */
 
-  stm32_configwaitints(priv, 0, 0, wkupevent);
+  kinetis_configwaitints(priv, 0, 0, wkupevent);
 
   /* Wake up the waiting thread */
 
-  stm32_givesem(priv);
+  kinetis_givesem(priv);
 }
 
 /****************************************************************************
- * Name: stm32_endtransfer
+ * Name: kinetis_endtransfer
  *
  * Description:
  *   Terminate a transfer with the provided status.  This function is called
@@ -1073,15 +1022,15 @@ static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
  *
  ****************************************************************************/
 
-static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
+static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent)
 {
   /* Disable all transfer related interrupts */
 
-  stm32_configxfrints(priv, 0);
+  kinetis_configxfrints(priv, 0);
 
   /* Clearing pending interrupt status on all transfer related interrupts */
  
-  putreg32(SDIO_XFRDONE_ICR, STM32_SDIO_ICR);
+  putreg32(SDHC_XFDONE_INTS, KINETIS_SDHC_IRQSTAT);
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
@@ -1090,14 +1039,14 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
     {
       /* DMA debug instrumentation */
 
-      stm32_sample(priv, SAMPLENDX_END_TRANSFER);
+      kinetis_sample(priv, SAMPLENDX_END_TRANSFER);
 
       /* Make sure that the DMA is stopped (it will be stopped automatically
        * on normal transfers, but not necessarily when the transfer terminates
        * on an error condition).
        */
 
-      stm32_dmastop(priv->dma);
+      kinetis_dmastop(priv->dma);
     }
 #endif
 
@@ -1111,7 +1060,7 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
     {
       /* Yes.. wake up any waiting threads */
 
-      stm32_endwait(priv, wkupevent);
+      kinetis_endwait(priv, wkupevent);
     }
 }
 
@@ -1120,7 +1069,7 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_interrupt
+ * Name: kinetis_interrupt
  *
  * Description:
  *   SDIO interrupt handler
@@ -1133,187 +1082,175 @@ static void stm32_endtransfer(struct stm32_dev_s *priv, sdio_eventset_t wkupeven
  *
  ****************************************************************************/
 
-static int stm32_interrupt(int irq, void *context)
+static int kinetis_interrupt(int irq, void *context)
 {
-  struct stm32_dev_s *priv = &g_sdiodev;
+  struct kinetis_dev_s *priv = &g_sdhcdev;
   uint32_t enabled;
   uint32_t pending;
+  uint32_t regval;
 
-  /* Loop while there are pending interrupts.  Check the SDIO status
-   * register.  Mask out all bits that don't correspond to enabled
-   * interrupts.  (This depends on the fact that bits are ordered
-   * the same in both the STA and MASK register).  If there are non-zero
-   * bits remaining, then we have work to do here.
+  /* Check the SDHC IRQSTAT register.  Mask out all bits that don't
+   * correspond to enabled interrupts.  (This depends on the fact that bits
+   * are ordered the same in both the IRQSTAT and IRQSIGEN registers).  If
+   * there are non-zero bits remaining, then we have work to do here.
    */
 
-  while ((enabled = getreg32(STM32_SDIO_STA) & getreg32(STM32_SDIO_MASK)) != 0)
+  regval  = getreg32(KINETIS_SDHC_IRQSIGEN);
+  enabled = getreg32(KINETIS_SDHC_IRQSTAT) & regval;
+  
+  /* Disable card interrupts to clear the card interrupt to the host system. */
+
+  regval &= ~SDHC_INT_CINT;
+  putreg32(regval, KINETIS_SDHC_IRQSIGEN);
+
+  /* Clear all pending interrupts */
+
+  putreg32(enabled, KINETIS_SDHC_IRQSTAT);
+
+  /* Handle in progress, interrupt driven data transfers ****************/
+
+  pending  = enabled & priv->xfrints;
+  if (pending != 0)
     {
-      /* Handle in progress, interrupt driven data transfers ****************/
-
-      pending  = enabled & priv->xfrmask;
-      if (pending != 0)
+#ifdef CONFIG_SDIO_DMA
+      if (!priv->dmamode)
+#endif
         {
-#ifdef CONFIG_SDIO_DMA
-          if (!priv->dmamode)
-#endif
+          /* Is the RX buffer read ready?  Is so then we must be
+          * processing a receive transaction.
+          */
+
+          if ((pending & SDHC_INT_BRR) != 0)
            {
-             /* Is the RX FIFO half full or more?  Is so then we must be
-              * processing a receive transaction.
-             */
+             /* Receive data from the RX buffer */
 
-             if ((pending & SDIO_STA_RXFIFOHF) != 0)
-               {
-                 /* Receive data from the RX FIFO */
-
-                 stm32_recvfifo(priv);
-               }
-
-             /* Otherwise, Is the transmit FIFO half empty or less?  If so we must
-              * be processing a send transaction.  NOTE:  We can't be processing
-              * both!
-              */
-
-             else if ((pending & SDIO_STA_TXFIFOHE) != 0)
-               {
-                 /* Send data via the TX FIFO */
-
-                 stm32_sendfifo(priv);
-               }
-           }
-
-          /* Handle data end events */
-
-          if ((pending & SDIO_STA_DATAEND) != 0)
-            {
-              /* Handle any data remaining the RX FIFO.  If the RX FIFO is
-               * less than half full at the end of the transfer, then no
-               * half-full interrupt will be received.
-               */
-
-              /* Was this transfer performed in DMA mode? */
-
-#ifdef CONFIG_SDIO_DMA
-              if (priv->dmamode)
-                {
-                  /* Yes.. Terminate the transfers only if the DMA has also
-                   * finished.
-                   */
-
-                  priv->xfrflags |= SDIO_XFRDONE_FLAG;
-                  if (priv->xfrflags == SDIO_ALLDONE)
-                    {
-                      stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
-                    }
-
-                  /* Otherwise, just disable futher transfer interrupts and
-                   * wait for the DMA complete event.
-                   */
-
-                  else
-                    {
-                      stm32_configxfrints(priv, 0);
-                    }
-                }
-              else
-#endif
-                {
-                  /* Receive data from the RX FIFO */
-
-                  stm32_recvfifo(priv);
-
-                  /* Then terminate the transfer */
-
-                  stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
-                }
+             kinetis_recvfifo(priv);
             }
 
-          /* Handle data block send/receive CRC failure */
+          /* Otherwise, Is the TX buffer write ready? If so we must
+           * be processing a send transaction.  NOTE:  We can't be
+           * processing both!
+           */
 
-          else if ((pending & SDIO_STA_DCRCFAIL) != 0)
+          else if ((pending & SDHC_INT_BWR) != 0)
             {
-              /* Terminate the transfer with an error */
+              /* Send data via the TX FIFO */
 
-              flldbg("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
-              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
+              kinetis_sendfifo(priv);
             }
-
-          /* Handle data timeout error */
-
-          else if ((pending & SDIO_STA_DTIMEOUT) != 0)
-            {
-              /* Terminate the transfer with an error */
-
-              flldbg("ERROR: Data timeout, remaining: %d\n", priv->remaining);
-              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
-            }
-
-          /* Handle RX FIFO overrun error */
-
-          else if ((pending & SDIO_STA_RXOVERR) != 0)
-            {
-              /* Terminate the transfer with an error */
-
-              flldbg("ERROR: RX FIFO overrun, remaining: %d\n", priv->remaining);
-              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
-            }
-
-          /* Handle TX FIFO underrun error */
-
-          else if ((pending & SDIO_STA_TXUNDERR) != 0)
-            {
-              /* Terminate the transfer with an error */
-
-              flldbg("ERROR: TX FIFO underrun, remaining: %d\n", priv->remaining);
-              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
-            }
-
-          /* Handle start bit error */
-
-          else if ((pending & SDIO_STA_STBITERR) != 0)
-            {
-              /* Terminate the transfer with an error */
-
-              flldbg("ERROR: Start bit, remaining: %d\n", priv->remaining);
-              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
-           }
         }
 
-      /* Handle wait events *************************************************/
+      /* Handle data end events */
 
-      pending  = enabled & priv->waitmask;
-      if (pending != 0)
+      if ((pending & SDHC_INT_DEBE) != 0)
         {
-          /* Is this a response completion event? */
+          /* Handle any data remaining the RX buffer */
 
-          if ((pending & SDIO_RESPDONE_STA) != 0)
+          /* Was this transfer performed in DMA mode? */
+
+#ifdef CONFIG_SDIO_DMA
+          if (priv->dmamode)
             {
-              /* Yes.. Is their a thread waiting for response done? */
+              /* Yes.. Terminate the transfers only if the DMA has also
+               * finished.
+               */
 
-              if ((priv->waitevents & SDIOWAIT_RESPONSEDONE) != 0)
+              priv->xfrflags |= SDHC_XFRDONE_FLAG;
+              if (priv->xfrflags == SDHC_ALLDONE)
                 {
-                  /* Yes.. wake the thread up */
+                  kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
+                }
 
-                  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
-                  stm32_endwait(priv, SDIOWAIT_RESPONSEDONE);
+              /* Otherwise, just disable futher transfer interrupts and
+               * wait for the DMA complete event.
+               */
+
+              else
+                {
+                  kinetis_configxfrints(priv, 0);
                 }
             }
-
-          /* Is this a command completion event? */
-
-          if ((pending & SDIO_CMDDONE_STA) != 0)
+          else
+#endif
             {
-              /* Yes.. Is their a thread waiting for command done? */
+              /* Receive data from the RX FIFO */
 
-              if ((priv->waitevents & SDIOWAIT_RESPONSEDONE) != 0)
-                {
-                  /* Yes.. wake the thread up */
+              kinetis_recvfifo(priv);
 
-                  putreg32(SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
-                  stm32_endwait(priv, SDIOWAIT_CMDDONE);
-                }
+              /* Then terminate the transfer */
+
+              kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
+            }
+        }
+
+      /* Handle data block send/receive CRC failure */
+
+      else if ((pending & SDHC_INT_DCE) != 0)
+        {
+          /* Terminate the transfer with an error */
+
+          flldbg("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
+          kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
+        }
+
+      /* Handle data timeout error */
+
+      else if ((pending & SDHC_INT_DTOE) != 0)
+        {
+          /* Terminate the transfer with an error */
+
+          flldbg("ERROR: Data timeout, remaining: %d\n", priv->remaining);
+          kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
+        }
+    }
+
+  /* Handle wait events *************************************************/
+
+  pending  = enabled & priv->waitints;
+  if (pending != 0)
+    {
+      /* Is this a response completion event? */
+
+      if ((pending & SDHC_RESPDONE_INTS) != 0)
+        {
+          /* Yes.. Is their a thread waiting for response done? */
+
+          if ((priv->waitevents & SDIOWAIT_RESPONSEDONE) != 0)
+            {
+              /* Yes.. mask further interrupts and wake the thread up */
+
+              regval = getreg32(KINETIS_SDHC_IRQSIGEN);
+              regval &= ~(SDHC_RESPDONE_INTS|SDHC_CMDDONE_INTS);
+              putreg32(regval, KINETIS_SDHC_IRQSIGEN);
+
+              kinetis_endwait(priv, SDIOWAIT_RESPONSEDONE);
+            }
+        }
+
+      /* Is this a command completion event? */
+
+      if ((pending & SDHC_CMDDONE_INTS) != 0)
+        {
+          /* Yes.. Is their a thread waiting for command done? */
+
+          if ((priv->waitevents & SDIOWAIT_RESPONSEDONE) != 0)
+            {
+              /* Yes.. mask further interrupts and wake the thread up */
+
+              regval = getreg32(KINETIS_SDHC_IRQSIGEN);
+              regval &= ~SDHC_CMDDONE_INTS;
+              putreg32(regval, KINETIS_SDHC_IRQSIGEN);
+
+              kinetis_endwait(priv, SDIOWAIT_CMDDONE);
             }
         }
     }
+
+  /* Re-enable card interrupts */
+
+  regval  = getreg32(KINETIS_SDHC_IRQSIGEN);
+  regval |= SDHC_INT_CINT;
+  putreg32(regval, KINETIS_SDHC_IRQSIGEN);
 
   return OK;
 }
@@ -1323,7 +1260,7 @@ static int stm32_interrupt(int irq, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_lock
+ * Name: kinetis_lock
  *
  * Description:
  *   Locks the bus. Function calls low-level multiplexed bus routines to
@@ -1339,19 +1276,19 @@ static int stm32_interrupt(int irq, void *context)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_MUXBUS
-static int stm32_lock(FAR struct sdio_dev_s *dev, bool lock)
+static int kinetis_lock(FAR struct sdio_dev_s *dev, bool lock)
 {  
   /* Single SDIO instance so there is only one possibility.  The multiplex
    * bus is part of board support package.
    */
 
-  stm32_muxbus_sdio_lock(lock);
+  kinetis_muxbus_sdio_lock(lock);
   return OK;
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_reset
+ * Name: kinetis_reset
  *
  * Description:
  *   Reset the SDIO controller.  Undo all setup and initialization.
@@ -1364,25 +1301,56 @@ static int stm32_lock(FAR struct sdio_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void stm32_reset(FAR struct sdio_dev_s *dev)
+static void kinetis_reset(FAR struct sdio_dev_s *dev)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
-  irqstate_t flags;
+  FAR struct kinetis_dev_s *priv = (FAR struct kinetis_dev_s *)dev;
+  uint32_t regval;
 
-  /* Disable clocking */
+  /* Disable all interrupts so that nothing interferes with the following. */
 
-  flags = irqsave();
-  putreg32(0, SDIO_CLKCR_CLKEN_BB);
-  stm32_setpwrctrl(SDIO_POWER_PWRCTRL_OFF);
+  putreg32(0, KINETIS_SDHC_IRQSIGEN);
 
-  /* Put SDIO registers in their default, reset state */
+  /* Reset the SDHC block, putting registers in their default, reset state.
+   * Initiate the reset by setting the RSTA bit in the SYSCTL register.
+   */
 
-  stm32_default();
+  regval  = getreg32(KINETIS_SDHC_SYSCTL);
+  regval |= SDHC_SYSCTL_RSTA;
+  putreg32(regval, KINETIS_SDHC_SYSCTL);
 
-  /* Reset data */
+  /* The SDHC will reset the RSTA bit to 0 when the capabilities
+   * registers are valid and the host driver can read them.
+   */
+
+  while ((getreg32(KINETIS_SDHC_SYSCTL) & SDHC_SYSCTL_RSTA) != 0);
+
+  /* Set the initially SDCLK frequency to around 400KHz */
+
+  kinetis_clock(dev, CLOCK_IDMODE);
+
+  /* Configure IO pad to set the power voltage of external card to around
+   * 3.0V.
+   */
+#warning "Missing logic"
+
+  /* Poll bits CIHB and CDIHB bits of PRSSTAT to wait both bits are cleared. */
+#warning "Missing logic"
+
+  /* Enable all status bits (these could not all be potential sources of
+   * interrupts.
+   */
+
+  putreg32(SDHC_INT_ALL, KINETIS_SDHC_IRQSTATEN);
+
+  /* The next phase of the hardware reset would be to set the SYSCTRL INITA
+   * bit to send 80 clock ticks for card to power up and then reset the card
+   * with CMD0.  This is done elsewhere.
+   */
+
+  /* Reset state data */
 
   priv->waitevents = 0;      /* Set of events to be waited for */
-  priv->waitmask   = 0;      /* Interrupt enables for event waiting */
+  priv->waitints   = 0;      /* Interrupt enables for event waiting */
   priv->wkupevent  = 0;      /* The event that caused the wakeup */
 #ifdef CONFIG_SDIO_DMA
   priv->xfrflags   = 0;      /* Used to synchronize SDIO and DMA completion events */
@@ -1394,7 +1362,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 
   priv->buffer     = 0;      /* Address of current R/W buffer */
   priv->remaining  = 0;      /* Number of bytes remaining in the transfer */
-  priv->xfrmask    = 0;      /* Interrupt enables for data transfer */
+  priv->xfrints    = 0;      /* Interrupt enables for data transfer */
 
   /* DMA data transfer support */
 
@@ -1402,21 +1370,10 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 #ifdef CONFIG_SDIO_DMA
   priv->dmamode    = false;  /* true: DMA mode transfer */
 #endif
-
-  /* Configure the SDIO peripheral */
-
-  stm32_setclkcr(STM32_CLCKCR_INIT);
-  stm32_setpwrctrl(SDIO_POWER_PWRCTRL_ON);
-
-  /* (Re-)enable clocking */
-
-  putreg32(1, SDIO_CLKCR_CLKEN_BB);
-  fvdbg("CLCKR: %08x POWER: %08x\n",
-        getreg32(STM32_SDIO_CLKCR), getreg32(STM32_SDIO_POWER));
 }
 
 /****************************************************************************
- * Name: stm32_status
+ * Name: kinetis_status
  *
  * Description:
  *   Get SDIO status.
@@ -1425,18 +1382,18 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
  *   dev   - Device-specific state data
  *
  * Returned Value:
- *   Returns a bitset of status values (see stm32_status_* defines)
+ *   Returns a bitset of status values (see kinetis_status_* defines)
  *
  ****************************************************************************/
 
-static uint8_t stm32_status(FAR struct sdio_dev_s *dev)
+static uint8_t kinetis_status(FAR struct sdio_dev_s *dev)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   return priv->cdstatus;
 }
 
 /****************************************************************************
- * Name: stm32_widebus
+ * Name: kinetis_widebus
  *
  * Description:
  *   Called after change in Bus width has been selected (via ACMD6).  Most
@@ -1452,14 +1409,143 @@ static uint8_t stm32_status(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_widebus(FAR struct sdio_dev_s *dev, bool wide)
+static void kinetis_widebus(FAR struct sdio_dev_s *dev, bool wide)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   priv->widebus = wide;
 }
 
 /****************************************************************************
- * Name: stm32_clock
+ * Name: kinetis_frequency
+ *
+ * Description:
+ *   Set the SD clock frequency
+ *
+ * Input Parameters:
+ *   dev       - An instance of the SDIO device interface
+ *   frequency - The frequency to use
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if CONFIG_KINETIS_SDHC_ABSFREQ
+static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
+{
+  uint32_t sdclkfs;
+  uint32_t prescaled;
+  uint32_t regval;
+  unsigned int prescaler;
+  unsigned int divisor;
+
+  /* The SDCLK frequency is determined by (1) the frequency of the base clock
+   * that was selected as the input clock, and (2) by a prescaler and a
+   * divisor that are selected here:
+   *
+   * SDCLK  frequency = (base clock) / (prescaler * divisor)
+   *
+   * The prescaler is avalable only for the values:  2, 4, 8, 16, 32, 64, 128,
+   * and 256.  Pick the smallest value of SDCLKFS that would result in an
+   * in-range frequency.
+   *
+   * For example, if the base clock frequency is 96 MHz, and the target
+   * frequency is 25 MHz, the following logic will select prescaler.
+   * 
+   *   96MHz / 2  <= 25MHz <= 96MHz / 2 /16       -- YES, prescaler == 2
+   *
+   * If the target frequency is 400 kHz, the following logic will select
+   * prescaler:
+   * 
+   *   96MHz / 2  <= 400KHz <= 96MHz / 2 / 16     -- NO
+   *   96MHz / 4  <= 400KHz <= 96MHz / 4 / 16     -- NO
+   *   96MHz / 8  <= 400KHz <= 96MHz / 8 / 16     -- NO
+   *   96MHz / 16 <= 400KHz <= 96MHz / 16 / 16    -- YES, prescaler == 16
+   */
+
+  if (/*frequency >= (BOARD_CORECLK_FREQ / 2) && */
+        frequency <= (BOARD_CORECLK_FREQ / 2 / 16))
+    {
+      sdclkfs   = SDHC_SYSCTL_SDCLKFS_DIV2;
+      prescaler = 2;
+    }
+  else if (frequency >= (BOARD_CORECLK_FREQ / 4) &&
+           frequency <= (BOARD_CORECLK_FREQ / 4 / 16))
+    {
+      sdclkfs   = SDHC_SYSCTL_SDCLKFS_DIV4;
+      prescaler = 4;
+    }
+  else if (frequency >= (BOARD_CORECLK_FREQ / 8) &&
+           frequency <= (BOARD_CORECLK_FREQ / 8 / 16))
+    {
+      sdclkfs   = SDHC_SYSCTL_SDCLKFS_DIV8;
+      prescaler = 8;
+    }
+  else if (frequency >= (BOARD_CORECLK_FREQ / 16) &&
+           frequency <= (BOARD_CORECLK_FREQ / 16 / 16))
+    {
+      sdclkfs   = SDHC_SYSCTL_SDCLKFS_DIV16;
+      prescaler = 16;
+    }
+  else if (frequency >= (BOARD_CORECLK_FREQ / 32) &&
+           frequency <= (BOARD_CORECLK_FREQ / 32 / 16))
+    {
+      sdclkfs   = SDHC_SYSCTL_SDCLKFS_DIV32;
+      prescaler = 32;
+    }
+  else if (frequency >= (BOARD_CORECLK_FREQ / 64) &&
+           frequency <= (BOARD_CORECLK_FREQ / 64 / 16))
+    {
+      sdclkfs   = SDHC_SYSCTL_SDCLKFS_DIV64;
+      prescaler = 64;
+    }
+  else if (frequency >= (BOARD_CORECLK_FREQ / 128) &&
+           frequency <= (BOARD_CORECLK_FREQ / 128 / 16))
+    {
+      sdclkfs   = SDHC_SYSCTL_SDCLKFS_DIV128;
+      prescaler = 128;
+    }
+  else /* if (frequency >= (BOARD_CORECLK_FREQ / 256) &&
+              frequency <= (BOARD_CORECLK_FREQ / 256 / 16)) */
+    {
+      sdclkfs   = SDHC_SYSCTL_SDCLKFS_DIV256;
+      prescaler = 256;
+    }
+
+  /* The optimal divider can than be calculated.
+   *
+   * For example, if the base clock frequency is 96 MHz, the target
+   * frequency is 25 MHz, and the selected prescaler value is 2, then
+   *
+   *   prescaled = 96MHz / 2 = 48MHz
+   *   divisor   = (48MHz + 12.5HMz/ 25MHz = 2
+   *
+   * And the resulting frequency will be 24MHz.
+   *
+   * Or, for example, if the target frequency is 400 kHz and the selected
+   * prescaler is 16, the following* logic will select prescaler:
+   * 
+   *   prescaled = 96MHz / 16 = 6MHz
+   *   divisor   = (6MHz + 200KHz) / 400KHz = 15
+   *
+   * And the restuling frequency will be exactly 400KHz.
+   */
+
+  prescaled = frequency / prescaler;
+  divisor   = (prescaled + (frequency >> 1)) / frequency;
+
+  /* Set the new divisor information in the SYSCTRL register */
+
+  regval  = getreg32(KINETIS_SDHC_SYSCTL);
+  regval &= ~(SDHC_SYSCTL_SDCLKFS_MASK|SDHC_SYSCTL_DVS_MASK);
+  regval |= (sdclkfs | SDHC_SYSCTL_DVS_DIV(divisor) | SDHC_SYSCTL_SDCLKEN);
+  putreg32(regval, KINETIS_SDHC_SYSCTL);
+  fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
+}
+#endif
+
+/****************************************************************************
+ * Name: kinetis_clock
  *
  * Description:
  *   Enable/disable SDIO clocking
@@ -1473,48 +1559,93 @@ static void stm32_widebus(FAR struct sdio_dev_s *dev, bool wide)
  *
  ****************************************************************************/
 
-static void stm32_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
+#if CONFIG_KINETIS_SDHC_ABSFREQ
+static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
-  uint32_t clckr;
-  uint32_t enable = 1;
+  uint32_t frequency;
+  uint32_t regval;
 
   switch (rate)
     {
-    default:
-    case CLOCK_SDIO_DISABLED:     /* Clock is disabled */
-      clckr  = STM32_CLCKCR_INIT;
-      enable = 0;
-      return;
+      default:
+      case CLOCK_SDIO_DISABLED :     /* Clock is disabled */
+        {
+          regval  = getreg32(KINETIS_SDHC_SYSCTL);
+          regval &= ~(SDHC_SYSCTL_SDCLKFS_MASK|SDHC_SYSCTL_DVS_MASK|SDHC_SYSCTL_SDCLKEN);
+          putreg32(regval, KINETIS_SDHC_SYSCTL);
+          fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
+          return;
+        }
 
-    case CLOCK_IDMODE:            /* Initial ID mode clocking (<400KHz) */
-      clckr  = STM32_CLCKCR_INIT;
-      break;
+      case CLOCK_IDMODE :            /* Initial ID mode clocking (<400KHz) */
+        frequency = CONFIG_KINETIS_IDMODE_FREQ;
+        break;
 
-    case CLOCK_MMC_TRANSFER:      /* MMC normal operation clocking */
-      clckr  = SDIO_CLKCR_MMCXFR;
-      break;
+      case CLOCK_MMC_TRANSFER :      /* MMC normal operation clocking */
+        frequency = CONFIG_KINETIS_MMCXFR_FREQ;
+        break;
 
-    case CLOCK_SD_TRANSFER_4BIT:  /* SD normal operation clocking (wide 4-bit mode) */
+      case CLOCK_SD_TRANSFER_1BIT :  /* SD normal operation clocking (narrow 1-bit mode) */
 #ifndef CONFIG_SDIO_WIDTH_D1_ONLY
-      clckr  = SDIO_CLCKR_SDWIDEXFR;
-      break;
+        frequency = CONFIG_KINETIS_SD1BIT_FREQ;
+        break;
 #endif
 
-    case CLOCK_SD_TRANSFER_1BIT:  /* SD normal operation clocking (narrow 1-bit mode) */
-      clckr  = SDIO_CLCKR_SDXFR;
-      break;
-    };
+      case CLOCK_SD_TRANSFER_4BIT :  /* SD normal operation clocking (wide 4-bit mode) */
+        frequency = CONFIG_KINETIS_SD4BIT_FREQ;
+        break;
+    }
 
-  /* Set the new clock frequency and make sure that the clock is enabled or
-   * disabled, whatever the case.
-   */
+  /* Then set the selected frequency */
 
-  stm32_setclkcr(clckr);
-  putreg32(enable, SDIO_CLKCR_CLKEN_BB);
+  kinetis_frequency(dev, frequency);
 }
+#else
+static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
+{
+  uint32_t regval;
+
+  regval  = getreg32(KINETIS_SDHC_SYSCTL);
+  regval &= ~(SDHC_SYSCTL_SDCLKFS_MASK|SDHC_SYSCTL_DVS_MASK|SDHC_SYSCTL_SDCLKEN);
+
+  switch (rate)
+    {
+      default:
+      case CLOCK_SDIO_DISABLED :     /* Clock is disabled */
+        break;
+
+      case CLOCK_IDMODE :            /* Initial ID mode clocking (<400KHz) */
+        regval |= (BOARD_SDHC_IDMODE_PRESCALER|BOARD_SDHC_IDMODE_DIVISOR|
+                   SDHC_SYSCTL_SDCLKEN);
+        break;
+
+      case CLOCK_MMC_TRANSFER :      /* MMC normal operation clocking */
+        regval |= (BOARD_SDHC_MMCMODE_PRESCALER|BOARD_SDHC_MMCMODE_DIVISOR|
+                   SDHC_SYSCTL_SDCLKEN);
+        break;
+
+      case CLOCK_SD_TRANSFER_1BIT :  /* SD normal operation clocking (narrow
+                                      * 1-bit mode) */
+#ifndef CONFIG_SDIO_WIDTH_D1_ONLY
+        regval |= (BOARD_SDHC_SD1MODE_PRESCALER|BOARD_SDHC_IDMODE_DIVISOR|
+                   SDHC_SYSCTL_SDCLKEN);
+        break;
+#endif
+
+      case CLOCK_SD_TRANSFER_4BIT :  /* SD normal operation clocking (wide
+                                      * 4-bit mode) */
+        regval |= (BOARD_SDHC_SD4MODE_PRESCALER|BOARD_SDHC_SD4MODE_DIVISOR|
+                   SDHC_SYSCTL_SDCLKEN);
+        break;
+    }
+
+  putreg32(regval, KINETIS_SDHC_SYSCTL);
+  fvdbg("SYSCTRL: %08x\n", getreg32(KINETIS_SDHC_SYSCTL));
+}
+#endif
 
 /****************************************************************************
- * Name: stm32_attach
+ * Name: kinetis_attach
  *
  * Description:
  *   Attach and prepare interrupts
@@ -1527,39 +1658,39 @@ static void stm32_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
  *
  ****************************************************************************/
 
-static int stm32_attach(FAR struct sdio_dev_s *dev)
+static int kinetis_attach(FAR struct sdio_dev_s *dev)
 {
   int ret;
 
   /* Attach the SDIO interrupt handler */
 
-  ret = irq_attach(STM32_IRQ_SDIO, stm32_interrupt);
+  ret = irq_attach(KINETIS_IRQ_SDHC, kinetis_interrupt);
   if (ret == OK)
     {
 
-      /* Disable all interrupts at the SDIO controller and clear static
-       * interrupt flags
+      /* Disable all interrupts at the SDIO controller and clear all pending
+       * interrupts.
        */
 
-      putreg32(SDIO_MASK_RESET,      STM32_SDIO_MASK);
-      putreg32(SDIO_ICR_STATICFLAGS, STM32_SDIO_ICR);
+      putreg32(0,            KINETIS_SDHC_IRQSIGEN);
+      putreg32(SDHC_INT_ALL, KINETIS_SDHC_IRQSTAT);
+
+      /* Set the interrrupt priority */
+
+      up_prioritize_irq(KINETIS_IRQ_SDHC, CONFIG_KINETIS_SDHC_PRIO);
 
       /* Enable SDIO interrupts at the NVIC.  They can now be enabled at
        * the SDIO controller as needed.
        */
 
-      up_enable_irq(STM32_IRQ_SDIO);
-
-      /* Set the interrrupt priority */
-
-      up_prioritize_irq(STM32_IRQ_SDIO, CONFIG_SDIO_PRI);
+      up_enable_irq(KINETIS_IRQ_SDHC);
     }
 
   return ret;
 }
 
 /****************************************************************************
- * Name: stm32_sendcmd
+ * Name: kinetis_sendcmd
  *
  * Description:
  *   Send the SDIO command
@@ -1574,59 +1705,140 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
+static void kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 {
   uint32_t regval;
   uint32_t cmdidx;
 
-  /* Set the SDIO Argument value */
+  /* Initialize the command index */
 
-  putreg32(arg, STM32_SDIO_ARG);
+  cmdidx = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
+  regval = cmdidx << SDHC_XFERTYP_CMDINX_SHIFT;
 
-  /* Clear CMDINDEX, WAITRESP, WAITINT, WAITPEND, and CPSMEN bits */
+  /* Does a data transfer accompany the command? */
 
-  regval = getreg32(STM32_SDIO_CMD);
-  regval &= ~(SDIO_CMD_CMDINDEX_MASK|SDIO_CMD_WAITRESP_MASK|
-              SDIO_CMD_WAITINT|SDIO_CMD_WAITPEND|SDIO_CMD_CPSMEN);
+  if ((cmd & MMCSD_DATAXFR) != 0)
+    {
+      /* CCEN=1: The SDHC will check the CRC field in the response. If an
+       *         error is detected, it is reported as a Command CRC Error.
+       *
+       * This probably should not always be set?
+       */
 
-  /* Set WAITRESP bits */
+#warning "Revisit"
+      regval |= SDHC_XFERTYP_CCCEN;
+
+      /* Yes.. Configure the data transfer */
+
+      switch (cmd & MMCSD_DATAXFR_MASK)
+        {
+          default:
+          case MMCSD_NODATAXFR : /* No.. no data transfer */
+            break;
+
+          case MMCSD_RDSTREAM :  /* Yes.. streaming read data transfer */
+#warning "Probably some missing setup"
+            regval |= SDHC_XFERTYP_DPSEL;
+            break;
+
+          case MMCSD_WRSTREAM :  /* Yes.. streaming write data transfer */
+#warning "Probably some missing setup"
+            regval |= (SDHC_XFERTYP_DPSEL | SDHC_XFERTYP_DTDSEL);
+            break;
+
+          case MMCSD_RDDATAXFR : /* Yes.. normal read data transfer */
+            regval |= SDHC_XFERTYP_DPSEL;
+            break;
+
+          case MMCSD_WRDATAXFR : /* Yes.. normal write data transfer */
+            regval |= (SDHC_XFERTYP_DPSEL | SDHC_XFERTYP_DTDSEL);
+            break;
+        }
+
+      /* Is it a multi-block transfer? */
+
+      if ((cmd & MMCSD_DATAXFR) != 0)
+        {
+          /* Yes.. should the transfer be stopped with ACMD12? */
+
+          if ((cmd & MMCSD_STOPXFR) != 0)
+            {
+              /* Yes.. Indefinite block transfer */
+
+              regval |= (SDHC_XFERTYP_MSBSEL | SDHC_XFERTYP_AC12EN);
+            }
+          else
+            {
+              /* No.. Fixed block transfer */
+
+              regval |= (SDHC_XFERTYP_MSBSEL | SDHC_XFERTYP_BCEN);
+            }
+        }
+    }
+    
+  /* Configure response type bits */
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
     case MMCSD_NO_RESPONSE:
-      regval |= SDIO_CMD_NORESPONSE;
+      regval |= SDHC_XFERTYP_RSPTYP_NONE;      /* No response */
       break;
 
-    case MMCSD_R1_RESPONSE:
     case MMCSD_R1B_RESPONSE:
+      regval |= SDHC_XFERTYP_RSPTYP_LEN48BSY;  /* Response length 48, check busy */
+    
+    case MMCSD_R1_RESPONSE:
     case MMCSD_R3_RESPONSE:
     case MMCSD_R4_RESPONSE:
     case MMCSD_R5_RESPONSE:
     case MMCSD_R6_RESPONSE:
     case MMCSD_R7_RESPONSE:
-      regval |= SDIO_CMD_SHORTRESPONSE;
+      regval |= SDHC_XFERTYP_RSPTYP_LEN48;     /* Response length 48 */
       break;
 
     case MMCSD_R2_RESPONSE:
-      regval |= SDIO_CMD_LONGRESPONSE;
+      regval |= SDHC_XFERTYP_RSPTYP_LEN136;    /* Response length 136 */
       break;
     }
 
-  /* Set CPSMEN and the command index */
-
-  cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
-  regval |= cmdidx | SDIO_CMD_CPSMEN;
-  
+# warning "Missing other settings?"
   fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
 
-  /* Write the SDIO CMD */
+  /* Enable DMA */
 
-  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
-  putreg32(regval, STM32_SDIO_CMD);
+#ifdef CONFIG_SDIO_DMA
+  if (priv->dmamode)
+    {
+      /* Internal DMA is used */
+
+      regval |= SDHC_XFERTYP_DMAEN;
+    }
+#endif
+
+  /* Other bits (revisit -- these probably should not alway be set).
+   *
+   * CICEN=1: The SDHC will check the index field in the response to see if
+   *          it has the same value as the command index. If it is not, it
+   *          is reported as a command index error.
+   * Also... what about CMDTYP?
+   */
+
+#warning "Revisit"
+  regval |= SDHC_XFERTYP_CICEN;
+
+  /* Set the SDHC Argument value */
+
+  putreg32(arg, KINETIS_SDHC_CMDARG);
+
+  /* Enable appropriate interrupts and write the SDHC CMD */
+
+  putreg32(SDHC_RESPDONE_INTS|SDHC_CMDDONE_INTS|SDHC_INT_CINT,
+           KINETIS_SDHC_IRQSIGEN);
+  putreg32(regval, KINETIS_SDHC_XFERTYP);
 }
 
 /****************************************************************************
- * Name: stm32_recvsetup
+ * Name: kinetis_recvsetup
  *
  * Description:
  *   Setup hardware in preparation for data transfer from the card in non-DMA
@@ -1646,20 +1858,20 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg
  *
  ****************************************************************************/
 
-static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
-                           size_t nbytes)
+static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+                             size_t nbytes)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  uint32_t dblocksize;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
+  uint32_t blocksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
   /* Reset the DPSM configuration */
 
-  stm32_datadisable();
-  stm32_sampleinit();
-  stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
+  kinetis_datadisable();
+  kinetis_sampleinit();
+  kinetis_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
   /* Save the destination buffer information for use by the interrupt handler */
 
@@ -1671,18 +1883,18 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
-  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, nbytes, dblocksize|SDIO_DCTRL_DTDIR);
+  blocksize = kinetis_log2(nbytes);
+  kinetis_dataconfig(blocksize, 1, SDHC_DVS_DATATIMEOUT);
 
   /* And enable interrupts */
 
-  stm32_configxfrints(priv, SDIO_RECV_MASK);
-  stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
+  kinetis_configxfrints(priv, SDHC_RECV_MASK);
+  kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32_sendsetup
+ * Name: kinetis_sendsetup
  *
  * Description:
  *   Setup hardware in preparation for data transfer from the card.  This method
@@ -1700,20 +1912,20 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
+static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
                            size_t nbytes)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  uint32_t dblocksize;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
+  uint32_t blocksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
   /* Reset the DPSM configuration */
 
-  stm32_datadisable();
-  stm32_sampleinit();
-  stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
+  kinetis_datadisable();
+  kinetis_sampleinit();
+  kinetis_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
   /* Save the source buffer information for use by the interrupt handler */
 
@@ -1725,18 +1937,18 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
 
   /* Then set up the SDIO data path */
 
-  dblocksize = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
-  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, nbytes, dblocksize);
+  blocksize = kinetis_log2(nbytes);
+  kinetis_dataconfig(blocksize, 1, SDHC_DVS_DATATIMEOUT);
 
   /* Enable TX interrrupts */
 
-  stm32_configxfrints(priv, SDIO_SEND_MASK);
-  stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
+  kinetis_configxfrints(priv, SDHC_SEND_MASK);
+  kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32_cancel
+ * Name: kinetis_cancel
  *
  * Description:
  *   Cancel the data transfer setup of SDIO_RECVSETUP, SDIO_SENDSETUP,
@@ -1752,20 +1964,20 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
  *
  ****************************************************************************/
 
-static int stm32_cancel(FAR struct sdio_dev_s *dev)
+static int kinetis_cancel(FAR struct sdio_dev_s *dev)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
 
   /* Disable all transfer- and event- related interrupts */
 
-  stm32_configxfrints(priv, 0);
-  stm32_configwaitints(priv, 0, 0, 0);
+  kinetis_configxfrints(priv, 0);
+  kinetis_configwaitints(priv, 0, 0, 0);
 
   /* Clearing pending interrupt status on all transfer- and event- related
    * interrupts
    */
  
-  putreg32(SDIO_WAITALL_ICR, STM32_SDIO_ICR);
+  putreg32(SDHC_WAITALL_INTS, KINETIS_SDHC_IRQSTAT);
 
   /* Cancel any watchdog timeout */
 
@@ -1781,7 +1993,7 @@ static int stm32_cancel(FAR struct sdio_dev_s *dev)
        * on an error condition.
        */
 
-      stm32_dmastop(priv->dma);
+      kinetis_dmastop(priv->dma);
     }
 #endif
 
@@ -1792,7 +2004,7 @@ static int stm32_cancel(FAR struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: stm32_waitresponse
+ * Name: kinetis_waitresponse
  *
  * Description:
  *   Poll-wait for the response to the last command to be ready.
@@ -1806,7 +2018,7 @@ static int stm32_cancel(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
+static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 {
   int32_t timeout;
   uint32_t events;
@@ -1814,16 +2026,16 @@ static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
     case MMCSD_NO_RESPONSE:
-      events  = SDIO_CMDDONE_STA;
-      timeout = SDIO_CMDTIMEOUT;
+      events  = SDHC_CMDDONE_INTS;
+      timeout = SDHC_CMDTIMEOUT;
       break;
 
     case MMCSD_R1_RESPONSE:
     case MMCSD_R1B_RESPONSE:
     case MMCSD_R2_RESPONSE:
     case MMCSD_R6_RESPONSE:
-      events  = SDIO_RESPDONE_STA;
-      timeout = SDIO_LONGTIMEOUT;
+      events  = SDHC_RESPDONE_INTS;
+      timeout = SDHC_LONGTIMEOUT;
       break;
 
     case MMCSD_R4_RESPONSE:
@@ -1832,8 +2044,8 @@ static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
     case MMCSD_R3_RESPONSE:
     case MMCSD_R7_RESPONSE:
-      events  = SDIO_RESPDONE_STA;
-      timeout = SDIO_CMDTIMEOUT;
+      events  = SDHC_RESPDONE_INTS;
+      timeout = SDHC_CMDTIMEOUT;
       break;
 
     default:
@@ -1842,23 +2054,23 @@ static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the response (or timeout) */
 
-  while ((getreg32(STM32_SDIO_STA) & events) == 0)
+  while ((getreg32(KINETIS_SDHC_IRQSTAT) & events) == 0)
     {
       if (--timeout <= 0)
         {
           fdbg("ERROR: Timeout cmd: %08x events: %08x STA: %08x\n",
-               cmd, events, getreg32(STM32_SDIO_STA));
+               cmd, events, getreg32(KINETIS_SDHC_IRQSTAT));
 
           return -ETIMEDOUT;
         }
     }
 
-  putreg32(SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
+  putreg32(SDHC_CMDDONE_INTS, KINETIS_SDHC_IRQSTAT);
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32_recvRx
+ * Name: kinetis_recvRx
  *
  * Description:
  *   Receive response to SDIO command.  Only the critical payload is
@@ -1879,7 +2091,7 @@ static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
  *
  ****************************************************************************/
 
-static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
+static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
 {
 #ifdef CONFIG_DEBUG
   uint32_t respcmd;
@@ -1931,13 +2143,13 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
     {
       /* Check if a timeout or CRC error occurred */
 
-      regval = getreg32(STM32_SDIO_STA);
-      if ((regval & SDIO_STA_CTIMEOUT) != 0)
+      regval = getreg32(KINETIS_SDHC_IRQSTAT);
+      if ((regval & SDHC_INT_CTOE) != 0)
         {
           fdbg("ERROR: Command timeout: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
-      else if ((regval & SDIO_STA_CCRCFAIL) != 0)
+      else if ((regval & SDHC_INT_CCE) != 0)
         {
           fdbg("ERROR: CRC failure: %08x\n", regval);
           ret = -EIO;
@@ -1947,8 +2159,8 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
         {
           /* Check response received is of desired command */
 
-          respcmd = getreg32(STM32_SDIO_RESPCMD);
-          if ((uint8_t)(respcmd & SDIO_RESPCMD_MASK) != (cmd & MMCSD_CMDIDX_MASK))
+          respcmd = getreg32(KINETIS_SDHC_RESPCMD);
+          if ((uint8_t)(respcmd & SDHC_RESPCMD_MASK) != (cmd & MMCSD_CMDIDX_MASK))
             {
               fdbg("ERROR: RESCMD=%02x CMD=%08x\n", respcmd, cmd);
               ret = -EINVAL;
@@ -1959,12 +2171,12 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t
 
   /* Clear all pending message completion events and return the R1/R6 response */
 
-  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
-  *rshort = getreg32(STM32_SDIO_RESP1);
+  putreg32(SDHC_RESPDONE_INTS|SDHC_CMDDONE_INTS, KINETIS_SDHC_IRQSTAT);
+  *rshort = getreg32(KINETIS_SDHC_CMDRSP0);
   return ret;
 }
 
-static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong[4])
+static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong[4])
 {
   uint32_t regval;
   int ret = OK;
@@ -1991,33 +2203,36 @@ static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
     {
       /* Check if a timeout or CRC error occurred */
 
-      regval = getreg32(STM32_SDIO_STA);
-      if (regval & SDIO_STA_CTIMEOUT)
+      regval = getreg32(KINETIS_SDHC_IRQSTAT);
+      if (regval & SDHC_INT_CTOE)
         {
           fdbg("ERROR: Timeout STA: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
-      else if (regval & SDIO_STA_CCRCFAIL)
+      else if (regval & SDHC_INT_CCE)
         {
           fdbg("ERROR: CRC fail STA: %08x\n", regval);
           ret = -EIO;
         }
     }
     
-  /* Return the long response */
+  /* Disable interrupts and return the long response */
 
-  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
+  regval = getreg32(KINETIS_SDHC_IRQSIGEN);
+  regval &= ~(SDHC_RESPDONE_INTS|SDHC_CMDDONE_INTS);
+  putreg32(regval, KINETIS_SDHC_IRQSIGEN);
+
   if (rlong)
     {
-      rlong[0] = getreg32(STM32_SDIO_RESP1);
-      rlong[1] = getreg32(STM32_SDIO_RESP2);
-      rlong[2] = getreg32(STM32_SDIO_RESP3);
-      rlong[3] = getreg32(STM32_SDIO_RESP4);
+      rlong[0] = getreg32(KINETIS_SDHC_CMDRSP0);
+      rlong[1] = getreg32(KINETIS_SDHC_CMDRSP1);
+      rlong[2] = getreg32(KINETIS_SDHC_CMDRSP2);
+      rlong[3] = getreg32(KINETIS_SDHC_CMDRSP3);
     }
   return ret;
 }
 
-static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
+static int kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
 {
   uint32_t regval;
   int ret = OK;
@@ -2047,8 +2262,8 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
        * a good response)
        */
 
-      regval = getreg32(STM32_SDIO_STA);
-      if (regval & SDIO_STA_CTIMEOUT)
+      regval = getreg32(KINETIS_SDHC_IRQSTAT);
+      if (regval & SDHC_INT_CTOE)
         {
           fdbg("ERROR: Timeout STA: %08x\n", regval);
           ret = -ETIMEDOUT;
@@ -2057,29 +2272,41 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
       /* Return the short response */
     }
 
-  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
+  /* Disable interrupts and return the short response */
+
+  regval = getreg32(KINETIS_SDHC_IRQSIGEN);
+  regval &= ~(SDHC_RESPDONE_INTS|SDHC_CMDDONE_INTS);
+  putreg32(regval, KINETIS_SDHC_IRQSIGEN);
+
   if (rshort)
     {
-      *rshort = getreg32(STM32_SDIO_RESP1);
+      *rshort = getreg32(KINETIS_SDHC_CMDRSP0);
     }
   return ret;
 }
 
 /* MMC responses not supported */
 
-static int stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rnotimpl)
+static int kinetis_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rnotimpl)
 {
-  putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
+  uint32_t regval;
+
+  /* Disable interrupts and return an error */
+
+  regval = getreg32(KINETIS_SDHC_IRQSIGEN);
+  regval &= ~(SDHC_RESPDONE_INTS|SDHC_CMDDONE_INTS);
+  putreg32(regval, KINETIS_SDHC_IRQSIGEN);
+
   return -ENOSYS;
 }
 
 /****************************************************************************
- * Name: stm32_waitenable
+ * Name: kinetis_waitenable
  *
  * Description:
  *   Enable/disable of a set of SDIO wait events.  This is part of the
  *   the SDIO_WAITEVENT sequence.  The set of to-be-waited-for events is
- *   configured before calling stm32_eventwait.  This is done in this way
+ *   configured before calling kinetis_eventwait.  This is done in this way
  *   to help the driver to eliminate race conditions between the command
  *   setup and the subsequent events.
  *
@@ -2097,51 +2324,55 @@ static int stm32_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t 
  *
  ****************************************************************************/
 
-static void stm32_waitenable(FAR struct sdio_dev_s *dev,
+static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
                              sdio_eventset_t eventset)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
-  uint32_t waitmask;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
+  uint32_t waitints;
+  uint32_t regval;
  
   DEBUGASSERT(priv != NULL);
 
   /* Disable event-related interrupts */
 
-  stm32_configwaitints(priv, 0, 0, 0);
+  kinetis_configwaitints(priv, 0, 0, 0);
 
   /* Select the interrupt mask that will give us the appropriate wakeup
    * interrupts.
    */
 
-  waitmask = 0;
+  waitints = 0;
   if ((eventset & SDIOWAIT_CMDDONE) != 0)
     {
-      waitmask |= SDIO_CMDDONE_MASK;
+      waitints |= SDHC_CMDDONE_INTS;
     }
 
   if ((eventset & SDIOWAIT_RESPONSEDONE) != 0)
     {
-      waitmask |= SDIO_RESPDONE_MASK;
+      waitints |= SDHC_RESPDONE_INTS;
     }
 
   if ((eventset & SDIOWAIT_TRANSFERDONE) != 0)
     {
-      waitmask |= SDIO_XFRDONE_MASK;
+//      waitints |= 0;
     }
 
   /* Enable event-related interrupts */
 
-  putreg32(SDIO_WAITALL_ICR, STM32_SDIO_ICR);
-  stm32_configwaitints(priv, waitmask, eventset, 0);
+  regval = getreg32(KINETIS_SDHC_IRQSIGEN);
+  regval &= ~(SDHC_WAITALL_INTS);
+  putreg32(regval, KINETIS_SDHC_IRQSIGEN);
+
+  kinetis_configwaitints(priv, waitints, eventset, 0);
 }
 
 /****************************************************************************
- * Name: stm32_eventwait
+ * Name: kinetis_eventwait
  *
  * Description:
  *   Wait for one of the enabled events to occur (or a timeout).  Note that
- *   all events enabled by SDIO_WAITEVENTS are disabled when stm32_eventwait
- *   returns.  SDIO_WAITEVENTS must be called again before stm32_eventwait
+ *   all events enabled by SDIO_WAITEVENTS are disabled when kinetis_eventwait
+ *   returns.  SDIO_WAITEVENTS must be called again before kinetis_eventwait
  *   can be used again.
  *
  * Input Parameters:
@@ -2156,10 +2387,10 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
+static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
                                        uint32_t timeout)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
   sdio_eventset_t wkupevent = 0;
   int ret;
 
@@ -2187,7 +2418,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = (timeout + (MSEC_PER_TICK-1)) / MSEC_PER_TICK;
-      ret   = wd_start(priv->waitwdog, delay, (wdentry_t)stm32_eventtimeout,
+      ret   = wd_start(priv->waitwdog, delay, (wdentry_t)kinetis_eventtimeout,
                        1, (uint32_t)priv);
       if (ret != OK)
         {
@@ -2196,7 +2427,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
     }
 
   /* Loop until the event (or the timeout occurs). Race conditions are avoided
-   * by calling stm32_waitenable prior to triggering the logic that will cause
+   * by calling kinetis_waitenable prior to triggering the logic that will cause
    * the wait to terminate.  Under certain race conditions, the waited-for
    * may have already occurred before this function was called!
    */
@@ -2208,7 +2439,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
        * there will be no wait.
        */
 
-      stm32_takesem(priv);
+      kinetis_takesem(priv);
       wkupevent = priv->wkupevent;
  
       /* Check if the event has occurred.  When the event has occurred, then
@@ -2225,7 +2456,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
 
   /* Disable event-related interrupts */
 
-  stm32_configwaitints(priv, 0, 0, 0);
+  kinetis_configwaitints(priv, 0, 0, 0);
 #ifdef CONFIG_SDIO_DMA
   priv->xfrflags   = 0;
 #endif
@@ -2234,12 +2465,12 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: stm32_callbackenable
+ * Name: kinetis_callbackenable
  *
  * Description:
  *   Enable/disable of a set of SDIO callback events.  This is part of the
  *   the SDIO callback sequence.  The set of events is configured to enabled
- *   callbacks to the function provided in stm32_registercallback.
+ *   callbacks to the function provided in kinetis_registercallback.
  *
  *   Events are automatically disabled once the callback is performed and no
  *   further callback events will occur until they are again enabled by
@@ -2255,20 +2486,20 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static void stm32_callbackenable(FAR struct sdio_dev_s *dev,
+static void kinetis_callbackenable(FAR struct sdio_dev_s *dev,
                                  sdio_eventset_t eventset)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
 
   fvdbg("eventset: %02x\n", eventset);
   DEBUGASSERT(priv != NULL);
 
   priv->cbevents = eventset;
-  stm32_callback(priv);
+  kinetis_callback(priv);
 }
 
 /****************************************************************************
- * Name: stm32_registercallback
+ * Name: kinetis_registercallback
  *
  * Description:
  *   Register a callback that that will be invoked on any media status
@@ -2289,10 +2520,10 @@ static void stm32_callbackenable(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static int stm32_registercallback(FAR struct sdio_dev_s *dev,
+static int kinetis_registercallback(FAR struct sdio_dev_s *dev,
                                   worker_t callback, void *arg)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
 
   /* Disable callbacks and register this callback and is argument */
 
@@ -2306,7 +2537,7 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: stm32_dmasupported
+ * Name: kinetis_dmasupported
  *
  * Description:
  *   Return true if the hardware can support DMA
@@ -2320,14 +2551,14 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static bool stm32_dmasupported(FAR struct sdio_dev_s *dev)
+static bool kinetis_dmasupported(FAR struct sdio_dev_s *dev)
 {
   return true;
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_dmarecvsetup
+ * Name: kinetis_dmarecvsetup
  *
  * Description:
  *   Setup to perform a read DMA.  If the processor supports a data cache,
@@ -2346,11 +2577,11 @@ static bool stm32_dmasupported(FAR struct sdio_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                               size_t buflen)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  uint32_t dblocksize;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
+  uint32_t blocksize;
   int ret = -EINVAL;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
@@ -2358,14 +2589,14 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Reset the DPSM configuration */
 
-  stm32_datadisable();
+  kinetis_datadisable();
 
   /* Wide bus operation is required for DMA */
 
   if (priv->widebus)
     {
-      stm32_sampleinit();
-      stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
+      kinetis_sampleinit();
+      kinetis_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
       /* Save the destination buffer information for use by the interrupt handler */
 
@@ -2375,22 +2606,22 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       /* Then set up the SDIO data path */
 
-      dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
-      stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, buflen, dblocksize|SDIO_DCTRL_DTDIR);
+      blocksize = kinetis_log2(buflen);
+      kinetis_dataconfig(blocksize, 1, SDHC_DVS_DATATIMEOUT);
 
       /* Configure the RX DMA */
 
-      stm32_configxfrints(priv, SDIO_DMARECV_MASK);
+      kinetis_configxfrints(priv, SDHC_DMARECV_MASK);
 
-      putreg32(1, SDIO_DCTRL_DMAEN_BB);
-      stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32_t)buffer,
-                     (buflen + 3) >> 2, SDIO_RXDMA32_CONFIG);
+      putreg32(1, SDHC_DCTRL_DMAEN_BB);
+      kinetis_dmasetup(priv->dma, KINETIS_SDHC_FIFO, (uint32_t)buffer,
+                     (buflen + 3) >> 2, SDHC_RXDMA32_CONFIG);
  
      /* Start the DMA */
 
-      stm32_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-      stm32_dmastart(priv->dma, stm32_dmacallback, priv, false);
-      stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
+      kinetis_sample(priv, SAMPLENDX_BEFORE_ENABLE);
+      kinetis_dmastart(priv->dma, kinetis_dmacallback, priv, false);
+      kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
       ret = OK;
     }
   return ret;
@@ -2398,7 +2629,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 #endif
 
 /****************************************************************************
- * Name: stm32_dmasendsetup
+ * Name: kinetis_dmasendsetup
  *
  * Description:
  *   Setup to perform a write DMA.  If the processor supports a data cache,
@@ -2417,11 +2648,11 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
+static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-  uint32_t dblocksize;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
+  uint32_t blocksize;
   int ret = -EINVAL;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
@@ -2429,14 +2660,14 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Reset the DPSM configuration */
 
-  stm32_datadisable();
+  kinetis_datadisable();
 
   /* Wide bus operation is required for DMA */
 
   if (priv->widebus)
     {
-      stm32_sampleinit();
-      stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
+      kinetis_sampleinit();
+      kinetis_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
       /* Save the source buffer information for use by the interrupt handler */
 
@@ -2446,25 +2677,25 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Then set up the SDIO data path */
 
-      dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
-      stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, buflen, dblocksize);
+      blocksize = kinetis_log2(buflen);
+      kinetis_dataconfig(blocksize, 1, SDHC_DVS_DATATIMEOUT);
 
       /* Configure the TX DMA */
 
-      stm32_dmasetup(priv->dma, STM32_SDIO_FIFO, (uint32_t)buffer,
-                     (buflen + 3) >> 2, SDIO_TXDMA32_CONFIG);
+      kinetis_dmasetup(priv->dma, KINETIS_SDHC_FIFO, (uint32_t)buffer,
+                     (buflen + 3) >> 2, SDHC_TXDMA32_CONFIG);
 
-      stm32_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-      putreg32(1, SDIO_DCTRL_DMAEN_BB);
+      kinetis_sample(priv, SAMPLENDX_BEFORE_ENABLE);
+      putreg32(1, SDHC_DCTRL_DMAEN_BB);
 
       /* Start the DMA */
 
-      stm32_dmastart(priv->dma, stm32_dmacallback, priv, false);
-      stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
+      kinetis_dmastart(priv->dma, kinetis_dmacallback, priv, false);
+      kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
 
       /* Enable TX interrrupts */
 
-      stm32_configxfrints(priv, SDIO_DMASEND_MASK);
+      kinetis_configxfrints(priv, SDHC_DMASEND_MASK);
 
       ret = OK;
     }
@@ -2476,7 +2707,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
  * Initialization/uninitialization/reset
  ****************************************************************************/
 /****************************************************************************
- * Name: stm32_callback
+ * Name: kinetis_callback
  *
  * Description:
  *   Perform callback.
@@ -2488,9 +2719,9 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static void stm32_callback(void *arg)
+static void kinetis_callback(void *arg)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s*)arg;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s*)arg;
 
   /* Is a callback registered? */
 
@@ -2554,27 +2785,6 @@ static void stm32_callback(void *arg)
 }
 
 /****************************************************************************
- * Name: stm32_default
- *
- * Description:
- *   Restore SDIO registers to their default, reset values
- *
- ****************************************************************************/
-
-static void stm32_default(void)
-{
-  putreg32(SDIO_POWER_RESET,  STM32_SDIO_POWER);
-  putreg32(SDIO_CLKCR_RESET,  STM32_SDIO_CLKCR);
-  putreg32(SDIO_ARG_RESET,    STM32_SDIO_ARG);
-  putreg32(SDIO_CMD_RESET,    STM32_SDIO_CMD);
-  putreg32(SDIO_DTIMER_RESET, STM32_SDIO_DTIMER);
-  putreg32(SDIO_DLEN_RESET,   STM32_SDIO_DLEN);
-  putreg32(SDIO_DCTRL_RESET,  STM32_SDIO_DCTRL);
-  putreg32(SDIO_ICR_RESET,    STM32_SDIO_ICR);
-  putreg32(SDIO_MASK_RESET,   STM32_SDIO_MASK);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -2594,11 +2804,14 @@ static void stm32_default(void)
 
 FAR struct sdio_dev_s *sdio_initialize(int slotno)
 {
+  uint32_t regval;
+
   /* There is only one slot */
 
-  struct stm32_dev_s *priv = &g_sdiodev;
+  struct kinetis_dev_s *priv = &g_sdhcdev;
+  DEBUGASSERT(slotno == 0);
 
-  /* Initialize the SDIO slot structure */
+  /* Initialize the SDHC slot structure data structure */
 
   sem_init(&priv->waitsem, 0, 0);
   priv->waitwdog = wd_create();
@@ -2607,33 +2820,71 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   /* Allocate a DMA channel */
 
 #ifdef CONFIG_SDIO_DMA
-  priv->dma = stm32_dmachannel(DMACHAN_SDIO);
+  priv->dma = kinetis_dmachannel(DMACHAN_SDHC);
 #endif
 
-  /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable of
-   * 8-bit wide bus operation but D4-D7 are not configured).
+  /* Enable clocking to the SDHC module. */
+
+  regval = getreg32(KINETIS_SIM_SCGC3);
+  regval |= SIM_SCGC3_SDHC;
+  putreg32(regval, KINETIS_SIM_SCGC3);
+  
+  /* In addition to the system clock, the SDHC module needs a clock for the
+   * base for the external card clock.  There are four possible sources for
+   * this clock, selected by the SIM's SOPT2 register:
+   *
+   * - Core/system clock
+   * - MCGPLLCLK/MCGFLLCLK clock
+   * - OSCERCLK EXTAL clock
+   * - External bypass clock from off-chip (SCHC0_CLKINB)
+   */
+
+  regval = getreg32(KINETIS_SIM_SOPT2);
+  regval &= ~SIM_SOPT2_SDHCSRC_MASK;
+  regval |= SIM_SOPT2_SDHCSRC_CORE;
+  putreg32(regval, KINETIS_SIM_SOPT2);
+
+  /* Configure pins for 1 or 4-bit, wide-bus operation (the chip is capable
+   * of 8-bit wide bus operation but D4-D7 are not configured).
    * 
    * If bus is multiplexed then there is a custom bus configuration utility
    * in the scope of the board support package.
    */
 
 #ifndef CONFIG_SDIO_MUXBUS
-  stm32_configgpio(GPIO_SDIO_D0);
+  /* Data width 1, 4 or 8 */
+
+  kinetis_pinconfig(PIN_SDHC0_D0);
+
+  /* Data width 4 or 8 */
+
 #ifndef CONFIG_SDIO_WIDTH_D1_ONLY
-  stm32_configgpio(GPIO_SDIO_D1);
-  stm32_configgpio(GPIO_SDIO_D2);
-  stm32_configgpio(GPIO_SDIO_D3);
+  kinetis_pinconfig(PIN_SDHC0_D1);
+  kinetis_pinconfig(PIN_SDHC0_D2);
+  kinetis_pinconfig(PIN_SDHC0_D3);
+
+  /* Data width 8 (not supported) */
+
+#if 0
+  kinetis_pinconfig(PIN_SDHC0_D4);
+  kinetis_pinconfig(PIN_SDHC0_D5);
+  kinetis_pinconfig(PIN_SDHC0_D6);
+  kinetis_pinconfig(PIN_SDHC0_D7);
 #endif
-  stm32_configgpio(GPIO_SDIO_CK);
-  stm32_configgpio(GPIO_SDIO_CMD);
+#endif
+
+  /* Clocking and CMD pins (all data widths) */
+
+  kinetis_pinconfig(PIN_SDHC0_DCLK);
+  kinetis_pinconfig(PIN_SDHC0_CMD);
 #endif
 
   /* Reset the card and assure that it is in the initial, unconfigured
    * state.
    */
 
-  stm32_reset(&priv->dev);
-  return &g_sdiodev.dev;
+  kinetis_reset(&priv->dev);
+  return &g_sdhcdev.dev;
 }
 
 /****************************************************************************
@@ -2657,7 +2908,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
 void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   uint8_t cdstatus;
   irqstate_t flags;
 
@@ -2679,7 +2930,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 
   if (cdstatus != priv->cdstatus)
     {
-      stm32_callback(priv);
+      kinetis_callback(priv);
     }
   irqrestore(flags);
 }
@@ -2702,7 +2953,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 
 void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
 {
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   irqstate_t flags;
 
   /* Update card status */
@@ -2719,4 +2970,4 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
   fvdbg("cdstatus: %02x\n", priv->cdstatus);
   irqrestore(flags);
 }
-#endif /* CONFIG_STM32_SDIO */
+#endif /* CONFIG_KINETIS_SDHC */

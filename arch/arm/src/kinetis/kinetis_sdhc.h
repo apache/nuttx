@@ -222,6 +222,7 @@
 #  define SDHC_SYSCTL_DVS_DIV(n)        (((n)-1) << SDHC_SYSCTL_DVS_SHIFT) /* Divide by n, n=1..16 */
 #define SDHC_SYSCTL_SDCLKFS_SHIFT       (8)       /* Bits 8-15: SDCLK Frequency Select */
 #define SDHC_SYSCTL_SDCLKFS_MASK        (0xff << SDHC_SYSCTL_SDCLKFS_SHIFT)
+#  define SDHC_SYSCTL_SDCLKFS_BYPASS    (0x00 << SDHC_SYSCTL_SDCLKFS_SHIFT) /* Bypass the prescaler */
 #  define SDHC_SYSCTL_SDCLKFS_DIV2      (0x01 << SDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 2 */
 #  define SDHC_SYSCTL_SDCLKFS_DIV4      (0x02 << SDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 4 */
 #  define SDHC_SYSCTL_SDCLKFS_DIV8      (0x04 << SDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 8 */
@@ -265,6 +266,8 @@
                                                   /* Bits 25-27: Reserved */
 #define SDHC_INT_DMAE                   (1 << 28) /* Bit 28: DMA Error */
                                                   /* Bits 29-31: Reserved */
+#define SDHC_INT_ALL                    0x117f01ff
+
 /* Auto CMD12 Error Status Register */
 
 #define SDHC_AC12ERR_NE                 (1 << 0)  /* Bit 0:  Auto CMD12 Not Executed */
