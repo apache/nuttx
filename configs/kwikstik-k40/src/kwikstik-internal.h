@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/kwikstik-k40/src/kwikstik_internal.h
- * arch/arm/src/board/kwikstik_internal.n
+ * configs/kwikstik-k40/src/kwikstik-internal.h
+ * arch/arm/src/board/kwikstik-internal.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
