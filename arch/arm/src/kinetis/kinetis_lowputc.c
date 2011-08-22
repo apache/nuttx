@@ -427,9 +427,9 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
   /* Otherwise, disable the FIFOs.  Then the FIFOs are disable, the effective
    * FIFO depth is 1.  So set the watermarks as follows:
    *
-   * TWFIFO[TXWATER] = 0:  TDRE will be set when the number of queues bytes
+   * TWFIFO[TXWATER] = 0:  TDRE will be set when the number of queued bytes
    *  (1 in this case) is less than or equal to 0.
-   * RWFIFO[RXWATER] = 1:  RDRF will be set when the number of queues bytes
+   * RWFIFO[RXWATER] = 1:  RDRF will be set when the number of queued bytes
    *  (1 in this case) is greater than or equal to 1.
    * 
    * Set the watermarks to one/zero and disable the FIFOs 
