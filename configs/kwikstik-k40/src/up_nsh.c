@@ -172,15 +172,6 @@ static void kinetis_mediachange(void)
 
       g_nsh.inserted = inserted;
       sdhc_mediachange(g_nsh.sdhc, inserted);
-
-      /* If the card has been inserted, then check if it is write protected
-       * aw well.
-       */
-
-      if (inserted)
-        {
-          sdhc_wrprotect(g_nsh.sdhc, !kinetis_gpioread(GPIO_SD_WRPROTECT));
-        }
     }
 }
 #endif
@@ -227,10 +218,6 @@ int nsh_archinitialize(void)
 
   kinetis_pinconfig(GPIO_SD_CARDDETECT);
   kinetis_pinirqattach(GPIO_SD_CARDDETECT, kinetis_cdinterrupt);
-
-  /* Configure the write protect GPIO */
-
-  kinetis_pinconfig(GPIO_SD_WRPROTECT);
 
   /* Mount the SDHC-based MMC/SD block driver */
   /* First, get an instance of the SDHC interface */

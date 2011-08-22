@@ -216,12 +216,7 @@ int nsh_archinitialize(void)
 #ifdef CONFIG_NSH_HAVEMMCSD
   int ret;
 
-  /* Configure GPIO pins.
-   *
-   * First CD power.  The initial state will provide SD power.
-   */
-
-  kinetis_pinconfig(GPIO_SD_CARDON);      /* Applies power to the card */
+  /* Configure GPIO pins */
 
   /* Attached the card detect interrupt (but don't enable it yet) */
 

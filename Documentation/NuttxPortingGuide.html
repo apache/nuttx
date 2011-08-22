@@ -2760,6 +2760,16 @@ extern void up_ledoff(int led);
       That structure defines a call table with the following methods:
     </p>
     <p>
+      Mutual exclusion:
+    </p>
+    <ul>
+      <p>
+        <code>#ifdef CONFIG_SDIO_MUXBUS</code><br>
+        <code>  int (*lock)(FAR struct sdio_dev_s *dev, bool lock);</code><br>
+        <code>#endif</code>
+      </p>
+    </ul>
+    <p>
       Initialization/setup:
     </p>
     <ul>
@@ -2767,13 +2777,13 @@ extern void up_ledoff(int led);
      <code>uint8_t (*status)(FAR struct sdio_dev_s *dev);</code><br>
      <code>void (*widebus)(FAR struct sdio_dev_s *dev, bool enable);</code><br>
      <code>void (*clock)(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate);</code><br>
-     <code>int (*attach)(FAR struct sdio_dev_s *dev);</code></p>
+     <code>int (*attach)(FAR struct sdio_dev_s *dev);</code><br>
     </ul>
     <p>
       Command/Status/Data Transfer:
     </p>
     <ul>
-     <p><code>void (*sendcmd)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg);</code><br>
+     <p><code>int (*sendcmd)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg);</code><br>
      <code>int (*recvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer, size_t nbytes);</code><br>
      <code>int (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer, size_t nbytes);</code><br>
      <code>int (*cancel)(FAR struct sdio_dev_s *dev);</code><br>

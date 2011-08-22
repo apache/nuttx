@@ -318,20 +318,22 @@ static int mmcsd_sendcmdpoll(FAR struct mmcsd_state_s *priv, uint32_t cmd,
 
   /* Send the command */
 
-  SDIO_SENDCMD(priv->dev, cmd, arg);
-
-  /* Then poll-wait until the response is available */
-
-  ret = SDIO_WAITRESPONSE(priv->dev, cmd);
-  if (ret != OK)
+  ret = SDIO_SENDCMD(priv->dev, cmd, arg);
+  if (ret == OK)
     {
-      fdbg("ERROR: Wait for response to cmd: %08x failed: %d\n", cmd, ret);
+      /* Then poll-wait until the response is available */
+
+      ret = SDIO_WAITRESPONSE(priv->dev, cmd);
+      if (ret != OK)
+        {
+          fdbg("ERROR: Wait for response to cmd: %08x failed: %d\n", cmd, ret);
+        }
     }
   return ret;
 }
 
 /****************************************************************************
- * Name: mmcsd_sendcmdpoll
+ * Name: mmcsd_sendcmd4
  *
  * Description:
  *   Set the Driver Stage Register (DSR) if (1) a CONFIG_MMCSD_DSR has been
@@ -2475,8 +2477,16 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
    * CMD8 Response: R7
    */
 
-  mmcsd_sendcmdpoll(priv, SD_CMD8, MMCSD_CMD8CHECKPATTERN|MMCSD_CMD8VOLTAGE_27);
-  ret = SDIO_RECVR7(priv->dev, SD_CMD8, &response);
+  ret = mmcsd_sendcmdpoll(priv, SD_CMD8, MMCSD_CMD8CHECKPATTERN|MMCSD_CMD8VOLTAGE_27);
+  if (ret == OK)
+    {
+      /* CMD8 was sent successfully... Get the R7 response */
+
+      ret = SDIO_RECVR7(priv->dev, SD_CMD8, &response);
+    }
+
+  /* Were both the command sent and response received correctly? */
+
   if (ret == OK)
   {
     /* CMD8 succeeded this is probably a SDHC card. Verify the operating

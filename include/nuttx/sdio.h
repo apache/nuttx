@@ -529,7 +529,10 @@
  * Name: SDIO_WAITRESPONSE
  *
  * Description:
- *   Poll-wait for the response to the last command to be ready.
+ *   Poll-wait for the response to the last command to be ready.  This
+ *   function should be called even after sending commands that have no
+ *   response (such as CMD0) to make sure that the hardware is ready to
+ *   receive the next command.
  *
  * Input Parameters:
  *   dev  - An instance of the SDIO device interface
@@ -790,7 +793,7 @@ struct sdio_dev_s
 
   /* Command/Status/Data Transfer */
 
-  void  (*sendcmd)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg);
+  int   (*sendcmd)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg);
 #ifdef CONFIG_SDIO_BLOCKSETUP
   void  (*blocksetup)(FAR struct sdio_dev_s *dev, unsigned int blocklen,
           unsigned int nblocks);

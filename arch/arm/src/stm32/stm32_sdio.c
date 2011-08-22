@@ -334,7 +334,7 @@ static int  stm32_attach(FAR struct sdio_dev_s *dev);
 
 /* Command/Status/Data Transfer */
 
-static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
 static int  stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
               size_t nbytes);
@@ -1574,7 +1574,7 @@ static int stm32_attach(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
+static int stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 {
   uint32_t regval;
   uint32_t cmdidx;
@@ -1623,6 +1623,7 @@ static void stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg
 
   putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
   putreg32(regval, STM32_SDIO_CMD);
+  return OK;
 }
 
 /****************************************************************************
