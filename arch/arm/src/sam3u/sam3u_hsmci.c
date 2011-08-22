@@ -393,7 +393,7 @@ static int  sam3u_attach(FAR struct sdio_dev_s *dev);
 
 /* Command/Status/Data Transfer */
 
-static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
 static void sam3u_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
               unsigned int nblocks);
@@ -1464,7 +1464,7 @@ static int sam3u_attach(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
+static int sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 {
   struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
   uint32_t regval;
@@ -1571,6 +1571,7 @@ static void sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg
   fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
   putreg32(regval, SAM3U_HSMCI_CMDR);
   sam3u_cmdsample1(SAMPLENDX_AFTER_CMDR);
+  return OK;
 }
 
 /****************************************************************************
