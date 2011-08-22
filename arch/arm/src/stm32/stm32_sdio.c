@@ -882,7 +882,7 @@ static void stm32_sendfifo(struct stm32_dev_s *priv)
   union
   {
     uint32_t w;
-    uint8_t  b[2];
+    uint8_t  b[4];
   } data;
 
   /* Loop while there is more data to be sent and the RX FIFO is not full */
@@ -944,7 +944,7 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
   union
   {
     uint32_t w;
-    uint8_t  b[2];
+    uint8_t  b[4];
   } data;
 
   /* Loop while there is space to store the data and there is more
