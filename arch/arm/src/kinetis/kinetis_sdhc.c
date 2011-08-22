@@ -155,9 +155,11 @@
 
 #define SDHC_RESPERR_INTS  (SDHC_INT_CCE|SDHC_INT_CTOE|SDHC_INT_CEBE|SDHC_INT_CIE)
 #define SDHC_RESPDONE_INTS (SDHC_RESPERR_INTS|SDHC_INT_CC)
-#define SDHC_XFDONE_INTS   (SDHC_INT_DCE|SDHC_INT_DTOE|SDHC_INT_DEBE)
+#define SDHC_XFDERR_INTS   (SDHC_INT_DCE|SDHC_INT_DTOE|SDHC_INT_DEBE)
+#define SDHC_XFRDONE_INTS  (SDHC_XFDERR_INTS|SDHC_INT_BRR|SDHC_INT_BWR)
+#define SDHC_DMADONE_INTS  (SDHC_XFDERR_INTS|SDHC_INT_DINT)
 
-#define SDHC_WAITALL_INTS  (SDHC_RESPDONE_INTS|SDHC_XFDONE_INTS)
+#define SDHC_WAITALL_INTS  (SDHC_RESPDONE_INTS|SDHC_XFRDONE_INTS|SDHC_DMADONE_INTS)
 
 /* Let's wait until we have both SDIO transfer complete and DMA complete. */
 
@@ -302,8 +304,8 @@ static void kinetis_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg);
 
 /* Data Transfer Helpers ****************************************************/
 
-static uint8_t kinetis_log2(uint16_t value);
-static void kinetis_dataconfig(unsigned int blocksize, unsigned int nblocks,
+static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
+                               unsigned int blocksize, unsigned int nblocks,
                                unsigned int timeout);
 static void kinetis_datadisable(void);
 static void kinetis_sendfifo(struct kinetis_dev_s *priv);
@@ -753,36 +755,6 @@ static void kinetis_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kinetis_log2
- *
- * Description:
- *   Take (approximate) log base 2 of the provided number (Only works if the
- *   provided number is a power of 2).
- *
- ****************************************************************************/
-
-static uint8_t kinetis_log2(uint16_t value)
-{
-  uint8_t log2 = 0;
-
-  /* 0000 0000 0000 0001 -> return 0,
-   * 0000 0000 0000 001x -> return 1,
-   * 0000 0000 0000 01xx -> return 2,
-   * 0000 0000 0000 1xxx -> return 3,
-   * ...
-   * 1xxx xxxx xxxx xxxx -> return 15,
-   */
-
-  DEBUGASSERT(value > 0);
-  while (value != 1)
-  {
-    value >>= 1;
-    log2++;
-  }
-  return log2;
-}
-
-/****************************************************************************
  * Name: kinetis_dataconfig
  *
  * Description:
@@ -790,7 +762,8 @@ static uint8_t kinetis_log2(uint16_t value)
  *
  ****************************************************************************/
 
-static void kinetis_dataconfig(unsigned int blocksize, unsigned int nblocks,
+static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
+                               unsigned int blocksize, unsigned int nblocks,
                                unsigned int timeout)
 {
   uint32_t regval = 0;
@@ -809,6 +782,38 @@ static void kinetis_dataconfig(unsigned int blocksize, unsigned int nblocks,
   regval = blocksize << SDHC_BLKATTR_SIZE_SHIFT |
            nblocks   << SDHC_BLKATTR_CNT_SHIFT;
   putreg32(regval, KINETIS_SDHC_BLKATTR);
+
+  /* Set the watermark level */
+
+#ifdef CONFIG_SDIO_DMA
+  if (priv->dma)
+    {
+#  warning "Missing logic"
+    }
+  else
+#endif
+    {
+      /* For now, treat the FIFO as though it had depth = 1. Set the
+       * read/write watermarks as follows:
+       */
+
+      if (bwrite)
+        {
+          /* Write Watermark Level = 0:  BWR will be set when the number of
+           * queued bytes is less than or equal to 0.
+           */
+
+          putreg32(0, KINETIS_SDHC_WML);
+        }
+      else
+        {
+          /* Read Watermark Level = 1:  BRR will be set when the number of
+           * queued bytes is greater than or equal to 1.
+           */
+
+          putreg32(1 << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);        
+        }
+    }
 }
 
 /****************************************************************************
@@ -988,7 +993,11 @@ static void kinetis_eventtimeout(int argc, uint32_t arg)
 
   if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
     {
-      /* Yes.. wake up any waiting threads */
+      /* Yes.. Sample registers at the time of the timeout */
+
+      kinetis_sample(priv, SAMPLENDX_END_TRANSFER);
+
+      /* Wake up any waiting threads */
 
       kinetis_endwait(priv, SDIOWAIT_TIMEOUT);
       flldbg("Timeout: remaining: %d\n", priv->remaining);
@@ -1056,7 +1065,7 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
 
   /* Clearing pending interrupt status on all transfer related interrupts */
  
-  putreg32(SDHC_XFDONE_INTS, KINETIS_SDHC_IRQSTAT);
+  putreg32(SDHC_XFRDONE_INTS, KINETIS_SDHC_IRQSTAT);
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
@@ -1799,26 +1808,26 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
 
           case MMCSD_RDSTREAM :  /* Yes.. streaming read data transfer */
 #warning "Probably some missing setup"
-            regval |= SDHC_XFERTYP_DPSEL;
+            regval |= (SDHC_XFERTYP_DPSEL | SDHC_XFERTYP_DTDSEL);
             break;
 
           case MMCSD_WRSTREAM :  /* Yes.. streaming write data transfer */
 #warning "Probably some missing setup"
-            regval |= (SDHC_XFERTYP_DPSEL | SDHC_XFERTYP_DTDSEL);
-            break;
-
-          case MMCSD_RDDATAXFR : /* Yes.. normal read data transfer */
             regval |= SDHC_XFERTYP_DPSEL;
             break;
 
-          case MMCSD_WRDATAXFR : /* Yes.. normal write data transfer */
+          case MMCSD_RDDATAXFR : /* Yes.. normal read data transfer */
             regval |= (SDHC_XFERTYP_DPSEL | SDHC_XFERTYP_DTDSEL);
+            break;
+
+          case MMCSD_WRDATAXFR : /* Yes.. normal write data transfer */
+            regval |= SDHC_XFERTYP_DPSEL;
             break;
         }
 
       /* Is it a multi-block transfer? */
 
-      if ((cmd & MMCSD_DATAXFR) != 0)
+      if ((cmd & MMCSD_MULTIBLOCK) != 0)
         {
           /* Yes.. should the transfer be stopped with ACMD12? */
 
@@ -1941,7 +1950,6 @@ static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                              size_t nbytes)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
-  uint32_t blocksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -1962,8 +1970,7 @@ static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  blocksize = kinetis_log2(nbytes);
-  kinetis_dataconfig(blocksize, 1, SDHC_DVS_DATATIMEOUT);
+  kinetis_dataconfig(priv, false, nbytes, 1, SDHC_DVS_DATATIMEOUT);
 
   /* And enable interrupts */
 
@@ -1995,7 +2002,6 @@ static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buff
                            size_t nbytes)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
-  uint32_t blocksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -2016,8 +2022,7 @@ static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buff
 
   /* Then set up the SDIO data path */
 
-  blocksize = kinetis_log2(nbytes);
-  kinetis_dataconfig(blocksize, 1, SDHC_DVS_DATATIMEOUT);
+  kinetis_dataconfig(priv, true, nbytes, 1, SDHC_DVS_DATATIMEOUT);
 
   /* Enable TX interrrupts */
 
@@ -2430,7 +2435,7 @@ static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
 
   if ((eventset & SDIOWAIT_TRANSFERDONE) != 0)
     {
-//      waitints |= 0;
+      waitints |= SDHC_XFRDONE_INTS;
     }
 
   /* Enable event-related interrupts */
@@ -2683,8 +2688,7 @@ static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       /* Then set up the SDIO data path */
 
-      blocksize = kinetis_log2(buflen);
-      kinetis_dataconfig(blocksize, 1, SDHC_DVS_DATATIMEOUT);
+      kinetis_dataconfig(priv, false, buflen, 1, SDHC_DVS_DATATIMEOUT);
 
       /* Configure the RX DMA */
 
@@ -2754,8 +2758,7 @@ static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Then set up the SDIO data path */
 
-      blocksize = kinetis_log2(buflen);
-      kinetis_dataconfig(blocksize, 1, SDHC_DVS_DATATIMEOUT);
+      kinetis_dataconfig(priv, true, buflen, 1, SDHC_DVS_DATATIMEOUT);
 
       /* Configure the TX DMA */
 
