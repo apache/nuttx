@@ -140,24 +140,15 @@
 #define SDHC_TXDMA32_CONFIG     (CONFIG_KINETIS_SDHC_DMAPRIO|DMA_CCR_MSIZE_32BITS|\
                                  DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC|DMA_CCR_DIR)
 
-/* Data transfer interrupt mask bits */
-
-#define SDHC_RECV_MASK     (SDHC_INT_BRR|SDHC_INT_DCE|SDHC_INT_DTOE|\
-                            SDHC_INT_DEBE)
-#define SDHC_SEND_MASK     (SDHC_INT_BWR|SDHC_INT_DCE|SDHC_INT_DTOE|\
-                            SDHC_INT_DEBE)
-#define SDHC_DMARECV_MASK  (SDHC_INT_DINT|DHC_INT_DCE|SDHC_INT_DTOE|\
-                            SDHC_INT_DEBE|SDHC_INT_DMAE)
-#define SDHC_DMASEND_MASK  (SDHC_INT_DINT|SDHC_INT_DCE|SDHC_INT_DTOE|\
-                            SDHC_INT_DEBE|SDHC_INT_DMAE)
-
-/* Event waiting interrupt mask bits */
+/* Data transfer / Event waiting interrupt mask bits */
 
 #define SDHC_RESPERR_INTS  (SDHC_INT_CCE|SDHC_INT_CTOE|SDHC_INT_CEBE|SDHC_INT_CIE)
 #define SDHC_RESPDONE_INTS (SDHC_RESPERR_INTS|SDHC_INT_CC)
-#define SDHC_XFDERR_INTS   (SDHC_INT_DCE|SDHC_INT_DTOE|SDHC_INT_DEBE)
-#define SDHC_XFRDONE_INTS  (SDHC_XFDERR_INTS|SDHC_INT_BRR|SDHC_INT_BWR)
-#define SDHC_DMADONE_INTS  (SDHC_XFDERR_INTS|SDHC_INT_DINT)
+#define SCHC_XFRERR_INTS   (SDHC_INT_DCE|SDHC_INT_DTOE|SDHC_INT_DEBE)
+#define SDHC_RCVDONE_INTS  (SCHC_XFRERR_INTS|SDHC_INT_BRR|SDHC_INT_TC)
+#define SDHC_SNDDONE_INTS  (SCHC_XFRERR_INTS|SDHC_INT_BWR|SDHC_INT_TC)
+#define SDHC_XFRDONE_INTS  (SCHC_XFRERR_INTS|SDHC_INT_BRR|SDHC_INT_BWR|SDHC_INT_TC)
+#define SDHC_DMADONE_INTS  (SCHC_XFRERR_INTS|SDHC_INT_DINT)
 
 #define SDHC_WAITALL_INTS  (SDHC_RESPDONE_INTS|SDHC_XFRDONE_INTS|SDHC_DMADONE_INTS)
 
@@ -308,8 +299,8 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
                                unsigned int blocksize, unsigned int nblocks,
                                unsigned int timeout);
 static void kinetis_datadisable(void);
-static void kinetis_sendfifo(struct kinetis_dev_s *priv);
-static void kinetis_recvfifo(struct kinetis_dev_s *priv);
+static void kinetis_transmit(struct kinetis_dev_s *priv);
+static void kinetis_receive(struct kinetis_dev_s *priv);
 static void kinetis_eventtimeout(int argc, uint32_t arg);
 static void kinetis_endwait(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent);
 static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent);
@@ -842,7 +833,7 @@ static void kinetis_datadisable(void)
 }
 
 /****************************************************************************
- * Name: kinetis_sendfifo
+ * Name: kinetis_transmit
  *
  * Description:
  *   Send SDIO data in interrupt mode
@@ -855,20 +846,23 @@ static void kinetis_datadisable(void)
  *
  ****************************************************************************/
 
-static void kinetis_sendfifo(struct kinetis_dev_s *priv)
+static void kinetis_transmit(struct kinetis_dev_s *priv)
 {
   union
   {
     uint32_t w;
-    uint8_t  b[2];
+    uint8_t  b[4];
   } data;
 
   /* Loop while there is more data to be sent, waiting for buffer write
    * ready (BWR)
    */
 
+  fllvdbg("Entry: remaining: %d IRQSTAT: %08x\n",
+          priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
+
   while (priv->remaining > 0 &&
-         (getreg32(KINETIS_SDHC_IRQSTAT) & SDHC_INT_BWR) == 0)
+         (getreg32(KINETIS_SDHC_IRQSTAT) & SDHC_INT_BWR) != 0)
     {
       /* Is there a full word remaining in the user buffer? */
 
@@ -881,32 +875,36 @@ static void kinetis_sendfifo(struct kinetis_dev_s *priv)
         }
       else
         {
-           /* No.. transfer just the bytes remaining in the user buffer,
-            * padding with zero as necessary to extend to a full word.
-            */
+          /* No.. transfer just the bytes remaining in the user buffer,
+           * padding with zero as necessary to extend to a full word.
+           */
 
-           uint8_t *ptr = (uint8_t *)priv->remaining;
-           int i;
+          uint8_t *ptr = (uint8_t *)priv->remaining;
+          int i;
 
-           data.w = 0;
-           for (i = 0; i < priv->remaining; i++)
-             {
-                data.b[i] = *ptr++;
-             }
+          data.w = 0;
+          for (i = 0; i < priv->remaining; i++)
+            {
+               data.b[i] = *ptr++;
+            }
  
-           /* Now the transfer is finished */
+          /* Now the transfer is finished */
 
-           priv->remaining = 0;
-         }
+          priv->remaining = 0;
+        }
 
        /* Put the word in the FIFO */
 
        putreg32(data.w, KINETIS_SDHC_DATPORT);
     }
+
+  fllvdbg("Exit: remaining: %d IRQSTAT: %08x\n",
+          priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
+
 }
 
 /****************************************************************************
- * Name: kinetis_recvfifo
+ * Name: kinetis_receive
  *
  * Description:
  *   Receive SDIO data in interrupt mode
@@ -919,17 +917,20 @@ static void kinetis_sendfifo(struct kinetis_dev_s *priv)
  *
  ****************************************************************************/
 
-static void kinetis_recvfifo(struct kinetis_dev_s *priv)
+static void kinetis_receive(struct kinetis_dev_s *priv)
 {
   union
   {
     uint32_t w;
-    uint8_t  b[2];
+    uint8_t  b[4];
   } data;
 
   /* Loop while there is space to store the data, waiting for buffer read
-   * ready (BWR)
+   * ready (BRR)
    */
+
+  fllvdbg("Entry: remaining: %d IRQSTAT: %08x\n",
+          priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 
   while (priv->remaining > 0 &&
          (getreg32(KINETIS_SDHC_IRQSTAT) & SDHC_INT_BRR) != 0)
@@ -961,6 +962,10 @@ static void kinetis_recvfifo(struct kinetis_dev_s *priv)
           priv->remaining = 0;
         }
     }
+
+  fllvdbg("Exit: remaining: %d IRQSTAT: %08x\n",
+          priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
+
 }
 
 /****************************************************************************
@@ -1132,6 +1137,8 @@ static int kinetis_interrupt(int irq, void *context)
 
   regval  = getreg32(KINETIS_SDHC_IRQSIGEN);
   enabled = getreg32(KINETIS_SDHC_IRQSTAT) & regval;
+  fllvdbg("IRQSTAT: %08x IRQSIGEN %08x enabled: %08x\n", 
+          getreg32(KINETIS_SDHC_IRQSTAT), regval, enabled);
   
   /* Disable card interrupts to clear the card interrupt to the host system. */
 
@@ -1156,10 +1163,10 @@ static int kinetis_interrupt(int irq, void *context)
           */
 
           if ((pending & SDHC_INT_BRR) != 0)
-           {
-             /* Receive data from the RX buffer */
+            {
+              /* Receive data from the RX buffer */
 
-             kinetis_recvfifo(priv);
+              kinetis_receive(priv);
             }
 
           /* Otherwise, Is the TX buffer write ready? If so we must
@@ -1171,13 +1178,13 @@ static int kinetis_interrupt(int irq, void *context)
             {
               /* Send data via the TX FIFO */
 
-              kinetis_sendfifo(priv);
+              kinetis_transmit(priv);
             }
         }
 
       /* Handle data end events */
 
-      if ((pending & SDHC_INT_DEBE) != 0)
+      if ((pending & SDHC_INT_TC) != 0)
         {
           /* Handle any data remaining the RX buffer */
 
@@ -1208,9 +1215,9 @@ static int kinetis_interrupt(int irq, void *context)
           else
 #endif
             {
-              /* Receive data from the RX FIFO */
+              /* Receive any additional data from the RX FIFO */
 
-              kinetis_recvfifo(priv);
+              kinetis_receive(priv);
 
               /* Then terminate the transfer */
 
@@ -1974,7 +1981,7 @@ static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* And enable interrupts */
 
-  kinetis_configxfrints(priv, SDHC_RECV_MASK);
+  kinetis_configxfrints(priv, SDHC_RCVDONE_INTS);
   kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
@@ -2026,7 +2033,7 @@ static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buff
 
   /* Enable TX interrrupts */
 
-  kinetis_configxfrints(priv, SDHC_SEND_MASK);
+  kinetis_configxfrints(priv, SDHC_SNDDONE_INTS);
   kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
@@ -2692,7 +2699,7 @@ static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       /* Configure the RX DMA */
 
-      kinetis_configxfrints(priv, SDHC_DMARECV_MASK);
+      kinetis_configxfrints(priv, SDHC_DMADONE_INTS);
 
       putreg32(1, SDHC_DCTRL_DMAEN_BB);
       kinetis_dmasetup(priv->dma, KINETIS_SDHC_FIFO, (uint32_t)buffer,
@@ -2775,7 +2782,7 @@ static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Enable TX interrrupts */
 
-      kinetis_configxfrints(priv, SDHC_DMASEND_MASK);
+      kinetis_configxfrints(priv, SDHC_DMADONE_INTS);
 
       ret = OK;
     }

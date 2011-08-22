@@ -76,7 +76,6 @@
 
 /* Timing (all in units of microseconds) */
 
-#define MMCSD_
 #define MMCSD_POWERUP_DELAY     ((useconds_t)250)    /* 74 clock cycles @ 400KHz = 185uS */
 #define MMCSD_IDLE_DELAY        ((useconds_t)50000)  /* Short delay to allow change to IDLE state */
 #define MMCSD_DSR_DELAY         ((useconds_t)100000) /* Time to wait after setting DSR */
@@ -86,7 +85,7 @@
  *
  *   For MMC & SD V1.x, these should be based on Nac = TAAC + NSAC; The maximum
  *   value of TAAC is 80MS and the maximum value of NSAC is 25.5K clock cycle.
- *   For SD V2.x, a fixed delay of 100MS is recommend which is preety close to
+ *   For SD V2.x, a fixed delay of 100MS is recommend which is pretty close to
  *   the worst case SD V1.x Nac.  Here we just use 100MS delay for all data
  *   transfers.
  */
