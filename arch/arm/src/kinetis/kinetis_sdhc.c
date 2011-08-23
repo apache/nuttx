@@ -1182,12 +1182,10 @@ static int kinetis_interrupt(int irq, void *context)
             }
         }
 
-      /* Handle data end events */
+      /* Handle transfer complete events */
 
       if ((pending & SDHC_INT_TC) != 0)
         {
-          /* Handle any data remaining the RX buffer */
-
           /* Was this transfer performed in DMA mode? */
 
 #ifdef CONFIG_SDIO_DMA
@@ -1924,10 +1922,9 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
 
   putreg32(arg, KINETIS_SDHC_CMDARG);
 
-  /* Enable appropriate interrupts and write the SDHC CMD */
+  /* Clear interrupt status and write the SDHC CMD */
 
   putreg32(SDHC_RESPDONE_INTS, KINETIS_SDHC_IRQSTAT);
-  putreg32(SDHC_RESPDONE_INTS|SDHC_INT_CINT, KINETIS_SDHC_IRQSIGEN);
   putreg32(regval, KINETIS_SDHC_XFERTYP);
   return OK;
 }
@@ -2262,9 +2259,11 @@ static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32
         }
     }
 
-  /* Clear all pending message completion events and return the R1/R6 response */
+  /* Return the R1/R1b/R6 response.  These responses are returned in
+   * CDMRSP0.  NOTE: This is not true for R1b (Auto CMD12 response) which
+   * is returned in CMDRSP3.
+   */
 
-  putreg32(SDHC_RESPDONE_INTS, KINETIS_SDHC_IRQSTAT);
   *rshort = getreg32(KINETIS_SDHC_CMDRSP0);
   return ret;
 }
@@ -2309,18 +2308,14 @@ static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t r
         }
     }
     
-  /* Disable interrupts and return the long response */
-
-  regval = getreg32(KINETIS_SDHC_IRQSIGEN);
-  regval &= ~SDHC_RESPDONE_INTS;
-  putreg32(regval, KINETIS_SDHC_IRQSIGEN);
+  /* Return the long response in CMDRSP3..0*/
 
   if (rlong)
     {
-      rlong[0] = getreg32(KINETIS_SDHC_CMDRSP0);
-      rlong[1] = getreg32(KINETIS_SDHC_CMDRSP1);
-      rlong[2] = getreg32(KINETIS_SDHC_CMDRSP2);
-      rlong[3] = getreg32(KINETIS_SDHC_CMDRSP3);
+      rlong[0] = getreg32(KINETIS_SDHC_CMDRSP3);
+      rlong[1] = getreg32(KINETIS_SDHC_CMDRSP2);
+      rlong[2] = getreg32(KINETIS_SDHC_CMDRSP1);
+      rlong[3] = getreg32(KINETIS_SDHC_CMDRSP0);
     }
   return ret;
 }
@@ -2361,20 +2356,15 @@ static int kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t 
           fdbg("ERROR: Timeout IRQSTAT: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
-
-      /* Return the short response */
     }
 
-  /* Disable interrupts and return the short response */
-
-  regval = getreg32(KINETIS_SDHC_IRQSIGEN);
-  regval &= ~SDHC_RESPDONE_INTS;
-  putreg32(regval, KINETIS_SDHC_IRQSIGEN);
+  /* Return the short response in CMDRSP0 */
 
   if (rshort)
     {
       *rshort = getreg32(KINETIS_SDHC_CMDRSP0);
     }
+
   return ret;
 }
 
@@ -2384,11 +2374,7 @@ static int kinetis_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_
 {
   uint32_t regval;
 
-  /* Disable interrupts and return an error */
-
-  regval = getreg32(KINETIS_SDHC_IRQSIGEN);
-  regval &= ~SDHC_RESPDONE_INTS;
-  putreg32(regval, KINETIS_SDHC_IRQSIGEN);
+  /* Just return an error */
 
   return -ENOSYS;
 }
@@ -2422,7 +2408,6 @@ static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
   uint32_t waitints;
-  uint32_t regval;
  
   DEBUGASSERT(priv != NULL);
 
@@ -2446,10 +2431,6 @@ static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
     }
 
   /* Enable event-related interrupts */
-
-  regval = getreg32(KINETIS_SDHC_IRQSIGEN);
-  regval &= ~(SDHC_WAITALL_INTS);
-  putreg32(regval, KINETIS_SDHC_IRQSIGEN);
 
   kinetis_configwaitints(priv, waitints, eventset, 0);
 }
@@ -2510,8 +2491,8 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
                        1, (uint32_t)priv);
       if (ret != OK)
         {
-           fdbg("ERROR: wd_start failed: %d\n", ret);
-         }
+          fdbg("ERROR: wd_start failed: %d\n", ret);
+        }
     }
 
   /* Loop until the event (or the timeout occurs). Race conditions are avoided
@@ -3059,6 +3040,7 @@ void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
     {
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
+
   fvdbg("cdstatus: %02x\n", priv->cdstatus);
   irqrestore(flags);
 }

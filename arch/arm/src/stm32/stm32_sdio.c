@@ -2054,8 +2054,6 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
           fdbg("ERROR: Timeout STA: %08x\n", regval);
           ret = -ETIMEDOUT;
         }
-
-      /* Return the short response */
     }
 
   putreg32(SDIO_RESPDONE_ICR|SDIO_CMDDONE_ICR, STM32_SDIO_ICR);
