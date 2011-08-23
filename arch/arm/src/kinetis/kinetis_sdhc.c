@@ -73,10 +73,6 @@
 
 /* Configuration ************************************************************/
 
-#if defined(CONFIG_SDIO_DMA) && !defined(CONFIG_KINETIS_DMA)
-#  warning "CONFIG_SDIO_DMA support requires CONFIG_KINETIS_DMA"
-#endif
-
 #ifndef CONFIG_SDIO_DMA
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
 #endif
@@ -121,12 +117,10 @@
 #  endif
 #endif
 
-/* Friendly SYSCTRL bit re-definitions ****************************************/
-
 /* Timing */
 
-#define SDHC_CMDTIMEOUT          (100000)
-#define SDHC_LONGTIMEOUT         (0x7fffffff)
+#define SDHC_CMDTIMEOUT         (100000)
+#define SDHC_LONGTIMEOUT        (0x7fffffff)
 
 /* Big DVS setting.  Range is 0=SDCLK*213 through 14=SDCLK*227 */
 
@@ -136,13 +130,6 @@
 /* Maximum watermark value */
 
 #define SDHC_MAX_WATERMARK      128
-
-/* DMA CCR register settings */
-
-#define SDHC_RXDMA32_CONFIG     (CONFIG_KINETIS_SDHC_DMAPRIO|DMA_CCR_MSIZE_32BITS|\
-                                 DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC)
-#define SDHC_TXDMA32_CONFIG     (CONFIG_KINETIS_SDHC_DMAPRIO|DMA_CCR_MSIZE_32BITS|\
-                                 DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC|DMA_CCR_DIR)
 
 /* Data transfer / Event waiting interrupt mask bits */
 
@@ -159,28 +146,13 @@
 
 #define SDHC_WAITALL_INTS  (SDHC_RESPDONE_INTS|SDHC_XFRDONE_INTS|SDHC_DMADONE_INTS)
 
-/* Let's wait until we have both SDIO transfer complete and DMA complete. */
-
-#define SDHC_XFRDONE_FLAG  (1)
-#define SDHC_DMADONE_FLAG  (2)
-#define SDHC_ALLDONE       (3)
-
 /* Register logging support */
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-#  ifdef CONFIG_SDIO_DMA
-#    define SAMPLENDX_BEFORE_SETUP  0
-#    define SAMPLENDX_BEFORE_ENABLE 1
-#    define SAMPLENDX_AFTER_SETUP   2
-#    define SAMPLENDX_DMA_CALLBACK  3
-#    define SAMPLENDX_END_TRANSFER  4
-#    define DEBUG_NSAMPLES          5
-#  else
-#    define SAMPLENDX_BEFORE_SETUP  0
-#    define SAMPLENDX_AFTER_SETUP   1
-#    define SAMPLENDX_END_TRANSFER  2
-#    define DEBUG_NSAMPLES          3
-#  endif
+#  define SAMPLENDX_BEFORE_SETUP  0
+#  define SAMPLENDX_AFTER_SETUP   1
+#  define SAMPLENDX_END_TRANSFER  2
+#  define DEBUG_NSAMPLES          3
 #endif
 
 /****************************************************************************
@@ -220,8 +192,6 @@ struct kinetis_dev_s
 
 #ifdef CONFIG_SDIO_DMA
   volatile uint8_t   xfrflags;   /* Used to synchronize SDIO and DMA completion events */
-  bool               dmamode;    /* true: DMA mode transfer */
-  DMA_HANDLE         dma;        /* Handle for DMA channel */
 #endif
 };
 
@@ -255,14 +225,6 @@ struct kinetis_sdhcregs_s
   uint32_t mmcboot;   /* MMC Boot Register */
   uint32_t hostver;   /* Host Controller Version */
 };
-
-struct kinetis_sampleregs_s
-{
-  struct kinetis_sdhcregs_s sdhc;
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
-  struct kinetis_dmaregs_s  dma;
-#endif
-};
 #endif
 
 /****************************************************************************
@@ -283,9 +245,8 @@ static void kinetis_configxfrints(struct kinetis_dev_s *priv, uint32_t xfrints);
 static void kinetis_sampleinit(void);
 static void kinetis_sdhcsample(struct kinetis_sdhcregs_s *regs);
 static void kinetis_sample(struct kinetis_dev_s *priv, int index);
-static void kinetis_sdhcdump(struct kinetis_sdhcregs_s *regs, const char *msg);
 static void kinetis_dumpsample(struct kinetis_dev_s *priv,
-              struct kinetis_sampleregs_s *regs, const char *msg);
+              struct kinetis_sdhcregs_s *regs, const char *msg);
 static void kinetis_dumpsamples(struct kinetis_dev_s *priv);
 static void kinetis_showregs(struct kinetis_dev_s *priv, const char *msg);
 #else
@@ -295,18 +256,16 @@ static void kinetis_showregs(struct kinetis_dev_s *priv, const char *msg);
 #  define   kinetis_showregs(priv,msg)
 #endif
 
-#ifdef CONFIG_SDIO_DMA
-static void kinetis_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg);
-#endif
-
 /* Data Transfer Helpers ****************************************************/
 
 static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
                                unsigned int blocksize, unsigned int nblocks,
                                unsigned int timeout);
 static void kinetis_datadisable(void);
+#ifndef CONFIG_SDIO_DMA
 static void kinetis_transmit(struct kinetis_dev_s *priv);
 static void kinetis_receive(struct kinetis_dev_s *priv);
+#endif
 static void kinetis_eventtimeout(int argc, uint32_t arg);
 static void kinetis_endwait(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent);
 static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent);
@@ -339,10 +298,12 @@ static int  kinetis_attach(FAR struct sdio_dev_s *dev);
 
 static int  kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
+#ifndef CONFIG_SDIO_DMA
 static int  kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
               size_t nbytes);
 static int  kinetis_sendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, uint32_t nbytes);
+#endif
 static int  kinetis_cancel(FAR struct sdio_dev_s *dev);
 
 static int  kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
@@ -397,8 +358,13 @@ struct kinetis_dev_s g_sdhcdev =
     .clock            = kinetis_clock,
     .attach           = kinetis_attach,
     .sendcmd          = kinetis_sendcmd,
+#ifndef CONFIG_SDIO_DMA
     .recvsetup        = kinetis_recvsetup,
     .sendsetup        = kinetis_sendsetup,
+#else
+    .recvsetup        = kinetis_dmarecvsetup,
+    .sendsetup        = kinetis_dmasendsetup,
+#endif
     .cancel           = kinetis_cancel,
     .waitresponse     = kinetis_waitresponse,
     .recvR1           = kinetis_recvshortcrc,
@@ -423,7 +389,7 @@ struct kinetis_dev_s g_sdhcdev =
 /* Register logging support */
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-static struct kinetis_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
+static struct kinetis_sdhcregs_s g_sampleregs[DEBUG_NSAMPLES];
 #endif
 
 /****************************************************************************
@@ -541,7 +507,7 @@ static void kinetis_configxfrints(struct kinetis_dev_s *priv, uint32_t xfrints)
 #ifdef CONFIG_SDIO_XFRDEBUG
 static void kinetis_sampleinit(void)
 {
-  memset(g_sampleregs, 0xff, DEBUG_NSAMPLES * sizeof(struct kinetis_sampleregs_s));
+  memset(g_sampleregs, 0xff, DEBUG_NSAMPLES * sizeof(struct kinetis_sdhcregs_s));
 }
 #endif
 
@@ -592,19 +558,12 @@ static void kinetis_sdhcsample(struct kinetis_sdhcregs_s *regs)
 #ifdef CONFIG_SDIO_XFRDEBUG
 static void kinetis_sample(struct kinetis_dev_s *priv, int index)
 {
-  struct kinetis_sampleregs_s *regs = &g_sampleregs[index];
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
-  if (priv->dmamode)
-    {
-      kinetis_dmasample(priv->dma, &regs->dma);
-    }
-#endif
-  kinetis_sdhcsample(&regs->sdhc);
+  kinetis_sdhcsample(&g_sampleregs[index]);
 }
 #endif
 
 /****************************************************************************
- * Name: kinetis_sdhcdump
+ * Name: kinetis_dumpsample
  *
  * Description:
  *   Dump one register sample
@@ -612,7 +571,8 @@ static void kinetis_sample(struct kinetis_dev_s *priv, int index)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_XFRDEBUG
-static void kinetis_sdhcdump(struct kinetis_sdhcregs_s *regs, const char *msg)
+static void kinetis_dumpsample(struct kinetis_dev_s *priv,
+                               struct kinetis_sdhcregs_s *regs, const char *msg)
 {
   fdbg("SDHC Registers: %s\n", msg);
   fdbg("   DSADDR[%08x]: %08x\n", KINETIS_SDHC_DSADDR,    regs->dsaddr);
@@ -641,28 +601,6 @@ static void kinetis_sdhcdump(struct kinetis_sdhcregs_s *regs, const char *msg)
 #endif
 
 /****************************************************************************
- * Name: kinetis_dumpsample
- *
- * Description:
- *   Dump one register sample
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_XFRDEBUG
-static void kinetis_dumpsample(struct kinetis_dev_s *priv,
-                             struct kinetis_sampleregs_s *regs, const char *msg)
-{
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
-  if (priv->dmamode)
-    {
-      kinetis_dmadump(priv->dma, &regs->dma, msg);
-    }
-#endif
-  kinetis_sdhcdump(&regs->sdhc, msg);
-}
-#endif
-
-/****************************************************************************
  * Name: kinetis_dumpsamples
  *
  * Description:
@@ -674,19 +612,7 @@ static void kinetis_dumpsample(struct kinetis_dev_s *priv,
 static void  kinetis_dumpsamples(struct kinetis_dev_s *priv)
 {
   kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP], "Before setup");
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
-  if (priv->dmamode)
-    {
-      kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
-    }
-#endif
   kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP], "After setup");
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
-  if (priv->dmamode)
-    {
-      kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
-    }
-#endif
   kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
 }
 #endif
@@ -702,48 +628,10 @@ static void  kinetis_dumpsamples(struct kinetis_dev_s *priv)
 #ifdef CONFIG_SDIO_XFRDEBUG
 static void kinetis_showregs(struct kinetis_dev_s *priv, const char *msg)
 {
-  struct kinetis_sampleregs_s regs;
+  struct kinetis_sdhcregs_s regs;
 
-#if defined(CONFIG_DEBUG_DMA) && defined(CONFIG_SDIO_DMA)
-  if (priv->dmamode)
-    {
-      kinetis_dmasample(priv->dma, &regs.dma);
-    }
-#endif
-  kinetis_sdhcsample(&regs.sdhc);
+  kinetis_sdhcsample(&regs);
   kinetis_dumpsample(priv, &regs, msg);
-}
-#endif
-
-/****************************************************************************
- * Name: kinetis_dmacallback
- *
- * Description:
- *   Called when SDIO DMA completes
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SDIO_DMA
-static void kinetis_dmacallback(DMA_HANDLE handle, uint8_t isr, void *arg)
-{
-  FAR struct kinetis_dev_s *priv = (FAR struct kinetis_dev_s *)arg;
-  DEBUGASSERT(priv->dmamode);
-
-  /* The SDIO appears to handle the End-Of-Transfer interrupt first with the
-   * End-Of-DMA event occurring significantly later.
-   */
-
-  kinetis_sample((struct kinetis_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
-  
-  /* Then terminate the transfer (we should already have the SDIO transfer
-   * done interrupt.  If not, the transfer will appropriately time out).
-   */
-
-  priv->xfrflags |= SDHC_DMADONE_FLAG;
-  if (priv->xfrflags == SDHC_ALLDONE)
-    {
-      kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
-    }
 }
 #endif
 
@@ -763,6 +651,7 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
                                unsigned int blocksize, unsigned int nblocks,
                                unsigned int timeout)
 {
+  unsigned int watermark;
   uint32_t regval = 0;
 
   /* Set the data timeout value in the SDHC_SYSCTL field to the selected value */
@@ -772,8 +661,8 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
   regval |= timeout << SDHC_SYSCTL_DVS_SHIFT;
   putreg32(regval, KINETIS_SDHC_SYSCTL);
 
-  /* Set the block size and count in the SDHC_BLKATTR register.  The block size
-   * is only valid for multiple block transfers.
+  /* Set the block size and count in the SDHC_BLKATTR register.  The block
+   * size is only valid for multiple block transfers.
    */
 
   regval = blocksize << SDHC_BLKATTR_SIZE_SHIFT |
@@ -783,41 +672,70 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
   /* Set the watermark level */
 
 #ifdef CONFIG_SDIO_DMA
-  if (priv->dma)
+  /* Set the Read Watermark Level to the blocksize to be read
+   * (limited to half of the maximum watermark value).  BRR will be
+   * set when the number of queued words is greater than or equal
+   * to this value.
+   */
+
+  watermark = (blocksize + 3) >> 2;
+  if (watermark > (SDHC_MAX_WATERMARK / 2))
     {
-#  warning "Missing logic"
+      watermark = (SDHC_MAX_WATERMARK / 2);
     }
-  else
-#endif
+
+  /* When the watermark level requirement is met in data transfer, and the
+   * internal DMA is enabled, the data buffer block sends a DMA request to
+   * the crossbar switch interface.
+   */
+
+  if (bwrite)
     {
-      /* For now, treat the FIFO as though it had depth = 1. Set the
-       * read/write watermarks as follows:
+      /* The SDHC will not start data transmission until the number of
+       * words set in the WML register can be held in the buffer. If the
+       * buffer is empty and the host system does not write data in time,
+       * the SDHC will stop the SD_CLK to avoid the data buffer under-run
+       * situation.
        */
 
-      if (bwrite)
-        {
-          /* Write Watermark Level = 0:  BWR will be set when the number of
-           * queued words is less than or equal to 0.
-           */
-
-          putreg32(0, KINETIS_SDHC_WML);
-        }
-      else
-        {
-          /* Set the Read Watermark Level to the blocksize to be read
-           * (limited to half of the maximum watermark value).  BRR will be
-           * set when the number of queued words is greater than or equal
-           * to this value.
-           */
-
-          unsigned int watermark = (blocksize + 3) >> 2;
-          if (watermark > (SDHC_MAX_WATERMARK / 2))
-            {
-              watermark = (SDHC_MAX_WATERMARK / 2);
-            }
-          putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);        
-        }
+      putreg32(watermark << SDHC_WML_WR_SHIFT, KINETIS_SDHC_WML);
     }
+  else
+    {
+      /* The SDHC will not start data transmission until the number of
+       * words set in the WML register are in the buffer. If the buffer
+       * is full and the Host System does not read data in time, the
+       * SDHC will stop the SDHC_DCLK to avoid the data buffer over-run
+       * situation.
+       */
+
+      putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);
+    }
+#else
+  if (bwrite)
+    {
+      /* Write Watermark Level = 0:  BWR will be set when the number of
+       * queued words is less than or equal to 0.
+       */
+
+      putreg32(0, KINETIS_SDHC_WML);
+    }
+  else
+    {
+      /* Set the Read Watermark Level to the blocksize to be read
+       * (limited to half of the maximum watermark value).  BRR will be
+       * set when the number of queued words is greater than or equal
+       * to this value.
+       */
+
+      watermark = (blocksize + 3) >> 2;
+      if (watermark > (SDHC_MAX_WATERMARK / 2))
+        {
+          watermark = (SDHC_MAX_WATERMARK / 2);
+        }
+      putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);        
+    }
+#endif
 }
 
 /****************************************************************************
@@ -859,6 +777,7 @@ static void kinetis_datadisable(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SDIO_DMA
 static void kinetis_transmit(struct kinetis_dev_s *priv)
 {
   union
@@ -921,6 +840,7 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
           priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT));
 
 }
+#endif
 
 /****************************************************************************
  * Name: kinetis_receive
@@ -936,6 +856,7 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SDIO_DMA
 static void kinetis_receive(struct kinetis_dev_s *priv)
 {
   unsigned int watermark;
@@ -1011,6 +932,7 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
           getreg32(KINETIS_SDHC_WML));
 
 }
+#endif
 
 /****************************************************************************
  * Name: kinetis_eventtimeout
@@ -1108,6 +1030,10 @@ static void kinetis_endwait(struct kinetis_dev_s *priv, sdio_eventset_t wkupeven
 
 static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent)
 {
+#ifdef CONFIG_SDIO_DMA
+  uint32_t regval;
+#endif
+
   /* Disable all transfer related interrupts */
 
   kinetis_configxfrints(priv, 0);
@@ -1119,15 +1045,11 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
 #ifdef CONFIG_SDIO_DMA
-  if (priv->dmamode)
-    {
-      /* Make sure that the DMA is stopped (it will be stopped automatically
-       * on normal transfers, but not necessarily when the transfer terminates
-       * on an error condition).
-       */
+  /* Stop the DMA by resetting the data path*/
 
-      kinetis_dmastop(priv->dma);
-    }
+  regval = getreg32(KINETIS_SDHC_SYSCTL);
+  regval |= SDHC_SYSCTL_RSTD;
+  putreg32(regval, KINETIS_SDHC_SYSCTL);
 #endif
 
   /* Mark the transfer finished */
@@ -1193,78 +1115,43 @@ static int kinetis_interrupt(int irq, void *context)
 
   putreg32(enabled, KINETIS_SDHC_IRQSTAT);
 
-  /* Handle in progress, interrupt driven data transfers ****************/
+  /* Handle in progress, interrupt driven data transfers ********************/
 
   pending  = enabled & priv->xfrints;
   if (pending != 0)
     {
-#ifdef CONFIG_SDIO_DMA
-      if (!priv->dmamode)
-#endif
+#ifndef CONFIG_SDIO_DMA
+      /* Is the RX buffer read ready?  Is so then we must be processing a
+       * non-DMA receive transaction.
+       */
+
+      if ((pending & SDHC_INT_BRR) != 0)
         {
-          /* Is the RX buffer read ready?  Is so then we must be
-          * processing a receive transaction.
-          */
+          /* Receive data from the RX buffer */
 
-          if ((pending & SDHC_INT_BRR) != 0)
-            {
-              /* Receive data from the RX buffer */
-
-              kinetis_receive(priv);
-            }
-
-          /* Otherwise, Is the TX buffer write ready? If so we must
-           * be processing a send transaction.  NOTE:  We can't be
-           * processing both!
-           */
-
-          else if ((pending & SDHC_INT_BWR) != 0)
-            {
-              /* Send data via the TX FIFO */
-
-              kinetis_transmit(priv);
-            }
+          kinetis_receive(priv);
         }
+
+        /* Otherwise, Is the TX buffer write ready? If so we must
+         * be processing a non-DMA send transaction.  NOTE:  We can't be
+         * processing both!
+         */
+
+      else if ((pending & SDHC_INT_BWR) != 0)
+        {
+          /* Send data via the TX FIFO */
+
+          kinetis_transmit(priv);
+        }
+#endif
 
       /* Handle transfer complete events */
 
       if ((pending & SDHC_INT_TC) != 0)
         {
-          /* Was this transfer performed in DMA mode? */
+          /* Terminate the transfer */
 
-#ifdef CONFIG_SDIO_DMA
-          if (priv->dmamode)
-            {
-              /* Yes.. Terminate the transfers only if the DMA has also
-               * finished.
-               */
-
-              priv->xfrflags |= SDHC_XFRDONE_FLAG;
-              if (priv->xfrflags == SDHC_ALLDONE)
-                {
-                  kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
-                }
-
-              /* Otherwise, just disable futher transfer interrupts and
-               * wait for the DMA complete event.
-               */
-
-              else
-                {
-                  kinetis_configxfrints(priv, 0);
-                }
-            }
-          else
-#endif
-            {
-              /* Receive any additional data from the RX FIFO */
-
-              kinetis_receive(priv);
-
-              /* Then terminate the transfer */
-
-              kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
-            }
+          kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
         }
 
       /* Handle data block send/receive CRC failure */
@@ -1288,7 +1175,7 @@ static int kinetis_interrupt(int irq, void *context)
         }
     }
 
-  /* Handle wait events *************************************************/
+  /* Handle wait events *****************************************************/
 
   pending  = enabled & priv->waitints;
   if (pending != 0)
@@ -1425,12 +1312,6 @@ static void kinetis_reset(FAR struct sdio_dev_s *dev)
   priv->buffer     = 0;      /* Address of current R/W buffer */
   priv->remaining  = 0;      /* Number of bytes remaining in the transfer */
   priv->xfrints    = 0;      /* Interrupt enables for data transfer */
-
-  /* DMA data transfer support */
-
-#ifdef CONFIG_SDIO_DMA
-  priv->dmamode    = false;  /* true: DMA mode transfer */
-#endif
 }
 
 /****************************************************************************
@@ -1858,13 +1739,13 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
           case MMCSD_NODATAXFR : /* No.. no data transfer */
             break;
 
+          /* The following two cases are probably missing some setup logic */
+
           case MMCSD_RDSTREAM :  /* Yes.. streaming read data transfer */
-#warning "Probably some missing setup"
             regval |= (SDHC_XFERTYP_DPSEL | SDHC_XFERTYP_DTDSEL);
             break;
 
           case MMCSD_WRSTREAM :  /* Yes.. streaming write data transfer */
-#warning "Probably some missing setup"
             regval |= SDHC_XFERTYP_DPSEL;
             break;
 
@@ -1930,17 +1811,12 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
   /* Enable DMA */
 
 #ifdef CONFIG_SDIO_DMA
-  if (priv->dmamode)
-    {
-      /* Internal DMA is used */
+  /* Internal DMA is used */
 
-      regval |= SDHC_XFERTYP_DMAEN;
-    }
+  regval |= SDHC_XFERTYP_DMAEN;
 #endif
 
   /* Other bits? What about CMDTYP? */
-
-#warning "Revisit"
 
   fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
 
@@ -1997,6 +1873,7 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SDIO_DMA
 static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                              size_t nbytes)
 {
@@ -2015,9 +1892,6 @@ static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   priv->buffer    = (uint32_t*)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_SDIO_DMA
-  priv->dmamode   = false;
-#endif
 
   /* Then set up the SDIO data path */
 
@@ -2029,6 +1903,7 @@ static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: kinetis_sendsetup
@@ -2049,6 +1924,7 @@ static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SDIO_DMA
 static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
                            size_t nbytes)
 {
@@ -2067,9 +1943,6 @@ static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buff
 
   priv->buffer    = (uint32_t*)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_SDIO_DMA
-  priv->dmamode   = false;
-#endif
 
   /* Then set up the SDIO data path */
 
@@ -2081,6 +1954,7 @@ static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buff
   kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: kinetis_cancel
@@ -2102,6 +1976,9 @@ static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buff
 static int kinetis_cancel(FAR struct sdio_dev_s *dev)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
+#ifdef CONFIG_SDIO_DMA
+  uint32_t regval;
+#endif
 
   /* Disable all transfer- and event- related interrupts */
 
@@ -2121,15 +1998,11 @@ static int kinetis_cancel(FAR struct sdio_dev_s *dev)
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
 #ifdef CONFIG_SDIO_DMA
-  if (priv->dmamode)
-    {
-      /* Make sure that the DMA is stopped (it will be stopped automatically
-       * on normal transfers, but not necessarily when the transfer terminates
-       * on an error condition.
-       */
+  /* Stop the DMA by resetting the data path*/
 
-      kinetis_dmastop(priv->dma);
-    }
+  regval = getreg32(KINETIS_SDHC_SYSCTL);
+  regval |= SDHC_SYSCTL_RSTD;
+  putreg32(regval, KINETIS_SDHC_SYSCTL);
 #endif
 
   /* Mark no transfer in progress */
@@ -2696,7 +2569,6 @@ static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                               size_t buflen)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
-  uint32_t blocksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -2714,7 +2586,6 @@ static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   priv->buffer    = (uint32_t*)buffer;
   priv->remaining = buflen;
-  priv->dmamode   = true;
 
   /* Then set up the SDIO data path */
 
@@ -2723,15 +2594,10 @@ static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Configure the RX DMA */
 
   kinetis_configxfrints(priv, SDHC_DMADONE_INTS);
-
-  putreg32(1, SDHC_DCTRL_DMAEN_BB);
-  kinetis_dmasetup(priv->dma, KINETIS_SDHC_FIFO, (uint32_t)buffer,
-                   (buflen + 3) >> 2, SDHC_RXDMA32_CONFIG);
+  putreg32((uint32_t)buffer, KINETIS_SDHC_DSADDR);
  
-  /* Start the DMA */
+  /* Sample the register state */
 
-  kinetis_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-  kinetis_dmastart(priv->dma, kinetis_dmacallback, priv, false);
   kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
@@ -2761,7 +2627,6 @@ static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
-  uint32_t blocksize;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
@@ -2779,7 +2644,6 @@ static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   priv->buffer    = (uint32_t*)buffer;
   priv->remaining = buflen;
-  priv->dmamode   = true;
 
   /* Then set up the SDIO data path */
 
@@ -2787,15 +2651,10 @@ static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Configure the TX DMA */
 
-  kinetis_dmasetup(priv->dma, KINETIS_SDHC_FIFO, (uint32_t)buffer,
-                   (buflen + 3) >> 2, SDHC_TXDMA32_CONFIG);
+  putreg32((uint32_t)buffer, KINETIS_SDHC_DSADDR);
 
-  kinetis_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-  putreg32(1, SDHC_DCTRL_DMAEN_BB);
+  /* Sample the register state */
 
-  /* Start the DMA */
-
-  kinetis_dmastart(priv->dma, kinetis_dmacallback, priv, false);
   kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
 
   /* Enable TX interrrupts */
@@ -2918,12 +2777,6 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
   sem_init(&priv->waitsem, 0, 0);
   priv->waitwdog = wd_create();
   DEBUGASSERT(priv->waitwdog);
-
-  /* Allocate a DMA channel */
-
-#ifdef CONFIG_SDIO_DMA
-  priv->dma = kinetis_dmachannel(DMACHAN_SDHC);
-#endif
 
   /* Enable clocking to the SDHC module.  Clocking is still diabled in
    * the SYSCTRL register.
