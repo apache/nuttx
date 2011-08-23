@@ -109,10 +109,19 @@
 #define BOARD_SDHC_SD1MODE_PRESCALER  SDHC_SYSCTL_SDCLKFS_DIV2
 #define BOARD_SDHC_SD1MODE_DIVISOR    SDHC_SYSCTL_DVS_DIV(3)
 
-/* SD normal mode (4-bit): 24MHz  = 96MHz / (2 * 2) */
+/* SD normal mode (4-bit): 24MHz  = 96MHz / (2 * 2) (with DMA)
+ * SD normal mode (4-bit): 16MHz  = 96MHz / (2 * 3) (no DMA)
+ */
 
-#define BOARD_SDHC_SD4MODE_PRESCALER  SDHC_SYSCTL_SDCLKFS_DIV2
-#define BOARD_SDHC_SD4MODE_DIVISOR    SDHC_SYSCTL_DVS_DIV(2)
+#ifdef CONFIG_SDIO_DMA
+#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
+#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(2)
+#else
+//#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
+//#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3)
+#  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV16
+#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(15)
+#endif
 
 /* LED definitions ******************************************************************/
 /* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
