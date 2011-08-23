@@ -331,6 +331,10 @@
 
 #define SDHC_ADMAES_SHIFT               (0)       /* Bits 0-1: ADMA Error State (when ADMA Error is occurred) */
 #define SDHC_ADMAES_MASK                (3 << SDHC_ADMAES_ADMAES_SHIFT)
+#  define SDHC_ADMAES_STOP              (0 << SDHC_ADMAES_ADMAES_SHIFT) /* Stop DMA */
+#  define SDHC_ADMAES_FDS               (1 << SDHC_ADMAES_ADMAES_SHIFT) /* Fetch descriptor */
+#  define SDHC_ADMAES_CADR              (2 << SDHC_ADMAES_ADMAES_SHIFT) /* Change address */
+#  define SDHC_ADMAES_TFR               (3 << SDHC_ADMAES_ADMAES_SHIFT) /* Transfer data */
 #define SDHC_ADMAES_LME                 (1 << 2)  /* Bit 2:  ADMA Length Mismatch Error */
 #define SDHC_ADMAES_DCE                 (1 << 3)  /* Bit 3:  ADMA Descriptor Error */
                                                   /* Bits 4-31: Reserved */
