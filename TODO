@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 8, 2011)
+NuttX TODO List (Last updated August 22, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nuttx/
@@ -13,7 +13,7 @@ nuttx/
  (16)  Network (net/, drivers/net)
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (6)  Libraries (lib/)
- (10)  File system/Generic drivers (fs/, drivers/)
+  (9)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -412,10 +412,6 @@ o File system / Generic drivers (fs/, drivers/)
   Description: Implement chmod(), truncate().
   Status:      Open
   Priority:    Low
-
-  Description: The CAN driver is untested.  Add a test for the CAN driver.
-  Status:      Open
-  Priority:    Medium
 
   Description: At present, the CAN driver does not support the poll() method.
   Status:      Open

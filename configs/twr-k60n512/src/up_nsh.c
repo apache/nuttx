@@ -174,12 +174,13 @@ static void kinetis_mediachange(void)
       sdhc_mediachange(g_nsh.sdhc, inserted);
 
       /* If the card has been inserted, then check if it is write protected
-       * aw well.
+       * as well.  The pin is pulled up, but apparently logic high means
+       * write protected.
        */
 
       if (inserted)
         {
-          sdhc_wrprotect(g_nsh.sdhc, !kinetis_gpioread(GPIO_SD_WRPROTECT));
+          sdhc_wrprotect(g_nsh.sdhc, kinetis_gpioread(GPIO_SD_WRPROTECT));
         }
     }
 }
