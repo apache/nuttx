@@ -73,13 +73,15 @@ RECT_CSRCS	= nxglib_rectcopy.c nxglib_rectoffset.c nxglib_vectoradd.c \
 TRAP_CSRCS	= nxglib_runoffset.c nxglib_runcopy.c \
 		  nxglib_trapoffset.c nxglib_trapcopy.c
 
-COLOR_CSRCS	= nxglib_colorcopy.c
+COLOR_CSRCS	= nxglib_colorcopy.c nxglib_rgb2yuv.c nxglib_yuv2rgb.c
+
+DRAW_CSRCS = nxglib_splitline.c nxglib_circlepts.c nxglib_circletraps.c
 
 LCD_CSRCS	= 
 
-NXGLIB_CSRCS	= nxglib_rgb2yuv.c nxglib_yuv2rgb.c nxglib_splitline.c \
+NXGLIB_CSRCS	= \
 		  $(SETP1_CSRCS) $(SETP2_CSRCS) $(RFILL1_CSRCS) $(RFILL2_CSRCS) \
 		  $(TFILL1_CSRCS) $(TFILL2_CSRCS) $(RMOVE1_CSRCS) $(RMOVE2_CSRCS) \
 		  $(RCOPY1_CSRCS) $(RCOPY2_CSRCS) $(RECT_CSRCS) $(TRAP_CSRCS) \
-		  $(COLOR_CSRCS) $(LCD_CSRCS)
+		  $(COLOR_CSRCS) $(DRAW_CSRCS) $(LCD_CSRCS)
 

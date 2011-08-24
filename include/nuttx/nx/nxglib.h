@@ -631,6 +631,51 @@ EXTERN int nxgl_splitline(FAR struct nxgl_vector_s *vector,
                           FAR struct nxgl_rect_s *rect,
                           nxgl_coord_t linewidth);
 
+/****************************************************************************
+ * Name: nxgl_circlepts
+ *
+ * Description:
+ *   Given a description of a circle, return a set of 16 points on the
+ *   circumference of the circle.  These points may then be used by
+ *   nx_drawcircle() or related APIs to draw a circle outline.
+ *
+ * Input parameters:
+ *   center - A pointer to the point that is the center of the circle
+ *   radius - The radius of the circle in pixels.
+ *   circle - A pointer the first entry in an array of 16 points where the
+ *            circle points will be returned.
+ *
+ * Returned value:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_circlepts(FAR struct nxgl_point_s *center,
+                           nxgl_coord_t radius,
+                           FAR struct nxgl_point_s *circle);
+
+/****************************************************************************
+ * Name: nxgl_circletraps
+ *
+ * Description:
+ *   Given a description of a a circle, return 8 trapezoids that can be
+ *   used to fill the circle by nx_fillcircle() and other interfaces.
+ *
+ * Input parameters:
+ *   center - A pointer to the point that is the center of the circle
+ *   radius - The radius of the circle in pixels.
+ *   circle - A pointer the first entry in an array of 8 trapezoids where
+ *            the circle description will be returned.
+ *
+ * Returned value:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_circletraps(FAR struct nxgl_point_s *center,
+                             nxgl_coord_t radius,
+                             FAR struct nxgl_trapezoid_s *circle);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

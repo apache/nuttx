@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_splitline.c
+ * graphics/nxglib/nxglib_splitline.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>

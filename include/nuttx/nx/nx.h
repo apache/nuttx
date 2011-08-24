@@ -634,6 +634,49 @@ EXTERN int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
                        nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
+ * Name: nx_drawcircle
+ *
+ * Description:
+ *  Draw a circular outline using the specified line thickness and color.
+ *
+ * Input Parameters:
+ *   hwnd   - The window handle
+ *   center - A pointer to the point that is the center of the circle
+ *   radius - The radius of the circle in pixels.
+ *   width  - The width of the line
+ *   color  - The color to use to fill the line
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nx_drawcircle(NXWINDOW hwnd, FAR struct nxgl_point_s *center,
+                         nxgl_coord_t radius, nxgl_coord_t width,
+                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
+ * Name: nx_fillcircle
+ *
+ * Description:
+ *  Fill a circular region using the specified color.
+ *
+ * Input Parameters:
+ *   hwnd   - The window handle
+ *   center - A pointer to the point that is the center of the circle
+ *   radius - The radius of the circle in pixels.
+ *   color  - The color to use to fill the circle
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nx_fillcircle(NXWINDOW hwnd, FAR struct nxgl_point_s *center,
+                         nxgl_coord_t radius,
+                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
  * Name: nx_setbgcolor
  *
  * Description:

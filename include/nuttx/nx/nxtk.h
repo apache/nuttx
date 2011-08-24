@@ -265,6 +265,51 @@ EXTERN int nxtk_drawlinewindow(NXTKWINDOW hfwnd,
                               nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
+ * Name: nxtk_drawcirclewindow
+ *
+ * Description:
+ *  Draw a circular outline using the specified line thickness and color.
+ *
+ * Input Parameters:
+ *   hfwnd  - The window handle returned by nxtk_openwindow()
+ *   center - A pointer to the point that is the center of the circle
+ *   radius - The radius of the circle in pixels.
+ *   width  - The width of the line
+ *   color  - The color to use to fill the line
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_drawcirclewindow(NXTKWINDOW hfwnd,
+                                 FAR struct nxgl_point_s *center,
+                                 nxgl_coord_t radius, nxgl_coord_t width,
+                                 nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
+ * Name: nxtk_fillcirclewindow
+ *
+ * Description:
+ *  Fill a circular region using the specified color.
+ *
+ * Input Parameters:
+ *   hfwnd  - The window handle returned by nxtk_openwindow()
+ *   center - A pointer to the point that is the center of the circle
+ *   radius - The radius of the circle in pixels.
+ *   color  - The color to use to fill the circle
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_fillcirclewindow(NXWINDOW hfwnd,
+                                 FAR struct nxgl_point_s *center,
+                                 nxgl_coord_t radius,
+                                 nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
  * Name: nxtk_movewindow
  *
  * Description:
@@ -395,8 +440,8 @@ EXTERN int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoi
  * Description:
  *  Fill the specified line in the toolbar sub-window with the specified
  *  color.  This is simply a wrapper that uses nxgl_splitline() to break the
- *  line into trapezoids and then calls nxtk_filltrapwindow() to render the
- *  line.
+ *  line into trapezoids and then calls nxtk_filltraptoolbar() to render the
+ *  lines.
  *
  * Input Parameters:
  *   hfwnd - The window handle returned by nxtk_openwindow
@@ -413,6 +458,51 @@ EXTERN int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd,
                                 FAR struct nxgl_vector_s *vector,
                                 nxgl_coord_t width,
                                 nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
+ * Name: nxtk_drawcircletoolbar
+ *
+ * Description:
+ *  Draw a circular outline using the specified line thickness and color.
+ *
+ * Input Parameters:
+ *   hfwnd  - The window handle returned by nxtk_openwindow()
+ *   center - A pointer to the point that is the center of the circle
+ *   radius - The radius of the circle in pixels.
+ *   width  - The width of the line
+ *   color  - The color to use to fill the line
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd,
+                                  FAR struct nxgl_point_s *center,
+                                  nxgl_coord_t radius, nxgl_coord_t width,
+                                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
+ * Name: nxtk_fillcircletoolbar
+ *
+ * Description:
+ *  Fill a circular region using the specified color.
+ *
+ * Input Parameters:
+ *   hfwnd  - The window handle returned by nxtk_openwindow()
+ *   center - A pointer to the point that is the center of the circle
+ *   radius - The radius of the circle in pixels.
+ *   color  - The color to use to fill the circle
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nxtk_fillcircletoolbar(NXWINDOW hfwnd,
+                                  FAR struct nxgl_point_s *center,
+                                  nxgl_coord_t radius,
+                                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxtk_movetoolbar
