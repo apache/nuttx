@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: August 2, 2011</p>
+      <p>Last Updated: August 24, 2011</p>
     </td>
   </tr>
 </table>
@@ -77,7 +77,9 @@
         <i>2.2.16 <a href="#nxgltrapoffset"><code>nxgl_trapoffset()</code></a></i><br>
         <i>2.2.17 <a href="#nxgltrapcopy"><code>nxgl_trapcopy()</code></a></i><br>
         <i>2.2.18 <a href="#nxglcolorcopy"><code>nxgl_colorcopy</code></a></i><br>
-        <i>2.2.19 <a href="#nxglsplitline"><code>nxgl_splitline</code></a></i>
+        <i>2.2.19 <a href="#nxglsplitline"><code>nxgl_splitline()</code></a></i><br>
+        <i>2.2.20 <a href="#nxglcirclepts"><code>nxgl_circlepts()</code></a></i><br>
+        <i>2.2.21 <a href="#nxglcircletraps"><code>nxgl_circletraps()</code></a></i>
       </ul>
      </p>
    <p>
@@ -115,11 +117,13 @@
         <i>2.3.20 <a href="#nxfill"><code>nx_fill()</code></a></i><br>
         <i>2.3.21 <a href="#nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></i><br>
         <i>2.3.22 <a href="#nxdrawline"><code>nx_drawline()</code></a></i><br>
-        <i>2.3.23 <a href="#nxglrgb2yuv"><code>nx_setbgcolor()</code></a></i><br>
-        <i>2.3.24 <a href="#nxmove"><code>nx_move()</code></a></i><br>
-        <i>2.3.25 <a href="#nxbitmap"><code>nx_bitmap()</code></a></i><br>
-        <i>2.3.26 <a href="#nxkbdin"><code>nx_kbdin()</code></a></i><br>
-        <i>2.3.27 <a href="#nxmousein"><code>nx_mousein()</code></a></i><br>
+        <i>2.3.23 <a href="#nxdrawcircle"><code>nx_drawcircle()</code></a></i><br>
+        <i>2.3.24 <a href="#nxfillcircle"><code>nx_fillcircle()</code></a></i><br>
+        <i>2.3.25 <a href="#nxglrgb2yuv"><code>nx_setbgcolor()</code></a></i><br>
+        <i>2.3.26 <a href="#nxmove"><code>nx_move()</code></a></i><br>
+        <i>2.3.27 <a href="#nxbitmap"><code>nx_bitmap()</code></a></i><br>
+        <i>2.3.28 <a href="#nxkbdin"><code>nx_kbdin()</code></a></i><br>
+        <i>2.3.29 <a href="#nxmousein"><code>nx_mousein()</code></a></i><br>
      </ul>
    </p>
   </td>
@@ -140,15 +144,19 @@
         <i>2.4.9 <a href="#nxtkfillwindow"><code>nxtk_fillwindow()</code></a></i><br>
         <i>2.4.10 <a href="#nxtkfilltrapwindow"><code>nxtk_filltrapwindow()</code></a></i><br>
         <i>2.4.11 <a href="#nxtkdrawlinewindow"><code>nxtk_drawlinewindow()</code></a></i><br>
-        <i>2.4.12 <a href="#nxtkmovewindow"><code>nxtk_movewindow()</code></a></i><br>
-        <i>2.4.13 <a href="#nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></i><br>
-        <i>2.4.14 <a href="#nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></i><br>
-        <i>2.4.15 <a href="#nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></i><br>
-        <i>2.4.16 <a href="#nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></i><br>
-        <i>2.4.17 <a href="#nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></i><br>
-        <i>2.4.18 <a href="#nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></i><br>
-        <i>2.4.19 <a href="#nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></i><br>
-        <i>2.4.20 <a href="#nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></i>
+        <i>2.4.12 <a href="#nxtkdrawcirclewindow"><code>nxtk_drawcirclewindow()</code></a></i><br>
+        <i>2.4.13 <a href="#nxtkfillcirclewindow"><code>nxtk_fillcirclewindow()</code></a></i><br>
+        <i>2.4.14 <a href="#nxtkmovewindow"><code>nxtk_movewindow()</code></a></i><br>
+        <i>2.4.15 <a href="#nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></i><br>
+        <i>2.4.16 <a href="#nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></i><br>
+        <i>2.4.17 <a href="#nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></i><br>
+        <i>2.4.18 <a href="#nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></i><br>
+        <i>2.4.19 <a href="#nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></i><br>
+        <i>2.4.20 <a href="#nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></i><br>
+        <i>2.4.21 <a href="#nxtkdrawcircletoolbar"><code>nxtk_drawcircletoolbar()</code></a></i><br>
+        <i>2.4.22 <a href="#nxtkfillcircletoolbar"><code>nxtk_fillcircletoolbar()</code></a></i><br>
+        <i>2.4.23 <a href="#nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></i><br>
+        <i>2.4.24 <a href="#nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></i>
      </ul>
    </p>
    <p>
@@ -805,6 +813,57 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector, FAR struct nxgl_trapezoid_s
   </p>
   <p>
 </ul>
+
+<h3>2.2.20 <a name="nxglcirclepts"><code>nxgl_circlepts</code></a></h3>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+void nxgl_circlepts(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
+                    FAR struct nxgl_point_s *circle);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Given a description of a circle, return a set of 16 points on the circumference of the circle.
+  These points may then be used by <a href="nxdrawcircle"><code>nx_drawcircle()</code></a> or related APIs to draw a circle outline.
+</p>
+<p>
+   <b>Input parameters</b>:
+<p>
+<ul><dl>
+   <dt><code>center</code>
+     <dd>A pointer to the point that is the center of the circle.
+   <dt><code>radius</code>
+     <dd>The radius of the circle in pixels.
+   <dt><code>circle</code>
+    <dd>A pointer the first entry in an array of 16 points where the circle points will be returned.
+</dl></ul>
+<p>
+  <b>Returned value</b>: None
+</p>
+
+<h3>2.2.21 <a name="nxglcircletraps"><code>nxgl_circletraps</code></a></h3>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+oid nxgl_circletraps(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
+                     FAR struct nxgl_trapezoid_s *circle);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Given a description of a a circle, return 8 trapezoids that can be used to fill the circle by <a href="nxfillcircle"><code>nx_fillcircle()</code></a> and other interfaces.
+</p>
+<p>
+   <b>Input parameters</b>:
+<p>
+<ul><dl>
+   <dt><code>center</code>
+     <dd>A pointer to the point that is the center of the circle.
+   <dt><code>radius</code>
+     <dd>The radius of the circle in pixels.
+   <dt><code>circle</code>
+    <dd>A pointer the first entry in an array of 8 trapezoids where the circle description will be returned.
+</dl></ul>
+<p>
+  <b>Returned value</b>: None
+</p>
 
 <h2>2.3 <a name="nx2">NX</a></h2>
 
@@ -1685,7 +1744,76 @@ int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.23 <a name="nxglrgb2yuv"><code>nx_setbgcolor()</code></a></h3>
+<h3>2.3.23 <a name="nxdrawcircle"><code>nx_drawcircle()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+
+int nx_drawcircle(NXWINDOW hwnd, FAR struct nxgl_point_s *center,
+                  nxgl_coord_t radius, nxgl_coord_t width,
+                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Draw a circular outline using the specified line thickness and color.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>hwnd</code>
+      <dd>The handle returned by <a href="#nxopenwindow"><code>nx_openwindow()</code></a>
+        or <a href="#nxrequestbkgd"><code>nx_requestbkgd()</code></a>
+    <dt><code>center</code>
+      <dd>A pointer to the point that is the center of the circle.
+    <dt><code>radius</code>
+      <dd>The radius of the circle in pixels.
+    <dt><code>width</code>
+      <dd>The width of the line
+    <dt><code>color</code>
+      <dd>The color to use to fill the line
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.3.24 <a name="nxfillcircle"><code>nx_fillcircle()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+
+int nx_fillcircle(NXWINDOW hwnd, FAR struct nxgl_point_s *center,
+                  nxgl_coord_t radius, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Fill a circular region using the specified color.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>hwnd</code>
+      <dd>The handle returned by <a href="#nxopenwindow"><code>nx_openwindow()</code></a>
+        or <a href="#nxrequestbkgd"><code>nx_requestbkgd()</code></a>
+    <dt><code>center</code>
+      <dd>A pointer to the point that is the center of the circle.
+    <dt><code>radius</code>
+      <dd>The width of the line
+    <dt><code>color</code>
+      <dd>The color to use to fill the circle
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.3.25 <a name="nxglrgb2yuv"><code>nx_setbgcolor()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1713,7 +1841,7 @@ int nx_setbgcolor(NXHANDLE handle,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.24 <a name="nxmove"><code>nx_move()</code></a></h3>
+<h3>2.3.26 <a name="nxmove"><code>nx_move()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1744,7 +1872,7 @@ int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.25 <a name="nxbitmap"><code>nx_bitmap()</code></a></h3>
+<h3>2.3.27 <a name="nxbitmap"><code>nx_bitmap()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1786,7 +1914,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.26 <a name="nxkbdin"><code>nx_kbdin()</code></a></h3>
+<h3>2.3.28 <a name="nxkbdin"><code>nx_kbdin()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1809,7 +1937,7 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.27 <a name="nxmousein"><code>nx_mousein()</code></a></h3>
+<h3>2.3.29 <a name="nxmousein"><code>nx_mousein()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2202,7 +2330,76 @@ int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.12 <a name="nxtkmovewindow"><code>nxtk_movewindow()</code></a></h3>
+<h3>2.4.12 <a name="nxtkdrawcirclewindow"><code>nxtk_drawcirclewindow()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
+
+int nxtk_drawcirclewindow(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *center,
+                          nxgl_coord_t radius, nxgl_coord_t width,
+                          nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Draw a circular outline using the specified line thickness and color.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>hfwnd</code>
+      <dd>A handle previously returned by
+        <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a>.
+    <dt><code>center</code>
+      <dd>A pointer to the point that is the center of the circle.
+    <dt><code>radius</code>
+      <dd>The radius of the circle in pixels.
+    <dt><code>width</code>
+      <dd>The width of the line
+    <dt><code>color</code>
+      <dd>The color to use to fill the line
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.4.13 <a name="nxtkfillcirclewindow"><code>nxtk_fillcirclewindow()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
+
+int nxtk_fillcirclewindow(NXWINDOW hfwnd, FAR struct nxgl_point_s *center,
+                          nxgl_coord_t radius, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Fill a circular region using the specified color.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>hfwnd</code>
+      <dd>A handle previously returned by
+        <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a>.
+    <dt><code>center</code>
+      <dd>A pointer to the point that is the center of the circle.
+    <dt><code>radius</code>
+      <dd>The width of the line
+    <dt><code>color</code>
+      <dd>The color to use to fill the circle
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.4.14 <a name="nxtkmovewindow"><code>nxtk_movewindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2235,7 +2432,7 @@ int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.13 <a name="nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></h3>
+<h3>2.4.15 <a name="nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2280,7 +2477,7 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.14 <a name="nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></h3>
+<h3>2.4.16 <a name="nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2315,7 +2512,7 @@ int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.15 <a name="nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></h3>
+<h3>2.4.17 <a name="nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2344,7 +2541,7 @@ int nxtk_closetoolbar(NXTKWINDOW hfwnd);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.16 <a name="nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></h3>
+<h3>2.4.18 <a name="nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2376,7 +2573,7 @@ int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.17 <a name="nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></h3>
+<h3>2.4.19 <a name="nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2408,7 +2605,7 @@ int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *tr
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.18 <a name="nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></h3>
+<h3>2.4.20 <a name="nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2445,7 +2642,76 @@ int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.19 <a name="nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></h3>
+<h3>2.4.21 <a name="nxtkdrawcircletoolbar"><code>nxtk_drawcircletoolbar()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
+
+int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *center,
+                           nxgl_coord_t radius, nxgl_coord_t width,
+                           nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Draw a circular outline using the specified line thickness and color.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>hfwnd</code>
+      <dd>A handle previously returned by
+        <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a>.
+    <dt><code>center</code>
+      <dd>A pointer to the point that is the center of the circle.
+    <dt><code>radius</code>
+      <dd>The radius of the circle in pixels.
+    <dt><code>width</code>
+      <dd>The width of the line
+    <dt><code>color</code>
+      <dd>The color to use to fill the line
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.4.22 <a name="nxtkfillcircletoolbar"><code>nxtk_fillcircletoolbar()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
+
+int nxtk_fillcircletoolbar(NXWINDOW hfwnd, FAR struct nxgl_point_s *center,
+                           nxgl_coord_t radius, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Fill a circular region using the specified color.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>hfwnd</code>
+      <dd>A handle previously returned by
+        <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a>.
+    <dt><code>center</code>
+      <dd>A pointer to the point that is the center of the circle.
+    <dt><code>radius</code>
+      <dd>The width of the line
+    <dt><code>color</code>
+      <dd>The color to use to fill the circle
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.4.23 <a name="nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2479,7 +2745,7 @@ int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.20 <a name="nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></h3>
+<h3>2.4.24 <a name="nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -3330,6 +3596,20 @@ make
   </td>
   <td align="center" bgcolor="skyblue">YES</td>
 </tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglcirclepts"><code>nxgl_circlepts</code></a></td>
+  <td>
+    Verified by <code>apps/examples/nxlines</code>.
+  </td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxglcircletraps"><code>nxgl_circletraps</code></a></td>
+  <td>
+    Verified by <code>apps/examples/nxlines</code>.
+  </td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
 </table></center>
 
 <center><h2>Table D.2: <a name="nxcbcoverage">NX Server Callbacks Test Coverage</a></h2></center>
@@ -3485,6 +3765,20 @@ make
   <td align="center" bgcolor="skyblue">YES</td>
 </tr>
 <tr>
+  <td align="left" valign="top"><a href="#nxdrawcircle"><code>nx_drawcircle()</code></a></td>
+  <td>
+    Verified by <code>apps/examples/nxlines</code>.
+  </td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxfillcircle"><code>nx_fillcircle()</code></a></td>
+  <td>
+    Verified by <code>apps/examples/nxlines</code>.
+  </td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
   <td align="left" valign="top"><a href="#nxglrgb2yuv"><code>nx_setbgcolor()</code></a></td>
   <td><br></td>
   <td align="center" bgcolor="skyblue">YES</td>
@@ -3572,6 +3866,16 @@ make
   <td align="center" bgcolor="skyblue">YES</td>
 </tr>
 <tr>
+  <td align="left" valign="top"><a href="#nxtkdrawcirclewindow"><code>nxtk_drawcirclewindow()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkfillcirclewindow"><code>nxtk_fillcirclewindow()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
   <td align="left" valign="top"><a href="#nxtkmovewindow"><code>nxtk_movewindow()</code></a></td>
   <td><br></td>
   <td align="center" bgcolor="lightgrey">NO</td>
@@ -3603,6 +3907,16 @@ make
 </tr>
 <tr>
   <td align="left" valign="top"><a href="#nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkdrawcircletoolbar"><code>nxtk_drawcircletoolbar()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkfillcircletoolbar"><code>nxtk_fillcircletoolbar()</code></a></td>
   <td><br></td>
   <td align="center" bgcolor="lightgrey">NO</td>
 </tr>
