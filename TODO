@@ -1348,3 +1348,20 @@ o Other Applications & Tests (apps/examples/)
                the artifact is larger.
   Status:      Open
   Priority:    Medium.
+
+  Description:  examples/nxlines.  There is an error in the line rendering
+                on the 24th step (270 degrees).  At that point, the
+                calculated position is just a bit from being horizontal.
+                Using configuration configs/stm3210e-eval/nxlines, I see:
+
+                  sin: ffff0000 cos: ffffffed radius: 76 halfx: -76 halfy: -1
+
+                And the resulting almost horizontal line:
+                
+                   vector: (44,159)->(196,161)
+
+                is rendered incorrectly every time around. Looks like logic
+                in nxgl_splitlines malfunctioned.
+
+  Status:       Open
+  Priority:     Medium/High

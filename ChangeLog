@@ -2019,5 +2019,6 @@
 	* arch/arm/src/kinetis/kinetis_sdhc.c: SDHC driver for Kinetis parts.
 	  Initially check-in is just a crude port of the STM32 SDIO driver.
 	  Much more is needed.
-
+	* graphics/, include/nuttx/nx:  Add new NX interfaces for drawing
+  	  circles -- both circular outlines and filled circles.
 

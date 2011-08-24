@@ -116,7 +116,7 @@
  *
  ****************************************************************************/
 
-void nxgl_circlepts(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
+void nxgl_circlepts(FAR const struct nxgl_point_s *center, nxgl_coord_t radius,
                     FAR struct nxgl_point_s *circle)
 {
   nxgl_coord_t xoffs;

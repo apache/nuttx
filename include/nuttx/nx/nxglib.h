@@ -650,7 +650,7 @@ EXTERN int nxgl_splitline(FAR struct nxgl_vector_s *vector,
  *
  ****************************************************************************/
 
-EXTERN void nxgl_circlepts(FAR struct nxgl_point_s *center,
+EXTERN void nxgl_circlepts(FAR const struct nxgl_point_s *center,
                            nxgl_coord_t radius,
                            FAR struct nxgl_point_s *circle);
 
@@ -672,7 +672,7 @@ EXTERN void nxgl_circlepts(FAR struct nxgl_point_s *center,
  *
  ****************************************************************************/
 
-EXTERN void nxgl_circletraps(FAR struct nxgl_point_s *center,
+EXTERN void nxgl_circletraps(FAR const struct nxgl_point_s *center,
                              nxgl_coord_t radius,
                              FAR struct nxgl_trapezoid_s *circle);
 

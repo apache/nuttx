@@ -95,7 +95,7 @@
  *
  ****************************************************************************/
 
-void nxgl_circletraps(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
+void nxgl_circletraps(FAR const struct nxgl_point_s *center, nxgl_coord_t radius,
                       FAR struct nxgl_trapezoid_s *circle)
 {
   nxgl_coord_t xoffs;
@@ -103,11 +103,11 @@ void nxgl_circletraps(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
 
   circle[0].top.x1      = itob16(center->x);
   circle[0].top.x2      = circle[0].top.x1;
-  circle[0].top.y       = center->y + radius;
+  circle[0].top.y       = center->y - radius;
 
   circle[7].bot.x1      = circle[0].top.x1;
   circle[7].bot.x2      = circle[0].top.x1;
-  circle[7].bot.y       = center->y - radius;
+  circle[7].bot.y       = center->y + radius;
 
   circle[3].bot.x1      = itob16(center->x - radius);
   circle[3].bot.x2      = itob16(center->x + radius);
@@ -124,7 +124,7 @@ void nxgl_circletraps(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
 
   circle[2].bot.x1      = itob16(center->x - xoffs);
   circle[2].bot.x2      = itob16(center->x + xoffs);
-  circle[2].bot.y       = center->y + yoffs;
+  circle[2].bot.y       = center->y - yoffs;
 
   circle[3].top.x1      = circle[2].bot.x1;
   circle[3].top.x2      = circle[2].bot.x2;
@@ -132,7 +132,7 @@ void nxgl_circletraps(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
 
   circle[4].bot.x1      = circle[2].bot.x1;
   circle[4].bot.x2      = circle[2].bot.x2;
-  circle[4].bot.y       = center->y - yoffs;
+  circle[4].bot.y       = center->y + yoffs;
 
   circle[5].top.x1      = circle[4].bot.x1;
   circle[5].top.x2      = circle[4].bot.x2;
@@ -140,7 +140,7 @@ void nxgl_circletraps(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
 
   circle[0].bot.x1      = itob16(center->x - yoffs);
   circle[0].bot.x2      = itob16(center->x + yoffs);
-  circle[0].bot.y       = center->y + xoffs;
+  circle[0].bot.y       = center->y - xoffs;
 
   circle[1].top.x1      = circle[0].bot.x1;
   circle[1].top.x2      = circle[0].bot.x2;
@@ -148,7 +148,7 @@ void nxgl_circletraps(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
 
   circle[6].bot.x1      = circle[1].top.x1;
   circle[6].bot.x2      = circle[1].top.x2;
-  circle[6].bot.y       = center->y - xoffs;
+  circle[6].bot.y       = center->y + xoffs;
 
   circle[7].top.x1      = circle[6].bot.x1;
   circle[7].top.x2      = circle[6].bot.x2;
@@ -160,7 +160,7 @@ void nxgl_circletraps(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
 
   circle[1].bot.x1      = itob16(center->x - xoffs);
   circle[1].bot.x2      = itob16(center->x + xoffs);
-  circle[1].bot.y       = center->y + xoffs;
+  circle[1].bot.y       = center->y - xoffs;
 
   circle[2].top.x1      = circle[1].bot.x1;
   circle[2].top.x2      = circle[1].bot.x2;
@@ -168,7 +168,7 @@ void nxgl_circletraps(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
   
   circle[5].bot.x1      = circle[1].bot.x1;
   circle[5].bot.x2      = circle[1].bot.x2;
-  circle[5].bot.y       = center->y - xoffs;
+  circle[5].bot.y       = center->y + xoffs;
 
   circle[6].top.x1      = circle[5].bot.x1;
   circle[6].top.x2      = circle[5].bot.x2;

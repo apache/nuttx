@@ -817,7 +817,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector, FAR struct nxgl_trapezoid_s
 <h3>2.2.20 <a name="nxglcirclepts"><code>nxgl_circlepts</code></a></h3>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
-void nxgl_circlepts(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
+void nxgl_circlepts(FAR const struct nxgl_point_s *center, nxgl_coord_t radius,
                     FAR struct nxgl_point_s *circle);
 </pre></ul>
 <p>
@@ -843,7 +843,7 @@ void nxgl_circlepts(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
 <h3>2.2.21 <a name="nxglcircletraps"><code>nxgl_circletraps</code></a></h3>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
-oid nxgl_circletraps(FAR struct nxgl_point_s *center, nxgl_coord_t radius,
+oid nxgl_circletraps(FAR const struct nxgl_point_s *center, nxgl_coord_t radius,
                      FAR struct nxgl_trapezoid_s *circle);
 </pre></ul>
 <p>
@@ -1750,7 +1750,7 @@ int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
 #include &lt;nuttx/nx/nxglib.h&gt;
 #include &lt;nuttx/nx/nx.h&gt;
 
-int nx_drawcircle(NXWINDOW hwnd, FAR struct nxgl_point_s *center,
+int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
                   nxgl_coord_t radius, nxgl_coord_t width,
                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 </pre></ul>
@@ -1786,7 +1786,7 @@ int nx_drawcircle(NXWINDOW hwnd, FAR struct nxgl_point_s *center,
 #include &lt;nuttx/nx/nxglib.h&gt;
 #include &lt;nuttx/nx/nx.h&gt;
 
-int nx_fillcircle(NXWINDOW hwnd, FAR struct nxgl_point_s *center,
+int nx_fillcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
                   nxgl_coord_t radius, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 </pre></ul>
 <p>
@@ -2336,7 +2336,7 @@ int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
 #include &lt;nuttx/nx/nxglib.h&gt;
 #include &lt;nuttx/nx/nxtk.h&gt;
 
-int nxtk_drawcirclewindow(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *center,
+int nxtk_drawcirclewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *center,
                           nxgl_coord_t radius, nxgl_coord_t width,
                           nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 </pre></ul>
@@ -2372,7 +2372,7 @@ int nxtk_drawcirclewindow(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *center,
 #include &lt;nuttx/nx/nxglib.h&gt;
 #include &lt;nuttx/nx/nxtk.h&gt;
 
-int nxtk_fillcirclewindow(NXWINDOW hfwnd, FAR struct nxgl_point_s *center,
+int nxtk_fillcirclewindow(NXWINDOW hfwnd, FAR const struct nxgl_point_s *center,
                           nxgl_coord_t radius, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 </pre></ul>
 <p>
@@ -2648,7 +2648,7 @@ int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
 #include &lt;nuttx/nx/nxglib.h&gt;
 #include &lt;nuttx/nx/nxtk.h&gt;
 
-int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *center,
+int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *center,
                            nxgl_coord_t radius, nxgl_coord_t width,
                            nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 </pre></ul>
@@ -2684,7 +2684,7 @@ int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *center,
 #include &lt;nuttx/nx/nxglib.h&gt;
 #include &lt;nuttx/nx/nxtk.h&gt;
 
-int nxtk_fillcircletoolbar(NXWINDOW hfwnd, FAR struct nxgl_point_s *center,
+int nxtk_fillcircletoolbar(NXWINDOW hfwnd, FAR const struct nxgl_point_s *center,
                            nxgl_coord_t radius, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 </pre></ul>
 <p>

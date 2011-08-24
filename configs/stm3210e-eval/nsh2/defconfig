@@ -1145,8 +1145,17 @@ CONFIG_EXAMPLES_NXIMAGE_EXTERNINIT=n
 #   depends on CONFIG_EXAMPLES_NXLINES_BPP.
 # CONFIG_EXAMPLES_NXLINES_LINEWIDTH - Selects the width of the lines in
 #   pixels (default: 16)
-# CONFIG_EXAMPLES_NXLINES_LINECOLOR -- The color of the lines drawn in the
-#   background window. Default depends on CONFIG_EXAMPLES_NXLINES_BPP.
+# CONFIG_EXAMPLES_NXLINES_LINECOLOR -- The color of the central lines drawn
+#   in the background window. Default depends on CONFIG_EXAMPLES_NXLINES_BPP
+#   (there really is no meaningful default).
+# CONFIG_EXAMPLES_NXLINES_BORDERWIDTH -- The width of the circular border
+#   drawn in the background window. (default: 4).
+# CONFIG_EXAMPLES_NXLINES_BORDERCOLOR -- The color of the circular border
+#   drawn in the background window. Default depends on CONFIG_EXAMPLES_NXLINES_BPP
+#   (there really is no meaningful default).
+# CONFIG_EXAMPLES_NXLINES_CIRCLECOLOR -- The color of the circular region
+#   filled in the background window. Default depends on CONFIG_EXAMPLES_NXLINES_BPP
+#   (there really is no meaningful default).
 # CONFIG_EXAMPLES_NXLINES_BPP -- Pixels per pixel to use.  Valid options
 #   include 2, 4, 8, 16, 24, and 32.  Default is 16.
 # CONFIG_EXAMPLES_NXLINES_EXTERNINIT - The driver for the graphics device on
@@ -1161,6 +1170,9 @@ CONFIG_EXAMPLES_NXLINES_DEVNO=0
 CONFIG_EXAMPLES_NXLINES_BGCOLOR=0x0320
 CONFIG_EXAMPLES_NXLINES_LINEWIDTH=16
 CONFIG_EXAMPLES_NXLINES_LINECOLOR=0xffe0
+CONFIG_EXAMPLES_NXLINES_BORDERWIDTH=4
+CONFIG_EXAMPLES_NXLINES_BORDERCOLOR=0xffe0
+CONFIG_EXAMPLES_NXLINES_CIRCLECOLOR=0xf7bb
 CONFIG_EXAMPLES_NXLINES_BPP=16
 CONFIG_EXAMPLES_NXLINES_EXTERNINIT=n
 

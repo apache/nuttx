@@ -283,7 +283,7 @@ EXTERN int nxtk_drawlinewindow(NXTKWINDOW hfwnd,
  ****************************************************************************/
 
 EXTERN int nxtk_drawcirclewindow(NXTKWINDOW hfwnd,
-                                 FAR struct nxgl_point_s *center,
+                                 FAR const struct nxgl_point_s *center,
                                  nxgl_coord_t radius, nxgl_coord_t width,
                                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
@@ -305,7 +305,7 @@ EXTERN int nxtk_drawcirclewindow(NXTKWINDOW hfwnd,
  ****************************************************************************/
 
 EXTERN int nxtk_fillcirclewindow(NXWINDOW hfwnd,
-                                 FAR struct nxgl_point_s *center,
+                                 FAR const struct nxgl_point_s *center,
                                  nxgl_coord_t radius,
                                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
@@ -478,7 +478,7 @@ EXTERN int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd,
  ****************************************************************************/
 
 EXTERN int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd,
-                                  FAR struct nxgl_point_s *center,
+                                  FAR const struct nxgl_point_s *center,
                                   nxgl_coord_t radius, nxgl_coord_t width,
                                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
@@ -500,7 +500,7 @@ EXTERN int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd,
  ****************************************************************************/
 
 EXTERN int nxtk_fillcircletoolbar(NXWINDOW hfwnd,
-                                  FAR struct nxgl_point_s *center,
+                                  FAR const struct nxgl_point_s *center,
                                   nxgl_coord_t radius,
                                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 

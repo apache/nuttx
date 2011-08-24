@@ -107,7 +107,7 @@
  *
  ****************************************************************************/
 
-int nx_drawcircle(NXWINDOW hwnd, FAR struct nxgl_point_s *center,
+int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
                   nxgl_coord_t radius, nxgl_coord_t width,
                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
