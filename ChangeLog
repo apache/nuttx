@@ -2020,5 +2020,7 @@
 	  Initially check-in is just a crude port of the STM32 SDIO driver.
 	  Much more is needed.
 	* graphics/, include/nuttx/nx:  Add new NX interfaces for drawing
-  	  circles -- both circular outlines and filled circles.
+	  circles -- both circular outlines and filled circles.
+	* graphic/nxglib/nxglib_spitline.c:  Add a "fudge factor" that eliminates
+	  some problems for rendering nearly horizontal, wide lines.
 

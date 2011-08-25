@@ -48,6 +48,8 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+#define SMALL_SIN 1966 /* 1966/65536 = 0.03 */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -231,14 +233,14 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
 
   /* If the sine of the angle is tiny (i.e., the line is nearly horizontal),
    * then we cannot compute the adjusted width.  In this case, just use
-   * the width of the line (not very good estimate -- need to revisit).
+   * the width of the line bounding box.
    */
 
   sinangle     =  b16sin(angle);
-  if (sinangle == 0)
+  if (sinangle < SMALL_SIN)
     {
       adjwidth = itob16(iwidth);
-      xoffset  = adjwidth;
+      xoffset  = 0;
     }
   else
     {
@@ -246,6 +248,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
       xoffset  = itob16(linewidth * linewidth);
       xoffset  = b16divb16(xoffset, adjwidth);
     }
+
   halfoffset   = (xoffset >> 1);
 
   /* Return the top triangle (if there is one).  NOTE that the horizontal

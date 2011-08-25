@@ -614,3 +614,31 @@ Where <subdir> is one of the following:
     using the DFU bootloader.
 
     CONFIG_KINETIS_BUILDROOT=y	  : NuttX buildroot under Linux or Cygwin
+
+  nsh:
+  ---
+    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
+    Configuration enables both the serial and telnet NSH interfaces.
+    Support for the board's SPI-based MicroSD card is included
+    (but not passing tests as of this writing).
+
+	NOTE: An SDHC driver is underwork and can be enabled in the NSH
+    configuration for further testing be setting the following
+    configuration faluesas follows:
+
+      -CONFIG_KINETIS_SDHC=n
+      +CONFIG_KINETIS_SDHC=y         # Enable the SDHC driver
+
+      -CONFIG_GPIO_IRQ=n
+      +CONFIG_GPIO_IRQ=y             # Enable GPIO interrupts
+
+      -CONFIG_KINETIS_PORTEINTS=n
+      +CONFIG_KINETIS_PORTEINTS=y    # Enable PortE GPIO interrupts
+
+      -CONFIG_SCHED_WORKQUEUE=n
+      +CONFIG_SCHED_WORKQUEUE=y      # Enable the NuttX workqueue
+
+      -CONFIG_NSH_ARCHINIT=n
+      +CONFIG_NSH_ARCHINIT=y         # Provide NSH intialization logic
+
+
