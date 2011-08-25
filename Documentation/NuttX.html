@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 19, 2011</p>
+      <p>Last Updated: August 24, 2011</p>
     </td>
   </tr>
 </table>
@@ -900,7 +900,7 @@
   <li><b>LPC17xx CAN driver</b>.
     LPC17xx CAN driver extended to support both CAN1 and CAN2 (submitted by
     Li Zhuoy (Lzzy)).  A Semaphore overflow problem was also corrected in the
-	CAN driver (reported by Li Zhouy (Lzzy)).
+    CAN driver (reported by Li Zhouy (Lzzy)).
   </li>
   <li><b>Signal-related bugfixes</b>.
     Fixed several critical bugs related to signal handling initialization and
@@ -1551,12 +1551,13 @@
   <td>
     <p>
       <b>FreeScale Kinetics K40</b>.
-      This port uses the Freescale Kinetis KwiStick K40.
+      This port uses the Freescale Kinetis KwikStik K40.
       Refer to the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=KWIKSTIK-K40">Freescale web site</a> for further information about this board.
       The Kwikstik is used with the FreeScale Tower System (mostly just to provide a simple UART connection)
     </p>
     <p>
       <b>STATUS:</b>
+      The unverified KwikStik K40 first appeared in NuttX-6.8
       As of this writing, the basic port is complete but I accidentally locked my board during the initial bringup.
       Further development is stalled unless I learn how to unlock the device (or until I get another K40).
       Additional work remaining includes, among other things: (1) complete the basic bring-up,
@@ -1583,12 +1584,12 @@
       As of this writing, the basic port is complete and passes the NuttX OS test.
       An additional, validated configuration exists for the NuttShell (NSH, see the
       <a href="http://www.nuttx.org/NuttShell.html">NSH User Guide</a>).
-      And Ethernet driver also exists, but has not yet been integrated.
-      Additional work remaining includes: (1) integrate the Ethernet driver,
-      (3) develop support for the SDHC-based SD card, and
-      (4) develop support for USB host and device.
-      NOTE: Most of these remaining tasks (excluding the Ethernet driver) are the
-      same as the pending K40 tasks described above.
+      This basic TWR-K60N512 first appeared in NuttX-6.8.
+      Ethernet and SD card (SDHC) drivers also exist:
+      The SDHC driver is partially integrated in to the NSH configuration but has some outstanding issues;
+      the Ethernet driver is completely untested.
+      Additional work remaining includes: (1) integrate the Ethernet and SDHC drivers, and (2) develop support for USB host and device.
+      NOTE: Most of these remaining tasks (excluding the Ethernet driver) are the same as the pending K40 tasks described above.
     </p>
   </td>
 </tr>
@@ -2514,7 +2515,7 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.9 2011-08-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.8 2011-08-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * arch/arm/src/lpc17xx/chip.h:  Fix some chip memory configuration errors
       for the LPC1764, LPC1756, and LPC1754 (submitted by Li Zhuoy (Lzzy))
@@ -2530,7 +2531,7 @@ nuttx-6.9 2011-08-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       Separate configs/rgmp/x86 and configs/rgmp/arm configuration directory, and
       (2) Extract architecture dependent code in arch/rgmp/include and
       arch/rgmp/src into corresponding x86/ and arm/ directories.
-    * arch/arm/src/kinetis, arch/arm/include/kinetis, configs/kwikstick-k40:
+    * arch/arm/src/kinetis, arch/arm/include/kinetis, configs/kwikstik-k40:
       Add a directory structure to support the port to the Kinetis KwikStik-K40.
       There is no real substance in the initial check-in; only the directory
       structure and skeleton files (Code complete on 8/15/11).
@@ -2562,7 +2563,7 @@ nuttx-6.9 2011-08-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
     * configs/twr-k60n512/nsh:  Added and verified a NuttShell (NSH)
       configuration for the Freescale, Kinetis TWR-K60N512 board.
 
-apps-6.9 2011-08-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+apps-6.8 2011-08-19 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * apps/examples/nxlines:  Added a test for NX line drawing capabilities.
 
@@ -2609,7 +2610,18 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 <ul><pre>
 nuttx-6.9 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
+    * arch/arm/src/kinetis/kinetis_sdhc.c: SDHC driver for Kinetis parts.
+      Initially check-in is just a crude port of the STM32 SDIO driver.
+      Much more is needed.
+    * graphics/, include/nuttx/nx:  Add new NX interfaces for drawing
+      circles -- both circular outlines and filled circles.
+    * graphic/nxglib/nxglib_spitline.c:  Add a &quot;fudge factor&quot; that eliminates
+      some problems for rendering nearly horizontal, wide lines.
+
 apps-6.9 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+
+    * apps/examples/nxlines:  Extend the line drawing text to include drawing
+      of circles.
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

@@ -3591,10 +3591,14 @@ make
 </tr>
 <tr>
   <td align="left" valign="top"><a href="#nxglsplitline"><code>nxgl_splitline</code></a></td>
-  <td>
-    Verified by <code>apps/examples/nxlines</code>.
+  <td bgcolor="lightgreen">
+    Verified using <code>apps/examples/nxlines</code>.
+    Generally works well, but has some accuracy/overflow problems wide lines
+    that are nearly horizontal.
+    There is a &quot;fudge factor&quot; that seems to eliminate the problem,
+    but there could still be issues in some configurations.
   </td>
-  <td align="center" bgcolor="skyblue">YES</td>
+  <td align="center" bgcolor="lightgreen">YES</td>
 </tr>
 <tr>
   <td align="left" valign="top"><a href="#nxglcirclepts"><code>nxgl_circlepts</code></a></td>
