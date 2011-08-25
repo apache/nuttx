@@ -2027,4 +2027,7 @@
 	  updates to the ADS1255 driver, (2) fix errors from my last merge (sorry),
 	  (3) Add DAC infrastructure, (4) add AD5410 DAC driver, and (5) add
 	  LPC17xx ADC and DAC drivers.  All contributed by Li Zhuoyi (Lzyy).
+	* tools/mkexport.sh:  Extended the script that implements the top-level
+	  'make export' logic.  The script now also finds and bundles up all of
+	  the architecture-specific header files as well.
 

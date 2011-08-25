@@ -129,6 +129,7 @@ mkdir "${EXPORTDIR}" || { echo "MK: 'mkdir ${EXPORTDIR}' failed"; exit 1; }
 mkdir "${EXPORTDIR}/startup" || { echo "MK: 'mkdir ${EXPORTDIR}/startup' failed"; exit 1; }
 mkdir "${EXPORTDIR}/libs" || { echo "MK: 'mkdir ${EXPORTDIR}/libs' failed"; exit 1; }
 mkdir "${EXPORTDIR}/build" || { echo "MK: 'mkdir ${EXPORTDIR}/build' failed"; exit 1; }
+mkdir "${EXPORTDIR}/arch" || { echo "MK: 'mkdir ${EXPORTDIR}/arch' failed"; exit 1; }
 
 # Verify that we have a Make.defs file.
 
@@ -186,6 +187,61 @@ find "${EXPORTDIR}/include" -name .svn | xargs rm -rf
 # Copy the startup object file(s)
 
 make -C ${ARCHDIR} export_head TOPDIR=${TOPDIR} EXPORT_DIR="${EXPORTDIR}"
+
+# Copy architecture-specific header files into the arch export sub-directory.
+# This is tricky because each architecture does things in a little different
+# way.
+#
+# First copy any header files in the architecture src/ sub-directory (some
+# architectures keep all of the header files there, some a few, and others
+# none
+
+cp -f "${ARCHDIR}"/*.h "${EXPORTDIR}"/arch/. 2>/dev/null
+
+# Then look a list of possible places where other architecture-specific
+# header files might be found.  If those places exist (as directories or
+# as symbolic links to directories, then copy the header files from 
+# those directories into the EXPORTDIR
+
+ARCH_HDRDIRS="common chip arm armv7-m avr avr32 mips32"
+for hdir in $ARCH_HDRDIRS; do
+
+	# Does the directory (or symbolic link) exist?
+
+	if [ -d "${ARCHDIR}/${hdir}" -o -h "${ARCHDIR}/${hdir}" ]; then
+
+		# Yes.. create a export sub-directory of the same name
+
+		mkdir "${EXPORTDIR}/arch/${hdir}" || \
+			{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}' failed"; exit 1; }
+
+		# Then copy the header files (only) into the new directory
+
+		cp -f "${ARCHDIR}"/${hdir}/*.h "${EXPORTDIR}"/arch/${hdir}/. 2>/dev/null
+
+		# One architecture has low directory called "chip" that holds the
+		# header files
+
+		if [ -d "${ARCHDIR}/${hdir}/chip" ]; then
+
+			# Yes.. create a export sub-directory of the same name
+
+			mkdir "${EXPORTDIR}/arch/${hdir}/chip" || \
+				{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}/chip' failed"; exit 1; }
+
+			# Then copy the header files (only) into the new directory
+
+			cp -f "${ARCHDIR}"/${hdir}/chip/*.h "${EXPORTDIR}"/arch/${hdir}/chip/. 2>/dev/null
+		fi
+	fi
+done
+
+# Copy OS internal header files as well.  They are used by some architecture-
+# specific header files.
+
+mkdir "${EXPORTDIR}/arch/os" || \
+	{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}/chip' failed"; exit 1; }
+cp -f "${TOPDIR}"/sched/*.h "${EXPORTDIR}"/arch/os/. 2>/dev/null
 
 # Add the board library to the list of libraries
 
