@@ -2023,4 +2023,8 @@
 	  circles -- both circular outlines and filled circles.
 	* graphic/nxglib/nxglib_spitline.c:  Add a "fudge factor" that eliminates
 	  some problems for rendering nearly horizontal, wide lines.
+	* drivers/analog, include/nuttx/analog, arch/arch/src/lpcxx:  (1) Add
+	  updates to the ADS1255 driver, (2) fix errors from my last merge (sorry),
+	  (3) Add DAC infrastructure, (4) add AD5410 DAC driver, and (5) add
+	  LPC17xx ADC and DAC drivers.  All contributed by Li Zhuoyi (Lzyy).
 

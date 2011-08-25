@@ -88,3 +88,11 @@ ifeq ($(CONFIG_LPC17_ETHERNET),y)
 CHIP_CSRCS	+= lpc17_ethernet.c
 endif
 endif
+
+ifeq ($(CONFIG_LPC17_ADC),y)
+CHIP_CSRCS	+= lpc17_adc.c
+endif
+
+ifeq ($(CONFIG_LPC17_DAC),y)
+CHIP_CSRCS	+= lpc17_dac.c
+endif

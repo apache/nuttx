@@ -41,8 +41,13 @@ ifeq ($(CONFIG_DAC),y)
 
 # Include the common ADC character driver
 
+CSRCS += dac.c
+
 # Include DAC device drivers
 
+ifeq ($(CONFIG_DAC_AD5410),y)
+  CSRCS += ad5410.c
+endif
 endif
 
 # Check for ADC devices

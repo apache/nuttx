@@ -1,10 +1,9 @@
 /************************************************************************************
- * include/nuttx/analog/adc.h
+ * include/nuttx/analog/dac.h
  *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-04 initial version
- * 			  0.2 remove ao_read
  *
  * Derived from include/nuttx/can.h
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
@@ -39,8 +38,8 @@
  *
  ************************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_ANALOG_ADC_H
-#define __INCLUDE_NUTTX_ANALOG_ADC_H
+#ifndef __NUTTX_DAC_H
+#define __NUTTX_DAC_H
 
 /************************************************************************************
  * Included Files
@@ -58,77 +57,78 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
 /* Default configuration settings that may be overridden in the board configuration.
  * file.  The configured size is limited to 255 to fit into a uint8_t.
  */
 
-#if !defined(CONFIG_ADC_FIFOSIZE)
-#  define CONFIG_ADC_FIFOSIZE 8
-#elif CONFIG_ADC_FIFOSIZE > 255
-#  undef  CONFIG_ADC_FIFOSIZE
-#  define CONFIG_ADC_FIFOSIZE 255
+#if !defined(CONFIG_DAC_FIFOSIZE)
+#  define CONFIG_DAC_FIFOSIZE 8
+#elif CONFIG_DAC_FIFOSIZE > 255
+#  undef  CONFIG_DAC_FIFOSIZE
+#  define CONFIG_DAC_FIFOSIZE 255
 #endif
 
 /************************************************************************************
  * Public Types
  ************************************************************************************/
-
-struct adc_msg_s
+struct dac_msg_s
 {
-  uint8_t      am_channel;               /* The 8-bit ADC Channel */
-  int32_t      am_data;                  /* ADC convert result (4 bytes) */
-}__attribute__((__packed__));
+  uint8_t      am_channel;                  /* The 8-bit DAC Channel */
+  int32_t      am_data;                    /* DAC convert result (4 bytes) */
+};
 
-struct adc_fifo_s
+struct dac_fifo_s
 {
-  sem_t        af_sem;                   /* Counting semaphore */
-  uint8_t      af_head;                  /* Index to the head [IN] index in the circular buffer */
-  uint8_t      af_tail;                  /* Index to the tail [OUT] index in the circular buffer */
+  sem_t         af_sem;                  /* Counting semaphore */
+  uint8_t       af_head;                 /* Index to the head [IN] index in the circular buffer */
+  uint8_t       af_tail;                 /* Index to the tail [OUT] index in the circular buffer */
                                          /* Circular buffer of CAN messages */
-  struct adc_msg_s af_buffer[CONFIG_ADC_FIFOSIZE];
+  struct dac_msg_s af_buffer[CONFIG_DAC_FIFOSIZE];
 };
 
 /* This structure defines all of the operations providd by the architecture specific
  * logic.  All fields must be provided with non-NULL function pointers by the
- * caller of can_register().
+ * caller of dac_register().
  */
 
-struct adc_dev_s;
-struct adc_ops_s
+struct dac_dev_s;
+struct dac_ops_s
 {
-  /* Reset the ADC device.  Called early to initialize the hardware. This
+  /* Reset the DAC device.  Called early to initialize the hardware. This
    * is called, before ao_setup() and on error conditions.
    */
 
-  CODE void (*ao_reset)(FAR struct adc_dev_s *dev);
+  CODE void (*ao_reset)(FAR struct dac_dev_s *dev);
 
-  /* Configure the ADC. This method is called the first time that the ADC
+  /* Configure the DAC. This method is called the first time that the DAC
    * device is opened.  This will occur when the port is first opened. 
-   * This setup includes configuring and attaching ADC interrupts.  Interrupts
+   * This setup includes configuring and attaching DAC interrupts.  Interrupts
    * are all disabled upon return.
    */
 
-  CODE int (*ao_setup)(FAR struct adc_dev_s *dev);
+  CODE int (*ao_setup)(FAR struct dac_dev_s *dev);
 
-  /* Disable the ADC.  This method is called when the ADC device is closed.
+  /* Disable the DAC.  This method is called when the DAC device is closed.
    * This method reverses the operation the setup method.
    */
+  CODE void (*ao_shutdown)(FAR struct dac_dev_s *dev);
 
-  CODE void (*ao_shutdown)(FAR struct adc_dev_s *dev);
+  /* Call to enable or disable TX interrupts */
 
-  /* Call to enable or disable RX interrupts */
+  CODE void (*ao_txint)(FAR struct dac_dev_s *dev, bool enable);
 
-  CODE void (*ao_rxint)(FAR struct adc_dev_s *dev, bool enable);
- 
+  /* This method will send one message on the DAC */
+
+  CODE int (*ao_send)(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg);
+
   /* All ioctl calls will be routed through this method */
 
-  CODE int (*ao_ioctl)(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
+  CODE int (*ao_ioctl)(FAR struct dac_dev_s *dev, int cmd, unsigned long arg);
 
 };
 
 /* This is the device structure used by the driver.  The caller of
- * can_register() must allocate and initialize this structure.  The
+ * dac_register() must allocate and initialize this structure.  The
  * calling logic need only set all fields to zero except:
  *
  *   The elements of 'ad_ops', and 'ad_priv'
@@ -136,14 +136,13 @@ struct adc_ops_s
  * The common logic will initialize all semaphores.
  */
 
-struct adc_dev_s
+struct dac_dev_s
 {
   uint8_t              ad_ocount;        /* The number of times the device has been opened */
-  uint8_t              ad_nrxwaiters;    /* Number of threads waiting to enqueue a message */
+  uint8_t              ad_nchannel;      /* Number of dac channel */
   sem_t                ad_closesem;      /* Locks out new opens while close is in progress */
-  sem_t                ad_recvsem;       /* Used to wakeup user waiting for space in ad_recv.buffer */
-  struct adc_fifo_s    ad_recv;          /* Describes receive FIFO */
-  const struct adc_ops_s *ad_ops;        /* Arch-specific operations */
+  struct dac_fifo_s    ad_xmit;          /* Describes receive FIFO */
+  const struct dac_ops_s *ad_ops;    /* Arch-specific operations */
   void                *ad_priv;          /* Used by the arch-specific logic */
 };
 
@@ -158,40 +157,33 @@ struct adc_dev_s
 #if defined(__cplusplus)
 extern "C" {
 #endif
-
 /************************************************************************************
- * Name: adc_register
+ * Name: dac_register
  *
  * Description:
- *   Register a adc driver.
+ *   Register a dac driver.
  *
  ************************************************************************************/
 
-int adc_register(FAR const char *path, FAR struct adc_dev_s *dev);
-
-int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data);
+int dac_register(FAR const char *path, FAR struct dac_dev_s *dev);
 
 /************************************************************************************
- * Name: up_ads1255initialize
+ * Name: dac_txdone
  *
  * Description:
- *   Initialize the TI ADS 125X lower half driver
+ *   Called from the DAC interrupt handler at the completion of a send operation.
+ *
+ * Return:
+ *   OK on success; a negated errno on failure.
  *
  ************************************************************************************/
+int dac_txdone(FAR struct dac_dev_s *dev);
 
-FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi, unsigned int devno);
-
-/************************************************************************************
- * Name: up_adcinitialize
- *
- * Description:
- *   Initialize the MCU internal adc driver
- *
- ************************************************************************************/
-FAR struct adc_dev_s *up_adcinitialize();
+FAR struct dac_dev_s *up_ad5410initialize(FAR struct spi_dev_s *spi, unsigned int devno);
+FAR struct dac_dev_s *up_dacinitialize();
 
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_ANALOG_ADC_H */
+#endif /* __NUTTX_DAC_H */

@@ -1,11 +1,10 @@
 /************************************************************************************
- * arch/drivers/analog/ads1255.c
+ * arch/arm/src/lpc17xx/lpc17_adc.c
  *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-05 initial version
- *            0.2 2011-08-25 fix bug in g_adcdev (cd_ops -> ad_ops,cd_priv -> ad_priv) 
- *
+ * 
  * This file is a part of NuttX:
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
@@ -51,70 +50,39 @@
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
-#include <nuttx/spi.h>
 #include <nuttx/analog/adc.h>
 
-#if defined(CONFIG_ADC_ADS1255)
+#include "up_internal.h"
+#include "up_arch.h"
 
-#define ADS125X_BUFON   0x02
-#define ADS125X_BUFOFF  0x00
+#include "chip.h"
+#include "lpc17_internal.h"
+#include "lpc17_syscon.h"
+#include "lpc17_pinconn.h"
+#include "lpc17_adc.h"
 
-#define ADS125X_PGA1    0x00
-#define ADS125X_PGA2    0x01
-#define ADS125X_PGA4    0x02
-#define ADS125X_PGA8    0x03
-#define ADS125X_PGA16   0x04
-#define ADS125X_PGA32   0x05
-#define ADS125X_PGA64   0x06
+#if defined(CONFIG_LPC17_ADC)
 
-#define ADS125X_RDATA     0x01    //Read Data
-#define ADS125X_RDATAC    0x03    //Read Data Continuously
-#define ADS125X_SDATAC    0x0F    //Stop Read Data Continuously
-#define ADS125X_RREG      0x10    //Read from REG
-#define ADS125X_WREG      0x50    //Write to REG
-#define ADS125X_SELFCAL   0xF0    //Offset and Gain Self-Calibration
-#define ADS125X_SELFOCAL  0xF1    //Offset Self-Calibration
-#define ADS125X_SELFGCAL  0xF2    //Gain Self-Calibration
-#define ADS125X_SYSOCAL   0xF3    //System Offset Calibration
-#define ADS125X_SYSGCAL   0xF4    //System Gain Calibration
-#define ADS125X_SYNC      0xFC    //Synchronize the A/D Conversion
-#define ADS125X_STANDBY   0xFD    //Begin Standby Mode
-#define ADS125X_RESET     0xFE    //Reset to Power-Up Values
-#define ADS125X_WAKEUP    0xFF    //Completes SYNC and Exits Standby Mode
-
-#ifndef CONFIG_ADS1255_FREQUENCY
-#define CONFIG_ADS1255_FREQUENCY  1000000
+#ifndef CONFIG_ADC0_MASK
+#define CONFIG_ADC0_MASK     0x01
 #endif
-#ifndef CONFIG_ADS1255_MUX
-#define CONFIG_ADS1255_MUX      0x01
+#ifndef CONFIG_ADC0_SPS
+#define CONFIG_ADC0_SPS      1000
 #endif
-#ifndef CONFIG_ADS1255_CHMODE
-#define CONFIG_ADS1255_CHMODE   0x00
-#endif
-#ifndef CONFIG_ADS1255_BUFON
-#define CONFIG_ADS1255_BUFON    1
-#endif
-#ifndef CONFIG_ADS1255_PGA
-#define CONFIG_ADS1255_PGA      ADS125X_PGA2
-#endif
-#ifndef CONFIG_ADS1255_SPS
-#define CONFIG_ADS1255_SPS      50
+#ifndef CONFIG_ADC0_AVERAGE
+#define CONFIG_ADC0_AVERAGE  200
 #endif
 
 /****************************************************************************
  * ad_private Types
  ****************************************************************************/
-
 struct up_dev_s
 {
-    uint8_t channel;
+    uint8_t mask;
     uint32_t sps;
-    uint8_t pga;
-    uint8_t buf;
-    const uint8_t *mux;
     int irq;
-    int devno;
-    FAR struct spi_dev_s  *spi;      /* Cached SPI device reference */
+    int32_t buf[8];
+    uint8_t count[8];
 };
 
 /****************************************************************************
@@ -136,22 +104,18 @@ static int  adc_interrupt(int irq, void *context);
 
 static const struct adc_ops_s g_adcops =
 {
-    .ao_reset = adc_reset,     /* ao_reset */
-    .ao_setup = adc_setup,     /* ao_setup */
-    .ao_shutdown = adc_shutdown,  /* ao_shutdown */
-    .ao_rxint = adc_rxint,     /* ao_rxint */
-    .ao_ioctl = adc_ioctl      /* ao_read */
+    .ao_reset =adc_reset,
+    .ao_setup = adc_setup,
+    .ao_shutdown = adc_shutdown,
+    .ao_rxint = adc_rxint,
+    .ao_ioctl = adc_ioctl,
 };
 
 static struct up_dev_s g_adcpriv =
 {
-    .mux  = (const uint8_t [])
-    {
-        CONFIG_ADS1255_MUX,0
-    },
-    .sps  = CONFIG_ADS1255_SPS,
-    .channel = 0,
-    .irq  = CONFIG_ADS1255_IRQ,
+    .sps  = CONFIG_ADC0_SPS,
+    .mask = CONFIG_ADC0_MASK,
+    .irq  = LPC17_IRQ_ADC,
 };
 
 static struct adc_dev_s g_adcdev =
@@ -161,49 +125,53 @@ static struct adc_dev_s g_adcdev =
 };
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-static uint8_t getspsreg(uint16_t sps)
-{
-    static const unsigned short sps_tab[]=
-    {
-        3,7,12,20,27,40,55,80,300,750,1500,3000,5000,10000,20000,65535,
-    };
-    static const unsigned char sps_reg[]=
-    {
-        0x03,0x13,0x23,0x33,0x43,0x53,0x63,0x72,0x82,0x92,0xa1,0xb0,0xc0,0xd0,0xe0,0xf0,
-    };
-    int i;
-    for (i=0; i<16; i++)
-    {
-        if (sps<sps_tab[i])
-            break;
-    }
-    return sps_reg[i];
-}
-
-/****************************************************************************
  * ad_private Functions
  ****************************************************************************/
 /* Reset the ADC device.  Called early to initialize the hardware. This
 * is called, before ao_setup() and on error conditions.
 */
-
 static void adc_reset(FAR struct adc_dev_s *dev)
 {
+    irqstate_t flags;
+    uint32_t regval;
     FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-    FAR struct spi_dev_s *spi = priv->spi;
 
-    SPI_SETMODE(spi, SPIDEV_MODE1);
-    SPI_SETBITS(spi, 8);
-    SPI_SETFREQUENCY(spi, CONFIG_ADS1255_FREQUENCY);
-    usleep(1000);
-    SPI_SELECT(spi, priv->devno, true);
-    SPI_SEND(spi,ADS125X_WREG+0x03);    //WRITE SPS REG
-    SPI_SEND(spi,0x00);                 //count=1
-    SPI_SEND(spi,0x63);
-    SPI_SELECT(spi, priv->devno, false);
+    flags = irqsave();
+
+	regval  = getreg32(LPC17_SYSCON_PCONP);
+	regval |= SYSCON_PCONP_PCADC;
+	putreg32(regval, LPC17_SYSCON_PCONP);
+
+	putreg32(ADC_CR_PDN,LPC17_ADC_CR);
+
+	regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
+	regval &= ~SYSCON_PCLKSEL0_ADC_MASK;
+	regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_ADC_SHIFT);
+	putreg32(regval, LPC17_SYSCON_PCLKSEL0);
+
+	uint32_t clkdiv=LPC17_CCLK/8/65/priv->sps;
+	clkdiv<<=8;
+	clkdiv&=0xff00;
+	putreg32(ADC_CR_PDN|ADC_CR_BURST|clkdiv|priv->mask,LPC17_ADC_CR);
+
+	if(priv->mask&0x01)
+		lpc17_configgpio(GPIO_AD0p0);
+	else if(priv->mask&0x02)
+		lpc17_configgpio(GPIO_AD0p1);
+	else if(priv->mask&0x04)
+		lpc17_configgpio(GPIO_AD0p2);
+	else if(priv->mask&0x08)
+		lpc17_configgpio(GPIO_AD0p3);
+	else if(priv->mask&0x10)
+		lpc17_configgpio(GPIO_AD0p4);
+	else if(priv->mask&0x20)
+		lpc17_configgpio(GPIO_AD0p5);
+	else if(priv->mask&0x40)
+		lpc17_configgpio(GPIO_AD0p6);
+	else if(priv->mask&0x80)
+		lpc17_configgpio(GPIO_AD0p7);
+	
+    irqrestore(flags);	
 }
 
 /* Configure the ADC. This method is called the first time that the ADC
@@ -211,36 +179,26 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 * This setup includes configuring and attaching ADC interrupts.  Interrupts
 * are all disabled upon return.
 */
-
 static int  adc_setup(FAR struct adc_dev_s *dev)
 {
+	int i;
     FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-    FAR struct spi_dev_s *spi = priv->spi;
     int ret = irq_attach(priv->irq, adc_interrupt);
     if (ret == OK)
     {
-        SPI_SELECT(spi, priv->devno, true);
-        SPI_SEND(spi,ADS125X_WREG);         //WRITE REG from 0
-        SPI_SEND(spi,0x03);                 //count=4+1
-        if (priv->buf)
-            SPI_SEND(spi,ADS125X_BUFON);    //REG0 STATUS BUFFER ON
-        else
-            SPI_SEND(spi,ADS125X_BUFOFF);
-        SPI_SEND(spi,priv->mux[0]);
-        SPI_SEND(spi,priv->pga);            //REG2 ADCON PGA=2
-        SPI_SEND(spi,getspsreg(priv->sps));
-        usleep(1000);
-        SPI_SEND(spi,ADS125X_SELFCAL);
-        SPI_SELECT(spi, priv->devno, false);
-        up_enable_irq(priv->irq);
-    }
+		for(i=0;i<8;i++)
+		{
+			priv->buf[i]=0;
+			priv->count[i]=0;
+		}
+		up_enable_irq(priv->irq);
+	}
     return ret;
 }
 
 /* Disable the ADC.  This method is called when the ADC device is closed.
 * This method reverses the operation the setup method.
 */
-
 static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
     FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
@@ -249,18 +207,16 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 }
 
 /* Call to enable or disable RX interrupts */
-
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 {
     FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
     if (enable)
-        up_enable_irq(priv->irq);
+		putreg32(ADC_INTEN_GLOBAL,LPC17_ADC_INTEN);
     else
-        up_disable_irq(priv->irq);
+		putreg32(0x00,LPC17_ADC_INTEN);
 }
 
 /* All ioctl calls will be routed through this method */
-
 static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
     dbg("Fix me:Not Implemented\n");
@@ -271,35 +227,21 @@ static int adc_interrupt(int irq, void *context)
 {
     uint32_t regval;
     FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
-    FAR struct spi_dev_s *spi = priv->spi;
-    unsigned char buf[4];
     unsigned char ch;
-
-    SPI_SELECT(spi, priv->devno, true);
-    SPI_SEND(spi,ADS125X_RDATA);
-    up_udelay(10);
-    buf[3]=SPI_SEND(spi,0xff);
-    buf[2]=SPI_SEND(spi,0xff);
-    buf[1]=SPI_SEND(spi,0xff);
-    buf[0]=0;
-
-    priv->channel++;
-    ch = priv->mux[priv->channel];
-    if ( ch == 0 )
+	int32_t value;
+	
+	regval=getreg32(LPC17_ADC_GDR);
+	ch=(regval>>24)&0x07;
+    priv->buf[ch]+=regval&0xfff0;
+    priv->count[ch]++;
+    if(priv->count[ch]>=CONFIG_ADC0_AVERAGE)
     {
-        priv->channel=0;
-        ch = priv->mux[0];
+		value=priv->buf[ch]/priv->count[ch];
+		value<<=15;
+		adc_receive(&g_adcdev,ch,value);
+		priv->buf[ch]=0;
+		priv->count[ch]=0;
     }
-
-    SPI_SEND(spi,ADS125X_WREG+0x01);
-    SPI_SEND(spi,0x00);
-    SPI_SEND(spi,ch);
-    SPI_SEND(spi,ADS125X_SYNC);
-    up_udelay(2);
-    SPI_SEND(spi,ADS125X_WAKEUP);
-    SPI_SELECT(spi, priv->devno, false);
-
-    adc_receive(&g_adcdev,priv->channel,*(int32_t *)buf);
     return OK;
 }
 
@@ -308,27 +250,18 @@ static int adc_interrupt(int irq, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ads1255initialize
+ * Name: up_adcinitialize
  *
  * Description:
- *   Initialize the selected adc port
- *
- * Input Parameter:
- *   Port number (for hardware that has mutiple adc interfaces)
+ *   Initialize the adc
  *
  * Returned Value:
  *   Valid can device structure reference on succcess; a NULL on failure
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi, unsigned int devno)
+FAR struct adc_dev_s *up_adcinitialize( )
 {
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
-
-    /* Driver state data */
-
-    priv->spi      = spi;
-    priv->devno    = devno;
     return &g_adcdev;
 }
 #endif

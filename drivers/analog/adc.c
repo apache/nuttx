@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/adc/adc.c
+ * drivers/analog/adc.c
  *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>

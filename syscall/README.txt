@@ -17,7 +17,7 @@ The syscall layer provided in this directory serves as the communication
 layer from the user-mode application into the kernel-mode RTOS.  The
 switch from user-mode to kernel-mode is accomplished using software
 interrupts (SWIs).  SWIs are implemented differently and named differently
-by different manufacters but all work essentially the same:  A special
+by different manufacturers but all work essentially the same:  A special
 instruction is executed in user-mode that causes a software generated
 interrupt.  The software generated interrrupt is caught within the kernel
 and handle in kernel-mode.
@@ -84,7 +84,7 @@ implemented as a simple comma-separated-value file, syscall.csv.  Most
 spreadsheets programs will accept this format and can be used to maintain
 the syscall database.
 
-The format of the CVS file for each line is:
+The format of the CSV file for each line is:
 
   Field 1: Function name
   Field 2: The header file that contains the function prototype
@@ -104,7 +104,7 @@ Each type field has a format as follows:
         A similar situation exists for unions.  For example, the formal
         parameter type union sigval -- You cannot cast a uintptr_t to
         a union sigval, but you can cast to the type of one of the union
-        member types when passing the actua paramter.  Similarly, we
+        member types when passing the actual paramter.  Similarly, we
         cannot cast a union sigval to a uinptr_t either.  Rather, we need
         to cast a specific union member fieldname to uintptr_t.
 
@@ -122,7 +122,7 @@ database.  Here the following definition is used:
 
   Stub  - Another tiny bit of code that executes within the NuttX kernel
           that is used to map a software interrupt received by the kernel to
-          a kernel function call. The stubs receive the marshalled system
+          a kernel function call. The stubs receive the marshaled system
           call data, and perform the actually kernel function call (in
           kernel-mode) on behalf of the proxy function.
 
@@ -140,4 +140,4 @@ mksyscall
   stubs and proxies is maintained in a comma separated value (CSV) file
   in the syscall/ directory.  The mksyscall program will accept this CVS
   file as input and generate all of the required proxy or stub files as
-  output.  See tools/README.txt for additonal information.
+  output.  See tools/README.txt for additional information.
