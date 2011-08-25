@@ -19,7 +19,7 @@ switch from user-mode to kernel-mode is accomplished using software
 interrupts (SWIs).  SWIs are implemented differently and named differently
 by different manufacturers but all work essentially the same:  A special
 instruction is executed in user-mode that causes a software generated
-interrupt.  The software generated interrrupt is caught within the kernel
+interrupt.  The software generated interrupt is caught within the kernel
 and handle in kernel-mode.
 
 Header Files
@@ -117,7 +117,7 @@ database.  Here the following definition is used:
   Proxy - A tiny bit of code that executes in the user space. A proxy
           has exactly the same function prototype as does the "real" function
           for which it proxies.  However, it only serves to map the function
-          call into a syscall, marshalling all of the system call parameters
+          call into a syscall, marshaling all of the system call parameters
           as necessary.
 
   Stub  - Another tiny bit of code that executes within the NuttX kernel

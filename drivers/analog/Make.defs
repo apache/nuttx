@@ -39,7 +39,7 @@
 
 ifeq ($(CONFIG_DAC),y)
 
-# Include the common ADC character driver
+# Include the common DAC character driver
 
 CSRCS += dac.c
 

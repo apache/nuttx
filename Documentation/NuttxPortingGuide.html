@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 19, 2011</p>
+      <p>Last Updated: August 25, 2011</p>
     </td>
   </tr>
 </table>
@@ -59,10 +59,10 @@
     <a href="#DirStructSched">2.13 nuttx/sched/</a><br>
     <a href="#DirStructSyscall">2.14 nuttx/syscall/</a><br>
     <a href="#DirStructTools">2.15 nuttx/tools/</a><br>
-    <a href="#topmakefile">2.16 nuttx/Makefile</a>
+    <a href="#topmakefile">2.16 nuttx/Makefile</a><br>
     <a href="#DirStructNetUtils">2.17 apps/netutils</a><br>
     <a href="#DirStructNshLib">2.18 apps/nshlib</a><br>
-    <a href="#DirStructExamples">2.19 apps/examples/</a><br>
+    <a href="#DirStructExamples">2.19 apps/examples/</a>
   </ul>
   <a href="#configandbuild">3.0 Configuring and Building</a>
   <ul>
@@ -126,6 +126,7 @@
        <a href="#sdiodrivers">6.3.8 SDIO Device Drivers</a><br>
        <a href="#usbhostdrivers">6.3.9 USB Host-Side Drivers</a><br>
        <a href="#usbdevdrivers">6.3.10 USB Device-Side Drivers</a><br>
+       <a href="#analogdrivers">6.3.11 Analog (ADC/DAC) Drivers</a>
     </ul>
   </ul>
   <a href="#apndxconfigs">Appendix A: NuttX Configuration Settings</a><br>
@@ -1000,22 +1001,43 @@
 <ul><pre>
 drivers/
 |-- Makefile
+|-- analog/
+|   |-- Make.defs
+|   `-- <i>(Common ADC and DAC driver source files)</i>
 |-- bch/
 |   |-- Make.defs
 |   `-- <i>(bch driver source files)</i>
+|-- input/
+|   |-- Make.defs
+|   `-- <i>(Common touchscreen and keypad driver source files)</i>
+|-- lcd/
+|   |-- Make.defs
+|   `-- <i>(Common LCD driver source files)</i>
 |-- mmcsd/
 |   |-- Make.defs
-|   `-- <i>(mmcsd driver source files)</i>
+|   `-- <i>(Common MMC/SD card driver source files)</i>
+|-- mtd/
+|   |-- Make.defs
+|   `-- <i>(Common memory technology device driver source files)</i>
 |-- net/
 |   |-- Make.defs
-|   `-- <i>(net driver source files)</i>
+|   `-- <i>(Common network driver source files)</i>
+|-- sensors/
+|   |-- Make.defs
+|   `-- <i>(Common sensor driver source files)</i>
+|-- serial/
+|   |-- Make.defs
+|   `-- <i>(Common front-end character drivers for chip-specific UARTs)</i>
 |-- usbdev/
 |   |-- Make.defs
-|   `-- <i>(USB device driver source files)</i>
+|   `-- <i>(Common USB device driver source files)</i>
 |-- usbhost/
 |   |-- Make.defs
-|   `-- <i>(USB host driver source files)</i>
-`-- <i>(common driver source files)</i>
+|   `-- <i>(Common USB host driver source files)</i>
+|-- wirelss/
+|   |-- Make.defs
+|   `-- <i>(Common wireless driver source files)</i>
+`-- <i>(Various common driver source files)</i>
 </pre></ul>
 
 <h2>2.6 <a name="DirStructFs">nuttx/fs</a></h2>
@@ -1029,13 +1051,16 @@ fs/
 |-- Makefile
 |-- fat/
 |   |-- Make.defs
-|   `-- <i>(fat file system source files)</i>
+|   `-- <i>(FAT file system source files)</i>
+|-- mmap/
+|   |-- Make.defs
+|   `-- <i>(RAM-based file mapping source files)</i>
 |-- nxffs/
 |   |-- Make.defs
-|   `-- <i>(NXFFS file system source files)</i>
+|   `-- <i>(NuttX Flash File System (NXFFS) source files)</i>
 |-- romfs/
 |   |-- Make.defs
-|   `-- <i>(romfs file system source files)</i>
+|   `-- <i>(ROMFS file system source files)</i>
  `-- <i>(common file system source files)</i>
 </pre></ul>
 
@@ -1047,12 +1072,21 @@ fs/
 <ul><pre>
 graphics/
 |-- Makefile
+|-- nxbe/
+|   |-- Make.defs
+|   `-- <i>(NuttX graphics back-end (NXBE) source files)</i>
+|-- nxfont/
+|   |-- Make.defs
+|   `-- <i>(NuttX graphics font-related (NXFONT) source files)</i>
 |-- nxglib/
 |   |-- Make.defs
-|   `-- <i>(NuttX graphics library source files)</i>
-|-- nx/
+|   `-- <i>(NuttX graphics library (NXGL) source files)</i>
+|-- nxmu/
 |   |-- Make.defs
-|   `-- <i>(NuttX X-server source files)</i>
+|   `-- <i>(NuttX graphics multi-user (NXMU) server source files)</i>
+|-- nxsu/
+|   |-- Make.defs
+|   `-- <i>(NuttX graphics single-user (NXSU) source files)</i>
 `-- <i>(common file system source files)</i>
 </pre></ul>
 
@@ -1073,16 +1107,18 @@ graphics/
 include/
 |-- <i>(standard header files)</i>
 |-- arpa/
-|   `-- <i>(standard header files)</i>
+|   `-- <i>(Standard header files)</i>
+|-- cxx/
+|   `-- <i>(C++ standard header files)</i>
 |-- net/
 |   `-- uip/
 |       `-- <i>(uIP specific header files)</i>
 |-- netinet/
-|   `-- <i>(standard header files)</i>
+|   `-- <i>(Standard header files)</i>
 |-- nuttx/
-|   `-- <i>(nuttx specific header files)</i>
+|   `-- <i>(NuttX specific header files)</i>
 `- sys/
-    `-- <i>(more standard header files)</i>
+    `-- <i>(More standard header files)</i>
 </per></ul>
 
 <h2>2.9 <a name="DirStructLib">nuttx/lib</a></h2>
@@ -1090,6 +1126,48 @@ include/
   This directory holds a collection of standard libc-like functions with custom
   interfaces into NuttX.
 </p>
+<p>
+  Normally the logic in this file builds to a single library (<code>liblib.a</code>).
+  However, if NuttX is built as a separately compiled kernel (with <code>CONFIG_NUTTX_KERNEL=y</code>), then the contents of this directory are built as two libraries:
+  One for use by user programs (<code>libulib.a</code>) and one for use only within the &lt;kernel&gt; space (<code>libklib.a</code>).
+</p>
+<p>
+  These user/kernel space libraries (along with the sycalls of <a href="#DirStructSyscall"><code>nuttx/syscall</code></a>) are needed to support the two differing protection domains.
+</p>
+<p>
+  Directory structure:
+</p>
+<ul><pre>
+lib/
+|-- libgen/
+|   `-- <i>(Implementation of functions from libgen.h)</i>
+|-- math/
+|   `-- <i>(Implementation of functions from fixedmath.h)</i>
+|-- misc/
+|   `-- <i>(Implementation of miscellaneous library functions)</i>
+|-- mqueue/
+|   `-- <i>(Implementation of some functions from mqueue.h)</i>
+|-- net/
+|   `-- <i>(Implementation of network-related library functions)</i>
+|-- queue/
+|   `-- <i>(Implementation of functions from queue.h)</i>
+|-- sched/
+|   `-- <i>(Implementation of some functions from sched.h)</i>
+|-- semaphore/
+|   `-- <i>(Implementation of some functions from semaphore.h)</i>
+|-- signal/
+|   `-- <i>(Implementation of some functions from signal.h)</i>
+|-- stdio/
+|   `-- <i>(Implementation of functions from stdio.h)</i>
+|-- stdlib/
+|   `-- <i>(Implementation of functions from stdlib.h)</i>
+|-- string/
+|   `-- <i>(Implementation of functions from string.h)</i>
+|-- time/
+|   `-- <i>(Implementation of some functions from time.h)</i>
+`-- unistd/
+    `-- <i>(Implementation of some functions from unistd.h)</i>
+</per></ul>
 
 <h2>2.10 <a name="DirStructLibXX">nuttx/libxx</a></h2>
 <p>
@@ -1115,7 +1193,7 @@ include/
 
 <h2>2.14 <a name="DirStructSyscall">nuttx/syscall</a></h2>
 <p>
-  If NuttX is built as a separately compiled kernel (with CONFIG_NUTTX_KERNEL=y),
+  If NuttX is built as a separately compiled kernel (with <code>CONFIG_NUTTX_KERNEL=y</code>),
   then the contents of this directory are built.
   This directory holds a syscall interface that can be used for communication
   between user-mode applications and the kernel-mode RTOS.
@@ -3033,6 +3111,69 @@ extern void up_ledoff(int led);
         </li>
       </ol>
     </p>
+  </li>
+</ul>
+
+<h3><a name="analogdrivers">6.3.11 Analog (ADC/DAC) Drivers</a></h3>
+<ul>
+  <li>
+    General header files for the NuttX analog reside in <code>include/nuttx/analog/</code>.
+  </li>
+  <li>
+    Common analog logic and share-able analog drivers reside in the <code>drivers/analog/</code>.
+  </li>
+  <li>
+    Platform-specific drivers reside in <code>arch/</code><i>&lt;architecture&gt;</i><code>/src/</code><i>&lt;chip&gt;</i> directory for the specific processor <i>&lt;architecture&gt;</i> and for the specific <i>&lt;chip&gt;</i> analog peripheral devices.
+  </li>
+</ul>
+
+<h4><a name="adcdrivers">6.3.11.1 ADC Drivers</a></h4>
+<ul>
+  <li>
+    <code>include/nuttx/analog/adc.h</code>.
+    All structures and APIs needed to work with ADC drivers are provided in this header file.
+    This header file includes:
+    <ol>
+      <li>
+        Structures and interface descriptions needed to develop a low-level,
+        architecture-specific, ADC driver.
+      </li>
+      <li>
+        To register the ADC driver with a common ADC character driver.
+      </li>
+      <li>
+        Interfaces needed for interfacing user programs with the common ADC character driver.
+      </li>
+    </ol>
+  </li>
+  <li>
+    <code>drivers/analog/adc.c</code>.
+    The implementation of the common ADC character driver.
+  </li>
+</ul>
+
+<h4><a name="dacdrivers">6.3.11.2 DAC Drivers</a></h4>
+<ul>
+  <li>
+    <code>include/nuttx/analog/dac.h</code>.
+    All structures and APIs needed to work with DAC drivers are provided in this header file.
+    This header file includes:
+    <ol>
+      <li>
+        Structures and interface descriptions needed to develop a low-level,
+        architecture-specific, DAC driver.
+      </li>
+      <li>
+        To register the DAC driver with a common DAC character driver.
+      </li>
+      <li>
+        Interfaces needed for interfacing user programs with the common DAC character driver.
+      </li>
+    </ol>
+  </li>
+  <li>
+    <code>drivers/analog/dac.c</code>.
+    The implementation of the common DAC character driver.
   </li>
 </ul>
 

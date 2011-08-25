@@ -38,11 +38,22 @@ rwbuffer.c
 Subdirectories of this directory:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+analog/
+	This directory holds implementations of analog device drivers.
+    This includes drivers for Analog to Digital Conversion (ADC) as
+    well as drivers for Digital to Analog Conversion (DAC).
+	See include/nuttx/analog/*.h for registration information.
+
 bch/
 	Contains logic that may be used to convert a block driver into
 	a character driver.  This is the complementary conversion as that
 	performed by loop.c.  See include/nuttx/fs.h for registration
 	information.
+
+analog/
+	This directory holds implementations of input device drivers.
+    This includes such things as touchscreen and keypad drivers.
+	See include/nuttx/input/*.h for registration information.
 
 lcd/
 	Drivers for parallel and serial LCD and OLED type devices.  These
@@ -74,7 +85,7 @@ sensors/
 	Drivers for various sensors
 
 serial/
-	Front-ends character drivers for chip-specific UARTs.  This provide
+	Front-end character drivers for chip-specific UARTs.  This provide
 	some TTY-like functionality and are commonly used (but not required for)
 	the NuttX system console.  See also include/nuttx/serial.h
 
@@ -83,6 +94,9 @@ usbdev/
 
 usbhost/
 	USB host drivers.  See also include/nuttx/usb/usbhost.h
+
+wireless/
+	Drivers for various wireless devices.
 
 Skeleton Files
 ^^^^^^^^^^^^^^
