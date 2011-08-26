@@ -59,6 +59,8 @@
 #include <nuttx/spi.h>
 #include <nuttx/lcd/lcd.h>
 
+#include <arch/board/board.h>
+
 #include "up_arch.h"
 #include "stm32.h"
 #include "stm32_internal.h"
@@ -354,7 +356,6 @@ static int stm3210e_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 /* Initialization */
 
 static inline void stm3210e_lcdinitialize(void);
-static inline void stm3210e_lcdclear(void);
 #ifdef CONFIG_LCD_BACKLIGHT
 static void stm3210e_backlight(void);
 #else
@@ -1060,26 +1061,6 @@ static inline void stm3210e_lcdinitialize(void)
 }
 
 /**************************************************************************************
- * Name:  stm3210e_lcdclear
- *
- * Description:
- *   Clear GRAM
- *
- **************************************************************************************/
-
-static inline void stm3210e_lcdclear(void)
-{
-  uint32_t i = 0;
-  
-  stm3210e_setcursor(0, STM3210E_XRES-1); 
-  stm3210e_gramselect();
-  for (i = 0; i < STM3210E_XRES * STM3210E_YRES; i++)
-    {
-      LCD->value = 0; /* Black */
-    }  
-}
-
-/**************************************************************************************
  * Name:  stm3210e_backlight
  *
  * Description:
@@ -1230,9 +1211,9 @@ int up_lcdinitialize(void)
   up_mdelay(50);
   stm3210e_lcdinitialize();
 
-  /* Clear the display */
+  /* Clear the display (setting it to the color 0=black) */
 
-  stm3210e_lcdclear();
+  stm3210e_lcdclear(0);
 
   /* Configure the backlight */
 
@@ -1267,5 +1248,28 @@ void up_lcduninitialize(void)
 {
   stm3210e_setpower(&g_lcddev.dev, 0);
   stm32_deselectlcd();
+}
+
+/**************************************************************************************
+ * Name:  stm3210e_lcdclear
+ *
+ * Description:
+ *   This is a non-standard LCD interface just for the STM3210E-EVAL board.  Because
+ *   of the various rotations, clearing the display in the normal way by writing a
+ *   sequences of runs that covers the entire display can be very slow.  Here the
+ *   dispaly is cleared by simply setting all GRAM memory to the specified color.
+ *
+ **************************************************************************************/
+
+void stm3210e_lcdclear(uint16_t color)
+{
+  uint32_t i = 0;
+  
+  stm3210e_setcursor(0, STM3210E_XRES-1); 
+  stm3210e_gramselect();
+  for (i = 0; i < STM3210E_XRES * STM3210E_YRES; i++)
+    {
+      LCD->value = color;
+    }  
 }
 
