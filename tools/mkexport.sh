@@ -203,7 +203,7 @@ cp -f "${ARCHDIR}"/*.h "${EXPORTDIR}"/arch/. 2>/dev/null
 # as symbolic links to directories, then copy the header files from 
 # those directories into the EXPORTDIR
 
-ARCH_HDRDIRS="common chip arm armv7-m avr avr32 mips32"
+ARCH_HDRDIRS="arm armv7-m avr avr32 board common chip mips32"
 for hdir in $ARCH_HDRDIRS; do
 
 	# Does the directory (or symbolic link) exist?
