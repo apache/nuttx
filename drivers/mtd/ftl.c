@@ -420,21 +420,46 @@ static int ftl_geometry(FAR struct inode *inode, struct geometry *geometry)
 static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 {
   struct ftl_struct_s *dev ;
-  int ret = -ENOTTY;
+  int ret;
 
   fvdbg("Entry\n");
-
-  /* Only one ioctl command is supported (and that is just passed on to MTD */
-
   DEBUGASSERT(inode && inode->i_private);
-  if (cmd == BIOC_XIPBASE && arg != 0)
+
+  /* Only one block driver ioctl command is supported by this driver (and
+   * that command is just passed on to the MTD driver in a slightly
+   * different form).
+   */
+
+  if (cmd == BIOC_XIPBASE)
     {
-      dev = (struct ftl_struct_s *)inode->i_private;
-      ret = MTD_IOCTL(dev->mtd, MTDIOC_XIPBASE, arg);
-      if (ret < 0)
+      /* The argument accompanying the BIOC_XIPBASE should be non-NULL.  If
+       * DEBUG is enabled, we will catch it here instead of in the MTD
+       * driver.
+       */
+
+#ifdef CONFIG_DEBUG
+      if (arg == 0)
         {
-          fdbg("MTD ioctl(MTDIOC_XIPBASE) failed: %d\n", ret);
+          fdbg("ERROR: BIOC_XIPBASE argument is NULL\n");
+          return -EINVAL;
         }
+#endif
+
+      /* Just change the BIOC_XIPBASE command to the MTDIOC_XIPBASE command. */
+
+      cmd = MTDIOC_XIPBASE;
+    }
+
+  /* No other block driver ioctl commmands are not recognized by this
+   * driver.  Other possible MTD driver ioctl commands are passed through
+   * to the MTD driver (unchanged).
+   */
+
+  dev = (struct ftl_struct_s *)inode->i_private;
+  ret = MTD_IOCTL(dev->mtd, cmd, arg);
+  if (ret < 0)
+    {
+      fdbg("ERROR: MTD ioctl(%04x) failed: %d\n", cmd, ret);
     }
 
   return ret;

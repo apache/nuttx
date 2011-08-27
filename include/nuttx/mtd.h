@@ -148,6 +148,17 @@ extern "C" {
 EXTERN int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
 
 /****************************************************************************
+ * Name: flash_eraseall
+ *
+ * Description:
+ *   Call a block driver with the MDIOC_BULKERASE ioctl command.  This will
+ *   cause the MTD driver to erase all of the flash.
+ *
+ ****************************************************************************/
+
+EXTERN int flash_eraseall(FAR const char *driver);
+
+/****************************************************************************
  * Name: rammtd_initialize
  *
  * Description:

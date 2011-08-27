@@ -2036,3 +2036,8 @@
 	* Scripts/makefiles/documents.  Several adjustments, corrections and
 	  typo fixes so that NuttX will build correctly on FreeBSD using the
 	  ASH shell (submitted by Kurt Lidl).
+	* drivers/mtd/flash_eraseall.c:  Add a callable function that accepts
+	  the path to a block driver and then erases the underlying FLASH memory
+	  (assuming that the block driver is an MTD driver wrapped in the FTL
+	  layer).
+

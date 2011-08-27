@@ -36,7 +36,7 @@
 
 # Include MTD drivers
 
-CSRCS += ftl.c m25px.c at45db.c ramtron.c rammtd.c
+CSRCS += at45db.c flash_eraseall.c ftl.c m25px.c rammtd.c ramtron.c
 
 # Include MTD driver support
 
