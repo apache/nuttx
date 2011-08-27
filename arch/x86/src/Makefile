@@ -81,6 +81,14 @@ BOARDDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
 
 LIBGCC		= "${shell $(CC) -print-libgcc-file-name}"
 
+ifeq ($(HOSTOS),FreeBSD)
+  HOST_ARCH	= ${shell uname -m 2>/dev/null || echo "Other"}
+  ifeq ($(HOST_ARCH),amd64)
+    LDFLAGS	+= -melf_i386
+    LIBGCC	= "/usr/lib32/libgcc.a"
+  endif
+endif
+
 VPATH		= chip:common:$(ARCH_SUBDIR)
 
 all: $(HEAD_OBJ) libarch$(LIBEXT)

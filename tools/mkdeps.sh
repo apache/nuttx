@@ -1,8 +1,8 @@
 #!/bin/bash
 ############################################################################
-# tools mkdeps.sh
+# tools/mkdeps.sh
 #
-#   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,12 +34,10 @@
 #
 ############################################################################
 
-WD=
-
 #
 # Usage:
 
-function show_usage ()
+show_usage ()
 {
   echo ""
   echo "$progname  [OPTIONS] CC -- CFLAGS -- file [file [file...]]"
@@ -69,7 +67,7 @@ function show_usage ()
   exit 1
 }
 
-function dodep ()
+dodep ()
 {
   unset fullpath
   if [ -z "$altpath" ]; then
@@ -94,7 +92,7 @@ function dodep ()
   fi
 
   $cc -M $cflags $fullpath || \
-    { echo "# ERROR: $cc -M $cflags $fullpath FAILED" ; exit 4 ; }
+    ( echo "# ERROR: $cc -M $cflags $fullpath FAILED"; exit 4; )
 }
 
 unset cc

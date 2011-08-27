@@ -1,5 +1,5 @@
-sycall/README.txt
-=================
+syscall/README.txt
+==================
 
 This directory supports a syscall layer from communication between a
 monolithic, kernel-mode NuttX kernel and a separately built, user-mode

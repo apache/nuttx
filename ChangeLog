@@ -2030,4 +2030,9 @@
 	* tools/mkexport.sh:  Extended the script that implements the top-level
 	  'make export' logic.  The script now also finds and bundles up all of
 	  the architecture-specific header files as well.
-
+	* drivers/arch/arm/src/stm32/stm32_i2c.c:  Add a reset to the I2C
+	  initialization logic to prevent spurious interrups when the I2C
+	  interrupts are enabled (submitted by Uros Platise).
+	* Scripts/makefiles/documents.  Several adjustments, corrections and
+	  typo fixes so that NuttX will build correctly on FreeBSD using the
+	  ASH shell (submitted by Kurt Lidl).

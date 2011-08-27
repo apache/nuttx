@@ -78,7 +78,7 @@ NUTTX_ADDONS	:= $(NX_DIR)
 USER_ADDONS		:=
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
-USER_ADDONS		+= $(APPDIR)
+USER_ADDONS	+= $(APPDIR)
 else
 NUTTX_ADDONS	+= $(APPDIR)
 endif
@@ -324,7 +324,7 @@ clean_context:
 check_context:
 	@if [ ! -e ${TOPDIR}/.config -o ! -e ${TOPDIR}/Make.defs ]; then \
 		echo "" ; echo "Nuttx has not been configured:" ; \
-		echo "  cd tools; ./configure.sh <target>\n" ; echo "" ;\
+		echo "  cd tools; ./configure.sh <target>" ; echo "" ; \
 		exit 1 ; \
 	fi
 

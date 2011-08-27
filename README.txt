@@ -2,9 +2,19 @@ README
 ^^^^^^
 
   o Installation
+    - Installing Cygwin
+    - Download and Unpack
+    - Semi-Optional apps/ Package
+    - Installation Directories with Spaces in the Path
+    - A Note about Header Files
   o Configuring NuttX
   o Toolchains
+    - Cross-Development Toolchains
+    - NuttX Buildroot Toolchain
+  o Shells
   o Building NuttX
+    - Building
+    - Re-building 
   o Documentation
 
 INSTALLATION
@@ -51,7 +61,7 @@ Download and Unpack:
   match the various instructions in the documentation and some scripts
   in the source tree.
 
-Semi-Optional apps/ package.
+Semi-Optional apps/ Package:
 
   All NuttX libraries and example code used to be in included within
   the NuttX source tree.  As of NuttX-6.0, this application code was
@@ -66,7 +76,7 @@ Semi-Optional apps/ package.
 
   Download the unpack the apps tarball in the same directly where you
   unpacked the NuttX tarball.  After you unpack the apps tarball, you
-  will have a new directory called apps-versioin (where the version
+  will have a new directory called apps-version (where the version
   should exactly match the version of the NuttX tarball).  Again, you
   might want to rename the directory to simply apps/ to match what
   you read in the documentation
@@ -81,10 +91,10 @@ Semi-Optional apps/ package.
 
   This is important because the NuttX build will expect to find the
   apps directory in that (default) location.  )That default location
-  can be changed by editting your NuttX configuration file, but that
+  can be changed by editing your NuttX configuration file, but that
   is another story).
 
-Installation Directories with Spaces in the Path
+Installation Directories with Spaces in the Path:
 
   The nuttx build directory should reside in a path that contains no
   spaces in any higher level directory name.  For example, under
@@ -187,6 +197,36 @@ NuttX Buildroot Toolchain
   This toolchain is available for both the Linux and Cygwin development
   environments.
 
+SHELLS
+^^^^^^
+
+  The NuttX build relies on some shell scripts.  Some are inline in the
+  Makefiles and many are exectuble scripts in the tools/. directory.  The
+  scripts were all developed using bash and many contain bash shell
+  dependencies.
+
+  Most of the scripts begin with #!/bin/bash to specifically select the
+  bash shell.  Some still have #!/bin/sh but I haven't heard any complaints
+  so these must not have bash dependencies.
+
+  There are two shell issues that I have heard of:
+
+  1. Linux where /bin/sh refers to an incompatible shell (like ksh or csh).
+
+     In this case, bash is probably avaiable and the #!/bin/bash at the
+     beginning of the file should do the job.  If any scripts with #!/bin/sh
+     fail, try changing that ti #!/bin/bash and let me know about the change.
+
+  2. FreeBSD with the Bourne Shell and no bash shell.
+
+     The other, reverse case has also been reported on FreeBSD setups that
+     have the Bourne shell, but not bash.  In this base, #!/bin/bash fails
+     but #!/bin/sh works okay.  My recommendation in this case is to create
+     a symbolic link at /bin/bash that refers to the Bourne shell.
+
+     There may still be issues, however, with certain the bash-centric scripts
+     that will require modifications.
+
 BUILDING NUTTX
 ^^^^^^^^^^^^^^
 
@@ -196,7 +236,7 @@ Building
   any special build directories.  Assuming that your Make.defs is setup
   properly for your tool chain and that setenv.sh contains the path to where
   your cross-development tools are installed, the following steps are all that
-  are equired to build NuttX:
+  are required to build NuttX:
 
     cd ${TOPDIR}
     . ./setenv.sh
@@ -226,16 +266,16 @@ Re-building
    
      make clean_context all
    
-  This 'make' coimmand will remove of the copied directories, re-copy them,
+  This 'make' command will remove of the copied directories, re-copy them,
   then make NuttX.
 
 CYGWIN BUILD PROBLEMS
 ^^^^^^^^^^^^^^^^^^^^^
 
-If you see strange behaviour when building under Cygwin then you may have
+If you see strange behavior when building under Cygwin then you may have
 a problem with your PATH variable.  For example, if you see failures to
 locate files that are clearly present, that may mean that you are using
-the wrong version of a tool.  For example, you may not be using Cywgin's
+the wrong version of a tool.  For example, you may not be using Cygwin's
 'make' program at /usr/bin/make.  Try:
 
     $ which make
@@ -268,12 +308,15 @@ NuttX documentation is also available online at http://www.nuttx.org.
 
 Below is a guide to the available README files in the NuttX source tree:
 
+nuttx
  |
  |- arch/
  |   |
- |   |- arm
+ |   |- arm/
  |   |   `- src
  |   |       `- lpc214x/README.txt
+ |   |- avr/
+ |   |   `- README.txt
  |   |- sh/
  |   |   |- include/
  |   |   |   |-m16c/README.txt
@@ -294,6 +337,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |       `- z80/README.txt
  |   `- README.txt
  |- configs/
+ |   |- amber/
+ |   |   `- README.txt
  |   |- avr32dev1/
  |   |   `- README.txt
  |   |- c5471evm/
@@ -301,6 +346,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- demo0s12ne64/
+ |   |   `- README.txt
+ |   |- detron/
  |   |   `- README.txt
  |   |- ea3131/
  |   |   `- README.txt
@@ -318,6 +365,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- nsh/README.txt
  |   |   |- ostest/README.txt
  |   |   |- poll/README.txt
+ |   |   `- README.txt
+ |   |- kwikstik-k40/
  |   |   `- README.txt
  |   |- lm3s6965-ek/
  |   |   |- include/README.txt
@@ -338,6 +387,8 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
+ |   |- micropendous3/
+ |   |   `- README.txt
  |   |- mx1ads/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
@@ -349,7 +400,7 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
- |   |- nucleus1g/
+ |   |- nucleus2g/
  |   |   `- README.txt
  |   |- olimex-lpc1766stk/
  |   |   `- README.txt
@@ -366,11 +417,11 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
- |   |- rgmp/
+ |   |- qemu-i486/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
- |   |- qemu-i486/
+ |   |- rgmp/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
@@ -388,6 +439,10 @@ Below is a guide to the available README files in the NuttX source tree:
  |   |   |- include/README.txt
  |   |   |- RIDE/README.txt
  |   |   |- src/README.txt
+ |   |   `- README.txt
+ |   |- sure-pic32mx/
+ |   |   `- README.txt
+ |   |- twr-k60n512/
  |   |   `- README.txt
  |   |- us7032evb1/
  |   |   |- bin/README.txt
@@ -418,9 +473,6 @@ Below is a guide to the available README files in the NuttX source tree:
  |   `- README.txt
  |- drivers/
  |   `- README.txt
- |- examples/
- |   |- pashello/README.txt
- |   `- README.txt
  |- fs/
  |   |- mmap/
  |   |   `- README.txt
@@ -436,3 +488,35 @@ Below is a guide to the available README files in the NuttX source tree:
  |   `- README.txt
  `- tools/
      `- README.txt
+
+apps
+ |- examples/
+ |   |- pashello/README.txt
+ |   `- README.txt
+ |- interpreters/
+ |   |- ficl
+ |   |  `- README.txt
+ |   `- README.txt
+ |- netutils/
+ |   |- ftpc
+ |   |  `- README.txt
+ |   |- telnetd
+ |   |  `- README.txt
+ |   `- README.txt
+ |- nshlib/
+ |   `- README.txt
+ |- system/
+ |   |- free/README.txt
+ |   `- install
+ |      `- README.txt
+ |- vsn/
+ |   |- hello/README.txt
+ |   |- poweroff
+ |   |  `- README.txt
+ |   |- ramtron
+ |   |  `- README.txt
+ |   |- sdcard
+ |   |  `- README.txt
+ |   `- sysinfo
+ |      `- README.txt
+ `- README.txt
