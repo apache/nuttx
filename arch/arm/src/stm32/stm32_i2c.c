@@ -129,14 +129,26 @@ struct stm32_i2c_inst_s {
 #if CONFIG_STM32_I2C1
 struct stm32_i2c_priv_s stm32_i2c1_priv = {
     .base       = STM32_I2C1_BASE,
-    .refs       = 0
+    .refs       = 0,
+    .msgc       = 0,
+    .msgv       = NULL,
+    .ptr        = NULL,
+    .dcnt       = 0,
+    .flags      = 0,
+    .status     = 0    
 };
 #endif
 
 #if CONFIG_STM32_I2C2
 struct stm32_i2c_priv_s stm32_i2c2_priv = {
     .base       = STM32_I2C2_BASE,
-    .refs       = 0
+    .refs       = 0,
+    .msgc       = 0,
+    .msgv       = NULL,
+    .ptr        = NULL,
+    .dcnt       = 0,
+    .flags      = 0,
+    .status     = 0
 };
 #endif
 
@@ -443,13 +455,24 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
     
 #if CONFIG_STM32_I2C1
         case STM32_I2C1_BASE:
-            modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_I2C1EN);
+        
+            /* enable power and reset the peripheral */
+        
+            modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_I2C1EN);            
+
+            modifyreg32(STM32_RCC_APB1RSTR, 0, RCC_APB1RSTR_I2C1RST);
+            modifyreg32(STM32_RCC_APB1RSTR, RCC_APB1RSTR_I2C1RST, 0);
+            
+            /* configure pins */
             
             if (stm32_configgpio(GPIO_I2C1_SCL)==ERROR) return ERROR;
             if (stm32_configgpio(GPIO_I2C1_SDA)==ERROR) {
                 stm32_unconfiggpio(GPIO_I2C1_SCL);
                 return ERROR;
             }
+            
+            /* attach ISRs */
+            
             irq_attach(STM32_IRQ_I2C1EV, stm32_i2c1_isr);
             irq_attach(STM32_IRQ_I2C1ER, stm32_i2c1_isr);
             up_enable_irq(STM32_IRQ_I2C1EV);
@@ -459,13 +482,24 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
       
 #if CONFIG_STM32_I2C2
         case STM32_I2C2_BASE:
+
+            /* enable power and reset the peripheral */
+
             modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_I2C2EN);
+
+            modifyreg32(STM32_RCC_APB1RSTR, 0, RCC_APB1RSTR_I2C2RST);
+            modifyreg32(STM32_RCC_APB1RSTR, RCC_APB1RSTR_I2C2RST, 0);
+
+            /* configure pins */
             
             if (stm32_configgpio(GPIO_I2C2_SCL)==ERROR) return ERROR;
             if (stm32_configgpio(GPIO_I2C2_SDA)==ERROR) {
                 stm32_unconfiggpio(GPIO_I2C2_SCL);
                 return ERROR;
             }
+
+            /* attach ISRs */
+
             irq_attach(STM32_IRQ_I2C2EV, stm32_i2c2_isr);
             irq_attach(STM32_IRQ_I2C2ER, stm32_i2c2_isr);
             up_enable_irq(STM32_IRQ_I2C2EV);
@@ -748,7 +782,7 @@ FAR struct i2c_dev_s * up_i2cinitialize(int port)
     return NULL;
 #endif
     
-    /* Get structure and enable power */
+    /* Get I2C private structure */
     
     switch(port) {
 #if CONFIG_STM32_I2C1
