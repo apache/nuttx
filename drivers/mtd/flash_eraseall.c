@@ -90,7 +90,7 @@ int flash_eraseall(FAR const char *driver)
   ret = open_blockdriver(driver ,0, &inode);
   if (ret < 0)
     {
-      fdbg("ERROR:  Failed to open '%s': %d\n", driver, ret);
+      fdbg("ERROR: Failed to open '%s': %d\n", driver, ret);
       return ret;
     }
 
@@ -104,6 +104,10 @@ int flash_eraseall(FAR const char *driver)
   if (ops->ioctl)
     {
       ret = ops->ioctl(inode, MTDIOC_BULKERASE, 0);
+      if (ret < 0)
+        {
+          fdbg("ERROR: MTD ioctl(%04x) failed: %d\n", MTDIOC_BULKERASE, ret);
+        }
     }
 
   /* Close the block driver */

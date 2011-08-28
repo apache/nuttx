@@ -123,7 +123,7 @@ if [ -z "${appdir}" ]; then
 
   unset CONFIG_VERSION_STRING
   if [ -x "${TOPDIR}/.version" ]; then
-    source "${TOPDIR}/.version"
+    . "${TOPDIR}/.version"
   fi
 
   # Check for an unversioned apps/ directory
