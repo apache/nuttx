@@ -66,6 +66,13 @@ ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES =
 
+ifeq ($(HOSTOS),FreeBSD)
+  HOST_ARCH     = ${shell uname -m 2>/dev/null || echo "Other"}
+  ifeq ($(HOST_ARCH),amd64)
+    ARCHCPUFLAGS += -m32
+  endif
+endif
+
 # We have to use a cross-development toolchain under Cygwin because the native
 # Cygwin toolchains don't generate ELF binaries.
 
