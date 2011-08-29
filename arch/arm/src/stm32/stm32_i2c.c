@@ -218,7 +218,7 @@ static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv, uint32_t frequ
         
     /* Update timing and control registers */
     
-    if (frequency < 400e3) {
+    if (frequency < 400000) {
         
         /* Speed: 100 kHz 
          * Risetime: 1000 ns
@@ -802,7 +802,7 @@ FAR struct i2c_dev_s * up_i2cinitialize(int port)
         
     inst->ops       = &stm32_i2c_ops;
     inst->priv      = priv;
-    inst->frequency = 100e3;
+    inst->frequency = 100000;
     inst->address   = 0;
     inst->flags     = 0;
 
