@@ -460,7 +460,7 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
     */
 
    ret = (unsigned int)data12[0] << 4 | (unsigned int)data12[1] >> 4;
-   ivdbg(&tsc->client->dev, "data: 0x%04x\n", ret);
+   ivdbg("data: 0x%04x\n", ret);
    return ret;
 }
 
@@ -579,7 +579,7 @@ static void tsc2007_worker(FAR void *arg)
       pressure = (x * config->rxplate * (z2 - z1)) / z1;
       pressure = (pressure + 2048) >> 12;
 
-      ivdbg("Position: (%d,%4d) pressure: %u z1/2: (%d,%d)\n"
+      ivdbg("Position: (%d,%4d) pressure: %u z1/2: (%d,%d)\n",
             x, y, pressure, z1, z2);
 
       /* Ignore out of range caculcations */
@@ -1105,9 +1105,9 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
 
   /* Debug-only sanity checks */
 
-  DEBUGASSERT(dev != NULL && config != NULL && minor > 0 && minor < 100);
+  DEBUGASSERT(dev != NULL && config != NULL && minor >= 0 && minor < 100);
   DEBUGASSERT((config->address & 0xfc) == 0x48);
-  DEBUGASSERT(config->attach != NULL && config->enable  != NULL
+  DEBUGASSERT(config->attach != NULL && config->enable  != NULL &&
               config->clear  != NULL && config->pendown != NULL);
 
   /* Create and initialize a TSC2007 device driver instance */

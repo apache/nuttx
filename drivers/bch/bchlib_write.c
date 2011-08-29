@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_write.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -145,7 +145,9 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
       len          -= nbytes;
     }
 
-  /* Then write all of the full sectors following the partial sector */
+  /* Then write all of the full sectors following the partial sector
+   * directly from the user buffer.
+   */
 
   if (len >= bch->sectsize )
     {
@@ -157,10 +159,11 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
 
       /* Write the contiguous sectors */
 
-      ret = bch->inode->u.i_bops->write(bch->inode, bch->buffer, sector, nsectors);
+      ret = bch->inode->u.i_bops->write(bch->inode, (FAR uint8_t *)buffer,
+                                        sector, nsectors);
       if (ret < 0)
         {
-          fdbg("Write failed: %d\n");
+          fdbg("Write failed: %d\n", ret);
           return ret;
         }
 
@@ -197,6 +200,15 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
       /* Adjust counts */
 
       byteswritten += len;
+    }
+
+  /* Finally, flush any cached writes to the device as well */
+
+  ret = bchlib_flushsector(bch);
+  if (ret < 0)
+    {
+      fdbg("Flush failed: %d\n", ret);
+      return ret;
     }
 
   return byteswritten;

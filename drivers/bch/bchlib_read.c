@@ -145,7 +145,9 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset, size_t le
       len       -= nbytes;
     }
 
-  /* Then read all of the full sectors following the partial sector */
+  /* Then read all of the full sectors following the partial sector directly
+   * into the user buffer.
+   */
 
   if (len >= bch->sectsize )
     {
@@ -155,7 +157,8 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset, size_t le
           nsectors = bch->nsectors - sector;
         }
 
-      ret = bch->inode->u.i_bops->read(bch->inode, bch->buffer, sector, nsectors);
+      ret = bch->inode->u.i_bops->read(bch->inode, (FAR uint8_t *)buffer,
+                                       sector, nsectors);
       if (ret < 0)
         {
           fdbg("Read failed: %d\n");
