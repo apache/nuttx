@@ -82,7 +82,7 @@ LDLIBS		= $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 
 BOARDDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
 
-LIBGCC		= "${shell $(CC) -print-libgcc-file-name}"
+LIBGCC		= "${shell $(CC) $(ARCHCPUFLAGS) -print-libgcc-file-name}"
 
 VPATH		= chip:common:$(ARCH_SUBDIR)
 
