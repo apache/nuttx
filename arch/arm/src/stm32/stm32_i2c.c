@@ -91,6 +91,16 @@
 #if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C2)
 
 /************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+/* Configuration ********************************************************************/
+/* Interrupt wait timeout in milliseconds */
+
+#ifndef CONFIG_STM32_I2CTIMEOMS
+#  define CONFIG_STM32_I2CTIMEOMS 50
+#endif
+
+/************************************************************************************
  * Private Types
  ************************************************************************************/
 
@@ -183,10 +193,27 @@ void inline stm32_i2c_sem_wait(FAR struct i2c_dev_s *dev)
 
 int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
 {
-    while( sem_wait( &((struct stm32_i2c_inst_s *)dev)->priv->sem_isr ) != 0 ) {
-        ASSERT(errno == EINTR);
+  struct timespec abstime;
+  irqstate_t flags;
+  int ret;
+
+  flags = irqsave();
+  do
+    {
+      (void)clock_settime(CLOCK_REALTIME, &abstime);
+      abstime.tv_nsec += CONFIG_STM32_I2CTIMEOMS * 1000 * 1000;
+      if (abstime.tv_nsec > 1000 * 1000 * 1000)
+        {
+          abstime.tv_sec++;
+          abstime.tv_nsec -= 1000 * 1000 * 1000;
+        }
+
+      ret = sem_timedwait(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, &abstime);
     }
-    return OK;
+  while (ret != OK && errno == EINTR);
+
+  irqrestore(flags);
+  return ret;
 }
 
 void inline stm32_i2c_sem_post(FAR struct i2c_dev_s *dev)
@@ -270,7 +297,7 @@ static inline uint32_t stm32_i2c_getstatus(FAR struct stm32_i2c_priv_s *priv)
 static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 {
     uint32_t status = stm32_i2c_getstatus(priv);
-    
+
 #ifdef NON_ISR
     static uint32_t isr_count = 0;
     static uint32_t old_status = 0xFFFF;
@@ -285,7 +312,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
     /* Was start bit sent */
     
     if (status & I2C_SR1_SB) {
-    
+
         /* Get run-time data */
                 
         priv->ptr   = priv->msgv->buffer;
@@ -315,7 +342,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
     
     else if (status & I2C_SR1_ADD10) {
         /* \todo Finish 10-bit mode addressing */
-        
+
     }
     
         /* Was address sent, continue with ether sending or reading data */
@@ -341,7 +368,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
         /* More bytes to read */
 
     else if ( status & I2C_SR1_RXNE ) {
-    
+
         /* Read a byte, if dcnt goes < 0, then read dummy bytes to ack ISRs */
     
 #ifdef NON_ISR
@@ -376,6 +403,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
      */
     
     if (priv->dcnt<=0 && (status & I2C_SR1_BTF)) {
+
 #ifdef NON_ISR
         printf("BTF\n");
 #endif
@@ -641,6 +669,7 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
 
     if (stm32_i2c_sem_waitisr(dev) == ERROR) {
         status = stm32_i2c_getstatus(inst->priv);
+        status_errno = ETIMEDOUT;
     }
     else status = inst->priv->status & 0xFFFF;  /* clear SR2 (BUSY flag) as we've done successfully */
 #else
