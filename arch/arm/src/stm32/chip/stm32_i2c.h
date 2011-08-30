@@ -147,7 +147,8 @@
 #define I2C_SR1_TIMEOUT         (1 << 14) /* Bit 14: Timeout or Tlow Error */
 #define I2C_SR1_SMBALERT        (1 << 15) /* Bit 15: SMBus Alert */
 
-#define I2C_SR1_ERRORMASK       (I2C_SR1_BERR|I2C_SR1_ARLO|I2C_SR1_AF|I2C_SR1_OVR|I2C_SR1_PECERR)
+#define I2C_SR1_ERRORMASK       (I2C_SR1_BERR|I2C_SR1_ARLO|I2C_SR1_AF|I2C_SR1_OVR|\
+                                 I2C_SR1_PECERR|I2C_SR1_TIMEOUT|I2C_SR1_SMBALERT)
 
 /* Status register 2 */
 
