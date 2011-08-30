@@ -455,8 +455,8 @@ Where <subdir> is one of the following:
     =========== ======================= ================================
                 nsh                     nsh2
     =========== ======================= ================================
-    Toolchain:  NuttX buildroot for     NuttX buildroot for)
-                Linux or Cygwin (1,2)   Linux or Cygwin (1,2)
+    Toolchain:  NuttX buildroot for     Codesourcery for Windows (1)
+                Linux or Cygwin (1,2)
     ----------- ----------------------- --------------------------------
     Loader:     DfuSe                   DfuSe
     ----------- ----------------------- --------------------------------
