@@ -75,7 +75,7 @@ VPATH		= chip:common:board
 
 # Libraries
 
-LIBGCC		= ${shell $(CC) -print-libgcc-file-name}
+LIBGCC		= ${shell $(CC) $(ARCHCPUFLAGS) -print-libgcc-file-name}
 
 # Supports dynamic sizing of HEAP.
 #
