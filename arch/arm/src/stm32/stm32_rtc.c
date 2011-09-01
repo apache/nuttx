@@ -222,11 +222,12 @@ clock_t up_rtc_getclock(void)
  * 
  * \param time The unit depends on the prescaler value 
  **/
-void up_rtc_setclock(clock_t clock)
+
+void up_rtc_setclock(clock_t newclock)
 {
     stm32_rtc_beginwr();
-    putreg16(clock >> 16,    STM32_RTC_CNTH);
-    putreg16(clock & 0xFFFF, STM32_RTC_CNTL);
+    putreg16(newclock >> 16,    STM32_RTC_CNTH);
+    putreg16(newclock & 0xFFFF, STM32_RTC_CNTL);
     stm32_rtc_endwr();
 }
 
@@ -263,14 +264,14 @@ time_t up_rtc_gettime(void)
 }
 
 
-void up_rtc_settime(time_t time)
+void up_rtc_settime(time_t newtime)
 {
     /* Do reverse compared to gettime above */
     
-    uint32_t time_lsb = time << RTC_CLOCKS_SHIFT | 
+    uint32_t time_lsb = newtime << RTC_CLOCKS_SHIFT | 
         (up_rtc_getclock() & ((1<<RTC_CLOCKS_SHIFT)-1));
         
-    uint32_t time_msb = time >> (32-RTC_CLOCKS_SHIFT);
+    uint32_t time_msb = newtime >> (32-RTC_CLOCKS_SHIFT);
     
     irqstate_t irqs = irqsave();
     
