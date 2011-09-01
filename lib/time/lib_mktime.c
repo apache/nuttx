@@ -109,7 +109,7 @@ time_t mktime(const struct tm *tp)
 #else
 
 /* Simple version that only works for dates within a (relatively) small range
- * from the epoch.  It does not handle earlier days on longer days where leap
+ * from the epoch.  It does not handle earlier days or longer days where leap
  * seconds, etc. apply.
  */
 

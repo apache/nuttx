@@ -191,7 +191,7 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
     {
       /* Is this year a leap year (we'll need this later too) */
 
-      leapyear = clock_isleapyear(value + 1900);
+      leapyear = clock_isleapyear(value + 1970);
 
       /* Get the number of days in the year */
 
@@ -239,14 +239,14 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
        * number of days we have remaining?
        */
 
-      if (tmp >= days)
+      if (tmp > days)
         {
           /* Yes.. then the month we want is somewhere from 'min' and to the
            * midpoint, 'value'.  Could it be the midpoint?
            */
 
           tmp = clock_daysbeforemonth(value, leapyear);
-          if (tmp >= days)
+          if (tmp > days)
             {
               /* No... The one we want is somewhere between min and value-1 */
 
@@ -265,21 +265,27 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
 
            min = value + 1;
         }
+
+      /* If we break out of the loop because min == max, then we want value
+       * to be equal to min == max.
+       */
+
+      value = min;
     }
   while (min < max);
 
-  /* The selected month number is in min (and max). Subtract the number of days in the
+  /* The selected month number is in value. Subtract the number of days in the
    * selected month
    */
 
-  days -= clock_daysbeforemonth(min, leapyear);
+  days -= clock_daysbeforemonth(value, leapyear);
 
   /* At this point, value has the month into this year (zero based) and days has
    * number of days into this month (zero based)
    */
 
-  *month = min + 1;  /* 1-based */
-  *day   = days + 1; /* 1-based */
+  *month = value + 1; /* 1-based */
+  *day   = days + 1;  /* 1-based */
 }
 
 #endif /* CONFIG_GREGORIAN_TIME */

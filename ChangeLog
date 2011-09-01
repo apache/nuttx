@@ -2049,3 +2049,5 @@
 	  crashes on Cortex-M3 if the ARM libgcc is used, for example.  The fix 
 	  is to include ARCHCPUFLAGS on the gcc command line when asking it to
 	  -print-libgcc-file-name.
+	* lib/time/lib_gmtimer.c:  Correct several calculations that could lead
+	  to errors in dates.
