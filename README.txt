@@ -506,6 +506,7 @@ apps
  |- nshlib/
  |   `- README.txt
  |- system/
+ |   |- i2c/README.txt
  |   |- free/README.txt
  |   `- install
  |      `- README.txt
