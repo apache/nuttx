@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 25, 2011</p>
+      <p>Last Updated: September 4, 2011</p>
     </td>
   </tr>
 </table>
@@ -110,7 +110,7 @@
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
-  <a href="#DeviceDrivers">6.0 NuttX Device Drivers</a><br>
+  <a href="#DeviceDrivers">6.0 NuttX Device Drivers</a>
   <ul>
     <a href="#chardrivers">6.1 Character Device Drivers</a><br>
     <a href="#blockdrivers">6.2 Block Device Drivers</a><br>
@@ -127,6 +127,12 @@
        <a href="#usbhostdrivers">6.3.9 USB Host-Side Drivers</a><br>
        <a href="#usbdevdrivers">6.3.10 USB Device-Side Drivers</a><br>
        <a href="#analogdrivers">6.3.11 Analog (ADC/DAC) Drivers</a>
+    </ul>
+    <a href="#pwrmgmt">6.4 Power Management</a>
+    <ul>
+       <a href="#pmoverview">6.4.1 Overview</a><br>
+       <a href="#pminterfaces">6.4.2 Interfaces</a><br>
+       <a href="#pmcallbacks">6.4.3 Callbacks</a>
     </ul>
   </ul>
   <a href="#apndxconfigs">Appendix A: NuttX Configuration Settings</a><br>
@@ -3176,6 +3182,262 @@ extern void up_ledoff(int led);
     The implementation of the common DAC character driver.
   </li>
 </ul>
+
+<h2><a name="pwrmgmt">6.4 Power Management</a></h2>
+
+<h3><a name="pmoverview">6.4.1 Overview</a></h3>
+<p>
+  NuttX supports a simple power managment (PM) sub-system.  This sub-system:
+</p>
+<ul>
+  <li>
+    <p>
+      Monitors driver activity, and
+    </p>
+  </li>
+  <li>
+    <p>
+      Provides hooks to place drivers (and the whole system) into reduce power
+      modes of operation.
+    </p>
+  </li>
+</ul>
+<p>
+  The PM sub-system integrates the MCU idle loop with a collection of device drivers to support:
+</p>
+<ul>
+  <li>
+    <p>
+      Reports of relevant driver or other system activity. 
+    </p>
+  </li>
+  <li>
+    <p>
+      Registration and callback mechanism to interface with individual device drivers. 
+    </p>
+  </li>
+  <li>
+    <p>
+      IDLE time polling of overall driver activity.
+    </p>
+  </li>
+  <li>
+    <p>
+      Coordinated, global, system-wide transitions to lower power usage states.
+    </p>
+  </li>
+</ul>
+<p>
+  Various &quot;sleep&quot; and low power consumption states have various names and are sometimes used in conflicting ways.
+  In the NuttX PM logic, we will use the following terminology:
+</p>
+<dl>
+  <dt><code>NORMAL</code>
+  <dd>The normal, full power operating mode.
+  <dt><code>IDLE</code>
+  <dd>This is still basically normal operational mode, the system is,
+      however, <code>IDLE</code> and some simple simple steps to reduce power
+      consumption provided that they do not interfere with normal
+      Operation.  Simply dimming the a backlight might be an example
+      somethat that would be done when the system is idle.
+  <dt><code>STANDBY</code>
+  <dd>Standby is a lower power consumption mode that may involve more
+      extensive power management steps such has disabling clocking or
+      setting the processor into reduced power consumption modes. In
+      this state, the system should still be able to resume normal
+      activity almost immediately.
+  <dt><code>SLEEP</code>
+  <dd>The lowest power consumption mode.  The most drastic power
+      reduction measures possible should be taken in this state. It
+      may require some time to get back to normal operation from
+      <code>SLEEP</code> (some MCUs may even require going through reset).
+</dl>
+<p>
+  These various states are represented with type <code>enum pm_state_e</code> in <code>include/nuttx/pm.h</code>.
+</p>
+
+<h3><a name="pminterfaces">6.4.2 Interfaces</a></h3>
+<p>
+  All PM interfaces are declared in the file <code>include/nuttx/pm.h</code>.
+</p>
+
+<h4><a name="pminitialize">6.4.2.1 pm_initialize()</a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/pm.h&gt;
+void pm_initialize(void);
+</pre></ul>
+<p><b>Description:</b>
+This function is called by MCU-specific one-time at power on reset in order to initialize the power management capabilities.
+This function must be called <i>very</i> early in the intialization sequence <i>before</i> any other device drivers are initialize (since they may attempt to register with the power management subsystem).
+</p>
+<p><b>Input Parameters:</b>
+None
+</p>
+<p><b>Returned Value:</b>
+None
+</p>
+
+<h4><a name="pmregister">6.4.2.2 pm_register()</a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/pm.h&gt;
+int pm_register(FAR struct pm_callback_s *callbacks);
+</pre></ul>
+<p><b>Description:</b>
+  This function is called by a device driver in order to register to receive power management event callbacks.
+  Refer to the <a href="#pmcallbacks">PM Callback</a> section for more details.
+</p>
+<p><b>Input Parameters:</b>
+ <dl>
+   <dt><code>callbacks</code>
+   <dd>An instance of <code>struct pm_callback_s</code> providing the driver callback functions.
+ </dl>
+</p>
+<p><b>Returned Value:</b>
+Zero (<code>OK</code>) on success; otherwise a negater <code>errno</code> value is returned.
+</p>
+
+<h4><a name="pmactivity">6.4.2.3 pm_activity()</a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/pm.h&gt;
+void pm_activity(int priority);
+</pre></ul>
+<p><b>Description:</b>
+ This function is called by a device driver to indicate that it is performing meaningful activities (non-idle).
+ This increment an activty count and/or will restart a idle timer and prevent entering reduced power states.
+</p>
+<p><b>Input Parameters:</b>
+ <dl>
+   <dt><code>priority</code>
+   <dd>
+     Activity priority, range 0-9.
+     Larger values correspond to higher priorities.
+     Higher priority activity can prevent the system from entering reduced power states for a longer period of time.
+     As an example, a button press might be higher priority activity because it means that the user is actively interacting with the device.
+ </dl>
+</p>
+<p><b>Returned Value:</b>
+  None
+</p>
+<p><b>Assumptions:</b>
+  This function may be called from an interrupt handler (this is the ONLY PM function that may be called from an interrupt handler!).
+</p>
+
+<h4><a name="pmcheckstate">6.4.2.4 pm_checkstate()</a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/pm.h&gt;
+enum pm_state_e pm_checkstate(void);
+</pre></ul>
+<p><b>Description:</b>
+  This function is called from the MCU-specific IDLE loop to monitor the the power management conditions.
+  This function returns the &quot;recommended&quot; power management state based on the PM configuration and activity reported in the last sampling periods.
+  The power management state is not automatically changed, however.
+  The IDLE loop must call <code>pm_changestate()</code> in order to make the state change.
+</p>
+<p>
+  These two steps are separated because the plaform-specific IDLE loop may have additional situational information that is not available to the the PM sub-system.
+  For example, the IDLE loop may know that the battery charge level is very low and may force lower power states even if there is activity.
+</p>
+<p>
+  NOTE: That these two steps are separated in time and, hence, the IDLE loop could be suspended for a long period of time between calling <code>pm_checkstate()</code> and <code>pm_changestate()</code>.
+  The IDLE loop may need to make these calls atomic by either disabling interrupts until the state change is completed.
+</p>
+<p><b>Input Parameters:</b>
+  None
+</p>
+<p><b>Returned Value:</b>
+  The recommended power management state.
+</p>
+
+<h4><a name="pmchangestate">6.4.2.5 pm_changestate()</a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/pm.h&gt;
+ int pm_changestate(enum pm_state_e newstate);
+</pre></ul>
+<p><b>Description:</b>
+  This function is used by platform-specific power management logic.
+  It will announce the power management power management state change to all drivers that have registered for power management event callbacks.
+</p>
+<p><b>Input Parameters:</b>
+ <dl>
+   <dt><code>newstate</code>
+   <dd>Identifies the new PM state
+ </dl>
+</p>
+<p><b>Returned Value:</b>
+  0 (<code>OK</code>) means that the callback function for all registered drivers returned <code>OK</code> (meaning that they accept the state change).
+  Non-zero means that one of the drivers refused the state change.
+  In this case, the system will revert to the preceding state.
+</p>
+<p><b>Assumptions:</b>
+   It is assumed that interrupts are disabled when this function is called.
+   This function is probably called from the IDLE loop... the lowest priority task in the system.
+   Changing driver power management states may result in renewed system activity and, as a result, can
+   suspend the IDLE thread before it completes the entire state change unless interrupts are disabled throughout the state change.
+</p>
+
+<h3><a name="pmcallbacks">6.4.3 Callbacks</a></h3>
+<p>
+  The <code>struct pm_callback_s</code> includes the pointers to the driver callback functions.
+  This structure is defined <code>include/nuttx/pm.h</code>.
+  These callback functions can be used to provide power management information to the driver.
+</p>
+
+<h4><a name="pmprepare">6.4.3.1 prepare()</a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+int (*prepare)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
+</pre></ul>
+<p><b>Description:</b>
+   Request the driver to prepare for a new power state.
+   This is a warning that the system is about to enter into a new power state.
+   The driver should begin whatever operations that may be required to enter power state.
+   The driver may abort the state change mode by returning a non-zero value from the callback function.
+</p>
+<p><b>Input Parameters:</b>
+ <dl>
+   <dt><code>cb</code>
+   <dd>Returned to the driver.
+   The driver version of the callback strucure may include additional, driver-specific state data at the end of the structure.
+   <dt><code>pmstate</code>
+   <dd>Identifies the new PM state
+ </dl>
+</p>
+<p><b>Returned Value:</b>
+   Zero (<code>OK</code>) means the event was successfully processed and that the driver is prepared for the PM state change.
+   Non-zero means that the driver is not prepared to perform the tasks needed achieve this power setting and will cause the state change to be aborted.
+   NOTE:  The <code>prepare()</code> method will also be called when reverting from lower back to higher power consumption modes (say because another driver refused a lower power state change).
+   Drivers are not permitted to return non-zero values when reverting back to higher power 
+   consumption modes!
+</p>
+
+<h4><a name="pmnotify">6.4.3.1 notify()</a></h4>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/pm.h&gt;
+void (*notify)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
+</pre></ul>
+<p><b>Description:</b>
+  Notify the driver of new power state.
+  This callback is called after all drivers have had the opportunity to prepare for the new power  state.
+</p>
+<p><b>Input Parameters:</b>
+ <dl>
+   <dt><code>cb</code>
+   <dd>Returned to the driver.
+   The driver version of the callback strucure may include additional, driver-specific state data at the end of the structure.
+   <dt><code>pmstate</code>
+   <dd>Identifies the new PM state
+ </dl>
+</p>
+<p><b>Returned Value:</b>
+  None.
+  The driver already agreed to transition to the low power consumption state when when it returned <code>OK</code> to the <code>prepare()</code> call.
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
