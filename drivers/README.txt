@@ -81,6 +81,12 @@ pipes/
 	FIFO and named pipe drivers.  Standard interfaces are declared
 	in include/unistd.h
 
+pm/
+    Power management (PM) driver interfaces.  These interfaces are used
+    to manage power usage of a platform by monitoring driver activity
+    and by placing drivers into reduce power usage modes when the
+    drivers are not active.
+
 sensors/
 	Drivers for various sensors
 

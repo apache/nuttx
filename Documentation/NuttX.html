@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 24, 2011</p>
+      <p>Last Updated: September 4, 2011</p>
     </td>
   </tr>
 </table>
@@ -381,35 +381,14 @@
   <td><br></td>
   <td>
     <p>
-      <li>Tiny in-memory, root pseudo-file-system.</li>
+      <li>Tiny, in-memory, root pseudo-file-system.</li>
     </p>
 </tr>
-
 <tr>
   <td><br></td>
   <td>
     <p>
-      <li>Supports character and block drivers.</li>
-    </p>
-</tr>
-
-<tr>
-  <td><br></td>
-  <td>
-    <p>
-      <li>
-        Network, USB (host), USB (device), serial, CAN, ADC, DAC driver architectures.
-      </li>
-    </p>
-</tr>
-
-<tr>
-  <td><br></td>
-  <td>
-    <p>
-      <li>
-        RAMDISK, pipes, FIFO, <code>/dev/null</code>, <code>/dev/zero</code>, and loop drivers.
-      </li>
+      <li>Virtual file system supports drivers and mountpoints.</li>
     </p>
 </tr>
 <tr>
@@ -443,13 +422,6 @@
   <td><br></td>
   <td>
     <p>
-      <li>Generic driver for SPI-based or SDIO-based MMC/SD/SDH cards.</li>
-    </p>
-</tr>
-<tr>
-  <td><br></td>
-  <td>
-    <p>
       <li>ROMFS filesystem support.</li>
     </p>
 </tr>
@@ -470,6 +442,53 @@
       FAT long file name support may be subject to certain Microsoft patent restrictions if enabled.
       See the top-level <code>COPYING</code> file for details.
     </small></p>
+</tr>
+
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <b>Device Drivers</b>
+  </td>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Supports character and block drivers as well as specialized driver interfaces.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>
+        Network, USB (host), USB (device), serial, CAN, ADC, DAC driver architectures.
+      </li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>
+        RAMDISK, pipes, FIFO, <code>/dev/null</code>, <code>/dev/zero</code>, and loop drivers.
+      </li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Generic driver for SPI-based or SDIO-based MMC/SD/SDH cards.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li><a href="NuttxPortingGuide.html#pwrmgmt">Power management</a> sub-system.</li>
+    </p>
 </tr>
 
 <tr>
@@ -2629,13 +2648,46 @@ nuttx-6.9 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
       Much more is needed.
     * graphics/, include/nuttx/nx:  Add new NX interfaces for drawing
       circles -- both circular outlines and filled circles.
-    * graphic/nxglib/nxglib_spitline.c:  Add a &quot;fudge factor&quot; that eliminates
+    * graphic/nxglib/nxglib_spitline.c:  Add a "fudge factor" that eliminates
       some problems for rendering nearly horizontal, wide lines.
+    * drivers/analog, include/nuttx/analog, arch/arch/src/lpcxx:  (1) Add
+      updates to the ADS1255 driver, (2) fix errors from my last merge (sorry),
+      (3) Add DAC infrastructure, (4) add AD5410 DAC driver, and (5) add
+      LPC17xx ADC and DAC drivers.  All contributed by Li Zhuoyi (Lzyy).
+    * tools/mkexport.sh:  Extended the script that implements the top-level
+      'make export' logic.  The script now also finds and bundles up all of
+      the architecture-specific header files as well.
+    * drivers/arch/arm/src/stm32/stm32_i2c.c:  Add a reset to the I2C
+      initialization logic to prevent spurious interrups when the I2C
+      interrupts are enabled (submitted by Uros Platise).
+    * Scripts/makefiles/documents.  Several adjustments, corrections and
+      typo fixes so that NuttX will build correctly on FreeBSD using the
+      ASH shell (submitted by Kurt Lidl).
+    * drivers/mtd/flash_eraseall.c:  Add a callable function that accepts
+      the path to a block driver and then erases the underlying FLASH memory
+      (assuming that the block driver is an MTD driver wrapped in the FTL
+      layer).
+    * drivers/bch:  Fixed some important bugs in the BCH driver (noted by
+      Li Zhuoyi (Lzyy)).  This would have effected any large reads or writes
+      (larger than the hardware sector size).
+    * arch/*/src/Makefile:  Use of -print-libgcc-file-name to get path to
+      libgcc.a may select the wrong libgcc.a if a multilib toolchain (like
+      CodeSourcery) is used. This can be a serious problem and can cause
+      crashes on Cortex-M3 if the ARM libgcc is used, for example.  The fix 
+      is to include ARCHCPUFLAGS on the gcc command line when asking it to
+      -print-libgcc-file-name.
+    * lib/time/lib_gmtimer.c:  Correct several calculations that could lead
+      to errors in dates.
+    * drivers/pm: Add the beginnings of a NuttX power management sub-system.
 
 apps-6.9 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 
     * apps/examples/nxlines:  Extend the line drawing text to include drawing
       of circles.
+    * apps/system/i2c:  Add an I2C test tool that should help to bring up I2C
+      devices (when it is fully functional).
+    * apps/nshlib/nsh_timcmds.c:  Add the date command that can be used to
+      show or set the time (only if CONFIG_RTC is set).
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
 

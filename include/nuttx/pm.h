@@ -234,7 +234,7 @@ struct pm_callback_s
    * Name: prepare
    *
    * Description:
-   *   Notify the driver to prepare for a new power confition  .This is a
+   *   Request the driver to prepare for a new power state. This is a
    *   warning that the system is about to enter into a new power state.  The
    *   driver should begin whatever operations that may be required to enter
    *   power state.  The driver may abort the state change mode by returning
@@ -244,12 +244,17 @@ struct pm_callback_s
    *   cb      - Returned to the driver.  The driver version of the callback
    *             strucure may include additional, driver-specific state
    *             data at the end of the structure.
-   *   pmstate - Idenfifies the new PM state
+   *   pmstate - Identifies the new PM state
    *
    * Returned Value:
-   *   0 (OK) means the event was successfully processed.  Non-zero means
-   *   means that the driver is not prepared to perform the tasks needed
-   *   achieve this power setting.
+   *   0 (OK) means the event was successfully processed and that the driver
+   *   is prepared for the PM state change.  Non-zero means that the driver
+   *   is not prepared to perform the tasks needed achieve this power setting
+   *   and will cause the state change to be aborted.  NOTE:  The prepare
+   *   method will also be recalled when reverting from lower back to higher
+   *   power consumption modes (say because another driver refused a lower
+   *   power state change).  Drivers are not permitted to return non-zero
+   *   values when reverting back to higher power consumption modes!
    *
    **************************************************************************/
 
@@ -267,13 +272,11 @@ struct pm_callback_s
    *   cb      - Returned to the driver.  The driver version of the callback
    *             strucure may include additional, driver-specific state
    *             data at the end of the structure.
-   *   pmstate - Idenfifies the new PM state
+   *   pmstate - Identifies the new PM state
    *
    * Returned Value:
-   *   0 (OK) means the event was successfully processed.  Non-zero means
-   *   means that the driver failed to enter the lower power consumption
-   *   mode.  Drivers are not permitted to return non-zero values when
-   *   reverting to higher power consumption modes!
+   *   None.  The driver already agreed to transition to the low power
+   *   consumption state when when it returned OK to the prepare() call.
    *
    **************************************************************************/
 
@@ -340,13 +343,13 @@ EXTERN int pm_register(FAR struct pm_callback_s *callbacks);
  * Description:
  *   This function is called by a device driver to indicate that it is
  *   performing meaningful activities (non-idle).  This increment an activty
- *   cound and/or will restart a idle timer and prevent entering IDLE
+ *   count and/or will restart a idle timer and prevent entering reduced
  *   power states.
  *
  * Input Parameters:
- *   priority - activity priority, range 0-9.  Larger values correspond to
+ *   priority - Activity priority, range 0-9.  Larger values correspond to
  *     higher priorities.  Higher priority activity can prevent the system
- *     fromentering reduced power states for a longer period of time.
+ *     from entering reduced power states for a longer period of time.
  *
  *     As an example, a button press might be higher priority activity because
  *     it means that the user is actively interacting with the device.
@@ -380,10 +383,10 @@ EXTERN void pm_activity(int priority);
  *   even if there is activity.
  *
  *   NOTE: That these two steps are separated in time and, hence, the IDLE
- *   could be suspended for a long period of time between calling
- *   pm_checkstate() and pm_changestate().  There it is recommended that
- *   the IDLE loop make these calls atomic by either disabling interrupts
- *   until the state change is completed.
+ *   loop could be suspended for a long period of time between calling
+ *   pm_checkstate() and pm_changestate().  The IDLE loop may need to make
+ *   these calls atomic by either disabling interrupts until the state change
+ *   is completed.
  *
  * Input Parameters:
  *   None
@@ -404,7 +407,7 @@ EXTERN enum pm_state_e pm_checkstate(void);
  *   drivers that have registered for power management event callbacks.
  *
  * Input Parameters:
- *   newstate - Idenfifies the new PM state
+ *   newstate - Identifies the new PM state
  *
  * Returned Value:
  *   0 (OK) means that the callback function for all registered drivers

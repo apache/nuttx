@@ -77,7 +77,7 @@
  *   Prepare every driver for the state change.
  *
  * Input Parameters:
- *   newstate - Idenfifies the new PM state
+ *   newstate - Identifies the new PM state
  *
  * Returned Value:
  *   0 (OK) means that the callback function for all registered drivers
@@ -122,7 +122,7 @@ static int pm_prepall(enum pm_state_e newstate)
  *   Inform all drivers of the state change.
  *
  * Input Parameters:
- *   newstate - Idenfifies the new PM state
+ *   newstate - Identifies the new PM state
  *
  * Returned Value:
  *   None
@@ -147,7 +147,7 @@ static inline void pm_changeall(enum pm_state_e newstate)
         {
           /* Yes.. notify the driver */
 
-          (void)cb->notify(cb, newstate);
+          cb->notify(cb, newstate);
         }
     }
 }
@@ -160,12 +160,12 @@ static inline void pm_changeall(enum pm_state_e newstate)
  * Name: pm_changestate
  *
  * Description:
- *   This function is used to platform-specific power managmeent logic.  It
+ *   This function is used by platform-specific power management logic.  It
  *   will announce the power management power management state change to all
  *   drivers that have registered for power management event callbacks.
  *
  * Input Parameters:
- *   newstate - Idenfifies the new PM state
+ *   newstate - Identifies the new PM state
  *
  * Returned Value:
  *   0 (OK) means that the callback function for all registered drivers

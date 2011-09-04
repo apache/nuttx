@@ -81,13 +81,13 @@
  * Description:
  *   This function is called by a device driver to indicate that it is
  *   performing meaningful activities (non-idle).  This increment an activty
- *   cound and/or will restart a idle timer and prevent entering IDLE
+ *   count and/or will restart a idle timer and prevent entering reduced
  *   power states.
  *
  * Input Parameters:
- *   priority - activity priority, range 0-9.  Larger values correspond to
+ *   priority - Activity priority, range 0-9.  Larger values correspond to
  *     higher priorities.  Higher priority activity can prevent the system
- *     fromentering reduced power states for a longer period of time.
+ *     from entering reduced power states for a longer period of time.
  *
  *     As an example, a button press might be higher priority activity because
  *     it means that the user is actively interacting with the device.

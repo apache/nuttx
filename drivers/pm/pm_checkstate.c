@@ -93,10 +93,10 @@
  *   even if there is activity.
  *
  *   NOTE: That these two steps are separated in time and, hence, the IDLE
- *   could be suspended for a long period of time between calling
- *   pm_checkstate() and pm_changestate().  There it is recommended that
- *   the IDLE loop make these calls atomic by either disabling interrupts
- *   until the state change is completed.
+ *   loop could be suspended for a long period of time between calling
+ *   pm_checkstate() and pm_changestate().  The IDLE loop may need to make
+ *   these calls atomic by either disabling interrupts until the state change
+ *   is completed.
  *
  * Input Parameters:
  *   None
