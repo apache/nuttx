@@ -37,22 +37,28 @@
  * have various names and are sometimes used in conflicting ways.  In the
  * PM logic, we will use the following terminology:
  *
- * NORMAL - The normal, full power operating mode.
- * REDUCED - This is still basically normal operational mode, but with some
- *           simple changes to reduce power consumption.  Perhaps this just
- *           means just dimming the backlight.
- * STANDBY - Standby is a very low power consumption mode.  It is the lowest
- *           power from which the system can recover quickly.
- * SLEEP   - The lowest power consumption mode.  It may require some time
- *           to get back to normal operation from SLEEP (some parts may
- *           even require going through reset).
+ * NORMAL  - The normal, full power operating mode.
+ * IDLE    - This is still basically normal operational mode, the system is,
+ *           however, IDLE and some simple simple steps to reduce power
+ *           consumption provided that they do not interfere with normal
+ *           Operation.  Simply dimming the a backlight might be an example
+ *           somethat that would be done when the system is idle.
+ * STANDBY - Standby is a lower power consumption mode that may involve more
+ *           extensive power management steps such has disabling clocking or
+ *           setting the processor into reduced power consumption modes. In
+ *           this state, the system should still be able to resume normal
+ *           activity almost immediately.
+ * SLEEP   - The lowest power consumption mode.  The most drastic power
+ *           reduction measures possible should be taken in this state. It
+ *           may require some time to get back to normal operation from
+ *           SLEEP (some MCUs may even require going through reset).
  *
  * State changes always proceed from higher to lower power usage:
  *
- * NORMAL->REDUCED->STANDBY->SLEEP
- *   ^       |         |        |
- *   |       V         V        V
- *   +-------+---------+--------+
+ * NORMAL->IDLE->STANDBY->SLEEP
+ *   ^       |      |        |
+ *   |       V      V        V
+ *   +-------+------+--------+
  */
 
 #ifndef __INCLUDE_NUTTX_PM_H
@@ -64,28 +70,112 @@
 
 #include <nuttx/config.h>
 
+#include <queue.h>
+
 #ifdef CONFIG_PM
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* Time slices */
+/* Time slices.  The power management module collects activity counts in
+ * time slices.  At the end of the time slice, the count accumulated during
+ * that interval is applied to an averaging algorithm to determine the
+ * activity level.
+ *
+ * CONFIG_PM_SLICEMS provides the duration of that time slice.  Default: 100
+ * Milliseconds
+ */
 
 #ifndef CONFIG_PM_SLICEMS
-#  define CONFIG_PM_SLICEMS 100 /* Default is 100 msec */
+#  define CONFIG_PM_SLICEMS  100 /* Default is 100 msec */
 #endif
 
-#ifndef CONFIG_PM_NREDUCED
-#  define CONFIG_PM_NREDUCED 30 /* Thiry IDLE slices to enter reduced mode */
+/* The averaging algorithm is simply: Y = (An*X + SUM(Ai*Yi))/SUM(Aj), where
+ * i = 1..n-1 and j= 1..n, n is the length of the "memory", Ai is the
+ * weight applied to each value, and X is the current activity.
+ *
+ * CONFIG_PM_MEMORY provides the memory for the algorithm.  Default: 2
+ * CONFIG_PM_COEFn provides weight for each sample.  Default: 1
+ *
+ * Setting CONFIG_PM_MEMORY=1 disables all smoothing.
+ */
+
+#ifndef CONFIG_PM_MEMORY
+#  define CONFIG_PM_MEMORY 2
 #endif
 
-#ifndef CONFIG_PM_NSTANDBY
-#  define CONFIG_PM_NSTANDBY 80 /* Eight IDLE slices to enter standby mode */
+#ifndef CONFIG_PM_MEMORY < 1
+#  error "CONFIG_PM_MEMORY must be >= 1"
 #endif
 
-#ifndef CONFIG_PM_NSLEEP
-#  define CONFIG_PM_NSLEEP 150 /* 150 IDLE slices to enter standby mode */
+#ifndef CONFIG_PM_COEFN
+#  define CONFIG_PM_COEFN 1
+#endif
+
+#if CONFIG_PM_MEMORY > 1 && !defined(CONFIG_PM_COEF1)
+#  define CONFIG_PM_COEF1 1
+#endif
+
+#if CONFIG_PM_MEMORY > 2 && !defined(CONFIG_PM_COEF2)
+#  define CONFIG_PM_COEF2 1
+#endif
+
+#if CONFIG_PM_MEMORY > 3 && !defined(CONFIG_PM_COEF3)
+#  define CONFIG_PM_COEF3 1
+#endif
+
+#if CONFIG_PM_MEMORY > 4 && !defined(CONFIG_PM_COEF4)
+#  define CONFIG_PM_COEF4 1
+#endif
+
+#if CONFIG_PM_MEMORY > 5 && !defined(CONFIG_PM_COEF5)
+#  define CONFIG_PM_COEF5 1
+#endif
+
+#if CONFIG_PM_MEMORY > 6
+#  warning "This logic needs to be extended"
+#endif
+
+/* State changes then occur when the weight activity account crosses
+ * threshold values for certain periods of time (time slice count).
+ *
+ * CONFIG_PM_xxxENTER_THRESH is the threshold value for entering state xxx.
+ * CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
+ *
+ * Resuming to normal state, on the other hand, is usually immediate and
+ * controlled by wakeup conditions established by the platform.  The PM
+ * module only recommends reduced power states.
+ */
+
+#ifndef CONFIG_PM_IDLEENTER_THRESH
+#  define CONFIG_PM_IDLEENTER_THRESH    1   /* Essentially no activity */
+#endif
+
+#ifndef CONFIG_PM_IDLEENTER_COUNT
+#  define CONFIG_PM_IDLEENTER_COUNT     30  /* Thirty IDLE slices to enter
+                                             * IDLE mode from normal
+                                             */
+#endif
+
+#ifndef CONFIG_PM_STANDBYENTER_THRESH
+#  define CONFIG_PM_STANDBYENTER_THRESH 1   /* Essentially no activity */
+#endif
+
+#ifndef CONFIG_PM_STANDBYENTER_COUNT
+#  define CONFIG_PM_STANDBYENTER_COUNT  50  /* Fifty IDLE slices to enter
+                                             * STANDBY mode from IDLE
+                                             */
+#endif
+
+#ifndef CONFIG_PM_SLEEPENTER_THRESH
+#  define CONFIG_PM_SLEEPENTER_THRESH   1   /* Essentially no activity */
+#endif
+
+#ifndef CONFIG_PM_SLEEPENTER_COUNT
+#  define CONFIG_PM_SLEEPENTER_COUNT    70  /* 70 IDLE slices to enter SLEEP
+                                             * mode from STANDBY
+                                             */
 #endif
 
 /****************************************************************************
@@ -98,30 +188,38 @@
 
 enum pm_state_e
 {
-  PM_REDUCED = 0,  /* Drivers will receive periodic this indications if it is
-                    * appropriate to enter a simple reduced power state.  This
-                    * would include simple things such as displaying display back-
-                    * lighting.  The driver should essentially be ready to resume
-                    * normal activity instantly.
+  PM_NORMAL = 0,   /* Normal full power operating mode.  If the driver is in
+                    * a reduced power usage mode, it should immediately re-
+                    * initialize for normal operatin.
                     *
-                    * PM_REDUCED may be followed by PM_STANDBY or PM_RESUME.
+                    * PM_NORMAL may be followed by PM_IDLE.
                     */
-  PM_STANDBY,      /* The system is entering standby mode.  The driver should
-                    * already be prepared for this mode.
+  PM_IDLE,         /* Drivers will receive this state change if it is
+                    * appropriate to enter a simple IDLE power state.  This
+                    * would include simple things such as reducing display back-
+                    * lighting.  The driver should be ready to resume normal
+                    * activity instantly.
                     *
-                    * PM_STANDBY may be followed PM_SLEEP or by PM_RESUME
+                    * PM_IDLE may be followed by PM_STANDBY or PM_NORMAL.
                     */
-  PM_SLEEP,        /* The system is entering deep sleep mode.  The driver should
-                    * already be prepared for this mode.
+  PM_STANDBY,      /* The system is entering standby mode. Standby is a lower
+                    * power consumption mode that may involve more extensive
+                    * power management steps such has disabling clocking or
+                    * setting the processor into reduced power consumption
+                    * modes. In this state, the system should still be able
+                    * to resume normal activity almost immediately.
                     *
-                    * PM_SLEEP may be following by PM_RESUME
+                    * PM_STANDBY may be followed PM_SLEEP or by PM_NORMAL
                     */
-  PM_RESUME,       /* The system is resuming normal operation.  The driver should
-                    * reinitialize for normal operation.
+  PM_SLEEP,        /* The system is entering deep sleep mode.  The most drastic
+                    * power reduction measures possible should be taken in this
+                    * state. It may require some time to get back to normal
+                    * operation from SLEEP (some MCUs may even require going
+                    * through reset).
                     *
-                    * PM_RESUME may be followed by PM_REDUCED.
+                    * PM_SLEEP may be following by PM_NORMAL
                     */
-}
+};
 
 /* This structure contain pointers callback functions in the driver.  These
  * callback functions can be used to provide power management information
@@ -130,7 +228,7 @@ enum pm_state_e
 
 struct pm_callback_s
 {
-  struct pm_callback_s *flink;            /* Supports a singly linked list */
+  struct sq_entry_s entry;   /* Supports a singly linked list */
 
   /**************************************************************************
    * Name: prepare
@@ -173,12 +271,14 @@ struct pm_callback_s
    *
    * Returned Value:
    *   0 (OK) means the event was successfully processed.  Non-zero means
-   *   means that the driver failed to enter the power mode.
+   *   means that the driver failed to enter the lower power consumption
+   *   mode.  Drivers are not permitted to return non-zero values when
+   *   reverting to higher power consumption modes!
    *
    **************************************************************************/
 
   int (*notify)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
-}
+};
 
 /****************************************************************************
  * Public Data
@@ -196,6 +296,26 @@ extern "C" {
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+/****************************************************************************
+ * Name: pm_initialize
+ *
+ * Description:
+ *   This function is called by MCU-specific one-time at power on reset in
+ *   order to initialize the power management capabilities.  This function
+ *   must be called *very* early in the intialization sequence *before* any
+ *   other device drivers are initialize (since they may attempt to register
+ *   with the power management subsystem).
+ *
+ * Input parameters:
+ *   None.
+ *
+ * Returned value:
+ *    None.
+ *
+ ****************************************************************************/
+
+EXTERN void pm_initialize(void);
+
 /****************************************************************************
  * Name: pm_register
  *
@@ -215,6 +335,67 @@ extern "C" {
 EXTERN int pm_register(FAR struct pm_callback_s *callbacks);
 
 /****************************************************************************
+ * Name: pm_activity
+ *
+ * Description:
+ *   This function is called by a device driver to indicate that it is
+ *   performing meaningful activities (non-idle).  This increment an activty
+ *   cound and/or will restart a idle timer and prevent entering IDLE
+ *   power states.
+ *
+ * Input Parameters:
+ *   priority - activity priority, range 0-9.  Larger values correspond to
+ *     higher priorities.  Higher priority activity can prevent the system
+ *     fromentering reduced power states for a longer period of time.
+ *
+ *     As an example, a button press might be higher priority activity because
+ *     it means that the user is actively interacting with the device.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler (this is the ONLY
+ *   PM function that may be called from an interrupt handler!).
+ *
+ ****************************************************************************/
+
+EXTERN void pm_activity(int priority);
+
+/****************************************************************************
+ * Name: pm_checkstate
+ *
+ * Description:
+ *   This function is called from the MCU-specific IDLE loop to monitor the
+ *   the power management conditions.  This function returns the "recommended"
+ *   power management state based on the PM configuration and activity
+ *   reported in the last sampling periods.  The power management state is
+ *   not automatically changed, however.  The IDLE loop must call
+ *   pm_changestate() in order to make the state change.
+ *
+ *   These two steps are separated because the plaform-specific IDLE loop may
+ *   have additional situational information that is not available to the
+ *   the PM sub-system.  For example, the IDLE loop may know that the
+ *   battery charge level is very low and may force lower power states
+ *   even if there is activity.
+ *
+ *   NOTE: That these two steps are separated in time and, hence, the IDLE
+ *   could be suspended for a long period of time between calling
+ *   pm_checkstate() and pm_changestate().  There it is recommended that
+ *   the IDLE loop make these calls atomic by either disabling interrupts
+ *   until the state change is completed.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The recommended power management state.
+ *
+ ****************************************************************************/
+
+EXTERN enum pm_state_e pm_checkstate(void);
+
+/****************************************************************************
  * Name: pm_changestate
  *
  * Description:
@@ -223,52 +404,25 @@ EXTERN int pm_register(FAR struct pm_callback_s *callbacks);
  *   drivers that have registered for power management event callbacks.
  *
  * Input Parameters:
- *   pmstate - Idenfifies the new PM state
+ *   newstate - Idenfifies the new PM state
  *
  * Returned Value:
  *   0 (OK) means that the callback function for all registered drivers
- *   returned OK (meaning that they accept the state change).
+ *   returned OK (meaning that they accept the state change).  Non-zero
+ *   means that one of the drivers refused the state change.  In this case,
+ *   the system will revert to the preceding state.
+ *
+ * Assumptions:
+ *   It is assumed that interrupts are disabled when this function is
+ *   called.  This function is probably called from the IDLE loop... the
+ *   lowest priority task in the system.  Changing driver power management
+ *   states may result in renewed system activity and, as a result, can
+ *   suspend the IDLE thread before it completes the entire state change
+ *   unless interrupts are disabled throughout the state change.
  *
  ****************************************************************************/
 
-EXTERN int pm_changestate(enum pm_event_s pmstate);
-
-/****************************************************************************
- * Name: pm_activity
- *
- * Description:
- *   This function is called by a device driver to indicate that it is
- *   performing meaningful activities (non-idle).  This increment an activty
- *   cound and/or will restart a idle timer and prevent entering reduced
- *   power states.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   The current activity count.
- *
- ****************************************************************************/
-
-EXTERN int pm_activity(void);
-
-/****************************************************************************
- * Name: pm_checkactivity
- *
- * Description:
- *   Return the activity count accumulated since the last time this function
- *   was called.  A count of zero will indicate that no meaningful activity
- *   occurred since the last time this function was called.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   The current activity count.
- *
- ****************************************************************************/
-
-EXTERN int pm_checkactivity(void);
+EXTERN int pm_changestate(enum pm_state_e newstate);
 
 #undef EXTERN
 #ifdef __cplusplus

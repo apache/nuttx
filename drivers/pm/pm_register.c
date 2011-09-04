@@ -1,7 +1,7 @@
 /****************************************************************************
- * up_head.c
+ * drivers/pm/pm_register.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,53 +39,74 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <setjmp.h>
+#include <queue.h>
 #include <assert.h>
 
-#include <nuttx/init.h>
-#include <nuttx/arch.h>
 #include <nuttx/pm.h>
+
+#include "pm_internal.h"
+
+#ifdef CONFIG_PM
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static jmp_buf sim_abort;
-
 /****************************************************************************
- * Global Functions
+ * Public Data
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pm_register
+ *
+ * Description:
+ *   This function is called by a device driver in order to register to
+ *   receive power management event callbacks.
+ *
+ * Input parameters:
+ *   callbacks - An instance of struct pm_callback_s providing the driver
+ *               callback functions.
+ *
+ * Returned value:
+ *    Zero (OK) on success; otherwise a negater errno value is returned.
+ *
+ ****************************************************************************/
+
+int pm_register(FAR struct pm_callback_s *callbacks)
 {
-  /* Power management should be initialized early in the (simulated) boot
-   * sequence.
-   */
+  int ret;
 
-#ifdef CONFIG_PM
-  pm_initialize();
-#endif
+  DEBUGASSERT(callbacks);
 
-  /* Then start NuttX */
+  /* Add the new entry to the end of the list of registered callbacks */
 
-  if (setjmp(sim_abort) == 0)
+  ret = pm_lock();
+  if (ret == OK)
     {
-      os_start();
+      sq_addlast(&callbacks->entry, &g_pmglobals.registry);
+      pm_unlock();
     }
-  return 0;
+  return ret;
 }
 
-void up_assert(const uint8_t *filename, int line)
-{
-  fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
-  longjmp(sim_abort, 1);
-}
-
-void up_assert_code(const uint8_t *filename, int line, int code)
-{
-  fprintf(stderr, "Assertion failed at file:%s line: %d error code: %d\n", filename, line, code);
-  longjmp(sim_abort, 1);
-}
+#endif /* CONFIG_PM */

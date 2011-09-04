@@ -2051,3 +2051,4 @@
 	  -print-libgcc-file-name.
 	* lib/time/lib_gmtimer.c:  Correct several calculations that could lead
 	  to errors in dates.
+	* drivers/pm: Add the beginnings of a NuttX power management sub-system.

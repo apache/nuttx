@@ -1,7 +1,7 @@
 /****************************************************************************
- * up_head.c
+ * drivers/pm/pm_initialize.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,53 +39,74 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <setjmp.h>
-#include <assert.h>
+#include <semaphore.h>
 
-#include <nuttx/init.h>
-#include <nuttx/arch.h>
 #include <nuttx/pm.h>
+
+#include "pm_internal.h"
+
+#ifdef CONFIG_PM
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static jmp_buf sim_abort;
-
 /****************************************************************************
- * Global Functions
+ * Public Data
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+/* All PM global data: */
+
+struct pm_global_s g_pmglobals;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pm_initialize
+ *
+ * Description:
+ *   This function is called by MCU-specific one-time at power on reset in
+ *   order to initialize the power management capabilities.  This function
+ *   must be called *very* early in the intialization sequence *before* any
+ *   other device drivers are initialize (since they may attempt to register
+ *   with the power management subsystem).
+ *
+ * Input parameters:
+ *   None.
+ *
+ * Returned value:
+ *    None.
+ *
+ ****************************************************************************/
+
+void pm_initialize(void)
 {
-  /* Power management should be initialized early in the (simulated) boot
-   * sequence.
+  /* Initialize the registry and the PM global data structures.  The PM
+   * global data structure resides in .bss which is zeroed at boot time.  So
+   * it is only required to initialize non-zero elements of the PM global
+   * data structure here.
    */
 
-#ifdef CONFIG_PM
-  pm_initialize();
-#endif
-
-  /* Then start NuttX */
-
-  if (setjmp(sim_abort) == 0)
-    {
-      os_start();
-    }
-  return 0;
+  sq_init(&g_pmglobals.registry);
+  sem_init(&g_pmglobals.regsem, 0, 1);
 }
 
-void up_assert(const uint8_t *filename, int line)
-{
-  fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
-  longjmp(sim_abort, 1);
-}
-
-void up_assert_code(const uint8_t *filename, int line, int code)
-{
-  fprintf(stderr, "Assertion failed at file:%s line: %d error code: %d\n", filename, line, code);
-  longjmp(sim_abort, 1);
-}
+#endif /* CONFIG_PM */

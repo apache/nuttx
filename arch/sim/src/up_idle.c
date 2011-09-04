@@ -40,7 +40,10 @@
 #include <nuttx/config.h>
 
 #include <time.h>
+
 #include <nuttx/arch.h>
+#include <nuttx/pm.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -101,6 +104,24 @@ void up_idle(void)
 
 #ifdef CONFIG_NET
   uipdriver_loop();
+#endif
+
+  /* Fake some power management stuff for testing purposes */
+
+#ifdef CONFIG_PM
+  {
+    static enum pm_state_e state = PM_NORMAL;
+    enum pm_state_e newstate;
+
+    newstate = pm_checkstate();
+    if (newstate != state)
+      {
+        if (pm_changestate(newstate) == OK)
+          {
+            state = newstate;
+          }
+      }
+  }
 #endif
 
   /* Wait a bit so that the sched_process_timer() is called close to the
