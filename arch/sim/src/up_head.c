@@ -47,6 +47,7 @@
 
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
+#include <nuttx/pm.h>
 
 /****************************************************************************
  * Private Data
@@ -60,6 +61,16 @@ static jmp_buf sim_abort;
 
 int main(int argc, char **argv, char **envp)
 {
+  /* Power management should be initialized early in the (simulated) boot
+   * sequence.
+   */
+
+#ifdef CONFIG_PM
+  pm_initialize();
+#endif
+
+  /* Then start NuttX */
+
   if (setjmp(sim_abort) == 0)
     {
       os_start();
