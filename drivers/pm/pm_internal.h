@@ -118,7 +118,7 @@ struct pm_global_s
    * thrcnt - The number of below threshold counts seen.
    */
 
-  uint16_t accum;
+  int16_t accum;
   uint16_t thrcnt;
 
   /* This is the averaging "memory."  The averaging algorithm is simply:
@@ -131,7 +131,7 @@ struct pm_global_s
    */
 
 #if CONFIG_PM_MEMORY > 1
-  uint16_t memory[CONFIG_PM_MEMORY-1];
+  int16_t memory[CONFIG_PM_MEMORY-1];
 #endif
 
   /* stime - The time (in ticks) at the start of the current time slice */
@@ -199,7 +199,7 @@ EXTERN struct pm_global_s g_pmglobals;
  *
  ****************************************************************************/
 
-EXTERN void pm_update(uint16_t accum);
+EXTERN void pm_update(int16_t accum);
 
 #undef EXTERN
 #if defined(__cplusplus)

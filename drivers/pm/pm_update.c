@@ -68,7 +68,7 @@
  */
 
 #if CONFIG_PM_MEMORY > 1
-static const uint16_t g_pmcoeffs[CONFIG_PM_MEMORY-1] =
+static const int16_t g_pmcoeffs[CONFIG_PM_MEMORY-1] =
 {
   CONFIG_PM_COEF1
 #if CONFIG_PM_MEMORY > 2
@@ -89,12 +89,31 @@ static const uint16_t g_pmcoeffs[CONFIG_PM_MEMORY-1] =
 };
 #endif
 
-static const uint16_t g_pmthresh[3] =
+/* Threshold activity values to enter into the next lower power consumption
+ * state. Indexing is next state 0:IDLE, 1:STANDBY, 2:SLEEP.
+ */
+ 
+static const int16_t g_pmenterthresh[3] =
 {
   CONFIG_PM_IDLEENTER_THRESH,
   CONFIG_PM_STANDBYENTER_THRESH,
   CONFIG_PM_SLEEPENTER_THRESH
 };
+
+/* Threshold activity values to leave the current low power consdumption
+ * state. Indexing is current state 0:IDLE, 1: STANDBY, 2: SLEEP.
+ */
+
+static const int16_t g_pmexitthresh[3] =
+{
+  CONFIG_PM_IDLEEXIT_THRESH,
+  CONFIG_PM_STANDBYEXIT_THRESH,
+  CONFIG_PM_SLEEPEXIT_THRESH
+};
+
+/* Threshold time slice count to enter the next low power consdumption
+ * state. Indexing is next state 0:IDLE, 1: STANDBY, 2: SLEEP.
+ */
 
 static const uint16_t g_pmcount[3] =
 {
@@ -132,11 +151,12 @@ static const uint16_t g_pmcount[3] =
 
 void pm_worker(FAR void *arg)
 {
-  uint16_t accum = (uint16_t)((uintptr_t)arg);
-  uint32_t Y;
+  int16_t accum = (int16_t)((intptr_t)arg);
+  int32_t Y;
+  int index;
 
 #if CONFIG_PM_MEMORY > 1
-  uint32_t denom;
+  int32_t denom;
   int i, j;
 
   /* We won't bother to do anything until we have accumulated
@@ -197,18 +217,43 @@ void pm_worker(FAR void *arg)
 
 #endif
 
+  /* First check if increased activity should cause us to return to the
+   * normal operating state.  This would be unlikely for the lowest power
+   * consumption states because the CPU is probably asleep.  However this
+   * probably does apply for the IDLE state.
+   */
+
+  if (g_pmglobals.state > PM_NORMAL)
+    {
+      /* Get the table index for the current state (which will be the
+       * current state minus one)
+       */
+
+      index = g_pmglobals.state - 1;
+
+      /* Has the threshold to return to normal power consumption state been
+       * exceeded?
+       */
+
+      if (Y > g_pmexitthresh[index])
+        {
+          /* Yes... reset the count and recommend the normal state. */
+
+          g_pmglobals.thrcnt = 0;
+          g_pmglobals.recommended = PM_NORMAL;
+          return;
+        }
+    }
+
   /* Now, compare this new activity level to the thresholds and counts for
-   * the next state.  Determine if it is appropriate to switch to a new,
-   * lower power consumption state.
-   *
-   * If we are already in the SLEEP state, then there is nothing more to be
-   * done (in fact, I would be surprised to be executing!).
+   * the next lower power consumption state. If we are already in the SLEEP
+   * state, then there is nothing more to be done (in fact, I would be
+   * surprised to be executing!).
    */
 
   if (g_pmglobals.state < PM_SLEEP)
     {
       unsigned int nextstate;
-      int index;
 
       /* Get the next state and the table index for the next state (which will
        * be the current state)
@@ -217,14 +262,16 @@ void pm_worker(FAR void *arg)
       index     = g_pmglobals.state;
       nextstate = g_pmglobals.state + 1;
 
-      /* Has the threshold for the next state been exceeded? */
+      /* Has the threshold to enter the next lower power consumption state
+       * been exceeded?
+       */
 
-      if (Y > g_pmthresh[index])
+      if (Y > g_pmenterthresh[index])
         {
           /* No... reset the count and recommend the current state */
 
           g_pmglobals.thrcnt      = 0;
-          g_pmglobals.recommended = g_pmglobals.state;          
+          g_pmglobals.recommended = g_pmglobals.state;
         }
 
       /* Yes.. have we already recommended this state? If so, do nothing */
@@ -276,12 +323,12 @@ void pm_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-void pm_update(uint16_t accum)
+void pm_update(int16_t accum)
 {
   /* The work will be performed on the worker thread */
 
   DEBUGASSERT(g_pmglobals.work.worker == NULL);
-  (void)work_queue(&g_pmglobals.work, pm_worker, (FAR void*)((uintptr_t)accum), 0);
+  (void)work_queue(&g_pmglobals.work, pm_worker, (FAR void*)((intptr_t)accum), 0);
 }
 
 #endif /* CONFIG_PM */

@@ -93,7 +93,8 @@
 
 /* The averaging algorithm is simply: Y = (An*X + SUM(Ai*Yi))/SUM(Aj), where
  * i = 1..n-1 and j= 1..n, n is the length of the "memory", Ai is the
- * weight applied to each value, and X is the current activity.
+ * weight applied to each value, and X is the current activity.  These weights
+ * may be negative and a limited to the range of int16_t.
  *
  * CONFIG_PM_MEMORY provides the memory for the algorithm.  Default: 2
  * CONFIG_PM_COEFn provides weight for each sample.  Default: 1
@@ -149,7 +150,15 @@
  */
 
 #ifndef CONFIG_PM_IDLEENTER_THRESH
-#  define CONFIG_PM_IDLEENTER_THRESH    1   /* Essentially no activity */
+#  define CONFIG_PM_IDLEENTER_THRESH    1   /* <=1: Essentially no activity */
+#endif
+
+#ifndef CONFIG_PM_IDLEEXIT_THRESH
+#  define CONFIG_PM_IDLEEXIT_THRESH     2   /* >=2: Active */
+#endif
+
+#if CONFIG_PM_IDLEENTER_THRESH >= CONFIG_PM_IDLEEXIT_THRESH
+#  error "Must have CONFIG_PM_IDLEENTER_THRESH < CONFIG_PM_IDLEEXIT_THRESH
 #endif
 
 #ifndef CONFIG_PM_IDLEENTER_COUNT
@@ -159,7 +168,15 @@
 #endif
 
 #ifndef CONFIG_PM_STANDBYENTER_THRESH
-#  define CONFIG_PM_STANDBYENTER_THRESH 1   /* Essentially no activity */
+#  define CONFIG_PM_STANDBYENTER_THRESH 1   /*  <=1: Essentially no activity */
+#endif
+
+#ifndef CONFIG_PM_STANDBYEXIT_THRESH
+#  define CONFIG_PM_STANDBYEXIT_THRESH  2   /* >=2: Active */
+#endif
+
+#if CONFIG_PM_STANDBYENTER_THRESH >= CONFIG_PM_STANDBYEXIT_THRESH
+#  error "Must have CONFIG_PM_STANDBYENTER_THRESH < CONFIG_PM_STANDBYEXIT_THRESH
 #endif
 
 #ifndef CONFIG_PM_STANDBYENTER_COUNT
@@ -169,7 +186,15 @@
 #endif
 
 #ifndef CONFIG_PM_SLEEPENTER_THRESH
-#  define CONFIG_PM_SLEEPENTER_THRESH   1   /* Essentially no activity */
+#  define CONFIG_PM_SLEEPENTER_THRESH   1   /*  <=1: Essentially no activity */
+#endif
+
+#ifndef CONFIG_PM_SLEEPEXIT_THRESH
+#  define CONFIG_PM_SLEEPEXIT_THRESH    2   /* >=2: Active */
+#endif
+
+#if CONFIG_PM_SLEEPENTER_THRESH >= CONFIG_PM_SLEEPEXIT_THRESH
+#  error "Must have CONFIG_PM_SLEEPENTER_THRESH < CONFIG_PM_SLEEPEXIT_THRESH
 #endif
 
 #ifndef CONFIG_PM_SLEEPENTER_COUNT

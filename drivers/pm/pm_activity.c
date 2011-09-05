@@ -120,14 +120,14 @@ void pm_activity(int priority)
 
       /* Make sure that we do not overflow the underlying uint16_t representation */
 
-      if (accum > UINT16_MAX)
+      if (accum > INT16_MAX)
         {
-          accum = UINT16_MAX;
+          accum = INT16_MAX;
         }
 
       /* Save the updated count */
 
-      g_pmglobals.accum = accum;
+      g_pmglobals.accum = (int16_t)accum;
 
       /* Check the elapsed time.  In periods of low activity, time slicing is
        * controlled by IDLE loop polling; in periods of higher activity, time
@@ -140,7 +140,7 @@ void pm_activity(int priority)
       now = clock_systimer();
       if (now - g_pmglobals.stime >= TIME_SLICE_TICKS)
         {
-          uint16_t tmp;
+          int16_t tmp;
 
           /* Sample the count, reset the time and count, and assess the PM
            * state.  This is an atomic operation because interrupts are

@@ -129,7 +129,7 @@ enum pm_state_e pm_checkstate(void)
    now = clock_systimer();
    if (now - g_pmglobals.stime >= TIME_SLICE_TICKS)
     {
-      uint16_t accum;
+      int16_t accum;
 
        /* Sample the count, reset the time and count, and assess the PM
         * state.  This is an atomic operation because interrupts are
