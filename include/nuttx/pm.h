@@ -458,5 +458,22 @@ EXTERN int pm_changestate(enum pm_state_e newstate);
 #endif
 
 #endif /* __ASSEMBLY__ */
+
+/****************************************************************************
+ * Stubs
+ ****************************************************************************/
+
+#else /* CONFIG_PM */
+
+/* Stubbed out versions of all of PM interface functions that may be used to
+ * avoid so much conditional compilation in driver code when PM is disabled:
+ */
+
+#  define pm_initialize()
+#  define pm_register(cb)       (0)
+#  define pm_activity(prio)
+#  define pm_checkstate()       (0)
+#  define pm_changestate(state)
+
 #endif /* CONFIG_PM */
 #endif /* __INCLUDE_NUTTX_PM_H */

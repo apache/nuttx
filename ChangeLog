@@ -2052,3 +2052,8 @@
 	* lib/time/lib_gmtimer.c:  Correct several calculations that could lead
 	  to errors in dates.
 	* drivers/pm: Add the beginnings of a NuttX power management sub-system.
+	* arch/arm/src/stm32/stm32_irq.c:  Fix a error introduced in 6.8.
+	  Timeout calculation uses clock_settime() instead of clock_gettime().
+	  Pretty gross error, but actually it works with the side effect of setting
+	  a bad time.
+

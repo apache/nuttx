@@ -200,7 +200,7 @@ int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
   flags = irqsave();
   do
     {
-      (void)clock_settime(CLOCK_REALTIME, &abstime);
+      (void)clock_gettime(CLOCK_REALTIME, &abstime);
       abstime.tv_nsec += CONFIG_STM32_I2CTIMEOMS * 1000 * 1000;
       if (abstime.tv_nsec > 1000 * 1000 * 1000)
         {
