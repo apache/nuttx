@@ -2056,4 +2056,7 @@
 	  Timeout calculation uses clock_settime() instead of clock_gettime().
 	  Pretty gross error, but actually it works with the side effect of setting
 	  a bad time.
-
+	* drivers/mtd/at24xx.c: Driver for I2C-based at24cxx EEPROM submitted by
+	  Li Zhuoyi (Lzyy).
+	* arch/arm/src/lpc17xx/lpc17_i2c.c: I2C driver for the NXP LPC17xx family
+	  submitted by Li Zhuoyi (Lzyy)

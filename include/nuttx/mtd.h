@@ -196,6 +196,18 @@ EXTERN FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
 
 EXTERN FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *dev);
 
+/****************************************************************************
+ * Name: at24c_initialize
+ *
+ * Description:
+ *   Create an initialize MTD device instance.  MTD devices are not registered
+ *   in the file system, but are created as instances that can be bound to
+ *   other functions (such as a block or character driver front end).
+ *
+ ****************************************************************************/
+
+EXTERN FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
