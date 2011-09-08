@@ -176,7 +176,7 @@
 
 /* APB2 Peripheral reset register */
 
-#define RCC_APB2RSTR_AFIORST        (1 << 0) /* Bit 0: Alternate Function I/O reset */
+#define RCC_APB2RSTR_AFIORST        (1 << 0)  /* Bit 0: Alternate Function I/O reset */
 #define RCC_APB2RSTR_IOPARST        (1 << 2)  /* Bit 2: I/O port A reset */
 #define RCC_APB2RSTR_IOPBRST        (1 << 3)  /* Bit 3: IO port B reset */
 #define RCC_APB2RSTR_IOPCRST        (1 << 4)  /* Bit 4: IO port C reset */
