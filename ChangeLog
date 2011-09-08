@@ -2060,3 +2060,7 @@
 	  Li Zhuoyi (Lzyy).
 	* arch/arm/src/lpc17xx/lpc17_i2c.c: I2C driver for the NXP LPC17xx family
 	  submitted by Li Zhuoyi (Lzyy)
+	* arch/arm/src/stm32_i2c.c:  Correct two issues with the STM32 I2C driver:
+	  (1) Clocking needs to be based on PCLK1, not HCLK and fast speed settings
+	  need some additional bits; and (2) Correct a hang that will occur on
+	  I2C1 if FSMC is also enabled.

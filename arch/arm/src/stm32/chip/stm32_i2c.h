@@ -82,7 +82,7 @@
 
 /* Control register 1 */
 
-#define I2C_CR1_PE              (1 << 0)  /* Bit 0: Peripheral Enable*/
+#define I2C_CR1_PE              (1 << 0)  /* Bit 0: Peripheral Enable */
 #define I2C_CR1_SMBUS           (1 << 1)  /* Bit 1: SMBus Mode */
 #define I2C_CR1_SMBTYPE         (1 << 3)  /* Bit 3: SMBus Type */
 #define I2C_CR1_ENARP           (1 << 4)  /* Bit 4: ARP Enable */
@@ -167,7 +167,7 @@
 #define I2C_CCR_CCR_SHIFT       (0)       /* Bits 11-0: Clock Control Register in Fast/Standard mode (Master mode) */
 #define I2C_CCR_CCR_MASK        (0x0fff << I2C_CCR_CCR_SHIFT)
 #define I2C_CCR_DUTY            (1 << 14) /* Bit 14: Fast Mode Duty Cycle */
-#define I2C_CCR_FS              (1 << 15) /* Bit 15: I2C Master Mode Selection */
+#define I2C_CCR_FS              (1 << 15) /* Bit 15: Fast Mode Selection */
 
 /* TRISE Register */
 
