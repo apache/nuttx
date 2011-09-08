@@ -88,7 +88,7 @@
  *   *JP7 will switch to PD6
  */
 
-/* GPIO configurations unique to SRAM  */
+/* GPIO configurations unique to the LCD  */
 
 static const uint16_t g_lcdconfig[] =
 {

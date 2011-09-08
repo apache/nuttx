@@ -360,6 +360,12 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_STM32_USART1
 	CONFIG_STM32_ADC3
 
+  Timer and I2C devices may need to the following to force power to be applied
+  unconditionally at power up.  (Otherwise, the device is powered when it is
+  initialized).
+
+    CONFIG_STM32_FORCEPOWER
+
   Alternate pin mappings (should not be used with the STM3210E-EVAL board):
 
 	CONFIG_STM32_TIM1_FULL_REMAP
