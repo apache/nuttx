@@ -109,6 +109,21 @@
 #  define CONFIG_STM32_I2CTIMEOMS   0     /* User provided seconds */
 #endif
 
+/* Debug ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_I2C
+#  define i2cdbg dbg
+#  ifdef CONFIG_DEBUG_I2CINTS
+#    define intdbg lldbg
+#  else
+#    define intdbg(x...)
+#  endif
+#else
+#  undef CONFIG_DEBUG_I2CINTS
+#  define i2cdbg(x...)
+#  define intdbg(x...)
+#endif
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -220,9 +235,17 @@ int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
   FAR struct stm32_i2c_priv_s *priv = ((struct stm32_i2c_inst_s *)dev)->priv;
   struct timespec abstime;
   irqstate_t flags;
+  uint32_t regval;
   int ret;
 
   flags = irqsave();
+
+  /* Enable I2C interrupts */
+
+  regval  = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
+  regval |= (I2C_CR2_ITERREN | I2C_CR2_ITEVFEN);
+  stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
+
   do
     {
       /* Get the current time */
@@ -250,6 +273,11 @@ int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
     }
   while (ret != OK && errno == EINTR);
 
+  /* Disable I2C interrupts */
+
+  regval  = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
+  regval &= ~I2C_CR2_ALLINTS;
+  stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
   irqrestore(flags);
   return ret;
 }
@@ -437,21 +465,18 @@ static inline void stm32_i2c_enablefsmc(uint32_t ahbenr)
  * Interrupt Service Routines
  ************************************************************************************/
 
-//DEBUG TO BE CLEANED
-//#define NON_ISR
-
 static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 {
   uint32_t status = stm32_i2c_getstatus(priv);
 
-#ifdef NON_ISR
+#ifdef CONFIG_DEBUG_I2CINTS
   static uint32_t isr_count = 0;
   static uint32_t old_status = 0xFFFF;
   isr_count++;
 
   if (old_status != status)
     {
-        printf("status = %8x, count=%d\n", status, isr_count); fflush(stdout);
+        intdbg("status = %8x, count=%d\n", status, isr_count); fflush(stdout);
         old_status = status;
     }
 #endif
@@ -501,9 +526,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
       if (--priv->dcnt >= 0)
         {
           /* Send a byte */
-#ifdef NON_ISR
-          printf("Send byte: %2x\n", *priv->ptr);
-#endif
+
+          intdbg("Send byte: %2x\n", *priv->ptr);
           stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET, *priv->ptr++); 
         }
     }
@@ -521,15 +545,12 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
     {
       /* Read a byte, if dcnt goes < 0, then read dummy bytes to ack ISRs */
     
-#ifdef NON_ISR
-      printf("dcnt=%d\n", priv->dcnt);
-#endif
+      intdbg("dcnt=%d\n", priv->dcnt);
       if (--priv->dcnt >= 0)
         {
           *priv->ptr++ = stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);
-#ifdef NON_ISR
-          printf("Received: %2x\n", *(priv->ptr-1) );
-#endif
+          intdbg("Received: %2x\n", *(priv->ptr-1) );
+
           /* Disable acknowledge when last byte is to be received */
 
           if (priv->dcnt == 1)
@@ -556,9 +577,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 
   if (priv->dcnt<=0 && (status & I2C_SR1_BTF))
     {
-#ifdef NON_ISR
-      printf("BTF\n");
-#endif
+      intdbg("BTF\n");
       stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);    /* ACK ISR */
 
       /* Do we need to terminate or restart after this byte */
@@ -590,9 +609,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
         }
       else if (priv->msgv)
         {
-#ifdef NON_ISR
-          printf("stop2: status = %8x\n", status);
-#endif
+          intdbg("stop2: status = %8x\n", status);
           stm32_i2c_sendstop(priv);
           if (priv->isr_wait)
             {
@@ -674,7 +691,7 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
             return ERROR;
           }
 
-        /* attach ISRs */
+        /* Attach ISRs */
             
         irq_attach(STM32_IRQ_I2C1EV, stm32_i2c1_isr);
         irq_attach(STM32_IRQ_I2C1ER, stm32_i2c1_isr);
@@ -719,17 +736,11 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
         return ERROR;
     }
 
-  /* Set peripheral frequency, where it must be at least 2 MHz 
-   * for 100 kHz or 4 MHz for 400 kHz. Enable interrupt generation.
+  /* Set peripheral frequency, where it must be at least 2 MHz  for 100 kHz
+   * or 4 MHz for 400 kHz.  This also disables all I2C interrupts.
    */
 
-  stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET,
-#ifndef NON_ISR
-                   I2C_CR2_ITERREN | I2C_CR2_ITEVFEN | // I2C_CR2_ITBUFEN |
-#endif
-                   (STM32_PCLK1_FREQUENCY / 1000000) 
-                   );
-    
+  stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, (STM32_PCLK1_FREQUENCY / 1000000));
   stm32_i2c_setclock(priv, 100000);
         
   /* Enable I2C */
@@ -824,7 +835,7 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
 
   ahbenr = stm32_i2c_disablefsmc(inst->priv);
 
-  /* wait as stop might still be in progress 
+  /* Wait as stop might still be in progress 
    * 
    * \todo GET RID OF THIS PERFORMANCE LOSS and for() loop
    */
@@ -839,27 +850,20 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
   inst->priv->msgv = msgs;
   inst->priv->msgc = count;
         
-  /* Set clock (on change it toggles I2C_CR1_PE !) */
+  /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !) */
 
   stm32_i2c_setclock(inst->priv, inst->frequency);
 
-  /* Trigger start condition, then the process moves into the ISR */
+  /* Clear any pending error interrupts */
+
+  stm32_i2c_putreg(inst->priv, STM32_I2C_SR1_OFFSET, 0);
+
+  /* Trigger start condition, then the process moves into the ISR.  I2C
+   * interrupts will be enabled within stm32_i2c_waitisr().
+   */
 
   stm32_i2c_sendstart(inst->priv);
 
-#ifdef NON_ISR   
-    do
-      {
-        do
-          {
-            stm32_i2c_isr(&stm32_i2c1_priv);
-            status = inst->priv->status;
-          }
-        while (status & (I2C_SR2_BUSY << 16));
-    } 
-  while( sem_trywait( &((struct stm32_i2c_inst_s *)dev)->priv->sem_isr ) != 0 );
-#else
-#if 1
   /* Wait for an ISR, if there was a timeout, fetch latest status to get
    * the BUSY flag.
    */
@@ -883,14 +887,8 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
 
       status = inst->priv->status & 0xffff;
     }
-#else
-  do
-    {
-      printf("%x, %d\n", inst->priv->status, isr_count );
-    } 
-  while( sem_trywait( &inst->priv->sem_isr ) != 0 );
-#endif
-#endif
+
+  /* Check for error status conditions */
 
   if (status & I2C_SR1_BERR)
     {
