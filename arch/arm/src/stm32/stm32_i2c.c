@@ -127,6 +127,14 @@
 /************************************************************************************
  * Private Types
  ************************************************************************************/
+/* Interrupt state */
+
+enum stm32_intstate_e
+{
+  INTSTATE_IDLE = 0,      /* No I2C activity */
+  INTSTATE_WAITING,       /* Waiting for completion of interrupt activity */
+  INTSTATE_DONE,          /* Interrupt activity complete */
+};
 
 /* I2C Device Private Data */
 
@@ -136,7 +144,7 @@ struct stm32_i2c_priv_s
   int         refs;        /* Referernce count */
   sem_t       sem_excl;    /* Mutual exclusion semaphore */
   sem_t       sem_isr;     /* Interrupt wait semaphore */
-  volatile bool isr_wait;  /* Handshake to ignore unexpected interrupts */
+  volatile uint8_t intstate;  /* Interrupt handshake (see enum stm32_intstate_e) */
     
   uint8_t     msgc;        /* Message count */
   struct i2c_msg_s *msgv;  /* Message list */
@@ -154,9 +162,9 @@ struct stm32_i2c_inst_s
   struct i2c_ops_s        *ops;  /* Standard I2C operations */
   struct stm32_i2c_priv_s *priv; /* Common driver private data structure */
     
-  uint32_t    frequency;         /* Frequency used in this instantiation */
-  int         address;           /* Address used in this instantiation */
-  uint16_t    flags;             /* Flags used in this instantiation */
+  uint32_t    frequency;   /* Frequency used in this instantiation */
+  int         address;     /* Address used in this instantiation */
+  uint16_t    flags;       /* Flags used in this instantiation */
 };
 
 /************************************************************************************
@@ -168,7 +176,7 @@ struct stm32_i2c_priv_s stm32_i2c1_priv =
 {
   .base       = STM32_I2C1_BASE,
   .refs       = 0,
-  .isr_wait   = false,
+  .intstate   = INTSTATE_IDLE,
   .msgc       = 0,
   .msgv       = NULL,
   .ptr        = NULL,
@@ -183,7 +191,7 @@ struct stm32_i2c_priv_s stm32_i2c2_priv =
 {
   .base       = STM32_I2C2_BASE,
   .refs       = 0,
-  .isr_wait   = false,
+  .intstate   = INTSTATE_IDLE,
   .msgc       = 0,
   .msgv       = NULL,
   .ptr        = NULL,
@@ -246,7 +254,13 @@ int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
   regval |= (I2C_CR2_ITERREN | I2C_CR2_ITEVFEN);
   stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
 
-  do
+  /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
+   * are currently disabled but will be temporarily re-enabled below when
+   * sem_timedwait() sleeps.
+   */
+
+   priv->intstate = INTSTATE_WAITING;
+   do
     {
       /* Get the current time */
 
@@ -267,17 +281,32 @@ int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
 #endif
       /* Wait until either the transfer is complete or the timeout expires */
 
-      priv->isr_wait = true;
       ret = sem_timedwait(&priv->sem_isr, &abstime);
-      priv->isr_wait = false;
-    }
-  while (ret != OK && errno == EINTR);
+      if (ret != OK && errno != EINTR)
+        {
+          /* Break out of the loop on irrecoverable errors.  This would
+           * include timeouts and mystery errors reported by sem_timedwait.
+           * NOTE that we try again if we are awakened by a signal (EINTR).
+           */
 
-  /* Disable I2C interrupts */
+          break;
+        }
+    }
+
+  /* Loop until the interrupt level transfer is complete. */
+
+  while (priv->intstate != INTSTATE_DONE);
+
+  /* Set the interrupt state back to IDLE */
+
+  priv->intstate = INTSTATE_IDLE;
+
+  /* Re-enable I2C interrupts */
 
   regval  = stm32_i2c_getreg(priv, STM32_I2C_CR2_OFFSET);
   regval &= ~I2C_CR2_ALLINTS;
   stm32_i2c_putreg(priv, STM32_I2C_CR2_OFFSET, regval);
+
   irqrestore(flags);
   return ret;
 }
@@ -471,7 +500,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 
 #ifdef CONFIG_DEBUG_I2CINTS
   static uint32_t isr_count = 0;
-  static uint32_t old_status = 0xFFFF;
+  static uint32_t old_status = 0xffff;
   isr_count++;
 
   if (old_status != status)
@@ -483,7 +512,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
             
   /* Was start bit sent */
     
-  if (status & I2C_SR1_SB)
+  if ((status & I2C_SR1_SB) != 0)
     {
       /* Get run-time data */
 
@@ -495,13 +524,11 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 
       stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET,
                       (priv->flags & I2C_M_TEN) ?
-                       0 :
-                      ((priv->msgv->addr << 1) | (priv->flags & I2C_M_READ))
-                      );
+                       0 : ((priv->msgv->addr << 1) | (priv->flags & I2C_M_READ)));
 
       /* Set ACK for receive mode */
 
-      if (priv->dcnt > 1 && (priv->flags & I2C_M_READ) )
+      if (priv->dcnt > 1 && (priv->flags & I2C_M_READ) != 0)
         {
           stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_ACK);
         }
@@ -514,14 +541,14 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 
  /* In 10-bit addressing mode, was first byte sent */
     
-  else if (status & I2C_SR1_ADD10)
+  else if ((status & I2C_SR1_ADD10) != 0)
     {
       /* \todo Finish 10-bit mode addressing */
     }
 
   /* Was address sent, continue with ether sending or reading data */
     
-  else if (!(priv->flags & I2C_M_READ) && (status & (I2C_SR1_ADDR | I2C_SR1_TXE)))
+  else if ((priv->flags & I2C_M_READ) == 0 && (status & (I2C_SR1_ADDR | I2C_SR1_TXE)) != 0)
     {
       if (--priv->dcnt >= 0)
         {
@@ -532,7 +559,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
         }
     }
 
-  else if ((priv->flags & I2C_M_READ) && (status & I2C_SR1_ADDR))
+  else if ((priv->flags & I2C_M_READ) != 0 && (status & I2C_SR1_ADDR) != 0)
     {
       /* Enable RxNE and TxE buffers in order to receive one or multiple bytes */
 
@@ -541,7 +568,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 
   /* More bytes to read */
 
-  else if (status & I2C_SR1_RXNE)
+  else if ((status & I2C_SR1_RXNE) != 0)
     {
       /* Read a byte, if dcnt goes < 0, then read dummy bytes to ack ISRs */
     
@@ -564,31 +591,31 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
    * (these ISRs could be replaced by DMAs)
    */
      
-  if (priv->dcnt>0)
+  if (priv->dcnt > 0)
     {
       stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_ITBUFEN);
     }
-  else if (priv->dcnt==0)
+  else if (priv->dcnt == 0)
     {
       stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_ITBUFEN, 0);  
     }
     
   /* Was last byte received or sent?  */
 
-  if (priv->dcnt<=0 && (status & I2C_SR1_BTF))
+  if (priv->dcnt <= 0 && (status & I2C_SR1_BTF) != 0)
     {
       intdbg("BTF\n");
       stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);    /* ACK ISR */
 
-      /* Do we need to terminate or restart after this byte */
-        
-      /* If there are more messages to send, then we may:
+      /* Do we need to terminate or restart after this byte?
+       * If there are more messages to send, then we may:
+       *
        *  - continue with repeated start
        *  - or just continue sending writeable part
        *  - or we close down by sending the stop bit 
        */
 
-      if (priv->msgc)
+      if (priv->msgc > 0)
         {
           if (priv->msgv->flags & I2C_M_NORESTART)
             {
@@ -611,10 +638,17 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
         {
           intdbg("stop2: status = %8x\n", status);
           stm32_i2c_sendstop(priv);
-          if (priv->isr_wait)
+
+          /* Is there a thread waiting for this event (there should be) */
+
+          if (priv->intstate == INTSTATE_WAITING)
             {
+              /* Yes.. inform the thread that the transfer is complete
+               * and wake it up.
+               */
+
               sem_post( &priv->sem_isr );
-              priv->isr_wait = false;
+              priv->intstate = INTSTATE_DONE;
             }
 
           /* Mark that we have stopped with this transaction */
@@ -628,12 +662,22 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
      * since ACK is not returned. We should ignore this error.
      */
     
-    if (status & I2C_SR1_ERRORMASK) {
-        stm32_i2c_putreg(priv, STM32_I2C_SR1_OFFSET, 0);    /* clear flags */
-        if (priv->isr_wait)
+    if ((status & I2C_SR1_ERRORMASK) != 0)
+      {
+        /* Clear interrupt flags */
+
+        stm32_i2c_putreg(priv, STM32_I2C_SR1_OFFSET, 0);
+
+        /* Is there a thread waiting for this event (there should be) */
+
+        if (priv->intstate == INTSTATE_WAITING)
           {
+              /* Yes.. inform the thread that the transfer is complete
+               * and wake it up.
+               */
+
             sem_post( &priv->sem_isr );
-            priv->isr_wait = false;
+            priv->intstate = INTSTATE_DONE;
           }
     }
 
@@ -926,11 +970,27 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
 
       status_errno = ETIME;
     }
+
+  /* This is not an error, but should not happen.  The BUSY signal can hang,
+   * however, if there are unhealthy devices on the bus that need to be reset.
+   */
+
   else if (status & (I2C_SR2_BUSY << 16))
     {
       /* I2C Bus is for some reason busy */
 
       status_errno = EBUSY;
+    }
+
+  /* This is not an error and should never happen since SMBus is not enabled */
+
+  else if (status & I2C_SR1_SMBALERT)
+    {
+      /* SMBus alert is an optional signal with an interrupt line for devices
+       * that want to trade their ability to master for a pin.
+       */
+
+      status_errno = EINTR;
     }
 
   /* Re-enable the FSMC */
