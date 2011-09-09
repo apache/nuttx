@@ -107,6 +107,8 @@
 #define I2C_CR2_DMAEN           (1 << 11) /* Bit 11: DMA Requests Enable */
 #define I2C_CR2_LAST            (1 << 12) /* Bit 12: DMA Last Transfer */
 
+#define I2C_CR2_ALLINTS         (I2C_CR2_ITERREN|I2C_CR2_ITEVFEN|I2C_CR2_ITBUFEN)
+
 /* Own address register 1 */
 
 #define I2C_OAR1_ADD0           (1 << 0)  /* Bit 0: Interface Address */
