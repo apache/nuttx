@@ -390,7 +390,7 @@ static inline uint32_t stm32_i2c_disablefsmc(FAR struct stm32_i2c_priv_s *priv)
       regval = ret & ~RCC_AHBENR_FSMCEN;
       putreg32(regval, STM32_RCC_AHBENR);
     }
-  return regval;
+  return ret;
 }
 
 static inline void stm32_i2c_enablefsmc(uint32_t ahbenr)
