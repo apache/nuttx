@@ -934,41 +934,55 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
 
   /* Check for error status conditions */
 
-  if (status & I2C_SR1_BERR)
+  if ((status & I2C_SR1_ERRORMASK) != 0)
     {
-      /* Bus Error */
+      if (status & I2C_SR1_BERR)
+        {
+          /* Bus Error */
 
-      status_errno = EIO;
-    }
-  else if (status & I2C_SR1_ARLO)
-    {
-      /* Arbitration Lost (master mode) */
+          status_errno = EIO;
+        }
+      else if (status & I2C_SR1_ARLO)
+        {
+          /* Arbitration Lost (master mode) */
 
-      status_errno = EAGAIN;
-    }
-  else if (status & I2C_SR1_AF)
-    {
-      /* Acknowledge Failure */
+          status_errno = EAGAIN;
+        }
+      else if (status & I2C_SR1_AF)
+        {
+          /* Acknowledge Failure */
 
-      status_errno = ENXIO;
-    }
-  else if (status & I2C_SR1_OVR)
-    {
-      /* Overrun/Underrun */
+          status_errno = ENXIO;
+        }
+      else if (status & I2C_SR1_OVR)
+        {
+          /* Overrun/Underrun */
 
-      status_errno = EIO;
-    }
-  else if (status & I2C_SR1_PECERR)
-    {
-      /* PEC Error in reception */
+          status_errno = EIO;
+        }
+      else if (status & I2C_SR1_PECERR)
+        {
+          /* PEC Error in reception */
 
-      status_errno = EPROTO;
-    }
-  else if (status & I2C_SR1_TIMEOUT)
-    {
-      /* Timeout or Tlow Error */
+          status_errno = EPROTO;
+        }
+      else if (status & I2C_SR1_TIMEOUT)
+        {
+          /* Timeout or Tlow Error */
 
-      status_errno = ETIME;
+          status_errno = ETIME;
+        }
+
+      /* This is not an error and should never happen since SMBus is not enabled */
+
+      else if (status & I2C_SR1_SMBALERT)
+        {
+          /* SMBus alert is an optional signal with an interrupt line for devices
+           * that want to trade their ability to master for a pin.
+           */
+
+          status_errno = EINTR;
+        }
     }
 
   /* This is not an error, but should not happen.  The BUSY signal can hang,
@@ -980,17 +994,6 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
       /* I2C Bus is for some reason busy */
 
       status_errno = EBUSY;
-    }
-
-  /* This is not an error and should never happen since SMBus is not enabled */
-
-  else if (status & I2C_SR1_SMBALERT)
-    {
-      /* SMBus alert is an optional signal with an interrupt line for devices
-       * that want to trade their ability to master for a pin.
-       */
-
-      status_errno = EINTR;
     }
 
   /* Re-enable the FSMC */
