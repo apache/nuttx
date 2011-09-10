@@ -1,12 +1,15 @@
-NuttX TODO List (Last updated August 24, 2011)
+NuttX TODO List (Last updated September 9, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This file summarizes known NuttX bugs, limitations, inconsistencies with 
+standards, things that could be improved, and ideas for enhancements.
 
 nuttx/
 
   (5)  Task/Scheduler (sched/)
   (1)  On-demand paging (sched/)
   (1)  Memory Managment (mm/)
-  (1)  Signals (sched/, arch/)
+  (2)  Signals (sched/, arch/)
   (1)  pthreads (sched/)
   (1)  C++ Support
   (5)  Binary loaders (binfmt/)
@@ -131,6 +134,13 @@ o Signals (sched/, arch/)
   Status:      Open
   Priority:    Low, required by standards but not so critical for an
                embedded system.
+
+  Description: sig_notify() logic does not support SIGEV_THREAD; structure
+               struct sigevent does not provide required members sigev_notify_function
+               or sigev_notify_attributes.
+  Status:      Low, there are alternative designs.  However, these features
+               are required by the POSIX standard.
+  Priority:    Low for now
 
 o pthreads (sched/)
   ^^^^^^^^^^^^^^^^^

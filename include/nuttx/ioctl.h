@@ -60,6 +60,7 @@
 #define _SIOCBASE       (0x8b00) /* Socket ioctl commands */
 #define _ARPBASE        (0x8c00) /* ARP ioctl commands */
 #define _TSBASE         (0x8d00) /* Touchscreen ioctl commands */
+#define _SNBASE         (0x8e00) /* Sensor ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -161,10 +162,15 @@
 #define _ARPIOCVALID(c)   (_IOC_TYPE(c)==_ARPBASE)
 #define _ARPIOC(nr)       _IOC(_ARPBASE,nr)
 
-/* NuttX ARP touchscrren ioctl definitions (see nuttx/input/touchscreen.h) **/
+/* NuttX ARP touchscreen ioctl definitions (see nuttx/input/touchscreen.h) **/
 
 #define _TSIOCVALID(c)    (_IOC_TYPE(c)==_TSBASE)
 #define _TSIOC(nr)        _IOC(_TSBASE,nr)
+
+/* NuttX ARP sensor ioctl definitions (see nuttx/sensor/*.h) ****************/
+
+#define _SNIOCVALID(c)    (_IOC_TYPE(c)==_SNBASE)
+#define _SNIOC(nr)        _IOC(_SNBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions

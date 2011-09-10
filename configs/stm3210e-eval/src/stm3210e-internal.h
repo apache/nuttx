@@ -62,7 +62,6 @@
 #endif
 
 /* STM3210E-EVAL GPIOs **************************************************************/
-
 /* LEDs */
 
 #define GPIO_LED1       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
@@ -106,6 +105,11 @@
 
 #define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTOD|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN14)
+
+/* LM-75 Temperature Sensor: PB.5 */
+
+#define GPIO_LM75_OSINT (GPIO_INPUT|GPIO_CNF_INPULLUP|GPIO_MODE_10MHz|\
+                         GPIO_EXTI|GPIO_PORTB|GPIO_PIN5)
 
 /************************************************************************************
  * Public Types
@@ -240,7 +244,8 @@ extern void stm32_deselectnor(void);
  ************************************************************************************/
 
 extern void stm32_selectsram(void);
-/************************************************************************************
+
+/************************************************************************************
  * Name: stm32_deselectsram
  *
  * Description:

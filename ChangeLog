@@ -2022,7 +2022,9 @@
 	* graphics/, include/nuttx/nx:  Add new NX interfaces for drawing
 	  circles -- both circular outlines and filled circles.
 	* graphic/nxglib/nxglib_spitline.c:  Add a "fudge factor" that eliminates
-	  some problems for rendering nearly horizontal, wide lines.
+	  some problems for rendering nearly horizontal, wide lines.  Hmm...
+	  but I suspect this fudge factor also leads to new problems rendering
+	  very thin, nearly horizontal lines.  More tuning is needed.
 	* drivers/analog, include/nuttx/analog, arch/arch/src/lpcxx:  (1) Add
 	  updates to the ADS1255 driver, (2) fix errors from my last merge (sorry),
 	  (3) Add DAC infrastructure, (4) add AD5410 DAC driver, and (5) add
@@ -2031,7 +2033,7 @@
 	  'make export' logic.  The script now also finds and bundles up all of
 	  the architecture-specific header files as well.
 	* drivers/arch/arm/src/stm32/stm32_i2c.c:  Add a reset to the I2C
-	  initialization logic to prevent spurious interrups when the I2C
+	  initialization logic to prevent spurious interrupts when the I2C
 	  interrupts are enabled (submitted by Uros Platise).
 	* Scripts/makefiles/documents.  Several adjustments, corrections and
 	  typo fixes so that NuttX will build correctly on FreeBSD using the
@@ -2064,3 +2066,7 @@
 	  (1) Clocking needs to be based on PCLK1, not HCLK and fast speed settings
 	  need some additional bits; and (2) Correct a hang that will occur on
 	  I2C1 if FSMC is also enabled.
+	* drivers/sensors/lm75.c and include/nuttx/sensors/lm75.h:  Add an LM-75
+	  temperature sensor driver.
+	* configs/stm3210e-eval/src/up_lm75.c:  Add support for the LM-75 on the
+	  STMicro STM3210E-EVAL board.

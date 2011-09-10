@@ -56,6 +56,10 @@ ifeq ($(CONFIG_USBSTRG),y)
 CSRCS		+= up_usbstrg.c
 endif
 
+ifeq ($(CONFIG_I2C_LM75),y)
+CSRCS		+= up_lm75.c
+endif
+
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

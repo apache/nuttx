@@ -38,6 +38,10 @@
 
 ifeq ($(CONFIG_I2C),y)
   CSRCS += lis331dl.c
+
+ifeq ($(CONFIG_I2C_LM75),y)
+  CSRCS += lm75.c
+endif
 endif
 
 # Include sensor driver build support
