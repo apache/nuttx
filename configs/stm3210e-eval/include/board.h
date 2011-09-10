@@ -255,6 +255,42 @@ EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 EXTERN void stm3210e_lcdclear(uint16_t color);
 #endif
 
+/************************************************************************************
+ * Name: stm32_lm75initialize
+ *
+ * Description:
+ *   Initialize and register the LM-75 Temperature Sensor driver.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
+EXTERN int stm32_lm75initialize(FAR const char *devpath);
+#endif
+
+/************************************************************************************
+ * Name: stm32_lm75attach
+ *
+ * Description:
+ *   Attach the LM-75 interrupt handler
+ *
+ * Input parameters:
+ *   irqhandler - the LM-75 interrupt handler
+ *
+ * Returned Value:
+ *   The previous LM-75 interrupt handler
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
+EXTERN xcpt_t stm32_lm75attach(xcpt_t irqhandler);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
