@@ -2070,3 +2070,7 @@
 	  temperature sensor driver.
 	* configs/stm3210e-eval/src/up_lm75.c:  Add support for the LM-75 on the
 	  STMicro STM3210E-EVAL board.
+	* sched/clock_gettime.c:  Correct an error in the tv_nsec calculation
+	  that happens only config CONFIG_RTC is enabled.
+	* arch/arm/src/stm32/stm32_i2c.c:  Correct some bugs related to waiting
+	  to the I2C STOP condition to be cleared.

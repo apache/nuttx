@@ -13,6 +13,7 @@ Contents
   - NuttX buildroot Toolchain
   - DFU
   - LEDs
+  - Temperature Sensor
   - STM3210E-EVAL-specific Configuration Options
   - Configurations
 
@@ -237,6 +238,32 @@ They are encoded as follows:
     on a small proportion of the time.
 *** LED2 may also flicker normally if signals are processed.
 
+Temperature Sensor
+==================
+
+Support for the on-board LM-75 temperature sensor is available.  This supported
+has been verified, but has not been included in any of the available the
+configurations.  To set up the temperature sensor, add the following to the
+NuttX configuration file
+
+  CONFIG_I2C=y
+  CONFIG_I2C_LM75=y
+
+Then you can implement logic like the following to use the temperature sensor:
+
+  #include <nuttx/sensors/lm75.h>
+  #include <arch/board/board.h>
+
+  ret =  stm32_lm75initialize("/dev/temp");       /* Register the temperature sensor */
+  fd = open("/dev/temp", O_RDONLY);               /* Open the temperature sensor device */
+  ret = ioctl(fd, SNIOC_FAHRENHEIT, 0);           /* Select Fahrenheit */
+  bytesread = read(fd, buffer, 8*sizeof(b16_t));  /* Read temperature samples */
+
+More complex temperature sensor operations are also available.  See the IOCTAL
+commands enumerated in include/nuttx/sensors/lm75.h.  Also read the descriptions
+of the stm32_lm75initialize() and stm32_lm75attach() interfaces in the
+arch/board/board.h file (sames as configs/stm3210e-eval/include/board.h).
+ 
 STM3210E-EVAL-specific Configuration Options
 ============================================
 

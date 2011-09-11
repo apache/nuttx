@@ -61,6 +61,10 @@
 #define SNIOC_POWERUP      _SNIOC(0x0004) /* Arg: None */
 #define SNIOC_FAHRENHEIT   _SNIOC(0x0005) /* Arg: None */
 #define SNIOC_CENTIGRADE   _SNIOC(0x0006) /* Arg: None */
+#define SNIOC_READTHYS     _SNIOC(0x0007) /* Arg: b16_t* pointer */
+#define SNIOC_WRITETHYS    _SNIOC(0x0008) /* Arg: b16_t value */
+#define SNIOC_READTOS      _SNIOC(0x0009) /* Arg: b16_t* pointer */
+#define SNIOC_WRITRETOS    _SNIOC(0x000a) /* Arg: b16_t value */
 
 /* LM-75 Register Definitions ***********************************************/
 /* LM-75 Registers addresses */
@@ -68,7 +72,7 @@
 #define LM75_TEMP_REG      0x00     /* Temperature Register */
 #define LM75_CONF_REG      0x01     /* Configuration Register */
 #define LM75_THYS_REG      0x02     /* Temperature Register */
-#define LM75_TOS_REG       0x03     /* Over-temp Shutdown threshold Register */
+#define LM75_TOS_REG       0x03     /* Over-temp Shutdown Threshold Register */
 
 /* Configuration Register Bit Definitions */
 

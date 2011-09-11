@@ -148,7 +148,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
       if (g_rtc_enabled)
         {
           tp->tv_sec  = up_rtc_gettime();
-          tp->tv_nsec = (up_rtc_getclock() & (RTC_CLOCKS_PER_SEC-1) ) * (1000000000/TICK_PER_SEC);
+          tp->tv_nsec = (up_rtc_getclock() & (RTC_CLOCKS_PER_SEC-1) ) * (1000000000/RTC_CLOCKS_PER_SEC);
         }
       else
 #endif
