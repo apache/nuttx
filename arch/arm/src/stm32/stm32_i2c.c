@@ -429,12 +429,25 @@ static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv)
 
 static inline void stm32_i2c_clrstart(FAR struct stm32_i2c_priv_s *priv)
 {
-  /* "This [START] bit is set and cleared by software and cleared by hardware
+  /* "Note: When the STOP, START or PEC bit is set, the software must
+   *  not perform any write access to I2C_CR1 before this bit is
+   *  cleared by hardware. Otherwise there is a risk of setting a
+   *  second STOP, START or PEC request."
+   *
+   * "The [STOP] bit is set and cleared by software, cleared by hardware
+   *  when a Stop condition is detected, set by hardware when a timeout
+   *  error is detected.
+   * 
+   * "This [START] bit is set and cleared by software and cleared by hardware
    *  when start is sent or PE=0."  The bit must be cleared by software if the
    *  START is never sent.
+   *
+   * "This [PEC] bit is set and cleared by software, and cleared by hardware
+   *  when PEC is transferred or by a START or Stop condition or when PE=0."
    */
 
-  stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_START, 0);
+  stm32_i2c_modifyreg(priv, STM32_I2C_CR1_OFFSET,
+                      I2C_CR1_START|I2C_CR1_STOP|I2C_CR1_PEC, 0);
 }
 
 static inline void stm32_i2c_sendstop(FAR struct stm32_i2c_priv_s *priv)
@@ -871,6 +884,7 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
   struct stm32_i2c_inst_s *inst = (struct stm32_i2c_inst_s *)dev;
   uint32_t    status = 0;
   uint32_t    ahbenr;
+  uint16_t    regval;
   int         status_errno = 0;
 
   ASSERT(count);
@@ -879,15 +893,43 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
 
   ahbenr = stm32_i2c_disablefsmc(inst->priv);
 
-  /* Wait as stop might still be in progress 
-   * 
-   * \todo GET RID OF THIS PERFORMANCE LOSS and for() loop
+  /* Wait as stop might still be in progress; but stop might also
+   * be set because of a timeout error: "The [STOP] bit is set and
+   * cleared by software, cleared by hardware when a Stop condition is
+   * detected, set by hardware when a timeout error is detected."
    */
- 
-  for (; stm32_i2c_getreg(inst->priv, STM32_I2C_CR1_OFFSET) & I2C_CR1_STOP; )
+
+  for (;;)
     {
-      up_waste();
+      /* Check for STOP condition */
+
+      regval = stm32_i2c_getreg(inst->priv, STM32_I2C_CR1_OFFSET);
+      if ((regval & I2C_CR1_STOP) == 0)
+        {
+          break;
+        }
+
+      /* Check for timeout error */
+
+      regval = stm32_i2c_getreg(inst->priv, STM32_I2C_SR1_OFFSET);
+      if ((regval & I2C_SR1_TIMEOUT) != 0)
+        {
+          break;
+        }      
     }
+
+  /* Clear any pending error interrupts */
+
+  stm32_i2c_putreg(inst->priv, STM32_I2C_SR1_OFFSET, 0);
+
+  /* "Note: When the STOP, START or PEC bit is set, the software must
+   *  not perform any write access to I2C_CR1 before this bit is
+   *  cleared by hardware. Otherwise there is a risk of setting a
+   *  second STOP, START or PEC request."  However, if the bits are
+   *  not cleared by hardware, then we will have to do that from hardware.
+   */
+
+  stm32_i2c_clrstart(inst->priv);
     
   /* Old transfers are done */
 
@@ -897,10 +939,6 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
   /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !) */
 
   stm32_i2c_setclock(inst->priv, inst->frequency);
-
-  /* Clear any pending error interrupts */
-
-  stm32_i2c_putreg(inst->priv, STM32_I2C_SR1_OFFSET, 0);
 
   /* Trigger start condition, then the process moves into the ISR.  I2C
    * interrupts will be enabled within stm32_i2c_waitisr().
@@ -917,10 +955,10 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
       status = stm32_i2c_getstatus(inst->priv);
       status_errno = ETIMEDOUT;
 
-      /* " Note: When the STOP, START or PEC bit is set, the software must
-       *   not perform any write access to I2C_CR1 before this bit is
-       *   cleared by hardware. Otherwise there is a risk of setting a
-       *   second STOP, START or PEC request."
+      /* "Note: When the STOP, START or PEC bit is set, the software must
+       *  not perform any write access to I2C_CR1 before this bit is
+       *  cleared by hardware. Otherwise there is a risk of setting a
+       *  second STOP, START or PEC request."
        */
 
       stm32_i2c_clrstart(inst->priv);
@@ -936,6 +974,8 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
 
   if ((status & I2C_SR1_ERRORMASK) != 0)
     {
+      /* I2C_SR1_ERRORMASK is the 'OR' of the following individual bits: */
+
       if (status & I2C_SR1_BERR)
         {
           /* Bus Error */
@@ -975,7 +1015,7 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
 
       /* This is not an error and should never happen since SMBus is not enabled */
 
-      else if (status & I2C_SR1_SMBALERT)
+      else /* if (status & I2C_SR1_SMBALERT) */
         {
           /* SMBus alert is an optional signal with an interrupt line for devices
            * that want to trade their ability to master for a pin.
@@ -987,9 +1027,11 @@ int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int
 
   /* This is not an error, but should not happen.  The BUSY signal can hang,
    * however, if there are unhealthy devices on the bus that need to be reset.
+   * NOTE:  We will only see this buy indication if stm32_i2c_sem_waitisr()
+   * fails above;  Otherwise it is cleared.
    */
 
-  else if (status & (I2C_SR2_BUSY << 16))
+  else if ((status & (I2C_SR2_BUSY << 16)) != 0)
     {
       /* I2C Bus is for some reason busy */
 
@@ -1016,7 +1058,7 @@ int stm32_i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen
     .buffer = (uint8_t *)buffer,
     .length = buflen
   };
-    
+
   return stm32_i2c_process(dev, &msgv, 1);
 }
 
