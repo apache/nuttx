@@ -2014,7 +2014,7 @@
 	* configs/twr-k60n512/nsh:  Added and verified a NuttShell (NSH)
 	  configuration for the Freescale, Kinetis TWR-K60N512 board.
 
-6.9 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+6.9 2011-09-11 Gregory Nutt <spudmonkey@racsa.co.cr>
 
 	* arch/arm/src/kinetis/kinetis_sdhc.c: SDHC driver for Kinetis parts.
 	  Initially check-in is just a crude port of the STM32 SDIO driver.
@@ -2077,3 +2077,6 @@
 	  that happens only config CONFIG_RTC is enabled.
 	* arch/arm/src/stm32/stm32_i2c.c:  Correct some bugs related to waiting
 	  to the I2C STOP condition to be cleared.
+
+6.10 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+
