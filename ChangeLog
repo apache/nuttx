@@ -2018,7 +2018,7 @@
 
 	* arch/arm/src/kinetis/kinetis_sdhc.c: SDHC driver for Kinetis parts.
 	  Initially check-in is just a crude port of the STM32 SDIO driver.
-	  Much more is needed.
+	  Much more work is needed.
 	* graphics/, include/nuttx/nx:  Add new NX interfaces for drawing
 	  circles -- both circular outlines and filled circles.
 	* graphic/nxglib/nxglib_spitline.c:  Add a "fudge factor" that eliminates
@@ -2041,7 +2041,10 @@
 	* drivers/mtd/flash_eraseall.c:  Add a callable function that accepts
 	  the path to a block driver and then erases the underlying FLASH memory
 	  (assuming that the block driver is an MTD driver wrapped in the FTL
-	  layer).
+	  layer).  Hmmm... this is probably not the best long term solution;
+	  flash_eraseall() should be a user-callable function that operates
+	  one driver interfaces; not an internal, OS function that operates
+	  on directly on block drivers.
 	* drivers/bch:  Fixed some important bugs in the BCH driver (noted by
 	  Li Zhuoyi (Lzyy)).  This would have effected any large reads or writes
 	  (larger than the hardware sector size).

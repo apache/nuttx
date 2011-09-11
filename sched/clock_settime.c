@@ -116,7 +116,7 @@ int clock_settime(clockid_t clock_id, const struct timespec *tp)
 #ifdef CONFIG_RTC
       if (g_rtc_enabled)
         {
-          up_rtc_settime( tp->tv_sec );
+          up_rtc_settime(tp->tv_sec);
         } 
       else
 #endif
@@ -143,7 +143,7 @@ int clock_settime(clockid_t clock_id, const struct timespec *tp)
   else 
     {
       sdbg("Returning ERROR\n");
-      *get_errno_ptr() = EINVAL;
+      set_errno(EINVAL);
       ret = ERROR;
     }
 

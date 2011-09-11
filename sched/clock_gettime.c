@@ -45,6 +45,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <arch/irq.h>
+
 #include "clock_internal.h"
 
 /************************************************************************
@@ -93,7 +95,14 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
   uint32_t msecs;
   uint32_t secs;
   uint32_t nsecs;
+#else
+  uint32_t system_utc;
+  uint32_t tickcount;
 #endif
+#if defined(CONFIG_RTC) || defined(CONFIG_SYSTEM_UTC)
+  irqstate_t flags;
+#endif
+
   int ret = OK;
 
   sdbg("clock_id=%d\n", clock_id);
@@ -147,14 +156,58 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 #ifdef CONFIG_RTC
       if (g_rtc_enabled)
         {
-          tp->tv_sec  = up_rtc_gettime();
-          tp->tv_nsec = (up_rtc_getclock() & (RTC_CLOCKS_PER_SEC-1) ) * (1000000000/RTC_CLOCKS_PER_SEC);
+          /* up_rtc_gettime() returns the time in seconds and up_rtc_getclock()
+           * will return the time int RTC clock ticks.  Under the hood, these
+           * are probably based on the same running time.  However, since we
+           * sample this time twice, we have to add the following strange logic
+           * to assure that the fractional second value does not rollover to
+           * a full second between sampling times.
+           */
+
+          clock_t rtc_frac; /* Current fractional seconds in RTC ticks */
+          clock_t rtc_last; /* Previous fractional seconds in RTC ticks */
+          time_t  rtc_sec;  /* Current seconds */
+
+          /* Interrupts are disabled here only to prevent interrupts and context
+           * switches from interfering with the consecutive time samples.  I
+           * expect to go through this loop 1 time 99.9% of the time and then
+           * only twice on the remaining cornercases.
+           */
+
+          flags = irqsave();
+          rtc_frac = up_rtc_getclock() & (RTC_CLOCKS_PER_SEC-1);
+          do
+            {
+              rtc_last = rtc_frac;
+              rtc_sec  = up_rtc_gettime();
+              rtc_frac = up_rtc_getclock() & (RTC_CLOCKS_PER_SEC-1);
+            }
+          while (rtc_frac < rtc_last);
+          irqrestore(flags);
+
+          /* Okay.. the samples should be as close together in time as possible
+           * and we can be assured that no fractional second rollover occurred
+           * between the samples.
+           */
+
+          tp->tv_sec  = rtc_sec;
+          tp->tv_nsec = rtc_frac * (1000000000/RTC_CLOCKS_PER_SEC);
         }
       else
 #endif
         {
-          tp->tv_sec  = g_system_utc;
-          tp->tv_nsec = g_tickcount * (1000000000/TICK_PER_SEC);
+          /* Disable interrupts while g_system_utc and g_tickcount are sampled
+           * so that we can be assured that g_system_utc and g_tickcount are based
+           * at the same point in time.
+           */
+
+          flags = irqsave();
+          system_utc = g_system_utc;
+          tickcount  = g_tickcount;
+          irqrestore(flags);
+
+          tp->tv_sec  = system_utc;
+          tp->tv_nsec = tickcount * (1000000000/TICK_PER_SEC);
         }
 #endif
 
@@ -169,8 +222,18 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 #ifdef CONFIG_RTC
   else if (clock_id == CLOCK_ACTIVETIME && g_rtc_enabled && tp)
     {
-      tp->tv_sec  = g_system_utc;
-      tp->tv_nsec = g_tickcount * (1000000000/TICK_PER_SEC);
+      /* Disable interrupts while g_system_utc and g_tickcount are sampled
+       * so that we can be assured that g_system_utc and g_tickcount are based
+       * at the same point in time.
+       */
+
+      flags = irqsave();
+      system_utc = g_system_utc;
+      tickcount  = g_tickcount;
+      irqrestore(flags);
+
+      tp->tv_sec  = system_utc;
+      tp->tv_nsec = tickcount * (1000000000/TICK_PER_SEC);
     }
 #endif
 

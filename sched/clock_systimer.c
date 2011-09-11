@@ -45,6 +45,8 @@
 #include <nuttx/rtc.h>
 #include <nuttx/time.h>
 
+#include <arch/irq.h>
+
 #if !defined(clock_systimer) /* See nuttx/clock.h */
 
 /****************************************************************************
@@ -77,6 +79,12 @@
 
 uint32_t clock_systimer(void)
 {
+#ifdef CONFIG_SYSTEM_UTC
+  irqstate_t flags;
+  uint32_t system_utc;
+  uint32_t tickcount;
+#endif
+
   /* Fetch the g_system_timer value from timer hardware, if available */
 
 #ifdef CONFIG_RTC
@@ -89,14 +97,24 @@ uint32_t clock_systimer(void)
 
   if (g_rtc_enabled)
     {
-//	  return up_rtc_getclock();
-	}
+      /* return up_rtc_getclock(); */
+    }
 #endif
 
 #ifndef CONFIG_SYSTEM_UTC
   return g_system_timer;
 #else
-  return g_system_utc * TICK_PER_SEC + g_tickcount;
+  /* Disable interrupts while g_system_utc and g_tickcount are sampled
+   * so that we can be assured that g_system_utc and g_tickcount are based
+   * at the same point in time.
+   */
+
+  flags = irqsave();
+  system_utc = g_system_utc;
+  tickcount  = g_tickcount;
+  irqrestore(flags);
+
+  return system_utc * TICK_PER_SEC + tickcount;
 #endif
 }
 
