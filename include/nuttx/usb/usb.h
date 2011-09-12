@@ -159,7 +159,7 @@
 
 #define USB_CLASS_PER_INTERFACE                 (0x00)
 #define USB_CLASS_AUDIO                         (0x01)
-#define USB_CLASS_COMM                          (0x02)
+#define USB_CLASS_CDC                           (0x02)
 #define USB_CLASS_HID                           (0x03)
 #define USB_CLASS_PHYSICAL                      (0x05)
 #define USB_CLASS_STILL_IMAGE                   (0x06)
