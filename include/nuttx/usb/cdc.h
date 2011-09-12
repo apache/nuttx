@@ -318,11 +318,6 @@
 #define ECM_SPEED_CHANGE        ATM_SPEED_CHANGE
 
 /* Descriptors ******************************************************************************/
-/* Table 24: Type Values for the bDescriptorType Field */
-
-#define CS_INTERFACE            0x24
-#define CS_ENDPOINT             0x25
-
 /* Table 25: bDescriptor SubType in Functional Descriptors */
 
 #define CDC_DSUBTYPE_HDR        0x00 /* Header Functional Descriptor, which marks the
@@ -577,7 +572,7 @@ struct cdc_protowrapper_s
 struct cdc_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t data[1];   /* Function-specific data follows */
 };
 
@@ -586,7 +581,7 @@ struct cdc_funcdesc_s
 struct cdc_hdr_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_HDR as defined in Table 25 */
   uint8_t cdc[2];    /* bcdCDC, USB Class Definitions for Communication Devices Specification release
                       * number in binary-coded decimal.
@@ -599,7 +594,7 @@ struct cdc_hdr_funcdesc_s
 struct cdc_callmgmt_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_CALLMGMT as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
   uint8_t ifno;      /* bDataInterface, Interface number of Data Class interface
@@ -613,7 +608,7 @@ struct cdc_callmgmt_funcdesc_s
 struct cdc_acm_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_ACM as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
@@ -624,7 +619,7 @@ struct cdc_acm_funcdesc_s
 struct cdc_dlc_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_DLC as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
@@ -635,7 +630,7 @@ struct cdc_dlc_funcdesc_s
 struct cdc_tcmr_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_TCMRINGER as defined in Table 25 */
   uint8_t volsteps;  /* bRingerVolSteps, Number of discrete steps in volume supported
                       * by the ringer.
@@ -649,7 +644,7 @@ struct cdc_tcmr_funcdesc_s
 struct cdc_tcmops_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_TCMOPS as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
@@ -660,7 +655,7 @@ struct cdc_tcmops_funcdesc_s
 struct cdc_tcmc_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_TCMCALL as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
@@ -671,7 +666,7 @@ struct cdc_tcmc_funcdesc_s
 struct cdc_union_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_UNION as defined in Table 25 */
   uint8_t master;    /* bMasterInterface: The interface number of the Communication or Data
                       * Class interface, designated as the master or controlling interface
@@ -681,14 +676,14 @@ struct cdc_union_funcdesc_s
                       * interface in the union
                       */
 };
-#define SIZEOF_CALLMGMT_FUNCDESC(n) ((n)+4)
+#define SIZEOF_UNION_FUNCDESC(n) ((n)+4)
 
 /* Table 34: Country Selection Functional Descriptor */
 
 struct cdc_country_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_COUNTRY as defined in Table 25 */
   uint8_t reldate;   /* iCountryCodeRelDate: Index of a string giving the release date for the
                       * implemented ISO 3166 Country Codes
@@ -697,14 +692,14 @@ struct cdc_country_funcdesc_s
                       * release date as specified in offset 3 for Nth country supported
                       */
 };
-#define SIZEOF_CONTRY_FUNCDESC(n) (sizeof(uint16_t)*(n) + 4)
+#define SIZEOF_COUNTRY_FUNCDESC(n) (sizeof(uint16_t)*(n) + 4)
 
 /* Table 35: USB Terminal Functional Descriptor */
 
 struct cdc_usbterm_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_USBTERM as defined in Table 25 */
   uint8_t id;        /* bEntityId, Constant uniquely identifying the Terminal */
   uint8_t ifno;      /* bInInterfaceNo, The input interface number of the associated
@@ -723,7 +718,7 @@ struct cdc_usbterm_funcdesc_s
 struct cdc_netchan_funcdesc_s
 {
   uint8_t size;     /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_NETCHAN as defined in Table 25 */
   uint8_t id;        /* bEntityId, Constant uniquely identifying the Terminal */
   uint8_t name;      /* iName, Index of string descriptor, describing the name of the Network
@@ -739,7 +734,7 @@ struct cdc_netchan_funcdesc_s
 struct cdc_protounit_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_PROTOUNIT as defined in Table 25 */
   uint8_t id;        /* bEntityId, Constant uniquely identifying the Unit */
   uint8_t proto;     /* bProtocol, Protocol code as defined in Table 19 */
@@ -752,7 +747,7 @@ struct cdc_protounit_funcdesc_s
 struct cdc_extunit_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_EXTUNIT as defined in Table 25 */
   uint8_t id;        /* bEntityId, Constant uniquely identifying the Extension Unit */
   uint8_t code;      /* bExtensionCode, Vendor specific code identifying the Extension Unit */
@@ -766,7 +761,7 @@ struct cdc_extunit_funcdesc_s
 struct cdc_mcm_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_MCM as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
@@ -777,7 +772,7 @@ struct cdc_mcm_funcdesc_s
 struct cdc_capi_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_CAPI as defined in Table 25 */
   uint8_t caps;      /* bmCapabilities: Bit encoded */
 };
@@ -788,7 +783,7 @@ struct cdc_capi_funcdesc_s
 struct cdc_ecm_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_ECM as defined in Table 25 */
   uint8_t mac;       /* iMACAddress, Index of teh 48bit Ethernet MAC address string descriptor */
   uint8_t stats[4];  /* bmEthernetStatistics, Indicates which Ethernet statistics functions
@@ -811,7 +806,7 @@ struct cdc_ecm_funcdesc_s
 struct cdc_atm_funcdesc_s
 {
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
-  uint8_t type;      /* bDescriptorType, CS_INTERFACE, as defined in Table 24 */
+  uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_ATM as defined in Table 25 */
   uint8_t endid;     /* iEndSystemIdentifier, Index of End System Identifier string descriptor */
   uint8_t datacaps;  /* bmDataCapabilities, The ATM data types the device supports */

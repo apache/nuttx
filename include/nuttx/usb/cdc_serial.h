@@ -41,45 +41,112 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/usb/usb.h>
 
 /****************************************************************************
  * Preprocessor definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+/* EP0 max packet size */
+
+#ifndef CONFIG_CDCSER_EP0MAXPACKET
+#  define CONFIG_CDCSER_EP0MAXPACKET 8
+#endif
+
 /* Endpoint number and size (in bytes) of the CDC serial device-to-host (IN)
  * notification interrupt endpoint.
  */
 
-#ifndef CONFIG_CDCSER_INTIN_EP
-#  define CONFIG_CDCSER_INTIN_EP 2
+#ifndef CONFIG_CDCSER_EPINTIN
+#  define CONFIG_CDCSER_EPINTIN 2
 #endif
 
-#ifndef CONFIG_CDCSER_INTIN_EPSIZE
-#  define CONFIG_CDCSER_INTIN_EPSIZE 8
+#ifndef CONFIG_CDCSER_EPINTIN_SIZE
+#  define CONFIG_CDCSER_EPINTIN_SIZE 8
 #endif
 
 /* Endpoint number and size (in bytes) of the CDC device-to-host (IN) data
  * bulk endpoint
  */
 
-#ifndef CONFIG_CDCSER_BULKIN_EP
-#  define CONFIG_CDCSER_BULKIN_EP 3
+#ifndef CONFIG_CDCSER_EPBULKIN
+#  define CONFIG_CDCSER_EPBULKIN 3
 #endif
 
-#ifndef CONFIG_CDCSER_BULKIN_EPSIZE
-#  define CONFIG_CDCSER_BULKIN_EPSIZE 16
+#ifndef CONFIG_CDCSER_EPBULKIN_SIZE
+#  define CONFIG_CDCSER_EPBULKIN_SIZE 16
 #endif
 
 /* Endpoint number and size (in bytes) of the CDC host-to-device (OUT) data
  * bulk endpoint
  */
 
-#ifndef CONFIG_CDCSER_BULKOUT_EP
-#  define CONFIG_CDCSER_BULKOUT_EP 4
+#ifndef CONFIG_CDCSER_EPBULKOUT
+#  define CONFIG_CDCSER_EPBULKOUT 4
 #endif
 
-#ifndef CONFIG_CDCSER_BULKOUT_EPSIZE
-#  define CONFIG_CDCSER_BULKOUT_EPSIZE 16
+#ifndef CONFIG_CDCSER_EPBULKOUT_SIZE
+#  define CONFIG_CDCSER_EPBULKOUT_SIZE 16
+#endif
+
+/* Number of requests in the write queue */
+
+#ifndef CONFIG_CDCSER_NWRREQS
+#  define CONFIG_CDCSER_NWRREQS 4
+#endif
+
+/* Number of requests in the read queue */
+
+#ifndef CONFIG_CDCSER_NRDREQS
+#  define CONFIG_CDCSER_NRDREQS 4
+#endif
+
+/* Write buffer size */
+
+#ifndef CONFIG_CDCSER_WRBUFFERSIZE
+#  define CONFIG_CDCSER_WRBUFFERSIZE 1024
+#endif
+
+/* Vendor and product IDs and strings */
+
+#ifndef CONFIG_CDCSER_VENDORID
+#  define CONFIG_CDCSER_VENDORID  0x03eb
+#endif
+
+#ifndef CONFIG_CDCSER_PRODUCTID
+#  define CONFIG_CDCSER_PRODUCTID 0x204b
+#endif
+
+#ifndef CONFIG_CDCSER_VENDORSTR
+#  define CONFIG_CDCSER_VENDORSTR  "NuttX"
+#endif
+
+#ifndef CONFIG_CDCSER_PRODUCTSTR
+#  define CONFIG_CDCSER_PRODUCTSTR "USBdev Serial"
+#endif
+
+#undef CONFIG_CDCSER_SERIALSTR
+#define CONFIG_CDCSER_SERIALSTR "0"
+
+#undef CONFIG_CDCSER_CONFIGSTR
+#define CONFIG_CDCSER_CONFIGSTR "Bulk"
+
+/* USB Controller */
+
+#ifndef CONFIG_USBDEV_SELFPOWERED
+#  define SELFPOWERED USB_CONFIG_ATT_SELFPOWER
+#else
+#  define SELFPOWERED (0)
+#endif
+
+#ifndef CONFIG_USBDEV_REMOTEWAKEUP
+#  define REMOTEWAKEUP USB_CONFIG_ATTR_WAKEUP
+#else
+#  define REMOTEWAKEUP (0)
+#endif
+
+#ifndef CONFIG_USBDEV_MAXPOWER
+#  define CONFIG_USBDEV_MAXPOWER 100
 #endif
 
 /****************************************************************************

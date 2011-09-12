@@ -188,12 +188,24 @@
 
 /* Endpoint descriptor attributes */
 
-#define USB_EP_ATTR_XFERTYPE_MASK               (0x03)
-#define USB_EP_ATTR_XFER_CONTROL                (0x00)
-#define USB_EP_ATTR_XFER_ISOC                   (0x01)
-#define USB_EP_ATTR_XFER_BULK                   (0x02)
-#define USB_EP_ATTR_XFER_INT                    (0x03)
-#define USB_EP_ATTR_MAX_ADJUSTABLE              (0x80)
+#define USB_EP_ATTR_XFERTYPE_SHIFT              (0)
+#define USB_EP_ATTR_XFERTYPE_MASK               (3 << USB_EP_ATTR_XFERTYPE_SHIFT)
+#  define USB_EP_ATTR_XFER_CONTROL              (0 << USB_EP_ATTR_XFERTYPE_SHIFT)
+#  define USB_EP_ATTR_XFER_ISOC                 (1 << USB_EP_ATTR_XFERTYPE_SHIFT)
+#  define USB_EP_ATTR_XFER_BULK                 (2 << USB_EP_ATTR_XFERTYPE_SHIFT)
+#  define USB_EP_ATTR_XFER_INT                  (3 << USB_EP_ATTR_XFERTYPE_SHIFT)
+#define USB_EP_ATTR_SYNC_SHIFT                  (2)
+#define USB_EP_ATTR_SYNC_MASK                   (3 << USB_EP_ATTR_SYNC_SHIFT)
+#  define USB_EP_ATTR_NO_SYNC                   (0 << USB_EP_ATTR_SYNC_SHIFT)
+#  define USB_EP_ATTR_ASYNC                     (1 << USB_EP_ATTR_SYNC_SHIFT)
+#  define USB_EP_ATTR_ADAPTIVE                  (2 << USB_EP_ATTR_SYNC_SHIFT)
+#  define USB_EP_ATTR_SYNC                      (3 << USB_EP_ATTR_SYNC_SHIFT)
+#define USB_EP_ATTR_USAGE_SHIFT                 (4)
+#define USB_EP_ATTR_USAGE_MASK                  (3 << USB_EP_ATTR_USAGE_SHIFT)
+#  define USB_EP_ATTR_USAGE_DATA                (0 << USB_EP_ATTR_USAGE_SHIFT)
+#  define USB_EP_ATTR_USAGE_FEEDBACK            (1 << USB_EP_ATTR_USAGE_SHIFT)
+#  define USB_EP_ATTR_USAGE_IMPLICIT            (2 << USB_EP_ATTR_USAGE_SHIFT)
+#define USB_EP_ATTR_MAX_ADJUSTABLE              (1 << 7)
 
 /************************************************************************************
  * Public Types
