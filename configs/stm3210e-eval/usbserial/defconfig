@@ -633,7 +633,7 @@ CONFIG_USBDEV_TRACE=n
 CONFIG_USBDEV_TRACE_NRECORDS=128
 
 #
-# USB Serial Device Configuration
+# USB Serial Device Configuration (Prolific PL2303 Emulation)
 #
 # CONFIG_USBSER
 #   Enable compilation of the USB serial driver
@@ -669,6 +669,69 @@ CONFIG_USBSER_RXBUFSIZE=512
 CONFIG_USBSER_TXBUFSIZE=512
 
 #
+# USB serial device class driver (Standard CDC ACM class)
+#
+# CONFIG_CDCSER
+#   Enable compilation of the USB serial driver
+# CONFIG_CDCSER_EP0MAXPACKET
+#   Endpoint 0 max packet size. Default 8.
+# CONFIG_CDCSER_EPINTIN
+#   The logical 7-bit address of a hardware endpoint that supports
+#   interrupt IN operation.  Default 2.
+# CONFIG_CDCSER_EPINTIN_FSSIZE
+#   Max package size for the interrupt IN endpoint if full speed mode.
+#   Default 64.
+# CONFIG_CDCSER_EPINTIN_HSSIZE
+#   Max package size for the interrupt IN endpoint if high speed mode.
+#   Default 512.
+# CONFIG_CDCSER_EPBULKOUT
+#   The logical 7-bit address of a hardware endpoint that supports
+#   bulk OUT operation
+# CONFIG_CDCSER_EPBULKOUT_FSSIZE
+#   Max package size for the bulk OUT endpoint if full speed mode.
+#   Default 64.
+# CONFIG_CDCSER_EPBULKOUT_HSSIZE
+#   Max package size for the bulk OUT  endpoint if high speed mode.
+#   Default 512.
+# CONFIG_CDCSER_EPBULKIN
+#   The logical 7-bit address of a hardware endpoint that supports
+#   bulk IN operation
+# CONFIG_CDCSER_EPBULKIN_FSSIZE
+#   Max package size for the bulk IN endpoint if full speed mode.
+#   Default 64.
+# CONFIG_CDCSER_EPBULKIN_HSSIZE
+#   Max package size for the bulk IN  endpoint if high speed mode.
+#   Default 512.
+# CONFIG_CDCSER_NWRREQS and CONFIG_CDCSER_NRDREQS
+#   The number of write/read requests that can be in flight.
+#   Default 256.
+# CONFIG_CDCSER_VENDORID and CONFIG_CDCSER_VENDORSTR
+#   The vendor ID code/string.  Default 0x03eb and "NuttX"
+# CONFIG_CDCSER_PRODUCTID and CONFIG_CDCSER_PRODUCTSTR
+#   The product ID code/string. Default 0x204b and "CDC/ACM Serial"
+# CONFIG_CDCSER_RXBUFSIZE and CONFIG_CDCSER_TXBUFSIZE
+#   Size of the serial receive/transmit buffers. Default 256.
+#
+CONFIG_CDCSER=n
+#CONFIG_CDCSER_EP0MAXPACKET
+#CONFIG_CDCSER_EPINTIN
+#CONFIG_CDCSER_EPINTIN_FSSIZE
+#CONFIG_CDCSER_EPINTIN_HSSIZE
+#CONFIG_CDCSER_EPBULKOUT
+#CONFIG_CDCSER_EPBULKOUT_FSSIZE
+#CONFIG_CDCSER_EPBULKOUT_HSSIZE
+#CONFIG_CDCSER_EPBULKIN
+#CONFIG_CDCSER_EPBULKIN_FSSIZE
+#CONFIG_CDCSER_EPBULKIN_HSSIZE
+#CONFIG_CDCSER_NWRREQS
+#CONFIG_CDCSER_NRDREQS
+#CONFIG_CDCSER_VENDORID
+#CONFIG_CDCSER_VENDORSTR
+#CONFIG_CDCSER_PRODUCTID
+#CONFIG_CDCSER_PRODUCTSTR
+#CONFIG_CDCSER_RXBUFSIZE
+#CONFIG_CDCSER_TXBUFSIZE
+
 # USB Storage Device Configuration
 #
 # CONFIG_USBSTRG
