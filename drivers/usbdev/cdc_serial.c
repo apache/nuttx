@@ -56,6 +56,7 @@
 #include <nuttx/serial.h>
 
 #include <nuttx/usb/usb.h>
+#include <nuttx/usb/cdc.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/cdc_serial.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -102,6 +103,8 @@
 #define CDCSER_PRODUCTSTRID        (2)
 #define CDCSER_SERIALSTRID         (3)
 #define CDCSER_CONFIGSTRID         (4)
+#define CDCSER_NOTIFSTRID          (5)
+#define CDCSER_DATAIFSTRID         (6)
 
 /* Number of individual descriptors in the configuration descriptor */
 
@@ -131,18 +134,18 @@
 
 /* Trace values *************************************************************/
 
-#define CDCSER_CLASSAPI_SETUP       TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_SETUP)
-#define CDCSER_CLASSAPI_SHUTDOWN    TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_SHUTDOWN)
-#define CDCSER_CLASSAPI_ATTACH      TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_ATTACH)
-#define CDCSER_CLASSAPI_DETACH      TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_DETACH)
-#define CDCSER_CLASSAPI_IOCTL       TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_IOCTL)
-#define CDCSER_CLASSAPI_RECEIVE     TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_RECEIVE)
-#define CDCSER_CLASSAPI_RXINT       TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_RXINT)
-#define CDCSER_CLASSAPI_RXAVAILABLE TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_RXAVAILABLE)
-#define CDCSER_CLASSAPI_SEND        TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_SEND)
-#define CDCSER_CLASSAPI_TXINT       TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_TXINT)
-#define CDCSER_CLASSAPI_TXREADY     TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_TXREADY)
-#define CDCSER_CLASSAPI_TXEMPTY     TRACE_EVENT(TRACE_CLASSAPI_ID, CDCSER_TRACECLASSAPI_TXEMPTY)
+#define CDCSER_CLASSAPI_SETUP       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_SETUP)
+#define CDCSER_CLASSAPI_SHUTDOWN    TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_SHUTDOWN)
+#define CDCSER_CLASSAPI_ATTACH      TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_ATTACH)
+#define CDCSER_CLASSAPI_DETACH      TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_DETACH)
+#define CDCSER_CLASSAPI_IOCTL       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_IOCTL)
+#define CDCSER_CLASSAPI_RECEIVE     TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_RECEIVE)
+#define CDCSER_CLASSAPI_RXINT       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_RXINT)
+#define CDCSER_CLASSAPI_RXAVAILABLE TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_RXAVAILABLE)
+#define CDCSER_CLASSAPI_SEND        TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_SEND)
+#define CDCSER_CLASSAPI_TXINT       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_TXINT)
+#define CDCSER_CLASSAPI_TXREADY     TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_TXREADY)
+#define CDCSER_CLASSAPI_TXEMPTY     TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_TXEMPTY)
 
 /****************************************************************************
  * Private Types
@@ -152,29 +155,31 @@
 
 struct usbser_req_s
 {
-  FAR struct usbser_req_s *flink;     /* Implements a singly linked list */
-  FAR struct usbdev_req_s *req;       /* The contained request */
+  FAR struct usbser_req_s *flink;      /* Implements a singly linked list */
+  FAR struct usbdev_req_s *req;        /* The contained request */
 };
 
 /* This structure describes the internal state of the driver */
 
 struct usbser_dev_s
 {
-  FAR struct uart_dev_s    serdev;    /* Serial device structure */
-  FAR struct usbdev_s     *usbdev;    /* usbdev driver pointer */
+  FAR struct uart_dev_s    serdev;     /* Serial device structure */
+  FAR struct usbdev_s     *usbdev;     /* usbdev driver pointer */
 
-  uint8_t config;                     /* Configuration number */
-  uint8_t nwrq;                       /* Number of queue write requests (in reqlist)*/
-  uint8_t nrdq;                       /* Number of queue read requests (in epbulkout) */
-  bool    rxenabled;                  /* true: UART RX "interrupts" enabled */
-  uint8_t linest[7];                  /* Fake line status */
-  int16_t rxhead;                     /* Working head; used when rx int disabled */
+  uint8_t config;                      /* Configuration number */
+  uint8_t nwrq;                        /* Number of queue write requests (in reqlist)*/
+  uint8_t nrdq;                        /* Number of queue read requests (in epbulkout) */
+  bool    rxenabled;                   /* true: UART RX "interrupts" enabled */
+  int16_t rxhead;                      /* Working head; used when rx int disabled */
 
-  FAR struct usbdev_ep_s  *epintin;   /* Interrupt IN endpoint structure */
-  FAR struct usbdev_ep_s  *epbulkin;  /* Bulk IN endpoint structure */
-  FAR struct usbdev_ep_s  *epbulkout; /* Bulk OUT endpoint structure */
-  FAR struct usbdev_req_s *ctrlreq;   /* Control request */
-  struct sq_queue_s        reqlist;   /* List of write request containers */
+  uint8_t                  ctrlline;   /* Buffered control line state */
+  struct cdc_linecoding_s  linecoding; /* Buffered line status */
+
+  FAR struct usbdev_ep_s  *epintin;    /* Interrupt IN endpoint structure */
+  FAR struct usbdev_ep_s  *epbulkin;   /* Bulk IN endpoint structure */
+  FAR struct usbdev_ep_s  *epbulkout;  /* Bulk OUT endpoint structure */
+  FAR struct usbdev_req_s *ctrlreq;    /* Control request */
+  struct sq_queue_s        reqlist;    /* List of write request containers */
 
   /* Pre-allocated write request containers.  The write requests will
    * be linked in a free list (reqlist), and used to send requests to
@@ -212,8 +217,9 @@ struct usbser_alloc_s
 
 struct cfgdecsc_group_s
 {
-  FAR void    *desc;
-  unsigned int size;
+  uint16_t  descsize; /* Size of the descriptor in bytes */
+  uint16_t  hsepsize; /* High speed max packet size */
+  FAR void *desc;     /* A pointer to the descriptor */
 };
 
 /****************************************************************************
@@ -239,13 +245,18 @@ static void    usbclass_freereq(FAR struct usbdev_ep_s *ep,
 
 static int     usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
 #ifdef CONFIG_USBDEV_DUALSPEED
-static void    usbclass_mkepbulkdesc(const struct usb_epdesc_s *indesc,
-                 uint16_t mxpacket, struct usb_epdesc_s *outdesc);
-static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type);
+static void    usbclass_mkepdesc(FAR const struct usb_epdesc_s *indesc,
+                 uint16_t mxpacket, FAR struct usb_epdesc_s *outdesc);
+static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf, uint8_t speed, uint8_t type);
 #else
-static int16_t usbclass_mkcfgdesc(uint8_t *buf);
+static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf);
 #endif
 static void    usbclass_resetconfig(FAR struct usbser_dev_s *priv);
+#ifdef CONFIG_USBDEV_DUALSPEED
+static int     usbclass_epconfigure(FAR struct usbdev_ep_s *ep,
+                 FAR const struct usb_epdesc_s *indesc, uint16_t mxpacket,
+                 bool last);
+#endif
 static int     usbclass_setconfig(FAR struct usbser_dev_s *priv,
                  uint8_t config);
 
@@ -336,7 +347,7 @@ static const struct usb_devdesc_s g_devdesc =
 
 /* Configuration descriptor */
 
-static const struct usb_cfgdesc_s g_cfgdesc;
+static const struct usb_cfgdesc_s g_cfgdesc =
 {
   USB_SIZEOF_CFGDESC,                           /* len */
   USB_DESC_TYPE_CONFIG,                         /* type */
@@ -363,7 +374,11 @@ static const struct usb_ifdesc_s g_notifdesc =
   USB_CLASS_CDC,                                /* class */
   CDC_SUBCLASS_ACM,                             /* subclass */
   CDC_PROTO_ATM,                                /* proto */
+#ifdef CONFIG_CDCSER_NOTIFSTR
   CDCSER_NOTIFSTRID                             /* iif */
+#else
+  0                                             /* iif */
+#endif
 };
 
 /* Header functional descriptor */
@@ -397,7 +412,7 @@ static const struct cdc_union_funcdesc_s g_unionfunc =
   USB_DESC_TYPE_CSINTERFACE,                    /* type */
   CDC_DSUBTYPE_UNION,                           /* subtype */
   0,                                            /* master */
-  1                                             /* slave[0] */
+  {1}                                           /* slave[0] */
 };
 
 /* Interrupt IN endpoint descriptor */
@@ -408,8 +423,9 @@ static const struct usb_epdesc_s g_epintindesc =
   USB_DESC_TYPE_ENDPOINT,                       /* type */
   CDCSER_EPINTIN_ADDR,                          /* addr */
   CDCSER_EPINTIN_ATTR,                          /* attr */
-  { LSBYTE(CONFIG_CDCSER_EPINTIN_SIZE),         /* maxpacket */
-    MSBYTE(CONFIG_CDCSER_EPINTIN_SIZE)
+  {
+    LSBYTE(CONFIG_CDCSER_EPINTIN_FSSIZE),       /* maxpacket (full speed) */
+    MSBYTE(CONFIG_CDCSER_EPINTIN_FSSIZE)
   },
   0xff                                          /* interval */
 };
@@ -426,7 +442,11 @@ static const struct usb_ifdesc_s g_dataifdesc =
   USB_CLASS_CDC_DATA,                           /* class */
   CDC_DATA_SUBCLASS_NONE,                       /* subclass */
   CDC_DATA_PROTO_NONE,                          /* proto */
+#ifdef CONFIG_CDCSER_DATAIFSTR
   CDCSER_DATAIFSTRID                            /* iif */
+#else
+  0                                             /* iif */
+#endif
 };
 
 /* Bulk OUT endpoint descriptor */
@@ -437,8 +457,9 @@ static const struct usb_epdesc_s g_epbulkoutdesc =
   USB_DESC_TYPE_ENDPOINT,                       /* type */
   CDCSER_EPOUTBULK_ADDR,                        /* addr */
   CDCSER_EPINTIN_ATTR,                          /* attr */
-  { LSBYTE(CONFIG_CDCSER_BULKOUT_EPSIZE),       /* maxpacket */
-    MSBYTE(CONFIG_CDCSER_BULKOUT_EPSIZE)
+  {
+    LSBYTE(CONFIG_CDCSER_EPBULKOUT_FSSIZE),     /* maxpacket (full speed) */
+    MSBYTE(CONFIG_CDCSER_EPBULKOUT_FSSIZE)
   },
   1                                             /* interval */
 };
@@ -451,8 +472,9 @@ static const struct usb_epdesc_s g_epbulkindesc =
   USB_DESC_TYPE_ENDPOINT,                       /* type */
   CDCSER_EPINBULK_ADDR,                         /* addr */
   CDCSER_EPINBULK_ATTR,                         /* attr */
-  { LSBYTE(CONFIG_CDCSER_BULKIN_EPSIZE),        /* maxpacket */
-    MSBYTE(CONFIG_CDCSER_BULKIN_EPSIZE)
+  {
+    LSBYTE(CONFIG_CDCSER_EPBULKIN_FSSIZE),      /* maxpacket (full speed) */
+    MSBYTE(CONFIG_CDCSER_EPBULKIN_FSSIZE)
   },
   1                                             /* interval */
 };
@@ -469,40 +491,49 @@ static const struct usb_epdesc_s g_epbulkindesc =
 
 static const struct cfgdecsc_group_s g_cfggroup[CDCSER_CFGGROUP_SIZE] = {
   {
-    (FAR void *)&g_cfgdesc,       /* 1. Configuration descriptor */
-    USB_SIZEOF_CFGDESC
+    USB_SIZEOF_CFGDESC,            /* 1. Configuration descriptor */
+    0,
+    (FAR void *)&g_cfgdesc
   },
   {
-    (FAR void *)&g_notifdesc,      /* 2. Notification interface */
-    USB_SIZEOF_IFDESC
+    USB_SIZEOF_IFDESC,             /* 2. Notification interface */
+    0,
+    (FAR void *)&g_notifdesc
   },
   {
-    (FAR void *)&g_funchdr,        /* 3. Header functional descriptor */
-    SIZEOF_HDR_FUNCDESC
+    SIZEOF_HDR_FUNCDESC,           /* 3. Header functional descriptor */
+    0,
+    (FAR void *)&g_funchdr
   },
   {
-    (FAR void *)&g_acmfunc,        /* 4. ACM functional descriptor */
-    SIZEOF_ACM_FUNCDESC
+    SIZEOF_ACM_FUNCDESC,           /* 4. ACM functional descriptor */
+    0,
+    (FAR void *)&g_acmfunc
   },
   {
-    (FAR void *)&g_unionfunc,      /* 5. Union functional descriptor */
-    SIZEOF_UNION_FUNCDESC(1)
+    SIZEOF_UNION_FUNCDESC(1),      /* 5. Union functional descriptor */
+    0,
+    (FAR void *)&g_unionfunc
   },
   {
-    (FAR void *)&g_epintindesc,    /* 6. Interrupt IN endpoint descriptor */
-    USB_SIZEOF_EPDESC
+    USB_SIZEOF_EPDESC,             /* 6. Interrupt IN endpoint descriptor */
+    CONFIG_CDCSER_EPINTIN_HSSIZE,
+    (FAR void *)&g_epintindesc
   },
   {
-    (FAR void *)&g_dataifdesc,     /* 7. Data interface descriptor */
-    USB_SIZEOF_IFDESC
+    USB_SIZEOF_IFDESC,             /* 7. Data interface descriptor */
+    0,
+    (FAR void *)&g_dataifdesc
   },
   {
-    (FAR void *)&g_epbulkoutdesc,  /* 8. Bulk OUT endpoint descriptor */
-    USB_SIZEOF_EPDESC
+    USB_SIZEOF_EPDESC,             /* 8. Bulk OUT endpoint descriptor */
+    CONFIG_CDCSER_EPBULKOUT_HSSIZE,
+    (FAR void *)&g_epbulkoutdesc
   },
   {
-    (FAR void *)&g_epbulkindesc,   /* 9. Bulk OUT endpoint descriptor */
-    USB_SIZEOF_EPDESC
+    USB_SIZEOF_EPDESC,             /* 9. Bulk OUT endpoint descriptor */
+    CONFIG_CDCSER_EPBULKIN_HSSIZE,
+    (FAR void *)&g_epbulkindesc
   }
 };
 
@@ -613,7 +644,7 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
 #ifdef CONFIG_DEBUG
   if (priv == NULL)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return -ENODEV;
     }
 #endif
@@ -658,7 +689,7 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
           ret          = EP_SUBMIT(ep, req);
           if (ret != OK)
             {
-              usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_SUBMITFAIL), (uint16_t)-ret);
+              usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SUBMITFAIL), (uint16_t)-ret);
               break;
             }
         }
@@ -774,7 +805,7 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
 
   if (nbytes < reqlen)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_RXOVERRUN), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RXOVERRUN), 0);
       return -ENOSPC;
     }
   return OK;
@@ -872,6 +903,18 @@ static int usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
       str = CONFIG_CDCSER_CONFIGSTR;
       break;
 
+#ifdef CONFIG_CDCSER_NOTIFSTR
+    case CDCSER_NOTIFSTRID:
+      str = CONFIG_CDCSER_NOTIFSTR;
+      break;
+#endif
+
+#ifdef CONFIG_CDCSER_DATAIFSTR
+    case CDCSER_DATAIFSTRID:
+      str = CONFIG_CDCSER_DATAIFSTR;
+      break;
+#endif
+
     default:
       return -EINVAL;
     }
@@ -893,19 +936,19 @@ static int usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
 }
 
 /****************************************************************************
- * Name: usbclass_mkepbulkdesc
+ * Name: usbclass_mkepdesc
  *
  * Description:
- *   Construct the endpoint descriptor
+ *   Construct the endpoint descriptor using the correct max packet size.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-static inline void usbclass_mkepbulkdesc(const FAR struct usb_epdesc_s *indesc,
-                                         uint16_t mxpacket,
-                                         FAR struct usb_epdesc_s *outdesc)
+static inline void usbclass_mkepdesc(FAR const FAR struct usb_epdesc_s *indesc,
+                                     uint16_t mxpacket,
+                                     FAR struct usb_epdesc_s *outdesc)
 {
-  /* Copy the canned descriptor */
+  /* Copy the "canned" descriptor */
 
   memcpy(outdesc, indesc, USB_SIZEOF_EPDESC);
 
@@ -925,74 +968,63 @@ static inline void usbclass_mkepbulkdesc(const FAR struct usb_epdesc_s *indesc,
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type)
+static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf, uint8_t speed, uint8_t type)
 #else
-static int16_t usbclass_mkcfgdesc(uint8_t *buf)
+static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf)
 #endif
 {
-  FAR struct usb_cfgdesc_s *cfgdesc = (struct usb_cfgdesc_s*)buf;
+  FAR const struct cfgdecsc_group_s *group;
+  FAR uint8_t *dest = buf;
+  int i;
+
 #ifdef CONFIG_USBDEV_DUALSPEED
   bool hispeed = (speed == USB_SPEED_HIGH);
-  uint16_t bulkmxpacket;
-#endif
-  uint16_t totallen;
 
-  /* This is the total length of the configuration (not necessarily the
-   * size that we will be sending now.
-   */
+  /* Check for switches between high and full speed */
 
-  totallen = USB_SIZEOF_CFGDESC + USB_SIZEOF_IFDESC + CDCSER_NENDPOINTS * USB_SIZEOF_EPDESC;
-
-  /* Configuration descriptor -- Copy the canned descriptor and fill in the
-   * type (we'll also need to update the size below
-   */
-
-  memcpy(cfgdesc, &g_cfgdesc, USB_SIZEOF_CFGDESC);
-  buf += USB_SIZEOF_CFGDESC;
-
-  /*  Copy the canned interface descriptor */
-
-  memcpy(buf, &g_ifdesc, USB_SIZEOF_IFDESC);
-  buf += USB_SIZEOF_IFDESC;
-
-  /* Make the three endpoint configurations.  First, check for switches
-   * between high and full speed
-   */
-
-#ifdef CONFIG_USBDEV_DUALSPEED
   if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG)
     {
       hispeed = !hispeed;
     }
 #endif
 
-  memcpy(buf, &g_epintindesc, USB_SIZEOF_EPDESC);
-  buf += USB_SIZEOF_EPDESC;
+  /* Copy all of the descriptors in the group */
+
+  for (i = 0, dest = buf; i < CDCSER_CFGGROUP_SIZE; i++)
+    {
+      group = &g_cfggroup[i];
+
+      /* The "canned" descriptors all have full speed endpoint maxpacket
+       * sizes. If high speed is selected, we will have to change the
+       * endpoint maxpacket size.
+       *
+       * Is there a alternative high speed maxpacket size in the table?
+       * If so, that is sufficient proof that the descriptor that we
+       * just copied is an endpoint descriptor and needs the fixup
+       */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-  if (hispeed)
-    {
-      bulkmxpacket = 512;
-    }
-  else
-    {
-      bulkmxpacket = 64;
-    }
-
-  usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket, (struct usb_epdesc_s*)buf);
-  buf += USB_SIZEOF_EPDESC;
-  usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket, (struct usb_epdesc_s*)buf);
-#else
-  memcpy(buf, &g_epbulkoutdesc, USB_SIZEOF_EPDESC);
-  buf += USB_SIZEOF_EPDESC;
-  memcpy(buf, &g_epbulkindesc, USB_SIZEOF_EPDESC);
+      if (highspeed && group->hsepsize != 0)
+        {
+          usbclass_mkepdesc(group->desc, group->hsepsize,
+                            (FAR struct usb_epdesc_s*)dest);
+        }
+      else
 #endif
+      /* Copy the "canned" descriptor with the full speed max packet
+       * size
+       */
 
-  /* Finally, fill in the total size of the configuration descriptor */
+        {
+          memcpy(dest, group->desc, group->descsize);
+        }
 
-  cfgdesc->totallen[0] = LSBYTE(totallen);
-  cfgdesc->totallen[1] = MSBYTE(totallen);
-  return totallen;
+      /* Advance to the destination location for the next descriptor */
+
+      dest += group->descsize;
+    }
+
+  return SIZEOF_CDCSER_CFGDESC;
 }
 
 /****************************************************************************
@@ -1024,6 +1056,25 @@ static void usbclass_resetconfig(FAR struct usbser_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: usbclass_epconfigure
+ *
+ * Description:
+ *   Configure one endpoint.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV_DUALSPEED
+static int usbclass_epconfigure(FAR struct usbdev_ep_s *ep,
+                                FAR const struct usb_epdesc_s *indesc,
+                                uint16_t mxpacket, bool last)
+{
+  struct usb_epdesc_s epdesc;
+  usbclass_mkepdesc(indesc, mxpacket, &epdesc);
+  return EP_CONFIGURE(ep, &epdesc, last);
+}
+#endif
+
+/****************************************************************************
  * Name: usbclass_setconfig
  *
  * Description:
@@ -1035,17 +1086,13 @@ static void usbclass_resetconfig(FAR struct usbser_dev_s *priv)
 static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
 {
   FAR struct usbdev_req_s *req;
-#ifdef CONFIG_USBDEV_DUALSPEED
-  struct usb_epdesc_s epdesc;
-  uint16_t bulkmxpacket;
-#endif
   int i;
   int ret = 0;
 
 #if CONFIG_DEBUG
   if (priv == NULL)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return -EIO;
     }
 #endif
@@ -1054,7 +1101,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
     {
       /* Already configured -- Do nothing */
 
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_ALREADYCONFIGURED), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALREADYCONFIGURED), 0);
       return 0;
     }
 
@@ -1066,7 +1113,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
 
   if (config == CDCSER_CONFIGIDNONE)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_CONFIGNONE), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_CONFIGNONE), 0);
       return 0;
     }
 
@@ -1074,16 +1121,27 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
 
   if (config != CDCSER_CONFIGID)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_CONFIGIDBAD), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_CONFIGIDBAD), 0);
       return -EINVAL;
     }
 
   /* Configure the IN interrupt endpoint */
 
-  ret = EP_CONFIGURE(priv->epintin, &g_epintindesc, false);
+#ifdef CONFIG_USBDEV_DUALSPEED
+  if (priv->usbdev->speed == USB_SPEED_HIGH)
+    {
+      ret = usbclass_epconfigure(priv->epintin, &g_epintindesc,
+                                 CONFIG_CDCSER_EPINTIN_HSSIZE, false);
+    }
+  else
+#endif
+    {
+      ret = EP_CONFIGURE(priv->epintin, &g_epintindesc, false);
+    }
+
   if (ret < 0)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_EPINTINCONFIGFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINCONFIGFAIL), 0);
       goto errout;
     }
   priv->epintin->priv = priv;
@@ -1093,21 +1151,18 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
-      bulkmxpacket = 512;
+      ret = usbclass_epconfigure(priv->epbulkin, &g_epbulkindesc,
+                                 CONFIG_CDCSER_EPBULKIN_HSSIZE, false);
     }
   else
+#endif
     {
-      bulkmxpacket = 64;
+      ret = EP_CONFIGURE(priv->epbulkin, &g_epbulkindesc, false);
     }
 
-  usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket, &epdesc);
-  ret = EP_CONFIGURE(priv->epbulkin, &epdesc, false);
-#else
-  ret = EP_CONFIGURE(priv->epbulkin, &g_epbulkindesc, false);
-#endif
   if (ret < 0)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_EPBULKINCONFIGFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINCONFIGFAIL), 0);
       goto errout;
     }
 
@@ -1116,14 +1171,20 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
   /* Configure the OUT bulk endpoint */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-  usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket, &epdesc);
-  ret = EP_CONFIGURE(priv->epbulkout, &epdesc, true);
-#else
-  ret = EP_CONFIGURE(priv->epbulkout, &g_epbulkoutdesc, true);
+  if (priv->usbdev->speed == USB_SPEED_HIGH)
+    {
+      ret = usbclass_epconfigure(priv->epbulkout, &g_epbulkoutdesc,
+                                 CONFIG_CDCSER_EPBULKOUT_HSSIZE, true);
+    }
+  else
 #endif
+    {
+      ret = EP_CONFIGURE(priv->epbulkout, &g_epbulkoutdesc, true);
+    }
+
   if (ret < 0)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_EPBULKOUTCONFIGFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTCONFIGFAIL), 0);
       goto errout;
     }
 
@@ -1139,7 +1200,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
       ret           = EP_SUBMIT(priv->epbulkout, req);
       if (ret != OK)
         {
-          usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_RDSUBMIT), (uint16_t)-ret);
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16_t)-ret);
           goto errout;
         }
       priv->nrdq++;
@@ -1166,7 +1227,7 @@ static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
 {
   if (req->result || req->xfrd != req->len)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_REQRESULT), (uint16_t)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_REQRESULT), (uint16_t)-req->result);
     }
 }
 
@@ -1191,7 +1252,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
 #ifdef CONFIG_DEBUG
   if (!ep || !ep->priv || !req)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
      }
 #endif
@@ -1211,13 +1272,13 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
       break;
 
     case -ESHUTDOWN: /* Disconnection */
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_RDSHUTDOWN), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
       priv->nrdq--;
       irqrestore(flags);
       return;
 
     default: /* Some other error occurred */
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_RDUNEXPECTED), (uint16_t)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDUNEXPECTED), (uint16_t)-req->result);
       break;
     };
 
@@ -1232,7 +1293,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
   ret      = EP_SUBMIT(ep, req);
   if (ret != OK)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_RDSUBMIT), (uint16_t)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16_t)-req->result);
     }
   irqrestore(flags);
 }
@@ -1258,7 +1319,7 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
 #ifdef CONFIG_DEBUG
   if (!ep || !ep->priv || !req || !req->priv)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
      }
 #endif
@@ -1287,11 +1348,11 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
       break;
 
     case -ESHUTDOWN: /* Disconnection */
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_WRSHUTDOWN), priv->nwrq);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRSHUTDOWN), priv->nwrq);
       break;
 
     default: /* Some other error occurred */
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_WRUNEXPECTED), (uint16_t)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRUNEXPECTED), (uint16_t)-req->result);
       break;
     }
 }
@@ -1329,7 +1390,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
   priv->ctrlreq = usbclass_allocreq(dev->ep0, CDCSER_MXDESCLEN);
   if (priv->ctrlreq == NULL)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_ALLOCCTRLREQ), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCCTRLREQ), 0);
       ret = -ENOMEM;
       goto errout;
     }
@@ -1347,7 +1408,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
   priv->epintin = DEV_ALLOCEP(dev, CDCSER_EPINTIN_ADDR, true, USB_EP_ATTR_XFER_INT);
   if (!priv->epintin)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_EPINTINALLOCFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINALLOCFAIL), 0);
       ret = -ENODEV;
       goto errout;
     }
@@ -1358,7 +1419,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
   priv->epbulkin = DEV_ALLOCEP(dev, CDCSER_EPINBULK_ADDR, true, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkin)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_EPBULKINALLOCFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINALLOCFAIL), 0);
       ret = -ENODEV;
       goto errout;
     }
@@ -1369,7 +1430,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
   priv->epbulkout = DEV_ALLOCEP(dev, CDCSER_EPOUTBULK_ADDR, false, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkout)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_EPBULKOUTALLOCFAIL), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTALLOCFAIL), 0);
       ret = -ENODEV;
       goto errout;
     }
@@ -1389,7 +1450,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
       reqcontainer->req = usbclass_allocreq(priv->epbulkout, reqlen);
       if (reqcontainer->req == NULL)
         {
-          usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_RDALLOCREQ), -ENOMEM);
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDALLOCREQ), -ENOMEM);
           ret = -ENOMEM;
           goto errout;
         }
@@ -1411,7 +1472,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
       reqcontainer->req = usbclass_allocreq(priv->epbulkin, reqlen);
       if (reqcontainer->req == NULL)
         {
-          usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_WRALLOCREQ), -ENOMEM);
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRALLOCREQ), -ENOMEM);
           ret = -ENOMEM;
           goto errout;
         }
@@ -1460,7 +1521,7 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
 #ifdef CONFIG_DEBUG
   if (!dev || !dev->ep0)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
      }
 #endif
@@ -1472,7 +1533,7 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
 #ifdef CONFIG_DEBUG
   if (!priv)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_EP0NOTBOUND), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EP0NOTBOUND), 0);
       return;
     }
 #endif
@@ -1584,7 +1645,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
 #ifdef CONFIG_DEBUG
   if (!dev || !dev->ep0 || !ctrl)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return -EIO;
      }
 #endif
@@ -1597,7 +1658,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
 #ifdef CONFIG_DEBUG
   if (!priv || !priv->ctrlreq)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_EP0NOTBOUND), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EP0NOTBOUND), 0);
       return -ENODEV;
     }
 #endif
@@ -1668,7 +1729,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
 
                 default:
                   {
-                    usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_GETUNKNOWNDESC), value);
+                    usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_GETUNKNOWNDESC), value);
                   }
                   break;
                 }
@@ -1729,78 +1790,109 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
              break;
 
           default:
-            usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_UNSUPPORTEDSTDREQ), ctrl->req);
+            usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDSTDREQ), ctrl->req);
             break;
           }
       }
       break;
 
-     /***********************************************************************
-      * PL2303 Vendor-Specific Requests
-      ***********************************************************************/
+    /************************************************************************
+     * CDC ACM-Specific Requests
+     ************************************************************************/
 
-    case CDC_CONTROL_TYPE:
+    /* ACM_GET_LINE_CODING requests current DTE rate, stop-bits, parity, and
+     * number-of-character bits. (Optional)
+     */
+
+    case ACM_GET_LINE_CODING:
       {
-        if ((ctrl->type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_INTERFACE)
+        if (ctrl->type == (USB_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE))
           {
-            switch (ctrl->req)
-              {
-              case CDC_SETLINEREQUEST:
-                {
-                   memcpy(priv->linest, ctrlreq->buf, min(len, 7));
-                   ret = 0;
-                }
-                break;
+            /* Return the current line status from the private data structure */
 
-
-              case CDC_GETLINEREQUEST:
-                {
-                   memcpy(ctrlreq->buf, priv->linest, 7);
-                   ret = 7;
-                }
-                break;
-
-              case CDC_SETCONTROLREQUEST:
-              case CDC_BREAKREQUEST:
-                {
-                  ret = 0;
-                }
-                break;
-
-              default:
-                usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_UNSUPPORTEDCTRLREQ), ctrl->type);
-                break;
-              }
+            memcpy(ctrlreq->buf, &priv->linecoding, SIZEOF_CDC_LINECODING);
+            ret = SIZEOF_CDC_LINECODING;
+          }
+        else
+          {
+            usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ), ctrl->type);
           }
       }
       break;
 
-    case CDC_RWREQUEST_TYPE:
+    /* ACM_SET_LINE_CODING configures DTE rate, stop-bits, parity, and
+     * number-of-character bits. (Optional)
+     */
+
+    case ACM_SET_LINE_CODING:
       {
-        if ((ctrl->type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE)
+        if (ctrl->type == (USB_DIR_OUT|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE))
           {
-            if (ctrl->req == CDC_RWREQUEST)
-              {
-                if ((ctrl->type & USB_DIR_IN) != 0)
-                  {
-                    *(uint32_t*)ctrlreq->buf = 0xdeadbeef;
-                    ret = 4;
-                  }
-                else
-                  {
-                     ret = 0;
-                  }
-              }
-            else
-              {
-                usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_UNSUPPORTEDRWREQ), ctrl->type);
-              }
+            /* Save the new line status in the private data structure */
+
+            memcpy(&priv->linecoding, ctrlreq->buf, min(len, 7));
+            ret = 0;
+
+            /* If there is a registered callback to receive line status info, then
+             * callout now.
+             */
+#warning "Missing logic"
+          }
+        else
+          {
+            usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ), ctrl->type);
+          }
+      }
+      break;
+
+    /* ACM_SET_CTRL_LINE_STATE: RS-232 signal used to tell the DCE device the
+     * DTE device is now present. (Optional)
+     */
+
+    case ACM_SET_CTRL_LINE_STATE:
+      {
+        if (ctrl->type == (USB_DIR_OUT|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE))
+          {
+            /* Save the control line state in the private data structure. Only bits
+             * 0 and 1 have meaning.
+             */
+
+            priv->ctrlline = value & 3;
+            ret = 0;
+
+            /* If there is a registered callback to receive control line status info,
+             * then callout now.
+             */
+#warning "Missing logic"
+          }
+        else
+          {
+            usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ), ctrl->type);
+          }
+      }
+      break;
+
+    /*  Sends special carrier*/
+
+    case ACM_SEND_BREAK:
+      {
+        if (ctrl->type == (USB_DIR_OUT|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE))
+          {
+            /* If there is a registered callback to handle the SendBreak request,
+             * then callout now.
+             */
+#warning "Missing logic"
+            ret = 0;
+          }
+        else
+          {
+            usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ), ctrl->type);
           }
       }
       break;
 
     default:
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_UNSUPPORTEDTYPE), ctrl->type);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDTYPE), ctrl->type);
       break;
     }
 
@@ -1815,7 +1907,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
       ret            = EP_SUBMIT(dev->ep0, ctrlreq);
       if (ret < 0)
         {
-          usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_EPRESPQ), (uint16_t)-ret);
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPRESPQ), (uint16_t)-ret);
           ctrlreq->result = OK;
           usbclass_ep0incomplete(dev->ep0, ctrlreq);
         }
@@ -1844,7 +1936,7 @@ static void usbclass_disconnect(FAR struct usbdev_s *dev)
 #ifdef CONFIG_DEBUG
   if (!dev || !dev->ep0)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return;
      }
 #endif
@@ -1856,7 +1948,7 @@ static void usbclass_disconnect(FAR struct usbdev_s *dev)
 #ifdef CONFIG_DEBUG
   if (!priv)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_EP0NOTBOUND), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EP0NOTBOUND), 0);
       return;
     }
 #endif
@@ -1902,7 +1994,7 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
 #if CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return -EIO;
     }
 #endif
@@ -1915,7 +2007,7 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
 
   if (priv->config == CDCSER_CONFIGIDNONE)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_SETUPNOTCONNECTED), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SETUPNOTCONNECTED), 0);
       return -ENOTCONN;
     }
 
@@ -1943,7 +2035,7 @@ static void usbser_shutdown(FAR struct uart_dev_s *dev)
 #if CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
-       usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
     }
 #endif
 }
@@ -2005,7 +2097,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
 #if CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
-       usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
        return;
     }
 #endif
@@ -2096,7 +2188,7 @@ static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
 #if CONFIG_DEBUG
   if (!dev || !dev->priv)
     {
-       usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
        return;
     }
 #endif
@@ -2139,7 +2231,7 @@ static bool usbser_txempty(FAR struct uart_dev_s *dev)
 #if CONFIG_DEBUG
   if (!priv)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_INVALIDARG), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return true;
     }
 #endif
@@ -2176,7 +2268,7 @@ int usbdev_serialinitialize(int minor)
   alloc = (FAR struct usbser_alloc_s*)kmalloc(sizeof(struct usbser_alloc_s));
   if (!alloc)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_ALLOCDEVSTRUCT), 0);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCDEVSTRUCT), 0);
       return -ENOMEM;
     }
 
@@ -2192,13 +2284,13 @@ int usbdev_serialinitialize(int minor)
 
   /* Fake line status */
 
-  priv->linest[0] = (115200) & 0xff;       /* Baud=115200 */
-  priv->linest[1] = (115200 >> 8) & 0xff;
-  priv->linest[2] = (115200 >> 16) & 0xff;
-  priv->linest[3] = (115200 >> 24) & 0xff;
-  priv->linest[4] = 0;                     /* One stop bit */
-  priv->linest[5] = 0;                     /* No parity */
-  priv->linest[6] = 8;                     /*8 data bits */
+  priv->linecoding.baud[0] = (115200) & 0xff;       /* Baud=115200 */
+  priv->linecoding.baud[1] = (115200 >> 8) & 0xff;
+  priv->linecoding.baud[2] = (115200 >> 16) & 0xff;
+  priv->linecoding.baud[3] = (115200 >> 24) & 0xff;
+  priv->linecoding.stop    = CDC_CHFMT_STOP1;       /* One stop bit */
+  priv->linecoding.parity  = CDC_PARITY_NONE;       /* No parity */
+  priv->linecoding.nbits   = 8;                     /* 8 data bits */
 
   /* Initialize the serial driver sub-structure */
 
@@ -2224,7 +2316,7 @@ int usbdev_serialinitialize(int minor)
   ret = usbdev_register(&drvr->drvr);
   if (ret)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_DEVREGISTER), (uint16_t)-ret);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_DEVREGISTER), (uint16_t)-ret);
       goto errout_with_alloc;
     }
 
@@ -2235,7 +2327,7 @@ int usbdev_serialinitialize(int minor)
   ret = uart_register("/dev/console", &pri->serdev);
   if (ret < 0)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_CONSOLEREGISTER), (uint16_t)-ret);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_CONSOLEREGISTER), (uint16_t)-ret);
       goto errout_with_class;
     }
 #endif
@@ -2246,7 +2338,7 @@ int usbdev_serialinitialize(int minor)
   ret = uart_register(devname, &priv->serdev);
   if (ret)
     {
-      usbtrace(TRACE_CLSERROR(CDCSER_TRACEERR_UARTREGISTER), (uint16_t)-ret);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UARTREGISTER), (uint16_t)-ret);
       goto errout_with_class;
     }
   return OK;

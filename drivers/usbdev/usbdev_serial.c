@@ -78,12 +78,6 @@
 #  define CONFIG_USBSER_NRDREQS 4
 #endif
 
-/* Write buffer size */
-
-#ifndef CONFIG_USBSER_WRBUFFERSIZE
-#  define CONFIG_USBSER_WRBUFFERSIZE 1024
-#endif
-
 /* Logical endpoint numbers / max packet sizes */
 
 #ifndef CONFIG_USBSER_EPINTIN
@@ -1731,7 +1725,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
                 break;
 
               default:
-                usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCTRLREQ), ctrl->type);
+                usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ), ctrl->type);
                 break;
               }
           }
@@ -1756,7 +1750,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
               }
             else
               {
-                usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDRWREQ), ctrl->type);
+                usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ), ctrl->type);
               }
           }
       }

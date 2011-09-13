@@ -61,32 +61,46 @@
 #  define CONFIG_CDCSER_EPINTIN 2
 #endif
 
-#ifndef CONFIG_CDCSER_EPINTIN_SIZE
-#  define CONFIG_CDCSER_EPINTIN_SIZE 8
+#ifndef CONFIG_CDCSER_EPINTIN_FSSIZE
+#  define CONFIG_CDCSER_EPINTIN_FSSIZE 8
+#endif
+
+#ifndef CONFIG_CDCSER_EPINTIN_HSSIZE
+#  define CONFIG_CDCSER_EPINTIN_HSSIZE 8
 #endif
 
 /* Endpoint number and size (in bytes) of the CDC device-to-host (IN) data
- * bulk endpoint
+ * bulk endpoint.  NOTE that difference sizes may be selected for full (FS)
+ * or high speed (HS) modes.
  */
 
 #ifndef CONFIG_CDCSER_EPBULKIN
 #  define CONFIG_CDCSER_EPBULKIN 3
 #endif
 
-#ifndef CONFIG_CDCSER_EPBULKIN_SIZE
-#  define CONFIG_CDCSER_EPBULKIN_SIZE 16
+#ifndef CONFIG_CDCSER_EPBULKIN_FSSIZE
+#  define CONFIG_CDCSER_EPBULKIN_FSSIZE 64
+#endif
+
+#ifndef CONFIG_CDCSER_EPBULKIN_HSSIZE
+#  define CONFIG_CDCSER_EPBULKIN_HSSIZE 512
 #endif
 
 /* Endpoint number and size (in bytes) of the CDC host-to-device (OUT) data
- * bulk endpoint
+ * bulk endpoint.  NOTE that difference sizes may be selected for full (FS)
+ * or high speed (HS) modes.
  */
 
 #ifndef CONFIG_CDCSER_EPBULKOUT
 #  define CONFIG_CDCSER_EPBULKOUT 4
 #endif
 
-#ifndef CONFIG_CDCSER_EPBULKOUT_SIZE
-#  define CONFIG_CDCSER_EPBULKOUT_SIZE 16
+#ifndef CONFIG_CDCSER_EPBULKOUT_FSSIZE
+#  define CONFIG_CDCSER_EPBULKOUT_FSSIZE 64
+#endif
+
+#ifndef CONFIG_CDCSER_EPBULKOUT_HSSIZE
+#  define CONFIG_CDCSER_EPBULKOUT_HSSIZE 512
 #endif
 
 /* Number of requests in the write queue */
@@ -101,10 +115,14 @@
 #  define CONFIG_CDCSER_NRDREQS 4
 #endif
 
-/* Write buffer size */
+/* TX/RX buffer sizes */
 
-#ifndef CONFIG_CDCSER_WRBUFFERSIZE
-#  define CONFIG_CDCSER_WRBUFFERSIZE 1024
+#ifndef CONFIG_CDCSER_RXBUFSIZE
+#  define CONFIG_CDCSER_RXBUFSIZE 256
+#endif
+
+#ifndef CONFIG_CDCSER_TXBUFSIZE
+#  define CONFIG_CDCSER_TXBUFSIZE 256
 #endif
 
 /* Vendor and product IDs and strings */

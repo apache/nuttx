@@ -138,41 +138,41 @@
                                       */
 /* Table 4: Requests, Abstract Control Model */
 
-#define ACS_SEND_COMMAND        0x00 /* Issues a command in the format of the supported
+#define ACM_SEND_COMMAND        0x00 /* Issues a command in the format of the supported
                                       * control protocol. (Required)
                                       */
-#define ACS_GET_RESPONSE        0x01 /* Requests a response in the format of the
+#define ACM_GET_RESPONSE        0x01 /* Requests a response in the format of the
                                       * supported control protocol. (Required)
                                       */
-#define ACS_SET_COMM_FEATURE    0x02 /* Controls the settings for a particular
+#define ACM_SET_COMM_FEATURE    0x02 /* Controls the settings for a particular
                                       * communication feature. (Optional)
                                       */
-#define ACS_GET_COMM_FEATURE    0x03 /* Returns the current settings for the
+#define ACM_GET_COMM_FEATURE    0x03 /* Returns the current settings for the
                                       * communication feature. (Optional)
                                       */
-#define ACS_CLEAR_COMM_FEATURE  0x04 /* Clears the settings for a particular
+#define ACM_CLEAR_COMM_FEATURE  0x04 /* Clears the settings for a particular
                                       * communication feature. (Optional)
                                       */
-#define ACS_SET_LINE_CODING     0x20 /* Configures DTE rate, stop-bits, parity, and
+#define ACM_SET_LINE_CODING     0x20 /* Configures DTE rate, stop-bits, parity, and
                                       * number-of-character bits. (Optional)
                                       */
-#define ACS_GET_LINE_CODING     0x21 /* Requests current DTE rate, stop-bits, parity, and
+#define ACM_GET_LINE_CODING     0x21 /* Requests current DTE rate, stop-bits, parity, and
                                       * number-of-character bits. (Optional)
                                       */
-#define ACS_SET_CTRL_LINE_STATE 0x22 /* RS-232 signal used to tell the DCE device the
+#define ACM_SET_CTRL_LINE_STATE 0x22 /* RS-232 signal used to tell the DCE device the
                                       * DTE device is now present. (Optional)
                                       */
-#define ACS_SEND_BREAK          0x23 /* Sends special carrier
+#define ACM_SEND_BREAK          0x23 /* Sends special carrier
                                       */
 /* Table 5: Notifications, Abstract Control Model */
 
-#define ACS_NETWORK_CONNECTION  0x00 /* Notification to host of network connection status.
+#define ACM_NETWORK_CONNECTION  0x00 /* Notification to host of network connection status.
                                       * (Optional)
                                       */
-#define ACS_RESPONSE_AVAILABLE  0x01 /* Notification to host to issue a GET_ENCAPSULATED_RESPONSE 
+#define ACM_RESPONSE_AVAILABLE  0x01 /* Notification to host to issue a GET_ENCAPSULATED_RESPONSE 
                                       * request. (Required)
                                       */
-#define ACS_SERIAL_STATE        0x20 /* Returns the current state of the carrier detect, DSR,
+#define ACM_SERIAL_STATE        0x20 /* Returns the current state of the carrier detect, DSR,
                                       * break, and ring signal. (Optional)
                                       */
 /* Table 6: Requests, Telephone Control Model */
@@ -402,11 +402,11 @@
 #define CDC_CHFMT_STOP1p5       1 /* 1.5 stop bits */
 #define CDC_CHFMT_STOP2         2 /* 2 stop bits */
 
-#define CDC_PARITY_None         0 /* No parity  */
-#define CDC_PARITY_Odd          1 /* Odd parity */
-#define CDC_PARITY_Even         2 /* Even parity */
-#define CDC_PARITY_Mark         3 /* Mark parity */
-#define CDC_PARITY_Space        4 /* Space parity */
+#define CDC_PARITY_NONE         0 /* No parity  */
+#define CDC_PARITY_ODD          1 /* Odd parity */
+#define CDC_PARITY_EVEN         2 /* Even parity */
+#define CDC_PARITY_MARK         3 /* Mark parity */
+#define CDC_PARITY_SPACE        4 /* Space parity */
 
 /* Table 58: Call State Value Definitions */
 
@@ -481,7 +481,7 @@
                                             * downstream from the WAN link by the ATM
                                             * layer.
                                             */
-#defined DS_CELLS_USB_CONGESTION     0x03h /* The number of cells that have been received
+#define DS_CELLS_USB_CONGESTION      0x03h /* The number of cells that have been received
                                             * downstream from the WAN link by the ATM
                                             * layer and discarded due to congestion on the
                                             * USB link.
@@ -832,9 +832,10 @@ struct cdc_linecoding_s
 {
   uint8_t baud[4];   /* dwDTERate, Data terminal rate, in bits per second */
   uint8_t stop;      /* bCharFormat 0=1, 1=1.5, 2=2 stop bits */
-  uint8_t parity     /* bParityType, 0=None, 1=Odd, 2=Even, 3=Mark, 4=Space */
-  uint8_t nbits      /* bDataBits, Data bits (5,6,7,8, or 16) */
+  uint8_t parity;    /* bParityType, 0=None, 1=Odd, 2=Even, 3=Mark, 4=Space */
+  uint8_t nbits;     /* bDataBits, Data bits (5,6,7,8, or 16) */
 };
+#define SIZEOF_CDC_LINECODING 7
 
 /* Table 55: Line Status Information Structure */
 

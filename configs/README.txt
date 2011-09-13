@@ -922,7 +922,7 @@ defconfig -- This is a configuration file similar to the Linux
 	  CONFIG_USBHOST_BULK_DISABLE=n, CONFIG_NFILE_DESCRIPTORS > 0,
 	  and CONFIG_SCHED_WORKQUEUE=y
 
-	USB serial device class driver
+	USB serial device class driver (Prolific PL2303 Emulation)
 
 		CONFIG_USBSER
 		  Enable compilation of the USB serial driver
@@ -943,6 +943,49 @@ defconfig -- This is a configuration file similar to the Linux
 		  The product ID code/string
 		CONFIG_USBSER_RXBUFSIZE and CONFIG_USBSER_TXBUFSIZE
 		  Size of the serial receive/transmit buffers
+
+	USB serial device class driver (Standard CDC ACM class)
+
+		CONFIG_CDCSER
+		  Enable compilation of the USB serial driver
+		CONFIG_CDCSER_EP0MAXPACKET
+		  Endpoint 0 max packet size. Default 8.
+		CONFIG_CDCSER_EPINTIN
+		  The logical 7-bit address of a hardware endpoint that supports
+		  interrupt IN operation.  Default 2.
+		CONFIG_CDCSER_EPINTIN_FSSIZE
+		  Max package size for the interrupt IN endpoint if full speed mode.
+		  Default 64.
+		CONFIG_CDCSER_EPINTIN_HSSIZE
+		  Max package size for the interrupt IN endpoint if high speed mode.
+		  Default 512.
+		CONFIG_CDCSER_EPBULKOUT
+		  The logical 7-bit address of a hardware endpoint that supports
+		  bulk OUT operation
+		CONFIG_CDCSER_EPBULKOUT_FSSIZE
+		  Max package size for the bulk OUT endpoint if full speed mode.
+		  Default 64.
+		CONFIG_CDCSER_EPBULKOUT_HSSIZE
+		  Max package size for the bulk OUT  endpoint if high speed mode.
+		  Default 512.
+		CONFIG_CDCSER_EPBULKIN
+		  The logical 7-bit address of a hardware endpoint that supports
+		  bulk IN operation
+		CONFIG_CDCSER_EPBULKIN_FSSIZE
+		  Max package size for the bulk IN endpoint if full speed mode.
+		  Default 64.
+		CONFIG_CDCSER_EPBULKIN_HSSIZE
+		  Max package size for the bulk IN  endpoint if high speed mode.
+		  Default 512.
+		CONFIG_CDCSER_NWRREQS and CONFIG_CDCSER_NRDREQS
+		  The number of write/read requests that can be in flight.
+		  Default 256.
+		CONFIG_CDCSER_VENDORID and CONFIG_CDCSER_VENDORSTR
+		  The vendor ID code/string.  Default 0x03eb and "NuttX"
+		CONFIG_CDCSER_PRODUCTID and CONFIG_CDCSER_PRODUCTSTR
+		  The product ID code/string. Default 0x204b and "CDC/ACM Serial"
+		CONFIG_CDCSER_RXBUFSIZE and CONFIG_CDCSER_TXBUFSIZE
+		  Size of the serial receive/transmit buffers. Default 256.
 
 	USB Storage Device Configuration
 

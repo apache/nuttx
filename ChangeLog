@@ -2080,3 +2080,9 @@
 
 6.10 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
+	* lib/stdio/lib_fopen.c:  Fix an error in fopen(); the file pointer was not
+	  being positioned at the end of the file when the "a" and "a+" modes are
+	  used.  There are other issues with the "a+" modes (see the top-level TODO
+	  list).
+	* drivers/usbdev/cdc_serial.c and include/nuttx/usb/cdc.h and cdc_serial.h:
+	  Add support for the CDC ACM serial device class.

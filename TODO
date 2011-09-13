@@ -1,5 +1,5 @@
-NuttX TODO List (Last updated September 9, 2011)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NuttX TODO List (Last updated September 12, 2011)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
 standards, things that could be improved, and ideas for enhancements.
@@ -15,7 +15,7 @@ nuttx/
   (5)  Binary loaders (binfmt/)
  (16)  Network (net/, drivers/net)
   (2)  USB (drivers/usbdev, drivers/usbhost)
-  (6)  Libraries (lib/)
+  (7)  Libraries (lib/)
   (9)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
@@ -414,6 +414,22 @@ o Libraries (lib/)
   Description: Not implemented: ferror() and clearerr()
   Status:      Open
   Priority:    Low
+
+  Description: NuttX only supports a single file pointer so reads and writes 
+               must be from the same position.  This prohibits implementation
+               of behavior like that required for fopen() with the "a+" mode.
+               According to the fopen man page:
+               
+               "a+ Open for reading and appending (writing at end of file).
+                The file is created if it does not exist. The initial file
+                position for reading is at the beginning of the file, but
+                output is always appended to the end of the file."
+
+               At present, the single NuttX file pointer is positioned to the
+               end of the file for both reading and writing.
+  Status:      Open
+  Priority:    Medium.  This kind of operation is probably not very common in
+               deeply embedded systems but is required by standards.
 
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

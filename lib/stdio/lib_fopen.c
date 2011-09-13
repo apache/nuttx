@@ -108,14 +108,14 @@ static int lib_mode2oflags(FAR const char *mode)
                  {
                    /* Read from the beginning of the file; write to the end */
 
-                   oflags |= O_RDWR|O_CREAT;
+                   oflags |= O_RDWR|O_CREAT|O_APPEND;
                    mode++;
                  }
                else
                  {
                    /* Write to the end of the file */
 
-                   oflags |= O_WROK|O_CREAT;
+                   oflags |= O_WROK|O_CREAT|O_APPEND;
                  }
                break;
 

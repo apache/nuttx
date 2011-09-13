@@ -72,19 +72,21 @@
 
 /* Control Setup Packet.  Byte 0=Request */
 
-#define USB_REQ_DIR_IN                          (0x80) /* Bit 7=1: IN */
-#define USB_REQ_DIR_OUT                         (0x00) /* Bit 7=0: OUT */
+#define USB_REQ_DIR_IN                          (1 << 7) /* Bit 7=1: IN */
+#define USB_REQ_DIR_OUT                         (0 << 7) /* Bit 7=0: OUT */
 
-#define USB_REQ_TYPE_MASK                       (0x60) /* Bits 5:6: Request type */
-#define USB_REQ_TYPE_STANDARD                   (0x00)
-#define USB_REQ_TYPE_CLASS                      (0x20)
-#define USB_REQ_TYPE_VENDOR                     (0x40)
+#define USB_REQ_TYPE_SHIFT                      (5) /* Bits 5:6: Request type */
+#  define USB_REQ_TYPE_MASK                     (3 << USB_REQ_TYPE_SHIFT)
+#  define USB_REQ_TYPE_STANDARD                 (0 << USB_REQ_TYPE_SHIFT)
+#  define USB_REQ_TYPE_CLASS                    (1 << USB_REQ_TYPE_SHIFT)
+#  define USB_REQ_TYPE_VENDOR                   (2 << USB_REQ_TYPE_SHIFT)
 
-#define USB_REQ_RECIPIENT_MASK                  (0x1f) /* Bits 0:4: Recipient */
-#define USB_REQ_RECIPIENT_DEVICE                (0x00)
-#define USB_REQ_RECIPIENT_INTERFACE             (0x01)
-#define USB_REQ_RECIPIENT_ENDPOINT              (0x02)
-#define USB_REQ_RECIPIENT_OTHER                 (0x03)
+#define USB_REQ_RECIPIENT_SHIFT                 (0) /* Bits 0:4: Recipient */
+#define USB_REQ_RECIPIENT_MASK                  (0x1f << USB_REQ_RECIPIENT_SHIFT)
+#  define USB_REQ_RECIPIENT_DEVICE              (0 << USB_REQ_RECIPIENT_SHIFT)
+#  define USB_REQ_RECIPIENT_INTERFACE           (1 << USB_REQ_RECIPIENT_SHIFT)
+#  define USB_REQ_RECIPIENT_ENDPOINT            (2 << USB_REQ_RECIPIENT_SHIFT)
+#  define USB_REQ_RECIPIENT_OTHER               (3 << USB_REQ_RECIPIENT_SHIFT)
 
 /* Control Setup Packet.  Byte 1=Standard Request Codes */
 
