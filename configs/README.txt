@@ -966,7 +966,7 @@ defconfig -- This is a configuration file similar to the Linux
 		  Max package size for the bulk OUT endpoint if full speed mode.
 		  Default 64.
 		CONFIG_CDCSER_EPBULKOUT_HSSIZE
-		  Max package size for the bulk OUT  endpoint if high speed mode.
+		  Max package size for the bulk OUT endpoint if high speed mode.
 		  Default 512.
 		CONFIG_CDCSER_EPBULKIN
 		  The logical 7-bit address of a hardware endpoint that supports
@@ -975,11 +975,12 @@ defconfig -- This is a configuration file similar to the Linux
 		  Max package size for the bulk IN endpoint if full speed mode.
 		  Default 64.
 		CONFIG_CDCSER_EPBULKIN_HSSIZE
-		  Max package size for the bulk IN  endpoint if high speed mode.
+		  Max package size for the bulk IN endpoint if high speed mode.
 		  Default 512.
 		CONFIG_CDCSER_NWRREQS and CONFIG_CDCSER_NRDREQS
 		  The number of write/read requests that can be in flight.
-		  Default 256.
+		  CONFIG_CDCSER_NWRREQS includes write requests used for both the
+		  interrupt and bulk IN endpoints.  Default 4.
 		CONFIG_CDCSER_VENDORID and CONFIG_CDCSER_VENDORSTR
 		  The vendor ID code/string.  Default 0x03eb and "NuttX"
 		CONFIG_CDCSER_PRODUCTID and CONFIG_CDCSER_PRODUCTSTR
