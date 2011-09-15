@@ -75,7 +75,7 @@
 #define F_DUPFD     0  /* Duplicate a file descriptor */
 #define F_GETFD     1  /* Read the file descriptor flags */
 #define F_GETFL     2  /* Read the file status flags */
-#define F_GETLEASE  3  /* Indicas what type of lease is held on fd (linux) */
+#define F_GETLEASE  3  /* Indicates what type of lease is held on fd (linux) */
 #define F_GETLK     4  /* Check if we could place a lock */
 #define F_GETOWN    5  /* Get the pid receiving  SIGIO and SIGURG signals for fd */
 #define F_GETSIG    6  /* Get the signal sent */
@@ -90,7 +90,7 @@
 
 /* For posix fcntl() and lockf() */
 
-#define F_RDLCK     0 /* Take out a read lease */
+#define F_RDLCK     0  /* Take out a read lease */
 #define F_WRLCK     1  /* Take out a write lease */
 #define F_UNLCK     2  /* Remove a lease */
 

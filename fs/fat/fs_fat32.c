@@ -708,14 +708,6 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
 
   while (buflen > 0)
     {
-      /* Check if there is unwritten data in the file buffer */
-
-      ret = fat_ffcacheflush(fs, ff);
-      if (ret < 0)
-        {
-          goto errout_with_semaphore;
-        }
-
       /* Check if the user has provided a buffer large enough to
        * hold one or more complete sectors.
        */
@@ -737,7 +729,8 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
             }
 
           /* We are not sure of the state of the file buffer so
-           * the safest thing to do is just invalidate it
+           * the safest thing to do is write back any dirty, cached sector
+           * and invalidate the current cache content.
            */
 
           (void)fat_ffcacheinvalidate(fs, ff);
@@ -770,6 +763,10 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
 
           if (filep->f_pos < ff->ff_size || sectorindex != 0)
             {
+              /* Read the current sector into memory (perhaps first flushing
+               * the old, dirty sector to disk).
+               */
+
               ret = fat_ffcacheread(fs, ff, ff->ff_currentsector);
               if (ret < 0)
                 {
@@ -778,9 +775,15 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
             }
           else
             {
-              /* But in this rare case, we do have to mark the unused cached
-               * buffer as the current buffer.
-               */
+               /* Flush unwritten data in the sector cache. */
+
+               ret = fat_ffcacheflush(fs, ff);
+               if (ret < 0)
+                 {
+                   goto errout_with_semaphore;
+                 }
+
+              /* Now mark the clean cache buffer as the current sector. */
 
               ff->ff_cachesector = ff->ff_currentsector;
             }
