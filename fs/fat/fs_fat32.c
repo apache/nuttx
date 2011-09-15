@@ -630,7 +630,6 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
   int32_t               cluster;
   unsigned int          byteswritten;
   unsigned int          writesize;
-  unsigned int          bufsize;
   unsigned int          nsectors;
   uint8_t              *userbuffer = (uint8_t*)buffer;
   int                   sectorindex;
@@ -788,8 +787,8 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
 
           /* Copy the partial sector from the user buffer */
 
-          bufsize = fs->fs_hwsectorsize - sectorindex;
-          if (bufsize > buflen)
+          writesize = fs->fs_hwsectorsize - sectorindex;
+          if (writesize > buflen)
             {
              /* We will not write to the end of the buffer.  Set
               * write size to the size of the user buffer.
@@ -799,12 +798,12 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
             }
           else
             {
-              /* We will write to the end of the cached sector and
-               * perhaps beyond.  Set writesize to the number of
-               * bytes still available in the cached sector.
+              /* We will write to the end of the buffer (or beyond).  Bump
+               * up the current sector number (actually the next sector number).
                */
 
-              writesize = bufsize;
+              ff->ff_sectorsincluster--;
+              ff->ff_currentsector++;
             }
 
           /* Copy the data into the cached sector and make sure that the
@@ -813,20 +812,6 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
 
           memcpy(&ff->ff_buffer[sectorindex], userbuffer, writesize);
           ff->ff_bflags |= (FFBUFF_DIRTY|FFBUFF_VALID|FFBUFF_MODIFIED);
-
-          /* Do we need to write more in the next sector? We may need
-           * to this if we wrote to the end of the cached sector.
-           */
-
-          if (writesize >= bufsize)
-            {
-              /* We will write to the end of the buffer (or beyond).  Bump
-               * up the current sector number.
-               */
-
-              ff->ff_sectorsincluster--;
-              ff->ff_currentsector++;
-            }
         }
 
       /* Set up for the next write */
