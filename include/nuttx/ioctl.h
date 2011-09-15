@@ -51,16 +51,17 @@
  * defined below:
  */
 
-#define _TIOCBASE       (0x5400) /* Terminal I/O ioctl commands */
-#define _WDIOCBASE      (0x5500) /* Watchdog driver ioctl commands */
-#define _FIOCBASE       (0x8700) /* File system ioctl commands */
-#define _DIOCBASE       (0x8800) /* Character driver ioctl commands */
-#define _BIOCBASE       (0x8900) /* Block driver ioctl commands */
-#define _MTDIOCBASE     (0x8a00) /* MTD ioctl commands */
-#define _SIOCBASE       (0x8b00) /* Socket ioctl commands */
-#define _ARPBASE        (0x8c00) /* ARP ioctl commands */
-#define _TSBASE         (0x8d00) /* Touchscreen ioctl commands */
-#define _SNBASE         (0x8e00) /* Sensor ioctl commands */
+#define _TIOCBASE       (0x0100) /* Terminal I/O ioctl commands */
+#define _WDIOCBASE      (0x0200) /* Watchdog driver ioctl commands */
+#define _FIOCBASE       (0x0300) /* File system ioctl commands */
+#define _DIOCBASE       (0x0400) /* Character driver ioctl commands */
+#define _BIOCBASE       (0x0500) /* Block driver ioctl commands */
+#define _MTDIOCBASE     (0x0600) /* MTD ioctl commands */
+#define _SIOCBASE       (0x0700) /* Socket ioctl commands */
+#define _ARPIOCBASE     (0x0800) /* ARP ioctl commands */
+#define _TSIOCBASE      (0x0900) /* Touchscreen ioctl commands */
+#define _SNIOCBASE      (0x0a00) /* Sensor ioctl commands */
+#define _CAIOCBASE      (0x0b00) /* CDC/ACM ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -159,18 +160,24 @@
 
 /* NuttX ARP driver ioctl definitions (see netinet/arp.h) *******************/
 
-#define _ARPIOCVALID(c)   (_IOC_TYPE(c)==_ARPBASE)
-#define _ARPIOC(nr)       _IOC(_ARPBASE,nr)
+#define _ARPIOCVALID(c)   (_IOC_TYPE(c)==_ARPIOCBASE)
+#define _ARPIOC(nr)       _IOC(_ARPIOCBASE,nr)
 
-/* NuttX ARP touchscreen ioctl definitions (see nuttx/input/touchscreen.h) **/
+/* NuttX touchscreen ioctl definitions (see nuttx/input/touchscreen.h) ******/
 
-#define _TSIOCVALID(c)    (_IOC_TYPE(c)==_TSBASE)
-#define _TSIOC(nr)        _IOC(_TSBASE,nr)
+#define _TSIOCVALID(c)    (_IOC_TYPE(c)==_TSIOCBASE)
+#define _TSIOC(nr)        _IOC(_TSIOCBASE,nr)
 
-/* NuttX ARP sensor ioctl definitions (see nuttx/sensor/*.h) ****************/
+/* NuttX sensor ioctl definitions (see nuttx/sensor/*.h) ********************/
 
-#define _SNIOCVALID(c)    (_IOC_TYPE(c)==_SNBASE)
-#define _SNIOC(nr)        _IOC(_SNBASE,nr)
+#define _SNIOCVALID(c)    (_IOC_TYPE(c)==_SNIOCBASE)
+#define _SNIOC(nr)        _IOC(_SNIOCBASE,nr)
+
+/* NuttX USB CDC/ACM serial driver ioctl definitions ************************/
+/* (see nuttx/usb/cdc_serial.h) */
+
+#define _CAIOCVALID(c)    (_IOC_TYPE(c)==_CAIOCBASE)
+#define _CAIOC(nr)        _IOC(_CAIOCBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions

@@ -41,12 +41,56 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/ioctl.h>
 #include <nuttx/usb/usb.h>
 
 /****************************************************************************
  * Preprocessor definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+/* CONFIG_CDCSER
+ *   Enable compilation of the USB serial driver
+ * CONFIG_CDCSER_EP0MAXPACKET
+ *   Endpoint 0 max packet size. Default 8.
+ * CONFIG_CDCSER_EPINTIN
+ *   The logical 7-bit address of a hardware endpoint that supports
+ *   interrupt IN operation.  Default 2.
+ * CONFIG_CDCSER_EPINTIN_FSSIZE
+ *   Max package size for the interrupt IN endpoint if full speed mode.
+ *   Default 64.
+ * CONFIG_CDCSER_EPINTIN_HSSIZE
+ *   Max package size for the interrupt IN endpoint if high speed mode.
+ *   Default 512.
+ * CONFIG_CDCSER_EPBULKOUT
+ *   The logical 7-bit address of a hardware endpoint that supports
+ *   bulk OUT operation
+ * CONFIG_CDCSER_EPBULKOUT_FSSIZE
+ *   Max package size for the bulk OUT endpoint if full speed mode.
+ *   Default 64.
+ * CONFIG_CDCSER_EPBULKOUT_HSSIZE
+ *   Max package size for the bulk OUT endpoint if high speed mode.
+ *   Default 512.
+ * CONFIG_CDCSER_EPBULKIN
+ *   The logical 7-bit address of a hardware endpoint that supports
+ *   bulk IN operation
+ * CONFIG_CDCSER_EPBULKIN_FSSIZE
+ *   Max package size for the bulk IN endpoint if full speed mode.
+ *   Default 64.
+ * CONFIG_CDCSER_EPBULKIN_HSSIZE
+ *   Max package size for the bulk IN endpoint if high speed mode.
+ *   Default 512.
+ * CONFIG_CDCSER_NWRREQS and CONFIG_CDCSER_NRDREQS
+ *   The number of write/read requests that can be in flight.
+ *   CONFIG_CDCSER_NWRREQS includes write requests used for both the
+ *   interrupt and bulk IN endpoints.  Default 4.
+ * CONFIG_CDCSER_VENDORID and CONFIG_CDCSER_VENDORSTR
+ *   The vendor ID code/string.  Default 0x03eb and "NuttX"
+ * CONFIG_CDCSER_PRODUCTID and CONFIG_CDCSER_PRODUCTSTR
+ *   The product ID code/string. Default 0x204b and "CDC/ACM Serial"
+ * CONFIG_CDCSER_RXBUFSIZE and CONFIG_CDCSER_TXBUFSIZE
+ *   Size of the serial receive/transmit buffers. Default 256.
+ */
+
 /* EP0 max packet size */
 
 #ifndef CONFIG_CDCSER_EP0MAXPACKET
@@ -103,7 +147,9 @@
 #  define CONFIG_CDCSER_EPBULKOUT_HSSIZE 512
 #endif
 
-/* Number of requests in the write queue */
+/* Number of requests in the write queue.  This includes write requests used
+ * for both the interrupt and bulk IN endpoints.
+ */
 
 #ifndef CONFIG_CDCSER_NWRREQS
 #  define CONFIG_CDCSER_NWRREQS 4
@@ -167,12 +213,41 @@
 #  define CONFIG_USBDEV_MAXPOWER 100
 #endif
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+/* IOCTL Commands ***********************************************************/
+/* The USB serial driver will support a subset of the TIOC IOCTL commands
+ * defined in include/nuttx/tioctl.h.  This subset includes:
+ *
+ * CAICO_REGISTERCB
+ *   Register a callback for serial event notification. Argument:
+ *   cdcser_callback_t.  See cdcser_callback_t type definition below.
+ *   NOTE:  The callback will most likely invoked at the interrupt level.
+ *   The called back function should, therefore, limit its operations to
+ *   invoking some kind of IPC to handle the serial event in some normal
+ *   task environment.
+ * CAIOC_GETLINECODING
+ *   Get current line coding.  Argument: struct cdc_linecoding_s*.
+ *   See include/nuttx/usb/cdc.h for structure definition.  This IOCTL
+ *   should be called to get the data associated with the
+ *   CDCSER_EVENT_LINECODING event (see devent definition below).
+ * CAIOC_GETCTRLLINE
+ *   Get control line status bits. Argument FAR int*.  See
+ *   include/nuttx/usb/cdc.h for bit definitions.  This IOCTL should be
+ *   called to get the data associated CDCSER_EVENT_CTRLLINE event (see event
+ *   definition below).
+ * CAIOC_NOTIFY
+ *   Send a serial state to the host via the Interrupt IN endpoint.
+ *   Argument: int.  This includes the current state of the carrier detect,
+ *   DSR, break, and ring signal.  See "Table 69: UART State Bitmap Values"
+ *   and CDC_UART_definitions in include/nuttx/usb/cdc.h.
+ */
+
+#define CAIOC_REGISTERCB    _CAIOC(0x0001)
+#define CAIOC_GETLINECODING _CAIOC(0x0002)
+#define CAIOC_GETCTRLLINE   _CAIOC(0x0003)
+#define CAIOC_NOTIFY        _CAIOC(0x0004)
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Types
  ****************************************************************************/
 
 #undef EXTERN
@@ -182,6 +257,48 @@ extern "C" {
 #else
 # define EXTERN extern
 #endif
+
+/* Reported serial events.  Data is associated with CDCSER_EVENT_LINECODING
+ * and CDCSER_EVENT_CTRLLINE.  The data may be obtained using CDCSER IOCTL
+ * commands described above.
+ *
+ * CDCSER_EVENT_LINECODING - See "Table 50: Line Coding Structure" and struct
+ *   cdc_linecoding_s in include/nuttx/usb/cdc.h.
+ * CDCSER_EVENT_CTRLLINE - See "Table 51: Control Signal Bitmap Values for
+ *   SetControlLineState" and definitions in include/nutt/usb/cdc.h
+ * CDCSER_EVENT_SENDBREAK - See Paragraph "6.2.15 SendBreak." This request
+ *   sends special carrier modulation that generates an RS-232 style break.
+ */
+
+enum cdcser_event_e
+{
+  CDCSER_EVENT_LINECODING = 0, /* New line coding received from host */
+  CDCSER_EVENT_CTRLLINE,       /* New control line status received from host */
+  CDCSER_EVENT_SENDBREAK       /* Send break request received */
+};
+
+typedef FAR void (*cdcser_callback_t)(enum cdcser_event_e event);
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: cdcser_initialize
+ *
+ * Description:
+ *   Register USB serial port (and USB serial console if so configured).
+ *
+ * Input Parameter:
+ *   Device minor number.  E.g., minor 0 would correspond to /dev/ttyUSB0.
+ *
+ * Returned Value:
+ *   Zero (OK) means that the driver was successfully registered.  On any
+ *   failure, a negated errno value is retured.
+ *
+ ****************************************************************************/
+
+EXTERN int cdcser_initialize(int minor);
 
 #undef EXTERN
 #if defined(__cplusplus)

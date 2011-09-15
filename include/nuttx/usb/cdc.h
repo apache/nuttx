@@ -408,15 +408,26 @@
 #define CDC_PARITY_MARK         3 /* Mark parity */
 #define CDC_PARITY_SPACE        4 /* Space parity */
 
+/* Table 51: Control Signal Bitmap Values for SetControlLineState */
+
+#define CDC_DTE_PRESENT         (1 << 0) /* Indicates to DCE if DTE is present or not.
+                                          * This signal corresponds to V.24 signal
+                                          * 108/2 and RS-232 signal DTR.
+                                          */
+#define CDC_ACTIVATE_CARRIER    (1 << 1) /* Carrier control for half duplex modems.
+                                          * This signal corresponds to V.24 signal
+                                          * 105 and RS-232 signal RTS.
+                                          */
+
 /* Table 58: Call State Value Definitions */
 
-#define CDC_CALLST_IDLE        0x00 /* Call is idle */
-#define CDC_CALLST_DIAL        0x01 /* Typical dial tone */
-#define CDC_CALLST_INTDIAL     0x02 /* Interrupted dial tone */
-#define CDC_CALLST_DIALING     0x03 /* Dialing is in progress */
-#define CDC_CALLST_RINGBACK    0x04 /* Ringback */
-#define CDC_CALLST_CONNECTED   0x05 /* Connected */
-#define CDC_CALLSTINCOMING     0x06 /* Incoming call */
+#define CDC_CALLST_IDLE         0x00 /* Call is idle */
+#define CDC_CALLST_DIAL         0x01 /* Typical dial tone */
+#define CDC_CALLST_INTDIAL      0x02 /* Interrupted dial tone */
+#define CDC_CALLST_DIALING      0x03 /* Dialing is in progress */
+#define CDC_CALLST_RINGBACK     0x04 /* Ringback */
+#define CDC_CALLST_CONNECTED    0x05 /* Connected */
+#define CDC_CALLSTINCOMING      0x06 /* Incoming call */
 
 /* Table 62: Ethernet Packet Filter Bitmap */
 
@@ -512,7 +523,6 @@
                                       */
 /* Notifications ****************************************************************************/
 /* Table 69: UART State Bitmap Values */
-
 
 #define CDC_UART_RXCARRIER      (1 << 0) /* bRxCarrier State of receiver carrier detection
                                           * mechanism of device. This signal corresponds to

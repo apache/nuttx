@@ -174,6 +174,7 @@ struct usbser_dev_s
 
   uint8_t                  ctrlline;   /* Buffered control line state */
   struct cdc_linecoding_s  linecoding; /* Buffered line status */
+  cdcser_callback_t        callback;   /* Serial event callback function */
 
   FAR struct usbdev_ep_s  *epintin;    /* Interrupt IN endpoint structure */
   FAR struct usbdev_ep_s  *epbulkin;   /* Bulk IN endpoint structure */
@@ -284,6 +285,7 @@ static int     usbser_setup(FAR struct uart_dev_s *dev);
 static void    usbser_shutdown(FAR struct uart_dev_s *dev);
 static int     usbser_attach(FAR struct uart_dev_s *dev);
 static void    usbser_detach(FAR struct uart_dev_s *dev);
+static int     usbser_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
 static void    usbser_rxint(FAR struct uart_dev_s *dev, bool enable);
 static void    usbser_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool    usbser_txempty(FAR struct uart_dev_s *dev);
@@ -312,7 +314,7 @@ static const struct uart_ops_s g_uartops =
   usbser_shutdown,      /* shutdown */
   usbser_attach,        /* attach */
   usbser_detach,        /* detach */
-  NULL,                 /* ioctl */
+  usbser_ioctl,         /* ioctl */
   NULL,                 /* receive */
   usbser_rxint,         /* rxinit */
   NULL,                 /* rxavailable */
@@ -1828,7 +1830,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
       {
         if (ctrl->type == (USB_DIR_OUT|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE))
           {
-            /* Save the new line status in the private data structure */
+            /* Save the new line coding in the private data structure */
 
             memcpy(&priv->linecoding, ctrlreq->buf, min(len, 7));
             ret = 0;
@@ -1836,7 +1838,11 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
             /* If there is a registered callback to receive line status info, then
              * callout now.
              */
-#warning "Missing logic"
+
+            if (priv->callback)
+              {
+                priv->callback(CDCSER_EVENT_LINECODING);
+              }
           }
         else
           {
@@ -1863,7 +1869,11 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
             /* If there is a registered callback to receive control line status info,
              * then callout now.
              */
-#warning "Missing logic"
+
+            if (priv->callback)
+              {
+                priv->callback(CDCSER_EVENT_CTRLLINE);
+              }
           }
         else
           {
@@ -1881,8 +1891,12 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
             /* If there is a registered callback to handle the SendBreak request,
              * then callout now.
              */
-#warning "Missing logic"
+
             ret = 0;
+            if (priv->callback)
+              {
+                priv->callback(CDCSER_EVENT_SENDBREAK);
+              }
           }
         else
           {
@@ -2068,6 +2082,105 @@ static void usbser_detach(FAR struct uart_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: usbser_ioctl
+ *
+ * Description:
+ *   All ioctl calls will be routed through this method
+ *
+ ****************************************************************************/
+
+static int usbser_ioctl(FAR struct file *filep,int cmd,unsigned long arg)
+{
+  struct inode        *inode = filep->f_inode;
+  struct usbser_dev_s *priv  = inode->i_private;
+  int                  ret   = OK;
+
+  switch (cmd)
+    {
+    /* CAICO_REGISTERCB
+     *   Register a callback for serial event notification. Argument:
+     *   cdcser_callback_t.  See cdcser_callback_t type definition below.
+     *   NOTE:  The callback will most likely invoked at the interrupt level.
+     *   The called back function should, therefore, limit its operations to
+     *   invoking some kind of IPC to handle the serial event in some normal
+     *   task environment.
+     */
+
+    case CAIOC_REGISTERCB:
+      {
+        /* Save the new callback function */
+
+        priv->callback = (cdcser_callback_t)((uintptr_t)arg);
+      }
+      break;
+
+    /* CAIOC_GETLINECODING
+     *   Get current line coding.  Argument: struct cdc_linecoding_s*.
+     *   See include/nuttx/usb/cdc.h for structure definition.  This IOCTL
+     *   should be called to get the data associated with the
+     *   CDCSER_EVENT_LINECODING event).
+     */
+
+    case CAIOC_GETLINECODING:
+      {
+        FAR struct cdc_linecoding_s *ptr = (FAR struct cdc_linecoding_s *)((uintptr_t)arg);
+        if (ptr)
+          {
+            memcpy(ptr, &priv->linecoding, sizeof(struct cdc_linecoding_s));
+          }
+        else
+          {
+            ret = -EINVAL;
+          }
+      }
+      break;
+
+    /* CAIOC_GETCTRLLINE
+     *   Get control line status bits. Argument FAR int*.  See
+     *   include/nuttx/usb/cdc.h for bit definitions.  This IOCTL should be
+     *   called to get the data associated CDCSER_EVENT_CTRLLINE event.
+     */
+
+   case CAIOC_GETCTRLLINE:
+      {
+        FAR int *ptr = (FAR int *)((uintptr_t)arg);
+        if (ptr)
+          {
+            *ptr = priv->ctrlline;
+          }
+        else
+          {
+            ret = -EINVAL;
+          }
+      }
+      break;
+
+    /* CAIOC_NOTIFY
+     *   Send a serial state to the host via the Interrupt IN endpoint.
+     *   Argument: int.  This includes the current state of the carrier detect,
+     *   DSR, break, and ring signal.  See "Table 69: UART State Bitmap Values"
+     *   and CDC_UART_definitions in include/nuttx/usb/cdc.h.
+     */
+
+    case CAIOC_NOTIFY:
+      {
+        /* Not yet implemented.  I probably won't bother to implement until
+         * I com up with a usage model that needs it.
+         */
+
+        ret = -ENOSYS;
+      }
+      break;
+
+    default:
+      ret = -ENOTTY;
+      break;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: usbser_rxint
  *
  * Description:
@@ -2248,14 +2361,21 @@ static bool usbser_txempty(FAR struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbdev_serialinitialize
+ * Name: cdcser_initialize
  *
  * Description:
  *   Register USB serial port (and USB serial console if so configured).
  *
+ * Input Parameter:
+ *   Device minor number.  E.g., minor 0 would correspond to /dev/ttyUSB0.
+ *
+ * Returned Value:
+ *   Zero (OK) means that the driver was successfully registered.  On any
+ *   failure, a negated errno value is retured.
+ *
  ****************************************************************************/
 
-int usbdev_serialinitialize(int minor)
+int cdcser_initialize(int minor)
 {
   FAR struct usbser_alloc_s *alloc;
   FAR struct usbser_dev_s *priv;
