@@ -2086,3 +2086,6 @@
 	  list).
 	* drivers/usbdev/cdc_serial.c and include/nuttx/usb/cdc.h and cdc_serial.h:
 	  Add support for the CDC ACM serial device class.
+	* fs/fat/fs_fat32.c: Fix a critical bug in the write logic:  It a tiny write
+	  cross a sector boundary, then two sector writes will occur.  The first part
+	  in the first sector may be written to the wrong sector number.

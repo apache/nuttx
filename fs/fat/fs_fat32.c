@@ -630,6 +630,7 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
   int32_t               cluster;
   unsigned int          byteswritten;
   unsigned int          writesize;
+  unsigned int          bufsize;
   unsigned int          nsectors;
   uint8_t              *userbuffer = (uint8_t*)buffer;
   int                   sectorindex;
@@ -776,28 +777,56 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
                   goto errout_with_semaphore;
                 }
             }
+          else
+            {
+              /* But in this rare case, we do have to mark the unused cached
+               * buffer as the current buffer.
+               */
+
+              ff->ff_cachesector = ff->ff_currentsector;
+            }
 
           /* Copy the partial sector from the user buffer */
 
-          writesize = fs->fs_hwsectorsize - sectorindex;
-          if (writesize > buflen)
+          bufsize = fs->fs_hwsectorsize - sectorindex;
+          if (bufsize > buflen)
             {
-             /* We will not write to the end of the buffer */
+             /* We will not write to the end of the buffer.  Set
+              * write size to the size of the user buffer.
+              */
 
               writesize = buflen;
             }
           else
             {
-             /* We will write to the end of the buffer (or beyond) */
+              /* We will write to the end of the cached sector and
+               * perhaps beyond.  Set writesize to the number of
+               * bytes still available in the cached sector.
+               */
+
+              writesize = bufsize;
+            }
+
+          /* Copy the data into the cached sector and make sure that the
+           * cached sector is marked "dirty"
+           */
+
+          memcpy(&ff->ff_buffer[sectorindex], userbuffer, writesize);
+          ff->ff_bflags |= (FFBUFF_DIRTY|FFBUFF_VALID|FFBUFF_MODIFIED);
+
+          /* Do we need to write more in the next sector? We may need
+           * to this if we wrote to the end of the cached sector.
+           */
+
+          if (writesize >= bufsize)
+            {
+              /* We will write to the end of the buffer (or beyond).  Bump
+               * up the current sector number.
+               */
 
               ff->ff_sectorsincluster--;
               ff->ff_currentsector++;
             }
-
-          memcpy(&ff->ff_buffer[sectorindex], userbuffer, writesize);
-
-          ff->ff_bflags     |= (FFBUFF_DIRTY|FFBUFF_VALID|FFBUFF_MODIFIED);
-          ff->ff_cachesector = ff->ff_currentsector;
         }
 
       /* Set up for the next write */
