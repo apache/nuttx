@@ -4811,7 +4811,9 @@ build
     <code>CONFIG_CDCSER_EPBULKIN_HSSIZE</code>:  Max package size for the bulk IN  endpoint if high speed mode.  Default 512.
   </li>
   <li>
-    <code>CONFIG_CDCSER_NWRREQS</code> and <code>CONFIG_CDCSER_NRDREQS</code>:  The number of write/read requests that can be in flight.  Default 4.
+    <code>CONFIG_CDCSER_NWRREQS</code> and <code>CONFIG_CDCSER_NRDREQS</code>:  The number of write/read requests that can be in flight.
+    <code>CONFIG_CDCSER_NWRREQS</code> includes write requests used for both the interrupt and bulk IN endpoints.
+    Default 4.
   </li>
   <li>
     <code>CONFIG_CDCSER_VENDORID</code> and <code>CONFIG_CDCSER_VENDORSTR</code>:  The vendor ID code/string.  Default 0x03eb and &quot;NuttX&quot;
