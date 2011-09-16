@@ -882,6 +882,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextclust
 
                   value = (uint8_t)nextcluster;
                 }
+
               fs->fs_buffer[fatindex] = value;
 
               /* With FAT12, the second byte of the cluster number may lie in
@@ -904,6 +905,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextclust
                   if (fat_fscacheread(fs, fatsector) < 0)
                     {
                       /* Read error */
+
                       break;
                     }
                 }
@@ -924,6 +926,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextclust
 
                   value = (fs->fs_buffer[fatindex] & 0xf0) | ((nextcluster >> 8) & 0x0f);
                 }
+
               fs->fs_buffer[fatindex] = value;
             }
           break;
@@ -937,6 +940,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextclust
               if (fat_fscacheread(fs, fatsector) < 0)
                 {
                   /* Read error */
+
                   break;
                 }
               FAT_PUTFAT16(fs->fs_buffer, fatindex, nextcluster & 0xffff);
@@ -952,6 +956,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextclust
               if (fat_fscacheread(fs, fatsector) < 0)
                 {
                   /* Read error */
+
                   break;
                 }
               FAT_PUTFAT32(fs->fs_buffer, fatindex, nextcluster & 0x0fffffff);
@@ -964,7 +969,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextclust
 
       /* Mark the modified sector as "dirty" and return success */
 
-      fs->fs_dirty = 1;
+      fs->fs_dirty = true;
       return OK;
     }
 
@@ -1067,8 +1072,8 @@ int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster)
         }
       else if (startsector < 2)
         {
-
           /* Oops.. this cluster does not exist. */
+
           return 0;
         }
       else if (startsector < fs->fs_nclusters)
@@ -1351,37 +1356,38 @@ int fat_fscacheflush(struct fat_mountpt_s *fs)
    */
 
   if (fs->fs_dirty)
-  {
+    {
       /* Write the dirty sector */
 
       ret = fat_hwwrite(fs, fs->fs_buffer, fs->fs_currentsector, 1);
       if (ret < 0)
-      {
+        {
           return ret;
-      }
+        }
 
       /* Does the sector lie in the FAT region? */
 
-      if (fs->fs_currentsector < fs->fs_fatbase + fs->fs_nfatsects)
-      {
+      if (fs->fs_currentsector >= fs->fs_fatbase &&
+          fs->fs_currentsector < fs->fs_fatbase + fs->fs_nfatsects)
+        {
           /* Yes, then make the change in the FAT copy as well */
           int i;
 
           for (i = fs->fs_fatnumfats; i >= 2; i--)
-          { 
+            { 
               fs->fs_currentsector += fs->fs_nfatsects;
               ret = fat_hwwrite(fs, fs->fs_buffer, fs->fs_currentsector, 1);
               if (ret < 0)
-              {
+                {
                   return ret;
-              }
-          }
-      }
+                }
+            }
+        }
 
       /* No longer dirty */
 
       fs->fs_dirty = false;
-  }
+    }
   return OK;
 }
 

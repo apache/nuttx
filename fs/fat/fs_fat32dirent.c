@@ -2505,7 +2505,7 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
       for (i = fs->fs_fatsecperclus; i; i--)
         {
           ret = fat_hwwrite(fs, fs->fs_buffer, sector, 1);
-          if ( ret < 0)
+          if (ret < 0)
             {
               return ret;
             }

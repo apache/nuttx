@@ -728,8 +728,8 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
               nsectors = ff->ff_sectorsincluster;
             }
 
-          /* We are not sure of the state of the file buffer so
-           * the safest thing to do is write back any dirty, cached sector
+          /* We are not sure of the state of the sector cache so the
+           * safest thing to do is write back any dirty, cached sector
            * and invalidate the current cache content.
            */
 

@@ -2076,7 +2076,7 @@
 	* sched/clock_gettime.c:  Correct an error in the tv_nsec calculation
 	  that happens only config CONFIG_RTC is enabled.
 	* arch/arm/src/stm32/stm32_i2c.c:  Correct some bugs related to waiting
-	  to the I2C STOP condition to be cleared.
+	  for the I2C STOP condition to be cleared.
 
 6.10 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
 
@@ -2089,3 +2089,7 @@
 	* fs/fat/fs_fat32.c: Fix a critical bug in the write logic:  It a tiny write
 	  cross a sector boundary, then two sector writes will occur.  The first part
 	  in the first sector may be written to the wrong sector number.
+	* fs/fat/fs_fat32util.c:  Fix a stray write into the FAT (always sector 964 on
+	  FAT32).  This bug will cause some lost chains.  I'm sure this bug could
+	  corrupt files but at present, the only thing I have seen is that before
+	  fixing this bug, the Windows chkdsk utility would report these lost chains.
