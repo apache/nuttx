@@ -51,7 +51,7 @@
 /* CONFIG_CDCSER
  *   Enable compilation of the USB serial driver
  * CONFIG_CDCSER_EP0MAXPACKET
- *   Endpoint 0 max packet size. Default 8.
+ *   Endpoint 0 max packet size. Default 64.
  * CONFIG_CDCSER_EPINTIN
  *   The logical 7-bit address of a hardware endpoint that supports
  *   interrupt IN operation.  Default 2.
@@ -60,7 +60,7 @@
  *   Default 64.
  * CONFIG_CDCSER_EPINTIN_HSSIZE
  *   Max package size for the interrupt IN endpoint if high speed mode.
- *   Default 512.
+ *   Default 64.
  * CONFIG_CDCSER_EPBULKOUT
  *   The logical 7-bit address of a hardware endpoint that supports
  *   bulk OUT operation
@@ -94,7 +94,7 @@
 /* EP0 max packet size */
 
 #ifndef CONFIG_CDCSER_EP0MAXPACKET
-#  define CONFIG_CDCSER_EP0MAXPACKET 8
+#  define CONFIG_CDCSER_EP0MAXPACKET 64
 #endif
 
 /* Endpoint number and size (in bytes) of the CDC serial device-to-host (IN)
@@ -106,11 +106,11 @@
 #endif
 
 #ifndef CONFIG_CDCSER_EPINTIN_FSSIZE
-#  define CONFIG_CDCSER_EPINTIN_FSSIZE 8
+#  define CONFIG_CDCSER_EPINTIN_FSSIZE 64
 #endif
 
 #ifndef CONFIG_CDCSER_EPINTIN_HSSIZE
-#  define CONFIG_CDCSER_EPINTIN_HSSIZE 8
+#  define CONFIG_CDCSER_EPINTIN_HSSIZE 64
 #endif
 
 /* Endpoint number and size (in bytes) of the CDC device-to-host (IN) data

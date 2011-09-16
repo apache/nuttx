@@ -67,14 +67,14 @@
 /* Descriptors ****************************************************************/
 /* These settings are not modifiable via the NuttX configuration */
 
-#define CDC_VERSIONNO              0x010a   /* CDC version number 1.10 */
+#define CDC_VERSIONNO              0x0110   /* CDC version number 1.10 (BCD) */
 #define CDCSER_CONFIGIDNONE        (0)      /* Config ID means to return to address mode */
 #define CDCSER_INTERFACEID         (0)
 #define CDCSER_ALTINTERFACEID      (0)
 
 /* Device descriptor values */
 
-#define CDCSER_VERSIONNO           (0x0101) /* Device version number 1.1 */
+#define CDCSER_VERSIONNO           (0x0101) /* Device version number 1.1 (BCD) */
 #define CDCSER_NCONFIGS            (1)      /* Number of configurations supported */
 
 /* Configuration descriptor values */
@@ -330,17 +330,23 @@ static const struct usb_devdesc_s g_devdesc =
 {
   USB_SIZEOF_DEVDESC,                           /* len */
   USB_DESC_TYPE_DEVICE,                         /* type */
-  {LSBYTE(0x0200), MSBYTE(0x0200)},             /* usb */
+  {                                             /* usb */
+    LSBYTE(0x0200),
+    MSBYTE(0x0200)
+  },
   USB_CLASS_CDC,                                /* class */
   CDC_SUBCLASS_NONE,                            /* subclass */
   CDC_PROTO_NONE,                               /* protocol */
   CONFIG_CDCSER_EP0MAXPACKET,                   /* maxpacketsize */
   { LSBYTE(CONFIG_CDCSER_VENDORID),             /* vendor */
-    MSBYTE(CONFIG_CDCSER_VENDORID) },
+    MSBYTE(CONFIG_CDCSER_VENDORID)
+  },
   { LSBYTE(CONFIG_CDCSER_PRODUCTID),            /* product */
-    MSBYTE(CONFIG_CDCSER_PRODUCTID) },
+    MSBYTE(CONFIG_CDCSER_PRODUCTID)
+  },
   { LSBYTE(CDCSER_VERSIONNO),                   /* device */
-    MSBYTE(CDCSER_VERSIONNO) },
+    MSBYTE(CDCSER_VERSIONNO)
+  },
   CDCSER_MANUFACTURERSTRID,                     /* imfgr */
   CDCSER_PRODUCTSTRID,                          /* iproduct */
   CDCSER_SERIALSTRID,                           /* serno */
@@ -458,7 +464,7 @@ static const struct usb_epdesc_s g_epbulkoutdesc =
   USB_SIZEOF_EPDESC,                            /* len */
   USB_DESC_TYPE_ENDPOINT,                       /* type */
   CDCSER_EPOUTBULK_ADDR,                        /* addr */
-  CDCSER_EPINTIN_ATTR,                          /* attr */
+  CDCSER_EPOUTBULK_ATTR,                        /* attr */
   {
     LSBYTE(CONFIG_CDCSER_EPBULKOUT_FSSIZE),     /* maxpacket (full speed) */
     MSBYTE(CONFIG_CDCSER_EPBULKOUT_FSSIZE)
@@ -1926,7 +1932,6 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
           usbclass_ep0incomplete(dev->ep0, ctrlreq);
         }
     }
-
   return ret;
 }
 
