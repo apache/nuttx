@@ -2093,3 +2093,5 @@
 	  FAT32).  This bug will cause some lost chains.  I'm sure this bug could
 	  corrupt files but at present, the only thing I have seen is that before
 	  fixing this bug, the Windows chkdsk utility would report these lost chains.
+	* arch/arm/src/stm32/stm32_i2c.c: Driver can now operate in a faster polled
+	  mode (at the expense of using more cpu cycles).
