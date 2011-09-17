@@ -263,7 +263,7 @@ More complex temperature sensor operations are also available.  See the IOCTAL
 commands enumerated in include/nuttx/sensors/lm75.h.  Also read the descriptions
 of the stm32_lm75initialize() and stm32_lm75attach() interfaces in the
 arch/board/board.h file (sames as configs/stm3210e-eval/include/board.h).
- 
+
 STM3210E-EVAL-specific Configuration Options
 ============================================
 
@@ -595,6 +595,38 @@ Where <subdir> is one of the following:
     more information.
 
     CONFIG_STM32_BUILDROOT=y	  : NuttX buildroot under Linux or Cygwin
+
+    USB debug output can be enabled as by changing the following
+    settings in the configuration file:
+
+    -CONFIG_DEBUG=n
+    -CONFIG_DEBUG_VERBOSE=n
+    -CONFIG_DEBUG_USB=n
+    +CONFIG_DEBUG=y
+    +CONFIG_DEBUG_VERBOSE=y
+    +CONFIG_DEBUG_USB=y
+
+    -CONFIG_EXAMPLES_USBSERIAL_TRACEINIT=n
+    -CONFIG_EXAMPLES_USBSERIAL_TRACECLASS=n
+    -CONFIG_EXAMPLES_USBSERIAL_TRACETRANSFERS=n
+    -CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER=n
+    -CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=n
+    +CONFIG_EXAMPLES_USBSERIAL_TRACEINIT=y
+    +CONFIG_EXAMPLES_USBSERIAL_TRACECLASS=y
+    +CONFIG_EXAMPLES_USBSERIAL_TRACETRANSFERS=y
+    +CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER=y
+    +CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=y
+
+    By default, the usbserial example uses the Prolific PL2303
+    serial/USB converter emulation.  The example can be modified
+    to use the CDC/ACM serial class by making the following changes
+    to the configuration file:
+
+    -CONFIG_USBSER=y
+    +CONFIG_USBSER=n
+
+    -CONFIG_CDCSER=n
+    +CONFIG_CDCSER=y
 
   usbstorage:
   ----------
