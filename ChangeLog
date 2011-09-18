@@ -2095,3 +2095,8 @@
 	  fixing this bug, the Windows chkdsk utility would report these lost chains.
 	* arch/arm/src/stm32/stm32_i2c.c: Driver can now operate in a faster polled
 	  mode (at the expense of using more cpu cycles).
+	* arch/arm/src/stm32/stm32_i2c.c: Add trace debug capability.  Enabled with
+	  CONFIG_I2C_TRACE.
+	* arch/arm/src/stm32/stm32_i2c.c: Fix another bug where I2C conflicts with FSMC
+	  being enabled.  That time at the tail end of the transaction where there is
+	  an unfinished stop condition.
