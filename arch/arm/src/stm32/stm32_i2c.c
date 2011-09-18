@@ -122,29 +122,30 @@
   (SEC2TICK(CONFIG_STM32_I2CTIMEOSEC) + MSEC2TICK(CONFIG_STM32_I2CTIMEOMS))
 
 /* Debug ****************************************************************************/
-/* CONFIG_DEBUG_I2C + CONFIG_DEBUG enables general I2C debug output.
- *
- * If CONFIG_I2C_POLLED and CONFIG_DEBUG_VERBOSE are also defined, then some
- * additinal detailed output is generated.  If CONFIG_I2C_POLLED is not defined and
- * CONFIG_DEBUG_I2CINTS, then output will ge generated from the interrupt handler
- * as well.
- */
+/* CONFIG_DEBUG_I2C + CONFIG_DEBUG enables general I2C debug output. */
 
 #ifdef CONFIG_DEBUG_I2C
 #  define i2cdbg dbg
-#  ifdef CONFIG_I2C_POLLED
-#    define intdbg vdbg
-#  else
-#    ifdef CONFIG_DEBUG_I2CINTS
-#      define intdbg lldbg
-#    else
-#      define intdbg(x...)
-#    endif
-#  endif
+#  define i2cvdbg vdbg
 #else
-#  undef CONFIG_DEBUG_I2CINTS
 #  define i2cdbg(x...)
-#  define intdbg(x...)
+#  define i2cvdbg(x...)
+#endif
+
+/* I2C event trace logic.  NOTE:  trace uses the internal, non-standard, low-level
+ * debug interface lib_rawprintf() but does not require that any other debug
+ * is enabled.
+ */
+
+#ifndef CONFIG_I2C_TRACE
+#  define stm32_i2c_tracereset(p)
+#  define stm32_i2c_tracenew(p,s)
+#  define stm32_i3c_traceevent(p,e,a)
+#  define stm32_i2c_tracedump(p)
+#endif
+
+#ifndef CONFIG_I2C_NTRACE
+#  define CONFIG_I2C_NTRACE 20
 #endif
 
 /************************************************************************************
@@ -157,6 +158,33 @@ enum stm32_intstate_e
   INTSTATE_IDLE = 0,      /* No I2C activity */
   INTSTATE_WAITING,       /* Waiting for completion of interrupt activity */
   INTSTATE_DONE,          /* Interrupt activity complete */
+};
+
+/* Trace events */
+
+enum stm32_trace_e
+{
+  I2CEVENT_NONE = 0,      /* No events have occurred with this status */
+  I2CEVENT_SB,            /* Start/Master, param = msgc */
+  I2CEVENT_SENDBYTE,      /* Send byte, param = byte sent */
+  I2CEVENT_READ,          /* Read data, param = dcnt */
+  I2CEVENT_ITBUFEN,       /* Enable buffer interrupts, param = 0 */
+  I2CEVENT_RXNE,          /* Read more dta, param = dcnt */
+  I2CEVENT_REITBUFEN,     /* Re-enable buffer interrupts, param = 0 */
+  I2CEVENT_DISITBUFEN,    /* Disable buffer interrupts, param = 0 */
+  I2CEVENT_BTFSTART,      /* Last byte sent, re-starting, param = msgc */
+  I2CEVENT_BTFSTOP,       /* Last byte sten, send stop, param = 0 */
+  I2CEVENT_ERROR          /* Error occurred, param = 0 */
+};
+
+/* Trace data */
+
+struct stm32_trace_s
+{
+  uint32_t status;             /* I2C 32-bit SR2|SR1 status */
+  uint32_t count;              /* Interrupt count when status change */
+  enum stm32_intstate_e event; /* Last event that occurred with this status */
+  uint32_t parm;               /* Parameter associated with the event */
 };
 
 /* I2C Device Private Data */
@@ -176,6 +204,18 @@ struct stm32_i2c_priv_s
   uint8_t    *ptr;         /* Current message buffer */
   int         dcnt;        /* Current message length */
   uint16_t    flags;       /* Current message flags */
+
+  /* I2C trace support */
+
+#ifdef CONFIG_I2C_TRACE
+  int         tndx;        /* Trace array index */
+  uint32_t    isr_count;   /* Count of ISRs processed */
+  uint32_t    old_status;  /* Last 32-bit status value */
+
+  /* The actual trace data */
+
+  struct stm32_trace_s trace[CONFIG_I2C_NTRACE];
+#endif
 
   uint32_t    status;      /* End of transfer SR2|SR1 status */
 };
@@ -203,11 +243,19 @@ static inline void stm32_i2c_putreg(FAR struct stm32_i2c_priv_s *priv, uint8_t o
 static inline void stm32_i2c_modifyreg(FAR struct stm32_i2c_priv_s *priv,
                                        uint8_t offset, uint16_t clearbits,
                                        uint16_t setbits);
-static void inline stm32_i2c_sem_wait(FAR struct i2c_dev_s *dev);
-static int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev);
-static void inline stm32_i2c_sem_post(FAR struct i2c_dev_s *dev);
-static void inline stm32_i2c_sem_init(FAR struct i2c_dev_s *dev);
-static void inline stm32_i2c_sem_destroy(FAR struct i2c_dev_s *dev);
+static inline void stm32_i2c_sem_wait(FAR struct i2c_dev_s *dev);
+static inline int  stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv);
+static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv);
+static inline void stm32_i2c_sem_post(FAR struct i2c_dev_s *dev);
+static inline void stm32_i2c_sem_init(FAR struct i2c_dev_s *dev);
+static inline void stm32_i2c_sem_destroy(FAR struct i2c_dev_s *dev);
+#ifdef CONFIG_I2C_TRACE
+static void stm32_i2c_tracereset(FAR struct stm32_i2c_priv_s *priv);
+static void stm32_i2c_tracenew(FAR struct stm32_i2c_priv_s *priv, uint32_t status);
+static void stm32_i3c_traceevent(FAR struct stm32_i2c_priv_s *priv,
+                               enum stm32_trace_e event, uint32_t parm);
+static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv);
+#endif
 static void stm32_i2c_setclock(FAR struct stm32_i2c_priv_s *priv,
                                uint32_t frequency);
 static inline void stm32_i2c_sendstart(FAR struct stm32_i2c_priv_s *priv);
@@ -356,7 +404,7 @@ static inline void stm32_i2c_modifyreg(FAR struct stm32_i2c_priv_s *priv,
  *
  ************************************************************************************/
 
-static void inline stm32_i2c_sem_wait(FAR struct i2c_dev_s *dev)
+static inline void stm32_i2c_sem_wait(FAR struct i2c_dev_s *dev)
 {
   while (sem_wait(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl) != 0)
     {
@@ -365,7 +413,7 @@ static void inline stm32_i2c_sem_wait(FAR struct i2c_dev_s *dev)
 }
 
 /************************************************************************************
- * Name: stm32_i2c_sem_waitisr
+ * Name: stm32_i2c_sem_waitdone
  *
  * Description:
  *   Wait for a transfer to complete
@@ -373,9 +421,8 @@ static void inline stm32_i2c_sem_wait(FAR struct i2c_dev_s *dev)
  ************************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
-static int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
+static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 {
-  FAR struct stm32_i2c_priv_s *priv = ((struct stm32_i2c_inst_s *)dev)->priv;
   struct timespec abstime;
   irqstate_t flags;
   uint32_t regval;
@@ -446,9 +493,8 @@ static int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
   return ret;
 }
 #else
-int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
+static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv )
 {
-  FAR struct stm32_i2c_priv_s *priv = ((struct stm32_i2c_inst_s *)dev)->priv;
   uint32_t start;
   uint32_t elapsed;
   int ret;
@@ -458,9 +504,9 @@ int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
    * sem_timedwait() sleeps.
    */
 
-   priv->intstate = INTSTATE_WAITING;
-   start = clock_systimer();
-   do
+  priv->intstate = INTSTATE_WAITING;
+  start = clock_systimer();
+  do
     {
       /* Poll by simply calling the timer interrupt handler until it
        * reports that it is done.
@@ -473,9 +519,12 @@ int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
       elapsed = clock_systimer() - start;
     }
 
-  /* Loop until the interrupt level transfer is complete. */
+  /* Loop until the transfer is complete. */
 
   while (priv->intstate != INTSTATE_DONE && elapsed < CONFIG_STM32_I2CTIMEOTICKS);
+
+  i2cvdbg("intstate: %d elapsed: %d threshold: %d status: %08x\n",
+          priv->intstate, elapsed, CONFIG_STM32_I2CTIMEOTICKS, priv->status);
 
   /* Set the interrupt state back to IDLE */
 
@@ -486,6 +535,62 @@ int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
 #endif
 
 /************************************************************************************
+ * Name: stm32_i2c_sem_waitstop
+ *
+ * Description:
+ *   Wait for a STOP to complete
+ *
+ ************************************************************************************/
+
+static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
+{
+  uint32_t start;
+  uint32_t elapsed;
+  uint32_t cr1;
+  uint32_t sr1;
+
+  /* Wait as stop might still be in progress; but stop might also
+   * be set because of a timeout error: "The [STOP] bit is set and
+   * cleared by software, cleared by hardware when a Stop condition is
+   * detected, set by hardware when a timeout error is detected."
+   */
+
+  start = clock_systimer();
+  do
+    {
+      /* Check for STOP condition */
+
+      cr1 = stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET);
+      if ((cr1 & I2C_CR1_STOP) == 0)
+        {
+          return;
+        }
+
+      /* Check for timeout error */
+
+      sr1 = stm32_i2c_getreg(priv, STM32_I2C_SR1_OFFSET);
+      if ((sr1 & I2C_SR1_TIMEOUT) != 0)
+        {
+          return;
+        }      
+
+      /* Calculate the elapsed time */
+
+      elapsed = clock_systimer() - start;
+    }
+
+  /* Loop until the stop is complete or a timeout occurs. */
+
+  while (elapsed < CONFIG_STM32_I2CTIMEOTICKS);
+
+  /* If we get here then a timeout occurred with the STOP condition
+   * still pending.
+   */
+
+  i2cvdbg("Timeout with CR1: %04x SR1: %04x\n", cr1, sr1);
+}
+
+/************************************************************************************
  * Name: stm32_i2c_sem_post
  *
  * Description:
@@ -493,7 +598,7 @@ int inline stm32_i2c_sem_waitisr(FAR struct i2c_dev_s *dev)
  *
  ************************************************************************************/
 
-static void inline stm32_i2c_sem_post(FAR struct i2c_dev_s *dev)
+static inline void stm32_i2c_sem_post(FAR struct i2c_dev_s *dev)
 {
   sem_post( &((struct stm32_i2c_inst_s *)dev)->priv->sem_excl );
 }
@@ -506,7 +611,7 @@ static void inline stm32_i2c_sem_post(FAR struct i2c_dev_s *dev)
  *
  ************************************************************************************/
 
-static void inline stm32_i2c_sem_init(FAR struct i2c_dev_s *dev)
+static inline void stm32_i2c_sem_init(FAR struct i2c_dev_s *dev)
 {
   sem_init(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl, 0, 1);
 #ifndef CONFIG_I2C_POLLED
@@ -522,13 +627,84 @@ static void inline stm32_i2c_sem_init(FAR struct i2c_dev_s *dev)
  *
  ************************************************************************************/
 
-static void inline stm32_i2c_sem_destroy(FAR struct i2c_dev_s *dev)
+static inline void stm32_i2c_sem_destroy(FAR struct i2c_dev_s *dev)
 {
   sem_destroy(&((struct stm32_i2c_inst_s *)dev)->priv->sem_excl);
 #ifndef CONFIG_I2C_POLLED
   sem_destroy(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr);
 #endif
 }
+
+/************************************************************************************
+ * Name: stm32_i2c_trace*
+ *
+ * Description:
+ *   I2C trace instrumentation
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_I2C_TRACE
+static void stm32_i2c_tracereset(FAR struct stm32_i2c_priv_s *priv)
+{
+  /* Reset the trace info for a new data collection */
+
+  priv->isr_count  = 0;
+  priv->old_status = 0xffffffff;
+  priv->tndx       = -1;
+}
+
+static void stm32_i2c_tracenew(FAR struct stm32_i2c_priv_s *priv, uint32_t status)
+{
+  /* Increment the cout of interrupts received */
+
+  priv->isr_count++;
+
+  /* Has the status changed from the last interrupt */
+
+  if (status != priv->old_status)
+    {
+      /* Yes.. bump up the trace index (unless we are out of trace entries) */
+
+      if (priv->tndx < CONFIG_I2C_NTRACE)
+        {
+          priv->tndx++;
+        }
+
+      /* Initialize the new trace entry */
+
+      priv->trace[priv->tndx].status = status;
+      priv->trace[priv->tndx].count  = priv->isr_count;
+      priv->trace[priv->tndx].event  = I2CEVENT_NONE;
+      priv->trace[priv->tndx].parm   = 0;
+      priv->old_status               = status;
+    }
+}
+
+static void stm32_i3c_traceevent(FAR struct stm32_i2c_priv_s *priv,
+                                enum stm32_trace_e event, uint32_t parm)
+{
+  /* Add the event to the trace entry (possibly overwriting a previous trace
+   * event.
+   */
+ 
+  priv->trace[priv->tndx].event  = event;
+  priv->trace[priv->tndx].parm   = parm;
+}
+
+static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
+{
+  int i;
+
+  /* Dump all of the buffered trace entries */
+
+  for (i = 0; i < priv->tndx; i++)
+    {
+      lib_rawprintf("%2d. STATUS: %08x COUNT: %3d EVENT: %2d PARM: %08x\n", i,
+                    priv->trace[i].status, priv->trace[i].count,
+                    priv->trace[i].event,  priv->trace[i].parm);
+    }
+}
+#endif /* CONFIG_I2C_TRACE */
 
 /************************************************************************************
  * Name: stm32_i2c_setclock
@@ -772,22 +948,16 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 {
   uint32_t status = stm32_i2c_getstatus(priv);
 
-#ifdef CONFIG_DEBUG_I2CINTS
-  static uint32_t isr_count = 0;
-  static uint32_t old_status = 0xffff;
-  isr_count++;
+  /* Check for new trace setup */
 
-  if (old_status != status)
-    {
-        intdbg("status = %8x, count=%d\n", status, isr_count); fflush(stdout);
-        old_status = status;
-    }
-#endif
+  stm32_i2c_tracenew(priv, status);
             
   /* Was start bit sent */
     
   if ((status & I2C_SR1_SB) != 0)
     {
+      stm32_i3c_traceevent(priv, I2CEVENT_SB, priv->msgc);
+
       /* Get run-time data */
 
       priv->ptr   = priv->msgv->buffer;
@@ -824,11 +994,13 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
     
   else if ((priv->flags & I2C_M_READ) == 0 && (status & (I2C_SR1_ADDR | I2C_SR1_TXE)) != 0)
     {
+      stm32_i3c_traceevent(priv, I2CEVENT_READ, priv->dcnt);
+
       if (--priv->dcnt >= 0)
         {
           /* Send a byte */
 
-          intdbg("Send byte: %2x\n", *priv->ptr);
+          stm32_i3c_traceevent(priv, I2CEVENT_SENDBYTE, *priv->ptr);
           stm32_i2c_putreg(priv, STM32_I2C_DR_OFFSET, *priv->ptr++); 
         }
     }
@@ -838,6 +1010,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
       /* Enable RxNE and TxE buffers in order to receive one or multiple bytes */
 
 #ifndef CONFIG_I2C_POLLED
+      stm32_i3c_traceevent(priv, I2CEVENT_ITBUFEN, 0);
       stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_ITBUFEN);
 #endif
     }
@@ -848,11 +1021,10 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
     {
       /* Read a byte, if dcnt goes < 0, then read dummy bytes to ack ISRs */
     
-      intdbg("dcnt=%d\n", priv->dcnt);
+      stm32_i3c_traceevent(priv, I2CEVENT_RXNE, priv->dcnt);
       if (--priv->dcnt >= 0)
         {
           *priv->ptr++ = stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);
-          intdbg("Received: %2x\n", *(priv->ptr-1) );
 
           /* Disable acknowledge when last byte is to be received */
 
@@ -870,10 +1042,12 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 #ifndef CONFIG_I2C_POLLED
   if (priv->dcnt > 0)
     {
+      stm32_i3c_traceevent(priv, I2CEVENT_REITBUFEN, 0);
       stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_ITBUFEN);
     }
   else if (priv->dcnt == 0)
     {
+      stm32_i3c_traceevent(priv, I2CEVENT_DISITBUFEN, 0);
       stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_ITBUFEN, 0);  
     }
 #endif
@@ -882,7 +1056,6 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 
   if (priv->dcnt <= 0 && (status & I2C_SR1_BTF) != 0)
     {
-      intdbg("BTF\n");
       stm32_i2c_getreg(priv, STM32_I2C_DR_OFFSET);    /* ACK ISR */
 
       /* Do we need to terminate or restart after this byte?
@@ -895,6 +1068,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 
       if (priv->msgc > 0)
         {
+          stm32_i3c_traceevent(priv, I2CEVENT_BTFSTART, priv->msgc);
           if (priv->msgv->flags & I2C_M_NORESTART)
             {
               priv->ptr   = priv->msgv->buffer;
@@ -916,7 +1090,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
         }
       else if (priv->msgv)
         {
-          intdbg("stop2: status = %8x\n", status);
+          stm32_i3c_traceevent(priv, I2CEVENT_BTFSTOP, 0);
           stm32_i2c_sendstop(priv);
 
           /* Is there a thread waiting for this event (there should be) */
@@ -948,6 +1122,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
     
     if ((status & I2C_SR1_ERRORMASK) != 0)
       {
+        stm32_i3c_traceevent(priv, I2CEVENT_ERROR, 0);
+
         /* Clear interrupt flags */
 
         stm32_i2c_putreg(priv, STM32_I2C_SR1_OFFSET, 0);
@@ -1216,46 +1392,30 @@ static int stm32_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 
 static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int count)
 {
-  struct stm32_i2c_inst_s *inst = (struct stm32_i2c_inst_s *)dev;
+  struct stm32_i2c_inst_s     *inst = (struct stm32_i2c_inst_s *)dev;
+  FAR struct stm32_i2c_priv_s *priv = inst->priv;
   uint32_t    status = 0;
   uint32_t    ahbenr;
-  uint16_t    regval;
-  int         status_errno = 0;
+  int         errval = 0;
 
   ASSERT(count);
 
   /* Disable FSMC that shares a pin with I2C1 (LBAR) */
 
-  ahbenr = stm32_i2c_disablefsmc(inst->priv);
+  ahbenr = stm32_i2c_disablefsmc(priv);
 
-  /* Wait as stop might still be in progress; but stop might also
-   * be set because of a timeout error: "The [STOP] bit is set and
-   * cleared by software, cleared by hardware when a Stop condition is
-   * detected, set by hardware when a timeout error is detected."
+  /* Wait for any STOP in progress.  NOTE:  If we have to disable the FSMC
+   * then we cannot do this at the top of the loop, unfortunately.  The STOP
+   * will not complete normally if the FSMC is enabled.
    */
 
-  for (;;)
-    {
-      /* Check for STOP condition */
-
-      regval = stm32_i2c_getreg(inst->priv, STM32_I2C_CR1_OFFSET);
-      if ((regval & I2C_CR1_STOP) == 0)
-        {
-          break;
-        }
-
-      /* Check for timeout error */
-
-      regval = stm32_i2c_getreg(inst->priv, STM32_I2C_SR1_OFFSET);
-      if ((regval & I2C_SR1_TIMEOUT) != 0)
-        {
-          break;
-        }      
-    }
+#ifndef CONFIG_STM32_I2C1
+  stm32_i2c_sem_waitstop(priv);
+#endif
 
   /* Clear any pending error interrupts */
 
-  stm32_i2c_putreg(inst->priv, STM32_I2C_SR1_OFFSET, 0);
+  stm32_i2c_putreg(priv, STM32_I2C_SR1_OFFSET, 0);
 
   /* "Note: When the STOP, START or PEC bit is set, the software must
    *  not perform any write access to I2C_CR1 before this bit is
@@ -1264,31 +1424,39 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
    *  not cleared by hardware, then we will have to do that from hardware.
    */
 
-  stm32_i2c_clrstart(inst->priv);
+  stm32_i2c_clrstart(priv);
     
   /* Old transfers are done */
 
-  inst->priv->msgv = msgs;
-  inst->priv->msgc = count;
+  priv->msgv = msgs;
+  priv->msgc = count;
+
+  /* Reset I2C trace logic */
+
+  stm32_i2c_tracereset(priv);
         
   /* Set I2C clock frequency (on change it toggles I2C_CR1_PE !) */
 
-  stm32_i2c_setclock(inst->priv, inst->frequency);
+  stm32_i2c_setclock(priv, inst->frequency);
 
   /* Trigger start condition, then the process moves into the ISR.  I2C
-   * interrupts will be enabled within stm32_i2c_waitisr().
+   * interrupts will be enabled within stm32_i2c_waitdone().
    */
 
-  stm32_i2c_sendstart(inst->priv);
+  priv->status = 0;
+  stm32_i2c_sendstart(priv);
 
   /* Wait for an ISR, if there was a timeout, fetch latest status to get
    * the BUSY flag.
    */
 
-  if (stm32_i2c_sem_waitisr(dev) == ERROR)
+  if (stm32_i2c_sem_waitdone(priv) == ERROR)
     {
-      status = stm32_i2c_getstatus(inst->priv);
-      status_errno = ETIMEDOUT;
+      status = stm32_i2c_getstatus(priv);
+      errval = ETIMEDOUT;
+
+      i2cdbg("Timed out: CR1: %04x status: %08x\n",
+             stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET), status);
 
       /* "Note: When the STOP, START or PEC bit is set, the software must
        *  not perform any write access to I2C_CR1 before this bit is
@@ -1296,13 +1464,13 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
        *  second STOP, START or PEC request."
        */
 
-      stm32_i2c_clrstart(inst->priv);
+      stm32_i2c_clrstart(priv);
     }
   else
     {
       /* clear SR2 (BUSY flag) as we've done successfully */
 
-      status = inst->priv->status & 0xffff;
+      status = priv->status & 0xffff;
     }
 
   /* Check for error status conditions */
@@ -1315,37 +1483,37 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
         {
           /* Bus Error */
 
-          status_errno = EIO;
+          errval = EIO;
         }
       else if (status & I2C_SR1_ARLO)
         {
           /* Arbitration Lost (master mode) */
 
-          status_errno = EAGAIN;
+          errval = EAGAIN;
         }
       else if (status & I2C_SR1_AF)
         {
           /* Acknowledge Failure */
 
-          status_errno = ENXIO;
+          errval = ENXIO;
         }
       else if (status & I2C_SR1_OVR)
         {
           /* Overrun/Underrun */
 
-          status_errno = EIO;
+          errval = EIO;
         }
       else if (status & I2C_SR1_PECERR)
         {
           /* PEC Error in reception */
 
-          status_errno = EPROTO;
+          errval = EPROTO;
         }
       else if (status & I2C_SR1_TIMEOUT)
         {
           /* Timeout or Tlow Error */
 
-          status_errno = ETIME;
+          errval = ETIME;
         }
 
       /* This is not an error and should never happen since SMBus is not enabled */
@@ -1356,13 +1524,13 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
            * that want to trade their ability to master for a pin.
            */
 
-          status_errno = EINTR;
+          errval = EINTR;
         }
     }
 
   /* This is not an error, but should not happen.  The BUSY signal can hang,
    * however, if there are unhealthy devices on the bus that need to be reset.
-   * NOTE:  We will only see this buy indication if stm32_i2c_sem_waitisr()
+   * NOTE:  We will only see this buy indication if stm32_i2c_sem_waitdone()
    * fails above;  Otherwise it is cleared.
    */
 
@@ -1370,16 +1538,28 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
     {
       /* I2C Bus is for some reason busy */
 
-      status_errno = EBUSY;
+      errval = EBUSY;
     }
+
+  /* Dump the trace result */
+
+  stm32_i2c_tracedump(priv);
+        
+  /* Wait for any STOP in progress.  NOTE:  If we have to disable the FSMC
+   * then we cannot do this at the top of the loop, unfortunately.  The STOP
+   * will not complete normally if the FSMC is enabled.
+   */
+
+#ifdef CONFIG_STM32_I2C1
+  stm32_i2c_sem_waitstop(priv);
+#endif
 
   /* Re-enable the FSMC */
 
   stm32_i2c_enablefsmc(ahbenr);
   stm32_i2c_sem_post(dev);
 
-  errno = status_errno;
-  return -status_errno;
+  return -errval;
 }
 
 /************************************************************************************
