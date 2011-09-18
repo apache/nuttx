@@ -1409,7 +1409,7 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
    * will not complete normally if the FSMC is enabled.
    */
 
-#ifndef CONFIG_STM32_I2C1
+#if !defined(CONFIG_STM32_FSMC) || !defined (CONFIG_STM32_I2C1)
   stm32_i2c_sem_waitstop(priv);
 #endif
 
@@ -1550,7 +1550,7 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
    * will not complete normally if the FSMC is enabled.
    */
 
-#ifdef CONFIG_STM32_I2C1
+#if defined(CONFIG_STM32_FSMC) && defined (CONFIG_STM32_I2C1)
   stm32_i2c_sem_waitstop(priv);
 #endif
 
