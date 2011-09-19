@@ -83,7 +83,6 @@
 
 #define RTC_TIMEMSB_REG      STM32_BKP_DR1
 
-
 /************************************************************************************
  * Private Data
  ************************************************************************************/
@@ -93,8 +92,8 @@
  *   - on start-up
  *   - during operation, reported by LSE interrupt
  */
-volatile bool g_rtc_enabled = false;
 
+volatile bool g_rtc_enabled = false;
 
 /************************************************************************************
  * Private Functions
@@ -109,12 +108,10 @@ static inline void stm32_rtc_beginwr(void)
     modifyreg16(STM32_RTC_CRL, 0, RTC_CRL_CNF);
 }
 
-
 static inline void stm32_rtc_endwr(void)
 {
     modifyreg16(STM32_RTC_CRL, RTC_CRL_CNF, 0);
 }
-
 
 /** Wait for registerred to synchronise with RTC module, call after power-up only */
 static inline void stm32_rtc_wait4rsf(void)
@@ -122,8 +119,6 @@ static inline void stm32_rtc_wait4rsf(void)
     modifyreg16(STM32_RTC_CRL, RTC_CRL_RSF, 0);
     while( !(getreg16(STM32_RTC_CRL) & RTC_CRL_RSF) ) up_waste();
 }
-
-
 
 /************************************************************************************
  * Interrupt Service Routines
@@ -146,7 +141,6 @@ static int stm32_rtc_overflow_isr(int irq, void *context)
     putreg16( RTC_CRL_RSF, STM32_RTC_CRL );    
     return 0;
 }
-
 
 /************************************************************************************
  * Public Function - Initialization
@@ -175,13 +169,13 @@ int up_rtcinitialize(void)
     
     // \todo Get state from this function, if everything is 
     //   okay and whether it is already enabled (if it was disabled
-    //   reset upper time register
+    //   reset upper time register)
     g_rtc_enabled = true;
 
     // \todo Possible stall? should we set the timeout period? and return with -1
     stm32_rtc_wait4rsf();
         
-    /* Configure prescaler, note that this are write-only registers */
+    /* Configure prescaler, note that these are write-only registers */
     
     stm32_rtc_beginwr();
     putreg16(prescaler >> 16,    STM32_RTC_PRLH);
@@ -206,17 +200,53 @@ int up_rtcinitialize(void)
     return OK;
 }
 
-
 /** Get time (counter) value 
  * 
  * \return time, where the unit depends on the prescaler value
  **/
+ 
 clock_t up_rtc_getclock(void)
 {
-    return ( (uint32_t)getreg16(STM32_RTC_CNTH) << 16) | 
-             (uint32_t)getreg16(STM32_RTC_CNTL);
-}
+  irqstate_t flags;
+  uint16_t cnth;
+  uint16_t cntl;
+  uint16_t tmp;
 
+  /* The RTC counter is read from two 16-bit registers to form one 32-bit
+   * value.  Because these are non-atomic operations, many things can happen
+   * between the two reads:  This thread could get suspended or interrrupted
+   * or the lower 16-bit counter could rollover between reads.  Disabling
+   * interrupts will prevent suspensions and interruptions:
+   */
+
+  flags = irqsave();
+
+  /* And the following loop will handle any clock rollover events that may
+   * happen between samples.  Most of the time (like 99.9%), the following
+   * loop will execute only once.  In the rare rollover case, it should
+   * execute no more than 2 times.
+   */
+
+  do
+    {
+      tmp  = getreg16(STM32_RTC_CNTL);
+      cnth = getreg16(STM32_RTC_CNTH);
+      cntl = getreg16(STM32_RTC_CNTL);
+    }
+
+  /* The second sample of CNTL could be less than the first sample of CNTL
+   * only if rollover occurred.  In that case, CNTH may or may not be out
+   * of sync.  The best thing to do is try again until we know that no
+   * rollover occurred.
+   */
+
+  while (cntl < tmp);
+  irqrestore(flags);
+
+  /* Then return the full 32-bit counter value */
+
+  return ((uint32_t)cnth << 16) | (uint32_t)cntl;
+}
 
 /** Set time (counter) value
  * 
@@ -230,7 +260,6 @@ void up_rtc_setclock(clock_t newclock)
     putreg16(newclock & 0xFFFF, STM32_RTC_CNTL);
     stm32_rtc_endwr();
 }
-
 
 time_t up_rtc_gettime(void)
 {
@@ -263,7 +292,6 @@ time_t up_rtc_gettime(void)
     return time_msb | time_lsb;
 }
 
-
 void up_rtc_settime(time_t newtime)
 {
     /* Do reverse compared to gettime above */
@@ -280,7 +308,6 @@ void up_rtc_settime(time_t newtime)
     
     irqrestore( irqs );
 }
-
 
 /** Set ALARM at which time ALARM callback is going to be generated
  * 
@@ -304,12 +331,10 @@ clock_t up_rtc_setalarm(clock_t atclock)
     return up_rtc_getclock();
 }
 
-
 /** Set alarm output pin */
 void stm32_rtc_settalarmpin(bool activate)
 {
 }
-
 
 #endif // defined(CONFIG_STM32_BKP)
 /** \} */
