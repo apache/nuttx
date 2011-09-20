@@ -181,5 +181,5 @@ EXTERN int nxsu_mousereport(struct nxbe_window_s *wnd);
 }
 #endif
 
-#endif  /* __GRAPHICS_NSMU_NXFE_H */
+#endif  /* __GRAPHICS_NXSU_NXFE_H */
 
