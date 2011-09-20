@@ -170,7 +170,7 @@ int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
 
   if (mqmsg)
     {
-      /* Yes, peforrm the message send. */
+      /* Yes, perform the message send. */
 
       ret = mq_dosend(mqdes, mqmsg, msg, msglen, prio);
     }
