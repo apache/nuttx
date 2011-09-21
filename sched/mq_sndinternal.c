@@ -114,19 +114,19 @@ int mq_verifysend(mqd_t mqdes, const void *msg, size_t msglen, int prio)
 
   if (!msg || !mqdes || prio < 0 || prio > MQ_PRIO_MAX)
     {
-      *get_errno_ptr() = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 
   if ((mqdes->oflags & O_WROK) == 0)
     {
-      *get_errno_ptr() = EPERM;
+      set_errno(EPERM);
       return ERROR;
     }
 
   if (msglen < 0 || msglen > (size_t)mqdes->msgq->maxmsgsize)
     {
-      *get_errno_ptr() = EMSGSIZE;
+      set_errno(EMSGSIZE);
       return ERROR;
     }
 
@@ -267,7 +267,7 @@ int mq_waitsend(mqd_t mqdes)
         {
           /* No... We will return an error to the caller. */
 
-          *get_errno_ptr() = EAGAIN;
+          set_errno(EAGAIN);
           return ERROR;
         }
 
@@ -289,9 +289,9 @@ int mq_waitsend(mqd_t mqdes)
 
               rtcb = (FAR _TCB*)g_readytorun.head;
               rtcb->msgwaitq = msgq;
-              (msgq->nwaitnotempty)++;
+              msgq->nwaitnotfull++;
 
-              *get_errno_ptr() = OK;
+              set_errno(OK);
               up_block_task(rtcb, TSTATE_WAIT_MQNOTFULL);
 
               /* When we resume at this point, either (1) the message queue
@@ -300,7 +300,7 @@ int mq_waitsend(mqd_t mqdes)
                * errno value (should be EINTR or ETIMEOUT).
                */
 
-              if (*get_errno_ptr() != OK)
+              if (get_errno() != OK)
                 {
                    return ERROR;
                 }

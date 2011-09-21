@@ -393,7 +393,7 @@ int sig_received(FAR _TCB *stcb, siginfo_t *info)
         if (stcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
             stcb->task_state == TSTATE_WAIT_MQNOTFULL)
            {
-             mq_waitirq(stcb);
+             mq_waitirq(stcb, EINTR);
            }
 #endif
        }

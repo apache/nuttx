@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/mq_timedreceive.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,16 +115,12 @@ static void mq_rcvtimeout(int argc, uint32_t pid)
 
   if (wtcb && wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY)
     {
-      /* Mark the errno value for the thread. */
+      /* Restart with task with a timeout error */
 
-      wtcb->pterrno = ETIMEDOUT;
-
-      /* Restart the task. */
-
-      up_unblock_task(wtcb);
+      mq_waitirq(wtcb, ETIMEDOUT);
     }
 
-  /* Interrupts may now be enabled. */
+  /* Interrupts may now be re-enabled. */
 
   irqrestore(saved_state);
 }
@@ -210,7 +206,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
 
   if (!abstime || abstime->tv_sec < 0 || abstime->tv_nsec > 1000000000)
     {
-      *get_errno_ptr() = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 
@@ -222,7 +218,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
   wdog = wd_create();
   if (!wdog)
     {
-      *get_errno_ptr() = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 
@@ -268,7 +264,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
 
       if (result != OK)
         {
-          *get_errno_ptr() = result;
+          set_errno(result);
           irqrestore(saved_state);
           sched_unlock();
           wd_delete(wdog);

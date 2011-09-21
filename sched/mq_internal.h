@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/mq_internal.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -154,7 +154,7 @@ EXTERN void         mq_msgqfree(FAR msgq_t *msgq);
 
 /* mq_waitirq.c ************************************************************/
 
-EXTERN void         mq_waitirq(FAR _TCB *wtcb);
+EXTERN void         mq_waitirq(FAR _TCB *wtcb, int errcode);
 
 /* mq_rcvinternal.c ********************************************************/
 

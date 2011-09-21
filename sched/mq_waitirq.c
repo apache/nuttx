@@ -75,9 +75,9 @@
  * Function:  sem_waitirq
  *
  * Description:
- *   This function is called when a signal is received by a task that is
- *   waiting on a message queue -- either for a queue to becoming not full
- *   (on mq_send) or not empty (on mq_receive).
+ *   This function is called when a signal or a timeout is received by a
+ *   task that is waiting on a message queue -- either for a queue to
+ *   becoming not full (on mq_send) or not empty (on mq_receive).
  *
  * Parameters:
  *   wtcb - A pointer to the TCB of the task that is waiting on a message
@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-void mq_waitirq(FAR _TCB *wtcb)
+void mq_waitirq(FAR _TCB *wtcb, int errcode)
 {
   FAR msgq_t *msgq;
   irqstate_t saved_state;
@@ -158,7 +158,7 @@ void mq_waitirq(FAR _TCB *wtcb)
 
       /* Mark the errno value for the thread. */
 
-      wtcb->pterrno = EINTR;
+      wtcb->pterrno = errcode;
 
       /* Restart the task. */
 

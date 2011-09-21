@@ -2100,3 +2100,11 @@
 	* arch/arm/src/stm32/stm32_i2c.c: Fix another bug where I2C conflicts with FSMC
 	  being enabled.  That time at the tail end of the transaction where there is
 	  an unfinished stop condition.
+	* sched/mq_timedreceive.c and sched/mq_timedsend.c:  The count of threads
+	  waiting on the message queues was not being decremented after a timeout.
+	  This would cause the accounting logic to become out of sync and the, perhaps,
+	  an assertion to be triggered.  This is an important bug and fixes a
+	  potential crash when using mq_timedreceived() and mq_timedsend().
+	* sched/mq_sndinternal.c: Related to the above, the send logic was incrementing
+	  the wrong counter when it waited as part of the mq_timedsend.c logic.
+
