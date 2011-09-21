@@ -53,7 +53,7 @@
 
 /* Monochrome Formats *******************************************************/
 
-#define FB_FMT_Y1          0         /* BPP=4, monochrome */
+#define FB_FMT_Y1          0         /* BPP=1, monochrome */
 #define FB_FMT_Y4          1         /* BPP=4, 4-bit uncompressed greyscale */
 #define FB_FMT_Y8          2         /* BPP=8, 8-bit uncompressed greyscale */
 #define FB_FMT_Y16         3         /* BPP=16, 16-bit uncompressed greyscale */
