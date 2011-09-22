@@ -493,6 +493,8 @@ apps
  |- examples/
  |   |- pashello/README.txt
  |   `- README.txt
+ |- graphics/
+ |   `- tiff/README.txt
  |- interpreters/
  |   |- ficl
  |   |  `- README.txt
