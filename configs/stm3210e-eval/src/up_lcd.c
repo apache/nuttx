@@ -121,6 +121,19 @@
 #  error "PA8 cannot be configured as TIM1 CH1 with full remap"
 #endif
 
+/* When reading 16-bit gram data, there appears to be a 5-bit shift in the returned
+ * data.
+ */
+
+#ifndef CONFIG_LCD_RDSHIFT
+#  define CONFIG_LCD_RDSHIFT 5
+#endif
+
+/* Red and green appear to be swapped on read-back as well */
+
+#undef CONFIG_LCD_RDSWAP
+#define CONFIG_LCD_RDSWAP 1
+
 /* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
  * also be enabled.
  */
@@ -317,7 +330,14 @@ static void stm3210e_writereg(uint8_t regaddr, uint16_t regval);
 static uint16_t stm3210e_readreg(uint8_t regaddr);
 static inline void stm3210e_gramselect(void);
 static inline void stm3210e_writegram(uint16_t rgbval);
-static inline uint16_t stm3210e_readgram(void);
+#if CONFIG_LCD_RDSHIFT > 0
+static inline void stm3210e_readsetup(FAR uint16_t *accum);
+static inline uint16_t stm3210e_readgram(FAR uint16_t *accum);
+#else
+static inline uint16_t stm3210e_readnoshift(void);
+#  define stm3210e_readsetup(a,n)
+#  define stm3210e_readgram(a,n) stm3210e_readnoshift()
+#endif
 static void stm3210e_setcursor(uint16_t col, uint16_t row);
 
 /* LCD Data Transfer Methods */
@@ -487,19 +507,136 @@ static inline void stm3210e_writegram(uint16_t rgbval)
 }
 
 /**************************************************************************************
+ * Name:  stm3210e_readsetup
+ *
+ * Description:
+ *   Prime the operation by reading one pixel from the GRAM memory
+ *
+ **************************************************************************************/
+
+#if CONFIG_LCD_RDSHIFT > 0
+static inline void stm3210e_readsetup(FAR uint16_t *accum)
+{
+  /* Read the value (GRAM register already selected) */
+
+  *accum  = LCD->value;
+}
+#endif
+
+/**************************************************************************************
  * Name:  stm3210e_readgram
+ *
+ * Description:
+ *   Read one correctly aligned pixel from the GRAM memory
+ *
+ **************************************************************************************/
+
+#if CONFIG_LCD_RDSHIFT > 0
+static inline uint16_t stm3210e_readgram(FAR uint16_t *accum)
+{
+#ifdef CONFIG_LCD_RDSWAP
+  uint16_t red;
+  uint16_t green;
+  uint16_t blue;
+#endif
+
+  /* Read the value (GRAM register already selected) */
+
+  uint16_t next = LCD->value;
+
+  /* Return previous bits 0-10 as bits 6-15 and next data bits 11-15 as bits 0-5
+   *
+   *   xxxx xPPP PPPP PPPP
+   *   NNNN Nxxx xxxx xxxx
+   *
+   * Assuming that CONFIG_LCD_RDSHIFT == 5
+   */
+
+  uint16_t value  = *accum << CONFIG_LCD_RDSHIFT | next >> (16-CONFIG_LCD_RDSHIFT);
+
+  /* Save the value for the next time we are called */
+
+  *accum = next;
+
+  /* Tear the RGB655 apart. Swap read and green */
+
+#ifdef CONFIG_LCD_RDSWAP
+  red   = (value << (11-5)) & 0xf800; /* Move bits 5-9 to 11-15 */
+  green = (value >> (10-5)) & 0x07e0; /* Move bits 10-15 to bits 5-10 */
+  blue  =  value            & 0x001f; /* Blue is in the right place */
+
+  /* And put the RGB565 back together */
+
+  value = red | green | blue;
+
+  /* This is wierd... If blue is zero, then red+green values are off by 0x20.
+   * Except that both 0x0000 and 0x0020 can map to 0x0000.  Need to revisit
+   * this!!!!!!!!!!!  I might be misinterpreting some of the data that I have.
+   */
+
+#if 0 /* REVISIT */
+  if (value != 0 && blue == 0)
+    {
+      value += 0x20;
+    }
+#endif
+#endif
+
+  return value;
+}
+#endif
+
+/**************************************************************************************
+ * Name:  stm3210e_readnoshift
  *
  * Description:
  *   Read one pixel from the GRAM memory
  *
  **************************************************************************************/
 
-static inline uint16_t stm3210e_readgram(void)
+#if CONFIG_LCD_RDSHIFT <= 0
+static inline uint16_t stm3210e_readnoshift(void)
 {
-  /* Write the value (GRAM register already selected) */
+#ifdef CONFIG_LCD_RDSWAP
+  uint16_t value;
+  uint16_t red;
+  uint16_t green;
+  uint16_t blue;
+
+  /* Read the value (GRAM register already selected) */
+
+  value = LCD->value;
+
+  /* Tear the RGB655 apart. Swap read and green */
+
+  red   = (value << (11-5)) & 0xf800; /* Move bits 5-9 to 11-15 */
+  green = (value >> (10-5)) & 0x07e0; /* Move bits 10-15 to bits 5-10 */
+  blue  = value             & 0x001f; /* Blue is in the right place */
+
+  /* And put the RGB565 back together */
+
+  value = red | green | blue;
+
+  /* This is wierd... If blue is zero, then red+green values are off by 0x20.
+   * Except that both 0x0000 and 0x0020 can map to 0x0000.  Need to revisit
+   * this!!!!!!!!!!!  I might be misinterpreting some of the data that I have.
+   */
+
+#if 0 /* REVISIT */
+  if (value != 0 && blue == 0)
+    {
+      value += 0x20;
+    }
+#endif
+
+  return value;
+#else
+  /* Read the value (GRAM register already selected) */
 
   return LCD->value;
+#endif
 }
+#endif
 
 /**************************************************************************************
  * Name:  stm3210e_setcursor
@@ -654,6 +791,9 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                        size_t npixels)
 {
   FAR uint16_t *dest = (FAR uint16_t*)buffer;
+#if CONFIG_LCD_RDSHIFT > 0
+  uint16_t accum;
+#endif
   int i;
  
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -677,11 +817,16 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   /* Then read the GRAM data, auto-decrementing Y */
 
   stm3210e_gramselect();
+
+  /* Prime the pump for unaligned read data */
+
+  stm3210e_readsetup(&accum);
+
   for (i = 0; i < npixels; i++)
     {
       /* Read the next pixel from this position (autoincrements to the next row) */
 
-      *dest++ = stm3210e_readgram();
+      *dest++ = stm3210e_readgram(&accum);
     }
 #elif defined(CONFIG_LCD_PORTRAIT)
   /* Convert coordinates (Swap row and column.  This is done implicitly). */
@@ -694,7 +839,8 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
       stm3210e_setcursor(row, col);
       stm3210e_gramselect();
-      *dest++ = stm3210e_readgram();
+      stm3210e_readsetup(&accum);
+      *dest++ = stm3210e_readgram(&accum);
 
       /* Increment to next column */
 
@@ -716,7 +862,8 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
       stm3210e_setcursor(row, col);
       stm3210e_gramselect();
-      *dest++ = stm3210e_readgram();
+      stm3210e_readsetup(&accum);
+      *dest++ = stm3210e_readgram(&accum);
 
       /* Decrement to next column */
 
