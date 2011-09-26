@@ -140,7 +140,7 @@ void __start(void)
    * segements.
    */
 
-#ifndef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_NUTTX_KERNEL
   sam3u_userspace();
 #endif
 

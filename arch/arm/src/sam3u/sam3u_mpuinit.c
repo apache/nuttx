@@ -41,7 +41,7 @@
 #include <arch/board/user_map.h>
 #include "mpu.h"
 
-#ifndef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_NUTTX_KERNEL
 
 /****************************************************************************
  * Private Definitions

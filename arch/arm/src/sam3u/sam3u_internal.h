@@ -448,7 +448,7 @@ EXTERN void sam3u_lowsetup(void);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_NUTTX_KERNEL
 EXTERN void sam3u_userspace(void);
 #endif
 
@@ -461,7 +461,7 @@ EXTERN void sam3u_userspace(void);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_NUTTX_KERNEL
 EXTERN void sam3u_mpuinitialize(void);
 #else
 #  define sam3u_mpuinitialize()
@@ -475,7 +475,7 @@ EXTERN void sam3u_mpuinitialize(void);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_NUTTX_KERNEL
 EXTERN void sam3u_mpuheap(uintptr_t start, size_t size);
 #else
 #  define sam3u_mpuheap(start,size)
