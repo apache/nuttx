@@ -113,7 +113,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Allow access to the heap memory */
 
-   sam3u_mpuheap((uintptr_)g_heapbase, size);
+   sam3u_mpuheap((uintptr_t)g_heapbase, size);
 }
 
 /************************************************************************
