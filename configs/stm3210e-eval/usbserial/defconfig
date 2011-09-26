@@ -885,6 +885,34 @@ CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER=n
 CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=n
 
 #
+# Settings for examples/usbterm
+#
+# CONFIG_EXAMPLES_UBSTERM_BUILTIN - Build the usbterm example as an NSH
+#   built-in command.  NOTE:  This is not fully functional as of this
+#   writing.. It should work, but there is no mechanism in place yet
+#   to exit the USB terminal program and return to NSH.
+# CONFIG_EXAMPLES_USBTERM_BUFLEN - The size of the input and output
+#   buffers used for receiving data. Default 256 bytes.
+#
+# If CONFIG_USBDEV_TRACE is enabled (or CONFIG_DEBUG and CONFIG_DEBUG_USB, or
+# CONFIG_USBDEV_TRACE), then the example code will also manage the USB trace
+# output.  The amount of trace output can be controlled using:
+#
+# CONFIG_EXAMPLES_USBTERM_TRACEINIT - Show initialization events
+# CONFIG_EXAMPLES_USBTERM_TRACECLASS - Show class driver events
+# CONFIG_EXAMPLES_USBTERM_TRACETRANSFERS - Show data transfer events
+# CONFIG_EXAMPLES_USBTERM_TRACECONTROLLER - Show controller events
+# CONFIG_EXAMPLES_USBTERM_TRACEINTERRUPTS - Show interrupt-related events
+#
+CONFIG_EXAMPLES_UBSTERM_BUILTIN=n
+CONFIG_EXAMPLES_USBTERM_BUFLEN=256
+CONFIG_EXAMPLES_USBTERM_TRACEINIT=n
+CONFIG_EXAMPLES_USBTERM_TRACECLASS=n
+CONFIG_EXAMPLES_USBTERM_TRACETRANSFERS=n
+CONFIG_EXAMPLES_USBTERM_TRACECONTROLLER=n
+CONFIG_EXAMPLES_USBTERM_TRACEINTERRUPTS=n
+
+#
 # Stack and heap information
 #
 # CONFIG_BOOT_RUNFROMFLASH - Some configurations support XIP

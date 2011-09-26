@@ -2170,7 +2170,20 @@ static int usbser_ioctl(FAR struct file *filep,int cmd,unsigned long arg)
     case CAIOC_NOTIFY:
       {
         /* Not yet implemented.  I probably won't bother to implement until
-         * I com up with a usage model that needs it.
+         * I comr up with a usage model that needs it.
+         *
+         * Here is what the needs to be done:
+         *
+         * 1. Format and send a request header with:
+         *
+         *   bmRequestType:
+         *    USB_REQ_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE
+         *   bRequest: ACM_SERIAL_STATE
+         *   wValue: 0
+         *   wIndex: 0
+         *   wLength: Length of data
+         *
+         * 2. Followed by the notification data (in a separate packet)
          */
 
         ret = -ENOSYS;

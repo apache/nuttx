@@ -631,6 +631,16 @@ Where <subdir> is one of the following:
     -CONFIG_CDCSER=n
     +CONFIG_CDCSER=y
 
+    The example can also be converted to use the alternative
+    USB serial example at apps/examples/usbterm by changing the 
+    following:
+
+    -CONFIGURED_APPS += examples/usbserial
+    +CONFIGURED_APPS += examples/usbterm
+
+    In either the original appconfig file (before configuring)
+    or in the final apps/.config file (after configuring).
+
   usbstorage:
   ----------
     This configuration directory exercises the USB mass storage
