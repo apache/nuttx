@@ -143,7 +143,7 @@ void up_addregion(void)
 
   /* Allow access to the heap memory */
 
-  sam3u_mpuheap(SAM3U_NFCSRAM_BASE, CONFIG_SAM3U_NFCSRAM_SIZE)
+  sam3u_mpuheap(SAM3U_NFCSRAM_BASE, CONFIG_SAM3U_NFCSRAM_SIZE);
 #endif
 }
 #endif
