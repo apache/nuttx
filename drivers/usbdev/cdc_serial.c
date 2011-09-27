@@ -61,91 +61,11 @@
 #include <nuttx/usb/cdc_serial.h>
 #include <nuttx/usb/usbdev_trace.h>
 
+#include "cdc_serial.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Descriptors ****************************************************************/
-/* These settings are not modifiable via the NuttX configuration */
-
-#define CDC_VERSIONNO              0x0110   /* CDC version number 1.10 (BCD) */
-#define CDCSER_CONFIGIDNONE        (0)      /* Config ID means to return to address mode */
-#define CDCSER_INTERFACEID         (0)
-#define CDCSER_ALTINTERFACEID      (0)
-
-/* Device descriptor values */
-
-#define CDCSER_VERSIONNO           (0x0101) /* Device version number 1.1 (BCD) */
-#define CDCSER_NCONFIGS            (1)      /* Number of configurations supported */
-
-/* Configuration descriptor values */
-
-#define CDCSER_NINTERFACES         (2)      /* Number of interfaces in the configuration */
-#define CDCSER_CONFIGID            (1)      /* The only supported configuration ID */
-
-/* Endpoint configuration */
-
-#define CDCSER_EPINTIN_ADDR        (USB_DIR_IN|CONFIG_CDCSER_EPINTIN)
-#define CDCSER_EPINTIN_ATTR        (USB_EP_ATTR_XFER_INT)
-
-#define CDCSER_EPOUTBULK_ADDR      (CONFIG_CDCSER_EPBULKOUT)
-#define CDCSER_EPOUTBULK_ATTR      (USB_EP_ATTR_XFER_BULK)
-
-#define CDCSER_EPINBULK_ADDR       (USB_DIR_IN|CONFIG_CDCSER_EPBULKIN)
-#define CDCSER_EPINBULK_ATTR       (USB_EP_ATTR_XFER_BULK)
-
-/* String language */
-
-#define CDCSER_STR_LANGUAGE        (0x0409) /* en-us */
-
-/* Descriptor strings */
-
-#define CDCSER_MANUFACTURERSTRID   (1)
-#define CDCSER_PRODUCTSTRID        (2)
-#define CDCSER_SERIALSTRID         (3)
-#define CDCSER_CONFIGSTRID         (4)
-#define CDCSER_NOTIFSTRID          (5)
-#define CDCSER_DATAIFSTRID         (6)
-
-/* Number of individual descriptors in the configuration descriptor */
-
-#define CDCSER_CFGGROUP_SIZE       (9)
-
-/* The size of the config descriptor: (9 + 2*9 + 3*7 + 4 + 5 + 5) = 62 */
-
-#define SIZEOF_CDCSER_CFGDESC \
-   (USB_SIZEOF_CFGDESC + 2*USB_SIZEOF_IFDESC + 3*USB_SIZEOF_EPDESC + SIZEOF_ACM_FUNCDESC + SIZEOF_HDR_FUNCDESC + SIZEOF_UNION_FUNCDESC(1))
-
-/* Buffer big enough for any of our descriptors (the config descriptor is the
- * biggest).
- */
-
-#define CDCSER_MXDESCLEN           (64)
-
-/* Misc Macros ****************************************************************/
-/* min/max macros */
-
-#ifndef min
-#  define min(a,b) ((a)<(b)?(a):(b))
-#endif
-
-#ifndef max
-#  define max(a,b) ((a)>(b)?(a):(b))
-#endif
-
-/* Trace values *************************************************************/
-
-#define CDCSER_CLASSAPI_SETUP       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_SETUP)
-#define CDCSER_CLASSAPI_SHUTDOWN    TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_SHUTDOWN)
-#define CDCSER_CLASSAPI_ATTACH      TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_ATTACH)
-#define CDCSER_CLASSAPI_DETACH      TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_DETACH)
-#define CDCSER_CLASSAPI_IOCTL       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_IOCTL)
-#define CDCSER_CLASSAPI_RECEIVE     TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_RECEIVE)
-#define CDCSER_CLASSAPI_RXINT       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_RXINT)
-#define CDCSER_CLASSAPI_RXAVAILABLE TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_RXAVAILABLE)
-#define CDCSER_CLASSAPI_SEND        TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_SEND)
-#define CDCSER_CLASSAPI_TXINT       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_TXINT)
-#define CDCSER_CLASSAPI_TXREADY     TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_TXREADY)
-#define CDCSER_CLASSAPI_TXEMPTY     TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_TXEMPTY)
 
 /****************************************************************************
  * Private Types
@@ -212,17 +132,6 @@ struct usbser_alloc_s
   struct usbser_driver_s drvr;
 };
 
-/* Describes one description in the group of descriptors forming the
- * total configuration descriptor.
- */
-
-struct cfgdecsc_group_s
-{
-  uint16_t  descsize; /* Size of the descriptor in bytes */
-  uint16_t  hsepsize; /* High speed max packet size */
-  FAR void *desc;     /* A pointer to the descriptor */
-};
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -244,19 +153,10 @@ static void    usbclass_freereq(FAR struct usbdev_ep_s *ep,
 
 /* Configuration ***********************************************************/
 
-static int     usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
-#ifdef CONFIG_USBDEV_DUALSPEED
-static void    usbclass_mkepdesc(FAR const struct usb_epdesc_s *indesc,
-                 uint16_t mxpacket, FAR struct usb_epdesc_s *outdesc);
-static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf, uint8_t speed, uint8_t type);
-#else
-static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf);
-#endif
 static void    usbclass_resetconfig(FAR struct usbser_dev_s *priv);
 #ifdef CONFIG_USBDEV_DUALSPEED
 static int     usbclass_epconfigure(FAR struct usbdev_ep_s *ep,
-                 FAR const struct usb_epdesc_s *indesc, uint16_t mxpacket,
-                 bool last);
+                 enum cdcser_epdesc_e epid, uint16_t mxpacket, bool last);
 #endif
 static int     usbclass_setconfig(FAR struct usbser_dev_s *priv,
                  uint8_t config);
@@ -323,248 +223,6 @@ static const struct uart_ops_s g_uartops =
   NULL,                 /* txready */
   usbser_txempty        /* txempty */
 };
-
-/* USB descriptor templates these will be copied and modified **************/
-
-static const struct usb_devdesc_s g_devdesc =
-{
-  USB_SIZEOF_DEVDESC,                           /* len */
-  USB_DESC_TYPE_DEVICE,                         /* type */
-  {                                             /* usb */
-    LSBYTE(0x0200),
-    MSBYTE(0x0200)
-  },
-  USB_CLASS_CDC,                                /* class */
-  CDC_SUBCLASS_NONE,                            /* subclass */
-  CDC_PROTO_NONE,                               /* protocol */
-  CONFIG_CDCSER_EP0MAXPACKET,                   /* maxpacketsize */
-  {
-    LSBYTE(CONFIG_CDCSER_VENDORID),             /* vendor */
-    MSBYTE(CONFIG_CDCSER_VENDORID)
-  },
-  {
-    LSBYTE(CONFIG_CDCSER_PRODUCTID),            /* product */
-    MSBYTE(CONFIG_CDCSER_PRODUCTID)
-  },
-  {
-    LSBYTE(CDCSER_VERSIONNO),                   /* device */
-    MSBYTE(CDCSER_VERSIONNO)
-  },
-  CDCSER_MANUFACTURERSTRID,                     /* imfgr */
-  CDCSER_PRODUCTSTRID,                          /* iproduct */
-  CDCSER_SERIALSTRID,                           /* serno */
-  CDCSER_NCONFIGS                               /* nconfigs */
-};
-
-/* Configuration descriptor */
-
-static const struct usb_cfgdesc_s g_cfgdesc =
-{
-  USB_SIZEOF_CFGDESC,                           /* len */
-  USB_DESC_TYPE_CONFIG,                         /* type */
-  {
-    LSBYTE(SIZEOF_CDCSER_CFGDESC),              /* LS totallen */
-    MSBYTE(SIZEOF_CDCSER_CFGDESC)               /* MS totallen */
-  },
-  CDCSER_NINTERFACES,                           /* ninterfaces */
-  CDCSER_CONFIGID,                              /* cfgvalue */
-  CDCSER_CONFIGSTRID,                           /* icfg */
-  USB_CONFIG_ATTR_ONE|SELFPOWERED|REMOTEWAKEUP, /* attr */
-  (CONFIG_USBDEV_MAXPOWER + 1) / 2              /* mxpower */
-};
-
-/* Notification interface */
-
-static const struct usb_ifdesc_s g_notifdesc =
-{
-  USB_SIZEOF_IFDESC,                            /* len */
-  USB_DESC_TYPE_INTERFACE,                      /* type */
-  0,                                            /* ifno */
-  0,                                            /* alt */
-  1,                                            /* neps */
-  USB_CLASS_CDC,                                /* class */
-  CDC_SUBCLASS_ACM,                             /* subclass */
-  CDC_PROTO_ATM,                                /* proto */
-#ifdef CONFIG_CDCSER_NOTIFSTR
-  CDCSER_NOTIFSTRID                             /* iif */
-#else
-  0                                             /* iif */
-#endif
-};
-
-/* Header functional descriptor */
-
-static const struct cdc_hdr_funcdesc_s g_funchdr =
-{
-  SIZEOF_HDR_FUNCDESC,                          /* size */
-  USB_DESC_TYPE_CSINTERFACE,                    /* type */
-  CDC_DSUBTYPE_HDR,                             /* subtype */
-  {
-    LSBYTE(CDC_VERSIONNO),                      /* LS cdc */
-    MSBYTE(CDC_VERSIONNO)                       /* MS cdc */
-  }
-};
- 
-/* ACM functional descriptor */
-
-static const struct cdc_acm_funcdesc_s g_acmfunc =
-{
-  SIZEOF_ACM_FUNCDESC,                          /* size */
-  USB_DESC_TYPE_CSINTERFACE,                    /* type */
-  CDC_DSUBTYPE_ACM,                             /* subtype */
-  0x06                                          /* caps */
-};
-
-/* Union functional descriptor */
-
-static const struct cdc_union_funcdesc_s g_unionfunc =
-{
-  SIZEOF_UNION_FUNCDESC(1),                     /* size */
-  USB_DESC_TYPE_CSINTERFACE,                    /* type */
-  CDC_DSUBTYPE_UNION,                           /* subtype */
-  0,                                            /* master */
-  {1}                                           /* slave[0] */
-};
-
-/* Interrupt IN endpoint descriptor */
-
-static const struct usb_epdesc_s g_epintindesc =
-{
-  USB_SIZEOF_EPDESC,                            /* len */
-  USB_DESC_TYPE_ENDPOINT,                       /* type */
-  CDCSER_EPINTIN_ADDR,                          /* addr */
-  CDCSER_EPINTIN_ATTR,                          /* attr */
-  {
-    LSBYTE(CONFIG_CDCSER_EPINTIN_FSSIZE),       /* maxpacket (full speed) */
-    MSBYTE(CONFIG_CDCSER_EPINTIN_FSSIZE)
-  },
-  0xff                                          /* interval */
-};
-
-/* Data interface descriptor */
-
-static const struct usb_ifdesc_s g_dataifdesc =
-{
-  USB_SIZEOF_IFDESC,                            /* len */
-  USB_DESC_TYPE_INTERFACE,                      /* type */
-  1,                                            /* ifno */
-  0,                                            /* alt */
-  2,                                            /* neps */
-  USB_CLASS_CDC_DATA,                           /* class */
-  CDC_DATA_SUBCLASS_NONE,                       /* subclass */
-  CDC_DATA_PROTO_NONE,                          /* proto */
-#ifdef CONFIG_CDCSER_DATAIFSTR
-  CDCSER_DATAIFSTRID                            /* iif */
-#else
-  0                                             /* iif */
-#endif
-};
-
-/* Bulk OUT endpoint descriptor */
-
-static const struct usb_epdesc_s g_epbulkoutdesc =
-{
-  USB_SIZEOF_EPDESC,                            /* len */
-  USB_DESC_TYPE_ENDPOINT,                       /* type */
-  CDCSER_EPOUTBULK_ADDR,                        /* addr */
-  CDCSER_EPOUTBULK_ATTR,                        /* attr */
-  {
-    LSBYTE(CONFIG_CDCSER_EPBULKOUT_FSSIZE),     /* maxpacket (full speed) */
-    MSBYTE(CONFIG_CDCSER_EPBULKOUT_FSSIZE)
-  },
-  1                                             /* interval */
-};
-
-/* Bulk IN endpoint descriptor */
-
-static const struct usb_epdesc_s g_epbulkindesc =
-{
-  USB_SIZEOF_EPDESC,                            /* len */
-  USB_DESC_TYPE_ENDPOINT,                       /* type */
-  CDCSER_EPINBULK_ADDR,                         /* addr */
-  CDCSER_EPINBULK_ATTR,                         /* attr */
-  {
-    LSBYTE(CONFIG_CDCSER_EPBULKIN_FSSIZE),      /* maxpacket (full speed) */
-    MSBYTE(CONFIG_CDCSER_EPBULKIN_FSSIZE)
-  },
-  1                                             /* interval */
-};
-
-/* The components of the the configuration descriptor are maintained as
- * a collection of separate descriptor structure coordinated by the
- * following array.  These descriptors could have been combined into
- * one larger "super" configuration descriptor structure.  However, I
- * have concerns about compiler-dependent alignment and packing.  Since
- * the individual structures consist only of byte types, alignment and
- * packing is not an issue.  And since the are concatentated at run time
- * instead of compile time, there should no issues there either.
- */
-
-static const struct cfgdecsc_group_s g_cfggroup[CDCSER_CFGGROUP_SIZE] = {
-  {
-    USB_SIZEOF_CFGDESC,            /* 1. Configuration descriptor */
-    0,
-    (FAR void *)&g_cfgdesc
-  },
-  {
-    USB_SIZEOF_IFDESC,             /* 2. Notification interface */
-    0,
-    (FAR void *)&g_notifdesc
-  },
-  {
-    SIZEOF_HDR_FUNCDESC,           /* 3. Header functional descriptor */
-    0,
-    (FAR void *)&g_funchdr
-  },
-  {
-    SIZEOF_ACM_FUNCDESC,           /* 4. ACM functional descriptor */
-    0,
-    (FAR void *)&g_acmfunc
-  },
-  {
-    SIZEOF_UNION_FUNCDESC(1),      /* 5. Union functional descriptor */
-    0,
-    (FAR void *)&g_unionfunc
-  },
-  {
-    USB_SIZEOF_EPDESC,             /* 6. Interrupt IN endpoint descriptor */
-    CONFIG_CDCSER_EPINTIN_HSSIZE,
-    (FAR void *)&g_epintindesc
-  },
-  {
-    USB_SIZEOF_IFDESC,             /* 7. Data interface descriptor */
-    0,
-    (FAR void *)&g_dataifdesc
-  },
-  {
-    USB_SIZEOF_EPDESC,             /* 8. Bulk OUT endpoint descriptor */
-    CONFIG_CDCSER_EPBULKOUT_HSSIZE,
-    (FAR void *)&g_epbulkoutdesc
-  },
-  {
-    USB_SIZEOF_EPDESC,             /* 9. Bulk OUT endpoint descriptor */
-    CONFIG_CDCSER_EPBULKIN_HSSIZE,
-    (FAR void *)&g_epbulkindesc
-  }
-};
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-static const struct usb_qualdesc_s g_qualdesc =
-{
-  USB_SIZEOF_QUALDESC,                          /* len */
-  USB_DESC_TYPE_DEVICEQUALIFIER,                /* type */
-  {                                             /* usb */
-     LSBYTE(0x0200),
-     MSBYTE(0x0200)
-  },
-  USB_CLASS_VENDOR_SPEC,                        /* class */
-  0,                                            /* subclass */
-  0,                                            /* protocol */
-  CONFIG_CDCSER_EP0MAXPACKET,                   /* mxpacketsize */
-  CDCSER_NCONFIGS,                              /* nconfigs */
-  0,                                            /* reserved */
-};
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -877,174 +535,6 @@ static void usbclass_freereq(FAR struct usbdev_ep_s *ep,
 }
 
 /****************************************************************************
- * Name: usbclass_mkstrdesc
- *
- * Description:
- *   Construct a string descriptor
- *
- ****************************************************************************/
-
-static int usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
-{
-  const char *str;
-  int len;
-  int ndata;
-  int i;
-
-  switch (id)
-    {
-    case 0:
-      {
-        /* Descriptor 0 is the language id */
-
-        strdesc->len     = 4;
-        strdesc->type    = USB_DESC_TYPE_STRING;
-        strdesc->data[0] = LSBYTE(CDCSER_STR_LANGUAGE);
-        strdesc->data[1] = MSBYTE(CDCSER_STR_LANGUAGE);
-        return 4;
-      }
-
-    case CDCSER_MANUFACTURERSTRID:
-      str = CONFIG_CDCSER_VENDORSTR;
-      break;
-
-    case CDCSER_PRODUCTSTRID:
-      str = CONFIG_CDCSER_PRODUCTSTR;
-      break;
-
-    case CDCSER_SERIALSTRID:
-      str = CONFIG_CDCSER_SERIALSTR;
-      break;
-
-    case CDCSER_CONFIGSTRID:
-      str = CONFIG_CDCSER_CONFIGSTR;
-      break;
-
-#ifdef CONFIG_CDCSER_NOTIFSTR
-    case CDCSER_NOTIFSTRID:
-      str = CONFIG_CDCSER_NOTIFSTR;
-      break;
-#endif
-
-#ifdef CONFIG_CDCSER_DATAIFSTR
-    case CDCSER_DATAIFSTRID:
-      str = CONFIG_CDCSER_DATAIFSTR;
-      break;
-#endif
-
-    default:
-      return -EINVAL;
-    }
-
-   /* The string is utf16-le.  The poor man's utf-8 to utf16-le
-    * conversion below will only handle 7-bit en-us ascii
-    */
-
-   len = strlen(str);
-   for (i = 0, ndata = 0; i < len; i++, ndata += 2)
-     {
-       strdesc->data[ndata]   = str[i];
-       strdesc->data[ndata+1] = 0;
-     }
-
-   strdesc->len  = ndata+2;
-   strdesc->type = USB_DESC_TYPE_STRING;
-   return strdesc->len;
-}
-
-/****************************************************************************
- * Name: usbclass_mkepdesc
- *
- * Description:
- *   Construct the endpoint descriptor using the correct max packet size.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-static inline void usbclass_mkepdesc(FAR const FAR struct usb_epdesc_s *indesc,
-                                     uint16_t mxpacket,
-                                     FAR struct usb_epdesc_s *outdesc)
-{
-  /* Copy the "canned" descriptor */
-
-  memcpy(outdesc, indesc, USB_SIZEOF_EPDESC);
-
-  /* Then add the correct max packet size */
-
-  outdesc->mxpacketsize[0] = LSBYTE(mxpacket);
-  outdesc->mxpacketsize[1] = MSBYTE(mxpacket);
-}
-#endif
-
-/****************************************************************************
- * Name: usbclass_mkcfgdesc
- *
- * Description:
- *   Construct the configuration descriptor
- *
- ****************************************************************************/
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf, uint8_t speed, uint8_t type)
-#else
-static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf)
-#endif
-{
-  FAR const struct cfgdecsc_group_s *group;
-  FAR uint8_t *dest = buf;
-  int i;
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-  bool hispeed = (speed == USB_SPEED_HIGH);
-
-  /* Check for switches between high and full speed */
-
-  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG)
-    {
-      hispeed = !hispeed;
-    }
-#endif
-
-  /* Copy all of the descriptors in the group */
-
-  for (i = 0, dest = buf; i < CDCSER_CFGGROUP_SIZE; i++)
-    {
-      group = &g_cfggroup[i];
-
-      /* The "canned" descriptors all have full speed endpoint maxpacket
-       * sizes. If high speed is selected, we will have to change the
-       * endpoint maxpacket size.
-       *
-       * Is there a alternative high speed maxpacket size in the table?
-       * If so, that is sufficient proof that the descriptor that we
-       * just copied is an endpoint descriptor and needs the fixup
-       */
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-      if (highspeed && group->hsepsize != 0)
-        {
-          usbclass_mkepdesc(group->desc, group->hsepsize,
-                            (FAR struct usb_epdesc_s*)dest);
-        }
-      else
-#endif
-      /* Copy the "canned" descriptor with the full speed max packet
-       * size
-       */
-
-        {
-          memcpy(dest, group->desc, group->descsize);
-        }
-
-      /* Advance to the destination location for the next descriptor */
-
-      dest += group->descsize;
-    }
-
-  return SIZEOF_CDCSER_CFGDESC;
-}
-
-/****************************************************************************
  * Name: usbclass_resetconfig
  *
  * Description:
@@ -1082,11 +572,11 @@ static void usbclass_resetconfig(FAR struct usbser_dev_s *priv)
 
 #ifdef CONFIG_USBDEV_DUALSPEED
 static int usbclass_epconfigure(FAR struct usbdev_ep_s *ep,
-                                FAR const struct usb_epdesc_s *indesc,
-                                uint16_t mxpacket, bool last)
+                                enum cdcser_epdesc_e epid, uint16_t mxpacket,
+                                bool last)
 {
   struct usb_epdesc_s epdesc;
-  usbclass_mkepdesc(indesc, mxpacket, &epdesc);
+  usbclass_mkepdesc(epid, mxpacket, &epdesc);
   return EP_CONFIGURE(ep, &epdesc, last);
 }
 #endif
@@ -1147,13 +637,14 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
-      ret = usbclass_epconfigure(priv->epintin, &g_epintindesc,
+      ret = usbclass_epconfigure(priv->epintin, CDCSER_EPINTIN,
                                  CONFIG_CDCSER_EPINTIN_HSSIZE, false);
     }
   else
 #endif
     {
-      ret = EP_CONFIGURE(priv->epintin, &g_epintindesc, false);
+      ret = EP_CONFIGURE(priv->epintin,
+                         usbclass_getepdesc(CDCSER_EPINTIN), false);
     }
 
   if (ret < 0)
@@ -1168,13 +659,14 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
-      ret = usbclass_epconfigure(priv->epbulkin, &g_epbulkindesc,
+      ret = usbclass_epconfigure(priv->epbulkin, CDCSER_EPBULKIN,
                                  CONFIG_CDCSER_EPBULKIN_HSSIZE, false);
     }
   else
 #endif
     {
-      ret = EP_CONFIGURE(priv->epbulkin, &g_epbulkindesc, false);
+      ret = EP_CONFIGURE(priv->epbulkin,
+                         usbclass_getepdesc(CDCSER_EPBULKIN), false);
     }
 
   if (ret < 0)
@@ -1190,13 +682,14 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
-      ret = usbclass_epconfigure(priv->epbulkout, &g_epbulkoutdesc,
+      ret = usbclass_epconfigure(priv->epbulkout, CDCSER_EPBULKOUT,
                                  CONFIG_CDCSER_EPBULKOUT_HSSIZE, true);
     }
   else
 #endif
     {
-      ret = EP_CONFIGURE(priv->epbulkout, &g_epbulkoutdesc, true);
+      ret = EP_CONFIGURE(priv->epbulkout,
+                         usbclass_getepdesc(CDCSER_EPBULKOUT), true);
     }
 
   if (ret < 0)
@@ -1711,7 +1204,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
                 case USB_DESC_TYPE_DEVICE:
                   {
                     ret = USB_SIZEOF_DEVDESC;
-                    memcpy(ctrlreq->buf, &g_devdesc, ret);
+                    memcpy(ctrlreq->buf, usbclass_getdevdesc(), ret);
                   }
                   break;
 
@@ -1719,7 +1212,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
                 case USB_DESC_TYPE_DEVICEQUALIFIER:
                   {
                     ret = USB_SIZEOF_QUALDESC;
-                    memcpy(ctrlreq->buf, &g_qualdesc, ret);
+                    memcpy(ctrlreq->buf, usbclass_getqualdesc(), ret);
                   }
                   break;
 

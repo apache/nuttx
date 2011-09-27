@@ -42,7 +42,7 @@ ifeq ($(CONFIG_USBSER),y)
 endif
 
 ifeq ($(CONFIG_CDCSER),y)
-  CSRCS  += cdc_serial.c
+  CSRCS  += cdc_serial.c cdc_serdesc.c
 endif
 
 ifeq ($(CONFIG_USBSTRG),y)
