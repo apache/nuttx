@@ -4816,10 +4816,13 @@ build
     Default 4.
   </li>
   <li>
-    <code>CONFIG_CDCSER_VENDORID</code> and <code>CONFIG_CDCSER_VENDORSTR</code>:  The vendor ID code/string.  Default 0x03eb and &quot;NuttX&quot;
+    <code>CONFIG_CDCSER_VENDORID</code> and <code>CONFIG_CDCSER_VENDORSTR</code>:  The vendor ID code/string.  Default 0x0525 and &quot;NuttX,&quot;
+    0x0525 is the Netchip vendor and should not be used in any products.
+    This default VID was selected for compatibility with the Linux CDC ACM default VID.
   </li>
   <li>
-    <code>CONFIG_CDCSER_PRODUCTID</code> and <code>CONFIG_CDCSER_PRODUCTSTR</code>:  The product ID code/string. Default 0x204b and &quot;CDC/ACM Serial&quot;
+    <code>CONFIG_CDCSER_PRODUCTID</code> and <code>CONFIG_CDCSER_PRODUCTSTR</code>:  The product ID code/string. Default 0xa4a7 and &quot;CDC/ACM Serial&quot;
+    0xa4a7 was selected for compatibility with the Linux CDC ACM default PID.
   </li>
   <li>
     <code>CONFIG_CDCSER_RXBUFSIZE</code> and <code>CONFIG_CDCSER_TXBUFSIZE</code>:  Size of the serial receive/transmit buffers.  Default 256.

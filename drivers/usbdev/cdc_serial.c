@@ -338,13 +338,16 @@ static const struct usb_devdesc_s g_devdesc =
   CDC_SUBCLASS_NONE,                            /* subclass */
   CDC_PROTO_NONE,                               /* protocol */
   CONFIG_CDCSER_EP0MAXPACKET,                   /* maxpacketsize */
-  { LSBYTE(CONFIG_CDCSER_VENDORID),             /* vendor */
+  {
+    LSBYTE(CONFIG_CDCSER_VENDORID),             /* vendor */
     MSBYTE(CONFIG_CDCSER_VENDORID)
   },
-  { LSBYTE(CONFIG_CDCSER_PRODUCTID),            /* product */
+  {
+    LSBYTE(CONFIG_CDCSER_PRODUCTID),            /* product */
     MSBYTE(CONFIG_CDCSER_PRODUCTID)
   },
-  { LSBYTE(CDCSER_VERSIONNO),                   /* device */
+  {
+    LSBYTE(CDCSER_VERSIONNO),                   /* device */
     MSBYTE(CDCSER_VERSIONNO)
   },
   CDCSER_MANUFACTURERSTRID,                     /* imfgr */
@@ -550,7 +553,10 @@ static const struct usb_qualdesc_s g_qualdesc =
 {
   USB_SIZEOF_QUALDESC,                          /* len */
   USB_DESC_TYPE_DEVICEQUALIFIER,                /* type */
-  {LSBYTE(0x0200), MSBYTE(0x0200) },            /* USB */
+  {                                             /* usb */
+     LSBYTE(0x0200),
+     MSBYTE(0x0200)
+  },
   USB_CLASS_VENDOR_SPEC,                        /* class */
   0,                                            /* subclass */
   0,                                            /* protocol */
@@ -732,6 +738,9 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
   uint16_t currhead;
   uint16_t nexthead;
   uint16_t nbytes = 0;
+
+  uvdbg("head=%d tail=%d nrdq=%d reqlen=%d\n",
+        priv->serdev.recv.head, priv->serdev.recv.tail, priv->nrdq, reqlen);
 
   /* Get the next head index. During the time that RX interrupts are disabled, the
    * the serial driver will be extracting data from the circular buffer and modifying
