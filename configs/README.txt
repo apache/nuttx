@@ -982,9 +982,14 @@ defconfig -- This is a configuration file similar to the Linux
 		  CONFIG_CDCSER_NWRREQS includes write requests used for both the
 		  interrupt and bulk IN endpoints.  Default 4.
 		CONFIG_CDCSER_VENDORID and CONFIG_CDCSER_VENDORSTR
-		  The vendor ID code/string.  Default 0x03eb and "NuttX"
+		  The vendor ID code/string.  Default 0x0525 and "NuttX"
+		  0x0525 is the Netchip vendor and should not be used in any
+		  products.  This default VID was selected for compatibility with
+		  the Linux CDC ACM default VID.
 		CONFIG_CDCSER_PRODUCTID and CONFIG_CDCSER_PRODUCTSTR
-		  The product ID code/string. Default 0x204b and "CDC/ACM Serial"
+		  The product ID code/string. Default 0xa4a7 and "CDC/ACM Serial"
+		  0xa4a7 was selected for compatibility with the Linux CDC ACM
+		  default PID.
 		CONFIG_CDCSER_RXBUFSIZE and CONFIG_CDCSER_TXBUFSIZE
 		  Size of the serial receive/transmit buffers. Default 256.
 
