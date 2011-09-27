@@ -1123,25 +1123,31 @@ static bool fat_cmplfname(const uint8_t *direntry, const uint8_t *substr)
   int len;
   bool match;
 
-  /* How much of string do we have to compare? (including the NUL
-   * terminator).
-   */
+  /* How much of string do we have to compare? */
 
-  len = strlen((char*)substr) + 1;
+  len = strlen((char*)substr);
 
   /* Check bytes 1-5 */
 
   chunk = LDIR_PTRWCHAR1_5(direntry);
   match = fat_cmplfnchunk(chunk, substr, 5);
-  if (match && len > 5)
+  if (match && len >= 5)
     {
-      /* Check bytes 6-11 */
+      /* Check bytes 6-11.  Note that len == 5, the substring passed to
+       * fat_cmplfnchunk() will point to the NUL terminator of substr.
+       * In this case, fat_cmplfnchunk() will only verify that the
+       * directory entry is also NUL terminated.
+       */
 
       chunk = LDIR_PTRWCHAR6_11(direntry);
       match = fat_cmplfnchunk(chunk, &substr[5], 6);
-      if (match && len > 11)
+      if (match && len >= 11)
         {
-          /* Check bytes 12-13 */
+          /* Check bytes 12-13.  Note that len == 11, the substring passed to
+           * fat_cmplfnchunk() will point to the NUL terminator of substr.
+           * In this case, fat_cmplfnchunk() will only verify that the
+           * directory entry is also NUL terminated.
+           */
 
           chunk = LDIR_PTRWCHAR12_13(direntry);
           match = fat_cmplfnchunk(chunk, &substr[11], 2);
@@ -1181,11 +1187,9 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
 
   /* Get the length of the long file name (size of the fd_lfname array is
    * LDIR_MAXFNAME+1 we do not have to check the length of the string).
-   * NOTE that the name length is incremented to include the NUL terminating
-   * character that must also be written to the directory entry. 
    */
 
-  namelen = strlen((char*)dirinfo->fd_lfname) + 1;
+  namelen = strlen((char*)dirinfo->fd_lfname);
   DEBUGASSERT(namelen <= LDIR_MAXFNAME+1);
 
   /* How many LFN directory entries are we expecting? */
@@ -1483,11 +1487,9 @@ static inline int fat_allocatelfnentry(struct fat_mountpt_s *fs,
 
   /* Get the length of the long file name (size of the fd_lfname array is
    * LDIR_MAXFNAME+1 we do not have to check the length of the string).
-   * NOTE that the name length is incremented to include the NUL terminating
-   * character that must also be written to the directory entry. 
    */
 
-  namelen = strlen((char *)dirinfo->fd_lfname) + 1;
+  namelen = strlen((char *)dirinfo->fd_lfname);
   DEBUGASSERT(namelen <= LDIR_MAXFNAME+1);
 
   /* How many LFN directory entries are we expecting? */
@@ -2018,11 +2020,13 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
   /* Get the length of the long file name (size of the fd_lfname array is
    * LDIR_MAXFNAME+1 we do not have to check the length of the string).
-   * NOTE that the name length is incremented to include the NUL terminating
-   * character that must also be written to the directory entry. 
+   * NOTE that remainder is conditionally incremented to include the NUL
+   * terminating character that may also need be written to the directory
+   * entry. NUL terminating is not required if length is multiple of
+   * LDIR_MAXLFNCHARS (13).
    */
 
-  namelen = strlen((char*)dirinfo->fd_lfname) + 1;
+  namelen = strlen((char*)dirinfo->fd_lfname);
   DEBUGASSERT(namelen <= LDIR_MAXFNAME+1);
 
   /* How many LFN directory entries do we need to write? */
@@ -2033,6 +2037,7 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
   if (remainder > 0)
     {
       nentries++;
+      remainder++;
     }
   DEBUGASSERT(nentries > 0 && nentries <= LDIR_MAXLFNS);
 

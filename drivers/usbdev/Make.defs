@@ -46,7 +46,11 @@ ifeq ($(CONFIG_CDCSER),y)
 endif
 
 ifeq ($(CONFIG_USBSTRG),y)
-  CSRCS  += usbdev_storage.c usbdev_scsi.c
+  CSRCS  += usbdev_storage.c usbdev_stordesc.c usbdev_scsi.c
+endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+  CSRCS  += usbdev_composite.c
 endif
 
 CSRCS  += usbdev_trace.c usbdev_trprintf.c

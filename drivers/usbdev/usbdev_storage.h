@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_storage.h
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -57,9 +57,7 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
 /* Configuration ************************************************************/
-
 /* Number of requests in the write queue */
 
 #ifndef CONFIG_USBSTRG_NWRREQS
@@ -303,9 +301,11 @@
 
 /* Macros for dual speed vs. full speed only operation */
 
-#ifdef  CONFIG_USBDEV_DUALSPEED
-#  define USBSTRG_EPBULKINDESC(hs)  ((hs) ? (&g_hsepbulkindesc) : (&g_fsepbulkindesc))
-#  define USBSTRG_EPBULKOUTDESC(hs) ((hs) ? (&g_hsepbulkoutdesc) : (&g_fsepbulkoutdesc))
+#ifdef CONFIG_USBDEV_DUALSPEED
+#  define USBSTRG_EPBULKINDESC(hs)  \
+   usbstrg_getepdesc((hs) ? USBSTRG_EPHSBULKIN : USBSTRG_EPFSBULKIN)
+#  define USBSTRG_EPBULKOUTDESC(hs) \
+   usbstrg_getepdesc((hs) ? USBSTRG_EPHSBULKOUT : USBSTRG_EPFSBULKOUT)
 #  define USBSTRG_BULKMAXPACKET(hs) \
    ((hs) ? USBSTRG_HSBULKMAXPACKET : USBSTRG_FSBULKMAXPACKET)
 #  define USBSTRG_BULKMXPKTSHIFT(d) \
@@ -313,8 +313,8 @@
 #  define USBSTRG_BULKMXPKTMASK(d) \
    (((d)->speed==USB_SPEED_HIGH) ? USBSTRG_HSBULKMXPKTMASK : USBSTRG_FSBULKMXPKTMASK)
 #else
-#  define USBSTRG_EPBULKINDESC(d)   (g_fsepbulkindesc))
-#  define USBSTRG_EPBULKOUTDESC(d)  (g_fsepbulkoutdesc))
+#  define USBSTRG_EPBULKINDESC(d)    usbstrg_getepdesc(USBSTRG_EPFSBULKIN)
+#  define USBSTRG_EPBULKOUTDESC(d)   usbstrg_getepdesc(USBSTRG_EPFSBULKOUT)
 #  define USBSTRG_BULKMAXPACKET(hs)  USBSTRG_FSBULKMAXPACKET
 #  define USBSTRG_BULKMXPKTSHIFT(d)  USBSTRG_FSBULKMXPKTSHIFT
 #  define USBSTRG_BULKMXPKTMASK(d)   USBSTRG_FSBULKMXPKTMASK
@@ -339,6 +339,18 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* Endpoint descriptors */
+
+enum usbstrg_epdesc_e
+{
+  USBSTRG_EPFSBULKOUT = 0, /* Full speed bulk OUT endpoint descriptor */
+  USBSTRG_EPFSBULKIN       /* Full speed bulk IN endpoint descriptor */
+#ifdef CONFIG_USBDEV_DUALSPEED
+  , 
+  USBSTRG_EPHSBULKOUT,     /* High speed bulk OUT endpoint descriptor */
+  USBSTRG_EPHSBULKIN       /* High speed bulk IN endpoint descriptor */
+#endif
+};
 
 /* Container to support a list of requests */
 
@@ -449,6 +461,64 @@ EXTERN const char g_serialstr[];
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: usbstrg_mkstrdesc
+ *
+ * Description:
+ *   Construct a string descriptor
+ *
+ ************************************************************************************/
+
+struct usb_strdesc_s;
+int usbstrg_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
+
+/************************************************************************************
+ * Name: usbstrg_getepdesc
+ *
+ * Description:
+ *   Return a pointer to the raw device descriptor
+ *
+ ************************************************************************************/
+
+FAR const struct usb_devdesc_s *usbstrg_getdevdesc(void);
+
+/************************************************************************************
+ * Name: usbstrg_getepdesc
+ *
+ * Description:
+ *   Return a pointer to the raw endpoint descriptor (used for configuring endpoints)
+ *
+ ************************************************************************************/
+
+struct usb_epdesc_s;
+FAR const struct usb_epdesc_s *usbstrg_getepdesc(enum usbstrg_epdesc_e epid);
+
+/************************************************************************************
+ * Name: usbstrg_mkcfgdesc
+ *
+ * Description:
+ *   Construct the configuration descriptor
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBDEV_DUALSPEED
+int16_t usbstrg_mkcfgdesc(FAR uint8_t *buf, uint8_t speed, uint8_t type);
+#else
+int16_t usbstrg_mkcfgdesc(FAR uint8_t *buf);
+#endif
+
+/************************************************************************************
+ * Name: usbstrg_getqualdesc
+ *
+ * Description:
+ *   Return a pointer to the raw qual descriptor
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBDEV_DUALSPEED
+FAR const struct usb_qualdesc_s *usbstrg_getqualdesc(void);
+#endif
 
 /****************************************************************************
  * Name: usbstrg_workerthread

@@ -365,14 +365,14 @@ static const struct usb_qualdesc_s g_qualdesc =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbclass_mkstrdesc
+ * Name: cdcser_mkstrdesc
  *
  * Description:
  *   Construct a string descriptor
  *
  ****************************************************************************/
 
-int usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
+int cdcser_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
 {
   const char *str;
   int len;
@@ -441,20 +441,20 @@ int usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
 }
 
 /****************************************************************************
- * Name: usbclass_getepdesc
+ * Name: cdcser_getepdesc
  *
  * Description:
  *   Return a pointer to the raw device descriptor
  *
  ****************************************************************************/
 
-FAR const struct usb_devdesc_s *usbclass_getdevdesc(void)
+FAR const struct usb_devdesc_s *cdcser_getdevdesc(void)
 {
   return &g_devdesc;
 }
 
 /****************************************************************************
- * Name: usbclass_getepdesc
+ * Name: cdcser_getepdesc
  *
  * Description:
  *   Return a pointer to the raw endpoint struct (used for configuring
@@ -462,7 +462,7 @@ FAR const struct usb_devdesc_s *usbclass_getdevdesc(void)
  *
  ****************************************************************************/
 
-FAR const struct usb_epdesc_s *usbclass_getepdesc(enum cdcser_epdesc_e epid)
+FAR const struct usb_epdesc_s *cdcser_getepdesc(enum cdcser_epdesc_e epid)
 {
   switch (epid)
     {
@@ -481,7 +481,7 @@ FAR const struct usb_epdesc_s *usbclass_getepdesc(enum cdcser_epdesc_e epid)
 }
 
 /****************************************************************************
- * Name: usbclass_mkepdesc
+ * Name: cdcser_mkepdesc
  *
  * Description:
  *   Construct the endpoint descriptor using the correct max packet size.
@@ -489,15 +489,14 @@ FAR const struct usb_epdesc_s *usbclass_getepdesc(enum cdcser_epdesc_e epid)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-void usbclass_mkepdesc(num cdcser_epdesc_e epid,
-                       uint16_t mxpacket,
-                       FAR struct usb_epdesc_s *outdesc)
+void cdcser_mkepdesc(num cdcser_epdesc_e epid, uint16_t mxpacket,
+                     FAR struct usb_epdesc_s *outdesc)
 {
   FAR const struct usb_epdesc_s *indesc;
 
   /* Copy the "canned" descriptor */
 
-  indesc = usbclass_getepdesc(epid)
+  indesc = cdcser_getepdesc(epid)
   memcpy(outdesc, indesc, USB_SIZEOF_EPDESC);
 
   /* Then add the correct max packet size */
@@ -508,7 +507,7 @@ void usbclass_mkepdesc(num cdcser_epdesc_e epid,
 #endif
 
 /****************************************************************************
- * Name: usbclass_mkcfgdesc
+ * Name: cdcser_mkcfgdesc
  *
  * Description:
  *   Construct the configuration descriptor
@@ -516,9 +515,9 @@ void usbclass_mkepdesc(num cdcser_epdesc_e epid,
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-int16_t usbclass_mkcfgdesc(FAR uint8_t *buf, uint8_t speed, uint8_t type)
+int16_t cdcser_mkcfgdesc(FAR uint8_t *buf, uint8_t speed, uint8_t type)
 #else
-int16_t usbclass_mkcfgdesc(FAR uint8_t *buf)
+int16_t cdcser_mkcfgdesc(FAR uint8_t *buf)
 #endif
 {
   FAR const struct cfgdecsc_group_s *group;
@@ -554,7 +553,7 @@ int16_t usbclass_mkcfgdesc(FAR uint8_t *buf)
 #ifdef CONFIG_USBDEV_DUALSPEED
       if (highspeed && group->hsepsize != 0)
         {
-          usbclass_mkepdesc(group->desc, group->hsepsize,
+          cdcser_mkepdesc(group->desc, group->hsepsize,
                             (FAR struct usb_epdesc_s*)dest);
         }
       else
@@ -576,7 +575,7 @@ int16_t usbclass_mkcfgdesc(FAR uint8_t *buf)
 }
 
 /****************************************************************************
- * Name: usbclass_getqualdesc
+ * Name: cdcser_getqualdesc
  *
  * Description:
  *   Return a pointer to the raw qual descriptor
@@ -584,7 +583,7 @@ int16_t usbclass_mkcfgdesc(FAR uint8_t *buf)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-FAR const struct usb_qualdesc_s *usbclass_getqualdesc(void)
+FAR const struct usb_qualdesc_s *cdcser_getqualdesc(void)
 {
   return &g_qualdesc;
 }

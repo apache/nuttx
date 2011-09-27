@@ -73,15 +73,15 @@
 
 /* Container to support a list of requests */
 
-struct usbser_req_s
+struct cdcser_req_s
 {
-  FAR struct usbser_req_s *flink;      /* Implements a singly linked list */
+  FAR struct cdcser_req_s *flink;      /* Implements a singly linked list */
   FAR struct usbdev_req_s *req;        /* The contained request */
 };
 
 /* This structure describes the internal state of the driver */
 
-struct usbser_dev_s
+struct cdcser_dev_s
 {
   FAR struct uart_dev_s    serdev;     /* Serial device structure */
   FAR struct usbdev_s     *usbdev;     /* usbdev driver pointer */
@@ -107,8 +107,8 @@ struct usbser_dev_s
    * EPBULKIN; Read requests will be queued in the EBULKOUT.
    */
 
-  struct usbser_req_s wrreqs[CONFIG_CDCSER_NWRREQS];
-  struct usbser_req_s rdreqs[CONFIG_CDCSER_NWRREQS];
+  struct cdcser_req_s wrreqs[CONFIG_CDCSER_NWRREQS];
+  struct cdcser_req_s rdreqs[CONFIG_CDCSER_NWRREQS];
 
   /* Serial I/O buffers */
 
@@ -118,18 +118,18 @@ struct usbser_dev_s
 
 /* The internal version of the class driver */
 
-struct usbser_driver_s
+struct cdcser_driver_s
 {
   struct usbdevclass_driver_s drvr;
-  FAR struct usbser_dev_s     *dev;
+  FAR struct cdcser_dev_s     *dev;
 };
 
 /* This is what is allocated */
 
-struct usbser_alloc_s
+struct cdcser_alloc_s
 {
-  struct usbser_dev_s    dev;
-  struct usbser_driver_s drvr;
+  struct cdcser_dev_s    dev;
+  struct cdcser_driver_s drvr;
 };
 
 /****************************************************************************
@@ -138,114 +138,113 @@ struct usbser_alloc_s
 
 /* Transfer helpers *********************************************************/
 
-static uint16_t usbclass_fillrequest(FAR struct usbser_dev_s *priv,
+static uint16_t cdcser_fillrequest(FAR struct cdcser_dev_s *priv,
                  uint8_t *reqbuf, uint16_t reqlen);
-static int     usbclass_sndpacket(FAR struct usbser_dev_s *priv);
-static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
+static int     cdcser_sndpacket(FAR struct cdcser_dev_s *priv);
+static inline int cdcser_recvpacket(FAR struct cdcser_dev_s *priv,
                  uint8_t *reqbuf, uint16_t reqlen);
 
 /* Request helpers *********************************************************/
 
-static struct usbdev_req_s *usbclass_allocreq(FAR struct usbdev_ep_s *ep,
+static struct usbdev_req_s *cdcser_allocreq(FAR struct usbdev_ep_s *ep,
                  uint16_t len);
-static void    usbclass_freereq(FAR struct usbdev_ep_s *ep,
+static void    cdcser_freereq(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
 
 /* Configuration ***********************************************************/
 
-static void    usbclass_resetconfig(FAR struct usbser_dev_s *priv);
+static void    cdcser_resetconfig(FAR struct cdcser_dev_s *priv);
 #ifdef CONFIG_USBDEV_DUALSPEED
-static int     usbclass_epconfigure(FAR struct usbdev_ep_s *ep,
+static int     cdcser_epconfigure(FAR struct usbdev_ep_s *ep,
                  enum cdcser_epdesc_e epid, uint16_t mxpacket, bool last);
 #endif
-static int     usbclass_setconfig(FAR struct usbser_dev_s *priv,
+static int     cdcser_setconfig(FAR struct cdcser_dev_s *priv,
                  uint8_t config);
 
 /* Completion event handlers ***********************************************/
 
-static void    usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
+static void    cdcser_ep0incomplete(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
-static void    usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
+static void    cdcser_rdcomplete(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
-static void    usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
+static void    cdcser_wrcomplete(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
 
 /* USB class device ********************************************************/
 
-static int     usbclass_bind(FAR struct usbdev_s *dev,
+static int     cdcser_bind(FAR struct usbdev_s *dev,
                  FAR struct usbdevclass_driver_s *driver);
-static void    usbclass_unbind(FAR struct usbdev_s *dev);
-static int     usbclass_setup(FAR struct usbdev_s *dev,
+static void    cdcser_unbind(FAR struct usbdev_s *dev);
+static int     cdcser_setup(FAR struct usbdev_s *dev,
                  const struct usb_ctrlreq_s *ctrl);
-static void    usbclass_disconnect(FAR struct usbdev_s *dev);
+static void    cdcser_disconnect(FAR struct usbdev_s *dev);
 
-/* Serial port *************************************************************/
+/* UART Operationt **********************************************************/
 
-static int     usbser_setup(FAR struct uart_dev_s *dev);
-static void    usbser_shutdown(FAR struct uart_dev_s *dev);
-static int     usbser_attach(FAR struct uart_dev_s *dev);
-static void    usbser_detach(FAR struct uart_dev_s *dev);
-static int     usbser_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
-static void    usbser_rxint(FAR struct uart_dev_s *dev, bool enable);
-static void    usbser_txint(FAR struct uart_dev_s *dev, bool enable);
-static bool    usbser_txempty(FAR struct uart_dev_s *dev);
+static int     cdcuart_setup(FAR struct uart_dev_s *dev);
+static void    cdcuart_shutdown(FAR struct uart_dev_s *dev);
+static int     cdcuart_attach(FAR struct uart_dev_s *dev);
+static void    cdcuart_detach(FAR struct uart_dev_s *dev);
+static int     cdcuart_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
+static void    cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable);
+static void    cdcuart_txint(FAR struct uart_dev_s *dev, bool enable);
+static bool    cdcuart_txempty(FAR struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
-
-/* USB class device ********************************************************/
+/* USB class device *********************************************************/
 
 static const struct usbdevclass_driverops_s g_driverops =
 {
-  usbclass_bind,        /* bind */
-  usbclass_unbind,      /* unbind */
-  usbclass_setup,       /* setup */
-  usbclass_disconnect,  /* disconnect */
+  cdcser_bind,          /* bind */
+  cdcser_unbind,        /* unbind */
+  cdcser_setup,         /* setup */
+  cdcser_disconnect,    /* disconnect */
   NULL,                 /* suspend */
   NULL,                 /* resume */
 };
 
-/* Serial port *************************************************************/
+/* Serial port **************************************************************/
 
 static const struct uart_ops_s g_uartops =
 {
-  usbser_setup,         /* setup */
-  usbser_shutdown,      /* shutdown */
-  usbser_attach,        /* attach */
-  usbser_detach,        /* detach */
-  usbser_ioctl,         /* ioctl */
+  cdcuart_setup,        /* setup */
+  cdcuart_shutdown,     /* shutdown */
+  cdcuart_attach,       /* attach */
+  cdcuart_detach,       /* detach */
+  cdcuart_ioctl,        /* ioctl */
   NULL,                 /* receive */
-  usbser_rxint,         /* rxinit */
+  cdcuart_rxint,        /* rxinit */
   NULL,                 /* rxavailable */
   NULL,                 /* send */
-  usbser_txint,         /* txinit */
+  cdcuart_txint,        /* txinit */
   NULL,                 /* txready */
-  usbser_txempty        /* txempty */
+  cdcuart_txempty       /* txempty */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-/************************************************************************************
- * Name: usbclass_fillrequest
+/****************************************************************************
+ * Name: cdcser_fillrequest
  *
  * Description:
- *   If there is data to send it is copied to the given buffer.  Called either
- *   to initiate the first write operation, or from the completion interrupt handler
- *   service consecutive write operations.
+ *   If there is data to send it is copied to the given buffer.  Called
+ *   either to initiate the first write operation, or from the completion
+ *   interrupt handler service consecutive write operations.
  *
- * NOTE: The USB serial driver does not use the serial drivers uart_xmitchars()
- *   API.  That logic is essentially duplicated here because unlike UART hardware,
- *   we need to be able to handle writes not byte-by-byte, but packet-by-packet.
- *   Unfortunately, that decision also exposes some internals of the serial driver
- *   in the following.
+ * NOTE: The USB serial driver does not use the serial drivers
+ *   uart_xmitchars() API.  That logic is essentially duplicated here because
+ *   unlike UART hardware, we need to be able to handle writes not byte-by-byte,
+ *   but packet-by-packet. Unfortunately, that decision also exposes some
+ *   internals of the serial driver in the following.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static uint16_t usbclass_fillrequest(FAR struct usbser_dev_s *priv, uint8_t *reqbuf,
-                                     uint16_t reqlen)
+static uint16_t cdcser_fillrequest(FAR struct cdcser_dev_s *priv, uint8_t *reqbuf,
+                                   uint16_t reqlen)
 {
   FAR uart_dev_t *serdev = &priv->serdev;
   FAR struct uart_buffer_s *xmit = &serdev->xmit;
@@ -293,22 +292,22 @@ static uint16_t usbclass_fillrequest(FAR struct usbser_dev_s *priv, uint8_t *req
   return nbytes;
 }
 
-/************************************************************************************
- * Name: usbclass_sndpacket
+/****************************************************************************
+ * Name: cdcser_sndpacket
  *
  * Description:
- *   This function obtains write requests, transfers the TX data into the request,
- *   and submits the requests to the USB controller.  This continues untils either
- *   (1) there are no further packets available, or (2) thre is not further data
- *   to send.
+ *   This function obtains write requests, transfers the TX data into the
+ *   request, and submits the requests to the USB controller.  This continues
+ *   untils either (1) there are no further packets available, or (2) thre is
+ *   no further data to send.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
+static int cdcser_sndpacket(FAR struct cdcser_dev_s *priv)
 {
   FAR struct usbdev_ep_s *ep;
   FAR struct usbdev_req_s *req;
-  FAR struct usbser_req_s *reqcontainer;
+  FAR struct cdcser_req_s *reqcontainer;
   irqstate_t flags;
   int len;
   int ret = OK;
@@ -327,7 +326,7 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
 
   ep = priv->epbulkin;
 
-  /* Loop until either (1) we run out or write requests, or (2) usbclass_fillrequest()
+  /* Loop until either (1) we run out or write requests, or (2) cdcser_fillrequest()
    * is unable to fill the request with data (i.e., untilthere is no more data
    * to be sent).
    */
@@ -340,12 +339,12 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
     {
       /* Peek at the request in the container at the head of the list */
 
-      reqcontainer = (struct usbser_req_s *)sq_peek(&priv->reqlist);
+      reqcontainer = (struct cdcser_req_s *)sq_peek(&priv->reqlist);
       req          = reqcontainer->req;
 
       /* Fill the request with serial TX data */
 
-      len = usbclass_fillrequest(priv, req->buf, req->len);
+      len = cdcser_fillrequest(priv, req->buf, req->len);
       if (len > 0)
         {
           /* Remove the empty container from the request list */
@@ -375,21 +374,21 @@ static int usbclass_sndpacket(FAR struct usbser_dev_s *priv)
   return ret;
 }
 
-/************************************************************************************
- * Name: usbclass_recvpacket
+/****************************************************************************
+ * Name: cdcser_recvpacket
  *
  * Description:
- *   A normal completion event was received by the read completion handler at the
- *   interrupt level (with interrupts disabled).  This function handles the USB packet
- *   and provides the received data to the uart RX buffer.
+ *   A normal completion event was received by the read completion handler
+ *   at the interrupt level (with interrupts disabled).  This function handles
+ *   the USB packet and provides the received data to the uart RX buffer.
  *
  * Assumptions:
  *   Called from the USB interrupt handler with interrupts disabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
-                                      uint8_t *reqbuf, uint16_t reqlen)
+static inline int cdcser_recvpacket(FAR struct cdcser_dev_s *priv,
+                                    uint8_t *reqbuf, uint16_t reqlen)
 {
   FAR uart_dev_t *serdev = &priv->serdev;
   FAR struct uart_buffer_s *recv = &serdev->recv;
@@ -487,15 +486,15 @@ static inline int usbclass_recvpacket(FAR struct usbser_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: usbclass_allocreq
+ * Name: cdcser_allocreq
  *
  * Description:
  *   Allocate a request instance along with its buffer
  *
  ****************************************************************************/
 
-static struct usbdev_req_s *usbclass_allocreq(FAR struct usbdev_ep_s *ep,
-                                              uint16_t len)
+static struct usbdev_req_s *cdcser_allocreq(FAR struct usbdev_ep_s *ep,
+                                            uint16_t len)
 {
   FAR struct usbdev_req_s *req;
 
@@ -514,15 +513,15 @@ static struct usbdev_req_s *usbclass_allocreq(FAR struct usbdev_ep_s *ep,
 }
 
 /****************************************************************************
- * Name: usbclass_freereq
+ * Name: cdcser_freereq
  *
  * Description:
  *   Free a request instance along with its buffer
  *
  ****************************************************************************/
 
-static void usbclass_freereq(FAR struct usbdev_ep_s *ep,
-                             FAR struct usbdev_req_s *req)
+static void cdcser_freereq(FAR struct usbdev_ep_s *ep,
+                           FAR struct usbdev_req_s *req)
 {
   if (ep != NULL && req != NULL)
     {
@@ -535,14 +534,14 @@ static void usbclass_freereq(FAR struct usbdev_ep_s *ep,
 }
 
 /****************************************************************************
- * Name: usbclass_resetconfig
+ * Name: cdcser_resetconfig
  *
  * Description:
  *   Mark the device as not configured and disable all endpoints.
  *
  ****************************************************************************/
 
-static void usbclass_resetconfig(FAR struct usbser_dev_s *priv)
+static void cdcser_resetconfig(FAR struct cdcser_dev_s *priv)
 {
   /* Are we configured? */
 
@@ -563,7 +562,7 @@ static void usbclass_resetconfig(FAR struct usbser_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: usbclass_epconfigure
+ * Name: cdcser_epconfigure
  *
  * Description:
  *   Configure one endpoint.
@@ -571,18 +570,18 @@ static void usbclass_resetconfig(FAR struct usbser_dev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-static int usbclass_epconfigure(FAR struct usbdev_ep_s *ep,
-                                enum cdcser_epdesc_e epid, uint16_t mxpacket,
-                                bool last)
+static int cdcser_epconfigure(FAR struct usbdev_ep_s *ep,
+                              enum cdcser_epdesc_e epid, uint16_t mxpacket,
+                              bool last)
 {
   struct usb_epdesc_s epdesc;
-  usbclass_mkepdesc(epid, mxpacket, &epdesc);
+  cdcser_mkepdesc(epid, mxpacket, &epdesc);
   return EP_CONFIGURE(ep, &epdesc, last);
 }
 #endif
 
 /****************************************************************************
- * Name: usbclass_setconfig
+ * Name: cdcser_setconfig
  *
  * Description:
  *   Set the device configuration by allocating and configuring endpoints and
@@ -590,7 +589,7 @@ static int usbclass_epconfigure(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
+static int cdcser_setconfig(FAR struct cdcser_dev_s *priv, uint8_t config)
 {
   FAR struct usbdev_req_s *req;
   int i;
@@ -614,7 +613,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
 
   /* Discard the previous configuration data */
 
-  usbclass_resetconfig(priv);
+  cdcser_resetconfig(priv);
 
   /* Was this a request to simply discard the current configuration? */
 
@@ -637,14 +636,14 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
-      ret = usbclass_epconfigure(priv->epintin, CDCSER_EPINTIN,
-                                 CONFIG_CDCSER_EPINTIN_HSSIZE, false);
+      ret = cdcser_epconfigure(priv->epintin, CDCSER_EPINTIN,
+                               CONFIG_CDCSER_EPINTIN_HSSIZE, false);
     }
   else
 #endif
     {
       ret = EP_CONFIGURE(priv->epintin,
-                         usbclass_getepdesc(CDCSER_EPINTIN), false);
+                         cdcser_getepdesc(CDCSER_EPINTIN), false);
     }
 
   if (ret < 0)
@@ -659,14 +658,14 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
-      ret = usbclass_epconfigure(priv->epbulkin, CDCSER_EPBULKIN,
-                                 CONFIG_CDCSER_EPBULKIN_HSSIZE, false);
+      ret = cdcser_epconfigure(priv->epbulkin, CDCSER_EPBULKIN,
+                               CONFIG_CDCSER_EPBULKIN_HSSIZE, false);
     }
   else
 #endif
     {
       ret = EP_CONFIGURE(priv->epbulkin,
-                         usbclass_getepdesc(CDCSER_EPBULKIN), false);
+                         cdcser_getepdesc(CDCSER_EPBULKIN), false);
     }
 
   if (ret < 0)
@@ -682,14 +681,14 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
-      ret = usbclass_epconfigure(priv->epbulkout, CDCSER_EPBULKOUT,
-                                 CONFIG_CDCSER_EPBULKOUT_HSSIZE, true);
+      ret = cdcser_epconfigure(priv->epbulkout, CDCSER_EPBULKOUT,
+                               CONFIG_CDCSER_EPBULKOUT_HSSIZE, true);
     }
   else
 #endif
     {
       ret = EP_CONFIGURE(priv->epbulkout,
-                         usbclass_getepdesc(CDCSER_EPBULKOUT), true);
+                         cdcser_getepdesc(CDCSER_EPBULKOUT), true);
     }
 
   if (ret < 0)
@@ -706,7 +705,7 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
   for (i = 0; i < CONFIG_CDCSER_NRDREQS; i++)
     {
       req           = priv->rdreqs[i].req;
-      req->callback = usbclass_rdcomplete;
+      req->callback = cdcser_rdcomplete;
       ret           = EP_SUBMIT(priv->epbulkout, req);
       if (ret != OK)
         {
@@ -720,19 +719,19 @@ static int usbclass_setconfig(FAR struct usbser_dev_s *priv, uint8_t config)
   return OK;
 
 errout:
-  usbclass_resetconfig(priv);
+  cdcser_resetconfig(priv);
   return ret;
 }
 
 /****************************************************************************
- * Name: usbclass_ep0incomplete
+ * Name: cdcser_ep0incomplete
  *
  * Description:
  *   Handle completion of EP0 control operations
  *
  ****************************************************************************/
 
-static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
+static void cdcser_ep0incomplete(FAR struct usbdev_ep_s *ep,
                                    FAR struct usbdev_req_s *req)
 {
   if (req->result || req->xfrd != req->len)
@@ -742,7 +741,7 @@ static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
 }
 
 /****************************************************************************
- * Name: usbclass_rdcomplete
+ * Name: cdcser_rdcomplete
  *
  * Description:
  *   Handle completion of read request on the bulk OUT endpoint.  This
@@ -750,10 +749,10 @@ static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
-                                FAR struct usbdev_req_s *req)
+static void cdcser_rdcomplete(FAR struct usbdev_ep_s *ep,
+                              FAR struct usbdev_req_s *req)
 {
-  FAR struct usbser_dev_s *priv;
+  FAR struct cdcser_dev_s *priv;
   irqstate_t flags;
   int ret;
 
@@ -769,7 +768,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Extract references to private data */
 
-  priv = (FAR struct usbser_dev_s*)ep->priv;
+  priv = (FAR struct cdcser_dev_s*)ep->priv;
 
   /* Process the received data unless this is some unusual condition */
 
@@ -778,7 +777,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
     {
     case 0: /* Normal completion */
       usbtrace(TRACE_CLASSRDCOMPLETE, priv->nrdq);
-      usbclass_recvpacket(priv, req->buf, req->xfrd);
+      cdcser_recvpacket(priv, req->buf, req->xfrd);
       break;
 
     case -ESHUTDOWN: /* Disconnection */
@@ -809,7 +808,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
 }
 
 /****************************************************************************
- * Name: usbclass_wrcomplete
+ * Name: cdcser_wrcomplete
  *
  * Description:
  *   Handle completion of write request.  This function probably executes
@@ -817,11 +816,11 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
-                                FAR struct usbdev_req_s *req)
+static void cdcser_wrcomplete(FAR struct usbdev_ep_s *ep,
+                              FAR struct usbdev_req_s *req)
 {
-  FAR struct usbser_dev_s *priv;
-  FAR struct usbser_req_s *reqcontainer;
+  FAR struct cdcser_dev_s *priv;
+  FAR struct cdcser_req_s *reqcontainer;
   irqstate_t flags;
 
   /* Sanity check */
@@ -836,8 +835,8 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Extract references to our private data */
 
-  priv         = (FAR struct usbser_dev_s *)ep->priv;
-  reqcontainer = (FAR struct usbser_req_s *)req->priv;
+  priv         = (FAR struct cdcser_dev_s *)ep->priv;
+  reqcontainer = (FAR struct cdcser_req_s *)req->priv;
 
   /* Return the write request to the free list */
 
@@ -854,7 +853,7 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
     {
     case OK: /* Normal completion */
       usbtrace(TRACE_CLASSWRCOMPLETE, priv->nwrq);
-      usbclass_sndpacket(priv);
+      cdcser_sndpacket(priv);
       break;
 
     case -ESHUTDOWN: /* Disconnection */
@@ -872,17 +871,17 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbclass_bind
+ * Name: cdcser_bind
  *
  * Description:
  *   Invoked when the driver is bound to a USB device driver
  *
  ****************************************************************************/
 
-static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_s *driver)
+static int cdcser_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver_s *driver)
 {
-  FAR struct usbser_dev_s *priv = ((struct usbser_driver_s*)driver)->dev;
-  FAR struct usbser_req_s *reqcontainer;
+  FAR struct cdcser_dev_s *priv = ((struct cdcser_driver_s*)driver)->dev;
+  FAR struct cdcser_req_s *reqcontainer;
   irqstate_t flags;
   uint16_t reqlen;
   int ret;
@@ -897,17 +896,17 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
 
   /* Preallocate control request */
 
-  priv->ctrlreq = usbclass_allocreq(dev->ep0, CDCSER_MXDESCLEN);
+  priv->ctrlreq = cdcser_allocreq(dev->ep0, CDCSER_MXDESCLEN);
   if (priv->ctrlreq == NULL)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCCTRLREQ), 0);
       ret = -ENOMEM;
       goto errout;
     }
-  priv->ctrlreq->callback = usbclass_ep0incomplete;
+  priv->ctrlreq->callback = cdcser_ep0incomplete;
 
   /* Pre-allocate all endpoints... the endpoints will not be functional
-   * until the SET CONFIGURATION request is processed in usbclass_setconfig.
+   * until the SET CONFIGURATION request is processed in cdcser_setconfig.
    * This is done here because there may be calls to kmalloc and the SET
    * CONFIGURATION processing probably occurrs within interrupt handling
    * logic where kmalloc calls will fail.
@@ -957,7 +956,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
   for (i = 0; i < CONFIG_CDCSER_NRDREQS; i++)
     {
       reqcontainer      = &priv->rdreqs[i];
-      reqcontainer->req = usbclass_allocreq(priv->epbulkout, reqlen);
+      reqcontainer->req = cdcser_allocreq(priv->epbulkout, reqlen);
       if (reqcontainer->req == NULL)
         {
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDALLOCREQ), -ENOMEM);
@@ -965,7 +964,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
           goto errout;
         }
       reqcontainer->req->priv     = reqcontainer;
-      reqcontainer->req->callback = usbclass_rdcomplete;
+      reqcontainer->req->callback = cdcser_rdcomplete;
     }
 
   /* Pre-allocate write request containers and put in a free list */
@@ -979,7 +978,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
   for (i = 0; i < CONFIG_CDCSER_NWRREQS; i++)
     {
       reqcontainer      = &priv->wrreqs[i];
-      reqcontainer->req = usbclass_allocreq(priv->epbulkin, reqlen);
+      reqcontainer->req = cdcser_allocreq(priv->epbulkin, reqlen);
       if (reqcontainer->req == NULL)
         {
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRALLOCREQ), -ENOMEM);
@@ -987,7 +986,7 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
           goto errout;
         }
       reqcontainer->req->priv     = reqcontainer;
-      reqcontainer->req->callback = usbclass_wrcomplete;
+      reqcontainer->req->callback = cdcser_wrcomplete;
 
       flags = irqsave();
       sq_addlast((sq_entry_t*)reqcontainer, &priv->reqlist);
@@ -1007,22 +1006,22 @@ static int usbclass_bind(FAR struct usbdev_s *dev, FAR struct usbdevclass_driver
   return OK;
 
 errout:
-  usbclass_unbind(dev);
+  cdcser_unbind(dev);
   return ret;
 }
 
 /****************************************************************************
- * Name: usbclass_unbind
+ * Name: cdcser_unbind
  *
  * Description:
  *    Invoked when the driver is unbound from a USB device driver
  *
  ****************************************************************************/
 
-static void usbclass_unbind(FAR struct usbdev_s *dev)
+static void cdcser_unbind(FAR struct usbdev_s *dev)
 {
-  FAR struct usbser_dev_s *priv;
-  FAR struct usbser_req_s *reqcontainer;
+  FAR struct cdcser_dev_s *priv;
+  FAR struct cdcser_req_s *reqcontainer;
   irqstate_t flags;
   int i;
 
@@ -1038,7 +1037,7 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
 
   /* Extract reference to private data */
 
-  priv = (FAR struct usbser_dev_s *)dev->ep0->priv;
+  priv = (FAR struct cdcser_dev_s *)dev->ep0->priv;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -1054,12 +1053,12 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
     {
       /* Make sure that the endpoints have been unconfigured.  If
        * we were terminated gracefully, then the configuration should
-       * already have been reset.  If not, then calling usbclass_resetconfig
+       * already have been reset.  If not, then calling cdcser_resetconfig
        * should cause the endpoints to immediately terminate all
        * transfers and return the requests to us (with result == -ESHUTDOWN)
        */
 
-      usbclass_resetconfig(priv);
+      cdcser_resetconfig(priv);
       up_mdelay(50);
 
       /* Free the interrupt IN endpoint */
@@ -1082,7 +1081,7 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
 
       if (priv->ctrlreq != NULL)
         {
-          usbclass_freereq(dev->ep0, priv->ctrlreq);
+          cdcser_freereq(dev->ep0, priv->ctrlreq);
           priv->ctrlreq = NULL;
         }
 
@@ -1096,7 +1095,7 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
           reqcontainer = &priv->rdreqs[i];
           if (reqcontainer->req)
             {
-              usbclass_freereq(priv->epbulkout, reqcontainer->req);
+              cdcser_freereq(priv->epbulkout, reqcontainer->req);
               reqcontainer->req = NULL;
             }
         }
@@ -1117,10 +1116,10 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
       DEBUGASSERT(priv->nwrq == CONFIG_CDCSER_NWRREQS);
       while (!sq_empty(&priv->reqlist))
         {
-          reqcontainer = (struct usbser_req_s *)sq_remfirst(&priv->reqlist);
+          reqcontainer = (struct cdcser_req_s *)sq_remfirst(&priv->reqlist);
           if (reqcontainer->req != NULL)
             {
-              usbclass_freereq(priv->epbulkin, reqcontainer->req);
+              cdcser_freereq(priv->epbulkin, reqcontainer->req);
               priv->nwrq--;     /* Number of write requests queued */
             }
         }
@@ -1135,7 +1134,7 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
 }
 
 /****************************************************************************
- * Name: usbclass_setup
+ * Name: cdcser_setup
  *
  * Description:
  *   Invoked for ep0 control requests.  This function probably executes
@@ -1143,9 +1142,9 @@ static void usbclass_unbind(FAR struct usbdev_s *dev)
  *
  ****************************************************************************/
 
-static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *ctrl)
+static int cdcser_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *ctrl)
 {
-  FAR struct usbser_dev_s *priv;
+  FAR struct cdcser_dev_s *priv;
   FAR struct usbdev_req_s *ctrlreq;
   uint16_t value;
   uint16_t index;
@@ -1163,7 +1162,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
   /* Extract reference to private data */
 
   usbtrace(TRACE_CLASSSETUP, ctrl->req);
-  priv = (FAR struct usbser_dev_s *)dev->ep0->priv;
+  priv = (FAR struct cdcser_dev_s *)dev->ep0->priv;
 
 #ifdef CONFIG_DEBUG
   if (!priv || !priv->ctrlreq)
@@ -1204,7 +1203,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
                 case USB_DESC_TYPE_DEVICE:
                   {
                     ret = USB_SIZEOF_DEVDESC;
-                    memcpy(ctrlreq->buf, usbclass_getdevdesc(), ret);
+                    memcpy(ctrlreq->buf, cdcser_getdevdesc(), ret);
                   }
                   break;
 
@@ -1212,7 +1211,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
                 case USB_DESC_TYPE_DEVICEQUALIFIER:
                   {
                     ret = USB_SIZEOF_QUALDESC;
-                    memcpy(ctrlreq->buf, usbclass_getqualdesc(), ret);
+                    memcpy(ctrlreq->buf, cdcser_getqualdesc(), ret);
                   }
                   break;
 
@@ -1222,9 +1221,9 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
                 case USB_DESC_TYPE_CONFIG:
                   {
 #ifdef CONFIG_USBDEV_DUALSPEED
-                    ret = usbclass_mkcfgdesc(ctrlreq->buf, dev->speed, ctrl->req);
+                    ret = cdcser_mkcfgdesc(ctrlreq->buf, dev->speed, ctrl->req);
 #else
-                    ret = usbclass_mkcfgdesc(ctrlreq->buf);
+                    ret = cdcser_mkcfgdesc(ctrlreq->buf);
 #endif
                   }
                   break;
@@ -1233,7 +1232,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
                   {
                     /* index == language code. */
 
-                    ret = usbclass_mkstrdesc(ctrl->value[0], (struct usb_strdesc_s *)ctrlreq->buf);
+                    ret = cdcser_mkstrdesc(ctrl->value[0], (struct usb_strdesc_s *)ctrlreq->buf);
                   }
                   break;
 
@@ -1250,7 +1249,7 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
             {
               if (ctrl->type == 0)
                 {
-                  ret = usbclass_setconfig(priv, value);
+                  ret = cdcser_setconfig(priv, value);
                 }
             }
             break;
@@ -1273,8 +1272,8 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
                       index == CDCSER_INTERFACEID &&
                       value == CDCSER_ALTINTERFACEID)
                     {
-                      usbclass_resetconfig(priv);
-                      usbclass_setconfig(priv, priv->config);
+                      cdcser_resetconfig(priv);
+                      cdcser_setconfig(priv, priv->config);
                       ret = 0;
                     }
                 }
@@ -1431,14 +1430,14 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
         {
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPRESPQ), (uint16_t)-ret);
           ctrlreq->result = OK;
-          usbclass_ep0incomplete(dev->ep0, ctrlreq);
+          cdcser_ep0incomplete(dev->ep0, ctrlreq);
         }
     }
   return ret;
 }
 
 /****************************************************************************
- * Name: usbclass_disconnect
+ * Name: cdcser_disconnect
  *
  * Description:
  *   Invoked after all transfers have been stopped, when the host is
@@ -1447,9 +1446,9 @@ static int usbclass_setup(FAR struct usbdev_s *dev, const struct usb_ctrlreq_s *
  *
  ****************************************************************************/
 
-static void usbclass_disconnect(FAR struct usbdev_s *dev)
+static void cdcser_disconnect(FAR struct usbdev_s *dev)
 {
-  FAR struct usbser_dev_s *priv;
+  FAR struct cdcser_dev_s *priv;
   irqstate_t flags;
 
   usbtrace(TRACE_CLASSDISCONNECT, 0);
@@ -1464,7 +1463,7 @@ static void usbclass_disconnect(FAR struct usbdev_s *dev)
 
   /* Extract reference to private data */
 
-  priv = (FAR struct usbser_dev_s *)dev->ep0->priv;
+  priv = (FAR struct cdcser_dev_s *)dev->ep0->priv;
 
 #ifdef CONFIG_DEBUG
   if (!priv)
@@ -1477,7 +1476,7 @@ static void usbclass_disconnect(FAR struct usbdev_s *dev)
   /* Reset the configuration */
 
   flags = irqsave();
-  usbclass_resetconfig(priv);
+  cdcser_resetconfig(priv);
 
   /* Clear out all data in the circular buffer */
 
@@ -1497,16 +1496,16 @@ static void usbclass_disconnect(FAR struct usbdev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usbser_setup
+ * Name: cdcuart_setup
  *
  * Description:
  *   This method is called the first time that the serial port is opened.
  *
  ****************************************************************************/
 
-static int usbser_setup(FAR struct uart_dev_s *dev)
+static int cdcuart_setup(FAR struct uart_dev_s *dev)
 {
-  FAR struct usbser_dev_s *priv;
+  FAR struct cdcser_dev_s *priv;
 
   usbtrace(CDCSER_CLASSAPI_SETUP, 0);
 
@@ -1522,7 +1521,7 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
 
   /* Extract reference to private data */
 
-  priv = (FAR struct usbser_dev_s*)dev->priv;
+  priv = (FAR struct cdcser_dev_s*)dev->priv;
 
   /* Check if we have been configured */
 
@@ -1536,18 +1535,18 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: usbser_shutdown
+ * Name: cdcuart_shutdown
  *
  * Description:
  *   This method is called when the serial port is closed.  This operation
  *   is very simple for the USB serial backend because the serial driver
  *   has already assured that the TX data has full drained -- it calls
- *   usbser_txempty() until that function returns true before calling this
+ *   cdcuart_txempty() until that function returns true before calling this
  *   function.
  *
  ****************************************************************************/
 
-static void usbser_shutdown(FAR struct uart_dev_s *dev)
+static void cdcuart_shutdown(FAR struct uart_dev_s *dev)
 {
   usbtrace(CDCSER_CLASSAPI_SHUTDOWN, 0);
 
@@ -1562,44 +1561,44 @@ static void usbser_shutdown(FAR struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: usbser_attach
+ * Name: cdcuart_attach
  *
  * Description:
  *   Does not apply to the USB serial class device
  *
  ****************************************************************************/
 
-static int usbser_attach(FAR struct uart_dev_s *dev)
+static int cdcuart_attach(FAR struct uart_dev_s *dev)
 {
   usbtrace(CDCSER_CLASSAPI_ATTACH, 0);
   return OK;
 }
 
 /****************************************************************************
- * Name: usbser_detach
+ * Name: cdcuart_detach
  *
  * Description:
 *   Does not apply to the USB serial class device
   *
  ****************************************************************************/
 
-static void usbser_detach(FAR struct uart_dev_s *dev)
+static void cdcuart_detach(FAR struct uart_dev_s *dev)
 {
   usbtrace(CDCSER_CLASSAPI_DETACH, 0);
 }
 
 /****************************************************************************
- * Name: usbser_ioctl
+ * Name: cdcuart_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
-static int usbser_ioctl(FAR struct file *filep,int cmd,unsigned long arg)
+static int cdcuart_ioctl(FAR struct file *filep,int cmd,unsigned long arg)
 {
   struct inode        *inode = filep->f_inode;
-  struct usbser_dev_s *priv  = inode->i_private;
+  struct cdcser_dev_s *priv  = inode->i_private;
   int                  ret   = OK;
 
   switch (cmd)
@@ -1701,25 +1700,25 @@ static int usbser_ioctl(FAR struct file *filep,int cmd,unsigned long arg)
 }
 
 /****************************************************************************
- * Name: usbser_rxint
+ * Name: cdcuart_rxint
  *
  * Description:
  *   Called by the serial driver to enable or disable RX interrupts.  We, of
  *   course, have no RX interrupts but must behave consistently.  This method
  *   is called under the conditions:
  *
- *   1. With enable==true when the port is opened (just after usbser_setup
- *      and usbser_attach are called called)
+ *   1. With enable==true when the port is opened (just after cdcuart_setup
+ *      and cdcuart_attach are called called)
  *   2. With enable==false while transferring data from the RX buffer
  *   2. With enable==true while waiting for more incoming data
- *   3. With enable==false when the port is closed (just before usbser_detach
- *      and usbser_shutdown are called).
+ *   3. With enable==false when the port is closed (just before cdcuart_detach
+ *      and cdcuart_shutdown are called).
  *
  ****************************************************************************/
 
-static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
+static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
 {
-  FAR struct usbser_dev_s *priv;
+  FAR struct cdcser_dev_s *priv;
   FAR uart_dev_t *serdev;
   irqstate_t flags;
 
@@ -1737,7 +1736,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
 
   /* Extract reference to private data */
 
-  priv   = (FAR struct usbser_dev_s*)dev->priv;
+  priv   = (FAR struct cdcser_dev_s*)dev->priv;
   serdev = &priv->serdev;
 
   /* We need exclusive access to the RX buffer and private structure
@@ -1797,7 +1796,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
 }
 
 /****************************************************************************
- * Name: usbser_txint
+ * Name: cdcuart_txint
  *
  * Description:
  *   Called by the serial driver to enable or disable TX interrupts.  We, of
@@ -1810,9 +1809,9 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
+static void cdcuart_txint(FAR struct uart_dev_s *dev, bool enable)
 {
-  FAR struct usbser_dev_s *priv;
+  FAR struct cdcser_dev_s *priv;
 
   usbtrace(CDCSER_CLASSAPI_TXINT, (uint16_t)enable);
 
@@ -1828,7 +1827,7 @@ static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
 
  /* Extract references to private data */
 
-  priv = (FAR struct usbser_dev_s*)dev->priv;
+  priv = (FAR struct cdcser_dev_s*)dev->priv;
 
   /* If the new state is enabled and if there is data in the XMIT buffer,
    * send the next packet now.
@@ -1839,12 +1838,12 @@ static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
 
   if (enable && priv->serdev.xmit.head != priv->serdev.xmit.tail)
     {
-      usbclass_sndpacket(priv);
+      cdcser_sndpacket(priv);
     }
 }
 
 /****************************************************************************
- * Name: usbser_txempty
+ * Name: cdcuart_txempty
  *
  * Description:
  *   Return true when all data has been sent.  This is called from the
@@ -1855,9 +1854,9 @@ static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static bool usbser_txempty(FAR struct uart_dev_s *dev)
+static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
 {
-  FAR struct usbser_dev_s *priv = (FAR struct usbser_dev_s*)dev->priv;
+  FAR struct cdcser_dev_s *priv = (FAR struct cdcser_dev_s*)dev->priv;
 
   usbtrace(CDCSER_CLASSAPI_TXEMPTY, 0);
 
@@ -1897,15 +1896,15 @@ static bool usbser_txempty(FAR struct uart_dev_s *dev)
 
 int cdcser_initialize(int minor)
 {
-  FAR struct usbser_alloc_s *alloc;
-  FAR struct usbser_dev_s *priv;
-  FAR struct usbser_driver_s *drvr;
+  FAR struct cdcser_alloc_s *alloc;
+  FAR struct cdcser_dev_s *priv;
+  FAR struct cdcser_driver_s *drvr;
   char devname[16];
   int ret;
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct usbser_alloc_s*)kmalloc(sizeof(struct usbser_alloc_s));
+  alloc = (FAR struct cdcser_alloc_s*)kmalloc(sizeof(struct cdcser_alloc_s));
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCDEVSTRUCT), 0);
@@ -1919,7 +1918,7 @@ int cdcser_initialize(int minor)
 
   /* Initialize the USB serial driver structure */
 
-  memset(priv, 0, sizeof(struct usbser_dev_s));
+  memset(priv, 0, sizeof(struct cdcser_dev_s));
   sq_init(&priv->reqlist);
 
   /* Fake line status */

@@ -118,12 +118,6 @@ static struct usbdev_req_s *usbstrg_allocreq(FAR struct usbdev_ep_s *ep,
                 uint16_t len);
 static void   usbstrg_freereq(FAR struct usbdev_ep_s *ep,
                 FAR struct usbdev_req_s *req);
-static int    usbstrg_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
-#ifdef CONFIG_USBDEV_DUALSPEED
-static int16_t usbstrg_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type);
-#else
-static int16_t usbstrg_mkcfgdesc(uint8_t *buf);
-#endif
 
 /* Class Driver Operations (most at interrupt level) ************************/
 
@@ -154,125 +148,9 @@ static struct usbdevclass_driverops_s g_driverops =
   NULL                /* resume */
 };
 
-/* Descriptors **************************************************************/
-
-/* Device descriptor */
-
-static const struct usb_devdesc_s g_devdesc =
-{
-  USB_SIZEOF_DEVDESC,                           /* len */
-  USB_DESC_TYPE_DEVICE,                         /* type */
-  {LSBYTE(0x0200), MSBYTE(0x0200)},             /* usb */
-  USB_CLASS_PER_INTERFACE,                      /* class */
-  0,                                            /* subclass */
-  0,                                            /* protocol */
-  CONFIG_USBSTRG_EP0MAXPACKET,                  /* maxpacketsize */
-  { LSBYTE(CONFIG_USBSTRG_VENDORID),            /* vendor */
-    MSBYTE(CONFIG_USBSTRG_VENDORID) },
-  { LSBYTE(CONFIG_USBSTRG_PRODUCTID),           /* product */
-    MSBYTE(CONFIG_USBSTRG_PRODUCTID) },
-  { LSBYTE(CONFIG_USBSTRG_VERSIONNO),           /* device */
-    MSBYTE(CONFIG_USBSTRG_VERSIONNO) },
-  USBSTRG_MANUFACTURERSTRID,                    /* imfgr */
-  USBSTRG_PRODUCTSTRID,                         /* iproduct */
-  USBSTRG_SERIALSTRID,                          /* serno */
-  USBSTRG_NCONFIGS                              /* nconfigs */
-};
-
-/* Configuration descriptor */
-
-static const struct usb_cfgdesc_s g_cfgdesc =
-{
-  USB_SIZEOF_CFGDESC,                           /* len */
-  USB_DESC_TYPE_CONFIG,                         /* type */
-  {0, 0},                                       /* totallen -- to be provided */
-  USBSTRG_NINTERFACES,                          /* ninterfaces */
-  USBSTRG_CONFIGID,                             /* cfgvalue */
-  USBSTRG_CONFIGSTRID,                          /* icfg */
-  USB_CONFIG_ATTR_ONE|SELFPOWERED|REMOTEWAKEUP, /* attr */
-  (CONFIG_USBDEV_MAXPOWER + 1) / 2              /* mxpower */
-};
-
-/* Single interface descriptor */
-
-static const struct usb_ifdesc_s g_ifdesc =
-{
-  USB_SIZEOF_IFDESC,                            /* len */
-  USB_DESC_TYPE_INTERFACE,                      /* type */
-  USBSTRG_INTERFACEID,                          /* ifno */
-  USBSTRG_ALTINTERFACEID,                       /* alt */
-  USBSTRG_NENDPOINTS,                           /* neps */
-  USB_CLASS_MASS_STORAGE,                       /* class */
-  USBSTRG_SUBCLASS_SCSI,                        /* subclass */
-  USBSTRG_PROTO_BULKONLY,                       /* protocol */
-  USBSTRG_CONFIGSTRID                           /* iif */
-};
-
-/* Endpoint descriptors */
-
-static const struct usb_epdesc_s g_fsepbulkoutdesc =
-{
-  USB_SIZEOF_EPDESC,                            /* len */
-  USB_DESC_TYPE_ENDPOINT,                       /* type */
-  USBSTRG_EPOUTBULK_ADDR,                       /* addr */
-  USBSTRG_EPOUTBULK_ATTR,                       /* attr */
-  { LSBYTE(USBSTRG_FSBULKMAXPACKET),            /* maxpacket */
-    MSBYTE(USBSTRG_FSBULKMAXPACKET) },
-  0                                             /* interval */
-};
-
-static const struct usb_epdesc_s g_fsepbulkindesc =
-{
-  USB_SIZEOF_EPDESC,                            /* len */
-  USB_DESC_TYPE_ENDPOINT,                       /* type */
-  USBSTRG_EPINBULK_ADDR,                        /* addr */
-  USBSTRG_EPINBULK_ATTR,                        /* attr */
-  { LSBYTE(USBSTRG_FSBULKMAXPACKET),            /* maxpacket */
-    MSBYTE(USBSTRG_FSBULKMAXPACKET) },
-  0                                             /* interval */
-};
-
-#ifdef  CONFIG_USBDEV_DUALSPEED
-static const struct usb_qualdesc_s g_qualdesc =
-{
-  USB_SIZEOF_QUALDESC,                          /* len */
-  USB_DESC_TYPE_DEVICEQUALIFIER,                /* type */
-  {LSBYTE(0x0200), MSBYTE(0x0200) },            /* USB */
-  USB_CLASS_PER_INTERFACE,                      /* class */
-  0,                                            /* subclass */
-  0,                                            /* protocol */
-  CONFIG_USBSTRG_EP0MAXPACKET,                  /* mxpacketsize */
-  USBSTRG_NCONFIGS,                             /* nconfigs */
-  0,                                            /* reserved */
-};
-
-static const struct usb_epdesc_s g_hsepbulkoutdesc =
-{
-  USB_SIZEOF_EPDESC,                            /* len */
-  USB_DESC_TYPE_ENDPOINT,                       /* type */
-  USBSTRG_EPOUTBULK_ADDR,                       /* addr */
-  USBSTRG_EPOUTBULK_ATTR,                       /* attr */
-  { LSBYTE(USBSTRG_HSBULKMAXPACKET),            /* maxpacket */
-    MSBYTE(USBSTRG_HSBULKMAXPACKET) },
-  0                                             /* interval */
-};
-
-static const struct usb_epdesc_s g_hsepbulkindesc =
-{
-  USB_SIZEOF_EPDESC,                            /* len */
-  USB_DESC_TYPE_ENDPOINT,                       /* type */
-  USBSTRG_EPINBULK_ADDR,                        /* addr */
-  USBSTRG_EPINBULK_ATTR,                        /* attr */
-  { LSBYTE(USBSTRG_HSBULKMAXPACKET),            /* maxpacket */
-    MSBYTE(USBSTRG_HSBULKMAXPACKET) },
-  0                                             /* interval */
-};
-#endif
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
 /* String *******************************************************************/
 
 const char g_vendorstr[]  = CONFIG_USBSTRG_VENDORSTR;
@@ -349,141 +227,6 @@ static void usbstrg_freereq(FAR struct usbdev_ep_s *ep, struct usbdev_req_s *req
         }
       EP_FREEREQ(ep, req);
     }
-}
-
-/****************************************************************************
- * Name: usbstrg_mkstrdesc
- *
- * Description:
- *   Construct a string descriptor
- *
- ****************************************************************************/
-
-static int usbstrg_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
-{
-  const char *str;
-  int len;
-  int ndata;
-  int i;
-
-  switch (id)
-    {
-    case 0:
-      {
-        /* Descriptor 0 is the language id */
-
-        strdesc->len     = 4;
-        strdesc->type    = USB_DESC_TYPE_STRING;
-        strdesc->data[0] = LSBYTE(USBSTRG_STR_LANGUAGE);
-        strdesc->data[1] = MSBYTE(USBSTRG_STR_LANGUAGE);
-        return 4;
-      }
-
-    case USBSTRG_MANUFACTURERSTRID:
-      str = g_vendorstr;
-      break;
-
-    case USBSTRG_PRODUCTSTRID:
-      str = g_productstr;
-      break;
-
-    case USBSTRG_SERIALSTRID:
-      str = g_serialstr;
-      break;
-
-    case USBSTRG_CONFIGSTRID:
-      str = CONFIG_USBSTRG_CONFIGSTR;
-      break;
-
-    default:
-      return -EINVAL;
-    }
-
-   /* The string is utf16-le.  The poor man's utf-8 to utf16-le
-    * conversion below will only handle 7-bit en-us ascii
-    */
-
-   len = strlen(str);
-   for (i = 0, ndata = 0; i < len; i++, ndata += 2)
-     {
-       strdesc->data[ndata]   = str[i];
-       strdesc->data[ndata+1] = 0;
-     }
-
-   strdesc->len  = ndata+2;
-   strdesc->type = USB_DESC_TYPE_STRING;
-   return strdesc->len;
-}
-
-/****************************************************************************
- * Name: usbstrg_mkcfgdesc
- *
- * Description:
- *   Construct the configuration descriptor
- *
- ****************************************************************************/
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-static int16_t usbstrg_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type)
-#else
-static int16_t usbstrg_mkcfgdesc(uint8_t *buf)
-#endif
-{
-  FAR struct usb_cfgdesc_s *cfgdesc = (struct usb_cfgdesc_s*)buf;
-#ifdef CONFIG_USBDEV_DUALSPEED
-  FAR const struct usb_epdesc_s *epdesc;
-  bool hispeed = (speed == USB_SPEED_HIGH);
-  uint16_t bulkmxpacket;
-#endif
-  uint16_t totallen;
-
-  /* This is the total length of the configuration (not necessarily the
-   * size that we will be sending now.
-   */
-
-  totallen = USB_SIZEOF_CFGDESC + USB_SIZEOF_IFDESC + USBSTRG_NENDPOINTS * USB_SIZEOF_EPDESC;
-
-  /* Configuration descriptor -- Copy the canned descriptor and fill in the
-   * type (we'll also need to update the size below
-   */
-
-  memcpy(cfgdesc, &g_cfgdesc, USB_SIZEOF_CFGDESC);
-  buf += USB_SIZEOF_CFGDESC;
-
-  /*  Copy the canned interface descriptor */
-
-  memcpy(buf, &g_ifdesc, USB_SIZEOF_IFDESC);
-  buf += USB_SIZEOF_IFDESC;
-
-  /* Make the two endpoint configurations */
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-  /* Check for switches between high and full speed */
-
-  hispeed = (speed == USB_SPEED_HIGH);
-  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG)
-    {
-      hispeed = !hispeed;
-    }
-
-  bulkmxpacket = USBSTRG_BULKMAXPACKET(hispeed);
-  epdesc       = USBSTRG_EPBULKINDESC(hispeed);
-  memcpy(buf, epdesc, USB_SIZEOF_EPDESC);
-  buf += USB_SIZEOF_EPDESC;
-
-  epdesc       = USBSTRG_EPBULKOUTDESC(hispeed);
-  memcpy(buf, epdesc, USB_SIZEOF_EPDESC);
-#else
-  memcpy(buf, &g_fsepbulkoutdesc, USB_SIZEOF_EPDESC);
-  buf += USB_SIZEOF_EPDESC;
-  memcpy(buf, &g_fsepbulkindesc, USB_SIZEOF_EPDESC);
-#endif
-
-  /* Finally, fill in the total size of the configuration descriptor */
-
-  cfgdesc->totallen[0] = LSBYTE(totallen);
-  cfgdesc->totallen[1] = MSBYTE(totallen);
-  return totallen;
 }
 
 /****************************************************************************
@@ -795,7 +538,7 @@ static int usbstrg_setup(FAR struct usbdev_s *dev,
               case USB_DESC_TYPE_DEVICE:
                 {
                   ret = USB_SIZEOF_DEVDESC;
-                  memcpy(ctrlreq->buf, &g_devdesc, ret);
+                  memcpy(ctrlreq->buf, usbstrg_getdevdesc(), ret);
                 }
                 break;
 
@@ -803,7 +546,7 @@ static int usbstrg_setup(FAR struct usbdev_s *dev,
               case USB_DESC_TYPE_DEVICEQUALIFIER:
                 {
                   ret = USB_SIZEOF_QUALDESC;
-                  memcpy(ctrlreq->buf, &g_qualdesc, ret);
+                  memcpy(ctrlreq->buf, usbstrg_getqualdesc(), ret);
                 }
                 break;
 
@@ -1151,7 +894,8 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, uint8_t config)
   epdesc       = USBSTRG_EPBULKINDESC(hispeed);
   ret          = EP_CONFIGURE(priv->epbulkin, epdesc, false);
 #else
-  ret          = EP_CONFIGURE(priv->epbulkin, &g_fsepbulkindesc, false);
+  ret          = EP_CONFIGURE(priv->epbulkin,
+                              usbstrg_getepdesc(USBSTRG_EPFSBULKIN), false);
 #endif
   if (ret < 0)
     {
@@ -1167,7 +911,8 @@ int usbstrg_setconfig(FAR struct usbstrg_dev_s *priv, uint8_t config)
   epdesc       = USBSTRG_EPBULKOUTDESC(hispeed);
   ret          = EP_CONFIGURE(priv->epbulkout, epdesc, true);
 #else
-  ret          = EP_CONFIGURE(priv->epbulkout, &g_fsepbulkoutdesc, true);
+  ret          = EP_CONFIGURE(priv->epbulkout,
+                              usbstrg_getepdesc(USBSTRG_EPFSBULKOUT), true);
 #endif
   if (ret < 0)
     {

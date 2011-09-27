@@ -2107,4 +2107,7 @@
 	  potential crash when using mq_timedreceived() and mq_timedsend().
 	* sched/mq_sndinternal.c: Related to the above, the send logic was incrementing
 	  the wrong counter when it waited as part of the mq_timedsend.c logic.
+	* fs/fat:  Fix an error in the long file name logic:  If the long file name
+	  is an even multiple of 13 bytes in length, then it should not include a
+	  NULL terminating character.  Fix contributed by Kaushal Parikh.
 
