@@ -63,18 +63,6 @@
 #  endif
 #endif
 
-#ifdef CONFIG_SIM_TOUCHSCREEN
-#  ifndef CONFIG_SIM_EVLOOPPRIORITY
-#    define CONFIG_SIM_EVLOOPPRIORITY 50
-#  endif
-#  ifndef CONFIG_SIM_EVLOOPSTACKSIZE
-#    define CONFIG_SIM_EVLOOPSTACKSIZE 4096
-#  endif
-#else
-#  undef CONFIG_SIM_EVLOOPPRIORITY
-#  undef CONFIG_SIM_EVLOOPSTACKSIZE
-#endif
-
 /* Context Switching Definitions ******************************************/
 /* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
 
@@ -174,7 +162,7 @@ extern int up_x11cmap(unsigned short first, unsigned short len,
 
 #ifdef CONFIG_SIM_X11FB
 #ifdef CONFIG_SIM_TOUCHSCREEN
-extern int up_x11eventloop(int argc, char *argv[]);
+extern int up_x11eventloop(void);
 #endif
 #endif
 

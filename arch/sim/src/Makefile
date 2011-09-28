@@ -88,18 +88,25 @@ SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS)
 OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 LDFLAGS = $(ARCHSCRIPT)
+
+# Determine which standard libraries will need to be linked in
+
 ifeq ($(CONFIG_SIM_X11FB),y)
-  STDLIBS = -lX11 -lXext -lc
-else
-  STDLIBS = -lc
+  STDLIBS += -lX11 -lXext
+ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
+  STDLIBS += -lpthread
 endif
+endif
+
 ifeq ($(CONFIG_FS_FAT),y)
-STDLIBS		+= -lz
+STDLIBS += -lz
 endif
+
+STDLIBS += -lc
 
 LINKOBJS = up_head$(OBJEXT)
 LINKLIBS =
-LDPATHS	= $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
+LDPATHS = $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS = $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 
 all: up_head$(OBJEXT) libarch$(LIBEXT)
