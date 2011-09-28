@@ -1123,31 +1123,25 @@ static bool fat_cmplfname(const uint8_t *direntry, const uint8_t *substr)
   int len;
   bool match;
 
-  /* How much of string do we have to compare? */
+  /* How much of string do we have to compare? (including the NUL
+   * terminator).
+   */
 
-  len = strlen((char*)substr);
+  len = strlen((char*)substr) + 1;
 
   /* Check bytes 1-5 */
 
   chunk = LDIR_PTRWCHAR1_5(direntry);
   match = fat_cmplfnchunk(chunk, substr, 5);
-  if (match && len >= 5)
+  if (match && len > 5)
     {
-      /* Check bytes 6-11.  Note that if len == 5, the substring passed to
-       * fat_cmplfnchunk() will point to the NUL terminator of substr.
-       * In this case, fat_cmplfnchunk() will only verify that the
-       * directory entry is also NUL terminated.
-       */
+      /* Check bytes 6-11 */
 
       chunk = LDIR_PTRWCHAR6_11(direntry);
       match = fat_cmplfnchunk(chunk, &substr[5], 6);
-      if (match && len >= 11)
+      if (match && len > 11)
         {
-          /* Check bytes 12-13.  Note that if len == 11, the substring passed to
-           * fat_cmplfnchunk() will point to the NUL terminator of substr.
-           * In this case, fat_cmplfnchunk() will only verify that the
-           * directory entry is also NUL terminated.
-           */
+          /* Check bytes 12-13 */
 
           chunk = LDIR_PTRWCHAR12_13(direntry);
           match = fat_cmplfnchunk(chunk, &substr[11], 2);
