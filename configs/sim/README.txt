@@ -1,6 +1,25 @@
 README
 ^^^^^^
 
+Contents
+^^^^^^^^
+  o Overview
+    - Description
+    - Fake Interrupts
+    - Timing Fidelity
+  o Debugging
+  o Issues
+    - 64-bit Issues
+    - Buffered I/O Issues
+    - Networking Issues
+    - X11 Issues
+  o Configurations
+
+Overview
+^^^^^^^^
+
+Description
+-----------
 This README file describes the contents of the build configurations available
 for the NuttX "sim" target.  The sim target is a NuttX port that runs as a
 user-space program under Linux or Cygwin.  It is a very "low fidelity" embedded
@@ -8,6 +27,8 @@ system simulation: This environment does not support any kind of asynchonous
 events -- there are nothing like interrupts in this context.  Therefore, there
 can be no pre-empting events.
 
+Fake Interrupts
+---------------
 In order to get timed behavior, the system timer "interrupt handler" is called
 from the sim target's IDLE loop.  The IDLE runs whenever there is no other task
 running.  So, for example, if a task calls sleep(), then that task will suspend
@@ -20,6 +41,8 @@ The sim target is used primarily as a development and test platform for new
 RTOS features.  It is also of academic interest.  But it has no real-world
 application that I know of.
 
+Timing Fidelity
+---------------
 NOTE:  In order to facility fast testing, the sim target's IDLE loop, by default,
 calls the system "interrupt handler" as fast as possible.  As a result, there
 really are no noticeable delays when a task sleeps.  However, the task really does
@@ -30,9 +53,38 @@ on each call so that the system "timer interrupt" is called at a rate approximat
 correct for the system timer tick rate.  With this definition in the configuration,
 sleep() behavior is more or less normal.
 
-64-Bit Issues
-^^^^^^^^^^^^^
+Debugging
+^^^^^^^^^
+One of the best reasons to use the simulation is that is supports great, Linux-
+based debugging.  Here are the steps that I following to use the Linux ddd
+graphical front-end to GDB:
 
+1. Modify the top-level configuration file.  Enable debug symbols by defining
+   the following.
+
+   cd <NuttX-Directory>
+   CONFIG_DEBUG_SYMBOLS=y
+
+2. Re-build:
+
+   cd <NuttX-Directory>
+   make clean
+   make
+
+3. Then start the debugging:
+
+   ddd nuttx &
+   gdb> b user_start
+   gdb> r
+
+NOTE:  This above steps work fine on both Linux and Cygwin.  On Cygwin, you
+will need to start the Cywin-X server before running ddd.
+
+Issues
+^^^^^^
+
+64-Bit Issues
+-------------
 As mentioned above, context switching is based on logic like setjmp and longjmp.
 This context switching is only available for 32-bit targets.  On 64-bit machines,
 this context switching will fail.
@@ -50,23 +102,20 @@ are included in the LDFLAGS.  See the patch 0001-Quick-hacks-to-build-sim-nsh-os
 that can be found at http://tech.groups.yahoo.com/group/nuttx/files.
 
 Buffered I/O Issues
-^^^^^^^^^^^^^^^^^^^
-
+-------------------
 The simulated serial driver has some odd behavior.  It will stall for a long time
 on reads when the C stdio buffers are being refilled. This only effects the behavior
 of things like fgetc().  Workaround: Set CONFIG_STDIO_BUFFER_SIZE=0, suppressing
 all C buffered I/O.
 
 Networking Issues
-^^^^^^^^^^^^^^^^^
-
+-----------------
 I never did get networking to work on the sim target.  It tries to use the tap device
 (/dev/net/tun) to emulate an Ethernet NIC, but I never got it correctly integrated
 with the NuttX networking (I probably should try using raw sockets instead).
 
 X11 Issues
-^^^^^^^^^^
-
+----------
 There is an X11-based framebuffer driver that you can use exercise the NuttX graphics
 subsystem on the simulator (see the sim/nx11 configuration below).  This may require a
 lot of tinkering to get working, depending upon where your X11 installation stores
