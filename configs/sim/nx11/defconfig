@@ -1,7 +1,7 @@
 ############################################################################
-# sim/nx/defconfig
+# sim/nx11/defconfig
 #
-#   Copyright (C) 2008, 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010-2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -51,10 +51,18 @@ CONFIG_ARCH_BOARD_SIM=y
 
 #
 # Simulated framebuffer configuration
+#
 CONFIG_SIM_X11FB=y
 CONFIG_SIM_FBWIDTH=480
 CONFIG_SIM_FBHEIGHT=240
 CONFIG_SIM_FBBPP=32
+
+#
+# Simulated touchscreen configuration
+# (Set both of the following to 'y' to enable)
+#
+CONFIG_INPUT=n
+CONFIG_SIM_TOUCHSCREEN=n
 
 #
 # General OS setup

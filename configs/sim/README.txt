@@ -68,7 +68,7 @@ X11 Issues
 ^^^^^^^^^^
 
 There is an X11-based framebuffer driver that you can use exercise the NuttX graphics
-subsystem on the simulator (see the sim/nx configuration below).  This may require a
+subsystem on the simulator (see the sim/nx11 configuration below).  This may require a
 lot of tinkering to get working, depending upon where your X11 installation stores
 libraries and header files and how it names libraries.
 
@@ -87,6 +87,9 @@ Configurations
 ^^^^^^^^^^^^^^
 
 mount
+
+  Description
+  -----------
   Configures to use examples/mount.  This configuration may be
   selected as follows:
 
@@ -95,6 +98,8 @@ mount
 
 nettest
 
+  Description
+  -----------
   Configures to use examples/nettest.  This configuration
   enables networking using the network TAP device.  It may
   be selected via:
@@ -118,6 +123,9 @@ nettest
     select the IP address that you want to use.
 
 nsh
+
+  Description
+  -----------
   Configures to use the NuttShell at examples/nsh.  This configuration
   may be selected as follows:
 
@@ -125,59 +133,112 @@ nsh
     ./configure.sh sim/nsh
 
 nx
+
+  Description
+  -----------
   Configures to use examples/nx.  This configuration may be
   selected as follows:
 
     cd <nuttx-directory>/tools
     ./configure.sh sim/nx
 
+  Special Framebuffer Configuration
+  ---------------------------------
   Special simulated framebuffer configuration options:
 
-  CONFIG_SIM_X11FB    - Use X11 window for framebuffer
-  CONFIG_SIM_FBHEIGHT - Height of the framebuffer in pixels
-  CONFIG_SIM_FBWIDTH  - Width of the framebuffer in pixels.
-  CONFIG_SIM_FBBPP    - Pixel depth in bits
+    CONFIG_SIM_FBHEIGHT - Height of the framebuffer in pixels
+    CONFIG_SIM_FBWIDTH  - Width of the framebuffer in pixels.
+    CONFIG_SIM_FBBPP    - Pixel depth in bits
 
-  NOTES:
-  - If CONFIG_SIM_X11FB is selected then the following are
-    needed
+  No Display!
+  -----------
+  This version has NO DISPLAY and is only useful for debugging NX
+  internals in environments where X11 is not supported.  There is
+  and additonal configuration that may be added to include an X11-
+  based simulated framebuffer driver:
+  
+    CONFIG_SIM_X11FB    - Use X11 window for framebuffer
 
-      CONFIG_SIM_FBBPP (must match the resolution of the display).
-      CONFIG_FB_CMAP=y
+  See the nx11 configuration below for more information.
 
-    My system has 24-bit color, but packed into 32-bit words so
-    the correct seeting of CONFIG_SIM_FBBPP is 32.
+  Multi- and Single-User Modes
+  ----------------------------
+  The default is the single-user NX implementation.  To select
+  the multi-user NX implementation:
 
-  - For whatever value of CONFIG_SIM_FBBPP is selected, then
-    the corresponidng CONFIG_NX_DISABLE_*BPP setting must
-    not be disabled.
+    CONFG_NX_MULTIUSER=y
+    CONFIG_DISABLE_MQUEUE=n
 
-  - The default in defconfig is to use a generic memory buffer
-    for the framebuffer.  defconfig-x11 is an example with X11
-    support enabled.  To use this configuration you have to
-    configure as follows:
+nx11
 
-    cd tools
-    ./configure.sh sim/nx
-    cd ..
-    cp configs/sim/nx/defconfig-x11 .config
+  Description
+  -----------
+  Configures to use examples/nx.  This configuration is similar
+  to the nx configuration except that it addes support for an X11-
+  based framebuffer driver.  Of course, this configuration can only
+  be used in environments that support X11!  (And it may not even
+  be usable in all of those environments without some "tweaking").
+  
+  This configuration may be selected as follows:
 
-  - The default is the single-user NX implementation.  To select
-    the multi-user NX implementation:
+    cd <nuttx-directory>/tools
+    ./configure.sh sim/nx11
 
-      CONFG_NX_MULTIUSER=y
-      CONFIG_DISABLE_MQUEUE=n
+  Special Framebuffer Configuration
+  ---------------------------------
+  This configuration uses the same special simulated framebuffer
+  configuration options as the nx configuration:
 
-  - To get the system to compile under various X11 installations
-    you may have to modify a few things.  For example, in order
-    to find libXext, I had to make the following change under
-    Ubuntu 9.09:
+    CONFIG_SIM_X11FB    - Use X11 window for framebuffer
+    CONFIG_SIM_FBHEIGHT - Height of the framebuffer in pixels
+    CONFIG_SIM_FBWIDTH  - Width of the framebuffer in pixels.
+    CONFIG_SIM_FBBPP    - Pixel depth in bits
+
+  X11 Configuration
+  -----------------
+  But now, since CONFIG_SIM_X11FB is also selected the following
+  definitions are needed
+
+    CONFIG_SIM_FBBPP (must match the resolution of the display).
+    CONFIG_FB_CMAP=y
+
+  My system has 24-bit color, but packed into 32-bit words so
+  the correct seeting of CONFIG_SIM_FBBPP is 32.
+
+  For whatever value of CONFIG_SIM_FBBPP is selected, the
+  corresponidng CONFIG_NX_DISABLE_*BPP setting must not be
+  disabled.
+
+  Touchscreen Support
+  -------------------
+  A X11 mouse-based touchscreen simulation can also be enabled
+  by setting:
+
+    CONFIG_INPUT=y
+    CONFIG_SIM_TOUCHSCREEN=y
+
+  X11 Build Issues
+  ----------------
+  To get the system to compile under various X11 installations
+  you may have to modify a few things.  For example, in order
+  to find libXext, I had to make the following change under
+  Ubuntu 9.09:
 
     cd /usr/lib/
     sudo ln -s libXext.so.6.4.0 libXext.so
 
+  Multi- and Single-User Modes
+  ----------------------------
+  The default is the single-user NX implementation.  To select
+  the multi-user NX implementation:
+
+    CONFG_NX_MULTIUSER=y
+    CONFIG_DISABLE_MQUEUE=n
+
 ostest
 
+  Description
+  -----------
   The "standard" NuttX examples/ostest configuration.  This
   configuration may be selected as follows:
 
@@ -186,6 +247,8 @@ ostest
 
 pashello
 
+  Description
+  -----------
   Configures to use examples/pashello.  This configuration may
   by selected as follows:
 

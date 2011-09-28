@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: August 24, 2011</p>
+      <p>Last Updated: September 28, 2011</p>
     </td>
   </tr>
 </table>
@@ -3416,13 +3416,13 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 <p><b>Building <code>apps/examples/nx</code></b>.
   NX testing was performed using <code>apps/examples/nx</code> with the
   Linux/Cygwin-based NuttX simulator.
-  Configuration files for building this test can be found in <code>configs/sim/nx</code>.
+  Configuration files for building this test can be found in <code>configs/sim/nx</code>
+  and <code>configs/sim/nx11</code>.
   There are two alternative configurations for building the simulation:
 </p>
 <ol>
   <li>
-    The default configuration using the configuration file at
-    <code>configs/sim/nx/defconfig</code>.
+    The configuration using the configuration file at <code>configs/sim/nx/defconfig</code>.
     This default configuration exercises the NX logic a 8 BPP but provides no visual feedback.
     In this configuration, a very simple, simulated framebuffer driver is used that is
     based upon a simple region of memory posing as video memory.
@@ -3437,18 +3437,17 @@ make
   </li>
   <li>
     <p>
-      A preferred configuration extends the test with a simulated framebuffer driver
+      The preferred configuration is at <code>configs/sim/nx11/defconfig</code>.
+      This configuration extends the test with a simulated framebuffer driver
       that uses an X window as a framebuffer.
-      This configuration uses the configuration file at <code>configs/sim/nx/defconfig-x11</code>.
       This is a superior test configuration because the X window appears at your desktop
       and you can see the NX output.
       This preferred configuration can be built as follows:
     </p>
 <ul><pre>
 cd &lt;NuttX-Directory&gt;/tools
-./configure sim/nx
+./configure sim/nx11
 cd  &lt;NuttX-Directory&gt;
-cp &lt;NuttX-Directory&gt;/configs/sim/nx/defconfig-x11 .config
 make
 ./nuttx
 </pre></ul>
@@ -3456,29 +3455,40 @@ make
       <i>Update:</i>
       The sim target has suffered some bit-rot over the years and so the following caveats need to be added:
       <ul>
-        <li>
-          The X target does not build under recent Cygwin configurations.
-        </li>
-        <li>
-          The X target does not build under current Ubuntu distributions;
-          it fails to locate the X header files.
-        </li>
-        <li>
+        <li><p>
+          The X target builds under recent Cygwin configurations, but does not execute.
+          (It fails inside of <code>XOpenDisplay()</code>.
+        </p></li>
+        <li><p>
+          The X target does not build under current (9.09) Ubuntu distributions.
+          I needed to make the following changes:
+        </p>
+        <ul></pre>
+cd /usr/lib/
+sudo ln -s libXext.so.6.4.0 libXext.so
+</pre></ul>
+        <p>
+          The build will also fail to locate the X header files unless you install an X11 development package.
+        </p></li>
+        <li><p>
           The sim target itself is broken under 64-bit Linux.
           This is because the sim target is based upon some assembly language setjmp/longjmp logic that only works on 32-bit systems.
-          <p><small><b>NOTE</b>: There is a workaround in this case: 
+        </p>
+        <p><small>
+          <b>NOTE</b>: There is a workaround in this case: 
           You can build for 32-bit execution on a 64-bit machine by adding <code>-m3</code> to the <code>CFLAGS</code> and <code>-m32 -m elf_i386</code> to the <code>LDFLAGS</code>.
           See the patch file <code>0001-Quick-hacks-to-build-sim-nsh-ostest-on-x86_64-as-32-.patch</code>
           that can be found in NuttX <a href="http://tech.groups.yahoo.com/group/nuttx/files">files</a>.
-          </small></p>
+        </small></p>
         </li>
+        <li><p>
+          Refer to the readme file in sim configuration
+          <a href="http://nuttx.svn.sourceforge.net/viewvc/nuttx/trunk/nuttx/configs/sim/README.txt?view=log">README.txt</a> file for additional information.
+        </p></li>
       </ul>
     </p>
   </li>
 </ol>
-<p>
-    Why isn't this configuration the default?  Because not all systems the use NX support X.
-</p>
 
 <p><b>Test Coverage</b>.
   At present, <code>apps/examples/nx</code>t only exercises a subset of NX;
@@ -3985,7 +3995,6 @@ make
 </tr>
 <tr>
   <td align="left" valign="top"><a href="#nxfconvertbpp"><code>nxf_convert_32bpp()</code></a></td>
-  <td>Use <code>defconfig-x11</code> when building.</td>
   <td align="center" bgcolor="skyblue">YES</td>
 </tr>
 </table></center>

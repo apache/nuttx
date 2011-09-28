@@ -64,16 +64,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Variables
  ****************************************************************************/
+
+/* Also used in up_x11eventloop */
+
+Display *g_display;
+Window g_window;
 
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
 
-static Display *g_display;
 static int g_screen;
-static Window g_window;
 static GC g_gc;
 #ifndef CONFIG_SIM_X11NOSHM
 static XShmSegmentInfo g_xshminfo;
@@ -438,4 +441,3 @@ void up_x11update(void)
     }
   XSync(g_display, 0);
 }
-
