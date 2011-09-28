@@ -38,7 +38,7 @@
  *
  ****************************************************************************/
 
-#ifndef CYGWIN
+#ifndef __CYGWIN__
 
 /****************************************************************************
  * Included Files
@@ -266,6 +266,6 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
   dump_ethhdr("write", buf, buflen);
 }
 
-#endif /* !CYGWIN */
+#endif /* !__CYGWIN__ */
 
 

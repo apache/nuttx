@@ -46,8 +46,6 @@ else
 endif
 else
   USEX = n
-  CFLAGS += -DCYGWIN
-  HOSTCFLAGS += -DCYGWIN
 endif
 
 CFLAGS += -I$(TOPDIR)/sched
