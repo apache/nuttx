@@ -68,10 +68,20 @@ X11 Issues
 ^^^^^^^^^^
 
 There is an X11-based framebuffer driver that you can use exercise the NuttX graphics
-subsystem on the simulator (see the sim/nx configuration below).  But I am not much
-of an X11 programmer so I did not use X11 autoconfiguration stuff. As a result, the X11
-support builds on old X11 installations, but not on current versions.  This needs to
-get fixed someday.
+subsystem on the simulator (see the sim/nx configuration below).  This may require a
+lot of tinkering to get working, depending upon where your X11 installation stores
+libraries and header files and how it names libraries.
+
+For example, on UBuntu 9.09, I had to do the following to get a clean build:
+
+    cd /usr/lib/
+    sudo ln -s libXext.so.6.4.0 libXext.so
+
+(I also get a segmentation fault at the conclusion of the NX test -- that will need
+to get looked into as well).
+
+The X11 examples builds on Cygwin, but does not run.  The last time I tried it,
+XOpenDisplay() aborted the program.
 
 Configurations
 ^^^^^^^^^^^^^^
@@ -137,17 +147,34 @@ nx
 
     My system has 24-bit color, but packed into 32-bit words so
     the correct seeting of CONFIG_SIM_FBBPP is 32.
+
   - For whatever value of CONFIG_SIM_FBBPP is selected, then
     the corresponidng CONFIG_NX_DISABLE_*BPP setting must
     not be disabled.
+
   - The default in defconfig is to use a generic memory buffer
     for the framebuffer.  defconfig-x11 is an example with X11
-    support enabled.
+    support enabled.  To use this configuration you have to
+    configure as follows:
+
+    cd tools
+    ./configure.sh sim/nx
+    cd ..
+    cp configs/sim/nx/defconfig-x11 .config
+
   - The default is the single-user NX implementation.  To select
     the multi-user NX implementation:
 
       CONFG_NX_MULTIUSER=y
       CONFIG_DISABLE_MQUEUE=n
+
+  - To get the system to compile under various X11 installations
+    you may have to modify a few things.  For example, in order
+    to find libXext, I had to make the following change under
+    Ubuntu 9.09:
+
+    cd /usr/lib/
+    sudo ln -s libXext.so.6.4.0 libXext.so
 
 ostest
 

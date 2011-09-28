@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 12, 2011)
+NuttX TODO List (Last updated September 28, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
@@ -21,7 +21,7 @@ nuttx/
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (5)  Build system / Toolchains
-  (7)  Linux/Cywgin simulation (arch/sim)
+  (6)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
@@ -622,14 +622,6 @@ o Linux/Cywgin simulation (arch/sim)
   Status:      Open
   Priority:    Low (unless you want to test networking features on the simulation).
   
-  Description: There is an X11-based framebuffer driver that you can use exercise
-               the NuttX graphics subsystem on the simulator.  But I am not much
-               of an X11 programmer so I did not use X11 autoconfiguration stuff.
-               As a result, it builds on old X11 installations, but not on current
-               versions.
-  Status:      Open
-  Priority:    Low (unless you want to test graphics features on the simulation).
-
   Description: Since the simulation is not pre-emptible, you can't use round-robin
                scheduling (no time slicing).  Currently, the timer interrupts are
                "faked" during IDLE loop processing and, as a result, there is no

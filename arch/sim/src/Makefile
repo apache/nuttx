@@ -35,19 +35,6 @@
 
 -include $(TOPDIR)/Make.defs
 
-# The X11 stuff only builds on Linux (but not Ubuntu -- Ubuntu needs
-# some work).
-
-ifneq ($(HOSTOS),Cygwin)
-ifeq ($(CONFIG_SIM_X11FB),y)
-  USEX = y
-else
-  USEX = n
-endif
-else
-  USEX = n
-endif
-
 CFLAGS += -I$(TOPDIR)/sched
 
 ASRCS = up_setjmp.S
@@ -64,7 +51,7 @@ ifeq ($(CONFIG_NX_LCDDRIVER),y)
   CSRCS += up_lcd.c
 else
   CSRCS += up_framebuffer.c
-ifeq ($(USEX),y)
+ifeq ($(CONFIG_SIM_X11FB),y)
   HOSTSRCS += up_x11framebuffer.c
 endif
 endif
@@ -97,7 +84,7 @@ SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS)
 OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 LDFLAGS = $(ARCHSCRIPT)
-ifeq ($(USEX),y)
+ifeq ($(CONFIG_SIM_X11FB),y)
   STDLIBS = -lX11 -lXext -lc
 else
   STDLIBS = -lc
