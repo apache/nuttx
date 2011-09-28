@@ -38,7 +38,7 @@
  *
  ****************************************************************************/
 
-#ifdef CYGWIN
+#ifdef __CYGWIN__
 
 /****************************************************************************
  * Included Files
@@ -309,4 +309,4 @@ void wpcap_send(unsigned char *buf, unsigned int buflen)
     }
 }
 
-#endif /* CYGWIN */
+#endif /* __CYGWIN__ */

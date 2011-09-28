@@ -128,7 +128,7 @@ extern unsigned long up_getwalltime( void );
 
 /* up_tapdev.c ************************************************************/
 
-#if defined(CONFIG_NET) && !defined(CYGWIN)
+#if defined(CONFIG_NET) && !defined(__CYGWIN__)
 extern void tapdev_init(void);
 extern unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
 extern void tapdev_send(unsigned char *buf, unsigned int buflen);
@@ -140,7 +140,7 @@ extern void tapdev_send(unsigned char *buf, unsigned int buflen);
 
 /* up_wpcap.c *************************************************************/
 
-#if defined(CONFIG_NET) && defined(CYGWIN)
+#if defined(CONFIG_NET) && defined(__CYGWIN__)
 extern void wpcap_init(void);
 extern unsigned int wpcap_read(unsigned char *buf, unsigned int buflen);
 extern void wpcap_send(unsigned char *buf, unsigned int buflen);
