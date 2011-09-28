@@ -121,7 +121,7 @@ static void *up_x11eventthread(void *arg)
   XEvent event;
   int ret;
 
-  /* Grab the pointer (mouse) */
+  /* Grab the pointer (mouse), enabling mouse enter/leave events */
 
   ret = XGrabPointer(g_display, g_window, 0,
                      EnterWindowMask|LeaveWindowMask,
@@ -132,8 +132,19 @@ static void *up_x11eventthread(void *arg)
       return NULL;
     }
 
+  /* Enable motion and button events.
+   * EnterWindowMask|LeaveWindowMask - When mouse enters or leaves window
+   * ButtonMotionMask - When mouse moves with any button pressed
+   * ButtonPress|ButtonRelease - When button is pressed or released
+   */
+
+  XSelectInput(g_display, g_window,
+               EnterWindowMask|LeaveWindowMask|ButtonMotionMask|
+               ButtonPressMask|ButtonReleaseMask);
+
   /* Then loop forever, waiting for events and processing events as they are
-   * received.
+   * received.  NOTE:  It seems to be fatal if you attempt to fprintf from
+   * within the following loop.
    */
  
   for (;;)
@@ -141,26 +152,36 @@ static void *up_x11eventthread(void *arg)
       XNextEvent(g_display, &event);
       switch (event.type)
         {
-          case EnterNotify:
+          case EnterNotify: /* Enabled by EnterWindowMask */
             {
-              fprintf(stderr, "EnterNotify event: (%d,%d) %08x\n",
-                      event.xcrossing.x, event.xcrossing.y, event.xcrossing.state);
               up_tcenter(event.xcrossing.x, event.xcrossing.y,
                          up_buttonmap(event.xcrossing.state));
             }
             break;
 
-          case LeaveNotify :
+          case LeaveNotify : /* Enabled by LeaveWindowMask */
             {
-              fprintf(stderr, "LeaveNotify event: (%d,%d) %08x\n",
-                      event.xcrossing.x, event.xcrossing.y, event.xcrossing.state);
               up_tcleave(event.xcrossing.x, event.xcrossing.y,
                          up_buttonmap(event.xcrossing.state));
             }
             break;
 
+          case MotionNotify : /* Enabled by ButtonMotionMask */
+            {
+              up_tcenter(event.xmotion.x, event.xmotion.y,
+                         up_buttonmap(event.xmotion.state));
+            }
+            break;
+
+          case ButtonPress  : /* Enabled by ButtonPressMask */
+          case ButtonRelease : /* Enabled by ButtonReleaseMask */
+            {
+              up_tcenter(event.xbutton.x, event.xbutton.y,
+                         up_buttonmap(event.xbutton.state));
+            }
+            break;
+
           default :
-            fprintf(stderr, "Unrecognized event: %d\n", event.type);
             break;
         }
     }
