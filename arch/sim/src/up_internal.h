@@ -114,11 +114,15 @@
  * Public Variables
  **************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
+extern volatile int g_evloopactive;
+#endif
+
 /**************************************************************************
  * Public Function Prototypes
  **************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 /* up_setjmp.S ************************************************************/
 
@@ -160,19 +164,15 @@ extern int up_x11cmap(unsigned short first, unsigned short len,
 
 /* up_eventloop.c ***********************************************************/
 
-#ifdef CONFIG_SIM_X11FB
-#ifdef CONFIG_SIM_TOUCHSCREEN
+#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
 extern int up_x11eventloop(void);
-#endif
 #endif
 
 /* up_eventloop.c ***********************************************************/
 
-#ifdef CONFIG_SIM_X11FB
-#ifdef CONFIG_SIM_TOUCHSCREEN
+#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
 extern int up_tcenter(int x, int y, int buttons);
 extern int up_tcleave(int x, int y, int buttons);
-#endif
 #endif
 
 /* up_tapdev.c ************************************************************/

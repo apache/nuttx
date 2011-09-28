@@ -103,6 +103,7 @@ struct up_dev_s
 {
   uint8_t nwaiters;                    /* Number of threads waiting for touchscreen data */
   uint8_t id;                          /* Current touch point ID */
+  uint8_t minor;                       /* Minor device number */
   bool penchange;                      /* An unreported event is buffered */
   sem_t devsem;                        /* Manages exclusive access to this structure */
   sem_t waitsem;                       /* Used to wait for the availability of data */
@@ -601,7 +602,7 @@ errout:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_simtouchscreen
+ * Name: sim_tcinitialize
  *
  * Description:
  *   Configure the simulated touchscreen.  This will register the driver as
@@ -616,13 +617,13 @@ errout:
  *
  ****************************************************************************/
 
-int up_simtouchscreen(int minor)
+int sim_tcinitialize(int minor)
 {
   FAR struct up_dev_s *priv = ( FAR struct up_dev_s *)&g_simtouchscreen;
   char devname[DEV_NAMELEN];
   int ret;
 
-  ivdbg("dev: %p minor: %d\n", dev, minor);
+  ivdbg("minor: %d\n", minor);
 
   /* Debug-only sanity checks */
 
@@ -633,6 +634,8 @@ int up_simtouchscreen(int minor)
   memset(priv, 0, sizeof(struct up_dev_s));
   sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
+
+  priv->minor = minor;
 
   /* Start the X11 event loop */
 
@@ -655,7 +658,7 @@ int up_simtouchscreen(int minor)
       goto errout_with_priv;
     }
 
-  /* And return success (?) */
+  /* And return success */
 
   return OK;
 
@@ -666,13 +669,73 @@ errout_with_priv:
 }
 
 /****************************************************************************
+ * Name: sim_tcuninitialize
+ *
+ * Description:
+ *   Uninitialized the simulated touchscreen
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void sim_tcuninitialize(void)
+{
+  FAR struct up_dev_s *priv = ( FAR struct up_dev_s *)&g_simtouchscreen;
+  char devname[DEV_NAMELEN];
+  int ret;
+
+  /* Get exclusive access */
+
+  do
+    {
+      ret = sem_wait(&priv->devsem);
+      if (ret < 0)
+        {
+          /* This should only happen if the wait was canceled by an signal */
+
+          DEBUGASSERT(errno == EINTR);
+        }
+    }
+  while (ret != OK);
+
+  /* Stop the event loop (Hmm.. the caller must be sure that there are no
+   * open references to the touchscreen driver.  This might better be
+   * done in close() using a reference count).
+   */
+
+  g_evloopactive = 0;
+
+  /* Un-register the device*/
+
+  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
+  ivdbg("Un-registering %s\n", devname);
+
+  ret = runegister_driver(devname);
+  if (ret < 0)
+    {
+      idbg("uregister_driver() failed: %d\n", ret);
+    }
+
+  /* Clean up any resources.  Ouch!  While we are holding the semaphore? */
+
+  sem_destroy(&priv->waitsem);
+  sem_destroy(&priv->devsem);
+}
+
+/****************************************************************************
  * Name: up_tcenter
  ****************************************************************************/
 
 int up_tcenter(int x, int y, int buttons)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
-  bool                         pendown;  /* true: pend is down */
+  bool                 pendown;  /* true: pen is down */
+
+  ivdbg("x=%d y=%d buttons=%02x\n", x, y, buttons);
 
   /* Any button press will count as pendown. */
 
@@ -734,6 +797,8 @@ int up_tcenter(int x, int y, int buttons)
 int up_tcleave(int x, int y, int buttons)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
+
+  ivdbg("x=%d y=%d buttons=%02x\n", x, y, buttons);
 
   /* Treat leaving as penup */
 
