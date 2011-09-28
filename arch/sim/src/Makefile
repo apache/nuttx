@@ -53,6 +53,10 @@ else
   CSRCS += up_framebuffer.c
 ifeq ($(CONFIG_SIM_X11FB),y)
   HOSTSRCS += up_x11framebuffer.c
+ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
+  CSRCS += up_touchscreen.c
+  HOSTSRCS += up_x11eventloop.c
+endif
 endif
 endif
 

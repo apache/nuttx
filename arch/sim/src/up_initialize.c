@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs.h>
 
+#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -98,10 +99,32 @@ void up_initialize(void)
   devnull_register();       /* Standard /dev/null */
   devzero_register();       /* Standard /dev/zero */
   up_devconsole();          /* Our private /dev/console */
+
 #if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
   up_registerblockdevice(); /* Our FAT ramdisk at /dev/ram0 */
 #endif
+
 #ifdef CONFIG_NET
   uipdriver_init();         /* Our "real" netwok driver */
+#endif
+
+  /* Start the X11 event loop and register the touchscreen driver */
+
+#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
+  {
+    int ret;
+
+    /* Start the X11 event loop */
+
+    ret = KERNEL_THREAD("evloop", CONFIG_SIM_EVLOOPPRIORITY,
+                        CONFIG_SIM_EVLOOPSTACKSIZE,
+                        (main_t)up_x11eventloop, (const char **)NULL);
+    ASSERT(ret != ERROR);
+
+    /* Register the touchscreen driver */
+
+    ret = up_tcregister(0);
+    ASSERT(ret == OK);
+  }
 #endif
 }

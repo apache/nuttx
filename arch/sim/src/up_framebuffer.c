@@ -114,21 +114,6 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcursor_
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_SIM_X11FB
-extern int up_x11initialize(unsigned short width, unsigned short height,
-                            void **fbmem, unsigned int *fblen, unsigned char *bpp,
-                            unsigned short *stride);
-#ifdef CONFIG_FB_CMAP
-extern int up_x11cmap(unsigned short first, unsigned short len,
-                      unsigned char *red, unsigned char *green,
-                      unsigned char *blue, unsigned char  *transp);
-#endif
-#endif
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 

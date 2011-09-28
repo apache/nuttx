@@ -1,7 +1,7 @@
 /**************************************************************************
  * up_internal.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,26 +45,56 @@
 #include <nuttx/irq.h>
 
 /**************************************************************************
- * Public Definitions
+ * Pre-processor Definitions
  **************************************************************************/
+/* Configuration **********************************************************/
 
-/* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
-#ifdef __ASSEMBLY__
-# define JB_EBX (0*4)
-# define JB_ESI (1*4)
-# define JB_EDI (2*4)
-# define JB_EBP (3*4)
-# define JB_SP  (4*4)
-# define JB_PC  (5*4)
+#ifndef CONFIG_SIM_X11FB
+#  ifdef CONFIG_SIM_TOUCHSCREEN
+#    error "CONFIG_SIM_TOUCHSCREEN depends on CONFIG_SIM_X11FB"
+#    undef CONFIG_SIM_TOUCHSCREEN
+#  endif
+#endif
+
+#ifndef CONFIG_INPUT
+#  ifdef CONFIG_SIM_TOUCHSCREEN
+#    error "CONFIG_SIM_TOUCHSCREEN depends on CONFIG_INPUT"
+#    undef CONFIG_SIM_TOUCHSCREEN
+#  endif
+#endif
+
+#ifdef CONFIG_SIM_TOUCHSCREEN
+#  ifndef CONFIG_SIM_EVLOOPPRIORITY
+#    define CONFIG_SIM_EVLOOPPRIORITY 50
+#  endif
+#  ifndef CONFIG_SIM_EVLOOPSTACKSIZE
+#    define CONFIG_SIM_EVLOOPSTACKSIZE 4096
+#  endif
 #else
-# define JB_EBX (0)
-# define JB_ESI (1)
-# define JB_EDI (2)
-# define JB_EBP (3)
-# define JB_SP  (4)
-# define JB_PC  (5)
+#  undef CONFIG_SIM_EVLOOPPRIORITY
+#  undef CONFIG_SIM_EVLOOPSTACKSIZE
+#endif
+
+/* Context Switching Definitions ******************************************/
+/* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
+
+#ifdef __ASSEMBLY__
+#  define JB_EBX (0*4)
+#  define JB_ESI (1*4)
+#  define JB_EDI (2*4)
+#  define JB_EBP (3*4)
+#  define JB_SP  (4*4)
+#  define JB_PC  (5*4)
+#else
+#  define JB_EBX (0)
+#  define JB_ESI (1)
+#  define JB_EDI (2)
+#  define JB_EBP (3)
+#  define JB_SP  (4)
+#  define JB_PC  (5)
 #endif /* __ASSEMBLY__ */
 
+/* Simulated Heap Definitions **********************************************/
 /* Size of the simulated heap */
 
 #if CONFIG_MM_SMALL
@@ -73,6 +103,7 @@
 #  define SIM_HEAP_SIZE (4*1024*1024)
 #endif
 
+/* File System Definitions **************************************************/
 /* These definitions characterize the compressed filesystem image */
 
 #define BLOCK_COUNT         1024
@@ -124,6 +155,37 @@ extern size_t up_hostwrite(const void *buffer, size_t len);
 
 #ifdef CONFIG_NET
 extern unsigned long up_getwalltime( void );
+#endif
+
+/* up_x11framebuffer.c ******************************************************/
+
+#ifdef CONFIG_SIM_X11FB
+extern int up_x11initialize(unsigned short width, unsigned short height,
+                            void **fbmem, unsigned int *fblen, unsigned char *bpp,
+                            unsigned short *stride);
+#ifdef CONFIG_FB_CMAP
+extern int up_x11cmap(unsigned short first, unsigned short len,
+                      unsigned char *red, unsigned char *green,
+                      unsigned char *blue, unsigned char  *transp);
+#endif
+#endif
+
+/* up_eventloop.c ***********************************************************/
+
+#ifdef CONFIG_SIM_X11FB
+#ifdef CONFIG_SIM_TOUCHSCREEN
+extern int up_x11eventloop(int argc, char *argv[]);
+#endif
+#endif
+
+/* up_eventloop.c ***********************************************************/
+
+#ifdef CONFIG_SIM_X11FB
+#ifdef CONFIG_SIM_TOUCHSCREEN
+extern int up_tcregister(int minor);
+extern int up_tcenter(int x, int y, int buttons);
+extern int up_tcleave(int x, int y, int buttons);
+#endif
 #endif
 
 /* up_tapdev.c ************************************************************/
