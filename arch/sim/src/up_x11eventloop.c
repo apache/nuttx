@@ -71,6 +71,7 @@ extern Display *g_display;
 extern Window g_window;
 
 pthread_t g_eventloop;
+volatile int g_evloopactive;
 
 /****************************************************************************
  * Private Variables
@@ -147,7 +148,7 @@ static void *up_x11eventthread(void *arg)
    * within the following loop.
    */
  
-  for (;;)
+  while (g_evloopactive)
     {
       XNextEvent(g_display, &event);
       switch (event.type)
@@ -196,6 +197,7 @@ int up_x11eventloop(void)
 {
   /* Start the X11 event loop */
 
+  g_evloopactive = 1;
   return pthread_create(&g_eventloop, 0, up_x11eventthread, 0);
 }
 

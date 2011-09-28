@@ -128,11 +128,11 @@ extern "C" {
 #endif
 
 /****************************************************************************
- * Name: up_simtouchscreen
+ * Name: sim_tcinitialize
  *
  * Description:
  *   Configure the simulated touchscreen.  This will register the driver as
- *   /dev/inputN where N is the minor device number
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor   - The input device minor number
@@ -144,7 +144,25 @@ extern "C" {
  ****************************************************************************/
 
 #if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
-EXTERN int up_simtouchscreen(int minor);
+EXTERN int sim_tcinitialize(int minor);
+#endif
+
+/****************************************************************************
+ * Name: sim_tcuninitialize
+ *
+ * Description:
+ *   Uninitialized the simulated touchscreen
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
+EXTERN void sim_tcuninitialize(void);
 #endif
 
 #undef EXTERN
