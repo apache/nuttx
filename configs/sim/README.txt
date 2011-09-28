@@ -266,6 +266,18 @@ nx11
     CONFIG_INPUT=y
     CONFIG_SIM_TOUCHSCREEN=y
 
+  Then you must also have some application logic that will call
+  up_simtouchscreen(0) to register the touchscreen driver.
+
+  NOTES:
+  1. If you do not have this call, the build will mysteriously
+     fail claiming that is can't find up_tcenter(0 and up_tcleave().
+     That is a consequence of the crazy way that the simulation is
+     built and can only be eliminated by call up_simtouchscreen(0)
+     from your application.
+
+  2. You must first call 
+
   X11 Build Issues
   ----------------
   To get the system to compile under various X11 installations
