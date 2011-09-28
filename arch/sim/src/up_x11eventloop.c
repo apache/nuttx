@@ -129,7 +129,7 @@ static void *up_x11eventthread(void *arg)
   if (ret != GrabSuccess)
     {
       fprintf(stderr, "Failed grap pointer\n");
-      return -1;
+      return NULL;
     }
 
   /* Then loop forever, waiting for events and processing events as they are

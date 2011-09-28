@@ -128,9 +128,6 @@ static int up_sample(FAR struct up_dev_s *priv,
                           FAR struct up_sample_s *sample);
 static int up_waitsample(FAR struct up_dev_s *priv,
                               FAR struct up_sample_s *sample);
-static int up_transfer(FAR struct up_dev_s *priv, uint8_t cmd);
-static void up_worker(FAR void *arg);
-static int up_interrupt(int irq, FAR void *context);
 
 /* Character driver methods */
 
