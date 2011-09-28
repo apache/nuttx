@@ -58,7 +58,6 @@
 
 #include <nuttx/input/touchscreen.h>
 
-#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -107,7 +106,6 @@ struct up_dev_s
   bool penchange;                      /* An unreported event is buffered */
   sem_t devsem;                        /* Manages exclusive access to this structure */
   sem_t waitsem;                       /* Used to wait for the availability of data */
-  pid_t eventloop;                     /* PID of the eventloop */
 
   struct up_sample_s sample;           /* Last sampled touch point data */
 
@@ -631,7 +629,7 @@ int up_simtouchscreen(int minor)
 
   /* Debug-only sanity checks */
 
-  DEBUGASSERT(minor >= 0 && minor < 100 && priv->eventloop == 0);
+  DEBUGASSERT(minor >= 0 && minor < 100);
 
   /* Initialize the touchscreen device driver instance */
 
@@ -641,15 +639,12 @@ int up_simtouchscreen(int minor)
 
   /* Start the X11 event loop */
 
-  ret = KERNEL_THREAD("evloop", CONFIG_SIM_EVLOOPPRIORITY,
-                      CONFIG_SIM_EVLOOPSTACKSIZE,
-                      (main_t)up_x11eventloop, (const char **)NULL);
+  ret = up_x11eventloop();
   if (ret < 0)
     {
       idbg("Failed to start event loop: %d\n", ret);
       goto errout_with_priv;     
     }
-  priv->eventloop = ret;
 
   /* Register the device as an input device */
 

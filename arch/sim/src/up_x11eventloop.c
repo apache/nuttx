@@ -38,6 +38,8 @@
  ****************************************************************************/
 
 #include <stdio.h>
+#include <pthread.h>
+
 #include <X11/Xlib.h>
 
 /****************************************************************************
@@ -67,6 +69,8 @@ extern int up_tcleave(int x, int y, int buttons);
 
 extern Display *g_display;
 extern Window g_window;
+
+pthread_t g_eventloop;
 
 /****************************************************************************
  * Private Variables
@@ -109,14 +113,10 @@ static int up_buttonmap(int state)
 }
 
 /****************************************************************************
- * Public Functions
- ***************************************************************************/
-
-/****************************************************************************
  * Name: up_x11eventloop
  ***************************************************************************/
 
-int up_x11eventloop(int argc, char *argv[])
+static void *up_x11eventthread(void *arg)
 {
   XEvent event;
   int ret;
@@ -164,5 +164,18 @@ int up_x11eventloop(int argc, char *argv[])
             break;
         }
     }
-  return 0;
+  return NULL;
 }
+
+/****************************************************************************
+ * Name: up_x11eventloop
+ ***************************************************************************/
+
+int up_x11eventloop(void)
+{
+  /* Start the X11 event loop */
+
+  return pthread_create(&g_eventloop, 0, up_x11eventthread, 0);
+}
+
+
