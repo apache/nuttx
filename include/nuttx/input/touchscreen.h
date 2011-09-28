@@ -127,6 +127,26 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/****************************************************************************
+ * Name: up_simtouchscreen
+ *
+ * Description:
+ *   Configure the simulated touchscreen.  This will register the driver as
+ *   /dev/inputN where N is the minor device number
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
+EXTERN int up_simtouchscreen(int minor);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

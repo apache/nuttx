@@ -280,7 +280,9 @@ errout_with_buffer:
 errout_with_cache:
   kfree(volume->cache);
 errout_with_volume:
+#ifndef CONFIG_NXFSS_PREALLOCATED
   kfree(volume);
+#endif
   return ret;
 }
 

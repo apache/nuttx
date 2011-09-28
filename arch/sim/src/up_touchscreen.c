@@ -58,6 +58,7 @@
 
 #include <nuttx/input/touchscreen.h>
 
+#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -106,6 +107,7 @@ struct up_dev_s
   bool penchange;                      /* An unreported event is buffered */
   sem_t devsem;                        /* Manages exclusive access to this structure */
   sem_t waitsem;                       /* Used to wait for the availability of data */
+  pid_t eventloop;                     /* PID of the eventloop */
 
   struct up_sample_s sample;           /* Last sampled touch point data */
 
@@ -604,15 +606,13 @@ errout:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_tcregister
+ * Name: up_simtouchscreen
  *
  * Description:
- *   Configure the touchscreen to use the provided I2C device instance.  This
- *   will register the driver as /dev/inputN where N is the minor device
- *   number
+ *   Configure the simulated touchscreen.  This will register the driver as
+ *   /dev/inputN where N is the minor device number
  *
  * Input Parameters:
- *   dev     - An I2C driver instance
  *   minor   - The input device minor number
  *
  * Returned Value:
@@ -621,9 +621,9 @@ errout:
  *
  ****************************************************************************/
 
-int up_tcregister(int minor)
+int up_simtouchscreen(int minor)
 {
-  FAR struct up_dev_s *priv;
+  FAR struct up_dev_s *priv = ( FAR struct up_dev_s *)&g_simtouchscreen;
   char devname[DEV_NAMELEN];
   int ret;
 
@@ -631,17 +631,25 @@ int up_tcregister(int minor)
 
   /* Debug-only sanity checks */
 
-  DEBUGASSERT(minor >= 0 && minor < 100);
-
-  /* Create and initialize a touchscreen device driver instance */
-
-  priv = &g_simtouchscreen;
+  DEBUGASSERT(minor >= 0 && minor < 100 && priv->eventloop == 0);
 
   /* Initialize the touchscreen device driver instance */
 
   memset(priv, 0, sizeof(struct up_dev_s));
   sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
+
+  /* Start the X11 event loop */
+
+  ret = KERNEL_THREAD("evloop", CONFIG_SIM_EVLOOPPRIORITY,
+                      CONFIG_SIM_EVLOOPSTACKSIZE,
+                      (main_t)up_x11eventloop, (const char **)NULL);
+  if (ret < 0)
+    {
+      idbg("Failed to start event loop: %d\n", ret);
+      goto errout_with_priv;     
+    }
+  priv->eventloop = ret;
 
   /* Register the device as an input device */
 
@@ -660,10 +668,8 @@ int up_tcregister(int minor)
   return OK;
 
 errout_with_priv:
+  sem_destroy(&priv->waitsem);
   sem_destroy(&priv->devsem);
-#ifdef CONFIG_touchscreen_MULTIPLE
-  kfree(priv);
-#endif
   return ret;
 }
 
@@ -749,5 +755,3 @@ int up_tcleave(int x, int y, int buttons)
     }
   return OK;
 }
-
-

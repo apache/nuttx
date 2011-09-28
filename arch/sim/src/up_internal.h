@@ -182,7 +182,6 @@ extern int up_x11eventloop(int argc, char *argv[]);
 
 #ifdef CONFIG_SIM_X11FB
 #ifdef CONFIG_SIM_TOUCHSCREEN
-extern int up_tcregister(int minor);
 extern int up_tcenter(int x, int y, int buttons);
 extern int up_tcleave(int x, int y, int buttons);
 #endif
