@@ -151,11 +151,6 @@ static struct usbdevclass_driverops_s g_driverops =
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-/* String *******************************************************************/
-
-const char g_vendorstr[]  = CONFIG_USBSTRG_VENDORSTR;
-const char g_productstr[] = CONFIG_USBSTRG_PRODUCTSTR;
-const char g_serialstr[]  = CONFIG_USBSTRG_SERIALSTR;
 
 /****************************************************************************
  * Private Functions

@@ -1133,7 +1133,7 @@ static bool fat_cmplfname(const uint8_t *direntry, const uint8_t *substr)
   match = fat_cmplfnchunk(chunk, substr, 5);
   if (match && len >= 5)
     {
-      /* Check bytes 6-11.  Note that len == 5, the substring passed to
+      /* Check bytes 6-11.  Note that if len == 5, the substring passed to
        * fat_cmplfnchunk() will point to the NUL terminator of substr.
        * In this case, fat_cmplfnchunk() will only verify that the
        * directory entry is also NUL terminated.
@@ -1143,7 +1143,7 @@ static bool fat_cmplfname(const uint8_t *direntry, const uint8_t *substr)
       match = fat_cmplfnchunk(chunk, &substr[5], 6);
       if (match && len >= 11)
         {
-          /* Check bytes 12-13.  Note that len == 11, the substring passed to
+          /* Check bytes 12-13.  Note that if len == 11, the substring passed to
            * fat_cmplfnchunk() will point to the NUL terminator of substr.
            * In this case, fat_cmplfnchunk() will only verify that the
            * directory entry is also NUL terminated.

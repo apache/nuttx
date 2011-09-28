@@ -66,7 +66,6 @@
  * Private Data
  ****************************************************************************/
 /* Descriptors **************************************************************/
-
 /* Device descriptor */
 
 static const struct usb_devdesc_s g_devdesc =
@@ -195,6 +194,15 @@ static const struct usb_epdesc_s g_hsepbulkindesc =
   0                                             /* interval */
 };
 #endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+/* Strings ******************************************************************/
+
+const char g_vendorstr[]  = CONFIG_USBSTRG_VENDORSTR;
+const char g_productstr[] = CONFIG_USBSTRG_PRODUCTSTR;
+const char g_serialstr[]  = CONFIG_USBSTRG_SERIALSTR;
 
 /****************************************************************************
  * Private Functions
