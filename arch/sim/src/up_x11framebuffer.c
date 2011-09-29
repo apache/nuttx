@@ -133,6 +133,18 @@ static inline int up_x11createframe(void)
   XSelectInput(g_display, g_window,
                ButtonPressMask|ButtonReleaseMask|ButtonMotionMask|KeyPressMask);
 
+  /* Release queued events on the display */
+
+#ifdef CONFIG_SIM_TOUCHSCREEN
+  (void)XAllowEvents(g_display, AsyncBoth, CurrentTime);
+
+  /* Grab mouse button 1, enabling mouse-related events */
+
+  (void)XGrabButton(g_display, Button1, AnyModifier, g_window, 1,
+                    ButtonPressMask|ButtonReleaseMask|ButtonMotionMask,
+                    GrabModeAsync, GrabModeAsync, None, None);
+#endif
+
   gcval.graphics_exposures = 0;
   g_gc = XCreateGC(g_display, g_window, GCGraphicsExposures, &gcval);
   return 0;
@@ -203,6 +215,12 @@ static void up_x11uninitX(void)
     {
       XDestroyImage(g_image);
     }
+
+  /* Un-grab the mouse buttons */
+
+#ifdef CONFIG_SIM_TOUCHSCREEN
+  XUngrabButton(g_display, Button1, AnyModifier, g_window);
+#endif
   XCloseDisplay(g_display);
 }
 

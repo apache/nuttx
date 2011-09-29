@@ -130,7 +130,19 @@ void up_idle(void)
 
 #if defined(CONFIG_SIM_WALLTIME) || defined(CONFIG_SIM_X11FB)
   (void)up_hostusleep(1000000 / CLK_TCK);
+
+  /* Handle X11-related events */
+
 #ifdef CONFIG_SIM_X11FB
+#ifdef CONFIG_SIM_TOUCHSCREEN
+  if (g_eventloop)
+    {
+      up_x11events();
+    }
+#endif
+
+  /* Update the display periodically */
+
   g_x11refresh += 1000000 / CLK_TCK;
   if (g_x11refresh > 500000)
     {

@@ -661,15 +661,6 @@ int sim_tcinitialize(int minor)
 
   priv->minor = minor;
 
-  /* Start the X11 event loop */
-
-  ret = up_x11eventloop();
-  if (ret < 0)
-    {
-      idbg("Failed to start event loop: %d\n", ret);
-      goto errout_with_priv;     
-    }
-
   /* Register the device as an input device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
@@ -681,6 +672,10 @@ int sim_tcinitialize(int minor)
       idbg("register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
+
+  /* Enable X11 event processing from the IDLE loop */
+
+  g_eventloop = 1;
 
   /* And return success */
 
@@ -731,7 +726,7 @@ void sim_tcuninitialize(void)
    * done in close() using a reference count).
    */
 
-  g_evloopactive = 0;
+  g_eventloop = 0;
 
   /* Un-register the device*/
 

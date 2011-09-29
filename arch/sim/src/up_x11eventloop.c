@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <stdio.h>
-#include <pthread.h>
 
 #include <X11/Xlib.h>
 
@@ -59,7 +58,6 @@
  ****************************************************************************/
 
 extern int up_buttonevent(int x, int y, int buttons);
-extern int up_tcleave(int x, int y, int buttons);
 
 /****************************************************************************
  * Public Variables
@@ -68,10 +66,8 @@ extern int up_tcleave(int x, int y, int buttons);
 /* Defined in up_x11framebuffer.c */
 
 extern Display *g_display;
-extern Window g_window;
 
-pthread_t g_eventloop;
-volatile int g_evloopactive;
+volatile int g_eventloop;
 
 /****************************************************************************
  * Private Variables
@@ -93,32 +89,33 @@ static int up_buttonmap(int state)
 }
 
 /****************************************************************************
- * Name: up_x11eventthread
+ * Public Functions
  ***************************************************************************/
 
-static void *up_x11eventthread(void *arg)
+/****************************************************************************
+ * Name: up_x11events
+ *
+ * Description:
+ *   Called periodically from the IDLE loop to check for queued X11 events.
+ *
+ ***************************************************************************/
+
+void up_x11events(void)
 {
-  Window window;
   XEvent event;
 
-  /* Release queued events on the display */
+  /* Check if there are any pending, queue X11 events. */
 
-  (void)XAllowEvents(g_display, AsyncBoth, CurrentTime);
-
-  /* Grab mouse button 1, enabling mouse-related events */
-
-  window = DefaultRootWindow(g_display);
-  (void)XGrabButton(g_display, Button1, AnyModifier, window, 1,
-                    ButtonPressMask|ButtonReleaseMask|ButtonMotionMask,
-                    GrabModeAsync, GrabModeAsync, None, None);
-
-  /* Then loop until we are commanded to stop (when g_evloopactive becomes zero),
-   * waiting for events and processing events as they are received.
-   */
- 
-  while ( g_evloopactive)
+  if (XPending(g_display) > 0)
     {
+      /* Yes, get the event (this should not block since we know there are
+       * pending events)
+       */
+
       XNextEvent(g_display, &event);
+
+      /* Then process the event */
+
       switch (event.type)
         {
           case MotionNotify : /* Enabled by ButtonMotionMask */
@@ -140,21 +137,4 @@ static void *up_x11eventthread(void *arg)
             break;
         }
     }
-
-  XUngrabButton(g_display, Button1, AnyModifier, window);
-  return NULL;
 }
-
-/****************************************************************************
- * Name: up_x11eventloop
- ***************************************************************************/
-
-int up_x11eventloop(void)
-{
-  /* Start the X11 event loop */
-
-  g_evloopactive = 1;
-  return pthread_create(&g_eventloop, 0, up_x11eventthread, 0);
-}
-
-
