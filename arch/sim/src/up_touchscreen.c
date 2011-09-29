@@ -65,6 +65,14 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
+#ifdef CONFIG_DISABLE_POLL
+#  undef CONFIG_SIM_TCNWAITERS
+#else
+#  ifndef CONFIG_SIM_TCNWAITERS
+#    define CONFIG_SIM_TCNWAITERS 4
+#  endif
+#endif
+
 /* Driver support ***********************************************************/
 /* This format is used to construct the /dev/input[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
@@ -101,10 +109,10 @@ struct up_sample_s
 
 struct up_dev_s
 {
-  uint8_t nwaiters;                    /* Number of threads waiting for touchscreen data */
+  volatile uint8_t nwaiters;           /* Number of threads waiting for touchscreen data */
   uint8_t id;                          /* Current touch point ID */
   uint8_t minor;                       /* Minor device number */
-  bool penchange;                      /* An unreported event is buffered */
+  volatile bool penchange;             /* An unreported event is buffered */
   sem_t devsem;                        /* Manages exclusive access to this structure */
   sem_t waitsem;                       /* Used to wait for the availability of data */
 
@@ -116,7 +124,7 @@ struct up_dev_s
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  struct pollfd *fds[CONFIG_touchscreen_NPOLLWAITERS];
+  struct pollfd *fds[CONFIG_SIM_TCNWAITERS];
 #endif
 };
 
@@ -183,6 +191,7 @@ static void up_notify(FAR struct up_dev_s *priv)
    * that the read data is available.
    */
 
+  ivdbg("contact=%d nwaiters=%d\n", priv->sample.contact, priv->nwaiters);
   if (priv->nwaiters > 0)
     {
       /* After posting this semaphore, we need to exit because the touchscreen
@@ -199,7 +208,7 @@ static void up_notify(FAR struct up_dev_s *priv)
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  for (i = 0; i < CONFIG_touchscreen_NPOLLWAITERS; i++)
+  for (i = 0; i < CONFIG_SIM_TCNWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
       if (fds)
@@ -222,6 +231,9 @@ static int up_sample(FAR struct up_dev_s *priv,
   int ret = -EAGAIN;
 
   /* Is there new touchscreen sample data available? */
+
+  ivdbg("penchange=%d contact=%d id=%d\n",
+        priv->penchange, sample->contact, priv->id);
 
   if (priv->penchange)
     {
@@ -248,6 +260,9 @@ static int up_sample(FAR struct up_dev_s *priv,
        }
 
       priv->penchange = false;
+      ivdbg("penchange=%d contact=%d id=%d\n",
+             priv->penchange, priv->sample.contact, priv->id);
+
       ret = OK;
     }
 
@@ -289,10 +304,12 @@ static int up_waitsample(FAR struct up_dev_s *priv,
   while (up_sample(priv, sample) < 0)
     {
       /* Wait for a change in the touchscreen state */
- 
+
+      ivdbg("Waiting...\n");
       priv->nwaiters++;
       ret = sem_wait(&priv->waitsem);
       priv->nwaiters--;
+      ivdbg("Awakened...\n");
 
       if (ret < 0)
         {
@@ -337,6 +354,7 @@ errout:
 
 static int up_open(FAR struct file *filep)
 {
+  ivdbg("Opening...\n");
   return OK;
 }
 
@@ -346,6 +364,7 @@ static int up_open(FAR struct file *filep)
 
 static int up_close(FAR struct file *filep)
 {
+  ivdbg("Closing...\n");
   return OK;
 }
 
@@ -360,6 +379,8 @@ static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len)
   FAR struct touch_sample_s *report;
   struct up_sample_s    sample;
   int                        ret;
+
+  ivdbg("len=%d\n", len);
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -454,6 +475,7 @@ static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len)
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
+  ivdbg("Returning %d\n", ret);
   sem_post(&priv->devsem);
   return ret;
 }
@@ -546,7 +568,7 @@ static int up_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * slot for the poll structure reference
        */
 
-      for (i = 0; i < CONFIG_touchscreen_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_SIM_TCNWAITERS; i++)
         {
           /* Find an available slot */
 
@@ -560,7 +582,7 @@ static int up_poll(FAR struct file *filep, FAR struct pollfd *fds,
             }
         }
 
-      if (i >= CONFIG_touchscreen_NPOLLWAITERS)
+      if (i >= CONFIG_SIM_TCNWAITERS)
         {
           fds->priv    = NULL;
           ret          = -EBUSY;
@@ -736,6 +758,7 @@ int up_tcenter(int x, int y, int buttons)
   bool                 pendown;  /* true: pen is down */
 
   ivdbg("x=%d y=%d buttons=%02x\n", x, y, buttons);
+  ivdbg("contact=%d nwaiters=%d\n", priv->sample.contact, priv->nwaiters);
 
   /* Any button press will count as pendown. */
 
@@ -784,7 +807,7 @@ int up_tcenter(int x, int y, int buttons)
   priv->sample.id = priv->id;
   priv->penchange = true;
 
-  /* Notify any waiters that nes touchscreen data is available */
+  /* Notify any waiters that new touchscreen data is available */
 
   up_notify(priv);
   return OK;
@@ -799,8 +822,9 @@ int up_tcleave(int x, int y, int buttons)
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
 
   ivdbg("x=%d y=%d buttons=%02x\n", x, y, buttons);
+  ivdbg("contact=%d nwaiters=%d\n", priv->sample.contact, priv->nwaiters);
 
-  /* Treat leaving as penup */
+  /* Treat leaving the window as penup */
 
   /* Ignore the pen up if the pen was already up (CONTACT_NONE == pen up and
    * already reported.  CONTACT_UP == pen up, but not reported)
@@ -809,6 +833,20 @@ int up_tcleave(int x, int y, int buttons)
   if (priv->sample.contact != CONTACT_NONE)
     {
       priv->sample.contact = CONTACT_UP;
+
+      /* Is there a thread waiting for the touchpad event? If so, awaken it! */
+
+      if (priv->nwaiters > 0)
+        {
+          /* Indicate the availability of new sample data for this ID */
+
+          priv->sample.id = priv->id;
+          priv->penchange = true;
+
+          /* Notify any waiters that new touchscreen data is available */
+
+         up_notify(priv);
+        }
     }
   return OK;
 }
