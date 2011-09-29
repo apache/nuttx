@@ -58,7 +58,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-extern int up_tcenter(int x, int y, int buttons);
+extern int up_buttonevent(int x, int y, int buttons);
 extern int up_tcleave(int x, int y, int buttons);
 
 /****************************************************************************
@@ -82,103 +82,57 @@ volatile int g_evloopactive;
  ***************************************************************************/
 
 /****************************************************************************
- * Name: up_x11eventloop
+ * Name: up_buttonmap
  ***************************************************************************/
 
 static int up_buttonmap(int state)
 {
-  int ret = 0;
+  /* Remove any X11 dependencies.  Just maps Button1Mask to bit 0. */
 
-  /* Remove any X11 dependencies.  Possible bit settings include:  Button1Mask,
-   * Button2Mask, Button3Mask, Button4Mask, Button5Mask, ShiftMask, LockMask,
-   * ControlMask, Mod1Mask, Mod2Mask, Mod3Mask, Mod4Mask, Mod5Mask.  I assume
-   * that for a mouse device Button1Mask, Button2Mask, and Button3Mask are
-   * sufficient.
-   */
-
-  if ((state & Button1Mask) != 0)
-    {
-      ret |= 1;
-    }
-
-  if ((state & Button2Mask) != 0)
-    {
-      ret |= 2;
-    }
-
-  if ((state & Button3Mask) != 0)
-    {
-      ret |= 4;
-    }
-  return ret;
+  return ((state & Button1Mask) != 0) ? 1 : 0;
 }
 
 /****************************************************************************
- * Name: up_x11eventloop
+ * Name: up_x11eventthread
  ***************************************************************************/
 
 static void *up_x11eventthread(void *arg)
 {
+  Window window;
   XEvent event;
-  int ret;
 
-  /* Grab the pointer (mouse), enabling mouse enter/leave events */
+  /* Release queued events on the display */
 
-  ret = XGrabPointer(g_display, g_window, 0,
-                     EnterWindowMask|LeaveWindowMask,
-                     GrabModeAsync, GrabModeAsync, None, None, CurrentTime);
-  if (ret != GrabSuccess)
-    {
-      fprintf(stderr, "Failed grap pointer\n");
-      return NULL;
-    }
+  (void)XAllowEvents(g_display, AsyncBoth, CurrentTime);
 
-  /* Enable motion and button events.
-   * EnterWindowMask|LeaveWindowMask - When mouse enters or leaves window
-   * ButtonMotionMask - When mouse moves with any button pressed
-   * ButtonPress|ButtonRelease - When button is pressed or released
-   */
+  /* Grab mouse button 1, enabling mouse-related events */
 
-  XSelectInput(g_display, g_window,
-               EnterWindowMask|LeaveWindowMask|ButtonMotionMask|
-               ButtonPressMask|ButtonReleaseMask);
+  window = DefaultRootWindow(g_display);
+  (void)XGrabButton(g_display, Button1, AnyModifier, window, 1,
+                    ButtonPressMask|ButtonReleaseMask|ButtonMotionMask,
+                    GrabModeAsync, GrabModeAsync, None, None);
 
-  /* Then loop forever, waiting for events and processing events as they are
-   * received.  NOTE:  It seems to be fatal if you attempt to fprintf from
-   * within the following loop.
+  /* Then loop until we are commanded to stop (when g_evloopactive becomes zero),
+   * waiting for events and processing events as they are received.
    */
  
-  while (g_evloopactive)
+  while ( g_evloopactive)
     {
       XNextEvent(g_display, &event);
       switch (event.type)
         {
-          case EnterNotify: /* Enabled by EnterWindowMask */
-            {
-              up_tcenter(event.xcrossing.x, event.xcrossing.y,
-                         up_buttonmap(event.xcrossing.state));
-            }
-            break;
-
-          case LeaveNotify : /* Enabled by LeaveWindowMask */
-            {
-              up_tcleave(event.xcrossing.x, event.xcrossing.y,
-                         up_buttonmap(event.xcrossing.state));
-            }
-            break;
-
           case MotionNotify : /* Enabled by ButtonMotionMask */
             {
-              up_tcenter(event.xmotion.x, event.xmotion.y,
-                         up_buttonmap(event.xmotion.state));
+              up_buttonevent(event.xmotion.x, event.xmotion.y,
+                             up_buttonmap(event.xmotion.state));
             }
             break;
 
           case ButtonPress  : /* Enabled by ButtonPressMask */
           case ButtonRelease : /* Enabled by ButtonReleaseMask */
             {
-              up_tcenter(event.xbutton.x, event.xbutton.y,
-                         up_buttonmap(event.xbutton.state));
+              up_buttonevent(event.xbutton.x, event.xbutton.y,
+                             up_buttonmap(event.xbutton.state));
             }
             break;
 
@@ -186,6 +140,8 @@ static void *up_x11eventthread(void *arg)
             break;
         }
     }
+
+  XUngrabButton(g_display, Button1, AnyModifier, window);
   return NULL;
 }
 
