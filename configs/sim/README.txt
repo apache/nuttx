@@ -208,7 +208,7 @@ nx
   
     CONFIG_SIM_X11FB    - Use X11 window for framebuffer
 
-  See the nx11 configuration below for more information.
+  See the "nx11" configuration below for more information.
 
   Multi- and Single-User Modes
   ----------------------------
@@ -267,7 +267,8 @@ nx11
     CONFIG_SIM_TOUCHSCREEN=y
 
   Then you must also have some application logic that will call
-  sim_tcinitializ(0) to register the touchscreen driver.
+  sim_tcinitialize(0) to register the touchscreen driver.  See
+  also configuration "touchscreen"
 
   NOTES:
 
@@ -322,3 +323,24 @@ pashello
 
     cd <nuttx-directory>/tools
     ./configure.sh sim/pashello
+
+touchscreen
+
+  Description
+  -----------
+  This configuration uses the simple touchscreen test at
+  apps/examples/touchscreen.  This test will create an empty X11 window
+  and will print the touchscreen output as it is received from the 
+  simulated touchscreen driver.  This configuration may
+  by selected as follows:
+
+    cd <nuttx-directory>/tools
+    ./configure.sh sim/touchscreen
+
+  Since this example uses the simulated frame buffer driver, the
+  most of the configuration settings discussed for the "nx11"
+  configuration also apply here.  See that discussion above.
+
+  See apps/examples/README.txt for further information about build
+  requirements and configuration settings.
+
