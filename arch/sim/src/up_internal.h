@@ -171,8 +171,7 @@ extern int up_x11eventloop(void);
 /* up_eventloop.c ***********************************************************/
 
 #if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
-extern int up_tcenter(int x, int y, int buttons);
-extern int up_tcleave(int x, int y, int buttons);
+extern int up_buttonevent(int x, int y, int buttons);
 #endif
 
 /* up_tapdev.c ************************************************************/

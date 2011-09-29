@@ -751,10 +751,10 @@ void sim_tcuninitialize(void)
 }
 
 /****************************************************************************
- * Name: up_tcenter
+ * Name: up_buttonevent
  ****************************************************************************/
 
-int up_tcenter(int x, int y, int buttons)
+int up_buttonevent(int x, int y, int buttons)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
   bool                 pendown;  /* true: pen is down */
@@ -815,40 +815,3 @@ int up_tcenter(int x, int y, int buttons)
   return OK;
 }
 
-/****************************************************************************
- * Name: up_tcleave
- ****************************************************************************/
-
-int up_tcleave(int x, int y, int buttons)
-{
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
-
-  ivdbg("x=%d y=%d buttons=%02x\n", x, y, buttons);
-  ivdbg("contact=%d nwaiters=%d\n", priv->sample.contact, priv->nwaiters);
-
-  /* Treat leaving the window as penup */
-
-  /* Ignore the pen up if the pen was already up (CONTACT_NONE == pen up and
-   * already reported.  CONTACT_UP == pen up, but not reported)
-   */
-
-  if (priv->sample.contact != CONTACT_NONE)
-    {
-      priv->sample.contact = CONTACT_UP;
-
-      /* Is there a thread waiting for the touchpad event? If so, awaken it! */
-
-      if (priv->nwaiters > 0)
-        {
-          /* Indicate the availability of new sample data for this ID */
-
-          priv->sample.id = priv->id;
-          priv->penchange = true;
-
-          /* Notify any waiters that new touchscreen data is available */
-
-         up_notify(priv);
-        }
-    }
-  return OK;
-}

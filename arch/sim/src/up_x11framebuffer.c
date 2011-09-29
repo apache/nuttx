@@ -70,13 +70,13 @@
 /* Also used in up_x11eventloop */
 
 Display *g_display;
-Window g_window;
 
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
 
 static int g_screen;
+static Window g_window;
 static GC g_gc;
 #ifndef CONFIG_SIM_X11NOSHM
 static XShmSegmentInfo g_xshminfo;
@@ -127,9 +127,12 @@ static inline int up_x11createframe(void)
                    &hints, NULL, NULL);
 
   XMapWindow(g_display, g_window);
+
+  /* Select window input events */
+
   XSelectInput(g_display, g_window,
-               ButtonPressMask | ButtonReleaseMask |
-               ButtonMotionMask | KeyPressMask | ExposureMask);
+               ButtonPressMask|ButtonReleaseMask|ButtonMotionMask|KeyPressMask);
+
   gcval.graphics_exposures = 0;
   g_gc = XCreateGC(g_display, g_window, GCGraphicsExposures, &gcval);
   return 0;
