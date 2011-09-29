@@ -117,7 +117,7 @@
 #ifndef __ASSEMBLY__
 
 #if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
-extern volatile int g_evloopactive;
+extern volatile int g_eventloop;
 #endif
 
 /**************************************************************************
@@ -165,7 +165,7 @@ extern int up_x11cmap(unsigned short first, unsigned short len,
 /* up_eventloop.c ***********************************************************/
 
 #if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
-extern int up_x11eventloop(void);
+extern void up_x11events(void);
 #endif
 
 /* up_eventloop.c ***********************************************************/
