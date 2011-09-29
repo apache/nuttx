@@ -81,7 +81,7 @@ endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
-NXOBJS = $(AOBJS) $(COBJS)
+NUTTXOBJS = $(AOBJS) $(COBJS)
 HOSTOBJS = $(HOSTSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS)
@@ -104,10 +104,21 @@ endif
 
 STDLIBS += -lc
 
+# Determine which NuttX libraries will need to be linked in
+# Most are provided by LINKLIBS on the MAKE command line
+
 LINKOBJS = up_head$(OBJEXT)
 LINKLIBS =
 LDPATHS = $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS = $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
+
+# Add the board-specific library and directory
+
+BOARDDIR = $(TOPDIR)/configs/sim/src
+LDPATHS += -L $(BOARDDIR)
+LDLIBS += -lboard
+
+# Make targets begin here
 
 all: up_head$(OBJEXT) libarch$(LIBEXT)
 .PHONY: export_head clean distclean cleanrel depend
@@ -123,10 +134,18 @@ $(HOSTOBJS): %$(OBJEXT): %.c
 	@$(CC) -c $(HOSTCFLAGS) $< -o $@
 
 # The architecture-specific library
-libarch$(LIBEXT): $(NXOBJS)
-	@( for obj in $(NXOBJS) ; do \
+
+libarch$(LIBEXT): $(NUTTXOBJS)
+	@( for obj in $(NUTTXOBJS) ; do \
 		$(call ARCHIVE, $@, $${obj}); \
 	done ; )
+
+# The "board"-specific library. Of course, there really are no boards in
+# the simulation.  However, this is a good place to keep parts of the simulation
+# that are not hardware-related.
+
+$(BOARDDIR)/libboard$(LIBEXT):
+	@$(MAKE) -C $(BOARDDIR) TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
 # A partially linked object containing only NuttX code (no interface to host OS)
 # Change the names of most symbols that conflict with libc symbols.
@@ -140,7 +159,7 @@ GNU/Linux-names.dat: GNU nuttx-names.dat
 Cygwin-names.dat: nuttx-names.dat
 	@cat $^ | sed -e "s/^/_/g" >$@
 
-nuttx.rel : libarch$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
+nuttx.rel : libarch$(LIBEXT) $(BOARDDIR)/libboard$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
 	@echo "LD:  nuttx.rel"
 	@$(LD) -r $(LDFLAGS) $(LDPATHS) -o $@ $(LINKOBJS) --start-group $(LDLIBS) --end-group $(EXTRA_LIBS)
 	@$(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat $@

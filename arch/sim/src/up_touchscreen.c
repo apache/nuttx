@@ -714,7 +714,7 @@ void sim_tcuninitialize(void)
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
   ivdbg("Un-registering %s\n", devname);
 
-  ret = runegister_driver(devname);
+  ret = unregister_driver(devname);
   if (ret < 0)
     {
       idbg("uregister_driver() failed: %d\n", ret);
