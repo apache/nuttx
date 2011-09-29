@@ -1,7 +1,7 @@
-############################################################################
-# configs/sim/src/Makefile
+#!/bin/bash
+# sim/touchscreen/setenv.sh
 #
-#   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,53 +31,15 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
-include $(TOPDIR)/Make.defs
+if [ "$(basename $0)" = "setenv.sh" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-CFLAGS += -I$(TOPDIR)/sched
+if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
 
-ASRCS = 
-AOBJS = $(ASRCS:.S=$(OBJEXT))
+#export NUTTX_BIN=
+#export PATH=${NUTTX_BIN}:/sbin:/usr/sbin:${PATH_ORIG}
 
-CSRCS = 
-ifeq ($(CONFIG_SIM_X11FB),y)
-ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
-  CSRCS += up_touchscreen.c
-endif
-endif
-COBJS = $(CSRCS:.c=$(OBJEXT))
-
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
-
-all: libboard$(LIBEXT)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	@$(AR) $@ # Create an empty archive
-ifneq ($(OBJS),)
-	@( for obj in $(OBJS) ; do \
-		$(call ARCHIVE, $@, $${obj}); \
-	done ; )
-endif
-
-.depend: Makefile $(SRCS)
-	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	@touch $@
-
-depend: .depend
-
-clean:
-	@rm -f libboard$(LIBEXT) *~ .*.swp
-	$(call CLEAN)
-
-distclean: clean
-	@rm -f Make.dep .depend
-
--include Make.dep
+echo "PATH : ${PATH}"

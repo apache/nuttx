@@ -2110,4 +2110,11 @@
 	* fs/fat:  Fix an error in the long file name logic:  If the long file name
 	  is an even multiple of 13 bytes in length, then it should not include a
 	  NULL terminating character.  Fix contributed by Kaushal Parikh.
-
+	* configs/sim/nx11 - Created a separate configuration to build the NX
+	  example using the a simulated framebuffer driver on an X11 window.  This
+	  example has been verified on Ubuntu 9.09 (it does not work on Cygwin).
+	* arch/sim/src/up_touchscreen.c and up_x11eventloop.c - Adds support for a
+	  simulated NuttX touchscreen device using mouse/pointer feedback from an
+	  x11 window.
+	* configs/sim/touchscreen - Adds a configuration to verify the simulated
+	  touchscreen driver (Does not work on Cygwin).
