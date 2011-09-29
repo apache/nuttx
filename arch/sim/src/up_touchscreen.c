@@ -134,9 +134,9 @@ struct up_dev_s
 
 static void up_notify(FAR struct up_dev_s *priv);
 static int up_sample(FAR struct up_dev_s *priv,
-                          FAR struct up_sample_s *sample);
+                     FAR struct up_sample_s *sample);
 static int up_waitsample(FAR struct up_dev_s *priv,
-                              FAR struct up_sample_s *sample);
+                         FAR struct up_sample_s *sample);
 
 /* Character driver methods */
 
@@ -274,7 +274,7 @@ static int up_sample(FAR struct up_dev_s *priv,
  ****************************************************************************/
 
 static int up_waitsample(FAR struct up_dev_s *priv,
-                              FAR struct up_sample_s *sample)
+                         FAR struct up_sample_s *sample)
 {
   irqstate_t flags;
   int ret;
@@ -298,7 +298,7 @@ static int up_waitsample(FAR struct up_dev_s *priv,
   sem_post(&priv->devsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
-   * that is posted when new sample data is availble.
+   * that is posted when new sample data is available.
    */
 
   while (up_sample(priv, sample) < 0)
@@ -375,9 +375,9 @@ static int up_close(FAR struct file *filep)
 static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
   FAR struct inode          *inode;
-  FAR struct up_dev_s  *priv;
+  FAR struct up_dev_s       *priv;
   FAR struct touch_sample_s *report;
-  struct up_sample_s    sample;
+  struct up_sample_s         sample;
   int                        ret;
 
   ivdbg("len=%d\n", len);
@@ -449,6 +449,8 @@ static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len)
   report->point[0].id        = priv->id;
   report->point[0].x         = sample.x;
   report->point[0].y         = sample.y;
+  report->point[0].h         = 1;
+  report->point[0].w         = 1;
   report->point[0].pressure  = 42;
 
   /* Report the appropriate flags */
@@ -527,14 +529,14 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 #ifndef CONFIG_DISABLE_POLL
 static int up_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup)
+                   bool setup)
 {
-  FAR struct inode         *inode;
+  FAR struct inode    *inode;
   FAR struct up_dev_s *priv;
-  pollevent_t               eventset;
-  int                       ndx;
-  int                       ret = OK;
-  int                       i;
+  pollevent_t          eventset;
+  int                  ndx;
+  int                  ret = OK;
+  int                  i;
 
   ivdbg("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
