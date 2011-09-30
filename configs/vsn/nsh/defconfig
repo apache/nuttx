@@ -267,6 +267,7 @@ CONFIG_WIRELESS=y
 # OS support for hardware RTC
 #
 CONFIG_RTC=y
+CONFIG_RTC_HIRES=y
 CONFIG_SYSTEM_UTC=y
 
 #

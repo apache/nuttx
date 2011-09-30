@@ -758,7 +758,7 @@ CONFIG_NX_MXCLIENTMSGS=16
 #   orientation support.
 #
 CONFIG_LCD_LANDSCAPE=n
-CONFIG_LCD_PORTRAIT=n
+CONFIG_LCD_PORTRAIT=y
 
 #
 # Settings for examples/uip
