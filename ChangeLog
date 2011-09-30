@@ -2118,3 +2118,6 @@
 	  x11 window.
 	* configs/sim/touchscreen - Adds a configuration to verify the simulated
 	  touchscreen driver (Does not work on Cygwin).
+	* configs/sam3u/touchscreen - This is the configuration that I plan to use
+	  to verify the SAM3U-EK touchscreen driver.  However, as of this writing,
+	  there is no touchscreen driver for the board.

@@ -354,7 +354,7 @@ must be is one of the following:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables both the serial and telnetd NSH interfaces.
 
-  nx
+  nx:
     Configures to use examples/nx using the HX834x LCD hardwar on
     the SAM3U-EK development board.
 
@@ -363,3 +363,9 @@ must be is one of the following:
     examples/ostest.  By default, this project assumes that you are
     using the DFU bootloader.
 
+  touchscreen:
+    This configuration implements an NSH configuratin with several
+    built-in applications.  The configuration is called touchscreen
+    because we intend to use this configuration to develop the
+    SAM3U-EK touchscreen.  However, there is no touchscreen driver
+    in place as of this writing.
