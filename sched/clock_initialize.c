@@ -54,6 +54,12 @@
  * Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_RTC
+#  ifndef CONFIG_SYSTEM_UTC
+#  error "In order to support hardware RTC system must have set the CONFIG_SYSTEM_UTC=y"
+#  endif
+#endif
+
 /* Standard time definitions (in units of seconds) */
 
 #define SEC_PER_MIN  ((time_t)60)
@@ -85,11 +91,11 @@
  ****************************************************************************/
 
 #if CONFIG_SYSTEM_UTC
-volatile time_t  g_system_utc   = 0;
+volatile time_t  g_system_utc;
 #else
-volatile clock_t g_system_timer = 0;
-struct timespec  g_basetime     = {0,0};
-uint32_t         g_tickbias     = 0;
+volatile clock_t g_system_timer;
+struct timespec  g_basetime;
+uint32_t         g_tickbias;
 #endif
 
 /**************************************************************************
@@ -102,11 +108,11 @@ uint32_t         g_tickbias     = 0;
 
 #if CONFIG_SYSTEM_UTC
 #if TICK_PER_SEC > 32767
-volatile uint32_t g_tickcount = 0;
+volatile uint32_t g_tickcount;
 #elif TICK_PER_SEC > 255
-volatile uint16_t g_tickcount = 0;
+volatile uint16_t g_tickcount;
 #else
-volatile uint8_t  g_tickcount = 0;
+volatile uint8_t  g_tickcount;
 #endif
 #endif /* CONFIG_SYSTEM_UTC */
 
@@ -114,7 +120,7 @@ volatile uint8_t  g_tickcount = 0;
  * Private Functions
  **************************************************************************/
 /****************************************************************************
- * Function: clock_timer
+ * Function: incr_utc
  *
  * Description:
  *   This function must be called once every time the real
@@ -139,8 +145,56 @@ static inline void incr_utc(void)
 #endif
 
 /****************************************************************************
- * Private Functions
+ * Function: clock_inittime
+ *
+ * Description:
+ *   Get the initial time value from the best source available.
+ *
  ****************************************************************************/
+
+#ifdef CONFIG_RTC
+#ifdef CONFIG_RTC_HIRES
+
+static inline void clock_inittime(FAR struct timespec *tp)
+{
+
+  /* Get the complete time from the hi-res RTC. */
+
+  (void)up_rtc_gettime(tp);
+}
+
+#else
+
+static inline void clock_inittime(FAR struct timespec *tp)
+{
+  /* Get the seconds (only) from the lo-res RTC */
+
+  tp->tv_sec  = up_rtc_time();
+  tp->tv_nsec = 0;
+}
+
+#endif /* CONFIG_RTC_HIRES */
+#else /* CONFIG_RTC */
+
+static inline void clock_inittime(FAR struct timespec *tp)
+{
+  time_t jdn = 0;
+
+  /* Get the EPOCH-relative julian date from the calendar year,
+   * month, and date
+   */
+
+  jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH,
+                           CONFIG_START_DAY);
+
+  /* Set the base time as seconds into this julian day. */
+
+  tp->tv_sec  = jdn * SEC_PER_DAY;
+  tp->tv_nsec = 0;
+}
+
+#endif /* CONFIG_RTC */
+
 
 /****************************************************************************
  * Public Functions
@@ -156,48 +210,26 @@ static inline void incr_utc(void)
 
 void clock_initialize(void)
 {
-#ifndef CONFIG_SYSTEM_UTC
-  time_t jdn = 0;
-#endif
-
-  /* Initialize the real time close (this should be un-nesssary except on a
-   * restart).
-   */
-
 #ifdef CONFIG_SYSTEM_UTC
-  g_system_utc   = 0;
-#else
-  g_system_timer = 0;
+  struct timespec ts;
 #endif
 
-  /* Do we have hardware RTC support? */
+  /* Initialize the RTC hardware */
 
 #ifdef CONFIG_RTC
-
-#ifndef CONFIG_SYSTEM_UTC
-#  error In order to support hardware RTC system must have set the CONFIG_SYSTEM_UTC=y
-#endif
-
   up_rtcinitialize();
 #endif
 
-#ifndef CONFIG_SYSTEM_UTC
+  /* Initialize the time value */
 
-  /* Get the EPOCH-relative julian date from the calendar year,
-   * month, and date
-   */
-
-  jdn = clock_calendar2utc(CONFIG_START_YEAR, CONFIG_START_MONTH,
-                           CONFIG_START_DAY);
-
-  /* Set the base time as seconds into this julian day. */
-
-  g_basetime.tv_sec  = jdn * SEC_PER_DAY;
-  g_basetime.tv_nsec = 0;
-
-  /* These is no time bias from this time. */
-
-  g_tickbias = 0;
+#ifdef CONFIG_SYSTEM_UTC
+  clock_inittime(&ts);
+  g_system_utc = ts.tv_sec;
+  g_tickcount  = ((ts.tv_nsec > 10) * CLOCKS_PER_SEC) / (1000000000 >> 10);
+#else
+  clock_inittime(&g_basetime);
+  g_system_timer = 0;
+  g_tickbias     = 0;
 #endif
 }
 

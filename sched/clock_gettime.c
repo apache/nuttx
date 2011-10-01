@@ -113,7 +113,12 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
   if (clock_id == CLOCK_REALTIME && tp)
     {
+      /* If CONFIG_SYSTEM_UTC is not defined, then we have to get the time
+       * from g_system_timer.
+       */
+
 #ifndef CONFIG_SYSTEM_UTC
+
       /* Get the elapsed time since power up (in milliseconds) biased
        * as appropriate.
        */
@@ -151,47 +156,18 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
       tp->tv_sec  = (time_t)secs;
       tp->tv_nsec = (long)nsecs;
       
-#else   /* if CONFIG_SYSTEM_UTC=y */
+#else /* CONFIG_SYSTEM_UTC */
 
-#ifdef CONFIG_RTC
+      /* CONFIG_SYSTEM_UTC is defined.  But we might be able to get the time
+       * from the hardware if a high resolution RTC is available.
+       */
+
+#ifdef CONFIG_RTC_HIRES
       if (g_rtc_enabled)
         {
-          /* up_rtc_gettime() returns the time in seconds and up_rtc_getclock()
-           * will return the time int RTC clock ticks.  Under the hood, these
-           * are probably based on the same running time.  However, since we
-           * sample this time twice, we have to add the following strange logic
-           * to assure that the fractional second value does not rollover to
-           * a full second between sampling times.
-           */
+          /* Get the hi-resolution time from the RTC */
 
-          clock_t rtc_frac; /* Current fractional seconds in RTC ticks */
-          clock_t rtc_last; /* Previous fractional seconds in RTC ticks */
-          time_t  rtc_sec;  /* Current seconds */
-
-          /* Interrupts are disabled here only to prevent interrupts and context
-           * switches from interfering with the consecutive time samples.  I
-           * expect to go through this loop 1 time 99.9% of the time and then
-           * only twice on the remaining cornercases.
-           */
-
-          flags = irqsave();
-          rtc_frac = up_rtc_getclock() & (RTC_CLOCKS_PER_SEC-1);
-          do
-            {
-              rtc_last = rtc_frac;
-              rtc_sec  = up_rtc_gettime();
-              rtc_frac = up_rtc_getclock() & (RTC_CLOCKS_PER_SEC-1);
-            }
-          while (rtc_frac < rtc_last);
-          irqrestore(flags);
-
-          /* Okay.. the samples should be as close together in time as possible
-           * and we can be assured that no fractional second rollover occurred
-           * between the samples.
-           */
-
-          tp->tv_sec  = rtc_sec;
-          tp->tv_nsec = rtc_frac * (1000000000/RTC_CLOCKS_PER_SEC);
+          ret = up_rtc_gettime(tp);
         }
       else
 #endif
@@ -209,17 +185,16 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
           tp->tv_sec  = system_utc;
           tp->tv_nsec = tickcount * (1000000000/TICK_PER_SEC);
         }
-#endif
+#endif  /* CONFIG_SYSTEM_UTC */
 
-      sdbg("Returning tp=(%d,%d)\n",
-           (int)tp->tv_sec, (int)tp->tv_nsec);
+      sdbg("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
     }
 
  /* CLOCK_ACTIVETIME is non-standard. Returns active UTC time, which is
   * disabled during power down modes. Unit is 1 second.
   */
 
-#ifdef CONFIG_RTC
+#ifdef CONFIG_SYSTEM_UTC
   else if (clock_id == CLOCK_ACTIVETIME && g_rtc_enabled && tp)
     {
       /* Disable interrupts while g_system_utc and g_tickcount are sampled

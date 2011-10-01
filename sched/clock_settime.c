@@ -43,6 +43,8 @@
 #include <time.h>
 #include <errno.h>
 #include <debug.h>
+
+#include <arch/irq.h>
 #include "clock_internal.h"
 
 /************************************************************************
@@ -85,7 +87,7 @@
  *
  ************************************************************************/
 
-int clock_settime(clockid_t clock_id, const struct timespec *tp)
+int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 {
   int ret = OK;
 
@@ -116,12 +118,13 @@ int clock_settime(clockid_t clock_id, const struct timespec *tp)
 #ifdef CONFIG_RTC
       if (g_rtc_enabled)
         {
-          up_rtc_settime(tp->tv_sec);
+          up_rtc_settime(tp);
         } 
       else
 #endif
-       g_system_utc = tp->tv_sec;
-
+        {
+          g_system_utc = tp->tv_sec;
+        }
 #endif
 
       sdbg("basetime=(%d,%d) tickbias=%d\n",
@@ -133,10 +136,25 @@ int clock_settime(clockid_t clock_id, const struct timespec *tp)
   * disabled during power down modes. Unit is 1 second.
   */
 
-#ifdef CONFIG_RTC
-  else if (clock_id == CLOCK_ACTIVETIME && g_rtc_enabled && tp) 
+#ifdef CONFIG_SYSTEM_UTC
+  else if (clock_id == CLOCK_ACTIVETIME && tp) 
     {
+      irqstate_t flags;
+      uint32_t tickcount;
+
+      /* Calculate the number of ticks correspond to the nanosecond count...
+       * exercising care to avoid overflows.  This could still overflow
+       * if CLOCKS_PER_SEC is very large (something like 4096).
+       */
+
+      tickcount = ((tp->tv_nsec >> 10) * CLOCKS_PER_SEC) / (1000000000 >> 10);
+
+      /* Then set the UTC time (seconds) plus the tickcount (fractional seconds */
+
+      flags = irqsave();
       g_system_utc = tp->tv_sec;
+      g_tickcount  = tickcount;
+      irqrestore(flags);
     }
 #endif
 

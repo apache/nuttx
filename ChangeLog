@@ -2121,3 +2121,8 @@
 	* configs/sam3u/touchscreen - This is the configuration that I plan to use
 	  to verify the SAM3U-EK touchscreen driver.  However, as of this writing,
 	  there is no touchscreen driver for the board.
+	* CONFIG_RTC_HIRES - Add an option to support either a high-resolution RTC
+	  that completely replaces the system timer tick but may overflow and lose
+	  time when the MCU is off and also for a low-resolution (1 sec/tick) RTC
+	  that can run until 2106 with no overflow.  But in this latter case, higher
+	  resolution time must come from the system timer.

@@ -77,7 +77,7 @@
  * power down modes. Unit is 1 second.
  */
 
-#ifdef CONFIG_RTC
+#ifdef CONFIG_SYSTEM_UTC
 #  define CLOCK_ACTIVETIME 1
 #endif
 

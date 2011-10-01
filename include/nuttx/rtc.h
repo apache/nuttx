@@ -4,6 +4,11 @@
  *   Copyright(C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *
+ * With extensions, modifications by:
+ *
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregroy Nutt <gnutt@nuttx.org>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -44,19 +49,51 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
-#include <nuttx/clock.h>
+#include <time.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* CONFIG_RTC - Enables general support for a hardware RTC.  Specific
+ *   architectures may require other specific settings.
+ *
+ * CONFIG_RTC_HIRES - The typical RTC keeps time to resolution of 1 second,
+ *   usually supporting a 32-bit time_t value.  In this case, the RTC is
+ *   used to "seed" the normal NuttX timer and the NuttX timer provides
+ *   for higher resoution time.
+ *
+ *   If CONFIG_RTC_HIRES is enabled in the NuttX configuration, then the
+ *   RTC provides higher resolution time and completely replaces the system
+ *   timer for purpose of date and time.
+ *
+ * CONFIG_RTC_FREQUENCY - If CONFIG_RTC_HIRES is defined, then the frequency
+ *   of the high resolution RTC must be provided.  If CONFIG_RTC_HIRES is
+ *   not defined, CONFIG_RTC_FREQUENCY is assumed to be one.
+ *
+ * CONFIG_RTC_ALARM - Enable if the RTC hardware supports setting of an
+ *   alarm.  A callback function will be executed when the alarm goes off
+ */
 
-#define RTC_CLOCKS_PER_SEC      16384
-#define RTC_CLOCKS_SHIFT        14
+#ifdef CONFIG_RTC_HIRES
+#  ifndef CONFIG_RTC_FREQUENCY
+#    error "CONFIG_RTC_FREQUENCY is required for CONFIG_RTC_HIRES"
+#  endif
+#else
+#  ifndef CONFIG_RTC_FREQUENCY
+#    define CONFIG_RTC_FREQUENCY 1
+#  endif
+#  if CONFIG_RTC_FREQUENCY != 1
+#    error "The low resolution RTC must have frequency 1Hz"
+#  endif
+#endif
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* The form of an alarm callback */
+
+typedef void (alarmcb_t)(void);
 
 /****************************************************************************
  * Public Variables
@@ -83,32 +120,92 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: up_rtcinitialize
  *
  * Description:
- *   Initialize the periodic timer interface. This function is called once
- *   from the clock_initialize() function.
+ *   Initialize the hardware RTC per the select configuration.  This function is
+ *   called once during the OS initialization sequence
+ *
+ * Input Parameters:
+ *   None
  *
  * Returned Value:
- *   Returns OK if RTC has successfully started, otherwise ERROR.
+ *   Zero (OK) on success; a negated errno on failure
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 EXTERN int up_rtcinitialize(void);
-EXTERN int up_rtcinitialize(void);
 
-EXTERN clock_t up_rtc_getclock(void);
-EXTERN void up_rtc_setclock(clock_t clock);
+/************************************************************************************
+ * Name: up_rtc_time
+ *
+ * Description:
+ *   Get the current time in seconds.  This is similar to the standard time()
+ *   function.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The current time in seconds
+ *
+ ************************************************************************************/
 
-EXTERN time_t up_rtc_gettime(void);
-EXTERN void up_rtc_settime(time_t time);
+EXTERN time_t up_rtc_time(void);
 
-EXTERN clock_t up_rtc_setalarm(clock_t atclock);
+/************************************************************************************
+ * Name: up_rtc_gettime
+ *
+ * Description:
+ *   Get the current time from the high resolution RTC clock.
+ *
+ * Input Parameters:
+ *   tp - The location to return the high resolution time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
 
-/* This callback is provided by the clock module and called by the RTC ISR */
+#ifdef CONFIG_RTC_HIRES
+EXTERN int up_rtc_gettime(FAR struct timespec *tp);
+#endif
 
-EXTERN void clock_rtcalarmcb(clock_t clock);
+/************************************************************************************
+ * Name: up_rtc_settime
+ *
+ * Description:
+ *   Set the RTC to the provided time.
+ *
+ * Input Parameters:
+ *   tp - the time to use
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+EXTERN int up_rtc_settime(FAR const struct timespec *tp);
+
+/************************************************************************************
+ * Name: up_rtc_setalarm
+ *
+ * Description:
+ *   Set up a alarm.
+ *
+ * Input Parameters:
+ *   tp - the time to set the alarm
+ *   callback - the function to call when the alarm expires.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+EXTERN int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -33,14 +33,7 @@
  *
  ************************************************************************************/
 
-/** \file
- *  \author Uros Platise
- *  \brief STM32 Real-Time Clock
- *  
- * \addtogroup STM32_RTC
- * \{
- * 
- * The STM32 RTC Driver offers standard precision of 1 Hz or High Resolution
+/* The STM32 RTC Driver offers standard precision of 1 Hz or High Resolution
  * operating at rate up to 16384 Hz. It provides UTC time and alarm interface
  * with external output pin (for wake-up).
  * 
@@ -53,8 +46,12 @@
  *  - time is a combination of clock and upper bits stored in backuped domain
  *    with unit of 1 [s]
  * 
- * \todo Error Handling in case LSE fails during start-up or during operation.
+ * TODO: Error Handling in case LSE fails during start-up or during operation.
  */
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -74,21 +71,78 @@
 #include "stm32_rtc.h"
 #include "stm32_waste.h"
 
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+/* Configuration ********************************************************************/
 
-#if defined(CONFIG_STM32_BKP)
+#ifdef CONFIG_RTC_HIRES
+#  ifndef CONFIG_RTC_FREQUENCY
+#    error "CONFIG_RTC_FREQUENCY is required for CONFIG_RTC_HIRES"
+#  elif CONFIG_RTC_FREQUENCY != 16384
+#    error "Only hi-res CONFIG_RTC_FREQUENCY of 16384Hz is supported"
+#  endif
+#  ifndef CONFIG_STM32_BKP
+#    error "CONFIG_STM32_BKP is required for CONFIG_RTC_HIRES"
+#  endif
+#else
+#  ifndef CONFIG_RTC_FREQUENCY
+#    define CONFIG_RTC_FREQUENCY 1
+#  endif
+#  if CONFIG_RTC_FREQUENCY != 1
+#    error "Only lo-res CONFIG_RTC_FREQUENCY of 1Hz is supported"
+#  endif
+#endif
+
+/* RTC/BKP Definitions *************************************************************/
+/* STM32_RTC_PRESCALAR_VALUE
+ *   RTC pre-scalar value.  The RTC is driven by a 32,768Hz input clock.  This input
+ *   value is divided by this value (plus one) to generate the RTC frequency.
+ * RTC_TIMEMSB_REG
+ *   The BKP module register used to hold the RTC overflow value.  Overflows are
+ *   only handled in hi-res mode.
+ * RTC_CLOCKS_SHIFT
+ *   The shift used to convert the hi-res timer LSB to one second.  Not used with
+ *   the lo-res timer.
+ */
+
+#ifdef CONFIG_RTC_HIRES
+#  define STM32_RTC_PRESCALAR_VALUE STM32_RTC_PRESCALER_MIN
+#  define RTC_TIMEMSB_REG           STM32_BKP_DR1
+#  define RTC_CLOCKS_SHIFT          14
+#else
+#  define STM32_RTC_PRESCALAR_VALUE STM32_RTC_PRESCALER_SECOND
+#endif
 
 /************************************************************************************
- * Configuration of the RTC Backup Register (16-bit)
+ * Private Types
  ************************************************************************************/
 
-#define RTC_TIMEMSB_REG      STM32_BKP_DR1
+struct rtc_regvals_s
+{
+  uint16_t cntl;
+  uint16_t cnth;
+#ifdef CONFIG_RTC_HIRES
+  uint16_t ovf;
+#endif
+};
 
 /************************************************************************************
  * Private Data
  ************************************************************************************/
 
-/** Variable determines the state of the LSE oscilator. 
- *  Possible errors:
+/* Callback to use when the alarm expires */
+
+#ifdef CONFIG_RTC_ALARM
+static alarmcb_t g_alarmcb;
+#endif
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+/* Variable determines the state of the LSE oscilator. 
+ * Possible errors:
  *   - on start-up
  *   - during operation, reported by LSE interrupt
  */
@@ -99,113 +153,265 @@ volatile bool g_rtc_enabled = false;
  * Private Functions
  ************************************************************************************/
 
+/************************************************************************************
+ * Name: stm32_rtc_beginwr
+ *
+ * Description:
+ *   Enter configuration mode
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
 static inline void stm32_rtc_beginwr(void)
 {
-    /* Previous write is done? */
-    while( (getreg16(STM32_RTC_CRL) & RTC_CRL_RTOFF)==0 ) up_waste();
+  /* Previous write is done? */
 
-    /* Enter Config mode, Set Value and Exit */
-    modifyreg16(STM32_RTC_CRL, 0, RTC_CRL_CNF);
+  while ((getreg16(STM32_RTC_CRL) & RTC_CRL_RTOFF) == 0)
+    {
+      up_waste();
+    }
+
+  /* Enter Config mode, Set Value and Exit */
+
+  modifyreg16(STM32_RTC_CRL, 0, RTC_CRL_CNF);
 }
+
+/************************************************************************************
+ * Name: stm32_rtc_endwr
+ *
+ * Description:
+ *   Exit configuration mode
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 static inline void stm32_rtc_endwr(void)
 {
-    modifyreg16(STM32_RTC_CRL, RTC_CRL_CNF, 0);
+  modifyreg16(STM32_RTC_CRL, RTC_CRL_CNF, 0);
 }
 
-/** Wait for registerred to synchronise with RTC module, call after power-up only */
+/************************************************************************************
+ * Name: stm32_rtc_wait4rsf
+ *
+ * Description:
+ *   Wait for registers to synchronise with RTC module, call after power-up only
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
 static inline void stm32_rtc_wait4rsf(void)
 {
-    modifyreg16(STM32_RTC_CRL, RTC_CRL_RSF, 0);
-    while( !(getreg16(STM32_RTC_CRL) & RTC_CRL_RSF) ) up_waste();
+  modifyreg16(STM32_RTC_CRL, RTC_CRL_RSF, 0);
+  while (!(getreg16(STM32_RTC_CRL) & RTC_CRL_RSF))
+    {
+      up_waste();
+    }
 }
 
 /************************************************************************************
- * Interrupt Service Routines
+ * Name: up_rtc_breakout
+ *
+ * Description:
+ *   Set the RTC to the provided time.
+ *
+ * Input Parameters:
+ *   tp - the time to use
+ *
+ * Returned Value:
+ *   None
+ *
  ************************************************************************************/
 
-static int stm32_rtc_overflow_isr(int irq, void *context)
+#ifdef CONFIG_RTC_HIRES
+static void up_rtc_breakout(FAR const struct timespec *tp,
+                            FAR struct rtc_regvals_s *regvals)
 {
-    uint16_t source = getreg16( STM32_RTC_CRL );
-    
-    if (source & RTC_CRL_OWF) {
-        putreg16( getreg16(RTC_TIMEMSB_REG) + 1, RTC_TIMEMSB_REG );
-    }
-    
-    if (source & RTC_CRL_ALRF) {
-        /* Alarm */
-    }
-    
-    /* Clear pending flags, leave RSF high */
-    
-    putreg16( RTC_CRL_RSF, STM32_RTC_CRL );    
-    return 0;
+  uint64_t frac;
+  uint32_t cnt;
+  uint16_t ovf;
+  
+  /* Break up the time in seconds + milleconds into the correct values for our use */
+
+  frac = ((uint64_t)tp->tv_nsec * CONFIG_RTC_FREQUENCY) / 1000000000;
+  cnt  = (tp->tv_sec << RTC_CLOCKS_SHIFT) | ((uint32_t)frac & (CONFIG_RTC_FREQUENCY-1));
+  ovf  = (tp->tv_sec >> (32 - RTC_CLOCKS_SHIFT));
+
+  /* Then return the broken out time */
+
+  regvals->cnth = cnt >> 16;
+  regvals->cntl = cnt & 0xffff;
+  regvals->ovf  = ovf;
 }
+#else
+static inline void up_rtc_breakout(FAR const struct timespec *tp,
+                                   FAR struct rtc_regvals_s *regvals)
+{
+  /* The low-res timer is easy... tv_sec holds exactly the value needed by the
+   * CNTH/CNTL registers.
+   */
+
+  regvals->cnth = (uint16_t)((uint32_t)tp->tv_sec >> 16);
+  regvals->cntl = (uint16_t)((uint32_t)tp->tv_sec & 0xffff);
+}
+#endif
 
 /************************************************************************************
- * Public Function - Initialization
+ * Name: stm32_rtc_interrupt
+ *
+ * Description:
+ *    RTC interrupt service routine
+ *
+ * Input Parameters:
+ *   irq - The IRQ number that generated the interrupt
+ *   context - Architecture specific register save information.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; A negated errno value on failure.
+ *
  ************************************************************************************/
 
-/** Power-up RTC 
- * 
- * \param prescaler A 20-bit value determines the time base, and is defined as: 
- *      f = 32768 / (prescaler + 1)
- * 
- * \return State of the RTC unit
- * 
- * \retval OK If RTC has been successfully configured.
- * \retval ERROR On error, if LSE does not start.
- **/
+#if defined(CONFIG_RTC_HIRES) || defined(CONFIG_RTC_ALARM)
+static int stm32_rtc_interrupt(int irq, void *context)
+{
+  uint16_t source = getreg16(STM32_RTC_CRL);
+
+#ifdef CONFIG_RTC_HIRES
+  if ((source & RTC_CRL_OWF) != 0)
+    {
+      putreg16(getreg16(RTC_TIMEMSB_REG) + 1, RTC_TIMEMSB_REG);
+    }
+#endif
+
+#ifdef CONFIG_RTC_ALARM
+  if ((source & RTC_CRL_ALRF) != 0 && g_alarmcb != NULL)
+    {
+      /* Alarm callback */
+
+      g_alarmcb();
+      g_alarmcb = NULL;
+    }
+#endif
+
+  /* Clear pending flags, leave RSF high */
+    
+  putreg16(RTC_CRL_RSF, STM32_RTC_CRL);    
+  return 0;
+}
+#endif
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: up_rtcinitialize
+ *
+ * Description:
+ *   Initialize the hardware RTC per the select configuration.  This function is
+ *   called once during the OS initialization sequence
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
 int up_rtcinitialize(void)
 {
-    /* For this initial version we use predefined value */
+  /* For this initial version we use predefined value */
     
-    uint32_t prescaler = STM32_RTC_PRESCALER_MIN;
+  uint32_t prescaler = STM32_RTC_PRESCALER_MIN;
     
-    /* Set access to the peripheral, enable power and LSE */
-    
-    stm32_pwr_enablebkp();
-    stm32_rcc_enablelse();
-    
-    // \todo Get state from this function, if everything is 
-    //   okay and whether it is already enabled (if it was disabled
-    //   reset upper time register)
-    g_rtc_enabled = true;
+  /* Set access to the peripheral, enable power and LSE */
 
-    // \todo Possible stall? should we set the timeout period? and return with -1
-    stm32_rtc_wait4rsf();
-        
-    /* Configure prescaler, note that these are write-only registers */
+#ifdef CONFIG_RTC_HIRES
+  stm32_pwr_enablebkp();
+#endif
+  stm32_rcc_enablelse();
     
-    stm32_rtc_beginwr();
-    putreg16(prescaler >> 16,    STM32_RTC_PRLH);
-    putreg16(prescaler & 0xFFFF, STM32_RTC_PRLL);
-    stm32_rtc_endwr();
-    
-    /* Configure Overflow Interrupt */
-    
-    irq_attach(STM32_IRQ_RTC, stm32_rtc_overflow_isr);
-    up_enable_irq(STM32_IRQ_RTC);
+  /* TODO: Get state from this function, if everything is 
+   *   okay and whether it is already enabled (if it was disabled
+   *   reset upper time register)
+   */
 
-    /* Previous write is done? This is required prior writing into CRH */
-    
-    while( (getreg16(STM32_RTC_CRL) & RTC_CRL_RTOFF)==0 ) up_waste();
-    
-    modifyreg16(STM32_RTC_CRH, 0, RTC_CRH_OWIE);
-    
-    /* Alarm Int via EXTI Line */
-    
-    // STM32_IRQ_RTCALR /* 41: RTC alarm through EXTI line interrupt */
+  g_rtc_enabled = true;
 
-    return OK;
+  /* TODO: Possible stall? should we set the timeout period? and return with -1 */
+
+  stm32_rtc_wait4rsf();
+
+  /* Configure prescaler, note that these are write-only registers */
+
+  stm32_rtc_beginwr();
+  putreg16(prescaler >> 16,    STM32_RTC_PRLH);
+  putreg16(prescaler & 0xFFFF, STM32_RTC_PRLL);
+  stm32_rtc_endwr();
+
+  /* Configure RTC interrupt to catch overflow and alarm interrupts. */
+
+#if defined(CONFIG_RTC_HIRES) || defined(CONFIG_RTC_ALARM)
+  irq_attach(STM32_IRQ_RTC, stm32_rtc_interrupt);
+  up_enable_irq(STM32_IRQ_RTC);
+#endif
+
+  /* Previous write is done? This is required prior writing into CRH */
+    
+  while ((getreg16(STM32_RTC_CRL) & RTC_CRL_RTOFF) == 0)
+    {
+      up_waste();
+    }
+  modifyreg16(STM32_RTC_CRH, 0, RTC_CRH_OWIE);
+    
+  /* Alarm Int via EXTI Line */
+    
+  /*  STM32_IRQ_RTCALR  41: RTC alarm through EXTI line interrupt */
+
+  return OK;
 }
 
-/** Get time (counter) value 
- * 
- * \return time, where the unit depends on the prescaler value
- **/
- 
-clock_t up_rtc_getclock(void)
+/************************************************************************************
+ * Name: up_rtc_time
+ *
+ * Description:
+ *   Get the current time in seconds.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The current time in seconds
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_HIRES
+time_t up_rtc_time(void)
+{
+  struct timespec ts;
+
+  /* In the hi-res case, this function is just a wrapper for up_rtc_gettime */
+
+  (void)up_rtc_gettime(&ts);
+  return ts.tv_sec;
+}
+#else
+time_t up_rtc_time(void)
 {
   irqstate_t flags;
   uint16_t cnth;
@@ -243,98 +449,176 @@ clock_t up_rtc_getclock(void)
   while (cntl < tmp);
   irqrestore(flags);
 
-  /* Then return the full 32-bit counter value */
+  /* Okay.. the samples should be as close together in time as possible and
+   * we can be assured that no clock rollover occurred between the samples.
+   *
+   * Return the time in seconds.
+   */
 
-  return ((uint32_t)cnth << 16) | (uint32_t)cntl;
+  return (time_t)cnth << 16 | (time_t)cntl;
 }
+#endif
 
-/** Set time (counter) value
- * 
- * \param time The unit depends on the prescaler value 
- **/
+/************************************************************************************
+ * Name: up_rtc_gettime
+ *
+ * Description:
+ *   Get the current time from the high resolution RTC clock.
+ *
+ * Input Parameters:
+ *   tp - The location to return the high resolution time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
 
-void up_rtc_setclock(clock_t newclock)
+#ifdef CONFIG_RTC_HIRES
+int up_rtc_gettime(FAR struct timespec *tp)
 {
-    stm32_rtc_beginwr();
-    putreg16(newclock >> 16,    STM32_RTC_CNTH);
-    putreg16(newclock & 0xFFFF, STM32_RTC_CNTL);
-    stm32_rtc_endwr();
-}
+  irqstate_t flags;
+  uint32_t ls;
+  uint32_t ms;
+  uint16_t ovf;
+  uint16_t cnth;
+  uint16_t cntl;
+  uint16_t tmp;
 
-time_t up_rtc_gettime(void)
+  /* The RTC counter is read from two 16-bit registers to form one 32-bit
+   * value.  Because these are non-atomic operations, many things can happen
+   * between the two reads:  This thread could get suspended or interrrupted
+   * or the lower 16-bit counter could rollover between reads.  Disabling
+   * interrupts will prevent suspensions and interruptions:
+   */
+
+  flags = irqsave();
+
+  /* And the following loop will handle any clock rollover events that may
+   * happen between samples.  Most of the time (like 99.9%), the following
+   * loop will execute only once.  In the rare rollover case, it should
+   * execute no more than 2 times.
+   */
+
+  do
+    {
+      tmp  = getreg16(STM32_RTC_CNTL);
+      cnth = getreg16(STM32_RTC_CNTH);
+      ovf  = getreg16(RTC_TIMEMSB_REG);
+      cntl = getreg16(STM32_RTC_CNTL);
+    }
+
+  /* The second sample of CNTL could be less than the first sample of CNTL
+   * only if rollover occurred.  In that case, CNTH may or may not be out
+   * of sync.  The best thing to do is try again until we know that no
+   * rollover occurred.
+   */
+
+  while (cntl < tmp);
+  irqrestore(flags);
+
+  /* Okay.. the samples should be as close together in time as possible and
+   * we can be assured that no clock rollover occurred between the samples.
+   *
+   * Create a 32-bit value from the LS and MS 16-bit RTC counter values and
+   * from the MS and overflow 16-bit counter values.
+   */
+
+  ls = (uint32_t)cnth << 16 | (uint32_t)cntl;
+  ms = (uint32_t)ovf  << 16 | (uint32_t)cnth;
+  
+  /* Then we can save the time in seconds and fractional seconds. */
+
+  tp->tv_sec  = (ms << (32-RTC_CLOCKS_SHIFT-16)) | (ls >> (RTC_CLOCKS_SHIFT+16));
+  tp->tv_nsec = (ls & (CONFIG_RTC_FREQUENCY-1)) * (1000000000/CONFIG_RTC_FREQUENCY);
+  return OK;
+}
+#endif
+
+/************************************************************************************
+ * Name: up_rtc_settime
+ *
+ * Description:
+ *   Set the RTC to the provided time.
+ *
+ * Input Parameters:
+ *   tp - the time to use
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+int up_rtc_settime(FAR const struct timespec *tp)
 {
-    /* Fetch time from LSB (hardware counter) and MSB (backup domain)
-     * Take care on overflow of the LSB:
-     *   - it may overflow just after reading the up_rtc_getclock, transition
-     *     from 0xFF...FF -> 0x000000
-     *   - ISR would be generated to increment the RTC_TIMEMSB_REG
-     *   - Wrong result would when: DR+1 and LSB is old, resulting in ~DR+2 
-     *     instead of just DR+1
-     */
+  struct rtc_regvals_s regvals;
+  irqstate_t flags;
 
-    irqstate_t irqs = irqsave();
-    
-    uint32_t time_lsb = up_rtc_getclock();
-    uint32_t time_msb = getreg16(RTC_TIMEMSB_REG);
-    
-    irqrestore( irqs );
-    
-    /* Use the upper bits of the LSB and lower bits of the MSB 
-     * structured as:
-     *   time = time[31:18] from MSB[13:0] | time[17:0] from time_lsb[31:14]
-     */
-    
-    time_lsb >>= RTC_CLOCKS_SHIFT;
-    
-    time_msb <<= (32-RTC_CLOCKS_SHIFT);
-    time_msb &= ~((1<<(32-RTC_CLOCKS_SHIFT))-1);
-    
-    return time_msb | time_lsb;
+  /* Break out the time values */
+
+  up_rtc_breakout(tp, &regvals);
+
+  /* Then write the broken out values to the RTC counter and BKP overflow register
+   * (hi-res mode only)
+   */
+
+  flags = irqsave();
+  stm32_rtc_beginwr();
+  putreg16(regvals.cnth, STM32_RTC_CNTH);
+  putreg16(regvals.cntl, STM32_RTC_CNTL);
+  stm32_rtc_endwr();
+
+#ifdef CONFIG_RTC_HIRES
+  putreg16(regvals.ovf, RTC_TIMEMSB_REG);
+#endif
+  irqrestore(flags);
+  return OK;
 }
 
-void up_rtc_settime(time_t newtime)
+/************************************************************************************
+ * Name: up_rtc_setalarm
+ *
+ * Description:
+ *   Set up a alarm.
+ *
+ * Input Parameters:
+ *   tp - the time to set the alarm
+ *   callback - the function to call when the alarm expires.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
 {
-    /* Do reverse compared to gettime above */
-    
-    uint32_t time_lsb = newtime << RTC_CLOCKS_SHIFT | 
-        (up_rtc_getclock() & ((1<<RTC_CLOCKS_SHIFT)-1));
-        
-    uint32_t time_msb = newtime >> (32-RTC_CLOCKS_SHIFT);
-    
-    irqstate_t irqs = irqsave();
-    
-    up_rtc_setclock(time_lsb);
-    putreg16( time_msb, RTC_TIMEMSB_REG );
-    
-    irqrestore( irqs );
-}
+  struct rtc_regvals_s regvals;
+  irqstate_t flags;
+  int ret = -EBUSY;
 
-/** Set ALARM at which time ALARM callback is going to be generated
- * 
- * The function sets the alarm and return present time at the time
- * of setting the alarm. 
- * 
- * Note that If actual time has already passed callback will not be
- * generated and it is up to the higher level code to  compare the 
- * returned (actual) time and desired time of alarm.
- * 
- * \param attime The unit depends on the prescaler value 
- * \return presenttime, where the unit depends on the prescaler value
- **/
-clock_t up_rtc_setalarm(clock_t atclock)
-{
-    stm32_rtc_beginwr();
-    putreg16(atclock >> 16,    STM32_RTC_ALRH);
-    putreg16(atclock & 0xFFFF, STM32_RTC_ALRL);
-    stm32_rtc_endwr();
-    
-    return up_rtc_getclock();
-}
+  /* Is there already something waiting on the ALARM? */
 
-/** Set alarm output pin */
-void stm32_rtc_settalarmpin(bool activate)
-{
-}
+  if (g_alarmcb == NULL)
+    {
+      /* No.. Save the callback function pointer */
 
-#endif // defined(CONFIG_STM32_BKP)
-/** \} */
+      g_alarmcb = callback;
+
+      /* Break out the time values */
+  
+      up_rtc_breakout(tp, &regvals);
+
+      /* The set the alarm */
+
+      flags = irqsave();
+      stm32_rtc_beginwr();
+      putreg16(regvals.cnth, STM32_RTC_ALRH);
+      putreg16(regvals.cntl, STM32_RTC_ALRL);
+      stm32_rtc_endwr();
+      irqrestore(flags);
+
+      ret = OK;
+    }
+  return ret;
+}
+#endif

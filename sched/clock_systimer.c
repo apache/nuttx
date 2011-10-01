@@ -85,20 +85,12 @@ uint32_t clock_systimer(void)
   uint32_t tickcount;
 #endif
 
-  /* Fetch the g_system_timer value from timer hardware, if available */
-
-#ifdef CONFIG_RTC
-
-  /* Check if the periodic timer is initialized
+#ifdef CONFIG_RTC_HIRES
+  /* Fetch the g_system_timer value from timer hardware, if available.
    *
-   * Note that the unit of the g_system_timer and and up_rtc_getclock() do
+   * Note that the unit of the g_system_timer and and up_rtc_gettime() do
    * not have the same unit.
    */
-
-  if (g_rtc_enabled)
-    {
-      /* return up_rtc_getclock(); */
-    }
 #endif
 
 #ifndef CONFIG_SYSTEM_UTC

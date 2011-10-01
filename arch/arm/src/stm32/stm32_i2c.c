@@ -6,6 +6,7 @@
  *
  * With extensions, modifications by:
  *
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregroy Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -932,7 +933,7 @@ static inline void stm32_i2c_enablefsmc(uint32_t ahbenr)
     }
 }
 #else
-#  define stm32_i2c_disablefsmc() (0)
+#  define stm32_i2c_disablefsmc(priv) (0)
 #  define stm32_i2c_enablefsmc(ahbenr)
 #endif
 

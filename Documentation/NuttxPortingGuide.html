@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: September 13, 2011</p>
+      <p>Last Updated: October 1, 2011</p>
     </td>
   </tr>
 </table>
@@ -1989,18 +1989,30 @@ CONFIG_SYSTEM_UTC=y
 
 <h4>4.1.20.2 Hardware</h4>
 <p>
-  To enable hardware module use option:
+  To enable hardware module use the following configuration options:
 <p>
-<ul><pre>
-CONFIG_RTC=y
-</pre></ul>
+<ul><dl>
+  <dt><code>CONFIG_RTC</code>
+  <dd>Enables general support for a hardware RTC. 
+      Specific architectures may require other specific settings.
+  <dt><code>CONFIG_RTC_HIRES</code>
+  <dd>The typical RTC keeps time to resolution of 1 second, usually supporting a 32-bit <code>time_t</code> value.
+      In this case, the RTC is used to &quot;seed&quot; the normal NuttX timer and the NuttX timer provides for higher resoution time.
+      If <code>CONFIG_RTC_HIRES</code> is enabled in the NuttX configuration, then the RTC provides higher resolution time and completely replaces the system timer for purpose of date and time.
+  <dt><code>CONFIG_RTC_FREQUENCY</code>
+  <dd>If <code>CONFIG_RTC_HIRES</code> is defined, then the frequency of the high resolution RTC must be provided.
+      If <code>CONFIG_RTC_HIRES</code> is not defined, <code>CONFIG_RTC_FREQUENCY</code> is assumed to be one.
+  <dt><code>CONFIG_RTC_ALARM</code>
+  <dd>Enable if the RTC hardware supports setting of an alarm. 
+    A callback function will be executed when the alarm goes off
+</dl></ul>
 <p>
   which requires the following three base functions to read time:
 </p>
 <ul>
   <li><code>up_rtcinitialize()</code></li>
-  <li><code>up_rtc_gettime()</code>. UTC time in seconds.</li>
-  <li><code>up_rtc_getclock()</code>. Replacement for <code>g_system_tick</code></li>
+  <li><code>up_rtc_time()</code>. UTC time in seconds.</li>
+  <li><code>up_rtc_gettime()</code>. Replacement for <code>g_system_tick</code></li>
 </ul>
 <p>
   This module depends on <code>CONFIG_SYSTEM_UTC=y</code>.
@@ -2024,15 +2036,17 @@ CONFIG_RTC=y
   Running at rate of system base timer, used for time-slicing, and so forth.
 </p>
 <p>
-  If hardware RTC is present (<code>CONFIG_RTC</code>) and enabled, then after successful
-  initiliazation variables are overriden by calls to <code>up_rtc_getclock()</code> which is
+  If hardware RTC is present (<code>CONFIG_RTC</code>) and and high-resolution timeing
+  is enabled (<code>CONFIG_RTC_HIRES</code>), then after successful
+  initiliazation variables are overriden by calls to <code>up_rtc_gettime()</code> which is
   running continously even in power-down modes.
 </p>
 <p>
-  In the case of <code>CONFIG_RTC</code> is set the <code>g_tickcount</code> and <code>g_system_utc</code> keep
-  counting at rate of a system timer, which however, is disabled in power-down
-  mode. By comparing this time and RTC (actual time) one may determine the
-  actual system active time. To retrieve that variable use:
+  In the case of <code>CONFIG_RTC_HIRES</code> is set the <code>g_tickcount</code> and
+  <code>g_system_utc</code> keep counting at rate of a system timer, which however, is
+  disabled in power-down mode.
+  By comparing this time and RTC (actual time) one may determine the actual system active time.
+  To retrieve that variable use:
 </p>
 <ul><pre>
   <li><code>clock_gettime(CLOCK_ACTIVETIME, tp)</code>
@@ -4239,10 +4253,35 @@ build
 </ul>
 
 <h2>Device Drivers</h2>
+<h3>RTC</h3>
+<ul>
+  <li>
+    <code>CONFIG_RTC</code>:
+      Enables general support for a hardware RTC. 
+      Specific architectures may require other specific settings.
+  </li>
+  <li>
+    <code>CONFIG_RTC_HIRES</code>:
+      The typical RTC keeps time to resolution of 1 second, usually supporting a 32-bit <code>time_t</code> value.
+      In this case, the RTC is used to &quot;seed&quot; the normal NuttX timer and the NuttX timer provides for higher resoution time.
+      If <code>CONFIG_RTC_HIRES</code> is enabled in the NuttX configuration, then the RTC provides higher resolution time and completely replaces the system timer for purpose of date and time.
+  </li>
+  <li>
+    <code>CONFIG_RTC_FREQUENCY</code>:
+      If <code>CONFIG_RTC_HIRES</code> is defined, then the frequency of the high resolution RTC must be provided.
+      If <code>CONFIG_RTC_HIRES</code> is not defined, <code>CONFIG_RTC_FREQUENCY</code> is assumed to be one.
+  </li>
+  <li>
+    <code>CONFIG_RTC_ALARM</code>:
+      Enable if the RTC hardware supports setting of an alarm. 
+      A callback function will be executed when the alarm goes off
+  </li>
+</ul>
+
 <h3>SPI driver</h3>
 <ul>
   <li>
-    <code>CONFIG_SPI_OWNBUS</code> - Set if there is only one active device
+    <code>CONFIG_SPI_OWNBUS</code>: Set if there is only one active device
     on the SPI bus.  No locking or SPI configuration will be performed.
     It is not necessary for clients to lock, re-configure, etc..
   </li>

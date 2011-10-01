@@ -714,9 +714,8 @@ int sif_main(int argc, char *argv[])
     struct timespec t_active;
     clock_gettime(CLOCK_ACTIVETIME, &t_active);
     
-    fprintf(stderr, "rtc time = %u / %u, active = %u / %u, time / systick = %u / %u\n", 
-        up_rtc_gettime(), up_rtc_getclock(),
-        t_active.tv_sec, t_active.tv_nsec,
+    fprintf(stderr, "rtc time = %u, active = %u / %u, time / systick = %u / %u\n", 
+        up_rtc_time(), t_active.tv_sec, t_active.tv_nsec,
         time(NULL), clock_systimer() );
     return -1;
 }

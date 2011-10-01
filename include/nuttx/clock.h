@@ -172,7 +172,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-#if defined(CONFIG_RTC) || !__HAVE_KERNEL_GLOBALS
+#if defined(CONFIG_SYSTEM_UTC) || !__HAVE_KERNEL_GLOBALS
 EXTERN uint32_t clock_systimer(void);
 #endif
 
