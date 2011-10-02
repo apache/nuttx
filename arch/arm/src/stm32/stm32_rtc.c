@@ -82,9 +82,6 @@
 #  elif CONFIG_RTC_FREQUENCY != 16384
 #    error "Only hi-res CONFIG_RTC_FREQUENCY of 16384Hz is supported"
 #  endif
-#  ifndef CONFIG_STM32_BKP
-#    error "CONFIG_STM32_BKP is required for CONFIG_RTC_HIRES"
-#  endif
 #else
 #  ifndef CONFIG_RTC_FREQUENCY
 #    define CONFIG_RTC_FREQUENCY 1
@@ -92,6 +89,10 @@
 #  if CONFIG_RTC_FREQUENCY != 1
 #    error "Only lo-res CONFIG_RTC_FREQUENCY of 1Hz is supported"
 #  endif
+#endif
+
+#ifndef CONFIG_STM32_BKP
+#  error "CONFIG_STM32_BKP is required for CONFIG_RTC"
 #endif
 
 /* RTC/BKP Definitions *************************************************************/
@@ -217,7 +218,7 @@ static inline void stm32_rtc_endwr(void)
 static inline void stm32_rtc_wait4rsf(void)
 {
   modifyreg16(STM32_RTC_CRL, RTC_CRL_RSF, 0);
-  while (!(getreg16(STM32_RTC_CRL) & RTC_CRL_RSF))
+  while ((getreg16(STM32_RTC_CRL) & RTC_CRL_RSF) == 0)
     {
       up_waste();
     }
@@ -335,15 +336,11 @@ static int stm32_rtc_interrupt(int irq, void *context)
 
 int up_rtcinitialize(void)
 {
-  /* For this initial version we use predefined value */
-    
-  uint32_t prescaler = STM32_RTC_PRESCALER_MIN;
-    
-  /* Set access to the peripheral, enable power and LSE */
+  /* Set access to the peripheral, enable the backup domain (BKP) and the lower power
+   * extern 32,768Hz LSE oscillator.
+   */
 
-#ifdef CONFIG_RTC_HIRES
   stm32_pwr_enablebkp();
-#endif
   stm32_rcc_enablelse();
     
   /* TODO: Get state from this function, if everything is 
@@ -360,8 +357,8 @@ int up_rtcinitialize(void)
   /* Configure prescaler, note that these are write-only registers */
 
   stm32_rtc_beginwr();
-  putreg16(prescaler >> 16,    STM32_RTC_PRLH);
-  putreg16(prescaler & 0xFFFF, STM32_RTC_PRLL);
+  putreg16(STM32_RTC_PRESCALAR_VALUE >> 16,    STM32_RTC_PRLH);
+  putreg16(STM32_RTC_PRESCALAR_VALUE & 0xffff, STM32_RTC_PRLL);
   stm32_rtc_endwr();
 
   /* Configure RTC interrupt to catch overflow and alarm interrupts. */
@@ -372,16 +369,16 @@ int up_rtcinitialize(void)
 #endif
 
   /* Previous write is done? This is required prior writing into CRH */
-    
+
   while ((getreg16(STM32_RTC_CRL) & RTC_CRL_RTOFF) == 0)
     {
       up_waste();
     }
   modifyreg16(STM32_RTC_CRH, 0, RTC_CRH_OWIE);
-    
+
   /* Alarm Int via EXTI Line */
-    
-  /*  STM32_IRQ_RTCALR  41: RTC alarm through EXTI line interrupt */
+
+  /* STM32_IRQ_RTCALR  41: RTC alarm through EXTI line interrupt */
 
   return OK;
 }

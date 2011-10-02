@@ -107,7 +107,6 @@ struct timespec   g_basetime;
 
 static inline void clock_inittime(FAR struct timespec *tp)
 {
-
   /* Get the complete time from the hi-res RTC. */
 
   (void)up_rtc_gettime(tp);

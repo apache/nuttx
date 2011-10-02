@@ -50,8 +50,8 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define STM32_RTC_PRESCALER_SECOND      32767   /** Default prescaler to get a second base */
-#define STM32_RTC_PRESCALER_MIN         1       /** Maximum speed of 16384 Hz */
+#define STM32_RTC_PRESCALER_SECOND      32767   /* Default prescaler to get a second base */
+#define STM32_RTC_PRESCALER_MIN         1       /* Maximum speed of 16384 Hz */
 
 #ifndef __ASSEMBLY__
 
@@ -67,11 +67,10 @@ extern "C" {
  * Public Functions
  ************************************************************************************/
 
-/** Set alarm output pin */
+/* Set alarm output pin */
+
 EXTERN void stm32_rtc_settalarmpin(bool activate);
 
-
-/** \} */
 #undef EXTERN
 #if defined(__cplusplus)
 }
