@@ -2126,3 +2126,6 @@
 	  time when the MCU is off and also for a low-resolution (1 sec/tick) RTC
 	  that can run until 2106 with no overflow.  But in this latter case, higher
 	  resolution time must come from the system timer.
+	* CONFIG_SYSTEM_UTC - Removed support for the UTC system timer.  It just
+	  doesn't do enough to be worth the CPU cycles or the complexity.
+	* CONFIG_SYSTEM_TIME16 - Added support for an optional 64-bit system timer.

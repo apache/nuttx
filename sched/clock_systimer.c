@@ -42,12 +42,8 @@
 #include <stdint.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/rtc.h>
-#include <nuttx/time.h>
 
-#include <arch/irq.h>
-
-#if !defined(clock_systimer) /* See nuttx/clock.h */
+#include "clock_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,7 +61,7 @@
  * Function:  clock_systimer
  *
  * Description:
- *   Return the current value of the system timer counter
+ *   Return the current value of the 32-bit system timer counter
  *
  * Parameters:
  *   None
@@ -77,38 +73,38 @@
  *
  ****************************************************************************/
 
+#if !defined(clock_systimer) /* See nuttx/clock.h */
 uint32_t clock_systimer(void)
 {
-#ifdef CONFIG_SYSTEM_UTC
-  irqstate_t flags;
-  uint32_t system_utc;
-  uint32_t tickcount;
-#endif
-
-#ifdef CONFIG_RTC_HIRES
-  /* Fetch the g_system_timer value from timer hardware, if available.
-   *
-   * Note that the unit of the g_system_timer and and up_rtc_gettime() do
-   * not have the same unit.
-   */
-#endif
-
-#ifndef CONFIG_SYSTEM_UTC
-  return g_system_timer;
+#ifdef CONFIG_SYSTEM_TIME64
+  return (uint32_t)(g_system_timer & 0x00000000ffffffff);
 #else
-  /* Disable interrupts while g_system_utc and g_tickcount are sampled
-   * so that we can be assured that g_system_utc and g_tickcount are based
-   * at the same point in time.
-   */
-
-  flags = irqsave();
-  system_utc = g_system_utc;
-  tickcount  = g_tickcount;
-  irqrestore(flags);
-
-  return system_utc * TICK_PER_SEC + tickcount;
+  return g_system_timer;
 #endif
 }
+#endif
 
-#endif /* !clock_systtimer */
+/****************************************************************************
+ * Function:  clock_systimer64
+ *
+ * Description:
+ *   Return the current value of the 64-bit system timer counter
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   The current value of the system timer counter
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
 
+#if !defined(clock_systimer) /* See nuttx/clock.h */
+#ifdef CONFIG_SYSTEM_TIME64
+uint64_t clock_systimer64(void)
+{
+  return g_system_timer;
+}
+#endif
+#endif

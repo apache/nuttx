@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <stdint.h>
 #include <time.h>
@@ -53,26 +54,11 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-#ifdef CONFIG_RTC
-#  ifndef CONFIG_SYSTEM_UTC
-#  error "In order to support hardware RTC system must have set the CONFIG_SYSTEM_UTC=y"
-#  endif
-#endif
-
 /* Standard time definitions (in units of seconds) */
 
 #define SEC_PER_MIN  ((time_t)60)
 #define SEC_PER_HOUR ((time_t)60 * SEC_PER_MIN)
 #define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
-
-/* Macro to increment the system timer -- or not */
-
-#ifndef CONFIG_SYSTEM_UTC
-#  define incr_systimer() g_system_timer++
-#else
-#  define incr_systimer()
-#endif
 
 /****************************************************************************
  * Private Type Declarations
@@ -90,59 +76,23 @@
  * Public Variables
  ****************************************************************************/
 
-#if CONFIG_SYSTEM_UTC
-volatile time_t  g_system_utc;
+#ifdef CONFIG_SYSTEM_TIME64
+volatile uint64_t g_system_timer;
+uint64_t          g_tickbias;
 #else
-volatile clock_t g_system_timer;
-struct timespec  g_basetime;
-uint32_t         g_tickbias;
+volatile uint32_t g_system_timer;
+uint32_t          g_tickbias;
 #endif
+
+struct timespec   g_basetime;
 
 /**************************************************************************
  * Private Variables
  **************************************************************************/
 
-/* This variable is used to count ticks and to increment the one-second
- * UTC variable.
- */
-
-#if CONFIG_SYSTEM_UTC
-#if TICK_PER_SEC > 32767
-volatile uint32_t g_tickcount;
-#elif TICK_PER_SEC > 255
-volatile uint16_t g_tickcount;
-#else
-volatile uint8_t  g_tickcount;
-#endif
-#endif /* CONFIG_SYSTEM_UTC */
-
 /**************************************************************************
  * Private Functions
  **************************************************************************/
-/****************************************************************************
- * Function: incr_utc
- *
- * Description:
- *   This function must be called once every time the real
- *   time clock interrupt occurs.  The interval of this
- *   clock interrupt must be MSEC_PER_TICK
- *
- ****************************************************************************/
-
-#if CONFIG_SYSTEM_UTC
-static inline void incr_utc(void)
-{
-  g_tickcount++;
-  
-  if (g_tickcount >= TICK_PER_SEC)
-    {
-      g_system_utc++;
-      g_tickcount -= TICK_PER_SEC;
-    }
-}
-#else
-#  define incr_utc()
-#endif
 
 /****************************************************************************
  * Function: clock_inittime
@@ -210,27 +160,17 @@ static inline void clock_inittime(FAR struct timespec *tp)
 
 void clock_initialize(void)
 {
-#ifdef CONFIG_SYSTEM_UTC
-  struct timespec ts;
-#endif
-
   /* Initialize the RTC hardware */
 
 #ifdef CONFIG_RTC
   up_rtcinitialize();
 #endif
 
-  /* Initialize the time value */
+  /* Initialize the time value to match */
 
-#ifdef CONFIG_SYSTEM_UTC
-  clock_inittime(&ts);
-  g_system_utc = ts.tv_sec;
-  g_tickcount  = ((ts.tv_nsec > 10) * CLOCKS_PER_SEC) / (1000000000 >> 10);
-#else
   clock_inittime(&g_basetime);
   g_system_timer = 0;
   g_tickbias     = 0;
-#endif
 }
 
 /****************************************************************************
@@ -247,9 +187,5 @@ void clock_timer(void)
 {
   /* Increment the per-tick system counter */
 
-  incr_systimer();
-
-  /* Increment the per-second UTC counter */
-
-  incr_utc();
+  g_system_timer++;
 }

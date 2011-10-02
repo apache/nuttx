@@ -73,16 +73,6 @@
 
 #define CLOCK_REALTIME     0
 
-/* Non-standard. Returns active UTC time, which is disabled during
- * power down modes. Unit is 1 second.
- */
-
-#ifdef CONFIG_SYSTEM_UTC
-#  define CLOCK_ACTIVETIME 1
-#endif
-
-#define CLOCK_ABSTIME
-
 /* This is a flag that may be passed to the timer_settime() function */
 
 #define TIMER_ABSTIME      1

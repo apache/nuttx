@@ -89,17 +89,25 @@
 
 int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 {
+  irqstate_t flags;
   int ret = OK;
 
   sdbg("clock_id=%d\n", clock_id);
+  DEBUGASSERT(tp != NULL);
 
   /* CLOCK_REALTIME - POSIX demands this to be present. This is the wall
    * time clock.
    */
 
-  if (clock_id == CLOCK_REALTIME && tp) 
+  if (clock_id == CLOCK_REALTIME) 
     {
-#ifndef CONFIG_SYSTEM_UTC
+      /* Interrupts are disabled here so that the in-memory time
+       * representation and the RTC setting will be as close as
+       * possible.
+       */
+
+      flags = irqsave();
+
       /* Save the new base time. */
 
       g_basetime.tv_sec  = tp->tv_sec;
@@ -109,55 +117,22 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
        * as appropriate.
        */
 
-      g_tickbias = clock_systimer();
-      
-#else   /* if CONFIG_SYSTEM_UTC=y */
+      g_tickbias = g_system_timer;
 
-      /* We ignore everything below one second in time configuration */
+      /* Setup the RTC (lo- or high-res) */
 
 #ifdef CONFIG_RTC
       if (g_rtc_enabled)
         {
           up_rtc_settime(tp);
         } 
-      else
 #endif
-        {
-          g_system_utc = tp->tv_sec;
-        }
-#endif
+      irqrestore(flags);
 
       sdbg("basetime=(%d,%d) tickbias=%d\n",
           (int)g_basetime.tv_sec, (int)g_basetime.tv_nsec,
           (int)g_tickbias);
     }
-
- /* CLOCK_ACTIVETIME is non-standard. Returns active UTC time, which is
-  * disabled during power down modes. Unit is 1 second.
-  */
-
-#ifdef CONFIG_SYSTEM_UTC
-  else if (clock_id == CLOCK_ACTIVETIME && tp) 
-    {
-      irqstate_t flags;
-      uint32_t tickcount;
-
-      /* Calculate the number of ticks correspond to the nanosecond count...
-       * exercising care to avoid overflows.  This could still overflow
-       * if CLOCKS_PER_SEC is very large (something like 4096).
-       */
-
-      tickcount = ((tp->tv_nsec >> 10) * CLOCKS_PER_SEC) / (1000000000 >> 10);
-
-      /* Then set the UTC time (seconds) plus the tickcount (fractional seconds */
-
-      flags = irqsave();
-      g_system_utc = tp->tv_sec;
-      g_tickcount  = tickcount;
-      irqrestore(flags);
-    }
-#endif
-
   else 
     {
       sdbg("Returning ERROR\n");

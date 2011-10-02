@@ -43,12 +43,21 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+
 #include <nuttx/clock.h>
 #include <nuttx/compiler.h>
 
 /********************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
+/* Configuration ************************************************************/
+/* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
+ * then a 64-bit system time will be used.
+ */
+
+#ifndef CONFIG_HAVE_LONG_LONG
+#  undef CONFIG_SYSTEM_TIME64
+#endif
 
 /********************************************************************************
  * Public Type Definitions
@@ -58,8 +67,13 @@
  * Global Variables
  ********************************************************************************/
 
-extern struct timespec g_basetime;
+#ifdef CONFIG_SYSTEM_TIME64
+extern uint64_t        g_tickbias;
+#else
 extern uint32_t        g_tickbias;
+#endif
+
+extern struct timespec g_basetime;
 
 /********************************************************************************
  * Public Function Prototypes

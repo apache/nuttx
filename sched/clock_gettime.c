@@ -91,127 +91,78 @@
 
 int clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
-#ifndef CONFIG_SYSTEM_UTC
+#ifdef CONFIG_SYSTEM_TIME64
+  uint64_t msecs;
+  uint64_t secs;
+  uint64_t nsecs;
+#else
   uint32_t msecs;
   uint32_t secs;
   uint32_t nsecs;
-#else
-  uint32_t system_utc;
-  uint32_t tickcount;
 #endif
-#if defined(CONFIG_RTC) || defined(CONFIG_SYSTEM_UTC)
-  irqstate_t flags;
-#endif
-
   int ret = OK;
 
   sdbg("clock_id=%d\n", clock_id);
+  DEBUGASSERT(tp != NULL);
 
   /* CLOCK_REALTIME - POSIX demands this to be present. This is the wall
    * time clock.
    */
 
-  if (clock_id == CLOCK_REALTIME && tp)
+  if (clock_id == CLOCK_REALTIME)
     {
-      /* If CONFIG_SYSTEM_UTC is not defined, then we have to get the time
-       * from g_system_timer.
-       */
-
-#ifndef CONFIG_SYSTEM_UTC
-
-      /* Get the elapsed time since power up (in milliseconds) biased
-       * as appropriate.
-       */
-
-      msecs = MSEC_PER_TICK * (clock_systimer() - g_tickbias);
-
-      sdbg("msecs = %d g_tickbias=%d\n",
-           (int)msecs, (int)g_tickbias);
-
-      /* Get the elapsed time in seconds and nanoseconds. */
-
-      secs  = msecs / MSEC_PER_SEC;
-      nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
-
-      sdbg("secs = %d + %d nsecs = %d + %d\n",
-           (int)msecs, (int)g_basetime.tv_sec,
-           (int)nsecs, (int)g_basetime.tv_nsec);
-
-      /* Add the base time to this. */
-
-      secs  += (uint32_t)g_basetime.tv_sec;
-      nsecs += (uint32_t)g_basetime.tv_nsec;
-
-      /* Handle carry to seconds. */
-
-      if (nsecs > NSEC_PER_SEC)
-        {
-          uint32_t dwCarrySecs = nsecs / NSEC_PER_SEC;
-          secs  += dwCarrySecs;
-          nsecs -= (dwCarrySecs * NSEC_PER_SEC);
-        }
-
-      /* And return the result to the caller. */
-
-      tp->tv_sec  = (time_t)secs;
-      tp->tv_nsec = (long)nsecs;
-      
-#else /* CONFIG_SYSTEM_UTC */
-
-      /* CONFIG_SYSTEM_UTC is defined.  But we might be able to get the time
-       * from the hardware if a high resolution RTC is available.
-       */
+      /* Do we have a high-resolution RTC that can provie us with the time? */
 
 #ifdef CONFIG_RTC_HIRES
       if (g_rtc_enabled)
         {
-          /* Get the hi-resolution time from the RTC */
+          /* Yes.. Get the hi-resolution time from the RTC */
 
           ret = up_rtc_gettime(tp);
         }
       else
 #endif
         {
-          /* Disable interrupts while g_system_utc and g_tickcount are sampled
-           * so that we can be assured that g_system_utc and g_tickcount are based
-           * at the same point in time.
+          /* Get the elapsed time since power up (in milliseconds) biased
+           * as appropriate.
            */
 
-          flags = irqsave();
-          system_utc = g_system_utc;
-          tickcount  = g_tickcount;
-          irqrestore(flags);
+          msecs = MSEC_PER_TICK * (g_system_timer - g_tickbias);
 
-          tp->tv_sec  = system_utc;
-          tp->tv_nsec = tickcount * (1000000000/TICK_PER_SEC);
+          sdbg("msecs = %d g_tickbias=%d\n",
+               (int)msecs, (int)g_tickbias);
+
+          /* Get the elapsed time in seconds and nanoseconds. */
+
+          secs  = msecs / MSEC_PER_SEC;
+          nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
+
+          sdbg("secs = %d + %d nsecs = %d + %d\n",
+               (int)msecs, (int)g_basetime.tv_sec,
+               (int)nsecs, (int)g_basetime.tv_nsec);
+
+          /* Add the base time to this. */
+
+          secs  += (uint32_t)g_basetime.tv_sec;
+          nsecs += (uint32_t)g_basetime.tv_nsec;
+
+          /* Handle carry to seconds. */
+
+          if (nsecs > NSEC_PER_SEC)
+            {
+              uint32_t dwCarrySecs = nsecs / NSEC_PER_SEC;
+              secs  += dwCarrySecs;
+              nsecs -= (dwCarrySecs * NSEC_PER_SEC);
+            }
+
+          /* And return the result to the caller. */
+
+          tp->tv_sec  = (time_t)secs;
+          tp->tv_nsec = (long)nsecs;
         }
-#endif  /* CONFIG_SYSTEM_UTC */
 
       sdbg("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
     }
-
- /* CLOCK_ACTIVETIME is non-standard. Returns active UTC time, which is
-  * disabled during power down modes. Unit is 1 second.
-  */
-
-#ifdef CONFIG_SYSTEM_UTC
-  else if (clock_id == CLOCK_ACTIVETIME && g_rtc_enabled && tp)
-    {
-      /* Disable interrupts while g_system_utc and g_tickcount are sampled
-       * so that we can be assured that g_system_utc and g_tickcount are based
-       * at the same point in time.
-       */
-
-      flags = irqsave();
-      system_utc = g_system_utc;
-      tickcount  = g_tickcount;
-      irqrestore(flags);
-
-      tp->tv_sec  = system_utc;
-      tp->tv_nsec = tickcount * (1000000000/TICK_PER_SEC);
-    }
-#endif
-
   else
     {
       sdbg("Returning ERROR\n");

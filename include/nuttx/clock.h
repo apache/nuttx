@@ -44,6 +44,7 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Pro-processor Definitions
@@ -61,6 +62,14 @@
 #  define __HAVE_KERNEL_GLOBALS 1
 #else
 #  define __HAVE_KERNEL_GLOBALS 0
+#endif
+
+/* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
+ * then a 64-bit system time will be used.
+ */
+
+#ifndef CONFIG_HAVE_LONG_LONG
+#  undef CONFIG_SYSTEM_TIME64
 #endif
 
 /* Timing constants *********************************************************/
@@ -126,20 +135,18 @@
  */
 
 #if __HAVE_KERNEL_GLOBALS
+#  ifdef CONFIG_SYSTEM_TIME64
+
+extern volatile uint64_t g_system_timer;
+#define clock_systimer()  (uint32_t)(g_system_timer & 0x00000000ffffffff)
+#define clock_systimer64() g_system_timer
+
+#  else
+
 extern volatile uint32_t g_system_timer;
-extern volatile uint32_t g_system_utc;
-
-#if TICK_PER_SEC > 32767
-extern volatile uint32_t g_tickcount;
-#elif TICK_PER_SEC > 255
-extern volatile uint16_t g_tickcount;
-#else
-extern volatile uint8_t  g_tickcount;
-#endif
-#endif /* __HAVE_KERNEL_GLOBALS */
-
-#if !defined(CONFIG_SYSTEM_UTC) && __HAVE_KERNEL_GLOBALS
 #define clock_systimer() g_system_timer
+
+#  endif
 #endif
 
 /****************************************************************************
@@ -157,10 +164,10 @@ extern "C" {
  * Function:  clock_systimer
  *
  * Description:
- *   Return the current value of the system timer counter.  Indirect access
- *   to the system timer counter is required through this function if (1) we
- *   are using a hardware periodic timer, OR (2) the execution environment
- *   does not have direct access to kernel global data
+ *   Return the current value of the 32-bit system timer counter.  Indirect
+ *   access to the system timer counter is required through this function if
+ *   the execution environment does not have direct access to kernel global
+ *   data
  *
  * Parameters:
  *   None
@@ -172,8 +179,35 @@ extern "C" {
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SYSTEM_UTC) || !__HAVE_KERNEL_GLOBALS
+#if !__HAVE_KERNEL_GLOBALS
+#  ifdef CONFIG_SYSTEM_TIME64
+#    define clock_systimer()  (uint32_t)(clock_systimer64() & 0x00000000ffffffff)
+#  else
 EXTERN uint32_t clock_systimer(void);
+#  endif
+#endif
+
+/****************************************************************************
+ * Function:  clock_systimer64
+ *
+ * Description:
+ *   Return the current value of the 64-bit system timer counter.  Indirect
+ *   access to the system timer counter is required through this function if
+ *   the execution environment does not have direct access to kernel global
+ *   data
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   The current value of the system timer counter
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#if !__HAVE_KERNEL_GLOBALS && defined(CONFIG_SYSTEM_TIME64)
+EXTERN uint64_t clock_systimer64(void);
 #endif
 
 #undef EXTERN
