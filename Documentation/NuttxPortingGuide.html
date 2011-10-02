@@ -1887,6 +1887,9 @@ The system can be re-made subsequently by just typing <code>make</code>.
   That timer interrupt runs at rate determined by <code>CONFIG_MSEC_PER_TICKS</code> (default 10 or 100Hz).
   The timer generates an interrupt each <code>CONFIG_MSEC_PER_TICKS</code> milliseconds and increments a counter called <code>g_system_timer</code>.
   <code>g_system_timer</code> then provides a time-base for calculating <i>up-time</i> and elapsed time intervals in units of <code>CONFIG_MSEC_PER_TICKS</code>.
+  The range of <code>g_system_timer</code> is, by default, 32-bits.
+  However, if the MCU supports type <code>long long</code> and <code>CONFIG_SYSTEM_TIME16</code> is selected,
+  a 64-bit system timer will be supported instead.
 </p>
 <p><b>System Timer Accuracy</b>
   On many system, the exact timer interval specified by <code>CONFIG_MSEC_PER_TICKS</code> cannot be achieved due to limitations in frequencies or in dividers.
@@ -1960,34 +1963,7 @@ else
   In this way, the timer interval is controlled from interrupt-to-interrupt to produce an average frequency of exactly 100Hz.
 </p>
 
-<h4>4.1.20.2 UTC Time Representation</h4>
-<p>
-  To enable UTC time representation use option:
-</p>
-<ul><pre>
-CONFIG_SYSTEM_UTC=y
-</pre></ul>
-<p>
-  which adds the following variables:
-</p>
-<ul>
-  <li><code>g_system_utc</code> (seconds, 4 bytes)</li>
-  <li><code>g_tickcount</code> (timer ticks, 1-2 bytes typically)</li>
-</ul>
-<p>
-  and replaces:
-</p>
-<ul>
-  <li><code>g_system_timer</code>(4 bytes)</li>
-  <li><code>g_basetime</code>(8 bytes)</li>
-  <li><code>g_tickbias</code>(4 bytes)</li>
-</ul>
-<p>
-  Otherwise internal time is computed from 32-bit running tick timer
-  <code>g_systemtimer</code> the start date <code>g_basetime</code> and time offset the <code>g_tickbias</code>.
-</p>
-
-<h4>4.1.20.2 Hardware</h4>
+<h4>4.1.20.1 Hardware</h4>
 <p>
   To enable hardware module use the following configuration options:
 <p>
@@ -2014,46 +1990,28 @@ CONFIG_SYSTEM_UTC=y
   <li><code>up_rtc_time()</code>. UTC time in seconds.</li>
   <li><code>up_rtc_gettime()</code>. Replacement for <code>g_system_tick</code></li>
 </ul>
-<p>
-  This module depends on <code>CONFIG_SYSTEM_UTC=y</code>.
-</p>
 
-<h4>4.1.20.3 System Tick and Time</h4>
+<h4>4.1.20.2 System Tick and Time</h4>
 <p>
-  The system tick is represented by, when <code>CONFIG_SYSTEM_UTC=n</code>:
+  The system tick is represented by::
 </p>
 <ul>
   <li><code>g_system_timer</code></li>
 </ul>
 <p>
-  or, when <code>CONFIG_SYSTEM_UTC=y</code>
-</p>
-<ul>
-  <li><code>g_tickcount</code></li>
-  <li><code>g_system_utc</code></li>
-</ul>
-<p>
   Running at rate of system base timer, used for time-slicing, and so forth.
 </p>
 <p>
-  If hardware RTC is present (<code>CONFIG_RTC</code>) and and high-resolution timeing
+  If hardware RTC is present (<code>CONFIG_RTC</code>) and and high-resolution timing
   is enabled (<code>CONFIG_RTC_HIRES</code>), then after successful
   initiliazation variables are overriden by calls to <code>up_rtc_gettime()</code> which is
   running continously even in power-down modes.
 </p>
 <p>
-  In the case of <code>CONFIG_RTC_HIRES</code> is set the <code>g_tickcount</code> and
-  <code>g_system_utc</code> keep counting at rate of a system timer, which however, is
-  disabled in power-down mode.
+  In the case of <code>CONFIG_RTC_HIRES</code> is set the <code>g_system_timer</code>
+  keeps counting at rate of a system timer, which however, is disabled in power-down mode.
   By comparing this time and RTC (actual time) one may determine the actual system active time.
   To retrieve that variable use:
-</p>
-<ul><pre>
-  <li><code>clock_gettime(CLOCK_ACTIVETIME, tp)</code>
-</pre></ul>
-<p>
-  If the <code>CLOCK_ACTIVETIME</code> time is never set it will serve as power-up time
-  minus all deep sleeps.
 </p>
 
 <h2><a name="exports">4.2 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
@@ -3764,6 +3722,12 @@ build
     <code>CONFIG_TASK_NAME_SIZE</code>: Specifies that maximum size of a
     task name to save in the TCB.  Useful if scheduler
     instrumentation is selected.  Set to zero to disable.
+  </li>
+  <li>
+  <code>CONFIG_SYSTEM_TIME16</code>:
+    The range of system time is, by default, 32-bits.
+    However, if the MCU supports type <code>long long</code> and <code>CONFIG_SYSTEM_TIME16</code> is selected,
+    a 64-bit system timer will be supported instead.
   </li>
   <li>
     <code>CONFIG_START_YEAR</code>, <code>CONFIG_START_MONTH</code>, <code>CONFIG_START_DAY</code> -
