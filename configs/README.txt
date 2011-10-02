@@ -578,6 +578,9 @@ defconfig -- This is a configuration file similar to the Linux
 		  define this value.  A good choice would be the same value as
 		  selected for CONFIG_NAME_MAX which will limit the visibility
 		  of longer file names anyway.
+		CONFIG_FS_FATTIME: Support FAT date and time. NOTE:  There is not
+		  much sense in supporting FAT date and time unless you have a
+		  hardware RTC or other way to get the time and date.
 		CONFIG_FS_NXFFS: Enable NuttX FLASH file system (NXFF) support.
 		CONFIG_NXFFS_ERASEDSTATE: The erased state of FLASH. 
 		  This must have one of the values of 0xff or 0x00.
