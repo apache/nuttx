@@ -2,7 +2,7 @@
  * sched/clock_gettime.c
  *
  *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,6 +42,7 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 

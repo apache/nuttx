@@ -4,6 +4,11 @@
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *
+ * With extensions, modifications by:
+ *
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregroy Nutt <gnutt@nuttx.org>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -337,7 +342,7 @@ static int stm32_rtc_interrupt(int irq, void *context)
 int up_rtcinitialize(void)
 {
   /* Set access to the peripheral, enable the backup domain (BKP) and the lower power
-   * extern 32,768Hz LSE oscillator.
+   * extern 32,768Hz (Low-Speed External, LSE) oscillator.
    */
 
   stm32_pwr_enablebkp();

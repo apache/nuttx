@@ -1,8 +1,8 @@
 /************************************************************************************
  * arch/arm/src/armv7-m/nvic.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -396,7 +396,7 @@
 #define NVIC_SYSTICK_RELOAD_SHIFT       0         /* Bits 23-0: Timer reload value */
 #define NVIC_SYSTICK_RELOAD_MASK        (0x00ffffff << NVIC_SYSTICK_RELOAD_SHIFT)
 
-/* SysTick current value registe (SYSTICK_CURRENT) */
+/* SysTick current value register (SYSTICK_CURRENT) */
 
 #define NVIC_SYSTICK_CURRENT_SHIFT      0         /* Bits 23-0: Timer current value */
 #define NVIC_SYSTICK_CURRENT_MASK       (0x00ffffff << NVIC_SYSTICK_RELOAD_SHIFT)

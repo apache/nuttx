@@ -4174,6 +4174,11 @@ build
       A good choice would be the same value as selected for CONFIG_NAME_MAX which will limit the visibility of longer file names anyway.
   </li>
   <li>
+    <code>CONFIG_FS_FATTIME</code>: Support FAT date and time.
+    NOTE:  There is not much sense in supporting FAT date and time unless you have a hardware RTC
+    or other way to get the time and date.
+  </li>
+  <li>
     <code>CONFIG_FS_NXFFS</code>: Enable NuttX FLASH file system (NXFF) support.
   </li>
   <li>

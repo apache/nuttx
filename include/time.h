@@ -2,7 +2,7 @@
  * include/time.h
  *
  *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -154,8 +154,8 @@ EXTERN int clock_gettime(clockid_t clockid, struct timespec *tp);
 EXTERN int clock_getres(clockid_t clockid, struct timespec *res);
 
 EXTERN time_t mktime(const struct tm *tp);
-EXTERN struct tm *gmtime(const time_t *timer);
-EXTERN struct tm *gmtime_r(const time_t *timer, struct tm *result);
+EXTERN FAR struct tm *gmtime(FAR const time_t *timer);
+EXTERN FAR struct tm *gmtime_r(FAR const time_t *timer, FAR struct tm *result);
 EXTERN size_t strftime(char *s, size_t max, const char *format, const struct tm *tm);
 
 EXTERN time_t time(time_t *tloc);

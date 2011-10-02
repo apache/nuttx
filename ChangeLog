@@ -1,10 +1,10 @@
-0.1.0 2007-03-09  Gregory Nutt <spudmonkey@racsa.co.cr>
+0.1.0 2007-03-09  Gregory Nutt <gnutt@nuttx.org>
 
 	* Initial Release
 	* Support for Linux user mode simulation and TI
 	  TMS320C5471 (Arm7) provided
 
-0.1.1 2007-03-14  Gregory Nutt <spudmonkey@racsa.co.cr>
+0.1.1 2007-03-14  Gregory Nutt <gnutt@nuttx.org>
 
 	* Corrected an error in interrupt level context switching
 	  for C5471
@@ -32,7 +32,7 @@
 	  issue when SP enters indirect address space.
 	* Documentation updates
 
-0.1.2 2007-03-19  Gregory Nutt <spudmonkey@racsa.co.cr>
+0.1.2 2007-03-19  Gregory Nutt <gnutt@nuttx.org>
 
 	* Add dirent.h, opendir(), readdir(), closedir(), etc.
 	* Add strerror()
@@ -57,7 +57,7 @@
 	  cause various problems
 	* Added a test for roundrobin scheduler.
 
-0.2.1 2007-03-22  Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.1 2007-03-22  Gregory Nutt <gnutt@nuttx.org>
 
 	* Fix error in handing signed decimal in vsprintf().
 	* Major restructuring of header files to get closer to
@@ -68,7 +68,7 @@
 	* Some Documentation updates
 	* Added support for the Neuros OSD / DM320
 
-0.2.2 2007-03-26 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.2 2007-03-26 Gregory Nutt <gnutt@nuttx.org>
 	* Created the configs/ directory; separated board configuration
 	  from processor architecture logic
 	* Add memory leak detection test to examples/ostest
@@ -88,7 +88,7 @@
 	* Added directories to hold board-specific header files
 	* Added directories to hold board-specific drivers
 
-0.2.3 2007-03-29 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.3 2007-03-29 Gregory Nutt <gnutt@nuttx.org>
 
 	* mq_receive and mq_send now return errno's appropriately
 	* mq_receive and mq_send are now correctly awakened by signals.
@@ -110,7 +110,7 @@
 	  pthread_join.  In the failure condition, memory was being
 	  deallocated while still in use.
 
-0.2.4 2007-04-28 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.4 2007-04-28 Gregory Nutt <gnutt@nuttx.org>
 
 	* Verified c5471 build under Cygwin on WinXP
 	* Makesystem changes to better support different SoCs.
@@ -120,7 +120,7 @@
 	  arch/c5471 and arch/dm320 are deprecated and will be removed
 	  when the new c5471 and dm320 logic is verified.
 
-0.2.5 2007-05-19 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.5 2007-05-19 Gregory Nutt <gnutt@nuttx.org>
 
 	* Corrected some build/configuration issues introduced with the
 	  last release.
@@ -137,7 +137,7 @@
 	* Added fsync()
 	* Added strspn() and strcspn()
 
-0.2.6 2007-05-26 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.6 2007-05-26 Gregory Nutt <gnutt@nuttx.org>
 
 	* Added unlink(), mkdir(), rmdir(), and rename()
 	* Fixed several serious FAT errors with oflags handling (&& instead of &)
@@ -147,7 +147,7 @@
 	* Fixed ARM compilation errors introduced in 0.2.5 (that is what I get
 	  for only testing on the simulation).
 
-0.2.7 2007-06-09 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.7 2007-06-09 Gregory Nutt <gnutt@nuttx.org>
 
 	* Added stat() to fs layer and to FAT
 	* Fixed reference counting errors associated with mounted filesystems
@@ -176,7 +176,7 @@
 	* examples/ostest/barrier.c: Don't call usleep() when signals are
 	  disabled.
 
-0.2.8 2007-07-02 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.2.8 2007-07-02 Gregory Nutt <gnutt@nuttx.org>
 	* tools/Makefile.mkconfig: Under Cygwin, executable has a different name
 	* tools/mkdeps.sh & arch/arm/src/Makefile: Corrected a problem makeing dependencies
 	* tools/zipme.sh: Force directory name to be nuttx-xx.yy.zz
@@ -198,7 +198,7 @@
 	* examples/nsh/: Add cp, rm, rmdir, set, unset commands. echo will now print
 	  environment variables.
 
-0.3.0 2007-11-06 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.0 2007-11-06 Gregory Nutt <gnutt@nuttx.org>
 
 	* Imported uIP into the tree (see
 	   http://www.sics.se/~adam/uip/index.php/Main_Page)
@@ -216,7 +216,7 @@
 	* ARP timer is now built into the network layer
 	* Basic client functionality verified: TCP socket(), bind(), connect(), recv(), send().
 
-0.3.1 2007-11-19 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.1 2007-11-19 Gregory Nutt <gnutt@nuttx.org>
 
 	* Separated net/uip/uip.c into several functions in several files.
 	* Corrected a TCP problem where packets were dropped because there was no
@@ -227,7 +227,7 @@
 	* Add strncmp()
 	* Added TCP/IP read-ahead buffer to minimize failed ACKs and packet loss.
 
-0.3.2 2007-11-23 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.2 2007-11-23 Gregory Nutt <gnutt@nuttx.org>
 
 	* Add strcat() and strncat()
 	* Integrated uIP micro webserver
@@ -243,7 +243,7 @@
 	* recvfrom() and accept() now correctly return the remote address.
 	* Fixed computation error in ntohl().
 
-0.3.3 2007-11-28 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.3 2007-11-28 Gregory Nutt <gnutt@nuttx.org>
 
 	* Removed unused uIP files
 	* sched/, mm/, and net/ subsystem debug can not be selectively enabled/disabled
@@ -257,7 +257,7 @@
 	* Improved ACK handling in send() to better handler deferred acknowledgements
 	  and polling intervals.  Greatly improves send performance.
 
-0.3.4 2007-12-10 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.4 2007-12-10 Gregory Nutt <gnutt@nuttx.org>
 
 	* Added and partially verified DHCP server logic (netutils/dhcpd)
 	* Fix BROADCAST=y compilation problems
@@ -270,7 +270,7 @@
 	* Added C5471 Ethernet device driver (arch/arm/src/c5471/c5471_ethernet.c)
 	* Found and fixed several problems in uIP when compiled for ARM with optimization.
 
-0.3.5 2007-12-18 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.5 2007-12-18 Gregory Nutt <gnutt@nuttx.org>
 
 	* Added inet_ntoa() and ether_ntoa()
 	* Added netdev_foreach() to support traversal of registered network devices
@@ -282,20 +282,20 @@
 	  there are more than one DHCPD server.
 	* NSH ifconfig command now shows uIP status as well (examples/nsh)
 
-0.3.6 2008-01-06 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.6 2008-01-06 Gregory Nutt <gnutt@nuttx.org>
 
 	* Changes for use with SDCC compiler
 	* Added a simulated z80 target
 	* Fix deadlock errors when using stdio but with no buffering
 	* Add support for Pascal P-Code interpreter
 
-0.3.6.1 2008-01-07 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.6.1 2008-01-07 Gregory Nutt <gnutt@nuttx.org>
 
 	* The initial 0.3.6 release including an error that prevented
 	  building successfully if the Pascal add-on was
 	  was not present.
 
-0.3.7 2008-01-31 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.7 2008-01-31 Gregory Nutt <gnutt@nuttx.org>
 
 	* Added support for the Zilog Z16F using the Zilog Z16F2800100ZCOG
 	  Development Kit.
@@ -309,7 +309,7 @@
 	* Corrected a bug that caused the errno value of one task to be clobbered
 	  when a different task exits.	Affects all architectures.
 
-0.3.8 2008-02-10 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.8 2008-02-10 Gregory Nutt <gnutt@nuttx.org>
 
 	* Added a test case to verify the Pascal P-Code interpreter
 	* Added /dev/zero
@@ -333,7 +333,7 @@
 	* Added a generic CAN driver.  This driver is untested as of this writing.
 	* Corrected DM320 UART configuration problem
 
-0.3.9 2008-03-09 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.9 2008-03-09 Gregory Nutt <gnutt@nuttx.org>
 
 	* Began adding support for the ZiLOG Z8Encore! microcontroller for the Z8Encore000ZCO
 	  development board and the Z8F6403 part.
@@ -346,7 +346,7 @@
 	  Ubuntu where /bin/sh is a link to dash.
 	* Z8Encore! port verified on ZDS-II instruction set/chip simulator.
 
-0.3.10 2008-05-15 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.10 2008-05-15 Gregory Nutt <gnutt@nuttx.org>
 
 	* Add support for the ZiLOG EZ80Acclaim microcontrooler (EZ80F91 chip).
 	* Add configuration for the ZiLOG z8f64200100kit development kit, Z8F6423 part.
@@ -355,7 +355,7 @@
 	  deletion logic (timer_delete.c) and one in stream logic (lib_init.c) reported
 	  by kwonsk.
 
-0.3.11 2008-06-01 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.11 2008-06-01 Gregory Nutt <gnutt@nuttx.org>
 
 	* Add support for recursive mutexes.
 	* Eliminate a memory leak: contained watchdog instance was not being
@@ -368,7 +368,7 @@
 	* Add logic to allow the examples/ostest to be run repetitively as an endurance test.
 	* Add a ramdisk block driver
 
-0.3.12 2008-08-10 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.12 2008-08-10 Gregory Nutt <gnutt@nuttx.org>
 
 	* Improved solution to POSIX timer lifetime controls bug fixed in 0.3.11.
 	* Add test for recursive mutexes
@@ -391,7 +391,7 @@
 	* Added a test for mkfatfs() on a RAM disk in examples/mount and verified
 	  basic mkfatfs functionality for FAT12.
 
-0.3.13 2008-09-01 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.13 2008-09-01 Gregory Nutt <gnutt@nuttx.org>
 
 	* NSH: Added mkfatfs, mkfifo, sleep, usleep and nice commands
 	* Fixed problem with console input in Cygwin-based simulator; NSH now works
@@ -433,7 +433,7 @@
 	  for example, one thread can be reading from a socket while another is
 	  writing to the socket.
 
-0.3.14 2008-09-08 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.14 2008-09-08 Gregory Nutt <gnutt@nuttx.org>
 	* FAT FS now uses position variable in struct file.  This simplifies operations
 	  like ftell().
 	* fseek() needs to discard bytes buffered by ungetc().
@@ -461,7 +461,7 @@
 	* Fixed another FAT bug in implementation of FAT lseek; this prohibit correct
 	  random access to large files.
 
-0.3.15 2008-09-20 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.15 2008-09-20 Gregory Nutt <gnutt@nuttx.org>
 	* Added support for ROMFS filesystem.
 	* Added a simple test the ROMFS filesystem (examples/romfs)
 	* NSH: Use ROMFS to provide an option for a start-up script at /etc/init.d/rcS
@@ -478,7 +478,7 @@
 	  succesfully passing the examples/ostest, and a NuttShell (NSH) configuration.
 	* ARM architectures now support drivers/lowconsole.c
 
-0.3.16 2008-10-10 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.16 2008-10-10 Gregory Nutt <gnutt@nuttx.org>
 	* Added header files defining a common USB device controller architecture
 	* Added USB device side driver for the LPC214x
 	* Correct the frequency of system timer interrupts in the NXP LPC214x port
@@ -497,7 +497,7 @@
 	* Fixed an error in read(); it was not setting the errno on errors returned
 	  from the driver.
 
-0.3.17 2008-10-28 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.17 2008-10-28 Gregory Nutt <gnutt@nuttx.org>
 	* Incorporate patch "[2164503] nuttx-0.3.16 does not build for ARM with USB disabled"
 	* Reduced the amount of memory reserved for USB serial control requests.  It
 	  was unnecessarily large.
@@ -524,7 +524,7 @@
 	* Fixed another bug in the NXP LPC214x USB device driver:  After a stalled endpoint
 	  is resumed (view CLEAR FEATURE), we must restart the IN (outgoing) queue.
 
-0.3.18 2008-11-16 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.18 2008-11-16 Gregory Nutt <gnutt@nuttx.org>
 	* Added port for the STMicro STR71x processor and configuration for the Olimex STR-P711
 	  board (STR71x testing is stalled because I have been unable to get OpenOCD to
 	  communicate with my JTAG wiggler on Linux).
@@ -562,7 +562,7 @@
 	* Fixed a bug in getopt().	It would fail if on certain combinations of terminal argument
 	  types.
 
-0.3.19 2008-11-26 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.3.19 2008-11-26 Gregory Nutt <gnutt@nuttx.org>
 	* Add poll() and select() APIs (in the initial check-in, these work only with character devices) 
 	* Add poll() methods to /dev/null, /dev/zero, pipes, fifos, and serial drivers.
 	* Add examples/poll for testing poll() and select()
@@ -587,7 +587,7 @@
 	* Network: add support for outgoing multicast addresses
 	* Added some rasterizers to the graphics library
 
-0.4.0 2008-12-06 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.0 2008-12-06 Gregory Nutt <gnutt@nuttx.org>
 	* Initial release of a tiny windowing system for NuttX
 	* Add fixed precision sin() and cos() (not well tested at initial check-in)
 	* Add an X11-based simulated framebuffer driver
@@ -598,7 +598,7 @@
 	* Integrated the new font support with a font test in examples/nx
 	* Add documentation for NX graphics subsystem
 
-0.4.1 2009-02-06 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.1 2009-02-06 Gregory Nutt <gnutt@nuttx.org>
 	* Added board support for the ZiLog eZ80Acclaim! ez80f910200zco Development Kit.
 	* Fixed several compilation errors in fixed precision math library when built
 	  against toolchains that do not support 64-bit type 'long long'.
@@ -610,7 +610,7 @@
 	  -- see the TODO.txt list for details)
 	* Fix problems with Z16F and eZ80 compilation introduced with recent changes.
 
-0.4.2 2009-02-28 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.2 2009-02-28 Gregory Nutt <gnutt@nuttx.org>
 
 	* M16C: Add support for the Renesas M16C MCU and the SKP16C26 StarterKit. However, 
 	  the target cannot be built because the GNU m16c-elf-ld link fails with 
@@ -637,7 +637,7 @@
 	* eZ80Acclaim!: Correct stack overflow in ostest example configuration
 	* eZ80Acclaim!: Fixed restoration of interrupts state on interrupt level context swith.
 
-0.4.3 2009-03-04 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.3 2009-03-04 Gregory Nutt <gnutt@nuttx.org>
 
 	* z8Encore! and eZ80Acclaim!: Fixed the serial driver initialization sequence
 	* eZ80Acclaim!: Fixed error in vector table:  Missing space set aside for the
@@ -652,7 +652,7 @@
 	* Implemented priority inheritance logic for POSIX semaphores.	Because the pthread
 	  mutexes are built on semaphores, they will have this property as well.
 
-0.4.4 2009-03-29 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.4 2009-03-29 Gregory Nutt <gnutt@nuttx.org>
 
 	* examples/nsh:  A debug option was left on that can (and does) cause
 	  infinite loops and stack overflows.
@@ -680,7 +680,7 @@
 	in this release and, hence, most likely have problems.	I don't have the correct network
 	setup to perform that testing now (I'm in a hotel).
 
-0.4.5 2009-04-19 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.5 2009-04-19 Gregory Nutt <gnutt@nuttx.org>
 
 	* Add an enumeration argument to the SPI chip select and status methods so
 	  that the interface can handle more than one device.
@@ -696,7 +696,7 @@
 	* include/css: Added std header files
 	* libxx: New C++-only directory provides support for minimal C++ applications
 
-0.4.6 2009-05-19 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.6 2009-05-19 Gregory Nutt <gnutt@nuttx.org>
 
 	* Change SPI interface so that is can accomodate interfaces where the
 	  number of bits per word is greater an 8 (such as with many 9-bit display
@@ -721,7 +721,7 @@
 	* sched/: pthread_create() must return a (non-negated) errno value on failure.
 	* configs/eagle100/nsh: Add a NuttShell (NSH) configuration for the Eagle-100
 
-0.4.7 2009-05-29 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.7 2009-05-29 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/lm3s: Added an Ethernet driver for the LM3S6918
 	* configs/eagle100/nettest: Added an examples/nettest configuration for the
@@ -751,7 +751,7 @@
 	* fs/fs_mount.c: Corrected error handling that could cause a deadlock on certain
 	  mount() failures.
 
-0.4.8 2009-06-13 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.8 2009-06-13 Gregory Nutt <gnutt@nuttx.org>
 
 	* lib/lib_*stream.c: Extend internal stream logic to support incoming streams.
 	* arch/arm/src/str71x: Serial output is now correct and timer interrupts are
@@ -772,7 +772,7 @@
 	* The NXP LPC2148 and STR711 targets can now also be built using the CodeSourcery
 	  or devkitARM Windows native toolchains.
 
-0.4.9 2009-06-26 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.9 2009-06-26 Gregory Nutt <gnutt@nuttx.org>
 
 	* Add strtoll() and strtoull(); Add macros for atol() and atoll().
 	* dup() and dup2() will now clone socket descriptors
@@ -801,7 +801,7 @@
 	  This file has been around for a long time, but I don't think it has
 	  every been used before (i.e., prior to the NXFLAT logic)
 
-0.4.10 2009-08-08 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.10 2009-08-08 Gregory Nutt <gnutt@nuttx.org>
 
 	* lib/: Added some basic regex-subset, pattern matching functions
 	* lib/: Greatly simplified mktime() and gmtime_r().  The Gregorian and
@@ -838,7 +838,7 @@
 	* net/accept.c: Fix bug in accept().  The logic expected parts of the
 	  return address structure to be initialized or it would return an error.
 
-0.4.11 2009-09-16 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.11 2009-09-16 Gregory Nutt <gnutt@nuttx.org>
 
 	* fs/fs_read.c and fs/fs_write.c.  read() and write() to socket is the
 	  same as recv() and send() with flags = 0.  Fixed!
@@ -892,7 +892,7 @@
 	  serving up files from a file system and executing NXFLAT-based CGI programs
 	  and pipe the stdout back to the HTTP client.
 
-0.4.12 2009-10-17 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.12 2009-10-17 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/stm32 and configs/stm3210e-eval.  Added basic support for the
 	  STMicro STM32, Cortex-M3 MCU.  The specific port is to the STMicro STM3210E-EVAL
@@ -912,7 +912,7 @@
 	  LCD driver and NX bringup on the eval board's display and MicroSD support.  An SPI
 	  driver was included in the 0.4.12 release, but is not yet tested.
 
-0.4.13 2009-11-04 Gregory Nutt <spudmonkey@racsa.co.cr>
+0.4.13 2009-11-04 Gregory Nutt <gnutt@nuttx.org>
 
 	* include/nuttx/mtd.h.	Added a simple interface definition to support some
 	  FLASH, EEPROM, NVRAM, etc. devices.
@@ -945,7 +945,7 @@
 	  certain range.  Worked fine until you try to use an interrupt in that
 	  range!
 
-4.14 2009-12-02 Gregory Nutt <spudmonkey@racsa.co.cr>
+4.14 2009-12-02 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/stm32/stm32_gpio.c: Add support for configure an input GPIO
 	  to generate an EXTI interrupt.
@@ -979,7 +979,7 @@
 	  driver:  (1) Need to disconnect after reset received, (2) Status setup
 	  to recover from stall on TX endpoint.
 
-5.0 2009-12-21 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.0 2009-12-21 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/hc: Adding framework to support m68hc11/12
 	* configs/demo9s12ne64: Configuration to support Freescale DEMO9S12NE64
@@ -1028,7 +1028,7 @@
 	* drivers/mmcsd/*: Add casts in constant expressions to avoid warnings
 	  when sizeof(int) is 16-bits.
 
-5.1 2010-01-30 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.1 2010-01-30 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/lpc313x and arch/arm/include/lpc313x: Added framework
 	  to support the NXP LPC3131.
@@ -1051,7 +1051,7 @@
 	  for arm, but really should be made for all architectures.
 	* configs/sam3u/nsh: Added NSH configuration for SAM3U
 
-5.2 2010-03-18 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.2 2010-03-18 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/sam3u/sam3u_pio.c: Fix an address calculation error
 	  that caused ports B & C to get mapped to the PIOA base address.
@@ -1067,7 +1067,7 @@
 	* configs/ea3131/nsh: Added a NuttShell (NSH) configuration for the
 	  EA3131.
 
-5.3 2010-04-11 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.3 2010-04-11 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/lpc313x/lpc313x_usbdev.c: USB driver for the LPC313x
 	  contributed by David Hewson.
@@ -1088,7 +1088,7 @@
 	  PIO decoding.  No PIOs greater than 15 could be used on any port!  Obviously,
 	  no one has been using this port.
 
-5.4 2010-04-23 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.4 2010-04-23 Gregory Nutt <gnutt@nuttx.org>
 
 	* include/nuttx/lcd.h: Defines an LCD interface.
 	* graphics/nxglib/fb and lcd: Support LCD and framebuffer rasterizers for NX.
@@ -1096,7 +1096,7 @@
 	  board.
 	* configs/sam3u-ek/nx: NX graphics configuration for the SAM3U-EK
 
-5.5 2010-05-09 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.5 2010-05-09 Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/net/enc28j60.c: Microchip ENC28J60 SPI Ethernet chip driver.
 	  (untested on original check-in).
@@ -1123,7 +1123,7 @@
 	  interfaces.
 	* net/net_close.c: Correct a UDP reference counting error
 
-5.6 2010-06-05 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.6 2010-06-05 Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/lcd/p14201.c: Driver for RiT P14201 series 128x96 4-bit OLED.
 	* configs/lm3s6965-ek/nx: NX graphics configuration for the LM3S6965
@@ -1144,7 +1144,7 @@
 
 	NOTE: Contributed by David Hewson.
 
-5.7 2010-06-22 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.7 2010-06-22 Gregory Nutt <gnutt@nuttx.org>
 
 	* configs/nucleus2g: Add ostest configuration for the Nucleus 2G
 	  LPC1768 board from 2G Engineering (http://www.2g-eng.com/)
@@ -1155,7 +1155,7 @@
 	* configs/nucleus2g/nsh: Added and verified a NuttShell (NSH)
 	  configuration for the LPC1768 on the Nucleus2G board.
 
-5.8 2010-07-18 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.8 2010-07-18 Gregory Nutt <gnutt@nuttx.org>
 
 	* configs/nucleus2g/src/up_nsh.c and up_ssp.c: Add support
 	  for SPI-based MMC/SD cards and integrate into the NSH example.
@@ -1181,7 +1181,7 @@
 	  */*_vectors.S: Correct compilations errors when CONFIG_ARCH_INTERRUPTSTACK
 	  is enabled (feature still not tested)
 
-5.9 2010-08-25 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.9 2010-08-25 Gregory Nutt <gnutt@nuttx.org>
 
 	* examples/nsh/nsh_telnetd.c: Fix compilation errors that happen
 	  when both DHCPC and TELNETD are enabled in the Nuttshell.
@@ -1220,7 +1220,7 @@
 	* configs/ntosd-dm320 and arch/arm/src/dm320: Add support for the
 	  Neuros production OSD (changes contributed by bf.nuttx).
 
-5.10 2010-09-07 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.10 2010-09-07 Gregory Nutt <gnutt@nuttx.org>
 
 	* configs/ea3131/locked: Create logic to support a two pass build
 	  process:  The first pass forces critical logic into the locked text
@@ -1265,7 +1265,7 @@
 	  are after this point, but really causes problems if you want to handle
 	  data and prefectch aborts which are within this zeroed region.
 
-5.11 2010-10-01 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.11 2010-10-01 Gregory Nutt <gnutt@nuttx.org>
 
 	* configs/ea3131/src/up_fillpage.c: Added new configuration item
 	  CONFIG_PAGING_BINPATH.  If CONFIG_PAGING_BINPATH is defined, then it
@@ -1288,7 +1288,7 @@
 	  test is ran repeatedly in a loop.
 	* configs/ez80f910200zco: Updated to used ZDS-II 4.11.1
 
-5.12 2010-10-26 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.12 2010-10-26 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/avr: Add a place to support AVR family processors.
 	* arch/avr/include/avr32 and arch/avr/src/avr32: Add support for AVR32
@@ -1314,7 +1314,7 @@
 	  The correction has been incorporated for all architectures but only
 	  verified on a few.
 
-5.13 2010-11-09 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.13 2010-11-09 Gregory Nutt <gnutt@nuttx.org>
 
 	* lib/lib_strnlen.c: Added POSIX 2008 strnlen() function.  Contributed
 	  by Michael Hrabanek.
@@ -1331,7 +1331,7 @@
 	  development board.  The OS test and NSH configurations (only) have been
 	  verified.
 
-5.14 2010-11-27 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.14 2010-11-27 Gregory Nutt <gnutt@nuttx.org>
 
 	* configs/olimex-lpc1766stk/nettest: Add examples/nettest configuration to
 	  verify the LPC17xx Ethernet driver currently under development.
@@ -1360,7 +1360,7 @@
 	  handling in send() and in uip_tcpinput.c; uip_tcpinput.c thought (incorrectly)
 	  that all of the bytes were acknowledged; send.c knew that they were not.
 
-5.15 2010-12-12 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.15 2010-12-12 Gregory Nutt <gnutt@nuttx.org>
 
 	* net/uip/uip_tcpaddsend.c and net/send.c: Another place where the TCP sequence
 	  number problem "fixed" in 5.14 might occur.
@@ -1405,7 +1405,7 @@
 	* include/nuttx/spi.h: the SPI_SETBITS macro was calling the setmode method.
 	  This is a very important bug-fix in some usages.
 
-5.16 2011-01-10 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.16 2011-01-10 Gregory Nutt <gnutt@nuttx.org>
 
 	* include/nuttx/usb: Created new directory.  Moved all usb-related header
 	  files to this new directory.  Created a skeleton for a new USB host header
@@ -1418,7 +1418,7 @@
 	* drivers/usbhost: Add a USB host class driver for the (Bulk-Only) USB
 	  Mass Storage Class.
 
-5.17 2011-01-19 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.17 2011-01-19 Gregory Nutt <gnutt@nuttx.org>
 
 	* include/nuttx/usb: rename usb_storage.h to storage.h.
 	* arch/arm/src/lpc17xx/lpc17_usbhost.c: Add support for low-speed devices.
@@ -1438,7 +1438,7 @@
 	* Ran the tool CppCheck (http://sourceforge.net/apps/mediawiki/cppcheck) and
 	  fixed several errors in the code identified by the tool.
 
-5.18 2011-02-27 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.18 2011-02-27 Gregory Nutt <gnutt@nuttx.org>
 
 	* Incorporate several uIP patches from http://gitweb.aeruder.net/?p=uip.git;a=summary.
 	  - Lost SYNACK causes connection reset
@@ -1481,7 +1481,7 @@
 	* Added a new 'kill' command to NSH that will support sending signals to
 	  running NuttX tasks.
 
-5.19 2011-03-12 Gregory Nutt <spudmonkey@racsa.co.cr>
+5.19 2011-03-12 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/stm32/stm32_idle.c: During idle times, the STM32 now uses the
 	  WFI instruction to sleep in a reduced power mode until the next interrupt
@@ -1553,7 +1553,7 @@
 	* configs/olimex-lpc1766stk/slip-httpd: An example that uses SLIP to
 	  provide a serial-port based THTTPD web server.
 
-6.0 2011-03-21 Gregory Nutt <spudmonkey@racsa.co.cr>
+6.0 2011-03-21 Gregory Nutt <gnutt@nuttx.org>
 
 	* lib/lib_fopen(): fopen() was not returning the correct errno value
 	  when the underlying open() failed.
@@ -1602,7 +1602,7 @@
 	* apps/vsn: Move all VSN apps to apps/vsn.
 	* nuttx/examples moved to apps/examples
 
-6.1 2011-04-11 Gregory Nutt <spudmonkey@racsa.co.cr>
+6.1 2011-04-11 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/include/lpc17xx/irq.h and arch/arm/src/lpc17xx/lpc17_gpio*.c:
 	  Fix several bugs in the GPIO interrupt logic.  Submited by
@@ -1664,7 +1664,7 @@
 	* configs/lpcxpresso-lpc1768: Add a board configuration for the Embedded
 	  Artists LPCXpresso LPC1768 board.
 
-6.2 2011-05-06 Gregory Nutt <spudmonkey@racsa.co.cr>
+6.2 2011-05-06 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/lpc17xx/lpc17_gpioint.c: Correct errors in logic that maps
 	  and IRQ number into a register bit number.
@@ -1723,7 +1723,7 @@
 	* fs/nxffs: After a couple of weeks of testing and bug fixes, NXFSS appears
 	  stable and functional.
 
-6.3 2011-05-15 Gregory Nutt <spudmonkey@racsa.co.cr>
+6.3 2011-05-15 Gregory Nutt <gnutt@nuttx.org>
 
 	* Remove clock_getutc().  It is replaces with clock_gettime(CLOCK_ACTIVETIME).
 	  Add other RTC related changes provided by Uros Platise.
@@ -1760,7 +1760,7 @@
 	  flushed.  This (slightly) increases the NuttX footprint but supports the kind of
 	  behavior that people expect for printf.
 
-6.4 2011-06-06 Gregory Nutt <spudmonkey@racsa.co.cr>
+6.4 2011-06-06 Gregory Nutt <gnutt@nuttx.org>
 
 	* lib/drivers/cc1101: Add initial, functional CC1101 wireless driver
 	  (contributed by Uros Platise)
@@ -1808,7 +1808,7 @@
 	  some networks:  CONFIG_NET_BUFSIZE should be set to at least 576 in
 	  all defconfig files.  This has only been fixed in this defconfig file.
 
-6.5 2011-06-21 Gregory Nutt <spudmonkey@racsa.co.cr>
+6.5 2011-06-21 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/avr/src/avr and arch/avr/include/avr: Adds general support for
 	  the Atmel 8-bit AVR family.
@@ -1829,7 +1829,7 @@
 	  does not make any difference except on systems (like the AVR) where size_t
 	  is only 16-bits.
 
-6.6 2011-07-11 Gregory Nutt <spudmonkey@racsa.co.cr>
+6.6 2011-07-11 Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/mtd/ramtron.c, net/net_checksd.c, fs/fs_fdopen.c, and include/nuttx/mii.h:
 	  Several structural changes made to get a clean compile under the ez80 ZDS-II
@@ -1896,7 +1896,7 @@
 	  When a window is closed, the display was not being updated.  The old
 	  window graphic was left on the display for a time.
 
-6.7 2011-08-02 Gregory Nutt <spudmonkey@racsa.co.cr>
+6.7 2011-08-02 Gregory Nutt <gnutt@nuttx.org>
 
 	* Makefile:  Added a export target that will bundle up all of the NuttX
 	  libraries, header files, and the startup object into an export-able
@@ -1966,7 +1966,7 @@
 	  graphics/nxtk/nxtk_drawlinewindow.c, graphics/nxtk/nxtk_drawlinetoolbar.c:
 	  Add new line drawing interfaces (untested).
 
-6.8 2011-08-19 Gregory Nutt <spudmonkey@racsa.co.cr>
+6.8 2011-08-19 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/lpc17xx/chip.h:  Fix some chip memory configuration errors
 	  for the LPC1764, LPC1756, and LPC1754 (submitted by Li Zhuoy (Lzzy))
@@ -2014,7 +2014,7 @@
 	* configs/twr-k60n512/nsh:  Added and verified a NuttShell (NSH)
 	  configuration for the Freescale, Kinetis TWR-K60N512 board.
 
-6.9 2011-09-11 Gregory Nutt <spudmonkey@racsa.co.cr>
+6.9 2011-09-11 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/kinetis/kinetis_sdhc.c: SDHC driver for Kinetis parts.
 	  Initially check-in is just a crude port of the STM32 SDIO driver.
@@ -2078,7 +2078,7 @@
 	* arch/arm/src/stm32/stm32_i2c.c:  Correct some bugs related to waiting
 	  for the I2C STOP condition to be cleared.
 
-6.10 2011-xx-xx Gregory Nutt <spudmonkey@racsa.co.cr>
+6.10 2011-xx-xx Gregory Nutt <gnutt@nuttx.org>
 
 	* lib/stdio/lib_fopen.c:  Fix an error in fopen(); the file pointer was not
 	  being positioned at the end of the file when the "a" and "a+" modes are
@@ -2110,22 +2110,24 @@
 	* fs/fat:  Fix an error in the long file name logic:  If the long file name
 	  is an even multiple of 13 bytes in length, then it should not include a
 	  NULL terminating character.  Fix contributed by Kaushal Parikh.
-	* configs/sim/nx11 - Created a separate configuration to build the NX
+	* configs/sim/nx11: Created a separate configuration to build the NX
 	  example using the a simulated framebuffer driver on an X11 window.  This
 	  example has been verified on Ubuntu 9.09 (it does not work on Cygwin).
-	* arch/sim/src/up_touchscreen.c and up_x11eventloop.c - Adds support for a
+	* arch/sim/src/up_touchscreen.c and up_x11eventloop.c: Adds support for a
 	  simulated NuttX touchscreen device using mouse/pointer feedback from an
 	  x11 window.
-	* configs/sim/touchscreen - Adds a configuration to verify the simulated
+	* configs/sim/touchscreen: Adds a configuration to verify the simulated
 	  touchscreen driver (Does not work on Cygwin).
-	* configs/sam3u/touchscreen - This is the configuration that I plan to use
+	* configs/sam3u/touchscreen: This is the configuration that I plan to use
 	  to verify the SAM3U-EK touchscreen driver.  However, as of this writing,
 	  there is no touchscreen driver for the board.
-	* CONFIG_RTC_HIRES - Add an option to support either a high-resolution RTC
+	* CONFIG_RTC_HIRES: Add an option to support either a high-resolution RTC
 	  that completely replaces the system timer tick but may overflow and lose
 	  time when the MCU is off and also for a low-resolution (1 sec/tick) RTC
 	  that can run until 2106 with no overflow.  But in this latter case, higher
 	  resolution time must come from the system timer.
-	* CONFIG_SYSTEM_UTC - Removed support for the UTC system timer.  It just
+	* CONFIG_SYSTEM_UTC: Removed support for the UTC system timer.  It just
 	  doesn't do enough to be worth the CPU cycles or the complexity.
-	* CONFIG_SYSTEM_TIME16 - Added support for an optional 64-bit system timer.
+	* CONFIG_SYSTEM_TIME16: Added support for an optional 64-bit system timer.
+	* fs/fat/fs_fat32util.c: Add support for FAT date/time stamps; Enabled via
+	  CONFIG_FS_FATTIME.

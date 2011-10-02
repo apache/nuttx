@@ -2,7 +2,7 @@
  * fs/fat/fs_fat32util.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
  *   Microsoft FAT documentation
@@ -50,6 +50,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
@@ -371,7 +372,7 @@ void fat_semgive(struct fat_mountpt_s *fs)
 /****************************************************************************
  * Name: fat_systime2fattime
  *
- * Desciption: Get the system time convertto a time and and date suitble
+ * Desciption: Get the system time convert to a time and and date suitble
  * for writing into the FAT FS.
  *
  *    TIME in LS 16-bits:
@@ -379,7 +380,7 @@ void fat_semgive(struct fat_mountpt_s *fs)
  *      Bits 5-10  = minutes (0-59)
  *      Bits 11-15 = hours (0-23)
  *    DATE in MS 16-bits
- *      Bits 0:4   = Day of month (0-31)
+ *      Bits 0:4   = Day of month (1-31)
  *      Bits 5:8   = Month of year (1-12)
  *      Bits 9:15  = Year from 1980 (0-127 representing 1980-2107)
  *
@@ -387,6 +388,46 @@ void fat_semgive(struct fat_mountpt_s *fs)
 
 uint32_t fat_systime2fattime(void)
 {
+  /* Unless you have a hardware RTC or some other to get accurate time, then
+   * there is no reason to support FAT time.
+   */
+
+#ifdef CONFIG_FS_FATTIME
+  struct timespec ts;
+  struct tm tm;
+  int ret;
+
+  /* Get the current time in seconds and nanoseconds */
+
+  ret = clock_settime(CLOCK_REALTIME, &ts);
+  if (ret == OK)
+    {
+      /* Break done the seconds in date and time units */
+
+      if (gmtime_r((FAR const time_t *)&ts.tv_sec, &tm) != NULL)
+        {
+          /* FAT can only represent dates since 1980.  struct tm can
+           * represent dates since 1900.
+           */
+
+          if (tm.tm_year >= 80)
+            {
+              uint16_t fattime;
+              uint16_t fatdate;
+
+              fattime  = (tm.tm_sec       >>  1) & 0x001f; /* Bits 0-4: 2 second count (0-29) */
+              fattime |= (tm.tm_min       <<  5) & 0x07e0; /* Bits 5-10: minutes (0-59) */
+              fattime |= (tm.tm_hour      << 11) & 0xf800; /* Bits 11-15: hours (0-23) */
+
+              fatdate  =  tm.tm_mday             & 0x001f; /* Bits 0-4: Day of month (1-31) */
+              fatdate |= ((tm.tm_mon+1)   <<  5) & 0x01e0; /* Bits 5-8: Month of year (1-12) */
+              fatdate |= ((tm.tm_year-80) <<  9) & 0xfe00; /* Bits 9-15: Year from 1980 */
+
+              return (uint32_t)fatdate << 16 | (uint32_t)fattime;
+            }
+        }
+    }
+#endif
     return 0;
 }
 
@@ -400,7 +441,7 @@ uint32_t fat_systime2fattime(void)
  *      Bits 5-10  = minutes (0-59)
  *      Bits 11-15 = hours (0-23)
  *    16-bit FAT date:
- *      Bits 0:4   = Day of month (0-31)
+ *      Bits 0:4   = Day of month (1-31)
  *      Bits 5:8   = Month of year (1-12)
  *      Bits 9:15  = Year from 1980 (0-127 representing 1980-2107)
  *
@@ -408,7 +449,31 @@ uint32_t fat_systime2fattime(void)
 
 time_t fat_fattime2systime(uint16_t fattime, uint16_t fatdate)
 {
+  /* Unless you have a hardware RTC or some other to get accurate time, then
+   * there is no reason to support FAT time.
+   */
+
+#ifdef CONFIG_FS_FATTIME
+  struct tm tm;
+  unsigned int tmp;
+
+  /* Break out the date and time */
+
+  tm.tm_sec  =  (fatdate & 0x001f) <<  1;       /* Bits 0-4: 2 second count (0-29) */
+  tm.tm_min  =  (fatdate & 0x07e0) >>  5;       /* Bits 5-10: minutes (0-59) */
+  tm.tm_hour =  (fatdate & 0xf800) >> 11;       /* Bits 11-15: hours (0-23) */
+
+  tm.tm_mday =  (fatdate & 0x001f);             /* Bits 0-4: Day of month (1-31) */
+  tmp        = ((fatdate & 0x01e0) >>  5);      /* Bits 5-8: Month of year (1-12) */
+  tm.tm_mon  =   tmp > 0 ? tmp-1 : 0;
+  tm.tm_year = ((fatdate & 0xfe00) >>  9) + 80; /* Bits 9-15: Year from 1980 */
+
+  /* Then convert the broken out time into seconds since the epoch */
+
+  return mktime(&tm);
+#else
     return 0;
+#endif
 }
 
 /****************************************************************************

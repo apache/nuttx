@@ -302,7 +302,7 @@ static void clock_utc2calendar(time_t days, int *year, int *month, int *day)
  *
  ****************************************************************************/
 
-struct tm *gmtime_r(const time_t *timer, struct tm *result)
+FAR struct tm *gmtime_r(FAR const time_t *timer, FAR struct tm *result)
 {
   time_t epoch;
   time_t jdn;
