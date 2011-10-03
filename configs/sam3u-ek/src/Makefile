@@ -50,6 +50,9 @@ endif
 ifeq ($(CONFIG_USBSTRG),y)
 CSRCS		+= up_usbstrg.c
 endif
+ifeq ($(CONFIG_INPUT_ADS7843E),y)
+CSRCS		+= up_touchscreen.c
+endif
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
