@@ -49,14 +49,16 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
 /* Configuration ************************************************************/
-
 /* CONFIG_SPI_OWNBUS - Set if there is only one active device on the SPI bus.
  *   No locking or SPI configuration will be performed. It is not necessary
  *   for clients to lock, re-configure, etc..
  * CONFIG_SPI_EXCHANGE - Driver supports a single exchange method
  *   (vs a recvblock() and sndblock ()methods).
+ * CONFIG_SPI_CMDDATA - Devices on the SPI bus require out-of-band support
+ *   to distinguish command transfers from data transfers.  Such devices
+ *   will often support either 9-bit SPI (yech) or 8-bit SPI and a GPIO
+ *   output that selects between command and data.
  */
 
 /* Access macros ************************************************************/
