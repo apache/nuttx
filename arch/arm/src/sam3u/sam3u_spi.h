@@ -144,6 +144,7 @@
 #define SPI_CSR_CSAAT               (1 << 3)  /* Bit 3:  Chip Select Active After Transfer */
 #define SPI_CSR_BITS_SHIFT          (4)       /* Bits 4-7: Bits Per Transfer */
 #define SPI_CSR_BITS_MASK           (15 << SPI_CSR_BITS_SHIFT)
+#  define SPI_CSR_BITS(n)           (((n)-8) << SPI_CSR_BITS_SHIFT) /* n, n=8-16 */
 #  define SPI_CSR_BITS8             (0 << SPI_CSR_BITS_SHIFT) /* 8 */
 #  define SPI_CSR_BITS9             (1 << SPI_CSR_BITS_SHIFT) /* 9 */
 #  define SPI_CSR_BITS10            (2 << SPI_CSR_BITS_SHIFT) /* 10 */
@@ -152,7 +153,7 @@
 #  define SPI_CSR_BITS13            (5 << SPI_CSR_BITS_SHIFT) /* 13 */
 #  define SPI_CSR_BITS14            (6 << SPI_CSR_BITS_SHIFT) /* 14 */
 #  define SPI_CSR_BITS15            (7 << SPI_CSR_BITS_SHIFT) /* 15 */
-#  define SPI_CSR_BITS15            (8 << SPI_CSR_BITS_SHIFT) /* 16 */
+#  define SPI_CSR_BITS16            (8 << SPI_CSR_BITS_SHIFT) /* 16 */
 #define SPI_CSR_SCBR_SHIFT          (8)       /* Bits 8-15: Serial Clock Baud Rate */
 #define SPI_CSR_SCBR_MASK           (0xff << SPI_CSR_SCBR_SHIFT)
 #define SPI_CSR_DLYBS_SHIFT         (16)      /* Bits 16-23: Delay Before SPCK */
