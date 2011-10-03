@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 28, 2011)
+NuttX TODO List (Last updated October 3, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
@@ -11,7 +11,7 @@ nuttx/
   (1)  Memory Managment (mm/)
   (2)  Signals (sched/, arch/)
   (1)  pthreads (sched/)
-  (1)  C++ Support
+  (2)  C++ Support
   (5)  Binary loaders (binfmt/)
  (16)  Network (net/, drivers/net)
   (2)  USB (drivers/usbdev, drivers/usbhost)
@@ -152,6 +152,21 @@ o pthreads (sched/)
 
 o C++ Support
   ^^^^^^^^^^^
+
+  Description: The argument of the 'new' operators should take a type of
+               size_t (see libxx/libxx_new.cxx and libxx/libxx_newa.cxx).  But
+               size_t has an unknown underlying.  In the nuttx sys/types.h
+               header file, size_t is typed as uint32_t (which is determined by
+               architecture-specific logic).  But the C++ compiler may believe
+               that size_t is of a different type resulting in compilation errors
+               in the operator.  Using the underlying integer type Instead of
+               size_t seems to resolve the compilation issues.
+  Status:      Kind of open.  There is a workaround.  Setting CONFIG_CXX_NEWLONG=y
+               will define the operators with argument of type unsigned long;
+               Setting CONFIG_CXX_NEWLONG=n will define the operators with argument
+               of type unsigned int.  But this is pretty ugly!  A better solution
+               would be to get ahold of the compilers definition of size_t.
+  Priority:    Low.
 
   Description: Need to call static constructors
   Status:      Open
