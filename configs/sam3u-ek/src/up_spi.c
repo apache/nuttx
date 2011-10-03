@@ -3,7 +3,7 @@
  * arch/arm/src/board/up_spi.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,7 +52,7 @@
 #include "sam3u_internal.h"
 #include "sam3uek_internal.h"
 
-#if defined(CONFIG_SAM3U_SPI1) || defined(CONFIG_SAM3U_SPI2) || defined(CONFIG_SAM3U_SPI3)
+#ifdef CONFIG_SAM3U_SPI
 
 /************************************************************************************
  * Definitions
@@ -94,67 +94,64 @@
 
 void weak_function sam3u_spiinitialize(void)
 {
+  /* The ZigBee module connects used NPCS0.  However, there is not yet any
+   * ZigBee support.
+   */
+
+   /* The touchscreen connects using NPCS2 (PC14). */
+
+#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
+   sam3u_configgpio(GPIO_TSC_NPCS2);
+#endif
 }
 
 /****************************************************************************
- * Name:  sam3u_spi1/2/3select and sam3u_spi1/2/3status
+ * Name:  sam3u_spiselect, sam3u_spistatus, and sam3u_spicmddata
  *
  * Description:
- *   The external functions, sam3u_spi1/2/3select and sam3u_spi1/2/3status must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
- *   are provided by common SAM3U logic.  To use this common SPI logic on your
- *   board:
+ *   These external functions must be provided by board-specific logic.  They
+ *   are implementations of the select, status, and cmddata methods of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi.h). All
+ *   other methods including up_spiinitialize()) are provided by common SAM3U
+ *   logic.  To use this common SPI logic on your board:
  *
  *   1. Provide logic in sam3u_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam3u_spi1/2/3select() and sam3u_spi1/2/3status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
+ *   2. Provide sam3u_spiselect() and sam3u_spistatus() functions in your
+ *      board-specific logic.  These functions will perform chip selection
+ *      and status operations using GPIOs in the way your board is configured.
+ *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
+ *      sam3u_spicmddata() functions in your board-specific logic.  This
+ *      function will perform cmd/data selection operations using GPIOs in
+ *      the way your board is configured.
+ *   3. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *      SPI driver to higher level logic (e.g., calling 
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAM3U_SPI1
-void sam3u_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+#ifdef CONFIG_SAM3U_SPI
+void sam3u_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
+  if (devid == SPIDEV_TOUCHSCREEN)
+    {
+      /* Assert the CS pin to the OLED display */
+
+      (void)lpc17_gpiowrite(GPIO_TSC_NPCS2, !selected);
+    }
+#endif
 }
 
-uint8_t sam3u_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t sam3u_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  return SPI_STATUS_PRESENT;
+  return 0;
 }
 #endif
 
-#ifdef CONFIG_SAM3U_SPI2
-void sam3u_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
-{
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-}
-
-uint8_t sam3u_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  return SPI_STATUS_PRESENT;
-}
-#endif
-
-#ifdef CONFIG_SAM3U_SPI3
-void sam3u_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
-{
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-}
-
-uint8_t sam3u_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  return SPI_STATUS_PRESENT;
-}
-#endif
-
-#endif /* CONFIG_SAM3U_SPI1 || CONFIG_SAM3U_SPI2 || CONFIG_SAM3U_SPI3 */
+#endif /* CONFIG_SAM3U_SPI */
