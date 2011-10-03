@@ -1,13 +1,12 @@
 /****************************************************************************
- * include/nuttx/input/tsc2007.h
+ * include/nuttx/input/ads7843e.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
- *   "1.2V to 3.6V, 12-Bit, Nanopower, 4-Wire Micro TOUCH SCREEN CONTROLLER
- *    with I2C Interface," SBAS405A March 2007, Revised, March 2009, Texas
- *    Instruments Incorporated
+ *   "Touch Screen Controller, ADS7843," Burr-Brown Products from Texas
+ *    Instruments, SBAS090B, September 2000, Revised May 2002"
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,13 +37,8 @@
  *
  ****************************************************************************/
 
-/* The TSC2007 is an analog interface circuit for a human interface touch
- * screen device. All peripheral functions are controlled through the command
- * byte and onboard state machines.
- */
-
-#ifndef __INCLUDE_NUTTX_INPUT_TSC2007_H
-#define __INCLUDE_NUTTX_INPUT_TSC2007_H
+#ifndef __INCLUDE_NUTTX_INPUT_ADS7843E_H
+#define __INCLUDE_NUTTX_INPUT_ADS7843E_H
 
 /****************************************************************************
  * Included Files
@@ -53,7 +47,7 @@
 #include <nuttx/config.h>
 #include <nuttx/i2c.h>
 
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_TSC2007)
+#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -61,17 +55,13 @@
 /* Configuration ************************************************************/
 /* Maximum number of threads than can be waiting for POLL events */
 
-#ifndef CONFIG_TSC2007_NPOLLWAITERS
-#  define CONFIG_TSC2007_NPOLLWAITERS 2
+#ifndef CONFIG_ADS7843E_NPOLLWAITERS
+#  define CONFIG_ADS7843E_NPOLLWAITERS 2
 #endif
 
 /* Check for some required settings.  This can save the user a lot of time
  * in getting the right configuration.
  */
-
-#ifndef CONFIG_I2C_TRANSFER
-#  error "CONFIG_I2C_TRANSFER is required in the I2C configuration"
-#endif
 
 #ifdef CONFIG_DISABLE_SIGNALS
 #  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
@@ -85,7 +75,7 @@
  * Public Types
  ****************************************************************************/
 
-/* A reference to a structure of this type must be passed to the TSC2007
+/* A reference to a structure of this type must be passed to the ADS7843E
  * driver.  This structure provides information about the configuration
  * of the TSB2007 and provides some board-specific hooks.
  *
@@ -95,38 +85,37 @@
  * may modify frequency or X plate resistance values.
  */
 
-struct tsc2007_config_s
+struct ads7843e_config_s
 {
   /* Device characterization */
 
-  uint8_t  address;    /* 7-bit I2C address (only bits 0-6 used) */
-  uint16_t rxplate;    /* Calibrated X plate resistance */
-  uint32_t frequency;  /* I2C frequency */
+  uint16_t calib;      /* Calibration resistance */
+  uint32_t frequency;  /* SPI frequency */
 
-  /* If multiple TSC2007 devices are supported, then an IRQ number must
+  /* If multiple ADS7843E devices are supported, then an IRQ number must
    * be provided for each so that their interrupts can be distinguished.
    */
 
-#ifndef CONFIG_TSC2007_MULTIPLE
+#ifndef CONFIG_ADS7843E_MULTIPLE
   int      irq;        /* IRQ number received by interrupt handler. */
 #endif
 
   /* IRQ/GPIO access callbacks.  These operations all hidden behind
-   * callbacks to isolate the TSC2007 driver from differences in GPIO
+   * callbacks to isolate the ADS7843E driver from differences in GPIO
    * interrupt handling by varying boards and MCUs.  If possible,
    * interrupts should be configured on both rising and falling edges
    * so that contact and loss-of-contact events can be detected.
    *
-   * attach  - Attach the TSC2007 interrupt handler to the GPIO interrupt
+   * attach  - Attach the ADS7843E interrupt handler to the GPIO interrupt
    * enable  - Enable or disable the GPIO interrupt
    * clear   - Acknowledge/clear any pending GPIO interrupt
    * pendown - Return the state of the pen down GPIO input
    */
 
-  int  (*attach)(FAR struct tsc2007_config_s *state, xcpt_t isr);
-  void (*enable)(FAR struct tsc2007_config_s *state, bool enable);
-  void (*clear)(FAR struct tsc2007_config_s *state);
-  bool (*pendown)(FAR struct tsc2007_config_s *state);
+  int  (*attach)(FAR struct ads7843e_config_s *state, xcpt_t isr);
+  void (*enable)(FAR struct ads7843e_config_s *state, bool enable);
+  void (*clear)(FAR struct ads7843e_config_s *state);
+  bool (*pendown)(FAR struct ads7843e_config_s *state);
 };
 
 /****************************************************************************
@@ -141,15 +130,15 @@ extern "C" {
 #endif
 
 /****************************************************************************
- * Name: tsc2007_register
+ * Name: ads7843e_register
  *
  * Description:
- *   Configure the TSC2007 to use the provided I2C device instance.  This
+ *   Configure the ADS7843E to use the provided SPI device instance.  This
  *   will register the driver as /dev/inputN where N is the minor device
  *   number
  *
  * Input Parameters:
- *   dev     - An I2C driver instance
+ *   dev     - An SPI driver instance
  *   config  - Persistant board configuration data
  *   minor   - The input device minor number
  *
@@ -159,8 +148,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN  int tsc2007_register(FAR struct i2c_dev_s *dev,
-                             FAR struct tsc2007_config_s *config,
+EXTERN  int ads7843e_register(FAR struct spi_dev_s *dev,
+                             FAR struct ads7843e_config_s *config,
                              int minor);
 
 #undef EXTERN
@@ -168,5 +157,5 @@ EXTERN  int tsc2007_register(FAR struct i2c_dev_s *dev,
 }
 #endif
 
-#endif /* CONFIG_INPUT && CONFIG_INPUT_TSC2007 */
-#endif /* __INCLUDE_NUTTX_INPUT_TSC2007_H */
+#endif /* CONFIG_INPUT && CONFIG_INPUT_ADS7843E */
+#endif /* __INCLUDE_NUTTX_INPUT_ADS7843E_H */

@@ -1,13 +1,12 @@
 /****************************************************************************
- * drivers/input/tsc2007.c
+ * drivers/input/ads7843e.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
- *   "1.2V to 3.6V, 12-Bit, Nanopower, 4-Wire Micro TOUCH SCREEN CONTROLLER
- *    with I2C Interface," SBAS405A March 2007, Revised, March 2009, Texas
- *    Instruments Incorporated
+ *   "Touch Screen Controller, ADS7843," Burr-Brown Products from Texas
+ *    Instruments, SBAS090B, September 2000, Revised May 2002"
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,11 +37,6 @@
  *
  ****************************************************************************/
 
-/* The TSC2007 is an analog interface circuit for a human interface touch
- * screen device. All peripheral functions are controlled through the command
- * byte and onboard state machines.
- */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -65,13 +59,13 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs.h>
-#include <nuttx/i2c.h>
+#include <nuttx/spi.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/input/touchscreen.h>
-#include <nuttx/input/tsc2007.h>
+#include <nuttx/input/ads7843e.h>
 
-#include "tsc2007.h"
+#include "ads7843e.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -81,7 +75,7 @@
  * current design.
  */
 
-#undef CONFIG_TSC2007_REFCNT
+#undef CONFIG_ADS7843E_REFCNT
 
 /* Driver support ***********************************************************/
 /* This format is used to construct the /dev/input[n] device driver path.  It
@@ -97,7 +91,7 @@
 
 /* This describes the state of one contact */
 
-enum tsc2007_contact_3
+enum ads7843e_contact_3
 {
   CONTACT_NONE = 0,                    /* No contact */
   CONTACT_DOWN,                        /* First contact */
@@ -105,37 +99,37 @@ enum tsc2007_contact_3
   CONTACT_UP,                          /* Contact lost */
 };
 
-/* This structure describes the results of one TSC2007 sample */
+/* This structure describes the results of one ADS7843E sample */
 
-struct tsc2007_sample_s
+struct ads7843e_sample_s
 {
-  uint8_t  id;                         /* Sampled touch point ID */
-  uint8_t  contact;                    /* Contact state (see enum tsc2007_contact_e) */
-  uint16_t x;                          /* Measured X position */
-  uint16_t y;                          /* Measured Y position */
-  uint16_t pressure;                   /* Calculated pressure */
+  uint8_t  id;                          /* Sampled touch point ID */
+  uint8_t  contact;                     /* Contact state (see enum ads7843e_contact_e) */
+  uint16_t x;                           /* Measured X position */
+  uint16_t y;                           /* Measured Y position */
+#warning "Missing other measurement data" /* Like size and pressure */
 };
 
-/* This structure describes the state of one TSC2007 driver instance */
+/* This structure describes the state of one ADS7843E driver instance */
 
-struct tsc2007_dev_s
+struct ads7843e_dev_s
 {
-#ifdef CONFIG_TSC2007_MULTIPLE
-  FAR struct tsc2007_dev_s *flink;     /* Supports a singly linked list of drivers */
+#ifdef CONFIG_ADS7843E_MULTIPLE
+  FAR struct ads7843e_dev_s *flink;     /* Supports a singly linked list of drivers */
 #endif
-#ifdef CONFIG_TSC2007_REFCNT
-  uint8_t crefs;                       /* Number of times the device has been opened */
+#ifdef CONFIG_ADS7843E_REFCNT
+  uint8_t crefs;                        /* Number of times the device has been opened */
 #endif
-  uint8_t nwaiters;                    /* Number of threads waiting for TSC2007 data */
-  uint8_t id;                          /* Current touch point ID */
-  volatile bool penchange;             /* An unreported event is buffered */
-  sem_t devsem;                        /* Manages exclusive access to this structure */
-  sem_t waitsem;                       /* Used to wait for the availability of data */
+  uint8_t nwaiters;                     /* Number of threads waiting for ADS7843E data */
+  uint8_t id;                           /* Current touch point ID */
+  volatile bool penchange;              /* An unreported event is buffered */
+  sem_t devsem;                         /* Manages exclusive access to this structure */
+  sem_t waitsem;                        /* Used to wait for the availability of data */
 
-  FAR struct tsc2007_config_s *config; /* Board configuration data */
-  FAR struct i2c_dev_s *i2c;           /* Saved I2C driver instance */
-  struct work_s work;                  /* Supports the interrupt handling "bottom half" */
-  struct tsc2007_sample_s sample;      /* Last sampled touch point data */
+  FAR struct ads7843e_config_s *config; /* Board configuration data */
+  FAR struct spi_dev_s *spi;            /* Saved SPI driver instance */
+  struct work_s work;                   /* Supports the interrupt handling "bottom half" */
+  struct ads7843e_sample_s sample;      /* Last sampled touch point data */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
@@ -143,7 +137,7 @@ struct tsc2007_dev_s
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  struct pollfd *fds[CONFIG_TSC2007_NPOLLWAITERS];
+  struct pollfd *fds[CONFIG_ADS7843E_NPOLLWAITERS];
 #endif
 };
 
@@ -151,23 +145,23 @@ struct tsc2007_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void tsc2007_notify(FAR struct tsc2007_dev_s *priv);
-static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
-                          FAR struct tsc2007_sample_s *sample);
-static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
-                              FAR struct tsc2007_sample_s *sample);
-static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd);
-static void tsc2007_worker(FAR void *arg);
-static int tsc2007_interrupt(int irq, FAR void *context);
+static void ads7843e_notify(FAR struct ads7843e_dev_s *priv);
+static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
+                           FAR struct ads7843e_sample_s *sample);
+static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
+                               FAR struct ads7843e_sample_s *sample);
+static int ads7843e_transfer(FAR struct ads7843e_dev_s *priv, uint8_t cmd);
+static void ads7843e_worker(FAR void *arg);
+static int ads7843e_interrupt(int irq, FAR void *context);
 
 /* Character driver methods */
 
-static int tsc2007_open(FAR struct file *filep);
-static int tsc2007_close(FAR struct file *filep);
-static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len);
-static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int ads7843e_open(FAR struct file *filep);
+static int ads7843e_close(FAR struct file *filep);
+static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t len);
+static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int tsc2007_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
+static int ads7843e_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
 #endif
 
 /****************************************************************************
@@ -176,30 +170,30 @@ static int tsc2007_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
 
 /* This the the vtable that supports the character driver interface */
 
-static const struct file_operations tsc2007_fops =
+static const struct file_operations ads7843e_fops =
 {
-  tsc2007_open,    /* open */
-  tsc2007_close,   /* close */
-  tsc2007_read,    /* read */
-  0,               /* write */
-  0,               /* seek */
-  tsc2007_ioctl    /* ioctl */
+  ads7843e_open,    /* open */
+  ads7843e_close,   /* close */
+  ads7843e_read,    /* read */
+  0,                /* write */
+  0,                /* seek */
+  ads7843e_ioctl    /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , tsc2007_poll   /* poll */
+  , ads7843e_poll   /* poll */
 #endif
 };
 
-/* If only a single TSC2007 device is supported, then the driver state
+/* If only a single ADS7843E device is supported, then the driver state
  * structure may as well be pre-allocated.
  */
 
-#ifndef CONFIG_TSC2007_MULTIPLE
-static struct tsc2007_dev_s g_tsc2007;
+#ifndef CONFIG_ADS7843E_MULTIPLE
+static struct ads7843e_dev_s g_ads7843e;
 
 /* Otherwise, we will need to maintain allocated driver instances in a list */
 
 #else
-static struct tsc2007_dev_s *g_tsc2007list;
+static struct ads7843e_dev_s *g_ads7843elist;
 #endif
 
 /****************************************************************************
@@ -207,10 +201,10 @@ static struct tsc2007_dev_s *g_tsc2007list;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tsc2007_notify
+ * Name: ads7843e_notify
  ****************************************************************************/
 
-static void tsc2007_notify(FAR struct tsc2007_dev_s *priv)
+static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
 {
 #ifndef CONFIG_DISABLE_POLL
   int i;
@@ -222,21 +216,21 @@ static void tsc2007_notify(FAR struct tsc2007_dev_s *priv)
 
   if (priv->nwaiters > 0)
     {
-      /* After posting this semaphore, we need to exit because the TSC2007
+      /* After posting this semaphore, we need to exit because the ADS7843E
        * is no longer avaialable.
        */
 
       sem_post(&priv->waitsem); 
     }
 
-  /* If there are threads waiting on poll() for TSC2007 data to become availabe,
+  /* If there are threads waiting on poll() for ADS7843E data to become availabe,
    * then wake them up now.  NOTE: we wake up all waiting threads because we
    * do not know that they are going to do.  If they all try to read the data,
    * then some make end up blocking after all.
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  for (i = 0; i < CONFIG_TSC2007_NPOLLWAITERS; i++)
+  for (i = 0; i < CONFIG_ADS7843E_NPOLLWAITERS; i++)
     {
       struct pollfd *fds = priv->fds[i];
       if (fds)
@@ -250,11 +244,11 @@ static void tsc2007_notify(FAR struct tsc2007_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: tsc2007_sample
+ * Name: ads7843e_sample
  ****************************************************************************/
 
-static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
-                          FAR struct tsc2007_sample_s *sample)
+static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
+                          FAR struct ads7843e_sample_s *sample)
 {
   irqstate_t flags;
   int ret = -EAGAIN;
@@ -266,7 +260,7 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
 
   flags = irqsave();
 
-  /* Is there new TSC2007 sample data available? */
+  /* Is there new ADS7843E sample data available? */
 
   if (priv->penchange)
     {
@@ -274,7 +268,7 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
        * sampled data.
        */
 
-      memcpy(sample, &priv->sample, sizeof(struct tsc2007_sample_s ));
+      memcpy(sample, &priv->sample, sizeof(struct ads7843e_sample_s ));
 
       /* Now manage state transitions */
 
@@ -301,11 +295,11 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: tsc2007_waitsample
+ * Name: ads7843e_waitsample
  ****************************************************************************/
 
-static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
-                              FAR struct tsc2007_sample_s *sample)
+static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
+                               FAR struct ads7843e_sample_s *sample)
 {
   irqstate_t flags;
   int ret;
@@ -332,9 +326,9 @@ static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
    * that is posted when new sample data is availble.
    */
 
-  while (tsc2007_sample(priv, sample) < 0)
+  while (ads7843e_sample(priv, sample) < 0)
     {
-      /* Wait for a change in the TSC2007 state */
+      /* Wait for a change in the ADS7843E state */
  
       priv->nwaiters++;
       ret = sem_wait(&priv->waitsem);
@@ -369,7 +363,7 @@ errout:
 
   /* Restore pre-emption.  We might get suspended here but that is okay
    * because we already have our sample.  Note:  this means that if there
-   * were two threads reading from the TSC2007 for some reason, the data
+   * were two threads reading from the ADS7843E for some reason, the data
    * might be read out of order.
    */
 
@@ -378,106 +372,29 @@ errout:
 }
 
 /****************************************************************************
- * Name: tsc2007_transfer
+ * Name: ads7843e_transfer
  ****************************************************************************/
 
-static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
+static int ads7843e_transfer(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
 {
-   struct i2c_msg_s msg;
-   uint8_t data12[2];
-   int ret;
-
-  /* "A conversion/write cycle begins when the master issues the address
-   *  byte containing the slave address of the TSC2007, with the eighth bit
-   *  equal to a 0 (R/W = 0)... Once the eighth bit has been received...
-   *  the TSC2007 issues an acknowledge.
-   *
-   * "When the master receives the acknowledge bit from the TSC2007, the
-   *  master writes the command byte to the slave... After the command byte
-   *  is received by the slave, the slave issues another acknowledge bit.
-   *  The master then ends the write cycle by issuing a repeated START or a
-   *  STOP condition...
-   */
-
-   msg.addr   = priv->config->address; /* 7-bit address */
-   msg.flags  = 0;                     /* Write transaction, beginning with START */
-   msg.buffer = &cmd;                  /* Transfer from this address */
-   msg.length = 1;                     /* Send one byte following the address */
- 
-   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
-   if (ret < 0)
-     {
-       idbg("I2C_TRANSFER failed: %d\n", ret);
-       return ret;
-     }
-
-  /* "The input multiplexer channel for the A/D converter is selected when
-   *  bits C3 through C0 are clocked in. If the selected channel is an X-,Y-,
-   *  or Z-position measurement, the appropriate drivers turn on once the
-   *  acquisition period begins.
-   *
-   * "... the input sample acquisition period starts on the falling edge of
-   *  SCL when the C0 bit of the command byte has been latched, and ends
-   *  when a STOP or repeated START condition has been issued. A/D conversion
-   *  starts immediately after the acquisition period...
-   *
-   * "For best performance, the I2C bus should remain in an idle state while
-   *  an A/D conversion is taking place. ... The master should wait for at
-   *  least 10ms before attempting to read data from the TSC2007...
-   */
-
-  usleep(10*1000);
-
-  /* "Data access begins with the master issuing a START condition followed
-   *  by the address byte ... with R/W = 1.
-   *
-   * "When the eighth bit has been received and the address matches, the
-   *  slave issues an acknowledge. The first byte of serial data then follows
-   *  (D11-D4, MSB first).
-   *
-   * "After the first byte has been sent by the slave, it releases the SDA line
-   *  for the master to issue an acknowledge.  The slave responds with the
-   *  second byte of serial data upon receiving the acknowledge from the master
-   *  (D3-D0, followed by four 0 bits). The second byte is followed by a NOT
-   *  acknowledge bit (ACK = 1) from the master to indicate that the last
-   *  data byte has been received...
-   */
-
-   msg.addr   = priv->config->address; /* 7-bit address */
-   msg.flags  = I2C_M_READ;            /* Read transaction, beginning with START */
-   msg.buffer = data12;                /* Transfer two this address */
-   msg.length = 2;                     /* Read two bytes following the address */
- 
-   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
-   if (ret < 0)
-     {
-       idbg("I2C_TRANSFER failed: %d\n", ret);
-       return ret;
-     }
-
-   /* Get the MS 12 bits from the first byte and the remaining LS 4 bits from
-    * the second byte.
-    */
-
-   ret = (unsigned int)data12[0] << 4 | (unsigned int)data12[1] >> 4;
-   ivdbg("data: 0x%04x\n", ret);
-   return ret;
+  int ret = 0;
+#warning "Missing logic"
+  ivdbg("data: 0x%04x\n", ret);
+  return ret;
 }
 
 /****************************************************************************
- * Name: tsc2007_worker
+ * Name: ads7843e_worker
  ****************************************************************************/
 
-static void tsc2007_worker(FAR void *arg)
+static void ads7843e_worker(FAR void *arg)
 {
-  FAR struct tsc2007_dev_s    *priv = (FAR struct tsc2007_dev_s *)arg;
-  FAR struct tsc2007_config_s *config;   /* Convenience pointer */
+  FAR struct ads7843e_dev_s    *priv = (FAR struct ads7843e_dev_s *)arg;
+  FAR struct ads7843e_config_s *config;   /* Convenience pointer */
   bool                         pendown;  /* true: pend is down */
   uint16_t                     x;        /* X position */
   uint16_t                     y;        /* Y position */
-  uint16_t                     z1;       /* Z1 position */
-  uint16_t                     z2;       /* Z2 position */
-  uint32_t                     pressure; /* Measured pressure */
+#warning "Missing other measurement data" /* Like size and pressure */
 
   ASSERT(priv != NULL);
 
@@ -507,94 +424,15 @@ static void tsc2007_worker(FAR void *arg)
     }
   else
     {
-      /* Handle all pen down events.  First, sample X, Y, Z1, and Z2 values.
-       *
-       * "A resistive touch screen operates by applying a voltage across a
-       *  resistor network and measuring the change in resistance at a given
-       *  point on the matrix where the screen is touched by an input (stylus,
-       *  pen, or finger). The change in the resistance ratio marks the location
-       *  on the touch screen.
-       *
-       * "The 4-wire touch screen panel works by applying a voltage across the
-       *  vertical or horizontal resistive network.  The A/D converter converts
-       *  the voltage measured at the point where the panel is touched. A measurement
-       *  of the Y position of the pointing device is made by connecting the X+
-       *  input to a data converter chip, turning on the Y+ and Y– drivers, and
-       *  digitizing the voltage seen at the X+ input ..."
-       *
-       * "... it is recommended that whenever the host writes to the TSC2007, the
-       *  master processor masks the interrupt associated to PENIRQ. This masking
-       *  prevents false triggering of interrupts when the PENIRQ line is disabled
-       *  in the cases previously listed."
-       */
+      /* Handle all pen down events.  First, sample positional values. */
 
-      y = tsc2007_transfer(priv,
-                          (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_YPOS));
-
-      /* "Voltage is then applied to the other axis, and the A/D converter
-       *  converts the voltage representing the X position on the screen. This
-       *  process provides the X and Y coordinates to the associated processor."
-       */
-
-      x = tsc2007_transfer(priv,
-                          (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_XPOS));
-
-      /* "... To determine pen or finger touch, the pressure of the touch must be
-       *  determined. ... There are several different ways of performing this
-       *  measurement. The TSC2007 supports two methods. The first method requires
-       *  knowing the X-plate resistance, the measurement of the X-position, and two
-       *  additional cross panel measurements (Z2 and Z1) of the touch screen."
-       *
-       *  Rtouch = Rxplate * (X / 4096)* (Z2/Z1 - 1)
-       *
-       * "The second method requires knowing both the X-plate and Y-plate
-       *  resistance, measurement of X-position and Y-position, and Z1 ..."
-       *
-       *  Rtouch = Rxplate * (X / 4096) * (4096/Z1 - 1) - Ryplate * (1 - Y/4096)
-       *
-       * Read Z1 and Z2 values.
-       */
-
-      z1 = tsc2007_transfer(priv,
-                           (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z1POS));
-      z2 = tsc2007_transfer(priv,
-                           (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z2POS));
-
-      /* Power down ADC and enable PENIRQ */
-
-     (void)tsc2007_transfer(priv,
-                           (TSC2007_CMD_12BIT | TSC2007_CMD_PWRDN_IRQEN));
-
-      /* Now calculate the pressure using the first method, reduced to:
-       *
-       * Rtouch = X * Rxplate *(Z2 - Z1) * / Z1 / 4096
-       */
-
-      if (z1 == 0)
-        {
-          idbg("Z1 zero\n");
-          goto errout;
-        }
-
-      pressure = (x * config->rxplate * (z2 - z1)) / z1;
-      pressure = (pressure + 2048) >> 12;
-
-      ivdbg("Position: (%d,%4d) pressure: %u z1/2: (%d,%d)\n",
-            x, y, pressure, z1, z2);
-
-      /* Ignore out of range caculcations */
-
-      if (pressure > 0x0fff)
-        {
-          idbg("Dropped out-of-range pressure: %d\n", pressure);
-          goto errout;
-        }
+#warning "Missing logic"
 
       /* Save the measurements */
 
       priv->sample.x        = x;
       priv->sample.y        = y;
-      priv->sample.pressure = pressure;
+#warning "Missing other measurement data" /* Like size and pressure */
     }
 
   /* Note the availability of new measurements */
@@ -628,32 +466,32 @@ static void tsc2007_worker(FAR void *arg)
   priv->sample.id = priv->id;
   priv->penchange = true;
 
-  /* Notify any waiters that nes TSC2007 data is available */
+  /* Notify any waiters that nes ADS7843E data is available */
 
-  tsc2007_notify(priv);
+  ads7843e_notify(priv);
 
-  /* Exit, re-enabling TSC2007 interrupts */
+  /* Exit, re-enabling ADS7843E interrupts */
 
 errout:
   config->enable(config, true);
 }
 
 /****************************************************************************
- * Name: tsc2007_interrupt
+ * Name: ads7843e_interrupt
  ****************************************************************************/
 
-static int tsc2007_interrupt(int irq, FAR void *context)
+static int ads7843e_interrupt(int irq, FAR void *context)
 {
-  FAR struct tsc2007_dev_s    *priv;
-  FAR struct tsc2007_config_s *config;
+  FAR struct ads7843e_dev_s    *priv;
+  FAR struct ads7843e_config_s *config;
   int                          ret;
 
-  /* Which TSC2007 device caused the interrupt? */
+  /* Which ADS7843E device caused the interrupt? */
 
-#ifndef CONFIG_TSC2007_MULTIPLE
-  priv = &g_tsc2007;
+#ifndef CONFIG_ADS7843E_MULTIPLE
+  priv = &g_ads7843e;
 #else
-  for (priv = g_tsc2007list;
+  for (priv = g_ads7843elist;
        priv && priv->configs->irq != irq;
        priv = priv->flink);
 
@@ -671,13 +509,13 @@ static int tsc2007_interrupt(int irq, FAR void *context)
 
   config->enable(config, false);
 
-  /* Transfer processing to the worker thread.  Since TSC2007 interrupts are
+  /* Transfer processing to the worker thread.  Since ADS7843E interrupts are
    * disabled while the work is pending, no special action should be required
    * to protected the work queue.
    */
 
   DEBUGASSERT(priv->work.worker == NULL);
-  ret = work_queue(&priv->work, tsc2007_worker, priv, 0);
+  ret = work_queue(&priv->work, ads7843e_worker, priv, 0);
   if (ret != 0)
     {
       illdbg("Failed to queue work: %d\n", ret);
@@ -690,14 +528,14 @@ static int tsc2007_interrupt(int irq, FAR void *context)
 }
 
 /****************************************************************************
- * Name: tsc2007_open
+ * Name: ads7843e_open
  ****************************************************************************/
 
-static int tsc2007_open(FAR struct file *filep)
+static int ads7843e_open(FAR struct file *filep)
 {
-#ifdef CONFIG_TSC2007_REFCNT
+#ifdef CONFIG_ADS7843E_REFCNT
   FAR struct inode         *inode;
-  FAR struct tsc2007_dev_s *priv;
+  FAR struct ads7843e_dev_s *priv;
   uint8_t                   tmp;
   int                       ret;
 
@@ -705,7 +543,7 @@ static int tsc2007_open(FAR struct file *filep)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct tsc2007_dev_s *)inode->i_private;
+  priv  = (FAR struct ads7843e_dev_s *)inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -746,21 +584,21 @@ errout_with_sem:
 }
 
 /****************************************************************************
- * Name: tsc2007_close
+ * Name: ads7843e_close
  ****************************************************************************/
 
-static int tsc2007_close(FAR struct file *filep)
+static int ads7843e_close(FAR struct file *filep)
 {
-#ifdef CONFIG_TSC2007_REFCNT
+#ifdef CONFIG_ADS7843E_REFCNT
   FAR struct inode         *inode;
-  FAR struct tsc2007_dev_s *priv;
+  FAR struct ads7843e_dev_s *priv;
   int                       ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct tsc2007_dev_s *)inode->i_private;
+  priv  = (FAR struct ads7843e_dev_s *)inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -789,22 +627,22 @@ static int tsc2007_close(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: tsc2007_read
+ * Name: ads7843e_read
  ****************************************************************************/
 
-static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
   FAR struct inode          *inode;
-  FAR struct tsc2007_dev_s  *priv;
+  FAR struct ads7843e_dev_s  *priv;
   FAR struct touch_sample_s *report;
-  struct tsc2007_sample_s    sample;
+  struct ads7843e_sample_s    sample;
   int                        ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct tsc2007_dev_s *)inode->i_private;
+  priv  = (FAR struct ads7843e_dev_s *)inode->i_private;
 
   /* Verify that the caller has provided a buffer large enough to receive
    * the touch data.
@@ -832,7 +670,7 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
 
   /* Try to read sample data. */
 
-  ret = tsc2007_sample(priv, &sample);
+  ret = ads7843e_sample(priv, &sample);
   if (ret < 0)
     {
       /* Sample data is not available now.  We would ave to wait to get
@@ -848,7 +686,7 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
 
       /* Wait for sample data */
 
-      ret = tsc2007_waitsample(priv, &sample);
+      ret = ads7843e_waitsample(priv, &sample);
       if (ret < 0)
         {
           /* We might have been awakened by a signal */
@@ -857,7 +695,7 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
         }
     }
 
-  /* In any event, we now have sampled TSC2007 data that we can report
+  /* In any event, we now have sampled ADS7843E data that we can report
    * to the caller.
    */
 
@@ -867,7 +705,7 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
   report->point[0].id        = priv->id;
   report->point[0].x         = sample.x;
   report->point[0].y         = sample.y;
-  report->point[0].pressure  = sample.pressure;
+  report->point[0].pressure  = 42; /* ???????????????????? */
 
   /* Report the appropriate flags */
 
@@ -898,13 +736,13 @@ errout:
 }
 
 /****************************************************************************
- * Name:tsc2007_ioctl
+ * Name:ads7843e_ioctl
  ****************************************************************************/
 
-static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode         *inode;
-  FAR struct tsc2007_dev_s *priv;
+  FAR struct ads7843e_dev_s *priv;
   int                       ret;
 
   ivdbg("cmd: %d arg: %ld\n", cmd, arg);
@@ -912,7 +750,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct tsc2007_dev_s *)inode->i_private;
+  priv  = (FAR struct ads7843e_dev_s *)inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -933,7 +771,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
           DEBUGASSERT(priv->config != NULL && ptr != NULL);
-          priv->config->rxplate = *ptr;
+          priv->config->calib = *ptr;
         }
         break;
 
@@ -941,7 +779,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
           DEBUGASSERT(priv->config != NULL && ptr != NULL);
-          *ptr = priv->config->rxplate;
+          *ptr = priv->config->calib;
         }
         break;
 
@@ -949,7 +787,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(priv->config != NULL && ptr != NULL);
-          priv->config->frequency = I2C_SETFREQUENCY(priv->i2c, *ptr);
+          priv->config->frequency = SPI_SETFREQUENCY(priv->spi, *ptr);
         }
         break;
 
@@ -971,15 +809,15 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: tsc2007_poll
+ * Name: ads7843e_poll
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
   FAR struct inode         *inode;
-  FAR struct tsc2007_dev_s *priv;
+  FAR struct ads7843e_dev_s *priv;
   pollevent_t               eventset;
   int                       ndx;
   int                       ret = OK;
@@ -990,7 +828,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct tsc2007_dev_s *)inode->i_private;
+  priv  = (FAR struct ads7843e_dev_s *)inode->i_private;
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -1017,7 +855,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * slot for the poll structure reference
        */
 
-      for (i = 0; i < CONFIG_TSC2007_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_ADS7843E_NPOLLWAITERS; i++)
         {
           /* Find an available slot */
 
@@ -1031,7 +869,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
             }
         }
 
-      if (i >= CONFIG_TSC2007_NPOLLWAITERS)
+      if (i >= CONFIG_ADS7843E_NPOLLWAITERS)
         {
           fds->priv    = NULL;
           ret          = -EBUSY;
@@ -1042,7 +880,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->penchange)
         {
-          tsc2007_notify(priv);
+          ads7843e_notify(priv);
         }
     }
   else if (fds->priv)
@@ -1073,15 +911,15 @@ errout:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tsc2007_register
+ * Name: ads7843e_register
  *
  * Description:
- *   Configure the TSC2007 to use the provided I2C device instance.  This
+ *   Configure the ADS7843E to use the provided SPI device instance.  This
  *   will register the driver as /dev/inputN where N is the minor device
  *   number
  *
  * Input Parameters:
- *   dev     - An I2C driver instance
+ *   dev     - An SPI driver instance
  *   config  - Persistant board configuration data
  *   minor   - The input device minor number
  *
@@ -1091,12 +929,12 @@ errout:
  *
  ****************************************************************************/
 
-int tsc2007_register(FAR struct i2c_dev_s *dev,
-                     FAR struct tsc2007_config_s *config, int minor)
+int ads7843e_register(FAR struct spi_dev_s *dev,
+                      FAR struct ads7843e_config_s *config, int minor)
 {
-  FAR struct tsc2007_dev_s *priv;
+  FAR struct ads7843e_dev_s *priv;
   char devname[DEV_NAMELEN];
-#ifdef CONFIG_TSC2007_MULTIPLE
+#ifdef CONFIG_ADS7843E_MULTIPLE
   irqstate_t flags;
 #endif
   int ret;
@@ -1110,39 +948,30 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
   DEBUGASSERT(config->attach != NULL && config->enable  != NULL &&
               config->clear  != NULL && config->pendown != NULL);
 
-  /* Create and initialize a TSC2007 device driver instance */
+  /* Create and initialize a ADS7843E device driver instance */
 
-#ifndef CONFIG_TSC2007_MULTIPLE
-  priv = &g_tsc2007;
+#ifndef CONFIG_ADS7843E_MULTIPLE
+  priv = &g_ads7843e;
 #else
-  priv = (FAR struct tsc2007_dev_s *)kmalloc(sizeof(struct tsc2007_dev_s));
+  priv = (FAR struct ads7843e_dev_s *)kmalloc(sizeof(struct ads7843e_dev_s));
   if (!priv)
     {
-      idbg("kmalloc(%d) failed\n", sizeof(struct tsc2007_dev_s));
+      idbg("kmalloc(%d) failed\n", sizeof(struct ads7843e_dev_s));
       return -ENOMEM;
     }
 #endif
 
-  /* Initialize the TSC2007 device driver instance */
+  /* Initialize the ADS7843E device driver instance */
 
-  memset(priv, 0, sizeof(struct tsc2007_dev_s));
-  priv->i2c    = dev;             /* Save the I2C device handle */
+  memset(priv, 0, sizeof(struct ads7843e_dev_s));
+  priv->spi    = dev;             /* Save the SPI device handle */
   priv->config = config;          /* Save the board configuration */
   sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
 
-  /* Set the I2C frequency (saving the actual frequency) */
+  /* Set the SPI frequency (saving the actual frequency) */
 
-  config->frequency = I2C_SETFREQUENCY(dev, config->frequency);
-
-  /* Set the I2C address and address size */
-
-  ret = I2C_SETADDRESS(dev, config->address, 7);
-  if (ret < 0)
-    {
-      idbg("I2C_SETADDRESS failed: %d\n", ret);
-      goto errout_with_priv;
-    }
+  config->frequency = SPI_SETFREQUENCY(dev, config->frequency);
 
   /* Make sure that interrupts are disabled */
 
@@ -1151,44 +980,36 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
 
   /* Attach the interrupt handler */
 
-  ret = config->attach(config, tsc2007_interrupt);
+  ret = config->attach(config, ads7843e_interrupt);
   if (ret < 0)
     {
       idbg("Failed to attach interrupt\n");
       goto errout_with_priv;
     }
 
-  /* Power down the ADC and enable PENIRQ.  This is the normal state while
-   * waiting for a touch event.
-   */
-
-  ret = tsc2007_transfer(priv, (TSC2007_CMD_12BIT | TSC2007_CMD_PWRDN_IRQEN));
-  if (ret < 0)
-    {
-      idbg("tsc2007_transfer failed: %d\n", ret);
-      goto errout_with_priv;
-    }
+  /* Initialize the touchscreen device */
+#warning "Missing logic"
 
   /* Register the device as an input device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
   ivdbg("Registering %s\n", devname);
 
-  ret = register_driver(devname, &tsc2007_fops, 0666, priv);
+  ret = register_driver(devname, &ads7843e_fops, 0666, priv);
   if (ret < 0)
     {
       idbg("register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 
-  /* If multiple TSC2007 devices are supported, then we will need to add
+  /* If multiple ADS7843E devices are supported, then we will need to add
    * this new instance to a list of device instances so that it can be
    * found by the interrupt handler based on the recieved IRQ number.
    */
 
-#ifdef CONFIG_TSC2007_MULTIPLE
-  priv->flink   = g_tsc2007list;
-  g_tsc2007list = priv;
+#ifdef CONFIG_ADS7843E_MULTIPLE
+  priv->flink    = g_ads7843elist;
+  g_ads7843elist = priv;
   irqrestore(flags);
 #endif
 
@@ -1196,7 +1017,7 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
    * availability conditions.
    */
 
-  ret = work_queue(&priv->work, tsc2007_worker, priv, 0);
+  ret = work_queue(&priv->work, ads7843e_worker, priv, 0);
   if (ret != 0)
     {
       idbg("Failed to queue work: %d\n", ret);
@@ -1209,7 +1030,7 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
 
 errout_with_priv:
   sem_destroy(&priv->devsem);
-#ifdef CONFIG_TSC2007_MULTIPLE
+#ifdef CONFIG_ADS7843E_MULTIPLE
   kfree(priv);
 #endif
   return ret;
