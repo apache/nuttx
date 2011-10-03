@@ -506,12 +506,13 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 #endif
   putreg32(regval, SAM3U_PMC_PCER);
 
-  /* Configure multiplexed pins as connected on the board. */
+  /* Configure multiplexed pins as connected on the board.  Chip select pins
+   * must be configured by board-specific logic.
+   */
 
   sam3u_configgpio(GPIO_SPI0_MISO);
   sam3u_configgpio(GPIO_SPI0_MOSI);
   sam3u_configgpio(GPIO_SPI0_SPCK);
-  sam3u_configgpio(GPIO_SPI0_NPCS2_PC14);
 
   /* Execute a software reset of the SPI twice */
 
