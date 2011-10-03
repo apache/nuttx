@@ -2,7 +2,8 @@
  * include/nuttx/input/ads7843e.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
  * References:
  *   "Touch Screen Controller, ADS7843," Burr-Brown Products from Texas
@@ -59,7 +60,11 @@
 #  define CONFIG_ADS7843E_NPOLLWAITERS 2
 #endif
 
-/* Check for some required settings.  This can save the user a lot of time
+#ifndef CONFIG_ADS7843E_SPIMODE
+#  define CONFIG_ADS7843E_SPIMODE SPIDEV_MODE0
+#endif
+
+ /* Check for some required settings.  This can save the user a lot of time
  * in getting the right configuration.
  */
 

@@ -2,7 +2,8 @@
  * drivers/input/ads7843e.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
  * References:
  *   "Touch Screen Controller, ADS7843," Burr-Brown Products from Texas
@@ -144,6 +145,18 @@ struct ads7843e_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+/* Low-level SPI helpers */
+
+static inline void ads7843e_configspi(FAR struct spi_dev_s *spi);
+#ifdef CONFIG_SPI_OWNBUS
+static inline void ads7843e_select(FAR struct spi_dev_s *spi);
+static inline void ads7843e_deselect(FAR struct spi_dev_s *spi);
+#else
+static void ads7843e_select(FAR struct spi_dev_s *spi);
+static void ads7843e_deselect(FAR struct spi_dev_s *spi);
+#endif
+
+/* Interrupts and data sampling */
 
 static void ads7843e_notify(FAR struct ads7843e_dev_s *priv);
 static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
@@ -199,6 +212,133 @@ static struct ads7843e_dev_s *g_ads7843elist;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: ads7843e_configspi
+ *
+ * Description:
+ *   Configure the SPI for use with the ADS7843E.  This funcution should be
+ *   called once during touchscreen initialization to configure the SPI
+ *   bus.  Note that if CONFIG_SPI_OWNBUS is not defined, then this function
+ *   does nothing.
+ *
+ * Parameters:
+ *   spi  - Reference to the SPI driver structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
+{
+#ifdef CONFIG_ADS7843E_FREQUENCY
+  idbg("Mode: %d Bits: 8 Frequency: %d\n",
+       CONFIG_ADS7843E_SPIMODE, CONFIG_ADS7843E_FREQUENCY);
+#else
+  idbg("Mode: %d Bits: 8\n", CONFIG_ADS7843E_SPIMODE);
+#endif
+
+  /* Configure SPI for the P14201.  But only if we own the SPI bus.  Otherwise, don't
+   * bother because it might change.
+   */
+
+#ifdef CONFIG_SPI_OWNBUS
+  SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
+  SPI_SETBITS(spi, 8);
+#ifdef CONFIG_ADS7843E_FREQUENCY
+  SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY)
+#endif
+#endif
+}
+
+/****************************************************************************
+ * Function: ads7843e_select
+ *
+ * Description:
+ *   Select the SPI, locking and  re-configuring if necessary.  This function
+ *   must be called before initiating any sequence of SPI operations. If we
+ *   are sharing the SPI bus with other devices (CONFIG_SPI_OWNBUS undefined)
+ *   then we need to lock and configure the SPI bus for each transfer.
+ *
+ * Parameters:
+ *   spi  - Reference to the SPI driver structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_OWNBUS
+static inline void ads7843e_select(FAR struct spi_dev_s *spi)
+{
+  /* We own the SPI bus, so just select the chip */
+
+  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+}
+#else
+static void ads7843e_select(FAR struct spi_dev_s *spi)
+{
+  /* Select P14201 chip (locking the SPI bus in case there are multiple
+   * devices competing for the SPI bus
+   */
+
+  SPI_LOCK(spi, true);
+  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+
+  /* Now make sure that the SPI bus is configured for the P14201 (it
+   * might have gotten configured for a different device while unlocked)
+   */
+
+  SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
+  SPI_SETBITS(spi, 8);
+#ifdef CONFIG_ADS7843E_FREQUENCY
+  SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
+#endif
+}
+#endif
+
+
+/****************************************************************************
+ * Function: ads7843e_deselect
+ *
+ * Description:
+ *   De-select the SPI, unlocking as necessary.  This function must be
+ *   after completing asequence of SPI operations. If we are sharing the SPI
+ *   bus with other devices (CONFIG_SPI_OWNBUS undefined) then we need to
+ *   un-lock the SPI bus for each transfer, possibly losing the current
+ *   configuration.
+ *
+ * Parameters:
+ *   spi  - Reference to the SPI driver structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_OWNBUS
+static inline void ads7843e_deselect(FAR struct spi_dev_s *spi)
+{
+  /* We own the SPI bus, so just de-select the chip */
+
+  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+}
+#else
+static void ads7843e_deselect(FAR struct spi_dev_s *spi)
+{
+  /* De-select P14201 chip and relinquish the SPI bus. */
+
+  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
+  SPI_LOCK(spi, false);
+}
+#endif
 
 /****************************************************************************
  * Name: ads7843e_notify
@@ -944,7 +1084,6 @@ int ads7843e_register(FAR struct spi_dev_s *dev,
   /* Debug-only sanity checks */
 
   DEBUGASSERT(dev != NULL && config != NULL && minor >= 0 && minor < 100);
-  DEBUGASSERT((config->address & 0xfc) == 0x48);
   DEBUGASSERT(config->attach != NULL && config->enable  != NULL &&
               config->clear  != NULL && config->pendown != NULL);
 
@@ -988,6 +1127,8 @@ int ads7843e_register(FAR struct spi_dev_s *dev,
     }
 
   /* Initialize the touchscreen device */
+
+  ads7843e_configspi(dev);
 #warning "Missing logic"
 
   /* Register the device as an input device */
