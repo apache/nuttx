@@ -80,6 +80,18 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
+/* In hi-res mode, the RTC operates at 16384Hz.  Overflow interrupts are handled
+ * when the 32-bit RTC counter overflows every 3 days and 43 minutes.  A BKP register
+ * is incremented on each overflow interrupt creating, effectively, a 48-bit RTC
+ * counter.
+ *
+ * In the lo-res mode, the RTC operates at 1Hz.  Overflow interrupts are not handled
+ * (because the next overflow is not expected until the year 2106.
+ *
+ * WARNING:  Overflow interrupts are lost whenever the STM32 is powered down.  The
+ * overflow interrupt may be lost even if the STM32 is powered down only momentarily.
+ * Therefor  hi-res solution is only useful in systems where the power is always on.
+ */
 
 #ifdef CONFIG_RTC_HIRES
 #  ifndef CONFIG_RTC_FREQUENCY

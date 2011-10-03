@@ -607,6 +607,23 @@ defconfig -- This is a configuration file similar to the Linux
 		  option will enable a limited form of memory mapping that is
 		  implemented by copying whole files into memory.
 
+	RTC
+
+		CONFIG_RTC - Enables general support for a hardware RTC. Specific
+		  architectures may require other specific settings.
+		CONFIG_RTC_HIRES - The typical RTC keeps time to resolution of 1
+		  second, usually supporting a 32-bit time_t value.  In this case,
+		  the RTC is used to &quot;seed&quot; the normal NuttX timer and the
+		  NuttX timer provides for higher resoution time. If CONFIG_RTC_HIRES
+		  is enabled in the NuttX configuration, then the RTC provides higher
+		  resolution time and completely replaces the system timer for purpose of
+		  date and time.
+		  CONFIG_RTC_FREQUENCY - If CONFIG_RTC_HIRES is defined, then the
+		  frequency of the high resolution RTC must be provided.  If CONFIG_RTC_HIRES
+		  is not defined, CONFIG_RTC_FREQUENCY is assumed to be one.
+		CONFIG_RTC_ALARM - Enable if the RTC hardware supports setting of an alarm. 
+		  A callback function will be executed when the alarm goes off
+
 	SPI driver
 
 		CONFIG_SPI_OWNBUS - Set if there is only one active device

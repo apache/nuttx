@@ -14,6 +14,7 @@ Contents
   - DFU
   - LEDs
   - Temperature Sensor
+  - RTC
   - STM3210E-EVAL-specific Configuration Options
   - Configurations
 
@@ -263,6 +264,38 @@ More complex temperature sensor operations are also available.  See the IOCTAL
 commands enumerated in include/nuttx/sensors/lm75.h.  Also read the descriptions
 of the stm32_lm75initialize() and stm32_lm75attach() interfaces in the
 arch/board/board.h file (sames as configs/stm3210e-eval/include/board.h).
+
+RTC
+===
+
+  The STM32 RTC may configured using the following settings.
+
+    CONFIG_RTC - Enables general support for a hardware RTC. Specific
+      architectures may require other specific settings.
+    CONFIG_RTC_HIRES - The typical RTC keeps time to resolution of 1
+      second, usually supporting a 32-bit time_t value.  In this case,
+      the RTC is used to &quot;seed&quot; the normal NuttX timer and the
+      NuttX timer provides for higher resoution time. If CONFIG_RTC_HIRES
+      is enabled in the NuttX configuration, then the RTC provides higher
+      resolution time and completely replaces the system timer for purpose of
+      date and time.
+      CONFIG_RTC_FREQUENCY - If CONFIG_RTC_HIRES is defined, then the
+      frequency of the high resolution RTC must be provided.  If CONFIG_RTC_HIRES
+      is not defined, CONFIG_RTC_FREQUENCY is assumed to be one.
+    CONFIG_RTC_ALARM - Enable if the RTC hardware supports setting of an alarm. 
+      A callback function will be executed when the alarm goes off
+
+  In hi-res mode, the STM32 RTC operates only at 16384Hz.  Overflow interrupts
+  are handled when the 32-bit RTC counter overflows every 3 days and 43 minutes.
+  A BKP register is incremented on each overflow interrupt creating, effectively,
+  a 48-bit RTC counter.
+
+  In the lo-res mode, the RTC operates at 1Hz.  Overflow interrupts are not handled
+  (because the next overflow is not expected until the year 2106.
+
+   WARNING:  Overflow interrupts are lost whenever the STM32 is powered down.  The
+   overflow interrupt may be lost even if the STM32 is powered down only momentarily.
+   Therefore hi-res solution is only useful in systems where the power is always on.
 
 STM3210E-EVAL-specific Configuration Options
 ============================================

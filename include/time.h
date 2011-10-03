@@ -67,11 +67,28 @@
 # define CLOCKS_PER_SEC    (100)
 #endif
 
-/* This is the only clock_id supported by the "Clock and Timer
- * Functions."
+/* CLOCK_REALTIME refers to the standard time source.  For most implementations,
+ * the standard time source is the system timer interrupt.  However, if the
+ * platform supports an RTC, then the standard time source will be the RTC
+ * for the clock_gettime() and clock_settime() interfaces (the system timer
+ * is still the time source for all of the interfaces).
  */
 
 #define CLOCK_REALTIME     0
+
+/* If an RTC is supported, then the non-standard CLOCK_ACTIVETIME is also
+ * supported to manage time based on the system timer interrupt separately from
+ * the RTC.  This may be necessary, for example, in certain cases where the
+ * system timer interrupt has been stopped in low power modes.
+ *
+ * CLOCK_ACTIVETIME is only recognized by clock_gettime() and clock_settime().
+ */
+
+#ifdef CONFIG_RTC
+#  define CLOCK_ACTIVETIME 1
+#else
+#  define CLOCK_ACTIVETIME CLOCK_REALTIME
+#endif
 
 /* This is a flag that may be passed to the timer_settime() function */
 
