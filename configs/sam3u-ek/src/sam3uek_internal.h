@@ -3,7 +3,7 @@
  * arch/arm/src/board/sam3uek_internal.n
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -161,9 +161,9 @@
 
 /* SPI Chip Selects */
 
-/* Chip select pin connected to the touchscreen controller. */
+/* Chip select pin connected to the touchscreen controller and to ZigBee module connector. */
 
-#define GPIO_TSC_NPCS  GPIO_SPI0_NPCS2_PC14
+#define GPIO_TSC_NPCS2  GPIO_SPI0_NPCS2_3
 
 /************************************************************************************
  * Public Types

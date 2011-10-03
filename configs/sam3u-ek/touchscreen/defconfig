@@ -180,6 +180,12 @@ CONFIG_USART2_2STOP=0
 CONFIG_USART3_2STOP=0
 
 #
+# Input device configuration
+#
+CONFIG_INPUT=y
+CONFIG_INPUT_ADS7843E=y
+
+#
 # General build options
 #
 # CONFIG_RRLOAD_BINARY - make the rrload binary format used with

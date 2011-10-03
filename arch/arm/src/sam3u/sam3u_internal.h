@@ -2,7 +2,7 @@
  * arch/arm/src/sam3u/sam3u_internal.h
  *
  *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -248,8 +248,27 @@
 #define GPIO_SPI0_MISO            (GPIO_PERIPHA|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN13)
 #define GPIO_SPI0_MOSI            (GPIO_PERIPHA|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN14)
 #define GPIO_SPI0_SPCK            (GPIO_PERIPHA|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN15)
-//#define GPIO_SPI0_NPCS2_PC14    (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOC|GPIO_PIN14)
-#define GPIO_SPI0_NPCS2_PC14      (GPIO_OUTPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOC|GPIO_OUTPUT_CLEAR|GPIO_PIN14)
+#if 0
+#  define GPIO_SPI0_NPCS0         (GPIO_PERIPHA|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN16)
+#  define GPIO_SPI0_NPCS1_1       (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN0)
+#  define GPIO_SPI0_NPCS1_2       (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOC|GPIO_PIN3)
+#  define GPIO_SPI0_NPCS1_3       (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOC|GPIO_PIN19)
+#  define GPIO_SPI0_NPCS2_1       (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN1)
+#  define GPIO_SPI0_NPCS2_2       (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOC|GPIO_PIN4)
+#  define GPIO_SPI0_NPCS2_3       (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOC|GPIO_PIN14)
+#  define GPIO_SPI0_NPCS3_1       (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN19)
+#  define GPIO_SPI0_NPCS3_2       (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOC|GPIO_PIN5)
+#else
+#  define GPIO_SPI0_NPCS0         (GPIO_OUTPUT|GPIO_CFG_PULLUP|GPIO_OUTPUT_CLEAR|GPIO_PORT_PIOA|GPIO_PIN16)
+#  define GPIO_SPI0_NPCS1_1       (GPIO_OUTPUT|GPIO_CFG_PULLUP|GPIO_OUTPUT_CLEAR|GPIO_PORT_PIOA|GPIO_PIN0)
+#  define GPIO_SPI0_NPCS1_2       (GPIO_OUTPUT|GPIO_CFG_PULLUP|GPIO_OUTPUT_CLEAR|GPIO_PORT_PIOC|GPIO_PIN3)
+#  define GPIO_SPI0_NPCS1_3       (GPIO_OUTPUT|GPIO_CFG_PULLUP|GPIO_OUTPUT_CLEAR|GPIO_PORT_PIOC|GPIO_PIN19)
+#  define GPIO_SPI0_NPCS2_1       (GPIO_OUTPUT|GPIO_CFG_PULLUP|GPIO_OUTPUT_CLEAR|GPIO_PORT_PIOA|GPIO_PIN1)
+#  define GPIO_SPI0_NPCS2_2       (GPIO_OUTPUT|GPIO_CFG_PULLUP|GPIO_OUTPUT_CLEAR|GPIO_PORT_PIOC|GPIO_PIN4)
+#  define GPIO_SPI0_NPCS2_3       (GPIO_OUTPUT|GPIO_CFG_PULLUP|GPIO_OUTPUT_CLEAR|GPIO_PORT_PIOC|GPIO_PIN14)
+#  define GPIO_SPI0_NPCS3_1       (GPIO_OUTPUT|GPIO_CFG_PULLUP|GPIO_OUTPUT_CLEAR|GPIO_PORT_PIOA|GPIO_PIN19)
+#  define GPIO_SPI0_NPCS3_2       (GPIO_OUTPUT|GPIO_CFG_PULLUP|GPIO_OUTPUT_CLEAR|GPIO_PORT_PIOC|GPIO_PIN5)
+#endif
 
 #define GPIO_SSC_TD               (GPIO_PERIPHA|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN26)
 #define GPIO_SSC_TK               (GPIO_PERIPHA|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN28)
@@ -752,6 +771,45 @@ EXTERN void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
  ****************************************************************************/
 
 EXTERN void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
+
+/****************************************************************************
+ * Name:  sam3u_spiselect, sam3u_spistatus, and sam3u_spicmddata
+ *
+ * Description:
+ *   These external functions must be provided by board-specific logic.  They
+ *   are implementations of the select, status, and cmddata methods of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi.h). All
+ *   other methods including up_spiinitialize()) are provided by common SAM3U
+ *   logic.  To use this common SPI logic on your board:
+ *
+ *   1. Provide logic in sam3u_boardinitialize() to configure SPI chip select
+ *      pins.
+ *   2. Provide sam3u_spiselect() and sam3u_spistatus() functions in your
+ *      board-specific logic.  These functions will perform chip selection
+ *      and status operations using GPIOs in the way your board is configured.
+ *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
+ *      sam3u_spicmddata() functions in your board-specific logic.  This
+ *      function will perform cmd/data selection operations using GPIOs in
+ *      the way your board is configured.
+ *   3. Add a call to up_spiinitialize() in your low level application
+ *      initialization logic
+ *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *      SPI driver to higher level logic (e.g., calling 
+ *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
+ *      the SPI MMC/SD driver).
+ *
+ ****************************************************************************/
+
+struct spi_dev_s;
+enum spi_dev_e;
+
+#ifdef CONFIG_SAM3U_SPI
+EXTERN void  sam3u_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t sam3u_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+EXTERN int sam3u_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

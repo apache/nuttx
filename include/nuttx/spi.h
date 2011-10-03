@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/nuttx/spi.h
  *
- *   Copyright(C) 2008-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright(C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -347,22 +347,23 @@ typedef void (*spi_mediachange_t)(FAR void *arg);
 
 enum spi_dev_e
 {
-  SPIDEV_NONE = 0,  /* Not a valid value */
-  SPIDEV_MMCSD,     /* Select SPI MMC/SD device */
-  SPIDEV_FLASH,     /* Select SPI FLASH device */
-  SPIDEV_ETHERNET,  /* Select SPI ethernet device */
-  SPIDEV_DISPLAY,   /* Select SPI LCD/OLED display device */
-  SPIDEV_WIRELESS   /* Select SPI Wireless device */
+  SPIDEV_NONE = 0,    /* Not a valid value */
+  SPIDEV_MMCSD,       /* Select SPI MMC/SD device */
+  SPIDEV_FLASH,       /* Select SPI FLASH device */
+  SPIDEV_ETHERNET,    /* Select SPI ethernet device */
+  SPIDEV_DISPLAY,     /* Select SPI LCD/OLED display device */
+  SPIDEV_WIRELESS,    /* Select SPI Wireless device */
+  SPIDEV_TOUCHSCREEN  /* Select SPI touchscreen device */
 };
 
 /* Certain SPI devices may required differnt clocking modes */
 
 enum spi_mode_e
 {
-  SPIDEV_MODE0 = 0,  /* CPOL=0 CHPHA=0 */
-  SPIDEV_MODE1,      /* CPOL=0 CHPHA=1 */
-  SPIDEV_MODE2,      /* CPOL=1 CHPHA=0 */
-  SPIDEV_MODE3       /* CPOL=1 CHPHA=1 */
+  SPIDEV_MODE0 = 0,   /* CPOL=0 CHPHA=0 */
+  SPIDEV_MODE1,       /* CPOL=0 CHPHA=1 */
+  SPIDEV_MODE2,       /* CPOL=1 CHPHA=0 */
+  SPIDEV_MODE3        /* CPOL=1 CHPHA=1 */
 };
 
 /* The SPI vtable */
