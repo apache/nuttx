@@ -134,18 +134,21 @@ void weak_function sam3u_spiinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SAM3U_SPI
-void sam3u_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+int sam3u_spiselect(enum spi_dev_e devid)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  int cs = -EINVAL;
 
 #if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
   if (devid == SPIDEV_TOUCHSCREEN)
     {
       /* Assert the CS pin to the OLED display */
 
-      (void)lpc17_gpiowrite(GPIO_TSC_NPCS2, !selected);
+	  cs = 2;
     }
 #endif
+
+  spidbg("devid: %d CS: %d\n", (int)devid, cs);
+  return cs;
 }
 
 uint8_t sam3u_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)

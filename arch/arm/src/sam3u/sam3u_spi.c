@@ -2,7 +2,8 @@
  * arch/arm/src/sam3u/sam3u_spi.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -82,24 +83,32 @@
 #  define spivdbg(x...)
 #endif
 
-/* SPI Clocking */
-
-#warning "Missing logi"
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+/* The state of one chip select */
+
+#ifndef CONFIG_SPI_OWNBUS
+struct sam3u_chipselect_s
+{
+  uint32_t         frequency;  /* Requested clock frequency */
+  uint32_t         actual;     /* Actual clock frequency */
+  uint8_t          nbits;      /* Width of word in bits (8 to 16) */
+  uint8_t          mode;       /* Mode 0,1,2,3 */
+};
+#endif
+
+/* The overall state of the SPI interface */
 
 struct sam3u_spidev_s
 {
   struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
 #ifndef CONFIG_SPI_OWNBUS
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
-  uint32_t         frequency;  /* Requested clock frequency */
-  uint32_t         actual;     /* Actual clock frequency */
-  uint8_t          nbits;      /* Width of word in bits (8 to 16) */
-  uint8_t          mode;       /* Mode 0,1,2,3 */
+  struct sam3u_chipselect_s csstate[4];
 #endif
+  uint8_t          cs;         /* Chip select number */
 };
 
 /****************************************************************************
@@ -123,12 +132,14 @@ static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_
  * Private Data
  ****************************************************************************/
 
+/* SPI driver operations */
+
 static const struct spi_ops_s g_spiops =
 {
 #ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
 #endif
-  .select            = sam3u_spiselect,
+  .select            = spi_select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
@@ -142,10 +153,19 @@ static const struct spi_ops_s g_spiops =
   .registercallback  = 0,                 /* Not implemented */
 };
 
+/* SPI device structure */
+
 static struct sam3u_spidev_s g_spidev =
 {
   .spidev            = { &g_spiops },
 }; 
+
+/* This array maps chip select numbers (0-3) to CSR register addresses */
+
+static const uint32_t g_csraddr[4] =
+{
+  SAM3U_SPI_CSR0, SAM3U_SPI_CSR1, SAM3U_SPI_CSR2, SAM3U_SPI_CSR3
+};
 
 /****************************************************************************
  * Public Data
@@ -203,6 +223,65 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 #endif
 
 /****************************************************************************
+ * Name: spi_select
+ *
+ * Description:
+ *   This function does not actually set the chip select line.  Rather, it
+ *   simply maps the device ID into a chip select number and retains that
+ *   chip select number for later use.
+ *
+ * Input Parameters:
+ *   dev -       Device-specific state data
+ *   frequency - The SPI frequency requested
+ *
+ * Returned Value:
+ *   Returns the actual frequency selected
+ *
+ ****************************************************************************/
+
+ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+ {
+  FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  uint32_t regval;
+
+  /* Are we selecting or de-selecting the device? */
+
+  if (selected)
+    {
+      /* At this point, we expect no chip selected */
+
+      DEBUGASSERT(priv->cs == 0xff);
+
+      /* Get the chip select associated with this SPI device */
+
+      priv->cs = sam3u_spiselect(devid);
+      DEBUGASSERT(priv->cs >= 0 && priv->cs <= 3);
+
+      /* Before writing the TDR, the PCS field in the SPI_MR register must be set
+       * in order to select a slave.
+       */
+
+      regval = getreg32(SAM3U_SPI_MR);
+      regval &= ~SPI_MR_PCS_MASK;
+      regval |= (priv->cs << SPI_MR_PCS_SHIFT);
+      putreg32(regval, SAM3U_SPI_MR);
+    }
+  else
+    {
+      /* At this point, we expect the chip to have already been selected */
+
+#ifdef CONFIG_DEBUG
+      int cs = sam3u_spiselect(devid);
+      DEBUGASSERT(priv->cs == cs);
+#endif
+
+      /* Mark no chip selected */
+
+      priv->cs = 0xff;
+    }
+ }
+
+/****************************************************************************
  * Name: spi_setfrequency
  *
  * Description:
@@ -221,34 +300,56 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
   uint32_t actual;
+  uint32_t divisor;
+  uint32_t regval;
+  uint32_t regaddr;
 
-  /* Check if the requested frequence is the same as the frequency selection */
+  DEBUGASSERT(priv->cs >= 0 && priv->cs <= 3);
+
+  /* Check if the requested frequency is the same as the frequency selection */
 
 #ifndef CONFIG_SPI_OWNBUS
-  if (priv->frequency == frequency)
+  if (priv->csstate[priv->cs].frequency == frequency)
     {
       /* We are already at this frequency.  Return the actual. */
 
-      return priv->actual;
+      return priv->csstate[priv->cs].actual;
     }
 #endif
 
-  /* Configure SPI to a frequency as close as possible to the requested
-   * frequency.
-   */
- 
-#warning "Missing logic"
+  /* Configure SPI to a frequency as close as possible to the requested frequency. */
 
-  /* Calculate the actual actual frequency that is used */
+  /* frequency = SPI_CLOCK / divisor, or divisor = SPI_CLOCK / frequency */
 
-#warning "Missing logic"
-  actual = 0;
+  divisor = SAM3U_MCK_FREQUENCY / frequency;
+
+  if (divisor < 8)
+    {
+      divisor = 8;
+    }
+  else if (divisor > 254)
+    {
+      divisor = 254;
+    }
+
+  divisor = (divisor + 1) & ~1;
+
+  /* Save the new divisor value */
+  
+  regaddr = g_csraddr[priv->cs];
+  regval  = getreg32(regaddr);
+  regval &= ~SPI_CSR_SCBR_MASK;
+  putreg32(divisor << SPI_CSR_SCBR_SHIFT, regaddr);
+
+  /* Calculate the new actual */
+
+  actual = SAM3U_MCK_FREQUENCY / divisor;
 
   /* Save the frequency setting */
 
 #ifndef CONFIG_SPI_OWNBUS
-  priv->frequency = frequency;
-  priv->actual    = actual;
+  priv->csstate[priv->cs].frequency = frequency;
+  priv->csstate[priv->cs].actual    = actual;
 #endif
 
   spidbg("Frequency %d->%d\n", frequency, actual);
@@ -274,28 +375,37 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
   uint32_t regval;
+  uint32_t regaddr;
+
+  DEBUGASSERT(priv->cs >= 0 && priv->cs <= 3);
 
   /* Has the mode changed? */
 
 #ifndef CONFIG_SPI_OWNBUS
-  if (mode != priv->mode)
+  if (mode != priv->csstate[priv->cs].mode)
     {
 #endif
       /* Yes... Set the mode appropriately */
-#warning "Missing logic"
+
+      regaddr = g_csraddr[priv->cs];
+      regval  = getreg32(regaddr);
+      regval &= ~(SPI_CSR_CPOL|SPI_CSR_NCPHA);
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
+        case SPIDEV_MODE0: /* CPOL=0; NCPHA=0 */
           break;
  
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+        case SPIDEV_MODE1: /* CPOL=0; NCPHA=1 */
+            regval |= SPI_CSR_NCPHA;
           break;
  
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
+        case SPIDEV_MODE2: /* CPOL=1; NCPHA=0 */
+            regval |= SPI_CSR_CPOL;
           break;
  
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+        case SPIDEV_MODE3: /* CPOL=1; NCPHA=1 */
+          regval |= (SPI_CSR_CPOL|SPI_CSR_NCPHA);
           break;
  
         default:
@@ -303,10 +413,12 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           return;
         }
 
+      putreg32(regval, regaddr);        
+
       /* Save the mode so that subsequent re-configurations will be faster */
 
 #ifndef CONFIG_SPI_OWNBUS
-      priv->mode = mode;
+      priv->csstate[priv->cs].mode = mode;
     }
 #endif
 }
@@ -329,22 +441,30 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
   FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  uint32_t regaddr;
   uint32_t regval;
 
   /* Has the number of bits changed? */
 
   DEBUGASSERT(priv && nbits > 7 && nbits < 17);
+  DEBUGASSERT(priv->cs >= 0 && priv->cs <= 3);
+
 #ifndef CONFIG_SPI_OWNBUS
-  if (nbits != priv->nbits)
+  if (nbits != priv->csstate[priv->cs].nbits)
     {
 #endif
       /* Yes... Set number of bits appropriately */
-#warning "Missing logic"
+
+      regaddr = g_csraddr[priv->cs];
+      regval  = getreg32(regaddr);
+      regval &= ~SPI_CSR_BITS_MASK;
+      regval |= SPI_CSR_BITS(nbits);
+      putreg32(regval, regaddr);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
 #ifndef CONFIG_SPI_OWNBUS
-      priv->nbits = nbits;
+      priv->csstate[priv->cs].nbits = nbits;
     }
 #endif
 }
@@ -367,15 +487,23 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
-  /* Write the data to transmitted to the SPI Data Register */
-#warning "Missing logic"
+  /* Wait for any previous data written to the TDR to be transferred to the
+   * serializer.
+   */
 
-  /* Wait for the data exchange to complete */
-#warning "Missing logic"
+  while ((getreg32(SAM3U_SPI_SR) & SPI_INT_TDRE) == 0);
 
- /* Clear any pending status and return the received data */
-#warning "Missing logic"
-  return 0;
+  /* Write the data to transmitted to the Transmit Data Register (TDR) */
+
+  putreg32((uint32_t)wd, SAM3U_SPI_TDR);
+
+  /* Wait for the read data to be available in the RDR */
+
+  while ((getreg32(SAM3U_SPI_SR) & SPI_INT_RDRF) == 0);
+
+  /* Return the received data */
+ 
+  return (uint16_t)getreg32(SAM3U_SPI_RDR);
 }
 
 /*************************************************************************
@@ -403,19 +531,21 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
   uint8_t data;
 
   spidbg("nwords: %d\n", nwords);
-  while (nwords)
+
+  /* Loop, sending each word in the user-provied data buffer */
+
+  for ( ; nwords > 0; nwords--)
     {
-      /* Write the data to transmitted to the SPI Data Register */
+      /* Wait for any previous data written to the TDR to be transferred
+       * to the serializer.
+       */
+      
+      while ((getreg32(SAM3U_SPI_SR) & SPI_INT_TDRE) == 0);
+
+      /* Write the data to transmitted to the Transmit Data Register (TDR) */
 
       data = *ptr++;
-#warning "Missing logic"
-
-      /* Wait for the data exchange to complete */
-#warning "Missing logic"
-
-     /* Clear any pending status */
-#warning "Missing logic"
-     nwords--;
+      putreg32((uint32_t)data, SAM3U_SPI_TDR);
     }
 }
 
@@ -443,28 +573,30 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
   FAR uint8_t *ptr = (FAR uint8_t*)buffer;
 
   spidbg("nwords: %d\n", nwords);
-  while (nwords)
+
+  /* Loop, receiving each word */
+
+  for ( ; nwords > 0; nwords--)
     {
-      /* Write some dummy data to the SPI Data Register in order to clock the
-       * read data.
+      /* Wait for any previous data written to the TDR to be transferred
+       * to the serializer.
+       */
+  
+      while ((getreg32(SAM3U_SPI_SR) & SPI_INT_TDRE) == 0);
+  
+      /* Write the some dummy data the Transmit Data Register (TDR) in order
+       * to clock the read data.
        */
 
-#warning "Missing logic"
+      putreg32(0xff, SAM3U_SPI_TDR);
 
-      /* Wait for the data exchange to complete */
-#warning "Missing logic"
+      /* Wait for the read data to be available in the RDR */
 
-     /* Read the received data from the SPI Data Register */   
-#warning "Missing logic"
+      while ((getreg32(SAM3U_SPI_SR) & SPI_INT_RDRF) == 0);
 
-     /* Clear any pending status */
-#warning "Missing logic"
+      /* Read the received data from the SPI Data Register */   
 
-     /* Read the received data from the SPI Data Register */   
-
-#warning "Missing logic"
-     *ptr++ = 0;
-     nwords--;
+      *ptr++ = (uint8_t)getreg32(SAM3U_SPI_RDR);
     }
 }
 
@@ -496,6 +628,10 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   DEBUGASSERT(port == 0);
 
+  /* Set up the initial state */
+
+  priv->cs = 0xff;
+
   /* Apply power to the SPI block */
 
   flags = irqsave();
@@ -514,30 +650,25 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   sam3u_configgpio(GPIO_SPI0_MOSI);
   sam3u_configgpio(GPIO_SPI0_SPCK);
 
-  /* Execute a software reset of the SPI twice */
+  /* Execute a software reset of the SPI (twice) */
 
   putreg32(SPI_CR_SWRST, SAM3U_SPI_CR);
   putreg32(SPI_CR_SWRST, SAM3U_SPI_CR);
-
-  /* Configure clocking */
-#warning "Missing logic - Check SPI MR register"
-
   irqrestore(flags);
-  
-  /* Configure 8-bit SPI mode and master mode */
-#warning "Missing logic"
 
-  /* Set the initial SPI configuration */
+  /* Configure the SPI mode register */
+#warning "Need to review this -- what other settngs are necessary"
+  putreg32(SPI_MR_MSTR, SAM3U_SPI_MR);
 
-#ifndef CONFIG_SPI_OWNBUS
-  priv->frequency = 0;
-  priv->nbits     = 8;
-  priv->mode      = SPIDEV_MODE0;
-#endif
+  /* And enable the SPI */
 
-  /* Select a default frequency of approx. 400KHz */
+  putreg32(SPI_CR_SPIEN, SAM3U_SPI_CR);
+  up_mdelay(20);
 
-  spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
+  /* Flush any pending transfers */
+
+  (void)getreg32(SAM3U_SPI_SR);
+  (void)getreg32(SAM3U_SPI_RDR);
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
