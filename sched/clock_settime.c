@@ -101,7 +101,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
    */
 
 #ifdef CONFIG_RTC
-  if (clock_id == CLOCK_REALTIME || clockid == CLOCK_ACTIVETIME)
+  if (clock_id == CLOCK_REALTIME || clock_id == CLOCK_ACTIVETIME)
 #else
   if (clock_id == CLOCK_REALTIME)
 #endif
@@ -127,7 +127,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
       /* Setup the RTC (lo- or high-res) */
 
 #ifdef CONFIG_RTC
-      if (g_rtc_enabled && clockid != CLOCK_ACTIVETIME)
+      if (g_rtc_enabled && clock_id != CLOCK_ACTIVETIME)
         {
           up_rtc_settime(tp);
         } 

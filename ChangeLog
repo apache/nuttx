@@ -2131,3 +2131,6 @@
 	* CONFIG_SYSTEM_TIME16: Added support for an optional 64-bit system timer.
 	* fs/fat/fs_fat32util.c: Add support for FAT date/time stamps; Enabled via
 	  CONFIG_FS_FATTIME.
+	* arch/arm/src/sam3u/sam3u_spi.c: Add an SPI driver for the AT91SAM3U.
+	* drivers/input/ads7843e.c and include/nuttx/input/ads7843e.h: Add a
+	  driver for the TI ADS7843E touchscreen controller.

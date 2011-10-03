@@ -111,7 +111,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
    */
 
 #ifdef CONFIG_RTC
-  if (clock_id == CLOCK_REALTIME || clockid == CLOCK_ACTIVETIME)
+  if (clock_id == CLOCK_REALTIME || clock_id == CLOCK_ACTIVETIME)
 #else
   if (clock_id == CLOCK_REALTIME)
 #endif
@@ -119,7 +119,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
       /* Do we have a high-resolution RTC that can provie us with the time? */
 
 #ifdef CONFIG_RTC_HIRES
-      if (g_rtc_enabled && clockid != CLOCK_ACTIVETIME)
+      if (g_rtc_enabled && clock_id != CLOCK_ACTIVETIME)
         {
           /* Yes.. Get the hi-resolution time from the RTC */
 

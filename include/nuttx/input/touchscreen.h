@@ -68,7 +68,7 @@
  * reported in the struct touch_point_s flags.
  */
 
-#define TOUCH_DOWN           (1 << 0) /* A new touch contact is establed */
+#define TOUCH_DOWN           (1 << 0) /* A new touch contact is established */
 #define TOUCH_MOVE           (1 << 1) /* Movement occurred with previously reported contact */
 #define TOUCH_UP             (1 << 2) /* The touch contact was lost */
 #define TOUCH_ID_VALID       (1 << 3) /* Touch ID is uncertain */
@@ -86,13 +86,13 @@
 
 struct touch_point_s
 {
- uint8_t  id;       /* Unique identifies contact; Same in all reports for the contact */
- uint8_t  flags;    /* See TOUCH_* definitions above */
- int16_t  x;        /* X coordinate of the touch point (uncalibrated) */
- int16_t  y;        /* Y coordinate of the touch point (uncalibrated) */
- int16_t  h;        /* Height of touch point (uncalibrated) */
- int16_t  w;        /* Width of touch point (uncalibrated) */
- uint16_t pressure; /* Touch pressure */
+  uint8_t  id;       /* Unique identifies contact; Same in all reports for the contact */
+  uint8_t  flags;    /* See TOUCH_* definitions above */
+  int16_t  x;        /* X coordinate of the touch point (uncalibrated) */
+  int16_t  y;        /* Y coordinate of the touch point (uncalibrated) */
+  int16_t  h;        /* Height of touch point (uncalibrated) */
+  int16_t  w;        /* Width of touch point (uncalibrated) */
+  uint16_t pressure; /* Touch pressure */
 };
 
 /* The typical touchscreen driver is a read-only, input character device driver.
