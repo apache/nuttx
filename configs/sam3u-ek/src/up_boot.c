@@ -2,7 +2,7 @@
  * configs/sam3u-ek/src/up_boot.c
  * arch/arm/src/board/up_boot.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
