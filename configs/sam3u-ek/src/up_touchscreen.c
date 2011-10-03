@@ -50,11 +50,21 @@
 #include <nuttx/input/ads7843e.h>
 
 #include "sam3u_internal.h"
-#include "sam3uek_internal.h.h"
+#include "sam3uek_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifdef CONFIG_INPUT_ADS7843E
+#ifndef CONFIG_INPUT
+#  error "Touchscreen support requires CONFIG_INPUT"
+#endif
+
+#ifndef CONFIG_SAM3U_SPI
+#  error "Touchscreen support requires CONFIG_SAM3U_SPI"
+#endif
 
 /****************************************************************************
  * Static Function Prototypes
@@ -150,7 +160,6 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
 
   return sam3u_gpioread(GPIO_ADS7843E);
 }
-#endif /* HAVE_TOUCHSCREEN */
 
 /****************************************************************************
  * Public Functions
@@ -195,3 +204,4 @@ int up_tcinitialize(void)
 
   return OK;
 }
+#endif /* CONFIG_INPUT_ADS7843E */
