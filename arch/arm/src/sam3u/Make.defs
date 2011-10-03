@@ -2,7 +2,7 @@
 # arch/arm/src/sam3u/Make.defs
 #
 #   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -75,3 +75,6 @@ ifeq ($(CONFIG_SAM3U_HSMCI),y)
 CHIP_CSRCS	+= sam3u_hsmci.c
 endif
 
+ifeq ($(CONFIG_SAM3U_SPI),y)
+CHIP_CSRCS	+= sam3u_spi.c
+endif
