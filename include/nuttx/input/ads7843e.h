@@ -61,10 +61,10 @@
 #endif
 
 #ifndef CONFIG_ADS7843E_SPIMODE
-#  define CONFIG_ADS7843E_SPIMODE SPIDEV_MODE0
+#  define CONFIG_ADS7843E_SPIMODE SPIDEV_MODE1
 #endif
 
- /* Check for some required settings.  This can save the user a lot of time
+/* Check for some required settings.  This can save the user a lot of time
  * in getting the right configuration.
  */
 
@@ -94,7 +94,6 @@ struct ads7843e_config_s
 {
   /* Device characterization */
 
-  uint16_t calib;      /* Calibration resistance */
   uint32_t frequency;  /* SPI frequency */
 
   /* If multiple ADS7843E devices are supported, then an IRQ number must
@@ -120,6 +119,7 @@ struct ads7843e_config_s
   int  (*attach)(FAR struct ads7843e_config_s *state, xcpt_t isr);
   void (*enable)(FAR struct ads7843e_config_s *state, bool enable);
   void (*clear)(FAR struct ads7843e_config_s *state);
+  bool (*busy)(FAR struct ads7843e_config_s *state);
   bool (*pendown)(FAR struct ads7843e_config_s *state);
 };
 

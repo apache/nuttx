@@ -53,6 +53,7 @@
 #include <fcntl.h>
 #include <semaphore.h>
 #include <poll.h>
+#include <wdog.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -71,76 +72,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-/* Reference counting is partially implemented, but not needed in the
- * current design.
- */
-
-#undef CONFIG_ADS7843E_REFCNT
-
-/* Driver support ***********************************************************/
-/* This format is used to construct the /dev/input[n] device driver path.  It
- * defined here so that it will be used consistently in all places.
- */
-
-#define DEV_FORMAT   "/dev/input%d"
-#define DEV_NAMELEN  16
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-/* This describes the state of one contact */
-
-enum ads7843e_contact_3
-{
-  CONTACT_NONE = 0,                    /* No contact */
-  CONTACT_DOWN,                        /* First contact */
-  CONTACT_MOVE,                        /* Same contact, possibly different position */
-  CONTACT_UP,                          /* Contact lost */
-};
-
-/* This structure describes the results of one ADS7843E sample */
-
-struct ads7843e_sample_s
-{
-  uint8_t  id;                          /* Sampled touch point ID */
-  uint8_t  contact;                     /* Contact state (see enum ads7843e_contact_e) */
-  uint16_t x;                           /* Measured X position */
-  uint16_t y;                           /* Measured Y position */
-#warning "Missing other measurement data" /* Like size and pressure */
-};
-
-/* This structure describes the state of one ADS7843E driver instance */
-
-struct ads7843e_dev_s
-{
-#ifdef CONFIG_ADS7843E_MULTIPLE
-  FAR struct ads7843e_dev_s *flink;     /* Supports a singly linked list of drivers */
-#endif
-#ifdef CONFIG_ADS7843E_REFCNT
-  uint8_t crefs;                        /* Number of times the device has been opened */
-#endif
-  uint8_t nwaiters;                     /* Number of threads waiting for ADS7843E data */
-  uint8_t id;                           /* Current touch point ID */
-  volatile bool penchange;              /* An unreported event is buffered */
-  sem_t devsem;                         /* Manages exclusive access to this structure */
-  sem_t waitsem;                        /* Used to wait for the availability of data */
-
-  FAR struct ads7843e_config_s *config; /* Board configuration data */
-  FAR struct spi_dev_s *spi;            /* Saved SPI driver instance */
-  struct work_s work;                   /* Supports the interrupt handling "bottom half" */
-  struct ads7843e_sample_s sample;      /* Last sampled touch point data */
-
-  /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
-   * retained in the f_priv field of the 'struct file'.
-   */
-
-#ifndef CONFIG_DISABLE_POLL
-  struct pollfd *fds[CONFIG_ADS7843E_NPOLLWAITERS];
-#endif
-};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -156,6 +91,9 @@ static void ads7843e_select(FAR struct spi_dev_s *spi);
 static void ads7843e_deselect(FAR struct spi_dev_s *spi);
 #endif
 
+static inline void ads7843e_waitbusy(FAR struct ads7843e_dev_s *priv);
+static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd);
+
 /* Interrupts and data sampling */
 
 static void ads7843e_notify(FAR struct ads7843e_dev_s *priv);
@@ -163,7 +101,6 @@ static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
                            FAR struct ads7843e_sample_s *sample);
 static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
                                FAR struct ads7843e_sample_s *sample);
-static int ads7843e_transfer(FAR struct ads7843e_dev_s *priv, uint8_t cmd);
 static void ads7843e_worker(FAR void *arg);
 static int ads7843e_interrupt(int irq, FAR void *context);
 
@@ -214,6 +151,91 @@ static struct ads7843e_dev_s *g_ads7843elist;
  ****************************************************************************/
 
 /****************************************************************************
+ * Function: ads7843e_select
+ *
+ * Description:
+ *   Select the SPI, locking and  re-configuring if necessary.  This function
+ *   must be called before initiating any sequence of SPI operations. If we
+ *   are sharing the SPI bus with other devices (CONFIG_SPI_OWNBUS undefined)
+ *   then we need to lock and configure the SPI bus for each transfer.
+ *
+ * Parameters:
+ *   spi  - Reference to the SPI driver structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_OWNBUS
+static inline void ads7843e_select(FAR struct spi_dev_s *spi)
+{
+  /* We own the SPI bus, so just select the chip */
+
+  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
+}
+#else
+static void ads7843e_select(FAR struct spi_dev_s *spi)
+{
+  /* Select P14201 chip (locking the SPI bus in case there are multiple
+   * devices competing for the SPI bus
+   */
+
+  SPI_LOCK(spi, true);
+  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
+
+  /* Now make sure that the SPI bus is configured for the P14201 (it
+   * might have gotten configured for a different device while unlocked)
+   */
+
+  SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
+  SPI_SETBITS(spi, 8);
+#ifdef CONFIG_ADS7843E_FREQUENCY
+  SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Function: ads7843e_deselect
+ *
+ * Description:
+ *   De-select the SPI, unlocking as necessary.  This function must be
+ *   after completing asequence of SPI operations. If we are sharing the SPI
+ *   bus with other devices (CONFIG_SPI_OWNBUS undefined) then we need to
+ *   un-lock the SPI bus for each transfer, possibly losing the current
+ *   configuration.
+ *
+ * Parameters:
+ *   spi  - Reference to the SPI driver structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_OWNBUS
+static inline void ads7843e_deselect(FAR struct spi_dev_s *spi)
+{
+  /* We own the SPI bus, so just de-select the chip */
+
+  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
+}
+#else
+static void ads7843e_deselect(FAR struct spi_dev_s *spi)
+{
+  /* De-select P14201 chip and relinquish the SPI bus. */
+
+  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
+  SPI_LOCK(spi, false);
+}
+#endif
+
+/****************************************************************************
  * Function: ads7843e_configspi
  *
  * Description:
@@ -246,99 +268,54 @@ static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
    */
 
 #ifdef CONFIG_SPI_OWNBUS
+  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
   SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
   SPI_SETBITS(spi, 8);
 #ifdef CONFIG_ADS7843E_FREQUENCY
   SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY)
 #endif
+  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
 #endif
 }
 
 /****************************************************************************
- * Function: ads7843e_select
- *
- * Description:
- *   Select the SPI, locking and  re-configuring if necessary.  This function
- *   must be called before initiating any sequence of SPI operations. If we
- *   are sharing the SPI bus with other devices (CONFIG_SPI_OWNBUS undefined)
- *   then we need to lock and configure the SPI bus for each transfer.
- *
- * Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
+ * Name: ads7843e_waitbusy
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ads7843e_select(FAR struct spi_dev_s *spi)
+static inline void ads7843e_waitbusy(FAR struct ads7843e_dev_s *priv)
 {
-  /* We own the SPI bus, so just select the chip */
-
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
+  while (priv->config->busy(priv->config));
 }
-#else
-static void ads7843e_select(FAR struct spi_dev_s *spi)
-{
-  /* Select P14201 chip (locking the SPI bus in case there are multiple
-   * devices competing for the SPI bus
-   */
-
-  SPI_LOCK(spi, true);
-  SPI_SELECT(spi, SPIDEV_DISPLAY, true);
-
-  /* Now make sure that the SPI bus is configured for the P14201 (it
-   * might have gotten configured for a different device while unlocked)
-   */
-
-  SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
-  SPI_SETBITS(spi, 8);
-#ifdef CONFIG_ADS7843E_FREQUENCY
-  SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
-#endif
-}
-#endif
-
 
 /****************************************************************************
- * Function: ads7843e_deselect
- *
- * Description:
- *   De-select the SPI, unlocking as necessary.  This function must be
- *   after completing asequence of SPI operations. If we are sharing the SPI
- *   bus with other devices (CONFIG_SPI_OWNBUS undefined) then we need to
- *   un-lock the SPI bus for each transfer, possibly losing the current
- *   configuration.
- *
- * Parameters:
- *   spi  - Reference to the SPI driver structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
+ * Name: ads7843e_sendcmd
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_OWNBUS
-static inline void ads7843e_deselect(FAR struct spi_dev_s *spi)
+static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
 {
-  /* We own the SPI bus, so just de-select the chip */
+  uint8_t  buffer[2];
+  uint16_t result;
 
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
-}
-#else
-static void ads7843e_deselect(FAR struct spi_dev_s *spi)
-{
-  /* De-select P14201 chip and relinquish the SPI bus. */
+  /* Select the ADS7843E */
 
-  SPI_SELECT(spi, SPIDEV_DISPLAY, false);
-  SPI_LOCK(spi, false);
+  ads7843e_select(priv->spi);
+
+  /* Send the command */
+
+  (void)SPI_SEND(priv->spi, cmd);
+  ads7843e_waitbusy(priv);
+
+  /* Read the data */
+
+  SPI_RECVBLOCK(priv->spi, buffer, 2);
+  ads7843e_deselect(priv->spi);
+
+  result = ((uint16_t)buffer[0] << 8) | (uint16_t)buffer[1];
+  result = result >> 4;
+
+  ivdbg("cmd:%02x response:%04x\n", cmd, result);
+  return result;
 }
-#endif
 
 /****************************************************************************
  * Name: ads7843e_notify
@@ -470,6 +447,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
     {
       /* Wait for a change in the ADS7843E state */
  
+      ivdbg("Waiting..\n");
       priv->nwaiters++;
       ret = sem_wait(&priv->waitsem);
       priv->nwaiters--;
@@ -480,13 +458,16 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
            * the failure now.
            */
 
+          idbg("sem_wait: %d\n", errno);
           DEBUGASSERT(errno == EINTR);
           ret = -EINTR;
           goto errout;
         }
     }
 
-  /* Re-acquire the the semaphore that manages mutually exclusive access to
+  ivdbg("Sampled\n");
+
+   /* Re-acquire the the semaphore that manages mutually exclusive access to
    * the device structure.  We may have to wait here.  But we have our sample.
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
@@ -512,15 +493,56 @@ errout:
 }
 
 /****************************************************************************
- * Name: ads7843e_transfer
+ * Name: ads7843e_schedule
  ****************************************************************************/
 
-static int ads7843e_transfer(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
+static int ads7843e_schedule(FAR struct ads7843e_dev_s *priv)
 {
-  int ret = 0;
-#warning "Missing logic"
-  ivdbg("data: 0x%04x\n", ret);
-  return ret;
+  FAR struct ads7843e_config_s *config;
+  int                           ret;
+
+  /* Get a pointer the callbacks for convenience (and so the code is not so
+   * ugly).
+   */
+
+  config = priv->config;
+  DEBUGASSERT(config != NULL);
+
+  /* Disable further interrupts.  ADS7843E interrupts will be re-enabled
+   * after the worker thread exectues.
+   */
+
+  config->enable(config, false);
+
+  /* Disable the watchdog timer.  It will be re-enabled in the worker thread
+   * while the pen remains down.
+   */
+
+  wd_cancel(priv->wdog);
+
+  /* Transfer processing to the worker thread.  Since ADS7843E interrupts are
+   * disabled while the work is pending, no special action should be required
+   * to protected the work queue.
+   */
+
+  DEBUGASSERT(priv->work.worker == NULL);
+  ret = work_queue(&priv->work, ads7843e_worker, priv, 0);
+  if (ret != 0)
+    {
+      illdbg("Failed to queue work: %d\n", ret);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ads7843e_wdog
+ ****************************************************************************/
+
+static void ads7843e_wdog(int argc, uint32_t arg1, ...)
+{
+  FAR struct ads7843e_dev_s *priv = (FAR struct ads7843e_dev_s *)((uintptr_t)arg1);
+  (void)ads7843e_schedule(priv);
 }
 
 /****************************************************************************
@@ -530,11 +552,8 @@ static int ads7843e_transfer(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
 static void ads7843e_worker(FAR void *arg)
 {
   FAR struct ads7843e_dev_s    *priv = (FAR struct ads7843e_dev_s *)arg;
-  FAR struct ads7843e_config_s *config;   /* Convenience pointer */
-  bool                         pendown;  /* true: pend is down */
-  uint16_t                     x;        /* X position */
-  uint16_t                     y;        /* Y position */
-#warning "Missing other measurement data" /* Like size and pressure */
+  FAR struct ads7843e_config_s *config;
+  bool                          pendown;
 
   ASSERT(priv != NULL);
 
@@ -544,6 +563,10 @@ static void ads7843e_worker(FAR void *arg)
 
   config = priv->config;
   DEBUGASSERT(config != NULL);
+
+  /* Disable the watchdog timer */
+
+  wd_cancel(priv->wdog);
 
   /* Check for pen up or down by reading the PENIRQ GPIO. */
 
@@ -561,24 +584,22 @@ static void ads7843e_worker(FAR void *arg)
         {
           goto errout;
         }
+
+      /* The pen is up.  NOTE: We know from a previous test, that this is a
+       * loss of contact condition.  This will be changed to CONTACT_NONE
+       * after the loss of contact is sampled.
+       */
+
+       priv->sample.contact = CONTACT_UP;
     }
   else
     {
       /* Handle all pen down events.  First, sample positional values. */
 
-#warning "Missing logic"
+      priv->sample.x = ads7843e_sendcmd(priv, ADS7843_CMD_XPOSITION);
+      priv->sample.y = ads7843e_sendcmd(priv, ADS7843_CMD_YPOSITION);
+      (void)ads7843e_sendcmd(priv, ADS7843_CMD_ENABPINIRQ);
 
-      /* Save the measurements */
-
-      priv->sample.x        = x;
-      priv->sample.y        = y;
-#warning "Missing other measurement data" /* Like size and pressure */
-    }
-
-  /* Note the availability of new measurements */
-
-  if (pendown)
-    {
       /* If this is the first (acknowledged) pend down report, then report
        * this as the first contact.  If contact == CONTACT_DOWN, it will be
        * set to set to CONTACT_MOVE after the contact is first sampled.
@@ -590,15 +611,10 @@ static void ads7843e_worker(FAR void *arg)
 
           priv->sample.contact = CONTACT_DOWN;
         }
-    }
-  else /* if (priv->sample.contact != CONTACT_NONE) */
-    {
-      /* The pen is up.  NOTE: We know from a previous test, that this is a
-       * loss of contact condition.  This will be changed to CONTACT_NONE
-       * after the loss of contact is sampled.
-       */
 
-       priv->sample.contact = CONTACT_UP;
+      /* Continue to sample the position while the pen is down */
+
+       wd_start(priv->wdog, ADS7843E_WDOG_DELAY, ads7843e_wdog, 1, (uint32_t)priv);
     }
 
   /* Indicate the availability of new sample data for this ID */
@@ -624,7 +640,7 @@ static int ads7843e_interrupt(int irq, FAR void *context)
 {
   FAR struct ads7843e_dev_s    *priv;
   FAR struct ads7843e_config_s *config;
-  int                          ret;
+  int                           ret;
 
   /* Which ADS7843E device caused the interrupt? */
 
@@ -645,26 +661,14 @@ static int ads7843e_interrupt(int irq, FAR void *context)
   config = priv->config;
   DEBUGASSERT(config != NULL);
 
-  /* Disable further interrupts */
+  /* Schedule sampling to occur on the worker thread */
 
-  config->enable(config, false);
-
-  /* Transfer processing to the worker thread.  Since ADS7843E interrupts are
-   * disabled while the work is pending, no special action should be required
-   * to protected the work queue.
-   */
-
-  DEBUGASSERT(priv->work.worker == NULL);
-  ret = work_queue(&priv->work, ads7843e_worker, priv, 0);
-  if (ret != 0)
-    {
-      illdbg("Failed to queue work: %d\n", ret);
-    }
+  ret = ads7843e_schedule(priv);
 
   /* Clear any pending interrupts and return success */
 
   config->clear(config);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -678,6 +682,8 @@ static int ads7843e_open(FAR struct file *filep)
   FAR struct ads7843e_dev_s *priv;
   uint8_t                   tmp;
   int                       ret;
+
+  ivdbg("Opening\n");
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -719,6 +725,7 @@ errout_with_sem:
   sem_post(&priv->devsem);
   return ret;
 #else
+  ivdbg("Opening\n");
   return OK;
 #endif
 }
@@ -734,6 +741,7 @@ static int ads7843e_close(FAR struct file *filep)
   FAR struct ads7843e_dev_s *priv;
   int                       ret;
 
+  ivdbg("Closing\n");
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -763,6 +771,7 @@ static int ads7843e_close(FAR struct file *filep)
 
   sem_post(&priv->devsem);
 #endif
+  ivdbg("Closing\n");
   return OK;
 }
 
@@ -773,11 +782,12 @@ static int ads7843e_close(FAR struct file *filep)
 static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
   FAR struct inode          *inode;
-  FAR struct ads7843e_dev_s  *priv;
+  FAR struct ads7843e_dev_s *priv;
   FAR struct touch_sample_s *report;
-  struct ads7843e_sample_s    sample;
+  struct ads7843e_sample_s   sample;
   int                        ret;
 
+  ivdbg("buffer:%p len:%d\n", buffer, len);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
@@ -794,6 +804,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
        * handle smaller reads... but why?
        */
 
+      idbg("Unsupported read size: %d\n", len);
       return -ENOSYS;
     }
 
@@ -804,6 +815,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
     {
       /* This should only happen if the wait was canceled by an signal */
 
+      idbg("sem_wait: %d\n", errno);
       DEBUGASSERT(errno == EINTR);
       return -EINTR;
     }
@@ -818,6 +830,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
        * option, then just return an error.
        */
 
+      ivdbg("Sample data is not available\n");
       if (filep->f_oflags & O_NONBLOCK)
         {
           ret = -EAGAIN;
@@ -831,6 +844,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
         {
           /* We might have been awakened by a signal */
 
+          idbg("ads7843e_waitsample: %d\n", ret);
           goto errout;
         }
     }
@@ -845,7 +859,6 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
   report->point[0].id        = priv->id;
   report->point[0].x         = sample.x;
   report->point[0].y         = sample.y;
-  report->point[0].pressure  = 42; /* ???????????????????? */
 
   /* Report the appropriate flags */
 
@@ -859,19 +872,25 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
     {
       /* First contact */
 
-      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID | TOUCH_PRESSURE_VALID;
+      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID;
     }
   else /* if (sample->contact == CONTACT_MOVE) */
     {
       /* Movement of the same contact */
 
-      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID | TOUCH_PRESSURE_VALID;
+      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID;
     }
+
+  ivdbg("  id:      %d\n", report->point[0].id);
+  ivdbg("  flags:   %02x\n", report->point[0].flags);
+  ivdbg("  x:       %d\n", report->point[0].x);
+  ivdbg("  y:       %d\n", report->point[0].y);
 
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
   sem_post(&priv->devsem);
+  ivdbg("Returning: %d\n", ret);
   return ret;
 }
 
@@ -907,22 +926,6 @@ static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      case TSIOC_SETCALIB:  /* arg: Pointer to int calibration value */
-        {
-          FAR int *ptr = (FAR int *)((uintptr_t)arg);
-          DEBUGASSERT(priv->config != NULL && ptr != NULL);
-          priv->config->calib = *ptr;
-        }
-        break;
-
-      case TSIOC_GETCALIB:  /* arg: Pointer to int calibration value */
-        {
-          FAR int *ptr = (FAR int *)((uintptr_t)arg);
-          DEBUGASSERT(priv->config != NULL && ptr != NULL);
-          *ptr = priv->config->calib;
-        }
-        break;
-
       case TSIOC_SETFREQUENCY:  /* arg: Pointer to uint32_t frequency value */
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
@@ -1084,8 +1087,6 @@ int ads7843e_register(FAR struct spi_dev_s *dev,
   /* Debug-only sanity checks */
 
   DEBUGASSERT(dev != NULL && config != NULL && minor >= 0 && minor < 100);
-  DEBUGASSERT(config->attach != NULL && config->enable  != NULL &&
-              config->clear  != NULL && config->pendown != NULL);
 
   /* Create and initialize a ADS7843E device driver instance */
 
@@ -1105,6 +1106,7 @@ int ads7843e_register(FAR struct spi_dev_s *dev,
   memset(priv, 0, sizeof(struct ads7843e_dev_s));
   priv->spi    = dev;             /* Save the SPI device handle */
   priv->config = config;          /* Save the board configuration */
+  priv->wdog   = wd_create();     /* Create a watchdog timer */
   sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
 
@@ -1126,10 +1128,13 @@ int ads7843e_register(FAR struct spi_dev_s *dev,
       goto errout_with_priv;
     }
 
-  /* Initialize the touchscreen device */
+  /* Configure the SPI interface */
 
   ads7843e_configspi(dev);
-#warning "Missing logic"
+
+  /* Enable the PEN IRQ */
+  
+  ads7843e_sendcmd(priv, ADS7843_CMD_ENABPINIRQ);
 
   /* Register the device as an input device */
 
