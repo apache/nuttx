@@ -120,13 +120,21 @@ struct sam3u_spidev_s
 #ifndef CONFIG_SPI_OWNBUS
 static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
 #endif
-static void     spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
-static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
+static void     spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                  bool selected);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                  uint32_t frequency);
+static void     spi_setmode(FAR struct spi_dev_s *dev,
+                  enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
+#ifdef CONFIG_SPI_EXCHANGE
+static void     spi_exchange(FAR struct spi_dev_s *dev,
+                   FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);
+#else
 static void     spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
 static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -148,8 +156,12 @@ static const struct spi_ops_s g_spiops =
   .cmddata           = sam3u_spicmddata,
 #endif
   .send              = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = spi_exchange,
+#else
   .sndblock          = spi_sndblock,
   .recvblock         = spi_recvblock,
+#endif
   .registercallback  = 0,                 /* Not implemented */
 };
 
@@ -300,7 +312,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
   uint32_t actual;
-  uint32_t divisor;
+  uint32_t scbr;
+  uint32_t dlybs;
+  uint32_t dlybct;
   uint32_t regval;
   uint32_t regaddr;
 
@@ -317,33 +331,65 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
     }
 #endif
 
-  /* Configure SPI to a frequency as close as possible to the requested frequency. */
+  /* Configure SPI to a frequency as close as possible to the requested frequency.
+   *
+   *   SPCK frequency = MCK / SCBR, or SCBR = MCK / frequency
+   */
 
-  /* frequency = SPI_CLOCK / divisor, or divisor = SPI_CLOCK / frequency */
+  scbr = SAM3U_MCK_FREQUENCY / frequency;
 
-  divisor = SAM3U_MCK_FREQUENCY / frequency;
-
-  if (divisor < 8)
+  if (scbr < 8)
     {
-      divisor = 8;
+      scbr = 8;
     }
-  else if (divisor > 254)
+  else if (scbr > 254)
     {
-      divisor = 254;
+      scbr = 254;
     }
 
-  divisor = (divisor + 1) & ~1;
+  scbr = (scbr + 1) & ~1;
 
-  /* Save the new divisor value */
+  /* Save the new scbr value */
   
   regaddr = g_csraddr[priv->cs];
   regval  = getreg32(regaddr);
-  regval &= ~SPI_CSR_SCBR_MASK;
-  putreg32(divisor << SPI_CSR_SCBR_SHIFT, regaddr);
+  regval &= ~(SPI_CSR_SCBR_MASK|SPI_CSR_DLYBS_MASK|SPI_CSR_DLYBCT_MASK);
+  regval |= scbr << SPI_CSR_SCBR_SHIFT;
 
-  /* Calculate the new actual */
+  /* DLYBS: Delay Before SPCK.  This field defines the delay from NPCS valid to the
+   * first valid SPCK transition. When DLYBS equals zero, the NPCS valid to SPCK
+   * transition is 1/2 the SPCK clock period. Otherwise, the following equations
+   * determine the delay:
+   *
+   *   Delay Before SPCK = DLYBS / MCK
+   *
+   * For a 2uS delay
+   *
+   *   DLYBS = MCK * 0.000002 = MCK / 500000
+   */
 
-  actual = SAM3U_MCK_FREQUENCY / divisor;
+  dlybs   = SAM3U_MCK_FREQUENCY / 500000;
+  regval |= dlybs << SPI_CSR_DLYBS_SHIFT;
+
+  /* DLYBCT: Delay Between Consecutive Transfers.  This field defines the delay
+   * between two consecutive transfers with the same peripheral without removing
+   * the chip select. The delay is always inserted after each transfer and
+   * before removing the chip select if needed.
+   *
+   *  Delay Between Consecutive Transfers = (32 x DLYBCT) / MCK
+   *
+   * For a 5uS delay:
+   *
+   *  DLYBCT = MCK * 0.000005 / 32 = MCK / 200000 / 32
+   */
+
+  dlybct  = SAM3U_MCK_FREQUENCY / 200000 / 32;
+  regval |= dlybct << SPI_CSR_DLYBCT_SHIFT;
+  putreg32(regval, regaddr);
+
+  /* Calculate the new actual frequency */
+
+  actual = SAM3U_MCK_FREQUENCY / scbr;
 
   /* Save the frequency setting */
 
@@ -487,6 +533,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
+#ifdef CONFIG_SPI_VARSELECT
+  FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  uint32_t tdr = (uint32_t)priv->cs << SPI_TDR_PCS_SHIFT;
+#endif
+
   /* Wait for any previous data written to the TDR to be transferred to the
    * serializer.
    */
@@ -495,7 +546,11 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   /* Write the data to transmitted to the Transmit Data Register (TDR) */
 
+#ifdef CONFIG_SPI_VARSELECT
+  putreg32((uint32_t)wd | tdr | SPI_TDR_LASTXFER, SAM3U_SPI_TDR);
+#else
   putreg32((uint32_t)wd, SAM3U_SPI_TDR);
+#endif
 
   /* Wait for the read data to be available in the RDR */
 
@@ -506,7 +561,91 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   return (uint16_t)getreg32(SAM3U_SPI_RDR);
 }
 
-/*************************************************************************
+/****************************************************************************
+ * Name: spi_exchange
+ *
+ * Description:
+ *   Exahange a block of data from SPI. Required.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   nwords   - the length of data that to be exchanged in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_EXCHANGE
+static void  spi_exchange(FAR struct spi_dev_s *dev,
+                          FAR const void *txbuffer, FAR void *rxbuffer,
+                          size_t nwords)
+{
+#ifdef CONFIG_SPI_VARSELECT
+  FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  uint32_t tdr = (uint32_t)priv->cs << SPI_TDR_PCS_SHIFT;
+#endif
+  FAR uint8_t *rxptr = (FAR uint8_t*)rxbuffer;
+  FAR uint8_t *txptr = (FAR uint8_t*)txbuffer;
+  uint8_t data;
+
+  spidbg("nwords: %d\n", nwords);
+
+  /* Loop, sending each word in the user-provied data buffer */
+
+  for ( ; nwords > 0; nwords--)
+    {
+      /* Wait for any previous data written to the TDR to be transferred
+       * to the serializer.
+       */
+      
+      while ((getreg32(SAM3U_SPI_SR) & SPI_INT_TDRE) == 0);
+
+      /* Get the data to send (0xff if there is no data source) */
+
+      if (rxptr)
+        {
+          data = *txptr++;
+        }
+      else
+        {
+          data = 0xff;
+        }
+
+      /* Write the data to transmitted to the Transmit Data Register (TDR) */
+
+#ifdef CONFIG_SPI_VARSELECT
+      if (nwords == 1)
+        {
+          tdr |= SPI_TDR_LASTXFER;
+        }
+      putreg32((uint32_t)data | tdr, SAM3U_SPI_TDR);
+#else
+      putreg32((uint32_t)data, SAM3U_SPI_TDR);
+#endif
+
+      /* Wait for the read data to be available in the RDR */
+
+      while ((getreg32(SAM3U_SPI_SR) & SPI_INT_RDRF) == 0);
+
+      /* Read the received data from the SPI Data Register */   
+
+      data = (uint8_t)getreg32(SAM3U_SPI_RDR);
+      if (rxptr)
+        {
+          *txptr++ = data;
+        }
+    }
+}
+#endif
+
+/***************************************************************************
  * Name: spi_sndblock
  *
  * Description:
@@ -525,8 +664,13 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SPI_EXCHANGE
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
 {
+#ifdef CONFIG_SPI_VARSELECT
+  FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  uint32_t tdr = (uint32_t)priv->cs << SPI_TDR_PCS_SHIFT;
+#endif
   FAR uint8_t *ptr = (FAR uint8_t*)buffer;
   uint8_t data;
 
@@ -545,9 +689,18 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
       /* Write the data to transmitted to the Transmit Data Register (TDR) */
 
       data = *ptr++;
+#ifdef CONFIG_SPI_VARSELECT
+      if (nwords == 1)
+        {
+          tdr |= SPI_TDR_LASTXFER;
+        }
+      putreg32((uint32_t)data | tdr, SAM3U_SPI_TDR);
+#else
       putreg32((uint32_t)data, SAM3U_SPI_TDR);
+#endif
     }
 }
+#endif
 
 /****************************************************************************
  * Name: spi_recvblock
@@ -568,8 +721,13 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SPI_EXCHANGE
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
 {
+#ifdef CONFIG_SPI_VARSELECT
+  FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  uint32_t tdr = (uint32_t)priv->cs << SPI_TDR_PCS_SHIFT;
+#endif
   FAR uint8_t *ptr = (FAR uint8_t*)buffer;
 
   spidbg("nwords: %d\n", nwords);
@@ -588,8 +746,15 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
        * to clock the read data.
        */
 
+#ifdef CONFIG_SPI_VARSELECT
+      if (nwords == 1)
+        {
+          tdr |= SPI_TDR_LASTXFER;
+        }
+      putreg32(0xff | tdr, SAM3U_SPI_TDR);
+#else
       putreg32(0xff, SAM3U_SPI_TDR);
-
+#endif
       /* Wait for the read data to be available in the RDR */
 
       while ((getreg32(SAM3U_SPI_SR) & SPI_INT_RDRF) == 0);
@@ -599,6 +764,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
       *ptr++ = (uint8_t)getreg32(SAM3U_SPI_RDR);
     }
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -657,8 +823,8 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   irqrestore(flags);
 
   /* Configure the SPI mode register */
-#warning "Need to review this -- what other settngs are necessary"
-  putreg32(SPI_MR_MSTR, SAM3U_SPI_MR);
+
+  putreg32(SPI_MR_MSTR | SPI_MR_MODFDIS, SAM3U_SPI_MR);
 
   /* And enable the SPI */
 
