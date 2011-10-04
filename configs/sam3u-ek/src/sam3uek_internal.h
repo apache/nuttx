@@ -46,6 +46,7 @@
 
 #include <stdint.h>
 
+#include <arch/irq.h>
 #include <nuttx/irq.h>
 
 /************************************************************************************
@@ -138,8 +139,10 @@
 
 /* Touchscreen controller (TSC) */
 
-#define GPIO_TCS_IRQ  (PIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN6)
-#define GPIO_TCS_BUSY (PIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN6)
+#define GPIO_TCS_IRQ  (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN24)
+#define GPIO_TCS_BUSY (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN2)
+
+#define SAM3U_TCS_IRQ  SAM3U_IRQ_PA24
 
 /* LEDs */
 

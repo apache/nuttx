@@ -43,6 +43,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <nuttx/spi.h>
 #include <arch/board/board.h>

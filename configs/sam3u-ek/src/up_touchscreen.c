@@ -45,7 +45,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/sdio.h>
+#include <nuttx/spi.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/ads7843e.h>
 
@@ -64,6 +64,26 @@
 
 #ifndef CONFIG_SAM3U_SPI
 #  error "Touchscreen support requires CONFIG_SAM3U_SPI"
+#endif
+
+#ifndef CONFIG_GPIOA_IRQ
+#  error "Touchscreen support requires CONFIG_GPIOA_IRQ"
+#endif
+
+#ifndef CONFIG_ADS7843E_FREQUENCY
+#  define CONFIG_ADS7843E_FREQUENCY 500000
+#endif
+
+#ifndef CONFIG_ADS7843E_SPIDEV
+#  define CONFIG_ADS7843E_SPIDEV 0
+#endif
+
+#if CONFIG_ADS7843E_SPIDEV != 0
+#  error "CONFIG_ADS7843E_SPIDEV must be zero"
+#endif
+
+#ifndef CONFIG_ADS7843E_DEVMINOR
+#  define CONFIG_ADS7843E_DEVMINOR 0
 #endif
 
 /****************************************************************************
@@ -85,6 +105,7 @@
 static int  tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr);
 static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable);
 static void tsc_clear(FAR struct ads7843e_config_s *state);
+static bool tsc_busy(FAR struct ads7843e_config_s *state);
 static bool tsc_pendown(FAR struct ads7843e_config_s *state);
 
 /****************************************************************************
@@ -103,12 +124,12 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state);
 
 static struct ads7843e_config_s g_tscinfo =
 {
-  .calib     = CONFIG_INPUT_TSCCALIB,
-  .frequency = CONFIG_INPUT_TSCFREQUENCY,
+  .frequency = CONFIG_ADS7843E_FREQUENCY,
 
   .attach    = tsc_attach,
   .enable    = tsc_enable,
   .clear     = tsc_clear,
+  .busy      = tsc_busy,
   .pendown   = tsc_pendown,
 };
 
@@ -130,22 +151,24 @@ static struct ads7843e_config_s g_tscinfo =
 
 static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
 {
-#warning "Missing logic"
-  return OK;
+  /* Attach the ADS7843E interrupt */
+
+  ivdbg("Attaching %p to IRQ %d\n", isr, SAM3U_TCS_IRQ);
+  return irq_attach(SAM3U_TCS_IRQ, isr);
 }
 
 static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
 {
   /* Attach and enable, or detach and disable */
 
-  if (enable && g_tschandler)
+  ivdbg("IRQ:%d enable:%d\n", SAM3U_TCS_IRQ, enable);
+  if (enable)
     {
-      /* Configure and enable the ADS7843E interrupt */
-#warning "Missing logic"
+      sam3u_gpioirqenable(SAM3U_TCS_IRQ);
     }
   else
     {
-#warning "Missing logic"
+      sam3u_gpioirqdisable(SAM3U_TCS_IRQ);
     }
 }
 
@@ -154,11 +177,22 @@ static void tsc_clear(FAR struct ads7843e_config_s *state)
   /* Does nothing */
 }
 
+static bool tsc_busy(FAR struct ads7843e_config_s *state)
+{
+  /* REVISIT:  This might need to be inverted */
+
+  bool busy = sam3u_gpioread(GPIO_TCS_BUSY);
+  ivdbg("busy:%d\n", busy);
+  return busy;
+}
+
 static bool tsc_pendown(FAR struct ads7843e_config_s *state)
 {
   /* REVISIT:  This might need to be inverted */
 
-  return sam3u_gpioread(GPIO_ADS7843E);
+  bool pendown = sam3u_gpioread(GPIO_TCS_IRQ);
+  ivdbg("pendown:%d\n", pendown);
+  return pendown;
 }
 
 /****************************************************************************
@@ -178,26 +212,32 @@ int up_tcinitialize(void)
   FAR struct spi_dev_s *dev;
   int ret;
 
+  ivdbg("Initializing\n");
+
   /* Configure and enable the ADS7843E interrupt pin as an input */
 
-  (void)sam3u_configgpio(GPIO_ADS7843E_BUY);
-  (void)sam3u_configgpio(GPIO_ADS7843E_IRQ);
+  (void)sam3u_configgpio(GPIO_TCS_BUSY);
+  (void)sam3u_configgpio(GPIO_TCS_IRQ);
+
+  /* Configure the PIO interrupt */
+
+  sam3u_gpioirq(GPIO_TCS_IRQ);
 
   /* Get an instance of the SPI interface */
 
-  dev = up_spiinitialize(CONFIG_INPUT_TSCSPIDEV);
+  dev = up_spiinitialize(CONFIG_ADS7843E_SPIDEV);
   if (!dev)
     {
-      dbg("Failed to initialize SPI bus %d\n", CONFIG_INPUT_TSCSPIDEV);
+      idbg("Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
       return -ENODEV;
     }
 
   /* Initialize and register the SPI touschscreen device */
 
-  ret = ads7843e_register(dev, &g_tscinfo, CONFIG_INPUT_TSCMINOR);
+  ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
   if (ret < 0)
     {
-      dbg("Failed to initialize SPI bus %d\n", CONFIG_INPUT_TSCSPIDEV);
+      idbg("Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
       /* up_spiuninitialize(dev); */
       return -ENODEV;
     }
