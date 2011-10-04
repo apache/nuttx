@@ -423,11 +423,27 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   ret = nxffs_findinode(volume, name, &entry);
   if (ret == OK)
     {
-      /* It exists.  It would be an error if we are asked to create it
+      FAR struct nxffs_ofile_s *ofile;
+
+      /* It exists.  Is the file already open for reading? */
+
+      ofile = nxffs_findofile(volume, name);
+      if (ofile)
+        {
+          /* The file is already open.
+           * Limitation:  Files cannot be open both for reading and writing.
+           */
+
+          fdbg("File is open for reading\n");
+          ret = -ENOSYS;
+          goto errout_with_exclsem;
+        }
+
+      /* It would be an error if we are asked to create the file
        * exclusively.
        */
 
-      if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
+      else if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
         {
           fdbg("File exists, can't create O_EXCL\n");
           ret = -EEXIST;
