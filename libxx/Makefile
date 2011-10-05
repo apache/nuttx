@@ -65,7 +65,7 @@ $(BIN):	$(OBJS)
 	done ; )
 
 .depend: Makefile $(SRCS)
-	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@$(MKDEP) $(CXX) -- $(CXXFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend

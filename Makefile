@@ -99,17 +99,28 @@ endif
 
 NONFSDIRS	= sched $(ARCH_SRC) $(NUTTX_ADDONS)
 FSDIRS		= fs drivers binfmt
-NETFSDIRS	= fs drivers
 CONTEXTDIRS	= $(APPDIR)
 USERDIRS	=
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
+
 NONFSDIRS	+= syscall
 CONTEXTDIRS	+= syscall
 USERDIRS	+= syscall lib mm $(USER_ADDONS)
+ifeq ($(CONFIG_HAVE_CXX),y)
+USERDIRS	+= libxx
+endif
+
 else
+
 NONFSDIRS	+= lib mm
 OTHERDIRS	+= syscall $(USER_ADDONS)
+ifeq ($(CONFIG_HAVE_CXX),y)
+NONFSDIRS	+= libxx
+else
+OTHERDIRS	+= libxx
+endif
+
 endif
 
 ifeq ($(CONFIG_NX),y)
@@ -183,7 +194,7 @@ else
 NUTTXLIBS	+= mm/libmm$(LIBEXT) lib/liblib$(LIBEXT)
 endif
 
-# Add libraries for network support.  CXX, CXXFLAGS, and COMPILEXX must
+# Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
 # be defined in Make.defs for this to work!
 
 ifeq ($(CONFIG_HAVE_CXX),y)

@@ -816,6 +816,10 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   sam3u_configgpio(GPIO_SPI0_MOSI);
   sam3u_configgpio(GPIO_SPI0_SPCK);
 
+  /* Disable SPI clocking */
+
+  putreg32(SPI_CR_SPIDIS, SAM3U_SPI_CR);
+
   /* Execute a software reset of the SPI (twice) */
 
   putreg32(SPI_CR_SWRST, SAM3U_SPI_CR);
