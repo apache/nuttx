@@ -200,14 +200,14 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_tcinitialize
+ * Name: arch_tcinitialize
  *
  * Description:
  *   Initialize the touchscreen device
  *
  ****************************************************************************/
 
-int up_tcinitialize(void)
+int arch_tcinitialize(void)
 {
   FAR struct spi_dev_s *dev;
   int ret;
@@ -244,4 +244,19 @@ int up_tcinitialize(void)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: arch_tcuninitialize
+ *
+ * Description:
+ *   Un-initialize the touchscreen device
+ *
+ ****************************************************************************/
+
+void arch_tcuninitialize(void)
+{
+  /* No support for un-initializing the touchscreen ADS7843E device yet */
+}
+
 #endif /* CONFIG_INPUT_ADS7843E */
+
