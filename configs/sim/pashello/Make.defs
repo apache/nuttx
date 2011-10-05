@@ -44,14 +44,18 @@ else
 endif
 
 ARCHCPUFLAGS		= -fno-builtin
+ARCHCPUFLAGSXX		= -fno-builtin -fno-exceptions
 ARCHPICFLAGS		= -fpic
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
+ARCHWARNINGSXX		= -Wall -Wshadow
 ARCHDEFINES		=
 ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
+ARCHINCLUDESXX		= -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
 ARCHSCRIPT		=
 
 CROSSDEV		=
 CC			= $(CROSSDEV)gcc
+CXX			= $(CROSSDEV)g++
 CPP			= $(CROSSDEV)gcc -E
 LD			= $(CROSSDEV)ld
 AR			= $(CROSSDEV)ar rcs
@@ -61,6 +65,8 @@ OBJDUMP			= $(CROSSDEV)objdump
 
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+CXXFLAGS		= $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
+			  $(ARCHCPUFLAGSXX) $(ARCHINCLUDESXX) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
 CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
 AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
 
@@ -86,6 +92,11 @@ endef
 define COMPILE
 	@echo "CC: $1"
 	@$(CC) -c $(CFLAGS) $1 -o $2
+endef
+
+define COMPILEXX
+	@echo "CXX: $1"
+	@$(CXX) -c $(CXXFLAGS) $1 -o $2
 endef
 
 define ASSEMBLE
