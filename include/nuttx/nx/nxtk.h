@@ -320,7 +320,8 @@ EXTERN int nxtk_fillcirclewindow(NXWINDOW hfwnd,
  *            This must have been previously created by nxtk_openwindow().
  *   rect   - Describes the rectangular region relative to the client
  *            sub-window to move
- *   offset - The offset to move the region
+ *   offset - The offset to move the region.  The  rectangular region will be
+ *            moved so that the origin is translated by this amount.
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -516,7 +517,8 @@ EXTERN int nxtk_fillcircletoolbar(NXWINDOW hfwnd,
  *            nxtk_openwindow().
  *   rect   - Describes the rectangular region relative to the toolbar
  *            sub-window to move
- *   offset - The offset to move the region
+ *   offset - The offset to move the region.  The  rectangular region will be
+ *            moved so that the origin is translated by this amount.
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately

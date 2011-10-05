@@ -103,7 +103,8 @@ struct nx_callback_s
    *   rect - The rectangle that needs to be re-drawn (in window relative
    *          coordinates)
    *   more - true:  More re-draw requests will follow
-   *   arg  - User provided argument (see nx_openwindow, nx_constructwindow)
+   *   arg  - User provided argument (see nx_openwindow, nx_requestbkgd,
+   *          nxtk_openwindow, or nxtk_opentoolbar)
    *
    * Returned Value:
    *   None
@@ -127,7 +128,8 @@ struct nx_callback_s
    *            the overall display
    *   bounds - The bounding rectangle that the describes the entire
    *            display
-   *   arg    - User provided argument (see nx_openwindow, nx_constructwindow)
+   *   arg  - User provided argument (see nx_openwindow, nx_requestbkgd,
+   *          nxtk_openwindow, or nxtk_opentoolbar)
    *
    * Returned Value:
    *   None
@@ -149,7 +151,8 @@ struct nx_callback_s
    *   hwnd    - Window handle
    *   pos     - The (x,y) position of the mouse
    *   buttons - See NX_MOUSE_* definitions
-   *   arg     - User provided argument (see nx_openwindow, nx_constructwindow)
+   *   arg  - User provided argument (see nx_openwindow, nx_requestbkgd,
+   *          nxtk_openwindow, or nxtk_opentoolbar)
    *
    * Returned Value:
    *   None
@@ -171,7 +174,8 @@ struct nx_callback_s
    *   hwnd - Window handle
    *   nch  - The number of characters that are available in ch[]
    *   ch   - The array of characters
-   *   arg  - User provided argument (see nx_openwindow, nx_constructwindow)
+   *   arg  - User provided argument (see nx_openwindow, nx_requestbkgd,
+   *          nxtk_openwindow, or nxtk_opentoolbar)
    *
    * Returned Value:
    *   None
@@ -458,7 +462,7 @@ EXTERN int nx_closewindow(NXWINDOW hwnd);
  * Input Parameters:
  *   handle - The handle returned by nx_connect
  *   cb     - Callbacks to use for processing background window events
- *   arg    - User provided argument (see nx_openwindow, nx_constructwindow)
+ *   arg    - User provided value that will be returned with NX callbacks.
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -703,7 +707,8 @@ int nx_setbgcolor(NXHANDLE handle,
  * Input Parameters:
  *   hwnd   - The window within which the move is to be done
  *   rect   - Describes the rectangular region to move
- *   offset - The offset to move the region
+ *   offset - The offset to move the region.  The  rectangular region will be
+ *            moved so that the origin is translated by this amount.
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
