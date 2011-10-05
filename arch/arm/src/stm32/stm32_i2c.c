@@ -1212,12 +1212,12 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
 
         /* Configure pins */
             
-        if (stm32_configgpio(GPIO_I2C1_SCL)==ERROR)
+        if (stm32_configgpio(GPIO_I2C1_SCL) < 0)
           {
             return ERROR;
           }
 
-        if (stm32_configgpio(GPIO_I2C1_SDA)==ERROR)
+        if (stm32_configgpio(GPIO_I2C1_SDA) < 0)
           {
             stm32_unconfiggpio(GPIO_I2C1_SCL);
             return ERROR;
@@ -1246,12 +1246,12 @@ static int stm32_i2c_init(FAR struct stm32_i2c_priv_s *priv)
 
         /* Configure pins */
 
-        if (stm32_configgpio(GPIO_I2C2_SCL)==ERROR)
+        if (stm32_configgpio(GPIO_I2C2_SCL) < 0)
           {
             return ERROR;
           }
 
-        if (stm32_configgpio(GPIO_I2C2_SDA)==ERROR)
+        if (stm32_configgpio(GPIO_I2C2_SDA) < 0)
           {
             stm32_unconfiggpio(GPIO_I2C2_SCL);
             return ERROR;
@@ -1451,7 +1451,7 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
    * the BUSY flag.
    */
 
-  if (stm32_i2c_sem_waitdone(priv) == ERROR)
+  if (stm32_i2c_sem_waitdone(priv) < 0)
     {
       status = stm32_i2c_getstatus(priv);
       errval = ETIMEDOUT;
