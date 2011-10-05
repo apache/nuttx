@@ -2134,3 +2134,12 @@
 	* arch/arm/src/sam3u/sam3u_spi.c: Add an SPI driver for the AT91SAM3U.
 	* drivers/input/ads7843e.c and include/nuttx/input/ads7843e.h: Add a
 	  driver for the TI ADS7843E touchscreen controller.
+	* fs/nxffs/nxffs_open.c:  Fix an error when a file is open for writing; since
+	  the file will get deleted it is already exists, there must be a check if
+	  there are other open references to the file.
+	* arch/arm/src/stm32/stm32_sdio.c: Fixed an error where during SDHC
+	  initialization interrupts were not being re-enabled.  Caused more subtle
+	  errors than you would think.
+	* arch/arm/src/stm32/stm32_i2c.c:  Fixed an error where I2C timeouts appeared
+	  to be successful transfers.
+

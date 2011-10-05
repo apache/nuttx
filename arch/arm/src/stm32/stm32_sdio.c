@@ -1411,6 +1411,8 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
   /* (Re-)enable clocking */
 
   putreg32(1, SDIO_CLKCR_CLKEN_BB);
+  irqrestore(flags);
+
   fvdbg("CLCKR: %08x POWER: %08x\n",
         getreg32(STM32_SDIO_CLKCR), getreg32(STM32_SDIO_POWER));
 }

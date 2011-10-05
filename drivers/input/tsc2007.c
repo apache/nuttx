@@ -1187,6 +1187,7 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
    */
 
 #ifdef CONFIG_TSC2007_MULTIPLE
+  flags         = irqsave();
   priv->flink   = g_tsc2007list;
   g_tsc2007list = priv;
   irqrestore(flags);
