@@ -698,7 +698,7 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
 
   /* Dump all of the buffered trace entries */
 
-  for (i = 0; i < priv->tndx; i++)
+  for (i = 0; i <= priv->tndx; i++)
     {
       lib_rawprintf("%2d. STATUS: %08x COUNT: %3d EVENT: %2d PARM: %08x\n", i,
                     priv->trace[i].status, priv->trace[i].count,
@@ -1144,7 +1144,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
 #else
         priv->intstate = INTSTATE_DONE;
 #endif
-    }
+      }
 
     priv->status = status;
     return OK;
