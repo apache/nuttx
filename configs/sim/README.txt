@@ -181,6 +181,28 @@ nsh
     cd <nuttx-directory>/tools
     ./configure.sh sim/nsh
 
+nsh2
+
+  Description
+  -----------
+  This is another example that configures to use the NuttShell at examples/nsh.
+  Unlike nsh, this version uses NSH built-in functions.  The nx, nxhello, and
+  nxlines examples are included as built-in functions.
+
+  X11 Configuration
+  -----------------
+  This configuration uses an X11-based framebuffer driver.  Of course, this
+  configuration can only be used in environments that support X11!  (And it
+  may not even be usable in all of those environments without some "tweaking"
+  See discussion below under the nx11 configuration).
+
+  Configuring
+  -----------
+  This configuration may be selected as follows:
+
+    cd <nuttx-directory>/tools
+    ./configure.sh sim/nsh2
+
 nx
 
   Description
@@ -223,7 +245,7 @@ nx11
   Description
   -----------
   Configures to use examples/nx.  This configuration is similar
-  to the nx configuration except that it addes support for an X11-
+  to the nx configuration except that it adds support for an X11-
   based framebuffer driver.  Of course, this configuration can only
   be used in environments that support X11!  (And it may not even
   be usable in all of those environments without some "tweaking").
@@ -343,4 +365,3 @@ touchscreen
 
   See apps/examples/README.txt for further information about build
   requirements and configuration settings.
-
