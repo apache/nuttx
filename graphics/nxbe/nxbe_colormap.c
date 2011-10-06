@@ -94,9 +94,12 @@ int nxbe_colormap(FAR NX_DRIVERTYPE *dev)
   int     ret;
   int     i, j, k;
 
-  /* Allocate the color map tables */
+  /* Allocate the color map tables in one allocation:
+   *
+   *   size = 3 colors x CONFIG_NX_COLORS each x 8-bits per color
+   */
 
-  size  = 3 * CONFIG_NX_NCOLORS * sizeof(uint16_t);
+  size  = 3 * CONFIG_NX_NCOLORS * sizeof(uint8_t);
   alloc = (uint8_t*)malloc(size);
   if (alloc == NULL)
     {
@@ -104,12 +107,14 @@ int nxbe_colormap(FAR NX_DRIVERTYPE *dev)
     }
   memset(alloc, 0xff, size);
 
+  /* Then get pointers to each color table */
+
   red   = alloc;
   green = &alloc[CONFIG_NX_NCOLORS];
   blue  = &alloc[2*CONFIG_NX_NCOLORS];
 
   /* Initialize the color map tables. 6*6*6 = 216, the rest
-   * are (0xffff, 0xffff, 0xffff)
+   * are (0xff, 0xfff 0xff)
    */
 
   ndx = 0;
@@ -131,6 +136,7 @@ int nxbe_colormap(FAR NX_DRIVERTYPE *dev)
 
   /* Now configure the cmap structure */
 
+  cmap.first  = 0;
   cmap.len    = CONFIG_NX_NCOLORS;
   cmap.red    = red;
   cmap.green  = green;

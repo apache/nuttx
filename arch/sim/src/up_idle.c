@@ -134,19 +134,24 @@ void up_idle(void)
   /* Handle X11-related events */
 
 #ifdef CONFIG_SIM_X11FB
-#ifdef CONFIG_SIM_TOUCHSCREEN
-  if (g_eventloop)
+  if (g_x11initialized)
     {
-      up_x11events();
-    }
+       /* Driver the X11 event loop */
+
+#ifdef CONFIG_SIM_TOUCHSCREEN
+      if (g_eventloop)
+        {
+          up_x11events();
+        }
 #endif
 
-  /* Update the display periodically */
+      /* Update the display periodically */
 
-  g_x11refresh += 1000000 / CLK_TCK;
-  if (g_x11refresh > 500000)
-    {
-      up_x11update();
+      g_x11refresh += 1000000 / CLK_TCK;
+      if (g_x11refresh > 500000)
+        {
+          up_x11update();
+        }
     }
 #endif
 #endif

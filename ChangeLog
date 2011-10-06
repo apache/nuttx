@@ -2142,4 +2142,7 @@
 	  errors than you would think.
 	* arch/arm/src/stm32/stm32_i2c.c:  Fixed an error where I2C timeouts appeared
 	  to be successful transfers.
+	* configs/sim/nsh2: Add another simulated NSH configuration.  This one
+	  supports X11 graphics, C++, and exercises graphic functions as built-in
+	  commands.
 
