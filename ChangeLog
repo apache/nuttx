@@ -2078,7 +2078,7 @@
 	* arch/arm/src/stm32/stm32_i2c.c:  Correct some bugs related to waiting
 	  for the I2C STOP condition to be cleared.
 
-6.10 2011-xx-xx Gregory Nutt <gnutt@nuttx.org>
+6.10 2011-10-06 Gregory Nutt <gnutt@nuttx.org>
 
 	* lib/stdio/lib_fopen.c:  Fix an error in fopen(); the file pointer was not
 	  being positioned at the end of the file when the "a" and "a+" modes are
@@ -2145,4 +2145,6 @@
 	* configs/sim/nsh2: Add another simulated NSH configuration.  This one
 	  supports X11 graphics, C++, and exercises graphic functions as built-in
 	  commands.
+
+6.11 2011-xx-xx Gregory Nutt <gnutt@nuttx.org>
 

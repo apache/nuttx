@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 11, 2011</p>
+      <p>Last Updated: October 6, 2011</p>
     </td>
   </tr>
 </table>
@@ -905,11 +905,11 @@
   </tr>
 </table>
 
-<p><b>nuttx-6.9 Release Notes</b>:
+<p><b>nuttx-6.10 Release Notes</b>:
 <p>
-  The 76<sup>th</sup> release of NuttX, Version 6.9, was made on  September 11, 2011, and is available for download from the
+  The 77<sup>th</sup> release of NuttX, Version 6.10, was made on  October 6, 2011, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that release consists of two tarballs:  <code>nuttx-6.9.tar.gz</code> and <code>apps-6.9.tar.gz</code>.
+  Note that release consists of two tarballs:  <code>nuttx-6.10.tar.gz</code> and <code>apps-6.10.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information)
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
@@ -920,63 +920,66 @@
   The new features (some still incomplete) include:
 </p>
 <ul>
-  <li><b>Analog Support/ NXP LPC17xx</b>:
-    New DAC sub-system including ADC and DAC drivers for the LPC17xx.
-    Extensions to the ADS1255 driver. (Contributed by Li Zhuoyi (Lzyy))
+  <li><b>USB Device</b>.
+    CDC ACM serial class device-side driver
   </li>
-  <li><b>Power Management</b>: 
-    Added a new NuttX power management sub-system for controlling and coordinating reduced power states.
-    At present, only verified in a simulation environment.
+  <li><b>RTC</b>.
+    Now supports hi-res and lo-res hardware RTC.  The lo-res RTC runs at 1Hz.
   </li>
-  <li><b>I2C Test Tool</b>:
-    A new application was added that can be used to verify and debug I2C interfaces from the NuttShell (NSH) command line.
+  <li><b>STM32 I2C driver</b>.
+    Now supports faster, polled mode of operation.  Added an I2C trace capability.
   </li>
-  <li><b>NuttShell (NSH)</b>:
-    In addition to the I2C test tool, a <code>date</code> command is now supported (if <code>CONFIG_RTC</code> is defined) that can be used to read and set the RTC.
+  <li><b>ADS7843E touchscreen driver</b>.
+    As used on the SAM3U-EK development board.
   </li>
-  <li><b>NXP LPC17xx</b>:
-    I2C and DAC drivers for the NXP LPC17xx family submitted by Li Zhuoyi (Lzyy)
+  <li><b>AT91SAM3U SPI driver</b>.
+    To support the ADS7843E toucscreen
   </li>
-  <li><b>Kinetis Cortex-M4</b>:
-    Added a SDHC driver for the Kinetis parts.
-    Complete debug of the Kinetis SDHC driver was not completed, however, do to some higher priority tasks that forced me to stop work.
+  <li><b>X11 Support on simulation target</b>.
+    Build errors in the X11 windows for the simulated target have been correct.
+    Added support for a simulated touchscreen on the X11 window (based on mouse inputs).
   </li>
-  <li><b>Other new drivers</b>:
-    Driver for I2C-based at24cxx EEPROM submitted by Li Zhuoyi (Lzyy);
-    Driver for the LM-75 temperature sensor. 
-    Support for the LM-75 temperature sensor integrated into the STMicro STM3210E-EVAL development board.
+  <li><b>System Timer</b>.
+    Added support for a 64-bit system timer.
   </li>
-  <li><b>NuttX Graphics (NX)</b>:
-    Added new NX interfaces for drawing circles,  both circle outlines and filled circles.
+  <li><b>TIFF Support</b>.
+    Added a TIFF library (currently used for storing LCD screen shots).
   </li>
-  <li><b>FLASH</b>:
-    Added a function that accepts the path to a block driver and then erases the underlying FLASH memory
+  <li><b>LCD Support</b>.
+    Added a test to verify that we read and write correct to LCD GRAM memory.
   </li>
-  <li><b>Build System</b>:
-    The Make export logic now also tries to track down all architecture-specific header files and include these in the NuttX export bundle as well.
-    Various changes and modifications so that NuttX wil build on FreeBSD using the ASH shell (submitted by Kurt Lidl).
+  <li><b>I2C tool</b>.
+    Extended to support to include a verify command and repititions and auto-address increment for most commands.
+  </li>
+  <li><b>USB terminal example</b>.
+    Line oriented serial bridge connects a host USB serial terminal to a host UART serial terminal.
+  </li>
+  <li><b>Build System</b>.
+    <code>apps/Makefile</code> will now include external directories in the application build.
   </li>
 </ul>
 <p>
-  Bugfixes, order roughly on decreasing criticality include:
+  Bugfixes, order roughly on decreasing criticality include the following.
+  The first two bugs are consider critical.
 </p>
 <ul>
+  <li><b>Message Queues</b>.
+    Correct errors in<code>mq_timedsend()</code> and <code>mq_timedrecieve()</code>.
   </li>
-  <li><b>STM32 I2C Driver</b>:
-    Add resets, timeout, and other fixes to work reliably with the I2C tool.
-    Corrected a major error introduced in NuttX 6.8.
+  <li><bFAT></b>.
+    Writes that cross sector boundaries, stray write into the FAT, and a FAT long file name issue.
   </li>
-  <li><b>BCH Driver</b>.
-    Several important bugs (noted by Li Zhuoyi (Lzyy)) were fixed.
+  <li><b>NXFFS</b>.
+    Added a missed error check.  Files cannot be opened for writing if they are already opened for reading.
   </li>
-  <li><b>C Library</b>:
-    Fixed errors in <code>gmtime()</code> and <code>gmtime_r()</code> that could lead to errors in date calculations.
+  <li><b>Library</b>.
+    <code>fopen()</code> for append modse was not appending.
   </li>
-  <li><b>Timing</b>:
-    Correct an error in the <code>tv_nsec</code> calculation that happens only config <code>CONFIG_RTC</code> is enabled
+  <li><b>STM32 I2C driver</b>.
+    Correct another conflict between concurrent FSMC and I2C1 accesses.  Fixed some bad error detection logic.
   </li>
-  <li><b>Build System</b>:
-    Use of <code>-print-libgcc-file-name</code> to get path to <code>libgcc.a</code> might select the wrong <code>libgcc.a</code> if a GCC multilib toolchain is used
+  <li><b>STM32 SDHC driver</b>.
+    Interrupts were being left disabled.
   </li>
 </ul>
 <p>
@@ -1471,11 +1474,12 @@
         NuttX version 5.4 adds support for the HX8347 LCD on the SAM3U-EK board.
         This LCD support includes an example using the
         <a href=" http://www.nuttx.org/NXGraphicsSubsystem.html">NX graphics system</a>.
+        NuttX version 6.10 adds SPI support.
       </p>
       <p>
         Subsequent NuttX releases will extend this port and add support for SDIO-based SD cards and
         USB device (and possible LCD support).
-        These extensions may or may not happen by the Nuttx 5.5 release as my plate is kind of full now.
+        These extensions may or may not happen soon as my plate is kind of full now.
       </p>
       <p>
         <b>Development Environments:</b>
@@ -2585,87 +2589,102 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.9 2011-09-11 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.10 2011-10-06 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
-    * arch/arm/src/kinetis/kinetis_sdhc.c: SDHC driver for Kinetis parts.
-      Initially check-in is just a crude port of the STM32 SDIO driver.
-      Much more work is needed.
-    * graphics/, include/nuttx/nx:  Add new NX interfaces for drawing
-      circles -- both circular outlines and filled circles.
-    * graphic/nxglib/nxglib_spitline.c:  Add a &quot;fudge factor&quot; that eliminates
-      some problems for rendering nearly horizontal, wide lines.  Hmm...
-      but I suspect this fudge factor also leads to new problems rendering
-      very thin, nearly horizontal lines.  More tuning is needed.
-    * drivers/analog, include/nuttx/analog, arch/arch/src/lpcxx:  (1) Add
-      updates to the ADS1255 driver, (2) fix errors from my last merge (sorry),
-      (3) Add DAC infrastructure, (4) add AD5410 DAC driver, and (5) add
-      LPC17xx ADC and DAC drivers.  All contributed by Li Zhuoyi (Lzyy).
-    * tools/mkexport.sh:  Extended the script that implements the top-level
-      'make export' logic.  The script now also finds and bundles up all of
-      the architecture-specific header files as well.
-    * drivers/arch/arm/src/stm32/stm32_i2c.c:  Add a reset to the I2C
-      initialization logic to prevent spurious interrupts when the I2C
-      interrupts are enabled (submitted by Uros Platise).
-    * Scripts/makefiles/documents.  Several adjustments, corrections and
-      typo fixes so that NuttX will build correctly on FreeBSD using the
-      ASH shell (submitted by Kurt Lidl).
-    * drivers/mtd/flash_eraseall.c:  Add a callable function that accepts
-      the path to a block driver and then erases the underlying FLASH memory
-      (assuming that the block driver is an MTD driver wrapped in the FTL
-      layer).  Hmmm... this is probably not the best long term solution;
-      flash_eraseall() should be a user-callable function that operates
-      one driver interfaces; not an internal, OS function that operates
-      on directly on block drivers.
-    * drivers/bch:  Fixed some important bugs in the BCH driver (noted by
-      Li Zhuoyi (Lzyy)).  This would have effected any large reads or writes
-      (larger than the hardware sector size).
-    * arch/*/src/Makefile:  Use of -print-libgcc-file-name to get path to
-      libgcc.a may select the wrong libgcc.a if a multilib toolchain (like
-      CodeSourcery) is used. This can be a serious problem and can cause
-      crashes on Cortex-M3 if the ARM libgcc is used, for example.  The fix 
-      is to include ARCHCPUFLAGS on the gcc command line when asking it to
-      -print-libgcc-file-name.
-    * lib/time/lib_gmtimer.c:  Correct several calculations that could lead
-      to errors in dates.
-    * drivers/pm: Add the beginnings of a NuttX power management sub-system.
-    * arch/arm/src/stm32/stm32_irq.c:  Fix a error introduced in 6.8.
-      Timeout calculation uses clock_settime() instead of clock_gettime().
-      Pretty gross error, but actually it works with the side effect of setting
-      a bad time.
-    * drivers/mtd/at24xx.c: Driver for I2C-based at24cxx EEPROM submitted by
-      Li Zhuoyi (Lzyy).
-    * arch/arm/src/lpc17xx/lpc17_i2c.c: I2C driver for the NXP LPC17xx family
-      submitted by Li Zhuoyi (Lzyy)
-    * arch/arm/src/stm32_i2c.c:  Correct two issues with the STM32 I2C driver:
-      (1) Clocking needs to be based on PCLK1, not HCLK and fast speed settings
-      need some additional bits; and (2) Correct a hang that will occur on
-      I2C1 if FSMC is also enabled.
-    * drivers/sensors/lm75.c and include/nuttx/sensors/lm75.h:  Add an LM-75
-      temperature sensor driver.
-    * configs/stm3210e-eval/src/up_lm75.c:  Add support for the LM-75 on the
-      STMicro STM3210E-EVAL board.
-    * sched/clock_gettime.c:  Correct an error in the tv_nsec calculation
-      that happens only config CONFIG_RTC is enabled.
-    * arch/arm/src/stm32/stm32_i2c.c:  Correct some bugs related to waiting
-      to the I2C STOP condition to be cleared.
+    * lib/stdio/lib_fopen.c:  Fix an error in fopen(); the file pointer was not
+      being positioned at the end of the file when the &quot;a&quot; and &quot;a+&quot; modes are
+      used.  There are other issues with the &quot;a+&quot; modes (see the top-level TODO
+      list).
+    * drivers/usbdev/cdc_serial.c and include/nuttx/usb/cdc.h and cdc_serial.h:
+      Add support for the CDC ACM serial device class.
+    * fs/fat/fs_fat32.c: Fix a critical bug in the write logic:  It a tiny write
+      cross a sector boundary, then two sector writes will occur.  The first part
+      in the first sector may be written to the wrong sector number.
+    * fs/fat/fs_fat32util.c:  Fix a stray write into the FAT (always sector 964 on
+      FAT32).  This bug will cause some lost chains.  I'm sure this bug could
+      corrupt files but at present, the only thing I have seen is that before
+      fixing this bug, the Windows chkdsk utility would report these lost chains.
+    * arch/arm/src/stm32/stm32_i2c.c: Driver can now operate in a faster polled
+      mode (at the expense of using more cpu cycles).
+    * arch/arm/src/stm32/stm32_i2c.c: Add trace debug capability.  Enabled with
+      CONFIG_I2C_TRACE.
+    * arch/arm/src/stm32/stm32_i2c.c: Fix another bug where I2C conflicts with FSMC
+      being enabled.  That time at the tail end of the transaction where there is
+      an unfinished stop condition.
+    * sched/mq_timedreceive.c and sched/mq_timedsend.c:  The count of threads
+      waiting on the message queues was not being decremented after a timeout.
+      This would cause the accounting logic to become out of sync and the, perhaps,
+      an assertion to be triggered.  This is an important bug and fixes a
+      potential crash when using mq_timedreceived() and mq_timedsend().
+    * sched/mq_sndinternal.c: Related to the above, the send logic was incrementing
+      the wrong counter when it waited as part of the mq_timedsend.c logic.
+    * fs/fat:  Fix an error in the long file name logic:  If the long file name
+      is an even multiple of 13 bytes in length, then it should not include a
+      NULL terminating character.  Fix contributed by Kaushal Parikh.
+    * configs/sim/nx11: Created a separate configuration to build the NX
+      example using the a simulated framebuffer driver on an X11 window.  This
+      example has been verified on Ubuntu 9.09 (it does not work on Cygwin).
+    * arch/sim/src/up_touchscreen.c and up_x11eventloop.c: Adds support for a
+      simulated NuttX touchscreen device using mouse/pointer feedback from an
+      x11 window.
+    * configs/sim/touchscreen: Adds a configuration to verify the simulated
+      touchscreen driver (Does not work on Cygwin).
+    * configs/sam3u/touchscreen: This is the configuration that I plan to use
+      to verify the SAM3U-EK touchscreen driver.  However, as of this writing,
+      there is no touchscreen driver for the board.
+    * CONFIG_RTC_HIRES: Add an option to support either a high-resolution RTC
+      that completely replaces the system timer tick but may overflow and lose
+      time when the MCU is off and also for a low-resolution (1 sec/tick) RTC
+      that can run until 2106 with no overflow.  But in this latter case, higher
+      resolution time must come from the system timer.
+    * CONFIG_SYSTEM_UTC: Removed support for the UTC system timer.  It just
+      doesn't do enough to be worth the CPU cycles or the complexity.
+    * CONFIG_SYSTEM_TIME16: Added support for an optional 64-bit system timer.
+    * fs/fat/fs_fat32util.c: Add support for FAT date/time stamps; Enabled via
+      CONFIG_FS_FATTIME.
+    * arch/arm/src/sam3u/sam3u_spi.c: Add an SPI driver for the AT91SAM3U.
+    * drivers/input/ads7843e.c and include/nuttx/input/ads7843e.h: Add a
+      driver for the TI ADS7843E touchscreen controller.
+    * fs/nxffs/nxffs_open.c:  Fix an error when a file is open for writing; since
+      the file will get deleted it is already exists, there must be a check if
+      there are other open references to the file.
+    * arch/arm/src/stm32/stm32_sdio.c: Fixed an error where during SDHC
+      initialization interrupts were not being re-enabled.  Caused more subtle
+      errors than you would think.
+    * arch/arm/src/stm32/stm32_i2c.c:  Fixed an error where I2C timeouts appeared
+      to be successful transfers.
+    * configs/sim/nsh2: Add another simulated NSH configuration.  This one
+      supports X11 graphics, C++, and exercises graphic functions as built-in
+      commands.
 
-apps-6.9 2011-09-11 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+apps-6.10 2011-10-06 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
-    * apps/examples/nxlines:  Extend the line drawing text to include drawing
-      of circles.
-    * apps/system/i2c:  Add an I2C test tool that should help to bring up I2C
-      devices (when it is fully functional).
-    * apps/nshlib/nsh_timcmds.c:  Add the date command that can be used to
-      show or set the time (only if CONFIG_RTC is set).
+    * apps/system/i2c:  Add repitition and address auto-incrementing so that
+      and command can be executed numerous times.  Add a new verify command
+      that will write to a register, read from register, and verify that
+      returned value.
+    * apps/graphics/tiff:  Add a library that can be used to create TIFF files.
+    * apps/examples/tiff:  Add a unit test for the TIFF file creation logic
+    * apps/examples/lcdrw:  Add a test to verify if you can or can or read
+      data from an LCD correctly.
+    * apps/examples/usbterm:  A USB terminal example.. more of a USB chat or
+      serial bridge:  Data received on local console echoed via USB serial; 
+      data received on USB serial is echoed on the local console.
+    * apps/examples/touchscreen:  Add a simple, generic test for any
+      touschscreen driver.
+    * Makefile:  The apps/ Makefile now checks for an apps/external directory
+      or symbolic link.  If such a directory/link exists (and has a Makefile),
+      it will be added to the apps/ build.  This allows external directories
+      to be included into the apps/ build by simply creating a symbolic link.
 
-pascal-1.0 2011-05-15 Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+pascal-1.0 2011-05-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
     * nuttx/:  The Pascal add-on module now installs and builds under the
       apps/interpreters directory.  This means that the pascal-2.1 module is
       incompatible with will all releases of NuttX prior to nuttx-6.0 where the 
       apps/ module was introduced.
 
-buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
+buildroot-1.10 2011-05-06 &lt;gnutt@nuttx.org&gt;
 
     * Add patch submitted by Dimiter Georgiev to work around problems in building
       GDB 6.8 with versions of Cygwin &gt; 1.7.
@@ -2699,13 +2718,13 @@ buildroot-1.10 2011-05-06 &lt;spudmonkey@racsa.co.cr&gt;
 </table>
 
 <ul><pre>
-nuttx-6.10 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+nuttx-6.11 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
-apps-6.10 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+apps-6.11 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
-pascal-3.1 2011-xx-xx Gregory Nutt &lt;spudmonkey@racsa.co.cr&gt;
+pascal-3.1 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
-buildroot-1.11 2011-xx-xx &lt;spudmonkey@racsa.co.cr&gt;
+buildroot-1.11 2011-xx-xx &lt;gnutt@nuttx.org&gt;
 </pre></ul>
 
 <table width ="100%">
