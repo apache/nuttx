@@ -116,8 +116,11 @@
 
 #ifndef __ASSEMBLY__
 
-#if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
+#ifdef CONFIG_SIM_X11FB
+extern int g_x11initialized;
+#ifdef CONFIG_SIM_TOUCHSCREEN
 extern volatile int g_eventloop;
+#endif
 #endif
 
 /**************************************************************************
