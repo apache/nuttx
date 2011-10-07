@@ -2148,3 +2148,9 @@
 
 6.11 2011-xx-xx Gregory Nutt <gnutt@nuttx.org>
 
+	* arch/arm/stm32/Make.defs:  Don't build stm32_rtc.c if CONFIG_RTC is not
+	  selected.  Doing so will cause errors if other configuration dependencies
+	  are not met
+	* configs/stm3210e-eval/src/up_lcd.c:  Color corrections for SPFD5408B LCD
+	  do not work with R61580 LCD.
+

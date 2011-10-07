@@ -2720,11 +2720,23 @@ buildroot-1.10 2011-05-06 &lt;gnutt@nuttx.org&gt;
 <ul><pre>
 nuttx-6.11 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
+    * arch/arm/stm32/Make.defs:  Don't build stm32_rtc.c if CONFIG_RTC is not
+      selected.  Doing so will cause errors if other configuration dependencies
+      are not met
+    * configs/stm3210e-eval/src/up_lcd.c:  Color corrections for SPFD5408B LCD
+      do not work with R61580 LCD.
+
 apps-6.11 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
 buildroot-1.11 2011-xx-xx &lt;gnutt@nuttx.org&gt;
+
+    * configs/avr-defconfig-4.3.3 - Added --enable-long-long as a GCC
+      option.
+    * configs/avr-defconfig-4.5.2 - New configuration.
+    * Config.in and almost all configurations in configs/ - Changed the
+      default nuttx path to $(TOPDIR)/../../nuttx
 </pre></ul>
 
 <table width ="100%">
