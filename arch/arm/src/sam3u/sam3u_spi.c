@@ -125,7 +125,9 @@ static void spi_dumpregs(FAR const char *msg);
 #else
 # define spi_dumpregs(msg)
 #endif
+
 static inline void spi_flush(void);
+static inline uint32_t spi_cs2pcs(FAR struct sam3u_spidev_s *priv);
 
 /* SPI methods */
 
@@ -222,7 +224,7 @@ static void spi_dumpregs(FAR const char *msg)
   spivdbg("  CSR0:%08x CSR1:%08x CSR2:%08x CSR3:%08x\n",
           getreg32(SAM3U_SPI_CSR0), getreg32(SAM3U_SPI_CSR1),
           getreg32(SAM3U_SPI_CSR2), getreg32(SAM3U_SPI_CSR3));
-  spivdbg("  WPCR:%08x WPSR:%08x  IMR:%08x\n",
+  spivdbg("  WPCR:%08x WPSR:%08x\n",
           getreg32(SAM3U_SPI_WPCR), getreg32(SAM3U_SPI_WPSR));
 }
 #endif
@@ -255,6 +257,37 @@ static inline void spi_flush(void)
     {
        (void)getreg32(SAM3U_SPI_RDR);
     }
+}
+
+/****************************************************************************
+ * Name: spi_cs2pcs
+ *
+ * Description:
+ *   Map the chip select number to the bit-set PCS field used in the SPI
+ *   registers.  A chip select number is used for indexing and identifying
+ *   chip selects.  However, the chip select information is represented by
+ *   a bit set in the SPI regsisters.  This function maps those chip select
+ *   numbers to the correct bit set:
+ *
+ *    CS  Returned   Spec    Effective
+ *    No.   PCS      Value    NPCS
+ *   ---- --------  -------- --------
+ *    0    0000      xxx0     1110
+ *    1    0001      xx01     1101
+ *    2    0011      x011     1011
+ *    3    0111      0111     0111
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline uint32_t spi_cs2pcs(FAR struct sam3u_spidev_s *priv)
+{
+  return ((uint32_t)1 << (priv->cs)) - 1;
 }
 
 /****************************************************************************
@@ -346,9 +379,9 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
        * in order to select a slave.
        */
 
-      regval = getreg32(SAM3U_SPI_MR);
+      regval  = getreg32(SAM3U_SPI_MR);
       regval &= ~SPI_MR_PCS_MASK;
-      regval |= (priv->cs << SPI_MR_PCS_SHIFT);
+      regval |= (spi_cs2pcs(priv) << SPI_MR_PCS_SHIFT);
       putreg32(regval, SAM3U_SPI_MR);
     }
   else
@@ -660,16 +693,18 @@ static void  spi_exchange(FAR struct spi_dev_s *dev,
                           FAR const void *txbuffer, FAR void *rxbuffer,
                           size_t nwords)
 {
-#ifdef CONFIG_SPI_VARSELECT
   FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
-  uint32_t tdr = (uint32_t)priv->cs << SPI_TDR_PCS_SHIFT;
-#endif
   FAR uint8_t *rxptr = (FAR uint8_t*)rxbuffer;
   FAR uint8_t *txptr = (FAR uint8_t*)txbuffer;
+  uint32_t pcs;
   uint32_t data;
 
   spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
+  /* Set up PCS bits */
+
+  pcs = spi_cs2pcs(priv) << SPI_TDR_PCS_SHIFT;
+  
   /* Make sure that any previous transfer is flushed from the hardware */
 
   spi_flush();
@@ -718,13 +753,13 @@ static void  spi_exchange(FAR struct spi_dev_s *dev,
           data = 0xffff;
         }
 
-      /* Set the chip select in the value written to the TDR */
+      /* Set the PCS field in the value written to the TDR */
 
-#ifdef CONFIG_SPI_VARSELECT
-      data |= tdr;
+      data |= pcs;
 
       /* Do we need to set the LASTXFER bit in the TDR value too? */
 
+#ifdef CONFIG_SPI_VARSELECT
       if (nwords == 1)
         {
           data |= SPI_TDR_LASTXFER;
@@ -734,7 +769,7 @@ static void  spi_exchange(FAR struct spi_dev_s *dev,
       /* Wait for any previous data written to the TDR to be transferred
        * to the serializer.
        */
-      
+
       while ((getreg32(SAM3U_SPI_SR) & SPI_INT_TDRE) == 0);
 
       /* Write the data to transmitted to the Transmit Data Register (TDR) */
@@ -750,7 +785,7 @@ static void  spi_exchange(FAR struct spi_dev_s *dev,
       data = getreg32(SAM3U_SPI_RDR);
       if (rxptr)
         {
-          *txptr++ = (uint8_t)data;
+          *rxptr++ = (uint8_t)data;
         }
     }
 }
