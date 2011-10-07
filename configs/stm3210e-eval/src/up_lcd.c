@@ -39,7 +39,15 @@
  * 2. Orise Tech SPFD5408B
  * 3. RenesasSP R61580
  *
- * The driver dynamically selects the LCD based on the reported LCD ID value.
+ * The driver dynamically selects the LCD based on the reported LCD ID value.  However,
+ * code size can be reduced by suppressing support for individual LCDs using:
+ *
+ *   CONFIG_STM32_AM240320_DISABLE
+ *   CONFIG_STM32_SPFD5408B_DISABLE
+ *   CONFIG_STM32_R61580_DISABLE
+ *
+ * Omitting the above (or setting them to "n") enables support for the LCD.  Setting
+ * any of the above to "y" will disable support for the corresponding LCD.
  */
  
 /**************************************************************************************
@@ -69,7 +77,6 @@
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
-
 /* Configuration **********************************************************************/
 /* Check contrast selection */
 
@@ -121,18 +128,16 @@
 #  error "PA8 cannot be configured as TIM1 CH1 with full remap"
 #endif
 
-/* When reading 16-bit gram data, there appears to be a 5-bit shift in the returned
- * data.
+/* When reading 16-bit gram data, there may some shifts in the returned data
+ * and/or there may be some colors in the incorrect posisions:
+ *
+ * - SPFD5408B:  There appears to be a 5-bit shift in the returned data.
+ *               Red and green appear to be swapped on read-back as well
+ * - R61580:     There is a 16-bit (1 pixel) shift in the returned data.
+ * - AM240320:   Unknown -- assume colors are correct for now.
  */
 
-#ifndef CONFIG_LCD_RDSHIFT
-#  define CONFIG_LCD_RDSHIFT 5
-#endif
-
-/* Red and green appear to be swapped on read-back as well */
-
-#undef CONFIG_LCD_RDSWAP
-#define CONFIG_LCD_RDSWAP 1
+#define SPFD5408B_RDSHIFT 5
 
 /* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
  * also be enabled.
@@ -299,6 +304,16 @@
  * Private Type Definition
  **************************************************************************************/
 
+/* LCD type */
+
+enum lcd_type_e
+{
+  LCD_TYPE_UNKNOWN = 0,
+  LCD_TYPE_SPFD5408B,
+  LCD_TYPE_R61580,
+  LCD_TYPE_AM240320
+};
+
 /* This structure describes the LCD registers */
 
 struct lcd_regs_s
@@ -317,7 +332,7 @@ struct stm3210e_dev_s
 
   /* Private LCD-specific information follows */
 
-  bool     spfd5408b;   /* TRUE: LCD is SPFD5408B Controller */
+  uint8_t  type;        /* LCD type. See enum lcd_type_e */
   uint8_t  power;       /* Current power setting */
 };
 
@@ -330,14 +345,10 @@ static void stm3210e_writereg(uint8_t regaddr, uint16_t regval);
 static uint16_t stm3210e_readreg(uint8_t regaddr);
 static inline void stm3210e_gramselect(void);
 static inline void stm3210e_writegram(uint16_t rgbval);
-#if CONFIG_LCD_RDSHIFT > 0
-static inline void stm3210e_readsetup(FAR uint16_t *accum);
-static inline uint16_t stm3210e_readgram(FAR uint16_t *accum);
-#else
-static inline uint16_t stm3210e_readnoshift(void);
-#  define stm3210e_readsetup(a,n)
-#  define stm3210e_readgram(a,n) stm3210e_readnoshift()
-#endif
+static void stm3210e_readsetup(FAR uint16_t *accum);
+static void stm3210e_readnosetup(FAR uint16_t *accum);
+static uint16_t stm3210e_readshift(FAR uint16_t *accum);
+static uint16_t stm3210e_readnoshift(FAR uint16_t *accum);
 static void stm3210e_setcursor(uint16_t col, uint16_t row);
 
 /* LCD Data Transfer Methods */
@@ -507,38 +518,63 @@ static inline void stm3210e_writegram(uint16_t rgbval)
 }
 
 /**************************************************************************************
- * Name:  stm3210e_readsetup
+ * Name:  stm3210e_readsetup / stm3210e_readnosetup
  *
  * Description:
- *   Prime the operation by reading one pixel from the GRAM memory
+ *   Prime the operation by reading one pixel from the GRAM memory if necessary for
+ *   this LCD type.  When reading 16-bit gram data, there may be some shifts in the
+ *   returned data:
+ *
+ *   - SPFD5408B:  There appears to be a 5-bit shift in the returned data.
+ *   - R61580:     There is a 16-bit (1 pixel) shift in the returned data.
+ *   - AM240320:   Unknown -- assuming no shift in the return data
  *
  **************************************************************************************/
 
-#if CONFIG_LCD_RDSHIFT > 0
-static inline void stm3210e_readsetup(FAR uint16_t *accum)
+/* Used for SPFD5408B and R61580 */
+
+#if !defined(CONFIG_STM32_SPFD5408B_DISABLE) || !defined(CONFIG_STM32_R61580_DISABLE)
+static void stm3210e_readsetup(FAR uint16_t *accum)
 {
-  /* Read the value (GRAM register already selected) */
+  /* Read-ahead one pixel */
 
   *accum  = LCD->value;
 }
 #endif
 
+/* Used only for AM240320 */
+
+#ifndef CONFIG_STM32_AM240320_DISABLE
+static void stm3210e_readnosetup(FAR uint16_t *accum)
+{
+}
+#endif
+
 /**************************************************************************************
- * Name:  stm3210e_readgram
+ * Name:  stm3210e_readshift / stm3210e_readnoshift
  *
  * Description:
- *   Read one correctly aligned pixel from the GRAM memory
+ *   Read one correctly aligned pixel from the GRAM memory.  Possibly shifting the
+ *   data and possibly swapping red and green components.
+ *
+ *   - SPFD5408B:  There appears to be a 5-bit shift in the returned data.
+ *                 Red and green appear to be swapped on read-back as well
+ *   - R61580:     There is a 16-bit (1 pixel) shift in the returned data.
+ *                 All colors in the normal order
+ *   - AM240320:   Unknown -- assuming colors are in the color order 
  *
  **************************************************************************************/
 
-#if CONFIG_LCD_RDSHIFT > 0
-static inline uint16_t stm3210e_readgram(FAR uint16_t *accum)
+/* This version is used only for the SPFD5408B.  It shifts the data by 5-bits and swaps
+ * red and green
+ */
+
+#ifndef CONFIG_STM32_SPFD5408B_DISABLE
+static uint16_t stm3210e_readshift(FAR uint16_t *accum)
 {
-#ifdef CONFIG_LCD_RDSWAP
   uint16_t red;
   uint16_t green;
   uint16_t blue;
-#endif
 
   /* Read the value (GRAM register already selected) */
 
@@ -549,10 +585,10 @@ static inline uint16_t stm3210e_readgram(FAR uint16_t *accum)
    *   xxxx xPPP PPPP PPPP
    *   NNNN Nxxx xxxx xxxx
    *
-   * Assuming that CONFIG_LCD_RDSHIFT == 5
+   * Assuming that SPFD5408B_RDSHIFT == 5
    */
 
-  uint16_t value  = *accum << CONFIG_LCD_RDSHIFT | next >> (16-CONFIG_LCD_RDSHIFT);
+  uint16_t value  = *accum << SPFD5408B_RDSHIFT | next >> (16-SPFD5408B_RDSHIFT);
 
   /* Save the value for the next time we are called */
 
@@ -560,7 +596,6 @@ static inline uint16_t stm3210e_readgram(FAR uint16_t *accum)
 
   /* Tear the RGB655 apart. Swap read and green */
 
-#ifdef CONFIG_LCD_RDSWAP
   red   = (value << (11-5)) & 0xf800; /* Move bits 5-9 to 11-15 */
   green = (value >> (10-5)) & 0x07e0; /* Move bits 10-15 to bits 5-10 */
   blue  =  value            & 0x001f; /* Blue is in the right place */
@@ -580,61 +615,21 @@ static inline uint16_t stm3210e_readgram(FAR uint16_t *accum)
       value += 0x20;
     }
 #endif
-#endif
 
   return value;
 }
 #endif
 
-/**************************************************************************************
- * Name:  stm3210e_readnoshift
- *
- * Description:
- *   Read one pixel from the GRAM memory
- *
- **************************************************************************************/
+/* This version is used for the R61580 and for the AM240320.  It neither shifts nor
+ * swaps colors.
+ */
 
-#if CONFIG_LCD_RDSHIFT <= 0
-static inline uint16_t stm3210e_readnoshift(void)
+#if !defined(CONFIG_STM32_R61580_DISABLE) || !defined(CONFIG_STM32_AM240320_DISABLE)
+static uint16_t stm3210e_readnoshift(FAR uint16_t *accum)
 {
-#ifdef CONFIG_LCD_RDSWAP
-  uint16_t value;
-  uint16_t red;
-  uint16_t green;
-  uint16_t blue;
-
-  /* Read the value (GRAM register already selected) */
-
-  value = LCD->value;
-
-  /* Tear the RGB655 apart. Swap read and green */
-
-  red   = (value << (11-5)) & 0xf800; /* Move bits 5-9 to 11-15 */
-  green = (value >> (10-5)) & 0x07e0; /* Move bits 10-15 to bits 5-10 */
-  blue  = value             & 0x001f; /* Blue is in the right place */
-
-  /* And put the RGB565 back together */
-
-  value = red | green | blue;
-
-  /* This is wierd... If blue is zero, then red+green values are off by 0x20.
-   * Except that both 0x0000 and 0x0020 can map to 0x0000.  Need to revisit
-   * this!!!!!!!!!!!  I might be misinterpreting some of the data that I have.
-   */
-
-#if 0 /* REVISIT */
-  if (value != 0 && blue == 0)
-    {
-      value += 0x20;
-    }
-#endif
-
-  return value;
-#else
   /* Read the value (GRAM register already selected) */
 
   return LCD->value;
-#endif
 }
 #endif
 
@@ -791,9 +786,9 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                        size_t npixels)
 {
   FAR uint16_t *dest = (FAR uint16_t*)buffer;
-#if CONFIG_LCD_RDSHIFT > 0
+  void (*readsetup)(FAR uint16_t *accum);
+  uint16_t (*readgram)(FAR uint16_t *accum);
   uint16_t accum;
-#endif
   int i;
  
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -801,6 +796,35 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   lcddbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
+  /* Configure according to the LCD type */
+
+  switch (g_lcddev.type)
+   {
+#ifndef CONFIG_STM32_SPFD5408B_DISABLE
+     case LCD_TYPE_SPFD5408B:
+       readsetup = stm3210e_readsetup;
+       readgram  = stm3210e_readshift;
+       break;
+#endif
+
+#ifndef CONFIG_STM32_R61580_DISABLE
+     case LCD_TYPE_R61580:
+       readsetup = stm3210e_readsetup;
+       readgram  = stm3210e_readnoshift;
+       break;
+#endif
+
+#ifndef CONFIG_STM32_AM240320_DISABLE
+     case LCD_TYPE_AM240320:
+       readsetup = stm3210e_readnosetup;
+       readgram  = stm3210e_readnoshift;
+       break;
+#endif
+
+     default:  /* Shouldn't happen */
+       return -ENOSYS;
+   }
+ 
   /* Read the run from GRAM. */
 
 #ifdef CONFIG_LCD_LANDSCAPE
@@ -820,13 +844,13 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   /* Prime the pump for unaligned read data */
 
-  stm3210e_readsetup(&accum);
+  readsetup(&accum);
 
   for (i = 0; i < npixels; i++)
     {
       /* Read the next pixel from this position (autoincrements to the next row) */
 
-      *dest++ = stm3210e_readgram(&accum);
+      *dest++ = readgram(&accum);
     }
 #elif defined(CONFIG_LCD_PORTRAIT)
   /* Convert coordinates (Swap row and column.  This is done implicitly). */
@@ -839,8 +863,8 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
       stm3210e_setcursor(row, col);
       stm3210e_gramselect();
-      stm3210e_readsetup(&accum);
-      *dest++ = stm3210e_readgram(&accum);
+      readsetup(&accum);
+      *dest++ = readgram(&accum);
 
       /* Increment to next column */
 
@@ -862,8 +886,8 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
       stm3210e_setcursor(row, col);
       stm3210e_gramselect();
-      stm3210e_readsetup(&accum);
-      *dest++ = stm3210e_readgram(&accum);
+      readsetup(&accum);
+      *dest++ = readgram(&accum);
 
       /* Decrement to next column */
 
@@ -959,7 +983,15 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
 #endif
       /* Then turn the display on */
 
-      stm3210e_writereg(LCD_REG_7, g_lcddev.spfd5408b ? 0x0112 : 0x0173);
+#ifndef CONFIG_STM32_AM240320_DISABLE
+#  if !defined (CONFIG_STM32_SPFD5408B_DISABLE) || !defined(CONFIG_STM32_R61580_DISABLE)
+      stm3210e_writereg(LCD_REG_7, g_lcddev.type == LCD_TYPE_AM240320 ? 0x0173 : 0x0112);
+#  else
+      stm3210e_writereg(LCD_REG_7, 0x0173);
+#  endif
+#else
+      stm3210e_writereg(LCD_REG_7, 0x0112);
+#endif
       g_lcddev.power = power;
     }
   else
@@ -1016,11 +1048,30 @@ static inline void stm3210e_lcdinitialize(void)
    */
 
   id = stm3210e_readreg(LCD_REG_0);
-  lcddbg("ID: %04x\n", id);
+  lcddbg("LCD ID: %04x\n", id);
 
+  /* Check if the ID is for the SPFD5408B or the almost compatible R61580 */
+
+#if !defined(CONFIG_STM32_SPFD5408B_DISABLE) || !defined(CONFIG_STM32_R61580_DISABLE)
+#if !defined(CONFIG_STM32_SPFD5408B_DISABLE) && !defined(CONFIG_STM32_R61580_DISABLE)
   if (id == SPFD5408B_ID || id == R61580_ID)
+#elif !defined(CONFIG_STM32_SPFD5408B_DISABLE)
+  if (id == SPFD5408B_ID)
+#else
+  if (id == R61580_ID)
+#endif
     {
-      g_lcddev.spfd5408b = true;
+      /* Set the LCD type for the SPFD5408B or the R61580 */
+
+#if !defined(CONFIG_STM32_SPFD5408B_DISABLE) && !defined(CONFIG_STM32_R61580_DISABLE)
+      g_lcddev.type = (id == SPFD5408B_ID ? LCD_TYPE_SPFD5408B : LCD_TYPE_R61580);
+#elif !defined(CONFIG_STM32_SPFD5408B_DISABLE)
+      g_lcddev.type = SPFD5408B_ID;
+#else
+      g_lcddev.type = LCD_TYPE_R61580;
+#endif
+
+      lcddbg("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
 
@@ -1115,8 +1166,11 @@ static inline void stm3210e_lcdinitialize(void)
       stm3210e_writereg(LCD_REG_7, 0);      /* Display OFF */
     }
   else
+#endif
     {
-      g_lcddev.spfd5408b = false;
+#ifndef CONFIG_STM32_AM240320_DISABLE
+      g_lcddev.type = LCD_TYPE_AM240320;
+      lcddbg("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
 
@@ -1204,6 +1258,9 @@ static inline void stm3210e_lcdinitialize(void)
 
       stm3210e_writereg(LCD_REG_3, 0x1018);
       stm3210e_writereg(LCD_REG_7, 0);       /* Display off */
+#else
+      lcddbg("Unsupported LCD type\n");
+#endif
   }
 }
 
