@@ -52,9 +52,12 @@ CHIP_ASRCS	=
 CHIP_CSRCS	= stm32_start.c stm32_rcc.c stm32_gpio.c stm32_flash.c \
 		  stm32_irq.c stm32_timerisr.c stm32_dma.c stm32_lowputc.c \
 		  stm32_serial.c stm32_spi.c stm32_usbdev.c stm32_sdio.c \
-		  stm32_tim.c stm32_i2c.c stm32_pwr.c stm32_rtc.c \
-		  stm32_idle.c stm32_waste.c
+		  stm32_tim.c stm32_i2c.c stm32_pwr.c stm32_idle.c stm32_waste.c
 
 ifeq ($(CONFIG_STM32_RCCLOCK),y)
 CHIP_CSRCS	+= stm32_rcclock.c
+endif
+
+ifeq ($(CONFIG_RTC),y)
+CHIP_CSRCS	+= stm32_rtc.c
 endif
