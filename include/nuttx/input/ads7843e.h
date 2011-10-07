@@ -54,6 +54,12 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+/* SPI Frequency.  Default:  100KHz */
+
+#ifndef CONFIG_ADS7843E_FREQUENCY
+#  define CONFIG_ADS7843E_FREQUENCY 100000
+#endif
+
 /* Maximum number of threads than can be waiting for POLL events */
 
 #ifndef CONFIG_ADS7843E_NPOLLWAITERS

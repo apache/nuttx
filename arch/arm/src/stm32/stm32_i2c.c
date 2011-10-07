@@ -991,8 +991,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s * priv)
       /* \todo Finish 10-bit mode addressing */
     }
 
-  /* Was address sent, continue with ether sending or reading data */
-    
+  /* Was address sent, continue with either sending or reading data */
+
   else if ((priv->flags & I2C_M_READ) == 0 && (status & (I2C_SR1_ADDR | I2C_SR1_TXE)) != 0)
     {
       stm32_i3c_traceevent(priv, I2CEVENT_READ, priv->dcnt);

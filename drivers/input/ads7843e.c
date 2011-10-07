@@ -192,9 +192,7 @@ static void ads7843e_select(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
   SPI_SETBITS(spi, 8);
-#ifdef CONFIG_ADS7843E_FREQUENCY
   SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
-#endif
 }
 #endif
 
@@ -256,12 +254,8 @@ static void ads7843e_deselect(FAR struct spi_dev_s *spi)
 
 static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
 {
-#ifdef CONFIG_ADS7843E_FREQUENCY
   idbg("Mode: %d Bits: 8 Frequency: %d\n",
        CONFIG_ADS7843E_SPIMODE, CONFIG_ADS7843E_FREQUENCY);
-#else
-  idbg("Mode: %d Bits: 8\n", CONFIG_ADS7843E_SPIMODE);
-#endif
 
   /* Configure SPI for the P14201.  But only if we own the SPI bus.  Otherwise, don't
    * bother because it might change.
@@ -271,9 +265,7 @@ static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
   SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
   SPI_SETBITS(spi, 8);
-#ifdef CONFIG_ADS7843E_FREQUENCY
   SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY)
-#endif
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
 #endif
 }
@@ -1109,10 +1101,6 @@ int ads7843e_register(FAR struct spi_dev_s *dev,
   priv->wdog   = wd_create();     /* Create a watchdog timer */
   sem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
-
-  /* Set the SPI frequency (saving the actual frequency) */
-
-  config->frequency = SPI_SETFREQUENCY(dev, config->frequency);
 
   /* Make sure that interrupts are disabled */
 

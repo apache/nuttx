@@ -2,7 +2,7 @@
  * drivers/input/ads7843e.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
  *   "Touch Screen Controller, ADS7843," Burr-Brown Products from Texas
@@ -60,9 +60,7 @@
  * Pre-Processor Definitions
  ********************************************************************************************/
 /* Configuration ****************************************************************************/
-/* Reference counting is partially implemented, but not needed in the
- * current design.
- */
+/* Reference counting is partially implemented, but not needed in the current design. */
 
 #undef CONFIG_ADS7843E_REFCNT
 
