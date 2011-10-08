@@ -369,9 +369,9 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
       DEBUGASSERT(priv->cs == 0xff);
 
-      /* Get the chip select associated with this SPI device */
+      /* Get the chip select number used with this SPI device */
 
-      priv->cs = sam3u_spiselect(devid);
+      priv->cs = sam3u_spicsnumber(devid);
       spivdbg("cs=%d\n", priv->cs);
       DEBUGASSERT(priv->cs >= 0 && priv->cs <= 3);
 
@@ -389,7 +389,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
       /* At this point, we expect the chip to have already been selected */
 
 #ifdef CONFIG_DEBUG
-      int cs = sam3u_spiselect(devid);
+      int cs = sam3u_spicsnumber(devid);
       DEBUGASSERT(priv->cs == cs);
 #endif
 
@@ -397,6 +397,22 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
       priv->cs = 0xff;
     }
+
+  /* Perform any board-specific chip select operations. PIO chip select
+   * pins may be programmed by the board specific logic in one of two
+   * different ways.  First, the pins may be programmed as SPI peripherals.
+   * In that case, the pins are completely controlled by the SPI driver.
+   * This sam3u_spiselect method still needs to be provided, but it may
+   * be only a stub.
+   *
+   * An alternative way to program the PIO chip select pins is as normal
+   * GPIO outputs.  In that case, the automatic control of the CS pins is
+   * bypassed and this function must provide control of the chip select.
+   * NOTE:  In this case, the GPIO output pin does *not* have to be the
+   * same as the NPCS pin normal associated with the chip select number.
+   */
+
+  sam3u_spiselect(devid, selected);
  }
 
 /****************************************************************************
