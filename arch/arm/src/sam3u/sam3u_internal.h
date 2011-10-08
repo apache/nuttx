@@ -249,6 +249,7 @@
 #define GPIO_SPI0_MOSI            (GPIO_PERIPHA|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN14)
 #define GPIO_SPI0_SPCK            (GPIO_PERIPHA|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN15)
 #define GPIO_SPI0_NPCS0           (GPIO_PERIPHA|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN16)
+
 #define GPIO_SPI0_NPCS1_1         (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOA|GPIO_PIN0)
 #define GPIO_SPI0_NPCS1_2         (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOC|GPIO_PIN3)
 #define GPIO_SPI0_NPCS1_3         (GPIO_PERIPHB|GPIO_CFG_DEFAULT|GPIO_PORT_PIOC|GPIO_PIN19)
@@ -761,20 +762,29 @@ EXTERN void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
 EXTERN void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 
 /****************************************************************************
- * Name:  sam3u_spiselect, sam3u_spistatus, and sam3u_spicmddata
+ * Name:  sam3u_spicsnumber, sam3u_spiselect, sam3u_spistatus, and
+ *        sam3u_spicmddata
  *
  * Description:
  *   These external functions must be provided by board-specific logic.  They
- *   are implementations of the select, status, and cmddata methods of the SPI
- *   interface defined by struct spi_ops_s (see include/nuttx/spi.h). All
- *   other methods including up_spiinitialize()) are provided by common SAM3U
- *   logic.  To use this common SPI logic on your board:
+ *   include:
+ *
+ *   o sam3u_spicsnumbe and sam3u_spiselect which are helper functions to
+ *     manage the board-specific aspects of the unique SAM3U chip select
+ *     architecture.
+ *   o sam3u_spistatus and sam3u_spicmddata:  Implementations of the status
+ *     and cmddata methods of the SPI interface defined by struct spi_ops_
+ *     (see include/nuttx/spi.h). All other methods including
+ *     up_spiinitialize()) are provided by common SAM3U logic.
+ *
+ *  To use this common SPI logic on your board:
  *
  *   1. Provide logic in sam3u_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam3u_spiselect() and sam3u_spistatus() functions in your
- *      board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
+ *   2. Provide sam3u_spicsnumber(), sam3u_spiselect() and sam3u_spistatus()
+ *      functions in your board-specific logic.  These functions will perform
+ *      chip selection and status operations using GPIOs in the way your board
+ *      is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam3u_spicmddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using GPIOs in
@@ -788,16 +798,108 @@ EXTERN void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SAM3U_SPI
 struct spi_dev_s;
 enum spi_dev_e;
 
-#ifdef CONFIG_SAM3U_SPI
-EXTERN int sam3u_spiselect(enum spi_dev_e devid);
+/****************************************************************************
+ * Name: sam3u_spicsnumber
+ *
+ * Description:
+ *   The SAM3U has 4 CS registers for controlling device features.  This
+ *   function must be provided by board-specific code.  Given a logical device
+ *   ID, this function returns a number from 0 to 3 that identifies one of
+ *   these SAM3U CS resources.
+ *
+ *   If CONFIG_SPI_OWNBUS is not defined and the GPIO is controlled by
+ *   sam3u_spiselect, then the same CS register may be used to control
+ *   multiple devices.
+ *
+ * Input Parameters:
+ *   dev - SPI device info
+ *   devid - Identifies the (logical) device
+ *
+ * Returned Values:
+ *   On success, a CS number from 0 to 3 is returned; A negated errno may
+ *   be returned on a failure.
+ *
+ ****************************************************************************/
+
+EXTERN int sam3u_spicsnumber(enum spi_dev_e devid);
+
+/****************************************************************************
+ * Name: sam3u_spiselect
+ *
+ * Description:
+ *   PIO chip select pins may be programmed by the board specific logic in
+ *   one of two different ways.  First, the pins may be programmed as SPI
+ *   peripherals.  In that case, the pins are completely controlled by the
+ *   SPI driver.  This method still needs to be provided, but it may be only
+ *   a stub.
+ *
+ *   An alternative way to program the PIO chip select pins is as a normal
+ *   GPIO output.  In that case, the automatic control of the CS pins is
+ *   bypassed and this function must provide control of the chip select.
+ *   NOTE:  In this case, the GPIO output pin does *not* have to be the
+ *   same as the NPCS pin normal associated with the chip select number.
+ *
+ * Input Parameters:
+ *   dev - SPI device info
+ *   devid - Identifies the (logical) device
+ *   selected - TRUE:Select the device, FALSE:De-select the device
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void sam3u_spiselect(enum spi_dev_e devid, bool selected);
+
+/****************************************************************************
+ * Name: sam3u_spistatus
+ *
+ * Description:
+ *   Return status information associated with the SPI device.
+ *
+ * Input Parameters:
+ *   dev - SPI device info
+ *   devid - Identifies the (logical) device
+ *
+ * Returned Values:
+ *   Bit-encoded SPI status (see include/nuttx/spi.h.
+ *
+ ****************************************************************************/
+
 EXTERN uint8_t sam3u_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+
+/****************************************************************************
+ * Name: sam3u_spicmddata
+ *
+ * Description:
+ *   Some SPI devices require an additional control to determine if the SPI
+ *   data being sent is a command or is data.  If CONFIG_SPI_CMDDATA then
+ *   this function will be called to different be command and data transfers.
+ *
+ *   This is often needed, for example, by LCD drivers.  Some LCD hardware
+ *   may be configured to use 9-bit data transfers with the 9th bit
+ *   indicating command or data.  That same hardware may be configurable,
+ *   instead, to use 8-bit data but to require an additional, board-
+ *   specific GPIO control to distinguish command and data.  This function
+ *   would be needed in that latter case.
+ *
+ * Input Parameters:
+ *   dev - SPI device info
+ *   devid - Identifies the (logical) device
+ *
+ * Returned Values:
+ *   Zero on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
 #ifdef CONFIG_SPI_CMDDATA
 EXTERN int sam3u_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
-#endif
+#endif /* CONFIG_SAM3U_SPI */
 
 #undef EXTERN
 #if defined(__cplusplus)

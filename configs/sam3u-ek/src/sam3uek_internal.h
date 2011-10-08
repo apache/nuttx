@@ -164,9 +164,17 @@
 
 /* SPI Chip Selects */
 
-/* Chip select pin connected to the touchscreen controller and to ZigBee module connector. */
+/* Chip select pin connected to the touchscreen controller and to the ZigBee module
+ * connector.  Notice that the touchscreen chip select is implemented as a GPIO
+ * OUTPUT that must be controlled by board-specific.  This is because the ADS7843E
+ * driver must be able to sample the device BUSY GPIO input between SPI transfers.
+ * However, the AD7843E will tri-state the BUSY input whenever the chip select is
+ * de-asserted.  So the only option is to control the chip select manually and hold
+ * it low throughout the SPI transfer.
+ */
 
-#define GPIO_TSC_NPCS2  GPIO_SPI0_NPCS2_3
+#define GPIO_TSC_NPCS2 (GPIO_OUTPUT|GPIO_CFG_PULLUP|GPIO_OUTPUT_SET|\
+                        GPIO_PORT_PIOC|GPIO_PIN14)
 
 /************************************************************************************
  * Public Types
