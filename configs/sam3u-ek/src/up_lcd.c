@@ -798,9 +798,9 @@ static int sam3u_setpower(struct lcd_dev_s *dev, int power)
       sam3u_gpiowrite(GPIO_LCD_BKL, false);
       sam3u_gpiowrite(GPIO_LCD_BKL, false);
       sam3u_gpiowrite(GPIO_LCD_BKL, false);
-      sam3u_gpiowrite(GPIO_LCD_BKL, true);;
-      sam3u_gpiowrite(GPIO_LCD_BKL, true);;
-      sam3u_gpiowrite(GPIO_LCD_BKL, true);;
+      sam3u_gpiowrite(GPIO_LCD_BKL, true);
+      sam3u_gpiowrite(GPIO_LCD_BKL, true);
+      sam3u_gpiowrite(GPIO_LCD_BKL, true);
     }
 
   /* This delay seems to be required... perhaps because of the big current jump? */
