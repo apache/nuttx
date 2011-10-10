@@ -3,7 +3,7 @@
  * include/arch/board/board.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -69,7 +69,7 @@
  */
 
 #define BOARD_UPLL_IDIV        5         /* USB PLL divider */
-#define BOARD_USB_CLOCK        48000000  /* USB clock ((20MHz / 5) * 24) */
+#define BOARD_USB_CLOCK        48000000  /* USB clock ((20MHz / 5) * 24) / 2 */
 
 /* Peripheral clock is *not* divided down from CPU clock.
  * PBCLOCK = CPU_CLOCK / PBDIV

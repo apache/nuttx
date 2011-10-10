@@ -57,9 +57,10 @@ Contents
 PIC32MX795F512L Pin Out
 =======================
 
-  LEFT SIDE, TOP-TO-BOTTOM (if pin 1 is in upper left)
-PIN CONFIGURATIONS                     SIGNAL NAME
-    (Table 1-1)                        (User Guide)
+LEFT SIDE, TOP-TO-BOTTOM (if pin 1 is in upper left)
+--- ---------------------------------- -------------------------- -----------------------------------------------
+PIN CONFIGURATIONS                     SIGNAL NAME                ON-BOARD CONNECTIONS
+    (Family Data Sheet Table 1-1)     (Starter Kit User Guide)
 --- ---------------------------------- -------------------------- -----------------------------------------------
   1 RG15/AERXERR                       ERXERR                     Ethernet RX_ER/MDIX_IN
   2 VDD                                P32_VDD                    ---
@@ -106,9 +107,10 @@ PIN CONFIGURATIONS                     SIGNAL NAME
  24 AN1/CN3/PGEC1/RB1                  PGC1/AN1/CN3/RB1           J2 pin 70 (A/D)
  25 AN0/CN2/PGED1/RB0                  PGD1/AN0/CN2/RB0           J2 pin 72 (A/D)
 
-  BOTTOM SIDE, LEFT-TO-RIGHT (if pin 1 is in upper left)
-PIN CONFIGURATIONS                     SIGNAL NAME
-    (Table 1-1)                        (User Guide)
+BOTTOM SIDE, LEFT-TO-RIGHT (if pin 1 is in upper left)
+--- ---------------------------------- -------------------------- -----------------------------------------------
+PIN CONFIGURATIONS                     SIGNAL NAME                ON-BOARD CONNECTIONS
+    (Family Data Sheet Table 1-1)     (Starter Kit User Guide)
 --- ---------------------------------- -------------------------- -----------------------------------------------
  26 AN6/OCFA/PGEC2/RB6                 PIC32_PGC2                 PIC32MX440F512H debug processor
                                                                   J2 pin 128 (ICSP)
@@ -130,7 +132,7 @@ PIN CONFIGURATIONS                     SIGNAL NAME
  38 RA1/TCK                            TCK/RA1                    PIC32MX440F512H debug processor
                                                                   J2 pin 124 (JTAG/GPIO)
  39 AC1TX/RF13/SCK4/U2RTS/U5TX         SCM3D/BCLK2/RF13           J2 pin 106 (UART2)
- 40 AC1RX/RF12/SS4/U2CTS/U5RX          SCM3C/FR12                 J2 pin 108 (UART2)
+ 40 AC1RX/RF12/SS4/U2CTS/U5RX          SCM3C/RF12                 J2 pin 108 (UART2)
  41 PMA11/AECRS/AN12/ERXD0/RB12        PMPA11/AN12/RB12           J2 pin 105 (PMP address)
  42 PMA10/AECOL/AN13/ERXD1/RB13        PMPA10/AN13/RB13           J2 pin 107 (PMP address)
  43 PMA1/AETXD3/AN14/ERXD2/PMALH/RB14  PMPA1/AN14/RB14            J2 pin 127 (PMP address)
@@ -145,9 +147,10 @@ PIN CONFIGURATIONS                     SIGNAL NAME
  50 PMA8/CN18/RF5/SCL5/SDO4/U2TX       PMPA8/SCM3B/CN18/RF5       J2 pin 111 (PMP address)
                                                                   J2 pin 112 (UART2)
 
-  RIGHT SIDE, TOP-TO-BOTTOM (if pin 1 is in upper left)
-PIN CONFIGURATIONS                     SIGNAL NAME
-    (Table 1-1)                        (User Guide)
+RIGHT SIDE, TOP-TO-BOTTOM (if pin 1 is in upper left)
+--- ---------------------------------- -------------------------- -----------------------------------------------
+PIN CONFIGURATIONS                     SIGNAL NAME                ON-BOARD CONNECTIONS
+    (Family Data Sheet Table 1-1)     (Starter Kit User Guide)
 --- ---------------------------------- -------------------------- -----------------------------------------------
  75 VSS                                (grounded)
  74 CN0/RC14/SOSCO/T1CK                SOSC0/T1CK/CN0/RC14        32kHz Oscillator, J2 pin (timer)
@@ -157,7 +160,7 @@ PIN CONFIGURATIONS                     SIGNAL NAME
  72 OC1/INT0/RD0/SDO1                  SDO1/INT0/OC1/RD0          User LED D4 (high illuminates)
                                                                   J2 pin 87 (EXT_INT)
                                                                   J2 pin 95 (SPI1)
-                                                                  J2 pin 46 (OC/PWN_
+                                                                  J2 pin 46 (OC/PWM)
  71 PMA14/AEMDC/EMDC/IC4/PMCS1/RD11    EMDC                       Ethernet MDC
  70 PMA15/IC3/PMCS2/RD10/SCK1          SCK1/IC3/PMPCS2/RD10       J2 pin 29 (PMP control)
                                                                   J2 pin 91 (SPI1)
@@ -183,9 +186,10 @@ PIN CONFIGURATIONS                     SIGNAL NAME
  52 RF2/SDA3/SDI3/U1RX                 SCM1A/RF2                  J2 pin 88 (UART1)
  51 RF3/USBID                          USBID/RF3                  Device OTG port (J5)
 
-  TOP SIDE, LEFT-TO-RIGHT (if pin 1 is in upper left)
-PIN CONFIGURATIONS                     SIGNAL NAME
-    (Table 1-1)                        (User Guide)
+TOP SIDE, LEFT-TO-RIGHT (if pin 1 is in upper left)
+--- ---------------------------------- -------------------------- -----------------------------------------------
+PIN CONFIGURATIONS                     SIGNAL NAME                ON-BOARD CONNECTIONS
+    (Family Data Sheet Table 1-1)     (Starter Kit User Guide)
 --- ---------------------------------- -------------------------- -----------------------------------------------
 100 PMD4/RE4                           PMPD4/RE4                  J2 pin 15 (PMP data)
  99 PMD3/RE3                           PMPD3/RE3                  J2 pin 17 (PMP data)
@@ -222,6 +226,99 @@ PIN CONFIGURATIONS                     SIGNAL NAME
 
 MEB Connector
 =============
+
+PIC32 SIGNAL               PIN     CONNECTION
+-------------------------- ------- ----------------------------------
+PMPD0                      pin 23  Graphics Controller (SSD1926)
+PMPD1                      pin 21  8-bit or 16-bit Data Bus
+PMPD2                      pin 19
+PMPD3                      pin 17
+PMPD4                      pin 15
+PMPD6                      pin 9
+PMPD7                      pin 7
+-------------------------- ------- ----------------------------------
+PMPD8                      pin 10  Graphics Controller (SSD1926)
+PMPD9                      pin 14  16-bit Data Bus
+PMPD10                     pin 16
+PMPD11                     pin 18
+PMPD12                     pin 20
+PMPD13                     pin 22
+PMPD14                     pin 24
+PMPD15                     pin 26
+-------------------------- ------- ----------------------------------
+                                   Graphics Controller (SSD1926)
+RG13                       pin 8   Chip select
+RB10                       pin 101 Register select
+RC3                        pin 39  Wait line
+RA10                       pin 115 Reset (see MRF24WBOMA and PICtail)
+-------------------------- ------- ----------------------------------
+                                   Touchscreen
+RB11                       pin 103 X+
+RB12                       pin 105 Y-
+RB13                       pin 107 X-
+RB14                       pin 127 Y+
+-------------------------- ------- ----------------------------------
+                                   Joystick
+CN2/RB0                    pin 72  Left
+CN3/RB1                    pin 70  Up
+CN5/RB3                    pin 66  Down
+CN6/RB4                    pin 64  Right
+CN12/RB15                  pin 36  Fire
+-------------------------- ------- ----------------------------------
+                                   LEDs
+RD1                        pin 44  LED1
+RD2                        pin 42  LED2
+RD3                        pin 40  LED3
+RC1                        pin 35  LED4
+RC2                        pin 37  LED5
+-------------------------- ------- ----------------------------------
+SDA2                       pin 74  I2C2 bus for BMA150, MCHP24LC08
+SCL2                       pin 76  and WM8731 (see also MRF24WBOMA)
+-------------------------- ------- ----------------------------------
+SCK1                       pin 91  SPI1 bus for WM8731
+SDI1                       pin 93
+SDO1                       pin 95
+-------------------------- ------- ----------------------------------
+RA6                        pin 4   CPLD
+RA7                        pin 6 
+RG12                       pin 5
+RG14                       pin 3
+SCK2                       pin 45  (see MRF24WBOMA)
+SDI2                       pin 47  (see MRF24WBOMA) 
+SDO2                       pin 49  (see MRF24WBOMA)
+RG9                        pin 51  (see MRF24WBOMA)
+SCK3A                      pin 106 (see PICtail)
+SDI3A                      pin 110 (see PICtail)
+SDO3A                      pin 112 (see PICtail)
+RF12                       pin 108 (see PICtail)
+~SSI                       pin 97  (see PICtail)
+RD9                        pin 54 
+-------------------------- ------- ----------------------------------
+INT3                       pin 81  MRF24WBOMA
+RA10                       pin 115 (also Graphics Controller and PICtail)
+RB8                        pin 71
+-------------------------- ------- ----------------------------------
+                                   PICtail J5
+SDA2                       pin 74  I2C2 bus (see above)
+SCL2                       pin 76  I2C2 bus (see above)
+SCK2                       pin 45  (see CPLD)
+SDI2                       pin 47  (see CPLD)
+SDO2                       pin 49  (see CPLD)
+RG9                        pin 51  (see CPLD)
+U1RX                       pin 88 
+U1TX                       pin 90 
+~U1RTS                     pin 92
+~U1CTS                     pin 94
+RB9                        pin 73
+RA10                       pin 115 Reset (see Graphics controller and MRF24WBOMA)
+INT1                       pin 85
+SCL1                       pin 84
+SDA1                       pin 86  (see CPLD)
+~SSI                       pin 97  (see CPLD)
+U2RX                       pin 110 (see CPLD)
+U2TX                       pin 112 (see CPLD)
+~U2RTS                     pin 106 (see CPLD)
+~U2CTS                     pin 108 (see CPLD)
 
 Toolchains
 ==========
