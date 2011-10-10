@@ -2,7 +2,7 @@
  * arch/mips/src/pic32mx/pic32mx-cvr.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,8 +45,6 @@
 #include "chip.h"
 #include "pic32mx-memorymap.h"
 
-#ifdef CHIP_CVR
-
 /************************************************************************************
  * Pre-Processor Definitions
  ************************************************************************************/
@@ -74,13 +72,15 @@
 #define CVR_CON_CVRSS             (1 << 4)  /* Bit 4:  CVREF source selection */
 #define CVR_CON_CVRR              (1 << 5)  /* Bit 5:  CVREF range selection */
 #define CVR_CON_CVROE             (1 << 6)  /* Bit 6:  CVREFOUT enable */
-#define CVR_CON_BGSEL_SHIFT       (8)       /* Bits 8-9: Band gap reference source */
-#define CVR_CON_BGSEL_MASK        (3 << CVR_CON_CVR_SHIFT)
-#  define CVR_CON_BGSEL_1p2V      (0 << CVR_CON_CVR_SHIFT) /* IVREF = 1.2V (nominal) */
-#  define CVR_CON_BGSEL_0p6V      (1 << CVR_CON_CVR_SHIFT) /* IVREF = 0.6V (nominal) */
-#  define CVR_CON_BGSEL_0p2V      (2 << CVR_CON_CVR_SHIFT) /* IVREF = 0.2V (nominal) */
-#  define CVR_CON_BGSEL_VREF      (3 << CVR_CON_CVR_SHIFT) /* VREF = VREF+ */
-#define CVR_CON_VREFSEL           (1 << 10) /* Bit 10:  Voltage reference select */
+#ifdef CHIP_VRFSEL
+#  define CVR_CON_BGSEL_SHIFT     (8)       /* Bits 8-9: Band gap reference source */
+#  define CVR_CON_BGSEL_MASK      (3 << CVR_CON_CVR_SHIFT)
+#    define CVR_CON_BGSEL_1p2V    (0 << CVR_CON_CVR_SHIFT) /* IVREF = 1.2V (nominal) */
+#    define CVR_CON_BGSEL_0p6V    (1 << CVR_CON_CVR_SHIFT) /* IVREF = 0.6V (nominal) */
+#    define CVR_CON_BGSEL_0p2V    (2 << CVR_CON_CVR_SHIFT) /* IVREF = 0.2V (nominal) */
+#    define CVR_CON_BGSEL_VREF    (3 << CVR_CON_CVR_SHIFT) /* VREF = VREF+ */
+#  define CVR_CON_VREFSEL         (1 << 10) /* Bit 10:  Voltage reference select */
+#endif
 #define CVR_CON_ON                (1 << 15) /* Bit 15: Comparator voltage reference on */
 
 /************************************************************************************
@@ -110,5 +110,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CHIP_CVR */
 #endif /* __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CVR_H */

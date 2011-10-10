@@ -149,8 +149,6 @@
 /* Comparator Register Base Addresses */
 
 #  define PIC32MX_CM_K1BASE         (PIC32MX_SFR_K1BASE + 0x0000a000)
-#  define PIC32MX_CM1_K1BASE        (PIC32MX_SFR_K1BASE + 0x0000a000)
-#  define PIC32MX_CM2_K1BASE        (PIC32MX_SFR_K1BASE + 0x0000a010)
 
 /* Oscillator Control Register Base Addresses */
 
@@ -264,6 +262,7 @@
 #  define PIC32MX_SPI3_K1BASE       (PIC32MX_SFR_K1BASE + 0x00005800)
 #  define PIC32MX_SPI2_K1BASE       (PIC32MX_SFR_K1BASE + 0x00005a00)
 #  define PIC32MX_SPI4_K1BASE       (PIC32MX_SFR_K1BASE + 0x00005c00)
+#  define PIC32MX_SPI1_K1BASE       (PIC32MX_SFR_K1BASE + 0x00005e00)
 
 /* UART 1-6 Register Base Addresses */
 
@@ -289,8 +288,6 @@
 /* Comparator Register Base Addresses */
 
 #  define PIC32MX_CM_K1BASE         (PIC32MX_SFR_K1BASE + 0x0000a000)
-#  define PIC32MX_CM1_K1BASE        (PIC32MX_SFR_K1BASE + 0x0000a000)
-#  define PIC32MX_CM2_K1BASE        (PIC32MX_SFR_K1BASE + 0x0000a010)
 
 /* Oscillator Control Register Base Addresses */
 
@@ -324,6 +321,10 @@
 #  define PIC32MX_DMACH1_K1BASE     (PIC32MX_SFR_K1BASE + 0x00083120)
 #  define PIC32MX_DMACH2_K1BASE     (PIC32MX_SFR_K1BASE + 0x000831e0)
 #  define PIC32MX_DMACH3_K1BASE     (PIC32MX_SFR_K1BASE + 0x000832a0)
+#  define PIC32MX_DMACH4_K1BASE     (PIC32MX_SFR_K1BASE + 0x00083360)
+#  define PIC32MX_DMACH5_K1BASE     (PIC32MX_SFR_K1BASE + 0x00083420)
+#  define PIC32MX_DMACH6_K1BASE     (PIC32MX_SFR_K1BASE + 0x000834e0)
+#  define PIC32MX_DMACH7_K1BASE     (PIC32MX_SFR_K1BASE + 0x000835a0)
 
 /* Prefetch Cache Register Base Address */
 

@@ -2,7 +2,7 @@
  * arch/mips/src/pic32mx/pic32mx-adc.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_ADc_H
-#define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_ADc_H
+#ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_ADC_H
+#define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_ADC_H
 
 /************************************************************************************
  * Included Files
@@ -240,4 +240,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MIPS_SRC_PIC32MX_PIC32MX_ADc_H */
+#endif /* __ARCH_MIPS_SRC_PIC32MX_PIC32MX_ADC_H */

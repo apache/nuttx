@@ -2,7 +2,7 @@
  * arch/mips/src/pic32mx/pic32mx-devcfg.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,14 +68,23 @@
 #define DEVCFG3_USERID_SHIFT      (0)       /* Bits 0-15: User-defined, readable via ICSP™ and JTAG */
 #define DEVCFG3_USERID_MASK       (0xffff << DEVCFG3_USERID_SHIFT)
 #define DEVCFG3_FSRSSEL_SHIFT     (16)      /* Bits 16-18: SRS select */
-#define DEVCFG3_FSRSSEL_MASK      (7 << DEVCFG3_FSRSSEL_SHIFT)
-#define DEVCFG3_FMIIEN            (1 << 24) /* Bit 24: Ethernet MII enable */
-#define DEVCFG3_FETHIO            (1 << 25) /* Bit 25: Ethernet I/O pin selection */
-#define DEVCFG3_FCANIO            (1 << 26) /* Bit 26: CAN I/O pin selection */
-#define DEVCFG3_FSCM1IO           (1 << 29) /* Bit 29: SCM1 pin C selection */
-#define DEVCFG3_FUSBIDIO          (1 << 30) /* Bit 30: USB USBID selection */
-#define DEVCFG3_FVBUSIO           (1 << 31) /* Bit 31: USB VBUSON selection */
-#define DEVCFG3_UNUSED            0x18f80000 /* Bits 19-23, 27-28 */
+
+#if defined(CHIP_PIC32MX3) || defined(CHIP_PIC32MX4)
+
+#  define DEVCFG3_UNUSED          0xffff0000 /* Bits 16-31 */
+
+#elif defined(CHIP_PIC32MX5) || defined(CHIP_PIC32MX6) || defined(CHIP_PIC32MX7)
+
+#  define DEVCFG3_FSRSSEL_MASK    (7 << DEVCFG3_FSRSSEL_SHIFT)
+#  define DEVCFG3_FMIIEN          (1 << 24) /* Bit 24: Ethernet MII enable */
+#  define DEVCFG3_FETHIO          (1 << 25) /* Bit 25: Ethernet I/O pin selection */
+#  define DEVCFG3_FCANIO          (1 << 26) /* Bit 26: CAN I/O pin selection */
+#  define DEVCFG3_FSCM1IO         (1 << 29) /* Bit 29: SCM1 pin C selection */
+#  define DEVCFG3_FUSBIDIO        (1 << 30) /* Bit 30: USB USBID selection */
+#  define DEVCFG3_FVBUSIO         (1 << 31) /* Bit 31: USB VBUSON selection */
+#  define DEVCFG3_UNUSED          0x18f80000 /* Bits 19-23, 27-28 */
+
+#endif
 
 /* Device configuration word 2 */
 
