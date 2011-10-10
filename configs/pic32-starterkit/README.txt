@@ -48,6 +48,7 @@ Contents
 ========
 
   PIC32MX795F512L Pin Out
+  MEB Connector
   Toolchains
   Loading NuttX with PICkit2
   PIC32MX Configuration Options
@@ -218,6 +219,9 @@ PIN CONFIGURATIONS                     SIGNAL NAME
                                                                   J2 pin 42 (OC/PWM)
  76 OC2/RD1                            OC1/RD1                    User LED D6 (high illuminates)
                                                                   J2 pin 44 (OC/PWM)
+
+MEB Connector
+=============
 
 Toolchains
 ==========
@@ -425,9 +429,16 @@ PIC32MX Configuration Options
        CONFIG_PIC32MX_OC5            - Output Compare 5
        CONFIG_PIC32MX_I2C1           - I2C 1
        CONFIG_PIC32MX_I2C2           - I2C 2
+       CONFIG_PIC32MX_I2C3           - I2C 3
+       CONFIG_PIC32MX_I2C4           - I2C 4
+       CONFIG_PIC32MX_I2C5           - I2C 5
        CONFIG_PIC32MX_SPI2           - SPI 2
        CONFIG_PIC32MX_UART1          - UART 1
        CONFIG_PIC32MX_UART2          - UART 2
+       CONFIG_PIC32MX_UART3          - UART 3
+       CONFIG_PIC32MX_UART4          - UART 4
+       CONFIG_PIC32MX_UART5          - UART 5
+       CONFIG_PIC32MX_UART6          - UART 6
        CONFIG_PIC32MX_ADC            - ADC 1
        CONFIG_PIC32MX_PMP            - Parallel Master Port
        CONFIG_PIC32MX_CM1            - Comparator 1
@@ -437,7 +448,9 @@ PIC32MX Configuration Options
        CONFIG_PIC32MX_FLASH          - FLASH
        CONFIG_PIC32MX_USBDEV         - USB device
        CONFIG_PIC32MX_USBHOST        - USB host
-
+       CONFIG_PIC32MX_CAN1           - Controller area network 1
+       CONFIG_PIC32MX_CAN2           - Controller area network 2
+       CONFIG_PIC32MX_ETHERNET       - Ethernet
 
     PIC32MX Configuration Settings
     DEVCFG0:
@@ -488,6 +501,9 @@ PIC32MX Configuration Options
        CONFIG_PIC32MX_OC5PRIO        - Output Compare 5
        CONFIG_PIC32MX_I2C1PRIO       - I2C 1
        CONFIG_PIC32MX_I2C2PRIO       - I2C 2
+       CONFIG_PIC32MX_I2C3PRIO       - I2C 3
+       CONFIG_PIC32MX_I2C4PRIO       - I2C 4
+       CONFIG_PIC32MX_I2C5PRIO       - I2C 5
        CONFIG_PIC32MX_SPI2PRIO       - SPI 2
        CONFIG_PIC32MX_UART1PRIO      - UART 1
        CONFIG_PIC32MX_UART2PRIO      - UART 2
@@ -502,6 +518,10 @@ PIC32MX Configuration Options
        CONFIG_PIC32MX_DMA1PRIO       - DMA Channel 1
        CONFIG_PIC32MX_DMA2PRIO       - DMA Channel 2
        CONFIG_PIC32MX_DMA3PRIO       - DMA Channel 3
+       CONFIG_PIC32MX_DMA4PRIO       - DMA Channel 4
+       CONFIG_PIC32MX_DMA5PRIO       - DMA Channel 5
+       CONFIG_PIC32MX_DMA6PRIO       - DMA Channel 6
+       CONFIG_PIC32MX_DMA7PRIO       - DMA Channel 7
        CONFIG_PIC32MX_FCEPRIO        - Flash Control Event
        CONFIG_PIC32MX_USBPRIO        - USB
 

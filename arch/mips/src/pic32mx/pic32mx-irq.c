@@ -97,6 +97,9 @@ void up_irqinitialize(void)
 
   putreg32(0xffff, PIC32MX_INT_IEC0CLR);
   putreg32(0xffff, PIC32MX_INT_IEC1CLR);
+#ifdef PIC32MX_INT_IEC1CLR
+  putreg32(0xffff, PIC32MX_INT_IEC2CLR);
+#endif
 
   /* Set all interrupts to the default (middle) priority */
 
@@ -163,8 +166,8 @@ void up_disable_irq(int irq)
 
   /* Disable the interrupt by clearing the associated bit in the IEC register */
 
-  DEBUGASSERT(irq >= PIC32MX_IRQSRC0_FIRST && irq <= PIC32MX_IRQSRC1_LAST)
-  if (irq >= PIC32MX_IRQSRC0_FIRST)
+  DEBUGASSERT(irq >= PIC32MX_IRQSRC_FIRST && irq <= PIC32MX_IRQSRC_LAST)
+  if (irq >= PIC32MX_IRQSRC_FIRST)
     {
       if (irq <= PIC32MX_IRQSRC0_LAST)
         {
@@ -180,6 +183,15 @@ void up_disable_irq(int irq)
           regaddr = PIC32MX_INT_IEC1CLR;
           bitno  -= PIC32MX_IRQSRC1_FIRST;
         }
+#ifdef PIC32MX_IRQSRC2_FIRST
+      else if (irq <= PIC32MX_IRQSRC2_LAST)
+        {
+          /* Use IEC2 */
+
+          regaddr = PIC32MX_INT_IEC2CLR;
+          bitno  -= PIC32MX_IRQSRC2_FIRST;
+        }
+#endif
       else
         {
           /* Value out of range.. just ignore */
@@ -208,8 +220,8 @@ void up_enable_irq(int irq)
 
   /* Enable the interrupt by setting the associated bit in the IEC register */
 
-  DEBUGASSERT(irq >= PIC32MX_IRQSRC0_FIRST && irq <= PIC32MX_IRQSRC1_LAST)
-  if (irq >= PIC32MX_IRQSRC0_FIRST)
+  DEBUGASSERT(irq >= PIC32MX_IRQSRC_FIRST && irq <= PIC32MX_IRQSRC_LAST)
+  if (irq >= PIC32MX_IRQSRC_FIRST)
     {
       if (irq <= PIC32MX_IRQSRC0_LAST)
         {
@@ -225,6 +237,15 @@ void up_enable_irq(int irq)
           regaddr = PIC32MX_INT_IEC1SET;
           bitno  -= PIC32MX_IRQSRC1_FIRST;
         }
+#ifdef PIC32MX_IRQSRC2_FIRST
+      else if (irq <= PIC32MX_IRQSRC2_LAST)
+        {
+          /* Use IEC2 */
+
+          regaddr = PIC32MX_INT_IEC2SET;
+          bitno  -= PIC32MX_IRQSRC2_FIRST;
+        }
+#endif
       else
         {
           /* Value out of range.. just ignore */
@@ -259,8 +280,8 @@ bool up_pending_irq(int irq)
    * priority level otherwise recursive interrupts would occur.
    */
 
-  DEBUGASSERT(irq >= PIC32MX_IRQSRC0_FIRST && irq <= PIC32MX_IRQSRC1_LAST)
-  if (irq >= PIC32MX_IRQSRC0_FIRST)
+  DEBUGASSERT(irq >= PIC32MX_IRQSRC_FIRST && irq <= PIC32MX_IRQSRC_LAST)
+  if (irq >= PIC32MX_IRQSRC_FIRST)
     {
       if (irq <= PIC32MX_IRQSRC0_LAST)
         {
@@ -278,6 +299,16 @@ bool up_pending_irq(int irq)
           iecaddr = PIC32MX_INT_IEC1;
           bitno  -= PIC32MX_IRQSRC1_FIRST;
         }
+#ifdef PIC32MX_IRQSRC2_FIRST
+      else if (irq <= PIC32MX_IRQSRC2_LAST)
+        {
+          /* Use IFS2 */
+
+          ifsaddr = PIC32MX_INT_IFS2;
+          iecaddr = PIC32MX_INT_IEC2;
+          bitno  -= PIC32MX_IRQSRC2_FIRST;
+        }
+#endif
       else
         {
           /* Value out of range.. just ignore */
@@ -315,8 +346,8 @@ void up_clrpend_irq(int irq)
    * priority level otherwise recursive interrupts would occur.
    */
 
-  DEBUGASSERT(irq >= PIC32MX_IRQSRC0_FIRST && irq <= PIC32MX_IRQSRC1_LAST)
-  if (irq >= PIC32MX_IRQSRC0_FIRST)
+  DEBUGASSERT(irq >= PIC32MX_IRQSRC_FIRST && irq <= PIC32MX_IRQSRC_LAST)
+  if (irq >= PIC32MX_IRQSRC_FIRST)
     {
       if (irq <= PIC32MX_IRQSRC0_LAST)
         {
@@ -332,6 +363,15 @@ void up_clrpend_irq(int irq)
           regaddr = PIC32MX_INT_IFS1CLR;
           bitno  -= PIC32MX_IRQSRC1_FIRST;
         }
+#ifdef PIC32MX_IRQSRC2_FIRST
+      else if (irq <= PIC32MX_IRQSRC2_LAST)
+        {
+          /* Use IFS2 */
+
+          regaddr = PIC32MX_INT_IFS2CLR;
+          bitno  -= PIC32MX_IRQSRC2_FIRST;
+        }
+#endif
       else
         {
           /* Value out of range.. just ignore */
