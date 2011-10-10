@@ -78,7 +78,8 @@ void pic32mx_boardinitialize(void)
    * function pic32mx_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_PIC32MX_SPI2)
+#if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2) || \
+    defined(CONFIG_PIC32MX_SPI3) || defined(CONFIG_PIC32MX_SPI4)
   if (pic32mx_spiinitialize)
     {
       pic32mx_spiinitialize();

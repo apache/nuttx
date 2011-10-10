@@ -58,24 +58,19 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-/* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not
- * controllable by software.  Four are controllable by software:
+/* The PIC32 starter kit has 3 user LEDs
  *
- * D7  "USB"    Yellow  RD7 Low illuminates
- * D8  "SD"     Yellow  RD6 Low illuminates
- * D9  "Flash"  Yellow  RF0 Low illuminates
- * D10 "Error"  Red     RF1 Low illuminates
+ *   RD0          User LED D4 (high illuminates)
+ *   RD2          User LED D5 (high illuminates)
+ *   RD1          User LED D6 (high illuminates)
  *
- *                           ON                  OFF
- *                           USB SD  FLASH ERROR USB SD  FLASH ERROR
- * LED_STARTED            0  OFF OFF OFF   OFF   --- --- ---   ---
- * LED_HEAPALLOCATE       1  ON  OFF N/C   N/C   --- --- ---   ---
- * LED_IRQSENABLED        2  OFF ON  N/C   N/C   --- --- ---   ---
- * LED_STACKCREATED       3  ON  ON  N/C   N/C   --- --- ---   ---
- * LED_INIRQ              4  N/C N/C ON    N/C   N/C N/C OFF   N/C
- * LED_SIGNAL             4  N/C N/C ON    N/C   N/C N/C OFF   N/C
- * LED_ASSERTION          4  N/C N/C ON    N/C   N/C N/C OFF   N/C
- * LED_PANIC              5  N/C N/C N/C   ON    N/C N/C N/C   OFF
+ * There are 5 LEDs available on the MEB:
+ *
+ *   RD1          LED1
+ *   RD2          LED2
+ *   RD3          LED3
+ *   RC1          LED4
+ *   RC2          LED5
  */
 
 /* Enables debug output from this file (needs CONFIG_DEBUG with

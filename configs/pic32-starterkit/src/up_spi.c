@@ -52,7 +52,8 @@
 #include "pic32mx-internal.h"
 #include "starterkit_internal.h"
 
-#if defined(CONFIG_PIC32MX_SPI2)
+#if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2) || \
+    defined(CONFIG_PIC32MX_SPI3) || defined(CONFIG_PIC32MX_SPI4)
 
 /************************************************************************************
  * Definitions
@@ -95,30 +96,31 @@
 
 void weak_function pic32mx_sspinitialize(void)
 {
-  /* Configure the SPI2 chip select GPIOs */
+  /* Configure the SPI chip select GPIOs */
 
-#ifdef CONFIG_PIC32MX_SPI2
-#  warning "Missing logic"
-#endif
+#warning "Missing logic"
 }
 
 /************************************************************************************
- * Name:  pic32mx_spi2select and pic32mx_spi2status
+ * Name:  pic32mx_spiNselect, pic32mx_spiNstatus, and pic32mx_spiNcmddata
  *
  * Description:
- *   The external functions, pic32mx_spi2select and pic32mx_spi2status 
- *   must be provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
- *   are provided by common PIC32MX logic.  To use this common SPI logic on your
- *   board:
+ *   These external functions must be provided by board-specific logic.  They are
+ *   implementations of the select, status, and cmddata methods of the SPI interface
+ *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods 
+ *   including up_spiinitialize()) are provided by common PIC32MX logic.  To use
+ *   this common SPI logic on your board:
  *
- *   1. Provide logic in pic32mx_boardinitialize() to configure SPI/SPI chip select
+ *   1. Provide logic in pic32mx_boardinitialize() to configure SPI/SSP chip select
  *      pins.
- *   2. Provide pic32mx_spi2select() and pic32mx_spi2status() functions
+ *   2. Provide pic32mx_spiNselect() and pic32mx_spiNstatus() functions
  *      in your board-specific logic.  These functions will perform chip selection
  *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
+ *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
+ *      pic32mx_spiNcmddata() functions in your board-specific logic.  These
+ *      functions will perform cmd/data selection operations using GPIOs in the way
+ *      your board is configured.
+ *   3. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling 
@@ -127,18 +129,95 @@ void weak_function pic32mx_sspinitialize(void)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_PIC32MX_SPI2
-void  pic32mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+struct spi_dev_s;
+enum spi_dev_e;
+
+#ifdef CONFIG_PIC32MX_SPI1
+void  pic32mx_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
-uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   sspdbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
+#ifdef CONFIG_SPI_CMDDATA
+int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+#warning "Missing logic"
+  return 0;
+}
 #endif
-#endif /* CONFIG_PIC32MX_SPI2 */
+#endif
+
+#ifdef CONFIG_PIC31MX_SPI1
+void  pic31mx_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+#warning "Missing logic"
+}
+
+uint8_t pic31mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  sspdbg("Returning nothing\n");
+#warning "Missing logic"
+  return 0;
+}
+#ifdef CONFIG_SPI_CMDDATA
+int pic31mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+#warning "Missing logic"
+  return 0;
+}
+#endif
+#endif
+
+#ifdef CONFIG_PIC31MX_SPI3
+void  pic32mx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+#warning "Missing logic"
+}
+
+uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  sspdbg("Returning nothing\n");
+#warning "Missing logic"
+  return 0;
+}
+#ifdef CONFIG_SPI_CMDDATA
+int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+#warning "Missing logic"
+  return 0;
+}
+#endif
+#endif
+
+#ifdef CONFIG_PIC32MX_SPI4
+void  pic32mx_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+#warning "Missing logic"
+}
+
+uint8_t pic32mx_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  sspdbg("Returning nothing\n");
+#warning "Missing logic"
+  return 0;
+}
+#ifdef CONFIG_SPI_CMDDATA
+int pic32mx_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+#warning "Missing logic"
+  return 0;
+}
+#endif
+#endif
+
+#endif /* CONFIG_PIC32MX_SPI1..4 */
