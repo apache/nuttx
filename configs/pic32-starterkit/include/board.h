@@ -51,32 +51,32 @@
 /* Clocking *****************************************************************/
 /* Crystal frequencies */
 
-#define BOARD_POSC_FREQ        20000000  /* Primary OSC XTAL frequency (20MHz) */
-#define BOARD_SOSC_FREQ        32768     /* Secondary OSC XTAL frequency (32.768KHz) */
+#define BOARD_POSC_FREQ        8000000  /* Primary OSC XTAL frequency (8MHz) */
+#define BOARD_SOSC_FREQ        32768    /* Secondary OSC XTAL frequency (32.768KHz) */
 
 /* PLL configuration and resulting CPU clock.
  * CPU_CLOCK = ((POSC_FREQ / IDIV) * MULT) / ODIV
  */
 
-#define BOARD_PLL_IDIV         5         /* PLL input divider */
-#define BOARD_PLL_MULT         15        /* PLL multiplier */
-#define BOARD_PLL_ODIV         1         /* PLL output divider */
+#define BOARD_PLL_IDIV         2        /* PLL input divider */
+#define BOARD_PLL_MULT         20       /* PLL multiplier */
+#define BOARD_PLL_ODIV         1        /* PLL output divider */
 
-#define BOARD_CPU_CLOCK        60000000 /* CPU clock (60MHz = (20MHz / 5) * 15 / 1) */
+#define BOARD_CPU_CLOCK        80000000 /* CPU clock (80MHz = 8MHz * 20 / 2) */
 
 /* USB PLL configuration.
  * USB_CLOCK = ((POSC_XTAL / IDIV) * 24) / 2
  */
 
-#define BOARD_UPLL_IDIV        5         /* USB PLL divider */
-#define BOARD_USB_CLOCK        48000000  /* USB clock ((20MHz / 5) * 24) */
+#define BOARD_UPLL_IDIV        2        /* USB PLL divider (revisit) */
+#define BOARD_USB_CLOCK        48000000 /* USB clock (8MHz / 2) * 24 / 2) */
 
-/* Peripheral clock is *not* divided down from CPU clock.
+/* Peripheral clock is divided down from CPU clock.
  * PBCLOCK = CPU_CLOCK / PBDIV
  */
 
-#define BOARD_PBDIV            1        /* Peripheral clock divisor (PBDIV) */
-#define BOARD_PBCLOCK          60000000 /* Peripheral clock (PBCLK = 60MHz/1) */
+#define BOARD_PBDIV            2        /* Peripheral clock divisor (PBDIV) */
+#define BOARD_PBCLOCK          40000000 /* Peripheral clock (PBCLK = 80MHz/2) */
 
 /* Watchdog pre-scaler (re-visit) */
 
