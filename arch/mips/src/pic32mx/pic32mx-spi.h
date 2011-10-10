@@ -2,7 +2,7 @@
  * arch/mips/src/pic32mx/pic32mx-spi.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include "chip.h"
 #include "pic32mx-memorymap.h"
 
 /****************************************************************************
@@ -63,34 +64,81 @@
 
 /* Register Addresses *******************************************************/
 
-#define PIC32MX_SPI1_CON           (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_CON_OFFSET)
-#define PIC32MX_SPI1_CONCLR        (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_CONCLR_OFFSET)
-#define PIC32MX_SPI1_CONSET        (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_CONSET_OFFSET)
-#define PIC32MX_SPI1_CONINV        (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_CONINV_OFFSET)
-#define PIC32MX_SPI1_STAT          (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_STAT_OFFSET)
-#define PIC32MX_SPI1_STATSET       (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_STATSET_OFFSET)
-#define PIC32MX_SPI1_BUF           (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_BUF_OFFSET)
-#define PIC32MX_SPI1_BRG           (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_BRG_OFFSET)
-#define PIC32MX_SPI1_BRGCLR        (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_BRGCLR_OFFSET)
-#define PIC32MX_SPI1_BRGSET        (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_BRGSET_OFFSET)
-#define PIC32MX_SPI1_BRGINV        (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_BRGINV_OFFSET)
+#ifdef PIC32MX_SPI1_K1BASE
+#  define PIC32MX_SPI1_CON         (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_CON_OFFSET)
+#  define PIC32MX_SPI1_CONCLR      (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_CONCLR_OFFSET)
+#  define PIC32MX_SPI1_CONSET      (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_CONSET_OFFSET)
+#  define PIC32MX_SPI1_CONINV      (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_CONINV_OFFSET)
+#  define PIC32MX_SPI1_STAT        (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_STAT_OFFSET)
+#  define PIC32MX_SPI1_STATSET     (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_STATSET_OFFSET)
+#  define PIC32MX_SPI1_BUF         (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_BUF_OFFSET)
+#  define PIC32MX_SPI1_BRG         (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_BRG_OFFSET)
+#  define PIC32MX_SPI1_BRGCLR      (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_BRGCLR_OFFSET)
+#  define PIC32MX_SPI1_BRGSET      (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_BRGSET_OFFSET)
+#  define PIC32MX_SPI1_BRGINV      (PIC32MX_SPI1_K1BASE+PIC32MX_SPI_BRGINV_OFFSET)
+#endif
 
-#define PIC32MX_SPI2_CON           (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_CON_OFFSET)
-#define PIC32MX_SPI2_CONCLR        (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_CONCLR_OFFSET)
-#define PIC32MX_SPI2_CONSET        (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_CONSET_OFFSET)
-#define PIC32MX_SPI2_CONINV        (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_CONINV_OFFSET)
-#define PIC32MX_SPI2_STAT          (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_STAT_OFFSET)
-#define PIC32MX_SPI2_STATSET       (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_STATSET_OFFSET)
-#define PIC32MX_SPI2_BUF           (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_BUF_OFFSET)
-#define PIC32MX_SPI2_BRG           (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_BRG_OFFSET)
-#define PIC32MX_SPI2_BRGCLR        (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_BRGCLR_OFFSET)
-#define PIC32MX_SPI2_BRGSET        (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_BRGSET_OFFSET)
-#define PIC32MX_SPI2_BRGINV        (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_BRGINV_OFFSET)
+#ifdef PIC32MX_SPI2_K1BASE
+#  define PIC32MX_SPI2_CON         (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_CON_OFFSET)
+#  define PIC32MX_SPI2_CONCLR      (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_CONCLR_OFFSET)
+#  define PIC32MX_SPI2_CONSET      (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_CONSET_OFFSET)
+#  define PIC32MX_SPI2_CONINV      (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_CONINV_OFFSET)
+#  define PIC32MX_SPI2_STAT        (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_STAT_OFFSET)
+#  define PIC32MX_SPI2_STATSET     (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_STATSET_OFFSET)
+#  define PIC32MX_SPI2_BUF         (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_BUF_OFFSET)
+#  define PIC32MX_SPI2_BRG         (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_BRG_OFFSET)
+#  define PIC32MX_SPI2_BRGCLR      (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_BRGCLR_OFFSET)
+#  define PIC32MX_SPI2_BRGSET      (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_BRGSET_OFFSET)
+#  define PIC32MX_SPI2_BRGINV      (PIC32MX_SPI2_K1BASE+PIC32MX_SPI_BRGINV_OFFSET)
+#endif
+
+#ifdef PIC32MX_SPI3_K1BASE
+#  define PIC32MX_SPI3_CON         (PIC32MX_SPI3_K1BASE+PIC32MX_SPI_CON_OFFSET)
+#  define PIC32MX_SPI3_CONCLR      (PIC32MX_SPI3_K1BASE+PIC32MX_SPI_CONCLR_OFFSET)
+#  define PIC32MX_SPI3_CONSET      (PIC32MX_SPI3_K1BASE+PIC32MX_SPI_CONSET_OFFSET)
+#  define PIC32MX_SPI3_CONINV      (PIC32MX_SPI3_K1BASE+PIC32MX_SPI_CONINV_OFFSET)
+#  define PIC32MX_SPI3_STAT        (PIC32MX_SPI3_K1BASE+PIC32MX_SPI_STAT_OFFSET)
+#  define PIC32MX_SPI3_STATSET     (PIC32MX_SPI3_K1BASE+PIC32MX_SPI_STATSET_OFFSET)
+#  define PIC32MX_SPI3_BUF         (PIC32MX_SPI3_K1BASE+PIC32MX_SPI_BUF_OFFSET)
+#  define PIC32MX_SPI3_BRG         (PIC32MX_SPI3_K1BASE+PIC32MX_SPI_BRG_OFFSET)
+#  define PIC32MX_SPI3_BRGCLR      (PIC32MX_SPI3_K1BASE+PIC32MX_SPI_BRGCLR_OFFSET)
+#  define PIC32MX_SPI3_BRGSET      (PIC32MX_SPI3_K1BASE+PIC32MX_SPI_BRGSET_OFFSET)
+#  define PIC32MX_SPI3_BRGINV      (PIC32MX_SPI3_K1BASE+PIC32MX_SPI_BRGINV_OFFSET)
+#endif
+
+#ifdef PIC32MX_SPI4_K1BASE
+#  define PIC32MX_SPI4_CON         (PIC32MX_SPI4_K1BASE+PIC32MX_SPI_CON_OFFSET)
+#  define PIC32MX_SPI4_CONCLR      (PIC32MX_SPI4_K1BASE+PIC32MX_SPI_CONCLR_OFFSET)
+#  define PIC32MX_SPI4_CONSET      (PIC32MX_SPI4_K1BASE+PIC32MX_SPI_CONSET_OFFSET)
+#  define PIC32MX_SPI4_CONINV      (PIC32MX_SPI4_K1BASE+PIC32MX_SPI_CONINV_OFFSET)
+#  define PIC32MX_SPI4_STAT        (PIC32MX_SPI4_K1BASE+PIC32MX_SPI_STAT_OFFSET)
+#  define PIC32MX_SPI4_STATSET     (PIC32MX_SPI4_K1BASE+PIC32MX_SPI_STATSET_OFFSET)
+#  define PIC32MX_SPI4_BUF         (PIC32MX_SPI4_K1BASE+PIC32MX_SPI_BUF_OFFSET)
+#  define PIC32MX_SPI4_BRG         (PIC32MX_SPI4_K1BASE+PIC32MX_SPI_BRG_OFFSET)
+#  define PIC32MX_SPI4_BRGCLR      (PIC32MX_SPI4_K1BASE+PIC32MX_SPI_BRGCLR_OFFSET)
+#  define PIC32MX_SPI4_BRGSET      (PIC32MX_SPI4_K1BASE+PIC32MX_SPI_BRGSET_OFFSET)
+#  define PIC32MX_SPI4_BRGINV      (PIC32MX_SPI4_K1BASE+PIC32MX_SPI_BRGINV_OFFSET)
+#endif
 
 /* Register Bit-Field Definitions *******************************************/
 
 /* SPI control register */
 
+#if defined(CHIP_PIC32MX5) || defined(CHIP_PIC32MX6) || defined(CHIP_PIC32MX7)
+#  define SPI_CON_RTXISEL_SHIFT    (0)       /* Bits 0-1: SPI Receive Buffer Full Interrupt Mode */
+#  define SPI_CON_RTXISEL_MASK     (3 << SPI_CON_RTXISEL_SHIFT)
+#    define SPI_CON_RTXISEL_EMPTY  (0 << SPI_CON_RTXISEL_SHIFT) /* Buffer empty*/
+#    define SPI_CON_RTXISEL_NEMPTY (1 << SPI_CON_RTXISEL_SHIFT) /* Buffer not empty*/
+#    define SPI_CON_RTXISEL_HALF   (2 << SPI_CON_RTXISEL_SHIFT) /* Buffer half full or more */
+#    define SPI_CON_RTXISEL_FULL   (3 << SPI_CON_RTXISEL_SHIFT) /* Buffer full */
+#  define SPI_CON_STXISEL_SHIFT    (2)       /* Bits 2-3: SPI Transmit Buffer Empty Interrupt Mode */
+#  define SPI_CON_STXISEL_MASK     (3 << SPI_CON_STXISEL_SHIFT)
+#    define SPI_CON_STXISEL_DONE   (0 << SPI_CON_STXISEL_SHIFT) /* Buffer empty (and data shifted out) */
+#    define SPI_CON_STXISEL_EMPTY  (1 << SPI_CON_STXISEL_SHIFT) /* Buffer empty */
+#    define SPI_CON_STXISEL_HALF   (2 << SPI_CON_STXISEL_SHIFT) /* Buffer half empty or more */
+#    define SPI_CON_STXISEL_NFULL  (3 << SPI_CON_STXISEL_SHIFT) /* Buffer not full */
+#endif
+                                             /* Bit 4:  Reserved */
 #define SPI_CON_MSTEN              (1 << 5)  /* Bits 5: Master mode enable */
 #define SPI_CON_CKP                (1 << 6)  /* Bits 6: Clock polarity select */
 #define SPI_CON_SSEN               (1 << 7)  /* Bits 7: Slave select enable (slave mode) */
@@ -108,42 +156,50 @@
 #define SPI_CON_ON                 (1 << 15) /* Bits 15: SPI peripheral on */
 #define SPI_CON_ENHBUF             (1 << 16) /* Bits 16: Enhanced buffer enable */
 #define SPI_CON_SPIFE              (1 << 17) /* Bits 17: Frame sync pulse edge select */
-#define SPI_CON_FRMCNT_SHIFT       (24)      /* Bits 24-26: Frame Sync Pulse Counter bits */
-#define SPI_CON_FRMCNT_MASK        (7 << SPI_CON_FRMCNT_SHIFT)
-#  define SPI_CON_FRMCNT_CHAR1     (0 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse each char */
-#  define SPI_CON_FRMCNT_CHAR2     (1 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 2 chars */
-#  define SPI_CON_FRMCNT_CHAR4     (2 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 4 chars */
-#  define SPI_CON_FRMCNT_CHAR8     (3 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 8 chars */
-#  define SPI_CON_FRMCNT_CHAR16    (4 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 16 chars */
-#  define SPI_CON_FRMCNT_CHAR32    (5 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 32 chars */
-#define SPI_CON_FRMSYPW            (1 << 27) /* Bits 27: Frame sync pulse width */
-#define SPI_CON_MSSEN              (1 << 28) /* Bits 28: Master mode slave select enable */
+                                             /* Bits 18-23: Reserved */
+#if defined(CHIP_PIC32MX5) || defined(CHIP_PIC32MX6) || defined(CHIP_PIC32MX7)
+#  define SPI_CON_FRMCNT_SHIFT     (24)      /* Bits 24-26: Frame Sync Pulse Counter bits */
+#  define SPI_CON_FRMCNT_MASK      (7 << SPI_CON_FRMCNT_SHIFT)
+#    define SPI_CON_FRMCNT_CHAR1   (0 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse each char */
+#    define SPI_CON_FRMCNT_CHAR2   (1 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 2 chars */
+#    define SPI_CON_FRMCNT_CHAR4   (2 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 4 chars */
+#    define SPI_CON_FRMCNT_CHAR8   (3 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 8 chars */
+#    define SPI_CON_FRMCNT_CHAR16  (4 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 16 chars */
+#    define SPI_CON_FRMCNT_CHAR32  (5 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 32 chars */
+#  define SPI_CON_FRMSYPW          (1 << 27) /* Bits 27: Frame sync pulse width */
+#  define SPI_CON_MSSEN            (1 << 28) /* Bits 28: Master mode slave select enable */
+#endif
 #define SPI_CON_FRMPOL             (1 << 29) /* Bits 29: Frame sync polarity */
 #define SPI_CON_FRMSYNC            (1 << 30) /* Bits 30: Frame sync pulse direction control on SSx pin */
 #define SPI_CON_FRMEN              (1 << 31) /* Bits 31: Framed SPI support */
 
 /* SPI status register */
 
-#define SPI_STAT_SPIRBF            (1 << 0)  /* Bits 0: SPI receive buffer full status */
-#define SPI_STAT_SPITBF            (1 << 1)  /* Bits 1: SPI transmit buffer full status */
-#define SPI_STAT_SPITBE            (1 << 3)  /* Bits 3: SPI transmit buffer empty status */
-#define SPI_STAT_SPIRBE            (1 << 5)  /* Bits 5: RX FIFO Empty */
-#define SPI_STAT_SPIROV            (1 << 6)  /* Bits 6: Receive overflow flag */
-#define SPI_STAT_SRMT              (1 << 7)  /* Bits 6: Shift Register Empty */
-#define SPI_STAT_SPITUR            (1 << 6)  /* Bits 8: Transmit under run */
-#define SPI_STAT_SPIBUSY           (1 << 11) /* Bits 11: SPI activity status */
-#define SPI_STAT_TXBUFELM_SHIFT    (16)      /* Bits 16-20: Transmit Buffer Element Count bits */
-#define SPI_STAT_TXBUFELM_MASK     (31 << SPI_STAT_TXBUFELM_SHIFT)
-#define SPI_STAT_RXBUFELM_SHIFT    (24)      /* Bits 24-28: Receive Buffer Element Count bits */
-#define SPI_STAT_RXBUFELM_MASK     (31 << SPI_STAT_RXBUFELM_SHIFT)
+#if defined(CHIP_PIC32MX3) || defined(CHIP_PIC32MX4)
+#  define SPI_STAT_SPIRBF          (1 << 0)  /* Bits 0: SPI receive buffer full status */
+#  define SPI_STAT_SPITBE          (1 << 3)  /* Bits 3: SPI transmit buffer empty status */
+#  define SPI_STAT_SPIROV          (1 << 6)  /* Bits 6: Receive overflow flag */
+#  define SPI_STAT_SPIBUSY         (1 << 11) /* Bits 11: SPI activity status */
+#elif defined(CHIP_PIC32MX5) || defined(CHIP_PIC32MX6) || defined(CHIP_PIC32MX7)
+#  define SPI_STAT_SPIRBF          (1 << 0)  /* Bits 0: SPI receive buffer full status */
+#  define SPI_STAT_SPITBF          (1 << 1)  /* Bits 1: SPI transmit buffer full status */
+#  define SPI_STAT_SPITBE          (1 << 3)  /* Bits 3: SPI transmit buffer empty status */
+#  define SPI_STAT_SPIRBE          (1 << 5)  /* Bits 5: RX FIFO Empty */
+#  define SPI_STAT_SPIROV          (1 << 6)  /* Bits 6: Receive overflow flag */
+#  define SPI_STAT_SRMT            (1 << 7)  /* Bits 6: Shift Register Empty */
+#  define SPI_STAT_SPITUR          (1 << 6)  /* Bits 8: Transmit under run */
+#  define SPI_STAT_SPIBUSY         (1 << 11) /* Bits 11: SPI activity status */
+#  define SPI_STAT_TXBUFELM_SHIFT  (16)      /* Bits 16-20: Transmit Buffer Element Count bits */
+#  define SPI_STAT_TXBUFELM_MASK   (31 << SPI_STAT_TXBUFELM_SHIFT)
+#  define SPI_STAT_RXBUFELM_SHIFT  (24)      /* Bits 24-28: Receive Buffer Element Count bits */
+#  define SPI_STAT_RXBUFELM_MASK   (31 << SPI_STAT_RXBUFELM_SHIFT)
+#endif
 
-/* SPI buffer register (May be 31-bits wide on some parts) */
+/* SPI buffer register (32-bits wide) */
 
-#define SPI_BUF_MASK               0x1ff
+/* SPI baud rate register */
 
-/* SPI baud rate register (This register holds 32-bits of data with other
- * bit-fields
- */
+#define SPI_BRG_MASK               0x1ff
 
 /****************************************************************************
  * Public Types

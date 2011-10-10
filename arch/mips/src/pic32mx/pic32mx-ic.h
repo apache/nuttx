@@ -2,7 +2,7 @@
  * arch/mips/src/pic32mx/pic32mx-ic.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,11 +52,11 @@
  ************************************************************************************/
 /* Register Offsets *****************************************************************/
 
-#define PIC32MX_IC_CON_OFFSET    0x0000 /* Input Capture X Control Register */
-#define PIC32MX_IC_CONCLR_OFFSET 0x0004 /* Input Capture X Control Set Register */
-#define PIC32MX_IC_CONSET_OFFSET 0x0008 /* Input Capture X Control Clear Register */
-#define PIC32MX_IC_CONINV_OFFSET 0x000c /* Input Capture X Control Invert Register */
-#define PIC32MX_IC_BUF_OFFSET    0x0010 /* Input Capture X Buffer Register */
+#define PIC32MX_IC_CON_OFFSET      0x0000 /* Input Capture X Control Register */
+#define PIC32MX_IC_CONCLR_OFFSET   0x0004 /* Input Capture X Control Set Register */
+#define PIC32MX_IC_CONSET_OFFSET   0x0008 /* Input Capture X Control Clear Register */
+#define PIC32MX_IC_CONINV_OFFSET   0x000c /* Input Capture X Control Invert Register */
+#define PIC32MX_IC_BUF_OFFSET      0x0010 /* Input Capture X Buffer Register */
 
 /* Register Addresses ***************************************************************/
 
@@ -108,16 +108,16 @@
 
 /* Input Capture X Control Register */
 
-#define IC_CON_ICI_SHIFT           (0)     /* Bits 0-2: Input Capture Mode Select */
-#define IC_CON_ICM_MASK            (7 << IC_CON_ICI_SHIFT)
-#  define IC_CON_ICM_DISABLE       (0 << IC_CON_ICI_SHIFT) /* Capture disable mode */
-#  define IC_CON_ICM_EDGE          (1 << IC_CON_ICI_SHIFT) /* Edge detect mode */
-#  define IC_CON_ICM_FALLING       (2 << IC_CON_ICI_SHIFT) /* Every falling edge */
-#  define IC_CON_ICM_RISING        (3 << IC_CON_ICI_SHIFT) /* Every rising edge */
-#  define IC_CON_ICM_4th           (4 << IC_CON_ICI_SHIFT) /* Every fourth rising edge */
-#  define IC_CON_ICM_16th          (5 << IC_CON_ICI_SHIFT) /* Every sixteenth rising edge */
-#  define IC_CON_ICM_TRIGGER       (6 << IC_CON_ICI_SHIFT) /* Specified edge first and every edge thereafter */
-#  define IC_CON_ICM_INTERRUPT     (7 << IC_CON_ICI_SHIFT) /* Interrupt-only mode */
+#define IC_CON_ICM_SHIFT           (0)     /* Bits 0-2: Input Capture Mode Select */
+#define IC_CON_ICM_MASK            (7 << IC_CON_ICM_SHIFT)
+#  define IC_CON_ICM_DISABLE       (0 << IC_CON_ICM_SHIFT) /* Capture disable mode */
+#  define IC_CON_ICM_EDGE          (1 << IC_CON_ICM_SHIFT) /* Edge detect mode */
+#  define IC_CON_ICM_FALLING       (2 << IC_CON_ICM_SHIFT) /* Every falling edge */
+#  define IC_CON_ICM_RISING        (3 << IC_CON_ICM_SHIFT) /* Every rising edge */
+#  define IC_CON_ICM_4th           (4 << IC_CON_ICM_SHIFT) /* Every fourth rising edge */
+#  define IC_CON_ICM_16th          (5 << IC_CON_ICM_SHIFT) /* Every sixteenth rising edge */
+#  define IC_CON_ICM_TRIGGER       (6 << IC_CON_ICM_SHIFT) /* Specified edge first and every edge thereafter */
+#  define IC_CON_ICM_INTERRUPT     (7 << IC_CON_ICM_SHIFT) /* Interrupt-only mode */
 #define IC_CON_ICBNE               (1 << 3)  /* Bit 3:  Input Capture Buffer Not Empty Status */
 #define IC_CON_ICOV                (1 << 4)  /* Bit 4:  Input Capture */
 #define IC_CON_ICI_SHIFT           (5)       /* Bits 5-6: Interrupt Control */

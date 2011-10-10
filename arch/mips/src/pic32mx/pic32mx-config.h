@@ -2,7 +2,7 @@
  * arch/mips/src/pic32mx/pic32mx-config.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -500,34 +500,98 @@
 /* UARTs ****************************************************************************/
 /* Don't enable UARTs not supported by the chip. */
 
-#if CHIP_NEUARTS < 1
+#if CHIP_NUARTS < 1
 #  undef CONFIG_PIC32MX_UART1
 #  undef CONFIG_PIC32MX_UART2
-#endif
-#if CHIP_NEUARTS < 2
+#  undef CONFIG_PIC32MX_UART3
+#  undef CONFIG_PIC32MX_UART4
+#  undef CONFIG_PIC32MX_UART5
+#  undef CONFIG_PIC32MX_UART6
+#elif CHIP_NUARTS < 2
 #  undef CONFIG_PIC32MX_UART2
+#  undef CONFIG_PIC32MX_UART3
+#  undef CONFIG_PIC32MX_UART4
+#  undef CONFIG_PIC32MX_UART5
+#  undef CONFIG_PIC32MX_UART6
+#elif CHIP_NUARTS < 3
+#  undef CONFIG_PIC32MX_UART3
+#  undef CONFIG_PIC32MX_UART4
+#  undef CONFIG_PIC32MX_UART5
+#  undef CONFIG_PIC32MX_UART6
+#elif CHIP_NUARTS < 4
+#  undef CONFIG_PIC32MX_UART4
+#  undef CONFIG_PIC32MX_UART5
+#  undef CONFIG_PIC32MX_UART6
+#elif CHIP_NUARTS < 5
+#  undef CONFIG_PIC32MX_UART5
+#  undef CONFIG_PIC32MX_UART6
+#elif CHIP_NUARTS < 6
+#  undef CONFIG_PIC32MX_UART6
 #endif
 
 /* Are any UARTs enabled? */
 
 #undef HAVE_UART_DEVICE
-#if defined(CONFIG_PIC32MX_UART1) || defined(CONFIG_PIC32MX_UART2)
+#if defined(CONFIG_PIC32MX_UART1) || defined(CONFIG_PIC32MX_UART2) || \
+    defined(CONFIG_PIC32MX_UART4) || defined(CONFIG_PIC32MX_UART4) || \
+    defined(CONFIG_PIC32MX_UART5) || defined(CONFIG_PIC32MX_UART6)
 #  define HAVE_UART_DEVICE 1
 #endif
 
 /* Is there a serial console?  There should be at most one defined.  It
- * could be on any UARTn, n=0,1
+ * could be on any UARTn, n=1,.. CHIP_NUARTS
  */
 
 #if defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_PIC32MX_UART1)
 #  undef CONFIG_UART2_SERIAL_CONSOLE
+#  undef CONFIG_UART3_SERIAL_CONSOLE
+#  undef CONFIG_UART4_SERIAL_CONSOLE
+#  undef CONFIG_UART5_SERIAL_CONSOLE
+#  undef CONFIG_UART6_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_PIC32MX_UART2)
 #  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  undef CONFIG_UART3_SERIAL_CONSOLE
+#  undef CONFIG_UART4_SERIAL_CONSOLE
+#  undef CONFIG_UART5_SERIAL_CONSOLE
+#  undef CONFIG_UART6_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#elif defined(CONFIG_UART3_SERIAL_CONSOLE) && defined(CONFIG_PIC32MX_UART3)
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  undef CONFIG_UART4_SERIAL_CONSOLE
+#  undef CONFIG_UART5_SERIAL_CONSOLE
+#  undef CONFIG_UART6_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#elif defined(CONFIG_UART4_SERIAL_CONSOLE) && defined(CONFIG_PIC32MX_UART4)
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  undef CONFIG_UART3_SERIAL_CONSOLE
+#  undef CONFIG_UART5_SERIAL_CONSOLE
+#  undef CONFIG_UART6_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#elif defined(CONFIG_UART5_SERIAL_CONSOLE) && defined(CONFIG_PIC32MX_UART5)
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  undef CONFIG_UART3_SERIAL_CONSOLE
+#  undef CONFIG_UART4_SERIAL_CONSOLE
+#  undef CONFIG_UART6_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#elif defined(CONFIG_UART6_SERIAL_CONSOLE) && defined(CONFIG_PIC32MX_UART6)
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  undef CONFIG_UART3_SERIAL_CONSOLE
+#  undef CONFIG_UART4_SERIAL_CONSOLE
+#  undef CONFIG_UART5_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
 #else
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_UART2_SERIAL_CONSOLE
+#  undef CONFIG_UART3_SERIAL_CONSOLE
+#  undef CONFIG_UART4_SERIAL_CONSOLE
+#  undef CONFIG_UART5_SERIAL_CONSOLE
+#  undef CONFIG_UART6_SERIAL_CONSOLE
 #  undef HAVE_SERIAL_CONSOLE
 #endif
 

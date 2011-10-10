@@ -2,7 +2,7 @@
  * arch/mips/include/pic32mx/cp0.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -66,6 +66,10 @@
 #  define PIC32MX_CP0_CONFIG1  $16,1  /* Configuration register 1 */
 #  define PIC32MX_CP0_CONFIG2  $16,2  /* Configuration register 3 */
 #  define PIC32MX_CP0_CONFIG3  $16,3  /* Configuration register 3 */
+#  define PIC32MX_CP0_DEBUG    $23,3  /* Debug control and exception status */
+#  define PIC32MX_CP0_DEPC     $24,3  /* Program counter at last debug exception */
+#  define PIC32MX_CP0_ERREPC   $30,3  /* Program counter at last error */
+#  define PIC32MX_CP0_DESAVE   $31,3  /* Debug handler scratchpad register */
 #endif
 
 /* CP0 Registers ************************************************************/
