@@ -128,14 +128,6 @@ void up_irqinitialize(void)
 
   current_regs = NULL;
 
-  /* Initialize logic to support a second level of interrupt decoding for
-   * IOPORT pins.
-   */
- 
-#ifdef CONFIG_GPIO_IRQ
-  lpc17_gpioirqinitialize();
-#endif
-
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS

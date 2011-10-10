@@ -55,14 +55,6 @@
  * Definitions
  ************************************************************************************/
 
-/* Configuration ********************************************************************/
-
-/* Bit-encoded input to pic32mx_configgpio() ****************************************/
-/* To be provided */
-
-/* GPIO pin definitions *************************************************************/
-/* To be provided */
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -168,20 +160,6 @@ EXTERN void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
 #endif
 
 /************************************************************************************
- * Name: pic32mx_gpioirqinitialize
- *
- * Description:
- *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_GPIO_IRQ
-EXTERN void pic32mx_gpioirqinitialize(void);
-#else
-#  define pic32mx_gpioirqinitialize()
-#endif
-
-/************************************************************************************
  * Name: pic32mx_boardinitialize
  *
  * Description:
@@ -212,78 +190,6 @@ EXTERN uint32_t *pic32mx_decodeirq(uint32_t *regs);
  ************************************************************************************/
 
 EXTERN uint32_t *pic32mx_dobev(uint32_t *regs);
-
-/************************************************************************************
- * Name: pic32mx_configgpio
- *
- * Description:
- *   Configure a GPIO pin based on bit-encoded description of the pin.
- *
- ************************************************************************************/
-
-EXTERN int pic32mx_configgpio(uint16_t cfgset);
-
-/************************************************************************************
- * Name: pic32mx_gpiowrite
- *
- * Description:
- *   Write one or zero to the selected GPIO pin
- *
- ************************************************************************************/
-
-EXTERN void pic32mx_gpiowrite(uint16_t pinset, bool value);
-
-/************************************************************************************
- * Name: pic32mx_gpioread
- *
- * Description:
- *   Read one or zero from the selected GPIO pin
- *
- ************************************************************************************/
-
-EXTERN bool pic32mx_gpioread(uint16_t pinset);
-
-/************************************************************************************
- * Name: pic32mx_gpioirqenable
- *
- * Description:
- *   Enable the interrupt for specified GPIO IRQ
- *
- ************************************************************************************/
-
-#ifdef CONFIG_GPIO_IRQ
-EXTERN void pic32mx_gpioirqenable(int irq);
-#else
-#  define pic32mx_gpioirqenable(irq)
-#endif
-
-/************************************************************************************
- * Name: pic32mx_gpioirqdisable
- *
- * Description:
- *   Disable the interrupt for specified GPIO IRQ
- *
- ************************************************************************************/
-
-#ifdef CONFIG_GPIO_IRQ
-EXTERN void pic32mx_gpioirqdisable(int irq);
-#else
-#  define pic32mx_gpioirqdisable(irq)
-#endif
-
-/************************************************************************************
- * Function:  pic32mx_dumpgpio
- *
- * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_DEBUG_GPIO
-EXTERN int pic32mx_dumpgpio(uint16_t pinset, const char *msg);
-#else
-#  define pic32mx_dumpgpio(p,m)
-#endif
 
 /************************************************************************************
  * Name:  pic32mx_spiNselect, pic32mx_spiNstatus, and pic32mx_spiNcmddata

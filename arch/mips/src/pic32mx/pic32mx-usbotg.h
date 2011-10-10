@@ -2,7 +2,7 @@
  * arch/mips/src/pic32mx/pic32mx-usbotg.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -165,7 +165,9 @@
 
 #define USB_PWRC_USBPWR            (1 << 0) /* Bit 0: USB Operation Enable */
 #define USB_PWRC_USUSPEND          (1 << 1) /* Bit 1: USB Suspend Mode */
-#define USB_PWRC_USBBUSY           (1 << 3) /* Bit 3: USB Module Busy */
+#if defined(CHIP_PIC32MX5) || defined(CHIP_PIC32MX6) || defined(CHIP_PIC32MX7)
+#  define USB_PWRC_USBBUSY         (1 << 3) /* Bit 3: USB Module Busy */
+#endif
 #define USB_PWRC_USLPGRD           (1 << 4) /* Bit 4: USB Sleep Entry Guard */
 #define USB_PWRC_UACTPND           (1 << 7) /* Bit 7: USB Activity Pending */
 
@@ -263,7 +265,9 @@
 
 /* USB Debug and Idle Register */
 
-#define USB_CNFG1_UASUSPND         (1 << 0) /* Bit 0: Automatic Suspend Enable */
+#if defined(CHIP_PIC32MX5) || defined(CHIP_PIC32MX6) || defined(CHIP_PIC32MX7)
+#  define USB_CNFG1_UASUSPND       (1 << 0) /* Bit 0: Automatic Suspend Enable */
+#endif
 #define USB_CNFG1_USBSIDL          (1 << 4) /* Bit 4: Stop in Idle Mode */
 #define USB_CNFG1_USBFRZ           (1 << 5) /* Bit 5: Freeze in Debug Mode */
 #define USB_CNFG1_UOEMON           (1 << 6) /* Bit 6: USB OE Monitor Enable */

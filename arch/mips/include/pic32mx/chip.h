@@ -63,7 +63,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       0   /* No programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -92,7 +93,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       0   /* No programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -121,7 +123,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       0   /* No programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS         2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -150,7 +153,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS         2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -179,7 +183,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS         2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -208,7 +213,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS         2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -237,7 +243,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       0   /* No programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS         2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -266,7 +273,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -295,7 +303,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -324,7 +333,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -353,7 +363,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       0   /* No programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -382,7 +393,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -411,7 +423,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -440,7 +453,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -469,7 +483,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -498,7 +513,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -527,7 +543,8 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
+
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
 #  define CHIP_UARTFIFOD    4
@@ -556,7 +573,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -585,7 +602,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -614,7 +631,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -643,7 +660,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -672,7 +689,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -701,7 +718,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -730,7 +747,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -759,7 +776,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -788,7 +805,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -817,7 +834,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -846,7 +863,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -857,7 +874,7 @@
 #  define CHIP_NCM          2   /* 2 Comparators */
 #  define CHIP_PMP          1   /* Have parallel master port */
 #  define CHIP_PSP          1   /* Have parallel slave port */
-#  define CHIP_NETHERNET    1   /* 1 Ethernett interface */
+#  define CHIP_NETHERNET    1   /* 1 Ethernet interface */
 #  define CHIP_JTAG
 #elif defined(CONFIG_ARCH_CHIP_PIC32MX664F128H)
 #  undef  CHIP_PIC32MX3
@@ -875,7 +892,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -886,7 +903,7 @@
 #  define CHIP_NCM          2   /* 2 Comparators */
 #  define CHIP_PMP          1   /* Have parallel master port */
 #  define CHIP_PSP          1   /* Have parallel slave port */
-#  define CHIP_NETHERNET    1   /* 1 Ethernett interface */
+#  define CHIP_NETHERNET    1   /* 1 Ethernet interface */
 #  define CHIP_JTAG
 #elif defined(CONFIG_ARCH_CHIP_PIC32MX675F256H)
 #  undef  CHIP_PIC32MX3
@@ -904,7 +921,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -915,7 +932,7 @@
 #  define CHIP_NCM          2   /* 2 Comparators */
 #  define CHIP_PMP          1   /* Have parallel master port */
 #  define CHIP_PSP          1   /* Have parallel slave port */
-#  define CHIP_NETHERNET    1   /* 1 Ethernett interface */
+#  define CHIP_NETHERNET    1   /* 1 Ethernet interface */
 #  define CHIP_JTAG
 #elif defined(CONFIG_ARCH_CHIP_PIC32MX675F512H)
 #  undef  CHIP_PIC32MX3
@@ -933,7 +950,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -944,7 +961,7 @@
 #  define CHIP_NCM          2   /* 2 Comparators */
 #  define CHIP_PMP          1   /* Have parallel master port */
 #  define CHIP_PSP          1   /* Have parallel slave port */
-#  define CHIP_NETHERNET    1   /* 1 Ethernett interface */
+#  define CHIP_NETHERNET    1   /* 1 Ethernet interface */
 #  define CHIP_JTAG
 #elif defined(CONFIG_ARCH_CHIP_PIC32MX695F512H)
 #  undef  CHIP_PIC32MX3
@@ -962,7 +979,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -973,7 +990,7 @@
 #  define CHIP_NCM          2   /* 2 Comparators */
 #  define CHIP_PMP          1   /* Have parallel master port */
 #  define CHIP_PSP          1   /* Have parallel slave port */
-#  define CHIP_NETHERNET    1   /* 1 Ethernett interface */
+#  define CHIP_NETHERNET    1   /* 1 Ethernet interface */
 #  define CHIP_JTAG
 #elif defined(CONFIG_ARCH_CHIP_PIC32MX664F064L)
 #  undef  CHIP_PIC32MX3
@@ -991,7 +1008,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1002,7 +1019,7 @@
 #  define CHIP_NCM          2   /* 2 Comparators */
 #  define CHIP_PMP          1   /* Have parallel master port */
 #  define CHIP_PSP          1   /* Have parallel slave port */
-#  define CHIP_NETHERNET    1   /* 1 Ethernett interface */
+#  define CHIP_NETHERNET    1   /* 1 Ethernet interface */
 #  define CHIP_JTAG
 #elif defined(CONFIG_ARCH_CHIP_PIC32MX664F128L)
 #  undef  CHIP_PIC32MX3
@@ -1020,7 +1037,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1031,7 +1048,7 @@
 #  define CHIP_NCM          2   /* 2 Comparators */
 #  define CHIP_PMP          1   /* Have parallel master port */
 #  define CHIP_PSP          1   /* Have parallel slave port */
-#  define CHIP_NETHERNET    1   /* 1 Ethernett interface */
+#  define CHIP_NETHERNET    1   /* 1 Ethernet interface */
 #  define CHIP_JTAG
 #elif defined(CONFIG_ARCH_CHIP_PIC32MX675F256L)
 #  undef  CHIP_PIC32MX3
@@ -1049,7 +1066,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1060,7 +1077,7 @@
 #  define CHIP_NCM          2   /* 2 Comparators */
 #  define CHIP_PMP          1   /* Have parallel master port */
 #  define CHIP_PSP          1   /* Have parallel slave port */
-#  define CHIP_NETHERNET    1   /* 1 Ethernett interface */
+#  define CHIP_NETHERNET    1   /* 1 Ethernet interface */
 #  define CHIP_JTAG
 #elif defined(CONFIG_ARCH_CHIP_PIC32MX675F512L)
 #  undef  CHIP_PIC32MX3
@@ -1078,7 +1095,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1089,7 +1106,7 @@
 #  define CHIP_NCM          2   /* 2 Comparators */
 #  define CHIP_PMP          1   /* Have parallel master port */
 #  define CHIP_PSP          1   /* Have parallel slave port */
-#  define CHIP_NETHERNET    1   /* 1 Ethernett interface */
+#  define CHIP_NETHERNET    1   /* 1 Ethernet interface */
 #  define CHIP_JTAG
 #elif defined(CONFIG_ARCH_CHIP_PIC32MX695F512L)
 #  undef  CHIP_PIC32MX3
@@ -1107,7 +1124,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* xx programmable DMA channels (4 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1118,7 +1135,7 @@
 #  define CHIP_NCM          2   /* 2 Comparators */
 #  define CHIP_PMP          1   /* Have parallel master port */
 #  define CHIP_PSP          1   /* Have parallel slave port */
-#  define CHIP_NETHERNET    1   /* 1 Ethernett interface */
+#  define CHIP_NETHERNET    1   /* 1 Ethernet interface */
 #  define CHIP_JTAG
 #elif defined(CONFIG_ARCH_CHIP_PIC32MX764F128H)
 #  undef  CHIP_PIC32MX3
@@ -1136,7 +1153,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (6 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1147,7 +1164,7 @@
 #  define CHIP_NCM          2   /* 2 Comparators */
 #  define CHIP_PMP          1   /* Have parallel master port */
 #  define CHIP_PSP          1   /* Have parallel slave port */
-#  define CHIP_NETHERNET    1   /* 1 Ethernett interface */
+#  define CHIP_NETHERNET    1   /* 1 Ethernet interface */
 #  define CHIP_JTAG
 #elif defined(CONFIG_ARCH_CHIP_PIC32MX775F256H)
 #  undef  CHIP_PIC32MX3
@@ -1165,7 +1182,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (8 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1194,7 +1211,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (8 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1223,7 +1240,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (8 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1252,7 +1269,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels (6 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1281,7 +1298,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (8 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1310,7 +1327,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (8 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  undef  CHIP_CVR              /* No comparator voltage reference */
+#  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
@@ -1339,7 +1356,7 @@
 #  define CHIP_NOC          5   /* 5 output compare */
 #  define CHIP_NDMACH       8   /* 8 programmable DMA channels (8 dedicated) */
 #  define CHIP_NUSBDMACHAN  tbd
-#  define CHIP_CVR          1   /* Have comparator voltage reference */
+#  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
 #  define CHIP_UARTFIFOD    tbd
