@@ -1,8 +1,8 @@
-############################################################################
-# arch/mips/src/pic32mx/Make.defs
+#!/bin/bash
+# configs/pic32-starterkit/ostest/setenv.sh
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,38 +31,31 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
-# The start-up, "head", file
+if [ "$_" = "$0" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-HEAD_ASRC = pic32mx-head.S
+if [ -z "${PATH_ORIG}" ]; then export PATH_ORIG="${PATH}"; fi
 
-# Common MIPS files
+WD=`pwd`
+if [ ! -x "setenv.sh" ]; then
+  echo "This script must be executed from the top-level NuttX build directory"
+  exit 1
+fi
 
-CMN_ASRCS = up_syscall0.S
-CMN_CSRCS = up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
-			up_createstack.c up_doirq.c up_exit.c up_idle.c up_initialize.c \
-			up_initialstate.c up_interruptcontext.c up_irq.c up_lowputs.c \
-			up_mdelay.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c \
-			up_puts.c up_releasepending.c up_releasestack.c up_reprioritizertr.c \
-			up_schedulesigaction.c up_sigdeliver.c up_swint0.c up_udelay.c \
-			up_unblocktask.c up_usestack.c
+# This the Cygwin path to the location where I installed the MicroChip
+# PIC32MX toolchain under windows.  This is *not* the default install
+# location so you will probably have to edit this.  You will also have
+# to edit this if you install a different version of if you install
+# the Linux PIC32MX toolchain as well
+export TOOLCHAIN_BIN="/cygdrive/c/MicroChip/mplabc32/v1.12/bin"
 
-# Configuration dependent common files
+# This is the path to the toosl subdirectory
+export PIC32TOOL_DIR="${WD}/configs/pic32-starterkit/tools"
 
-ifeq ($(CONFIG_NET),y)
-CMN_CSRCS += up_etherstub.c
-endif
+# Add the path to the toolchain to the PATH varialble
+export PATH="${TOOLCHAIN_BIN}:${PIC32TOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
 
-ifeq ($(CONFIG_ARCH_STACKDUMP),y)
-CMN_CSRCS += up_dumpstate.c
-endif
-
-# Required PIC32MX files
-
-CHIP_ASRCS =
-CHIP_CSRCS = pic32mx-irq.c pic32mx-decodeirq.c pic32mx-dobev.c pic32mx-lowconsole.c \
-			 pic32mx-lowinit.c pic32mx-serial.c pic32mx-timerisr.c
-
-# Configuration-dependent PIC32MX files
-
+echo "PATH : ${PATH}"

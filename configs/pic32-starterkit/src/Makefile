@@ -1,8 +1,8 @@
 ############################################################################
-# arch/mips/src/pic32mx/Make.defs
+# configs/pic32-starterkit/src/Makefile
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,36 +33,60 @@
 #
 ############################################################################
 
-# The start-up, "head", file
+-include $(TOPDIR)/Make.defs
 
-HEAD_ASRC = pic32mx-head.S
+CFLAGS		+= -I$(TOPDIR)/sched
 
-# Common MIPS files
+ASRCS		= 
+CSRCS		= up_boot.c up_spi.c
 
-CMN_ASRCS = up_syscall0.S
-CMN_CSRCS = up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
-			up_createstack.c up_doirq.c up_exit.c up_idle.c up_initialize.c \
-			up_initialstate.c up_interruptcontext.c up_irq.c up_lowputs.c \
-			up_mdelay.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c \
-			up_puts.c up_releasepending.c up_releasestack.c up_reprioritizertr.c \
-			up_schedulesigaction.c up_sigdeliver.c up_swint0.c up_udelay.c \
-			up_unblocktask.c up_usestack.c
-
-# Configuration dependent common files
-
-ifeq ($(CONFIG_NET),y)
-CMN_CSRCS += up_etherstub.c
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS		+= up_leds.c
 endif
 
-ifeq ($(CONFIG_ARCH_STACKDUMP),y)
-CMN_CSRCS += up_dumpstate.c
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS		+= up_nsh.c
 endif
 
-# Required PIC32MX files
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
+COBJS		= $(CSRCS:.c=$(OBJEXT))
 
-CHIP_ASRCS =
-CHIP_CSRCS = pic32mx-irq.c pic32mx-decodeirq.c pic32mx-dobev.c pic32mx-lowconsole.c \
-			 pic32mx-lowinit.c pic32mx-serial.c pic32mx-timerisr.c
+SRCS		= $(ASRCS) $(CSRCS)
+OBJS		= $(AOBJS) $(COBJS)
 
-# Configuration-dependent PIC32MX files
+ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ifeq ($(WINTOOL),y)
+  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
+  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/mips32}"
+else
+  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/mips32
+endif
 
+all: libboard$(LIBEXT)
+
+$(AOBJS): %$(OBJEXT): %.S
+	$(call ASSEMBLE, $<, $@)
+
+$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
+
+libboard$(LIBEXT): $(OBJS)
+	@( for obj in $(OBJS) ; do \
+		$(call ARCHIVE, $@, $${obj}); \
+	done ; )
+
+.depend: Makefile $(SRCS)
+	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
+
+depend: .depend
+
+clean:
+	@rm -f libboard$(LIBEXT) *~ .*.swp
+	$(call CLEAN)
+
+distclean: clean
+	@rm -f Make.dep .depend
+
+-include Make.dep

@@ -2153,4 +2153,6 @@
 	  are not met
 	* configs/stm3210e-eval/src/up_lcd.c:  Color corrections for SPFD5408B LCD
 	  do not work with R61580 LCD.
+	* configs/pic32-starterkit: Beginning of a configuratin for the Microchip
+	  PIC32 Ethernet Starter Kit.
 

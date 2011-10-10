@@ -1,8 +1,9 @@
 /****************************************************************************
- * arch/mips/src/pic32mx/pic32mx_timerisr.c
+ * configs/pic32-starterkit/src/up_leds.c
+ * arch/arm/src/board/up_leds.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,126 +41,99 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <time.h>
+#include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "clock_internal.h"
-#include "up_internal.h"
+#include "chip.h"
 #include "up_arch.h"
+#include "up_internal.h"
 
-#include "pic32mx-config.h"
-#include "pic32mx-timer.h"
-#include "pic32mx-int.h"
 #include "pic32mx-internal.h"
+#include "starterkit_internal.h"
+
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-/* Timer Setup **************************************************************/
-/* Select a timer 1 prescale value.  Our goal is to select the timer MATCH
- * register value given the board's SOSC clock frequency and the desired
- * system timer frequency:
+/* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not
+ * controllable by software.  Four are controllable by software:
  *
- *   TIMER1_MATCH = BOARD_SOSC_FREQ / TIMER1_PRESCALE / CLOCKS_PER_SEC
+ * D7  "USB"    Yellow  RD7 Low illuminates
+ * D8  "SD"     Yellow  RD6 Low illuminates
+ * D9  "Flash"  Yellow  RF0 Low illuminates
+ * D10 "Error"  Red     RF1 Low illuminates
  *
- * We want the largest possible value for MATCH that is less than 65,535, the
- * maximum value for the 16-bit timer register:
- *
- *   TIMER1_PRESCALE >= BOARD_SOSC_FREQ / CLOCKS_PER_SEC / 65535
- *
- * Timer 1 does not have very many options for the perscaler value.  So we
- * can pick the best by brute force.  Example:
- *
- *   BOARD_SOSC_FREQ        = 32768
- *   CLOCKS_PER_SEC         = 100
- *   OPTIMAL_PRESCALE       = 1
- *   TIMER1_PRESCALE        = 1
- *   TIMER1_MATCH           = 328 -> 99.90 ticks/sec
+ *                           ON                  OFF
+ *                           USB SD  FLASH ERROR USB SD  FLASH ERROR
+ * LED_STARTED            0  OFF OFF OFF   OFF   --- --- ---   ---
+ * LED_HEAPALLOCATE       1  ON  OFF N/C   N/C   --- --- ---   ---
+ * LED_IRQSENABLED        2  OFF ON  N/C   N/C   --- --- ---   ---
+ * LED_STACKCREATED       3  ON  ON  N/C   N/C   --- --- ---   ---
+ * LED_INIRQ              4  N/C N/C ON    N/C   N/C N/C OFF   N/C
+ * LED_SIGNAL             4  N/C N/C ON    N/C   N/C N/C OFF   N/C
+ * LED_ASSERTION          4  N/C N/C ON    N/C   N/C N/C OFF   N/C
+ * LED_PANIC              5  N/C N/C N/C   ON    N/C N/C N/C   OFF
  */
- 
-#define OPTIMAL_PRESCALE (BOARD_SOSC_FREQ / CLOCKS_PER_SEC / 65535)
-#if OPTIMAL_PRESCALE <= 1
-#  define TIMER1_CON_TCKPS    TIMER1_CON_TCKPS_1
-#  define TIMER1_PRESCALE     1
-#elif OPTIMAL_PRESCALE <= 8
-#  define TIMER1_CON_TCKPS    TIMER1_CON_TCKPS_8
-#  define TIMER1_PRESCALE     8
-#elif OPTIMAL_PRESCALE <= 64
-#  define TIMER1_CON_TCKPS    TIMER1_CON_TCKPS_64
-#  define TIMER1_PRESCALE     64
-#elif OPTIMAL_PRESCALE <= 256
-#  define TIMER1_CON_TCKPS    TIMER1_CON_TCKPS_256
-#  define TIMER1_PRESCALE     256
+
+/* Enables debug output from this file (needs CONFIG_DEBUG with
+ * CONFIG_DEBUG_VERBOSE too)
+ */
+
+#undef LED_DEBUG   /* Define to enable debug */
+#undef LED_VERBOSE /* Define to enable verbose debug */
+
+#ifdef LED_DEBUG
+#  define leddbg  lldbg
+#  ifdef LED_VERBOSE
+#    define ledvdbg lldbg
+#  else
+#    define ledvdbg(x...)
+#  endif
 #else
-#  error "This timer frequency cannot be represented"
+#  undef LED_VERBOSE
+#  define leddbg(x...)
+#  define ledvdbg(x...)
 #endif
 
-#define TIMER1_MATCH (BOARD_SOSC_FREQ / TIMER1_PRESCALE / CLOCKS_PER_SEC)
-
 /****************************************************************************
- * Private Types
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  up_timerisr
- *
- * Description:
- *   The timer ISR will perform a variety of services for various portions
- *   of the systems.
- *
+ * Name: up_ledinit
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs)
+void up_ledinit(void)
 {
-   /* Clear the pending timer interrupt */
- 
-   putreg32(INT_T1, PIC32MX_INT_IFS0CLR);
-
-   /* Process timer interrupt */
-
-   sched_process_timer();
-   return 0;
+#warning "Missing logic"
 }
 
 /****************************************************************************
- * Function:  up_timerinit
- *
- * Description:
- *   This function is called during start-up to initialize
- *   the timer interrupt.
- *
+ * Name: up_ledon
  ****************************************************************************/
 
-void up_timerinit(void)
+void up_ledon(int led)
 {
-  /* Configure and enable TIMER1 -- source internal SOSC (TCS=0) */
-
-  putreg32(TIMER1_CON_TCKPS, PIC32MX_TIMER1_CON);
-  putreg32(0, PIC32MX_TIMER1_CNT);
-  putreg32(TIMER1_MATCH-1, PIC32MX_TIMER1_PR);
-  putreg32(TIMER_CON_ON, PIC32MX_TIMER1_CONSET);
-
-  /* Configure the timer interrupt */
-
-  up_clrpend_irq(PIC32MX_IRQSRC_T1);
-  (void)up_prioritize_irq(PIC32MX_IRQ_T1, CONFIG_PIC32MX_T1PRIO);
-
-  /* Attach the timer interrupt vector */
-
-  (void)irq_attach(PIC32MX_IRQ_T1, (xcpt_t)up_timerisr);
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(PIC32MX_IRQSRC_T1);
+#warning "Missing logic"
 }
+
+/****************************************************************************
+ * Name: up_ledoff
+ ****************************************************************************/
+
+void up_ledoff(int led)
+{
+#warning "Missing logic"
+}
+#endif /* CONFIG_ARCH_LEDS */

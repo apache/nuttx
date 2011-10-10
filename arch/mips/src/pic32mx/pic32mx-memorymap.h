@@ -48,9 +48,12 @@
 /************************************************************************************
  * Pre-Processor Definitions
  ************************************************************************************/
-/* This memory may be valid for other chips as well, but I don't know that */
+/* This top-level memory map is valid for the PIC32MX3xx/4xx as well as the
+ * PIC32MX5xx/6xx/7xx families.
+ */
 
-#if defined(CHIP_PIC32MX3) || defined(CHIP_PIC32MX4)
+#if defined(CHIP_PIC32MX3) || defined(CHIP_PIC32MX4) || defined(CHIP_PIC32MX5) ||
+    defined(CHIP_PIC32MX6) || defined(CHIP_PIC32MX7)
 
 /* Physical Memory Map **************************************************************/
 
@@ -72,8 +75,11 @@
 #  define PIC32MX_SFR_K1BASE        (KSEG1_BASE + PIC32MX_SFR_PBASE)
 #  define PIC32MX_BOOTFLASH_K1BASE  (KSEG1_BASE + PIC32MX_BOOTFLASH_PBASE)
 #  define PIC32MX_DEVCFG_K1BASE     (KSEG1_BASE + PIC32MX_DEVCFG_PBASE)
+#endif
 
 /* Register Base Addresses **********************************************************/
+
+#if defined(CHIP_PIC32MX3) || defined(CHIP_PIC32MX4)
 
 /* Watchdog Register Base Address */
 
@@ -205,6 +211,8 @@
 
 #  define PIC32MX_IOPORTCN_K1BASE  (PIC32MX_SFR_K1BASE + 0x000861c0)
 
+#elif defined(CHIP_PIC32MX5) || defined(CHIP_PIC32MX6) || defined(CHIP_PIC32MX7)
+#  error "Missing definitions"
 #else
 #  error "Memory map unknown for this PIC32 chip"
 #endif
