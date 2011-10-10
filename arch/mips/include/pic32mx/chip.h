@@ -67,7 +67,7 @@
 
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -97,7 +97,7 @@
 
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -126,8 +126,8 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 
 #  undef  CHIP_TRACE            /* No trace capability */
-#  define CHIP_NUARTS         2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_NUARTS       2   /* 2 UARTS */
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -154,10 +154,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  undef  CHIP_TRACE            /* No trace capability */
-#  define CHIP_NUARTS         2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_NUARTS       2   /* 2 UARTS */
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -184,10 +183,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  undef  CHIP_TRACE            /* No trace capability */
-#  define CHIP_NUARTS         2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_NUARTS       2   /* 2 UARTS */
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -214,10 +212,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  undef  CHIP_TRACE            /* No trace capability */
-#  define CHIP_NUARTS         2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_NUARTS       2   /* 2 UARTS */
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -244,10 +241,9 @@
 #  define CHIP_NDMACH       0   /* No programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  undef  CHIP_TRACE            /* No trace capability */
-#  define CHIP_NUARTS         2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_NUARTS       2   /* 2 UARTS */
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -274,10 +270,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -304,10 +299,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -334,10 +328,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  0
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -364,10 +357,9 @@
 #  define CHIP_NDMACH       0   /* No programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         1   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -394,10 +386,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         1   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -424,10 +415,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         1   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -454,10 +444,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         1   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -484,10 +473,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -514,10 +502,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -544,10 +531,9 @@
 #  define CHIP_NDMACH       4   /* 4 programmable DMA channels */
 #  define CHIP_NUSBDMACHAN  2
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
-
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       2   /* 2 UARTS */
-#  define CHIP_UARTFIFOD    4
+#  define CHIP_UARTFIFOD    8   /* 4 level deep UART FIFOs */
 #  define CHIP_NSPI         2   /* 2 SPI interfaces */
 #  define CHIP_NI2C         2   /* 2 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -576,7 +562,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -605,7 +591,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -634,7 +620,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -663,7 +649,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -692,7 +678,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -721,7 +707,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -750,7 +736,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -779,7 +765,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -808,7 +794,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -837,7 +823,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -866,7 +852,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -895,7 +881,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -924,7 +910,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -953,7 +939,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -982,7 +968,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -1011,7 +997,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -1040,7 +1026,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -1069,7 +1055,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -1098,7 +1084,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -1127,7 +1113,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         0   /* No CAN interface */
@@ -1156,7 +1142,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -1185,7 +1171,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         2   /* 2 CAN interfaces */
@@ -1214,7 +1200,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         2   /* 2 CAN interfaces */
@@ -1243,7 +1229,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  undef  CHIP_TRACE            /* No trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         3   /* 3 SPI interfaces */
 #  define CHIP_NI2C         4   /* 4 I2C interfaces */
 #  define CHIP_NCAN         2   /* 2 CAN interfaces */
@@ -1272,7 +1258,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         1   /* 1 CAN interface */
@@ -1301,7 +1287,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         2   /* 2 CAN interfaces */
@@ -1330,7 +1316,7 @@
 #  undef  CHIP_VRFSEL           /* No comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         2   /* 2 CAN interfaces */
@@ -1359,7 +1345,7 @@
 #  define CHIP_VRFSEL       1   /* Have comparator voltage reference selection */
 #  define CHIP_TRACE        1   /* Have trace capability */
 #  define CHIP_NUARTS       6   /* 6 UARTS */
-#  define CHIP_UARTFIFOD    tbd
+#  define CHIP_UARTFIFOD    8   /* 8 level deep UART FIFOs */
 #  define CHIP_NSPI         4   /* 4 SPI interfaces */
 #  define CHIP_NI2C         5   /* 5 I2C interfaces */
 #  define CHIP_NCAN         2   /* 2 CAN interfaces */

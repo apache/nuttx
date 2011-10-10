@@ -243,8 +243,21 @@ void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
                  UART_MODE_RXINV    | UART_MODE_WAKE        | UART_MODE_LPBACK |
                  UART_MODE_UEN_MASK | UART_MODE_RTSMD       | UART_MODE_IREN   |
                  UART_MODE_SIDL     | UART_MODE_ON);
+
+  /* Configure the FIFOs:
+   *
+   *   RX: Interrupt at 6 of 8 (for 8-deep FIFO) or 3 o 4 (4-deep FIFO)
+   *   TX: Interrupt on FIFO not full
+   *   Invert transmit polarity.
+   */
+
+#ifdef UART_STA_URXISEL_RXB6
   pic32mx_putreg(uart_base, PIC32MX_UART_STACLR_OFFSET,
-                 UART_STA_UTXINV    | UART_STA_UTXISEL_MASK | UART_STA_URXISEL_RXBF);
+                 UART_STA_UTXINV    | UART_STA_UTXISEL_TXBNF | UART_STA_URXISEL_RXB6);
+#else
+  pic32mx_putreg(uart_base, PIC32MX_UART_STACLR_OFFSET,
+                 UART_STA_UTXINV    | UART_STA_UTXISEL_TXBNF | UART_STA_URXISEL_RXB3);
+#endif
 
   /* Configure the FIFO interrupts */
 
