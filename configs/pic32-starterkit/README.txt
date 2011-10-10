@@ -55,6 +55,7 @@ Contents
   Configurations
 
 PIC32MX795F512L Pin Out
+PIC32MX795F512L Pin Out
 =======================
 
 LEFT SIDE, TOP-TO-BOTTOM (if pin 1 is in upper left)
@@ -529,7 +530,10 @@ PIC32MX Configuration Options
        CONFIG_PIC32MX_I2C3           - I2C 3
        CONFIG_PIC32MX_I2C4           - I2C 4
        CONFIG_PIC32MX_I2C5           - I2C 5
+       CONFIG_PIC32MX_SPI1           - SPI 1
        CONFIG_PIC32MX_SPI2           - SPI 2
+       CONFIG_PIC32MX_SPI3           - SPI 3
+       CONFIG_PIC32MX_SPI4           - SPI 4
        CONFIG_PIC32MX_UART1          - UART 1
        CONFIG_PIC32MX_UART2          - UART 2
        CONFIG_PIC32MX_UART3          - UART 3

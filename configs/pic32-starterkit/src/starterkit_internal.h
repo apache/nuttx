@@ -46,14 +46,26 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-
-/* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not
- * controllable by software.  Four are controllable by software:
+/* The PIC32 starter kit has 3 user LEDs
  *
- * D7  "USB"    Yellow  RD7 Low illuminates
- * D8  "SD"     Yellow  RD6 Low illuminates
- * D9  "Flash"  Yellow  RF0 Low illuminates
- * D10 "Error"  Red     RF1 Low illuminates
+ *   RD0          User LED D4 (high illuminates)
+ *   RD2          User LED D5 (high illuminates)
+ *   RD1          User LED D6 (high illuminates)
+ *
+ * There are 5 LEDs available on the MEB:
+ *
+ *   RD1          LED1
+ *   RD2          LED2
+ *   RD3          LED3
+ *   RC1          LED4
+ *   RC2          LED5
+ */
+
+/* The PIC32 start kit has 3 switches:
+ *
+ *   RD7            Switch SW2 (low when closed)
+ *   RD6            Switch SW1 (low when closed)
+ *   RD13           Switch SW3 (low when closed)
  */
 
 /****************************************************************************

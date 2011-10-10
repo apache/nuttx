@@ -229,6 +229,7 @@ EXTERN uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devi
 EXTERN int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
+
 #ifdef CONFIG_PIC32MX_SPI2
 EXTERN void  pic32mx_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 EXTERN uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
@@ -237,25 +238,20 @@ EXTERN int pic32mx_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, 
 #endif
 #endif
 
-/****************************************************************************
- * Name: pic32mx_spiflush
- *
- * Description:
- *   Flush and discard any words left in the RX fifo.  This can be called
- *   from ssp0/1select after a device is deselected (if you worry about such
- *   things).
- *
- * Input Parameters:
- *   dev - Device-specific state data
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+#ifdef CONFIG_PIC32MX_SPI3
+EXTERN void  pic32mx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+EXTERN int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
+#endif
 
-struct spi_dev_s;
-#if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2)
-EXTERN void pic32mx_spiflush(FAR struct spi_dev_s *dev);
+#ifdef CONFIG_PIC32MX_SPI3
+EXTERN void  pic32mx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+EXTERN uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+EXTERN int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
 #endif
 
 /****************************************************************************
