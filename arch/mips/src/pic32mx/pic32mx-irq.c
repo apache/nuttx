@@ -97,7 +97,7 @@ void up_irqinitialize(void)
 
   putreg32(0xffff, PIC32MX_INT_IEC0CLR);
   putreg32(0xffff, PIC32MX_INT_IEC1CLR);
-#ifdef PIC32MX_INT_IEC1CLR
+#ifdef PIC32MX_INT_IEC2CLR
   putreg32(0xffff, PIC32MX_INT_IEC2CLR);
 #endif
 
