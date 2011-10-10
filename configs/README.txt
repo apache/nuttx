@@ -1321,7 +1321,14 @@ configs/pcblogic-pic32mx
 	STATUS:  Code complete but testing has been stalled due to tool related problems
 	(PICkit 2 does not work with the PIC32).
 
-confgis/qemu-i486
+configs/pic32-starterkit
+
+	This README file discusses the port of NuttX to the Microchip PIC32 Ethernet
+	Starter Kit (DM320004) with the Multimedia Expansion Board (MEB, DM320005).
+	Advanced USB Storage.  See www.microchip.com for further information.
+
+configs/qemu-i486
+
 	Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
 	hardwared (Google the Bifferboard).
 

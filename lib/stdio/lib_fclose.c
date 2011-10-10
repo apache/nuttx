@@ -2,7 +2,7 @@
  * lib/stdio/lib_fclose.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,6 +41,7 @@
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 
@@ -70,29 +71,36 @@ int fclose(FAR FILE *stream)
 {
   int err = EINVAL;
   int ret = ERROR;
+  int status;
 
   /* Verify that a stream was provided. */
 
   if (stream)
     {
-      /* Flush the stream */
-
-      ret = lib_fflush(stream, true);
-      err = errno;
-
-      /* Close the underlying file descriptor */
-
-      if (stream->fs_filedes > 0)
+      /* Check that the underlying file descriptor corresponds to an an open
+       * file.
+       */
+ 
+      ret = OK;
+      if (stream->fs_filedes >= 0)
         {
-          /* Close the file and save the return status */
+          /* If the stream was opened for writing, then flush the stream */
 
-          int status = close(stream->fs_filedes);
+          if ((stream->fs_oflags & O_WROK) != 0)
+            {
+              ret = lib_fflush(stream, true);
+              err = errno;
+            }
 
-          /* If close() returns an error but flush() did not then make
-           * sure that we return the close() error condition.
+          /* Close the underlying file descriptor and save the return status */
+
+          status = close(stream->fs_filedes);
+
+          /* If close() returns an error but flush() did not then make sure
+           * that we return the close() error condition.
            */
 
-          if (ret == 0)
+          if (ret == OK)
             {
               ret = status;
               err = errno;

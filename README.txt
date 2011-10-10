@@ -413,6 +413,8 @@ nuttx
  |   |   `- README.txt
  |   |- pcblogic-pic32mx/
  |   |   `- README.txt
+ |   |- pic32-starterkit/
+ |   |   `- README.txt
  |   |- pjrc-8051/
  |   |   |- include/README.txt
  |   |   |- src/README.txt

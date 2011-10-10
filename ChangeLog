@@ -2155,4 +2155,8 @@
 	  do not work with R61580 LCD.
 	* configs/pic32-starterkit: Beginning of a configuratin for the Microchip
 	  PIC32 Ethernet Starter Kit.
+	* lib/stdio/lib_fclose.c: fclose() always returns an error (EOF) when it
+	  closes a read-only file.  This is because it calls flush() which will
+	  fail on read-only files.  No harm is done other that a bad value is
+	  returned.
 
