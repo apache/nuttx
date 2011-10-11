@@ -2,7 +2,7 @@
 # arch/mips/src/pic32mx/Make.defs
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -61,8 +61,11 @@ endif
 # Required PIC32MX files
 
 CHIP_ASRCS =
-CHIP_CSRCS = pic32mx-irq.c pic32mx-decodeirq.c pic32mx-dobev.c pic32mx-lowconsole.c \
-			 pic32mx-lowinit.c pic32mx-serial.c pic32mx-timerisr.c
+CHIP_CSRCS = pic32mx-irq.c pic32mx-decodeirq.c pic32mx-dobev.c pic32mx-gpio.c \
+			 pic32mx-lowconsole.c pic32mx-lowinit.c pic32mx-serial.c pic32mx-timerisr.c
 
 # Configuration-dependent PIC32MX files
 
+ifeq ($(CONFIG_GPIO_IRQ),y)
+CHIP_CSRCS += up_gpioirq.c
+endif
