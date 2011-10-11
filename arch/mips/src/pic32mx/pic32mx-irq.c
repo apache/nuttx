@@ -3,7 +3,7 @@
  * arch/mips/src/chip/pic32mx-irq.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -122,6 +122,12 @@ void up_irqinitialize(void)
   putreg32(INT_INTCON_MVEC, PIC32MX_INT_INTCONSET);
 #else
   putreg32(INT_INTCON_MVEC, PIC32MX_INT_INTCONCLR);
+#endif
+
+  /* Initialize GPIO change notifiction handling */
+ 
+#ifdef CONFIG_GPIO_IRQ
+  pic32mx_gpioirqinitialize();
 #endif
 
   /* currents_regs is non-NULL only while processing an interrupt */

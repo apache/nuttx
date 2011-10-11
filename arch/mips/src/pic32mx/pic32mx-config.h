@@ -354,14 +354,14 @@
 #  error "CONFIG_PIC32MX_UART2PRIO is too large"
 #endif
 
-#ifndef CONFIG_PIC32MX_CN            /* Input Change Interrupt */
-#  define CONFIG_PIC32MX_CN (INT_ICP_MID_PRIORITY << 2)
+#ifndef CONFIG_PIC32MX_CNPRIO            /* Input Change Interrupt */
+#  define CONFIG_PIC32MX_CNPRIO (INT_ICP_MID_PRIORITY << 2)
 #endif
-#if CONFIG_PIC32MX_CN < 4
-#  error "CONFIG_PIC32MX_CN is too small"
+#if CONFIG_PIC32MX_CNPRIO < 4
+#  error "CONFIG_PIC32MX_CNPRIO is too small"
 #endif
-#if CONFIG_PIC32MX_CN > 31
-#  error "CONFIG_PIC32MX_CN is too large"
+#if CONFIG_PIC32MX_CNPRIO > 31
+#  error "CONFIG_PIC32MX_CNPRIO is too large"
 #endif
 
 #ifndef CONFIG_PIC32MX_ADCPRIO       /* ADC1 Convert Done */

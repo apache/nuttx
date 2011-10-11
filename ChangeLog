@@ -2162,3 +2162,6 @@
 	  returned.
 	* arch/sim/src/Makefile: Correct build issue for sim/nsh2 target.  Old
 	  libboard.a was not being cleaned.
+	* arch/mips/src/pic32mx/pic32mx-gpio*.c:  Add GPIO support for the PIC32MX.
+	* configs/sure-pic32mx/src/up_leds.c and up_buttons.c:  Add button and LED
+	  support for the Sure Electronics PIC32MX board.

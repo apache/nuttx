@@ -2,7 +2,7 @@
  * arch/mips/src/pic32mx/pic32mx-internal.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -54,6 +54,56 @@
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+/* GPIO settings used in the configport, readport, writeport, etc.
+ *
+ * General encoding:
+ * MMxV Ixxx RRRx PPPP
+ */
+
+#define GPIO_MODE_SHIFT   (14)      /* Bits 14-15: I/O mode */
+#define GPIO_MODE_MASK    (3 << GPIO_MODE_SHIFT)
+#  define GPIO_INPUT      (0 << GPIO_MODE_SHIFT) /* 00 Normal input */
+#  define GPIO_OUTPUT     (2 << GPIO_MODE_SHIFT) /* 10 Normal output */
+#  define GPIO_OPENDRAN   (3 << GPIO_MODE_SHIFT) /* 11 Open drain output */
+
+#define GPIO_VALUE_MASK   (1 << 12) /* Bit 12: Initial output value */
+#  define GPIO_VALUE_ONE  (1 << 12)
+#  define GPIO_VALUE_ZERO (0)
+
+#define GPIO_INT_SHIFT    (14)      /* Bits 10-11: Interrupt mode */
+#define GPIO_INT_MASK     (3 << GPIO_INT_SHIFT)
+#  define GPIO_INT_NONE   (0 << GPIO_INT_SHIFT) /* Bit 00: No interrupt */
+#  define GPIO_INT        (1 << GPIO_INT_SHIFT) /* Bit 01: Change notification enable */
+#  define GPIO_PUINT      (3 << GPIO_INT_SHIFT) /* Bit 11: Pulled-up interrupt input */
+
+#define GPIO_PORT_SHIFT   (5)       /* Bits 5-7: Port number */
+#define GPIO_PORT_MASK    (7 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTA      (0 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTB      (1 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTC      (2 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTD      (3 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTE      (4 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTF      (5 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTG      (6 << GPIO_PORT_SHIFT)
+
+#define GPIO_PIN_SHIFT    0        /* Bits 0-3: GPIO number: 0-15 */
+#define GPIO_PIN_MASK     (15 << GPIO_PIN_SHIFT)
+#define GPIO_PIN0         (0  << GPIO_PIN_SHIFT)
+#define GPIO_PIN1         (1  << GPIO_PIN_SHIFT)
+#define GPIO_PIN2         (2  << GPIO_PIN_SHIFT)
+#define GPIO_PIN3         (3  << GPIO_PIN_SHIFT)
+#define GPIO_PIN4         (4  << GPIO_PIN_SHIFT)
+#define GPIO_PIN5         (5  << GPIO_PIN_SHIFT)
+#define GPIO_PIN6         (6  << GPIO_PIN_SHIFT)
+#define GPIO_PIN7         (7  << GPIO_PIN_SHIFT)
+#define GPIO_PIN8         (8  << GPIO_PIN_SHIFT)
+#define GPIO_PIN9         (9  << GPIO_PIN_SHIFT)
+#define GPIO_PIN10        (10 << GPIO_PIN_SHIFT)
+#define GPIO_PIN11        (11 << GPIO_PIN_SHIFT)
+#define GPIO_PIN12        (12 << GPIO_PIN_SHIFT)
+#define GPIO_PIN13        (13 << GPIO_PIN_SHIFT)
+#define GPIO_PIN14        (14 << GPIO_PIN_SHIFT)
+#define GPIO_PIN15        (15 << GPIO_PIN_SHIFT)
 
 /************************************************************************************
  * Public Types
@@ -190,6 +240,129 @@ EXTERN uint32_t *pic32mx_decodeirq(uint32_t *regs);
  ************************************************************************************/
 
 EXTERN uint32_t *pic32mx_dobev(uint32_t *regs);
+
+/************************************************************************************
+ * Name: pic32mx_configgpio
+ *
+ * Description:
+ *   Configure a GPIO pin based on bit-encoded description of the pin (the interrupt
+ *   will be configured when pic32mx_attach() is called).
+ * 
+ * Returned Value:
+ *   OK on success; negated errno on failure.
+ * 
+ ************************************************************************************/
+
+EXTERN int pic32mx_configgpio(uint16_t cfgset);
+
+/************************************************************************************
+ * Name: pic32mx_gpiowrite
+ *
+ * Description:
+ *   Write one or zero to the selected GPIO pin
+ *
+ ************************************************************************************/
+
+EXTERN void pic32mx_gpiowrite(uint16_t pinset, bool value);
+
+/************************************************************************************
+ * Name: pic32mx_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin
+ *
+ ************************************************************************************/
+
+EXTERN bool pic32mx_gpioread(uint16_t pinset);
+
+/************************************************************************************
+ * Name: pic32mx_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a GPIO change notification interrupts.  This
+ *   function is called internally by the system on power up and should not be
+ *   called again.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+EXTERN void pic32mx_gpioirqinitialize(void);
+#else
+#  define pic32mx_gpioirqinitialize()
+#endif
+
+/************************************************************************************
+ * Name: pic32mx_gpioattach
+ *
+ * Description:
+ *   Attach an interrupt service routine to a GPIO interrupt.  This will also
+ *   reconfigure the pin as an interrupting input.  The change notification number is
+ *   associated with all interrupt-capabile GPIO pins.  The association could,
+ *   however, differ from part to part and must be  provided by the caller.
+ *
+ *   When an interrupt occurs, it is due to a change on the GPIO input pin.  In that
+ *   case, all attached handlers will be called.  Each handler must maintain state
+ *   and determine if the unlying GPIO input value changed.
+ * 
+ * Parameters:
+ *  - pinset:  GPIO pin configuration
+ *  - cn:      The change notification number associated with the pin
+ *  - handler: Interrupt handler (may be NULL to detach)
+ * 
+ * Returns: 
+ *  The previous value of the interrupt handler function pointer.  This value may,
+ *  for example, be used to restore the previous handler when multiple handlers are
+ *  used.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+EXTERN xcpt_t pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler);
+#else
+#  define pic32mx_gpioattach(p,f) (NULL)
+#endif
+
+/************************************************************************************
+ * Name: pic32mx_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified GPIO IRQ
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+EXTERN void pic32mx_gpioirqenable(unsigned int cn);
+#else
+#  define pic32mx_gpioirqenable(irq)
+#endif
+
+/************************************************************************************
+ * Name: pic32mx_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified GPIO IRQ
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+EXTERN void pic32mx_gpioirqdisable(unsigned int cn);
+#else
+#  define pic32mx_gpioirqdisable(irq)
+#endif
+
+/************************************************************************************
+ * Function:  pic32mx_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the provided base address
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_DEBUG_GPIO
+EXTERN void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
+#else
+#  define pic32mx_dumpgpio(p,m)
+#endif
 
 /************************************************************************************
  * Name:  pic32mx_spiNselect, pic32mx_spiNstatus, and pic32mx_spiNcmddata

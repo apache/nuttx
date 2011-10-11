@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include "chip.h"
 #include "pic32mx-memorymap.h"
 
 /********************************************************************************************
@@ -264,6 +265,14 @@
 /* Input change notification pull-up enable */
 
 #define IOPORT_CNPUE(n)                (1 << (n)) /* Bits 0-18/21: Port pin pull-up enabled */
+
+#if defined(CHIP_PIC32MX3) || defined(CHIP_PIC32MX4)
+#  define IOPORT_CN_ALL                0x0007ffff /* Bits 0-18 */
+#  define IOPORT_NUMCN                 19
+#elif defined(CHIP_PIC32MX5) || defined(CHIP_PIC32MX6) || defined(CHIP_PIC32MX7)
+#  define IOPORT_CN_ALL                0x003fffff /* Bits 0-21 */
+#  define IOPORT_NUMCN                 22
+#endif
 
 /********************************************************************************************
  * Public Types
