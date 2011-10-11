@@ -4,7 +4,7 @@ configs/pic32-starterkit README
 
 This README file discusses the port of NuttX to the Microchip PIC32 Ethernet
 Starter Kit (DM320004) with the Multimedia Expansion Board (MEB, DM320005).
-Advanced USB Storage.  See www.microchip.com for further information.
+See www.microchip.com for further information.
 
 The PIC32 Ethernet Starter Kit includes:
 
@@ -54,7 +54,6 @@ Contents
   PIC32MX Configuration Options
   Configurations
 
-PIC32MX795F512L Pin Out
 PIC32MX795F512L Pin Out
 =======================
 

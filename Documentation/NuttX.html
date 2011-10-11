@@ -994,7 +994,11 @@
   </tr>
 </table>
 
-<p>The short story (Number of ports follow in parentheses. Follow the links for the details):</p>
+<p>
+  The short story (Number of ports follow in parentheses).
+  The state of the various ports vary from board-to-board.
+  Follow the links for the details:
+</p>
 <center><table width="90%">
 <ul>
   <tr>
@@ -1023,7 +1027,7 @@
       <li><a href="#80x86">Intel 80x86</a> (2)</li>
     </ul>
   </li>
-  <li>MicroChip <a href="#pic32mips">PIC32</a> (MIPS) (2)</li>
+  <li>MicroChip <a href="#pic32mips">PIC32MX</a> (MIPS) (3)</li>
   <li>Renesas/Hitachi:
     <ul>
         <li><a href="#superh">Renesas/Hitachi SuperH</a> (1/2)</li>
@@ -1999,7 +2003,8 @@
     <p>
       <b>PIC32MX440F512H</b>.
         This port uses the &quot;Advanced USB Storage Demo Board,&quot; Model DB-DP11215, from <a href="http://www.sureelectronics.net">Sure Electronics</a>.
-        This board features the MicroChip PIC32MX440F512H.  See the <a href="http://www.sureelectronics.net/goods.php?id=1168">Sure website</a> for further    information about the DB-DP11215 board.
+        This board features the MicroChip PIC32MX440F512H.
+        See the <a href="http://www.sureelectronics.net/goods.php?id=1168">Sure website</a> for further information about the DB-DP11215 board.
     </p>
     <ul>
       <p>
@@ -2007,6 +2012,27 @@
        This port is code complete and has begun testing.
        I hope to use the on-board LEDs to work around the debug problems with the PCL Logic board (see above).
        Update: Work on this board has stalled due to higher priority tasks.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>PIC32MX795F512L</b>.
+        This port uses the Microchip PIC32 Ethernet Starter Kit (DM320004) with the Multimedia Expansion Board (MEB, DM320005).
+        See the <a href="http://ww.microchip.com">Microchip website</a> for further information.
+    </p>
+    <ul>
+      <p>
+       <b>STATUS:</b>
+         This port was started a shelved... The Starter Kit (even with the MEB) has no serial port.
+         I will have to come up with a different bring-up strategy to work with this board.
       </p>
     </ul>
   </td>
@@ -2722,9 +2748,18 @@ nuttx-6.11 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
     * arch/arm/stm32/Make.defs:  Don't build stm32_rtc.c if CONFIG_RTC is not
       selected.  Doing so will cause errors if other configuration dependencies
-      are not met
+      are not met.
     * configs/stm3210e-eval/src/up_lcd.c:  Color corrections for SPFD5408B LCD
       do not work with R61580 LCD.
+    * configs/pic32-starterkit: Beginning of a configuration for the Microchip
+      PIC32 Ethernet Starter Kit.  Hmmm.. I don't have a clue how to test this
+      with no serial port?!
+    * lib/stdio/lib_fclose.c: fclose() always returns an error (EOF) when it
+      closes a read-only file.  This is because it calls flush() which will
+      fail on read-only files.  No harm is done other that a bad value is
+      returned.
+    * arch/sim/src/Makefile: Correct build issue for sim/nsh2 target.  Old
+      libboard.a was not being cleaned.
 
 apps-6.11 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 

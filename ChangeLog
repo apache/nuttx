@@ -2160,4 +2160,5 @@
 	  closes a read-only file.  This is because it calls flush() which will
 	  fail on read-only files.  No harm is done other that a bad value is
 	  returned.
-
+	* arch/sim/src/Makefile: Correct build issue for sim/nsh2 target.  Old
+	  libboard.a was not being cleaned.
