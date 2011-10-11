@@ -3,7 +3,7 @@
  * arch/arm/src/board/up_leds.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -51,6 +51,7 @@
 #include "up_internal.h"
 
 #include "pic32mx-internal.h"
+#include "pic32mx-ioport.h"
 #include "sure-internal.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -58,6 +59,7 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+/* LED Configuration ********************************************************/
 /* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not
  * controllable by software.  Four are controllable by software:
  *
@@ -78,6 +80,18 @@
  * LED_PANIC              5  N/C N/C N/C   ON    N/C N/C N/C   OFF
  */
 
+#define GPIO_USB_LED   (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTD|GPIO_PIN7)
+#define GPIO_SD_LED    (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTD|GPIO_PIN8)
+#define GPIO_FLASH_LED (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTD|GPIO_PIN9)
+#define GPIO_ERROR_LED (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTD|GPIO_PIN10)
+
+/* LED Management Definitions ***********************************************/
+
+#define LED_OFF 0
+#define LED_ON  1
+#define LED_NC  2
+
+/* Debug ********************************************************************/
 /* Enables debug output from this file (needs CONFIG_DEBUG with
  * CONFIG_DEBUG_VERBOSE too)
  */
@@ -99,12 +113,71 @@
 #endif
 
 /****************************************************************************
+ * Private types
+ ****************************************************************************/
+
+struct led_setting_s
+{
+  uint8_t usb    : 2;
+  uint8_t sd     : 2;
+  uint8_t flash  : 2;
+  uint8_t error  : 2;
+};
+
+ /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static const g_ledonvalues[LED_NVALUES] =
+{
+  {LED_OFF, LED_OFF, LED_OFF, LED_OFF},
+  {LED_ON,  LED_OFF, LED_NC,  LED_NC},
+  {LED_OFF, LED_ON,  LED_NC,  LED_NC},
+  {LED_ON,  LED_ON,  LED_NC,  LED_NC},
+  {LED_NC,  LED_NC,  LED_ON,  LED_NC},
+  {LED_NC,  LED_NC,  LED_NC,  LED_ON},
+};
+
+static const g_ledoffvalues[LED_NVALUES] =
+{
+  {LED_NC,  LED_NC,  LED_NC,  LED_NC},
+  {LED_NC,  LED_NC,  LED_NC,  LED_NC},
+  {LED_NC,  LED_NC,  LED_NC,  LED_NC},
+  {LED_NC,  LED_NC,  LED_NC,  LED_NC}, 
+  {LED_NC,  LED_NC,  LED_OFF, LED_NC},
+  {LED_NC,  LED_NC,  LED_NC,  LED_OFF}
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_ledinit
+ ****************************************************************************/
+
+void up_setleds(struct led_setting_s *setting)
+{
+  if (setting->usb != LED_NC)
+    {
+      pic32mx_gpiowrite(GPIO_USB_LED, setting->usb != LED_ON);
+    }
+
+  if (setting->sd != LED_NC)
+    {
+      pic32mx_gpiowrite(GPIO_SD_LED, setting->sd != LED_ON);
+    }
+
+  if (setting->flash != LED_NC)
+    {
+      pic32mx_gpiowrite(GPIO_FLASH_LED, setting->flash != LED_ON);
+    }
+
+  if (setting->error != LED_NC)
+    {
+      pic32mx_gpiowrite(GPIO_ERROR_LED, setting->error != LED_ON);
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -116,7 +189,12 @@
 
 void up_ledinit(void)
 {
-#warning "Missing logic"
+  /* Configure output pins */
+
+  pic32mx_configgpio(GPIO_USB_LED);
+  pic32mx_configgpio(GPIO_SD_LED);
+  pic32mx_configgpio(GPIO_FLASH_LED);
+  pic32mx_configgpio(GPIO_ERROR_LED);
 }
 
 /****************************************************************************
@@ -125,7 +203,10 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-#warning "Missing logic"
+  if (led < LED_NVALUES)
+    {
+      up_setleds(&g_ledonvalues[led]);
+    }
 }
 
 /****************************************************************************
@@ -134,6 +215,9 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-#warning "Missing logic"
+  if (led < LED_NVALUES)
+    {
+      up_setleds(&g_ledoffvalues[led]);
+    }
 }
 #endif /* CONFIG_ARCH_LEDS */
