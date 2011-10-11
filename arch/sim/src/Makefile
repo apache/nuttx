@@ -114,8 +114,7 @@ LDLIBS = $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
 
 # Add the board-specific library and directory
 
-BOARDDIR = $(TOPDIR)/configs/sim/src
-LDPATHS += -L $(BOARDDIR)
+LDPATHS += -L board
 LDLIBS += -lboard
 
 # Make targets begin here
@@ -144,8 +143,8 @@ libarch$(LIBEXT): $(NUTTXOBJS)
 # the simulation.  However, this is a good place to keep parts of the simulation
 # that are not hardware-related.
 
-$(BOARDDIR)/libboard$(LIBEXT):
-	@$(MAKE) -C $(BOARDDIR) TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
+board/libboard$(LIBEXT):
+	@$(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
 
 # A partially linked object containing only NuttX code (no interface to host OS)
 # Change the names of most symbols that conflict with libc symbols.
@@ -159,7 +158,7 @@ GNU/Linux-names.dat: GNU nuttx-names.dat
 Cygwin-names.dat: nuttx-names.dat
 	@cat $^ | sed -e "s/^/_/g" >$@
 
-nuttx.rel : libarch$(LIBEXT) $(BOARDDIR)/libboard$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
+nuttx.rel : libarch$(LIBEXT) board/libboard$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
 	@echo "LD:  nuttx.rel"
 	@$(LD) -r $(LDFLAGS) $(LDPATHS) -o $@ $(LINKOBJS) --start-group $(LDLIBS) --end-group $(EXTRA_LIBS)
 	@$(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat $@
@@ -191,10 +190,16 @@ cleanrel:
 	@rm -f nuttx.rel GNU/Linux-names.dat Cygwin-names.dat
 
 clean: cleanrel
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
+	fi
 	@rm -f nuttx.rel libarch$(LIBEXT) *~ .*.swp
 	$(call CLEAN)
 
 distclean: clean
+	@if [ -e board/Makefile ]; then \
+		$(MAKE) -C board TOPDIR="$(TOPDIR)" distclean ; \
+	fi
 	@rm -f Make.dep .depend
 	@rm -rf GNU
 
