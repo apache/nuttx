@@ -104,6 +104,13 @@
 #define LED_PANIC              5  /* N/C N/C N/C   ON    N/C N/C N/C   OFF   */
 #define LED_NVALUES            6
 
+/* For distinguishing individual LEDs */
+
+#define LED_USB                0
+#define LED_SD                 1
+#define LED_FLASH              2
+#define LED_ERROR              3
+
 /* Button Definitions *******************************************************/
 /* The Sure PIC32MX board has three buttons.
  *
