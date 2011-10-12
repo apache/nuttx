@@ -161,7 +161,6 @@ void weak_function sam3u_spiinitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAM3U_SPI
 int sam3u_spicsnumber(enum spi_dev_e devid)
 {
   int cs = -EINVAL;
@@ -240,6 +239,5 @@ uint8_t sam3u_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return 0;
 }
-#endif
 
 #endif /* CONFIG_SAM3U_SPI */

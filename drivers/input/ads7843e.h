@@ -72,11 +72,11 @@
 #define ADS7843E_CMD_DFR              (1 << 2)  /* SER/DFR */
 #define ADS7843E_CMD_EIGHT_BITS_MOD   (1 << 3)  /* Mode */
 #define ADS7843E_CMD_START            (1 << 7)  /* Start Bit */
-#define ADS7843E_CMD_SWITCH_SHIFT     4          /* Address setting */
+#define ADS7843E_CMD_SWITCH_SHIFT     4         /* Address setting */
 
 /* ADS7843E Commands */
 
-#define ADS7843_CMD_YPOSITION  \
+#define ADS7843_CMD_YPOSITION \
   ((1 << ADS7843E_CMD_SWITCH_SHIFT)|ADS7843E_CMD_START|ADS7843E_CMD_PD0|ADS7843E_CMD_PD1)
 #define ADS7843_CMD_XPOSITION \
   ((5 << ADS7843E_CMD_SWITCH_SHIFT)|ADS7843E_CMD_START|ADS7843E_CMD_PD0|ADS7843E_CMD_PD1)
