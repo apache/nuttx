@@ -166,7 +166,7 @@ Loading NuttX with PICkit2
 ==========================
 
   NOTE:  You need a PICKit3 if you plan to use the MPLAB debugger!  The PICKit2
-  can, however, still be used to load problems.  Instructions for the PICKit3
+  can, however, still be used to load programs.  Instructions for the PICKit3
   are similar.
 
   Intel Hex Forma Files:
