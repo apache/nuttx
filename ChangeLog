@@ -2165,3 +2165,6 @@
 	* arch/mips/src/pic32mx/pic32mx-gpio*.c:  Add GPIO support for the PIC32MX.
 	* configs/sure-pic32mx/src/up_leds.c and up_buttons.c:  Add button and LED
 	  support for the Sure Electronics PIC32MX board.
+	* configs/ea3152:  Add a configuration for the Embedded Artists LPC3152
+	  daughter board (with the same base-board used with configs/ea3131)
+

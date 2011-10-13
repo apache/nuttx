@@ -455,8 +455,9 @@ static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
        return ret;
      }
 
-   /* Get the MS 12 bits from the first byte and the remaining LS 4 bits from
-    * the second byte.
+   /* Get the MS 8 bits from the first byte and the remaining LS 4 bits from
+    * the second byte.  The valid range of data is then from 0 to 4095 with
+    * the LSB unit corresponding to Vref/4096.
     */
 
    ret = (unsigned int)data12[0] << 4 | (unsigned int)data12[1] >> 4;

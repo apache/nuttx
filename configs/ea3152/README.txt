@@ -2,7 +2,7 @@ README
 ^^^^^^
 
   This README file discusses the port of NuttX to the Embedded Artists
-  EA3131 board.
+  EA3152 board.
 
 Contents
 ^^^^^^^^
@@ -15,8 +15,7 @@ Contents
   o Image Format
   o Image Download to ISRAM
   o Using OpenOCD and GDB
-  o On-Demand Paging
-  o ARM/EA3131-specific Configuration Options
+  o ARM/EA3152-specific Configuration Options
   o Configurations
 
 Development Environment
@@ -141,7 +140,7 @@ NuttX buildroot Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh ea3131/<sub-dir>
+     ./configure.sh ea3152/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -186,18 +185,18 @@ Image Format
   it!
 
   To work around both of these issues, I have created a small program under
-  configs/ea3131/tools to add the header.  This program can be built under
+  configs/ea3152/tools to add the header.  This program can be built under
   either Linux or Cygwin (and probably other tool environments as well).  That
   tool can be built as follows:
 
-  - cd configs/ea3131/tools
+  - cd configs/ea3152/tools
   - make
 
   Then, to build the NuttX binary ready to load with the bootloader, just
   following these steps:
 
   - cd tools/				# Configure Nuttx
-  - ./configure.sh ea3131/ostest	# (using the ostest configuration for this example)
+  - ./configure.sh ea3152/ostest	# (using the ostest configuration for this example)
   - cd ..				# Set up environment
   - . ./setenv.sh			# (see notes below)
   - make				# Make NuttX.  This will produce nuttx.bin
@@ -206,15 +205,15 @@ Image Format
   NOTES:
   
     1. setenv.sh just sets up pathes to the toolchain and also to
-       configs/ea3131/tools where mklpc.sh resides. Use of setenv.sh is optional.
+       configs/ea3152/tools where mklpc.sh resides. Use of setenv.sh is optional.
        If you don't use setenv.sh, then just set your PATH variable appropriately or
        use the full path to mklpc.sh in the final step.
     2. You can instruct Symantec to ignore the errors and it will stop quarantining
        the NXP program.
-    3. The CRC32 logic in configs/ea3131/tools doesn't seem to work.  As a result,
+    3. The CRC32 logic in configs/ea3152/tools doesn't seem to work.  As a result,
        the CRC is currently disabled in the header:
 
-       RCS file: /cvsroot/nuttx/nuttx/configs/ea3131/tools/lpchdr.c,v
+       RCS file: /cvsroot/nuttx/nuttx/configs/ea3152/tools/lpchdr.c,v
        retrieving revision 1.2
        diff -r1.2 lpchdr.c
        264c264
@@ -226,13 +225,13 @@ Image Download to ISRAM
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Assuming that you already have the FTDI driver installed*, then here is the
-are the steps that I use for loading new code into the EA3131:
+are the steps that I use for loading new code into the EA3152:
 
 - Create the bootloader binary, nuttx.lpc, as described above.
-- Connected the EA3131 using the FTDI USB port (not the lpc3131 USB port)
-  This will power up the EA3131 and start the bootloader.
+- Connected the EA3152 using the FTDI USB port (not the lpc3152 USB port)
+  This will power up the EA3152 and start the bootloader.
 - Start a terminal emulator (such as TeraTerm) at 115200 8NI.
-- Reset the EA3131 and you should see:
+- Reset the EA3152 and you should see:
   LPC31xx READY FOR PLAIN IMAGE>
 - Send the nuttx.lpc file and you should see:
   Download finished
@@ -244,7 +243,7 @@ That will load the NuttX binary into ISRAM and attempt to execute it.
 Using OpenOCD and GDB
 ^^^^^^^^^^^^^^^^^^^^^
 
-  I have been using the Olimex ARM-USB-OCD JTAG debugger with the EA3131
+  I have been using the Olimex ARM-USB-OCD JTAG debugger with the EA3152
   (http://www.olimex.com).  The OpenOCD configuration file is here:
   tools/armusbocb.cfg.  There is also a script on the tools directory that
   I used to start the OpenOCD daemon on my system called oocd.sh.  That
@@ -257,7 +256,7 @@ Using OpenOCD and GDB
 
   Then you should be able to start the OpenOCD daemon like:
 
-    configs/ea3131/tools/oocd.sh $PWD
+    configs/ea3152/tools/oocd.sh $PWD
 
   Where it is assumed that you are executing oocd.sh from the top level
   directory where NuttX is installed.
@@ -273,200 +272,7 @@ Using OpenOCD and GDB
    (gdb) symbol-file nuttx
    (gdb) load nuttx
 
-On-Demand Paging
-^^^^^^^^^^^^^^^^
-
-  There is a configuration that was used to verify the On-Demand Paging
-  feature for the ARM926 (see http://nuttx.sourceforge.net/NuttXDemandPaging.html).
-  That configuration is contained in the pgnsh sub-directory.  The pgnsh configuration
-  is only a test configuration, and lacks some logic to provide the full On-Demand
-  Paging solution (see below).
-
-  Page Table Layout:
-  ------------------
-
-  The ARM926 MMU uses a page table in memory.  The page table is divided
-  into (1) a level 1 (L1) page table that maps 1Mb memory regions to level 2
-  page tables (except in the case of 1Mb sections, of course), and (2) a level
-  2 (L2) page table that maps the 1Mb memory regions into individual 64Kb, 4kb,
-  or 1kb pages.  The pgnsh configuration uses 1Kb pages:  it positions 48x1Kb
-  pages at beginning of SRAM (the "locked" memory region), 16x1Kb pages at
-  the end of SRAM for the L1 page table, and 44x1Kb pages just before the
-  L1 page table.  That leaves 96x1Kb virtual pages in the middle of SRAM for
-  the paged memory region; up to 384x1kb of physical pages may be paged into
-  this region.  Physical memory map:
-  
-    11028000 "locked" text region   48x1Kb
-    11034000 "paged" text region    96x1Kb
-    1104c000 "data" region          32x1Kb
-    11054000 L1 page table          16x1Kb
-    -------- --------------------- ------
-    11058000                       192x1Kb
-
-  The virtual memory map allows more space for the paged region:
-
-    11028000 "locked" text region   48x1Kb
-    11034000 "paged" text region   384x1Kb
-    11094000 "data" region          32x1Kb
-    1109c000 L1 page table          16x1Kb
-    -------- --------------------- ------
-    110a0000                       480x1Kb
-
-  The L1 contains a single 1Mb entry to span the entire LPC3131 SRAM memory
-  region.  The virtual address for this region is 0x11028000.  The offset into
-  the L1 page table is given by:
-  
-    offset = ((0x11028000 >> 20) << 2) = 0x00000440
-
-  The value at that offset into the L1 page table contains the address of the
-  L2 page table (0x11056000) plus some extra bits to specify that that entry
-  is valid and and points to a 1Kb L1 page table:
-  
-    11054440 11056013
-
-  Why is the address 11056000 used for the address of the L2 page table?  Isn't
-  that inside of the L1 page table?  Yes, this was done to use the preceious
-  SRAM memory more conservatively.  If you look at the LPC313x virtual memory
-  map, you can see that no virtual addresses above 0x60100000 are used.  That
-  corresponds to L1 page table offset 0x0001800 (physical address 0x11055800).
-  The rest of the L1 page table is unused and so we reuse it to hold the L2 page
-  table (or course, this could cause some really weird addressing L1 mapping
-  issues if bad virtual addresses were used in that region -- oh well).  The
-  address 0x11056000 is then the first properly aligned memory that can be used
-  in that L2 page table area.
-
-  Only only L2 page table will be used to span the LPC3131 SRAM virtual text
-  address region (480x1Kb).  That one entry maps the virtual address range of
-  0x11000000 through 0x110ffc00.  Each entry maps a 1Kb page of physical memory:
-  
-    PAGE      VIRTUAL ADDR L2 OFFSET
-    --------- ------------ ---------
-    Page 0    0x11000000   0x00000000
-    Page 1    0x11000400   0x00000004
-    Page 2    0x11000800   0x00000008
-    ...
-    Page 1023 0x110ffc00   0x00000ffc
-  
-  The "locked" text region begins at an offset of 0x00028000 into that region.
-  The 48 page table entries needed to make this region begin at:
-  
-    offset = ((0x00028000 >> 10) << 2) = 0x00000280
-
-  Each entry contains the address of a physical page in the "locked" text region
-  (plus some extra bits to identify domains, page sizes, access privileges, etc.):
-
-    0x11000280 0x1102800b
-    0x11000284 0x1102840b
-    0x11000288 0x1102880b
-    ...
-
-  The locked region is initially unmapped.  But the data region and page table
-  regions must be mapped in a similar manner.  Those 
-  
-    Data:
-       Virtual address  = 0x11094000 Offset = 0x00064000
-       Physical address = 0x1104c000
-       L2 offset        = ((0x00094000 >> 10) << 2) = 0x00000940
-
-    Page table:
-       Virtual address  = 0x1109c000 Offset = 0x0009c000
-       Physical address = 0x11054000
-       L2 offset        = ((0x0009c000 >> 10) << 2) = 0x000009c0
-
-  Build Sequence:
-  ---------------
-
-  This example uses a two-pass build.  The top-level Makefile recognizes the
-  configuration option CONFIG_BUILD_2PASS and will execute the Makefile in
-  configs/ea3131/locked/Makefile to build the first pass object, locked.r.
-  This first pass object contains all of the code that must be in the locked
-  text region. The Makefile in arch/arm/src/Makefile then includes this 1st
-  pass in build, positioning it as controlled by configs/ea3131/pgnsh/ld.script.
-
-  Finishing the Example:
-  ----------------------
-
-  This example is incomplete in that it does not have any media to reload the
-  page text region from:  The file configs/ea3131/src/up_fillpage.c is only
-  a stub.  That logic to actually reload the page from some storage medium
-  (among other things) would have to be implemented in order to complete this
-  example.  At present, the example works correctly up to the point where
-  up_fillpage() is first called and then fails in the expected way.
-
-  Here are the detailed list of things that would need to be done in addition
-  to finishing th up_fillpage() logic (this assumes that SPI NOR FLASH is the
-  media on which the NuttX image is stored):
-
-  1. Develop a NOR FLASH layout can can be used to (1) boot the locked text
-     section into memory on a reset, and (2) map a virtual fault address
-     to an offset into paged text section in NOR FLASH.
-  2. Develop/modify the build logic to build the binaries for this NOR
-     flash layout: Can the NuttX image be formed as a single image that
-     is larger than the IRAM?  Can we boot from such a large image?  If
-     so, then no special build modifications are required.  Or, does the
-     locked section have to be smaller with a separate paged text section
-     image in FLASH?  In this case, some tool will be needed to break
-     the nuttx.bin file into the two pieces.
-  3. Develop a mechanism to load the NuttX image into SPI NOR FLASH.  A
-     basic procedure is already documented in NXP publications: "LPC313x
-     Linux Quick Start Guide, Version 2.0" and "AN10811 Programming SPI
-     flash on EA3131 boards, V1 (May 1, 2009)."  That procedure may be
-     sufficient, depending on the decisions made in (1) and (2):  
-  4. Develop a procedure to boot the locked text image from SPI NOR.
-     The references and issues related to this are discussed in (2)
-     and (3) above.
-
-  Basic support for paging from SPI NOR FLASH can be enabled by adding:
-
-    CONFIG_PAGING_AT45DB=y
-
-  Or:
-
-    CONFIG_PAGING_M25PX=y
-
-  NOTE:  See the TODO list in the top-level directory:
-  
-    "arch/arm/src/lpc31xx/lpc31_spi.c may or may not be functional.  It was
-     reported to be working, but I was unable to get it working with the
-     Atmel at45dbxx serial FLASH driver."
-
-  Alternative:
-  ------------
-
-  I have implemented an alternative within configs/ea3131/src/up_fillpage.c
-  which is probably only useful for testing.  Here is the usage module
-  for this alternative
-
-  1. Place the nuttx.bin file on an SD card.
-  2. Insert the SD card prior to booting
-  3. In up_fillpage(), use the virtual miss address (minus the virtual
-     base address) as an offset into the nuttx.bin file, and read the
-     required page from that offset in the nuttx.bin file:
-
-     off_t offset = (off_t)vpage - PG_LOCKED_VBASE;
-     off_t pos    = lseek(fd, offset, SEEK_SET);
-     if (pos != (off_t)-1)
-       {
-         int ret = read(fd, vpage, PAGESIZE);
-       }
-
-  In this way, the paging implementation can do on-demand paging
-  from an image file on the SD card.  Problems/issues with this
-  approach probably make it only useful for testing:
-
-  1. You would still have to boot the locked section over serial or
-     using a bootloader -- it is not clear how the power up boot
-     would occur.  For testing, the nuttx.bin file could be both
-     provided on the SD card and loaded over serial. 
-  2. If the SD card is not in place, the system will crash.
-  3. This means that all of the file system logic and FAT file
-     system would have to reside in the locked text region.
-
-  And the show-stopper:
-
-  4. There is no MCI driver for the ea3131, yet!
-
-ARM/EA3131-specific Configuration Options
+ARM/EA3152-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 	CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
@@ -488,16 +294,16 @@ ARM/EA3131-specific Configuration Options
 
 	CONFIG_ARCH_CHIP_name - For use in C code
 
-	   CONFIG_ARCH_CHIP_LPC3131
+	   CONFIG_ARCH_CHIP_LPC3152
 
 	CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
 	   hence, the board that supports the particular chip or SoC.
 
-	   CONFIG_ARCH_BOARD=ea3131
+	   CONFIG_ARCH_BOARD=ea3152
 
 	CONFIG_ARCH_BOARD_name - For use in C code
 
-	   CONFIG_ARCH_BOARD_EA3131
+	   CONFIG_ARCH_BOARD_EA3152
 
 	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
 	   of delay loops
@@ -588,49 +394,18 @@ ARM/EA3131-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each EA3131 configuration is maintained in a sudirectory and can be
+Each EA3152 configuration is maintained in a sudirectory and can be
 selected as follow:
 
 	cd tools
-	./configure.sh ea3131/<subdir>
+	./configure.sh ea3152/<subdir>
 	cd -
 	. ./setenv.sh
 
 Where <subdir> is one of the following:
 
-  locked
-    This is not a configuration.  When on-demand page is enabled
-    then we must do a two pass link:  The first pass creates an
-    intermediate object that has all of the code that must be
-    placed in the locked memory partition.  This is logic that
-    must be locked in memory at all times.
-
-    The directory contains the logic necessary to do the platform
-    specific first pass link for the EA313x.
- 
-  nsh:
-    Configures the NuttShell (nsh) located at examples/nsh.  The
-    Configuration enables only the serial NSH interface.
-
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.  By default, this project assumes that you are
     using the DFU bootloader.
-
-  pgnsh:
-    This is the same configuration as nsh, but with On-Demand
-    paging enabled.  See http://www.nuttx.org/NuttXDemandPaging.html.
-    This configuration is an experiment for the purposes of test
-    and debug.  At present, this does not produce functioning, 
-    usable system
- 
-  usbserial:
-    This configuration directory exercises the USB serial class
-    driver at examples/usbserial.  See examples/README.txt for
-    more information.
-
-  usbstorage:
-    This configuration directory exercises the USB mass storage
-    class driver at examples/usbstorage.  See examples/README.txt for
-    more information.
 
