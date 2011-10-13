@@ -11,71 +11,73 @@ fi
 ###############################################################################
 # OpenOCD 0.4.0 ###############################################################
 ###############################################################################
-# This script *probably* only works with the following version of OpenOCD:
+# This script *probably* only works with the following versions of OpenOCD:
 
 OPENOCD_PATH="/cygdrive/c/OpenOCD/openocd-0.4.0/src"
 OPENOCD_EXE=openocd.exe
 
-# Local search directory and configurations
+echo "Trying OpenOCD 0.4.0 path: ${OPENOCD_PATH}/${OPENOCD_EXE}"
 
-OPENOCD_SEARCHDIR="${TOPDIR}/configs/ea3152/tools"
-OPENOCD_WSEARCHDIR="`cygpath -w ${OPENOCD_SEARCHDIR}`"
-OPENOCD_INTERFACE="olimex-arm-usb-ocd.cfg"
-OPENOCD_TARGET="lpc3152.cfg"
-OPENOCD_ARGS="-s ${OPENOCD_WSEARCHDIR} -f ${OPENOCD_INTERFACE} -f ${OPENOCD_TARGET}"
+if [ -x "${OPENOCD_PATH}/${OPENOCD_EXE}" ]; then
 
-# Verify that everything is what it claims it is and is located where it claims it is.
+  # Local search directory and configurations
 
-if [ ! -d "${OPENOCD_PATH}" ]; then
-	echo "OpenOCD path does not exist: ${OPENOCD_PATH}"
-	exit 1
-fi
-if [ ! -x "${OPENOCD_PATH}/${OPENOCD_EXE}" ]; then
-	echo "OpenOCD does not exist: ${OPENOCD_PATH}/${OPENOCD_EXE}"
-	exit 1
-fi
-if [ ! -f "${OPENOCD_SEARCHDIR}/${OPENOCD_TARGET}" ]; then
+  OPENOCD_SEARCHDIR="${TOPDIR}/configs/ea3152/tools"
+  OPENOCD_WSEARCHDIR="`cygpath -w ${OPENOCD_SEARCHDIR}`"
+  OPENOCD_INTERFACE="olimex-arm-usb-ocd.cfg"
+  OPENOCD_TARGET="lpc3152.cfg"
+  OPENOCD_ARGS="-s ${OPENOCD_WSEARCHDIR} -f ${OPENOCD_INTERFACE} -f ${OPENOCD_TARGET}"
+
+  # Verify that everything is what it claims it is and is located where it claims it is.
+
+  if [ ! -f "${OPENOCD_SEARCHDIR}/${OPENOCD_TARGET}" ]; then
 	echo "OpenOCD target config file does not exist: ${OPENOCD_SEARCHDIR}/${OPENOCD_TARGET}"
 	exit 1
-fi
-if [ ! -f "${OPENOCD_SEARCHDIR}/${OPENOCD_INTERFACE}" ]; then
+  fi
+  if [ ! -f "${OPENOCD_SEARCHDIR}/${OPENOCD_INTERFACE}" ]; then
 	echo "OpenOCD interface config file does not exist: ${OPENOCD_SEARCHDIR}/${OPENOCD_INTERFACE}"
 	exit 1
-fi
+  fi
+
 ###############################################################################
 
 ###############################################################################
 # Older OpenOCD that Shipped with the ARM-OCD JTAG ############################
 ###############################################################################
-# This script *probably* only works with the following version of OpenOCD:
-#
-#OPENOCD_PATH="/cygdrive/c/gccfd/openocd/bin"
-#OPENOCD_EXE=openocd-ftd2xx.exe
-#
-# Local search directory and configurations
-#
-#OPENOCD_CFG="${TOPDIR}/configs/ea3152/tools/armusbocd.cfg"
-#OPENOCD_ARGS="-f `cygpath -w ${OPENOCD_CFG}`"
-#
-#if [ ! -f ${OPENOCD_CFG} ]; then
-#	echo "OpenOCD config file does not exist: ${OPENOCD_CFG}"
-#	exit 1
-#fi
-#
-# Verify that everything is what it claims it is and is located where it claims it is.
-#
-#if [ ! -d "${OPENOCD_PATH}" ]; then
-#	echo "OpenOCD path does not exist: ${OPENOCD_PATH}"
-#	exit 1
-#fi
-#if [ ! -x "${OPENOCD_PATH}/${OPENOCD_EXE}" ]; then
-#	echo "OpenOCD does not exist: ${OPENOCD_PATH}/${OPENOCD_EXE}"
-#	exit 1
-#fi
-#if [ ! -f ${OPENOCD_CFG} ]; then
-#	echo "OpenOCD config file does not exist: ${OPENOCD_CFG}"
-#	exit 1
-#fi
+
+else
+  echo "OpenOCD 0.4.0 path does not exist: ${OPENOCD_PATH}/${OPENOCD_EXE}"
+
+  OPENOCD_PATH="/cygdrive/c/gccfd/openocd/bin"
+  OPENOCD_EXE=openocd-ftd2xx.exe
+
+  echo "Trying GCCFD OpenOCD 0.1.0 path: ${OPENOCD_PATH}/${OPENOCD_EXE}"
+
+  # Local search directory and configurations
+
+  OPENOCD_CFG="${TOPDIR}/configs/ea3152/tools/armusbocd.cfg"
+  OPENOCD_ARGS="-f `cygpath -w ${OPENOCD_CFG}`"
+
+  if [ ! -f ${OPENOCD_CFG} ]; then
+	echo "OpenOCD config file does not exist: ${OPENOCD_CFG}"
+	exit 1
+  fi
+
+  # Verify that everything is what it claims it is and is located where it claims it is.
+
+  if [ ! -d "${OPENOCD_PATH}" ]; then
+	echo "OpenOCD path does not exist: ${OPENOCD_PATH}"
+	exit 1
+  fi
+  if [ ! -x "${OPENOCD_PATH}/${OPENOCD_EXE}" ]; then
+	echo "OpenOCD does not exist: ${OPENOCD_PATH}/${OPENOCD_EXE}"
+	exit 1
+  fi
+  if [ ! -f ${OPENOCD_CFG} ]; then
+	echo "OpenOCD config file does not exist: ${OPENOCD_CFG}"
+	exit 1
+  fi
+fi
 ###############################################################################
 
 # Enable debug if so requested
