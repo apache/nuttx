@@ -191,7 +191,7 @@ Toolchains
      are used in Nuttx (e.g., include/arch).  The make system works around these
      problems for the Windows tools by copying directories instead of linking them.
      But this can also cause some confusion for you:  For example, you may edit
-     a file in a "linked" directory and find that your changes had not effect.
+     a file in a "linked" directory and find that your changes had no effect.
      That is because you are building the copy of the file in the "fake" symbolic
      directory.  If you use a Windows toolchain, you should get in the habit of
      making like this:
