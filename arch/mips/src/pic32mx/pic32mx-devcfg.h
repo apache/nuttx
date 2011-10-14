@@ -161,7 +161,7 @@
 #define DEVCFG1_FCKSM_MASK        (3 << DEVCFG1_FCKSM_SHIFT)
 #  define DEVCFG1_FCKSM_BOTH      (0 << DEVCFG1_FCKSM_SHIFT) /* Clock switching and FSCM are enabled */
 #  define DEVCFG1_FCKSM_CSONLY    (1 << DEVCFG1_FCKSM_SHIFT) /* Clock switching is enabled, FSCM is disabled */
-#  define DEVCFG1_FCKSM_NONE      (2 << DEVCFG1_FCKSM_SHIFT) /* Clock switching and FSCM are disabled */
+#  define DEVCFG1_FCKSM_NONE      (3 << DEVCFG1_FCKSM_SHIFT) /* Clock switching and FSCM are disabled */
 #define DEVCFG1_WDTPS_SHIFT       (16)      /* Bits 16-20: WDT postscaler select */
 #define DEVCFG1_WDTPS_MASK        (31 << DEVCFG1_WDTPS_SHIFT)
 #  define DEVCFG1_WDTPS_1         (0 << DEVCFG1_WDTPS_SHIFT)  /* 1:1 */
