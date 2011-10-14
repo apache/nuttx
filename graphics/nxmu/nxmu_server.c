@@ -2,7 +2,7 @@
  * graphics/nxmu/nxmu_server.c
  *
  *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -430,6 +430,13 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
            {
              FAR struct nxsvrmsg_lower_s *lowermsg = (FAR struct nxsvrmsg_lower_s *)buffer;
              nxbe_lower(lowermsg->wnd);
+           }
+           break;
+
+         case NX_SVRMSG_SETPIXEL: /* Set a single pixel in the window with a color */
+           {
+             FAR struct nxsvrmsg_setpixel_s *setmsg = (FAR struct nxsvrmsg_fill_s *)buffer;
+             nxbe_setpixel(fillmsg->wnd, &setmsg->pos, setmsg->color);
            }
            break;
 

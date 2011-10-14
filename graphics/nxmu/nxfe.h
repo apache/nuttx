@@ -2,7 +2,7 @@
  * graphics/nxmu/nxfe.h
  *
  *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -160,6 +160,7 @@ enum nxmsg_e
   NX_SVRMSG_GETPOSITION,      /* Get the current window position and size */
   NX_SVRMSG_RAISE,            /* Move the window to the top */
   NX_SVRMSG_LOWER,            /* Move the window to the bottom */
+  NX_SVRMSG_SETPIXEL,         /* Set a single pixel in the window with a color */
   NX_SVRMSG_FILL,             /* Fill a rectangle in the window with a color */
   NX_SVRMSG_FILLTRAP,         /* Fill a trapezoidal region in the window with a color */
   NX_SVRMSG_MOVE,             /* Move a rectangular region within the window */
@@ -332,6 +333,16 @@ struct nxsvrmsg_lower_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_LOWER */
   FAR struct nxbe_window_s *wnd;   /* The window to be lowered  */
+};
+
+/* Set a single pixel in the window with a color */
+
+struct nxsvrmsg_setpixel_s
+{
+  uint32_t  msgid;                 /* NX_SVRMSG_SETPIXEL */
+  FAR struct nxbe_window_s *wnd;   /* The window to fill  */
+  struct nxgl_point_s pos;         /* The position of the pixel in the window */
+  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the fill */
 };
 
 /* Fill a rectangle in the window with a color */

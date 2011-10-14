@@ -2,7 +2,7 @@
  * include/nuttx/nx/nx.h
  *
  *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -573,6 +573,26 @@ EXTERN int nx_raise(NXWINDOW hwnd);
  ****************************************************************************/
 
 EXTERN int nx_lower(NXWINDOW hwnd);
+
+/****************************************************************************
+ * Name: nx_setpixel
+ *
+ * Description:
+ *  Set a single pixel in the window to the specified color.  This is simply
+ *  a degenerate case of nx_fill(), but may be optimized in some architectures.
+ *
+ * Input Parameters:
+ *   wnd  - The window structure reference
+ *   pos  - The pixel location to be set
+ *   col  - The color to use in the set
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN int nx_setpixel(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
+                       nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nx_fill

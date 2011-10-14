@@ -2,7 +2,7 @@
  * graphics/nxbe/nxbe_configure.c
  *
  *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -129,6 +129,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 #ifndef CONFIG_NX_DISABLE_1BPP
       if (be->plane[i].pinfo.bpp == 1)
         {
+          be->plane[i].setpixel      = nxgl_setpixel_1bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_1bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_1bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_1bpp;
@@ -139,6 +140,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 #ifndef CONFIG_NX_DISABLE_2BPP
       if (be->plane[i].pinfo.bpp == 2)
         {
+          be->plane[i].setpixel      = nxgl_setpixel_2bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_2bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_2bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_2bpp;
@@ -149,6 +151,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 #ifndef CONFIG_NX_DISABLE_4BPP
       if (be->plane[i].pinfo.bpp == 4)
         {
+          be->plane[i].setpixel      = nxgl_setpixel_4bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_4bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_4bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_4bpp;
@@ -159,6 +162,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 #ifndef CONFIG_NX_DISABLE_8BPP
       if (be->plane[i].pinfo.bpp == 8)
         {
+          be->plane[i].setpixel      = nxgl_setpixel_8bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_8bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_8bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_8bpp;
@@ -169,6 +173,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 #ifndef CONFIG_NX_DISABLE_16BPP
       if (be->plane[i].pinfo.bpp == 16)
         {
+          be->plane[i].setpixel      = nxgl_setpixel_16bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_16bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_16bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_16bpp;
@@ -179,6 +184,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 #ifndef CONFIG_NX_DISABLE_24BPP
       if (be->plane[i].pinfo.bpp == 24)
         {
+          be->plane[i].setpixel      = nxgl_setpixel_24bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_24bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_24bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_24bpp;
@@ -189,6 +195,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
 #ifndef CONFIG_NX_DISABLE_32BPP
       if (be->plane[i].pinfo.bpp == 32)
         {
+          be->plane[i].setpixel      = nxgl_setpixel_32bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_32bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_32bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_32bpp;

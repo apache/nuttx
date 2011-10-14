@@ -1,8 +1,8 @@
 /****************************************************************************
  * graphics/nxbe/nxbe.h
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -84,6 +84,9 @@ struct nxbe_plane_s
 {
   /* Raster operation callbacks for this bits-per-pixel value */
 
+  void (*setpixel)(FAR NX_PLANEINFOTYPE *pinfo,
+                   FAR const struct nxgl_point_s *pos,
+                   nxgl_mxpixel_t color);
   void (*fillrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
                         FAR const struct nxgl_rect_s *rect,
                         nxgl_mxpixel_t color);
@@ -286,6 +289,27 @@ EXTERN void nxbe_raise(FAR struct nxbe_window_s *wnd);
  ****************************************************************************/
 
 EXTERN void nxbe_lower(FAR struct nxbe_window_s *wnd);
+
+/****************************************************************************
+ * Name: nxbe_setpixel
+ *
+ * Description:
+ *  Set a single pixel in the window to the specified color.  This is simply
+ *  a degenerate case of nxbe_fill(), but may be optimized in some architectures.
+ *
+ * Input Parameters:
+ *   wnd  - The window structure reference
+ *   pos  - The pixel location to be set
+ *   col  - The color to use in the set
+ *
+ * Return:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
+                          FAR const struct nxgl_point_s *pos,
+                          nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxbe_fill

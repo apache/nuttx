@@ -1,8 +1,8 @@
 ############################################################################
 # graphics/nxmu/Make.defs
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -38,8 +38,9 @@ NXAPI_CSRCS	= nx_bitmap.c nx_closewindow.c nx_connect.c nx_disconnect.c \
 		  nx_eventhandler.c nx_eventnotify.c nx_fill.c nx_filltrapezoid.c \
 		  nx_getposition.c nx_kbdchin.c nx_kbdin.c nx_lower.c \
 		  nx_mousein.c nx_move.c nx_openwindow.c nx_raise.c \
-		  nx_releasebkgd.c nx_requestbkgd.c nx_setsize.c nx_setbgcolor.c \
-		  nx_setposition.c nx_drawcircle.c nx_drawline.c nx_fillcircle.c
+		  nx_releasebkgd.c nx_requestbkgd.c nx_setpixel.c nx_setsize.c \
+		  nx_setbgcolor.c nx_setposition.c nx_drawcircle.c nx_drawline.c 
+		  nx_fillcircle.c
 NXMU_CSRCS	= nxmu_constructwindow.c nxmu_kbdin.c nxmu_mouse.c \
 		  nxmu_openwindow.c nxmu_redrawreq.c nxmu_releasebkgd.c \
 		  nxmu_requestbkgd.c nxmu_reportposition.c nxmu_semtake.c \

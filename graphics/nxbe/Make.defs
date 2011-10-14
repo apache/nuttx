@@ -35,7 +35,7 @@
 
 NXBE_ASRCS	=
 NXBE_CSRCS	= nxbe_configure.c nxbe_colormap.c nxbe_clipper.c \
-		  nxbe_closewindow.c \
+		  nxbe_closewindow.c nxbe_setpixel.c \
 		  nxbe_setposition.c nxbe_setsize.c nxbe_raise.c nxbe_lower.c \
 		  nxbe_fill.c nxbe_filltrapezoid.c nxbe_move.c nxbe_bitmap.c \
 		  nxbe_redraw.c nxbe_redrawbelow.c nxbe_visible.c
