@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-int nx_setsize(NXWINDOW hwnd, FAR struct nxgl_size_s *size)
+int nx_setsize(NXWINDOW hwnd, FAR const struct nxgl_size_s *size)
 {
 #ifdef CONFIG_DEBUG
   if (!hwnd || !size)

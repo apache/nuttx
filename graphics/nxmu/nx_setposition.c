@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-int nx_setposition(NXWINDOW hwnd, FAR struct nxgl_point_s *pos)
+int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos)
 {
   FAR struct nxbe_window_s       *wnd = (FAR struct nxbe_window_s *)hwnd;
   struct nxsvrmsg_setposition_s outmsg;

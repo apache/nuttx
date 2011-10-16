@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-int nxtk_setposition(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *pos)
+int nxtk_setposition(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *pos)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_point_s offset;

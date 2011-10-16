@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-int nxtk_setsize(NXTKWINDOW hfwnd, FAR struct nxgl_size_s *size)
+int nxtk_setsize(NXTKWINDOW hfwnd, FAR const struct nxgl_size_s *size)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_size_s newsize;

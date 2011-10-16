@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-int nx_setposition(NXWINDOW hwnd, FAR struct nxgl_point_s *pos)
+int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos)
 {
 #ifdef CONFIG_DEBUG
   if (!hwnd || !pos)

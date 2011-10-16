@@ -523,7 +523,7 @@ EXTERN int nx_getposition(NXWINDOW hwnd);
  *
  ****************************************************************************/
 
-EXTERN int nx_setposition(NXWINDOW hwnd, FAR struct nxgl_point_s *pos);
+EXTERN int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos);
 
 /****************************************************************************
  * Name: nx_setsize
@@ -540,7 +540,7 @@ EXTERN int nx_setposition(NXWINDOW hwnd, FAR struct nxgl_point_s *pos);
  *
  ****************************************************************************/
 
-EXTERN int nx_setsize(NXWINDOW hwnd, FAR struct nxgl_size_s *size);
+EXTERN int nx_setsize(NXWINDOW hwnd, FAR const struct nxgl_size_s *size);
 
 /****************************************************************************
  * Name: nx_raise

@@ -144,7 +144,7 @@ EXTERN int nxtk_getposition(NXTKWINDOW hfwnd);
  *
  ****************************************************************************/
 
-EXTERN int nxtk_setposition(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *pos);
+EXTERN int nxtk_setposition(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *pos);
 
 /****************************************************************************
  * Name: nxtk_setsize
@@ -163,7 +163,7 @@ EXTERN int nxtk_setposition(NXTKWINDOW hfwnd, FAR struct nxgl_point_s *pos);
  *
  ****************************************************************************/
 
-EXTERN int nxtk_setsize(NXTKWINDOW hfwnd, FAR struct nxgl_size_s *size);
+EXTERN int nxtk_setsize(NXTKWINDOW hfwnd, FAR const struct nxgl_size_s *size);
 
 /****************************************************************************
  * Name: nxtk_raise

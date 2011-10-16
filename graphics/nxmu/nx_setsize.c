@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_setsize`
+ * Name: nx_setsize
  *
  * Description:
  *  Set the size of the selected window
@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-int nx_setsize(NXWINDOW hwnd, FAR struct nxgl_size_s *size)
+int nx_setsize(NXWINDOW hwnd, FAR const struct nxgl_size_s *size)
 {
   FAR struct nxbe_window_s   *wnd = (FAR struct nxbe_window_s *)hwnd;
   struct nxsvrmsg_setsize_s outmsg;
