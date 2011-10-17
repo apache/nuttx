@@ -43,6 +43,7 @@
 #include <arch/pic32mx/cp0.h>
 
 #include "pic32mx-config.h"
+#include "pic32mx-bmx.h"
 #include "excptmacros.h"
 
 /****************************************************************************
@@ -333,13 +334,13 @@ __start:
 	 */
 
 	la		t1, _bmxdkpba_address
-	la		t2, BMXDKPBA
+	la		t2, PIC32MX_BMX_DKPBA
 	sw		t1, 0(t2)
 	la		t1, _bmxdudba_address
-	la		t2, BMXDUDBA
+	la		t2, PIC32MX_BMX_DUDBA
 	sw		t1, 0(t2)
 	la		t1, _bmxdupba_address
-	la		t2, BMXDUPBA
+	la		t2, PIC32MX_BMX_DUPBA
 	sw		t1, 0(t2)
 .Lnoramfuncs:
 #endif
