@@ -458,6 +458,29 @@ EXTERN void nxgl_rectintersect(FAR struct nxgl_rect_s *dest,
                                FAR const struct nxgl_rect_s *src2);
 
 /****************************************************************************
+ * Name: nxgl_intersecting
+ *
+ * Description:
+ *   Return true if the rectangles intersect.
+ *
+ ****************************************************************************/
+
+EXTERN bool nxgl_intersecting(FAR const struct nxgl_rect_s *rect1,
+                              FAR const struct nxgl_rect_s *rect2);
+
+/****************************************************************************
+ * Name: nxgl_rectadd
+ *
+ * Description:
+ *   Return the rectangle that contains exactly two other rectanges.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_rectadd(FAR struct nxgl_rect_s *dest,
+                         FAR const struct nxgl_rect_s *src1,
+                         FAR const struct nxgl_rect_s *src2);
+
+/****************************************************************************
  * Name: nxgl_rectunion
  *
  * Description:
