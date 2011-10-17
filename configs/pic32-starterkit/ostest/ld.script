@@ -190,7 +190,8 @@ SECTIONS
 	 * they can be guaranteed to satisfy the 2Kb alignment requirement.
 	 */
 
-	.ramfunc ALIGN(2K) :
+/* This causes failures if there are no RAM functions
+	.ramfunc /* ALIGN(2K) */ :
 	{
 		_sramfunc =  ABSOLUTE(.);
 		*(.ramfunc	.ramfunc.*)
@@ -198,10 +199,11 @@ SECTIONS
 	} > kseg1_datamem AT > kseg0_progmem
 
 	_ramfunc_loadaddr = LOADADDR(.ramfunc);
-	_ramfunc_sizeof = SIZEOF(.ramfunc);
+	_ramfunc_sizeof   = SIZEOF(.ramfunc);
 	_bmxdkpba_address = _sramfunc - ORIGIN(kseg1_datamem) ;
 	_bmxdudba_address = LENGTH(kseg1_datamem) ;
 	_bmxdupba_address = LENGTH(kseg1_datamem) ;
+*/
 
 	.dbg_data (NOLOAD) :
 	{
