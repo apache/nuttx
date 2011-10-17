@@ -189,7 +189,7 @@ SECTIONS
 	/* RAM functions are positioned at the beginning of RAM so that
 	 * they can be guaranteed to satisfy the 2Kb alignment requirement.
 	 */
-/*
+
 	.ramfunc ALIGN(2K) :
 	{
 		_sramfunc =  ABSOLUTE(.);
@@ -202,7 +202,7 @@ SECTIONS
 	_bmxdkpba_address = _sramfunc - ORIGIN(kseg1_datamem) ;
 	_bmxdudba_address = LENGTH(kseg1_datamem) ;
 	_bmxdupba_address = LENGTH(kseg1_datamem) ;
-*/
+
 	.dbg_data (NOLOAD) :
 	{
 		. += (DEFINED (_DEBUGGER) ? 0x200 : 0x0);

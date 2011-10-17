@@ -91,6 +91,11 @@ CONFIG_ARCH_CALIBRATION=n
 CONFIG_ARCH_DMA=n
 
 #
+# Enable support for RAM-based functions
+#
+CONFIG_PIC32MX_RAMFUNCS=y
+
+#
 # Identify toolchain and linker options
 #
 CONFIG_PIC32MX_MICROCHIPW=n
