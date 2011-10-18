@@ -434,7 +434,7 @@ _bev_handler:
 	move	a0, sp					/* Pass register save structure as the parameter 1 */
 	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
 	la		t0, pic32mx_dobev		/* Call up_dobev(regs) */
-	jalr	t0, ra
+	jalr	ra, t0
 	di								/* Disable interrupts */
 	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
 	EXCPT_EPILOGUE v0				/* Return to the context returned by up_dobev() */
@@ -456,7 +456,7 @@ _int_handler:
 	move	a0, sp					/* Pass register save structure as the parameter 1 */
 	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
 	la		t0, pic32mx_decodeirq	/* Call pic32mx_decodeirq(regs) */
-	jalr	t0, ra
+	jalr	ra, t0
 	di								/* Disable interrupts */
 	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
 	EXCPT_EPILOGUE v0				/* Return to the context returned by pic32mx_decodeirq() */
@@ -479,7 +479,7 @@ _nmi_handler:
 	move	a0, sp					/* Pass register save structure as the parameter 1 */
 	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
 	la		t0, pic32mx_donmi		/* Call up_donmi(regs) */
-	jalr	t0, ra
+	jalr	ra, t0
 	di								/* Disable interrupts */
 	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
 	EXCPT_EPILOGUE v0				/* Return to the context returned by pic32mx_donmi() */
@@ -505,13 +505,13 @@ __start_nuttx:
 	/* Perform low level initialization */
 
 	la		t0, pic32mx_lowinit
-	jalr	t0, ra
+	jalr    ra, t0
 	nop
 
 	/* Call os_start */
 
 	la		t0, os_start
-	jalr	t0, ra
+	jalr	ra, t0
 	nop
 
 	/* Just in case main returns, go into an infinite loop */

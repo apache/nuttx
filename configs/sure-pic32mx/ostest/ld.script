@@ -191,7 +191,7 @@ SECTIONS
 	 */
 
 /* This causes failures if there are no RAM functions
-	.ramfunc /* ALIGN(2K) */ :
+	.ramfunc :
 	{
 		_sramfunc = ABSOLUTE(.);
 		*(.ramfunc .ramfunc.*)

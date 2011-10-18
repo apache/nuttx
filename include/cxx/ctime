@@ -59,7 +59,6 @@ namespace std
   using ::sigevent;
   using ::clock_settime;
   using ::clock_gettime;
-  using ::lock_getres;
   using ::mktime;
   using ::gmtime_r;
   using ::timer_create;
