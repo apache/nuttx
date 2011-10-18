@@ -123,7 +123,7 @@ struct led_setting_s
  * Private Data
  ****************************************************************************/
 
-static const g_ledonvalues[LED_NVALUES] =
+static const struct led_setting_s g_ledonvalues[LED_NVALUES] =
 {
   {LED_OFF, LED_OFF, LED_OFF, LED_OFF},
   {LED_ON,  LED_OFF, LED_NC,  LED_NC},
@@ -133,7 +133,7 @@ static const g_ledonvalues[LED_NVALUES] =
   {LED_NC,  LED_NC,  LED_NC,  LED_ON},
 };
 
-static const g_ledoffvalues[LED_NVALUES] =
+static const struct led_setting_s g_ledoffvalues[LED_NVALUES] =
 {
   {LED_NC,  LED_NC,  LED_NC,  LED_NC},
   {LED_NC,  LED_NC,  LED_NC,  LED_NC},
@@ -151,7 +151,7 @@ static const g_ledoffvalues[LED_NVALUES] =
  * Name: up_setleds
  ****************************************************************************/
 
-void up_setleds(struct led_setting_s *setting)
+void up_setleds(FAR const struct led_setting_s *setting)
 {
   if (setting->usb != LED_NC)
     {
@@ -179,10 +179,10 @@ void up_setleds(struct led_setting_s *setting)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: pic32mx_ledinit
  ****************************************************************************/
 
-void up_ledinit(void)
+void pic32mx_ledinit(void)
 {
   /* Configure output pins */
 
