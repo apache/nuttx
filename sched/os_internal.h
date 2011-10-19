@@ -2,7 +2,7 @@
  * sched/os_internal.h
  *
  *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,7 +52,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* OS CRASH CODES */
+/* OS CRASH CODES:  All must lie in the range 0-99 */
 
 enum os_crash_codes_e
 {

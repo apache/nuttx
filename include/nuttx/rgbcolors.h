@@ -2,8 +2,8 @@
  * include/nuttx/rgbcolors.h
  * User-friendly RGB color definitions
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,8 +44,23 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Color Creation and Conversion Macros *************************************/
+/* This macro creates RGB24  from 8:8:8 RGB */
 
-/* Color conversions.  This macros converts RGB24 (8:8:8) to RGB16 (5:6:5):
+#define RGBTO24(r,g,b) \
+  ((uint32_t)((r) & 0xff) << 16 | (uint32_t)((g) & 0xff) << 8 | (uint32_t)((b) & 0xff))
+
+/* This macro creates RGB16 (5:6:5) from 8:8:8 RGB */
+
+#define RGBTO16(r,g,b) \
+  ((((uint16_t)(r) << 11) & 0xf800) | (((uint16_t)(r) << 5) & 0x07e0) | ((uint16_t)(r) & 0x001f))
+
+/* This macro creates RGB8 (3:3:2) from 8:8:8 RGB */
+
+#define RGBTO8(r,g,b) \
+  ((((uint8_t)(r) << 5) & 0xe0) | (((uint8_t)(r) << 2) & 0x1c) | ((uint8_t)(r) & 0x03))
+
+/* This macro converts RGB24 (8:8:8) to RGB16 (5:6:5):
  *
  *   00000000 RRRRRRRR BBBBBBBB GGGGGGGG -> RRRRRBBB BBBGGGGG
  */
@@ -53,7 +68,7 @@
 #define RGB24TO16(rgb24) \
   (((rgb24 >> 8) & 0xf800) | ((rgb24 >> 5) & 0x07e0) | ((rgb24 >> 3) & 0x001f))
 
-/* This macros converts RGB16 (5:6:5) to RGB24 (8:8:8):
+/* This macro converts RGB16 (5:6:5) to RGB24 (8:8:8):
  *
  *   RRRRRBBB BBBGGGGG -> 00000000 RRRRRRRR BBBBBBBB GGGGGGGG
  */
@@ -61,6 +76,7 @@
 #define RGB16TO24(rgb16) \
   (((rgb16 & 0xf800) << 8) | ((rgb16 & 0x07e0) << 5)  | ((rgb16 & 0x001f) << 3))
 
+/* Standard Color Definitions ***********************************************/
 /* RGB24-888: 00000000 RRRRRRRR GGGGGGGG BBBBBBBB */
 
 #define RGB24_BLACK          0x00000000

@@ -1,8 +1,8 @@
 //***************************************************************************
 // libxx/libxx_cxapurevirtual.cxx
 //
-//   Copyright (C) 2009 Gregory Nutt. All rights reserved.
-//   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+//   Copyright (C) 2009 2011 Gregory Nutt. All rights reserved.
+//   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
@@ -37,6 +37,8 @@
 // Included Files
 //***************************************************************************
 
+#include <cassert>
+
 //***************************************************************************
 // Definitions
 //***************************************************************************
@@ -53,12 +55,15 @@
 // Name:  __cxa_pure_virtual
 //
 // Description:
-//    Do nothing when a pure virtual function is called
+//    Crash when an un-implemented pure virtual function is called
 //
 //***************************************************************************
 
-int __cxa_pure_virtual(void)
+extern "C"
 {
-  return 0;
+  void __cxa_pure_virtual(void)
+  {
+    PANIC(100);
+  }
 }
 
