@@ -747,8 +747,8 @@ EXTERN int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  *
  * Input Parameters:
  *   hwnd   - The window that will receive the bitmap image
- *   dest   - Describes the rectangular on the display that will receive the
- *            the bit map.
+ *   dest   - Describes the rectangular region on the display that will
+ *            receive the bit map.
  *   src    - The start of the source image.  This is an array source
  *            images of size CONFIG_NX_NPLANES.
  *   origin - The origin of the upper, left-most corner of the full bitmap.

@@ -50,15 +50,33 @@
 #define RGBTO24(r,g,b) \
   ((uint32_t)((r) & 0xff) << 16 | (uint32_t)((g) & 0xff) << 8 | (uint32_t)((b) & 0xff))
 
+/* And these macros perform the inverse transformation */
+
+#define RBG24RED(rgb)   (((rgb) >> 16) & 0xff)
+#define RBG24GREEN(rgb) (((rgb) >> 8)  & 0xff)
+#define RBG24BLUE(rgb)  ( (rgb)        & 0xff)
+
 /* This macro creates RGB16 (5:6:5) from 8:8:8 RGB */
 
 #define RGBTO16(r,g,b) \
   ((((uint16_t)(r) << 11) & 0xf800) | (((uint16_t)(r) << 5) & 0x07e0) | ((uint16_t)(r) & 0x001f))
 
+/* And these macros perform the inverse transformation */
+
+#define RBG16RED(rgb)   (((rgb) >> 8) & 0xf8)
+#define RBG16GREEN(rgb) (((rgb) >> 3) & 0xfc)
+#define RBG16BLUE(rgb)  (((rgb) << 3) & 0xf8)
+
 /* This macro creates RGB8 (3:3:2) from 8:8:8 RGB */
 
 #define RGBTO8(r,g,b) \
   ((((uint8_t)(r) << 5) & 0xe0) | (((uint8_t)(r) << 2) & 0x1c) | ((uint8_t)(r) & 0x03))
+
+/* And these macros perform the inverse transformation */
+
+#define RBG8RED(rgb)    ( (rgb)       & 0xe0)
+#define RBG8GREEN(rgb)  (((rgb) << 3) & 0xe0)
+#define RBG8BLUE(rgb)   (((rgb) << 6) & 0xc0)
 
 /* This macro converts RGB24 (8:8:8) to RGB16 (5:6:5):
  *
