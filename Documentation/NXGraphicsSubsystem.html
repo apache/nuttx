@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: September 28, 2011</p>
+      <p>Last Updated: October 22, 2011</p>
     </td>
   </tr>
 </table>
@@ -115,15 +115,16 @@
         <i>2.3.18 <a href="#nxraise"><code>nx_raise()</code></a></i><br>
         <i>2.3.19 <a href="#nxlower"><code>nx_lower()</code></a></i><br>
         <i>2.3.20 <a href="#nxfill"><code>nx_fill()</code></a></i><br>
-        <i>2.3.21 <a href="#nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></i><br>
-        <i>2.3.22 <a href="#nxdrawline"><code>nx_drawline()</code></a></i><br>
-        <i>2.3.23 <a href="#nxdrawcircle"><code>nx_drawcircle()</code></a></i><br>
-        <i>2.3.24 <a href="#nxfillcircle"><code>nx_fillcircle()</code></a></i><br>
-        <i>2.3.25 <a href="#nxglrgb2yuv"><code>nx_setbgcolor()</code></a></i><br>
-        <i>2.3.26 <a href="#nxmove"><code>nx_move()</code></a></i><br>
-        <i>2.3.27 <a href="#nxbitmap"><code>nx_bitmap()</code></a></i><br>
-        <i>2.3.28 <a href="#nxkbdin"><code>nx_kbdin()</code></a></i><br>
-        <i>2.3.29 <a href="#nxmousein"><code>nx_mousein()</code></a></i><br>
+        <i>2.3.21 <a href="#nxgetrectangle"><code>nx_getrectangle()</code></a></i><br>
+        <i>2.3.22 <a href="#nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></i><br>
+        <i>2.3.23 <a href="#nxdrawline"><code>nx_drawline()</code></a></i><br>
+        <i>2.3.24 <a href="#nxdrawcircle"><code>nx_drawcircle()</code></a></i><br>
+        <i>2.3.25 <a href="#nxfillcircle"><code>nx_fillcircle()</code></a></i><br>
+        <i>2.3.26 <a href="#nxglrgb2yuv"><code>nx_setbgcolor()</code></a></i><br>
+        <i>2.3.27 <a href="#nxmove"><code>nx_move()</code></a></i><br>
+        <i>2.3.28 <a href="#nxbitmap"><code>nx_bitmap()</code></a></i><br>
+        <i>2.3.29 <a href="#nxkbdin"><code>nx_kbdin()</code></a></i><br>
+        <i>2.3.30 <a href="#nxmousein"><code>nx_mousein()</code></a></i><br>
      </ul>
    </p>
   </td>
@@ -142,21 +143,23 @@
         <i>2.4.7 <a href="#nxtkraise"><code>nxtk_raise()</code></a></i><br>
         <i>2.4.8 <a href="#nxtklower"><code>nxtk_lower()</code></a></i><br>
         <i>2.4.9 <a href="#nxtkfillwindow"><code>nxtk_fillwindow()</code></a></i><br>
-        <i>2.4.10 <a href="#nxtkfilltrapwindow"><code>nxtk_filltrapwindow()</code></a></i><br>
-        <i>2.4.11 <a href="#nxtkdrawlinewindow"><code>nxtk_drawlinewindow()</code></a></i><br>
-        <i>2.4.12 <a href="#nxtkdrawcirclewindow"><code>nxtk_drawcirclewindow()</code></a></i><br>
-        <i>2.4.13 <a href="#nxtkfillcirclewindow"><code>nxtk_fillcirclewindow()</code></a></i><br>
-        <i>2.4.14 <a href="#nxtkmovewindow"><code>nxtk_movewindow()</code></a></i><br>
-        <i>2.4.15 <a href="#nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></i><br>
-        <i>2.4.16 <a href="#nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></i><br>
-        <i>2.4.17 <a href="#nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></i><br>
-        <i>2.4.18 <a href="#nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></i><br>
-        <i>2.4.19 <a href="#nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></i><br>
-        <i>2.4.20 <a href="#nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></i><br>
-        <i>2.4.21 <a href="#nxtkdrawcircletoolbar"><code>nxtk_drawcircletoolbar()</code></a></i><br>
-        <i>2.4.22 <a href="#nxtkfillcircletoolbar"><code>nxtk_fillcircletoolbar()</code></a></i><br>
-        <i>2.4.23 <a href="#nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></i><br>
-        <i>2.4.24 <a href="#nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></i>
+        <i>2.4.10 <a href="#nxtkgetwindow"><code>nxtk_getwindow()</code></a></i><br>
+        <i>2.4.11 <a href="#nxtkfilltrapwindow"><code>nxtk_filltrapwindow()</code></a></i><br>
+        <i>2.4.12 <a href="#nxtkdrawlinewindow"><code>nxtk_drawlinewindow()</code></a></i><br>
+        <i>2.4.13 <a href="#nxtkdrawcirclewindow"><code>nxtk_drawcirclewindow()</code></a></i><br>
+        <i>2.4.14 <a href="#nxtkfillcirclewindow"><code>nxtk_fillcirclewindow()</code></a></i><br>
+        <i>2.4.15 <a href="#nxtkmovewindow"><code>nxtk_movewindow()</code></a></i><br>
+        <i>2.4.16 <a href="#nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></i><br>
+        <i>2.4.17 <a href="#nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></i><br>
+        <i>2.4.18 <a href="#nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></i><br>
+        <i>2.4.19 <a href="#nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></i><br>
+        <i>2.4.20 <a href="#nxtkgettoolbar"><code>nxtk_gettoolbar()</code></a></i><br>
+        <i>2.4.21 <a href="#nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></i><br>
+        <i>2.4.22 <a href="#nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></i><br>
+        <i>2.4.23 <a href="#nxtkdrawcircletoolbar"><code>nxtk_drawcircletoolbar()</code></a></i><br>
+        <i>2.4.24 <a href="#nxtkfillcircletoolbar"><code>nxtk_fillcircletoolbar()</code></a></i><br>
+        <i>2.4.25 <a href="#nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></i><br>
+        <i>2.4.26 <a href="#nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></i>
      </ul>
    </p>
    <p>
@@ -1674,7 +1677,47 @@ int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.21 <a name="nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></h3>
+<h3>2.3.21 <a name="nxgetrectangle"><code>nx_getrectangle()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+
+void nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                     unsigned int plane, FAR uint8_t *dest,
+                     unsigned int deststride);
+</pre></ul>
+<p>
+  <b>Description:</b>
+   Get the raw contents of graphic memory within a rectangular region. NOTE:
+   Since raw graphic memory is returned, the returned memory content may be
+   the memory of windows above this one and may not necessarily belong to
+   this window unless you assure that this is the top window.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul><dl>
+    <dt><code>hwnd</code>
+    <dd>The handle returned by <a href="#nxopenwindow"><code>nx_openwindow()</code></a>
+      or <a href="#nxrequestbkgd"><code>nx_requestbkgd()</code></a>
+    <dt><code>rect</code>
+    <dd>The location to be copied
+
+    <dt><code>plane</code>
+    <dd>Specifies the color plane to get from
+    <dt><code>dest</code>
+    <dd>The location to copy the memory region
+    <dt><code>deststride</code>
+    <dd>The width, in bytes, the the dest memory
+  </dl></ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.3.22 <a name="nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1708,7 +1751,7 @@ int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.22 <a name="nxdrawline"><code>nx_drawline()</code></a></h3>
+<h3>2.3.23 <a name="nxdrawline"><code>nx_drawline()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1744,7 +1787,7 @@ int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.23 <a name="nxdrawcircle"><code>nx_drawcircle()</code></a></h3>
+<h3>2.3.24 <a name="nxdrawcircle"><code>nx_drawcircle()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1780,7 +1823,7 @@ int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.24 <a name="nxfillcircle"><code>nx_fillcircle()</code></a></h3>
+<h3>2.3.25 <a name="nxfillcircle"><code>nx_fillcircle()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1813,7 +1856,7 @@ int nx_fillcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.25 <a name="nxglrgb2yuv"><code>nx_setbgcolor()</code></a></h3>
+<h3>2.3.26 <a name="nxglrgb2yuv"><code>nx_setbgcolor()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1841,7 +1884,7 @@ int nx_setbgcolor(NXHANDLE handle,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.26 <a name="nxmove"><code>nx_move()</code></a></h3>
+<h3>2.3.27 <a name="nxmove"><code>nx_move()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1872,7 +1915,7 @@ int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.27 <a name="nxbitmap"><code>nx_bitmap()</code></a></h3>
+<h3>2.3.28 <a name="nxbitmap"><code>nx_bitmap()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1914,7 +1957,7 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.28 <a name="nxkbdin"><code>nx_kbdin()</code></a></h3>
+<h3>2.3.29 <a name="nxkbdin"><code>nx_kbdin()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -1937,7 +1980,7 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.3.29 <a name="nxmousein"><code>nx_mousein()</code></a></h3>
+<h3>2.3.30 <a name="nxmousein"><code>nx_mousein()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2260,7 +2303,47 @@ int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.10 <a name="nxtkfilltrapwindow"><code>nxtk_filltrapwindow()</code></a></h3>
+<h3>2.4.10 <a name="nxtkgetwindow"><code>nxtk_getwindow()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
+
+void nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                    unsigned int plane, FAR uint8_t *dest,
+                    unsigned int deststride);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Get the raw contents of graphic memory within a rectangular region. NOTE:
+  Since raw graphic memory is returned, the returned memory content may be
+  the memory of windows above this one and may not necessarily belong to
+  this window unless you assure that this is the top window.</p>
+<p>
+  <b>Input Parameters:</b>
+  <dl>
+    <dt><code>hfwnd</code>
+    <dd>A handle previously returned by
+      <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a>.
+    <dt><code>rect</code>
+    <dd>The location within the client window to be retrieved.
+
+    <dt><code>plane</code>
+    <dd>Specifies the color plane to get from.
+    <dt><code>dest</code>
+    <dd>The location to copy the memory region
+    <dt><code>deststride</code>
+    <dd>The width, in bytes, the the dest memory
+  </dl>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.4.11 <a name="nxtkfilltrapwindow"><code>nxtk_filltrapwindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2293,7 +2376,7 @@ int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.11 <a name="nxtkdrawlinewindow"><code>nxtk_drawlinewindow()</code></a></h3>
+<h3>2.4.12 <a name="nxtkdrawlinewindow"><code>nxtk_drawlinewindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2330,7 +2413,7 @@ int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.12 <a name="nxtkdrawcirclewindow"><code>nxtk_drawcirclewindow()</code></a></h3>
+<h3>2.4.13 <a name="nxtkdrawcirclewindow"><code>nxtk_drawcirclewindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2366,7 +2449,7 @@ int nxtk_drawcirclewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *cente
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.13 <a name="nxtkfillcirclewindow"><code>nxtk_fillcirclewindow()</code></a></h3>
+<h3>2.4.14 <a name="nxtkfillcirclewindow"><code>nxtk_fillcirclewindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2399,7 +2482,7 @@ int nxtk_fillcirclewindow(NXWINDOW hfwnd, FAR const struct nxgl_point_s *center,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.14 <a name="nxtkmovewindow"><code>nxtk_movewindow()</code></a></h3>
+<h3>2.4.15 <a name="nxtkmovewindow"><code>nxtk_movewindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2432,7 +2515,7 @@ int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.15 <a name="nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></h3>
+<h3>2.4.16 <a name="nxtkbitmapwindow"><code>nxtk_bitmapwindow()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2477,7 +2560,7 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.16 <a name="nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></h3>
+<h3>2.4.17 <a name="nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2512,7 +2595,7 @@ int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.17 <a name="nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></h3>
+<h3>2.4.18 <a name="nxtkclosetoolbar"><code>nxtk_closetoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2541,7 +2624,7 @@ int nxtk_closetoolbar(NXTKWINDOW hfwnd);
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.18 <a name="nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></h3>
+<h3>2.4.19 <a name="nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2573,7 +2656,48 @@ int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.19 <a name="nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></h3>
+<h3>2.4.19 <a name="nxtkgettoolbar"><code>nxtk_gettoolbar()</code></a></h3>
+<p><b>Function Prototype:</b></p>
+<ul><pre>
+#include &lt;nuttx/nx/nxglib.h&gt;
+#include &lt;nuttx/nx/nx.h&gt;
+#include &lt;nuttx/nx/nxtk.h&gt;
+
+int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                    unsigned int plane, FAR uint8_t *dest,
+                    unsigned int deststride);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  Get the raw contents of graphic memory within a rectangular region. NOTE:
+  Since raw graphic memory is returned, the returned memory content may be
+  the memory of windows above this one and may not necessarily belong to
+  this window unless you assure that this is the top window.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <dl>
+    <dt><code>hfwnd</code>
+    <dd>A handle previously returned by
+      <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a>.
+    <dt><code>rect</code>
+    <dd>The location within the toolbar window to be retrieved.
+
+    <dt><code>plane</code>
+    <dd>TSpecifies the color plane to get from.
+    <dt><code>dest</code>
+    <dd>TThe location to copy the memory region.
+    <dt><code>deststride</code>
+    <dd>The width, in bytes, the the dest memory.
+  </dl>
+</p>
+<p>
+  <b>Returned Value:</b>
+  <code>OK</code> on success;
+  <code>ERROR</code> on failure with <code>errno</code> set appropriately
+</p>
+
+<h3>2.4.21 <a name="nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2605,7 +2729,7 @@ int nxtk_filltraptoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_trapezoid_s *tr
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.20 <a name="nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></h3>
+<h3>2.4.22 <a name="nxtkdrawlinetoolbar"><code>nxtk_drawlinetoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2642,7 +2766,7 @@ int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.21 <a name="nxtkdrawcircletoolbar"><code>nxtk_drawcircletoolbar()</code></a></h3>
+<h3>2.4.23 <a name="nxtkdrawcircletoolbar"><code>nxtk_drawcircletoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2678,7 +2802,7 @@ int nxtk_drawcircletoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_point_s *cent
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.22 <a name="nxtkfillcircletoolbar"><code>nxtk_fillcircletoolbar()</code></a></h3>
+<h3>2.4.24 <a name="nxtkfillcircletoolbar"><code>nxtk_fillcircletoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2711,7 +2835,7 @@ int nxtk_fillcircletoolbar(NXWINDOW hfwnd, FAR const struct nxgl_point_s *center
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.23 <a name="nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></h3>
+<h3>2.4.25 <a name="nxtkmovetoolbar"><code>nxtk_movetoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -2745,7 +2869,7 @@ int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   <code>ERROR</code> on failure with <code>errno</code> set appropriately
 </p>
 
-<h3>2.4.24 <a name="nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></h3>
+<h3>2.4.26 <a name="nxtkbitmaptoolbar"><code>nxtk_bitmaptoolbar()</code></a></h3>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
 #include &lt;nuttx/nx/nxglib.h&gt;
@@ -3765,6 +3889,11 @@ sudo ln -s libXext.so.6.4.0 libXext.so
   <td align="center" bgcolor="skyblue">YES</td>
 </tr>
 <tr>
+  <td align="left" valign="top"><a href="#nxgetrectangle"><code>nx_getrectangle()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
   <td align="left" valign="top"><a href="#nxfilltrapezoid"><code>nx_filltrapezoid()</code></a></td>
   <td>
     Verified by <code>apps/examples/nxlines</code>.
@@ -3870,6 +3999,11 @@ sudo ln -s libXext.so.6.4.0 libXext.so
   <td align="center" bgcolor="skyblue">YES</td>
 </tr>
 <tr>
+  <td align="left" valign="top"><a href="#nxtkgetwindow"><code>nxtk_getwindow()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
+</tr>
+<tr>
   <td align="left" valign="top"><a href="#nxtkfilltrapwindow"><code>nxtk_filltrapwindow()</code></a></td>
   <td><br></td>
   <td align="center" bgcolor="lightgrey">NO</td>
@@ -3913,6 +4047,11 @@ sudo ln -s libXext.so.6.4.0 libXext.so
   <td align="left" valign="top"><a href="#nxtkfilltoolbar"><code>nxtk_filltoolbar()</code></a></td>
   <td><br></td>
   <td align="center" bgcolor="skyblue">YES</td>
+</tr>
+<tr>
+  <td align="left" valign="top"><a href="#nxtkgettoolbar"><code>nxtk_gettoolbar()</code></a></td>
+  <td><br></td>
+  <td align="center" bgcolor="lightgrey">NO</td>
 </tr>
 <tr>
   <td align="left" valign="top"><a href="#nxtkfilltraptoolbar"><code>nxtk_filltraptoolbar()</code></a></td>
