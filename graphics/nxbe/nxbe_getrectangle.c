@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/fb/nxglib_setpixel.c
+ * graphics/nxbe/nxbe_fill.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,24 +39,23 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-
-#include <nuttx/fb.h>
 #include <nuttx/nx/nxglib.h>
 
-#include "nxglib_bitblit.h"
+#include "nxbe.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#ifndef NXGLIB_SUFFIX
-#  error "NXGLIB_SUFFIX must be defined before including this header file"
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct nxbe_fill_s
+{
+  struct nxbe_clipops_s cops;
+  nxgl_mxpixel_t color;
+};
 
 /****************************************************************************
  * Private Data
@@ -71,86 +70,80 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxbe_clipfill
+ *
+ * Description:
+ *  Called from nxbe_clipper() to performed the fill operation on visible portions
+ *  of the rectangle.
+ *
+ ****************************************************************************/
+
+static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
+                        FAR struct nxbe_plane_s *plane,
+                        FAR const struct nxgl_rect_s *rect)
+{
+  struct nxbe_fill_s *fillinfo = (struct nxbe_fill_s *)cops;
+  plane->fillrectangle(&plane->pinfo, rect, fillinfo->color);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_setpixel_*bpp
+ * Name: nxbe_getrectangle
  *
- * Descripton:
- *   Draw a single pixel in frambuffer memory at the given position and with
- *   the given color.   This is equivalent to nxgl_fillrectangle_*bpp() with
- *   a 1x1 rectangle but is more efficient.
+ * Description:
+ *  Get the raw contents of graphic memory within a rectangular region. NOTE:
+ *  Since raw graphic memory is returned, the returned memory content may be
+ *  the memory of windows above this one and may not necessarily belong to
+ *  this window unless you assure that this is the top window.
+ *
+ * Input Parameters:
+ *   wnd  - The window structure reference
+ *   rect - The location to be copied
+ *   plane - Specifies the color plane to get from.
+ *   dest - The location to copy the memory region
+ *   deststride - The width, in bytes, the the dest memory
+ *
+ * Return:
+ *   None
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_setpixel,NXGLIB_SUFFIX)
-  (FAR struct fb_planeinfo_s *pinfo,
-   FAR const struct nxgl_point_s *pos,
-   NXGL_PIXEL_T color)
+void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
+                       FAR const struct nxgl_rect_s *rect, unsigned int plane,
+                       FAR uint8_t *dest, unsigned int deststride)
 {
-  FAR uint8_t *dest;
+  struct nxgl_rect_s remaining;
+  int i;
 
-#if NXGLIB_BITSPERPIXEL < 8
-  uint8_t shift;
-  uint8_t mask;
-#else
-  FAR NXGL_PIXEL_T *pixel;
+#ifdef CONFIG_DEBUG
+  if (!wnd || !rect || ! rect || plane >= wnd->be->vinfo.nplanes)
+    {
+      return;
+    }
 #endif
 
-  /* Get the address of the first byte of the pixel to write */
+  /* Offset the rectangle by the window origin to convert it into a
+   * bounding box
+   */
 
-  dest = pinfo->fbmem + pos->y * pinfo->stride + NXGL_SCALEX(pos->x);
+  nxgl_rectoffset(&remaining, rect, wnd->bounds.pt1.x, wnd->bounds.pt1.y);
 
-#if NXGLIB_BITSPERPIXEL < 8
+  /* Clip to the bounding box to the limits of the window and of the
+   * background screen
+   */
 
-  /* Shift the color into the proper position */
+  nxgl_rectintersect(&remaining, &remaining, &wnd->bounds);
+  nxgl_rectintersect(&remaining, &remaining, &wnd->be->bkgd.bounds);
 
-# ifdef CONFIG_NX_PACKEDMSFIRST
+  /* The return the graphics memory at this location.  NOTE: Since raw
+   * graphic memory is returned, the returned memory content may be
+   * the memory of windows above this one and may not necessarily belong
+   * to this window.
+   */
 
-#if NXGLIB_BITSPERPIXEL == 1
-  shift   = (7 - (pos->x & 7));              /* Shift is 0, 1, ... 7 */
-  mask    = (1 << shift);                    /* Mask is 0x01, 0x02, .. 0x80 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 2
-  shift   = (6 - ((pos->x & 3) << 1));       /* Shift is 0, 2, 4, or 6 */
-  mask    = (3 << shift);                    /* Mask is 0x03, 0x0c, 0x30, or 0xc0 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 4
-  shift   = (4 - ((pos->x & 1) << 2));       /* Shift is 0 or 4 */
-  mask    = (15 << shift);                   /* Mask is 0x0f or 0xf0 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#else
-#  error "Unsupport pixel depth"
-#endif
-
-# else /* CONFIG_NX_PACKEDMSFIRST */
-
-#if NXGLIB_BITSPERPIXEL == 1
-  shift   = (pos->x & 7);                    /* Shift is 0, 1, ... 7 */
-  mask    = (1 << shift);                    /* Mask is 0x01, 0x02, .. 0x80 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 2
-  shift   = (pos->x & 3) << 1;               /* Shift is 0, 2, 4, or 6 */
-  mask    = (3 << shift);                    /* Mask is 0x03, 0x0c, 0x30, or 0xc0 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 4
-  shift   = (pos->x & 1) << 2;               /* Shift is 0 or 4 */
-  mask    = (15 << shift);                   /* Mask is 0x0f or 0xf0 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#else
-#  error "Unsupport pixel depth"
-#endif
-#endif /* CONFIG_NX_PACKEDMSFIRST */
-
-  /* Handle masking of the fractional byte */
-
-  *dest = (*dest & ~mask) | (color & mask);
-#else
-
-  /* Write the pixel (proper alignment assumed) */
-
-   pixel = (FAR NXGL_PIXEL_T *)dest;
-  *pixel = color;
-#endif
+  FAR struct nxbe_plane_s *pplane = &wnd->be->plane[i];
+  pplane->getrectangle(&pplane->pinfo, rect, dest, deststride);
 }

@@ -447,6 +447,13 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
            }
            break;
 
+         case NX_SVRMSG_GETRECTANGLE: /* Get a rectangular region from the window */
+           {
+             FAR struct nxsvrmsg_getrectangle_s *getmsg = (FAR struct nxsvrmsg_getrectangle_s *)buffer;
+             nxbe_getrectangle(getmsg->wnd, &getmsg->rect, getmsg->plane, getmsg->dest, getmsg->deststride);
+           }
+           break;
+
          case NX_SVRMSG_FILLTRAP: /* Fill a trapezoidal region in the window with a color */
            {
              FAR struct nxsvrmsg_filltrapezoid_s *trapmsg = (FAR struct nxsvrmsg_filltrapezoid_s *)buffer;

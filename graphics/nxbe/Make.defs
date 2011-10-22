@@ -1,8 +1,8 @@
 ############################################################################
 # graphics/nxbe/Make.defs
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -34,8 +34,8 @@
 ############################################################################
 
 NXBE_ASRCS	=
-NXBE_CSRCS	= nxbe_configure.c nxbe_colormap.c nxbe_clipper.c \
-		  nxbe_closewindow.c nxbe_setpixel.c \
-		  nxbe_setposition.c nxbe_setsize.c nxbe_raise.c nxbe_lower.c \
-		  nxbe_fill.c nxbe_filltrapezoid.c nxbe_move.c nxbe_bitmap.c \
-		  nxbe_redraw.c nxbe_redrawbelow.c nxbe_visible.c
+NXBE_CSRCS	= nxbe_bitmap.c nxbe_configure.c nxbe_colormap.c nxbe_clipper.c \
+		  nxbe_closewindow.c  nxbe_fill.c nxbe_filltrapezoid.c \
+		  nxbe_getrectangle.c nxbe_lower.c nxbe_move.c nxbe_raise.c \
+		  nxbe_redraw.c nxbe_redrawbelow.c nxbe_setpixel.c nxbe_setposition.c \
+		  nxbe_setsize.c nxbe_visible.c

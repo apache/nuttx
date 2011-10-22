@@ -2,7 +2,7 @@
  * include/nuttx/nx/nxtk.h
  *
  *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -221,6 +221,31 @@ EXTERN int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                            nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
+ * Name: nxtk_getwindow
+ *
+ * Description:
+ *  Get the raw contents of graphic memory within a rectangular region. NOTE:
+ *  Since raw graphic memory is returned, the returned memory content may be
+ *  the memory of windows above this one and may not necessarily belong to
+ *  this window unless you assure that this is the top window.
+ *
+ * Input Parameters:
+ *   wnd  - The window structure reference
+ *   rect - The location to be copied
+ *   plane - Specifies the color plane to get from.
+ *   dest - The location to copy the memory region
+ *   deststride - The width, in bytes, the the dest memory
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN void nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                           unsigned int plane, FAR uint8_t *dest,
+                           unsigned int deststride);
+
+/****************************************************************************
  * Name: nxtk_filltrapwindow
  *
  * Description:
@@ -415,6 +440,31 @@ EXTERN int nxtk_closetoolbar(NXTKWINDOW hfwnd);
 
 EXTERN int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                             nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
+ * Name: nxtk_gettoolbar
+ *
+ * Description:
+ *  Get the raw contents of graphic memory within a rectangular region. NOTE:
+ *  Since raw graphic memory is returned, the returned memory content may be
+ *  the memory of windows above this one and may not necessarily belong to
+ *  this window unless you assure that this is the top window.
+ *
+ * Input Parameters:
+ *   wnd  - The window structure reference
+ *   rect - The location to be copied
+ *   plane - Specifies the color plane to get from.
+ *   dest - The location to copy the memory region
+ *   deststride - The width, in bytes, the the dest memory
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN void nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                            unsigned int plane, FAR uint8_t *dest,
+                            unsigned int deststride);
 
 /****************************************************************************
  * Name: nxtk_filltraptoolbar

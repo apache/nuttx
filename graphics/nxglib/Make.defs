@@ -1,8 +1,8 @@
 ############################################################################
 # graphics/nxglib/Make.defs
 #
-#   Copyright (C) 2008, 2010 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Copyright (C) 2008, 2010-2011 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -47,6 +47,12 @@ RFILL1_CSRCS	= nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c \
 RFILL2_CSRCS	= nxglib_fillrectangle_8bpp.c nxglib_fillrectangle_16bpp.c \
 		  nxglib_fillrectangle_24bpp.c nxglib_fillrectangle_32bpp.c
 
+RGET1_CSRCS	= nxglib_getrectangle_1bpp.c nxglib_getrectangle_2bpp.c \
+		  nxglib_getrectangle_4bpp.c
+
+RGET2_CSRCS	= nxglib_getrectangle_8bpp.c nxglib_getrectangle_16bpp.c \
+		  nxglib_getrectangle_24bpp.c nxglib_getrectangle_32bpp.c
+
 TFILL1_CSRCS	= nxglib_filltrapezoid_1bpp.c nxglib_filltrapezoid_2bpp.c \
 		  nxglib_filltrapezoid_4bpp.c
 
@@ -81,7 +87,7 @@ LCD_CSRCS	=
 
 NXGLIB_CSRCS	= \
 		  $(SETP1_CSRCS) $(SETP2_CSRCS) $(RFILL1_CSRCS) $(RFILL2_CSRCS) \
-		  $(TFILL1_CSRCS) $(TFILL2_CSRCS) $(RMOVE1_CSRCS) $(RMOVE2_CSRCS) \
-		  $(RCOPY1_CSRCS) $(RCOPY2_CSRCS) $(RECT_CSRCS) $(TRAP_CSRCS) \
-		  $(COLOR_CSRCS) $(DRAW_CSRCS) $(LCD_CSRCS)
+		  $(RGET1_CSRCS) $(RGET2_CSRCS) $(TFILL1_CSRCS) $(TFILL2_CSRCS) \
+		  $(RMOVE1_CSRCS) $(RMOVE2_CSRCS) $(RCOPY1_CSRCS) $(RCOPY2_CSRCS) \
+		  $(RECT_CSRCS) $(TRAP_CSRCS) $(COLOR_CSRCS) $(DRAW_CSRCS) $(LCD_CSRCS)
 

@@ -222,7 +222,7 @@ EXTERN void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v,
  * Name: nxgl_setpixel_*bpp
  *
  * Descripton:
- *   Draw a single pixel in graphics memory memory at the given position and
+ *   Draw a single pixel in graphics memory at the given position and
  *   with the given color.  This is equivalent to nxgl_fillrectangle_*bpp()
  *   with a 1x1 rectangle but is more efficient.
  *
@@ -281,10 +281,41 @@ EXTERN void nxgl_fillrectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                      uint32_t color);
 
 /****************************************************************************
+ * Name: nxgl_getrectangle_*bpp
+ *
+ * Descripton:
+ *   Fetch a rectangular region from graphics memory.  The source is
+ *   expressed as a rectangle.
+ *
+ ****************************************************************************/
+
+EXTERN void nxgl_getrectangle_1bpp(FAR struct fb_planeinfo_s *pinfo,
+                                   FAR const struct nxgl_rect_s *rect,
+                                   FAR void *dest, unsigned int deststride);
+EXTERN void nxgl_getrectangle_2bpp(FAR struct fb_planeinfo_s *pinfo,
+                                   FAR const struct nxgl_rect_s *rect,
+                                   FAR void *dest, unsigned int deststride);
+EXTERN void nxgl_getrectangle_4bpp(FAR struct fb_planeinfo_s *pinfo,
+                                   FAR const struct nxgl_rect_s *rect,
+                                   FAR void *dest, unsigned int deststride);
+EXTERN void nxgl_getrectangle_8bpp(FAR struct fb_planeinfo_s *pinfo,
+                                   FAR const struct nxgl_rect_s *rect,
+                                   FAR void *dest, unsigned int deststride);
+EXTERN void nxgl_getrectangle_16bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_rect_s *rect,
+                                    FAR void *dest, unsigned int deststride);
+EXTERN void nxgl_getrectangle_24bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_rect_s *rect,
+                                    FAR void *dest, unsigned int deststride);
+EXTERN void nxgl_getrectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
+                                    FAR const struct nxgl_rect_s *rect,
+                                    FAR void *dest, unsigned int deststride);
+
+/****************************************************************************
  * Name: nxglib_filltrapezoid_*bpp
  *
  * Descripton:
- *   Fill a trapezoidal region in the framebuffer memory with a fixed color.
+ *   Fill a trapezoidal region in the graphics memory with a fixed color.
  *   Clip the trapezoid to lie within a boundng box.  This is useful for
  *   drawing complex shapes that can be broken into a set of trapezoids.
  *
@@ -357,7 +388,7 @@ EXTERN void nxgl_moverectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
  *
  * Descripton:
  *   Copy a rectangular bitmap image into the specific position in the
- *   framebuffer memory.
+ *   graphics memory.
  *
  ****************************************************************************/
 

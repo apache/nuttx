@@ -1,8 +1,8 @@
 ############################################################################
 # graphics/nxglib/Makefile.sources
 #
-#   Copyright (C) 2008, 2010 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Copyright (C) 2008, 2010-2011 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -40,6 +40,7 @@ ifeq ($(NXGLIB_BITSPERPIXEL),1)
 NXGLIB_SUFFIX	:= _1bpp
 SETP_CSRC	:= nxglib_setpixel_1bpp.c
 RFILL_CSRC	:= nxglib_fillrectangle_1bpp.c
+RGET_CSRC	:= nxglib_getrectangle_1bpp.c
 TFILL_CSRC	:= nxglib_filltrapezoid_1bpp.c
 RMOVE_CSRC	:= nxglib_moverectangle_1bpp.c
 RCOPY_CSRC	:= nxglib_copyrectangle_1bpp.c
@@ -48,6 +49,7 @@ ifeq ($(NXGLIB_BITSPERPIXEL),2)
 NXGLIB_SUFFIX	:= _2bpp
 SETP_CSRC	:= nxglib_setpixel_2bpp.c
 RFILL_CSRC	:= nxglib_fillrectangle_2bpp.c
+RGET_CSRC	:= nxglib_getrectangle_2bpp.c
 TFILL_CSRC	:= nxglib_filltrapezoid_2bpp.c
 RMOVE_CSRC	:= nxglib_moverectangle_2bpp.c
 RCOPY_CSRC	:= nxglib_copyrectangle_2bpp.c
@@ -56,6 +58,7 @@ ifeq ($(NXGLIB_BITSPERPIXEL),4)
 NXGLIB_SUFFIX	:= _4bpp
 SETP_CSRC	:= nxglib_setpixel_4bpp.c
 RFILL_CSRC	:= nxglib_fillrectangle_4bpp.c
+RGET_CSRC	:= nxglib_getrectangle_4bpp.c
 TFILL_CSRC	:= nxglib_filltrapezoid_4bpp.c
 RMOVE_CSRC	:= nxglib_moverectangle_4bpp.c
 RCOPY_CSRC	:= nxglib_copyrectangle_4bpp.c
@@ -64,6 +67,7 @@ ifeq ($(NXGLIB_BITSPERPIXEL),8)
 NXGLIB_SUFFIX	:= _8bpp
 SETP_CSRC	:= nxglib_setpixel_8bpp.c
 RFILL_CSRC	:= nxglib_fillrectangle_8bpp.c
+RGET_CSRC	:= nxglib_getrectangle_8bpp.c
 TFILL_CSRC	:= nxglib_filltrapezoid_8bpp.c
 RMOVE_CSRC	:= nxglib_moverectangle_8bpp.c
 RCOPY_CSRC	:= nxglib_copyrectangle_8bpp.c
@@ -72,6 +76,7 @@ ifeq ($(NXGLIB_BITSPERPIXEL),16)
 NXGLIB_SUFFIX	:= _16bpp
 SETP_CSRC	:= nxglib_setpixel_16bpp.c
 RFILL_CSRC	:= nxglib_fillrectangle_16bpp.c
+RGET_CSRC	:= nxglib_getrectangle_16bpp.c
 TFILL_CSRC	:= nxglib_filltrapezoid_16bpp.c
 RMOVE_CSRC	:= nxglib_moverectangle_16bpp.c
 RCOPY_CSRC	:= nxglib_copyrectangle_16bpp.c
@@ -80,6 +85,7 @@ ifeq ($(NXGLIB_BITSPERPIXEL),24)
 NXGLIB_SUFFIX	:= _24bpp
 SETP_CSRC	:= nxglib_setpixel_24bpp.c
 RFILL_CSRC	:= nxglib_fillrectangle_24bpp.c
+RGET_CSRC	:= nxglib_getrectangle_24bpp.c
 TFILL_CSRC	:= nxglib_filltrapezoid_24bpp.c
 RMOVE_CSRC	:= nxglib_moverectangle_24bpp.c
 RCOPY_CSRC	:= nxglib_copyrectangle_24bpp.c
@@ -88,6 +94,7 @@ ifeq ($(NXGLIB_BITSPERPIXEL),32)
 NXGLIB_SUFFIX	:= _32bpp
 SETP_CSRC	:= nxglib_setpixel_32bpp.c
 RFILL_CSRC	:= nxglib_fillrectangle_32bpp.c
+RGET_CSRC	:= nxglib_getrectangle_32bpp.c
 TFILL_CSRC	:= nxglib_filltrapezoid_32bpp.c
 RMOVE_CSRC	:= nxglib_moverectangle_32bpp.c
 RCOPY_CSRC	:= nxglib_copyrectangle_32bpp.c
@@ -98,11 +105,12 @@ CPPFLAGS	+= -DNXGLIB_SUFFIX=$(NXGLIB_SUFFIX)
 
 SETP_TMP	= $(SETP_CSRC:.c=.i)
 RFILL_TMP	= $(RFILL_CSRC:.c=.i)
+RGET_TMP	= $(RGET_CSRC:.c=.i)
 TFILL_TMP	= $(TFILL_CSRC:.c=.i)
 RMOVE_TMP	= $(RMOVE_CSRC:.c=.i)
 RCOPY_TMP	= $(RCOPY_CSRC:.c=.i)
 
-GEN_CSRCS	= $(SETP_CSRC) $(RFILL_CSRC) $(TFILL_CSRC) $(RMOVE_CSRC) $(RCOPY_CSRC)
+GEN_CSRCS	= $(SETP_CSRC) $(RFILL_CSRC) $(RGET_CSRC) $(TFILL_CSRC) $(RMOVE_CSRC) $(RCOPY_CSRC)
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
 BLITDIR		= lcd
@@ -125,6 +133,13 @@ ifneq ($(NXGLIB_BITSPERPIXEL),)
 	@$(call PREPROCESS, $(BLITDIR)/nxglib_fillrectangle.c, $(RFILL_TMP))
 	@cat $(RFILL_TMP) | sed -e "/^#/d" >$@
 	@rm -f  $(RFILL_TMP)
+endif
+
+$(RGET_CSRC) : $(BLITDIR)/nxglib_getrectangle.c nxglib_bitblit.h
+ifneq ($(NXGLIB_BITSPERPIXEL),)
+	@$(call PREPROCESS, $(BLITDIR)/nxglib_getrectangle.c, $(RGET_TMP))
+	@cat $(RGET_TMP) | sed -e "/^#/d" >$@
+	@rm -f  $(RGET_TMP)
 endif
 
 $(TFILL_CSRC) : $(BLITDIR)/nxglib_filltrapezoid.c nxglib_bitblit.h
@@ -154,7 +169,7 @@ clean:
 distclean: clean
 	@rm -f nxglib_setpixel_*bpp.c
 	@rm -f nxglib_fillrectangle_*bpp.c
+	@rm -f nxglib_getrectangle_*bpp.c
 	@rm -f nxglib_filltrapezoid_*bpp.c
 	@rm -f nxglib_moverectangle_*bpp.c
 	@rm -f nxglib_copyrectangle_*bpp.c
-

@@ -131,6 +131,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
         {
           be->plane[i].setpixel      = nxgl_setpixel_1bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_1bpp;
+          be->plane[i].getrectangle  = nxgl_getrectangle_1bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_1bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_1bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_1bpp;
@@ -142,6 +143,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
         {
           be->plane[i].setpixel      = nxgl_setpixel_2bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_2bpp;
+          be->plane[i].getrectangle  = nxgl_getrectangle_2bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_2bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_2bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_2bpp;
@@ -153,6 +155,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
         {
           be->plane[i].setpixel      = nxgl_setpixel_4bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_4bpp;
+          be->plane[i].getrectangle  = nxgl_getrectangle_4bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_4bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_4bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_4bpp;
@@ -164,6 +167,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
         {
           be->plane[i].setpixel      = nxgl_setpixel_8bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_8bpp;
+          be->plane[i].getrectangle  = nxgl_getrectangle_8bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_8bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_8bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_8bpp;
@@ -175,6 +179,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
         {
           be->plane[i].setpixel      = nxgl_setpixel_16bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_16bpp;
+          be->plane[i].getrectangle  = nxgl_getrectangle_16bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_16bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_16bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_16bpp;
@@ -186,6 +191,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
         {
           be->plane[i].setpixel      = nxgl_setpixel_24bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_24bpp;
+          be->plane[i].getrectangle  = nxgl_getrectangle_24bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_24bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_24bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_24bpp;
@@ -197,6 +203,7 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
         {
           be->plane[i].setpixel      = nxgl_setpixel_32bpp;
           be->plane[i].fillrectangle = nxgl_fillrectangle_32bpp;
+          be->plane[i].getrectangle  = nxgl_getrectangle_32bpp;
           be->plane[i].filltrapezoid = nxgl_filltrapezoid_32bpp;
           be->plane[i].moverectangle = nxgl_moverectangle_32bpp;
           be->plane[i].copyrectangle = nxgl_copyrectangle_32bpp;

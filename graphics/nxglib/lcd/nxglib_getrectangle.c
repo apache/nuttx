@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/fb/nxglib_setpixel.c
+ * graphics/nxglib/lcd/nxglib_getrectangle.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,7 +41,7 @@
 
 #include <stdint.h>
 
-#include <nuttx/fb.h>
+#include <nuttx/lcd/lcd.h>
 #include <nuttx/nx/nxglib.h>
 
 #include "nxglib_bitblit.h"
@@ -49,10 +49,6 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
-#ifndef NXGLIB_SUFFIX
-#  error "NXGLIB_SUFFIX must be defined before including this header file"
-#endif
 
 /****************************************************************************
  * Private Types
@@ -75,82 +71,35 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_setpixel_*bpp
+ * Name: nxgl_moverectangle_*bpp
  *
  * Descripton:
- *   Draw a single pixel in frambuffer memory at the given position and with
- *   the given color.   This is equivalent to nxgl_fillrectangle_*bpp() with
- *   a 1x1 rectangle but is more efficient.
+ *   Fetch a rectangular region from LCD GRAM memory.  The source is
+ *   expressed as a rectangle.
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_setpixel,NXGLIB_SUFFIX)
-  (FAR struct fb_planeinfo_s *pinfo,
-   FAR const struct nxgl_point_s *pos,
-   NXGL_PIXEL_T color)
+void NXGL_FUNCNAME(nxgl_getrectangle,NXGLIB_SUFFIX)
+(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect,
+ FAR void *dest, unsigned int deststride)
 {
-  FAR uint8_t *dest;
+  FAR uint8_t *dline;
+  unsigned int ncols;
+  unsigned int srcrow;
 
-#if NXGLIB_BITSPERPIXEL < 8
-  uint8_t shift;
-  uint8_t mask;
-#else
-  FAR NXGL_PIXEL_T *pixel;
-#endif
+  /* Get the width of the rectange to move in pixels. */
 
-  /* Get the address of the first byte of the pixel to write */
+  ncols = rect->pt2.x - rect->pt1.x + 1;
 
-  dest = pinfo->fbmem + pos->y * pinfo->stride + NXGL_SCALEX(pos->x);
+  /* dline = address of the first row pixel */
 
-#if NXGLIB_BITSPERPIXEL < 8
+  dline = (FAR uint8_t *)dest;
 
-  /* Shift the color into the proper position */
+  /* Copy the rectangle */
 
-# ifdef CONFIG_NX_PACKEDMSFIRST
-
-#if NXGLIB_BITSPERPIXEL == 1
-  shift   = (7 - (pos->x & 7));              /* Shift is 0, 1, ... 7 */
-  mask    = (1 << shift);                    /* Mask is 0x01, 0x02, .. 0x80 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 2
-  shift   = (6 - ((pos->x & 3) << 1));       /* Shift is 0, 2, 4, or 6 */
-  mask    = (3 << shift);                    /* Mask is 0x03, 0x0c, 0x30, or 0xc0 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 4
-  shift   = (4 - ((pos->x & 1) << 2));       /* Shift is 0 or 4 */
-  mask    = (15 << shift);                   /* Mask is 0x0f or 0xf0 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#else
-#  error "Unsupport pixel depth"
-#endif
-
-# else /* CONFIG_NX_PACKEDMSFIRST */
-
-#if NXGLIB_BITSPERPIXEL == 1
-  shift   = (pos->x & 7);                    /* Shift is 0, 1, ... 7 */
-  mask    = (1 << shift);                    /* Mask is 0x01, 0x02, .. 0x80 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 2
-  shift   = (pos->x & 3) << 1;               /* Shift is 0, 2, 4, or 6 */
-  mask    = (3 << shift);                    /* Mask is 0x03, 0x0c, 0x30, or 0xc0 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#elif NXGLIB_BITSPERPIXEL == 4
-  shift   = (pos->x & 1) << 2;               /* Shift is 0 or 4 */
-  mask    = (15 << shift);                   /* Mask is 0x0f or 0xf0 */
-  color <<= shift;                           /* Color is positioned under the mask */
-#else
-#  error "Unsupport pixel depth"
-#endif
-#endif /* CONFIG_NX_PACKEDMSFIRST */
-
-  /* Handle masking of the fractional byte */
-
-  *dest = (*dest & ~mask) | (color & mask);
-#else
-
-  /* Write the pixel (proper alignment assumed) */
-
-   pixel = (FAR NXGL_PIXEL_T *)dest;
-  *pixel = color;
-#endif
+  for (srcrow = rect->pt1.y; srcrow <= rect->pt2.y; srcrow++)
+    {
+      (void)pinfo->getrun(srcrow, rect->pt1.x, dline, ncols);
+      dline += deststride;
+    }
 }

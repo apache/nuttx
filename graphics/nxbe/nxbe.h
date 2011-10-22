@@ -90,6 +90,9 @@ struct nxbe_plane_s
   void (*fillrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
                         FAR const struct nxgl_rect_s *rect,
                         nxgl_mxpixel_t color);
+  void (*getrectangle)(FAR struct fb_planeinfo_s *pinfo,
+                       FAR const struct nxgl_rect_s *rect,
+                       FAR void *dest, unsigned int deststride);
   void (*filltrapezoid)(FAR NX_PLANEINFOTYPE *pinfo,
                         FAR const struct nxgl_trapezoid_s *trap,
                         FAR const struct nxgl_rect_s *bounds,
@@ -352,6 +355,32 @@ EXTERN void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
                                FAR const struct nxgl_rect_s *clip,
                                FAR const struct nxgl_trapezoid_s *trap,
                                nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+
+/****************************************************************************
+ * Name: nxbe_getrectangle
+ *
+ * Description:
+ *  Get the raw contents of graphic memory within a rectangular region. NOTE:
+ *  Since raw graphic memory is returned, the returned memory content may be
+ *  the memory of windows above this one and may not necessarily belong to
+ *  this window unless you assure that this is the top window.
+ *
+ * Input Parameters:
+ *   wnd  - The window structure reference
+ *   rect - The location to be copied
+ *   plane - Specifies the color plane to get from.
+ *   dest - The location to copy the memory region
+ *   deststride - The width, in bytes, the the dest memory
+ *
+ * Return:
+ *   None
+ *
+ ****************************************************************************/
+
+EXTERN void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
+                              FAR const struct nxgl_rect_s *rect,
+                              unsigned int plane,
+                              FAR uint8_t *dest, unsigned int deststride);
 
 /****************************************************************************
  * Name: nxbe_move

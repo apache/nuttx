@@ -613,6 +613,35 @@ EXTERN int nx_setpixel(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
 EXTERN int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
                    nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
+/****************************************************************************
+ * Name: nx_getrectangle
+ *
+ * Description:
+ *  Get the raw contents of graphic memory within a rectangular region. NOTE:
+ *  Since raw graphic memory is returned, the returned memory content may be
+ *  the memory of windows above this one and may not necessarily belong to
+ *  this window unless you assure that this is the top window.
+ *
+ * Input Parameters:
+ *   wnd  - The window structure reference
+ *   rect - The location to be copied
+ *   plane - Specifies the color plane to get from.
+ *   dest - The location to copy the memory region
+ *   deststride - The width, in bytes, the the dest memory
+ *
+ * Input Parameters:
+ *   hwnd  - The window handle
+ *   rect  - The location to be filled
+ *   color - The color to use in the fill
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
+ *
+ ****************************************************************************/
+
+EXTERN void nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                            unsigned int plane, FAR uint8_t *dest,
+                            unsigned int deststride);
 
 /****************************************************************************
  * Name: nx_filltrapezoid

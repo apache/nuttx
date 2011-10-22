@@ -2167,4 +2167,7 @@
 	  support for the Sure Electronics PIC32MX board.
 	* configs/ea3152:  Add a configuration for the Embedded Artists LPC3152
 	  daughter board (with the same base-board used with configs/ea3131)
+	* graphics/nxmu/nx_getrectangle.c, graphics/nxsu/nx_getrectangle.c,
+	  graphics/mxtk/nx_getwindow.c, graphics/nxmu/nx_gettoobar.c:  New
+	  interfaces to read from graphics memory
 

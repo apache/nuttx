@@ -35,7 +35,7 @@
 
 NX_ASRCS	=
 NXAPI_CSRCS	= nx_bitmap.c nx_close.c nx_closewindow.c nx_fill.c \
-		  nx_filltrapezoid.c nx_getposition.c nx_kbdchin.c  \
+		  nx_filltrapezoid.c nx_getposition.c nx_getrectangle.c nx_kbdchin.c  \
 		  nx_kbdin.c nx_lower.c nx_mousein.c nx_move.c nx_open.c \
 		  nx_openwindow.c nx_raise.c nx_releasebkgd.c nx_requestbkgd.c \
 		  nx_setpixel.c nx_setsize.c nx_setbgcolor.c nx_setposition.c \
