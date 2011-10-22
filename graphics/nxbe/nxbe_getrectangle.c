@@ -70,23 +70,6 @@ struct nxbe_fill_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxbe_clipfill
- *
- * Description:
- *  Called from nxbe_clipper() to performed the fill operation on visible portions
- *  of the rectangle.
- *
- ****************************************************************************/
-
-static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
-                        FAR struct nxbe_plane_s *plane,
-                        FAR const struct nxgl_rect_s *rect)
-{
-  struct nxbe_fill_s *fillinfo = (struct nxbe_fill_s *)cops;
-  plane->fillrectangle(&plane->pinfo, rect, fillinfo->color);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -116,7 +99,6 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
                        FAR uint8_t *dest, unsigned int deststride)
 {
   struct nxgl_rect_s remaining;
-  int i;
 
 #ifdef CONFIG_DEBUG
   if (!wnd || !rect || ! rect || plane >= wnd->be->vinfo.nplanes)
@@ -144,6 +126,6 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
    * to this window.
    */
 
-  FAR struct nxbe_plane_s *pplane = &wnd->be->plane[i];
+  FAR struct nxbe_plane_s *pplane = &wnd->be->plane[plane];
   pplane->getrectangle(&pplane->pinfo, rect, dest, deststride);
 }
