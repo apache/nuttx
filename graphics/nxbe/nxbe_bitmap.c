@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_bitmap.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -125,6 +125,7 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
   struct nxgl_rect_s bounds;
   struct nxgl_point_s offset;
   struct nxgl_rect_s remaining;
+  unsigned int deststride;
   int i;
 
 #ifdef CONFIG_DEBUG
@@ -150,10 +151,11 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
     }
 
   /* Verify that the width of the destination rectangle does not exceed the 
-   * with of the source bitmap data
+   * width of the source bitmap data
    */
 
-  if ((((bounds.pt2.x - offset.x) * wnd->be->plane[0].pinfo.bpp) >> 3) > stride)
+  deststride = (((bounds.pt2.x - bounds.pt1.x + 1) * wnd->be->plane[0].pinfo.bpp + 7) >> 3);
+  if (deststride > stride)
     {
       gdbg("Bad dest width\n");
       return;

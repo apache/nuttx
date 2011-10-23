@@ -2170,4 +2170,5 @@
 	* graphics/nxmu/nx_getrectangle.c, graphics/nxsu/nx_getrectangle.c,
 	  graphics/mxtk/nx_getwindow.c, graphics/nxmu/nx_gettoobar.c:  New
 	  interfaces to read from graphics memory
-
+	* graphics/nxbe/nxbe_bitmap.c: Fix an error in the error handling that
+	  can cause valid bitmaps to fail to render.
