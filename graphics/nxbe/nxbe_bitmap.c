@@ -151,10 +151,10 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
     }
 
   /* Verify that the width of the destination rectangle does not exceed the 
-   * width of the source bitmap data
+   * width of the source bitmap data (taking into account the bitmap origin)
    */
 
-  deststride = (((bounds.pt2.x - bounds.pt1.x + 1) * wnd->be->plane[0].pinfo.bpp + 7) >> 3);
+  deststride = (((bounds.pt2.x - origin->x + 1) * wnd->be->plane[0].pinfo.bpp + 7) >> 3);
   if (deststride > stride)
     {
       gdbg("Bad dest width\n");
