@@ -102,10 +102,11 @@ void nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   struct nxgl_rect_s getrect;
 
 #ifdef CONFIG_DEBUG
-  if (!hwnd || !rect || !dest)
+  if (!hfwnd || !rect || !dest)
     {
+      gvdbg("Invalid parameters\n");
       errno = EINVAL;
-      return ERROR;
+      return;
     }
 #endif
 

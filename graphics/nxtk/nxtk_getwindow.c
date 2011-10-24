@@ -102,10 +102,10 @@ void nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   struct nxgl_rect_s getrect;
 
 #ifdef CONFIG_DEBUG
-  if (!hwnd || !rect || !dest)
+  if (!hfwnd || !rect || !dest)
     {
-      errno = EINVAL;
-      return ERROR;
+      gvdbg("Invalid parameters\n");
+      return;
     }
 #endif
 
