@@ -11,7 +11,7 @@ Contents
   - GNU Toolchain Options
   - IDEs
   - NuttX buildroot Toolchain
-  - DFU
+  - DFU and JTAG
   - LEDs
   - Temperature Sensor
   - RTC
@@ -166,9 +166,11 @@ NuttX buildroot Toolchain
   detailed PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
-DFU
-===
+DFU and JTAG
+============
 
+  Enbling Support for the DFU Bootloader
+  --------------------------------------
   The linker files in these projects can be configured to indicate that you
   will be loading code using STMicro built-in USB Device Firmware Upgrade (DFU)
   loader or via some JTAG emulator.  You can specify the DFU bootloader by
@@ -212,6 +214,29 @@ DFU
   provide to the DFU File Manager.  You will need to rename it to nuttx.hex
   in order to find it with the DFU File Manager. You will end up with
   a file called nuttx.dfu that you can use with the STMicro DFU SE program.
+
+  Enabling JTAG
+  -------------
+  If you are not using the DFU, then you will probably also need to enable
+  JTAG support.  By default, all JTAG support is disabled but there NuttX
+  configuration options to enable JTAG in various different ways.
+
+  These configurations effect the setting of the SWJ_CFG[2:0] bits in the AFIO
+  MAPR register.  These bits are used to configure the SWJ and trace alternate function I/Os. The SWJ (SerialWire JTAG) supports JTAG or SWD access to the
+  Cortex debug port.  The default state in this port is for all JTAG support
+  to be disable.
+
+  CONFIG_STM32_JTAG_FULL_ENABLE - sets SWJ_CFG[2:0] to 000 which enables full
+    SWJ (JTAG-DP + SW-DP)
+
+  CONFIG_STM32_JTAG_NOJNTRST_ENABLE - sets SWJ_CFG[2:0] to 001 which enable
+    full SWJ (JTAG-DP + SW-DP) but without JNTRST.
+
+  CONFIG_STM32_JTAG_SW_ENABLE - sets SWJ_CFG[2:0] to 010 which would set JTAG-DP
+    disabled and SW-DP enabled
+
+  The default setting (none of the above defined) is SWJ_CFG[2:0] set to 100
+  which disable JTAG-DP and SW-DP.
 
 LEDs
 ====
@@ -446,6 +471,12 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_STM32_CAN1_FULL_REMAP
 	CONFIG_STM32_CAN1_PARTIAL_REMAP
 	CONFIG_STM32_CAN2_REMAP
+
+  JTAG Enable settings (by default JTAG-DP and SW-DP are disabled):
+	CONFIG_STM32_JTAG_FULL_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
+	CONFIG_STM32_JTAG_NOJNTRST_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
+	  but without JNTRST.
+	CONFIG_STM32_JTAG_SW_ENABLE - Set JTAG-DP disabled and SW-DP enabled
 
   STM32F103Z specific device driver settings
 
