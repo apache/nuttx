@@ -153,6 +153,8 @@ void up_initialize(void)
 
 #ifdef CONFIG_USE_SERIALDRIVER
   up_serialinit();
+#elif defined(CONFIG_DEV_LOWCONSOLE)
+  lowconsole_init();
 #endif
 
   /* Initialize the netwok */

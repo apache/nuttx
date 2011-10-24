@@ -301,7 +301,7 @@ void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
 
   /* Enable the UART */
 
-  pic32mx_putreg(uart_base, PIC32MX_UART_MODESET_OFFSET,
+  pic32mx_putreg(uart_base, PIC32MX_UART_STASET_OFFSET,
                  UART_STA_UTXEN | UART_STA_URXEN);
   pic32mx_putreg(uart_base, PIC32MX_UART_MODESET_OFFSET,
                  UART_MODE_ON);
