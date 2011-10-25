@@ -289,25 +289,25 @@ EXTERN void nxgl_fillrectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
  *
  ****************************************************************************/
 
-EXTERN void nxgl_getrectangle_1bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_getrectangle_1bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                    FAR const struct nxgl_rect_s *rect,
                                    FAR void *dest, unsigned int deststride);
-EXTERN void nxgl_getrectangle_2bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_getrectangle_2bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                    FAR const struct nxgl_rect_s *rect,
                                    FAR void *dest, unsigned int deststride);
-EXTERN void nxgl_getrectangle_4bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_getrectangle_4bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                    FAR const struct nxgl_rect_s *rect,
                                    FAR void *dest, unsigned int deststride);
-EXTERN void nxgl_getrectangle_8bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_getrectangle_8bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                    FAR const struct nxgl_rect_s *rect,
                                    FAR void *dest, unsigned int deststride);
-EXTERN void nxgl_getrectangle_16bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_getrectangle_16bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
                                     FAR void *dest, unsigned int deststride);
-EXTERN void nxgl_getrectangle_24bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_getrectangle_24bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
                                     FAR void *dest, unsigned int deststride);
-EXTERN void nxgl_getrectangle_32bpp(FAR struct fb_planeinfo_s *pinfo,
+EXTERN void nxgl_getrectangle_32bpp(FAR NX_PLANEINFOTYPE *pinfo,
                                     FAR const struct nxgl_rect_s *rect,
                                     FAR void *dest, unsigned int deststride);
 

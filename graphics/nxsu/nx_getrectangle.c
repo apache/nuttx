@@ -92,17 +92,19 @@
  *
  ****************************************************************************/
 
-void nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                     unsigned int plane, FAR uint8_t *dest,
-                     unsigned int deststride)
+int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                    unsigned int plane, FAR uint8_t *dest,
+                    unsigned int deststride)
 {
 #ifdef CONFIG_DEBUG
   if (!hwnd || !rect || !dest)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  return nxbe_getrectangle((FAR struct nxbe_window_s *)hwnd, rect, plane, dest, deststride);
+  nxbe_getrectangle((FAR struct nxbe_window_s *)hwnd, rect, plane,
+                    dest, deststride);
+  return OK;
 }

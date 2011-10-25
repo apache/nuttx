@@ -94,7 +94,7 @@
  *
  ****************************************************************************/
 
-void nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
                      unsigned int plane, FAR uint8_t *dest,
                      unsigned int deststride)
 {
@@ -105,8 +105,8 @@ void nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   if (!hfwnd || !rect || !dest)
     {
       gvdbg("Invalid parameters\n");
-      errno = EINVAL;
-      return;
+      set_errno(EINVAL);
+      return ERROR;
     }
 #endif
 

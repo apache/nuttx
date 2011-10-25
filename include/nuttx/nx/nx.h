@@ -639,9 +639,9 @@ EXTERN int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  *
  ****************************************************************************/
 
-EXTERN void nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                            unsigned int plane, FAR uint8_t *dest,
-                            unsigned int deststride);
+EXTERN int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                           unsigned int plane, FAR uint8_t *dest,
+                           unsigned int deststride);
 
 /****************************************************************************
  * Name: nx_filltrapezoid

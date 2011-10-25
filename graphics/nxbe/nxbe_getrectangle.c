@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+#include <debug.h>
+
 #include <nuttx/nx/nxglib.h>
 
 #include "nxbe.h"
@@ -103,6 +106,7 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
 #ifdef CONFIG_DEBUG
   if (!wnd || !rect || ! rect || plane >= wnd->be->vinfo.nplanes)
     {
+      gvdbg("Invalid parameters\n");
       return;
     }
 #endif

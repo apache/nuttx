@@ -241,9 +241,9 @@ EXTERN int nxtk_fillwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *
  ****************************************************************************/
 
-EXTERN void nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
-                           unsigned int plane, FAR uint8_t *dest,
-                           unsigned int deststride);
+EXTERN int nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                          unsigned int plane, FAR uint8_t *dest,
+                          unsigned int deststride);
 
 /****************************************************************************
  * Name: nxtk_filltrapwindow
@@ -462,9 +462,9 @@ EXTERN int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect
  *
  ****************************************************************************/
 
-EXTERN void nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
-                            unsigned int plane, FAR uint8_t *dest,
-                            unsigned int deststride);
+EXTERN int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                           unsigned int plane, FAR uint8_t *dest,
+                           unsigned int deststride);
 
 /****************************************************************************
  * Name: nxtk_filltraptoolbar

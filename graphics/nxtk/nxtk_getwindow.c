@@ -94,9 +94,9 @@
  *
  ****************************************************************************/
 
-void nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
-                     unsigned int plane, FAR uint8_t *dest,
-                     unsigned int deststride)
+int nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                   unsigned int plane, FAR uint8_t *dest,
+                   unsigned int deststride)
 {
   FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
   struct nxgl_rect_s getrect;
@@ -105,7 +105,8 @@ void nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
   if (!hfwnd || !rect || !dest)
     {
       gvdbg("Invalid parameters\n");
-      return;
+      set_errno(EINVAL);
+      return ERROR;
     }
 #endif
 

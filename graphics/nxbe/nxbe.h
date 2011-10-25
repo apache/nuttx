@@ -90,7 +90,7 @@ struct nxbe_plane_s
   void (*fillrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
                         FAR const struct nxgl_rect_s *rect,
                         nxgl_mxpixel_t color);
-  void (*getrectangle)(FAR struct fb_planeinfo_s *pinfo,
+  void (*getrectangle)(FAR NX_PLANEINFOTYPE *pinfo,
                        FAR const struct nxgl_rect_s *rect,
                        FAR void *dest, unsigned int deststride);
   void (*filltrapezoid)(FAR NX_PLANEINFOTYPE *pinfo,

@@ -59,7 +59,7 @@
 /* This macro creates RGB16 (5:6:5) from 8:8:8 RGB */
 
 #define RGBTO16(r,g,b) \
-  ((((uint16_t)(r) << 11) & 0xf800) | (((uint16_t)(r) << 5) & 0x07e0) | ((uint16_t)(r) & 0x001f))
+  ((((uint16_t)(r) << 11) & 0xf800) | (((uint16_t)(g) << 5) & 0x07e0) | ((uint16_t)(b) & 0x001f))
 
 /* And these macros perform the inverse transformation */
 

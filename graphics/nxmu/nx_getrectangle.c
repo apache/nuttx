@@ -92,9 +92,9 @@
  *
  ****************************************************************************/
 
-void nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                     unsigned int plane, FAR uint8_t *dest,
-                     unsigned int deststride)
+int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                    unsigned int plane, FAR uint8_t *dest,
+                    unsigned int deststride)
 {
   FAR struct nxbe_window_s        *wnd = (FAR struct nxbe_window_s *)hwnd;
   struct nxsvrmsg_getrectangle_s  outmsg;
@@ -103,15 +103,8 @@ void nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 #ifdef CONFIG_DEBUG
   if (!hwnd || !rect || !dest)
     {
-      errno = EINVAL;
-      return ERROR;
-    }
-#endif
-
-#ifdef CONFIG_DEBUG
-  if (!wnd || !wnd->conn || !rect || !color)
-    {
-      errno = EINVAL;
+      gvdbg("Invalid parameters\n");
+      set_errno(EINVAL);
       return ERROR;
     }
 #endif

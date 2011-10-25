@@ -2,7 +2,7 @@
 # configs/stm3210e-eval/buttons/defconfig
 #
 #   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -251,6 +251,7 @@ CONFIG_HAVE_LIBM=n
 # CONFIG_DEBUG_VERBOSE - enables verbose debug output
 # CONFIG_DEBUG_SYMBOLS - build without optimization and with
 #   debug symbols (needed for use with a debugger).
+# CONFIG_HAVE_CXX - Enable support for C++S
 # CONFIG_MM_REGIONS - If the architecture includes multiple
 #   regions of memory to allocate from, this specifies the
 #   number of memory regions that the memory manager must
@@ -338,6 +339,7 @@ CONFIG_HAVE_LIBM=n
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n
+CONFIG_HAVE_CXX=n
 CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=y
 CONFIG_RR_INTERVAL=200
