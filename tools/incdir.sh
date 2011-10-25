@@ -2,7 +2,7 @@
 # tools/incdir.sh
 #
 #   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+#   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -111,27 +111,29 @@ fi
 
 os=`uname -o 2>/dev/null || echo "Other"`
 
-# Let's assume that all GCC compiler paths contain the string gcc and
-# no non-GCC compiler pathes include this substring
+# Let's assume that all GCC compiler paths contain the string gcc or
+# g++ and no non-GCC compiler pathes include these substrings
 
 gcc=`echo $ccpath | grep gcc`
+if [ -z "${gcc}" ]; then
+  gcc=`echo $ccpath | grep g++`
+fi
+
 sdcc=`echo $ccpath | grep sdcc`
 
 if [ "X$os" = "XCygwin" ]; then
 	# We can treat Cygwin native toolchains just like Linux native
 	# toolchains in the Linux.  Let's assume:
 	# 1. GCC or SDCC are the only possible Cygwin native compilers
-	# 2. If this is a Window native GCC version, then -w provided
-	#    on the command line (wintool=y)
+	# 2. If this is a Window native GCC version, then -w must be
+	#    provided on the command line (wintool=y)
 
 	if [ -z "$gcc" -a -z "$sdcc" ]; then
-	
 		# Not GCC or SDCC, must be Windows native
 		windows=yes
 		compiler=`cygpath -u "$ccpath"`
 	else
 		if [ "X$wintool" == "Xy" ]; then
-	
 			# It is a native GCC or SDCC compiler
 			windows=yes
 			compiler=`cygpath -u "$ccpath"`

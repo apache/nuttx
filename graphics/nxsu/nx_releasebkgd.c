@@ -2,7 +2,7 @@
  * graphics/nxsu/nx_releasebkgd.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -86,11 +86,10 @@
 
 int nx_releasebkgd(NXWINDOW hwnd)
 {
-  FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)hwnd;
-  FAR struct nxbe_state_s *be = &fe->be;
+  FAR struct nxbe_window_s *bkgd = (FAR struct nxbe_window_s *)hwnd;
 
 #ifdef CONFIG_DEBUG
-  if (!fe)
+  if (!bkgd)
     {
       errno = EINVAL;
       return ERROR;
@@ -99,12 +98,12 @@ int nx_releasebkgd(NXWINDOW hwnd)
 
   /* Restore the NX background window callbacks */
 
-  be->bkgd.cb  = &g_bkgdcb;
-  be->bkgd.arg = NULL;
+  bkgd->cb  = &g_bkgdcb;
+  bkgd->arg = NULL;
 
   /* Redraw the background window */
 
-  nxfe_redrawreq(&be->bkgd, &be->bkgd.bounds);
+  nxfe_redrawreq(bkgd, &bkgd->bounds);
   return OK;
 }
 

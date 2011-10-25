@@ -58,6 +58,7 @@ CONFIG_ARCH_BOARD_SIM=y
 # CONFIG_DEBUG_VERBOSE - enables verbose debug output
 # CONFIG_DEBUG_SYMBOLS - build without optimization and with
 #   debug symbols (needed for use with a debugger).
+# CONFIG_HAVE_CXX - Enable support for C++
 # CONFIG_MM_REGIONS - If the architecture includes multiple
 #   regions of memory to allocate from, this specifies the
 #   number of memory regions that the memory manager must
@@ -118,6 +119,7 @@ CONFIG_ARCH_BOARD_SIM=y
 CONFIG_DEBUG=y
 CONFIG_DEBUG_VERBOSE=y
 CONFIG_DEBUG_SYMBOLS=n
+CONFIG_HAVE_CXX=n
 CONFIG_MM_REGIONS=1
 CONFIG_ARCH_LOWPUTC=y
 CONFIG_RR_INTERVAL=0

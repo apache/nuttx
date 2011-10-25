@@ -70,7 +70,7 @@
 /* This macro creates RGB8 (3:3:2) from 8:8:8 RGB */
 
 #define RGBTO8(r,g,b) \
-  ((((uint8_t)(r) << 5) & 0xe0) | (((uint8_t)(r) << 2) & 0x1c) | ((uint8_t)(r) & 0x03))
+  ((((uint8_t)(r) << 5) & 0xe0) | (((uint8_t)(g) << 2) & 0x1c) | ((uint8_t)(b) & 0x03))
 
 /* And these macros perform the inverse transformation */
 

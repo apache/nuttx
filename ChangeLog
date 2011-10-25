@@ -2172,3 +2172,9 @@
 	  interfaces to read from graphics memory
 	* graphics/nxbe/nxbe_bitmap.c: Fix an error in the error handling that
 	  can cause valid bitmaps to fail to render.
+	* include/nuttx/rgbcolors.h: Fix errors in some 16- and 8-bit color
+	  conversion macros.
+	* tools/incdir.sh: Fix issues when g++ is used as the compiler.  It was
+	  not being recognized and handled properly.
+	* graphics/nxsu/nx_releasebkgdg.c: Fix a bad cast that was causing
+	  problems with the backgournd window was released.
