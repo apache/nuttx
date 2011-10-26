@@ -10,6 +10,7 @@ Contents
   o Debugging
   o Issues
     - 64-bit Issues
+    - Stack Size Issues
     - Buffered I/O Issues
     - Networking Issues
     - X11 Issues
@@ -101,6 +102,36 @@ appropriate places so that -m32 is included in the CFLAGS and -m32 and -melf_386
 are included in the LDFLAGS.  See the patch 0001-Quick-hacks-to-build-sim-nsh-ostest-on-x86_64-as-32-.patch
 that can be found at http://tech.groups.yahoo.com/group/nuttx/files.
 
+Stack Size Issues
+-----------------
+When you run the NuttX simulation, it uses stacks allocated by NuttX from the
+NuttX heap.  The memory management model is exactly the same in the simulation
+as it is real, target system.  This is good because this produces a higher
+fidelity simulation.
+
+However, when the simulation calls into Linux/Cygwin libraries, it will still
+use these small simulation stacks.  This happens, for example, when you call
+into the system to get and put characters to the console window or when you
+make x11 calls into the system.  The programming model within those libraries
+will assume a Linux/Cygwin environment where the stack size grows dynamically
+and not the small, limited stacks of a deeply embedded system.
+
+As a consequence, those system libraries may allocate large data structures
+on the stack and overflow the small NuttX stacks.  X11, in particular,
+requires large stacks.  If you are using X11 in the simulation, make sure
+that you set aside a "lot" of stack for the X11 system calls (maybe 8 or 16Kb).
+The stack size for the thread that begins with user start is controlled
+by the configuration setting CONFIG_USERMAIN_STACKSIZE; you may need to
+increase this value to larger number to survive the X11 system calls.
+
+If you are running X11 applications as NSH add-on programs, then the stack
+size of the add-on program is controlled in another way.  Here are the
+steps for increasing the stack size in that case:
+
+  cd ../apps/namedapps  # Go to the namedapps directory
+  vi namedapps_list.h   # Edit this file and increase the stack size of the add-on
+  rm .built *.o         # This will force the namedapps logic to rebuild
+
 Buffered I/O Issues
 -------------------
 The simulated serial driver has some odd behavior.  It will stall for a long time
@@ -130,7 +161,9 @@ For example, on UBuntu 9.09, I had to do the following to get a clean build:
 to get looked into as well).
 
 The X11 examples builds on Cygwin, but does not run.  The last time I tried it,
-XOpenDisplay() aborted the program.
+XOpenDisplay() aborted the program.  UPDATE:  This was caused by the small stack
+size and can be fixed by increasing the size of the NuttX stack that calls into
+X11.  See the discussion "Stack Size Issues" above.
 
 Configurations
 ^^^^^^^^^^^^^^
