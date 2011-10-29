@@ -1440,15 +1440,11 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
                        {
                          DEBUGASSERT(packed == true);
 
-                         /* Make sure there is space at this location for an inode header */
+                         /* Make sure there is space at this location for an inode
+                          * header.
+                          */
 
-                         if (pack.iooffset + SIZEOF_NXFFS_INODE_HDR > volume->geo.blocksize)
-                          {
-                            /* No.. not enough space here.  Skip the rest of this block */
-
-                            pack.iooffset = SIZEOF_NXFFS_BLOCK_HDR;
-                          }
-                        else
+                         if (pack.iooffset + SIZEOF_NXFFS_INODE_HDR <= volume->geo.blocksize)
                           {
                             /* Pack write data into this block */
 
@@ -1487,7 +1483,7 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
                             volume->geo.blocksize - pack.iooffset);
                    }
 
-                 /* Next time we get here, pack.iooffset will point to the
+                 /* Next time through the loop, pack.iooffset will point to the
                   * first byte after the block header.
                   */
 
