@@ -136,16 +136,19 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-
   /* Interrupts are enabled by setting the IE bit in the CP0 status register */
 
   regval = 0;
   asm volatile("ei    %0" : "=r"(regval));
 
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then enable all interrupt levels */
 
   irqrestore(CP0_STATUS_IM_ALL);
+#else
+  /* Enable only software interrupts */
+
+  irqrestore(CP0_STATUS_IM_SWINTS);
 #endif
 }
 
