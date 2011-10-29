@@ -52,8 +52,10 @@ namespace std
   using ::size_t;
   using ::strchr;
   using ::strdup;
+  using ::strndup;
   using ::strerror;
   using ::strlen;
+  using ::strnlen;
   using ::strcat;
   using ::strncat;
   using ::strcmp;

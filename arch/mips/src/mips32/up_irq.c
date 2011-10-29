@@ -83,7 +83,7 @@ irqstate_t irqsave(void)
   status &= ~CP0_STATUS_IM_MASK;   /* Clear all interrupt mask bits */
   status |= CP0_STATUS_IM_SWINTS;  /* Keep S/W interrupts enabled */
   cp0_putstatus(status);           /* Disable interrupts */
-  return ret;                      /* Return status before interrtupts disabled */
+  return ret;                      /* Return status before interrupts disabled */
 }
 
 /****************************************************************************
