@@ -97,7 +97,23 @@ CONFIG_STM32_CODESOURCERYL=n
 CONFIG_STM32_DEVKITARM=n
 CONFIG_STM32_RAISONANCE=n
 CONFIG_STM32_BUILDROOT=y
+
+#
+# JTAG Enable settings (by default JTAG-DP and SW-DP are disabled):
+#
+#   CONFIG_STM32_DFU - Use the DFU bootloader, not JTAG
+#
+# JTAG Enable options:
+#
+#   CONFIG_STM32_JTAG_FULL_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
+#   CONFIG_STM32_JTAG_NOJNTRST_ENABLE - Enables full SWJ (JTAG-DP + SW-DP)
+#     but without JNTRST.
+#   CONFIG_STM32_JTAG_SW_ENABLE - Set JTAG-DP disabled and SW-DP enabled
+#
 CONFIG_STM32_DFU=y
+CONFIG_STM32_JTAG_FULL_ENABLE=y
+CONFIG_STM32_JTAG_NOJNTRST_ENABLE=n
+CONFIG_STM32_JTAG_SW_ENABLE=n
 
 #
 #  Individual subsystems can be enabled:
