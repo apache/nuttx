@@ -2178,3 +2178,8 @@
 	  not being recognized and handled properly.
 	* graphics/nxsu/nx_releasebkgdg.c: Fix a bad cast that was causing
 	  problems with the backgournd window was released.
+	* fs/nxffs/nxffs_pack.c:  Correct a critical bug in the NXFFS file system:
+	  When repacking the filesystem, there was a missing check to see if an
+	  inode structure would fit at the end of a block.  This is a rare case
+	  if the block size is large, but can be common for tiny block sizes
+	  and results in a crash and file system corruption.

@@ -1433,34 +1433,45 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
                        }
 
                      /* If all of the "normal" inodes have been packed, then check if
-                      * we need to the current, in-progress write operation.
+                      * we need to pack the current, in-progress write operation.
                       */
 
                      if (wrfile)
                        {
                          DEBUGASSERT(packed == true);
 
-                         /* Pack write data into this block */
+                         /* Make sure there is space at this location for an inode header */
 
-                         ret = nxffs_packwriter(volume, &pack, wrfile);
-                         if (ret < 0)
-                           {
-                             /* The error -ENOSPC is a special value that simply
-                              * means that there is nothing further to be packed.
-                              */
+                         if (pack.iooffset + SIZEOF_NXFFS_INODE_HDR > volume->geo.blocksize)
+                          {
+                            /* No.. not enough space here.  Skip the rest of this block */
 
-                             if (ret == -ENOSPC)
-                               {
-                                 wrfile = NULL;
-                               }
-                             else
-                               {
-                                 /* Otherwise, something really bad happened */
+                            pack.iooffset = SIZEOF_NXFFS_BLOCK_HDR;
+                          }
+                        else
+                          {
+                            /* Pack write data into this block */
 
-                                 fdbg("Failed to pack into block %d: %d\n",
-                                      block, ret);
-                                 goto errout_with_pack;
-                               }
+                            ret = nxffs_packwriter(volume, &pack, wrfile);
+                            if (ret < 0)
+                              {
+                                /* The error -ENOSPC is a special value that simply
+                                 * means that there is nothing further to be packed.
+                                 */
+
+                                if (ret == -ENOSPC)
+                                  {
+                                    wrfile = NULL;
+                                  }
+                                else
+                                  {
+                                    /* Otherwise, something really bad happened */
+
+                                    fdbg("Failed to pack into block %d: %d\n",
+                                         block, ret);
+                                    goto errout_with_pack;
+                                  }
+                              }
                            }
                        }
                    }
