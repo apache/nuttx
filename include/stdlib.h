@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdlib.h
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,11 +51,25 @@
 
 /* The C standard specifies two constants, EXIT_SUCCESS and
  * EXIT_FAILURE, that may be passed to exit() to indicate
- * successfuol or unsucessful termination, respectively.
+ * successful or unsucessful termination, respectively.
  */
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
+
+/* The NULL pointer should be defined in this file but is currently defined
+ * in sys/types.h.
+ */
+
+/* Maximum value returned by rand() */
+
+#define MAX_RAND 32767
+
+/* Integer expression whose value is the maximum number of bytes in a
+ * character specified by the current locale. 
+ */
+
+#define MB_CUR_MAX 1
 
 /* The environ variable, normally 'extern char **environ;' is
  * not implemented as a function call.  However, get_environ_ptr()
