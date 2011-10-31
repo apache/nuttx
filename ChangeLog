@@ -2185,4 +2185,7 @@
 	  and results in a crash and file system corruption.
 	* fs/nxffs/nxffs_initialize.c:  Fix an initialize error.  If the FLASH
 	  is on power-up, NXFFS will fail to initialize correctly.
+	* fs/nxffs/nxffs_write.c and nxffs_pack.c:  Fix an error that can occur
+	  when attempt to write to FLASH volume that is completely full but
+	  has no value inodes on it.
 

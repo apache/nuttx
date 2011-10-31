@@ -2,7 +2,7 @@
  * fs/nxffs/nxffs_pack.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
  *
@@ -84,7 +84,7 @@ struct nxffs_pack_s
 
   FAR uint8_t         *iobuffer;   /* I/O block start position */
   off_t                ioblock;    /* I/O block number */
-  off_t                block0;     /* First I/O Block number in the erase block */
+  off_t                block0;     /* First I/O block number in the erase block */
   uint16_t             iooffset;   /* I/O block offset */
 };
 
@@ -282,8 +282,8 @@ static inline int nxffs_startpos(FAR struct nxffs_volume_s *volume,
   off_t nbytes;
   int ret;
 
-  /* Loop until we find a gap of unused FLASH large enough to warrant the
-   * compression.
+  /* Loop until we find a gap of unused FLASH large enough to warrant
+   * compacting.
    */
 
   for(;;)
@@ -1279,24 +1279,67 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
 
   /* Get the offset to the first valid inode entry */
 
+  wrfile = NULL;
+  packed = false;
+
   iooffset = nxffs_mediacheck(volume, &pack);
   if (iooffset == 0)
     {
       /* Offset zero is only returned if no valid blocks were found on the
        * FLASH media or if there are no valid inode entries on the FLASH after
-       * the first valid block.  In this case, the media needs to be re-
-       * formatted.
+       * the first valid block.  There are two possibilities:  (1) there 
+       * really is nothing on the FLASH, or (2) there is a file being written
+       * to the FLASH now.
        */
 
-      return nxffs_reformat(volume);
+      /* Is there a writer? */
+
+      wrfile = nxffs_setupwriter(volume, &pack);
+      if (wrfile)
+        {
+          /* If there is a write, just set ioffset to the offset of data in
+           * first block. Setting 'packed' to true will supress normal inode
+           * packing operation.  Then we can start compacting the FLASH.
+           */
+
+          iooffset = SIZEOF_NXFFS_BLOCK_HDR;
+          packed   = true;
+          goto start_pack;
+        }
+      else
+        {
+          /* No, there is no write in progress.  We just have an empty flash
+           * full of deleted files.  In this case, the media needs to be re-
+           * formatted.
+            */
+
+          ret = nxffs_reformat(volume);
+          if (ret == OK)
+            {
+              /* The free flash offset will be in the first valid block of
+               * the FLASH.
+               */
+
+              block = 0;
+              ret = nxffs_validblock(volume, &block);
+              if (ret == OK)
+                {
+                  /* Set to the offset past the block header in the first
+                   * valid block
+                   */
+
+                  volume->froffset =
+                    block * volume->geo.blocksize + SIZEOF_NXFFS_BLOCK_HDR;
+                }
+            }
+
+          return ret;
+        }
     }
 
   /* There is a valid format and valid inodes on the media.. setup up to
    * begin the packing operation.
    */
-
-  packed = false;
-  wrfile = NULL;
 
   ret = nxffs_startpos(volume, &pack, &iooffset);
   if (ret < 0)
@@ -1350,6 +1393,8 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
    * this case, the FLASH offset to the first inode header is return in 
    * iooffset.
    */
+
+start_pack:
 
   pack.ioblock     = nxffs_getblock(volume, iooffset);
   pack.iooffset    = nxffs_getoffset(volume, iooffset, pack.ioblock);

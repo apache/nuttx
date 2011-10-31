@@ -2,7 +2,7 @@
  * fs/nxffs/nxffs_write.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
  *
@@ -267,11 +267,12 @@ static inline int nxffs_wralloc(FAR struct nxffs_volume_s *volume,
           fdbg("Failed to pack the volume: %d\n", -ret);
           return ret;
         }
-              
+
       /* After packing the volume, froffset will be updated to point to the
        * new free flash region.  Try again.
        */
-               
+
+      nxffs_ioseek(volume, volume->froffset);
       packed = true;
     }
 
@@ -496,7 +497,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
 
       if (wrfile->doffset == 0)
         {
-          /* No, allocate the data block now */
+          /* No, allocate the data block now, re-packing if necessary. */
 
           wrfile->datlen = 0;
           ret = nxffs_wralloc(volume, wrfile, remaining);
