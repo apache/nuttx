@@ -470,9 +470,11 @@ off_t nxffs_inodeend(FAR struct nxffs_volume_s *volume,
 
   if (entry->doffset)
     {
-      /* This is the maximum size of one data block */
+      /* This is the maximum size of one data block.  It is the physcal size
+       * of the block minus the minimum number of headers: block sna data
+       */
 
-      uint16_t maxsize = volume->geo.blocksize - SIZEOF_NXFFS_DATA_HDR;
+      uint16_t maxsize = volume->geo.blocksize - SIZEOF_NXFFS_BLOCK_HDR - SIZEOF_NXFFS_DATA_HDR;
 
       /* This is the minimum number of blocks require to span all of the
        * inode data.  One additional block could possibly be required -- we

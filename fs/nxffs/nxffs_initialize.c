@@ -398,7 +398,24 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
            * is full?
            */
 
-          fvdbg("nxffs_getc failed: %d\n", -ch);
+          if (volume->ioblock + 1 >= volume->nblocks &&
+              volume->iooffset + 1 >= volume->geo.blocksize)
+            {
+              /* Yes.. the FLASH is full.  Force the offsets to the end of FLASH */
+
+              volume->froffset = volume->nblocks * volume->geo.blocksize;
+              fvdbg("Assume no free FLASH, froffset: %d\n", volume->froffset);
+              if (noinodes)
+                {
+                  volume->inoffset = volume->froffset;
+                  fvdbg("No inodes, inoffset: %d\n", volume->inoffset);
+                }
+              return OK;
+            }
+
+          // No?  Then it is some other failure that we do not know how to handle
+
+          fdbg("nxffs_getc failed: %d\n", -ch);
           return ch;
         }
 

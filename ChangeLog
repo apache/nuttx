@@ -2183,3 +2183,6 @@
 	  inode structure would fit at the end of a block.  This is a rare case
 	  if the block size is large, but can be common for tiny block sizes
 	  and results in a crash and file system corruption.
+	* fs/nxffs/nxffs_initialize.c:  Fix an initialize error.  If the FLASH
+	  is on power-up, NXFFS will fail to initialize correctly.
+
