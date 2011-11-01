@@ -2188,4 +2188,7 @@
 	* fs/nxffs/nxffs_write.c and nxffs_pack.c:  Fix an error that can occur
 	  when attempt to write to FLASH volume that is completely full but
 	  has no value inodes on it.
-
+	* drivers/mtd/at24xx.c:  Now supports a configurable block size that
+	  supports using "clusters" of AT24 pages as blocks.  This allows bigger
+	  block sizes and more efficient use of FLASH when the AT24 is used to
+	  support a file system (such as NXFFS).
