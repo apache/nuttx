@@ -204,8 +204,8 @@ static ssize_t at24c_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   size_t blocksleft;
 
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
-  startblock *= CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE;
-  nblocks    *= CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE;
+  startblock *= (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
+  nblocks    *= (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
 #endif
   blocksleft  = nblocks;
 
@@ -264,8 +264,8 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
   uint8_t buf[AT24XX_PAGESIZE+2];
 
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
-  startblock *= CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE;
-  nblocks    *= CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE;
+  startblock *= (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
+  nblocks    *= (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
 #endif
   blocksleft  = nblocks;
 
@@ -302,7 +302,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
     }
 
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
-  return nblocks /(CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
+  return nblocks / (CONFIG_AT24XX_MTD_BLOCKSIZE / AT24XX_PAGESIZE);
 #else
   return nblocks;
 #endif
@@ -343,13 +343,14 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                *   It has to be at least as big as the blocksize, bigger serves no
                *   purpose.
                * neraseblocks
-               *   Note that the device size is in kb, so * 1024 / 8 for bytes
+               *   Note that the device size is in kilobits and must be scaled by
+               *   1024 / 8
                */
 
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
               geo->blocksize    = CONFIG_AT24XX_MTD_BLOCKSIZE;
-              geo->erasesize    = geo->blocksize;
-              geo->neraseblocks = CONFIG_AT24XX_SIZE * (1024/8) / geo->erasesize;
+              geo->erasesize    = CONFIG_AT24XX_MTD_BLOCKSIZE;
+              geo->neraseblocks = (CONFIG_AT24XX_SIZE * 1024 / 8) / CONFIG_AT24XX_MTD_BLOCKSIZE;
 #else
               geo->blocksize    = priv->pagesize;
               geo->erasesize    = priv->pagesize;
