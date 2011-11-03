@@ -68,6 +68,126 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: cp0_getintctl
+ *
+ * Description:
+ *   Get the CP0 IntCtl register
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline uint32_t cp0_getintctl(void)
+{
+  register irqstate_t ebase;
+  __asm__ __volatile__
+    (
+      "\t.set    push\n"
+      "\t.set    noat\n"
+      "\t mfc0   %0, $12, 1\n"           /* Get CP0 IntCtl register */
+      "\t.set    pop\n"
+      : "=r" (ebase)
+      :
+      : "memory"
+    );
+
+  return cause;
+}
+
+/****************************************************************************
+ * Name: cp0_putintctl
+ *
+ * Description:
+ *   Write the CP0 IntCtl register
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void cp0_putintctl(uint32_t ebase)
+{
+  __asm__ __volatile__
+    (
+      "\t.set    push\n"
+      "\t.set    noat\n"
+      "\t.set    noreorder\n"
+      "\tmtc0   %0, $12, 1\n"             /* Set the IntCtl to the provided value */
+      "\t.set    pop\n"
+      : 
+      : "r" (ebase)
+      : "memory"
+    );
+}
+
+/****************************************************************************
+ * Name: cp0_getebase
+ *
+ * Description:
+ *   Get the CP0 EBASE register
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline uint32_t cp0_getebase(void)
+{
+  register irqstate_t ebase;
+  __asm__ __volatile__
+    (
+      "\t.set    push\n"
+      "\t.set    noat\n"
+      "\t mfc0   %0, $15, 1\n"           /* Get CP0 EBASE register */
+      "\t.set    pop\n"
+      : "=r" (ebase)
+      :
+      : "memory"
+    );
+
+  return cause;
+}
+
+/****************************************************************************
+ * Name: cp0_putebase
+ *
+ * Description:
+ *   Write the CP0 EBASE register
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void cp0_putebase(uint32_t ebase)
+{
+  __asm__ __volatile__
+    (
+      "\t.set    push\n"
+      "\t.set    noat\n"
+      "\t.set    noreorder\n"
+      "\tmtc0   %0, $15, 1\n"             /* Set the EBASE to the provided value */
+      "\t.set    pop\n"
+      : 
+      : "r" (ebase)
+      : "memory"
+    );
+}
+
+/****************************************************************************
  * Public Variables
  ****************************************************************************/
 
