@@ -130,6 +130,9 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
    * to this window.
    */
 
-  FAR struct nxbe_plane_s *pplane = &wnd->be->plane[plane];
-  pplane->getrectangle(&pplane->pinfo, rect, dest, deststride);
+  if (!nxgl_nullrect(&remaining))
+    {
+      FAR struct nxbe_plane_s *pplane = &wnd->be->plane[plane];
+      pplane->getrectangle(&pplane->pinfo, &remaining, dest, deststride);
+    }
 }

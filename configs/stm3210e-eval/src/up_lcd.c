@@ -346,7 +346,9 @@ static uint16_t stm3210e_readreg(uint8_t regaddr);
 static inline void stm3210e_gramselect(void);
 static inline void stm3210e_writegram(uint16_t rgbval);
 static void stm3210e_readsetup(FAR uint16_t *accum);
+#ifndef CONFIG_STM32_AM240320_DISABLE
 static void stm3210e_readnosetup(FAR uint16_t *accum);
+#endif
 static uint16_t stm3210e_readshift(FAR uint16_t *accum);
 static uint16_t stm3210e_readnoshift(FAR uint16_t *accum);
 static void stm3210e_setcursor(uint16_t col, uint16_t row);
