@@ -2192,3 +2192,6 @@
 	  supports using "clusters" of AT24 pages as blocks.  This allows bigger
 	  block sizes and more efficient use of EEPROM when the AT24 is used to
 	  support a file system (such as NXFFS). (Contributed by Hal Glenn).
+	* include/nuttx/rgbcolors.h: More fixes to RGB color conversion
+	  macros.
+

@@ -56,10 +56,15 @@
 #define RBG24GREEN(rgb) (((rgb) >> 8)  & 0xff)
 #define RBG24BLUE(rgb)  ( (rgb)        & 0xff)
 
-/* This macro creates RGB16 (5:6:5) from 8:8:8 RGB */
+/* This macro creates RGB16 (5:6:5) from 8:8:8 RGB:
+ *
+ *   R[7:3] -> RGB[15:11]
+ *   G[7:2] -> RGB[10:5]
+ *   B[7:3] -> RGB[4:0]
+ */
 
 #define RGBTO16(r,g,b) \
-  ((((uint16_t)(r) << 11) & 0xf800) | (((uint16_t)(g) << 5) & 0x07e0) | ((uint16_t)(b) & 0x001f))
+  ((((uint16_t)(r) << 8) & 0xf800) | (((uint16_t)(g) << 3) & 0x07e0) | (((uint16_t)(b) >> 3) & 0x001f))
 
 /* And these macros perform the inverse transformation */
 
