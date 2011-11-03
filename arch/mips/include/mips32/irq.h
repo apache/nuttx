@@ -338,7 +338,7 @@ struct xcptcontext
  * Name: cp0_getstatus
  *
  * Description:
- *   Disable interrupts
+ *   Read the CP0 STATUS register
  *
  * Input Parameters:
  *   None
@@ -355,7 +355,7 @@ static inline irqstate_t cp0_getstatus(void)
     (
       "\t.set    push\n"
       "\t.set    noat\n"
-      "\t mfc0   %0,$12\n"              /* Get CP0 status register */
+      "\t mfc0   %0, $12, 0\n"           /* Get CP0 status register */
       "\t.set    pop\n"
       : "=r" (status)
       :
@@ -369,7 +369,7 @@ static inline irqstate_t cp0_getstatus(void)
  * Name: cp0_putstatus
  *
  * Description:
- *   Disable interrupts
+ *   Write the CP0 STATUS register
  *
  * Input Parameters:
  *   None
@@ -386,7 +386,7 @@ static inline void cp0_putstatus(irqstate_t status)
       "\t.set    push\n"
       "\t.set    noat\n"
       "\t.set    noreorder\n"
-      "\tmtc0   %0,$12\n"                /* Set the status to the provided value */
+      "\tmtc0   %0, $12, 0\n"            /* Set the status to the provided value */
       "\tnop\n"                          /* MTC0 status hazard: */
       "\tnop\n"                          /* Recommended spacing: 3 */
       "\tnop\n"
@@ -394,6 +394,66 @@ static inline void cp0_putstatus(irqstate_t status)
       "\t.set    pop\n"
       : 
       : "r" (status)
+      : "memory"
+    );
+}
+
+/****************************************************************************
+ * Name: cp0_getcause
+ *
+ * Description:
+ *   Get the CP0 CAUSE register
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline uint32_t cp0_getcause(void)
+{
+  register irqstate_t cause;
+  __asm__ __volatile__
+    (
+      "\t.set    push\n"
+      "\t.set    noat\n"
+      "\t mfc0   %0, $13, 0\n"           /* Get CP0 cause register */
+      "\t.set    pop\n"
+      : "=r" (cause)
+      :
+      : "memory"
+    );
+
+  return cause;
+}
+
+/****************************************************************************
+ * Name: cp0_putcause
+ *
+ * Description:
+ *   Write the CP0 CAUSE register
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void cp0_putcause(uint32_t cause)
+{
+  __asm__ __volatile__
+    (
+      "\t.set    push\n"
+      "\t.set    noat\n"
+      "\t.set    noreorder\n"
+      "\tmtc0   %0, $13, 0\n"            /* Set the cause to the provided value */
+      "\t.set    pop\n"
+      : 
+      : "r" (cause)
       : "memory"
     );
 }

@@ -107,14 +107,33 @@ void up_irqinitialize(void)
     {
       (void)up_prioritize_irq(irq, (INT_ICP_MID_PRIORITY << 2));
     }
-  
-  /* Set the CP0 cause IV bit meaning that the interrupt exception uses
-   * the "special interrupt vector"
-   */
- 
-  asm volatile("\tmfc0 %0,$13,0\n" : "=r"(regval));
+
+  /* Set the BEV bit in the STATUS register */
+
+  regval  = cp0_getstatus();
+  regval |= CP0_STATUS_BEV;
+  cp0_putstatus(regval);
+
+  /* Set the EBASE value to the beginning of boot FLASH */
+
+  cp0_putebase(0xbfc00000);
+
+  /* Set the INTCTL vector spacing to non-zero */
+
+  cp0_putintctl(0x00000020);
+
+  /* Set the IV bit in the CAUSE register */
+
+  regval  = cp0_getcause();
   regval |= CP0_CAUSE_IV; 
-  asm volatile("\tmtc0 %0,$13,0\n" : : "r"(regval));
+  cp0_putcause(regval);
+
+  /* Clear the EXL bit in the STATUS register */
+
+  regval  = cp0_getstatus();
+//regval &= ~CP0_STATUS_BEV;
+  regval &= ~CP0_STATUS_EXL;
+  cp0_putstatus(regval);
 
   /* Configure multi- or single- vector interrupts */
 
