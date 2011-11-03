@@ -414,7 +414,7 @@ static inline void cp0_putstatus(irqstate_t status)
 
 static inline uint32_t cp0_getcause(void)
 {
-  register irqstate_t cause;
+  register uint32_t cause;
   __asm__ __volatile__
     (
       "\t.set    push\n"

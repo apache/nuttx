@@ -83,14 +83,14 @@
 
 static inline uint32_t cp0_getintctl(void)
 {
-  register irqstate_t ebase;
+  register uint32_t intctl;
   __asm__ __volatile__
     (
       "\t.set    push\n"
       "\t.set    noat\n"
       "\t mfc0   %0, $12, 1\n"           /* Get CP0 IntCtl register */
       "\t.set    pop\n"
-      : "=r" (ebase)
+      : "=r" (intctl)
       :
       : "memory"
     );
@@ -112,7 +112,7 @@ static inline uint32_t cp0_getintctl(void)
  *
  ****************************************************************************/
 
-static inline void cp0_putintctl(uint32_t ebase)
+static inline void cp0_putintctl(uint32_t intctl)
 {
   __asm__ __volatile__
     (
@@ -122,7 +122,7 @@ static inline void cp0_putintctl(uint32_t ebase)
       "\tmtc0   %0, $12, 1\n"             /* Set the IntCtl to the provided value */
       "\t.set    pop\n"
       : 
-      : "r" (ebase)
+      : "r" (intctl)
       : "memory"
     );
 }
@@ -143,7 +143,7 @@ static inline void cp0_putintctl(uint32_t ebase)
 
 static inline uint32_t cp0_getebase(void)
 {
-  register irqstate_t ebase;
+  register uint32_t ebase;
   __asm__ __volatile__
     (
       "\t.set    push\n"
