@@ -278,7 +278,7 @@
 #  define CP0_CAUSE_IP5             (0x13 << CP0_CAUSE_IP_SHIFT) /*  Hardware interrupt 3 */
 #  define CP0_CAUSE_IP6             (0x14 << CP0_CAUSE_IP_SHIFT) /*  Hardware interrupt 4 */
 #  define CP0_CAUSE_IP7             (0x15 << CP0_CAUSE_IP_SHIFT) /*  Hardware interrupt 5, timer or performance counter interrupt */
-#define CP0_CAUSE_WP                (1 << 22) /* Watch exception was deferred
+#define CP0_CAUSE_WP                (1 << 22) /* Watch exception was deferred */
 #define CP0_CAUSE_IV                (1 << 23) /* Bit 23:  Interrupt exception uses special interrupt vector */
 #define CP0_CAUSE_CE_SHIFT          (28)      /* Bits 28-29: Coprocessor unit number fo Coprocessor Unusable exception */
 #define CP0_CAUSE_CE_MASK           (3 << CP0_CAUSE_CE_SHIFT)
