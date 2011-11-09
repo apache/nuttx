@@ -60,7 +60,7 @@ MEMORY
 	 *   Debug code    0x1fc02000 KSEG1  4096-16   12272
 	 *   DEVCFG3-0     0x1fc02ff0 KSEG1  16        12288 (12Kb)
 	 *
-	 * Exceptions assme:
+	 * Exceptions assume:
 	 *
 	 *   STATUS: BEV=1 and EXL=0
 	 *   CAUSE:  IV=1
@@ -79,9 +79,12 @@ MEMORY
 	/* The PIC32MX795F512L has 128Kb of data memory at physical address
 	 * 0x00000000.  Since the PIC32MX has no data cache, this memory is
 	 * always accessed through KSEG1.
+	 *
+	 * When used with MPLAB, we need to set aside 512 bytes of memory
+	 * for use by MPLAB.
 	 */
 
-	kseg1_datamem (w!x) : ORIGIN = 0xa0000000, LENGTH = 128K
+	kseg1_datamem (w!x) : ORIGIN = 0xa0000200, LENGTH = 128K - 512
 }
 
 OUTPUT_FORMAT("elf32-tradlittlemips")

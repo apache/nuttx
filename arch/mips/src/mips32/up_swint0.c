@@ -326,7 +326,7 @@ int up_swint0(int irq, FAR void *context)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          memcpy((uint32_t*)regs[REG_A1], regs, XCPTCONTEXT_SIZE);
+          up_copystate((uint32_t*)regs[REG_A1], regs);
           current_regs = (uint32_t*)regs[REG_A2];
         }
         break;

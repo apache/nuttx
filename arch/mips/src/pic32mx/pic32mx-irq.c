@@ -143,11 +143,16 @@ void up_irqinitialize(void)
   putreg32(INT_INTCON_MVEC, PIC32MX_INT_INTCONCLR);
 #endif
 
-  /* Initialize GPIO change notifiction handling */
+  /* Initialize GPIO change notification handling */
  
 #ifdef CONFIG_GPIO_IRQ
   pic32mx_gpioirqinitialize();
 #endif
+
+  /* Attach and enable software interrupts */
+
+  irq_attach(PIC32MX_IRQ_CS0, up_swint0);
+  up_enable_irq(PIC32MX_IRQSRC_CS0);
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -194,14 +199,14 @@ void up_disable_irq(int irq)
           /* Use IEC0 */
 
           regaddr = PIC32MX_INT_IEC0CLR;
-          bitno  -= PIC32MX_IRQSRC0_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC0_FIRST;
         }
       else if (irq <= PIC32MX_IRQSRC1_LAST)
         {
           /* Use IEC1 */
 
           regaddr = PIC32MX_INT_IEC1CLR;
-          bitno  -= PIC32MX_IRQSRC1_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC1_FIRST;
         }
 #ifdef PIC32MX_IRQSRC2_FIRST
       else if (irq <= PIC32MX_IRQSRC2_LAST)
@@ -209,7 +214,7 @@ void up_disable_irq(int irq)
           /* Use IEC2 */
 
           regaddr = PIC32MX_INT_IEC2CLR;
-          bitno  -= PIC32MX_IRQSRC2_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC2_FIRST;
         }
 #endif
       else
@@ -248,14 +253,14 @@ void up_enable_irq(int irq)
           /* Use IEC0 */
 
           regaddr = PIC32MX_INT_IEC0SET;
-          bitno  -= PIC32MX_IRQSRC0_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC0_FIRST;
         }
       else if (irq <= PIC32MX_IRQSRC1_LAST)
         {
           /* Use IEC1 */
 
           regaddr = PIC32MX_INT_IEC1SET;
-          bitno  -= PIC32MX_IRQSRC1_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC1_FIRST;
         }
 #ifdef PIC32MX_IRQSRC2_FIRST
       else if (irq <= PIC32MX_IRQSRC2_LAST)
@@ -263,7 +268,7 @@ void up_enable_irq(int irq)
           /* Use IEC2 */
 
           regaddr = PIC32MX_INT_IEC2SET;
-          bitno  -= PIC32MX_IRQSRC2_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC2_FIRST;
         }
 #endif
       else

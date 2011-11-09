@@ -12,6 +12,7 @@ Contents
   - IDEs
   - NuttX buildroot Toolchain
   - DFU and JTAG
+  - OpenOCD
   - LEDs
   - Temperature Sensor
   - RTC
@@ -237,6 +238,32 @@ DFU and JTAG
 
   The default setting (none of the above defined) is SWJ_CFG[2:0] set to 100
   which disable JTAG-DP and SW-DP.
+
+OpenOCD
+=======
+
+I have also used OpenOCD with the STM3210E-EVAL.  In this case, I used
+the Olimex USB ARM OCD.  See the script in configs/stm3210e-eval/tools/oocd.sh
+for more information.  Using the script:
+
+1) Start the OpenOCD GDB server
+
+   cd <nuttx-build-directory>
+   configs/stm3210e-eval/tools/oocd.sh $PWD
+
+2) Load Nuttx
+
+   cd <nuttx-built-directory>
+   arm-none-eabi-gdb nuttx
+   gdb> target remote localhost:3333
+   gdb> mon reset
+   gdb> mon halt
+   gdb> load nuttx
+
+3) Running NuttX
+
+   gdb> mon reset
+   gdb> c
 
 LEDs
 ====

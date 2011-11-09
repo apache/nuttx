@@ -136,8 +136,8 @@
 	/* Then insert pending interrupt level as the current mask level in the CP0 status
 	 * register. Also clear bits 1-4 in new value of the status register:
 	 *
-     *   Bit 1: Exception Level
-     *   Bit 2: Error Level
+	 *   Bit 1: Exception Level
+	 *   Bit 2: Error Level
 	 *   Bit 3: (not used in PIC32MX)
 	 *   Bit 4: Operating mode == USER
 	 */
