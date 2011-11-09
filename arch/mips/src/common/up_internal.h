@@ -182,6 +182,10 @@ extern void up_dumpstate(void);
 
 extern uint32_t *up_doirq(int irq, uint32_t *regs);
 
+/* Software interrupt 0 handler */
+
+extern int up_swint0(int irq, FAR void *context);
+
 /* Signals */
 
 extern void up_sigdeliver(void);

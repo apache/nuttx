@@ -435,6 +435,7 @@ _bev_handler:
 	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
 	la		t0, pic32mx_dobev		/* Call up_dobev(regs) */
 	jalr	ra, t0
+	nop
 	di								/* Disable interrupts */
 	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
 	EXCPT_EPILOGUE v0				/* Return to the context returned by up_dobev() */
@@ -457,6 +458,7 @@ _int_handler:
 	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
 	la		t0, pic32mx_decodeirq	/* Call pic32mx_decodeirq(regs) */
 	jalr	ra, t0
+	nop
 	di								/* Disable interrupts */
 	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
 	EXCPT_EPILOGUE v0				/* Return to the context returned by pic32mx_decodeirq() */
@@ -480,6 +482,7 @@ _nmi_handler:
 	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
 	la		t0, pic32mx_donmi		/* Call up_donmi(regs) */
 	jalr	ra, t0
+	nop
 	di								/* Disable interrupts */
 	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
 	EXCPT_EPILOGUE v0				/* Return to the context returned by pic32mx_donmi() */
