@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include  <debug.h>
+
 #include <stdint.h>
 #include <assert.h>
 
@@ -83,14 +85,6 @@
 
 uint32_t *pic32mx_decodeirq(uint32_t *regs)
 {
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-
-  up_ledon(LED_INIRQ);
-  PANIC(OSERR_ERREXCEPTION);
-  up_ledoff(LED_INIRQ); /* Won't get here */
-  return regs;
-
-#else
   uint32_t *savestate;
   uint32_t regval;
   int irq;
@@ -170,5 +164,4 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
     }
 
   return regs;
-#endif
 }

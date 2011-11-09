@@ -95,7 +95,7 @@ static inline uint32_t cp0_getintctl(void)
       : "memory"
     );
 
-  return cause;
+  return intctl;
 }
 
 /****************************************************************************
@@ -155,7 +155,7 @@ static inline uint32_t cp0_getebase(void)
       : "memory"
     );
 
-  return cause;
+  return ebase;
 }
 
 /****************************************************************************
