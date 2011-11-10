@@ -1183,7 +1183,7 @@ void weak_function up_dmainitialize(void)
   /* Initialize semaphores */
 
   sem_init(&g_chsem, 0, 1);
-  sem_init(&g_chsem, 0, CONFIG_SAM3U_NDMACHAN);
+  sem_init(&g_dsem, 0, CONFIG_SAM3U_NDMACHAN);
 }
 
 /****************************************************************************
