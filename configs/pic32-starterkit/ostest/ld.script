@@ -194,7 +194,7 @@ SECTIONS
 	 */
 
 /* This causes failures if there are no RAM functions
-	.ramfunc :
+	.ramfunc ALIGN(2K) :
 	{
 		_sramfunc =  ABSOLUTE(.);
 		*(.ramfunc	.ramfunc.*)
@@ -207,11 +207,6 @@ SECTIONS
 	_bmxdudba_address = LENGTH(kseg1_datamem) ;
 	_bmxdupba_address = LENGTH(kseg1_datamem) ;
 */
-
-	.dbg_data (NOLOAD) :
-	{
-		. += (DEFINED (_DEBUGGER) ? 0x200 : 0x0);
-	} > kseg1_datamem
 
 	.data :
 	{
