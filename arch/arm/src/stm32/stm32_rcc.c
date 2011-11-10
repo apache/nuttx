@@ -40,9 +40,11 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <debug.h>
-#include <arch/board/board.h>
 #include <stdio.h>
+#include <assert.h>
+#include <debug.h>
+
+#include <arch/board/board.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -57,7 +59,12 @@
  * Definitions
  ****************************************************************************/
 
-#define HSERDY_TIMEOUT 256
+/* Allow up to 100 milliseconds for the high speed clock to become ready.
+ * that is a very long delay, but if the clock does not become ready we are
+ * hosed anyway.
+ */
+
+#define HSERDY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
 
 /****************************************************************************
  * Private Data
@@ -375,14 +382,13 @@ static inline void rcc_enableapb2(void)
   putreg32(regval, STM32_RCC_APB2ENR);
 }
 
-#if !defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
-
 /* Called to change to new clock based on settings in board.h
  * 
  *   NOTE:  This logic would need to be extended if you need to select low-
  *   power clocking modes!
  */
  
+#ifndef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 static inline void stm32_stdclockconfig(void)
 {
   uint32_t regval;
@@ -409,63 +415,68 @@ static inline void stm32_stdclockconfig(void)
       }
   }
 
-  if( timeout > 0)
+  /* Check for a timeout.  If this timeout occurs, then we are hosed.  We
+   * have no real back-up plan, although the following logic makes it look
+   * as though we do.
+   */
+
+  if (timeout > 0)
     {
-    /* Enable FLASH prefetch buffer and 2 wait states */
+      /* Enable FLASH prefetch buffer and 2 wait states */
 
-    regval  = getreg32(STM32_FLASH_ACR);
-    regval &= ~FLASH_ACR_LATENCY_MASK;
-    regval |= (FLASH_ACR_LATENCY_2|FLASH_ACR_PRTFBE);
-    putreg32(regval, STM32_FLASH_ACR);
+      regval  = getreg32(STM32_FLASH_ACR);
+      regval &= ~FLASH_ACR_LATENCY_MASK;
+      regval |= (FLASH_ACR_LATENCY_2|FLASH_ACR_PRTFBE);
+      putreg32(regval, STM32_FLASH_ACR);
 
-    /* Set the HCLK source/divider */
+      /* Set the HCLK source/divider */
  
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_HPRE_MASK;
-    regval |= STM32_RCC_CFGR_HPRE;
-    putreg32(regval, STM32_RCC_CFGR);
+      regval = getreg32(STM32_RCC_CFGR);
+      regval &= ~RCC_CFGR_HPRE_MASK;
+      regval |= STM32_RCC_CFGR_HPRE;
+      putreg32(regval, STM32_RCC_CFGR);
 
-    /* Set the PCLK2 divider */
+      /* Set the PCLK2 divider */
 
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_PPRE2_MASK;
-    regval |= STM32_RCC_CFGR_PPRE2;
-    putreg32(regval, STM32_RCC_CFGR);
+      regval = getreg32(STM32_RCC_CFGR);
+      regval &= ~RCC_CFGR_PPRE2_MASK;
+      regval |= STM32_RCC_CFGR_PPRE2;
+      putreg32(regval, STM32_RCC_CFGR);
   
-    /* Set the PCLK1 divider */
+      /* Set the PCLK1 divider */
 
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_PPRE1_MASK;
-    regval |= STM32_RCC_CFGR_PPRE1;
-    putreg32(regval, STM32_RCC_CFGR);
+      regval = getreg32(STM32_RCC_CFGR);
+      regval &= ~RCC_CFGR_PPRE1_MASK;
+      regval |= STM32_RCC_CFGR_PPRE1;
+      putreg32(regval, STM32_RCC_CFGR);
  
-    /* Set the PLL divider and multipler */
+      /* Set the PLL divider and multipler */
 
-    regval = getreg32(STM32_RCC_CFGR);
-    regval &= ~(RCC_CFGR_PLLSRC|RCC_CFGR_PLLXTPRE|RCC_CFGR_PLLMUL_MASK);
-    regval |= (STM32_CFGR_PLLSRC|STM32_CFGR_PLLXTPRE|STM32_CFGR_PLLMUL);
-    putreg32(regval, STM32_RCC_CFGR);
+      regval = getreg32(STM32_RCC_CFGR);
+      regval &= ~(RCC_CFGR_PLLSRC|RCC_CFGR_PLLXTPRE|RCC_CFGR_PLLMUL_MASK);
+      regval |= (STM32_CFGR_PLLSRC|STM32_CFGR_PLLXTPRE|STM32_CFGR_PLLMUL);
+      putreg32(regval, STM32_RCC_CFGR);
  
-    /* Enable the PLL */
+      /* Enable the PLL */
 
-    regval = getreg32(STM32_RCC_CR);
-    regval |= RCC_CR_PLLON;
-    putreg32(regval, STM32_RCC_CR);
+      regval = getreg32(STM32_RCC_CR);
+      regval |= RCC_CR_PLLON;
+      putreg32(regval, STM32_RCC_CR);
  
-    /* Wait until the PLL is ready */
+      /* Wait until the PLL is ready */
   
-    while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
+      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
  
-    /* Select the system clock source (probably the PLL) */
+      /* Select the system clock source (probably the PLL) */
  
-    regval  = getreg32(STM32_RCC_CFGR);
-    regval &= ~RCC_CFGR_SW_MASK;
-    regval |= STM32_SYSCLK_SW;
-    putreg32(regval, STM32_RCC_CFGR);
+      regval  = getreg32(STM32_RCC_CFGR);
+      regval &= ~RCC_CFGR_SW_MASK;
+      regval |= STM32_SYSCLK_SW;
+      putreg32(regval, STM32_RCC_CFGR);
 
-    /* Wait until the selected source is used as the system clock source */
+      /* Wait until the selected source is used as the system clock source */
   
-    while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
+      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != STM32_SYSCLK_SWS);
   }
 }
 #endif
