@@ -101,6 +101,16 @@
 #define GPIO_FLASH_CS   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN2)
 
+/* Backlight control: PA.8
+ *
+ * If CONFIG_LCD_TIM1 (and CONFIG_STM32_TIM1) is defined, PA.8 will be
+ * configured as CH1OUT for variable backlight control.  Otherwise, the
+ * following definition will be used to support a discrete backlight control.
+ */
+ 
+#define GPIO_LCD_BACKLIGHT (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                             GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN8)
+
 /* USB Soft Connect Pullup: PB.14 */
 
 #define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTOD|GPIO_MODE_50MHz|\

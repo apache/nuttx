@@ -84,11 +84,34 @@
 #  define CONFIG_LCD_MAXCONTRAST 1
 #endif
 
+/* Backlight */
+
+#ifndef CONFIG_LCD_BACKLIGHT
+#  undef CONFIG_LCD_PWM
+#endif
+
+#if defined(CONFIG_LCD_BACKLIGHT) && defined(CONFIG_LCD_PWM)
+#  if !defined(CONFIG_STM32_TIM1)
+#    warning "CONFIG_LCD_PWM requires CONFIG_STM32_TIM1"
+#    undef CONFIG_LCD_PWM
+#  endif
+#  if defined(CONFIG_STM32_TIM1_FULL_REMAP)
+#    warning "PA8 cannot be configured as TIM1 CH1 with full remap"
+#    undef CONFIG_LCD_PWM
+#  endif
+#endif
+
+#if defined(CONFIG_LCD_BACKLIGHT) && defined(CONFIG_LCD_PWM)
+#  if CONFIG_LCD_MAXPOWER < 2
+#    warning "A larger value of CONFIG_LCD_MAXPOWER is recommended"
+#  endif
+#endif
+
 /* Check power setting */
 
 #if !defined(CONFIG_LCD_MAXPOWER) || CONFIG_LCD_MAXPOWER < 1
 #  undef CONFIG_LCD_MAXPOWER
-#  ifdef CONFIG_LCD_BACKLIGHT
+#  if defined(CONFIG_LCD_BACKLIGHT) && defined(CONFIG_LCD_PWM)
 #    define CONFIG_LCD_MAXPOWER 100
 #  else
 #    define CONFIG_LCD_MAXPOWER 1
@@ -111,21 +134,6 @@
 #  endif
 #elif !defined(CONFIG_LCD_LANDSCAPE)
 #  define CONFIG_LCD_LANDSCAPE 1
-#endif
-
-/* Backlight */
-
-#ifdef CONFIG_LCD_BACKLIGHT
-#  ifndef CONFIG_STM32_TIM1
-#    error "CONFIG_STM32_TIM1 to use the LCD backlight controls"
-#  endif
-#  if CONFIG_LCD_MAXPOWER < 2
-#    warning "A larger value of CONFIG_LCD_MAXPOWER is recommended"
-#  endif
-#endif
-
-#if defined(CONFIG_STM32_TIM1_FULL_REMAP)
-#  error "PA8 cannot be configured as TIM1 CH1 with full remap"
 #endif
 
 /* When reading 16-bit gram data, there may some shifts in the returned data
@@ -969,6 +977,7 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
   if (power > 0)
     {
 #ifdef CONFIG_LCD_BACKLIGHT
+#ifdef CONFIG_LCD_PWM
       uint32_t duty;
 
       /* Caclulate the new backlight duty.  It is a faction of the timer1
@@ -982,6 +991,11 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
           duty = LCD_BL_TIMER_PERIOD - 1;
         }
       putreg16((uint16_t)duty, STM32_TIM1_CCR1);
+#else
+      /* Turn the backlight on */
+
+      stm32_gpiowrite(GPIO_LCD_BACKLIGHT, true);
+#endif
 #endif
       /* Then turn the display on */
 
@@ -998,7 +1012,15 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
     }
   else
     {
+      /* Turn the display off */
+
       stm3210e_writereg(LCD_REG_7, 0); 
+
+      /* Turn the backlight off */
+
+#if defined(CONFIG_LCD_BACKLIGHT) && !defined(CONFIG_LCD_PWM)
+      stm32_gpiowrite(GPIO_LCD_BACKLIGHT, true);
+#endif
       g_lcddev.power = 0;
     }
 
@@ -1279,6 +1301,7 @@ static inline void stm3210e_lcdinitialize(void)
 #ifdef CONFIG_LCD_BACKLIGHT
 static void stm3210e_backlight(void)
 {
+#ifdef CONFIG_LCD_PWM
   uint16_t ccmr;
   uint16_t ccer;
   uint16_t cr2;
@@ -1387,6 +1410,9 @@ static void stm3210e_backlight(void)
   lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM1_CCR4));
   lcddbg("CCR4:    %04x\n", getreg32(STM32_TIM1_CCR4));
   lcddbg("DMAR:    %04x\n", getreg32(STM32_TIM1_DMAR));
+#else
+  stm32_configgpio(GPIO_LCD_BACKLIGHT);
+#endif
 }
 #endif
 
