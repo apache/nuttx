@@ -545,12 +545,24 @@ STM3210E-EVAL-specific Configuration Options
       portrait" orientation support.  In this orientation, the
       STM3210E-EVAL's LCD ribbon cable is at the top of the display.
       Default is 320x240 "landscape" orientation.
-    CONFIG_LCD_BACKLIGHT - Define to support an adjustable backlight
-      using timer 1.  The granularity of the settings is determined
-      by CONFIG_LCD_MAXPOWER.  Requires CONFIG_STM32_TIM1.
+    CONFIG_LCD_BACKLIGHT - Define to support a backlight.
+    CONFIG_LCD_PWM - If CONFIG_STM32_TIM1 is also defined, then an
+      adjustable backlight will be provided using timer 1 to generate
+      various pulse widthes.  The granularity of the settings is
+      determined by CONFIG_LCD_MAXPOWER.  If CONFIG_LCD_PWM (or
+      CONFIG_STM32_TIM1) is not defined, then a simple on/off backlight
+      is provided.
     CONFIG_LCD_RDSHIFT - When reading 16-bit gram data, there appears
       to be a shift in the returned data.  This value fixes the offset.
       Default 5.
+
+    The LCD driver dynamically selects the LCD based on the reported LCD
+    ID value.  However, code size can be reduced by suppressing support for
+    individual LCDs using:
+
+    CONFIG_STM32_AM240320_DISABLE
+    CONFIG_STM32_SPFD5408B_DISABLE
+    CONFIG_STM32_R61580_DISABLE
 
 Configurations
 ==============
