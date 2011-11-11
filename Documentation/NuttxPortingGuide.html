@@ -5114,7 +5114,12 @@ build
     some functions into RAM, either for better performance or for errata workarounds.
   </li>
   <li>
-    <code>CONFIG_STACK_POINTER</code>: The initial stack pointer
+    <code>CONFIG_STACK_POINTER</code>: The initial stack pointer (may not be supported
+    in all architectures).
+  </li>
+  <li>
+    <code>CONFIG_STACK_ALIGNMENT</code>: Set if the your application has specific
+    stack alignment requirements (may not be supported in all architectures).
   </li>
   <li>
     <code>CONFIG_IDLETHREAD_STACKSIZE</code>: The size of the initial stack.

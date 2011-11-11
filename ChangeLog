@@ -2194,4 +2194,7 @@
 	  support a file system (such as NXFFS). (Contributed by Hal Glenn).
 	* include/nuttx/rgbcolors.h: More fixes to RGB color conversion
 	  macros.
+	* arch/arm/src/common/up_createstack.c and up_usestack.c:  For ARM EABI
+	  the stack must be aligned to 8-byte boundaries.  This is necessary for
+	  passing aligned floating point values under EABI.
 
