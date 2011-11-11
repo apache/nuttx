@@ -50,6 +50,33 @@
 #include "up_internal.h"
 
 /****************************************************************************
+ * Pre-processor Macros
+ ****************************************************************************/
+
+/* ARM requires at least a 4-byte stack alignment.  For use with EABI and
+ * floating point, the stack must be aligned to 8-byte addresses.
+ */
+
+#ifndef CONFIG_STACK_ALIGNMENT
+
+/* The symbol  __ARM_EABI__ is defined by GCC if EABI is being used.  If you
+ * are not using GCC, make sure that CONFIG_STACK_ALIGNMENT is set correctly!
+ */
+
+#  ifdef __ARM_EABI__
+#    define CONFIG_STACK_ALIGNMENT 8
+#  else
+#    define CONFIG_STACK_ALIGNMENT 4
+#  endif
+#endif
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (CONFIG_STACK_ALIGNMENT-1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -96,21 +123,27 @@ int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
 
   tcb->stack_alloc_ptr = stack;
 
-  /* The ARM uses a push-down stack:  the stack grows
-   * toward loweraddresses in memory.  The stack pointer
-   * register, points to the lowest, valid work address
-   * (the "top" of the stack).  Items on the stack are
+  /* The ARM uses a push-down stack:  the stack grows toward lower addresses
+   * in memory.  The stack pointer register, points to the lowest, valid
+   * work address (the "top" of the stack).  Items on the stack are
    * referenced as positive word offsets from sp.
    */
 
   top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
 
-  /* The ARM stack must be aligned at word (4 byte)
-   * boundaries. If necessary top_of_stack must be rounded
-   * down to the next boundary
+  /* The ARM stack must be aligned; 4 byte alignment for OABI and 8-byte
+   * alignment for EABI. If necessary top_of_stack must be rounded down
+   * to the next boundary
    */
 
-  top_of_stack &= ~3;
+  top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
+
+  /* The size of the stack in bytes is then the difference between
+   * the top and the bottom of the stack (+4 because if the top
+   * is the same as the bottom, then the size is one 32-bit element).
+   * The size need not be aligned.
+   */
+
   size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
 
   /* Save the adjusted stack values in the _TCB */
