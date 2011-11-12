@@ -314,7 +314,7 @@ bool up_pending_irq(int irq)
 
           ifsaddr = PIC32MX_INT_IFS0;
           iecaddr = PIC32MX_INT_IEC0;
-          bitno  -= PIC32MX_IRQSRC0_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC0_FIRST;
         }
       else if (irq <= PIC32MX_IRQSRC1_LAST)
         {
@@ -322,7 +322,7 @@ bool up_pending_irq(int irq)
 
           ifsaddr = PIC32MX_INT_IFS1;
           iecaddr = PIC32MX_INT_IEC1;
-          bitno  -= PIC32MX_IRQSRC1_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC1_FIRST;
         }
 #ifdef PIC32MX_IRQSRC2_FIRST
       else if (irq <= PIC32MX_IRQSRC2_LAST)
@@ -331,7 +331,7 @@ bool up_pending_irq(int irq)
 
           ifsaddr = PIC32MX_INT_IFS2;
           iecaddr = PIC32MX_INT_IEC2;
-          bitno  -= PIC32MX_IRQSRC2_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC2_FIRST;
         }
 #endif
       else
@@ -365,8 +365,7 @@ void up_clrpend_irq(int irq)
   uint32_t regaddr;
   int bitno;
 
-  /* Disable the interrupt by clearing the associated bit in the IEC and then
-   * acknowledge the interrupt by clearing the associated bit in the IFS
+  /* Acknowledge the interrupt by clearing the associated bit in the IFS
    * register.  It is necessary to do this BEFORE lowering the interrupt
    * priority level otherwise recursive interrupts would occur.
    */
@@ -379,14 +378,14 @@ void up_clrpend_irq(int irq)
           /* Use IFS0 */
 
           regaddr = PIC32MX_INT_IFS0CLR;
-          bitno  -= PIC32MX_IRQSRC0_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC0_FIRST;
         }
       else if (irq <= PIC32MX_IRQSRC1_LAST)
         {
           /* Use IFS1 */
 
           regaddr = PIC32MX_INT_IFS1CLR;
-          bitno  -= PIC32MX_IRQSRC1_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC1_FIRST;
         }
 #ifdef PIC32MX_IRQSRC2_FIRST
       else if (irq <= PIC32MX_IRQSRC2_LAST)
@@ -394,7 +393,7 @@ void up_clrpend_irq(int irq)
           /* Use IFS2 */
 
           regaddr = PIC32MX_INT_IFS2CLR;
-          bitno  -= PIC32MX_IRQSRC2_FIRST;
+          bitno   = irq - PIC32MX_IRQSRC2_FIRST;
         }
 #endif
       else

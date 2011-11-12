@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 6, 2011</p>
+      <p>Last Updated: November 12, 2011</p>
     </td>
   </tr>
 </table>
@@ -905,81 +905,66 @@
   </tr>
 </table>
 
-<p><b>nuttx-6.10 Release Notes</b>:
+<h2>NuttX-6.11 Release Notes</h2>
 <p>
-  The 77<sup>th</sup> release of NuttX, Version 6.10, was made on  October 6, 2011, and is available for download from the
+  The 78<sup>th</sup> release of NuttX, Version 6.11, was made on November 12, 2011, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that release consists of two tarballs:  <code>nuttx-6.10.tar.gz</code> and <code>apps-6.10.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-6.11.tar.gz</code> and <code>apps-6.11.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information)
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in SVN.
   These unreleased changes are also listed <a href="#pendingchanges">here</a>.
 </p>
 <p>
-  This release includes a few new features and several important bug fixes.
-  The new features (some still incomplete) include:
+  This release is a maintenance release that includes a few new features
+  and some important bugfixes.  New features include:
 </p>
 <ul>
-  <li><b>USB Device</b>.
-    CDC ACM serial class device-side driver
+  <li><b>NX Graphics</b>.
+    New interfaces to read from graphics memory.
   </li>
-  <li><b>RTC</b>.
-    Now supports hi-res and lo-res hardware RTC.  The lo-res RTC runs at 1Hz.
+  <li><b>Drivers</b>.
+    The AT24xx FLASH drivers will now support clustering of blocks to achieve a larger, more usable block size for FAT.
   </li>
-  <li><b>STM32 I2C driver</b>.
-    Now supports faster, polled mode of operation.  Added an I2C trace capability.
+  <li><b>STM32</b>.
+    LCD color corrections.
   </li>
-  <li><b>ADS7843E touchscreen driver</b>.
-    As used on the SAM3U-EK development board.
+  <li><b>PIC32</b>.
+    Board configuration for the Microchip PIC32 Ethernet Starter kit (not yet verified),
+    new GPIO support library,
+    button and LED support for the Sure Electronics PIC32MX board.
+    A lot of progress has been made on the PIC32 NuttX port, but it is still not ready for prime time.
   </li>
-  <li><b>AT91SAM3U SPI driver</b>.
-    To support the ADS7843E toucscreen
-  </li>
-  <li><b>X11 Support on simulation target</b>.
-    Build errors in the X11 windows for the simulated target have been correct.
-    Added support for a simulated touchscreen on the X11 window (based on mouse inputs).
-  </li>
-  <li><b>System Timer</b>.
-    Added support for a 64-bit system timer.
-  </li>
-  <li><b>TIFF Support</b>.
-    Added a TIFF library (currently used for storing LCD screen shots).
-  </li>
-  <li><b>LCD Support</b>.
-    Added a test to verify that we read and write correct to LCD GRAM memory.
-  </li>
-  <li><b>I2C tool</b>.
-    Extended to support to include a verify command and repititions and auto-address increment for most commands.
-  </li>
-  <li><b>USB terminal example</b>.
-    Line oriented serial bridge connects a host USB serial terminal to a host UART serial terminal.
-  </li>
-  <li><b>Build System</b>.
-    <code>apps/Makefile</code> will now include external directories in the application build.
+  <li><b>NXP LPC3152</b>.
+    Board configuration for the Embedded Artists EA3152.
   </li>
 </ul>
 <p>
   Bugfixes, order roughly on decreasing criticality include the following.
-  The first two bugs are consider critical.
+  The first two bugfixes are considered critical.
 </p>
 <ul>
-  <li><b>Message Queues</b>.
-    Correct errors in<code>mq_timedsend()</code> and <code>mq_timedrecieve()</code>.
-  </li>
-  <li><bFAT></b>.
-    Writes that cross sector boundaries, stray write into the FAT, and a FAT long file name issue.
-  </li>
   <li><b>NXFFS</b>.
-    Added a missed error check.  Files cannot be opened for writing if they are already opened for reading.
+    Corrected critical bugs in initialization, some full FLASH handling,
+    and errors in certain cases where the FLASH is repacked.
   </li>
-  <li><b>Library</b>.
-    <code>fopen()</code> for append modse was not appending.
+  <li><b>ARM EABI</b>.
+    Fix stack aligment required for passing floating point values.
   </li>
-  <li><b>STM32 I2C driver</b>.
-    Correct another conflict between concurrent FSMC and I2C1 accesses.  Fixed some bad error detection logic.
+  <li><b>Build system</b>.
+    Fix build issues when g++ is used as the compiler.
   </li>
-  <li><b>STM32 SDHC driver</b>.
-    Interrupts were being left disabled.
+  <li><b>NX Graphics</b>.
+    Bitmap error handling, correct RGB color conversion macros, Error when the background window is released.
+  </li>
+  <li><b>STM32</b>.
+    RTC build fixes, LCD color corrections.
+  </li>
+  <li><b>C Library</b>.
+    <code>fclose()</code> return value.
+  </li>
+  <li><b>Simulation target</b>.
+    build fixes.
   </li>
 </ul>
 <p>
@@ -1281,15 +1266,20 @@
 <tr>
   <td><br></td>
   <td>
-    <b>NXP LPC315x</b>.
+    <b>NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC315x</a></b>.
     Support for the NXP LPC315x family has been incorporated into the code base as of NuttX-6.4.
+    Support has added for the Embedded Artists EA3152 board in NuttX-6.11.
     </p>
     <ul>
       <p>
         <b>STATUS:</b>
-          The MCU support logic is present but as of this writing has not been verified on hardware.
-          Because of the high degree of compatibility between the LPC313x and LPC315x family, it
+          Basic support is in place for both the LPC3152 MCU and the EA3152 board.
+          Verification of the port was deferred due to tool issues
+          However, because of the high degree of compatibility between the LPC313x and LPC315x family, it
           is very likely that the support is in place (or at least very close).
+          At this point, verification of the EA3152 port has been overcome by events and
+          may never happen.
+          However, the port is available for anyone who may want to use it.
       </p>
     </ul>
   </td>
@@ -1985,10 +1975,10 @@
     <ul>
       <p>
        <b>STATUS:</b>
-       This port is code complete and has begun testing.
-       Testing is, unfortunately, delayed until I obtain some additional test equipment
-       (you can't use PICkit 2 with the PIC32; you need PICkit 3.  And, to make things worse,
-       my PICKit3 just hangs when I try to debug).
+       This port is code complete and partially testing.
+       Initial testing was, unfortunately, delayed due to test equipment issues.
+       In the mean time, I received the Sure Electronics and the Microchip PIC32 Ethernet Starter kit.
+       I expect that this port will be functional when those other ports are functional, but I have not revisited this.
       </p>
     </ul>
   </td>
@@ -2009,9 +1999,9 @@
     <ul>
       <p>
        <b>STATUS:</b>
-       This port is code complete and has begun testing.
-       I hope to use the on-board LEDs to work around the debug problems with the PCL Logic board (see above).
-       Update: Work on this board has stalled due to higher priority tasks.
+       This port is code complete and has considerable test testing.
+       The port for this board was nearly complete in NuttX 6.11, but still requires a few bug fixes before it will be ready for prime time.
+       Work is ongoing as time permits and I expect a solid port for this board in NuttX 6.12.
       </p>
     </ul>
   </td>
@@ -2032,7 +2022,8 @@
       <p>
        <b>STATUS:</b>
          This port was started a shelved... The Starter Kit (even with the MEB) has no serial port.
-         I will have to come up with a different bring-up strategy to work with this board.
+         I will have to come up with a different bring-up strategy to work with this board (probably using
+         an external MAX2232 board for UART support).
       </p>
     </ul>
   </td>
@@ -2615,93 +2606,64 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.10 2011-10-06 Gregory Nutt &lt;gnutt@nuttx.org&gt;
+nuttx-6.11 2011-11-12 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
-    * lib/stdio/lib_fopen.c:  Fix an error in fopen(); the file pointer was not
-      being positioned at the end of the file when the &quot;a&quot; and &quot;a+&quot; modes are
-      used.  There are other issues with the &quot;a+&quot; modes (see the top-level TODO
-      list).
-    * drivers/usbdev/cdc_serial.c and include/nuttx/usb/cdc.h and cdc_serial.h:
-      Add support for the CDC ACM serial device class.
-    * fs/fat/fs_fat32.c: Fix a critical bug in the write logic:  It a tiny write
-      cross a sector boundary, then two sector writes will occur.  The first part
-      in the first sector may be written to the wrong sector number.
-    * fs/fat/fs_fat32util.c:  Fix a stray write into the FAT (always sector 964 on
-      FAT32).  This bug will cause some lost chains.  I'm sure this bug could
-      corrupt files but at present, the only thing I have seen is that before
-      fixing this bug, the Windows chkdsk utility would report these lost chains.
-    * arch/arm/src/stm32/stm32_i2c.c: Driver can now operate in a faster polled
-      mode (at the expense of using more cpu cycles).
-    * arch/arm/src/stm32/stm32_i2c.c: Add trace debug capability.  Enabled with
-      CONFIG_I2C_TRACE.
-    * arch/arm/src/stm32/stm32_i2c.c: Fix another bug where I2C conflicts with FSMC
-      being enabled.  That time at the tail end of the transaction where there is
-      an unfinished stop condition.
-    * sched/mq_timedreceive.c and sched/mq_timedsend.c:  The count of threads
-      waiting on the message queues was not being decremented after a timeout.
-      This would cause the accounting logic to become out of sync and the, perhaps,
-      an assertion to be triggered.  This is an important bug and fixes a
-      potential crash when using mq_timedreceived() and mq_timedsend().
-    * sched/mq_sndinternal.c: Related to the above, the send logic was incrementing
-      the wrong counter when it waited as part of the mq_timedsend.c logic.
-    * fs/fat:  Fix an error in the long file name logic:  If the long file name
-      is an even multiple of 13 bytes in length, then it should not include a
-      NULL terminating character.  Fix contributed by Kaushal Parikh.
-    * configs/sim/nx11: Created a separate configuration to build the NX
-      example using the a simulated framebuffer driver on an X11 window.  This
-      example has been verified on Ubuntu 9.09 (it does not work on Cygwin).
-    * arch/sim/src/up_touchscreen.c and up_x11eventloop.c: Adds support for a
-      simulated NuttX touchscreen device using mouse/pointer feedback from an
-      x11 window.
-    * configs/sim/touchscreen: Adds a configuration to verify the simulated
-      touchscreen driver (Does not work on Cygwin).
-    * configs/sam3u/touchscreen: This is the configuration that I plan to use
-      to verify the SAM3U-EK touchscreen driver.  However, as of this writing,
-      there is no touchscreen driver for the board.
-    * CONFIG_RTC_HIRES: Add an option to support either a high-resolution RTC
-      that completely replaces the system timer tick but may overflow and lose
-      time when the MCU is off and also for a low-resolution (1 sec/tick) RTC
-      that can run until 2106 with no overflow.  But in this latter case, higher
-      resolution time must come from the system timer.
-    * CONFIG_SYSTEM_UTC: Removed support for the UTC system timer.  It just
-      doesn't do enough to be worth the CPU cycles or the complexity.
-    * CONFIG_SYSTEM_TIME16: Added support for an optional 64-bit system timer.
-    * fs/fat/fs_fat32util.c: Add support for FAT date/time stamps; Enabled via
-      CONFIG_FS_FATTIME.
-    * arch/arm/src/sam3u/sam3u_spi.c: Add an SPI driver for the AT91SAM3U.
-    * drivers/input/ads7843e.c and include/nuttx/input/ads7843e.h: Add a
-      driver for the TI ADS7843E touchscreen controller.
-    * fs/nxffs/nxffs_open.c:  Fix an error when a file is open for writing; since
-      the file will get deleted it is already exists, there must be a check if
-      there are other open references to the file.
-    * arch/arm/src/stm32/stm32_sdio.c: Fixed an error where during SDHC
-      initialization interrupts were not being re-enabled.  Caused more subtle
-      errors than you would think.
-    * arch/arm/src/stm32/stm32_i2c.c:  Fixed an error where I2C timeouts appeared
-      to be successful transfers.
-    * configs/sim/nsh2: Add another simulated NSH configuration.  This one
-      supports X11 graphics, C++, and exercises graphic functions as built-in
-      commands.
+    * arch/arm/stm32/Make.defs:  Don't build stm32_rtc.c if CONFIG_RTC is not
+      selected.  Doing so will cause errors if other configuration dependencies
+      are not met.
+    * configs/stm3210e-eval/src/up_lcd.c:  Color corrections for SPFD5408B LCD
+      do not work with R61580 LCD.
+    * configs/pic32-starterkit: Beginning of a configuration for the Microchip
+      PIC32 Ethernet Starter Kit.  Hmmm.. I don't have a clue how to test this
+      with no serial port?!
+    * lib/stdio/lib_fclose.c: fclose() always returns an error (EOF) when it
+      closes a read-only file.  This is because it calls flush() which will
+      fail on read-only files.  No harm is done other that a bad value is
+      returned.
+    * arch/sim/src/Makefile: Correct build issue for sim/nsh2 target.  Old
+      libboard.a was not being cleaned.
+    * arch/mips/src/pic32mx/pic32mx-gpio*.c:  Add GPIO support for the PIC32MX.
+    * configs/sure-pic32mx/src/up_leds.c and up_buttons.c:  Add button and LED
+      support for the Sure Electronics PIC32MX board.
+    * configs/ea3152:  Add a configuration for the Embedded Artists LPC3152
+      daughter board (with the same base-board used with configs/ea3131)
+    * graphics/nxmu/nx_getrectangle.c, graphics/nxsu/nx_getrectangle.c,
+      graphics/mxtk/nx_getwindow.c, graphics/nxmu/nx_gettoobar.c:  New
+      interfaces to read from graphics memory
+    * graphics/nxbe/nxbe_bitmap.c: Fix an error in the error handling that
+      can cause valid bitmaps to fail to render.
+    * include/nuttx/rgbcolors.h: Fix errors in some 16- and 8-bit color
+      conversion macros.
+    * tools/incdir.sh: Fix issues when g++ is used as the compiler.  It was
+      not being recognized and handled properly.
+    * graphics/nxsu/nx_releasebkgd.c: Fix a bad cast that was causing
+      problems with the background window was released.
+    * fs/nxffs/nxffs_pack.c:  Correct a critical bug in the NXFFS file system:
+      When repacking the filesystem, there was a missing check to see if an
+      inode structure would fit at the end of a block.  This is a rare case
+      if the block size is large, but can be common for tiny block sizes
+      and results in a crash and file system corruption.
+    * fs/nxffs/nxffs_initialize.c:  Fix an initialize error.  If the FLASH
+      is on power-up, NXFFS will fail to initialize correctly.
+    * fs/nxffs/nxffs_write.c and nxffs_pack.c:  Fix an error that can occur
+      when attempt to write to FLASH volume that is completely full but
+      has no value inodes on it.
+    * drivers/mtd/at24xx.c:  Now supports a configurable block size that
+      supports using "clusters" of AT24 pages as blocks.  This allows bigger
+      block sizes and more efficient use of EEPROM when the AT24 is used to
+      support a file system (such as NXFFS). (Contributed by Hal Glenn).
+    * include/nuttx/rgbcolors.h: More fixes to RGB color conversion
+      macros.
+    * arch/arm/src/common/up_createstack.c and up_usestack.c:  For ARM EABI
+      the stack must be aligned to 8-byte boundaries.  This is necessary for
+      passing aligned floating point values under EABI.  Fix contributed by
+      David Sidrane.
+    * Numerous changes and fixes to the PIC32 interrupt handing logic. The
+      PIC32 port is almost complete but still not ready for prime time.
 
-apps-6.10 2011-10-06 Gregory Nutt &lt;gnutt@nuttx.org&gt;
+apps-6.11 2011-11-12 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
-    * apps/system/i2c:  Add repitition and address auto-incrementing so that
-      and command can be executed numerous times.  Add a new verify command
-      that will write to a register, read from register, and verify that
-      returned value.
-    * apps/graphics/tiff:  Add a library that can be used to create TIFF files.
-    * apps/examples/tiff:  Add a unit test for the TIFF file creation logic
-    * apps/examples/lcdrw:  Add a test to verify if you can or can or read
-      data from an LCD correctly.
-    * apps/examples/usbterm:  A USB terminal example.. more of a USB chat or
-      serial bridge:  Data received on local console echoed via USB serial; 
-      data received on USB serial is echoed on the local console.
-    * apps/examples/touchscreen:  Add a simple, generic test for any
-      touschscreen driver.
-    * Makefile:  The apps/ Makefile now checks for an apps/external directory
-      or symbolic link.  If such a directory/link exists (and has a Makefile),
-      it will be added to the apps/ build.  This allows external directories
-      to be included into the apps/ build by simply creating a symbolic link.
+    There were no major changes to the apps package in NuttX 6.11
 
 pascal-1.0 2011-05-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
@@ -2744,24 +2706,9 @@ buildroot-1.10 2011-05-06 &lt;gnutt@nuttx.org&gt;
 </table>
 
 <ul><pre>
-nuttx-6.11 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
+nuttx-6.12 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
-    * arch/arm/stm32/Make.defs:  Don't build stm32_rtc.c if CONFIG_RTC is not
-      selected.  Doing so will cause errors if other configuration dependencies
-      are not met.
-    * configs/stm3210e-eval/src/up_lcd.c:  Color corrections for SPFD5408B LCD
-      do not work with R61580 LCD.
-    * configs/pic32-starterkit: Beginning of a configuration for the Microchip
-      PIC32 Ethernet Starter Kit.  Hmmm.. I don't have a clue how to test this
-      with no serial port?!
-    * lib/stdio/lib_fclose.c: fclose() always returns an error (EOF) when it
-      closes a read-only file.  This is because it calls flush() which will
-      fail on read-only files.  No harm is done other that a bad value is
-      returned.
-    * arch/sim/src/Makefile: Correct build issue for sim/nsh2 target.  Old
-      libboard.a was not being cleaned.
-
-apps-6.11 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
+apps-6.12 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
 pascal-3.1 2011-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 

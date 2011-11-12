@@ -2146,7 +2146,7 @@
 	  supports X11 graphics, C++, and exercises graphic functions as built-in
 	  commands.
 
-6.11 2011-xx-xx Gregory Nutt <gnutt@nuttx.org>
+6.11 2011-11-12 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/stm32/Make.defs:  Don't build stm32_rtc.c if CONFIG_RTC is not
 	  selected.  Doing so will cause errors if other configuration dependencies
@@ -2176,8 +2176,8 @@
 	  conversion macros.
 	* tools/incdir.sh: Fix issues when g++ is used as the compiler.  It was
 	  not being recognized and handled properly.
-	* graphics/nxsu/nx_releasebkgdg.c: Fix a bad cast that was causing
-	  problems with the backgournd window was released.
+	* graphics/nxsu/nx_releasebkgd.c: Fix a bad cast that was causing
+	  problems with the background window was released.
 	* fs/nxffs/nxffs_pack.c:  Correct a critical bug in the NXFFS file system:
 	  When repacking the filesystem, there was a missing check to see if an
 	  inode structure would fit at the end of a block.  This is a rare case
@@ -2196,5 +2196,9 @@
 	  macros.
 	* arch/arm/src/common/up_createstack.c and up_usestack.c:  For ARM EABI
 	  the stack must be aligned to 8-byte boundaries.  This is necessary for
-	  passing aligned floating point values under EABI.
+	  passing aligned floating point values under EABI.  Fix contributed by
+	  David Sidrane.
+	* Numerous changes and fixes to the PIC32 interrupt handing logic. The
+	  PIC32 port is almost complete but still not ready for prime time.
 
+6.12 2011-xx-xx Gregory Nutt <gnutt@nuttx.org>
