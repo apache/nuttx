@@ -359,5 +359,9 @@ int up_swint0(int irq, FAR void *context)
     }
 #endif
 
+  /* Clear the pending software interrupt 0 */
+ 
+  up_clrpend_irq(PIC32MX_IRQSRC_CS0);
+  
   return OK;
 }
