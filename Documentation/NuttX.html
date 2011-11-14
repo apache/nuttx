@@ -924,7 +924,7 @@
     New interfaces to read from graphics memory.
   </li>
   <li><b>Drivers</b>.
-    The AT24xx FLASH drivers will now support clustering of blocks to achieve a larger, more usable block size for FAT.
+    The AT24xx FLASH driver will now supports clustering of blocks to achieve a larger, more usable block size for NXFFS.
   </li>
   <li><b>STM32</b>.
     LCD color corrections.
@@ -2644,7 +2644,7 @@ nuttx-6.11 2011-11-12 Gregory Nutt &lt;gnutt@nuttx.org&gt;
       if the block size is large, but can be common for tiny block sizes
       and results in a crash and file system corruption.
     * fs/nxffs/nxffs_initialize.c:  Fix an initialize error.  If the FLASH
-      is on power-up, NXFFS will fail to initialize correctly.
+      is full on power-up, NXFFS will fail to initialize correctly.
     * fs/nxffs/nxffs_write.c and nxffs_pack.c:  Fix an error that can occur
       when attempt to write to FLASH volume that is completely full but
       has no value inodes on it.
