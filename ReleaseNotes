@@ -2374,8 +2374,8 @@ This release is a maintenance release that includes a few new features
 and some important bugfixes.  New features include:
 
     * NX Graphics:  New interfaces to read from graphics memory
-    * Drivers:  AT24 FLASH drivers will now support clustering of blocks
-      to achieve a larger, more usable block size for FAT.
+    * Drivers:  AT24 FLASH driver will now supports clustering of blocks
+      to achieve a larger, more usable block size for NXFFS.
     * STM32: LCD color corrections
     * PIC32: Board configuration for the Microchip PIC32 Ethernet Starter kit
       (not yet verified), new GPIO support library, button and LED support
