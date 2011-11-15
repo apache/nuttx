@@ -129,10 +129,12 @@
  */
                               /* 446@0: Generally unused and zero; but may
                                * include IDM Boot Manager menu entry at 8@394 */
+#define PART_ENTRY(n)    (446+((n) << 4)) /* n = 0,1,2,3 */
 #define PART_ENTRY1       446 /* 16@446: Partition table, first entry */
 #define PART_ENTRY2       462 /* 16@462: Partition table, second entry */
-                              /* 32@478: Unused, should be zero */
-#define PART_SIGNATURE        /* 2@510: Valid partitions have 0x55aa here */
+#define PART_ENTRY3       478 /* 16@478: Partition table, third entry */
+#define PART_ENTRY4       494 /* 16@494: Partition table, fourth entry */
+#define PART_SIGNATURE    510 /* 2@510: Valid partitions have 0x55aa here */
 
 /****************************************************************************
  * These offsets describes one partition table entry.  NOTE that ent entries
@@ -146,6 +148,26 @@
 #define PART_ENDCHS         5  /* 3@5:  Ending Cylinder/Head/Sector values */
 #define PART_STARTSECTOR    8  /* 4@8:  Starting sector */
 #define PART_SIZE          12  /* 4@12: Partition size (in sectors) */
+
+/****************************************************************************
+ * Partition table types.
+ */
+
+#define PART_TYPE_NONE      0  /* No partition */
+#define PART_TYPE_FAT12     1  /* FAT12 */
+#define PART_TYPE_FAT16A    4  /* FAT16 (Partition smaller than 32MB) */
+#define PART_TYPE_EXT       5  /* Extended MS-DOS Partition */
+#define PART_TYPE_FAT16B    6  /* FAT16 (Partition larger than 32MB) */
+#define PART_TYPE_FAT32    11  /* FAT32 (Partition up to 2048Gb) */
+#define PART_TYPE_FAT32X   12  /* Same as 11, but uses LBA1 0x13 extensions */
+#define PART_TYPE_FAT16X   14  /* Same as 6, but uses LBA1 0x13 extensions */
+#define PART_TYPE_EXTX     15  /* Same as 5, but uses LBA1 0x13 extensions */
+
+/****************************************************************************
+ * Each FAT "short" 8.3 file name directory entry is 32-bytes long.
+ *
+ * Sizes and limits
+ */
 
 /****************************************************************************
  * Each FAT "short" 8.3 file name directory entry is 32-bytes long.
@@ -329,8 +351,11 @@
 #define MBR_GETBOOTSIG16(p)       UBYTE_VAL(p,BS16_BOOTSIG)
 #define MBR_GETBOOTSIG32(p)       UBYTE_VAL(p,BS32_BOOTSIG)
 
+#define PART_GETTYPE(n,p)         UBYTE_VAL(p,PART_ENTRY(n)+PART_TYPE)
 #define PART1_GETTYPE(p)          UBYTE_VAL(p,PART_ENTRY1+PART_TYPE)
 #define PART2_GETTYPE(p)          UBYTE_VAL(p,PART_ENTRY2+PART_TYPE)
+#define PART3_GETTYPE(p)          UBYTE_VAL(p,PART_ENTRY3+PART_TYPE)
+#define PART4_GETTYPE(p)          UBYTE_VAL(p,PART_ENTRY4+PART_TYPE)
 
 #define DIR_GETATTRIBUTES(p)      UBYTE_VAL(p,DIR_ATTRIBUTES)
 #define DIR_GETNTRES(p)           UBYTE_VAL(p,DIR_NTRES)
@@ -351,8 +376,11 @@
 #define MBR_PUTBOOTSIG16(p,v)     UBYTE_PUT(p,BS16_BOOTSIG,v)
 #define MBR_PUTBOOTSIG32(p,v)     UBYTE_PUT(p,BS32_BOOTSIG,v)
 
+#define PART_PUTTYPE(n,p,v)       UBYTE_PUT(p,PART_ENTRY(n)+PART_TYPE,v)
 #define PART1_PUTTYPE(p,v)        UBYTE_PUT(p,PART_ENTRY1+PART_TYPE,v)
 #define PART2_PUTTYPE(p,v)        UBYTE_PUT(p,PART_ENTRY2+PART_TYPE,v)
+#define PART3_PUTTYPE(p,v)        UBYTE_PUT(p,PART_ENTRY3+PART_TYPE,v)
+#define PART4_PUTTYPE(p,v)        UBYTE_PUT(p,PART_ENTRY4+PART_TYPE,v)
 
 #define DIR_PUTATTRIBUTES(p,v)    UBYTE_PUT(p,DIR_ATTRIBUTES,v)
 #define DIR_PUTNTRES(p,v)         UBYTE_PUT(p,DIR_NTRES,v)
@@ -378,10 +406,16 @@
 #define MBR_GETVOLID16(p)          fat_getuint32(UBYTE_PTR(p,BS16_VOLID))
 #define MBR_GETVOLID32(p)          fat_getuint32(UBYTE_PTR(p,BS32_VOLID))
 
+#define PART_GETSTARTSECTOR(n,p)   fat_getuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_STARTSECTOR))
+#define PART_GETSIZE(n,p)          fat_getuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_SIZE))
 #define PART1_GETSTARTSECTOR(p)    fat_getuint32(UBYTE_PTR(p,PART_ENTRY1+PART_STARTSECTOR))
 #define PART1_GETSIZE(p)           fat_getuint32(UBYTE_PTR(p,PART_ENTRY1+PART_SIZE))
 #define PART2_GETSTARTSECTOR(p)    fat_getuint32(UBYTE_PTR(p,PART_ENTRY2+PART_STARTSECTOR))
 #define PART2_GETSIZE(p)           fat_getuint32(UBYTE_PTR(p,PART_ENTRY2+PART_SIZE))
+#define PART3_GETSTARTSECTOR(p)    fat_getuint32(UBYTE_PTR(p,PART_ENTRY3+PART_STARTSECTOR))
+#define PART3_GETSIZE(p)           fat_getuint32(UBYTE_PTR(p,PART_ENTRY3+PART_SIZE))
+#define PART4_GETSTARTSECTOR(p)    fat_getuint32(UBYTE_PTR(p,PART_ENTRY4+PART_STARTSECTOR))
+#define PART4_GETSIZE(p)           fat_getuint32(UBYTE_PTR(p,PART_ENTRY4+PART_SIZE))
 
 #define MBR_PUTBYTESPERSEC(p,v)    fat_putuint16(UBYTE_PTR(p,BS_BYTESPERSEC),v)
 #define MBR_PUTROOTENTCNT(p,v)     fat_putuint16(UBYTE_PTR(p,BS_ROOTENTCNT),v)
@@ -389,10 +423,16 @@
 #define MBR_PUTVOLID16(p,v)        fat_putuint32(UBYTE_PTR(p,BS16_VOLID),v)
 #define MBR_PUTVOLID32(p,v)        fat_putuint32(UBYTE_PTR(p,BS32_VOLID),v)
 
+#define PART_PUTSTARTSECTOR(n,p,v) fat_putuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_STARTSECTOR),v)
+#define PART_PUTSIZE(n,p,v)        fat_putuint32(UBYTE_PTR(p,PART_ENTRY(n)+PART_SIZE),v)
 #define PART1_PUTSTARTSECTOR(p,v)  fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_STARTSECTOR),v)
 #define PART1_PUTSIZE(p,v)         fat_putuint32(UBYTE_PTR(p,PART_ENTRY1+PART_SIZE),v)
 #define PART2_PUTSTARTSECTOR(p,v)  fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_STARTSECTOR),v)
 #define PART2_PUTSIZE(p,v)         fat_putuint32(UBYTE_PTR(p,PART_ENTRY2+PART_SIZE),v)
+#define PART3_PUTSTARTSECTOR(p,v)  fat_putuint32(UBYTE_PTR(p,PART_ENTRY3+PART_STARTSECTOR),v)
+#define PART3_PUTSIZE(p,v)         fat_putuint32(UBYTE_PTR(p,PART_ENTRY3+PART_SIZE),v)
+#define PART4_PUTSTARTSECTOR(p,v)  fat_putuint32(UBYTE_PTR(p,PART_ENTRY4+PART_STARTSECTOR),v)
+#define PART4_PUTSIZE(p,v)         fat_putuint32(UBYTE_PTR(p,PART_ENTRY4+PART_SIZE),v)
 
 #ifdef CONFIG_FAT_LFN
 # define LDIR_PTRWCHAR1_5(p)       UBYTE_PTR(p,LDIR_WCHAR1_5)

@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -128,11 +129,15 @@ struct mmcsd_state_s
 
   /* Memory card geometry (extracted from the CSD) */
 
-  uint8_t  blockshift;               /* Log2 of blocksize */
+  uint8_t  blockshift;             /* Log2 of blocksize */
   uint16_t blocksize;              /* Read block length (== block size) */
-  size_t nblocks;                  /* Number of blocks */
-  size_t capacity;                 /* Total capacity of volume */
+  uint32_t nblocks;                /* Number of blocks */
 
+#ifdef CONFIG_HAVE_LONG_LONG
+  uint64_t capacity;               /* Total capacity of volume */
+#else
+  uint32_t capacity;               /* Total capacity of volume (Limited to 4Gb) */
+#endif
   /* Read-ahead and write buffering support */
 
 #if defined(CONFIG_FS_WRITEBUFFER) || defined(CONFIG_FS_READAHEAD)
@@ -635,7 +640,11 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
        */
 
       uint32_t csize                 = ((csd[1] & 0x3f) << 16) | (csd[2] >> 16);
+#ifdef CONFIG_HAVE_LONG_LONG
+      priv->capacity                 = ((uint64_t)(csize + 1)) << 19;
+#else
       priv->capacity                 = (csize + 1) << 19;
+#endif
       priv->blockshift               = 9;
       priv->blocksize                = 1 << 9;
       priv->nblocks                  = priv->capacity >> 9;
@@ -802,8 +811,9 @@ static void mmcsd_decodeCSD(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
   fvdbg("  FILE_FORMAT: %d ECC: %d (MMC) CRC: %d\n",
         decoded.fileformat, decoded.mmcecc, decoded.crc);
 
-  fvdbg("Capacity: %dKb, Block size: %db, nblocks: %d wrprotect: %d\n",
-         priv->capacity / 1024, priv->blocksize, priv->nblocks, priv->wrprotect);
+  fvdbg("Capacity: %luKb, Block size: %db, nblocks: %d wrprotect: %d\n",
+         (unsigned long)(priv->capacity / 1024), priv->blocksize,
+         priv->nblocks, priv->wrprotect);
 #endif
 }
 
@@ -2759,7 +2769,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
               {
                 /* Yes...  */
 
-                fvdbg("Capacity: %d Kbytes\n", priv->capacity / 1024);
+                fvdbg("Capacity: %lu Kbytes\n", (unsigned long)(priv->capacity / 1024));
                 priv->mediachanged = true;
 
                 /* Set up to receive asynchronous, media removal events */

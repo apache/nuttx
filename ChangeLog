@@ -2202,3 +2202,11 @@
 	  PIC32 port is almost complete but still not ready for prime time.
 
 6.12 2011-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* fs/fat/fs_fat32util.c and fs_fat32.h: Logic extended to look in up to
+	  four partitions for a valid FAT file system.
+	* drivers/input/tsc2007.c: Add support for 8-bit conversions; make sure
+	  that A/D converters are active before requesting conversions.
+	* drivers/mmcsd0/mmcsd_sdio.c: Increase capacity variable from size_t
+	  to uin64_t (if available) so that SD cards with capacities greater
+	  than 4Gb can be supported.

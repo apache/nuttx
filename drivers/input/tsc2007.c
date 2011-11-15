@@ -91,6 +91,29 @@
 #define DEV_FORMAT   "/dev/input%d"
 #define DEV_NAMELEN  16
 
+/* Commands *****************************************************************/
+
+#define TSC2007_SETUP           (TSC2007_CMD_FUNC_SETUP)
+#ifdef CONFIG_TSC2007_8BIT
+#  define TSC2007_ACTIVATE_Y    (TSC2007_CMD_8BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_YON)
+#  define TSC2007_MEASURE_Y     (TSC2007_CMD_8BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_YPOS)
+#  define TSC2007_ACTIVATE_X    (TSC2007_CMD_8BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_XON)
+#  define TSC2007_MEASURE_X     (TSC2007_CMD_8BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_XPOS)
+#  define TSC2007_ACTIVATE_Z    (TSC2007_CMD_8BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_YXON)
+#  define TSC2007_MEASURE_Z1    (TSC2007_CMD_8BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z1POS)
+#  define TSC2007_MEASURE_Z2    (TSC2007_CMD_8BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z2POS)
+#  define TSC2007_ENABLE_PENIRQ (TSC2007_CMD_8BIT | TSC2007_CMD_PWRDN_IRQEN)
+#else
+#  define TSC2007_ACTIVATE_Y    (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_YON)
+#  define TSC2007_MEASURE_Y     (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_YPOS)
+#  define TSC2007_ACTIVATE_X    (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_XON)
+#  define TSC2007_MEASURE_X     (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_XPOS)
+#  define TSC2007_ACTIVATE_Z    (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_YXON)
+#  define TSC2007_MEASURE_Z1    (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z1POS)
+#  define TSC2007_MEASURE_Z2    (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z2POS)
+#  define TSC2007_ENABLE_PENIRQ (TSC2007_CMD_12BIT | TSC2007_CMD_PWRDN_IRQEN)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -156,6 +179,7 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
                           FAR struct tsc2007_sample_s *sample);
 static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
                               FAR struct tsc2007_sample_s *sample);
+static int tsc2007_activate(FAR struct tsc2007_dev_s *priv, uint8_t cmd);
 static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd);
 static void tsc2007_worker(FAR void *arg);
 static int tsc2007_interrupt(int irq, FAR void *context);
@@ -378,6 +402,48 @@ errout:
 }
 
 /****************************************************************************
+ * Name: tsc2007_activate
+ ****************************************************************************/
+
+static int tsc2007_activate(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
+{
+   struct i2c_msg_s msg;
+   uint8_t data;
+   int ret;
+
+  /* Send the setup command (with no ACK) followed by the A/D converter
+   * activation command (ACKed).
+   */
+
+   data = TSC2007_SETUP;
+
+   msg.addr   = priv->config->address; /* 7-bit address */
+   msg.flags  = 0;                     /* Write transaction, beginning with START */
+   msg.buffer = &data;                 /* Transfer from this address */
+   msg.length = 1;                     /* Send one byte following the address */
+ 
+   /* Ignore errors from the setup command (because it is not ACKed) */
+
+   (void)I2C_TRANSFER(priv->i2c, &msg, 1);
+
+   /* Now activate the A/D converter */
+
+   data = cmd;
+
+   msg.addr   = priv->config->address; /* 7-bit address */
+   msg.flags  = 0;                     /* Write transaction, beginning with START */
+   msg.buffer = &data;                 /* Transfer from this address */
+   msg.length = 1;                     /* Send one byte following the address */
+ 
+   ret = I2C_TRANSFER(priv->i2c, &msg, 1);
+   if (ret < 0)
+     {
+       idbg("I2C_TRANSFER failed: %d\n", ret);
+     }
+   return ret;
+}
+
+/****************************************************************************
  * Name: tsc2007_transfer
  ****************************************************************************/
 
@@ -529,16 +595,17 @@ static void tsc2007_worker(FAR void *arg)
        *  in the cases previously listed."
        */
 
-      y = tsc2007_transfer(priv,
-                          (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_YPOS));
+      (void)tsc2007_activate(priv, TSC2007_ACTIVATE_X);
+      y = tsc2007_transfer(priv, TSC2007_MEASURE_Y);
+
 
       /* "Voltage is then applied to the other axis, and the A/D converter
        *  converts the voltage representing the X position on the screen. This
        *  process provides the X and Y coordinates to the associated processor."
        */
 
-      x = tsc2007_transfer(priv,
-                          (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_XPOS));
+      (void)tsc2007_activate(priv, TSC2007_ACTIVATE_Y);
+      x = tsc2007_transfer(priv, TSC2007_MEASURE_X);
 
       /* "... To determine pen or finger touch, the pressure of the touch must be
        *  determined. ... There are several different ways of performing this
@@ -556,15 +623,14 @@ static void tsc2007_worker(FAR void *arg)
        * Read Z1 and Z2 values.
        */
 
-      z1 = tsc2007_transfer(priv,
-                           (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z1POS));
-      z2 = tsc2007_transfer(priv,
-                           (TSC2007_CMD_12BIT | TSC2007_CMD_ADCON_IRQDIS | TSC2007_CMD_FUNC_Z2POS));
+      (void)tsc2007_activate(priv, TSC2007_ACTIVATE_Z);
+      z1 = tsc2007_transfer(priv, TSC2007_MEASURE_Z1);
+      (void)tsc2007_activate(priv, TSC2007_ACTIVATE_Z);
+      z2 = tsc2007_transfer(priv, TSC2007_MEASURE_Z2);
 
       /* Power down ADC and enable PENIRQ */
 
-     (void)tsc2007_transfer(priv,
-                           (TSC2007_CMD_12BIT | TSC2007_CMD_PWRDN_IRQEN));
+     (void)tsc2007_transfer(priv, TSC2007_ENABLE_PENIRQ);
 
       /* Now calculate the pressure using the first method, reduced to:
        *
@@ -574,21 +640,23 @@ static void tsc2007_worker(FAR void *arg)
       if (z1 == 0)
         {
           idbg("Z1 zero\n");
-          goto errout;
+          pressure = 0;
         }
-
-      pressure = (x * config->rxplate * (z2 - z1)) / z1;
-      pressure = (pressure + 2048) >> 12;
-
-      ivdbg("Position: (%d,%4d) pressure: %u z1/2: (%d,%d)\n",
-            x, y, pressure, z1, z2);
-
-      /* Ignore out of range caculcations */
-
-      if (pressure > 0x0fff)
+      else
         {
-          idbg("Dropped out-of-range pressure: %d\n", pressure);
-          goto errout;
+          pressure = (x * config->rxplate * (z2 - z1)) / z1;
+          pressure = (pressure + 2048) >> 12;
+
+          ivdbg("Position: (%d,%4d) pressure: %u z1/2: (%d,%d)\n",
+                x, y, pressure, z1, z2);
+
+          /* Ignore out of range caculcations */
+
+          if (pressure > 0x0fff)
+            {
+              idbg("Dropped out-of-range pressure: %d\n", pressure);
+              pressure = 0;
+            }
         }
 
       /* Save the measurements */
@@ -878,17 +946,27 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer, size_t len
 
       report->point[0].flags  = TOUCH_UP | TOUCH_ID_VALID;
     }
-  else if (sample.contact == CONTACT_DOWN)
+  else
     {
-      /* First contact */
+      if (sample.contact == CONTACT_DOWN)
+        {
+          /* First contact */
 
-      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID | TOUCH_PRESSURE_VALID;
-    }
-  else /* if (sample->contact == CONTACT_MOVE) */
-    {
-      /* Movement of the same contact */
+          report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID;
+        }
+      else /* if (sample->contact == CONTACT_MOVE) */
+        {
+          /* Movement of the same contact */
 
-      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID | TOUCH_PRESSURE_VALID;
+          report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID;
+        }
+
+      /* A pressure measurement of zero means that pressure is not available */
+
+      if (report->point[0].pressure != 0)
+        {
+          report->point[0].flags  |= TOUCH_PRESSURE_VALID;
+        }
     }
 
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
@@ -1163,7 +1241,7 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
    * waiting for a touch event.
    */
 
-  ret = tsc2007_transfer(priv, (TSC2007_CMD_12BIT | TSC2007_CMD_PWRDN_IRQEN));
+  ret = tsc2007_transfer(priv, TSC2007_ENABLE_PENIRQ);
   if (ret < 0)
     {
       idbg("tsc2007_transfer failed: %d\n", ret);

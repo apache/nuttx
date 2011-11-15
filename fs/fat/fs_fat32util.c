@@ -138,6 +138,10 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   if (MBR_GETSIGNATURE(fs->fs_buffer) != BOOT_SIGNATURE16 ||
       MBR_GETBYTESPERSEC(fs->fs_buffer) != fs->fs_hwsectorsize)
     {
+      fdbg("ERROR: Signature: %04x FS sectorsize: %d HW sectorsize: %d\n",
+            MBR_GETSIGNATURE(fs->fs_buffer), MBR_GETBYTESPERSEC(fs->fs_buffer),
+            fs->fs_hwsectorsize);
+
       return -ENODEV;
     }
 
@@ -172,6 +176,9 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   if (!fs->fs_nfatsects || fs->fs_nfatsects >= fs->fs_hwnsectors)
     {
+      fdbg("ERROR: fs_nfatsects %d fs_hwnsectors: %d\n",
+           fs->fs_nfatsects, fs->fs_hwnsectors);
+
       return -ENODEV;
     }
 
@@ -189,6 +196,9 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   if (!fs->fs_fattotsec || fs->fs_fattotsec > fs->fs_hwnsectors)
     {
+      fdbg("ERROR: fs_fattotsec %d fs_hwnsectors: %d\n",
+           fs->fs_fattotsec, fs->fs_hwnsectors);
+
       return -ENODEV;
     }
 
@@ -197,6 +207,9 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   fs->fs_fatresvdseccount = MBR_GETRESVDSECCOUNT(fs->fs_buffer);
   if (fs->fs_fatresvdseccount > fs->fs_hwnsectors)
     {
+      fdbg("ERROR: fs_fatresvdseccount %d fs_hwnsectors: %d\n",
+           fs->fs_fatresvdseccount, fs->fs_hwnsectors);
+
       return -ENODEV;
     }
 
@@ -210,6 +223,9 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   ndatasectors = fs->fs_fattotsec - fs->fs_fatresvdseccount - ntotalfatsects - rootdirsectors;
   if (ndatasectors > fs->fs_hwnsectors)
     {
+      fdbg("ERROR: ndatasectors %d fs_hwnsectors: %d\n",
+           ndatasectors, fs->fs_hwnsectors);
+
       return -ENODEV;
     }
 
@@ -235,11 +251,14 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
     }
   else if (!notfat32)
     {
-      fs->fs_fsinfo   = fs->fs_fatbase + MBR_GETFSINFO(fs->fs_buffer);
-      fs->fs_type     = FSTYPE_FAT32;
+      fs->fs_fsinfo = fs->fs_fatbase + MBR_GETFSINFO(fs->fs_buffer);
+      fs->fs_type   = FSTYPE_FAT32;
     }
   else
     {
+      fdbg("ERROR: notfat32: %d fs_nclusters: %d\n",
+           notfat32, fs->fs_nclusters);
+
       return -ENODEV;
     }
 
@@ -550,37 +569,63 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
       /* The contents of sector 0 is not a boot record.  It could be a
        * partition, however.  Assume it is a partition and get the offset
        * into the partition table.  This table is at offset MBR_TABLE and is
-       * indexed by 16x the partition number.  Here we support only
-       * partition 0.
-       *
-       * Check if the partition exists and, if so, get the bootsector for that
-       * partition and see if we can find the boot record there.
+       * indexed by 16x the partition number.
        */
+
+       int i;
+       for (i = 0; i < 4; i++)
+         {
+           /* Check if the partition exists and, if so, get the bootsector for that
+            * partition and see if we can find the boot record there.
+            */
  
-      if (PART1_GETTYPE(fs->fs_buffer) == 0)
-        {
-          fdbg("No MBR or partition\n");
-          goto errout_with_buffer;
+          uint8_t part = PART_GETTYPE(i, fs->fs_buffer);
+          fvdbg("Partition %d, offset %d, type %d\n", i, PART_ENTRY(i), part);
+
+          if (part == 0)
+            {
+              fvdbg("No partition %d\n", i);
+              continue;
+            }
+
+          /* There appears to be a partition, get the sector number of the
+           * partition (LBA)
+           */
+
+          fs->fs_fatbase = PART_GETSTARTSECTOR(i, fs->fs_buffer);
+
+          /* Read the new candidate boot sector */
+
+          ret = fat_hwread(fs, fs->fs_buffer, fs->fs_fatbase, 1);
+          if (ret < 0)
+            {
+              /* Failed to read the sector */
+
+              goto errout_with_buffer;
+            }
+
+          /* Check if this is a boot record */
+
+          ret = fat_checkbootrecord(fs);
+          if (ret == OK)
+            {
+              /* Break out of the loop if a valid boot record is found */
+
+              fvdbg("MBR found in partition %d\n", i);
+              break;
+            }
+
+          /* Re-read sector 0 so that we can check the next partition */
+
+          fvdbg("Partition %d is not an MBR\n", i);
+          ret = fat_hwread(fs, fs->fs_buffer, 0, 1);
+          if (ret < 0)
+            {
+              goto errout_with_buffer;
+            }
         }
 
-      /* There appears to be a partition, get the sector number of the
-       * partition (LBA)
-       */
-
-      fs->fs_fatbase = PART1_GETSTARTSECTOR(fs->fs_buffer);
-
-      /* Read the new candidate boot sector */
-
-      ret = fat_hwread(fs, fs->fs_buffer, fs->fs_fatbase, 1);
-      if (ret < 0)
-        {
-          goto errout_with_buffer;
-        }
-
-      /* Check if this is a boot record */
-
-      ret = fat_checkbootrecord(fs);
-      if (ret != OK)
+      if (i > 3)
         {
           fdbg("No valid MBR\n");
           goto errout_with_buffer;
