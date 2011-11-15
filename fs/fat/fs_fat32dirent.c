@@ -144,6 +144,8 @@ static inline int fat_getsfname(uint8_t *direntry, char *buffer,
 static void fat_getlfnchunk(uint8_t *chunk, uint8_t *dest, int nchunk);
 static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *dir);
 #endif
+static int fat_dirverify(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
+                         uint16_t offset);
 static int fat_putsfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo);
 #ifdef CONFIG_FAT_LFN
 static void fat_initlfname(uint8_t *chunk, int nchunk);
@@ -792,13 +794,14 @@ static inline int fat_findalias(struct fat_mountpt_s *fs,
 
   memcpy(&tmpinfo, dirinfo, sizeof(struct fat_dirinfo_s));
 
-  /* Then re-initialize to the beginning of the current directory (skipping
-   * '.' and '..').
+  /* Then re-initialize to the beginning of the current directory, skipping
+   * over the first entry (unused in the root directory and '.' entry in other
+   * directories).
    */
 
   tmpinfo.dir.fd_startcluster = tmpinfo.dir.fd_currcluster;
   tmpinfo.dir.fd_currsector   = tmpinfo.fd_seq.ds_startsector;
-  tmpinfo.dir.fd_index        = 2;
+  tmpinfo.dir.fd_index        = 1;
 
   /* Search for the single short file name directory entry in this directory */
 
@@ -1909,6 +1912,56 @@ static inline int fat_getlfname(struct fat_mountpt_s *fs, struct fs_dirent_s *di
 #endif
 
 /****************************************************************************
+ * Name: fat_dirverify
+ *
+ * Desciption:
+ *   Verify that every entry preceding this one is marked with something
+ *   other than DIR0_ALLEMPTY.  This is necessary only in the root directory
+ *   of freshly formatted volumes.  In that case, all entries are set to
+ *   zero.
+ *
+ *   This function also assures that the sector containing the entry is in
+ *   the sector cache.
+ *
+ ****************************************************************************/
+
+static int fat_dirverify(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
+                         uint16_t offset)
+{
+  uint8_t *direntry;
+  uint16_t i;
+  int ret;
+ 
+  /* Make sure that the sector containing the directory entry is in the sector
+  * cache.
+   */
+
+  ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Check every entry preceding this one */
+
+  for (i = 0; i < offset; i += DIR_SIZE)
+    {
+      /* Is the rest of the directory marked empty? */
+
+      direntry = &fs->fs_buffer[i];
+      if (direntry[DIR_NAME] == DIR0_ALLEMPTY)
+        {
+          /* Then mark the just the entry as empty */
+
+          fs->fs_dirty       = true;
+          direntry[DIR_NAME] = DIR0_EMPTY;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: fat_putsfname
  *
  * Desciption: Write the short directory entry name.
@@ -1921,6 +1974,8 @@ static int fat_putsfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 {
   uint8_t *direntry = &fs->fs_buffer[dirinfo->fd_seq.ds_offset];
  
+  /* Write the short directory entry */
+
   memcpy(&direntry[DIR_NAME], dirinfo->fd_name, DIR_MAXFNAME);
 #ifdef CONFIG_FAT_LCNAMES
   DIR_PUTNTRES(direntry, dirinfo->fd_ntflags);
@@ -2012,6 +2067,12 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
   int      namelen;
   int      ret;
 
+  /* Some special handling in case we are writing the first entry of the
+   * root directory in a freshly formatted volume.
+   */
+
+  (void)fat_dirverify(fs, dirinfo, dirinfo->fd_seq.ds_lfnoffset);
+
   /* Get the length of the long file name (size of the fd_lfname array is
    * LDIR_MAXFNAME+1 we do not have to check the length of the string).
    * NOTE that remainder is conditionally incremented to include the NUL
@@ -2065,17 +2126,10 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
   seqno = LDIR0_LAST | nentries;
 
-  /* Make sure that the sector containing the "last" long file name entry
-   * is in the sector cache (it probably is not).
+  /* Now loop, writing each long file name entry.  We know that the sector
+   * is in the sector cache because fat_dirverify() assures us that that is
+   * so.
    */
-
-  ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Now loop, writing each long file name entry */
 
   for (;;)
     {
@@ -2201,6 +2255,12 @@ static int fat_putsfdirentry(struct fat_mountpt_s *fs,
 {
   uint8_t *direntry;
 
+  /* Some special handling in case we are writing the first entry of the
+   * root directory in a freshly formatted volume.
+   */
+
+  (void)fat_dirverify(fs, dirinfo, dirinfo->fd_seq.ds_offset);
+
   /* Initialize the 32-byte directory entry */
 
   direntry = &fs->fs_buffer[dirinfo->fd_seq.ds_offset];
@@ -2276,11 +2336,11 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
       dirinfo->dir.fd_currsector   = cluster;
     }
 
-  /* fd_index is the index into the current directory table. Skipping over
-   * the '.' and '..' entries.
+  /* fd_index is the index into the current directory table. It is set to one
+   * to skip over the first, unused entry in the root directory.
    */
 
-  dirinfo->dir.fd_index = 2;
+  dirinfo->dir.fd_index = 1;
 
   /* If no path was provided, then the root directory must be exactly what
    * the caller is looking for.
@@ -2377,7 +2437,10 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
           ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
           DIR_GETFSTCLUSTLO(direntry);
 
-      /* Then restart scanning at the new directory */
+      /* Then restart scanning at the new directory, skipping over both the
+       * '.' and '..' entries that exist in all directories EXCEPT the root
+       * directory.
+       */
 
       dirinfo->dir.fd_startcluster = cluster;
       dirinfo->dir.fd_currcluster  = cluster;
@@ -2426,9 +2489,9 @@ int fat_allocatedirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
           dirinfo->dir.fd_currsector = fs->fs_rootbase;
         }
 
-      /* Skip over the '.' and '..' entries */
+      /* Skip over the first, unused entry in the root directory. */
 
-      dirinfo->dir.fd_index = 2;
+      dirinfo->dir.fd_index = 1;
  
       /* Is this a path segment a long or a short file.  Was a long file
        * name parsed?
@@ -2835,8 +2898,9 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory)
           return -EISDIR;
         }
 
-      /* We are asked to delete a directory. Check if this
-       * sub-directory is empty
+      /* We are asked to delete a directory. Check if this sub-directory is
+       * empty (i.e., that there are no valid entries other than the initial
+       * '.' and '..' entries).
        */
 
       dirinfo.dir.fd_currcluster = dircluster;

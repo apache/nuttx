@@ -2210,3 +2210,7 @@
 	* drivers/mmcsd0/mmcsd_sdio.c: Increase capacity variable from size_t
 	  to uin64_t (if available) so that SD cards with capacities greater
 	  than 4Gb can be supported.
+	* fs/fat/fs_fat32dirent.c: The root directory structure is different
+	  from other directories.  When formatted by Windows, it is not initialized
+	  at all.  Some additional special handling is required to initialize the
+	  root directory entry to interoperate correctly with windows.

@@ -1295,12 +1295,13 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct fs_dir
   else if ((DIR_GETATTRIBUTES(direntry) & FATATTR_DIRECTORY) == 0)
     {
        /* The entry is not a directory */
+
        ret = -ENOTDIR;
        goto errout_with_semaphore;
     }
   else
     {
-       /* The entry is a directory */
+       /* The entry is a directory (but not the root directory) */
 
       dir->u.fat.fd_startcluster = 
           ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
@@ -1492,7 +1493,9 @@ static int fat_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
       goto errout_with_semaphore;
     }
 
-  /* Check if this is the root directory */
+  /* Check if this is the root directory.  If it is the root directory, we
+   * reset the fd_index to 1, skipping over the initial, unused entry.
+   */
 
   if (fs->fs_type != FSTYPE_FAT32 &&
       dir->u.fat.fd_startcluster == 0)
@@ -1501,7 +1504,7 @@ static int fat_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 
       dir->u.fat.fd_currcluster  = 0;
       dir->u.fat.fd_currsector   = fs->fs_rootbase;
-      dir->u.fat.fd_index        = 0;
+      dir->u.fat.fd_index        = 1;
     }
   else if (fs->fs_type == FSTYPE_FAT32 &&
            dir->u.fat.fd_startcluster == fs->fs_rootbase)
@@ -1510,10 +1513,12 @@ static int fat_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 
       dir->u.fat.fd_currcluster = dir->u.fat.fd_startcluster;
       dir->u.fat.fd_currsector  = fat_cluster2sector(fs, fs->fs_rootbase);
-      dir->u.fat.fd_index       = 0;
+      dir->u.fat.fd_index       = 1;
     }
 
-  /* This is not the root directory */
+  /* This is not the root directory.  Here the fd_index is set to 2, skipping over
+   * both the "." and ".." entries.
+   */
 
   else
     {

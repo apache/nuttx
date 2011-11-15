@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 3, 2011)
+NuttX TODO List (Last updated November 15, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
@@ -16,7 +16,7 @@ nuttx/
  (16)  Network (net/, drivers/net)
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (7)  Libraries (lib/)
-  (9)  File system/Generic drivers (fs/, drivers/)
+ (10)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -500,6 +500,14 @@ o File system / Generic drivers (fs/, drivers/)
                fat_systime2fattime() and fat_fattime2systime()
   Status:      Open
   Priority:    Medium
+
+  Description: mkfatfs() does not create the "." directory entry (all directories)
+               or the ".." directory entry (all directories except for the root
+               directory).  NuttX doesn't care about these entries, but this will
+               probably make a FAT filesystem formatted on NuttX unusable under
+               Windows.
+  Status:      Open
+  Priority:    High
 
 o Graphics subystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

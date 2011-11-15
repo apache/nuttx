@@ -148,7 +148,7 @@
 
 /* Context switching system calls ***************************************************/
 
-/* SYS call 0:
+/* SYS call 1:
  *
  * void up_fullcontextrestore(uint32_t *restoreregs) __attribute__ ((noreturn));
  */
@@ -157,7 +157,7 @@
 #define up_fullcontextrestore(restoreregs) \
   (void)sys_call1(SYS_restore_context, (uintptr_t)restoreregs)
 
-/* SYS call 1:
+/* SYS call 2:
  *
  * void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
  */
