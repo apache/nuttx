@@ -202,7 +202,7 @@ static inline void dispatch_syscall(uint32_t *regs)
 #endif
     }
 
-  /* Set up the return vaue.  First, check if a context switch occurred. 
+  /* Set up the return value.  First, check if a context switch occurred. 
    * In this case, regs will no longer be the same as current_regs.  In
    * the case of a context switch, we will have to save the return value
    * in the TCB where it can be returned later when the task is restarted.
