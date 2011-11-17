@@ -2214,3 +2214,5 @@
 	  from other directories.  When formatted by Windows, it is not initialized
 	  at all.  Some additional special handling is required to initialize the
 	  root directory entry to interoperate correctly with windows.
+	* fs/fat/fs_fat32util.c: In fat_systime2fattime(void) should be
+	  clock_gettime() and not clock_gettime() (Thanks to David Sidrane).

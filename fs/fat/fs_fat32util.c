@@ -418,7 +418,7 @@ uint32_t fat_systime2fattime(void)
 
   /* Get the current time in seconds and nanoseconds */
 
-  ret = clock_settime(CLOCK_REALTIME, &ts);
+  ret = clock_gettime(CLOCK_REALTIME, &ts);
   if (ret == OK)
     {
       /* Break done the seconds in date and time units */
