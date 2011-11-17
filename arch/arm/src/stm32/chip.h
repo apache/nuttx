@@ -57,11 +57,12 @@
  */
 
 #if defined(CONFIG_ARCH_CHIP_STM32F103ZET6) 
+#  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  define CONFIG_STM32_HIGHDENSITY       1   /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  undef  CONFIG_STM32_STM3240XX             /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit generall timers TIM2,3,4,5 with DMA */
@@ -85,11 +86,12 @@
 #  include "chip/stm32f103ze_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103RET6)
+#  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef CONFIG_STM32_LOWDENSITY             /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  define CONFIG_STM32_HIGHDENSITY       1   /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  undef  CONFIG_STM32_STM3240XX             /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and TIM8 */
 #  define STM32_NGTIM                    4   /* 16-bit generall timers TIM2,3,4,5 with DMA */
@@ -113,11 +115,12 @@
 #  include "chip/stm32f103re_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
+#  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
-#  define CONFIG_STM32_CONNECTIVITYLINE 1    /* STM32F105x and STM32F107x */
-#  undef  CONFIG_STM32_STM3240XX             /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_CONNECTIVITYLINE  1   /* STM32F105x and STM32F107x */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit generall timers TIM2,3,4,5 with DMA */
@@ -141,11 +144,12 @@
 #  include "chip/stm32f107vc_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F405RG)  /* LQFP 64 10x10x1.4 1024Kb FLASH 192Kb SRAM */
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  define CONFIG_STM32_STM3240XX         1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
@@ -170,11 +174,12 @@
 #  include "chip/stm32f405rg_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F405VG)  /* LQFP 100 14x14x1.4  1024Kb FLASH 192Kb SRAM */
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  define CONFIG_STM32_STM3240XX         1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
@@ -199,11 +204,12 @@
 #  include "chip/stm32f405vg_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F405ZG)  /* LQFP 144 20x20x1.4 1024Kb FLASH 192Kb SRAM */
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  define CONFIG_STM32_STM3240XX         1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
@@ -228,11 +234,12 @@
 #  include "chip/stm32f405zg_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407VE)  /* LQFP-100 512Kb FLASH 192Kb SRAM */
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  define CONFIG_STM32_STM3240XX         1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
@@ -257,11 +264,12 @@
 #  include "chip/stm32f407ve_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407VG)  /* LQFP-100 14x14x1.4 1024Kb FLASH 192Kb SRAM */
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  define CONFIG_STM32_STM3240XX         1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
@@ -286,11 +294,12 @@
 #  include "chip/stm32f407vg_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407ZE)  /* LQFP-144 512Kb FLASH 192Kb SRAM */
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  define CONFIG_STM32_STM3240XX         1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
@@ -315,11 +324,12 @@
 #  include "chip/stm32f407ze_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407ZG)  /* LQFP 144 20x20x1.4 1024Kb FLASH 192Kb SRAM */
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  define CONFIG_STM32_STM3240XX         1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
@@ -344,11 +354,12 @@
 #  include "chip/stm32f407zg_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407IE)  /* LQFP 176 24x24x1.4 512Kb FLASH 192Kb SRAM */
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  define CONFIG_STM32_STM3240XX         1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
@@ -373,11 +384,12 @@
 #  include "chip/stm32f407ie_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407IG)  /* BGA 176; LQFP 176 24x24x1.4 1024Kb FLASH 192Kb SRAM */
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
 #  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  define CONFIG_STM32_STM3240XX         1   /* STM32F405xx and STM32407xx */
+#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
