@@ -54,20 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-
-  /* Enable only software interrupts */
-
-# define INITIAL_STATUS (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_SWINTS)
-
-#else
-
-  /* Enable all interrupts */
-
-# define INITIAL_STATUS (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_ALL)
-
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -97,6 +83,7 @@
 void up_initial_state(_TCB *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
+  uint32_t regval;
 
   /* Initialize the initial exception register context structure */
 
@@ -133,8 +120,27 @@ void up_initial_state(_TCB *tcb)
 #  warning "Missing logic"
 #endif
 
-  /* Enable or disable interrupts, based on user configuration */
+  /* Set the initial value of the status register.  It will be the same
+   * as the current status register with some changes:
+   *
+   * 1. Make sure the IE is set (it should be)
+   * 2. Clear the BEV bit (it should be)
+   * 3. Set the interrupt mask bits (depending on configuration)
+   * 4. Set the EXL bit
+   *
+   * The EXL bit is set because this new STATUS register will be
+   * instantiated in kernel mode inside of an interrupt handler. EXL
+   * will be automatically cleared by the eret instruction.
+   */
 
-  xcp->regs[REG_STATUS] = INITIAL_STATUS;
+  regval  = cp0_getstatus();
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  regval &= ~(CP0_STATUS_IM_ALL | CP0_STATUS_BEV);
+  regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_SWINTS);
+#else
+  regval &= ~(CP0_STATUS_BEV);
+  regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_ALL);
+#endif
+  xcp->regs[REG_STATUS] = regval;
 }
 
