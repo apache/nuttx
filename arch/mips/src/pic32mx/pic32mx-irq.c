@@ -131,7 +131,6 @@ void up_irqinitialize(void)
   /* Clear the EXL bit in the STATUS register */
 
   regval  = cp0_getstatus();
-//regval &= ~CP0_STATUS_BEV;
   regval &= ~CP0_STATUS_EXL;
   cp0_putstatus(regval);
 

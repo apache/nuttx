@@ -142,7 +142,7 @@
 	 *   Bit 4: Operating mode == USER
 	 */
 
-	ins 	k1, \tmp, CP0_STATUS_IPL_SHIFT, 6
+	ins 	k1, k0, CP0_STATUS_IPL_SHIFT, 6
 	ins		k1, zero, 1, 4
 
 	/* And Enable interrupts */
