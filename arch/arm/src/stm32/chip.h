@@ -171,7 +171,7 @@
 #  define STM32_NTHERNET                 0   /* No Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
-#  include "chip/stm32f405rg_pinmap.h"
+#  include "chip/stm32f40xxx_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F405VG)  /* LQFP 100 14x14x1.4  1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
@@ -201,7 +201,7 @@
 #  define STM32_NTHERNET                 0   /* No Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
-#  include "chip/stm32f405vg_pinmap.h"
+#  include "chip/stm32f40xxx_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F405ZG)  /* LQFP 144 20x20x1.4 1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
@@ -231,7 +231,7 @@
 #  define STM32_NTHERNET                 0   /* No Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
-#  include "chip/stm32f405zg_pinmap.h"
+#  include "chip/stm32f40xxx_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407VE)  /* LQFP-100 512Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
@@ -261,7 +261,7 @@
 #  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
-#  include "chip/stm32f407ve_pinmap.h"
+#  include "chip/stm32f40xxx_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407VG)  /* LQFP-100 14x14x1.4 1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
@@ -291,7 +291,7 @@
 #  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
-#  include "chip/stm32f407vg_pinmap.h"
+#  include "chip/stm32f40xxx_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407ZE)  /* LQFP-144 512Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
@@ -321,7 +321,7 @@
 #  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
-#  include "chip/stm32f407ze_pinmap.h"
+#  include "chip/stm32f40xxx_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407ZG)  /* LQFP 144 20x20x1.4 1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
@@ -351,7 +351,7 @@
 #  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
-#  include "chip/stm32f407zg_pinmap.h"
+#  include "chip/stm32f40xxx_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407IE)  /* LQFP 176 24x24x1.4 512Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
@@ -381,7 +381,7 @@
 #  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
-#  include "chip/stm32f407ie_pinmap.h"
+#  include "chip/stm32f40xxx_pinmap.h"
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407IG)  /* BGA 176; LQFP 176 24x24x1.4 1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
@@ -411,7 +411,7 @@
 #  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
-#  include "chip/stm32f407ig_pinmap.h"
+#  include "chip/stm32f40xxx_pinmap.h"
 
 #else
 #  error "Unsupported STM32 chip"
