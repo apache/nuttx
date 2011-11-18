@@ -221,7 +221,7 @@ extern "C" {
 #  define GPIO_OUTPUT_MODE_2MHz       (0 << GPIO_MODE_SHIFT)     /* 2 MHz Low speed output */
 #  define GPIO_OUTPUT_MODE_25MHz      (1 << GPIO_MODE_SHIFT)     /* 25 MHz Medium speed output */
 #  define GPIO_OUTPUT_MODE_20MHz      (2 << GPIO_MODE_SHIFT)     /* 50 MHz Fast speed output  */
-#  define GPIOOUTPUT__MODE_100MHz     (3 << GPIO_MODE_SHIFT)     /* 100 MHz High speed output */
+#  define GPIO_OUTPUT_MODE_100MHz     (3 << GPIO_MODE_SHIFT)     /* 100 MHz High speed output */
 
 /* Output type selection:
  *  .... ..O. .... ....
