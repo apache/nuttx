@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32_gpio.h
+ * arch/arm/src/stm32/chip/stm32f10xxx_gpio.h
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_GPIO_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32_GPIO_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_GPIO_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_GPIO_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -360,5 +360,5 @@
 #define AFIO_EXTICR4_EXTI15_SHIFT    (12)      /* Bits 15-12: EXTI 15 configuration */
 #define AFIO_EXTICR4_EXTI15_MASK     (AFIO_EXTICR_PORT_MASK << AFIO_EXTICR4_EXTI15_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_GPIO_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_GPIO_H */
 
