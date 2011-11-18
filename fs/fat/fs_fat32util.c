@@ -447,7 +447,7 @@ uint32_t fat_systime2fattime(void)
         }
     }
 #endif
-    return 0;
+  return 0;
 }
 
 /****************************************************************************
@@ -478,9 +478,9 @@ time_t fat_fattime2systime(uint16_t fattime, uint16_t fatdate)
 
   /* Break out the date and time */
 
-  tm.tm_sec  =  (fatdate & 0x001f) <<  1;       /* Bits 0-4: 2 second count (0-29) */
-  tm.tm_min  =  (fatdate & 0x07e0) >>  5;       /* Bits 5-10: minutes (0-59) */
-  tm.tm_hour =  (fatdate & 0xf800) >> 11;       /* Bits 11-15: hours (0-23) */
+  tm.tm_sec  =  (fattime & 0x001f) <<  1;       /* Bits 0-4: 2 second count (0-29) */
+  tm.tm_min  =  (fattime & 0x07e0) >>  5;       /* Bits 5-10: minutes (0-59) */
+  tm.tm_hour =  (fattime & 0xf800) >> 11;       /* Bits 11-15: hours (0-23) */
 
   tm.tm_mday =  (fatdate & 0x001f);             /* Bits 0-4: Day of month (1-31) */
   tmp        = ((fatdate & 0x01e0) >>  5);      /* Bits 5-8: Month of year (1-12) */
@@ -491,7 +491,7 @@ time_t fat_fattime2systime(uint16_t fattime, uint16_t fatdate)
 
   return mktime(&tm);
 #else
-    return 0;
+  return 0;
 #endif
 }
 
