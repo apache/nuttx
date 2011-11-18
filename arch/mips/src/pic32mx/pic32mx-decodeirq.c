@@ -85,7 +85,9 @@
 
 uint32_t *pic32mx_decodeirq(uint32_t *regs)
 {
+#ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
   uint32_t *savestate;
+#endif
   uint32_t regval;
   int irq;
 
@@ -100,7 +102,11 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
    * the interrupted context that is being processed now.
    */
 
-  savestate    = (uint32_t*)current_regs;
+#ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
+  savestate = (uint32_t*)current_regs;
+#else
+  DEBUGASSERT(current_regs == NULL);
+#endif
   current_regs = regs;
 
   /* Loop while there are pending interrupts with priority greater than zero */
@@ -145,11 +151,16 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
    * are returning from a nested interrupt.
    */
 
+#ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
   current_regs = savestate;
   if (current_regs == NULL)
     {
       up_ledoff(LED_INIRQ);
     }
+#else
+  current_regs = savestate;
+  up_ledoff(LED_INIRQ);
+#endif
 
   return regs;
 }
