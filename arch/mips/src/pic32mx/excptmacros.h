@@ -114,6 +114,7 @@
 	 *  bits (Status<15:10>) and the ErrorEPC register, respectively, on the stack. ..."
 	 */
 
+#ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS // Does not work!
 	mfc0	k0, MIPS32_CP0_CAUSE
 	mfc0 	k1, MIPS32_CP0_EPC
 
@@ -148,6 +149,25 @@
 	/* And Enable interrupts */
 
 	mtc0	k1, MIPS32_CP0_STATUS
+#else
+	/* Get the EPC and STATUS register (Don't bother with the CAUSE register if we are
+	 * not supporting nested interrupts)
+	 */
+
+	mfc0 	k0, MIPS32_CP0_EPC
+	mfc0	k1, MIPS32_CP0_STATUS
+
+	/* Create the register context stack frame large enough to hold the entire register
+	 * save array.
+	 */
+
+	addiu	sp, sp, -XCPTCONTEXT_SIZE
+
+	/* Save the EPC and STATUS in the register context array */
+
+	sw		k0, REG_EPC(sp)
+	sw		k1, REG_STATUS(sp)
+#endif
 
 	/* Save floating point registers */
 
@@ -314,6 +334,10 @@
 #ifdef MIPS32_SAVE_GP
 	lw		gp, REG_GP(k1)
 #endif
+
+	/* $29 = sp: Stack pointer */
+
+	lw		sp, REG_SP(k1)
 
 	/* $30 = either s8 or fp:  Depends if a frame pointer is used or not */
 

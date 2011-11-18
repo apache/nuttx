@@ -436,7 +436,9 @@ _bev_handler:
 	la		t0, pic32mx_dobev		/* Call up_dobev(regs) */
 	jalr	ra, t0
 	nop
-	di								/* Disable interrupts */
+#ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
+	di								/* Prohibit nested interrupts from here */
+#endif
 	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
 	EXCPT_EPILOGUE v0				/* Return to the context returned by up_dobev() */
 	.end	_bev_handler
@@ -459,7 +461,9 @@ _int_handler:
 	la		t0, pic32mx_decodeirq	/* Call pic32mx_decodeirq(regs) */
 	jalr	ra, t0
 	nop
-	di								/* Disable interrupts */
+#ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
+	di								/* Prohibit nested interrupts from here */
+#endif
 	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
 	EXCPT_EPILOGUE v0				/* Return to the context returned by pic32mx_decodeirq() */
 	.end	_int_handler
@@ -483,7 +487,9 @@ _nmi_handler:
 	la		t0, pic32mx_donmi		/* Call up_donmi(regs) */
 	jalr	ra, t0
 	nop
-	di								/* Disable interrupts */
+#ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
+	di								/* Prohibit nested interrupts from here */
+#endif
 	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
 	EXCPT_EPILOGUE v0				/* Return to the context returned by pic32mx_donmi() */
 	.end	_nmi_handler
