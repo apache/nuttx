@@ -46,7 +46,14 @@
 #include <nuttx/irq.h>
 
 #include "chip.h"
-#include "chip/stm32_gpio.h"
+
+#if defined(CONFIG_STM32_STM32F10XX)
+#  include "chip/stm32f10xxx_gpio.h"
+#elif defined(CONFIG_STM32_STM32F40XX)
+#  include "chip/stm32f40xxx_gpio.h"
+#else
+#  error "Unrecognized STM32 chip"
+#endif
 
 /************************************************************************************
  * Pre-Processor Declarations
@@ -62,9 +69,9 @@ extern "C" {
 #define EXTERN extern
 #endif
  
-/* Bit-encoded input to stm32_configgpio() 
- * These definitions could be replaced by 'enum' as a stm32_gpio_t data type. 
- */
+/* Bit-encoded input to stm32_configgpio() */
+
+#if defined(CONFIG_STM32_STM32F10XX)
 
 /* 16-bit Encoding:
  * OFFS SX.. VPPP BBBB
@@ -130,13 +137,13 @@ extern "C" {
 
 #define GPIO_PORT_SHIFT               4                          /* Bit 4-6:  Port number */
 #define GPIO_PORT_MASK                (7 << GPIO_PORT_SHIFT)
-#define GPIO_PORTA                    (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
-#define GPIO_PORTB                    (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
-#define GPIO_PORTC                    (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
-#define GPIO_PORTD                    (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
-#define GPIO_PORTE                    (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
-#define GPIO_PORTF                    (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
-#define GPIO_PORTG                    (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
+#  define GPIO_PORTA                  (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
+#  define GPIO_PORTB                  (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
+#  define GPIO_PORTC                  (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
+#  define GPIO_PORTD                  (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
+#  define GPIO_PORTE                  (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
+#  define GPIO_PORTF                  (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
+#  define GPIO_PORTG                  (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
 
 /* This identifies the bit in the port:
  * .... .... .... BBBB
@@ -160,6 +167,145 @@ extern "C" {
 #define GPIO_PIN13                    (13 << GPIO_PIN_SHIFT)
 #define GPIO_PIN14                    (14 << GPIO_PIN_SHIFT)
 #define GPIO_PIN15                    (15 << GPIO_PIN_SHIFT)
+
+#elif defined(CONFIG_STM32_STM32F40XX)
+
+/* 16-bit Encoding:
+ * Inputs:                MMUU X... PPPP BBBB
+ * Outputs:               MMUU FFOV PPPP BBBB
+ * Alternate Functions:   MMUU AAAA PPPP BBBB
+ * Analog:                MMUU .... PPPP BBBB
+ */
+
+/* Common mode encodings ***********************************************************/
+/* Mode:
+ *
+ * MM.. .... .... ....
+ */
+
+#define GPIO_MODE_SHIFT               (14)                       /* Bits 14-15: GPIO port mode */
+#define GPIO_MODE_MASK                (3 << GPIO_MODE_SHIFT)
+#define GPIO_INPUT                    (0 << GPIO_MODE_SHIFT)     /* Input mode */
+#define GPIO_OUTPUT                   (1 << GPIO_MODE_SHIFT)     /* General purpose output mode */
+#define GPIO_ALT                      (2 << GPIO_MODE_SHIFT)     /* Alternate function mode */
+#define GPIO_ANALOG                   (3 << GPIO_MODE_SHIFT)     /* Analog mode */
+
+/* Output pull-ups/downs:
+ * ..UU .... .... ....
+ */
+
+#define GPIO_PUPD_SHIFT               (12)                       /* Bits 12-13: Pull-up/pull down */
+#define GPIO_PUPD_MASK                (3 << GPIO_PUPD_SHIFT)
+#  define GPIO_FLLOAT                 (0 << GPIO_PUPD_SHIFT)     /* No pull-up, pull-down */
+#  define GPIO_PULLUP                 (1 << GPIO_PUPD_SHIFT)     /* Pull-up */
+#  define GPIO_PULLUP                 (2 << GPIO_PUPD_SHIFT)     /* Pull-down */
+
+/* Input (only) mode encodings *****************************************************/
+/* Outputs: MMUU X... PPPP BBBB */
+
+/* External interrupt selection (GPIO inputs only):
+ * .... X... .... ....
+ */
+
+#define GPIO_EXTI                     (1 << 11)                  /* Bit 11: Configure as EXTI interrupt */
+
+/* Output (only) mode encodings ****************************************************/
+/* Outputs: MMUU FFOV PPPP BBBB */
+
+/* Output frequency selection:
+ * .... FF.. .... ....
+ */
+
+#define GPIO_OUTPUT_MODE_SHIFT        (10)                       /* Bits 10-11: GPIO frequency selection */
+#define GPIO_OUTPUT_MODE_MASK         (3 << GPIO_MODE_SHIFT)
+#  define GPIO_OUTPUT_MODE_2MHz       (0 << GPIO_MODE_SHIFT)     /* 2 MHz Low speed output */
+#  define GPIO_OUTPUT_MODE_25MHz      (1 << GPIO_MODE_SHIFT)     /* 25 MHz Medium speed output */
+#  define GPIO_OUTPUT_MODE_20MHz      (2 << GPIO_MODE_SHIFT)     /* 50 MHz Fast speed output  */
+#  define GPIOOUTPUT__MODE_100MHz     (3 << GPIO_MODE_SHIFT)     /* 100 MHz High speed output */
+
+/* Output type selection:
+ *  .... ..O. .... ....
+ */
+
+#define GPIO_OUTPUT_OPENDRAM          (1 << 9)                   /* Open-drain output */
+#define GPIO_OUTPUT_PUSHPULL          (0)                        /* Push-pull output */
+
+/* If the pin is a GPIO digital output, then this identifies the initial output value.
+ * If the pin is an input, this bit is overloaded to provide the qualifier to
+ * distinquish input pull-up and -down:
+ *
+ * .... ...V .... ....
+ */
+
+#define GPIO_OUTPUT_SET               (1 << 8)                   /* Bit 8: If output, inital value of output */
+#define GPIO_OUTPUT_CLEAR             (0)
+
+/* Alternate function (only) mode encodings ****************************************/
+/* Alternate Functions:   MMUU AAAA PPPP BBBB */
+
+#define GPIO_ALTFUNC_SHIFT            (8)                        /* Bits 8-11: Alternate function */
+#define GPIO_ALTFUNC_MASK             (15 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC(n)             ((n) << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_0              (0 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_1              (1 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_2              (2 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_3              (3 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_4              (4 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_5              (5 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_6              (6 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_7              (7 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_8              (8 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_9              (9 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_10             (10 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_11             (11 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_12             (12 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_13             (13 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_14             (14 << GPIO_ALTFUNC_SHIFT)
+#  define GPIO_ALTFUNC_15             (15 << GPIO_ALTFUNC_SHIFT)
+
+/* Common port encodings ***********************************************************/
+/* This identifies the GPIO port:
+ * .... .... PPPP ....
+ */
+
+#define GPIO_PORT_SHIFT               4                          /* Bit 4-6:  Port number */
+#define GPIO_PORT_MASK                (7 << GPIO_PORT_SHIFT)
+#  define GPIO_PORTA                  (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
+#  define GPIO_PORTB                  (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
+#  define GPIO_PORTC                  (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
+#  define GPIO_PORTD                  (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
+#  define GPIO_PORTE                  (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
+#  define GPIO_PORTF                  (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
+#  define GPIO_PORTG                  (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
+#  define GPIO_PORTH                  (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
+#  define GPIO_PORTI                  (8 << GPIO_PORT_SHIFT)     /*   GPIOI */
+
+/* This identifies the bit in the port:
+ * .... .... .... BBBB
+ */
+
+#define GPIO_PIN_SHIFT                0                          /* Bits 0-3: GPIO number: 0-15 */
+#define GPIO_PIN_MASK                 (15 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN0                   (0 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN1                   (1 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN2                   (2 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN3                   (3 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN4                   (4 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN5                   (5 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN6                   (6 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN7                   (7 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN8                   (8 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN9                   (9 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN10                  (10 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN11                  (11 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN12                  (12 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN13                  (13 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN14                  (14 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN15                  (15 << GPIO_PIN_SHIFT)
+
+#else
+#  error "Unrecognized STM32 chip"
+#endif
 
 /************************************************************************************
  * Public Function Prototypes

@@ -37,15 +37,27 @@
 #define __ARCH_ARM_SRC_STM32_CHIP_STM32_EXTI_H
 
 /************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
+#include <nuttx/config.h>
+#include "chip.h"
+
+/************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-#ifdef CONFIG_STM32_CONNECTIVITYLINE
-#  define STM32_NEXTI            20
-#  define STM32_EXTI_MASK        0x000fffff
-#else
-#  define STM32_NEXTI            19
-#  define STM32_EXTI_MASK        0x0007ffff
+#if defined(CONFIG_STM32_STM32F10XX)
+#  ifdef CONFIG_STM32_CONNECTIVITYLINE
+#    define STM32_NEXTI          20
+#    define STM32_EXTI_MASK      0x000fffff
+#  else
+#    define STM32_NEXTI          19
+#    define STM32_EXTI_MASK      0x0007ffff
+#  endif
+#elif defined(CONFIG_STM32_STM32F40XX)
+#  define STM32_NEXTI            23
+#  define STM32_EXTI_MASK        0x007fffff
 #endif
 
 #define STM32_EXTI_BIT(n)        (1 << (n))
@@ -72,38 +84,38 @@
 
 /* Interrupt mask register */
 
-#define EXTI_IMR_BIT(n)          STM32_EXTI_BIT(n)
-#define EXTI_IMR_SHIFT           (0)     /* Bits 18/19-0: Interrupt Mask on line n */
+#define EXTI_IMR_BIT(n)          STM32_EXTI_BIT(n) /* 1=Interrupt request from line x is not masked */
+#define EXTI_IMR_SHIFT           (0)               /* Bits 0-X: Interrupt Mask for all lines */
 #define EXTI_IMR_MASK            STM32_EXTI_MASK
 
 /* Event mask register */
 
-#define EXTI_EMR_BIT(n)          STM32_EXTI_BIT(n)
-#define EXTI_EMR_SHIFT           (0)     /* Bits 18/19-0:  Event Mask on line n */
+#define EXTI_EMR_BIT(n)          STM32_EXTI_BIT(n) /* 1=Event request from line x is not mask */
+#define EXTI_EMR_SHIFT           (0)               /* Bits Bits 0-X:  Event Mask for all lines */
 #define EXTI_EMR_MASK            STM32_EXTI_MASK
 
 /* Rising Trigger selection register */
 
-#define EXTI_RTSR_BIT(n)         STM32_EXTI_BIT(n)
-#define EXTI_RTSR_SHIFT          (0)     /* Bits 18/19-0: Rising trigger event configuration bit of line n */
+#define EXTI_RTSR_BIT(n)         STM32_EXTI_BIT(n) /* 1=Rising trigger enabled (for Event and Interrupt) for input line */
+#define EXTI_RTSR_SHIFT          (0)               /* Bits 0-X: Rising trigger event configuration bit for all lines */
 #define EXTI_RTSR_MASK           STM32_EXTI_MASK
 
 /* Falling Trigger selection register */
 
-#define EXTI_FTSR_BIT(n)         STM32_EXTI_BIT(n)
-#define EXTI_FTSR_SHIFT          (0)     /* Bits 18/19-0: Falling trigger event configuration bit of line n */
+#define EXTI_FTSR_BIT(n)         STM32_EXTI_BIT(n)  /* 1=Falling trigger enabled (for Event and Interrupt) for input line */
+#define EXTI_FTSR_SHIFT          (0)                /* Bits 0-X: Falling trigger event configuration bitfor all lines */
 #define EXTI_FTSR_MASK           STM32_EXTI_MASK
 
 /* Software interrupt event register  */
 
-#define EXTI_SWIER_BIT(n)        STM32_EXTI_BIT(n)
-#define EXTI_SWIER_SHIFT         (0)     /*  Bits 18/19-0: Software Interrupt on line n */
+#define EXTI_SWIER_BIT(n)        STM32_EXTI_BIT(n)  /* 1=Sets the corresponding pending bit in EXTI_PR */
+#define EXTI_SWIER_SHIFT         (0)                /* Bits 0-X: Software Interrupt for all lines */
 #define EXTI_SWIER_MASK          STM32_EXTI_MASK
 
 /* Pending register */
 
-#define EXTI_IMR_BIT(n)          STM32_EXTI_BIT(n)
-#define EXTI_IMR_SHIFT           (0)     /* Bits 18/19-0: Pending bit on line x */
+#define EXTI_IMR_BIT(n)          STM32_EXTI_BIT(n)  /* 1=Selected trigger request occurred */
+#define EXTI_IMR_SHIFT           (0)                /* Bits 0-X: Pending bit for all lines */
 #define EXTI_IMR_MASK            STM32_EXTI_MASK
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_EXTI_H */
