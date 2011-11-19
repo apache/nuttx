@@ -46,7 +46,13 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Alternate Pin Functions: */
+/* Alternate Pin Functions */
+
+/* Additional effort is required to select specific GPIO options such as frequency,
+ * open-drain/push-pull, and pull-up/down!
+ */
+
+#warning "Missing logic"
 
 /* TIMERS */
 
