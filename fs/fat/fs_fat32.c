@@ -1494,7 +1494,7 @@ static int fat_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
     }
 
   /* Check if this is the root directory.  If it is the root directory, we
-   * reset the fd_index to 1, skipping over the initial, unused entry.
+   * reset the fd_index to 0, starting with the initial, entry.
    */
 
   if (fs->fs_type != FSTYPE_FAT32 &&
@@ -1504,7 +1504,7 @@ static int fat_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 
       dir->u.fat.fd_currcluster  = 0;
       dir->u.fat.fd_currsector   = fs->fs_rootbase;
-      dir->u.fat.fd_index        = 1;
+      dir->u.fat.fd_index        = 0;
     }
   else if (fs->fs_type == FSTYPE_FAT32 &&
            dir->u.fat.fd_startcluster == fs->fs_rootbase)
@@ -1513,7 +1513,7 @@ static int fat_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 
       dir->u.fat.fd_currcluster = dir->u.fat.fd_startcluster;
       dir->u.fat.fd_currsector  = fat_cluster2sector(fs, fs->fs_rootbase);
-      dir->u.fat.fd_index       = 1;
+      dir->u.fat.fd_index       = 0;
     }
 
   /* This is not the root directory.  Here the fd_index is set to 2, skipping over
