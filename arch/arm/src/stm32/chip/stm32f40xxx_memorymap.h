@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/chip/stm32f40xxx_memorymap.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -140,6 +140,10 @@
 #define STM32_USART1_BASE    0x40011000     /* 0x40011000-0x400113ff: USART1 */
 #define STM32_USART6_BASE    0x40011400     /* 0x40011400-0x400117ff: USART6 */
 #define STM32_ADC_BASE       0x40012000     /* 0x40012000-0x400123ff: ADC1-3 */
+#  define STM32_ADC1_BASE    0x40012000     /*                        ADC1 */
+#  define STM32_ADC2_BASE    0x40012100     /*                        ADC2 */
+#  define STM32_ADC3_BASE    0x40012200     /*                        ADC3 */
+#  define STM32_ADCCMN_BASE  0x40012300     /*                        Common */
 #define STM32_SDIO_BASE      0x40012c00     /* 0x40012c00-0x40012fff: SDIO  */
 #define STM32_SPI1_BASE      0x40013000     /* 0x40013000-0x400133ff: SPI1 */
 #define STM32_SYSCFG_BASE    0x40013800     /* 0x40013800-0x40013bff: SYSCFG */

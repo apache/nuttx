@@ -2069,7 +2069,7 @@ static int fat_putlfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
 
   /* Make sure that the sector containing the "last" long file name entry
    * is in the sector cache (it probably is not).
-    */
+   */
  
   ret = fat_fscacheread(fs, dirinfo->dir.fd_currsector);
   if (ret < 0)
