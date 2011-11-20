@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_dma.h
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,7 +44,14 @@
 #include <sys/types.h>
 
 #include "chip.h"
-#include "chip/stm32_dma.h"
+
+#if defined(CONFIG_STM32_STM32F10XX)
+#  include "chip/stm32f10xxx_dma.h"
+#elif defined(CONFIG_STM32_STM32F40XX)
+#  include "chip/stm32f40xxx_dma.h"
+#else
+#  error "Unknown STM32 DMA"
+#endif
 
 /************************************************************************************
  * Public Types
