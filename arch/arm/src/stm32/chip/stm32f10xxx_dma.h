@@ -1,8 +1,8 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32_dma.h
+ * arch/arm/src/stm32/chip/stm32f10xxx_dma.h
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_DMA_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_DMA_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -52,8 +52,8 @@
 
 /* Register Offsets *****************************************************************/
 
-#define STM32_DMA_ISR_OFFSET        0x0000 /* DMA interrupt status register */
-#define STM32_DMA_IFCR_OFFSET       0x0004 /* DMA interrupt flag clear register */
+#define STM32_DMA_ISR_OFFSET       0x0000 /* DMA interrupt status register */
+#define STM32_DMA_IFCR_OFFSET      0x0004 /* DMA interrupt flag clear register */
 
 #define STM32_DMACHAN_OFFSET(n)    (0x0014*(n))
 #define STM32_DMACHAN_CCR_OFFSET   0x0008
@@ -230,31 +230,31 @@
 
 /* DMA channel configuration register */
 
-#define DMA_CCR_MEM2MEM           (1 << 14) /* Bit 14: Memory to memory mode */
-#define DMA_CCR_PL_SHIFT          (12)      /* Bits 13-12: Channel Priority level */
+#define DMA_CCR_EN                (1 << 0)  /* Bit 0: Channel enable */
+#define DMA_CCR_TCIE              (1 << 1)  /* Bit 1: Transfer complete interrupt enable */
+#define DMA_CCR_HTIE              (1 << 2)  /* Bit 2: Half Transfer interrupt enable */
+#define DMA_CCR_TEIE              (1 << 3)  /* Bit 3: Transfer error interrupt enable */
+#define DMA_CCR_DIR               (1 << 4)  /* Bit 4: Data transfer direction */
+#define DMA_CCR_CIRC              (1 << 5)  /* Bit 5: Circular mode */
+#define DMA_CCR_PINC              (1 << 6)  /* Bit 6: Peripheral increment mode */
+#define DMA_CCR_MINC              (1 << 7)  /* Bit 7: Memory increment mode */
+#define DMA_CCR_PSIZE_SHIFT       (8)       /* Bits 8-9: Peripheral size */
+#define DMA_CCR_PSIZE_MASK        (3 << DMA_CCR_PSIZE_SHIFT)
+#  define DMA_CCR_PSIZE_8BITS     (0 << DMA_CCR_PSIZE_SHIFT) /* 00: 8-bits */
+#  define DMA_CCR_PSIZE_16BITS    (1 << DMA_CCR_PSIZE_SHIFT) /* 01: 16-bits */
+#  define DMA_CCR_PSIZE_32BITS    (2 << DMA_CCR_PSIZE_SHIFT) /* 10: 32-bits */
+#define DMA_CCR_MSIZE_SHIFT       (10)      /* Bits 10-11: Memory size */
+#define DMA_CCR_MSIZE_MASK        (3 << DMA_CCR_MSIZE_SHIFT)
+#  define DMA_CCR_MSIZE_8BITS     (0 << DMA_CCR_MSIZE_SHIFT) /* 00: 8-bits */
+#  define DMA_CCR_MSIZE_16BITS    (1 << DMA_CCR_MSIZE_SHIFT) /* 01: 16-bits */
+#  define DMA_CCR_MSIZE_32BITS    (2 << DMA_CCR_MSIZE_SHIFT) /* 10: 32-bits */
+#define DMA_CCR_PL_SHIFT          (12)      /* Bits 12-13: Channel Priority level */
 #define DMA_CCR_PL_MASK           (3 << DMA_CCR_PL_SHIFT)
 #  define DMA_CCR_PRILO           (0 << DMA_CCR_PL_SHIFT) /* 00: Low */
 #  define DMA_CCR_PRIMED          (1 << DMA_CCR_PL_SHIFT) /* 01: Medium */
 #  define DMA_CCR_PRIHI           (2 << DMA_CCR_PL_SHIFT) /* 10: High */
 #  define DMA_CCR_PRIVERYHI       (3 << DMA_CCR_PL_SHIFT) /* 11: Very high */
-#define DMA_CCR_MSIZE_SHIFT       (10)      /* Bits 11-10: Memory size */
-#define DMA_CCR_MSIZE_MASK        (3 << DMA_CCR_MSIZE_SHIFT)
-#  define DMA_CCR_MSIZE_8BITS     (0 << DMA_CCR_MSIZE_SHIFT) /* 00: 8-bits */
-#  define DMA_CCR_MSIZE_16BITS    (1 << DMA_CCR_MSIZE_SHIFT) /* 01: 16-bits */
-#  define DMA_CCR_MSIZE_32BITS    (2 << DMA_CCR_MSIZE_SHIFT) /* 10: 32-bits */
-#define DMA_CCR_PSIZE_SHIFT       (8)       /* Bits 9-8: Peripheral size */
-#define DMA_CCR_PSIZE_MASK        (3 << DMA_CCR_PSIZE_SHIFT)
-#  define DMA_CCR_PSIZE_8BITS     (0 << DMA_CCR_PSIZE_SHIFT) /* 00: 8-bits */
-#  define DMA_CCR_PSIZE_16BITS    (1 << DMA_CCR_PSIZE_SHIFT) /* 01: 16-bits */
-#  define DMA_CCR_PSIZE_32BITS    (2 << DMA_CCR_PSIZE_SHIFT) /* 10: 32-bits */
-#define DMA_CCR_MINC              (1 << 7)  /* Bit 7: Memory increment mode */
-#define DMA_CCR_PINC              (1 << 6)  /* Bit 6: Peripheral increment mode */
-#define DMA_CCR_CIRC              (1 << 5)  /* Bit 5: Circular mode */
-#define DMA_CCR_DIR               (1 << 4)  /* Bit 4: Data transfer direction */
-#define DMA_CCR_TEIE              (1 << 3)  /* Bit 3: Transfer error interrupt enable */
-#define DMA_CCR_HTIE              (1 << 2)  /* Bit 2: Half Transfer interrupt enable */
-#define DMA_CCR_TCIE              (1 << 1)  /* Bit 1: Transfer complete interrupt enable */
-#define DMA_CCR_EN                (1 << 0)  /* Bit 0: Channel enable */
+#define DMA_CCR_MEM2MEM           (1 << 14) /* Bit 14: Memory to memory mode */
 
 #define DMA_CCR_ALLINTS           (DMA_CCR_TEIE|DMA_CCR_HTIE|DMA_CCR_TCIE)
 
@@ -347,5 +347,5 @@
 #define DMACHAN_TIM5_CH1          STM32_DMA2_CHAN5
 #define DMACHAN_TIM8_CH2          STM32_DMA2_CHAN5
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_DMA_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_DMA_H */
 
