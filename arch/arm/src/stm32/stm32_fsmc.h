@@ -1,8 +1,8 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_fsmc.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -96,47 +96,47 @@
 
 /* Register Addresses ***************************************************************/
 
-#define STM32_FSMC_BCR(n)         (STM32_FSMC_BASE+STM32_FSMC_BCR_OFFSET (n))
+#define STM32_FSMC_BCR(n)         (STM32_FSMC_BASE+STM32_FSMC_BCR_OFFSET(n))
 #define STM32_FSMC_BCR1           (STM32_FSMC_BASE+STM32_FSMC_BCR1_OFFSET )
 #define STM32_FSMC_BCR2           (STM32_FSMC_BASE+STM32_FSMC_BCR2_OFFSET )
 #define STM32_FSMC_BCR3           (STM32_FSMC_BASE+STM32_FSMC_BCR3_OFFSET )
 #define STM32_FSMC_BCR4           (STM32_FSMC_BASE+STM32_FSMC_BCR4_OFFSET )
 
-#define STM32_FSMC_BTR(n)         (STM32_FSMC_BASE+STM32_FSMC_BTR_OFFSET (n))
+#define STM32_FSMC_BTR(n)         (STM32_FSMC_BASE+STM32_FSMC_BTR_OFFSET(n))
 #define STM32_FSMC_BTR1           (STM32_FSMC_BASE+STM32_FSMC_BTR1_OFFSET )
 #define STM32_FSMC_BTR2           (STM32_FSMC_BASE+STM32_FSMC_BTR2_OFFSET )
 #define STM32_FSMC_BTR3           (STM32_FSMC_BASE+STM32_FSMC_BTR3_OFFSET )
 #define STM32_FSMC_BTR4           (STM32_FSMC_BASE+STM32_FSMC_BTR4_OFFSET )
 
-#define STM32_FSMC_BWTR(n)        (STM32_FSMC_BASE+STM32_FSMC_BWTR_OFFSET (n))
+#define STM32_FSMC_BWTR(n)        (STM32_FSMC_BASE+STM32_FSMC_BWTR_OFFSET(n))
 #define STM32_FSMC_BWTR1          (STM32_FSMC_BASE+STM32_FSMC_BWTR1_OFFSET )
 #define STM32_FSMC_BWTR2          (STM32_FSMC_BASE+STM32_FSMC_BWTR2_OFFSET )
 #define STM32_FSMC_BWTR3          (STM32_FSMC_BASE+STM32_FSMC_BWTR3_OFFSET )
 #define STM32_FSMC_BWTR4          (STM32_FSMC_BASE+STM32_FSMC_BWTR4_OFFSET )
 
-#define STM32_FSMC_PCR(n)         (STM32_FSMC_BASE+STM32_FSMC_PCR_OFFSET (n))
+#define STM32_FSMC_PCR(n)         (STM32_FSMC_BASE+STM32_FSMC_PCR_OFFSET(n))
 #define STM32_FSMC_PCR2           (STM32_FSMC_BASE+STM32_FSMC_PCR2_OFFSET )
 #define STM32_FSMC_PCR3           (STM32_FSMC_BASE+STM32_FSMC_PCR3_OFFSET )
 #define STM32_FSMC_PCR4           (STM32_FSMC_BASE+STM32_FSMC_PCR4_OFFSET )
 
-#define STM32_FSMC_SR(n)          (STM32_FSMC_BASE+STM32_FSMC_SR_OFFSET (n))
+#define STM32_FSMC_SR(n)          (STM32_FSMC_BASE+STM32_FSMC_SR_OFFSET(n))
 #define STM32_FSMC_SR2            (STM32_FSMC_BASE+STM32_FSMC_SR2_OFFSET )
 #define STM32_FSMC_SR3            (STM32_FSMC_BASE+STM32_FSMC_SR3_OFFSET )
 #define STM32_FSMC_SR4            (STM32_FSMC_BASE+STM32_FSMC_SR4_OFFSET )
 
-#define STM32_FSMC_PMEM(n)        (STM32_FSMC_BASE+STM32_FSMC_PMEM_OFFSET (n))
+#define STM32_FSMC_PMEM(n)        (STM32_FSMC_BASE+STM32_FSMC_PMEM_OFFSET(n))
 #define STM32_FSMC_PMEM2          (STM32_FSMC_BASE+STM32_FSMC_PMEM2_OFFSET )
 #define STM32_FSMC_PMEM3          (STM32_FSMC_BASE+STM32_FSMC_PMEM3_OFFSET )
 #define STM32_FSMC_PMEM4          (STM32_FSMC_BASE+STM32_FSMC_PMEM4_OFFSET )
 
-#define STM32_FSMC_PATT(n)        (STM32_FSMC_BASE+STM32_FSMC_PATT_OFFSET (n))
+#define STM32_FSMC_PATT(n)        (STM32_FSMC_BASE+STM32_FSMC_PATT_OFFSET(n))
 #define STM32_FSMC_PATT2          (STM32_FSMC_BASE+STM32_FSMC_PATT2_OFFSET )
 #define STM32_FSMC_PATT3          (STM32_FSMC_BASE+STM32_FSMC_PATT3_OFFSET )
 #define STM32_FSMC_PATT4          (STM32_FSMC_BASE+STM32_FSMC_PATT4_OFFSET )
 
 #define STM32_PIO4                (STM32_FSMC_BASE+STM32_FSMC_PIO4_OFFSET )
 
-#define STM32_FSMC_ECCR(n)        (STM32_FSMC_BASE+STM32_FSMC_ECCR_OFFSET (n))
+#define STM32_FSMC_ECCR(n)        (STM32_FSMC_BASE+STM32_FSMC_ECCR_OFFSET(n))
 #define STM32_FSMC_ECCR2          (STM32_FSMC_BASE+STM32_FSMC_ECCR2_OFFSET )
 #define STM32_FSMC_ECCR3          (STM32_FSMC_BASE+STM32_FSMC_ECCR3_OFFSET )
 
@@ -163,6 +163,9 @@
 #define FSMC_BCR_WREN            (1 << 12)  /* Write enable bit */
 #define FSMC_BCR_WAITEN          (1 << 13)  /* Wait enable bit */
 #define FSMC_BCR_EXTMOD          (1 << 14)  /* Extended mode enable */
+#ifdef CONFIG_STM32_STM32F40XX
+#  define FSMC_BCR_ASYNCWAIT     (1 << 15)  /* Wait signal during asynchronous transfers */
+#endif
 #define FSMC_BCR_CBURSTRW        (1 << 19)  /* Write burst enable */
 
 #define FSMC_BTR_ADDSET_SHIFT    (0)        /* Address setup phase duration */

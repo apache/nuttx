@@ -36,6 +36,10 @@
 #ifndef __ARCH_ARM_SRC_STM32_STM32_FLASH_H
 #define __ARCH_ARM_SRC_STM32_STM32_FLASH_H
 
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
 #include <nuttx/config.h>
 #include <nuttx/progmem.h>
 
