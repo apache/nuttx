@@ -43,7 +43,12 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32_rcc.h"
+
+#if defined(CONFIG_STM32_STM32F10XX)
+#  include "chip/stm32f10xxx_rcc.h"
+#elif defined(CONFIG_STM32_STM32F40XX)
+#  include "chip/stm32f40xxx_rcc.h"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions

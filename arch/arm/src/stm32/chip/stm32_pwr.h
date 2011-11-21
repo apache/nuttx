@@ -1,8 +1,8 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32_pwr.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,6 +37,13 @@
 #define __ARCH_ARM_SRC_STM32_CHIP_STM32_PWR_H
 
 /************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
+#include <nuttx/config.h>
+#include "chip.h"
+
+/************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
@@ -47,6 +54,8 @@
 
 /* Register Addresses ***************************************************************/
 
+#define STM32_PWR_CR           (STM32_PWR_BASE+STM32_PWR_CR_OFFSET)
+#define STM32_PWR_CSR          (STM32_PWR_BASE+STM32_PWR_CSR_OFFSET)
 
 /* Register Bitfield Definitions ****************************************************/
 
@@ -69,11 +78,26 @@
 #  define PWR_CR_2p9V          (7 << PWR_CR_PLS_SHIFT) /* 111: 2.9V */
 #define PWR_CR_DBP             (1 << 8)  /* Bit 8: Disable Backup Domain write protection */
 
+#ifdef CONFIG_STM32_STM32F40XX
+#  define PWR_CR_FPDS          (1 << 9)  /* Bit 9: Flash power down in Stop mode */
+#  define PWR_CR_VOS           (1 << 14) /* Bit 14: Regulator voltage scaling output selection */
+#endif
+
 /* Power control/status register */
 
-#define PWR_CSR_WUF            (1 << 0)  /* Bit 0: Wakeup Flag */
-#define PWR_CSR_SBF            (1 << 1)  /* Bit 1: Standby Flag */
-#define PWR_CSR_PVDO           (1 << 2)  /* Bit 2: PVD Output */
-#define PWR_CSR_EWUP           (1 << 8)  /* Bit 8: Enable WKUP pin */
+#define PWR_CSR_WUF            (1 << 0)  /* Bit 0:  Wakeup Flag */
+#define PWR_CSR_SBF            (1 << 1)  /* Bit 1:  Standby Flag */
+#define PWR_CSR_PVDO           (1 << 2)  /* Bit 2:  PVD Output */
+
+#ifdef CONFIG_STM32_STM32F40XX
+#  define PWR_CSR_BRR          (1 << 3)  /* Bit 3:  Backup regulator ready */
+#endif
+
+#define PWR_CSR_EWUP           (1 << 8)  /* Bit 8:  Enable WKUP pin */
+
+#ifdef CONFIG_STM32_STM32F40XX
+#  define PWR_CSR_BRE          (1 << 9)  /* Bit 9:  Backup regulator enable */
+#  define PWR_CSR_VOSRDY       (1 << 14) /* Bit 14: Regulator voltage scaling output selection ready bite */
+#endif
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_PWR_H */
