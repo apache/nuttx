@@ -33,19 +33,18 @@
  *
  ************************************************************************************/
 
-/** \file
- *  \author Uros Platise
- *  \brief STM32 Flash - Program and Data Memory
- * 
- * Provides standard flash access functions, to be used also by the
- * drivers/mtd/progmem.c program memory flash mtd driver.
+/* Provides standard flash access functions, to be used by the  flash mtd driver.
  * The interface is defined in the include/nuttx/progmem.h
  * 
  * Requirements during write/erase operations on FLASH:
  *  - HSI must be ON.
  *  - Low Power Modes are not permitted during write/erase
  */
- 
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <errno.h>
@@ -55,14 +54,12 @@
 #include "stm32_waste.h"
 #include "up_arch.h"
 
-
 /************************************************************************************
- * Declarations
+ * Pre-processor Definitions
  ************************************************************************************/
 
 #define FLASH_KEY1      0x45670123
 #define FLASH_KEY2      0xCDEF89AB
-
 
 /************************************************************************************
  * Private Functions
