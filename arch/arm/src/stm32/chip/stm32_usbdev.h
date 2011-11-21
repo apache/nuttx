@@ -37,6 +37,15 @@
 #define __ARCH_ARM_SRC_STM32_CHIP_STM32_USBDEV_H
 
 /************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
+#include <nuttx/config.h>
+#include <chip.h>
+
+#ifdef CONFIG_STM32_STM32F10XX
+
+/************************************************************************************
  * Definitions
  ************************************************************************************/
 
@@ -222,5 +231,6 @@
 #define USB_COUNT_RX_SHIFT           (0)       /* Bits 9-0: Reception Byte Count */
 #define USB_COUNT_RX_MASK            (0x03ff << USB_COUNT_RX_SHIFT)
 
+#endif /* CONFIG_STM32_STM32F10XX */
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_USBDEV_H */
 
