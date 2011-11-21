@@ -66,7 +66,6 @@
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit generall timers TIM2,3,4,5 with DMA */
-#  define STM32_NGTIM32                  0   /* No 32-bit General timers */
 #  define STM32 NBTIM                    0   /* No basic timers */
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     2   /* SPI1-2 */
@@ -95,7 +94,6 @@
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and TIM8 */
 #  define STM32_NGTIM                    4   /* 16-bit generall timers TIM2,3,4,5 with DMA */
-#  define STM32_NGTIM32                  0   /* No 32-bit General timers */
 #  define STM32_NBTIM                    2   /* Two basic timers TIM6 and TIM7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
@@ -124,7 +122,6 @@
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit generall timers TIM2,3,4,5 with DMA */
-#  define STM32_NGTIM32                  0   /* No 32-bit General timers */
 #  define STM32 NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
@@ -152,8 +149,8 @@
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
-#  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
-#  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
+                                              * 32-bit general timers TIM2 and 5 with DMA */
 #  define STM32_NGTIMNDMA                6   /* 16-bit general timers TIM9-14 without DMA */
 #  define STM32 NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
@@ -182,8 +179,8 @@
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
-#  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
-#  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
+                                              * 32-bit general timers TIM2 and 5 with DMA */
 #  define STM32_NGTIMNDMA                6   /* 16-bit general timers TIM9-14 without DMA */
 #  define STM32 NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
@@ -212,8 +209,8 @@
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
-#  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
-#  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
+                                              * 32-bit general timers TIM2 and 5 with DMA */
 #  define STM32_NGTIMNDMA                6   /* 16-bit general timers TIM9-14 without DMA */
 #  define STM32 NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
@@ -242,8 +239,8 @@
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
-#  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
-#  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
+                                              * 32-bit general timers TIM2 and 5 with DMA */
 #  define STM32_NGTIMNDMA                6   /* 16-bit general timers TIM9-14 without DMA */
 #  define STM32 NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
@@ -272,8 +269,8 @@
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
-#  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
-#  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
+                                              * 32-bit general timers TIM2 and 5 with DMA */
 #  define STM32_NGTIMNDMA                6   /* 16-bit general timers TIM9-14 without DMA */
 #  define STM32 NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
@@ -302,8 +299,8 @@
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
-#  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
-#  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
+                                              * 32-bit general timers TIM2 and 5 with DMA */
 #  define STM32_NGTIMNDMA                6   /* 16-bit general timers TIM9-14 without DMA */
 #  define STM32 NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
@@ -332,8 +329,8 @@
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
-#  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
-#  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
+                                              * 32-bit general timers TIM2 and 5 with DMA */
 #  define STM32_NGTIMNDMA                6   /* 16-bit general timers TIM9-14 without DMA */
 #  define STM32 NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
@@ -362,8 +359,8 @@
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
-#  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
-#  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
+                                              * 32-bit general timers TIM2 and 5 with DMA */
 #  define STM32_NGTIMNDMA                6   /* 16-bit general timers TIM9-14 without DMA */
 #  define STM32 NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
@@ -392,8 +389,8 @@
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
-#  define STM32_NGTIM                    2   /* 16-bit general timers TIM3 and 4 with DMA */
-#  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
+                                              * 32-bit general timers TIM2 and 5 with DMA */
 #  define STM32_NGTIMNDMA                6   /* 16-bit general timers TIM9-14 without DMA */
 #  define STM32 NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */

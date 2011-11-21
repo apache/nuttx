@@ -167,7 +167,7 @@
 
 /* I2S configuration register */
 
-#fdef CONFIG_STM32_STM32F40XX
+#ifdef CONFIG_STM32_STM32F40XX
 #  define SPI_I2SCFGR_CHLEN          (1 << 0)  /* Bit 0: Channel length (number of bits per audio channel) */
 #  define SPI_I2SCFGR_DATLEN_SHIFT   (1)       /* Bit 1-2: Data length to be transferred */
 #  define SPI_I2SCFGR_DATLEN_MASK    (3 << SPI_I2SCFGR_DATLEN_SHIFT)
