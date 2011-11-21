@@ -1,8 +1,8 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32_rcc.h
+ * arch/arm/src/stm32/chip/stm32f10xx_rcc.h
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_RRC_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32_RRC_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_RCC_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_RCC_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -293,5 +293,5 @@
 #define RCC_CSR_WWDGRSTF            (1 << 30) /* Bit 30: Window watchdog reset flag */
 #define RCC_CSR_LPWRRSTF            (1 << 31) /* Bit 31: Low-Power reset flag */
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_RRC_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_RCC_H */
 

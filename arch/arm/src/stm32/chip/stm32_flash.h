@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
  
-#ifdef defined(CONFIG_STM32_LOWDENSITY)
+#if defined(CONFIG_STM32_LOWDENSITY)
 #  define STM32_FLASH_NPAGES        32
 #  define STM32_FLASH_PAGESIZE      1024
 #elif  defined(CONFIG_STM32_MEDIUMDENSITY)
