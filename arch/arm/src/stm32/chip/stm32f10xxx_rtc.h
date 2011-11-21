@@ -1,8 +1,8 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32_rtc.h
+ * arch/arm/src/stm32/chip/stm32f10xxx_rtc.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_RTC_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32_RTC_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_RTC_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_RTC_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -93,4 +93,4 @@
 #define RTC_DIVH_RTC_DIV_SHIFT  (0)      /* Bits 3-0: RTC Clock Divider High */
 #define RTC_DIVH_RTC_DIV_MASK   (0x0f << RTC_DIVH_RTC_DIV_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_RTC_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F10XXX_RTC_H */
