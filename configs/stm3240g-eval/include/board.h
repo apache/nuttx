@@ -145,6 +145,16 @@
 
 #warning "Missing logic"
 
+/* Alternate function pin selections ************************************************/
+
+/* UART3:
+ * - PC11 is MicroSDCard_D3 & RS232/IrDA_RX (JP22 open)
+ * - PC10 is MicroSDCard_D2 & RSS232/IrDA_TX
+ */
+
+#define GPIO_USART3_RX GPIO_USART3_RX_2
+#define GPIO_USART3_TX GPIO_USART3_TX_2
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
