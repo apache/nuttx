@@ -320,7 +320,7 @@
 /* GPIO port bit set/reset register */
 
 #define GPIO_BSRR_SET(n)           (1 << (n))
-#define GPIO_BSRR_RESET(n)         (1 << ((n)+16)
+#define GPIO_BSRR_RESET(n)         (1 << ((n)+16))
 
 /* GPIO port configuration lock register */
 
