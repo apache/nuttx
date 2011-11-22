@@ -162,7 +162,7 @@
 #define SPI_SR_BSY                (1 << 7)  /* Bit 7: Busy flag */
 
 #ifdef CONFIG_STM32_STM32F40XX
-#  define SPI_SR_TIFRFE:E         (1 << 8)  /* Bit 8: TI frame format error */
+#  define SPI_SR_TIFRFE           (1 << 8)  /* Bit 8: TI frame format error */
 #endif
 
 /* I2S configuration register */
