@@ -1,9 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_gpio.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,12 +82,40 @@ static const uint32_t g_gpiobase[STM32_NGPIO_PORTS] =
 #if STM32_NGPIO_PORTS > 6
 	STM32_GPIOG_BASE,
 #endif
+#if STM32_NGPIO_PORTS > 7
+	STM32_GPIOH_BASE,
+#endif
+#if STM32_NGPIO_PORTS > 8
+	STM32_GPIOI_BASE,
+#endif
 };
 
 #ifdef CONFIG_DEBUG
-static const char g_portchar[8] =
+static const char g_portchar[STM32_NGPIO_PORTS] =
 {
+#if STM32_NGPIO_PORTS > 9
+#  error "Additional support required for this number of GPIOs"
+#elif STM32_NGPIO_PORTS > 8
+  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'
+#elif STM32_NGPIO_PORTS > 7
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' 
+#elif STM32_NGPIO_PORTS > 6
+  'A', 'B', 'C', 'D', 'E', 'F', 'G'
+#elif STM32_NGPIO_PORTS > 5
+  'A', 'B', 'C', 'D', 'E', 'F'
+#elif STM32_NGPIO_PORTS > 4
+  'A', 'B', 'C', 'D', 'E'
+#elif STM32_NGPIO_PORTS > 3
+  'A', 'B', 'C', 'D'
+#elif STM32_NGPIO_PORTS > 2
+  'A', 'B', 'C'
+#elif STM32_NGPIO_PORTS > 1
+  'A', 'B'
+#elif STM32_NGPIO_PORTS > 0
+  'A'
+#else
+#  error "Bad number of GPIOs"
+#endif
 };
 #endif
 
