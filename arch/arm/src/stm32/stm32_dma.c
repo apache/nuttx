@@ -56,6 +56,10 @@
 #include "stm32_dma.h"
 #include "stm32_internal.h"
 
+/* Only for the STM32F10xx family for now */
+
+#ifdef CONFIG_STM32_STM32F10XX
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -603,3 +607,4 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
 }
 #endif
 
+#endif /* CONFIG_STM32_STM32F10XX */

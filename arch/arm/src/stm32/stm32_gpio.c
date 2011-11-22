@@ -40,29 +40,28 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
-
 #include "up_arch.h"
+
 #include "chip.h"
 #include "stm32_gpio.h"
-#include "stm32_exti.h"
-#include "stm32_rcc.h"
-#include "stm32_internal.h"
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 /* Base addresses for each GPIO block */
 
-static const uint32_t g_gpiobase[STM32_NGPIO_PORTS] =
+const uint32_t g_gpiobase[STM32_NGPIO_PORTS] =
 {
 #if STM32_NGPIO_PORTS > 0
   STM32_GPIOA_BASE,
@@ -92,41 +91,6 @@ static const uint32_t g_gpiobase[STM32_NGPIO_PORTS] =
   STM32_GPIOI_BASE,
 #endif
 };
-
-/* Port letters for prettier debug output */
-
-#ifdef CONFIG_DEBUG
-static const char g_portchar[STM32_NGPIO_PORTS] =
-{
-#if STM32_NGPIO_PORTS > 9
-#  error "Additional support required for this number of GPIOs"
-#elif STM32_NGPIO_PORTS > 8
-  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'
-#elif STM32_NGPIO_PORTS > 7
-  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' 
-#elif STM32_NGPIO_PORTS > 6
-  'A', 'B', 'C', 'D', 'E', 'F', 'G'
-#elif STM32_NGPIO_PORTS > 5
-  'A', 'B', 'C', 'D', 'E', 'F'
-#elif STM32_NGPIO_PORTS > 4
-  'A', 'B', 'C', 'D', 'E'
-#elif STM32_NGPIO_PORTS > 3
-  'A', 'B', 'C', 'D'
-#elif STM32_NGPIO_PORTS > 2
-  'A', 'B', 'C'
-#elif STM32_NGPIO_PORTS > 1
-  'A', 'B'
-#elif STM32_NGPIO_PORTS > 0
-  'A'
-#else
-#  error "Bad number of GPIOs"
-#endif
-};
-#endif
-
-/* Interrupt handles attached to each EXTI */
-
-static xcpt_t stm32_exti_callbacks[16];
 
 /****************************************************************************
  * Private Functions
@@ -304,143 +268,6 @@ static int stm32_gpio_configlock(uint32_t cfgset, bool altlock)
   return -ENOSYS;
 }
 #endif
-
-/****************************************************************************
- * Interrupt Service Routines - Dispatchers
- ****************************************************************************/
-
-static int stm32_exti0_isr(int irq, void *context)
-{
-  int ret = OK;
-
-  /* Clear the pending interrupt */
-
-  putreg32(0x0001, STM32_EXTI_PR);
-          
-  /* And dispatch the interrupt to the handler */
-          
-  if (stm32_exti_callbacks[0])
-    {
-      ret = stm32_exti_callbacks[0](irq, context);
-    }
-  return ret;
-}
-
-static int stm32_exti1_isr(int irq, void *context)
-{
-  int ret = OK;
-
-  /* Clear the pending interrupt */
-
-  putreg32(0x0002, STM32_EXTI_PR);
-          
-  /* And dispatch the interrupt to the handler */
-          
-  if (stm32_exti_callbacks[1])
-    {
-      ret = stm32_exti_callbacks[1](irq, context);
-    }
-  return ret;
-}
-
-static int stm32_exti2_isr(int irq, void *context)
-{
-  int ret = OK;
-
-  /* Clear the pending interrupt */
-
-  putreg32(0x0004, STM32_EXTI_PR);
-          
-  /* And dispatch the interrupt to the handler */
-          
-  if (stm32_exti_callbacks[2])
-    {
-      ret = stm32_exti_callbacks[2](irq, context);
-    }
-  return ret;
-}
-
-static int stm32_exti3_isr(int irq, void *context)
-{
-  int ret = OK;
-
-  /* Clear the pending interrupt */
-
-  putreg32(0x0008, STM32_EXTI_PR);
-          
-  /* And dispatch the interrupt to the handler */
-          
-  if (stm32_exti_callbacks[3])
-    {
-      ret = stm32_exti_callbacks[3](irq, context);
-    }
-  return ret;
-}
-
-static int stm32_exti4_isr(int irq, void *context)
-{
-  int ret = OK;
-
-  /* Clear the pending interrupt */
-
-  putreg32(0x0010, STM32_EXTI_PR);
-          
-  /* And dispatch the interrupt to the handler */
-          
-  if (stm32_exti_callbacks[4])
-    {
-      ret = stm32_exti_callbacks[4](irq, context);
-    }
-  return ret;
-}
-
-static int stm32_exti_multiisr(int irq, void *context, int first, int last)
-{
-  uint32_t pr;
-  int pin;
-  int ret = OK;
-
-  /* Examine the state of each pin in the group */
-
-  pr = getreg32(STM32_EXTI_PR);
-          
-  /* And dispatch the interrupt to the handler */
-          
-  for (pin = first; pin <= last; pin++)
-    {
-      /* Is an interrupt pending on this pin? */
-
-      uint32_t mask = (1 << pin);
-      if ((pr & mask) != 0)
-        {
-          /* Clear the pending interrupt */
-
-          putreg32(mask, STM32_EXTI_PR);
-          
-          /* And dispatch the interrupt to the handler */
-          
-          if (stm32_exti_callbacks[pin])
-            {
-              int tmp = stm32_exti_callbacks[pin](irq, context);
-              if (tmp != OK)
-                {
-                  ret = tmp;
-                }
-            }
-        }
-    }
-  return ret;
-}
-
-static int stm32_exti95_isr(int irq, void *context)
-{
-  return stm32_exti_multiisr(irq, context, 5, 9);
-}
-
-static int stm32_exti1510_isr(int irq, void *context)
-{
-  return stm32_exti_multiisr(irq, context, 10, 15);
-}
 
 /****************************************************************************
  * Function:  stm32_gpioremap
@@ -702,181 +529,3 @@ bool stm32_gpioread(uint32_t pinset)
     }
   return 0;
 }
-
-/****************************************************************************
- * Name: stm32_gpiosetevent
- *
- * Description:
- *   Sets/clears GPIO based event and interrupt triggers.
- * 
- * Parameters:
- *  - pinset: gpio pin configuration
- *  - rising/falling edge: enables
- *  - event:  generate event when set
- *  - func:   when non-NULL, generate interrupt
- * 
- * Returns: 
- *  The previous value of the interrupt handler function pointer.  This value may,
- *  for example, be used to restore the previous handler when multiple handlers are
- *  used.
- *
- ****************************************************************************/
-
-xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge, 
-                          bool event, xcpt_t func)
-{
-  uint32_t pin = pinset & GPIO_PIN_MASK;
-  uint32_t exti = STM32_EXTI_BIT(pin);
-  int      irq;
-  xcpt_t   handler;
-  xcpt_t   oldhandler = NULL;
-    
-  /* Select the interrupt handler for this EXTI pin */
-    
-  if (pin < 5)
-    {
-      irq = pin + STM32_IRQ_EXTI0;
-      switch (pin)
-        {
-          case 0:
-            handler = stm32_exti0_isr;
-            break;
-          case 1:
-            handler = stm32_exti1_isr;
-            break;
-          case 2:
-            handler = stm32_exti2_isr;
-            break;
-          case 3:
-            handler = stm32_exti3_isr;
-            break;
-          default:
-            handler = stm32_exti4_isr;
-            break;
-        }
-    }
-  else if (pin < 10)
-    {
-      irq     = STM32_IRQ_EXTI95;
-      handler = stm32_exti95_isr;
-    }
-  else
-    {
-      irq     = STM32_IRQ_EXTI1510;
-      handler = stm32_exti1510_isr;
-    }
-    
-  /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
-
-  oldhandler = stm32_exti_callbacks[pin];
-  stm32_exti_callbacks[pin] = func;
-
-  /* Install external interrupt handlers */
-    
-  if (func)
-    {
-      irq_attach(irq, handler);
-      up_enable_irq(irq);
-    }
-  else
-    {
-      up_disable_irq(irq);
-    }
-
-  /* Configure GPIO, enable EXTI line enabled if event or interrupt is enabled */
-    
-  if (event || func) 
-    {
-      pinset |= GPIO_EXTI;
-    }
-   
-  stm32_configgpio(pinset);
-
-  /* Configure rising/falling edges */
-
-  modifyreg32(STM32_EXTI_RTSR, risingedge ? 0 : exti, risingedge ? exti : 0);
-  modifyreg32(STM32_EXTI_FTSR, fallingedge ? 0 : exti, fallingedge ? exti : 0);
-
-  /* Enable Events and Interrupts */
-
-  modifyreg32(STM32_EXTI_EMR, event ? 0 : exti, event ? exti : 0);
-  modifyreg32(STM32_EXTI_IMR, func ? 0 : exti, func ? exti : 0);
-
-  /* Return the old IRQ handler */
-
-  return oldhandler;
-}
-
-/****************************************************************************
- * Function:  stm32_dumpgpio
- *
- * Description:
- *   Dump all GPIO registers associated with the provided base address
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-int stm32_dumpgpio(uint32_t pinset, const char *msg)
-{
-  irqstate_t   flags;
-  uint32_t     base;
-  unsigned int port;
-  unsigned int pin;
-
-  /* Get the base address associated with the GPIO port */
-
-  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  base = g_gpiobase[port];
-
-  /* The following requires exclusive access to the GPIO registers */
-
-  flags = irqsave();
-#if defined(CONFIG_STM32_STM32F10XX)
-  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pinset, base, msg);
-  if ((getreg32(STM32_RCC_APB2ENR) & RCC_APB2ENR_IOPEN(port)) != 0)
-    {
-      lldbg("  CR: %08x %08x IDR: %04x ODR: %04x LCKR: %04x\n",
-            getreg32(base + STM32_GPIO_CRH_OFFSET), getreg32(base + STM32_GPIO_CRL_OFFSET),
-            getreg32(base + STM32_GPIO_IDR_OFFSET), getreg32(base + STM32_GPIO_ODR_OFFSET),
-            getreg32(base + STM32_GPIO_LCKR_OFFSET));
-      lldbg("  EVCR: %02x MAPR: %08x CR: %04x %04x %04x %04x\n",
-            getreg32(STM32_AFIO_EVCR), getreg32(STM32_AFIO_MAPR),
-            getreg32(STM32_AFIO_EXTICR1), getreg32(STM32_AFIO_EXTICR2),
-            getreg32(STM32_AFIO_EXTICR3), getreg32(STM32_AFIO_EXTICR4));
-    }
-  else
-    {
-      lldbg("  GPIO%c not enabled: APB2ENR: %08x\n",
-            g_portchar[port], getreg32(STM32_RCC_APB2ENR));
-    }
-#elif defined(CONFIG_STM32_STM32F40XX)
-  DEBUGASSERT(port < STM32_NGPIO_PORTS);
-
-  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
-        g_portchar[port], pinset, base, msg);
-  if ((getreg32(STM32_RCC_APB1ENR) & RCC_AH1BENR_GPIOEN(port)) != 0)
-    {
-      lldbg("  MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
-            getreg32(base + STM32_GPIO_MODER_OFFSET), getreg32(base + STM32_GPIO_OTYPER_OFFSET),
-            getreg32(base + STM32_GPIO_OSPEED_OFFSET), getreg32(base + STM32_GPIO_PUPDR_OFFSET));
-      lldbg("  IDR: %04x       ODR: %04x       BSRR: %08x   LCKR: %04x\n",
-            getreg32(STM32_GPIO_IDR_OFFSET), getreg32(STM32_GPIO_ODR_OFFSET),
-            getreg32(STM32_GPIO_BSRR_OFFSET), getreg32(STM32_GPIO_LCKR_OFFSET));
-      lldbg(" AFRH: %08x  AFRL: %08x\n",
-            getreg32(STM32_GPIO_ARFH_OFFSET), getreg32(STM32_GPIO_AFRL_OFFSET));
-    }
-  else
-    {
-      lldbg("  GPIO%c not enabled: APB1ENR: %08x\n",
-            g_portchar[port], getreg32(STM32_RCC_APB1ENR));
-    }
-
-#else
-# error "Unsupported STM32 chip"
-#endif
-  irqrestore(flags);
-  return OK;
-}
-#endif
