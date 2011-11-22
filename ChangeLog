@@ -2218,3 +2218,7 @@
 	  clock_gettime() and not clock_gettime().  Also, there is a place where
 	  FAT date is used instead of FAT time. (Thanks to David Sidrane).
 	* arch/arm/src/stm32: Add support for the STM3240xxx MCU family.
+	* arch/arm/src/stm32 and arch/arm/include/stm32:  Add support for the
+	  STM32F50xxx family of MCUs.
+	* configs/stm3240g-eval:  Add framework for the STMicro STM3240G-EVAL
+	  board.
