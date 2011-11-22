@@ -3,7 +3,7 @@
  * arch/arm/src/board/stm3210e_internal.n
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,9 +49,8 @@
  * Definitions
  ************************************************************************************/
 
-/* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
- * modules (others may support more -- in such case, the following must be
- * expanded).
+/* How many SPI modules does this chip support? Most support 2 SPI modules (others
+ * may support more -- in such case, the following must be expanded).
  */
 
 #if STM32_NSPI < 1
