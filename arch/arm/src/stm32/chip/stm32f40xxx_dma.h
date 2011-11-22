@@ -379,6 +379,14 @@
  * sources/sinks of data.  The requests from peripherals assigned to a stream
  * are simply OR'ed together before entering the DMA block.  This means that only
  * one request on a given stream can be enabled at once.
+ *
+ * Alternative stream selections are provided with a numeric suffix like _1, _2, etc.
+ * The DMA driver, however, will use the pin selection without the numeric suffix.
+ * Additional definitions are required in the board.h file.  For example, if
+ * SPI3_RX connects via DMA STREAM0, then following should be application-specific
+ * mapping should be used:
+ *
+ * #define DMAMAP_SPI3_RX DMAMAP_SPI3_RX_1
  */
 
 #define STM32_DMA_MAP(d,c,s)       ((d) << 6 | (s) << 3 | (c))

@@ -294,6 +294,7 @@
 
 /* AHB1 Peripheral Clock enable register */
 
+#define RCC_AH1BENR_GPIOEN(n)       (1 << (n))
 #define RCC_AH1BENR_GPIOAEN         (1 << 0)  /* Bit 0:  IO port A clock enable */
 #define RCC_AH1BENR_GPIOBEN         (1 << 1)  /* Bit 1:  IO port B clock enable */
 #define RCC_AH1BENR_GPIOCEN         (1 << 2)  /* Bit 2:  IO port C clock enable */
@@ -371,6 +372,7 @@
 
 /* RCC AHB1 low power modeperipheral clock enable register */
 
+#define RCC_AH1BLPENR_GPIOLPEN(n)    (1 << (n))
 #define RCC_AH1BLPENR_GPIOALPEN      (1 << 0)  /* Bit 0:  IO port A clock enable during Sleep mode */
 #define RCC_AH1BLPENR_GPIOBLPEN      (1 << 1)  /* Bit 1:  IO port B clock enable during Sleep mode */
 #define RCC_AH1BLPENR_GPIOCLPEN      (1 << 2)  /* Bit 2:  IO port C clock enable during Sleep mode */

@@ -45,7 +45,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
+
 #include <arch/irq.h>
 
 #include "up_arch.h"
@@ -58,37 +60,40 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+/* Base addresses for each GPIO block */
 
 static const uint32_t g_gpiobase[STM32_NGPIO_PORTS] =
 {
 #if STM32_NGPIO_PORTS > 0
-	STM32_GPIOA_BASE,
+  STM32_GPIOA_BASE,
 #endif
 #if STM32_NGPIO_PORTS > 1
-	STM32_GPIOB_BASE,
+  STM32_GPIOB_BASE,
 #endif
 #if STM32_NGPIO_PORTS > 2
-	STM32_GPIOC_BASE,
+  STM32_GPIOC_BASE,
 #endif
 #if STM32_NGPIO_PORTS > 3
-	STM32_GPIOD_BASE,
+  STM32_GPIOD_BASE,
 #endif
 #if STM32_NGPIO_PORTS > 4
-	STM32_GPIOE_BASE,
+  STM32_GPIOE_BASE,
 #endif
 #if STM32_NGPIO_PORTS > 5
-	STM32_GPIOF_BASE,
+  STM32_GPIOF_BASE,
 #endif
 #if STM32_NGPIO_PORTS > 6
-	STM32_GPIOG_BASE,
+  STM32_GPIOG_BASE,
 #endif
 #if STM32_NGPIO_PORTS > 7
-	STM32_GPIOH_BASE,
+  STM32_GPIOH_BASE,
 #endif
 #if STM32_NGPIO_PORTS > 8
-	STM32_GPIOI_BASE,
+  STM32_GPIOI_BASE,
 #endif
 };
+
+/* Port letters for prettier debug output */
 
 #ifdef CONFIG_DEBUG
 static const char g_portchar[STM32_NGPIO_PORTS] =
@@ -119,13 +124,20 @@ static const char g_portchar[STM32_NGPIO_PORTS] =
 };
 #endif
 
+/* Interrupt handles attached to each EXTI */
+
 static xcpt_t stm32_exti_callbacks[16];
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-int stm32_gpio_configlock(uint32_t cfgset, bool altlock)
+/****************************************************************************
+ * Name: stm32_gpio_configlock (for the STM32F10xxx family
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_STM32F10XX)
+static int stm32_gpio_configlock(uint32_t cfgset, bool altlock)
 {
   uint32_t base;
   uint32_t cr;
@@ -142,7 +154,7 @@ int stm32_gpio_configlock(uint32_t cfgset, bool altlock)
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   if (port >= STM32_NGPIO_PORTS)
     {
-      return ERROR;
+      return -EINVAL;
     }
     
   /* Get the port base address */
@@ -189,7 +201,7 @@ int stm32_gpio_configlock(uint32_t cfgset, bool altlock)
       ( ((cfgset & GPIO_CNF_MASK) >> GPIO_CNF_SHIFT) < GPIO_CR_CNF_ALTPP || /* new state is not output ALT? */
         input ) )                                                           /* or it is input */
     {
-      return ERROR;
+      return -EINVAL;
     }
       
   if (input)
@@ -279,6 +291,19 @@ int stm32_gpio_configlock(uint32_t cfgset, bool altlock)
   putreg32(regval, regaddr);
   return OK;
 }
+#endif
+
+/****************************************************************************
+ * Name: stm32_gpio_configlock (for the STM32F40xxx family
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_STM32F40XX)
+static int stm32_gpio_configlock(uint32_t cfgset, bool altlock)
+{
+# warning "Missing logic"
+  return -ENOSYS;
+}
+#endif
 
 /****************************************************************************
  * Interrupt Service Routines - Dispatchers
@@ -418,10 +443,97 @@ static int stm32_exti1510_isr(int irq, void *context)
 }
 
 /****************************************************************************
+ * Function:  stm32_gpioremap
+ *
+ * Description:
+ *
+ *   Based on configuration within the .config file, this function will
+ *   remaps positions of alternative functions. 
+ * 
+ ****************************************************************************/
+
+static inline void stm32_gpioremap(void)
+{
+#if defined(CONFIG_STM32_STM32F10XX)
+
+  /* Remap according to the configuration within .config file */
+
+  uint32_t val = 0;
+
+#ifdef CONFIG_STM32_JTAG_FULL_ENABLE
+  /* The reset default */
+#elif CONFIG_STM32_JTAG_NOJNTRST_ENABLE
+  val |= AFIO_MAPR_SWJ;    /* enabled but without JNTRST */
+#elif CONFIG_STM32_JTAG_SW_ENABLE
+  val |= AFIO_MAPR_SWDP;      /* set JTAG-DP disabled and SW-DP enabled */
+#else
+  val |= AFIO_MAPR_DISAB;     /* set JTAG-DP and SW-DP Disabled */
+#endif
+
+#ifdef CONFIG_STM32_TIM1_FULL_REMAP
+  val |= AFIO_MAPR_TIM1_FULLREMAP;
+#endif
+#ifdef CONFIG_STM32_TIM1_PARTIAL_REMAP
+  val |= AFIO_MAPR_TIM1_PARTREMAP;
+#endif
+#ifdef CONFIG_STM32_TIM2_FULL_REMAP
+  val |= AFIO_MAPR_TIM2_FULLREMAP;
+#endif
+#ifdef CONFIG_STM32_TIM2_PARTIAL_REMAP_1
+  val |= AFIO_MAPR_TIM2_PARTREMAP1;
+#endif
+#ifdef CONFIG_STM32_TIM2_PARTIAL_REMAP_2
+  val |= AFIO_MAPR_TIM2_PARTREMAP2;
+#endif
+#ifdef CONFIG_STM32_TIM3_FULL_REMAP
+  val |= AFIO_MAPR_TIM3_FULLREMAP;
+#endif
+#ifdef CONFIG_STM32_TIM3_PARTIAL_REMAP
+  val |= AFIO_MAPR_TIM3_PARTREMAP;
+#endif
+#ifdef CONFIG_STM32_TIM4_REMAP
+  val |= AFIO_MAPR_TIM4_REMAP;
+#endif
+
+#ifdef CONFIG_STM32_USART1_REMAP
+  val |= AFIO_MAPR_USART1_REMAP;
+#endif
+#ifdef CONFIG_STM32_USART2_REMAP
+  val |= AFIO_MAPR_USART2_REMAP;
+#endif
+#ifdef CONFIG_STM32_USART3_FULL_REMAP
+  val |= AFIO_MAPR_USART3_FULLREMAP;
+#endif
+#ifdef CONFIG_STM32_USART3_PARTIAL_REMAP
+  val |= AFIO_MAPR_USART3_PARTREMAP;
+#endif
+
+#ifdef CONFIG_STM32_SPI1_REMAP
+  val |= AFIO_MAPR_SPI1_REMAP;
+#endif
+#ifdef CONFIG_STM32_SPI3_REMAP
+#endif
+
+#ifdef CONFIG_STM32_I2C1_REMAP
+  val |= AFIO_MAPR_I2C1_REMAP;
+#endif
+
+#ifdef CONFIG_STM32_CAN1_REMAP1
+  val |= AFIO_MAPR_PB89;
+#endif
+#ifdef CONFIG_STM32_CAN1_REMAP2
+  val |= AFIO_MAPR_PD01;
+#endif
+
+  putreg32(val, STM32_AFIO_MAPR);  
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Function:  stm32_gpioinit
  *
  * Description:
@@ -429,84 +541,16 @@ static int stm32_exti1510_isr(int irq, void *context)
  *    - Remaps positions of alternative functions. 
  * 
  * Typically called from stm32_start().
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_gpioinit(void)
 {
-    /* Remap according to the configuration within .config file */
+  /* Remap according to the configuration within .config file */
 
-    uint32_t val = 0;
-
-#ifdef CONFIG_STM32_JTAG_FULL_ENABLE
-    // the reset default
-#elif CONFIG_STM32_JTAG_NOJNTRST_ENABLE
-    val |= AFIO_MAPR_SWJ;		/* enabled but without JNTRST */
-#elif CONFIG_STM32_JTAG_SW_ENABLE
-    val |= AFIO_MAPR_SWDP;      /* set JTAG-DP disabled and SW-DP enabled */
-#else
-    val |= AFIO_MAPR_DISAB;     /* set JTAG-DP and SW-DP Disabled */
-#endif
-
-#ifdef CONFIG_STM32_TIM1_FULL_REMAP
-    val |= AFIO_MAPR_TIM1_FULLREMAP;
-#endif
-#ifdef CONFIG_STM32_TIM1_PARTIAL_REMAP
-    val |= AFIO_MAPR_TIM1_PARTREMAP;
-#endif
-#ifdef CONFIG_STM32_TIM2_FULL_REMAP
-    val |= AFIO_MAPR_TIM2_FULLREMAP;
-#endif
-#ifdef CONFIG_STM32_TIM2_PARTIAL_REMAP_1
-    val |= AFIO_MAPR_TIM2_PARTREMAP1;
-#endif
-#ifdef CONFIG_STM32_TIM2_PARTIAL_REMAP_2
-    val |= AFIO_MAPR_TIM2_PARTREMAP2;
-#endif
-#ifdef CONFIG_STM32_TIM3_FULL_REMAP
-    val |= AFIO_MAPR_TIM3_FULLREMAP;
-#endif
-#ifdef CONFIG_STM32_TIM3_PARTIAL_REMAP
-    val |= AFIO_MAPR_TIM3_PARTREMAP;
-#endif
-#ifdef CONFIG_STM32_TIM4_REMAP
-    val |= AFIO_MAPR_TIM4_REMAP;
-#endif
-
-#ifdef CONFIG_STM32_USART1_REMAP
-    val |= AFIO_MAPR_USART1_REMAP;
-#endif
-#ifdef CONFIG_STM32_USART2_REMAP
-    val |= AFIO_MAPR_USART2_REMAP;
-#endif
-#ifdef CONFIG_STM32_USART3_FULL_REMAP
-    val |= AFIO_MAPR_USART3_FULLREMAP;
-#endif
-#ifdef CONFIG_STM32_USART3_PARTIAL_REMAP
-    val |= AFIO_MAPR_USART3_PARTREMAP;
-#endif
-
-#ifdef CONFIG_STM32_SPI1_REMAP
-    val |= AFIO_MAPR_SPI1_REMAP;
-#endif
-#ifdef CONFIG_STM32_SPI3_REMAP
-#endif
-
-#ifdef CONFIG_STM32_I2C1_REMAP
-    val |= AFIO_MAPR_I2C1_REMAP;
-#endif
-
-#ifdef CONFIG_STM32_CAN1_REMAP1
-    val |= AFIO_MAPR_PB89;
-#endif
-#ifdef CONFIG_STM32_CAN1_REMAP2
-    val |= AFIO_MAPR_PD01;
-#endif
-
-    putreg32(val, STM32_AFIO_MAPR);  
+  stm32_gpioremap();
 }
 
-
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_configgpio
  *
  * Description:
@@ -517,18 +561,18 @@ void stm32_gpioinit(void)
  * 
  * Returns:
  *   OK on success
- *   ERROR on invalid port, or when pin is locked as ALT function.
+ *   A negated errono valu on invalid port, or when pin is locked as ALT
+ *   function.
  * 
- * \todo Auto Power Enable
- ************************************************************************************/
+ * To-Do: Auto Power Enable
+ ****************************************************************************/
 
 int stm32_configgpio(uint32_t cfgset)
 {
-   return stm32_gpio_configlock(cfgset, true);
+  return stm32_gpio_configlock(cfgset, true);
 }
 
-
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_unconfiggpio
  *
  * Description:
@@ -543,23 +587,28 @@ int stm32_configgpio(uint32_t cfgset)
  * 
  * Returns:
  *  OK on success
- *  ERROR on invalid port
+ *  A negated errno value on invalid port
  *
- * \todo Auto Power Disable
- ************************************************************************************/
+ * To-Do: Auto Power Disable
+ ****************************************************************************/
 
 int stm32_unconfiggpio(uint32_t cfgset)
 {
-    /* Reuse port and pin number and set it to default HiZ INPUT */
+  /* Reuse port and pin number and set it to default HiZ INPUT */
     
-    cfgset &= GPIO_PORT_MASK | GPIO_PIN_MASK;
-    cfgset |= GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT;
+  cfgset &= GPIO_PORT_MASK | GPIO_PIN_MASK;
+#if defined(CONFIG_STM32_STM32F10XX)
+  cfgset |= GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT;
+#elif defined(CONFIG_STM32_STM32F40XX)
+  cfgset |= GPIO_INPUT | GPIO_FLOAT;
+#else
+# error "Unsupported STM32 chip"
+#endif
     
-    /* \todo : Mark its unuse for automatic power saving options */
-    
-    return stm32_gpio_configlock(cfgset, false);
-}
+  /* To-Do: Mark its unuse for automatic power saving options */
 
+  return stm32_gpio_configlock(cfgset, false);
+}
 
 /****************************************************************************
  * Name: stm32_gpiowrite
@@ -572,7 +621,11 @@ int stm32_unconfiggpio(uint32_t cfgset)
 void stm32_gpiowrite(uint32_t pinset, bool value)
 {
   uint32_t base;
+#if defined(CONFIG_STM32_STM32F10XX)
   uint32_t offset;
+#elif defined(CONFIG_STM32_STM32F40XX)
+  uint32_t bit;
+#endif
   unsigned int port;
   unsigned int pin;
 
@@ -589,15 +642,35 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
 
       /* Set or clear the output on the pin */
 
+#if defined(CONFIG_STM32_STM32F10XX)
+
       if (value)
         {
           offset = STM32_GPIO_BSRR_OFFSET;
         }
       else
-          offset = STM32_GPIO_BRR_OFFSET;
         {
+          offset = STM32_GPIO_BRR_OFFSET;
         }
+
       putreg32((1 << pin), base + offset);
+
+#elif defined(CONFIG_STM32_STM32F40XX)
+
+      if (value)
+        {
+          bit = GPIO_BSRR_SET(pin);
+        }
+      else
+        {
+          bit = GPIO_BSRR_RESET(pin);
+        }
+
+      putreg32(bit, base + STM32_GPIO_BSRR_OFFSET);
+
+#else
+# error "Unsupported STM32 chip"
+#endif
     }
 }
 
@@ -630,7 +703,7 @@ bool stm32_gpioread(uint32_t pinset)
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_gpiosetevent
  *
  * Description:
@@ -647,7 +720,7 @@ bool stm32_gpioread(uint32_t pinset)
  *  for example, be used to restore the previous handler when multiple handlers are
  *  used.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 xcpt_t stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge, 
                           bool event, xcpt_t func)
@@ -759,6 +832,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
   /* The following requires exclusive access to the GPIO registers */
 
   flags = irqsave();
+#if defined(CONFIG_STM32_STM32F10XX)
   lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
   if ((getreg32(STM32_RCC_APB2ENR) & RCC_APB2ENR_IOPEN(port)) != 0)
@@ -777,6 +851,31 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
       lldbg("  GPIO%c not enabled: APB2ENR: %08x\n",
             g_portchar[port], getreg32(STM32_RCC_APB2ENR));
     }
+#elif defined(CONFIG_STM32_STM32F40XX)
+  DEBUGASSERT(port < STM32_NGPIO_PORTS);
+
+  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
+        g_portchar[port], pinset, base, msg);
+  if ((getreg32(STM32_RCC_APB1ENR) & RCC_AH1BENR_GPIOEN(port)) != 0)
+    {
+      lldbg("  MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
+            getreg32(base + STM32_GPIO_MODER_OFFSET), getreg32(base + STM32_GPIO_OTYPER_OFFSET),
+            getreg32(base + STM32_GPIO_OSPEED_OFFSET), getreg32(base + STM32_GPIO_PUPDR_OFFSET));
+      lldbg("  IDR: %04x       ODR: %04x       BSRR: %08x   LCKR: %04x\n",
+            getreg32(STM32_GPIO_IDR_OFFSET), getreg32(STM32_GPIO_ODR_OFFSET),
+            getreg32(STM32_GPIO_BSRR_OFFSET), getreg32(STM32_GPIO_LCKR_OFFSET));
+      lldbg(" AFRH: %08x  AFRL: %08x\n",
+            getreg32(STM32_GPIO_ARFH_OFFSET), getreg32(STM32_GPIO_AFRL_OFFSET));
+    }
+  else
+    {
+      lldbg("  GPIO%c not enabled: APB1ENR: %08x\n",
+            g_portchar[port], getreg32(STM32_RCC_APB1ENR));
+    }
+
+#else
+# error "Unsupported STM32 chip"
+#endif
   irqrestore(flags);
   return OK;
 }

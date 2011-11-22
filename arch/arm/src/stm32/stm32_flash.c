@@ -52,7 +52,10 @@
 #include "stm32_flash.h"
 #include "stm32_rcc.h"
 #include "stm32_waste.h"
+
 #include "up_arch.h"
+
+#ifdef CONFIG_STM32_STM32F10XX
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -67,23 +70,24 @@
 
 void stm32_flash_unlock(void)
 {
-    while( getreg32(STM32_FLASH_SR) & FLASH_SR_BSY ) up_waste();
+  while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
+    {
+      up_waste();
+    }
 
-    if ( getreg32(STM32_FLASH_CR) & FLASH_CR_LOCK ) {
-    
-        /* Unlock sequence */
+  if (getreg32(STM32_FLASH_CR) & FLASH_CR_LOCK)
+    {
+      /* Unlock sequence */
         
-        putreg32(FLASH_KEY1, STM32_FLASH_KEYR);
-        putreg32(FLASH_KEY2, STM32_FLASH_KEYR);
+      putreg32(FLASH_KEY1, STM32_FLASH_KEYR);
+      putreg32(FLASH_KEY2, STM32_FLASH_KEYR);
     }
 }
 
-
 void stm32_flash_lock(void)
 {
-    modifyreg16(STM32_FLASH_CR, 0, FLASH_CR_LOCK);
+  modifyreg16(STM32_FLASH_CR, 0, FLASH_CR_LOCK);
 }
-
 
 /************************************************************************************
  * Public Functions
@@ -91,134 +95,151 @@ void stm32_flash_lock(void)
 
 uint16_t up_progmem_npages(void)
 {
-    return STM32_FLASH_NPAGES;
+  return STM32_FLASH_NPAGES;
 }
-
 
 bool up_progmem_isuniform(void)
 {
-    return TRUE;
+  return true;
 }
-
 
 uint16_t up_progmem_pagesize(uint16_t page)
 {
-    return STM32_FLASH_PAGESIZE;
+  return STM32_FLASH_PAGESIZE;
 }
-
 
 int up_progmem_getpage(uint32_t addr)
 {
-    if (addr >= STM32_FLASH_SIZE)
-        return -EFAULT;
+  if (addr >= STM32_FLASH_SIZE)
+    {
+      return -EFAULT;
+    }
 
-    return addr / STM32_FLASH_PAGESIZE;
+  return addr / STM32_FLASH_PAGESIZE;
 }
-
 
 int up_progmem_erasepage(uint16_t page)
 {
-    uint32_t addr;
-    uint16_t count;
+  uint32_t addr;
+  uint16_t count;
 
-    if (page >= STM32_FLASH_NPAGES)
-        return -EFAULT;
+  if (page >= STM32_FLASH_NPAGES)
+    {
+      return -EFAULT;
+    }
 
-    /* Get flash ready and begin erasing single page */
+  /* Get flash ready and begin erasing single page */
     
-    if ( !(getreg32(STM32_RCC_CR) & RCC_CR_HSION) )
-        return -EPERM;
-    
-    stm32_flash_unlock();
-        
-    modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PER);
-    putreg32(page * STM32_FLASH_PAGESIZE, STM32_FLASH_AR);
-    modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_STRT);
-    
-    while( getreg32(STM32_FLASH_SR) & FLASH_SR_BSY ) up_waste();
-    
-    modifyreg32(STM32_FLASH_CR, FLASH_CR_PER, 0);
-    
-    /* Verify */
-    
-    for (addr = page * STM32_FLASH_PAGESIZE + STM32_FLASH_BASE, count = STM32_FLASH_PAGESIZE; 
-         count; count-=4, addr += 4) {
-         
-        if (getreg32(addr) != 0xFFFFFFFF)
-            return -EIO;
+  if (!(getreg32(STM32_RCC_CR) & RCC_CR_HSION))
+    {
+      return -EPERM;
     }
     
-    return STM32_FLASH_PAGESIZE;
-}
+  stm32_flash_unlock();
+        
+  modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PER);
+  putreg32(page * STM32_FLASH_PAGESIZE, STM32_FLASH_AR);
+  modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_STRT);
 
+  while(getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
+
+  modifyreg32(STM32_FLASH_CR, FLASH_CR_PER, 0);
+    
+  /* Verify */
+    
+  for (addr = page * STM32_FLASH_PAGESIZE + STM32_FLASH_BASE, count = STM32_FLASH_PAGESIZE; 
+       count; count-=4, addr += 4)
+    {
+      if (getreg32(addr) != 0xffffffff)
+        {
+          return -EIO;
+        }
+    }
+
+  return STM32_FLASH_PAGESIZE;
+}
 
 int up_progmem_ispageerased(uint16_t page)
 {
-    uint32_t addr;
-    uint16_t count;
-    uint16_t bwritten = 0;
+  uint32_t addr;
+  uint16_t count;
+  uint16_t bwritten = 0;
 
-    if (page >= STM32_FLASH_NPAGES)
-        return -EFAULT;
-
-    /* Verify */
-    
-    for (addr = page * STM32_FLASH_PAGESIZE + STM32_FLASH_BASE, count = STM32_FLASH_PAGESIZE; 
-         count; count--, addr++) {
-         
-        if (getreg8(addr) != 0xFF) bwritten++;
+  if (page >= STM32_FLASH_NPAGES)
+    {
+      return -EFAULT;
     }
-    
-    return bwritten;
-}
 
+  /* Verify */
+    
+  for (addr = page * STM32_FLASH_PAGESIZE + STM32_FLASH_BASE, count = STM32_FLASH_PAGESIZE; 
+       count; count--, addr++)
+    {
+      if (getreg8(addr) != 0xff)
+        {
+          bwritten++;
+        }
+    }
+
+  return bwritten;
+}
 
 int up_progmem_write(uint32_t addr, const void *buf, size_t count)
 {
-    uint16_t *hword = (uint16_t *)buf;
-    size_t written = count;
+  uint16_t *hword = (uint16_t *)buf;
+  size_t written = count;
 
-    /* STM32 requires half-word access */
-    
-    if (count & 1)
-        return -EINVAL;
-        
-    /* Check for valid address range */
-        
-    if ( (addr+count) >= STM32_FLASH_SIZE)
-        return -EFAULT;
+  /* STM32 requires half-word access */
 
-    /* Get flash ready and begin flashing */
-    
-    if ( !(getreg32(STM32_RCC_CR) & RCC_CR_HSION) )
-        return -EPERM;
-        
-    stm32_flash_unlock();
-    
-    modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PG);
-    
-    for (addr += STM32_FLASH_BASE; count; count--, hword++, addr+=2) {
-            
-        /* Write half-word and wait to complete */
-    
-        putreg16(*hword, addr);
-        
-        while( getreg32(STM32_FLASH_SR) & FLASH_SR_BSY ) up_waste();
-        
-        /* Verify */
-        
-        if (getreg32(STM32_FLASH_SR) & FLASH_SR_WRPRT_ERR) {
-            modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
-            return -EROFS;
-        }
-        
-        if (getreg16(addr) != *hword) {
-            modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
-            return -EIO;
-        }
-        
+  if (count & 1)
+    {
+      return -EINVAL;
     }
+
+  /* Check for valid address range */
+
+  if ((addr+count) >= STM32_FLASH_SIZE)
+    {
+      return -EFAULT;
+    }
+
+  /* Get flash ready and begin flashing */
+
+  if (!(getreg32(STM32_RCC_CR) & RCC_CR_HSION))
+    {
+      return -EPERM;
+    }
+
+  stm32_flash_unlock();
     
-    modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
-    return written;
+  modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PG);
+    
+  for (addr += STM32_FLASH_BASE; count; count--, hword++, addr+=2)
+    {
+      /* Write half-word and wait to complete */
+
+      putreg16(*hword, addr);
+
+      while(getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
+
+      /* Verify */
+
+      if (getreg32(STM32_FLASH_SR) & FLASH_SR_WRPRT_ERR)
+        {
+          modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
+          return -EROFS;
+        }
+
+      if (getreg16(addr) != *hword)
+        {
+          modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
+          return -EIO;
+        }
+
+    }
+
+  modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
+  return written;
 }
+
+#endif /* CONFIG_STM32_STM32F10XX */
