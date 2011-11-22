@@ -55,6 +55,8 @@
 
 #include "up_arch.h"
 
+/* Only for the STM32F10xx family for now */
+
 #ifdef CONFIG_STM32_STM32F10XX
 
 /************************************************************************************

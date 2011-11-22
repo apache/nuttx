@@ -47,6 +47,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
+
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"
 #include "stm32_uart.h"
@@ -55,27 +56,86 @@
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
-
 /* Configuration **********************************************************/
+/* Make sure that we have not enabled more U[S]ARTs than are support by
+ * the device.
+ */
+
+#if STM32_NUSART < 6
+#  undef CONFIG_STM32_USART6
+#endif
+#if STM32_NUSART < 5
+#  undef CONFIG_STM32_UART5
+#endif
+#if STM32_NUSART < 4
+#  undef CONFIG_STM32_UART4
+#endif
+#if STM32_NUSART < 3
+#  undef CONFIG_STM32_USART3
+#endif
+#if STM32_NUSART < 2
+#  undef CONFIG_STM32_USART2
+#endif
+#if STM32_NUSART < 1
+#  undef CONFIG_STM32_USART1
+#endif
+
+#if defined(CONFIG_STM32_USART1) || defined (CONFIG_STM32_USART2) || defined(CONFIG_STM32_USART3) || \
+    defined(CONFIG_STM32_UART4)  || defined (CONFIG_STM32_UART5)  || defined(CONFIG_STM32_USART6)
+# define HAVE_UART
+#endif
 
 /* Is there a serial console? */
 
 #if defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART1)
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_UART4_SERIAL_CONSOLE
+#  undef CONFIG_UART5_SERIAL_CONSOLE
+#  undef CONFIG_USART6_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART2)
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_USART4_SERIAL_CONSOLE
+#  undef CONFIG_USART5_SERIAL_CONSOLE
+#  undef CONFIG_USART6_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART3)
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
+#  undef CONFIG_UART4_SERIAL_CONSOLE
+#  undef CONFIG_UART5_SERIAL_CONSOLE
+#  undef CONFIG_USART6_SERIAL_CONSOLE
+#  define HAVE_CONSOLE 1
+#elif defined(CONFIG_UART4_SERIAL_CONSOLE) && defined(CONFIG_STM32_UART4)
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  undef CONFIG_USART2_SERIAL_CONSOLE
+#  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_UART5_SERIAL_CONSOLE
+#  undef CONFIG_USART6_SERIAL_CONSOLE
+#  define HAVE_CONSOLE 1
+#elif defined(CONFIG_UART5_SERIAL_CONSOLE) && defined(CONFIG_STM32_UART5)
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  undef CONFIG_USART2_SERIAL_CONSOLE
+#  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_UART4_SERIAL_CONSOLE
+#  undef CONFIG_USART6_SERIAL_CONSOLE
+#  define HAVE_CONSOLE 1
+#elif defined(CONFIG_USART6_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART6)
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  undef CONFIG_USART2_SERIAL_CONSOLE
+#  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_UART4_SERIAL_CONSOLE
+#  undef CONFIG_UART5_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #else
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_UART4_SERIAL_CONSOLE
+#  undef CONFIG_UART5_SERIAL_CONSOLE
+#  undef CONFIG_USART6_SERIAL_CONSOLE
 #  undef HAVE_CONSOLE
 #endif
 
@@ -102,6 +162,27 @@
 #  define STM32_CONSOLE_BITS     CONFIG_USART3_BITS
 #  define STM32_CONSOLE_PARITY   CONFIG_USART3_PARITY
 #  define STM32_CONSOLE_2STOP    CONFIG_USART3_2STOP
+#elif defined(CONFIG_UART4_SERIAL_CONSOLE)
+#  define STM32_CONSOLE_BASE     STM32_USART4_BASE
+#  define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
+#  define STM32_CONSOLE_BAUD     CONFIG_USART4_BAUD
+#  define STM32_CONSOLE_BITS     CONFIG_USART4_BITS
+#  define STM32_CONSOLE_PARITY   CONFIG_USART4_PARITY
+#  define STM32_CONSOLE_2STOP    CONFIG_USART4_2STOP
+#elif defined(CONFIG_UART5_SERIAL_CONSOLE)
+#  define STM32_CONSOLE_BASE     STM32_USART5_BASE
+#  define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
+#  define STM32_CONSOLE_BAUD     CONFIG_USART5_BAUD
+#  define STM32_CONSOLE_BITS     CONFIG_USART5_BITS
+#  define STM32_CONSOLE_PARITY   CONFIG_USART5_PARITY
+#  define STM32_CONSOLE_2STOP    CONFIG_USART5_2STOP
+#elif defined(CONFIG_USART6_SERIAL_CONSOLE)
+#  define STM32_CONSOLE_BASE     STM32_USART6_BASE
+#  define STM32_APBCLOCK         STM32_PCLK2_FREQUENCY
+#  define STM32_CONSOLE_BAUD     CONFIG_USART6_BAUD
+#  define STM32_CONSOLE_BITS     CONFIG_USART6_BITS
+#  define STM32_CONSOLE_PARITY   CONFIG_USART6_PARITY
+#  define STM32_CONSOLE_2STOP    CONFIG_USART6_2STOP
 #else
 #  error "No CONFIG_USARTn_SERIAL_CONSOLE Setting"
 #endif
@@ -239,9 +320,10 @@ void up_lowputc(char ch)
  *
  **************************************************************************/
 
+#if defined(CONFIG_STM32_STM32F10XX)
 void stm32_lowsetup(void)
 {
-#if defined(CONFIG_STM32_USART1) || defined(CONFIG_STM32_USART2) || defined(CONFIG_STM32_USART3)
+#if defined(HAVE_UART)
   uint32_t mapr;
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t cr;
@@ -364,7 +446,107 @@ void stm32_lowsetup(void)
   cr |= (USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
   putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 #endif
-#endif /* CONFIG_STM32_USART1 || CONFIG_STM32_USART2 || CONFIG_STM32_USART3 */
+#endif /* HAVE_UART */
 }
+#elif defined(CONFIG_STM32_STM32F40XX)
+void stm32_lowsetup(void)
+{
+#if defined(HAVE_UART)
+#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+  uint32_t cr;
+#endif
+
+  /* Enable the selected USARTs and configure GPIO pins need by the
+   * the selected USARTs.  NOTE: The serial driver later depends on
+   * this pin configuration -- whether or not a serial console is selected.
+   *
+   * NOTE: Clocking for USART1, USART2, and/or USART3 was already provided in stm32_rcc.c
+   */
+
+#ifdef CONFIG_STM32_USART1
+  stm32_configgpio(GPIO_USART1_TX);
+  stm32_configgpio(GPIO_USART1_RX);
+# ifdef GPIO_USART1_CTS
+  stm32_configgpio(GPIO_USART1_CTS);
+  stm32_configgpio(GPIO_USART1_RTS);
+# endif
+#endif
+
+#ifdef CONFIG_STM32_USART2
+  stm32_configgpio(GPIO_USART2_TX);
+  stm32_configgpio(GPIO_USART2_RX);
+# ifdef GPIO_USART2_CTS
+  stm32_configgpio(GPIO_USART2_CTS);
+  stm32_configgpio(GPIO_USART2_RTS);
+# endif
+#endif
+
+#ifdef CONFIG_STM32_USART3
+  stm32_configgpio(GPIO_USART3_TX);
+  stm32_configgpio(GPIO_USART3_RX);
+# ifdef GPIO_USART3_CTS
+  stm32_configgpio(GPIO_USART3_CTS);
+  stm32_configgpio(GPIO_USART3_RTS);
+# endif
+#endif
+
+#ifdef CONFIG_STM32_UART4
+  stm32_configgpio(GPIO_UART4_TX);
+  stm32_configgpio(GPIO_UART4_RX);
+#endif
+
+#ifdef CONFIG_STM32_UART5
+  stm32_configgpio(GPIO_UART5_TX);
+  stm32_configgpio(GPIO_UART5_RX);
+#endif
+
+#ifdef CONFIG_STM32_USART6
+  stm32_configgpio(GPIO_USART6_TX);
+  stm32_configgpio(GPIO_USART6_RX);
+# ifdef GPIO_USART6_CTS
+  stm32_configgpio(GPIO_USART6_CTS);
+  stm32_configgpio(GPIO_USART6_RTS);
+# endif
+#endif
+
+  /* Enable and configure the selected console device */
+
+#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+  /* Configure CR2 */
+
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
+  cr &= ~USART_CR2_CLRBITS;
+  cr |= USART_CR2_SETBITS;
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
+
+  /* Configure CR1 */
+
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
+  cr &= ~USART_CR1_CLRBITS;
+  cr |= USART_CR1_SETBITS;
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
+
+  /* Configure CR3 */
+
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR3_OFFSET);
+  cr &= ~USART_CR3_CLRBITS;
+  cr |= USART_CR3_SETBITS;
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR3_OFFSET);
+
+  /* Configure the USART Baud Rate */
+
+  putreg32(STM32_BRR_VALUE, STM32_CONSOLE_BASE + STM32_USART_BRR_OFFSET);
+
+  /* Enable Rx, Tx, and the USART */
+
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
+  cr |= (USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
+#endif
+#endif /* HAVE_UART */
+}
+#else
+#  error "Unsupported STM32 chip"
+#endif
 
 
