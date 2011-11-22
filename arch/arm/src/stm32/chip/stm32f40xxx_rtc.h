@@ -267,7 +267,7 @@
 
 /* RTC write protection register */
 
-#define RTC_WPR_MASK              (0xff)    /* Bits 0-7: Write protection ke
+#define RTC_WPR_MASK              (0xff)    /* Bits 0-7: Write protection key */
 
 /* RTC sub second register */
 
@@ -293,7 +293,7 @@
 #define RTC_TSTR_HU_MASK          (15 << RTC_TSTR_HU_SHIFT)
 #define RTC_TSTR_HT_SHIFT         (20)      /* Bits 20-21: Hour tens in BCD format. */
 #define RTC_TSTR_HT_MASK          (3 << RTC_TSTR_HT_SHIFT)
-#define RTC_TSTR_PM               (1 << 22) /* Bit 22: AM/PM notation
+#define RTC_TSTR_PM               (1 << 22) /* Bit 22: AM/PM notation */
 
 /* RTC timestamp sub second register */
 

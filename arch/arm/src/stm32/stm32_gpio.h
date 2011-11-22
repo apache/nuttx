@@ -43,6 +43,12 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#  include <stdbool.h>
+#endif
+
 #include <nuttx/irq.h>
 
 #include "chip.h"
@@ -231,10 +237,10 @@ extern "C" {
 
 #define GPIO_MODE_SHIFT               (18)                       /* Bits 18-19: GPIO port mode */
 #define GPIO_MODE_MASK                (3 << GPIO_MODE_SHIFT)
-#define GPIO_INPUT                    (0 << GPIO_MODE_SHIFT)     /* Input mode */
-#define GPIO_OUTPUT                   (1 << GPIO_MODE_SHIFT)     /* General purpose output mode */
-#define GPIO_ALT                      (2 << GPIO_MODE_SHIFT)     /* Alternate function mode */
-#define GPIO_ANALOG                   (3 << GPIO_MODE_SHIFT)     /* Analog mode */
+#  define GPIO_INPUT                  (0 << GPIO_MODE_SHIFT)     /* Input mode */
+#  define GPIO_OUTPUT                 (1 << GPIO_MODE_SHIFT)     /* General purpose output mode */
+#  define GPIO_ALT                    (2 << GPIO_MODE_SHIFT)     /* Alternate function mode */
+#  define GPIO_ANALOG                 (3 << GPIO_MODE_SHIFT)     /* Analog mode */
 
 /* Input/output pull-ups/downs (not used with analog):
  *
@@ -286,12 +292,12 @@ extern "C" {
  * .... .... FF.. .... ....
  */
 
-#define GPIO_MODE_SHIFT               (10)                       /* Bits 10-11: GPIO frequency selection */
-#define GPIO_MODE_MASK                (3 << GPIO_MODE_SHIFT)
-#  define GPIO_MODE_2MHz              (0 << GPIO_MODE_SHIFT)     /* 2 MHz Low speed output */
-#  define GPIO_MODE_25MHz             (1 << GPIO_MODE_SHIFT)     /* 25 MHz Medium speed output */
-#  define GPIO_MODE_20MHz             (2 << GPIO_MODE_SHIFT)     /* 50 MHz Fast speed output  */
-#  define GPIO_MODE_100MHz            (3 << GPIO_MODE_SHIFT)     /* 100 MHz High speed output */
+#define GPIO_SPEED_SHIFT              (10)                       /* Bits 10-11: GPIO frequency selection */
+#define GPIO_SPEED_MASK               (3 << GPIO_SPEED_SHIFT)
+#  define GPIO_SPEED_2MHz             (0 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
+#  define GPIO_SPEED_25MHz            (1 << GPIO_SPEED_SHIFT)     /* 25 MHz Medium speed output */
+#  define GPIO_SPEED_20MHz            (2 << GPIO_SPEED_SHIFT)     /* 50 MHz Fast speed output  */
+#  define GPIO_SPEED_100MHz           (3 << GPIO_SPEED_SHIFT)     /* 100 MHz High speed output */
 
 /* Output/Alt function type selection:
  *

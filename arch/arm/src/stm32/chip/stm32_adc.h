@@ -503,21 +503,21 @@
 #ifdef CONFIG_STM32_STM32F40XX
 #  define ADC_CCR_MULTI_SHIFT      (0)        /* Bits 0-4: Multi ADC mode selection */
 #  define ADC_CCR_MULTI_MASK       (31 << ADC_CCR_MULTI_SHIFT)
-#    define ADC_CCR_MULTI_NON      (0 << ADC_CCR_MULTI_SHIFT)  /* 00000: Independent mode */
+#    define ADC_CCR_MULTI_NONE     (0 << ADC_CCR_MULTI_SHIFT)  /* 00000: Independent mode */
                                                                /* 00001 to 01001: Dual mode (ADC1 and ADC2), ADC3 independent */
-#    define ADC_CCR_MULTI_ MASK    (1 << ADC_CCR_MULTI_SHIFT)  /* 00001: Combined regular simultaneous + injected simultaneous mode */
-#    define ADC_CCR_MULTI_ MASK    (2 << ADC_CCR_MULTI_SHIFT)  /* 00010: Combined regular simultaneous + alternate trigger mode */
-#    define ADC_CCR_MULTI_ MASK    (5 << ADC_CCR_MULTI_SHIFT)  /* 00101: Injected simultaneous mode only */
-#    define ADC_CCR_MULTI_ MASK    (6 << ADC_CCR_MULTI_SHIFT)  /* 00110: Regular simultaneous mode only */
-#    define ADC_CCR_MULTI_ MASK    (7 << ADC_CCR_MULTI_SHIFT)  /* 00111: interleaved mode only */
-#    define ADC_CCR_MULTI_ MASK    (9 << ADC_CCR_MULTI_SHIFT)  /* 01001: Alternate trigger mode only */
+#    define ADC_CCR_MULTI_RSISM2   (1 << ADC_CCR_MULTI_SHIFT)  /* 00001: Combined regular simultaneous + injected simultaneous mode */
+#    define ADC_CCR_MULTI_RSATM2   (2 << ADC_CCR_MULTI_SHIFT)  /* 00010: Combined regular simultaneous + alternate trigger mode */
+#    define ADC_CCR_MULTI_ISM2     (5 << ADC_CCR_MULTI_SHIFT)  /* 00101: Injected simultaneous mode only */
+#    define ADC_CCR_MULTI_RSM2     (6 << ADC_CCR_MULTI_SHIFT)  /* 00110: Regular simultaneous mode only */
+#    define ADC_CCR_MULTI_IM2      (7 << ADC_CCR_MULTI_SHIFT)  /* 00111: interleaved mode only */
+#    define ADC_CCR_MULTI_ATM2     (9 << ADC_CCR_MULTI_SHIFT)  /* 01001: Alternate trigger mode only */
                                                                /* 10001 to 11001: Triple mode (ADC1, 2 and 3) */
-#    define ADC_CCR_MULTI_ MASK    (17 << ADC_CCR_MULTI_SHIFT) /* 10001: Combined regular simultaneous + injected simultaneous mode */
-#    define ADC_CCR_MULTI_ MASK    (18 << ADC_CCR_MULTI_SHIFT) /* 10010: Combined regular simultaneous + alternate trigger mode */
-#    define ADC_CCR_MULTI_ MASK    (21 << ADC_CCR_MULTI_SHIFT) /* 10101: Injected simultaneous mode only */
-#    define ADC_CCR_MULTI_ MASK    (22 << ADC_CCR_MULTI_SHIFT) /* 10110: Regular simultaneous mode only */
-#    define ADC_CCR_MULTI_ MASK    (23 << ADC_CCR_MULTI_SHIFT) /* 10111: interleaved mode only */
-#    define ADC_CCR_MULTI_ MASK    (25 << ADC_CCR_MULTI_SHIFT) /* 11001: Alternate trigger mode only */
+#    define ADC_CCR_MULTI_RSISM3   (17 << ADC_CCR_MULTI_SHIFT) /* 10001: Combined regular simultaneous + injected simultaneous mode */
+#    define ADC_CCR_MULTI_RSATM3   (18 << ADC_CCR_MULTI_SHIFT) /* 10010: Combined regular simultaneous + alternate trigger mode */
+#    define ADC_CCR_MULTI_ISM3     (21 << ADC_CCR_MULTI_SHIFT) /* 10101: Injected simultaneous mode only */
+#    define ADC_CCR_MULTI_RSM3     (22 << ADC_CCR_MULTI_SHIFT) /* 10110: Regular simultaneous mode only */
+#    define ADC_CCR_MULTI_IM3      (23 << ADC_CCR_MULTI_SHIFT) /* 10111: interleaved mode only */
+#    define ADC_CCR_MULTI_ATM3     (25 << ADC_CCR_MULTI_SHIFT) /* 11001: Alternate trigger mode only */
                                               /* Bits 5-7: Reserved, must be kept at reset value. */
 #  define ADC_CCR_DELAY_SHIFT      (8)        /* Bits 8-11: Delay between 2 sampling phases */
 #  define ADC_CCR_DELAY_MASK       (15 << ADC_CCR_DELAY_SHIFT)
