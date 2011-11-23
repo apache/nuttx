@@ -54,7 +54,7 @@
 
 #define STM32_AFIO_EVCR_OFFSET       0x0000  /* Event control register */
 #define STM32_AFIO_MAPR_OFFSET       0x0004  /* AF remap and debug I/O configuration register */
-#define STM32_AFIO_EXTICR_OFFSET(p)  (0x0008 + ((p) & 0xC)) /* Registers are displaced by 4! */
+#define STM32_AFIO_EXTICR_OFFSET(p)  (0x0008 + ((p) & 0x000c)) /* Registers are displaced by 4! */
 #define STM32_AFIO_EXTICR1_OFFSET    0x0008  /* External interrupt configuration register 1 */
 #define STM32_AFIO_EXTICR2_OFFSET    0x000c  /* External interrupt configuration register 2 */
 #define STM32_AFIO_EXTICR3_OFFSET    0x0010  /* External interrupt configuration register 3 */
