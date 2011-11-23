@@ -51,12 +51,12 @@
 #define STM32_RCC_AHB3RSTR_OFFSET   0x0018  /* AHB3 peripheral reset register */
 #define STM32_RCC_APB1RSTR_OFFSET   0x0020  /* APB1 Peripheral reset register */
 #define STM32_RCC_APB2RSTR_OFFSET   0x0024  /* APB2 Peripheral reset register */
-#define STM32_RCC_AH1BENR_OFFSET    0x0030  /* AHB1 Peripheral Clock enable register */
+#define STM32_RCC_AHB1ENR_OFFSET    0x0030  /* AHB1 Peripheral Clock enable register */
 #define STM32_RCC_AHB2ENR_OFFSET    0x0034  /* AHB2 Peripheral Clock enable register */
 #define STM32_RCC_AHB3ENR_OFFSET    0x0038  /* AHB3 Peripheral Clock enable register */
 #define STM32_RCC_APB1ENR_OFFSET    0x0040  /* APB1 Peripheral Clock enable register */
 #define STM32_RCC_APB2ENR_OFFSET    0x0044  /* APB2 Peripheral Clock enable register */
-#define STM32_RCC_AH1BLPENR_OFFSET  0x0050  /* RCC AHB1 low power modeperipheral clock enable register */
+#define STM32_RCC_AHB1LPENR_OFFSET  0x0050  /* RCC AHB1 low power modeperipheral clock enable register */
 #define STM32_RCC_AH2BLPENR_OFFSET  0x0054  /* RCC AHB2 low power modeperipheral clock enable register */
 #define STM32_RCC_AH3BLPENR_OFFSET  0x0058  /* RCC AHB3 low power modeperipheral clock enable register */
 #define STM32_RCC_APB1LPENR_OFFSET  0x0060  /* RCC APB1 low power modeperipheral clock enable register */
@@ -82,7 +82,7 @@
 #define STM32_RCC_AHB3ENR           (STM32_RCC_BASE+STM32_RCC_AHB3ENR_OFFSET)
 #define STM32_RCC_APB1ENR           (STM32_RCC_BASE+STM32_RCC_APB1ENR_OFFSET)
 #define STM32_RCC_APB2ENR           (STM32_RCC_BASE+STM32_RCC_APB2ENR_OFFSET)
-#define STM32_RCC_AH1BLPENR         (STM32_RCC_BASE+STM32_RCC_AH1BLPENR_OFFSET)
+#define STM32_RCC_AHB1LPENR         (STM32_RCC_BASE+STM32_RCC_AHB1LPENR_OFFSET)
 #define STM32_RCC_AH2BLPENR         (STM32_RCC_BASE+STM32_RCC_AH2BLPENR)
 #define STM32_RCC_AH3BLPENR         (STM32_RCC_BASE+STM32_RCC_AH3BLPENR_OFFSET)
 #define STM32_RCC_APB1LPENR         (STM32_RCC_BASE+STM32_RCC_APB1LPENR_OFFSET)
@@ -121,17 +121,22 @@
 #define RCC_PLLCFG_PLLN_MASK        (0x1ff << RCC_PLLCFG_PLLN_SHIFT)
 #  define RCC_PLLCFG_PLLN(n)        ((n) << RCC_PLLCFG_PLLN_SHIFT) /* n = 2..432 */
 #define RCC_PLLCFG_PLLP_SHIFT       (16)      /* Bits 16-17: Main PLL (PLL) main system clock divider */
-#define RCC_PLLCFG_PLLP_MASK        (3 << RCC_PLLCFG_PLLSRC)
-#  define RCC_PLLCFG_PLLP_2         (0 << RCC_PLLCFG_PLLSRC) /* 00: PLLP = 2 */
-#  define RCC_PLLCFG_PLLP_4         (1 << RCC_PLLCFG_PLLSRC) /* 01: PLLP = 4 */
-#  define RCC_PLLCFG_PLLP_6         (2 << RCC_PLLCFG_PLLSRC) /* 10: PLLP = 6 */
-#  define RCC_PLLCFG_PLLP_8         (3 << RCC_PLLCFG_PLLSRC) /* 11: PLLP = 8 */
+#define RCC_PLLCFG_PLLP_MASK        (3 << RCC_PLLCFG_PLLP_SHIFT)
+#  define RCC_PLLCFG_PLLP(n)        ((((n)>>1)-1)<< RCC_PLLCFG_PLLP_SHIFT) /* n=2,4,6,8 */
+#  define RCC_PLLCFG_PLLP_2         (0 << RCC_PLLCFG_PLLP_SHIFT) /* 00: PLLP = 2 */
+#  define RCC_PLLCFG_PLLP_4         (1 << RCC_PLLCFG_PLLP_SHIFT) /* 01: PLLP = 4 */
+#  define RCC_PLLCFG_PLLP_6         (2 << RCC_PLLCFG_PLLP_SHIFT) /* 10: PLLP = 6 */
+#  define RCC_PLLCFG_PLLP_8         (3 << RCC_PLLCFG_PLLP_SHIFT) /* 11: PLLP = 8 */
 #define RCC_PLLCFG_PLLSRC           (1 << 22) /* Bit 22: Main PLL(PLL) and audio PLL (PLLI2S)
                                                * entry clock source */
+#  define RCC_PLLCFG_PLLSRC_HSI     (0)
+#  define RCC_PLLCFG_PLLSRC_HSE     RCC_PLLCFG_PLLSRC
 #define RCC_PLLCFG_PLLQ_SHIFT       (24)      /* Bits 24-27: Main PLL (PLL) divider
                                                * (USB OTG FS, SDIO and RNG clocks) */
 #define RCC_PLLCFG_PLLQ_MASK        (15 << RCC_PLLCFG_PLLQ_SHIFT)
 #  define RCC_PLLCFG_PLLQ(n)        ((n) << RCC_PLLCFG_PLLQ_SHIFT) /* n=2..15 */
+
+#define RCC_PLLCFG_RESET            (0x24003010) /* PLLCFG reset value */
 
 /* Clock configuration register */
 
@@ -294,27 +299,27 @@
 
 /* AHB1 Peripheral Clock enable register */
 
-#define RCC_AH1BENR_GPIOEN(n)       (1 << (n))
-#define RCC_AH1BENR_GPIOAEN         (1 << 0)  /* Bit 0:  IO port A clock enable */
-#define RCC_AH1BENR_GPIOBEN         (1 << 1)  /* Bit 1:  IO port B clock enable */
-#define RCC_AH1BENR_GPIOCEN         (1 << 2)  /* Bit 2:  IO port C clock enable */
-#define RCC_AH1BENR_GPIODEN         (1 << 3)  /* Bit 3:  IO port D clock enable */
-#define RCC_AH1BENR_GPIOEEN         (1 << 4)  /* Bit 4:  IO port E clock enable */
-#define RCC_AH1BENR_GPIOFEN         (1 << 5)  /* Bit 5:  IO port F clock enable */
-#define RCC_AH1BENR_GPIOGEN         (1 << 6)  /* Bit 6:  IO port G clock enable */
-#define RCC_AH1BENR_GPIOHEN         (1 << 7)  /* Bit 7:  IO port H clock enable */
-#define RCC_AH1BENR_GPIOIEN         (1 << 8)  /* Bit 8:  IO port I clock enable */
-#define RCC_AH1BENR_CRCEN           (1 << 12) /* Bit 12: CRC clock enable */
-#define RCC_AH1BENR_BKPSRAMEN       (1 << 18) /* Bit 18: Backup SRAM interface clock enable */
-#define RCC_AH1BENR_CCMDATARAMEN    (1 << 20) /* Bit 20: CCM data RAM clock enable */
-#define RCC_AH1BENR_DMA1EN          (1 << 21) /* Bit 21: DMA1 clock enable */
-#define RCC_AH1BENR_DMA2EN          (1 << 22) /* Bit 22: DMA2 clock enable */
-#define RCC_AH1BENR_ETHMACEN        (1 << 25) /* Bit 25: Ethernet MAC clock enable */
-#define RCC_AH1BENR_ETHMACTXEN      (1 << 26) /* Bit 26: Ethernet Transmission clock enable */
-#define RCC_AH1BENR_ETHMACRXEN      (1 << 27) /* Bit 27: Ethernet Reception clock enable */
-#define RCC_AH1BENR_ETHMACPTPEN     (1 << 28) /* Bit 28: Ethernet PTP clock enable */
-#define RCC_AH1BENR_OTGHSEN         (1 << 29) /* Bit 29: USB OTG HS clock enable */
-#define RCC_AH1BENR_OTGHSULPIEN     (1 << 30) /* Bit 30: USB OTG HSULPI clock enable */
+#define RCC_AHB1ENR_GPIOEN(n)       (1 << (n))
+#define RCC_AHB1ENR_GPIOAEN         (1 << 0)  /* Bit 0:  IO port A clock enable */
+#define RCC_AHB1ENR_GPIOBEN         (1 << 1)  /* Bit 1:  IO port B clock enable */
+#define RCC_AHB1ENR_GPIOCEN         (1 << 2)  /* Bit 2:  IO port C clock enable */
+#define RCC_AHB1ENR_GPIODEN         (1 << 3)  /* Bit 3:  IO port D clock enable */
+#define RCC_AHB1ENR_GPIOEEN         (1 << 4)  /* Bit 4:  IO port E clock enable */
+#define RCC_AHB1ENR_GPIOFEN         (1 << 5)  /* Bit 5:  IO port F clock enable */
+#define RCC_AHB1ENR_GPIOGEN         (1 << 6)  /* Bit 6:  IO port G clock enable */
+#define RCC_AHB1ENR_GPIOHEN         (1 << 7)  /* Bit 7:  IO port H clock enable */
+#define RCC_AHB1ENR_GPIOIEN         (1 << 8)  /* Bit 8:  IO port I clock enable */
+#define RCC_AHB1ENR_CRCEN           (1 << 12) /* Bit 12: CRC clock enable */
+#define RCC_AHB1ENR_BKPSRAMEN       (1 << 18) /* Bit 18: Backup SRAM interface clock enable */
+#define RCC_AHB1ENR_CCMDATARAMEN    (1 << 20) /* Bit 20: CCM data RAM clock enable */
+#define RCC_AHB1ENR_DMA1EN          (1 << 21) /* Bit 21: DMA1 clock enable */
+#define RCC_AHB1ENR_DMA2EN          (1 << 22) /* Bit 22: DMA2 clock enable */
+#define RCC_AHB1ENR_ETHMACEN        (1 << 25) /* Bit 25: Ethernet MAC clock enable */
+#define RCC_AHB1ENR_ETHMACTXEN      (1 << 26) /* Bit 26: Ethernet Transmission clock enable */
+#define RCC_AHB1ENR_ETHMACRXEN      (1 << 27) /* Bit 27: Ethernet Reception clock enable */
+#define RCC_AHB1ENR_ETHMACPTPEN     (1 << 28) /* Bit 28: Ethernet PTP clock enable */
+#define RCC_AHB1ENR_OTGHSEN         (1 << 29) /* Bit 29: USB OTG HS clock enable */
+#define RCC_AHB1ENR_OTGHSULPIEN     (1 << 30) /* Bit 30: USB OTG HSULPI clock enable */
 
 /* AHB2 Peripheral Clock enable register */
 
@@ -372,30 +377,30 @@
 
 /* RCC AHB1 low power modeperipheral clock enable register */
 
-#define RCC_AH1BLPENR_GPIOLPEN(n)    (1 << (n))
-#define RCC_AH1BLPENR_GPIOALPEN      (1 << 0)  /* Bit 0:  IO port A clock enable during Sleep mode */
-#define RCC_AH1BLPENR_GPIOBLPEN      (1 << 1)  /* Bit 1:  IO port B clock enable during Sleep mode */
-#define RCC_AH1BLPENR_GPIOCLPEN      (1 << 2)  /* Bit 2:  IO port C clock enable during Sleep mode */
-#define RCC_AH1BLPENR_GPIODLPEN      (1 << 3)  /* Bit 3:  IO port D clock enable during Sleep mode */
-#define RCC_AH1BLPENR_GPIOELPEN      (1 << 4)  /* Bit 4:  IO port E clock enable during Sleep mode */
-#define RCC_AH1BLPENR_GPIOFLPEN      (1 << 5)  /* Bit 5:  IO port F clock enable during Sleep mode */
-#define RCC_AH1BLPENR_GPIOGLPEN      (1 << 6)  /* Bit 6:  IO port G clock enable during Sleep mode */
-#define RCC_AH1BLPENR_GPIOHLPEN      (1 << 7)  /* Bit 7:  IO port H clock enable during Sleep mode */
-#define RCC_AH1BLPENR_GPIOILPEN      (1 << 8)  /* Bit 8:  IO port I clock enable during Sleep mode */
-#define RCC_AH1BLPENR_CRCLPEN        (1 << 12) /* Bit 12: CRC clock enable during Sleep mode */
-#define RCC_AH1BLPENR_FLITFLPEN      (1 << 15) /* Bit 15: Flash interface clock enable during Sleep mode */
-#define RCC_AH1BLPENR_SRAM1LPEN      (1 << 16) /* Bit 16: SRAM 1 interface clock enable during Sleep mode */
-#define RCC_AH1BLPENR_SRAM2LPEN      (1 << 17) /* Bit 17: SRAM 2 interface clock enable during Sleep mode */
-#define RCC_AH1BLPENR_BKPSRAMLPEN    (1 << 18) /* Bit 18: Backup SRAM interface clock enable during Sleep mode */
-#define RCC_AH1BLPENR_CCMDATARAMLPEN (1 << 20) /* Bit 20: CCM data RAM clock enable during Sleep mode */
-#define RCC_AH1BLPENR_DMA1LPEN       (1 << 21) /* Bit 21: DMA1 clock enable during Sleep mode */
-#define RCC_AH1BLPENR_DMA2LPEN       (1 << 22) /* Bit 22: DMA2 clock enable during Sleep mode */
-#define RCC_AH1BLPENR_ETHMACLPEN     (1 << 25) /* Bit 25: Ethernet MAC clock enable during Sleep mode */
-#define RCC_AH1BLPENR_ETHMACTXLPEN   (1 << 26) /* Bit 26: Ethernet Transmission clock enable during Sleep mode */
-#define RCC_AH1BLPENR_ETHMACRXLPEN   (1 << 27) /* Bit 27: Ethernet Reception clock enable during Sleep mode */
-#define RCC_AH1BLPENR_ETHMACPTPLPEN  (1 << 28) /* Bit 28: Ethernet PTP clock enable during Sleep mode */
-#define RCC_AH1BLPENR_OTGHSLPEN      (1 << 29) /* Bit 29: USB OTG HS clock enable during Sleep mode */
-#define RCC_AH1BLPENR_OTGHSULPILPEN  (1 << 30) /* Bit 30: USB OTG HSULPI clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOLPEN(n)    (1 << (n))
+#define RCC_AHB1LPENR_GPIOALPEN      (1 << 0)  /* Bit 0:  IO port A clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOBLPEN      (1 << 1)  /* Bit 1:  IO port B clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOCLPEN      (1 << 2)  /* Bit 2:  IO port C clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIODLPEN      (1 << 3)  /* Bit 3:  IO port D clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOELPEN      (1 << 4)  /* Bit 4:  IO port E clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOFLPEN      (1 << 5)  /* Bit 5:  IO port F clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOGLPEN      (1 << 6)  /* Bit 6:  IO port G clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOHLPEN      (1 << 7)  /* Bit 7:  IO port H clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOILPEN      (1 << 8)  /* Bit 8:  IO port I clock enable during Sleep mode */
+#define RCC_AHB1LPENR_CRCLPEN        (1 << 12) /* Bit 12: CRC clock enable during Sleep mode */
+#define RCC_AHB1LPENR_FLITFLPEN      (1 << 15) /* Bit 15: Flash interface clock enable during Sleep mode */
+#define RCC_AHB1LPENR_SRAM1LPEN      (1 << 16) /* Bit 16: SRAM 1 interface clock enable during Sleep mode */
+#define RCC_AHB1LPENR_SRAM2LPEN      (1 << 17) /* Bit 17: SRAM 2 interface clock enable during Sleep mode */
+#define RCC_AHB1LPENR_BKPSRAMLPEN    (1 << 18) /* Bit 18: Backup SRAM interface clock enable during Sleep mode */
+#define RCC_AHB1LPENR_CCMDATARAMLPEN (1 << 20) /* Bit 20: CCM data RAM clock enable during Sleep mode */
+#define RCC_AHB1LPENR_DMA1LPEN       (1 << 21) /* Bit 21: DMA1 clock enable during Sleep mode */
+#define RCC_AHB1LPENR_DMA2LPEN       (1 << 22) /* Bit 22: DMA2 clock enable during Sleep mode */
+#define RCC_AHB1LPENR_ETHMACLPEN     (1 << 25) /* Bit 25: Ethernet MAC clock enable during Sleep mode */
+#define RCC_AHB1LPENR_ETHMACTXLPEN   (1 << 26) /* Bit 26: Ethernet Transmission clock enable during Sleep mode */
+#define RCC_AHB1LPENR_ETHMACRXLPEN   (1 << 27) /* Bit 27: Ethernet Reception clock enable during Sleep mode */
+#define RCC_AHB1LPENR_ETHMACPTPLPEN  (1 << 28) /* Bit 28: Ethernet PTP clock enable during Sleep mode */
+#define RCC_AHB1LPENR_OTGHSLPEN      (1 << 29) /* Bit 29: USB OTG HS clock enable during Sleep mode */
+#define RCC_AHB1LPENR_OTGHSULPILPEN  (1 << 30) /* Bit 30: USB OTG HSULPI clock enable during Sleep mode */
 
 /* RCC AHB2 low power modeperipheral clock enable register */
 

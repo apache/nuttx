@@ -43,7 +43,8 @@
 
 /* Allow up to 100 milliseconds for the high speed clock to become ready.
  * that is a very long delay, but if the clock does not become ready we are
- * hosed anyway.
+ * hosed anyway.  Normally this is very fast, but I have seen at least one
+ * board that required this long, long timeout for the HSE to be ready.
  */
 
 #define HSERDY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
