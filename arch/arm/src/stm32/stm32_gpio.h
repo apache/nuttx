@@ -307,7 +307,7 @@ extern "C" {
  * .... .... ..O. .... ....
  */
 
-#define GPIO_OPENDRAM                 (1 << 9)                   /* Bit9: 1=Open-drain output */
+#define GPIO_OPENDRAIN                (1 << 9)                   /* Bit9: 1=Open-drain output */
 #define GPIO_PUSHPULL                 (0)                        /* Bit9: 0=Push-pull output */
 
 /* If the pin is a GPIO digital output, then this identifies the initial output value.
