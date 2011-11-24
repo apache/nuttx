@@ -70,13 +70,154 @@
 #  define ledvdbg(x...)
 #endif
 
+/* The following definitions map the encoded LED setting to GPIO settings */
+
+#define STM3210E_LED1     (1 << 0)
+#define STM3210E_LED2     (1 << 1)
+#define STM3210E_LED3     (1 << 2)
+#define STM3210E_LED4     (1 << 3)
+
+#define ON_SETBITS_SHIFT  (0)
+#define ON_CLRBITS_SHIFT  (4)
+#define OFF_SETBITS_SHIFT (8)
+#define OFF_CLRBITS_SHIFT (12)
+
+#define ON_BITS(v)        ((v) & 0xff)
+#define OFF_BITS(v)       (((v) >> 8) & 0x0ff)
+#define SETBITS(b)        ((b) & 0x0f)
+#define CLRBITS(b)        (((b) >> 4) & 0x0f)
+
+#define ON_SETBITS(v)     (SETBITS(ON_BITS(v))
+#define ON_CLRBITS(v)     (CLRBITS(ON_BITS(v))
+#define OFF_SETBITS(v)    (SETBITS(OFF_BITS(v))
+#define OFF_CLRBITS(v)    (CLRBITS(OFF_BITS(v))
+
+#define LED_STARTED_ON_SETBITS       ((STM3210E_LED1) << ON_SETBITS_SHIFT)
+#define LED_STARTED_ON_CLRBITS       ((STM3210E_LED2|STM3210E_LED3|STM3210E_LED4) << ON_CLRBITS_SHIFT)
+#define LED_STARTED_OFF_SETBITS      (0 << OFF_SETBITS_SHIFT)
+#define LED_STARTED_OFF_CLRBITS      ((STM3210E_LED1|STM3210E_LED2|STM3210E_LED3|STM3210E_LED4) << OFF_CLRBITS_SHIFT)
+
+#define LED_HEAPALLOCATE_ON_SETBITS  ((STM3210E_LED2) << ON_SETBITS_SHIFT)
+#define LED_HEAPALLOCATE_ON_CLRBITS  ((STM3210E_LED1|STM3210E_LED3|STM3210E_LED4) << ON_CLRBITS_SHIFT)
+#define LED_HEAPALLOCATE_OFF_SETBITS ((STM3210E_LED1) << OFF_SETBITS_SHIFT)
+#define LED_HEAPALLOCATE_OFF_CLRBITS ((STM3210E_LED2|STM3210E_LED3|STM3210E_LED4) << OFF_CLRBITS_SHIFT)
+
+#define LED_IRQSENABLED_ON_SETBITS   ((STM3210E_LED1|STM3210E_LED2) << ON_SETBITS_SHIFT)
+#define LED_IRQSENABLED_ON_CLRBITS   ((STM3210E_LED3|STM3210E_LED4) << ON_CLRBITS_SHIFT)
+#define LED_IRQSENABLED_OFF_SETBITS  ((STM3210E_LED2) << OFF_SETBITS_SHIFT)
+#define LED_IRQSENABLED_OFF_CLRBITS  ((STM3210E_LED1|STM3210E_LED3|STM3210E_LED4) << OFF_CLRBITS_SHIFT)
+
+#define LED_STACKCREATED_ON_SETBITS  ((STM3210E_LED3) << ON_SETBITS_SHIFT)
+#define LED_STACKCREATED_ON_CLRBITS  ((STM3210E_LED1|STM3210E_LED2|STM3210E_LED4) << ON_CLRBITS_SHIFT)
+#define LED_STACKCREATED_OFF_SETBITS ((STM3210E_LED1|STM3210E_LED2) << OFF_SETBITS_SHIFT)
+#define LED_STACKCREATED_OFF_CLRBITS ((STM3210E_LED3|STM3210E_LED4) << OFF_CLRBITS_SHIFT)
+
+#define LED_INIRQ_ON_SETBITS         ((STM3210E_LED1) << ON_SETBITS_SHIFT)
+#define LED_INIRQ_ON_CLRBITS         ((0) << ON_CLRBITS_SHIFT)
+#define LED_INIRQ_OFF_SETBITS        ((0) << OFF_SETBITS_SHIFT)
+#define LED_INIRQ_OFF_CLRBITS        ((STM3210E_LED1) << OFF_CLRBITS_SHIFT)
+
+#define LED_SIGNAL_ON_SETBITS        ((STM3210E_LED2) << ON_SETBITS_SHIFT)
+#define LED_SIGNAL_ON_CLRBITS        ((0) << ON_CLRBITS_SHIFT)
+#define LED_SIGNAL_OFF_SETBITS       ((0) << OFF_SETBITS_SHIFT)
+#define LED_SIGNAL_OFF_CLRBITS       ((STM3210E_LED2) << OFF_CLRBITS_SHIFT)
+
+#define LED_ASSERTION_ON_SETBITS     ((STM3210E_LED4) << ON_SETBITS_SHIFT)
+#define LED_ASSERTION_ON_CLRBITS     ((0) << ON_CLRBITS_SHIFT)
+#define LED_ASSERTION_OFF_SETBITS    ((0) << OFF_SETBITS_SHIFT)
+#define LED_ASSERTION_OFF_CLRBITS    ((STM3210E_LED4) << OFF_CLRBITS_SHIFT)
+
+#define LED_PANIC_ON_SETBITS         ((STM3210E_LED4) << ON_SETBITS_SHIFT)
+#define LED_PANIC_ON_CLRBITS         ((0) << ON_CLRBITS_SHIFT)
+#define LED_PANIC_OFF_SETBITS        ((0) << OFF_SETBITS_SHIFT)
+#define LED_PANIC_OFF_CLRBITS        ((STM3210E_LED4) << OFF_CLRBITS_SHIFT)
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+static const uint16_t g_ledbits[8] =
+{
+  (LED_STARTED_ON_SETBITS       | LED_STARTED_ON_CLRBITS |
+   LED_STARTED_OFF_SETBITS      | LED_STARTED_OFF_CLRBITS),
+
+  (LED_HEAPALLOCATE_ON_SETBITS  | LED_HEAPALLOCATE_ON_CLRBITS |
+   LED_HEAPALLOCATE_OFF_SETBITS | LED_HEAPALLOCATE_OFF_CLRBITS),
+
+  (LED_IRQSENABLED_ON_SETBITS   | LED_IRQSENABLED_ON_CLRBITS |
+   LED_IRQSENABLED_OFF_SETBITS  | LED_IRQSENABLED_OFF_CLRBITS),
+
+  (LED_STACKCREATED_ON_SETBITS  | LED_STACKCREATED_ON_CLRBITS |
+   LED_STACKCREATED_OFF_SETBITS | LED_STACKCREATED_OFF_CLRBITS),
+
+  (LED_INIRQ_ON_SETBITS         | LED_INIRQ_ON_CLRBITS |
+   LED_INIRQ_OFF_SETBITS        | LED_INIRQ_OFF_CLRBITS),
+
+  (LED_SIGNAL_ON_SETBITS        | LED_SIGNAL_ON_CLRBITS |
+   LED_SIGNAL_OFF_SETBITS       | LED_SIGNAL_OFF_CLRBITS),
+
+  (LED_ASSERTION_ON_SETBITS     | LED_ASSERTION_ON_CLRBITS |
+   LED_ASSERTION_OFF_SETBITS    | LED_ASSERTION_OFF_CLRBITS),
+
+  (LED_PANIC_ON_SETBITS         | LED_PANIC_ON_CLRBITS |
+   LED_PANIC_OFF_SETBITS        | LED_PANIC_OFF_CLRBITS)
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static inline void led_clrbits(unsigned int clrbits)
+{
+  if ((clrbits & STM3210E_LED1) != 0)
+    {
+      stm32_gpiowrite(GPIO_LED1, false);
+    }
+
+  if ((clrbits & STM3210E_LED2) != 0)
+    {
+      stm32_gpiowrite(GPIO_LED2, false);
+    }
+
+  if ((clrbits & STM3210E_LED3) != 0)
+    {
+      stm32_gpiowrite(GPIO_LED3, false);
+    }
+
+  if ((clrbits & STM3210E_LED4) != 0)
+    {
+      stm32_gpiowrite(GPIO_LED4, false);
+    }
+}
+
+static inline void led_setbits(unsigned int setbits)
+{
+  if ((setbits & STM3210E_LED1) != 0)
+    {
+      stm32_gpiowrite(GPIO_LED1, true);
+    }
+
+  if ((setbits & STM3210E_LED2) != 0)
+    {
+      stm32_gpiowrite(GPIO_LED2, true);
+    }
+
+  if ((setbits & STM3210E_LED3) != 0)
+    {
+      stm32_gpiowrite(GPIO_LED3, true);
+    }
+
+  if ((setbits & STM3210E_LED4) != 0)
+    {
+      stm32_gpiowrite(GPIO_LED4, true);
+    }
+}
+
+static void led_setonoff(unsigned int bits)
+{
+  led_clrbits(CLRBITS(bits));
+  led_setbits(SETBITS(bits));
+}
 
 /****************************************************************************
  * Public Functions
@@ -89,7 +230,12 @@
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
-#warning "Missing logic"
+   /* Configure LED1-4 GPIOs for output */
+
+   stm32_configgpio(GPIO_LED1);
+   stm32_configgpio(GPIO_LED2);
+   stm32_configgpio(GPIO_LED3);
+   stm32_configgpio(GPIO_LED4);
 }
 
 /****************************************************************************
@@ -98,7 +244,7 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-#warning "Missing logic"
+  led_setonoff(ON_BITS(g_ledbits[led]));
 }
 
 /****************************************************************************
@@ -107,7 +253,7 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-#warning "Missing logic"
+  led_setonoff(OFF_BITS(g_ledbits[led]));
 }
 
 #endif /* CONFIG_ARCH_LEDS */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm3240g-eval/src/up_buttons.c
+ * arch/arm/src/stm32/up_allocateheap.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,16 +39,47 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <sys/types.h>
+#include <debug.h>
 
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
-#include "stm3240g-internal.h"
 
-#ifdef CONFIG_ARCH_BUTTONS
+#include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Definitions
  ****************************************************************************/
+
+/* For the STM312F10xxx family, all SRAM is in a contiguous block starting
+ * at g_heapbase and extending through CONFIG_DRAM_END (my apologies for
+ * the bad naming).
+ */
+
+#if defined(CONFIG_STM32_STM32F10XX)
+#  define SRAM1_END CONFIG_DRAM_END
+
+/* All members of the STM32F40xxx family have 192Kb in three banks:
+ *
+ * 1) 112Kb of SRAM beginning at address 0x2000:0000
+ * 2)  16Kb of SRAM beginning at address 0x2001:c000
+ * 3)  64Kb of TCM SRAM beginning at address 0x1000:0000
+ *
+ * As determined by ld.script, g_heapbase lies in the 112Kb memory
+ * region and that extends to 0x2001:0000.  But the  first and second memory
+ * regions are contiguous and treated as one in this logic that extends to
+ * 0x2002:0000.
+ */
+
+#elif defined(CONFIG_STM32_STM32F40XX)
+#  define SRAM1_END   0x20020000
+#  define SRAM2_START 0x10000000
+#  define SRAM2_END   0x10010000
+#else
+#  error "Unsupported STM32 chip"
+#endif
 
 /****************************************************************************
  * Private Data
@@ -58,113 +89,73 @@
  * Private Functions
  ****************************************************************************/
 
-/* Pin configuration for each STM3210E-EVAL button.  This array is indexed by
- * the BUTTON_* and JOYSTICK_* definitions in board.h
- */
-
-static const uint16_t g_buttons[NUM_BUTTONS] =
-{
-  GPIO_BTN_WAKEUP, GPIO_BTN_TAMPER, GPIO_BTN_USER
-};
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Name: up_allocate_heap
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
- *   handlers.
+ *   The heap may be statically allocated by
+ *   defining CONFIG_HEAP_BASE and CONFIG_HEAP_SIZE.  If these
+ *   are not defined, then this function will be called to
+ *   dynamically set aside the heap region.
  *
  ****************************************************************************/
 
-void up_buttoninit(void)
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-  int i;
-
-  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are 
-   * configured for all pins.
-   */
-
-  for (i = 0; i < NUM_BUTTONS; i++)
-    {
-      stm32_configgpio(g_buttons[i]);
-    }
+  up_ledon(LED_HEAPALLOCATE);
+  *heap_start = (FAR void*)g_heapbase;
+  *heap_size  = SRAM1_END - g_heapbase;
 }
 
 /****************************************************************************
- * Name: up_buttons
- ****************************************************************************/
-
-uint8_t up_buttons(void)
-{
-  uint8_t ret = 0;
-  int i;
-
-  /* Check that state of each key */
-
-  for (i = 0; i < NUM_BUTTONS; i++)
-    {
-       /* A LOW value means that the key is pressed for most keys.  The exception
-        * is the WAKEUP button.
-        */
-
-       bool released = stm32_gpioread(g_buttons[i]);
-       if (i == BUTTON_WAKEUP)
-         {
-           released = !released;
-         }
-
-       /* Accumulate the set of depressed (not released) keys */
-
-       if (!released)
-         {
-            ret |= (1 << i);
-         }
-    }
-
-  return ret;
-}
-
-/************************************************************************************
- * Button support.
+ * Name: up_addregion
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
- *   handlers.
+ *   Memory may be added in non-contiguous chunks.  Additional chunks are
+ *   added by calling this function.
  *
- *   After up_buttoninit() has been called, up_buttons() may be called to
- *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON_*_BIT
- *   definitions in board.h for the meaning of each bit.
- *
- *   up_irqbutton() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
- *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
+#if CONFIG_MM_REGIONS > 1
+#  if defined(CONFIG_STM32_STM32F40XX)
+#    if defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_END)
+#      if CONFIG_MM_REGIONS > 3
+#        error "CONFIG_MM_REGIONS > 3 but I don't know what all of the regions are"
+#      endif
+#    elif CONFIG_MM_REGIONS > 2
+#      error "CONFIG_MM_REGIONS > 2 but I don't know what all of the regions are"
+#    endif
+
+void up_addregion(void)
 {
-  xcpt_t oldhandler = NULL;
+  /* Add the STM32F40xxx TCM SRAM heap region. */
 
-  /* The following should be atomic */
+   mm_addregion((FAR void*)SRAM2_START, SRAM2_END-SRAM2_START);
 
-  if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
-    {
-      oldhandler = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler);
-    }
-  return oldhandler;
+   /* Add the user specified heap region. */
+
+#  if CONFIG_MM_REGIONS > 2 && defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_END)
+   mm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_END - CONFIG_HEAP2_BASE);
+#  endif
 }
+
+#  elif defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_END)
+#    if CONFIG_MM_REGIONS > 2
+#      error "CONFIG_MM_REGIONS > 2 but I don't know what all of the regions are"
+#    endif
+
+void up_addregion(void)
+{
+  /* Add the user specified heap region. */
+
+  mm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_END - CONFIG_HEAP2_BASE);
+}
+
+#  else
+#    error "CONFIG_MM_REGIONS > 1 but I don't know what any of the region(s) are"
+#  endif
 #endif
-#endif /* CONFIG_ARCH_BUTTONS */

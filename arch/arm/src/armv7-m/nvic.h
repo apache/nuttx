@@ -170,6 +170,8 @@
 #define NVIC_IRQ232_235_PRIORITY_OFFSET 0x04e8 /* IRQ 232-235 priority register */
 #define NVIC_IRQ236_239_PRIORITY_OFFSET 0x04ec /* IRQ 236-239 priority register */
 
+/* System Control Block (SCB) */
+
 #define NVIC_CPUID_BASE_OFFSET          0x0d00 /* CPUID base register */
 #define NVIC_INTCTRL_OFFSET             0x0d04 /* Interrupt control state register */
 #define NVIC_VECTAB_OFFSET              0x0d08 /* Vector table offset register */
@@ -200,6 +202,7 @@
 #define NVIC_ISAR2_OFFSET               0x0d68 /* ISA feature register 2 */
 #define NVIC_ISAR3_OFFSET               0x0d6c /* ISA feature register 3 */
 #define NVIC_ISAR4_OFFSET               0x0d70 /* ISA feature register 4 */
+#define NVIC_CPACR_OFFSET               0x0d88 /* Coprocessor Access Control Register */
 #define NVIC_STIR_OFFSET                0x0f00 /* Software trigger interrupt register */
 #define NVIC_PID4_OFFSET                0x0fd0 /* Peripheral identification register (PID4) */
 #define NVIC_PID5_OFFSET                0x0fd4 /* Peripheral identification register (PID5) */
@@ -363,6 +366,7 @@
 #define NVIC_ISAR2                      (ARMV7M_NVIC_BASE + NVIC_ISAR2_OFFSET)
 #define NVIC_ISAR3                      (ARMV7M_NVIC_BASE + NVIC_ISAR3_OFFSET)
 #define NVIC_ISAR4                      (ARMV7M_NVIC_BASE + NVIC_ISAR4_OFFSET)
+#define NVIC_CPACR                      (ARMV7M_NVIC_BASE + NVIC_CPACR_OFFSET)
 #define NVIC_STIR                       (ARMV7M_NVIC_BASE + NVIC_STIR_OFFSET)
 #define NVIC_PID4                       (ARMV7M_NVIC_BASE + NVIC_PID4_OFFSET)
 #define NVIC_PID5                       (ARMV7M_NVIC_BASE + NVIC_PID5_OFFSET)

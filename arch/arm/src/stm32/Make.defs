@@ -36,7 +36,7 @@
 HEAD_ASRC	= stm32_vectors.S
 
 CMN_ASRCS	= up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
-CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
+CMN_CSRCS	= up_assert.c up_blocktask.c up_copystate.c \
 		  up_createstack.c up_mdelay.c up_udelay.c up_exit.c \
 		  up_initialize.c up_initialstate.c up_interruptcontext.c \
 		  up_memfault.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c \
@@ -49,10 +49,11 @@ CMN_CSRCS	+= up_checkstack.c
 endif
 
 CHIP_ASRCS	= 
-CHIP_CSRCS	= stm32_start.c stm32_rcc.c stm32_gpio.c stm32_exti.c stm32_flash.c \
-		  stm32_irq.c stm32_timerisr.c stm32_dma.c stm32_lowputc.c \
-		  stm32_serial.c stm32_spi.c stm32_usbdev.c stm32_sdio.c \
-		  stm32_tim.c stm32_i2c.c stm32_pwr.c stm32_idle.c stm32_waste.c
+CHIP_CSRCS	= stm32_allocateheap.c stm32_start.c stm32_rcc.c stm32_lse.c \
+		  stm32_gpio.c  stm32_exti.c stm32_flash.c stm32_irq.c \
+		  stm32_timerisr.c stm32_dma.c stm32_lowputc.c stm32_serial.c \
+		  stm32_spi.c stm32_usbdev.c stm32_sdio.c stm32_tim.c stm32_i2c.c \
+		  stm32_pwr.c stm32_idle.c stm32_waste.c
 
 ifeq ($(CONFIG_STM32_RCCLOCK),y)
 CHIP_CSRCS	+= stm32_rcclock.c
