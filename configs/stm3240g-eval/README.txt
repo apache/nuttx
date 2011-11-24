@@ -12,6 +12,7 @@ Contents
   - IDEs
   - NuttX buildroot Toolchain
   - STM3240G-EVAL-specific Configuration Options
+  - LEDs
   - Configurations
 
 Development Environment
@@ -160,6 +161,31 @@ NuttX buildroot Toolchain
   detailed PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
 
+LEDs
+====
+
+The STM3240G-EVAL board has four LEDs labeled. Usage of these LEDs is defined
+in include/board.h and src/up_leds.c. They are encoded as follows:
+
+	SYMBOL				Meaning					LED1*	LED2	LED3	LED4
+	-------------------	-----------------------	-------	-------	-------	------
+	LED_STARTED			NuttX has been started	ON		OFF		OFF		OFF
+	LED_HEAPALLOCATE	Heap has been allocated	OFF		ON		OFF		OFF
+	LED_IRQSENABLED		Interrupts enabled		ON		ON		OFF		OFF
+	LED_STACKCREATED	Idle stack created		OFF		OFF		ON		OFF
+	LED_INIRQ			In an interrupt**		ON		N/C		N/C		OFF
+	LED_SIGNAL			In a signal handler***  N/C		ON		N/C		OFF
+	LED_ASSERTION		An assertion failed		ON		ON		N/C		OFF
+	LED_PANIC			The system has crashed	N/C		N/C		N/C		ON
+    LED_IDLE            STM32 is is sleep mode  (Optional, not used)
+
+  * If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
+    and these LEDs will give you some indication of where the failure was
+ ** The normal state is LED3 ON and LED1 faintly glowing.  This faint glow
+    is because of timer interupts that result in the LED being illuminated
+    on a small proportion of the time.
+*** LED2 may also flicker normally if signals are processed.
+
 STM3240G-EVAL-specific Configuration Options
 ============================================
 
@@ -220,6 +246,10 @@ STM3240G-EVAL-specific Configuration Options
 	CONFIG_ARCH_IRQPRIO - The STM3240xxx supports interrupt prioritization
 
 	   CONFIG_ARCH_IRQPRIO=y
+
+	CONFIG_ARCH_FPU - The STM3240xxx supports a floating point unit (FPU)
+
+	   CONFIG_ARCH_FPU=y
 
 	CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
 	   have LEDs

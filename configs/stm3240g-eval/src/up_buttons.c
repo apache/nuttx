@@ -58,6 +58,15 @@
  * Private Functions
  ****************************************************************************/
 
+/* Pin configuration for each STM3210E-EVAL button.  This array is indexed by
+ * the BUTTON_* and JOYSTICK_* definitions in board.h
+ */
+
+static const uint16_t g_buttons[NUM_BUTTONS] =
+{
+  GPIO_BTN_WAKEUP, GPIO_BTN_TAMPER, GPIO_BTN_USER
+};
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -75,7 +84,16 @@
 
 void up_buttoninit(void)
 {
-#warning "Missing logic"
+  int i;
+
+  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are 
+   * configured for all pins.
+   */
+
+  for (i = 0; i < NUM_BUTTONS; i++)
+    {
+      stm32_configgpio(g_buttons[i]);
+    }
 }
 
 /****************************************************************************
@@ -84,7 +102,32 @@ void up_buttoninit(void)
 
 uint8_t up_buttons(void)
 {
-#warning "Missing logic"
+  uint8_t ret = 0;
+  int i;
+
+  /* Check that state of each key */
+
+  for (i = 0; i < NUM_BUTTONS; i++)
+    {
+       /* A LOW value means that the key is pressed for most keys.  The exception
+        * is the WAKEUP button.
+        */
+
+       bool released = stm32_gpioread(g_buttons[i]);
+       if (i == BUTTON_WAKEUP)
+         {
+           released = !released;
+         }
+
+       /* Accumulate the set of depressed (not released) keys */
+
+       if (!released)
+         {
+            ret |= (1 << i);
+         }
+    }
+
+  return ret;
 }
 
 /************************************************************************************
@@ -113,7 +156,15 @@ uint8_t up_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
 {
-#warning "Missing logic"
+  xcpt_t oldhandler = NULL;
+
+  /* The following should be atomic */
+
+  if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
+    {
+      oldhandler = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler);
+    }
+  return oldhandler;
 }
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

@@ -174,18 +174,28 @@
 
 /* LED definitions ******************************************************************/
 
-#define LED_STARTED       0
-#define LED_HEAPALLOCATE  1
-#define LED_IRQSENABLED   2
-#define LED_STACKCREATED  3
-#define LED_INIRQ         4
-#define LED_SIGNAL        5
-#define LED_ASSERTION     6
-#define LED_PANIC         7
+/* The STM3240G-EVAL board has 4 LEDs that we will encode as: */
 
-/* The STM3240G-EVAL supports several buttons */
+#define LED_STARTED       0  /* LED1 */
+#define LED_HEAPALLOCATE  1  /* LED2 */
+#define LED_IRQSENABLED   2  /* LED1 + LED2 */
+#define LED_STACKCREATED  3  /* LED3 */
+#define LED_INIRQ         4  /* LED1 + LED3 */
+#define LED_SIGNAL        5  /* LED2 + LED3 */
+#define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
+#define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
-#warning "Missing logic"
+/* The STM3240G-EVAL supports three buttons: */
+
+#define BUTTON_WAKEUP      0
+#define BUTTON_TAMPER      1
+#define BUTTON_USER        2
+
+#define NUM_BUTTONS        3
+
+#define BUTTON_WAKEUP_BIT  (1 << BUTTON_WAKEUP)
+#define BUTTON_TAMPER_BIT  (1 << BUTTON_TAMPER)
+#define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate function pin selections ************************************************/
 

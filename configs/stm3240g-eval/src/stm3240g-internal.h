@@ -64,10 +64,25 @@
 
 /* STM3240G-EVAL GPIOs ******************************************************************************/
 /* LEDs */
-#warning "Missing logic"
 
-/* BUTTONS -- NOTE that some have EXTI interrupts configured */
-#warning "Missing logic"
+#define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTG|GPIO_PIN6)
+#define GPIO_LED2       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTG|GPIO_PIN8)
+#define GPIO_LED3       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTI|GPIO_PIN9)
+#define GPIO_LED4       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN7)
+
+/* BUTTONS -- NOTE that all have EXTI interrupts configured */
+
+#define MIN_IRQBUTTON   BUTTON_WAKEUP
+#define MAX_IRQBUTTON   BUTTON_USER
+#define NUM_IRQBUTTONS  (BUTTON_USER - BUTTON_WAKEUP + 1)
+
+#define GPIO_BTN_WAKEUP (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
+#define GPIO_BTN_TAMPER (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
+#define GPIO_BTN_USER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN15)
 
 /****************************************************************************************************
  * Public Types
