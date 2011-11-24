@@ -296,7 +296,7 @@ extern "C" {
 #define GPIO_SPEED_MASK               (3 << GPIO_SPEED_SHIFT)
 #  define GPIO_SPEED_2MHz             (0 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
 #  define GPIO_SPEED_25MHz            (1 << GPIO_SPEED_SHIFT)     /* 25 MHz Medium speed output */
-#  define GPIO_SPEED_20MHz            (2 << GPIO_SPEED_SHIFT)     /* 50 MHz Fast speed output  */
+#  define GPIO_SPEED_50MHz            (2 << GPIO_SPEED_SHIFT)     /* 50 MHz Fast speed output  */
 #  define GPIO_SPEED_100MHz           (3 << GPIO_SPEED_SHIFT)     /* 100 MHz High speed output */
 
 /* Output/Alt function type selection:

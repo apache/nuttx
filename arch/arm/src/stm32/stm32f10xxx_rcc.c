@@ -512,31 +512,3 @@ static inline void rcc_enableperipherals(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: stm32_rcc_enablelse
- *
- * Todo:
- *   Check for LSE good timeout and return with -1,
- *   possible ISR optimization? or at least ISR should be cough in case of failure
- *
- ****************************************************************************/
-
-void stm32_rcc_enablelse(void)
-{
-  /* Enable LSE */
-
-  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_LSEON);
-
-  /* We could wait for ISR here ... */
-
-  while( !(getreg16(STM32_RCC_BDCR) & RCC_BDCR_LSERDY) ) up_waste();
-    
-  /* Select LSE as RTC Clock Source */
-
-  modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
-    
-  /* Enable Clock */
-
-  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);    
-}

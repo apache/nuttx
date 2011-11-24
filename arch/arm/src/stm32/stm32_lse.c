@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_start.c
- * arch/arm/src/chip/stm32_start.c
+ * arch/arm/src/stm32/stm32_lse.c
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
@@ -34,132 +33,61 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
-#include <debug.h>
-
-#include <nuttx/init.h>
-#include <arch/board/board.h>
-
 #include "up_arch.h"
-#include "up_internal.h"
 
-#include "stm32_internal.h"
-#include "stm32_gpio.h"
-
-#ifdef CONFIG_ARCH_FPU
-#  include "nvic.h"
-#endif
+#include "stm32_rcc.h"
+#include "stm32_waste.h"
 
 /****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
+ * Definitions
  ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
 
 /****************************************************************************
- * Public Functions
+ * Private Data
  ****************************************************************************/
 
- /****************************************************************************
- * Name: stm32_fpuconfig
- *
- * Description:
- *   Configure the FPU.  The the MCU has an FPU, then enable full access
- *   to coprocessors CP10 and CP11.
- *
- *   This is implemented as a macro because the stack has not yet been
- *   initialized.
- *
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_ARCH_FPU
-#  define stm32_fpuconfig() \
-{ \
-  uint32_t regval = getreg32(NVIC_CPACR); \
-  regval |= ((3 << (2*10)) | (3 << (2*11))); \
-  putreg32(regval, NVIC_CPACR); \
-}
-#else
-#  define stm32_fpuconfig()
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: stm32_rcc_enablelse
  *
- * Description:
- *   This is the reset entry point.
+ * Todo:
+ *   Check for LSE good timeout and return with -1,
+ *   possible ISR optimization? or at least ISR should be cough in case of\
+ *   failure
  *
  ****************************************************************************/
 
-void __start(void)
+void stm32_rcc_enablelse(void)
 {
-  const uint32_t *src;
-  uint32_t *dest;
+  /* Enable LSE */
 
-  /* Configure the uart so that we can get debug output as soon as possible */
+  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_LSEON);
 
-  stm32_clockconfig();
-  stm32_fpuconfig();
-  stm32_lowsetup();
-  stm32_gpioinit();
-  showprogress('A');
+  /* We could wait for ISR here ... */
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (dest = &_sbss; dest < &_ebss; )
+  while ((getreg16(STM32_RCC_BDCR) & RCC_BDCR_LSERDY) == 0)
     {
-      *dest++ = 0;
+      up_waste();
     }
-  showprogress('B');
+    
+  /* Select LSE as RTC Clock Source */
 
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
+  modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
+    
+  /* Enable Clock */
 
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-  showprogress('C');
-
-  /* Perform early serial initialization */
-
-#ifdef CONFIG_USE_EARLYSERIALINIT
-  up_earlyserialinit();
-#endif
-  showprogress('D');
-
-  /* Initialize onboard resources */
-
-  stm32_boardinitialize();
-  showprogress('E');
-
-  /* Then start NuttX */
-
-  showprogress('\r');
-  showprogress('\n');
-  os_start();
-
-  /* Shoulnd't get here */
-
-  for(;;);
+  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);    
 }

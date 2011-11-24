@@ -500,7 +500,7 @@ int stm32_configgpio(uint32_t cfgset)
             setting = GPIO_OSPEED_25MHz;
             break;
 
-          case GPIO_SPEED_20MHz:   /* 50 MHz Fast speed output  */
+          case GPIO_SPEED_50MHz:   /* 50 MHz Fast speed output  */
             setting = GPIO_OSPEED_50MHz;
             break;
 

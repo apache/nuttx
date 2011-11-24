@@ -36,13 +36,7 @@
 #ifndef __ARCH_ARM_SRC_STM32_STM32_WASTE_H
 #define __ARCH_ARM_SRC_STM32_STM32_WASTE_H
 
-/** \file
- *  \author Uros Platise
- *  \brief Waste CPU Time
- *  
- * \addtogroup STM32_WASTE
- * \{
- */
+/* Waste CPU Time */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -57,7 +51,6 @@ extern "C" {
 #else
 #define EXTERN extern
 #endif
-
 
 /****************************************************************************
  * Public Functions
@@ -76,10 +69,10 @@ extern "C" {
 
 EXTERN void up_waste(void);
 
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_RRC_H */
