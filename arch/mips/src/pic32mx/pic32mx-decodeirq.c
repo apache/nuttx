@@ -158,7 +158,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
       up_ledoff(LED_INIRQ);
     }
 #else
-  current_regs = savestate;
+  current_regs = NULL;
   up_ledoff(LED_INIRQ);
 #endif
 
