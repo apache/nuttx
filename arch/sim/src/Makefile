@@ -104,10 +104,23 @@ endif
 
 STDLIBS += -lc
 
+# Determine which objects are required in the link.  The
+# up_head object normally draws in all that is needed, but
+# there are a fews that must be included because they 
+# are called only from the host OS-specific logic (HOSTOBJS)
+
+LINKOBJS = up_head$(OBJEXT)
+REQUIREDOBJS = $(LINKOBJS)
+
+ifeq ($(CONFIG_SIM_X11FB),y)
+ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
+  REQUIREDOBJS += up_touchscreen.o
+endif
+endif
+
 # Determine which NuttX libraries will need to be linked in
 # Most are provided by LINKLIBS on the MAKE command line
 
-LINKOBJS = up_head$(OBJEXT)
 LINKLIBS =
 LDPATHS = $(addprefix -L$(TOPDIR)/,$(dir $(LINKLIBS)))
 LDLIBS = $(patsubst lib%,-l%,$(basename $(notdir $(LINKLIBS))))
@@ -160,7 +173,7 @@ Cygwin-names.dat: nuttx-names.dat
 
 nuttx.rel : libarch$(LIBEXT) board/libboard$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
 	@echo "LD:  nuttx.rel"
-	@$(LD) -r $(LDFLAGS) $(LDPATHS) -o $@ $(LINKOBJS) --start-group $(LDLIBS) --end-group $(EXTRA_LIBS)
+	@$(LD) -r $(LDFLAGS) $(LDPATHS) -o $@ $(REQUIREDOBJS) --start-group $(LDLIBS) --end-group $(EXTRA_LIBS)
 	@$(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat $@
 
 # Generate the final NuttX binary by linking the host-specific objects with the NuttX
