@@ -1261,6 +1261,9 @@ interface of the same name.
   is not queued and <code>ERROR</code> is returned.
 </p>
 <p>
+<b>NOTE</b>: <i>mq_send()</i> may be called from an interrupt handler.
+<p>
+<p>
   <b>Input Parameters:</b> 
 </p>
 <ul>
@@ -2236,7 +2239,7 @@ If the value of the semaphore resulting from this operation is zero, then
 on of the tasks blocked waiting for the semaphore will be allowed to
 return successfully from its call to <i>sem_wait()</i>.
 <p>
-<b>NOTE</b>:  <i>sem_post()</i> may be called from an interrupt handler.
+<b>NOTE</b>: <i>sem_post()</i> may be called from an interrupt handler.
 <p>
 <b>Input Parameters:</b> 
 <ul>
@@ -2250,9 +2253,9 @@ return successfully from its call to <i>sem_wait()</i>.
 </ul>
 
 <p>
-<b>Assumptions/Limitations:</b> This function cannot be called
-from an interrupt handler. It assumes the currently executing
-task is the one that is performing the unlock.
+<b>Assumptions/Limitations:</b>.
+When called from an interrupt handler, it will appear as though the
+interrupt task is the one that is performing the unlock.
 <p>
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
