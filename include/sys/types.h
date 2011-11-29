@@ -165,9 +165,14 @@ typedef unsigned int id_t;
 
 typedef intptr_t     ptrdiff_t;
 
-/* Wide, 16-bit character types */
+/* Wide, 16-bit character types.  wchar_t is a built-in type in C++ and
+ * its declaration here may cause compilation errors on some compilers
+ * if -DCONFIG_WCHAR_BUILTIN is not included in the CXXFLAGS.
+ */
 
+#ifndef CONFIG_WCHAR_BUILTIN
 typedef uint16_t     wchar_t;
+#endif
 
 /* blkcnt_t and off_t are signed integer types.
  *

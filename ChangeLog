@@ -2222,3 +2222,6 @@
 	  STM32F50xxx family of MCUs.
 	* configs/stm3240g-eval:  Add framework for the STMicro STM3240G-EVAL
 	  board.
+	* include/sys/types.h:  wchar_t is a builtin type in C++ and its
+	  declaration can cause errors with certain C++ compilers.
+
