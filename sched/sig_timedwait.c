@@ -277,12 +277,18 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
       if (info)
         {
           memcpy(info, &rtcb->sigunbinfo, sizeof(struct siginfo));
+
+          /* The return value is the number of the signal that awakened us */
+
+          ret = info->si_signo;
+        }
+      else
+        {
+          /* We don't know which signal awakened us.  This is probably a bug. */
+
+          ret = 0;
         }
       irqrestore(saved_state);
-
-      /* The return value is the number of the signal that awakened us */
-
-      ret = info->si_signo;
    }
    sched_unlock();
 

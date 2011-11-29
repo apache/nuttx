@@ -2224,4 +2224,6 @@
 	  board.
 	* include/sys/types.h:  wchar_t is a builtin type in C++ and its
 	  declaration can cause errors with certain C++ compilers.
-
+	* sched/sig_timedwait.c:  Fix signal handling with the returned info
+	  is NULL.  Before this change, it would derefence a NULL pointer
+	  in this case.
