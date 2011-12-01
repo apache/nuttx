@@ -2227,3 +2227,7 @@
 	* sched/sig_timedwait.c:  Fix signal handling with the returned info
 	  is NULL.  Before this change, it would derefence a NULL pointer
 	  in this case.
+	* graphics/nxfonts/nxfonts_sans17x22.h and nxfonts_sans20x26.h:  Add
+	  some very small sans serif fonts.
+	* graphics/nxfonts/nxfonts_sans17x23b.h and nxfonts_sans20x27b.h:  Add
+	  corresponding sans serif bold fonts.

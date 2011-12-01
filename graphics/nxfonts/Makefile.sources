@@ -75,6 +75,16 @@ ifdef NXFONTS_FONTID
 
 # SANS
 
+ifeq ($(NXFONTS_FONTID),14)
+NXFONTS_PREFIX	:= g_sans17x22_
+GEN_CSRC	= nxfonts_bitmaps_sans17x22.c
+endif
+
+ifeq ($(NXFONTS_FONTID),15)
+NXFONTS_PREFIX	:= g_sans20x26_
+GEN_CSRC	= nxfonts_bitmaps_sans20x26.c
+endif
+
 ifeq ($(NXFONTS_FONTID),1)
 NXFONTS_PREFIX	:= g_sans23x27_
 GEN_CSRC	= nxfonts_bitmaps_sans23x27.c
@@ -96,6 +106,16 @@ GEN_CSRC	= nxfonts_bitmaps_sans39x48.c
 endif
 
 # SANS-BOLD
+
+ifeq ($(NXFONTS_FONTID),16)
+NXFONTS_PREFIX	:= g_sans17x23b_
+GEN_CSRC	= nxfonts_bitmaps_sans17x23b.c
+endif
+
+ifeq ($(NXFONTS_FONTID),17)
+NXFONTS_PREFIX	:= g_sans20x27b_
+GEN_CSRC	= nxfonts_bitmaps_sans20x27b.c
+endif
 
 ifeq ($(NXFONTS_FONTID),5)
 NXFONTS_PREFIX	:= g_sans22x29b_

@@ -62,6 +62,14 @@
 
 /* SANS */
 
+#ifdef CONFIG_NXFONT_SANS17X22
+extern const struct nx_fontpackage_s g_sans17x22_package;
+#endif
+
+#ifdef CONFIG_NXFONT_SANS20X26
+extern const struct nx_fontpackage_s g_sans20x26_package;
+#endif
+
 #ifdef CONFIG_NXFONT_SANS23X27
 extern const struct nx_fontpackage_s g_sans23x27_package;
 #endif
@@ -79,6 +87,14 @@ extern const struct nx_fontpackage_s g_sans39x48_package;
 #endif
 
 /* SANS-BOLD */
+
+#ifdef CONFIG_NXFONT_SANS17X23B
+extern const struct nx_fontpackage_s g_sans17x23b_package;
+#endif
+
+#ifdef CONFIG_NXFONT_SANS20X27B
+extern const struct nx_fontpackage_s g_sans20x27b_package;
+#endif
 
 #ifdef CONFIG_NXFONT_SANS22X29B
 extern const struct nx_fontpackage_s g_sans22x29b_package;
@@ -125,6 +141,14 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 
 /* SANS */
 
+#ifdef CONFIG_NXFONT_SANS17X22
+  &g_sans17x22_package,
+#endif
+
+#ifdef CONFIG_NXFONT_SANS20X26
+  &g_sans20x26_package,
+#endif
+
 #ifdef CONFIG_NXFONT_SANS23X27
   &g_sans23x27_package,
 #endif
@@ -142,6 +166,14 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 /* SANS-BOLD */
+
+#ifdef CONFIG_NXFONT_SANS17X23B
+  &g_sans17x23b_package,
+#endif
+
+#ifdef CONFIG_NXFONT_SANS20X27B
+  &g_sans20x27b_package,
+#endif
 
 #ifdef CONFIG_NXFONT_SANS22X29B
   &g_sans22x29b_package,

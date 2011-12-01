@@ -54,10 +54,16 @@
  * is likely down the road.
  */
 
-/* SANS */
+/* Sans serif fonts */
 
 #if defined(CONFIG_NXFONT_SANS23X27)       /* The "legacy," tiny NuttX font */
 # define NXFONT_DEFAULT FONTID_SANS23X27
+
+#elif defined(CONFIG_NXFONT_SANS17X22)
+# define NXFONT_DEFAULT FONTID_SANS17X22
+
+#elif defined(CONFIG_NXFONT_SANS20X26)
+# define NXFONT_DEFAULT FONTID_SANS20X26
 
 #elif defined(CONFIG_NXFONT_SANS22X29)
 # define NXFONT_DEFAULT FONTID_SANS22X29
@@ -68,7 +74,13 @@
 #elif defined(CONFIG_NXFONT_SANS39X48)
 # define NXFONT_DEFAULT FONTID_SANS39X48
 
-/* SANS-BOLD */
+/* Sans serif bold fonts */
+
+#elif defined(CONFIG_NXFONT_SANS17X23B)
+# define NXFONT_DEFAULT FONTID_SANS17X23B
+
+#elif defined(CONFIG_NXFONT_SANS20X27B)
+# define NXFONT_DEFAULT FONTID_SANS20X27B
 
 #elif defined(CONFIG_NXFONT_SANS22X29B)
 # define NXFONT_DEFAULT FONTID_SANS22X29B
@@ -79,7 +91,7 @@
 #elif defined(CONFIG_NXFONT_SANS40X49B)
 # define NXFONT_DEFAULT FONTID_SANS40X49B
 
-/* SERIF */
+/* Serif fonts */
 
 #elif defined(CONFIG_NXFONT_SERIF22X29)
 # define NXFONT_DEFAULT FONTID_SERIF22X29
@@ -90,11 +102,10 @@
 #elif defined(CONFIG_NXFONT_SERIF38X48)
 # define NXFONT_DEFAULT FONTID_SERIF38X48
 
-/* SERIF-BOLD */
+/* Serif bold fonts */
 
 #elif defined(CONFIG_NXFONT_SERIF22X28B)
 # define NXFONT_DEFAULT FONTID_SERIF22X28B
-
 
 #elif defined(CONFIG_NXFONT_SERIF27X38B)
 # define NXFONT_DEFAULT FONTID_SERIF27X38B
@@ -114,7 +125,15 @@ enum nx_fontid_e
 {
   FONTID_DEFAULT     = 0         /* The default font */
 
-/* SANS */
+/* Sans Serif fonts */
+
+#ifdef CONFIG_NXFONT_SANS17X22
+  , FONTID_SANS17X22 = 14        /* The 17x22 sans serif font */
+#endif
+
+#ifdef CONFIG_NXFONT_SANS20X26
+  , FONTID_SANS20X26 = 15        /* The 20x26 sans serif font */
+#endif
 
 #ifdef CONFIG_NXFONT_SANS23X27
   , FONTID_SANS23X27 = 1         /* The 23x27 sans serif font */
@@ -132,7 +151,15 @@ enum nx_fontid_e
   , FONTID_SANS39X48 = 4         /* The 39x48 sans serif font */
 #endif
 
-/* SANS-BOLD */
+/* Sans Serif bold fonts */
+
+#ifdef CONFIG_NXFONT_SANS17X23B
+  , FONTID_SANS17X23B = 16       /* The 17x23 sans bold font */
+#endif
+
+#ifdef CONFIG_NXFONT_SANS20X27B
+  , FONTID_SANS20X27B = 17       /* The 20x27 sans bold font */
+#endif
 
 #ifdef CONFIG_NXFONT_SANS22X29B
   , FONTID_SANS22X29B = 5        /* The 22x29 sans bold font */
@@ -146,7 +173,7 @@ enum nx_fontid_e
   , FONTID_SANS40X49B = 7        /* The 40x49 sans bold font */
 #endif
 
-/* SERIF */
+/* Serif fonts */
 
 #ifdef CONFIG_NXFONT_SERIF22X29
   , FONTID_SERIF22X29 = 8        /* The 22x29 serif font */
@@ -160,7 +187,7 @@ enum nx_fontid_e
   , FONTID_SERIF38X48 = 10       /* The 38x48 serif font */
 #endif
 
-/* SERIF-BOLD */
+/* Serif bold fonts */
 
 #ifdef CONFIG_NXFONT_SERIF22X28B
   , FONTID_SERIF22X28B = 11      /* The 22x28 serif bold font */

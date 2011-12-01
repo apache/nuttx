@@ -263,6 +263,12 @@ CONFIG_NXFONTS_CHARBITS
   The number of bits in the character set.  Current options are only 7 and 8.
   The default is 7.
 
+CONFIG_NXFONT_SANS17X22
+  This option enables support for a tiny, 17x22 san serif font
+  (font ID FONTID_SANS17X22 == 14).
+CONFIG_NXFONT_SANS20X26
+  This option enables support for a tiny, 20x26 san serif font
+  (font ID FONTID_SANS20X26 == 15).
 CONFIG_NXFONT_SANS23X27
   This option enables support for a tiny, 23x27 san serif font
   (font ID FONTID_SANS23X27 == 1).
@@ -275,6 +281,12 @@ CONFIG_NXFONT_SANS28X37
 CONFIG_NXFONT_SANS39X48
   This option enables support for a large, 39x48 san serif font
   (font ID FONTID_SANS39X48 == 4).
+CONFIG_NXFONT_SANS17X23B
+  This option enables support for a tiny, 17x23 san serif bold font
+  (font ID FONTID_SANS17X23B == 16).
+CONFIG_NXFONT_SANS20X27B
+  This option enables support for a tiny, 20x27 san serif bold font
+  (font ID FONTID_SANS20X27B == 17).
 CONFIG_NXFONT_SANS22X29B
   This option enables support for a small, 22x29 san serif bold font
   (font ID FONTID_SANS22X29B == 5).
