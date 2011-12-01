@@ -83,6 +83,14 @@
 
 #undef CONFIG_TSC2007_REFCNT
 
+/* I don't think that it is necessary to activate the converters before
+ * making meaurements.  However, I will keep this functionality enabled
+ * until I have a change to prove that that activation is unnecessary.
+ */
+
+#undef  CONFIG_TSC2007_ACTIVATE
+#define CONFIG_TSC2007_ACTIVATE 1
+
 /* Driver support ***********************************************************/
 /* This format is used to construct the /dev/input[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
@@ -179,7 +187,9 @@ static int tsc2007_sample(FAR struct tsc2007_dev_s *priv,
                           FAR struct tsc2007_sample_s *sample);
 static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
                               FAR struct tsc2007_sample_s *sample);
+#ifdef CONFIG_TSC2007_ACTIVATE
 static int tsc2007_activate(FAR struct tsc2007_dev_s *priv, uint8_t cmd);
+#endif
 static int tsc2007_transfer(FAR struct tsc2007_dev_s *priv, uint8_t cmd);
 static void tsc2007_worker(FAR void *arg);
 static int tsc2007_interrupt(int irq, FAR void *context);
@@ -405,6 +415,7 @@ errout:
  * Name: tsc2007_activate
  ****************************************************************************/
 
+#ifdef CONFIG_TSC2007_ACTIVATE
 static int tsc2007_activate(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
 {
    struct i2c_msg_s msg;
@@ -442,6 +453,9 @@ static int tsc2007_activate(FAR struct tsc2007_dev_s *priv, uint8_t cmd)
      }
    return ret;
 }
+#else
+#  define tsc2007_activate(p,c)
+#endif
 
 /****************************************************************************
  * Name: tsc2007_transfer
@@ -1059,8 +1073,6 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct inode         *inode;
   FAR struct tsc2007_dev_s *priv;
-  pollevent_t               eventset;
-  int                       ndx;
   int                       ret = OK;
   int                       i;
 
