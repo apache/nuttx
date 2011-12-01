@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: October 22, 2011</p>
+      <p>Last Updated: December 1, 2011</p>
     </td>
   </tr>
 </table>
@@ -3291,6 +3291,12 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
     <dt><code>CONFIG_NXFONTS_CHARBITS</code>:
       <dd>The number of bits in the character set.  Current options are
         only 7 and 8.  The default is 7.
+    <dt><code>CONFIG_NXFONT_SANS17X22</code>:
+      <dd>This option enables support for a tiny, 17x22 san serif font
+        (font <code>ID FONTID_SANS17X22</code> == 14).
+    <dt><code>CONFIG_NXFONT_SANS20X26</code>:
+      <dd>This option enables support for a tiny, 20x26 san serif font
+        (font <code>ID FONTID_SANS20X26</code> == 15).
     <dt><code>CONFIG_NXFONT_SANS23X27</code>:
       <dd>This option enables support for a tiny, 23x27 san serif font
         (font <code>ID FONTID_SANS23X27</code> == 1).
@@ -3303,6 +3309,12 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
     <dt><code>CONFIG_NXFONT_SANS39X48</code>:
       <dd>This option enables support for a large, 39x48 san serif font
         (font <code>ID FONTID_SANS39X48</code> == 4).
+    <dt><code>CONFIG_NXFONT_SANS17X23B</code>:
+      <dd>This option enables support for a tiny, 17x23 san serif bold font
+        (font <code>ID FONTID_SANS17X23B</code> == 16).
+    <dt><code>CONFIG_NXFONT_SANS20X27B</code>:
+      <dd>This option enables support for a tiny, 20x27 san serif bold font
+        (font <code>ID FONTID_SANS20X27B</code> == 17).
     <dt><code>CONFIG_NXFONT_SANS22X29B</code>:
       <dd>This option enables support for a small, 22x29 san serif bold font
         (font ID <code>FONTID_SANS22X29B</code> == 5).
