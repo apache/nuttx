@@ -2231,3 +2231,5 @@
 	  some very small sans serif fonts.
 	* graphics/nxfonts/nxfonts_sans17x23b.h and nxfonts_sans20x27b.h:  Add
 	  corresponding sans serif bold fonts.
+	* drivers/input/ads7843e.c and tsc2007.c:  Fix some errors in the poll
+	  setup error checking that was cloned into both drivers.

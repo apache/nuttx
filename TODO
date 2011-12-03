@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 15, 2011)
+NuttX TODO List (Last updated December 3, 2011)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
@@ -16,7 +16,7 @@ nuttx/
  (16)  Network (net/, drivers/net)
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (7)  Libraries (lib/)
-  (9)  File system/Generic drivers (fs/, drivers/)
+ (11)  File system/Generic drivers (fs/, drivers/)
   (2)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -500,6 +500,25 @@ o File system / Generic drivers (fs/, drivers/)
                fat_systime2fattime() and fat_fattime2systime()
   Status:      Open
   Priority:    Medium
+
+  Description: The serial driver (drivers/serial) should return with an
+               error and errno=EINTR when an interrupt is received.  However,
+               the serial driver just continues waiting:
+
+               static void uart_takesem(FAR sem_t *sem)
+               {
+                 while (sem_wait(sem) != 0)
+                   {
+                     ASSERT(*get_errno_ptr() == EINTR);
+                   }
+               }
+  Status:      Open
+  Priority     Medium
+
+  Description: All drivers that support the poll method should also report
+               POLLHUP event when the driver is closedd.
+  Status:      Open
+  Priority:    Medium-Low
 
 o Graphics subystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

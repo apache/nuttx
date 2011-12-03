@@ -980,7 +980,7 @@ static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* Ignore waits that do not include POLLIN */
 
-      if ((fds->revents & POLLIN) == 0)
+      if ((fds->events & POLLIN) == 0)
         {
           ret = -EDEADLK;
           goto errout;

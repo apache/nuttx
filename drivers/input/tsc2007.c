@@ -1073,7 +1073,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct inode         *inode;
   FAR struct tsc2007_dev_s *priv;
-  int                       ret = OK;
+  int                       ret;
   int                       i;
 
   ivdbg("setup: %d\n", (int)setup);
@@ -1098,8 +1098,9 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* Ignore waits that do not include POLLIN */
 
-      if ((fds->revents & POLLIN) == 0)
+      if ((fds->events & POLLIN) == 0)
         {
+          idbg("Missing POLLIN: revents: %08x\n", fds->revents);
           ret = -EDEADLK;
           goto errout;
         }
@@ -1124,6 +1125,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_TSC2007_NPOLLWAITERS)
         {
+          idbg("No availabled slot found: %d\n", i);
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;
