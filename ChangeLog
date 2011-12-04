@@ -2233,3 +2233,5 @@
 	  corresponding sans serif bold fonts.
 	* drivers/input/ads7843e.c and tsc2007.c:  Fix some errors in the poll
 	  setup error checking that was cloned into both drivers.
+	* sched/mq_notify.c:  Set errno appropriately on failures.  There are
+	  still severl message queue functions that do not set errno!

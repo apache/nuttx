@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/mq_notify.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@
 #include <signal.h>
 #include <mqueue.h>
 #include <sched.h>
+#include <errno.h>
+
 #include "os_internal.h"
 #include "mq_internal.h"
 
@@ -95,7 +97,17 @@
  *      sigev_value - Value associated with the signal
  *
  * Return Value:
- *   None
+ *  On success mq_notify() returns 0; on error, -1 is returned, with
+ *  errno set to indicate the error.
+ *
+ *  EBADF The descriptor specified in mqdes is invalid. 
+ *  EBUSY Another process has already registered to receive notification
+ *    for this message queue. 
+ *  EINVAL sevp->sigev_notify is not one of the permitted values; or
+ *    sevp->sigev_notify is SIGEV_SIGNAL and sevp->sigev_signo is not a
+ *    valid signal number. 
+ *  ENOMEM
+ *    Insufficient memory.
  *
  * Assumptions:
  *
@@ -117,56 +129,84 @@ int mq_notify(mqd_t mqdes, const struct sigevent *notification)
 {
   _TCB   *rtcb;
   msgq_t *msgq;
-  int     ret = ERROR;
+  int     errval;
 
-  if (mqdes)
+  /* Was a valid message queue descriptor provided? */
+
+  if (!mqdes)
     {
-      sched_lock();
+      /* No.. return EBADF */
 
-      /* Get a pointer to the message queue */
-
-      msgq = mqdes->msgq;
-
-      /* Get the current process ID */
-
-      rtcb = (_TCB*)g_readytorun.head;
-
-      /* Is there already a notification attached */
-
-      if (!msgq->ntmqdes)
-        {
-          /* No... Have we been asked to establish one?  Make
-           * sure a good signal number has been provided
-           */
-
-          if (notification && GOOD_SIGNO(notification->sigev_signo))
-            {
-              /* Yes... Assign it to the current task. */
-
-              msgq->ntvalue.sival_ptr = notification->sigev_value.sival_ptr;
-              msgq->ntsigno           = notification->sigev_signo;
-              msgq->ntpid             = rtcb->pid;
-              msgq->ntmqdes           = mqdes;
-              ret                     = OK;
-            }
-        }
-
-      /* Yes... a notification is attached.  Does this task own it?
-       * Is it trying to remove it?
-       */
-
-      else if ((msgq->ntpid == rtcb->pid) && (!notification))
-        {
-          /* Yes... Detach the notification */
-
-          msgq->ntpid             = INVALID_PROCESS_ID;
-          msgq->ntsigno           = 0;
-          msgq->ntvalue.sival_ptr = NULL;
-          msgq->ntmqdes           = NULL;
-          ret                     = OK;
-        }
-      sched_unlock();
+      errval = EBADF;
+      goto errout;
     }
 
-  return ret;
+  /* Get a pointer to the message queue */
+
+  sched_lock();
+  msgq = mqdes->msgq;
+
+  /* Get the current process ID */
+
+  rtcb = (_TCB*)g_readytorun.head;
+
+  /* Is there already a notification attached */
+
+  if (!msgq->ntmqdes)
+    {
+      /* No... Have we been asked to establish one? */
+
+      if (notification)
+        {
+          /* Yes... Was a valid signal number supplied? */
+
+          if (!GOOD_SIGNO(notification->sigev_signo))
+            {
+              /* No... Return EINVAL */
+
+              errval = EINVAL;
+              goto errout;
+            }
+
+          /* Yes... Assign it to the current task. */
+
+          msgq->ntvalue.sival_ptr = notification->sigev_value.sival_ptr;
+          msgq->ntsigno           = notification->sigev_signo;
+          msgq->ntpid             = rtcb->pid;
+          msgq->ntmqdes           = mqdes;
+        }
+    }
+
+  /* Yes... a notification is attached.  Does this task own it?
+   * Is it trying to remove it?
+   */
+
+  else if ((msgq->ntpid != rtcb->pid) || (notification))
+    {
+      /* This thread does not own the notification OR it is
+       * not trying to remove it.  Return EBUSY.
+       */
+
+      errval = EBUSY;
+      goto errout;
+    }
+  else
+    {
+      /* Yes, the notification belongs to this thread.  Allow the
+       * thread to detach the notification.
+       */
+
+      msgq->ntpid             = INVALID_PROCESS_ID;
+      msgq->ntsigno           = 0;
+      msgq->ntvalue.sival_ptr = NULL;
+      msgq->ntmqdes           = NULL;
+    }
+
+  sched_unlock();
+  return OK;
+
+errout:
+  set_errno(errval);
+  sched_unlock();
+  return ERROR;
 }
