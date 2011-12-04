@@ -122,7 +122,7 @@ extern uint32_t g_heapbase;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 #if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
-extern void g_intstackbase;
+extern uint32_t g_intstackbase;
 #  else
 extern uint32_t g_userstack;
 #  endif
