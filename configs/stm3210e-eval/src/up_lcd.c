@@ -289,6 +289,7 @@
 #define LCD_REG_153           0x99
 #define LCD_REG_154           0x9a
 #define LCD_REG_157           0x9d
+#define LCD_REG_164           0xa4
 #define LCD_REG_192           0xc0
 #define LCD_REG_193           0xc1
 #define LCD_REG_229           0xe5
@@ -1074,27 +1075,14 @@ static inline void stm3210e_lcdinitialize(void)
   id = stm3210e_readreg(LCD_REG_0);
   lcddbg("LCD ID: %04x\n", id);
 
-  /* Check if the ID is for the SPFD5408B or the almost compatible R61580 */
+  /* Check if the ID is for the SPFD5408B */
 
-#if !defined(CONFIG_STM32_SPFD5408B_DISABLE) || !defined(CONFIG_STM32_R61580_DISABLE)
-#if !defined(CONFIG_STM32_SPFD5408B_DISABLE) && !defined(CONFIG_STM32_R61580_DISABLE)
-  if (id == SPFD5408B_ID || id == R61580_ID)
-#elif !defined(CONFIG_STM32_SPFD5408B_DISABLE)
+#if !defined(CONFIG_STM32_SPFD5408B_DISABLE)
   if (id == SPFD5408B_ID)
-#else
-  if (id == R61580_ID)
-#endif
     {
-      /* Set the LCD type for the SPFD5408B or the R61580 */
+      /* Set the LCD type for the SPFD5408B */
 
-#if !defined(CONFIG_STM32_SPFD5408B_DISABLE) && !defined(CONFIG_STM32_R61580_DISABLE)
-      g_lcddev.type = (id == SPFD5408B_ID ? LCD_TYPE_SPFD5408B : LCD_TYPE_R61580);
-#elif !defined(CONFIG_STM32_SPFD5408B_DISABLE)
-      g_lcddev.type = SPFD5408B_ID;
-#else
-      g_lcddev.type = LCD_TYPE_R61580;
-#endif
-
+      g_lcddev.type = LCD_TYPE_SPFD5408B;
       lcddbg("LCD type: %d\n", g_lcddev.type);
 
       /* Start Initial Sequence */
@@ -1188,6 +1176,80 @@ static inline void stm3210e_lcdinitialize(void)
 
       stm3210e_writereg(LCD_REG_3, 0x1018);
       stm3210e_writereg(LCD_REG_7, 0);      /* Display OFF */
+    }
+  else
+#endif
+
+  /* Check if the ID is for the almost compatible R61580 */
+
+#if !defined(CONFIG_STM32_R61580_DISABLE)
+  if (id == R61580_ID)
+    {
+      /* Set the LCD type for the R61580 */
+
+      g_lcddev.type = LCD_TYPE_R61580;
+      lcddbg("LCD type: %d\n", g_lcddev.type);
+
+      /* Start Initial Sequence */
+
+      stm3210e_writereg(LCD_REG_0,   0x0000);
+      stm3210e_writereg(LCD_REG_0,   0x0000);
+      up_mdelay(100);
+      stm3210e_writereg(LCD_REG_0,   0x0000);
+      stm3210e_writereg(LCD_REG_0,   0x0000);
+      stm3210e_writereg(LCD_REG_0,   0x0000);
+      stm3210e_writereg(LCD_REG_0,   0x0000);
+      stm3210e_writereg(LCD_REG_164, 0x0001);
+      up_mdelay(100);
+      stm3210e_writereg(LCD_REG_96,  0xa700);
+      stm3210e_writereg(LCD_REG_8,   0x0808);
+
+      /* Gamma Setting */
+
+      stm3210e_writereg(LCD_REG_48,  0x0203);
+      stm3210e_writereg(LCD_REG_49,  0x080f);
+      stm3210e_writereg(LCD_REG_50,  0x0401);
+      stm3210e_writereg(LCD_REG_51,  0x050b);
+      stm3210e_writereg(LCD_REG_52,  0x3330);
+      stm3210e_writereg(LCD_REG_53,  0x0b05);
+      stm3210e_writereg(LCD_REG_54,  0x0005);
+      stm3210e_writereg(LCD_REG_55,  0x0f08);
+      stm3210e_writereg(LCD_REG_56,  0x0302);
+      stm3210e_writereg(LCD_REG_57,  0x3033);
+
+      /* Power Setting */
+
+      stm3210e_writereg(LCD_REG_144, 0x0018); /* 80Hz */
+      stm3210e_writereg(LCD_REG_16,  0x0530); /* BT, AP */
+      stm3210e_writereg(LCD_REG_17,  0x0237); /* DC1,DC0,VC */
+      stm3210e_writereg(LCD_REG_18,  0x01bf);
+      stm3210e_writereg(LCD_REG_19,  0x1000); /* VCOM */
+      up_mdelay(200);
+
+      stm3210e_writereg(LCD_REG_1,   0x0100); /* Set SS bit */
+      stm3210e_writereg(LCD_REG_2,   0x0200);
+      stm3210e_writereg(LCD_REG_3,   0x1030); /* Set GRAM write direction and BGR=1. */
+      stm3210e_writereg(LCD_REG_9,   0x0001);
+      stm3210e_writereg(LCD_REG_10,  0x0008);
+      stm3210e_writereg(LCD_REG_12,  0x0000); /* RGB 18-bit System interface setting */
+      stm3210e_writereg(LCD_REG_13,  0xd000);
+      stm3210e_writereg(LCD_REG_14,  0x0030);
+      stm3210e_writereg(LCD_REG_15,  0x0000); /* RGB interface polarity, no impact */
+      stm3210e_writereg(LCD_REG_32,  0x0000); /* H Start */
+      stm3210e_writereg(LCD_REG_33,  0x0000); /* V Start */
+      stm3210e_writereg(LCD_REG_41,  0x002e);
+      stm3210e_writereg(LCD_REG_80,  0x0000); /* Horizontal GRAM Start Address */
+      stm3210e_writereg(LCD_REG_81,  0x00ef); /* Horizontal GRAM End Address */
+      stm3210e_writereg(LCD_REG_82,  0x0000); /* Vertical GRAM Start Address */
+      stm3210e_writereg(LCD_REG_83,  0x013f); /* Vertical GRAM End Address */
+      stm3210e_writereg(LCD_REG_97,  0x0001); /* NDL, VLE, REV */
+      stm3210e_writereg(LCD_REG_106, 0x0000); /* set scrolling line */
+      stm3210e_writereg(LCD_REG_128, 0x0000);
+      stm3210e_writereg(LCD_REG_129, 0x0000);
+      stm3210e_writereg(LCD_REG_130, 0x005f);
+      stm3210e_writereg(LCD_REG_147, 0x0701);
+
+      stm3210e_writereg(LCD_REG_7,   0x0000); /* Display OFF */
     }
   else
 #endif

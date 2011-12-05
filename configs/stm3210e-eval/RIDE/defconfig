@@ -224,6 +224,13 @@ CONFIG_SSI_POLLWAIT=y
 #CONFIG_SSI_TXLIMIT=4
 
 #
+# STM3210E-EVAL specific LCD settings
+#
+CONFIG_STM32_AM240320_DISABLE=n
+CONFIG_STM32_SPFD5408B_DISABLE=n
+CONFIG_STM32_R61580_DISABLE=y
+
+#
 # General build options
 #
 # CONFIG_RRLOAD_BINARY - make the rrload binary format used with
