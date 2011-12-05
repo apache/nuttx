@@ -2217,14 +2217,13 @@
 	* fs/fat/fs_fat32util.c: In fat_systime2fattime(void) should be
 	  clock_gettime() and not clock_gettime().  Also, there is a place where
 	  FAT date is used instead of FAT time. (Thanks to David Sidrane).
-	* arch/arm/src/stm32: Add support for the STM3240xxx MCU family.
 	* arch/arm/src/stm32 and arch/arm/include/stm32:  Add support for the
-	  STM32F50xxx family of MCUs.
+	  STM32F40xxx family of MCUs.
 	* configs/stm3240g-eval:  Add framework for the STMicro STM3240G-EVAL
 	  board.
 	* include/sys/types.h:  wchar_t is a builtin type in C++ and its
 	  declaration can cause errors with certain C++ compilers.
-	* sched/sig_timedwait.c:  Fix signal handling with the returned info
+	* sched/sig_timedwait.c:  Fix signal handling when the returned info
 	  is NULL.  Before this change, it would derefence a NULL pointer
 	  in this case.
 	* graphics/nxfonts/nxfonts_sans17x22.h and nxfonts_sans20x26.h:  Add
@@ -2234,4 +2233,6 @@
 	* drivers/input/ads7843e.c and tsc2007.c:  Fix some errors in the poll
 	  setup error checking that was cloned into both drivers.
 	* sched/mq_notify.c:  Set errno appropriately on failures.  There are
-	  still severl message queue functions that do not set errno!
+	  still several message queue functions that do not set errno!
+	* arch/arm/src/stm32: Fixes to several STM32F40xxx files (contributed by
+	  Mikhail Bychek).

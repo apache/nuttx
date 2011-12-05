@@ -164,8 +164,8 @@
 #define STM32_GPIOH_BASE     0x40021C00     /* 0x40021C00-0x40021fff: GPIO Port H */
 #define STM32_GPIOI_BASE     0x40022000     /* 0x40022000-0x400223ff: GPIO Port I */
 #define STM32_CRC_BASE       0x40023000     /* 0x40023000-0x400233ff: CRC */
+#define STM32_RCC_BASE       0x40023800     /* 0x40023800-0x40023bff: Reset and Clock control RCC */
 #define STM32_FLASHIF_BASE   0x40023c00     /* 0x40023c00-0x40023fff: Flash memory interface */
-#define STM32_RCC_BASE       0x40038000     /* 0x40023800-0x40023bff: Reset and Clock control RCC */
 #define STM32_BKPSRAM_BASE   0x40024000     /* 0x40024000-0x40024fff: Backup SRAM (BKPSRAM) */
 #define STM32_DMA1_BASE      0x40026000     /* 0x40026000-0x400263ff: DMA1  */
 #define STM32_DMA2_BASE      0x40026400     /* 0x40026400-0x400267ff: DMA2  */
