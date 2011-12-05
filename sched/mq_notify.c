@@ -2,7 +2,7 @@
  * sched/mq_notify.c
  *
  *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -97,17 +97,17 @@
  *      sigev_value - Value associated with the signal
  *
  * Return Value:
- *  On success mq_notify() returns 0; on error, -1 is returned, with
- *  errno set to indicate the error.
+ *   On success mq_notify() returns 0; on error, -1 is returned, with
+ *   errno set to indicate the error.
  *
- *  EBADF The descriptor specified in mqdes is invalid. 
- *  EBUSY Another process has already registered to receive notification
- *    for this message queue. 
- *  EINVAL sevp->sigev_notify is not one of the permitted values; or
- *    sevp->sigev_notify is SIGEV_SIGNAL and sevp->sigev_signo is not a
- *    valid signal number. 
- *  ENOMEM
- *    Insufficient memory.
+ *   EBADF The descriptor specified in mqdes is invalid. 
+ *   EBUSY Another process has already registered to receive notification
+ *     for this message queue. 
+ *   EINVAL sevp->sigev_notify is not one of the permitted values; or
+ *     sevp->sigev_notify is SIGEV_SIGNAL and sevp->sigev_signo is not a
+ *     valid signal number. 
+ *   ENOMEM
+ *     Insufficient memory.
  *
  * Assumptions:
  *
