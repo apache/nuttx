@@ -118,7 +118,7 @@ static inline void rcc_enableahb1(void)
    * selected AHB1 peripherals.
    */
 
-  regval = getreg32(STM32_RCC_APB1ENR);
+  regval = getreg32(STM32_RCC_AHB1ENR);
 
   /* Enable GPIOA, GPIOB, .... GPIOI*/
 
@@ -194,7 +194,7 @@ static inline void rcc_enableahb1(void)
   regval |= (RCC_AHB1ENR_OTGHSEN|RCC_AHB1ENR_OTGHSULPIEN);
 #endif
 
-  putreg32(regval, STM32_RCC_APB1ENR);   /* Enable peripherals */
+  putreg32(regval, STM32_RCC_AHB1ENR);   /* Enable peripherals */
 }
 
 /****************************************************************************

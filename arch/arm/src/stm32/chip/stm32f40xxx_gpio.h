@@ -183,7 +183,7 @@
 #define GPIO_MODER_ALT             (2) /* Alternate mode */
 #define GPIO_MODER_ANALOG          (3) /* Analog mode */
 
-#define GPIO_MODER_SHIFT(n)        ((n) << 2)
+#define GPIO_MODER_SHIFT(n)        ((n) << 1)
 #define GPIO_MODER_MASK(n)         (3 << GPIO_MODER_SHIFT(n))
 
 #define GPIO_MODER0_SHIFT          (0)
@@ -231,7 +231,7 @@
 #define GPIO_OSPEED_50MHz          (2) /* 50 MHz Fast speed */
 #define GPIO_OSPEED_100MHz         (3) /* 100 MHz High speed on 30 pF (80 MHz Output max speed on 15 pF) */
 
-#define GPIO_OSPEED_SHIFT(n)       ((n) << 2)
+#define GPIO_OSPEED_SHIFT(n)       ((n) << 1)
 #define GPIO_OSPEED_MASK(n)        (3 << GPIO_OSPEED_SHIFT(n))
 
 #define GPIO_OSPEED0_SHIFT         (0)
@@ -273,7 +273,7 @@
 #define GPIO_PUPDR_PULLUP          (1) /* Pull-up */
 #define GPIO_PUPDR_PULLDOWN        (2) /* Pull-down */
 
-#define GPIO_PUPDR_SHIFT(n)        ((n) << 2)
+#define GPIO_PUPDR_SHIFT(n)        ((n) << 1)
 #define GPIO_PUPDR_MASK(n)         (3 << GPIO_PUPDR_SHIFT(n))
 
 #define GPIO_PUPDR0_SHIFT          (0)
@@ -329,7 +329,7 @@
 
 /* GPIO alternate function low/high register */
 
-#define GPIO_AFR_SHIFT(n)          ((n) << 4)
+#define GPIO_AFR_SHIFT(n)          ((n) << 2)
 #define GPIO_AFR_MASK(n)           (15 << GPIO_AFR_SHIFT(n))
 
 #define GPIO_AFRL0_SHIFT           (0)
@@ -350,21 +350,21 @@
 #define GPIO_AFRL7_MASK            (15 << GPIO_AFRL7_SHIFT)
 
 #define GPIO_AFRH8_SHIFT           (0)
-#define GPIO_AFRH8_MASK            (15 << GPIO_AFRH0_SHIFT)
+#define GPIO_AFRH8_MASK            (15 << GPIO_AFRH8_SHIFT)
 #define GPIO_AFRH9_SHIFT           (4)
-#define GPIO_AFRH9_MASK            (15 << GPIO_AFRH1_SHIFT)
+#define GPIO_AFRH9_MASK            (15 << GPIO_AFRH9_SHIFT)
 #define GPIO_AFRH10_SHIFT          (8)
-#define GPIO_AFRH10_MASK           (15 << GPIO_AFRH2_SHIFT)
+#define GPIO_AFRH10_MASK           (15 << GPIO_AFRH10_SHIFT)
 #define GPIO_AFRH11_SHIFT          (12)
-#define GPIO_AFRH11_MASK           (15 << GPIO_AFRH3_SHIFT)
+#define GPIO_AFRH11_MASK           (15 << GPIO_AFRH11_SHIFT)
 #define GPIO_AFRH12_SHIFT          (16)
-#define GPIO_AFRH12_MASK           (15 << GPIO_AFRH4_SHIFT)
+#define GPIO_AFRH12_MASK           (15 << GPIO_AFRH12_SHIFT)
 #define GPIO_AFRH13_SHIFT          (20)
-#define GPIO_AFRH13_MASK           (15 << GPIO_AFRH5_SHIFT)
+#define GPIO_AFRH13_MASK           (15 << GPIO_AFRH13_SHIFT)
 #define GPIO_AFRH14_SHIFT          (24)
-#define GPIO_AFRH14_MASK           (15 << GPIO_AFRH6_SHIFT)
+#define GPIO_AFRH14_MASK           (15 << GPIO_AFRH14_SHIFT)
 #define GPIO_AFRH15_SHIFT          (28)
-#define GPIO_AFRH15_MASK           (15 << GPIO_AFRH7_SHIFT)
+#define GPIO_AFRH15_MASK           (15 << GPIO_AFRH15_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_GPIO_H */
 
