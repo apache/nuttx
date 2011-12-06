@@ -72,9 +72,13 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > flash
 
-	_eronly = ABSOLUTE(.);
+	__exidx_start = ABSOLUTE(.);
+	.ARM.exidx : {
+		*(.ARM.exidx*)
+	} > flash
+	__exidx_end = ABSOLUTE(.);
 
-	/* The STM32F103Z has 64Kb of SRAM beginning at the following address */
+	_eronly = ABSOLUTE(.);
 
 	.data : {
 		_sdata = ABSOLUTE(.);
@@ -87,12 +91,6 @@ SECTIONS
 	.ARM.extab : {
 		*(.ARM.extab*)
 	} >sram
-
-	__exidx_start = ABSOLUTE(.);
-	.ARM.exidx : {
-		*(.ARM.exidx*)
-	} >sram
-	__exidx_end = ABSOLUTE(.);
 
 	.bss : {
 		_sbss = ABSOLUTE(.);
