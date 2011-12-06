@@ -124,15 +124,15 @@
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
 #define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY  /* same as above, to satisfy compiler */
 
-/* APB2 clock (PCLK2) is HCLK/2 (84MHz) */
-
-#define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE1_HCLKd2 /* PCLK2 = HCLK / 2 */
-#define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
-
 /* APB1 clock (PCLK1) is HCLK/4 (42MHz) */
 
-#define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE2_HCLKd4 /* PCLK1 = HCLK / 4 */
+#define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd4 /* PCLK1 = HCLK / 4 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
+
+/* APB2 clock (PCLK2) is HCLK/2 (84MHz) */
+
+#define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLKd2 /* PCLK2 = HCLK / 2 */
+#define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx. 
