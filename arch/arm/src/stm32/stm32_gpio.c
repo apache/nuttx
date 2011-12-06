@@ -515,8 +515,8 @@ int stm32_configgpio(uint32_t cfgset)
     }
 
   regval  = getreg32(base + STM32_GPIO_OSPEED_OFFSET);
-  regval &= ~GPIO_OSPEED_MASK(pos);
-  regval |= (setting << GPIO_OSPEED_SHIFT(pos));
+  regval &= ~GPIO_OSPEED_MASK(pin);
+  regval |= (setting << GPIO_OSPEED_SHIFT(pin));
   putreg32(regval, base + STM32_GPIO_OSPEED_OFFSET);
 
   /* Set push-pull/open-drain (Only outputs and alternate function pins) */

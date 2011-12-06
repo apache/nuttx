@@ -2238,3 +2238,5 @@
 	  Mikhail Bychek).
 	* configs/stm3210e-eval/src/up_lcd.c:  Fix banding problem on the R61580
 	  LCD
+	* configs/stm3240g-eval/ostest:  The basic STM32F40xx bringup is functional
+	  (11/12/06) and passes the OS test.
