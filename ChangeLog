@@ -2236,3 +2236,5 @@
 	  still several message queue functions that do not set errno!
 	* arch/arm/src/stm32: Fixes to several STM32F40xxx files (contributed by
 	  Mikhail Bychek).
+	* configs/stm3210e-eval/src/up_lcd.c:  Fix banding problem on the R61580
+	  LCD
