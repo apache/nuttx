@@ -1,5 +1,5 @@
 ############################################################################
-# configs/stm3240g-eval/ostest/defconfig
+# configs/stm3240g-eval/nsh/defconfig
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -372,19 +372,23 @@ CONFIG_HAVE_LIBM=n
 CONFIG_DEBUG=n
 CONFIG_DEBUG_VERBOSE=n
 CONFIG_DEBUG_SYMBOLS=n
-CONFIG_HAVE_CXX=n
+CONFIG_DEBUG_FS=n
+CONFIG_DEBUG_GRAPHICS=n
+CONFIG_DEBUG_LCD=n
+CONFIG_DEBUG_USB=n
+CONFIG_HAVE_CXX=y
 CONFIG_MM_REGIONS=2
 CONFIG_ARCH_LOWPUTC=y
 CONFIG_RR_INTERVAL=200
 CONFIG_SCHED_INSTRUMENTATION=n
 CONFIG_TASK_NAME_SIZE=0
-CONFIG_START_YEAR=2009
-CONFIG_START_MONTH=9
-CONFIG_START_DAY=21
+CONFIG_START_YEAR=2011
+CONFIG_START_MONTH=12
+CONFIG_START_DAY=6
 CONFIG_GREGORIAN_TIME=n
 CONFIG_JULIAN_TIME=n
 CONFIG_DEV_CONSOLE=y
-CONFIG_DEV_LOWCONSOLE=y
+CONFIG_DEV_LOWCONSOLE=n
 CONFIG_MUTEX_TYPES=n
 CONFIG_PRIORITY_INHERITANCE=n
 CONFIG_SEM_PREALLOCHOLDERS=0
@@ -397,7 +401,7 @@ CONFIG_SCHED_WORKPRIORITY=50
 CONFIG_SCHED_WORKPERIOD=(50*1000)
 CONFIG_SCHED_WORKSTACKSIZE=1024
 CONFIG_SIG_SIGWORK=4
-CONFIG_SCHED_WAITPID=n
+CONFIG_SCHED_WAITPID=y
 CONFIG_SCHED_ATEXIT=n
 
 #
@@ -437,8 +441,8 @@ CONFIG_DISABLE_POSIX_TIMERS=n
 CONFIG_DISABLE_PTHREAD=n
 CONFIG_DISABLE_SIGNALS=n
 CONFIG_DISABLE_MQUEUE=n
-CONFIG_DISABLE_MOUNTPOINT=y
-CONFIG_DISABLE_ENVIRON=y
+CONFIG_DISABLE_MOUNTPOINT=n
+CONFIG_DISABLE_ENVIRON=n
 CONFIG_DISABLE_POLL=y
 
 #
@@ -516,6 +520,15 @@ CONFIG_PREALLOC_WDOGS=4
 CONFIG_PREALLOC_TIMERS=4
 
 #
+# Framebuffer driver options
+#
+CONFIG_FB_CMAP=n
+CONFIG_FB_HWCURSOR=n
+CONFIG_FB_HWCURSORIMAGE=n
+#CONFIG_FB_HWCURSORSIZE
+#CONFIG_FB_TRANSPARENCY
+
+#
 # Filesystem configuration
 #
 # CONFIG_FS_FAT - Enable FAT filesystem support
@@ -558,9 +571,9 @@ CONFIG_PREALLOC_TIMERS=4
 #   option will enable a limited form of memory mapping that is
 #   implemented by copying whole files into memory.
 #
-CONFIG_FS_FAT=n
-CONFIG_FAT_LCNAMES=n
-CONFIG_FAT_LFN=n
+CONFIG_FS_FAT=y
+CONFIG_FAT_LCNAMES=y
+CONFIG_FAT_LFN=y
 CONFIG_FAT_MAXFNAME=32
 CONFIG_FS_NXFFS=n
 CONFIG_FS_ROMFS=n
@@ -589,6 +602,28 @@ CONFIG_MMCSD_SPICLOCK=12500000
 #
 CONFIG_FS_READAHEAD=n
 CONFIG_FS_WRITEBUFFER=n
+
+#
+# STM32 SDIO-based MMC/SD driver
+#
+# CONFIG_SDIO_DMA
+#   SDIO driver supports DMA
+# CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+# CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
+#   Default:  Medium
+# CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
+#   4-bit transfer mode.
+# CONFIG_MMCSD_MMCSUPPORT
+#   Enable support for MMC cards
+# CONFIG_MMCSD_HAVECARDDETECT
+#   SDIO driver card detection is 100% accurate
+#
+CONFIG_SDIO_DMA=n
+#CONFIG_SDIO_PRI=128
+#CONFIG_SDIO_DMAPRIO
+#CONFIG_SDIO_WIDTH_D1_ONLY
+CONFIG_MMCSD_MMCSUPPORT=n
+CONFIG_MMCSD_HAVECARDDETECT=n
 
 #
 # SDIO-based MMC/SD driver
@@ -869,7 +904,7 @@ CONFIG_USBSTRG_REMOVABLE=y
 #   too many messages (CONFIG_PREALLOC_MQ_MSGS controls how many
 #   messages are pre-allocated).
 #
-CONFIG_NX=y
+CONFIG_NX=n
 CONFIG_NX_MULTIUSER=n
 CONFIG_NX_NPLANES=1
 CONFIG_NX_DISABLE_1BPP=y
@@ -911,42 +946,6 @@ CONFIG_NX_MXSERVERMSGS=32
 CONFIG_NX_MXCLIENTMSGS=16
 
 #
-# NxWidgets
-CONFIG_NXWIDGETS_BPP=16
-CONFIG_NXWIDGETS_DEFAULT_FONTID=5
-
-#
-# STM3240G-EVAL LCD Hardware Configuration
-#
-# CONFIG_LCD_LANDSCAPE - Define for 320x240 display "landscape"
-#   support. Default is this 320x240 "landscape" orientation
-#   (this setting is informative only... not used).
-# CONFIG_LCD_PORTRAIT - Define for 240x320 display "portrait"
-#   orientation support.  In this orientation, the PT3's
-#   LCD ribbon cable is at the bottom of the display. Default is
-#   320x240 "landscape" orientation.
-# CONFIG_LCD_RPORTRAIT - Define for 240x320 display "reverse
-#   portrait" orientation support.  In this orientation, the
-#   STM3240G-EVAL's LCD ribbon cable is at the top of the display.
-#   Default is 320x240 "landscape" orientation.
-# CONFIG_LCD_BACKLIGHT - Define to support a backlight.
-# CONFIG_LCD_PWM - If CONFIG_STM32_TIM1 is also defined, then an
-#   adjustable backlight will be provided using timer 1 to generate
-#   various pulse widthes.  The granularity of the settings is
-#   determined by CONFIG_LCD_MAXPOWER.  If CONFIG_LCD_PWM (or
-#   CONFIG_STM32_TIM1) is not defined, then a simple on/off backlight
-#   is provided.
-#
-CONFIG_LCD_LANDSCAPE=n
-CONFIG_LCD_PORTRAIT=n
-CONFIG_LCD_RPORTRAIT=y
-CONFIG_LCD_BACKLIGHT=y
-CONFIG_LCD_PWM=n
-CONFIG_STM32_AM240320_DISABLE=y
-CONFIG_STM32_SPFD5408B_DISABLE=n
-CONFIG_STM32_R61580_DISABLE=n
-
-#
 # Settings for examples/uip
 #
 CONFIG_EXAMPLE_UIP_IPADDR=(10<<24|0<<16|0<<8|2)
@@ -974,9 +973,6 @@ CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS=3
 #
 # Settings for apps/nshlib
 #
-# CONFIG_NSH_BUILTIN_APPS - Support external registered,
-#   "named" applications that can be executed from the NSH
-#   command line (see apps/README.txt for more information).
 # CONFIG_NSH_FILEIOSIZE - Size of a static I/O buffer
 # CONFIG_NSH_STRERROR - Use strerror(errno)
 # CONFIG_NSH_LINELEN - Maximum length of one command line
@@ -986,8 +982,6 @@ CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS=3
 # CONFIG_NSH_DISABLEBG - Disable background commands
 # CONFIG_NSH_ROMFSETC - Use startup script in /etc
 # CONFIG_NSH_CONSOLE - Use serial console front end
-# CONFIG_NSH_CONDEV - Select the serial device used to support
-#   the NSH console.  Default: stdin and stdout
 # CONFIG_NSH_TELNET - Use telnetd console front end
 # CONFIG_NSH_ARCHINIT - Platform provides architecture
 #   specific initialization (nsh_archinitialize()).
@@ -1010,7 +1004,6 @@ CONFIG_EXAMPLES_OSTEST_NBARRIER_THREADS=3
 # CONFIG_NSH_FATNSECTORS - FAT FS number of sectors
 # CONFIG_NSH_FATMOUNTPT - FAT FS mountpoint
 #
-CONFIG_NSH_BUILTIN_APPS=y
 CONFIG_NSH_FILEIOSIZE=512
 CONFIG_NSH_STRERROR=n
 CONFIG_NSH_LINELEN=64
@@ -1020,7 +1013,6 @@ CONFIG_NSH_DISABLESCRIPT=n
 CONFIG_NSH_DISABLEBG=n
 CONFIG_NSH_ROMFSETC=n
 CONFIG_NSH_CONSOLE=y
-#CONFIG_NSH_CONDEV="/dev/ttyS1"
 CONFIG_NSH_TELNET=n
 CONFIG_NSH_ARCHINIT=n
 CONFIG_NSH_IOBUFFER_SIZE=512
@@ -1046,207 +1038,6 @@ CONFIG_NSH_MMCSDSLOTNO=0
 CONFIG_NSH_MMCSDMINOR=0
 
 #
-# Settings for examples/nx
-#
-# CONFIG_EXAMPLES_NX_BUILTIN -- Build the NX example as a "built-in"
-#  that can be executed from the NSH command line  
-# CONFIG_EXAMPLES_NX_VPLANE -- The plane to select from the frame-
-#   buffer driver for use in the test.  Default: 0
-# CONFIG_EXAMPLES_NX_DEVNO - The LCD device to select from the LCD
-#  driver for use in the test: Default: 0
-# CONFIG_EXAMPLES_NX_BGCOLOR -- The color of the background.  Default depends on
-#   CONFIG_EXAMPLES_NX_BPP.
-# CONFIG_EXAMPLES_NX_COLOR1 -- The color of window 1. Default depends on
-#   CONFIG_EXAMPLES_NX_BPP.
-# CONFIG_EXAMPLES_NX_COLOR2 -- The color of window 2. Default depends on
-#   CONFIG_EXAMPLES_NX_BPP.
-# CONFIG_EXAMPLES_NX_TBCOLOR -- The color of the toolbar. Default depends on
-#   CONFIG_EXAMPLES_NX_BPP.
-# CONFIG_EXAMPLES_NX_FONTID - Selects the font (see font ID numbers in
-#   include/nuttx/nx/nxfonts.h)
-# CONFIG_EXAMPLES_NX_FONTCOLOR -- The color of the toolbar. Default depends on
-#   CONFIG_EXAMPLES_NX_BPP.
-# CONFIG_EXAMPLES_NX_BPP -- Pixels per pixel to use.  Valid options
-#   include 2, 4, 8, 16, 24, and 32.  Default is 32.
-# CONFIG_EXAMPLES_NX_RAWWINDOWS -- Use raw windows;  Default is to
-#   use pretty, framed NXTK windows with toolbars.
-# CONFIG_EXAMPLES_NX_STACKSIZE -- The stacksize to use when creating
-#   the NX server.  Default 2048
-# CONFIG_EXAMPLES_NX_CLIENTPRIO -- The client priority.  Default: 80
-# CONFIG_EXAMPLES_NX_SERVERPRIO -- The server priority.  Default: 120
-# CONFIG_EXAMPLES_NX_NOTIFYSIGNO -- The signal number to use with
-#   nx_eventnotify().  Default: 4
-#
-CONFIG_EXAMPLES_NX_BUILTIN=y
-CONFIG_EXAMPLES_NX_VPLANE=0
-CONFIG_EXAMPLES_NX_DEVNO=0
-CONFIG_EXAMPLES_NX_BGCOLOR=0x0011
-CONFIG_EXAMPLES_NX_COLOR1=0xaedc
-CONFIG_EXAMPLES_NX_COLOR2=0xe7ff
-CONFIG_EXAMPLES_NX_TBCOLOR=0xd69a
-CONFIG_EXAMPLES_NX_FONTID=0
-CONFIG_EXAMPLES_NX_FONTCOLOR=0x0000
-CONFIG_EXAMPLES_NX_BPP=16
-CONFIG_EXAMPLES_NX_RAWWINDOWS=n
-CONFIG_EXAMPLES_NX_STACKSIZE=2048
-CONFIG_EXAMPLES_NX_CLIENTPRIO=80
-CONFIG_EXAMPLES_NX_SERVERPRIO=120
-CONFIG_EXAMPLES_NX_NOTIFYSIGNO=4
-CONFIG_EXAMPLES_NX_EXTERNINIT=n
-
-#
-# Settings for examples/nxhello
-#
-# CONFIG_EXAMPLES_NXHELLO_BUILTIN -- Build the NXHELLO example as a "built-in"
-#   that can be executed from the NSH command line    
-# CONFIG_EXAMPLES_NXHELLO_VPLANE -- The plane to select from the frame-
-#   buffer driver for use in the test.  Default: 0
-# CONFIG_EXAMPLES_NXHELLO_DEVNO - The LCD device to select from the LCD
-#   driver for use in the test: Default: 0
-# CONFIG_EXAMPLES_NXHELLO_BGCOLOR -- The color of the background.  Default
-#   depends on CONFIG_EXAMPLES_NXHELLO_BPP.
-# CONFIG_EXAMPLES_NXHELLO_FONTID - Selects the font (see font ID numbers in
-#   include/nuttx/nx/nxfonts.h)
-# CONFIG_EXAMPLES_NXHELLO_FONTCOLOR -- The color of the fonts used in the
-#   background window. Default depends on CONFIG_EXAMPLES_NXHELLO_BPP.
-# CONFIG_EXAMPLES_NXHELLO_BPP -- Pixels per pixel to use.  Valid options
-#   include 2, 4, 8, 16, 24, and 32.  Default is 32.
-# CONFIG_EXAMPLES_NXHELLO_EXTERNINIT - The driver for the graphics device on
-#   this platform requires some unusual initialization.  This is the
-#   for, for example, SPI LCD/OLED devices.  If this configuration is
-#   selected, then the platform code must provide an LCD initialization
-#   function.
-#
-CONFIG_EXAMPLES_NXHELLO_BUILTIN=y
-CONFIG_EXAMPLES_NXHELLO_VPLANE=0
-CONFIG_EXAMPLES_NXHELLO_DEVNO=0
-CONFIG_EXAMPLES_NXHELLO_BGCOLOR=0x0011
-CONFIG_EXAMPLES_NXHELLO_FONTID=6
-CONFIG_EXAMPLES_NXHELLO_FONTCOLOR=0xffdf
-CONFIG_EXAMPLES_NXHELLO_BPP=16
-CONFIG_EXAMPLES_NXHELLO_EXTERNINIT=n
-
-#
-# Settings for examples/nximage
-#
-# CONFIG_EXAMPLES_NXIMAGE_BUILTIN -- Build the NXIMAGE example as a "built-in"
-#   that can be executed from the NSH command line    
-# CONFIG_EXAMPLES_NXIMAGE_VPLANE -- The plane to select from the frame-
-#   buffer driver for use in the test.  Default: 0
-# CONFIG_EXAMPLES_NXIMAGE_DEVNO - The LCD device to select from the LCD
-#   driver for use in the test: Default: 0
-# CONFIG_EXAMPLES_NXIMAGE_BPP -- Pixels per pixel to use.  Valid options
-#   include 8, 16, and 24.  Default is 16.
-# CONFIG_EXAMPLES_NXIMAGE_XSCALEp5, CONFIG_EXAMPLES_NXIMAGE_XSCALE1p5,
-# CONFIG_EXAMPLES_NXIMAGE_XSCALE2p0 -- The logo image width is 160 columns.
-#   One of these may be defined to rescale the image horizontally by .5, 1.5,
-#   or 2.0.
-# CONFIG_EXAMPLES_NXIMAGE_YSCALEp5, CONFIG_EXAMPLES_NXIMAGE_YSCALE1p5,
-# CONFIG_EXAMPLES_NXIMAGE_YSCALE2p0 -- The logo image height is 160 rows.
-#   One of these may be defined to rescale the image vertically by .5, 1.5,
-#   or 2.0.
-# CONFIG_EXAMPLES_NXIMAGE_EXTERNINIT - The driver for the graphics device on
-#   this platform requires some unusual initialization.  This is the
-#   for, for example, SPI LCD/OLED devices.  If this configuration is
-#   selected, then the platform code must provide an LCD initialization
-#   function.
-#
-CONFIG_EXAMPLES_NXIMAGE_BUILTIN=y
-CONFIG_EXAMPLES_NXIMAGE_VPLANE=0
-CONFIG_EXAMPLES_NXIMAGE_DEVNO=0
-CONFIG_EXAMPLES_NXIMAGE_BPP=16
-CONFIG_EXAMPLES_NXIMAGE_XSCALEp5=n
-CONFIG_EXAMPLES_NXIMAGE_XSCALE1p5=y
-CONFIG_EXAMPLES_NXIMAGE_XSCALE2p0=n
-CONFIG_EXAMPLES_NXIMAGE_YSCALEp5=n
-CONFIG_EXAMPLES_NXIMAGE_YSCALE1p5=y
-CONFIG_EXAMPLES_NXIMAGE_YSCALE2p0=n
-CONFIG_EXAMPLES_NXIMAGE_EXTERNINIT=n
-
-#
-# Settings for examples/nxlines
-#
-# CONFIG_EXAMPLES_NXLINES_BUILTIN -- Build the NXLINES example as a "built-in"
-#   that can be executed from the NSH command line
-# CONFIG_EXAMPLES_NXLINES_VPLANE -- The plane to select from the frame-
-#   buffer driver for use in the test.  Default: 0
-# CONFIG_EXAMPLES_NXLINES_DEVNO - The LCD device to select from the LCD
-#   driver for use in the test: Default: 0
-# CONFIG_EXAMPLES_NXLINES_BGCOLOR -- The color of the background.  Default
-#   depends on CONFIG_EXAMPLES_NXLINES_BPP.
-# CONFIG_EXAMPLES_NXLINES_LINEWIDTH - Selects the width of the lines in
-#   pixels (default: 16)
-# CONFIG_EXAMPLES_NXLINES_LINECOLOR -- The color of the central lines drawn
-#   in the background window. Default depends on CONFIG_EXAMPLES_NXLINES_BPP
-#   (there really is no meaningful default).
-# CONFIG_EXAMPLES_NXLINES_BORDERWIDTH -- The width of the circular border
-#   drawn in the background window. (default: 4).
-# CONFIG_EXAMPLES_NXLINES_BORDERCOLOR -- The color of the circular border
-#   drawn in the background window. Default depends on CONFIG_EXAMPLES_NXLINES_BPP
-#   (there really is no meaningful default).
-# CONFIG_EXAMPLES_NXLINES_CIRCLECOLOR -- The color of the circular region
-#   filled in the background window. Default depends on CONFIG_EXAMPLES_NXLINES_BPP
-#   (there really is no meaningful default).
-# CONFIG_EXAMPLES_NXLINES_BPP -- Pixels per pixel to use.  Valid options
-#   include 2, 4, 8, 16, 24, and 32.  Default is 16.
-# CONFIG_EXAMPLES_NXLINES_EXTERNINIT - The driver for the graphics device on
-#   this platform requires some unusual initialization.  This is the
-#   for, for example, SPI LCD/OLED devices.  If this configuration is
-#   selected, then the platform code must provide an LCD initialization
-#   function.
-#
-CONFIG_EXAMPLES_NXLINES_BUILTIN=n
-CONFIG_EXAMPLES_NXLINES_VPLANE=0
-CONFIG_EXAMPLES_NXLINES_DEVNO=0
-CONFIG_EXAMPLES_NXLINES_BGCOLOR=0x0320
-CONFIG_EXAMPLES_NXLINES_LINEWIDTH=16
-CONFIG_EXAMPLES_NXLINES_LINECOLOR=0xffe0
-CONFIG_EXAMPLES_NXLINES_BORDERWIDTH=4
-CONFIG_EXAMPLES_NXLINES_BORDERCOLOR=0xffe0
-CONFIG_EXAMPLES_NXLINES_CIRCLECOLOR=0xf7bb
-CONFIG_EXAMPLES_NXLINES_BPP=16
-CONFIG_EXAMPLES_NXLINES_EXTERNINIT=n
-
-#
-# Settings for examples/touchscreen
-#
-# CONFIG_EXAMPLES_TOUCHSCREEN_BUILTIN - Build the touchscreen test as
-#   an NSH built-in function.  Default: Built as a standalone problem
-# CONFIG_EXAMPLES_TOUCHSCREEN_MINOR - The minor device number.  Minor=N
-#   correspnds to touchscreen device /dev/input0.  Note this value must
-#   with CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH.  Default 0.
-# CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH - The path to the touchscreen
-#   device.  This must be consistent with CONFIG_EXAMPLES_TOUCHSCREEN_MINOR.
-#   Default: "/dev/input0"
-# CONFIG_EXAMPLES_TOUCHSCREEN_NSAMPLES - If CONFIG_EXAMPLES_TOUCHSCREEN_BUILTIN
-#   is defined, then the number of samples is provided on the command line
-#   and this value is ignored.  Otherwise, this number of samples is
-#   collected and the program terminates.  Default:  Samples are collected
-#   indefinitely.
-#
-CONFIG_EXAMPLES_TOUCHSCREEN_BUILTIN=y
-CONFIG_EXAMPLES_TOUCHSCREEN_MINOR=0
-CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH="/dev/input0"
-CONFIG_EXAMPLES_TOUCHSCREEN_NSAMPLES=25
-
-#
-# Settings for examples/buttons
-#
-# CONFIG_EXAMPLE_BUTTONS_MIN and CONFIG_EXAMPLE_BUTTONS_MAX
-#   Lowest and highest button number (0-7)
-# CONFIG_EXAMPLE_IRQBUTTONS_MIN and CONFIG_EXAMPLE_IRQBUTTONS_MAX
-#   Lowest and highest interrupting button number (-7)
-# CONFIG_EXAMPLE_BUTTONS_NAMEn - Name for button n
-#
-CONFIG_EXAMPLE_BUTTONS_MIN=0
-CONFIG_EXAMPLE_BUTTONS_MAX=2
-CONFIG_EXAMPLE_IRQBUTTONS_MIN=0
-CONFIG_EXAMPLE_IRQBUTTONS_MAX=2
-CONFIG_EXAMPLE_BUTTONS_NAME0="Key/Select"
-CONFIG_EXAMPLE_BUTTONS_NAME1="Left/Right"
-CONFIG_EXAMPLE_BUTTONS_NAME2="Up/Down"
-
-#
 # Settings for examples/usbserial
 #
 # CONFIG_EXAMPLES_USBSERIAL_INONLY
@@ -1268,58 +1059,6 @@ CONFIG_EXAMPLES_USBSERIAL_TRACECLASS=n
 CONFIG_EXAMPLES_USBSERIAL_TRACETRANSFERS=n
 CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER=n
 CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=n
-
-#
-# Settings for examples/usbstorage
-#
-# CONFIG_EXAMPLES_USBSTRG_BUILTIN
-#   This example can be built as two NSH "built-in" commands if this option
-#   is selection: 'msconn' will connect the USB mass storage device; 'msdis'
-#   will disconnect the USB storage device.
-# CONFIG_EXAMPLES_USBSTRG_NLUNS
-#    Defines the number of logical units (LUNs) exported by the USB storage
-#    driver.  Each LUN corresponds to one exported block driver (or partition
-#    of a block driver).  May be 1, 2, or 3.  Default is 1.
-# CONFIG_EXAMPLES_USBSTRG_DEVMINOR1
-#    The minor device number of the block driver for the first LUN. For
-#    example, N in /dev/mmcsdN.  Used for registering the block driver. Default
-#    is zero.
-# CONFIG_EXAMPLES_USBSTRG_DEVPATH1
-#    The full path to the registered block driver.  Default is "/dev/mmcsd0"
-#  CONFIG_EXAMPLES_USBSTRG_DEVMINOR2 and CONFIG_EXAMPLES_USBSTRG_DEVPATH2
-#    Similar parameters that would have to be provided if CONFIG_EXAMPLES_USBSTRG_NLUNS
-#    is 2 or 3.  No defaults.
-#  CONFIG_EXAMPLES_USBSTRG_DEVMINOR3 and CONFIG_EXAMPLES_USBSTRG_DEVPATH3
-#    Similar parameters that would have to be provided if CONFIG_EXAMPLES_USBSTRG_NLUNS
-#    is 3.  No defaults.
-#  CONFIG_EXAMPLES_USBSTRG_DEBUGMM
-#    Enables some debug tests to check for memory usage and memory leaks.
-#
-#  If CONFIG_USBDEV_TRACE is enabled (or CONFIG_DEBUG and CONFIG_DEBUG_USB), then
-#  the example code will also manage the USB trace output.  The amount of trace output
-#  can be controlled using:
-#
-#  CONFIG_EXAMPLES_USBSTRG_TRACEINIT
-#    Show initialization events
-#  CONFIG_EXAMPLES_USBSTRG_TRACECLASS
-#    Show class driver events
-#  CONFIG_EXAMPLES_USBSTRG_TRACETRANSFERS
-#    Show data transfer events
-#  CONFIG_EXAMPLES_USBSTRG_TRACECONTROLLER
-#    Show controller events
-#  CONFIG_EXAMPLES_USBSTRG_TRACEINTERRUPTS
-#    Show interrupt-related events.
-#
-CONFIG_EXAMPLES_USBSTRG_BUILTIN=y
-CONFIG_EXAMPLES_USBSTRG_NLUNS=1
-CONFIG_EXAMPLES_USBSTRG_DEVMINOR1=0
-CONFIG_EXAMPLES_USBSTRG_DEVPATH1="/dev/mmcsd0"
-CONFIG_EXAMPLES_USBSTRG_DEBUGMM=n
-CONFIG_EXAMPLES_USBSTRG_TRACEINIT=n
-CONFIG_EXAMPLES_USBSTRG_TRACECLASS=n
-CONFIG_EXAMPLES_USBSTRG_TRACETRANSFERS=n
-CONFIG_EXAMPLES_USBSTRG_TRACECONTROLLER=n
-CONFIG_EXAMPLES_USBSTRG_TRACEINTERRUPTS=n
 
 #
 # Stack and heap information
