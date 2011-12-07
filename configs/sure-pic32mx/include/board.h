@@ -83,6 +83,13 @@
 #define BOARD_WD_ENABLE        0        /* Watchdog is disabled */
 #define BOARD_WD_PRESCALER     8        /* Watchdog pre-scaler */
 
+/* Timer 1 is a type A timer and is used as system clock.  It can be clocked
+ * with either the SOSC or the PBCLOCK.  We will use the PBCLOCK because it
+ * is much more accurate.
+ */
+
+#undef BOARD_TIMER1_SOSC
+
 /* LED definitions **********************************************************/
 /* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not
  * controllable by software.  Four are controllable by software:

@@ -59,28 +59,53 @@
  * Definitions
  ****************************************************************************/
 /* Timer Setup **************************************************************/
+/* Timer 1 is a type A timer.  Setting the TCS bit in the timer control
+ * register will select the SOSC as the clock source.  Otherwise, PBCLOCK
+ * is the clock source.
+ */
+
+#ifdef BOARD_TIMER1_SOSC
+#  define TIMER1_SRC_FREQ BOARD_SOSC_FREQ
+#  define TIMER1_CON_TCS  TIMER_CON_TCS
+#else
+#  define TIMER1_SRC_FREQ BOARD_PBCLOCK
+#  define TIMER1_CON_TCS  (0)
+#endif
+
 /* Select a timer 1 prescale value.  Our goal is to select the timer MATCH
- * register value given the board's SOSC clock frequency and the desired
+ * register value given the timer 1 input clock frequency and the desired
  * system timer frequency:
  *
- *   TIMER1_MATCH = BOARD_SOSC_FREQ / TIMER1_PRESCALE / CLOCKS_PER_SEC
+ *   TIMER1_MATCH = TIMER1_SRC_FREQ / TIMER1_PRESCALE / CLOCKS_PER_SEC
  *
  * We want the largest possible value for MATCH that is less than 65,535, the
  * maximum value for the 16-bit timer register:
  *
- *   TIMER1_PRESCALE >= BOARD_SOSC_FREQ / CLOCKS_PER_SEC / 65535
+ *   TIMER1_PRESCALE >= TIMER1_SRC_FREQ / CLOCKS_PER_SEC / 65535
  *
  * Timer 1 does not have very many options for the perscaler value.  So we
  * can pick the best by brute force.  Example:
  *
+ * Example 1. Given:
+ *   BOARD_TIMER1_SOSC      = Defined
  *   BOARD_SOSC_FREQ        = 32768
  *   CLOCKS_PER_SEC         = 100
+ * Then:
  *   OPTIMAL_PRESCALE       = 1
  *   TIMER1_PRESCALE        = 1
- *   TIMER1_MATCH           = 328 -> 99.90 ticks/sec
+ *   TIMER1_MATCH           = 327 -> 100.3 ticks/sec
+ *
+ * Example 2. Given:
+ *   BOARD_TIMER1_SOSC      = Not defined
+ *   BOARD_PBCLOCK          = 60000000
+ *   CLOCKS_PER_SEC         = 100
+ * Then:
+ *   OPTIMAL_PRESCALE       = 9.2
+ *   TIMER1_PRESCALE        = 64
+ *   TIMER1_MATCH           = 9375 -> 100.0 ticks/sec
  */
  
-#define OPTIMAL_PRESCALE (BOARD_SOSC_FREQ / CLOCKS_PER_SEC / 65535)
+#define OPTIMAL_PRESCALE (TIMER1_SRC_FREQ / CLOCKS_PER_SEC / 65535)
 #if OPTIMAL_PRESCALE <= 1
 #  define TIMER1_CON_TCKPS    TIMER1_CON_TCKPS_1
 #  define TIMER1_PRESCALE     1
@@ -97,7 +122,7 @@
 #  error "This timer frequency cannot be represented"
 #endif
 
-#define TIMER1_MATCH (BOARD_SOSC_FREQ / TIMER1_PRESCALE / CLOCKS_PER_SEC)
+#define TIMER1_MATCH (TIMER1_SRC_FREQ / TIMER1_PRESCALE / CLOCKS_PER_SEC)
 
 /****************************************************************************
  * Private Types
@@ -143,9 +168,12 @@ int up_timerisr(int irq, uint32_t *regs)
 
 void up_timerinit(void)
 {
-  /* Configure and enable TIMER1 -- source internal SOSC (TCS=0) */
+  /* Configure and enable TIMER1.  Used the computed TCKPS divider and timer
+   * match valude.  The source will be either the internal PBCLOCK (TCS=0) or
+   * the external SOSC (TCS=1)
+   */
 
-  putreg32(TIMER1_CON_TCKPS, PIC32MX_TIMER1_CON);
+  putreg32((TIMER1_CON_TCKPS|TIMER1_CON_TCS), PIC32MX_TIMER1_CON);
   putreg32(0, PIC32MX_TIMER1_CNT);
   putreg32(TIMER1_MATCH-1, PIC32MX_TIMER1_PR);
   putreg32(TIMER_CON_ON, PIC32MX_TIMER1_CONSET);
