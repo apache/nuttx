@@ -44,6 +44,10 @@
 
 #include "chip.h"
 
+#if STM32_NETHERNET > 1
+
+#include "chip/stm32_eth.h"
+
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
@@ -77,9 +81,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-#if STM32_NTHERNET > 1
 EXTERN int stm32_ethinitialize(int intf);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -87,5 +89,6 @@ EXTERN int stm32_ethinitialize(int intf);
 #endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* STM32_NETHERNET > 1 */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_ETH_H */
 

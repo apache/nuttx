@@ -79,7 +79,7 @@
 #  define STM32_NADC                     1   /* ADC1 */
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCRC                     0   /* No CRC */
-#  define STM32_NTHERNET                 0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -106,7 +106,7 @@
 #  define STM32_NADC                     2   /* ADC1-2 */
 #  define STM32_NDAC                     2   /* DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -133,7 +133,7 @@
 #  define STM32_NADC                     2   /* ADC1-2*/
 #  define STM32_NDAC                     2   /* DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
+#  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -162,7 +162,7 @@
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 16 channels */
 #  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 0   /* No Ethernet MAC */
+#  define STM32_NETHERNET                0   /* No Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -191,7 +191,7 @@
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 16 channels */
 #  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 0   /* No Ethernet MAC */
+#  define STM32_NETHERNET                0   /* No Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -220,7 +220,7 @@
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
 #  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 0   /* No Ethernet MAC */
+#  define STM32_NETHERNET                0   /* No Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -249,7 +249,7 @@
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 16 channels */
 #  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
+#  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
 
@@ -278,7 +278,7 @@
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 16 channels */
 #  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
+#  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
 
@@ -307,7 +307,7 @@
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
 #  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
+#  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
 
@@ -336,7 +336,7 @@
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
 #  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
+#  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
 
@@ -365,7 +365,7 @@
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
 #  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
+#  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
 
@@ -394,7 +394,7 @@
 #  define STM32_NADC                     3   /* 12-bit ADC1-3, 24 channels */
 #  define STM32_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 1   /* 100/100 Ethernet MAC */
+#  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
 

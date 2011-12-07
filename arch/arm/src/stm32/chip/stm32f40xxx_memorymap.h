@@ -169,7 +169,7 @@
 #define STM32_BKPSRAM_BASE   0x40024000     /* 0x40024000-0x40024fff: Backup SRAM (BKPSRAM) */
 #define STM32_DMA1_BASE      0x40026000     /* 0x40026000-0x400263ff: DMA1  */
 #define STM32_DMA2_BASE      0x40026400     /* 0x40026400-0x400267ff: DMA2  */
-#define STM32_ETHERNET_BASE  0x40029000     /* 0x40028000-0x400283ff: Ethernet MAC */
+#define STM32_ETHERNET_BASE  0x40028000     /* 0x40028000-0x400283ff: Ethernet MAC */
                                             /* 0x40028400-0x400287ff: Ethernet MAC */
                                             /* 0x40028800-0x40028bff: Ethernet MAC */
                                             /* 0x40028c00-0x40028fff: Ethernet MAC */
