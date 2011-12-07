@@ -272,6 +272,9 @@ int up_svcall(int irq, FAR void *context)
         {
           DEBUGASSERT(regs[REG_R1] != 0);
           memcpy((uint32_t*)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
+#ifdef CONFIG_ARCH_FPU
+          up_savefpu((uint32_t*)regs[REG_R1]);
+#endif
         }
         break;
 

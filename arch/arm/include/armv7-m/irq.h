@@ -2,7 +2,7 @@
  * arch/arm/include/armv7-m/irq.h
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -143,7 +143,7 @@
 #  define REG_D15           (SW_INT_REGS+30) /* D15 */
 #  define REG_S30           (SW_INT_REGS+30) /* S30 */
 #  define REG_S31           (SW_INT_REGS+31) /* S31 */
-#  DEFINE REG_FPSCR         (SW_INT_REGS+32) /* Floating point status and control */
+#  define REG_FPSCR         (SW_INT_REGS+32) /* Floating point status and control */
 #  define SW_FPU_REGS       (33)
 #else
 #  define SW_FPU_REGS       (0)

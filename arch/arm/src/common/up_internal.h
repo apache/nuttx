@@ -2,7 +2,7 @@
  * common/up_internal.h
  *
  *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -76,14 +76,23 @@
 # define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-/* Macros to handle saving and restore interrupt state.  In the current ARM
+/* Macros to handle saving and restoring interrupt state.  In the current ARM
  * model, the state is always copied to and from the stack and TCB.  In the
  * Cortex-M3 model, the state is copied from the stack to the TCB, but only
  * a referenced is passed to get the state from the TCB.
  */
 
 #if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
-#  define up_savestate(regs)    up_copystate(regs, (uint32_t*)current_regs)
+#  ifdef CONFIG_ARCH_FPU
+#    define up_savestate(regs) \
+       do { \
+         up_copystate(regs, (uint32_t*)current_regs); \
+         up_savefpu(regs); \
+       } \
+       while (0)
+#  else
+#    define up_savestate(regs)  up_copystate(regs, (uint32_t*)current_regs)
+#  endif
 #  define up_restorestate(regs) (current_regs = regs)
 #else
 #  define up_savestate(regs)    up_copystate(regs, (uint32_t*)current_regs)
@@ -239,6 +248,16 @@ extern void up_vectordata(void);
 extern void up_vectoraddrexcptn(void);
 extern void up_vectorirq(void);
 extern void up_vectorfiq(void);
+
+/* Floating point unit ******************************************************/
+
+#ifdef CONFIG_ARCH_FPU
+extern void up_savefpu(uint32_t *regs);
+extern void up_restorefpu(const uint32_t *regs);
+#else
+#  define up_savefpu(regs)
+#  define up_restorefpu(regs)
+#endif
 
 /* System timer *************************************************************/
 
