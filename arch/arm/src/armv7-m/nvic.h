@@ -204,6 +204,11 @@
 #define NVIC_ISAR4_OFFSET               0x0d70 /* ISA feature register 4 */
 #define NVIC_CPACR_OFFSET               0x0d88 /* Coprocessor Access Control Register */
 #define NVIC_STIR_OFFSET                0x0f00 /* Software trigger interrupt register */
+#define NVIC_FPCCR_OFFSET               0x0f34 /* Floating-point Context Control Register */
+#define NVIC_FPCAR_OFFSET               0x0f38 /* Floating-point Context Address Register */
+#define NVIC_FPDSCR_OFFSET              0x0f3c /* Floating-point Default Status Control Register */
+#define NVIC_MVFR0_OFFSET               0x0f40 /* Media and VFP Feature Register 0 */
+#define NVIC_MVFR1_OFFSET               0x0f44 /* Media and VFP Feature Register 1 */
 #define NVIC_PID4_OFFSET                0x0fd0 /* Peripheral identification register (PID4) */
 #define NVIC_PID5_OFFSET                0x0fd4 /* Peripheral identification register (PID5) */
 #define NVIC_PID6_OFFSET                0x0fd8 /* Peripheral identification register (PID6) */
