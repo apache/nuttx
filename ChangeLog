@@ -2247,3 +2247,8 @@
 
 	* arch/arm/src/stm32/stm32f40xxx_dma.c:  Add DMA support for the STM32 F4
 	  family (untested on initial check-in)
+	* arch/arm/src/armv7-m/up_fpu.c:  Add logic for saving an restoring VFP
+	  floating point registers on context switches (but also disable the FPU
+	  because CodeSourcery doesn't support hard flowing point!)
+	* arch/arm/src/stm32/chip/stm32_eth.h:  Add Ethernet register definitions
+	  for the STM32 F4.
