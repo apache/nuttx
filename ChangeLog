@@ -2201,7 +2201,7 @@
 	* Numerous changes and fixes to the PIC32 interrupt handing logic. The
 	  PIC32 port is almost complete but still not ready for prime time.
 
-6.12 2011-xx-xx Gregory Nutt <gnutt@nuttx.org>
+6.12 2011-12-06 Gregory Nutt <gnutt@nuttx.org>
 
 	* fs/fat/fs_fat32util.c and fs_fat32.h: Logic extended to look in up to
 	  four partitions for a valid FAT file system.
@@ -2242,3 +2242,6 @@
 	  (11/12/06) for the STM3240G-EVAL board and passes the OS test.
 	* configs/stm3240g-eval/nsh:  Adds a NuttShell (NSH) configure for the
 	  STM3240G-EVAL board.
+
+6.13 2012-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
