@@ -48,6 +48,10 @@ ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS	+= up_checkstack.c
 endif
 
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_ASRCS	+= up_fpu.S
+endif
+
 CHIP_ASRCS	= 
 CHIP_CSRCS	= stm32_allocateheap.c stm32_start.c stm32_rcc.c stm32_lse.c \
 		  stm32_gpio.c  stm32_exti.c stm32_flash.c stm32_irq.c \

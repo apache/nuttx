@@ -3,7 +3,7 @@
  * arch/arm/src/chip/stm32_vectors.S
  *
  *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -254,7 +254,7 @@ stm32_common:
 	 * values to the stack.
 	 */
 
-	add	r1, r0, #SW_XCPT_SIZE		/* R1=Address of HW save area in reg array */
+	add		r1, r0, #SW_XCPT_SIZE	/* R1=Address of HW save area in reg array */
 	ldmia	r1, {r4-r11}			/* Fetch eight registers in HW save area */
 	ldr	r1, [r0, #(4*REG_SP)]		/* R1=Value of SP before interrupt */
 	stmdb	r1!, {r4-r11}			/* Store eight registers in HW save area */
@@ -262,6 +262,17 @@ stm32_common:
 	ldmia	r0, {r2-r11,r14}		/* Recover R4-R11, r14 + 2 temp values */
 #else
 	ldmia	r0, {r2-r11}			/* Recover R4-R11 + 2 temp values */
+#endif
+
+	/* We may also need to restore FPU registers.  This is not done in
+	 * normal interrupt save/restore because the cost is prohibitive.  This
+	 * is only done when switching contexts.  A consequence of this is that
+	 * floating point operations may not be performed in interrupt handling
+	 * logic.
+	 */
+
+#ifdef CONFIG_ARCH_FPU
+	bl		up_restorefpu			/* Restore the FPU registers */
 #endif
 	b		2f						/* Re-join common logic */
 
