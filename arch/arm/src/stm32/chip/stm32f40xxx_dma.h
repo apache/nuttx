@@ -270,52 +270,32 @@
 
 /* Register Bitfield Definitions ****************************************************/
 
-#define DMA_STREAM_MASK             0x3f
-#define DMA_STREAM_FEIF_BIT         (1 << 0)  /* Bit 0: Stream FIFO error interrupt flag */
-#define DMA_STREAM_DMEIF_BIT        (1 << 2)  /* Bit 2: Stream direct mode error interrupt flag */
-#define DMA_STREAM_TEIF_BIT         (1 << 3)  /* Bit 3: Stream Transfer Error flag */
-#define DMA_STREAM_HTIF_BIT         (1 << 4)  /* Bit 4: Stream Half Transfer flag */
-#define DMA_STREAM_TCIF_BIT         (1 << 5)  /* Bit 5: Stream Transfer Complete flag */
+#define DMA_STREAM_MASK           0x3f
+#define DMA_STREAM_FEIF_BIT       (1 << 0)  /* Bit 0: Stream FIFO error interrupt flag */
+#define DMA_STREAM_DMEIF_BIT      (1 << 2)  /* Bit 2: Stream direct mode error interrupt flag */
+#define DMA_STREAM_TEIF_BIT       (1 << 3)  /* Bit 3: Stream Transfer Error flag */
+#define DMA_STREAM_HTIF_BIT       (1 << 4)  /* Bit 4: Stream Half Transfer flag */
+#define DMA_STREAM_TCIF_BIT       (1 << 5)  /* Bit 5: Stream Transfer Complete flag */
 
-/* DMA interrupt status register */
+/* DMA interrupt status register and interrupt flag clear register field defintions */
 
-#define DMA_LISR_STREAM0_SHIFT      (0)       /* Bits 0-5:   DMA Stream 0 interrupt status */
-#define DMA_LISR_STREAM0_MASK       (DMA_STREAM_MASK <<  DMA_LISR_STREAM0_SHIFT)
-#define DMA_LISR_STREAM1_SHIFT      (6)       /* Bits 6-11:  DMA Stream 1 interrupt status */
-#define DMA_LISR_STREAM1_MASK       (DMA_STREAM_MASK <<  DMA_LISR_STREAM1_SHIFT)
-#define DMA_LISR_STREAM2_SHIFT      (16)      /* Bits 16-21: DMA Stream 2 interrupt status */
-#define DMA_LISR_STREAM2_MASK       (DMA_STREAM_MASK <<  DMA_LISR_STREAM2_SHIFT)
-#define DMA_LISR_STREAM3_SHIFT      (22)      /* Bits 22-27: DMA Stream 3 interrupt status */
-#define DMA_LISR_STREAM3_MASK       (DMA_STREAM_MASK <<  DMA_LISR_STREAM3_SHIFT)
+#define DMA_INT_STREAM0_SHIFT     (0)       /* Bits 0-5:   DMA Stream 0 interrupt */
+#define DMA_INT_STREAM0_MASK      (DMA_STREAM_MASK <<  DMA_INT_STREAM0_SHIFT)
+#define DMA_INT_STREAM1_SHIFT     (6)       /* Bits 6-11:  DMA Stream 1 interrupt */
+#define DMA_INT_STREAM1_MASK      (DMA_STREAM_MASK <<  DMA_INT_STREAM1_SHIFT)
+#define DMA_INT_STREAM2_SHIFT     (16)      /* Bits 16-21: DMA Stream 2 interrupt */
+#define DMA_INT_STREAM2_MASK      (DMA_STREAM_MASK <<  DMA_INT_STREAM2_SHIFT)
+#define DMA_INT_STREAM3_SHIFT     (22)      /* Bits 22-27: DMA Stream 3 interrupt */
+#define DMA_INT_STREAM3_MASK      (DMA_STREAM_MASK <<  DMA_INT_STREAM3_SHIFT)
 
-#define DMA_HISR_STREAM4_SHIFT      (0)       /* Bits 0-5:   DMA Stream 4 interrupt status */
-#define DMA_HISR_STREAM4_MASK       (DMA_STREAM_MASK <<  DMA_HISR_STREAM4_SHIFT)
-#define DMA_HISR_STREAM5_SHIFT      (6)       /* Bits 6-11:  DMA Stream 5 interrupt status */
-#define DMA_HISR_STREAM5_MASK       (DMA_STREAM_MASK <<  DMA_HISR_STREAM5_SHIFT)
-#define DMA_HISR_STREAM6_SHIFT      (16)      /* Bits 16-21: DMA Stream 6 interrupt status */
-#define DMA_HISR_STREAM6_MASK       (DMA_STREAM_MASK <<  DMA_HISR_STREAM6_SHIFT)
-#define DMA_HISR_STREAM7_SHIFT      (22)      /* Bits 22-27: DMA Stream 7 interrupt status */
-#define DMA_HISR_STREAM7_MASK       (DMA_STREAM_MASK <<  DMA_HISR_STREAM7_SHIFT)
-
-/* DMA interrupt flag clear register */
-
-#define DMA_LICR_STREAM0_SHIFT      (0)       /* Bits 0-5:   DMA Stream 0 interrupt flag clear */
-#define DMA_LICR_STREAM0_MASK       (DMA_STREAM_MASK <<  DMA_LICR_STREAM0_SHIFT)
-#define DMA_LICR_STREAM1_SHIFT      (6)       /* Bits 6-11:  DMA Stream 1 interrupt flag clear */
-#define DMA_LICR_STREAM1_MASK       (DMA_STREAM_MASK <<  DMA_LICR_STREAM1_SHIFT)
-#define DMA_LICR_STREAM2_SHIFT      (16)      /* Bits 16-21: DMA Stream 2 interrupt flag clear */
-#define DMA_LICR_STREAM2_MASK       (DMA_STREAM_MASK <<  DMA_LICR_STREAM2_SHIFT)
-#define DMA_LICR_STREAM3_SHIFT      (22)      /* Bits 22-27: DMA Stream 3 interrupt flag clear */
-#define DMA_LICR_STREAM3_MASK       (DMA_STREAM_MASK <<  DMA_LICR_STREAM3_SHIFT)
-
-#define DMA_HICR_STREAM4_SHIFT      (0)       /* Bits 0-5:   DMA Stream 4 interrupt flag clear */
-#define DMA_HICR_STREAM4_MASK       (DMA_STREAM_MASK <<  DMA_HICR_STREAM4_SHIFT)
-#define DMA_HICR_STREAM5_SHIFT      (6)       /* Bits 6-11:  DMA Stream 5 interrupt flag clear */
-#define DMA_HICR_STREAM5_MASK       (DMA_STREAM_MASK <<  DMA_HICR_STREAM5_SHIFT)
-#define DMA_HICR_STREAM6_SHIFT      (16)      /* Bits 16-21: DMA Stream 6 interrupt flag clear */
-#define DMA_HICR_STREAM6_MASK       (DMA_STREAM_MASK <<  DMA_HICR_STREAM6_SHIFT)
-#define DMA_HICR_STREAM7_SHIFT      (22)      /* Bits 22-27: DMA Stream 7 interrupt flag clear */
-#define DMA_HICR_STREAM7_MASK       (DMA_STREAM_MASK <<  DMA_HICR_STREAM7_SHIFT)
+#define DMA_INT_STREAM4_SHIFT     (0)       /* Bits 0-5:   DMA Stream 4 interrupt */
+#define DMA_INT_STREAM4_MASK      (DMA_STREAM_MASK <<  DMA_INT_STREAM4_SHIFT)
+#define DMA_INT_STREAM5_SHIFT     (6)       /* Bits 6-11:  DMA Stream 5 interrupt */
+#define DMA_INT_STREAM5_MASK      (DMA_STREAM_MASK <<  DMA_INT_STREAM5_SHIFT)
+#define DMA_INT_STREAM6_SHIFT     (16)      /* Bits 16-21: DMA Stream 6 interrupt */
+#define DMA_INT_STREAM6_MASK      (DMA_STREAM_MASK <<  DMA_INT_STREAM6_SHIFT)
+#define DMA_INT_STREAM7_SHIFT     (22)      /* Bits 22-27: DMA Stream 7 interrupt */
+#define DMA_INT_STREAM7_MASK      (DMA_STREAM_MASK <<  DMA_INT_STREAM7_SHIFT)
 
 /* DMA stream configuration register */
 
