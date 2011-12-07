@@ -2245,3 +2245,5 @@
 
 6.13 2012-xx-xx Gregory Nutt <gnutt@nuttx.org>
 
+	* arch/arm/src/stm32/stm32f40xxx_dma.c:  Add DMA support for the STM32 F4
+	  family (untested on initial check-in)

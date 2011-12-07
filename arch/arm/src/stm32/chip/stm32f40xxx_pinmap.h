@@ -62,11 +62,11 @@
  * The driver will then automatically configre PA11 as the CAN1 RX pin.
  */
 
-/* Additional effort is required to select specific GPIO options such as frequency,
- * open-drain/push-pull, and pull-up/down!
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! 
+ * Additional effort is required to select specific GPIO options such as frequency,
+ * open-drain/push-pull, and pull-up/down!  Just the basics are defined for most
+ * pins in this file.
  */
-
-#warning "Missing logic"
 
 /* CAN */
 

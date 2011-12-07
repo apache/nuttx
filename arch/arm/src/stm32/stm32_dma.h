@@ -61,6 +61,7 @@ typedef FAR void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t isr, void *arg);
 
 #ifdef CONFIG_DEBUG_DMA
+#if defined(CONFIG_STM32_STM32F10XX)
 struct stm32_dmaregs_s
 {
   uint32_t isr;
@@ -69,6 +70,21 @@ struct stm32_dmaregs_s
   uint32_t cpar;
   uint32_t cmar;
 };
+#elif defined(CONFIG_STM32_STM32F40XX)
+struct stm32_dmaregs_s
+{
+  uint32_t lisr;
+  uint32_t hisr;
+  uint32_t scr;
+  uint32_t sndtr;
+  uint32_t spar;
+  uint32_t sm0ar;
+  uint32_t sm1ar;
+  uint32_t sfcr;
+};
+#else
+#  error "Unknown STM32 DMA"
+#endif
 #endif
 
 /************************************************************************************
