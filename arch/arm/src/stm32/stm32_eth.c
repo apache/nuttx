@@ -55,10 +55,15 @@
 #include <net/uip/uip-arp.h>
 #include <net/uip/uip-arch.h>
 
+#include "up_internal.h"
+
 #include "chip.h"
+#include "stm32_gpio.h"
+#include "stm32_rcc.h"
+#include "stm32_syscfg.h"
 #include "stm32_eth.h"
 
-#include "up_internal.h"
+#include <arch/board/board.h>
 
 /* STM32_NETHERNET determines the number of physical interfaces
  * that will be supported.
@@ -69,8 +74,33 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
+#ifndef CONFIG_STM32_SYSCFG
+#  error "CONFIG_STM32_SYSCFG must be defined in the NuttX configuration"
+#endif
+
+#if !defined(CONFIG_STM32_MII) && !defined(CONFIG_STM32_RMII)
+#  warning "Neither CONFIG_STM32_MII nor CONFIG_STM32_RMII defined"
+#endif
+
+#if defined(CONFIG_STM32_MII) && defined(CONFIG_STM32_RMII)
+#  error "Both CONFIG_STM32_MII and CONFIG_STM32_RMII defined"
+#endif
+
+#ifdef CONFIG_STM32_MII
+#  if !defined(CONFIG_STM32_MII_MCO1) && !defined(CONFIG_STM32_MII_MCO2)
+#    warning "Neither CONFIG_STM32_MII_MCO1 nor CONFIG_STM32_MII_MCO2 defined"
+#  endif
+#  if defined(CONFIG_STM32_MII_MCO1) && defined(CONFIG_STM32_MII_MCO2)
+#    warning "Both CONFIG_STM32_MII_MCO1 and CONFIG_STM32_MII_MCO2 defined"
+#  endif
+#endif
+
+/* Timing *******************************************************************/
+/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
+ * second
+ */
 
 #define STM32_WDDELAY   (1*CLK_TCK)
 #define STM32_POLLHSEC  (1*2)
@@ -79,7 +109,10 @@
 
 #define STM32_TXTIMEOUT (60*CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* Helpers ******************************************************************/
+/* This is a helper pointer for accessing the contents of the Ethernet
+ * header
+ */
 
 #define BUF ((struct uip_eth_hdr *)priv->dev.d_buf)
 
@@ -137,6 +170,10 @@ static int stm32_txavail(struct uip_driver_s *dev);
 static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 #endif
+
+/* Initialization */
+
+static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -623,6 +660,127 @@ static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
+ * Function: stm32_ethgpioconfig
+ *
+ * Description:
+ *  Configure GPIOs for the Ethernet interface.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#if STM32_NETHERNET == 1
+static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
+{
+  /* Configure GPIO pins to support Ethernet */
+
+#if defined(CONFIG_STM32_MII) || defined(CONFIG_STM32_RMII)
+
+  /* MDC and MDIO are common to both modes */
+
+  stm32_configgpio(GPIO_ETH_MDC);
+  stm32_configgpio(GPIO_ETH_MDIO);
+
+  /* Set up the MII interface */
+
+#if defined(CONFIG_STM32_MII)
+
+  /* Select the MII interface */
+
+  stm32_selectmii();
+
+  /* Provide clocking via MCO1 or MCO2:
+   *
+   * "MCO1 (microcontroller clock output), used to output HSI, LSE, HSE or PLL
+   *  clock (through a configurable prescaler) on PA8 pin."
+   *
+   * "MCO2 (microcontroller clock output), used to output HSE, PLL, SYSCLK or
+   *  PLLI2S clock (through a configurable prescaler) on PC9 pin."
+   */
+
+#  warning "REVISIT:  This is very board-specific"
+#  if defined(CONFIG_STM32_MII_MCO1)
+  /* Configure MC01 to drive the PHY */
+
+  stm32_configgpio(GPIO_MCO1);
+
+  /* Output HSE clock (25MHz) on MCO pin (PA8) to clock the PHY */
+
+  stm32_mco1config(RCC_CFGR_MCO1_HSE, RCC_CFGR_MCO1PRE_NONE);
+
+#  elif defined(CONFIG_STM32_MII_MCO2)
+  /* Configure MC02 to drive the PHY */
+
+  stm32_configgpio(GPIO_MCO2);
+
+  /* Output HSE clock (25MHz) on MCO pin (PA8) to clock the PHY */
+
+  stm32_mco2config(RCC_CFGR_MCO2_HSE, RCC_CFGR_MCO2PRE_NONE);
+#  endif
+
+  /* MII interface pins (17):  
+   *
+   * MII_TX_CLK, MII_TXD[3:0], MII_TX_EN, MII_RX_CLK, MII_RXD[3:0], MII_RX_ER,
+   * MII_RX_DV, MII_CRS, MII_COL, MDC, MDIO
+   */
+
+  stm32_configgpio(GPIO_ETH_MII_COL);
+  stm32_configgpio(GPIO_ETH_MII_CRS);
+  stm32_configgpio(GPIO_ETH_MII_RXD0);
+  stm32_configgpio(GPIO_ETH_MII_RXD1);
+  stm32_configgpio(GPIO_ETH_MII_RXD2);
+  stm32_configgpio(GPIO_ETH_MII_RXD3);
+  stm32_configgpio(GPIO_ETH_MII_RX_CLK);
+  stm32_configgpio(GPIO_ETH_MII_RX_DV);
+  stm32_configgpio(GPIO_ETH_MII_RX_ER);
+  stm32_configgpio(GPIO_ETH_MII_TXD0);
+  stm32_configgpio(GPIO_ETH_MII_TXD1);
+  stm32_configgpio(GPIO_ETH_MII_TXD2);
+  stm32_configgpio(GPIO_ETH_MII_TXD3);
+  stm32_configgpio(GPIO_ETH_MII_TX_CLK);
+  stm32_configgpio(GPIO_ETH_MII_TX_EN);
+
+  /* Set up the RMII interface. */
+
+#elif defined(CONFIG_STM32_RMII)
+
+  /* Select the RMII interface */
+
+  stm32_selectrmii();
+
+  /* RMII interface pins (7):
+   *
+   * RMII_TXD[1:0], RMII_TX_EN, RMII_RXD[1:0], RMII_CRS_DV, MDC, MDIO,
+   * RMII_REF_CLK
+   */
+
+  stm32_configgpio(GPIO_ETH_RMII_CRS_DV);
+  stm32_configgpio(GPIO_ETH_RMII_REF_CLK);
+  stm32_configgpio(GPIO_ETH_RMII_RXD0);
+  stm32_configgpio(GPIO_ETH_RMII_RXD1);
+  stm32_configgpio(GPIO_ETH_RMII_TXD0);
+  stm32_configgpio(GPIO_ETH_RMII_TXD1);
+  stm32_configgpio(GPIO_ETH_RMII_TX_CLK);
+  stm32_configgpio(GPIO_ETH_RMII_TX_EN);
+
+#endif
+#endif
+
+  /* Enable pulse-per-second (PPS) output signal */
+
+  stm32_configgpio(GPIO_ETH_PPS_OUT);
+}
+#else
+#  warning "This would need to be re-designed to support multiple interfaces"
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -659,17 +817,6 @@ int stm32_ethinitialize(int intf)
   DEBUGASSERT(inf < STM32_NETHERNET);
   priv = &g_stm32ethmac[intf];
 
-  /* Check if a Ethernet chip is recognized at its I/O base */
-
-  /* Attach the IRQ to the driver */
-
-  if (irq_attach(STM32_IRQ_ETH, stm32_interrupt))
-    {
-      /* We could not attach the ISR to the interrupt */
-
-      return -EAGAIN;
-    }
-
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct stm32_ethmac_s));
@@ -686,6 +833,21 @@ int stm32_ethinitialize(int intf)
 
   priv->txpoll       = wd_create();   /* Create periodic poll timer */
   priv->txtimeout    = wd_create();   /* Create TX timeout timer */
+
+  /* Configure GPIO pins to support Ethernet */
+
+  stm32_ethgpioconfig(priv);
+
+  /* Check if a Ethernet chip is recognized at its I/O base */
+
+  /* Attach the IRQ to the driver */
+
+  if (irq_attach(STM32_IRQ_ETH, stm32_interrupt))
+    {
+      /* We could not attach the ISR to the interrupt */
+
+      return -EAGAIN;
+    }
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling stm32_ifdown().

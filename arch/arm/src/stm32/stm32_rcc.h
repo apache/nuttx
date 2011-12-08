@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include "up_arch.h"
 #include "chip.h"
 
 #if defined(CONFIG_STM32_STM32F10XX)
@@ -75,21 +76,109 @@ extern "C" {
  * and we will need to set the NVIC vector location to this alternative location.
  */
 
-extern uint32_t stm32_vectors[];	/* See stm32_vectors.S */
+extern uint32_t stm32_vectors[];  /* See stm32_vectors.S */
+
+/************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: stm32_mco1config
+ *
+ * Description:
+ *   Selects the clock source to output on MCO1 pin (PA8). PA8 should be configured in
+ *   alternate function mode.
+ *
+ * Input Parameters:
+ *   source - One of the definitions for the RCC_CFGR_MCO1 definitions from
+ *     chip/stm32f40xxx_rcc.h {RCC_CFGR_MCO1_HSI, RCC_CFGR_MCO1_LSE,
+ *     RCC_CFGR_MCO1_HSE, RCC_CFGR_MCO1_PLL}
+ *   div - One of the definitions for the RCC_CFGR_MCO1PRE definitions from
+ *     chip/stm32f40xxx_rcc.h {RCC_CFGR_MCO1PRE_NONE, RCC_CFGR_MCO1PRE_DIV2,
+ *     RCC_CFGR_MCO1PRE_DIV3, RCC_CFGR_MCO1PRE_DIV4, RCC_CFGR_MCO1PRE_DIV5}
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32_STM32F40XX)
+static inline void stm32_mco1config(uint32_t source, uint32_t div)
+{
+  uint32_t regval;
+
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~(RCC_CFGR_MCO1_MASK|RCC_CFGR_MCO1PRE_MASK);
+  regval |= (source | div);
+  putreg32(regval, STM32_RCC_CFGR);
+}
+#endif
+
+/************************************************************************************
+ * Name: stm32_mco2config
+ *
+ * Description:
+ *   Selects the clock source to output on MCO2 pin (PC9). PC9 should be configured in
+ *   alternate function mode.
+ *
+ * Input Parameters:
+ *   source - One of the definitions for the RCC_CFGR_MCO2 definitions from
+ *     chip/stm32f40xxx_rcc.h {RCC_CFGR_MCO2_SYSCLK, RCC_CFGR_MCO2_PLLI2S,
+ *     RCC_CFGR_MCO2_HSE, RCC_CFGR_MCO2_PLL}
+ *   div - One of the definitions for the RCC_CFGR_MCO2PRE definitions from
+ *     chip/stm32f40xxx_rcc.h {RCC_CFGR_MCO2PRE_NONE, RCC_CFGR_MCO2PRE_DIV2,
+ *     RCC_CFGR_MCO2PRE_DIV3, RCC_CFGR_MCO2PRE_DIV4, RCC_CFGR_MCO2PRE_DIV5}
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32_STM32F40XX)
+static inline void stm32_mco2config(uint32_t source, uint32_t div)
+{
+  uint32_t regval;
+
+  regval = getreg32(STM32_RCC_CFGR);
+  regval &= ~(RCC_CFGR_MCO2_MASK|RCC_CFGR_MCO2PRE_MASK);
+  regval |= (source | div);
+  putreg32(regval, STM32_RCC_CFGR);
+}
+#endif
 
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
 
-/* Called to change to new clock based on settings in board.h
- * 
- * NOTE:  This logic needs to be extended so that we can selected low-power
- * clocking modes as well!
- */
+/************************************************************************************
+ * Name: stm32_clockconfig
+ *
+ * Description:
+ *   Called to change to new clock based on settings in board.h
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 EXTERN void stm32_clockconfig(void);
 
-/* Enable LSE Clock */
+/************************************************************************************
+ * Name: stm32_rcc_enablelse
+ *
+ * Description:
+ *   Enable LSE Clock
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 EXTERN void stm32_rcc_enablelse(void);
 
