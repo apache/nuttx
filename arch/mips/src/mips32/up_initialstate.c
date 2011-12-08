@@ -123,10 +123,12 @@ void up_initial_state(_TCB *tcb)
   /* Set the initial value of the status register.  It will be the same
    * as the current status register with some changes:
    *
-   * 1. Make sure the IE is set (it should be)
-   * 2. Clear the BEV bit (it should be)
-   * 3. Set the interrupt mask bits (depending on configuration)
-   * 4. Set the EXL bit
+   * 1. Make sure the IE is set
+   * 2. Clear the BEV bit (This bit should already be clear)
+   * 3. Clear the UM bit so that the new task executes in kernel mode
+   *   (This bit should already be clear)
+   * 4. Set the interrupt mask bits (depending on configuration)
+   * 5. Set the EXL bit (This will not be set)
    *
    * The EXL bit is set because this new STATUS register will be
    * instantiated in kernel mode inside of an interrupt handler. EXL
@@ -135,10 +137,10 @@ void up_initial_state(_TCB *tcb)
 
   regval  = cp0_getstatus();
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  regval &= ~(CP0_STATUS_IM_ALL | CP0_STATUS_BEV);
+  regval &= ~(CP0_STATUS_IM_ALL | CP0_STATUS_BEV | CP0_STATUS_UM);
   regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_SWINTS);
 #else
-  regval &= ~(CP0_STATUS_BEV);
+  regval &= ~(CP0_STATUS_BEV | CP0_STATUS_UM);
   regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_ALL);
 #endif
   xcp->regs[REG_STATUS] = regval;

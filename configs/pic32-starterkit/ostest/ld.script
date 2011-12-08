@@ -62,14 +62,14 @@ MEMORY
 	 *
 	 * Exceptions assume:
 	 *
-	 *   STATUS: BEV=1 and EXL=0
+	 *   STATUS: BEV=0/1 and EXL=0
 	 *   CAUSE:  IV=1
 	 *   JTAG:   ProbEn=0
 	 *   And multi-vector support disabled
 	 */
 
-	kseg1_reset    (rx) : ORIGIN = 0xbfc00000, LENGTH = 896
-	kseg1_bevexcpt (rx) : ORIGIN = 0xbfc00380, LENGTH = 128
+	kseg1_reset    (rx) : ORIGIN = 0xbfc00000, LENGTH = 384
+	kseg1_genexcpt (rx) : ORIGIN = 0xbfc00180, LENGTH = 128
 	kseg1_intexcpt (rx) : ORIGIN = 0xbfc00400, LENGTH = 128
 	kseg1_dbgexcpt (rx) : ORIGIN = 0xbfc00480, LENGTH = 16
 	kseg0_bootmem  (rx) : ORIGIN = 0x9fc00490, LENGTH = 8192-1168
@@ -118,6 +118,11 @@ SECTIONS
 	 */
 
 	 /* KSEG1 exception handler "trampolines" */
+
+	.gen_excpt :
+	{
+		KEEP (*(.gen_excpt))
+	} > kseg1_genexcpt
 
 	.bev_excpt :
 	{
