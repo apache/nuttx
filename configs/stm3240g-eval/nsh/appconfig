@@ -43,3 +43,11 @@ CONFIGURED_APPS += nshlib
 
 # Applications configured as an NX built-in commands
 
+ifeq ($(CONFIG_NET),y)
+CONFIGURED_APPS += netutils/uiplib
+CONFIGURED_APPS += netutils/resolv
+CONFIGURED_APPS += netutils/webclient
+CONFIGURED_APPS += netutils/tftpc
+endif
+
+

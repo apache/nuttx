@@ -185,7 +185,7 @@ static inline void rcc_enableahb1(void)
   /* Ethernet MAC clocking */
 
   regval |= (RCC_AHB1ENR_ETHMACEN|RCC_AHB1ENR_ETHMACTXEN|
-             RCC_AHB1ENR_ETHMACRXEN|RCC_AHB1ENR_ETHMACPTPEN)
+             RCC_AHB1ENR_ETHMACRXEN|RCC_AHB1ENR_ETHMACPTPEN);
 #endif
 
 #ifdef CONFIG_STM32_OTGHS

@@ -44,7 +44,7 @@
 
 #include "chip.h"
 
-#if STM32_NETHERNET > 1
+#if STM32_NETHERNET > 0
 
 #include "chip/stm32_eth.h"
 
@@ -67,12 +67,13 @@ extern "C" {
  *
  * Description:
  *   Initialize the Ethernet driver for one interface.  If the STM32 chip
- *   supports multiple Ethernet controllers, then bould specific logic
+ *   supports multiple Ethernet controllers, then board specific logic
  *   must implement up_netinitialize() and call this function to initialize
- *   the desiresed interfaces.
+ *   the desired interfaces.
  *
  * Parameters:
- *   None
+ *   intf - In the case where there are multiple EMACs, this value
+ *          identifies which EMAC is to be initialized.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -81,7 +82,9 @@ extern "C" {
  *
  ************************************************************************************/
 
+#if STM32_NETHERNET > 1
 EXTERN int stm32_ethinitialize(int intf);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -89,6 +92,6 @@ EXTERN int stm32_ethinitialize(int intf);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* STM32_NETHERNET > 1 */
+#endif /* STM32_NETHERNET > 0 */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_ETH_H */
 
