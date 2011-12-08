@@ -179,11 +179,11 @@
 #define RCC_CFGR_RTCPRE_MASK        (31 << RCC_CFGR_RTCPRE)
 #  define RCC_CFGR_RTCPRE(n)        ((n) << RCC_CFGR_RTCPRE) /* HSE/n, n=1..31 */
 #define RCC_CFGR_MCO1_SHIFT         (21)      /* Bits 21-22: Microcontroller Clock Output */
-#define RCC_CFGR_MCO1_MASK          (3 << RCC_CFGR_MCO_SHIFT)
-#  define RCC_CFGR_MCO1_HSI         (0 << RCC_CFGR_MCO_SHIFT) /* 00: HSI clock selected */
-#  define RCC_CFGR_MCO1_LSE         (1 << RCC_CFGR_MCO_SHIFT) /* 01: LSE oscillator selected */
-#  define RCC_CFGR_MCO1_HSE         (2 << RCC_CFGR_MCO_SHIFT) /* 10: HSE oscillator clock selected */
-#  define RCC_CFGR_MCO1_PLL         (3 << RCC_CFGR_MCO_SHIFT) /* 11: PLL clock selected */
+#define RCC_CFGR_MCO1_MASK          (3 << RCC_CFGR_MCO1_SHIFT)
+#  define RCC_CFGR_MCO1_HSI         (0 << RCC_CFGR_MCO1_SHIFT) /* 00: HSI clock selected */
+#  define RCC_CFGR_MCO1_LSE         (1 << RCC_CFGR_MCO1_SHIFT) /* 01: LSE oscillator selected */
+#  define RCC_CFGR_MCO1_HSE         (2 << RCC_CFGR_MCO1_SHIFT) /* 10: HSE oscillator clock selected */
+#  define RCC_CFGR_MCO1_PLL         (3 << RCC_CFGR_MCO1_SHIFT) /* 11: PLL clock selected */
 #define TCC_CFGR_I2SSRC             (1 << 23) /* Bit 23: I2S clock selection */
 #define RCC_CFGR_MCO1PRE_SHIFT      (24)      /* Bits 24-26: MCO1 prescaler */
 #define RCC_CFGR_MCO1PRE_MASK       (7 << RCC_CFGR_MCO1PRE_SHIFT)
