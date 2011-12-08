@@ -61,7 +61,7 @@ endif
 # Required PIC32MX files
 
 CHIP_ASRCS =
-CHIP_CSRCS = pic32mx-irq.c pic32mx-decodeirq.c pic32mx-dobev.c pic32mx-gpio.c \
+CHIP_CSRCS = pic32mx-irq.c pic32mx-decodeirq.c pic32mx-exception.c pic32mx-gpio.c \
 			 pic32mx-lowconsole.c pic32mx-lowinit.c pic32mx-serial.c pic32mx-timerisr.c
 
 # Configuration-dependent PIC32MX files

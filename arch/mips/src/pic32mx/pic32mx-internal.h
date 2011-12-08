@@ -232,14 +232,14 @@ EXTERN void pic32mx_boardinitialize(void);
 EXTERN uint32_t *pic32mx_decodeirq(uint32_t *regs);
 
 /************************************************************************************
- * Name: pic32mx_dobev
+ * Name: pic32mx_exception
  *
  * Description:
  *   Called from assembly language logic on all other exceptions.
  *
  ************************************************************************************/
 
-EXTERN uint32_t *pic32mx_dobev(uint32_t *regs);
+EXTERN uint32_t *pic32mx_exception(uint32_t *regs);
 
 /************************************************************************************
  * Name: pic32mx_configgpio

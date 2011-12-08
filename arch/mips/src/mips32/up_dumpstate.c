@@ -120,24 +120,24 @@ static inline void up_registerdump(void)
       lldbg("MFLO:%08x MFHI:%08x EPC:%08x STATUS:%08x\n",
             current_regs[REG_MFLO], current_regs[REG_MFHI], current_regs[REG_EPC],
             current_regs[REG_STATUS]);
-      lldbg("AT:%08x V0:$08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
+      lldbg("AT:%08x V0:%08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
             current_regs[REG_AT], current_regs[REG_V0], current_regs[REG_V1],
             current_regs[REG_A0], current_regs[REG_A1], current_regs[REG_A2],
             current_regs[REG_A3]);
-      lldbg("T0:%08x T1:$08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x T7:%08x\n",
+      lldbg("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x T7:%08x\n",
             current_regs[REG_T0], current_regs[REG_T1], current_regs[REG_T2],
             current_regs[REG_T3], current_regs[REG_T4], current_regs[REG_T5],
             current_regs[REG_T6], current_regs[REG_T7]);
-      lldbg("S0:%08x S1:$08x S2:%08x S3:%08x S4:%08x S5:%08x S6:%08x S7:%08x\n",
+      lldbg("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x S6:%08x S7:%08x\n",
             current_regs[REG_S0], current_regs[REG_S1], current_regs[REG_S2],
             current_regs[REG_S3], current_regs[REG_S4], current_regs[REG_S5],
             current_regs[REG_S6], current_regs[REG_S7]);
 #ifdef MIPS32_SAVE_GP
-      lldbg("T8:%08x T9:$08x GP:%08x SP:%08x FP:%08x RA:%08x\n",
+      lldbg("T8:%08x T9:%08x GP:%08x SP:%08x FP:%08x RA:%08x\n",
             current_regs[REG_T8], current_regs[REG_T9], current_regs[REG_GP],
             current_regs[REG_SP], current_regs[REG_FP], current_regs[REG_RA]);
 #else
-      lldbg("T8:%08x T9:$08x SP:%08x FP:%08x RA:%08x\n",
+      lldbg("T8:%08x T9:%08x SP:%08x FP:%08x RA:%08x\n",
             current_regs[REG_T8], current_regs[REG_T9], current_regs[REG_SP],
             current_regs[REG_FP], current_regs[REG_RA]);
 #endif

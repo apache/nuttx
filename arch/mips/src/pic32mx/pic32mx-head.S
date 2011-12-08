@@ -125,7 +125,7 @@
 	/* Imported symbols */
 
 	.global os_start
-	.global	pic32mx_dobev
+	.global	pic32mx_exception
 	.global pic32mx_decodeirq
 #ifdef CONFIG_PIC32MX_NMIHANDLER
 	.global	pic32mx_donmi
@@ -156,11 +156,35 @@ __reset:
 	nop
 	.end	__reset
 
+ 
+/****************************************************************************
+ * Name: _gen_exception
+ *
+ * Description:
+ *   General Exception Vector Handler.  Jumps to _exception_handler
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Does not return
+ *
+ ****************************************************************************/
+
+	.section .gen_excpt,"ax",@progbits
+	.set	noreorder
+	.ent	_gen_exception
+_gen_exception:
+	la		k0, _exception_handler
+	jr		k0
+	nop
+	.end _gen_exception
+
 /****************************************************************************
  * Name: _bev_exception
  *
  * Description:
- *   Boot Exception Vector Handler.  Jumps to _bev_handler
+ *   Boot Exception Vector Handler.  Jumps to _exception_handler
  *
  * Input Parameters:
  *   None
@@ -174,7 +198,7 @@ __reset:
 	.set	noreorder
 	.ent	_bev_exception
 _bev_exception:
-	la		k0, _bev_handler
+	la		k0, _exception_handler
 	jr		k0
 	nop
 	.end _bev_exception
@@ -419,29 +443,29 @@ __start:
 	.end __start
 
 /****************************************************************************
- * Name: _bev_handler
+ * Name: _exception_handler
  *
  * Description:
- *   BEV exception handler.  Calls pic32mx_dobev()
+ *   BEV/General exception handler.  Calls pic32mx_exception()
  *
  ****************************************************************************/
 
 	.section .bev_handler, "ax", @progbits
 	.set	noreorder
-	.ent	_bev_handler
-_bev_handler:
+	.ent	_exception_handler
+_exception_handler:
 	EXCPT_PROLOGUE t0				/* Save registers on stack, enable nested interrupts */
 	move	a0, sp					/* Pass register save structure as the parameter 1 */
 	USE_INTSTACK t0, t1, t2			/* Switch to the interrupt stack */
-	la		t0, pic32mx_dobev		/* Call up_dobev(regs) */
+	la		t0, pic32mx_exception		/* Call pic32mx_exception(regs) */
 	jalr	ra, t0
 	nop
 #ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
 	di								/* Prohibit nested interrupts from here */
 #endif
 	RESTORE_STACK t0, t1			/* Undo the operations of USE_STACK */
-	EXCPT_EPILOGUE v0				/* Return to the context returned by up_dobev() */
-	.end	_bev_handler
+	EXCPT_EPILOGUE v0				/* Return to the context returned by pic32mx_exception() */
+	.end	_exception_handler
 
 /****************************************************************************
  * Name: _int_handler
