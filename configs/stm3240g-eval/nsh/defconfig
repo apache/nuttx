@@ -182,7 +182,7 @@ CONFIG_STM32_TIM11=n
 #CONFIG_STM32_FORCEPOWER=y
 
 #
-# STM3240xxx specific serial device driver settings
+# STM32F40xxx specific serial device driver settings
 #
 # CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn for the
 #   console and ttys0 (default is the USART1).
@@ -238,7 +238,7 @@ CONFIG_USART4_2STOP=0
 CONFIG_USART5_2STOP=0
 
 #
-# STM32F103Z specific SSI device driver settings
+# STM32F40xxx specific SSI device driver settings
 #
 # CONFIG_SSIn_DISABLE - select to disable all support for
 #   the SSI
@@ -254,6 +254,19 @@ CONFIG_SSI0_DISABLE=n
 CONFIG_SSI1_DISABLE=y
 CONFIG_SSI_POLLWAIT=y
 #CONFIG_SSI_TXLIMIT=4
+
+#
+# STM32F40xxx Ethernet device driver settings
+#
+# CONFIG_STM32_MII - Support Ethernet MII interface
+# CONFIG_STM32_MII_MCO1 - Use MCO1 to clock the MII interface
+# CONFIG_STM32_MII_MCO2 - Use MCO2 to clock the MII interface
+# CONFIG_STM32_RMII - Support Ethernet RMII interface
+#
+CONFIG_STM32_MII=y
+CONFIG_STM32_MII_MCO1=y
+CONFIG_STM32_MII_MCO2=n
+CONFIG_STM32_RMII=n
 
 #
 # General build options

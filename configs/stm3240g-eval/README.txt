@@ -374,6 +374,11 @@ STM3240G-EVAL-specific Configuration Options
 	CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
 	  4-bit transfer mode.
 
+	CONFIG_STM32_MII - Support Ethernet MII interface
+	CONFIG_STM32_MII_MCO1 - Use MCO1 to clock the MII interface
+	CONFIG_STM32_MII_MCO2 - Use MCO2 to clock the MII interface
+	CONFIG_STM32_RMII - Support Ethernet RMII interface
+
   STM3240G-EVAL LCD Hardware Configuration
 
 Configurations

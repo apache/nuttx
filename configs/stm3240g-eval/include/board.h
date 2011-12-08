@@ -207,6 +207,42 @@
 #define GPIO_USART3_RX GPIO_USART3_RX_2
 #define GPIO_USART3_TX GPIO_USART3_TX_2
 
+/* Ethernet:
+ *
+ * - PA2  is ETH_MDIO
+ * - PC1  is ETH_MDC
+ * - PB5  is ETH_PPS_OUT
+ * - PH2  is ETH_MII_CRS
+ * - PH3  is ETH_MII_COL
+ * - PI10 is ETH_MII_RX_ER
+ * - PH6  is ETH_MII_RXD2
+ * - PH7  is ETH_MII_RXD3
+ * - PC3  is ETH_MII_TX_CLK
+ * - PC2  is ETH_MII_TXD2
+ * - PB8  is ETH_MII_TXD3
+ * - PA1  is ETH_MII_RX_CLK/ETH_RMII_REF_CLK
+ * - PA7  is ETH_MII_RX_DV/ETH_RMII_CRS_DV
+ * - PC4  is ETH_MII_RXD0/ETH_RMII_RXD0
+ * - PC5  is ETH_MII_RXD1/ETH_RMII_RXD1
+ * - PG11 is ETH_MII_TX_EN/ETH_RMII_TX_EN
+ * - PG13 is ETH_MII_TXD0/ETH_RMII_TXD0
+ * - PG14 is ETH_MII_TXD1/ETH_RMII_TXD1
+ */
+
+#define GPIO_ETH_PPS_OUT    GPIO_ETH_PPS_OUT_1
+#define GPIO_ETH_MII_CRS    GPIO_ETH_MII_CRS_2
+#define GPIO_ETH_MII_COL    GPIO_ETH_MII_COL_2
+#define GPIO_ETH_MII_RX_ER  GPIO_ETH_MII_RX_ER_2
+#define GPIO_ETH_MII_RXD2   GPIO_ETH_MII_RXD2_2
+#define GPIO_ETH_MII_RXD3   GPIO_ETH_MII_RXD3_2
+#define GPIO_ETH_MII_TXD3   GPIO_ETH_MII_TXD3_1
+#define GPIO_ETH_MII_TX_EN  GPIO_ETH_MII_TX_EN_2
+#define GPIO_ETH_MII_TXD0   GPIO_ETH_MII_TXD0_2
+#define GPIO_ETH_MII_TXD1   GPIO_ETH_MII_TXD1_2
+#define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_2
+#define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_2
+#define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_2
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
