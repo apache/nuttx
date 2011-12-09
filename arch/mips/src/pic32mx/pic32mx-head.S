@@ -161,7 +161,9 @@ __reset:
  * Name: _gen_exception
  *
  * Description:
- *   General Exception Vector Handler.  Jumps to _exception_handler
+ *   General Exception Vector Handler.  Jumps to _exception_handler.  NOTE:
+ *   we set the BEV bit in the status register so all interrupt vectors
+ *   should go through the _bev_exception.
  *
  * Input Parameters:
  *   None

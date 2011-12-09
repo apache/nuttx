@@ -50,6 +50,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/mii.h>
 
 #include <net/uip/uip.h>
 #include <net/uip/uip-arp.h>
@@ -75,9 +76,20 @@
  * Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+/* See configs/stm3240g-eval/README.txt for an explanation of the configuration
+ * settings.
+ */
+
+#if STM32_NETHERNET > 1
+#  error "Logic to support multiple Ethernet interfaces is incomplete"
+#endif
 
 #ifndef CONFIG_STM32_SYSCFG
 #  error "CONFIG_STM32_SYSCFG must be defined in the NuttX configuration"
+#endif
+
+#ifndef CONFIG_STM32_PHYADDR
+#  error "CONFIG_STM32_PHYADDR must be defined in the NuttX configuration"
 #endif
 
 #if !defined(CONFIG_STM32_MII) && !defined(CONFIG_STM32_RMII)
@@ -93,8 +105,68 @@
 #    warning "Neither CONFIG_STM32_MII_MCO1 nor CONFIG_STM32_MII_MCO2 defined"
 #  endif
 #  if defined(CONFIG_STM32_MII_MCO1) && defined(CONFIG_STM32_MII_MCO2)
-#    warning "Both CONFIG_STM32_MII_MCO1 and CONFIG_STM32_MII_MCO2 defined"
+#    error "Both CONFIG_STM32_MII_MCO1 and CONFIG_STM32_MII_MCO2 defined"
 #  endif
+#endif
+
+#ifdef CONFIG_STM32_AUTONEG
+#  ifndef CONFIG_STM32_PHYSR
+#    error "CONFIG_STM32_PHYSR must be defined in the NuttX configuration"
+#  endif
+#  ifndef CONFIG_STM32_PHYSR_SPEED
+#    error "CONFIG_STM32_PHYSR_SPEED must be defined in the NuttX configuration"
+#  endif
+#  ifndef CONFIG_STM32_PHYSR_100MBPS
+#    error "CONFIG_STM32_PHYSR_100MBPS must be defined in the NuttX configuration"
+#  endif
+#  ifndef CONFIG_STM32_PHYSR_MODE
+#    error "CONFIG_STM32_PHYSR_MODE must be defined in the NuttX configuration"
+#  endif
+#  ifndef CONFIG_STM32_PHYSR_FULLDUPLEX
+#    error "CONFIG_STM32_PHYSR_FULLDUPLEX must be defined in the NuttX configuration"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_ETH_PTP
+#  warning "CONFIG_STM32_ETH_PTP is not yet supported"
+#endif
+
+/* This driver always uses enhanced descriptors.  However, this would not be
+ * the cased if support is added for stamping and/or IPv4 checksum offload 
+ */
+
+#define CONFIG_STM32_ETH_ENHANCEDDESC 1
+
+/* Ethernet buffer sizes and numbers */
+
+#ifndef CONFIG_STM32_ETH_RXBUFSIZE
+#  define CONFIG_STM32_ETH_RXBUFSIZE  CONFIG_NET_BUFSIZE
+#endif
+#ifndef CONFIG_STM32_ETH_TXBUFSIZE
+#  define CONFIG_STM32_ETH_TXBUFSIZE  CONFIG_NET_BUFSIZE
+#endif
+#ifndef CONFIG_STM32_ETH_RXNBUFFERS
+#  define CONFIG_STM32_ETH_RXNBUFFERS 20
+#endif
+#ifndef CONFIG_STM32_ETH_TXNBUFFERS
+#  define CONFIG_STM32_ETH_TXNBUFFERS 5
+#endif
+
+/* Clocking *****************************************************************/
+/* Set MACMIIAR CR bits depending on HCLK setting */
+
+#if STM32_HCLK_FREQUENCY >= 20000000 && STM32_HCLK_FREQUENCY < 35000000
+#  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_20_35
+#elif STM32_HCLK_FREQUENCY >= 35000000 && STM32_HCLK_FREQUENCY < 60000000
+#  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_35_60
+#elif STM32_HCLK_FREQUENCY >= 60000000 && STM32_HCLK_FREQUENCY < 100000000
+#  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_60_100
+#elif STM32_HCLK_FREQUENCY >= 100000000 && STM32_HCLK_FREQUENCY < 150000000
+#  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_100_150
+#elif STM32_HCLK_FREQUENCY >= 150000000 && STM32_HCLK_FREQUENCY <= 168000000
+#  define ETH_MACMIIAR_CR ETH_MACMIIAR_CR_150_168
+#else
+#  error "STM32_HCLK_FREQUENCY not supportable"
 #endif
 
 /* Timing *******************************************************************/
@@ -102,12 +174,22 @@
  * second
  */
 
-#define STM32_WDDELAY   (1*CLK_TCK)
-#define STM32_POLLHSEC  (1*2)
+#define STM32_WDDELAY     (1*CLK_TCK)
+#define STM32_POLLHSEC    (1*2)
 
 /* TX timeout = 1 minute */
 
-#define STM32_TXTIMEOUT (60*CLK_TCK)
+#define STM32_TXTIMEOUT   (60*CLK_TCK)
+
+/* PHY reset/configuration delays in milliseconds */ 
+
+#define PHY_RESET_DELAY   (65)
+#define PHY_CONFIG_DELAY  (1000)
+
+/* PHY read/write delays in loop counts */
+
+#define PHY_READ_TIMEOUT  (0x0004ffff)
+#define PHY_WRITE_TIMEOUT (0x0004ffff)
 
 /* Helpers ******************************************************************/
 /* This is a helper pointer for accessing the contents of the Ethernet
@@ -126,7 +208,9 @@
 
 struct stm32_ethmac_s
 {
-  bool    bifup;            /* true:ifup false:ifdown */
+  uint8_t ifup    : 1;      /* true:ifup false:ifdown */
+  uint8_t mbps100 : 1;      /* 100MBps operation (vs 10 MBps) */
+  uint8_t fduplex : 1;      /* Full (vs. half) duplex */
   WDOG_ID txpoll;           /* TX poll timer */
   WDOG_ID txtimeout;        /* TX timeout timer */
 
@@ -171,9 +255,18 @@ static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
-/* Initialization */
+/* PHY Initialization */
+
+static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
+static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
+static int stm32_phyinit(FAR struct stm32_ethmac_s *priv);
+
+/* MAC/DMA Initialization */
 
 static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv);
+static void stm32_ethreset(FAR struct stm32_ethmac_s *priv);
+static int stm32_macconfig(FAR struct stm32_ethmac_s *priv);
+static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -508,7 +601,7 @@ static int stm32_ifup(struct uip_driver_s *dev)
 
   /* Enable the Ethernet interrupt */
 
-  priv->bifup = true;
+  priv->ifup = true;
   up_enable_irq(STM32_IRQ_ETH);
   return OK;
 }
@@ -551,7 +644,7 @@ static int stm32_ifdown(struct uip_driver_s *dev)
 
   /* Mark the device "down" */
 
-  priv->bifup = false;
+  priv->ifup = false;
   irqrestore(flags);
   return OK;
 }
@@ -588,7 +681,7 @@ static int stm32_txavail(struct uip_driver_s *dev)
 
   /* Ignore the notification if the interface is not yet up */
 
-  if (priv->bifup)
+  if (priv->ifup)
     {
       /* Check if there is room in the hardware to hold another outgoing packet. */
 
@@ -660,10 +753,124 @@ static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: stm32_ethgpioconfig
+ * Function: stm32_phyread
  *
  * Description:
- *  Configure GPIOs for the Ethernet interface.
+ *  Read a PHY register.
+ *
+ * Parameters:
+ *   phydevaddr - The PHY device address
+ *   phyregaddr - The PHY register address
+ *   value - The location to return the 16-bit PHY register value.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value)
+{
+  volatile uint32_t timeout;
+  uint32_t regval;
+
+  /* Configure the MACMIIAR register, preserving CSR Clock Range CR[2:0] bits */
+
+  regval  = getreg32(STM32_ETH_MACMIIAR);
+  regval &= ETH_MACMIIAR_CR_MASK;
+
+  /* Set the PHY device address, PHY register address, and set the buy bit.
+   * the  ETH_MACMIIAR_MW is clear, indicating a read operation.
+   */
+
+  regval |= (((uint32_t)phydevaddr << ETH_MACMIIAR_PA_SHIFT) & ETH_MACMIIAR_PA_MASK);
+  regval |= (((uint32_t)phyregaddr << ETH_MACMIIAR_MR_SHIFT) & ETH_MACMIIAR_MR_MASK);
+  regval |= ETH_MACMIIAR_MB;
+
+  putreg32(regval, STM32_ETH_MACMIIAR);
+
+  /* Wait for the transfer to complete */
+
+  for (timeout = 0; timeout < PHY_READ_TIMEOUT; timeout++)
+    {
+      if ((getreg32(STM32_ETH_MACMIIAR) && ETH_MACMIIAR_MB) == 0)
+        {
+          *value = (uint16_t)getreg32(STM32_ETH_MACMIIDR);
+          return OK;
+        }
+    }
+
+  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
+       phydevaddr, phyregaddr);
+
+  return -ETIMEDOUT;
+}
+
+/****************************************************************************
+ * Function: stm32_phywrite
+ *
+ * Description:
+ *  Write to a PHY register.
+ *
+ * Parameters:
+ *   phydevaddr - The PHY device address
+ *   phyregaddr - The PHY register address
+ *   value - The 16-bit value to write to the PHY register value.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value)
+{
+  volatile uint32_t timeout;
+  uint32_t regval;
+
+  /* Configure the MACMIIAR register, preserving CSR Clock Range CR[2:0] bits */
+
+  regval  = getreg32(STM32_ETH_MACMIIAR);
+  regval &= ETH_MACMIIAR_CR_MASK;
+
+  /* Set the PHY device address, PHY register address, and set the busy bit.
+   * the  ETH_MACMIIAR_MW is set, indicating a write operation.
+   */
+
+  regval |= (((uint32_t)phydevaddr << ETH_MACMIIAR_PA_SHIFT) & ETH_MACMIIAR_PA_MASK);
+  regval |= (((uint32_t)phyregaddr << ETH_MACMIIAR_MR_SHIFT) & ETH_MACMIIAR_MR_MASK);
+  regval |= (ETH_MACMIIAR_MB | ETH_MACMIIAR_MW);
+
+  /* Write the value into the MACIIDR register before setting the new MACMIIAR
+   * register value.
+   */
+
+  putreg32(value, STM32_ETH_MACMIIDR);
+  putreg32(regval, STM32_ETH_MACMIIAR);
+
+  /* Wait for the transfer to complete */
+
+  for (timeout = 0; timeout < PHY_WRITE_TIMEOUT; timeout++)
+    {
+      if ((getreg32(STM32_ETH_MACMIIAR) && ETH_MACMIIAR_MB) == 0)
+        {
+          return OK;
+        }
+    }
+
+  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
+       phydevaddr, phyregaddr, value);
+
+  return -ETIMEDOUT;
+}
+
+/****************************************************************************
+ * Function: stm32_phyinit
+ *
+ * Description:
+ *  Configure the PHY and determine the link speed/duplex.
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -675,7 +882,153 @@ static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#if STM32_NETHERNET == 1
+static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
+{
+  volatile uint32_t timeout;
+  uint32_t regval;
+  uint16_t phyval;
+  int ret;
+
+  /* Assume 10MBps and half duplex */
+
+  priv->mbps100 = 0;
+  priv->fduplex = 0;
+
+  /* Setup up PHY clocking by setting the SR field in the MACMIIAR register */
+
+  regval  = getreg32(STM32_ETH_MACMIIAR);
+  regval &= ~ETH_MACMIIAR_CR_MASK;
+  regval |= ETH_MACMIIAR_CR;
+  putreg32(regval, STM32_ETH_MACMIIAR);
+
+  /* Put the PHY in reset mode */
+
+  ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_MCR, MII_MCR_RESET);
+  if (ret < 0)
+    {
+      return ret;
+    }
+  up_mdelay(PHY_RESET_DELAY);
+
+  /* Perform auto-negotion if so configured */
+
+#ifdef CONFIG_STM32_AUTONEG
+  /* Wait for link status */
+
+  for (timeout = 0; timeout < PHY_READ_TIMEOUT; timeout++)
+    {
+      ret = stm32_phyread(CONFIG_STM32_PHYADDR, MII_MSR, &phyval);
+      if (ret < 0)
+        {
+          return ret;
+        }
+      else if ((phyval & MII_MSR_LINKSTATUS) != 0)
+        {
+          break;
+        }
+    }
+
+  if (timeout >= PHY_READ_TIMEOUT)
+    {
+      ndbg("Timed out waiting for link status\n");
+      return -ETIMEDOUT;
+    }
+
+  /* Enable auto-gegotiation */
+
+  ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Wait until auto-negotiation completes */
+
+  for (timeout = 0; timeout < PHY_READ_TIMEOUT; timeout++)
+    {
+      ret = stm32_phyread(CONFIG_STM32_PHYADDR, MII_MSR, &phyval);
+      if (ret < 0)
+        {
+          return ret;
+        }
+      else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
+        {
+          break;
+        }
+    }
+
+  if (timeout >= PHY_READ_TIMEOUT)
+    {
+      ndbg("Timed out waiting for auto-negotiation\n");
+      return -ETIMEDOUT;
+    }
+ 
+  /* Read the result of the auto-negotiation from the PHY-specific register */
+
+  ret = stm32_phyread(CONFIG_STM32_PHYADDR, CONFIG_STM32_PHYSR, &phyval);
+  if (ret < 0)
+    {
+      ndbg("Failed to read PHY status register\n");
+      return ret;
+    }
+
+  /* Remember the selected speed and duplex modes */
+
+  if ((phyval & CONFIG_STM32_PHYSR_MODE) == CONFIG_STM32_PHYSR_FULLDUPLEX)
+    {
+      priv->fduplex = 1;
+    }
+
+  if ((phyval & CONFIG_STM32_PHYSR_SPEED) == CONFIG_STM32_PHYSR_100MBPS)
+    {
+      priv->mbps100 = 1;
+    }
+
+#else /* Auto-negotion not selected */
+
+  phyval = 0;
+#ifdef CONFIG_STM32_ETHFD
+  phyval |= MII_MCR_FULLDPLX;
+#endif
+#ifdef CONFIG_STM32_ETH100MBPS
+  phyval |= MII_MCR_SPEED100;
+#endif
+
+  ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_MCR, phyval);
+  if (ret < 0)
+    {
+      return ret;
+    }
+  up_mdelay(PHY_CONFIG_DELAY);
+
+  /* Remember the selected speed and duplex modes */
+
+#ifdef CONFIG_STM32_ETHFD
+  priv->fduplex = 1;
+#endif
+#ifdef CONFIG_STM32_ETH100MBPS
+  priv->mbps100 = 1;
+#endif
+#endif
+  return OK;
+}
+
+/****************************************************************************
+ * Function: stm32_ethgpioconfig
+ *
+ * Description:
+ *  Configure GPIOs for the Ethernet interface.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
 static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
 {
   /* Configure GPIO pins to support Ethernet */
@@ -704,24 +1057,21 @@ static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
    *  PLLI2S clock (through a configurable prescaler) on PC9 pin."
    */
 
-#  warning "REVISIT:  This is very board-specific"
 #  if defined(CONFIG_STM32_MII_MCO1)
-  /* Configure MC01 to drive the PHY */
+  /* Configure MC01 to drive the PHY.  Board logic must provide MC01 clocking
+   * info.
+   */
 
   stm32_configgpio(GPIO_MCO1);
-
-  /* Output HSE clock (25MHz) on MCO pin (PA8) to clock the PHY */
-
-  stm32_mco1config(RCC_CFGR_MCO1_HSE, RCC_CFGR_MCO1PRE_NONE);
+  stm32_mco1config(BOARD_CFGR_MC01_SOURCE, BOARD_CFGR_MC01_DIVIDER);
 
 #  elif defined(CONFIG_STM32_MII_MCO2)
-  /* Configure MC02 to drive the PHY */
+  /* Configure MC02 to drive the PHY.  Board logic must provide MC02 clocking
+   * info.
+   */
 
   stm32_configgpio(GPIO_MCO2);
-
-  /* Output HSE clock (25MHz) on MCO pin (PA8) to clock the PHY */
-
-  stm32_mco2config(RCC_CFGR_MCO2_HSE, RCC_CFGR_MCO2PRE_NONE);
+  stm32_mco2config(BOARD_CFGR_MC02_SOURCE, BOARD_CFGR_MC02_DIVIDER);
 #  endif
 
   /* MII interface pins (17):  
@@ -776,9 +1126,114 @@ static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
 
   stm32_configgpio(GPIO_ETH_PPS_OUT);
 }
-#else
-#  warning "This would need to be re-designed to support multiple interfaces"
-#endif
+
+/****************************************************************************
+ * Function: stm32_ethreset
+ *
+ * Description:
+ *  Reset the Ethernet block.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void stm32_ethreset(FAR struct stm32_ethmac_s *priv)
+{
+  uint32_t regval;
+
+  /* Reset the Ethernet on the AHB1 bus */
+
+  regval  = getreg32(STM32_RCC_AHB1RSTR);
+  regval |= RCC_AHB1RSTR_ETHMACRST;
+  putreg32(regval, STM32_RCC_AHB1RSTR);
+
+  regval &= ~RCC_AHB1RSTR_ETHMACRST;
+  putreg32(regval, STM32_RCC_AHB1RSTR);
+
+  /* Perform a software reset by setting the SR bit in the DMABMR register.
+   * This Resets all MAC subsystem internal registers and logic.  After this
+   * reset all the registers holds their reset values.
+   */
+
+  regval = getreg32(STM32_ETH_DMABMR);
+  regval |= ETH_DMABMR_SR;
+  putreg32(regval, STM32_ETH_DMABMR);
+
+  /* Wait for software reset to complete. The SR bit is cleared automatically
+   * after the reset operation has completed in all of the core clock domains.
+   */
+
+  while ((getreg32(STM32_ETH_DMABMR) & ETH_DMABMR_SR) != 0);
+}
+
+/****************************************************************************
+ * Function: stm32_macconfig
+ *
+ * Description:
+ *  Configure the Ethernet MAC for DMA operation.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
+{
+#warning "Missing logic"
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Function: stm32_ethconfig
+ *
+ * Description:
+ *  Configure the Ethernet interface for DMA operation.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
+{
+  int ret;
+
+  /* NOTE: The Ethernet clocks were initialized early in the boot-up
+   * sequence in stm32_rcc.c.
+   */
+
+  /* Reset the Ethernet block */
+
+  stm32_ethreset(priv);
+
+  /* Initialize the PHY */
+
+  ret = stm32_phyinit(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Initialize the MAC and DMA */
+
+  return stm32_macconfig(priv);
+}
 
 /****************************************************************************
  * Public Functions
@@ -811,6 +1266,7 @@ static inline
 int stm32_ethinitialize(int intf)
 {
   struct stm32_ethmac_s *priv;
+  int ret;
 
   /* Get the interface structure associated with this interface number. */
 
@@ -838,7 +1294,13 @@ int stm32_ethinitialize(int intf)
 
   stm32_ethgpioconfig(priv);
 
-  /* Check if a Ethernet chip is recognized at its I/O base */
+  /* Configure the Ethernet interface for DMA operation. */
+
+  ret = stm32_ethconfig(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Attach the IRQ to the driver */
 
@@ -849,11 +1311,12 @@ int stm32_ethinitialize(int intf)
       return -EAGAIN;
     }
 
-  /* Put the interface in the down state.  This usually amounts to resetting
-   * the device and/or calling stm32_ifdown().
-   */
+  /* Put the interface in the down state. */
+
+  stm32_ifdown(&priv->dev);
 
   /* Read the MAC address from the hardware into priv->dev.d_mac.ether_addr_octet */
+#warning "Missing logic"
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
