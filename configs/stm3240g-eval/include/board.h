@@ -172,8 +172,26 @@
 #  define SDIO_SDXFR_CLKDIV     (3 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
-/* LED definitions ******************************************************************/
+/* Ethernet *************************************************************************/
+/* We need to provide clocking to the MII PHY via MCO1 (PA8) */
 
+#if defined(CONFIG_NET) && defined(CONFIG_STM32_ETHMAC)
+
+#  if !defined(CONFIG_STM32_MII)
+#    warning "CONFIG_STM32_MII required for Ethernet"
+#  elif !defined(CONFIG_STM32_MII_MCO1)
+#    warning "CONFIG_STM32_MII_MCO1 required for Ethernet MII"
+#  else
+
+  /* Output HSE clock (25MHz) on MCO1 pin (PA8) to clock the PHY */
+
+#    define BOARD_CFGR_MC01_SOURCE  RCC_CFGR_MCO1_HSE
+#    define BOARD_CFGR_MC01_DIVIDER RCC_CFGR_MCO1PRE_NONE
+
+#  endif
+#endif
+
+/* LED definitions ******************************************************************/
 /* The STM3240G-EVAL board has 4 LEDs that we will encode as: */
 
 #define LED_STARTED       0  /* LED1 */
@@ -185,6 +203,7 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
+/* Button definitions ***************************************************************/
 /* The STM3240G-EVAL supports three buttons: */
 
 #define BUTTON_WAKEUP      0
@@ -200,6 +219,7 @@
 /* Alternate function pin selections ************************************************/
 
 /* UART3:
+ *
  * - PC11 is MicroSDCard_D3 & RS232/IrDA_RX (JP22 open)
  * - PC10 is MicroSDCard_D2 & RSS232/IrDA_TX
  */

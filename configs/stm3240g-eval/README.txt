@@ -374,10 +374,29 @@ STM3240G-EVAL-specific Configuration Options
 	CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
 	  4-bit transfer mode.
 
+	CONFIG_STM32_PHYADDR - The 5-bit address of the PHY on the board
 	CONFIG_STM32_MII - Support Ethernet MII interface
 	CONFIG_STM32_MII_MCO1 - Use MCO1 to clock the MII interface
 	CONFIG_STM32_MII_MCO2 - Use MCO2 to clock the MII interface
 	CONFIG_STM32_RMII - Support Ethernet RMII interface
+	CONFIG_STM32_AUTONEG - Use PHY autonegotion to determine speed and mode
+	CONFIG_STM32_ETHFD - If CONFIG_STM32_AUTONEG is not defined, then this
+	  may be defined to select full duplex mode. Default: half-duplex
+	CONFIG_STM32_ETH100MBPS - If CONFIG_STM32_AUTONEG is not defined, then this
+	  may be defined to select 100 MBps speed.  Default: 10 Mbps
+	CONFIG_STM32_PHYSR - This must be provided if CONFIG_STM32_AUTONEG is
+	  defined.  The PHY status register address may diff from PHY to PHY.  This
+	  configuration sets the address of the PHY status register.
+	CONFIG_STM32_PHYSR_SPEED - This must be provided if CONFIG_STM32_AUTONEG is
+	  defined.  This provides bit mask indicating 10 or 100MBps speed.
+	CONFIG_STM32_PHYSR_100MBPS - This must be provided if CONFIG_STM32_AUTONEG is
+	  defined.  This provides the value of the speed bit(s) indicating 100MBps speed.
+	CONFIG_STM32_PHYSR_MODE - This must be provided if CONFIG_STM32_AUTONEG is
+	  defined.  This provide bit mask indicating full or half duplex modes.
+	CONFIG_STM32_PHYSR_FULLDUPLEX - This must be provided if CONFIG_STM32_AUTONEG is
+	  defined.  This provides the value of the mode bits indicating full duplex mode.
+	CONFIG_STM32_ETH_PTP - Precision Time Protocol (PTP).  Not supported
+	  but some hooks are indicated with this condition.
 
   STM3240G-EVAL LCD Hardware Configuration
 
