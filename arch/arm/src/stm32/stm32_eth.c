@@ -136,6 +136,7 @@
  */
 
 #define CONFIG_STM32_ETH_ENHANCEDDESC 1
+#undef  CONFIG_STM32_ETH_HWCHECKSUM
 
 /* Ethernet buffer sizes and numbers */
 
@@ -190,6 +191,242 @@
 
 #define PHY_READ_TIMEOUT  (0x0004ffff)
 #define PHY_WRITE_TIMEOUT (0x0004ffff)
+#define PHY_RETRY_TIMEOUT (0x0004ffff)
+
+/* Register values **********************************************************/
+
+/* Clear the MACCR bits that will be setup during MAC initialization (or that
+ * are cleared unconditionally).  Per the reference manual, all reserved bits
+ * must be retained at their reset value.
+ *
+ * ETH_MACCR_RE    Bit 2:  Receiver enable
+ * ETH_MACCR_TE    Bit 3:  Transmitter enable
+ * ETH_MACCR_DC    Bit 4:  Deferral check
+ * ETH_MACCR_BL    Bits 5-6: Back-off limit
+ * ETH_MACCR_APCS  Bit 7:  Automatic pad/CRC stripping
+ * ETH_MACCR_RD    Bit 9:  Retry disable
+ * ETH_MACCR_IPCO  Bit 10: IPv4 checksum offload
+ * ETH_MACCR_DM    Bit 11: Duplex mode
+ * ETH_MACCR_LM    Bit 12: Loopback mode
+ * ETH_MACCR_ROD   Bit 13: Receive own disable
+ * ETH_MACCR_FES   Bit 14: Fast Ethernet speed
+ * ETH_MACCR_CSD   Bit 16: Carrier sense disable
+ * ETH_MACCR_IFG   Bits 17-19: Interframe gap
+ * ETH_MACCR_JD    Bit 22: Jabber disable
+ * ETH_MACCR_WD    Bit 23: Watchdog disable
+ * ETH_MACCR_CSTF  Bits 25: CRC stripping for Type frames
+ */
+
+#define MACCR_CLEAR_BITS \
+ ( ETH_MACCR_RE | ETH_MACCR_TE | ETH_MACCR_DC | ETH_MACCR_BL_MASK | \
+   ETH_MACCR_APCS | ETH_MACCR_RD | ETH_MACCR_IPCO | ETH_MACCR_DM | \
+   ETH_MACCR_LM | ETH_MACCR_ROD | ETH_MACCR_FES | ETH_MACCR_CSD | \
+   ETH_MACCR_IFG_MASK | ETH_MACCR_JD | ETH_MACCR_WD | ETH_MACCR_CSTF )
+
+/* The following bits are set or left zero unconditionally in all modes.
+ *
+ * ETH_MACCR_RE    Receiver enable                0 (disabled)
+ * ETH_MACCR_TE    Transmitter enable             0 (disabled)
+ * ETH_MACCR_DC    Deferral check                 0 (disabled)
+ * ETH_MACCR_BL    Back-off limit                 0 (10)
+ * ETH_MACCR_APCS  Automatic pad/CRC stripping    0 (disabled)
+ * ETH_MACCR_RD    Retry disable                  1 (disabled)
+ * ETH_MACCR_IPCO  IPv4 checksum offload          Depends on CONFIG_STM32_ETH_HWCHECKSUM
+ * ETH_MACCR_LM    Loopback mode                  0 (disabled)
+ * ETH_MACCR_ROD   Receive own disable            0 (enabled)
+ * ETH_MACCR_CSD   Carrier sense disable          0 (enabled)
+ * ETH_MACCR_IFG   Interframe gap                 0 (96 bits)
+ * ETH_MACCR_JD    Jabber disable                 0 (enabled)
+ * ETH_MACCR_WD    Watchdog disable               0 (enabled)
+ * ETH_MACCR_CSTF  CRC stripping for Type frames  0 (disabled)
+ *
+ * The following are set conditioinally based on mode and speed.
+ *
+ * ETH_MACCR_DM       Duplex mode                    Depends on priv->fduplex
+ * ETH_MACCR_FES      Fast Ethernet speed            Depends on priv->mbps100
+ */
+
+#ifdef CONFIG_STM32_ETH_HWCHECKSUM
+#  define MACCR_SET_BITS \
+     (ETH_MACCR_BL_10 | ETH_MACCR_RD | ETH_MACCR_IPCO | ETH_MACCR_IFG(96))
+#else
+#  define MACCR_SET_BITS \
+     (ETH_MACCR_BL_10 | ETH_MACCR_RD | ETH_MACCR_IFG(96))
+#endif
+
+/* Clear the MACCR bits that will be setup during MAC initialization (or that
+ * are cleared unconditionally).  Per the reference manual, all reserved bits
+ * must be retained at their reset value.
+ *
+ * ETH_MACFFR_PM    Bit 0: Promiscuous mode
+ * ETH_MACFFR_HU    Bit 1: Hash unicast
+ * ETH_MACFFR_HM    Bit 2: Hash multicast
+ * ETH_MACFFR_DAIF  Bit 3: Destination address inverse filtering
+ * ETH_MACFFR_PAM   Bit 4: Pass all multicast
+ * ETH_MACFFR_BFD   Bit 5: Broadcast frames disable
+ * ETH_MACFFR_PCF   Bits 6-7: Pass control frames
+ * ETH_MACFFR_SAIF  Bit 8: Source address inverse filtering
+ * ETH_MACFFR_SAF   Bit 9: Source address filter
+ * ETH_MACFFR_HPF   Bit 10: Hash or perfect filter
+ * ETH_MACFFR_RA    Bit 31: Receive all
+ */
+
+#define MACFFR_CLEAR_BITS \
+  (ETH_MACFFR_PM | ETH_MACFFR_HU | ETH_MACFFR_HM | ETH_MACFFR_DAIF | \
+   ETH_MACFFR_PAM | ETH_MACFFR_BFD | ETH_MACFFR_PCF_MASK | ETH_MACFFR_SAIF | \
+   ETH_MACFFR_SAF | ETH_MACFFR_HPF | ETH_MACFFR_RA)
+  
+/* The following bits are set or left zero unconditionally in all modes.
+ *
+ * ETH_MACFFR_PM    Promiscuous mode                       0 (disabled)
+ * ETH_MACFFR_HU    Hash unicast                           0 (perfect dest filtering)
+ * ETH_MACFFR_HM    Hash multicast                         0 (perfect dest filtering)
+ * ETH_MACFFR_DAIF  Destination address inverse filtering  0 (normal)
+ * ETH_MACFFR_PAM   Pass all multicast                     0 (Depends on HM bit)
+ * ETH_MACFFR_BFD   Broadcast frames disable               0 (enabled)
+ * ETH_MACFFR_PCF   Pass control frames                    1 (block all but PAUSE)
+ * ETH_MACFFR_SAIF  Source address inverse filtering       0 (not used)
+ * ETH_MACFFR_SAF   Source address filter                  0 (disabled)
+ * ETH_MACFFR_HPF   Hash or perfect filter                 0 (Only matching frames passed)
+ * ETH_MACFFR_RA    Receive all                            0 (disabled)
+ */
+
+#define MACFFR_SET_BITS (ETH_MACFFR_PCF_PAUSE)
+
+/* Clear the MACFCR bits that will be setup during MAC initialization (or that
+ * are cleared unconditionally).  Per the reference manual, all reserved bits
+ * must be retained at their reset value.
+ *
+ * ETH_MACFCR_FCB_BPA Bit 0: Flow control busy/back pressure activate
+ * ETH_MACFCR_TFCE    Bit 1: Transmit flow control enable
+ * ETH_MACFCR_RFCE    Bit 2: Receive flow control enable
+ * ETH_MACFCR_UPFD    Bit 3: Unicast pause frame detect
+ * ETH_MACFCR_PLT     Bits 4-5: Pause low threshold
+ * ETH_MACFCR_ZQPD    Bit 7: Zero-quanta pause disable
+ * ETH_MACFCR_PT      Bits 16-31: Pause time
+ */
+
+#define MACFCR_CLEAR_MASK \
+  (ETH_MACFCR_FCB_BPA | ETH_MACFCR_TFCE | ETH_MACFCR_RFCE | ETH_MACFCR_UPFD | \
+   ETH_MACFCR_PLT_MASK | ETH_MACFCR_ZQPD | ETH_MACFCR_PT_MASK)
+
+/* The following bits are set or left zero unconditionally in all modes.
+ *
+ * ETH_MACFCR_FCB_BPA Flow control busy/back pressure activate   0 (no pause control frame)
+ * ETH_MACFCR_TFCE    Transmit flow control enable               0 (disabled)
+ * ETH_MACFCR_RFCE    Receive flow control enable                0 (disabled)
+ * ETH_MACFCR_UPFD    Unicast pause frame detect                 0 (disabled)
+ * ETH_MACFCR_PLT     Pause low threshold                        0 (pause time - 4)
+ * ETH_MACFCR_ZQPD    Zero-quanta pause disable                  1 (disabled)
+ * ETH_MACFCR_PT      Pause time                                 0
+ */
+
+#define MACFCR_SET_MASK (ETH_MACFCR_PLT_M4 | ETH_MACFCR_ZQPD)
+
+/* Clear the DMAOMR bits that will be setup during MAC initialization (or that
+ * are cleared unconditionally).  Per the reference manual, all reserved bits
+ * must be retained at their reset value.
+ *
+ * ETH_DMAOMR_SR     Bit 1:  Start/stop receive
+ * TH_DMAOMR_OSF     Bit 2:  Operate on second frame
+ * ETH_DMAOMR_RTC    Bits 3-4: Receive threshold control
+ * ETH_DMAOMR_FUGF   Bit 6:  Forward undersized good frames
+ * ETH_DMAOMR_FEF    Bit 7:  Forward error frames
+ * ETH_DMAOMR_ST     Bit 13: Start/stop transmission
+ * ETH_DMAOMR_TTC    Bits 14-16: Transmit threshold control
+ * ETH_DMAOMR_FTF    Bit 20: Flush transmit FIFO
+ * ETH_DMAOMR_TSF    Bit 21: Transmit store and forward
+ * ETH_DMAOMR_DFRF   Bit 24: Disable flushing of received frames
+ * ETH_DMAOMR_RSF    Bit 25: Receive store and forward
+ * TH_DMAOMR_DTCEFD  Bit 26: Dropping of TCP/IP checksum error frames disable
+ */
+
+#define DMAOMR_CLEAR_MASK \
+  (ETH_DMAOMR_SR | ETH_DMAOMR_OSF | ETH_DMAOMR_RTC_MASK | ETH_DMAOMR_FUGF | \
+   ETH_DMAOMR_FEF | ETH_DMAOMR_ST | ETH_DMAOMR_TTC_MASK | ETH_DMAOMR_FTF | \
+   ETH_DMAOMR_TSF | ETH_DMAOMR_DFRF | ETH_DMAOMR_RSF | ETH_DMAOMR_DTCEFD)
+
+/* The following bits are set or left zero unconditionally in all modes.
+ *
+ * ETH_DMAOMR_SR     Start/stop receive                   0 (not running)
+ * TH_DMAOMR_OSF     Operate on second frame              1 (enabled)
+ * ETH_DMAOMR_RTC    Receive threshold control            0 (64 bytes)
+ * ETH_DMAOMR_FUGF   Forward undersized good frames       0 (disabled)
+ * ETH_DMAOMR_FEF    Forward error frames                 0 (disabled)
+ * ETH_DMAOMR_ST     Start/stop transmission              0 (not running)
+ * ETH_DMAOMR_TTC    Transmit threshold control           0 (64 bytes)
+ * ETH_DMAOMR_FTF    Flush transmit FIFO                  0 (no flush)
+ * ETH_DMAOMR_TSF    Transmit store and forward           Depends on CONFIG_STM32_ETH_HWCHECKSUM
+ * ETH_DMAOMR_DFRF   Disable flushing of received frames  0 (enabled)
+ * ETH_DMAOMR_RSF    Receive store and forward            Depends on CONFIG_STM32_ETH_HWCHECKSUM
+ * TH_DMAOMR_DTCEFD  Dropping of TCP/IP checksum error    Depends on CONFIG_STM32_ETH_HWCHECKSUM
+ *                   frames disable
+ *
+ * When the checksum offload feature is enabled, we need to enable the Store
+ * and Forward mode: the store and forward guarantee that a whole frame is
+ * stored in the FIFO, so the MAC can insert/verify the checksum, if the
+ * checksum is OK the DMA can handle the frame otherwise the frame is dropped
+ */
+ 
+#if CONFIG_STM32_ETH_HWCHECKSUM
+#  define DMAOMR_SET_MASK \
+    (ETH_DMAOMR_OSF | ETH_DMAOMR_RTC_64 | ETH_DMAOMR_TTC_64 | \
+     ETH_DMAOMR_TSF | ETH_DMAOMR_RSF)
+#else
+#  define DMAOMR_SET_MASK \
+    (ETH_DMAOMR_OSF | ETH_DMAOMR_RTC_64 | ETH_DMAOMR_TTC_64 | \
+     ETH_DMAOMR_DTCEFD)
+#endif
+
+/* Clear the DMABMR bits that will be setup during MAC initialization (or that
+ * are cleared unconditionally).  Per the reference manual, all reserved bits
+ * must be retained at their reset value.
+ *
+ * ETH_DMABMR_SR    Bit 0: Software reset
+ * ETH_DMABMR_DA    Bit 1: DMA Arbitration
+ * ETH_DMABMR_DSL   Bits 2-6: Descriptor skip length
+ * ETH_DMABMR_EDFE  Bit 7: Enhanced descriptor format enable
+ * ETH_DMABMR_PBL   Bits 8-13: Programmable burst length
+ * ETH_DMABMR_RTPR  Bits 14-15: Rx Tx priority ratio
+ * ETH_DMABMR_FB    Bit 16: Fixed burst
+ * ETH_DMABMR_RDP   Bits 17-22: Rx DMA PBL
+ * ETH_DMABMR_USP   Bit 23: Use separate PBL
+ * ETH_DMABMR_FPM   Bit 24: 4xPBL mode
+ * ETH_DMABMR_AAB   Bit 25: Address-aligned beats
+ * ETH_DMABMR_MB    Bit 26: Mixed burst
+ */
+
+#define DMABMR_CLEAR_MASK \
+  (ETH_DMABMR_SR | ETH_DMABMR_DA | ETH_DMABMR_DSL_MASK | ETH_DMABMR_EDFE | \
+   ETH_DMABMR_PBL_MASK | ETH_DMABMR_RTPR_MASK | ETH_DMABMR_FB | ETH_DMABMR_RDP_MASK | \
+   ETH_DMABMR_USP | ETH_DMABMR_FPM | ETH_DMABMR_AAB | ETH_DMABMR_MB)
+
+/* The following bits are set or left zero unconditionally in all modes.
+ *
+ *
+ * ETH_DMABMR_SR    Software reset                     0 (no reset)
+ * ETH_DMABMR_DA    DMA Arbitration                    0 (round robin)
+ * ETH_DMABMR_DSL   Descriptor skip length             0
+ * ETH_DMABMR_EDFE  Enhanced descriptor format enable  Depends on CONFIG_STM32_ETH_ENHANCEDDESC
+ * ETH_DMABMR_PBL   Programmable burst length          32 beats
+ * ETH_DMABMR_RTPR  Rx Tx priority ratio               2:1
+ * ETH_DMABMR_FB    Fixed burst                        1 (enabled)
+ * ETH_DMABMR_RDP   Rx DMA PBL                         32 beats
+ * ETH_DMABMR_USP   Use separate PBL                   1 (enabled)
+ * ETH_DMABMR_FPM   4xPBL mode                         0 (disabled)
+ * ETH_DMABMR_AAB   Address-aligned beats              1 (enabled)
+ * ETH_DMABMR_MB    Mixed burst                        0 (disabled)
+ */
+
+#ifdef CONFIG_STM32_ETH_ENHANCEDDESC
+#  define DMABMR_SET_MASK \
+     (ETH_DMABMR_DSL(0) | ETH_DMABMR_PBL(32) | ETH_DMABMR_EDFE | ETH_DMABMR_RTPR_2TO1 | \
+      ETH_DMABMR_FB | ETH_DMABMR_RDP(32) | ETH_DMABMR_USP | ETH_DMABMR_AAB)
+#else
+#  define DMABMR_SET_MASK \
+     (ETH_DMABMR_DSL(0) | ETH_DMABMR_PBL(32) | ETH_DMABMR_RTPR_2TO1 | ETH_DMABMR_FB | \
+      ETH_DMABMR_RDP(32) | ETH_DMABMR_USP | ETH_DMABMR_AAB)
+#endif
 
 /* Helpers ******************************************************************/
 /* This is a helper pointer for accessing the contents of the Ethernet
@@ -588,12 +825,19 @@ static void stm32_polltimer(int argc, uint32_t arg, ...)
 static int stm32_ifup(struct uip_driver_s *dev)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
+  int ret;
 
   ndbg("Bringing up: %d.%d.%d.%d\n",
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
 
-  /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
+  /* Configure the Ethernet interface for DMA operation. */
+
+  ret = stm32_ethconfig(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Set and activate a timer process */
 
@@ -641,6 +885,8 @@ static int stm32_ifdown(struct uip_driver_s *dev)
    * a known configuration that will guarantee the stm32_ifup() always
    * successfully brings the interface back up.
    */
+
+  stm32_ethreset(priv);
 
   /* Mark the device "down" */
 
@@ -915,7 +1161,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 #ifdef CONFIG_STM32_AUTONEG
   /* Wait for link status */
 
-  for (timeout = 0; timeout < PHY_READ_TIMEOUT; timeout++)
+  for (timeout = 0; timeout < PHY_RETRY_TIMEOUT; timeout++)
     {
       ret = stm32_phyread(CONFIG_STM32_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
@@ -928,7 +1174,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
         }
     }
 
-  if (timeout >= PHY_READ_TIMEOUT)
+  if (timeout >= PHY_RETRY_TIMEOUT)
     {
       ndbg("Timed out waiting for link status\n");
       return -ETIMEDOUT;
@@ -944,7 +1190,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 
   /* Wait until auto-negotiation completes */
 
-  for (timeout = 0; timeout < PHY_READ_TIMEOUT; timeout++)
+  for (timeout = 0; timeout < PHY_RETRY_TIMEOUT; timeout++)
     {
       ret = stm32_phyread(CONFIG_STM32_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
@@ -957,7 +1203,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
         }
     }
 
-  if (timeout >= PHY_READ_TIMEOUT)
+  if (timeout >= PHY_RETRY_TIMEOUT)
     {
       ndbg("Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
@@ -1190,8 +1436,69 @@ static void stm32_ethreset(FAR struct stm32_ethmac_s *priv)
 
 static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
 {
-#warning "Missing logic"
-  return -ENOSYS;
+  uint32_t regval;
+
+  /* Set up the MACCR register */
+
+  regval  = getreg32(STM32_ETH_MACCR);
+  regval &= ~MACCR_CLEAR_BITS;
+  regval |= MACCR_SET_BITS;
+
+  if (priv->fduplex)
+    {
+      /* Set the DM bit for full duplex support */
+
+      regval |= ETH_MACCR_DM;
+    }
+
+  if (priv->mbps100)
+    {
+      /* Set the FES bit for 100Mbps fast ethernet support */
+
+      regval |= ETH_MACCR_FES;
+    }
+
+  putreg32(regval, STM32_ETH_MACCR);
+
+  /* Set up the MACFFR register */
+
+  regval  = getreg32(STM32_ETH_MACFFR);
+  regval &= ~MACFFR_CLEAR_BITS;
+  regval |= MACFFR_SET_BITS;
+  putreg32(regval, STM32_ETH_MACFFR);
+
+  /* Set up the MACHTHR and MACHTLR registers */
+
+  putreg32(0, STM32_ETH_MACHTHR);
+  putreg32(0, STM32_ETH_MACHTLR);
+
+  /* Setup up the MACFCR register */
+
+  regval  = getreg32(STM32_ETH_MACFCR);
+  regval &= ~MACFCR_CLEAR_MASK;
+  regval |= MACFCR_SET_MASK;
+  putreg32(regval, STM32_ETH_MACFCR);
+
+  /* Setup up the MACVLANTR register */
+
+  putreg32(0, STM32_ETH_MACVLANTR);
+
+  /* DMA Configuration */
+  /* Set up the DMAOMR register */
+
+  regval  = getreg32(STM32_ETH_DMAOMR);
+  regval &= ~DMAOMR_CLEAR_MASK;
+  regval |= DMAOMR_SET_MASK;
+  putreg32(regval, STM32_ETH_DMAOMR);
+
+  /* Set up the DMABMR register */
+
+  regval  = getreg32(STM32_ETH_DMABMR);
+  regval &= ~DMABMR_CLEAR_MASK;
+  regval |= DMABMR_SET_MASK;
+  putreg32(regval, STM32_ETH_DMABMR);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1266,7 +1573,6 @@ static inline
 int stm32_ethinitialize(int intf)
 {
   struct stm32_ethmac_s *priv;
-  int ret;
 
   /* Get the interface structure associated with this interface number. */
 
@@ -1294,14 +1600,6 @@ int stm32_ethinitialize(int intf)
 
   stm32_ethgpioconfig(priv);
 
-  /* Configure the Ethernet interface for DMA operation. */
-
-  ret = stm32_ethconfig(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
   /* Attach the IRQ to the driver */
 
   if (irq_attach(STM32_IRQ_ETH, stm32_interrupt))
@@ -1314,9 +1612,6 @@ int stm32_ethinitialize(int intf)
   /* Put the interface in the down state. */
 
   stm32_ifdown(&priv->dev);
-
-  /* Read the MAC address from the hardware into priv->dev.d_mac.ether_addr_octet */
-#warning "Missing logic"
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
