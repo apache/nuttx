@@ -524,8 +524,10 @@
 #define ETH_DMABMR_DA                (1 << 1)  /* Bit 1: DMA Arbitration */
 #define ETH_DMABMR_DSL_SHIFT         (2)       /* Bits 2-6: Descriptor skip length */
 #define ETH_DMABMR_DSL_MASK          (31 << ETH_DMABMR_DSL_SHIFT)
+#  define ETH_DMABMR_DSL(n)          ((n) << ETH_DMABMR_DSL_SHIFT)
 #define ETH_DMABMR_EDFE              (1 << 7)  /* Bit 7: Enhanced descriptor format enable */
 #define ETH_DMABMR_PBL_SHIFT         (8)       /* Bits 8-13: Programmable burst length */
+#  define ETH_DMABMR_PBL(n)          ((n) << ETH_DMABMR_PBL_SHIFT) /* n=1, 2, 4, 8, 16, 32 */
 #define ETH_DMABMR_PBL_MASK          (0x3f << ETH_DMABMR_PBL_SHIFT)
 #define ETH_DMABMR_RTPR_SHIFT        (14)      /* Bits 14-15: Rx Tx priority ratio */
 #define ETH_DMABMR_RTPR_MASK         (3 << ETH_DMABMR_RTPR_SHIFT)
@@ -594,11 +596,11 @@
 #define ETH_DMAOMR_SR                (1 << 1)  /* Bit 1:  Start/stop receive */
 #define ETH_DMAOMR_OSF               (1 << 2)  /* Bit 2:  Operate on second frame */
 #define ETH_DMAOMR_RTC_SHIFT         (3)       /* Bits 3-4: Receive threshold control */
-#define ETH_DMAOMR_RTC_MASK          (3 << ETH_DMAOMR_RTC_MASK)
-#  define ETH_DMAOMR_RTC_64          (0 << ETH_DMAOMR_RTC_MASK)
-#  define ETH_DMAOMR_RTC_32          (1 << ETH_DMAOMR_RTC_MASK)
-#  define ETH_DMAOMR_RTC_96          (2 << ETH_DMAOMR_RTC_MASK)
-#  define ETH_DMAOMR_RTC_128         (3 << ETH_DMAOMR_RTC_MASK)
+#define ETH_DMAOMR_RTC_MASK          (3 << ETH_DMAOMR_RTC_SHIFT)
+#  define ETH_DMAOMR_RTC_64          (0 << ETH_DMAOMR_RTC_SHIFT)
+#  define ETH_DMAOMR_RTC_32          (1 << ETH_DMAOMR_RTC_SHIFT)
+#  define ETH_DMAOMR_RTC_96          (2 << ETH_DMAOMR_RTC_SHIFT)
+#  define ETH_DMAOMR_RTC_128         (3 << ETH_DMAOMR_RTC_SHIFT)
 #define ETH_DMAOMR_FUGF              (1 << 6)  /* Bit 6:  Forward undersized good frames */
 #define ETH_DMAOMR_FEF               (1 << 7)  /* Bit 7:  Forward error frames */
 #define ETH_DMAOMR_ST                (1 << 13) /* Bit 13: Start/stop transmission */
