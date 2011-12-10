@@ -549,23 +549,28 @@
 /* Ethernet DMA receive descriptor list address register (32-bit address) */
 /* Ethernet DMA transmit descriptor list address register (32-bit address) */
 
-/* Ethernet DMA status register */
+/* Interrupt bit definitions common between the DMA status register (DMASR) and
+ * the DMA interrupt enable register (DMAIER).
+ */
 
-#define ETH_DMASR_TS                 (1 << 0)  /* Bit 0:  Transmit status */
-#define ETH_DMASR_TPSS               (1 << 1)  /* Bit 1:  Transmit process stopped status */
-#define ETH_DMASR_TBUS               (1 << 2)  /* Bit 2:  Transmit buffer unavailable status */
-#define ETH_DMASR_TJTS               (1 << 3)  /* Bit 3:  Transmit jabber timeout status */
-#define ETH_DMASR_ROS                (1 << 4)  /* Bit 4:  Receive overflow status */
-#define ETH_DMASR_TUS                (1 << 5)  /* Bit 5:  Transmit underflow status */
-#define ETH_DMASR_RS                 (1 << 6)  /* Bit 6:  Receive status */
-#define ETH_DMASR_RBUS               (1 << 7)  /* Bit 7:  Receive buffer unavailable status */
-#define ETH_DMASR_RPSS               (1 << 8)  /* Bit 8:  Receive process stopped status */
-#define ETH_DMASR_RWTS               (1 << 9)  /* Bit 9:  Receive watchdog timeout status */
-#define ETH_DMASR_ETS                (1 << 10) /* Bit 10: Early transmit status */
-#define ETH_DMASR_FBES               (1 << 13) /* Bit 13: Fatal bus error status */
-#define ETH_DMASR_ERS                (1 << 14) /* Bit 14: Early receive status */
-#define ETH_DMASR_AIS                (1 << 15) /* Bit 15: Abnormal interrupt summary */
-#define ETH_DMASR_NIS                (1 << 16) /* Bit 16: Normal interrupt summary */
+#define ETH_DMAINT_TI                (1 << 0)  /* Bit 0:  Transmit interrupt */
+#define ETH_DMAINT_TPSI              (1 << 1)  /* Bit 1:  Transmit process stopped interrupt */
+#define ETH_DMAINT_TBUI              (1 << 2)  /* Bit 2:  Transmit buffer unavailable interrupt */
+#define ETH_DMAINT_TJTI              (1 << 3)  /* Bit 3:  Transmit jabber timeout interrupt */
+#define ETH_DMAINT_ROI               (1 << 4)  /* Bit 4:  Overflow interrupt */
+#define ETH_DMAINT_TUI               (1 << 5)  /* Bit 5:  Underflow interrupt */
+#define ETH_DMAINT_RI                (1 << 6)  /* Bit 6:  Receive interrupt */
+#define ETH_DMAINT_RBUI              (1 << 7)  /* Bit 7:  Receive buffer unavailable interrupt */
+#define ETH_DMAINT_RPSI              (1 << 8)  /* Bit 8:  Receive process stopped interrupt */
+#define ETH_DMAINT_RWTI              (1 << 9)  /* Bit 9:  Receive watchdog timeout interrupt */
+#define ETH_DMAINT_ETI               (1 << 10) /* Bit 10: Early transmit interrupt */
+#define ETH_DMAINT_FBEI              (1 << 13) /* Bit 13: Fatal bus error interrupt */
+#define ETH_DMAINT_ERI               (1 << 14) /* Bit 14: Early receive interrupt */
+#define ETH_DMAINT_AIS               (1 << 15) /* Bit 15: Abnormal interrupt summary */
+#define ETH_DMAINT_NIS               (1 << 16) /* Bit 16: Normal interrupt summary */
+
+/* Ethernet DMA status register (in addition to the interrupt bits above */
+
 #define ETH_DMASR_RPS_SHIFT          (17)      /* Bits 17-19: Receive process state */
 #define ETH_DMASR_RPS_MASK           (7 << ETH_DMASR_RPS_SHIFT)
 #  define ETH_DMASR_RPS_STOPPED      (0 << ETH_DMASR_RPS_SHIFT) /* 000: Stopped: Reset or Stop Receive Command issued */
@@ -619,24 +624,6 @@
 #define ETH_DMAOMR_DFRF              (1 << 24) /* Bit 24: Disable flushing of received frames */
 #define ETH_DMAOMR_RSF               (1 << 25) /* Bit 25: Receive store and forward */
 #define ETH_DMAOMR_DTCEFD            (1 << 26) /* Bit 26: Dropping of TCP/IP checksum error frames disable */
-
-/* Ethernet DMA interrupt enable register */
-
-#define ETH_DMAIER_TIE               (1 << 0)  /* Bit 0:  Transmit interrupt enable */
-#define ETH_DMAIER_TPSIE             (1 << 1)  /* Bit 1:  Transmit process stopped interrupt enable */
-#define ETH_DMAIER_TBUIE             (1 << 2)  /* Bit 2:  Transmit buffer unavailable interrupt enable */
-#define ETH_DMAIER_TJTIE             (1 << 3)  /* Bit 3:  Transmit jabber timeout interrupt enable */
-#define ETH_DMAIER_ROIE              (1 << 4)  /* Bit 4:  Overflow interrupt enable */
-#define ETH_DMAIER_TUIE              (1 << 5)  /* Bit 5:  Underflow interrupt enable */
-#define ETH_DMAIER_RIE               (1 << 6)  /* Bit 6:  Receive interrupt enable */
-#define ETH_DMAIER_RBUIE             (1 << 7)  /* Bit 7:  Receive buffer unavailable interrupt enable */
-#define ETH_DMAIER_RPSIE             (1 << 8)  /* Bit 8:  Receive process stopped interrupt enable */
-#define ETH_DMAIER_RWTIE             (1 << 9)  /* Bit 9:  Receive watchdog timeout interrupt enable */
-#define ETH_DMAIER_ETIE              (1 << 10) /* Bit 10: Early transmit interrupt enable */
-#define ETH_DMAIER_FBEIE             (1 << 13) /* Bit 13: Fatal bus error interrupt enable */
-#define ETH_DMAIER_ERIE              (1 << 14) /* Bit 14: Early receive interrupt enable */
-#define ETH_DMAIER_AISE              (1 << 15) /* Bit 15: Abnormal interrupt summary enable */
-#define ETH_DMAIER_NISE              (1 << 16) /* Bit 16: Normal interrupt summary enable */
 
 /* Ethernet DMA missed frame and buffer overflow counter register */
 
