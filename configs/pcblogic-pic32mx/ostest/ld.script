@@ -70,6 +70,7 @@ MEMORY
 
 	kseg1_reset    (rx) : ORIGIN = 0xbfc00000, LENGTH = 384
 	kseg1_genexcpt (rx) : ORIGIN = 0xbfc00180, LENGTH = 128
+	kseg1_ebexcpt  (rx) : ORIGIN = 0xbfc00200, LENGTH = 128
 	kseg1_bevexcpt (rx) : ORIGIN = 0xbfc00380, LENGTH = 128
 	kseg1_intexcpt (rx) : ORIGIN = 0xbfc00400, LENGTH = 128
 	kseg1_dbgexcpt (rx) : ORIGIN = 0xbfc00480, LENGTH = 16
@@ -124,6 +125,11 @@ SECTIONS
 	{
 		KEEP (*(.gen_excpt))
 	} > kseg1_genexcpt
+
+	.ebase_excpt :
+	{
+		KEEP (*(.ebase_excpt))
+	} > kseg1_ebexcpt
 
 	.bev_excpt :
 	{

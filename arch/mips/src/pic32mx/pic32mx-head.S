@@ -161,8 +161,9 @@ __reset:
  * Name: _gen_exception
  *
  * Description:
- *   General Exception Vector Handler.  Jumps to _exception_handler.  NOTE:
- *   we set the BEV bit in the status register so all interrupt vectors
+ *   General Exception Vector Handler.  Jumps to _exception_handler. This
+ *   vector will be positioned at 0xbfc00180 by the linker script. NOTE:
+ *   If we set the BEV bit in the status register so all interrupt vectors
  *   should go through the _bev_exception.
  *
  * Input Parameters:
@@ -183,10 +184,39 @@ _gen_exception:
 	.end _gen_exception
 
 /****************************************************************************
+ * Name: _ebase_exception
+ *
+ * Description:
+ *   Interrupt Exception Vector Handler.  Jumps to _int_handler.  This
+ *   vector will be positioned at 0xbfc00200 by the linker script. NOTE:
+ *   Several vectors (JTAG, TLB fills, etc.) could come through this vector.
+ *   However, this is intended to serve vectors in PIC32MX single vector
+ *   mode:  The EBASE register will be set to 0xbfc00000 and the vector
+ *   should go to EBASE + 0x0200.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Does not return
+ *
+ ****************************************************************************/
+
+	.section .ebase_excpt,"ax",@progbits
+	.set	noreorder
+	.ent	_ebase_exception
+_ebase_exception:
+	la		k0, _int_handler
+	jr		k0
+	nop
+	.end _ebase_exception
+
+/****************************************************************************
  * Name: _bev_exception
  *
  * Description:
- *   Boot Exception Vector Handler.  Jumps to _exception_handler
+ *   Boot Exception Vector Handler.  Jumps to _exception_handler.  This
+ *   vector will be positioned at 0xbfc00380 by the linker script. 
  *
  * Input Parameters:
  *   None
@@ -209,7 +239,8 @@ _bev_exception:
  * Name: _int_exception
  *
  * Description:
- *   Interrupt Exception Vector Handler.  Jumps to _int_handler
+ *   Interrupt Exception Vector Handler.  Jumps to _int_handler.  This
+ *   vector will be positioned at 0xbfc00400 by the linker script. 
  *
  * Input Parameters:
  *   None
