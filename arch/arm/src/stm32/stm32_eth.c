@@ -1775,9 +1775,63 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
 
 static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
 {
+  uint32_t regval;
+  int i;
+
+  /* Enable Ethernet Rx interrrupt */
+
+  for (i = 0; i < CONFIG_STM32_ETH_RXNBUFFERS; i++)
+    {
+      /* Enable the DMA Rx Desc receive interrupt */
+ 
+       priv->rxtable[i].rdes1 &= ~ETH_RDES1_DIC;
+    }
+
+#ifdef CHECKSUM_BY_HARDWARE
+  /* Enable the checksum insertion for the Tx frames */
+
+  for (i = 0; i < CONFIG_STM32_ETH_TXNBUFFERS; i++)
+    {
+      /* Set the selected DMA Tx desc checksum insertion control */
+
+      priv->txtable[i].tdes0 |= ETH_TDES0_CIC_ALL;
+    }
+#endif
+
   /* Enable RX and TX */
 #warning "Missing Logic"
   
+  /* Enable transmit state machine of the MAC for transmission on the MII */  
+
+  regval  = getreg32(STM32_ETH_MACCR);
+  regval |= ETH_MACCR_TE;
+  putreg32(regval, STM32_ETH_MACCR);
+
+  /* Flush Transmit FIFO */
+
+  regval  = getreg32(STM32_ETH_DMAOMR);
+  regval |= ETH_DMAOMR_FTF;
+  putreg32(regval, STM32_ETH_DMAOMR);
+
+  /* Enable receive state machine of the MAC for reception from the MII */  
+
+  /* Enables or disables the MAC reception. */
+
+  regval  = getreg32(STM32_ETH_MACCR);
+  regval |= ETH_MACCR_RE;
+  putreg32(regval, STM32_ETH_MACCR);
+ 
+  /* Start DMA transmission */
+
+  regval  = getreg32(STM32_ETH_DMAOMR);
+  regval |= ETH_DMAOMR_ST;
+  putreg32(regval, STM32_ETH_DMAOMR);
+ 
+  /* Start DMA reception */
+
+  regval  = getreg32(STM32_ETH_DMAOMR);
+  regval |= ETH_DMAOMR_SR;
+  putreg32(regval, STM32_ETH_DMAOMR);
 
   /* Enable Ethernet DMA interrupts.
    *
