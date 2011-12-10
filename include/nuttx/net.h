@@ -111,10 +111,6 @@ struct socketlist
 };
 #endif
 
-/* This defines a bitmap big enough for one bit for each socket option */
-
-typedef uint16_t sockopt_t;
-
 /* Callback from netdev_foreach() */
 
 struct uip_driver_s; /* Forward reference.  See net/uip/uip-arch.h */
