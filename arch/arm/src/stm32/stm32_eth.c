@@ -428,6 +428,29 @@
       ETH_DMABMR_RDP(32) | ETH_DMABMR_USP | ETH_DMABMR_AAB)
 #endif
 
+/* Interrupt bit sets *******************************************************/
+/* All interrupts in the normal and abnormal interrupt summary */
+
+#define ETH_DMAINT_NORMAL \
+  (ETH_DMAINT_TI | ETH_DMAINT_TBUI |ETH_DMAINT_RI | ETH_DMAINT_ERI)
+
+#define ETH_DMAINT_ABNORMAL \
+  (ETH_DMAINT_TPSI | ETH_DMAINT_TJTI | ETH_DMAINT_ROI | ETH_DMAINT_TUI | \
+   ETH_DMAINT_RBUI | ETH_DMAINT_RPSI | ETH_DMAINT_RWTI | ETH_DMAINT_ETI | \
+   ETH_DMAINT_FBEI)
+
+/* Normal receive, transmit, error interrupt enable bit sets */
+
+#define ETH_DMAINT_RECV_ENABLE    (ETH_DMAINT_NIS | ETH_DMAINT_RI)
+#define ETH_DMAINT_XMIT_ENABLE    (ETH_DMAINT_NIS | ETH_DMAINT_TI)
+#define ETH_DMAINT_XMIT_DISABLE   (ETH_DMAINT_TI)
+
+#ifdef CONFIG_DEBUG_NET
+#  define ETH_DMAINT_ERROR_ENABLE (ETH_DMAINT_AIS | ETH_DMAINT_ABNORMAL)
+#else
+#  define ETH_DMAINT_ERROR_ENABLE (0)
+#endif
+
 /* Helpers ******************************************************************/
 /* This is a helper pointer for accessing the contents of the Ethernet
  * header
@@ -531,6 +554,8 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv);
 
 static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 {
+  uint32_t regval;
+
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
    * must have assured that there is no transmission in progress.
@@ -541,6 +566,10 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
   /* Send the packet: address=priv->dev.d_buf, length=priv->dev.d_len */
 
   /* Enable Tx interrupts */
+
+  regval  = getreg32(STM32_ETH_DMAIER);
+  regval |= ETH_DMAINT_XMIT_ENABLE;
+  putreg32(regval, STM32_ETH_DMAIER);
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -683,13 +712,19 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 
 static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 {
+  uint32_t regval;
+
   /* Check for errors and update statistics */
 
-  /* If no further xmits are pending, then cancel the TX timeout and
-   * disable further Tx interrupts.
-   */
+  /* If no further xmits are pending, then cancel the TX timeout */
 
   wd_cancel(priv->txtimeout);
+
+  /* And disable further Tx interrupts. */
+
+  regval = getreg32(STM32_ETH_DMAIER);
+  regval &= ~ETH_DMAINT_XMIT_DISABLE;
+  putreg32(regval, STM32_ETH_DMAIER);
 
   /* Then poll uIP for new XMIT data */
 
@@ -716,22 +751,79 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 static int stm32_interrupt(int irq, FAR void *context)
 {
   register FAR struct stm32_ethmac_s *priv = &g_stm32ethmac[0];
+  uint32_t dmasr;
 
-  /* Get and clear interrupt status bits */
+  /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
 
-  /* Handle interrupts according to status bit settings */
+  dmasr = getreg32(STM32_ETH_DMASR);
 
-  /* Check if we received an incoming packet, if so, call stm32_receive() */
-
-  stm32_receive(priv);
-
-  /* Check if a packet transmission just completed.  If so, call stm32_txdone.
-   * This may disable further Tx interrupts if there are no pending
-   * tansmissions.
+  /* Mask only enabled interrupts.  This depends on the fact that the interrupt
+   * related bits (0-16) correspond in these two registers.
    */
 
-  stm32_txdone(priv);
+  dmasr &= ~getreg32(STM32_ETH_DMAIER);
 
+  /* Check if there are pending "normal" interrupts */
+
+  if ((dmasr & ETH_DMAINT_NIS) != 0)
+    {
+      /* Yes.. Check if we received an incoming packet, if so, call
+       * stm32_receive()
+       */
+
+      if ((dmasr & ETH_DMAINT_RI) != 0)
+        {
+          /* Clear the pending receive interrupt */
+
+          putreg32(ETH_DMAINT_RI, STM32_ETH_DMASR);
+
+          /* Handle the received package */
+
+          stm32_receive(priv);
+        }
+
+      /* Check if a packet transmission just completed.  If so, call
+       * stm32_txdone(). This may disable further Tx interrupts if there
+       * are no pending tansmissions.
+       */
+
+      if ((dmasr & ETH_DMAINT_TI) != 0)
+        {
+          /* Clear the pending receive interrupt */
+
+          putreg32(ETH_DMAINT_TI, STM32_ETH_DMASR);
+
+          /* Check if there are pending transmissions */
+
+          stm32_txdone(priv);
+        }
+
+      /* Clear the pending normal summary interrupt */
+
+      putreg32(ETH_DMAINT_NIS, STM32_ETH_DMASR);
+    }
+
+  /* Handle error interrupt only if CONFIG_DEBUG_NET is eanbled */
+
+#ifdef CONFIG_DEBUG_NET
+
+  /* Check if there are pending "anormal" interrupts */
+
+  if ((dmasr & ETH_DMAINT_AIS) != 0)
+    {
+      /* Just let the user know what happened */
+
+      nlldbg("Abormal event(s): %08x\n", dmasr);
+
+      /* Clear all pending abnormal events */
+
+      putreg32(ETH_DMAINT_ABNORMAL, STM32_ETH_DMASR);
+
+      /* Clear the pending normal summary interrupt */
+
+      putreg32(ETH_DMAINT_NIS, STM32_ETH_DMASR);
+    }
+#endif
   return OK;
 }
 
@@ -1498,6 +1590,24 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
   regval |= DMABMR_SET_MASK;
   putreg32(regval, STM32_ETH_DMABMR);
 
+  /* Enable Ethernet DMA interrupts.
+   *
+   * The STM32 hardware supports two interrupts: (1) one dedicated to normal
+   * Ethernet operations and the other, used only for the Ethernet wakeup
+   * event.  The wake-up interrupt is not used by this driver.
+   *
+   * The first Ethernet vector is reserved for interrupts generated by the
+   * MAC and the DMA.  The MAC provides PMT and time stamp trigger interrupts,
+   * neither of which are used by this driver.
+   *
+   * Ethernet DMA supports two classes of interrupts: Normal interrupt
+   * summary (NIS) and Abnormal interrupt summary (AIS) with a variety
+   * individual normal and abnormal interrupting events.  Here only
+   * the normal receive event is enabled (unless DEBUG is enabled).  Transmit
+   * events will only be enabled when a transmit interrupt is expected.
+   */
+
+  putreg32((ETH_DMAINT_RECV_ENABLE | ETH_DMAINT_ERROR_ENABLE), STM32_ETH_DMAIER);
   return OK;
 }
 
