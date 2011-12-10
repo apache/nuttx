@@ -144,7 +144,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
 
   lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
-  if ((getreg32(STM32_RCC_APB1ENR) & RCC_AH1BENR_GPIOEN(port)) != 0)
+  if ((getreg32(STM32_RCC_APB1ENR) & RCC_AHB1ENR_GPIOEN(port)) != 0)
     {
       lldbg("  MODE: %08x OTYPE: %04x     OSPEED: %08x PUPDR: %08x\n",
             getreg32(base + STM32_GPIO_MODER_OFFSET), getreg32(base + STM32_GPIO_OTYPER_OFFSET),
