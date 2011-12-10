@@ -114,7 +114,9 @@ void up_irqinitialize(void)
   regval |= CP0_STATUS_BEV;
   cp0_putstatus(regval);
 
-  /* Set the EBASE value to the beginning of boot FLASH */
+  /* Set the EBASE value to the beginning of boot FLASH.  In single-vector
+   * mode, interrupt vectors should go to EBASE + 0x0200 0r 0xbfc00200.
+   */
 
   cp0_putebase(0xbfc00000);
 
@@ -128,10 +130,10 @@ void up_irqinitialize(void)
   regval |= CP0_CAUSE_IV; 
   cp0_putcause(regval);
 
-  /* Clear the EXL bit in the STATUS register */
+  /* Clear the EXL and BEV bits in the STATUS register */
 
   regval  = cp0_getstatus();
-  regval &= ~CP0_STATUS_EXL;
+  regval &= ~(CP0_STATUS_EXL | CP0_STATUS_BEV);
   cp0_putstatus(regval);
 
   /* Configure multi- or single- vector interrupts */
