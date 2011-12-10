@@ -1576,7 +1576,7 @@ int stm32_ethinitialize(int intf)
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(inf < STM32_NETHERNET);
+  DEBUGASSERT(intf < STM32_NETHERNET);
   priv = &g_stm32ethmac[intf];
 
   /* Initialize the driver structure */
