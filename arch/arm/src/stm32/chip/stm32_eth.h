@@ -349,6 +349,7 @@
 
 #define ETH_MACIMR_PMTIM             (1 << 3)  /* Bit 3: PMT interrupt mask */
 #define ETH_MACIMR_TSTIM             (1 << 9)  /* Bit 9: Time stamp trigger interrupt mask */
+#define ETH_MACIMR_ALLINTS           (ETH_MACIMR_PMTIM|ETH_MACIMR_TSTIM)
 
 /* Ethernet MAC address 0 high register */
 
@@ -643,11 +644,176 @@
 /* Ethernet DMA current host transmit buffer address register (32-bit address) */
 /* Ethernet DMA current host receive buffer address register (32-bit address) */
 
+/* DMA Descriptors **********************************************************************************/
+/* TDES0: Transmit descriptor Word0 */
+
+#define ETH_TDES0_DB                 (1 << 0)  /* Bit 0:  Deferred bit */
+#define ETH_TDES0_UF                 (1 << 1)  /* Bit 1:  Underflow error */
+#define ETH_TDES0_ED                 (1 << 2)  /* Bit 2:  Excessive deferral */
+#define ETH_TDES0_CC_SHIFT           (3)       /* Bits 3-6: Collision count */
+#define ETH_TDES0_CC_MASK            (15 << ETH_TDES0_CC_SHIFT)
+#define ETH_TDES0_VF                 (1 << 7)  /* Bit 7:  VLAN frame */
+#define ETH_TDES0_EC                 (1 << 8)  /* Bit 8:  Excessive collision */
+#define ETH_TDES0_LCO                (1 << 9)  /* Bit 9:  Late collision */
+#define ETH_TDES0_NC                 (1 << 10) /* Bit 10: No carrier */
+#define ETH_TDES0_LCA                (1 << 11) /* Bit 11: Loss of carrier */
+#define ETH_TDES0_IPE                (1 << 12) /* Bit 12: IP payload error */
+#define ETH_TDES0_FF                 (1 << 13) /* Bit 13: Frame flushed */
+#define ETH_TDES0_JT                 (1 << 14) /* Bit 14: Jabber timeout */
+#define ETH_TDES0_ES                 (1 << 15) /* Bit 15: Error summary */
+#define ETH_TDES0_IHE                (1 << 16) /* Bit 16: IP header error */
+#define ETH_TDES0_TTSS               (1 << 17) /* Bit 17: Transmit time stamp status */
+#define ETH_TDES0_TCH                (1 << 20) /* Bit 20: Second address chained */
+#define ETH_TDES0_TER                (1 << 21) /* Bit 21: Transmit end of ring */
+#define ETH_TDES0_CIC_SHIFT          (22)      /* Bits 22-23: Checksum insertion control */
+#define ETH_TDES0_CIC_MASK           (3 << ETH_TDES0_CIC_SHIFT)
+#  define ETH_TDES0_CIC_DISABLED     (0 << ETH_TDES0_CIC_SHIFT) /* Checksum disabled */
+#  define ETH_TDES0_CIC_IH           (1 << ETH_TDES0_CIC_SHIFT) /* IP header checksum enabled */
+#  define ETH_TDES0_CIC_IHPL         (2 << ETH_TDES0_CIC_SHIFT) /* IP header and payload checksum enabled */
+#  define ETH_TDES0_CIC_ALL          (3 << ETH_TDES0_CIC_SHIFT) /* IP Header, payload, and pseudo-header checksum enabled */
+#define ETH_TDES0_TTSE               (1 << 25) /* Bit 25: Transmit time stamp enable */
+#define ETH_TDES0_DP                 (1 << 26) /* Bit 26: Disable pad */
+#define ETH_TDES0_DC                 (1 << 27) /* Bit 27: Disable CRC */
+#define ETH_TDES0_FS                 (1 << 28) /* Bit 28: First segment */
+#define ETH_TDES0_LS                 (1 << 29) /* Bit 29: Last segment */
+#define ETH_TDES0_IC                 (1 << 30) /* Bit 30: Interrupt on completion */
+#define ETH_TDES0_OWN                (1 << 31) /* Bit 31: Own bit */
+
+/* TDES1: Transmit descriptor Word1 */
+
+#define ETH_TDES1_TBS1_SHIFT         (0)  /* Bits 0-12: Transmit buffer 1 size */
+#define ETH_TDES1_TBS1_MASK          (0x1fff << ETH_TDES1_TBS1_SHIFT)
+#define ETH_TDES1_TBS2_SHIFT         (16)  /* Bits 16-28: Transmit buffer 2 size */
+#define ETH_TDES1_TBS2_MASK          (0x1fff << ETH_TDES1_TBS2_SHIFT)
+
+/* TDES2: Transmit descriptor Word2 (32-bit address) */
+/* TDES3: Transmit descriptor Word3 (32-bit address) */
+/* TDES6: Transmit descriptor Word6 (32-bit time stamp) */
+/* TDES7: Transmit descriptor Word7 (32-bit time stamp) */
+
+/* RDES0: Receive descriptor Word0 */
+
+#define ETH_RDES0_PCE                (1 << 0)  /* Bit 0:  Payload checksum error */
+#define ETH_RDES0_ESA                (1 << 0)  /* Bit 0:  Extended status available */
+#define ETH_RDES0_CE                 (1 << 1)  /* Bit 1:  CRC error */
+#define ETH_RDES0_DBE                (1 << 2)  /* Bit 2:  Dribble bit error */
+#define ETH_RDES0_RE                 (1 << 3)  /* Bit 3:  Receive error */
+#define ETH_RDES0_RWT                (1 << 4)  /* Bit 4:  Receive watchdog timeout */
+#define ETH_RDES0_FT                 (1 << 5)  /* Bit 5:  Frame type */
+#define ETH_RDES0_LCO                (1 << 6)  /* Bit 6:  Late collision */
+#define ETH_RDES0_TSV                (1 << 7)  /* Bit 7:  Time stamp valid */
+#define ETH_RDES0_IPHCE              (1 << 7)  /* Bit 7:  IPv header checksum error */
+#define ETH_RDES0_LS                 (1 << 8)  /* Bit 8:  Last descriptor */
+#define ETH_RDES0_FS                 (1 << 9)  /* Bit 9:  First descriptor */
+#define ETH_RDES0_VLAN               (1 << 10) /* Bit 10: VLAN tag */
+#define ETH_RDES0_OE                 (1 << 11) /* Bit 11: Overflow error */
+#define ETH_RDES0_LE                 (1 << 12) /* Bit 12: Length error */
+#define ETH_RDES0_SAF                (1 << 13) /* Bit 13: Source address filter fail */
+#define ETH_RDES0_DE                 (1 << 14) /* Bit 14: Descriptor error */
+#define ETH_RDES0_ES                 (1 << 15) /* Bit 15: Error summary */
+#define ETH_RDES0_FL_SHIFT           (16)      /* Bits 16-29: Frame length */
+#define ETH_RDES0_FL_MASK            (0x3fff << ETH_RDES0_FL_SHIFT)
+#define ETH_RDES0_AFM                (1 << 30) /* Bit 30: Destination address filter fail */
+#define ETH_RDES0_OWN                (1 << 31) /* Bit 31: Own bit */
+
+/* RDES1: Receive descriptor Word1 */
+
+#define ETH_RDES1_RBS1_SHIFT         (0)      /* Bits 0-12: Receive buffer 1 size */
+#define ETH_RDES1_RBS1_MASK          (0x1fff << ETH_RDES1_RBS1_SHIFT)
+#define ETH_RDES1_RCH                (1 << 14) /* Bit 14: Second address chained */
+#define ETH_RDES1_RER                (1 << 15) /* Bit 15: Receive end of ring */
+#define ETH_RDES1_DIC                (1 << 31) /* Bit 31: Disable interrupt on completion */
+#define ETH_RDES1_RBS2_SHIFT         (16)      /* Bits 16-28: Receive buffer 2 size */
+#define ETH_RDES1_RBS2_MASK          (0x1fff << ETH_RDES1_RBS2_SHIFT)
+
+/* RDES2: Receive descriptor Word2 (32-bit address) */
+/* RDES3: Receive descriptor Word3 (32-bit address) */
+
+/* RDES4: Receive descriptor Word4 */
+
+#define ETH_RDES4_PV                 (1 << 13) /* Bit 13: PTP version */
+#define ETH_RDES4_PFT                (1 << 12) /* Bit 12: PTP frame type */
+#define ETH_RDES4_PMT_SHIFT          (8)       /* Bits 8-11: PTP message type */
+#define ETH_RDES4_PMT_MASK           (15 << ETH_RDES4_PMT_SHIFT)
+#  define ETH_RDES4_PMT_NONE         (0 << ETH_RDES4_PMT_SHIFT) /* No PTP message received */
+#  define ETH_RDES4_PMT_SYNC         (1 << ETH_RDES4_PMT_SHIFT) /* SYNC (all clock types) */
+#  define ETH_RDES4_PMT_FOLLOWUP     (2 << ETH_RDES4_PMT_SHIFT) /* Follow_Up (all clock types) */
+#  define ETH_RDES4_PMT_DELAYREQ     (3 << ETH_RDES4_PMT_SHIFT) /* Delay_Req (all clock types) */
+#  define ETH_RDES4_PMT_DELAYRESP    (4 << ETH_RDES4_PMT_SHIFT) /* Delay_Resp (all clock types) */
+#  define ETH_RDES4_PMT_PDELREQAM    (5 << ETH_RDES4_PMT_SHIFT) /* 0101: Pdelay_Req (in peer-to-peer
+                                                                 * transparent clock) or Announce (in
+                                                                 * ordinary or boundary clock) */
+#  define ETH_RDES4_PMT_PDELREQMM    (6 << ETH_RDES4_PMT_SHIFT) /* Pdelay_Resp (in peer-to-peer
+                                                                 * transparent clock) or Management (in
+                                                                 * ordinary or boundary clock) */
+#  define ETH_RDES4_PMT_PDELREQFUS   (7 << ETH_RDES4_PMT_SHIFT) /* Pdelay_Resp_Follow_Up (in
+                                                                 * peer-to-peer transparent clock) or
+                                                                 * Signaling (for ordinary or boundary
+                                                                 * clock) */
+#define ETH_RDES4_IPV6PR             (1 << 7)  /* Bit 7:  IPv6 packet received */
+#define ETH_RDES4_IPV4PR             (1 << 6)  /* Bit 6:  IPv4 packet received */
+#define ETH_RDES4_IPCB               (1 << 5)  /* Bit 5:  IP checksum bypassed */
+#define ETH_RDES4_IPPE               (1 << 4)  /* Bit 4:  IP payload error */
+#define ETH_RDES4_IPHE               (1 << 3)  /* Bit 3:  IP header error */
+#define ETH_RDES4_IPPT_SHIFT         (0)       /* Bits 0-2: IP payload type */
+#define ETH_RDES4_IPPT_MASK          (7 << ETH_RDES4_IPPT_SHIFT)
+# define ETH_RDES4_IPPT_UDP          (1 << ETH_RDES4_IPPT_SHIFT) /* UDP payload in IP datagram */
+# define ETH_RDES4_IPPT_TCP          (2 << ETH_RDES4_IPPT_SHIFT) /* TCP payload in IP datagram */ 
+# define ETH_RDES4_IPPT_ICMP         (3 << ETH_RDES4_IPPT_SHIFT) /* ICMP payload in IP datagram */
+
+/* RDES5: Receive descriptor Word5 - Reserved */
+/* RDES6: Receive descriptor Word6 (32-bit time stamp) */
+/* RDES7: Receive descriptor Word7 (32-bit time stamp) */
+
 /****************************************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/* Ethernet TX DMA Descriptor */ 
+
+struct eth_txdesc_s
+{
+  /* Normal DMA descriptor words */
+
+  volatile uint32_t tdes0;   /* Status */
+  volatile uint32_t tdes1;   /* Control and buffer1/2 lengths */
+  volatile uint32_t tdes2;   /* Buffer1 address pointer */
+  volatile uint32_t tdes3;   /* Buffer2 or next descriptor address pointer */
+
+  /* Enhanced DMA descriptor words with time stamp */
+
+#ifdef CONFIG_STM32_ETH_ENHANCEDDESC
+  volatile uint32_t tdes4;   /* Reserved */
+  volatile uint32_t tdes5;   /* Reserved */
+  volatile uint32_t tdes6;   /* Time Stamp Low value for transmit and receive */
+  volatile uint32_t tdes7;   /* Time Stamp High value for transmit and receive */
+#endif
+};
+
+/* Ethernet RX DMA Descriptor */ 
+
+struct eth_rxdesc_s
+{
+  volatile uint32_t rdes0;   /* Status */
+  volatile uint32_t rdes1;   /* Control and buffer1/2 lengths */
+  volatile uint32_t rdes2;   /* Buffer1 address pointer */
+  volatile uint32_t rdes3;   /* Buffer2 or next descriptor address pointer */
+
+  /* Enhanced DMA descriptor words with time stamp and PTP support */
+
+#ifdef CONFIG_STM32_ETH_ENHANCEDDESC
+  volatile uint32_t rdes4;   /* Extended status for PTP receive descriptor */
+  volatile uint32_t rdes5;   /* Reserved */
+  volatile uint32_t rdes6;   /* Time Stamp Low value for transmit and receive */
+  volatile uint32_t rdes7;   /* Time Stamp High value for transmit and receive */
+#endif
+};
+
+/****************************************************************************************************
+ * Public Functions
+ ****************************************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -656,7 +822,6 @@ extern "C" {
 #else
 #define EXTERN extern
 #endif
-
 
 #endif /* __ASSEMBLY__ */
 #endif /* STM32_NETHERNET > 0 */
