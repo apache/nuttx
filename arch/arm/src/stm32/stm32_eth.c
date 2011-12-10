@@ -131,12 +131,13 @@
 #  warning "CONFIG_STM32_ETH_PTP is not yet supported"
 #endif
 
-/* This driver always uses enhanced descriptors.  However, this would not be
- * the cased if support is added for stamping and/or IPv4 checksum offload 
+/* This driver does not use enhanced descriptors.  Enhanced descriptors must
+ * be used, however, if time stamping or and/or IPv4 checksum offload is
+ * supported.
  */
 
-#define CONFIG_STM32_ETH_ENHANCEDDESC 1
-#undef  CONFIG_STM32_ETH_HWCHECKSUM
+#undef CONFIG_STM32_ETH_ENHANCEDDESC
+#undef CONFIG_STM32_ETH_HWCHECKSUM
 
 /* Ethernet buffer sizes and numbers */
 
@@ -462,6 +463,13 @@
  * Private Types
  ****************************************************************************/
 
+struct eth_rxframe_info_s
+{
+  volatile struct stm2_ethdesc_s *rxfirst;  /* First Segment Rx Desc */
+  volatile struct stm2_ethdesc_s *rxlast;   /* Last Segment Rx Desc */
+  volatile uint32_t               segcount; /* Segment count */
+};
+
 /* The stm32_ethmac_s encapsulates all state information for a single hardware
  * interface
  */
@@ -477,6 +485,26 @@ struct stm32_ethmac_s
   /* This holds the information visible to uIP/NuttX */
 
   struct uip_driver_s dev;  /* Interface understood by uIP */
+
+  /* Used to track transmit and receive descriptors */
+
+  volatile struct eth_txdesc_s *txdesc;
+  volatile struct eth_rxdesc_s *rxdesc;
+
+  /* Frame info */
+
+  struct eth_rxframe_info_s rxframe;
+  volatile struct eth_rxframe_info_s *rxframeinfo;
+
+  /* Descriptor allocations */
+
+  struct eth_rxdesc_s rxtable[CONFIG_STM32_ETH_RXNBUFFERS];
+  struct eth_txdesc_s txtable[CONFIG_STM32_ETH_TXNBUFFERS];
+
+  /* Buffer allocations */
+
+  uint8_t rxbuffer[CONFIG_STM32_ETH_RXNBUFFERS*CONFIG_STM32_ETH_RXBUFSIZE];
+  uint8_t txbuffer[CONFIG_STM32_ETH_TXNBUFFERS*CONFIG_STM32_ETH_TXBUFSIZE];
 };
 
 /****************************************************************************
@@ -515,6 +543,11 @@ static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
+/* Descriptor Initialization */
+
+static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv);
+static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv);
+
 /* PHY Initialization */
 
 static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
@@ -526,6 +559,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv);
 static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv);
 static void stm32_ethreset(FAR struct stm32_ethmac_s *priv);
 static int stm32_macconfig(FAR struct stm32_ethmac_s *priv);
+static int stm32_macenable(FAR struct stm32_ethmac_s *priv);
 static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv);
 
 /****************************************************************************
@@ -1091,6 +1125,136 @@ static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
+ * Function: stm32_txdescinit
+ *
+ * Description:
+ *   Initializes the DMA TX descriptors in chain mode.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
+{
+  struct eth_txdesc_s *txdesc;
+  int i;
+  
+  /* Set the priv->txdesc pointer with the first descriptor in the table */
+
+  priv->txdesc = priv->txtable;
+
+  /* Initialize each TX descriptor */   
+
+  for (i = 0; i < CONFIG_STM32_ETH_TXNBUFFERS; i++)
+    {
+      txdesc = &priv->txtable[i];
+
+      /* Set Second Address Chained bit */
+
+      txdesc->tdes0 = ETH_TDES0_TCH;  
+       
+      /* Set Buffer1 address pointer */
+
+      txdesc->tdes2 = (uint32_t)(&priv->txbuffer[i*CONFIG_STM32_ETH_TXBUFSIZE]);
+    
+      /* Initialize the next descriptor with the Next Descriptor Polling Enable */
+
+      if( i < (CONFIG_STM32_ETH_TXNBUFFERS-1))
+        {
+          /* Set next descriptor address register with next descriptor base
+           * address
+           */
+
+          txdesc->tdes3 = (uint32_t)&priv->txtable[i+1];
+        }
+      else
+        {
+          /* For last descriptor, set next descriptor address register equal
+           * to the first descriptor base address
+           */
+
+          txdesc->tdes3 = (uint32_t)priv->txtable;  
+        }
+    }
+}
+
+/****************************************************************************
+ * Function: stm32_rxdescinit
+ *
+ * Description:
+ *   Initializes the DMA RX descriptors in chain mode.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
+{
+  struct eth_rxdesc_s *rxdesc;
+  int i;
+  
+  /* Set the priv->rxdesc pointer with the first one of the table list */
+
+  priv->rxdesc = priv->rxtable; 
+
+  /* Initialize each TX descriptor */   
+
+  for (i = 0; i < CONFIG_STM32_ETH_RXNBUFFERS; i++)
+    {
+      rxdesc = &priv->rxtable[i];
+
+      /* Set Own bit of the Rx descriptor rdes0 */
+
+      rxdesc->rdes0 = ETH_RDES0_OWN;
+
+      /* Set Buffer1 size and Second Address Chained bit */
+
+      rxdesc->rdes1 = ETH_RDES1_RCH | (uint32_t)CONFIG_STM32_ETH_RXBUFSIZE;  
+
+      /* Set Buffer1 address pointer */
+
+      rxdesc->rdes2 = (uint32_t)&priv->rxbuffer[i*CONFIG_STM32_ETH_RXBUFSIZE];
+    
+      /* Initialize the next descriptor with the Next Descriptor Polling Enable */
+
+      if( i < (CONFIG_STM32_ETH_RXNBUFFERS-1))
+        {
+          /* Set next descriptor address register with next descriptor base
+           * address
+           */
+
+          rxdesc->rdes3 = (uint32_t)&priv->rxtable[i+1];
+        }
+      else
+        {
+          /* For last descriptor, set next descriptor address register equal
+           * to the first descriptor base address
+           */
+
+          rxdesc->rdes3 = (uint32_t)priv->rxtable;  
+        }
+    }
+
+  /* Set Receive Descriptor List Address Register */
+
+  putreg32((uint32_t)priv->rxtable, STM32_ETH_DMARDLAR);
+
+  priv->rxframeinfo = &priv->rxframe;
+}
+
+/****************************************************************************
  * Function: stm32_phyread
  *
  * Description:
@@ -1590,6 +1754,31 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
   regval |= DMABMR_SET_MASK;
   putreg32(regval, STM32_ETH_DMABMR);
 
+  return OK;
+}
+
+/****************************************************************************
+ * Function: stm32_macenable
+ *
+ * Description:
+ *  Enable normal MAC operation.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
+{
+  /* Enable RX and TX */
+#warning "Missing Logic"
+  
+
   /* Enable Ethernet DMA interrupts.
    *
    * The STM32 hardware supports two interrupts: (1) one dedicated to normal
@@ -1599,8 +1788,11 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
    * The first Ethernet vector is reserved for interrupts generated by the
    * MAC and the DMA.  The MAC provides PMT and time stamp trigger interrupts,
    * neither of which are used by this driver.
-   *
-   * Ethernet DMA supports two classes of interrupts: Normal interrupt
+   */
+
+  putreg32(ETH_MACIMR_ALLINTS, STM32_ETH_MACIMR);
+  
+  /* Ethernet DMA supports two classes of interrupts: Normal interrupt
    * summary (NIS) and Abnormal interrupt summary (AIS) with a variety
    * individual normal and abnormal interrupting events.  Here only
    * the normal receive event is enabled (unless DEBUG is enabled).  Transmit
@@ -1649,7 +1841,23 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Initialize the MAC and DMA */
 
-  return stm32_macconfig(priv);
+  ret = stm32_macconfig(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Initialize Tx Descriptors list: Chain Mode */
+
+  stm32_txdescinit(priv);
+
+  /* Initialize Rx Descriptors list: Chain Mode  */
+
+  stm32_rxdescinit(priv);
+
+  /* Enable normal MAC operation */
+
+  return stm32_macenable(priv);
 }
 
 /****************************************************************************
