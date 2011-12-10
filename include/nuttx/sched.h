@@ -294,7 +294,15 @@ struct _TCB
 #endif
 
 };
+
+/* Certain other header files may also define this time to avoid circular header
+ * file inclusion issues.
+ */
+
+#ifndef __TCB_DEFINED__
 typedef struct _TCB _TCB;
+#define __TCB_DEFINED__
+#endif
 
 /* This is the callback type used by sched_foreach() */
 

@@ -379,7 +379,12 @@ EXTERN int close_blockdriver(FAR struct inode *inode);
 /* Used by the OS to clone stdin, stdout, stderr */
 
 #if CONFIG_NFILE_STREAMS > 0
+
+#ifndef __TCB_DEFINED__
 typedef struct _TCB _TCB;
+#define __TCB_DEFINED__
+#endif
+
 EXTERN FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR _TCB *tcb);
 #endif
 
