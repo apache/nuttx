@@ -419,4 +419,12 @@ Where <subdir> is one of the following:
     examples/ostest.  By default, this project assumes that you are
     using the DFU bootloader.
 
-    CONFIG_STM32_BUILDROOT=y	  : CodeSourcery under Windows
+    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+
+  nsh:
+  ---
+    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
+    Configuration enables both the serial and telnet NSH interfaces.
+
+    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+

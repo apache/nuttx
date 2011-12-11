@@ -2252,3 +2252,4 @@
 	  because CodeSourcery doesn't support hard flowing point!)
 	* arch/arm/src/stm32/chip/stm32_eth.h:  Add Ethernet register definitions
 	  for the STM32 F4.
+	* arch/arm/srcm/stm32/stm32_eth.c:  Adds an Ethernet driver for the STM32 F4.
