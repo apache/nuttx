@@ -149,6 +149,11 @@
 #ifndef CONFIG_STM32_ETH_BUFSIZE
 #  define CONFIG_STM32_ETH_BUFSIZE  CONFIG_NET_BUFSIZE
 #endif
+
+#if CONFIG_STM32_ETH_BUFSIZE > ETH_TDES1_TBS1_MASK
+#  error "CONFIG_STM32_ETH_BUFSIZE is too large"
+#endif
+
 #ifndef CONFIG_STM32_ETH_NRXDESC
 #  define CONFIG_STM32_ETH_NRXDESC 8
 #endif
@@ -156,11 +161,9 @@
 #  define CONFIG_STM32_ETH_NTXDESC 4
 #endif
 
-#if CONFIG_STM32_ETH_NTXDESC > 2
-#  define STM32_ETH_NFREEBUFFERS CONFIG_STM32_ETH_NTXDESC
-#else
-#  define STM32_ETH_NFREEBUFFERS 2
-#endif
+/* We need at least one more free buffer than transmit buffers */
+
+#define STM32_ETH_NFREEBUFFERS (CONFIG_STM32_ETH_NTXDESC+1)
 
 /* Clocking *****************************************************************/
 /* Set MACMIIAR CR bits depending on HCLK setting */
@@ -396,9 +399,9 @@
  * ETH_DMABMR_DSL   Bits 2-6: Descriptor skip length
  * ETH_DMABMR_EDFE  Bit 7: Enhanced descriptor format enable
  * ETH_DMABMR_PBL   Bits 8-13: Programmable burst length
- * ETH_DMABMR_RTPR  Bits 14-15: Rx Tx priority ratio
+ * ETH_DMABMR_RTPR  Bits 14-15: RX TX priority ratio
  * ETH_DMABMR_FB    Bit 16: Fixed burst
- * ETH_DMABMR_RDP   Bits 17-22: Rx DMA PBL
+ * ETH_DMABMR_RDP   Bits 17-22: RX DMA PBL
  * ETH_DMABMR_USP   Bit 23: Use separate PBL
  * ETH_DMABMR_FPM   Bit 24: 4xPBL mode
  * ETH_DMABMR_AAB   Bit 25: Address-aligned beats
@@ -418,9 +421,9 @@
  * ETH_DMABMR_DSL   Descriptor skip length             0
  * ETH_DMABMR_EDFE  Enhanced descriptor format enable  Depends on CONFIG_STM32_ETH_ENHANCEDDESC
  * ETH_DMABMR_PBL   Programmable burst length          32 beats
- * ETH_DMABMR_RTPR  Rx Tx priority ratio               2:1
+ * ETH_DMABMR_RTPR  RX TX priority ratio               2:1
  * ETH_DMABMR_FB    Fixed burst                        1 (enabled)
- * ETH_DMABMR_RDP   Rx DMA PBL                         32 beats
+ * ETH_DMABMR_RDP   RX DMA PBL                         32 beats
  * ETH_DMABMR_USP   Use separate PBL                   1 (enabled)
  * ETH_DMABMR_FPM   4xPBL mode                         0 (disabled)
  * ETH_DMABMR_AAB   Address-aligned beats              1 (enabled)
@@ -489,10 +492,13 @@ struct stm32_ethmac_s
 
   /* Used to track transmit and receive descriptors */
 
-  struct eth_txdesc_s *txdesc;      /* Next TX descriptor */
-  struct eth_rxdesc_s *rxdesc;      /* Next RX descriptor */
-  struct eth_rxdesc_s *rxfirst;     /* First RX descriptor of the segment */
-  uint32_t             segcount;    /* Segment count */
+  struct eth_txdesc_s *txhead;      /* Next available TX descriptor */
+  struct eth_rxdesc_s *rxhead;      /* Next available RX descriptor */
+
+  struct eth_txdesc_s *txtail;      /* First "in_flight" TX descriptor */
+  struct eth_rxdesc_s *rxcurr;      /* First RX descriptor of the segment */
+  uint16_t             segments;    /* RX segment count */
+  uint16_t             inflight;    /* Number of TX transfers "in_flight" */
   sq_queue_t           freeb;       /* The free buffer list */
 
   /* Descriptor allocations */
@@ -530,9 +536,10 @@ static int  stm32_uiptxpoll(struct uip_driver_s *dev);
 /* Interrupt handling */
 
 static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
-                              FAR struct eth_rxdesc_s *rxfirst, int nsegments);
+                              FAR struct eth_rxdesc_s *rxfirst, int segments);
 static int  stm32_recvframe(FAR struct stm32_ethmac_s *priv);
 static void stm32_receive(FAR struct stm32_ethmac_s *priv);
+static void stm32_freeframe(FAR struct stm32_ethmac_s *priv);
 static void stm32_txdone(FAR struct stm32_ethmac_s *priv);
 static int  stm32_interrupt(int irq, FAR void *context);
 
@@ -543,12 +550,12 @@ static void stm32_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int stm32_ifup(struct uip_driver_s *dev);
-static int stm32_ifdown(struct uip_driver_s *dev);
-static int stm32_txavail(struct uip_driver_s *dev);
+static int  stm32_ifup(struct uip_driver_s *dev);
+static int  stm32_ifdown(struct uip_driver_s *dev);
+static int  stm32_txavail(struct uip_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int  stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int  stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /* Descriptor Initialization */
@@ -558,17 +565,18 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv);
 
 /* PHY Initialization */
 
-static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
-static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
-static int stm32_phyinit(FAR struct stm32_ethmac_s *priv);
+static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
+static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
+static int  stm32_phyinit(FAR struct stm32_ethmac_s *priv);
 
 /* MAC/DMA Initialization */
 
 static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv);
 static void stm32_ethreset(FAR struct stm32_ethmac_s *priv);
-static int stm32_macconfig(FAR struct stm32_ethmac_s *priv);
-static int stm32_macenable(FAR struct stm32_ethmac_s *priv);
-static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv);
+static int  stm32_macconfig(FAR struct stm32_ethmac_s *priv);
+static void stm32_macaddress(FAR struct stm32_ethmac_s *priv);
+static int  stm32_macenable(FAR struct stm32_ethmac_s *priv);
+static int  stm32_ethconfig(FAR struct stm32_ethmac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -701,18 +709,149 @@ static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv)
 
 static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 {
+  struct eth_txdesc_s *txdesc;
   uint32_t regval;
+
+  /* The internal uIP buffer size may be configured to be larger than the
+   * Ethernet buffer size.
+   */
+
+#if CONFIG_NET_BUFSIZE > CONFIG_STM32_ETH_BUFSIZE
+  struct eth_txdesc_s *txnext;
+  uint8_t *buffer;
+  int bufcount;
+  int lastsize;
+  int i;
+#endif
 
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
    * must have assured that there is no transmission in progress.
    */
 
-  /* Increment statistics */
+  txdesc = priv->txhead;
+  DEBUGASSERT(txdesc && (txdesc->tdes0 & ETH_TDES0_OWN) == 0);
 
-  /* Send the packet: address=priv->dev.d_buf, length=priv->dev.d_len */
+  /* Is the size to be sent greater than the size of the Ethernet buffer? */
 
-  /* Enable Tx interrupts */
+#if CONFIG_NET_BUFSIZE > CONFIG_STM32_ETH_BUFSIZE
+  if (priv->dev.d_len > CONFIG_STM32_ETH_BUFSIZE)
+    {
+      /* Yes... how many buffers will be need to send the packet? */
+
+      bufcount = (priv->dev.d_len + (CONFIG_STM32_ETH_BUFSIZE-1)) / CONFIG_STM32_ETH_BUFSIZE;
+      lastsize = priv->dev.d_len - (bufcount - 1) * CONFIG_STM32_ETH_BUFSIZE;
+
+      /* Set the first segment bit in the first TX descriptor */
+
+      txdesc->tdes0 |= ETH_TDES0_FS;
+
+      /* Set up all but the last TX descriptor */
+
+      txnext = txdesc;
+      buffer = priv->dev.d_buf;
+
+      for (i = 0; i < bufcount; i++)
+        {
+          /* This could be a normal event but the design does not handle it */
+
+          DEBUGASSERT((txnext->tdes0 & ETH_TDES0_OWN) == 0);
+
+          /* Set the Buffer1 address pointer */
+
+          txdesc->tdes2 = (uint32_t)buffer;
+
+          /* Set the buffer size in all TX descriptors, set the last segment
+           * bit in the last TX descriptor
+           */
+
+          if (i == (bufcount-1))
+            {
+              txnext->tdes0 |= ETH_TDES0_LS;
+              txnext->tdes1  = lastsize;
+              buffer        += lastsize;
+            }
+          else
+            {
+              txnext->tdes1  = CONFIG_STM32_ETH_BUFSIZE;
+              buffer        += CONFIG_STM32_ETH_BUFSIZE;
+            }
+
+          /* Give descriptor back to DMA */
+
+          txnext->tdes0 |= ETH_TDES0_OWN;
+          txnext         = (struct eth_txdesc_s *)txnext->tdes3;
+        }
+
+      /* Remember the start of the next available TX descriptor */
+ 
+      txdesc = txnext;
+    }
+  else
+#endif
+    {
+      /* The single descriptor is both the first and last segment */
+
+      txdesc->tdes0 |= (ETH_TDES0_FS | ETH_TDES0_LS);
+
+      /* Set frame size */
+
+      DEBUGASSERT(priv->dev.d_len <= CONFIG_NET_BUFSIZE);
+      txdesc->tdes1 = priv->dev.d_len;
+
+      /* Set the Buffer1 address pointer */
+
+      txdesc->tdes2 = (uint32_t)priv->dev.d_buf;
+
+      /* Set OWN bit of the TX descriptor tdes0.  This gives the buffer to
+       * Ethernet DMA
+       */
+
+      txdesc->tdes0 |= ETH_TDES0_OWN;
+
+      /* Point to the next available TX descriptor */
+
+      txdesc = (struct eth_txdesc_s *)txdesc->tdes3;
+    }
+
+  /* Remember where we left off in the TX descriptor chain */
+
+  priv->txhead = txdesc;
+
+  /* Detach the buffer from priv->dev structure.  That buffer is now
+   * "in-flight".
+   */
+
+  priv->dev.d_buf = NULL;
+
+  /* If there is no other TX buffer, in flight, then remember this
+   * as the location to check for TX done events.
+   */
+
+  if (!priv->txtail)
+    {
+      DEBUGASSERT(priv->inflight == 0);
+      priv->txtail = txdesc;
+    }
+
+  /* Increment the number of TX transfer in-flight */
+
+  priv->inflight++;
+
+  /* Check if the TX Buffer unavailable flag is set */
+
+  if ((getreg32(STM32_ETH_DMASR) & ETH_DMAINT_TBUI) != 0)
+    {
+      /* Clear TX Buffer unavailable flag */
+
+      putreg32(ETH_DMAINT_TBUI, STM32_ETH_DMASR);
+
+      /* Resume DMA transmission */
+
+      putreg32(0, STM32_ETH_DMATPDR);
+    }
+
+  /* Enable TX interrupts */
 
   regval  = getreg32(STM32_ETH_DMAIER);
   regval |= ETH_DMAINT_XMIT_ENABLE;
@@ -758,12 +897,24 @@ static int stm32_uiptxpoll(struct uip_driver_s *dev)
 
   if (priv->dev.d_len > 0)
     {
+      /* Send the packet */
+
       uip_arp_out(&priv->dev);
       stm32_transmit(priv);
 
-      /* Check if there is room in the device to hold another packet. If not,
-       * return a non-zero value to terminate the poll.
+      /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
+       * cannot perform the TX poll if we are unable to accept another packet for
+       * transmission.
        */
+
+      if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0)
+        {
+          /* There is room in the device to hold another packet. Return a non-
+           * zero value to terminate the poll.
+           */
+
+          return -EBUSY;
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have
@@ -792,7 +943,7 @@ static int stm32_uiptxpoll(struct uip_driver_s *dev)
  ****************************************************************************/
 
 static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
-                              FAR struct eth_rxdesc_s *rxfirst, int nsegments)
+                              FAR struct eth_rxdesc_s *rxfirst, int segments)
 {
   struct eth_rxdesc_s *rxdesc;
   int i;
@@ -800,7 +951,7 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
   /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
   rxdesc = rxfirst;
-  for (i = 0; i < nsegments; i++)
+  for (i = 0; i < segments; i++)
     {
       rxdesc->rdes0 = ETH_RDES0_OWN;
       rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
@@ -808,8 +959,8 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
 
   /* Reset the segment managment logic */
 
-  priv->rxfirst  = NULL;
-  priv->segcount = 0;
+  priv->rxcurr   = NULL;
+  priv->segments = 0;
 
   /* Check if the RX Buffer unavailable flag is set */
 
@@ -849,7 +1000,7 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
 static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
 {
   struct eth_rxdesc_s *rxdesc;
-  struct eth_rxdesc_s *rxfirst;
+  struct eth_rxdesc_s *rxcurr;
   uint8_t *buffer;
   int i;
 
@@ -865,7 +1016,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
 
   /* Scan descriptors owned by the CPU */
 
-  rxdesc = priv->rxdesc;
+  rxdesc = priv->rxhead;
   for (i = 0;
        (rxdesc->rdes0 & ETH_RDES0_OWN) == 0 && i < CONFIG_STM32_ETH_NRXDESC;
        i++)
@@ -875,8 +1026,8 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
       if ((rxdesc->rdes0 & ETH_RDES0_FS) != 0 &&
           (rxdesc->rdes0 & ETH_RDES0_LS) == 0)
         {
-          priv->rxfirst  = rxdesc;
-          priv->segcount = 1;   
+          priv->rxcurr   = rxdesc;
+          priv->segments = 1;   
         }
     
       /* Check if this is an intermediate segment in the frame */
@@ -884,24 +1035,24 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
       else if (((rxdesc->rdes0 & ETH_RDES0_LS) == 0)&&
                ((rxdesc->rdes0 & ETH_RDES0_FS) == 0))
         {
-          priv->segcount++;
+          priv->segments++;
         }
 
       /* Otherwise, it is the last segment in the frame */
 
       else
         { 
-          priv->segcount++;
+          priv->segments++;
 
           /* Check if the there is only one segment in the frame */
 
-          if (priv->segcount == 1)
+          if (priv->segments == 1)
             {
-              rxfirst = rxdesc;
+              rxcurr = rxdesc;
             }
           else
             {
-              rxfirst = priv->rxfirst;
+              rxcurr = priv->rxcurr;
             }
 
           /* Check if any errors are reported in the frame */
@@ -929,15 +1080,16 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
                * buffer.
                */
 
-              dev->d_buf     = (uint8_t*)rxfirst->rdes2;
-              rxfirst->rdes2 = (uint32_t)buffer;
+              DEBUGASSERT(dev->d_buf == NULL);
+              dev->d_buf    = (uint8_t*)rxcurr->rdes2;
+              rxcurr->rdes2 = (uint32_t)buffer;
 
               /* Return success, remebering where we should re-start scanning
                * and resetting the segment scanning logic
                */
 
-              priv->rxdesc   = (struct eth_rxdesc_s*)rxdesc->rdes3;
-              stm32_freesegment(priv, rxfirst, priv->segcount);
+              priv->rxhead   = (struct eth_rxdesc_s*)rxdesc->rdes3;
+              stm32_freesegment(priv, rxcurr, priv->segments);
               return OK;
             }
           else
@@ -947,7 +1099,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
                */
 
               nlldbg("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
-              stm32_freesegment(priv, rxfirst, priv->segcount);
+              stm32_freesegment(priv, rxcurr, priv->segments);
             }
         }
 
@@ -956,11 +1108,11 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
       rxdesc = (struct eth_rxdesc_s*)rxdesc->rdes3;
     }
 
-  /* We get here after all of the descriptors have been scanned.  Remember
-   * where we left off.
+  /* We get here after all of the descriptors have been scanned or when rxdesc points
+   * to the first descriptor owned by the DMA.  Remember where we left off.
    */
 
-  priv->rxdesc = rxdesc;
+  priv->rxhead = rxdesc;
   return -EAGAIN; 
 }
 
@@ -1003,9 +1155,9 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
       /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv6
-      if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
+      else if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
 #else
-      if (BUF->type == HTONS(UIP_ETHTYPE_IP))
+      else if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
         {
           uip_arp_ipin(&priv->dev);
@@ -1034,6 +1186,102 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
               stm32_transmit(priv);
             }
         }
+      else
+        {
+          nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
+        }
+
+      /* We are finished with the RX buffer.  NOTE:  If the buffer is
+       * re-used for transmission, the dev->d_buf field will have been
+       * nullified.
+       */
+
+      if (dev->d_buf)
+        {
+          /* Free the receive packet buffer */
+
+          stm32_freebuffer(priv, dev->d_buf);
+          dev->d_buf = NULL;
+        }
+    }
+}
+
+/****************************************************************************
+ * Function: stm32_freeframe
+ *
+ * Description:
+ *   Scans the TX descriptors and frees the buffers of completed TX transfers.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
+{
+  struct eth_txdesc_s *txdesc;
+  int i;
+
+  /* Scan for "in-flight" descriptors owned by the CPU */
+
+  txdesc = priv->txtail;
+  if (txdesc)
+    {
+      DEBUGASSERT(priv->inflight > 0);
+
+      for (i = 0; (txdesc->tdes0 & ETH_TDES0_OWN) == 0; i++)
+        {
+          /* There should be a buffer assigned to all in-flight
+           * TX descriptors.
+           */
+
+          DEBUGASSERT(txdesc->tdes2 != 0);
+
+          /* Check if this is the first segment of a TX frame. */
+
+          if ((txdesc->tdes0 & ETH_TDES0_FS) != 0)
+            {
+              /* Yes.. Free the buffer */
+
+              stm32_freebuffer(priv, (uint8_t*)txdesc->tdes2);
+            }
+
+          /* In any event, make sure that TDES2 is nullified. */
+
+          txdesc->tdes2 = 0;
+
+          /* Check if this is the last segement of a TX frame */
+
+          if ((txdesc->tdes0 & ETH_TDES0_FS) != 0)
+            {
+              /* Yes.. Decrement the number of frames "in-flight".
+               * If there are no more frames in-flight, then bail.
+               */
+
+              if (--priv->inflight <= 0)
+                {
+                  priv->txtail   = NULL;
+                  priv->inflight = 0;
+                  return;
+                }
+            }
+
+          /* Try the next descriptor in the TX chain */
+
+          txdesc = (struct eth_txdesc_s*)txdesc->tdes3;
+        }
+
+      /* We get here if (1) there are still frames "in-flight". Remember
+       * where we left off.
+       */
+
+      priv->txtail = txdesc;
     }
 }
 
@@ -1058,17 +1306,24 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 {
   uint32_t regval;
 
-  /* Check for errors and update statistics */
+  DEBUGASSERT(priv->txtail != NULL);
+
+  /* Scan the TX desciptor change, returning buffers to free list */
+
+  stm32_freeframe(priv);
 
   /* If no further xmits are pending, then cancel the TX timeout */
 
-  wd_cancel(priv->txtimeout);
+  if (priv->inflight <= 0)
+    {
+      wd_cancel(priv->txtimeout);
 
-  /* And disable further Tx interrupts. */
+      /* And disable further TX interrupts. */
 
-  regval = getreg32(STM32_ETH_DMAIER);
-  regval &= ~ETH_DMAINT_XMIT_DISABLE;
-  putreg32(regval, STM32_ETH_DMAIER);
+      regval = getreg32(STM32_ETH_DMAIER);
+      regval &= ~ETH_DMAINT_XMIT_DISABLE;
+      putreg32(regval, STM32_ETH_DMAIER);
+    }
 
   /* Then poll uIP for new XMIT data */
 
@@ -1127,7 +1382,7 @@ static int stm32_interrupt(int irq, FAR void *context)
         }
 
       /* Check if a packet transmission just completed.  If so, call
-       * stm32_txdone(). This may disable further Tx interrupts if there
+       * stm32_txdone(). This may disable further TX interrupts if there
        * are no pending tansmissions.
        */
 
@@ -1194,9 +1449,12 @@ static void stm32_txtimeout(int argc, uint32_t arg, ...)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
 
-  /* Increment statistics and dump debug info */
+  /* Then reset the hardware.  Just take the interface down, then back
+   * up again.
+   */
 
-  /* Then reset the hardware */
+  stm32_ifdown(&priv->dev);
+  stm32_ifup(&priv->dev);
 
   /* Then poll uIP for new XMIT data */
 
@@ -1225,16 +1483,20 @@ static void stm32_polltimer(int argc, uint32_t arg, ...)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
 
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
+  /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
+   * cannot perform the TX poll if we are unable to accept another packet for
+   * transmission.
    */
 
-  /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
-   * might be bug here.  Does this mean if there is a transmit in progress,
-   * we will missing TCP time state updates?
-   */
+  if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0)
+    {
+      /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
+       * might be bug here.  Does this mean if there is a transmit in progress,
+       * we will missing TCP time state updates?
+       */
 
-  (void)uip_timer(&priv->dev, stm32_uiptxpoll, STM32_POLLHSEC);
+      (void)uip_timer(&priv->dev, stm32_uiptxpoll, STM32_POLLHSEC);
+    }
 
   /* Setup the watchdog poll timer again */
 
@@ -1365,11 +1627,18 @@ static int stm32_txavail(struct uip_driver_s *dev)
 
   if (priv->ifup)
     {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
+      /* Check if the next TX descriptor is owned by the Ethernet DMA or
+       * CPU.  We cannot perform the TX poll if we are unable to accept
+       * another packet for
+       * transmission.
+       */
 
-      /* If so, then poll uIP for new XMIT data */
+      if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0)
+        {
+          /* If we have the descriptor, then poll uIP for new XMIT data */
 
-      (void)uip_poll(&priv->dev, stm32_uiptxpoll);
+          (void)uip_poll(&priv->dev, stm32_uiptxpoll);
+        }
     }
 
   irqrestore(flags);
@@ -1400,6 +1669,7 @@ static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
+#error "Missing logic"
 
   return OK;
 }
@@ -1429,6 +1699,7 @@ static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
+#error "Missing logic"
 
   return OK;
 }
@@ -1455,9 +1726,19 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
   struct eth_txdesc_s *txdesc;
   int i;
   
-  /* Set the priv->txdesc pointer with the first descriptor in the table */
+  /* priv->txhead will point to the first, available TX descriptor in the chain.
+   * Set the priv->txhead pointer to the first descriptor in the table.
+   */
 
-  priv->txdesc = priv->txtable;
+  priv->txhead = priv->txtable;
+
+  /* priv->txtail will point to the first segment of the oldest pending
+   * "in-flight" TX transfer.  NULL means that there are no active TX
+   * transfers.
+   */
+
+   priv->txtail   = NULL;
+   priv->inflight = 0;
 
   /* Initialize each TX descriptor */   
 
@@ -1470,7 +1751,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
       txdesc->tdes0 = ETH_TDES0_TCH;  
        
 #ifdef CHECKSUM_BY_HARDWARE
-      /* Enable the checksum insertion for the Tx frames */
+      /* Enable the checksum insertion for the TX frames */
 
       txdesc->tdes0 |= ETH_TDES0_CIC_ALL;
 #endif
@@ -1479,7 +1760,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
        * are used)
        */
 
-      txdesc->tdes2 = 0;;
+      txdesc->tdes2 = 0;
     
       /* Initialize the next descriptor with the Next Descriptor Polling Enable */
 
@@ -1527,9 +1808,18 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
   struct eth_rxdesc_s *rxdesc;
   int i;
   
-  /* Set the priv->rxdesc pointer with the first one of the table list */
+  /* priv->rxhead will point to the first,  RX descriptor in the chain.
+   * This will be where we receive the first incomplete frame.
+   */
 
-  priv->rxdesc = priv->rxtable; 
+  priv->rxhead = priv->rxtable;
+
+  /* If we accumulate the frame in segments, priv->rxcurr points to the
+   * RX descriptor of the first segment in the current TX frame.
+   */
+
+  priv->rxcurr   = NULL;
+  priv->segments = 0;
 
   /* Initialize each TX descriptor */   
 
@@ -1537,7 +1827,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
     {
       rxdesc = &priv->rxtable[i];
 
-      /* Set Own bit of the Rx descriptor rdes0 */
+      /* Set Own bit of the RX descriptor rdes0 */
 
       rxdesc->rdes0 = ETH_RDES0_OWN;
 
@@ -2080,6 +2370,41 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
 }
 
 /****************************************************************************
+ * Function: stm32_macaddress
+ *
+ * Description:
+ *   Configure the selected MAC address.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void stm32_macaddress(FAR struct stm32_ethmac_s *priv)
+{
+  uint32_t regval;
+
+  /* Set the MAC address high register */
+  
+  regval = ((uint32_t)priv->dev.d_mac.ether_addr_octet[5] << 8) |
+            (uint32_t)priv->dev.d_mac.ether_addr_octet[4];
+  putreg32(regval, STM32_ETH_MACA0HR);
+
+  /* Set the MAC address low register */
+  
+  regval = ((uint32_t)priv->dev.d_mac.ether_addr_octet[3] << 24) |
+           ((uint32_t)priv->dev.d_mac.ether_addr_octet[2] << 16) |
+           ((uint32_t)priv->dev.d_mac.ether_addr_octet[1] <<  8) | 
+            (uint32_t)priv->dev.d_mac.ether_addr_octet[0];
+  putreg32(regval, STM32_ETH_MACA0LR);
+}
+
+/****************************************************************************
  * Function: stm32_macenable
  *
  * Description:
@@ -2098,6 +2423,10 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
 static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
 {
   uint32_t regval;
+
+  /* Set the MAC address */
+
+  stm32_macaddress(priv);
 
   /* Enable transmit state machine of the MAC for transmission on the MII */  
 
@@ -2203,11 +2532,11 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   stm32_initbuffer(priv);
 
-  /* Initialize Tx Descriptors list: Chain Mode */
+  /* Initialize TX Descriptors list: Chain Mode */
 
   stm32_txdescinit(priv);
 
-  /* Initialize Rx Descriptors list: Chain Mode  */
+  /* Initialize RX Descriptors list: Chain Mode  */
 
   stm32_rxdescinit(priv);
 
