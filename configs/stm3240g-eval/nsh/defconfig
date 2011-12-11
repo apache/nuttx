@@ -686,6 +686,8 @@ CONFIG_MMCSD_HAVECARDDETECT=n
 # TCP/IP and UDP support via uIP
 #
 # CONFIG_NET - Enable or disable all network features
+# CONFIG_NET_NOINTS - uIP not called from interrupt level.
+# CONFIG_NET_MULTIBUFFER - Use multiple input/output buffers (probably no)
 # CONFIG_NET_IPv6 - Build in support for IPv6
 # CONFIG_NSOCKET_DESCRIPTORS - Maximum number of socket descriptors per task/thread.
 # CONFIG_NET_SOCKOPTS - Enable or disable support for socket options
@@ -710,6 +712,8 @@ CONFIG_MMCSD_HAVECARDDETECT=n
 # CONFIG_NET_FWCACHE_SIZE - number of packets to remember when looking for duplicates
 #
 CONFIG_NET=n
+CONFIG_NET_NOINTS=n
+CONFIG_NET_MULTIBUFFER=y
 CONFIG_NET_IPv6=n
 CONFIG_NSOCKET_DESCRIPTORS=10
 CONFIG_NET_SOCKOPTS=y
