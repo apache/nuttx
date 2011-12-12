@@ -1,13 +1,8 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx/lpc17_dac.c
+ * arch/arm/src/stm32/stm32_dac.c
  *
- *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
- *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *   History: 0.1 2011-08-05 initial version
- * 
- * This file is a part of NuttX:
- *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -60,12 +55,10 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "lpc17_internal.h"
-#include "lpc17_syscon.h"
-#include "lpc17_pinconn.h"
-#include "lpc17_dac.h"
+#include "stm32_internal.h"
+#include "stm32_dac.h"
 
-#if defined(CONFIG_LPC17_DAC)
+#if defined(CONFIG_DAC) && defined(CONFIG_STM32_DAC)
 
 /****************************************************************************
  * Private Types
@@ -74,6 +67,9 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+/* Interrupt handler */
+
+static int  dac_interrupt(int irq, void *context);
 
 /* DAC methods */
 
@@ -91,89 +87,154 @@ static int  dac_interrupt(int irq, void *context);
 
 static const struct dac_ops_s g_dacops =
 {
-    .ao_reset =dac_reset,
-    .ao_setup = dac_setup,
-    .ao_shutdown = dac_shutdown,
-    .ao_txint = dac_txint,
-    .ao_send = dac_send,
-    .ao_ioctl = dac_ioctl,
+  .ao_reset    = dac_reset,
+  .ao_setup    = dac_setup,
+  .ao_shutdown = dac_shutdown,
+  .ao_txint    = dac_txint,
+  .ao_send     = dac_send,
+  .ao_ioctl    = dac_ioctl,
 };
 
 static struct dac_dev_s g_dacdev =
 {
-    .ad_ops = &g_dacops,
+  .ad_ops = &g_dacops,
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-/* Reset the DAC device.  Called early to initialize the hardware. This
- * is called, before ao_setup() and on error conditions.
- */
+/****************************************************************************
+ * Name: dac_interrupt
+ *
+ * Description:
+ *   DAC interrupt handler.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
+static int dac_interrupt(int irq, void *context)
+{
+  return OK;
+}
+
+/****************************************************************************
+ * Name: dac_reset
+ *
+ * Description:
+ *   Reset the DAC device.  Called early to initialize the hardware. This
+ *   is called, before dac_setup() and on error conditions.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
 
 static void dac_reset(FAR struct dac_dev_s *dev)
 {
-    irqstate_t flags;
-    uint32_t regval;
+  irqstate_t flags;
+  uint32_t regval;
     
-    flags = irqsave();
+  flags = irqsave();
 
-    regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
-    regval &= ~SYSCON_PCLKSEL0_DAC_MASK;
-    regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_DAC_SHIFT);
-    putreg32(regval, LPC17_SYSCON_PCLKSEL0);
-
-    //putreg32(DAC_CTRL_DBLBUFEN,LPC17_DAC_CTRL); ?
-
-    lpc17_configgpio(GPIO_AOUT);
+# warning "Missing logic"
     
-    irqrestore(flags);
-
+  irqrestore(flags);
 }
 
-/* Configure the DAC. This method is called the first time that the DAC
- * device is opened.  This will occur when the port is first opened.
- * This setup includes configuring and attaching DAC interrupts.  Interrupts
- * are all disabled upon return.
- */
+/****************************************************************************
+ * Name: dac_setup
+ *
+ * Description:
+ *   Configure the DAC. This method is called the first time that the DAC
+ *   device is opened.  This will occur when the port is first opened.
+ *   This setup includes configuring and attaching DAC interrupts.  Interrupts
+ *   are all disabled upon return.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
 
-static int  dac_setup(FAR struct dac_dev_s *dev)
+static int dac_setup(FAR struct dac_dev_s *dev)
 {
-    return OK;
+# warning "Missing logic"
+  return -ENOSYS;
 }
 
-/* Disable the DAC.  This method is called when the DAC device is closed.
- * This method reverses the operation the setup method.
- */
+/****************************************************************************
+ * Name: dac_shutdown
+ *
+ * Description:
+ *   Disable the DAC.  This method is called when the DAC device is closed.
+ *   This method reverses the operation the setup method.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
 
 static void dac_shutdown(FAR struct dac_dev_s *dev)
 {
+# warning "Missing logic"
 }
 
-/* Call to enable or disable TX interrupts */
+/****************************************************************************
+ * Name: dac_txint
+ *
+ * Description:
+ *   Call to enable or disable TX interrupts.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
 
 static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
 {
+# warning "Missing logic"
 }
 
-static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
+/****************************************************************************
+ * Name: dac_send
+ *
+ * Description:
+ *   Set the DAC output.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
+static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 {
-    putreg32((msg->am_data>>16)&0xfffff,LPC17_DAC_CR);
-    dac_txdone(&g_dacdev);
-    return 0;
+# warning "Missing logic"
+  return -ENOSYS;
 }
 
-/* All ioctl calls will be routed through this method */
+/****************************************************************************
+ * Name: dac_ioctl
+ *
+ * Description:
+ *   All ioctl calls will be routed through this method.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
 
 static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
 {
-    dbg("Fix me:Not Implemented\n");
-    return 0;
-}
-
-static int  dac_interrupt(int irq, void *context)
-{
+  return -ENOTTY;
 }
 
 /****************************************************************************
@@ -191,9 +252,10 @@ static int  dac_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-FAR struct dac_dev_s *up_dacinitialize()
+FAR struct dac_dev_s *up_dacinitialize(int channel)
 {
-    return &g_dacdev;
+  return &g_dacdev;
 }
-#endif
+
+#endif /* CONFIG_DAC && CONFIG_STM32_DAC */
 
