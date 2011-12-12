@@ -147,11 +147,15 @@
 #endif
 
 #ifndef CONFIG_STM32_ETH_BUFSIZE
-#  define CONFIG_STM32_ETH_BUFSIZE  CONFIG_NET_BUFSIZE
+#  define CONFIG_STM32_ETH_BUFSIZE CONFIG_NET_BUFSIZE
 #endif
 
 #if CONFIG_STM32_ETH_BUFSIZE > ETH_TDES1_TBS1_MASK
 #  error "CONFIG_STM32_ETH_BUFSIZE is too large"
+#endif
+
+#if CONFIG_STM32_ETH_BUFSIZE != CONFIG_NET_BUFSIZE
+#  warning "You using an incomplete/untested configuration"
 #endif
 
 #ifndef CONFIG_STM32_ETH_NRXDESC
