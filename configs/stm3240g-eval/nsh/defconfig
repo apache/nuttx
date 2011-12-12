@@ -128,7 +128,7 @@ CONFIG_STM32_BKPSRAM=n
 CONFIG_STM32_CCMDATARAM=n
 CONFIG_STM32_DMA1=n
 CONFIG_STM32_DMA2=n
-CONFIG_STM32_ETHMAC=n
+CONFIG_STM32_ETHMAC=y
 CONFIG_STM32_OTGHS=n
 # AHB2:
 CONFIG_STM32_DCMI=n
@@ -281,6 +281,9 @@ CONFIG_SSI_POLLWAIT=y
 #   defined.  This provides the value of the mode bits indicating full duplex mode.
 # CONFIG_STM32_ETH_PTP - Precision Time Protocol (PTP).  Not supported
 #   but some hooks are indicated with this condition.
+# CONFIG_STM32_ETHMAC_REGDEBUG - If CONFIG_DEBUG is also enabled, this will
+#   generate far more debug output than you could ever care to see unless you
+#   are debugging low-level Ethernet driver features.
 #
 CONFIG_STM32_PHYADDR=0x01
 CONFIG_STM32_MII=y
@@ -296,6 +299,7 @@ CONFIG_STM32_PHYSR_100MBPS=0x0000
 CONFIG_STM32_PHYSR_MODE=0x0004
 CONFIG_STM32_PHYSR_FULLDUPLEX=0x0004
 CONFIG_STM32_ETH_PTP=n
+CONFIG_STM32_ETHMAC_REGDEBUG=n
 
 #
 # General build options
@@ -419,6 +423,7 @@ CONFIG_DEBUG_FS=n
 CONFIG_DEBUG_GRAPHICS=n
 CONFIG_DEBUG_LCD=n
 CONFIG_DEBUG_USB=n
+CONFIG_DEBUG_NET=n
 CONFIG_HAVE_CXX=y
 CONFIG_MM_REGIONS=2
 CONFIG_ARCH_LOWPUTC=y
@@ -711,7 +716,7 @@ CONFIG_MMCSD_HAVECARDDETECT=n
 # CONFIG_NET_BROADCAST - Broadcast support
 # CONFIG_NET_FWCACHE_SIZE - number of packets to remember when looking for duplicates
 #
-CONFIG_NET=n
+CONFIG_NET=y
 CONFIG_NET_NOINTS=n
 CONFIG_NET_MULTIBUFFER=y
 CONFIG_NET_IPv6=n

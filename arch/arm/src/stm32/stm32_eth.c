@@ -453,14 +453,17 @@
 #endif
 
 /* Interrupt bit sets *******************************************************/
-/* All interrupts in the normal and abnormal interrupt summary */
+/* All interrupts in the normal and abnormal interrupt summary.  Early transmit
+ * interrupt (ETI) is excluded from the abnormal set because it causes too
+ * many interrupts and is not interesting.
+ */
 
 #define ETH_DMAINT_NORMAL \
   (ETH_DMAINT_TI | ETH_DMAINT_TBUI |ETH_DMAINT_RI | ETH_DMAINT_ERI)
 
 #define ETH_DMAINT_ABNORMAL \
   (ETH_DMAINT_TPSI | ETH_DMAINT_TJTI | ETH_DMAINT_ROI | ETH_DMAINT_TUI | \
-   ETH_DMAINT_RBUI | ETH_DMAINT_RPSI | ETH_DMAINT_RWTI | ETH_DMAINT_ETI | \
+   ETH_DMAINT_RBUI | ETH_DMAINT_RPSI | ETH_DMAINT_RWTI | /* ETH_DMAINT_ETI | */ \
    ETH_DMAINT_FBEI)
 
 /* Normal receive, transmit, error interrupt enable bit sets */
@@ -540,8 +543,8 @@ static uint32_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint32_t val, uint32_t addr);
 static void stm32_checksetup(void);
 #else
-# define stm32_getreg(addr)      getreg16(addr)
-# define stm32_putreg(val,addr)  putreg16(val,addr)
+# define stm32_getreg(addr)      getreg32(addr)
+# define stm32_putreg(val,addr)  putreg32(val,addr)
 # define stm32_checksetup()
 #endif
 
@@ -556,6 +559,7 @@ static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv);
 
 static int  stm32_transmit(FAR struct stm32_ethmac_s *priv);
 static int  stm32_uiptxpoll(struct uip_driver_s *dev);
+static void stm32_dopoll(FAR struct stm32_ethmac_s *priv);
 
 /* Interrupt handling */
 
@@ -863,6 +867,7 @@ static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv)
 static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
+  struct eth_txdesc_s *txfirst;
   uint32_t regval;
 
   /* The internal uIP buffer size may be configured to be larger than the
@@ -870,7 +875,6 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
    */
 
 #if CONFIG_NET_BUFSIZE > CONFIG_STM32_ETH_BUFSIZE
-  struct eth_txdesc_s *txnext;
   uint8_t *buffer;
   int bufcount;
   int lastsize;
@@ -882,8 +886,11 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
    * must have assured that there is no transmission in progress.
    */
 
-  txdesc = priv->txhead;
-  nllvdbg("d_len: %d txhead: %08x tdes0: %08x\n", txdesc, txdesc->tdes0);
+  txdesc  = priv->txhead;
+  txfirst = txdesc;
+
+  nllvdbg("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+          priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & ETH_TDES0_OWN) == 0);
 
@@ -891,7 +898,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
   DEBUGASSERT(priv->dev.d_len > 0 && priv->dev.d_buf != NULL);
 
-  #if CONFIG_NET_BUFSIZE > CONFIG_STM32_ETH_BUFSIZE
+#if CONFIG_NET_BUFSIZE > CONFIG_STM32_ETH_BUFSIZE
   if (priv->dev.d_len > CONFIG_STM32_ETH_BUFSIZE)
     {
       /* Yes... how many buffers will be need to send the packet? */
@@ -907,51 +914,62 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
       /* Set up all but the last TX descriptor */
 
-      txnext = txdesc;
       buffer = priv->dev.d_buf;
 
       for (i = 0; i < bufcount; i++)
         {
           /* This could be a normal event but the design does not handle it */
 
-          DEBUGASSERT((txnext->tdes0 & ETH_TDES0_OWN) == 0);
+          DEBUGASSERT((txdesc->tdes0 & ETH_TDES0_OWN) == 0);
 
           /* Set the Buffer1 address pointer */
 
           txdesc->tdes2 = (uint32_t)buffer;
 
-          /* Set the buffer size in all TX descriptors, set the last segment
-           * bit in the last TX descriptor
-           */
+          /* Set the buffer size in all TX descriptors */
 
           if (i == (bufcount-1))
             {
-              txnext->tdes0 |= ETH_TDES0_LS;
-              txnext->tdes1  = lastsize;
+              /* This is the last segment.  Set the last segment bit in the
+               * last TX descriptor and ask for an interrupt when this
+               * segment transfer completes.
+               */
+
+              txdesc->tdes0 |= (ETH_TDES0_LS | ETH_TDES0_IC);
+
+              /* This segement is, most likely, of fractional buffersize */
+
+              txdesc->tdes1  = lastsize;
               buffer        += lastsize;
             }
           else
             {
-              txnext->tdes1  = CONFIG_STM32_ETH_BUFSIZE;
+              /* This is not the last segment.  We don't want an interrupt
+               * when this segment transfer completes.
+               */
+
+              txdesc->tdes0 &= ~ETH_TDES0_IC;
+
+              /* The size of the transfer is the whole buffer */
+
+              txdesc->tdes1  = CONFIG_STM32_ETH_BUFSIZE;
               buffer        += CONFIG_STM32_ETH_BUFSIZE;
             }
 
-          /* Give descriptor back to DMA */
+          /* Give the descriptor to DMA */
 
-          txnext->tdes0 |= ETH_TDES0_OWN;
-          txnext         = (struct eth_txdesc_s *)txnext->tdes3;
+          txdesc->tdes0 |= ETH_TDES0_OWN;
+          txdesc         = (struct eth_txdesc_s *)txdesc->tdes3;
         }
-
-      /* Remember the start of the next available TX descriptor */
- 
-      txdesc = txnext;
     }
   else
 #endif
     {
-      /* The single descriptor is both the first and last segment */
+      /* The single descriptor is both the first and last segment.  And we do
+       * want an interrupt when the transfer completes.
+       */
 
-      txdesc->tdes0 |= (ETH_TDES0_FS | ETH_TDES0_LS);
+      txdesc->tdes0 |= (ETH_TDES0_FS | ETH_TDES0_LS | ETH_TDES0_IC);
 
       /* Set frame size */
 
@@ -982,15 +1000,16 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
    */
 
   priv->dev.d_buf = NULL;
+  priv->dev.d_len = 0;
 
-  /* If there is no other TX buffer, in flight, then remember this
-   * as the location to check for TX done events.
+  /* If there is no other TX buffer, in flight, then remember the location
+   * of the TX descriptor.  This is the location to check for TX done events.
    */
 
   if (!priv->txtail)
     {
       DEBUGASSERT(priv->inflight == 0);
-      priv->txtail = txdesc;
+      priv->txtail = txfirst;
     }
 
   /* Increment the number of TX transfer in-flight */
@@ -1053,6 +1072,8 @@ static int stm32_uiptxpoll(struct uip_driver_s *dev)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
 
+  DEBUGASSERT(priv->dev.d_buf != NULL);
+
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
@@ -1063,6 +1084,7 @@ static int stm32_uiptxpoll(struct uip_driver_s *dev)
 
       uip_arp_out(&priv->dev);
       stm32_transmit(priv);
+      DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
 
       /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
        * cannot perform the TX poll if we are unable to accept another packet for
@@ -1071,11 +1093,26 @@ static int stm32_uiptxpoll(struct uip_driver_s *dev)
 
       if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0)
         {
-          /* There is room in the device to hold another packet. Return a non-
-           * zero value to terminate the poll.
+          /* We have to terminate the poll if we have no more descriptors
+           * available for another transfer.
            */
 
           return -EBUSY;
+        }
+
+      /* We have the descriptor, we can continue the poll. Allocate a new
+       * buffer for the poll.
+       */
+
+      dev->d_buf = stm32_allocbuffer(priv);
+
+      /* We can't continue the poll if we have no buffers */
+
+      if (dev->d_buf == NULL)
+        {
+          /* Terminate the poll. */
+
+          return -ENOMEM;
         }
     }
 
@@ -1084,6 +1121,62 @@ static int stm32_uiptxpoll(struct uip_driver_s *dev)
    */
 
   return 0;
+}
+
+/****************************************************************************
+ * Function: stm32_dopoll
+ *
+ * Description:
+ *   The function is called when a frame is received using the DMA receive
+ *   interrupt.  It scans the RX descriptors to the the received frame.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static void stm32_dopoll(FAR struct stm32_ethmac_s *priv)
+{
+  FAR struct uip_driver_s *dev = &priv->dev;
+
+  /* Check if the next TX descriptor is owned by the Ethernet DMA or
+   * CPU.  We cannot perform the TX poll if we are unable to accept
+   * another packet for transmission.
+   */
+
+  if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0)
+    {
+      /* If we have the descriptor, then poll uIP for new XMIT data.
+       * Allocate a buffer for the poll.
+       */
+
+      DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
+      dev->d_buf = stm32_allocbuffer(priv);
+
+      /* We can't poll if we have no buffers */
+
+      if (dev->d_buf)
+        {
+          (void)uip_poll(dev, stm32_uiptxpoll);
+
+          /* We will, most likely end up with a buffer to be freed.  But it
+           * might not be the same one that we allocated above.
+           */
+
+          if (dev->d_buf)
+            {
+              DEBUGASSERT(dev->d_len == 0);
+              stm32_freebuffer(priv, dev->d_buf);
+              dev->d_buf = NULL;
+            }
+        }
+    }
 }
 
 /****************************************************************************
@@ -1519,7 +1612,7 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&priv->dev, stm32_uiptxpoll);
+  stm32_dopoll(priv);
 }
 
 /****************************************************************************
@@ -1552,7 +1645,7 @@ static int stm32_interrupt(int irq, FAR void *context)
    * related bits (0-16) correspond in these two registers.
    */
 
-  dmasr &= ~stm32_getreg(STM32_ETH_DMAIER);
+  dmasr &= stm32_getreg(STM32_ETH_DMAIER);
 
   /* Check if there are pending "normal" interrupts */
 
@@ -1652,7 +1745,7 @@ static void stm32_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&priv->dev, stm32_uiptxpoll);
+  stm32_dopoll(priv);
 }
 
 /****************************************************************************
@@ -1676,20 +1769,43 @@ static void stm32_txtimeout(int argc, uint32_t arg, ...)
 static void stm32_polltimer(int argc, uint32_t arg, ...)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  FAR struct uip_driver_s   *dev  = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
-   * cannot perform the TX poll if we are unable to accept another packet for
-   * transmission.
+   * cannot perform the timer poll if we are unable to accept another packet
+   * for transmission.  Hmmm.. might be bug here.  Does this mean if there is
+   * a transmit in progress, we will missing TCP time state updates?
    */
 
   if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0)
     {
-      /* If so, update TCP timing states and poll uIP for new XMIT data. Hmmm..
-       * might be bug here.  Does this mean if there is a transmit in progress,
-       * we will missing TCP time state updates?
+      /* If we have the descriptor, then perform the timer poll.  Allocate a
+       * buffer for the poll.
        */
 
-      (void)uip_timer(&priv->dev, stm32_uiptxpoll, STM32_POLLHSEC);
+      DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
+      dev->d_buf = stm32_allocbuffer(priv);
+
+      /* We can't poll if we have no buffers */
+
+      if (dev->d_buf)
+        {
+          /* Update TCP timing states and poll uIP for new XMIT data. 
+           */
+
+          (void)uip_timer(dev, stm32_uiptxpoll, STM32_POLLHSEC);
+
+          /* We will, most likely end up with a buffer to be freed.  But it
+           * might not be the same one that we allocated above.
+           */
+
+          if (dev->d_buf)
+            {
+              DEBUGASSERT(dev->d_len == 0);
+              stm32_freebuffer(priv, dev->d_buf);
+              dev->d_buf = NULL;
+            }
+        }
     }
 
   /* Setup the watchdog poll timer again */
@@ -1827,18 +1943,9 @@ static int stm32_txavail(struct uip_driver_s *dev)
 
   if (priv->ifup)
     {
-      /* Check if the next TX descriptor is owned by the Ethernet DMA or
-       * CPU.  We cannot perform the TX poll if we are unable to accept
-       * another packet for
-       * transmission.
-       */
+      /* Poll uIP for new XMIT data */
 
-      if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0)
-        {
-          /* If we have the descriptor, then poll uIP for new XMIT data */
-
-          (void)uip_poll(&priv->dev, stm32_uiptxpoll);
-        }
+      stm32_dopoll(priv);
     }
 
   irqrestore(flags);

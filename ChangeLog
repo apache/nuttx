@@ -2255,3 +2255,6 @@
 	* arch/arm/srcm/stm32/stm32_eth.c:  Adds an Ethernet driver for the STM32 F4.
 	* arch/arm/srcm/stm32/stm32_dac.c and stm32_adc.c: "Skeleton" files for STM32
 	  DAC and ADC drivers.  The actual logic will come later.
+	* arch/arm/srcm/stm32/stm32_eth.c:  There may be a few more lurking bugs, but
+	  the STM32 Ethernet driver appears to be fully functional on the STM3240G-EVAL.
+
