@@ -169,6 +169,14 @@
 
 #define STM32_ETH_NFREEBUFFERS (CONFIG_STM32_ETH_NTXDESC+1)
 
+/* Extremely detailed register debug that you would normally never want
+ * enabled.
+ */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_STM32_ETHMAC_REGDEBUG
+#endif
+
 /* Clocking *****************************************************************/
 /* Set MACMIIAR CR bits depending on HCLK setting */
 
@@ -525,6 +533,18 @@ static struct stm32_ethmac_s g_stm32ethmac[STM32_NETHERNET];
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+/* Register operations ******************************************************/
+
+#if defined(CONFIG_STM32_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+static uint32_t stm32_getreg(uint32_t addr);
+static void stm32_putreg(uint32_t val, uint32_t addr);
+static void stm32_checksetup(void);
+#else
+# define stm32_getreg(addr)      getreg16(addr)
+# define stm32_putreg(val,addr)  putreg16(val,addr)
+# define stm32_checksetup()
+#endif
+
 /* Free buffer management */
 
 static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv);
@@ -585,6 +605,125 @@ static int  stm32_ethconfig(FAR struct stm32_ethmac_s *priv);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+/****************************************************************************
+ * Name: stm32_getreg
+ *
+ * Description:
+ *   This function may to used to intercept an monitor all register accesses.
+ *   Clearly this is nothing you would want to do unless you are debugging
+ *   this driver.
+ *
+ * Input Parameters:
+ *   addr - The register address to read
+ *
+ * Returned Value:
+ *   The value read from the register
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+static uint32_t stm32_getreg(uint32_t addr)
+{
+  static uint32_t prevaddr = 0;
+  static uint32_t preval   = 0;
+  static uint32_t count    = 0;
+
+  /* Read the value from the register */
+
+  uint32_t val = getreg32(addr);
+
+  /* Is this the same value that we read from the same register last time?
+   * Are we polling the register?  If so, suppress some of the output.
+   */
+
+  if (addr == prevaddr && val == preval)
+    {
+      if (count == 0xffffffff || ++count > 3)
+        {
+           if (count == 4)
+             {
+               lldbg("...\n");
+             }
+          return val;
+        }
+    }
+
+  /* No this is a new address or value */
+
+  else
+    {
+       /* Did we print "..." for the previous value? */
+
+       if (count > 3)
+         {
+           /* Yes.. then show how many times the value repeated */
+
+           lldbg("[repeats %d more times]\n", count-3);
+         }
+
+       /* Save the new address, value, and count */
+
+       prevaddr = addr;
+       preval   = val;
+       count    = 1;
+    }
+
+  /* Show the register value read */
+
+  lldbg("%08x->%08x\n", addr, val);
+  return val;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_putreg
+ *
+ * Description:
+ *   This function may to used to intercept an monitor all register accesses.
+ *   Clearly this is nothing you would want to do unless you are debugging
+ *   this driver.
+ *
+ * Input Parameters:
+ *   val - The value to write to the register
+ *   addr - The register address to read
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+static void stm32_putreg(uint32_t val, uint32_t addr)
+{
+  /* Show the register value being written */
+
+  lldbg("%08x<-%08x\n", addr, val);
+
+  /* Write the value */
+
+  putreg32(val, addr);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_checksetup
+ *
+ * Description:
+ *   Show the state of critical configuration registers.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32_ETHMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+static void stm32_checksetup(void)
+{
+}
+#endif
 
 /****************************************************************************
  * Function: stm32_initbuffer
@@ -609,7 +748,11 @@ static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv)
   uint8_t *buffer;
   int i;
 
+  /* Initialize the head of the free buffer list */
+
   sq_init(&priv->freeb);
+
+  /* Add all of the pre-allocated buffers to the free buffer list */
 
   for (i = 0, buffer = priv->alloc;
        i < STM32_ETH_NFREEBUFFERS;
@@ -640,6 +783,8 @@ static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv)
 
 static inline uint8_t *stm32_allocbuffer(FAR struct stm32_ethmac_s *priv)
 {
+  /* Allocate a buffer by returning the head of the free buffer list */
+
   return (uint8_t *)sq_remfirst(&priv->freeb);
 }
 
@@ -665,6 +810,8 @@ static inline uint8_t *stm32_allocbuffer(FAR struct stm32_ethmac_s *priv)
 
 static inline void stm32_freebuffer(FAR struct stm32_ethmac_s *priv, uint8_t *buffer)
 {
+  /* Free the buffer by adding it to to the end of the free buffer list */
+
   sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
 }
 
@@ -688,6 +835,8 @@ static inline void stm32_freebuffer(FAR struct stm32_ethmac_s *priv, uint8_t *bu
 
 static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv)
 {
+  /* Return TRUE if the free buffer list is not empty */
+
   return !sq_empty(&priv->freeb);
 }
 
@@ -734,17 +883,23 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
    */
 
   txdesc = priv->txhead;
+  nllvdbg("d_len: %d txhead: %08x tdes0: %08x\n", txdesc, txdesc->tdes0);
+
   DEBUGASSERT(txdesc && (txdesc->tdes0 & ETH_TDES0_OWN) == 0);
 
   /* Is the size to be sent greater than the size of the Ethernet buffer? */
 
-#if CONFIG_NET_BUFSIZE > CONFIG_STM32_ETH_BUFSIZE
+  DEBUGASSERT(priv->dev.d_len > 0 && priv->dev.d_buf != NULL);
+
+  #if CONFIG_NET_BUFSIZE > CONFIG_STM32_ETH_BUFSIZE
   if (priv->dev.d_len > CONFIG_STM32_ETH_BUFSIZE)
     {
       /* Yes... how many buffers will be need to send the packet? */
 
       bufcount = (priv->dev.d_len + (CONFIG_STM32_ETH_BUFSIZE-1)) / CONFIG_STM32_ETH_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * CONFIG_STM32_ETH_BUFSIZE;
+
+      nllvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
       /* Set the first segment bit in the first TX descriptor */
 
@@ -842,24 +997,27 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
   priv->inflight++;
 
+  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+          priv->txhead, priv->txtail, priv->inflight);
+
   /* Check if the TX Buffer unavailable flag is set */
 
-  if ((getreg32(STM32_ETH_DMASR) & ETH_DMAINT_TBUI) != 0)
+  if ((stm32_getreg(STM32_ETH_DMASR) & ETH_DMAINT_TBUI) != 0)
     {
       /* Clear TX Buffer unavailable flag */
 
-      putreg32(ETH_DMAINT_TBUI, STM32_ETH_DMASR);
+      stm32_putreg(ETH_DMAINT_TBUI, STM32_ETH_DMASR);
 
       /* Resume DMA transmission */
 
-      putreg32(0, STM32_ETH_DMATPDR);
+      stm32_putreg(0, STM32_ETH_DMATPDR);
     }
 
   /* Enable TX interrupts */
 
-  regval  = getreg32(STM32_ETH_DMAIER);
+  regval  = stm32_getreg(STM32_ETH_DMAIER);
   regval |= ETH_DMAINT_XMIT_ENABLE;
-  putreg32(regval, STM32_ETH_DMAIER);
+  stm32_putreg(regval, STM32_ETH_DMAIER);
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -952,6 +1110,8 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
   struct eth_rxdesc_s *rxdesc;
   int i;
 
+  nllvdbg("rxfirst: %d segments: %d\n", rxfirst, segments);
+
   /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
   rxdesc = rxfirst;
@@ -968,15 +1128,15 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
 
   /* Check if the RX Buffer unavailable flag is set */
 
-  if ((getreg32(STM32_ETH_DMASR) & ETH_DMAINT_RBUI) != 0)  
+  if ((stm32_getreg(STM32_ETH_DMASR) & ETH_DMAINT_RBUI) != 0)  
     {
       /* Clear RBUS Ethernet DMA flag */
 
-      putreg32(ETH_DMAINT_RBUI, STM32_ETH_DMASR);
+      stm32_putreg(ETH_DMAINT_RBUI, STM32_ETH_DMASR);
       
       /* Resume DMA reception */
 
-      putreg32(0, STM32_ETH_DMARPDR);
+      stm32_putreg(0, STM32_ETH_DMARPDR);
     }
 }
 
@@ -1007,6 +1167,9 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
   struct eth_rxdesc_s *rxcurr;
   uint8_t *buffer;
   int i;
+
+  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+          priv->rxhead, priv->rxcurr, priv->segments);
 
   /* Check if there are free buffers.  We cannot receive new frames in this
    * design unless there is at least one free buffer.
@@ -1047,6 +1210,9 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
       else
         { 
           priv->segments++;
+
+          nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+              priv->rxhead, priv->rxcurr, priv->segments);
 
           /* Check if the there is only one segment in the frame */
 
@@ -1094,6 +1260,10 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
 
               priv->rxhead   = (struct eth_rxdesc_s*)rxdesc->rdes3;
               stm32_freesegment(priv, rxcurr, priv->segments);
+
+              nllvdbg("rxhead: %p d_buf: %p d_len: %d\n",
+                      priv->rxhead, dev->d_buf, dev->d_len);
+
               return OK;
             }
           else
@@ -1117,6 +1287,10 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
    */
 
   priv->rxhead = rxdesc;
+
+  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+          priv->rxhead, priv->rxcurr, priv->segments);
+
   return -EAGAIN; 
 }
 
@@ -1164,6 +1338,10 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
       else if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
         {
+          nllvdbg("IP frame\n");
+
+          /* Handle ARP on input then give the IP packet to uIP */
+
           uip_arp_ipin(&priv->dev);
           uip_input(&priv->dev);
 
@@ -1179,6 +1357,10 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
         }
       else if (BUF->type == htons(UIP_ETHTYPE_ARP))
         {
+          nllvdbg("ARP frame\n");
+
+          /* Handle ARP packet */
+
           uip_arp_arpin(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
@@ -1231,6 +1413,9 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   int i;
+
+  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+          priv->txhead, priv->txtail, priv->inflight);
 
   /* Scan for "in-flight" descriptors owned by the CPU */
 
@@ -1286,6 +1471,9 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
        */
 
       priv->txtail = txdesc;
+
+      nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+              priv->txhead, priv->txtail, priv->inflight);
     }
 }
 
@@ -1324,9 +1512,9 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 
       /* And disable further TX interrupts. */
 
-      regval = getreg32(STM32_ETH_DMAIER);
+      regval = stm32_getreg(STM32_ETH_DMAIER);
       regval &= ~ETH_DMAINT_XMIT_DISABLE;
-      putreg32(regval, STM32_ETH_DMAIER);
+      stm32_putreg(regval, STM32_ETH_DMAIER);
     }
 
   /* Then poll uIP for new XMIT data */
@@ -1358,13 +1546,13 @@ static int stm32_interrupt(int irq, FAR void *context)
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
 
-  dmasr = getreg32(STM32_ETH_DMASR);
+  dmasr = stm32_getreg(STM32_ETH_DMASR);
 
   /* Mask only enabled interrupts.  This depends on the fact that the interrupt
    * related bits (0-16) correspond in these two registers.
    */
 
-  dmasr &= ~getreg32(STM32_ETH_DMAIER);
+  dmasr &= ~stm32_getreg(STM32_ETH_DMAIER);
 
   /* Check if there are pending "normal" interrupts */
 
@@ -1378,7 +1566,7 @@ static int stm32_interrupt(int irq, FAR void *context)
         {
           /* Clear the pending receive interrupt */
 
-          putreg32(ETH_DMAINT_RI, STM32_ETH_DMASR);
+          stm32_putreg(ETH_DMAINT_RI, STM32_ETH_DMASR);
 
           /* Handle the received package */
 
@@ -1394,7 +1582,7 @@ static int stm32_interrupt(int irq, FAR void *context)
         {
           /* Clear the pending receive interrupt */
 
-          putreg32(ETH_DMAINT_TI, STM32_ETH_DMASR);
+          stm32_putreg(ETH_DMAINT_TI, STM32_ETH_DMASR);
 
           /* Check if there are pending transmissions */
 
@@ -1403,7 +1591,7 @@ static int stm32_interrupt(int irq, FAR void *context)
 
       /* Clear the pending normal summary interrupt */
 
-      putreg32(ETH_DMAINT_NIS, STM32_ETH_DMASR);
+      stm32_putreg(ETH_DMAINT_NIS, STM32_ETH_DMASR);
     }
 
   /* Handle error interrupt only if CONFIG_DEBUG_NET is eanbled */
@@ -1420,11 +1608,11 @@ static int stm32_interrupt(int irq, FAR void *context)
 
       /* Clear all pending abnormal events */
 
-      putreg32(ETH_DMAINT_ABNORMAL, STM32_ETH_DMASR);
+      stm32_putreg(ETH_DMAINT_ABNORMAL, STM32_ETH_DMASR);
 
       /* Clear the pending normal summary interrupt */
 
-      putreg32(ETH_DMAINT_NIS, STM32_ETH_DMASR);
+      stm32_putreg(ETH_DMAINT_NIS, STM32_ETH_DMASR);
     }
 #endif
   return OK;
@@ -1452,6 +1640,8 @@ static int stm32_interrupt(int irq, FAR void *context)
 static void stm32_txtimeout(int argc, uint32_t arg, ...)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+
+  nlldbg("Timeout!\n");
 
   /* Then reset the hardware.  Just take the interface down, then back
    * up again.
@@ -1549,6 +1739,8 @@ static int stm32_ifup(struct uip_driver_s *dev)
 
   priv->ifup = true;
   up_enable_irq(STM32_IRQ_ETH);
+
+  stm32_checksetup();
   return OK;
 }
 
@@ -1572,6 +1764,8 @@ static int stm32_ifdown(struct uip_driver_s *dev)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
+
+  ndbg("Taking the network down\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -1620,6 +1814,8 @@ static int stm32_txavail(struct uip_driver_s *dev)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
+
+  nllvdbg("ifup: %d\n", priv->ifup);
 
   /* Disable interrupts because this function may be called from interrupt
    * level processing.
@@ -1672,6 +1868,10 @@ static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
 
+  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+  /* Add the MAC address to the hardware multicast routing table */
   /* Add the MAC address to the hardware multicast routing table */
 #error "Missing logic"
 
@@ -1701,6 +1901,9 @@ static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
+
+  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Add the MAC address to the hardware multicast routing table */
 #error "Missing logic"
@@ -1788,7 +1991,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
 
   /* Set Transmit Desciptor List Address Register */
 
-  putreg32((uint32_t)priv->txtable, STM32_ETH_DMATDLAR);
+  stm32_putreg((uint32_t)priv->txtable, STM32_ETH_DMATDLAR);
 }
 
 /****************************************************************************
@@ -1867,7 +2070,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
 
   /* Set Receive Descriptor List Address Register */
 
-  putreg32((uint32_t)priv->rxtable, STM32_ETH_DMARDLAR);
+  stm32_putreg((uint32_t)priv->rxtable, STM32_ETH_DMARDLAR);
 }
 
 /****************************************************************************
@@ -1895,7 +2098,7 @@ static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *val
 
   /* Configure the MACMIIAR register, preserving CSR Clock Range CR[2:0] bits */
 
-  regval  = getreg32(STM32_ETH_MACMIIAR);
+  regval  = stm32_getreg(STM32_ETH_MACMIIAR);
   regval &= ETH_MACMIIAR_CR_MASK;
 
   /* Set the PHY device address, PHY register address, and set the buy bit.
@@ -1906,15 +2109,15 @@ static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *val
   regval |= (((uint32_t)phyregaddr << ETH_MACMIIAR_MR_SHIFT) & ETH_MACMIIAR_MR_MASK);
   regval |= ETH_MACMIIAR_MB;
 
-  putreg32(regval, STM32_ETH_MACMIIAR);
+  stm32_putreg(regval, STM32_ETH_MACMIIAR);
 
   /* Wait for the transfer to complete */
 
   for (timeout = 0; timeout < PHY_READ_TIMEOUT; timeout++)
     {
-      if ((getreg32(STM32_ETH_MACMIIAR) && ETH_MACMIIAR_MB) == 0)
+      if ((stm32_getreg(STM32_ETH_MACMIIAR) & ETH_MACMIIAR_MB) == 0)
         {
-          *value = (uint16_t)getreg32(STM32_ETH_MACMIIDR);
+          *value = (uint16_t)stm32_getreg(STM32_ETH_MACMIIDR);
           return OK;
         }
     }
@@ -1950,7 +2153,7 @@ static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t val
 
   /* Configure the MACMIIAR register, preserving CSR Clock Range CR[2:0] bits */
 
-  regval  = getreg32(STM32_ETH_MACMIIAR);
+  regval  = stm32_getreg(STM32_ETH_MACMIIAR);
   regval &= ETH_MACMIIAR_CR_MASK;
 
   /* Set the PHY device address, PHY register address, and set the busy bit.
@@ -1965,14 +2168,14 @@ static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t val
    * register value.
    */
 
-  putreg32(value, STM32_ETH_MACMIIDR);
-  putreg32(regval, STM32_ETH_MACMIIAR);
+  stm32_putreg(value, STM32_ETH_MACMIIDR);
+  stm32_putreg(regval, STM32_ETH_MACMIIAR);
 
   /* Wait for the transfer to complete */
 
   for (timeout = 0; timeout < PHY_WRITE_TIMEOUT; timeout++)
     {
-      if ((getreg32(STM32_ETH_MACMIIAR) && ETH_MACMIIAR_MB) == 0)
+      if ((stm32_getreg(STM32_ETH_MACMIIAR) & ETH_MACMIIAR_MB) == 0)
         {
           return OK;
         }
@@ -2014,16 +2217,17 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 
   /* Setup up PHY clocking by setting the SR field in the MACMIIAR register */
 
-  regval  = getreg32(STM32_ETH_MACMIIAR);
+  regval  = stm32_getreg(STM32_ETH_MACMIIAR);
   regval &= ~ETH_MACMIIAR_CR_MASK;
   regval |= ETH_MACMIIAR_CR;
-  putreg32(regval, STM32_ETH_MACMIIAR);
+  stm32_putreg(regval, STM32_ETH_MACMIIAR);
 
   /* Put the PHY in reset mode */
 
   ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
+      ndbg("Failed to reset the PHY: %d\n", ret);
       return ret;
     }
   up_mdelay(PHY_RESET_DELAY);
@@ -2038,6 +2242,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
       ret = stm32_phyread(CONFIG_STM32_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
+          ndbg("Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_LINKSTATUS) != 0)
@@ -2057,6 +2262,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
   ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
+      ndbg("Failed to enable auto-negotiation: %d\n", ret);
       return ret;
     }
 
@@ -2067,6 +2273,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
       ret = stm32_phyread(CONFIG_STM32_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
+          ndbg("Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
@@ -2115,6 +2322,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
   ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
+     ndbg("Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
   up_mdelay(PHY_CONFIG_DELAY);
@@ -2128,6 +2336,11 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
   priv->mbps100 = 1;
 #endif
 #endif
+
+  ndbg("Duplex: %s Speed: %d MBps\n",
+       priv->fduplex ? "FULL" : "HALF",
+       priv->mbps100 ? 100 : 10);
+
   return OK;
 }
 
@@ -2267,27 +2480,27 @@ static void stm32_ethreset(FAR struct stm32_ethmac_s *priv)
 
   /* Reset the Ethernet on the AHB1 bus */
 
-  regval  = getreg32(STM32_RCC_AHB1RSTR);
+  regval  = stm32_getreg(STM32_RCC_AHB1RSTR);
   regval |= RCC_AHB1RSTR_ETHMACRST;
-  putreg32(regval, STM32_RCC_AHB1RSTR);
+  stm32_putreg(regval, STM32_RCC_AHB1RSTR);
 
   regval &= ~RCC_AHB1RSTR_ETHMACRST;
-  putreg32(regval, STM32_RCC_AHB1RSTR);
+  stm32_putreg(regval, STM32_RCC_AHB1RSTR);
 
   /* Perform a software reset by setting the SR bit in the DMABMR register.
    * This Resets all MAC subsystem internal registers and logic.  After this
    * reset all the registers holds their reset values.
    */
 
-  regval = getreg32(STM32_ETH_DMABMR);
+  regval = stm32_getreg(STM32_ETH_DMABMR);
   regval |= ETH_DMABMR_SR;
-  putreg32(regval, STM32_ETH_DMABMR);
+  stm32_putreg(regval, STM32_ETH_DMABMR);
 
   /* Wait for software reset to complete. The SR bit is cleared automatically
    * after the reset operation has completed in all of the core clock domains.
    */
 
-  while ((getreg32(STM32_ETH_DMABMR) & ETH_DMABMR_SR) != 0);
+  while ((stm32_getreg(STM32_ETH_DMABMR) & ETH_DMABMR_SR) != 0);
 }
 
 /****************************************************************************
@@ -2312,7 +2525,7 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Set up the MACCR register */
 
-  regval  = getreg32(STM32_ETH_MACCR);
+  regval  = stm32_getreg(STM32_ETH_MACCR);
   regval &= ~MACCR_CLEAR_BITS;
   regval |= MACCR_SET_BITS;
 
@@ -2330,45 +2543,45 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
       regval |= ETH_MACCR_FES;
     }
 
-  putreg32(regval, STM32_ETH_MACCR);
+  stm32_putreg(regval, STM32_ETH_MACCR);
 
   /* Set up the MACFFR register */
 
-  regval  = getreg32(STM32_ETH_MACFFR);
+  regval  = stm32_getreg(STM32_ETH_MACFFR);
   regval &= ~MACFFR_CLEAR_BITS;
   regval |= MACFFR_SET_BITS;
-  putreg32(regval, STM32_ETH_MACFFR);
+  stm32_putreg(regval, STM32_ETH_MACFFR);
 
   /* Set up the MACHTHR and MACHTLR registers */
 
-  putreg32(0, STM32_ETH_MACHTHR);
-  putreg32(0, STM32_ETH_MACHTLR);
+  stm32_putreg(0, STM32_ETH_MACHTHR);
+  stm32_putreg(0, STM32_ETH_MACHTLR);
 
   /* Setup up the MACFCR register */
 
-  regval  = getreg32(STM32_ETH_MACFCR);
+  regval  = stm32_getreg(STM32_ETH_MACFCR);
   regval &= ~MACFCR_CLEAR_MASK;
   regval |= MACFCR_SET_MASK;
-  putreg32(regval, STM32_ETH_MACFCR);
+  stm32_putreg(regval, STM32_ETH_MACFCR);
 
   /* Setup up the MACVLANTR register */
 
-  putreg32(0, STM32_ETH_MACVLANTR);
+  stm32_putreg(0, STM32_ETH_MACVLANTR);
 
   /* DMA Configuration */
   /* Set up the DMAOMR register */
 
-  regval  = getreg32(STM32_ETH_DMAOMR);
+  regval  = stm32_getreg(STM32_ETH_DMAOMR);
   regval &= ~DMAOMR_CLEAR_MASK;
   regval |= DMAOMR_SET_MASK;
-  putreg32(regval, STM32_ETH_DMAOMR);
+  stm32_putreg(regval, STM32_ETH_DMAOMR);
 
   /* Set up the DMABMR register */
 
-  regval  = getreg32(STM32_ETH_DMABMR);
+  regval  = stm32_getreg(STM32_ETH_DMABMR);
   regval &= ~DMABMR_CLEAR_MASK;
   regval |= DMABMR_SET_MASK;
-  putreg32(regval, STM32_ETH_DMABMR);
+  stm32_putreg(regval, STM32_ETH_DMABMR);
 
   return OK;
 }
@@ -2391,21 +2604,28 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
 
 static void stm32_macaddress(FAR struct stm32_ethmac_s *priv)
 {
+  FAR struct uip_driver_s *dev = &priv->dev;
   uint32_t regval;
+
+  nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+          dev->d_ifname,
+          dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+          dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+          dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
   
-  regval = ((uint32_t)priv->dev.d_mac.ether_addr_octet[5] << 8) |
-            (uint32_t)priv->dev.d_mac.ether_addr_octet[4];
-  putreg32(regval, STM32_ETH_MACA0HR);
+  regval = ((uint32_t)dev->d_mac.ether_addr_octet[5] << 8) |
+            (uint32_t)dev->d_mac.ether_addr_octet[4];
+  stm32_putreg(regval, STM32_ETH_MACA0HR);
 
   /* Set the MAC address low register */
   
-  regval = ((uint32_t)priv->dev.d_mac.ether_addr_octet[3] << 24) |
-           ((uint32_t)priv->dev.d_mac.ether_addr_octet[2] << 16) |
-           ((uint32_t)priv->dev.d_mac.ether_addr_octet[1] <<  8) | 
-            (uint32_t)priv->dev.d_mac.ether_addr_octet[0];
-  putreg32(regval, STM32_ETH_MACA0LR);
+  regval = ((uint32_t)dev->d_mac.ether_addr_octet[3] << 24) |
+           ((uint32_t)dev->d_mac.ether_addr_octet[2] << 16) |
+           ((uint32_t)dev->d_mac.ether_addr_octet[1] <<  8) | 
+            (uint32_t)dev->d_mac.ether_addr_octet[0];
+  stm32_putreg(regval, STM32_ETH_MACA0LR);
 }
 
 /****************************************************************************
@@ -2434,35 +2654,35 @@ static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
 
   /* Enable transmit state machine of the MAC for transmission on the MII */  
 
-  regval  = getreg32(STM32_ETH_MACCR);
+  regval  = stm32_getreg(STM32_ETH_MACCR);
   regval |= ETH_MACCR_TE;
-  putreg32(regval, STM32_ETH_MACCR);
+  stm32_putreg(regval, STM32_ETH_MACCR);
 
   /* Flush Transmit FIFO */
 
-  regval  = getreg32(STM32_ETH_DMAOMR);
+  regval  = stm32_getreg(STM32_ETH_DMAOMR);
   regval |= ETH_DMAOMR_FTF;
-  putreg32(regval, STM32_ETH_DMAOMR);
+  stm32_putreg(regval, STM32_ETH_DMAOMR);
 
   /* Enable receive state machine of the MAC for reception from the MII */  
 
   /* Enables or disables the MAC reception. */
 
-  regval  = getreg32(STM32_ETH_MACCR);
+  regval  = stm32_getreg(STM32_ETH_MACCR);
   regval |= ETH_MACCR_RE;
-  putreg32(regval, STM32_ETH_MACCR);
+  stm32_putreg(regval, STM32_ETH_MACCR);
  
   /* Start DMA transmission */
 
-  regval  = getreg32(STM32_ETH_DMAOMR);
+  regval  = stm32_getreg(STM32_ETH_DMAOMR);
   regval |= ETH_DMAOMR_ST;
-  putreg32(regval, STM32_ETH_DMAOMR);
+  stm32_putreg(regval, STM32_ETH_DMAOMR);
  
   /* Start DMA reception */
 
-  regval  = getreg32(STM32_ETH_DMAOMR);
+  regval  = stm32_getreg(STM32_ETH_DMAOMR);
   regval |= ETH_DMAOMR_SR;
-  putreg32(regval, STM32_ETH_DMAOMR);
+  stm32_putreg(regval, STM32_ETH_DMAOMR);
 
   /* Enable Ethernet DMA interrupts.
    *
@@ -2475,7 +2695,7 @@ static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
    * neither of which are used by this driver.
    */
 
-  putreg32(ETH_MACIMR_ALLINTS, STM32_ETH_MACIMR);
+  stm32_putreg(ETH_MACIMR_ALLINTS, STM32_ETH_MACIMR);
   
   /* Ethernet DMA supports two classes of interrupts: Normal interrupt
    * summary (NIS) and Abnormal interrupt summary (AIS) with a variety
@@ -2484,7 +2704,7 @@ static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
    * events will only be enabled when a transmit interrupt is expected.
    */
 
-  putreg32((ETH_DMAINT_RECV_ENABLE | ETH_DMAINT_ERROR_ENABLE), STM32_ETH_DMAIER);
+  stm32_putreg((ETH_DMAINT_RECV_ENABLE | ETH_DMAINT_ERROR_ENABLE), STM32_ETH_DMAIER);
   return OK;
 }
 
@@ -2514,10 +2734,12 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Reset the Ethernet block */
 
+  nllvdbg("Reset the Ethernet block\n");
   stm32_ethreset(priv);
 
   /* Initialize the PHY */
 
+  nllvdbg("Initialize the PHY\n");
   ret = stm32_phyinit(priv);
   if (ret < 0)
     {
@@ -2526,6 +2748,7 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Initialize the MAC and DMA */
 
+  nllvdbg("Initialize the MAC and DMA\n");
   ret = stm32_macconfig(priv);
   if (ret < 0)
     {
@@ -2546,6 +2769,7 @@ static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
 
   /* Enable normal MAC operation */
 
+  nllvdbg("Enable normal operation\n");
   return stm32_macenable(priv);
 }
 
@@ -2580,6 +2804,8 @@ static inline
 int stm32_ethinitialize(int intf)
 {
   struct stm32_ethmac_s *priv;
+
+  nvdbg("intf: %d\n", intf);
 
   /* Get the interface structure associated with this interface number. */
 

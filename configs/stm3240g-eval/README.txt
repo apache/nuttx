@@ -13,6 +13,7 @@ Contents
   - NuttX buildroot Toolchain
   - STM3240G-EVAL-specific Configuration Options
   - LEDs
+  - Ethernet
   - Configurations
 
 Development Environment
@@ -160,6 +161,19 @@ NuttX buildroot Toolchain
   See the file configs/README.txt in the buildroot source tree.  That has more
   detailed PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
+
+Ethernet
+========
+
+The Ethernet driver is configured to use the MII interface:
+
+  Board Jumper Settings:
+
+    Jumper  Description
+    JP8     To enable MII, JP8 should not be fitted.
+    JP6     2-3: Enable MII interface mode
+    JP5     2-3: Provide 25 MHz clock for MII or 50 MHz clock for RMII by MCO at PA8
+    SB1     Not used with MII
 
 LEDs
 ====

@@ -2253,3 +2253,5 @@
 	* arch/arm/src/stm32/chip/stm32_eth.h:  Add Ethernet register definitions
 	  for the STM32 F4.
 	* arch/arm/srcm/stm32/stm32_eth.c:  Adds an Ethernet driver for the STM32 F4.
+	* arch/arm/srcm/stm32/stm32_dac.c and stm32_adc.c: "Skeleton" files for STM32
+	  DAC and ADC drivers.  The actual logic will come later.
