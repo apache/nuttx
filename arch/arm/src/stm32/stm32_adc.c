@@ -209,7 +209,7 @@ static int adc_interrupt(int irq, void *context)
  *
  * Description:
  *   Reset the ADC device.  Called early to initialize the hardware. This
- *   is called, before ao_setup() and on error conditions.
+ *   is called, before adc_setup() and on error conditions.
  *
  * Input Parameters:
  *
