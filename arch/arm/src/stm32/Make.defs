@@ -71,6 +71,10 @@ ifeq ($(CONFIG_RTC),y)
 CHIP_CSRCS	+= stm32_rtc.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CHIP_CSRCS	+= stm32_adc.c
+endif
+
 ifeq ($(CONFIG_DEBUG),y)
 CHIP_CSRCS	+= stm32_dumpgpio.c
 endif
