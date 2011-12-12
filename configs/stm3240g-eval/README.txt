@@ -178,8 +178,11 @@ The Ethernet driver is configured to use the MII interface:
 LEDs
 ====
 
-The STM3240G-EVAL board has four LEDs labeled. Usage of these LEDs is defined
-in include/board.h and src/up_leds.c. They are encoded as follows:
+The STM3240G-EVAL board has four LEDs labeled LD1, LD2, LD3 and LD4 on the
+board.. These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+defined.  In that case, the usage by the board port is defined in
+include/board.h and src/up_leds.c. The LEDs are used to encode OS-related\
+events as follows:
 
 	SYMBOL				Meaning					LED1*	LED2	LED3	LED4
 	-------------------	-----------------------	-------	-------	-------	------
@@ -440,5 +443,8 @@ Where <subdir> is one of the following:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
 
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_STM32_CODESOURCERYW=y              : CodeSourcery under Windows
+    CONFIG_NSH_DHCPC=n                        : DHCP is disabled
+    CONFIG_NSH_IPADDR=(10<<24|0<<16|0<<8|2)   : Target IP address 10.0.0.2
+    CONFIG_NSH_DRIPADDR=(10<<24|0<<16|0<<8|1) : Host IP address 10.0.0.1
 
