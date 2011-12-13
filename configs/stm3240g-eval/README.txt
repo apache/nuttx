@@ -452,7 +452,7 @@ Where <subdir> is one of the following:
     CONFIG_EXAMPLE_NETTEST_PERFORMANCE=y                  : Only network performance is verified.
     CONFIG_EXAMPLE_NETTEST_IPADDR=(10<<24|0<<16|0<<8|2)   : Target side is IP: 10.0.0.2
     CONFIG_EXAMPLE_NETTEST_DRIPADDR=(10<<24|0<<16|0<<8|1) : Host side is IP: 10.0.0.1
-    CONFIG_EXAMPLE_NETTEST_CLIENTIP=(10<<24|0<<16|0<<8|1) : Server add
+    CONFIG_EXAMPLE_NETTEST_CLIENTIP=(10<<24|0<<16|0<<8|1) : Server address used by which ever is client.
 
   ostest:
   ------
