@@ -1203,7 +1203,7 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
   struct eth_rxdesc_s *rxdesc;
   int i;
 
-  nllvdbg("rxfirst: %d segments: %d\n", rxfirst, segments);
+  nllvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
 
   /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
@@ -1703,9 +1703,9 @@ static int stm32_interrupt(int irq, FAR void *context)
 
       stm32_putreg(ETH_DMAINT_ABNORMAL, STM32_ETH_DMASR);
 
-      /* Clear the pending normal summary interrupt */
+      /* Clear the pending abnormal summary interrupt */
 
-      stm32_putreg(ETH_DMAINT_NIS, STM32_ETH_DMASR);
+      stm32_putreg(ETH_DMAINT_AIS, STM32_ETH_DMASR);
     }
 #endif
   return OK;

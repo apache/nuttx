@@ -729,10 +729,10 @@ Where <subdir> is one of the following:
     Support for the board's SPI-based MicroSD card is included
     (but not passing tests as of this writing).
 
-	NOTE: At present, the value for the SD SPI frequency is too
-	high and the SD will fail.  Setting that frequency to 400000
-	removes the problem. TODO:  Tune this frequency to some optimal
-	value.
+    NOTE: At present, the value for the SD SPI frequency is too
+    high and the SD will fail.  Setting that frequency to 400000
+    removes the problem. TODO:  Tune this frequency to some optimal
+    value.
 
     Jumpers: J55 must be set to provide chip select PIO1_11 signal as
     the SD slot chip select.

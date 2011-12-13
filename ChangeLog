@@ -2257,4 +2257,7 @@
 	  DAC and ADC drivers.  The actual logic will come later.
 	* arch/arm/srcm/stm32/stm32_eth.c:  There may be a few more lurking bugs, but
 	  the STM32 Ethernet driver appears to be fully functional on the STM3240G-EVAL.
-
+	* arch/arm/srcm/stm32/stm32_eth.c:  Fix an error in clearing abnormal interrupt
+	  events.
+	* configs/stm3240g-eval/dhcpd:  Add a DCHP daemon configuration for the
+	  STM3240G-EVAL board.
