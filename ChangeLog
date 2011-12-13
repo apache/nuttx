@@ -2261,3 +2261,5 @@
 	  events.
 	* configs/stm3240g-eval/dhcpd:  Add a DCHP daemon configuration for the
 	  STM3240G-EVAL board.
+	* configs/stm3240g-eval/nettest:  Add a network test configuration for the
+	  STM3240G-EVAL board.
