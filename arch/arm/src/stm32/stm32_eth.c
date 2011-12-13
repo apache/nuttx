@@ -563,6 +563,9 @@ static void stm32_dopoll(FAR struct stm32_ethmac_s *priv);
 
 /* Interrupt handling */
 
+static void stm32_enableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit);
+static void stm32_disableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit);
+
 static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
                               FAR struct eth_rxdesc_s *rxfirst, int segments);
 static int  stm32_recvframe(FAR struct stm32_ethmac_s *priv);
@@ -868,7 +871,6 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   struct eth_txdesc_s *txfirst;
-  uint32_t regval;
 
   /* The internal uIP buffer size may be configured to be larger than the
    * Ethernet buffer size.
@@ -1019,6 +1021,16 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
   nllvdbg("txhead: %p txtail: %p inflight: %d\n",
           priv->txhead, priv->txtail, priv->inflight);
 
+  /* If all TX descriptors are in-flight, then we have to disable receive interrupts
+   * too.  This is because receive events can trigger more un-stoppable transmit
+   * events.
+   */
+
+  if (priv->inflight >= CONFIG_STM32_ETH_NTXDESC)
+    {
+      stm32_disableint(priv, ETH_DMAINT_RI);
+    }
+
   /* Check if the TX Buffer unavailable flag is set */
 
   if ((stm32_getreg(STM32_ETH_DMASR) & ETH_DMAINT_TBUI) != 0)
@@ -1034,9 +1046,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
   /* Enable TX interrupts */
 
-  regval  = stm32_getreg(STM32_ETH_DMAIER);
-  regval |= ETH_DMAINT_XMIT_ENABLE;
-  stm32_putreg(regval, STM32_ETH_DMAIER);
+  stm32_enableint(priv, ETH_DMAINT_TI);
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -1089,9 +1099,15 @@ static int stm32_uiptxpoll(struct uip_driver_s *dev)
       /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
        * cannot perform the TX poll if we are unable to accept another packet for
        * transmission.
+       *
+       * In a race condition, ETH_TDES0_OWN may be cleared BUT still not available
+       * because stm32_freeframe() has not yet run.  If stm32_freeframe() has run,
+       * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
+       * CONFIG_STM32_ETH_NTXDESC).
        */
 
-      if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0)
+      if ((priv->txhead->tdes0 & ETH_TDES0_OWN) != 0 ||
+           priv->txhead->tdes2 != 0)
         {
           /* We have to terminate the poll if we have no more descriptors
            * available for another transfer.
@@ -1148,9 +1164,15 @@ static void stm32_dopoll(FAR struct stm32_ethmac_s *priv)
   /* Check if the next TX descriptor is owned by the Ethernet DMA or
    * CPU.  We cannot perform the TX poll if we are unable to accept
    * another packet for transmission.
+   *
+   * In a race condition, ETH_TDES0_OWN may be cleared BUT still not available
+   * because stm32_freeframe() has not yet run.  If stm32_freeframe() has run,
+   * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
+   * CONFIG_STM32_ETH_NTXDESC).
    */
 
-  if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0)
+  if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0 &&
+       priv->txhead->tdes2 == 0)
     {
       /* If we have the descriptor, then poll uIP for new XMIT data.
        * Allocate a buffer for the poll.
@@ -1177,6 +1199,72 @@ static void stm32_dopoll(FAR struct stm32_ethmac_s *priv)
             }
         }
     }
+}
+
+/****************************************************************************
+ * Function: stm32_enableint
+ *
+ * Description:
+ *   Enable a "normal" interrupt
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static void stm32_enableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit)
+{
+  uint32_t regval;
+
+  /* Enable the specified "normal" interrupt */
+
+  regval  = stm32_getreg(STM32_ETH_DMAIER);
+  regval |= (ETH_DMAINT_NIS | ierbit);
+  stm32_putreg(regval, STM32_ETH_DMAIER);
+}
+
+/****************************************************************************
+ * Function: stm32_disableint
+ *
+ * Description:
+ *   Disable a normal interrupt.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Global interrupts are disabled by interrupt handling logic.
+ *
+ ****************************************************************************/
+
+static void stm32_disableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit)
+{
+  uint32_t regval;
+
+  /* Disable the "normal" interrupt */
+
+  regval  = stm32_getreg(STM32_ETH_DMAIER);
+  regval &= ~ierbit;
+
+  /* Are all "normal" interrupts now disabled? */
+
+  if ((regval & ETH_DMAINT_NORMAL) == 0)
+    {
+      /* Yes.. disable normal interrupts */
+ 
+      regval &= ~ETH_DMAINT_NIS;
+    }
+
+  stm32_putreg(regval, STM32_ETH_DMAIER);
 }
 
 /****************************************************************************
@@ -1274,11 +1362,23 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
       return -ENOMEM;
     }
 
-  /* Scan descriptors owned by the CPU */
+  /* Scan descriptors owned by the CPU.  Scan until:
+   *
+   *   1) We find a descriptor still owned by the DMA,
+   *   2) We have examined all of the RX descriptors, or
+   *   3) All of the TX descriptors are in flight.
+   *
+   * This last case is obscure.  It is due to that fact that each packet
+   * that we receive can generate and unstoppable transmisson.  So we have
+   * to stop receiving when we can not longer transmit.  In this case, the
+   * transmit logic should also have disabled further RX interrupts.
+   */
 
   rxdesc = priv->rxhead;
   for (i = 0;
-       (rxdesc->rdes0 & ETH_RDES0_OWN) == 0 && i < CONFIG_STM32_ETH_NRXDESC;
+       (rxdesc->rdes0 & ETH_RDES0_OWN) == 0 &&
+        i < CONFIG_STM32_ETH_NRXDESC &&
+        priv->inflight < CONFIG_STM32_ETH_NTXDESC;
        i++)
     {
       /* Check if this is the first segment in the frame */
@@ -1523,6 +1623,9 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
            * TX descriptors.
            */
 
+          nllvdbg("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+                  txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
+
           DEBUGASSERT(txdesc->tdes2 != 0);
 
           /* Check if this is the first segment of a TX frame. */
@@ -1542,11 +1645,19 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
 
           if ((txdesc->tdes0 & ETH_TDES0_FS) != 0)
             {
-              /* Yes.. Decrement the number of frames "in-flight".
-               * If there are no more frames in-flight, then bail.
+              /* Yes.. Decrement the number of frames "in-flight". */
+
+              priv->inflight--;
+
+              /* If all of the TX descriptors were in-flight, then RX interrupts
+               * may have been disabled... we can re-enable them now.
                */
 
-              if (--priv->inflight <= 0)
+              stm32_enableint(priv, ETH_DMAINT_RI);
+
+              /* If there are no more frames in-flight, then bail. */
+
+              if (priv->inflight <= 0)
                 {
                   priv->txtail   = NULL;
                   priv->inflight = 0;
@@ -1589,8 +1700,6 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
 
 static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 {
-  uint32_t regval;
-
   DEBUGASSERT(priv->txtail != NULL);
 
   /* Scan the TX desciptor change, returning buffers to free list */
@@ -1605,9 +1714,7 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
 
       /* And disable further TX interrupts. */
 
-      regval = stm32_getreg(STM32_ETH_DMAIER);
-      regval &= ~ETH_DMAINT_XMIT_DISABLE;
-      stm32_putreg(regval, STM32_ETH_DMAIER);
+      stm32_disableint(priv, ETH_DMAINT_TI);
     }
 
   /* Then poll uIP for new XMIT data */
@@ -1775,9 +1882,15 @@ static void stm32_polltimer(int argc, uint32_t arg, ...)
    * cannot perform the timer poll if we are unable to accept another packet
    * for transmission.  Hmmm.. might be bug here.  Does this mean if there is
    * a transmit in progress, we will missing TCP time state updates?
+   *
+   * In a race condition, ETH_TDES0_OWN may be cleared BUT still not available
+   * because stm32_freeframe() has not yet run.  If stm32_freeframe() has run,
+   * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
+   * CONFIG_STM32_ETH_NTXDESC).
    */
 
-  if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0)
+  if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0 &&
+       priv->txhead->tdes2 == 0)
     {
       /* If we have the descriptor, then perform the timer poll.  Allocate a
        * buffer for the poll.
