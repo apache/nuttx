@@ -430,6 +430,17 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  dhcpd:
+  -----
+
+    This builds the DCHP server using the apps/examples/dhcpd application
+    (for execution from FLASH.) See apps/examples/README.txt for information
+    about the dhcpd example.  The server address is 10.0.0.1 and it serves
+    IP addresses in the range 10.0.0.2 through 10.0.0.17 (all of which, of
+    course, are configurable).
+
+    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+
   ostest:
   ------
     This configuration directory, performs a simple OS test using
