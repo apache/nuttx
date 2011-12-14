@@ -401,7 +401,7 @@
 
 /* ADC watchdog low threshold register */
 
-#define ADC_LTR_SHIFT              (0)        /* Bits 11:0: Analog watchdog low threshold */
+#define ADC_LTR_SHIFT              (0)        /* Bits 11-0: Analog watchdog low threshold */
 #define ADC_LTR_MASK               (0x0fff << ADC_LTR_SHIFT)
 
 /* ADC regular sequence register 1 */
@@ -414,12 +414,12 @@
 #define ADC_SQR1_SQ15_MASK         (0x1f << ADC_SQR1_SQ15_SHIFT)
 #define ADC_SQR1_SQ16_SHIFT        (15)        /* Bits 19-15: 16th conversion in regular sequence */
 #define ADC_SQR1_SQ16_MASK         (0x1f << ADC_SQR1_SQ16_SHIFT)
-#define ADC_SQR1_L_SHIFT           (20)        /* Bits 23:20 L[3:0]: Regular channel sequence length */
+#define ADC_SQR1_L_SHIFT           (20)        /* Bits 23-20: Regular channel sequence length */
 #define ADC_SQR1_L_MASK            (0x0f << ADC_SQR1_L_SHIFT)
 
 /* ADC regular sequence register 2 */
 
-#define ADC_SQR1_SQ7_SHIFT         (0)         /* Bits 4-0: 7th conversion in regular sequence */
+#define ADC_SQR2_SQ7_SHIFT         (0)         /* Bits 4-0: 7th conversion in regular sequence */
 #define ADC_SQR2_SQ7_MASK          (0x1f << ADC_SQR2_SQ7_SHIFT)
 #define ADC_SQR2_SQ8_SHIFT         (5)         /* Bits 9-5: 8th conversion in regular sequence */
 #define ADC_SQR2_SQ8_MASK          (0x1f << ADC_SQR2_SQ8_SHIFT)
@@ -427,9 +427,9 @@
 #define ADC_SQR2_SQ9_MASK          (0x1f << ADC_SQR2_SQ9_SHIFT)
 #define ADC_SQR2_SQ10_SHIFT        (15)        /* Bits 19-15: 10th conversion in regular sequence */
 #define ADC_SQR2_SQ10_MASK         (0x1f << ADC_SQR2_SQ10_SHIFT)
-#define ADC_SQR2_SQ11_SHIFT        (20)        /* Bits 24:20: 11th conversion in regular sequence */
+#define ADC_SQR2_SQ11_SHIFT        (20)        /* Bits 24-20: 11th conversion in regular sequence */
 #define ADC_SQR2_SQ11_MASK         (0x1f << ADC_SQR2_SQ11_SHIFT )
-#define ADC_SQR2_SQ12_SHIFT        (25)        /* Bits 29:25: 12th conversion in regular sequence */
+#define ADC_SQR2_SQ12_SHIFT        (25)        /* Bits 29-25: 12th conversion in regular sequence */
 #define ADC_SQR2_SQ12_MASK         (0x1f << ADC_SQR2_SQ12_SHIFT)
 
 /* ADC regular sequence register 3 */
@@ -442,22 +442,22 @@
 #define ADC_SQR3_SQ3_MASK          (0x1f << ADC_SQR3_SQ3_SHIFT)
 #define ADC_SQR3_SQ4_SHIFT         (15)        /* Bits 19-15: 4th conversion in regular sequence */
 #define ADC_SQR3_SQ4_MASK          (0x1f << ADC_SQR3_SQ4_SHIFT)
-#define ADC_SQR3_SQ5_SHIFT         (20)        /* Bits 24:20: 5th conversion in regular sequence */
+#define ADC_SQR3_SQ5_SHIFT         (20)        /* Bits 24-20: 5th conversion in regular sequence */
 #define ADC_SQR3_SQ5_MASK          (0x1f << ADC_SQR3_SQ5_SHIFT )
-#define ADC_SQR3_SQ6_SHIFT         (25)        /* Bits 29:25: 6th conversion in regular sequence */
+#define ADC_SQR3_SQ6_SHIFT         (25)        /* Bits 29-25: 6th conversion in regular sequence */
 #define ADC_SQR3_SQ6_MASK          (0x1f << ADC_SQR3_SQ6_SHIFT)
 
 /* ADC injected sequence register */
 
-#define ADC_JSQR_JSQ1_SHIFT        (0)        /* Bits 4:0 JSQ1[4:0]: 1st conversion in injected sequence */
+#define ADC_JSQR_JSQ1_SHIFT        (0)        /* Bits 4-0: 1st conversion in injected sequence */
 #define ADC_JSQR_JSQ1_MASK         (0x1f << ADC_JSQR_JSQ1_SHIFT)
-#define ADC_JSQR_JSQ2_SHIFT        (5)        /* Bits 9:5 JSQ2[4:0]: 2nd conversion in injected sequence */
+#define ADC_JSQR_JSQ2_SHIFT        (5)        /* Bits 9-5: 2nd conversion in injected sequence */
 #define ADC_JSQR_JSQ2_MASK         (0x1f << ADC_JSQR_JSQ2_MASK)
-#define ADC_JSQR_JSQ3_SHIFT        (10)       /* Bits 14:10 JSQ3[4:0]: 3rd conversion in injected sequence */
+#define ADC_JSQR_JSQ3_SHIFT        (10)       /* Bits 14-10: 3rd conversion in injected sequence */
 #define ADC_JSQR_JSQ3_MASK         (0x1f << ADC_JSQR_JSQ3_SHIFT)
-#define ADC_JSQR_JSQ4_SHIFT        (15)       /* Bits 19:15 JSQ4[4:0]: 4th conversion in injected sequence */
+#define ADC_JSQR_JSQ4_SHIFT        (15)       /* Bits 19-15: 4th conversion in injected sequence */
 #define ADC_JSQR_JSQ4_MASK         (0x1f << ADC_JSQR_JSQ4_SHIFT)
-#define ADC_JSQR_JL_SHIFT          (20)       /* Bits 21:20 JL[1:0]: Injected Sequence length */
+#define ADC_JSQR_JL_SHIFT          (20)       /* Bits 21-20: Injected Sequence length */
 #define ADC_JSQR_JL_MASK           (3 << ADC_JSQR_JL_SHIFT)
 
 /* ADC injected data register 1-4 */
@@ -467,9 +467,9 @@
 
 /* ADC regular data register */
 
-#define ADC_DR_DATA_SHIFT          (0)        /* Bits 15:0 Regular data */
+#define ADC_DR_DATA_SHIFT          (0)        /* Bits 15-0 Regular data */
 #define ADC_DR_DATA_MASK           (0xffff << ADC_DR_DATA_SHIFT)
-#define ADC_DR_ADC2DATA_SHIFT      (16)       /* Bits 31:16: ADC2 data */
+#define ADC_DR_ADC2DATA_SHIFT      (16)       /* Bits 31-16: ADC2 data */
 #define ADC_DR_ADC2DATA_MASK       (0xffff << ADC_DR_ADC2DATA_SHIFT)
 
 /* Common status register */

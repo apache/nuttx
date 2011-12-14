@@ -52,6 +52,10 @@ ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS		+= up_nsh.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS		+= up_adc.c
+endif
+
 ifeq ($(CONFIG_USBSTRG),y)
 CSRCS		+= up_usbstrg.c
 endif
