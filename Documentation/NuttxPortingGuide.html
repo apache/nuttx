@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: December 1, 2011</p>
+      <p>Last Updated: December 14, 2011</p>
     </td>
   </tr>
 </table>
@@ -1971,8 +1971,16 @@ else
   <dt><code>CONFIG_RTC</code>
   <dd>Enables general support for a hardware RTC. 
       Specific architectures may require other specific settings.
+  <dt><code>CONFIG_RTC_DATETIME</code>
+  <dd>There are two general types of RTC:  (1) A simple battery backed counter that keeps the time when power
+     is down, and (2) A full date / time RTC the provides the date and time information, often in BCD format.
+     If <code>CONFIG_RTC_DATETIME</code> is selected, it specifies this second kind of RTC.
+     In this case, the RTC is used to &quot;seed&quot;" the normal NuttX timer and the NuttX system timer
+     provides for higher resoution time.
   <dt><code>CONFIG_RTC_HIRES</code>
-  <dd>The typical RTC keeps time to resolution of 1 second, usually supporting a 32-bit <code>time_t</code> value.
+  <dd>If <code>CONFIG_RTC_DATETIME</code> not selected, then the simple, battery backed counter is used.
+      There are two different implementations of such simple counters based on the time resolution of the counter:
+      The typical RTC keeps time to resolution of 1 second, usually supporting a 32-bit <code>time_t</code> value.
       In this case, the RTC is used to &quot;seed&quot; the normal NuttX timer and the NuttX timer provides for higher resoution time.
       If <code>CONFIG_RTC_HIRES</code> is enabled in the NuttX configuration, then the RTC provides higher resolution time and completely replaces the system timer for purpose of date and time.
   <dt><code>CONFIG_RTC_FREQUENCY</code>
@@ -1983,12 +1991,31 @@ else
     A callback function will be executed when the alarm goes off
 </dl></ul>
 <p>
-  which requires the following three base functions to read time:
+  which requires the following base functions to read and set time:
 </p>
 <ul>
-  <li><code>up_rtcinitialize()</code></li>
-  <li><code>up_rtc_time()</code>. UTC time in seconds.</li>
-  <li><code>up_rtc_gettime()</code>. Replacement for <code>g_system_tick</code></li>
+  <li><code>up_rtcinitialize()</code>.
+     Initialize the hardware RTC per the selected configuration.
+     This function is called once during the OS initialization sequence
+  </li>
+  <li><code>up_rtc_time()</code>. 
+    Get the current time in seconds.  This is similar to the standard <code>time()</code> function.
+    This interface is only required if the low-resolution RTC/counter hardware implementation selected.
+    It is only used by the RTOS during intialization to set up the system time when <code>CONFIG_RTC</code> is set
+    but neither <code>CONFIG_RTC_HIRES</code> nor <code>CONFIG_RTC_DATETIME</code> are set.
+  </li>
+  <li><code>up_rtc_gettime()</code>. 
+    Get the current time from the high resolution RTC clock/counter.
+    This interface is only supported by the hight-resolution RTC/counter hardware implementation.
+    It is used to replace the system timer (<code>g_system_tick</code>).
+  </li>
+  <li><code>up_rtc_settime()</code>.
+    Set the RTC to the provided time.
+    All RTC implementations must be able to set their time based on a standard timespec.
+  </li>
+  <li><code>up_rtc_setalarm()</code>.
+    Set up an alarm.
+  </li>
 </ul>
 
 <h4>4.1.20.2 System Tick and Time</h4>
@@ -4230,7 +4257,17 @@ build
       Specific architectures may require other specific settings.
   </li>
   <li>
+    <code>CONFIG_RTC_DATETIME</code>:
+      There are two general types of RTC:  (1) A simple battery backed counter that keeps the time when power
+      is down, and (2) A full date / time RTC the provides the date and time information, often in BCD format.
+      If <code>CONFIG_RTC_DATETIME</code> is selected, it specifies this second kind of RTC.
+      In this case, the RTC is used to &quot;seed&quot;" the normal NuttX timer and the NuttX system timer
+      provides for higher resoution time.
+  </li>
+  <li>
     <code>CONFIG_RTC_HIRES</code>:
+      If <code>CONFIG_RTC_DATETIME</code> not selected, then the simple, battery backed counter is used.
+      There are two different implementations of such simple counters based on the time resolution of the counter:
       The typical RTC keeps time to resolution of 1 second, usually supporting a 32-bit <code>time_t</code> value.
       In this case, the RTC is used to &quot;seed&quot; the normal NuttX timer and the NuttX timer provides for higher resoution time.
       If <code>CONFIG_RTC_HIRES</code> is enabled in the NuttX configuration, then the RTC provides higher resolution time and completely replaces the system timer for purpose of date and time.
