@@ -55,6 +55,7 @@
 #define STM32_RTC_SSR_OFFSET      0x0028 /* RTC sub second register */
 #define STM32_RTC_SHIFTR_OFFSET   0x002c /* RTC shift control register */
 #define STM32_RTC_TSTR_OFFSET     0x0030 /* RTC time stamp time register */
+#define STM32_RTC_TSDR_OFFSET     0x0030 /* RTC time stamp date register */
 #define STM32_RTC_TSSSR_OFFSET    0x0038 /* RTC timestamp sub second register */
 #define STM32_RTC_CALR_OFFSET     0x003c /* RTC calibration register */
 #define STM32_RTC_TAFCR_OFFSET    0x0040 /* RTC tamper and alternate function configuration register */
@@ -98,6 +99,7 @@
 #define STM32_RTC_SSR             (STM32_RTC_BASE+STM32_RTC_SSR_OFFSET)
 #define STM32_RTC_SHIFTR          (STM32_RTC_BASE+STM32_RTC_SHIFTR_OFFSET)
 #define STM32_RTC_TSTR            (STM32_RTC_BASE+STM32_RTC_TSTR_OFFSET)
+#define STM32_RTC_TSDR            (STM32_RTC_BASE+STM32_RTC_TSDR_OFFSET)
 #define STM32_RTC_TSSSR           (STM32_RTC_BASE+STM32_RTC_TSSSR_OFFSET)
 #define STM32_RTC_CALR            (STM32_RTC_BASE+STM32_RTC_CALR_OFFSET)
 #define STM32_RTC_TAFCR           (STM32_RTC_BASE+STM32_RTC_TAFCR_OFFSET)
@@ -151,7 +153,7 @@
 #define RTC_DR_DU_MASK            (15 << RTC_DR_DU_SHIFT)
 #define RTC_DR_DT_SHIFT           (4)       /* Bits 4-5: Date tens in BCD format */
 #define RTC_DR_DT_MASK            (3 << RTC_DR_DT_SHIFT)
-#define RTC_DR_MU_SHIFT           (20)      /* Bits 8-11: Month units in BCD format */
+#define RTC_DR_MU_SHIFT           (8)      /* Bits 8-11: Month units in BCD format */
 #define RTC_DR_MU_MASK            (15 << RTC_DR_MU_SHIFT)
 #define RTC_DR_MT                 (1 << 12) /* Bit 12: Month tens in BCD format */
 #define RTC_DR_WDU_SHIFT          (13)      /* Bits 13-15: Week day units */
@@ -297,6 +299,18 @@
 #define RTC_TSTR_HT_SHIFT         (20)      /* Bits 20-21: Hour tens in BCD format. */
 #define RTC_TSTR_HT_MASK          (3 << RTC_TSTR_HT_SHIFT)
 #define RTC_TSTR_PM               (1 << 22) /* Bit 22: AM/PM notation */
+
+/* RTC time stamp date register */
+
+#define RTC_TSDR_DU_SHIFT         (0)       /* Bit 0-3: Date units in BCD format */
+#define RTC_TSDR_DU_MASK          (15 << RTC_TSDR_DU_SHIFT) */
+#define RTC_TSDR_DT_SHIFT         (4)       /* Bits 4-5: Date tens in BCD format */
+#define RTC_TSDR_DT_MASK          (3 << RTC_TSDR_DT_SHIFT)
+#define RTC_TSDR_MU_SHIFT         (8)       /* Bits 8-11: Month units in BCD format */
+#define RTC_TSDR_MU_MASK          (xx << RTC_TSDR_MU_SHIFT)
+#define RTC_TSDR_MT               (1 << 12) /* Bit 12: Month tens in BCD format */
+#define RTC_TSDR_WDU_SHIFT        (13)      /* Bits 13-15: Week day units */
+#define RTC_TSDR_WDU_MASK         (7 << RTC_TSDR_WDU_SHIFT)
 
 /* RTC timestamp sub second register */
 
