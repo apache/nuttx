@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_lse.c
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.orgr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -63,31 +63,43 @@
 /****************************************************************************
  * Name: stm32_rcc_enablelse
  *
+ * Description:
+ *   Enable the External Low-Speed (LSE) Oscillator and, if the RTC is
+ *   configured, setup the LSE as the RTC clock source, and enable the RTC.
+ *
  * Todo:
  *   Check for LSE good timeout and return with -1,
- *   possible ISR optimization? or at least ISR should be cough in case of\
- *   failure
  *
  ****************************************************************************/
 
 void stm32_rcc_enablelse(void)
 {
-  /* Enable LSE */
+  /* Enable the External Low-Speed (LSE) Oscillator by setting the LSEON bit
+   * the RCC BDCR register.
+   */
 
   modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_LSEON);
 
-  /* We could wait for ISR here ... */
+  /* Wait for the LSE clock to be ready */
 
   while ((getreg16(STM32_RCC_BDCR) & RCC_BDCR_LSERDY) == 0)
     {
       up_waste();
     }
     
-  /* Select LSE as RTC Clock Source */
+  /* The primariy purpose of the LSE clock is to drive the RTC.  The RTC could
+   * also be driven by the LSI (but that would be very inaccurate) or by the
+   * HSE (but that would prohibit low-power operation)
+   *
+   * Select LSE as RTC Clock Source by setting the RTCSEL field of the RCC BDCR
+   * register.
+   */
 
+#ifdef CONFIG_RTC
   modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
-    
-  /* Enable Clock */
+
+  /* Enable the RTC Clock by setting the RTCEN bit in the RCC BDCR register */
 
   modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);    
+#endif
 }

@@ -33,13 +33,9 @@
  *
  ************************************************************************************/
 
-/** \file
- *  \author Uros Platise
- *  \brief STM32 Power
- *  
- * \addtogroup STM32_PWR
- * \{
- */
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -50,7 +46,6 @@
 #include "up_arch.h"
 #include "stm32_pwr.h"
 
-
 #if defined(CONFIG_STM32_PWR)
 
 /************************************************************************************
@@ -59,32 +54,41 @@
 
 static inline uint16_t stm32_pwr_getreg(uint8_t offset)
 {
-    return getreg32(STM32_PWR_BASE + offset);
+  return getreg32(STM32_PWR_BASE + offset);
 }
-
 
 static inline void stm32_pwr_putreg(uint8_t offset, uint16_t value)
 {
-    putreg32(value, STM32_PWR_BASE + offset);
+  putreg32(value, STM32_PWR_BASE + offset);
 }
-
 
 static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint16_t setbits)
 {
-    modifyreg32(STM32_PWR_BASE + offset, clearbits, setbits);
+  modifyreg32(STM32_PWR_BASE + offset, clearbits, setbits);
 }
 
-
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
 
 /************************************************************************************
- * Public Function - Initialization
+ * Name: stm32_pwr_enablebkp
+ *
+ * Description:
+ *   Enables access to the backup domain (RTC registers, RTC backup data registers
+ *   and backup SRAM).
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Values:
+ *   None
+ *
  ************************************************************************************/
 
 void stm32_pwr_enablebkp(void)
 {
-    stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, PWR_CR_DBP);
+  stm32_pwr_modifyreg(STM32_PWR_CR_OFFSET, 0, PWR_CR_DBP);
 }
 
-
 #endif // defined(CONFIG_STM32_PWR)
-/** \} */

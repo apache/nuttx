@@ -354,7 +354,8 @@ static int stm32_rtc_interrupt(int irq, void *context)
 int up_rtcinitialize(void)
 {
   /* Set access to the peripheral, enable the backup domain (BKP) and the lower power
-   * extern 32,768Hz (Low-Speed External, LSE) oscillator.
+   * extern 32,768Hz (Low-Speed External, LSE) oscillator.  Configure the LSE to
+   * drive the RTC.
    */
 
   stm32_pwr_enablebkp();

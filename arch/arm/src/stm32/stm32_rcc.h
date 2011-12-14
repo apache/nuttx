@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_rcc.h
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.orgr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -170,7 +170,8 @@ EXTERN void stm32_clockconfig(void);
  * Name: stm32_rcc_enablelse
  *
  * Description:
- *   Enable LSE Clock
+ *   Enable the External Low-Speed (LSE) Oscillator and, if the RTC is
+ *   configured, setup the LSE as the RTC clock source, and enable the RTC.
  *
  * Input Parameters:
  *   None

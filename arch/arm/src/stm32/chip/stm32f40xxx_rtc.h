@@ -133,7 +133,7 @@
 #define RTC_TR_SU_SHIFT           (0)       /* Bits 0-3: Second units in BCD format */
 #define RTC_TR_SU_MASK            (15 << RTC_TR_SU_SHIFT)
 #define RTC_TR_ST_SHIFT           (4)       /* Bits 4-6: Second tens in BCD format */
-#define RTC_TR_ST_MASK            (7 << RTC_TR_ST_SHIFT)*
+#define RTC_TR_ST_MASK            (7 << RTC_TR_ST_SHIFT)
 #define RTC_TR_MNU_SHIFT          (8)       /* Bit 8-11: Minute units in BCD format */
 #define RTC_TR_MNU_MASK           (15 << RTC_TR_MNU_SHIFT)
 #define RTC_TR_MNT_SHIFT          (12)      /* Bits 12-14: Minute tens in BCD format */
@@ -143,10 +143,11 @@
 #define RTC_TR_HT_SHIFT           (20)      /* Bits 20-21: Hour tens in BCD format */
 #define RTC_TR_HT_MASK            (3 << RTC_TR_HT_SHIFT)
 #define RTC_TR_PM                 (1 << 22) /* Bit 22: AM/PM notation */
+#define RTC_TR_RESERVED_BITS      (0xff808080)
 
 /* RTC date register */
 
-#define RTC_DR_DU_SHIFT           (0)       /* Bits 0-3]: Date units in BCD format */
+#define RTC_DR_DU_SHIFT           (0)       /* Bits 0-3: Date units in BCD format */
 #define RTC_DR_DU_MASK            (15 << RTC_DR_DU_SHIFT)
 #define RTC_DR_DT_SHIFT           (4)       /* Bits 4-5: Date tens in BCD format */
 #define RTC_DR_DT_MASK            (3 << RTC_DR_DT_SHIFT)
@@ -166,6 +167,7 @@
 #define RTC_DR_YU_MASK            (15 << RTC_DR_YU_SHIFT)
 #define RTC_DR_YT_SHIFT           (20)     /* Bits 20-23: Year tens in BCD format */
 #define RTC_DR_YT_MASK            (15 << RTC_DR_YT_SHIFT)
+#define RTC_DR_RESERVED_BITS      (0xff0000c0)
 
 /* RTC control register */
 
@@ -220,13 +222,14 @@
 #define RTC_ISR_TSOVF             (1 << 12) /* Bit 12: Timestamp overflow flag */
 #define RTC_ISR_TAMP1F            (1 << 13) /* Bit 13: Tamper detection flag */
 #define RTC_ISR_TAMP2F            (1 << 14) /* Bit 14: TAMPER2 detection flag */
-#define RTC_ISR_RECALPF           (1 << 15) /* Bit 16: Recalibration pending Flag */
+#define RTC_ISR_RECALPF           (1 << 16) /* Bit 16: Recalibration pending Flag */
+#define RTC_ISR_ALLFLAGS          (0x00017fff)
 
 /* RTC prescaler register */
 
 #define RTC_PRER_PREDIV_S_SHIFT   (0)       /* Bits 0-14: Synchronous prescaler factor */
 #define RTC_PRER_PREDIV_S_MASK    (0x7fff << RTC_PRER_PREDIV_S_SHIFT)
-#define RTC_PRER_PREDIV_A_SHIFT   (22)      /* Bits 16-22: Asynchronous prescaler factor */
+#define RTC_PRER_PREDIV_A_SHIFT   (16)      /* Bits 16-22: Asynchronous prescaler factor */
 #define RTC_PRER_PREDIV_A_MASK    (0x7f << RTC_PRER_PREDIV_A_SHIFT)
 
 /* RTC wakeup timer register */
