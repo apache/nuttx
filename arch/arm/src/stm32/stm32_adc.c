@@ -145,6 +145,8 @@ static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
  * Private Data
  ****************************************************************************/
 
+/* ADC interface operations */
+
 static const struct adc_ops_s g_adcops =
 {
   .ao_reset    = adc_reset,
@@ -153,6 +155,8 @@ static const struct adc_ops_s g_adcops =
   .ao_rxint    = adc_rxint,
   .ao_ioctl    = adc_ioctl,
 };
+
+/* ADC1 state */
 
 #ifdef CONFIG_STM32_ADC1
 static struct stm32_dev_s g_adcpriv1 =
@@ -174,6 +178,8 @@ static struct adc_dev_s g_adcdev1 =
 };
 #endif
 
+/* ADC2 state */
+
 #ifdef CONFIG_STM32_ADC2
 static struct stm32_dev_s g_adcpriv2 =
 {
@@ -192,8 +198,9 @@ static struct adc_dev_s g_adcdev2 =
   .ad_ops = &g_adcops,
   .ad_priv= &g_adcpriv2,
 };
-
 #endif
+
+/* ADC3 state */
 
 #ifdef CONFIG_STM32_ADC3
 static struct stm32_dev_s g_adcpriv3 =
@@ -213,7 +220,6 @@ static struct adc_dev_s g_adcdev3 =
   .ad_ops = &g_adcops,
   .ad_priv= &g_adcpriv3,
 };
-
 #endif
 
 /****************************************************************************
@@ -255,7 +261,7 @@ static uint32_t adc_getreg(struct stm32_dev_s *priv, int offset)
 
 static void adc_putreg(struct stm32_dev_s *priv, int offset, uint32_t value)
 {
-  putreg32(value, priv->base + offst);
+  putreg32(value, priv->base + offset);
 }
 
 /****************************************************************************
@@ -314,9 +320,11 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   regval &= ~ADC_CR2_ALIGN;
 
   /* Initialize the External event select "Timer CC1 event" */
+
   regval &= ~ADC_CR2_EXTSEL_MASK;
 
   /* Initialize the ADC_ContinuousConvMode "Single conversion mode" */
+
   regval &= ~ADC_CR2_CONT;
   adc_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
 
@@ -357,8 +365,8 @@ static int adc_setup(FAR struct adc_dev_s *dev)
     {
       for (i = 0; i < 8; i++)
       {
-        priv->buf[i]=0;
-        priv->count[i]=0;
+        priv->buf[i]   = 0;
+        priv->count[i] = 0;
       }
       
       /* Enable the ADC interrupt */
@@ -606,7 +614,7 @@ static int adc123_interrupt(int irq, void *context)
   pending = regval & ADC_SR_ALLINTS;
   if (pending != 0)
     {
-      adc_interrupt(&g_adcpriv2);
+      adc_interrupt(&g_adcpriv3);
       regval &= ~pending;
       putreg32(regval, STM32_ADC3_SR);
     }
