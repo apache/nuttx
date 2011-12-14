@@ -217,7 +217,7 @@ EXTERN int up_rtc_gettime(FAR struct timespec *tp);
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_DATETIME
-EXTERN int up_rtc_getdatetime(FAR const struct tm *tp);
+EXTERN int up_rtc_getdatetime(FAR struct tm *tp);
 #endif
 
 /************************************************************************************

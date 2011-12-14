@@ -335,6 +335,7 @@ STM3240G-EVAL-specific Configuration Options
 	CONFIG_STM32_CAN1
 	CONFIG_STM32_CAN2
 	CONFIG_STM32_DAC
+	CONFIG_STM32_PWR -- Required for RTC
 
 	APB2
 	----

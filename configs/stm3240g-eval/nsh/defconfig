@@ -161,6 +161,7 @@ CONFIG_STM32_I2C3=n
 CONFIG_STM32_CAN1=n
 CONFIG_STM32_CAN2=n
 CONFIG_STM32_DAC=n
+CONFIG_STM32_PWR=n
 # APB2:
 CONFIG_STM32_TIM1=n
 CONFIG_STM32_TIM8=n
@@ -757,6 +758,39 @@ CONFIG_NET_BROADCAST=n
 #
 CONFIG_NET_DHCP_LIGHT=n
 CONFIG_NET_RESOLV_ENTRIES=4
+
+#
+# RTC Configuration
+#
+# CONFIG_RTC - Enables general support for a hardware RTC.  Specific
+#   architectures may require other specific settings.
+# CONFIG_RTC_DATETIME - There are two general types of RTC:  (1) A simple
+#   battery backed counter that keeps the time when power is down, and (2)
+#    A full date / time RTC the provides the date and time information, often
+#   in BCD format.  If CONFIG_RTC_DATETIME is selected, it specifies this
+#   second kind of RTC. In this case, the RTC is used to "seed" the normal
+#   NuttX timer and the NuttX system timer provides for higher resoution
+#   time.
+# CONFIG_RTC_HIRES - If CONFIG_RTC_DATETIME not selected, then the simple,
+#   battery backed counter is used.  There are two different implementations
+#   of such simple counters based on the time resolution of the counter:
+#   The typical RTC keeps time to resolution of 1 second, usually
+#   supporting a 32-bit time_t value.  In this case, the RTC is used to
+#   "seed" the normal NuttX timer and the NuttX timer provides for higher
+#   resoution time. If CONFIG_RTC_HIRES is enabled in the NuttX configuration,
+#   then the RTC provides higher resolution time and completely replaces the
+#   system timer for purpose of date and time.
+# CONFIG_RTC_FREQUENCY - If CONFIG_RTC_HIRES is defined, then the frequency
+#  of the high resolution RTC must be provided.  If CONFIG_RTC_HIRES is
+#   not defined, CONFIG_RTC_FREQUENCY is assumed to be one.
+# CONFIG_RTC_ALARM - Enable if the RTC hardware supports setting of an
+#  alarm.  A callback function will be executed when the alarm goes off
+#
+CONFIG_RTC=n
+CONFIG_RTC_DATETIME=y
+CONFIG_RTC_HIRES=n
+CONFIG_RTC_FREQUENCY=n
+CONFIG_RTC_ALARM=n
 
 #
 # USB Device Configuration

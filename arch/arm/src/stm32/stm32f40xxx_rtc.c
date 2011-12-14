@@ -43,6 +43,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/rtc.h>
 
+#include <time.h>
+#include <errno.h>
+
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -61,8 +64,12 @@
 #  error "CONFIG_RTC_DATETIME must be set to use this driver"
 #endif
 
-#ifndef CONFIG_RTC_HIRES
+#ifdef CONFIG_RTC_HIRES
 #  error "CONFIG_RTC_HIRES must NOT be set with this driver"
+#endif
+
+#ifndef CONFIG_STM32_PWR
+#  error "CONFIG_STM32_PWR must selected to use this driver"
 #endif
 
 /* Constants ************************************************************************/
@@ -226,24 +233,25 @@ static int rtc_enterinit(void)
 
   ret = OK;
   if ((regval & RTC_ISR_INITF) == 0)
-  {
-    /* Set the Initialization mode */
+    {
+      /* Set the Initialization mode */
 
-    putreg32(RTC_ISR_INIT, STM32_RTC_ISR);
+      putreg32(RTC_ISR_INIT, STM32_RTC_ISR);
     
-    /* Wait until the RTC is in the INIT state (or a timeout occurs) */
+      /* Wait until the RTC is in the INIT state (or a timeout occurs) */
  
-    ret = -ETIMEDOUT;
-    for (timeout = 0; timeout < INITMODE_TIMEOUT; timeout++)
-      {
-        regval = getreg32(STM32_RTC_ISR);
-        if ((regval & RTC_ISR_INITF) != 0)
-          {
-            ret = OK;
-            break;
-          }
-      }
-    
+      ret = -ETIMEDOUT;
+      for (timeout = 0; timeout < INITMODE_TIMEOUT; timeout++)
+        {
+          regval = getreg32(STM32_RTC_ISR);
+          if ((regval & RTC_ISR_INITF) != 0)
+            {
+              ret = OK;
+              break;
+            }
+        }
+    }
+
   return ret;  
 }
 
@@ -357,7 +365,7 @@ static int rtc_setup(void)
 
       /* Set Initialization mode */
 
-      ret = rtc_enterinit()
+      ret = rtc_enterinit();
       if (ret == OK)
         {
           /* Set the 24 hour format by clearing the FMT bit in the RTC
@@ -365,7 +373,7 @@ static int rtc_setup(void)
            */
 
           regval = getreg32(STM32_RTC_CR);
-          regval &= ~RTC_CR_FMT
+          regval &= ~RTC_CR_FMT;
           putreg32(regval, STM32_RTC_CR);
 
           /* Configure RTC pre-scaler to the required, default values for
@@ -405,7 +413,9 @@ static int rtc_setup(void)
 
 static int rtc_resume(void)
 {
+#ifdef CONFIG_RTC_ALARM
   uint32_t regval;
+#endif
   int ret;
 
   /* Wait for the RTC Time and Date registers to be syncrhonized with RTC APB
@@ -473,6 +483,7 @@ static int rtc_interrupt(int irq, void *context)
 int up_rtcinitialize(void)
 {
   uint32_t regval;
+  int ret;
 
   /* Clocking for the PWR block must be provided.  However, this is done
    * unconditionally in stm32f40xxx_rcc.c on power up.  This done unconditionally
@@ -551,7 +562,7 @@ int up_rtcinitialize(void)
  *
  ************************************************************************************/
 
-int up_rtc_getdatetime(FAR const struct tm *tp)
+int up_rtc_getdatetime(FAR struct tm *tp)
 {
   uint32_t dr;
   uint32_t tr;
@@ -575,13 +586,13 @@ int up_rtc_getdatetime(FAR const struct tm *tp)
    * register.
    */
 
-  tmp = (uint8_t)(tr & (RTC_TR_SU_MASK|RTC_TR_ST_MASK)) >> RTC_TR_SU_SHIFT;
+  tmp = (tr & (RTC_TR_SU_MASK|RTC_TR_ST_MASK)) >> RTC_TR_SU_SHIFT;
   tp->tm_sec = rtc_bcd2bin(tmp);
 
-  tmp = (tr & RTC_TR_MNU_MASK|RTC_TR_MNT_MASK) >> RTC_TR_MNU_SHIFT;
+  tmp = (tr & (RTC_TR_MNU_MASK|RTC_TR_MNT_MASK)) >> RTC_TR_MNU_SHIFT;
   tp->tm_min = rtc_bcd2bin(tmp);
 
-  tmp = (tr & RTC_TR_HU_MASK|RTC_TR_HT_MASK) >> RTC_TR_HU_SHIFT;
+  tmp = (tr & (RTC_TR_HU_MASK|RTC_TR_HT_MASK)) >> RTC_TR_HU_SHIFT;
   tp->tm_hour = rtc_bcd2bin(tmp);
 
   /* Now convert the RTC date to fields in struct tm format:
@@ -593,13 +604,13 @@ int up_rtc_getdatetime(FAR const struct tm *tp)
    * years 2000-2099?  I'll assume so.
    */
 
-  tmp = (dr & RTC_DR_DU_MASK|RTC_DR_DT_MASK) >> RTC_DR_DU_SHIFT;
+  tmp = (dr & (RTC_DR_DU_MASK|RTC_DR_DT_MASK)) >> RTC_DR_DU_SHIFT;
   tp->tm_mday = rtc_bcd2bin(tmp);
 
-  tmp = (dr & RTC_DR_MU_MASK|RTC_DR_MT) >> RTC_DR_MU_SHIFT;
+  tmp = (dr & (RTC_DR_MU_MASK|RTC_DR_MT)) >> RTC_DR_MU_SHIFT;
   tp->tm_mon = rtc_bcd2bin(tmp) - 1;
 
-  tmp = (dr & RTC_DR_YU_MASK|RTC_DR_YT_MASK) >> RTC_DR_YU_SHIFT; /* Year units, BCD 0-99 */
+  tmp = (dr & (RTC_DR_YU_MASK|RTC_DR_YT_MASK)) >> RTC_DR_YU_SHIFT;
   tp->tm_year = rtc_bcd2bin(tmp) + 100;
   return OK;
 }
@@ -637,9 +648,9 @@ int up_rtc_settime(FAR const struct timespec *tp)
    * register.
    */
 
-  tr = (rtc_bin2bcd(tp->tm_sec)  << RTC_TR_SU_SHIFT) |
-       (rtc_bin2bcd(tp->tm_min)  << RTC_TR_MNU_SHIFT) |
-       (rtc_bin2bcd(tp->tm_hour) << RTC_TR_HU_SHIFT);
+  tr = (rtc_bin2bcd(newtime.tm_sec)  << RTC_TR_SU_SHIFT) |
+       (rtc_bin2bcd(newtime.tm_min)  << RTC_TR_MNU_SHIFT) |
+       (rtc_bin2bcd(newtime.tm_hour) << RTC_TR_HU_SHIFT);
   tr &= ~RTC_TR_RESERVED_BITS;
 
   /* Now convert the fields in struct tm format to the RTC date register fields:
@@ -651,9 +662,9 @@ int up_rtc_settime(FAR const struct timespec *tp)
    * years 2000-2099?  I'll assume so.
    */
 
-  dr = (rtc_bin2bcd(tp->tm_mday) << RTC_DR_DU_SHIFT) |
-       ((rtc_bin2bcd(tp->tm_mon) + 1)  << RTC_DR_MU_SHIFT) |
-       ((rtc_bin2bcd(tp->tm_year) - 100) << RTC_DR_YU_SHIFT);
+  dr = (rtc_bin2bcd(newtime.tm_mday) << RTC_DR_DU_SHIFT) |
+       ((rtc_bin2bcd(newtime.tm_mon) + 1)  << RTC_DR_MU_SHIFT) |
+       ((rtc_bin2bcd(newtime.tm_year) - 100) << RTC_DR_YU_SHIFT);
   dr &= ~RTC_DR_RESERVED_BITS;
 
   /* Disable the write protection for RTC registers */
@@ -662,7 +673,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Set Initialization mode */
 
-  ret = rtc_enterinit()
+  ret = rtc_enterinit();
   if (ret == OK)
     {
       /* Set the RTC TR and DR registers */
@@ -674,7 +685,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
        * registers to be synchronized with RTC APB clock.
        */
 
-      rtc_enterinit()
+      rtc_exitinit();
       ret = rtc_synchwait();
     }
 
