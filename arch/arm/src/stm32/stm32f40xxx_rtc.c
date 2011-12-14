@@ -45,6 +45,7 @@
 
 #include <time.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <arch/board/board.h>
 
@@ -72,6 +73,10 @@
 #  error "CONFIG_STM32_PWR must selected to use this driver"
 #endif
 
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_RTC
+#endif
+
 /* Constants ************************************************************************/
 
 #define SYNCHRO_TIMEOUT  (0x00020000)
@@ -79,6 +84,20 @@
 #define RTC_MAGIC        (0xfacefeed)
 #define RTC_PREDIV_S     (0xff)
 #define RTC_PREDIV_A     (0x7f)
+
+/* Debug ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_RTC
+#  define rtcdbg    dbg
+#  define rtcvdbg   vdbg
+#  define rtclldbg  lldbg
+#  define rtcllvdbg llvdbg
+#else
+#  define rtcdbg(x...)
+#  define rtcvdbg(x...)
+#  define rtclldbg(x...)
+#  define rtcllvdbg(x...)
+#endif
 
 /************************************************************************************
  * Private Types
@@ -105,6 +124,76 @@ volatile bool g_rtc_enabled = false;
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
+/************************************************************************************
+ * Name: rtc_dumpregs
+ *
+ * Description:
+ *    Disable RTC write protection
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_DEBUG_RTC
+static void rtc_dumpregs(FAR const char *msg)
+{
+  rtclldbg("%s:\n", msg);
+  rtclldbg("      TR: %08x\n", getreg32(STM32_RTC_TR));
+  rtclldbg("      DR: %08x\n", getreg32(STM32_RTC_DR));
+  rtclldbg("      CR: %08x\n", getreg32(STM32_RTC_CR));
+  rtclldbg("     ISR: %08x\n", getreg32(STM32_RTC_ISR));
+  rtclldbg("    PRER: %08x\n", getreg32(STM32_RTC_PRER));
+  rtclldbg("    WUTR: %08x\n", getreg32(STM32_RTC_WUTR));
+  rtclldbg("  CALIBR: %08x\n", getreg32(STM32_RTC_CALIBR));
+  rtclldbg("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
+  rtclldbg("  ALRMBR: %08x\n", getreg32(STM32_RTC_ALRMBR));
+  rtclldbg("  SHIFTR: %08x\n", getreg32(STM32_RTC_SHIFTR));
+  rtclldbg("    TSTR: %08x\n", getreg32(STM32_RTC_TSTR));
+  rtclldbg("    TSDR: %08x\n", getreg32(STM32_RTC_TSDR));
+  rtclldbg("   TSSSR: %08x\n", getreg32(STM32_RTC_TSSSR));
+  rtclldbg("    CALR: %08x\n", getreg32(STM32_RTC_CALR));
+  rtclldbg("   TAFCR: %08x\n", getreg32(STM32_RTC_TAFCR));
+  rtclldbg("ALRMASSR: %08x\n", getreg32(STM32_RTC_ALRMASSR));
+  rtclldbg("ALRMBSSR: %08x\n", getreg32(STM32_RTC_ALRMBSSR));
+  rtclldbg("     BK0: %08x\n", getreg32(STM32_RTC_BK0R));
+}
+#else
+#  define tc_dumpregs(msg)
+#endif
+
+/************************************************************************************
+ * Name: rtc_dumptime
+ *
+ * Description:
+ *    Disable RTC write protection
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_DEBUG_RTC
+static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
+{
+  rtclldbg("%s:\n", msg);
+  rtclldbg("  tm_sec: %08x\n", tp->tm_sec);
+  rtclldbg("  tm_min: %08x\n", tp->tm_min);
+  rtclldbg(" tm_hour: %08x\n", tp->tm_hour);
+  rtclldbg(" tm_mday: %08x\n", tp->tm_mday);
+  rtclldbg("  tm_mon: %08x\n", tp->tm_mon);
+  rtclldbg(" tm_year: %08x\n", tp->tm_year);
+}
+#else
+#  define rtc_dumptime(tp, msg)
+#endif
+
 /************************************************************************************
  * Name: rtc_wprunlock
  *
@@ -485,6 +574,8 @@ int up_rtcinitialize(void)
   uint32_t regval;
   int ret;
 
+  rtc_dumpregs("On reset");
+
   /* Clocking for the PWR block must be provided.  However, this is done
    * unconditionally in stm32f40xxx_rcc.c on power up.  This done unconditionally
    * because the PWR block is also needed to set the internal voltage regulator for
@@ -508,6 +599,10 @@ int up_rtcinitialize(void)
       /* Perform the one-time setup of the LSE clocking to the RTC */
 
       ret = rtc_setup();
+
+      /* Remember that the RTC is initialized */
+
+      putreg32(RTC_MAGIC, STM32_RTC_BK0R);
     }
   else
     {
@@ -527,7 +622,7 @@ int up_rtcinitialize(void)
    */
 
 #ifdef CONFIG_RTC_ALARM
-#  warning "Missing logic"
+#  warning "Missing EXTI setup logic"
 
   /* Then attach the ALARM interrupt handler */
 
@@ -536,6 +631,7 @@ int up_rtcinitialize(void)
 #endif
 
   g_rtc_enabled = true;
+  rtc_dumpregs("After Initialzation");
   return OK;
 }
 
@@ -581,6 +677,8 @@ int up_rtc_getdatetime(FAR struct tm *tp)
     }
   while (tmp != dr);
 
+  rtc_dumpregs("Reading Time");
+
   /* Convert the RTC time to fields in struct tm format.  All of the STM32
    * All of the ranges of values correspond between struct tm and the time
    * register.
@@ -612,6 +710,8 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   tmp = (dr & (RTC_DR_YU_MASK|RTC_DR_YT_MASK)) >> RTC_DR_YU_SHIFT;
   tp->tm_year = rtc_bcd2bin(tmp) + 100;
+
+  rtc_dumptime(tp, "Returning");
   return OK;
 }
 
@@ -640,6 +740,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   /* Break out the time values (not that the time is set only to units of seconds) */
 
   (void)gmtime_r(&tp->tv_sec, &newtime);
+  rtc_dumptime(&newtime, "Setting time");
 
   /* Then write the broken out values to the RTC */
 
@@ -663,8 +764,8 @@ int up_rtc_settime(FAR const struct timespec *tp)
    */
 
   dr = (rtc_bin2bcd(newtime.tm_mday) << RTC_DR_DU_SHIFT) |
-       ((rtc_bin2bcd(newtime.tm_mon) + 1)  << RTC_DR_MU_SHIFT) |
-       ((rtc_bin2bcd(newtime.tm_year) - 100) << RTC_DR_YU_SHIFT);
+       ((rtc_bin2bcd(newtime.tm_mon + 1))  << RTC_DR_MU_SHIFT) |
+       ((rtc_bin2bcd(newtime.tm_year - 100)) << RTC_DR_YU_SHIFT);
   dr &= ~RTC_DR_RESERVED_BITS;
 
   /* Disable the write protection for RTC registers */
@@ -692,6 +793,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   /* Re-enable the write protection for RTC registers */
 
   rtc_wprlock();
+  rtc_dumpregs("New time setting");
   return ret;
 }
 
