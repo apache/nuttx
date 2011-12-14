@@ -1689,7 +1689,7 @@
     <p>
       <b>STATUS:</b>
       This is really a vapor ware, pre-announcement.
-      I have the hardware and the motivation and I expect to announce the availability of support the STM32F4-Discovery with the NuttX 6.13 release.
+      I have the hardware and the motivation and I expect to announce the availability of support the STM32F4-Discovery in a later NuttX release.
     </p>
   </td>
 </tr>
@@ -2728,7 +2728,38 @@ buildroot-1.10 2011-05-06 &lt;gnutt@nuttx.org&gt;
 <ul><pre>
 nuttx-6.13 2012-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
+    * arch/arm/src/stm32/stm32f40xxx_dma.c:  Add DMA support for the STM32 F4
+      family (untested on initial check-in)
+    * arch/arm/src/armv7-m/up_fpu.c:  Add logic for saving an restoring VFP
+      floating point registers on context switches (but also disable the FPU
+      because CodeSourcery doesn't support hard flowing point!)
+    * arch/arm/src/stm32/chip/stm32_eth.h:  Add Ethernet register definitions
+      for the STM32 F4.
+    * arch/arm/srcm/stm32/stm32_eth.c:  Adds an Ethernet driver for the STM32 F4.
+    * arch/arm/srcm/stm32/stm32_dac.c and stm32_adc.c: &quot;Skeleton&quot; files for STM32
+      DAC and ADC drivers.  The actual logic will come later.
+    * arch/arm/srcm/stm32/stm32_eth.c:  There may be a few more lurking bugs, but
+      the STM32 Ethernet driver appears to be fully functional on the STM3240G-EVAL.
+    * arch/arm/srcm/stm32/stm32_eth.c:  Fix an error in clearing abnormal interrupt
+      events.
+    * configs/stm3240g-eval/dhcpd:  Add a DCHP daemon configuration for the
+      STM3240G-EVAL board.
+    * configs/stm3240g-eval/nettest:  Add a network test configuration for the
+      STM3240G-EVAL board.
+    * arch/arm/srcm/stm32/stm32_rtc.c, stm32f10xxx_rtc.c, and stm32f40xxx_rtc:
+      Broke out separate drivers to handle the very different RTC implementations
+      in the STM32 F1 and F4 family.
+
 apps-6.13 2012-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
+
+    * apps/examples/dhcpd: May now be built as an NSH built-in application
+      by setting CONFIG_NSH_BUILTIN_APPS.
+    * apps/netutils/dhcpd/dhcpd.c: Fix several problems using host order address
+      where network addresses expected (and vice versa).
+    * apps/examples/nettest: May now be built as an NSH built-in application
+      by setting CONFIG_NSH_BUILTIN_APPS.
+    * apps/examples/nettest: Correct some build issues with the nettest is
+      built for performance evaluation.
 
 pascal-3.1 2012-xx-xx Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
