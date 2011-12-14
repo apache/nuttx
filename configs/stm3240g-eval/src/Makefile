@@ -42,6 +42,10 @@ AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		= up_boot.c up_leds.c up_buttons.c up_spi.c
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS		+= up_adc.c
+endif
+
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
