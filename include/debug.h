@@ -236,6 +236,18 @@
 # define illvdbg(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_ANALOG
+# define adbg(format, arg...)    dbg(format, ##arg)
+# define alldbg(format, arg...)  lldbg(format, ##arg)
+# define avdbg(format, arg...)   vdbg(format, ##arg)
+# define allvdbg(format, arg...) llvdbg(format, ##arg)
+#else
+# define adbg(x...)
+# define alldbg(x...)
+# define avdbg(x...)
+# define allvdbg(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_GRAPHICS
 # define gdbg(format, arg...)    dbg(format, ##arg)
 # define glldbg(format, arg...)  lldbg(format, ##arg)
@@ -391,6 +403,18 @@
 # define illdbg  (void)
 # define ivdbg   (void)
 # define illvdbg (void)
+#endif
+
+#ifdef CONFIG_DEBUG_ANALOG
+# define adbg    dbg
+# define alldbg  lldbg
+# define avdbg   vdbg
+# define allvdbg llvdbg
+#else
+# define adbg    (void)
+# define alldbg  (void)
+# define avdbg   (void)
+# define allvdbg (void)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS

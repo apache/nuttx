@@ -63,15 +63,27 @@ extern "C" {
  * Public Functions
  ************************************************************************************/
  
-/** Disables Write Protection to the Backup Area
- **/
+/************************************************************************************
+ * Name: stm32_pwr_enablebkp
+ *
+ * Description:
+ *   Enables access to the backup domain (RTC registers, RTC backup data registers
+ *   and backup SRAM).
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Values:
+ *   None
+ *
+ ************************************************************************************/
+
 EXTERN void stm32_pwr_enablebkp(void);
 
-
-/** \} */
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_PWR_H */

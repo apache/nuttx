@@ -426,7 +426,7 @@ static inline void rcc_enableapb1(void)
 #endif
 
   /* Power interface clock enable.  The PWR block is always enabled so that
-   * we can set the internal voltage regulator for maximum performanc.
+   * we can set the internal voltage regulator for maximum performance.
    */
 
   regval |= RCC_APB1ENR_PWREN;
