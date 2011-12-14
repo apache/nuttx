@@ -2263,3 +2263,6 @@
 	  STM3240G-EVAL board.
 	* configs/stm3240g-eval/nettest:  Add a network test configuration for the
 	  STM3240G-EVAL board.
+	* arch/arm/srcm/stm32/stm32_rtc.c, stm32f10xxx_rtc.c, and stm32f40xxx_rtc:
+	  Broke out separate drivers to handle the very different RTC implementations
+	  in the STM32 F1 and F4 family.

@@ -103,7 +103,26 @@ struct timespec   g_basetime;
  ****************************************************************************/
 
 #ifdef CONFIG_RTC
-#ifdef CONFIG_RTC_HIRES
+#if defined(CONFIG_RTC_DATETIME)
+/* Initialize the system time using a broken out date/time structure */
+
+static inline void clock_inittime(FAR struct timespec *tp)
+{
+  struct tm rtctime;
+
+  /* Get the broken-out time from the date/time RTC. */
+
+  (void)up_rtc_getdatetime(&rtctime);
+
+  /* And use the broken-out time to initialize the system time */
+
+  tp->tv_sec  = mktime(&rtctime);
+  tp->tv_nsec = 0;
+}
+
+#elif defined(CONFIG_RTC_HIRES)
+
+/* Initialize the system time using a high-resolution structure */
 
 static inline void clock_inittime(FAR struct timespec *tp)
 {
@@ -114,9 +133,11 @@ static inline void clock_inittime(FAR struct timespec *tp)
 
 #else
 
+/* Initialize the system time using seconds only */
+
 static inline void clock_inittime(FAR struct timespec *tp)
 {
-  /* Get the seconds (only) from the lo-res RTC */
+  /* Get the seconds (only) from the lo-resolution RTC */
 
   tp->tv_sec  = up_rtc_time();
   tp->tv_nsec = 0;

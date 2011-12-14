@@ -58,10 +58,21 @@
 /* CONFIG_RTC - Enables general support for a hardware RTC.  Specific
  *   architectures may require other specific settings.
  *
- * CONFIG_RTC_HIRES - The typical RTC keeps time to resolution of 1 second,
- *   usually supporting a 32-bit time_t value.  In this case, the RTC is
- *   used to "seed" the normal NuttX timer and the NuttX timer provides
- *   for higher resoution time.
+ * CONFIG_RTC_DATETIME - There are two general types of RTC:  (1) A simple
+ *   battery backed counter that keeps the time when power is down, and (2)
+ *   A full date / time RTC the provides the date and time information, often
+ *   in BCD format.  If CONFIG_RTC_DATETIME is selected, it specifies this
+ *   second kind of RTC. In this case, the RTC is used to "seed" the normal
+ *   NuttX timer and the NuttX system timer provides for higher resoution
+ *   time.
+ *
+ * CONFIG_RTC_HIRES - If CONFIG_RTC_DATETIME not selected, then the simple,
+ *   battery backed counter is used.  There are two different implementations
+ *   of such simple counters based on the time resolution of the counter:
+ *   The typical RTC keeps time to resolution of 1 second, usually
+ *   supporting a 32-bit time_t value.  In this case, the RTC is used to
+ *   "seed" the normal NuttX timer and the NuttX timer provides for higher
+ *   resoution time.
  *
  *   If CONFIG_RTC_HIRES is enabled in the NuttX configuration, then the
  *   RTC provides higher resolution time and completely replaces the system
@@ -76,6 +87,9 @@
  */
 
 #ifdef CONFIG_RTC_HIRES
+#  ifdef CONFIG_RTC_DATETIME
+#    error "CONFIG_RTC_HIRES and CONFIG_RTC_DATETIME are both defined"
+#  endif
 #  ifndef CONFIG_RTC_FREQUENCY
 #    error "CONFIG_RTC_FREQUENCY is required for CONFIG_RTC_HIRES"
 #  endif
@@ -124,7 +138,7 @@ extern "C" {
  * Name: up_rtcinitialize
  *
  * Description:
- *   Initialize the hardware RTC per the select configuration.  This function is
+ *   Initialize the hardware RTC per the selected configuration.  This function is
  *   called once during the OS initialization sequence
  *
  * Input Parameters:
@@ -142,7 +156,10 @@ EXTERN int up_rtcinitialize(void);
  *
  * Description:
  *   Get the current time in seconds.  This is similar to the standard time()
- *   function.
+ *   function.  This interface is only required if the low-resolution RTC/counter
+ *   hardware implementation selected.  It is only used by the RTOS during
+ *   intialization to set up the system time when CONFIG_RTC is set but neither
+ *   CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
  * Input Parameters:
  *   None
@@ -152,13 +169,17 @@ EXTERN int up_rtcinitialize(void);
  *
  ************************************************************************************/
 
+#ifndef CONFIG_RTC_HIRES
 EXTERN time_t up_rtc_time(void);
+#endif
 
 /************************************************************************************
  * Name: up_rtc_gettime
  *
  * Description:
- *   Get the current time from the high resolution RTC clock.
+ *   Get the current time from the high resolution RTC clock/counter.  This interface
+ *   is only supported by the high-resolution RTC/counter hardware implementation.
+ *   It is used to replace the system timer.
  *
  * Input Parameters:
  *   tp - The location to return the high resolution time value.
@@ -173,10 +194,38 @@ EXTERN int up_rtc_gettime(FAR struct timespec *tp);
 #endif
 
 /************************************************************************************
+ * Name: up_rtc_getdatetime
+ *
+ * Description:
+ *   Get the current date and time from the date/time RTC.  This interface
+ *   is only supported by the date/time RTC hardware implementation.
+ *   It is used to replace the system timer.  It is only used by the RTOS during
+ *   intialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
+ *   are selected (and CONFIG_RTC_HIRES is not).
+ *
+ *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.  That
+ *   sub-second accuracy is lost in this interface.  However, since the system time
+ *   is reinitialized on each power-up/reset, there will be no timing inaccuracy in
+ *   the long run.
+ *
+ * Input Parameters:
+ *   tp - The location to return the high resolution time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_RTC_DATETIME
+EXTERN int up_rtc_getdatetime(FAR const struct tm *tp);
+#endif
+
+/************************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.
+ *   Set the RTC to the provided time.  All RTC implementations must be able to
+ *   set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -192,7 +241,7 @@ EXTERN int up_rtc_settime(FAR const struct timespec *tp);
  * Name: up_rtc_setalarm
  *
  * Description:
- *   Set up a alarm.
+ *   Set up an alarm.
  *
  * Input Parameters:
  *   tp - the time to set the alarm
