@@ -3,7 +3,7 @@
  * Implementation of the ARP Address Resolution Protocol.
  *
  *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based on uIP which also has a BSD style license:
  *
@@ -81,8 +81,8 @@
 #define RASIZE         4  /* Size of ROUTER ALERT */
 
 #define ETHBUF        ((struct uip_eth_hdr *)&dev->d_buf[0])
-#define ARPBUF        ((struct arp_hdr *)&dev->d_buf[UIP_LLH_LEN])
-#define IPBUF         ((struct ethip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define ARPBUF        ((struct arp_hdr_s *)&dev->d_buf[UIP_LLH_LEN])
+#define IPBUF         ((struct arp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Private Types
@@ -90,7 +90,7 @@
 
 /* ARP header -- Size 28 bytes */
 
-struct arp_hdr
+struct arp_hdr_s
 {
   uint16_t ah_hwtype;        /* 16-bit Hardware type (Ethernet=0x001) */
   uint16_t ah_protocol;      /* 16-bit Protocol type (IP=0x0800) */
@@ -105,7 +105,7 @@ struct arp_hdr
 
 /* IP header -- Size 20 or 24 bytes */
 
-struct ethip_hdr
+struct arp_iphdr_s
 {
   uint8_t  eh_vhl;           /*  8-bit Version (4) and header length (5 or 6) */
   uint8_t  eh_tos;           /*  8-bit Type of service (e.g., 6=TCP) */
@@ -155,7 +155,7 @@ static const uint8_t g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
  ****************************************************************************/
 
 #if defined(CONFIG_NET_DUMPARP) && defined(CONFIG_DEBUG)
-static void uip_arp_dump(struct arp_hdr *arp)
+static void uip_arp_dump(struct arp_hdr_s *arp)
 {
   nlldbg("  HW type: %04x Protocol: %04x\n",
          arp->ah_hwtype, arp->ah_protocol);\
@@ -200,10 +200,10 @@ void uip_arp_ipin(struct uip_driver_s *dev)
    * packet comes from a host on the local network.
    */
 
-  srcipaddr = uip_ip4addr_conv(IPBUF->srcipaddr);
-  if (!uip_ipaddr_maskcmp(ipaddr, dev->d_ipaddr, dev->d_netmask))
+  srcipaddr = uip_ip4addr_conv(IPBUF->eh_srcipaddr);
+  if (!uip_ipaddr_maskcmp(srcipaddr, dev->d_ipaddr, dev->d_netmask))
     {
-      uip_arp_update(IPBUF->srcipaddr, ETHBUF->src);
+      uip_arp_update(IPBUF->eh_srcipaddr, ETHBUF->src);
     }
 }
 #endif /* CONFIG_NET_ARP_IPIN */
@@ -231,10 +231,10 @@ void uip_arp_ipin(struct uip_driver_s *dev)
 
 void uip_arp_arpin(struct uip_driver_s *dev)
 {
-  struct arp_hdr *parp = ARPBUF;
+  struct arp_hdr_s *parp = ARPBUF;
   in_addr_t ipaddr;
 
-  if (dev->d_len < (sizeof(struct arp_hdr) + UIP_LLH_LEN))
+  if (dev->d_len < (sizeof(struct arp_hdr_s) + UIP_LLH_LEN))
     {
       nlldbg("Too small\n");    
       dev->d_len = 0;
@@ -273,7 +273,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
             uip_arp_dump(parp);
 
             peth->type          = HTONS(UIP_ETHTYPE_ARP);
-            dev->d_len          = sizeof(struct arp_hdr) + UIP_LLH_LEN;
+            dev->d_len          = sizeof(struct arp_hdr_s) + UIP_LLH_LEN;
           }
         break;
 
@@ -320,9 +320,9 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 void uip_arp_out(struct uip_driver_s *dev)
 {
   const struct arp_entry *tabptr = NULL;
-  struct arp_hdr         *parp   = ARPBUF;
+  struct arp_hdr_s       *parp   = ARPBUF;
   struct uip_eth_hdr     *peth   = ETHBUF;
-  struct ethip_hdr       *pip    = IPBUF;
+  struct arp_iphdr_s     *pip    = IPBUF;
   in_addr_t               ipaddr;
   in_addr_t               destipaddr;
 
@@ -411,7 +411,7 @@ void uip_arp_out(struct uip_driver_s *dev)
           uip_arp_dump(parp);
 
           peth->type        = HTONS(UIP_ETHTYPE_ARP);
-          dev->d_len        = sizeof(struct arp_hdr) + UIP_LLH_LEN;
+          dev->d_len        = sizeof(struct arp_hdr_s) + UIP_LLH_LEN;
           return;
         }
 

@@ -51,7 +51,7 @@
 #include <nuttx/clock.h>
 #include <net/uip/uip-arch.h>
 
-#ifndef CONFIG_NET_ARP_IPIN
+#ifdef CONFIG_NET_ARP_IPIN
 #  include <net/uip/uip-arp.h>
 #endif
 
