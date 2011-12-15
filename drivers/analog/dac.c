@@ -296,17 +296,17 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
    */
 
   if (buflen % 5 ==0 )
-	msglen=5;
+    msglen=5;
   else if (buflen % 4 ==0 )
-	msglen=4;
+    msglen=4;
   else if (buflen % 3 ==0 )
-	msglen=3;
+    msglen=3;
   else if (buflen % 2 ==0 )
-	msglen=2;
+    msglen=2;
   else if (buflen == 1)
-	msglen=1;
+    msglen=1;
   else
-	msglen=5;
+    msglen=5;
 
   while ((buflen - nsent) >= msglen )
     {
@@ -369,35 +369,36 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer, size_t 
       /* We get here if there is space at the end of the FIFO.  Add the new
        * CAN message at the tail of the FIFO.
        */
-	 if(msglen==5)
+
+     if (msglen==5)
      {
-		msg    = (FAR struct dac_msg_s *)&buffer[nsent];
-		memcpy(&fifo->af_buffer[fifo->af_tail], msg, msglen);
+        msg    = (FAR struct dac_msg_s *)&buffer[nsent];
+        memcpy(&fifo->af_buffer[fifo->af_tail], msg, msglen);
      }
      else if(msglen == 4)
      {
-		 fifo->af_buffer[fifo->af_tail].am_channel=buffer[nsent];
-		 fifo->af_buffer[fifo->af_tail].am_data=*(uint32_t *)&buffer[nsent];
-		 fifo->af_buffer[fifo->af_tail].am_data&=0xffffff00;
-	 }
+         fifo->af_buffer[fifo->af_tail].am_channel=buffer[nsent];
+         fifo->af_buffer[fifo->af_tail].am_data=*(uint32_t *)&buffer[nsent];
+         fifo->af_buffer[fifo->af_tail].am_data&=0xffffff00;
+     }
      else if(msglen == 3)
      {
-		 fifo->af_buffer[fifo->af_tail].am_channel=buffer[nsent];
-		 fifo->af_buffer[fifo->af_tail].am_data=(*(uint16_t *)&buffer[nsent+1]);
-		 fifo->af_buffer[fifo->af_tail].am_data<<=16;
-	 }
+         fifo->af_buffer[fifo->af_tail].am_channel=buffer[nsent];
+         fifo->af_buffer[fifo->af_tail].am_data=(*(uint16_t *)&buffer[nsent+1]);
+         fifo->af_buffer[fifo->af_tail].am_data<<=16;
+     }
      else if(msglen == 2)
      {
-		 fifo->af_buffer[fifo->af_tail].am_channel=0;
-		 fifo->af_buffer[fifo->af_tail].am_data=(*(uint16_t *)&buffer[nsent]);
-		 fifo->af_buffer[fifo->af_tail].am_data<<=16;
-	 }
+         fifo->af_buffer[fifo->af_tail].am_channel=0;
+         fifo->af_buffer[fifo->af_tail].am_data=(*(uint16_t *)&buffer[nsent]);
+         fifo->af_buffer[fifo->af_tail].am_data<<=16;
+     }
      else if(msglen == 1)
      {
-		 fifo->af_buffer[fifo->af_tail].am_channel=0;
-		 fifo->af_buffer[fifo->af_tail].am_data=buffer[nsent];
-		 fifo->af_buffer[fifo->af_tail].am_data<<=24;
-	 }
+         fifo->af_buffer[fifo->af_tail].am_channel=0;
+         fifo->af_buffer[fifo->af_tail].am_data=buffer[nsent];
+         fifo->af_buffer[fifo->af_tail].am_data<<=24;
+     }
       /* Increment the tail of the circular buffer */
 
       fifo->af_tail = nexttail;

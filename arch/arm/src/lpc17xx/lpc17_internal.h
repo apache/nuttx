@@ -609,7 +609,7 @@ EXTERN int lpc17_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bo
 #endif
 
 /****************************************************************************
- * Name: ssp_flush
+ * Name: spi_flush
  *
  * Description:
  *   Flush and discard any words left in the RX fifo.  This can be called
@@ -754,6 +754,21 @@ EXTERN void lpc17_dmadump(DMA_HANDLE handle, const struct lpc17_dmaregs_s *regs,
 #else
 #  define lpc17_dmadump(handle,regs,msg)
 #endif
+#endif
+
+/****************************************************************************
+ * Name: lpc17_dacinitialize
+ *
+ * Description:
+ *   Initialize the DAC
+ *
+ * Returned Value:
+ *   Valid dac device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LPC17_DAC
+EXTERN FAR struct dac_dev_s *lpc17_dacinitialize(void);
 #endif
 
 #undef EXTERN

@@ -6,6 +6,7 @@
  *   History: 0.1 2011-08-04 initial version
  *
  * Derived from include/nuttx/can.h
+ *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
  *
@@ -71,10 +72,11 @@
 /************************************************************************************
  * Public Types
  ************************************************************************************/
+
 struct dac_msg_s
 {
-  uint8_t      am_channel;                  /* The 8-bit DAC Channel */
-  int32_t      am_data;                    /* DAC convert result (4 bytes) */
+  uint8_t      am_channel;               /* The 8-bit DAC Channel */
+  int32_t      am_data;                  /* DAC convert result (4 bytes) */
 };
 
 struct dac_fifo_s
@@ -138,12 +140,12 @@ struct dac_ops_s
 
 struct dac_dev_s
 {
-  uint8_t              ad_ocount;        /* The number of times the device has been opened */
-  uint8_t              ad_nchannel;      /* Number of dac channel */
-  sem_t                ad_closesem;      /* Locks out new opens while close is in progress */
-  struct dac_fifo_s    ad_xmit;          /* Describes receive FIFO */
-  const struct dac_ops_s *ad_ops;    /* Arch-specific operations */
-  void                *ad_priv;          /* Used by the arch-specific logic */
+  uint8_t                 ad_ocount;   /* The number of times the device has been opened */
+  uint8_t                 ad_nchannel; /* Number of dac channel */
+  sem_t                   ad_closesem; /* Locks out new opens while close is in progress */
+  struct dac_fifo_s       ad_xmit;     /* Describes receive FIFO */
+  const struct dac_ops_s *ad_ops;      /* Arch-specific operations */
+  void                   *ad_priv;     /* Used by the arch-specific logic */
 };
 
 /************************************************************************************
@@ -157,11 +159,20 @@ struct dac_dev_s
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
 /************************************************************************************
  * Name: dac_register
  *
  * Description:
  *   Register a dac driver.
+ *
+ * Input Parameters:
+ *    path - The full path to the DAC device to be registered.  This could be, as an
+ *      example, "/dev/dac0"
+ *    dev - An instance of the device-specific DAC interface
+ *
+ * Returned Value:
+ *    Zero on success; A negated errno value on failure.
  *
  ************************************************************************************/
 
@@ -173,14 +184,26 @@ int dac_register(FAR const char *path, FAR struct dac_dev_s *dev);
  * Description:
  *   Called from the DAC interrupt handler at the completion of a send operation.
  *
+ * Input Parameters:
+ *    dev - An instance of the device-specific DAC interface
+ *
  * Return:
  *   OK on success; a negated errno on failure.
  *
  ************************************************************************************/
+
 int dac_txdone(FAR struct dac_dev_s *dev);
 
+/************************************************************************************
+ * DAC Initialization functions
+ *
+ * Architecture-specific versions will have prototypes in architect-specific header
+ * files.  Common DAC implementations in drivers/analog will have prototypes listed
+ * below.
+ *
+ ************************************************************************************/
+
 FAR struct dac_dev_s *up_ad5410initialize(FAR struct spi_dev_s *spi, unsigned int devno);
-FAR struct dac_dev_s *up_dacinitialize();
 
 #if defined(__cplusplus)
 }
