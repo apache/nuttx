@@ -723,9 +723,13 @@ CONFIG_MMCSD_HAVECARDDETECT=n
 # CONFIG_NET_PINGADDRCONF - Use "ping" packet for setting IP address
 # CONFIG_NET_STATISTICS - uIP statistics on or off
 # CONFIG_NET_RECEIVE_WINDOW - The size of the advertised receiver's window
-# CONFIG_NET_ARPTAB_SIZE - The size of the ARP table
 # CONFIG_NET_BROADCAST - Broadcast support
-# CONFIG_NET_FWCACHE_SIZE - number of packets to remember when looking for duplicates
+# CONFIG_NET_ARPTAB_SIZE - The size of the ARP table
+# CONFIG_NET_ARP_IPIN - Harvest IP/MAC address mappings from the ARP table
+#   from incoming IP packets.
+# CONFIG_NET_MULTICAST - Outgoing multi-cast address support
+# CONFIG_NET_FWCACHE_SIZE - number of packets to remember when
+#   looking for duplicates
 #
 CONFIG_NET=y
 CONFIG_NET_NOINTS=n
@@ -748,8 +752,10 @@ CONFIG_NET_ICMP_PING=y
 #CONFIG_NET_PINGADDRCONF=0
 CONFIG_NET_STATISTICS=y
 #CONFIG_NET_RECEIVE_WINDOW=
-#CONFIG_NET_ARPTAB_SIZE=8
 CONFIG_NET_BROADCAST=n
+#CONFIG_NET_ARPTAB_SIZE=8
+CONFIG_NET_ARP_IPIN=n
+CONFIG_NET_MULTICAST=n
 #CONFIG_NET_FWCACHE_SIZE=2
 
 #
