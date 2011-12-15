@@ -91,7 +91,11 @@
 #define DAC_CR_TSEL_SHIFT        (3)       /* Bits 3-5: DAC channel1 trigger selection */
 #define DAC_CR_TSEL_MASK         (7 << DAC_CR_TSEL_SHIFT)
 #  define DAC_CR_TSEL_TIM6       (0 << DAC_CR_TSEL_SHIFT) /* Timer 6 TRGO event */
+#ifdef CONFIG_STM32_CONNECTIVITYLINE
+#  define DAC_CR_TSEL_TIM3       (1 << DAC_CR_TSEL_SHIFT) /* Timer 3 TRGO event */
+#else
 #  define DAC_CR_TSEL_TIM8       (1 << DAC_CR_TSEL_SHIFT) /* Timer 8 TRGO event */
+#endif
 #  define DAC_CR_TSEL_TIM7       (2 << DAC_CR_TSEL_SHIFT) /* Timer 7 TRGO event */
 #  define DAC_CR_TSEL_TIM5       (3 << DAC_CR_TSEL_SHIFT) /* Timer 5 TRGO event */
 #  define DAC_CR_TSEL_TIM2       (4 << DAC_CR_TSEL_SHIFT) /* Timer 2 TRGO event */
