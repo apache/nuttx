@@ -523,7 +523,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
     }
   adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
 
-  regval = adc_getreg(priv, STM32_ADC_SQR1_OFFSET) & ~ADC_SQR1_RESERVED;
+  regval = adc_getreg(priv, STM32_ADC_SQR1_OFFSET) & ~(ADC_SQR1_RESERVED|ADC_SQR1_L_MASK);
   for (i = 13, offset = 0; i <= priv->nchannels && i <= 16; i++, offset += 5)
     {
       regval |= (uint32_t)priv->chanlist[i-1] << offset;
