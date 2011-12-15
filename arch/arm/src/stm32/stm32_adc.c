@@ -504,27 +504,27 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   L = L << 20;
   regval  = adc_getreg(priv, STM32_ADC_SQR1_OFFSET);
   regval &= ~ADC_SQR1_L_MASK; /* Clear L Mask */ 
-  regval |= L;                /* SetL, # of convertions */
+  regval |= L;                /* SetL, # of conversions */
   adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
 
-  /* Configuration of the channels convertions */
+  /* Configuration of the channels conversions */
 
   regval = adc_getreg(priv, STM32_ADC_SQR3_OFFSET) & ~ADC_SQR3_RESERVED;
-  if (i = 1, offset = 0; i <= priv->nchannels && i <= 6; i++, offset += 5)
+  for (i = 1, offset = 0; i <= priv->nchannels && i <= 6; i++, offset += 5)
     {
       regval |= (uint32_t)priv->chanlist[i-1] << offset;
     }
   adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
 
   regval = adc_getreg(priv, STM32_ADC_SQR2_OFFSET) & ~ADC_SQR2_RESERVED;
-  if (i = 7, offset = 0; i <= priv->nchannels && i <= 12; i++, offset += 5)
+  for (i = 7, offset = 0; i <= priv->nchannels && i <= 12; i++, offset += 5)
     {
       regval |= (uint32_t)priv->chanlist[i-1] << offset;
     }
   adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
 
   regval = adc_getreg(priv, STM32_ADC_SQR1_OFFSET) & ~ADC_SQR1_RESERVED;
-  if (i = 13, offset = 0; i <= priv->nchannels && i <= 16; i++, offset += 5)
+  for (i = 13, offset = 0; i <= priv->nchannels && i <= 16; i++, offset += 5)
     {
       regval |= (uint32_t)priv->chanlist[i-1] << offset;
     }
