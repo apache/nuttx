@@ -58,18 +58,33 @@
 #include "stm32_internal.h"
 #include "stm32_dac.h"
 
-#if defined(CONFIG_DAC) && defined(CONFIG_STM32_DAC)
+#ifdef CONFIG_DAC
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+/* Up to 2 DAC interfaces are supported */
+
+#if STM32_NDAC < 2
+#  undef CONFIG_STM32_DAC2
+#endif
+
+#if STM32_NDAC < 1
+#  undef CONFIG_STM32_DAC1
+#endif
+
+#if defined(CONFIG_STM32_DAC1) || defined(CONFIG_STM32_DAC2)
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 /* Interrupt handler */
 
+#ifdef CONFIG_STM32_STM32F40XX
 static int  dac_interrupt(int irq, void *context);
+#endif
 
 /* DAC methods */
 
@@ -108,7 +123,8 @@ static struct dac_dev_s g_dacdev =
  * Name: dac_interrupt
  *
  * Description:
- *   DAC interrupt handler.
+ *   DAC interrupt handler.  The STM32 F4 family supports a only a DAC
+ *   underrun interrupt.
  *
  * Input Parameters:
  *
@@ -116,10 +132,12 @@ static struct dac_dev_s g_dacdev =
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_STM32F40XX
 static int dac_interrupt(int irq, void *context)
 {
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: dac_reset
@@ -242,20 +260,23 @@ static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dacinitialize
+ * Name: stm32_dacinitialize
  *
  * Description:
  *   Initialize the DAC
+ *
+ * Input Parameters:
+ *   intf - The DAC interface number.
  *
  * Returned Value:
  *   Valid dac device structure reference on succcess; a NULL on failure
  *
  ****************************************************************************/
 
-FAR struct dac_dev_s *up_dacinitialize(int channel)
+FAR struct dac_dev_s *stm32_dacinitialize(int intf)
 {
   return &g_dacdev;
 }
 
-#endif /* CONFIG_DAC && CONFIG_STM32_DAC */
-
+#endif /* CONFIG_STM32_DAC1 || CONFIG_STM32_DAC2 */
+#endif /* CONFIG_DAC */
