@@ -46,6 +46,7 @@
 #include <stdbool.h>
 #include <semaphore.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
@@ -400,7 +401,8 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   uint32_t regval;
   uint32_t L = priv->nchannels;
   uint32_t ch;
-  int offset = 0;
+  int offset;
+  int i;
     
   flags = irqsave();
 
@@ -507,172 +509,28 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   /* Configuration of the channels convertions */
 
-#warning "I can improve the ugly code below with a logic using offsets"
-#warning "Or.. better yet, a loop"
-  regval = adc_getreg(priv, STM32_ADC_SQR3_OFFSET);
-  if (priv->nchannels >= 1)
+  regval = adc_getreg(priv, STM32_ADC_SQR3_OFFSET) & ~ADC_SQR3_RESERVED;
+  if (i = 1, offset = 0; i <= priv->nchannels && i <= 6; i++, offset += 5)
     {
-      ch = priv->chanlist[0];
-      ch <<= offset;
-      regval &= ~ADC_SQR3_SQ1_MASK; /* clear SQ1 */
-      regval |= ch;                 /* Set SQ1 */
-      adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
-      offset += 5;
+      regval |= (uint32_t)priv->chanlist[i-1] << offset;
     }
+  adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
 
-  if (priv->nchannels >= 2)
+  regval = adc_getreg(priv, STM32_ADC_SQR2_OFFSET) & ~ADC_SQR2_RESERVED;
+  if (i = 7, offset = 0; i <= priv->nchannels && i <= 12; i++, offset += 5)
     {
-      ch = priv->chanlist[1];
-      ch <<= offset;
-      regval &= ~ADC_SQR3_SQ2_MASK; /* clear SQ2 */
-      regval |= ch;                 /* Set SQ2 */
-      adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
-      offset += 5;
+      regval |= (uint32_t)priv->chanlist[i-1] << offset;
     }
+  adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
 
-  if (priv->nchannels >= 3)
+  regval = adc_getreg(priv, STM32_ADC_SQR1_OFFSET) & ~ADC_SQR1_RESERVED;
+  if (i = 13, offset = 0; i <= priv->nchannels && i <= 16; i++, offset += 5)
     {
-      ch = priv->chanlist[2];
-      ch <<= offset;
-      regval &= ~ADC_SQR3_SQ3_MASK; /* clear SQ3 */
-      regval |= ch;                 /* SetSQ3 */
-      adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
-      offset += 5;
+      regval |= (uint32_t)priv->chanlist[i-1] << offset;
     }
+  adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
 
-  if (priv->nchannels >= 4)
-    {
-      ch = priv->chanlist[3];
-      ch <<= offset;
-      regval &= ~ADC_SQR3_SQ4_MASK; /* clear SQ4 */
-      regval |= ch;                 /* SetSQ4 */
-      adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
-      offset += 5;
-    }
-
-  if (priv->nchannels >= 5)
-    {
-      ch = priv->chanlist[4];
-      ch <<= offset;
-      regval &= ~ADC_SQR3_SQ5_MASK; /* clear SQ5 */
-      regval |= ch;                 /* SetSQ5 */
-      adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
-     offset += 5;
-    }
-
-  if (priv->nchannels >= 6)
-    {
-      ch = priv->chanlist[5];
-      ch <<= offset;
-      regval &= ~ADC_SQR3_SQ6_MASK; /* clear SQ6 */
-      regval |= ch;                 /* SetSQ6 */
-      adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
-      offset = 0;
-    }
-
-  if (priv->nchannels >= 7)
-    {
-      ch = priv->chanlist[6];
-      ch <<= offset;
-      regval &= ~ADC_SQR2_SQ7_MASK; /* clear SQ7 */
-      regval |= ch;                 /* SetSQ7 */
-      adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
-      offset += 5;
-    }
-
-  if (priv->nchannels >= 8)
-    {
-      ch = priv->chanlist[7];
-      ch <<= offset;
-      regval &= ~ADC_SQR2_SQ8_MASK; /* clear SQ8 */
-      regval |= ch;                 /* SetSQ8 */
-      adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
-      offset += 5;
-    }
-
-  if (priv->nchannels >= 9)
-    {
-      ch = priv->chanlist[8];
-      ch <<= offset;
-      regval &= ~ADC_SQR2_SQ9_MASK; /* clear SQ9 */
-      regval |= ch;                 /* SetSQ9 */
-      adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
-      offset += 5;
-    }
-
-  if (priv->nchannels >= 10)
-    {
-      ch = priv->chanlist[9];
-      ch <<= offset;
-      regval &= ~ADC_SQR2_SQ10_MASK; /* clear SQ10 */
-      regval |= ch;                  /* SetSQ10 */
-      adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
-      offset += 5;
-    }
-
-  if (priv->nchannels >= 11)
-    {
-      ch = priv->chanlist[10];
-      ch <<= offset;
-      regval &= ~ADC_SQR2_SQ11_MASK; /* clear SQ11 */
-      regval |= ch;                  /* SetSQ11 */
-      adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
-      offset += 5;
-    }
-
-  if (priv->nchannels >= 12)
-    {
-      ch = priv->chanlist[11];
-      ch <<= offset;
-      regval &= ~ADC_SQR2_SQ12_MASK; /* clear SQ12 */
-      regval |= ch;                  /* SetSQ12 */
-      adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
-      offset = 0;
-    }
-
-  if (priv->nchannels >= 13)
-    {
-      ch = priv->chanlist[12];
-      ch <<= offset;
-      regval &= ~ADC_SQR1_SQ13_MASK; /* clear SQ13 */
-      regval |= ch;                  /* SetSQ13 */
-      adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
-      offset += 5;
-    }
-
-  if (priv->nchannels >= 14)
-    {
-      ch = priv->chanlist[13];
-      ch <<= offset;
-      regval &= ~ADC_SQR1_SQ14_MASK; /* clear SQ14 */
-      regval |= ch;                  /* SetSQ14 */
-      adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
-      offset += 5;
-    }
-
-  if (priv->nchannels >= 15)
-    {
-      ch = priv->chanlist[14];
-      ch <<= offset;
-      regval &= ~ADC_SQR1_SQ15_MASK; /* clear SQ15 */
-      regval |= ch;                  /* SetSQ15 */
-      adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
-      offset += 5;
-    }
-
-  if (priv->nchannels >= 16)
-    {
-      ch = priv->chanlist[15];
-      ch <<= offset;
-      regval &= ~ADC_SQR1_SQ16_MASK; /* clear SQ16 */
-      regval |= ch;                  /* SetSQ16 */
-      adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
-    }
-
-  if (priv->nchannels >= 17)
-    {
-      adbg("ERROR: Number of channels exceeded\n");
-    }
+  DEBUGASSERT(priv->nchannels <= 16);
   irqrestore(flags);
 }
 

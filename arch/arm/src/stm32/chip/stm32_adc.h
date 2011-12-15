@@ -416,6 +416,7 @@
 #define ADC_SQR1_SQ16_MASK         (0x1f << ADC_SQR1_SQ16_SHIFT)
 #define ADC_SQR1_L_SHIFT           (20)        /* Bits 23-20: Regular channel sequence length */
 #define ADC_SQR1_L_MASK            (0x0f << ADC_SQR1_L_SHIFT)
+#define ADC_SQR1_RESERVED          (0xff000000)
 
 /* ADC regular sequence register 2 */
 
@@ -431,6 +432,7 @@
 #define ADC_SQR2_SQ11_MASK         (0x1f << ADC_SQR2_SQ11_SHIFT )
 #define ADC_SQR2_SQ12_SHIFT        (25)        /* Bits 29-25: 12th conversion in regular sequence */
 #define ADC_SQR2_SQ12_MASK         (0x1f << ADC_SQR2_SQ12_SHIFT)
+#define ADC_SQR2_RESERVED          (0xc0000000)
 
 /* ADC regular sequence register 3 */
 
@@ -446,6 +448,7 @@
 #define ADC_SQR3_SQ5_MASK          (0x1f << ADC_SQR3_SQ5_SHIFT )
 #define ADC_SQR3_SQ6_SHIFT         (25)        /* Bits 29-25: 6th conversion in regular sequence */
 #define ADC_SQR3_SQ6_MASK          (0x1f << ADC_SQR3_SQ6_SHIFT)
+#define ADC_SQR3_RESERVED          (0xc0000000)
 
 /* ADC injected sequence register */
 
