@@ -65,7 +65,7 @@
 #include "lpc17_pinconn.h"
 #include "lpc17_dac.h"
 
-#if defined(CONFIG_LPC17_DAC)
+#ifdef CONFIG_LPC17_DAC
 
 /****************************************************************************
  * Private Types
@@ -91,17 +91,17 @@ static int  dac_interrupt(int irq, void *context);
 
 static const struct dac_ops_s g_dacops =
 {
-    .ao_reset =dac_reset,
-    .ao_setup = dac_setup,
-    .ao_shutdown = dac_shutdown,
-    .ao_txint = dac_txint,
-    .ao_send = dac_send,
-    .ao_ioctl = dac_ioctl,
+  .ao_reset =dac_reset,
+  .ao_setup = dac_setup,
+  .ao_shutdown = dac_shutdown,
+  .ao_txint = dac_txint,
+  .ao_send = dac_send,
+  .ao_ioctl = dac_ioctl,
 };
 
 static struct dac_dev_s g_dacdev =
 {
-    .ad_ops = &g_dacops,
+  .ad_ops = &g_dacops,
 };
 
 /****************************************************************************
@@ -114,22 +114,21 @@ static struct dac_dev_s g_dacdev =
 
 static void dac_reset(FAR struct dac_dev_s *dev)
 {
-    irqstate_t flags;
-    uint32_t regval;
+  irqstate_t flags;
+  uint32_t regval;
     
-    flags = irqsave();
+  flags = irqsave();
 
-    regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
-    regval &= ~SYSCON_PCLKSEL0_DAC_MASK;
-    regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_DAC_SHIFT);
-    putreg32(regval, LPC17_SYSCON_PCLKSEL0);
+  regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
+  regval &= ~SYSCON_PCLKSEL0_DAC_MASK;
+  regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_DAC_SHIFT);
+  putreg32(regval, LPC17_SYSCON_PCLKSEL0);
 
-    //putreg32(DAC_CTRL_DBLBUFEN,LPC17_DAC_CTRL); ?
+  //putreg32(DAC_CTRL_DBLBUFEN,LPC17_DAC_CTRL); ?
 
-    lpc17_configgpio(GPIO_AOUT);
-    
-    irqrestore(flags);
+  lpc17_configgpio(GPIO_AOUT);
 
+  irqrestore(flags);
 }
 
 /* Configure the DAC. This method is called the first time that the DAC
@@ -140,7 +139,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
 
 static int  dac_setup(FAR struct dac_dev_s *dev)
 {
-    return OK;
+  return OK;
 }
 
 /* Disable the DAC.  This method is called when the DAC device is closed.
@@ -159,17 +158,17 @@ static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
 
 static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 {
-    putreg32((msg->am_data>>16)&0xfffff,LPC17_DAC_CR);
-    dac_txdone(&g_dacdev);
-    return 0;
+  putreg32((msg->am_data>>16)&0xfffff,LPC17_DAC_CR);
+  dac_txdone(&g_dacdev);
+  return 0;
 }
 
 /* All ioctl calls will be routed through this method */
 
 static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
 {
-    dbg("Fix me:Not Implemented\n");
-    return 0;
+  dbg("Fix me:Not Implemented\n");
+  return 0;
 }
 
 static int  dac_interrupt(int irq, void *context)
@@ -181,7 +180,7 @@ static int  dac_interrupt(int irq, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dacinitialize
+ * Name: lpc17_dacinitialize
  *
  * Description:
  *   Initialize the DAC
@@ -191,9 +190,10 @@ static int  dac_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-FAR struct dac_dev_s *up_dacinitialize()
+FAR struct dac_dev_s *lpc17_dacinitialize(void)
 {
-    return &g_dacdev;
+  return &g_dacdev;
 }
-#endif
+
+#endif /* CONFIG_LPC17_DAC */
 
