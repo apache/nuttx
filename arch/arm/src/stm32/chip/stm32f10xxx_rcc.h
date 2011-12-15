@@ -190,7 +190,7 @@
 #define RCC_APB2RSTR_SPI1RST        (1 << 12) /* Bit 12: SPI 1 reset */
 #define RCC_APB2RSTR_TIM8RST        (1 << 13) /* Bit 13: TIM8 Timer reset */
 #define RCC_APB2RSTR_USART1RST      (1 << 14) /* Bit 14: USART1 reset */
-#define RCC_APB2RTST_ADC2RST        (1 << 15) /* Bit 15: ADC3 interface reset */
+#define RCC_APB2RSTR_ADC3RST        (1 << 15) /* Bit 15: ADC3 interface reset */
 
 /* APB1 Peripheral reset register */
 
