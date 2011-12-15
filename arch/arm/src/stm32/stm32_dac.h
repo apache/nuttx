@@ -47,5 +47,40 @@
 
 #include <nuttx/analog/dac.h>
 
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: stm32_dacinitialize
+ *
+ * Description:
+ *   Initialize the DAC
+ *
+ * Input Parameters:
+ *   intf - The DAC interface number.
+ *
+ * Returned Value:
+ *   Valid dac device structure reference on succcess; a NULL on failure
+ *
+ ****************************************************************************/
+
+struct dac_dev_s;
+EXTERN FAR struct dac_dev_s *stm32_dacinitialize(int intf);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+#endif /* __ASSEMBLY__ */
+
 #endif /* __ARCH_ARM_SRC_STM32_STM32_DAC_H */
 

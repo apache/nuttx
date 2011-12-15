@@ -510,23 +510,23 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   /* Configuration of the channels conversions */
 
   regval = adc_getreg(priv, STM32_ADC_SQR3_OFFSET) & ~ADC_SQR3_RESERVED;
-  for (i = 1, offset = 0; i <= priv->nchannels && i <= 6; i++, offset += 5)
+  for (i = 0, offset = 0; i < priv->nchannels && i < 6; i++, offset += 5)
     {
-      regval |= (uint32_t)priv->chanlist[i-1] << offset;
+      regval |= (uint32_t)priv->chanlist[i] << offset;
     }
   adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
 
   regval = adc_getreg(priv, STM32_ADC_SQR2_OFFSET) & ~ADC_SQR2_RESERVED;
-  for (i = 7, offset = 0; i <= priv->nchannels && i <= 12; i++, offset += 5)
+  for (i = 6, offset = 0; i < priv->nchannels && i < 12; i++, offset += 5)
     {
-      regval |= (uint32_t)priv->chanlist[i-1] << offset;
+      regval |= (uint32_t)priv->chanlist[i] << offset;
     }
   adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
 
   regval = adc_getreg(priv, STM32_ADC_SQR1_OFFSET) & ~(ADC_SQR1_RESERVED|ADC_SQR1_L_MASK);
-  for (i = 13, offset = 0; i <= priv->nchannels && i <= 16; i++, offset += 5)
+  for (i = 12, offset = 0; i < priv->nchannels && i < 16; i++, offset += 5)
     {
-      regval |= (uint32_t)priv->chanlist[i-1] << offset;
+      regval |= (uint32_t)priv->chanlist[i] << offset;
     }
   adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
 
@@ -842,20 +842,21 @@ static int adc123_interrupt(int irq, void *context)
  * Name: stm32_adcinitialize
  *
  * Description:
- *   Initialize the ADC.  The logic is, save nchannels : # of channels
- *   (conversions) in ADC_SQR1_L
- * Then, take the chanlist array and store it in the SQR Regs, 
- *   chanlist[0] -> ADC_SQR3_SQ1
- *   chanlist[1] -> ADC_SQR3_SQ2
- *   chanlist[2] -> ADC_SQR3_SQ3
- *   chanlist[3] -> ADC_SQR3_SQ4
- *   chanlist[4] -> ADC_SQR3_SQ5
- *   chanlist[5] -> ADC_SQR3_SQ6
- *   ...
- *   chanlist[15]-> ADC_SQR1_SQ16
+ *   Initialize the ADC.
  *
- * up to
- *   chanlist[nchannels]
+ *   The logic is, save nchannels : # of channels (conversions) in ADC_SQR1_L
+ *   Then, take the chanlist array and store it in the SQR Regs, 
+ *     chanlist[0] -> ADC_SQR3_SQ1
+ *     chanlist[1] -> ADC_SQR3_SQ2
+ *     chanlist[2] -> ADC_SQR3_SQ3
+ *     chanlist[3] -> ADC_SQR3_SQ4
+ *     chanlist[4] -> ADC_SQR3_SQ5
+ *     chanlist[5] -> ADC_SQR3_SQ6
+ *     ...
+ *     chanlist[15]-> ADC_SQR1_SQ16
+ *
+ *   up to
+ *     chanlist[nchannels]
  *
  * Input Parameters:
  *   intf      - Could be {1,2,3} for ADC1, ADC2, or ADC3
@@ -863,7 +864,7 @@ static int adc123_interrupt(int irq, void *context)
  *   nchannels - Number of channels
  *
  * Returned Value:
- *   Valid can device structure reference on succcess; a NULL on failure
+ *   Valid ADC device structure reference on succcess; a NULL on failure
  *
  ****************************************************************************/
 
