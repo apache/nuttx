@@ -83,6 +83,10 @@ ifeq ($(CONFIG_DAC),y)
 CHIP_CSRCS	+= stm32_dac.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CHIP_CSRCS	+= stm32_pwm.c
+endif
+
 ifeq ($(CONFIG_DEBUG),y)
 CHIP_CSRCS	+= stm32_dumpgpio.c
 endif

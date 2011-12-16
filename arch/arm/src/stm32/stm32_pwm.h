@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_dac.h
+ * arch/arm/src/stm32/stm32_pwm.h
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,14 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_DAC_H
-#define __ARCH_ARM_SRC_STM32_STM32_DAC_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_TIM_H
+#define __ARCH_ARM_SRC_STM32_STM32_TIM_H
+
+/* The STM32 does not have dedicated PWM hardware.  Rather, pulsed output control
+ * is a capabilitiy of the STM32 timers.  The logic in this file implements the
+ * lower half of the standard, NuttX PWM interface using the STM32 timers.  That
+ * interface is described in include/nuttx/pwm.h.
+ */
 
 /************************************************************************************
  * Included Files
@@ -43,97 +49,106 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32_dac.h"
-
-#include <nuttx/analog/dac.h>
+#include "chip/stm32_tim.h"
 
 /************************************************************************************
- * Pre-processor definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
-/* Timer devices may be used for different purposes.  One special purpose is to
- * control periodic DAC outputs.  If CONFIG_STM32_TIMn is defined then 
- * CONFIG_STM32_TIMn_DAC must also be defined to indicate that timer "n" is intended
- * to be used for that purpose.
+/* Timer devices may be used for different purposes.  One special purpose is
+ * to generate modulated outputs for such things as motor control.  If CONFIG_STM32_TIMn
+ * is defined then the CONFIG_STM32_TIMn_PWM must also be defined to indicate that
+ * timer "n" is intended to be used for pulsed output signal generation.
  */
 
 #ifndef CONFIG_STM32_TIM1
-#  undef CONFIG_STM32_TIM1_DAC
+#  undef CONFIG_STM32_TIM1_PWM
 #endif
 #ifndef CONFIG_STM32_TIM2
-#  undef CONFIG_STM32_TIM2_DAC
+#  undef CONFIG_STM32_TIM2_PWM
 #endif
 #ifndef CONFIG_STM32_TIM3
-#  undef CONFIG_STM32_TIM3_DAC
+#  undef CONFIG_STM32_TIM3_PWM
 #endif
 #ifndef CONFIG_STM32_TIM4
-#  undef CONFIG_STM32_TIM4_DAC
+#  undef CONFIG_STM32_TIM4_PWM
 #endif
 #ifndef CONFIG_STM32_TIM5
-#  undef CONFIG_STM32_TIM5_DAC
+#  undef CONFIG_STM32_TIM5_PWM
 #endif
 #ifndef CONFIG_STM32_TIM6
-#  undef CONFIG_STM32_TIM6_DAC
+#  undef CONFIG_STM32_TIM6_PWM
 #endif
 #ifndef CONFIG_STM32_TIM7
-#  undef CONFIG_STM32_TIM7_DAC
+#  undef CONFIG_STM32_TIM7_PWM
 #endif
 #ifndef CONFIG_STM32_TIM8
-#  undef CONFIG_STM32_TIM8_DAC
+#  undef CONFIG_STM32_TIM8_PWM
 #endif
 #ifndef CONFIG_STM32_TIM9
-#  undef CONFIG_STM32_TIM9_DAC
+#  undef CONFIG_STM32_TIM9_PWM
 #endif
 #ifndef CONFIG_STM32_TIM10
-#  undef CONFIG_STM32_TIM10_DAC
+#  undef CONFIG_STM32_TIM10_PWM
 #endif
 #ifndef CONFIG_STM32_TIM11
-#  undef CONFIG_STM32_TIM11_DAC
+#  undef CONFIG_STM32_TIM11_PWM
 #endif
 #ifndef CONFIG_STM32_TIM12
-#  undef CONFIG_STM32_TIM12_DAC
+#  undef CONFIG_STM32_TIM12_PWM
 #endif
 #ifndef CONFIG_STM32_TIM13
-#  undef CONFIG_STM32_TIM13_DAC
+#  undef CONFIG_STM32_TIM13_PWM
 #endif
 #ifndef CONFIG_STM32_TIM14
-#  undef CONFIG_STM32_TIM14_DAC
+#  undef CONFIG_STM32_TIM14_PWM
 #endif
 
 /************************************************************************************
- * Public Function Prototypes
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
-#ifdef __cplusplus
+
+#undef EXTERN
+#if defined(__cplusplus)
 #define EXTERN extern "C"
 extern "C" {
 #else
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Name: stm32_dacinitialize
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: stm32_pwminitialize
  *
  * Description:
- *   Initialize the DAC
+ *   Initialize one timer for use with the upper_level PWM driver.
  *
  * Input Parameters:
- *   intf - The DAC interface number.
+ *   timer - A number identifying the timer use.  The number of valid timer
+ *     IDs varies with the STM32 MCU and MCU family but is somewhere in
+ *     the range of {1,..,14}.
  *
  * Returned Value:
- *   Valid dac device structure reference on succcess; a NULL on failure
+ *   On success, a pointer to the STM32 lower half PWM driver is returned.
+ *   NULL is returned on any failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-struct dac_dev_s;
-EXTERN FAR struct dac_dev_s *stm32_dacinitialize(int intf);
+EXTERN FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer);
 
 #undef EXTERN
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
+
 #endif /* __ASSEMBLY__ */
-
-#endif /* __ARCH_ARM_SRC_STM32_STM32_DAC_H */
-
+#endif /* __ARCH_ARM_SRC_STM32_STM32_TIM_H */

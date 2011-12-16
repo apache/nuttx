@@ -83,7 +83,131 @@
 
 #if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
 
-/* ADC interrupts */
+/* Timer configuration:  If a timer trigger is specified, then get information
+ * about the timer.
+ */
+
+#if defined(CONFIG_STM32_TIM1_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_EXTSEL_VALUE         ADC_CR2_EXTSEL_T1CC1
+#    define ADC1_TIMER_BASE           STM32_TIM1_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_PCLK2_FREQUENCY
+#elif defined(CONFIG_STM32_TIM2_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_EXTSEL_VALUE         ADC_CR2_EXTSEL_T2CC2
+#    define ADC1_TIMER_BASE           STM32_TIM2_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM3_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_EXTSEL_VALUE         ADC_CR2_EXTSEL_T3CC1
+#    define ADC1_TIMER_BASE           STM32_TIM3_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM4_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_EXTSEL_VALUE         ADC_CR2_EXTSEL_T4CC4
+#    define ADC1_TIMER_BASE           STM32_TIM4_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM5_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_EXTSEL_VALUE         ADC_CR2_EXTSEL_T5CC1
+#    define ADC1_TIMER_BASE           STM32_TIM5_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM8_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_EXTSEL_VALUE         ??? which ????
+#    define ADC1_TIMER_BASE           STM32_TIM8_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_PCLK2_FREQUENCY
+#else
+#    undef  ADC1_HAVE_TIMER
+#endif
+
+#if defined(ADC1_HAVE_TIMER) && !defined(CONFIG_STM32_ADC1_SAMPLE_FREQUENCY)
+#  error "CONFIG_STM32_ADC1_SAMPLE_FREQUENCY not defined"
+#endif
+
+#if defined(CONFIG_STM32_TIM1_ADC2)
+#    define ADC2_HAVE_TIMER           1
+#    define ADC2_EXTSEL_VALUE         ADC_CR2_EXTSEL_T1CC1
+#    define ADC2_TIMER_BASE           STM32_TIM1_BASE
+#    define ADC2_TIMER_PCLK_FREQUENCY STM32_PCLK2_FREQUENCY
+#elif defined(CONFIG_STM32_TIM2_ADC2)
+#    define ADC2_HAVE_TIMER           1
+#    define ADC2_EXTSEL_VALUE         ADC_CR2_EXTSEL_T2CC2
+#    define ADC2_TIMER_BASE           STM32_TIM2_BASE
+#    define ADC2_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM3_ADC2)
+#    define ADC2_HAVE_TIMER           1
+#    define ADC2_EXTSEL_VALUE         ADC_CR2_EXTSEL_T3CC1
+#    define ADC2_TIMER_BASE           STM32_TIM3_BASE
+#    define ADC2_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM4_ADC2)
+#    define ADC2_HAVE_TIMER           1
+#    define ADC2_EXTSEL_VALUE         ADC_CR2_EXTSEL_T4CC4
+#    define ADC2_TIMER_BASE           STM32_TIM4_BASE
+#    define ADC2_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM5_ADC2)
+#    define ADC2_HAVE_TIMER           1
+#    define ADC2_EXTSEL_VALUE         ADC_CR2_EXTSEL_T5CC1
+#    define ADC2_TIMER_BASE           STM32_TIM5_BASE
+#    define ADC2_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM8_ADC2)
+#    define ADC2_HAVE_TIMER           1
+#    define ADC2_EXTSEL_VALUE         ADC_CR2_EXTSEL_T8CC1
+#    define ADC2_TIMER_BASE           STM32_TIM8_BASE
+#    define ADC2_TIMER_PCLK_FREQUENCY STM32_PCLK2_FREQUENCY
+#else
+#    undef  ADC2_HAVE_TIMER
+#endif
+
+#if defined(ADC2_HAVE_TIMER) && !defined(CONFIG_STM32_ADC2_SAMPLE_FREQUENCY)
+#  error "CONFIG_STM32_ADC2_SAMPLE_FREQUENCY not defined"
+#endif
+
+#if defined(CONFIG_STM32_TIM1_ADC3)
+#    define ADC3_HAVE_TIMER           1
+#    define ADC3_EXTSEL_VALUE         ADC_CR2_EXTSEL_T1CC1
+#    define ADC3_TIMER_BASE           STM32_TIM1_BASE
+#    define ADC3_TIMER_PCLK_FREQUENCY STM32_PCLK2_FREQUENCY
+#elif defined(CONFIG_STM32_TIM2_ADC3)
+#    define ADC3_HAVE_TIMER           1
+#    define ADC3_EXTSEL_VALUE         ADC_CR2_EXTSEL_T2CC2
+#    define ADC3_TIMER_BASE           STM32_TIM2_BASE
+#    define ADC3_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM3_ADC3)
+#    define ADC3_HAVE_TIMER           1
+#    define ADC3_EXTSEL_VALUE         ADC_CR2_EXTSEL_T3CC1
+#    define ADC3_TIMER_BASE           STM32_TIM3_BASE
+#    define ADC3_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM4_ADC3)
+#    define ADC3_HAVE_TIMER           1
+#    define ADC3_EXTSEL_VALUE         ADC_CR2_EXTSEL_T4CC4
+#    define ADC3_TIMER_BASE           STM32_TIM4_BASE
+#    define ADC3_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM5_ADC3)
+#    define ADC3_HAVE_TIMER           1
+#    define ADC3_EXTSEL_VALUE         ADC_CR2_EXTSEL_T5CC1
+#    define ADC3_TIMER_BASE           STM32_TIM5_BASE
+#    define ADC3_TIMER_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32_TIM8_ADC3)
+#    define ADC3_HAVE_TIMER           1
+#    define ADC3_EXTSEL_VALUE         ADC_CR2_EXTSEL_T8CC1
+#    define ADC3_TIMER_BASE           STM32_TIM8_BASE
+#    define ADC3_TIMER_PCLK_FREQUENCY STM32_PCLK2_FREQUENCY
+#else
+#    undef  ADC3_HAVE_TIMER
+#endif
+
+#if defined(ADC3_HAVE_TIMER) && !defined(CONFIG_STM32_ADC3_SAMPLE_FREQUENCY)
+#  error "CONFIG_STM32_ADC3_SAMPLE_FREQUENCY not defined"
+#endif
+
+#if defined(ADC1_HAVE_TIMER) || defined(ADC2_HAVE_TIMER) || defined(ADC3_HAVE_TIMER)
+#  define ADC_HAVE_TIMER 1
+#else
+#  undef ADC_HAVE_TIMER
+#endif
+
+/* ADC interrupts ***********************************************************/
 
 #ifdef CONFIG_STM32_STM32F10XX
 #  define ADC_SR_ALLINTS (ADC_SR_AWD | ADC_SR_EOC | ADC_SR_JEOC)
@@ -97,7 +221,24 @@
 #  define ADC_CR1_ALLINTS (ADC_CR1_AWDIE | ADC_CR1_EOCIE | ADC_CR1_JEOCIE | ADC_CR1_OVRIE)
 #endif
 
-/* The maximum number of samples */
+/* Timer Setup **************************************************************/
+/* Calculate timer divider values based upon ADCn_TIMER_PCLK_FREQUENCY and
+ * CONFIG_STM32_ADCn_SAMPLE_FREQUENCY.
+ */
+
+#ifdef ADC1_HAVE_TIMER
+#  warning "Missing Logic"
+#endif
+
+#ifdef ADC2_HAVE_TIMER
+#  warning "Missing Logic"
+#endif
+
+#ifdef ADC3_HAVE_TIMER
+#  warning "Missing Logic"
+#endif
+
+/* The maximum number of channels that can be sampled */
 
 #define ADC_MAX_SAMPLES 16
 
@@ -115,6 +256,11 @@ struct stm32_dev_s
   uint8_t  current;   /* Current ADC channel being converted */
   xcpt_t   isr;       /* Interrupt handler for this ADC block */
   uint32_t base;      /* Base address of registers unique to this ADC block */
+#ifdef ADC_HAVE_TIMER
+  uint32_t tbase;     /* Base address of timer used by this ADC block */
+  uint32_t extsel;    /* EXTSEL value used by this ADC block */
+  uint32_t pclck;     /* The PCLK frequency that drivers this timer */
+#endif
 
   uint8_t  chanlist[ADC_MAX_SAMPLES];
 };
@@ -149,7 +295,12 @@ static int  adc_setup(FAR struct adc_dev_s *dev);
 static void adc_shutdown(FAR struct adc_dev_s *dev);
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable);
 static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
-static void adc_enable(FAR struct adc_dev_s *dev, bool enable);
+static void adc_enable(FAR struct stm32_dev_s *priv, bool enable);
+
+#ifdef ADC_HAVE_TIMER
+static int  adc_timinit(FAR struct stm32_dev_s *priv);
+#endif
+static void adc_startconv(FAR struct stm32_dev_s *priv, bool enable);
 
 /****************************************************************************
  * Private Data
@@ -180,6 +331,11 @@ static struct stm32_dev_s g_adcpriv1 =
 #endif
   .intf        = 1,
   .base        = STM32_ADC1_BASE,
+#ifdef ADC1_HAVE_TIMER
+  .tbase       = ADC1_TIMER_BASE,
+  .extsel      = ADC1_EXTSEL_VALUE,
+  .pclck       = ADC1_TIMER_PCLK_FREQUENCY,
+#endif
 };
 
 static struct adc_dev_s g_adcdev1 =
@@ -203,6 +359,11 @@ static struct stm32_dev_s g_adcpriv2 =
 #endif
   .intf        = 2;
   .base        = STM32_ADC2_BASE,
+#ifdef ADC2_HAVE_TIMER
+  .tbase       = ADC2_TIMER_BASE,
+  .extsel      = ADC2_EXTSEL_VALUE,
+  .pclck       = ADC2_TIMER_PCLK_FREQUENCY,
+#endif
 };
 
 static struct adc_dev_s g_adcdev2 =
@@ -226,6 +387,11 @@ static struct stm32_dev_s g_adcpriv3 =
 #endif
   .intf        = 3;
   .base        = STM32_ADC3_BASE,
+#ifdef ADC3_HAVE_TIMER
+  .tbase       = ADC3_TIMER_BASE,
+  .extsel      = ADC3_EXTSEL_VALUE,
+  .pclck       = ADC3_TIMER_PCLK_FREQUENCY,
+#endif
 };
 
 static struct adc_dev_s g_adcdev3 =
@@ -275,6 +441,116 @@ static uint32_t adc_getreg(struct stm32_dev_s *priv, int offset)
 static void adc_putreg(struct stm32_dev_s *priv, int offset, uint32_t value)
 {
   putreg32(value, priv->base + offset);
+}
+
+/****************************************************************************
+ * Name: tim_getreg
+ *
+ * Description:
+ *   Read the value of an ADC timer register.
+ *
+ * Input Parameters:
+ *   priv - A reference to the ADC block status
+ *   offset - The offset to the register to read
+ *
+ * Returned Value:
+ *   The current contents of the specified register
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_DMA
+static uint32_t tim_getreg(struct stm32_dev_s *priv, int offset)
+{
+  return getreg32(priv->tbase + offset);
+}
+#endif
+
+/****************************************************************************
+ * Name: tim_putreg
+ *
+ * Description:
+ *   Read the value of an ADC timer register.
+ *
+ * Input Parameters:
+ *   priv - A reference to the ADC block status
+ *   offset - The offset to the register to read
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void tim_putreg(struct stm32_dev_s *priv, int offset, uint32_t value)
+{
+  putreg32(value, priv->tbase + offset);
+}
+#endif
+
+/****************************************************************************
+ * Name: adc_timinit
+ *
+ * Description:
+ *   Initialize the timer that drivers the ADC sampling for this channel using
+ *   the pre-calculated timer divider definitions.
+ *
+ * Input Parameters:
+ *   chan - A reference to the DAC channel state data
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef ADC_HAVE_TIMER
+static int adc_timinit(FAR struct stm32_dev_s *priv)
+{
+  /* Configure the time base: Timer period, prescaler, clock division,
+   * counter mode (up).
+   */
+#warning "Missing Logic"
+
+  /* Selection EXTSEL selection: update */
+#warning "Missing Logic"
+  
+  /* Enable the counter */
+#warning "Missing Logic"
+}
+#endif
+
+/****************************************************************************
+ * Name: adc_startconv
+ *
+ * Description:
+ *   Start (or stop) the ADC conversion process
+ *
+ * Input Parameters:
+ *   priv - A reference to the ADC block status
+ *   enable - True: Start conversion
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
+static void adc_startconv(struct stm32_dev_s *priv, bool enable)
+{
+  uint32_t regval;
+
+  avdbg("enable: %d\n", enable);
+
+  regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
+  if (enable)
+    {
+      /* Start conversion of regular channles */
+
+      regval |= ADC_CR2_SWSTART;
+    }
+  else
+    {
+      /* Disable the conversion of regular channels */
+
+      regval &= ~ADC_CR2_SWSTART;
+    }
+  regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
 }
 
 /****************************************************************************
@@ -363,9 +639,8 @@ static void adc_rccreset(struct stm32_dev_s *priv, bool reset)
  *
  *******************************************************************************/
 
-static void adc_enable(FAR struct adc_dev_s *dev, bool enable)
+static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   uint32_t regval;
 
   avdbg("enable: %d\n", enable);
@@ -380,6 +655,10 @@ static void adc_enable(FAR struct adc_dev_s *dev, bool enable)
       regval &= ~ADC_CR2_ADON;
     }
   adc_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
+
+  /* Enable or disable conversions */
+
+//adc_startconv(priv, enable);
 }
 
 /****************************************************************************
@@ -473,38 +752,47 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   regval |= ADC_CR1_AWDEN;
 
   /* AWDIE: Analog watchdog interrupt enable */
-  
+
   regval |= ADC_CR1_AWDIE;
-  
+
   /* EOCIE: Interrupt enable for EOC */
   
   regval |= ADC_CR1_EOCIE;
-  
+
   adc_putreg(priv, STM32_ADC_CR1_OFFSET, regval);
 
-#warning "Only one channel is able to be guarded for the watchdog"
-#warning "The channel is configured in the ADC_CR1_AWDCH [4:0]"
-#warning "We have to decide if we need this watchdog "
-
   /* ADC1 CR2 Configuration */
-  
-  /* Set the ADON bit to wake up the ADC from power down mode */
 
   regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
-  regval |= ADC_CR2_ADON;
-    
+
   /* Clear CONT, ALIGN (Right = 0) and EXTTRIG bits */
 
   regval &= ~ADC_CR2_CONT;
   regval &= ~ADC_CR2_ALIGN;
   regval &= ~ADC_CR2_EXTSEL_MASK;
-  
-  /* SWSTART: Start conversion of regular channels */
 
-#warning "Don't you want to finish setting up the registers before starting the conversion?"
-  regval |= ADC_CR2_SWSTART;
-  adc_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
+  /* EXTTRIG: External Trigger Conversion mode for regular channels enable*/
   
+  //regval |= ADC_CR2_EXTTRIG;
+  
+  /* EXTSEL[2:0]: External event select for regular group
+   * These bits select the external event used to trigger the start
+   * of conversion of a regular group: 
+   *    000: Timer 1 CC1 event
+   *    001: Timer 1 CC2 event
+   *    010: Timer 1 CC3 event
+   *    011: Timer 2 CC2 event
+   *    100: Timer 3 TRGO event
+   *    101: Timer 4 CC4 event
+   *    110: EXTI line11/TIM8_TRGO event (TIM8_TRGO is available only in high-density devices)
+   *    111: SWSTART
+   */
+
+  /* Select trigger when SWSTART is set */
+  //regval |= ADC_CR2_EXTSEL_SWSTART;
+
+  adc_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
+
   /* Configuration of the channel conversions */
 
   regval = adc_getreg(priv, STM32_ADC_SQR3_OFFSET) & ADC_SQR3_RESERVED;
@@ -513,7 +801,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
       regval |= (uint32_t)priv->chanlist[i] << offset;
     }
   adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
-  
+
   regval = adc_getreg(priv, STM32_ADC_SQR2_OFFSET) & ADC_SQR2_RESERVED;
   for (i = 6, offset = 0; i < priv->nchannels && i < 12; i++, offset += 5)
     {
@@ -537,15 +825,21 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   /* Set the channel index of the first conversion */
 
   priv->current = 0;
-  irqrestore(flags);
 
-  avdbg("CR1: 0x%08x  CR2: 0x%08x\n",
+  /* Set ADON to wake up the ADC from Power Down state. */
+  
+  adc_enable(priv, true);
+  adc_startconv(priv, true);
+  irqrestore(flags);
+  
+  avdbg("SR: %08x CR1: 0x%08x  CR2: 0x%08x\n",
+        adc_getreg(priv, STM32_ADC_SR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR1_OFFSET),
-        adc_getreg(priv, STM32_ADC_CR2_OFFSET))
+        adc_getreg(priv, STM32_ADC_CR2_OFFSET));
   avdbg("SQR1: 0x%08x  SQR2: 0x%08x SQR3: 0x%08x\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
-        adc_getreg(priv, STM32_ADC_SQR3_OFFSET))
+        adc_getreg(priv, STM32_ADC_SQR3_OFFSET));
 }
 
 /****************************************************************************
@@ -632,9 +926,9 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
   regval = adc_getreg(priv, STM32_ADC_CR1_OFFSET);
   if (enable)
     {
-      /* Enable the end-of-conversion ADC interrupt */
+      /* Enable the end-of-conversion ADC and analog watchdog interrupts */
 
-      regval |= ADC_CR1_EOCIE;
+      regval |= (ADC_CR1_EOCIE | ADC_CR1_AWDIE);
     }
   else
     {
@@ -659,7 +953,7 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 
 static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
-  avdbg("intf: %d\n", priv->intf);
+  avdbg("Entry\n");
   return -ENOTTY;
 }
 
@@ -680,7 +974,6 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   uint32_t adcsr;
   int32_t  value;
-  uint8_t  ch;
 
   avdbg("intf: %d\n", priv->intf);
 
@@ -700,6 +993,10 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
 
       value  = adc_getreg(priv, STM32_ADC_DR_OFFSET);
       value &= ADC_DR_DATA_MASK;
+#ifdef ADC_DUALMODE
+#error "not yet implemented"
+      value &= ADC_DR_ADC2DATA_MASK;
+#endif
     
       /* Give the ADC data to the ADC dirver.  adc_receive accepts 3 parameters:
        *
@@ -708,18 +1005,21 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
        * 3) The third is the converted data for the channel.
        */
 
-      adc_receive(dev, priv->current, value);
+      avdbg("Calling adc_receive(priv, ch=%d, value=%d)\n",
+            priv->chanlist[priv->current], value);
 
+      adc_receive(dev, priv->chanlist[priv->current], value);
+  
       /* Set the channel number of the next channel that will complete conversion */
 
       if (++priv->current >= priv->nchannels)
         {
-           /* Restart the conversion sequence from the beginning */
+          /* Restart the conversion sequence from the beginning */
 #warning "Missing logic"
-
-           /* Reset the index to the first channel to be converted */
-
-           priv->current = 0;
+         
+          /* Reset the index to the first channel to be converted */
+        
+          priv->current = 0;
         }
     }
 
@@ -744,7 +1044,7 @@ static int adc12_interrupt(int irq, void *context)
   uint32_t regval;
   uint32_t pending;
 
-  avdbg("irq: %d\n");
+  avdbg("irq: %d\n", irq);
 
   /* Check for pending ADC1 interrupts */
 
@@ -793,7 +1093,7 @@ static int adc3_interrupt(int irq, void *context)
   uint32_t regval;
   uint32_t pending;
 
-  avdbg("irq: %d\n");
+  avdbg("irq: %d\n", irq);
 
   /* Check for pending ADC3 interrupts */
 
@@ -828,7 +1128,7 @@ static int adc123_interrupt(int irq, void *context)
   uint32_t regval;
   uint32_t pending;
 
-  avdbg("irq: %d\n");
+  avdbg("irq: %d\n", irq);
 
   /* Check for pending ADC1 interrupts */
 
