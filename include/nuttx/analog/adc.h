@@ -160,17 +160,54 @@ extern "C" {
 #endif
 
 /************************************************************************************
+ * "Upper-Half" ADC Driver Interfaces
+ ************************************************************************************/
+/************************************************************************************
  * Name: adc_register
  *
  * Description:
- *   Register a adc driver.
+ *   Register a ADC driver. This function binds an instance of a "lower half" ADC
+ *   driver with the "upper half" ADC device and registers that device so that can
+ *   be used by application code.
+ *
+ * Input parameters:
+ *   path - The full path to the driver to be registers in the NuttX pseudo-
+ *     filesystem.  The recommended convention is to name all PWM drivers
+ *     as "/dev/adc", "/dev/adc1", etc.  where the driver path differs only
+ *     in the "minor" number at the end of the device name.
+ *   dev - A pointer to an instance of lower half ADC driver.  This instance
+ *     is bound to the upper half ADC driver and must persists as long as the
+ *     upper half driver driver persists.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
  *
  ************************************************************************************/
 
 int adc_register(FAR const char *path, FAR struct adc_dev_s *dev);
 
+/************************************************************************************
+ * Name: adc_receive
+ *
+ * Description:
+ *   This function is called from the lower half, platform-specific ADC logic when
+ *   new ADC sample data is available.
+ *
+ * Input Parameters:
+ *   dev - The ADC device structure that was previously registered by adc_register()
+ *   ch  - And ID for the ADC channel number that generated the data
+ *   data - The actualy converted data from the channel.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ************************************************************************************/
+
 int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data);
 
+/************************************************************************************
+ * Platform-Independent "Lower Half" ADC Driver Interfaces
+ ************************************************************************************/
 /************************************************************************************
  * Name: up_ads1255initialize
  *
@@ -180,15 +217,6 @@ int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data);
  ************************************************************************************/
 
 FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi, unsigned int devno);
-
-/************************************************************************************
- * Name: up_adcinitialize
- *
- * Description:
- *   Initialize the MCU internal adc driver
- *
- ************************************************************************************/
-FAR struct adc_dev_s *up_adcinitialize();
 
 #if defined(__cplusplus)
 }

@@ -710,16 +710,16 @@ static int adc_interrupt(FAR struct adc_dev_s *dev)
 
       adc_receive(dev, priv->current, value);
 
-	  /* Set the channel number of the next channel that will complete conversion */
+      /* Set the channel number of the next channel that will complete conversion */
 
-	  if (++priv->current >= priv->nchannels)
-	    {
-		   /* Restart the conversion sequence from the beginning */
-#warning "Is there anything that you have to do to restart the conversion sequence?"
+      if (++priv->current >= priv->nchannels)
+        {
+           /* Restart the conversion sequence from the beginning */
+#warning "Missing logic"
 
            /* Reset the index to the first channel to be converted */
 
-		   priv->current = 0;
+           priv->current = 0;
         }
     }
 

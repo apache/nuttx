@@ -61,7 +61,9 @@
 #define _ARPIOCBASE     (0x0800) /* ARP ioctl commands */
 #define _TSIOCBASE      (0x0900) /* Touchscreen ioctl commands */
 #define _SNIOCBASE      (0x0a00) /* Sensor ioctl commands */
-#define _CAIOCBASE      (0x0b00) /* CDC/ACM ioctl commands */
+#define _ANIOCBASE      (0x0b00) /* Analog (DAC/ADC) ioctl commands */
+#define _PWMIOCBASE     (0x0c00) /* PWM ioctl commands */
+#define _CAIOCBASE      (0x0d00) /* CDC/ACM ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -172,6 +174,11 @@
 
 #define _SNIOCVALID(c)    (_IOC_TYPE(c)==_SNIOCBASE)
 #define _SNIOC(nr)        _IOC(_SNIOCBASE,nr)
+
+/* NuttX PWM ioctl definitions (see nuttx/pwm.h) ***************************/
+
+#define _PWMIOCVALID(c)    (_IOC_TYPE(c)==_PWMIOCBASE)
+#define _PWMIOC(nr)        _IOC(_PWMIOCBASE,nr)
 
 /* NuttX USB CDC/ACM serial driver ioctl definitions ************************/
 /* (see nuttx/usb/cdc_serial.h) */

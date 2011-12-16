@@ -68,6 +68,9 @@ ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
   CSRCS += ramdisk.c rwbuffer.c
 endif
+ifeq ($(CONFIG_PWM),y)
+  CSRCS += pwm.c
+endif
 endif
 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
