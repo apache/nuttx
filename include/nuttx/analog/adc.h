@@ -78,7 +78,7 @@ struct adc_msg_s
 {
   uint8_t      am_channel;               /* The 8-bit ADC Channel */
   int32_t      am_data;                  /* ADC convert result (4 bytes) */
-}__attribute__((__packed__));
+} __attribute__((__packed__));
 
 struct adc_fifo_s
 {
