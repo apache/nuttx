@@ -72,6 +72,22 @@
 
 #if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
 
+/* The number of ADC channels in the conversion list */
+
+#define ADC_NCHANNELS 2
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+/* Identifying number of each ADC channel */
+
+static const uint8_t  g_chanlist[ADC_NCHANNELS] = {14, 10};
+
+/* Configurations of pins used byte each ADC channels */
+
+static const uint32_t g_pinlist[ADC_NCHANNELS]  = {GPIO_ADC1_IN14 , GPIO_ADC1_IN10};
+
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
@@ -90,13 +106,24 @@
  *
  ************************************************************************************/
 
-void adc_devinit(void)
+int adc_devinit(void)
 {
   struct adc_dev_s *adc;
   int ret;
+  int i;
 
-  /* Call stm32_adcinitialize() to get an instance of the ADC interface */
-#warning "Missing Logic"
+  avdbg("Entry\n");
+
+  /* Configure the pins as analog inputs for the selected channels */^M
+
+  for(i = 0; i < ADC_NCHANNELS; i++)
+    {
+      stm32_configgpio(chanlist[i]);
+    }
+
+  /* Call stm32_adcinitialize() to get an instance of the ADC interface */^M
+
+  adc = stm32_adcinitialize(1, g_chanlist, ADC_NCHANNELS);
 
   /* Register the ADC driver at "/dev/adc0" */
 
@@ -105,6 +132,8 @@ void adc_devinit(void)
     {
       adbg("adc_register failed: %d\n", ret);
     }
+
+  return OK;
 }
 
 #endif /* CONFIG_STM32_ADC || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
