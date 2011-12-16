@@ -48,6 +48,104 @@
 #include <nuttx/analog/adc.h>
 
 /************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+/* Configuration ********************************************************************/
+/* Timer devices may be used for different purposes.  One special purpose is to
+ * control periodic ADC sampling.  If CONFIG_STM32_TIMn is defined then 
+ * CONFIG_STM32_TIMn_ADC must also be defined to indicate that timer "n" is intended
+ * to be used for that purpose.
+ */
+
+/* For the STM32 F1 line, timers 1-4 may be used.  For STM32 F4 line, timers 1-5 and
+ * 8 may be used.
+ */
+
+#ifndef CONFIG_STM32_TIM1
+#  undef CONFIG_STM32_TIM1_ADC
+#  undef CONFIG_STM32_TIM1_ADC1
+#  undef CONFIG_STM32_TIM1_ADC2
+#  undef CONFIG_STM32_TIM1_ADC3
+#endif
+#ifndef CONFIG_STM32_TIM2
+#  undef CONFIG_STM32_TIM2_ADC
+#  undef CONFIG_STM32_TIM2_ADC1
+#  undef CONFIG_STM32_TIM2_ADC2
+#  undef CONFIG_STM32_TIM2_ADC3
+#endif
+#ifndef CONFIG_STM32_TIM3
+#  undef CONFIG_STM32_TIM3_ADC
+#  undef CONFIG_STM32_TIM3_ADC1
+#  undef CONFIG_STM32_TIM3_ADC2
+#  undef CONFIG_STM32_TIM3_ADC3
+#endif
+#ifndef CONFIG_STM32_TIM4
+#  undef CONFIG_STM32_TIM4_ADC
+#  undef CONFIG_STM32_TIM4_ADC1
+#  undef CONFIG_STM32_TIM4_ADC2
+#  undef CONFIG_STM32_TIM4_ADC3
+#endif
+
+#if defined(CONFIG_STM32_STM32F40XX)
+#  ifndef CONFIG_STM32_TIM5
+#    undef CONFIG_STM32_TIM5_ADC
+#    undef CONFIG_STM32_TIM5_ADC1
+#    undef CONFIG_STM32_TIM5_ADC2
+#    undef CONFIG_STM32_TIM5_ADC3
+#  endif
+#  ifndef CONFIG_STM32_TIM8
+#    undef CONFIG_STM32_TIM8_ADC
+#    undef CONFIG_STM32_TIM8_ADC1
+#    undef CONFIG_STM32_TIM8_ADC2
+#    undef CONFIG_STM32_TIM8_ADC3
+#  endif
+#else
+#  undef CONFIG_STM32_TIM5_ADC
+#  undef CONFIG_STM32_TIM5_ADC1
+#  undef CONFIG_STM32_TIM5_ADC2
+#  undef CONFIG_STM32_TIM5_ADC3
+#  undef CONFIG_STM32_TIM8_ADC
+#  undef CONFIG_STM32_TIM8_ADC1
+#  undef CONFIG_STM32_TIM8_ADC2
+#  undef CONFIG_STM32_TIM8_ADC3
+#endif
+
+/* Timers 6, 7, and 10-14 are not used with the ADC by any supported family */
+
+#undef CONFIG_STM32_TIM6_ADC
+#undef CONFIG_STM32_TIM6_ADC1
+#undef CONFIG_STM32_TIM6_ADC2
+#undef CONFIG_STM32_TIM6_ADC3
+#undef CONFIG_STM32_TIM7_ADC
+#undef CONFIG_STM32_TIM7_ADC1
+#undef CONFIG_STM32_TIM7_ADC2
+#undef CONFIG_STM32_TIM7_ADC3
+#undef CONFIG_STM32_TIM9_ADC
+#undef CONFIG_STM32_TIM9_ADC1
+#undef CONFIG_STM32_TIM9_ADC2
+#undef CONFIG_STM32_TIM9_ADC3
+#undef CONFIG_STM32_TIM10_ADC
+#undef CONFIG_STM32_TIM10_ADC1
+#undef CONFIG_STM32_TIM10_ADC2
+#undef CONFIG_STM32_TIM10_ADC3
+#undef CONFIG_STM32_TIM11_ADC
+#undef CONFIG_STM32_TIM11_ADC1
+#undef CONFIG_STM32_TIM11_ADC2
+#undef CONFIG_STM32_TIM11_ADC3
+#undef CONFIG_STM32_TIM12_ADC
+#undef CONFIG_STM32_TIM12_ADC1
+#undef CONFIG_STM32_TIM12_ADC2
+#undef CONFIG_STM32_TIM12_ADC3
+#undef CONFIG_STM32_TIM13_ADC
+#undef CONFIG_STM32_TIM13_ADC1
+#undef CONFIG_STM32_TIM13_ADC2
+#undef CONFIG_STM32_TIM13_ADC3
+#undef CONFIG_STM32_TIM14_ADC
+#undef CONFIG_STM32_TIM14_ADC1
+#undef CONFIG_STM32_TIM14_ADC2
+#undef CONFIG_STM32_TIM14_ADC3
+
+/************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
 

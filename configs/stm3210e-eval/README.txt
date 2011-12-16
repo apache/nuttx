@@ -481,7 +481,40 @@ STM3210E-EVAL-specific Configuration Options
 
     CONFIG_STM32_FORCEPOWER
 
-  Alternate pin mappings (should not be used with the STM3210E-EVAL board):
+  Timer devices may be used for different purposes.  One special purpose is
+  to generate modulated outputs for such things as motor control.  If CONFIG_STM32_TIMn
+  is defined (as above) then the following may also be defined to indicate that
+  the timer is intended to be used for pulsed output modulation, ADC conversion,
+  or DAC conversion.
+
+	CONFIG_STM32_TIM1_PWM
+	CONFIG_STM32_TIM2_PWM
+	CONFIG_STM32_TIM3_PWM
+	CONFIG_STM32_TIM4_PWM
+	CONFIG_STM32_TIM5_PWM
+	CONFIG_STM32_TIM6_PWM
+	CONFIG_STM32_TIM7_PWM
+	CONFIG_STM32_TIM8_PWM
+
+	CONFIG_STM32_TIM1_ADC
+	CONFIG_STM32_TIM2_ADC
+	CONFIG_STM32_TIM3_ADC
+	CONFIG_STM32_TIM4_ADC
+	CONFIG_STM32_TIM5_ADC
+	CONFIG_STM32_TIM6_ADC
+	CONFIG_STM32_TIM7_ADC
+	CONFIG_STM32_TIM8_ADC
+
+	CONFIG_STM32_TIM1_DAC
+	CONFIG_STM32_TIM2_DAC
+	CONFIG_STM32_TIM3_DAC
+	CONFIG_STM32_TIM4_DAC
+	CONFIG_STM32_TIM5_DAC
+	CONFIG_STM32_TIM6_DAC
+	CONFIG_STM32_TIM7_DAC
+	CONFIG_STM32_TIM8_DAC
+
+    Alternate pin mappings (should not be used with the STM3210E-EVAL board):
 
 	CONFIG_STM32_TIM1_FULL_REMAP
 	CONFIG_STM32_TIM1_PARTIAL_REMAP

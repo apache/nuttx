@@ -4,6 +4,11 @@
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *
+ * With modifications and updates by:
+ *
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -33,13 +38,12 @@
  *
  ************************************************************************************/
 
-/** \file
- *  \author Uros Platise
- *  \brief STM32 Timer Device Driver
- */
-
 #ifndef __ARCH_ARM_SRC_STM32_STM32_TIM_H
 #define __ARCH_ARM_SRC_STM32_STM32_TIM_H
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,107 +53,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/** TIM Device Structure
- */
-struct stm32_tim_dev_s {
-    struct stm32_tim_ops_s *ops;
-};
-
-
-/** TIM Modes of Operation
- */
-typedef enum {
-    STM32_TIM_MODE_UNUSED       = -1,
-    
-    /* One of the following */
-    STM32_TIM_MODE_MASK         = 0x0310,
-    STM32_TIM_MODE_DISABLED     = 0x0000,
-    STM32_TIM_MODE_UP           = 0x0100,
-    STM32_TIM_MODE_DOWN         = 0x0110,
-    STM32_TIM_MODE_UPDOWN       = 0x0200,
-    STM32_TIM_MODE_PULSE        = 0x0300,
-    
-    /* One of the following */
-    STM32_TIM_MODE_CK_INT       = 0x0000,
-//  STM32_TIM_MODE_CK_INT_TRIG  = 0x0400,
-//  STM32_TIM_MODE_CK_EXT       = 0x0800,
-//  STM32_TIM_MODE_CK_EXT_TRIG  = 0x0C00,
-
-    /* Clock sources, OR'ed with CK_EXT */
-//  STM32_TIM_MODE_CK_CHINVALID = 0x0000,
-//  STM32_TIM_MODE_CK_CH1       = 0x0001,
-//  STM32_TIM_MODE_CK_CH2       = 0x0002,
-//  STM32_TIM_MODE_CK_CH3       = 0x0003,
-//  STM32_TIM_MODE_CK_CH4       = 0x0004
-    
-    /* Todo: external trigger block */
-    
-} stm32_tim_mode_t;
-
-
-/** TIM Channel Modes
- */
-typedef enum {
-    STM32_TIM_CH_DISABLED       = 0x00,
-    
-    /* Common configuration */
-    STM32_TIM_CH_POLARITY_POS   = 0x00,
-    STM32_TIM_CH_POLARITY_NEG   = 0x01,
-    
-    /* MODES: */
-    STM32_TIM_CH_MODE_MASK      = 0x06,
-    
-    /* Output Compare Modes */
-    STM32_TIM_CH_OUTPWM         = 0x04,     /** Enable standard PWM mode, active high when counter < compare */
-//  STM32_TIM_CH_OUTCOMPARE     = 0x06,
-    
-    // TODO other modes ... as PWM capture, ENCODER and Hall Sensor
-//  STM32_TIM_CH_INCAPTURE      = 0x10,
-//  STM32_TIM_CH_INPWM          = 0x20
-//  STM32_TIM_CH_DRIVE_OC   -- open collector mode
-    
-} stm32_tim_channel_t;
-
-
-/** TIM Operations
- */
-struct stm32_tim_ops_s {
-
-    /* Basic Timers */
-    
-    int	    (*setmode)(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
-    int     (*setclock)(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
-    void    (*setperiod)(FAR struct stm32_tim_dev_s *dev, uint16_t period);
-    
-    /* General and Advanced Timers Adds */
-    
-    int     (*setchannel)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, stm32_tim_channel_t mode);
-    int	    (*setcompare)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, uint16_t compare);
-    int	    (*getcapture)(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
-    
-    int     (*setisr)(FAR struct stm32_tim_dev_s *dev, int (*handler)(int irq, void *context), int source);
-    void    (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
-    void    (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
-    void    (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
-};
-
-
-/* Helpers */
+/* Helpers **************************************************************************/
 
 #define STM32_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
 #define STM32_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
@@ -162,17 +66,121 @@ struct stm32_tim_ops_s {
 #define STM32_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
 #define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
 
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/* TIM Device Structure */
+
+struct stm32_tim_dev_s
+{
+  struct stm32_tim_ops_s *ops;
+};
+
+/* TIM Modes of Operation */
+
+typedef enum
+{
+  STM32_TIM_MODE_UNUSED       = -1,
+    
+  /* One of the following */
+
+  STM32_TIM_MODE_MASK         = 0x0310,
+  STM32_TIM_MODE_DISABLED     = 0x0000,
+  STM32_TIM_MODE_UP           = 0x0100,
+  STM32_TIM_MODE_DOWN         = 0x0110,
+  STM32_TIM_MODE_UPDOWN       = 0x0200,
+  STM32_TIM_MODE_PULSE        = 0x0300,
+    
+  /* One of the following */
+
+  STM32_TIM_MODE_CK_INT       = 0x0000,
+//STM32_TIM_MODE_CK_INT_TRIG  = 0x0400,
+//STM32_TIM_MODE_CK_EXT       = 0x0800,
+//STM32_TIM_MODE_CK_EXT_TRIG  = 0x0C00,
+
+  /* Clock sources, OR'ed with CK_EXT */
+
+//STM32_TIM_MODE_CK_CHINVALID = 0x0000,
+//STM32_TIM_MODE_CK_CH1       = 0x0001,
+//STM32_TIM_MODE_CK_CH2       = 0x0002,
+//STM32_TIM_MODE_CK_CH3       = 0x0003,
+//STM32_TIM_MODE_CK_CH4       = 0x0004
+    
+  /* Todo: external trigger block */
+    
+} stm32_tim_mode_t;
+
+/* TIM Channel Modes */
+
+typedef enum
+{
+  STM32_TIM_CH_DISABLED       = 0x00,
+    
+  /* Common configuration */
+
+  STM32_TIM_CH_POLARITY_POS   = 0x00,
+  STM32_TIM_CH_POLARITY_NEG   = 0x01,
+    
+  /* MODES: */
+
+  STM32_TIM_CH_MODE_MASK      = 0x06,
+    
+  /* Output Compare Modes */
+
+  STM32_TIM_CH_OUTPWM         = 0x04,     /** Enable standard PWM mode, active high when counter < compare */
+//STM32_TIM_CH_OUTCOMPARE     = 0x06,
+    
+  // TODO other modes ... as PWM capture, ENCODER and Hall Sensor
+//STM32_TIM_CH_INCAPTURE      = 0x10,
+//STM32_TIM_CH_INPWM          = 0x20
+//STM32_TIM_CH_DRIVE_OC   -- open collector mode
+    
+} stm32_tim_channel_t;
+
+/* TIM Operations */
+
+struct stm32_tim_ops_s
+{
+  /* Basic Timers */
+
+  int  (*setmode)(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
+  int  (*setclock)(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
+  void (*setperiod)(FAR struct stm32_tim_dev_s *dev, uint16_t period);
+    
+  /* General and Advanced Timers Adds */
+    
+  int  (*setchannel)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, stm32_tim_channel_t mode);
+  int  (*setcompare)(FAR struct stm32_tim_dev_s *dev, uint8_t channel, uint16_t compare);
+  int  (*getcapture)(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
+
+  int  (*setisr)(FAR struct stm32_tim_dev_s *dev, int (*handler)(int irq, void *context), int source);
+  void (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
+  void (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
+  void (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
+};
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/** Power-up timer and get its structure */
+/* Power-up timer and get its structure */
+
 EXTERN FAR struct stm32_tim_dev_s * stm32_tim_init(int timer);
 
-/** Power-down timer, mark it as unused */
-EXTERN int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev);
+/* Power-down timer, mark it as unused */
 
+EXTERN int stm32_tim_deinit(FAR struct stm32_tim_dev_s * dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

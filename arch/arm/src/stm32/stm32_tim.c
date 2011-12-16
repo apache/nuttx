@@ -4,6 +4,11 @@
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *
+ * With modifications and updates by:
+ *
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -33,10 +38,9 @@
  *
  ************************************************************************************/
 
-/** \file
- *  \author Uros Platise
- *  \brief STM32 Basic, General and Advanced Timers
- */
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -58,6 +62,74 @@
 #include "stm32_internal.h"
 #include "stm32_gpio.h"
 #include "stm32_tim.h"
+
+/************************************************************************************
+ * Private Types
+ ************************************************************************************/
+/* Configuration ********************************************************************/
+/* Timer devices may be used for different purposes.  Such special purposes include:
+ *
+ * - To generate modulated outputs for such things as motor control.  If CONFIG_STM32_TIMn
+ *   is defined then the CONFIG_STM32_TIMn_PWM may also be defined to indicate that
+ *   the timer is intended to be used for pulsed output modulation.
+ *
+ * - To control periodic ADC input sampling.  If CONFIG_STM32_TIMn is defined then 
+ *   CONFIG_STM32_TIMn_ADC may also be defined to indicate that timer "n" is intended
+ *   to be used for that purpose.
+ *
+ * - To control periodic DAC outputs.  If CONFIG_STM32_TIMn is defined then 
+ *   CONFIG_STM32_TIMn_DAC may also be defined to indicate that timer "n" is intended
+ *   to be used for that purpose.
+ *
+ * In any of these cases, the timer will not be used by this timer module.
+ */
+
+#if defined(CONFIG_STM32_TIM1_PWM) || defined (CONFIG_STM32_TIM1_ADC) || defined(CONFIG_STM32_TIM1_DAC)
+#  undef CONFIG_STM32_TIM1
+#endif
+#if defined(CONFIG_STM32_TIM2_PWM || defined (CONFIG_STM32_TIM2_ADC) || defined(CONFIG_STM32_TIM2_DAC)
+#  undef CONFIG_STM32_TIM2
+#endif
+#if defined(CONFIG_STM32_TIM3_PWM || defined (CONFIG_STM32_TIM3_ADC) || defined(CONFIG_STM32_TIM3_DAC)
+#  undef CONFIG_STM32_TIM3
+#endif
+#if defined(CONFIG_STM32_TIM4_PWM || defined (CONFIG_STM32_TIM4_ADC) || defined(CONFIG_STM32_TIM4_DAC)
+#  undef CONFIG_STM32_TIM4
+#endif
+#if defined(CONFIG_STM32_TIM5_PWM || defined (CONFIG_STM32_TIM5_ADC) || defined(CONFIG_STM32_TIM5_DAC)
+#  undef CONFIG_STM32_TIM5
+#endif
+#if defined(CONFIG_STM32_TIM6_PWM || defined (CONFIG_STM32_TIM6_ADC) || defined(CONFIG_STM32_TIM6_DAC)
+#  undef CONFIG_STM32_TIM6
+#endif
+#if defined(CONFIG_STM32_TIM7_PWM || defined (CONFIG_STM32_TIM7_ADC) || defined(CONFIG_STM32_TIM7_DAC)
+#  undef CONFIG_STM32_TIM7
+#endif
+#if defined(CONFIG_STM32_TIM8_PWM || defined (CONFIG_STM32_TIM8_ADC) || defined(CONFIG_STM32_TIM8_DAC)
+#  undef CONFIG_STM32_TIM8
+#endif
+#if defined(CONFIG_STM32_TIM9_PWM || defined (CONFIG_STM32_TIM9_ADC) || defined(CONFIG_STM32_TIM9_DAC)
+#  undef CONFIG_STM32_TIM9
+#endif
+#if defined(CONFIG_STM32_TIM10_PWM || defined (CONFIG_STM32_TIM10_ADC) || defined(CONFIG_STM32_TIM10_DAC)
+#  undef CONFIG_STM32_TIM10
+#endif
+#if defined(CONFIG_STM32_TIM11_PWM || defined (CONFIG_STM32_TIM11_ADC) || defined(CONFIG_STM32_TIM11_DAC)
+#  undef CONFIG_STM32_TIM11
+#endif
+#if defined(CONFIG_STM32_TIM12_PWM || defined (CONFIG_STM32_TIM12_ADC) || defined(CONFIG_STM32_TIM12_DAC)
+#  undef CONFIG_STM32_TIM12
+#endif
+#if defined(CONFIG_STM32_TIM13_PWM || defined (CONFIG_STM32_TIM13_ADC) || defined(CONFIG_STM32_TIM13_DAC)
+#  undef CONFIG_STM32_TIM13
+#endif
+#if defined(CONFIG_STM32_TIM14_PWM || defined (CONFIG_STM32_TIM14_ADC) || defined(CONFIG_STM32_TIM14_DAC)
+#  undef CONFIG_STM32_TIM14
+#endif
+
+/* This module then only compiles if there are enabled timers that are not intended for
+ * some other purpose.
+ */
 
 #if defined(CONFIG_STM32_TIM1) || defined(CONFIG_STM32_TIM2) || defined(CONFIG_STM32_TIM3) || \
     defined(CONFIG_STM32_TIM4) || defined(CONFIG_STM32_TIM5) || defined(CONFIG_STM32_TIM6) || \
