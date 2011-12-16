@@ -44,6 +44,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
@@ -115,8 +116,6 @@ struct stm32_dev_s
   uint32_t base;      /* Base address of registers unique to this ADC block */
 
   uint8_t  chanlist[ADC_MAX_SAMPLES];
-  int32_t  buf[8];
-  uint8_t  count[8];
 };
 
 /****************************************************************************
@@ -127,11 +126,11 @@ struct stm32_dev_s
 
 static uint32_t adc_getreg(struct stm32_dev_s *priv, int offset);
 static void adc_putreg(struct stm32_dev_s *priv, int offset, uint32_t value);
-static void adc_rccreset(int regaddr, bool reset);
+static void adc_rccreset(struct stm32_dev_s *priv, bool reset);
 
 /* ADC Interrupt Handler */
 
-static int adc_interrupt(FAR struct stm32_dev_s *priv);
+static int adc_interrupt(FAR struct adc_dev_s *dev);
 #if defined(CONFIG_STM32_STM32F10XX) && (defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2))
 static int adc12_interrupt(int irq, void *context);
 #endif
@@ -178,7 +177,7 @@ static struct stm32_dev_s g_adcpriv1 =
   .irq         = STM32_IRQ_ADC,
   .isr         = adc123_interrupt,
 #endif
-  .intf        = 1;
+  .intf        = 1,
   .base        = STM32_ADC1_BASE,
 };
 
@@ -362,10 +361,13 @@ static void adc_rccreset(struct stm32_dev_s *priv, bool reset)
  * Returned Value:
  *
  *******************************************************************************/
+
 static void adc_enable(FAR struct adc_dev_s *dev, bool enable)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   uint32_t regval;
+
+  avdbg("enable: %d\n", enable);
 
   regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
   if (enable)
@@ -394,16 +396,13 @@ static void adc_enable(FAR struct adc_dev_s *dev, bool enable)
 
 static void adc_reset(FAR struct adc_dev_s *dev)
 {
-  adbg("Initializing the ADC to the reset values \n");
-  
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   irqstate_t flags;
   uint32_t regval;
-  uint32_t L = priv->nchannels;
-  uint32_t ch;
   int offset;
   int i;
-    
+
+  avdbg("intf: %d\n", priv->intf);
   flags = irqsave();
 
   /* Enable  ADC reset state */
@@ -435,22 +434,22 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   putreg32(regval,STM32_ADC_CCR_OFFSET);
 #endif
 
-  /* Initialize the same sample time for each ADC 1.5 cycles
+  /* Initialize the same sample time for each ADC 55.5 cycles
    *
    * During sample cycles channel selection bits must remain unchanged.
    *
-   * 000: 1.5 cycles
-   * 001: 7.5 cycles
-   * 010: 13.5 cycles
-   * 011: 28.5 cycles
-   * 100: 41.5 cycles
-   * 101: 55.5 cycles
-   * 110: 71.5 cycles
-   * 111: 239.5 cycles
+   *   000:   1.5 cycles
+   *   001:   7.5 cycles
+   *   010:  13.5 cycles
+   *   011:  28.5 cycles
+   *   100:  41.5 cycles
+   *   101:  55.5 cycles
+   *   110:  71.5 cycles
+   *   111: 239.5 cycles
    */
 
-  adc_putreg(priv,STM32_ADC_SMPR1_OFFSET,0x00000000);
-  adc_putreg(priv,STM32_ADC_SMPR2_OFFSET,0x00000000);
+  adc_putreg(priv, STM32_ADC_SMPR1_OFFSET, 0x00b6db6d);
+  adc_putreg(priv, STM32_ADC_SMPR2_OFFSET, 0x00b6db6d);
   
   /* ADC CR1 Configuration */
 
@@ -467,7 +466,24 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   /* Initialize the ADC_CR1_SCAN member DISABLE */
 
   regval &= ~ADC_CR1_SCAN;
+  
+  /* Initialize the Analog watchdog enable */
+
+  regval |= ADC_CR1_AWDEN;
+
+  /* AWDIE: Analog watchdog interrupt enable */
+  
+  regval |= ADC_CR1_AWDIE;
+  
+  /* EOCIE: Interrupt enable for EOC */
+  
+  regval |= ADC_CR1_EOCIE;
+  
   adc_putreg(priv, STM32_ADC_CR1_OFFSET, regval);
+
+#warning "Only one channel is able to be guarded for the watchdog"
+#warning "The channel is configured in the ADC_CR1_AWDCH [4:0]"
+#warning "We have to decide if we need this watchdog "
 
   /* ADC1 CR2 Configuration */
   
@@ -476,62 +492,55 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
   regval |= ADC_CR2_ADON;
     
-  /* Clear CONT, ALIGN and EXTTRIG bits */
+  /* Clear CONT, ALIGN (Right = 0) and EXTTRIG bits */
 
-  regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
   regval &= ~ADC_CR2_CONT;
   regval &= ~ADC_CR2_ALIGN;
   regval &= ~ADC_CR2_EXTSEL_MASK;
+  
+  /* SWSTART: Start conversion of regular channels */
+
+#warning "Don't you want to finish setting up the registers before starting the conversion?"
+  regval |= ADC_CR2_SWSTART;
   adc_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
+  
+  /* Configuration of the channel conversions */
 
-  /* Set CONT, ALIGN and EXTTRIG bits */
-  /* Initialize the ALIGN: Data alignment Right */
-
-  regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET);
-  regval &= ~ADC_CR2_ALIGN;
-
-  /* Initialize the External event select "Timer CC1 event" */
-
-  regval &= ~ADC_CR2_EXTSEL_MASK;
-
-  /* Initialize the ADC_ContinuousConvMode "Single conversion mode" */
-
-  regval &= ~ADC_CR2_CONT;
-  adc_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
-
-  /* ADC1 SQR Configuration */
-
-  L = L << 20;
-  regval  = adc_getreg(priv, STM32_ADC_SQR1_OFFSET);
-  regval &= ~ADC_SQR1_L_MASK; /* Clear L Mask */ 
-  regval |= L;                /* SetL, # of conversions */
-  adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
-
-  /* Configuration of the channels conversions */
-
-  regval = adc_getreg(priv, STM32_ADC_SQR3_OFFSET) & ~ADC_SQR3_RESERVED;
+  regval = adc_getreg(priv, STM32_ADC_SQR3_OFFSET) & ADC_SQR3_RESERVED;
   for (i = 0, offset = 0; i < priv->nchannels && i < 6; i++, offset += 5)
     {
       regval |= (uint32_t)priv->chanlist[i] << offset;
     }
   adc_putreg(priv, STM32_ADC_SQR3_OFFSET, regval);
-
-  regval = adc_getreg(priv, STM32_ADC_SQR2_OFFSET) & ~ADC_SQR2_RESERVED;
+  
+  regval = adc_getreg(priv, STM32_ADC_SQR2_OFFSET) & ADC_SQR2_RESERVED;
   for (i = 6, offset = 0; i < priv->nchannels && i < 12; i++, offset += 5)
     {
       regval |= (uint32_t)priv->chanlist[i] << offset;
     }
   adc_putreg(priv, STM32_ADC_SQR2_OFFSET, regval);
 
-  regval = adc_getreg(priv, STM32_ADC_SQR1_OFFSET) & ~(ADC_SQR1_RESERVED|ADC_SQR1_L_MASK);
+  regval = adc_getreg(priv, STM32_ADC_SQR1_OFFSET) & ADC_SQR1_RESERVED;
   for (i = 12, offset = 0; i < priv->nchannels && i < 16; i++, offset += 5)
     {
       regval |= (uint32_t)priv->chanlist[i] << offset;
     }
-  adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
+
+  /* Set the number of conversions */
 
   DEBUGASSERT(priv->nchannels <= 16);
+
+  regval |= ((uint32_t)priv->nchannels << ADC_SQR1_L_SHIFT);
+  adc_putreg(priv, STM32_ADC_SQR1_OFFSET, regval);
   irqrestore(flags);
+
+  avdbg("CR1: 0x%08x  CR2: 0x%08x\n",
+        adc_getreg(priv, STM32_ADC_CR1_OFFSET),
+        adc_getreg(priv, STM32_ADC_CR2_OFFSET))
+  avdbg("SQR1: 0x%08x  SQR2: 0x%08x SQR3: 0x%08x\n",
+        adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
+        adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
+        adc_getreg(priv, STM32_ADC_SQR3_OFFSET))
 }
 
 /****************************************************************************
@@ -553,18 +562,14 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   int ret;
-  int i;
+
+  avdbg("intf: %d\n", priv->intf);
+
   /* Attach the ADC interrupt */
 
   ret = irq_attach(priv->irq, priv->isr);
   if (ret == OK)
     {
-      for (i = 0; i < 8; i++)
-      {
-        priv->buf[i]   = 0;
-        priv->count[i] = 0;
-      }
-      
       /* Enable the ADC interrupt */
 
       up_enable_irq(priv->irq);
@@ -589,6 +594,8 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+
+  avdbg("intf: %d\n", priv->intf);
 
   /* Disable ADC interrupts and detach the ADC interrupt handler */
 
@@ -615,6 +622,8 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   uint32_t regval;
 
+  avdbg("intf: %d enable: %d\n", priv->intf, enable);
+
   regval = adc_getreg(priv, STM32_ADC_CR1_OFFSET);
   if (enable)
     {
@@ -624,7 +633,7 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
     }
   else
     {
-      /* Enable all ADC interrupts */
+      /* Disable all ADC interrupts */
 
       regval &= ~ADC_CR1_ALLINTS;
     }
@@ -645,6 +654,7 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 
 static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
+  avdbg("intf: %d\n", priv->intf);
   return -ENOTTY;
 }
 
@@ -660,12 +670,15 @@ static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int adc_interrupt(FAR struct stm32_dev_s *priv)
+static int adc_interrupt(FAR struct adc_dev_s *dev)
 {
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   uint32_t adcsr;
   int32_t  value;
   uint8_t  ch;
   int      i;
+
+  avdbg("intf: %d\n", priv->intf);
 
   /* Identifies the interruption AWD or EOC */
   
@@ -679,16 +692,27 @@ static int adc_interrupt(FAR struct stm32_dev_s *priv)
 
   if ((adcsr & ADC_SR_EOC) != 0)
     {
-      value  = adc_getreg(priv, STM32_ADC_DR_OFFSET);
-      value &= ADC_DR_DATA_MASK;
-#error "i is not assigned a value"
-      ch     = priv->chanlist[i]; /* Channel converted */
-    
-      /* Handle the ADC interrupt */
+      /* Call adc_receive for each channel that completed */
 
-      adc_receive(priv, ch, value);
-      priv->buf[ch]   = 0;
-      priv->count[ch] = 0;
+# warning "Does the DR register need to be read numerous times?  Once for each channel?"
+# warning "I don't know how this is supposed to work, but I will add some guesses here -- please fix"
+
+      for (i = 0; i < priv->nchannels; i++)
+        {
+          /* Read the converted value */
+
+          value  = adc_getreg(priv, STM32_ADC_DR_OFFSET);
+          value &= ADC_DR_DATA_MASK;
+    
+          /* Give the ADC data to the ADC dirver.  adc_receive accepts 3 parameters:
+           *
+           * 1) The first is the ADC device instance for this ADC block.
+           * 2) The second is the channel number for the data, and
+           * 3) The third is the converted data for the channel.
+           */
+
+          adc_receive(dev, i, value);
+        }
     }
 
   return OK;
@@ -712,6 +736,8 @@ static int adc12_interrupt(int irq, void *context)
   uint32_t regval;
   uint32_t pending;
 
+  avdbg("irq: %d\n");
+
   /* Check for pending ADC1 interrupts */
 
 #ifdef CONFIG_STM32_ADC1
@@ -719,7 +745,7 @@ static int adc12_interrupt(int irq, void *context)
   pending = regval & ADC_SR_ALLINTS;
   if (pending != 0)
     {
-      adc_interrupt(&g_adcpriv1);
+      adc_interrupt(&g_adcdev1);
       regval &= ~pending;
       putreg32(regval, STM32_ADC1_SR);
     }
@@ -732,7 +758,7 @@ static int adc12_interrupt(int irq, void *context)
   pending = regval & ADC_SR_ALLINTS;
   if (pending != 0)
     {
-      adc_interrupt(&g_adcpriv2);
+      adc_interrupt(&g_adcdev2);
       regval &= ~pending;
       putreg32(regval, STM32_ADC2_SR);
     }
@@ -759,13 +785,15 @@ static int adc3_interrupt(int irq, void *context)
   uint32_t regval;
   uint32_t pending;
 
+  avdbg("irq: %d\n");
+
   /* Check for pending ADC3 interrupts */
 
   regval  = getreg32(STM32_ADC3_SR);
   pending = regval & ADC_SR_ALLINTS;
   if (pending != 0)
     {
-      adc_interrupt(&g_adcpriv3);
+      adc_interrupt(&g_adcdev3);
       regval &= ~pending;
       putreg32(regval, STM32_ADC3_SR);
     }
@@ -792,6 +820,8 @@ static int adc123_interrupt(int irq, void *context)
   uint32_t regval;
   uint32_t pending;
 
+  avdbg("irq: %d\n");
+
   /* Check for pending ADC1 interrupts */
 
 #ifdef CONFIG_STM32_ADC1
@@ -799,7 +829,7 @@ static int adc123_interrupt(int irq, void *context)
   pending = regval & ADC_SR_ALLINTS;
   if (pending != 0)
     {
-      adc_interrupt(&g_adcpriv1);
+      adc_interrupt(&g_adcdev1);
       regval &= ~pending;
       putreg32(regval, STM32_ADC1_SR);
     }
@@ -812,7 +842,7 @@ static int adc123_interrupt(int irq, void *context)
   pending = regval & ADC_SR_ALLINTS;
   if (pending != 0)
     {
-      adc_interrupt(&g_adcpriv2);
+      adc_interrupt(&g_adcdev2);
       regval &= ~pending;
       putreg32(regval, STM32_ADC2_SR);
     }
@@ -825,7 +855,7 @@ static int adc123_interrupt(int irq, void *context)
   pending = regval & ADC_SR_ALLINTS;
   if (pending != 0)
     {
-      adc_interrupt(&g_adcpriv3);
+      adc_interrupt(&g_adcdev3);
       regval &= ~pending;
       putreg32(regval, STM32_ADC3_SR);
     }
@@ -868,15 +898,17 @@ static int adc123_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-struct adc_dev_s *stm32_adcinitialize(int intf, uint8_t *chanlist, int nchannels)
+struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist, int nchannels)
 {
   FAR struct adc_dev_s   *dev;
   FAR struct stm32_dev_s *priv;
   
+  avdbg("intf: %d nchannels: %d\n", intf, nchannels);
+
 #ifdef CONFIG_STM32_ADC1
   if (intf == 1)
     {
-      adbg("ADC1 Selected \n");
+      adbg("ADC1 Selected\n");
       dev = &g_adcdev1;
     }
   else
@@ -884,7 +916,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, uint8_t *chanlist, int nchannels
 #ifdef CONFIG_STM32_ADC2
   if (intf == 2)
     {
-      adbg("ADC2 Selected \n");
+      adbg("ADC2 Selected\n");
       dev = &g_adcdev2;
     }
   else
@@ -892,7 +924,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, uint8_t *chanlist, int nchannels
 #ifdef CONFIG_STM32_ADC3
   if (intf == 3)
     {
-      adbg("ADC3 Selected \n");
+      adbg("ADC3 Selected\n");
       dev = &g_adcdev3;
     }
   else
