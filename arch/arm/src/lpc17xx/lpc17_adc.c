@@ -83,11 +83,11 @@
 
 struct up_dev_s
 {
-    uint8_t mask;
-    uint32_t sps;
-    int irq;
-    int32_t buf[8];
-    uint8_t count[8];
+  uint8_t mask;
+  uint32_t sps;
+  int irq;
+  int32_t buf[8];
+  uint8_t count[8];
 };
 
 /****************************************************************************
@@ -109,24 +109,24 @@ static int  adc_interrupt(int irq, void *context);
 
 static const struct adc_ops_s g_adcops =
 {
-    .ao_reset =adc_reset,
-    .ao_setup = adc_setup,
-    .ao_shutdown = adc_shutdown,
-    .ao_rxint = adc_rxint,
-    .ao_ioctl = adc_ioctl,
+  .ao_reset =adc_reset,
+  .ao_setup = adc_setup,
+  .ao_shutdown = adc_shutdown,
+  .ao_rxint = adc_rxint,
+  .ao_ioctl = adc_ioctl,
 };
 
 static struct up_dev_s g_adcpriv =
 {
-    .sps  = CONFIG_ADC0_SPS,
-    .mask = CONFIG_ADC0_MASK,
-    .irq  = LPC17_IRQ_ADC,
+  .sps  = CONFIG_ADC0_SPS,
+  .mask = CONFIG_ADC0_MASK,
+  .irq  = LPC17_IRQ_ADC,
 };
 
 static struct adc_dev_s g_adcdev =
 {
-    .ad_ops = &g_adcops,
-    .ad_priv= &g_adcpriv,
+  .ad_ops = &g_adcops,
+  .ad_priv= &g_adcpriv,
 };
 
 /****************************************************************************
@@ -139,46 +139,46 @@ static struct adc_dev_s g_adcdev =
 
 static void adc_reset(FAR struct adc_dev_s *dev)
 {
-    irqstate_t flags;
-    uint32_t regval;
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  irqstate_t flags;
+  uint32_t regval;
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
 
-    flags = irqsave();
+  flags = irqsave();
 
-    regval  = getreg32(LPC17_SYSCON_PCONP);
-    regval |= SYSCON_PCONP_PCADC;
-    putreg32(regval, LPC17_SYSCON_PCONP);
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval |= SYSCON_PCONP_PCADC;
+  putreg32(regval, LPC17_SYSCON_PCONP);
 
-    putreg32(ADC_CR_PDN,LPC17_ADC_CR);
+  putreg32(ADC_CR_PDN,LPC17_ADC_CR);
 
-    regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
-    regval &= ~SYSCON_PCLKSEL0_ADC_MASK;
-    regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_ADC_SHIFT);
-    putreg32(regval, LPC17_SYSCON_PCLKSEL0);
+  regval  = getreg32(LPC17_SYSCON_PCLKSEL0);
+  regval &= ~SYSCON_PCLKSEL0_ADC_MASK;
+  regval |= (SYSCON_PCLKSEL_CCLK8 << SYSCON_PCLKSEL0_ADC_SHIFT);
+  putreg32(regval, LPC17_SYSCON_PCLKSEL0);
 
-    uint32_t clkdiv=LPC17_CCLK/8/65/priv->sps;
-    clkdiv<<=8;
-    clkdiv&=0xff00;
-    putreg32(ADC_CR_PDN|ADC_CR_BURST|clkdiv|priv->mask,LPC17_ADC_CR);
+  uint32_t clkdiv=LPC17_CCLK/8/65/priv->sps;
+  clkdiv<<=8;
+  clkdiv&=0xff00;
+  putreg32(ADC_CR_PDN|ADC_CR_BURST|clkdiv|priv->mask,LPC17_ADC_CR);
 
-    if(priv->mask&0x01)
-        lpc17_configgpio(GPIO_AD0p0);
-    else if(priv->mask&0x02)
-        lpc17_configgpio(GPIO_AD0p1);
-    else if(priv->mask&0x04)
-        lpc17_configgpio(GPIO_AD0p2);
-    else if(priv->mask&0x08)
-        lpc17_configgpio(GPIO_AD0p3);
-    else if(priv->mask&0x10)
-        lpc17_configgpio(GPIO_AD0p4);
-    else if(priv->mask&0x20)
-        lpc17_configgpio(GPIO_AD0p5);
-    else if(priv->mask&0x40)
-        lpc17_configgpio(GPIO_AD0p6);
-    else if(priv->mask&0x80)
-        lpc17_configgpio(GPIO_AD0p7);
+  if(priv->mask&0x01)
+    lpc17_configgpio(GPIO_AD0p0);
+  else if(priv->mask&0x02)
+    lpc17_configgpio(GPIO_AD0p1);
+  else if(priv->mask&0x04)
+    lpc17_configgpio(GPIO_AD0p2);
+  else if(priv->mask&0x08)
+    lpc17_configgpio(GPIO_AD0p3);
+  else if(priv->mask&0x10)
+    lpc17_configgpio(GPIO_AD0p4);
+  else if(priv->mask&0x20)
+    lpc17_configgpio(GPIO_AD0p5);
+  else if(priv->mask&0x40)
+    lpc17_configgpio(GPIO_AD0p6);
+  else if(priv->mask&0x80)
+    lpc17_configgpio(GPIO_AD0p7);
     
-    irqrestore(flags);
+  irqrestore(flags);
 }
 
 /* Configure the ADC. This method is called the first time that the ADC
@@ -189,19 +189,19 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
 static int  adc_setup(FAR struct adc_dev_s *dev)
 {
-    int i;
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-    int ret = irq_attach(priv->irq, adc_interrupt);
-    if (ret == OK)
+  int i;
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  int ret = irq_attach(priv->irq, adc_interrupt);
+  if (ret == OK)
     {
-        for(i=0;i<8;i++)
+      for (i = 0; i < 8; i++)
         {
-            priv->buf[i]=0;
-            priv->count[i]=0;
+          priv->buf[i]=0;
+          priv->count[i]=0;
         }
-        up_enable_irq(priv->irq);
+      up_enable_irq(priv->irq);
     }
-    return ret;
+  return ret;
 }
 
 /* Disable the ADC.  This method is called when the ADC device is closed.
@@ -210,50 +210,50 @@ static int  adc_setup(FAR struct adc_dev_s *dev)
 
 static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-    up_disable_irq(priv->irq);
-    irq_detach(priv->irq);
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  up_disable_irq(priv->irq);
+  irq_detach(priv->irq);
 }
 
 /* Call to enable or disable RX interrupts */
 
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 {
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-    if (enable)
-        putreg32(ADC_INTEN_GLOBAL,LPC17_ADC_INTEN);
-    else
-        putreg32(0x00,LPC17_ADC_INTEN);
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  if (enable)
+    putreg32(ADC_INTEN_GLOBAL, LPC17_ADC_INTEN);
+  else
+    putreg32(0x00, LPC17_ADC_INTEN);
 }
 
 /* All ioctl calls will be routed through this method */
 
 static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
-    dbg("Fix me:Not Implemented\n");
-    return 0;
+  dbg("Fix me:Not Implemented\n");
+  return 0;
 }
 
 static int adc_interrupt(int irq, void *context)
 {
-    uint32_t regval;
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
-    unsigned char ch;
-    int32_t value;
+  uint32_t regval;
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
+  unsigned char ch;
+  int32_t value;
     
-    regval=getreg32(LPC17_ADC_GDR);
-    ch=(regval>>24)&0x07;
-    priv->buf[ch]+=regval&0xfff0;
-    priv->count[ch]++;
-    if(priv->count[ch]>=CONFIG_ADC0_AVERAGE)
+  regval = getreg32(LPC17_ADC_GDR);
+  ch = (regval >> 24) & 0x07;
+  priv->buf[ch] += regval & 0xfff0;
+  priv->count[ch]++;
+  if (priv->count[ch] >= CONFIG_ADC0_AVERAGE)
     {
-        value=priv->buf[ch]/priv->count[ch];
-        value<<=15;
-        adc_receive(&g_adcdev,ch,value);
-        priv->buf[ch]=0;
-        priv->count[ch]=0;
+      value = priv->buf[ch] / priv->count[ch];
+      value <<= 15;
+      adc_receive(&g_adcdev,ch,value);
+      priv->buf[ch] = 0;
+      priv->count[ch] = 0;
     }
-    return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -261,7 +261,7 @@ static int adc_interrupt(int irq, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_adcinitialize
+ * Name: stm32_adcinitialize
  *
  * Description:
  *   Initialize the adc
@@ -271,9 +271,9 @@ static int adc_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *up_adcinitialize( )
+FAR struct adc_dev_s *stm32_adcinitialize(void)
 {
-    return &g_adcdev;
+  return &g_adcdev;
 }
 #endif
 
