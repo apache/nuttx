@@ -179,14 +179,14 @@ static inline void ads7843e_select(FAR struct spi_dev_s *spi)
 #else
 static void ads7843e_select(FAR struct spi_dev_s *spi)
 {
-  /* Select P14201 chip (locking the SPI bus in case there are multiple
+  /* Select ADS7843 chip (locking the SPI bus in case there are multiple
    * devices competing for the SPI bus
    */
 
   SPI_LOCK(spi, true);
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
 
-  /* Now make sure that the SPI bus is configured for the P14201 (it
+  /* Now make sure that the SPI bus is configured for the ADS7843 (it
    * might have gotten configured for a different device while unlocked)
    */
 
@@ -201,7 +201,7 @@ static void ads7843e_select(FAR struct spi_dev_s *spi)
  *
  * Description:
  *   De-select the SPI, unlocking as necessary.  This function must be
- *   after completing asequence of SPI operations. If we are sharing the SPI
+ *   after completing a sequence of SPI operations. If we are sharing the SPI
  *   bus with other devices (CONFIG_SPI_OWNBUS undefined) then we need to
  *   un-lock the SPI bus for each transfer, possibly losing the current
  *   configuration.
@@ -226,7 +226,7 @@ static inline void ads7843e_deselect(FAR struct spi_dev_s *spi)
 #else
 static void ads7843e_deselect(FAR struct spi_dev_s *spi)
 {
-  /* De-select P14201 chip and relinquish the SPI bus. */
+  /* De-select ADS7843 chip and relinquish the SPI bus. */
 
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
   SPI_LOCK(spi, false);
@@ -237,7 +237,7 @@ static void ads7843e_deselect(FAR struct spi_dev_s *spi)
  * Function: ads7843e_configspi
  *
  * Description:
- *   Configure the SPI for use with the ADS7843E.  This funcution should be
+ *   Configure the SPI for use with the ADS7843E.  This function should be
  *   called once during touchscreen initialization to configure the SPI
  *   bus.  Note that if CONFIG_SPI_OWNBUS is not defined, then this function
  *   does nothing.
@@ -257,7 +257,7 @@ static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
   idbg("Mode: %d Bits: 8 Frequency: %d\n",
        CONFIG_ADS7843E_SPIMODE, CONFIG_ADS7843E_FREQUENCY);
 
-  /* Configure SPI for the P14201.  But only if we own the SPI bus.  Otherwise, don't
+  /* Configure SPI for the ADS7843.  But only if we own the SPI bus.  Otherwise, don't
    * bother because it might change.
    */
 
@@ -265,7 +265,7 @@ static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
   SPI_SETMODE(spi, CONFIG_ADS7843E_SPIMODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY)
+  SPI_SETFREQUENCY(spi, CONFIG_ADS7843E_FREQUENCY);
   SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
 #endif
 }
@@ -326,13 +326,13 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
   if (priv->nwaiters > 0)
     {
       /* After posting this semaphore, we need to exit because the ADS7843E
-       * is no longer avaialable.
+       * is no longer available.
        */
 
       sem_post(&priv->waitsem); 
     }
 
-  /* If there are threads waiting on poll() for ADS7843E data to become availabe,
+  /* If there are threads waiting on poll() for ADS7843E data to become available,
    * then wake them up now.  NOTE: we wake up all waiting threads because we
    * do not know that they are going to do.  If they all try to read the data,
    * then some make end up blocking after all.
@@ -363,7 +363,7 @@ static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
   int ret = -EAGAIN;
 
   /* Interrupts me be disabled when this is called to (1) prevent posting
-   * of semphores from interrupt handlers, and (2) to prevent sampled data
+   * of semaphores from interrupt handlers, and (2) to prevent sampled data
    * from changing until it has been reported.
    */
 
@@ -383,7 +383,7 @@ static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
 
       if (sample->contact == CONTACT_UP)
         {
-          /* Next.. no contract.  Increment the ID so that next contact ID will be unique */
+          /* Next.. no contact.  Increment the ID so that next contact ID will be unique */
 
           priv->sample.contact = CONTACT_NONE;
           priv->id++;
@@ -414,7 +414,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
   int ret;
 
   /* Interrupts me be disabled when this is called to (1) prevent posting
-   * of semphores from interrupt handlers, and (2) to prevent sampled data
+   * of semaphores from interrupt handlers, and (2) to prevent sampled data
    * from changing until it has been reported.
    *
    * In addition, we will also disable pre-emption to prevent other threads
@@ -432,7 +432,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
   sem_post(&priv->devsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
-   * that is posted when new sample data is availble.
+   * that is posted when new sample data is available.
    */
 
   while (ads7843e_sample(priv, sample) < 0)
@@ -501,7 +501,7 @@ static int ads7843e_schedule(FAR struct ads7843e_dev_s *priv)
   DEBUGASSERT(config != NULL);
 
   /* Disable further interrupts.  ADS7843E interrupts will be re-enabled
-   * after the worker thread exectues.
+   * after the worker thread executes.
    */
 
   config->enable(config, false);
@@ -568,7 +568,7 @@ static void ads7843e_worker(FAR void *arg)
 
   if (!pendown)
     {
-      /* Ignore the interrupt if the pen was already down (CONTACT_NONE == pen up and
+      /* Ignore the interrupt if the pen was already up (CONTACT_NONE == pen up and
        * already reported.  CONTACT_UP == pen up, but not reported)
        */
 
@@ -614,7 +614,7 @@ static void ads7843e_worker(FAR void *arg)
   priv->sample.id = priv->id;
   priv->penchange = true;
 
-  /* Notify any waiters that nes ADS7843E data is available */
+  /* Notify any waiters that new ADS7843E data is available */
 
   ads7843e_notify(priv);
 
@@ -1055,7 +1055,7 @@ errout:
  *
  * Input Parameters:
  *   dev     - An SPI driver instance
- *   config  - Persistant board configuration data
+ *   config  - Persistent board configuration data
  *   minor   - The input device minor number
  *
  * Returned Value:

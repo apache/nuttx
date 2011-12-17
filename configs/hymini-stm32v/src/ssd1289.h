@@ -1,8 +1,10 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip.h
+ * configs/hymini-stm32v/src/ssd1289.h
+ * arch/arm/src/board/ssd1289.h
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Laurent Latil <laurent@latil.nom.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,46 +35,21 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_H
-#define __ARCH_ARM_SRC_STM32_CHIP_H
+#ifndef SSD1289_H_
+#define SSD1289_H_
 
-/************************************************************************************
- * Included Files
- ************************************************************************************/
+#include <nuttx/lcd/lcd.h>
 
-#include <nuttx/config.h>
+/* LCD IDs */
+#define SSD1289_ID          0x8989
 
-/* Include the chip capabilities file */
+struct ssd1289_dev_s
+{
+  /* Publicly visible device structure */
+  struct lcd_dev_s dev;
 
-#include <arch/stm32/chip.h>
+  /* Private LCD-specific information follows */
+  uint8_t power; /* Current power setting */
+};
 
-/* Include the chip pin configuration file */
-
-#if defined(CONFIG_STM32_STM32F10XX)
-#  if defined(CONFIG_ARCH_CHIP_STM32F103ZET6) 
-#    include "chip/stm32f103ze_pinmap.h"
-#  elif defined(CONFIG_ARCH_CHIP_STM32F103RET6)
-#    include "chip/stm32f103re_pinmap.h"
-#  elif defined(CONFIG_ARCH_CHIP_STM32F103VCT6)
-#    include "chip/stm32f103vc_pinmap.h"
-#  elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
-#    include "chip/stm32f107vc_pinmap.h"
-#  else
-#    error "Unsupported STM32F10XXX chip"
-#  endif
-#elif defined(CONFIG_STM32_STM32F40XX)
-#  include "chip/stm32f40xxx_pinmap.h"
-#else
-#  error "Unsupported STM32 chip"
-#endif
-
-/* Include only the mchip emory map. */
-
-#include "chip/stm32_memorymap.h"
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_H */
-
+#endif /* SSD1289_H_ */

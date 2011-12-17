@@ -905,7 +905,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
         spi_modifycr1(priv, setbits, clrbits);
 
-        /* Save the mode so that subsequent re-configuratins will be faster */
+        /* Save the mode so that subsequent re-configurations will be faster */
 
 #ifndef CONFIG_SPI_OWNBUS
         priv->mode = mode;
@@ -1102,7 +1102,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
  *   rxbuffer - A pointer to a buffer in which to receive data
- *   nwords   - the length of data to be exchaned in units of words.
+ *   nwords   - the length of data to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
  *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
@@ -1169,7 +1169,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, si
  * Name: spi_recvblock
  *
  * Description:
- *   Revice a block of data from SPI
+ *   Receive a block of data from SPI
  *
  * Input Parameters:
  *   dev      - Device-specific state data
@@ -1295,8 +1295,6 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 #ifdef CONFIG_STM32_SPI1
   if (port == 1)
     {
-      uint32_t mapr;
-
       /* Select SPI1 */
 
       priv = &g_spi1dev;

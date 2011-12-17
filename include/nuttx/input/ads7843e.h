@@ -67,7 +67,7 @@
 #endif
 
 #ifndef CONFIG_ADS7843E_SPIMODE
-#  define CONFIG_ADS7843E_SPIMODE SPIDEV_MODE1
+#  define CONFIG_ADS7843E_SPIMODE SPIDEV_MODE0
 #endif
 
 /* Check for some required settings.  This can save the user a lot of time
@@ -150,7 +150,7 @@ extern "C" {
  *
  * Input Parameters:
  *   dev     - An SPI driver instance
- *   config  - Persistant board configuration data
+ *   config  - Persistent board configuration data
  *   minor   - The input device minor number
  *
  * Returned Value:

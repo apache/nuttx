@@ -1236,6 +1236,9 @@ configs/ez80f0910200zco
 	development kit, eZ80F091 part, and the Zilog ZDS-II Windows command line
 	tools.  The development environment is Cygwin under WinXP.
 
+configs/hymini-stm32v
+	A configuration for the HY-Mini STM32v board.
+
 configs/kwikstik-k40.
     Kinetis K40 Cortex-M4 MCU.  This port uses the FreeScale KwikStik-K40
     development board.

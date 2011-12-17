@@ -6,7 +6,6 @@
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *           Gregory Nutt <spudmonkey@racsa.co.cr>
- *           
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -276,7 +275,7 @@ static void ramtron_lock(FAR struct spi_dev_s *dev)
    * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
    */
 
-  (void)SPI_LOCK(dev, true);
+  SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
@@ -296,7 +295,7 @@ static void ramtron_lock(FAR struct spi_dev_s *dev)
 
 static inline void ramtron_unlock(FAR struct spi_dev_s *dev)
 {
-  (void)SPI_LOCK(dev, false);
+  SPI_LOCK(dev, false);
 }
 
 /************************************************************************************

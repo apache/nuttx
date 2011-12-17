@@ -110,6 +110,33 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
+#elif defined(CONFIG_ARCH_CHIP_STM32F103VCT6)
+#  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
+#  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  define CONFIG_STM32_HIGHDENSITY       1   /* STM32F101x  and STM32F103x w/ 256/512 Kbytes */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  define STM32_NFSMC                    1   /* FSMC */
+#  define STM32_NATIM                    2   /* Two advanced timers TIM1 and TIM8 */
+#  define STM32_NGTIM                    4   /* General timers TIM2,3,4,5 */
+#  define STM32_NBTIM                    2   /* Two basic timers TIM6 and TIM7 */
+#  define STM32_NDMA                     2   /* DMA1-2 */
+#  define STM32_NSPI                     3   /* SPI1-3 */
+#  define STM32_NI2S                     0   /* No I2S (?) */
+#  define STM32_NUSART                   5   /* USART1-5 */
+#  define STM32_NI2C                     2   /* I2C1-2 */
+#  define STM32_NCAN                     1   /* bxCAN1 */
+#  define STM32_NSDIO                    1   /* SDIO */
+#  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS */
+#  define STM32_NGPIO                    80  /* GPIOA-E */
+#  define STM32_NADC                     3   /* ADC1-3 */
+#  define STM32_NDAC                     2   /* DAC1-2 */
+#  define STM32_NCRC                     1   /* CRC */
+#  define STM32_NTHERNET                 0   /* No ethernet */
+#  define STM32_NRNG                     0   /* No random number generator (RNG) */
+#  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
+
 #elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
