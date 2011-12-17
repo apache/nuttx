@@ -938,22 +938,19 @@ static void stm32_seteptxstatus(uint8_t epno, uint16_t state)
   uint32_t epaddr = STM32_USB_EPR(epno);
   uint16_t regval;
 
-  regval = stm32_getreg(epaddr) & EPR_TXDTOG_MASK;
+  /* The bits in the STAT_TX field can be toggled by software to set their
+   * value. When set to 0, the value remains unchanged; when set to one,
+   * value toggles.
+   */
 
-  /* Toggle first bit */
+  regval = stm32_getreg(epaddr);
 
-  if ((USB_EPR_STATTX_DTOG1 & state) != 0)
-    {
-      regval ^= USB_EPR_STATTX_DTOG1;
-    }
+  /* The exclusive OR will set STAT_TX bits to 1 if there value is different
+   * from the bits requested in 'state'
+   */
 
-  /* Toggle second bit */
-
-  if ((USB_EPR_STATTX_DTOG2 & state) != 0)
-    {
-      regval ^= USB_EPR_STATTX_DTOG2;
-    }
-
+  regval ^= state;
+  regval &= EPR_TXDTOG_MASK;
   stm32_putreg(regval, epaddr);
 } 
 
@@ -966,22 +963,19 @@ static void stm32_seteprxstatus(uint8_t epno, uint16_t state)
   uint32_t epaddr = STM32_USB_EPR(epno);
   uint16_t regval;
 
-  regval = stm32_getreg(epaddr) & EPR_RXDTOG_MASK;
+  /* The bits in the STAT_RX field can be toggled by software to set their
+   * value. When set to 0, the value remains unchanged; when set to one,
+   * value toggles.
+   */
 
-  /* Toggle first bit */
+  regval = stm32_getreg(epaddr);
 
-  if ((USB_EPR_STATRX_DTOG1 & state) != 0)
-    {
-      regval ^= USB_EPR_STATRX_DTOG1;
-    }
+  /* The exclusive OR will set STAT_RX bits to 1 if there value is different
+   * from the bits requested in 'state'
+   */
 
-  /* Toggle second bit */
-
-  if ((USB_EPR_STATRX_DTOG2 & state) != 0)
-    {
-      regval ^= USB_EPR_STATRX_DTOG2;
-    }
-
+  regval ^= state;
+  regval &= EPR_RXDTOG_MASK;
   stm32_putreg(regval, epaddr);
 } 
 
@@ -1435,23 +1429,32 @@ static void stm32_epdone(struct stm32_usbdev_s *priv, uint8_t epno)
     {
       usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPOUTDONE), epr);
 
-      /* Handle read requests: Read host data into the current read request */
+      /* Handle read requests.  First check if a read request is available to
+       * accept the host data.
+       */
 
-      priv->rxstatus  = USB_EPR_STATRX_VALID;
       if (!stm32_rqempty(privep))
         {
+          /* Read host data into the current read request */
+
           stm32_rdrequest(priv, privep);
 
-          /* Clear the interrupt status */
+          /* "After the received data is processed, the application software
+           *  should set the STAT_RX bits to '11' (Valid) in the USB_EPnR,
+           *  enabling further transactions. "
+           */
 
-          stm32_clrepctrrx(epno);
+          priv->rxstatus  = USB_EPR_STATRX_VALID;
         }
       else
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPOUTPENDING), (uint16_t)epno);
 
           /* Mark the RX processing as pending and NAK any OUT actions
-           * on this endpoint
+           * on this endpoint.  "While the STAT_RX bits are equal to '10'
+           * (NAK), any OUT request addressed to that endpoint is NAKed,
+           * indicating a flow control condition: the USB host will retry
+           * the transaction until it succeeds."
            */
 
           priv->rxstatus  = USB_EPR_STATRX_NAK;
@@ -1460,6 +1463,7 @@ static void stm32_epdone(struct stm32_usbdev_s *priv, uint8_t epno)
 
       /* Clear the interrupt status and set the new RX status */
 
+      stm32_clrepctrrx(epno);
       stm32_seteprxstatus(epno, priv->rxstatus);
     }
 
@@ -2116,7 +2120,7 @@ static inline void stm32_ep0done(struct stm32_usbdev_s *priv, uint16_t istr)
 
   /* Was a transmission started?  If so, txstatus will be VALID.  The
    * only special case to handle is when both are set to NAK.  In that
-   * case, we need to for RX status to VALID in order to accept the next
+   * case, we need to set RX status to VALID in order to accept the next
    * SETUP request.
    */
 
@@ -2845,17 +2849,19 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
       if (priv->rxpending)
         {
+          /* Set STAT_RX bits to '11' in the USB_EPnR, enabling further
+           * transactions. "While the STAT_RX bits are equal to '10'
+           * (NAK), any OUT request addressed to that endpoint is NAKed,
+           * indicating a flow control condition: the USB host will retry
+           * the transaction until it succeeds."
+           */
+
           priv->rxstatus  = USB_EPR_STATRX_VALID;
-          ret             = stm32_rdrequest(priv, privep);
-
-          /* Clear the pending interrupt status */
-
-          stm32_clrepctrrx(epno);
-          priv->rxpending = false;
-
-          /* Set the new RX status */
-
           stm32_seteprxstatus(epno, priv->rxstatus);
+
+          /* Data is no longer pending */
+
+          priv->rxpending = false;
         }
     }
 

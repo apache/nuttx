@@ -2272,3 +2272,11 @@
 	  "upper half" driver for PWM output.
 	* arch/arm/src/stm32/stm32_pwm.c:  Added a PWM "lower half" driver for the
 	  STM32.  The initial check-in is little more than a framework for the driver.
+	* arch/arm/src/stm32/stm32_usbdev.c:  Corrected two CRITICAL errors in the USB
+	  device-side driver:  (1) Handling of data overrun condition was wrong.  When
+	  there was no further memory to accept further OUT endpoint data, the driver
+	  would hang with infinite interrupts; (2) the logic in setting toggle bits
+	  was not correct.  However, this driver has functioned for a long time until
+	  the particular condition that revealed the bug occurred.  My impression is
+	  that this latter bugfix also fixes some STM32 USB performance problems.
+
