@@ -74,19 +74,19 @@
 
 /* The number of ADC channels in the conversion list */
 
-#define ADC_NCHANNELS 2
+#define ADC_NCHANNELS 3
 
 /************************************************************************************
  * Private Data
  ************************************************************************************/
 
-/* Identifying number of each ADC channel */
+/* Identifying number of each ADC channel: Variable Resistor , BNC_CN5 and BNC_CN3 */
 
-static const uint8_t  g_chanlist[ADC_NCHANNELS] = {14, 10};
+static const uint8_t  g_chanlist[ADC_NCHANNELS] = {14, 10, 12};
 
 /* Configurations of pins used byte each ADC channels */
 
-static const uint32_t g_pinlist[ADC_NCHANNELS]  = {GPIO_ADC1_IN14 , GPIO_ADC1_IN10};
+static const uint32_t g_pinlist[ADC_NCHANNELS]  = {GPIO_ADC1_IN14 , GPIO_ADC1_IN10, GPIO_ADC1_IN13};
 
 /************************************************************************************
  * Private Functions
@@ -114,14 +114,14 @@ int adc_devinit(void)
 
   avdbg("Entry\n");
 
-  /* Configure the pins as analog inputs for the selected channels */^M
+  /* Configure the pins as analog inputs for the selected channels */
 
   for(i = 0; i < ADC_NCHANNELS; i++)
     {
       stm32_configgpio(chanlist[i]);
     }
 
-  /* Call stm32_adcinitialize() to get an instance of the ADC interface */^M
+  /* Call stm32_adcinitialize() to get an instance of the ADC interface */
 
   adc = stm32_adcinitialize(1, g_chanlist, ADC_NCHANNELS);
 

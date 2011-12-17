@@ -87,43 +87,43 @@
 #if defined(CONFIG_STM32_TIM1_PWM) || defined (CONFIG_STM32_TIM1_ADC) || defined(CONFIG_STM32_TIM1_DAC)
 #  undef CONFIG_STM32_TIM1
 #endif
-#if defined(CONFIG_STM32_TIM2_PWM || defined (CONFIG_STM32_TIM2_ADC) || defined(CONFIG_STM32_TIM2_DAC)
+#if defined(CONFIG_STM32_TIM2_PWM) || defined (CONFIG_STM32_TIM2_ADC) || defined(CONFIG_STM32_TIM2_DAC)
 #  undef CONFIG_STM32_TIM2
 #endif
-#if defined(CONFIG_STM32_TIM3_PWM || defined (CONFIG_STM32_TIM3_ADC) || defined(CONFIG_STM32_TIM3_DAC)
+#if defined(CONFIG_STM32_TIM3_PWM) || defined (CONFIG_STM32_TIM3_ADC) || defined(CONFIG_STM32_TIM3_DAC)
 #  undef CONFIG_STM32_TIM3
 #endif
-#if defined(CONFIG_STM32_TIM4_PWM || defined (CONFIG_STM32_TIM4_ADC) || defined(CONFIG_STM32_TIM4_DAC)
+#if defined(CONFIG_STM32_TIM4_PWM) || defined (CONFIG_STM32_TIM4_ADC) || defined(CONFIG_STM32_TIM4_DAC)
 #  undef CONFIG_STM32_TIM4
 #endif
-#if defined(CONFIG_STM32_TIM5_PWM || defined (CONFIG_STM32_TIM5_ADC) || defined(CONFIG_STM32_TIM5_DAC)
+#if defined(CONFIG_STM32_TIM5_PWM) || defined (CONFIG_STM32_TIM5_ADC) || defined(CONFIG_STM32_TIM5_DAC)
 #  undef CONFIG_STM32_TIM5
 #endif
-#if defined(CONFIG_STM32_TIM6_PWM || defined (CONFIG_STM32_TIM6_ADC) || defined(CONFIG_STM32_TIM6_DAC)
+#if defined(CONFIG_STM32_TIM6_PWM) || defined (CONFIG_STM32_TIM6_ADC) || defined(CONFIG_STM32_TIM6_DAC)
 #  undef CONFIG_STM32_TIM6
 #endif
-#if defined(CONFIG_STM32_TIM7_PWM || defined (CONFIG_STM32_TIM7_ADC) || defined(CONFIG_STM32_TIM7_DAC)
+#if defined(CONFIG_STM32_TIM7_PWM) || defined (CONFIG_STM32_TIM7_ADC) || defined(CONFIG_STM32_TIM7_DAC)
 #  undef CONFIG_STM32_TIM7
 #endif
-#if defined(CONFIG_STM32_TIM8_PWM || defined (CONFIG_STM32_TIM8_ADC) || defined(CONFIG_STM32_TIM8_DAC)
+#if defined(CONFIG_STM32_TIM8_PWM) || defined (CONFIG_STM32_TIM8_ADC) || defined(CONFIG_STM32_TIM8_DAC)
 #  undef CONFIG_STM32_TIM8
 #endif
-#if defined(CONFIG_STM32_TIM9_PWM || defined (CONFIG_STM32_TIM9_ADC) || defined(CONFIG_STM32_TIM9_DAC)
+#if defined(CONFIG_STM32_TIM9_PWM) || defined (CONFIG_STM32_TIM9_ADC) || defined(CONFIG_STM32_TIM9_DAC)
 #  undef CONFIG_STM32_TIM9
 #endif
-#if defined(CONFIG_STM32_TIM10_PWM || defined (CONFIG_STM32_TIM10_ADC) || defined(CONFIG_STM32_TIM10_DAC)
+#if defined(CONFIG_STM32_TIM10_PWM) || defined (CONFIG_STM32_TIM10_ADC) || defined(CONFIG_STM32_TIM10_DAC)
 #  undef CONFIG_STM32_TIM10
 #endif
-#if defined(CONFIG_STM32_TIM11_PWM || defined (CONFIG_STM32_TIM11_ADC) || defined(CONFIG_STM32_TIM11_DAC)
+#if defined(CONFIG_STM32_TIM11_PWM) || defined (CONFIG_STM32_TIM11_ADC) || defined(CONFIG_STM32_TIM11_DAC)
 #  undef CONFIG_STM32_TIM11
 #endif
-#if defined(CONFIG_STM32_TIM12_PWM || defined (CONFIG_STM32_TIM12_ADC) || defined(CONFIG_STM32_TIM12_DAC)
+#if defined(CONFIG_STM32_TIM12_PWM) || defined (CONFIG_STM32_TIM12_ADC) || defined(CONFIG_STM32_TIM12_DAC)
 #  undef CONFIG_STM32_TIM12
 #endif
-#if defined(CONFIG_STM32_TIM13_PWM || defined (CONFIG_STM32_TIM13_ADC) || defined(CONFIG_STM32_TIM13_DAC)
+#if defined(CONFIG_STM32_TIM13_PWM) || defined (CONFIG_STM32_TIM13_ADC) || defined(CONFIG_STM32_TIM13_DAC)
 #  undef CONFIG_STM32_TIM13
 #endif
-#if defined(CONFIG_STM32_TIM14_PWM || defined (CONFIG_STM32_TIM14_ADC) || defined(CONFIG_STM32_TIM14_DAC)
+#if defined(CONFIG_STM32_TIM14_PWM) || defined (CONFIG_STM32_TIM14_ADC) || defined(CONFIG_STM32_TIM14_DAC)
 #  undef CONFIG_STM32_TIM14
 #endif
 
@@ -147,18 +147,15 @@ struct stm32_tim_priv_s {
     uint32_t                base;   /** TIMn base address */
 };
 
-
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
-
 
 /** Get register value by offset */
 static inline uint16_t stm32_tim_getreg(FAR struct stm32_tim_dev_s *dev, uint8_t offset)
 {
     return getreg16( ((struct stm32_tim_priv_s *)dev)->base + offset);
 }
-
 
 /** Put register value by offset */
 static inline void stm32_tim_putreg(FAR struct stm32_tim_dev_s *dev, uint8_t offset, uint16_t value)
@@ -167,13 +164,11 @@ static inline void stm32_tim_putreg(FAR struct stm32_tim_dev_s *dev, uint8_t off
     putreg16(value, ((struct stm32_tim_priv_s *)dev)->base + offset);
 }
 
-
 /** Modify register value by offset */
 static inline void stm32_tim_modifyreg(FAR struct stm32_tim_dev_s *dev, uint8_t offset, uint16_t clearbits, uint16_t setbits)
 {
     modifyreg16( ((struct stm32_tim_priv_s *)dev)->base + offset, clearbits, setbits);
 }
-
 
 static void stm32_tim_reload_counter(FAR struct stm32_tim_dev_s *dev)
 {
@@ -181,7 +176,6 @@ static void stm32_tim_reload_counter(FAR struct stm32_tim_dev_s *dev)
     val |= ATIM_EGR_UG;
     stm32_tim_putreg(dev, STM32_BTIM_EGR_OFFSET, val);    
 }
-
 
 static void stm32_tim_enable(FAR struct stm32_tim_dev_s *dev)
 {
@@ -191,7 +185,6 @@ static void stm32_tim_enable(FAR struct stm32_tim_dev_s *dev)
     stm32_tim_putreg(dev, STM32_BTIM_CR1_OFFSET, val);
 }
 
-
 static void stm32_tim_disable(FAR struct stm32_tim_dev_s *dev)
 {
     uint16_t val = stm32_tim_getreg(dev, STM32_BTIM_CR1_OFFSET);
@@ -199,14 +192,12 @@ static void stm32_tim_disable(FAR struct stm32_tim_dev_s *dev)
     stm32_tim_putreg(dev, STM32_BTIM_CR1_OFFSET, val);
 }
 
-
 /** Reset timer into system default state, but do not affect output/input pins */
 static void stm32_tim_reset(FAR struct stm32_tim_dev_s *dev)
 {
     ((struct stm32_tim_priv_s *)dev)->mode = STM32_TIM_MODE_DISABLED;
     stm32_tim_disable(dev);
 }
-
 
 static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode)
 {
@@ -219,7 +210,6 @@ static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode)
         stm32_unconfiggpio(cfg);
     }
 }
-
 
 /************************************************************************************
  * Basic Functions
@@ -257,13 +247,11 @@ static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
     return prescaler;
 }
 
-
 static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev, uint16_t period)
 {
     ASSERT(dev);
     stm32_tim_putreg(dev, STM32_BTIM_ARR_OFFSET, period);
 }
-
 
 static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, int (*handler)(int irq, void *context), int source)
 {
@@ -323,13 +311,11 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, int (*handler)(int 
     return OK;
 }
 
-
 static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
     ASSERT(dev);
     stm32_tim_modifyreg(dev, STM32_BTIM_DIER_OFFSET, 0, ATIM_DIER_UIE);
 }
-
 
 static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
@@ -337,13 +323,10 @@ static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
     stm32_tim_modifyreg(dev, STM32_BTIM_DIER_OFFSET, ATIM_DIER_UIE, 0);
 }
 
-
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source)
 {
     stm32_tim_putreg(dev, STM32_BTIM_SR_OFFSET, ~ATIM_SR_UIF);
 }
-
-
 
 /************************************************************************************
  * General Functions
@@ -409,7 +392,6 @@ static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t m
     
     return OK;
 }
-
 
 static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel, stm32_tim_channel_t mode)
 {
@@ -542,7 +524,6 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
     return OK;
 }
 
-
 static int stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev, uint8_t channel, uint16_t compare)
 {
     ASSERT(dev);
@@ -557,7 +538,6 @@ static int stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev, uint8_t channel
     return OK;
 }
 
-
 static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel)
 {
     ASSERT(dev);
@@ -570,7 +550,6 @@ static int stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel
     }
     return ERROR;
 }
-
 
 /************************************************************************************
  * Advanced Functions

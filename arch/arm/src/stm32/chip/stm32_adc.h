@@ -236,17 +236,17 @@
 #  define ADC_CR2_JEXTSEL_SHIFT     (16)      /* Bits 16-19: External event select for injected group */
 #  define ADC_CR2_JEXTSEL_MASK      (15 << ADC_CR2_JEXTSEL_SHIFT)
 #    define ADC_CR2_JEXTSEL_T1CC4   (0 << ADC_CR2_JEXTSEL_SHIFT)  /* 0000: Timer 1 CC4 event */
-#    define ADC_CR2_JEXTSEL_T1TRG0  (1 << ADC_CR2_JEXTSEL_SHIFT)  /* 0001: Timer 1 TRGO event */
+#    define ADC_CR2_JEXTSEL_T1TRGO  (1 << ADC_CR2_JEXTSEL_SHIFT)  /* 0001: Timer 1 TRGO event */
 #    define ADC_CR2_JEXTSEL_T2CC1   (2 << ADC_CR2_JEXTSEL_SHIFT)  /* 0010: Timer 2 CC1 event */
-#    define ADC_CR2_JEXTSEL_T2TRG0  (3 << ADC_CR2_JEXTSEL_SHIFT)  /* 0011: Timer 2 TRGO event */
+#    define ADC_CR2_JEXTSEL_T2TRGO  (3 << ADC_CR2_JEXTSEL_SHIFT)  /* 0011: Timer 2 TRGO event */
 #    define ADC_CR2_JEXTSEL_T3CC2   (4 << ADC_CR2_JEXTSEL_SHIFT)  /* 0100: Timer 3 CC2 event */
 #    define ADC_CR2_JEXTSEL_T3CC4   (5 << ADC_CR2_JEXTSEL_SHIFT)  /* 0101: Timer 3 CC4 event */
 #    define ADC_CR2_JEXTSEL_T4CC1   (6 << ADC_CR2_JEXTSEL_SHIFT)  /* 0110: Timer 4 CC1 event */
 #    define ADC_CR2_JEXTSEL_T4CC2   (7 << ADC_CR2_JEXTSEL_SHIFT)  /* 0111: Timer 4 CC2 event */
 #    define ADC_CR2_JEXTSEL_T4CC3   (8 << ADC_CR2_JEXTSEL_SHIFT)  /* 1000: Timer 4 CC3 event */
-#    define ADC_CR2_JEXTSEL_T4TRG0  (9 << ADC_CR2_JEXTSEL_SHIFT)  /* 1001: Timer 4 TRGO event */
+#    define ADC_CR2_JEXTSEL_T4TRGO  (9 << ADC_CR2_JEXTSEL_SHIFT)  /* 1001: Timer 4 TRGO event */
 #    define ADC_CR2_JEXTSEL_T5CC4   (10 << ADC_CR2_JEXTSEL_SHIFT) /* 1010: Timer 5 CC4 event */
-#    define ADC_CR2_JEXTSEL_T5TRG0  (11 << ADC_CR2_JEXTSEL_SHIFT) /* 1011: Timer 5 TRGO event */
+#    define ADC_CR2_JEXTSEL_T5TRGO  (11 << ADC_CR2_JEXTSEL_SHIFT) /* 1011: Timer 5 TRGO event */
 #    define ADC_CR2_JEXTSEL_T8CC2   (12 << ADC_CR2_JEXTSEL_SHIFT) /* 1100: Timer 8 CC2 event */
 #    define ADC_CR2_JEXTSEL_T8CC3   (13 << ADC_CR2_JEXTSEL_SHIFT) /* 1101: Timer 8 CC3 event */
 #    define ADC_CR2_JEXTSEL_T8CC4   (14 << ADC_CR2_JEXTSEL_SHIFT) /* 1110: Timer 8 CC4 event */
@@ -277,7 +277,7 @@
 #    define ADC_CR2_EXTSEL_T5CC2    (11 << ADC_CR2_EXTSEL_SHIFT) /* 1011: Timer 5 CC2 event */
 #    define ADC_CR2_EXTSEL_T5CC3    (12 << ADC_CR2_EXTSEL_SHIFT) /* 1100: Timer 5 CC3 event */
 #    define ADC_CR2_EXTSEL_T8CC1    (13 << ADC_CR2_EXTSEL_SHIFT) /* 1101: Timer 8 CC1 event */
-#    define ADC_CR2_EXTSEL_T8TRG0   (14 << ADC_CR2_EXTSEL_SHIFT) /* 1110: Timer 8 TRGO event */
+#    define ADC_CR2_EXTSEL_T8TRGO   (14 << ADC_CR2_EXTSEL_SHIFT) /* 1110: Timer 8 TRGO event */
 #    define ADC_CR2_EXTSEL_EXTI     (15 << ADC_CR2_EXTSEL_SHIFT) /* 1111: EXTI line11 */
 
 #  define ACD_CR2_EXTEN_SHIFT       (28)      /* Bits 28-29: External trigger enable for regular channels */
@@ -292,12 +292,12 @@
 #else
 #  define ADC_CR2_JEXTSEL_SHIFT     (12)      /* Bits 12-14: External event select for injected group */
 #  define ADC_CR2_JEXTSEL_MASK      (7 << ADC_CR2_JEXTSEL_SHIFT)
-#    define ADC_CR2_JEXTSEL_T1TRG0  (0 << ADC_CR2_JEXTSEL_SHIFT) /* 000: Timer 1 TRGO event */
+#    define ADC_CR2_JEXTSEL_T1TRGO  (0 << ADC_CR2_JEXTSEL_SHIFT) /* 000: Timer 1 TRGO event */
 #    define ADC_CR2_JEXTSEL_T1CC4   (1 << ADC_CR2_JEXTSEL_SHIFT) /* 001: Timer 1 CC4 event */
-#    define ADC_CR2_JEXTSEL_T2TRG0  (2 << ADC_CR2_JEXTSEL_SHIFT) /* 010: Timer 2 TRGO event */
+#    define ADC_CR2_JEXTSEL_T2TRGO  (2 << ADC_CR2_JEXTSEL_SHIFT) /* 010: Timer 2 TRGO event */
 #    define ADC_CR2_JEXTSEL_T2CC1   (3 << ADC_CR2_JEXTSEL_SHIFT) /* 011: Timer 2 CC1 event */
 #    define ADC_CR2_JEXTSEL_T3CC4   (4 << ADC_CR2_JEXTSEL_SHIFT) /* 100: Timer 3 CC4 event */
-#    define ADC_CR2_JEXTSEL_T4TRG0  (5 << ADC_CR2_JEXTSEL_SHIFT) /* 101: Timer 4 TRGO event */
+#    define ADC_CR2_JEXTSEL_T4TRGO  (5 << ADC_CR2_JEXTSEL_SHIFT) /* 101: Timer 4 TRGO event */
 #    define ADC_CR2_JEXTSEL_EXTI15  (6 << ADC_CR2_JEXTSEL_SHIFT) /* 110: EXTI line15 */
 #    define ADC_CR2_JEXTSEL_SWSTART (7 << ADC_CR2_JEXTSEL_SHIFT) /* 111: JSWSTART */
 
@@ -308,7 +308,7 @@
 #    define ADC_CR2_EXTSEL_T1CC2    (1 << ADC_CR2_EXTSEL_SHIFT) /* 001: Timer 1 CC2 event */
 #    define ADC_CR2_EXTSEL_T1CC3    (2 << ADC_CR2_EXTSEL_SHIFT) /* 010: Timer 1 CC3 event */
 #    define ADC_CR2_EXTSEL_T2CC2    (3 << ADC_CR2_EXTSEL_SHIFT) /* 011: Timer 2 CC2 event */
-#    define ADC_CR2_EXTSEL_T3TRG0   (4 << ADC_CR2_EXTSEL_SHIFT) /* 100: Timer 3 TRGO event */
+#    define ADC_CR2_EXTSEL_T3TRGO   (4 << ADC_CR2_EXTSEL_SHIFT) /* 100: Timer 3 TRGO event */
 #    define ADC_CR2_EXTSEL_T4CC4    (5 << ADC_CR2_EXTSEL_SHIFT) /* 101: Timer 4 CC4 event */
 #    define ADC_CR2_EXTSEL_EXTI11   (6 << ADC_CR2_EXTSEL_SHIFT) /* 110: EXTI line11 */
 #    define ADC_CR2_EXTSEL_SWSTART  (7 << ADC_CR2_EXTSEL_SHIFT) /* 111: SWSTART */

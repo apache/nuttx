@@ -2268,3 +2268,7 @@
 	  in the STM32 F1 and F4 family.
 	* arch/arm/srcm/stm32/stm32f10xxx_rtc.c:  STM32 F4 RTC is functional (12/14/2011)
 	* net/uip-arp.c: Fix compilation issue with CONFIG_NET_ARP_IPIN
+	* include/nuttx/pwm.h and drivers/pwm.c:  Add an interface definition and a
+	  "upper half" driver for PWM output.
+	* arch/arm/src/stm32/stm32_pwm.c:  Added a PWM "lower half" driver for the
+	  STM32.  The initial check-in is little more than a framework for the driver.
