@@ -1006,8 +1006,9 @@ static void stm32_eventtimeout(int argc, uint32_t arg)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
 
-  DEBUGASSERT(argc == 1 && priv != NULL);
-  DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0);
+  /* There is always race conditions with timer expirations. */
+
+  DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0 || priv->wkupevent != 0);
 
   /* Is a data transfer complete event expected? */
 
@@ -2162,6 +2163,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s*)dev;
   sdio_eventset_t wkupevent = 0;
+  irqstate_t flags;
   int ret;
 
   /* There is a race condition here... the event may have completed before
@@ -2169,8 +2171,8 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
    * be non-zero (and, hopefully, the semaphore count will also be non-zero.
    */
 
-  DEBUGASSERT((priv->waitevents != 0 && priv->wkupevent == 0) ||
-              (priv->waitevents == 0 && priv->wkupevent != 0));
+  flags = irqsave();
+  DEBUGASSERT(priv->waitevents != 0 || priv->wkupevent != 0);
 
   /* Check if the timeout event is specified in the event set */
 
@@ -2178,11 +2180,16 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
     {
       int delay;
 
-      /* Yes.. Handle a cornercase */
+      /* Yes.. Handle a cornercase: The user request a timeout event but
+       * with timeout == 0?
+       */
 
       if (!timeout)
         {
-           return SDIOWAIT_TIMEOUT;
+           /* Then just tell the caller that we already timed out */
+
+           wkupevent = SDIOWAIT_TIMEOUT;
+           goto errout;
         }
 
       /* Start the watchdog timer */
@@ -2231,6 +2238,8 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
   priv->xfrflags   = 0;
 #endif
 
+errout:
+  irqrestore(flags);
   return wkupevent;
 }
 

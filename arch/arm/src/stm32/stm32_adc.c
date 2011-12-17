@@ -350,14 +350,22 @@ static void tim_putreg(struct stm32_dev_s *priv, int offset, uint32_t value)
 static int adc_timinit(FAR struct stm32_dev_s *priv)
 {
   uint32_t regval;
-  
-  /* Configure the time base: Timer period, prescaler, clock division,
-   * counter mode (up).
-   *
-   * EXTTRIG: External Trigger Conversion mode for regular channels
+
+  /* If the timer base address is zero, then this ADC was not configured to
+   * use a timer.
    */
+
+  if (!priv->tbase)
+    {
+#warning "Does anything need to be configured if there is no timer for this ADC?"
+      return OK;
+    }
+
+  /* Configure the ADC to use the selected timer and timer channel as the trigger */
+
+  /* EXTTRIG: External Trigger Conversion mode for regular channels */
   
-  regval  = tim_getreg(priv, STM32_ADC_CR2_OFFSET)
+  regval  = adc_getreg(priv, STM32_ADC_CR2_OFFSET)
   regval |= ADC_CR2_EXTTRIG;
 
   /* EXTSEL selection: These bits select the external event used to trigger
@@ -371,11 +379,10 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
   
   regval &= ~ADC_CR2_EXTSEL_MASK;
   regval |= priv->extsel;
-  tim_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
-  
-  /* ADC Prescaler (ADCPRE) selection: Set and cleared by software to select
-   * the frequency of the clock to the ADCs.
-   */
+  adc_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
+
+  /* Configure the timer channel to drive the ADC */
+#warning "LOTS of missing timer setup logic"
 
   regval = priv->presc;
 
@@ -399,13 +406,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
   tim_putreg(priv,  STM32_BTIM_PSC_OFFSET, regval); 
 
-#if 0 // What is this?  
-  regval  = getreg32(STM32_RCC_CFGR);
-  regval |= presc << RCC_CFGR_ADCPRE_SHIFT;
-  putreg32(regval, STM32_RCC_CFGR);
-#endif
-
-  /* Enable the counter */
+  /* Enable the timer counter */
 
   regval  = stm32_tim_getreg(priv, STM32_BTIM_CR1_OFFSET);
   regval |= ATIM_CR1_CEN;
