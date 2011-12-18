@@ -16,11 +16,11 @@ nuttx/
  (16)  Network (net/, drivers/net)
   (2)  USB (drivers/usbdev, drivers/usbhost)
   (7)  Libraries (lib/)
- (11)  File system/Generic drivers (fs/, drivers/)
-  (2)  Graphics subystem (graphics/)
+ (10)  File system/Generic drivers (fs/, drivers/)
+  (1)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
-  (5)  Build system / Toolchains
+  (7)  Build system / Toolchains
   (6)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
@@ -30,15 +30,15 @@ nuttx/
   (7)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (2)  ARM/LPC313x (arch/arm/src/lpc313x/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
-  (4)  ARM/LM3S6918 (arch/arm/src/lm3s/)
+  (3)  ARM/LM3S6918 (arch/arm/src/lm3s/)
   (4)  ARM/STM32 (arch/arm/src/stm32/)
   (3)  AVR (arch/avr)
   (0)  Intel x86 (arch/x86)
   (4)  8051 / MCS51 (arch/8051/)
   (1)  MIPS (arch/mips)
-  (2)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
+  (1)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
-  (8)  z80/z8/ez80 (arch/z80/)
+ (10)  z80/z8/ez80 (arch/z80/)
   (8)  z16 (arch/z16/)
   (1)  mc68hc1x (arch/hc)
 
@@ -51,11 +51,13 @@ apps/
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       CHILD PTHREAD TERMINATION
   Description: When a tasks exits, shouldn't all of its child pthreads also be
                terminated?
   Status:      Open
   Priority:    Medium, required for good emulation of process/pthread model.
 
+  Title:       MULTIPLE ATEXIT() FUNCTIONS
   Description: atexit() supports registration of only single function called on
                exit().  It should support multiple functions registered by atexit()
                or onexit() and these should be called in reverse order of
@@ -63,10 +65,12 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Low
 
+  Title:       MMAN.H
   Description: Implement sys/mman.h and functions
   Status:      Open
   Priority:    Low
 
+  Title:       WAIT.H
   Description: Implement sys/wait.h and functions.  Consider implementing wait,
                waitpid, waitid.  At present, a parent has no information about
                child tasks.
@@ -77,6 +81,7 @@ o Task/Scheduler (sched/)
   Status:      Open
   Priority:    Low
 
+  Title:       MISSING ERRNO SETTINGS
   Description: Several APIs do not set errno.  Need to review all APIs.
   Status:      Open
   Priority:    Medium, required for standard compliance (but makes the
@@ -85,6 +90,7 @@ o Task/Scheduler (sched/)
 o On-demand paging (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       ON-DEMAND PAGE INCOMPLETE
   Description: On-demand paging has recently been incorporated into the RTOS.
                The design of this feature is described here:
                http://www.nuttx.org/NuttXDemandPaging.html.
@@ -100,6 +106,7 @@ o On-demand paging (sched/)
 o Other core OS logic
   ^^^^^^^^^^^^^^^^^^^
 
+  Title:       GET_ENVIRON_PTR()
   Description: get_environ_ptr() (sched/sched_getenvironptr.c) is not implemented.
                The representation of the the environment strings selected for
                NutX is not compatible with the operation.  Some significant
@@ -108,6 +115,7 @@ o Other core OS logic
   Status:      Open
   Priority:    Low -- There is no plan to implement this.
 
+  Title:       TIMER_GETOVERRUN()
   Description: timer_getoverrun() (sched/timer_getoverrun.c) is not implemented.
   Status:      Open
   Priority:    Low -- There is no plan to implement this.
@@ -115,6 +123,7 @@ o Other core OS logic
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       FREE MEMORY ON TASK EXIT
   Description: Add an option to free all memory allocated by a task when the
                task exits. This is probably not be worth the overhead for a
                deeply embedded system.
@@ -129,12 +138,14 @@ o Memory Managment (mm/)
 o Signals (sched/, arch/)
   ^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       STANDARD SIGNALS
   Description: 'Standard' signals and signal actions are not supported.
                (e.g., SIGINT, SIGCHLD, SIGSEGV, etc).
   Status:      Open
   Priority:    Low, required by standards but not so critical for an
                embedded system.
 
+  Title:       SIGEV_THREAD
   Description: sig_notify() logic does not support SIGEV_THREAD; structure
                struct sigevent does not provide required members sigev_notify_function
                or sigev_notify_attributes.
@@ -145,6 +156,7 @@ o Signals (sched/, arch/)
 o pthreads (sched/)
   ^^^^^^^^^^^^^^^^^
 
+  Title:       CANCELLATION POINTS
   Description: pthread_cancel():  Should implement cancellation points and
                pthread_testcancel()
   Status:      Open
@@ -153,6 +165,7 @@ o pthreads (sched/)
 o C++ Support
   ^^^^^^^^^^^
 
+  Title:       USE OF SIZE_T IN NEW OPERATOR
   Description: The argument of the 'new' operators should take a type of
                size_t (see libxx/libxx_new.cxx and libxx/libxx_newa.cxx).  But
                size_t has an unknown underlying.  In the nuttx sys/types.h
@@ -168,6 +181,7 @@ o C++ Support
                would be to get ahold of the compilers definition of size_t.
   Priority:    Low.
 
+  Title:       STATIC CONSTRUCTORS
   Description: Need to call static constructors
   Status:      Open
   Priority:    Low, depends on toolchain.  Call to gcc's built-in static
@@ -177,23 +191,27 @@ o C++ Support
 o Binary loaders (binfmt/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       NXFLAT TESTS
   Description: Not all of the NXFLAT test under apps/examples/nxflat are working.
                Most simply do not compile yet.  tests/mutex runs okay but
                outputs garbage on completion.
   Status:      Open
   Priority:    High
 
+  Title:       ARM UP_GETPICBASE()
   Description: The ARM up_getpicbase() does not seem to work.  This means
                the some features like wdog's might not work in NXFLAT modules.
   Status:      Open
   Priority:    Medium-High
 
+  Title:       READ-ONLY DATA IN RAM
   Description: At present, all .rodata must be put into RAM.  There is a 
                tentative design change that might allow .rodata to be placed
                in FLASH (see Documentation/NuttXNxFlat.html).
   Status:      Open
   Priority:    Medium
 
+  Title:       GOT-RELATIVE FUNCTION POINTERS
   Description: If the function pointer to a statically defined function is
                taken, then GCC generates a relocation that cannot be handled
                by NXFLAT.  There is a solution described in Documentataion/NuttXNxFlat.html,
@@ -202,16 +220,17 @@ o Binary loaders (binfmt/)
   Status:      Open
   Priority:    Low (probably will not fix)
 
+  Title:       USE A HASH INSTEAD OF A STRING IN SYMBOL TABLES
   Description: In the NXFLAT symbol tables... Using a 32-bit hash value instead
                of a string to identify a symbol should result in a smaller footprint.
   Status:      Open
   Priority:    Low
 
+  Title:       WINDOWS-BASED TOOLCHAIN BUILD
   Description: Windows build issue.  Some of the configurations that use NXFLAT have
                the linker script specified like this:
 
                NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat.ld -no-check-sections
-
 
                That will not work for windows-based tools because they require Windows
                style paths.  The solution is to do something like this:
@@ -225,7 +244,7 @@ o Binary loaders (binfmt/)
                Then use
                
                NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T"$(NXFLATLDSCRIPT)" -no-check-sections
-               
+
   Status:      Open
   Priority:    There are too many references like the above.  They will have
                to get fixed as needed for Windows native tool builds.
@@ -233,10 +252,12 @@ o Binary loaders (binfmt/)
 o Network (net/, drivers/net)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       SOCK_RAW/SOCK_PACKET
   Description: Should implement SOCK_RAW, SOCK_PACKET
   Status:      Open
   Priority:    Low
 
+  Tile:        MULTIPLE NETWORK INTERFACE SUPPORT
   Description: uIP polling issues / Multiple network interface support:
                (1) Current logic will not support multiple ethernet drivers.
                   Each driver should poll on TCP connections connect on the
@@ -251,6 +272,7 @@ o Network (net/, drivers/net)
   Priority:    Medium, The feature is not important, but it is important
                for NuttX to resolve the architectural issues.
 
+  Title:       SENTDO() AND MULTIPLE NETWORK INTERFACE SUPPORT
   Description: sendto() and multiple network interface support:
                When polled, would have to assure that the destination IP
                is on the subnet served by the polling driver.
@@ -258,17 +280,20 @@ o Network (net/, drivers/net)
   Priority:    Medium, The feature is not important, but it is important
                for NuttX to resolve the architectural issues.
 
+  Title:       IPv6
   Description: IPv6 support is incomplete.  Adam Dunkels has recently announced
                IPv6 support for uIP (currently only as part of Contiki).  Those
                changes need to be ported to NuttX.
   Status:      Open
   Priority:    Medium
 
+  Title:       LISTENING FOR UDP BROADCASTS
   Description: Incoming UDP broadcast should only be accepted if listening on
                INADDR_ANY(?)
   Status:      Open
   Priority:    Low
 
+  Title:       READ-AHEAD THROTTLING
   Description: Read-ahead buffers capture incoming TCP data when no user
                thread is recv-ing the data.  Should add some driver call to
                support throttling; when there is no listener for new data, the
@@ -278,12 +303,14 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Medium
 
+  Title:       STANDARDIZE ETHERNET DRIVER STATISTICS
   Description: Need to standardize collection of statistics from network
                drivers.  apps/nshlib ifconfig command should present
                statistics.
   Status:      Open
   Priority:    Low
 
+  Title:       CONCURRENT TCP SEND OPERATIONS
   Description: At present, there cannot be two concurrent active TCP send
                operations in progress using the same socket.  This is because
                the uIP ACK logic will support only one transfer at a time.  The
@@ -296,6 +323,7 @@ o Network (net/, drivers/net)
   Priority:    Medium-Low.  This is an important issue for applications that
                send on the same TCP socket from multiple threads.
 
+  Title:       UDP READ-AHEAD?
   Description: TCP supports read-ahead buffering to handle the receipt of
                TCP/IP packets when there is no read() in place.  Should such
                capability be useful for UDP?  PRO: Would reduce packet loss
@@ -304,12 +332,14 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Medium
 
+  Title:       NO POLL/SELECT ON UDP SOCKETS
   Description: poll()/select() is not implemented for UDP sockets because they do
                do not support read-ahead buffering.  Therefore, there is never
                a case where you can read from a UDP socket without blocking.
   Status:      Open, depends on UDP read-ahead support
   Priority:    Medium
 
+  Title:       POLL/SELECT ON TCP SOCKETS NEEDS READ-AHEAD
   Description: poll()/select() only works for availability of buffered TCP
                read data (when read-ahead is enabled).  The way writing is
                handled in uIP, all sockets must wait when send and cannot
@@ -318,24 +348,28 @@ o Network (net/, drivers/net)
   Priority:    Medium... this does effect porting of applications that expect
                different behavior from poll()/select()
 
-  Description: sockets do not support all modes except for O_NONBLOCK. Sockets
+  Title:       SOCKETS DO NOT ALWAYS SUPPORT O_NONBLOCK
+  Description: sockets do not support all modes for O_NONBLOCK. Sockets
                support only (1) TCP/IP non-blocking read operations when read-ahead
                buffering is enabled, and (2) TCP/IP accept() operations when TCP/IP
                connection backlog is enabled.
   Status:      Open
   Priority:    Low.
 
+  Title:       UNFINISHED CRYSTALLAN CS89X0 DRIVER
   Description: I started coding a CrystalLan CS89x0 driver (drivers/net/cs89x0.c),
                but never finished it.
   Status:      Open
   Priority:    Low unless you need it.
 
+  Title:       UNFINISHED ENC28J60 DRIVER
   Description: So far, I have not come up with a usable hardware platform to
                verify the ENC28J60 Ethernet driver (drivers/net/enc28j60.c).
                So it is untested.
   Status:      Open
   Priority:    Low unless you need it.
 
+  Title:       UNTESTED IGMPv2
   Description: Support for client-side IGMPv2 multicast has been added but not yet
                tested (because I don't have a proper environment for multicast testing).
                There are most likely errors that need to be fixed at least in the
@@ -346,6 +380,7 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low unless you need it.
 
+  Title:       INTERFACES TO LEAVE/JOIN IGMP MULTICAST GROUP
   Description: The interfaces used to leave/join IGMP multicast groups is non-standard.
                RFC3678 (IGMPv3) suggests ioctl() commands to do this (SIOCSIPMSFILTER) but
                also status that those APIs are historic.  NuttX implements these ioctl
@@ -361,6 +396,7 @@ o Network (net/, drivers/net)
                the mechanism for leaving and joining groups is hidden behind a wrapper
                function so that little of this incompatibilities need be exposed.
 
+  Title:       CONFIGURATIONS WITH TINY MTUS
   Description: Many configurations have the MTU (CONFIG_NET_BUFSIZE) set to very small
                numbers, less then the minimum MTU size that must be supported -- 576.
                This can cause problems in some networks:  CONFIG_NET_BUFSIZE should
@@ -376,25 +412,30 @@ o Network (net/, drivers/net)
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^
 
+  Title:       USB STORAGE DRIVER DELAYS
   Description: There is a workaround for a bug in drivers/usbdev/usbdev_storage.c.
                that involves delays.  This needs to be redesigned to eliminate these delays.
   Status:      Open
   Priority:    Medium
 
-  Description: drivers/usbhost/usbhost_rtl8187.c is a work in progress.  There is no RTL8187
-               driver available yet.  That is a work in progress.
+  Title:       RTL8187 DRIVER IS UNFINISHED
+  Description: misc/drivers/usbhost_rtl8187.c is a work in progress.  There is no RTL8187
+               driver available yet.  That is a work in progress it was abandoned because
+               it depends on having an 802.11g stack.
   Status:      Open
   Priority:    Low (Unless you need RTL8187 support).
 
 o Libraries (lib/)
   ^^^^^^^^^^^^^^^^
 
+  Title:       ENVIRON
   Description: The definition of environ in stdlib.h is bogus and will not
                work as it should.  This is because the underlying
                representation of the environment is not an arry of pointers.
   Status:      Open
   Priority:    Medium
 
+  Title:       FGETS IMPLEMENTATION
   Description: fgets implementation does not use C-buffered I/O, but rather
                talks to serial driver directly via read().  It includes VT-100
                specific editting commands.  This gets should be renamed readlin()
@@ -403,16 +444,19 @@ o Libraries (lib/)
   Priority:    Low (unless you are using mixed C-buffered I/O with fgets and
                fgetc, for example).
 
+  Title:       TERMIOS
   Description: Need some minimal termios support... at a minimum, enough to
                switch between raw and "normal" modes to support behavior like
                that needed for readline().
   Status:      Open
   Priority:    Low
 
+  Title:       DAYS OF THE WEEK
   Description: strftime() and other timing functions do not handle days of the week.
   Status:      Open
   Priority:    Low
 
+  Title:       RESETTING GETOPT()
   Description: There is an issue with the way that getopt() handles errors that
                return '?'.
                
@@ -426,10 +470,12 @@ o Libraries (lib/)
   Status:      Open
   Priority:    Low
 
+  Title:       FERROR() AND CLEARERR()
   Description: Not implemented: ferror() and clearerr()
   Status:      Open
   Priority:    Low
 
+  Title:       CONCURRENT STREAM READ/WRITE
   Description: NuttX only supports a single file pointer so reads and writes 
                must be from the same position.  This prohibits implementation
                of behavior like that required for fopen() with the "a+" mode.
@@ -451,14 +497,17 @@ o File system / Generic drivers (fs/, drivers/)
 
   NOTE:  The NXFFS file system has its own TODO list at nuttx/fs/nxffs/README.txt
 
+  Title:       CHMOD() AND TRUNCATE()
   Description: Implement chmod(), truncate().
   Status:      Open
   Priority:    Low
 
+  Title:       CAN POLL SUPPORT
   Description: At present, the CAN driver does not support the poll() method.
   Status:      Open
   Priority:    Low
 
+  Title:       REMOVING PIPES AND FIFOS
   Description: There is no way to remove a FIFO or PIPE created in the
                psuedo filesystem.  Once created, they persist indefinitely
                and cannot be unlinked.  This is actually a more generic
@@ -468,39 +517,39 @@ o File system / Generic drivers (fs/, drivers/)
                when there are not open references to the pipe/FIFO.
   Priority:    Medium
 
+  Title:       ROMFS CHECKSUMS
   Description: The ROMFS file system does not verify checksums on either
                volume header on on the individual files.
   Status:      Open
   Priority:    Low.  I have mixed feelings about if NuttX should pay a
                performance penalty for better data integrity.
 
+  Title:       SPI-BASED SD MULTIPLE BLOCK TRANSFERS
   Description: The simple SPI based MMCS/SD driver in fs/mmcsd does not
                yet handle multiple block transfers.
   Status:      Open
   Priority:    Medium-Low
 
+  Title:       READ-AHEAD/WRITE BUFFER UNTESTED
   Description: Block driver read-ahead buffer and write buffer support is
                implemented but not yet tested.
   Status:      Open
   Priority:    Low
 
+  Title:       SDIO-BASED SD READ-AHEAD/WRITE BUFFERING INCOMPLETE
   Description: The drivers/mmcsd/mmcsd_sdio.c driver has hooks in place to
                support read-ahead buffering and write buffering, but the logic
                is incomplete and untested.
   Status:      Open
   Priority:    Low
 
+  Title:       ENC29J60 DRIVER UNTESTED
   Description: ENC28J60 driver is complete, but untested (I still haven't got
                a good ENC28J60 test platform).
   Status:      Open
   Priority:    Low
 
-  Description: Time stamping is not implemented in the NuttX FAT file system.
-               See the following functions in fs/fat/fs_fat32util.c:
-               fat_systime2fattime() and fat_fattime2systime()
-  Status:      Open
-  Priority:    Medium
-
+  Title:       SERIAL DRIVER DOES NOT RETURN WHEN SIGNAL RECEIVED
   Description: The serial driver (drivers/serial) should return with an
                error and errno=EINTR when an interrupt is received.  However,
                the serial driver just continues waiting:
@@ -515,6 +564,7 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority     Medium
 
+  Title:       POLLHUP SUPPORT
   Description: All drivers that support the poll method should also report
                POLLHUP event when the driver is closedd.
   Status:      Open
@@ -523,11 +573,13 @@ o File system / Generic drivers (fs/, drivers/)
 o Graphics subystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       UNTESTED GRAPHICS APIS
   Description: Testing of all APIs is not complete.  See
                http://nuttx.sourceforge.net/NXGraphicsSubsystem.html#testcoverage
   Status:      Open
   Priority:    Medium
 
+  Title:       ITALIC FONTS / NEGATIVE FONT OFFSETS
   Description: Font metric structure (in include/nuttx/nx/nxfont.h) should allow
                negative X offsets. Negative x-offsets are necessary for certain
                glyphs (and is very common in italic fonts).
@@ -538,25 +590,15 @@ o Graphics subystem (graphics/)
                in the current structure.
   Priority:    Low.
 
-  Description: In the kernel build mode (where NuttX is built as a monlithic
-               kernel and user code must trap into the protected kernel via
-               syscalls), the single user mode cannot be supported.  In this
-               built configuration, only the multiple user mode can be supported
-               with the NX server residing inside of the kernel space.  In
-               this case, most of the user end functions in graphics/nxmu
-               must be moved to lib/nx and those functions must be built into
-               libuser.a to be linked with the user-space code.
-  Status:      Open
-  Priority:    Low -- the kernel build configuration is not fully fielded
-               yet.
-
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       P-CODES IN MEMORY UNTESTED
   Description: Need APIs to verify execution of P-Code from memory buffer.
   Status:      Open
   Priority:    Low
 
+  Title:       SMALLER LOADER AND OBJECT FORMAT
   Description: Loader and object format may be too large for some small
                memory systems.  Consider ways to reduce memory footprint.
   Status:      Open
@@ -565,6 +607,7 @@ o Pascal Add-On (pcode/)
 o Documentation (Documentation/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       DOCUMENT APIS USABLE FROM INTERRUPT HANDLERS
   Description: Need to document which APIs can be used in interrupt
                handlers (like mq_send and sem_post) and which cannot.
   Status:      Open
@@ -573,22 +616,33 @@ o Documentation (Documentation/)
 o Build system
   ^^^^^^^^^^^^
 
+  Title:       DEPENDENCIES IN THE BOARD DIRECTORY
   Description: Dependencies do not work correctly under configs/<board>/src
                (same as arch/<arch>/src/board).
   Status:      Open
   Priority:    Medium (maybe higher for z80 target)
 
+  Title:       NUTTX CONFIGURATION TOOL
   Description: Need a NuttX configuration tool.  The number of configuration
                settings has become quite large and difficult to manage manually.
   Status:      Open
   Priority:    Medium-low
 
+  Title:       NATIVE WINDOWS BUILD
   Description: At present, NuttX builds only under Linux or Cygwin.
                Investigate the possibility of a native Windows build using
                something like the GNUWin32 tools (coreutils+make+grep+sed+uname).
   Status:      Open
   Priority:    Low
 
+  Title:       WINDOWS DEPENDENCY GENERATION
+  Description: Dependency generation is currently disabled when a Windows native
+               toolchain is used.  I think that the only issue is that all of the
+               Windows dependencies needed to be quoted in the Make.dep files.
+  Status:      Open
+  Priority:    Low -- unless some dependency-related build issues is discovered.
+
+  Title:       SETENV.H
   Description: Logic in most setenv.sh files can create the following problem
                on many platforms:
 
@@ -611,6 +665,7 @@ o Build system
   Priority:    Low.  Use of setenv.sh is optional and most platforms do not have
                this problem.  Scripts will be fixed one-at-a-time as is appropropriate.
 
+  Title:       MAKE EXPORT LIMITATIONS
   Description: The top-level Makefile 'export' target that will bundle up all of the
                NuttX libraries, header files, and the startup object into an export-able
                tarball. This target uses the tools/mkexport.sh script.  Issues:
@@ -623,9 +678,23 @@ o Build system
   Status:      Open
   Priority:    Low.
 
+  Title:       KERNEL BUILD MODE ISSUES
+  Description: In the kernel build mode (where NuttX is built as a monlithic
+               kernel and user code must trap into the protected kernel via
+               syscalls), the single user mode cannot be supported.  In this
+               built configuration, only the multiple user mode can be supported
+               with the NX server residing inside of the kernel space.  In
+               this case, most of the user end functions in graphics/nxmu
+               must be moved to lib/nx and those functions must be built into
+               libuser.a to be linked with the user-space code.
+  Status:      Open
+  Priority:    Low -- the kernel build configuration is not fully fielded
+               yet.
+
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       SIMULATED SERIAL DRIVER
   Description: The simulated serial driver has some odd behavior.  It
                will stall for a long time on reads when the C stdio buffers are
                being refilled. This only effects the behavior of things like
@@ -634,6 +703,7 @@ o Linux/Cywgin simulation (arch/sim)
   Status:      Open
   Priority:    Low (because the simulator is only a test/development platform)
 
+  Title:       SIMULATOR BUILD ON 64-BIT MACHINES
   Description: Simulator does not build correctly on 64-bit machines.  Two
                issues:
                1) It saves addresses in 32-bit types and these fail when cast
@@ -648,6 +718,7 @@ o Linux/Cywgin simulation (arch/sim)
                See the patch 0001-Quick-hacks-to-build-sim-nsh-ostest-on-x86_64-as-32-.patch
                that can be found at http://tech.groups.yahoo.com/group/nuttx/files.
 
+  Title:       SIMULATOR NETWORKING SUPPORT
   Description: I never did get networking to work on the sim Linux target.  On Linux,
                it tries to use the tap device (/dev/net/tun) to emulate an Ethernet
                NIC, but I never got it correctly integrated with the NuttX networking.
@@ -656,6 +727,7 @@ o Linux/Cywgin simulation (arch/sim)
   Status:      Open
   Priority:    Low (unless you want to test networking features on the simulation).
   
+  Title:       ROUND-ROBIN SCHEDULING IN THE SIMULATOR
   Description: Since the simulation is not pre-emptible, you can't use round-robin
                scheduling (no time slicing).  Currently, the timer interrupts are
                "faked" during IDLE loop processing and, as a result, there is no
@@ -666,6 +738,7 @@ o Linux/Cywgin simulation (arch/sim)
   Status:      Open
   Priority:    Low
   
+  Title:       NSH ISSUES ON THE SIMULATOR
   Descripion:  The NSH example has some odd behaviors.  Mult-tasking -- for example,
                execution of commands in background -- does not work normally.  This
                is due to the fact that NSH uses the system standard input for the
@@ -678,6 +751,7 @@ o Linux/Cywgin simulation (arch/sim)
                because NSH will "sleep" when it waits for console inpu and other
                tasks can run freely.
 
+  Title:       DOUBLE COMMAND ECHO
   Description: In the NSH example, the host HOST echoes each command so after you
                you enter a command, the command is repeated on the next line.  This
                is an artifact of the simulator only.
@@ -688,14 +762,16 @@ o Linux/Cywgin simulation (arch/sim)
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^
 
+  Title:       IMPROVED ARM INTERRUPT HANDLING
   Description: ARM interrupt handling performance could be improved in some
                ways. One easy way is to use a pointer to the context save
                area in current_regs instead of using up_copystate so much.
                see handling of 'current_regs" in arch/arm/src/armv7-m/* for
                examples of how this might be done.
-                Status:      Open
+  Status:      Open
   Priority:    Low
 
+  Title:       IMPROVED ARM INTERRUPT HANDLING
   Description: The ARM and Cortex-M3 interrupt handlers restores all regisers
                upon return. This could be improved as well:  If there is no
                context switch, then the static registers need not be restored
@@ -704,6 +780,7 @@ o ARM (arch/arm/)
   Status:      Open
   Priority:    Low
 
+  Title:       SVCALLS AND HARDFAULTS
   Description: The Cortex-M3 user context switch logic uses SVCall instructions.
                This user context switching time could be improved by eliminating
                the SVCalls and developing assembly language implementations
@@ -718,6 +795,7 @@ o ARM (arch/arm/)
   Status:      Open
   Priority:    Low
 
+  Title:       ARM INTERRUPTS AND USER MODE
   Description: The ARM interrupt handling (arch/arm/src/arm/up_vectors.S) returns
                using 'ldmia   sp, {r0-r15}^'  My understanding is that this works
                fine because everything is in kernel-mode.  In an operating model
@@ -733,6 +811,7 @@ o ARM (arch/arm/)
 o ARM/C5471 (arch/arm/src/c5471/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       UART RECONFIGURATION
   Description: UART re-configuration is untested and conditionally compiled out.
   Status:      Open
   Priority:    Medium.  ttyS1 is not configured, but not used; ttyS0 is configured
@@ -741,6 +820,7 @@ o ARM/C5471 (arch/arm/src/c5471/)
 o ARM/DM320 (arch/arm/src/dm320/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       DEBUG ISSUES
   Description: config/ntos-dm320: It seems that when a lot of debug statements
                are added, the system no longer boots.  This is suspected to be
                a stack problem: Making the stack bigger or removing arrays on
@@ -749,14 +829,17 @@ o ARM/DM320 (arch/arm/src/dm320/)
   Status:      Open
   Priority:    Medium
 
+  Title:       USB DEVICE DRIVER UNTESTED
   Description: A USB device controller driver was added but has never been tested.
   Status:      Open
   Priority:    Medium
 
+  Title:       FRAMEBUFFER DRIVER UNTESTED
   Description: A framebuffer "driver" was added, however, it remains untested.
   Status:      Open
   Priority:    Medium
 
+  Title:       VIDEO ENCODER DRIVER
   Description: In order to use the framebuffer "driver" additional video encoder
                logic is required to setupt composite video output or to interface
                with an LCD.
@@ -766,12 +849,14 @@ o ARM/DM320 (arch/arm/src/dm320/)
 o ARM/i.MX (arch/arm/src/imx/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       PORT IS INCOMPLETE
   Description: The basic port of the i.MX1 architecuture was never finished.  The port
                is incomplete (as of this writing, is still lacks a timer, interrupt
                decoding, USB, network) and untested.
   Status:      Open
   Priority:    Medium (high if you need i.MX1/L support)
 
+  Title:       SPI METHODS ARE NOT THREAD SAFE
   Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
   Status:      Open
   Priority:    Medium -- Will be very high if you do SPI access from multiple threads.
@@ -779,11 +864,13 @@ o ARM/i.MX (arch/arm/src/imx/)
 o ARM/LPC17xx (arch/arm/src/lpc17xx/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       USB DMA INCOMPLETE
   Description: USB DMA not fully implemented. Partial logic is in place but it is
                fragmentary and bogus. (Leveraged from the lpc214x)
   Status:      Open
   Priority:    Low
 
+  Title:       SSP DRIVER IMPROVEMENTS
   Description: a) At present the SSP driver is polled.  Should it be interrupt driven?
                   Look at arch/arm/src/imx/imx_spi.c -- that is a good example of an
                   interrupt driven SPI driver.  Should be very easy to part that architecture
@@ -795,6 +882,7 @@ o ARM/LPC17xx (arch/arm/src/lpc17xx/)
   Status:      Open
   Priority:    Medium
 
+  Title:       NOKIA LCD DRIVER NONFUNCTIONAL
   Description: An LCD driver for the Olimex LPC1766STK has been developed.  However, that
                driver is not yet functional on the board:  The backlight comes on, but
                nothing is visible on the display.
@@ -804,20 +892,24 @@ o ARM/LPC17xx (arch/arm/src/lpc17xx/)
 o ARM/LPC214x (arch/arm/src/lpc214x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       VECTOR INTERRUPTS
   Description: Should use Vector Interrupts
   Status:      Open
   Priority:    Low
 
+  Title:       USB DMA INCOMPLETE
   Description: USB DMA not fully implemented. Partial logic is in place but it is
                fragmentary and bogus.
   Status:      Open
   Priority:    Low
 
+  Title:       USB SERIAL DRIVER REPORTS WRONG ERROR
   Description: USB Serial Driver reports wrong error when opened before the
                USB is connected (reports EBADF instead of ENOTCONN)
   Status:      Open
   Priority:    Low
 
+  Title:       SPI DRIVER IMPROVEMENTS
   Description: At present the SPI driver is polled.  Should it be interrupt driven?
                Look at arch/arm/src/imx/imx_spi.c -- that is a good example of an
                interrupt driven SPI driver.  Should be very easy to part that architecture
@@ -825,10 +917,12 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
   Status:      Open
   Priority:    Medium
 
+  Title:       SPI METHODS ARE NOT THREAD SAFE
   Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
   Status:      Open
   Priority:    Medium -- Will be very high if you do SPI access from multiple threads.
 
+  Title:       SPI DRIVER DELAYS
   Description: At present the SPI driver is polled -AND- there is a rather large, arbitrary,
                delay in one of the block access routines.  The purpose of the delay is to
                avoid a race conditions.  This begs for a re-design -OR- at a minimum, some
@@ -836,16 +930,18 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
   Status:      Open
   Priority:    Medium
 
+  Title:       2GB SD CARD ISSUES
   Desription:  I am unable to initialize a 2Gb SanDisk microSD card (in adaptor) on the
                the mcu123 board.  The card fails to accept CMD0.  Doesn't seem like a software
                issue, but if anyone else sees the problem, I'd like to know.
                Related:  Fixes were recently made for the SDIO-based MMC/SD driver to
                support 2Gb cards -- the blocksize was forced to 512 in all cases.  The SPI-
                based driver may also have this problem (but I don't think this would have
-               andything to do with CMD0).
+               anything to do with CMD0).
   Status:      Open
   Priority:    Uncertain
 
+  Title:       USB DEVICE DRIVER ISSUES?
   Description: Possible errors in USB device driver reported "I suspect there's a few
                issues in the lpc214x USB driver - in particular it doesn't stall both
                in/out endpoints for unsupported setup requests and it doesn't call
@@ -857,6 +953,7 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
 o ARM/LPC313x (arch/arm/src/lpc313x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       PLATFORM-SPECIFIC LOGIC
   Description: arch/arm/src/lpc313x/lpc313x_spi.c contains logic that is specific to the
                Embedded Artist's ea3131 board.  We need to abstract the assignment of SPI
                chip selects and logic SPI functions (like SPIDEV_FLASH).  My thoughts are:
@@ -870,6 +967,7 @@ o ARM/LPC313x (arch/arm/src/lpc313x/)
   Status:      Open
   Priority:    High if you want to use SPI on any board other than the ea3131.
 
+  Title:       SPI DRIVER
   Description: arch/arm/src/lpc313x/lpc313x_spi.c may or may not be functional.  It was
                reported to be working, but I was unable to get it working with the
                Atmel at45dbxx serial FLASH driver.
@@ -879,17 +977,20 @@ o ARM/LPC313x (arch/arm/src/lpc313x/)
 o ARM/STR71x (arch/arm/src/str71x/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       UNVERIFIED MMC SUPPORT
   Description: Verify SPI driver and integrate with MMC support. This effort is stalled
                at the moment because the slot on the Olimex board only accepts MMC card;
                I have no MMC cards, only SD cards which won't fit into the slot.
   Status:      Open
   Priority:    Medium
 
+  Title:       NO USB DRIVER
   Description: Develop a USB driver and integrate with existing USB serial and storage
                class drivers.
   Status:      Open
   Priority:    Medium
 
+  Title:       SPI METHODS ARE NOT THREAD SAFE
   Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
   Status:      Open
   Priority:    Medium -- Will be very high if you do SPI access from multiple threads.
@@ -897,22 +998,19 @@ o ARM/STR71x (arch/arm/src/str71x/)
 o ARM/LM3S6918 (arch/arm/src/lm3s/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       I2C DRIVER
   Description: Still need to implement I2C
   Status:      Open
   Priority:    Low
 
+  Title:       SSI OVERRUNS
   Description: Should terminate SSI/SPI transfer if an Rx FIFO overrun occurs.
                Right now, if an Rx FIFO overrun occurs, the SSI driver hangs.
   Status:      Open
   Priority:    Medium, If the transfer is properly tuned, then there should not
                be any Rx FIFO overruns.
 
-  Description: Dependency generation is currently disabled when a Windows native
-               toolchain is used.  I think that the only issue is that all of the
-               Windows dependencies needed to be quoted in the Make.dep files.
-  Status:      Open
-  Priority:    Low -- unless some dependency-related build issues is discovered.
-
+  Title:       THTTPD BUGS
   Description: There are some lingering bugs in THTTPD, possibly race conditions.  This
                is covered above under Network Utilities, but is duplicated here
                to point out that the LM3S suffers from this bug.
@@ -925,10 +1023,12 @@ o ARM/LM3S6918 (arch/arm/src/lm3s/)
 o ARM/STM32 (arch/arm/src/stm32/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       NOR FLASH DRIVER
   Description: NOR Flash driver with FTL layer to support a file system.
   Status:      Open
   Priority:    Low
 
+  Title:       USBSERIAL ISSUES
   Description  A USB device-side driver is in place but not well tested.  At
                present, the apps/examples/usbserial test sometimes fails.  The situation
                that causes the failure is:
@@ -950,10 +1050,12 @@ o ARM/STM32 (arch/arm/src/stm32/)
   Status:      Open
   Priority:    Medium-High
   
+  Title:       FSMC EXTERNAL MEMORY UNTESTED
   Description: FSMC external memory support is untested
   Status:      Open
   Priority:    Low
 
+  Title:       DMA EXTENSIONS
   Description: DMA logic needs to be extended.  DMA2, Channel 5, will not work
                because the DMA2 channels 4 & 5 share the same interrupt.
   Status:      Open
@@ -963,6 +1065,7 @@ o ARM/STM32 (arch/arm/src/stm32/)
 o AVR (arch/avr)
   ^^^^^^^^^^^^^^
 
+  Title:        AMBER WEB SERVER UNTESTED
   Description:  There is a port for the Amber Web Server ATMega128, however this is
                 completely untested due to the lack to compatible, functional test
                 equipment.
@@ -970,6 +1073,7 @@ o AVR (arch/avr)
   Priority:     The priority might as well be low since there is nothing I can do about
                 it anyway.
 
+  Title:        STRINGS IN RAM
   Description:  Many printf-intensive examples (such as the OS test) cannot be executed
                 on most AVR platforms.  The reason is because these tests/examples
                 generate a lot of string data.  The build system currently places all
@@ -981,6 +1085,7 @@ o AVR (arch/avr)
   Priority:     Low.  The AVR is probably not the architecuture that you want to use
                 for extensive string operations.
 
+  Title:        SPI AND USB DRIVERS UNTESTED
   Description:  An SPI driver and a USB device driver exist for the AT90USB (as well
                 as a USB mass storage example).  However, this configuration is not
                 fully debugged as of the NuttX-6.5 release.
@@ -992,6 +1097,7 @@ o AVR (arch/avr)
   Status:       Open
   Priority:     Medium-High.
 
+  Title:        AVR32 PORT IS NOT FULLY TESTED
   Description:  A complete port for the AVR32 is provided and has been partially
                 debugged.  There may still be some issues with the serial port
                 driver.
@@ -1004,6 +1110,7 @@ o Intel x86 (arch/x86)
 o 8051 / MCS51 (arch/8051/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       STACK OVERFLOWS DURING INTERRUPT HANDLING
   Description: Current status:
                - Basic OS task management seems OK
                - Fails when interrupts enabled.  The stack pointer is around
@@ -1014,6 +1121,7 @@ o 8051 / MCS51 (arch/8051/)
   Status:      Open
   Priority:    Low, 8051 is a tough platform because of the tiny stack.
 
+  Title:       TIMER 0 AS SYSTEM TIMER
   Description: Use timer 0 as system timer.  Timer 2 is needed for second UART.
                Logic is implemented, but there needs to be a system
                configuration to change the ticks-per-second value to match the
@@ -1021,6 +1129,7 @@ o 8051 / MCS51 (arch/8051/)
   Status:      Open
   Priority:    Low
 
+  Title:       OVERFLOWS DURING BUILD
   Description: During build, there are several integer overflows reported:
                sched/gmtime_r.c aroud lines 184 and 185
                sched/clock_initialize.c at line 107
@@ -1034,6 +1143,7 @@ o 8051 / MCS51 (arch/8051/)
                but this has not been verified on this platform).
   Priority:    Medium
 
+  Title:       DATA INITIALIZATION
   Description  Global data is not being initialized.  Logic like that of SDCCs
                crt0*.s needs to be incorporated into the system boot logic
   Status:      Open
@@ -1042,15 +1152,15 @@ o 8051 / MCS51 (arch/8051/)
 o MIPS (arch/mips)
   ^^^^^^^^^^^^^^^^
 
-  Description: A port to the PIC32MX has been completed, but is pending debug.
-               Right now, there are some issues with intregating the PICKit 3
-               and MPLAB so I don't have capability to debug the port.
+  Title:       PIC32MX PORT UNVERIFIED
+  Description: A port to the PIC32MX has been completed, but is pending verification.
   Status:      Open
   Priority:    High
 
 o Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:        SH-1 IS UNUSABLE
   Description:  There are instabilities that make the SH-1 port un-usable.  The
                 nature of these is not understood; the behavior is that certain SH-1
                 instructions stop working as advertised.  I have seen the following
@@ -1071,11 +1181,10 @@ o Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   Priority:     Low -- because the SH-1, SH7032, is very old and only of historical
                 interest.
 
-  Description:  arch/sh has been restructured to support M16C.  Need to verify that
-                SH-1 still builds.
-  Status:       Open
-  Priority:     Low
+o Renesas M16C/26 (arch/sh/src/m16c)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:        M16C DOES NOT BUILD
   Description:  The M16C target cannot be built.  The GNU m16c-elf-ld link fails with 
                 the following message:
 
@@ -1091,18 +1200,18 @@ o Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   Status:       Open
   Priority:     High -- this is a show stopper for M16C.
 
-o Renesas M16C/26 (arch/sh/src/m16c)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+  Title:       M16C PORT UNTESTED
   Description: Coding of the initial port is complete, but is untested.
   Status:      Open
   Priority:    Low
 
+  Title:       NO SERIAL CONNECTOR
   Description: Serial drivers were developed for the M16C, however, the SKP16C26
                StarterKit has no serial connectors.
   Status:      Open
   Priority:    Low
 
+  Title:       UNIMPLEMENTED M16C DRIVERS
   Description: Should implement SPI, I2C, Virual EEPROM, FLASH, RTC drivers
   Status:      Open
   Priority:    Medium
@@ -1110,6 +1219,7 @@ o Renesas M16C/26 (arch/sh/src/m16c)
 o z80/z8/ez80 (arch/z80)
  ^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       SDCC INTEGER OVERFLOWS
   Description: The SDCC version the same problems with integer overflow during
                compilation as described for pjrc-8051.  At typical cause is code like
                usleep(500*1000) which exceeds the range of a 16-bit integer.
@@ -1117,6 +1227,7 @@ o z80/z8/ez80 (arch/z80)
                been verified on these platforms.
   Priority:    See pjrc-8051
 
+  Title:       Z80 SIMULATED CONSOLE
   Description: The simulated Z80 serial console (configs/z80sim/src/z80_serial.c +
                driver/serial.c) does not work.  This is because there are
                no interrupts in the simulation so there is never any serial
@@ -1125,12 +1236,14 @@ o z80/z8/ez80 (arch/z80)
   Priority:    Low -- the simulated console is not critical path and the designs
                to solve the problem are complex.
 
+  Title:       ZDS-II LIBRARIAN WARNINGS
   Description: ZDS-II Librarian complains that the source for the .obj file
                is not in the library.
   Status:      Open
   Priority:    Low, thought to be cosmetic.  I think this is a consequence of
                replacing vs. inserting the library.
 
+  Title:       ZDS-II COMPILER PROBLEMS
   Description: The ZDS-II compiler (version 4.10.1) fails with an internal error
                while compiler mm/mm_initialize.  This has been reported as
                incident 81509.
@@ -1154,20 +1267,19 @@ o z80/z8/ez80 (arch/z80)
   Status:      Open
   Priority:    High
 
+  Title:       EZ8 PRIORITY INTERRUPTS
   Description: Add support for prioritized ez8 interrupts.  Currently logic supports
                only nominal interrupt priority.
   Status:      Open
   Priority:    Low
 
+  Title:       Z8ENCORE ONLY VERIFIED ON SIMULATOR
   Description: The z8Encore! port has only been verified on the ZDS-II instruction
                set simulator.
   Status:      Open
   Priority:    Medium
 
-  Description: Upgrade to the ZDS-II Z8Encore! 4.11.0 toolchain
-  Status:      Open
-  Priority:    Low
-
+  Title:       XTRS CLEAN
   Description: The XTRS target (configs/xtrs) has a clean problem. The clean
                rule removes .asm files.  This works because there are no .asm
                files except in sub-directories that are provided from 'make clean' --
@@ -1176,16 +1288,19 @@ o z80/z8/ez80 (arch/z80)
   Status:      Open
   Priority:    High if you happen to be working with XTRS.
 
+  Title:       SPI/I2C UNTESTED
   Description: A "generic" SPI and I2C drivers have been coded for the eZ80Acclaim!
                However, these remains untested since I have no SPI or I2C devices for
                the board (yet).
   Status:      Open
   Priority:    Med
 
+  Title:       SPI METHODS ARE NOT THREAD SAFE
   Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
   Status:      Open
   Priority:    Medium -- Will be very high if you do SPI access from multiple threads.
 
+  Title:       I2C UNTESTED
   Description: A "generic" I2C driver has been coded for the eZ8Encore!
                However, this remains untested since I have no I2C devices for
                the board (yet).
@@ -1195,12 +1310,14 @@ o z80/z8/ez80 (arch/z80)
 o z16 (arch/z16)
 ^^^^^^^^^^^^^^^^
 
+  Title:       ZDS-II LIBRARIAN WARNINGS
   Description: ZDS-II Librarian complains that the source for the .obj file
                is not in the library.
   Status:      Open
   Priority:    Low, thought to be cosmetic.  I think this is a consequence of
                replacing vs. inserting the library.
 
+  Title:       SERIAL DRIVER HANGS
   Description: When the interrupt-driven serial driver is used, the system
                hangs.  This is because of TX ready (TRDE) interrupts that
                get lost while interrupts are disabled.  The existing
@@ -1210,11 +1327,13 @@ o z16 (arch/z16)
   Priority:    Medium. A polled, write-only serial driver is used in the
                interim for system testing.
 
+  Title:       SYSTEM DELAYS
   Description: The system delays do not appear to be correct with the
                apps/examples/ostest/timedmqueue.c test.
   Status:      Open
   Priority:    Medium-High
 
+  Title:       PROBLEMS WHEN DEBUG DISABLED
   Description: At present, the z16f port does not run properly when CONFIG_DEBUG
                is disabled:  The obvious symptom is that there is no printf()
                output.  I have isolated with problem to errors in optimization.
@@ -1236,6 +1355,7 @@ o z16 (arch/z16)
   Status:      Open
   Priority:    Medium-High
 
+  Title:       PASCAL ADD-ON
   Description: The pascal add-on does not work with the z16f (that is
                configuration z16f2800100zcog/pashello).  This appears to be
                another ZDS-II error:  when executing the instruction
@@ -1267,17 +1387,20 @@ o z16 (arch/z16)
                uwcase in the NuttX code base.
   Priority:    Medium
 
+  Title:       USE SPOV
   Description: Add support to maintain SPOV in context switching.  This
                improvement will provide protection against stack overflow
                and make a safer system solution.
   Status:      Open
   Priority:    Low
 
+  Title:       PRIORITIZED INTERRUPTS
   Description: Add support for prioritized interrupts.  Currently logic supports
                only nominal interrupt priority.
   Status:      Open
   Priority:    Low
 
+  Title:       ZDS-II COMPILER PROBLEMS
   Description: The file drivers/mmcsd/mmcsd_sdio.c generates an internal compiler
                error like:
  
@@ -1292,6 +1415,7 @@ o z16 (arch/z16)
 o mc68hc1x (arch/hc)
   ^^^^^^^^^^^^^^^^^^
 
+  Title:       BANKED MODE
   Description: There is no script for building in banked mode (more correctly, there
                is a script, but logic inside the script has not yet been implemented).
                It would be necessary to implement banked mode to able to access more
@@ -1301,6 +1425,7 @@ o mc68hc1x (arch/hc)
 
 o Network Utilities (apps/netutils/)
 
+  Title:       UIP RESOLVER
   Description: One critical part of netutils/ apps is untested: The uIP
                resolver in netutils/resolv.  The webclient code has been
                tested on host using gethosbyname(), but still depends on the
@@ -1308,16 +1433,19 @@ o Network Utilities (apps/netutils/)
   Status:      Open
   Priority:    Medium, Important but not core NuttX functionality
 
+  Title:       PPP PORT
   Description: Port PPP support from http://contiki.cvs.sourceforge.net/contiki/contiki-2.x/backyard/core/net/ppp/
   Status:      Open
   Priority:    Low
 
+  Title:       UNVERIFIED THTTPD FEATURES
   Description: Not all THTTPD features/options have been verified.  In particular, there is no
                test case of a CGI program receiving POST input.  Only the configuration of
                apps/examples/thttpd has been tested.
   Status:      Open
   Priority:    Medium
 
+  Title:       THE ARP ISSUES AGAIN
   Description: The first GET received by THTTPD is not responded to.  Refreshing the page
                from the browser solves the problem and THTTPD works fine after thatg.  I 
                believe that this is the duplicate of another bug: "Outgoing [uIP] packets are dropped
@@ -1325,6 +1453,7 @@ o Network Utilities (apps/netutils/)
   Status:      Open
   Priority:    Medium
 
+  Title:       THTTPD WARNINGS
   Description: If the network is enabled, but THTTPD is not configured, it spews out lots
                of pointless warnings.  This is kind of annoying and unprofessional; needs to
                be fixed someday.
@@ -1334,6 +1463,7 @@ o Network Utilities (apps/netutils/)
 o NuttShell (NSH) (apps/nshlib)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       EACH TCP PACKET CAUSES PROMPT
   Description: When the telnetd front end is received, each TCP packet
                received causes a prompt (nsh >) to be presented.  The
                prompt should only be presented when the user enters a
@@ -1341,6 +1471,7 @@ o NuttShell (NSH) (apps/nshlib)
   Status:      Open
   Priority:    Low
 
+  Title:       WGET UNTESTED
   Description: The wget command has been incorporated into NSH, however
                it is still untested as of this writing (only because I
                have not had the correct network setup for the testing
@@ -1349,6 +1480,7 @@ o NuttShell (NSH) (apps/nshlib)
   Status:      Open
   Priority:    Med-High
 
+  Title:       IFCONFIG AND MULTIPLE NETWORK INTERFACES
   Descripton:  The ifconfig command will not behave correctly if an interface
                is provided and there are multiple interfaces.  It should only
                show status for the single interface on the command line; it will
@@ -1356,10 +1488,12 @@ o NuttShell (NSH) (apps/nshlib)
   Status:      Open
   Priority:    Low (multiple network interfaces not fully supported yet anyway).
 
+  Title:       RUN NXFLAT PROGRAMS
   Description: Add support to NSH to run NXFLAT programs from a ROMFS file system
   Status:      Open
   Priority:    Low (enhancement)
 
+  Title:       ARP COMMAND
   Description: Add an ARP command so that we can see the contents of the ARP table.
   Status:      Open
   Priority:    Low (enhancement)
@@ -1367,22 +1501,26 @@ o NuttShell (NSH) (apps/nshlib)
 o Other Applications & Tests (apps/examples/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  Title:       EXAMPLES/PIPE ON CYGWIN
   Description: The redirection test (part of examples/pipe) terminates
                incorrectly on the Cywgin-based simulation platform (but works
                fine on the Linux-based simulation platform).
   Status:      Open
   Priority:    Low
 
+  Title:       EXAMPLES/WGET UNTESTED
   Description: examples/wget is untested on the target (it has been tested
                on the host, but not in the target using the uIP resolv logic).
   Status:      Open
   Priority:    Med
 
+  Title:       EXAMPLES/SENDMAIL UNTESTED
   Description: examples/sendmail is untested on the target (it has been tested
                on the host, but not on the target.
   Status:      Open
   Priority:    Med
 
+  Title:       EXAMPLES/NX FONT CACHING
   Description: The font caching logic in examples/nx is incomplete.  Fonts are
                added to the cache, but never removed.  When the cache is full
                it stops rendering.  This is not a problem for the examples/nx
@@ -1393,6 +1531,7 @@ o Other Applications & Tests (apps/examples/)
   Priority:    Low.  This is not really a problem becauses examples/nx works
                fine with its bogus font caching.
 
+  Title:       EXAMPLES/NXTEXT ARTIFACTS
   Description: examples/nxtext.  Artifacts when the pop-up window is opened.
                There are some artifacts that appear in the upper left hand
                corner.  These seems to be related to window creation.  At
