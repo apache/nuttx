@@ -1085,8 +1085,7 @@ static struct stm32_req_s *stm32_rqdequeue(struct stm32_ep_s *privep)
  * Name: stm32_rqenqueue
  ****************************************************************************/
 
-static void stm32_rqenqueue(struct stm32_ep_s *privep,
-                              struct stm32_req_s *req)
+static void stm32_rqenqueue(struct stm32_ep_s *privep, struct stm32_req_s *req)
 {
   req->flink = NULL;
   if (!privep->head)
@@ -1446,7 +1445,10 @@ static void stm32_epdone(struct stm32_usbdev_s *priv, uint8_t epno)
 
           priv->rxstatus  = USB_EPR_STATRX_VALID;
         }
-      else
+
+      /* NAK further OUT packets if there there no more read requests */
+
+      if (stm32_rqempty(privep))
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPOUTPENDING), (uint16_t)epno);
 
