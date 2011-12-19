@@ -96,19 +96,13 @@
 #define STM32_ATIM_CNT_OFFSET     0x0024  /* Counter (16-bit) */
 #define STM32_ATIM_PSC_OFFSET     0x0028  /* Prescaler (16-bit) */
 #define STM32_ATIM_ARR_OFFSET     0x002c  /* Auto-reload register (16-bit) */
-
-#ifdef CONFIG_STM32_STM32F10XX
-#  define STM32_ATIM_RCR_OFFSET   0x0030  /* Repetition counter register (16-bit) */
-#endif
+#define STM32_ATIM_RCR_OFFSET     0x0030  /* Repetition counter register (16-bit) */
 
 #define STM32_ATIM_CCR1_OFFSET    0x0034  /* Capture/compare register 1 (16-bit) */
 #define STM32_ATIM_CCR2_OFFSET    0x0038  /* Capture/compare register 2 (16-bit) */
 #define STM32_ATIM_CCR3_OFFSET    0x003c  /* Capture/compare register 3 (16-bit) */
 #define STM32_ATIM_CCR4_OFFSET    0x0040  /* Capture/compare register 4 (16-bit) */
-
-#ifdef CONFIG_STM32_STM32F10XX
-#  define STM32_ATIM_BDTR_OFFSET  0x0044  /* Break and dead-time register (16-bit) */
-#endif
+#define STM32_ATIM_BDTR_OFFSET    0x0044  /* Break and dead-time register (16-bit) */
 
 #define STM32_ATIM_DCR_OFFSET     0x0048  /* DMA control register (16-bit) */
 #define STM32_ATIM_DMAR_OFFSET    0x004c  /* DMA address for burst mode (16-bit) */
@@ -130,16 +124,12 @@
 #  define STM32_TIM1_CNT         (STM32_TIM1_BASE+STM32_ATIM_CNT_OFFSET)
 #  define STM32_TIM1_PSC         (STM32_TIM1_BASE+STM32_ATIM_PSC_OFFSET)
 #  define STM32_TIM1_ARR         (STM32_TIM1_BASE+STM32_ATIM_ARR_OFFSET)
-#  ifdef CONFIG_STM32_STM32F10XX
-#    define STM32_TIM1_RCR       (STM32_TIM1_BASE+STM32_ATIM_RCR_OFFSET)
-#  endif
+#  define STM32_TIM1_RCR         (STM32_TIM1_BASE+STM32_ATIM_RCR_OFFSET)
 #  define STM32_TIM1_CCR1        (STM32_TIM1_BASE+STM32_ATIM_CCR1_OFFSET)
 #  define STM32_TIM1_CCR2        (STM32_TIM1_BASE+STM32_ATIM_CCR2_OFFSET)
 #  define STM32_TIM1_CCR3        (STM32_TIM1_BASE+STM32_ATIM_CCR3_OFFSET)
 #  define STM32_TIM1_CCR4        (STM32_TIM1_BASE+STM32_ATIM_CCR4_OFFSET)
-#  ifdef CONFIG_STM32_STM32F10XX
-#    define STM32_TIM1_BDTR      (STM32_TIM1_BASE+STM32_ATIM_BDTR_OFFSET)
-#  endif
+#  define STM32_TIM1_BDTR        (STM32_TIM1_BASE+STM32_ATIM_BDTR_OFFSET)
 #  define STM32_TIM1_DCR         (STM32_TIM1_BASE+STM32_ATIM_DCR_OFFSET)
 #  define STM32_TIM1_DMAR        (STM32_TIM1_BASE+STM32_ATIM_DMAR_OFFSET)
 #endif
@@ -157,16 +147,12 @@
 #  define STM32_TIM8_CNT         (STM32_TIM8_BASE+STM32_ATIM_CNT_OFFSET)
 #  define STM32_TIM8_PSC         (STM32_TIM8_BASE+STM32_ATIM_PSC_OFFSET)
 #  define STM32_TIM8_ARR         (STM32_TIM8_BASE+STM32_ATIM_ARR_OFFSET)
-#  ifdef CONFIG_STM32_STM32F10XX
-#    define STM32_TIM8_RCR       (STM32_TIM8_BASE+STM32_ATIM_RCR_OFFSET)
-#  endif
+#  define STM32_TIM8_RCR         (STM32_TIM8_BASE+STM32_ATIM_RCR_OFFSET)
 #  define STM32_TIM8_CCR1        (STM32_TIM8_BASE+STM32_ATIM_CCR1_OFFSET)
 #  define STM32_TIM8_CCR2        (STM32_TIM8_BASE+STM32_ATIM_CCR2_OFFSET)
 #  define STM32_TIM8_CCR3        (STM32_TIM8_BASE+STM32_ATIM_CCR3_OFFSET)
 #  define STM32_TIM8_CCR4        (STM32_TIM8_BASE+STM32_ATIM_CCR4_OFFSET)
-#  ifdef CONFIG_STM32_STM32F10XX
-#    define STM32_TIM8_BDTR      (STM32_TIM8_BASE+STM32_ATIM_BDTR_OFFSET)
-#  endif
+#  define STM32_TIM8_BDTR        (STM32_TIM8_BASE+STM32_ATIM_BDTR_OFFSET)
 #  define STM32_TIM8_DCR         (STM32_TIM8_BASE+STM32_ATIM_DCR_OFFSET)
 #  define STM32_TIM8_DMAR        (STM32_TIM8_BASE+STM32_ATIM_DMAR_OFFSET)
 #endif
@@ -402,29 +388,23 @@
 
 /* Control register 2 */
 
-#ifdef CONFIG_STM32_STM32F10XX
-#  define ATIM_CR2_CCPC           (1 << 0)  /* Bit 0:  Capture/Compare Preloaded Control */
-#  define ATIM_CR2_CCUS           (1 << 2)  /* Bit 2:  Capture/Compare Control Update Selection */
-#endif
-
+#define ATIM_CR2_CCPC             (1 << 0)  /* Bit 0:  Capture/Compare Preloaded Control */
+#define ATIM_CR2_CCUS             (1 << 2)  /* Bit 2:  Capture/Compare Control Update Selection */
 #define ATIM_CR2_CCDS             (1 << 3)  /* Bit 3:  Capture/Compare DMA Selection */
 #define ATIM_CR2_MMS_SHIFT        (4)       /* Bits 6-4: Master Mode Selection */
 #define ATIM_CR2_MMS_MASK         (7 << ATIM_CR2_MMS_SHIFT)
-#  define ATIM_CR2_OC1REF         (4 << ATIM_CR2_MMS_SHIFT) /* 100: Compare OC1REF is TRGO */
-#  define ATIM_CR2_OC2REF         (5 << ATIM_CR2_MMS_SHIFT) /* 101: Compare OC2REF is TRGO */
-#  define ATIM_CR2_OC3REF         (6 << ATIM_CR2_MMS_SHIFT) /* 110: Compare OC3REF is TRGO */
-#  define ATIM_CR2_OC4REF         (7 << ATIM_CR2_MMS_SHIFT) /* 111: Compare OC4REF is TRGO */
+#define ATIM_CR2_OC1REF           (4 << ATIM_CR2_MMS_SHIFT) /* 100: Compare OC1REF is TRGO */
+#define ATIM_CR2_OC2REF           (5 << ATIM_CR2_MMS_SHIFT) /* 101: Compare OC2REF is TRGO */
+#define ATIM_CR2_OC3REF           (6 << ATIM_CR2_MMS_SHIFT) /* 110: Compare OC3REF is TRGO */
+#define ATIM_CR2_OC4REF           (7 << ATIM_CR2_MMS_SHIFT) /* 111: Compare OC4REF is TRGO */
 #define ATIM_CR2_TI1S             (1 << 7)  /* Bit 7: TI1 Selection */
-
-#ifdef CONFIG_STM32_STM32F10XX
-#  define ATIM_CR2_OIS1           (1 << 8)  /* Bit 8:  Output Idle state 1 (OC1 output) */
-#  define ATIM_CR2_OIS1N          (1 << 9)  /* Bit 9:  Output Idle state 1 (OC1N output) */
-#  define ATIM_CR2_OIS2           (1 << 10) /* Bit 10: Output Idle state 2 (OC2 output) */
-#  define ATIM_CR2_OIS2N          (1 << 11) /* Bit 11: Output Idle state 2 (OC2N output) */
-#  define ATIM_CR2_OIS3           (1 << 12) /* Bit 12: Output Idle state 3 (OC3 output) */
-#  define ATIM_CR2_OIS3N          (1 << 13) /* Bit 13: Output Idle state 3 (OC3N output) */
-#  define ATIM_CR2_OIS4           (1 << 14) /* Bit 14: Output Idle state 4 (OC4 output) */
-#endif
+#define ATIM_CR2_OIS1             (1 << 8)  /* Bit 8:  Output Idle state 1 (OC1 output) */
+#define ATIM_CR2_OIS1N            (1 << 9)  /* Bit 9:  Output Idle state 1 (OC1N output) */
+#define ATIM_CR2_OIS2             (1 << 10) /* Bit 10: Output Idle state 2 (OC2 output) */
+#define ATIM_CR2_OIS2N            (1 << 11) /* Bit 11: Output Idle state 2 (OC2N output) */
+#define ATIM_CR2_OIS3             (1 << 12) /* Bit 12: Output Idle state 3 (OC3 output) */
+#define ATIM_CR2_OIS3N            (1 << 13) /* Bit 13: Output Idle state 3 (OC3N output) */
+#define ATIM_CR2_OIS4             (1 << 14) /* Bit 14: Output Idle state 4 (OC4 output) */
 
 /* Slave mode control register */
 
@@ -667,27 +647,15 @@
 
 #define ATIM_CCER_CC1E            (1 << 0)  /* Bit 0: Capture/Compare 1 output enable */
 #define ATIM_CCER_CC1P            (1 << 1)  /* Bit 1: Capture/Compare 1 output Polarity */
-
-#ifdef CONFIG_STM32_STM32F10XX
-#  define ATIM_CCER_CC1NE           (1 << 2)  /* Bit 2: Capture/Compare 1 Complementary output enable */
-#endif
-
+#define ATIM_CCER_CC1NE           (1 << 2)  /* Bit 2: Capture/Compare 1 Complementary output enable */
 #define ATIM_CCER_CC1NP           (1 << 3)  /* Bit 3: Capture/Compare 1 Complementary output Polarity */
 #define ATIM_CCER_CC2E            (1 << 4)  /* Bit 4: Capture/Compare 2 output enable */
 #define ATIM_CCER_CC2P            (1 << 5)  /* Bit 5: Capture/Compare 2 output Polarity */
-
-#ifdef CONFIG_STM32_STM32F10XX
-#  define ATIM_CCER_CC2NE           (1 << 6)  /* Bit 6: Capture/Compare 2 Complementary output enable */
-#endif
-
+#define ATIM_CCER_CC2NE           (1 << 6)  /* Bit 6: Capture/Compare 2 Complementary output enable */
 #define ATIM_CCER_CC2NP           (1 << 7)  /* Bit 7: Capture/Compare 2 Complementary output Polarity */
 #define ATIM_CCER_CC3E            (1 << 8)  /* Bit 8: Capture/Compare 3 output enable */
 #define ATIM_CCER_CC3P            (1 << 9)  /* Bit 9: Capture/Compare 3 output Polarity */
-
-#ifdef CONFIG_STM32_STM32F10XX
-#  define ATIM_CCER_CC3NE           (1 << 10) /* Bit 10: Capture/Compare 3 Complementary output enable */
-#endif
-
+#define ATIM_CCER_CC3NE           (1 << 10) /* Bit 10: Capture/Compare 3 Complementary output enable */
 #define ATIM_CCER_CC3NP           (1 << 11) /* Bit 11: Capture/Compare 3 Complementary output Polarity */
 #define ATIM_CCER_CC4E            (1 << 12) /* Bit 12: Capture/Compare 4 output enable */
 #define ATIM_CCER_CC4P            (1 << 13) /* Bit 13: Capture/Compare 4 output Polarity */
@@ -698,29 +666,25 @@
 
 /* Repetition counter register */
 
-#ifdef CONFIG_STM32_STM32F10XX
-#  define ATIM_RCR_REP_SHIFT      (0)       /* Bits 7-0: Repetition Counter Value */
-#  define ATIM_RCR_REP_MASK       (0xff << ATIM_RCR_REP_SHIFT)
-#endif
+#define ATIM_RCR_REP_SHIFT        (0)       /* Bits 7-0: Repetition Counter Value */
+#define ATIM_RCR_REP_MASK         (0xff << ATIM_RCR_REP_SHIFT)
 
 /* Break and dead-time register */
 
-#ifdef CONFIG_STM32_STM32F10XX
-#  define ATIM_BDTR_DTG_SHIFT     (0)       /* Bits 7:0 [7:0]: Dead-Time Generator set-up */
-#  define ATIM_BDTR_DTG_MASK      (0xff << ATIM_BDTR_DTG_SHIFT)
-#  define ATIM_BDTR_LOCK_SHIFT    (8)       /* Bits 9:8 [1:0]: Lock Configuration */
-#  define ATIM_BDTR_LOCK_MASK     (3 << ATIM_BDTR_LOCK_SHIFT)
-#    define ATIM_BDTR_LOCKOFF     (0 << ATIM_BDTR_LOCK_SHIFT) /* 00: LOCK OFF - No bit is write protected */
-#    define ATIM_BDTR_LOCK1       (1 << ATIM_BDTR_LOCK_SHIFT) /* 01: LOCK Level 1 protection */
-#    define ATIM_BDTR_LOCK2       (2 << ATIM_BDTR_LOCK_SHIFT) /* 10: LOCK Level 2 protection */
-#    define ATIM_BDTR_LOCK3       (3 << ATIM_BDTR_LOCK_SHIFT) /* 11: LOCK Level 3 protection */ */
-#  define ATIM_BDTR_OSSI          (1 << 10) /* Bit 10: Off-State Selection for Idle mode */
-#  define ATIM_BDTR_OSSR          (1 << 11) /* Bit 11: Off-State Selection for Run mode */
-#  define ATIM_BDTR_BKE           (1 << 12) /* Bit 12: Break enable */
-#  define ATIM_BDTR_BKP           (1 << 13) /* Bit 13: Break Polarity */
-#  define ATIM_BDTR_AOE           (1 << 14) /* Bit 14: Automatic Output enable */
-#  define ATIM_BDTR_MOE           (1 << 15) /* Bit 15: Main Output enable */
-#endif
+#define ATIM_BDTR_DTG_SHIFT       (0)       /* Bits 7:0 [7:0]: Dead-Time Generator set-up */
+#define ATIM_BDTR_DTG_MASK        (0xff << ATIM_BDTR_DTG_SHIFT)
+#define ATIM_BDTR_LOCK_SHIFT      (8)       /* Bits 9:8 [1:0]: Lock Configuration */
+#define ATIM_BDTR_LOCK_MASK       (3 << ATIM_BDTR_LOCK_SHIFT)
+#  define ATIM_BDTR_LOCKOFF       (0 << ATIM_BDTR_LOCK_SHIFT) /* 00: LOCK OFF - No bit is write protected */
+#  define ATIM_BDTR_LOCK1         (1 << ATIM_BDTR_LOCK_SHIFT) /* 01: LOCK Level 1 protection */
+#  define ATIM_BDTR_LOCK2         (2 << ATIM_BDTR_LOCK_SHIFT) /* 10: LOCK Level 2 protection */
+#  define ATIM_BDTR_LOCK3         (3 << ATIM_BDTR_LOCK_SHIFT) /* 11: LOCK Level 3 protection */ */
+#define ATIM_BDTR_OSSI            (1 << 10) /* Bit 10: Off-State Selection for Idle mode */
+#define ATIM_BDTR_OSSR            (1 << 11) /* Bit 11: Off-State Selection for Run mode */
+#define ATIM_BDTR_BKE             (1 << 12) /* Bit 12: Break enable */
+#define ATIM_BDTR_BKP             (1 << 13) /* Bit 13: Break Polarity */
+#define ATIM_BDTR_AOE             (1 << 14) /* Bit 14: Automatic Output enable */
+#define ATIM_BDTR_MOE             (1 << 15) /* Bit 15: Main Output enable */
 
 /* DMA control register */
 
@@ -843,7 +807,7 @@
 #define GTIM_SR_CC3OF             (1 << 11) /* Bit 11: Capture/Compare 3 Overcapture Flag (TIM2-5 only) */
 #define GTIM_SR_CC4OF             (1 << 12) /* Bit 12: Capture/Compare 4 Overcapture Flag (TIM2-5 only) */
 
-/* Event generation register (TIM2-5 and TIM9-14) (TIM2-5 and TIM9-14) */
+/* Event generation register (TIM2-5 and TIM9-14) */
 
 #define GTIM_EGR_UG               (1 << 0)  /* Bit 0: Update generation */
 #define GTIM_EGR_CC1G             (1 << 1)  /* Bit 1: Capture/compare 1 generation */
