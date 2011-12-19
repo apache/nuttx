@@ -115,7 +115,7 @@
 struct pwm_info_s
 {
   uint32_t frequency; /* Frequency of the pulse train */
-  b16_t    duty;      /* Duty of the pulse train, "1" to "0" duration */
+  ub16_t   duty;      /* Duty of the pulse train, "1" to "0" duration */
 };
 
 /* This type is used to return pulse counts */
@@ -211,7 +211,7 @@ extern "C" {
 #endif
 
 /****************************************************************************
- * "Upper-Half" ADC Driver Interfaces
+ * "Upper-Half" PWM Driver Interfaces
  ****************************************************************************/
 /****************************************************************************
  * Name: pwm_register
@@ -241,7 +241,7 @@ extern "C" {
 int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev);
 
 /****************************************************************************
- * Platform-Independent "Lower-Half" ADC Driver Interfaces
+ * Platform-Independent "Lower-Half" PWM Driver Interfaces
  ****************************************************************************/
 
 #undef EXTERN

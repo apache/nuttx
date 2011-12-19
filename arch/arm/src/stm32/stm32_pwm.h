@@ -49,7 +49,6 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32_tim.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -76,12 +75,6 @@
 #ifndef CONFIG_STM32_TIM5
 #  undef CONFIG_STM32_TIM5_PWM
 #endif
-#ifndef CONFIG_STM32_TIM6
-#  undef CONFIG_STM32_TIM6_PWM
-#endif
-#ifndef CONFIG_STM32_TIM7
-#  undef CONFIG_STM32_TIM7_PWM
-#endif
 #ifndef CONFIG_STM32_TIM8
 #  undef CONFIG_STM32_TIM8_PWM
 #endif
@@ -102,6 +95,228 @@
 #endif
 #ifndef CONFIG_STM32_TIM14
 #  undef CONFIG_STM32_TIM14_PWM
+#endif
+
+/* The basic timers (timer 6 and 7) are not capable of generating output pulses */
+
+#undef CONFIG_STM32_TIM6_PWM
+#undef CONFIG_STM32_TIM7_PWM
+
+/* Check if PWM support for any channel is enabled. */
+
+#if defined(CONFIG_STM32_TIM1_PWM)  || defined(CONFIG_STM32_TIM2_PWM)  || \
+    defined(CONFIG_STM32_TIM3_PWM)  || defined(CONFIG_STM32_TIM4_PWM)  || \
+    defined(CONFIG_STM32_TIM5_PWM)  || defined(CONFIG_STM32_TIM8_PWM)  || \
+    defined(CONFIG_STM32_TIM9_PWM)  || defined(CONFIG_STM32_TIM10_PWM) || \
+    defined(CONFIG_STM32_TIM11_PWM) || defined(CONFIG_STM32_TIM12_PWM) || \
+    defined(CONFIG_STM32_TIM13_PWM) || defined(CONFIG_STM32_TIM14_PWM)
+
+#include <arch/board/board.h>
+#include "chip/stm32_tim.h"
+
+/* For each timer that is enabled for PWM usage, we need the following additional
+ * configuration settings:
+ *
+ * CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
+ * PWM_TIMx_CHn - One of the values defined in chip/stm32*_pinmap.h.  In the case
+ *   where there are multiple pin selections, the correct setting must be provided
+ *   in the arch/board/board.h file.
+ *
+ * NOTE: The STM32 timers are each capable of generating different signals on
+ * each of the four channels with different duty cycles.  That capability is
+ * not supported by this driver:  Only one output channel per timer.
+ */
+
+#ifdef CONFIG_STM32_TIM1_PWM
+#  if !defined(CONFIG_STM32_TIM1_CHANNEL)
+#    error "CONFIG_STM32_TIM1_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM1_CHANNEL == 1
+#    define PWM_TIM1_PINCFG GPIO_TIM1_CH1
+#  elif CONFIG_STM32_TIM1_CHANNEL == 2
+#    define PWM_TIM1_PINCFG GPIO_TIM1_CH2
+#  elif CONFIG_STM32_TIM1_CHANNEL == 3
+#    define PWM_TIM1_PINCFG GPIO_TIM1_CH3
+#  elif CONFIG_STM32_TIM1_CHANNEL == 4
+#    define PWM_TIM1_PINCFG GPIO_TIM1_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM1_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_TIM2_PWM
+#  if !defined(CONFIG_STM32_TIM2_CHANNEL)
+#    error "CONFIG_STM32_TIM2_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM2_CHANNEL == 1
+#    define PWM_TIM2_PINCFG GPIO_TIM2_CH1
+#  elif CONFIG_STM32_TIM2_CHANNEL == 2
+#    define PWM_TIM2_PINCFG GPIO_TIM2_CH2
+#  elif CONFIG_STM32_TIM2_CHANNEL == 3
+#    define PWM_TIM2_PINCFG GPIO_TIM2_CH3
+#  elif CONFIG_STM32_TIM2_CHANNEL == 4
+#    define PWM_TIM2_PINCFG GPIO_TIM2_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM2_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_TIM3_PWM
+#  if !defined(CONFIG_STM32_TIM3_CHANNEL)
+#    error "CONFIG_STM32_TIM3_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM3_CHANNEL == 1
+#    define PWM_TIM3_PINCFG GPIO_TIM3_CH1
+#  elif CONFIG_STM32_TIM3_CHANNEL == 2
+#    define PWM_TIM3_PINCFG GPIO_TIM3_CH2
+#  elif CONFIG_STM32_TIM3_CHANNEL == 3
+#    define PWM_TIM3_PINCFG GPIO_TIM3_CH3
+#  elif CONFIG_STM32_TIM3_CHANNEL == 4
+#    define PWM_TIM3_PINCFG GPIO_TIM3_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM3_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_TIM4_PWM
+#  if !defined(CONFIG_STM32_TIM4_CHANNEL)
+#    error "CONFIG_STM32_TIM4_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM4_CHANNEL == 1
+#    define PWM_TIM4_PINCFG GPIO_TIM4_CH1
+#  elif CONFIG_STM32_TIM4_CHANNEL == 2
+#    define PWM_TIM4_PINCFG GPIO_TIM4_CH2
+#  elif CONFIG_STM32_TIM4_CHANNEL == 3
+#    define PWM_TIM4_PINCFG GPIO_TIM4_CH3
+#  elif CONFIG_STM32_TIM4_CHANNEL == 4
+#    define PWM_TIM4_PINCFG GPIO_TIM4_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM4_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_TIM5_PWM
+#  if !defined(CONFIG_STM32_TIM5_CHANNEL)
+#    error "CONFIG_STM32_TIM5_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM5_CHANNEL == 1
+#    define PWM_TIM5_PINCFG GPIO_TIM5_CH1
+#  elif CONFIG_STM32_TIM5_CHANNEL == 2
+#    define PWM_TIM5_PINCFG GPIO_TIM5_CH2
+#  elif CONFIG_STM32_TIM5_CHANNEL == 3
+#    define PWM_TIM5_PINCFG GPIO_TIM5_CH3
+#  elif CONFIG_STM32_TIM5_CHANNEL == 4
+#    define PWM_TIM5_PINCFG GPIO_TIM5_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM5_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_TIM8_PWM
+#  if !defined(CONFIG_STM32_TIM8_CHANNEL)
+#    error "CONFIG_STM32_TIM8_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM8_CHANNEL == 1
+#    define PWM_TIM8_PINCFG GPIO_TIM8_CH1
+#  elif CONFIG_STM32_TIM8_CHANNEL == 2
+#    define PWM_TIM8_PINCFG GPIO_TIM8_CH2
+#  elif CONFIG_STM32_TIM8_CHANNEL == 3
+#    define PWM_TIM8_PINCFG GPIO_TIM8_CH3
+#  elif CONFIG_STM32_TIM8_CHANNEL == 4
+#    define PWM_TIM8_PINCFG GPIO_TIM8_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM8_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_TIM9_PWM
+#  if !defined(CONFIG_STM32_TIM9_CHANNEL)
+#    error "CONFIG_STM32_TIM9_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM9_CHANNEL == 1
+#    define PWM_TIM9_PINCFG GPIO_TIM9_CH1
+#  elif CONFIG_STM32_TIM9_CHANNEL == 2
+#    define PWM_TIM9_PINCFG GPIO_TIM9_CH2
+#  elif CONFIG_STM32_TIM9_CHANNEL == 3
+#    define PWM_TIM9_PINCFG GPIO_TIM9_CH3
+#  elif CONFIG_STM32_TIM9_CHANNEL == 4
+#    define PWM_TIM9_PINCFG GPIO_TIM9_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM9_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_TIM10_PWM
+#  if !defined(CONFIG_STM32_TIM10_CHANNEL)
+#    error "CONFIG_STM32_TIM10_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM10_CHANNEL == 1
+#    define PWM_TIM10_PINCFG GPIO_TIM10_CH1
+#  elif CONFIG_STM32_TIM10_CHANNEL == 2
+#    define PWM_TIM10_PINCFG GPIO_TIM10_CH2
+#  elif CONFIG_STM32_TIM10_CHANNEL == 3
+#    define PWM_TIM10_PINCFG GPIO_TIM10_CH3
+#  elif CONFIG_STM32_TIM10_CHANNEL == 4
+#    define PWM_TIM10_PINCFG GPIO_TIM10_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM10_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_TIM11_PWM
+#  if !defined(CONFIG_STM32_TIM11_CHANNEL)
+#    error "CONFIG_STM32_TIM11_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM11_CHANNEL == 1
+#    define PWM_TIM11_PINCFG GPIO_TIM11_CH1
+#  elif CONFIG_STM32_TIM11_CHANNEL == 2
+#    define PWM_TIM11_PINCFG GPIO_TIM11_CH2
+#  elif CONFIG_STM32_TIM11_CHANNEL == 3
+#    define PWM_TIM11_PINCFG GPIO_TIM11_CH3
+#  elif CONFIG_STM32_TIM11_CHANNEL == 4
+#    define PWM_TIM11_PINCFG GPIO_TIM11_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM11_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_TIM12_PWM
+#  if !defined(CONFIG_STM32_TIM12_CHANNEL)
+#    error "CONFIG_STM32_TIM12_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM12_CHANNEL == 1
+#    define PWM_TIM12_PINCFG GPIO_TIM12_CH1
+#  elif CONFIG_STM32_TIM12_CHANNEL == 2
+#    define PWM_TIM12_PINCFG GPIO_TIM12_CH2
+#  elif CONFIG_STM32_TIM12_CHANNEL == 3
+#    define PWM_TIM12_PINCFG GPIO_TIM12_CH3
+#  elif CONFIG_STM32_TIM12_CHANNEL == 4
+#    define PWM_TIM12_PINCFG GPIO_TIM12_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM12_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_TIM13_PWM
+#  if !defined(CONFIG_STM32_TIM13_CHANNEL)
+#    error "CONFIG_STM32_TIM13_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM13_CHANNEL == 1
+#    define PWM_TIM13_PINCFG GPIO_TIM13_CH1
+#  elif CONFIG_STM32_TIM13_CHANNEL == 2
+#    define PWM_TIM13_PINCFG GPIO_TIM13_CH2
+#  elif CONFIG_STM32_TIM13_CHANNEL == 3
+#    define PWM_TIM13_PINCFG GPIO_TIM13_CH3
+#  elif CONFIG_STM32_TIM13_CHANNEL == 4
+#    define PWM_TIM13_PINCFG GPIO_TIM13_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM13_CHANNEL"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_TIM14_PWM)
+#  if !defined(CONFIG_STM32_TIM14_CHANNEL)
+#    error "CONFIG_STM32_TIM14_CHANNEL must be provided"
+#  elif CONFIG_STM32_TIM14_CHANNEL == 1
+#    define PWM_TIM14_PINCFG GPIO_TIM14_CH1
+#  elif CONFIG_STM32_TIM14_CHANNEL == 2
+#    define PWM_TIM14_PINCFG GPIO_TIM14_CH2
+#  elif CONFIG_STM32_TIM14_CHANNEL == 3
+#    define PWM_TIM14_PINCFG GPIO_TIM14_CH3
+#  elif CONFIG_STM32_TIM14_CHANNEL == 4
+#    define PWM_TIM14_PINCFG GPIO_TIM14_CH4
+#  else
+#    error "Unsupported value of CONFIG_STM32_TIM14_CHANNEL"
+#  endif
 #endif
 
 /************************************************************************************
@@ -151,4 +366,5 @@ EXTERN FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* CONFIG_STM32_TIMx_PWM */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_TIM_H */

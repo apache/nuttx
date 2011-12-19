@@ -162,7 +162,7 @@ static void rtc_dumpregs(FAR const char *msg)
   rtclldbg("     BK0: %08x\n", getreg32(STM32_RTC_BK0R));
 }
 #else
-#  define tc_dumpregs(msg)
+#  define rtc_dumpregs(msg)
 #endif
 
 /************************************************************************************
