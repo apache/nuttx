@@ -492,8 +492,6 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_STM32_TIM3_PWM
 	CONFIG_STM32_TIM4_PWM
 	CONFIG_STM32_TIM5_PWM
-	CONFIG_STM32_TIM6_PWM
-	CONFIG_STM32_TIM7_PWM
 	CONFIG_STM32_TIM8_PWM
 
 	CONFIG_STM32_TIM1_ADC
@@ -514,7 +512,16 @@ STM3210E-EVAL-specific Configuration Options
 	CONFIG_STM32_TIM7_DAC
 	CONFIG_STM32_TIM8_DAC
 
-    Alternate pin mappings (should not be used with the STM3210E-EVAL board):
+  For each timer that is enabled for PWM usage, we need the following additional
+  configuration settings:
+
+	CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
+ 
+  NOTE: The STM32 timers are each capable of generating different signals on
+  each of the four channels with different duty cycles.  That capability is
+  not supported by this driver:  Only one output channel per timer.
+
+  Alternate pin mappings (should not be used with the STM3210E-EVAL board):
 
 	CONFIG_STM32_TIM1_FULL_REMAP
 	CONFIG_STM32_TIM1_PARTIAL_REMAP
