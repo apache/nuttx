@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/stm3240g-eval/src/up_adc.c
- * arch/arm/src/board/up_adc.c
+ * configs/stm3240g-eval/src/up_can.c
+ * arch/arm/src/board/up_can.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,39 +40,51 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/analog/adc.h>
+#include <nuttx/can.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
 #include "up_arch.h"
 
-#include "stm32_pwm.h"
+#include "stm32.h"
+#include "stm32_can.h"
 #include "stm3240g-internal.h"
 
-#ifdef CONFIG_ADC
+#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration ********************************************************************/
 
-/* Configuration ************************************************************/
-/* Up to 3 ADC interfaces are supported */
-
-#if STM32_NADC < 3
-#  undef CONFIG_STM32_ADC3
+#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
+#  warning "Both CAN1 and CAN2 are enabled.  Assuming only CAN1."
+#  undef CONFIG_STM32_CAN2
 #endif
 
-#if STM32_NADC < 2
-#  undef CONFIG_STM32_ADC2
+#ifdef CONFIG_STM32_CAN1
+#  define CAN_PORT 1
+#else
+#  define CAN_PORT 2
 #endif
 
-#if STM32_NADC < 1
-#  undef CONFIG_STM32_ADC1
-#endif
+/* Debug ***************************************************************************/
+/* Non-standard debug that may be enabled just for testing CAN */
 
-#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
+#ifdef CONFIG_DEBUG_CAN
+#  define candbg    dbg
+#  define canvdbg   vdbg
+#  define canlldbg  lldbg
+#  define canllvdbg llvdbg
+#else
+#  define candbg(x...)
+#  define canvdbg(x...)
+#  define canlldbg(x...)
+#  define canllvdbg(x...)
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -83,36 +95,39 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: adc_devinit
+ * Name: can_devinit
  *
  * Description:
  *   All STM32 architectures must provide the following interface to work with
- *   examples/adc.
+ *   examples/can.
  *
  ************************************************************************************/
 
-int adc_devinit(void)
+int can_devinit(void)
 {
   static bool initialized = false;
-  struct adc_dev_s *adc;
+  struct can_dev_s *can;
   int ret;
 
   /* Check if we have already initialized */
 
   if (!initialized)
     {
-      /* Configure the pins as analog inputs for the selected channels */
-#warning "Missing Logic"
+      /* Call stm32_caninitialize() to get an instance of the CAN interface */
 
-      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
-#warning "Missing Logic"
+      can = stm32_caninitialize(CAN_PORT);
+      if (can == NULL)
+        {
+          candbg("ERROR:  Failed to get CAN interface\n");
+          return -ENODEV;
+        }
 
-      /* Register the ADC driver at "/dev/adc0" */
+      /* Register the CAN driver at "/dev/can0" */
 
-      ret = adc_register("/dev/adc0", adc);
+      ret = can_register("/dev/can0", can);
       if (ret < 0)
         {
-          adbg("adc_register failed: %d\n", ret);
+          candbg("ERROR: can_register failed: %d\n", ret);
           return ret;
         }
 
@@ -124,5 +139,4 @@ int adc_devinit(void)
   return OK;
 }
 
-#endif /* CONFIG_STM32_ADC || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
-#endif /* CONFIG_ADC */
+#endif /* CONFIG_STM32_CAN || CONFIG_STM32_CAN2 || CONFIG_STM32_CAN3 */
