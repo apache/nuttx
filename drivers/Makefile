@@ -65,12 +65,15 @@ include wireless/Make.defs
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
   CSRCS += dev_null.c dev_zero.c loop.c
+
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
   CSRCS += ramdisk.c rwbuffer.c
 endif
-ifneq ($(CONFIG_CAN),y)
+
+ifeq ($(CONFIG_CAN),y)
   CSRCS += can.c
 endif
+
 ifeq ($(CONFIG_PWM),y)
   CSRCS += pwm.c
 endif
