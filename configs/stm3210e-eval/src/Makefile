@@ -60,6 +60,10 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS		+= up_usbmsc.c
 endif
 
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS		+= up_composite.c
+endif
+
 ifeq ($(CONFIG_I2C_LM75),y)
 CSRCS		+= up_lm75.c
 endif
