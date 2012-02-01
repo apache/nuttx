@@ -49,16 +49,8 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* In some systems, the underlying serial logic may
- * automatically echo characters back to the console.  We
- * will assume that that is not the case here
- */
-
-#define CONFIG_FGETS_ECHO 1
-
-/* Some environments may return CR as end-of-line, others LF, and
- * others both.  The logic here assumes either but not both.
+/* Some environments may return CR as end-of-line, others LF, and others
+ * both.  The logic here assumes either but not both.
  */
 
 #undef  CONFIG_EOL_IS_CR
@@ -82,55 +74,9 @@
  * Private Data
  ****************************************************************************/
 
-/* <esc>[K is the VT100 command erases to the end of the line. */
-
-static const char g_erasetoeol[] = "\033[K";
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: _lib_rawgetc
- ****************************************************************************/
-
-static inline int _lib_rawgetc(int fd)
-{
-  char buffer;
-  ssize_t nread;
-
-  nread = read(fd, &buffer, 1);
-  if (nread < 1)
-    {
-      /* Return EOF if the end of file (0) or error (-1) occurs */
-
-      return EOF;
-    }
-  return (int)buffer;
-}
-
-/****************************************************************************
- * Name: _lib_consoleputc
- ****************************************************************************/
-
-#ifdef CONFIG_FGETS_ECHO
-static inline void _lib_consoleputc(int ch)
-{
-  char buffer = ch;
-  (void)write(1, &buffer, 1);
-}
-#endif
-
-/****************************************************************************
- * Name: _lib_consoleputs
- ****************************************************************************/
-
-#ifdef CONFIG_FGETS_ECHO
-static inline void _lib_consoleputs(FAR const char *str)
-{
-  (void)write(1, str, strlen(str));
-}
-#endif
 
 /****************************************************************************
  * Global Functions
@@ -140,28 +86,16 @@ static inline void _lib_consoleputs(FAR const char *str)
  * Name: fgets
  *
  * Description:
- *   fgets() reads in at most one less than 'buflen' characters
- *   from stream and stores them into the buffer pointed to
- *   by 'buf'. Reading stops after an EOF or a newline.  If a
- *   newline is read, it is stored into the buffer.  A null
- *   terminator is stored after the last character in the
+ *   fgets() reads in at most one less than 'buflen' characters from stream
+ *   and stores them into the buffer pointed to by 'buf'. Reading stops after
+ *   an EOF or a newline.  If a newline is read, it is stored into the
+ *   buffer.  A null terminator is stored after the last character in the
  *   buffer.
- *
- * Assumptions:
- *   If the stream corresponds to stdin (fd=0) this version
- *   will assume that we are reading characters from a
- *   VT100 console and that stdout (fd=1) is also available.
- *   This will not work well if fd=0 corresponds to a raw
- *   byte steam.
  *
  **************************************************************************/
 
 char *fgets(FAR char *buf, int buflen, FILE *stream)
 {
-#ifdef CONFIG_FGETS_ECHO
-  bool console;
-#endif
-  int  escape = 0;
   int  nch = 0;
 
   /* Sanity checks */
@@ -177,86 +111,16 @@ char *fgets(FAR char *buf, int buflen, FILE *stream)
       return buf;
     }
 
-  /* Check if the stream is stdin */
-
-#ifdef CONFIG_FGETS_ECHO
-  console = (stream->fs_filedes == 0);
-
-  /* <esc>[K is the VT100 command that erases to the end of the line. */
-
-  if (console)
-    {
-      _lib_consoleputs(g_erasetoeol);
-    }
-#endif
-
-  /* Read characters until we have a full line. On each
-   * the loop we must be assured that there are two free bytes
-   * in the line buffer:  One for the next character and one for
-   * the null terminator.
+  /* Read characters until we have a full line. On each the loop we must
+   * be assured that there are two free bytes in the line buffer:  One for
+   * the next character and one for the null terminator.
    */
 
   for(;;)
     {
       /* Get the next character */
 
-      int ch = _lib_rawgetc(stream->fs_filedes);
-
-      /* Are we processing a VT100 escape sequence */
-
-      if (escape)
-        {
-          /* Yes, is it an <esc>[, 3 byte sequence */
-
-          if (ch != 0x5b || escape == 2)
-            {
-              /* We are finished with the escape sequence */
-
-              escape = 0;
-              ch = 'a';
-            }
-          else
-            {
-              /* The next character is the end of a 3-byte sequence.
-               * NOTE:  Some of the <esc>[ sequences are longer than
-               * 3-bytes, but I have not encountered any in normal use
-               * yet and, so, have not provided the decoding logic.
-               */
-
-              escape = 2;
-            }
-        }
-
-      /* Check for backspace */
-
-      else if (ch == 0x08)
-        {
-          /* Eliminate that last character in the buffer. */
-
-          if (nch > 0)
-            {
-              nch--;
-
-#ifdef CONFIG_FGETS_ECHO
-              if (console)
-                {
-                  /* Echo the backspace character on the console */
-
-                  _lib_consoleputc(ch);
-                  _lib_consoleputs(g_erasetoeol);
-                }
-#endif
-            }
-        }
-
-      /* Check for the beginning of a VT100 escape sequence */
-
-      else if (console && ch == 0x1b)
-        {
-          /* The next character is escaped */
-
-          escape = 1;
-        }
+      int ch = fgetc(stream);
 
       /* Check for end-of-line.  This is tricky only in that some
        * environments may return CR as end-of-line, others LF, and
@@ -264,28 +128,19 @@ char *fgets(FAR char *buf, int buflen, FILE *stream)
        */
 
 #if  defined(CONFIG_EOL_IS_LF) || defined(CONFIG_EOL_IS_BOTH_CRLF)
-      else if (ch == '\n')
+      if (ch == '\n')
 #elif defined(CONFIG_EOL_IS_CR)
-      else if (ch == '\r')
+      if (ch == '\r')
 #elif CONFIG_EOL_IS_EITHER_CRLF
-      else if (ch == '\n' || ch == '\r')
+      if (ch == '\n' || ch == '\r')
 #endif
         {
-          /* The newline is stored in the buffer along
-           * with the null terminator.
+          /* The newline is stored in the buffer along with the null
+           * terminator.
            */
 
           buf[nch++] = '\n';
           buf[nch]   = '\0';
-
-#ifdef CONFIG_FGETS_ECHO
-          if (console)
-            {
-              /* Echo the newline to the console */
-
-              _lib_consoleputc('\n');
-            }
-#endif
           return buf;
         }
 
@@ -310,25 +165,16 @@ char *fgets(FAR char *buf, int buflen, FILE *stream)
             }
         }
 
-      /* Otherwise, check if the character is printable and,
-       * if so, put the character in the line buffer
+      /* Otherwise, check if the character is printable and, if so, put the
+       * character in the line buffer
        */
 
       else if (isprint(ch))
         {
           buf[nch++] = ch;
 
-#ifdef CONFIG_FGETS_ECHO
-          if (console)
-            {
-              /* Echo the character to the console */
-
-              _lib_consoleputc(ch);
-            }
-#endif
-          /* Check if there is room for another character
-           * and the line's null terminator.  If not then
-           * we have to end the line now.
+          /* Check if there is room for another character and the line's
+           * null terminator.  If not then we have to end the line now.
            */
 
           if (nch + 1 >= buflen)
@@ -338,6 +184,5 @@ char *fgets(FAR char *buf, int buflen, FILE *stream)
             }
         }
     }
-
 }
 

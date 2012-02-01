@@ -1,8 +1,8 @@
 /****************************************************************************
  * lib/stdio/lib_gets.c
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright (C) 2007-2008, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -85,31 +85,27 @@
  * Name: gets
  *
  * Description:
- *   gets() reads a line from stdin into the buffer pointed
- *   to by s until either a terminating newline or EOF,
- *   which it replaces with '\0'.  No check for buffer
- *   overrun is performed
+ *   gets() reads a line from stdin into the buffer pointed to by s until
+ *   either a terminating newline or EOF, which it replaces with '\0'.  No
+ *   check for buffer overrun is performed
  *
- *   This API should not be used because it is inherently
- *   unsafe.  Consider using fgets which is safer and
- *   slightly more efficient.
+ *   This API should not be used because it is inherently unsafe.  Consider
+ *   using fgets which is safer and slightly more efficient.
  *
  **************************************************************************/
 
 FAR char *gets(FAR char *s)
 {
-  /* gets is ALMOST the same as fgets using stdin and no
-   * length limit (hence, the unsafeness of gets).  So let
-   * fgets do most of the work.
+  /* gets is ALMOST the same as fgets using stdin and no length limit
+   * (hence, the unsafeness of gets).  So let fgets do most of the work.
    */
 
   FAR char *ret = fgets(s, INT_MAX, stdin);
   if (ret)
     {
-      /* Another subtle difference from fgets is that gets
-       * replaces end-of-line markers with null terminators.
-       * We will do that as a second step (with some loss
-       * in performance).
+      /* Another subtle difference from fgets is that gets replaces
+       * end-of-line markers with null terminators. We will do that as
+       * a second step (with some loss in performance).
        */
 
       int len = strlen(ret);
@@ -118,6 +114,7 @@ FAR char *gets(FAR char *s)
            ret[len-1] = '\0';
         }
     }
+
   return ret;
 }
 
