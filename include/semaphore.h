@@ -71,7 +71,13 @@ struct semholder_s
   void   *holder;               /* Holder TCB (actual type is _TCB) */
   int16_t counts;               /* Number of counts owned by this holder */
 };
+
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  define SEMHOLDER_INITIALIZER {NULL, NULL, 0}
+#else
+#  define SEMHOLDER_INITIALIZER {NULL, 0}
 #endif
+#endif /* CONFIG_PRIORITY_INHERITANCE */
 
 /* This is the generic semaphore structure. */
 
@@ -84,6 +90,12 @@ struct sem_s
 #endif
 };
 typedef struct sem_s sem_t;
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+#  define SEM_INITIALIZER(c) {(c), SEMHOLDER_INITIALIZER}
+#else
+#  define SEM_INITIALIZER(c) {(c)}
+#endif
 
 /****************************************************************************
  * Public Variables
