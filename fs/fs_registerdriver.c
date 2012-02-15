@@ -1,8 +1,8 @@
 /****************************************************************************
  * fs/fs_registerdriver.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <spudmonkey@racsa.co.cr>
+ *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -65,34 +65,51 @@
 
 /****************************************************************************
  * Name: register_driver
+ *
+ * Description:
+ *   Register a character driver inode the pseudo file system.
+ *
+ * Input parameters:
+ *   path - The path to the inode to create
+ *   fops - The file operations structure
+ *   mode - inmode priviledges (not used)
+ *   priv - Private, user data that will be associated with the inode.
+ *
+ * Returned Value:
+ *   Zero on success (with the inode point in 'inode'); A negated errno
+ *   value is returned on a failure (all error values returned by
+ *   inode_reserve):
+ *
+ *   EINVAL - 'path' is invalid for this operation
+ *   EEXIST - An inode already exists at 'path'
+ *   ENOMEM - Failed to allocate in-memory resources for the operation
+ *
  ****************************************************************************/
 
-int register_driver(const char *path, const struct file_operations *fops,
-                       mode_t mode, void *priv)
+int register_driver(FAR const char *path, FAR const struct file_operations *fops,
+                    mode_t mode, FAR void *priv)
 {
-  struct inode *node;
-  int ret = ERROR;
+  FAR struct inode *node;
+  int ret;
 
-  /* Insert a dummy node -- we need to hold the inode semaphore
-   * to do this because we will have a momentarily bad structure.
+  /* Insert a dummy node -- we need to hold the inode semaphore because we
+   * will have a momentarily bad structure.
    */
 
   inode_semtake();
-  node = inode_reserve(path);
-  if (node != NULL)
+  ret = inode_reserve(path, &node);
+  if (ret >= 0)
     {
-        /* We have it, now populate it with driver specific
-         * information.
-         */
+      /* We have it, now populate it with driver specific information. */
 
-        INODE_SET_DRIVER(node);
+      INODE_SET_DRIVER(node);
 
-        node->u.i_ops   = fops;
+      node->u.i_ops   = fops;
 #ifdef CONFIG_FILE_MODE
-        node->i_mode    = mode;
+      node->i_mode    = mode;
 #endif
-        node->i_private = priv;
-        ret             = OK;
+      node->i_private = priv;
+      ret             = OK;
     }
 
   inode_semgive();
