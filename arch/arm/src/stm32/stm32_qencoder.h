@@ -96,11 +96,11 @@
  *
  * Description:
  *   Initialize a quadrature encoder interface.  This function must be called from
- *   board-specific logic after input pins have been configured.
+ *   board-specific logic..
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/qe0"
- *   tim     - The timer number to used.  time must be an element of {1,2,3,4,5,8}
+ *   tim     - The timer number to used.  'tim' must be an element of {1,2,3,4,5,8}
  *
  * Returned Values:
  *   Zero on success; A negated errno value is returned on failure.
