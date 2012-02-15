@@ -51,3 +51,7 @@ endif
 ifeq ($(CONFIG_PWM),y)
 CONFIGURED_APPS += examples/pwm
 endif
+
+ifeq ($(CONFIG_QENCODER),y)
+CONFIGURED_APPS += examples/qencoder
+endif
