@@ -1,7 +1,7 @@
 ############################################################################
-# configs/sure-pic32mx/src/Makefile
+# configs/sure-pic32mx/usbnsh/appconfig
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,71 +33,15 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+############################################################################
+# Path to example in apps/examples containing the user_start entry point
+############################################################################
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CONFIGURED_APPS += examples/nsh
 
-ASRCS		= 
-CSRCS		= up_boot.c up_spi.c
+############################################################################
+# The NSH application library
+############################################################################
 
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS		+= up_leds.c
-endif
-
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS		+= up_buttons.c
-endif
-
-ifeq ($(CONFIG_PIC32MX_USBDEV),y)
-CSRCS		+= up_usbdev.c
-ifeq ($(CONFIG_EXAMPLES_USBTERM_DEVINIT),y)
-CSRCS		+= up_usbterm.c
-endif
-endif
-
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
-endif
-
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
-
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
-
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/mips32}"
-else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/mips32
-endif
-
-all: libboard$(LIBEXT)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	@( for obj in $(OBJS) ; do \
-		$(call ARCHIVE, $@, $${obj}); \
-	done ; )
-
-.depend: Makefile $(SRCS)
-	@$(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	@touch $@
-
-depend: .depend
-
-clean:
-	@rm -f libboard$(LIBEXT) *~ .*.swp
-	$(call CLEAN)
-
-distclean: clean
-	@rm -f Make.dep .depend
-
--include Make.dep
+CONFIGURED_APPS += system/readline
+CONFIGURED_APPS += nshlib
