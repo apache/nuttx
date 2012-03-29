@@ -1,7 +1,7 @@
-############################################################################
-# configs/stm3210e-eval/nsh2/appconfig
+#!/bin/bash
+# configs/stm3210e-eval/nxconsole/setenv.sh
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,33 +31,32 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
-# Path to example in apps/examples containing the user_start entry point
+if [ "$_" = "$0" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-CONFIGURED_APPS += examples/nsh
+WD=`pwd`
+if [ ! -x "setenv.sh" ]; then
+  echo "This script must be executed from the top-level NuttX build directory"
+  exit 1
+fi
 
-# The NSH application library
+if [ -z "${PATH_ORIG}" ]; then
+  export PATH_ORIG="${PATH}"
+fi
 
-CONFIGURED_APPS += system/readline
-CONFIGURED_APPS += nshlib
+# This the Cygwin path to the location where I installed the CodeSourcery
+# toolchain under windows.  You will also have to edit this if you install
+# the CodeSourcery toolchain in any other location
+export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
 
-# The NX and NXHELLO examples configured as an NX built-in commands
-# Various NX tests can be supported, simply comment-out examples/nx and
-# uncomment the test you wish to perform
+# This the Cygwin path to the location where I build the buildroot
+# toolchain.
+#export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 
-CONFIGURED_APPS += examples/nx
-CONFIGURED_APPS += examples/nxhello
-#CONFIGURED_APPS += examples/nxlines
-#CONFIGURED_APPS += examples/nxtext
-CONFIGURED_APPS += examples/usbstorage
+# Add the path to the toolchain to the PATH varialble
+export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
-ifeq ($(CONFIG_I2C),y)
-CONFIGURED_APPS += system/i2c
-endif
-
-# Applications configured as an NX built-in commands
-
-ifeq ($(CONFIG_CAN),y)
-CONFIGURED_APPS += examples/can
-endif
+echo "PATH : ${PATH}"
