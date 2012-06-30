@@ -107,8 +107,16 @@ int stm32_pmstop(bool lpds)
   regval |= NVIC_SYSCON_SLEEPDEEP;
   putreg32(regval, NVIC_SYSCON);
   
-  /* Sleep until the wakeup interrupt occurs (us WFE to wait for an event) */
+  /* Sleep until the wakeup interrupt or event occurs */
 
-  asm("WFI");
+#ifdef CONFIG_PM_WFE
+  /* Mode: SLEEP + Entry with WFE */
+
+  __asm("wfe");
+#else
+  /* Mode: SLEEP + Entry with WFI */
+
+  __asm("wfi");
+#endif
   return OK;
 }
