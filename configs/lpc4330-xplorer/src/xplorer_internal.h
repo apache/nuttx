@@ -85,6 +85,22 @@
 
 #define LPC4330_XPLORER_BUT1_IRQ  LPC43_IRQ_P0p23
 
+#define GPIO_SSP0_SCK  GPIO_SSP0_SCK_1
+#define GPIO_SSP0_SSEL GPIO_SSP0_SSEL_1
+#define GPIO_SSP0_MISO GPIO_SSP0_MISO_1
+#define GPIO_SSP0_MOSI GPIO_SSP0_MOSI_1
+
+/* We need to redefine USB_PWRD as GPIO to get USB Host working
+ * Also remember to add 2 resistors of 15K to D+ and D- pins.
+ */
+
+#ifdef CONFIG_USBHOST
+#  ifdef GPIO_USB_PWRD
+#    undef  GPIO_USB_PWRD
+#    define GPIO_USB_PWRD  (GPIO_INPUT | GPIO_PORT1 | GPIO_PIN22)
+#  endif
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
