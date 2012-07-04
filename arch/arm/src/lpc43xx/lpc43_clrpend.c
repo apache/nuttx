@@ -1,5 +1,6 @@
 /****************************************************************************
- * arch/arm/src/lpc43xx/lpc43_lowputc.h
+ * arch/arm/src/lpc43/lpc43_clrpend.c
+ * arch/arm/src/chip/lpc43_clrpend.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,56 +34,66 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H
-#define __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <arch/irq.h>
+
+#include "nvic.h"
+#include "up_arch.h"
+
+#include "lpc43_irq.h"
 
 /****************************************************************************
- * Public Types
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_lowsetup
+ * Name: lpc43_clrpend
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level
- *   initialization of the serial console.
+ *   Clear a pending interrupt at the NVIC.  This does not seem to be required
+ *   for most interrupts.  Don't know why... but the LPC4366 Ethernet EMAC
+ *   interrupt definitely needs it!
+ *
+ *   This function is logically a part of lpc43_irq.c, but I will keep it in
+ *   a separate file so that it will not increase the footprint on LPC43xx
+ *   platforms that do not need this function.
  *
  ****************************************************************************/
 
-EXTERN void lpc43_lowsetup(void);
+void lpc43_clrpend(int irq)
+{
+  /* Check for external interrupt */
 
-#undef EXTERN
-#if defined(__cplusplus)
+  if (irq >= LPC43_IRQ_EXTINT)
+    {
+      if (irq < (LPC43_IRQ_EXTINT + 32))
+        {
+          putreg32(1 << (irq - LPC43_IRQ_EXTINT), NVIC_IRQ0_31_CLRPEND);
+        }
+      else if (irq < LPC43M4_IRQ_NIRQS)
+        {
+          putreg32(1 << (irq - LPC43_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
+        }
+    }
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H */

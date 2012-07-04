@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc43xx/lpc43_lowputc.h
+ * arch/arm/src/lpc43xx/lpc43_serial.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H
-#define __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_SERIAL_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_SERIAL_H
 
 /****************************************************************************
  * Included Files
@@ -54,35 +54,12 @@
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: lpc43_lowsetup
- *
- * Description:
- *   Called at the very beginning of _start.  Performs low level
- *   initialization of the serial console.
- *
- ****************************************************************************/
-
-EXTERN void lpc43_lowsetup(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_SERIAL_H */

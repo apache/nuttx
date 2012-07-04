@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc43xx/lpc43_lowputc.h
+ *  arch/arm/src/lpc43/lpc43_pinconfig.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,56 +33,62 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H
-#define __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <arch/board/board.h>
 #include <nuttx/config.h>
+
+#include <nuttx/arch.h>
+#include <errno.h>
+
+#include "lpc43_pinconfig.h"
+
+#ifdef CONFIG_DEBUG
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 /****************************************************************************
- * Name: lpc43_lowsetup
+ * Function:  lpc43_dumppinconfig
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level
- *   initialization of the serial console.
+ *   Dump all pin configuration registers associated with the provided pin
+ *   configuration
  *
  ****************************************************************************/
 
-EXTERN void lpc43_lowsetup(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
+int lpc43_dumppinconfig(uint32_t pinconf, const char *msg)
+{
+#warning "Missing logic"
+  return -ENOSYS;
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H */
+/********************************************************************************************
+ * Function:  lpc43_dumpgpio
+ *
+ * Description:
+ *   Dump all pin configuration registers associated with the provided base address
+ *
+ ********************************************************************************************/
+
+int lpc43_dumpgpio(uint16_t gpiocfg, const char *msg)
+{
+#warning "Missing logic"
+  return -ENOSYS;
+}
+
+#endif /* CONFIG_DEBUG */

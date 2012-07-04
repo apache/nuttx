@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc43xx/lpc43_lowputc.h
+ * arch/arm/src/lpc43xx/lpc43_irq.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H
-#define __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_IRQ_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -65,19 +65,23 @@ extern "C" {
 #endif
 
 /****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc43_lowsetup
+ * Name: lpc43_clrpend
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level
- *   initialization of the serial console.
+ *   Clear a pending interrupt at the NVIC.  This does not seem to be
+ *   required for most interrupts.
  *
  ****************************************************************************/
 
-EXTERN void lpc43_lowsetup(void);
+EXTERN void lpc43_clrpend(int irq);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -85,4 +89,4 @@ EXTERN void lpc43_lowsetup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC43XX_LOWSETUP_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_IRQ_H */
