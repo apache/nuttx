@@ -41,6 +41,8 @@
 
 #include <stdint.h>
 
+#include <arch/avr32/irq.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
