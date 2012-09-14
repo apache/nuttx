@@ -1,8 +1,9 @@
+#!/usr/bin/env python
 ############################################################################
-# lib/string/Make.defs
+# tools/xmlrpc_test.py
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+#   Copyright (C) 2012 Max Holtzberg. All rights reserved.
+#   Author: Max Holtzberg <mh@uvc.de>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,18 +34,15 @@
 #
 ############################################################################
 
-# Add the string C files to the build
+import sys
+import xmlrpclib
 
-CSRCS += lib_checkbase.c lib_isbasedigit.c lib_memset.c lib_memchr.c \
-		 lib_memccpy.c lib_memcpy.c lib_memcmp.c lib_memmove.c lib_skipspace.c \
-		 lib_strcasecmp.c lib_strcat.c lib_strchr.c lib_strcpy.c lib_strcmp.c \
-		 lib_strcspn.c lib_strdup.c lib_strerror.c lib_strlen.c lib_strnlen.c \
-		 lib_strncasecmp.c lib_strncat.c lib_strncmp.c lib_strncpy.c \
-		 lib_strndup.c lib_strcasestr.c lib_strpbrk.c lib_strrchr.c\
-		 lib_strspn.c lib_strstr.c lib_strtok.c lib_strtokr.c lib_strtol.c \
-		 lib_strtoll.c lib_strtoul.c lib_strtoull.c lib_strtod.c
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print 'Usage: %s <ip address>' % sys.argv[0]
+        quit(1)
 
-# Add the string directory to the build
-
-DEPPATH += --dep-path string
-VPATH += :string
+    server_url = 'http://%s/device' % sys.argv[1]
+    server = xmlrpclib.ServerProxy(server_url)
+    result = server.get_device_stats("username", "password", 0)
+    print result
