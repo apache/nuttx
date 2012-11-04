@@ -1,10 +1,10 @@
-############################################################################
-# configs/rgmp/default/Make.defs
+#!/bin/bash
+# config/rgmp/default/setenv.sh
 #
 #   Copyright (C) 2011 Yu Qiang. All rights reserved.
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Authors: Yu Qiang <yuq825@gmail.com>
-#            Gregory Nutt <gnutt@nuttx.org>
+#            Gregory Nutt <spudmonkey@racsa.co.cr>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,62 +33,15 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
-include ${TOPDIR}/.config
-include ${TOPDIR}/tools/Config.mk
+if [ "$(basename $0)" = "setenv.sh" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-RGMPLIBDIR := $(RGMP_INST_DIR)/lib
-RGMPINCDIR := $(RGMP_INST_DIR)/include
-RGMPLKSCPT := $(RGMP_INST_DIR)/etc/rgmp.ld
+if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
 
-HOSTOS			= ${shell uname -o}
+#export NUTTX_BIN=
+#export PATH=${NUTTX_BIN}:/sbin:/usr/sbin:${PATH_ORIG}
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION	= -O2 -gstabs
-else
-  ARCHOPTIMIZATION	= -O2
-endif
-
-ARCHCPUFLAGS		= -fno-builtin -nostdinc -fno-stack-protector 
-ARCHPICFLAGS		= -fpic
-ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
-ARCHDEFINES		= -D__RGMP_KERNEL__ -D__RTOS_KERNEL__ -D__SHARE_KERNEL__
-ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include -I$(RGMPINCDIR) \
-			  -I$(TOPDIR)/configs/rgmp/include -I$(TOPDIR)/arch/rgmp/include/x86
-ARCHSCRIPT		=
-
-CROSSDEV		=
-CC			= $(CROSSDEV)gcc
-CPP			= $(CROSSDEV)gcc -E
-LD			= $(CROSSDEV)ld
-AR			= $(CROSSDEV)ar rcs
-NM			= $(CROSSDEV)nm
-OBJCOPY			= $(CROSSDEV)objcopy
-OBJDUMP			= $(CROSSDEV)objdump
-
-CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) -pipe
-CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES)
-AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
-
-OBJEXT			= .o
-LIBEXT			= .a
-
-ifeq ($(HOSTOS),Cygwin)
-  EXEEXT		= .exe
-else
-  EXEEXT		=
-endif
-
-LDFLAGS                 += -nostdlib
-EXTRA_LIBS		= 
-
-
-MKDEP			= $(TOPDIR)/tools/mkdeps.sh
-
-HOSTCC			= gcc
-HOSTINCLUDES		= -I.
-HOSTCFLAGS		= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-			  $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(ARCHDEFINES) -pipe
-HOSTLDFLAGS		=
+echo "PATH : ${PATH}"
