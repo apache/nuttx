@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/lm3s/chip.h
+ * arch/arm/src/lm3s/lm3s_syscontrol.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,51 +33,68 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LM3S_CHIP_H
-#define __ARCH_ARM_SRC_LM3S_CHIP_H
+#ifndef __ARCH_ARM_SRC_LM3S_LM_SYSCONTROL_H
+#define __ARCH_ARM_SRC_LM3S_LM_SYSCONTROL_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/lm3s/chip.h>
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-/* Then get all of the register definitions */
-
-#include "chip/lm_memorymap.h"    /* Memory map */
-#include "chip/lm3s_syscontrol.h" /* System control module */
-#include "chip/lm3s_gpio.h"       /* GPIO modules */
-#include "chip/lm3s_uart.h"       /* UART modules */
-#include "chip/lm3s_i2c.h"        /* I2C modules */
-#include "chip/lm3s_ssi.h"        /* SSI modules */
-#include "chip/lm3s_ethernet.h"   /* Ethernet MAC and PHY */
-#include "chip/lm3s_flash.h"      /* FLASH */
-
-/* The LM3S69xx only supports 8 priority levels.  The hardware priority mechanism
- * will only look at the upper N bits of the 8-bit priority level (where N is 3 for
- * the Stellaris family), so any prioritization must be performed in those bits.
- * The default priority level is set to the middle value
- */
-
-#define NVIC_SYSH_PRIORITY_MIN     0xe0 /* All bits set in minimum priority */
-#define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
-#define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
 
 /************************************************************************************
  * Public Types
  ************************************************************************************/
 
 /************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
  * Public Data
  ************************************************************************************/
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LM3S_CHIP_H */
+/****************************************************************************
+ * Name: lm3s_clockconfig
+ *
+ * Description:
+ *   Called to change to new clock based on desired rcc and rcc2 settings.
+ *   This is use to set up the initial clocking but can be used later to
+ *   support slow clocked, low power consumption modes.
+ *
+ ****************************************************************************/
+
+void lm3s_clockconfig(uint32_t newrcc, uint32_t newrcc2);
+
+/****************************************************************************
+ * Name: up_clockconfig
+ *
+ * Description:
+ *   Called early in the bootsequence (before .data and .bss are available)
+ *   in order to configure initial clocking.
+ *
+ ****************************************************************************/
+
+void up_clockconfig(void);
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_LM3S_LM_SYSCONTROL_H */

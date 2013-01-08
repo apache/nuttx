@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/lm3s/chip.h
+ * arch/arm/src/lm3s/lm_ssi.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,51 +33,82 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LM3S_CHIP_H
-#define __ARCH_ARM_SRC_LM3S_CHIP_H
+#ifndef __ARCH_ARM_SRC_LM3S_LM_SSI_H
+#define __ARCH_ARM_SRC_LM3S_LM_SSI_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/lm3s/chip.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-/* Then get all of the register definitions */
-
-#include "chip/lm_memorymap.h"    /* Memory map */
-#include "chip/lm3s_syscontrol.h" /* System control module */
-#include "chip/lm3s_gpio.h"       /* GPIO modules */
-#include "chip/lm3s_uart.h"       /* UART modules */
-#include "chip/lm3s_i2c.h"        /* I2C modules */
-#include "chip/lm3s_ssi.h"        /* SSI modules */
-#include "chip/lm3s_ethernet.h"   /* Ethernet MAC and PHY */
-#include "chip/lm3s_flash.h"      /* FLASH */
-
-/* The LM3S69xx only supports 8 priority levels.  The hardware priority mechanism
- * will only look at the upper N bits of the 8-bit priority level (where N is 3 for
- * the Stellaris family), so any prioritization must be performed in those bits.
- * The default priority level is set to the middle value
- */
-
-#define NVIC_SYSH_PRIORITY_MIN     0xe0 /* All bits set in minimum priority */
-#define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
-#define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
 
 /************************************************************************************
  * Public Types
  ************************************************************************************/
 
 /************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
  * Public Data
  ************************************************************************************/
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LM3S_CHIP_H */
+/****************************************************************************
+ * The external functions, lm3s_spiselect, lm3s_spistatus, and
+ * lm3s_spicmddata must be provided by board-specific logic.  These are
+ * implementations of the select, status, and cmddata methods of the SPI
+ * interface defined by struct spi_ops_s (see include/nuttx/spi.h).
+ * All other methods (including up_spiinitialize()) are provided by common
+ * logic.  To use this common SPI logic on your board:
+ *
+ *   1. Provide logic in lm3s_boardinitialize() to configure SPI chip select
+ *      pins.
+ *   2. Provide lm3s_spiselect() and lm3s_spistatus() functions in your
+ *      board-specific logic.  These functions will perform chip selection and
+ *      status operations using GPIOs in the way your board is configured.
+ *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration, provide
+ *      the lm3s_spicmddata() function in your board-specific logic.  This
+ *      functions will perform cmd/data selection operations using GPIOs in
+ *      the way your board is configured.
+ *   4. Add a call to up_spiinitialize() in your low level application
+ *      initialization logic
+ *   5. The handle returned by up_spiinitialize() may then be used to bind the
+ *      SPI driver to higher level logic (e.g., calling 
+ *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
+ *      the SPI MMC/SD driver).
+ *
+ ****************************************************************************/
+
+struct spi_dev_s;
+enum spi_dev_e;
+void lm3s_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t lm3s_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+int lm3s_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_LM3S_LM_SSI_H */
