@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/string/lib_psa_init.c
+ * libc/string/lib_psa_dump.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,55 +39,89 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
 #include <spawn.h>
-#include <assert.h>
-#include <errno.h>
+#include <debug.h>
+
+#ifdef CONFIG_DEBUG
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: posix_spawnattr_init
+ * Name: posix_spawnattr_dump
  *
  * Description:
- *   The posix_spawnattr_init() function initializes the object referenced
- *   by attr, to an empty set of spawn attributes for subsequent use in a
- *   call to posix_spawn() or posix_spawnp().
+ *   Show the current attributes.
  *
  * Input Parameters:
- *   attr - The address of the spawn attributes to be initialized.
+ *   attr - The address of the spawn attributes to be dumped.
  *
  * Returned Value:
- *   On success, these functions return 0; on failure they return an error
- *   number from <errno.h>.
+ *   None
  *
  ****************************************************************************/
 
-int posix_spawnattr_init(posix_spawnattr_t *attr)
+void posix_spawnattr_dump(posix_spawnattr_t *attr)
 {
-  struct sched_param param;
-  int ret;
-
-  DEBUGASSERT(attr);
-
-  /* Flags: None */
-
-  attr->flags = 0;
-
-  /* Set the default scheduler policy to the policy of this task */
-
-  attr->policy = sched_getscheduler(0);
-
-  /* Set the default priority to the same priority as this task */
-
-  ret = sched_getparam(0, &param);
-  if (ret < 0)
+  dbg("attr[%p]:\n", attr);
+  dbg("  flags:    %04x\n", attr->flags);
+  if (attr->flags == 0)
     {
-      return errno;
+      dbg("            None\n");
+    }
+  else
+    {
+      if ((attr->flags & POSIX_SPAWN_RESETIDS) != 0)
+        {
+          dbg("            POSIX_SPAWN_RESETIDS\n");
+        }
+
+      if ((attr->flags & POSIX_SPAWN_SETPGROUP) != 0)
+        {
+          dbg("            POSIX_SPAWN_SETPGROUP\n");
+        }
+
+      if ((attr->flags & POSIX_SPAWN_SETSCHEDPARAM) != 0)
+        {
+          dbg("            POSIX_SPAWN_SETSCHEDPARAM\n");
+        }
+
+      if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0)
+        {
+          dbg("            POSIX_SPAWN_SETSCHEDULER\n");
+        }
+
+      if ((attr->flags & POSIX_SPAWN_SETSIGDEF) != 0)
+        {
+          dbg("            POSIX_SPAWN_SETSIGDEF\n");
+        }
+
+      if ((attr->flags & POSIX_SPAWN_SETSIGMASK) != 0)
+        {
+          dbg("            POSIX_SPAWN_SETSIGMASK\n");
+        }
     }
 
-  attr->priority = param.sched_priority;
-  return OK;
-}
+  dbg("  priority: %d\n", attr->priority);
+
+  dbg("  policy:   %d\n", attr->policy);
+  if (attr->policy == SCHED_FIFO)
+    {
+      dbg("            SCHED_FIFO\n");
+    }
+  else if (attr->policy == SCHED_RR)
+    {
+      dbg("            SCHED_RR\n");
+    }
+  else
+    {
+      dbg("            Unrecognized\n");
+    }
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  dbg("  sigmask:  %08x\n", attr->sigmask);
+#endif
+};
+
+#endif /* CONFIG_DEBUG */
