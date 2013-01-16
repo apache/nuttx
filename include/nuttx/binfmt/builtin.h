@@ -1,8 +1,10 @@
 /****************************************************************************
- * include/nuttx/fs/binfs.h
+ * include/nuttx/binfmt/builtin.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2011 Uros Platise. All rights reserved.
+ *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Authors: Uros Platise <uros.platise@isotel.eu>
+ *            Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,62 +35,51 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_FS_BINFS_H
-#define __INCLUDE_NUTTX_FS_BINFS_H
+#ifndef __INCLUDE_NUTTX_BINFMT_BUILTIN_H
+#define __INCLUDE_NUTTX_BINFMT_BUILTIN_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <nuttx/fs/ioctl.h>
-
-#ifdef CONFIG_FS_BINFS
+#include <apps/apps.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
-/* This is the BINFS ioctl that can be used to recover the filename
- * associated with the builtin task.
- */
 
-#define FIOC_FILENAME FIOC_USER /* IN:  FAR const char ** pointer 
-                                 * OUT: Pointer to a persistent file name
-                                 *      (Guaranteed to persist while the file
-                                 *      is open).
-                                 */
-
-/****************************************************************************
- * Type Definitions
- ****************************************************************************/
+struct builtin_s
+{
+  const char *name;         /* Invocation name and as seen under /sbin/ */
+  int         priority;     /* Use: SCHED_PRIORITY_DEFAULT */
+  int         stacksize;    /* Desired stack size */
+  main_t      main;         /* Entry point: main(int argc, char *argv[]) */
+};
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifdef __cplusplus
+#if defined(__cplusplus)
 #define EXTERN extern "C"
 extern "C" {
 #else
 #define EXTERN extern
 #endif
 
-/* The "bindir" is file system that supports access to the builtin applications.
- * It is typically mounted under /bin.
- */
-
-EXTERN mountpt_operations;
-EXTERN const struct mountpt_operations binfs_operations;
+EXTERN const struct builtin_s g_builtins[];
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
+EXTERN int number_builtins(void);
+
 #undef EXTERN
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
 
-#endif /* CONFIG_FS_BINFS */
-#endif /* __INCLUDE_NUTTX_FS_BINFS_H */
+#endif /* __INCLUDE_NUTTX_BINFMT_BUILTIN_H */
+
