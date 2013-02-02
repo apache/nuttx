@@ -72,8 +72,20 @@ FAR struct filelist *sched_getfiles(void)
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
   FAR struct task_group_s *group = rtcb->group;
 
-  DEBUGASSERT(group);
-  return &group->tg_filelist;
+  /* The group may be NULL under certain conditions.  For example, if
+   * debug output is attempted from the IDLE thead before the group has
+   * been allocated.  I have only seen this case when memory management
+   * debug is enabled.
+   */
+
+  if (group)
+    {
+      return &group->tg_filelist;
+    }
+
+  /* Higher level logic must handle the NULL gracefully */
+
+  return NULL;
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */

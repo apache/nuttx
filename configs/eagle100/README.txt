@@ -383,7 +383,7 @@ Eagle100-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Eagle-100 configuration is maintained in a sudirectory and
+Each Eagle-100 configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools

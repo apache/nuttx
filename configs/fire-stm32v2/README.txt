@@ -810,7 +810,7 @@ M3 Wildfire-specific Configuration Options
 Configurations
 ==============
 
-Each M3 Wildfire configuration is maintained in a sudirectory and
+Each M3 Wildfire configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools

@@ -110,8 +110,6 @@ static int task_spawn_exec(FAR pid_t *pidp, FAR const char *name,
   int pid;
   int ret = OK;
 
-  DEBUGASSERT(path);
-
   /* Disable pre-emption so that we can modify the task parameters after
    * we start the new task; the new task will not actually begin execution
    * until we re-enable pre-emption.
@@ -158,6 +156,23 @@ errout:
  *
  * Description:
  *   Perform file_actions, then execute the task from the file system.
+ *
+ *   Do we really need a proxy task in this case?  Isn't that wasteful?
+ *
+ *   Q: Why can we do what we need to do here and the just call the
+ *      new task's entry point.
+ *   A: This would require setting up the name, priority, and stacksize from
+ *      the task_spawn, but it do-able.  The only issue I can think of is
+ *      that NuttX supports task_restart(), and you would never be able to
+ *      restart a task from this point.
+ *
+ *   Q: Why not use a starthook so that there is callout from task_start()
+ *      to perform these operations?
+ *   A: Good idea, except that existing task_starthook() implementation
+ *      cannot be used here unless we get rid of task_create and, instead,
+ *      use task_init() and task_activate().  start_taskhook() could then
+ *      be called between task_init() and task)activate().  task_restart()
+ *      would still be an issue.
  *
  * Input Parameters:
  *   Standard task start-up parameters
@@ -303,10 +318,8 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
 #endif
   int ret;
 
-  DEBUGASSERT(path);
-
-  svdbg("pid=%p path=%s file_actions=%p attr=%p argv=%p\n",
-        pid, path, file_actions, attr, argv);
+  svdbg("pid=%p name=%s entry=%p file_actions=%p attr=%p argv=%p\n",
+        pid, name, entry, file_actions, attr, argv);
 
   /* If there are no file actions to be performed and there is no change to
    * the signal mask, then start the new child task directly from the parent task.
@@ -359,7 +372,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
       return errcode;
     }
 
-  /* Disable pre-emption so that the proxy does not run until we waitpid
+  /* Disable pre-emption so that the proxy does not run until waitpid
    * is called.  This is probably unnecessary since the task_spawn_proxy has
    * the same priority as this thread; it should be schedule behind this
    * task in the ready-to-run list.

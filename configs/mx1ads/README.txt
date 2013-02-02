@@ -121,7 +121,7 @@ ARM/i.MX1-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each MX1ADS configuration is maintained in a sudirectory and
+Each MX1ADS configuration is maintained in a sub-directory and
 can be selected as follow:
 
 	cd tools

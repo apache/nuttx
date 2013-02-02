@@ -893,7 +893,7 @@ LPC4330-Xplorer Configuration Options
 Configurations
 ==============
 
-Each LPC4330-Xplorer configuration is maintained in a sudirectory and can be selected
+Each LPC4330-Xplorer configuration is maintained in a sub-directory and can be selected
 as follow:
 
     cd tools

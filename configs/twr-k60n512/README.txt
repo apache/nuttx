@@ -645,7 +645,7 @@ TWR-K60N512-specific Configuration Options
 Configurations
 ==============
 
-Each TWR-K60N512 configuration is maintained in a sudirectory and
+Each TWR-K60N512 configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools

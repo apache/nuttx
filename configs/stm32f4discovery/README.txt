@@ -1003,7 +1003,7 @@ STM32F4Discovery-specific Configuration Options
 Configurations
 ==============
 
-Each STM32F4Discovery configuration is maintained in a sudirectory and
+Each STM32F4Discovery configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools

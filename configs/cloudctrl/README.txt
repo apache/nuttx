@@ -726,7 +726,7 @@ Cloudctrl-specific Configuration Options
 Configurations
 ==============
 
-Each Cloudctrl configuration is maintained in a sudirectory and
+Each Cloudctrl configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools

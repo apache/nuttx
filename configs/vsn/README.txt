@@ -290,7 +290,7 @@ VSN-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each VSN configuration is maintained in a sudirectory and
+Each VSN configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools

@@ -449,7 +449,7 @@ Configurations
 ^^^^^^^^^^^^^^
 
 Each Stellaris LM3S8962 Evaluation Kit configuration is maintained in a
-sudirectory and can be selected as follow:
+sub-directory and can be selected as follow:
 
     cd tools
     ./configure.sh lm3s8962-ek/<subdir>

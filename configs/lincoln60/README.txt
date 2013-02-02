@@ -473,7 +473,7 @@ the mountpoint /mnt/flash.
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Lincoln 60 configuration is maintained in a sudirectory and can be selected
+Each Lincoln 60 configuration is maintained in a sub-directory and can be selected
 as follow:
 
     cd tools

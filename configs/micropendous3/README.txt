@@ -510,7 +510,7 @@ Micropendous3 Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Micropendous3 configuration is maintained in a sudirectory and can
+Each Micropendous3 configuration is maintained in a sub-directory and can
 be selected as follow:
 
     cd tools

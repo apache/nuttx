@@ -849,7 +849,7 @@ Configurations
 ^^^^^^^^^^^^^^
 
 Each Olimex LPC1766-STK configuration is maintained in a
-sudirectory and can be selected as follow:
+sub-directory and can be selected as follow:
 
     cd tools
     ./configure.sh olimex-lpc1766stk/<subdir>

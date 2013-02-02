@@ -734,7 +734,7 @@ LPCXpresso Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each LPCXpresso configuration is maintained in a sudirectory and can be
+Each LPCXpresso configuration is maintained in a sub-directory and can be
 selected as follow:
 
     cd tools

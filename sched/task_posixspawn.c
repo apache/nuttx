@@ -166,6 +166,16 @@ errout:
  * Description:
  *   Perform file_actions, then execute the task from the file system.
  *
+ *   Do we really need this proxy task?  Isn't that wasteful?
+ *
+ *   Q: Why not use a starthook so that there is callout from task_start()
+ *      to perform these operations after the file is loaded from
+ *      the file system?
+ *   A: That existing task_starthook() implementation cannot be used in
+ *      this context; any of task_starthook() will also conflict with
+ *      binfmt's use of the start hook to call C++ static initializers.
+ *      task_restart() would also be an issue.
+ *
  * Input Parameters:
  *   Standard task start-up parameters
  *
@@ -399,7 +409,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
       return errcode;
     }
 
-  /* Disable pre-emption so that the proxy does not run until we waitpid
+  /* Disable pre-emption so that the proxy does not run until waitpid
    * is called.  This is probably unnecessary since the posix_spawn_proxy has
    * the same priority as this thread; it should be schedule behind this
    * task in the ready-to-run list.

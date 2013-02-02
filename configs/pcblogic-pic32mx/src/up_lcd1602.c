@@ -40,25 +40,25 @@
  /* LCD pin mapping (see configs/pcblogic-pic32mx/README.txt)
  *
  *  ----------------------------------- ---------- ----------------------------------
- *  PIC32                               LCD1602    UBW32 PIN
+ *  PIC32                               LCD1602    PCBLogic PIN
  *  PIN  SIGNAL NAME                    PIN NAME(s)
  *  ----------------------------------- ---------- ----------------------------------
- *                                      1.  Vss    GND
- *                                      2.  Vdd    Vcc (5V)
- *                                      3.  Vee    To ground via 10K potentiometer
- *    4  AN15/OCFB/PMALL/PMA0/CN12/RB15 4.  RS     PMA0, Selects registers
- *   82  PMRD/CN14/RD5                  5.  RW     PMRD/PMWR, Selects read or write
- *   81  OC5/PMWR/CN13/RD4              6.  E      PMENB, Starts data read/write
- *   93  PMD0/RE0                       7.  D0     PMD0
- *   94  PMD1/RE1                       8.  D1     PMD1
- *   98  PMD2/RE2                       9.  D2     PMD2
- *   99  PMD3/RE3                       10. D3     PMD3
- *  100  PMD4/RE4                       11. D4     PMD4
- *    3  PMD5/RE5                       12. D5     PMD5
- *    4  PMD6/RE6                       13. D6     PMD6
- *    5  PMD7/RE7                       14. D7     PMD7
- *                                      15. A      To Vcc (5V) via 10K potentiometer
- *                                      16. K      GND
+ *                                      1.  Vss    --> Powerpoint GND
+ *                                      2.  Vdd    --> Powerpoint USB+5V
+ *                                      3.  Vee    N/C To ground via 10K potentiometer
+ *    4  AN15/OCFB/PMALL/PMA0/CN12/RB15 4.  RS       4 PMA0, Selects registers
+ *   82  PMRD/CN14/RD5                  5.  RW      82 PMRD/PMWR, Selects read or write
+ *   81  OC5/PMWR/CN13/RD4              6.  E       81 PMENB, Starts data read/write
+ *   93  PMD0/RE0                       7.  D0      93 PMD0
+ *   94  PMD1/RE1                       8.  D1      94 PMD1
+ *   98  PMD2/RE2                       9.  D2      98 PMD2
+ *   99  PMD3/RE3                       10. D3      99 PMD3
+ *  100  PMD4/RE4                       11. D4     100 PMD4
+ *    3  PMD5/RE5                       12. D5       3 PMD5
+ *    4  PMD6/RE6                       13. D6       4 PMD6
+ *    5  PMD7/RE7                       14. D7       5 PMD7
+ *                                      15. A      N/C To Vcc (5V) via 10K potentiometer
+ *                                      16. K      --> Powerpoint GND
  *  ----------------------------------- ---------- ----------------------------------
  */
 

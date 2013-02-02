@@ -560,7 +560,7 @@ HY-Mini specific Configuration Options
 Configurations
 ==============
 
-Each HY-MiniSTM32V configuration is maintained in a sudirectory and
+Each HY-MiniSTM32V configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools

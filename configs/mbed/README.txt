@@ -444,7 +444,7 @@ the mountpoint /mnt/flash.
 Configurations
 ^^^^^^^^^^^^^^
 
-Each mbed configuration is maintained in a sudirectory and can be selected
+Each mbed configuration is maintained in a sub-directory and can be selected
 as follow:
 
     cd tools
