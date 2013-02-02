@@ -461,10 +461,10 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
         {
           /* We know that the child task was running okay we stared,
            * so we must have lost the signal.  What can we do?
-           * Let's claim we were interrupted by a signal.
+           * Let's return ECHILD.. that is at least informative.
            */
 
-          err = EINTR;
+          err = ECHILD;
           goto errout_with_errno;
         }
 #endif

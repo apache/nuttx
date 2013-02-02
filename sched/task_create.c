@@ -100,10 +100,10 @@
 
 #ifndef CONFIG_CUSTOM_STACK
 static int thread_create(const char *name, uint8_t ttype, int priority,
-                         int stack_size, main_t entry, const char **argv)
+                         int stack_size, main_t entry, FAR char * const argv[])
 #else
 static int thread_create(const char *name, uint8_t ttype, int priority,
-                         main_t entry, const char **argv)
+                         main_t entry, FAR char * const argv[])
 #endif
 {
   FAR _TCB *tcb;
@@ -244,10 +244,10 @@ errout:
 
 #ifndef CONFIG_CUSTOM_STACK
 int task_create(const char *name, int priority,
-                int stack_size, main_t entry, const char *argv[])
+                int stack_size, main_t entry, FAR char * const argv[])
 #else
 int task_create(const char *name, int priority,
-                main_t entry, const char *argv[])
+                main_t entry, FAR char * const argv[])
 #endif
 {
 #ifndef CONFIG_CUSTOM_STACK
@@ -275,10 +275,10 @@ int task_create(const char *name, int priority,
 
 #ifndef CONFIG_CUSTOM_STACK
 int kernel_thread(const char *name, int priority,
-                  int stack_size, main_t entry, const char *argv[])
+                  int stack_size, main_t entry, FAR char * const argv[])
 #else
 int kernel_thread(const char *name, int priority,
-                  main_t entry, const char *argv[])
+                  main_t entry, FAR char * const argv[])
 #endif
 {
 #ifndef CONFIG_CUSTOM_STACK

@@ -121,16 +121,25 @@ config EXECFUNCS_NSYMBOLS
 		symbols in that table.  This selection provides the number of
 		symbols in the symbol table.
 
-config POSIX_SPAWN_STACKSIZE
-	int "posix_spawn Stack Size"
+endif
+
+config POSIX_SPAWN_PROXY_STACKSIZE
+	int "Spawn Stack Size"
 	default 1024
 	---help---
-		If posix_spawn[p] uses I/O redirection options, then it will require
-		an intermediary/proxy task to muck with the file descriptors.  This
-		configuration item specifies the stack size used for the proxy. Default:
-		1024 bytes.
+		If posix_spawn[p]() and task_spawn() use I/O redirection options,
+		they will require an intermediary/proxy task to muck with the file
+		descriptors.  This configuration item specifies the stack size
+		used for the proxy. Default: 1024 bytes.
 
-endif
+config TASK_SPAWN_DEFAULT_STACKSIZE
+	int "Default task_spawn Stack Size"
+	default 2048
+	---help---
+		The actual size to use for the child task's stack can be set with
+		task_spawnattr_setstacksize().  This value specifies the default
+		stack size to use if task_spawnattr_setstacksize() is not used.
+		Default: 2048.
 
 config LIBC_STRERROR
 	bool "Enable strerror"

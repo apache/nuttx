@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 30, 2013)
+NuttX TODO List (Last updated February 2, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
@@ -45,7 +45,7 @@ nuttx/
 apps/
 
   (5)  Network Utilities (apps/netutils/)
-  (5)  NuttShell (NSH) (apps/nshlib)
+  (4)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (5)  Other Applications & Tests (apps/examples/)
 
@@ -2027,32 +2027,6 @@ o NuttShell (NSH) (apps/nshlib)
   Description: Add an ARP command so that we can see the contents of the ARP table.
   Status:      Open
   Priority:    Low (enhancement)
-
-  Title:       RE-DIRECTION OF BUILTIN APPLICATONS
-  Description: There is a problem with the re-direction of output form built-in
-               applications in NSH.  When output is re-directed, exec_builtin()
-               spawns a tiny trampoline task that re-directs the output as
-               requested, starts the built-in task and then exit.
-
-               The problem is that when exec_builtin() starts the trampoline task,
-               it receives and returns the pid of the trampoline task, and *not*
-               the pid of the desired builtin application.  This bad pid is returned
-               to NSH and when NSH tries to use that pid in the waitpid() call, it
-               fails because the trampoline task no longer exists.
-
-               The same tasking arrangement is used by the standard function
-               posix_spawn().  However, posix_spawn uses the non-standard, internal
-               NuttX interface task_reparent() to replace the childs parent task
-               with the caller of posix_spawn().
-
-               exec_builtin() should not use this internal interface, however,
-               since it resides in the application space.  The suggested solution
-               is (1) move the exec_builtin() logic into nuttx/sched, (2) make it
-               a semi-standard interface renamed to task_spawn() and prototyped
-               in nuttx/include/sched.h, and then (2) use task_reparent to solve
-               the parental problem in the same way that posix_spawn does.
-  Status:      Open
-  Priority:    Medium
 
 o System libraries apps/system (apps/system)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

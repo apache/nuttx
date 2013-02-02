@@ -450,7 +450,7 @@ mkfatfs_tryfat12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
        *   maxnclusters = nfatsects * sectorsize / 1.5 - 2
        */
 
-      maxnclusters = (config->fc_nfatsects >> (var->fv_sectshift + 1)) / 3;
+      maxnclusters = (config->fc_nfatsects << (var->fv_sectshift + 1)) / 3;
       if (maxnclusters > FAT_MAXCLUST12)
         {
           maxnclusters = FAT_MAXCLUST12;

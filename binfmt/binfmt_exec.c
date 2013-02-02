@@ -92,7 +92,7 @@
  *
  ****************************************************************************/
 
-int exec(FAR const char *filename, FAR const char **argv,
+int exec(FAR const char *filename, FAR char * const *argv,
          FAR const struct symtab_s *exports, int nexports)
 {
 #ifdef CONFIG_SCHED_ONEXIT

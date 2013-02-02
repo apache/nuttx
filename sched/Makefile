@@ -48,6 +48,8 @@ TSK_SRCS += sched_removereadytorun.c sched_addprioritized.c sched_mergepending.c
 TSK_SRCS += sched_addblocked.c sched_removeblocked.c sched_free.c sched_gettcb.c
 TSK_SRCS += sched_verifytcb.c sched_releasetcb.c
 
+TSK_SRCS += task_spawn.c task_spawnparms.c
+
 ifneq ($(CONFIG_BINFMT_DISABLE),y)
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
 TSK_SRCS += task_posixspawn.c

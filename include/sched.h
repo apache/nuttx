@@ -112,18 +112,18 @@ extern "C"
 #ifndef CONFIG_CUSTOM_STACK
 int    task_init(FAR _TCB *tcb, const char *name, int priority,
                  FAR uint32_t *stack, uint32_t stack_size, main_t entry,
-                 FAR const char *argv[]);
+                 FAR char * const argv[]);
 #else
 int    task_init(FAR _TCB *tcb, const char *name, int priority, main_t entry,
-                 FAR const char *argv[]);
+                 FAR char * const argv[]);
 #endif
 int    task_activate(FAR _TCB *tcb);
 #ifndef CONFIG_CUSTOM_STACK
 int    task_create(FAR const char *name, int priority, int stack_size, main_t entry,
-                   FAR const char *argv[]);
+                   FAR char * const argv[]);
 #else
 int    task_create(FAR const char *name, int priority, main_t entry,
-                   FAR const char *argv[]);
+                   FAR char * const argv[]);
 #endif
 int    task_delete(pid_t pid);
 int    task_restart(pid_t pid);

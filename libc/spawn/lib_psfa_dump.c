@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_psfa_dump
+ * Name: posix_spawn_file_actions_dump 
  *
  * Description:
  *   Show the entryent file actions.
@@ -127,3 +127,4 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
 }
 
 #endif /* CONFIG_DEBUG */
+

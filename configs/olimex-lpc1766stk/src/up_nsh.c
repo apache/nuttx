@@ -287,10 +287,10 @@ static int nsh_usbhostinitialize(void)
 #ifndef CONFIG_CUSTOM_STACK
       pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
                         CONFIG_USBHOST_STACKSIZE,
-                        (main_t)nsh_waiter, (const char **)NULL);
+                        (main_t)nsh_waiter, (FAR char * const *)NULL);
 #else
       pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
-                        (main_t)nsh_waiter, (const char **)NULL);
+                        (main_t)nsh_waiter, (FAR char * const *)NULL);
 #endif
       return pid < 0 ? -ENOEXEC : OK;
     }

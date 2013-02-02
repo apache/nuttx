@@ -141,7 +141,7 @@ int os_bringup(void)
 
   g_pgworker = KERNEL_THREAD("pgfill", CONFIG_PAGING_DEFPRIO,
                              CONFIG_PAGING_STACKSIZE,
-                             (main_t)pg_worker, (const char **)NULL);
+                             (main_t)pg_worker, (FAR char * const *)NULL);
   ASSERT(g_pgworker != ERROR);
 #endif
 
@@ -154,7 +154,7 @@ int os_bringup(void)
 
   g_work[HPWORK].pid = KERNEL_THREAD("work0", CONFIG_SCHED_WORKPRIORITY,
                                      CONFIG_SCHED_WORKSTACKSIZE,
-                                     (main_t)work_hpthread, (const char **)NULL);
+                                     (main_t)work_hpthread, (FAR char * const *)NULL);
   ASSERT(g_work[HPWORK].pid != ERROR);
 
   /* Start a lower priority worker thread for other, non-critical continuation
@@ -166,7 +166,7 @@ int os_bringup(void)
 
   g_work[LPWORK].pid = KERNEL_THREAD("work1", CONFIG_SCHED_LPWORKPRIORITY,
                                      CONFIG_SCHED_LPWORKSTACKSIZE,
-                                     (main_t)work_lpthread, (const char **)NULL);
+                                     (main_t)work_lpthread, (FAR char * const *)NULL);
   ASSERT(g_work[LPWORK].pid != ERROR);
 #endif
 #endif
@@ -182,7 +182,7 @@ int os_bringup(void)
 
   init_taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
                             CONFIG_USERMAIN_STACKSIZE,
-                            (main_t)CONFIG_USER_ENTRYPOINT, (const char **)NULL);
+                            (main_t)CONFIG_USER_ENTRYPOINT, (FAR char * const *)NULL);
   ASSERT(init_taskid != ERROR);
 
   /* We an save a few bytes by discarding the IDLE thread's environment. */

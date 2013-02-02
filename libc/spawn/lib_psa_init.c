@@ -45,7 +45,15 @@
 #include <errno.h>
 
 /****************************************************************************
- * Global Functions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef TASK_SPAWN_DEFAULT_STACKSIZE
+#  define TASK_SPAWN_DEFAULT_STACKSIZE 2048
+#endif
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -76,10 +84,6 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
 
   attr->flags = 0;
 
-  /* Set the default scheduler policy to the policy of this task */
-
-  attr->policy = sched_getscheduler(0);
-
   /* Set the default priority to the same priority as this task */
 
   ret = sched_getparam(0, &param);
@@ -89,5 +93,17 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
     }
 
   attr->priority = param.sched_priority;
+
+  /* Set the default scheduler policy to the policy of this task */
+
+  attr->policy = sched_getscheduler(0);
+
+  /* Empty signal masek */
+
+  attr->sigmask = 0;
+
+  /* Default stack size */
+
+  attr->stacksize = TASK_SPAWN_DEFAULT_STACKSIZE;
   return OK;
 }

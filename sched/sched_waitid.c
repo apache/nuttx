@@ -342,10 +342,10 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
         {
           /* We know that the child task was running okay we stared,
            * so we must have lost the signal.  What can we do?
-           * Let's claim we were interrupted by a signal.
+           * Let's return ECHILD.. that is at least informative.
            */
 
-          err = EINTR;
+          err = ECHILD;
           goto errout_with_errno;
         }
 #endif

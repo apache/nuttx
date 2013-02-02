@@ -75,12 +75,18 @@
 
 struct posix_spawnattr_s
 {
-  uint8_t  flags;
-  uint8_t  priority;
-  uint8_t  policy;
+  /* Used by posix_spawn, posix_spawnp, and task_spawn */
+
+  uint8_t  flags;                /* See POSIX_SPAWN_ definitions */
+  uint8_t  priority;             /* Task scheduling priority */
+  uint8_t  policy;               /* Task scheduling policy */
 #ifndef CONFIG_DISABLE_SIGNALS
-  sigset_t sigmask;
+  sigset_t sigmask;              /* Signals to be masked */
 #endif
+
+  /* Used only by task_spawn (non-standard) */
+
+  size_t   stacksize;            /* Task stack size */
 };
 
 typedef struct posix_spawnattr_s posix_spawnattr_t;
@@ -107,7 +113,10 @@ extern "C"
 {
 #endif
 
-/* posix_spawn[p] interfaces ************************************************/
+/* Spawn interfaces *********************************************************/
+/* Standard posix_spawn[p] interfaces.  These functions execute files in the
+ * file system at 'path'
+ */
 
 #ifdef CONFIG_BINFMT_EXEPATH
 int posix_spawnp(FAR pid_t *pid, FAR const char *path,
@@ -121,7 +130,19 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
       FAR char *const argv[], FAR char *const envp[]);
+#define posix_spawnp(pid,path,file_actions,attr,argv,envp) \
+      posix_spawn(pid,path,file_actions,attr,argv,envp)
 #endif
+
+/* Non-standard task_spawn interface.  This function uses the same
+ * semantics to execute a file in memory at 'entry', giving it the name
+ * 'name'.
+ */
+
+int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
+      FAR const posix_spawn_file_actions_t *file_actions,
+      FAR const posix_spawnattr_t *attr,
+      FAR char *const argv[], FAR char *const envp[]);
 
 /* File action interfaces ***************************************************/
 /* File action initialization and destruction */
@@ -180,6 +201,15 @@ int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr,
 #else
 #  define posix_spawnattr_setsigmask(attr,sigmask) (ENOSYS)
 #endif
+
+/* Non-standard get/set spawn attributes interfaces for use only with
+ * task_spawn()
+ */
+
+int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
+      size_t *stacksize);
+int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
+      size_t stacksize);
 
 /* Non standard debug functions */
 

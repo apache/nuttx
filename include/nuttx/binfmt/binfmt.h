@@ -97,7 +97,7 @@ struct binary_s
   /* Information provided to the loader to load and bind a module */
 
   FAR const char *filename;            /* Full path to the binary to be loaded (See NOTE 1 above) */
-  FAR const char **argv;               /* Argument list */
+  FAR char * const *argv;              /* Argument list */
   FAR const struct symtab_s *exports;  /* Table of exported symbols */
   int nexports;                        /* The number of symbols in exports[] */
 
@@ -290,7 +290,7 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin);
  *
  ****************************************************************************/
 
-int exec(FAR const char *filename, FAR const char **argv,
+int exec(FAR const char *filename, FAR char * const *argv,
          FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************

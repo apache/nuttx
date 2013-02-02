@@ -414,7 +414,7 @@ int task_schedsetup(FAR _TCB *tcb, int priority, start_t start, main_t main,
  *
  ****************************************************************************/
 
-int task_argsetup(FAR _TCB *tcb, const char *name, const char *argv[])
+int task_argsetup(FAR _TCB *tcb, const char *name, FAR char * const argv[])
 {
   int i;
 

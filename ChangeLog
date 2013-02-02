@@ -4100,3 +4100,10 @@
 
 	* drivers/serial/serial.c:  Correct some race conditions when checking
 	  for disconnection of a removable serial device.
+	* sched/task_posixspawn.c, task_spawn.c, task_spawnparms.c and
+	  spawn_internal.h:  Create new interface task_spawn() that is
+	  like posix_spawn(), but uses entry point addresses like
+	  task_create().
+	* Corrected all argv[] arguments. Should be char * const *, not
+	  const char **.
+

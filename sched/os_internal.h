@@ -259,16 +259,16 @@ void weak_function task_initialize(void);
 void task_start(void);
 int  task_schedsetup(FAR _TCB *tcb, int priority, start_t start,
                      main_t main, uint8_t ttype);
-int  task_argsetup(FAR _TCB *tcb, FAR const char *name, FAR const char *argv[]);
+int  task_argsetup(FAR _TCB *tcb, FAR const char *name, FAR char * const argv[]);
 void task_exithook(FAR _TCB *tcb, int status);
 int  task_deletecurrent(void);
 
 #ifndef CONFIG_CUSTOM_STACK
 int  kernel_thread(FAR const char *name, int priority, int stack_size,
-                   main_t entry, FAR const char *argv[]);
+                   main_t entry, FAR char * const argv[]);
 #else
 int  kernel_thread(FAR const char *name, int priority, main_t entry,
-                   FAR const char *argv[]);
+                   FAR char * const argv[]);
 #endif
 bool sched_addreadytorun(FAR _TCB *rtrtcb);
 bool sched_removereadytorun(FAR _TCB *rtrtcb);

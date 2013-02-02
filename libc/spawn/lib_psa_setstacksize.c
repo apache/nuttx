@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/string/lib_psa_getschedparam.c
+ * libc/string/lib_psa_setstacksize.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,16 +48,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: posix_spawnattr_getschedparam
+ * Name: task_spawnattr_setstacksize
  *
  * Description:
- *   The posix_spawnattr_getschedparam() function will obtain the value of
- *   the spawn-schedparam attribute from the attributes object referenced
+ *   The task_spawnattr_setstacksize() function shall set the spawn-
+ *   stacksize attribute in an initialized attributes object referenced
  *   by attr.
  *
  * Input Parameters:
- *   attr - The address spawn attributes to be queried.
- *   param - The location to return the spawn-schedparam value.
+ *   attr  - The address spawn attributes to be used.
+ *   stacksize - The new stacksize to set.
  *
  * Returned Value:
  *   On success, these functions return 0; on failure they return an error
@@ -65,10 +65,9 @@
  *
  ****************************************************************************/
 
-int posix_spawnattr_getschedparam(FAR const posix_spawnattr_t *attr,
-                                  FAR struct sched_param *param)
+int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr, size_t stacksize)
 {
-  DEBUGASSERT(attr && param);
-  param->sched_priority = attr->priority;
+  DEBUGASSERT(attr);
+  attr->stacksize = stacksize;
   return OK;
 }
