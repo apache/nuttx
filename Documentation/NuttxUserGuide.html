@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: January 23, 2013</p>
+      <p>Last Updated: February 2, 2013</p>
     </td>
   </tr>
 </table>
@@ -221,7 +221,6 @@ paragraphs.
 <p>
   Standard <code>posix_spawn</code> interfaces:
 </p>
-
 <ul>
   <li><a href="#posix_spawn">2.1.11 posix_spawn and posix_spawnp</a></li>
   <li><a href="#posix_spawn_file_actions_init">2.1.12 posix_spawn_file_actions_init</a></li>
@@ -239,6 +238,14 @@ paragraphs.
   <li><a href="#posix_spawnattr_setschedpolicy">2.1.24 posix_spawnattr_setschedpolicy</a></li>
   <li><a href="#posix_spawnattr_setsigmask">2.1.25 posix_spawnattr_setsigmask</a></li>
 </ul>
+<p>
+  Non-standard task control interfaces inspired by <code>posix_spawn</code>:
+</p>
+<ul>
+  <li><a href="#task_spawn">2.1.26 task_spawn</a></li>
+  <li><a href="#task_spawnattr_getstacksize">2.1.27 task_spawnattr_getstacksize</a></li>
+  <li><a href="#task_spawnattr_setstacksize">2.1.28 task_spawnattr_setstacksize</a></li>
+</ul>
 
 <H3><a name="taskcreate">2.1.1 task_create</a></H3>
 
@@ -246,7 +253,7 @@ paragraphs.
 <b>Function Prototype:</b> 
 <ul><pre>
 #include &lt;sched.h&gt;
-int task_create(char *name, int priority, int stack_size, main_t entry, const char *argv[]);
+int task_create(char *name, int priority, int stack_size, main_t entry, char * const argv[]);
 </pre></ul>
 
 <p>
@@ -336,7 +343,7 @@ VxWorks provides the following similar interface:
 <pre>
    #include &lt;sched.h&gt;
    int task_init(_TCB *tcb, char *name, int priority, uint32_t *stack, uint32_t stack_size,
-                 maint_t entry, const char *argv[]);
+                 maint_t entry, char * const argv[]);
 </pre>
 
 <p>
@@ -831,7 +838,7 @@ int posix_spawnp(FAR pid_t *pid, FAR const char *file,
 </pre></ul>
 <p>
   <b>Description:</b>
-   The <code>posix_spawn()</code> and <code>posix_spawnp()</code> functions will create a new, child task, constructed from a regular executable file.<p>
+   The <code>posix_spawn()</code> and <code>posix_spawnp()</code> functions will create a new, child task, constructed from a regular executable file.
 </p>
 <p>
   <b>Input Parameters:</b>
@@ -1402,6 +1409,206 @@ int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr, FAR const sigset_t *
   <b>Returned Value:</b> 
   On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
 </p>
+
+<h3><a name="task_spawn">2.1.26 task_spawn</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+  <ul><pre>
+#include &lt;spawn.h&gt;
+int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
+      FAR const posix_spawn_file_actions_t *file_actions,
+      FAR const posix_spawnattr_t *attr,
+      FAR char *const argv[], FAR char *const envp[]);
+</pre></ul>
+<p>
+  <b>Description:</b>
+   The <code>task_spawn()</code> function will create a new, child task, where the entry point to the task is an address in memory.
+</p>
+</p>
+<ul>
+   <li>
+     <p>
+       <code>pid</code>:
+       Upon successful completion, <code>task_spawn()</code> will return the task ID of the child task to the parent task, in the variable pointed to by a non-NULL <code>pid</code> argument.
+       If the <code>pid</code> argument is a null pointer, the process ID of the child is not returned to the caller.
+     </p>
+   </li>
+   <li>
+     <p>
+       <code>name</code>:
+       The name to assign to the child task.
+     </p>
+   </li>
+   <li>
+     <p>
+       <code>entry</code>:
+       The child task's entry point (an address in memory).
+     </p>
+   </li>
+   <li>
+     <p>
+       <code>file_actions</code>:
+       If <code>file_actions</code> is a null pointer, then file descriptors open in the calling process will remain open in the child process (unless <code>CONFIG_FDCLONE_STDIO</code> is defined).
+       If <code>file_actions</code> is not NULL, then the file descriptors open in the child process will be those open in the calling process as modified by the spawn file actions object pointed to by <code>file_actions</code>.
+     </p>
+   </li>
+   <li>
+     <p>
+       <code>attr</code>:
+       If the value of the <code>attr</code> parameter is <code>NULL</code>, the all default values for the POSIX spawn attributes will be used.
+       Otherwise, the attributes will be set according to the spawn flags.
+       The <code>posix_spawnattr_t</code> spawn attributes object type is defined in <code>spawn.h</code>.
+       It will contains these attributes, not all of which are supported by NuttX:
+     </p>
+     <ul>
+       <li>
+         <code>POSIX_SPAWN_SETPGROUP</code>:
+         Setting of the new task's process group is not supported.
+         NuttX does not support process groups.
+       </li>
+       <li>
+         <code>POSIX_SPAWN_SETSCHEDPARAM</code>:
+         Set new tasks priority to the <code>sched_param</code> value.
+       </li>
+       <li>
+         <code>POSIX_SPAWN_SETSCHEDULER</code>:
+         Set the new task's scheduler policy to the <code>sched_policy</code> value.
+       </li>
+       <li>
+         <code>POSIX_SPAWN_RESETIDS</code>
+         Resetting of the effective user ID of the child process is not supported.
+         NuttX does not support effective user IDs.
+       </li>
+       <li>
+         <code>POSIX_SPAWN_SETSIGMASK</code>:
+         Set the new task's signal mask.
+       </li>
+       <li>
+         <code>POSIX_SPAWN_SETSIGDEF</code>:
+         Resetting signal default actions is not supported.
+         NuttX does not support default signal actions.
+       </li>
+    </ul>
+    <p>
+       And the non-standard:
+    </p>
+    <ul>
+      <li>
+        <code>TASK_SPAWN_SETSTACKSIZE</code>:
+        Set the stack size for the new task.
+      </li>
+    </ul>
+  </li>
+   <li>
+     <p>
+       <code>argv</code>:
+       <code>argv[]</code> is the argument list for the new task.  <code>argv[]</code> is an array of pointers to null-terminated strings.
+       The list is terminated with a null pointer.
+     </p>
+   </li>
+   <li>
+     <p>
+       <code>envp</code>:
+       The <code>envp[]</code> argument is not used by NuttX and may be <code>NULL</code>.
+     </p>
+   </li>
+</ul>
+<p>
+  <b>Returned Value:</b> 
+  <code>task_spawn()</code> will return zero on success.
+  Otherwise, an error number will be returned as the function return value to indicate the error:
+</p>
+<p>
+  <b>POSIX Compatibility:</b>
+  This is a non-standard interface inspired by <code>posix_spawn()</code>.
+</p>
+
+<h3><a name="task_spawnattr_getstacksize">2.1.26 task_spawnattr_getstacksize</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+  <ul><pre>
+#include &lt;spawn.h&gt;
+int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr, FAR size_t *stacksize);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  The <code>task_spawnattr_getstacksize()</code> function will obtain the value of the <i>spawn-stacksize</i> attribute from the attributes object referenced by <code>attr</code>.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+   <li>
+     <code>attr</code>:
+     The address spawn attributes to be queried.
+   </li>
+   <li>
+     <code>policy</code>:
+      The location to return the <i>spawn-stacksize</i> value.
+   </li>
+</ul>
+<p>
+  <b>Returned Value:</b> 
+  On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
+</p>
+
+<h3><a name="task_spawnattr_setstacksize">2.1.26 task_spawnattr_setstacksize</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+  <ul><pre>
+#include &lt;spawn.h&gt;
+int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr, size_t stacksize);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  The <code>task_spawnattr_setstacksize()</code> function will set the <i>spawn-stacksize</i> attribute in an initialized attributes object referenced by <code>attr</code>.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+   <li>
+     <code>attr</code>:
+     The address spawn attributes to be used.
+   </li>
+   <li>
+     <code>policy</code>:
+      The new value of the <i>spawn-stacksize</i> attribute.
+   </li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+  On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>
+</p>
+
+<h3><a name="posix_spawn_file_actions_init">2.1.12 posix_spawn_file_actions_init</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+  <ul><pre>
+#include &lt;spawn.h&gt;
+int posix_spawn_file_actions_init(FAR posix_spawn_file_actions_t *file_actions);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  The <code>posix_spawn_file_actions_init()</code> function initializes the object referenced by <code>file_actions</code> to an empty set of file actions for subsequent use in a call to <code>posix_spawn()</code> or <code>posix_spawnp()</code>.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+   <li>
+     <code>file_actions</code>:
+     The address of the <code>posix_spawn_file_actions_t</code> to be initialized.
+   </li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+  On success, this function returns 0; on failure it will return an error number from <code>&lt;errno.h&gt;</code>.
+<p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -9277,9 +9484,9 @@ notify a task when a message is available on a queue.
   <li><a href="#poll">poll</a></li>
   <li><a href="#drvrpollops">poll.h</a></li>
   <li><a href="#posix_spawn">posix_spawn</a></li>
+  <li><a href="#posix_spawn_file_actions_addclose">posix_spawn_file_actions_addclose</a></li>
 </td>
 <td valign="top" width="33%">
-  <li><a href="#posix_spawn_file_actions_addclose">posix_spawn_file_actions_addclose</a></li>
   <li><a href="#posix_spawn_file_actions_adddup2">posix_spawn_file_actions_adddup2</a></li>
   <li><a href="#posix_spawn_file_actions_addopen">posix_spawn_file_actions_addopen</a></li>
   <li><a href="#posix_spawn_file_actions_destroy">posix_spawn_file_actions_destroy</a></li>
@@ -9362,10 +9569,10 @@ notify a task when a message is available on a queue.
   <li><a href="#standardio">rename</a></li>
   <li><a href="#standardio">rmdir</a></li>
   <li><a href="#dirdirentops">rewinddir</a></li>
-</td>
-<td valign="top">
   <li><a href="#mmapxip">ROM disk driver</a></li>
   <li><a href="#mmapxip">ROMFS</a></li>
+</td>
+<td valign="top">
   <li><a href="#schedgetparam">sched_getparam</a></li>
   <li><a href="#schedgetprioritymax">sched_get_priority_max</a></li>
   <li><a href="#schedgetprioritymin">sched_get_priority_min</a></li>
@@ -9419,8 +9626,11 @@ notify a task when a message is available on a queue.
   <li><a href="#taskdelete">task_delete</a></li>
   <li><a href="#taskinit">task_init</a></li>
   <li><a href="#taskrestart">task_restart</a></li>
-  <li><a href="#Task_Switch">Task Control Interfaces</a>
   <li><a href="#Task_Schedule">Task Scheduling Interfaces</a>
+  <li><a href="#task_spawn">task_spawn</a></li>
+  <li><a href="#task_spawnattr_getstacksize">task_spawnattr_getstacksize</a></li>
+  <li><a href="#task_spawnattr_setstacksize">task_spawnattr_setstacksize</a></li>
+  <li><a href="#Task_Switch">Task Switching Interfaces</a>
   <li><a href="#dirdirentops">telldir</a></li>
   <li><a href="#timercreate">timer_create</a></li>
   <li><a href="#timerdelete">timer_delete</a></li>
