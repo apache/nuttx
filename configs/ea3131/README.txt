@@ -605,7 +605,7 @@ ARM/EA3131-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each EA3131 configuration is maintained in a sudirectory and can be
+Each EA3131 configuration is maintained in a sub-directory and can be
 selected as follow:
 
     cd tools

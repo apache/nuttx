@@ -521,7 +521,7 @@ Configurations
 ^^^^^^^^^^^^^^
 
 Each Nucleus 2G configuration is maintained in a
-sudirectory and can be selected as follow:
+sub-directory and can be selected as follow:
 
     cd tools
     ./configure.sh nucleus2g/<subdir>

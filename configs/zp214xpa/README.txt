@@ -282,7 +282,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 Configurations:
 ===============
 
-  Each NXP LPC214x configuration is maintained in a sudirectory and
+  Each NXP LPC214x configuration is maintained in a sub-directory and
   can be selected as follow:
 
     cd tools

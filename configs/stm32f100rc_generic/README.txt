@@ -454,7 +454,7 @@ configured on pins PA3 and PA2, respectively.
 Configurations
 ==============
 
-Each STMicro STM32F100RC generic configuration is maintained in a sudirectory
+Each STMicro STM32F100RC generic configuration is maintained in a sub-directory
 and can be selected as follow:
 
     cd tools

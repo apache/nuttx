@@ -431,7 +431,7 @@ AVR32DEV1 Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Atmel AVR32DEV configuration is maintained in a sudirectory and
+Each Atmel AVR32DEV configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools

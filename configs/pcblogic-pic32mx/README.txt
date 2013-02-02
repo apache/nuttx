@@ -159,7 +159,7 @@ MAX3232 Connection
   RX  -- Pin 52: U1RX/RF2
   GND -- POWER POINT: GND
   Vcc -- POWER POINT: Vdd (3.3V) -- Or P32_VBUS (+5V)
-         -- Or +5V from a USB PC port.
+         Or +5V from a USB PC port.
  
 Toolchains
 ==========
@@ -524,7 +524,7 @@ PIC32MX Configuration Options
 Configurations
 ==============
 
-Each PIC32MX configuration is maintained in a sudirectory and can be
+Each PIC32MX configuration is maintained in a sub-directory and can be
 selected as follow:
 
     cd tools

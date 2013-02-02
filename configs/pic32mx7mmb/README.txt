@@ -599,7 +599,7 @@ PIC32MX specific PHY/Ethernet device driver settings
 Configurations
 ==============
 
-Each PIC32MX configuration is maintained in a sudirectory and can be
+Each PIC32MX configuration is maintained in a sub-directory and can be
 selected as follow:
 
     cd tools

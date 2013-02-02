@@ -358,7 +358,7 @@ HCS12/DEMO9S12NEC64-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Freescale HCS12 configuration is maintained in a sudirectory and
+Each Freescale HCS12 configuration is maintained in a sub-directory and
 can be selected as follow:
 
 	cd tools

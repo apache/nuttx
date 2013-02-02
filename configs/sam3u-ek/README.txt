@@ -355,7 +355,7 @@ SAM3U-EK-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each SAM3U-EK configuration is maintained in a sudirectory and
+Each SAM3U-EK configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools

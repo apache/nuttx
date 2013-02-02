@@ -55,7 +55,7 @@ shterm
 Configurations
 ^^^^^^^^^^^^^^
 
-Each SH-1 configuration is maintained in a sudirectory and
+Each SH-1 configuration is maintained in a sub-directory and
 can be selected as follow:
 
 	cd tools

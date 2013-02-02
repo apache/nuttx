@@ -320,7 +320,7 @@ ARM/LPC214X-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each NXP LPC214x configuration is maintained in a sudirectory and
+Each NXP LPC214x configuration is maintained in a sub-directory and
 can be selected as follow:
 
 	cd tools

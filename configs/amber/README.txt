@@ -490,7 +490,7 @@ Amber Web Server Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Amber Web Server configuration is maintained in a sudirectory and can
+Each Amber Web Server configuration is maintained in a sub-directory and can
 be selected as follow:
 
     cd tools

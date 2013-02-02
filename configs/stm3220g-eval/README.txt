@@ -776,7 +776,7 @@ STM3220G-EVAL-specific Configuration Options
 Configurations
 ==============
 
-Each STM3220G-EVAL configuration is maintained in a sudirectory and
+Each STM3220G-EVAL configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools

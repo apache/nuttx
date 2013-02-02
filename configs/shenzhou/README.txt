@@ -743,7 +743,7 @@ Shenzhou-specific Configuration Options
 Configurations
 ==============
 
-Each Shenzhou configuration is maintained in a sudirectory and
+Each Shenzhou configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools
