@@ -195,7 +195,7 @@ int stm32_usbhost_initialize(void)
 
       pid = TASK_CREATE("usbhost", CONFIG_USBHOST_DEFPRIO,
                         CONFIG_USBHOST_STACKSIZE,
-                        (main_t)usbhost_waiter, (const char **)NULL);
+                        (main_t)usbhost_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
 
