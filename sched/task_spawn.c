@@ -52,10 +52,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_POSIX_SPAWN_PROXY_STACKSIZE
-#  define CONFIG_POSIX_SPAWN_PROXY_STACKSIZE 1024
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -240,7 +236,7 @@ static int task_spawn_proxy(int argc, FAR char *argv[])
 
   g_spawn_parms.result = ret;
 #ifndef CONFIG_SCHED_WAITPID
-  spawn_semgive(&g_task_spawn_execsem);
+  spawn_semgive(&g_spawn_execsem);
 #endif
   return OK;
 }
@@ -416,7 +412,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
        goto errout_with_lock;
      }
 #else
-   spawn_semtake(&g_task_spawn_execsem);
+   spawn_semtake(&g_spawn_execsem);
 #endif
 
    /* Get the result and relinquish our access to the parameter structure */

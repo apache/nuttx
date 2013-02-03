@@ -47,6 +47,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_POSIX_SPAWN_PROXY_STACKSIZE
+#  define CONFIG_POSIX_SPAWN_PROXY_STACKSIZE 1024
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

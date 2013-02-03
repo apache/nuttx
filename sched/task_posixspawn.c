@@ -233,7 +233,7 @@ static int posix_spawn_proxy(int argc, FAR char *argv[])
 
   g_spawn_parms.result = ret;
 #ifndef CONFIG_SCHED_WAITPID
-  spawn_semgive(&g_posix_spawn_execsem);
+  spawn_semgive(&g_spawn_execsem);
 #endif
   return OK;
 }
@@ -445,7 +445,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
        goto errout_with_lock;
      }
 #else
-   spawn_semtake(&g_posix_spawn_execsem);
+   spawn_semtake(&g_spawn_execsem);
 #endif
 
    /* Get the result and relinquish our access to the parameter structure */
