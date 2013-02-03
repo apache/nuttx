@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_gpio.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           With LPC178x extensions from Rommel Marcelo
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -98,20 +99,6 @@ const uint32_t g_fiobase[GPIO_NPORTS] =
 #endif
 };
 
-#ifdef LPC178X
-/* IOCON register base addresses */
-
-const uint32_t g_ioconport[GPIO_NPORTS] =
-{
-  LPC17_IOCON_P0,
-  LPC17_IOCON_P1,
-  LPC17_IOCON_P2,
-  LPC17_IOCON_P3,
-  LPC17_IOCON_P4,
-  LPC17_IOCON_P5
-}
-#endif
-
 /* Port 0 and Port 2 can provide a single interrupt for any combination of
  * port pins
  */
@@ -191,6 +178,62 @@ const uint32_t g_odmode[GPIO_NPORTS] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc17_configiocon
+ *
+ * Description:
+ *   Set the LPC178x IOCON register
+ *
+ *   Type D: FUNC, MODE, HYS, INV, SLEW, OD             -
+ *   Type A: FUNC, MODE, INV, ADMODE, FILTER, OD, DACEN -P0[12:13,23:26],P1[30:31]
+ *   Type U: FUNC                                       -P0[29:31]
+ *   Type I: FUNC, INV, HS, HIDRIVE                     -P0[27:28], P5[2:3]
+ *   Type W: FUNC, MODE, HYS, INV, FILTER, SLEW, OD     -P0[7:9]
+ *
+ ****************************************************************************/
+
+#ifdef LPC178x
+static int lpc17_configiocon(unsigned int port, unsigned int pin,
+                             unsigned int value)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+  uint32_t typemask
+
+    /* Select the mask based on pin usage */
+
+    if (port == 0 && (pin==7 || pin==8 || pin==9))
+      {
+        typemask = GPIO_IOCON_TYPE_W_MASK;
+      }
+    else if ((port == 0 && (pin==27 || pin==28)) ||
+             (port == 5 && (pin==2 || pin==3)))
+      {
+        typemask = GPIO_IOCON_TYPE_I_MASK;
+      }
+    else if (port == 0 && (pin==29 || pin==30 || pin==31))
+      {
+        typemask = GPIO_IOCON_TYPE_U_MASK;
+      }
+    else if ((port == 0 && (pin==12 || pin==13 || pin==23 ||
+                            pin==24 || pin==25 || pin==26)) ||
+             (port == 1 && (pin==30 || pin==31)))
+      {
+        typemask = GPIO_IOCON_TYPE_A_MASK;
+      }
+    else
+      {
+        typemask = GPIO_IOCON_TYPE_D_MASK;
+      }
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval &= value;
+  regval &= ~typemask;
+  putreg32(regval, regaddr);
+}
+#endif
 
 /****************************************************************************
  * Name: lpc17_pinsel
@@ -383,27 +426,6 @@ static void lpc17_clropendrain(unsigned int port, unsigned int pin)
 }
 
 /****************************************************************************
- * Name: lpc17_configiocon
- *
- * Description:
- *   Set the LPC178x IOCON register
- ****************************************************************************/
-
-#ifdef LPC178x
-static int lpc17_configiocon(unsigned int port, unsigned int pin,
-                             unsigned int value)
-{
-  uint32_t regaddr;
-  uint32_t regval;
-
-  regaddr = (g_ioconbase[port] + LPC17_IOCON_PP_OFFSET(pin));
-  regval  = getreg32(regaddr);
-  regval &= value;
-  putreg32(regval, regaddr);
-}
-#endif
-
-/****************************************************************************
  * Name: lpc17_configinput
  *
  * Description:
@@ -452,11 +474,10 @@ static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port, un
 #endif
     }
 
-#if defined(LPC176x)
-
   /* Set up PINSEL registers */
   /* Configure as GPIO */
 
+#if defined(LPC176x)
   lpc17_pinsel(port, pin, PINCONN_PINSEL_GPIO);
 
   /* Set pull-up mode */
@@ -469,35 +490,21 @@ static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port, un
 
 #elif defined(LPC178x)
 
-  uint32_t value;
-
   /* Configure as GPIO */
 
-  if ((cfgset & GPIO_FILTER) != 0)
-    {
-      value = (IOCON_FUNC_GPIO | ~GPIO_IOCON_TYPE_W_MASK);
-    }
-  else
-    {
-      value = (IOCON_FUNC_GPIO | ~GPIO_IOCON_TYPE_D_MASK);
-    }
+  regval = IOCON_FUNC_GPIO;
 
   /* Set pull-up mode */
 
-  value |= ((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT);
+  regval |= ((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT);
 
-  /* Clear open drain: open drain only applies to outputs */
+  /* Clear opendrain, input hysteresis, invertion, slew */
 
-  value &= ~IOCON_OD_MASK ;
-
-  /* Clear input hysteresis, invertion, slew */
-
-  value &= ~(IOCON_HYS_MASK | IOCON_INV_MASK | IOCON_SLEW_MASK);
+  regval &= ~(IOCON_HYS_MASK | IOCON_INV_MASK | IOCON_SLEW_MASK | IOCON_OD_MASK);
 
   /* Set IOCON register */
 
-  lpc17_configiocon(port, pin, value);
-
+  lpc17_configiocon(port, pin, regval);
 #endif
 
   return OK;
@@ -556,6 +563,7 @@ static inline int lpc17_configoutput(lpc17_pinset_t cfgset, unsigned int port,
   regval |= (1 << pin);
   putreg32(regval, fiobase + LPC17_FIO_DIR_OFFSET);
 
+#if defined(LPC176x)
   /* Check for open drain output */
 
   if ((cfgset & GPIO_OPEN_DRAIN) != 0)
@@ -569,7 +577,33 @@ static inline int lpc17_configoutput(lpc17_pinset_t cfgset, unsigned int port,
       /* Select open drain output */
 
       lpc17_setopendrain(port, pin);
-  }
+    }
+
+#elif defined(LPC178x)
+  regval = 0;
+
+  /* Select open drain output */
+
+  if ((cfgset & GPIO_OPEN_DRAIN) != 0)
+    {
+      regval |= IOCON_OD_MASK;
+    }
+
+  /* Select slew output */
+
+  if ((cfgset & GPIO_SLEW) != 0)
+    {
+      regval |= IOCON_SLEW_MASK;
+    }
+
+  /* Set pull-up mode */
+
+  regval |= ((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT);
+
+  /* Set IOCON register */
+
+  lpc17_configiocon(port, pin, regval);
+#endif
 
   /* Set the initial value of the output */
 
@@ -595,6 +629,7 @@ static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
 
   (void)lpc17_configinput(DEFAULT_INPUT, port, pin);
 
+#if defined(LPC176x)
   /* Set up PINSEL registers */
   /* Configure as GPIO */
 
@@ -611,7 +646,37 @@ static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
       /* Select open drain output */
 
       lpc17_setopendrain(port, pin);
-   }
+    }
+
+#elif defined(LPC178x)
+  uint32_t regval = 0;
+
+  /* Select open drain output */
+
+  if ((cfgset & GPIO_OPEN_DRAIN) != 0)
+    {
+      regval |= IOCON_OD_MASK;
+    }
+
+  //~ /* Select slew output */
+  //~
+  //~ if ((cfgset & GPIO_SLEW) != 0)
+  //~ {
+  //~   regval |= IOCON_SLEW_MASK;
+  //~ }
+
+  /* Set pull-up mode */
+
+  regval |= ((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT);
+
+  /* Set the alternate pin */
+
+  regval |= alt;
+
+  /* Set IOCON register */
+
+  lpc17_configiocon(port, pin, regval);
+#endif
 
   return OK;
 }
@@ -676,19 +741,19 @@ int lpc17_configgpio(lpc17_pinset_t cfgset)
 #ifdef LPC178x
 
         case GPIO_ALT4:    /* Alternate function 4 */
-          ret =  ;
+          ret = lpc17_configalternate(cfgset, port, pin, IOCON_FUNC_ALT4);
           break;
 
         case GPIO_ALT5:    /* Alternate function 5 */
-          ret =  ;
+          ret = lpc17_configalternate(cfgset, port, pin, IOCON_FUNC_ALT5);
           break;
 
         case GPIO_ALT6:    /* Alternate function 6 */
-          ret =  ;
+          ret = lpc17_configalternate(cfgset, port, pin, IOCON_FUNC_ALT6);
           break;
 
         case GPIO_ALT7:    /* Alternate function 7 */
-          ret =  ;
+          ret = lpc17_configalternate(cfgset, port, pin, IOCON_FUNC_ALT7);
           break;
 
 #endif
