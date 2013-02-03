@@ -101,6 +101,7 @@ void pthread_destroyjoin(FAR struct task_group_s *group,
                          FAR struct join_s *pjoin);
 FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
                                         pid_t pid);
+void pthread_release(FAR struct task_group_s *group);
 int pthread_givesemaphore(sem_t *sem);
 int pthread_takesemaphore(sem_t *sem);
 

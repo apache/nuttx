@@ -146,7 +146,7 @@ PTHREAD_SRCS += pthread_barrierinit.c pthread_barrierdestroy.c pthread_barrierwa
 PTHREAD_SRCS += pthread_cancel.c pthread_setcancelstate.c
 PTHREAD_SRCS += pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c pthread_keydelete.c
 PTHREAD_SRCS += pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c
-PTHREAD_SRCS += pthread_once.c pthread_setschedprio.c
+PTHREAD_SRCS += pthread_once.c pthread_release.c pthread_setschedprio.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 PTHREAD_SRCS += pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c

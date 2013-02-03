@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/pthread_keydelete.c
+ * sched/pthread_release.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,9 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
-#include <errno.h>
 #include <debug.h>
 
+#include "os_internal.h"
 #include "pthread_internal.h"
 
 /************************************************************************
@@ -70,18 +70,18 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: pthread_key_delete
+ * Name: pthread_release
  *
  * Description:
- *   This POSIX function should delete a thread-specific data key
- *   previously returned by pthread_key_create().  However, this function
- *   does nothing in the present implementation.
+ *   Release pthread resources from the task group with the group
+ *   terminated.
  *
  * Parameters:
- *   key = the key to delete
+ *   group = The task group containing the pthread resources to be
+ *           released.
  *
  * Return Value:
- *   Always returns ENOSYS.
+ *   None
  *
  * Assumptions:
  *
@@ -89,8 +89,35 @@
  *
  ************************************************************************/
 
-int pthread_key_delete(pthread_key_t key)
+void pthread_release(FAR struct task_group_s *group)
 {
-  return ENOSYS;
-}
+  FAR struct join_s *join;
 
+  sdbg("group=0x%p\n", group);
+
+  /* Visit and delete each join structure still in the list.  Since we
+   * are last exiting thread of the group, no special protection should
+   * be required.
+   */
+
+  while (group->tg_joinhead)
+    {
+      /* Remove the join from the head of the list. */
+
+      join = group->tg_joinhead;
+      group->tg_joinhead = join->next;
+
+      /* Destroy the join semaphores */
+
+      (void)sem_destroy(&join->data_sem);
+      (void)sem_destroy(&join->exit_sem);
+
+      /* And deallocate the join structure */
+
+      sched_free(join);
+    }
+
+  /* Destroy the join list semaphore */
+
+  (void)sem_destroy(&group->tg_joinsem);
+}
