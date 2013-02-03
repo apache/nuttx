@@ -1,7 +1,7 @@
 /****************************************************************************
  * pthread_join.c
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <debug.h>
 
 #include "os_internal.h"
+#include "group_internal.h"
 #include "pthread_internal.h"
 
 /****************************************************************************
@@ -77,6 +78,10 @@
  *    A thread can await termination of another thread and retrieve the
  *    return value of the thread.
  *
+ *    The caller's task/thread must belong to the same "task group" as the
+ *    pthread is (or was) a member of.  The thread may or may not still
+ *    be running.
+ *
  * Parameters:
  *   thread
  *   pexit_value
@@ -97,10 +102,13 @@
 
 int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 {
-  FAR join_t *pjoin;
+  FAR _TCB *rtcb = (FAR _TCB *)g_readytorun.head;
+  FAR struct task_group_s *group = rtcb->group;
+  FAR struct join_s *pjoin;
   int ret;
 
-  sdbg("thread=%d\n", thread);
+  sdbg("thread=%d group=%p\n", thread, group);
+  DEBUGASSERT(group);
 
   /* First make sure that this is not an attempt to join to
    * ourself.
@@ -117,7 +125,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
    * because it will also attempt to get this semaphore.
    */
 
-  (void)pthread_takesemaphore(&g_join_semaphore);
+  (void)pthread_takesemaphore(&group->tg_joinsem);
 
   /* Find the join information associated with this thread.
    * This can fail for one of three reasons:  (1) There is no
@@ -126,7 +134,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
    * was detached and has exited.
    */
 
-  pjoin = pthread_findjoininfo((pid_t)thread);
+  pjoin = pthread_findjoininfo(group, (pid_t)thread);
   if (!pjoin)
     {
       /* Determine what kind of error to return */
@@ -151,7 +159,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
           ret = EINVAL;
         }
 
-      (void)pthread_givesemaphore(&g_join_semaphore);
+      (void)pthread_givesemaphore(&group->tg_joinsem);
     }
   else
     {
@@ -192,7 +200,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
            * semaphore.
            */
 
-          (void)pthread_givesemaphore(&g_join_semaphore);
+          (void)pthread_givesemaphore(&group->tg_joinsem);
 
           /* Take the thread's thread exit semaphore.  We will sleep here
            * until the thread exits.  We need to exercise caution because
@@ -220,7 +228,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
            * pthread_destroyjoin is called.
            */
 
-          (void)pthread_takesemaphore(&g_join_semaphore);
+          (void)pthread_takesemaphore(&group->tg_joinsem);
         }
 
       /* Pre-emption is okay now. The logic still cannot be re-entered
@@ -235,10 +243,10 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
       if (--pjoin->crefs <= 0)
         {
-          (void)pthread_destroyjoin(pjoin);
+          (void)pthread_destroyjoin(group, pjoin);
         }
 
-      (void)pthread_givesemaphore(&g_join_semaphore);
+      (void)pthread_givesemaphore(&group->tg_joinsem);
       ret = OK;
     }
 

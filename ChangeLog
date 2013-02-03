@@ -4106,4 +4106,5 @@
 	  task_create().
 	* Corrected all argv[] arguments. Should be char * const *, not
 	  const char **.
-
+	* sched/pthread* and include/nuttx/sched: Move pthread join data
+	  and pthread key calculation data into the "task group" structure.

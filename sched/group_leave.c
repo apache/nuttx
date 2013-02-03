@@ -154,6 +154,12 @@ static inline void group_release(FAR struct task_group_s *group)
   group_removechildren(group);
 #endif
 
+  /* Free pthread join data */
+
+#ifndef CONFIG_DISABLE_PTHREAD
+  (void)sem_destroy(&group->tg_joinsem);
+#endif
+
   /* Free all file-related resources now.  We really need to close files as
    * soon as possible while we still have a functioning task.
    */

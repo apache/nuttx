@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread_keycreate.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,10 @@
 
 #include <sched.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
+#include "os_internal.h"
 #include "pthread_internal.h"
 
 /****************************************************************************
@@ -109,19 +111,23 @@
 int pthread_key_create(FAR pthread_key_t *key, CODE void (*destructor)(void*))
 {
 #if CONFIG_NPTHREAD_KEYS > 0
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct task_group_s *group = rtcb->group;
   int ret = EAGAIN;
+
+  DEBUGASSERT(group);
 
   /* Check if we have exceeded the system-defined number of keys. */
 
-  if (g_pthread_num_keys < PTHREAD_KEYS_MAX)
+  if (group->tg_nkeys < PTHREAD_KEYS_MAX)
     {
       /* Return the key value */
 
-      *key = g_pthread_num_keys;
+      *key = group->tg_nkeys;
 
       /* Increment the count of global keys. */
 
-      g_pthread_num_keys++;
+      group->tg_nkeys++;
 
       /* Return success. */
 

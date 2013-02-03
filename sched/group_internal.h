@@ -88,6 +88,12 @@ int group_addmember(FAR struct task_group_s *group, pid_t pid);
 int  group_removemember(FAR struct task_group_s *group, pid_t pid);
 #endif
 
+/* Convenience functions */
+
+FAR struct task_group_s *task_getgroup(pid_t pid);
+
+/* Signaling group members */
+
 #ifndef CONFIG_DISABLE_SIGNALS
 int  group_signal(FAR struct task_group_s *group, FAR siginfo_t *info);
 #endif

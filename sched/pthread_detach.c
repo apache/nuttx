@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/pthread_detach.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,11 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include "os_internal.h"
+#include "group_internal.h"
 #include "pthread_internal.h"
 
 /************************************************************************
@@ -79,6 +81,10 @@
  *    A thread object may be "detached" to specify that the return value
  *    and completion status will not be requested.
  *
+ *    The caller's task/thread must belong to the same "task group" as the
+ *    pthread is (or was) a member of.  The thread may or may not still
+ *    be running.
+ *
  * Parameters:
  *   thread
  *
@@ -91,15 +97,18 @@
 
 int pthread_detach(pthread_t thread)
 {
-  FAR join_t *pjoin;
+  FAR _TCB *rtcb = (FAR _TCB *)g_readytorun.head;
+  FAR struct task_group_s *group = rtcb->group;
+  FAR struct join_s *pjoin;
   int ret;
 
-  sdbg("Thread=%d\n", thread);
+  sdbg("Thread=%d group=%p\n", thread, group);
+  DEBUGASSERT(group);
 
   /* Find the entry associated with this pthread. */
 
-  (void)pthread_takesemaphore(&g_join_semaphore);
-  pjoin = pthread_findjoininfo((pid_t)thread);
+  (void)pthread_takesemaphore(&group->tg_joinsem);
+  pjoin = pthread_findjoininfo(group, (pid_t)thread);
   if (!pjoin)
     {
       sdbg("Could not find thread entry\n");
@@ -113,7 +122,7 @@ int pthread_detach(pthread_t thread)
         {
           /* YES.. just remove the thread entry. */
 
-          pthread_destroyjoin(pjoin);
+          pthread_destroyjoin(group, pjoin);
         }
       else
         {
@@ -130,7 +139,7 @@ int pthread_detach(pthread_t thread)
       ret = OK;
     }
 
-  (void)pthread_givesemaphore(&g_join_semaphore);
+  (void)pthread_givesemaphore(&group->tg_joinsem);
 
   sdbg("Returning %d\n", ret);
   return ret;

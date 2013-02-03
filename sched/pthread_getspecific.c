@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/pthread_getspecific.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <sched.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include "os_internal.h"
@@ -104,11 +105,14 @@ FAR void *pthread_getspecific(pthread_key_t key)
 {
 #if CONFIG_NPTHREAD_KEYS > 0
   FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct task_group_s *group = rtcb->group;
   FAR void *ret = NULL;
+
+  DEBUGASSERT(group);
 
   /* Check if the key is valid. */
 
-  if (key < g_pthread_num_keys)
+  if (key < group->tg_nkeys)
     {
       /* Return the stored value. */
 

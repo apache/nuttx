@@ -86,6 +86,7 @@ endif
 
 GRP_SRCS  = group_create.c group_join.c group_leave.c group_find.c
 GRP_SRCS += group_setupstreams.c group_setupidlefiles.c group_setuptaskfiles.c
+GRP_SRCS += task_getgroup.c
 
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
 GRP_SRCS += task_reparent.c
@@ -145,7 +146,7 @@ PTHREAD_SRCS += pthread_barrierinit.c pthread_barrierdestroy.c pthread_barrierwa
 PTHREAD_SRCS += pthread_cancel.c pthread_setcancelstate.c
 PTHREAD_SRCS += pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c pthread_keydelete.c
 PTHREAD_SRCS += pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c
-PTHREAD_SRCS += pthread_removejoininfo.c pthread_once.c pthread_setschedprio.c
+PTHREAD_SRCS += pthread_once.c pthread_setschedprio.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 PTHREAD_SRCS += pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c

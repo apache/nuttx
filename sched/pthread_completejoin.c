@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/pthread_completejoin.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include "os_internal.h"
+#include "group_internal.h"
 #include "pthread_internal.h"
 
 /************************************************************************
@@ -78,7 +79,7 @@
  *
  ************************************************************************/
 
-static bool pthread_notifywaiters(FAR join_t *pjoin)
+static bool pthread_notifywaiters(FAR struct join_s *pjoin)
 {
   int ntasks_waiting;
   int status;
@@ -122,6 +123,76 @@ static bool pthread_notifywaiters(FAR join_t *pjoin)
 }
 
 /************************************************************************
+ * Name: pthread_removejoininfo
+ *
+ * Description:
+ *   Remove a join structure from the local data set.
+ *
+ * Parameters:
+ *   pid
+ *
+ * Return Value:
+ *   None.
+ *
+ * Assumptions:
+ *   The caller has provided protection from re-entrancy.
+ *
+ ************************************************************************/
+
+static void pthread_removejoininfo(FAR struct task_group_s *group,
+                                   pid_t pid)
+{
+  FAR struct join_s *prev;
+  FAR struct join_s *join;
+
+  /* Find the entry with the matching pid */
+
+  for (prev = NULL, join = group->tg_joinhead;
+       (join && (pid_t)join->thread != pid);
+       prev = join, join = join->next);
+
+  /* Remove it from the data set. */
+
+  /* First check if this is the entry at the head of the list. */
+
+  if (join)
+    {
+      if (!prev)
+        {
+          /* Check if this is the only entry in the list */
+
+          if (!join->next)
+            {
+              group->tg_joinhead = NULL;
+              group->tg_jointail = NULL;
+            }
+
+          /* Otherwise, remove it from the head of the list */
+
+          else
+            {
+              group->tg_joinhead = join->next;
+            }
+        }
+
+      /* It is not at the head of the list, check if it is at the tail. */
+
+      else if (!join->next)
+        {
+          group->tg_jointail = prev;
+          prev->next = NULL;
+        }
+
+      /* No, remove it from the middle of the list. */
+
+      else
+        {
+          prev->next = join->next;
+        }
+    }
+}
+
+/************************************************************************
  * Public Functions
  ************************************************************************/
 
@@ -147,18 +218,20 @@ static bool pthread_notifywaiters(FAR join_t *pjoin)
 
 int pthread_completejoin(pid_t pid, FAR void *exit_value)
 {
-  FAR join_t *pjoin;
+  FAR struct task_group_s *group = task_getgroup(pid);
+  FAR struct join_s *pjoin;
 
-  svdbg("pid=%d exit_value=%p\n", pid, exit_value);
+  svdbg("pid=%d exit_value=%p group=%p\n", pid, exit_value, group);
+  DEBUGASSERT(group);
 
   /* First, find thread's structure in the private data set. */
 
-  (void)pthread_takesemaphore(&g_join_semaphore);
-  pjoin = pthread_findjoininfo(pid);
+  (void)pthread_takesemaphore(&group->tg_joinsem);
+  pjoin = pthread_findjoininfo(group, pid);
   if (!pjoin)
     {
       sdbg("Could not find join info, pid=%d\n", pid);
-      (void)pthread_givesemaphore(&g_join_semaphore);
+      (void)pthread_givesemaphore(&group->tg_joinsem);
       return ERROR;
     }
   else
@@ -182,14 +255,14 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
 
       if (!waiters && pjoin->detached)
         {
-           pthread_destroyjoin(pjoin);
+           pthread_destroyjoin(group, pjoin);
         }
 
       /* Giving the following semaphore will allow the waiters
        * to call pthread_destroyjoin.
        */
 
-      (void)pthread_givesemaphore(&g_join_semaphore);
+      (void)pthread_givesemaphore(&group->tg_joinsem);
     }
 
   return OK;
@@ -207,17 +280,18 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
  *   no thread ever calls pthread_join.  In case, there is a memory leak!
  *
  * Assumptions:
- *   The caller holds g_join_semaphore
+ *   The caller holds tg_joinsem
  *
  ************************************************************************/
 
-void pthread_destroyjoin(FAR join_t *pjoin)
+void pthread_destroyjoin(FAR struct task_group_s *group,
+                         FAR struct join_s *pjoin)
 {
   sdbg("pjoin=0x%p\n", pjoin);
 
   /* Remove the join info from the set of joins */
 
-  (void)pthread_removejoininfo((pid_t)pjoin->thread);
+  pthread_removejoininfo(group, (pid_t)pjoin->thread);
 
   /* Destroy its semaphores */
 

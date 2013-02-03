@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread_internal.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,53 +75,37 @@ struct join_s
   sem_t          exit_sem;       /* Implements join */
   sem_t          data_sem;       /* Implements join */
   pthread_addr_t exit_value;     /* Returned data */
-
 };
-
-typedef struct join_s join_t;
 
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
 
-/* This is the head of a private singly linked list.  It is used to retain
- * information about the spawned threads.
- */
-
-extern FAR join_t *g_pthread_head;
-extern FAR join_t *g_pthread_tail;
-
-/* Mutually exclusive access to this data set is enforced with the following
- * (un-named) semaphore.
- */
-
-extern sem_t g_join_semaphore;
-
-/* This keys track of the number of global keys that have been allocated. */
-
-extern uint8_t g_pthread_num_keys;
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+struct task_group_s; /* Forward reference */
 
-EXTERN void weak_function pthread_initialize(void);
-EXTERN int                pthread_completejoin(pid_t pid, FAR void *exit_value);
-EXTERN void               pthread_destroyjoin(FAR join_t *pjoin);
-EXTERN FAR join_t        *pthread_findjoininfo(pid_t pid);
-EXTERN int                pthread_givesemaphore(sem_t *sem);
-EXTERN FAR join_t        *pthread_removejoininfo(pid_t pid);
-EXTERN int                pthread_takesemaphore(sem_t *sem);
+void weak_function pthread_initialize(void);
+int pthread_completejoin(pid_t pid, FAR void *exit_value);
+void pthread_destroyjoin(FAR struct task_group_s *group,
+                         FAR struct join_s *pjoin);
+FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
+                                        pid_t pid);
+int pthread_givesemaphore(sem_t *sem);
+int pthread_takesemaphore(sem_t *sem);
 
 #ifdef CONFIG_MUTEX_TYPES
-EXTERN int                pthread_mutexattr_verifytype(int type);
+int pthread_mutexattr_verifytype(int type);
 #endif
 
 #undef EXTERN

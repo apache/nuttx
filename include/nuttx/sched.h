@@ -273,6 +273,12 @@ struct dspace_s
  */
 
 #ifdef HAVE_TASK_GROUP
+
+#ifndef CONFIG_DISABLE_PTHREAD
+struct join_s;                      /* Forward reference                        */
+                                    /* Defined in pthread_internal.h            */
+#endif
+
 struct task_group_s
 {
 #ifdef HAVE_GROUP_MEMBERS
@@ -294,6 +300,16 @@ struct task_group_s
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   FAR struct child_status_s *tg_children; /* Head of a list of child status     */
+#endif
+
+  /* Pthreads *******************************************************************/
+
+#ifndef CONFIG_DISABLE_PTHREAD
+                                    /* Pthread join Info:                       */
+  sem_t tg_joinsem;                 /*   Mutually exclusive access to join data */
+  FAR struct join_s *tg_joinhead;   /*   Head of a list of join data            */
+  FAR struct join_s *tg_jointail;   /*   Tail of a list of join data            */
+  uint8_t tg_nkeys;                 /* Number pthread keys allocated            */
 #endif
 
   /* Environment variables ******************************************************/

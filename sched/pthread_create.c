@@ -147,7 +147,7 @@ static void pthread_argsetup(FAR _TCB *tcb, pthread_addr_t arg)
  * Name: pthread_addjoininfo
  *
  * Description:
- *   Add a join_t to the local data set.
+ *   Add a join structure to the local data set.
  *
  * Parameters:
  *   pjoin
@@ -160,27 +160,27 @@ static void pthread_argsetup(FAR _TCB *tcb, pthread_addr_t arg)
  *
  ****************************************************************************/
 
-static void pthread_addjoininfo(FAR join_t *pjoin)
+static inline void pthread_addjoininfo(FAR struct task_group_s *group,
+                                       FAR struct join_s *pjoin)
 {
   pjoin->next = NULL;
-  if (!g_pthread_tail)
+  if (!group->tg_jointail)
     {
-      g_pthread_head = pjoin;
+      group->tg_joinhead = pjoin;
     }
   else
     {
-      g_pthread_tail->next = pjoin;
+      group->tg_jointail->next = pjoin;
     }
 
-  g_pthread_tail = pjoin;
+  group->tg_jointail = pjoin;
 }
 
 /****************************************************************************
  * Name:  pthread_start
  *
  * Description:
- *   This function is the low level entry point into the
- *   pthread
+ *   This function is the low level entry point into the pthread
  *
  * Parameters:
  * None
@@ -190,16 +190,19 @@ static void pthread_addjoininfo(FAR join_t *pjoin)
 static void pthread_start(void)
 {
   FAR _TCB   *ptcb  = (FAR _TCB*)g_readytorun.head;
-  FAR join_t *pjoin = (FAR join_t*)ptcb->joininfo;
+  FAR struct task_group_s *group = ptcb->group;
+  FAR struct join_s *pjoin = (FAR struct join_s*)ptcb->joininfo;
   pthread_addr_t exit_status;
+
+  DEBUGASSERT(group && pjoin);
 
   /* Sucessfully spawned, add the pjoin to our data set.
    * Don't re-enable pre-emption until this is done.
    */
 
-  (void)pthread_takesemaphore(&g_join_semaphore);
-  pthread_addjoininfo(pjoin);
-  (void)pthread_givesemaphore(&g_join_semaphore);
+  (void)pthread_takesemaphore(&group->tg_joinsem);
+  pthread_addjoininfo(group, pjoin);
+  (void)pthread_givesemaphore(&group->tg_joinsem);
 
   /* Report to the spawner that we successfully started. */
 
@@ -245,7 +248,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
                    pthread_startroutine_t start_routine, pthread_addr_t arg)
 {
   FAR _TCB *ptcb;
-  FAR join_t *pjoin;
+  FAR struct join_s *pjoin;
   int priority;
 #if CONFIG_RR_INTERVAL > 0
   int policy;
@@ -298,7 +301,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Allocate a detachable structure to support pthread_join logic */
 
-  pjoin = (FAR join_t*)kzalloc(sizeof(join_t));
+  pjoin = (FAR struct join_s*)kzalloc(sizeof(struct join_s));
   if (!pjoin)
     {
       errcode = ENOMEM;
@@ -424,7 +427,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
   if (ret == OK)
     {
       /* Wait for the task to actually get running and to register
-       * its join_t
+       * its join structure.
        */
 
       (void)pthread_takesemaphore(&pjoin->data_sem);

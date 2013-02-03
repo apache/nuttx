@@ -1,7 +1,7 @@
 /************************************************************************
  * pthread_findjoininfo.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 
+#include "group_internal.h"
 #include "pthread_internal.h"
 
 /************************************************************************
@@ -71,10 +72,11 @@
  * Name: thread_findjoininfo
  *
  * Description:
- *   Find a join_t to the local data set.
+ *   Find a join structure in a local data set.
  *
  * Parameters:
- *   pid
+ *   group - The that the pid is (or was) a member of of
+ *   pid - The ID of the pthread
  *
  * Return Value:
  *   None or pointer to the found entry.
@@ -84,13 +86,16 @@
  *
  ************************************************************************/
 
-FAR join_t *pthread_findjoininfo(pid_t pid)
+FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
+                                        pid_t pid)
 {
-  FAR join_t *pjoin;
+  FAR struct join_s *pjoin;
+
+  DEBUGASSERT(group);
 
   /* Find the entry with the matching pid */
 
-  for (pjoin = g_pthread_head;
+  for (pjoin = group->tg_joinhead;
        (pjoin && (pid_t)pjoin->thread != pid);
        pjoin = pjoin->next);
 

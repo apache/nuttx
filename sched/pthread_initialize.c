@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread_initialize.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,25 +57,6 @@
  * Global Variables
  ****************************************************************************/
 
-/* This is the head of a private singly linked list.  It
- * is used to retain information about the spawned threads.
- */
-
-FAR join_t *g_pthread_head = NULL;
-FAR join_t *g_pthread_tail = NULL;
-
-/* Mutually exclusive access to this data set is enforced with
- * the following (un-named) semaphore.
- */
-
-sem_t g_join_semaphore;
-
-/* This keys track of the number of global keys that have been
- * allocated.
- */
-
-uint8_t g_pthread_num_keys;
-
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
@@ -92,7 +73,9 @@ uint8_t g_pthread_num_keys;
  * Name: pthread_initialize
  *
  * Description:
- *   This is an internal OS function called only at power-up boot time.
+ *   This is an internal OS function called only at power-up boot time.  It
+ *   no longer does anything since all of the pthread data structures have
+ *   been moved into the "task group"
  *
  * Parameters:
  *   None
@@ -106,17 +89,6 @@ uint8_t g_pthread_num_keys;
 
 void pthread_initialize(void)
 {
-  /* Initialize some global variables */
-
-  g_pthread_head          = NULL;
-  g_pthread_tail          = NULL;
-  g_pthread_num_keys      = 0;
-
-  /* Initialize the join semaphore to one (to support one-at-
-   * a-time access to private data sets).
-   */
-
-  (void)sem_init(&g_join_semaphore, 0, 1);
 }
 
 /****************************************************************************

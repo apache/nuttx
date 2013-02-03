@@ -176,35 +176,46 @@ void group_assigngid(FAR struct task_group_s *group)
 
 int group_allocate(FAR _TCB *tcb)
 {
+  FAR struct task_group_s *group;
   int ret;
 
   DEBUGASSERT(tcb && !tcb->group);
 
   /* Allocate the group structure and assign it to the TCB */
 
-  tcb->group = (FAR struct task_group_s *)kzalloc(sizeof(struct task_group_s));
-  if (!tcb->group)
+  group = (FAR struct task_group_s *)kzalloc(sizeof(struct task_group_s));
+  if (!group)
     {
       return -ENOMEM;
     }
+
+  /* Attach the group to the TCB */
+
+  tcb->group = group;
 
   /* Assign the group a unique ID.  If g_gidcounter were to wrap before we
    * finish with task creation, that would be a problem.
    */
 
 #ifdef HAVE_GROUP_MEMBERS
-  group_assigngid(tcb->group);
+  group_assigngid(group);
 #endif
 
   /* Duplicate the parent tasks envionment */
 
-  ret = env_dup(tcb->group);
+  ret = env_dup(group);
   if (ret < 0)
     {
-      kfree(tcb->group);
+      kfree(group);
       tcb->group = NULL;
       return ret;
     }
+
+  /* Initialize the pthread join semaphore */
+
+#ifndef CONFIG_DISABLE_PTHREAD
+  (void)sem_init(&group->tg_joinsem, 0, 1);
+#endif
 
   return OK;
 }

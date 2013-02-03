@@ -1,5 +1,5 @@
 /*****************************************************************************
- * sched/group_find.c
+ * sched/task_getgroup.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,14 +40,9 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
 
-#include <nuttx/kmalloc.h>
-
+#include "os_internal.h"
 #include "group_internal.h"
-#include "env_internal.h"
 
 #ifdef HAVE_TASK_GROUP
 
@@ -76,21 +71,18 @@
  *****************************************************************************/
 
 /*****************************************************************************
- * Name: group_find
+ * Name: task_getgroup
  *
  * Description:
- *   Given a group ID, find the group task structure with that ID.  IDs are
- *   used instead of pointers to group structures.  This is done because a 
- *   group can disappear at any time leaving a stale pointer; an ID is cleaner
- *   because if the group disappears, this function will fail gracefully.
+ *   Given a task ID, return the group structure of this task.
  *
  * Parameters:
- *   gid - The group ID to find.
+ *   pid - The task ID to use in the lookup.
  *
  * Return Value:
  *   On success, a pointer to the group task structure is returned.  This
  *   function can fail only if there is no group that corresponds to the
- *   group ID.
+ *   groupd ID.
  *
  * Assumptions:
  *   Called during when signally tasks in a safe context.  No special
@@ -99,27 +91,15 @@
  *
  *****************************************************************************/
 
-#ifdef HAVE_GROUP_MEMBERS
-FAR struct task_group_s *group_find(gid_t gid)
+FAR struct task_group_s *task_getgroup(pid_t pid)
 {
-  FAR struct task_group_s *group;
-  irqstate_t flags;
-
-  /* Find the status structure with the matching PID  */
-
-  flags = irqsave();
-  for (group = g_grouphead; group; group = group->flink)
+  FAR _TCB *tcb = sched_gettcb(pid);
+  if (tcb)
     {
-      if (group->tg_gid == gid)
-        {
-          irqrestore(flags);
-          return group;
-        }
+      return tcb->group;
     }
 
-  irqrestore(flags);
   return NULL;
 }
-#endif
 
 #endif /* HAVE_TASK_GROUP */

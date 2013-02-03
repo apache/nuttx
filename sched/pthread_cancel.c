@@ -1,7 +1,7 @@
 /**************************************************************************
  * sched/pthread_cancel.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,9 @@ int pthread_cancel(pthread_t thread)
   tcb = sched_gettcb((pid_t)thread);
   if (!tcb)
     {
-      /* The pid does not correspond to any known thread */
+      /* The pid does not correspond to any known thread.  The thread
+       * has probably already exited.
+       */
 
       return ESRCH;
     }
