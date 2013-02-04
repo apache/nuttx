@@ -64,7 +64,7 @@
 #undef HAVE_TASK_GROUP
 #undef HAVE_GROUP_MEMBERS
 
-/* We need a group an group members if we are supportint the parent/child
+/* We need a group an group members if we are supporting the parent/child
  * relationship.
  */
 
@@ -77,13 +77,17 @@
  */
 
 #else
-#  if !defined(CONFIG_DISABLE_ENVIRON)
+#  if !defined(CONFIG_DISABLE_ENVIRON)   /* Environment variales */
 #    define HAVE_TASK_GROUP   1
-#  elif CONFIG_NFILE_DESCRIPTORS > 0
+#  elif defined(CONFIG_SCHED_ATEXIT)     /* Group atexit() function */
 #    define HAVE_TASK_GROUP   1
-#  elif CONFIG_NFILE_STREAMS > 0
+#  elif defined(CONFIG_SCHED_ONEXIT)     /* Group on_exit() function */
 #    define HAVE_TASK_GROUP   1
-#  elif CONFIG_NSOCKET_DESCRIPTORS > 0
+#  elif CONFIG_NFILE_DESCRIPTORS > 0     /* File descriptors */
+#    define HAVE_TASK_GROUP   1
+#  elif CONFIG_NFILE_STREAMS > 0         /* Standard C buffered I/O */
+#    define HAVE_TASK_GROUP   1
+#  elif CONFIG_NSOCKET_DESCRIPTORS > 0   /* Sockets */
 #    define HAVE_TASK_GROUP   1
 #  endif
 #endif
@@ -296,6 +300,26 @@ struct task_group_s
   FAR pid_t *tg_members;            /* Members of the group                     */
 #endif
 
+  /* atexit/on_exit support ****************************************************/
+
+#if defined(CONFIG_SCHED_ATEXIT) && !defined(CONFIG_SCHED_ONEXIT)
+# if defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
+  atexitfunc_t tg_atexitfunc[CONFIG_SCHED_ATEXIT_MAX];
+# else
+  atexitfunc_t tg_atexitfunc;       /* Called when exit is called.             */
+# endif
+#endif
+
+#ifdef CONFIG_SCHED_ONEXIT
+# if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
+  onexitfunc_t tg_onexitfunc[CONFIG_SCHED_ONEXIT_MAX];
+  FAR void *tg_onexitarg[CONFIG_SCHED_ONEXIT_MAX];
+# else
+  onexitfunc_t tg_onexitfunc;       /* Called when exit is called.             */
+  FAR void *tg_onexitarg;           /* The argument passed to the function     */
+# endif
+#endif
+
   /* Child exit status **********************************************************/
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
@@ -382,24 +406,6 @@ struct _TCB
 #ifdef CONFIG_SCHED_STARTHOOK
   starthook_t starthook;                 /* Task startup function               */
   FAR void *starthookarg;                /* The argument passed to the function */
-#endif
-
-#if defined(CONFIG_SCHED_ATEXIT) && !defined(CONFIG_SCHED_ONEXIT)
-# if defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
-  atexitfunc_t atexitfunc[CONFIG_SCHED_ATEXIT_MAX];
-# else
-  atexitfunc_t atexitfunc;               /* Called when exit is called.         */
-# endif
-#endif
-
-#ifdef CONFIG_SCHED_ONEXIT
-# if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
-  onexitfunc_t onexitfunc[CONFIG_SCHED_ONEXIT_MAX];
-  FAR void *onexitarg[CONFIG_SCHED_ONEXIT_MAX];
-# else
-  onexitfunc_t onexitfunc;               /* Called when exit is called.         */
-  FAR void *onexitarg;                   /* The argument passed to the function */
-# endif
 #endif
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)

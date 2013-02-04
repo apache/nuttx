@@ -87,41 +87,50 @@
 #if defined(CONFIG_SCHED_ATEXIT) && !defined(CONFIG_SCHED_ONEXIT)
 static inline void task_atexit(FAR _TCB *tcb)
 {
-#if defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
-  int index;
+  FAR struct task_group_s *group = tcb->group;
 
-  /* Call each atexit function in reverse order of registration  atexit()
-   * functions are registered from lower to higher arry indices; they must
-   * be called in the reverse order of registration when task exists, i.e.,
-   * from higher to lower indices.
+  /* Make sure that we have not already left the group.  Only the final
+   * exitting thread in the task group should trigger the atexit()
+   * callbacks.
    */
 
-  for (index = CONFIG_SCHED_ATEXIT_MAX-1; index >= 0; index--)
+  if (group && group->tg_nmembers == 1)
     {
-      if (tcb->atexitfunc[index])
+#if defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
+      int index;
+
+      /* Call each atexit function in reverse order of registration atexit()
+       * functions are registered from lower to higher arry indices; they
+       * must be called in the reverse order of registration when the task
+       * group exits, i.e., from higher to lower indices.
+       */
+
+      for (index = CONFIG_SCHED_ATEXIT_MAX-1; index >= 0; index--)
+        {
+          if (group->tg_atexitfunc[index])
+            {
+              /* Call the atexit function */
+
+              (*group->tg_atexitfunc[index])();
+
+              /* Nullify the atexit function to prevent its reuse. */
+
+              group->tg_atexitfunc[index] = NULL;
+            }
+        }
+#else
+      if (group->tg_atexitfunc)
         {
           /* Call the atexit function */
 
-          (*tcb->atexitfunc[index])();
+          (*group->tg_atexitfunc)();
 
           /* Nullify the atexit function to prevent its reuse. */
 
-          tcb->atexitfunc[index] = NULL;
+          group->tg_atexitfunc = NULL;
         }
-    }
-
-#else
-  if (tcb->atexitfunc)
-    {
-      /* Call the atexit function */
-
-      (*tcb->atexitfunc)();
-
-      /* Nullify the atexit function to prevent its reuse. */
-
-      tcb->atexitfunc = NULL;
-    }
 #endif
+    }
 }
 #else
 #  define task_atexit(tcb)
@@ -138,40 +147,50 @@ static inline void task_atexit(FAR _TCB *tcb)
 #ifdef CONFIG_SCHED_ONEXIT
 static inline void task_onexit(FAR _TCB *tcb, int status)
 {
-#if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
-  int index;
+  FAR struct task_group_s *group = tcb->group;
 
-  /* Call each on_exit function in reverse order of registration.  on_exit()
-   * functions are registered from lower to higher arry indices; they must
-   * be called in the reverse order of registration when task exists, i.e.,
-   * from higher to lower indices.
+  /* Make sure that we have not already left the group.  Only the final
+   * exitting thread in the task group should trigger the atexit()
+   * callbacks.
    */
 
-  for (index = CONFIG_SCHED_ONEXIT_MAX-1; index >= 0; index--)
+  if (group && group->tg_nmembers == 1)
     {
-      if (tcb->onexitfunc[index])
+#if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
+      int index;
+
+      /* Call each on_exit function in reverse order of registration.
+       * on_exit() functions are registered from lower to higher arry
+       * indices; they must be called in the reverse order of registration
+       * when the task grroup exits, i.e., from higher to lower indices.
+       */
+
+      for (index = CONFIG_SCHED_ONEXIT_MAX-1; index >= 0; index--)
+        {
+          if (group->tg_onexitfunc[index])
+            {
+              /* Call the on_exit function */
+
+             (*group->tg_onexitfunc[index])(status, group->tg_onexitarg[index]);
+
+              /* Nullify the on_exit function to prevent its reuse. */
+
+              group->tg_onexitfunc[index] = NULL;
+            }
+        }
+#else
+      if (group->tg_onexitfunc)
         {
           /* Call the on_exit function */
 
-          (*tcb->onexitfunc[index])(status, tcb->onexitarg[index]);
+          (*group->tg_onexitfunc)(status, group->tg_onexitarg);
 
           /* Nullify the on_exit function to prevent its reuse. */
 
-          tcb->onexitfunc[index] = NULL;
+          group->tg_onexitfunc = NULL;
         }
-    }
-#else
-  if (tcb->onexitfunc)
-    {
-      /* Call the on_exit function */
-
-      (*tcb->onexitfunc)(status, tcb->onexitarg);
-
-      /* Nullify the on_exit function to prevent its reuse. */
-
-      tcb->onexitfunc = NULL;
-    }
 #endif
+    }
 }
 #else
 #  define task_onexit(tcb,status)
@@ -490,7 +509,7 @@ static inline void task_exitwakeup(FAR _TCB *tcb, int status)
  * Description:
  *   This function implements some of the internal logic of exit() and
  *   task_delete().  This function performs some cleanup and other actions
- *   required when a task exists:
+ *   required when a task exits:
  *
  *   - All open streams are flushed and closed.
  *   - All functions registered with atexit() and on_exit() are called, in

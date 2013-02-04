@@ -48,8 +48,9 @@
 #include <nuttx/net/net.h>
 #include <nuttx/lib.h>
 
-#include "group_internal.h"
 #include "env_internal.h"
+#include "pthread_internal.h"
+#include "group_internal.h"
 
 #ifdef HAVE_TASK_GROUP
 

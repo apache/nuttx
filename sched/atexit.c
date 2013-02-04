@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/atexit.c
  *
- *   Copyright (C) 2007, 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,12 +117,15 @@ int atexit(void (*func)(void))
    * can handle a callback function that recieves more parameters than it expects).
    */
 
-  return on_exit(onexitfunc_t func, NULL);
+  return on_exit((onexitfunc_t)func, NULL);
 
 #elif defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
-  _TCB *tcb = (_TCB*)g_readytorun.head;
-  int   index;
-  int   ret = ERROR;
+  FAR _TCB *tcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct task_group_s *group = tcb->group;
+  int index;
+  int ret = ERROR;
+
+  DEBUGASSERT(group);
 
   /* The following must be atomic */
 
@@ -139,9 +142,9 @@ int atexit(void (*func)(void))
       available = -1;
       for (index = 0; index < CONFIG_SCHED_ATEXIT_MAX; index++)
         {
-          if (!tcb->atexitfunc[index])
+          if (!group->tg_atexitfunc[index])
             {
-              tcb->atexitfunc[index] = func;
+              group->tg_atexitfunc[index] = func;
               ret = OK;
               break;
             }
@@ -152,15 +155,18 @@ int atexit(void (*func)(void))
 
   return ret;
 #else
-  _TCB *tcb = (_TCB*)g_readytorun.head;
-  int   ret = ERROR;
+  FAR _TCB *tcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct task_group_s *group = tcb->group;
+  int ret = ERROR;
+
+  DEBUGASSERT(group);
 
   /* The following must be atomic */
 
   sched_lock();
-  if (func && !tcb->atexitfunc)
+  if (func && !group->tg_atexitfunc)
     {
-      tcb->atexitfunc = func;
+      group->tg_atexitfunc = func;
       ret = OK;
     }
 

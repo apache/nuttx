@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/on_exit.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,9 +115,12 @@
 int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 {
 #if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
-  _TCB *tcb = (_TCB*)g_readytorun.head;
+  FAR _TCB *tcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct task_group_s *group = tcb->group;
   int   index;
   int   ret = ENOSPC;
+
+  DEBUGASSERT(group);
 
   /* The following must be atomic */
 
@@ -133,10 +136,10 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 
       for (index = 0; index < CONFIG_SCHED_ONEXIT_MAX; index++)
         {
-          if (!tcb->onexitfunc[index])
+          if (!group->tg_onexitfunc[index])
             {
-              tcb->onexitfunc[index] = func;
-              tcb->onexitarg[index]  = arg;
+              group->tg_onexitfunc[index] = func;
+              group->tg_onexitarg[index]  = arg;
               ret = OK;
               break;
             }
@@ -147,16 +150,19 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 
   return ret;
 #else
-  _TCB *tcb = (_TCB*)g_readytorun.head;
+  FAR _TCB *tcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct task_group_s *group = tcb->group;
   int   ret = ENOSPC;
+
+  DEBUGASSERT(group);
 
   /* The following must be atomic */
 
   sched_lock();
-  if (func && !tcb->onexitfunc)
+  if (func && !group->tg_onexitfunc)
     {
-      tcb->onexitfunc = func;
-      tcb->onexitarg  = arg;
+      group->tg_onexitfunc = func;
+      group->tg_onexitarg  = arg;
       ret = OK;
     }
 
