@@ -330,7 +330,7 @@ void os_start(void)
   /* Allocate the IDLE group and suppress child status. */
 
 #ifdef HAVE_TASK_GROUP
-  (void)group_allocate(&g_idletcb.cmn);
+  (void)group_allocate(&g_idletcb);
 #endif
 
   /* Initialize the interrupt handling subsystem (if included) */
@@ -456,7 +456,7 @@ void os_start(void)
    */
 
 #ifdef HAVE_TASK_GROUP
-  (void)group_initialize(&g_idletcb.cmn);
+  (void)group_initialize(&g_idletcb);
   g_idletcb.cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
 #endif
 

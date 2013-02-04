@@ -179,7 +179,7 @@ static inline void clock_basetime(FAR struct timespec *tp)
 
 static void clock_inittime(void)
 {
-  /* (Re-)initialize the time value to match the RTC*/
+  /* (Re-)initialize the time value to match the RTC */
 
   clock_basetime(&g_basetime);
   g_system_timer = 0;

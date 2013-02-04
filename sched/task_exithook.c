@@ -343,7 +343,11 @@ static inline void task_sigchild(gid_t pgid, FAR struct tcb_s *ctcb, int status)
       info.si_signo           = SIGCHLD;
       info.si_code            = CLD_EXITED;
       info.si_value.sival_ptr = NULL;
+#ifndef CONFIG_DISABLE_PTHREAD
+      info.si_pid             = chgrp->tg_task;
+#else
       info.si_pid             = ctcb->pid;
+#endif
       info.si_status          = status;
 
       /* Send the signal.  We need to use this internal interface so that we
@@ -356,7 +360,8 @@ static inline void task_sigchild(gid_t pgid, FAR struct tcb_s *ctcb, int status)
 
 #else /* HAVE_GROUP_MEMBERS */
 
-static inline void task_sigchild(FAR struct tcb_s *ptcb, FAR struct tcb_s *ctcb, int status)
+static inline void task_sigchild(FAR struct tcb_s *ptcb,
+                                 FAR struct tcb_s *ctcb, int status)
 {
   siginfo_t info;
 
@@ -391,7 +396,11 @@ static inline void task_sigchild(FAR struct tcb_s *ptcb, FAR struct tcb_s *ctcb,
       info.si_signo           = SIGCHLD;
       info.si_code            = CLD_EXITED;
       info.si_value.sival_ptr = NULL;
+#ifndef CONFIG_DISABLE_PTHREAD
+      info.si_pid             = chgrp->tg_task;
+#else
       info.si_pid             = ctcb->pid;
+#endif
       info.si_status          = status;
 
       /* Send the signal.  We need to use this internal interface so that we

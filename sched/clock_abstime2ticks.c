@@ -120,7 +120,7 @@ int clock_abstime2ticks(clockid_t clockid, FAR const struct timespec *abstime,
       reltime.tv_sec  -= 1;
     }
 
-  /* Convert this relative time into microseconds.*/
+  /* Convert this relative time into microseconds. */
 
   return clock_time2ticks(&reltime, ticks);
 }

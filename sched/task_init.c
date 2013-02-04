@@ -134,7 +134,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
   /* Create a new task group */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_allocate(tcb);
+  ret = group_allocate(ttcb);
   if (ret < 0)
     {
       errcode = -ret;
@@ -176,7 +176,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
   /* Now we have enough in place that we can join the group */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_initialize(tcb);
+  ret = group_initialize(ttcb);
   if (ret < 0)
     {
       errcode = -ret;

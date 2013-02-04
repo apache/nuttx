@@ -77,22 +77,24 @@
  */
 
 #else
-#  if !defined(CONFIG_DISABLE_ENVIRON)   /* Environment variables */
-#    define HAVE_TASK_GROUP   1
-#  elif defined(CONFIG_SCHED_ATEXIT)     /* Group atexit() function */
-#    define HAVE_TASK_GROUP   1
-#  elif defined(CONFIG_SCHED_ONEXIT)     /* Group on_exit() function */
-#    define HAVE_TASK_GROUP   1
-#  elif defined(CONFIG_SCHED_WAITPID)    /* Group waitpid() function */
-#    define HAVE_TASK_GROUP   1
-#  elif CONFIG_NFILE_DESCRIPTORS > 0     /* File descriptors */
-#    define HAVE_TASK_GROUP   1
-#  elif CONFIG_NFILE_STREAMS > 0         /* Standard C buffered I/O */
-#    define HAVE_TASK_GROUP   1
-#  elif CONFIG_NSOCKET_DESCRIPTORS > 0   /* Sockets */
-#    define HAVE_TASK_GROUP   1
-#  elif !defined(CONFIG_DISABLE_MQUEUE)  /* Message queues */
-#    define HAVE_TASK_GROUP   1
+#  if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
+#    define HAVE_TASK_GROUP   1          /* pthreads with parent*/
+#  elif !defined(CONFIG_DISABLE_ENVIRON)
+#    define HAVE_TASK_GROUP   1          /* Environment variables */
+#  elif defined(CONFIG_SCHED_ATEXIT)
+#    define HAVE_TASK_GROUP   1          /* Group atexit() function */
+#  elif defined(CONFIG_SCHED_ONEXIT)
+#    define HAVE_TASK_GROUP   1          /* Group on_exit() function */
+#  elif defined(CONFIG_SCHED_WAITPID)
+#    define HAVE_TASK_GROUP   1          /* Group waitpid() function */
+#  elif CONFIG_NFILE_DESCRIPTORS > 0
+#    define HAVE_TASK_GROUP   1          /* File descriptors */
+#  elif CONFIG_NFILE_STREAMS > 0
+#    define HAVE_TASK_GROUP   1          /* Standard C buffered I/O */
+#  elif CONFIG_NSOCKET_DESCRIPTORS > 0
+#    define HAVE_TASK_GROUP   1          /* Sockets */
+#  elif !defined(CONFIG_DISABLE_MQUEUE)
+#    define HAVE_TASK_GROUP   1          /* Message queues */
 #  endif
 #endif
 
@@ -293,6 +295,9 @@ struct task_group_s
   struct task_group_s *flink;       /* Supports a singly linked list            */
   gid_t      tg_gid;                /* The ID of this task group                */
   gid_t      tg_pgid;               /* The ID of the parent task group          */
+#endif
+#if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
+  pid_t      tg_task;               /* The ID of the task within the group      */
 #endif
   uint8_t    tg_flags;              /* See GROUP_FLAG_* definitions             */
 

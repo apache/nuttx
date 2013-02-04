@@ -246,4 +246,5 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
 #endif
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0*/
+#endif /* CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0 */
+

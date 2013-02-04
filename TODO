@@ -6,7 +6,7 @@ standards, things that could be improved, and ideas for enhancements.
 
 nuttx/
 
- (11)  Task/Scheduler (sched/)
+ (12)  Task/Scheduler (sched/)
   (1)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
@@ -203,6 +203,48 @@ o Task/Scheduler (sched/)
   Status:      Closed.  The existing solution is better (although its
                incompatibilities could show up in porting some code).
   Priority:    Low
+
+  Title:       SIGNALS IN TASK GROUPS WITH MANY PTHREADS
+  Description: Presumably when you single the task group you would signal
+               using the task ID of the task that created the group (in
+               practice, a different task should not know the IDs of the
+               internal threads created within the task group).
+
+               Here are some of the things that should happen, but don't
+               as of this writing:
+
+               - If a task group receives a signal then one and only one
+                 indeterminate thread in the process which is not blocking
+                 the signal should receive the signal.
+
+               - If a task group receives a signal and more than one thread
+                 is waiting on that signal, then one and only one
+                 indeterminate thread out of that waiting group will receive
+                 the signal.
+
+               - If any signal which would normally cause the termination of
+                 a process is sent to a thread it will result in the parent
+                 process and all threads being terminated. (NuttX does not
+                 support these default signal actions... that is really
+                 another topic).
+
+               On creation a thread does correctly inherits the signal mask of the thread that created it.
+
+               You should be able to control which thread receives the signal
+               by control the signal mask. You should, for example, be able
+               to create a seperate thread whose sole purpose it is to catch
+               signals and respond to them. You can mask out certain signals
+               using sigprocmask() (or pthread_sigmask()). These signals
+               will be effectively disabled and will never be received in
+               these contexts. In the "signal processing" thread, enable the
+               blocked signals. This should now be the only thread who
+               receives the signals.
+
+               At present, the signal APIs will attempt to signal only the
+               thread that is the main task of the task group.
+  Status:      Open.
+  Priority:    Medium-high for spec compliance; but probably low for everyday
+               embedded applications.
 
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^

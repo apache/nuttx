@@ -4130,4 +4130,9 @@
 	  for pthreads.  By dividing the TCB structure into these variants,
 	  pthreads do not have to be burdened by task-specific data structures
 	  (and vice versa).
+	* sched/task_exithook.c adn group_create.c:  Fix an error, the
+	  task within the task group may exit early leaving a pthread to
+	  exit the task group last.  In this case, we need to remember the
+	  the PID of the main task in the task group and use that PID for
+	  signalling SIGCHILD to the parent task group.
 

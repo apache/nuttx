@@ -83,7 +83,7 @@ FAR char **get_environ_ptr( void )
 
 #else
 
-  /* Return a reference to the thread-private environ in the TCB.*/
+  /* Return a reference to the thread-private environ in the TCB. */
 
   FAR struct tcb_s *ptcb = (FAR struct tcb_s*)g_readytorun.head;
   if (ptcb->envp)
@@ -99,6 +99,4 @@ FAR char **get_environ_ptr( void )
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
-
-
 

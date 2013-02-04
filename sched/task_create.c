@@ -123,7 +123,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
   /* Allocate a new task group */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_allocate((FAR struct tcb_s *)tcb);
+  ret = group_allocate(tcb);
   if (ret < 0)
     {
       errcode = -ret;
@@ -169,7 +169,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
   /* Now we have enough in place that we can join the group */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_initialize((FAR struct tcb_s *)tcb);
+  ret = group_initialize(tcb);
   if (ret < 0)
     {
       errcode = -ret;

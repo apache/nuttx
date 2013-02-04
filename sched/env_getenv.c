@@ -91,7 +91,7 @@ FAR char *getenv(const char *name)
       goto errout;
     }
 
-  /* Get a reference to the thread-private environ in the TCB.*/
+  /* Get a reference to the thread-private environ in the TCB. */
 
   sched_lock();
   rtcb = (FAR struct tcb_s*)g_readytorun.head;
@@ -130,6 +130,4 @@ errout:
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
-
-
 

@@ -49,7 +49,7 @@
 #include "group_internal.h"
 #include "env_internal.h"
 
-#ifdef HAVE_TASK_GROUP
+#if defined(HAVE_TASK_GROUP) && !defined(CONFIG_DISABLE_PTHREAD)
 
 /*****************************************************************************
  * Pre-processor Definitions
@@ -99,15 +99,15 @@
  *
  *****************************************************************************/
 
-int group_bind(FAR struct tcb_s *tcb)
+int group_bind(FAR struct pthread_tcb_s *tcb)
 {
   FAR struct tcb_s *ptcb = (FAR struct tcb_s *)g_readytorun.head;
 
-  DEBUGASSERT(ptcb && tcb && ptcb->group && !tcb->group);
+  DEBUGASSERT(ptcb && tcb && ptcb->group && !tcb->cmn.group);
 
   /* Copy the group reference from the parent to the child */
 
-  tcb->group = ptcb->group;
+  tcb->cmn.group = ptcb->group;
   return OK;
 }
 
@@ -136,24 +136,24 @@ int group_bind(FAR struct tcb_s *tcb)
  *
  *****************************************************************************/
 
-int group_join(FAR struct tcb_s *tcb)
+int group_join(FAR struct pthread_tcb_s *tcb)
 {
   FAR struct task_group_s *group;
 #ifdef HAVE_GROUP_MEMBERS
   int ret;
 #endif
 
-  DEBUGASSERT(tcb && tcb->group &&
-              tcb->group->tg_nmembers < UINT8_MAX);
+  DEBUGASSERT(tcb && tcb->cmn.group &&
+              tcb->cmn.group->tg_nmembers < UINT8_MAX);
 
   /* Get the group from the TCB */
 
-  group = tcb->group;
+  group = tcb->cmn.group;
 
 #ifdef HAVE_GROUP_MEMBERS
   /* Add the member to the group */
 
-  ret = group_addmember(group, tcb->pid);
+  ret = group_addmember(group, tcb->cmn.pid);
   if (ret < 0)
     {
       return ret;
@@ -224,4 +224,4 @@ int group_addmember(FAR struct task_group_s *group, pid_t pid)
 }
 #endif /* HAVE_GROUP_MEMBERS */
 
-#endif /* HAVE_TASK_GROUP */
+#endif /* HAVE_TASK_GROUP && !CONFIG_DISABLE_PTHREAD */

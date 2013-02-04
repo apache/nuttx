@@ -255,7 +255,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
    */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_bind((FAR struct tcb_s *)ptcb);
+  ret = group_bind(ptcb);
   if (ret < 0)
     {
       errcode = ENOMEM;
@@ -354,7 +354,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
   /* Join the parent's task group */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_join((FAR struct tcb_s *)ptcb);
+  ret = group_join(ptcb);
   if (ret < 0)
     {
       errcode = ENOMEM;

@@ -174,12 +174,12 @@ void group_assigngid(FAR struct task_group_s *group)
  *
  *****************************************************************************/
 
-int group_allocate(FAR struct tcb_s *tcb)
+int group_allocate(FAR struct task_tcb_s *tcb)
 {
   FAR struct task_group_s *group;
   int ret;
 
-  DEBUGASSERT(tcb && !tcb->group);
+  DEBUGASSERT(tcb && !tcb->cmn.group);
 
   /* Allocate the group structure and assign it to the TCB */
 
@@ -191,7 +191,7 @@ int group_allocate(FAR struct tcb_s *tcb)
 
   /* Attach the group to the TCB */
 
-  tcb->group = group;
+  tcb->cmn.group = group;
 
   /* Assign the group a unique ID.  If g_gidcounter were to wrap before we
    * finish with task creation, that would be a problem.
@@ -207,7 +207,7 @@ int group_allocate(FAR struct tcb_s *tcb)
   if (ret < 0)
     {
       kfree(group);
-      tcb->group = NULL;
+      tcb->cmn.group = NULL;
       return ret;
     }
 
@@ -241,15 +241,15 @@ int group_allocate(FAR struct tcb_s *tcb)
  *
  *****************************************************************************/
 
-int group_initialize(FAR struct tcb_s *tcb)
+int group_initialize(FAR struct task_tcb_s *tcb)
 {
   FAR struct task_group_s *group;
 #ifdef HAVE_GROUP_MEMBERS
   irqstate_t flags;
 #endif
 
-  DEBUGASSERT(tcb && tcb->group);
-  group = tcb->group;
+  DEBUGASSERT(tcb && tcb->cmn.group);
+  group = tcb->cmn.group;
 
 #ifdef HAVE_GROUP_MEMBERS
   /* Allocate space to hold GROUP_INITIAL_MEMBERS members of the group */
@@ -261,9 +261,9 @@ int group_initialize(FAR struct tcb_s *tcb)
       return -ENOMEM;
     }
 
-  /* Assign the PID of this new task as a member of the group*/
+  /* Assign the PID of this new task as a member of the group. */
 
-  group->tg_members[0] = tcb->pid;
+  group->tg_members[0] = tcb->cmn.pid;
 
   /* Initialize the non-zero elements of group structure and assign it to
    * the tcb.
@@ -280,8 +280,21 @@ int group_initialize(FAR struct tcb_s *tcb)
 
 #endif
 
-  group->tg_nmembers = 1; /* Number of members in the group */
+  /* Save the ID of the main task within the group of threads.  This needed
+   * for things like SIGCHILD.  It ID is also saved in the TCB of the main
+   * task but is also retained in the group which may persist after the main
+   * task has exited.
+   */
+
+#if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
+  group->tg_task = tcb->cmn.pid;
+#endif
+
+  /* Mark that there is one member in the group, the main task */
+
+  group->tg_nmembers = 1;
   return OK;
 }
 
 #endif /* HAVE_TASK_GROUP */
+

@@ -76,16 +76,18 @@ extern FAR struct task_group_s *g_grouphead;
 /* Task group data structure management */
 
 #ifdef HAVE_TASK_GROUP
-int  group_allocate(FAR struct tcb_s *tcb);
-int  group_initialize(FAR struct tcb_s *tcb);
-int  group_bind(FAR struct tcb_s *tcb);
-int  group_join(FAR struct tcb_s *tcb);
+int  group_allocate(FAR struct task_tcb_s *tcb);
+int  group_initialize(FAR struct task_tcb_s *tcb);
+#ifndef CONFIG_DISABLE_PTHREAD
+int  group_bind(FAR struct pthread_tcb_s *tcb);
+int  group_join(FAR struct pthread_tcb_s *tcb);
+#endif
 void group_leave(FAR struct tcb_s *tcb);
 
 #ifdef HAVE_GROUP_MEMBERS
 FAR struct task_group_s *group_find(gid_t gid);
 int group_addmember(FAR struct task_group_s *group, pid_t pid);
-int  group_removemember(FAR struct task_group_s *group, pid_t pid);
+int group_removemember(FAR struct task_group_s *group, pid_t pid);
 #endif
 
 /* Convenience functions */
