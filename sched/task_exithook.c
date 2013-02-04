@@ -318,7 +318,9 @@ static inline void task_sigchild(gid_t pgid, FAR struct tcb_s *ctcb, int status)
    * interpretable exit  Check if this is the main task that is exiting.
    */
 
-  if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_TASK)
+#ifndef CONFIG_DISABLE_PTHREAD
+  if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+#endif
     {
       task_exitstatus(pgrp, status);
     }
@@ -363,7 +365,9 @@ static inline void task_sigchild(FAR struct tcb_s *ptcb, FAR struct tcb_s *ctcb,
    * that are still running.
    */
 
-  if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_TASK)
+#ifndef CONFIG_DISABLE_PTHREAD
+  if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+#endif
     {
 #ifdef CONFIG_SCHED_CHILD_STATUS
       /* Save the exit status now of the main thread */
@@ -480,11 +484,14 @@ static inline void task_exitwakeup(FAR struct tcb_s *tcb, int status)
 
   if (group)
     {
-      /* Only tasks return valid status.  Record the exit status when the
-       * task exists.  The group, however, may still be executing.
+      /* Only tasks (and kernel threads) return valid status.  Record the
+       * exit status when the task exists.  The group, however, may still
+       * be executing.
        */
 
-      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_TASK)
+#ifndef CONFIG_DISABLE_PTHREAD
+      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+#endif
         {
           /* Report the exit status.  We do not nullify tg_statloc here
            * because we want to prent other tasks from registering for

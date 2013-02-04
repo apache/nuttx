@@ -99,48 +99,26 @@ static const char g_pthreadname[] = "<pthread>";
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
- *   name       - Name of the new task (not used)
- *   argv       - A pointer to an array of input parameters. Up to
- *                CONFIG_MAX_TASK_ARG parameters may be provided. If fewer
- *                than CONFIG_MAX_TASK_ARG parameters are passed, the list
- *                should be terminated with a NULL argv[] value. If no
- *                parameters are required, argv may be NULL.
+ *   arg        - The argument to provide to the pthread on startup.
  *
  * Return Value:
  *  None
  *
  ****************************************************************************/
 
-static void pthread_argsetup(FAR struct tcb_s *tcb, pthread_addr_t arg)
+static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb, pthread_addr_t arg)
 {
-  int i;
-
 #if CONFIG_TASK_NAME_SIZE > 0
   /* Copy the pthread name into the TCB */
 
-  strncpy(tcb->name, g_pthreadname, CONFIG_TASK_NAME_SIZE);
-
-  /* Save the name as the first argument in the TCB */
-
-  tcb->argv[0] = tcb->name;
-#else
-  /* Save the name as the first argument in the TCB */
-
-  tcb->argv[0] = (char *)g_pthreadname;
+  strncpy(tcb->cmn.name, g_pthreadname, CONFIG_TASK_NAME_SIZE);
 #endif /* CONFIG_TASK_NAME_SIZE */
 
   /* For pthreads, args are strictly pass-by-value; that actual
    * type wrapped by pthread_addr_t is unknown.
    */
 
-  tcb->argv[1]  = (char*)arg;
-
-  /* Nullify the remaining, unused argument storage */
-
-  for (i = 2; i < CONFIG_MAX_TASK_ARGS+1; i++)
-    {
-      tcb->argv[i] = NULL;
-    }
+  tcb->arg = arg;
 }
 
 /****************************************************************************
@@ -189,8 +167,8 @@ static inline void pthread_addjoininfo(FAR struct task_group_s *group,
 
 static void pthread_start(void)
 {
-  FAR struct tcb_s *ptcb = (FAR struct tcb_s*)g_readytorun.head;
-  FAR struct task_group_s *group = ptcb->group;
+  FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s*)g_readytorun.head;
+  FAR struct task_group_s *group = ptcb->cmn.group;
   FAR struct join_s *pjoin = (FAR struct join_s*)ptcb->joininfo;
   pthread_addr_t exit_status;
 
@@ -214,7 +192,7 @@ static void pthread_start(void)
    * available to the pthread.
    */
 
-  exit_status = (*ptcb->entry.pthread)((pthread_addr_t)ptcb->argv[1]);
+  exit_status = (*ptcb->cmn.entry.pthread)(ptcb->arg);
 
   /* The thread has returned */
 
@@ -247,7 +225,7 @@ static void pthread_start(void)
 int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
                    pthread_startroutine_t start_routine, pthread_addr_t arg)
 {
-  FAR struct tcb_s *ptcb;
+  FAR struct pthread_tcb_s *ptcb;
   FAR struct join_s *pjoin;
   int priority;
 #if CONFIG_RR_INTERVAL > 0
@@ -266,7 +244,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Allocate a TCB for the new task. */
 
-  ptcb = (FAR struct tcb_s*)kzalloc(sizeof(struct tcb_s));
+  ptcb = (FAR struct pthread_tcb_s *)kzalloc(sizeof(struct pthread_tcb_s));
   if (!ptcb)
     {
       return ENOMEM;
@@ -277,7 +255,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
    */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_bind(ptcb);
+  ret = group_bind((FAR struct tcb_s *)ptcb);
   if (ret < 0)
     {
       errcode = ENOMEM;
@@ -291,7 +269,8 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
    */
 
 #ifdef CONFIG_ADDRENV
-  ret = up_addrenv_share((FAR const struct tcb_s *)g_readytorun.head, ptcb);
+  ret = up_addrenv_share((FAR const struct tcb_s *)g_readytorun.head,
+                         (FAR struct tcb_s *)ptcb);
   if (ret < 0)
     {
       errcode = -ret;
@@ -310,7 +289,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Allocate the stack for the TCB */
 
-  ret = up_create_stack(ptcb, attr->stacksize);
+  ret = up_create_stack((FAR struct tcb_s *)ptcb, attr->stacksize);
   if (ret != OK)
     {
       errcode = ENOMEM;
@@ -359,8 +338,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Initialize the task control block */
 
-  ret = task_schedsetup(ptcb, priority, pthread_start, (main_t)start_routine,
-                        TCB_FLAG_TTYPE_PTHREAD);
+  ret = pthread_schedsetup(ptcb, priority, pthread_start, start_routine);
   if (ret != OK)
     {
       errcode = EBUSY;
@@ -376,7 +354,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
   /* Join the parent's task group */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_join(ptcb);
+  ret = group_join((FAR struct tcb_s *)ptcb);
   if (ret < 0)
     {
       errcode = ENOMEM;
@@ -386,7 +364,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Attach the join info to the TCB. */
 
-  ptcb->joininfo = (void*)pjoin;
+  ptcb->joininfo = (FAR void *)pjoin;
 
   /* If round robin scheduling is selected, set the appropriate flag
    * in the TCB.
@@ -405,7 +383,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
    * as well.
    */
 
-  pid = (int)ptcb->pid;
+  pid = (int)ptcb->cmn.pid;
   pjoin->thread = (pthread_t)pid;
 
   /* Initialize the semaphores in the join structure to zero. */
@@ -421,7 +399,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
   sched_lock();
   if (ret == OK)
     {
-      ret = task_activate(ptcb);
+      ret = task_activate((FAR struct tcb_s *)ptcb);
     }
 
   if (ret == OK)
@@ -465,6 +443,6 @@ errout_with_join:
   ptcb->joininfo = NULL;
 
 errout_with_tcb:
-  sched_releasetcb(ptcb);
+  sched_releasetcb((FAR struct tcb_s *)ptcb);
   return errcode;
 }

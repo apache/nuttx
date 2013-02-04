@@ -204,7 +204,7 @@ const tasklist_t g_tasklisttable[NUM_TASK_STATES] =
  * that user init task is responsible for bringing up the rest of the system
  */
 
-static FAR struct tcb_s g_idletcb;
+static FAR struct task_tcb_s g_idletcb;
 
 /* This is the name of the idle task */
 
@@ -262,7 +262,7 @@ void os_start(void)
 
   /* Assign the process ID of ZERO to the idle task */
 
-  g_pidhash[ PIDHASH(0)].tcb = &g_idletcb;
+  g_pidhash[ PIDHASH(0)].tcb = &g_idletcb.cmn;
   g_pidhash[ PIDHASH(0)].pid = 0;
 
   /* Initialize a TCB for this thread of execution.  NOTE:  The default
@@ -272,13 +272,13 @@ void os_start(void)
    * that has pid == 0 and sched_priority == 0.
    */
 
-  bzero((void*)&g_idletcb, sizeof(struct tcb_s));
-  g_idletcb.task_state = TSTATE_TASK_RUNNING;
-  g_idletcb.entry.main = (main_t)os_start;
+  bzero((void*)&g_idletcb, sizeof(struct task_tcb_s));
+  g_idletcb.cmn.task_state = TSTATE_TASK_RUNNING;
+  g_idletcb.cmn.entry.main = (main_t)os_start;
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  strncpy(g_idletcb.name, g_idlename, CONFIG_TASK_NAME_SIZE-1);
-  g_idletcb.argv[0] = g_idletcb.name;
+  strncpy(g_idletcb.cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE-1);
+  g_idletcb.argv[0] = g_idletcb.cmn.name;
 #else
   g_idletcb.argv[0] = (char*)g_idlename;
 #endif /* CONFIG_TASK_NAME_SIZE */
@@ -289,7 +289,7 @@ void os_start(void)
 
   /* Initialize the processor-specific portion of the TCB */
 
-  up_initial_state(&g_idletcb);
+  up_initial_state(&g_idletcb.cmn);
 
   /* Initialize the semaphore facility(if in link).  This has to be done
    * very early because many subsystems depend upon fully functional
@@ -330,7 +330,7 @@ void os_start(void)
   /* Allocate the IDLE group and suppress child status. */
 
 #ifdef HAVE_TASK_GROUP
-  (void)group_allocate(&g_idletcb);
+  (void)group_allocate(&g_idletcb.cmn);
 #endif
 
   /* Initialize the interrupt handling subsystem (if included) */
@@ -456,8 +456,8 @@ void os_start(void)
    */
 
 #ifdef HAVE_TASK_GROUP
-  (void)group_initialize(&g_idletcb);
-  g_idletcb.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
+  (void)group_initialize(&g_idletcb.cmn);
+  g_idletcb.cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
 #endif
 
   /* Create initial tasks and bring-up the system */

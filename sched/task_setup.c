@@ -49,6 +49,7 @@
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
+#include "pthread_internal.h"
 #include "group_internal.h"
 
 /****************************************************************************
@@ -183,7 +184,9 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
    * the same task group.
    */
 
+#ifndef CONFIG_DISABLE_PTHREAD
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+#endif
     {
       /* This is a new task in a new task group, we have to copy the ID from
        * the parent's task group structure to child's task group.
@@ -290,24 +293,20 @@ static inline void task_dupdspace(FAR struct tcb_s *tcb)
 #endif
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: task_schedsetup
+ * Name: thread_schedsetup
  *
  * Description:
- *   This functions initializes a Task Control Block (TCB) in preparation
- *   for starting a new thread.
+ *   This functions initializes the common portions of the Task Control Block
+ *   (TCB) in preparation for starting a new thread.
  *
- *   task_schedsetup() is called from task_init(), task_start(), and
- *   pthread_create();
+ *   thread_schedsetup() is called from task_schedsetup() and
+ *   pthread_schedsetup().
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
  *   priority   - Priority of the new task
- *   entry      - Entry point of a new task
- *   main       - Application start point of the new task
+ *   start      - Thread startup rotuine
+ *   entry       - Thred user entry point
  *   ttype      - Type of the new thread: task, pthread, or kernel thread
  *
  * Return Value:
@@ -318,8 +317,8 @@ static inline void task_dupdspace(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int task_schedsetup(FAR struct tcb_s *tcb, int priority, start_t start, main_t main,
-                    uint8_t ttype)
+static int thread_schedsetup(FAR struct tcb_s *tcb, int priority,
+                             start_t start, FAR void *entry, uint8_t ttype)
 {
   int ret;
 
@@ -330,13 +329,12 @@ int task_schedsetup(FAR struct tcb_s *tcb, int priority, start_t start, main_t m
     {
       /* Save task priority and entry point in the TCB */
 
-      tcb->init_priority  = (uint8_t)priority;
       tcb->sched_priority = (uint8_t)priority;
 #ifdef CONFIG_PRIORITY_INHERITANCE
       tcb->base_priority  = (uint8_t)priority;
 #endif
       tcb->start          = start;
-      tcb->entry.main     = main;
+      tcb->entry.main     = (main_t)entry;
 
       /* Save the thrad type.  This setting will be needed in
        * up_initial_state() is called.
@@ -389,6 +387,88 @@ int task_schedsetup(FAR struct tcb_s *tcb, int priority, start_t start, main_t m
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: task_schedsetup
+ *
+ * Description:
+ *   This functions initializes a Task Control Block (TCB) in preparation
+ *   for starting a new task.
+ *
+ *   task_schedsetup() is called from task_init() and task_start().
+ *
+ * Input Parameters:
+ *   tcb        - Address of the new task's TCB
+ *   priority   - Priority of the new task
+ *   start      - Startup function (probably task_start())
+ *   main       - Application start point of the new task
+ *   ttype      - Type of the new thread: task or kernel thread
+ *
+ * Return Value:
+ *   OK on success; ERROR on failure.
+ *
+ *   This function can only failure is it is unable to assign a new, unique
+ *   task ID to the TCB (errno is not set).
+ *
+ ****************************************************************************/
+
+int task_schedsetup(FAR struct task_tcb_s *tcb, int priority, start_t start,
+                    main_t main, uint8_t ttype)
+{
+  int ret;
+
+  /* Perform common thread setup */
+
+  ret = thread_schedsetup((FAR struct tcb_s *)tcb, priority, start,
+                          (FAR void *)main, ttype);
+  if (ret == OK)
+    {
+      /* Save task restart priority */
+
+      tcb->init_priority  = (uint8_t)priority;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: pthread_schedsetup
+ *
+ * Description:
+ *   This functions initializes a Task Control Block (TCB) in preparation
+ *   for starting a new pthread.
+ *
+ *   pthread_schedsetup() is called from pthread_create(),
+ *
+ * Input Parameters:
+ *   tcb        - Address of the new task's TCB
+ *   priority   - Priority of the new task
+ *   start      - Startup function (probably pthread_start())
+ *   entry      - Entry point of the new pthread
+ *   ttype      - Type of the new thread: task, pthread, or kernel thread
+ *
+ * Return Value:
+ *   OK on success; ERROR on failure.
+ *
+ *   This function can only failure is it is unable to assign a new, unique
+ *   task ID to the TCB (errno is not set).
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_PTHREAD
+int pthread_schedsetup(FAR struct tcb_s *tcb, int priority, start_t start,
+                       pthread_startroutine_t entry)
+{
+  /* Perform common thread setup */
+
+  return thread_schedsetup(tcb, priority, start, (FAR void *)entry,
+                           TCB_FLAG_TTYPE_PTHREAD);
+}
+#endif
+
+/****************************************************************************
  * Name: task_argsetup
  *
  * Description:
@@ -414,7 +494,8 @@ int task_schedsetup(FAR struct tcb_s *tcb, int priority, start_t start, main_t m
  *
  ****************************************************************************/
 
-int task_argsetup(FAR struct tcb_s *tcb, const char *name, FAR char * const argv[])
+int task_argsetup(FAR struct task_tcb_s *tcb, const char *name,
+                  FAR char * const argv[])
 {
   int i;
 
@@ -423,16 +504,16 @@ int task_argsetup(FAR struct tcb_s *tcb, const char *name, FAR char * const argv
 
   if (!name)
     {
-      name = (char *)g_noname;
+      name = (FAR char *)g_noname;
     }
 
   /* Copy the name into the TCB */
 
-  strncpy(tcb->name, name, CONFIG_TASK_NAME_SIZE);
+  strncpy(tcb->cmn.name, name, CONFIG_TASK_NAME_SIZE);
 
   /* Save the name as the first argument */
 
-  tcb->argv[0] = tcb->name;
+  tcb->argv[0] = tcb->cmn.name;
 #else
   /* Save the name as the first argument */
 

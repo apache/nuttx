@@ -4124,4 +4124,10 @@
 	* includes/nuttx/sched.h and Lots of files:  Change name of _TCB to
 	  struct tcb_s so that (1) it is consitent with other NuttX naming and
 	  so that (2) the naming can handle some upcoming changes.
+	* includes/nuttx/sched.h and sched/:  There are three TCB structures:
+	  struct tcb_s is a generic common version, struct task_tcb_s is a
+	  version for tasks and kernel threads and pthread_tcb_s is a version
+	  for pthreads.  By dividing the TCB structure into these variants,
+	  pthreads do not have to be burdened by task-specific data structures
+	  (and vice versa).
 

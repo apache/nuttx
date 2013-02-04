@@ -134,7 +134,7 @@ static void exec_ctors(FAR void *arg)
 
 int exec_module(FAR const struct binary_s *binp)
 {
-  FAR struct tcb_s *tcb;
+  FAR struct task_tcb_s *tcb;
 #ifndef CONFIG_CUSTOM_STACK
   FAR uint32_t *stack;
 #endif
@@ -156,7 +156,7 @@ int exec_module(FAR const struct binary_s *binp)
 
   /* Allocate a TCB for the new task. */
 
-  tcb = (FAR struct tcb_s*)kzalloc(sizeof(struct tcb_s));
+  tcb = (FAR struct task_tcb_s*)kzalloc(sizeof(struct task_tcb_s));
   if (!tcb)
     {
       err = ENOMEM;
@@ -198,17 +198,17 @@ int exec_module(FAR const struct binary_s *binp)
    */
 
 #ifdef CONFIG_PIC
-  tcb->dspace = binp->alloc[0];
+  tcb->cmn.dspace = binp->alloc[0];
 
   /* Re-initialize the task's initial state to account for the new PIC base */
 
-  up_initial_state(tcb);
+  up_initial_state(&tcb->cmn);
 #endif
 
   /* Assign the address environment to the task */
 
 #ifdef CONFIG_ADDRENV
-  ret = up_addrenv_assign(binp->addrenv, tcb);
+  ret = up_addrenv_assign(binp->addrenv, &tcb->cmn);
   if (ret < 0)
     {
       err = -ret;
@@ -228,7 +228,7 @@ int exec_module(FAR const struct binary_s *binp)
 
   /* Get the assigned pid before we start the task */
 
-  pid = tcb->pid;
+  pid = tcb->cmn.pid;
 
   /* Then activate the task at the provided priority */
 
@@ -244,11 +244,11 @@ int exec_module(FAR const struct binary_s *binp)
 
 errout_with_stack:
 #ifndef CONFIG_CUSTOM_STACK
-  tcb->stack_alloc_ptr = NULL;
-  sched_releasetcb(tcb);
+  tcb->cmn.stack_alloc_ptr = NULL;
+  sched_releasetcb(&tcb->cmn);
   kfree(stack);
 #else
-  sched_releasetcb(tcb);
+  sched_releasetcb(&tcb->cmn);
 #endif
   goto errout;
 

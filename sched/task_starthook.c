@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/task_start.c
+ * sched/task_starthook.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,9 +90,20 @@
  *
  ****************************************************************************/
 
-void task_starthook(FAR struct tcb_s *tcb, starthook_t starthook, FAR void *arg)
+void task_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
+                    FAR void *arg)
 {
-  DEBUGASSERT(tcb);
+  /* Only tasks can have starthooks.  The starthook will be called when the
+   * task is started (or restarted).
+   */
+
+#ifndef CONFIG_DISABLE_PTHREAD
+  DEBUGASSERT(tcb &&
+             (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+#endif
+
+  /* Set up the start hook */
+
   tcb->starthook    = starthook;
   tcb->starthookarg = arg;
 }

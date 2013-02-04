@@ -387,8 +387,9 @@ struct task_group_s
 #endif
 
 /* struct tcb_s ******************************************************************/
-/* This is the common part of the task control block (TCB).  Each task or thread
- * is represented by a TCB.  The TCB is the heart of the NuttX task-control logic.
+/* This is the common part of the task control block (TCB).  The TCB is the heart
+ * of the NuttX task-control logic.  Each task or thread is represented by a TCB
+ * that includes these common definitions.
  */
 
 struct tcb_s
@@ -419,12 +420,6 @@ struct tcb_s
 
   start_t  start;                        /* Thread start function               */
   entry_t  entry;                        /* Entry Point into the thread         */
-
-#ifdef CONFIG_SCHED_STARTHOOK
-  starthook_t starthook;                 /* Task startup function               */
-  FAR void *starthookarg;                /* The argument passed to the function */
-#endif
-
   uint8_t  sched_priority;               /* Current priority of the thread      */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
@@ -439,18 +434,9 @@ struct tcb_s
   uint16_t flags;                        /* Misc. general status flags          */
   int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
 
-#ifndef CONFIG_DISABLE_PTHREAD
-  FAR void *joininfo;                    /* Detach-able info to support join    */
-#endif
-
 #if CONFIG_RR_INTERVAL > 0
   int      timeslice;                    /* RR timeslice interval remaining     */
 #endif
-
-  /* Values needed to restart a task ********************************************/
-
-  uint8_t  init_priority;                /* Initial priority of the task        */
-  char    *argv[CONFIG_MAX_TASK_ARGS+1]; /* Name+start-up parameters            */
 
   /* Stack-Related Fields *******************************************************/
 
@@ -468,12 +454,6 @@ struct tcb_s
 
 #ifdef CONFIG_PIC
   FAR struct dspace_s *dspace;           /* Allocated area for .bss and .data   */
-#endif
-
-  /* POSIX Thread Specific Data *************************************************/
-
-#if !defined(CONFIG_DISABLE_PTHREAD) && CONFIG_NPTHREAD_KEYS > 0
-  FAR void *pthread_data[CONFIG_NPTHREAD_KEYS];
 #endif
 
   /* POSIX Semaphore Control Fields *********************************************/
@@ -511,6 +491,65 @@ struct tcb_s
   char name[CONFIG_TASK_NAME_SIZE];      /* Task name                           */
 #endif
 };
+
+/* struct task_tcb_s *************************************************************/
+/* This is the particular form of the task control block (TCB) structure used by
+ * tasks (and kernel threads).  There are two TCB forms:  one for pthreads and
+ * one for tasks.  Both share the common TCB fields (which must appear at the
+ * top of the structure) plus additional fields unique to tasks and threads.
+ * Having separate structures for tasks and pthreads adds some complexity, but
+ * saves memory in that it prevents pthreads from being burdened with the
+ * overhead required for tasks (and vice versa).
+ */
+
+struct task_tcb_s
+{
+  /* Common TCB fields **********************************************************/
+
+  struct tcb_s cmn;                      /* Common TCB fields                   */
+
+  /* Task Management Fields *****************************************************/
+
+#ifdef CONFIG_SCHED_STARTHOOK
+  starthook_t starthook;                 /* Task startup function               */
+  FAR void *starthookarg;                /* The argument passed to the function */
+#endif
+
+  /* Values needed to restart a task ********************************************/
+
+  uint8_t  init_priority;                /* Initial priority of the task        */
+  char    *argv[CONFIG_MAX_TASK_ARGS+1]; /* Name+start-up parameters            */
+};
+
+/* struct pthread_tcb_s **********************************************************/
+/* This is the particular form of the task control block (TCB) structure used by
+ * pthreads.  There are two TCB forms:  one for pthreads and one for tasks.  Both
+ * share the common TCB fields (which must appear at the top of the structure)
+ * plus additional fields unique to tasks and threads.  Having separate structures
+ * for tasks and pthreads adds some complexity,  but saves memory in that it
+ * prevents pthreads from being burdened with the overhead required for tasks
+ * (and vice versa).
+ */
+
+#ifndef CONFIG_DISABLE_PTHREAD
+struct pthread_tcb_s
+{
+  /* Common TCB fields **********************************************************/
+
+  struct tcb_s cmn;                      /* Common TCB fields                   */
+
+  /* Task Management Fields *****************************************************/
+
+  pthread_addr_t arg;                    /* Startup argument                    */
+  FAR void *joininfo;                    /* Detach-able info to support join    */
+
+  /* POSIX Thread Specific Data *************************************************/
+
+#if CONFIG_NPTHREAD_KEYS > 0
+  FAR void *pthread_data[CONFIG_NPTHREAD_KEYS];
+#endif
+};
+#endif /* !CONFIG_DISABLE_PTHREAD */
 
 /* This is the callback type used by sched_foreach() */
 
@@ -556,7 +595,7 @@ FAR struct socketlist *sched_getsockets(void);
 /* Setup up a start hook */
 
 #ifdef CONFIG_SCHED_STARTHOOK
-void task_starthook(FAR struct tcb_s *tcb, starthook_t starthook, FAR void *arg);
+void task_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook, FAR void *arg);
 #endif
 
 /* Internal vfork support.The  overall sequence is:

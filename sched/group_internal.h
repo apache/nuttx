@@ -122,10 +122,10 @@ void group_removechildren(FAR struct task_group_s *group);
 /* Group data resource configuration */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-int  group_setupidlefiles(FAR struct tcb_s *tcb);
-int  group_setuptaskfiles(FAR struct tcb_s *tcb);
+int  group_setupidlefiles(FAR struct task_tcb_s *tcb);
+int  group_setuptaskfiles(FAR struct task_tcb_s *tcb);
 #if CONFIG_NFILE_STREAMS > 0
-int  group_setupstreams(FAR struct tcb_s *tcb);
+int  group_setupstreams(FAR struct task_tcb_s *tcb);
 #endif
 #endif
 

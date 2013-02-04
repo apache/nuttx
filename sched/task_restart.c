@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task_restart.c
  *
- *   Copyright (C) 2007, 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <sched.h>
+#include <errno.h>
+
 #include <nuttx/arch.h>
+
 #include "os_internal.h"
 #include "sig_internal.h"
 
@@ -97,7 +101,7 @@
 int task_restart(pid_t pid)
 {
   FAR struct tcb_s *rtcb;
-  FAR struct tcb_s *tcb;
+  FAR struct task_tcb_s *tcb;
   irqstate_t state;
   int status;
 
@@ -109,11 +113,12 @@ int task_restart(pid_t pid)
 
   /* Check if the task to restart is the calling task */
 
-  rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  rtcb = (FAR struct tcb_s *)g_readytorun.head;
   if ((pid == 0) || (pid == rtcb->pid))
     {
       /* Not implemented */
 
+      set_errno(ENOSYS);
       return ERROR;
     }
 
@@ -123,11 +128,18 @@ int task_restart(pid_t pid)
     {
       /* Find for the TCB associated with matching pid  */
 
-      tcb = sched_gettcb(pid);
+      tcb = (FAR struct task_tcb_s *)sched_gettcb(pid);
+#ifndef CONFIG_DISABLE_PTHREAD
+      if (!tcb || (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+#else
       if (!tcb)
+#endif
         {
-          /* There is no TCB with this pid */
+          /* There is no TCB with this pid or, if there is, it is not a
+           * task.
+           */
 
+          set_errno(ESRCH);
           return ERROR;
         }
 
@@ -136,24 +148,25 @@ int task_restart(pid_t pid)
        */
 
       state = irqsave();
-      dq_rem((FAR dq_entry_t*)tcb, (dq_queue_t*)g_tasklisttable[tcb->task_state].list);
-      tcb->task_state = TSTATE_TASK_INVALID;
+      dq_rem((FAR dq_entry_t*)tcb,
+             (dq_queue_t*)g_tasklisttable[tcb->cmn.task_state].list);
+      tcb->cmn.task_state = TSTATE_TASK_INVALID;
       irqrestore(state);
 
       /* Deallocate anything left in the TCB's queues */
 
-      sig_cleanup(tcb); /* Deallocate Signal lists */
+      sig_cleanup((FAR struct tcb_s *)tcb); /* Deallocate Signal lists */
 
       /* Reset the current task priority  */
 
-      tcb->sched_priority = tcb->init_priority;
+      tcb->cmn.sched_priority = tcb->init_priority;
 
       /* Reset the base task priority and the number of pending reprioritizations */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      tcb->base_priority  = tcb->init_priority;
+      tcb->cmn.base_priority = tcb->init_priority;
 #  if CONFIG_SEM_NNESTPRIO > 0
-      tcb->npend_reprio   = 0;
+      tcb->npend_reprio = 0;
 #  endif
 #endif
 
@@ -161,20 +174,20 @@ int task_restart(pid_t pid)
        * This will reset the entry point and the start-up parameters
        */
 
-      up_initial_state(tcb);
+      up_initial_state((FAR struct tcb_s *)tcb);
 
       /* Add the task to the inactive task list */
 
       dq_addfirst((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
-      tcb->task_state = TSTATE_TASK_INACTIVE;
+      tcb->cmn.task_state = TSTATE_TASK_INACTIVE;
 
       /* Activate the task */
 
-      status = task_activate(tcb);
+      status = task_activate((FAR struct tcb_s *)tcb);
       if (status != OK)
         {
           dq_rem((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
-          sched_releasetcb(tcb);
+          sched_releasetcb((FAR struct tcb_s *)tcb);
           return ERROR;
         }
     }

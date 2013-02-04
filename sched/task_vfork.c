@@ -108,7 +108,7 @@
 FAR struct tcb_s *task_vforksetup(start_t retaddr)
 {
   struct tcb_s *parent = (FAR struct tcb_s *)g_readytorun.head;
-  struct tcb_s *child;
+  struct task_tcb_s *child;
   int priority;
   int ret;
 
@@ -116,7 +116,7 @@ FAR struct tcb_s *task_vforksetup(start_t retaddr)
 
   /* Allocate a TCB for the child task. */
 
-  child = (FAR struct tcb_s*)kzalloc(sizeof(struct tcb_s));
+  child = (FAR struct task_tcb_s *)kzalloc(sizeof(struct task_tcb_s));
   if (!child)
     {
       set_errno(ENOMEM);
@@ -152,10 +152,10 @@ FAR struct tcb_s *task_vforksetup(start_t retaddr)
     }
 
   svdbg("parent=%p, returning child=%p\n", parent, child);
-  return child;
+  return (FAR struct tcb_s *)child;
 
 errout_with_tcb:
-  sched_releasetcb(child);
+  sched_releasetcb((FAR struct tcb_s *)child);
   set_errno(-ret);
   return NULL;
 }

@@ -120,8 +120,16 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
               main_t entry, FAR char * const argv[])
 #endif
 {
+  FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
   int errcode;
   int ret;
+
+  /* Only tasks and kernel threads can be initialized in this way */
+
+#ifndef CONFIG_DISABLE_PTHREAD
+  DEBUGASSERT(tcb &&
+             (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+#endif
 
   /* Create a new task group */
 
@@ -137,7 +145,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
  /* Associate file descriptors with the new task */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-  ret = group_setuptaskfiles(tcb);
+  ret = group_setuptaskfiles(ttcb);
   if (ret < 0)
     {
       errcode = -ret;
@@ -153,7 +161,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Initialize the task control block */
 
-  ret = task_schedsetup(tcb, priority, task_start, entry,
+  ret = task_schedsetup(ttcb, priority, task_start, entry,
                         TCB_FLAG_TTYPE_TASK);
   if (ret < OK)
     {
@@ -163,7 +171,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Setup to pass parameters to the new task */
 
-  (void)task_argsetup(tcb, name, argv);
+  (void)task_argsetup(ttcb, name, argv);
 
   /* Now we have enough in place that we can join the group */
 

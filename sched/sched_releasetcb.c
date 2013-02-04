@@ -155,11 +155,14 @@ int sched_releasetcb(FAR struct tcb_s *tcb)
        * start/re-start.
        */
 
-      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_TASK)
+#ifndef CONFIG_DISABLE_PTHREAD
+      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+#endif
         {
-          for (i = 1; i < CONFIG_MAX_TASK_ARGS+1 && tcb->argv[i]; i++)
+          FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
+          for (i = 1; i < CONFIG_MAX_TASK_ARGS+1 && ttcb->argv[i]; i++)
             {
-              sched_free((FAR void*)tcb->argv[i]);
+              sched_free((FAR void*)ttcb->argv[i]);
             }
         }
 

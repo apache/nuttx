@@ -72,13 +72,13 @@
  *
  ****************************************************************************/
 
-int group_setupstreams(FAR struct tcb_s *tcb)
+int group_setupstreams(FAR struct task_tcb_s *tcb)
 {
-  DEBUGASSERT(tcb && tcb->group);
+  DEBUGASSERT(tcb && tcb->cmn.group);
 
   /* Initialize file streams for the task group */
 
-  lib_streaminit(&tcb->group->tg_streamlist);
+  lib_streaminit(&tcb->cmn.group->tg_streamlist);
 
   /* fdopen to get the stdin, stdout and stderr streams. The following logic
    * depends on the fact that the library layer will allocate FILEs in order.
@@ -88,9 +88,9 @@ int group_setupstreams(FAR struct tcb_s *tcb)
    * fd = 2 is stderr (write-only, append)
    */
 
-  (void)fs_fdopen(0, O_RDONLY,       tcb);
-  (void)fs_fdopen(1, O_WROK|O_CREAT, tcb);
-  (void)fs_fdopen(2, O_WROK|O_CREAT, tcb);
+  (void)fs_fdopen(0, O_RDONLY,       (FAR struct tcb_s *)tcb);
+  (void)fs_fdopen(1, O_WROK|O_CREAT, (FAR struct tcb_s *)tcb);
+  (void)fs_fdopen(2, O_WROK|O_CREAT, (FAR struct tcb_s *)tcb);
 
   return OK;
 }

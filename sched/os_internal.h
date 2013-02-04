@@ -257,9 +257,9 @@ int  os_bringup(void);
 void weak_function task_initialize(void);
 #endif
 void task_start(void);
-int  task_schedsetup(FAR struct tcb_s *tcb, int priority, start_t start,
+int  task_schedsetup(FAR struct task_tcb_s *tcb, int priority, start_t start,
                      main_t main, uint8_t ttype);
-int  task_argsetup(FAR struct tcb_s *tcb, FAR const char *name, FAR char * const argv[]);
+int  task_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name, FAR char * const argv[]);
 void task_exithook(FAR struct tcb_s *tcb, int status);
 int  task_deletecurrent(void);
 

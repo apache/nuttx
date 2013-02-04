@@ -106,14 +106,14 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
                          main_t entry, FAR char * const argv[])
 #endif
 {
-  FAR struct tcb_s *tcb;
+  FAR struct task_tcb_s *tcb;
   pid_t pid;
   int errcode;
   int ret;
 
   /* Allocate a TCB for the new task. */
 
-  tcb = (FAR struct tcb_s*)kzalloc(sizeof(struct tcb_s));
+  tcb = (FAR struct task_tcb_s *)kzalloc(sizeof(struct task_tcb_s));
   if (!tcb)
     {
       errcode = ENOMEM;
@@ -123,7 +123,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
   /* Allocate a new task group */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_allocate(tcb);
+  ret = group_allocate((FAR struct tcb_s *)tcb);
   if (ret < 0)
     {
       errcode = -ret;
@@ -145,7 +145,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
   /* Allocate the stack for the TCB */
 
 #ifndef CONFIG_CUSTOM_STACK
-  ret = up_create_stack(tcb, stack_size);
+  ret = up_create_stack((FAR struct tcb_s *)tcb, stack_size);
   if (ret != OK)
     {
       errcode = -ret;
@@ -169,7 +169,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
   /* Now we have enough in place that we can join the group */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_initialize(tcb);
+  ret = group_initialize((FAR struct tcb_s *)tcb);
   if (ret < 0)
     {
       errcode = -ret;
@@ -179,11 +179,11 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
 
   /* Get the assigned pid before we start the task */
 
-  pid = (int)tcb->pid;
+  pid = (int)tcb->cmn.pid;
 
   /* Activate the task */
 
-  ret = task_activate(tcb);
+  ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret != OK)
     {
       errcode = get_errno();
@@ -197,7 +197,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
   return pid;
 
 errout_with_tcb:
-  sched_releasetcb(tcb);
+  sched_releasetcb((FAR struct tcb_s *)tcb);
 
 errout:
   set_errno(errcode);

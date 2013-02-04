@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task_start.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,8 +91,10 @@
 
 void task_start(void)
 {
-  FAR struct tcb_s *tcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s*)g_readytorun.head;
   int argc;
+
+  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
 
   /* Execute the start hook if one has been registered */
 
@@ -119,5 +121,5 @@ void task_start(void)
    * the task returns.
    */
 
-  exit(tcb->entry.main(argc, tcb->argv));
+  exit(tcb->cmn.entry.main(argc, tcb->argv));
 }
