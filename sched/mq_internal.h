@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/mq_internal.h
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,69 +109,73 @@ typedef struct mqmsg mqmsg_t;
  * Global Variables
  ****************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /* This is a list of all opened message queues */
 
-extern sq_queue_t  g_msgqueues;
+EXTERN sq_queue_t  g_msgqueues;
 
 /* The g_msgfree is a list of messages that are available for general use.
  * The number of messages in this list is a system configuration item.
  */
 
-extern sq_queue_t  g_msgfree;
+EXTERN sq_queue_t  g_msgfree;
 
 /* The g_msgfreeInt is a list of messages that are reserved for use by
  * interrupt handlers.
  */
 
-extern sq_queue_t  g_msgfreeirq;
+EXTERN sq_queue_t  g_msgfreeirq;
 
 /* The g_desfree data structure is a list of message descriptors available
  * to the operating system for general use. The number of messages in the
  * pool is a constant.
  */
 
-extern sq_queue_t  g_desfree;
+EXTERN sq_queue_t  g_desfree;
 
 /****************************************************************************
  * Global Function Prototypes
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
 /* Functions defined in mq_initialize.c ************************************/
 
-EXTERN void weak_function mq_initialize(void);
-EXTERN void         mq_desblockalloc(void);
+void weak_function mq_initialize(void);
+void mq_desblockalloc(void);
 
-EXTERN mqd_t        mq_descreate(FAR _TCB* mtcb, FAR msgq_t* msgq, int oflags);
-EXTERN FAR msgq_t  *mq_findnamed(const char *mq_name);
-EXTERN void         mq_msgfree(FAR mqmsg_t *mqmsg);
-EXTERN void         mq_msgqfree(FAR msgq_t *msgq);
+mqd_t mq_descreate(FAR _TCB* mtcb, FAR msgq_t* msgq, int oflags);
+FAR msgq_t  *mq_findnamed(const char *mq_name);
+void mq_msgfree(FAR mqmsg_t *mqmsg);
+void mq_msgqfree(FAR msgq_t *msgq);
 
 /* mq_waitirq.c ************************************************************/
 
-EXTERN void         mq_waitirq(FAR _TCB *wtcb, int errcode);
+void mq_waitirq(FAR _TCB *wtcb, int errcode);
 
 /* mq_rcvinternal.c ********************************************************/
 
-EXTERN int          mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen);
-EXTERN FAR mqmsg_t *mq_waitreceive(mqd_t mqdes);
-EXTERN ssize_t      mq_doreceive(mqd_t mqdes, mqmsg_t *mqmsg, void *ubuffer,
-                                 int *prio);
+int mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen);
+FAR mqmsg_t *mq_waitreceive(mqd_t mqdes);
+ssize_t mq_doreceive(mqd_t mqdes, mqmsg_t *mqmsg, void *ubuffer, int *prio);
 
 /* mq_sndinternal.c ********************************************************/
 
-EXTERN int          mq_verifysend(mqd_t mqdes, const void *msg, size_t msglen,
-                                  int prio);
-EXTERN FAR mqmsg_t *mq_msgalloc(void);
-EXTERN int          mq_waitsend(mqd_t mqdes);
-EXTERN int          mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg,
-                              size_t msglen, int prio);
+int mq_verifysend(mqd_t mqdes, const void *msg, size_t msglen, int prio);
+FAR mqmsg_t *mq_msgalloc(void);
+int mq_waitsend(mqd_t mqdes);
+int mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg,
+              size_t msglen, int prio);
+
+/* mq_release.c ************************************************************/
+
+struct task_group_s; /* Forward reference */
+void mq_release(FAR struct task_group_s *group);
 
 #undef EXTERN
 #ifdef __cplusplus

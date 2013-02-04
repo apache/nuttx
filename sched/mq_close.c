@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/mq_close.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <mqueue.h>
 #include <sched.h>
+#include <assert.h>
 
 #include "os_internal.h"
 #include "mq_internal.h"
@@ -112,10 +113,13 @@
 
 int mq_close(mqd_t mqdes)
 {
-  FAR _TCB    *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct task_group_s *group = rtcb->group;
   FAR msgq_t *msgq;
-  irqstate_t  saved_state;
-  int         ret = ERROR;
+  irqstate_t saved_state;
+  int ret = ERROR;
+
+  DEBUGASSERT(group);
 
   /* Verify the inputs */
 
@@ -127,7 +131,7 @@ int mq_close(mqd_t mqdes)
         * list of message descriptors.
         */
 
-       sq_rem((FAR sq_entry_t*)mqdes, &rtcb->msgdesq);
+       sq_rem((FAR sq_entry_t*)mqdes, &group->tg_msgdesq);
 
        /* Find the message queue associated with the message descriptor */
 

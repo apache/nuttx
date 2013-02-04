@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/mq_descreate.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,7 +137,10 @@ static mqd_t mq_desalloc(void)
 
 mqd_t mq_descreate(FAR _TCB* mtcb, FAR msgq_t* msgq, int oflags)
 {
+  FAR struct task_group_s *group = mtcb->group;
   mqd_t mqdes;
+
+  DEBUGASSERT(group);
 
   /* Create a message queue descriptor for the TCB */
 
@@ -152,7 +155,7 @@ mqd_t mq_descreate(FAR _TCB* mtcb, FAR msgq_t* msgq, int oflags)
 
       /* And add it to the specified tasks's TCB */
 
-      sq_addlast((FAR sq_entry_t*)mqdes, &mtcb->msgdesq);
+      sq_addlast((FAR sq_entry_t*)mqdes, &group->tg_msgdesq);
     }
 
   return mqdes;

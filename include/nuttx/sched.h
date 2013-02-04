@@ -77,7 +77,7 @@
  */
 
 #else
-#  if !defined(CONFIG_DISABLE_ENVIRON)   /* Environment variales */
+#  if !defined(CONFIG_DISABLE_ENVIRON)   /* Environment variables */
 #    define HAVE_TASK_GROUP   1
 #  elif defined(CONFIG_SCHED_ATEXIT)     /* Group atexit() function */
 #    define HAVE_TASK_GROUP   1
@@ -90,6 +90,8 @@
 #  elif CONFIG_NFILE_STREAMS > 0         /* Standard C buffered I/O */
 #    define HAVE_TASK_GROUP   1
 #  elif CONFIG_NSOCKET_DESCRIPTORS > 0   /* Sockets */
+#    define HAVE_TASK_GROUP   1
+#  elif !defined(CONFIG_DISABLE_MQUEUE)  /* Message queues */
 #    define HAVE_TASK_GROUP   1
 #  endif
 #endif
@@ -376,6 +378,11 @@ struct task_group_s
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
   struct socketlist tg_socketlist;  /* Maps socket descriptor to socket         */
 #endif
+  /* POSIX Named Message Queue Fields *******************************************/
+
+#ifndef CONFIG_DISABLE_MQUEUE
+  sq_queue_t tg_msgdesq;            /* List of opened message queues           */
+#endif
 };
 #endif
 
@@ -488,13 +495,12 @@ struct _TCB
   /* POSIX Named Message Queue Fields *******************************************/
 
 #ifndef CONFIG_DISABLE_MQUEUE
-  sq_queue_t msgdesq;                    /* List of opened message queues       */
   FAR msgq_t *msgwaitq;                  /* Waiting for this message queue      */
 #endif
 
   /* Library related fields *****************************************************/
 
-  int        pterrno;                    /* Current per-thread errno            */
+  int pterrno;                           /* Current per-thread errno            */
 
   /* State save areas ***********************************************************/
   /* The form and content of these fields are processor-specific.               */
@@ -504,7 +510,6 @@ struct _TCB
 #if CONFIG_TASK_NAME_SIZE > 0
   char name[CONFIG_TASK_NAME_SIZE];      /* Task name                           */
 #endif
-
 };
 
 /* Certain other header files may also define this time to avoid circular header

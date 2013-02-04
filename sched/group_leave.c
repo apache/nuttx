@@ -50,6 +50,7 @@
 
 #include "env_internal.h"
 #include "pthread_internal.h"
+#include "mq_internal.h"
 #include "group_internal.h"
 
 #ifdef HAVE_TASK_GROUP
@@ -188,6 +189,12 @@ static inline void group_release(FAR struct task_group_s *group)
 
 #ifndef CONFIG_DISABLE_ENVIRON
   env_release(group);
+#endif
+
+  /* Close message queues opened by members of the group */
+
+#ifndef CONFIG_DISABLE_MQUEUE
+  mq_release(group);
 #endif
 
 #ifdef HAVE_GROUP_MEMBERS

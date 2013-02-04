@@ -4116,4 +4116,9 @@
 	  Move waitpid data data structures to task group.  Callers of
 	  of waitpid() are now only awakened whent he final thread of the
 	  task group exits.
+	* sched/mq_descreate.c, mq_open.c, mq_remove.c, group_leave.c, and
+	  include/nuttx/sched.h:  Move list of opened message queues to
+	  the task group structures.  Now all message queues opened by
+	  members of the group are closed when the last member of the group
+	  exits.
 
