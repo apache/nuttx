@@ -76,7 +76,7 @@
  *
  ****************************************************************************/
 
-void up_initial_state(_TCB *tcb)
+void up_initial_state(struct tcb_s *tcb)
 {
   memset(&tcb->xcp, 0, sizeof(struct xcptcontext));
   tcb->xcp.regs[JB_SP] = (uint32_t)tcb->adj_stack_ptr;

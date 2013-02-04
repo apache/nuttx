@@ -410,8 +410,8 @@ extern void up_rnginitialize(void);
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
 extern size_t up_check_stack(void);
-extern size_t up_check_tcbstack(FAR _TCB);
-extern size_t up_check_tcbstack_remain(FAR _TCB);
+extern size_t up_check_tcbstack(FAR struct tcb_s);
+extern size_t up_check_tcbstack_remain(FAR struct tcb_s);
 #endif
 
 #endif /* __ASSEMBLY__ */

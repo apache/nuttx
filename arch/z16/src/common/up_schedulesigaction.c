@@ -100,7 +100,7 @@
  *
  ****************************************************************************/
 
-void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
+void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   /* Refuse to handle nested signal actions */
 
@@ -120,7 +120,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
 
       dbg("rtcb=0x%p current_regs=0x%p\n", g_readytorun.head, current_regs);
 
-      if (tcb == (FAR _TCB*)g_readytorun.head)
+      if (tcb == (FAR struct tcb_s*)g_readytorun.head)
         {
           /* CASE 1:  We are not in an interrupt handler and
            * a task is signalling itself for some reason.

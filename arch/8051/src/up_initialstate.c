@@ -74,7 +74,7 @@
  *
  ************************************************************************/
 
-void up_initial_state(FAR _TCB *tcb)
+void up_initial_state(FAR struct tcb_s *tcb)
 {
   FAR uint8_t *frame = tcb->xcp.stack;
   FAR uint8_t *regs  = tcb->xcp.regs;

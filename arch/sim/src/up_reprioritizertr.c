@@ -85,7 +85,7 @@
  *
  ****************************************************************************/
 
-void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
+void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 {
   /* Verify that the caller is sane */
 
@@ -103,7 +103,7 @@ void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
     }
   else
     {
-      _TCB *rtcb = (_TCB*)g_readytorun.head;
+      struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
       bool switch_needed;
 
       sdbg("TCB=%p PRI=%d\n", tcb, priority);
@@ -154,7 +154,7 @@ void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
                * of the g_readytorun task list.
                */
 
-              rtcb = (_TCB*)g_readytorun.head;
+              rtcb = (struct tcb_s*)g_readytorun.head;
               sdbg("New Active Task TCB=%p\n", rtcb);
 
               /* The way that we handle signals in the simulation is kind of

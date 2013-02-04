@@ -79,7 +79,7 @@
  *
  ****************************************************************************/
 
-void up_unblock_task(_TCB *tcb)
+void up_unblock_task(struct tcb_s *tcb)
 {
   /* Verify that the context switch can be performed */
   if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
@@ -89,7 +89,7 @@ void up_unblock_task(_TCB *tcb)
     }
   else
     {
-      _TCB *rtcb = (_TCB*)g_readytorun.head;
+      struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
 
       sdbg("Unblocking TCB=%p\n", tcb);
 
@@ -124,7 +124,7 @@ void up_unblock_task(_TCB *tcb)
               * g_readytorun task list.
               */
 
-             rtcb = (_TCB*)g_readytorun.head;
+             rtcb = (struct tcb_s*)g_readytorun.head;
              sdbg("New Active Task TCB=%p\n", rtcb);
 
               /* The way that we handle signals in the simulation is kind of

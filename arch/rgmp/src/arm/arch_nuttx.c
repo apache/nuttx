@@ -55,7 +55,7 @@ void nuttx_arch_exit(void)
 
 }
 
-void up_initial_state(_TCB *tcb)
+void up_initial_state(struct tcb_s *tcb)
 {
     struct Trapframe *tf;
 

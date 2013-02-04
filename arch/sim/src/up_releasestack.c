@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-void up_release_stack(_TCB *dtcb)
+void up_release_stack(struct tcb_s *dtcb)
 {
   if (dtcb->stack_alloc_ptr)
     {

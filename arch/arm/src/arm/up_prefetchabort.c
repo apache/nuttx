@@ -121,7 +121,7 @@ void up_prefetchabort(uint32_t *regs)
        * prefetch and data aborts.
        */
 
-      FAR _TCB *tcb = (FAR _TCB *)g_readytorun.head;
+      FAR struct tcb_s *tcb = (FAR struct tcb_s *)g_readytorun.head;
       tcb->xcp.far  = regs[REG_R15];
 
       /* Call pg_miss() to schedule the page fill.  A consequences of this

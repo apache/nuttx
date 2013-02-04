@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-void up_unblock_task(_TCB *tcb)
+void up_unblock_task(struct tcb_s *tcb)
 {
   /* Verify that the context switch can be performed */
 
@@ -89,7 +89,7 @@ void up_unblock_task(_TCB *tcb)
     }
   else
     {
-      _TCB *rtcb = (_TCB*)g_readytorun.head;
+      struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
 
       /* Remove the task from the blocked task list */
 
@@ -127,7 +127,7 @@ void up_unblock_task(_TCB *tcb)
                * of the g_readytorun task list.
                */
 
-              rtcb = (_TCB*)g_readytorun.head;
+              rtcb = (struct tcb_s*)g_readytorun.head;
 
               /* Then switch contexts */
 
@@ -147,7 +147,7 @@ void up_unblock_task(_TCB *tcb)
                * g_readytorun task list.
                */
 
-              rtcb = (_TCB*)g_readytorun.head;
+              rtcb = (struct tcb_s*)g_readytorun.head;
 
               /* Then switch contexts */
 

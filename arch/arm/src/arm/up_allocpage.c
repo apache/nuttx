@@ -165,7 +165,7 @@ static bool g_pgwrap;
  *
  ****************************************************************************/
 
-int up_allocpage(FAR _TCB *tcb, FAR void **vpage)
+int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
 {
   uintptr_t vaddr;
   uintptr_t paddr;

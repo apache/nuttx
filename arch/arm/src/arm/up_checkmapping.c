@@ -97,7 +97,7 @@
  *
  ****************************************************************************/
 
-bool up_checkmapping(FAR _TCB *tcb)
+bool up_checkmapping(FAR struct tcb_s *tcb)
 {
   uintptr_t vaddr;
   uint32_t *pte;

@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
+void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 {
   /* Verify that the caller is sane */
 
@@ -102,7 +102,7 @@ void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
     }
   else
     {
-      _TCB *rtcb = (_TCB*)g_readytorun.head;
+      struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
       bool switch_needed;
 
       slldbg("TCB=%p PRI=%d\n", tcb, priority);
@@ -156,7 +156,7 @@ void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
                * of the g_readytorun task list.
                */
 
-              rtcb = (_TCB*)g_readytorun.head;
+              rtcb = (struct tcb_s*)g_readytorun.head;
               slldbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */
@@ -172,7 +172,7 @@ void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
                * ready to run list.
                */
 
-              _TCB *nexttcb = (_TCB*)g_readytorun.head;
+              struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
               up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
 
               /* up_switchcontext forces a context switch to the task at the

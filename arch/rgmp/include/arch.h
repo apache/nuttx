@@ -48,10 +48,10 @@
 
 struct up_wait {
     struct up_wait *next;
-    _TCB *task;
+    struct tcb_s *task;
 };
 
-extern _TCB *current_task;
+extern struct tcb_s *current_task;
 
 void up_sigentry(void);
 

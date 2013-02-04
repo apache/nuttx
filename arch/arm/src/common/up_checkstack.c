@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(FAR _TCB *tcb)
+size_t up_check_tcbstack(FAR struct tcb_s *tcb)
 {
   FAR uint32_t *ptr;
   size_t mark;
@@ -136,12 +136,12 @@ size_t up_check_tcbstack(FAR _TCB *tcb)
 
 size_t up_check_stack(void)
 {
-  return up_check_tcbstack((FAR _TCB*)g_readytorun.head);
+  return up_check_tcbstack((FAR struct tcb_s*)g_readytorun.head);
 }
 
 size_t up_check_stack_remain(void)
 {
-  return ((FAR _TCB*)g_readytorun.head)->adj_stack_size - up_check_tcbstack((FAR _TCB*)g_readytorun.head);
+  return ((FAR struct tcb_s*)g_readytorun.head)->adj_stack_size - up_check_tcbstack((FAR struct tcb_s*)g_readytorun.head);
 }
 
 #endif /* CONFIG_DEBUG && CONFIG_DEBUG_STACK */

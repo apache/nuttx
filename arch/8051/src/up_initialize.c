@@ -68,7 +68,7 @@ volatile uint8_t g_irqtos;
  * during the interrupt handling, these registers will be
  * copied into the TCB again (NOTE:  We could save a copy
  * if the interrupt handling logic saved the registers
- * directly into (_TCB*)g_readytorun.head->xcp.regs).
+ * directly into (struct tcb_s*)g_readytorun.head->xcp.regs).
  */
 
 uint8_t g_irqregs[REGS_SIZE];

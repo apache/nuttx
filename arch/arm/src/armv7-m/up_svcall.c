@@ -109,9 +109,9 @@
 #ifdef CONFIG_NUTTX_KERNEL
 static inline void dispatch_syscall(uint32_t *regs)
 {
-  uint32_t  cmd  = regs[REG_R0];
-  FAR _TCB *rtcb = sched_self();
-  uintptr_t ret  = (uintptr_t)ERROR;
+  uint32_t  cmd = regs[REG_R0];
+  FAR struct tcb_s *rtcb = sched_self();
+  uintptr_t ret = (uintptr_t)ERROR;
 
   /* Verify the the SYS call number is within range */
 

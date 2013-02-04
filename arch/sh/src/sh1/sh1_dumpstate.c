@@ -147,7 +147,7 @@ static inline void sh1_registerdump(void)
 
 void up_dumpstate(void)
 {
-  _TCB    *rtcb     = (_TCB*)g_readytorun.head;
+  struct tcb_s    *rtcb     = (struct tcb_s*)g_readytorun.head;
   uint32_t sp       = sh1_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;

@@ -80,7 +80,7 @@
 void up_sigdeliver(void)
 {
 #ifndef CONFIG_DISABLE_SIGNALS
-  FAR _TCB  *rtcb = (_TCB*)g_readytorun.head;
+  FAR struct tcb_s  *rtcb = (struct tcb_s*)g_readytorun.head;
   chipreg_t regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
 

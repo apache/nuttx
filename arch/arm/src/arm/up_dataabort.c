@@ -102,9 +102,9 @@
 #ifdef CONFIG_PAGING
 void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 {
-  FAR _TCB *tcb = (FAR _TCB *)g_readytorun.head;
+  FAR struct tcb_s *tcb = (FAR struct tcb_s *)g_readytorun.head;
 #ifdef CONFIG_PAGING
-   uint32_t *savestate;
+  uint32_t *savestate;
 
   /* Save the saved processor context in current_regs where it can be accessed
    * for register dumps and possibly context switching.

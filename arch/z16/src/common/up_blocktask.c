@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-void up_block_task(FAR _TCB *tcb, tstate_t task_state)
+void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
 {
   /* Verify that the context switch can be performed */
 
@@ -95,7 +95,7 @@ void up_block_task(FAR _TCB *tcb, tstate_t task_state)
     }
   else
     {
-      FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+      FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
       bool switch_needed;
 
       /* dbg("Blocking TCB=%p\n", tcb); */
@@ -140,7 +140,7 @@ void up_block_task(FAR _TCB *tcb, tstate_t task_state)
                * of the g_readytorun task list.
                */
 
-              rtcb = (FAR _TCB*)g_readytorun.head;
+              rtcb = (FAR struct tcb_s*)g_readytorun.head;
               /* dbg("New Active Task TCB=%p\n", rtcb); */
 
               /* Then setup so that the context will be performed on exit
@@ -161,7 +161,7 @@ void up_block_task(FAR _TCB *tcb, tstate_t task_state)
                * of the g_readytorun task list.
                */
 
-              rtcb = (FAR _TCB*)g_readytorun.head;
+              rtcb = (FAR struct tcb_s*)g_readytorun.head;
               /* dbg("New Active Task TCB=%p\n", rtcb); */
 
               /* Then switch contexts */

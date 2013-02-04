@@ -167,8 +167,8 @@ static inline void up_registerdump(void)
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_dumpstate(void)
 {
-  _TCB    *rtcb = (_TCB*)g_readytorun.head;
-  uint32_t sp   = up_getsp();
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
@@ -272,7 +272,7 @@ static void _up_assert(int errorcode)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (current_regs || ((_TCB*)g_readytorun.head)->pid == 0)
+  if (current_regs || ((struct tcb_s*)g_readytorun.head)->pid == 0)
     {
        (void)irqsave();
         for(;;)
@@ -302,7 +302,7 @@ static void _up_assert(int errorcode)
 void up_assert(const uint8_t *filename, int lineno)
 {
 #ifdef CONFIG_PRINT_TASKNAME
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
 #endif
 
   up_ledon(LED_ASSERTION);
@@ -324,7 +324,7 @@ void up_assert(const uint8_t *filename, int lineno)
 void up_assert_code(const uint8_t *filename, int lineno, int errorcode)
 {
 #ifdef CONFIG_PRINT_TASKNAME
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
 #endif
 
   up_ledon(LED_ASSERTION);

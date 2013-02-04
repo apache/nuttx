@@ -156,7 +156,7 @@ void z80_restoreusercontext(FAR chipreg_t *regs);
 
 /* Defined in z80_sigsetup.c */
 
-void z80_sigsetup(FAR _TCB *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs);
+void z80_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs);
 
 /* Defined in z80_registerdump.c */
 

@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
+int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 {
   /* Move up to next even word boundary if necessary */
 

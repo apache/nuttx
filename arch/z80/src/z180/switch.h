@@ -223,7 +223,7 @@ void z180_restoreusercontext(FAR chipreg_t *regs);
 
 /* Defined in z180_sigsetup.c */
 
-void z180_sigsetup(FAR _TCB *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs);
+void z180_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs);
 
 /* Defined in z180_registerdump.c */
 

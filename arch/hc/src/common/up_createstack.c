@@ -83,7 +83,7 @@
  *
  ****************************************************************************/
 
-int up_create_stack(_TCB *tcb, size_t stack_size)
+int up_create_stack(struct tcb_s *tcb, size_t stack_size)
 {
   if (tcb->stack_alloc_ptr && tcb->adj_stack_size != stack_size)
     {
@@ -118,7 +118,7 @@ int up_create_stack(_TCB *tcb, size_t stack_size)
        top_of_stack &= ~1;
        size_of_stack = top_of_stack - (size_t)tcb->stack_alloc_ptr;
 
-       /* Save the adjusted stack values in the _TCB */
+       /* Save the adjusted stack values in the struct tcb_s */
 
        tcb->adj_stack_ptr  = (uint32_t*)top_of_stack;
        tcb->adj_stack_size = size_of_stack;

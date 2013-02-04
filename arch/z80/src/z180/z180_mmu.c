@@ -435,7 +435,7 @@ int up_addrenv_destroy(task_addrenv_t addrenv)
  *
  ****************************************************************************/
 
-int up_addrenv_assign(task_addrenv_t addrenv, FAR _TCB *tcb)
+int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb)
 {
   FAR struct z180_cbr_s *cbr = (FAR struct z180_cbr_s *)addrenv;
   int ret;
@@ -470,7 +470,7 @@ int up_addrenv_assign(task_addrenv_t addrenv, FAR _TCB *tcb)
  *
  ****************************************************************************/
 
-int up_addrenv_share(FAR const _TCB *ptcb, FAR _TCB *ctcb)
+int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb)
 {
   irqstate_t flags;
 
@@ -513,7 +513,7 @@ int up_addrenv_share(FAR const _TCB *ptcb, FAR _TCB *ctcb)
  *
  ****************************************************************************/
 
-int up_addrenv_release(FAR _TCB *tcb)
+int up_addrenv_release(FAR struct tcb_s *tcb)
 {
   FAR struct z180_cbr_s *cbr;
   irqstate_t flags;

@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-void up_block_task(_TCB *tcb, tstate_t task_state)
+void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 {
   /* Verify that the context switch can be performed */
 
@@ -95,7 +95,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
     }
   else
     {
-      _TCB *rtcb = (_TCB*)g_readytorun.head;
+      struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
       bool switch_needed;
 
       /* Remove the tcb task from the ready-to-run list.  If we
@@ -138,7 +138,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
                * of the g_readytorun task list.
                */
 
-              rtcb = (_TCB*)g_readytorun.head;
+              rtcb = (struct tcb_s*)g_readytorun.head;
 
               /* Then switch contexts */
 
@@ -153,7 +153,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
                * ready to run list.
                */
 
-               _TCB *nexttcb = (_TCB*)g_readytorun.head;
+               struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
                up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
 
               /* up_switchcontext forces a context switch to the task at the

@@ -101,14 +101,14 @@ void rtos_exit_interrupt(void)
     local_irq_disable();
     nest_irq--;
     if (!nest_irq) {
-		_TCB *rtcb = current_task;
-		_TCB *ntcb;
+		struct tcb_s *rtcb = current_task;
+		struct tcb_s *ntcb;
 
 		if (rtcb->xcp.sigdeliver) {
 			rtcb->xcp.ctx.tf = current_regs;
 			push_xcptcontext(&rtcb->xcp);
 		}
-		ntcb = (_TCB*)g_readytorun.head;
+		ntcb = (struct tcb_s*)g_readytorun.head;
 		// switch needed
 		if (rtcb != ntcb) {
 			rtcb->xcp.ctx.tf = current_regs;
