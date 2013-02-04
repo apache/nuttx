@@ -83,6 +83,8 @@
 #    define HAVE_TASK_GROUP   1
 #  elif defined(CONFIG_SCHED_ONEXIT)     /* Group on_exit() function */
 #    define HAVE_TASK_GROUP   1
+#  elif defined(CONFIG_SCHED_WAITPID)    /* Group waitpid() function */
+#    define HAVE_TASK_GROUP   1
 #  elif CONFIG_NFILE_DESCRIPTORS > 0     /* File descriptors */
 #    define HAVE_TASK_GROUP   1
 #  elif CONFIG_NFILE_STREAMS > 0         /* Standard C buffered I/O */
@@ -326,6 +328,14 @@ struct task_group_s
   FAR struct child_status_s *tg_children; /* Head of a list of child status     */
 #endif
 
+  /* waitpid support ************************************************************/
+  /* Simple mechanism used only when there is no support for SIGCHLD            */
+
+#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+  sem_t tg_exitsem;                 /* Support for waitpid                      */
+  int *tg_statloc;                  /* Location to return exit status           */
+#endif
+
   /* Pthreads *******************************************************************/
 
 #ifndef CONFIG_DISABLE_PTHREAD
@@ -406,11 +416,6 @@ struct _TCB
 #ifdef CONFIG_SCHED_STARTHOOK
   starthook_t starthook;                 /* Task startup function               */
   FAR void *starthookarg;                /* The argument passed to the function */
-#endif
-
-#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
-  sem_t    exitsem;                      /* Support for waitpid                 */
-  int     *stat_loc;                     /* Location to return exit status      */
 #endif
 
   uint8_t  sched_priority;               /* Current priority of the thread      */

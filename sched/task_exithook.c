@@ -474,25 +474,52 @@ static inline void task_leavegroup(FAR _TCB *ctcb, int status)
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
 static inline void task_exitwakeup(FAR _TCB *tcb, int status)
 {
-  /* Wakeup any tasks waiting for this task to exit */
+  FAR struct task_group_s *group = tcb->group;
 
-  while (tcb->exitsem.semcount < 0)
+  /* Have we already left the group? */
+
+  if (group)
     {
-      /* "If more than one thread is suspended in waitpid() awaiting
-       *  termination of the same process, exactly one thread will return
-       *  the process status at the time of the target process termination." 
-       *  Hmmm.. what do we return to the others?
+      /* Only tasks return valid status.  Record the exit status when the
+       * task exists.  The group, however, may still be executing.
        */
 
-      if (tcb->stat_loc)
+      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_TASK)
         {
-          *tcb->stat_loc = status << 8;
-           tcb->stat_loc = NULL;
+          /* Report the exit status.  We do not nullify tg_statloc here
+           * because we want to prent other tasks from registering for
+           * the return status.  There is only one task per task group,
+           * there for, this logic should execute exactly once in the
+           * lifetime of the task group.
+           *
+           * "If more than one thread is suspended in waitpid() awaiting
+           *  termination of the same process, exactly one thread will
+           * return the process status at the time of the target process
+           * termination." 
+           *
+           *  Hmmm.. what do we return to the others?
+           */
+
+          if (group->tg_statloc)
+            {
+              *group->tg_statloc = status << 8;
+            }
         }
 
-      /* Wake up the thread */
+      /* Is this the last thread in the group? */
 
-      sem_post(&tcb->exitsem);
+      if (group->tg_nmembers == 1)
+        {
+          /* Yes.. Wakeup any tasks waiting for this task to exit */
+
+         group->tg_statloc = NULL;
+         while (group->tg_exitsem.semcount < 0)
+            { 
+              /* Wake up the thread */
+
+              sem_post(&group->tg_exitsem);
+            }
+        }
     }
 }
 #else
@@ -530,7 +557,7 @@ void task_exithook(FAR _TCB *tcb, int status)
 {
   /* Under certain conditions, task_exithook() can be called multiple times.
    * A bit in the TCB was set the first time this function was called.  If
-   * that bit is set, then just ext doing nothing more..
+   * that bit is set, then just exit doing nothing more..
    */
 
   if ((tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)

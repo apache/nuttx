@@ -182,7 +182,8 @@
 #ifndef CONFIG_SCHED_HAVE_PARENT
 pid_t waitpid(pid_t pid, int *stat_loc, int options)
 {
-  _TCB *ctcb;
+  FAR _TCB *ctcb;
+  FAR struct task_group_s *group;
   bool mystat;
   int err;
   int ret;
@@ -212,21 +213,26 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
       goto errout_with_errno;
     }
 
+  /* The the task group corresponding to this PID */
+
+  group = ctcb->group;
+  DEBUGASSERT(group);
+
   /* "If more than one thread is suspended in waitpid() awaiting termination of
    * the same process, exactly one thread will return the process status at the
    * time of the target process termination."  Hmmm.. what do we return to the
    * others?
    */
 
-  if (stat_loc != NULL && ctcb->stat_loc == NULL)
+  if (stat_loc != NULL && group->tg_statloc == NULL)
     {
-      ctcb->stat_loc = stat_loc;
-      mystat         = true;
+      group->tg_statloc = stat_loc;
+      mystat = true;
     }
 
   /* Then wait for the task to exit */
  
-  ret = sem_wait(&ctcb->exitsem);
+  ret = sem_wait(&group->tg_exitsem);
   if (ret < 0)
     {
       /* Unlock pre-emption and return the ERROR (sem_wait has already set
@@ -236,7 +242,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
       if (mystat)
         {
-          ctcb->stat_loc = NULL;
+          group->tg_statloc = NULL;
         }
 
       goto errout;
