@@ -81,7 +81,7 @@
 void up_sigdeliver(void)
 {
 #ifndef CONFIG_DISABLE_SIGNALS
-  _TCB  *rtcb = (_TCB*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
   uint8_t regs[XCPTCONTEXT_SIZE];
   sig_deliver_t sigdeliver;
 

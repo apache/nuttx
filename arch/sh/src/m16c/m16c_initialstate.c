@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-void up_initial_state(FAR _TCB *tcb)
+void up_initial_state(FAR struct tcb_s *tcb)
 {
   FAR struct xcptcontext *xcp  = &tcb->xcp;
   FAR uint8_t            *regs = xcp->regs;

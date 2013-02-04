@@ -98,7 +98,7 @@ extern pid_t g_pgworker;
  * TSTATE_TASK_INVALID.
  */
 
-extern FAR _TCB *g_pftcb;
+extern FAR struct tcb_s *g_pftcb;
 
 /****************************************************************************
  * Public Function Prototypes

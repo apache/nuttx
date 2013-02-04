@@ -81,7 +81,7 @@
  *
  ************************************************************************/
 
-static int sig_queueaction(FAR _TCB *stcb, siginfo_t *info)
+static int sig_queueaction(FAR struct tcb_s *stcb, siginfo_t *info)
 {
   FAR sigactq_t *sigact;
   FAR sigq_t    *sigq;
@@ -134,7 +134,7 @@ static int sig_queueaction(FAR _TCB *stcb, siginfo_t *info)
  *
  ************************************************************************/
 
-static FAR sigpendq_t *sig_findpendingsignal(FAR _TCB *stcb, int signo)
+static FAR sigpendq_t *sig_findpendingsignal(FAR struct tcb_s *stcb, int signo)
 {
   FAR sigpendq_t *sigpend = NULL;
   irqstate_t      saved_state;
@@ -234,7 +234,7 @@ static FAR sigpendq_t *sig_allocatependingsignal(void)
  *
  ************************************************************************/
 
-static FAR sigpendq_t *sig_addpendingsignal(FAR _TCB *stcb,
+static FAR sigpendq_t *sig_addpendingsignal(FAR struct tcb_s *stcb,
                                             siginfo_t *info)
 {
   FAR sigpendq_t *sigpend;
@@ -292,7 +292,7 @@ static FAR sigpendq_t *sig_addpendingsignal(FAR _TCB *stcb,
  *
  ************************************************************************/
 
-int sig_received(FAR _TCB *stcb, siginfo_t *info)
+int sig_received(FAR struct tcb_s *stcb, siginfo_t *info)
 {
   irqstate_t saved_state;
   int        ret = ERROR;

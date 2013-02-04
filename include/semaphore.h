@@ -63,12 +63,13 @@ extern "C" {
 /* This structure contains information about the holder of a semaphore */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
+struct tcb_s; /* Forward reference */
 struct semholder_s
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
   struct semholder_s *flink;     /* Implements singly linked list */
 #endif
-  void *htcb;                    /* Holder TCB (actual type is _TCB) */
+  FAR struct tcb_s *htcb;        /* Holder TCB */
   int16_t counts;                /* Number of counts owned by this holder */
 };
 

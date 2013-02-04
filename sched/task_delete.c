@@ -112,14 +112,14 @@
 
 int task_delete(pid_t pid)
 {
-  FAR _TCB  *rtcb;
-  FAR _TCB  *dtcb;
+  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *dtcb;
   irqstate_t saved_state;
-  int        ret = ERROR;
+  int ret = ERROR;
 
   /* Check if the task to delete is the calling task */
 
-  rtcb = (FAR _TCB*)g_readytorun.head;
+  rtcb = (FAR struct tcb_s*)g_readytorun.head;
   if (pid == 0 || pid == rtcb->pid)
     {
       /* If it is, then what we really wanted to do was exit. Note that we

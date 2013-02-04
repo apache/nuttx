@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/sched.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,17 +110,17 @@ extern "C"
 /* Task Control Interfaces (non-standard) */
 
 #ifndef CONFIG_CUSTOM_STACK
-int    task_init(FAR _TCB *tcb, const char *name, int priority,
+int    task_init(FAR struct tcb_s *tcb, const char *name, int priority,
                  FAR uint32_t *stack, uint32_t stack_size, main_t entry,
                  FAR char * const argv[]);
 #else
-int    task_init(FAR _TCB *tcb, const char *name, int priority, main_t entry,
-                 FAR char * const argv[]);
+int    task_init(FAR struct tcb_s *tcb, const char *name, int priority,
+                 main_t entry, FAR char * const argv[]);
 #endif
-int    task_activate(FAR _TCB *tcb);
+int    task_activate(FAR struct tcb_s *tcb);
 #ifndef CONFIG_CUSTOM_STACK
-int    task_create(FAR const char *name, int priority, int stack_size, main_t entry,
-                   FAR char * const argv[]);
+int    task_create(FAR const char *name, int priority, int stack_size,
+                   main_t entry, FAR char * const argv[]);
 #else
 int    task_create(FAR const char *name, int priority, main_t entry,
                    FAR char * const argv[]);
@@ -152,9 +152,10 @@ int    sched_lockcount(void);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
-void   sched_note_start(FAR _TCB *tcb);
-void   sched_note_stop(FAR _TCB *tcb);
-void   sched_note_switch(FAR _TCB *pFromTcb, FAR _TCB *pToTcb);
+void   sched_note_start(FAR struct tcb_s *tcb);
+void   sched_note_stop(FAR struct tcb_s *tcb);
+void   sched_note_switch(FAR struct tcb_s *pFromTcb,
+                         FAR struct tcb_s *pToTcb);
 
 #else
 # define sched_note_start(t)

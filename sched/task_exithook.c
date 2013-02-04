@@ -85,7 +85,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_ATEXIT) && !defined(CONFIG_SCHED_ONEXIT)
-static inline void task_atexit(FAR _TCB *tcb)
+static inline void task_atexit(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group = tcb->group;
 
@@ -145,7 +145,7 @@ static inline void task_atexit(FAR _TCB *tcb)
  ****************************************************************************/
  
 #ifdef CONFIG_SCHED_ONEXIT
-static inline void task_onexit(FAR _TCB *tcb, int status)
+static inline void task_onexit(FAR struct tcb_s *tcb, int status)
 {
   FAR struct task_group_s *group = tcb->group;
 
@@ -289,7 +289,7 @@ static inline void task_groupexit(FAR struct task_group_s *group)
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
 #ifdef HAVE_GROUP_MEMBERS
-static inline void task_sigchild(gid_t pgid, FAR _TCB *ctcb, int status)
+static inline void task_sigchild(gid_t pgid, FAR struct tcb_s *ctcb, int status)
 {
   FAR struct task_group_s *chgrp = ctcb->group;
   FAR struct task_group_s *pgrp;
@@ -354,7 +354,7 @@ static inline void task_sigchild(gid_t pgid, FAR _TCB *ctcb, int status)
 
 #else /* HAVE_GROUP_MEMBERS */
 
-static inline void task_sigchild(FAR _TCB *ptcb, FAR _TCB *ctcb, int status)
+static inline void task_sigchild(FAR struct tcb_s *ptcb, FAR struct tcb_s *ctcb, int status)
 {
   siginfo_t info;
 
@@ -414,7 +414,7 @@ static inline void task_sigchild(FAR _TCB *ptcb, FAR _TCB *ctcb, int status)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
-static inline void task_leavegroup(FAR _TCB *ctcb, int status)
+static inline void task_leavegroup(FAR struct tcb_s *ctcb, int status)
 {
 #ifdef HAVE_GROUP_MEMBERS
   DEBUGASSERT(ctcb && ctcb->group);
@@ -428,7 +428,7 @@ static inline void task_leavegroup(FAR _TCB *ctcb, int status)
   task_sigchild(ctcb->group->tg_pgid, ctcb, status);
   sched_unlock();
 #else
-  FAR _TCB *ptcb;
+  FAR struct tcb_s *ptcb;
 
   /* Keep things stationary throughout the following */
 
@@ -472,7 +472,7 @@ static inline void task_leavegroup(FAR _TCB *ctcb, int status)
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
-static inline void task_exitwakeup(FAR _TCB *tcb, int status)
+static inline void task_exitwakeup(FAR struct tcb_s *tcb, int status)
 {
   FAR struct task_group_s *group = tcb->group;
 
@@ -553,7 +553,7 @@ static inline void task_exitwakeup(FAR _TCB *tcb, int status)
  *
  ****************************************************************************/
 
-void task_exithook(FAR _TCB *tcb, int status)
+void task_exithook(FAR struct tcb_s *tcb, int status)
 {
   /* Under certain conditions, task_exithook() can be called multiple times.
    * A bit in the TCB was set the first time this function was called.  If

@@ -590,13 +590,8 @@ int close_blockdriver(FAR struct inode *inode);
  ****************************************************************************/
 
 #if CONFIG_NFILE_STREAMS > 0
-
-#ifndef __TCB_DEFINED__
-typedef struct _TCB _TCB;
-#define __TCB_DEFINED__
-#endif
-
-FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR _TCB *tcb);
+struct tcb_s; /* Forward reference */
+FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb);
 #endif
 
 /* lib/stdio/lib_fflush.c **************************************************/

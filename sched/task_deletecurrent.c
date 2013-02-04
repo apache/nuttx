@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task_deletecurrent.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,8 +97,8 @@
 
 int task_deletecurrent(void)
 {
-  FAR _TCB  *dtcb = (FAR _TCB*)g_readytorun.head;
-  FAR _TCB  *rtcb;
+  FAR struct tcb_s *dtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb;
 
   /* Remove the TCB of the current task from the ready-to-run list.  A context
    * switch will definitely be necessary -- that must be done by the
@@ -109,7 +109,7 @@ int task_deletecurrent(void)
    */
 
   (void)sched_removereadytorun(dtcb);
-  rtcb = (FAR _TCB*)g_readytorun.head;
+  rtcb = (FAR struct tcb_s*)g_readytorun.head;
 
   /* We are now in a bad state -- the head of the ready to run task list
    * does not correspond to the thread that is running.  Disabling pre-

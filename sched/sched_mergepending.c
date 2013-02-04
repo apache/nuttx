@@ -94,19 +94,19 @@
 
 bool sched_mergepending(void)
 {
-  FAR _TCB *pndtcb;
-  FAR _TCB *pndnext;
-  FAR _TCB *rtrtcb;
-  FAR _TCB *rtrprev;
+  FAR struct tcb_s *pndtcb;
+  FAR struct tcb_s *pndnext;
+  FAR struct tcb_s *rtrtcb;
+  FAR struct tcb_s *rtrprev;
   bool ret = false;
 
   /* Initialize the inner search loop */
 
-  rtrtcb = (FAR _TCB*)g_readytorun.head;
+  rtrtcb = (FAR struct tcb_s*)g_readytorun.head;
 
   /* Process every TCB in the g_pendingtasks list */
 
-  for (pndtcb = (FAR _TCB*)g_pendingtasks.head; pndtcb; pndtcb = pndnext)
+  for (pndtcb = (FAR struct tcb_s*)g_pendingtasks.head; pndtcb; pndtcb = pndnext)
     {
       pndnext = pndtcb->flink;
 

@@ -174,7 +174,7 @@ void group_assigngid(FAR struct task_group_s *group)
  *
  *****************************************************************************/
 
-int group_allocate(FAR _TCB *tcb)
+int group_allocate(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
   int ret;
@@ -241,7 +241,7 @@ int group_allocate(FAR _TCB *tcb)
  *
  *****************************************************************************/
 
-int group_initialize(FAR _TCB *tcb)
+int group_initialize(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
 #ifdef HAVE_GROUP_MEMBERS

@@ -91,7 +91,7 @@
 
 void task_start(void)
 {
-  FAR _TCB *tcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *tcb = (FAR struct tcb_s*)g_readytorun.head;
   int argc;
 
   /* Execute the start hook if one has been registered */

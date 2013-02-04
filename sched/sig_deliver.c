@@ -83,7 +83,7 @@
  *
  ****************************************************************************/
 
-void sig_deliver(FAR _TCB *stcb)
+void sig_deliver(FAR struct tcb_s *stcb)
 {
   FAR sigq_t *sigq;
   FAR sigq_t *next;

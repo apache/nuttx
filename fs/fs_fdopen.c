@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-static inline int fs_checkfd(FAR _TCB *tcb, int fd, int oflags)
+static inline int fs_checkfd(FAR struct tcb_s *tcb, int fd, int oflags)
 {
   FAR struct filelist *flist;
   FAR struct inode    *inode;
@@ -119,7 +119,7 @@ static inline int fs_checkfd(FAR _TCB *tcb, int fd, int oflags)
  *
  ****************************************************************************/
 
-FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR _TCB *tcb)
+FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 {
   FAR struct streamlist *slist;
   FAR FILE              *stream;

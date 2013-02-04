@@ -198,8 +198,8 @@ o Task/Scheduler (sched/)
                bug-for-bug compatibility, the same errno should be shared by
                the task and each thread that it creates.  It is *very* easy
                to make this change:  Just move the pterrno field from
-               _TCB to struct task_group_s.   However, I am still not sure
-               if this should be done or not.
+               struct tcb_s to struct task_group_s.   However, I am still not
+               sure if this should be done or not.
   Status:      Closed.  The existing solution is better (although its
                incompatibilities could show up in porting some code).
   Priority:    Low

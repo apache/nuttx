@@ -76,7 +76,7 @@
 
 void _exit(int status)
 {
-  _TCB* tcb;
+  struct tcb_s* tcb;
 
   sdbg("TCB=%p exitting\n", tcb);
 
@@ -88,7 +88,7 @@ void _exit(int status)
    * head of the list.
    */
 
-  tcb = (_TCB*)g_readytorun.head;
+  tcb = (struct tcb_s*)g_readytorun.head;
   sdbg("New Active Task TCB=%p\n", tcb);
 
   /* The way that we handle signals in the simulation is kind of

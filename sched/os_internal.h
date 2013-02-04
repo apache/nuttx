@@ -114,7 +114,7 @@ enum os_crash_codes_e
 /* A more efficient ways to access the errno */
 
 #define SET_ERRNO(e) \
-  { _TCB *rtcb = _TCB*)g_readytorun.head; rtcb->pterrno = (e); }
+  { struct tcb_s *rtcb = struct tcb_s*)g_readytorun.head; rtcb->pterrno = (e); }
 
 #define _SET_TCB_ERRNO(t,e) \
   { (t)->pterrno = (e); }
@@ -130,8 +130,8 @@ enum os_crash_codes_e
 
 struct pidhash_s
 {
-  FAR _TCB *tcb;
-  pid_t     pid;
+  FAR struct tcb_s *tcb;
+  pid_t pid;
 };
 
 typedef struct pidhash_s  pidhash_t;
@@ -257,10 +257,10 @@ int  os_bringup(void);
 void weak_function task_initialize(void);
 #endif
 void task_start(void);
-int  task_schedsetup(FAR _TCB *tcb, int priority, start_t start,
+int  task_schedsetup(FAR struct tcb_s *tcb, int priority, start_t start,
                      main_t main, uint8_t ttype);
-int  task_argsetup(FAR _TCB *tcb, FAR const char *name, FAR char * const argv[]);
-void task_exithook(FAR _TCB *tcb, int status);
+int  task_argsetup(FAR struct tcb_s *tcb, FAR const char *name, FAR char * const argv[]);
+void task_exithook(FAR struct tcb_s *tcb, int status);
 int  task_deletecurrent(void);
 
 #ifndef CONFIG_CUSTOM_STACK
@@ -270,22 +270,22 @@ int  kernel_thread(FAR const char *name, int priority, int stack_size,
 int  kernel_thread(FAR const char *name, int priority, main_t entry,
                    FAR char * const argv[]);
 #endif
-bool sched_addreadytorun(FAR _TCB *rtrtcb);
-bool sched_removereadytorun(FAR _TCB *rtrtcb);
-bool sched_addprioritized(FAR _TCB *newTcb, DSEG dq_queue_t *list);
+bool sched_addreadytorun(FAR struct tcb_s *rtrtcb);
+bool sched_removereadytorun(FAR struct tcb_s *rtrtcb);
+bool sched_addprioritized(FAR struct tcb_s *newTcb, DSEG dq_queue_t *list);
 bool sched_mergepending(void);
-void sched_addblocked(FAR _TCB *btcb, tstate_t task_state);
-void sched_removeblocked(FAR _TCB *btcb);
-int  sched_setpriority(FAR _TCB *tcb, int sched_priority);
+void sched_addblocked(FAR struct tcb_s *btcb, tstate_t task_state);
+void sched_removeblocked(FAR struct tcb_s *btcb);
+int  sched_setpriority(FAR struct tcb_s *tcb, int sched_priority);
 #ifdef CONFIG_PRIORITY_INHERITANCE
-int  sched_reprioritize(FAR _TCB *tcb, int sched_priority);
+int  sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 #else
 #  define sched_reprioritize(tcb,sched_priority) sched_setpriority(tcb,sched_priority)
 #endif
-FAR _TCB *sched_gettcb(pid_t pid);
-bool sched_verifytcb(FAR _TCB *tcb);
+FAR struct tcb_s *sched_gettcb(pid_t pid);
+bool sched_verifytcb(FAR struct tcb_s *tcb);
 
-int  sched_releasetcb(FAR _TCB *tcb);
+int  sched_releasetcb(FAR struct tcb_s *tcb);
 void sched_garbagecollection(void);
 
 #endif /* __SCHED_OS_INTERNAL_H */

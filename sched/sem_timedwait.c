@@ -93,7 +93,7 @@
 
 static void sem_timeout(int argc, uint32_t pid)
 {
-  FAR _TCB *wtcb;
+  FAR struct tcb_s *wtcb;
   irqstate_t flags;
 
   /* Disable interrupts to avoid race conditions */

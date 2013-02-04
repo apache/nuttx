@@ -91,7 +91,7 @@
  *
  ****************************************************************************/
 
-void sem_waitirq(FAR _TCB *wtcb, int errcode)
+void sem_waitirq(FAR struct tcb_s *wtcb, int errcode)
 {
   irqstate_t saved_state;
 

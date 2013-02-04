@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched_setparam.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -107,9 +107,9 @@
 
 int sched_setparam(pid_t pid, const struct sched_param *param)
 {
-  FAR _TCB  *rtcb;
-  FAR _TCB  *tcb;
-  int        ret;
+  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *tcb;
+  int ret;
 
   /* Verify that the requested priority is in the valid range */
 
@@ -127,7 +127,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
 
   /* Check if the task to reprioritize is the calling task */
 
-  rtcb = (FAR _TCB*)g_readytorun.head;
+  rtcb = (FAR struct tcb_s*)g_readytorun.head;
   if (pid == 0 || pid == rtcb->pid)
     {
       tcb = rtcb;

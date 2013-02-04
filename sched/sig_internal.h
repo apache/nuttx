@@ -167,24 +167,24 @@ void               sig_releaseaction(FAR sigactq_t *sigact);
 
 /* sig_pending.c */
 
-sigset_t           sig_pendingset(FAR _TCB *stcb);
+sigset_t           sig_pendingset(FAR struct tcb_s *stcb);
 
 /* In files of the same name */
 
 FAR sigq_t        *sig_allocatependingsigaction(void);
-void               sig_cleanup(FAR _TCB *stcb);
-void               sig_deliver(FAR _TCB *stcb);
-FAR sigactq_t     *sig_findaction(FAR _TCB *stcb, int signo);
+void               sig_cleanup(FAR struct tcb_s *stcb);
+void               sig_deliver(FAR struct tcb_s *stcb);
+FAR sigactq_t     *sig_findaction(FAR struct tcb_s *stcb, int signo);
 int                sig_lowest(FAR sigset_t *set);
 #ifdef CONFIG_CAN_PASS_STRUCTS
 int                sig_mqnotempty(int tid, int signo, union sigval value);
 #else
 int                sig_mqnotempty(int tid, int signo, FAR void *sival_ptr);
 #endif
-int                sig_received(FAR _TCB *stcb, FAR siginfo_t *info);
+int                sig_received(FAR struct tcb_s *stcb, FAR siginfo_t *info);
 void               sig_releasependingsigaction(FAR sigq_t *sigq);
 void               sig_releasependingsignal(FAR sigpendq_t *sigpend);
-FAR sigpendq_t    *sig_removependingsignal(FAR _TCB *stcb, int signo);
+FAR sigpendq_t    *sig_removependingsignal(FAR struct tcb_s *stcb, int signo);
 void               sig_unmaskpendingsignal(void);
 
 #endif /* __SCHED_SIG_INTERNAL_H */

@@ -168,7 +168,7 @@ static FAR sigactq_t *sig_allocateaction(void)
 
 int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *oact)
 {
-  FAR _TCB      *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR sigactq_t *sigact;
 
   /* Since sigactions can only be installed from the running thread of

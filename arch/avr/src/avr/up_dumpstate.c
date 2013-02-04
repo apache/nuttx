@@ -168,8 +168,8 @@ static inline void up_registerdump(void)
 
 void up_dumpstate(void)
 {
-  _TCB    *rtcb = (_TCB*)g_readytorun.head;
-  uint16_t sp   = up_getsp();
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  uint16_t sp = up_getsp();
   uint16_t ustackbase;
   uint16_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 0

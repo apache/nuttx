@@ -85,7 +85,7 @@
  *
  ************************************************************************/
 
-FAR sigpendq_t *sig_removependingsignal(FAR _TCB *stcb, int signo)
+FAR sigpendq_t *sig_removependingsignal(FAR struct tcb_s *stcb, int signo)
 {
   FAR sigpendq_t *currsig;
   FAR sigpendq_t *prevsig;

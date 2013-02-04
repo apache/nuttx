@@ -95,10 +95,10 @@
  *   match the state associated with the list.
  ************************************************************************/
 
-bool sched_addprioritized(FAR _TCB *tcb, DSEG dq_queue_t *list)
+bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
 {
-  FAR _TCB *next;
-  FAR _TCB *prev;
+  FAR struct tcb_s *next;
+  FAR struct tcb_s *prev;
   uint8_t sched_priority = tcb->sched_priority;
   bool ret = false;
 
@@ -110,7 +110,7 @@ bool sched_addprioritized(FAR _TCB *tcb, DSEG dq_queue_t *list)
    * Each is list is maintained in ascending sched_priority order.
    */
 
-  for (next = (FAR _TCB*)list->head;
+  for (next = (FAR struct tcb_s*)list->head;
       (next && sched_priority <= next->sched_priority);
       next = next->flink);
 
@@ -123,7 +123,7 @@ bool sched_addprioritized(FAR _TCB *tcb, DSEG dq_queue_t *list)
     {
       /* The tcb goes at the end of the list. */
 
-      prev = (FAR _TCB*)list->tail;
+      prev = (FAR struct tcb_s*)list->tail;
       if (!prev)
         {
           /* Special case:  The list is empty */
@@ -148,7 +148,7 @@ bool sched_addprioritized(FAR _TCB *tcb, DSEG dq_queue_t *list)
     {
       /* The tcb goes just before next */
 
-      prev = (FAR _TCB*)next->blink;
+      prev = (FAR struct tcb_s*)next->blink;
       if (!prev)
         {
           /* Special case:  Insert at the head of the list */

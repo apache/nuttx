@@ -81,7 +81,7 @@
 
 void up_sigdeliver(void)
 {
-  _TCB  *rtcb = (_TCB*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
   uint32_t regs[XCPTCONTEXT_REGS];
   sig_deliver_t sigdeliver;
 

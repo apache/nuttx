@@ -126,8 +126,8 @@
 
 pid_t up_vfork(const struct vfork_s *context)
 {
-  _TCB *parent = (FAR _TCB *)g_readytorun.head;
-  _TCB *child;
+  struct tcb_s *parent = (FAR struct tcb_s *)g_readytorun.head;
+  struct tcb_s *child;
   size_t stacksize;
   uint32_t newsp;
   uint32_t newfp;

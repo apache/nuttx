@@ -72,13 +72,13 @@
 static void sched_process_timeslice(void)
 {
 #if CONFIG_RR_INTERVAL > 0
-  _TCB *rtcb;
+  struct tcb_s *rtcb;
 
   /* Check if the currently executing task uses round robin
    * scheduling.
    */
 
-  rtcb = (_TCB*)g_readytorun.head;
+  rtcb = (struct tcb_s*)g_readytorun.head;
   if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0)
     {
       /* Yes, check if decrementing the timeslice counter

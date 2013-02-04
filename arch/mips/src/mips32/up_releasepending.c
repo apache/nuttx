@@ -77,7 +77,7 @@
 
 void up_release_pending(void)
 {
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
 
   slldbg("From TCB=%p\n", rtcb);
 
@@ -103,7 +103,7 @@ void up_release_pending(void)
            * of the g_readytorun task list.
            */
 
-          rtcb = (_TCB*)g_readytorun.head;
+          rtcb = (struct tcb_s*)g_readytorun.head;
           slldbg("New Active Task TCB=%p\n", rtcb);
 
           /* Then switch contexts */
@@ -119,7 +119,7 @@ void up_release_pending(void)
            * ready to run list.
            */
 
-          _TCB *nexttcb = (_TCB*)g_readytorun.head;
+          struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
           up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
 
           /* up_switchcontext forces a context switch to the task at the

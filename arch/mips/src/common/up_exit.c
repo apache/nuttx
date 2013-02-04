@@ -75,7 +75,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
-static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
+static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct filelist *filelist;
@@ -138,7 +138,7 @@ static void _up_dumponexit(FAR _TCB *tcb, FAR void *arg)
 
 void _exit(int status)
 {
-  _TCB* tcb;
+  struct tcb_s* tcb;
 
   /* Disable interrupts.  They will be restored when the next
    * task is started.
@@ -161,7 +161,7 @@ void _exit(int status)
    * head of the list.
    */
 
-  tcb = (_TCB*)g_readytorun.head;
+  tcb = (struct tcb_s*)g_readytorun.head;
 
   /* Then switch contexts */
 

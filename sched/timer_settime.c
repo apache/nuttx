@@ -95,7 +95,7 @@ static void timer_timeout(int argc, uint32_t itimer);
 
 static void inline timer_sigqueue(FAR struct posix_timer_s *timer)
 {
-  FAR _TCB *tcb;
+  FAR struct tcb_s *tcb;
 
   /* Get the TCB of the receiving task */
 
@@ -177,7 +177,7 @@ static void timer_timeout(int argc, uint32_t itimer)
 {
 #ifndef CONFIG_CAN_PASS_STRUCTS
   /* On many small machines, pointers are encoded and cannot be simply cast from
-   * uint32_t to _TCB*.  The following union works around this (see wdogparm_t).
+   * uint32_t to struct tcb_s*.  The following union works around this (see wdogparm_t).
    */
 
   union

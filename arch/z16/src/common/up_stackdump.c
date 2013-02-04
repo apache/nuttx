@@ -78,8 +78,8 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_stackdump(void)
 {
-  _TCB *rtcb        = (_TCB*)g_readytorun.head;
-  chipreg_t sp         = up_getsp();
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  chipreg_t sp = up_getsp();
   chipreg_t stack_base = (chipreg_t)rtcb->adj_stack_ptr;
   chipreg_t stack_size = (chipreg_t)rtcb->adj_stack_size;
 

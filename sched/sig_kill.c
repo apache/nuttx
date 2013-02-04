@@ -85,11 +85,11 @@
 int kill(pid_t pid, int signo)
 {
 #ifdef CONFIG_SCHED_HAVE_PARENT
-  FAR _TCB *rtcb = (FAR _TCB *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
 #endif
-  FAR _TCB *stcb;
+  FAR struct tcb_s *stcb;
   siginfo_t info;
-  int       ret = ERROR;
+  int ret = ERROR;
 
   /* We do not support sending signals to process groups */
 

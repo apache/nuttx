@@ -96,10 +96,10 @@
 
 int task_restart(pid_t pid)
 {
-  FAR _TCB  *rtcb;
-  FAR _TCB  *tcb;
-  int        status;
+  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *tcb;
   irqstate_t state;
+  int status;
 
   /* Make sure this task does not become ready-to-run while
    * we are futzing with its TCB
@@ -109,7 +109,7 @@ int task_restart(pid_t pid)
 
   /* Check if the task to restart is the calling task */
 
-  rtcb = (FAR _TCB*)g_readytorun.head;
+  rtcb = (FAR struct tcb_s*)g_readytorun.head;
   if ((pid == 0) || (pid == rtcb->pid))
     {
       /* Not implemented */

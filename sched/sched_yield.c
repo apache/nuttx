@@ -90,7 +90,7 @@
 
 int sched_yield(void)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
 
   /* This equivalent to just resetting the task priority to its current value
    * since this will cause the task to be rescheduled behind any other tasks

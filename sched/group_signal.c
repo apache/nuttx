@@ -92,7 +92,7 @@
 int group_signal(FAR struct task_group_s *group, FAR siginfo_t *info)
 {
 #ifdef HAVE_GROUP_MEMBERS
-  FAR _TCB *gtcb;
+  FAR struct tcb_s *gtcb;
   int i;
 
   DEBUGASSERT(group && info);
@@ -151,7 +151,7 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *info)
  *
  *****************************************************************************/
 
-int group_signalmember(FAR _TCB *tcb, FAR siginfo_t *info)
+int group_signalmember(FAR struct tcb_s *tcb, FAR siginfo_t *info)
 {
 #ifdef HAVE_GROUP_MEMBERS
   DEBUGASSERT(tcb);

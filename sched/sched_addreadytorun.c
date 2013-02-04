@@ -98,9 +98,9 @@
  *
  ****************************************************************************/
 
-bool sched_addreadytorun(FAR _TCB *btcb)
+bool sched_addreadytorun(FAR struct tcb_s *btcb)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   bool ret;
 
   /* Check if pre-emption is disabled for the current running task and if

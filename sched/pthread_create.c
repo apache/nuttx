@@ -111,7 +111,7 @@ static const char g_pthreadname[] = "<pthread>";
  *
  ****************************************************************************/
 
-static void pthread_argsetup(FAR _TCB *tcb, pthread_addr_t arg)
+static void pthread_argsetup(FAR struct tcb_s *tcb, pthread_addr_t arg)
 {
   int i;
 
@@ -189,7 +189,7 @@ static inline void pthread_addjoininfo(FAR struct task_group_s *group,
 
 static void pthread_start(void)
 {
-  FAR _TCB   *ptcb  = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *ptcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct task_group_s *group = ptcb->group;
   FAR struct join_s *pjoin = (FAR struct join_s*)ptcb->joininfo;
   pthread_addr_t exit_status;
@@ -247,7 +247,7 @@ static void pthread_start(void)
 int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
                    pthread_startroutine_t start_routine, pthread_addr_t arg)
 {
-  FAR _TCB *ptcb;
+  FAR struct tcb_s *ptcb;
   FAR struct join_s *pjoin;
   int priority;
 #if CONFIG_RR_INTERVAL > 0
@@ -266,7 +266,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Allocate a TCB for the new task. */
 
-  ptcb = (FAR _TCB*)kzalloc(sizeof(_TCB));
+  ptcb = (FAR struct tcb_s*)kzalloc(sizeof(struct tcb_s));
   if (!ptcb)
     {
       return ENOMEM;
@@ -291,7 +291,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
    */
 
 #ifdef CONFIG_ADDRENV
-  ret = up_addrenv_share((FAR const _TCB *)g_readytorun.head, ptcb);
+  ret = up_addrenv_share((FAR const struct tcb_s *)g_readytorun.head, ptcb);
   if (ret < 0)
     {
       errcode = -ret;

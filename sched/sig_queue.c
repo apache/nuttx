@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sig_queue.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,11 +112,11 @@ int sigqueue(int pid, int signo, void *sival_ptr)
 #endif
 {
 #ifdef CONFIG_SCHED_HAVE_PARENT
-  FAR _TCB *rtcb = (FAR _TCB *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
 #endif
-  FAR _TCB *stcb;
+  FAR struct tcb_s *stcb;
   siginfo_t info;
-  int       ret = ERROR;
+  int ret = ERROR;
 
   /* Sanity checks */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sig_suspend.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,12 +110,12 @@
 
 int sigsuspend(FAR const sigset_t *set)
 {
-  FAR _TCB       *rtcb = (FAR _TCB*)g_readytorun.head;
-  sigset_t        intersection;
-  sigset_t        saved_sigprocmask;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  sigset_t intersection;
+  sigset_t saved_sigprocmask;
   FAR sigpendq_t *sigpend;
-  irqstate_t      saved_state;
-  int             unblocksigno;
+  irqstate_t saved_state;
+  int unblocksigno;
 
   /* Several operations must be performed below:  We must determine if any
    * signal is pending and, if not, wait for the signal.  Since signals can

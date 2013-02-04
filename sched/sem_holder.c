@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_holder.c
  *
- *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,7 +133,8 @@ static inline FAR struct semholder_s *sem_allocholder(sem_t *sem)
  * Name: sem_findholder
  ****************************************************************************/
 
-static FAR struct semholder_s *sem_findholder(sem_t *sem, FAR _TCB *htcb)
+static FAR struct semholder_s *sem_findholder(sem_t *sem,
+                                              FAR struct tcb_s *htcb)
 {
   FAR struct semholder_s *pholder;
 
@@ -162,7 +163,8 @@ static FAR struct semholder_s *sem_findholder(sem_t *sem, FAR _TCB *htcb)
  * Name: sem_findorallocateholder
  ****************************************************************************/
 
-static inline FAR struct semholder_s *sem_findorallocateholder(sem_t *sem, FAR _TCB *htcb)
+static inline FAR struct semholder_s *
+sem_findorallocateholder(sem_t *sem, FAR struct tcb_s *htcb)
 {
   FAR struct semholder_s *pholder = sem_findholder(sem, htcb);
   if (!pholder)
@@ -272,8 +274,8 @@ static int sem_recoverholders(FAR struct semholder_s *pholder, FAR sem_t *sem, F
 static int sem_boostholderprio(FAR struct semholder_s *pholder,
                                FAR sem_t *sem, FAR void *arg)
 {
-  FAR _TCB *htcb = (FAR _TCB *)pholder->htcb;
-  FAR _TCB *rtcb = (FAR _TCB*)arg;
+  FAR struct tcb_s *htcb = (FAR struct tcb_s *)pholder->htcb;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)arg;
 
   /* Make sure that the holder thread is still active.  If it exited without
    * releasing its counts, then that would be a bad thing.  But we can take no
@@ -376,7 +378,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
 static int sem_verifyholder(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
 {
 #if 0 // Need to revisit this, but these assumptions seem to be untrue -- OR there is a bug???
-  FAR _TCB *htcb = (FAR _TCB *)pholder->htcb;
+  FAR struct tcb_s *htcb = (FAR struct tcb_s *)pholder->htcb;
 
   /* Called after a semaphore has been released (incremented), the semaphore
    * could is non-negative, and there is no thread waiting for the count.
@@ -415,9 +417,9 @@ static int sem_dumpholder(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR v
 
 static int sem_restoreholderprio(FAR struct semholder_s *pholder, FAR sem_t *sem, FAR void *arg)
 {
-  FAR _TCB *htcb = (FAR _TCB *)pholder->htcb;
+  FAR struct tcb_s *htcb = (FAR struct tcb_s *)pholder->htcb;
 #if CONFIG_SEM_NNESTPRIO > 0
-  FAR _TCB *stcb = (FAR _TCB *)arg;
+  FAR struct tcb_s *stcb = (FAR struct tcb_s *)arg;
   int rpriority;
   int i;
   int j;
@@ -546,7 +548,7 @@ static int sem_restoreholderprio(FAR struct semholder_s *pholder, FAR sem_t *sem
 static int sem_restoreholderprioA(FAR struct semholder_s *pholder,
                                   FAR sem_t *sem, FAR void *arg)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   if (pholder->htcb != rtcb)
     {
       return sem_restoreholderprio(pholder, sem, arg);
@@ -566,7 +568,7 @@ static int sem_restoreholderprioA(FAR struct semholder_s *pholder,
 static int sem_restoreholderprioB(FAR struct semholder_s *pholder,
                                   FAR sem_t *sem, FAR void *arg)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   if (pholder->htcb == rtcb)
     {
       (void)sem_restoreholderprio(pholder, sem, arg);
@@ -608,7 +610,8 @@ static int sem_restoreholderprioB(FAR struct semholder_s *pholder,
  *
  ****************************************************************************/
 
-static inline void sem_restorebaseprio_irq(FAR _TCB *stcb, FAR sem_t *sem)
+static inline void sem_restorebaseprio_irq(FAR struct tcb_s *stcb,
+                                           FAR sem_t *sem)
 {
   /* Perfom the following actions only if a new thread was given a count.
    * The thread that received the count should be the highest priority
@@ -668,9 +671,9 @@ static inline void sem_restorebaseprio_irq(FAR _TCB *stcb, FAR sem_t *sem)
  *
  ****************************************************************************/
 
-static inline void sem_restorebaseprio_task(FAR _TCB *stcb, FAR sem_t *sem)
+static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb, FAR sem_t *sem)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct semholder_s *pholder;
 
   /* Perfom the following actions only if a new thread was given a count.
@@ -829,7 +832,7 @@ void sem_destroyholder(FAR sem_t *sem)
 
 void sem_addholder(FAR sem_t *sem)
 {
-  FAR _TCB               *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct semholder_s *pholder;
 
   /* Find or allocate a container for this new holder */
@@ -862,7 +865,7 @@ void sem_addholder(FAR sem_t *sem)
 
 void sem_boostpriority(FAR sem_t *sem)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
 
   /* Boost the priority of every thread holding counts on this semaphore
    * that are lower in priority than the new thread that is waiting for a
@@ -891,7 +894,7 @@ void sem_boostpriority(FAR sem_t *sem)
 
 void sem_releaseholder(FAR sem_t *sem)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct semholder_s *pholder;
 
   /* Find the container for this holder */
@@ -940,7 +943,7 @@ void sem_releaseholder(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem)
+void sem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
 {
   /* Check our assumptions */
 
@@ -985,7 +988,7 @@ void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_SIGNALS
-void sem_canceled(FAR _TCB *stcb, FAR sem_t *sem)
+void sem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
 {
   /* Check our assumptions */
 

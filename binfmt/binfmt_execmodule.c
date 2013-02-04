@@ -134,13 +134,13 @@ static void exec_ctors(FAR void *arg)
 
 int exec_module(FAR const struct binary_s *binp)
 {
-  FAR _TCB     *tcb;
+  FAR struct tcb_s *tcb;
 #ifndef CONFIG_CUSTOM_STACK
   FAR uint32_t *stack;
 #endif
-  pid_t         pid;
-  int           err;
-  int           ret;
+  pid_t pid;
+  int err;
+  int ret;
 
   /* Sanity checking */
 
@@ -156,7 +156,7 @@ int exec_module(FAR const struct binary_s *binp)
 
   /* Allocate a TCB for the new task. */
 
-  tcb = (FAR _TCB*)kzalloc(sizeof(_TCB));
+  tcb = (FAR struct tcb_s*)kzalloc(sizeof(struct tcb_s));
   if (!tcb)
     {
       err = ENOMEM;

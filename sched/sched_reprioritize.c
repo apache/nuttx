@@ -102,7 +102,7 @@
  *
  ****************************************************************************/
 
-int sched_reprioritize(FAR _TCB *tcb, int sched_priority)
+int sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority)
 {
   /* This function is equivalent to sched_setpriority() BUT it also has the
    * side effect of discarding all priority inheritance history.  This is

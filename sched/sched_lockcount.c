@@ -91,7 +91,7 @@
 
 int sched_lockcount(void)
 {
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
   return (int)rtcb->lockcount;
 }
 

@@ -106,14 +106,14 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
                          main_t entry, FAR char * const argv[])
 #endif
 {
-  FAR _TCB *tcb;
+  FAR struct tcb_s *tcb;
   pid_t pid;
   int errcode;
   int ret;
 
   /* Allocate a TCB for the new task. */
 
-  tcb = (FAR _TCB*)kzalloc(sizeof(_TCB));
+  tcb = (FAR struct tcb_s*)kzalloc(sizeof(struct tcb_s));
   if (!tcb)
     {
       errcode = ENOMEM;

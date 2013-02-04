@@ -70,7 +70,7 @@
 
 FAR struct socketlist *sched_getsockets(void)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct task_group_s *group = rtcb->group;
 
   DEBUGASSERT(group);

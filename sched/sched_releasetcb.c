@@ -93,7 +93,7 @@ static void sched_releasepid(pid_t pid)
  *
  ************************************************************************/
 
-int sched_releasetcb(FAR _TCB *tcb)
+int sched_releasetcb(FAR struct tcb_s *tcb)
 {
   int ret = OK;
   int i;

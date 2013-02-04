@@ -4121,4 +4121,7 @@
 	  the task group structures.  Now all message queues opened by
 	  members of the group are closed when the last member of the group
 	  exits.
+	* includes/nuttx/sched.h and Lots of files:  Change name of _TCB to
+	  struct tcb_s so that (1) it is consitent with other NuttX naming and
+	  so that (2) the naming can handle some upcoming changes.
 

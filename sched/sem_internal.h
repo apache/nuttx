@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_internal.h
  *
- *   Copyright (C) 2007, 2009-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,30 +85,31 @@ extern dq_queue_t g_nsems;
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /* Common semaphore logic */
 
-EXTERN void weak_function sem_initialize(void);
-EXTERN void               sem_waitirq(FAR _TCB *wtcb, int errcode);
-EXTERN FAR nsem_t        *sem_findnamed(const char *name);
+void weak_function sem_initialize(void);
+void sem_waitirq(FAR struct tcb_s *wtcb, int errcode);
+FAR nsem_t *sem_findnamed(const char *name);
 
 /* Special logic needed only by priority inheritance to manage collections of
  * holders of semaphores.
  */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-EXTERN void sem_initholders(void);
-EXTERN void sem_destroyholder(FAR sem_t *sem);
-EXTERN void sem_addholder(FAR sem_t *sem);
-EXTERN void sem_boostpriority(FAR sem_t *sem);
-EXTERN void sem_releaseholder(FAR sem_t *sem);
-EXTERN void sem_restorebaseprio(FAR _TCB *stcb, FAR sem_t *sem);
+void sem_initholders(void);
+void sem_destroyholder(FAR sem_t *sem);
+void sem_addholder(FAR sem_t *sem);
+void sem_boostpriority(FAR sem_t *sem);
+void sem_releaseholder(FAR sem_t *sem);
+void sem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem);
 #  ifndef CONFIG_DISABLE_SIGNALS
-EXTERN void sem_canceled(FAR _TCB *stcb, FAR sem_t *sem);
+void sem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem);
 #  else
 #    define sem_canceled(stcb, sem)
 #  endif

@@ -135,7 +135,7 @@ static mqd_t mq_desalloc(void)
  *
  ****************************************************************************/
 
-mqd_t mq_descreate(FAR _TCB* mtcb, FAR msgq_t* msgq, int oflags)
+mqd_t mq_descreate(FAR struct tcb_s* mtcb, FAR msgq_t* msgq, int oflags)
 {
   FAR struct task_group_s *group = mtcb->group;
   mqd_t mqdes;

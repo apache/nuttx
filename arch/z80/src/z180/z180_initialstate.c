@@ -76,7 +76,7 @@
  *
  ****************************************************************************/
 
-void up_initial_state(_TCB *tcb)
+void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
 

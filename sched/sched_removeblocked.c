@@ -87,7 +87,7 @@
  *
  ************************************************************************/
 
-void sched_removeblocked(FAR _TCB *btcb)
+void sched_removeblocked(FAR struct tcb_s *btcb)
 {
   tstate_t task_state = btcb->task_state;
 

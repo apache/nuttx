@@ -115,7 +115,7 @@
 int pthread_setspecific(pthread_key_t key, FAR void *value)
 {
 #if CONFIG_NPTHREAD_KEYS > 0
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct task_group_s *group = rtcb->group;
   int ret = EINVAL;
 

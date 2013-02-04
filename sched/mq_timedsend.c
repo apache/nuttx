@@ -93,7 +93,7 @@
 
 static void mq_sndtimeout(int argc, uint32_t pid)
 {
-  FAR _TCB *wtcb;
+  FAR struct tcb_s *wtcb;
   irqstate_t saved_state;
 
   /* Disable interrupts.  This is necessary because an interrupt handler may

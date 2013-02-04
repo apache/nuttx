@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_wait.c
  *
- *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,9 +96,9 @@
 
 int sem_wait(FAR sem_t *sem)
 {
-  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
-  int        ret  = ERROR;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   irqstate_t saved_state;
+  int ret  = ERROR;
 
   /* This API should not be called from interrupt handlers */
 

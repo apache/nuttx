@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/mq_send.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -249,8 +249,8 @@ FAR mqmsg_t *mq_msgalloc(void)
 
 int mq_waitsend(mqd_t mqdes)
 {
-  FAR _TCB    *rtcb;
-  FAR msgq_t  *msgq;
+  FAR struct tcb_s *rtcb;
+  FAR msgq_t *msgq;
 
   /* Get a pointer to the message queue */
 
@@ -288,7 +288,7 @@ int mq_waitsend(mqd_t mqdes)
                * When we are unblocked, we will try again
                */
 
-              rtcb = (FAR _TCB*)g_readytorun.head;
+              rtcb = (FAR struct tcb_s*)g_readytorun.head;
               rtcb->msgwaitq = msgq;
               msgq->nwaitnotfull++;
 
@@ -336,11 +336,11 @@ int mq_waitsend(mqd_t mqdes)
 
 int mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg, size_t msglen, int prio)
 {
-  FAR _TCB    *btcb;
-  FAR msgq_t  *msgq;
+  FAR struct tcb_s *btcb;
+  FAR msgq_t *msgq;
   FAR mqmsg_t *next;
   FAR mqmsg_t *prev;
-  irqstate_t   saved_state;
+  irqstate_t saved_state;
 
   /* Get a pointer to the message queue */
 
@@ -430,7 +430,7 @@ int mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg, size_t msglen, i
        * interrupts should never cause a change in this list
        */
 
-      for (btcb = (FAR _TCB*)g_waitingformqnotempty.head;
+      for (btcb = (FAR struct tcb_s*)g_waitingformqnotempty.head;
            btcb && btcb->msgwaitq != msgq;
            btcb = btcb->flink);
 

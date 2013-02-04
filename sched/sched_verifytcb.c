@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-bool sched_verifytcb(FAR _TCB *tcb)
+bool sched_verifytcb(FAR struct tcb_s *tcb)
 {
   /* Return true if the PID hashes to this TCB. */
 

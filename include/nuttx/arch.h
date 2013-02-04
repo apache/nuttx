@@ -57,7 +57,7 @@
  * Public Types
  ****************************************************************************/
 
-typedef CODE void (*sig_deliver_t)(FAR _TCB *tcb);
+typedef CODE void (*sig_deliver_t)(FAR struct tcb_s *tcb);
 
 /****************************************************************************
  * Public Variables
@@ -129,7 +129,7 @@ void up_idle(void);
  *
  ****************************************************************************/
 
-void up_initial_state(FAR _TCB *tcb);
+void up_initial_state(FAR struct tcb_s *tcb);
 
 /****************************************************************************
  * Name: up_create_stack
@@ -154,7 +154,7 @@ void up_initial_state(FAR _TCB *tcb);
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-int up_create_stack(FAR _TCB *tcb, size_t stack_size);
+int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size);
 #endif
 
 /****************************************************************************
@@ -179,7 +179,7 @@ int up_create_stack(FAR _TCB *tcb, size_t stack_size);
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-int up_use_stack(FAR _TCB *tcb, FAR void *stack, size_t stack_size);
+int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);
 #endif
 
 /****************************************************************************
@@ -192,7 +192,7 @@ int up_use_stack(FAR _TCB *tcb, FAR void *stack, size_t stack_size);
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-void up_release_stack(FAR _TCB *dtcb);
+void up_release_stack(FAR struct tcb_s *dtcb);
 #endif
 
 /****************************************************************************
@@ -215,7 +215,7 @@ void up_release_stack(FAR _TCB *dtcb);
  *
  ****************************************************************************/
 
-void up_unblock_task(FAR _TCB *tcb);
+void up_unblock_task(FAR struct tcb_s *tcb);
 
 /****************************************************************************
  * Name: up_block_task
@@ -241,7 +241,7 @@ void up_unblock_task(FAR _TCB *tcb);
  *
  ****************************************************************************/
 
-void up_block_task(FAR _TCB *tcb, tstate_t task_state);
+void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state);
 
 /****************************************************************************
  * Name: up_release_pending
@@ -286,7 +286,7 @@ void up_release_pending(void);
  *
  ****************************************************************************/
 
-void up_reprioritize_rtr(FAR _TCB *tcb, uint8_t priority);
+void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
 
 /****************************************************************************
  * Name: _exit
@@ -348,7 +348,7 @@ void up_reprioritize_rtr(FAR _TCB *tcb, uint8_t priority);
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_SIGNALS
-void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver);
+void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);
 #endif
 
 /****************************************************************************
@@ -542,7 +542,7 @@ int up_addrenv_destroy(task_addrenv_t addrenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ADDRENV
-int up_addrenv_assign(task_addrenv_t addrenv, FAR _TCB *tcb);
+int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
@@ -564,7 +564,7 @@ int up_addrenv_assign(task_addrenv_t addrenv, FAR _TCB *tcb);
  ****************************************************************************/
 
 #ifdef CONFIG_ADDRENV
-int up_addrenv_share(FAR const _TCB *ptcb, FAR _TCB *ctcb);
+int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb);
 #endif
 
 /****************************************************************************
@@ -586,7 +586,7 @@ int up_addrenv_share(FAR const _TCB *ptcb, FAR _TCB *ctcb);
  ****************************************************************************/
 
 #ifdef CONFIG_ADDRENV
-int up_addrenv_release(FAR _TCB *tcb);
+int up_addrenv_release(FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************

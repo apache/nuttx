@@ -85,11 +85,11 @@
  ****************************************************************************/
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_FDCLONE_DISABLE)
-static inline void sched_dupfiles(FAR _TCB *tcb)
+static inline void sched_dupfiles(FAR struct tcb_s *tcb)
 {
   /* The parent task is the one at the head of the ready-to-run list */
 
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct file *parent;
   FAR struct file *child;
   int i;
@@ -143,11 +143,11 @@ static inline void sched_dupfiles(FAR _TCB *tcb)
  ****************************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0 && !defined(CONFIG_SDCLONE_DISABLE)
-static inline void sched_dupsockets(FAR _TCB *tcb)
+static inline void sched_dupsockets(FAR struct tcb_s *tcb)
 {
   /* The parent task is the one at the head of the ready-to-run list */
 
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct socket *parent;
   FAR struct socket *child;
   int i;
@@ -206,7 +206,7 @@ static inline void sched_dupsockets(FAR _TCB *tcb)
  *
  ****************************************************************************/
 
-int group_setuptaskfiles(FAR _TCB *tcb)
+int group_setuptaskfiles(FAR struct tcb_s *tcb)
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   FAR struct task_group_s *group = tcb->group;

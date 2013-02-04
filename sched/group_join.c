@@ -99,9 +99,9 @@
  *
  *****************************************************************************/
 
-int group_bind(FAR _TCB *tcb)
+int group_bind(FAR struct tcb_s *tcb)
 {
-  FAR _TCB *ptcb = (FAR _TCB *)g_readytorun.head;
+  FAR struct tcb_s *ptcb = (FAR struct tcb_s *)g_readytorun.head;
 
   DEBUGASSERT(ptcb && tcb && ptcb->group && !tcb->group);
 
@@ -136,7 +136,7 @@ int group_bind(FAR _TCB *tcb)
  *
  *****************************************************************************/
 
-int group_join(FAR _TCB *tcb)
+int group_join(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
 #ifdef HAVE_GROUP_MEMBERS

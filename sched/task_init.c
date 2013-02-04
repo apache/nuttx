@@ -112,11 +112,11 @@
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-int task_init(FAR _TCB *tcb, const char *name, int priority,
+int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
               FAR uint32_t *stack, uint32_t stack_size,
               main_t entry, FAR char * const argv[])
 #else
-int task_init(FAR _TCB *tcb, const char *name, int priority,
+int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
               main_t entry, FAR char * const argv[])
 #endif
 {

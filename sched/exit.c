@@ -92,7 +92,7 @@
 
 void exit(int status)
 {
-  _TCB *tcb = (_TCB*)g_readytorun.head;
+  struct tcb_s *tcb = (struct tcb_s*)g_readytorun.head;
 
   /* Only the lower 8-bits of status are used */
 

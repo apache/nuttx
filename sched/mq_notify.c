@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/mq_notify.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,9 +126,9 @@
 
 int mq_notify(mqd_t mqdes, const struct sigevent *notification)
 {
-  _TCB   *rtcb;
+  struct tcb_s *rtcb;
   msgq_t *msgq;
-  int     errval;
+  int errval;
 
   /* Was a valid message queue descriptor provided? */
 
@@ -147,7 +147,7 @@ int mq_notify(mqd_t mqdes, const struct sigevent *notification)
 
   /* Get the current process ID */
 
-  rtcb = (_TCB*)g_readytorun.head;
+  rtcb = (struct tcb_s*)g_readytorun.head;
 
   /* Is there already a notification attached */
 

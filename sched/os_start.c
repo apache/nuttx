@@ -204,7 +204,7 @@ const tasklist_t g_tasklisttable[NUM_TASK_STATES] =
  * that user init task is responsible for bringing up the rest of the system
  */
 
-static FAR _TCB g_idletcb;
+static FAR struct tcb_s g_idletcb;
 
 /* This is the name of the idle task */
 
@@ -272,7 +272,7 @@ void os_start(void)
    * that has pid == 0 and sched_priority == 0.
    */
 
-  bzero((void*)&g_idletcb, sizeof(_TCB));
+  bzero((void*)&g_idletcb, sizeof(struct tcb_s));
   g_idletcb.task_state = TSTATE_TASK_RUNNING;
   g_idletcb.entry.main = (main_t)os_start;
 

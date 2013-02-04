@@ -69,7 +69,7 @@
 
 FAR struct filelist *sched_getfiles(void)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct task_group_s *group = rtcb->group;
 
   /* The group may be NULL under certain conditions.  For example, if

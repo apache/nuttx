@@ -93,7 +93,7 @@
 
 FAR struct task_group_s *task_getgroup(pid_t pid)
 {
-  FAR _TCB *tcb = sched_gettcb(pid);
+  FAR struct tcb_s *tcb = sched_gettcb(pid);
   if (tcb)
     {
       return tcb->group;

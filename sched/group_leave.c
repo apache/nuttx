@@ -242,7 +242,7 @@ static inline void group_release(FAR struct task_group_s *group)
  *****************************************************************************/
 
 #ifdef HAVE_GROUP_MEMBERS
-void group_leave(FAR _TCB *tcb)
+void group_leave(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
 
@@ -277,7 +277,7 @@ void group_leave(FAR _TCB *tcb)
 
 #else /* HAVE_GROUP_MEMBERS */
 
-void group_leave(FAR _TCB *tcb)
+void group_leave(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
 

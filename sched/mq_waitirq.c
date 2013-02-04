@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-void mq_waitirq(FAR _TCB *wtcb, int errcode)
+void mq_waitirq(FAR struct tcb_s *wtcb, int errcode)
 {
   FAR msgq_t *msgq;
   irqstate_t saved_state;

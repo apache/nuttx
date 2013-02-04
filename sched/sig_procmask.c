@@ -112,7 +112,7 @@
 
 int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 {
-  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s  *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   sigset_t   oldsigprocmask;
   irqstate_t saved_state;
   int        ret = OK;

@@ -102,7 +102,7 @@
 
 int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 {
-  FAR _TCB *rtcb = (FAR _TCB *)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   FAR struct task_group_s *group = rtcb->group;
   FAR struct join_s *pjoin;
   int ret;
@@ -139,7 +139,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
     {
       /* Determine what kind of error to return */
 
-      FAR _TCB *tcb = sched_gettcb((pthread_t)thread);
+      FAR struct tcb_s *tcb = sched_gettcb((pthread_t)thread);
 
       sdbg("Could not find thread data\n");
 

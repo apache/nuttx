@@ -77,7 +77,7 @@
  *
  ************************************************************************/
 
-void sig_cleanup(FAR _TCB *stcb)
+void sig_cleanup(FAR struct tcb_s *stcb)
 {
   FAR sigactq_t  *sigact;
   FAR sigq_t     *sigq;

@@ -100,13 +100,13 @@
 
 int sched_getscheduler(pid_t pid)
 {
-  _TCB *tcb;
+  struct tcb_s *tcb;
 
   /* Verify that the pid corresponds to a real task */
 
   if (!pid)
     {
-      tcb = (_TCB*)g_readytorun.head;
+      tcb = (struct tcb_s*)g_readytorun.head;
     }
   else
     {

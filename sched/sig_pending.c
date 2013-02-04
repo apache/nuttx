@@ -89,8 +89,8 @@
 
 int sigpending(FAR sigset_t *set)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
-  int       ret  = ERROR;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  int ret = ERROR;
 
   if (set)
     {
@@ -109,11 +109,11 @@ int sigpending(FAR sigset_t *set)
  *
  ****************************************************************************/
 
-sigset_t sig_pendingset(FAR _TCB *stcb)
+sigset_t sig_pendingset(FAR struct tcb_s *stcb)
 {
-  sigset_t        sigpendset;
+  sigset_t sigpendset;
   FAR sigpendq_t *sigpend;
-  irqstate_t      saved_state;
+  irqstate_t saved_state;
 
   sigpendset = NULL_SIGNAL_SET;
 

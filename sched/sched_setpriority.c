@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched_setpriority.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,10 +101,10 @@
  *
  ****************************************************************************/
 
-int sched_setpriority(FAR _TCB *tcb, int sched_priority)
+int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
 {
-  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
-  tstate_t   task_state;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  tstate_t task_state;
   irqstate_t saved_state;
 
   /* Verify that the requested priority is in the valid range */

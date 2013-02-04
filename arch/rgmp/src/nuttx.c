@@ -54,7 +54,7 @@
 #include <arch/arch.h>
 #include <os_internal.h>
 
-_TCB *current_task = NULL;
+struct tcb_s *current_task = NULL;
 
 
 /**
@@ -62,7 +62,7 @@ _TCB *current_task = NULL;
  * to switch tasks.
  * Assumption: global interrupt is disabled.
  */
-static inline void up_switchcontext(_TCB *ctcb, _TCB *ntcb)
+static inline void up_switchcontext(struct tcb_s *ctcb, struct tcb_s *ntcb)
 {
     // do nothing if two tasks are the same
     if (ctcb == ntcb)
@@ -111,7 +111,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
     *heap_size = KERNBASE + kmem_size - (uint32_t)boot_freemem;
 }
 
-int up_create_stack(_TCB *tcb, size_t stack_size)
+int up_create_stack(struct tcb_s *tcb, size_t stack_size)
 {
     int ret = ERROR;
     size_t *adj_stack_ptr;
@@ -139,7 +139,7 @@ int up_create_stack(_TCB *tcb, size_t stack_size)
     return ret;
 }
 
-int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
+int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 {
     /* Move up to next even word boundary if necessary */
 
@@ -158,7 +158,7 @@ int up_use_stack(_TCB *tcb, void *stack, size_t stack_size)
     return OK;
 }
 
-void up_release_stack(_TCB *dtcb)
+void up_release_stack(struct tcb_s *dtcb)
 {
     if (dtcb->stack_alloc_ptr) {
 		free(dtcb->stack_alloc_ptr);
@@ -192,7 +192,7 @@ void up_release_stack(_TCB *dtcb)
  *     hold the blocked task TCB.
  *
  ****************************************************************************/
-void up_block_task(_TCB *tcb, tstate_t task_state)
+void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 {
     /* Verify that the context switch can be performed */
     if ((tcb->task_state < FIRST_READY_TO_RUN_STATE) ||
@@ -201,7 +201,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
 		return;
     }
     else {
-		_TCB *rtcb = current_task;
+		struct tcb_s *rtcb = current_task;
 		bool switch_needed;
 
 		/* Remove the tcb task from the ready-to-run list.  If we
@@ -217,7 +217,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
 
 		/* Now, perform the context switch if one is needed */
 		if (switch_needed) {
-			_TCB *nexttcb;
+			struct tcb_s *nexttcb;
 			// this part should not be executed in interrupt context
 			if (up_interrupt_context()) {
 				panic("%s: %d\n", __func__, __LINE__);
@@ -230,7 +230,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
 				warn("Disable preemption failed for task block itself\n");
 				sched_mergepending();
 			}
-			nexttcb = (_TCB*)g_readytorun.head;
+			nexttcb = (struct tcb_s*)g_readytorun.head;
 			// context switch
 			up_switchcontext(rtcb, nexttcb);
         }
@@ -252,7 +252,7 @@ void up_block_task(_TCB *tcb, tstate_t task_state)
  *     ready to run taks, executed.
  *
  ****************************************************************************/
-void up_unblock_task(_TCB *tcb)
+void up_unblock_task(struct tcb_s *tcb)
 {
     /* Verify that the context switch can be performed */
     if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
@@ -261,7 +261,7 @@ void up_unblock_task(_TCB *tcb)
 		return;
     }
     else {
-		_TCB *rtcb = current_task;
+		struct tcb_s *rtcb = current_task;
 
 		/* Remove the task from the blocked task list */
 		sched_removeblocked(tcb);
@@ -277,7 +277,7 @@ void up_unblock_task(_TCB *tcb)
 		// g_readytorun task list.
 		if (sched_addreadytorun(tcb) && !up_interrupt_context()) {
 			/* The currently active task has changed! */
-			_TCB *nexttcb = (_TCB*)g_readytorun.head;
+			struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
 			// context switch
 			up_switchcontext(rtcb, nexttcb);
 		}
@@ -290,20 +290,20 @@ void up_unblock_task(_TCB *tcb)
  */
 void up_release_pending(void)
 {
-    _TCB *rtcb = current_task;
+    struct tcb_s *rtcb = current_task;
 
     /* Merge the g_pendingtasks list into the g_readytorun task list */
 
     if (sched_mergepending()) {
 		/* The currently active task has changed! */
-		_TCB *nexttcb = (_TCB*)g_readytorun.head;
+		struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
 
 		// context switch
 		up_switchcontext(rtcb, nexttcb);
     }
 }
 
-void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
+void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 {
     /* Verify that the caller is sane */
 
@@ -320,7 +320,7 @@ void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
 		return;
     }
     else {
-		_TCB *rtcb = current_task;
+		struct tcb_s *rtcb = current_task;
 		bool switch_needed;
 
 		/* Remove the tcb task from the ready-to-run list.
@@ -343,7 +343,7 @@ void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
 
 		/* Now, perform the context switch if one is needed */
 		if (switch_needed && !up_interrupt_context()) {
-			_TCB *nexttcb;
+			struct tcb_s *nexttcb;
 			// If there are any pending tasks, then add them to the g_readytorun
 			// task list now. It should be the up_realease_pending() called from
 			// sched_unlock() to do this for disable preemption. But it block 
@@ -353,7 +353,7 @@ void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
 				sched_mergepending();
             }
 
-			nexttcb = (_TCB*)g_readytorun.head;
+			nexttcb = (struct tcb_s*)g_readytorun.head;
 			// context switch
 			up_switchcontext(rtcb, nexttcb);
         }
@@ -362,7 +362,7 @@ void up_reprioritize_rtr(_TCB *tcb, uint8_t priority)
 
 void _exit(int status)
 {
-    _TCB* tcb;
+    struct tcb_s* tcb;
 
     /* Destroy the task at the head of the ready to run list. */
 
@@ -372,7 +372,7 @@ void _exit(int status)
      * head of the list.
      */
 
-    tcb = (_TCB*)g_readytorun.head;
+    tcb = (struct tcb_s*)g_readytorun.head;
 
     /* Then switch contexts */
 
@@ -413,7 +413,7 @@ void up_assert_code(const uint8_t *filename, int line, int code)
 
 #ifndef CONFIG_DISABLE_SIGNALS
 
-void up_schedule_sigaction(_TCB *tcb, sig_deliver_t sigdeliver)
+void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
     /* Refuse to handle nested signal actions */
     if (!tcb->xcp.sigdeliver) {

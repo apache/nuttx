@@ -75,9 +75,9 @@
  *
  ****************************************************************************/
 
-FAR _TCB *sched_self(void)
+FAR struct tcb_s *sched_self(void)
 {
-  return (FAR _TCB*)g_readytorun.head;
+  return (FAR struct tcb_s*)g_readytorun.head;
 }
 
 

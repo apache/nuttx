@@ -75,7 +75,7 @@
 
 int pthread_setcancelstate(int state, FAR int *oldstate)
 {
-  _TCB *tcb = (_TCB*)g_readytorun.head;
+  struct tcb_s *tcb = (struct tcb_s*)g_readytorun.head;
   int ret = OK;
 
   /* Suppress context changes for a bit so that the flags are stable. (the

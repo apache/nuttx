@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: February 2, 2013</p>
+      <p>Last Updated: February 4, 2013</p>
     </td>
   </tr>
 </table>
@@ -342,7 +342,7 @@ VxWorks provides the following similar interface:
 <b>Function Prototype:</b> 
 <pre>
    #include &lt;sched.h&gt;
-   int task_init(_TCB *tcb, char *name, int priority, uint32_t *stack, uint32_t stack_size,
+   int task_init(struct tcb_s *tcb, char *name, int priority, uint32_t *stack, uint32_t stack_size,
                  maint_t entry, char * const argv[]);
 </pre>
 
@@ -414,7 +414,7 @@ VxWorks provides the following similar interface:
 <b>Function Prototype:</b> 
 <pre>
     #include &lt;sched.h&gt;
-    int task_activate(_TCB *tcb);
+    int task_activate(struct tcb_s *tcb);
 </pre>
 
 <p>
@@ -9188,7 +9188,7 @@ From the standpoint of the application, these structures (and
 structure pointers) should be treated as simple handles to reference
 OS resources. These hidden structures include:
 <ul>
-<li>_TCB
+<li>struct tcb_s
 <li>mqd_t
 <li>sem_t
 <li>WDOG_ID

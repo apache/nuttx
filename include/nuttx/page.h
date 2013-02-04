@@ -2,7 +2,7 @@
  * include/nuttx/page.h
  * This file defines interfaces used to support NuttX On-Demand Paging.
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -232,7 +232,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -308,7 +309,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN void pg_miss(void);
+void pg_miss(void);
 
 /****************************************************************************
  * Public Functions -- Provided by architecture-specific logic to common
@@ -345,7 +346,7 @@ EXTERN void pg_miss(void);
  *
  ****************************************************************************/
 
-EXTERN bool up_checkmapping(FAR _TCB *tcb);
+bool up_checkmapping(FAR struct tcb_s *tcb);
 
 /****************************************************************************
  * Name: up_allocpage()
@@ -396,7 +397,7 @@ EXTERN bool up_checkmapping(FAR _TCB *tcb);
  *
  ****************************************************************************/
 
-EXTERN int up_allocpage(FAR _TCB *tcb, FAR void **vpage);
+int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage);
 
 /****************************************************************************
  * Name: up_fillpage()
@@ -451,10 +452,11 @@ EXTERN int up_allocpage(FAR _TCB *tcb, FAR void **vpage);
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING_BLOCKINGFILL
-EXTERN int up_fillpage(FAR _TCB *tcb, FAR void *vpage);
+int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage);
 #else
-typedef void (*up_pgcallback_t)(FAR _TCB *tcb, int result);
-EXTERN int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callback);
+typedef void (*up_pgcallback_t)(FAR struct tcb_s *tcb, int result);
+int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage,
+                up_pgcallback_t pg_callback);
 #endif
 
 #undef EXTERN

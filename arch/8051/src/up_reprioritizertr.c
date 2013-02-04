@@ -85,7 +85,7 @@
  *
  ****************************************************************************/
 
-void up_reprioritize_rtr(FAR _TCB *tcb, uint8_t priority)
+void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
 {
   /* Verify that the caller is sane */
 
@@ -103,7 +103,7 @@ void up_reprioritize_rtr(FAR _TCB *tcb, uint8_t priority)
     }
   else
     {
-      FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+      FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
       bool switch_needed;
 
       dbg("TCB=%p PRI=%d\n", tcb, priority);
@@ -157,7 +157,7 @@ void up_reprioritize_rtr(FAR _TCB *tcb, uint8_t priority)
                * of the g_readytorun task list.
                */
 
-              rtcb = (FAR _TCB*)g_readytorun.head;
+              rtcb = (FAR struct tcb_s*)g_readytorun.head;
               dbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then setup so that the context will be performed on exit
@@ -178,7 +178,7 @@ void up_reprioritize_rtr(FAR _TCB *tcb, uint8_t priority)
                * of the g_readytorun task list.
                */
 
-              rtcb = (FAR _TCB*)g_readytorun.head;
+              rtcb = (FAR struct tcb_s*)g_readytorun.head;
               dbg("New Active Task TCB=%p\n", rtcb);
 
               /* Then switch contexts */

@@ -75,7 +75,7 @@ static const char g_noname[] = "<noname>";
  * Private Function Prototypes
  ****************************************************************************/
 
-static int task_assignpid(FAR _TCB* tcb);
+static int task_assignpid(FAR struct tcb_s* tcb);
 
 /****************************************************************************
  * Private Functions
@@ -95,7 +95,7 @@ static int task_assignpid(FAR _TCB* tcb);
  *
  ****************************************************************************/
 
-static int task_assignpid(FAR _TCB *tcb)
+static int task_assignpid(FAR struct tcb_s *tcb)
 {
   pid_t next_pid;
   int   hash_ndx;
@@ -168,9 +168,9 @@ static int task_assignpid(FAR _TCB *tcb)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
-static inline void task_saveparent(FAR _TCB *tcb, uint8_t ttype)
+static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_SCHED_CHILD_STATUS)
   DEBUGASSERT(tcb && tcb->group && rtcb->group);
@@ -271,9 +271,9 @@ static inline void task_saveparent(FAR _TCB *tcb, uint8_t ttype)
  ****************************************************************************/
 
 #ifdef CONFIG_PIC
-static inline void task_dupdspace(FAR _TCB *tcb)
+static inline void task_dupdspace(FAR struct tcb_s *tcb)
 {
-  FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   if (rtcb->dspace != NULL)
     {
       /* Copy the D-Space structure reference and increment the reference
@@ -318,7 +318,7 @@ static inline void task_dupdspace(FAR _TCB *tcb)
  *
  ****************************************************************************/
 
-int task_schedsetup(FAR _TCB *tcb, int priority, start_t start, main_t main,
+int task_schedsetup(FAR struct tcb_s *tcb, int priority, start_t start, main_t main,
                     uint8_t ttype)
 {
   int ret;
@@ -414,7 +414,7 @@ int task_schedsetup(FAR _TCB *tcb, int priority, start_t start, main_t main,
  *
  ****************************************************************************/
 
-int task_argsetup(FAR _TCB *tcb, const char *name, FAR char * const argv[])
+int task_argsetup(FAR struct tcb_s *tcb, const char *name, FAR char * const argv[])
 {
   int i;
 

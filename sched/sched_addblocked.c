@@ -88,7 +88,7 @@
  *
  ************************************************************************/
 
-void sched_addblocked(FAR _TCB *btcb, tstate_t task_state)
+void sched_addblocked(FAR struct tcb_s *btcb, tstate_t task_state)
 {
   /* Make sure that we received a valid blocked state */
 

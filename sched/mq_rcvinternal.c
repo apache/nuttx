@@ -156,8 +156,8 @@ int mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen)
 
 FAR mqmsg_t *mq_waitreceive(mqd_t mqdes)
 {
-  FAR _TCB    *rtcb;
-  FAR msgq_t  *msgq;
+  FAR struct tcb_s *rtcb;
+  FAR msgq_t *msgq;
   FAR mqmsg_t *rcvmsg;
 
   /* Get a pointer to the message queue */
@@ -176,7 +176,7 @@ FAR mqmsg_t *mq_waitreceive(mqd_t mqdes)
         {
           /* Yes.. Block and try again */
 
-          rtcb = (FAR _TCB*)g_readytorun.head;
+          rtcb = (FAR struct tcb_s*)g_readytorun.head;
           rtcb->msgwaitq = msgq;
           msgq->nwaitnotempty++;
 
@@ -247,10 +247,10 @@ FAR mqmsg_t *mq_waitreceive(mqd_t mqdes)
 
 ssize_t mq_doreceive(mqd_t mqdes, mqmsg_t *mqmsg, void *ubuffer, int *prio)
 {
-  FAR _TCB   *btcb;
-  irqstate_t  saved_state;
+  FAR struct tcb_s *btcb;
+  irqstate_t saved_state;
   FAR msgq_t *msgq;
-  ssize_t     rcvmsglen;
+  ssize_t rcvmsglen;
 
   /* Get the length of the message (also the return value) */
 
@@ -283,7 +283,7 @@ ssize_t mq_doreceive(mqd_t mqdes, mqmsg_t *mqmsg, void *ubuffer, int *prio)
        */
 
       saved_state = irqsave();
-      for (btcb = (FAR _TCB*)g_waitingformqnotfull.head;
+      for (btcb = (FAR struct tcb_s*)g_waitingformqnotfull.head;
            btcb && btcb->msgwaitq != msgq;
            btcb = btcb->flink);
 

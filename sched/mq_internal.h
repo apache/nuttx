@@ -149,14 +149,14 @@ EXTERN sq_queue_t  g_desfree;
 void weak_function mq_initialize(void);
 void mq_desblockalloc(void);
 
-mqd_t mq_descreate(FAR _TCB* mtcb, FAR msgq_t* msgq, int oflags);
+mqd_t mq_descreate(FAR struct tcb_s* mtcb, FAR msgq_t* msgq, int oflags);
 FAR msgq_t  *mq_findnamed(const char *mq_name);
 void mq_msgfree(FAR mqmsg_t *mqmsg);
 void mq_msgqfree(FAR msgq_t *msgq);
 
 /* mq_waitirq.c ************************************************************/
 
-void mq_waitirq(FAR _TCB *wtcb, int errcode);
+void mq_waitirq(FAR struct tcb_s *wtcb, int errcode);
 
 /* mq_rcvinternal.c ********************************************************/
 

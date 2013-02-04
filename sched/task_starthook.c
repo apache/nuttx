@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-void task_starthook(FAR _TCB *tcb, starthook_t starthook, FAR void *arg)
+void task_starthook(FAR struct tcb_s *tcb, starthook_t starthook, FAR void *arg)
 {
   DEBUGASSERT(tcb);
   tcb->starthook    = starthook;

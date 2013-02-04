@@ -105,10 +105,10 @@
  *
  ****************************************************************************/
 
-FAR _TCB *task_vforksetup(start_t retaddr)
+FAR struct tcb_s *task_vforksetup(start_t retaddr)
 {
-  _TCB *parent = (FAR _TCB *)g_readytorun.head;
-  _TCB *child;
+  struct tcb_s *parent = (FAR struct tcb_s *)g_readytorun.head;
+  struct tcb_s *child;
   int priority;
   int ret;
 
@@ -116,7 +116,7 @@ FAR _TCB *task_vforksetup(start_t retaddr)
 
   /* Allocate a TCB for the child task. */
 
-  child = (FAR _TCB*)kzalloc(sizeof(_TCB));
+  child = (FAR struct tcb_s*)kzalloc(sizeof(struct tcb_s));
   if (!child)
     {
       set_errno(ENOMEM);
@@ -203,10 +203,10 @@ errout_with_tcb:
  *
  ****************************************************************************/
 
-pid_t task_vforkstart(FAR _TCB *child)
+pid_t task_vforkstart(FAR struct tcb_s *child)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
-  _TCB *parent = (FAR _TCB *)g_readytorun.head;
+  struct tcb_s *parent = (FAR struct tcb_s *)g_readytorun.head;
 #endif
   FAR const char *name;
   pid_t pid;
@@ -317,7 +317,7 @@ pid_t task_vforkstart(FAR _TCB *child)
  *
  ****************************************************************************/
 
-void task_vforkabort(FAR _TCB *child, int errcode)
+void task_vforkabort(FAR struct tcb_s *child, int errcode)
 {
   /* The TCB was added to the active task list by task_schedsetup() */
 

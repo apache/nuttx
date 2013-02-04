@@ -26,9 +26,9 @@ config SCHED_INSTRUMENTATION
 		If enabled, then the board-specific logic must provide the following
 		functions (see include/sched.h):
 
-		void sched_note_start(FAR _TCB *tcb);
-		void sched_note_stop(FAR _TCB *tcb);
-		void sched_note_switch(FAR _TCB *pFromTcb, FAR _TCB *pToTcb);
+		void sched_note_start(FAR struct tcb_s *tcb);
+		void sched_note_stop(FAR struct tcb_s *tcb);
+		void sched_note_switch(FAR struct tcb_s *pFromTcb, FAR struct tcb_s *pToTcb);
 
 config TASK_NAME_SIZE
 	int "Maximum task name size"

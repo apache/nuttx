@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: January 23, 2013</p>
+      <p>Last Updated: February 4, 2013</p>
     </td>
   </tr>
 </table>
@@ -1590,7 +1590,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upinitialstate">4.1.3 <code>up_initial_state()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_initial_state(FAR _TCB *tcb);</code></p>
+<p><b>Prototype</b>: <code>void up_initial_state(FAR struct tcb_s *tcb);</code></p>
 
 <p><b>Description</b>.
   A new thread is being started and a new TCB has been created.
@@ -1613,7 +1613,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upcreatestack">4.1.4 <code>up_create_stack()</code></a></h3>
-<p><b>Prototype</b>: <code>STATUS up_create_stack(FAR _TCB *tcb, size_t stack_size);</code></p>
+<p><b>Prototype</b>: <code>STATUS up_create_stack(FAR struct tcb_s *tcb, size_t stack_size);</code></p>
 
 <p><b>Description</b>.
   Allocate a stack for a new thread and setup
@@ -1648,7 +1648,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 
 <h3><a name="upusestack">4.1.5 <code>up_use_stack()</code></a></h3>
 <p><b>Prototype</b>: 
-  <code>STATUS up_use_stack(FAR _TCB *tcb, FAR void *stack, size_t stack_size);</code>
+  <code>STATUS up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);</code>
 </p>
 
 <p><b>Description</b>.
@@ -1682,7 +1682,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </ul>
 
 <h3><a name="upreleasestack">4.1.6 <code>up_release_stack()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_release_stack(FAR _TCB *dtcb);</code></p>
+<p><b>Prototype</b>: <code>void up_release_stack(FAR struct tcb_s *dtcb);</code></p>
 
 <p><b>Description</b>.
   A task has been stopped. Free all stack
@@ -1694,7 +1694,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upunblocktask">4.1.7 <code>up_unblock_task()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_unblock_task(FAR _TCB *tcb);</code></p>
+<p><b>Prototype</b>: <code>void up_unblock_task(FAR struct tcb_s *tcb);</code></p>
 
 <p><b>Description</b>.
   A task is currently in an inactive task list
@@ -1717,7 +1717,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </ul>
 
 <h3><a name="upblocktask">4.1.8 <code>up_block_task()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_block_task(FAR _TCB *tcb, tstate_t task_state);</code></p>
+<p><b>Prototype</b>: <code>void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state);</code></p>
 
 <p><b>Description</b>.
   The currently executing task at the head of
@@ -1760,7 +1760,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upreprioritizertr">4.1.10 <code>up_reprioritize_rtr()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_reprioritize_rtr(FAR _TCB *tcb, uint8_t priority);</code></p>
+<p><b>Prototype</b>: <code>void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);</code></p>
 
 <p><b>Description</b>.
   Called when the priority of a running or
@@ -1821,7 +1821,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 
 <h3><a name="upschedulesigaction">4.1.13 <code>up_schedule_sigaction()</code></a></h3>
 <p><b>Prototype</b>:
-  <code>void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver);</code>
+  <code>void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);</code>
 </p>
 
 <p><b>Description</b>.
@@ -2297,7 +2297,7 @@ else
 <h4><a name="up_addrenv_assign">4.1.21.6 <code>up_addrenv_assign()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_assign(task_addrenv_t addrenv, FAR _TCB *tcb);</code>
+  <code>int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
@@ -2316,7 +2316,7 @@ else
 <h4><a name="up_addrenv_share">4.1.21.7 <code>up_addrenv_share()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_share(FAR const _TCB *ptcb, FAR _TCB *ctcb);</code>
+  <code>int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
@@ -2336,7 +2336,7 @@ else
 <h4><a name="up_addrenv_release">4.1.21.8 <code>up_addrenv_release()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_release(FAR _TCB *tcb);</code>
+  <code>int up_addrenv_release(FAR struct tcb_s *tcb);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>

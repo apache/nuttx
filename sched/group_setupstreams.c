@@ -72,7 +72,7 @@
  *
  ****************************************************************************/
 
-int group_setupstreams(FAR _TCB *tcb)
+int group_setupstreams(FAR struct tcb_s *tcb)
 {
   DEBUGASSERT(tcb && tcb->group);
 

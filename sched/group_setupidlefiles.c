@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-int group_setupidlefiles(FAR _TCB *tcb)
+int group_setupidlefiles(FAR struct tcb_s *tcb)
 {
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct task_group_s *group = tcb->group;

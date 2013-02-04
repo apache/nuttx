@@ -108,7 +108,7 @@
 
 #define MAX_LOCK_COUNT             127
 
-/* Values for the _TCB flags bits */
+/* Values for the struct tcb_s flags bits */
 
 #define TCB_FLAG_TTYPE_SHIFT       (0)      /* Bits 0-1: thread type */
 #define TCB_FLAG_TTYPE_MASK        (3 << TCB_FLAG_TTYPE_SHIFT)
@@ -140,10 +140,10 @@
 #ifndef __ASSEMBLY__
 
 /* General Task Management Types ************************************************/
-
 /* This is the type of the task_state field of the TCB. NOTE: the order and
  * content of this enumeration is critical since there are some OS tables indexed
- * by these values.  The range of values is assumed to fit into a uint8_t in _TCB.
+ * by these values.  The range of values is assumed to fit into a uint8_t in
+ * struct tcb_s.
  */
 
 enum tstate_e
@@ -386,17 +386,17 @@ struct task_group_s
 };
 #endif
 
-/* _TCB **************************************************************************/
-/* This is the task control block (TCB).  Each task or thread is represented by
- * a TCB.  The TCB is the heart of the NuttX task-control logic.
+/* struct tcb_s ******************************************************************/
+/* This is the common part of the task control block (TCB).  Each task or thread
+ * is represented by a TCB.  The TCB is the heart of the NuttX task-control logic.
  */
 
-struct _TCB
+struct tcb_s
 {
   /* Fields used to support list management *************************************/
 
-  FAR struct _TCB *flink;                /* Doubly linked list                  */
-  FAR struct _TCB *blink;
+  FAR struct tcb_s *flink;               /* Doubly linked list                  */
+  FAR struct tcb_s *blink;
 
   /* Task Group *****************************************************************/
 
@@ -512,18 +512,9 @@ struct _TCB
 #endif
 };
 
-/* Certain other header files may also define this time to avoid circular header
- * file inclusion issues.
- */
-
-#ifndef __TCB_DEFINED__
-typedef struct _TCB _TCB;
-#define __TCB_DEFINED__
-#endif
-
 /* This is the callback type used by sched_foreach() */
 
-typedef void (*sched_foreach_t)(FAR _TCB *tcb, FAR void *arg);
+typedef void (*sched_foreach_t)(FAR struct tcb_s *tcb, FAR void *arg);
 
 #endif /* __ASSEMBLY__ */
 
@@ -547,7 +538,7 @@ extern "C"
 
 /* TCB helpers */
 
-FAR _TCB *sched_self(void);
+FAR struct tcb_s *sched_self(void);
 
 /* File system helpers */
 
@@ -565,7 +556,7 @@ FAR struct socketlist *sched_getsockets(void);
 /* Setup up a start hook */
 
 #ifdef CONFIG_SCHED_STARTHOOK
-void task_starthook(FAR _TCB *tcb, starthook_t starthook, FAR void *arg);
+void task_starthook(FAR struct tcb_s *tcb, starthook_t starthook, FAR void *arg);
 #endif
 
 /* Internal vfork support.The  overall sequence is:
@@ -590,9 +581,9 @@ void task_starthook(FAR _TCB *tcb, starthook_t starthook, FAR void *arg);
  * task_vforkabort() may be called if an error occurs between steps 3 and 6.
  */
 
-FAR _TCB *task_vforksetup(start_t retaddr);
-pid_t task_vforkstart(FAR _TCB *child);
-void task_vforkabort(FAR _TCB *child, int errcode);
+FAR struct tcb_s *task_vforksetup(start_t retaddr);
+pid_t task_vforkstart(FAR struct tcb_s *child);
+void task_vforkabort(FAR struct tcb_s *child, int errcode);
 
 /* sched_foreach will enumerate over each task and provide the
  * TCB of each task to a user callback functions.  Interrupts

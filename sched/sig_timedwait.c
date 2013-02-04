@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sig_timedwait.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,15 +93,15 @@
 static void sig_timeout(int argc, uint32_t itcb)
 {
   /* On many small machines, pointers are encoded and cannot be simply cast
-   * from uint32_t to _TCB*.  The following union works around this
+   * from uint32_t to struct tcb_s*.  The following union works around this
    * (see wdogparm_t).  This odd logic could be conditioned on
    * CONFIG_CAN_CAST_POINTERS, but it is not too bad in any case.
    */
 
   union
     {
-      FAR _TCB *wtcb;
-      uint32_t  itcb;
+      FAR struct tcb_s *wtcb;
+      uint32_t itcb;
     } u;
 
    u.itcb = itcb;
@@ -178,13 +178,13 @@ static void sig_timeout(int argc, uint32_t itcb)
 int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                  FAR const struct timespec *timeout)
 {
-  FAR _TCB       *rtcb = (FAR _TCB*)g_readytorun.head;
-  sigset_t        intersection;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  sigset_t intersection;
   FAR sigpendq_t *sigpend;
-  WDOG_ID         wdog;
-  irqstate_t      saved_state;
-  int32_t         waitticks;
-  int             ret = ERROR;
+  WDOG_ID wdog;
+  irqstate_t saved_state;
+  int32_t waitticks;
+  int ret = ERROR;
 
   sched_lock();  /* Not necessary */
 

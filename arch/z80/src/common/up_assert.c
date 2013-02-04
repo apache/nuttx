@@ -81,7 +81,7 @@ static void _up_assert(int errorcode) /* noreturn_function */
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (up_interrupt_context() || ((FAR _TCB*)g_readytorun.head)->pid == 0)
+  if (up_interrupt_context() || ((FAR struct tcb_s*)g_readytorun.head)->pid == 0)
     {
        (void)irqsave();
         for(;;)
@@ -115,7 +115,7 @@ void up_assert(void)
 #endif
 {
 #if CONFIG_TASK_NAME_SIZE > 0
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
 #endif
 
   up_ledon(LED_ASSERTION);
@@ -152,7 +152,7 @@ void up_assert_code(int errorcode)
 #endif
 {
 #if CONFIG_TASK_NAME_SIZE > 0
-  _TCB *rtcb = (_TCB*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
 #endif
 
   up_ledon(LED_ASSERTION);

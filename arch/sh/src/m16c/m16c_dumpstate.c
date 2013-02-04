@@ -158,8 +158,8 @@ static inline void m16c_registerdump(void)
 
 void up_dumpstate(void)
 {
-  _TCB    *rtcb = (_TCB*)g_readytorun.head;
-  uint16_t sp   = m16c_getsp();
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  uint16_t sp = m16c_getsp();
   uint16_t ustackbase;
   uint16_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3

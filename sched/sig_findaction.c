@@ -72,7 +72,7 @@
  *
  ************************************************************************/
 
-FAR sigactq_t *sig_findaction(FAR _TCB *stcb, int signo)
+FAR sigactq_t *sig_findaction(FAR struct tcb_s *stcb, int signo)
 {
   FAR sigactq_t *sigact = NULL;
 

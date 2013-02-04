@@ -79,7 +79,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
   FAR struct task_group_s *chgrp;
   FAR struct task_group_s *ogrp;
   FAR struct task_group_s *pgrp;
-  _TCB *tcb;
+  struct tcb_s *tcb;
   gid_t ogid;
   gid_t pgid;
   irqstate_t flags;
@@ -210,9 +210,9 @@ int task_reparent(pid_t ppid, pid_t chpid)
 #ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child;
 #endif
-  _TCB *ptcb;
-  _TCB *chtcb;
-  _TCB *otcb;
+  struct tcb_s *ptcb;
+  struct tcb_s *chtcb;
+  struct tcb_s *otcb;
   pid_t opid;
   irqstate_t flags;
   int ret;

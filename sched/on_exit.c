@@ -115,7 +115,7 @@
 int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 {
 #if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
-  FAR _TCB *tcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *tcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct task_group_s *group = tcb->group;
   int   index;
   int   ret = ENOSPC;
@@ -150,7 +150,7 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 
   return ret;
 #else
-  FAR _TCB *tcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *tcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct task_group_s *group = tcb->group;
   int   ret = ENOSPC;
 

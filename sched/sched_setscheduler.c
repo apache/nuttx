@@ -108,7 +108,7 @@
 int sched_setscheduler(pid_t pid, int policy,
                        const struct sched_param *param)
 {
-  FAR _TCB *tcb;
+  FAR struct tcb_s *tcb;
 #if CONFIG_RR_INTERVAL > 0
   irqstate_t saved_state;
 #endif

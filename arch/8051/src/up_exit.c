@@ -77,7 +77,7 @@
 
 void _exit(int status)
 {
-  FAR _TCB* tcb;
+  FAR struct tcb_s* tcb;
 
   dbg("TCB=%p exitting\n", tcb);
 
@@ -95,7 +95,7 @@ void _exit(int status)
    * head of the list.
    */
 
-  tcb = (FAR _TCB*)g_readytorun.head;
+  tcb = (FAR struct tcb_s*)g_readytorun.head;
   dbg("New Active Task TCB=%p\n", tcb);
 
   /* Then switch contexts */

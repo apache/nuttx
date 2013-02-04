@@ -85,7 +85,7 @@
  *
  ****************************************************************************/
 
-int up_create_stack(_TCB *tcb, size_t stack_size)
+int up_create_stack(struct tcb_s *tcb, size_t stack_size)
 {
   int ret = ERROR;
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_post.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,9 +102,9 @@
 
 int sem_post(FAR sem_t *sem)
 {
-  FAR _TCB  *stcb = NULL;
-  int        ret = ERROR;
+  FAR struct tcb_s *stcb = NULL;
   irqstate_t saved_state;
+  int ret = ERROR;
 
   /* Make sure we were supplied with a valid semaphore. */
 
@@ -146,7 +146,7 @@ int sem_post(FAR sem_t *sem)
            * that we want.
            */
 
-          for (stcb = (FAR _TCB*)g_waitingforsemaphore.head;
+          for (stcb = (FAR struct tcb_s*)g_waitingforsemaphore.head;
                (stcb && stcb->waitsem != sem);
                stcb = stcb->flink);
 

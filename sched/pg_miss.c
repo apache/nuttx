@@ -121,8 +121,8 @@
 
 void pg_miss(void)
 {
-  FAR _TCB *ftcb = (FAR _TCB*)g_readytorun.head;
-  FAR _TCB *wtcb;
+  FAR struct tcb_s *ftcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *wtcb;
 
   /* Sanity checking
    *

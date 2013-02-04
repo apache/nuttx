@@ -91,7 +91,7 @@ pid_t g_pgworker;
  * TSTATE_TASK_INVALID.
  */
 
-FAR _TCB *g_pftcb;
+FAR struct tcb_s *g_pftcb;
 
 /****************************************************************************
  * Private Variables
@@ -155,15 +155,15 @@ status uint32_t g_starttime;
  ****************************************************************************/
 
 #ifndef CONFIG_PAGING_BLOCKINGFILL
-static void pg_callback(FAR _TCB *tcb, int result)
+static void pg_callback(FAR struct tcb_s *tcb, int result)
 {
   /* Verify that g_pftcb is non-NULL */
 
   pgllvdbg("g_pftcb: %p\n", g_pftcb);
   if (g_pftcb)
     {
-      FAR _TCB *htcb = (FAR _TCB *)g_waitingforfill.head;
-      FAR _TCB *wtcb = sched_gettcb(g_pgworker);
+      FAR struct tcb_s *htcb = (FAR struct tcb_s *)g_waitingforfill.head;
+      FAR struct tcb_s *wtcb = sched_gettcb(g_pgworker);
 
       /* Find the higher priority between the task waiting for the fill to
        * complete in g_pftcb and the task waiting at the head of the
@@ -249,7 +249,7 @@ static inline bool pg_dequeue(void)
     {
       /* Remove the TCB from the head of the list (if any) */
 
-      g_pftcb = (FAR _TCB *)dq_remfirst((dq_queue_t*)&g_waitingforfill);
+      g_pftcb = (FAR struct tcb_s *)dq_remfirst((dq_queue_t*)&g_waitingforfill);
       pgllvdbg("g_pftcb: %p\n", g_pftcb);
       if (g_pftcb != NULL)
         {
@@ -279,7 +279,7 @@ static inline bool pg_dequeue(void)
                * if a new higher priority fill is required).
                */
                
-              FAR _TCB *wtcb = (FAR _TCB *)g_readytorun.head;
+              FAR struct tcb_s *wtcb = (FAR struct tcb_s *)g_readytorun.head;
               if (wtcb->sched_priority > CONFIG_PAGING_DEFPRIO &&
                   wtcb->sched_priority > g_pftcb->sched_priority)
                 {
@@ -456,7 +456,7 @@ static inline bool pg_startfill(void)
 
 static inline void pg_alldone(void)
 {
-  FAR _TCB *wtcb = (FAR _TCB *)g_readytorun.head;
+  FAR struct tcb_s *wtcb = (FAR struct tcb_s *)g_readytorun.head;
   g_pftcb = NULL;
   pgllvdbg("New worker priority. %d->%d\n",
            wtcb->sched_priority, CONFIG_PAGING_DEFPRIO);

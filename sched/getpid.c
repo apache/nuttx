@@ -81,5 +81,5 @@ pid_t getpid(void)
    * ready-to-run task list
    */
 
-  return ((FAR _TCB*)g_readytorun.head)->pid;
+  return ((FAR struct tcb_s*)g_readytorun.head)->pid;
 }

@@ -91,7 +91,7 @@ FAR int *get_errno_ptr(void)
        * logic (see, for example, task_deletecurrent.c).
        */
 
-      FAR _TCB *rtcb = (FAR _TCB*)g_readytorun.head;
+      FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
       if (rtcb->task_state == TSTATE_TASK_RUNNING)
         {
           /* Yes.. the task is running normally.  Return a reference to the

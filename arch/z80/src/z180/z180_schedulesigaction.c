@@ -68,7 +68,7 @@
  * Name: z180_sigsetup
  ****************************************************************************/
 
-static void z180_sigsetup(FAR _TCB *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs)
+static void z180_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs)
 {
   /* Save the return address and interrupt state. These will be restored by
    * the signal trampoline after the signals have been delivered.
@@ -121,7 +121,7 @@ static void z180_sigsetup(FAR _TCB *tcb, sig_deliver_t sigdeliver, FAR chipreg_t
  *
  ****************************************************************************/
 
-void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
+void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   dbg("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16_t)sigdeliver);
 
@@ -139,7 +139,7 @@ void up_schedule_sigaction(FAR _TCB *tcb, sig_deliver_t sigdeliver)
        * to the currently executing task.
        */
 
-      if (tcb == (FAR _TCB*)g_readytorun.head)
+      if (tcb == (FAR struct tcb_s*)g_readytorun.head)
         {
           /* CASE 1:  We are not in an interrupt handler and a task is
            * signalling itself for some reason.

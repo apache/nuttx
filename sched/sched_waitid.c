@@ -64,7 +64,7 @@
  *****************************************************************************/
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
-static void exited_child(FAR _TCB *rtcb, FAR struct child_status_s *child,
+static void exited_child(FAR struct tcb_s *rtcb, FAR struct child_status_s *child,
                           FAR siginfo_t *info)
 {
   /* The child has exited. Return the saved exit status (and some fudged
@@ -153,8 +153,8 @@ static void exited_child(FAR _TCB *rtcb, FAR struct child_status_s *child,
 
 int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 {
-  FAR _TCB *rtcb = (FAR _TCB *)g_readytorun.head;
-  FAR _TCB *ctcb;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *ctcb;
 #ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child;
   bool retains;

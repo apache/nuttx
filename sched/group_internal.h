@@ -76,11 +76,11 @@ extern FAR struct task_group_s *g_grouphead;
 /* Task group data structure management */
 
 #ifdef HAVE_TASK_GROUP
-int  group_allocate(FAR _TCB *tcb);
-int  group_initialize(FAR _TCB *tcb);
-int  group_bind(FAR _TCB *tcb);
-int  group_join(FAR _TCB *tcb);
-void group_leave(FAR _TCB *tcb);
+int  group_allocate(FAR struct tcb_s *tcb);
+int  group_initialize(FAR struct tcb_s *tcb);
+int  group_bind(FAR struct tcb_s *tcb);
+int  group_join(FAR struct tcb_s *tcb);
+void group_leave(FAR struct tcb_s *tcb);
 
 #ifdef HAVE_GROUP_MEMBERS
 FAR struct task_group_s *group_find(gid_t gid);
@@ -122,10 +122,10 @@ void group_removechildren(FAR struct task_group_s *group);
 /* Group data resource configuration */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-int  group_setupidlefiles(FAR _TCB *tcb);
-int  group_setuptaskfiles(FAR _TCB *tcb);
+int  group_setupidlefiles(FAR struct tcb_s *tcb);
+int  group_setuptaskfiles(FAR struct tcb_s *tcb);
 #if CONFIG_NFILE_STREAMS > 0
-int  group_setupstreams(FAR _TCB *tcb);
+int  group_setupstreams(FAR struct tcb_s *tcb);
 #endif
 #endif
 

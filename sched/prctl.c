@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/prctl.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,8 +92,8 @@ int prctl(int option, ...)
         /* Get the prctl arguments */
 
         FAR char *name = va_arg(ap, FAR char *);
-        int       pid  = va_arg(ap, int);
-        FAR _TCB *tcb;
+        int pid  = va_arg(ap, int);
+        FAR struct tcb_s *tcb;
 
         /* Get the TCB associated with the PID (handling the special case of
          * pid==0 meaning "this thread")
@@ -101,7 +101,7 @@ int prctl(int option, ...)
 
         if (!pid)
           {
-            tcb = (FAR _TCB *)g_readytorun.head;
+            tcb = (FAR struct tcb_s *)g_readytorun.head;
           }
         else
           {

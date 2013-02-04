@@ -182,7 +182,7 @@
 #ifndef CONFIG_SCHED_HAVE_PARENT
 pid_t waitpid(pid_t pid, int *stat_loc, int options)
 {
-  FAR _TCB *ctcb;
+  FAR struct tcb_s *ctcb;
   FAR struct task_group_s *group;
   bool mystat;
   int err;
@@ -276,8 +276,8 @@ errout:
 #else
 pid_t waitpid(pid_t pid, int *stat_loc, int options)
 {
-  FAR _TCB *rtcb = (FAR _TCB *)g_readytorun.head;
-  FAR _TCB *ctcb;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct tcb_s *ctcb;
 #ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child;
   bool retains;

@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-bool sched_removereadytorun(FAR _TCB *rtcb)
+bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 {
   bool ret = false;
 

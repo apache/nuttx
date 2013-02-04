@@ -96,9 +96,9 @@
 
 int sem_trywait(FAR sem_t *sem)
 {
-  FAR _TCB  *rtcb = (FAR _TCB*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   irqstate_t saved_state;
-  int        ret = ERROR;
+  int ret = ERROR;
 
   /* This API should not be called from interrupt handlers */
 
