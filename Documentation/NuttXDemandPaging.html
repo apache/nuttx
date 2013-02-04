@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>On-Demand Paging</i></font></big></h1>
-      <p>Last Updated: August 12, 2010</p>
+      <p>Last Updated: February 4, 2010</p>
     </td>
   </tr>
 </table>
@@ -306,7 +306,7 @@
 </p>
 
 <p>
-  The page fill worker thread will maintain a static variable called <code>_TCB *g_pftcb</code>.
+  The page fill worker thread will maintain a static variable called <code>struct tcb_s *g_pftcb</code>.
   If no fill is in progress, <code>g_pftcb</code> will be NULL.
   Otherwise, it will point to the TCB of the task which is receiving the fill that is in progess.
 </p>
@@ -619,7 +619,7 @@
 </p>
 <ul><dl>
   <dt>
-    <code>void up_block_task(FAR _TCB *tcb, tstate_t task_state);</code>
+    <code>void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state);</code>
   </dt>
   <dd>
     The currently executing task at the head of the ready to run list must be stopped.
@@ -628,7 +628,7 @@
     page fill, and to 
   </dd>
   <dt>
-    <code>void up_unblock_task(FAR _TCB *tcb);</code>
+    <code>void up_unblock_task(FAR struct tcb_s *tcb);</code>
   </dt>
   <dd>
     A task is currently in an inactive task list but has been prepped to execute.
@@ -643,7 +643,7 @@
 
 <ul><dl>
   <dt>
-    <code>int up_checkmapping(FAR _TCB *tcb);</code>
+    <code>int up_checkmapping(FAR struct tcb_s *tcb);</code>
   </dt>
   <dd>
     The function <code>up_checkmapping()</code> returns an indication if the page fill still needs to performed or not.
@@ -651,7 +651,7 @@
     This function will prevent the same page from be filled multiple times.
   </dd>
   <dt>
-    <code>int up_allocpage(FAR _TCB *tcb, FAR void *vpage);</code>
+    <code>int up_allocpage(FAR struct tcb_s *tcb, FAR void *vpage);</code>
   </dt>
   <dd>
     This architecture-specific function will set aside page in memory and map to its correct virtual address.
@@ -661,7 +661,7 @@
     NOTE:  This function must <i>always</i> return a page allocation.
     If all available pages are in-use (the typical case), then this function will select a page in-use, un-map it, and make it available.
   </dd>
-  <dt><code>int up_fillpage(FAR _TCB *tcb, FAR const void *vpage, void (*pg_callback)(FAR _TCB *tcb, int result));</code>
+  <dt><code>int up_fillpage(FAR struct tcb_s *tcb, FAR const void *vpage, void (*pg_callback)(FAR struct tcb_s *tcb, int result));</code>
   </dt>
     The actual filling of the page with data from the non-volatile, must be performed by a separate call to the architecture-specific function, <code>up_fillpage()</code>.
     This will start asynchronous page fill.
