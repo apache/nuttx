@@ -2,7 +2,7 @@
  * configs/ea3131/src/up_fillpage.c
  * arch/arm/src/board/up_fillpage.c
  *
- *   Copyright (C) 2010,2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -402,7 +402,7 @@ static inline void lpc31_initsrc(void)
 
 /* Version 1:  Supports blocking fill operations */
 
-int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
+int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 {
 #if defined(CONFIG_PAGING_BINPATH)
   ssize_t nbytes;
@@ -474,7 +474,7 @@ int up_fillpage(FAR _TCB *tcb, FAR void *vpage)
 
 /* Version 2:  Supports non-blocking, asynchronous fill operations */
 
-int up_fillpage(FAR _TCB *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
+int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage, up_pgcallback_t pg_callback)
 {
   pglldbg("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
   DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
