@@ -85,9 +85,10 @@ int  group_join(FAR struct pthread_tcb_s *tcb);
 void group_leave(FAR struct tcb_s *tcb);
 
 #ifdef HAVE_GROUP_MEMBERS
-FAR struct task_group_s *group_find(gid_t gid);
-int group_addmember(FAR struct task_group_s *group, pid_t pid);
-int group_removemember(FAR struct task_group_s *group, pid_t pid);
+FAR struct task_group_s *group_findbygid(gid_t gid);
+#endif
+#if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
+FAR struct task_group_s *group_findbypid(pid_t pid);
 #endif
 
 /* Convenience functions */

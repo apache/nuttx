@@ -133,7 +133,7 @@ void group_assigngid(FAR struct task_group_s *group)
           /* Does a task group with this ID already exist? */
 
           irqrestore(flags);
-          if (group_find(gid) == NULL)
+          if (group_findbygid(gid) == NULL)
             {
               /* Now assign this ID to the group and return */
 

@@ -114,33 +114,21 @@ int sigqueue(int pid, int signo, void *sival_ptr)
 #ifdef CONFIG_SCHED_HAVE_PARENT
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
 #endif
-  FAR struct tcb_s *stcb;
   siginfo_t info;
-  int ret = ERROR;
+  int ret;
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  sdbg("pid=0x%08x signo=%d value=%d\n", pid, signo, value.sival_int);
+#else
+  sdbg("pid=0x%08x signo=%d value=%p\n", pid, signo, sival_ptr);
+#endif
 
   /* Sanity checks */
 
   if (!GOOD_SIGNO(signo))
     {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  sched_lock();
-
-  /* Get the TCB of the receiving task */
-
-  stcb = sched_gettcb(pid);
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  sdbg("TCB=0x%08x signo=%d value=%d\n", stcb, signo, value.sival_int);
-#else
-  sdbg("TCB=0x%08x signo=%d value=%p\n", stcb, signo, sival_ptr);
-#endif
-  if (pid == 0 || !stcb)
-    {
-      set_errno(ESRCH);
-      sched_unlock();
-      return ERROR;
+      ret = -EINVAL;
+      goto errout;
     }
 
   /* Create the siginfo structure */
@@ -159,8 +147,21 @@ int sigqueue(int pid, int signo, void *sival_ptr)
 
   /* Send the signal */
 
-  ret = sig_received(stcb, &info);
+  sched_lock();
+  ret = sig_dispatch(pid, &info);
   sched_unlock();
-  return ret;
+
+  /* Check for errors */
+
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  return OK;
+
+errout:
+  set_errno(-ret);
+  return ERROR;
 }
 

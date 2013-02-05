@@ -76,7 +76,7 @@
  *****************************************************************************/
 
 /*****************************************************************************
- * Name: group_find
+ * Name: group_findbygid
  *
  * Description:
  *   Given a group ID, find the group task structure with that ID.  IDs are
@@ -100,7 +100,53 @@
  *****************************************************************************/
 
 #ifdef HAVE_GROUP_MEMBERS
-FAR struct task_group_s *group_find(gid_t gid)
+FAR struct task_group_s *group_findbygid(gid_t gid)
+{
+  FAR struct task_group_s *group;
+  irqstate_t flags;
+
+  /* Find the status structure with the matching GID  */
+
+  flags = irqsave();
+  for (group = g_grouphead; group; group = group->flink)
+    {
+      if (group->tg_gid == gid)
+        {
+          irqrestore(flags);
+          return group;
+        }
+    }
+
+  irqrestore(flags);
+  return NULL;
+}
+#endif
+
+/*****************************************************************************
+ * Name: group_findbygid
+ *
+ * Description:
+ *   Given a task ID, find the group task structure with was started by that
+ *   task ID.  That task's ID is retained in the group as tg_task and will
+ *   be remember even if the main task thread leaves the group.
+ *
+ * Parameters:
+ *   pid - The task ID of the main task thread.
+ *
+ * Return Value:
+ *   On success, a pointer to the group task structure is returned.  This
+ *   function can fail only if there is no group that corresponds to the
+ *   task ID.
+ *
+ * Assumptions:
+ *   Called during when signally tasks in a safe context.  No special
+ *   precautions should be required here.  However, extra care is taken when
+ *   accessing the global g_grouphead list.
+ *
+ *****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
+FAR struct task_group_s *group_findbypid(pid_t pid)
 {
   FAR struct task_group_s *group;
   irqstate_t flags;
@@ -110,7 +156,7 @@ FAR struct task_group_s *group_find(gid_t gid)
   flags = irqsave();
   for (group = g_grouphead; group; group = group->flink)
     {
-      if (group->tg_gid == gid)
+      if (group->tg_task == pid)
         {
           irqrestore(flags);
           return group;

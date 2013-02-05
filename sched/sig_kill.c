@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sig_kill.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,40 +87,28 @@ int kill(pid_t pid, int signo)
 #ifdef CONFIG_SCHED_HAVE_PARENT
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
 #endif
-  FAR struct tcb_s *stcb;
   siginfo_t info;
-  int ret = ERROR;
+  int ret;
 
   /* We do not support sending signals to process groups */
 
   if (pid <= 0)
     {
-      errno = ENOSYS;
-      return ERROR;
+      ret = -ENOSYS;
+      goto errout;
     }
 
   /* Make sure that the signal is valid */
 
   if (!GOOD_SIGNO(signo))
     {
-      errno = EINVAL;
-      return ERROR;
+      ret = -EINVAL;
+      goto errout;
     }
 
   /* Keep things stationary through the following */
 
   sched_lock();
-
-  /* Get the TCB of the receiving task */
-
-  stcb = sched_gettcb(pid);
-  sdbg("TCB=0x%08x signo=%d\n", stcb, signo);
-  if (!stcb)
-    {
-      errno = ESRCH;
-      sched_unlock();
-      return ERROR;
-    }
 
   /* Create the siginfo structure */
 
@@ -134,9 +122,19 @@ int kill(pid_t pid, int signo)
 
   /* Send the signal */
 
-  ret = sig_received(stcb, &info);
+  ret = sig_dispatch(pid, &info);
   sched_unlock();
-  return ret;
+
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  return OK;
+
+errout:
+  set_errno(-ret);
+  return ERROR;
 }
 
 

@@ -122,9 +122,14 @@ void sig_unmaskpendingsignal(void)
 
           if ((pendingsig = sig_removependingsignal(rtcb, signo)) != NULL)
             {
-              /* If there is one, then process it like a normal signal */
+              /* If there is one, then process it like a normal signal.
+               * Since the signal was pending, then unblocked on this
+               * thread, we can skip the normal group signal dispatching
+               * rules; there can be no other recipient for the signal
+               * other than this thread.
+               */
 
-              sig_received(rtcb, &pendingsig->info);
+              sig_tcbdispatch(rtcb, &pendingsig->info);
 
               /* Then remove it from the pending signal list */
 

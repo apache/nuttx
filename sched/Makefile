@@ -122,13 +122,13 @@ SIGNAL_SRCS += sig_kill.c sig_queue.c sig_waitinfo.c sig_timedwait.c
 SIGNAL_SRCS += sig_findaction.c sig_allocatependingsigaction.c
 SIGNAL_SRCS += sig_releasependingsigaction.c sig_unmaskpendingsignal.c
 SIGNAL_SRCS += sig_removependingsignal.c sig_releasependingsignal.c sig_lowest.c
-SIGNAL_SRCS += sig_mqnotempty.c sig_cleanup.c sig_received.c sig_deliver.c
+SIGNAL_SRCS += sig_mqnotempty.c sig_cleanup.c sig_dispatch.c sig_deliver.c
 SIGNAL_SRCS += pause.c
 
 MQUEUE_SRCS  = mq_open.c mq_close.c mq_unlink.c mq_send.c mq_timedsend.c
 MQUEUE_SRCS += mq_sndinternal.c mq_receive.c mq_timedreceive.c mq_rcvinternal.c
 MQUEUE_SRCS += mq_initialize.c mq_descreate.c mq_findnamed.c mq_msgfree.c
-MQUEUE_SRCS += mq_msgqfree.c mq_release.c
+MQUEUE_SRCS += mq_msgqfree.c mq_release.c mq_recover.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 MQUEUE_SRCS += mq_waitirq.c

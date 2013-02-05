@@ -109,7 +109,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
   /* Get the old parent task's task group (ogrp) */
 
-  ogrp = group_find(ogid);
+  ogrp = group_findbygid(ogid);
   if (!ogrp)
     {
       ret = -ESRCH;
@@ -126,7 +126,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
       /* Get the grandparent task's task group (pgrp) */
 
       pgid = ogrp->tg_pgid;
-      pgrp = group_find(pgid);
+      pgrp = group_findbygid(pgid);
     }
   else
     {

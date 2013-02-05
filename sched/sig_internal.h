@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sig_internal.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -169,10 +169,19 @@ void               sig_releaseaction(FAR sigactq_t *sigact);
 
 sigset_t           sig_pendingset(FAR struct tcb_s *stcb);
 
+/* sig_dispatch.c */
+
+int                sig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info);
+int                sig_dispatch(pid_t pid, FAR siginfo_t *info);
+
+/* sig_cleanup.c */
+
+void               sig_cleanup(FAR struct tcb_s *stcb);
+void               sig_release(FAR struct task_group_s *group);
+
 /* In files of the same name */
 
 FAR sigq_t        *sig_allocatependingsigaction(void);
-void               sig_cleanup(FAR struct tcb_s *stcb);
 void               sig_deliver(FAR struct tcb_s *stcb);
 FAR sigactq_t     *sig_findaction(FAR struct tcb_s *stcb, int signo);
 int                sig_lowest(FAR sigset_t *set);
@@ -181,7 +190,6 @@ int                sig_mqnotempty(int tid, int signo, union sigval value);
 #else
 int                sig_mqnotempty(int tid, int signo, FAR void *sival_ptr);
 #endif
-int                sig_received(FAR struct tcb_s *stcb, FAR siginfo_t *info);
 void               sig_releasependingsigaction(FAR sigq_t *sigq);
 void               sig_releasependingsignal(FAR sigpendq_t *sigpend);
 FAR sigpendq_t    *sig_removependingsignal(FAR struct tcb_s *stcb, int signo);

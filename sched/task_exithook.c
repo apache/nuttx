@@ -51,6 +51,7 @@
 #include "os_internal.h"
 #include "group_internal.h"
 #include "sig_internal.h"
+#include "mq_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -302,7 +303,7 @@ static inline void task_sigchild(gid_t pgid, FAR struct tcb_s *ctcb, int status)
    * this case, the child task group has been orphaned.
    */
 
-  pgrp = group_find(chgrp->tg_pgid);
+  pgrp = group_findbygid(pgid);
   if (!pgrp)
     {
       /* Set the task group ID to an invalid group ID.  The dead parent
@@ -350,9 +351,7 @@ static inline void task_sigchild(gid_t pgid, FAR struct tcb_s *ctcb, int status)
 #endif
       info.si_status          = status;
 
-      /* Send the signal.  We need to use this internal interface so that we
-       * can provide the correct si_code value with the signal.
-       */
+      /* Send the signal to one thread in the group */
 
       (void)group_signal(pgrp, &info);
     }
@@ -407,7 +406,7 @@ static inline void task_sigchild(FAR struct tcb_s *ptcb,
        * can provide the correct si_code value with the signal.
        */
 
-      (void)sig_received(ptcb, &info);
+      (void)sig_tcbdispatch(ptcb, &info);
     }
 }
 
@@ -591,6 +590,14 @@ void task_exithook(FAR struct tcb_s *tcb, int status)
   /* Call any registered on_exit function(s) */
 
   task_onexit(tcb, status);
+
+  /* If the task was terminated by another task, it may be in an unknown
+   * state.  Make some feed effort to recover the state.
+   */
+
+#ifndef CONFIG_DISABLE_MQUEUE
+  mq_recover(tcb);
+#endif
 
   /* Leave the task group */
 

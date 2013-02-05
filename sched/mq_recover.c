@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/sig_cleanup.c
+ * sched/mq_recover.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,10 +38,13 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
 
-#include "os_internal.h"
-#include "sig_internal.h"
+#include <assert.h>
+
+#include <nuttx/mqueue.h>
+#include <nuttx/sched.h>
+
+#include "mq_internal.h"
 
 /************************************************************************
  * Definitions
@@ -68,67 +71,47 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sig_cleanup
+ * Name: mq_recover
  *
  * Description:
- *   Deallocate all signal-related lists in a TCB.  This function is
- *   called only at task deletion time.  The caller is expected to have
- *   assured the critical section necessary to perform this action.
+ *   This function is called when a task is deleted via task_deleted or
+ *   via pthread_cancel. I checks if the task was waiting for a message
+ *   queue event and adjusts counts appropriately.
+ *
+ * Inputs:
+ *   tcb - The TCB of the terminated task or thread
+ *
+ * Return Value:
+ *   None.
+ *
+ * Assumptions:
+ *   This function is called from task deletion logic in a safe context.
  *
  ************************************************************************/
 
-void sig_cleanup(FAR struct tcb_s *stcb)
+void mq_recover(FAR struct tcb_s *tcb)
 {
-  FAR sigactq_t  *sigact;
-  FAR sigq_t     *sigq;
+  /* TODO:  What if it was waiting for a timed message queue event?
+   * We might need the wdog in the TCB so that we can cancel timeouts.
+   */
+ 
+  /* Was the task waiting for a message queue to become non-empty? */
 
-  /* Deallocate all entries in the list of signal actions */
-
-  while ((sigact = (FAR sigactq_t*)sq_remfirst(&stcb->sigactionq)) != NULL)
+  if (tcb->task_state == TSTATE_WAIT_MQNOTEMPTY)
     {
-      sig_releaseaction(sigact);
+      /* Decrement the count of waiters */
+
+      DEBUGASSERT(tcb->msgwaitq && tcb->msgwaitq->nwaitnotempty > 0);
+      tcb->msgwaitq->nwaitnotempty--;
     }
 
-  /* Deallocate all entries in the list of pending signal actions */
+  /* Was the task waiting for a message queue to become non-full? */
 
-  while ((sigq = (FAR sigq_t*)sq_remfirst(&stcb->sigpendactionq)) != NULL)
+  else if (tcb->task_state == TSTATE_WAIT_MQNOTFULL)
     {
-      sig_releasependingsigaction(sigq);
-    }
+      /* Decrement the count of waiters */
 
-  /* Deallocate all entries in the list of posted signal actions */
-
-  while ((sigq = (FAR sigq_t*)sq_remfirst(&stcb->sigpostedq)) != NULL)
-    {
-      sig_releasependingsigaction(sigq);
-    }
-
-   /* Misc. signal-related clean-up */
-
-   stcb->sigprocmask  = ALL_SIGNAL_SET;
-   stcb->sigwaitmask  = NULL_SIGNAL_SET;
-}
-
-/************************************************************************
- * Name: sig_release
- *
- * Description:
- *   Deallocate all signal-related lists in a group.  This function is
- *   called only when the last thread leaves the group.  The caller is
- *   expected to have assured the critical section necessary to perform
- *   this action.
- *
- ************************************************************************/
-
-void sig_release(FAR struct task_group_s *group)
-{
-  FAR sigpendq_t *sigpend;
-
-  /* Deallocate all entries in the list of pending signals */
-
-  while ((sigpend = (FAR sigpendq_t*)sq_remfirst(&group->sigpendingq)) != NULL)
-    {
-      sig_releasependingsignal(sigpend);
+      DEBUGASSERT(tcb->msgwaitq && tcb->msgwaitq->nwaitnotfull > 0);
+      tcb->msgwaitq->nwaitnotfull--;
     }
 }
-

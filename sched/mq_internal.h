@@ -177,6 +177,10 @@ int mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg,
 struct task_group_s; /* Forward reference */
 void mq_release(FAR struct task_group_s *group);
 
+/* mq_recover.c ************************************************************/
+
+void mq_recover(FAR struct tcb_s *tcb);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

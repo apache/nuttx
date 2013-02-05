@@ -42,6 +42,7 @@
 
 #include <signal.h>
 #include <sched.h>
+#include <errno.h>
 #include <debug.h>
 
 #include "os_internal.h"
@@ -83,29 +84,29 @@
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-int sig_mqnotempty (int pid, int signo, union sigval value)
+int sig_mqnotempty(int pid, int signo, union sigval value)
 #else
-int sig_mqnotempty (int pid, int signo, void *sival_ptr)
+int sig_mqnotempty(int pid, int signo, void *sival_ptr)
 #endif
 {
 #ifdef CONFIG_SCHED_HAVE_PARENT
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
 #endif
-  FAR struct tcb_s *stcb;
   siginfo_t info;
-  int ret = ERROR;
-
-  sched_lock();
-
-  /* Get the TCB of the receiving task */
-
-  stcb = sched_gettcb(pid);
+  int ret;
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-  sdbg("TCB=%p signo=%d value=%d\n", stcb, signo, value.sival_int);
+  sdbg("pid=%p signo=%d value=%d\n", pid, signo, value.sival_int);
 #else
-  sdbg("TCB=%p signo=%d sival_ptr=%p\n", stcb, signo, sival_ptr);
+  sdbg("pid=%p signo=%d sival_ptr=%p\n", pid, signo, sival_ptr);
 #endif
+
+  /* Verify that we can perform the signalling operation */
+
+  if (GOOD_SIGNO(signo))
+    {
+      return -EINVAL;
+    }
 
   /* Create the siginfo structure */
 
@@ -121,15 +122,11 @@ int sig_mqnotempty (int pid, int signo, void *sival_ptr)
   info.si_status          = OK;
 #endif
 
-  /* Verify that we can perform the signalling operation */
+  /* Process the receipt of the signal */
 
-  if ((stcb) && (GOOD_SIGNO(signo)))
-    {
-      /* Process the receipt of the signal */
-
-      ret = sig_received(stcb, &info);
-    }
-
+  sched_lock();
+  ret = sig_dispatch(pid, &info);
   sched_unlock();
+
   return ret;
 }

@@ -49,6 +49,7 @@
 #include <nuttx/lib.h>
 
 #include "env_internal.h"
+#include "sig_internal.h"
 #include "pthread_internal.h"
 #include "mq_internal.h"
 #include "group_internal.h"
@@ -156,6 +157,12 @@ static inline void group_release(FAR struct task_group_s *group)
   group_removechildren(group);
 #endif
 
+#ifndef CONFIG_DISABLE_SIGNALS
+  /* Release pending signals */
+
+  sig_release(group);
+#endif
+
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Release pthread resources */
 
@@ -215,6 +222,74 @@ static inline void group_release(FAR struct task_group_s *group)
 
   sched_free(group);
 }
+
+/*****************************************************************************
+ * Name: group_removemember
+ *
+ * Description:
+ *   Remove a member from a group.
+ *
+ * Parameters:
+ *   group - The group from which to remove the member.
+ *   pid - The member to be removed.
+ *
+ * Return Value:
+ *   On success, returns the number of members remaining in the group (>=0).
+ *   Can fail only if the member is not found in the group.  On failure,
+ *   returns -ENOENT
+ *
+ * Assumptions:
+ *   Called during task deletion and also from the reparenting logic, both
+ *   in a safe context.  No special precautions are required here.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_GROUP_MEMBERS
+static inline int group_removemember(FAR struct task_group_s *group, pid_t pid)
+{
+  irqstate_t flags;
+  int i;
+
+  DEBUGASSERT(group);
+
+  /* Find the member in the array of members and remove it */
+
+  for (i = 0; i < group->tg_nmembers; i++)
+    {
+      /* Does this member have the matching pid */
+
+      if (group->tg_members[i] == pid)
+       {
+          /* Yes.. break out of the loop.  We don't do the actual
+           * removal here, instead we re-test i and do the adjustments
+           * outside of the loop.  We do this because we want the
+           * DEBUGASSERT to work properly.
+           */
+
+          break;
+       }
+    }
+
+  /* Now, test if we found the task in the array of members. */
+
+  if (i < group->tg_nmembers)
+    {
+      /* Remove the member from the array of members.  This must be an
+       * atomic operation because the member array may be accessed from
+       * interrupt handlers (read-only).
+       */
+
+      flags = irqsave();
+      group->tg_members[i] = group->tg_members[group->tg_nmembers - 1];
+      group->tg_nmembers--;
+      irqrestore(flags);
+
+      return group->tg_nmembers;
+    }
+
+  return -ENOENT;
+}
+#endif /* HAVE_GROUP_MEMBERS */
 
 /*****************************************************************************
  * Public Functions
@@ -315,66 +390,4 @@ void group_leave(FAR struct tcb_s *tcb)
 }
 
 #endif /* HAVE_GROUP_MEMBERS */
-
-/*****************************************************************************
- * Name: group_removemember
- *
- * Description:
- *   Remove a member from a group.
- *
- * Parameters:
- *   group - The group from which to remove the member.
- *   pid - The member to be removed.
- *
- * Return Value:
- *   On success, returns the number of members remaining in the group (>=0).
- *   Can fail only if the member is not found in the group.  On failure,
- *   returns -ENOENT
- *
- * Assumptions:
- *   Called during task deletion and also from the reparenting logic, both
- *   in a safe context.  No special precautions are required here.
- *
- *****************************************************************************/
-
-#ifdef HAVE_GROUP_MEMBERS
-int group_removemember(FAR struct task_group_s *group, pid_t pid)
-{
-  int i;
-
-  DEBUGASSERT(group);
-
-  /* Find the member in the array of members and remove it */
-
-  for (i = 0; i < group->tg_nmembers; i++)
-    {
-      /* Does this member have the matching pid */
-
-      if (group->tg_members[i] == pid)
-       {
-          /* Yes.. break out of the loop.  We don't do the actual
-           * removal here, instead we re-test i and do the adjustments
-           * outside of the loop.  We do this because we want the
-           * DEBUGASSERT to work properly.
-           */
-
-          break;
-       }
-    }
-
-  /* Now, test if we found the task in the array of members. */
-
-  if (i < group->tg_nmembers)
-    {
-      /* Remove the member from the array of members */
-
-      group->tg_members[i] = group->tg_members[group->tg_nmembers - 1];
-      group->tg_nmembers--;
-      return group->tg_nmembers;
-    }
-
-  return -ENOENT;
-}
-#endif /* HAVE_GROUP_MEMBERS */
-
 #endif /* HAVE_TASK_GROUP */

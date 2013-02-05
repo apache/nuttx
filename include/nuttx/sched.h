@@ -73,7 +73,9 @@
 #  define HAVE_GROUP_MEMBERS  1
 
 /* We need a group (but not members) if any other resources are shared within
- * a task group.
+ * a task group.  NOTE: that we essentially always need a task group and that
+ * managing this definition adds a lot of overhead just to handle a corner-
+ * case very minimal system!
  */
 
 #else
@@ -81,6 +83,8 @@
 #    define HAVE_TASK_GROUP   1          /* pthreads with parent*/
 #  elif !defined(CONFIG_DISABLE_ENVIRON)
 #    define HAVE_TASK_GROUP   1          /* Environment variables */
+#  elif !defined(CONFIG_DISABLE_SIGNALS)
+#    define HAVE_TASK_GROUP   1          /* Signals */
 #  elif defined(CONFIG_SCHED_ATEXIT)
 #    define HAVE_TASK_GROUP   1          /* Group atexit() function */
 #  elif defined(CONFIG_SCHED_ONEXIT)
@@ -293,13 +297,13 @@ struct task_group_s
 {
 #ifdef HAVE_GROUP_MEMBERS
   struct task_group_s *flink;       /* Supports a singly linked list            */
-  gid_t      tg_gid;                /* The ID of this task group                */
-  gid_t      tg_pgid;               /* The ID of the parent task group          */
+  gid_t tg_gid;                     /* The ID of this task group                */
+  gid_t tg_pgid;                    /* The ID of the parent task group          */
 #endif
 #if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
-  pid_t      tg_task;               /* The ID of the task within the group      */
+  pid_t tg_task;                    /* The ID of the task within the group      */
 #endif
-  uint8_t    tg_flags;              /* See GROUP_FLAG_* definitions             */
+  uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
 
   /* Group membership ***********************************************************/
 
@@ -351,6 +355,12 @@ struct task_group_s
   FAR struct join_s *tg_joinhead;   /*   Head of a list of join data            */
   FAR struct join_s *tg_jointail;   /*   Tail of a list of join data            */
   uint8_t tg_nkeys;                 /* Number pthread keys allocated            */
+#endif
+
+  /* POSIX Signal Control Fields ************************************************/
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  sq_queue_t sigpendingq;           /* List of pending signals                  */
 #endif
 
   /* Environment variables ******************************************************/
@@ -471,7 +481,6 @@ struct tcb_s
   sigset_t   sigprocmask;                /* Signals that are blocked            */
   sigset_t   sigwaitmask;                /* Waiting for pending signals         */
   sq_queue_t sigactionq;                 /* List of actions for signals         */
-  sq_queue_t sigpendingq;                /* List of Pending Signals             */
   sq_queue_t sigpendactionq;             /* List of pending signal actions      */
   sq_queue_t sigpostedq;                 /* List of posted signals              */
   siginfo_t  sigunbinfo;                 /* Signal info when task unblocked     */

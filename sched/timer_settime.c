@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/timer_settime.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,33 +95,25 @@ static void timer_timeout(int argc, uint32_t itimer);
 
 static void inline timer_sigqueue(FAR struct posix_timer_s *timer)
 {
-  FAR struct tcb_s *tcb;
+  siginfo_t info;
 
-  /* Get the TCB of the receiving task */
+  /* Create the siginfo structure */
 
-  tcb = sched_gettcb(timer->pt_owner);
-  if (tcb)
-    {
-       siginfo_t info;
-
-       /* Create the siginfo structure */
-
-       info.si_signo           = timer->pt_signo;
-       info.si_code            = SI_TIMER;
+  info.si_signo           = timer->pt_signo;
+  info.si_code            = SI_TIMER;
 #ifdef CONFIG_CAN_PASS_STRUCTS
-       info.si_value           = timer->pt_value;
+  info.si_value           = timer->pt_value;
 #else
-       info.si_value.sival_ptr = timer->pt_value.sival_ptr;
+  info.si_value.sival_ptr = timer->pt_value.sival_ptr;
 #endif
 #ifdef CONFIG_SCHED_HAVE_PARENT
-       info.si_pid             = 0;  /* Not applicable */
-       info.si_status          = OK;
+  info.si_pid             = 0;  /* Not applicable */
+  info.si_status          = OK;
 #endif
 
-       /* Send the signal */
+  /* Send the signal */
 
-       (void)sig_received(tcb, &info);
-    }
+  (void)sig_dispatch(timer->pt_owner, &info);
 }
 
 /********************************************************************************

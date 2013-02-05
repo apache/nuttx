@@ -84,80 +84,162 @@
  *   0 (OK) on success; a negated errno value on failure.
  *
  * Assumptions:
- *   Called during task terminatino in a safe context.  No special precautions
- *   are required here.
+ *   Called during task termination in a safe context.  No special precautions
+ *   are required here.  Because signals can be sent from interrupt handlers,
+ *   this function may be called indirectly in the context of an interrupt
+ *   handler.
  *
  *****************************************************************************/
 
 int group_signal(FAR struct task_group_s *group, FAR siginfo_t *info)
 {
 #ifdef HAVE_GROUP_MEMBERS
-  FAR struct tcb_s *gtcb;
+  FAR struct tcb_s *tcb;         /* Working TCB */
+  FAR struct tcb_s *dtcb = NULL; /* Default, valid TCB */
+  FAR struct tcb_s *utcb = NULL; /* TCB with this signal unblocked */
+  FAR struct tcb_s *atcb = NULL; /* This TCB was awakened */
+  FAR struct tcb_s *ptcb = NULL; /* This TCB received the signal */
+  FAR sigactq_t *sigact;
+  bool dispatched = false;
+  bool done = false;
+  int ret;
   int i;
 
   DEBUGASSERT(group && info);
 
-  /* Make sure that pre-emption is disabled to that we signal all of teh
-   * members of the group before any of them actually run.
+  /* Make sure that pre-emption is disabled to that we signal all of the
+   * members of the group before any of them actually run. (This does
+   * nothing if were were called from an interrupt handler).
    */
 
   sched_lock();
 
-  /* Send the signal to each member of the group */
+  /* Now visit each member of the group and do the same checks.  The main
+   * task is always the first member in the member array (unless it has
+   * already exited).  So the main task will get predence in the following
+   * search algorithm.
+   */
 
-  for (i = 0; i < group->tg_nmembers; i++)
+  for (i = 0; i < group->tg_nmembers && !done; i++)
     {
-      gtcb = sched_gettcb(group->tg_members[i]);
-      DEBUGASSERT(gtcb);
-      if (gtcb)
+      tcb = sched_gettcb(group->tg_members[i]);
+      DEBUGASSERT(tcb);
+      if (tcb)
         {
-          /* Use the sig_received interface so that it does not muck with
-           * the siginfo_t.
+          /* Set this one as the default if we have not already set the
+           * default.
            */
 
-#ifdef CONFIG_DEBUG
-          int ret = sig_received(gtcb, info);
-          DEBUGASSERT(ret == 0);
-#else
-          (void)sig_received(gtcb, info);
-#endif
+          if (!dtcb)
+            {
+              dtcb = tcb;
+            }
+
+          /* Is the thread waiting for this signal (in this case, the
+           * signal is probably blocked).
+           */
+
+          if (sigismember(&tcb->sigwaitmask, info->si_signo) && !atcb)
+            {
+              /* Yes.. This means that the task is suspended, waiting
+               * for this signal to occur. Stop looking and use this TCB.
+               * The requirement is this:  If a task group receives a signal
+               * and more than one thread is waiting on that signal, then
+               * one and only one indeterminate thread out of that waiting
+               * group will receive the signal.
+               */
+
+              ret = sig_tcbdispatch(tcb, info);
+              if (ret < 0)
+                {
+                  goto errout;
+                }
+
+              /* Limit to one thread */
+
+              atcb = tcb;
+              done = dispatched;
+            }
+
+          /* Is this signal unblocked on this thread? */
+
+          if (!sigismember(&tcb->sigprocmask, info->si_signo) &&
+              !dispatched && tcb != atcb)
+            {
+              /* Yes.. remember this TCB if we have not encountered any
+               * other threads that have the signal unblocked.
+               */
+
+              if (!utcb)
+                {
+                  utcb = tcb;
+                }
+
+              /* Is there also an action associated with the task? */
+
+              sigact = sig_findaction(tcb, info->si_signo);
+              if (sigact)
+                {
+                  /* Yes.. then use this thread.  The requirement is this:
+                   * If a task group receives a signal then one and only one
+                   * indeterminate thread in the task group which is not
+                   * blocking the signal will receive the signal.
+                   */
+
+                  ret = sig_tcbdispatch(tcb, info);
+                  if (ret < 0)
+                    {
+                      goto errout;
+                    }
+
+                  /* Limit to one thread */
+
+                  dispatched = true;
+                  done = (atcb != NULL);
+                }
+            }
         }
     }
-  
+
+  /* We need to dispatch the signal in any event (if nothing else so that it
+   * can be added to the pending signal list). If we found a thread with the
+   * signal unblocked, then use that thread.
+   */
+
+  if (!dispatched && atcb == NULL)
+    {
+      if (utcb)
+        {
+          tcb = utcb;
+        }
+
+      /* Otherwise use the default TCB.  There should always be a default
+       * TCB. It will have the signal blocked, but can be used to get the
+       * signal to a pending state.
+       */
+
+      else /* if (dtcb) */
+        {
+          DEBUGASSERT(dtcb);
+          tcb = dtcb;
+        }
+
+      /* Now deliver the signal to the selected group member */
+
+      ret = sig_tcbdispatch(tcb, info);
+    }
+
   /* Re-enable pre-emption an return success */
 
+errout:
   sched_unlock();
-  return OK;
+  return ret;
+
 #else
+
   return -ENOSYS;
+  
 #endif
 }
 
-/*****************************************************************************
- * Name: group_signalmember
- *
- * Description:
- *   Send a signal to every member of the group to which task belongs.
- *
- * Parameters:
- *   tcb - The tcb of one task in the task group that needs to be signalled.
- *
- * Return Value:
- *   0 (OK) on success; a negated errno value on failure.
- *
- * Assumptions:
- *   Called during task terminatino in a safe context.  No special precautions
- *   are required here.
- *
- *****************************************************************************/
-
-int group_signalmember(FAR struct tcb_s *tcb, FAR siginfo_t *info)
-{
-#ifdef HAVE_GROUP_MEMBERS
-  DEBUGASSERT(tcb);
-  return group_signal(tcb->group, info);
-#else
-  return sig_received(tcb, info);
-#endif
-}
 #endif /* HAVE_TASK_GROUP && !CONFIG_DISABLE_SIGNALS */

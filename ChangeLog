@@ -4135,4 +4135,13 @@
 	  exit the task group last.  In this case, we need to remember the
 	  the PID of the main task in the task group and use that PID for
 	  signalling SIGCHILD to the parent task group.
+	* included/nuttx/sched.h and sched/sig*.c:  Numerous changes to the
+	  signal deliver logic so that the delivery of signals to threads
+	  within a task group will be compliant with delivery of signals
+	  to threads within a POSIX process.
+	* sched/mq_recover.c and task_exithook.c:  Add logic to handle the
+	  case where a task is deleted (or pthread canceled) while it is
+	  waiting on a message queue.  task_delete() and pthread_cancel()
+	  are dangerous interfaces.  This is only one feeble recover measure
+	  of *many* that would be needed to do this safely.
 

@@ -97,7 +97,7 @@ extern "C"
 struct task_group_s; /* Forward reference */
 
 void weak_function pthread_initialize(void);
-int pthread_schedsetup(FAR struct tcb_s *tcb, int priority, start_t start,
+int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority, start_t start,
                        pthread_startroutine_t entry);
 int pthread_completejoin(pid_t pid, FAR void *exit_value);
 void pthread_destroyjoin(FAR struct task_group_s *group,

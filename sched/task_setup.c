@@ -458,13 +458,13 @@ int task_schedsetup(FAR struct task_tcb_s *tcb, int priority, start_t start,
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PTHREAD
-int pthread_schedsetup(FAR struct tcb_s *tcb, int priority, start_t start,
+int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority, start_t start,
                        pthread_startroutine_t entry)
 {
   /* Perform common thread setup */
 
-  return thread_schedsetup(tcb, priority, start, (FAR void *)entry,
-                           TCB_FLAG_TTYPE_PTHREAD);
+  return thread_schedsetup((FAR struct tcb_s *)tcb, priority, start,
+                           (FAR void *)entry, TCB_FLAG_TTYPE_PTHREAD);
 }
 #endif
 
