@@ -1,7 +1,8 @@
 /************************************************************************************
- * arch/arm/include/stm32s/irq.h
+ * configs/stm32f3discovery/src/up_boot.c
+ * arch/arm/src/board/up_boot.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,87 +34,70 @@
  *
  ************************************************************************************/
 
-/* This file should never be included directed but, rather,
- * only indirectly through nuttx/irq.h
- */
-
-#ifndef __ARCH_ARM_INCLUDE_STM32_IRQ_H
-#define __ARCH_ARM_INCLUDE_STM32_IRQ_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
-#include <arch/stm32/chip.h>
+
+#include <debug.h>
+
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "stm32f3discovery-internal.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
- */
-
-/* Processor Exceptions (vectors 0-15) */
-
-#define STM32_IRQ_RESERVED       (0) /* Reserved vector (only used with CONFIG_DEBUG) */
-                                     /* Vector  0: Reset stack pointer value */
-                                     /* Vector  1: Reset (not handler as an IRQ) */
-#define STM32_IRQ_NMI            (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
-#define STM32_IRQ_HARDFAULT      (3) /* Vector  3: Hard fault */
-#define STM32_IRQ_MEMFAULT       (4) /* Vector  4: Memory management (MPU) */
-#define STM32_IRQ_BUSFAULT       (5) /* Vector  5: Bus fault */
-#define STM32_IRQ_USAGEFAULT     (6) /* Vector  6: Usage fault */
-#define STM32_IRQ_SVCALL        (11) /* Vector 11: SVC call */
-#define STM32_IRQ_DBGMONITOR    (12) /* Vector 12: Debug Monitor */
-                                     /* Vector 13: Reserved */
-#define STM32_IRQ_PENDSV        (14) /* Vector 14: Pendable system service request */
-#define STM32_IRQ_SYSTICK       (15) /* Vector 15: System tick */
-
-/* External interrupts (vectors >= 16).  These definitions are chip-specific */
-
-#define STM32_IRQ_INTERRUPTS    (16) /* Vector number of the first external interrupt */
-
-#if defined(CONFIG_STM32_STM32F10XX)
-#  include <arch/stm32/stm32f10xxx_irq.h>
-#elif defined(CONFIG_STM32_STM32F20XX)
-#  include <arch/stm32/stm32f20xxx_irq.h>
-#elif defined(CONFIG_STM32_STM32F30XX)
-#  include <arch/stm32/stm32f30xxx_irq.h>
-#elif defined(CONFIG_STM32_STM32F40XX)
-#  include <arch/stm32/stm32f40xxx_irq.h>
-#else
-#  error "Unsupported STM32 chip"
-#endif
-
 /************************************************************************************
- * Public Types
+ * Private Functions
  ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-#undef EXTERN
-#ifdef __cplusplus
+/************************************************************************************
+ * Name: stm32_boardinitialize
+ *
+ * Description:
+ *   All STM32 architectures must provide the following entry point.  This entry point
+ *   is called early in the intitialization -- after all memory has been configured
+ *   and mapped but before any devices have been initialized.
+ *
+ ************************************************************************************/
+
+void stm32_boardinitialize(void)
+{
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * stm32_spiinitialize() has been brought into the link.
+   */
+
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
+  if (stm32_spiinitialize)
+    {
+      stm32_spiinitialize();
+    }
+#endif
+
+  /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
+   * disabled, and 3) the weak function stm32_usbinitialize() has been brought 
+   * the weak function stm32_usbinitialize() has been brought into the build.
+   * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
+   */
+
+#ifdef CONFIG_STM32_OTGFS
+  if (stm32_usbinitialize)
+    {
+      stm32_usbinitialize();
+    }
+#endif
+
+  /* Configure on-board LEDs if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  up_ledinit();
+#endif
 }
-#endif
-#endif
-
-#endif /* __ARCH_ARM_INCLUDE_STM32_IRQ_H */
-

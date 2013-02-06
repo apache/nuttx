@@ -1,7 +1,8 @@
 /************************************************************************************
- * arch/arm/include/stm32s/irq.h
+ * configs/stm32f3discovery/src/up_pwm.c
+ * arch/arm/src/board/up_pwm.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,87 +34,109 @@
  *
  ************************************************************************************/
 
-/* This file should never be included directed but, rather,
- * only indirectly through nuttx/irq.h
- */
-
-#ifndef __ARCH_ARM_INCLUDE_STM32_IRQ_H
-#define __ARCH_ARM_INCLUDE_STM32_IRQ_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
-#include <arch/stm32/chip.h>
+
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/pwm.h>
+#include <arch/board/board.h>
+
+#include "chip.h"
+#include "up_arch.h"
+#include "stm32_pwm.h"
+#include "stm32f3discovery-internal.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
-
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
+/* Configuration *******************************************************************/
+/* PWM
+ *
+ * The stm32f3discovery has no real on-board PWM devices, but the board can be configured to output
+ * a pulse train using TIM4 CH2.  This pin is used by FSMC is connect to CN5 just for this
+ * purpose:
+ *
+ * PD13 FSMC_A18 / MC_TIM4_CH2OUT pin 33 (EnB)
+ *
+ * FSMC must be disabled in this case!
  */
 
-/* Processor Exceptions (vectors 0-15) */
+#define HAVE_PWM 1
 
-#define STM32_IRQ_RESERVED       (0) /* Reserved vector (only used with CONFIG_DEBUG) */
-                                     /* Vector  0: Reset stack pointer value */
-                                     /* Vector  1: Reset (not handler as an IRQ) */
-#define STM32_IRQ_NMI            (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
-#define STM32_IRQ_HARDFAULT      (3) /* Vector  3: Hard fault */
-#define STM32_IRQ_MEMFAULT       (4) /* Vector  4: Memory management (MPU) */
-#define STM32_IRQ_BUSFAULT       (5) /* Vector  5: Bus fault */
-#define STM32_IRQ_USAGEFAULT     (6) /* Vector  6: Usage fault */
-#define STM32_IRQ_SVCALL        (11) /* Vector 11: SVC call */
-#define STM32_IRQ_DBGMONITOR    (12) /* Vector 12: Debug Monitor */
-                                     /* Vector 13: Reserved */
-#define STM32_IRQ_PENDSV        (14) /* Vector 14: Pendable system service request */
-#define STM32_IRQ_SYSTICK       (15) /* Vector 15: System tick */
-
-/* External interrupts (vectors >= 16).  These definitions are chip-specific */
-
-#define STM32_IRQ_INTERRUPTS    (16) /* Vector number of the first external interrupt */
-
-#if defined(CONFIG_STM32_STM32F10XX)
-#  include <arch/stm32/stm32f10xxx_irq.h>
-#elif defined(CONFIG_STM32_STM32F20XX)
-#  include <arch/stm32/stm32f20xxx_irq.h>
-#elif defined(CONFIG_STM32_STM32F30XX)
-#  include <arch/stm32/stm32f30xxx_irq.h>
-#elif defined(CONFIG_STM32_STM32F40XX)
-#  include <arch/stm32/stm32f40xxx_irq.h>
-#else
-#  error "Unsupported STM32 chip"
+#ifndef CONFIG_PWM
+#  undef HAVE_PWM
 #endif
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
+#ifndef CONFIG_STM32_TIM4
+#  undef HAVE_PWM
 #endif
+
+#ifndef CONFIG_STM32_TIM4_PWM
+#  undef HAVE_PWM
+#endif
+
+#if CONFIG_STM32_TIM4_CHANNEL != STM32F3DISCOVERY_PWMCHANNEL
+#  undef HAVE_PWM
+#endif
+
+#ifdef HAVE_PWM
+
+/************************************************************************************
+ * Private Functions
+ ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-#undef EXTERN
-#ifdef __cplusplus
+/************************************************************************************
+ * Name: pwm_devinit
+ *
+ * Description:
+ *   All STM32 architectures must provide the following interface to work with
+ *   examples/pwm.
+ *
+ ************************************************************************************/
+
+int pwm_devinit(void)
+{
+  static bool initialized = false;
+  struct pwm_lowerhalf_s *pwm;
+  int ret;
+
+  /* Have we already initialized? */
+
+  if (!initialized)
+    {
+      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
+
+      pwm = stm32_pwminitialize(STM32F3DISCOVERY_PWMTIMER);
+      if (!pwm)
+        {
+          dbg("Failed to get the STM32 PWM lower half\n");
+          return -ENODEV;
+        }
+
+      /* Register the PWM driver at "/dev/pwm0" */
+
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          adbg("pwm_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
+    }
+
+  return OK;
 }
-#endif
-#endif
 
-#endif /* __ARCH_ARM_INCLUDE_STM32_IRQ_H */
-
+#endif /* HAVE_PWM */

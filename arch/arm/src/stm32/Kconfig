@@ -128,6 +128,66 @@ config ARCH_CHIP_STM32F207IG
 	select ARCH_CORTEXM3
 	select STM32_STM32F20XX
 
+config ARCH_CHIP_STM32F302CB
+	bool "STM32F302CB"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
+config ARCH_CHIP_STM32F302CC
+	bool "STM32F302CC"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
+config ARCH_CHIP_STM32F302RB
+	bool "STM32F302RB"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
+config ARCH_CHIP_STM32F302RC
+	bool "STM32F302RC"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
+config ARCH_CHIP_STM32F302VB
+	bool "STM32F302VB"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
+config ARCH_CHIP_STM32F302VC
+	bool "STM32F302VC"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
+config ARCH_CHIP_STM32F303CB
+	bool "STM32F303CB"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
+config ARCH_CHIP_STM32F303CC
+	bool "STM32F303CC"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
+config ARCH_CHIP_STM32F303RB
+	bool "STM32F303RB"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
+config ARCH_CHIP_STM32F303RC
+	bool "STM32F303RC"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
+config ARCH_CHIP_STM32F303VB
+	bool "STM32F303VB"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
+config ARCH_CHIP_STM32F303VC
+	bool "STM32F303VC"
+	select ARCH_CORTEXM4
+	select STM32_STM32F30XX
+
 config ARCH_CHIP_STM32F405RG
 	bool "STM32F405RG"
 	select ARCH_CORTEXM4
@@ -190,6 +250,9 @@ config STM32_CONNECTIVITYLINE
 config STM32_STM32F20XX
 	bool
 
+config STM32_STM32F30XX
+	bool
+
 config STM32_STM32F40XX
 	bool
 
@@ -219,6 +282,12 @@ config STM32_ADC3
 	default n
 	select STM32_ADC
 	depends on !STM32_VALUELINE
+
+config STM32_ADC4
+	bool "ADC4"
+	default n
+	select STM32_ADC
+	depends on STM32_STM32F30XX
 
 config STM32_BKP
 	bool "BKP"
@@ -441,17 +510,17 @@ config STM32_TIM14
 config STM32_TIM15
 	bool "TIM15"
 	default n
-	depends on STM32_VALUELINE
+	depends on STM32_VALUELINE || STM32_STM32F30XX
 
 config STM32_TIM16
 	bool "TIM16"
 	default n
-	depends on STM32_VALUELINE
+	depends on STM32_VALUELINE || STM32_STM32F30XX
 
 config STM32_TIM17
 	bool "TIM17"
 	default n
-	depends on STM32_VALUELINE
+	depends on STM32_VALUELINE || STM32_STM32F30XX
 
 config STM32_USART1
 	bool "USART1"
@@ -468,18 +537,21 @@ config STM32_USART2
 config STM32_USART3
 	bool "USART3"
 	default n
+	depends on !STM32_STM32F30XX
 	select ARCH_HAVE_USART3
 	select STM32_USART
 
 config STM32_UART4
 	bool "UART4"
 	default n
+	depends on !STM32_STM32F30XX
 	select ARCH_HAVE_UART4
 	select STM32_USART
 
 config STM32_UART5
 	bool "UART5"
 	default n
+	depends on !STM32_STM32F30XX
 	select ARCH_HAVE_UART5
 	select STM32_USART
 
@@ -493,7 +565,7 @@ config STM32_USART6
 config STM32_USB
 	bool "USB Device"
 	default n
-	depends on STM32_STM32F10XX && !STM32_VALUELINE
+	depends on (STM32_STM32F10XX && !STM32_VALUELINE) || STM32_STM32F30XX
 	select USBDEV
 
 config STM32_WWDG

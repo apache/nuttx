@@ -49,6 +49,7 @@
 /* Include the chip pin configuration file */
 
 /* STM32 F1 Family ******************************************************************/
+
 #if defined(CONFIG_STM32_STM32F10XX)
 
 /* STM32F100 Value Line */
@@ -89,10 +90,17 @@
 #  endif
 
 /* STM32 F2 Family ******************************************************************/
+
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_pinmap.h"
 
+/* STM32 F3 Family ******************************************************************/
+
+#elif defined(CONFIG_STM32_STM32F30XX)
+#  include "chip/stm32f30xxx_pinmap.h"
+
 /* STM32 F4 Family ******************************************************************/
+
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_pinmap.h"
 #else
@@ -108,6 +116,8 @@
 #    include "chip/stm32f10xxx_vectors.h"
 #  elif defined(CONFIG_STM32_STM32F20XX)
 #    include "chip/stm32f20xxx_vectors.h"
+#  elif defined(CONFIG_STM32_STM32F30XX)
+#    include "chip/stm32f30xxx_vectors.h"
 #  elif defined(CONFIG_STM32_STM32F40XX)
 #    include "chip/stm32f40xxx_vectors.h"
 #  else

@@ -4153,4 +4153,7 @@
 	  task is canceled or restarted while it is waiting for a timed
 	  event, we can gracefully recover.  We can't let the timer expire
 	  after the task has been deleted.
-
+	* arch/arm/include/stm32 and arch/arm/src/stm32:  Add support for
+	  the STM32 F3 family (still missing some things).
+	* configs/stm32f3discovery:  This will (eventually) be support for
+	  the STM32F3Discovery board.
