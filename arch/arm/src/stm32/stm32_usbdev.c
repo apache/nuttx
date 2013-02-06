@@ -3476,17 +3476,17 @@ void up_usbinitialize(void)
    * them when we need them later.
    */
 
-  if (irq_attach(STM32_IRQ_USBHPCANTX, stm32_hpinterrupt) != 0)
+  if (irq_attach(STM32_IRQ_USBHP, stm32_hpinterrupt) != 0)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_IRQREGISTRATION),
-               (uint16_t)STM32_IRQ_USBHPCANTX);
+               (uint16_t)STM32_IRQ_USBHP);
       goto errout;
     }
 
-  if (irq_attach(STM32_IRQ_USBLPCANRX0, stm32_lpinterrupt) != 0)
+  if (irq_attach(STM32_IRQ_USBLP, stm32_lpinterrupt) != 0)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_IRQREGISTRATION),
-               (uint16_t)STM32_IRQ_USBLPCANRX0);
+               (uint16_t)STM32_IRQ_USBLP);
       goto errout;
     }
   return;
@@ -3522,10 +3522,10 @@ void up_usbuninitialize(void)
 
   /* Disable and detach the USB IRQs */
 
-  up_disable_irq(STM32_IRQ_USBHPCANTX);
-  up_disable_irq(STM32_IRQ_USBLPCANRX0);
-  irq_detach(STM32_IRQ_USBHPCANTX);
-  irq_detach(STM32_IRQ_USBLPCANRX0);
+  up_disable_irq(STM32_IRQ_USBHP);
+  up_disable_irq(STM32_IRQ_USBLP);
+  irq_detach(STM32_IRQ_USBHP);
+  irq_detach(STM32_IRQ_USBLP);
 
   if (priv->driver)
     {
@@ -3595,13 +3595,13 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       /* Enable USB controller interrupts at the NVIC */
 
-      up_enable_irq(STM32_IRQ_USBHPCANTX);
-      up_enable_irq(STM32_IRQ_USBLPCANRX0);
+      up_enable_irq(STM32_IRQ_USBHP);
+      up_enable_irq(STM32_IRQ_USBLP);
 
       /* Set the interrrupt priority */
 
-      up_prioritize_irq(STM32_IRQ_USBHPCANTX, CONFIG_USB_PRI);
-      up_prioritize_irq(STM32_IRQ_USBLPCANRX0, CONFIG_USB_PRI);
+      up_prioritize_irq(STM32_IRQ_USBHP, CONFIG_USB_PRI);
+      up_prioritize_irq(STM32_IRQ_USBLP, CONFIG_USB_PRI);
 
       /* Enable pull-up to connect the device.  The host should enumerate us
        * some time after this
@@ -3657,8 +3657,8 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   /* Disable USB controller interrupts (but keep them attached) */
 
-  up_disable_irq(STM32_IRQ_USBHPCANTX);
-  up_disable_irq(STM32_IRQ_USBLPCANRX0);
+  up_disable_irq(STM32_IRQ_USBHP);
+  up_disable_irq(STM32_IRQ_USBLP);
 
   /* Put the hardware in an inactive state.  Then bring the hardware back up
    * in the reset state (this is probably not necessary, the stm32_reset()
