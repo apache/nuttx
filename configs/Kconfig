@@ -508,6 +508,15 @@ config ARCH_BOARD_STM32F100RC_GENERIC
 	---help---
 		STMicro STM32F100RC generic board.
 
+config ARCH_BOARD_STM32F3_DISCOVERY
+	bool "STMicro STM32F3-Discovery board"
+	depends on ARCH_CHIP_STM32F303VC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro STM32F3-Discovery board based on the STMicro CONFIG_ARCH_CHIP_STM32F303VCT6 MCU.
+
 config ARCH_BOARD_STM32F4_DISCOVERY
 	bool "STMicro STM32F4-Discovery board"
 	depends on ARCH_CHIP_STM32F407VG
@@ -705,6 +714,7 @@ config ARCH_BOARD
 	default "stm3220g-eval"       if ARCH_BOARD_STM3220G_EVAL
 	default "stm3240g-eval"       if ARCH_BOARD_STM3240G_EVAL
 	default "stm32f100rc_generic" if ARCH_BOARD_STM32F100RC_GENERIC
+	default "stm32f3discovery"    if ARCH_BOARD_STM32F3_DISCOVERY
 	default "stm32f4discovery"    if ARCH_BOARD_STM32F4_DISCOVERY
 	default "sure-pic32mx"        if ARCH_BOARD_SUREPIC32MX
 	default "teensy"              if ARCH_BOARD_TEENSY

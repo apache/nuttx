@@ -2,7 +2,7 @@
  * configs/stm32f3discovery/src/stm32f3discovery-internal.h
  * arch/arm/src/board/stm32f3discovery-internal.n
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
