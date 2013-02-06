@@ -396,7 +396,7 @@ static inline void task_sigchild(FAR struct tcb_s *ptcb,
       info.si_code            = CLD_EXITED;
       info.si_value.sival_ptr = NULL;
 #ifndef CONFIG_DISABLE_PTHREAD
-      info.si_pid             = chgrp->tg_task;
+      info.si_pid             = ctcb->group->tg_task;
 #else
       info.si_pid             = ctcb->pid;
 #endif

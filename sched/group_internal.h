@@ -86,8 +86,6 @@ void group_leave(FAR struct tcb_s *tcb);
 
 #ifdef HAVE_GROUP_MEMBERS
 FAR struct task_group_s *group_findbygid(gid_t gid);
-#endif
-#if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
 FAR struct task_group_s *group_findbypid(pid_t pid);
 #endif
 
