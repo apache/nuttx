@@ -267,6 +267,13 @@
 #  define STM32_IRQ_DMA2CH3     (74) /* 58: DMA2 Channel 3 global interrupt */
 #  define STM32_IRQ_DMA2CH45    (75) /* 59: DMA2 Channel 4&5 global interrupt */
 #  define NR_IRQS               (76)
+
+/* Convenience definitions for interrupts with multiple functions */
+
+#  define STM32_IRQ_USBHP       STM32_IRQ_USBHPCANTX
+#  define STM32_IRQ_CAN1TX      STM32_IRQ_USBHPCANTX
+#  define STM32_IRQ_USBLP       STM32_IRQ_USBLPCANRX0
+#  define STM32_IRQ_CAN1RX0     STM32_IRQ_USBLPCANRX0
 #endif
 
 /************************************************************************************
