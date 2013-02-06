@@ -67,6 +67,7 @@
 #  define CONFIG_STM32_VALUELINE         1   /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
 #  define STM32_NFSMC                    0   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
@@ -97,6 +98,7 @@
 #  define CONFIG_STM32_VALUELINE         1   /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
 #  define STM32_NFSMC                    0   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
@@ -130,6 +132,7 @@
 #  define CONFIG_STM32_VALUELINE         1   /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
 #  define STM32_NFSMC                    0   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
@@ -161,6 +164,7 @@
 #  define CONFIG_STM32_VALUELINE         1   /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
@@ -189,33 +193,34 @@
  */
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103RBT6)
-# define CONFIG_STM32_STM32F10XX         1   /* STM32F10xxx family */
-# undef  CONFIG_STM32_LOWDENSITY             /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
-# define CONFIG_STM32_MEDIUMDENSITY      1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
-# undef  CONFIG_STM32_HIGHDENSITY            /* STM32F100x, STM32F101x, and STM32F103x w/ 256/512 Kbytes */
-# undef  CONFIG_STM32_VALUELINE              /* STM32F100x */
-# undef  CONFIG_STM32_CONNECTIVITYLINE       /* STM32F105x and STM32F107x */
-# undef  CONFIG_STM32_STM32F20XX             /* STM32F205x and STM32F207x */
-# undef  CONFIG_STM32_STM32F40XX             /* STM32F405xx and STM32407xx families */
-# define STM32_NFSMC                     0   /* FSMC */
-# define STM32_NATIM                     1   /* One advanced timer TIM1 */
-# define STM32_NGTIM                     3   /* General timers TIM2,3,4 */
-# define STM32_NBTIM                     0   /* Two basic timers TIM6 and TIM7 */
-# define STM32_NDMA                      1   /* DMA1 */
-# define STM32_NSPI                      2   /* SPI1-2 */
-# define STM32_NI2S                      0   /* No I2S (?) */
-# define STM32_NUSART                    3   /* USART1-3 */
-# define STM32_NI2C                      2   /* I2C1-2 */
-# define STM32_NCAN                      1   /* bxCAN1 */
-# define STM32_NSDIO                     0   /* No SDIO */
-# define STM32_NUSBOTG                   0   /* No USB OTG FS/HS */
-# define STM32_NGPIO                     51  /* GPIOA-E */
-# define STM32_NADC                      2   /* ADC1-2 */
-# define STM32_NDAC                      0   /* No DAC */
-# define STM32_NCRC                      1   /* CRC */
-# define STM32_NTHERNET                  0   /* No ethernet */
-# define STM32_NRNG                      0   /* No random number generator (RNG) */
-# define STM32_NDCMI                     0   /* No digital camera interface (DCMI) */
+#  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
+#  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  define CONFIG_STM32_MEDIUMDENSITY     1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F100x, STM32F101x, and STM32F103x w/ 256/512 Kbytes */
+#  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
+#  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX           /* STM32F30xxx family */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
+#  define STM32_NFSMC                    0   /* FSMC */
+#  define STM32_NATIM                    1   /* One advanced timer TIM1 */
+#  define STM32_NGTIM                    3   /* General timers TIM2,3,4 */
+#  define STM32_NBTIM                    0   /* Two basic timers TIM6 and TIM7 */
+#  define STM32_NDMA                     1   /* DMA1 */
+#  define STM32_NSPI                     2   /* SPI1-2 */
+#  define STM32_NI2S                     0   /* No I2S (?) */
+#  define STM32_NUSART                   3   /* USART1-3 */
+#  define STM32_NI2C                     2   /* I2C1-2 */
+#  define STM32_NCAN                     1   /* bxCAN1 */
+#  define STM32_NSDIO                    0   /* No SDIO */
+#  define STM32_NUSBOTG                  0   /* No USB OTG FS/HS */
+#  define STM32_NGPIO                    51  /* GPIOA-E */
+#  define STM32_NADC                     2   /* ADC1-2 */
+#  define STM32_NDAC                     0   /* No DAC */
+#  define STM32_NCRC                     1   /* CRC */
+#  define STM32_NTHERNET                 0   /* No ethernet */
+#  define STM32_NRNG                     0   /* No random number generator (RNG) */
+#  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
 /* STM32 F103 High Density Family ***************************************************/
 /* STM32F103RC, STM32F103RD, and STM32F103RE are all provided in 64 pin packages and
@@ -230,6 +235,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and TIM8 */
@@ -263,6 +269,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and TIM8 */
@@ -296,6 +303,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
@@ -326,6 +334,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  define CONFIG_STM32_CONNECTIVITYLINE  1   /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
@@ -355,6 +364,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  define CONFIG_STM32_CONNECTIVITYLINE  1   /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
@@ -385,6 +395,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  define CONFIG_STM32_STM32F20XX        1   /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -408,6 +419,220 @@
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
 
+/* STM23 F3 Family ******************************************************************/
+/* Part Numbering: STM32Fssscfxxx
+ *
+ *  Where
+ *     sss = 302 or 303
+ *     c   = C (48pins) R (68 pins) V (100 pins)
+ *     f   = B (128KB FLASH), C (256KB FLASH)
+ *     xxx = Package, temperature range, options (ignored here)
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32F302CB) || defined(CONFIG_ARCH_CHIP_STM32F302CC)
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
+#  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F100x, STM32F101x, and STM32F103x w/ 256/512 Kbytes */
+#  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
+#  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  define STM32_NFSMC                    0   /* No FSMC */
+#  define STM32_NATIM                    1   /* (1) Advanced 16-bit timers with DMA: TIM1 (no TIM8) */
+#  define STM32_NGTIM                    6   /* (2) 16-bit general timers with DMA: TIM3 and TIM4
+                                              * (1) 32-bit general timers with DMA: TIM2
+                                              * (3) 16-bit general timers count-up timers with DMA: TIM15-17 */
+#  define STM32_NGTIMNDMA                0   /* All timers have DMA */
+
+#  define STM32_NBTIM                    1   /* (1) Basic timers: TIM6 (no TIM7) */
+#  define STM32_NDMA                     2   /* (2) DMA1 (7 channels) and DMA2 (5 channels) */
+#  define STM32_NSPI                     3   /* (3) SPI1-3 */
+#  define STM32_NI2S                     0   /* (0) No I2S */
+#  define STM32_NUSART                   3   /* (3) No UART1-3, no UARTs */
+#  define STM32_NI2C                     2   /* (2) I2C1-2 */
+#  define STM32_NCAN                     1   /* (1) CAN1 */
+#  define STM32_NSDIO                    0   /* (0) No SDIO */
+#  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
+#  define STM32_NGPIO                    37  /* GPIOA-F */
+#  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
+#  define STM32_NDAC                     1   /* (1) 12-bit DAC1 */
+#  define STM32_NCRC                     1   /* (1) CRC calculation unit */
+#  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
+#  define STM32_NRNG                     0   /* (0) No random number generator (RNG) */
+#  define STM32_NDCMI                    0   /* (0) No digital camera interface (DCMI) */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32F302RB) || defined(CONFIG_ARCH_CHIP_STM32F302RC)
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
+#  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F100x, STM32F101x, and STM32F103x w/ 256/512 Kbytes */
+#  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
+#  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  define STM32_NFSMC                    0   /* No FSMC */
+#  define STM32_NATIM                    1   /* (1) Advanced 16-bit timers with DMA: TIM1 (no TIM8) */
+#  define STM32_NGTIM                    6   /* (2) 16-bit general timers with DMA: TIM3 and TIM4
+                                              * (1) 32-bit general timers with DMA: TIM2
+                                              * (3) 16-bit general timers count-up timers with DMA: TIM15-17 */
+#  define STM32_NGTIMNDMA                0   /* All timers have DMA */
+
+#  define STM32_NBTIM                    1   /* (1) Basic timers: TIM6 (no TIM7) */
+#  define STM32_NDMA                     2   /* (2) DMA1 (7 channels) and DMA2 (5 channels) */
+#  define STM32_NSPI                     3   /* (3) SPI1-3 */
+#  define STM32_NI2S                     0   /* (0) No I2S */
+#  define STM32_NUSART                   5   /* (5) USART1-3, UART4-5 */
+#  define STM32_NI2C                     2   /* (2) I2C1-2 */
+#  define STM32_NCAN                     1   /* (1) CAN1 */
+#  define STM32_NSDIO                    0   /* (0) No SDIO */
+#  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
+#  define STM32_NGPIO                    52  /* GPIOA-F */
+#  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
+#  define STM32_NDAC                     1   /* (1) 12-bit DAC1 */
+#  define STM32_NCRC                     1   /* (1) CRC calculation unit */
+#  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
+#  define STM32_NRNG                     0   /* (0) No random number generator (RNG) */
+#  define STM32_NDCMI                    0   /* (0) No digital camera interface (DCMI) */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32F302VB) || defined(CONFIG_ARCH_CHIP_STM32F302VC)
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
+#  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F100x, STM32F101x, and STM32F103x w/ 256/512 Kbytes */
+#  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
+#  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  define STM32_NFSMC                    0   /* No FSMC */
+#  define STM32_NATIM                    1   /* (1) Advanced 16-bit timers with DMA: TIM1 (no TIM8) */
+#  define STM32_NGTIM                    6   /* (2) 16-bit general timers with DMA: TIM3 and TIM4
+                                              * (1) 32-bit general timers with DMA: TIM2
+                                              * (3) 16-bit general timers count-up timers with DMA: TIM15-17 */
+#  define STM32_NGTIMNDMA                0   /* All timers have DMA */
+
+#  define STM32_NBTIM                    1   /* (1) Basic timers: TIM6 (no TIM7) */
+#  define STM32_NDMA                     2   /* (2) DMA1 (7 channels) and DMA2 (5 channels) */
+#  define STM32_NSPI                     3   /* (3) SPI1-3 */
+#  define STM32_NI2S                     0   /* (0) No I2S */
+#  define STM32_NUSART                   5   /* (5) USART1-3, UART4-5 */
+#  define STM32_NI2C                     2   /* (2) I2C1-2 */
+#  define STM32_NCAN                     1   /* (1) CAN1 */
+#  define STM32_NSDIO                    0   /* (0) No SDIO */
+#  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
+#  define STM32_NGPIO                    87  /* GPIOA-F */
+#  define STM32_NADC                     2   /* (2) 12-bit ADC1-2 */
+#  define STM32_NDAC                     1   /* (1) 12-bit DAC1 */
+#  define STM32_NCRC                     1   /* (1) CRC calculation unit */
+#  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
+#  define STM32_NRNG                     0   /* (0) No random number generator (RNG) */
+#  define STM32_NDCMI                    0   /* (0) No digital camera interface (DCMI) */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32F303CB) || defined(CONFIG_ARCH_CHIP_STM32F303CC)
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
+#  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F100x, STM32F101x, and STM32F103x w/ 256/512 Kbytes */
+#  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
+#  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  define STM32_NFSMC                    0   /* No FSMC */
+
+#  define STM32_NATIM                    2   /* (2) Advanced 16-bit timers with DMA: TIM1 and TIM8 */
+#  define STM32_NGTIM                    6   /* (2) 16-bit general timers with DMA: TIM3 and TIM4
+                                              * (1) 32-bit general timers with DMA: TIM2
+                                              * (3) 16-bit general timers count-up timers with DMA: TIM15-17 */
+#  define STM32_NGTIMNDMA                0   /* All timers have DMA */
+#  define STM32_NBTIM                    2   /* (2) Basic timers: TIM6 and TIM7 */
+#  define STM32_NDMA                     2   /* (2) DMA1 (7 channels) and DMA2 (5 channels) */
+#  define STM32_NSPI                     3   /* (3) SPI1-3 */
+#  define STM32_NI2S                     2   /* (2) I2S1-2 (multiplexed with SPI2-3) */
+#  define STM32_NUSART                   3   /* (3) No UART1-3, no UARTs */
+#  define STM32_NI2C                     2   /* (2) I2C1-2 */
+#  define STM32_NCAN                     1   /* (1) CAN1 */
+#  define STM32_NSDIO                    0   /* (0) No SDIO */
+#  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
+#  define STM32_NGPIO                    37  /* GPIOA-F */
+#  define STM32_NADC                     3   /* (3) 12-bit ADC1-3 */
+#  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
+#  define STM32_NCRC                     1   /* (1) CRC calculation unit */
+#  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
+#  define STM32_NRNG                     0   /* (0) No random number generator (RNG) */
+#  define STM32_NDCMI                    0   /* (0) No digital camera interface (DCMI) */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32F303RB) || defined(CONFIG_ARCH_CHIP_STM32F303RC)
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
+#  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F100x, STM32F101x, and STM32F103x w/ 256/512 Kbytes */
+#  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
+#  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  define STM32_NFSMC                    0   /* No FSMC */
+
+#  define STM32_NATIM                    2   /* (2) Advanced 16-bit timers with DMA: TIM1 and TIM8 */
+#  define STM32_NGTIM                    6   /* (2) 16-bit general timers with DMA: TIM3 and TIM4
+                                              * (1) 32-bit general timers with DMA: TIM2
+                                              * (3) 16-bit general timers count-up timers with DMA: TIM15-17 */
+#  define STM32_NGTIMNDMA                0   /* All timers have DMA */
+#  define STM32_NBTIM                    2   /* (2) Basic timers: TIM6 and TIM7 */
+#  define STM32_NDMA                     2   /* (2) DMA1 (7 channels) and DMA2 (5 channels) */
+#  define STM32_NSPI                     3   /* (3) SPI1-3 */
+#  define STM32_NI2S                     2   /* (2) I2S1-2 (multiplexed with SPI2-3) */
+#  define STM32_NUSART                   5   /* (5) USART1-3, UART4-5 */
+#  define STM32_NI2C                     2   /* (2) I2C1-2 */
+#  define STM32_NCAN                     1   /* (1) CAN1 */
+#  define STM32_NSDIO                    0   /* (0) No SDIO */
+#  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
+#  define STM32_NGPIO                    52  /* GPIOA-F */
+#  define STM32_NADC                     3   /* (3) 12-bit ADC1-3 */
+#  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
+#  define STM32_NCRC                     1   /* (1) CRC calculation unit */
+#  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
+#  define STM32_NRNG                     0   /* (0) No random number generator (RNG) */
+#  define STM32_NDCMI                    0   /* (0) No digital camera interface (DCMI) */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32F303VB) || defined(CONFIG_ARCH_CHIP_STM32F303VC)
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
+#  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F100x, STM32F101x, and STM32F103x w/ 256/512 Kbytes */
+#  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
+#  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  define CONFIG_STM32_STM32F30XX        1   /* STM32F30xxx family */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
+#  define STM32_NFSMC                    0   /* No FSMC */
+
+#  define STM32_NATIM                    2   /* (2) Advanced 16-bit timers with DMA: TIM1 and TIM8 */
+#  define STM32_NGTIM                    6   /* (2) 16-bit general timers with DMA: TIM3 and TIM4
+                                              * (1) 32-bit general timers with DMA: TIM2
+                                              * (3) 16-bit general timers count-up timers with DMA: TIM15-17 */
+#  define STM32_NGTIMNDMA                0   /* All timers have DMA */
+#  define STM32_NBTIM                    2   /* (2) Basic timers: TIM6 and TIM7 */
+#  define STM32_NDMA                     2   /* (2) DMA1 (7 channels) and DMA2 (5 channels) */
+#  define STM32_NSPI                     3   /* (3) SPI1-3 */
+#  define STM32_NI2S                     2   /* (2) I2S1-2 (multiplexed with SPI2-3) */
+#  define STM32_NUSART                   5   /* (5) USART1-3, UART4-5 */
+#  define STM32_NI2C                     2   /* (2) I2C1-2 */
+#  define STM32_NCAN                     1   /* (1) CAN1 */
+#  define STM32_NSDIO                    0   /* (0) No SDIO */
+#  define STM32_NUSBOTG                  0   /* USB FS device, but no USB OTG FS/HS */
+#  define STM32_NGPIO                    87  /* GPIOA-F */
+#  define STM32_NADC                     3   /* (3) 12-bit ADC1-3 */
+#  define STM32_NDAC                     2   /* (2) 12-bit DAC1-2 */
+#  define STM32_NCRC                     1   /* (1) CRC calculation unit */
+#  define STM32_NETHERNET                0   /* (0) No Ethernet MAC */
+#  define STM32_NRNG                     0   /* (0) No random number generator (RNG) */
+#  define STM32_NDCMI                    0   /* (0) No digital camera interface (DCMI) */
+
 /* STM23 F4 Family ******************************************************************/
 #elif defined(CONFIG_ARCH_CHIP_STM32F405RG)  /* LQFP 64 10x10x1.4 1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
@@ -417,6 +642,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -448,6 +674,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -479,6 +706,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -510,6 +738,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -541,6 +770,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -572,6 +802,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -603,6 +834,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -634,6 +866,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
@@ -665,6 +898,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
