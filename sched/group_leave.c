@@ -260,31 +260,18 @@ static inline int group_removemember(FAR struct task_group_s *group, pid_t pid)
 
       if (group->tg_members[i] == pid)
        {
-          /* Yes.. break out of the loop.  We don't do the actual
-           * removal here, instead we re-test i and do the adjustments
-           * outside of the loop.  We do this because we want the
-           * DEBUGASSERT to work properly.
+          /* Remove the member from the array of members.  This must be an
+           * atomic operation because the member array may be accessed from
+           * interrupt handlers (read-only).
            */
 
-          break;
-       }
-    }
+          flags = irqsave();
+          group->tg_members[i] = group->tg_members[group->tg_nmembers - 1];
+          group->tg_nmembers--;
+          irqrestore(flags);
 
-  /* Now, test if we found the task in the array of members. */
-
-  if (i < group->tg_nmembers)
-    {
-      /* Remove the member from the array of members.  This must be an
-       * atomic operation because the member array may be accessed from
-       * interrupt handlers (read-only).
-       */
-
-      flags = irqsave();
-      group->tg_members[i] = group->tg_members[group->tg_nmembers - 1];
-      group->tg_nmembers--;
-      irqrestore(flags);
-
-      return group->tg_nmembers;
+          return group->tg_nmembers;
+        }
     }
 
   return -ENOENT;

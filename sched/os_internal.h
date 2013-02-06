@@ -262,6 +262,7 @@ int  task_schedsetup(FAR struct task_tcb_s *tcb, int priority, start_t start,
 int  task_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name, FAR char * const argv[]);
 void task_exithook(FAR struct tcb_s *tcb, int status);
 int  task_deletecurrent(void);
+void task_recover(FAR struct tcb_s *tcb);
 
 #ifndef CONFIG_CUSTOM_STACK
 int  kernel_thread(FAR const char *name, int priority, int stack_size,

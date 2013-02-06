@@ -4144,4 +4144,13 @@
 	  waiting on a message queue.  task_delete() and pthread_cancel()
 	  are dangerous interfaces.  This is only one feeble recover measure
 	  of *many* that would be needed to do this safely.
+	* sched/group_killchildren.c, task_recover.c, group_foreachchild.c,
+	  sched/restart.c, sched/task_delete.c, and others:  Beef up logic
+	  to better support task deletion and pthread cancellation.  Needed
+	  to pass need OS test case for task_restart().
+	* sched/include/sched.h and all timed functions in sched/:  Move
+	  timer from local variables to TCB.  This is needed so that if a
+	  task is canceled or restarted while it is waiting for a timed
+	  event, we can gracefully recover.  We can't let the timer expire
+	  after the task has been deleted.
 

@@ -170,4 +170,3 @@ void   sched_note_switch(FAR struct tcb_s *pFromTcb,
 #endif /* __ASSEMBLY__ */
 
 #endif /* __INCLUDE_SCHED_H */
-

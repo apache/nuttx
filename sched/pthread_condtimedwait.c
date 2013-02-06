@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread_condtimedwait.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
+#include <assert.h>
 #include <wdog.h>
 #include <debug.h>
 
@@ -179,14 +180,16 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
 int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                            FAR const struct timespec *abstime)
 {
-  WDOG_ID         wdog;
-  int             ticks;
-  int             mypid = (int)getpid();
-  irqstate_t      int_state;
-  int             ret = OK;
-  int             status;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  int ticks;
+  int mypid = (int)getpid();
+  irqstate_t int_state;
+  int ret = OK;
+  int status;
 
   sdbg("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
+
+  DEBUGASSERT(rtcb->waitdog == NULL);
 
   /* Make sure that non-NULL references were provided. */
 
@@ -215,8 +218,8 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
     {
       /* Create a watchdog */
 
-      wdog = wd_create();
-      if (!wdog)
+      rtcb->waitdog = wd_create();
+      if (!rtcb->waitdog)
         {
           ret = EINVAL;
         }
@@ -280,7 +283,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                     {
                       /* Start the watchdog */
 
-                      wd_start(wdog, ticks, (wdentry_t)pthread_condtimedout,
+                      wd_start(rtcb->waitdog, ticks, (wdentry_t)pthread_condtimedout,
                                2, (uint32_t)mypid, (uint32_t)SIGCONDTIMEDOUT);
 
                       /* Take the condition semaphore.  Do not restore interrupts
@@ -343,7 +346,8 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
 
           /* We no longer need the watchdog */
 
-          wd_delete(wdog);
+          wd_delete(rtcb->waitdog);
+          rtcb->waitdog = NULL;
         }
     }
 

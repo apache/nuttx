@@ -51,7 +51,6 @@
 #include "os_internal.h"
 #include "group_internal.h"
 #include "sig_internal.h"
-#include "mq_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -592,12 +591,10 @@ void task_exithook(FAR struct tcb_s *tcb, int status)
   task_onexit(tcb, status);
 
   /* If the task was terminated by another task, it may be in an unknown
-   * state.  Make some feed effort to recover the state.
+   * state.  Make some feeble effort to recover the state.
    */
 
-#ifndef CONFIG_DISABLE_MQUEUE
-  mq_recover(tcb);
-#endif
+  task_recover(tcb);
 
   /* Leave the task group */
 

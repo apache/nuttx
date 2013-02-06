@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/task_restart.c
+ * sched/task_recover.c
  *
- *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,15 +39,13 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sched.h>
-#include <errno.h>
+#include <wdog.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 
 #include "os_internal.h"
-#include "group_internal.h"
-#include "sig_internal.h"
+#include "mq_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -78,131 +76,48 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_restart
+ * Name: task_recover
  *
  * Description:
- *   This function "restarts" a task.  The task is first terminated and then
- *   reinitialized with same ID, priority, original entry point, stack size,
- *   and parameters it had when it was first started.
+ *   This function is called when a task is deleted via task_deleted or
+ *   via pthread_cancel. I checks if the task was waiting for a message
+ *   queue event and adjusts counts appropriately.
  *
  * Inputs:
- *   pid - The task ID of the task to delete.  An ID of zero signifies the
- *         calling task.
+ *   tcb - The TCB of the terminated task or thread
  *
  * Return Value:
- *   OK on sucess; ERROR on failure.
+ *   None.
  *
- *   This function can fail if:
- *   (1) A pid of zero or the pid of the calling task is provided
- *      (functionality not implemented)
- *   (2) The pid is not associated with any task known to the system.
+ * Assumptions:
+ *   This function is called from task deletion logic in a safe context.
  *
  ****************************************************************************/
 
-int task_restart(pid_t pid)
+void task_recover(FAR struct tcb_s *tcb)
 {
-  FAR struct tcb_s *rtcb;
-  FAR struct task_tcb_s *tcb;
-  irqstate_t state;
-  int status;
+  irqstate_t flags;
 
-  /* Make sure this task does not become ready-to-run while
-   * we are futzing with its TCB
+  /* The task is being deleted.  If it is waiting for any timed event, then
+   * tcb->waitdog will be non-NULL.  Cancel the watchdog now so that no
+   * events occur after the watchdog expires.  Obviously there are lots of
+   * race conditions here so this will most certainly have to be revisited in
+   * the future.
    */
 
-  sched_lock();
-
-  /* Check if the task to restart is the calling task */
-
-  rtcb = (FAR struct tcb_s *)g_readytorun.head;
-  if ((pid == 0) || (pid == rtcb->pid))
+  flags = irqsave();
+  if (tcb->waitdog)
     {
-      /* Not implemented */
-
-      set_errno(ENOSYS);
-      return ERROR;
+      (void)wd_cancel(tcb->waitdog);
+      (void)wd_delete(tcb->waitdog);
+      tcb->waitdog = NULL;
     }
 
-  /* We are restarting some other task than ourselves */
+  irqrestore(flags);
 
-  else
-    {
-      /* Find for the TCB associated with matching pid  */
+  /* Handle cases where the thread was waiting for a message queue event */
 
-      tcb = (FAR struct task_tcb_s *)sched_gettcb(pid);
-#ifndef CONFIG_DISABLE_PTHREAD
-      if (!tcb || (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
-#else
-      if (!tcb)
+#ifndef CONFIG_DISABLE_MQUEUE
+  mq_recover(tcb);
 #endif
-        {
-          /* There is no TCB with this pid or, if there is, it is not a
-           * task.
-           */
-
-          set_errno(ESRCH);
-          return ERROR;
-        }
-
-      /* Try to recover from any bad states */
- 
-      task_recover((FAR struct tcb_s *)tcb);
-
-      /* Kill any children of this thread */
-
-#if HAVE_GROUP_MEMBERS
-      (void)group_killchildren(tcb);
-#endif
-
-      /* Remove the TCB from whatever list it is in.  At this point, the
-       * TCB should no longer be accessible to the system 
-       */
-
-      state = irqsave();
-      dq_rem((FAR dq_entry_t*)tcb,
-             (dq_queue_t*)g_tasklisttable[tcb->cmn.task_state].list);
-      tcb->cmn.task_state = TSTATE_TASK_INVALID;
-      irqrestore(state);
-
-      /* Deallocate anything left in the TCB's queues */
-
-      sig_cleanup((FAR struct tcb_s *)tcb); /* Deallocate Signal lists */
-
-      /* Reset the current task priority  */
-
-      tcb->cmn.sched_priority = tcb->init_priority;
-
-      /* Reset the base task priority and the number of pending reprioritizations */
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-      tcb->cmn.base_priority = tcb->init_priority;
-#  if CONFIG_SEM_NNESTPRIO > 0
-      tcb->npend_reprio = 0;
-#  endif
-#endif
-
-      /* Re-initialize the processor-specific portion of the TCB
-       * This will reset the entry point and the start-up parameters
-       */
-
-      up_initial_state((FAR struct tcb_s *)tcb);
-
-      /* Add the task to the inactive task list */
-
-      dq_addfirst((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
-      tcb->cmn.task_state = TSTATE_TASK_INACTIVE;
-
-      /* Activate the task */
-
-      status = task_activate((FAR struct tcb_s *)tcb);
-      if (status != OK)
-        {
-          (void)task_delete(pid);
-          set_errno(-status);
-          return ERROR;
-        }
-    }
-
-  sched_unlock();
-  return OK;
 }

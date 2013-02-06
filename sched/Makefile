@@ -41,14 +41,13 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 MISC_SRCS  = os_start.c os_bringup.c errno_getptr.c errno_get.c errno_set.c
 MISC_SRCS += sched_garbage.c sched_getfiles.c sched_getsockets.c sched_getstreams.c
 
-TSK_SRCS = prctl.c task_create.c task_init.c task_setup.c task_activate.c
-TSK_SRCS += task_start.c task_delete.c task_deletecurrent.c task_exithook.c
-TSK_SRCS += task_restart.c task_vfork.c exit.c getpid.c sched_addreadytorun.c
-TSK_SRCS += sched_removereadytorun.c sched_addprioritized.c sched_mergepending.c
-TSK_SRCS += sched_addblocked.c sched_removeblocked.c sched_free.c sched_gettcb.c
-TSK_SRCS += sched_verifytcb.c sched_releasetcb.c
-
-TSK_SRCS += task_spawn.c task_spawnparms.c
+TSK_SRCS  = prctl.c exit.c getpid.c
+TSK_SRCS += task_create.c task_init.c task_setup.c task_activate.c task_start.c
+TSK_SRCS += task_delete.c task_deletecurrent.c task_exithook.c task_recover.c
+TSK_SRCS += task_restart.c task_spawn.c task_spawnparms.c task_vfork.c
+TSK_SRCS += sched_addreadytorun.c sched_removereadytorun.c sched_addprioritized.c
+TSK_SRCS += sched_mergepending.c sched_addblocked.c sched_removeblocked.c
+TSK_SRCS += sched_free.c sched_gettcb.c sched_verifytcb.c sched_releasetcb.c
 
 ifneq ($(CONFIG_BINFMT_DISABLE),y)
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
@@ -86,7 +85,7 @@ endif
 
 GRP_SRCS  = group_create.c group_join.c group_leave.c group_find.c
 GRP_SRCS += group_setupstreams.c group_setupidlefiles.c group_setuptaskfiles.c
-GRP_SRCS += task_getgroup.c
+GRP_SRCS += task_getgroup.c group_foreachchild.c group_killchildren.c
 
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
 GRP_SRCS += task_reparent.c

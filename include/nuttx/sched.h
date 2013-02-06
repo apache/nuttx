@@ -407,6 +407,8 @@ struct task_group_s
  * that includes these common definitions.
  */
 
+FAR struct wdog_s;                       /* Forward reference                   */
+
 struct tcb_s
 {
   /* Fields used to support list management *************************************/
@@ -452,6 +454,7 @@ struct tcb_s
 #if CONFIG_RR_INTERVAL > 0
   int      timeslice;                    /* RR timeslice interval remaining     */
 #endif
+  FAR struct wdog_s *waitdog;            /* All timed waits used this wdog      */
 
   /* Stack-Related Fields *******************************************************/
 

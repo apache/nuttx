@@ -181,10 +181,11 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   sigset_t intersection;
   FAR sigpendq_t *sigpend;
-  WDOG_ID wdog;
   irqstate_t saved_state;
   int32_t waitticks;
   int ret = ERROR;
+
+  DEBUGASSERT(rtcb->waitdog == NULL);
 
   sched_lock();  /* Not necessary */
 
@@ -265,8 +266,8 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
           /* Create a watchdog */
 
-          wdog = wd_create();
-          if (wdog)
+          rtcb->waitdog = wd_create();
+          if (rtcb->waitdog)
             {
               /* This little of nonsense is necessary for some
                * processors where sizeof(pointer) < sizeof(uint32_t).
@@ -278,7 +279,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
               /* Start the watchdog */
 
-              wd_start(wdog, waitticks, (wdentry_t)sig_timeout, 1, wdparm.dwarg);
+              wd_start(rtcb->waitdog, waitticks, (wdentry_t)sig_timeout, 1, wdparm.dwarg);
 
               /* Now wait for either the signal or the watchdog */
 
@@ -286,7 +287,8 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
               /* We no longer need the watchdog */
 
-              wd_delete(wdog);
+              wd_delete(rtcb->waitdog);
+              rtcb->waitdog = NULL;
             }
         }
 

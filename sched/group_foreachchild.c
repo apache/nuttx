@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/wd_create.c
+ * sched/group_foreachchild.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,29 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <wdog.h>
-#include <queue.h>
+#include <nuttx/sched.h>
 
-#include <nuttx/arch.h>
+#include "group_internal.h"
 
-#include "wd_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
+#ifdef HAVE_GROUP_MEMBERS
 
 /****************************************************************************
  * Private Functions
@@ -72,39 +54,43 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wd_create
+ * Name: group_foreachchild
  *
- * Description:  
- *   The wd_create function will create a watchdog by allocating it from the
- *   list of free watchdogs.
+ * Description:
+ *   Execute a function for each child of a group.
  *
  * Parameters:
- *   None
+ *   group - The group containing the children
+ *   handler - The function to be called
+ *   arg - An additional argument to provide to the handler
  *
  * Return Value:
- *   Pointer to watchdog (i.e., the watchdog ID), or NULL if insufficient
- *   watchdogs are available.
+ *   Success (OK) is always returned unless the handler returns a non-zero
+ *   value (a negated errno on errors).  In that case, the traversal
+ *   terminates and that non-zero value is returned.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-WDOG_ID wd_create (void)
+int group_foreachchild(FAR struct task_group_s *group,
+                       foreachchild_t handler, FAR void *arg)
 {
-  FAR wdog_t *wdog;
-  irqstate_t saved_state;
+  int ret;
+  int i;
 
-  saved_state = irqsave();
-  wdog = (FAR wdog_t*)sq_remfirst(&g_wdfreelist);
-  irqrestore(saved_state);
+  DEBUGASSERT(group);
 
-  /* Indicate that the watchdog is not actively timing */
-
-  if (wdog)
+  for (i = 0; i < group->tg_nmembers; i++)
     {
-      wdog->next = NULL;
-      wdog->active = false;
+       ret = handler(group->tg_members[i], arg);
+       if (ret != 0)
+         {
+           return ret;
+         }
     }
 
-  return (WDOG_ID)wdog;
+  return 0;
 }
+
+#endif /* HAVE_GROUP_MEMBERS */

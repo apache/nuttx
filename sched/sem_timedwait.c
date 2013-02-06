@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sem_timedwait.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,13 +164,13 @@ static void sem_timeout(int argc, uint32_t pid)
 
 int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 {
-  WDOG_ID    wdog;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
   irqstate_t flags;
   int        ticks;
   int        err;
   int        ret = ERROR;
 
-  DEBUGASSERT(up_interrupt_context() == false);
+  DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
 
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.
@@ -189,8 +189,8 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
    * front before we enter the following critical section.
    */
 
-  wdog = wd_create();
-  if (!wdog)
+  rtcb->waitdog = wd_create();
+  if (!rtcb->waitdog)
     {
       err = ENOMEM;
       goto errout;
@@ -214,7 +214,8 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
       /* We got it! */
 
       irqrestore(flags);
-      wd_delete(wdog);
+      wd_delete(rtcb->waitdog);
+      rtcb->waitdog = NULL;
       return OK;
     }
 
@@ -252,7 +253,7 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
   /* Start the watchdog */
 
   err = OK; 
-  wd_start(wdog, ticks, (wdentry_t)sem_timeout, 1, getpid());
+  wd_start(rtcb->waitdog, ticks, (wdentry_t)sem_timeout, 1, getpid());
 
   /* Now perform the blocking wait */
 
@@ -260,12 +261,13 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 
   /* Stop the watchdog timer */
 
-  wd_cancel(wdog);
+  wd_cancel(rtcb->waitdog);
 
   /* We can now restore interrupts and delete the watchdog */
 
   irqrestore(flags);
-  wd_delete(wdog);
+  wd_delete(rtcb->waitdog);
+  rtcb->waitdog = NULL;
 
   /* We are either returning success or an error detected by sem_wait()
    * or the timeout detected by sem_timeout().  The 'errno' value has
@@ -279,7 +281,9 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 
 errout_disabled:
   irqrestore(flags);
-  wd_delete(wdog);
+  wd_delete(rtcb->waitdog);
+  rtcb->waitdog = NULL;
+
 errout:
   set_errno(err);
   return ERROR;

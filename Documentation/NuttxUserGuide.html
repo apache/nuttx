@@ -4680,7 +4680,7 @@ interface of the same name.
 </p>
 <p>
   You can control which thread receives the signal by controlling the signal mask.
-  You should, for example, be able to create a separate thread whose sole purpose it is to catch a particular signal and respond to it.  Simply block the thread in the main task; then the signal will be blocked in all of the pthreads in the group too.  In the one "signal processing" pthread, enable the blocked signal. This thread will then be only thread that will receive the signal.
+  You can, for example, create a single thread whose sole purpose it is to catch a particular signal and respond to it:  Simply block the signal in the main task; then the signal will be blocked in all of the pthreads in the group too.  In the one "signal processing" pthread, enable the blocked signal. This thread will then be only thread that will receive the signal.
 </p>
 <p>
   <b>Signal Interfaces</b>.

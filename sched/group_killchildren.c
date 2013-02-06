@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/wd_create.c
+ * sched/group_killchildren.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,72 +39,73 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <wdog.h>
-#include <queue.h>
+#include <sched.h>
 
-#include <nuttx/arch.h>
+#include "group_internal.h"
 
-#include "wd_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
+#if HAVE_GROUP_MEMBERS
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/*****************************************************************************
+ * Name: group_killchildren_handler
+ *
+ * Description:
+ *   Callback from group_foreachchild that handles one member of the group.
+ *
+ * Parameters:
+ *   pid - The ID of the group member that may be signalled.
+ *   arg - The PID of the thread to be retained.
+ *
+ * Return Value:
+ *   0 (OK) on success; a negated errno value on failure.
+ *
+ *****************************************************************************/
+
+static int group_killchildren_handler(pid_t pid, FAR void *arg)
+{
+  int ret = OK;
+
+  /* Is this the pthread that we are looking for? */
+
+  if (pid != (pid_t)((uintptr_t)arg))
+    {
+      /* Yes.. cancel it */
+
+      ret = pthread_cancel(pid);
+    }
+
+ return ret;
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wd_create
+ * Name: group_killchildren
  *
- * Description:  
- *   The wd_create function will create a watchdog by allocating it from the
- *   list of free watchdogs.
+ * Description:
+ *   Delete all children of a task except for the specified task.  This is
+ *   used by the task restart logic.  When the main task is restarted,
+ *   all of its child pthreads must be terminated.
  *
  * Parameters:
- *   None
+ *   tcb - TCB of the task to be retained.
  *
  * Return Value:
- *   Pointer to watchdog (i.e., the watchdog ID), or NULL if insufficient
- *   watchdogs are available.
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-WDOG_ID wd_create (void)
+int group_killchildren(FAR struct task_tcb_s *tcb)
 {
-  FAR wdog_t *wdog;
-  irqstate_t saved_state;
-
-  saved_state = irqsave();
-  wdog = (FAR wdog_t*)sq_remfirst(&g_wdfreelist);
-  irqrestore(saved_state);
-
-  /* Indicate that the watchdog is not actively timing */
-
-  if (wdog)
-    {
-      wdog->next = NULL;
-      wdog->active = false;
-    }
-
-  return (WDOG_ID)wdog;
+  return group_foreachchild(tcb->cmn.group, group_killchildren_handler,
+                           (FAR void *)((uintptr_t)tcb->cmn.pid));
 }
+
+#endif /* HAVE_GROUP_MEMBERS */

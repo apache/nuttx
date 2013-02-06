@@ -91,8 +91,9 @@
 
 void mq_recover(FAR struct tcb_s *tcb)
 {
-  /* TODO:  What if it was waiting for a timed message queue event?
-   * We might need the wdog in the TCB so that we can cancel timeouts.
+  /* If were were waiting for a timed message queue event, then the
+   * timer was canceled and deleted in task_recover() before this
+   * function was called.
    */
  
   /* Was the task waiting for a message queue to become non-empty? */

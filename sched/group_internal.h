@@ -61,6 +61,8 @@
  * Public Type Definitions
  ****************************************************************************/
 
+typedef int (*foreachchild_t)(pid_t pid, FAR void *arg);
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -87,6 +89,9 @@ void group_leave(FAR struct tcb_s *tcb);
 #ifdef HAVE_GROUP_MEMBERS
 FAR struct task_group_s *group_findbygid(gid_t gid);
 FAR struct task_group_s *group_findbypid(pid_t pid);
+int group_foreachchild(FAR struct task_group_s *group,
+                       foreachchild_t handler, FAR void *arg);
+int group_killchildren(FAR struct task_tcb_s *tcb);
 #endif
 
 /* Convenience functions */
@@ -96,7 +101,7 @@ FAR struct task_group_s *task_getgroup(pid_t pid);
 /* Signaling group members */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-int  group_signal(FAR struct task_group_s *group, FAR siginfo_t *info);
+int  group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo);
 #endif
 #endif /* HAVE_TASK_GROUP */
 

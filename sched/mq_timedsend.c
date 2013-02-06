@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/mq_timedsend.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,13 +182,13 @@ static void mq_sndtimeout(int argc, uint32_t pid)
 int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
                  const struct timespec *abstime)
 {
-  WDOG_ID      wdog;
-  FAR msgq_t  *msgq;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR msgq_t *msgq;
   FAR mqmsg_t *mqmsg = NULL;
-  irqstate_t   saved_state;
-  int          ret = ERROR;
+  irqstate_t saved_state;
+  int ret = ERROR;
 
-  DEBUGASSERT(up_interrupt_context() == false);
+  DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
 
   /* Verify the input parameters -- setting errno appropriately
    * on any failures to verify.
@@ -214,8 +214,8 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
    * before we enter the following critical section.
    */
 
-  wdog = wd_create();
-  if (!wdog)
+  rtcb->waitdog = wd_create();
+  if (!rtcb->waitdog)
     {
       set_errno(EINVAL);
       return ERROR;
@@ -272,7 +272,7 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
         {
           /* Start the watchdog */
 
-          wd_start(wdog, ticks, (wdentry_t)mq_sndtimeout, 1, getpid());
+          wd_start(rtcb->waitdog, ticks, (wdentry_t)mq_sndtimeout, 1, getpid());
 
           /* And wait for the message queue to be non-empty */
 
@@ -282,7 +282,7 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
            * or ETIMEOUT.  Cancel the watchdog timer in any event.
            */
 
-          wd_cancel(wdog);
+          wd_cancel(rtcb->waitdog);
         }
 
       /* That is the end of the atomic operations */
@@ -313,7 +313,8 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
     }
 
   sched_unlock();
-  wd_delete(wdog);
+  wd_delete(rtcb->waitdog);
+  rtcb->waitdog = NULL;
   return ret;
 }
 
