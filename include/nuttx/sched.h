@@ -637,9 +637,9 @@ void task_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook, FAR void 
  * task_vforkabort() may be called if an error occurs between steps 3 and 6.
  */
 
-FAR struct tcb_s *task_vforksetup(start_t retaddr);
-pid_t task_vforkstart(FAR struct tcb_s *child);
-void task_vforkabort(FAR struct tcb_s *child, int errcode);
+FAR struct task_tcb_s *task_vforksetup(start_t retaddr);
+pid_t task_vforkstart(FAR struct task_tcb_s *child);
+void task_vforkabort(FAR struct task_tcb_s *child, int errcode);
 
 /* sched_foreach will enumerate over each task and provide the
  * TCB of each task to a user callback functions.  Interrupts

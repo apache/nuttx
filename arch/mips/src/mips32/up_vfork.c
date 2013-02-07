@@ -114,7 +114,7 @@
 pid_t up_vfork(const struct vfork_s *context)
 {
   struct tcb_s *parent = (FAR struct tcb_s *)g_readytorun.head;
-  struct tcb_s *child;
+  struct task_tcb_s *child;
   size_t stacksize;
   uint32_t newsp;
 #if CONFIG_MIPS32_FRAMEPOINTER
@@ -167,7 +167,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Allocate the stack for the TCB */
 
-  ret = up_create_stack(child, stacksize);
+  ret = up_create_stack((FAR struct tcb_s *)child, stacksize);
   if (ret != OK)
     {
       sdbg("up_create_stack failed: %d\n", ret);
@@ -193,7 +193,7 @@ pid_t up_vfork(const struct vfork_s *context)
    * effort is overkill.
    */
 
-  newsp = (uint32_t)child->adj_stack_ptr - stackutil;
+  newsp = (uint32_t)child->cmn.adj_stack_ptr - stackutil;
   memcpy((void *)newsp, (const void *)context->sp, stackutil);
 
   /* Was there a frame pointer in place before? */
@@ -203,7 +203,7 @@ pid_t up_vfork(const struct vfork_s *context)
       context->fp >= (uint32_t)parent->adj_stack_ptr - stacksize)
     {
       uint32_t frameutil = (uint32_t)parent->adj_stack_ptr - context->fp;
-      newfp = (uint32_t)child->adj_stack_ptr - frameutil;
+      newfp = (uint32_t)child->cmn.adj_stack_ptr - frameutil;
     }
   else
     {
@@ -213,12 +213,12 @@ pid_t up_vfork(const struct vfork_s *context)
   svdbg("Old stack base:%08x SP:%08x FP:%08x\n",
         parent->adj_stack_ptr, context->sp, context->fp);
   svdbg("New stack base:%08x SP:%08x FP:%08x\n",
-        child->adj_stack_ptr, newsp, newfp);
+        child->cmn.adj_stack_ptr, newsp, newfp);
 #else
   svdbg("Old stack base:%08x SP:%08x\n",
         parent->adj_stack_ptr, context->sp);
   svdbg("New stack base:%08x SP:%08x\n",
-        child->adj_stack_ptr, newsp);
+        child->cmn.adj_stack_ptr, newsp);
 #endif
 
  /* Update the stack pointer, frame pointer, global pointer and saved
@@ -228,22 +228,22 @@ pid_t up_vfork(const struct vfork_s *context)
   * indication to the newly started child thread.
   */
 
-  child->xcp.regs[REG_S0]  = context->s0;  /* Saved register s0 */
-  child->xcp.regs[REG_S1]  = context->s1;  /* Saved register s1 */
-  child->xcp.regs[REG_S2]  = context->s2;  /* Saved register s2 */
-  child->xcp.regs[REG_S3]  = context->s3;  /* Volatile register s3 */
-  child->xcp.regs[REG_S4]  = context->s4;  /* Volatile register s4 */
-  child->xcp.regs[REG_S5]  = context->s5;  /* Volatile register s5 */
-  child->xcp.regs[REG_S6]  = context->s6;  /* Volatile register s6 */
-  child->xcp.regs[REG_S7]  = context->s7;  /* Volatile register s7 */
+  child->cmn.xcp.regs[REG_S0]  = context->s0;  /* Saved register s0 */
+  child->cmn.xcp.regs[REG_S1]  = context->s1;  /* Saved register s1 */
+  child->cmn.xcp.regs[REG_S2]  = context->s2;  /* Saved register s2 */
+  child->cmn.xcp.regs[REG_S3]  = context->s3;  /* Volatile register s3 */
+  child->cmn.xcp.regs[REG_S4]  = context->s4;  /* Volatile register s4 */
+  child->cmn.xcp.regs[REG_S5]  = context->s5;  /* Volatile register s5 */
+  child->cmn.xcp.regs[REG_S6]  = context->s6;  /* Volatile register s6 */
+  child->cmn.xcp.regs[REG_S7]  = context->s7;  /* Volatile register s7 */
 #if CONFIG_MIPS32_FRAMEPOINTER
-  child->xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
+  child->cmn.xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
 #else
-  child->xcp.regs[REG_S8]  = context->s8;  /* Volatile register s8 */
+  child->cmn.xcp.regs[REG_S8]  = context->s8;  /* Volatile register s8 */
 #endif
-  child->xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
+  child->cmn.xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
 #if MIPS32_SAVE_GP
-  child->xcp.regs[REG_GP]  = newsp;        /* Global pointer */
+  child->cmn.xcp.regs[REG_GP]  = newsp;        /* Global pointer */
 #endif
 
   /* And, finally, start the child task.  On a failure, task_vforkstart()

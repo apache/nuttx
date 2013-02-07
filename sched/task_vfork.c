@@ -105,7 +105,7 @@
  *
  ****************************************************************************/
 
-FAR struct tcb_s *task_vforksetup(start_t retaddr)
+FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
 {
   struct tcb_s *parent = (FAR struct tcb_s *)g_readytorun.head;
   struct task_tcb_s *child;
@@ -152,7 +152,7 @@ FAR struct tcb_s *task_vforksetup(start_t retaddr)
     }
 
   svdbg("parent=%p, returning child=%p\n", parent, child);
-  return (FAR struct tcb_s *)child;
+  return child;
 
 errout_with_tcb:
   sched_releasetcb((FAR struct tcb_s *)child);
@@ -203,7 +203,7 @@ errout_with_tcb:
  *
  ****************************************************************************/
 
-pid_t task_vforkstart(FAR struct tcb_s *child)
+pid_t task_vforkstart(FAR struct task_tcb_s *child)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   struct tcb_s *parent = (FAR struct tcb_s *)g_readytorun.head;
@@ -226,15 +226,15 @@ pid_t task_vforkstart(FAR struct tcb_s *child)
   name = NULL;
 #endif
 
-  (void)task_argsetup(child, name, (const char **)NULL);
+  (void)task_argsetup(child, name, (FAR char * const *)NULL);
 
   /* Get the assigned pid before we start the task */
 
-  pid = (int)child->pid;
+  pid = (int)child->cmn.pid;
 
   /* Activate the task */
 
-  ret = task_activate(child);
+  ret = task_activate((FAR struct tcb_s *)child);
   if (ret != OK)
     {
       task_vforkabort(child, -ret);
@@ -317,7 +317,7 @@ pid_t task_vforkstart(FAR struct tcb_s *child)
  *
  ****************************************************************************/
 
-void task_vforkabort(FAR struct tcb_s *child, int errcode)
+void task_vforkabort(FAR struct task_tcb_s *child, int errcode)
 {
   /* The TCB was added to the active task list by task_schedsetup() */
 
@@ -325,6 +325,6 @@ void task_vforkabort(FAR struct tcb_s *child, int errcode)
 
   /* Release the TCB */
 
-  sched_releasetcb(child);
+  sched_releasetcb((FAR struct tcb_s *)child);
   set_errno(errcode);
 }

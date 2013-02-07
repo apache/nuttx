@@ -373,8 +373,8 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 #if CONFIG_RR_INTERVAL > 0
   if (policy == SCHED_RR)
     {
-      ptcb->flags    |= TCB_FLAG_ROUND_ROBIN;
-      ptcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
+      ptcb->cmn.flags    |= TCB_FLAG_ROUND_ROBIN;
+      ptcb->cmn.timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
     }
 #endif
 
