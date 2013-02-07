@@ -80,6 +80,8 @@
 #  include "chip/stm32f10xxx_rcc.c"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_rcc.c"
+#elif defined(CONFIG_STM32_STM32F30XX)
+#  include "chip/stm32f30xxx_rcc.c"
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_rcc.c"
 #else
@@ -179,5 +181,3 @@ void stm32_clockenable(void)
 #endif
 }
 #endif
-
-

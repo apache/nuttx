@@ -56,73 +56,67 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* The STM32F3Discovery board features a single 8MHz crystal.  Space is provided
- * for a 32kHz RTC backup crystal, but it is not stuffed.
- *
- * This is the canonical configuration:
- *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 168000000    Determined by PLL configuration
- *   HCLK(Hz)                      : 168000000    (STM32_RCC_CFGR_HPRE)
- *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
- *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
- *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
- *   HSE Frequency(Hz)             : 8000000      (STM32_BOARD_XTAL)
- *   PLLM                          : 8            (STM32_PLLCFG_PLLM)
- *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
- *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
- *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
- *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
- *   Flash Latency(WS)             : 5
- *   Prefetch Buffer               : OFF
- *   Instruction cache             : ON
- *   Data cache                    : ON
- *   Require 48MHz for USB OTG FS, : Enabled
- *   SDIO and RNG clock
- */
 
-/* HSI - 16 MHz RC factory-trimmed
+/* HSI - Internal 8 MHz RC Oscillator
  * LSI - 32 KHz RC
  * HSE - On-board crystal frequency is 8MHz
  * LSE - 32.768 kHz
  */
 
-#define STM32_BOARD_XTAL        8000000ul
+#define STM32_BOARD_XTAL        8000000ul        /* X1 on board */
 
-#define STM32_HSI_FREQUENCY     16000000ul
-#define STM32_LSI_FREQUENCY     32000
+#define STM32_HSI_FREQUENCY     8000000ul
+#define STM32_LSI_FREQUENCY     40000            /* Between 30kHz and 60kHz */
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
-#define STM32_LSE_FREQUENCY     32768
+#define STM32_LSE_FREQUENCY     32768            /* X2 on board */
 
-/* Main PLL Configuration.
- *
- * PLL source is HSE
- * PLL_VCO = (STM32_HSE_FREQUENCY / PLLM) * PLLN
- *         = (8,000,000 / 8) * 336
- *         = 336,000,000
- * SYSCLK  = PLL_VCO / PLLP
- *         = 336,000,000 / 2 = 168,000,000
- * USB OTG FS, SDIO and RNG Clock
- *         =  PLL_VCO / PLLQ
- *         = 48,000,000
- */
+/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is 8MHz (XTAL) x 9 = 72MHz */
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(8)
-#define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(336)
-#define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
-#define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(7)
+#define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
+#define STM32_CFGR_PLLXTPRE     0
+#define STM32_CFGR_PLLMUL       RCC_CFGR_PLLMUL_CLKx9
+#define STM32_PLL_FREQUENCY     (9*STM32_BOARD_XTAL)
 
-#define STM32_SYSCLK_FREQUENCY  168000000ul
+/* Use the PLL and set the SYSCLK source to be the PLL */
 
-/* AHB clock (HCLK) is SYSCLK (168MHz) */
+#define STM32_SYSCLK_SW         RCC_CFGR_SW_PLL
+#define STM32_SYSCLK_SWS        RCC_CFGR_SWS_PLL
+#define STM32_SYSCLK_FREQUENCY  STM32_PLL_FREQUENCY
 
-#define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK  /* HCLK  = SYSCLK / 1 */
-#define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY  /* same as above, to satisfy compiler */
+/* AHB clock (HCLK) is SYSCLK (72MHz) */
 
-/* APB1 clock (PCLK1) is HCLK/4 (42MHz) */
+#define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK
+#define STM32_HCLK_FREQUENCY    STM32_PLL_FREQUENCY
+#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY    /* same as above, to satisfy compiler */
 
-#define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd4     /* PCLK1 = HCLK / 4 */
-#define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
+/* APB2 clock (PCLK2) is HCLK (72MHz) */
+
+#define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK
+#define STM32_PCLK2_FREQUENCY   STM32_HCLK_FREQUENCY
+#define STM32_APB2_CLKIN        (STM32_PCLK2_FREQUENCY)   /* Timers 2-7, 12-14 */
+
+/* APB2 timers 1 and 8 will receive PCLK2. */
+
+#define STM32_APB2_TIM1_CLKIN   (STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM8_CLKIN   (STM32_PCLK2_FREQUENCY)
+
+/* APB1 clock (PCLK1) is HCLK/2 (36MHz) */
+
+#define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd2
+#define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
+
+/* APB1 timers 2-4 will be twice PCLK1 (I presume the remaining will receive PCLK1) */
+
+#define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM3_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM4_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM5_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM6_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM7_CLKIN   (STM32_PCLK1_FREQUENCY)
+
+/* USB divider -- Divide PLL clock by 1.5 */
+
+#define STM32_CFGR_USBPRE       0
 
 /* Timers driven from APB1 will be twice PCLK1 */
 

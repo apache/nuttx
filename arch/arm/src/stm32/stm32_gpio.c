@@ -543,10 +543,6 @@ int stm32_configgpio(uint32_t cfgset)
           case GPIO_SPEED_100MHz:   /* 100 MHz High speed output */
             setting = GPIO_OSPEED_100MHz;
             break;
-#else
-          default:
-            setting = GPIO_OSPEED_50MHz;
-            break;
 #endif
         }
     }

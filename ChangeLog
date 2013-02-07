@@ -4157,3 +4157,5 @@
 	  the STM32 F3 family (still missing some things).
 	* configs/stm32f3discovery:  This will (eventually) be support for
 	  the STM32F3Discovery board.
+	* STM32 F3 and STM32F3Discovery port is complete a ready for test.
+
