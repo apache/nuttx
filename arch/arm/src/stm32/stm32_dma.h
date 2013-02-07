@@ -47,7 +47,7 @@
 
 /* Include the correct DMA register definitions for this STM32 family */
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 #  include "chip/stm32f10xxx_dma.h"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_dma.h"

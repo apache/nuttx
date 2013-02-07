@@ -39,8 +39,8 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
-/* 7 DMA Channels */
+/* These definitions apply to both the STM32 F1 and F3 families */
+/* 12 Channels Total: 7 DMA1 Channels(1-7) and 5 DMA2 channels (1-5) */
 
 #define DMA1 0
 #define DMA2 1
@@ -55,11 +55,19 @@
 #define STM32_DMA_ISR_OFFSET       0x0000 /* DMA interrupt status register */
 #define STM32_DMA_IFCR_OFFSET      0x0004 /* DMA interrupt flag clear register */
 
-#define STM32_DMACHAN_OFFSET(n)    (0x0014*(n))
-#define STM32_DMACHAN_CCR_OFFSET   0x0008
-#define STM32_DMACHAN_CNDTR_OFFSET 0x000c
-#define STM32_DMACHAN_CPAR_OFFSET  0x0010
-#define STM32_DMACHAN_CMAR_OFFSET  0x0014
+#define STM32_DMACHAN_OFFSET(n)    (0x0008 + 0x0014*(n))
+#define STM32_DMACHAN1_OFFSET      0x0008
+#define STM32_DMACHAN2_OFFSET      0x001c
+#define STM32_DMACHAN3_OFFSET      0x0030
+#define STM32_DMACHAN4_OFFSET      0x0044
+#define STM32_DMACHAN5_OFFSET      0x0058
+#define STM32_DMACHAN6_OFFSET      0x006c
+#define STM32_DMACHAN7_OFFSET      0x0080
+
+#define STM32_DMACHAN_CCR_OFFSET   0x0008 /* DMA channel configuration register */
+#define STM32_DMACHAN_CNDTR_OFFSET 0x000c /* DMA channel number of data register */
+#define STM32_DMACHAN_CPAR_OFFSET  0x0010 /* DMA channel peripheral address register */
+#define STM32_DMACHAN_CMAR_OFFSET  0x0014 /* DMA channel 1 memory address register */
 
 #define STM32_DMA_CCR_OFFSET(n)   (STM32_DMACHAN_CCR_OFFSET+STM32_DMACHAN_OFFSET(n))
 #define STM32_DMA_CNDTR_OFFSET(n) (STM32_DMACHAN_CNDTR_OFFSET+STM32_DMACHAN_OFFSET(n))
