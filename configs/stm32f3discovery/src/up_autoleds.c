@@ -47,9 +47,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm32f3discovery-internal.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -72,153 +70,32 @@
 #  define ledvdbg(x...)
 #endif
 
-/* The following definitions map the encoded LED setting to GPIO settings */
-
-#define STM32F3_LED1      (1 << 0)
-#define STM32F3_LED2      (1 << 1)
-#define STM32F3_LED3      (1 << 2)
-#define STM32F3_LED4      (1 << 3)
-
-#define ON_SETBITS_SHIFT  (0)
-#define ON_CLRBITS_SHIFT  (4)
-#define OFF_SETBITS_SHIFT (8)
-#define OFF_CLRBITS_SHIFT (12)
-
-#define ON_BITS(v)        ((v) & 0xff)
-#define OFF_BITS(v)       (((v) >> 8) & 0x0ff)
-#define SETBITS(b)        ((b) & 0x0f)
-#define CLRBITS(b)        (((b) >> 4) & 0x0f)
-
-#define ON_SETBITS(v)     (SETBITS(ON_BITS(v))
-#define ON_CLRBITS(v)     (CLRBITS(ON_BITS(v))
-#define OFF_SETBITS(v)    (SETBITS(OFF_BITS(v))
-#define OFF_CLRBITS(v)    (CLRBITS(OFF_BITS(v))
-
-#define LED_STARTED_ON_SETBITS       ((STM32F3_LED1) << ON_SETBITS_SHIFT)
-#define LED_STARTED_ON_CLRBITS       ((STM32F3_LED2|STM32F3_LED3|STM32F3_LED4) << ON_CLRBITS_SHIFT)
-#define LED_STARTED_OFF_SETBITS      (0 << OFF_SETBITS_SHIFT)
-#define LED_STARTED_OFF_CLRBITS      ((STM32F3_LED1|STM32F3_LED2|STM32F3_LED3|STM32F3_LED4) << OFF_CLRBITS_SHIFT)
-
-#define LED_HEAPALLOCATE_ON_SETBITS  ((STM32F3_LED2) << ON_SETBITS_SHIFT)
-#define LED_HEAPALLOCATE_ON_CLRBITS  ((STM32F3_LED1|STM32F3_LED3|STM32F3_LED4) << ON_CLRBITS_SHIFT)
-#define LED_HEAPALLOCATE_OFF_SETBITS ((STM32F3_LED1) << OFF_SETBITS_SHIFT)
-#define LED_HEAPALLOCATE_OFF_CLRBITS ((STM32F3_LED2|STM32F3_LED3|STM32F3_LED4) << OFF_CLRBITS_SHIFT)
-
-#define LED_IRQSENABLED_ON_SETBITS   ((STM32F3_LED1|STM32F3_LED2) << ON_SETBITS_SHIFT)
-#define LED_IRQSENABLED_ON_CLRBITS   ((STM32F3_LED3|STM32F3_LED4) << ON_CLRBITS_SHIFT)
-#define LED_IRQSENABLED_OFF_SETBITS  ((STM32F3_LED2) << OFF_SETBITS_SHIFT)
-#define LED_IRQSENABLED_OFF_CLRBITS  ((STM32F3_LED1|STM32F3_LED3|STM32F3_LED4) << OFF_CLRBITS_SHIFT)
-
-#define LED_STACKCREATED_ON_SETBITS  ((STM32F3_LED3) << ON_SETBITS_SHIFT)
-#define LED_STACKCREATED_ON_CLRBITS  ((STM32F3_LED1|STM32F3_LED2|STM32F3_LED4) << ON_CLRBITS_SHIFT)
-#define LED_STACKCREATED_OFF_SETBITS ((STM32F3_LED1|STM32F3_LED2) << OFF_SETBITS_SHIFT)
-#define LED_STACKCREATED_OFF_CLRBITS ((STM32F3_LED3|STM32F3_LED4) << OFF_CLRBITS_SHIFT)
-
-#define LED_INIRQ_ON_SETBITS         ((STM32F3_LED1) << ON_SETBITS_SHIFT)
-#define LED_INIRQ_ON_CLRBITS         ((0) << ON_CLRBITS_SHIFT)
-#define LED_INIRQ_OFF_SETBITS        ((0) << OFF_SETBITS_SHIFT)
-#define LED_INIRQ_OFF_CLRBITS        ((STM32F3_LED1) << OFF_CLRBITS_SHIFT)
-
-#define LED_SIGNAL_ON_SETBITS        ((STM32F3_LED2) << ON_SETBITS_SHIFT)
-#define LED_SIGNAL_ON_CLRBITS        ((0) << ON_CLRBITS_SHIFT)
-#define LED_SIGNAL_OFF_SETBITS       ((0) << OFF_SETBITS_SHIFT)
-#define LED_SIGNAL_OFF_CLRBITS       ((STM32F3_LED2) << OFF_CLRBITS_SHIFT)
-
-#define LED_ASSERTION_ON_SETBITS     ((STM32F3_LED4) << ON_SETBITS_SHIFT)
-#define LED_ASSERTION_ON_CLRBITS     ((0) << ON_CLRBITS_SHIFT)
-#define LED_ASSERTION_OFF_SETBITS    ((0) << OFF_SETBITS_SHIFT)
-#define LED_ASSERTION_OFF_CLRBITS    ((STM32F3_LED4) << OFF_CLRBITS_SHIFT)
-
-#define LED_PANIC_ON_SETBITS         ((STM32F3_LED4) << ON_SETBITS_SHIFT)
-#define LED_PANIC_ON_CLRBITS         ((0) << ON_CLRBITS_SHIFT)
-#define LED_PANIC_OFF_SETBITS        ((0) << OFF_SETBITS_SHIFT)
-#define LED_PANIC_OFF_CLRBITS        ((STM32F3_LED4) << OFF_CLRBITS_SHIFT)
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const uint16_t g_ledbits[8] =
+/* This array maps an LED number to GPIO pin configuration */
+
+static const uint32_t g_ledcfg[BOARD_NLEDS] = 
 {
-  (LED_STARTED_ON_SETBITS       | LED_STARTED_ON_CLRBITS |
-   LED_STARTED_OFF_SETBITS      | LED_STARTED_OFF_CLRBITS),
-
-  (LED_HEAPALLOCATE_ON_SETBITS  | LED_HEAPALLOCATE_ON_CLRBITS |
-   LED_HEAPALLOCATE_OFF_SETBITS | LED_HEAPALLOCATE_OFF_CLRBITS),
-
-  (LED_IRQSENABLED_ON_SETBITS   | LED_IRQSENABLED_ON_CLRBITS |
-   LED_IRQSENABLED_OFF_SETBITS  | LED_IRQSENABLED_OFF_CLRBITS),
-
-  (LED_STACKCREATED_ON_SETBITS  | LED_STACKCREATED_ON_CLRBITS |
-   LED_STACKCREATED_OFF_SETBITS | LED_STACKCREATED_OFF_CLRBITS),
-
-  (LED_INIRQ_ON_SETBITS         | LED_INIRQ_ON_CLRBITS |
-   LED_INIRQ_OFF_SETBITS        | LED_INIRQ_OFF_CLRBITS),
-
-  (LED_SIGNAL_ON_SETBITS        | LED_SIGNAL_ON_CLRBITS |
-   LED_SIGNAL_OFF_SETBITS       | LED_SIGNAL_OFF_CLRBITS),
-
-  (LED_ASSERTION_ON_SETBITS     | LED_ASSERTION_ON_CLRBITS |
-   LED_ASSERTION_OFF_SETBITS    | LED_ASSERTION_OFF_CLRBITS),
-
-  (LED_PANIC_ON_SETBITS         | LED_PANIC_ON_CLRBITS |
-   LED_PANIC_OFF_SETBITS        | LED_PANIC_OFF_CLRBITS)
+  GPIO_LED1, GPIO_LED2, GPIO_LED3, GPIO_LED4
+  GPIO_LED5, GPIO_LED6, GPIO_LED7, GPIO_LED8
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static inline void led_clrbits(unsigned int clrbits)
+/****************************************************************************
+ * Name: up_ledonoff
+ ****************************************************************************/
+
+void up_ledonoff(int led, bool state)
 {
-  if ((clrbits & STM32F3_LED1) != 0)
+  if ((unsigned)led < BOARD_NLEDS)
     {
-      stm32_gpiowrite(GPIO_LED1, false);
+      stm32_gpiowrite(g_ledcfg[led], state);
     }
-
-  if ((clrbits & STM32F3_LED2) != 0)
-    {
-      stm32_gpiowrite(GPIO_LED2, false);
-    }
-
-  if ((clrbits & STM32F3_LED3) != 0)
-    {
-      stm32_gpiowrite(GPIO_LED3, false);
-    }
-
-  if ((clrbits & STM32F3_LED4) != 0)
-    {
-      stm32_gpiowrite(GPIO_LED4, false);
-    }
-}
-
-static inline void led_setbits(unsigned int setbits)
-{
-  if ((setbits & STM32F3_LED1) != 0)
-    {
-      stm32_gpiowrite(GPIO_LED1, true);
-    }
-
-  if ((setbits & STM32F3_LED2) != 0)
-    {
-      stm32_gpiowrite(GPIO_LED2, true);
-    }
-
-  if ((setbits & STM32F3_LED3) != 0)
-    {
-      stm32_gpiowrite(GPIO_LED3, true);
-    }
-
-  if ((setbits & STM32F3_LED4) != 0)
-    {
-      stm32_gpiowrite(GPIO_LED4, true);
-    }
-}
-
-static void led_setonoff(unsigned int bits)
-{
-  led_clrbits(CLRBITS(bits));
-  led_setbits(SETBITS(bits));
 }
 
 /****************************************************************************
@@ -231,12 +108,14 @@ static void led_setonoff(unsigned int bits)
 
 void up_ledinit(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+  int i;
 
-   stm32_configgpio(GPIO_LED1);
-   stm32_configgpio(GPIO_LED2);
-   stm32_configgpio(GPIO_LED3);
-   stm32_configgpio(GPIO_LED4);
+  /* Configure LED1-8 GPIOs for output */
+
+  for (i = 0; i < BOARD_NLEDS; i++)
+    {
+      stm32_configgpio(g_ledcfg[i]);
+    }
 }
 
 /****************************************************************************
@@ -245,7 +124,7 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-  led_setonoff(ON_BITS(g_ledbits[led]));
+  up_ledonoff(led, true);
 }
 
 /****************************************************************************
@@ -254,7 +133,7 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  led_setonoff(OFF_BITS(g_ledbits[led]));
+  up_ledonoff(led, false);
 }
 
 #endif /* CONFIG_ARCH_LEDS */

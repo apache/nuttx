@@ -18,9 +18,6 @@ Contents
   - UARTs
   - Timer Inputs/Outputs
   - FPU
-  - FSMC SRAM
-  - SSD1289
-  - UG-2864AMBAG01 / UG-2964SWEG01
   - STM32F3Discovery-specific Configuration Options
   - Configurations
 
@@ -29,9 +26,7 @@ Development Environment
 
   Either Linux or Cygwin on Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
-  toolchains will likely cause problems. Testing was performed using the Cygwin
-  environment because the Raisonance R-Link emulatator and some RIDE7 development tools
-  were used and those tools works only under Windows.
+  toolchains will likely cause problems.
 
 GNU Toolchain Options
 =====================
@@ -268,31 +263,49 @@ NXFLAT Toolchain
 LEDs
 ====
 
-The STM32F3Discovery board has four LEDs; green, organge, red and blue on the
-board. These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+The STM32F3Discovery board has ten LEDs.  Two of these are controlled by
+logic on the board and are not available for software control:
+
+LD1 PWR:   red LED indicates that the board is powered.
+LD2 COM:   LD2 default status is red. LD2 turns to green to indicate that
+           communications are in progress between the PC and the ST-LINK/V2.
+
+And eight can be controlled by software:
+
+User LD3:  red LED is a user LED connected to the I/O PE9 of the
+           STM32F303VCT6.
+User LD4:  blue LED is a user LED connected to the I/O PE8 of the
+           STM32F303VCT6.
+User LD5:  orange LED is a user LED connected to the I/O PE10 of the
+           STM32F303VCT6.
+User LD6:  green LED is a user LED connected to the I/O PE15 of the
+           STM32F303VCT6.
+User LD7:  green LED is a user LED connected to the I/O PE11 of the
+           STM32F303VCT6.
+User LD8:  orange LED is a user LED connected to the I/O PE14 of the
+           STM32F303VCT6.
+User LD9:  blue LED is a user LED connected to the I/O PE12 of the
+           STM32F303VCT6.
+User LD10: red LED is a user LED connected to the I/O PE13 of the
+           STM32F303VCT6.
+
+These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
 defined.  In that case, the usage by the board port is defined in
 include/board.h and src/up_leds.c. The LEDs are used to encode OS-related
 events as follows:
 
-  SYMBOL                Meaning                 LED1*    LED2     LED3     LED4
-                                                green    orange   red      blue
-  -------------------  -----------------------  -------  -------  -------  ------
-  LED_STARTED          NuttX has been started   ON       OFF      OFF      OFF
-  LED_HEAPALLOCATE     Heap has been allocated  OFF      ON       OFF      OFF
-  LED_IRQSENABLED      Interrupts enabled       ON       ON       OFF      OFF
-  LED_STACKCREATED     Idle stack created       OFF      OFF      ON       OFF
-  LED_INIRQ            In an interrupt**        ON       N/C      N/C      OFF
-  LED_SIGNAL           In a signal handler***   N/C      ON       N/C      OFF
-  LED_ASSERTION        An assertion failed      ON       ON       N/C      OFF
-  LED_PANIC            The system has crashed   N/C      N/C      N/C      ON
+  SYMBOL                Meaning                 LED state
+                                                Initially all LEDs are OFF
+  -------------------  -----------------------  ------------- ------------
+  LED_STARTED          NuttX has been started   LD3 ON
+  LED_HEAPALLOCATE     Heap has been allocated  LD4 ON
+  LED_IRQSENABLED      Interrupts enabled       LD4 ON
+  LED_STACKCREATED     Idle stack created       LD6 ON
+  LED_INIRQ            In an interrupt          LD7 should glow
+  LED_SIGNAL           In a signal handler      LD8 might glow
+  LED_ASSERTION        An assertion failed      LD9 ON while handling the assertion
+  LED_PANIC            The system has crashed   LD10 Blinking at 2Hz
   LED_IDLE             STM32 is is sleep mode   (Optional, not used)
-
-  * If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
-    and these LEDs will give you some indication of where the failure was
- ** The normal state is LED3 ON and LED1 faintly glowing.  This faint glow
-    is because of timer interupts that result in the LED being illuminated
-    on a small proportion of the time.
-*** LED2 may also flicker normally if signals are processed.
 
 PWM
 ===
@@ -331,17 +344,10 @@ UART4
 UART5
   RX      PD2
   TX      PC12*
-USART6
-  CK      PC8, PG7**
-  CTS     PG13**, PG15**
-  RTS     PG12**, PG8**
-  RX      PC7*, PG9**
-  TX      PC6, PG14**
 
  * Indicates pins that have other on-board functions and should be used only
    with care (See table 5 in the STM32F3Discovery User Guide).  The rest are
    free I/O pins.
-** Port G pins are not supported by the MCU
  
 Default USART/UART Configuration
 --------------------------------
@@ -382,20 +388,6 @@ TIM8
   CH2     PC7*, PI6
   CH3     PC8, PI7
   CH4     PC9, PI2
-TIM9
-  CH1     PA2, PE5
-  CH2     PA3, PE6
-TIM10
-  CH1     PB8, PF6
-TIM11
-  CH1     PB9*, PF7
-TIM12
-  CH1     PH6**, PB14
-  CH2     PC15, PH9**
-TIM13
-  CH1     PA6*, PF8
-TIM14
-  CH1     PA7*, PF9
 
  * Indicates pins that have other on-board functions and should be used only
    with care (See table 5 in the STM32F3Discovery User Guide).  The rest are
@@ -476,58 +468,6 @@ options as used with the Atollic toolchain in the Make.defs file:
 
   ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
-FSMC SRAM
-=========
-
-On-board SRAM
--------------
-The STM32F3Discovery has no on-board SRAM.  The information here is only for
-reference in case you choose to add some.
-
-Configuration Options
----------------------
-Internal SRAM is available in all members of the STM32 family. The F4 family
-also contains internal CCM SRAM.  This SRAM is different because it cannot
-be used for DMA.  So if DMA needed, then the following should be defined
-to exclude CCM SRAM from the heap:
-
-  CONFIG_STM32_CCMEXCLUDE    : Exclude CCM SRAM from the HEAP
-
-In addition to internal SRAM, SRAM may also be available through the FSMC.
-In order to use FSMC SRAM, the following additional things need to be
-present in the NuttX configuration file:
-
-  CONFIG_STM32_FSMC=y        : Enables the FSMC
-  CONFIG_STM32_FSMC_SRAM=y   : Indicates that SRAM is available via the
-                               FSMC (as opposed to an LCD or FLASH).
-  CONFIG_HEAP2_BASE          : The base address of the SRAM in the FSMC
-                               address space
-  CONFIG_HEAP2_SIZE          : The size of the SRAM in the FSMC
-                               address space
-  CONFIG_MM_REGIONS          : Must be set to a large enough value to
-                               include the FSMC SRAM 
-
-SRAM Configurations
--------------------
-There are 4 possible SRAM configurations:
-
-  Configuration 1. System SRAM (only)
-                   CONFIG_MM_REGIONS == 1
-                   CONFIG_STM32_FSMC_SRAM NOT defined
-                   CONFIG_STM32_CCMEXCLUDE defined
-  Configuration 2. System SRAM and CCM SRAM
-                   CONFIG_MM_REGIONS == 2
-                   CONFIG_STM32_FSMC_SRAM NOT defined
-                   CONFIG_STM32_CCMEXCLUDE NOT defined
-  Configuration 3. System SRAM and FSMC SRAM
-                   CONFIG_MM_REGIONS == 2
-                   CONFIG_STM32_FSMC_SRAM defined
-                   CONFIG_STM32_CCMEXCLUDE defined
-  Configuration 4. System SRAM, CCM SRAM, and FSMC SRAM
-                   CONFIG_MM_REGIONS == 3
-                   CONFIG_STM32_FSMC_SRAM defined
-                   CONFIG_STM32_CCMEXCLUDE NOT defined
-
 Configuration Changes
 ---------------------
 
@@ -554,184 +494,6 @@ in order to successfully build NuttX using the Atollic toolchain WITH FPU suppor
 See the section above on Toolchains, NOTE 2, for explanations for some of
 the configuration settings.  Some of the usual settings are just not supported
 by the "Lite" version of the Atollic toolchain.
-
-SSD1289
-=======
-
-I purchased an LCD display on eBay from China.  The LCD is 320x240 RGB565 and
-is based on an SSD1289 LCD controller and an XPT2046 touch IC.  The pin out
-from the 2x16 connect on the LCD is labeled as follows:
-
-LCD CONNECTOR:          SSD1289 MPU INTERFACE PINS:
-
-   +------+------+      DEN     I  Display enable pin
-1  | GND  | 3V3  |  2   VSYNC   I  Frame synchronization signal
-   +------+------+      HSYNC   I  Line synchronization signal
-3  | D1   | D0   |  4   DOTCLK  I  Dot clock and OSC source
-   +------+------+      DC      I  Data or command
-5  | D3   | D2   |  6   E (~RD) I  Enable/Read strobe
-   +------+------+      R (~WR) I  Read/Write strobe
-7  | D5   | D4   |  8   D0-D17  IO For parallel mode, 8/9/16/18 bit interface
-   +------+------+      WSYNC   O  RAM write synchronizatin output
-9  | D7   | D6   | 10   ~RES    I  System reset
-   +------+------+      ~CS     I  Chip select of serial interface
-11 | D9   | D8   | 12   SCK     I  Clock of serial interface
-   +------+------+      SDI     I  Data input in serial mode
-13 | D11  | D10  | 14   SDO     O  Data output in serial moce
-   +------+------+
-15 | D13  | D12  | 16
-   +------+------+
-17 | D15  | D14  | 18
-   +------+------+
-19 | RS   | CS   | 20
-   +------+------+
-21 | RD   | WR   | 22  NOTES:
-   +------+------+
-23 |BL_CNT|RESET | 24  BL_CNT is the PWM backlight level control.
-   +------+------+
-25 |TP_RQ |TP_S0 | 26  These pins are for the touch panel: TP_REQ
-   +------+------+     TP_S0, TP_SI, TP_SCX, and TP_CS
-27 | NC   |TP_SI | 28
-   +------+------+
-29 | NC   |TP_SCX| 30
-   +------+------+
-31 | NC   |TP_CS | 32
-   +------+------+
-
-MAPPING TO STM32 F4:
-
-  ---------------- -------------- ----------------------------------
-   STM32 FUNCTION  LCD PIN       STM32F3Discovery PIN
-  ---------------- -------------- ----------------------------------
-   FSMC_D0          D0     pin 4   PD14 P1 pin 46 Conflict (Note 1)
-   FSMC_D1          D1     pin 3   PD15 P1 pin 47 Conflict (Note 2)
-   FSMC_D2          D2     pin 6   PD0  P2 pin 36 Free I/O
-   FSMC_D3          D3     pin 5   PD1  P2 pin 33 Free I/O
-   FSMC_D4          D4     pin 8   PE7  P1 pin 25 Free I/O
-   FSMC_D5          D5     pin 7   PE8  P1 pin 26 Free I/O
-   FSMC_D6          D6     pin 10  PE9  P1 pin 27 Free I/O
-   FSMC_D7          D7     pin 9   PE10 P1 pin 28 Free I/O
-   FSMC_D8          D8     pin 12  PE11 P1 pin 29 Free I/O
-   FSMC_D9          D9     pin 11  PE12 P1 pin 30 Free I/O
-   FSMC_D10         D10    pin 14  PE13 P1 pin 31 Free I/O
-   FSMC_D11         D11    pin 13  PE14 P1 pin 32 Free I/O
-   FSMC_D12         D12    pin 16  PE15 P1 pin 33 Free I/O
-   FSMC_D13         D13    pin 15  PD8  P1 pin 40 Free I/O
-   FSMC_D14         D14    pin 18  PD9  P1 pin 41 Free I/O
-   FSMC_D15         D15    pin 17  PD10 P1 pin 42 Free I/O
-   FSMC_A16         RS     pin 19  PD11 P1 pin 27 Free I/O
-   FSMC_NE1         ~CS    pin 10  PD7  P2 pin 27 Free I/O
-   FSMC_NWE         ~WR    pin 22  PD5  P2 pin 29 Conflict (Note 3)
-   FSMC_NOE         ~RD    pin 21  PD4  P2 pin 32 Conflict (Note 4)
-   PC6              RESET  pin 24  PC6  P2 pin 47 Free I/O
-   Timer ouput      BL_CNT pin 23  (to be determined)
-  ---------------- -------------- ----------------------------------
-
-   1 Used for the RED LED
-   2 Used for the BLUE LED
-   3 Used for the RED LED and for OTG FS Overcurrent.  It may be okay to use
-     for the parallel interface if PC0 is held high (or floating).  PC0 enables
-     the STMPS2141STR IC power switch that drives the OTG FS host VBUS.
-   4 Also the reset pin for the CS43L22 audio Codec.
-
-NOTE:  The configuration to test this LCD configuration is available at
-configs/stm32f3discovery/nxlines.  As of this writing, I have not seen the
-LCD working so I probaby have some things wrong.
-
-I might need to use a bit-baning interface.  Below is the pin configurationf
-of a similar LCD to support a (write-only), bit banging interface:
-
-  LCD PIN   BOARD CONNECTION
-  LEDA      5V
-  VCC       5V
-  RD        3.3V
-  GND       GND
-  DB0-7     Port C pins configured as outputs
-  DB8-15    Port A pins configured as outputs
-  RS        Pin configured as output
-  WR        Pin configured as output
-  CS        Pin configured as output
-  RSET      Pin configured as output
-
-The following summarize the bit banging oprations:
-
-  /* Rese the LCD */
-  void Reset(void)
-  {
-    Set RSET output
-    delay
-    Clear RSET output
-    delay
-    Set RSET output
-  }
-
-  /* Write 16-bits of whatever */
-  void Write16(uint8_t ms, uint8_t ls)
-  {
-    Set port A to ms
-    Set port B to ls
-
-    Clear WR pin
-    Set   WR pin
-  }
-
-  /* Set the index register to an LCD register address */
-  void Index(uint8_t address)
-  {
-    Clear RS
-    Write16(0, address);
-  }
-
-  /* Write data to the LCD register or GRAM memory */
-  void WriteData(uin16_t data)
-  {
-    Set RS
-    Write16(data >> 8, data & 0xff);
-  }
-
-  /* Write to a register */
-  void WriteRegister(uint8_t address, uint16_t data)
-  {
-    Index(address);
-    WriteData(data);
-  }
-
-UG-2864AMBAG01 / UG-2964SWEG01
-==============================
-
-I purchased an OLED display on eBay.  The OLED is 128x64 monochrome and
-is based on an UG-2864AMBAG01 OLED controller.  The OLED can run in either
-parallel or SPI mode.  I am using SPI mode.  In SPI mode, the OLED is
-write only so the driver keeps a 128*64/8 = 1KB framebuffer to remember
-the display contents:
-
-Here is how I have the OLED connected.  But you can change this with the
-settings in include/board.h and src/stm324fdiscovery-internal.h.  Connector
-pinout for the UG-2864AMBAG01 is specific to the theO.net display board
-that I am using:
-
-  --------------------------+----------------------------------------------
-  Connector CON10 J1:       | STM32F3Discovery
-  --------------+-----------+----------------------------------------------
-  CON10 J1:     | CON20 J2: | P1/P2:
-  --------------+-----------+----------------------------------------------
-  1  3v3        | 3,4 3v3   | P2 3V
-  3  /RESET     | 8 /RESET  | P2 PB6 (Arbitrary selection)
-  5  /CS        | 7 /CS     | P2 PB7 (Arbitrary selection)
-  7  A0         | 9 A0      | P2 PB8 (Arbitrary selection)
-  9  LED+ (N/C) | -----     | -----
-  2  5V Vcc     | 1,2 Vcc   | P2 5V
-  4  DI         | 18 D1/SI  | P1 PA7 (GPIO_SPI1_MOSI == GPIO_SPI1_MOSI_1 (1))
-  6  SCLK       | 19 D0/SCL | P1 PA5 (GPIO_SPI1_SCK == GPIO_SPI1_SCK_1 (1))
-  8  LED- (N/C) | -----     | ------
-  10 GND        | 20 GND    | P2 GND
-  --------------+-----------+----------------------------------------------
-  (1) Required because of on-board MEMS
-  -------------------------------------------------------------------------
-
-Darcy Gong recently added support for the UG-2964SWEG01 OLED which is also
-an option with this configuratin.  I have little technical information about
-the UG-2964SWEG01 interface (see configs/stm32f3discovery/src/up_ug2864sweg01.c).
 
 STM32F3Discovery-specific Configuration Options
 ===============================================
@@ -788,17 +550,6 @@ STM32F3Discovery-specific Configuration Options
 
     CONFIG_STM32_CCMEXCLUDE - Exclude CCM SRAM from the HEAP
 
-    In addition to internal SRAM, SRAM may also be available through the FSMC.
-    In order to use FSMC SRAM, the following additional things need to be
-    present in the NuttX configuration file:
-
-    CONFIG_STM32_FSMC_SRAM - Indicates that SRAM is available via the
-      FSMC (as opposed to an LCD or FLASH).
-
-    CONFIG_HEAP2_BASE - The base address of the SRAM in the FSMC address space (hex)
-
-    CONFIG_HEAP2_SIZE - The size of the SRAM in the FSMC address space (decimal)
-
     CONFIG_ARCH_IRQPRIO - The STM32F3Discovery supports interrupt prioritization
 
        CONFIG_ARCH_IRQPRIO=y
@@ -830,25 +581,21 @@ STM32F3Discovery-specific Configuration Options
 
     AHB1
     ----
-    CONFIG_STM32_CRC
-    CONFIG_STM32_BKPSRAM
-    CONFIG_STM32_CCMDATARAM
     CONFIG_STM32_DMA1
     CONFIG_STM32_DMA2
-    CONFIG_STM32_ETHMAC
-    CONFIG_STM32_OTGHS
+    CONFIG_STM32_CRC
+    CONFIG_STM32_TSC
 
     AHB2
     ----
-    CONFIG_STM32_DCMI
-    CONFIG_STM32_CRYP
-    CONFIG_STM32_HASH
-    CONFIG_STM32_RNG
-    CONFIG_STM32_OTGFS
+    (GPIOs are always enabled)
 
     AHB3
     ----
-    CONFIG_STM32_FSMC
+    CONFIG_STM32_ADC1
+    CONFIG_STM32_ADC2
+    CONFIG_STM32_ADC3
+    CONFIG_STM32_ADC4
 
     APB1
     ----
@@ -858,9 +605,6 @@ STM32F3Discovery-specific Configuration Options
     CONFIG_STM32_TIM5
     CONFIG_STM32_TIM6
     CONFIG_STM32_TIM7
-    CONFIG_STM32_TIM12
-    CONFIG_STM32_TIM13
-    CONFIG_STM32_TIM14
     CONFIG_STM32_WWDG
     CONFIG_STM32_IWDG
     CONFIG_STM32_SPI2
@@ -871,28 +615,21 @@ STM32F3Discovery-specific Configuration Options
     CONFIG_STM32_UART5
     CONFIG_STM32_I2C1
     CONFIG_STM32_I2C2
-    CONFIG_STM32_I2C3
+    CONFIG_STM32_USB
     CONFIG_STM32_CAN1
-    CONFIG_STM32_CAN2
-    CONFIG_STM32_DAC1
-    CONFIG_STM32_DAC2
     CONFIG_STM32_PWR -- Required for RTC
+    CONFIG_STM32_DAC1
 
     APB2
     ----
+    CONFIG_STM32_SYSCFG
     CONFIG_STM32_TIM1
+    CONFIG_STM32_SPI1
     CONFIG_STM32_TIM8
     CONFIG_STM32_USART1
-    CONFIG_STM32_USART6
-    CONFIG_STM32_ADC1
-    CONFIG_STM32_ADC2
-    CONFIG_STM32_ADC3
-    CONFIG_STM32_SDIO
-    CONFIG_STM32_SPI1
-    CONFIG_STM32_SYSCFG
-    CONFIG_STM32_TIM9
-    CONFIG_STM32_TIM10
-    CONFIG_STM32_TIM11
+    CONFIG_STM32_TIM15
+    CONFIG_STM32_TIM16
+    CONFIG_STM32_TIM17
 
   Timer devices may be used for different purposes.  One special purpose is
   to generate modulated outputs for such things as motor control.  If CONFIG_STM32_TIMn
@@ -974,32 +711,6 @@ STM32F3Discovery-specific Configuration Options
     CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.
 
-  STM32 USB OTG FS Host Driver Support
-
-  Pre-requisites
- 
-   CONFIG_USBDEV          - Enable USB device support
-   CONFIG_USBHOST         - Enable USB host support
-   CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
-   CONFIG_STM32_SYSCFG    - Needed
-   CONFIG_SCHED_WORKQUEUE - Worker thread support is required
- 
-  Options:
- 
-   CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
-     Default 128 (512 bytes)
-   CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
-     in 32-bit words.  Default 96 (384 bytes)
-   CONFIG_STM32_OTGFS_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
-     words.  Default 96 (384 bytes)
-   CONFIG_STM32_OTGFS_DESCSIZE - Maximum size of a descriptor.  Default: 128
-   CONFIG_STM32_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
-     want to do that?
-   CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
-     debug.  Depends on CONFIG_DEBUG.
-   CONFIG_STM32_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
-     packets. Depends on CONFIG_DEBUG.
-
 Configurations
 ==============
 
@@ -1017,99 +728,6 @@ instead of configure.sh:
     configure.bat STM32F3Discovery\<subdir>
 
 Where <subdir> is one of the following:
-
-  cxxtest:
-  -------
-
-  The C++ standard libary test at apps/examples/cxxtest configuration.  This
-  test is used to verify the uClibc++ port to NuttX.  This configuration may
-  be selected as follows:
-
-    cd <nuttx-directory>/tools
-    ./configure.sh sim/cxxtest
-
-  NOTES:
-
-  1. Before you can use this example, you must first install the uClibc++
-     C++ library.  This is located outside of the NuttX source tree at
-     misc/uClibc++ in SVN.  See the README.txt file for instructions on
-     how to install uClibc++
-
-  2. This configuration uses the mconf-based configuration tool.  To
-     change this configuration using that tool, you should:
-
-     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-        and misc/tools/
-
-     b. Execute 'make menuconfig' in nuttx/ in order to start the
-        reconfiguration process.
-
-  3. Ideally, you should build with a toolchain based on GLIBC or
-     uClibc++.  It you use a toolchain based on newlib, you may see
-     an error like the following:
-
-     .../lib/libsupc++.a(vterminate.o): In function `__gnu_cxx::__verbose_terminate_handler()':
-     vterminate.cc:(....): undefined reference to `_impure_ptr'
-
-     Here is a quick'n'dirty fix:
-
-     1. Get the directory where you can find libsupc++:
-
-        arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -print-file-name=libsupc++.a
-
-     2. Go to that directory and save a copy of vterminate.o (in case you
-        want to restore it later:
-
-        cd <the-directory-containing-libsupc++.a>
-        arm-none-eabi-ar.exe -x libsupc++.a vterminate.o
-
-     3. Then remove vterminate.o from the library.  At build time, the
-        uClibc++ package will provide a usable replacement vterminate.o.
-
-     Steps 2 and 3 will require root privileges on most systems (not Cygwin).
-
-     Now NuttX should link with no problem.  If you want to restore the
-     vterminate.o that you removed from libsupc++, you can do that with:
-
-       arm-none-eabi-ar.exe rcs libsupc++.a vterminate.o
-        
-  4. Exceptions are enabled and workking (CONFIG_UCLIBCXX_EXCEPTIONS=y)
-
-  elf:
-  ---
-
-    This configuration derives from the ostest configuration.  It has
-    been modified to us apps/examples/elf in order to test the ELF
-    loader.
-
-    NOTES:
- 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Default platform/toolchain:
-
-       CONFIG_HOST_WINDOWS=y         : Windows
-       CONFIG_WINDOWS_CYGWIN=y       : Cygwin environment on Windows
-       CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-
-    3. By default, this project assumes that you are *NOT* using the DFU
-       bootloader.
- 
-    4. It appears that you cannot excute from CCM RAM.  This is why the
-       following definition appears in the defconfig file:
-
-       CONFIG_STM32_CCMEXCLUDE=y
-
-    5. This configuration requires that you have the genromfs tool installed
-       on your system and that you have the full path to the installed genromfs
-       executable in PATH variable (see apps/examples/README.txt)
 
   ostest:
   ------
@@ -1356,151 +974,6 @@ Where <subdir> is one of the following:
 
        nsh> umount /mnt/stuff
 
-  nxlines:
-  ------
-    An example using the NuttX graphics system (NX).   This example focuses on
-    placing lines on the background in various orientations.
-
-      CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-      CONFIG_LCD_LANDSCAPE=y        : 320x240 landscape orientation
-
-    The STM32F3Discovery board does not have any graphics capability.  This
-    configuration assumes that you have connected an SD1289-based LCD as
-    described above under "SSD1289".  NOTE:  At present, it has not been
-    proven that the STM32F3Discovery can actually drive an LCD.  There are
-    some issues with how some of the dedicated FSMC pins are used on the
-    boards.  This configuration may not be useful and may only serve as
-    an illustration of how to build for th SSD1289 LCD.
-
-  NOTES:
-
-  1. As of this writing, I have not seen the LCD work!
-
-  2. This configuration uses the mconf-based configuration tool.  To
-     change this configuration using that tool, you should:
-
-     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-        and misc/tools/
-
-     b. Execute 'make menuconfig' in nuttx/ in order to start the
-        reconfiguration process.
-
-  3. This configured can be re-configured to use either the
-     UG-2864AMBAG01 or UG-2864SWEG01 0.96 inch OLEDs by adding
-     or changing the following items in the configuration (using
-     'make menuconfig'):
-
-     +CONFIG_SPI_CMDDATA=y
-
-     -CONFIG_LCD_MAXCONTRAST=1
-     -CONFIG_LCD_MAXPOWER=255
-     +CONFIG_LCD_MAXCONTRAST=255
-     +CONFIG_LCD_MAXPOWER=1
-
-     -CONFIG_LCD_SSD1289=y
-     -CONFIG_SSD1289_PROFILE1=y
-     +CONFIG_LCD_UG2864AMBAG01=y              : For the UG-2964AMBAG01
-     +CONFIG_UG2864AMBAG01_SPIMODE=3
-     +CONFIG_UG2864AMBAG01_FREQUENCY=3500000
-     +CONFIG_UG2864AMBAG01_NINTERFACES=1
-
-     -CONFIG_NX_DISABLE_1BPP=y
-     +CONFIG_NX_DISABLE_16BPP=y
-
-     -CONFIG_EXAMPLES_NXLINES_BGCOLOR=0x0320
-     -CONFIG_EXAMPLES_NXLINES_LINEWIDTH=16
-     -CONFIG_EXAMPLES_NXLINES_LINECOLOR=0xffe0
-     -CONFIG_EXAMPLES_NXLINES_BORDERWIDTH=4
-     -CONFIG_EXAMPLES_NXLINES_BORDERCOLOR=0xffe0
-     -CONFIG_EXAMPLES_NXLINES_CIRCLECOLOR=0xf7bb
-     -CONFIG_EXAMPLES_NXLINES_BPP=16
-     +CONFIG_EXAMPLES_NXLINES_BGCOLOR=0x00
-     +CONFIG_EXAMPLES_NXLINES_LINEWIDTH=4
-     +CONFIG_EXAMPLES_NXLINES_LINECOLOR=0x01
-     +CONFIG_EXAMPLES_NXLINES_BORDERWIDTH=2
-     +CONFIG_EXAMPLES_NXLINES_BORDERCOLOR=0x01
-     +CONFIG_EXAMPLES_NXLINES_CIRCLECOLOR=0x00
-     +CONFIG_EXAMPLES_NXLINES_BPP=1
-     +CONFIG_EXAMPLES_NXLINES_EXTERNINIT=y
-
-     There are some issues with with the presentation... some tuning of the
-     configuration could fix that.  Lower resolution displays are also more
-     subject to the "fat, flat line bug" that I need to fix someday.  See
-     http://www.nuttx.org/doku.php?id=wiki:graphics:nxgraphics for a description
-     of the fat, flat line bug.
-
-  pm:
-  --
-    This is a configuration that is used to test STM32 power management, i.e.,
-    to test that the board can go into lower and lower states of power usage
-    as a result of inactivity.  This configuration is based on the nsh2
-    configuration with modifications for testing power management.  This
-    configuration should provide some guideline for power management in your
-    STM32 application.
-
-      CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-
-    CONFIG_PM_CUSTOMINIT and CONFIG_IDLE_CUSTOM are necessary parts of the
-    PM configuration:
-
-      CONFIG_PM_CUSTOMINIT=y
-
-    CONFIG_PM_CUSTOMINIT moves the PM initialization from arch/arm/src/stm32/stm32_pminitialiaze.c
-    to configs/stm3210-eval/src/up_pm.c.  This allows us to support board-
-    specific PM initialization.
-    
-      CONFIG_IDLE_CUSTOM=y
-
-    The bulk of the PM activities occur in the IDLE loop.  The IDLE loop is
-    special because it is what runs when there is no other task running.  Therefore
-    when the IDLE executes, we can be assure that nothing else is going on; this
-    is the ideal condition for doing reduced power management.
-
-    The configuration CONFIG_IDLE_CUSTOM allows us to "steal" the normal STM32
-    IDLE loop (of arch/arm/src/stm32/stm32_idle.c) and replace this with our own
-    custom IDLE loop (at configs/stm3210-eval/src/up_idle.c).
-
-    Here are some additional things to note in the configuration:
-
-      CONFIG_PM_BUTTONS=y
-    
-    CONFIG_PM_BUTTONS enables button support for PM testing.  Buttons can drive
-    EXTI interrupts and EXTI interrrupts can be used to wakeup for certain reduced
-    power modes (STOP mode).  The use of the buttons here is for PM testing purposes
-    only; buttons would normally be part the application code and CONFIG_PM_BUTTONS
-    would not be defined.
-
-      CONFIG_RTC_ALARM=y
-
-    The RTC alarm is used to wake up from STOP mode and to transition to
-    STANDBY mode.  This used of the RTC alarm could conflict with other uses of
-    the RTC alarm in your application.
-
-  posix_spawn:
-  ------------
-    This configuration directory, performs a simple test os the posix_spawn
-    interface using apps/examples/posix_spawn.
-
-    NOTES:
- 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Default toolchain:
-
-       CONFIG_HOST_WINDOWS=y         : Builds under windows
-       CONFIG_WINDOWS_CYGWIN=y       : Using Cygwin and
-       CONFIG_STM32_CODESOURCERYW=y  : The native Windows CodeSourcery toolchain
-
-    3. By default, this project assumes that you are *NOT* using the DFU
-       bootloader.
- 
   usbnsh:
   -------
 
@@ -1572,41 +1045,3 @@ Where <subdir> is one of the following:
       CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is NOT the console
       CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
       CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
-
-  winbuild:
-  --------
-
-    This is a version of the apps/example/ostest, but configure to build natively
-    in the Windows CMD shell.
-
-    NOTES:
-
-    1. The beginnings of a Windows native build are in place but still not full
-       usable as of this writing.  The windows native build logic is currently
-       separate and must be started by:
-
-        make -f Makefile.win
-
-      This build:
-
-        - Uses all Windows style paths
-        - Uses primarily Windows batch commands from cmd.exe, with
-        - A few extensions from GNUWin32 (or MSYS is you prefer)
-
-      In this build, you cannot use a Cygwin or MSYS shell. Rather the build must
-      be performed in a Windows console. Here is a better shell than than the
-      standard issue, CMD.exe shell:  ConEmu which can be downloaded from:
-      http://code.google.com/p/conemu-maximus5/
-
-       CONFIG_HOST_WINDOWS=y         : Windows
-       CONFIG_WINDOWS_NATIVE=y       : Native Windows environment
-       CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-
-      Build Tools.  The build still relies on some Unix-like commands.  I use
-      the GNUWin32 tools that can be downloaded from http://gnuwin32.sourceforge.net/.
-      The MSYS tools are probably also a option but are likely lower performance
-      since they are based on Cygwin 1.3.
-
-      Host Compiler:  I use the MingGW compiler which can be downloaded from
-      http://www.mingw.org/.  If you are using GNUWin32, then it is recommended
-      the you not install the optional MSYS components as there may be conflicts.
