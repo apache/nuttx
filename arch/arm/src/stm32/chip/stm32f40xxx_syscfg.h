@@ -1,7 +1,7 @@
 /****************************************************************************************************
- * arch/arm/src/stm32/chip/stm32_syscfg.h
+ * arch/arm/src/stm32/chip/stm32f40xxx_syscfg.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_SYSCFG_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32_SYSCFG_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_SYSCFG_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_SYSCFG_H
 
 /****************************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#ifdef CONFIG_STM32_STM32F40XX
 
 /****************************************************************************************************
  * Pre-processor Definitions
@@ -147,5 +147,5 @@
 #define SYSCFG_CMPCR_CMPPD            (1 << 0)  /* Bit 0: Compensation cell power-down */
 #define SYSCFG_CMPCR_READY            (1 << 8)  /* Bit 8: Compensation cell ready flag */
 
-#endif /* CONFIG_STM32_STM32F20XX || CONFIG_STM32_STM32F40XX */
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_SYSCFG_H */
+#endif /* CONFIG_STM32_STM32F40XX */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_SYSCFG_H */

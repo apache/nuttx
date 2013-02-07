@@ -52,6 +52,9 @@
 #elif defined(CONFIG_STM32_HIGHDENSITY)
 #  define STM32_FLASH_NPAGES        256
 #  define STM32_FLASH_PAGESIZE      2048
+#elif defined(CONFIG_STM32_STM32F30XX)
+#  define STM32_FLASH_NPAGES        128
+#  define STM32_FLASH_PAGESIZE      (2*1024)
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define STM32_FLASH_NPAGES        8
 #  define STM32_FLASH_PAGESIZE      (128*1024)
@@ -67,7 +70,7 @@
 #define STM32_FLASH_SR_OFFSET      0x000c
 #define STM32_FLASH_CR_OFFSET      0x0010
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 #  define STM32_FLASH_AR_OFFSET    0x0014
 #  define STM32_FLASH_OBR_OFFSET   0x001c
 #  define STM32_FLASH_WRPR_OFFSET  0x0020
@@ -83,7 +86,7 @@
 #define STM32_FLASH_SR             (STM32_FLASHIF_BASE+STM32_FLASH_SR_OFFSET)
 #define STM32_FLASH_CR             (STM32_FLASHIF_BASE+STM32_FLASH_CR_OFFSET)
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 #  define STM32_FLASH_AR           (STM32_FLASHIF_BASE+STM32_FLASH_AR_OFFSET)
 #  define STM32_FLASH_OBR          (STM32_FLASHIF_BASE+STM32_FLASH_OBR_OFFSET)
 #  define STM32_FLASH_WRPR         (STM32_FLASHIF_BASE+STM32_FLASH_WRPR_OFFSET)
@@ -106,47 +109,53 @@
 #  define FLASH_ACR_LATENCY_6       (6 << FLASH_ACR_LATENCY_SHIFT)    /* 110: Six wait states */
 #  define FLASH_ACR_LATENCY_7       (7 << FLASH_ACR_LATENCY_SHIFT)    /* 111: Seven wait states */
 
-#if defined(CONFIG_STM32_STM32F10XX)
-#  define FLASH_ACR_HLFCYA          (1 << 3)                /* FLASH half cycle access */
-#  define FLASH_ACR_PRTFBE          (1 << 4)                /* FLASH prefetch enable */
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
+#  define FLASH_ACR_HLFCYA          (1 << 3)  /* Bit 3: FLASH half cycle access */
+#  define FLASH_ACR_PRTFBE          (1 << 4)  /* Bit 4: FLASH prefetch enable */
+#  ifdef CONFIG_STM32_STM32F30XX
+#    define FLASH_ACR_PRFTBS        (1 << 5)  /* Bit 5: FLASH prefetch buffer status */
+#  endif
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#  define FLASH_ACR_PRFTEN          (1 << 8)                /* FLASH prefetch enable */
-#  define FLASH_ACR_ICEN            (1 << 9)                /* Bit 9: Instruction cache enable */
-#  define FLASH_ACR_DCEN            (1 << 10)               /* Bit 10: Data cache enable */
-#  define FLASH_ACR_ICRST           (1 << 11)               /* Bit 11: Instruction cache reset */
-#  define FLASH_ACR_DCRST           (1 << 12)               /* Bit 12: Data cache reset */
+#  define FLASH_ACR_PRFTEN          (1 << 8)  /* FLASH prefetch enable */
+#  define FLASH_ACR_ICEN            (1 << 9)  /* Bit 9: Instruction cache enable */
+#  define FLASH_ACR_DCEN            (1 << 10) /* Bit 10: Data cache enable */
+#  define FLASH_ACR_ICRST           (1 << 11) /* Bit 11: Instruction cache reset */
+#  define FLASH_ACR_DCRST           (1 << 12) /* Bit 12: Data cache reset */
 #endif
 
 /* Flash Status Register (SR) */
 
-#if defined(CONFIG_STM32_STM32F10XX)
-#  define FLASH_SR_BSY              (1 << 0)                /* Busy */
-#  define FLASH_SR_PGERR            (1 << 2)                /* Programming Error */
-#  define FLASH_SR_WRPRT_ERR        (1 << 4)                /* Write Protection Error */
-#  define FLASH_SR_EOP              (1 << 5)                /* End of Operation */
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
+#  define FLASH_SR_BSY              (1 << 0)  /* Busy */
+#  define FLASH_SR_PGERR            (1 << 2)  /* Programming Error */
+#  define FLASH_SR_WRPRT_ERR        (1 << 4)  /* Write Protection Error */
+#  define FLASH_SR_EOP              (1 << 5)  /* End of Operation */
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#  define FLASH_SR_EOP              (1 << 0)                /* Bit 0: End of operation */
-#  define FLASH_SR_OPERR            (1 << 1)                /* Bit 1: Operation error */
-#  define FLASH_SR_WRPERR           (1 << 4)                /* Bit 4: Write protection error */
-#  define FLASH_SR_PGAERR           (1 << 5)                /* Bit 5: Programming alignment error */
-#  define FLASH_SR_PGPERR           (1 << 6)                /* Bit 6: Programming parallelism error */
-#  define FLASH_SR_PGSERR           (1 << 7)                /* Bit 7: Programming sequence error */
-#  define FLASH_SR_BSY              (1 << 16)               /* Bit 16: Busy */
+#  define FLASH_SR_EOP              (1 << 0)  /* Bit 0: End of operation */
+#  define FLASH_SR_OPERR            (1 << 1)  /* Bit 1: Operation error */
+#  define FLASH_SR_WRPERR           (1 << 4)  /* Bit 4: Write protection error */
+#  define FLASH_SR_PGAERR           (1 << 5)  /* Bit 5: Programming alignment error */
+#  define FLASH_SR_PGPERR           (1 << 6)  /* Bit 6: Programming parallelism error */
+#  define FLASH_SR_PGSERR           (1 << 7)  /* Bit 7: Programming sequence error */
+#  define FLASH_SR_BSY              (1 << 16) /* Bit 16: Busy */
 #endif
 
 /* Flash Control Register (CR) */
 
-#if defined(CONFIG_STM32_STM32F10XX)
-#  define FLASH_CR_PG               (1 << 0)                /* Program Page */
-#  define FLASH_CR_PER              (1 << 1)                /* Page Erase */
-#  define FLASH_CR_MER              (1 << 2)                /* Mass Erase */
-#  define FLASH_CR_OPTPG            (1 << 4)                /* Option Byte Programming */
-#  define FLASH_CR_OPTER            (1 << 5)                /* Option Byte Erase */
-#  define FLASH_CR_STRT             (1 << 6)                /* Start Erase */
-#  define FLASH_CR_LOCK             (1 << 7)                /* Page Locked or Lock Page */
-#  define FLASH_CR_OPTWRE           (1 << 9)                /* Option Bytes Write Enable */
-#  define FLASH_CR_ERRIE            (1 << 10)               /* Error Interrupt Enable */
-#  define FLASH_CR_EOPIE            (1 << 12)               /* End of Program Interrupt Enable */
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
+#  define FLASH_CR_PG               (1 << 0)  /* Bit 0: Program Page */
+#  define FLASH_CR_PER              (1 << 1)  /* Bit 1: Page Erase */
+#  define FLASH_CR_MER              (1 << 2)  /* Bit 2: Mass Erase */
+#  define FLASH_CR_OPTPG            (1 << 4)  /* Bit 4: Option Byte Programming */
+#  define FLASH_CR_OPTER            (1 << 5)  /* Bit 5: Option Byte Erase */
+#  define FLASH_CR_STRT             (1 << 6)  /* Bit 6: Start Erase */
+#  define FLASH_CR_LOCK             (1 << 7)  /* Bit 7: Page Locked or Lock Page */
+#  define FLASH_CR_OPTWRE           (1 << 9)  /* Bit 8: Option Bytes Write Enable */
+#  define FLASH_CR_ERRIE            (1 << 10) /* Bit 10: Error Interrupt Enable */
+#  define FLASH_CR_EOPIE            (1 << 12) /* Bit 12: End of Program Interrupt Enable */
+#  ifdef CONFIG_STM32_STM32F30XX
+#    define FLASH_CR_OBL_LAUNCH     (1 << 13) /* Bit 13: Force option byte loading */
+#  endif
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define FLASH_CR_PG               (1 << 0)                /* Bit 0: Programming */
 #  define FLASH_CR_SER              (1 << 1)                /* Bit 1: Sector Erase */

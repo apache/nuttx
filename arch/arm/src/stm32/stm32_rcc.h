@@ -49,6 +49,8 @@
 #  include "chip/stm32f10xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_rcc.h"
+#elif defined(CONFIG_STM32_STM32F30XX)
+#  include "chip/stm32f30xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_rcc.h"
 #endif

@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/src/stm32/stm32_syscfg.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,13 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#  include "chip/stm32_syscfg.h"
-#endif /* CONFIG_STM32_STM32F20XX || CONFIG_STM32_STM32F40XX */
+#if defined(CONFIG_STM32_STM32F20XX)
+#  include "chip/stm32f20xxx_syscfg.h"
+#elif defined(CONFIG_STM32_STM32F30XX)
+#  include "chip/stm32f30xxx_syscfg.h"
+#elif defined(CONFIG_STM32_STM32F40XX)
+#  include "chip/stm32f40xxx_syscfg.h"
+#endif
 
 /****************************************************************************************************
  * Pre-processor Definitions
