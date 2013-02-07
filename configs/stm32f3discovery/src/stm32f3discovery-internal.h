@@ -63,18 +63,54 @@
 #endif
 
 /* STM32F3Discovery GPIOs **************************************************************************/
-/* LEDs */
+/* The STM32F3Discovery board has ten LEDs.  Two of these are controlled by logic on
+ * the board and are not available for software control:
+ *
+ * LD1 PWR:   red LED indicates that the board is powered.
+ * LD2 COM:   LD2 default status is red. LD2 turns to green to indicate that
+ *            communications are in progress between the PC and the ST-LINK/V2.
+ *
+ * And eight can be controlled by software:
+ *
+ * User LD3:  red LED is a user LED connected to the I/O PE9 of the STM32F303VCT6.
+ * User LD4:  blue LED is a user LED connected to the I/O PE8 of the STM32F303VCT6.
+ * User LD5:  orange LED is a user LED connected to the I/O PE10 of the STM32F303VCT6.
+ * User LD6:  green LED is a user LED connected to the I/O PE15 of the STM32F303VCT6.
+ * User LD7:  green LED is a user LED connected to the I/O PE11 of the STM32F303VCT6.
+ * User LD8:  orange LED is a user LED connected to the I/O PE14 of the STM32F303VCT6.
+ * User LD9:  blue LED is a user LED connected to the I/O PE12 of the STM32F303VCT6.
+ * User LD10: red LED is a user LED connected to the I/O PE13 of the STM32F303VCT6.
+ *
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
+ * way.  The following definitions are used to access individual LEDs.
+ */
 
 #define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN12)
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN9)
 #define GPIO_LED2       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN13)
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN8)
 #define GPIO_LED3       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN14)
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN10)
 #define GPIO_LED4       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN15)
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN15)
+#define GPIO_LED5       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN11)
+#define GPIO_LED6       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN14)
+#define GPIO_LED7       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN12)
+#define GPIO_LED8       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN13)
 
-/* BUTTONS -- NOTE that all have EXTI interrupts configured */
+/* Button definitions ***************************************************************/
+/* The STM32F3Discovery supports two buttons; only one button is controllable by
+ * software:
+ *
+ *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F303VCT6.
+ *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F303VCT6.
+ *
+ * NOTE that  EXTI interrupts are configured
+ */
 
 #define MIN_IRQBUTTON   BUTTON_USER
 #define MAX_IRQBUTTON   BUTTON_USER

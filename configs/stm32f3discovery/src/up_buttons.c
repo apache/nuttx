@@ -159,6 +159,7 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
     {
       oldhandler = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler);
     }
+
   return oldhandler;
 }
 #endif

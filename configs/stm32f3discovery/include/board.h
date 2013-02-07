@@ -158,22 +158,39 @@
 #define STM32_TIM27_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
 /* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
+/* The STM32F3Discovery board has ten LEDs.  Two of these are controlled by logic on
+ * the board and are not available for software control:
+ *
+ * LD1 PWR:   red LED indicates that the board is powered.
+ * LD2 COM:   LD2 default status is red. LD2 turns to green to indicate that
+ *            communications are in progress between the PC and the ST-LINK/V2.
+ *
+ * And eight can be controlled by software:
+ *
+ * User LD3:  red LED is a user LED connected to the I/O PE9 of the STM32F303VCT6.
+ * User LD4:  blue LED is a user LED connected to the I/O PE8 of the STM32F303VCT6.
+ * User LD5:  orange LED is a user LED connected to the I/O PE10 of the STM32F303VCT6.
+ * User LD6:  green LED is a user LED connected to the I/O PE15 of the STM32F303VCT6.
+ * User LD7:  green LED is a user LED connected to the I/O PE11 of the STM32F303VCT6.
+ * User LD8:  orange LED is a user LED connected to the I/O PE14 of the STM32F303VCT6.
+ * User LD9:  blue LED is a user LED connected to the I/O PE12 of the STM32F303VCT6.
+ * User LD10: red LED is a user LED connected to the I/O PE13 of the STM32F303VCT6.
+ *
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
  * way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with stm32_setled() */
 
-#define BOARD_LED1        0
-#define BOARD_LED2        1
-#define BOARD_LED3        2
-#define BOARD_LED4        3
-#define BOARD_NLEDS       4
-
-#define BOARD_LED_GREEN   BOARD_LED1
-#define BOARD_LED_ORANGE  BOARD_LED2
-#define BOARD_LED_RED     BOARD_LED3
-#define BOARD_LED_BLUE    BOARD_LED4
+#define BOARD_LED1        0 /* User LD3 */
+#define BOARD_LED2        1 /* User LD4 */
+#define BOARD_LED3        2 /* User LD5 */
+#define BOARD_LED4        3 /* User LD6 */
+#define BOARD_LED5        4 /* User LD7 */
+#define BOARD_LED6        5 /* User LD8 */
+#define BOARD_LED7        6 /* User LD9 */
+#define BOARD_LED8        7 /* User LD10 */
+#define BOARD_NLEDS       8
 
 /* LED bits for use with stm32_setleds() */
 
@@ -181,22 +198,44 @@
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
 #define BOARD_LED4_BIT    (1 << BOARD_LED4)
+#define BOARD_LED5_BIT    (1 << BOARD_LED5)
+#define BOARD_LED6_BIT    (1 << BOARD_LED6)
+#define BOARD_LED7_BIT    (1 << BOARD_LED7)
+#define BOARD_LED8_BIT    (1 << BOARD_LED8)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 8 LEDs on board the
  * stm32f3discovery.  The following definitions describe how NuttX controls the LEDs:
+ *
+ *   SYMBOL                Meaning                 LED state
+ *                                              Initially all LEDs are OFF
+ *   -------------------  -----------------------  ------------- ------------
+ *   LED_STARTED          NuttX has been started   LD3 ON
+ *   LED_HEAPALLOCATE     Heap has been allocated  LD4 ON
+ *   LED_IRQSENABLED      Interrupts enabled       LD4 ON
+ *   LED_STACKCREATED     Idle stack created       LD6 ON
+ *   LED_INIRQ            In an interrupt          LD7 should glow
+ *   LED_SIGNAL           In a signal handler      LD8 might glow
+ *   LED_ASSERTION        An assertion failed      LD9 ON while handling the assertion
+ *   LED_PANIC            The system has crashed   LD10 Blinking at 2Hz
+ *   LED_IDLE             STM32 is is sleep mode   (Optional, not used)
  */
 
-#define LED_STARTED       0  /* LED1 */
-#define LED_HEAPALLOCATE  1  /* LED2 */
-#define LED_IRQSENABLED   2  /* LED1 + LED2 */
-#define LED_STACKCREATED  3  /* LED3 */
-#define LED_INIRQ         4  /* LED1 + LED3 */
-#define LED_SIGNAL        5  /* LED2 + LED3 */
-#define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
-#define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
+#define LED_STARTED       0
+#define LED_HEAPALLOCATE  1
+#define LED_IRQSENABLED   2
+#define LED_STACKCREATED  3
+#define LED_INIRQ         4
+#define LED_SIGNAL        5
+#define LED_ASSERTION     6
+#define LED_PANIC         7
 
 /* Button definitions ***************************************************************/
-/* The STM32F3Discovery supports one button: */
+/* The STM32F3Discovery supports two buttons; only one button is controllable by
+ * software:
+ *
+ *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F303VCT6.
+ *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F303VCT6.
+ */
 
 #define BUTTON_USER        0
 

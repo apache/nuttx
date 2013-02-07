@@ -29,9 +29,7 @@ Development Environment
 
   Either Linux or Cygwin on Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
-  toolchains will likely cause problems. Testing was performed using the Cygwin
-  environment because the Raisonance R-Link emulatator and some RIDE7 development tools
-  were used and those tools works only under Windows.
+  toolchains will likely cause problems.
 
 GNU Toolchain Options
 =====================
@@ -476,6 +474,33 @@ options as used with the Atollic toolchain in the Make.defs file:
 
   ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
+Configuration Changes
+---------------------
+
+Below are all of the configuration changes that I had to make to configs/stm3240g-eval/nsh2
+in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
+
+  -CONFIG_ARCH_FPU=n              : Enable FPU support
+  +CONFIG_ARCH_FPU=y
+
+  -CONFIG_STM32_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
+  +CONFIG_STM32_CODESOURCERYW=n
+
+  -CONFIG_STM32_ATOLLIC_LITE=n   : Enable *one* the Atollic toolchains
+   CONFIG_STM32_ATOLLIC_PRO=n
+  -CONFIG_STM32_ATOLLIC_LITE=y   : The "Lite" version
+   CONFIG_STM32_ATOLLIC_PRO=n    : The "Pro" version
+
+  -CONFIG_INTELHEX_BINARY=y       : Suppress generation FLASH download formats
+  +CONFIG_INTELHEX_BINARY=n       : (Only necessary with the "Lite" version)
+
+  -CONFIG_HAVE_CXX=y              : Suppress generation of C++ code
+  +CONFIG_HAVE_CXX=n              : (Only necessary with the "Lite" version)
+
+See the section above on Toolchains, NOTE 2, for explanations for some of
+the configuration settings.  Some of the usual settings are just not supported
+by the "Lite" version of the Atollic toolchain.
+
 FSMC SRAM
 =========
 
@@ -527,33 +552,6 @@ There are 4 possible SRAM configurations:
                    CONFIG_MM_REGIONS == 3
                    CONFIG_STM32_FSMC_SRAM defined
                    CONFIG_STM32_CCMEXCLUDE NOT defined
-
-Configuration Changes
----------------------
-
-Below are all of the configuration changes that I had to make to configs/stm3240g-eval/nsh2
-in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
-
-  -CONFIG_ARCH_FPU=n              : Enable FPU support
-  +CONFIG_ARCH_FPU=y
-
-  -CONFIG_STM32_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
-  +CONFIG_STM32_CODESOURCERYW=n
-
-  -CONFIG_STM32_ATOLLIC_LITE=n   : Enable *one* the Atollic toolchains
-   CONFIG_STM32_ATOLLIC_PRO=n
-  -CONFIG_STM32_ATOLLIC_LITE=y   : The "Lite" version
-   CONFIG_STM32_ATOLLIC_PRO=n    : The "Pro" version
-
-  -CONFIG_INTELHEX_BINARY=y       : Suppress generation FLASH download formats
-  +CONFIG_INTELHEX_BINARY=n       : (Only necessary with the "Lite" version)
-
-  -CONFIG_HAVE_CXX=y              : Suppress generation of C++ code
-  +CONFIG_HAVE_CXX=n              : (Only necessary with the "Lite" version)
-
-See the section above on Toolchains, NOTE 2, for explanations for some of
-the configuration settings.  Some of the usual settings are just not supported
-by the "Lite" version of the Atollic toolchain.
 
 SSD1289
 =======
