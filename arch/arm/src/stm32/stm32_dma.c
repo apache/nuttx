@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_dma.c
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@
  * channels.
  */
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 #  include "stm32f10xxx_dma.c"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "stm32f20xxx_dma.c"
