@@ -127,7 +127,7 @@
 pid_t up_vfork(const struct vfork_s *context)
 {
   struct tcb_s *parent = (FAR struct tcb_s *)g_readytorun.head;
-  struct tcb_s *child;
+  struct task_tcb_s *child;
   size_t stacksize;
   uint32_t newsp;
   uint32_t newfp;
@@ -161,7 +161,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Allocate the stack for the TCB */
 
-  ret = up_create_stack(child, stacksize);
+  ret = up_create_stack((FAR struct tcb_s *)child, stacksize);
   if (ret != OK)
     {
       sdbg("up_create_stack failed: %d\n", ret);
@@ -187,7 +187,7 @@ pid_t up_vfork(const struct vfork_s *context)
    * effort is overkill.
    */
 
-  newsp = (uint32_t)child->adj_stack_ptr - stackutil;
+  newsp = (uint32_t)child->cmn.adj_stack_ptr - stackutil;
   memcpy((void *)newsp, (const void *)context->sp, stackutil);
 
   /* Was there a frame pointer in place before? */
@@ -196,7 +196,7 @@ pid_t up_vfork(const struct vfork_s *context)
       context->fp >= (uint32_t)parent->adj_stack_ptr - stacksize)
     {
       uint32_t frameutil = (uint32_t)parent->adj_stack_ptr - context->fp;
-      newfp = (uint32_t)child->adj_stack_ptr - frameutil;
+      newfp = (uint32_t)child->cmn.adj_stack_ptr - frameutil;
     }
   else
     {
@@ -206,7 +206,7 @@ pid_t up_vfork(const struct vfork_s *context)
   svdbg("Old stack base:%08x SP:%08x FP:%08x\n",
         parent->adj_stack_ptr, context->sp, context->fp);
   svdbg("New stack base:%08x SP:%08x FP:%08x\n",
-        child->adj_stack_ptr, newsp, newfp);
+        child->cmn.adj_stack_ptr, newsp, newfp);
 
  /* Update the stack pointer, frame pointer, and volatile registers.  When
   * the child TCB was initialized, all of the values were set to zero.
@@ -215,15 +215,15 @@ pid_t up_vfork(const struct vfork_s *context)
   * child thread.
   */
 
-  child->xcp.regs[REG_R4]  = context->r4;  /* Volatile register r4 */
-  child->xcp.regs[REG_R5]  = context->r5;  /* Volatile register r5 */
-  child->xcp.regs[REG_R6]  = context->r6;  /* Volatile register r6 */
-  child->xcp.regs[REG_R7]  = context->r7;  /* Volatile register r7 */
-  child->xcp.regs[REG_R8]  = context->r8;  /* Volatile register r8 */
-  child->xcp.regs[REG_R9]  = context->r9;  /* Volatile register r9 */
-  child->xcp.regs[REG_R10] = context->r10; /* Volatile register r10 */
-  child->xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
-  child->xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
+  child->cmn.xcp.regs[REG_R4]  = context->r4;  /* Volatile register r4 */
+  child->cmn.xcp.regs[REG_R5]  = context->r5;  /* Volatile register r5 */
+  child->cmn.xcp.regs[REG_R6]  = context->r6;  /* Volatile register r6 */
+  child->cmn.xcp.regs[REG_R7]  = context->r7;  /* Volatile register r7 */
+  child->cmn.xcp.regs[REG_R8]  = context->r8;  /* Volatile register r8 */
+  child->cmn.xcp.regs[REG_R9]  = context->r9;  /* Volatile register r9 */
+  child->cmn.xcp.regs[REG_R10] = context->r10; /* Volatile register r10 */
+  child->cmn.xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
+  child->cmn.xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
 
   /* And, finally, start the child task.  On a failure, task_vforkstart()
    * will discard the TCB by calling task_vforkabort().
