@@ -135,7 +135,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   ret = group_setuptaskfiles(tcb);
-  if (ret != OK)
+  if (ret < OK)
     {
       errcode = -ret;
       goto errout_with_tcb;
@@ -146,7 +146,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
 
 #ifndef CONFIG_CUSTOM_STACK
   ret = up_create_stack((FAR struct tcb_s *)tcb, stack_size);
-  if (ret != OK)
+  if (ret < OK)
     {
       errcode = -ret;
       goto errout_with_tcb;
@@ -184,7 +184,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
   /* Activate the task */
 
   ret = task_activate((FAR struct tcb_s *)tcb);
-  if (ret != OK)
+  if (ret < OK)
     {
       errcode = get_errno();
 

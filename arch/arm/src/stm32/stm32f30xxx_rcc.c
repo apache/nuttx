@@ -90,6 +90,8 @@ static inline void rcc_reset(void)
               RCC_CFGR2_ADC34PRES_MASK);
   putreg32(regval, STM32_RCC_CFGR2);
 
+  putreg32(0, STM32_RCC_CFGR2);             /* Reset fCK source for all U[S]ARTs to PCLK */
+
   regval  = getreg32(STM32_RCC_CR);         /* Reset HSEON, CSSON and PLLON bits */
   regval &= ~(RCC_CR_HSEON|RCC_CR_CSSON|RCC_CR_PLLON);
   putreg32(regval, STM32_RCC_CR);

@@ -123,11 +123,21 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
       return NULL;
     }
 
+  /* Allocate a new task group */
+
+#ifdef HAVE_TASK_GROUP
+  ret = group_allocate(child);
+  if (ret < 0)
+    {
+      goto errout_with_tcb;
+    }
+#endif
+
   /* Associate file descriptors with the new task */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   ret = group_setuptaskfiles(child);
-  if (ret != OK)
+  if (ret < OK)
     {
       goto errout_with_tcb;
     }
@@ -146,7 +156,7 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
   svdbg("Child priority=%d start=%p\n", priority, retaddr);
   ret = task_schedsetup(child, priority, retaddr, parent->entry.main,
                         TCB_FLAG_TTYPE_TASK);
-  if (ret != OK)
+  if (ret < OK)
     {
       goto errout_with_tcb;
     }
@@ -228,6 +238,17 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
 
   (void)task_argsetup(child, name, (FAR char * const *)NULL);
 
+  /* Now we have enough in place that we can join the group */
+
+#ifdef HAVE_TASK_GROUP
+  ret = group_initialize(child);
+  if (ret < 0)
+    {
+      task_vforkabort(child, -ret);
+      return ERROR;
+    }
+#endif
+
   /* Get the assigned pid before we start the task */
 
   pid = (int)child->cmn.pid;
@@ -235,7 +256,7 @@ pid_t task_vforkstart(FAR struct task_tcb_s *child)
   /* Activate the task */
 
   ret = task_activate((FAR struct tcb_s *)child);
-  if (ret != OK)
+  if (ret < OK)
     {
       task_vforkabort(child, -ret);
       return ERROR;
