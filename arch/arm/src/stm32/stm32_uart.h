@@ -43,7 +43,18 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32_uart.h"
+
+#if defined(CONFIG_STM32_STM32F10XX)
+#  include "chip/stm32f10xxx_uart.h"
+#elif defined(CONFIG_STM32_STM32F20XX)
+#  include "chip/stm32f20xxx_uart.h"
+#elif defined(CONFIG_STM32_STM32F30XX)
+#  include "chip/stm32f30xxx_uart.h"
+#elif defined(CONFIG_STM32_STM32F40XX)
+#  include "chip/stm32f40xxx_uart.h"
+#else
+#  error "Unsupported STM32 memory map"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions

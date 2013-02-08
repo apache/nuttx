@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32_uart.h
+ * arch/arm/src/stm32/chip/stm32f10xxx_uart.h
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32_CHIP_STM32_UART_H
-#define __ARCH_ARM_STC_STM32_CHIP_STM32_UART_H
+#ifndef __ARCH_ARM_STC_STM32_CHIP_STM32F10XXX_UART_H
+#define __ARCH_ARM_STC_STM32_CHIP_STM32F10XXX_UART_H
 
 /************************************************************************************
  * Included Files
@@ -108,16 +108,6 @@
 #  define STM32_UART5_CR3         (STM32_UART5_BASE+STM32_USART_CR3_OFFSET)
 #endif
 
-#if STM32_NUSART > 5
-#  define STM32_USART6_SR         (STM32_USART6_BASE+STM32_USART_SR_OFFSET)
-#  define STM32_USART6_DR         (STM32_USART6_BASE+STM32_USART_DR_OFFSET)
-#  define STM32_USART6_BRR        (STM32_USART6_BASE+STM32_USART_BRR_OFFSET)
-#  define STM32_USART6_CR1        (STM32_USART6_BASE+STM32_USART_CR1_OFFSET)
-#  define STM32_USART6_CR2        (STM32_USART6_BASE+STM32_USART_CR2_OFFSET)
-#  define STM32_USART6_CR3        (STM32_USART6_BASE+STM32_USART_CR3_OFFSET)
-#  define STM32_USART6_GTPR       (STM32_USART6_BASE+STM32_USART_GTPR_OFFSET)
-#endif
-
 /* Register Bitfield Definitions ****************************************************/
 
 /* Status register */
@@ -165,10 +155,6 @@
 #define USART_CR1_M               (1 << 12) /* Bit 12: word length */
 #define USART_CR1_UE              (1 << 13) /* Bit 13: USART Enable */
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#  define USART_CR1_OVER8         (1 << 15) /* Bit 15: Oversampling mode */
-#endif
-
 #define USART_CR1_ALLINTS         (USART_CR1_IDLEIE|USART_CR1_RXNEIE|USART_CR1_TCIE|USART_CR1_PEIE)
 
 /* Control register 2 */
@@ -203,16 +189,18 @@
 #define USART_CR3_CTSE            (1 << 9)  /* Bit 9: CTS Enable */
 #define USART_CR3_CTSIE           (1 << 10) /* Bit 10: CTS Interrupt Enable */
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#  define USART_CR1_ONEBIT        (1 << 11) /* Bit 11: One sample bit method enable */
-#endif
-
 /* Guard time and prescaler register */
 
 #define USART_GTPR_PSC_SHIFT      (0) /* Bits 0-7: Prescaler value */
 #define USART_GTPR_PSC_MASK       (0xff << USART_GTPR_PSC_SHIFT)
 #define USART_GTPR_GT_SHIFT       (8) /* Bits 8-15: Guard time value */
 #define USART_GTPR_GT_MASK        (0xff <<  USART_GTPR_GT_SHIFT)
+
+/* Compatibility definitions ********************************************************/
+/* F3 Transmit/Read registers */
+
+#define STM32_USART_RDR_OFFSET    STM32_USART_DR_OFFSET  /* Receive data register */
+#define STM32_USART_TDR_OFFSET    STM32_USART_DR_OFFSET  /* Transmit data register */
 
 /************************************************************************************
  * Public Types
@@ -226,4 +214,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_STC_STM32_CHIP_STM32_UART_H */
+#endif /* __ARCH_ARM_STC_STM32_CHIP_STM32F10XXX_UART_H */
