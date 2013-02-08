@@ -511,7 +511,7 @@ static void spi_dmarxwait(FAR struct stm32_spidev_s *priv)
    * must not really have completed???
    */
 
-  while (sem_wait(&priv->rxsem) != 0 && priv->rxresult == 0)
+  while (sem_wait(&priv->rxsem) != 0 || priv->rxresult == 0)
     {
       /* The only case that an error should occur here is if the wait was awakened
        * by a signal.
@@ -537,7 +537,7 @@ static void spi_dmatxwait(FAR struct stm32_spidev_s *priv)
    * must not really have completed???
    */
 
-  while (sem_wait(&priv->txsem) != 0 && priv->txresult == 0)
+  while (sem_wait(&priv->txsem) != 0 || priv->txresult == 0)
     {
       /* The only case that an error should occur here is if the wait was awakened
        * by a signal.
@@ -731,6 +731,7 @@ static void spi_dmatxsetup(FAR struct stm32_spidev_s *priv, FAR const void *txbu
 #ifdef CONFIG_STM32_SPI_DMA
 static inline void spi_dmarxstart(FAR struct stm32_spidev_s *priv)
 {
+  priv->rxresult = 0;
   stm32_dmastart(priv->rxdma, spi_dmarxcallback, priv, false);
 }
 #endif
@@ -746,6 +747,7 @@ static inline void spi_dmarxstart(FAR struct stm32_spidev_s *priv)
 #ifdef CONFIG_STM32_SPI_DMA
 static inline void spi_dmatxstart(FAR struct stm32_spidev_s *priv)
 {
+  priv->txresult = 0;
   stm32_dmastart(priv->txdma, spi_dmatxcallback, priv, false);
 }
 #endif
