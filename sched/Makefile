@@ -44,10 +44,16 @@ MISC_SRCS += sched_garbage.c sched_getfiles.c sched_getsockets.c sched_getstream
 TSK_SRCS  = prctl.c exit.c getpid.c
 TSK_SRCS += task_create.c task_init.c task_setup.c task_activate.c task_start.c
 TSK_SRCS += task_delete.c task_deletecurrent.c task_exithook.c task_recover.c
-TSK_SRCS += task_restart.c task_spawn.c task_spawnparms.c task_vfork.c
+TSK_SRCS += task_restart.c task_spawn.c task_spawnparms.c 
 TSK_SRCS += sched_addreadytorun.c sched_removereadytorun.c sched_addprioritized.c
 TSK_SRCS += sched_mergepending.c sched_addblocked.c sched_removeblocked.c
 TSK_SRCS += sched_free.c sched_gettcb.c sched_verifytcb.c sched_releasetcb.c
+
+ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
+ifeq ($(CONFIG_SCHED_WAITPID),y)
+TSK_SRCS += task_vfork.c
+endif
+endif
 
 ifneq ($(CONFIG_BINFMT_DISABLE),y)
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
