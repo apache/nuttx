@@ -60,6 +60,7 @@ config ARCH_CHIP_LM
 config ARCH_CHIP_LPC17XX
 	bool "NXP LPC17xx"
 	select ARCH_CORTEXM3
+	select ARCH_HAVE_CMNVECTOR
 	select ARCH_HAVE_MPU
 	---help---
 		NXP LPC17xx architectures (ARM Cortex-M3)

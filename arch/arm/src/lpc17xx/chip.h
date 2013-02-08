@@ -42,11 +42,28 @@
 
 #include <nuttx/config.h>
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
- */
+/* Include the chip capabilities file */
 
 #include <arch/lpc17xx/chip.h>
+
+/* If the common ARMv7-M vector handling logic is used, then include the
+ * required vector definitions as well.
+ */
+
+#ifdef CONFIG_ARMV7M_CMNVECTOR
+#  if defined(LPC176x)
+#    include "chip/lpc176x_vectors.h"
+#  elif defined(LPC178x)
+#    include "chip/lpc178x_vectors.h"
+#  else
+#    error "No vector file for this LPC17xx family"
+#  endif
+#endif
+
+/* Include the memory map file.  Other chip hardware files should then include
+ * this file for the proper setup.
+ */
+
 #include "chip/lpc17_memorymap.h"
 
 /************************************************************************************

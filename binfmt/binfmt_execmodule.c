@@ -175,13 +175,13 @@ int exec_module(FAR const struct binary_s *binp)
 
   /* Initialize the task */
 
-  ret = task_init(tcb, binp->filename, binp->priority, stack,
-                  binp->stacksize, binp->entrypt, binp->argv);
+  ret = task_init((FAR struct tcb_s *)tcb, binp->filename, binp->priority,
+                  stack, binp->stacksize, binp->entrypt, binp->argv);
 #else
   /* Initialize the task */
 
-  ret = task_init(tcb, binp->filename, binp->priority, stack,
-                  binp->entrypt, binp->argv);
+  ret = task_init((FAR struct tcb_s *)tcb, binp->filename, binp->priority,
+                  stack, binp->entrypt, binp->argv);
 #endif
   if (ret < 0)
     {
@@ -232,7 +232,7 @@ int exec_module(FAR const struct binary_s *binp)
 
   /* Then activate the task at the provided priority */
 
-  ret = task_activate(tcb);
+  ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret < 0)
     {
       err = errno;
