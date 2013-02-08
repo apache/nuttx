@@ -122,7 +122,8 @@ static inline void rcc_enableahb(void)
 
   regval = RCC_AHBENR_FLITFEN | RCC_AHBENR_SRAMEN;
 
-  /* Enable GPIOA, GPIOB, ... and AFIO clocks */
+  /* Enable GPIO PORTA, PORTB, ... PORTF */
+
   regval |= (RCC_AHBENR_IOPAEN | RCC_AHBENR_IOPBEN | RCC_AHBENR_IOPCEN |
              RCC_AHBENR_IOPDEN | RCC_AHBENR_IOPEEN | RCC_AHBENR_IOPFEN);
 

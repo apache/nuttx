@@ -197,48 +197,89 @@
 #define USART_CR3_CLRBITS (USART_CR3_CTSIE|USART_CR3_CTSE|USART_CR3_RTSE|USART_CR3_EIE)
 #define USART_CR3_SETBITS 0
 
-/* Calculate USART BAUD rate divider
- *
- * The baud rate for the receiver and transmitter (Rx and Tx) are both set to
- * the same value as programmed in the Mantissa and Fraction values of USARTDIV.
- *
- *   baud     = fCK / (16 * usartdiv)
- *   usartdiv = fCK / (16 * baud)
- *
- * Where fCK is the input clock to the peripheral (PCLK1 for USART2, 3, 4, 5
- * or PCLK2 for USART1).  Example, fCK=72MHz baud=115200, usartdiv=39.0625=39 1/16th;
- *
- * First calculate:
- *
- *   usartdiv32 = 32 * usartdiv = fCK / (baud/2)
- *
- * (NOTE: all standard baud values are even so dividing by two does not
- * lose precision).  Eg. (same fCK and buad), usartdiv32 = 1250
- */
+/* Only the STM32 F3 supports oversampling by 8 */
 
-#define STM32_USARTDIV32 (STM32_APBCLOCK / (STM32_CONSOLE_BAUD >> 1))
+#undef USE_OVER8
 
-/* The mantissa is then usartdiv32 / 32:
- *
- *   mantissa = usartdiv32 / 32/
- *
- * Eg. usartdiv32=1250, mantissa = 39
- */
+/* Calculate USART BAUD rate divider */
 
-#define STM32_MANTISSA   (STM32_USARTDIV32 >> 5)
+#ifdef CONFIG_STM32_STM32F30XX
 
-/* And the fraction:
- *
- *  fraction = (usartdiv32 - mantissa*32 + 1) / 2
- *
- * Eg., (1,250 - 39*32 + 1)/2 = 1 (or 0.0625)
- */
+  /* Baud rate for standard USART (SPI mode included):
+   *
+   * In case of oversampling by 16, the equation is:
+   *   baud    = fCK / UARTDIV
+   *   UARTDIV = fCK / baud
+   *
+   * In case of oversampling by 8, the equation is:
+   *
+   *   baud    = 2 * fCK / UARTDIV
+   *   UARTDIV = 2 * fCK / baud
+   */
 
-#define STM32_FRACTION   ((STM32_USARTDIV32 - (STM32_MANTISSA << 5) + 1) >> 1)
+#  define STM32_USARTDIV8 \
+    (((STM32_APBCLOCK << 1) + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
+#  define STM32_USARTDIV16 \
+    ((STM32_APBCLOCK + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
+
+   /* Use oversamply by 8 only if the divisor is small */
+
+#  if STM32_USARTDIV8 > 100
+#    define STM32_BRR_VALUE STM32_USARTDIV16
+#  else
+#    define USE_OVER8 1
+#    define STM32_BRR_VALUE \
+      ((STM32_USARTDIV8 && 0xfff0) | ((STM32_USARTDIV8 & 0x000f) >> 1)
+#  endif
+
+#else
+
+  /* The baud rate for the receiver and transmitter (Rx and Tx) are both set
+   * to the same value as programmed in the Mantissa and Fraction values of
+   * USARTDIV.
+   *
+   *   baud     = fCK / (16 * usartdiv)
+   *   usartdiv = fCK / (16 * baud)
+   *
+   * Where fCK is the input clock to the peripheral (PCLK1 for USART2, 3, 4,
+   * 5 or PCLK2 for USART1).  Example, fCK=72MHz baud=115200,
+   * usartdiv=39.0625=39 1/16th;
+   *
+   * First calculate:
+   *
+   *   usartdiv32 = 32 * usartdiv = fCK / (baud/2)
+   *
+   * (NOTE: all standard baud values are even so dividing by two does not
+   * lose precision).  Eg. (same fCK and buad), usartdiv32 = 1250
+   */
+
+#  define STM32_USARTDIV32 (STM32_APBCLOCK / (STM32_CONSOLE_BAUD >> 1))
+
+  /* The mantissa is then usartdiv32 / 32:
+   *
+   *   mantissa = usartdiv32 / 32/
+   *
+   * Eg. usartdiv32=1250, mantissa = 39
+   */
+
+#  define STM32_MANTISSA (STM32_USARTDIV32 >> 5)
+
+  /* And the fraction:
+   *
+   *  fraction = (usartdiv32 - mantissa*32 + 1) / 2
+   *
+   * Eg., (1,250 - 39*32 + 1)/2 = 1 (or 0.0625)
+   */
+
+#  define STM32_FRACTION \
+    ((STM32_USARTDIV32 - (STM32_MANTISSA << 5) + 1) >> 1)
 
 /* And, finally, the BRR value is: */
 
-#define STM32_BRR_VALUE  ((STM32_MANTISSA << USART_BRR_MANT_SHIFT) | (STM32_FRACTION << USART_BRR_FRAC_SHIFT))
+#  define STM32_BRR_VALUE \
+    ((STM32_MANTISSA << USART_BRR_MANT_SHIFT) | \
+     (STM32_FRACTION << USART_BRR_FRAC_SHIFT))
+#endif
 
 /**************************************************************************
  * Private Types
@@ -284,7 +325,7 @@ void up_lowputc(char ch)
 
   /* Then send the character */
 
-  putreg32((uint32_t)ch, STM32_CONSOLE_BASE + STM32_USART_DR_OFFSET);
+  putreg32((uint32_t)ch, STM32_CONSOLE_BASE + STM32_USART_TDR_OFFSET);
 
 #if STM32_CONSOLE_RS485_DIR
   while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) & USART_SR_TC) == 0);
@@ -305,6 +346,7 @@ void up_lowputc(char ch)
  **************************************************************************/
 
 #if defined(CONFIG_STM32_STM32F10XX)
+
 void stm32_lowsetup(void)
 {
 #if defined(HAVE_UART)
@@ -423,6 +465,14 @@ void stm32_lowsetup(void)
 
   putreg32(STM32_BRR_VALUE, STM32_CONSOLE_BASE + STM32_USART_BRR_OFFSET);
 
+  /* Select oversampling by 8 */
+
+#ifdef USE_OVER8
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
+  cr |= USART_CR1_OVER8;
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
+#endif
+
   /* Enable Rx, Tx, and the USART */
 
   cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
@@ -431,7 +481,9 @@ void stm32_lowsetup(void)
 #endif
 #endif /* HAVE_UART */
 }
+
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+
 void stm32_lowsetup(void)
 {
 #if defined(HAVE_UART)
@@ -492,6 +544,7 @@ void stm32_lowsetup(void)
 #endif
 #endif /* HAVE_UART */
 }
+
 #else
 #  error "Unsupported STM32 chip"
 #endif
