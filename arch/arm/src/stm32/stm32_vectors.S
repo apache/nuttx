@@ -40,7 +40,6 @@
 
 #include <nuttx/config.h>
 
-
 #include <arch/irq.h>
 
 #include "chip.h"
