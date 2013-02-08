@@ -118,68 +118,12 @@
 
 #define GPIO_BTN_USER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
 
-/* PWM
- *
- * The STM32F3Discovery has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using TIM4 CH2 on PD13.
- */
+/* SPI - There is a ST MEMS L3GD20 device on SPI1 using these pins: */
 
-#define STM32F3DISCOVERY_PWMTIMER   4
-#define STM32F3DISCOVERY_PWMCHANNEL 2
-
-/* SPI chip selects */
-
-#define GPIO_CS_MEMS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+#define GPIO_MEMS_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN3)
-
-/* USB OTG FS 
- *
- * PA9  OTG_FS_VBUS VBUS sensing (also connected to the green LED)
- * PC0  OTG_FS_PowerSwitchOn
- * PD5  OTG_FS_Overcurrent
- */
-
-#define GPIO_OTGFS_VBUS (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
-#define GPIO_OTGFS_PWRON (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN0)
-
-#ifdef CONFIG_USBHOST
-#  define GPIO_OTGFS_OVER  (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTD|GPIO_PIN5)
-
-#else
-#  define GPIO_OTGFS_OVER  (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTD|GPIO_PIN5)
-#endif
-
-/* UG-2864AMBAG01 or UG-2864HSWEG01 OLED Display (SPI 4-wire):
- *
- * --------------------------+----------------------------------------------
- * Connector CON10 J1:      | STM32F3Discovery
- * --------------+-----------+----------------------------------------------
- * CON10 J1:     | CON20 J2: | P1/P2:
- * --------------+-----------+----------------------------------------------
- * 1  3v3        | 3,4 3v3   | P2 3V
- * 3  /RESET     | 8 /RESET  | P2 PB6 (Arbitrary selection)
- * 5  /CS        | 7 /CS     | P2 PB7 (Arbitrary selection)
- * 7  A0|D/C     | 9 A0|D/C  | P2 PB8 (Arbitrary selection)
- * 9  LED+ (N/C) | -----     | -----
- * 2  5V Vcc     | 1,2 Vcc   | P2 5V
- * 4  DI         | 18 D1/SI  | P1 PA7 (GPIO_SPI1_MOSI == GPIO_SPI1_MOSI_1 (1))
- * 6  SCLK       | 19 D0/SCL | P1 PA5 (GPIO_SPI1_SCK == GPIO_SPI1_SCK_1 (1))
- * 8  LED- (N/C) | -----     | ------
- * 10 GND        | 20 GND    | P2 GND
- * --------------+-----------+----------------------------------------------
- * (1) Required because of on-board MEMS
- * -------------------------------------------------------------------------
- */
- 
-#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
-#  define GPIO_OLED_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN6)
-#  define GPIO_OLED_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                           GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN7)
-#  define GPIO_OLED_A0    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN8)
-#  define GPIO_OLED_DC    GPIO_OLED_A0
-#endif
+#define GPIO_MEMS_INT1  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN0)
+#define GPIO_MEMS_INT2  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN1)
 
 /****************************************************************************************************
  * Public Types

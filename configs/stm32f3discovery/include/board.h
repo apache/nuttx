@@ -246,30 +246,14 @@
  * (See the README.txt file for other options)
  */
 
-#define GPIO_USART2_RX GPIO_USART2_RX_1
-#define GPIO_USART2_TX GPIO_USART2_TX_1
+#define GPIO_USART2_RX GPIO_USART2_RX_2
+#define GPIO_USART2_TX GPIO_USART2_TX_2
 
-/* PWM
- *
- * The STM32F3Discovery has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using TIM4 CH2 on PD13.
- */
-
-#define GPIO_TIM4_CH2OUT GPIO_TIM4_CH2OUT_2
-
-/* SPI - There is a MEMS device on SPI1 using these pins: */
+/* SPI - There is a ST MEMS L3GD20 device on SPI1 using these pins: */
 
 #define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
 #define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
 #define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1
-
-/* Timer Inputs/Outputs (see the README.txt file for options) */
-
-#define GPIO_TIM2_CH1IN  GPIO_TIM2_CH1IN_2
-#define GPIO_TIM2_CH2IN  GPIO_TIM2_CH2IN_1
-
-#define GPIO_TIM8_CH1IN  GPIO_TIM8_CH1IN_1
-#define GPIO_TIM8_CH2IN  GPIO_TIM8_CH2IN_1
 
 /************************************************************************************
  * Public Data
