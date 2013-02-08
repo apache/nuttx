@@ -14,10 +14,9 @@ Contents
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
   - LEDs
-  - PWM
-  - UARTs
-  - Timer Inputs/Outputs
+  - Serial Console
   - FPU
+  - Debugging
   - STM32F3Discovery-specific Configuration Options
   - Configurations
 
@@ -307,101 +306,24 @@ events as follows:
   LED_PANIC            The system has crashed   LD10 Blinking at 2Hz
   LED_IDLE             STM32 is is sleep mode   (Optional, not used)
 
-PWM
-===
+Serial Console
+==============
 
-The STM32F3Discovery has no real on-board PWM devices, but the board can be
-configured to output a pulse train using TIM4 CH2 on PD3.  This pin is
-available next to the audio jack.
+The STM32F3Discovery has no on-board RS-232 driver, however USART2 is
+configuration as the serial console in all configurations that use a serial
+console.
 
-UARTs
-=====
+There are many options for USART2 RX and TX pins.  They configured to use
+PA2 (TX) and PA3 (RX) for connection to an external serial device because of
+the following settings in the include/board.h file:
 
-UART/USART PINS
----------------
+  #define GPIO_USART2_RX GPIO_USART2_RX_2
+  #define GPIO_USART2_TX GPIO_USART2_TX_2
 
-USART1
-  CK      PA8
-  CTS     PA11*
-  RTS     PA12*
-  RX      PA10*, PB7
-  TX      PA9*, PB6*
-USART2
-  CK      PA4*, PD7
-  CTS     PA0*, PD3
-  RTS     PA1, PD4*
-  RX      PA3, PD6
-  TX      PA2, PD5*
-USART3
-  CK      PB12, PC12*, PD10
-  CTS     PB13, PD11
-  RTS     PB14, PD12*
-  RX      PB11, PC11, PD9
-  TX      PB10*, PC10*, PD8
-UART4
-  RX      PA1, PC11
-  TX      PA0*, PC10*
-UART5
-  RX      PD2
-  TX      PC12*
+This can be found on the board at:
 
- * Indicates pins that have other on-board functions and should be used only
-   with care (See table 5 in the STM32F3Discovery User Guide).  The rest are
-   free I/O pins.
- 
-Default USART/UART Configuration
---------------------------------
- 
-USART2 is enabled in all configurations (see */defconfig).  RX and TX are
-configured on pins PA3 and PA2, respectively (see include/board.h).
-
-Timer Inputs/Outputs
-====================
-
-TIM1
-  CH1     PA8, PE9
-  CH2     PA9*, PE11
-  CH3     PA10*, PE13
-  CH4     PA11*, PE14
-TIM2
-  CH1     PA0*, PA15, PA5*
-  CH2     PA1, PB3*
-  CH3     PA2, PB10*
-  CH4     PA3, PB11
-TIM3
-  CH1     PA6*, PB4, PC6
-  CH2     PA7*, PB5, PC7*
-  CH3     PB0, PC8
-  CH4     PB1, PC9
-TIM4
-  CH1     PB6*, PD12*
-  CH2     PB7, PD13*
-  CH3     PB8, PD14*
-  CH4     PB9*, PD15*
-TIM5
-  CH1     PA0*, PH10**
-  CH2     PA1, PH11**
-  CH3     PA2, PH12**
-  CH4     PA3, PI0
-TIM8
-  CH1     PC6, PI5
-  CH2     PC7*, PI6
-  CH3     PC8, PI7
-  CH4     PC9, PI2
-
- * Indicates pins that have other on-board functions and should be used only
-   with care (See table 5 in the STM32F3Discovery User Guide).  The rest are
-   free I/O pins.
-** Port H pins are not supported by the MCU
-
-Quadrature Encode Timer Inputs
-------------------------------
-
-If enabled (by setting CONFIG_QENCODER=y), then quadrature encoder will
-use either TIM2 or TIM8 (see nsh/defconfig).  If TIM2 is selected, the input 
-pins PA15 and PA1 for CH1 and CH2, respectively).  If TIM8 is selected, then
-PC6 and PI5 will be used for CH1 and CH2  (see include board.h for pin
-definitions).
+  TX, PA2, Connector P1, pin 14
+  RX, PA3, Connector P1, pin 9
 
 FPU
 ===
@@ -494,6 +416,36 @@ in order to successfully build NuttX using the Atollic toolchain WITH FPU suppor
 See the section above on Toolchains, NOTE 2, for explanations for some of
 the configuration settings.  Some of the usual settings are just not supported
 by the "Lite" version of the Atollic toolchain.
+
+Debugging
+=========
+
+STM32 ST-LINK Utility
+---------------------
+For simply writing to FLASH, I use the STM32 ST-LINK Utility.  At least
+version 2.4.0 is required (older versions do not recognize the STM32 F3
+device).  This utility is available from free from the STMicro website.
+
+Debugging
+---------
+If you are going to use a debugger, you should make sure that the following
+settings are selection in your configuration file:
+
+  CONFIG_DEBUG_SYMBOLS=y     : Enable debug symbols in the build
+  CONFIG_ARMV7M_USEBASEPRI=y : Use the BASEPRI register to disable interrupts
+
+OpenOCD
+-------
+I am told that OpenOCD will work with the ST-Link, but I have never tried
+it.
+
+https://github.com/texane/stlink
+--------------------------------
+This is an open source server for the ST-Link that I have never used.
+
+Atollic GDB Server
+------------------
+You can use the Atollic IDE, but I have never done that either.
 
 STM32F3Discovery-specific Configuration Options
 ===============================================
@@ -746,7 +698,9 @@ Where <subdir> is one of the following:
 
     2. Default toolchain:
 
-       CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux / Mac OS X
+       CONFIG_HOST_WINDOWS=y                   : Builds under Windows
+       CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
     3. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
@@ -805,35 +759,15 @@ Where <subdir> is one of the following:
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
-    3. This example supports the PWM test (apps/examples/pwm) but this must
-       be manually enabled by selecting:
+    3. This configuration includes USB Support (CDC/ACM device)
 
-       CONFIG_PWM=y              : Enable the generic PWM infrastructure
-       CONFIG_STM32_TIM4=y       : Enable TIM4
-       CONFIG_STM32_TIM4_PWM=y   : Use TIM4 to generate PWM output
+        CONFIG_STM32_USB=y            : STM32 USB device support
+        CONFIG_USBDEV=y               : USB device support must be enabled
+        CONFIG_CDCACM=y               : The CDC/ACM driver must be built
+        CONFIG_NSH_BUILTIN_APPS=y     : NSH built-in application support must be enabled
+        CONFIG_NSH_ARCHINIT=y         : To perform USB initialization
 
-       See also apps/examples/README.txt
-
-       Special PWM-only debug options:
-
-       CONFIG_DEBUG_PWM
-
-    5. This example supports the Quadrature Encode test (apps/examples/qencoder)
-       but this must be manually enabled by selecting:
-
-       CONFIG_EXAMPLES_QENCODER=y : Enable the apps/examples/qencoder
-       CONFIG_SENSORS=y           : Enable support for sensors
-       CONFIG_QENCODER=y          : Enable the generic Quadrature Encoder infrastructure
-       CONFIG_STM32_TIM8=y        : Enable TIM8
-       CONFIG_STM32_TIM2=n        : (Or optionally TIM2)
-       CONFIG_STM32_TIM8_QE=y     : Use TIM8 as the quadrature encoder
-       CONFIG_STM32_TIM2_QE=y     : (Or optionally TIM2)
-
-       See also apps/examples/README.tx. Special PWM-only debug options:
-
-       CONFIG_DEBUG_QENCODER
-
-    6. This example supports the watchdog timer test (apps/examples/watchdog)
+    4. This example supports the watchdog timer test (apps/examples/watchdog)
        but this must be manually enabled by selecting:
 
        CONFIG_EXAMPLES_WATCHDOG=y : Enable the apps/examples/watchdog
@@ -850,21 +784,13 @@ Where <subdir> is one of the following:
 
        The IWDG timer has a range of about 35 seconds and should not be an issue.
 
-     7. USB Support (CDC/ACM device)
-
-        CONFIG_STM32_OTGFS=y          : STM32 OTG FS support
-        CONFIG_USBDEV=y               : USB device support must be enabled
-        CONFIG_CDCACM=y               : The CDC/ACM driver must be built
-        CONFIG_NSH_BUILTIN_APPS=y     : NSH built-in application support must be enabled
-        CONFIG_NSH_ARCHINIT=y         : To perform USB initialization
-
-     8. Using the USB console.
+    5. Using the USB console.
 
         The STM32F3Discovery NSH configuration can be set up to use a USB CDC/ACM
         (or PL2303) USB console.  The normal way that you would configure the
         the USB console would be to change the .config file like this:
 
-        CONFIG_STM32_OTGFS=y           : STM32 OTG FS support
+        CONFIG_STM32_USB=y             : STM32 OTG FS support
         CONFIG_USART2_SERIAL_CONSOLE=n : Disable the USART2 console
         CONFIG_DEV_CONSOLE=n           : Inhibit use of /dev/console by other logic
         CONFIG_USBDEV=y                : USB device support must be enabled
@@ -875,12 +801,12 @@ Where <subdir> is one of the following:
         times before NSH starts.  The logic does this to prevent sending USB data
         before there is anything on the host side listening for USB serial input.
 
-    9.  Here is an alternative USB console configuration.  The following
+    6.  Here is an alternative USB console configuration.  The following
         configuration will also create a NSH USB console but this version
         will use /dev/console.  Instead, it will use the normal /dev/ttyACM0
         USB serial device for the console:
 
-        CONFIG_STM32_OTGFS=y           : STM32 OTG FS support
+        CONFIG_STM32_USB=y           : STM32 OTG FS support
         CONFIG_USART2_SERIAL_CONSOLE=y : Keep the USART2 console
         CONFIG_DEV_CONSOLE=y           : /dev/console exists (but NSH won't use it)
         CONFIG_USBDEV=y                : USB device support must be enabled
@@ -913,65 +839,6 @@ Where <subdir> is one of the following:
 
           See the usbnsh configuration below for more information on configuring
           USB trace output and the USB monitor.
-
-   10. USB OTG FS Host Support.  The following changes will enable support for
-       a USB host on the STM32F3Discovery, including support for a mass storage
-       class driver:
-
-       CONFIG_USBDEV=n          : Make sure tht USB device support is disabled
-       CONFIG_USBHOST=y         : Enable USB host support
-       CONFIG_STM32_OTGFS=y     : Enable the STM32 USB OTG FS block
-       CONFIG_STM32_SYSCFG=y    : Needed for all USB OTF FS support
-       CONFIG_SCHED_WORKQUEUE=y : Worker thread support is required for the mass
-                                  storage class driver.
-       CONFIG_NSH_ARCHINIT=y    : Architecture specific USB initialization
-                                  is needed for NSH
-       CONFIG_FS_FAT=y          : Needed by the USB host mass storage class.
-
-       With those changes, you can use NSH with a FLASH pen driver as shown
-       belong.  Here NSH is started with nothing in the USB host slot:
-
-       NuttShell (NSH) NuttX-x.yy
-       nsh> ls /dev
-       /dev:
-        console
-        null
-        ttyS0
-
-       After inserting the FLASH drive, the /dev/sda appears and can be
-       mounted like this:
-
-       nsh> ls /dev
-       /dev:
-        console
-        null
-        sda
-        ttyS0
-       nsh> mount -t vfat /dev/sda /mnt/stuff
-       nsh> ls /mnt/stuff
-       /mnt/stuff:
-        -rw-rw-rw-   16236 filea.c
-
-       And files on the FLASH can be manipulated to standard interfaces:
-
-       nsh> echo "This is a test" >/mnt/stuff/atest.txt
-       nsh> ls /mnt/stuff
-       /mnt/stuff:
-        -rw-rw-rw-   16236 filea.c
-        -rw-rw-rw-      16 atest.txt
-       nsh> cat /mnt/stuff/atest.txt
-       This is a test
-       nsh> cp /mnt/stuff/filea.c fileb.c
-       nsh> ls /mnt/stuff
-       /mnt/stuff:
-        -rw-rw-rw-   16236 filea.c
-        -rw-rw-rw-      16 atest.txt
-        -rw-rw-rw-   16236 fileb.c
-
-       To prevent data loss, don't forget to un-mount the FLASH drive
-       before removing it:
-
-       nsh> umount /mnt/stuff
 
   usbnsh:
   -------
