@@ -4161,4 +4161,17 @@
 	* arch/arm/src/lpc17xx: Add support for the Cortex-M4 FPU and
 	  Mikes "common vector" logic.  The LPC1788 is going to need
 	  these things.
-
+	* arch/arm/src/stm32/stm32_spi.c:  Fix SPI DMA logic that does
+	  not work if sem_wait() is interrupt by a signal.  From Petteri
+	  Aimonen.
+	* drivers/input/max11802.c: MAX11802: Fix a timing bug that
+	  corrupted coordinates.  From Petteri Aimonen.
+	* drivers/mmcsd/mmcsd_spi.c:  Use SPI locking so that MMC/SD can
+	  exist on the same bus as other SPI devices.  From Petteri
+	  Aimonen.
+	* graphics/nxfonts/nxfonts_sans17x22.h: Small mod to hyphen in
+	  sans17x22 font.  The hyphen did not have any space on its sides.
+	  This caused it to run together with other characters so that for
+	  example "+-" would look weird. From Petteri Aimonen.
+	* mm/mm_mallinfo.c:  Take MM semaphore in mm_mallinfo. From Petteri
+	  Aimonen.

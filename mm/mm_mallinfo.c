@@ -98,13 +98,17 @@ int mallinfo(struct mallinfo *info)
   for (region = 0; region < g_nregions; region++)
 #endif
     {
-      /* Visit each node in the region */
+      /* Visit each node in the region
+       * Retake the semaphore for each region to reduce latencies
+       */
+      
+      mm_takesemaphore();
 
       for (node = g_heapstart[region];
            node < g_heapend[region];
            node = (struct mm_allocnode_s *)((char*)node + node->size))
         {
-          mvdbg("region=%d node=%p preceding=%p\n", region, node, node->preceding);
+          mvdbg("region=%d node=%p size=%p preceding=%p\n", region, node, node->size, node->preceding);
           if (node->preceding & MM_ALLOC_BIT)
             {
               uordblks += node->size;
@@ -120,6 +124,8 @@ int mallinfo(struct mallinfo *info)
             }
         }
 
+      mm_givesemaphore();
+        
       mvdbg("region=%d node=%p g_heapend=%p\n", region, node, g_heapend[region]);
       DEBUGASSERT(node == g_heapend[region]);
       uordblks += SIZEOF_MM_ALLOCNODE; /* account for the tail node */

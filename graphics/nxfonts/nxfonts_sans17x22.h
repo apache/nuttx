@@ -114,8 +114,8 @@
 #define NXFONT_BITMAP_44 {0x40, 0x40, 0x40, 0x80}
 
 /* hyphen (45) */
-#define NXFONT_METRICS_45 {1, 3, 1, 0, 12, 0}
-#define NXFONT_BITMAP_45 {0xe0}
+#define NXFONT_METRICS_45 {1, 5, 1, 0, 12, 0}
+#define NXFONT_BITMAP_45 {0x70}
 
 /* period (46) */
 #define NXFONT_METRICS_46 {1, 1, 2, 1, 15, 0}

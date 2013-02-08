@@ -188,11 +188,9 @@ static void max11802_lock(FAR struct spi_dev_s *spi)
    * unlocked)
    */
 
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
   SPI_SETMODE(spi, CONFIG_MAX11802_SPIMODE);
   SPI_SETBITS(spi, 8);
   SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
 }
 #endif
 
@@ -249,11 +247,9 @@ static inline void max11802_configspi(FAR struct spi_dev_s *spi)
    * bother because it might change.
    */
 
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, true);
   SPI_SETMODE(spi, CONFIG_MAX11802_SPIMODE);
   SPI_SETBITS(spi, 8);
   SPI_SETFREQUENCY(spi, CONFIG_MAX11802_FREQUENCY);
-  SPI_SELECT(spi, SPIDEV_TOUCHSCREEN, false);
 }
 #endif
 
@@ -629,10 +625,20 @@ static void max11802_worker(FAR void *arg)
     }
   else
     {
-      /* Wait for data ready */
-      do {
-        /* Handle pen down events.  First, sample positional values. */
+      /* Wait for data ready
+       * Note: MAX11802 signals the readiness of the results using
+       * the lowest 4 bits of the result. However these are the
+       * last bits to be read out of the device. It appears that
+       * the hardware value can change in the middle of the readout,
+       * causing the upper bits to be still invalid even though lower
+       * bits indicate valid result.
+       * 
+       * We work around this by reading the registers once more after
+       * the tags indicate they are ready.
+       */
       
+      int readycount = 0;
+      do {
 #ifdef CONFIG_MAX11802_SWAPXY
         x = max11802_sendcmd(priv, MAX11802_CMD_YPOSITION, &tags);
         y = max11802_sendcmd(priv, MAX11802_CMD_XPOSITION, &tags2);
@@ -640,8 +646,12 @@ static void max11802_worker(FAR void *arg)
         x = max11802_sendcmd(priv, MAX11802_CMD_XPOSITION, &tags);
         y = max11802_sendcmd(priv, MAX11802_CMD_YPOSITION, &tags2);
 #endif
-      } while (tags == 0xF || tags2 == 0xF);
-
+        if (tags != 0xF && tags2 != 0xF)
+        {
+          readycount++;
+        }
+      } while (readycount < 2);
+      
       /* Continue to sample the position while the pen is down */
       wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1, (uint32_t)priv);
       
