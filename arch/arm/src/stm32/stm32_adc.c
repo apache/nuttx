@@ -60,7 +60,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm32_adc.h"
 
 #ifdef CONFIG_ADC

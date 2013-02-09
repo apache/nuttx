@@ -57,7 +57,7 @@
 #include "os_internal.h"
 
 #include "chip.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm32_can.h"
 
 #if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))

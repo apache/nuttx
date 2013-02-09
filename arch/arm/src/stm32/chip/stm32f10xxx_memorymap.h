@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32f10xxx_memorymap.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 3013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,8 @@
 #define STM32_I2C1_BASE      0x40005400     /* 0x40005400 - 0x400057ff: I2C1 */
 #define STM32_I2C2_BASE      0x40005800     /* 0x40005800 - 0x40005Bff: I2C2 */
 #define STM32_USB_BASE       0x40005c00     /* 0x40005c00 - 0x40005fff: USB device FS registers */
-#define STM32_USBCANRAM_BASE 0x40006000     /* 0x40006000 - 0x400063ff: Shared USB/CAN SRAM 512 bytes */
+#define STM32_USBRAM_BASE    0x40006000     /* 0x40006000 - 0x400063ff: Shared USB/CAN SRAM 512 bytes */
+#define STM32_CANRAM_BASE    0x40006000     /* 0x40006000 - 0x400063ff: Shared USB/CAN SRAM 512 bytes */
 #define STM32_CAN1_BASE      0x40006400     /* 0x40006400 - 0x400067ff: bxCAN1 */
 #define STM32_CAN2_BASE      0x40006800     /* 0x40006800 - 0x40006bff: bxCAN2 */
 #define STM32_BKP_BASE       0x40006c00     /* 0x40006c00 - 0x40006fff: Backup registers (BKP) */

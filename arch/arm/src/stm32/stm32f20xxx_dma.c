@@ -54,7 +54,7 @@
 #include "os_internal.h"
 #include "chip.h"
 #include "stm32_dma.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 
 /* This file supports only the STM32 F2 family (although it is identical to
  * the corresponding F4 file).

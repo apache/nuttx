@@ -54,7 +54,7 @@
 #include "os_internal.h"
 #include "chip.h"
 #include "stm32_dma.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 
 /* Only for the STM32F10xx family for now */
 

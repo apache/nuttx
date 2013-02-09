@@ -46,7 +46,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm32_gpio.h"
 
 #ifdef CONFIG_ARCH_FPU

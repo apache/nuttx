@@ -54,7 +54,7 @@
 
 #include "chip.h"
 #include "stm32_pwm.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 
 /* This module then only compiles if there is at least one enabled timer
  * intended for use with the PWM upper half driver.

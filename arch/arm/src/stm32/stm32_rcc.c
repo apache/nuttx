@@ -52,7 +52,7 @@
 #include "chip.h"
 #include "stm32_rcc.h"
 #include "stm32_flash.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm32_waste.h"
 
 /****************************************************************************
