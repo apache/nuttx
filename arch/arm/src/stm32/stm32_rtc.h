@@ -2,7 +2,9 @@
  * arch/arm/src/stm32/stm32_rtc.h
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu>
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Author: Uros Platise <uros.platise@isotel.eu> (Original for the F1)
+ *           Gregory Nutt <gnutt@nuttx.org> (On-going support and development)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,13 +45,23 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
+
+/* The STM32 F1 has a simple battery-backed counter for its RTC and has a separate
+ * block for the BKP registers.
+ */
+
 #if defined(CONFIG_STM32_STM32F10XX)
-#  include "chip/stm32f10xxx_rtc.h"
+#  include "chip/stm32_rtc.h"
 #  include "chip/stm32_bkp.h"
-#elif defined(CONFIG_STM32_STM32F20XX)
-#  include "chip/stm32f20xxx_rtc.h"
-#elif defined(CONFIG_STM32_STM32F40XX)
-#  include "chip/stm32f40xxx_rtc.h"
+
+/* The other families use a more traditional Realtime Clock/Calendar (RTCC) with
+ * broken-out data/time in BCD format.  The backup registers are integrated into
+ * the RTCC in these families.
+ */
+
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) ||\
+      defined(CONFIG_STM32_STM32F40XX)
+#  include "chip/stm32_rtcc.h"
 #endif
 
 /************************************************************************************
