@@ -167,7 +167,9 @@
 #define USART_CR1_RTOIE           (1 << 26) /* Bit 26: Receiver timeout interrupt enable */
 #define USART_CR1_EOBIE           (1 << 27) /* Bit 27: End of Block interrupt enable */
 
-#define USART_CR1_ALLINTS         (USART_CR1_IDLEIE|USART_CR1_RXNEIE|USART_CR1_TCIE|USART_CR1_TXEIE|USART_CR1_PEIE|USART_CR1_CMIE|USART_CR1_RTOIE|USART_CR1_EOBIE)
+#define USART_CR1_ALLINTS \
+  (USART_CR1_IDLEIE | USART_CR1_RXNEIE | USART_CR1_TCIE | USART_CR1_TXEIE |\
+   USART_CR1_PEIE | USART_CR1_CMIE |USART_CR1_RTOIE | USART_CR1_EOBIE)
 
 /* Control register 2 */
 
@@ -289,17 +291,31 @@
 #define USART_ISR_ALLBITS         (0x007fdfff)
 
 /* Interrupt flag clear register */
-#define USART_ICR_
+
+#define USART_ICR_PECF            (1 << 0)  /* Bit 0:  Parity error clear flag */
+#define USART_ICR_FECF            (1 << 1)  /* Bit 1:  Framing error clear flag */
+#define USART_ICR_NCF             (1 << 2)  /* Bit 2:  Noise detected flag *clear flag */
+#define USART_ICR_ORECF           (1 << 3)  /* Bit 3:  Overrun error clear flag */
+#define USART_ICR_IDLECF          (1 << 4)  /* Bit 4:  Idle line detected clear flag */
+#define USART_ICR_TCCF            (1 << 6)  /* Bit 6:  Transmission complete */
+#define USART_ICR_LBDCF           (1 << 8)  /* Bit 8:  LIN break detection clear flag */
+#define USART_ICR_CTSCF           (1 << 9)  /* Bit 9:  CTS interrupt clear flag */
+#define USART_ICR_RTOCF           (1 << 11) /* Bit 11: Receiver timeout clear flag */
+#define USART_ICR_EOBCF           (1 << 12) /* Bit 12: End of block clear flag */
+#define USART_ICR_CMCF            (1 << 17) /* Bit 17: Character match clear flag */
+#define USART_ICR_WUCF            (1 << 20) /* Bit 20: Wakeup from Stop mode clear flag */
+
+#define USART_ICR_ALLBITS         (0x00121b5f)
+
 /* Receive data register */
-#define USART_RDR_
+
+#define USART_RDR_SHIFT           (0)       /* Bits 8:0: Receive data value */
+#define USART_RDR_MASK            (0x1ff << USART_RDR_SHIFT)
+
 /* Transmit data register */
-#define USART_TDR_
 
-
-/* Data register */
-
-#define USART_DR_SHIFT            (0)       /* Bits 8:0: Data value */
-#define USART_DR_MASK             (0xff << USART_DR_SHIFT)
+#define USART_TDR_SHIFT           (0)       /* Bits 8:0: Transmit data value */
+#define USART_TDR_MASK            (0x1ff << USART_TDR_SHIFT)
 
 /* Compatibility definitions ********************************************************/
 /* F1/F2/F4 Status register */
