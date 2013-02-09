@@ -1,12 +1,12 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32f10xxx_rtc.c
+ * arch/arm/src/stm32/stm32_rtcounter.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *
  * With extensions, modifications by:
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregroy Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32f40xxx_rtc.h
+ * arch/arm/src/stm32/chip/stm32_rtcc.h.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_RTC_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_RTC_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32_RTCC_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32_RTCC_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -48,7 +48,9 @@
 #define STM32_RTC_ISR_OFFSET      0x000c /* RTC initialization and status register */
 #define STM32_RTC_PRER_OFFSET     0x0010 /* RTC prescaler register */
 #define STM32_RTC_WUTR_OFFSET     0x0014 /* RTC wakeup timer register */
-#define STM32_RTC_CALIBR_OFFSET   0x0018 /* RTC calibration register */
+#ifndef CONFIG_STM32_STM32F30XX
+#  define STM32_RTC_CALIBR_OFFSET 0x0018 /* RTC calibration register */
+#endif
 #define STM32_RTC_ALRMAR_OFFSET   0x001c /* RTC alarm A register */
 #define STM32_RTC_ALRMBR_OFFSET   0x0020 /* RTC alarm B register */
 #define STM32_RTC_WPR_OFFSET      0x0024 /* RTC write protection register */
@@ -79,10 +81,12 @@
 #define STM32_RTC_BK13R_OFFSET    0x0084 /* RTC backup register 13 */
 #define STM32_RTC_BK14R_OFFSET    0x0088 /* RTC backup register 14 */
 #define STM32_RTC_BK15R_OFFSET    0x008c /* RTC backup register 15 */
-#define STM32_RTC_BK16R_OFFSET    0x0090 /* RTC backup register 16 */
-#define STM32_RTC_BK17R_OFFSET    0x0094 /* RTC backup register 17 */
-#define STM32_RTC_BK18R_OFFSET    0x0098 /* RTC backup register 18 */
-#define STM32_RTC_BK19R_OFFSET    0x009c /* RTC backup register 19 */
+#ifndef CONFIG_STM32_STM32F30XX
+#  define STM32_RTC_BK16R_OFFSET  0x0090 /* RTC backup register 16 */
+#  define STM32_RTC_BK17R_OFFSET  0x0094 /* RTC backup register 17 */
+#  define STM32_RTC_BK18R_OFFSET  0x0098 /* RTC backup register 18 */
+#  define STM32_RTC_BK19R_OFFSET  0x009c /* RTC backup register 19 */
+#endif
 
 /* Register Addresses ***************************************************************/
 
@@ -92,7 +96,9 @@
 #define STM32_RTC_ISR             (STM32_RTC_BASE+STM32_RTC_ISR_OFFSET)
 #define STM32_RTC_PRER            (STM32_RTC_BASE+STM32_RTC_PRER_OFFSET)
 #define STM32_RTC_WUTR            (STM32_RTC_BASE+STM32_RTC_WUTR_OFFSET)
-#define STM32_RTC_CALIBR          (STM32_RTC_BASE+STM32_RTC_CALIBR_OFFSET)
+#ifndef CONFIG_STM32_STM32F30XX
+#  define STM32_RTC_CALIBR        (STM32_RTC_BASE+STM32_RTC_CALIBR_OFFSET)
+#endif
 #define STM32_RTC_ALRMAR          (STM32_RTC_BASE+STM32_RTC_ALRMAR_OFFSET)
 #define STM32_RTC_ALRMBR          (STM32_RTC_BASE+STM32_RTC_ALRMBR_OFFSET)
 #define STM32_RTC_WPR             (STM32_RTC_BASE+STM32_RTC_WPR_OFFSET)
@@ -123,10 +129,12 @@
 #define STM32_RTC_BK13R           (STM32_RTC_BASE+STM32_RTC_BK13R_OFFSET)
 #define STM32_RTC_BK14R           (STM32_RTC_BASE+STM32_RTC_BK14R_OFFSET)
 #define STM32_RTC_BK15R           (STM32_RTC_BASE+STM32_RTC_BK15R_OFFSET)
-#define STM32_RTC_BK16R           (STM32_RTC_BASE+STM32_RTC_BK16R_OFFSET)
-#define STM32_RTC_BK17R           (STM32_RTC_BASE+STM32_RTC_BK17R_OFFSET)
-#define STM32_RTC_BK18R           (STM32_RTC_BASE+STM32_RTC_BK18R_OFFSET)
-#define STM32_RTC_BK19R           (STM32_RTC_BASE+STM32_RTC_BK19R_OFFSET)
+#ifndef CONFIG_STM32_STM32F30XX
+#  define STM32_RTC_BK16R         (STM32_RTC_BASE+STM32_RTC_BK16R_OFFSET)
+#  define STM32_RTC_BK17R         (STM32_RTC_BASE+STM32_RTC_BK17R_OFFSET)
+#  define STM32_RTC_BK18R         (STM32_RTC_BASE+STM32_RTC_BK18R_OFFSET)
+#  define STM32_RTC_BK19R         (STM32_RTC_BASE+STM32_RTC_BK19R_OFFSET)
+#endif
 
 /* Register Bitfield Definitions ****************************************************/
 
@@ -240,10 +248,12 @@
 
 /* RTC calibration register */
 
-#define RTC_CALIBR_DCS            (1 << 7)  /* Bit 7  Digital calibration sign */
-#define RTC_CALIBR_DC_SHIFT       (0)       /* Bits 4:0 0-4: Digital calibration */
-#define RTC_CALIBR_DC_MASK        (31 << RTC_CALIBR_DC_SHIFT)
-#  define RTC_CALIBR_DC(n)        (((n) >> 2) << RTC_CALIBR_DC_SHIFT) /* n= 0, 4, 8, ... 126 */
+#ifndef CONFIG_STM32_STM32F30XX
+#  define RTC_CALIBR_DCS          (1 << 7)  /* Bit 7  Digital calibration sign */
+#  define RTC_CALIBR_DC_SHIFT     (0)       /* Bits 4:0 0-4: Digital calibration */
+#  define RTC_CALIBR_DC_MASK      (31 << RTC_CALIBR_DC_SHIFT)
+#    define RTC_CALIBR_DC(n)      (((n) >> 2) << RTC_CALIBR_DC_SHIFT) /* n= 0, 4, 8, ... 126 */
+#endif
 
 /* RTC alarm A/B registers */
 
@@ -318,15 +328,45 @@
 
 /* RTC calibration register */
 
-#define RTC_CALR_
+#define RTC_CALR_CALM_SHIFT       (0)       /* Bits 0-8: Calibration minus */
+#define RTC_CALR_CALM_MASK        (0x1ff << RTC_CALR_CALM_SHIFT)
+#define RTC_CALR_CALW16           (1 << 13) /* Bit 13: Use a 16-second calibration cycle period */
+#define RTC_CALR_CALW8            (1 << 14) /* Bit 14: Use an 8-second calibration cycle period */
+#define RTC_CALR_CALP             (1 << 15) /* Bit 15: Increase frequency of RTC by 488.5 ppm */
 
 /* RTC tamper and alternate function configuration register */
 
-#define RTC_TAFCR_CALM_SHIFT      (0)       /* Bits 0-8: Calibration minus */
-#define RTC_TAFCR_CALM_MASK       (0x1ff << RTC_TAFCR_CALM_SHIFT)
-#define RTC_TAFCR_CALW16          (1 << 13) /* Bit 13: Use a 16-second calibration cycle period */
-#define RTC_TAFCR_CALW8           (1 << 14) /* Bit 14: Use an 8-second calibration cycle period */
-#define RTC_TAFCR_CALP            (1 << 15) /* Bit 15: Increase frequency of RTC by 488.5 ppm */
+#define RTC_TAFCR_TAMP1E          (1 << 0)  /* Bit 0:  RTC_TAMP1 input detection enable */
+#define RTC_TAFCR_TAMP1TRG        (1 << 1)  /* Bit 1:  Active level for RTC_TAMP1 input */
+#define RTC_TAFCR_TAMPIE          (1 << 2)  /* Bit 2:  Tamper interrupt enable */
+#define RTC_TAFCR_TAMP3E          (1 << 5)  /* Bit 5:  RTC_TAMP3 detection enable */
+#define RTC_TAFCR_TAMP3TRG        (1 << 6)  /* Bit 6:  Active level for RTC_TAMP3 input */
+#define RTC_TAFCR_TAMPTS          (1 << 7)  /* Bit 7:  Activate timestamp on tamper detection event */
+#define RTC_TAFCR_TAMPFREQ_SHIFT  (8)        /* Bits 8-10: Tamper sampling frequency */
+#define RTC_TAFCR_TAMPFREQ_MASK   (7 << RTC_TAFCR_TAMPFREQ_SHIFT)
+#  define RTC_TAFCR_TAMPFREQ_DIV32768 (0 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 32768 (1 Hz) */
+#  define RTC_TAFCR_TAMPFREQ_DIV16384 (1 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 16384 (2 Hz) */
+#  define RTC_TAFCR_TAMPFREQ_DIV8192  (2 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 8192 (4 Hz) */
+#  define RTC_TAFCR_TAMPFREQ_DIV4096  (3 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 4096 (8 Hz) */
+#  define RTC_TAFCR_TAMPFREQ_DIV2048  (4 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 2048 (16 Hz) */
+#  define RTC_TAFCR_TAMPFREQ_DIV1024  (5 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 1024 (32 Hz) */
+#  define RTC_TAFCR_TAMPFREQ_DIV512   (6 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 512 (64 Hz) */
+#  define RTC_TAFCR_TAMPFREQ_DIV256   (7 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 256 (128 Hz) */
+#define RTC_TAFCR_TAMPFLT_SHIFT   (11)        /* Bits 11-12: RTC_TAMPx filter count */
+#define RTC_TAFCR_TAMPFLT_MASK    (3 << RTC_TAFCR_TAMPFLT_SHIFT)
+#define RTC_TAFCR_TAMPPRCH_SHIFT  (13)        /* Bits 13-14: RTC_TAMPx precharge duration */
+#define RTC_TAFCR_TAMPPRCH_MASK   (3 << RTC_TAFCR_TAMPPRCH_SHIFT)
+#  define RTC_TAFCR_TAMPPRCH_1CYCLE  (0 << RTC_TAFCR_TAMPPRCH_SHIFT) /* 1 RTCCLK cycle */
+#  define RTC_TAFCR_TAMPPRCH_2CYCLES (1 << RTC_TAFCR_TAMPPRCH_SHIFT) /* 2 RTCCLK cycles */
+#  define RTC_TAFCR_TAMPPRCH_4CYCLES (2 << RTC_TAFCR_TAMPPRCH_SHIFT) /* 4 RTCCLK cycles */
+#  define RTC_TAFCR_TAMPPRCH_5CYCLES (3 << RTC_TAFCR_TAMPPRCH_SHIFT) /* 8 RTCCLK cycles */
+#define RTC_TAFCR_TAMPPUDIS       (1 << 15) /* Bit 15: RTC_TAMPx pull-up disable */
+#define RTC_TAFCR_PC13VALUE       (1 << 18) /* Bit 18: RTC_ALARM output type/PC13 value */
+#define RTC_TAFCR_PC13MODE        (1 << 19) /* Bit 19: PC13 mode */
+#define RTC_TAFCR_PC14VALUE       (1 << 20) /* Bit 20: PC14 value */
+#define RTC_TAFCR_PC14MODE        (1 << 21) /* Bit 21: PC14 mode */
+#define RTC_TAFCR_PC15VALUE       (1 << 22) /* Bit 22: PC15 value */
+#define RTC_TAFCR_PC15MODE        (1 << 23) /* Bit 23: PC15 mode */
 
 /* RTC alarm A/B sub second register */
 
@@ -335,4 +375,4 @@
 #define RTC_ALRMSSR_MASKSS_SHIFT  (0)  /* Bits 24-27:  Mask the most-significant bits starting at this bit */
 #define RTC_ALRMSSR_MASKSS_MASK   (0xffff << RTC_ALRMSSR_SS_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_RTC_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_RTCC_H */

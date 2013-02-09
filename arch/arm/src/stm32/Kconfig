@@ -2421,7 +2421,7 @@ config STM32_USBHOST_PKTDUMP
 
 endmenu
 
-menu "USB Device Configuration"
+comment "USB Device Configuration"
 
 config STM32_USB_ITRMP
 	bool "Re-map USB interrupt"

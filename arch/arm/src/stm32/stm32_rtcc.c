@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32f20xxx_rtc.c
+ * arch/arm/src/stm32/stm32_rtcc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,7 +148,9 @@ static void rtc_dumpregs(FAR const char *msg)
   rtclldbg("     ISR: %08x\n", getreg32(STM32_RTC_ISR));
   rtclldbg("    PRER: %08x\n", getreg32(STM32_RTC_PRER));
   rtclldbg("    WUTR: %08x\n", getreg32(STM32_RTC_WUTR));
+#ifndef CONFIG_STM32_STM32F30XX
   rtclldbg("  CALIBR: %08x\n", getreg32(STM32_RTC_CALIBR));
+#endif
   rtclldbg("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
   rtclldbg("  ALRMBR: %08x\n", getreg32(STM32_RTC_ALRMBR));
   rtclldbg("  SHIFTR: %08x\n", getreg32(STM32_RTC_SHIFTR));
@@ -626,12 +628,12 @@ int up_rtcinitialize(void)
 
   /* Then attach the ALARM interrupt handler */
 
-  irq_attach(STM32_IRQ_RTC, rtc_interrupt);
-  up_enable_irq(STM32_IRQ_RTC);
+  irq_attach(STM32_IRQ_RTC_WKUP, rtc_interrupt);
+  up_enable_irq(STM32_IRQ_RTC_WKUP);
 #endif
 
   g_rtc_enabled = true;
-  rtc_dumpregs("After Initialzation");
+  rtc_dumpregs("After Initialization");
   return OK;
 }
 
@@ -813,7 +815,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  ************************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
+int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 {
   irqstate_t flags;
   int ret = -EBUSY;
