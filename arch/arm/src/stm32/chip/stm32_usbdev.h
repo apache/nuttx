@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <chip.h>
 
-#ifdef CONFIG_STM32_STM32F10XX
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 
 /************************************************************************************
  * Definitions
@@ -108,7 +108,7 @@
 
 /* Buffer Descriptor Table (Relatative to BTABLE address) */
 
-#define STM32_USB_BTABLE_ADDR(ep,o)  (STM32_USBCANRAM_BASE+STM32_USB_BTABLE_RADDR(ep,o))
+#define STM32_USB_BTABLE_ADDR(ep,o)  (STM32_USBRAM_BASE+STM32_USB_BTABLE_RADDR(ep,o))
 #define STM32_USB_ADDR_TX(ep)        STM32_USB_BTABLE_ADDR(ep,STM32_USB_ADDR_TX_WOFFSET)
 #define STM32_USB_COUNT_TX(ep)       STM32_USB_BTABLE_ADDR(ep,STM32_USB_COUNT_TX_WOFFSET)
 #define STM32_USB_ADDR_RX(ep)        STM32_USB_BTABLE_ADDR(ep,STM32_USB_ADDR_RX_WOFFSET)
@@ -231,6 +231,6 @@
 #define USB_COUNT_RX_SHIFT           (0)       /* Bits 9-0: Reception Byte Count */
 #define USB_COUNT_RX_MASK            (0x03ff << USB_COUNT_RX_SHIFT)
 
-#endif /* CONFIG_STM32_STM32F10XX */
+#endif /* CONFIG_STM32_STM32F10XX || CONFIG_STM32_STM32F10XX */
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_USBDEV_H */
 

@@ -46,7 +46,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include "stm32_internal.h"
+#include "stm32.h"
 
 /****************************************************************************
  * Pre-Processor Definitions

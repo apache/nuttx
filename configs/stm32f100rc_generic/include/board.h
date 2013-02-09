@@ -46,7 +46,7 @@
 # include <stdint.h>
 #endif
 #include "stm32_rcc.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 
 /************************************************************************************
  * Definitions

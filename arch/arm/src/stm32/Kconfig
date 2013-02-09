@@ -2420,3 +2420,18 @@ config STM32_USBHOST_PKTDUMP
 		Dump all incoming and outgoing USB packets. Depends on DEBUG.
 
 endmenu
+
+menu "USB Device Configuration"
+
+config STM32_USB_ITRMP
+	bool "Re-map USB interrupt"
+	default n if !STM32_CAN1
+	default y if STM32_CAN1
+	depends on STM32_USB && STM32_STM32F30XX
+	---help---
+		The legacy USB in the F1 series shared interrupt lines with USB
+		device and CAN1.  In the F3 series, a hardware options was added to
+		either retain the legacy F1 behavior or to map the USB interupts to
+		there own dedicated vectors.  The option is available only for the
+		F3 family and selects the use of the dedicated USB interrupts.
+

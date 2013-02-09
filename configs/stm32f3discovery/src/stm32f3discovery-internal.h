@@ -158,21 +158,8 @@ void weak_function stm32_spiinitialize(void);
  *
  ****************************************************************************************************/
 
-#ifdef CONFIG_STM32_OTGFS
+#ifdef CONFIG_STM32_USB
 void weak_function stm32_usbinitialize(void);
-#endif
-
-/****************************************************************************************************
- * Name: stm32_usbhost_initialize
- *
- * Description:
- *   Called at application startup time to initialize the USB host functionality. This function will
- *   start a thread that will monitor for device connection/disconnection events.
- *
- ****************************************************************************************************/
-
-#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
-int stm32_usbhost_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

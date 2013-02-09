@@ -59,7 +59,8 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
-#include "stm32_internal.h"
+#include "stm32.h"
+#include "stm32_syscfg.h"
 #include "stm32_usbdev.h"
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
@@ -76,6 +77,20 @@
 
 #ifndef CONFIG_USB_PRI
 #  define CONFIG_USB_PRI NVIC_SYSH_PRIORITY_DEFAULT
+#endif
+
+/* USB Interrupts.  Should be re-mapped if CAN is used. */
+
+#ifdef CONFIG_STM32_STM32F30XX
+#  ifdef CONFIG_STM32_USB_ITRMP
+#    define STM32_IRQ_USBHP   STM32_IRQ_USBHP_1
+#    define STM32_IRQ_USBLP   STM32_IRQ_USBLP_1
+#    define STM32_IRQ_USBWKUP STM32_IRQ_USBWKUP_1
+#  else
+#    define STM32_IRQ_USBHP   STM32_IRQ_USBHP_2
+#    define STM32_IRQ_USBLP   STM32_IRQ_USBLP_2
+#    define STM32_IRQ_USBWKUP STM32_IRQ_USBWKUP_2
+#  endif
 #endif
 
 /* Extremely detailed register debug that you would normally never want
@@ -1014,7 +1029,7 @@ static void stm32_copytopma(const uint8_t *buffer, uint16_t pma, uint16_t nbytes
 
   /* Copy loop.  Source=user buffer, Dest=packet memory */
 
-  dest = (uint16_t*)(STM32_USBCANRAM_BASE + ((uint32_t)pma << 1));
+  dest = (uint16_t*)(STM32_USBRAM_BASE + ((uint32_t)pma << 1));
   for (i = nwords; i != 0; i--)
     {
       /* Read two bytes and pack into on 16-bit word */
@@ -1044,7 +1059,7 @@ stm32_copyfrompma(uint8_t *buffer, uint16_t pma, uint16_t nbytes)
 
   /* Copy loop.  Source=packet memory, Dest=user buffer */
 
-  src = (uint32_t*)(STM32_USBCANRAM_BASE + ((uint32_t)pma << 1));
+  src = (uint32_t*)(STM32_USBRAM_BASE + ((uint32_t)pma << 1));
   for (i = nwords; i != 0; i--)
     {
       /* Copy 16-bits from packet memory to user buffer. */
@@ -3469,6 +3484,20 @@ void up_usbinitialize(void)
   /* Power up the USB controller, but leave it in the reset state */
 
   stm32_hwsetup(priv);
+
+  /* Remap the USB interrupt as needed (Only supported by the STM32 F3 family) */
+
+#ifdef CONFIG_STM32_STM32F30XX
+#  ifdef CONFIG_STM32_USB_ITRMP
+  /* Clear the ITRMP bit to use the legacy, shared USB/CAN interrupts */
+
+  modifyreg32(STM32_RCC_APB1ENR, SYSCFG_CFGR1_USB_ITRMP, 0);
+#  else
+  /* Set the ITRMP bit to use the STM32 F3's dedicated USB interrupts */
+
+  modifyreg32(STM32_RCC_APB1ENR, 0, SYSCFG_CFGR1_USB_ITRMP);
+#  endif
+#endif
 
   /* Attach USB controller interrupt handlers.  The hardware will not be
    * initialized and interrupts will not be enabled until the class device

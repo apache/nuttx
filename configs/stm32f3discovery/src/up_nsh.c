@@ -58,7 +58,7 @@
 #  include "stm32_usbhost.h"
 #endif
 
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm32f3discovery-internal.h"
 
 /****************************************************************************

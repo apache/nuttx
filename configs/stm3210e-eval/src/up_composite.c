@@ -49,7 +49,7 @@
 #include <nuttx/mmcsd.h>
 #include <nuttx/usb/composite.h>
 
-#include "stm32_internal.h"
+#include "stm32.h"
 
 /* There is nothing to do here if SDIO support is not selected. */
 

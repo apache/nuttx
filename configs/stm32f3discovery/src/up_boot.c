@@ -82,13 +82,12 @@ void stm32_boardinitialize(void)
     }
 #endif
 
-  /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
+  /* Initialize USB if the 1) USB device controller is in the configuration and 2)
    * disabled, and 3) the weak function stm32_usbinitialize() has been brought 
-   * the weak function stm32_usbinitialize() has been brought into the build.
-   * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
+   * into the build. Presumeably either CONFIG_USBDEV is also selected.
    */
 
-#ifdef CONFIG_STM32_OTGFS
+#ifdef CONFIG_STM32_USB
   if (stm32_usbinitialize)
     {
       stm32_usbinitialize();

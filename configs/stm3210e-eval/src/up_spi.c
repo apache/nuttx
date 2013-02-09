@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm3210e-internal.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)

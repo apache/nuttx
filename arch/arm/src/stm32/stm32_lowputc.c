@@ -48,10 +48,10 @@
 
 #include "chip.h"
 
+#include "stm32.h"
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"
 #include "stm32_uart.h"
-#include "stm32_internal.h"
 
 /**************************************************************************
  * Private Definitions
@@ -255,14 +255,14 @@
 #  define STM32_USARTDIV16 \
     ((STM32_APBCLOCK + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
 
-   /* Use oversamply by 8 only if the divisor is small */
+   /* Use oversamply by 8 only if the divisor is small.  But what is small? */
 
 #  if STM32_USARTDIV8 > 100
 #    define STM32_BRR_VALUE STM32_USARTDIV16
 #  else
 #    define USE_OVER8 1
 #    define STM32_BRR_VALUE \
-      ((STM32_USARTDIV8 && 0xfff0) | ((STM32_USARTDIV8 & 0x000f) >> 1)
+      ((STM32_USARTDIV8 & 0xfff0) | ((STM32_USARTDIV8 & 0x000f) >> 1))
 #  endif
 
 #else

@@ -55,7 +55,7 @@
 #  include <nuttx/mmcsd.h>
 #endif
 
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "hymini_stm32v-internal.h"
 
 /****************************************************************************

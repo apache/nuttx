@@ -52,82 +52,29 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm32f3discovery-internal.h"
 
-#ifdef CONFIG_STM32_OTGFS
+#ifdef CONFIG_STM32_USB
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-#if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)
+#ifdef CONFIG_USBDEV
 #  define HAVE_USB 1
 #else
-#  warning "CONFIG_STM32_OTGFS is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
+#  warning "CONFIG_STM32_USB is enabled but CONFIG_USBDEV is not"
 #  undef HAVE_USB
-#endif
-
-#ifndef CONFIG_USBHOST_DEFPRIO
-#  define CONFIG_USBHOST_DEFPRIO 50
-#endif
-
-#ifndef CONFIG_USBHOST_STACKSIZE
-#  define CONFIG_USBHOST_STACKSIZE 1024
 #endif
 
 /************************************************************************************
  * Private Data
  ************************************************************************************/
 
-#ifdef CONFIG_USBHOST
-static struct usbhost_driver_s *g_drvr;
-#endif
-
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
-
-/************************************************************************************
- * Name: usbhost_waiter
- *
- * Description:
- *   Wait for USB devices to be connected.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_USBHOST
-static int usbhost_waiter(int argc, char *argv[])
-{
-  bool connected = false;
-  int ret;
-
-  uvdbg("Running\n");
-  for (;;)
-    {
-      /* Wait for the device to change state */
-
-      ret = DRVR_WAIT(g_drvr, connected);
-      DEBUGASSERT(ret == OK);
-
-      connected = !connected;
-      uvdbg("%s\n", connected ? "connected" : "disconnected");
-
-      /* Did we just become connected? */
-
-      if (connected)
-        {
-          /* Yes.. enumerate the newly connected device */
-
-          (void)DRVR_ENUMERATE(g_drvr);
-        }
-    }
-
-  /* Keep the compiler from complaining */
-
-  return 0;
-}
-#endif
 
 /************************************************************************************
  * Public Functions
@@ -144,131 +91,24 @@ static int usbhost_waiter(int argc, char *argv[])
 
 void stm32_usbinitialize(void)
 {
-  /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
-
-  /* Configure the OTG FS VBUS sensing GPIO, Power On, and Overcurrent GPIOs */
-
-#ifdef CONFIG_STM32_OTGFS
-  stm32_configgpio(GPIO_OTGFS_VBUS);
-  stm32_configgpio(GPIO_OTGFS_PWRON);
-  stm32_configgpio(GPIO_OTGFS_OVER);
-#endif
+  /* Does the STM32 F3 hava an external soft pull-up? */
 }
-
-/***********************************************************************************
- * Name: stm32_usbhost_initialize
- *
- * Description:
- *   Called at application startup time to initialize the USB host functionality.
- *   This function will start a thread that will monitor for device
- *   connection/disconnection events.
- *
- ***********************************************************************************/
-
-#ifdef CONFIG_USBHOST
-int stm32_usbhost_initialize(void)
-{
-  int pid;
-  int ret;
-
-  /* First, register all of the class drivers needed to support the drivers
-   * that we care about:
-   */
-
-  uvdbg("Register class drivers\n");
-  ret = usbhost_storageinit();
-  if (ret != OK)
-    {
-      udbg("Failed to register the mass storage class\n");
-    }
-
-  /* Then get an instance of the USB host interface */
-
-  uvdbg("Initialize USB host\n");
-  g_drvr = usbhost_initialize(0);
-  if (g_drvr)
-    {
-      /* Start a thread to handle device connection. */
-
-      uvdbg("Start usbhost_waiter\n");
-
-      pid = TASK_CREATE("usbhost", CONFIG_USBHOST_DEFPRIO,
-                        CONFIG_USBHOST_STACKSIZE,
-                        (main_t)usbhost_waiter, (FAR char * const *)NULL);
-      return pid < 0 ? -ENOEXEC : OK;
-    }
-
-  return -ENODEV;
-}
-#endif
-
-/***********************************************************************************
- * Name: stm32_usbhost_vbusdrive
- *
- * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided be
- *   each platform that implements the STM32 OTG FS host interface
- *
- *   "On-chip 5 V VBUS generation is not supported. For this reason, a charge pump 
- *    or, if 5 V are available on the application board, a basic power switch, must 
- *    be added externally to drive the 5 V VBUS line. The external charge pump can 
- *    be driven by any GPIO output. When the application decides to power on VBUS 
- *    using the chosen GPIO, it must also set the port power bit in the host port 
- *    control and status register (PPWR bit in OTG_FS_HPRT).
- *
- *   "The application uses this field to control power to this port, and the core 
- *    clears this bit on an overcurrent condition."
- *
- * Input Parameters:
- *   iface - For future growth to handle multiple USB host interface.  Should be zero.
- *   enable - true: enable VBUS power; false: disable VBUS power
- *
- * Returned Value:
- *   None
- *
- ***********************************************************************************/
-
-#ifdef CONFIG_USBHOST
-void stm32_usbhost_vbusdrive(int iface, bool enable)
-{
-  DEBUGASSERT(iface == 0);
-  
-  if (enable)
-    {
-      /* Enable the Power Switch by driving the enable pin low */
-
-      stm32_gpiowrite(GPIO_OTGFS_PWRON, false);
-    }
-  else
-    { 
-      /* Disable the Power Switch by driving the enable pin high */
- 
-      stm32_gpiowrite(GPIO_OTGFS_PWRON, true);
-    }
-}
-#endif
 
 /************************************************************************************
- * Name: stm32_setup_overcurrent
+ * Name:  stm32_usbpullup
  *
  * Description:
- *   Setup to receive an interrupt-level callback if an overcurrent condition is
- *   detected.
- *
- * Input paramter:
- *   handler - New overcurrent interrupt handler
- *
- * Returned value:
- *   Old overcurrent interrupt handler
+ *   If USB is supported and the board supports a pullup via GPIO (for USB software
+ *   connect and disconnect), then the board software must provide stm32_pullup.
+ *   See include/nuttx/usb/usbdev.h for additional description of this method.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_USBHOST
-xcpt_t stm32_setup_overcurrent(xcpt_t handler)
+int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
 {
-  return stm32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler);
+  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
+  return OK;
 }
-#endif
 
 /************************************************************************************
  * Name:  stm32_usbsuspend
@@ -281,14 +121,12 @@ xcpt_t stm32_setup_overcurrent(xcpt_t handler)
  *
  ************************************************************************************/
 
-#ifdef CONFIG_USBDEV
 void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
   ulldbg("resume: %d\n", resume);
 }
-#endif
 
-#endif /* CONFIG_STM32_OTGFS */
+#endif /* CONFIG_STM32_USB */
 
 
 

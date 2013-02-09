@@ -51,7 +51,7 @@
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/ads7843e.h>
 
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "shenzhou-internal.h"
 
 /****************************************************************************

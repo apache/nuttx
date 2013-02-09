@@ -76,7 +76,6 @@
 
 #include "up_arch.h"
 #include "stm32.h"
-#include "stm32_internal.h"
 #include "stm3210e-internal.h"
 
 /**************************************************************************************

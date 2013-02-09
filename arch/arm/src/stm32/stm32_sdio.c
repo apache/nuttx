@@ -60,7 +60,7 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm32_dma.h"
 #include "stm32_sdio.h"
 

@@ -92,8 +92,8 @@
 #define SYSCFG_CFGR1_TIM17_DMARMP      (1 << 12) /* Bit 12: TIM17 DMA request remapping bit */
 #define SYSCFG_CFGR1_TIM6_DMARMP       (1 << 13) /* Bit 13: TIM6 DMA remap, or */
 #define SYSCFG_CFGR1_DAC1_DMARMP       (1 << 13) /* Bit 13: DAC channel DMA remap */
-#define SYSCFG_CFGR1_TIM7_DMARMP       (1 << 14) /* Bit 14: : TIM7 DMA remap */
-#define SYSCFG_CFGR1_DAC2_DMARMP       (1 << 14) /* Bit 14: : DAC channel2 DMA remap */
+#define SYSCFG_CFGR1_TIM7_DMARMP       (1 << 14) /* Bit 14: TIM7 DMA remap */
+#define SYSCFG_CFGR1_DAC2_DMARMP       (1 << 14) /* Bit 14: DAC channel2 DMA remap */
 #define SYSCFG_CFGR1_I2C_PBXFMP_SHIFT  (0)       /* Bits 16-19: Fast Mode Plus (FM+) driving capability */
 #define SYSCFG_CFGR1_I2C_PBXFMP_MASK   (15 << SYSCFG_CFGR1_I2C_PBXFMP_SHIFT)
 #define SYSCFG_CFGR1_I2C1_FMP          (1 << 20) /* Bit 20: I2C1 fast mode Plus driving capability */
