@@ -56,7 +56,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS +=  up_buttons.c
 endif
 
-ifeq ($(CONFIG_STM32_OTGFS),y)
+ifeq ($(CONFIG_STM32_USB),y)
 CSRCS += up_usb.c
 endif
 

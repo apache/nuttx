@@ -48,7 +48,7 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
-#include "stm32_internal.h"
+#include "stm32.h"
 
 /* There is nothing to do here if SDIO support is not selected. */
 

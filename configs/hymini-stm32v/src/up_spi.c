@@ -50,7 +50,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "hymini_stm32v-internal.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)

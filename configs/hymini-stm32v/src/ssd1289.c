@@ -51,7 +51,6 @@
 
 #include "up_arch.h"
 #include "stm32.h"
-#include "stm32_internal.h"
 #include "hymini_stm32v-internal.h"
 
 #include "ssd1289.h"

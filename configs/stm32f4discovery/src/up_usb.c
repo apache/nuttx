@@ -52,7 +52,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm32f4discovery-internal.h"
 
 #ifdef CONFIG_STM32_OTGFS

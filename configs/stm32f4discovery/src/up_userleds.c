@@ -50,7 +50,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm32f4discovery-internal.h"
 
 #ifndef CONFIG_ARCH_LEDS

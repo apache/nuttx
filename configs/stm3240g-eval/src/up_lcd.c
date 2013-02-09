@@ -61,7 +61,6 @@
 
 #include "up_arch.h"
 #include "stm32.h"
-#include "stm32_internal.h"
 #include "stm3240g-internal.h"
 
 #if !defined(CONFIG_STM32_ILI9320_DISABLE) || !defined(CONFIG_STM32_ILI9325_DISABLE)

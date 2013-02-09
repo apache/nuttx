@@ -51,7 +51,7 @@
 
 #include "stm32_fsmc.h"
 #include "stm32_gpio.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm3240g-internal.h"
 
 /************************************************************************************

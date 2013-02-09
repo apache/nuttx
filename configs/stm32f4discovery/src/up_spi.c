@@ -50,7 +50,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "stm32_internal.h"
+#include "stm32.h"
 #include "stm32f4discovery-internal.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
