@@ -350,7 +350,9 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
             }
         }
     }
-#else
+
+#else /* CONFIG_SCHED_CHILD_STATUS */
+
   if (rtcb->nchildren == 0)
     {
       /* There are no children */
@@ -373,7 +375,8 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
           goto errout_with_errno;
         }
     }
-#endif
+
+#endif /* CONFIG_SCHED_CHILD_STATUS */
 
   /* Loop until the child that we are waiting for dies */
 
@@ -455,7 +458,9 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
               goto errout_with_errno;
             }
         }
-#else
+
+#else  /* CONFIG_SCHED_CHILD_STATUS */
+
       /* Check if the task has already died. Signals are not queued in
        * NuttX.  So a possibility is that the child has died and we
        * missed the death of child signal (we got some other signal
@@ -473,7 +478,8 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
           err = ECHILD;
           goto errout_with_errno;
         }
-#endif
+
+#endif /* CONFIG_SCHED_CHILD_STATUS */
 
       /* Wait for any death-of-child signal */
 
