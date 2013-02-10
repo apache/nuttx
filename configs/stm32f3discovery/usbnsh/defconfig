@@ -214,6 +214,11 @@ CONFIG_STM32_USART=y
 #
 
 #
+# USB Device Configuration
+#
+# CONFIG_STM32_USB_ITRMP is not set
+
+#
 # External Memory Configuration
 #
 
