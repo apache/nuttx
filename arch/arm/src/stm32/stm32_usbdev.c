@@ -61,6 +61,7 @@
 #include "up_arch.h"
 #include "stm32.h"
 #include "stm32_syscfg.h"
+#include "stm32_gpio.h"
 #include "stm32_usbdev.h"
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
@@ -3480,6 +3481,13 @@ void up_usbinitialize(void)
 
   usbtrace(TRACE_DEVINIT, 0);
   stm32_checksetup();
+
+  /* Configure USB GPIO alternate function pins */
+
+#ifdef CONFIG_STM32_STM32F30XX
+  (void)stm32_configgpio(GPIO_USB_DM);
+  (void)stm32_configgpio(GPIO_USB_DP);
+#endif
 
   /* Power up the USB controller, but leave it in the reset state */
 
