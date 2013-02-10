@@ -761,14 +761,29 @@ Where <subdir> is one of the following:
 
     3. This configuration includes USB Support (CDC/ACM device)
 
-        CONFIG_STM32_USB=y            : STM32 USB device support
-        CONFIG_USBDEV=y               : USB device support must be enabled
-        CONFIG_CDCACM=y               : The CDC/ACM driver must be built
-        CONFIG_NSH_BUILTIN_APPS=y     : NSH built-in application support must be enabled
-        CONFIG_NSH_ARCHINIT=y         : To perform USB initialization
+       CONFIG_STM32_USB=y            : STM32 USB device support
+       CONFIG_USBDEV=y               : USB device support must be enabled
+       CONFIG_CDCACM=y               : The CDC/ACM driver must be built
+       CONFIG_NSH_BUILTIN_APPS=y     : NSH built-in application support must be enabled
+       CONFIG_NSH_ARCHINIT=y         : To perform USB initialization
 
-    4. This example supports the watchdog timer test (apps/examples/watchdog)
-       but this must be manually enabled by selecting:
+       The CDC/ACM example is included as two NSH "built-in" commands.\
+ 
+       CONFIG_EXAMPLES_CDCACM=y      : Enable apps/examples/cdcacm
+  
+       The two commands are:
+ 
+       sercon : Connect the serial device a create /dev/ttyACM0
+       serdis : Disconnect the serial device.        
+
+       NOTE:  I don't expect there serial connections/disconnections to work
+       well.  the STM32F3Discovery board does not provide circuitry for
+       control for the "soft connect" USB pullup.  As a result, the host PC
+       may not know when the USB has been logically connected or disconnected
+       and may not re-enumerate the device.
+
+    4. This example can support the watchdog timer test (apps/examples/watchdog)
+       but this must be enabled by selecting:
 
        CONFIG_EXAMPLES_WATCHDOG=y : Enable the apps/examples/watchdog
        CONFIG_WATCHDOG=y          : Enables watchdog timer driver support
@@ -783,62 +798,6 @@ Where <subdir> is one of the following:
        CONFIG_EXAMPLES_WATCHDOG_TIMEOUT=49
 
        The IWDG timer has a range of about 35 seconds and should not be an issue.
-
-    5. Using the USB console.
-
-        The STM32F3Discovery NSH configuration can be set up to use a USB CDC/ACM
-        (or PL2303) USB console.  The normal way that you would configure the
-        the USB console would be to change the .config file like this:
-
-        CONFIG_STM32_USB=y             : STM32 OTG FS support
-        CONFIG_USART2_SERIAL_CONSOLE=n : Disable the USART2 console
-        CONFIG_DEV_CONSOLE=n           : Inhibit use of /dev/console by other logic
-        CONFIG_USBDEV=y                : USB device support must be enabled
-        CONFIG_CDCACM=y                : The CDC/ACM driver must be built
-        CONFIG_CDCACM_CONSOLE=y        : Enable the CDC/ACM USB console.
-
-        NOTE: When you first start the USB console, you have hit ENTER a few
-        times before NSH starts.  The logic does this to prevent sending USB data
-        before there is anything on the host side listening for USB serial input.
-
-    6.  Here is an alternative USB console configuration.  The following
-        configuration will also create a NSH USB console but this version
-        will use /dev/console.  Instead, it will use the normal /dev/ttyACM0
-        USB serial device for the console:
-
-        CONFIG_STM32_USB=y           : STM32 OTG FS support
-        CONFIG_USART2_SERIAL_CONSOLE=y : Keep the USART2 console
-        CONFIG_DEV_CONSOLE=y           : /dev/console exists (but NSH won't use it)
-        CONFIG_USBDEV=y                : USB device support must be enabled
-        CONFIG_CDCACM=y                : The CDC/ACM driver must be built
-        CONFIG_CDCACM_CONSOLE=n        : Don't use the CDC/ACM USB console.
-        CONFIG_NSH_USBCONSOLE=y        : Instead use some other USB device for the console
-
-        The particular USB device that is used is:
-
-        CONFIG_NSH_USBCONDEV="/dev/ttyACM0"
-
-        The advantage of this configuration is only that it is easier to
-        bet working.  This alternative does has some side effects:
-
-        - When any other device other than /dev/console is used for a user
-          interface, linefeeds (\n) will not be expanded to carriage return /
-          linefeeds (\r\n).  You will need to set your terminal program to account
-          for this.
-
-        - /dev/console still exists and still refers to the serial port. So
-          you can still use certain kinds of debug output (see include/debug.h, all
-          of the interfaces based on lowsyslog will work in this configuration).
-
-        - But don't enable USB debug output!  Since USB is console is used for 
-          USB debug output and you are using a USB console, there will be
-          infinite loops and deadlocks:  Debug output generates USB debug
-          output which generatates USB debug output, etc.  If you want USB
-          debug output, you should consider enabling USB trace
-          (CONFIG_USBDEV_TRACE) and perhaps the USB monitor (CONFIG_SYSTEM_USBMONITOR).
-
-          See the usbnsh configuration below for more information on configuring
-          USB trace output and the USB monitor.
 
   usbnsh:
   -------
