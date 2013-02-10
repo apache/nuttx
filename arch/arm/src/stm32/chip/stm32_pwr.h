@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32_pwr.h
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,12 @@
 #  define PWR_CSR_BRR          (1 << 3)  /* Bit 3:  Backup regulator ready */
 #endif
 
-#define PWR_CSR_EWUP           (1 << 8)  /* Bit 8:  Enable WKUP pin */
+#if defined(CONFIG_STM32_STM32F30XX)
+#  define PWR_CSR_EWUP1        (1 << 8)  /* Bit 8:  Enable WKUP1 pin */
+#  define PWR_CSR_EWUP2        (1 << 9)  /* Bit 9:  Enable WKUP2 pin */
+#else
+#  define PWR_CSR_EWUP         (1 << 8)  /* Bit 8:  Enable WKUP pin */
+#endif
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define PWR_CSR_BRE          (1 << 9)  /* Bit 9:  Backup regulator enable */

@@ -63,8 +63,18 @@
 #include "stm32.h"
 #include "stm32_adc.h"
 
+/* ADC "upper half" support must be enabled */
+
 #ifdef CONFIG_ADC
+
+/* Some ADC peripheral must be enabled */
+
 #if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
+
+/* This implementation is for the STM32 F1, F2, and F4 only */
+
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F20XX) || \
+    defined(CONFIG_STM32_STM32F40XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1541,6 +1551,6 @@ struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist, int nch
   return dev;
 }
 
+#endif /* CONFIG_STM32_STM32F10XX || CONFIG_STM32_STM32F20XX || CONFIG_STM32_STM32F40XX */
 #endif /* CONFIG_STM32_ADC || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
 #endif /* CONFIG_ADC */
-

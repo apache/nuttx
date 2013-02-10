@@ -203,12 +203,12 @@
 #define ADC_CR1_AWDEN               (1 << 23) /* Bit 23: Analog watchdog enable on regular channels */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#  define ACD_CR1_RES_SHIFT         (24)      /* Bits 24-25: Resolution */
-#  define ACD_CR1_RES_MASK          (3 << ACD_CR1_RES_SHIFT)
-#    define ACD_CR1_RES_12BIT       (0 << ACD_CR1_RES_SHIFT) /* 15 ADCCLK clyes */
-#    define ACD_CR1_RES_10BIT       (1 << ACD_CR1_RES_SHIFT) /* 13 ADCCLK clyes */
-#    define ACD_CR1_RES_8BIT        (2 << ACD_CR1_RES_SHIFT) /* 11 ADCCLK clyes */
-#    define ACD_CR1_RES_6BIT        (3 << ACD_CR1_RES_SHIFT) /* 9 ADCCLK clyes */
+#  define ADC_CR1_RES_SHIFT         (24)      /* Bits 24-25: Resolution */
+#  define ADC_CR1_RES_MASK          (3 << ADC_CR1_RES_SHIFT)
+#    define ADC_CR1_RES_12BIT       (0 << ADC_CR1_RES_SHIFT) /* 15 ADCCLK clyes */
+#    define ADC_CR1_RES_10BIT       (1 << ADC_CR1_RES_SHIFT) /* 13 ADCCLK clyes */
+#    define ADC_CR1_RES_8BIT        (2 << ADC_CR1_RES_SHIFT) /* 11 ADCCLK clyes */
+#    define ADC_CR1_RES_6BIT        (3 << ADC_CR1_RES_SHIFT) /* 9 ADCCLK clyes */
 #  define ADC_CR1_OVRIE             (1 << 26) /* Bit 26: Overrun interrupt enable */
 #endif
 
@@ -252,12 +252,12 @@
 #    define ADC_CR2_JEXTSEL_T8CC4   (14 << ADC_CR2_JEXTSEL_SHIFT) /* 1110: Timer 8 CC4 event */
 #    define ADC_CR2_JEXTSEL_EXTI    (15 << ADC_CR2_JEXTSEL_SHIFT) /* 1111: EXTI line15 */
 
-#  define ACD_CR2_JEXTEN_SHIFT      (20)      /* Bits 20-21: External trigger enable for injected channels */
-#  define ACD_CR2_JEXTEN_MASK       (3 << ACD_CR2_JEXTEN_SHIFT)
-#    define ACD_CR2_JEXTEN_NONE     (0 << ACD_CR2_JEXTEN_SHIFT) /* 00: Trigger detection disabled */
-#    define ACD_CR2_JEXTEN_RISING   (1 << ACD_CR2_JEXTEN_SHIFT) /* 01: Trigger detection on the rising edge */
-#    define ACD_CR2_JEXTEN_FALLING  (2 << ACD_CR2_JEXTEN_SHIFT) /* 10: Trigger detection on the falling edge */
-#    define ACD_CR2_JEXTEN_BOTH     (3 << ACD_CR2_JEXTEN_SHIFT) /* 11: Trigger detection on both the rising and falling edges */
+#  define ADC_CR2_JEXTEN_SHIFT      (20)      /* Bits 20-21: External trigger enable for injected channels */
+#  define ADC_CR2_JEXTEN_MASK       (3 << ADC_CR2_JEXTEN_SHIFT)
+#    define ADC_CR2_JEXTEN_NONE     (0 << ADC_CR2_JEXTEN_SHIFT) /* 00: Trigger detection disabled */
+#    define ADC_CR2_JEXTEN_RISING   (1 << ADC_CR2_JEXTEN_SHIFT) /* 01: Trigger detection on the rising edge */
+#    define ADC_CR2_JEXTEN_FALLING  (2 << ADC_CR2_JEXTEN_SHIFT) /* 10: Trigger detection on the falling edge */
+#    define ADC_CR2_JEXTEN_BOTH     (3 << ADC_CR2_JEXTEN_SHIFT) /* 11: Trigger detection on both the rising and falling edges */
 
 #  define ADC_CR2_JSWSTART          (1 << 22) /* Bit 22: Start Conversion of injected channels */
                                               /* Bit 23: Reserved, must be kept at reset value. */
@@ -280,12 +280,12 @@
 #    define ADC_CR2_EXTSEL_T8TRGO   (14 << ADC_CR2_EXTSEL_SHIFT) /* 1110: Timer 8 TRGO event */
 #    define ADC_CR2_EXTSEL_EXTI     (15 << ADC_CR2_EXTSEL_SHIFT) /* 1111: EXTI line11 */
 
-#  define ACD_CR2_EXTEN_SHIFT       (28)      /* Bits 28-29: External trigger enable for regular channels */
-#  define ACD_CR2_EXTEN_MASK        (3 << ACD_CR2_EXTEN_SHIFT)
-#    define ACD_CR2_EXTEN_NONE      (0 << ACD_CR2_EXTEN_SHIFT) /* 00: Trigger detection disabled */
-#    define ACD_CR2_EXTEN_RISING    (1 << ACD_CR2_EXTEN_SHIFT) /* 01: Trigger detection on the rising edge */
-#    define ACD_CR2_EXTEN_FALLING   (2 << ACD_CR2_EXTEN_SHIFT) /* 10: Trigger detection on the falling edge */
-#    define ACD_CR2_EXTEN_BOTH      (3 << ACD_CR2_EXTEN_SHIFT) /* 11: Trigger detection on both the rising and falling edges */
+#  define ADC_CR2_EXTEN_SHIFT       (28)      /* Bits 28-29: External trigger enable for regular channels */
+#  define ADC_CR2_EXTEN_MASK        (3 << ADC_CR2_EXTEN_SHIFT)
+#    define ADC_CR2_EXTEN_NONE      (0 << ADC_CR2_EXTEN_SHIFT) /* 00: Trigger detection disabled */
+#    define ADC_CR2_EXTEN_RISING    (1 << ADC_CR2_EXTEN_SHIFT) /* 01: Trigger detection on the rising edge */
+#    define ADC_CR2_EXTEN_FALLING   (2 << ADC_CR2_EXTEN_SHIFT) /* 10: Trigger detection on the falling edge */
+#    define ADC_CR2_EXTEN_BOTH      (3 << ADC_CR2_EXTEN_SHIFT) /* 11: Trigger detection on both the rising and falling edges */
 
 #  define ADC_CR2_SWSTART           (1 << 30) /* Bit 30: Start Conversion of regular channels */
 
@@ -369,25 +369,25 @@
 /* ADC sample time register 2 */
 
 #define ADC_SMPR2_SMP0_SHIFT        (0)       /* Bits 2-0: Channel 0 Sample time selection */
-#define ADC_SMPR2_SMP0_MASK         (7 << ADC_SMPR1_SMP0_SHIFT)
+#define ADC_SMPR2_SMP0_MASK         (7 << ADC_SMPR2_SMP0_SHIFT)
 #define ADC_SMPR2_SMP1_SHIFT        (3)       /* Bits 5-3: Channel 1 Sample time selection */
-#define ADC_SMPR2_SMP1_MASK         (7 << ADC_SMPR1_SMP1_SHIFT)
+#define ADC_SMPR2_SMP1_MASK         (7 << ADC_SMPR2_SMP1_SHIFT)
 #define ADC_SMPR2_SMP2_SHIFT        (6)       /* Bits 8-6: Channel 2 Sample time selection */
-#define ADC_SMPR2_SMP2_MASK         (7 << ADC_SMPR1_SMP2_SHIFT)
+#define ADC_SMPR2_SMP2_MASK         (7 << ADC_SMPR2_SMP2_SHIFT)
 #define ADC_SMPR2_SMP3_SHIFT        (9)       /* Bits 11-9: Channel 3 Sample time selection */
-#define ADC_SMPR2_SMP3_MASK         (7 << ADC_SMPR1_SMP3_SHIFT)
+#define ADC_SMPR2_SMP3_MASK         (7 << ADC_SMPR2_SMP3_SHIFT)
 #define ADC_SMPR2_SMP4_SHIFT        (12)      /* Bits 14-12: Channel 4 Sample time selection */
-#define ADC_SMPR2_SMP4_MASK         (7 << ADC_SMPR1_SMP4_SHIFT)
+#define ADC_SMPR2_SMP4_MASK         (7 << ADC_SMPR2_SMP4_SHIFT)
 #define ADC_SMPR2_SMP5_SHIFT        (15)      /* Bits 17-15: Channel 5 Sample time selection */
-#define ADC_SMPR2_SMP5_MASK         (7 << ADC_SMPR1_SMP5_SHIFT)
+#define ADC_SMPR2_SMP5_MASK         (7 << ADC_SMPR2_SMP5_SHIFT)
 #define ADC_SMPR2_SMP6_SHIFT        (18)      /* Bits 20-18: Channel 6 Sample time selection */
-#define ADC_SMPR2_SMP6_MASK         (7 << ADC_SMPR1_SMP6_SHIFT)
+#define ADC_SMPR2_SMP6_MASK         (7 << ADC_SMPR2_SMP6_SHIFT)
 #define ADC_SMPR2_SMP7_SHIFT        (21)      /* Bits 23-21: Channel 7 Sample time selection */
-#define ADC_SMPR2_SMP7_MASK         (7 << ADC_SMPR1_SMP7_SHIFT)
+#define ADC_SMPR2_SMP7_MASK         (7 << ADC_SMPR2_SMP7_SHIFT)
 #define ADC_SMPR2_SMP8_SHIFT        (24)      /* Bits 26-24: Channel 8 Sample time selection */
-#define ADC_SMPR2_SMP8_MASK         (7 << ADC_SMPR1_SMP8_SHIFT)
+#define ADC_SMPR2_SMP8_MASK         (7 << ADC_SMPR2_SMP8_SHIFT)
 #define ADC_SMPR2_SMP9_SHIFT        (27)      /* Bits 29-27: Channel 9 Sample time selection */
-#define ADC_SMPR2_SMP9_MASK         (7 << ADC_SMPR1_SMP9_SHIFT)
+#define ADC_SMPR2_SMP9_MASK         (7 << ADC_SMPR2_SMP9_SHIFT)
 
 /* ADC injected channel data offset register 1-4 */
 
@@ -455,7 +455,7 @@
 #define ADC_JSQR_JSQ1_SHIFT        (0)        /* Bits 4-0: 1st conversion in injected sequence */
 #define ADC_JSQR_JSQ1_MASK         (0x1f << ADC_JSQR_JSQ1_SHIFT)
 #define ADC_JSQR_JSQ2_SHIFT        (5)        /* Bits 9-5: 2nd conversion in injected sequence */
-#define ADC_JSQR_JSQ2_MASK         (0x1f << ADC_JSQR_JSQ2_MASK)
+#define ADC_JSQR_JSQ2_MASK         (0x1f << ADC_JSQR_JSQ2_SHIFT)
 #define ADC_JSQR_JSQ3_SHIFT        (10)       /* Bits 14-10: 3rd conversion in injected sequence */
 #define ADC_JSQR_JSQ3_MASK         (0x1f << ADC_JSQR_JSQ3_SHIFT)
 #define ADC_JSQR_JSQ4_SHIFT        (15)       /* Bits 19-15: 4th conversion in injected sequence */

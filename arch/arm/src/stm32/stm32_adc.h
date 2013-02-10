@@ -43,7 +43,12 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32_adc.h"
+
+#if defined(CONFIG_STM32_STM32F30XX)
+#  include "chip/stm32f30xxx_adc.h"
+#else
+#  include "chip/stm32_adc.h"
+#endif
 
 #include <nuttx/analog/adc.h>
 

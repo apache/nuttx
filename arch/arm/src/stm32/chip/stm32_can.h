@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32_can.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,8 @@
 
 /* Number of filters depends on silicon */
 
-#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F20XX) || \
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define CAN_NFILTERS 28
 #else
 #  define CAN_NFILTERS 14
@@ -271,7 +272,7 @@
 #define CAN_MSR_SLAKI             (1 << 4)  /* Bit 4: Sleep acknowledge interrupt */
 #define CAN_MSR_TXM               (1 << 8)  /* Bit 8: Transmit Mode */
 #define CAN_MSR_RXM               (1 << 9)  /* Bit 9: Receive Mode */
-#define CAN_MSR_SAMP              (1 << 20) /* Bit 10: Last Sample Point */
+#define CAN_MSR_SAMP              (1 << 10) /* Bit 10: Last Sample Point */
 #define CAN_MSR_RX                (1 << 11) /* Bit 11: CAN Rx Signal */
 
 /* CAN transmit status register */
