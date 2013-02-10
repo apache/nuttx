@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_i2c.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,11 @@
 #include <nuttx/i2c.h>
 
 #include "chip.h"
-#include "chip/stm32_i2c.h"
+#if defined(CONFIG_STM32_STM32F30XX)
+#  include "chip/stm32f30xxx_i2c.h"
+#else
+#  include "chip/stm32_i2c.h"
+#endif
 
 #endif /* __ARCH_ARM_SRC_STM32_STM32_I2C_H */
 
