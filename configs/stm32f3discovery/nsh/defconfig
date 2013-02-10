@@ -166,7 +166,7 @@ CONFIG_STM32_STM32F30XX=y
 # CONFIG_STM32_IWDG is not set
 CONFIG_STM32_PWR=y
 # CONFIG_STM32_SDIO is not set
-CONFIG_STM32_SPI1=y
+# CONFIG_STM32_SPI1 is not set
 # CONFIG_STM32_SPI2 is not set
 CONFIG_STM32_SYSCFG=y
 # CONFIG_STM32_TIM1 is not set
@@ -184,7 +184,6 @@ CONFIG_STM32_SYSCFG=y
 CONFIG_STM32_USART2=y
 CONFIG_STM32_USB=y
 # CONFIG_STM32_WWDG is not set
-CONFIG_STM32_SPI=y
 
 #
 # Alternate Pin Mapping
@@ -204,14 +203,13 @@ CONFIG_STM32_USART=y
 # CONFIG_STM32_USART_SINGLEWIRE is not set
 
 #
-# SPI Configuration
-#
-# CONFIG_STM32_SPI_INTERRUPTS is not set
-# CONFIG_STM32_SPI_DMA is not set
-
-#
 # USB Host Configuration
 #
+
+#
+# USB Device Configuration
+#
+# CONFIG_STM32_USB_ITRMP is not set
 
 #
 # External Memory Configuration
@@ -345,10 +343,7 @@ CONFIG_DEV_NULL=y
 # CONFIG_PWM is not set
 # CONFIG_I2C is not set
 CONFIG_ARCH_HAVE_I2CRESET=y
-CONFIG_SPI=y
-# CONFIG_SPI_OWNBUS is not set
-CONFIG_SPI_EXCHANGE=y
-# CONFIG_SPI_CMDDATA is not set
+# CONFIG_SPI is not set
 # CONFIG_RTC is not set
 # CONFIG_WATCHDOG is not set
 # CONFIG_ANALOG is not set
