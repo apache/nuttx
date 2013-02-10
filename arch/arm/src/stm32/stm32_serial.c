@@ -138,7 +138,7 @@
 #      error "USART6 DMA channel not defined (DMAMAP_USART6_RX)"
 #    endif
 
-#  elif defined(CONFIG_STM32_STM32F10XX)
+#  elif defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 
 #    if defined(CONFIG_USART1_RXDMA) || defined(CONFIG_USART2_RXDMA) || \
       defined(CONFIG_USART3_RXDMA)
@@ -173,7 +173,7 @@
 /* DMA priority */
 
 #  ifndef CONFIG_USART_DMAPRIO
-#    if defined(CONFIG_STM32_STM32F10XX)
+#    if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 #      define CONFIG_USART_DMAPRIO  DMA_CCR_PRIMED
 #    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #      define CONFIG_USART_DMAPRIO  DMA_SCR_PRIMED
@@ -181,7 +181,7 @@
 #      error "Unknown STM32 DMA"
 #    endif
 #  endif
-#  if defined(CONFIG_STM32_STM32F10XX)
+#    if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 #    if (CONFIG_USART_DMAPRIO & ~DMA_CCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_USART_DMAPRIO"
 #    endif
