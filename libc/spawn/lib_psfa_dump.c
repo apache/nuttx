@@ -113,8 +113,8 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
             FAR struct spawn_open_file_action_s *action =
               (FAR struct spawn_open_file_action_s *)entry;
 
-            svdbg("  OPEN: path=%s oflags=%04x mode=%04x fd=%d\n",
-                  action->path, action->oflags, action->mode, action->fd);
+            dbg("  OPEN: path=%s oflags=%04x mode=%04x fd=%d\n",
+                action->path, action->oflags, action->mode, action->fd);
           }
           break;
 

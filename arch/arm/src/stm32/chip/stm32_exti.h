@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32_exti.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,11 @@
 #    define STM32_NEXTI          19
 #    define STM32_EXTI_MASK      0x0007ffff
 #  endif
+#eif defined(CONFIG_STM32_STM32F30XX)
+#    define STM32_NEXTI1         31
+#    define STM32_EXTI1_MASK     0xffffffff
+#    define STM32_NEXTI2         4
+#    define STM32_EXTI2_MASK     0x0000000f
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define STM32_NEXTI            23
 #  define STM32_EXTI_MASK        0x007fffff
@@ -63,6 +68,11 @@
 #define STM32_EXTI_BIT(n)        (1 << (n))
 
 /* Register Offsets *****************************************************************/
+
+#if defined(CONFIG_STM32_STM32F30XX)
+#  define STM32_EXTI1_OFFSET     0x0000  /* Offset to EXTI1 registers */
+#  define STM32_EXTI2_OFFSET     0x0018  /* Offset to EXTI2 registers */
+#endif
 
 #define STM32_EXTI_IMR_OFFSET    0x0000  /* Interrupt mask register */
 #define STM32_EXTI_EMR_OFFSET    0x0004  /* Event mask register */
@@ -73,12 +83,39 @@
 
 /* Register Addresses ***************************************************************/
 
-#define STM32_EXTI_IMR          (STM32_EXTI_BASE+STM32_EXTI_IMR_OFFSET)
-#define STM32_EXTI_EMR          (STM32_EXTI_BASE+STM32_EXTI_EMR_OFFSET)
-#define STM32_EXTI_RTSR         (STM32_EXTI_BASE+STM32_EXTI_RTSR_OFFSET)
-#define STM32_EXTI_FTSR         (STM32_EXTI_BASE+STM32_EXTI_FTSR_OFFSET)
-#define STM32_EXTI_SWIER        (STM32_EXTI_BASE+STM32_EXTI_SWIER_OFFSET)
-#define STM32_EXTI_PR           (STM32_EXTI_BASE+STM32_EXTI_PR_OFFSET)
+#if defined(CONFIG_STM32_STM32F30XX)
+#  define STM32_EXTI1_BASE       (STM32_EXTI_BASE+STM32_EXTI1_OFFSET)
+#  define STM32_EXTI2_BASE       (STM32_EXTI_BASE+STM32_EXTI2_OFFSET)
+
+#  define STM32_EXTI1_IMR        (STM32_EXTI1_BASE+STM32_EXTI_IMR_OFFSET)
+#  define STM32_EXTI1_EMR        (STM32_EXTI1_BASE+STM32_EXTI_EMR_OFFSET)
+#  define STM32_EXTI1_RTSR       (STM32_EXTI1_BASE+STM32_EXTI_RTSR_OFFSET)
+#  define STM32_EXTI1_FTSR       (STM32_EXTI1_BASE+STM32_EXTI_FTSR_OFFSET)
+#  define STM32_EXTI1_SWIER      (STM32_EXTI1_BASE+STM32_EXTI_SWIER_OFFSET)
+#  define STM32_EXTI1_PR         (STM32_EXTI1_BASE+STM32_EXTI_PR_OFFSET)
+
+#  define STM32_EXTI2_IMR        (STM32_EXTI2_BASE+STM32_EXTI_IMR_OFFSET)
+#  define STM32_EXTI2_EMR        (STM32_EXTI2_BASE+STM32_EXTI_EMR_OFFSET)
+#  define STM32_EXTI2_RTSR       (STM32_EXTI2_BASE+STM32_EXTI_RTSR_OFFSET)
+#  define STM32_EXTI2_FTSR       (STM32_EXTI2_BASE+STM32_EXTI_FTSR_OFFSET)
+#  define STM32_EXTI2_SWIER      (STM32_EXTI2_BASE+STM32_EXTI_SWIER_OFFSET)
+#  define STM32_EXTI2_PR         (STM32_EXTI2_BASE+STM32_EXTI_PR_OFFSET)
+
+#  define STM32_EXTI_IMR         STM32_EXTI1_IMR
+#  define STM32_EXTI_EMR         STM32_EXTI1_EMR
+#  define STM32_EXTI_RTSR        STM32_EXTI1_RTSR
+#  define STM32_EXTI_FTSR        STM32_EXTI1_FTSR
+#  define STM32_EXTI_SWIER       STM32_EXTI1_SWIER
+#  define STM32_EXTI_PR          STM32_EXTI1_PR
+
+#else
+#  define STM32_EXTI_IMR         (STM32_EXTI_BASE+STM32_EXTI_IMR_OFFSET)
+#  define STM32_EXTI_EMR         (STM32_EXTI_BASE+STM32_EXTI_EMR_OFFSET)
+#  define STM32_EXTI_RTSR        (STM32_EXTI_BASE+STM32_EXTI_RTSR_OFFSET)
+#  define STM32_EXTI_FTSR        (STM32_EXTI_BASE+STM32_EXTI_FTSR_OFFSET)
+#  define STM32_EXTI_SWIER       (STM32_EXTI_BASE+STM32_EXTI_SWIER_OFFSET)
+#  define STM32_EXTI_PR          (STM32_EXTI_BASE+STM32_EXTI_PR_OFFSET)
+#endif
 
 /* Register Bitfield Definitions ****************************************************/
 
@@ -137,5 +174,18 @@
 #define EXTI_IMR_BIT(n)          STM32_EXTI_BIT(n)  /* 1=Selected trigger request occurred */
 #define EXTI_IMR_SHIFT           (0)                /* Bits 0-X: Pending bit for all lines */
 #define EXTI_IMR_MASK            STM32_EXTI_MASK
+
+/* Compatibility Definitions ********************************************************/
+
+#if defined(CONFIG_STM32_STM32F30XX)
+#  define STM32_NEXTI            STM32_NEXTI1
+#  define STM32_EXTI_MASK        STM32_EXTI1_MASK
+#  define STM32_EXTI_IMR         STM32_EXTI1_IMR
+#  define STM32_EXTI_EMR         STM32_EXTI1_EMR
+#  define STM32_EXTI_RTSR        STM32_EXTI1_RTSR
+#  define STM32_EXTI_FTSR        STM32_EXTI1_FTSR
+#  define STM32_EXTI_SWIER       STM32_EXTI1_SWIER
+#  define STM32_EXTI_PR          STM32_EXTI1_PR
+#endif
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32_EXTI_H */

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32_dac.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,9 +86,10 @@
 /* DAC control register */
 /* These definitions may be used for 16-bit values of either channel */
 
-#define DAC_CR_EN                (1 << 0)  /* Bit 0:  DAC channel1 enable */
-#define DAC_CR_BOFF              (1 << 1)  /* Bit 1:  DAC channel1 output buffer disable */
-#define DAC_CR_TSEL_SHIFT        (3)       /* Bits 3-5: DAC channel1 trigger selection */
+#define DAC_CR_EN                (1 << 0)  /* Bit 0:  DAC channel enable */
+#define DAC_CR_BOFF              (1 << 1)  /* Bit 1:  DAC channel output buffer disable */
+#define DAC_CR_TEN               (1 << 2)  /* Bit 2:  DAC channel trigger enable */
+#define DAC_CR_TSEL_SHIFT        (3)       /* Bits 3-5: DAC channel trigger selection */
 #define DAC_CR_TSEL_MASK         (7 << DAC_CR_TSEL_SHIFT)
 #  define DAC_CR_TSEL_TIM6       (0 << DAC_CR_TSEL_SHIFT) /* Timer 6 TRGO event */
 #ifdef CONFIG_STM32_CONNECTIVITYLINE
@@ -102,14 +103,14 @@
 #  define DAC_CR_TSEL_TIM4       (5 << DAC_CR_TSEL_SHIFT) /* Timer 4 TRGO event */
 #  define DAC_CR_TSEL_EXT9       (6 << DAC_CR_TSEL_SHIFT) /* External line9 */
 #  define DAC_CR_TSEL_SW         (7 << DAC_CR_TSEL_SHIFT) /* Software trigger */
-#define DAC_CR_WAVE_SHIFT        (6)       /* Bits 6-7: DAC channel1 noise/triangle wave generation  */enable
+#define DAC_CR_WAVE_SHIFT        (6)       /* Bits 6-7: DAC channel noise/triangle wave generation  */enable
 #define DAC_CR_WAVE_MASK         (3 << DAC_CR_WAVE_SHIFT)
 #  define DAC_CR_WAVE_DISABLED   (0 << DAC_CR_WAVE_SHIFT) /* Wave generation disabled */
 #  define DAC_CR_WAVE_NOISE      (1 << DAC_CR_WAVE_SHIFT) /* Noise wave generation enabled */
 #  define DAC_CR_WAVE_TRIANGLE   (2 << DAC_CR_WAVE_SHIFT) /* Triangle wave generation enabled */
-#define DAC_CR_MAMP_SHIFT        (8)       /* Bits 8-11: DAC channel1 mask/amplitude selector */
+#define DAC_CR_MAMP_SHIFT        (8)       /* Bits 8-11: DAC channel mask/amplitude selector */
 #define DAC_CR_MAMP_MASK         (15 << DAC_CR_MAMP_SHIFT)
-#  define DAC_CR_MAMP_AMP1       (0 << DAC_CR_MAMP1_SHIFT)  /* Unmask bit0 of LFSR/triangle amplitude=1 */
+#  define DAC_CR_MAMP_AMP1       (0 << DAC_CR_MAMP1_SHIFT) /* Unmask bit0 of LFSR/triangle amplitude=1 */
 #  define DAC_CR_MAMP_AMP3       (1 << DAC_CR_MAMP_SHIFT)  /* Unmask bits[1:0] of LFSR/triangle amplitude=3 */
 #  define DAC_CR_MAMP_AMP7       (2 << DAC_CR_MAMP_SHIFT)  /* Unmask bits[2:0] of LFSR/triangle amplitude=7 */
 #  define DAC_CR_MAMP_AMP15      (3 << DAC_CR_MAMP_SHIFT)  /* Unmask bits[3:0] of LFSR/triangle amplitude=15 */
@@ -121,13 +122,14 @@
 #  define DAC_CR_MAMP_AMP1023    (9 << DAC_CR_MAMP_SHIFT)  /* Unmask bits[9:0] of LFSR/triangle amplitude=1023 */
 #  define DAC_CR_MAMP_AMP2047    (10 << DAC_CR_MAMP_SHIFT) /* Unmask bits[10:0] of LFSR/triangle amplitude=2047 */
 #  define DAC_CR_MAMP_AMP4095    (11 << DAC_CR_MAMP_SHIFT) /* Unmask bits[11:0] of LFSR/triangle amplitude=4095 */
-#define DAC_CR_DMAEN             (1 << 12) /* Bit 12: DAC channel1 DMA enable */
-#define DAC_CR_DMAUDRIE          (1 << 13) /* Bit 13: DAC channel1 DMA Underrun Interrupt enable */
+#define DAC_CR_DMAEN             (1 << 12) /* Bit 12: DAC channel DMA enable */
+#define DAC_CR_DMAUDRIE          (1 << 13) /* Bit 13: DAC channel DMA Underrun Interrupt enable */
 
 /* These definitions may be used with the full, 32-bit register */
 
 #define DAC_CR_EN1                (1 << 0)  /* Bit 0:  DAC channel1 enable */
 #define DAC_CR_BOFF1              (1 << 1)  /* Bit 1:  DAC channel1 output buffer disable */
+#define DAC_CR_TEN1               (1 << 2)  /* Bit 2:  DAC channel1 trigger enable */
 #define DAC_CR_TSEL1_SHIFT        (3)       /* Bits 3-5: DAC channel1 trigger selection */
 #define DAC_CR_TSEL1_MASK         (7 << DAC_CR_TSEL1_SHIFT)
 #  define DAC_CR_TSEL1_TIM6       (0 << DAC_CR_TSEL1_SHIFT) /* Timer 6 TRGO event */
