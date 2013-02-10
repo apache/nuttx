@@ -4175,3 +4175,5 @@
 	  example "+-" would look weird. From Petteri Aimonen.
 	* mm/mm_mallinfo.c:  Take MM semaphore in mm_mallinfo. From Petteri
 	  Aimonen.
+	* configs/stm32f3discovery/nsh/defconfig:  Disable SPI.  It is nto
+	  used.
