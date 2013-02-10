@@ -776,11 +776,20 @@ Where <subdir> is one of the following:
        sercon : Connect the serial device a create /dev/ttyACM0
        serdis : Disconnect the serial device.        
 
-       NOTE:  I don't expect there serial connections/disconnections to work
-       well.  the STM32F3Discovery board does not provide circuitry for
-       control for the "soft connect" USB pullup.  As a result, the host PC
-       may not know when the USB has been logically connected or disconnected
-       and may not re-enumerate the device.
+       NOTE:  The serial connections/disconnections do not work as advertised.
+       This is because the STM32F3Discovery board does not provide circuitry for
+       control of the "soft connect" USB pullup.  As a result, the host PC
+       does not know the USB has been logically connected or disconnected.  You
+       have to follow these steps to use USB:
+
+       1) Start NSH with USB disconnected
+       2) enter to 'sercon' command to start the CDC/ACM device, then
+       3) Connect the USB device to the host.
+ 
+       and to close the connection:
+
+       4) Disconnect the USB device from the host
+       5) Enter the 'serdis' command
 
     4. This example can support the watchdog timer test (apps/examples/watchdog)
        but this must be enabled by selecting:
@@ -806,6 +815,9 @@ Where <subdir> is one of the following:
     in that this configurations uses a USB serial device for console I/O.
     Such a configuration is useful on the stm32f3discovery which has no
     builtin RS-232 drivers.
+
+    Status:  As of this writing, this configuration has not ran properly.
+    There appears to be some kind of driver-related issue.
 
     NOTES:
  
@@ -858,6 +870,14 @@ Where <subdir> is one of the following:
        CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
        CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
 
+    5. The STM32F3Discovery board does not provide circuitry for control of
+       the "soft connect" USB pullup.  As a result, the host PC does not know
+       the USB has been logically connected or disconnected.  You have to
+       follow these steps to use USB:
+
+       1) Start NSH with USB disconnected, then
+       2) Connect the USB device to the host.
+ 
     5. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
 
