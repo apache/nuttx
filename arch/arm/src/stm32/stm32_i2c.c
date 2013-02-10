@@ -7,7 +7,7 @@
  *
  * With extensions, modifications by:
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregroy Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,14 @@
 #include "stm32_i2c.h"
 #include "stm32_waste.h"
 
+/* At least one I2C peripheral must be enabled */
+
 #if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C2) || defined(CONFIG_STM32_I2C3)
+
+/* This implementation is for the STM32 F1, F2, and F4 only */
+
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F20XX) || \
+    defined(CONFIG_STM32_STM32F40XX)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -2086,4 +2093,5 @@ out:
 }
 #endif /* CONFIG_I2C_RESET */
 
+#endif /* CONFIG_STM32_STM32F10XX || CONFIG_STM32_STM32F20XX || CONFIG_STM32_STM32F40XX */
 #endif /* CONFIG_STM32_I2C1 || CONFIG_STM32_I2C2 || CONFIG_STM32_I2C3 */
