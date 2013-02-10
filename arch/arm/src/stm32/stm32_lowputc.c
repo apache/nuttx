@@ -56,263 +56,268 @@
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
+
 /* Select USART parameters for the selected console */
 
-#if defined(CONFIG_USART1_SERIAL_CONSOLE)
-#  define STM32_CONSOLE_BASE     STM32_USART1_BASE
-#  define STM32_APBCLOCK         STM32_PCLK2_FREQUENCY
-#  define STM32_CONSOLE_BAUD     CONFIG_USART1_BAUD
-#  define STM32_CONSOLE_BITS     CONFIG_USART1_BITS
-#  define STM32_CONSOLE_PARITY   CONFIG_USART1_PARITY
-#  define STM32_CONSOLE_2STOP    CONFIG_USART1_2STOP
-#  define STM32_CONSOLE_TX       GPIO_USART1_TX
-#  define STM32_CONSOLE_RX       GPIO_USART1_RX
-#  ifdef CONFIG_USART1_RS485
-#    define STM32_CONSOLE_RS485_DIR GPIO_USART1_RS485_DIR
-#    if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
-#      define STM32_CONSOLE_RS485_DIR_POLARITY false
-#    else
-#      define STM32_CONSOLE_RS485_DIR_POLARITY true
+#ifdef HAVE_CONSOLE
+#  if defined(CONFIG_USART1_SERIAL_CONSOLE)
+#    define STM32_CONSOLE_BASE     STM32_USART1_BASE
+#    define STM32_APBCLOCK         STM32_PCLK2_FREQUENCY
+#    define STM32_CONSOLE_BAUD     CONFIG_USART1_BAUD
+#    define STM32_CONSOLE_BITS     CONFIG_USART1_BITS
+#    define STM32_CONSOLE_PARITY   CONFIG_USART1_PARITY
+#    define STM32_CONSOLE_2STOP    CONFIG_USART1_2STOP
+#    define STM32_CONSOLE_TX       GPIO_USART1_TX
+#    define STM32_CONSOLE_RX       GPIO_USART1_RX
+#    ifdef CONFIG_USART1_RS485
+#      define STM32_CONSOLE_RS485_DIR GPIO_USART1_RS485_DIR
+#      if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
+#        define STM32_CONSOLE_RS485_DIR_POLARITY false
+#      else
+#        define STM32_CONSOLE_RS485_DIR_POLARITY true
+#      endif
+#    endif
+#  elif defined(CONFIG_USART2_SERIAL_CONSOLE)
+#    define STM32_CONSOLE_BASE     STM32_USART2_BASE
+#    define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
+#    define STM32_CONSOLE_BAUD     CONFIG_USART2_BAUD
+#    define STM32_CONSOLE_BITS     CONFIG_USART2_BITS
+#    define STM32_CONSOLE_PARITY   CONFIG_USART2_PARITY
+#    define STM32_CONSOLE_2STOP    CONFIG_USART2_2STOP
+#    define STM32_CONSOLE_TX       GPIO_USART2_TX
+#    define STM32_CONSOLE_RX       GPIO_USART2_RX
+#    ifdef CONFIG_USART2_RS485
+#      define STM32_CONSOLE_RS485_DIR GPIO_USART2_RS485_DIR
+#      if (CONFIG_USART2_RS485_DIR_POLARITY == 0)
+#        define STM32_CONSOLE_RS485_DIR_POLARITY false
+#      else
+#        define STM32_CONSOLE_RS485_DIR_POLARITY true
+#      endif
+#    endif
+#  elif defined(CONFIG_USART3_SERIAL_CONSOLE)
+#    define STM32_CONSOLE_BASE     STM32_USART3_BASE
+#    define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
+#    define STM32_CONSOLE_BAUD     CONFIG_USART3_BAUD
+#    define STM32_CONSOLE_BITS     CONFIG_USART3_BITS
+#    define STM32_CONSOLE_PARITY   CONFIG_USART3_PARITY
+#    define STM32_CONSOLE_2STOP    CONFIG_USART3_2STOP
+#    define STM32_CONSOLE_TX       GPIO_USART3_TX
+#    define STM32_CONSOLE_RX       GPIO_USART3_RX
+#    ifdef CONFIG_USART3_RS485
+#      define STM32_CONSOLE_RS485_DIR GPIO_USART3_RS485_DIR
+#      if (CONFIG_USART3_RS485_DIR_POLARITY == 0)
+#        define STM32_CONSOLE_RS485_DIR_POLARITY false
+#      else
+#        define STM32_CONSOLE_RS485_DIR_POLARITY true
+#      endif
+#    endif
+#  elif defined(CONFIG_UART4_SERIAL_CONSOLE)
+#    define STM32_CONSOLE_BASE     STM32_UART4_BASE
+#    define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
+#    define STM32_CONSOLE_BAUD     CONFIG_UART4_BAUD
+#    define STM32_CONSOLE_BITS     CONFIG_UART4_BITS
+#    define STM32_CONSOLE_PARITY   CONFIG_UART4_PARITY
+#    define STM32_CONSOLE_2STOP    CONFIG_UART4_2STOP
+#    define STM32_CONSOLE_TX       GPIO_UART4_TX
+#    define STM32_CONSOLE_RX       GPIO_UART4_RX
+#    ifdef CONFIG_UART4_RS485
+#      define STM32_CONSOLE_RS485_DIR GPIO_UART4_RS485_DIR
+#      if (CONFIG_UART4_RS485_DIR_POLARITY == 0)
+#        define STM32_CONSOLE_RS485_DIR_POLARITY false
+#      else
+#        define STM32_CONSOLE_RS485_DIR_POLARITY true
+#      endif
+#    endif
+#  elif defined(CONFIG_UART5_SERIAL_CONSOLE)
+#    define STM32_CONSOLE_BASE     STM32_UART5_BASE
+#    define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
+#    define STM32_CONSOLE_BAUD     CONFIG_UART5_BAUD
+#    define STM32_CONSOLE_BITS     CONFIG_UART5_BITS
+#    define STM32_CONSOLE_PARITY   CONFIG_UART5_PARITY
+#    define STM32_CONSOLE_2STOP    CONFIG_UART5_2STOP
+#    define STM32_CONSOLE_TX       GPIO_UART5_TX
+#    define STM32_CONSOLE_RX       GPIO_UART5_RX
+#    ifdef CONFIG_UART5_RS485
+#      define STM32_CONSOLE_RS485_DIR GPIO_UART5_RS485_DIR
+#      if (CONFIG_UART5_RS485_DIR_POLARITY == 0)
+#        define STM32_CONSOLE_RS485_DIR_POLARITY false
+#      else
+#        define STM32_CONSOLE_RS485_DIR_POLARITY true
+#      endif
+#    endif
+
+#  elif defined(CONFIG_USART6_SERIAL_CONSOLE)
+#    define STM32_CONSOLE_BASE     STM32_USART6_BASE
+#    define STM32_APBCLOCK         STM32_PCLK2_FREQUENCY
+#    define STM32_CONSOLE_BAUD     CONFIG_USART6_BAUD
+#    define STM32_CONSOLE_BITS     CONFIG_USART6_BITS
+#    define STM32_CONSOLE_PARITY   CONFIG_USART6_PARITY
+#    define STM32_CONSOLE_2STOP    CONFIG_USART6_2STOP
+#    define STM32_CONSOLE_TX       GPIO_USART6_TX
+#    define STM32_CONSOLE_RX       GPIO_USART6_RX
+#    ifdef CONFIG_USART6_RS485
+#      define STM32_CONSOLE_RS485_DIR GPIO_USART6_RS485_DIR
+#      if (CONFIG_USART6_RS485_DIR_POLARITY == 0)
+#        define STM32_CONSOLE_RS485_DIR_POLARITY false
+#      else
+#        define STM32_CONSOLE_RS485_DIR_POLARITY true
+#      endif
 #    endif
 #  endif
-#elif defined(CONFIG_USART2_SERIAL_CONSOLE)
-#  define STM32_CONSOLE_BASE     STM32_USART2_BASE
-#  define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
-#  define STM32_CONSOLE_BAUD     CONFIG_USART2_BAUD
-#  define STM32_CONSOLE_BITS     CONFIG_USART2_BITS
-#  define STM32_CONSOLE_PARITY   CONFIG_USART2_PARITY
-#  define STM32_CONSOLE_2STOP    CONFIG_USART2_2STOP
-#  define STM32_CONSOLE_TX       GPIO_USART2_TX
-#  define STM32_CONSOLE_RX       GPIO_USART2_RX
-#  ifdef CONFIG_USART2_RS485
-#    define STM32_CONSOLE_RS485_DIR GPIO_USART2_RS485_DIR
-#    if (CONFIG_USART2_RS485_DIR_POLARITY == 0)
-#      define STM32_CONSOLE_RS485_DIR_POLARITY false
-#    else
-#      define STM32_CONSOLE_RS485_DIR_POLARITY true
-#    endif
-#  endif
-#elif defined(CONFIG_USART3_SERIAL_CONSOLE)
-#  define STM32_CONSOLE_BASE     STM32_USART3_BASE
-#  define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
-#  define STM32_CONSOLE_BAUD     CONFIG_USART3_BAUD
-#  define STM32_CONSOLE_BITS     CONFIG_USART3_BITS
-#  define STM32_CONSOLE_PARITY   CONFIG_USART3_PARITY
-#  define STM32_CONSOLE_2STOP    CONFIG_USART3_2STOP
-#  define STM32_CONSOLE_TX       GPIO_USART3_TX
-#  define STM32_CONSOLE_RX       GPIO_USART3_RX
-#  ifdef CONFIG_USART3_RS485
-#    define STM32_CONSOLE_RS485_DIR GPIO_USART3_RS485_DIR
-#    if (CONFIG_USART3_RS485_DIR_POLARITY == 0)
-#      define STM32_CONSOLE_RS485_DIR_POLARITY false
-#    else
-#      define STM32_CONSOLE_RS485_DIR_POLARITY true
-#    endif
-#  endif
-#elif defined(CONFIG_UART4_SERIAL_CONSOLE)
-#  define STM32_CONSOLE_BASE     STM32_UART4_BASE
-#  define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
-#  define STM32_CONSOLE_BAUD     CONFIG_UART4_BAUD
-#  define STM32_CONSOLE_BITS     CONFIG_UART4_BITS
-#  define STM32_CONSOLE_PARITY   CONFIG_UART4_PARITY
-#  define STM32_CONSOLE_2STOP    CONFIG_UART4_2STOP
-#  define STM32_CONSOLE_TX       GPIO_UART4_TX
-#  define STM32_CONSOLE_RX       GPIO_UART4_RX
-#  ifdef CONFIG_UART4_RS485
-#    define STM32_CONSOLE_RS485_DIR GPIO_UART4_RS485_DIR
-#    if (CONFIG_UART4_RS485_DIR_POLARITY == 0)
-#      define STM32_CONSOLE_RS485_DIR_POLARITY false
-#    else
-#      define STM32_CONSOLE_RS485_DIR_POLARITY true
-#    endif
-#  endif
-#elif defined(CONFIG_UART5_SERIAL_CONSOLE)
-#  define STM32_CONSOLE_BASE     STM32_UART5_BASE
-#  define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
-#  define STM32_CONSOLE_BAUD     CONFIG_UART5_BAUD
-#  define STM32_CONSOLE_BITS     CONFIG_UART5_BITS
-#  define STM32_CONSOLE_PARITY   CONFIG_UART5_PARITY
-#  define STM32_CONSOLE_2STOP    CONFIG_UART5_2STOP
-#  define STM32_CONSOLE_TX       GPIO_UART5_TX
-#  define STM32_CONSOLE_RX       GPIO_UART5_RX
-#  ifdef CONFIG_UART5_RS485
-#    define STM32_CONSOLE_RS485_DIR GPIO_UART5_RS485_DIR
-#    if (CONFIG_UART5_RS485_DIR_POLARITY == 0)
-#      define STM32_CONSOLE_RS485_DIR_POLARITY false
-#    else
-#      define STM32_CONSOLE_RS485_DIR_POLARITY true
-#    endif
-#  endif
-#elif defined(CONFIG_USART6_SERIAL_CONSOLE)
-#  define STM32_CONSOLE_BASE     STM32_USART6_BASE
-#  define STM32_APBCLOCK         STM32_PCLK2_FREQUENCY
-#  define STM32_CONSOLE_BAUD     CONFIG_USART6_BAUD
-#  define STM32_CONSOLE_BITS     CONFIG_USART6_BITS
-#  define STM32_CONSOLE_PARITY   CONFIG_USART6_PARITY
-#  define STM32_CONSOLE_2STOP    CONFIG_USART6_2STOP
-#  define STM32_CONSOLE_TX       GPIO_USART6_TX
-#  define STM32_CONSOLE_RX       GPIO_USART6_RX
-#  ifdef CONFIG_USART6_RS485
-#    define STM32_CONSOLE_RS485_DIR GPIO_USART6_RS485_DIR
-#    if (CONFIG_USART6_RS485_DIR_POLARITY == 0)
-#      define STM32_CONSOLE_RS485_DIR_POLARITY false
-#    else
-#      define STM32_CONSOLE_RS485_DIR_POLARITY true
-#    endif
-#  endif
-#endif
 
-/* CR1 settings */
+  /* CR1 settings */
 
-#if STM32_CONSOLE_BITS == 9
-#  define USART_CR1_M_VALUE USART_CR1_M
-#else
-#  define USART_CR1_M_VALUE 0
-#endif
-
-#if STM32_CONSOLE_PARITY == 1
-#  define USART_CR1_PARITY_VALUE (USART_CR1_PCE|USART_CR1_PS)
-#elif STM32_CONSOLE_PARITY == 2
-#  define USART_CR1_PARITY_VALUE USART_CR1_PCE
-#else
-#  define USART_CR1_PARITY_VALUE 0
-#endif
-
-#ifdef CONFIG_STM32_STM32F30XX
-#  define USART_CR1_CLRBITS\
-    (USART_CR1_UESM | USART_CR1_RE | USART_CR1_TE | USART_CR1_PS |\
-     USART_CR1_PCE |USART_CR1_WAKE | USART_CR1_M | USART_CR1_MME |\
-     USART_CR1_OVER8 | USART_CR1_DEDT_MASK | USART_CR1_DEAT_MASK |\
-     USART_CR1_ALLINTS)
-#else
-#  define USART_CR1_CLRBITS\
-    (USART_CR1_M | USART_CR1_PCE |USART_CR1_PS | USART_CR1_TE |\
-     USART_CR1_RE | USART_CR1_ALLINTS)
-#endif
-
-#define USART_CR1_SETBITS (USART_CR1_M_VALUE|USART_CR1_PARITY_VALUE)
-
-/* CR2 settings */
-
-#if STM32_CONSOLE_2STOP != 0
-#  define USART_CR2_STOP2_VALUE USART_CR2_STOP2
-#else
-#  define USART_CR2_STOP2_VALUE 0
-#endif
-
-#ifdef CONFIG_STM32_STM32F30XX
-#  define USART_CR2_CLRBITS \
-    (USART_CR2_ADDM7 | USART_CR2_LBDL | USART_CR2_LBDIE | USART_CR2_LBCL |\
-     USART_CR2_CPHA | USART_CR2_CPOL | USART_CR2_CLKEN | USART_CR2_STOP_MASK |\
-     USART_CR2_LINEN | USART_CR2_RXINV | USART_CR2_TXINV | USART_CR2_DATAINV |\
-     USART_CR2_MSBFIRST | USART_CR2_ABREN | USART_CR2_ABRMOD_MASK |\
-     USART_CR2_RTOEN | USART_CR2_ADD8_MASK)
-#else
-#  define USART_CR2_CLRBITS \
-    (USART_CR2_STOP_MASK|USART_CR2_CLKEN|USART_CR2_CPOL|USART_CR2_CPHA|\
-     USART_CR2_LBCL|USART_CR2_LBDIE)
-#endif
-#define USART_CR2_SETBITS USART_CR2_STOP2_VALUE
-
-/* CR3 settings */
-
-#ifdef CONFIG_STM32_STM32F30XX
-
-#  define USART_CR3_CLRBITS \
-    (USART_CR3_EIE | USART_CR3_IREN | USART_CR3_IRLP | USART_CR3_HDSEL |\
-     USART_CR3_NACK | USART_CR3_SCEN | USART_CR3_DMAR | USART_CR3_DMAT |\
-     USART_CR3_RTSE | USART_CR3_CTSE | USART_CR3_CTSIE | USART_CR1_ONEBIT |\
-     USART_CR1_OVRDIS | USART_CR1_DDRE | USART_CR1_DEM | USART_CR1_DEP |\
-     USART_CR1_SCARCNT_MASK | USART_CR1_WUS_MASK | USART_CR1_WUFIE)
-#else
-#  define USART_CR3_CLRBITS \
-    (USART_CR3_CTSIE|USART_CR3_CTSE|USART_CR3_RTSE|USART_CR3_EIE)
-#endif
-#define USART_CR3_SETBITS 0
-
-/* Only the STM32 F3 supports oversampling by 8 */
-
-#undef USE_OVER8
-
-/* Calculate USART BAUD rate divider */
-
-#ifdef CONFIG_STM32_STM32F30XX
-
-  /* Baud rate for standard USART (SPI mode included):
-   *
-   * In case of oversampling by 16, the equation is:
-   *   baud    = fCK / UARTDIV
-   *   UARTDIV = fCK / baud
-   *
-   * In case of oversampling by 8, the equation is:
-   *
-   *   baud    = 2 * fCK / UARTDIV
-   *   UARTDIV = 2 * fCK / baud
-   */
-
-#  define STM32_USARTDIV8 \
-    (((STM32_APBCLOCK << 1) + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
-#  define STM32_USARTDIV16 \
-    ((STM32_APBCLOCK + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
-
-   /* Use oversamply by 8 only if the divisor is small.  But what is small? */
-
-#  if STM32_USARTDIV8 > 100
-#    define STM32_BRR_VALUE STM32_USARTDIV16
+#  if STM32_CONSOLE_BITS == 9
+#    define USART_CR1_M_VALUE USART_CR1_M
 #  else
-#    define USE_OVER8 1
-#    define STM32_BRR_VALUE \
-      ((STM32_USARTDIV8 & 0xfff0) | ((STM32_USARTDIV8 & 0x000f) >> 1))
+#    define USART_CR1_M_VALUE 0
 #  endif
 
-#else
+#  if STM32_CONSOLE_PARITY == 1
+#    define USART_CR1_PARITY_VALUE (USART_CR1_PCE|USART_CR1_PS)
+#  elif STM32_CONSOLE_PARITY == 2
+#    define USART_CR1_PARITY_VALUE USART_CR1_PCE
+#  else
+#    define USART_CR1_PARITY_VALUE 0
+#  endif
 
-  /* The baud rate for the receiver and transmitter (Rx and Tx) are both set
-   * to the same value as programmed in the Mantissa and Fraction values of
-   * USARTDIV.
-   *
-   *   baud     = fCK / (16 * usartdiv)
-   *   usartdiv = fCK / (16 * baud)
-   *
-   * Where fCK is the input clock to the peripheral (PCLK1 for USART2, 3, 4,
-   * 5 or PCLK2 for USART1).  Example, fCK=72MHz baud=115200,
-   * usartdiv=39.0625=39 1/16th;
-   *
-   * First calculate:
-   *
-   *   usartdiv32 = 32 * usartdiv = fCK / (baud/2)
-   *
-   * (NOTE: all standard baud values are even so dividing by two does not
-   * lose precision).  Eg. (same fCK and buad), usartdiv32 = 1250
-   */
+#  ifdef CONFIG_STM32_STM32F30XX
+#    define USART_CR1_CLRBITS\
+      (USART_CR1_UESM | USART_CR1_RE | USART_CR1_TE | USART_CR1_PS |\
+       USART_CR1_PCE |USART_CR1_WAKE | USART_CR1_M | USART_CR1_MME |\
+       USART_CR1_OVER8 | USART_CR1_DEDT_MASK | USART_CR1_DEAT_MASK |\
+       USART_CR1_ALLINTS)
+#  else
+#    define USART_CR1_CLRBITS\
+      (USART_CR1_M | USART_CR1_PCE |USART_CR1_PS | USART_CR1_TE |\
+       USART_CR1_RE | USART_CR1_ALLINTS)
+#  endif
 
-#  define STM32_USARTDIV32 (STM32_APBCLOCK / (STM32_CONSOLE_BAUD >> 1))
+#  define USART_CR1_SETBITS (USART_CR1_M_VALUE|USART_CR1_PARITY_VALUE)
 
-  /* The mantissa is then usartdiv32 / 32:
-   *
-   *   mantissa = usartdiv32 / 32/
-   *
-   * Eg. usartdiv32=1250, mantissa = 39
-   */
+  /* CR2 settings */
 
-#  define STM32_MANTISSA (STM32_USARTDIV32 >> 5)
+#  if STM32_CONSOLE_2STOP != 0
+#    define USART_CR2_STOP2_VALUE USART_CR2_STOP2
+#  else
+#    define USART_CR2_STOP2_VALUE 0
+#  endif
 
-  /* And the fraction:
-   *
-   *  fraction = (usartdiv32 - mantissa*32 + 1) / 2
-   *
-   * Eg., (1,250 - 39*32 + 1)/2 = 1 (or 0.0625)
-   */
+#  ifdef CONFIG_STM32_STM32F30XX
+#    define USART_CR2_CLRBITS \
+      (USART_CR2_ADDM7 | USART_CR2_LBDL | USART_CR2_LBDIE | USART_CR2_LBCL |\
+       USART_CR2_CPHA | USART_CR2_CPOL | USART_CR2_CLKEN | USART_CR2_STOP_MASK |\
+       USART_CR2_LINEN | USART_CR2_RXINV | USART_CR2_TXINV | USART_CR2_DATAINV |\
+       USART_CR2_MSBFIRST | USART_CR2_ABREN | USART_CR2_ABRMOD_MASK |\
+       USART_CR2_RTOEN | USART_CR2_ADD8_MASK)
+#  else
+#    define USART_CR2_CLRBITS \
+       (USART_CR2_STOP_MASK|USART_CR2_CLKEN|USART_CR2_CPOL|USART_CR2_CPHA|\
+       USART_CR2_LBCL|USART_CR2_LBDIE)
+#  endif
+#  define USART_CR2_SETBITS USART_CR2_STOP2_VALUE
 
-#  define STM32_FRACTION \
-    ((STM32_USARTDIV32 - (STM32_MANTISSA << 5) + 1) >> 1)
+  /* CR3 settings */
 
-/* And, finally, the BRR value is: */
+#  ifdef CONFIG_STM32_STM32F30XX
 
-#  define STM32_BRR_VALUE \
-    ((STM32_MANTISSA << USART_BRR_MANT_SHIFT) | \
-     (STM32_FRACTION << USART_BRR_FRAC_SHIFT))
-#endif
+#    define USART_CR3_CLRBITS \
+      (USART_CR3_EIE | USART_CR3_IREN | USART_CR3_IRLP | USART_CR3_HDSEL |\
+       USART_CR3_NACK | USART_CR3_SCEN | USART_CR3_DMAR | USART_CR3_DMAT |\
+       USART_CR3_RTSE | USART_CR3_CTSE | USART_CR3_CTSIE | USART_CR1_ONEBIT |\
+       USART_CR1_OVRDIS | USART_CR1_DDRE | USART_CR1_DEM | USART_CR1_DEP |\
+       USART_CR1_SCARCNT_MASK | USART_CR1_WUS_MASK | USART_CR1_WUFIE)
+#  else
+#    define USART_CR3_CLRBITS \
+      (USART_CR3_CTSIE|USART_CR3_CTSE|USART_CR3_RTSE|USART_CR3_EIE)
+#  endif
+#  define USART_CR3_SETBITS 0
+
+  /* Only the STM32 F3 supports oversampling by 8 */
+
+#  undef USE_OVER8
+
+  /* Calculate USART BAUD rate divider */
+
+#  ifdef CONFIG_STM32_STM32F30XX
+
+    /* Baud rate for standard USART (SPI mode included):
+     *
+     * In case of oversampling by 16, the equation is:
+     *   baud    = fCK / UARTDIV
+     *   UARTDIV = fCK / baud
+     *
+     * In case of oversampling by 8, the equation is:
+     *
+     *   baud    = 2 * fCK / UARTDIV
+     *   UARTDIV = 2 * fCK / baud
+     */
+
+#    define STM32_USARTDIV8 \
+      (((STM32_APBCLOCK << 1) + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
+#    define STM32_USARTDIV16 \
+      ((STM32_APBCLOCK + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
+
+     /* Use oversamply by 8 only if the divisor is small.  But what is small? */
+
+#    if STM32_USARTDIV8 > 100
+#      define STM32_BRR_VALUE STM32_USARTDIV16
+#    else
+#      define USE_OVER8 1
+#      define STM32_BRR_VALUE \
+        ((STM32_USARTDIV8 & 0xfff0) | ((STM32_USARTDIV8 & 0x000f) >> 1))
+#    endif
+
+#  else /* CONFIG_STM32_STM32F30XX */
+
+    /* The baud rate for the receiver and transmitter (Rx and Tx) are both set
+     * to the same value as programmed in the Mantissa and Fraction values of
+     * USARTDIV.
+     *
+     *   baud     = fCK / (16 * usartdiv)
+     *   usartdiv = fCK / (16 * baud)
+     *
+     * Where fCK is the input clock to the peripheral (PCLK1 for USART2, 3, 4,
+     * 5 or PCLK2 for USART1).  Example, fCK=72MHz baud=115200,
+     * usartdiv=39.0625=39 1/16th;
+     *
+     * First calculate:
+     *
+     *   usartdiv32 = 32 * usartdiv = fCK / (baud/2)
+     *
+     * (NOTE: all standard baud values are even so dividing by two does not
+     * lose precision).  Eg. (same fCK and buad), usartdiv32 = 1250
+     */
+
+#    define STM32_USARTDIV32 (STM32_APBCLOCK / (STM32_CONSOLE_BAUD >> 1))
+
+    /* The mantissa is then usartdiv32 / 32:
+     *
+     *   mantissa = usartdiv32 / 32/
+     *
+     * Eg. usartdiv32=1250, mantissa = 39
+     */
+
+#    define STM32_MANTISSA (STM32_USARTDIV32 >> 5)
+
+    /* And the fraction:
+     *
+     *  fraction = (usartdiv32 - mantissa*32 + 1) / 2
+     *
+     * Eg., (1,250 - 39*32 + 1)/2 = 1 (or 0.0625)
+     */
+
+#    define STM32_FRACTION \
+      ((STM32_USARTDIV32 - (STM32_MANTISSA << 5) + 1) >> 1)
+
+    /* And, finally, the BRR value is: */
+
+#    define STM32_BRR_VALUE \
+      ((STM32_MANTISSA << USART_BRR_MANT_SHIFT) | \
+       (STM32_FRACTION << USART_BRR_FRAC_SHIFT))
+
+#  endif /* CONFIG_STM32_STM32F30XX */
+#endif /* HAVE_CONSOLE */
 
 /**************************************************************************
  * Private Types
@@ -365,7 +370,7 @@ void up_lowputc(char ch)
   stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
-#endif
+#endif /* HAVE_CONSOLE */
 }
 
 /**************************************************************************
@@ -503,7 +508,8 @@ void stm32_lowsetup(void)
   cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
   cr |= (USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
   putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
-#endif
+
+#endif /* HAVE_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
 #endif /* HAVE_UART */
 }
 
@@ -573,7 +579,8 @@ void stm32_lowsetup(void)
 
   cr |= (USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
   putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
-#endif
+
+#endif /* HAVE_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
 #endif /* HAVE_UART */
 }
 
