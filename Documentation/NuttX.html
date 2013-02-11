@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 2, 2013</p>
+      <p>Last Updated: February 11, 2013</p>
     </td>
   </tr>
 </table>
@@ -1679,7 +1679,7 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
       <li><a href="#arm920t">ARM920T</a> (1) </li>
       <li><a href="#arm926ejs">ARM926EJS</a> (3) </li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (16)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (5)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (6)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -2143,7 +2143,7 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM32F100x</b>.
+      <b>STMicro STM32F100x (STM32 F1 &quot;Value Line&quot;Family)</b>.
       Chip support for these STM32 &quot;Value Line&quot; family was contributed by Mike Smith and users have reported that they have successful brought up NuttX on there proprietary boards using this logic.
       This logic was extended to support the <i>high density</i> STM32F100RC chips by Freddie Chopin
       However, there is <i>no</i> specific board support for this chip families in the NuttX source tree.
@@ -2158,7 +2158,7 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM32F103x</b>.
+      <b>STMicro STM32F103x (STM32 F1 Family)</b>.
       Support for four MCUs and four board configurations are available.
       MCU support includes all of the high density and connectivity line families.
       Board supported is available specifically for: STM32F103ZET6, STM32F103RET6, STM32F103VCT, and STM32F103VET6.
@@ -2235,7 +2235,7 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM32F107x</b>.
+      <b>STMicro STM32F107x (STM32 F1 &quot;Connectivity Line&quot; family)</b>.
       Chip support for the STM32 F1 &quot;Connectivity Line&quot; family has been present in NuttX for some time and users have reported that they have successful brought up NuttX on there proprietary boards using this logic.
     </p>
     <p>
@@ -2270,7 +2270,7 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM32F207IG</b>.
+      <b>STMicro STM32F207IG (STM32 F2 family)</b>.
       Support for the STMicro STM3220G-EVAL development board was contributed by Gary Teravskis and first released in NuttX-6.16.
     </p>
     <ul>
@@ -2521,7 +2521,7 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM3240G-EVAL</b>.
+      <b>STMicro STM3240G-EVAL (STM32 F4 family)</b>.
       This port uses the STMicro STM3240G-EVAL board featuring the STM32F407IGH6 MCU.
       Refer to the <a href="http://www.st.com/internet/evalboard/product/252216.jsp">STMicro web site</a> for further information about this board.
     </p>
@@ -2563,7 +2563,7 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM32F4-Discovery</b>.
+      <b>STMicro STM32F4-Discovery (STM32 F4 family)</b>.
       This port uses the STMicro STM32F4-Discovery board featuring the STM32F407VGT6 MCU.
       Refer to the <a href="http://www.st.com/internet/evalboard/product/252419.jsp">STMicro web site</a> for further information about this board.
     </p>
@@ -2571,7 +2571,29 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
       <p>
         <b>STATUS:</b>
         The basic port for the STM32F4-Discovery was contributed by Mike Smith and was first released in NuttX-6.14.
-        Drivers listed for the STM3240G-EVAL may be usable on this plaform as well.
+        All drivers listed for the STM3240G-EVAL are usable on this plaform as well.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>STMicro STM32F3-Discovery (STM32 F3 family)</b>.
+      This port uses the STMicro STM32F3-Discovery board featuring the STM32F303VCT6 MCU (STM32 F3 family).
+      Refer to the <a href="http://www.st.com/internet/evalboard/product/254044.jsp">STMicro web site</a> for further information about this board.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        The basic port for the STM32F3-Discover was first released in NuttX-6.26.
+        Many of the drivers previously released for the STM32 F1, Value Line, and F2 and F4 may be usable on this plaform as well.
+        New drivers will be required for ADC and I2C which are very different on this platform.
       </p>
     </ul>
   </td>
