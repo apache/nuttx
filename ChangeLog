@@ -4177,3 +4177,4 @@
 	  Aimonen.
 	* configs/stm32f3discovery/nsh/defconfig:  Disable SPI.  It is nto
 	  used.
+	* drivers/mtd/sst39vf:  Add a driver for the SST29VF NOR FLASH parts.

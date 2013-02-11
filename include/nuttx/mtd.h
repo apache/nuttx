@@ -123,7 +123,8 @@ struct mtd_dev_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -145,7 +146,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
+int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
 
 /****************************************************************************
  * Name: flash_eraseall
@@ -156,7 +157,7 @@ EXTERN int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
  *
  ****************************************************************************/
 
-EXTERN int flash_eraseall(FAR const char *driver);
+int flash_eraseall(FAR const char *driver);
 
 /****************************************************************************
  * Name: rammtd_initialize
@@ -170,7 +171,7 @@ EXTERN int flash_eraseall(FAR const char *driver);
  *
  ****************************************************************************/
 
-EXTERN FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size);
+FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size);
 
 /****************************************************************************
  * Name: m25p_initialize
@@ -182,7 +183,7 @@ EXTERN FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size);
  *
  ****************************************************************************/
 
-EXTERN FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
+FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
  * Name: at45db_initialize
@@ -194,7 +195,7 @@ EXTERN FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
-EXTERN FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *dev);
+FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
  * Name: at24c_initialize
@@ -206,7 +207,7 @@ EXTERN FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
-EXTERN FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev);
+FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev);
 
 /****************************************************************************
  * Name: sst25_initialize
@@ -218,7 +219,21 @@ EXTERN FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev);
  *
  ****************************************************************************/
 
-EXTERN FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev);
+FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev);
+
+/****************************************************************************
+ * Name: sst39vf_initialize
+ *
+ * Description:
+ *   Create and initialize an MTD device instance assuming an SST39VF NOR
+ *   FLASH device at the configured address in memory.  MTD devices are not
+ *   registered in the file system, but are created as instances that can
+ *   be bound to other functions (such as a block or character driver front
+ *   end).
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *sst39vf_initialize(void);
 
 /****************************************************************************
  * Name: w25_initialize
@@ -230,9 +245,9 @@ EXTERN FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
-EXTERN FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
+FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
 
-EXTERN FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev);
+FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev);
 
 #undef EXTERN
 #ifdef __cplusplus

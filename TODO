@@ -31,7 +31,7 @@ nuttx/
   (0)  ARM/LPC43x (arch/arm/src/lpc43xx/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (3)  ARM/LM3S6918 (arch/arm/src/lm/)
-  (5)  ARM/STM32 (arch/arm/src/stm32/)
+  (6)  ARM/STM32 (arch/arm/src/stm32/)
   (3)  AVR (arch/avr)
   (0)  Intel x86 (arch/x86)
   (5)  8051 / MCS51 (arch/8051/)
@@ -696,6 +696,39 @@ o USB (drivers/usbdev, drivers/usbhost)
                class drivers. (2) The logic in the STM32 F4 OTG FS device driver
                has been extended to provide this data.  Updates are still needed
                to other drivers.
+
+               Here is an overview of the required changes:
+               New two buffers in driver structure:
+
+               1. The existing EP0 setup request buffer (ctrlreq, 8 bytes)
+               2. A new EP0 data buffer to driver state structure (ep0data,
+                  max packetsize)
+
+               Add a new state:
+
+               3. Waiting for EP0 setup OUT data (EP0STATE_SETUP_OUT)
+
+               General logic flow:
+
+               1. When an EP0 SETUP packet is received:
+                  - Read the request into EP0 setup request buffer (ctrlreq,
+                    8 bytes)
+                  - If this is an OUT request with data length, set the EP0
+                    state to EP0STATE_SETUP_OUT and wait to receive data on
+                    EP0.
+                  - Otherwise, the SETUP request may be processed now (or,
+                    in the case of the F4 driver, at the conclusion of the
+                    SETUP phase).
+               2. When EP0 the EP0 OUT DATA packet is received:
+                  - Verify state is EP0STATE_SETUP_OUT
+                  - Read the request into the EP0 data buffer (ep0data, max
+                    packet size)
+                  - Now process the previously buffered SETUP request along
+                    with the OUT data.
+               3. When the setup packet is dispatched to the class driver,
+                  the OUT data must be passed as the final parameter in the
+                  call.
+
   Status:      Open
   Priority:    High for class drivers that need EP0 data.  For example, the
                CDC/ACM serial driver might need the line coding data (that
@@ -1492,6 +1525,21 @@ o ARM/STM32 (arch/arm/src/stm32/)
                SRAM.
   Status:      Open
   Priority:    Low
+
+  Title:       USB DRIVER IN STM32F4DISCVORY usbnsh CONFIGURATION
+  Description: The USB device driver is not reliable in the
+               configs/stm32f3discovery/upnsh configuration.  When a large
+               volume of serial data is sent (for example, by entering
+               'help' from the NSH command line), the driver hangs.  This
+               looks like an improperly handled output data overrun problem.
+  
+               This is a surprising since this same driver has worked with
+               the STM32 F1 for some time using the Mass Storage driver
+               which has considerably higher data rates.  So this seems to
+               be some particular issue with the way that the CDC/ACM driver
+               sends data through the driver.
+  Status:      Open
+  Priority:    Medium High
 
 o AVR (arch/avr)
   ^^^^^^^^^^^^^^

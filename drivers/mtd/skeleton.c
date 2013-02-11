@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mtd/skeleton.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,11 +84,12 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+/* This structure holds the state of the MTD driver */
 
 static struct skel_dev_s g_skeldev =
 {
   { skel_erase, skel_rbead, skel_bwrite, skel_read, skel_ioctl },
-  /* Initialization of any other implemenation specific data goes here */
+  /* Initialization of any other implementation specific data goes here */
 };
 
 /****************************************************************************
@@ -97,9 +98,14 @@ static struct skel_dev_s g_skeldev =
 
 /****************************************************************************
  * Name: skel_erase
+ *
+ * Description:
+ *   Erase several blocks, each of the size previously reported.
+ *
  ****************************************************************************/
 
-static int skel_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
+static int skel_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+                      size_t nblocks)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
 
@@ -115,6 +121,10 @@ static int skel_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
 
 /****************************************************************************
  * Name: skel_bread
+ *
+ * Description:
+ *   Read the specified number of blocks into the user provided buffer.
+ *
  ****************************************************************************/
 
 static ssize_t skel_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
@@ -136,6 +146,10 @@ static ssize_t skel_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
 
 /****************************************************************************
  * Name: skel_bwrite
+ *
+ * Description:
+ *   Write the specified number of blocks from the user provided buffer.
+ *
  ****************************************************************************/
 
 static ssize_t skel_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
@@ -157,6 +171,10 @@ static ssize_t skel_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
 
 /****************************************************************************
  * Name: skel_read
+ *
+ * Description:
+ *   Read the specified number of bytes to the user provided buffer.
+ *
  ****************************************************************************/
 
 static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
@@ -197,7 +215,7 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FARstruct mtd_geometry_s *)arg;
+          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -236,9 +254,9 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case MTDIOC_BULKERASE:
         {
-	        /* Erase the entire device */
+          /* Erase the entire device */
 
-	        ret = OK;
+          ret = OK;
         }
         break;
  
@@ -265,7 +283,7 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-void skel_initialize(void)
+FAR struct mtd_dev_s *skel_initialize(void)
 {
   /* Perform initialization as necessary */
 
