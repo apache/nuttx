@@ -133,40 +133,6 @@
 //#define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV44
 #define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV20
 
-/* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
- * any way.  The following definitions are used to access individual LEDs.
- *
- * LED1            -- Connected to P1[25]
- * LED2            -- Connected to P0[4]
- */
-
-/* LED index values for use with lpc17_setled() */
-
-#define BOARD_LED1                0
-#define BOARD_LED2                1
-#define BOARD_NLEDS               2
-
-/* LED bits for use with lpc17_setleds() */
-
-#define BOARD_LED1_BIT            (1 << BOARD_LED1)
-#define BOARD_LED2_BIT            (1 << BOARD_LED2)
-
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 3 LEDs
- * on board the Olimex LPC1766-STK.  The following definitions
- * describe how NuttX controls the LEDs:
- */
-                                      /* LED1 LED2 */
-#define LED_STARTED                0  /*  OFF  OFF = Still initializing */
-#define LED_HEAPALLOCATE           0  /*  OFF  OFF = Still initializing */
-#define LED_IRQSENABLED            0  /*  OFF  OFF = Still initializing */
-#define LED_STACKCREATED           1  /*  ON   OFF = Initialization complete */
-#define LED_INIRQ                  2  /*  N/C  ON  = In an interrupt handler */
-#define LED_SIGNAL                 2  /*  N/C  ON  = In a signal handler (glowing) */
-#define LED_ASSERTION              2  /*  N/C  ON  = In an assertion */
-#define LED_PANIC                  2  /*  N/C  ON  = Oops! We crashed. (flashing) */
-#define LED_IDLE                   3  /*  OFF  N/C = LPC17 in sleep mode (LED1 glowing) */
-
 /* Set EMC delay values:
  *
  * CMDDLY: Programmable delay value for EMC outputs in command delayed
@@ -187,8 +153,8 @@
 
 #if defined(CONFIG_LPC17_EMC_NAND) || defined(CONFIG_LPC17_EMC_SDRAM)
 #  define BOARD_CMDDLY     17
-#  define BOARD_FBCLKDLY   1
-#  define BOARD_CLKOUT0DLY 2
+#  define BOARD_FBCLKDLY   17
+#  define BOARD_CLKOUT0DLY 1
 #  define BOARD_CLKOUT1DLY 1
 #else
 #  define BOARD_CMDDLY     1
@@ -197,187 +163,91 @@
 #  define BOARD_CLKOUT1DLY 1
 #endif
 
+/* LED definitions ******************************************************************/
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
+ *
+ * LED1 -- Connected to P1[14]
+ * LED2 -- Connected to P0[16]
+ * LED3 -- Connected to P1[13]
+ * LED4 -- Connected to P4[27]
+ *
+ * These LEDs are connecte to ground so a high output value will illuminate them.
+ */
+
+/* LED index values for use with lpc17_setled() */
+
+#define BOARD_LED1                0
+#define BOARD_LED2                1
+#define BOARD_LED3                2
+#define BOARD_LED4                3
+#define BOARD_NLEDS               4
+
+/* LED bits for use with lpc17_setleds() */
+
+#define BOARD_LED1_BIT            (1 << BOARD_LED1)
+#define BOARD_LED2_BIT            (1 << BOARD_LED2)
+#define BOARD_LED3_BIT            (1 << BOARD_LED3)
+#define BOARD_LED4_BIT            (1 << BOARD_LED4)
+
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the four LEDs
+ * on the WaveShare Open1788K.  The following definitions describe how NuttX
+ * controls the LEDs:
+ */
+                                      /* LED1 LED2 LED3 LED4                        */
+#define LED_STARTED                0  /*  OFF  OFF  OFF  OFF                        */
+#define LED_HEAPALLOCATE           1  /*  ON   OFF  OFF  OFF                        */
+#define LED_IRQSENABLED            2  /*  OFF   ON  OFF  OFF                        */
+#define LED_STACKCREATED           1  /*  ON    ON  OFF  OFF                        */
+#define LED_INIRQ                  2  /*  LED3 glows, on while in interupt          */
+#define LED_SIGNAL                 2  /*  LED3 glows, on while in signal handler    */
+#define LED_ASSERTION              2  /*  LED3 glows, on while in assertion         */
+#define LED_PANIC                  2  /*  LED3 Flashes at 2Hz                       */
+#define LED_IDLE                   3  /*  LED glows, ON while sleeping              */
+
 /* Button definitions ***************************************************************/
-/* The LPC1766-STK supports several buttons.  All will read "1" when open and "0"
+/* The Open1788K supports several buttons.  All will read "1" when open and "0"
  * when closed
  *
- * BUT1            -- Connected to P0[23]
- * BUT2            -- Connected to P2[13]
- * WAKE-UP         -- Connected to P2[12]
+ * USER1           -- Connected to P4[26]
+ * USER2           -- Connected to P2[22]
+ * USER3           -- Connected to P0[10]
  *
  * And a Joystick
  *
- * CENTER          -- Connected to P0[4]
- * DOWN            -- Connected to P2[1]
- * LEFT            -- Connected to P2[7]
- * RIGHT           -- Connected to P2[8]
- * UP              -- Connected to P2[0]
+ * JOY_A           -- Connected to P2[25]
+ * JOY_B           -- Connected to P2[26]
+ * JOY_C           -- Connected to P2[23]
+ * JOY_D           -- Connected to P2[19]
+ * JOY_CTR         -- Connected to P0[14]
+ *
+ * The switches are all connected to ground and should be pulled up and sensed
+ * with a value of '0' when closed.
  */
 
-#define BOARD_BUTTON_1             0
-#define BOARD_BUTTON_2             1
-#define BOARD_BUTTON_WAKEUP        2
+#define BOARD_BUTTON_USER1         0
+#define BOARD_BUTTON_USER2         1
+#define BOARD_BUTTON_USER3         2
 
-#define BOARD_JOYSTICK_CENTER      3
-#define BOARD_JOYSTICK_UP          4
-#define BOARD_JOYSTICK_DOWN        5
-#define BOARD_JOYSTICK_LEFT        6
-#define BOARD_JOYSTICK_RIGHT       7
+#define BOARD_JOYSTICK_A           3
+#define BOARD_JOYSTICK_B           4
+#define BOARD_JOYSTICK_C           5
+#define BOARD_JOYSTICK_D           6
+#define BOARD_JOYSTICK_CTR         7
 
 #define BOARD_NUM_BUTTONS          8
 
-#define BOARD_BUTTON_BUTTON1_BIT   (1 << BOARD_BUTTON_1)
-#define BOARD_BUTTON_BUTTON2_BIT   (1 << BOARD_BUTTON_2)
-#define BOARD_BUTTON_WAKEUP_BIT    (1 << BOARD_BUTTON_WAKEUP)
+#define BOARD_BUTTON_USER1_BIT     (1 << BOARD_BUTTON_USER1)
+#define BOARD_BUTTON_USER2_BIT     (1 << BOARD_BUTTON_USER2)
+#define BOARD_BUTTON_USER3_BIT     (1 << BOARD_BUTTON_USER3)
 
-#define BOARD_JOYSTICK_CENTER_BIT  (1 << BOARD_JOYSTICK_CENTER)
-#define BOARD_JOYSTICK_UP_BIT      (1 << BOARD_JOYSTICK_UP)
-#define BOARD_JOYSTICK_DOWN_BIT    (1 << BOARD_JOYSTICK_DOWN)
-#define BOARD_JOYSTICK_LEFT_BIT    (1 << BOARD_JOYSTICK_LEFT)
-#define BOARD_JOYSTICK_RIGHT_BIT   (1 << BOARD_JOYSTICK_RIGHT)
+#define BOARD_JOYSTICK_A_BIT       (1 << BOARD_JOYSTICK_A)
+#define BOARD_JOYSTICK_B_BIT       (1 << BOARD_JOYSTICK_B)
+#define BOARD_JOYSTICK_C_BIT       (1 << BOARD_JOYSTICK_C)
+#define BOARD_JOYSTICK_D_BIT       (1 << BOARD_JOYSTICK_D)
+#define BOARD_JOYSTICK_CTR_BIT     (1 << BOARD_JOYSTICK_CTR)
 
 /* Alternate pin selections *********************************************************/
-
-/* CAN1 GPIO                        PIN  SIGNAL NAME
- * -------------------------------- ---- --------------
- * P0[0]/RD1/TXD3/SDA1               46  RD1
- * P0[1]/TD1/RXD3/SCL1               47  TD1
- */
-
-#define GPIO_CAN1_RD  GPIO_CAN1_RD_1
-#define GPIO_CAN1_TD  GPIO_CAN1_TD_1
-
-/* UART0 GPIO                       PIN  SIGNAL NAME
- * -------------------------------- ---- --------------
- * P0[2]/TXD0/AD0[7]                 98  TXD0
- * P0[3]/RXD0/AD0[6]                 99  RXD0
- */
-
-/* UART1 GPIO                       PIN  SIGNAL NAME
- * -------------------------------- ---- --------------
- * P0[15]/TXD1/SCK0/SCK              62  TXD1
- * P0[16]/RXD1/SSEL0/SSEL            63  RXD1
- * P0[17]/CTS1/MISO0/MISO            61  CTS1
- * P0[18]/DCD1/MOSI0/MOSI            60  DCD1
- * P0[19]/DSR1/SDA1                  59  DSR1
- * P0[20]/DTR1/SCL1                  58  DTR1
- * P0[22]/RTS1/TD1                   56  RTS1
- */
-
-#define GPIO_UART1_TXD GPIO_UART1_TXD_1
-#define GPIO_UART1_RXD GPIO_UART1_RXD_1
-#define GPIO_UART1_CTS GPIO_UART1_CTS_1
-#define GPIO_UART1_DCD GPIO_UART1_DCD_1
-#define GPIO_UART1_DSR GPIO_UART1_DSR_1
-#define GPIO_UART1_DTR GPIO_UART1_DTR_1
-#define GPIO_UART1_RTS GPIO_UART1_RTS_1
-
-/* SSP0 GPIO                        PIN  SIGNAL NAME
- * -------------------------------- ---- --------------
- * P1[21]/MCABORT/PWM1[3]/SSEL0      35  SSEL0
- * P1[20]/MCFB0/PWM1[2]/SCK0         34  SCK0
- * P1[23]/MCFB1/PWM1[4]/MISO0        37  MISO0
- * P1[24]/MCFB2/PWM1[5]/MOSI0        38  MOSI0
- */
-
-#define GPIO_SSP0_SSEL GPIO_SSP0_SSEL_2
-#define GPIO_SSP0_SCK  GPIO_SSP0_SCK_2
-#define GPIO_SSP0_MISO GPIO_SSP0_MISO_2
-#define GPIO_SSP0_MOSI GPIO_SSP0_MOSI_2
-
-/* SSP1 GPIO                        PIN  SIGNAL NAME
- * -------------------------------- ---- --------------
- * P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     79  SSEL1
- * P0[7]/I2STX_CLK/SCK1/MAT2[1]      78  SCK1
- * P0[8]/I2STX_WS/MISO1/MAT2[2]      77  MISO1
- * P0[9]/I2STX_SDA/MOSI1/MAT2[3]     76  MOSI1
- */
-
-#define GPIO_SSP1_SCK GPIO_SSP1_SCK_1
-
-/* I2C2 GPIO                        PIN  SIGNAL NAME
- * -------------------------------- ---- --------------
- * P0[10]/TXD2/SDA2/MAT3[0]          48  SDA2
- * P0[11]/RXD2/SCL2/MAT3[1]          49  SCL2
- */
-
-/* AD GPIO                          PIN  SIGNAL NAME
- * -------------------------------- ---- --------------
- * P0[24]/AD0[1]/I2SRX_WS/CAP3[1]     8  TEMP
- * P0[25]/AD0[2]/I2SRX_SDA/TXD3       7  MIC IN
-
-/* USB GPIO                         PIN  SIGNAL NAME
- * -------------------------------- ---- --------------
- * P0[27]/SDA0/USB_SDA               25  USB_SDA
- * P0[28]/SCL0/USB_SCL               24  USB_SCL
- * P0[29]/USB_D+                     29  USB_D+
- * P0[30]/USB_D-                     30  USB_D-
- * P1[18]/USB_UP_LED/PWM1[1]/CAP1[0] 32  USB_UP_LED
- * P1[19]/MC0A/#USB_PPWR/CAP1[1]     33  #USB_PPWR
- * P1[22]/MC0B/USB_PWRD/MAT1[0]      36  USBH_PWRD
- * P1[27]/CLKOUT/#USB_OVRCR/CAP0[1]  43  #USB_OVRCR
- * P1[30]/VBUS/AD0[4]                21  VBUS
- * P2[9]/USB_CONNECT/RXD2            64  USBD_CONNECT
- */
-
-#ifdef GPIO_USB_PPWR  /* We can only redefine this if they have been defined */
-
-/* The Olimex LPC1766-STK has 10K pull-ups on PPWR and OVRCR and a 100k
- * pull-down on PWRD so we should make sure that the outputs float.
- */
-
-#  undef  GPIO_USB_PPWR
-#  define GPIO_USB_PPWR    (GPIO_ALT2 | GPIO_FLOAT | GPIO_PORT1 | GPIO_PIN19)
-#  undef  GPIO_USB_OVRCR
-#  define GPIO_USB_OVRCR   (GPIO_ALT2 | GPIO_FLOAT | GPIO_PORT1 | GPIO_PIN27)
-#  undef  GPIO_USB_PWRD
-#  define GPIO_USB_PWRD    (GPIO_ALT2 | GPIO_FLOAT | GPIO_PORT1 | GPIO_PIN22)
-
-/* In host mode (only) there are also 15K pull-downs on D+ and D- */
-
-#  ifdef CONFIG_USBHOST
-#    undef  GPIO_USB_DP
-#    define GPIO_USB_DP    (GPIO_ALT1 | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN29)
-#    undef  GPIO_USB_DM
-#    define GPIO_USB_DM    (GPIO_ALT1 | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN30)
-#  endif
-#endif
-
-/* Ethernet GPIO                    PIN  SIGNAL NAME
- * -------------------------------- ---- --------------
- * P1[0]/ENET_TXD0                   95  E_TXD0
- * P1[1]/ENET_TXD1                   94  E_TXD1
- * P1[4]/ENET_TX_EN                  93  E_TX_EN
- * P1[8]/ENET_CRS                    92  E_CRS
- * P1[9]/ENET_RXD0                   91  E_RXD0
- * P1[10]/ENET_RXD1                  90  E_RXD1
- * P1[14]/ENET_RX_ER                 89  E_RX_ER
- * P1[15]/ENET_REF_CLK               88  E_REF_CLK
- * P1[16]/ENET_MDC                   87  E_MDC
- * P1[17]/ENET_MDIO                  86  E_MDIO
- */
-
-#define GPIO_ENET_MDC  GPIO_ENET_MDC_1
-#define GPIO_ENET_MDIO GPIO_ENET_MDIO_1
-
-/* Trace GPIO                       PIN  SIGNAL NAME
- * -------------------------------- ---- --------------
- * P2[2]/PWM1[3]/CTS1/TRACEDATA[3]   73  TRACE_D3
- * P2[3]/PWM1[4]/DCD1/TRACEDATA[2]   70  TRACE_D2
- * P2[4]/PWM1[5]/DSR1/TRACEDATA[1]   69  TRACE_D1
- * P2[5]/PWM1[6]/DTR1/TRACEDATA[0]   68  TRACE_D0
- * P2[6]/PCAP1[0]/RI1/TRACECLK       67  TRACE_CLK
- */
-
-/* EINT GPIO                       PIN  SIGNAL NAME
- * -------------------------------- ---- --------------
- * P2[11]/#EINT1/I2STX_CLK           52  #EINT1
- */
-
-/* ?
- *  P0[26]/AD0[3]/AOUT/RXD3            6  AOUT
- *  P1[31]/SCK1/AD0[5]                20  AIN5
- */
 
 /************************************************************************************
  * Public Types

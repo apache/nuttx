@@ -8,8 +8,57 @@ NXP LPC1788 MCU
 CONTENTS
 ========
 
+  o LEDs
+  o Buttons
   o FPU
   o Configuration
+
+LEDs
+====
+
+The Open1788 base board has four user LEDs
+
+  LED1 : Connected to P1[14]
+  LED2 : Connected to P0[16]
+  LED3 : Connected to P1[13]
+  LED4 : Connected to P4[27]
+
+If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+any way using the defitions provided in the board.h header file.
+
+If CONFIG_ARCH_LEDs is defined, then NuttX will control the 3 LEDs on the
+WaveShare Open1788K.  The following definitions describe how NuttX controls
+the LEDs:
+                             LED1 LED2 LED3 LED4
+  LED_STARTED                OFF  OFF  OFF  OFF
+  LED_HEAPALLOCATE           ON   OFF  OFF  OFF
+  LED_IRQSENABLED            OFF   ON  OFF  OFF
+  LED_STACKCREATED           ON    ON  OFF  OFF
+  LED_INIRQ                  LED3 glows, on while in interupt
+  LED_SIGNAL                 LED3 glows, on while in signal handler
+  LED_ASSERTION              LED3 glows, on while in assertion
+  LED_PANIC                  LED3 Flashes at 2Hz
+  LED_IDLE                   LED glows, ON while sleeping
+
+Buttons
+=======
+
+The Open1788K supports several buttons:
+
+  USER1           : Connected to P4[26]
+  USER2           : Connected to P2[22]
+  USER3           : Connected to P0[10]
+
+And a Joystick
+
+  JOY_A           : Connected to P2[25]
+  JOY_B           : Connected to P2[26]
+  JOY_C           : Connected to P2[23]
+  JOY_D           : Connected to P2[19]
+  JOY_CTR         : Connected to P0[14]
+
+These can be accessed using the definitions and interfaces defined in the
+board.h header file.
 
 FPU
 ===
