@@ -130,6 +130,11 @@ config LPC17_PLL1
 	bool "PLL1"
 	default y
 
+config LPC17_EMC
+	bool "PLL1"
+	default y
+	depends on ARCH_FAMILY_LPC178X
+
 config LPC17_ETHERNET
 	bool "Ethernet"
 	select NET
