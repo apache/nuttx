@@ -48,7 +48,6 @@
 #include <debug.h>
 
 #include <nuttx/usb/usbdev.h>
-#include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"

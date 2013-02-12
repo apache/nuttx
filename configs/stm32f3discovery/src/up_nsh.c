@@ -45,17 +45,8 @@
 #include <debug.h>
 #include <errno.h>
 
-#ifdef CONFIG_STM32_SDIO
-#  include <nuttx/sdio.h>
-#  include <nuttx/mmcsd.h>
-#endif
-
 #ifdef CONFIG_SYSTEM_USBMONITOR
 #  include <apps/usbmonitor.h>
-#endif
-
-#ifdef CONFIG_STM32_OTGFS
-#  include "stm32_usbhost.h"
 #endif
 
 #include "stm32.h"
@@ -68,14 +59,14 @@
 /* Configuration ************************************************************/
 
 #define HAVE_USBDEV     1
-#define HAVE_USBHOST    1
 #define HAVE_USBMONITOR 1
 
-/* Can't support USB host or device features if USB OTG FS is not enabled */
+/* Can't support USB device features if the STM32 USB peripheral is not
+ * enabled.
+ */
 
-#ifndef CONFIG_STM32_OTGFS
+#ifndef CONFIG_STM32_USB
 #  undef HAVE_USBDEV
-#  undef HAVE_USBHOST
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -84,12 +75,6 @@
 #ifndef CONFIG_USBDEV
 #  undef HAVE_USBDEV
 #  undef HAVE_USBMONITOR
-#endif
-
-/* Can't support USB host is USB host is not enabled */
-
-#ifndef CONFIG_USBHOST
-#  undef HAVE_USBHOST
 #endif
 
 /* Check if we should enable the USB monitor before starting NSH */
@@ -128,24 +113,9 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
-  int ret;
-#endif
-
-#ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
-   */
-
-  ret = stm32_usbhost_initialize();
-  if (ret != OK)
-    {
-      message("nsh_archinitialize: Failed to initialize USB host: %d\n", ret);
-      return ret;
-    }
-#endif
-
 #ifdef HAVE_USBMONITOR
+  int ret;
+
   /* Start the USB Monitor */
 
   ret = usbmonitor_start(0, NULL);
