@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_fcntl.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,13 @@
 #include <nuttx/sched.h>
 
 #include "fs_internal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define ACCESS_MODES   (O_RDONLY | O_WRONLY | O_RDWR)
+#define CREATION_MODES (O_CREAT | O_EXCL | O_APPEND | O_TRUNC)
 
 /****************************************************************************
  * Private Functions
@@ -143,7 +150,11 @@ static inline int file_vfcntl(int fildes, int cmd, va_list ap)
          */
 
         {
-          this_file->f_oflags = va_arg(ap, int);
+          int oflags = va_arg(ap, int);
+
+          oflags              &= ~(ACCESS_MODES | CREATION_MODES);
+          this_file->f_oflags &=  (ACCESS_MODES | CREATION_MODES);
+          this_file->f_oflags |=  oflags;
         }
         break;
 

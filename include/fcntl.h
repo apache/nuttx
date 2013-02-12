@@ -79,6 +79,13 @@
 
 #define _O_MAXBIT   8
 
+/* Synonyms historically used as F_SETFL flags (BSD).  Also FASYNC. */
+
+#define FNDELAY     O_NONBLOCK
+#define FNONBLOCK   O_NONBLOCK
+#define FAPPEND     O_APPEND
+#define FSYNC       O_SYNC
+
 /* fcntl() commands */
 
 #define F_DUPFD     0  /* Duplicate a file descriptor */
