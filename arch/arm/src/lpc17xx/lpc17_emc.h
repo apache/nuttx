@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lpc17xx/lpc17_i2s.h
+ * arch/arm/src/lpc17xx/lpc17_emc.h
  *
- *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,15 +33,15 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_I2S_H
-#define __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_I2S_H
+#ifndef __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_EMC_H
+#define __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_EMC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip/lpc17_i2s.h"
+#include "chip/lpc17_emc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -59,4 +59,16 @@
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_I2S_H */
+/****************************************************************************
+ * Name: lpc17_emcinitialize
+ *
+ * Description:
+ *   Initialize EMC clocking and pin configuration.  This function should be
+ *   called once when the system first boots in order to make the EMC
+ *   operational.
+ *
+ ****************************************************************************/
+
+void lpc17_emcinitialize(void);
+
+#endif /* __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_EMC_H */

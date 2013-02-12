@@ -349,7 +349,7 @@
 
 #define SYSCON_LCDCFG_CLKDIV_SHIFT       (0) /* Bits 0-4: LCD Panel clock prescaler  */
 #define SYSCON_LCDCFG_CLKDIV_MASK        (0x1f << SYSCON_LCDCFG_CLKDIV_SHIFT)
-#define SYSCON_LCDCFG_CLKDIV(n)          ((n+1) << SYSCON_LCDCFG_CLKDIV_SHIFT) /* n = 0 - 31 */
+#define SYSCON_LCDCFG_CLKDIV(n)          ((n-1) << SYSCON_LCDCFG_CLKDIV_SHIFT) /* n = 1 - 32 */
                                              /* Bits 5-31: Reserved */
 /* Clocking and power control - Peripheral power control registers */
 /* Power Control Register */
@@ -555,19 +555,19 @@
                                                   /* Delay values multiplied by 250 picoseconds */
 #define SYSCON_EMCDLYCTL_CMDDLY_SHIFT     (0)     /* Bits 0-4: Delay value for EMC outputs in command delayed mode */
 #define SYSCON_EMCDLYCTL_CMDDLY_MASK      (0x1f << SYSCON_EMCDLYCTL_CMDDLY_SHIFT)
-# define SYSCON_EMCDLYCTL_CMDDLY(n)       ((n+1) << SYSCON_EMCDLYCTL_CMDDLY_SHIFT) /* n = 2 - 31 */
+# define SYSCON_EMCDLYCTL_CMDDLY(n)       ((n-1) << SYSCON_EMCDLYCTL_CMDDLY_SHIFT) /* n = 3 - 32 */
                                                   /* Bits 5-7: Reserved */
 #define SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT   (8)     /* Bits 8-12: Delay value for the feedback clock that controls input data sampling */
 #define SYSCON_EMCDLYCTL_FBCLKDLY_MASK    (0x1f << SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT)
-#define SYSCON_EMCDLYCTL_FBCLKDLY(n)      ((n+1)<< SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT) /* n = 2 - 31 */
+#define SYSCON_EMCDLYCTL_FBCLKDLY(n)      ((n-1)<< SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT) /* n = 3 - 32 */
                                                   /* Bits 13-15: Reserved */
 #define SYSCON_EMCDLYCTL_CLKOUT0DLY_SHIFT (16)    /* Bits 16-20: Delay value for the CLKOUT0 output */
 #define SYSCON_EMCDLYCTL_CLKOUT0DLY_MASK  (0x1f << SYSCON_EMCDLYCTL_CLKOUT0DLY_SHIFT)
-# define SYSCON_EMCDLYCTL_CLKOUT0DLY(n)   ((n+1) << SYSCON_EMCDLYCTL_CLKOUT0DLY_SHIFT) /* n = 2 - 31 */
+# define SYSCON_EMCDLYCTL_CLKOUT0DLY(n)   ((n-1) << SYSCON_EMCDLYCTL_CLKOUT0DLY_SHIFT) /* n = 3 - 32 */
                                                   /* Bits 21-23: Reserved */
 #define SYSCON_EMCDLYCTL_CLKOUT1DLY_SHIFT (24)    /* Bits 24-28: Delay value for the CLKOUT1 output */
 #define SYSCON_EMCDLYCTL_CLKOUT1DLY_MASK  (0x1f << SYSCON_EMCDLYCTL_CLKOUT1DLY_SHIFT)
-# define SYSCON_EMCDLYCTL_CLKOUT1DLY(n)   ((n+1) << SYSCON_EMCDLYCTL_CLKOUT1DLY_SHIFT) /* n = 2 - 31 */
+# define SYSCON_EMCDLYCTL_CLKOUT1DLY(n)   ((n-1) << SYSCON_EMCDLYCTL_CLKOUT1DLY_SHIFT) /* n = 3 - 32 */
                                                   /* Bits 29-31: Reserved */
 /* Calibration Register - EMC */
 

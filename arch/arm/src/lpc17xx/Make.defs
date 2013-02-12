@@ -91,6 +91,10 @@ ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 CHIP_ASRCS += lpc17_vectors.S
 endif
 
+ifeq ($(CONFIG_LPC17_EMC),y)
+CHIP_CSRCS += lpc17_emc.c
+endif
+
 ifeq ($(CONFIG_GPIO_IRQ),y)
 CHIP_CSRCS += lpc17_gpioint.c
 endif
