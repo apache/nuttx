@@ -76,10 +76,6 @@
 #  define CONFIG_USBDEV_EP0_MAXSIZE 64
 #endif
 
-#ifndef CONFIG_USBDEV_SETUP_MAXDATASIZE
-#  define CONFIG_USBDEV_SETUP_MAXDATASIZE CONFIG_USBDEV_EP0_MAXSIZE
-#endif
-
 #ifndef CONFIG_USB_PRI
 #  define CONFIG_USB_PRI NVIC_SYSH_PRIORITY_DEFAULT
 #endif
@@ -339,6 +335,7 @@ struct stm32_usbdev_s
 
   /* STM32-specific fields */
 
+  struct usb_ctrlreq_s     ctrl;          /* Last EP0 request */
   uint8_t                  ep0state;      /* State of EP0 (see enum stm32_ep0state_e) */
   uint8_t                  rsmstate;      /* Resume state (see enum stm32_rsmstate_e) */
   uint8_t                  nesofs;        /* ESOF counter (for resume support) */
@@ -349,30 +346,6 @@ struct stm32_usbdev_s
   uint16_t                 rxstatus;      /* Saved during interrupt processing */
   uint16_t                 txstatus;      /* "   " "    " "       " "        " */
   uint16_t                 imask;         /* Current interrupt mask */
-
-  /* E0 SETUP data buffering.
-   *
-   * ctrl:
-   *   The 8-byte SETUP request is received on the EP0 OUT endpoint and is
-   *   saved.
-   *
-   * ep0data
-   *   For OUT SETUP requests, the SETUP data phase must also complete before
-   *   the SETUP command can be processed.  The pack receipt logic will save
-   *   the accompanying EP0 IN data in ep0data[] before the SETUP command is
-   *   processed.
-   *
-   *   For IN SETUP requests, the DATA phase will occurr AFTER the SETUP
-   *   control request is processed.  In that case, ep0data[] may be used as
-   *   the response buffer.
-   *
-   * ep0datlen
-   *   Lenght of OUT DATA received in ep0data[] (Not used with OUT data)
-   */
-
-  struct usb_ctrlreq_s     ctrl;          /* Last EP0 request */
-  uint8_t                  ep0data[CONFIG_USBDEV_SETUP_MAXDATASIZE];
-  uint16_t                 ep0datlen;
 
   /* The endpoint list */
 
