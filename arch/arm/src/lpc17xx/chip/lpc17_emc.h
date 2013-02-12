@@ -277,8 +277,9 @@
 #define EMC_DYNAMICCONFIG_MD_MASK           (3 << EMC_DYNAMICCONFIG_MD_SHIFT)
 #  define EMC_DYNAMICCONFIG_MD_SDRAM        (0 << EMC_DYNAMICCONFIG_MD_SHIFT) /* SDRAM */
 #  define EMC_DYNAMICCONFIG_MD_LOWPOWER     (1 << EMC_DYNAMICCONFIG_MD_SHIFT) /* Low-power SDRAM */
-#define EMC_DYNAMICCONFIG_AM0_SHIFT         (nn)      /* Bits 7-12: */
+#define EMC_DYNAMICCONFIG_AM0_SHIFT         (7)       /* Bits 7-12: */
 #define EMC_DYNAMICCONFIG_AM0_MASK          (63 << EMC_DYNAMICCONFIG_AM0_SHIFT)
+#  define EMC_DYNAMICCONFIG_AM0(n)          ((n) << EMC_DYNAMICCONFIG_AM0_SHIFT)
 #define EMC_DYNAMICCONFIG_AM1               (1 << 14) /* Bit 14:  */
 #define EMC_DYNAMICCONFIG_B                 (1 << 19) /* Bit 19:  Buffer enable */
 #define EMC_DYNAMICCONFIG_P                 (1 << 20) /* Bit 20:  Write protect */
@@ -298,41 +299,41 @@
 
 /* Static Memory Configuration registers (0-3) */
 
-#define EMC_STATICCONFIG_MW_SHIFT         (0)       /* Bits 0-1: Memory width */
-#define EMC_STATICCONFIG_MW_MASK          (3 << EMC_STATICCONFIG_MW_SHIFT)
-#  define EMC_STATICCONFIG_MW_8BIT        (0 << EMC_STATICCONFIG_MW_SHIFT)
-#  define EMC_STATICCONFIG_MW_16BIT       (1 << EMC_STATICCONFIG_MW_SHIFT)
-#  define EMC_STATICCONFIG_MW_32BIT       (2 << EMC_STATICCONFIG_MW_SHIFT)
-#define EMC_STATICCONFIG_PM               (1 << 3)  /* Bit 3:  Page mode */
-#define EMC_STATICCONFIG_PC               (1 << 6)  /* Bit 6:  Chip select polarity */
-#define EMC_STATICCONFIG_PB               (1 << 7)  /* Bit 7:  Byte lane state */
-#define EMC_STATICCONFIG_EW               (1 << 8)  /* Bit 8:  Extended wait */
-#define EMC_STATICCONFIG_B                (1 << 19) /* Bit 19: Buffer enable */
-#define EMC_STATICCONFIG_P                (1 << 20) /* Bit 20: Write protect */
+#define EMC_STATICCONFIG_MW_SHIFT           (0)       /* Bits 0-1: Memory width */
+#define EMC_STATICCONFIG_MW_MASK            (3 << EMC_STATICCONFIG_MW_SHIFT)
+#  define EMC_STATICCONFIG_MW_8BIT          (0 << EMC_STATICCONFIG_MW_SHIFT)
+#  define EMC_STATICCONFIG_MW_16BIT         (1 << EMC_STATICCONFIG_MW_SHIFT)
+#  define EMC_STATICCONFIG_MW_32BIT         (2 << EMC_STATICCONFIG_MW_SHIFT)
+#define EMC_STATICCONFIG_PM                 (1 << 3)  /* Bit 3:  Page mode */
+#define EMC_STATICCONFIG_PC                 (1 << 6)  /* Bit 6:  Chip select polarity */
+#define EMC_STATICCONFIG_PB                 (1 << 7)  /* Bit 7:  Byte lane state */
+#define EMC_STATICCONFIG_EW                 (1 << 8)  /* Bit 8:  Extended wait */
+#define EMC_STATICCONFIG_B                  (1 << 19) /* Bit 19: Buffer enable */
+#define EMC_STATICCONFIG_P                  (1 << 20) /* Bit 20: Write protect */
 
 /* Static Memory Write Enable Delay registers (0-3) */
 
-#define EMC_STATICWAITWEN_MASK            (0x0000000f) /* Bits 0-3: Wait write enable */
+#define EMC_STATICWAITWEN_MASK              (0x0000000f) /* Bits 0-3: Wait write enable */
 
 /* Static Memory Output Enable Delay registers (0-3) */
 
-#define EMC_STATICWAITOEN_MASK            (0x0000000f) /* Bits 0-3: Wait output enable */
+#define EMC_STATICWAITOEN_MASK              (0x0000000f) /* Bits 0-3: Wait output enable */
 
 /* Static Memory Read Delay registers (0-3) */
 
-#define EMC_STATICWAITRD_MASK             (0x0000001f) /* Bits 0-4: Exit self-refresh to active command time */
+#define EMC_STATICWAITRD_MASK               (0x0000001f) /* Bits 0-4: Exit self-refresh to active command time */
 
 /* Static Memory Page Mode Read Delay registers (0-3) */
 
-#define EMC_STATICWAITPAGE_MASK           (0x0000001f) /* Bits 0-4: Asynchronous page mode read after the first read wait states */
+#define EMC_STATICWAITPAGE_MASK             (0x0000001f) /* Bits 0-4: Asynchronous page mode read after the first read wait states */
 
 /* Static Memory Write Delay registers (0-3) */
 
-#define EMC_STATICWAITWR_MASK             (0x0000001f) /* Bits 0-4: Write wait states */
+#define EMC_STATICWAITWR_MASK               (0x0000001f) /* Bits 0-4: Write wait states */
 
 /* Static Memory Turn Round Delay registers (0-3) */
 
-#define EMC_STATICWAITTURN_MASK           (0x0000000f) /* Bits 0-3: Bus turn-around cycles */
+#define EMC_STATICWAITTURN_MASK             (0x0000000f) /* Bits 0-3: Bus turn-around cycles */
 
 /****************************************************************************************************
  * Public Types

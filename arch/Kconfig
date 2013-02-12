@@ -172,6 +172,22 @@ config ARCH_EXTDRAMSIZE
 	---help---
 		Size of the external SDRAM in bytes.
 
+choice
+	prompt "SDRAM Width Selection"
+	default ARCH_CHIP_STM32F103ZET6
+	depends on ARCH_CHIP_STM32
+
+config ARCH_SDRAM_8BIT
+	bool "8-bit"
+
+config ARCH_SDRAM_16BIT
+	bool "16-bit"
+
+config ARCH_SDRAM_32BIT
+	bool "32-bit"
+
+endchoice
+
 config ARCH_EXTDRAMHEAP
 	bool "Add external SDRAM to the heap"
 	default y
