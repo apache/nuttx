@@ -79,12 +79,17 @@
 
 #define _O_MAXBIT   8
 
-/* Synonyms historically used as F_SETFL flags (BSD).  Also FASYNC. */
+/* Synonyms historically used as F_SETFL flags (BSD). */
 
-#define FNDELAY     O_NONBLOCK
-#define FNONBLOCK   O_NONBLOCK
-#define FAPPEND     O_APPEND
-#define FSYNC       O_SYNC
+#define FNDELAY     O_NONBLOCK        /* Don't wait for data */
+#define FNONBLOCK   O_NONBLOCK        /* Don't wait for data */
+#define FAPPEND     O_APPEND          /* Keep contents, append to end */
+#define FSYNC       O_SYNC            /* Synchronize output on write */
+#define FASYNC      0                 /* No counterpart in NuttX */
+
+/* FFCNTL is all the bits that may be set via fcntl. */
+
+#define FFCNTL      (FNONBLOCK | FNDELAY | FAPPEND | FSYNC | FASYNC)
 
 /* fcntl() commands */
 

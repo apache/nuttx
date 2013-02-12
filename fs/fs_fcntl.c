@@ -53,9 +53,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ACCESS_MODES   (O_RDONLY | O_WRONLY | O_RDWR)
-#define CREATION_MODES (O_CREAT | O_EXCL | O_APPEND | O_TRUNC)
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -152,8 +149,8 @@ static inline int file_vfcntl(int fildes, int cmd, va_list ap)
         {
           int oflags = va_arg(ap, int);
 
-          oflags              &= ~(ACCESS_MODES | CREATION_MODES);
-          this_file->f_oflags &=  (ACCESS_MODES | CREATION_MODES);
+          oflags              &=  FFCNTL;
+          this_file->f_oflags &= ~FFCNTL;
           this_file->f_oflags |=  oflags;
         }
         break;
