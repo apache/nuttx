@@ -44,6 +44,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
+#  include <stdbool.h>
 #endif
 
 #include <arch/lpc17xx/chip.h>
