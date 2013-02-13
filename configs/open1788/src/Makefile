@@ -44,6 +44,28 @@ ifeq ($(CONFIG_LPC17_EMC_NOR),y)
 CSRCS		+= lpc17_norinitialize.c
 endif
 
+ifeq ($(CONFIG_LPC17_EMC_NAND),y)
+CSRCS		+= lpc17_nandinitialize.c
+endif
+
+ifeq ($(CONFIG_LPC17_EMC_SDRM),y)
+CSRCS		+= lpc17_sdraminitialize.c
+endif
+
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS		+= lpc17_nsh.c
+endif
+
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS		+= lpc17_autoleds.c
+else
+CSRCS		+= lpc17_userleds.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS		+= up_buttons.c
+endif
+
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 

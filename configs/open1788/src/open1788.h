@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/olimex-lpc1766stk/src/lpc1766stk_internal.h
- * arch/arm/src/board/lpc1766stk_internal.n
+ * configs/open1788/src/open1788.h
+ * arch/arm/src/board/open1788.n
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_INTERNAL_H
-#define _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_INTERNAL_H
+#ifndef _CONFIGS_OPEN1788_SRC_OPEN1788_H
+#define _CONFIGS_OPEN1788_SRC_OPEN1788_H
 
 /************************************************************************************
  * Included Files
@@ -48,12 +48,58 @@
  * Definitions
  ************************************************************************************/
 
-/* LPC1766-STK GPIO Pin Definitions *************************************************/
+/* Open1788 GPIO Pin Definitions ****************************************************/
 /* GPIO P2[21] connects to the Ready/Busy pin of the NAND part.  We need to
  * reconfigure this pin as normal GPIO input if NAND is used.
  */
 
 #define GPIO_NAND_RB (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN21)
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
+ *
+ * LED1 -- Connected to P1[14]
+ * LED2 -- Connected to P0[16]
+ * LED3 -- Connected to P1[13]
+ * LED4 -- Connected to P4[27]
+ *
+ * These LEDs are connecte to ground so a high output value will illuminate them.
+ */
+
+#define GPIO_LED1    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN14)
+#define GPIO_LED2    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN16)
+#define GPIO_LED3    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN13)
+#define GPIO_LED4    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT4 | GPIO_PIN27)
+
+/* Button definitions ***************************************************************/
+/* The Open1788 supports several buttons.  All will read "1" when open and "0"
+ * when closed
+ *
+ * USER1           -- Connected to P4[26]
+ * USER2           -- Connected to P2[22]
+ * USER3           -- Connected to P0[10]
+ *
+ * And a Joystick
+ *
+ * JOY_A           -- Connected to P2[25]
+ * JOY_B           -- Connected to P2[26]
+ * JOY_C           -- Connected to P2[23]
+ * JOY_D           -- Connected to P2[19]
+ * JOY_CTR         -- Connected to P0[14]
+ *
+ * The switches are all connected to ground and should be pulled up and sensed
+ * with a value of '0' when closed.
+ */
+
+#define GPIO_USER1   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT4 | GPIO_PIN26)
+#define GPIO_USER2   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN22)
+#define GPIO_USER3   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN10)
+
+#define GPIO_JOY_A   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN25)
+#define GPIO_JOY_B   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN26)
+#define GPIO_JOY_C   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN23)
+#define GPIO_JOY_D   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN19)
+#define GPIO_JOY_CTR (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN14)
 
 /************************************************************************************
  * Public Types
@@ -73,7 +119,7 @@
  * Name: lpc17_sspinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Olimex LPC1766-STK board.
+ *   Called to configure SPI chip select GPIO pins for the WaveShare Open1788 board.
  *
  ************************************************************************************/
 
@@ -118,5 +164,5 @@ void lpc17_nand_initialize(void);
 #endif /* CONFIG_LPC17_EMC */
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_INTERNAL_H */
+#endif /* _CONFIGS_OPEN1788_SRC_OPEN1788_H */
 

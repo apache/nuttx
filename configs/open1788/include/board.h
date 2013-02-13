@@ -198,15 +198,15 @@
 #define LED_STARTED                0  /*  OFF  OFF  OFF  OFF                        */
 #define LED_HEAPALLOCATE           1  /*  ON   OFF  OFF  OFF                        */
 #define LED_IRQSENABLED            2  /*  OFF   ON  OFF  OFF                        */
-#define LED_STACKCREATED           1  /*  ON    ON  OFF  OFF                        */
-#define LED_INIRQ                  2  /*  LED3 glows, on while in interupt          */
-#define LED_SIGNAL                 2  /*  LED3 glows, on while in signal handler    */
-#define LED_ASSERTION              2  /*  LED3 glows, on while in assertion         */
-#define LED_PANIC                  2  /*  LED3 Flashes at 2Hz                       */
-#define LED_IDLE                   3  /*  LED glows, ON while sleeping              */
+#define LED_STACKCREATED           3  /*  ON    ON  OFF  OFF                        */
+#define LED_INIRQ                  4  /*  LED3 glows, on while in interupt          */
+#define LED_SIGNAL                 4  /*  LED3 glows, on while in signal handler    */
+#define LED_ASSERTION              4  /*  LED3 glows, on while in assertion         */
+#define LED_PANIC                  4  /*  LED3 Flashes at 2Hz                       */
+#define LED_IDLE                   5  /*  LED4 glows, ON while sleeping             */
 
 /* Button definitions ***************************************************************/
-/* The Open1788K supports several buttons.  All will read "1" when open and "0"
+/* The Open1788 supports several buttons.  All will read "1" when open and "0"
  * when closed
  *
  * USER1           -- Connected to P4[26]
