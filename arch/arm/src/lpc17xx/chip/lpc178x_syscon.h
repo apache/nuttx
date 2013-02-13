@@ -276,7 +276,7 @@
 #define SYSCON_EMCDIV                    (1 << 0)  /* Bit 0: EMC Clock rate relative to CPU */
                                                    /* 0: EMC uses same clock as CPU */
                                                    /* 1: EMC uses half the rate of CPU */
-                                                   /* Bits 1-31: Reserved
+                                                   /* Bits 1-31: Reserved */
 /* CPU Clock Configuration register */
 
 #define SYSCON_CCLKCFG_CCLKDIV_SHIFT     (0)       /* 0-4: Divide value for CPU clock (CCLK) */
@@ -387,7 +387,7 @@
 #define SYSCON_PCONP_PCMCPWM             (1 << 17) /* Bit 17: Motor Control PWM */
 #define SYSCON_PCONP_PCQEI               (1 << 18) /* Bit 18: Quadrature Encoder power/clock control */
 #define SYSCON_PCONP_PCI2C1              (1 << 19) /* Bit 19: I2C1 power/clock control */
-#define SYSCON_PCONP_PCSSP0              (1 << 20) /* Bit 20: SSP2 power/clock control */
+#define SYSCON_PCONP_PCSSP2              (1 << 20) /* Bit 20: SSP2 power/clock control */
 #define SYSCON_PCONP_PCSSP0              (1 << 21) /* Bit 21: SSP0 power/clock control */
 #define SYSCON_PCONP_PCTIM2              (1 << 22) /* Bit 22: Timer 2 power/clock control */
 #define SYSCON_PCONP_PCTIM3              (1 << 23) /* Bit 23: Timer 3 power/clock control */

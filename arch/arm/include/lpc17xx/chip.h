@@ -218,8 +218,8 @@
 #  undef  LPC176x                  /* Not LPC175/6 family */
 #  define LPC178x               1  /* LPC177/8 family */
 #  define LPC17_FLASH_SIZE      (128*1024) /* 128Kb */
-#  define LPC17_SRAM_SIZE       (32*1024)  /*  32Kb */
-#  define LPC17_CPUSRAM_SIZE    (8*1024)
+#  define LPC17_SRAM_SIZE       (40*1024)  /*  40Kb */
+#  define LPC17_CPUSRAM_SIZE    (32*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have Peripheral SRAM bank 0 */
 #  undef  LPC17_HAVE_BANK1         /* No Peripheral SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -234,8 +234,8 @@
 #  undef  LPC176x                  /* Not LPC175/6 family */
 #  define LPC178x               1  /* LPC177/8 family */
 #  define LPC17_FLASH_SIZE      (128*1024) /* 128Kb */
-#  define LPC17_SRAM_SIZE       (32*1024)  /*  32Kb */
-#  define LPC17_CPUSRAM_SIZE    (8*1024)
+#  define LPC17_SRAM_SIZE       (40*1024)  /*  40Kb */
+#  define LPC17_CPUSRAM_SIZE    (32*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have Peripheral SRAM bank 0*/
 #  undef  LPC17_HAVE_BANK1         /* Have Peripheral SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -250,8 +250,8 @@
 #  undef  LPC176x                  /* Not LPC175/6 family */
 #  define LPC178x               1  /* LPC177/8 family */
 #  define LPC17_FLASH_SIZE      (256*1024) /* 256Kb */
-#  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
-#  define LPC17_CPUSRAM_SIZE      (16*1024)
+#  define LPC17_SRAM_SIZE       (80*1024)  /*  80Kb */
+#  define LPC17_CPUSRAM_SIZE    (64*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have Peripheral SRAM bank 0  */
 #  undef  LPC17_HAVE_BANK1         /* Have Peripheral SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -266,8 +266,8 @@
 #  undef  LPC176x                  /* Not LPC175/6 family */
 #  define LPC178x               1  /* LPC177/8 family */
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
-#  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
-#  define LPC17_CPUSRAM_SIZE    (32*1024)
+#  define LPC17_SRAM_SIZE       (96*1024)  /*  96Kb */
+#  define LPC17_CPUSRAM_SIZE    (64*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have Peripheral SRAM bank 0 */
 #  define LPC17_HAVE_BANK1      1  /* Have Peripheral SRAM bank 1 */
 #  undef  LPC17_NETHCONTROLLERS    /* One Ethernet controller */
@@ -282,8 +282,8 @@
 #  undef  LPC176x                  /* Not LPC175/6 family */
 #  define LPC178x               1  /* LPC177/8 family */
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
-#  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
-#  define LPC17_CPUSRAM_SIZE    (32*1024)
+#  define LPC17_SRAM_SIZE       (96*1024)  /*  64Kb */
+#  define LPC17_CPUSRAM_SIZE    (64*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have Peripheral SRAM bank 0 */
 #  define LPC17_HAVE_BANK1      1  /* Have Peripheral SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -298,8 +298,8 @@
 #  undef  LPC176x                  /* Not LPC175/6 family */
 #  define LPC178x               1  /* LPC177/8 family */
 #  define LPC17_FLASH_SIZE      (256*1024) /* 256Kb */
-#  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
-#  define LPC17_CPUSRAM_SIZE    (16*1024)
+#  define LPC17_SRAM_SIZE       (80*1024)  /*  80Kb */
+#  define LPC17_CPUSRAM_SIZE    (64*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have Peripheral SRAM bank 0 */
 #  undef  LPC17_HAVE_BANK1         /* Have Peripheral SRAM bank 1 */
 #  undef  LPC17_NETHCONTROLLERS    /* One Ethernet controller */
@@ -314,8 +314,8 @@
 #  undef  LPC176x                  /* Not LPC175/6 family */
 #  define LPC178x               1  /* LPC177/8 family */
 #  define LPC17_FLASH_SIZE      (256*1024) /* 256Kb */
-#  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
-#  define LPC17_CPUSRAM_SIZE    (16*1024)
+#  define LPC17_SRAM_SIZE       (80*1024)  /*  80Kb */
+#  define LPC17_CPUSRAM_SIZE    (64*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have Peripheral SRAM bank 0 */
 #  undef  LPC17_HAVE_BANK1         /* Have Peripheral SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
@@ -330,8 +330,8 @@
 #  undef  LPC176x                  /* Not LPC175/6 family */
 #  define LPC178x               1  /* LPC177/8 family */
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
-#  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
-#  define LPC17_CPUSRAM_SIZE    (32*1024)
+#  define LPC17_SRAM_SIZE       (96*1024)  /*  96Kb */
+#  define LPC17_CPUSRAM_SIZE    (64*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have Peripheral SRAM bank 0 */
 #  define LPC17_HAVE_BANK1      1  /* Have Peripheral SRAM bank 1 */
 #  undef  LPC17_NETHCONTROLLERS    /* One Ethernet controller */
@@ -346,8 +346,8 @@
 #  undef  LPC176x                  /* Not LPC175/6 family */
 #  define LPC178x               1  /* LPC177/8 family */
 #  define LPC17_FLASH_SIZE      (512*1024) /* 512Kb */
-#  define LPC17_SRAM_SIZE       (64*1024)  /*  64Kb */
-#  define LPC17_CPUSRAM_SIZE    (32*1024)
+#  define LPC17_SRAM_SIZE       (96*1024)  /*  96Kb */
+#  define LPC17_CPUSRAM_SIZE    (64*1024)
 #  define LPC17_HAVE_BANK0      1  /* Have Peripheral SRAM bank 0 */
 #  define LPC17_HAVE_BANK1      1  /* Have Peripheral SRAM bank 1 */
 #  define LPC17_NETHCONTROLLERS 1  /* One Ethernet controller */
