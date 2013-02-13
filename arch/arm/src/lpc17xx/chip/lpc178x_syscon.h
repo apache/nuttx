@@ -249,9 +249,9 @@
 /* PLL0/1 Configuration register */
 
 #define SYSCON_PLLCFG_MSEL_SHIFT         (0)       /* Bit 0-4: PLL Multiplier value */
-#define SYSCON_PLLCFG_MSEL_MASK          (0x1f << SYSCON_PLL0CFG_MSEL_SHIFT)
+#define SYSCON_PLLCFG_MSEL_MASK          (0x1f << SYSCON_PLLCFG_MSEL_SHIFT)
 #define SYSCON_PLLCFG_PSEL_SHIFT         (5)       /* Bit 5-6: PLL Pre-Divider value */
-#define SYSCON_PLLCFG_PSEL_MASK          (3 << SYSCON_PLL0CFG_PSEL_SHIFT)
+#define SYSCON_PLLCFG_PSEL_MASK          (3 << SYSCON_PLLCFG_PSEL_SHIFT)
 
 /* PLL0/1 Status register */
 
@@ -573,7 +573,6 @@
 
 #define SYSCON_EMCCAL_CALVALUE_SHIFT     (0)      /* Bits 0-7: Ring oscillator count during 32 clocks of Internal RC */
 #define SYSCON_EMCCAL_CALVALUE_MASK      (0xff << SYSCON_EMCCAL_CALVALUE_SHIFT)
-//~ #define SYSCON_EMCCAL_CALVALUE
                                                   /* Bits 8-13: Reserved */
 #define SYSCON_EMCCAL_START_SHIFT        (14)     /* Bit 14: Start control bit for EMC calibration counter */
 #define SYSCON_EMCCAL_START_MASK         (1 << SYSCON_EMCCAL_START_SHIFT)
@@ -581,8 +580,16 @@
 #define SYSCON_EMCCAL_DONE_SHIFT         (15)     /* Bit 15: Measurement completetion flag bit */
 #define SYSCON_EMCCAL_DONE_MASK          (1 << SYSCON_EMCCAL_DONE_SHIFT)
                                                   /* Automatically cleared when START bit is set */
-//~ # define SYSCON_EMCCAL_DONE
                                                   /* Bits 16-31: Reserved */
+
+/* Compatibility Definitions ************************************************************************/
+/* Need in lpc17_clockconfig.h for compatibility with the LPC176x family: */
+
+#define SYSCON_PLLCON_PLLC               (0)                  /* Bit does not exist in LPC178x family */
+#define SYSCON_PLL0STAT_PLLE             SYSCON_PLLSTAT_PLLE  /* PLL enable readback */
+#define SYSCON_PLL0STAT_PLLC             SYSCON_PLLSTAT_PLLC  /* PLL connect readback */
+#define SYSCON_PLL0STAT_PLOCK            SYSCON_PLLSTAT_PLOCK /* PLL lock status */
+
 /****************************************************************************************************
  * Public Types
  ****************************************************************************************************/
