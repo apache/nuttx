@@ -72,6 +72,12 @@
 #define LPC17_UART_RS485DLY_OFFSET   0x0054 /* RS-485/EIA-485 direction control delay (UART1 only) */
 #define LPC17_UART_FIFOLVL_OFFSET    0x0058 /* FIFO Level register (all) */
 
+#ifdef LPC178x
+#  define LPC17_UART_OSR_OFFSET      0x002c /* Oversampling Register (UART4 only) */
+#  define LPC17_UART_SCICTRL_OFFSET  0x0048 /* Smart Card Interface Register (UART4 only) */
+#  define LPC17_UART_SYNCCTRL_OFFSET 0x0058 /* Synchronous Mode  Register (UART4 only) */
+#endif
+
 /* Register addresses ***************************************************************/
 
 #define LPC17_UART0_RBR              (LPC17_UART0_BASE+LPC17_UART_RBR_OFFSET)
@@ -88,6 +94,13 @@
 #define LPC17_UART0_ICR              (LPC17_UART0_BASE+LPC17_UART_ICR_OFFSET)
 #define LPC17_UART0_FDR              (LPC17_UART0_BASE+LPC17_UART_FDR_OFFSET)
 #define LPC17_UART0_TER              (LPC17_UART0_BASE+LPC17_UART_TER_OFFSET)
+
+#ifdef LPC178x
+#  define LPC17_UART0_RS485CTRL      (LPC17_UART0_BASE+LPC17_UART_RS485CTRL_OFFSET)
+#  define LPC17_UART0_ADRMATCH       (LPC17_UART0_BASE+LPC17_UART_ADRMATCH_OFFSET)
+#  define LPC17_UART0_RS485DLY       (LPC17_UART0_BASE+LPC17_UART_RS485DLY_OFFSET)
+#endif
+
 #define LPC17_UART0_FIFOLVL          (LPC17_UART0_BASE+LPC17_UART_FIFOLVL_OFFSET)
 
 #define LPC17_UART1_RBR              (LPC17_UART1_BASE+LPC17_UART_RBR_OFFSET)
@@ -124,6 +137,13 @@
 #define LPC17_UART2_ICR              (LPC17_UART2_BASE+LPC17_UART_ICR_OFFSET)
 #define LPC17_UART2_FDR              (LPC17_UART2_BASE+LPC17_UART_FDR_OFFSET)
 #define LPC17_UART2_TER              (LPC17_UART2_BASE+LPC17_UART_TER_OFFSET)
+
+#ifdef LPC178x
+#  define LPC17_UART2_RS485CTRL      (LPC17_UART2_BASE+LPC17_UART_RS485CTRL_OFFSET)
+#  define LPC17_UART2_ADRMATCH       (LPC17_UART2_BASE+LPC17_UART_ADRMATCH_OFFSET)
+#  define LPC17_UART2_RS485DLY       (LPC17_UART2_BASE+LPC17_UART_RS485DLY_OFFSET)
+#endif
+
 #define LPC17_UART2_FIFOLVL          (LPC17_UART2_BASE+LPC17_UART_FIFOLVL_OFFSET)
 
 #define LPC17_UART3_RBR              (LPC17_UART3_BASE+LPC17_UART_RBR_OFFSET)
@@ -140,7 +160,38 @@
 #define LPC17_UART3_ICR              (LPC17_UART3_BASE+LPC17_UART_ICR_OFFSET)
 #define LPC17_UART3_FDR              (LPC17_UART3_BASE+LPC17_UART_FDR_OFFSET)
 #define LPC17_UART3_TER              (LPC17_UART3_BASE+LPC17_UART_TER_OFFSET)
+
+#ifdef LPC178x
+#  define LPC17_UART3_RS485CTRL      (LPC17_UART3_BASE+LPC17_UART_RS485CTRL_OFFSET)
+#  define LPC17_UART3_ADRMATCH       (LPC17_UART3_BASE+LPC17_UART_ADRMATCH_OFFSET)
+#  define LPC17_UART3_RS485DLY       (LPC17_UART3_BASE+LPC17_UART_RS485DLY_OFFSET)
+#endif
+
 #define LPC17_UART3_FIFOLVL          (LPC17_UART3_BASE+LPC17_UART_FIFOLVL_OFFSET)
+
+#ifdef LPC178x
+#  define LPC17_UART4_RBR            (LPC17_UART4_BASE+LPC17_UART_RBR_OFFSET)
+#  define LPC17_UART4_THR            (LPC17_UART4_BASE+LPC17_UART_THR_OFFSET)
+#  define LPC17_UART4_DLL            (LPC17_UART4_BASE+LPC17_UART_DLL_OFFSET)
+#  define LPC17_UART4_DLM            (LPC17_UART4_BASE+LPC17_UART_DLM_OFFSET)
+#  define LPC17_UART4_IER            (LPC17_UART4_BASE+LPC17_UART_IER_OFFSET)
+#  define LPC17_UART4_IIR            (LPC17_UART4_BASE+LPC17_UART_IIR_OFFSET)
+#  define LPC17_UART4_FCR            (LPC17_UART4_BASE+LPC17_UART_FCR_OFFSET)
+#  define LPC17_UART4_LCR            (LPC17_UART4_BASE+LPC17_UART_LCR_OFFSET)
+#  define LPC17_UART4_LSR            (LPC17_UART4_BASE+LPC17_UART_LSR_OFFSET)
+#  define LPC17_UART4_SCR            (LPC17_UART4_BASE+LPC17_UART_SCR_OFFSET)
+#  define LPC17_UART4_ACR            (LPC17_UART4_BASE+LPC17_UART_ACR_OFFSET)
+#  define LPC17_UART4_ICR            (LPC17_UART4_BASE+LPC17_UART_ICR_OFFSET)
+#  define LPC17_UART4_FDR            (LPC17_UART4_BASE+LPC17_UART_FDR_OFFSET)
+#  define LPC17_UART4_TER            (LPC17_UART4_BASE+LPC17_UART_TER_OFFSET)
+#  define LPC17_UART4_RS485CTRL      (LPC17_UART4_BASE+LPC17_UART_RS485CTRL_OFFSET)
+#  define LPC17_UART4_ADRMATCH       (LPC17_UART4_BASE+LPC17_UART_ADRMATCH_OFFSET)
+#  define LPC17_UART4_RS485DLY       (LPC17_UART4_BASE+LPC17_UART_RS485DLY_OFFSET)
+#  define LPC17_UART4_FIFOLVL        (LPC17_UART4_BASE+LPC17_UART_FIFOLVL_OFFSET)
+#  define LPC17_UART4_OSR            (LPC17_UART4_BASE+LPC17_UART4_OSR_OFFSET)
+#  define LPC17_UART4_SCICTRL        (LPC17_UART4_BASE+LPC17_UART4_SCICTRL_OFFSET)
+#  define LPC17_UART4_SYNCCTRL       (LPC17_UART4_BASE+LPC17_UART4_SYNCCTRL_OFFSET)
+#endif
 
 /* Register bit definitions *********************************************************/
 
@@ -323,6 +374,30 @@
 #define UART_FIFOLVL_TX_SHIFT        (8)       /* Bits 8-11: Current level of the UART TX FIFO */
 #define UART_FIFOLVL_TX_MASK         (15 << UART_FIFOLVL_TX_SHIFT)
                                                /* Bits 12-31: Reserved */
+
+/* SCICTL Smart Card Interface (UART4 only) */
+
+#ifdef LPC178x
+#  define UART_SCIEN                 (1 << 0)  /* Bit 0: Smart Card Interface enable */
+#  define UART_NACKDIS               (1 << 1)  /* Bit 1: NACK response disable.Applicable if PROTSEL=0 */
+#  define UART_PROTSEL               (1 << 2)  /* Bit 2: Protocol Selection ISO7816-3 */
+#  define UART_TXRETRY               (7 << 5)  /* Bits 5-7: Maximum number of Re-Transmission */
+#  define UART_GUARDTIME_SHIFT       (8)       /* Bits 8-15: Extra guard time */
+#  define UART_GUARDTIME_MASK        (0xff << UART_GUARDTIME_SHIFT)
+                                               /* Bits 16-31: Reserved */
+#endif
+
+/* OSR Oversampling Register (UART4 only) */
+
+#ifdef LPC178x
+                                               /* Bit 0: Reserved */
+#  define UART_OSFRAC                (7 << 1)  /* Bits 1-3: Fractional part of Oversampling Ratio */
+#  define UART_OSINT_SHIFT           (4)       /* Bits 4-7:  Integer part of (Oversampling Ratio -1) */
+#  define UART_OSINT_MASK            (0x0f << UART_OSINT_SHIFT)
+#  define UART_FDINT_SHIFT           (8)       /* Bits 8-14: OSINT extension in Smart Card mode */
+#  define UART_FDINT_MASK            (0x7f << UART_FDINT_SHIFT)
+                                               /* Bits 15-31: Reserved */
+#endif
 
 /************************************************************************************
  * Public Types

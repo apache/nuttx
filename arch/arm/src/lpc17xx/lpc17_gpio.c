@@ -671,7 +671,7 @@ static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
 
   /* Set the alternate pin */
 
-  regval |= alt;
+  regval |= (alt & ~IOCON_FUNC_MASK);
 
   /* Set IOCON register */
 

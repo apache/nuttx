@@ -188,15 +188,22 @@
 #define RTC_AMR_MON             (1 << 6)  /* Bit 6:  Month not compared for alarm */
 #define RTC_AMR_YEAR            (1 << 7)  /* Bit 7:  Year not compared for alarm */
                                           /* Bits 8-31: Reserved */
-/* RTC Auxiliary Enable register */
+
+/* RTC Auxiliary Control Register */
                                           /* Bits 0-3: Reserved */
 #define RTC_AUXEN_RTCOSCF       (1 << 4)  /* Bit 4:  RTC Oscillator Fail detect flag */
-                                          /* Bits 5-31: Reserved */
-/* RTC Auxiliary control register */
+#ifdef LPC178x
+                                          /* Bit 5:  Reserved */
+#  define RTC_AUXEN_RTCPDOUT    (1 << 6)  /* Bit 6:  RTC power down mode flag */
+                                          /* Bits 7-31: Reserved */
+#endif
+
+/* RTC Auxiliary Enable Register */
                                           /* Bits 0-3: Reserved */
 #define RTC_AUX_OSCFEN          (1 << 4)  /* Bit 4:  Oscillator Fail Detect interrupt enable */
                                           /* Bits 5-31: Reserved */
-/* Consolidated time registers */
+
+/* Consolidated Time Registers */
 /* Consolidated Time Register 0 */
 
 #define RTC_CTIME0_SEC_SHIFT    (0)       /* Bits 0-5: Seconds */
