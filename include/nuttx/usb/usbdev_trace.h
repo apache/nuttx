@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/usb/usbdev_trace.h
  *
- *   Copyright (C) 2008, 2009-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009-2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -173,6 +173,14 @@
  */
 
 #define TRACE_CLSERROR(id)       TRACE_EVENT(TRACE_CLSERROR_ID, id)
+
+/* Event string descriptions ************************************************/
+/* Macros for defining the string arrays for display of the traces. */
+
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+#  define TRACE_STR(id) {id, #id}
+#  define TRACE_STR_END {0, NULL}
+#endif
 
 /* USB Serial driver class events *******************************************/
 /* Used by both the CDC/ACM and the PL2303 serial class drivers */
@@ -398,6 +406,18 @@ struct usbtrace_s
   uint16_t value;
 };
 
+/* Describes on element of a string string for decoding of device-specific
+ * trace events.
+ */
+
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+struct trace_msg_t
+{
+  int id;
+  const char *str;
+};
+#endif
+
 /* Enumeration callback function signature */
 
 typedef int (*trace_callback_t)(struct usbtrace_s *trace, void *arg);
@@ -413,16 +433,31 @@ typedef uint16_t usbtrace_idset_t;
 typedef int (*trprintf_t)(const char *fmt, ...);
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
-
+ 
 #undef EXTERN
 #if defined(__cplusplus)
 # define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 # define EXTERN extern
 #endif
+
+/* If CONFIG_USBDEV_TRACE_STRINGS is defined, then the USB device controller
+ * driver must provide these strings to support decoding of device-specific
+ * trace events.
+ */
+
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+EXTERN const struct trace_msg_t g_usb_trace_strings_deverror[];
+EXTERN const struct trace_msg_t g_usb_trace_strings_intdecode[];
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /*******************************************************************************
  * Name: usbtrace_enable
@@ -443,7 +478,7 @@ extern "C" {
  *******************************************************************************/
 
 #if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
-EXTERN usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
+usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
 #else
 #  define usbtrace_enable(idset)
 #endif
@@ -460,7 +495,7 @@ EXTERN usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset);
  *******************************************************************************/
 
 #if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
-EXTERN void usbtrace(uint16_t event, uint16_t value);
+void usbtrace(uint16_t event, uint16_t value);
 #else
 #  define usbtrace(event, value)
 #endif
@@ -477,7 +512,7 @@ EXTERN void usbtrace(uint16_t event, uint16_t value);
  *******************************************************************************/
 
 #ifdef CONFIG_USBDEV_TRACE
-EXTERN int usbtrace_enumerate(trace_callback_t callback, void *arg);
+int usbtrace_enumerate(trace_callback_t callback, void *arg);
 #else
 #  define usbtrace_enumerate(event)
 #endif
@@ -490,7 +525,7 @@ EXTERN int usbtrace_enumerate(trace_callback_t callback, void *arg);
  *
  *******************************************************************************/
 
-EXTERN void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value);
+void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value);
 
 #undef EXTERN
 #if defined(__cplusplus)

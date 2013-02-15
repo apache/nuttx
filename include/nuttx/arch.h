@@ -81,23 +81,37 @@ extern "C"
  * Name: up_initialize
  *
  * Description:
- *   up_initialize will be called once during OS
- *   initialization after the basic OS services have been
- *   initialized.  The architecture specific details of
- *   initializing the OS will be handled here.  Such things as
- *   setting up interrupt service routines, starting the
- *   clock, and registering device drivers are some of the
- *   things that are different for each processor and hardware
- *   platform.
+ *   up_initialize will be called once during OS initialization after the
+ *   basic OS services have been initialized.  The architecture specific
+ *   details of initializing the OS will be handled here.  Such things as
+ *   setting up interrupt service routines, starting the clock, and
+ *   registering device drivers are some of the things that are different
+ *   for each processor and hardware platform.
  *
- *   up_initialize is called after the OS initialized but
- *   before the init process has been started and before the
- *   libraries have been initialized.  OS services and driver
- *   services are available.
+ *   up_initialize is called after the OS initialized but before the initial
+ *   application has been started and before the libraries have been
+ *   initialized. OS services and driver services are available.
  *
  ****************************************************************************/
 
 void up_initialize(void);
+
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_intiialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void);
+#endif
 
 /****************************************************************************
  * Name: up_idle

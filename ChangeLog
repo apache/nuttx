@@ -4178,3 +4178,21 @@
 	* configs/stm32f3discovery/nsh/defconfig:  Disable SPI.  It is nto
 	  used.
 	* drivers/mtd/sst39vf:  Add a driver for the SST29VF NOR FLASH parts.
+	* sched/os_start.c:  Add an additional call-out to support board-
+	  specific driver initialization during the start phase:  If
+	  CONFIG_BOARD_INITIALIZE is defined, then an additioinal
+	  initialization function called board_initialize() will be called
+	  just after up_initialize() is called and just before the initial
+	  application is started.
+	* arch/arm/src/stm32/stm32_otgfsdev.c, drivers/usbdev/usbdev_trprintf.c,
+	  and include/nuttx/usb/usbdev_trace.h:  Add logic to support decoding
+	  of device-specific trace events to make the trace ouput more readable.
+	  From Petteri Aimonen.
+	* arch/arm/src/stm32/stm32_otgfsdev.c:  Need to manually set CNAK in
+	  the case where we are waiting for a SETUP command with DATA.  Otherwise,
+	  the core may NAK further transactions.  From Petteri Aimonen.
+	* arch/arm/src/stm32/stm32_otgfsdev.c: Add logic to prevent premature
+	  to IDLE state.  This change (plus the previous) was necessary to get
+	  the CDC/ACM driver working the certain STM32 F4 hardware (but not others).
+	  These changes appear to prevent certain race conditions that may or may
+	  not cause USB problems.  From Petteri Aimonen.

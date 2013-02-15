@@ -83,6 +83,21 @@ config USBDEV_TRACE_NRECORDS
 	---help---
 		Number of trace entries to remember
 
+config USBDEV_TRACE_STRINGS
+bool "Decode device controller events"
+	default n
+	depends on USBDEV_TRACE
+	---help---
+		If USBDEV_TRACE_STRINGS is defined, then the USB device controller
+		driver must provide arrays of strings to support decoding of device-
+		specific trace events.  These arrays of strings (and the type struct
+		trace_msg_t) are defined in include/nuttx/usb/usbdev_trace.h:
+
+		#ifdef CONFIG_USBDEV_TRACE_STRINGS
+		extern const struct trace_msg_t g_usb_trace_strings_deverror[];
+		extern const struct trace_msg_t g_usb_trace_strings_intdecode[];
+		#endif
+
 endmenu
 
 menuconfig USBDEV_COMPOSITE

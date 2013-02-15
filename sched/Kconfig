@@ -3,6 +3,34 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+config BOARD_INITIALIZE
+	bool "Custom board/driver initialization"
+	default n
+	---help---
+		By default, there are three points in time where you can insert
+		custom initialization logic:
+
+		1) <arch>_boardinitialize():  This function is used only for
+		   initialize of very low-level things like configuration of
+		   GPIO pins, power setting.  The OS has not been initialized
+		   at this point, so you cannot allocate memory or initialize
+		   device drivers at this phase.
+
+		2) The next level of initialization is performed by a call to
+		   up_initialize() (in arch/<arch>/src/common/up_initialize.c).
+		   The OS has been initialized at this point and it is okay to
+		   initialize drivers in this phase.
+
+		3) And, finally, when the user application code starts.
+
+		If BOARD_INITIALIZE is selected, then an additional initialization
+		call will be performed in the boot-up sequence to a function
+		called board_initialize().  board_initialize() will be
+		call between phases 2) and 3) above, immediately after
+		up_initialize() is called.  This additional initialization
+		phase may be used, for example, to initialize board-specific
+		device drivers.
+
 config MSEC_PER_TICK
 	int "Milliseconds per system timer tick"
 	default 10
