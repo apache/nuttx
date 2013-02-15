@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv7-m/stm32_fpu.S
+ * arch/arm/src/armv7-m/up_fpu.S
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
