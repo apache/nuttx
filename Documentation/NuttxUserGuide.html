@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: February 5, 2013</p>
+      <p>Last Updated: February 13, 2013</p>
     </td>
   </tr>
 </table>
@@ -1999,8 +1999,22 @@ priority of the calling task is returned.
       <li><a href="#waitid">2.3.5 waitid</a></li>
       <li><a href="#wait">2.3.6 wait</a></li>
     </ul>
+  <li>
     <p>
-      <code>atexit()</code> and <code>on_exit()</code> may be use to register callback functions that are executed when a task exits.
+      <b>Task Exit Hooks</b>.
+      <code>atexit()</code> and <code>on_exit()</code> may be use to register callback functions that are executed when a <i>task group</i> terminates.
+      A task group is the functional analog of a process:
+      It is a group that consists of the main task thread and of all of the pthreads created by the main task thread or any of the other pthreads within the task broup.
+      Members of a task group share certain resources such as environment variables, file descriptors, <code>FILE</code> streams, sockets, pthread keys and open message queues.
+    </p>
+    <blockquote><small>
+      <b>NOTE:</b>
+      Behavior of features related to <i>task group</i>s depend of NuttX configuration settings.
+      See the discussion of &quot;Parent and Child Tasks,&quot; below.
+      See also the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:nxtasking">NuttX Threading Wiki</a> page and the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:tasksnthreads">Tasks vs. Threads FAQ</a> for additional information on tasks and threads in NuttX.
+    </small></blockquote>
+    <p>
+      A <i>task group</i> terminates when the last thread within the group exits.
     </p>
     <ul>
       <li><a href="#atexit">2.3.7 atexit</a></li>
@@ -4649,12 +4663,14 @@ interface of the same name.
   NuttX supports both tasks and pthreads.
   The primary difference between tasks and pthreads is the tasks are much more independent.
   Tasks can create pthreads and those pthreads will share the resources of the task.
-  The main task and its children pthreads together are referred as a "task group."
+  The main task and its children pthreads together are referred as a <i>task group</i>.
   A task group is used in NuttX to emulate a POSIX <i>process</i>.
 </p>
-<p>
+<blockquote><small>
+  <b>NOTE:</b>
+  Behavior of features related to <i>task group</i>s depend of NuttX configuration settings.
   See the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:nxtasking">NuttX Threading Wiki</a> page and the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:tasksnthreads">Tasks vs. Threads FAQ</a> for additional information on tasks and threads in NuttX.
-</p>
+</small></blockquote>
 <p>
   <b>Signalling Multi-threaded Task Groups</b>.
   The behavior of signals in the multi-thread task group is complex.
@@ -5326,68 +5342,114 @@ be sent.
 <p>
   NuttX does not support <i>processes</i> in the way that, say, Linux does.
   NuttX only supports simple threads or tasks running within the same address space.
-  For the most part, threads and tasks are interchangeable and differ primarily
-  only in such things as the inheritance of file descriptors.
-  Basically, threads are initialized and uninitialized differently and share a
-  few more resources than tasks.
+  However, NuttX does support the concept of a <i>task group</i>.
+  A task group is the functional analog of a process:
+  It is a group that consists of the main task thread and of all of the pthreads created by the main thread or any of the other pthreads within the task broup.
+  Members of a task group share certain resources such as environment variables, file descriptors, <code>FILE</code> streams, sockets, pthread keys and open message queues.
+</p>
+<blockquote><small>
+  <b>NOTE:</b>
+  Behavior of features related to <i>task group</i>s depend of NuttX configuration settings.
+  See the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:nxtasking">NuttX Threading Wiki</a> page and the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:tasksnthreads">Tasks vs. Threads FAQ</a> for additional information on tasks and threads in NuttX.
+</small></blockquote>
 <p>
   The following pthread interfaces are supported in some form by NuttX:
 </p>
 <ul>
-  <li><a href="#pthreadattrinit">2.9.1 pthread_attr_init</a></li>
-  <li><a href="#pthreadattrdestroy">2.9.2 pthread_attr_destroy</a></li>
-  <li><a href="#pthreadattrsetschedpolity">2.9.3 pthread_attr_setschedpolicy</a></li>
-  <li><a href="#pthreadattrgetschedpolicy">2.9.4 pthread_attr_getschedpolicy</a></li>
-  <li><a href="#pthreadattrsetschedparam">2.9.5 pthread_attr_setschedparam</a></li>
-  <li><a href="#pthreadattrgetschedparam">2.9.6 pthread_attr_getschedparam</a></li>
-  <li><a href="#pthreadattrsetinheritsched">2.9.7 pthread_attr_setinheritsched</a></li>
-  <li><a href="#pthreadattrgetinheritsched">2.9.8 pthread_attr_getinheritsched</a></li>
-  <li><a href="#pthreadattrsetstacksize">2.9.9 pthread_attr_setstacksize</a></li>
-  <li><a href="#pthreadattrgetstacksize">2.9.10 pthread_attr_getstacksize</a></li>
-  <li><a href="#pthreadcreate">2.9.11 pthread_create</a></li>
-  <li><a href="#pthreaddetach">2.9.12 pthread_detach</a></li>
-  <li><a href="#pthreadexit">2.9.13 pthread_exit</a></li>
-  <li><a href="#pthreadcancel">2.9.14 pthread_cancel</a></li>
-  <li><a href="#pthreadsetcancelstate">2.9.15 pthread_setcancelstate</a></li>
-  <li><a href="#pthreadtestcancelstate">2.9.16 pthread_testcancelstate</a></li>
-  <li><a href="#pthreadjoin">2.9.17 pthread_join</a></li>
-  <li><a href="#pthreadyield">2.9.18 pthread_yield</a></li>
-  <li><a href="#pthreadself">2.9.19 pthread_self</a></li>
-  <li><a href="#pthreadgetschedparam">2.9.20 pthread_getschedparam</a></li>
-  <li><a href="#pthreadsetschedparam">2.9.21 pthread_setschedparam</a></li>
-  <li><a href="#pthreadkeycreate">2.9.22 pthread_key_create</a></li>
-  <li><a href="#pthreadsetspecific">2.9.23 pthread_setspecific</a></li>
-  <li><a href="#pthreadgetspecific">2.9.24 pthread_getspecific</a></li>
-  <li><a href="#pthreadkeydelete">2.9.25 pthread_key_delete</a></li>
-  <li><a href="#pthreadmutexattrinit">2.9.26 pthread_mutexattr_init</a></li>
-  <li><a href="#pthreadmutexattrdestroy">2.9.27 pthread_mutexattr_destroy</a></li>
-  <li><a href="#pthreadmutexattrgetpshared">2.9.28 pthread_mutexattr_getpshared</a></li>
-  <li><a href="#pthreadmutexattrsetpshared">2.9.29 pthread_mutexattr_setpshared</a></li>
-  <li><a href="#pthreadmutexattrgettype">2.9.30 pthread_mutexattr_gettype</a></li>
-  <li><a href="#pthreadmutexattrsettype">2.9.31 pthread_mutexattr_settype</a></li>  
-  <li><a href="#pthreadmutexinit">2.9.32 pthread_mutex_init</a></li>
-  <li><a href="#pthreadmutexdestrory">2.9.33 pthread_mutex_destroy</a></li>
-  <li><a href="#pthreadmutexlock">2.9.34 pthread_mutex_lock</a></li>
-  <li><a href="#pthreadmutextrylock">2.9.35 pthread_mutex_trylock</a></li>
-  <li><a href="#pthreadmutexunlock">2.9.36 pthread_mutex_unlock</a></li>
-  <li><a href="#pthreadconaddrinit">2.9.37 pthread_condattr_init</a></li>
-  <li><a href="#pthreadocndattrdestroy">2.9.38 pthread_condattr_destroy</a></li>
-  <li><a href="#pthreadcondinit">2.9.39 pthread_cond_init</a></li>
-  <li><a href="#pthreadconddestroy">2.9.40 pthread_cond_destroy</a></li>
-  <li><a href="#pthreadcondbroadcast">2.9.41 pthread_cond_broadcast</a></li>
-  <li><a href="#pthreadcondsignal">2.9.42 pthread_cond_signal</a></li>
-  <li><a href="#pthreadcondwait">2.9.43 pthread_cond_wait</a></li>
-  <li><a href="#pthreadcondtimedwait">2.9.44 pthread_cond_timedwait</a></li>
-  <li><a href="#pthreadbarrierattrinit">2.9.45 pthread_barrierattr_init</a></li>
-  <li><a href="#pthreadbarrierattrdestroy">2.9.46 pthread_barrierattr_destroy</a></li>
-  <li><a href="#pthreadbarrierattrsetpshared">2.9.47 pthread_barrierattr_setpshared</a></li>
-  <li><a href="#pthreadbarrierattrgetpshared">2.9.48 pthread_barrierattr_getpshared</a></li>
-  <li><a href="#pthreadbarrierinit">2.9.49 pthread_barrier_init</a></li>
-  <li><a href="#pthreadbarrierdestroy">2.9.50 pthread_barrier_destroy</a></li>
-  <li><a href="#pthreadbarrierwait">2.9.51 pthread_barrier_wait</a></li>
-  <li><a href="#pthreadonce">2.9.52 pthread_once</a></li>
-  <li><a href="#pthreadkill">2.9.53 pthread_kill</a></li>
-  <li><a href="#pthreadsigmask">2.9.54 pthread_sigmask</a></li>
+  <p>
+    <b>pthread control interfaces</b>.
+    Interfaces that allow you to create and manage pthreads.
+  </p>
+  <ul>
+    <li><a href="#pthreadattrinit">2.9.1 pthread_attr_init</a></li>
+    <li><a href="#pthreadattrdestroy">2.9.2 pthread_attr_destroy</a></li>
+    <li><a href="#pthreadattrsetschedpolity">2.9.3 pthread_attr_setschedpolicy</a></li>
+    <li><a href="#pthreadattrgetschedpolicy">2.9.4 pthread_attr_getschedpolicy</a></li>
+    <li><a href="#pthreadattrsetschedparam">2.9.5 pthread_attr_setschedparam</a></li>
+    <li><a href="#pthreadattrgetschedparam">2.9.6 pthread_attr_getschedparam</a></li>
+    <li><a href="#pthreadattrsetinheritsched">2.9.7 pthread_attr_setinheritsched</a></li>
+    <li><a href="#pthreadattrgetinheritsched">2.9.8 pthread_attr_getinheritsched</a></li>
+    <li><a href="#pthreadattrsetstacksize">2.9.9 pthread_attr_setstacksize</a></li>
+    <li><a href="#pthreadattrgetstacksize">2.9.10 pthread_attr_getstacksize</a></li>
+    <li><a href="#pthreadcreate">2.9.11 pthread_create</a></li>
+    <li><a href="#pthreaddetach">2.9.12 pthread_detach</a></li>
+    <li><a href="#pthreadexit">2.9.13 pthread_exit</a></li>
+    <li><a href="#pthreadcancel">2.9.14 pthread_cancel</a></li>
+    <li><a href="#pthreadsetcancelstate">2.9.15 pthread_setcancelstate</a></li>
+    <li><a href="#pthreadtestcancelstate">2.9.16 pthread_testcancelstate</a></li>
+    <li><a href="#pthreadjoin">2.9.17 pthread_join</a></li>
+    <li><a href="#pthreadyield">2.9.18 pthread_yield</a></li>
+    <li><a href="#pthreadself">2.9.19 pthread_self</a></li>
+    <li><a href="#pthreadgetschedparam">2.9.20 pthread_getschedparam</a></li>
+    <li><a href="#pthreadsetschedparam">2.9.21 pthread_setschedparam</a></li>
+  </ul>
+  <p>
+    <b>Thread Specific Data</b>.
+    These interfaces can be used to create pthread <i>keys</i> and then to access thread-specific data using these keys.
+    Each <i>task group</i> has its own set of pthread keys.
+    NOTES: (1) pthread keys create in one <i>task group</i> are not accessible in other task groups.
+    (2) The main task thread does not had thread-specific data.
+  </p>
+  <ul>
+    <li><a href="#pthreadkeycreate">2.9.22 pthread_key_create</a></li>
+    <li><a href="#pthreadsetspecific">2.9.23 pthread_setspecific</a></li>
+    <li><a href="#pthreadgetspecific">2.9.24 pthread_getspecific</a></li>
+    <li><a href="#pthreadkeydelete">2.9.25 pthread_key_delete</a></li>
+  </ul>
+  <p>
+    <b>pthread Mutexes</b>.
+  </p>
+  <ul>
+    <li><a href="#pthreadmutexattrinit">2.9.26 pthread_mutexattr_init</a></li>
+    <li><a href="#pthreadmutexattrdestroy">2.9.27 pthread_mutexattr_destroy</a></li>
+    <li><a href="#pthreadmutexattrgetpshared">2.9.28 pthread_mutexattr_getpshared</a></li>
+    <li><a href="#pthreadmutexattrsetpshared">2.9.29 pthread_mutexattr_setpshared</a></li>
+    <li><a href="#pthreadmutexattrgettype">2.9.30 pthread_mutexattr_gettype</a></li>
+    <li><a href="#pthreadmutexattrsettype">2.9.31 pthread_mutexattr_settype</a></li>  
+    <li><a href="#pthreadmutexinit">2.9.32 pthread_mutex_init</a></li>
+    <li><a href="#pthreadmutexdestrory">2.9.33 pthread_mutex_destroy</a></li>
+    <li><a href="#pthreadmutexlock">2.9.34 pthread_mutex_lock</a></li>
+    <li><a href="#pthreadmutextrylock">2.9.35 pthread_mutex_trylock</a></li>
+    <li><a href="#pthreadmutexunlock">2.9.36 pthread_mutex_unlock</a></li>
+  </ul>
+  <p>
+    <b>Condition Variables</b>.
+  </p>
+  <ul>
+    <li><a href="#pthreadconaddrinit">2.9.37 pthread_condattr_init</a></li>
+    <li><a href="#pthreadocndattrdestroy">2.9.38 pthread_condattr_destroy</a></li>
+    <li><a href="#pthreadcondinit">2.9.39 pthread_cond_init</a></li>
+    <li><a href="#pthreadconddestroy">2.9.40 pthread_cond_destroy</a></li>
+    <li><a href="#pthreadcondbroadcast">2.9.41 pthread_cond_broadcast</a></li>
+    <li><a href="#pthreadcondsignal">2.9.42 pthread_cond_signal</a></li>
+    <li><a href="#pthreadcondwait">2.9.43 pthread_cond_wait</a></li>
+    <li><a href="#pthreadcondtimedwait">2.9.44 pthread_cond_timedwait</a></li>
+  </ul>
+  <p>
+    <b>Barriers</b>.
+  </p>
+  <ul>
+    <li><a href="#pthreadbarrierattrinit">2.9.45 pthread_barrierattr_init</a></li>
+    <li><a href="#pthreadbarrierattrdestroy">2.9.46 pthread_barrierattr_destroy</a></li>
+    <li><a href="#pthreadbarrierattrsetpshared">2.9.47 pthread_barrierattr_setpshared</a></li>
+    <li><a href="#pthreadbarrierattrgetpshared">2.9.48 pthread_barrierattr_getpshared</a></li>
+    <li><a href="#pthreadbarrierinit">2.9.49 pthread_barrier_init</a></li>
+    <li><a href="#pthreadbarrierdestroy">2.9.50 pthread_barrier_destroy</a></li>
+    <li><a href="#pthreadbarrierwait">2.9.51 pthread_barrier_wait</a></li>
+  </ul>
+  <p>
+    <b>Initialization</b>.
+  </p>
+  <ul>
+    <li><a href="#pthreadonce">2.9.52 pthread_once</a></li>
+  </ul>
+  <p>
+    <b>Signals</b>.
+  </p>
+  <ul>
+    <li><a href="#pthreadkill">2.9.53 pthread_kill</a></li>
+    <li><a href="#pthreadsigmask">2.9.54 pthread_sigmask</a></li>
+  </ul>
 </ul>
 <p>
   No support for the following pthread interfaces is provided by NuttX:
