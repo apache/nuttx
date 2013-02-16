@@ -61,15 +61,16 @@
 #define BOARD_OSCCLK_FREQUENCY      BOARD_XTAL_FREQUENCY  /* Main oscillator frequency */
 #define BOARD_RTCCLK_FREQUENCY      (32768)               /* RTC oscillator frequency */
 #define BOARD_INTRCOSC_FREQUENCY    (4000000)             /* Internal RC oscillator frequency */
+#define BOARD_WDTOSC_FREQUENCY      (500000)              /* WDT oscillator frequency */
 
 /* This is the clock setup we configure for:
  *
  *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
- *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
- *   CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
+ *   PLL0CLK = (10 * SYSCLK) / 1 = 120MHz -> PLL0 multipler=10, pre-divider=1
+ *   CCLCK = 120MHz  -> CCLK divider = 1
  */
 
-#define LPC17_CCLK                 80000000 /* 80Mhz */
+#define LPC17_CCLK                 120000000 /* 120Mhz */
 
 /* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
  * of the main oscillator.
@@ -89,44 +90,50 @@
 /* PLL0.  PLL0 is used to generate the CPU clock divider input (PLLCLK).
  *
  *  Source clock:               Main oscillator
- *  PLL0 Multiplier value (M):  20 
- *  PLL0 Pre-divider value (N): 1
+ *  PLL0 Multiplier value (M):  10
+ *  PLL0 Pre-divider value (P): 1
  *
- *  PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz
+ *  PLL0CLK = (M * SYSCLK) = 120MHz
  */
 
 #undef CONFIG_LPC17_PLL0
 #define CONFIG_LPC17_PLL0          1
 #define BOARD_CLKSRCSEL_VALUE      SYSCON_CLKSRCSEL_MAIN
 
-#define BOARD_PLL0CFG_MSEL         20
+#define BOARD_PLL0CFG_MSEL         10
 #define BOARD_PLL0CFG_PSEL         1
 #define BOARD_PLL0CFG_VALUE \
   (((BOARD_PLL0CFG_MSEL-1) << SYSCON_PLLCFG_MSEL_SHIFT) | \
    ((BOARD_PLL0CFG_PSEL-1) << SYSCON_PLLCFG_PSEL_SHIFT))
 
-/* PLL1 -- Not used. */
+#ifdef (CONFIG_LPC17_USBHOST || CONFIG_LPC17_USBDEV)
+/* PLL1 : PLL1 is used to generate clock for the USB */
 
-#undef CONFIG_LPC17_PLL1
-#define BOARD_PLL1CFG_MSEL         36
-#define BOARD_PLL1CFG_NSEL         1
-#define BOARD_PLL1CFG_VALUE \
-  (((BOARD_PLL1CFG_MSEL-1) << SYSCON_PLL1CFG_MSEL_SHIFT) | \
-   ((BOARD_PLL1CFG_NSEL-1) << SYSCON_PLL1CFG_NSEL_SHIFT))
+ #undef CONFIG_LPC17_PLL1
+ #define CONFIG_LPC17_PLL1          1
+ #define BOARD_PLL1CFG_MSEL         4
+ #define BOARD_PLL1CFG_PSEL         2
+ #define BOARD_PLL1CFG_VALUE \
+  (((BOARD_PLL1CFG_MSEL-1) << SYSCON_PLLCFG_MSEL_SHIFT) | \
+   ((BOARD_PLL1CFG_NSEL-1) << SYSCON_PLLCFG_PSEL_SHIFT))
 
-/* USB divider.  This divider is used when PLL1 is not enabled to get the
- * USB clock from PLL0:
+ /* USB divider.  The output of the PLL is used as the USB clock
  *
- *  USBCLK = PLL0CLK / 10 = 48MHz
+ *  USBCLK = PLL1CLK = (SYSCLK * 4)  = 48MHz
  */
 
-#define BOARD_USBCLKCFG_VALUE      SYSCON_USBCLKCFG_DIV10
+#define BOARD_USBCLKCFG_VALUE      (SYSCON_USBCLKSEL_USBDIV_DIV1 | \
+                                    SYSCON_USBCLKSEL_USBSEL_PLL1)
+#endif
 
 /* FLASH Configuration */
 
 #undef  CONFIG_LP17_FLASH
 #define CONFIG_LP17_FLASH          1
-#define BOARD_FLASHCFG_VALUE       0x0000303a
+
+/* Flash access use 6 CPU clocks - Safe for any allowed conditions */
+
+#define BOARD_FLASHCFG_VALUE       SYSCON_FLASHCFG_TIM_5
 
 /* Ethernet configuration */
 
