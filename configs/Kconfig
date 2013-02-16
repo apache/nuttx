@@ -318,6 +318,15 @@ config ARCH_BOARD_MIRTOO
 		This is the port to the DTX1-4000L "Mirtoo" module.  This module uses MicroChip
 		PIC32MX250F128D.  See http://www.dimitech.com/ for further information.
 
+config ARCH_BOARD_NUTINY_NUC120
+	bool "Nuvoton NuTiny NUC120"
+	depends on ARCH_CHIP_NUC120LE3AN
+	select ARCH_HAVE_LEDS
+	---help---
+		This is the port to the Nuvoton NuTiny EVB 120 board.  This board uses a 
+		Nuvoton NUC120 chip, specifically the NUC120LE3AN.  See http://www.nuvoton.com/
+		for further information.
+
 config ARCH_BOARD_OLIMEXLPC2378
 	bool "Olimex-lpc2378 board"
 	depends on ARCH_CHIP_LPC2378
@@ -695,6 +704,7 @@ config ARCH_BOARD
 	default "ne64badge"           if ARCH_BOARD_NE64BADGE
 	default "ntosd-dm320"         if ARCH_BOARD_NTOSD_DM320
 	default "nucleus2g"           if ARCH_BOARD_NUCLEUS2G
+	default "nutiny-nuc120"       if ARCH_BOARD_NUTINY_NUC120
 	default "olimex-lpc1766stk"   if ARCH_BOARD_LPC1766STK
 	default "olimex-lpc2378"      if ARCH_BOARD_OLIMEXLPC2378
 	default "olimex-stm32-p107"   if ARCH_BOARD_OLIMEX_STM32P107
@@ -875,6 +885,9 @@ source "configs/ntosd-dm320/Kconfig"
 endif
 if ARCH_BOARD_NUCLEUS2G
 source "configs/nucleus2g/Kconfig"
+endif
+if ARCH_BOARD_NUTINY_NUC120
+source "configs/nutiny-nuc120/Kconfig"
 endif
 if ARCH_BOARD_LPC1766STK
 source "configs/olimex-lpc1766stk/Kconfig"
