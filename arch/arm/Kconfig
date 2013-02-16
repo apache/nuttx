@@ -96,8 +96,8 @@ config ARCH_CHIP_LPC43XX
 	---help---
 		NPX LPC43XX architectures (ARM Cortex-M4).
 
-config ARCH_CHIP_NUC120
-	bool "Nuvoton NUC120"
+config ARCH_CHIP_NUC1XX
+	bool "Nuvoton NUC100/120"
 	select ARCH_CORTEXM0
 	select ARCH_HAVE_CMNVECTOR
 	---help---
@@ -167,7 +167,7 @@ config ARCH_CHIP
 	default "lpc2378"	if ARCH_CHIP_LPC2378
 	default "lpc31xx"	if ARCH_CHIP_LPC31XX
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
-	default "nuc1xx"	if ARCH_CHIP_NUC120
+	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "sam3u"		if ARCH_CHIP_SAM3U
 	default "stm32"		if ARCH_CHIP_STM32
 	default "str71x"	if ARCH_CHIP_STR71X
@@ -318,7 +318,7 @@ endif
 if ARCH_CHIP_LPC43XX
 source arch/arm/src/lpc43xx/Kconfig
 endif
-if ARCH_CHIP_NUC120
+if ARCH_CHIP_NUC1XX
 source arch/arm/src/nuc1xx/Kconfig
 endif
 if ARCH_CHIP_SAM3U

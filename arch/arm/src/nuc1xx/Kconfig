@@ -4,3 +4,140 @@
 #
 
 comment "NUC100/120 Configuration Options"
+
+choice
+	prompt "Nuvoton NUC1xx Chip Selection"
+	default ARCH_CHIP_NUC120LE3AN
+	depends on ARCH_CHIP_NUC1XX
+
+config ARCH_CHIP_NUC100LC1BN
+	bool "NUC100LC1BN
+	---help---
+		Nuvoton NUC100 low density chip: Flash 32K SRAM 4K, LQFP48 package
+
+config ARCH_CHIP_NUC100LD1BN
+	bool "NUC100LD1BN
+	---help---
+		Nuvoton NUC100 low density chip: Flash 64K SRAM 4K, LQFP48 package
+
+config ARCH_CHIP_NUC100LD2BN
+	bool "NUC100LD2BN
+	---help---
+		Nuvoton NUC100 low density chip: Flash 64K SRAM 8K, LQFP48 package
+
+config ARCH_CHIP_NUC100RC1BN
+	bool "NUC100RC1BN
+	---help---
+		Nuvoton NUC100 low density chip: Flash 32K SRAM 4K, LQFP64 package
+
+config ARCH_CHIP_NUC100RD1BN
+	bool "NUC100RD1BN
+	---help---
+		Nuvoton NUC100 low density chip: Flash 64K SRAM 4K, LQFP64 package
+
+config ARCH_CHIP_NUC100RD2BN
+	bool "NUC100RD2BN
+	---help---
+		Nuvoton NUC100 low density chip: Flash 64K SRAM 8K, LQFP64 package
+
+config ARCH_CHIP_NUC100LD3AN
+	bool "NUC100LD3AN
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 64K SRAM 16K, LQFP48 package
+
+config ARCH_CHIP_NUC100LE3AN
+	bool "NUC100LE3AN
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 128K SRAM 16K, LQFP48 package
+
+config ARCH_CHIP_NUC100RD3AN
+	bool "NUC100RD3AN
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 64K SRAM 16K, LQFP64 package
+
+config ARCH_CHIP_NUC100RE3AN
+	bool "NUC100RE3AN
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 128K SRAM 16K, LQFP64 package
+
+config ARCH_CHIP_NUC100VD2AN
+	bool "NUC100VD2AN
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 64K SRAM 8K, LQFP100 package
+
+config ARCH_CHIP_NUC100VD3AN
+	bool "NUC100VD3AN
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 64K SRAM 16K, LQFP100 package
+
+config ARCH_CHIP_NUC100VE3AN
+	bool "NUC100VE3AN
+	---help---
+		Nuvoton NUC100 medium density chip: Flash 128K SRAM 8K, LQFP100 package
+
+config ARCH_CHIP_NUC120LC1BN
+	bool "NUC120LC1BN
+	---help---
+		Nuvoton NUC120 low density chip: Flash 32K SRAM 4K, LQFP48 package
+
+config ARCH_CHIP_NUC120LD1BN
+	bool "NUC120LD1BN
+	---help---
+		Nuvoton NUC120 low density chip: Flash 64K SRAM 4K, LQFP48 package
+
+config ARCH_CHIP_NUC120LD2BN
+	bool "NUC120LD2BN
+	---help---
+		Nuvoton NUC120 low density chip: Flash 64K SRAM 8K, LQFP48 package
+
+config ARCH_CHIP_NUC120RC1BN
+	bool "NUC120RC1BN
+	---help---
+		Nuvoton NUC120 low density chip: Flash 32K SRAM 4K, LQFP64 package
+
+config ARCH_CHIP_NUC120RD1BN
+	bool "NUC120RD1BN
+	---help---
+		Nuvoton NUC120 low density chip: Flash 64K SRAM 4K, LQFP64 package
+
+config ARCH_CHIP_NUC120RD2BN
+	bool "NUC120RD2BN
+	---help---
+		Nuvoton NUC120 low density chip: Flash 64K SRAM 8K, LQFP64 package
+
+config ARCH_CHIP_NUC120LD3AN
+	bool "NUC120LD3AN
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 64K SRAM 16K, LQFP48 package
+
+config ARCH_CHIP_NUC120LE3AN
+	bool "NUC120LE3AN
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 128K SRAM 16K, LQFP48 package
+
+config ARCH_CHIP_NUC120RD3AN
+	bool "NUC120RD3AN
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 64K SRAM 16K, LQFP64 package
+
+config ARCH_CHIP_NUC120RE3AN
+	bool "NUC120RE3AN
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 128K SRAM 16K, LQFP64 package
+
+config ARCH_CHIP_NUC120VD2AN
+	bool "NUC120VD2AN
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 64K SRAM 8K, LQFP100 package
+
+config ARCH_CHIP_NUC120VD3AN
+	bool "NUC120VD3AN
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 64K SRAM 16K, LQFP100 package
+
+config ARCH_CHIP_NUC120VE3AN
+	bool "NUC120VE3AN
+	---help---
+		Nuvoton NUC120 medium density chip: Flash 128K SRAM 16K, LQFP100 package
+
+endchoice
