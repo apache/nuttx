@@ -47,9 +47,11 @@
 /* Include ARM architecture-specific syscall macros */
 
 #if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
-# include <arch/armv7-m/syscall.h>
+#  include <arch/armv7-m/syscall.h>
+#elif defined(CONFIG_ARCH_CORTEXM0)
+#  include <arch/armv6-m/syscall.h>
 #else
-# include <arch/arm/syscall.h>
+#  include <arch/arm/syscall.h>
 #endif
 
 /****************************************************************************
