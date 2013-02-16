@@ -4196,3 +4196,7 @@
 	  the CDC/ACM driver working the certain STM32 F4 hardware (but not others).
 	  These changes appear to prevent certain race conditions that may or may
 	  not cause USB problems.  From Petteri Aimonen.
+	* arch/arm/include/armv6-m and arch/arm/src/armv6-m: First cut at support
+	  for the Cortex-M0
+	* configs/nutiny-nuc120, arch/arm/include/nu1xx, and arch/arm/src/nuc1xx:
+	  Fragmentary support for Nuvoton NuTiny NUC120.
