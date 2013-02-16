@@ -57,9 +57,11 @@
  */
 
 #if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
-# include <arch/armv7-m/irq.h>
+#  include <arch/armv7-m/irq.h>
+#elif defined(CONFIG_ARCH_CORTEXM0)
+#  include <arch/armv6-m/irq.h>
 #else
-# include <arch/arm/irq.h>
+#  include <arch/arm/irq.h>
 #endif
 
 /****************************************************************************

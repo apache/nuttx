@@ -220,13 +220,13 @@
                                                       /* Bits 0-11:  Reserved */
 #define SYSCON_FLASHCFG_TIM_SHIFT        (12)         /* Bits 12-15: FLASHTIM Flash access time */
 #define SYSCON_FLASHCFG_TIM_MASK         (15 << SYSCON_FLASHCFG_TIM_SHIFT)
-#  define SYSCON_FLASHCFG_TIM_1          (0 << SYSCON_FLASHCFG_TIM_SHIFT) /* 1 CPU clock <= 20 MHz CPU clock */
-#  define SYSCON_FLASHCFG_TIM_2          (1 << SYSCON_FLASHCFG_TIM_SHIFT) /* 2 CPU clock <= 40 MHz CPU clock */
-#  define SYSCON_FLASHCFG_TIM_3          (2 << SYSCON_FLASHCFG_TIM_SHIFT) /* 3 CPU clock <= 60 MHz CPU clock */
-#  define SYSCON_FLASHCFG_TIM_4          (3 << SYSCON_FLASHCFG_TIM_SHIFT) /* 4 CPU clock <= 80 MHz CPU clock */
-#  define SYSCON_FLASHCFG_TIM_5          (4 << SYSCON_FLASHCFG_TIM_SHIFT) /* 5 CPU clock <= 100 MHz CPU clock
+#  define SYSCON_FLASHCFG_TIM_0          (0)                              /* 1 CPU clock <= 20 MHz CPU clock */
+#  define SYSCON_FLASHCFG_TIM_1          (1 << SYSCON_FLASHCFG_TIM_SHIFT) /* 2 CPU clock <= 40 MHz CPU clock */
+#  define SYSCON_FLASHCFG_TIM_2          (2 << SYSCON_FLASHCFG_TIM_SHIFT) /* 3 CPU clock <= 60 MHz CPU clock */
+#  define SYSCON_FLASHCFG_TIM_3          (3 << SYSCON_FLASHCFG_TIM_SHIFT) /* 4 CPU clock <= 80 MHz CPU clock */
+#  define SYSCON_FLASHCFG_TIM_4          (4 << SYSCON_FLASHCFG_TIM_SHIFT) /* 5 CPU clock <= 100 MHz CPU clock
                                                                            * (Up to 120 Mhz for LPC1788x) */
-#  define SYSCON_FLASHCFG_TIM_6          (5 << SYSCON_FLASHCFG_TIM_SHIFT) /* "safe" setting for any conditions */
+#  define SYSCON_FLASHCFG_TIM_5          (5 << SYSCON_FLASHCFG_TIM_SHIFT) /* "safe" setting for any conditions */
                                                    /* Bits 16-31:  Reserved */
 /* Memory Mapping Control register (MEMMAP - 0x400F C040) */
 
@@ -289,16 +289,16 @@
                                                    /* Bits 9-31:  Reserved */
 /* USB Clock Configuration register */
 
-#define SYSCON_USBCLKCFG_USBDIV_SHIFT    (0)       /* Bits 0-4: PLL0/1 divide value USB clock */
-#define SYSCON_USBCLKCFG_USBDIV_MASK     (0x1f << SYSCON_USBCLKCFG_USBDIV_SHIFT)
-#  define SYSCON_USBCLKCFG_USBDIV_DIV1   (1 << SYSCON_USBCLKCFG_USBDIV_SHIFT) /* PLL0/1 output must be 48MHz */
-#  define SYSCON_USBCLKCFG_USBDIV_DIV2   (2 << SYSCON_USBCLKCFG_USBDIV_SHIFT) /* PLL0/1 output must be 96MHz */
-#  define SYSCON_USBCLKCFG_USBDIV_DIV3   (3 << SYSCON_USBCLKCFG_USBDIV_SHIFT) /* PLL0/1 output must be 144MHz */
+#define SYSCON_USBCLKSEL_USBDIV_SHIFT    (0)       /* Bits 0-4: PLL0/1 divide value USB clock */
+#define SYSCON_USBCLKSEL_USBDIV_MASK     (0x1f << SYSCON_USBCLKSEL_USBDIV_SHIFT)
+#  define SYSCON_USBCLKSEL_USBDIV_DIV1   (1 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 48MHz */
+#  define SYSCON_USBCLKSEL_USBDIV_DIV2   (2 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 96MHz */
+#  define SYSCON_USBCLKSEL_USBDIV_DIV3   (3 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 144MHz */
                                                    /* Bits 5-7:  Reserved */
-#define SYSCON_USBCLKCFG_USBSEL_SHIFT    (8)       /* Bits 8-9: Input clock to USBDIV */
-#define SYSCON_USBCLKCFG_USBSEL_MASK     (3 << SYSCON_USBCLKCFG_USBSEL_SHIFT)
-#define SYSCON_USBCLKCFG_USBSEL_MAINPLL  (1 << SYSCON_USBCLKCFG_USBSEL_SHIFT)  /* 01: PLL0 is used as input clock to USBDIV */
-#define SYSCON_USBCLKCFG_USBSEL_ALTPLL   (2 << SYSCON_USBCLKCFG_USBSEL_SHIFT)  /* 10: PLL1 is used as input clock to USBDIV */
+#define SYSCON_USBCLKSEL_USBSEL_SHIFT    (8)       /* Bits 8-9: Input clock to USBDIV */
+#define SYSCON_USBCLKSEL_USBSEL_MASK     (3 << SYSCON_USBCLKSEL_USBSEL_SHIFT)
+#define SYSCON_USBCLKSEL_USBSEL_PLL0     (1 << SYSCON_USBCLKSEL_USBSEL_SHIFT)  /* 01: PLL0 is used as input clock to USBDIV */
+#define SYSCON_USBCLKSEL_USBSEL_PLL1     (2 << SYSCON_USBCLKSEL_USBSEL_SHIFT)  /* 10: PLL1 is used as input clock to USBDIV */
                                                                                /* 11: unused */
                                                    /* Bits 10-31:  Reserved */
 /* CAN0/1 Sleep Clear Register */
@@ -383,7 +383,7 @@
 #define SYSCON_PCONP_PCCAN1              (1 << 13) /* Bit 13: CAN Controller 1 power/clock control */
 #define SYSCON_PCONP_PCCAN2              (1 << 14) /* Bit 14: CAN Controller 2 power/clock control */
 #define SYSCON_PCONP_PCGPIO              (1 << 15) /* Bit 15: GPIOs power/clock enable */
-#define SYSCON_PCONP_PCRIT               (1 << 16) /* Bit 16: Repetitive Interrupt Timer power/clock control */
+#define SYSCON_PCONP_PCSPIFI             (1 << 16) /* Bit 16: SPI Flash Interface power/clock control */
 #define SYSCON_PCONP_PCMCPWM             (1 << 17) /* Bit 17: Motor Control PWM */
 #define SYSCON_PCONP_PCQEI               (1 << 18) /* Bit 18: Quadrature Encoder power/clock control */
 #define SYSCON_PCONP_PCI2C1              (1 << 19) /* Bit 19: I2C1 power/clock control */

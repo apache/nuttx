@@ -89,7 +89,7 @@ typedef unsigned int       _uintptr_t;
  */
 
 #ifdef __thumb2__
-#ifdef CONFIG_ARMV7M_USEBASEPRI
+#if defined(CONFIG_ARMV7M_USEBASEPRI) || defined(CONFIG_ARCH_ARMV6M)
 typedef unsigned char      irqstate_t;
 #else
 typedef unsigned short     irqstate_t;
