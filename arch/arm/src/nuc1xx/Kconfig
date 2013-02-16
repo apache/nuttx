@@ -1,0 +1,6 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+comment "NUC100/120 Configuration Options"

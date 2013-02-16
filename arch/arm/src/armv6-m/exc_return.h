@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/armv7-m/exc_return.h
+ * arch/arm/src/armv6-m/exc_return.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_M_EXC_RETURN_H
-#define __ARCH_ARM_SRC_ARMV7_M_EXC_RETURN_H
+#ifndef __ARCH_ARM_SRC_ARMV6_M_EXC_RETURN_H
+#define __ARCH_ARM_SRC_ARMV6_M_EXC_RETURN_H
 
 /************************************************************************************
  * Included Files
@@ -50,10 +50,10 @@
  * exception mechanism relies on this value to detect when the processor has
  * completed an exception handler.
  *
- * Bits [31:28] of an EXC_RETURN value are always 1.  When the processor loads a 
- * value matching this pattern to the PC it detects that the operation is a not 
- * a normal branch operation and instead, that the exception is complete. 
- * Therefore, it starts the exception return sequence. 
+ * Bits [31:28] of an EXC_RETURN value are always 1.  When the processor loads a
+ * value matching this pattern to the PC it detects that the operation is a not
+ * a normal branch operation and instead, that the exception is complete.
+ * Therefore, it starts the exception return sequence.
  *
  * Bits[4:0] of the EXC_RETURN value indicate the required return stack and eventual
  * processor mode.  The remaining bits of the EXC_RETURN value should be set to 1.
@@ -64,24 +64,27 @@
 #define EXC_RETURN_BASE          0xffffffe1
 
 /* EXC_RETURN_PROCESS_STACK: The exception saved (and will restore) the hardware
- * context using the process stack pointer (if not set, the context was saved 
+ * context using the process stack pointer (if not set, the context was saved
  * using the main stack pointer)
  */
- 
-#define EXC_RETURN_PROCESS_STACK (1 << 2)
+
+#define EXC_RETURN_PROCESS_BITNO (2)
+#define EXC_RETURN_PROCESS_STACK (1 << EXC_RETURN_PROCESS_BITNO)
 
 /* EXC_RETURN_THREAD_MODE: The exception will return to thread mode (if not set,
  * return stays in handler mode)
  */
- 
-#define EXC_RETURN_THREAD_MODE   (1 << 3)
 
-/* EXC_RETURN_STD_CONTEXT: The state saved on the stack does not include the 
+#define EXC_RETURN_THREAD_BITNO  (3)
+#define EXC_RETURN_THREAD_MODE   (1 << EXC_RETURN_THREAD_BITNO)
+
+/* EXC_RETURN_STD_CONTEXT: The state saved on the stack does not include the
  * volatile FP registers and FPSCR.  If this bit is clear, the state does include
  * these registers.
  */
- 
-#define EXC_RETURN_STD_CONTEXT   (1 << 4)
+
+#define EXC_RETURN_STD_BITNO     (4)
+#define EXC_RETURN_STD_CONTEXT   (1 << EXC_RETURN_STD_BITNO)
 
 /* EXC_RETURN_HANDLER: Return to handler mode. Exception return gets state from
  * the main stack. Execution uses MSP after return.
@@ -113,5 +116,5 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_M_EXC_RETURN_H */
+#endif  /* __ARCH_ARM_SRC_ARMV6_M_EXC_RETURN_H */
 

@@ -263,14 +263,15 @@ extern void up_systemreset(void) noreturn_function;
 extern void up_irqinitialize(void);
 extern void up_maskack_irq(int irq);
 
-#if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM3) || \
+    defined(CONFIG_ARCH_CORTEXM4)
 
 extern uint32_t *up_doirq(int irq, uint32_t *regs);
 extern int  up_svcall(int irq, FAR void *context);
 extern int  up_hardfault(int irq, FAR void *context);
 extern int  up_memfault(int irq, FAR void *context);
 
-#else /* CONFIG_ARCH_CORTEXM3 || CONFIG_ARCH_CORTEXM4 */
+#else /* CONFIG_ARCH_CORTEXM0 || CONFIG_ARCH_CORTEXM3 || CONFIG_ARCH_CORTEXM4 */
 
 extern void up_doirq(int irq, uint32_t *regs);
 #ifdef CONFIG_PAGING
