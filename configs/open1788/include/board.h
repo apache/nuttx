@@ -57,11 +57,11 @@
  * because the including C file may not have that file in its include path.
  */
 
-#define BOARD_XTAL_FREQUENCY        (12000000)            /* XTAL oscillator frequency */
-#define BOARD_OSCCLK_FREQUENCY      BOARD_XTAL_FREQUENCY  /* Main oscillator frequency */
-#define BOARD_RTCCLK_FREQUENCY      (32768)               /* RTC oscillator frequency */
-#define BOARD_INTRCOSC_FREQUENCY    (4000000)             /* Internal RC oscillator frequency */
-#define BOARD_WDTOSC_FREQUENCY      (500000)              /* WDT oscillator frequency */
+#define BOARD_XTAL_FREQUENCY       (12000000)            /* XTAL oscillator frequency */
+#define BOARD_OSCCLK_FREQUENCY     BOARD_XTAL_FREQUENCY  /* Main oscillator frequency */
+#define BOARD_RTCCLK_FREQUENCY     (32768)               /* RTC oscillator frequency */
+#define BOARD_INTRCOSC_FREQUENCY   (4000000)             /* Internal RC oscillator frequency */
+#define BOARD_WDTOSC_FREQUENCY     (500000)              /* WDT oscillator frequency */
 
 /* This is the clock setup we configure for:
  *
@@ -71,6 +71,7 @@
  */
 
 #define LPC17_CCLK                 120000000 /* 120Mhz */
+#define LPC17_PCLKDIV              2         /* Peripheral clock = LPC17_CCLK/2 */
 
 /* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
  * of the main oscillator.
@@ -87,7 +88,7 @@
 #define BOARD_CCLKCFG_DIVIDER      6
 #define BOARD_CCLKCFG_VALUE        ((BOARD_CCLKCFG_DIVIDER-1) << SYSCON_CCLKCFG_CCLKDIV_SHIFT)
 
-/* PLL0.  PLL0 is used to generate the CPU clock divider input (PLLCLK).
+/* PLL0.  PLL0 is used to generate the CPU clock (PLLCLK).
  *
  *  Source clock:               Main oscillator
  *  PLL0 Multiplier value (M):  10
@@ -106,16 +107,17 @@
   (((BOARD_PLL0CFG_MSEL-1) << SYSCON_PLLCFG_MSEL_SHIFT) | \
    ((BOARD_PLL0CFG_PSEL-1) << SYSCON_PLLCFG_PSEL_SHIFT))
 
-#ifdef (CONFIG_LPC17_USBHOST || CONFIG_LPC17_USBDEV)
 /* PLL1 : PLL1 is used to generate clock for the USB */
 
  #undef CONFIG_LPC17_PLL1
- #define CONFIG_LPC17_PLL1          1
- #define BOARD_PLL1CFG_MSEL         4
- #define BOARD_PLL1CFG_PSEL         2
+ #define CONFIG_LPC17_PLL1         1
+ #define BOARD_PLL1CFG_MSEL        4
+ #define BOARD_PLL1CFG_PSEL        2
  #define BOARD_PLL1CFG_VALUE \
   (((BOARD_PLL1CFG_MSEL-1) << SYSCON_PLLCFG_MSEL_SHIFT) | \
-   ((BOARD_PLL1CFG_NSEL-1) << SYSCON_PLLCFG_PSEL_SHIFT))
+   ((BOARD_PLL1CFG_PSEL-1) << SYSCON_PLLCFG_PSEL_SHIFT))
+
+#if defined(CONFIG_LPC17_USBHOST) || (CONFIG_LPC17_USBDEV)
 
  /* USB divider.  The output of the PLL is used as the USB clock
  *
@@ -128,8 +130,8 @@
 
 /* FLASH Configuration */
 
-#undef  CONFIG_LP17_FLASH
-#define CONFIG_LP17_FLASH          1
+#undef  CONFIG_LPC17_FLASH
+#define CONFIG_LPC17_FLASH         1
 
 /* Flash access use 6 CPU clocks - Safe for any allowed conditions */
 
@@ -137,8 +139,7 @@
 
 /* Ethernet configuration */
 
-//#define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV44
-#define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV20
+#define ETH_MCFG_CLKSEL_DIV        ETH_MCFG_CLKSEL_DIV20
 
 /* Set EMC delay values:
  *
@@ -159,15 +160,15 @@
  */
 
 #if defined(CONFIG_LPC17_EMC_NAND) || defined(CONFIG_LPC17_EMC_SDRAM)
-#  define BOARD_CMDDLY     17
-#  define BOARD_FBCLKDLY   17
-#  define BOARD_CLKOUT0DLY 1
-#  define BOARD_CLKOUT1DLY 1
+#  define BOARD_CMDDLY             17
+#  define BOARD_FBCLKDLY           17
+#  define BOARD_CLKOUT0DLY         1
+#  define BOARD_CLKOUT1DLY         1
 #else
-#  define BOARD_CMDDLY     1
-#  define BOARD_FBCLKDLY   1
-#  define BOARD_CLKOUT0DLY 1
-#  define BOARD_CLKOUT1DLY 1
+#  define BOARD_CMDDLY             1
+#  define BOARD_FBCLKDLY           1
+#  define BOARD_CLKOUT0DLY         1
+#  define BOARD_CLKOUT1DLY         1
 #endif
 
 /* LED definitions ******************************************************************/
@@ -184,18 +185,18 @@
 
 /* LED index values for use with lpc17_setled() */
 
-#define BOARD_LED1                0
-#define BOARD_LED2                1
-#define BOARD_LED3                2
-#define BOARD_LED4                3
-#define BOARD_NLEDS               4
+#define BOARD_LED1                 0
+#define BOARD_LED2                 1
+#define BOARD_LED3                 2
+#define BOARD_LED4                 3
+#define BOARD_NLEDS                4
 
 /* LED bits for use with lpc17_setleds() */
 
-#define BOARD_LED1_BIT            (1 << BOARD_LED1)
-#define BOARD_LED2_BIT            (1 << BOARD_LED2)
-#define BOARD_LED3_BIT            (1 << BOARD_LED3)
-#define BOARD_LED4_BIT            (1 << BOARD_LED4)
+#define BOARD_LED1_BIT             (1 << BOARD_LED1)
+#define BOARD_LED2_BIT             (1 << BOARD_LED2)
+#define BOARD_LED3_BIT             (1 << BOARD_LED3)
+#define BOARD_LED4_BIT             (1 << BOARD_LED4)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the four LEDs
  * on the WaveShare Open1788K.  The following definitions describe how NuttX
@@ -255,6 +256,10 @@
 #define BOARD_JOYSTICK_CTR_BIT     (1 << BOARD_JOYSTICK_CTR)
 
 /* Alternate pin selections *********************************************************/
+
+#define GPIO_UART0_TXD             GPIO_UART0_TXD_1
+#define GPIO_UART0_RXD             GPIO_UART0_RXD_1
+
 
 /************************************************************************************
  * Public Types

@@ -119,8 +119,8 @@
 
 /* FLASH Configuration */
 
-#undef  CONFIG_LP17_FLASH
-#define CONFIG_LP17_FLASH          1
+#undef  CONFIG_LPC17_FLASH
+#define CONFIG_LPC17_FLASH         1
 #define BOARD_FLASHCFG_VALUE       0x0000303a
 
 /* Ethernet configuration */

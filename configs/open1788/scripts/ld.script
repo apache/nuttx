@@ -39,8 +39,9 @@
  * 0x10000000 and 32Kb of Peripheral SRAM in two banks, 8Kb at addresses
  * 0x20000000 bank0 first and 8kb at 0x20020000 at bank0 second. And 16Kb
  * at 0x20040000 on bank1.
- * Here we assume that .data and .bss will all fit
- * into the 64Kb CPU SRAM address range.
+ *
+ * Here we assume that .data and .bss will all fit into the 64Kb CPU SRAM
+ * address range.
  */
 
 MEMORY
@@ -55,81 +56,81 @@ OUTPUT_ARCH(arm)
 ENTRY(_stext)
 SECTIONS
 {
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.vectors)
-		*(.text .text.*)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_etext = ABSOLUTE(.);
-	} > FLASH
+    .text : {
+        _stext = ABSOLUTE(.);
+        *(.vectors)
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        _etext = ABSOLUTE(.);
+    } > FLASH
 
-	.init_section : {
-		_sinit = ABSOLUTE(.);
-		*(.init_array .init_array.*)
-		_einit = ABSOLUTE(.);
-	} > FLASH
+    .init_section : {
+        _sinit = ABSOLUTE(.);
+        *(.init_array .init_array.*)
+        _einit = ABSOLUTE(.);
+    } > FLASH
 
-	.ARM.extab : {
-		*(.ARM.extab*)
-	} > FLASH
+    .ARM.extab : {
+        *(.ARM.extab*)
+    } > FLASH
 
-	__exidx_start = ABSOLUTE(.);
-	.ARM.exidx : {
-		*(.ARM.exidx*)
-	} > FLASH
-	__exidx_end = ABSOLUTE(.);
+    __exidx_start = ABSOLUTE(.);
+    .ARM.exidx : {
+        *(.ARM.exidx*)
+    } > FLASH
+    __exidx_end = ABSOLUTE(.);
 
-	_eronly = ABSOLUTE(.);
+    _eronly = ABSOLUTE(.);
 
-	.data : {
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > SRAM AT > FLASH
+    .data : {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        _edata = ABSOLUTE(.);
+    } > SRAM AT > FLASH
 
-	.bss : {
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > SRAM
-    
-    .psram0 (NOLOAD)	:
+    .bss : {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+        _ebss = ABSOLUTE(.);
+    } > SRAM
+/*
+    .psram0 (NOLOAD) :
     {
-		*(.psram0)
-		. = ALIGN(4)
-	} > PSRAM0
+        *(.psram0)
+        . = ALIGN(4)
+    } > PSRAM0
 
 
-    .psram1 (NOLOAD)	:
+    .psram1 (NOLOAD) :
     {
-		*(.psram0)
-		. = ALIGN(4)
-	} > PSRAM1
+        *(.psram1)
+        . = ALIGN(4)
+    } > PSRAM1
+*/
+    /* Stabs debugging sections */
 
-	/* Stabs debugging sections */
-
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }
