@@ -88,13 +88,13 @@
 
 /* Register addresses ***************************************************************/
 
-#define LPC17_IOCON_P_BASE(b)       (LPC17_IOCON_BASE + (unsigned int(b) << 7))
+#define LPC17_IOCON_P_BASE(b)       (LPC17_IOCON_BASE + ((unsigned int)(b) << 7))
 #define LPC17_IOCON_P0_BASE         (LPC17_IOCON_BASE + 0x0000)
 #define LPC17_IOCON_P1_BASE         (LPC17_IOCON_BASE + 0x0080)
 #define LPC17_IOCON_P2_BASE         (LPC17_IOCON_BASE + 0x0100)
 #define LPC17_IOCON_P3_BASE         (LPC17_IOCON_BASE + 0x0180)
 #define LPC17_IOCON_P4_BASE         (LPC17_IOCON_BASE + 0x0200)
-#define LPC17_IOCON_P4_BASE         (LPC17_IOCON_BASE + 0x0280)
+#define LPC17_IOCON_P5_BASE         (LPC17_IOCON_BASE + 0x0280)
 
 #define LPC17_IOCON_P(b,p)          (LPC17_IOCON_P_BASE(b) + LPC17_IOCON_PP_OFFSET(p))
 
@@ -308,9 +308,9 @@
 #define IOCON_FUNC_ALT6             (6)
 #define IOCON_FUNC_ALT7             (7)
 
-#define IOCON_FUNC_SHIFT            (0)   /* Bits 0-2: All types */ 
+#define IOCON_FUNC_SHIFT            (0)   /* Bits 0-2: All types */
 #define IOCON_FUNC_MASK             (7 << IOCON_FUNC_SHIFT)
-#define IOCON_MODE_SHIFT            (3)   /* Bits 3-4: Type D,A,W */ 
+#define IOCON_MODE_SHIFT            (3)   /* Bits 3-4: Type D,A,W */
 #define IOCON_MODE_MASK             (3 << IOCON_MODE_SHIFT )
 #define IOCON_HYS_SHIFT             (5)   /* Bit 5: Type D,W  */
 #define IOCON_HYS_MASK              (1 << IOCON_HYS_SHIFT)

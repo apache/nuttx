@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx/chip/lp176x_pinconfig.h
+ * arch/arm/src/lpc17xx/chip/lpc176x_pinconfig.h
  *
  *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

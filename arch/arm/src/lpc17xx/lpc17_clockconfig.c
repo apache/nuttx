@@ -2,7 +2,7 @@
  * arch/arm/src/lpc17xx/lpc17_clockconfig.c
  * arch/arm/src/chip/lpc17_clockconfig.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -186,8 +186,12 @@ void lpc17_clockconfig(void)
    * when the device driver is initialized.
    */
 
+# if defined(LPC176x)
   putreg32(0, LPC17_SYSCON_PCLKSEL0);
   putreg32(0, LPC17_SYSCON_PCLKSEL1);
+# elif defined(LPC178x)
+  putreg32(0, LPC17_SYSCON_PCLKSEL);
+# endif
 
   /* Disable power to all peripherals (execpt GPIO).  Peripherals must be re-powered
    * one at a time by each device driver when the driver is initialized.
@@ -201,7 +205,7 @@ void lpc17_clockconfig(void)
 
   /* Configure FLASH */
 
-#ifdef CONFIG_LP17_FLASH
+#ifdef CONFIG_LPC17_FLASH
   putreg32(BOARD_FLASHCFG_VALUE, LPC17_SYSCON_FLASHCFG);
 #endif
 }

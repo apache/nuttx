@@ -56,4 +56,4 @@ CMN_CSRCS += up_elf.c
 endif
 
 CHIP_ASRCS  = 
-CHIP_CSRCS  =
+CHIP_CSRCS  = nuc_start.c
