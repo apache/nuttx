@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx/chip/lp17_memorymap.h
+ * arch/arm/src/lpc17xx/chip/lpc17_memorymap.h
  *
  *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

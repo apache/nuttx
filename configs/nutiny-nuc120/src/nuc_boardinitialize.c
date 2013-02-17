@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/nutiny-nuc120/include/board.h
- * include/arch/board/board.h
+ * configs/nutiny-nuc120/src/up_boot.c
+ * arch/arm/src/board/up_boot.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,80 +34,31 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_NUTINY_NUC12_INCLUDE_BOARD_H
-#define __CONFIGS_NUTINY_NUC12_INCLUDE_BOARD_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
 
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
+#include <debug.h>
+
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "nutiny-nuc120.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
-/* Clocking *************************************************************************/
-
-/* LED definitions ******************************************************************/
-/* The NuTiny has a single green LED that can be controlled from sofware.  This LED
- * is connected to PIN17.  It is pulled high so a low value will illuminate the LED.
- */
-
-#define BOARD_NLEDS       1
-
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
- * NuTiny.  The following definitions describe how NuttX controls the LEDs:
- *
- *   SYMBOL                Meaning                 LED state
- *                                                 Initially all LED is OFF
- *   -------------------  -----------------------  ------------- ------------
- *   LED_STARTED          NuttX has been started   LED ON
- *   LED_HEAPALLOCATE     Heap has been allocated  LED ON
- *   LED_IRQSENABLED      Interrupts enabled       LED ON
- *   LED_STACKCREATED     Idle stack created       LED ON
- *   LED_INIRQ            In an interrupt          LED should glow
- *   LED_SIGNAL           In a signal handler      LED might glow
- *   LED_ASSERTION        An assertion failed      LED ON while handling the assertion
- *   LED_PANIC            The system has crashed   LED Blinking at 2Hz
- *   LED_IDLE             NUC1XX is is sleep mode   (Optional, not used)
- */
-
-#define LED_STARTED       0
-#define LED_HEAPALLOCATE  0
-#define LED_IRQSENABLED   0
-#define LED_STACKCREATED  0
-#define LED_INIRQ         0
-#define LED_SIGNAL        0
-#define LED_ASSERTION     0
-#define LED_PANIC         0
-
-/* Button definitions ***************************************************************/
-/* The NuTiny has no buttons */
-
-#define NUM_BUTTONS        0
 
 /************************************************************************************
- * Public Data
+ * Private Functions
  ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 /************************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ************************************************************************************/
+
 /************************************************************************************
  * Name: nuc_boardinitialize
  *
@@ -118,12 +69,34 @@ extern "C"
  *
  ************************************************************************************/
 
-void nuc_boardinitialize(void);
+void nuc_boardinitialize(void)
+{
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+   * nuc_spiinitialize() has been brought into the link.
+   */
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
+#if defined(CONFIG_NUC1XX_SPI1) || defined(CONFIG_NUC1XX_SPI2) || defined(CONFIG_NUC1XX_SPI3)
+  if (nuc_spiinitialize)
+    {
+      nuc_spiinitialize();
+    }
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif  /* __CONFIGS_NUTINY_NUC12_INCLUDE_BOARD_H */
+  /* Initialize USB if the 1) USB device controller is in the configuration and 2)
+   * disabled, and 3) the weak function nuc_usbinitialize() has been brought 
+   * into the build. Presumeably either CONFIG_USBDEV is also selected.
+   */
+
+#ifdef CONFIG_NUC1XX_USB
+  if (nuc_usbinitialize)
+    {
+      nuc_usbinitialize();
+    }
+#endif
+
+  /* Configure on-board LED if LED support has been selected. */
+
+#ifdef CONFIG_ARCH_LEDS
+  nuc_ledinit();
+#endif
+}

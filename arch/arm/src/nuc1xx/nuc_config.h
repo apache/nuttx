@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx/chip/lpc17_pinconfig.h
+ * arch/arm/src/nuc1xx/nuc_config.h
  *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_PINCONFIG_H
-#define __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_PINCONFIG_H
+#ifndef __ARCH_ARM_SRC_NUC1XX_NUC_CONFIG_H
+#define __ARCH_ARM_SRC_NUC1XX_NUC_CONFIG_H
 
 /************************************************************************************
  * Included Files
@@ -42,19 +42,74 @@
 
 #include <nuttx/config.h>
 
-#include <arch/lpc17xx/chip.h>
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+/* Limit the number of enabled UARTs to those supported by the chip architecture */
 
-#if defined(LPC176x)
-#  include "chip/lpc176x_pinconfig.h"
-#elif defined(LPC178x)
-#  include "chip/lpc178x_pinconfig.h"
-#else
-#  error "Unrecognized LPC17xx family"
+#if NUC_NUARTS < 3
+#  undef CONFIG_NUC_UART2
 #endif
 
-/************************************************************************************
- * Definitions
- ************************************************************************************/
+#if NUC_NUARTS < 2
+#  undef CONFIG_NUC_UART1
+#endif
+
+#if NUC_NUARTS < 1
+#  undef CONFIG_NUC_UART0
+#endif
+
+/* Are any UARTs enabled? */
+
+#undef HAVE_UART
+#if defined(CONFIG_NUC_UART0) || defined(CONFIG_NUC_UART1) || defined(CONFIG_NUC_UART2)
+#  define HAVE_UART 1
+#endif
+
+/* Make sure all features are disabled for diabled U[S]ARTs.  This simplifies
+ * checking later.
+ */
+
+#ifndef CONFIG_NUC_UART0
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART0_IRDAMODE
+#  undef CONFIG_UART0_RS485MODE
+#endif
+
+#ifndef CONFIG_NUC_UART1
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART1_IRDAMODE
+#  undef CONFIG_UART1_RS485MODE
+#endif
+
+#ifndef CONFIG_NUC_UART2
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  undef CONFIG_UART2_IRDAMODE
+#  undef CONFIG_UART2_RS485MODE
+#endif
+
+/* Is there a serial console? There should be at most one defined.  It could be on
+ * any UARTn, n=0,1,2 - OR - there might not be any serial console at all.
+ */
+
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  define HAVE_CONSOLE 1
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  define HAVE_CONSOLE 1
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  define HAVE_CONSOLE 1
+#else
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_UART2_SERIAL_CONSOLE
+#  undef HAVE_CONSOLE
+#endif
 
 /************************************************************************************
  * Public Types
@@ -65,7 +120,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ************************************************************************************/
 
- #endif /* __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_PINCONFIG_H */
+#endif /* __ARCH_ARM_SRC_NUC1XX_NUC_CONFIG_H */

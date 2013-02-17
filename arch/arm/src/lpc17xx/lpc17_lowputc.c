@@ -1,7 +1,7 @@
 /**************************************************************************
  * arch/arm/src/lpc17xx/lpc17_lowputc.c
  *
- *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
-     
+
 /* Select UART parameters for the selected console */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
@@ -189,7 +189,7 @@
  * And
  *
  *   4 * CCLK / BAUD / 16 >= MinDL, or
- *   BAUD <= CCLK / 4 / MinDL 
+ *   BAUD <= CCLK / 4 / MinDL
  */
 
 #elif CONSOLE_BAUD < (LPC17_CCLK / 4 / UART_MINDL)
@@ -204,7 +204,7 @@
  * And
  *
  *   8 * CCLK / BAUD / 16 >= MinDL, or
- *   BAUD <= CCLK / 2 / MinDL 
+ *   BAUD <= CCLK / 2 / MinDL
  */
 
 #else /* if CONSOLE_BAUD < (LPC17_CCLK / 2 / UART_MINDL) */
@@ -277,7 +277,7 @@ void up_lowputc(char ch)
  *      PCLK_UART1; in the PCLKSEL1 register, select PCLK_UART2 and PCLK_UART3.
  *   3. Baud rate: In the LCR register, set bit DLAB = 1. This enables access
  *      to registers DLL and DLM for setting the baud rate. Also, if needed,
- *      set the fractional baud rate in the fractional divider 
+ *      set the fractional baud rate in the fractional divider.
  *   4. UART FIFO: Use bit FIFO enable (bit 0) in FCR register to
  *      enable FIFO.
  *   5. Pins: Select UART pins through the PINSEL registers and pin modes
@@ -318,6 +318,7 @@ void lpc17_lowsetup(void)
  * clocking for all other UARTs
  */
 
+#if defined(LPC176x)
   regval = getreg32(LPC17_SYSCON_PCLKSEL0);
   regval &= ~(SYSCON_PCLKSEL0_UART0_MASK|SYSCON_PCLKSEL0_UART1_MASK);
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
@@ -335,6 +336,10 @@ void lpc17_lowsetup(void)
   regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL1_UART3_SHIFT);
 #endif
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
+
+#elif defined(LPC178x)
+  putreg32(LPC17_PCLKDIV, LPC17_SYSCON_PCLKSEL);
+#endif
 
   /* Configure UART pins for the selected CONSOLE */
 

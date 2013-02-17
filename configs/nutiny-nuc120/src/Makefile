@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/src/nuc1xx/Make.defs
+# configs/nutiny-nuc120/src/Makefile
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,27 +33,84 @@
 #
 ############################################################################
 
-HEAD_ASRC = 
+-include $(TOPDIR)/Make.defs
 
-CMN_ASRCS  = up_exception.S up_saveusercontext.S up_fullcontextrestore.S
-CMN_ASRCS += up_switchcontext.S vfork.S
+CFLAGS += -I$(TOPDIR)/sched
 
-CMN_CSRCS  = up_assert.c up_blocktask.c up_copystate.c
-CMN_CSRCS += up_createstack.c up_mdelay.c up_udelay.c up_exit.c
-CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
-CMN_CSRCS += up_memfault.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
-CMN_CSRCS += up_releasepending.c up_releasestack.c up_reprioritizertr.c
-CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_systemreset.c
-CMN_CSRCS += up_unblocktask.c up_usestack.c up_doirq.c up_hardfault.c
-CMN_CSRCS += up_svcall.c up_vectors.c up_vfork.c
+ASRCS = 
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-ifeq ($(CONFIG_DEBUG_STACK),y)
-CMN_CSRCS += up_checkstack.c
+CSRCS = nuc_boardinitialize.c 
+
+ifeq ($(CONFIG_HAVE_CXX),y)
+CSRCS += nuc_cxxinitialize.c
 endif
 
-ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += up_elf.c
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += nuc_led.c
 endif
 
-CHIP_ASRCS  = 
-CHIP_CSRCS  = nuc_start.c
+ifeq ($(CONFIG_NUC1XX_USBD),y)
+CSRCS += nuc_usbd.c
+endif
+
+ifeq ($(CONFIG_PWM),y)
+CSRCS += nuc_pwm.c
+endif
+
+ifeq ($(CONFIG_QENCODER),y)
+CSRCS += nuc_qencoder.c
+endif
+
+ifeq ($(CONFIG_WATCHDOG),y)
+CSRCS += nuc_watchdog.c
+endif
+
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS += nuc_nsh.c
+endif
+
+COBJS = $(CSRCS:.c=$(OBJEXT))
+
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
+
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  CFLAGS += -I$(ARCH_SRCDIR)\chip -I$(ARCH_SRCDIR)\common -I$(ARCH_SRCDIR)\armv7-m
+else
+ifeq ($(WINTOOL),y)
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
+			-I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+			-I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
+else
+  CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
+endif
+endif
+
+all: libboard$(LIBEXT)
+
+$(AOBJS): %$(OBJEXT): %.S
+	$(call ASSEMBLE, $<, $@)
+
+$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
+
+libboard$(LIBEXT): $(OBJS)
+	$(call ARCHIVE, $@, $(OBJS))
+
+.depend: Makefile $(SRCS)
+	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) touch $@
+
+depend: .depend
+
+clean:
+	$(call DELFILE, libboard$(LIBEXT))
+	$(call CLEAN)
+
+distclean: clean
+	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
+
+-include Make.dep

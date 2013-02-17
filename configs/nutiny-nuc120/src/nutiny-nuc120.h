@@ -1,6 +1,6 @@
-/************************************************************************************
- * configs/nutiny-nuc120/include/board.h
- * include/arch/board/board.h
+/****************************************************************************************************
+ * configs/nutiny-nuc120/src/nutiny-nuc120.h
+ * arch/arm/src/board/nutiny-nuc120.n
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,34 +32,29 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************************************/
 
-#ifndef __CONFIGS_NUTINY_NUC12_INCLUDE_BOARD_H
-#define __CONFIGS_NUTINY_NUC12_INCLUDE_BOARD_H
+#ifndef __CONFIGS_NUTINY_NUC120_SRC_NUTINY_NUC120_H
+#define __CONFIGS_NUTINY_NUC120_SRC_NUTINY_NUC120_H
 
-/************************************************************************************
+/****************************************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+#include <stdint.h>
 
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
-
-/************************************************************************************
+/****************************************************************************************************
  * Definitions
- ************************************************************************************/
-/* Clocking *************************************************************************/
+ ****************************************************************************************************/
+/* Configuration ************************************************************************************/
 
-/* LED definitions ******************************************************************/
+/* NuTiny-EVB-120 GPIOs *****************************************************************************/
 /* The NuTiny has a single green LED that can be controlled from sofware.  This LED
  * is connected to PIN17.  It is pulled high so a low value will illuminate the LED.
- */
-
-#define BOARD_NLEDS       1
-
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
+ *
+ * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
  * NuTiny.  The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
@@ -76,54 +71,46 @@
  *   LED_IDLE             NUC1XX is is sleep mode   (Optional, not used)
  */
 
-#define LED_STARTED       0
-#define LED_HEAPALLOCATE  0
-#define LED_IRQSENABLED   0
-#define LED_STACKCREATED  0
-#define LED_INIRQ         0
-#define LED_SIGNAL        0
-#define LED_ASSERTION     0
-#define LED_PANIC         0
-
 /* Button definitions ***************************************************************/
 /* The NuTiny has no buttons */
 
-#define NUM_BUTTONS        0
+/****************************************************************************************************
+ * Public Types
+ ****************************************************************************************************/
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
+/****************************************************************************************************
+ * Public data
+ ****************************************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************************************
+ * Public Functions
+ ****************************************************************************************************/
 
-/************************************************************************************
- * Public Function Prototypes
- ************************************************************************************/
-/************************************************************************************
- * Name: nuc_boardinitialize
+/****************************************************************************************************
+ * Name: nuc_spiinitialize
  *
  * Description:
- *   All NUC1XX architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Called to configure SPI chip select GPIO pins for the NuTiny-EVB-120 board.
  *
- ************************************************************************************/
+ ****************************************************************************************************/
 
-void nuc_boardinitialize(void);
+void weak_function nuc_spiinitialize(void);
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
+/****************************************************************************************************
+ * Name: nuc_usbinitialize
+ *
+ * Description:
+ *   Called from nuc_usbinitialize very early in inialization to setup USB-related
+ *   GPIO pins for the NuTiny-EVB-120 board.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_STM32_USB
+void weak_function nuc_usbinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __CONFIGS_NUTINY_NUC12_INCLUDE_BOARD_H */
+#endif /* __CONFIGS_NUTINY_NUC120_SRC_NUTINY_NUC120_H */
+

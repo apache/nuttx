@@ -115,6 +115,7 @@ const uint32_t g_intbase[GPIO_NPORTS] =
 #endif
 };
 
+#ifdef LPC176x
 const uint32_t g_lopinsel[GPIO_NPORTS] =
 {
   LPC17_PINCONN_PINSEL0,
@@ -174,6 +175,7 @@ const uint32_t g_odmode[GPIO_NPORTS] =
   , 0
 #endif
 };
+#endif /* LPC176x */
 
 /****************************************************************************
  * Private Functions
@@ -199,41 +201,85 @@ static int lpc17_configiocon(unsigned int port, unsigned int pin,
 {
   uint32_t regaddr;
   uint32_t regval;
-  uint32_t typemask
+  uint32_t typemask = GPIO_IOCON_TYPE_D_MASK;
 
-    /* Select the mask based on pin usage */
+  /* Select the mask based on pin usage */
 
-    if (port == 0 && (pin==7 || pin==8 || pin==9))
-      {
-        typemask = GPIO_IOCON_TYPE_W_MASK;
-      }
-    else if ((port == 0 && (pin==27 || pin==28)) ||
-             (port == 5 && (pin==2 || pin==3)))
-      {
-        typemask = GPIO_IOCON_TYPE_I_MASK;
-      }
-    else if (port == 0 && (pin==29 || pin==30 || pin==31))
-      {
-        typemask = GPIO_IOCON_TYPE_U_MASK;
-      }
-    else if ((port == 0 && (pin==12 || pin==13 || pin==23 ||
-                            pin==24 || pin==25 || pin==26)) ||
-             (port == 1 && (pin==30 || pin==31)))
-      {
-        typemask = GPIO_IOCON_TYPE_A_MASK;
-      }
-    else
-      {
-        typemask = GPIO_IOCON_TYPE_D_MASK;
-      }
+  switch (port)
+    {
+      case 0:
+        switch (pin)
+          {
+            case 7:
+            case 8:
+            case 9:
+              typemask = GPIO_IOCON_TYPE_W_MASK;
+              break;
+
+            case 12:
+            case 13:
+            case 23:
+            case 24:
+            case 25:
+            case 26:
+              typemask = GPIO_IOCON_TYPE_A_MASK;
+              break;
+
+            case 27:
+            case 28:
+              typemask = GPIO_IOCON_TYPE_I_MASK;
+              break;
+
+            case 29:
+            case 30:
+            case 31:
+              typemask = GPIO_IOCON_TYPE_U_MASK;
+              break;
+
+            default:
+                break;
+          }
+        break;
+
+      case 1:
+        switch (pin)
+          {
+            case 30:
+            case 31:
+              typemask = GPIO_IOCON_TYPE_A_MASK;
+              break;
+
+            default:
+              break;
+          }
+        break;
+
+      case 5:
+        switch (pin)
+          {
+            case 2:
+            case 3:
+              typemask = GPIO_IOCON_TYPE_I_MASK;
+              break;
+
+            default:
+              break;
+          }
+        break;
+
+      default:
+        break;
+    }
 
   regaddr = LPC17_IOCON_P(port, pin);
   regval  = getreg32(regaddr);
   regval &= value;
   regval &= ~typemask;
   putreg32(regval, regaddr);
+
+  return OK;
 }
-#endif
+#endif /* LPC178x */
 
 /****************************************************************************
  * Name: lpc17_pinsel
@@ -244,6 +290,7 @@ static int lpc17_configiocon(unsigned int port, unsigned int pin,
  *
  ****************************************************************************/
 
+#ifdef LPC176x
 static int lpc17_pinsel(unsigned int port, unsigned int pin, unsigned int value)
 {
   const uint32_t *table;
@@ -290,7 +337,8 @@ static int lpc17_pinsel(unsigned int port, unsigned int pin, unsigned int value)
  *
  ****************************************************************************/
 
-static int lpc17_pullup(lpc17_pinset_t cfgset, unsigned int port, unsigned int pin)
+static int lpc17_pullup(lpc17_pinset_t cfgset, unsigned int port,
+                        unsigned int pin)
 {
   const uint32_t *table;
   uint32_t regaddr;
@@ -347,6 +395,7 @@ static int lpc17_pullup(lpc17_pinset_t cfgset, unsigned int port, unsigned int p
 
   return -EINVAL;
 }
+#endif /* LPC176x */
 
 /****************************************************************************
  * Name: lpc17_setintedge
@@ -385,7 +434,7 @@ static void lpc17_setintedge(unsigned int port, unsigned int pin,
   *intedge &= ~((uint64_t)3     << shift);
   *intedge |=  ((uint64_t)value << shift);
 }
-#endif
+#endif /* CONFIG_GPIO_IRQ */
 
 /****************************************************************************
  * Name: lpc17_setopendrain
@@ -395,6 +444,7 @@ static void lpc17_setintedge(unsigned int port, unsigned int pin,
  *
  ****************************************************************************/
 
+#ifdef LPC176x
 static void lpc17_setopendrain(unsigned int port, unsigned int pin)
 {
   uint32_t regaddr;
@@ -424,6 +474,7 @@ static void lpc17_clropendrain(unsigned int port, unsigned int pin)
   regval &= ~(1 << pin);
   putreg32(regval, regaddr);
 }
+#endif /* LPC176x */
 
 /****************************************************************************
  * Name: lpc17_configinput
@@ -726,6 +777,8 @@ int lpc17_configgpio(lpc17_pinset_t cfgset)
           ret = lpc17_configoutput(cfgset, port, pin);
           break;
 
+#if defined(LPC176x)
+
         case GPIO_ALT1:    /* Alternate function 1 */
           ret = lpc17_configalternate(cfgset, port, pin, PINCONN_PINSEL_ALT1);
           break;
@@ -738,7 +791,19 @@ int lpc17_configgpio(lpc17_pinset_t cfgset)
           ret = lpc17_configalternate(cfgset, port, pin, PINCONN_PINSEL_ALT3);
           break;
 
-#ifdef LPC178x
+#elif defined(LPC178x)
+
+        case GPIO_ALT1:    /* Alternate function 1 */
+          ret = lpc17_configalternate(cfgset, port, pin, IOCON_FUNC_ALT1);
+          break;
+
+        case GPIO_ALT2:    /* Alternate function 2 */
+          ret = lpc17_configalternate(cfgset, port, pin, IOCON_FUNC_ALT2);
+          break;
+
+        case GPIO_ALT3:    /* Alternate function 3 */
+          ret = lpc17_configalternate(cfgset, port, pin, IOCON_FUNC_ALT3);
+          break;
 
         case GPIO_ALT4:    /* Alternate function 4 */
           ret = lpc17_configalternate(cfgset, port, pin, IOCON_FUNC_ALT4);

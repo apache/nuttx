@@ -324,7 +324,7 @@
 
 #define SYSCON_PCLKSEL_PCLKDIV_SHIFT     (0)       /* Bits 0-4: Clock divide value for all APB peripherals */
 #define SYSCON_PCLKSEL_PCLKDIV_MASK      (0x1f << SYSCON_PCLKSEL_PCLKDIV_SHIFT)
-#  define SYSCON_PCLKSEL_PCLKDIV(n)      ((n-1) << SYSCON_PCLKSEL_PCLKDIV_SHIFT) /* n = 2 - 31 */
+#  define SYSCON_PCLKSEL_PCLKDIV(n)      ((n) & SYSCON_PCLKSEL_PCLKDIV_MASK) /* n = 1 - 31 */
                                                    /* Bits 5-31: Reserved */
 /* Power Boost Control Register */
 
@@ -589,6 +589,9 @@
 #define SYSCON_PLL0STAT_PLLE             SYSCON_PLLSTAT_PLLE  /* PLL enable readback */
 #define SYSCON_PLL0STAT_PLLC             SYSCON_PLLSTAT_PLLC  /* PLL connect readback */
 #define SYSCON_PLL0STAT_PLOCK            SYSCON_PLLSTAT_PLOCK /* PLL lock status */
+#define SYSCON_PLL1STAT_PLLE             SYSCON_PLLSTAT_PLLE  /* PLL enable readback */
+#define SYSCON_PLL1STAT_PLLC             SYSCON_PLLSTAT_PLLC  /* PLL connect readback */
+#define SYSCON_PLL1STAT_PLOCK            SYSCON_PLLSTAT_PLOCK /* PLL lock status */
 
 /****************************************************************************************************
  * Public Types
