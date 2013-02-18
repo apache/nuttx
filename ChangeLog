@@ -4199,4 +4199,4 @@
 	* arch/arm/include/armv6-m and arch/arm/src/armv6-m: First cut at support
 	  for the Cortex-M0
 	* configs/nutiny-nuc120, arch/arm/include/nu1xx, and arch/arm/src/nuc1xx:
-	  Fragmentary support for Nuvoton NuTiny NUC120.
+	  Support for Nuvoton NuTiny NUC120.

@@ -341,7 +341,6 @@
 #define SYSTICK_CSR_CLKSOURCE          (1 << 2)  /* Bit 2:  Selects the SysTick timer clock source */
 #define SYSTICK_CSR_COUNTFLAG          (1 << 16) /* Bit 16: Returns 1 if timer counted to 0 since
                                                   *         the last read of this register */
-
 /* SysTick reload value register */
 
 #define SYSTICK_RVR_MASK               (0x0fffffff) /* Bits 0-23 */

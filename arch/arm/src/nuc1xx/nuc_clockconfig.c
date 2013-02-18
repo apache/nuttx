@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nuc1xx/nuc_start.c
- * arch/arm/src/chip/nuc_start.c
+ * arch/arm/src/nuc1xx/nuc_clockconfig.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,122 +43,138 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/init.h>
+#include <nuttx/arch.h>
+
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "up_internal.h"
 
-#include "nuc_lowputc.h"
+#include "chip.h"
+#include "chip/chip/nuc_gcr.h"
+#include "chip/chip/nuc_clk.h"
+
 #include "nuc_clockconfig.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Memory Map:
- *
- * 0x0000:0000 - Beginning of FLASH. Address of exception vectors.
- * 0x0001:ffff - End of flash (assuming 128KB of FLASH)
- * 0x2000:0000 - Start of SRAM and start of .data (_sdata)
- *             - End of .data (_edata) abd start of .bss (_sbss)
- *             - End of .bss (_ebss) and bottom of idle stack
- *             - _ebss + CONFIG_IDLETHREAD_STACKSIZE = end of idle stack,
- *               start of heap
- * 0x2000:3fff - End of SRAM and end of heap (assuming 16KB of SRAM)
- */
-
-#define IDLE_STACK ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-#define HEAP_BASE  ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-const uint32_t g_heapbase = HEAP_BASE;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: showprogress
+ * Name: nuc_unlock
  *
  * Description:
- *   Print a character on the UART to show boot status.
+ *   Unlock registers
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
+static inline void nuc_unlock(void)
+{
+  putreg32(0x59, NUC_GCR_REGWRPROT);
+  putreg32(0x16, NUC_GCR_REGWRPROT);
+  putreg32(0x88, NUC_GCR_REGWRPROT);
+}
+
+/****************************************************************************
+ * Name: nuclock
+ *
+ * Description:
+ *   Lok registers
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void nuc_lock(void)
+{
+  putreg32(0, NUC_GCR_REGWRPROT);
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: _start
+/************************************************************************************
+ * Name: nuc_clockconfig
  *
  * Description:
- *   This is the reset entry point.
+ *   Called to establish the clock settings based on the values in board.h.
  *
- ****************************************************************************/
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-void __start(void)
+void nuc_clockconfig(void)
 {
-  const uint32_t *src;
-  uint32_t *dest;
+  uint32_t regval;
 
-  /* Configure the uart so that we can get debug output as soon as possible */
+  /* Unlock registers */
 
-  nuc_clockconfig();
-  nuc_lowsetup();
-  showprogress('A');
+  nuc_unlock();
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
+  /* Enable External 4~24 mhz high speed crystal */
+
+  regval = getreg32(NUC_CLK_PWRCON);
+  regval |= CLK_PWRCON_XTL12M_EN;
+  putreg32(regval, NUC_CLK_PWRCON);
+
+  /* Delay to assure that crystal input to be stable */
+
+  up_mdelay(5);
+
+  /* Set up the PLL configuration.
+   *
+   * Feedback divider (FB_DV)   = Determined by settings in board.h
+   * Input divider (IN_DV)      = Determined by settings in board.h
+   * Output divider (OUT_DV)    = Determined by settings in board.h
+   * Power down mode (PD)       = Normal mode (0)
+   * Bypass (BP)                = Normal mode (0)
+   * FOUT enable (OE)           = PLL FOUT enabled (0)
+   * PLL srouce clock (PLL_SRC) = External high speed crystal (0)
    */
 
-  for (dest = &_sbss; dest < &_ebss; )
-    {
-      *dest++ = 0;
-    }
-  showprogress('B');
+  regval = getreg32(NUC_CLK_PLLCON);
+  regval &= ~(CLK_PLLCON_FB_DV_MASK | CLK_PLLCON_IN_DV_MASK |
+              CLK_PLLCON_OUT_DV_MASK | CLK_PLLCON_PD | CLK_PLLCON_BP |
+              CLK_PLLCON_OE | CLK_PLLCON_PLL_SRC);
+  regval |=  (CLK_PLLCON_FB_DV(BOARD_PLL_FB_DV) |
+              CLK_PLLCON_IN_DV(BOARD_PLL_IN_DV) |
+              CLK_PLLCON_OUT_DV(BOARD_PLL_OUT_DV));
+  putreg32(regval, NUC_CLK_PLLCON);
 
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
+  /* Delay until the PLL output is stable */
 
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-  showprogress('C');
+  up_mdelay(5);
 
-  /* Perform early serial initialization */
+  /* Set the HCLK divider per settings from the board.h file */
 
-#ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
-#endif
-  showprogress('D');
+  regval = getreg32(NUC_CLK_CLKDIV);
+  regval &= ~CLK_CLKDIV_HCLK_N_MASK;
+  regval |=  CLK_CLKDIV_HCLK_N(BOARD_HCLK_N);
+  putreg32(regval, NUC_CLK_CLKDIV);
 
-  /* Initialize onboard resources */
+  /* Select the PLL output as the HCLKC source */
 
-  nuc_boardinitialize();
-  showprogress('E');
+  regval = getreg32(NUC_CLK_CLKSEL0);
+  regval &= ~CLK_CLKSEL0_HCLK_S_MASK;
+  regval |= CLK_CLKSEL0_HCLK_S_PLL;
+  putreg32(regval, NUC_CLK_CLKSEL0);
+  up_mdelay(1);
 
-  /* Then start NuttX */
+  /* Lock the registers */
 
-  showprogress('\r');
-  showprogress('\n');
-  os_start();
-
-  /* Shoulnd't get here */
-
-  for(;;);
+  nuc_lock();
 }

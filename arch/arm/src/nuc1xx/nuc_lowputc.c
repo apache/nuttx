@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/nutiny-nuc120/src/up_autoleds.c
- * arch/arm/src/board/up_autoleds.c
+ * arch/arm/src/nuc1xx/nuc_lowputc.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,26 +32,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* The NuTiny has a single green LED that can be controlled from sofware.
- * This LED is connected to PIN17.  It is pulled high so a low value will
- * illuminate the LED.
- *
- * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
- * NuTiny.  The following definitions describe how NuttX controls the LEDs:
- *
- *   SYMBOL                Meaning                 LED state
- *                                                 Initially all LED is OFF
- *   -------------------  -----------------------  ------------- ------------
- *   LED_STARTED          NuttX has been started   LED ON
- *   LED_HEAPALLOCATE     Heap has been allocated  LED ON
- *   LED_IRQSENABLED      Interrupts enabled       LED ON
- *   LED_STACKCREATED     Idle stack created       LED ON
- *   LED_INIRQ            In an interrupt          LED should glow
- *   LED_SIGNAL           In a signal handler      LED might glow
- *   LED_ASSERTION        An assertion failed      LED ON while handling the assertion
- *   LED_PANIC            The system has crashed   LED Blinking at 2Hz
- *   LED_IDLE             NUC1XX is is sleep mode   (Optional, not used)
- */
 
 /****************************************************************************
  * Included Files
@@ -61,38 +40,26 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <stdbool.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
 
+#include "up_arch.h"
+
 #include "chip.h"
-#include "nuc_gpio.h"
-#include "nutiny-nuc120.h"
+#include "nuc_config.h"
+#include "chip/chip/nuc_clk.h"
+#include "chip/chip/nuc_uart.h"
 
-#ifdef CONFIG_ARCH_LEDS
+#include "nuc_lowputc.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* Here we assume that the default clock source for the UART modules is
+ * the external high speed crystal.
  */
-
-#undef LED_DEBUG  /* Define to enable debug */
-
-#ifdef LED_DEBUG
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -103,34 +70,46 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nuc_ledinit
+ * Name: nuc_lowsetup
  *
  * Description:
- *   Initialize the on-board LED
+ *   Called at the very beginning of _start.  Performs low level initialization.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
-void nuc_ledinit(void)
+void nuc_lowsetup(void)
 {
-  nuc_configgpio(GPIO_LED);
+#ifdef HAVE_UART
+  uint32_t regval;
+
+  /* Configure the UART clock source 
+   *
+   * Here we assume that the UART clock source is the external high speed
+   * crystal -- the power on default value in the CLKSEL0 register.
+   */
+
+  /* Enable UART clocking for the selected UARTs */
+
+  regval = getreg32(NUC_CLK_APBCLK);
+  regval &= ~(CLK_APBCLK_UART0_EN | CLK_APBCLK_UART1_EN | CLK_APBCLK_UART2_EN);
+
+#ifdef CONFIG_NUC_UART0
+  regval |= CLK_APBCLK_UART0_EN;
+#endif
+#ifdef CONFIG_NUC_UART1
+  regval |= CLK_APBCLK_UART1_EN;
+#endif
+#ifdef CONFIG_NUC_UART2
+  regval |= CLK_APBCLK_UART2_EN;
+#endif
+
+  putreg32(regval, NUC_CLK_APBCLK);
+
+  /* Configure UART GPIO pins */
+#warning "Missing logic"
+
+  /* Configure the console UART */
+#warning "Missing logic"
+
+#endif /* HAVE_UART */
 }
-
-/****************************************************************************
- * Name: up_ledon
- ****************************************************************************/
-
-void up_ledon(int led)
-{
-  nuc_gpiowrite(GPIO_LED, false);
-}
-
-/****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
-
-void up_ledoff(int led)
-{
-  nuc_gpiowrite(GPIO_LED, true);
-}
-
-#endif /* CONFIG_ARCH_LEDS */

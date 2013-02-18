@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 11, 2013</p>
+      <p>Last Updated: February 18, 2013</p>
     </td>
   </tr>
 </table>
@@ -1678,6 +1678,7 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
       <li><a href="#arm7tdmi">ARM7TDMI</b></a> (5)</li>
       <li><a href="#arm920t">ARM920T</a> (1) </li>
       <li><a href="#arm926ejs">ARM926EJS</a> (3) </li>
+      <li><a href="#armcortexm0">ARM Cortex-M0</a> (1)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (16)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (6)</li>
     </ul>
@@ -1996,6 +1997,36 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
+    <a name="armcortexm0"><b>ARM Cortex-M0</b>.</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>NuvoTon NUC120</b>.
+      This is a port of NuttX to the Nuvoton NuTiny-SDK-NUC120 that features the NUC120LE3AN MCU.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS</b>.
+        As of this writing, this is very much a work in progress.
+        For a full-featured RTOS such as NuttX, providing support in a usable and meaningful way within the tiny memories of the NUC120 will be a challenge (128KB FLASH and 16KB of SRAM).
+        Initial support for the NUC120 is expected in NuttX-6.26.
+      </p>
+    </ul>
+    <p>
+      <b>Development Environments:</b>
+      1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS
+      with Windows native toolchain, or 4) Native Windows.
+      A DIY toolchain for Linux or Cygwin is provided by the NuttX
+      <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a> package.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
     <a name="armcortexm3"><b>ARM Cortex-M3</b>.</a>
   </td>
 </tr>
@@ -2029,16 +2060,16 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
           There are working configurations the NuttX OS test, to run the <a href="NuttShell.html">NuttShell
           (NSH)</a>, the NuttX networking test, and the uIP web server.
       </p>
-      <p>
-        <b>Development Environments:</b>
-        1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS
-        with Windows native toolchain (CodeSourcery or devkitARM), or 4) Native Windows.  A DIY toolchain for Linux
-        or Cygwin is provided by the NuttX
-        <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a>
-        package.
-      </p>
      </ul>
-   </td>
+    <p>
+      <b>Development Environments:</b>
+      1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS
+      with Windows native toolchain (CodeSourcery or devkitARM), or 4) Native Windows.  A DIY toolchain for Linux
+      or Cygwin is provided by the NuttX
+      <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a>
+      package.
+    </p>
+  </td>
 </tr>
 <tr>
   <td><br></td>
@@ -2068,10 +2099,10 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
          Otherwise, the NSH prompt will not come up because the Ethernet
          driver is waiting for the network to come up.
       </small></p>
-      <p>
-        <b>Development Environments:</b> See the Eagle-100 LM3S6918 above.
-      </p>
      </ul>
+    <p>
+      <b>Development Environments:</b> See the Eagle-100 LM3S6918 above.
+    </p>
    </td>
 </tr>
 <tr>
@@ -2216,16 +2247,16 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
           Customizations for the v3 version of the Wildfire board are selectable (but untested).
         </li>
       </ul>
-      <p>
-        <b>Development Environments:</b>
-        1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS
-        with Windows native toolchain (RIDE7, CodeSourcery or devkitARM), or 4) Native Windows.  A DIY toolchain for Linux
-        or Cygwin is provided by the NuttX
-        <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a>
-        package.
-      </p>
      </ul>
-   </td>
+     <p>
+       <b>Development Environments:</b>
+       1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS
+       with Windows native toolchain (RIDE7, CodeSourcery or devkitARM), or 4) Native Windows.  A DIY toolchain or Linux
+       or Cygwin is provided by the NuttX
+       <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a>
+       package.
+     </p>
+  </td>
 </tr>
 <tr>
   <td><br></td>
@@ -2310,16 +2341,16 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
         USB device (and possible LCD support).
         These extensions may or may not happen soon as my plate is kind of full now.
       </p>
-      <p>
-        <b>Development Environments:</b>
-        1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS
-        with Windows native toolchain (CodeSourcery or devkitARM), or 4) Native Windows.  A DIY toolchain for Linux
-        or Cygwin is provided by the NuttX
-        <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a>
-        package.
-      </p>
      </ul>
-   </td>
+     <p>
+       <b>Development Environments:</b>
+       1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS
+       with Windows native toolchain (CodeSourcery or devkitARM), or 4) Native Windows.  A DIY toolchain for inux
+       or Cygwin is provided by the NuttX
+       <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a>
+       package.
+     </p>
+  </td>
 </tr>
 <tr>
   <td><br></td>
@@ -2445,15 +2476,15 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
         </p>
       </li>
       </ol>
-      <p>
-        <b>Development Environments:</b>
-        1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS
-        with Windows native toolchain (CodeSourcery devkitARM or Code Red), or 4) Native Windows.  A DIY toolchain for Linux
-        or Cygwin is provided by the NuttX
-        <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a>
-        package.
-      </p>
-   </td>
+     </ul>
+     <p>
+       <b>Development Environments:</b>
+       1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS
+       with Windows native toolchain (CodeSourcery devkitARM or Code Red), or 4) Native Windows.  A DIY toolchain for Linux
+       or Cygwin is provided by the NuttX
+       <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a> package.
+     </p>
+  </td>
 </tr>
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>

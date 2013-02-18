@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/nutiny-nuc120/src/up_autoleds.c
- * arch/arm/src/board/up_autoleds.c
+ * arch/arm/src/nuc1xx/nuc_timerisr.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,26 +32,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* The NuTiny has a single green LED that can be controlled from sofware.
- * This LED is connected to PIN17.  It is pulled high so a low value will
- * illuminate the LED.
- *
- * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
- * NuTiny.  The following definitions describe how NuttX controls the LEDs:
- *
- *   SYMBOL                Meaning                 LED state
- *                                                 Initially all LED is OFF
- *   -------------------  -----------------------  ------------- ------------
- *   LED_STARTED          NuttX has been started   LED ON
- *   LED_HEAPALLOCATE     Heap has been allocated  LED ON
- *   LED_IRQSENABLED      Interrupts enabled       LED ON
- *   LED_STACKCREATED     Idle stack created       LED ON
- *   LED_INIRQ            In an interrupt          LED should glow
- *   LED_SIGNAL           In a signal handler      LED might glow
- *   LED_ASSERTION        An assertion failed      LED ON while handling the assertion
- *   LED_PANIC            The system has crashed   LED Blinking at 2Hz
- *   LED_IDLE             NUC1XX is is sleep mode   (Optional, not used)
- */
 
 /****************************************************************************
  * Included Files
@@ -61,76 +40,114 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <stdbool.h>
+#include <time.h>
 #include <debug.h>
-
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
-#include "nuc_gpio.h"
-#include "nutiny-nuc120.h"
+#include "nvic.h"
+#include "clock_internal.h"
+#include "up_internal.h"
+#include "up_arch.h"
 
-#ifdef CONFIG_ARCH_LEDS
+#include "chip.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* The desired timer interrupt frequency is provided by the definition
+ * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
+ * system clock ticks per second.  That value is a user configurable setting
+ * that defaults to 100 (100 ticks per second = 10 MS interval).
+ *
+ * Here we assume that the default clock source for the SysTick is the
+ * external high speed crystal -- the power-on default value for the
+ * CLKSEL0 register
+ *
+ * Then, for example, if BOARD_HIGHSPEED_XTAL_FREQUENCY is 12MHz and
+ * CLK_TCK is 100, the the reload value would be:
+ *
+ *   SYSTICK_RELOAD = (12,000,000 / 100) - 1
+ *                  = 119,999
+ *                  = 0x1d4bf
+ *
+ * Which fits within the maximum 14-bit reload value.
  */
 
-#undef LED_DEBUG  /* Define to enable debug */
+#define SYSTICK_RELOAD ((BOARD_HIGHSPEED_XTAL_FREQUENCY / CLK_TCK) - 1)
 
-#ifdef LED_DEBUG
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+/* The size of the reload field is 24 bits.  Verify that the reload value
+ * will fit in the reload register.
+ */
+
+#if SYSTICK_RELOAD > 0x00ffffff
+#  error SYSTICK_RELOAD exceeds the range of the RELOAD register
 #endif
 
 /****************************************************************************
- * Private Data
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nuc_ledinit
+ * Function:  up_timerisr
  *
  * Description:
- *   Initialize the on-board LED
+ *   The timer ISR will perform a variety of services for various portions
+ *   of the systems.
  *
  ****************************************************************************/
 
-void nuc_ledinit(void)
+int up_timerisr(int irq, uint32_t *regs)
 {
-  nuc_configgpio(GPIO_LED);
+   /* Process timer interrupt */
+
+   sched_process_timer();
+   return 0;
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Function:  up_timerinit
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer interrupt.
+ *
  ****************************************************************************/
 
-void up_ledon(int led)
+void up_timerinit(void)
 {
-  nuc_gpiowrite(GPIO_LED, false);
+  uint32_t regval;
+
+  /* Set the SysTick interrupt to the default priority */
+
+  regval = getreg32(ARMV6M_SYSCON_SHPR3);
+  regval &= ~SYSCON_SHPR3_PRI_15_MASK;
+  regval |= (NVIC_SYSH_PRIORITY_DEFAULT << SYSCON_SHPR3_PRI_15_SHIFT);
+  putreg32(regval, ARMV6M_SYSCON_SHPR3);
+
+  /* Configure SysTick to interrupt at the requested rate */
+
+  putreg32(SYSTICK_RELOAD, ARMV6M_SYSTICK_RVR);
+
+  /* Attach the timer interrupt vector */
+
+  (void)irq_attach(NUC_IRQ_SYSTICK, (xcpt_t)up_timerisr);
+
+  /* Enable SysTick interrupts */
+
+  putreg32((SYSTICK_CSR_CLKSOURCE | SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE),
+           ARMV6M_SYSTICK_CSR);
+
+  /* And enable the timer interrupt */
+
+  up_enable_irq(NUC_IRQ_SYSTICK);
 }
-
-/****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
-
-void up_ledoff(int led)
-{
-  nuc_gpiowrite(GPIO_LED, true);
-}
-
-#endif /* CONFIG_ARCH_LEDS */

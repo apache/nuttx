@@ -51,6 +51,47 @@
  * Definitions
  ************************************************************************************/
 /* Clocking *************************************************************************/
+/* Crystal frequencies */
+
+#define BOARD_HIGHSPEED_XTAL_FREQUENCY 12000000
+#define BOARD_LOWSPEED_XTAL_FREQUENCY  32768
+
+/* PLL: The PLL must be 48MHz x N times when using USB
+ *
+ * FOUT = FIN x (NF/NR) x (1 / NO)
+ * FIN  = Input reference clock frequency
+ * NF   = Feedback divider
+ *      = (FB_DV + 2)
+ * NR   = Input divider
+ *      = (IN_DV + 2)
+ * NO   = 1 if OUT_DV == 0
+ *        2 if OUT_DV == 1 or 2
+ *        4 if OUT_DV == 3
+ *
+ * FOUT = 12000000 x 48 / 3 / 4
+ *      = 48MHz
+ */
+
+#define BOARD_PLL_FIN    BOARD_HIGHSPEED_XTAL_FREQUENCY
+#define BOARD_PLL_FB_DV  46
+#define BOARD_PLL_NF     (BOARD_PLL_FB_DV+2)
+#define BOARD_PLL_IN_DV  1
+#define BOARD_PLL_NR     (BOARD_PLL_IN_DV+2)
+#define BOARD_PLL_OUT_DV 3
+#define BOARD_PLL_NO     4
+
+#define BOARD_PLL_FOUT \
+  (BOARD_PLL_FIN * BOARD_PLL_NF / BOARD_PLL_NR / BOARD_PLL_NO)
+
+/* HCLK. FOUT is the HCLK source clock. */
+
+#define BOARD_HCLK_N     0
+#define BOARD_HCLK_FREQUENCY (BOARD_PLL_FOUT / (BOARD_HCLK_N + 1))
+
+/* USB. FOUT is the source.  The USB CLK must be 48MHz */
+
+#define BOARD_USB_N     0
+#define BOARD_USB_FREQUENCY (BOARD_PLL_FOUT / (BOARD_USB_N + 1))
 
 /* LED definitions ******************************************************************/
 /* The NuTiny has a single green LED that can be controlled from sofware.  This LED

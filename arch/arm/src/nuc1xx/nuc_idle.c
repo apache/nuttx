@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/nutiny-nuc120/src/up_autoleds.c
- * arch/arm/src/board/up_autoleds.c
+ *  arch/arm/src/stm32/nuc_idle.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,61 +32,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* The NuTiny has a single green LED that can be controlled from sofware.
- * This LED is connected to PIN17.  It is pulled high so a low value will
- * illuminate the LED.
- *
- * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
- * NuTiny.  The following definitions describe how NuttX controls the LEDs:
- *
- *   SYMBOL                Meaning                 LED state
- *                                                 Initially all LED is OFF
- *   -------------------  -----------------------  ------------- ------------
- *   LED_STARTED          NuttX has been started   LED ON
- *   LED_HEAPALLOCATE     Heap has been allocated  LED ON
- *   LED_IRQSENABLED      Interrupts enabled       LED ON
- *   LED_STACKCREATED     Idle stack created       LED ON
- *   LED_INIRQ            In an interrupt          LED should glow
- *   LED_SIGNAL           In a signal handler      LED might glow
- *   LED_ASSERTION        An assertion failed      LED ON while handling the assertion
- *   LED_PANIC            The system has crashed   LED Blinking at 2Hz
- *   LED_IDLE             NUC1XX is is sleep mode   (Optional, not used)
- */
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <arch/board/board.h>
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
+#include <nuttx/arch.h>
+#include <nuttx/power/pm.h>
 
-#include <arch/board/board.h>
+#include <arch/irq.h>
 
 #include "chip.h"
-#include "nuc_gpio.h"
-#include "nutiny-nuc120.h"
-
-#ifdef CONFIG_ARCH_LEDS
+#include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* Does the board support an IDLE LED to indicate that the board is in the
+ * IDLE state?
  */
 
-#undef LED_DEBUG  /* Define to enable debug */
-
-#ifdef LED_DEBUG
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
+#if defined(CONFIG_ARCH_LEDS) && defined(LED_IDLE)
+#  define BEGIN_IDLE() up_ledon(LED_IDLE)
+#  define END_IDLE()   up_ledoff(LED_IDLE)
 #else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
+#  define BEGIN_IDLE()
+#  define END_IDLE()
 #endif
 
 /****************************************************************************
@@ -99,38 +73,115 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_idlepm
+ *
+ * Description:
+ *   Perform IDLE state power management.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static void up_idlepm(void)
+{
+  static enum pm_state_e oldstate = PM_NORMAL;
+  enum pm_state_e newstate;
+  irqstate_t flags;
+  int ret;
+  
+  /* Decide, which power saving level can be obtained */
+
+  newstate = pm_checkstate();
+
+  /* Check for state changes */
+
+  if (newstate != oldstate)
+    {
+      flags = irqsave();
+
+      /* Perform board-specific, state-dependent logic here */
+
+      llvdbg("newstate= %d oldstate=%d\n", newstate, oldstate);
+
+      /* Then force the global state change */
+
+      ret = pm_changestate(newstate);
+      if (ret < 0)
+        {
+          /* The new state change failed, revert to the preceding state */
+
+          (void)pm_changestate(oldstate);
+        }
+      else
+        {
+          /* Save the new state */
+
+          oldstate = newstate;
+        }
+
+      /* MCU-specific power management logic */
+
+      switch (newstate)
+        {
+        case PM_NORMAL:
+          break;
+
+        case PM_IDLE:
+          break;
+
+        case PM_STANDBY:
+          nuc_pmstop(true);
+          break;
+
+        case PM_SLEEP:
+          (void)nuc_pmstandby();
+          break;
+
+        default:
+          break;
+        }
+
+      irqrestore(flags);
+    }
+}
+#else
+#  define up_idlepm()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nuc_ledinit
+ * Name: up_idle
  *
  * Description:
- *   Initialize the on-board LED
+ *   up_idle() is the logic that will be executed when their is no other
+ *   ready-to-run task.  This is processor idle time and will continue until
+ *   some interrupt occurs to cause a context switch from the idle task.
+ *
+ *   Processing in this state may be processor-specific. e.g., this is where
+ *   power management operations might be performed.
  *
  ****************************************************************************/
 
-void nuc_ledinit(void)
+void up_idle(void)
 {
-  nuc_configgpio(GPIO_LED);
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* If the system is idle and there are no timer interrupts, then process
+   * "fake" timer interrupts. Hopefully, something will wake up.
+   */
+
+  sched_process_timer();
+#else
+
+  /* Perform IDLE mode power management */
+
+  up_idlepm();
+
+  /* Sleep until an interrupt occurs to save power. */
+
+  BEGIN_IDLE();
+  asm("WFI");
+  END_IDLE();
+#endif
 }
-
-/****************************************************************************
- * Name: up_ledon
- ****************************************************************************/
-
-void up_ledon(int led)
-{
-  nuc_gpiowrite(GPIO_LED, false);
-}
-
-/****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
-
-void up_ledoff(int led)
-{
-  nuc_gpiowrite(GPIO_LED, true);
-}
-
-#endif /* CONFIG_ARCH_LEDS */
