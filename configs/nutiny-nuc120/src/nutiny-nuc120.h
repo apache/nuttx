@@ -52,7 +52,7 @@
 
 /* NuTiny-EVB-120 GPIOs *****************************************************************************/
 /* The NuTiny has a single green LED that can be controlled from sofware.  This LED
- * is connected to PIN17.  It is pulled high so a low value will illuminate the LED.
+ * is connected to PIN17 (PB.0).  It is pulled high so a low value will illuminate the LED.
  *
  * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
  * NuTiny.  The following definitions describe how NuttX controls the LEDs:
@@ -70,6 +70,8 @@
  *   LED_PANIC            The system has crashed   LED Blinking at 2Hz
  *   LED_IDLE             NUC1XX is is sleep mode   (Optional, not used)
  */
+
+#define GPIO_LED (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN8)
 
 /* Button definitions ***************************************************************/
 /* The NuTiny has no buttons */
@@ -110,6 +112,19 @@ void weak_function nuc_spiinitialize(void);
 #ifdef CONFIG_STM32_USB
 void weak_function nuc_usbinitialize(void);
 #endif
+
+/****************************************************************************************************
+ * Name: nuc_ledinit
+ *
+ * Description:
+ *   Initialize the on-board LED
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+void nuc_ledinit(void);
+#endif
+
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_NUTINY_NUC120_SRC_NUTINY_NUC120_H */
