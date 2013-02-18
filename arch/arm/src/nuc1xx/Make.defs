@@ -38,7 +38,7 @@ HEAD_ASRC =
 CMN_ASRCS  = up_exception.S up_saveusercontext.S up_fullcontextrestore.S
 CMN_ASRCS += up_switchcontext.S vfork.S
 
-CMN_CSRCS  = up_assert.c up_blocktask.c up_copystate.c
+CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c
 CMN_CSRCS += up_createstack.c up_mdelay.c up_udelay.c up_exit.c
 CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
 CMN_CSRCS += up_memfault.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
@@ -56,4 +56,5 @@ CMN_CSRCS += up_elf.c
 endif
 
 CHIP_ASRCS  = 
-CHIP_CSRCS  = nuc_start.c
+CHIP_CSRCS  = nuc_clockconfig.c nuc_gpio.c nuc_idle.c nuc_irq.c nuc_lowputc.c
+CHIP_CSRCS += nuc_start.c nuc_timerisr.c

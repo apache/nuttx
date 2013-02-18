@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nuc1xx/nuc_start.c
- * arch/arm/src/chip/nuc_start.c
+ *  arch/arm/src/stm32/nuc_idle.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,62 +37,114 @@
  * Included Files
  ****************************************************************************/
 
+#include <arch/board/board.h>
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
-#include <debug.h>
+#include <nuttx/arch.h>
+#include <nuttx/power/pm.h>
 
-#include <nuttx/init.h>
-#include <arch/board/board.h>
+#include <arch/irq.h>
 
-#include "up_arch.h"
+#include "chip.h"
 #include "up_internal.h"
-
-#include "nuc_lowputc.h"
-#include "nuc_clockconfig.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Memory Map:
- *
- * 0x0000:0000 - Beginning of FLASH. Address of exception vectors.
- * 0x0001:ffff - End of flash (assuming 128KB of FLASH)
- * 0x2000:0000 - Start of SRAM and start of .data (_sdata)
- *             - End of .data (_edata) abd start of .bss (_sbss)
- *             - End of .bss (_ebss) and bottom of idle stack
- *             - _ebss + CONFIG_IDLETHREAD_STACKSIZE = end of idle stack,
- *               start of heap
- * 0x2000:3fff - End of SRAM and end of heap (assuming 16KB of SRAM)
+/* Does the board support an IDLE LED to indicate that the board is in the
+ * IDLE state?
  */
 
-#define IDLE_STACK ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-#define HEAP_BASE  ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
+#if defined(CONFIG_ARCH_LEDS) && defined(LED_IDLE)
+#  define BEGIN_IDLE() up_ledon(LED_IDLE)
+#  define END_IDLE()   up_ledoff(LED_IDLE)
+#else
+#  define BEGIN_IDLE()
+#  define END_IDLE()
+#endif
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
-
-const uint32_t g_heapbase = HEAP_BASE;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: showprogress
+ * Name: up_idlepm
  *
  * Description:
- *   Print a character on the UART to show boot status.
+ *   Perform IDLE state power management.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
+#ifdef CONFIG_PM
+static void up_idlepm(void)
+{
+  static enum pm_state_e oldstate = PM_NORMAL;
+  enum pm_state_e newstate;
+  irqstate_t flags;
+  int ret;
+  
+  /* Decide, which power saving level can be obtained */
+
+  newstate = pm_checkstate();
+
+  /* Check for state changes */
+
+  if (newstate != oldstate)
+    {
+      flags = irqsave();
+
+      /* Perform board-specific, state-dependent logic here */
+
+      llvdbg("newstate= %d oldstate=%d\n", newstate, oldstate);
+
+      /* Then force the global state change */
+
+      ret = pm_changestate(newstate);
+      if (ret < 0)
+        {
+          /* The new state change failed, revert to the preceding state */
+
+          (void)pm_changestate(oldstate);
+        }
+      else
+        {
+          /* Save the new state */
+
+          oldstate = newstate;
+        }
+
+      /* MCU-specific power management logic */
+
+      switch (newstate)
+        {
+        case PM_NORMAL:
+          break;
+
+        case PM_IDLE:
+          break;
+
+        case PM_STANDBY:
+          nuc_pmstop(true);
+          break;
+
+        case PM_SLEEP:
+          (void)nuc_pmstandby();
+          break;
+
+        default:
+          break;
+        }
+
+      irqrestore(flags);
+    }
+}
 #else
-#  define showprogress(c)
+#  define up_idlepm()
 #endif
 
 /****************************************************************************
@@ -101,65 +152,36 @@ const uint32_t g_heapbase = HEAP_BASE;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: up_idle
  *
  * Description:
- *   This is the reset entry point.
+ *   up_idle() is the logic that will be executed when their is no other
+ *   ready-to-run task.  This is processor idle time and will continue until
+ *   some interrupt occurs to cause a context switch from the idle task.
+ *
+ *   Processing in this state may be processor-specific. e.g., this is where
+ *   power management operations might be performed.
  *
  ****************************************************************************/
 
-void __start(void)
+void up_idle(void)
 {
-  const uint32_t *src;
-  uint32_t *dest;
-
-  /* Configure the uart so that we can get debug output as soon as possible */
-
-  nuc_clockconfig();
-  nuc_lowsetup();
-  showprogress('A');
-
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* If the system is idle and there are no timer interrupts, then process
+   * "fake" timer interrupts. Hopefully, something will wake up.
    */
 
-  for (dest = &_sbss; dest < &_ebss; )
-    {
-      *dest++ = 0;
-    }
-  showprogress('B');
+  sched_process_timer();
+#else
 
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
+  /* Perform IDLE mode power management */
 
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-  showprogress('C');
+  up_idlepm();
 
-  /* Perform early serial initialization */
+  /* Sleep until an interrupt occurs to save power. */
 
-#ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  BEGIN_IDLE();
+  asm("WFI");
+  END_IDLE();
 #endif
-  showprogress('D');
-
-  /* Initialize onboard resources */
-
-  nuc_boardinitialize();
-  showprogress('E');
-
-  /* Then start NuttX */
-
-  showprogress('\r');
-  showprogress('\n');
-  os_start();
-
-  /* Shoulnd't get here */
-
-  for(;;);
 }

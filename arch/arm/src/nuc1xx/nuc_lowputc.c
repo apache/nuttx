@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nuc1xx/nuc_start.c
- * arch/arm/src/chip/nuc_start.c
+ * arch/arm/src/nuc1xx/nuc_lowputc.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,122 +43,73 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/init.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "up_internal.h"
+
+#include "chip.h"
+#include "nuc_config.h"
+#include "chip/chip/nuc_clk.h"
+#include "chip/chip/nuc_uart.h"
 
 #include "nuc_lowputc.h"
-#include "nuc_clockconfig.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Memory Map:
- *
- * 0x0000:0000 - Beginning of FLASH. Address of exception vectors.
- * 0x0001:ffff - End of flash (assuming 128KB of FLASH)
- * 0x2000:0000 - Start of SRAM and start of .data (_sdata)
- *             - End of .data (_edata) abd start of .bss (_sbss)
- *             - End of .bss (_ebss) and bottom of idle stack
- *             - _ebss + CONFIG_IDLETHREAD_STACKSIZE = end of idle stack,
- *               start of heap
- * 0x2000:3fff - End of SRAM and end of heap (assuming 16KB of SRAM)
+/* Here we assume that the default clock source for the UART modules is
+ * the external high speed crystal.
  */
-
-#define IDLE_STACK ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-#define HEAP_BASE  ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-const uint32_t g_heapbase = HEAP_BASE;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: nuc_lowsetup
  *
  * Description:
- *   This is the reset entry point.
+ *   Called at the very beginning of _start.  Performs low level initialization.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
-void __start(void)
+void nuc_lowsetup(void)
 {
-  const uint32_t *src;
-  uint32_t *dest;
+#ifdef HAVE_UART
+  uint32_t regval;
 
-  /* Configure the uart so that we can get debug output as soon as possible */
-
-  nuc_clockconfig();
-  nuc_lowsetup();
-  showprogress('A');
-
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
+  /* Configure the UART clock source 
+   *
+   * Here we assume that the UART clock source is the external high speed
+   * crystal -- the power on default value in the CLKSEL0 register.
    */
 
-  for (dest = &_sbss; dest < &_ebss; )
-    {
-      *dest++ = 0;
-    }
-  showprogress('B');
+  /* Enable UART clocking for the selected UARTs */
 
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
+  regval = getreg32(NUC_CLK_APBCLK);
+  regval &= ~(CLK_APBCLK_UART0_EN | CLK_APBCLK_UART1_EN | CLK_APBCLK_UART2_EN);
 
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-  showprogress('C');
-
-  /* Perform early serial initialization */
-
-#ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+#ifdef CONFIG_NUC_UART0
+  regval |= CLK_APBCLK_UART0_EN;
 #endif
-  showprogress('D');
+#ifdef CONFIG_NUC_UART1
+  regval |= CLK_APBCLK_UART1_EN;
+#endif
+#ifdef CONFIG_NUC_UART2
+  regval |= CLK_APBCLK_UART2_EN;
+#endif
 
-  /* Initialize onboard resources */
+  putreg32(regval, NUC_CLK_APBCLK);
 
-  nuc_boardinitialize();
-  showprogress('E');
+  /* Configure UART GPIO pins */
+#warning "Missing logic"
 
-  /* Then start NuttX */
+  /* Configure the console UART */
+#warning "Missing logic"
 
-  showprogress('\r');
-  showprogress('\n');
-  os_start();
-
-  /* Shoulnd't get here */
-
-  for(;;);
+#endif /* HAVE_UART */
 }

@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nuc1xx/nuc_start.c
- * arch/arm/src/chip/nuc_start.c
+ * arch/arm/src/nuc1xx/nuc_timerisr.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,125 +40,114 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <assert.h>
+#include <time.h>
 #include <debug.h>
-
-#include <nuttx/init.h>
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "nvic.h"
+#include "clock_internal.h"
 #include "up_internal.h"
+#include "up_arch.h"
 
-#include "nuc_lowputc.h"
-#include "nuc_clockconfig.h"
+#include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Memory Map:
+/* The desired timer interrupt frequency is provided by the definition
+ * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
+ * system clock ticks per second.  That value is a user configurable setting
+ * that defaults to 100 (100 ticks per second = 10 MS interval).
  *
- * 0x0000:0000 - Beginning of FLASH. Address of exception vectors.
- * 0x0001:ffff - End of flash (assuming 128KB of FLASH)
- * 0x2000:0000 - Start of SRAM and start of .data (_sdata)
- *             - End of .data (_edata) abd start of .bss (_sbss)
- *             - End of .bss (_ebss) and bottom of idle stack
- *             - _ebss + CONFIG_IDLETHREAD_STACKSIZE = end of idle stack,
- *               start of heap
- * 0x2000:3fff - End of SRAM and end of heap (assuming 16KB of SRAM)
+ * Here we assume that the default clock source for the SysTick is the
+ * external high speed crystal -- the power-on default value for the
+ * CLKSEL0 register
+ *
+ * Then, for example, if BOARD_HIGHSPEED_XTAL_FREQUENCY is 12MHz and
+ * CLK_TCK is 100, the the reload value would be:
+ *
+ *   SYSTICK_RELOAD = (12,000,000 / 100) - 1
+ *                  = 119,999
+ *                  = 0x1d4bf
+ *
+ * Which fits within the maximum 14-bit reload value.
  */
 
-#define IDLE_STACK ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-#define HEAP_BASE  ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
+#define SYSTICK_RELOAD ((BOARD_HIGHSPEED_XTAL_FREQUENCY / CLK_TCK) - 1)
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+/* The size of the reload field is 24 bits.  Verify that the reload value
+ * will fit in the reload register.
+ */
 
-const uint32_t g_heapbase = HEAP_BASE;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
+#if SYSTICK_RELOAD > 0x00ffffff
+#  error SYSTICK_RELOAD exceeds the range of the RELOAD register
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function:  up_timerisr
  *
  * Description:
- *   This is the reset entry point.
+ *   The timer ISR will perform a variety of services for various portions
+ *   of the systems.
  *
  ****************************************************************************/
 
-void __start(void)
+int up_timerisr(int irq, uint32_t *regs)
 {
-  const uint32_t *src;
-  uint32_t *dest;
+   /* Process timer interrupt */
 
-  /* Configure the uart so that we can get debug output as soon as possible */
+   sched_process_timer();
+   return 0;
+}
 
-  nuc_clockconfig();
-  nuc_lowsetup();
-  showprogress('A');
+/****************************************************************************
+ * Function:  up_timerinit
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer interrupt.
+ *
+ ****************************************************************************/
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
+void up_timerinit(void)
+{
+  uint32_t regval;
 
-  for (dest = &_sbss; dest < &_ebss; )
-    {
-      *dest++ = 0;
-    }
-  showprogress('B');
+  /* Set the SysTick interrupt to the default priority */
 
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
+  regval = getreg32(ARMV6M_SYSCON_SHPR3);
+  regval &= ~SYSCON_SHPR3_PRI_15_MASK;
+  regval |= (NVIC_SYSH_PRIORITY_DEFAULT << SYSCON_SHPR3_PRI_15_SHIFT);
+  putreg32(regval, ARMV6M_SYSCON_SHPR3);
 
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-  showprogress('C');
+  /* Configure SysTick to interrupt at the requested rate */
 
-  /* Perform early serial initialization */
+  putreg32(SYSTICK_RELOAD, ARMV6M_SYSTICK_RVR);
 
-#ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
-#endif
-  showprogress('D');
+  /* Attach the timer interrupt vector */
 
-  /* Initialize onboard resources */
+  (void)irq_attach(NUC_IRQ_SYSTICK, (xcpt_t)up_timerisr);
 
-  nuc_boardinitialize();
-  showprogress('E');
+  /* Enable SysTick interrupts */
 
-  /* Then start NuttX */
+  putreg32((SYSTICK_CSR_CLKSOURCE | SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE),
+           ARMV6M_SYSTICK_CSR);
 
-  showprogress('\r');
-  showprogress('\n');
-  os_start();
+  /* And enable the timer interrupt */
 
-  /* Shoulnd't get here */
-
-  for(;;);
+  up_enable_irq(NUC_IRQ_SYSTICK);
 }

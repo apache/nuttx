@@ -421,14 +421,14 @@
 
 /* GPIO port pin I/O mode control */
 
-#define GPIO_PMD_INPUT             0
-#define GPIO_PMD_OUTPUT            1
-#define GPIO_PMD_OPENDRAIN         2
-#define GPIO_PMD_BIDI              3
+#define GPIO_PMD_INPUT             0 /* Input */
+#define GPIO_PMD_OUTPUT            1 /* Push-pull output */
+#define GPIO_PMD_OPENDRAIN         2 /* Open drain output */
+#define GPIO_PMD_BIDI              3 /* Quasi bi-directional */
 
 #define GPIO_PMD_SHIFT(n)          ((n) << 1) /* Bits 2n-2n+_1: GPIOx Pin[n] mode control */ 
 #define GPIO_PMD_MASK(n)           (3 << GPIO_PMD_SHIFT(n))
-#  define GPIO_PMD_MASK(n,v)       ((v) << GPIO_PMD_SHIFT(n))
+#  define GPIO_PMD(n,v)            ((v) << GPIO_PMD_SHIFT(n))
 
 #define GPIO_PMD0_SHIFT            (0)      /* Bits 0-1: GPIOx Pin0 mode control */ 
 #define GPIO_PMD0_MASK             (3 << GPIO_PMD0_SHIFT)
