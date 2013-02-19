@@ -53,7 +53,7 @@
 #define LPC17_FLASH_BASE    0x00000000 /* -0x1fffffff: On-chip non-volatile memory */
 #define LPC17_SRAM_BASE     0x10000000 /* -0x10007fff: On-chip SRAM (devices <=32Kb) */
 #define LPC17_ROM_BASE      0x1fff0000 /* -0x1fffffff: 8Kb Boot ROM with flash services */
-#define LPC17_AHBSRAM_BASE  0x20000000 /* -0x3fffffff: On-chip Peripheral SRAM (devices >32Kb) */    
+#define LPC17_AHBSRAM_BASE  0x20000000 /* -0x3fffffff: On-chip Peripheral SRAM (devices >32Kb) */
 #  define LPC17_SRAM_BANK0  0x20000000 /* -0x20003fff: On-chip Peripheral SRAM Bank0 (devices >=32Kb) */
 #  define LPC17_SRAM_BANK1  0x20004000 /* -0x20007fff: On-chip Peripheral SRAM Bank1 (devices 64Kb) */
 #define LPC17_AHB_BASE      0x20080000 /* -0x2008ffff: DMA Controller, Ethernet, and USB */
@@ -138,6 +138,10 @@
 #define LPC17_CRC_BASE      0x20090000 /*  CRC engine */
 #define LPC17_GPIO_BASE     0x20098000 /*  GPIO */
 #define LPC17_EMC_BASE      0x2009c000 /*  External Memory Controller */
+
+/* EEPROM */
+
+#define LPC17_EEPROM_BASE   0x00200000 /* EEPROM controller */
 
 /************************************************************************************
  * Public Types
