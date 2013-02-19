@@ -257,9 +257,8 @@
 
 /* Alternate pin selections *********************************************************/
 
-#define GPIO_UART0_TXD             GPIO_UART0_TXD_1
-#define GPIO_UART0_RXD             GPIO_UART0_RXD_1
-
+#define GPIO_UART0_TXD             GPIO_UART0_TXD_2
+#define GPIO_UART0_RXD             GPIO_UART0_RXD_2
 
 /************************************************************************************
  * Public Types
