@@ -57,14 +57,32 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Here we assume that the default clock source for the UART modules is
- * the external high speed crystal.
- */
+/* Get the serial console UART configuration */
+
+#ifdef HAVE_SERIAL_CONSOLE
+#  if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#    define NUC_CONSOLE_BASE     NUC_UART0_BASE
+#    define NUC_CONSOLE_BAUD     CONFIG_UART0_BAUD
+#    define NUC_CONSOLE_BITS     CONFIG_UART0_BITS
+#    define NUC_CONSOLE_PARITY   CONFIG_UART0_PARITY
+#    define NUC_CONSOLE_2STOP    CONFIG_UART0_2STOP
+#  if defined(CONFIG_UART1_SERIAL_CONSOLE)
+#    define NUC_CONSOLE_BASE     NUC_UART1_BASE
+#    define NUC_CONSOLE_BAUD     CONFIG_UART1_BAUD
+#    define NUC_CONSOLE_BITS     CONFIG_UART1_BITS
+#    define NUC_CONSOLE_PARITY   CONFIG_UART1_PARITY
+#    define NUC_CONSOLE_2STOP    CONFIG_UART1_2STOP
+#  elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#    define NUC_CONSOLE_BASE     NUC_UART2_BASE
+#    define NUC_CONSOLE_BAUD     CONFIG_UART2_BAUD
+#    define NUC_CONSOLE_BITS     CONFIG_UART2_BITS
+#    define NUC_CONSOLE_PARITY   CONFIG_UART2_PARITY
+#    define NUC_CONSOLE_2STOP    CONFIG_UART2_2STOP
+#  endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -81,6 +99,81 @@ void nuc_lowsetup(void)
 {
 #ifdef HAVE_UART
   uint32_t regval;
+
+  /* Configure UART GPIO pins.
+   *
+   * Basic UART0 TX/RX requires that GPIOB MFP bits 0 and 1 be set. If flow
+   * control is enabled, then GPIOB MFP bits 3 and 4 must also be set and ALT
+   * MFP bits 11, 13,  and 14 must be cleared.
+   */
+
+#if defined(CONFIG_NUC_UART0) || defined(CONFIG_NUC_UART1)
+  regval = getreg32(NUC_GCR_GPB_MFP);
+
+#ifdef CONFIG_NUC_UART0
+#ifdef CONFIG_UART0_FLOW_CONTROL
+  regval |= (GCR_GPB_MFP0 | GCR_GPB_MFP1 | GCR_GPB_MFP2| GCR_GPB_MFP3);
+#else
+  regval |= (GCR_GPB_MFP0 | GCR_GPB_MFP1);
+#endif
+#endif /* CONFIG_NUC_UART0 */
+
+  /* Basic UART1 TX/RX requires that GPIOB MFP bits 4 and 5 be set. If flow
+   * control is enabled, then GPIOB MFP bits 6 and 7 must also be set and ALT
+   * MFP bit 11 must be cleared.
+   */
+
+#ifdef CONFIG_NUC_UART1
+#ifdef CONFIG_UART1_FLOW_CONTROL
+  regval |= (GCR_GPB_MFP4 | GCR_GPB_MFP5 | GCR_GPB_MFP6| GCR_GPB_MFP7) 
+#else
+  regval |= (GCR_GPB_MFP4 | GCR_GPB_MFP5);
+#endif
+#endif /* CONFIG_NUC_UART1 */
+
+  putreg32(regval, NUC_GCR_GPB_MFP);
+
+#if defined(CONFIG_UART0_FLOW_CONTROL) || defined(CONFIG_UART1_FLOW_CONTROL)
+  regval = getreg32(NUC_GCR_ALT_MFP);
+  regval &= ~GCR_ALT_MFP_EBI_EN;
+#ifdef CONFIG_UART0_FLOW_CONTROL
+  regval &= ~(GCR_ALT_MFP_EBI_NWRL_EN | GCR_ALT_MFP_EBI_NWRH_WN);
+#endif
+  putreg32(NUC_GCR_ALT_MFP);
+#endif /* CONFIG_UART0_FLOW_CONTROL || CONFIG_UART1_FLOW_CONTROL */
+#endif /* CONFIG_NUC_UART0 || CONFIG_NUC_UART1 */
+
+  /* UART1 TX/RX support requires that GPIOD bits 14 and 15 be set.  UART2
+   * does not support flow control.
+   */
+
+#ifdef CONFIG_NUC_UART2
+  regval = getreg32(NUC_GCR_GPD_MFP);
+  regval |= (GCR_GPD_MFP14 | GCR_GPD_MFP15);
+  putreg32(regval, NUC_GCR_GPD_MFP);
+#endif /* CONFIG_NUC_UART2 */
+
+  /* Reset the UART peripheral(s) */
+
+  regval = getreg32(NUC_GCR_IPRSTC2);
+#ifdef CONFIG_NUC_UART0
+  regval |= GCR_IPRSTC2_UART0_RST;
+  putreg32(regval, NUC_GCR_IPRSTC2);
+  regval &= ~GCR_IPRSTC2_UART0_RST;
+  putreg32(regval, NUC_GCR_IPRSTC2);
+#endif
+#ifdef CONFIG_NUC_UART1
+  regval |= GCR_IPRSTC2_UART1_RST;
+  putreg32(regval, NUC_GCR_IPRSTC2);
+  regval &= ~GCR_IPRSTC2_UART1_RST;
+  putreg32(regval, NUC_GCR_IPRSTC2);
+#endif
+#ifdef CONFIG_NUC_UART2
+  regval |= GCR_IPRSTC2_UART2_RST;
+  putreg32(regval, NUC_GCR_IPRSTC2);
+  regval &= ~GCR_IPRSTC2_UART2_RST;
+  putreg32(regval, NUC_GCR_IPRSTC2);
+#endif
 
   /* Configure the UART clock source 
    *
@@ -105,11 +198,140 @@ void nuc_lowsetup(void)
 
   putreg32(regval, NUC_CLK_APBCLK);
 
-  /* Configure UART GPIO pins */
-#warning "Missing logic"
-
   /* Configure the console UART */
-#warning "Missing logic"
 
+#ifdef HAVE_SERIAL_CONSOLE
+
+  /* Reset the TX FIFO */
+
+  regval = getreg32(NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET
+  regval |= UART_FCR_TFR
+  putreg32(regval, NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
+
+  /* Reset the RX FIFO */
+
+  regval = getreg32(NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET
+  regval |= UART_FCR_RFR
+  putreg32(regval, NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
+
+  /* Set Rx Trigger Level */
+
+  regval &= ~UART_FCR_FRITL_MASK;
+  regval |= UART_FCR_FRITL_4;
+  putreg32(regval, NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
+
+  /* Set Parity & Data bits and Stop bits */
+
+  regval = 0;
+#if NUC_CONSOLE_BITS  == 5
+  regval |= UART_LCR_WLS_5;
+#elif NUC_CONSOLE_BITS  == 6
+  regval |= UART_LCR_WLS_6;
+#elif NUC_CONSOLE_BITS  == 7
+  regval |= UART_LCR_WLS_7;
+#elif NUC_CONSOLE_BITS  == 8
+  regval |= UART_LCR_WLS_8;
+#else
+  error "Unknown console UART data width"
+#endif
+
+#if NUC_CONSOLE_PARITY == 1
+  regval |= UART_LCR_PBE;
+#elif NUC_CONSOLE_PARITY == 2
+  regval |= (UART_LCR_PBE | UART_LCR_EPE);
+#endif
+
+
+#if NUC_CONSOLE_2STOP != 0
+  revgval |= UART_LCR_NSB;
+#endif
+
+  putreg32(regval, NUC_CONSOLE_BASE + NUC_UART_LCR_OFFSET);
+
+  /* Set Time-Out values */
+
+  regval = UART_TOR_TOIC(40) |  UART_TOR_DLY(0);
+  putreg32(regval, NUC_CONSOLE_BASE + NUC_UART_TOR_OFFSET);
+
+  /* Set the baud */
+
+  nuc_setbaud(CONSOLE_BASE, CONSOLE_BAUD);
+
+#endif /* HAVE_SERIAL_CONSOLE */
 #endif /* HAVE_UART */
 }
+
+/****************************************************************************
+ * Name: nuc_setbaud
+ *
+ * Description:
+ *   Set the BAUD divxisor for the selected UART
+ *
+ *   Mode DIV_X_EN DIV_X_ONE Divider X   BRD  (Baud rate equation)
+ *   -------------------------------------------------------------
+ *   0    Disable  0         B           A    UART_CLK / [16 * (A+2)]
+ *   1    Enable   0         B           A    UART_CLK / [(B+1) * (A+2)] , B must >= 8
+ *   2    Enable   1         Don't care  A    UART_CLK / (A+2), A must >=3
+ *
+ * Here we assume that the default clock source for the UART modules is
+ * the external high speed crystal.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_UART
+void nuc_setbaud(uintptr_t base, uint32_t baud)
+{
+  uint32_t regval;
+  uint32_t clksperbit;
+  uint32_t brd;
+  uint32_t divx;
+
+  regval = getreg32(base + NUC_UART_BAUD_OFFSET);
+  
+   /* Source Clock mod 16 < 3 => Using Divider X = 16 (MODE#0) */
+
+  clksperbit = BOARD_HIGHSPEED_XTAL_FREQUENCY / baud;
+  if ((clksperbit & 15) < 3)          
+    {
+      regval &= ~(UART_BAUD_DIV_X_ONE | UART_BAUD_DIV_X_EN);
+      brd = (clksperbit >> 4) - 2;
+    }
+
+  /* Source Clock mod 16 >3 => Up 5% Error BaudRate */
+
+  else
+    {
+      /* Try to Set Divider X = 1 (MODE#2)*/
+
+      regval |= (UART_BAUD_DIV_X_ONE | UART_BAUD_DIV_X_EN);
+      brd = clksperbit - 2;
+
+      /* Check if the divxider exceeds the range */
+
+      if (clksperbit > 0xffff)
+        {
+          /* Try to Set Divider X up 10 (MODE#1) */
+
+          regval &= ~UART_BAUD_DIV_X_ONE;
+   
+          for (divx = 8; divx <16; divx++)
+            {
+              brd = (clksperbit % (divx+1))
+              if (brd < 3)
+                {
+                  regval &= ~UART_BAUD_DIVIDER_X_MASK;
+                  regval |= UART_BAUD_DIVIDER_X(divx);
+
+                  brd -= 2;
+                  break;
+                }
+            }
+        }
+    }
+
+  regval &= ~UART_BAUD_BRD_MASK;
+  regval &= define UART_BAUD_BRD(brd);
+  putreg32(regval, base + NUC_UART_BAUD_OFFSET);
+
+}
+#endif /* HAVE_UART */
