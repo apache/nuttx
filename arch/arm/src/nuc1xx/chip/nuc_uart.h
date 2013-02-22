@@ -136,10 +136,12 @@
 #define UART_IER_DMA_TX_EN         (1 << 14) /* Bit 14: TX DMA enable (UART0/1) */
 #define UART_IER_DMA_RX_EN         (1 << 15) /* Bit 15: RX DMA enable (UART0/1) */
 
+#define UART_IER_ALLIE             (0x0000f87f)
+
 /* UART FIFO control register */
 
-#define UART_FCR_RFR               (1 << 1)  /* Bit 1:  RX filed software reset */
-#define UART_FCR_TFR               (1 << 2)  /* Bit 2:  TX field softweare reset */
+#define UART_FCR_RFR               (1 << 1)  /* Bit 1:  RX FIFO software reset */
+#define UART_FCR_TFR               (1 << 2)  /* Bit 2:  TX FIFO software reset */
 #define UART_FCR_FRITL_SHIFT       (4)       /* Bits 4-7: RX FIFO interrupt trigger level */
 #define UART_FCR_FRITL_MASK        (15 << UART_FCR_FRITL_SHIFT)
 #  define UART_FCR_FRITL_1         (0 << UART_FCR_FRITL_SHIFT)
@@ -188,6 +190,10 @@
 
 /* UART FIFO status register */
 
+#define UART0_FIFO_DEPTH           64
+#define UART1_FIFO_DEPTH           16
+#define UART2_FIFO_DEPTH           16
+
 #define UART_FSR_RX_OVER_IF        (1 << 0)  /* Bit 0:  RX overflow error interrupt flag */
 #define UART_FSR_RS485_ADD_DETF    (1 << 3)  /* Bit 3:  RS-485 address byte detection flag */
 #define UART_FSR_PEF               (1 << 4)  /* Bit 4:  Parity error flag */
@@ -195,7 +201,7 @@
 #define UART_FSR_BIF               (1 << 6)  /* Bit 6:  Break interrupt flag */
 #define UART_FSR_RX_POINTER_SHIFT  (8)       /* Bits 8-13: RX FIFO pointer */
 #define UART_FSR_RX_POINTER_MASK   (0x3f << UART_FSR_RX_POINTER_SHIFT)
-#define UART_FSR_RX_EMPTY          (1 << 14) /* Bit 14: Receiver FIFO emtpy */
+#define UART_FSR_RX_EMPTY          (1 << 14) /* Bit 14: Receiver FIFO empty */
 #define UART_FSR_TX_POINTER_SHIFT  (16)      /* Bits 16-21: TX FIFO pointer */
 #define UART_FSR_TX_POINTER_MASK   (0x3f << UART_FSR_TX_POINTER_SHIFT)
 #define UART_FSR_TX_EMPTY          (1 << 22) /* Bit 22: Transmitter FIFO empty flag */
@@ -203,9 +209,8 @@
 #define UART_FSR_TE_FLAG           (1 << 28) /* Bit 28: Transmitter empty flag */
 
 /* UART interrupt status register */
-#define UART_ISR_
 
-#define UART_ISR_RDA_IF            (1 << 0)  /* Bit 0:  Receive data avaiable interrupt flag */
+#define UART_ISR_RDA_IF            (1 << 0)  /* Bit 0:  Receive data available interrupt flag */
 #define UART_ISR_THRE_IF           (1 << 1)  /* Bit 1:  Transmit holding register empty interrupt flag */
 #define UART_ISR_RLS_IF            (1 << 2)  /* Bit 2:  Receive line status interrupt flag */
 #define UART_ISR_MODEM_IF          (1 << 3)  /* Bit 3:  Modem interrupt flag (UART0/1) */
@@ -230,16 +235,20 @@
 
 #define UART_TOR_TOIC_SHIFT        (0)       /* Bits 0-7: Time out interrupt comparator */
 #define UART_TOR_TOIC_MASK         (0xff << UART_TOR_TOIC_SHIFT)
+#  define UART_TOR_TOIC(t)         ((t) << UART_TOR_TOIC_SHIFT)
 #define UART_TOR_DLY_SHIFT         (8)       /* Bits 8-15: TX delay time value */
 #define UART_TOR_DLY_MASK          (0xff << UART_TOR_DLY_SHIFT)
+#  define UART_TOR_DLY(d)          ((d) << UART_TOR_DLY_SHIFT)
 
 /* UART BAUD rate divisor register */
 
 #define UART_BAUD_BRD_SHIFT        (0)       /* Bits 0-15: Baud rate divider */
 #define UART_BAUD_BRD_MASK         (0xffff << UART_BAUD_BRD_SHIFT)
+#  define UART_BAUD_BRD(b)         ((b) << UART_BAUD_BRD_SHIFT)
 #define UART_BAUD_DIVIDER_X_SHIFT  (24)      /* Bits 24-27: Divider X */
 #define UART_BAUD_DIVIDER_X_MASK   (15 << UART_BAUD_DIVIDER_X_SHIFT)
-#define UART_BAUD_DIV_X_OINE       (1 << 28) /* Bit 28: Divider X equals one */
+#  define UART_BAUD_DIVIDER_X(x)   ((x) << UART_BAUD_DIVIDER_X_SHIFT)
+#define UART_BAUD_DIV_X_ONE        (1 << 28) /* Bit 28: Divider X equals one */
 #define UART_BAUD_DIV_X_EN         (1 << 29) /* Bit 29: Divider X enable */
 
 /* UART IrDA control register */

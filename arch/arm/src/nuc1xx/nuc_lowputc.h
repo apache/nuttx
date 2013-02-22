@@ -79,6 +79,27 @@ extern "C"
 
 void nuc_lowsetup(void);
 
+/****************************************************************************
+ * Name: nuc_setbaud
+ *
+ * Description:
+ *   Set the BAUD divxisor for the selected UART
+ *
+ *   Mode DIV_X_EN DIV_X_ONE Divider X   BRD  (Baud rate equation)
+ *   -------------------------------------------------------------
+ *   0    Disable  0         B           A    UART_CLK / [16 * (A+2)]
+ *   1    Enable   0         B           A    UART_CLK / [(B+1) * (A+2)] , B must >= 8
+ *   2    Enable   1         Don't care  A    UART_CLK / (A+2), A must >=3
+ *
+ * Here we assume that the default clock source for the UART modules is
+ * the external high speed crystal.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_UART
+void nuc_setbaud(uintptr_t base, uint32_t baud)
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
