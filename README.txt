@@ -1053,6 +1053,8 @@ nuttx
  |   |   `- README.txt
  |   |- nucleus2g/
  |   |   `- README.txt
+ |   |- nutiny-nuc120/
+ |   |   `- README.txt
  |   |- olimex-lpc1766stk/
  |   |   `- README.txt
  |   |- olimex-lpc2378/
@@ -1061,6 +1063,8 @@ nuttx
  |   |- olimex-strp711/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
+ |   |   `- README.txt
+ |   |- open1788/
  |   |   `- README.txt
  |   |- p112/
  |   |   `- README.txt
