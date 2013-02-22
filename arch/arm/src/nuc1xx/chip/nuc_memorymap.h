@@ -57,6 +57,10 @@
 #define NUC_EXTMEM_BASE  0x60000000 /* -0x6001ffff: External Memory space (128KB) */
 #define NUC_SYSCON_BASE  0x60000000 /* -0x6001ffff: ARMv6-M system controller space
                                      *              See nvic.h */
+/* FLASH space */
+
+#define NUC_CONFIG_BASE  0x00300000 /* -0x00300004: User configuration */
+
 /* AHB controller space */
 
 #define NUC_GCR_BASE     0x50000000 /* -0x500001ff: System global control registers */
