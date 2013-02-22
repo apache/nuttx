@@ -1,0 +1,13 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_BOARD_NUTINY_NUC120
+config ARCH_LEDS
+	bool "NuttX LED support"
+	default n
+	---help---
+		"Support control of the on-board LED by NuttX to indicate system state"
+
+endif

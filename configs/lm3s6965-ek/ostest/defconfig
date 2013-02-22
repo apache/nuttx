@@ -101,7 +101,6 @@ CONFIG_ARMV7M_OABI_TOOLCHAIN=y
 CONFIG_ARCH_CHIP_LM3S6965=y
 # CONFIG_ARCH_CHIP_LM3S8962 is not set
 # CONFIG_LM_REVA2 is not set
-CONFIG_LM_DFU=y
 
 #
 # Select Stellaris Peripheral Support
