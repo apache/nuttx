@@ -4200,5 +4200,7 @@
 	  for the Cortex-M0
 	* configs/nutiny-nuc120, arch/arm/include/nu1xx, and arch/arm/src/nuc1xx:
 	  Support for Nuvoton NuTiny NUC120.
-	* 2013-02-22:  the Cortex-M0, NuvoTron NUC1xx, and NuTiny-SDK-NUC120 port is
-	  code complete and ready for testing.
+	* 2013-02-22:  the Cortex-M0, NuvoTron NUC1xx, and NuTiny-SDK-NUC120 port
+	  is code complete and ready for testing.
+	* configs/ekk-lm3s9b96/ostest and nsh:  All EKK-LM3S9B96 configurations
+	  converted to use the mconf configuration tool.

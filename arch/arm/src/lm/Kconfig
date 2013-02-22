@@ -56,10 +56,6 @@ config LM_REVA2
 		Some early silicon returned an increase LDO voltage or 2.75V to work
 		around a PLL bug
 
-config LM_DFU
-	bool "DFU"
-	default y
-
 menu "Stellaris Peripheral Support"
 
 config LM_UART0
