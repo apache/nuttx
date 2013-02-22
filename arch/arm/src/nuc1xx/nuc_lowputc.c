@@ -66,7 +66,7 @@
 #    define NUC_CONSOLE_BITS     CONFIG_UART0_BITS
 #    define NUC_CONSOLE_PARITY   CONFIG_UART0_PARITY
 #    define NUC_CONSOLE_2STOP    CONFIG_UART0_2STOP
-#  if defined(CONFIG_UART1_SERIAL_CONSOLE)
+#  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #    define NUC_CONSOLE_BASE     NUC_UART1_BASE
 #    define NUC_CONSOLE_BAUD     CONFIG_UART1_BAUD
 #    define NUC_CONSOLE_BITS     CONFIG_UART1_BITS
@@ -79,6 +79,7 @@
 #    define NUC_CONSOLE_PARITY   CONFIG_UART2_PARITY
 #    define NUC_CONSOLE_2STOP    CONFIG_UART2_2STOP
 #  endif
+#endif
 
 /****************************************************************************
  * Private Functions
