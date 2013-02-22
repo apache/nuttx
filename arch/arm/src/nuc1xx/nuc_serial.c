@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/nuc1xx/nuc_serial.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,8 +77,6 @@
 
 #if defined(USE_SERIALDRIVER) && defined(HAVE_UART)
 
-/* Configuration ************************************************************/
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -150,11 +148,6 @@ static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 #endif
 
-#ifdef CONFIG_NUC_UART3
-static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
-static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
-#endif
-
 /* This describes the state of the LPC17xx uart0 port. */
 
 #ifdef CONFIG_NUC_UART0
@@ -184,7 +177,7 @@ static uart_dev_t g_uart0port =
   .ops      = &g_uart_ops,
   .priv     = &g_uart0priv,
 };
-#endif
+#endif /* CONFIG_NUC_UART0 */
 
 /* This describes the state of the LPC17xx uart1 port. */
 
@@ -215,7 +208,7 @@ static uart_dev_t g_uart1port =
   .ops      = &g_uart_ops,
   .priv     = &g_uart1priv,
 };
-#endif
+#endif /* CONFIG_NUC_UART1 */
 
 /* This describes the state of the LPC17xx uart1 port. */
 
@@ -246,7 +239,7 @@ static uart_dev_t g_uart2port =
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
 };
-#endif
+#endif /* CONFIG_NUC_UART2 */
 
 /* Which UART with be tty0/console and which tty1? tty2? */
 
@@ -308,6 +301,7 @@ static uart_dev_t g_uart2port =
 #        undef TTYS2_DEV                    /* No ttyS2 */
 #      endif
 #    endif
+#  endif
 #else /* No console */
 #  define TTYS0_DEV       g_uart0port       /* UART0=ttyS0 */
 #  ifdef CONFIG_NUC_UART1
@@ -433,7 +427,6 @@ static int up_setup(struct uart_dev_s *dev)
   regval |= (UART_LCR_PBE | UART_LCR_EPE);
 #endif
 
-
 #if NUC_CONSOLE_2STOP != 0
   revgval |= UART_LCR_NSB;
 #endif
@@ -456,6 +449,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Enable Flow Control in the Modem Control Register */
   /* Not implemented */
 
+#endif /* CONFIG_SUPPRESS_NUC_UART_CONFIG */
   return OK;
 }
 
@@ -562,13 +556,6 @@ static int up_interrupt(int irq, void *context)
   if (g_uart2priv.irq == irq)
     {
       dev = &g_uart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_NUC_UART3
-  if (g_uart3priv.irq == irq)
-    {
-      dev = &g_uart3port;
     }
   else
 #endif
@@ -720,7 +707,8 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         nuc_setbaud(priv->base, priv->baud);
       }
       break;
-#endif
+
+#endif /* CONFIG_SERIAL_TERMIOS */
 
     default:
       ret = -ENOTTY;
@@ -958,7 +946,7 @@ int up_putc(int ch)
   return ch;
 }
 
-#else /* USE_SERIALDRIVER */
+#else /* USE_SERIALDRIVER && HAVE_UART */
 
 /****************************************************************************
  * Name: up_putc
@@ -985,4 +973,4 @@ int up_putc(int ch)
   return ch;
 }
 
-#endif /* USE_SERIALDRIVER */
+#endif /* USE_SERIALDRIVER && HAVE_UART */
