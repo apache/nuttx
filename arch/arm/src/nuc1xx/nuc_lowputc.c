@@ -276,7 +276,7 @@ void nuc_lowputc(uint32_t ch)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait for the TX FIFO to be empty (excessive!) */
 
-  while ((getreg32(NUC_CONSOLE_BASE + NUC_UART_FSR_OFFSET) & UART_FSR_TX_EMPTY) != 0);
+  while ((getreg32(NUC_CONSOLE_BASE + NUC_UART_FSR_OFFSET) & UART_FSR_TX_EMPTY) == 0);
 
   /* Then write the character to to the TX FIFO */
 
@@ -331,15 +331,15 @@ void nuc_setbaud(uintptr_t base, uint32_t baud)
 
       /* Check if the divxider exceeds the range */
 
-      if (clksperbit > 0xffff)
+      if (brd > 0xffff)
         {
           /* Try to Set Divider X up 10 (MODE#1) */
 
           regval &= ~UART_BAUD_DIV_X_ONE;
    
-          for (divx = 8; divx <16; divx++)
+          for (divx = 8; divx < 16; divx++)
             {
-              brd = (clksperbit % (divx+1));
+              brd = (clksperbit % (divx + 1));
               if (brd < 3)
                 {
                   regval &= ~UART_BAUD_DIVIDER_X_MASK;

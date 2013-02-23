@@ -127,7 +127,7 @@ void nuc_clockconfig(void)
 
   /* Enable External 4~24 mhz high speed crystal */
 
-  regval = getreg32(NUC_CLK_PWRCON);
+  regval  = getreg32(NUC_CLK_PWRCON);
   regval |= CLK_PWRCON_XTL12M_EN;
   putreg32(regval, NUC_CLK_PWRCON);
 
