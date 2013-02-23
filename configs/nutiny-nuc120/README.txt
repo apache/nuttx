@@ -193,13 +193,17 @@ NuTiny-specific Configuration Options
 
     CONFIG_NUC_WDT     Watchdog timer
     CONFIG_NUC_RTC     Real time clock (RTC)
-    CONFIG_NUC_TMR01   Timer0/Timer1
+    CONFIG_NUC_TMR0    Timer0
+    CONFIG_NUC_TMR1    Timer1
     CONFIG_NUC_I2C0    I2C interface
     CONFIG_NUC_SPI0    SPI0 master/slave
     CONFIG_NUC_SPI1    SPI1 master/slave
-    CONFIG_NUC_PWMA    PWM0/1/2/3
+    CONFIG_NUC_PWM0    PWM0
+    CONFIG_NUC_PWM1    PWM1
+    CONFIG_NUC_PWM2    PWM2
+    CONFIG_NUC_PWM3    PWM3
     CONFIG_NUC_UART0   UART0
-    CONFIG_NUC_USBD    USB 2.0 FS device controller registers */
+    CONFIG_NUC_USBD    USB 2.0 FS device controller
     CONFIG_NUC_ACMP    Analog comparator
     CONFIG_NUC_ADC     Analog-digital-converter (ADC)
 
@@ -207,11 +211,15 @@ NuTiny-specific Configuration Options
   ---
 
     CONFIG_NUC_PS2     PS/2 interface
-    CONFIG_NUC_TIMR23  Timer2/Timer3
+    CONFIG_NUC_TIMR2   Timer2
+    CONFIG_NUC_TIMR3   Timer3
     CONFIG_NUC_I2C1    I2C1 interface
     CONFIG_NUC_SPI2    SPI2 master/slave
     CONFIG_NUC_SPI3    SPI3 master/slave
-    CONFIG_NUC_PWMB    PWM4/5/6/7
+    CONFIG_NUC_PWM4    PWM4
+    CONFIG_NUC_PWM5    PWM5
+    CONFIG_NUC_PWM6    PWM6
+    CONFIG_NUC_PWM7    PWM7
     CONFIG_NUC_UART1   UART1
     CONFIG_NUC_UART2   UART2
     CONFIG_NUC_I2S     I2S interface
