@@ -41,6 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "nuc_config.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -97,7 +98,19 @@ void nuc_lowsetup(void);
  *****************************************************************************/
 
 #ifdef HAVE_UART
-void nuc_setbaud(uintptr_t base, uint32_t baud)
+void nuc_setbaud(uintptr_t base, uint32_t baud);
+#endif
+
+/****************************************************************************
+ * Name: nuc_lowputc
+ *
+ * Description:
+ *   Output one character to the UART using a simple polling method.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_SERIAL_CONSOLE
+void nuc_lowputc(uint32_t ch);
 #endif
 
 #undef EXTERN

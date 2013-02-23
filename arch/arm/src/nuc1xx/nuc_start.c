@@ -50,6 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "nuc_config.h"
 #include "nuc_lowputc.h"
 #include "nuc_clockconfig.h"
 
@@ -90,8 +91,8 @@ const uint32_t g_heapbase = HEAP_BASE;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
+#if defined(CONFIG_DEBUG) && defined(HAVE_SERIAL_CONSOLE)
+#  define showprogress(c) nuc_lowputc((uint32_t)c)
 #else
 #  define showprogress(c)
 #endif

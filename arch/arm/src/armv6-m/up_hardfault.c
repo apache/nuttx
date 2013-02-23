@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv6-m/up_hardfault.c
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,6 @@ int up_hardfault(int irq, FAR void *context)
 {
 #if defined(CONFIG_DEBUG_HARDFAULT)
   uint32_t *regs = (uint32_t*)context;
-#endif
 
   /* Dump some hard fault info */
 
@@ -100,10 +99,6 @@ int up_hardfault(int irq, FAR void *context)
   hfdbg("  IRQ: %d regs: %p\n", irq, regs);
   hfdbg("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x\n",
         getbasepri(), getprimask(), getipsr());
-  hfdbg("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x AFAULTS: %08x\n",
-        getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
-        getreg32(NVIC_DFAULTS), getreg32(NVIC_BFAULT_ADDR),
-        getreg32(NVIC_AFAULTS));
   hfdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
@@ -112,9 +107,10 @@ int up_hardfault(int irq, FAR void *context)
         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
   hfdbg("  xPSR: %08x BASEPRI: %08x (saved)\n",
         current_regs[REG_XPSR],  current_regs[REG_BASEPRI]);
+#endif
 
   (void)irqsave();
-  lldbg("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
+  lldbg("PANIC!!! Hard fault\n");
   PANIC(OSERR_UNEXPECTEDISR);
   return OK;
 }
