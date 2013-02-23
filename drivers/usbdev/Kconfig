@@ -3,7 +3,7 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-menu "Device Controller Driver Options"
+comment "USB Device Controller Driver Options"
 
 config USBDEV_ISOCHRONOUS
 	bool "Enable isochronous"
@@ -98,9 +98,9 @@ bool "Decode device controller events"
 		extern const struct trace_msg_t g_usb_trace_strings_intdecode[];
 		#endif
 
-endmenu
+comment "USB Device Class Driver Options"
 
-menuconfig USBDEV_COMPOSITE
+config USBDEV_COMPOSITE
 	bool "USB composite device support"
 	default n
 	---help---
@@ -162,7 +162,7 @@ config COMPOSITE_VERSIONNO
 		Interface version number.
 endif
 
-menuconfig PL2303
+config PL2303
 	bool "Prolific PL2303 serial/USB converter emulation"
 	default n
 	select SERIAL_REMOVABLE
@@ -235,7 +235,7 @@ config PL2303_PRODUCTSTR
 	default "PL2303 Emulation"
 endif
 
-menuconfig CDCACM
+config CDCACM
 	bool "USB Modem (CDC ACM) support"
 	default n
 	select SERIAL_REMOVABLE
@@ -400,7 +400,7 @@ config CDCACM_PRODUCTSTR
 	default "CDC/ACM Serial"
 endif
 
-menuconfig USBMSC
+config USBMSC
 	bool "USB Mass storage class device"
 	default n
 	---help---

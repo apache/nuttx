@@ -85,13 +85,13 @@
 
 /* HCLK. FOUT is the HCLK source clock. */
 
-#define BOARD_HCLK_N     0
-#define BOARD_HCLK_FREQUENCY (BOARD_PLL_FOUT / (BOARD_HCLK_N + 1))
+#define BOARD_HCLK_N     1
+#define BOARD_HCLK_FREQUENCY (BOARD_PLL_FOUT / BOARD_HCLK_N)
 
 /* USB. FOUT is the source.  The USB CLK must be 48MHz */
 
-#define BOARD_USB_N     0
-#define BOARD_USB_FREQUENCY (BOARD_PLL_FOUT / (BOARD_USB_N + 1))
+#define BOARD_USB_N     1
+#define BOARD_USB_FREQUENCY (BOARD_PLL_FOUT / BOARD_USB_N)
 
 /* LED definitions ******************************************************************/
 /* The NuTiny has a single green LED that can be controlled from sofware.  This LED

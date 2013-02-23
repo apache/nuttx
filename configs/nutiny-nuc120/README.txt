@@ -95,18 +95,38 @@ LEDs
 Serial Console
 ==============
 
-To be provided
+By default UART1 is used as the serial console on these boards.  NUC120LE3AN
+is provided as an LQFP48 package and, for this case, the UART1 RX signal
+(RXD1) is on PB.4, pin 8, and the TX signal (TXD1) is on PB.5, pin 9.
+These pins are available on the NuTiny-SDC-NUC120 JP5.
+
+  NOTE: The TX vs RX terminology is confusing.  On my RS-232 driver board,
+  I need to connect the NUC120 TXD0 pin to the driver boards RXD pin.  How
+  confusing!
+
+UART0 is an alternative that can be selected by modifying the default
+configuation.  UART0 RX (RXD0) is on PB.0, pin 17, and the TX signal (TXD0)
+is on PB.1, pin 18.  These pins are available on the NuTiny-SDC-NUC120 JP1.
+
+  NOTE: PB.0, pin 17, is also used to control the user LED on board (labeled
+  "IO").  CONFIG_ARCH_LED should not be selected if UART0 is used.
+
+The NUC120LE3AN does not support UART2.
 
 Debugging
 =========
 
 The NuTiny-SDK-NUC120 includes a built-in NuLink debugger.  Unfortunately,
 full debug support is available only with the Keil and IAR toolchains.
-There is, however, a free program call call ICP (In-Circuit Programmer).
-It can be used to burn programs into FLASH (aka APROM).
+There is, however, a free program called ICP (In-Circuit Programmer).  It
+can be used to burn programs into FLASH (aka APROM).
 
 The ICP program can also be used to burn an ISP program into LDROM.  The
 ISP (In-System Programmer) is available free from the Nuvton website.
+
+Then NuttX build does not set the configuration words at 0x0030000-0x00300004.
+You should uncheck the Config box when burning APROM or the previous contents
+of the configuration words will be erased.
 
 NuTiny-specific Configuration Options
 =====================================
@@ -179,7 +199,9 @@ NuTiny-specific Configuration Options
        the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
        the delay actually is 100 seconds.
 
-  Individual subsystems can be enabled:
+  Individual subsystems can be enabled as follows.  These settings are for
+  all of the NUC100/120 line and may not be available for the NUC120LE3AN
+  in particular:
 
   AHB
   ---
@@ -226,13 +248,14 @@ NuTiny-specific Configuration Options
 
   NUC1XX specific device driver settings
 
-    CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn (n=0,1,2) for the
-      console and ttys0 (default is the USART0).
+    CONFIG_UARTn_SERIAL_CONSOLE - Selects the UARTn (n=0,1,2) for the
+      console and ttys0.
     CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
-       This specific the size of the receive buffer
+       This specific the size of the receive buffer for UARTn.
     CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
        being sent.  This specific the size of the transmit buffer
-    CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
+       for UARTn.
+    CONFIG_UARTn_BAUD - The configure BAUD of UARTn,
     CONFIG_UARTn_BITS - The number of bits.  Must be 5, 6, 7, or 8.
     CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
     CONFIG_UARTn_2STOP - Two stop bits
@@ -277,12 +300,17 @@ Where <subdir> is one of the following:
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
        CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
+    3. Serial Console.  The serial console is on UART1 which is available
+       on JP5:
+
+       UART1 RX signal (RXD1) is on PB.4, pin 8, and
+       UART1 TX signal (TXD1) is on PB.5, pin 9.
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART0.  Support for
-    builtin applications is enabled, but in the base configuration no
-    builtin applications are selected (see NOTES below).
+    Configuration enables the serial interfaces on UART1.  Support for
+    builtin applications is disabled.
 
     NOTES:
  
@@ -303,7 +331,13 @@ Where <subdir> is one of the following:
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
-    3. This configuration includes USB Support (CDC/ACM device)
+    3. Serial Console.  The serial console is on UART1 which is available
+       on JP5:
+
+       UART1 RX signal (RXD1) is on PB.4, pin 8, and
+       UART1 TX signal (TXD1) is on PB.5, pin 9.
+
+    4. This configuration includes USB Support (CDC/ACM device)
 
        CONFIG_STM32_USB=y            : STM32 USB device support
        CONFIG_USBDEV=y               : USB device support must be enabled
@@ -311,7 +345,7 @@ Where <subdir> is one of the following:
        CONFIG_NSH_BUILTIN_APPS=y     : NSH built-in application support must be enabled
        CONFIG_NSH_ARCHINIT=y         : To perform USB initialization
 
-       The CDC/ACM example is included as two NSH "built-in" commands.\
+       The CDC/ACM example is included as two NSH "built-in" commands.
  
        CONFIG_EXAMPLES_CDCACM=y      : Enable apps/examples/cdcacm
   
