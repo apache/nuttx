@@ -65,6 +65,7 @@
 
 #include "chip.h"
 #include "chip/nuc_uart.h"
+#include "nuc_lowputc.h"
 #include "nuc_serial.h"
 
 /****************************************************************************
@@ -935,10 +936,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      nuc_lowputc((uint32_t)'\r');
     }
 
-  up_lowputc(ch);
+  nuc_lowputc((uint32_t)ch);
 #ifdef HAVE_CONSOLE
   up_restoreuartint(priv, ier);
 #endif
@@ -965,10 +966,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      nuc_lowputc((uint32_t)'\r');
     }
 
-  up_lowputc(ch);
+  nuc_lowputc((uint32_t)ch);
 #endif
   return ch;
 }

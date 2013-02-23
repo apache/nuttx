@@ -52,6 +52,7 @@
 #include "chip/chip/nuc_clk.h"
 #include "chip/chip/nuc_uart.h"
 
+#include "chip/nuc_gcr.h"
 #include "nuc_lowputc.h"
 
 /****************************************************************************
@@ -205,14 +206,14 @@ void nuc_lowsetup(void)
 
   /* Reset the TX FIFO */
 
-  regval = getreg32(NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET
-  regval |= UART_FCR_TFR
+  regval = getreg32(NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
+  regval |= UART_FCR_TFR;
   putreg32(regval, NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
 
   /* Reset the RX FIFO */
 
-  regval = getreg32(NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET
-  regval |= UART_FCR_RFR
+  regval = getreg32(NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
+  regval |= UART_FCR_RFR;
   putreg32(regval, NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
 
   /* Set Rx Trigger Level */
@@ -256,10 +257,31 @@ void nuc_lowsetup(void)
 
   /* Set the baud */
 
-  nuc_setbaud(CONSOLE_BASE, CONSOLE_BAUD);
+  nuc_setbaud(NUC_CONSOLE_BASE, NUC_CONSOLE_BAUD);
 
 #endif /* HAVE_SERIAL_CONSOLE */
 #endif /* HAVE_UART */
+}
+
+/****************************************************************************
+ * Name: nuc_lowputc
+ *
+ * Description:
+ *   Output one character to the UART using a simple polling method.
+ *
+ *****************************************************************************/
+
+void nuc_lowputc(uint32_t ch)
+{
+#ifdef HAVE_SERIAL_CONSOLE
+  /* Wait for the TX FIFO to be empty (excessive!) */
+
+  while ((getreg32(NUC_CONSOLE_BASE + NUC_UART_FSR_OFFSET) & UART_FSR_TX_EMPTY) != 0);
+
+  /* Then write the character to to the TX FIFO */
+
+  putreg32(ch, NUC_CONSOLE_BASE + NUC_UART_THR_OFFSET);
+#endif /* HAVE_SERIAL_CONSOLE */
 }
 
 /****************************************************************************
@@ -317,7 +339,7 @@ void nuc_setbaud(uintptr_t base, uint32_t baud)
    
           for (divx = 8; divx <16; divx++)
             {
-              brd = (clksperbit % (divx+1))
+              brd = (clksperbit % (divx+1));
               if (brd < 3)
                 {
                   regval &= ~UART_BAUD_DIVIDER_X_MASK;
@@ -331,7 +353,7 @@ void nuc_setbaud(uintptr_t base, uint32_t baud)
     }
 
   regval &= ~UART_BAUD_BRD_MASK;
-  regval &= define UART_BAUD_BRD(brd);
+  regval |= UART_BAUD_BRD(brd);
   putreg32(regval, base + NUC_UART_BAUD_OFFSET);
 
 }
