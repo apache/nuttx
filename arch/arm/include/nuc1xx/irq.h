@@ -45,6 +45,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/nuc1xx/chip.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -72,10 +73,10 @@
 
 #define NUC_IRQ_INTERRUPT     (16)
 
-#if defined(CONFIG_ARCH_CHIP_NUC120)
+#if defined(NUC120)
 #  include <arch/nuc1xx/nuc120_irq.h>
 #else
-#  error "Unrecognized NUC chip"
+#  error "Unrecognized/unsupported NUC chip"
 #endif
 
 /************************************************************************************

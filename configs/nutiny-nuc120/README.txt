@@ -10,6 +10,7 @@ Contents
 
   - Development Environment
   - GNU Toolchain Options
+  - NuttX Buildroot Toolchain
   - LEDs
   - Serial Console
   - Debugging
@@ -26,7 +27,47 @@ Development Environment
 GNU Toolchain Options
 =====================
 
-  As of this writing I have used only the CodeSourcery GCC toolchain for windows.
+  As of this writing, all testing has been performed using the NuttX buildroot
+  toolchain described below.  I have also verified the build using the
+  CodeSourcery GCC toolchain for windows.  Most any contemporary EABI GCC
+  toolchain should work will a little tinkering.
+
+NuttX Buildroot Toolchain
+=========================
+
+  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
+  different from the default in your PATH variable).
+
+  If you have no Cortex-M0 toolchain, one can be downloaded from the NuttX
+  SourceForge download site (https://sourceforge.net/projects/nuttx/files/buildroot/).
+  This GNU toolchain builds and executes in the Linux or Cygwin environment.
+
+  1. You must have already configured Nuttx in <some-dir>/nuttx.
+
+     cd tools
+     ./configure.sh nutiny-nuc120/<sub-dir>
+
+  2. Download the latest buildroot package into <some-dir>
+
+  3. unpack the buildroot tarball.  The resulting directory may
+     have versioning information on it like buildroot-x.y.z.  If so,
+     rename <some-dir>/buildroot-x.y.z to <some-dir>/buildroot.
+
+  4. cd <some-dir>/buildroot
+
+  5. cp configs/cortexm0-eabi-defconfig-4.6.3 .config
+
+  6. make oldconfig
+
+  7. make
+
+  8. Edit setenv.h, if necessary, so that the PATH variable includes
+     the path to the newly built binaries.
+
+  See the file configs/README.txt in the buildroot source tree.  That has more
+  details PLUS some special instructions that you will need to follow if you are
+  building a Cortex-M3 toolchain for Cygwin under Windows.
 
 LEDs
 ====

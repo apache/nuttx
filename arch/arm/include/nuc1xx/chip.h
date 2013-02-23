@@ -50,6 +50,10 @@
 /* NUC100 Advanced Line (Low Density) */
 
 #if defined(CONFIG_ARCH_CHIP_NUC100LC1BN) /* Flash 32K SRAM 4K, LQFP48 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (32*1024)  /* 32K FLASH */
 #  define NUC_SRAM   (4*1024)   /* 4K SRAM */
 #  define NUC_NIO     35        /* (35) GPIO */
@@ -68,6 +72,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC100LD1BN) /* Flash 64K SRAM 4K, LQFP48 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (4*1024)   /* 4K SRAM */
 #  define NUC_NIO     31        /* (35) GPIO */
@@ -86,6 +94,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC100LD2BN) /* Flash 64K SRAM 8K, LQFP48 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (8*1024)   /* 8K SRAM */
 #  define NUC_NIO     31        /* (35) GPIO */
@@ -104,6 +116,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC100RC1BN) /* Flash 32K SRAM 4K, LQFP64 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (32*1024)  /* 32K FLASH */
 #  define NUC_SRAM   (4*1024)   /* 4K SRAM */
 #  define NUC_NIO     49        /* (49) GPIO */
@@ -122,6 +138,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  define NUC_EBI     1         /* Supports EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC100RD1BN) /* Flash 64K SRAM 4K, LQFP64 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (4*1024)   /* 4K SRAM */
 #  define NUC_NIO     49        /* (49) GPIO */
@@ -140,6 +160,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  define NUC_EBI     1         /* Supports EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC100RD2BN) /* Flash 64K SRAM 8K, LQFP64 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (8*1024)   /* 4K SRAM */
 #  define NUC_NIO     49        /* (49) GPIO */
@@ -161,6 +185,10 @@
 /* NUC100 Advanced Line (Medium Density) */
 
 #elif defined(CONFIG_ARCH_CHIP_NUC100LD3AN) /* Flash 64K SRAM 16K, LQFP48 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     35        /* (35) GPIO */
@@ -179,6 +207,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC100LE3AN) /* Flash 128K SRAM 16K, LQFP48 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (128*1024) /* 64K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     35        /* (35) GPIO */
@@ -197,6 +229,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC100RD3AN) /* Flash 64K SRAM 16K, LQFP64 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     49        /* (49) GPIO */
@@ -215,6 +251,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC100RE3AN) /* Flash 128K SRAM 16K, LQFP64 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (128*1024) /* 128K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     49        /* (49) GPIO */
@@ -233,6 +273,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC100VD2AN) /* Flash 64K SRAM 8K, LQFP100 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (8*1024)   /* 8K SRAM */
 #  define NUC_NIO     80        /* (80) GPIO */
@@ -251,6 +295,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC100VD3AN) /* Flash 64K SRAM 16K, LQFP100 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     80        /* (80) GPIO */
@@ -269,6 +317,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC100VE3AN) /* Flash 128K SRAM 8K, LQFP100 package */
+#  define NUC100      1         /* NUC100 family */
+#  undef  NUC120                /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (128*1024) /* 128K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     80        /* (80) GPIO */
@@ -290,6 +342,10 @@
 /* NUC120 USB Line (Low Density) */
 
 #elif defined(CONFIG_ARCH_CHIP_NUC120LC1BN) /* Flash 32K SRAM 4K, LQFP48 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (32*1024)  /* 32K FLASH */
 #  define NUC_SRAM   (4*1024)   /* 4K SRAM */
 #  define NUC_NIO     31        /* (31) GPIO */
@@ -308,6 +364,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC120LD1BN) /* Flash 64K SRAM 4K, LQFP48 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (4*1024)   /* 4K SRAM */
 #  define NUC_NIO     31        /* (31) GPIO */
@@ -326,6 +386,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC120LD2BN) /* Flash 64K SRAM 8K, LQFP48 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (8*1024)   /* 8K SRAM */
 #  define NUC_NIO     31        /* (31) GPIO */
@@ -344,6 +408,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC120RC1BN) /* Flash 32K SRAM 4K, LQFP64 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (32*1024)  /* 32K FLASH */
 #  define NUC_SRAM   (4*1024)   /* 4K SRAM */
 #  define NUC_NIO     45        /* (45) GPIO */
@@ -362,6 +430,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  define NUC_EBI     1         /* Have EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC120RD1BN) /* Flash 64K SRAM 4K, LQFP64 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (4*1024)   /* 4K SRAM */
 #  define NUC_NIO     45        /* (45) GPIO */
@@ -380,6 +452,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  define NUC_EBI     1         /* Have EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC120RD2BN) /* Flash 64K SRAM 8K, LQFP64 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  define NUC_LOW     1         /* Low density part */
+#  undef  NUC_MEDIUM            /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (8*1024)   /* 8K SRAM */
 #  define NUC_NIO     45        /* (45) GPIO */
@@ -401,6 +477,10 @@
 /* NUC120 USB Line (Medium Density) */
 
 #elif defined(CONFIG_ARCH_CHIP_NUC120LD3AN) /* Flash 64K SRAM 16K, LQFP48 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     31        /* (31) GPIO */
@@ -419,6 +499,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC120LE3AN) /* Flash 128K SRAM 16K, LQFP48 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (128*1024) /* 128K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     31        /* (31) GPIO */
@@ -437,6 +521,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC120RD3AN) /* Flash 64K SRAM 16K, LQFP64 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     45        /* (45) GPIO */
@@ -455,6 +543,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC120RE3AN) /* Flash 128K SRAM 16K, LQFP64 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (128*1024) /* 128K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     45        /* (45) GPIO */
@@ -473,6 +565,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC120VD2AN) /* Flash 64K SRAM 8K, LQFP100 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (8*1024)   /* 8K SRAM */
 #  define NUC_NIO     76        /* (76) GPIO */
@@ -491,6 +587,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC120VD3AN) /* Flash 64K SRAM 16K, LQFP100 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (64*1024)  /* 64K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     76        /* (76) GPIO */
@@ -509,6 +609,10 @@
 #  define NUC_RTC     1         /* RTC */
 #  undef  NUC_EBI               /* No EBI */
 #elif defined(CONFIG_ARCH_CHIP_NUC120VE3AN) /* Flash 128K SRAM 16K, LQFP100 package */
+#  undef  NUC100                /* NUC100 family */
+#  define NUC120      1         /* NUC120 family */
+#  undef  NUC_LOW               /* Low density part */
+#  define NUC_MEDIUM  1         /* Medium density part */
 #  define NUC_FLASH  (128*1024) /* 128K FLASH */
 #  define NUC_SRAM   (16*1024)  /* 16K SRAM */
 #  define NUC_NIO     76        /* (76) GPIO */

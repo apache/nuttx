@@ -76,7 +76,9 @@
 int closedir(FAR DIR *dirp)
 {
   struct fs_dirent_s *idir = (struct fs_dirent_s *)dirp;
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   struct inode *inode;
+#endif
   int ret;
 
   if (!idir || !idir->fd_root)
@@ -89,13 +91,13 @@ int closedir(FAR DIR *dirp)
    * things wih different filesystems.
    */
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   inode = idir->fd_root;
 
   /* The way that we handle the close operation depends on what kind of root
    * inode we have open.
    */
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
   if (INODE_IS_MOUNTPT(inode) && !DIRENT_ISPSEUDONODE(idir->fd_flags))
     {
       /* The node is a file system mointpoint. Verify that the mountpoint

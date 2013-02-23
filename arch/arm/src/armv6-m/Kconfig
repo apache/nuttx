@@ -44,16 +44,4 @@ config ARMV6M_TOOLCHAIN_GNU_EABI
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 		configured for arm-none-eabi.
 
-config ARMV6M_TOOLCHAIN_RAISONANCE
-	bool "STMicro Raisonance for Windows"
-	depends on HOST_WINDOWS
-
 endchoice
-
-config ARMV6M_OABI_TOOLCHAIN
-	bool "OABI (vs EABI)"
-	default y
-	depends on ARMV6M_TOOLCHAIN_BUILDROOT
-	---help---
-		Most of the older buildroot toolchains are OABI and are named arm-nuttx-elf- vs. arm-nuttx-eabi-
-
