@@ -53,8 +53,8 @@
 /* Clocking *************************************************************************/
 /* Crystal frequencies */
 
-#define BOARD_HIGHSPEED_XTAL_FREQUENCY 12000000
-#define BOARD_LOWSPEED_XTAL_FREQUENCY  32768
+#define BOARD_XTALHI_FREQUENCY 12000000
+#define BOARD_XTALLO_FREQUENCY 32768
 
 /* PLL: The PLL must be 48MHz x N times when using USB
  *
@@ -72,7 +72,7 @@
  *      = 48MHz
  */
 
-#define BOARD_PLL_FIN    BOARD_HIGHSPEED_XTAL_FREQUENCY
+#define BOARD_PLL_FIN    BOARD_XTALHI_FREQUENCY
 #define BOARD_PLL_FB_DV  46
 #define BOARD_PLL_NF     (BOARD_PLL_FB_DV+2)
 #define BOARD_PLL_IN_DV  1

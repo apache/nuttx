@@ -100,8 +100,8 @@ is provided as an LQFP48 package and, for this case, the UART1 RX signal
 (RXD1) is on PB.4, pin 8, and the TX signal (TXD1) is on PB.5, pin 9.
 These pins are available on the NuTiny-SDC-NUC120 JP5.
 
-  NOTE: The TX vs RX terminology is confusing.  On my RS-232 driver board,
-  I need to connect the NUC120 TXD0 pin to the driver boards RXD pin.  How
+  NOTE: The TX vs RX labeling may be confusing.  On one RS-232 driver board,
+  I had to connect the NUC120 TXD0 pin to the driver boards RXD pin.  How
   confusing!
 
 UART0 is an alternative that can be selected by modifying the default
