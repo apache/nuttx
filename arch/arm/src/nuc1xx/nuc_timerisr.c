@@ -51,22 +51,33 @@
 #include "up_arch.h"
 
 #include "chip.h"
+#include "chip/nuc_clk.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Get the frequency of the selected clock source */
+
+#if defined(CONFIG_NUC_SYSTICK_XTALHI)
+#  define SYSTICK_CLOCK BOARD_XTALHI_FREQUENCY     /* High speed XTAL clock */
+#elif defined(CONFIG_NUC_SYSTICK_XTALLO)
+#  define SYSTICK_CLOCK BOARD_XTALLO_FREQUENCY     /* Low speed XTAL clock */
+#elif defined(CONFIG_NUC_SYSTICK_XTALHId2)
+#  define SYSTICK_CLOCK (BOARD_XTALHI_FREQUENCY/2) /* High speed XTAL clock/2 */
+#elif defined(CONFIG_NUC_SYSTICK_HCLKd2)
+#  define SYSTICK_CLOCK (BOARD_HCLK_FREQUENCY/2)   /* HCLK/2 */
+#elif defined(CONFIG_NUC_SYSTICK_INTHId2)
+#  define SYSTICK_CLOCK (NUC_INTHI_FREQUENCY/2)    /* Internal high speed clock/2 */
+#endif
 
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
  * system clock ticks per second.  That value is a user configurable setting
  * that defaults to 100 (100 ticks per second = 10 MS interval).
  *
- * Here we assume that the default clock source for the SysTick is the
- * external high speed crystal -- the power-on default value for the
- * CLKSEL0 register
- *
- * Then, for example, if BOARD_HIGHSPEED_XTAL_FREQUENCY is 12MHz and
- * CLK_TCK is 100, the the reload value would be:
+ * Then, for example, if the external high speed crystal is the SysTick
+ * clock source and BOARD_XTALHI_FREQUENCY is 12MHz and CLK_TCK is 100, then
+ * the reload value would be:
  *
  *   SYSTICK_RELOAD = (12,000,000 / 100) - 1
  *                  = 119,999
@@ -75,7 +86,7 @@
  * Which fits within the maximum 14-bit reload value.
  */
 
-#define SYSTICK_RELOAD ((BOARD_HIGHSPEED_XTAL_FREQUENCY / CLK_TCK) - 1)
+#define SYSTICK_RELOAD ((SYSTICK_CLOCK / CLK_TCK) - 1)
 
 /* The size of the reload field is 24 bits.  Verify that the reload value
  * will fit in the reload register.
@@ -126,6 +137,23 @@ int up_timerisr(int irq, uint32_t *regs)
 void up_timerinit(void)
 {
   uint32_t regval;
+
+  /* Configure the SysTick clock source.*/
+
+  regval  = getreg32(NUC_CLK_CLKSEL0);
+  regval &= ~CLK_CLKSEL0_STCLK_S_MASK;
+#if defined(CONFIG_NUC_SYSTICK_XTALHI)
+  regval |= CLK_CLKSEL0_STCLK_S_XTALHI;   /* High speed XTAL clock */
+#elif defined(CONFIG_NUC_SYSTICK_XTALLO)
+  regval |= CLK_CLKSEL0_STCLK_S_XTALLO;   /* Low speed XTAL clock */
+#elif defined(CONFIG_NUC_SYSTICK_XTALHId2)
+  regval |= CLK_CLKSEL0_STCLK_S_XTALDIV2; /* High speed XTAL clock/2 */
+#elif defined(CONFIG_NUC_SYSTICK_HCLKd2)
+  regval |= CLK_CLKSEL0_STCLK_S_HCLKDIV2; /* HCLK/2 */
+#elif defined(CONFIG_NUC_SYSTICK_INTHId2)
+  regval |= CLK_CLKSEL0_STCLK_S_INTDIV2;  /* Internal high speed clock/2 */
+#endif
+  putreg32(regval, NUC_CLK_CLKSEL0);
 
   /* Set the SysTick interrupt to the default priority */
 

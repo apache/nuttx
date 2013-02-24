@@ -125,10 +125,18 @@ void nuc_clockconfig(void)
 
   nuc_unlock();
 
-  /* Enable External 4~24 mhz high speed crystal */
+  /* Enable External 4~24 mhz high speed crystal (And other clocks if needed by
+   * other drivers).
+   */
 
   regval  = getreg32(NUC_CLK_PWRCON);
   regval |= CLK_PWRCON_XTL12M_EN;
+#ifdef CONFIG_NUC_XTALLO
+  regval |= CLK_PWRCON_XTL32K_EN;
+#endif
+#ifdef CONFIG_NUC_INTHI
+  regval |= CLK_PWRCON_OSC22M_EN;
+#endif
   putreg32(regval, NUC_CLK_PWRCON);
 
   /* Delay to assure that crystal input to be stable */

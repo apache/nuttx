@@ -86,11 +86,11 @@
 	.type	exception_common, function
 exception_common:
 
-	mrs		r0, ipsr				/* R0=exception number */
-
 	/* Complete the context save */
 
-	/* The EXC_RETURN value tells us whether the context is on the MSP or PSP */
+	/* Get the current stack pointer.  The EXC_RETURN value tells us whether
+	 * the context is on the MSP or PSP.
+	 */
 
 	mov		r0, r14					/* Copy high register to low register */
 	lsl		r1, r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
@@ -101,21 +101,36 @@ exception_common:
 1:
 	mrs		r1, psp					/* R1=The process stack pointer */
 
+	/* R1 is the current stack pointer.  HW_XCPT_REGS were pushed onto the stack
+	 * when the interrupt was taken so (R1)+HW_XCPT_SIZE is the value of the
+	 * stack pointer before the interrupt.  The total size of the context save
+	 * area is XCPTCONTEXT_SIZE = SW_XCPT_SIZE + HW_XCPT_SIZE so (R1)-SW_XCPT_SIZE
+	 * is the address of the beginning of the context save area.
+	 */
+
 2:
-	mov		r2, #XCPTCONTEXT_SIZE	/* R2=Size of context array */
-	sub		r0, r1, r2				/* R0=Beginning of context array on the stack */
-	mov		r2, r1					/* R2=Copy of the main/process stack pointer */
-	add		r2, #HW_XCPT_SIZE		/* R2=MSP/PSP before the interrupt was taken */
+	/* Save SP, BASEPRI, and R4-R7 in the context array */
+
+	sub		r1, #SW_XCPT_SIZE		/* R1=Beginning of context array on the stack */
+	mov		r2, #XCPTCONTEXT_SIZE   /* R2=Size of the context array */
+	add		r2, r1					/* R2=MSP/PSP before the interrupt was taken */
 									/* (ignoring the xPSR[9] alignment bit) */
 	mrs		r3, basepri				/* R3=Current BASEPRI setting */
+	mov		r0, r1					/* Copy the context array pointer */
+	stmia	r0!, {r2-r7}			/* Save the SP, BASEPRI, and R4-R7 in the context array */
 
-	stmia	r0!, {r2-r7}			/* Save the SP, BASEPRI, and R4-R7 */
+	/* Save R8-R11 and the EXEC_RETURN value in the context array */
+
 	mov		r2, r8					/* Copy high registers to low */
 	mov		r3, r9
 	mov		r4, r10
 	mov		r5, r11
 	mov		r6, r14
 	stmia	r0!, {r2-r6}			/* Save the high registers r8-r11 and r14 */
+
+	/* Get the exception number in R0=IRQ, R1=register save area on stack */
+
+	mrs		r0, ipsr				/* R0=exception number */
 
 	/* Disable interrupts, select the stack to use for interrupt handling
 	 * and call up_doirq to handle the interrupt
@@ -134,9 +149,9 @@ exception_common:
 	bl		up_doirq				/* R0=IRQ, R1=register save area on stack */
 	pop		{r1}					/* Recover R1=main stack pointer */
 #else
-	msr	 msp, r1					/* We are using the main stack pointer */
+	msr		msp, r1					/* We are using the main stack pointer */
 	bl		up_doirq				/* R0=IRQ, R1=register save area on stack */
-	mrs	 r1, msp					/* Recover R1=main stack pointer */
+	mrs		r1, msp					/* Recover R1=main stack pointer */
 #endif
 
 	/* On return from up_doirq, r0 will hold a pointer to register context
@@ -173,26 +188,38 @@ exception_common:
 	 * the same stack frame that we created at entry.
 	 */
 
+	/* Recover R8-R11 and EXEC_RETURN (5 registers) */
+
 	mov		r2, #(4*REG_R8)			/* R2=Offset to R8 storage */
 	sub		r0, r1, r2				/* R0=Address of R8 storage */
-	ldmia	r0!, {r2-r6}			/* Recover R8-R11 and R14 */
+	ldmia	r0!, {r2-r6}			/* Recover R8-R11 and R14 (5 registers)*/
 	mov		r8, r2					/* Move to position in high registers */
 	mov		r9, r3
 	mov		r10, r4
 	mov		r11, r5
-	mov		r14, r6
-	ldmia	r1!, {r2-r7}			/* Recover R4-R7 + 2 temp values */
+	mov		r14, r6					/* EXEC_RETURN */
 
-	/* The EXC_RETURN value tells us whether the context is on the MSP or PSP */
+	/* Recover SP (R2), BASEPRI (R3), and R4-R7.  The size of the sofware saved
+	 * portion is 11 words.  5 were recovered above; 6 are recovered by the
+	 * ldmia below.  So adding (4*5) to r1 accounts for all of the software
+	 * saved registers.
+	 */
+
+	ldmia	r1!, {r2-r7}			/* Recover R4-R7 + 2 temp values */
+	add		r1, #(4*5)				/* R1=Value of MSP/PSP on exception entry */
+
+	/* Restore the stack pointer.  The EXC_RETURN value tells us whether the
+	 * context is on the MSP or PSP.
+	 */
 
 	mov		r0, r14					/* Copy high register to low register */
 	lsl		r1, r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		5f						/* Test bit 31 */
-	mrs		r1, msp					/* R1=The main stack pointer */
+	msr		msp, r1					/* R1=The main stack pointer */
 	b		6f
 
 5:
-	mrs		r1, psp					/* R1=The process stack pointer */
+	msr		psp, r1					/* R1=The process stack pointer */
 
 6:
 	/* Restore the interrupt state */

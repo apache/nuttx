@@ -257,8 +257,12 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  DEBUGASSERT(irq == NUC_IRQ_SYSTICK ||
-             (irq >= NUC_IRQ_INTERRUPT && irq < NR_IRQS));
+  /* This will be called on each interrupt (via up_maskack_irq()) whether
+   * the interrupt can be disabled or not.  So this assertion is necessarily
+   * lame.
+   */
+
+  DEBUGASSERT((unsigned)irq < NR_IRQS);
 
   /* Check for an external interrupt */
 
@@ -291,8 +295,11 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-  DEBUGASSERT(irq == NUC_IRQ_SYSTICK ||
-             (irq >= NUC_IRQ_INTERRUPT && irq < NR_IRQS));
+  /* This will be called on each interrupt exit whether the interrupt can be
+   * enambled or not.  So this assertion is necessarily lame.
+   */
+
+  DEBUGASSERT((unsigned)irq < NR_IRQS);
 
   /* Check for external interrupt */
 

@@ -82,6 +82,18 @@
 #  endif
 #endif
 
+/* Select either the external high speed crystal, the PLL output, or
+ * the internal high speed clock as the the UART clock source.
+ */
+
+#if defined(CONFIG_NUC_UARTCLK_XTALHI)
+#  define NUC_UART_CLK BOARD_XTALHI_FREQUENCY
+#elif defined(CONFIG_NUC_UARTCLK_PLL)
+#  define NUC_UART_CLK BOARD_PLL_FOUT
+#elif defined(CONFIG_NUC_UARTCLK_INTHI)
+#  define NUC_UART_CLK NUC_INTHI_FREQUENCY
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -177,11 +189,21 @@ void nuc_lowsetup(void)
   putreg32(regval, NUC_GCR_IPRSTC2);
 #endif
 
-  /* Configure the UART clock source 
-   *
-   * Here we assume that the UART clock source is the external high speed
-   * crystal -- the power on default value in the CLKSEL0 register.
+  /* Configure the UART clock source. Set the UART clock source to either
+   * the external high speed crystal (CLKSEL1 reset value), the PLL output,
+   * or the internal high speed clock.
    */
+
+  regval  = getreg32(NUC_CLK_CLKSEL1);
+  regval &= ~CLK_CLKSEL1_UART_S_MASK;
+#if defined(CONFIG_NUC_UARTCLK_XTALHI)
+  regval |= CLK_CLKSEL1_UART_S_XTALHI;
+#elif defined(CONFIG_NUC_UARTCLK_PLL)
+  regval |= CLK_CLKSEL1_UART_S_PLL;
+#elif defined(CONFIG_NUC_UARTCLK_INTHI)
+  regval |= CLK_CLKSEL1_UART_S_INTHI;
+#endif
+  putreg32(regval, NUC_CLK_CLKSEL1);
 
   /* Enable UART clocking for the selected UARTs */
 
@@ -206,15 +228,13 @@ void nuc_lowsetup(void)
 
   /* Reset the TX FIFO */
 
-  regval = getreg32(NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
-  regval |= UART_FCR_TFR;
-  putreg32(regval, NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
+  regval  = getreg32(NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
+  regval &= ~(UART_FCR_TFR | UART_FCR_RFR);
+  putreg32(regval | UART_FCR_TFR, NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
 
   /* Reset the RX FIFO */
 
-  regval = getreg32(NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
-  regval |= UART_FCR_RFR;
-  putreg32(regval, NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
+  putreg32(regval | UART_FCR_RFR, NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
 
   /* Set Rx Trigger Level */
 
@@ -242,7 +262,6 @@ void nuc_lowsetup(void)
 #elif NUC_CONSOLE_PARITY == 2
   regval |= (UART_LCR_PBE | UART_LCR_EPE);
 #endif
-
 
 #if NUC_CONSOLE_2STOP != 0
   revgval |= UART_LCR_NSB;
@@ -292,9 +311,9 @@ void nuc_lowputc(uint32_t ch)
  *
  *   Mode DIV_X_EN DIV_X_ONE Divider X   BRD  (Baud rate equation)
  *   -------------------------------------------------------------
- *   0    Disable  0         B           A    UART_CLK / [16 * (A+2)]
- *   1    Enable   0         B           A    UART_CLK / [(B+1) * (A+2)] , B must >= 8
- *   2    Enable   1         Don't care  A    UART_CLK / (A+2), A must >=3
+ *    0       0        0         B        A   UART_CLK / [16 * (A+2)]
+ *    1       1        0         B        A   UART_CLK / [(B+1) * (A+2)] , B must >= 8
+ *    2       1        1     Don't care   A   UART_CLK / (A+2), A must >=3
  *
  * Here we assume that the default clock source for the UART modules is
  * the external high speed crystal.
@@ -311,9 +330,9 @@ void nuc_setbaud(uintptr_t base, uint32_t baud)
 
   regval = getreg32(base + NUC_UART_BAUD_OFFSET);
   
-   /* Source Clock mod 16 < 3 => Using Divider X = 16 (MODE#0) */
+   /* Mode 0: Source Clock mod 16 < 3 => Using Divider X = 16 */
 
-  clksperbit = BOARD_HIGHSPEED_XTAL_FREQUENCY / baud;
+  clksperbit = (NUC_UART_CLK + (baud >> 1)) / baud;
   if ((clksperbit & 15) < 3)          
     {
       regval &= ~(UART_BAUD_DIV_X_ONE | UART_BAUD_DIV_X_EN);
@@ -324,7 +343,7 @@ void nuc_setbaud(uintptr_t base, uint32_t baud)
 
   else
     {
-      /* Try to Set Divider X = 1 (MODE#2)*/
+      /* Mode 2: Try to Set Divider X = 1 */
 
       regval |= (UART_BAUD_DIV_X_ONE | UART_BAUD_DIV_X_EN);
       brd = clksperbit - 2;
@@ -333,13 +352,13 @@ void nuc_setbaud(uintptr_t base, uint32_t baud)
 
       if (brd > 0xffff)
         {
-          /* Try to Set Divider X up 10 (MODE#1) */
+          /* Mode 1: Try to Set Divider X up 10 */
 
           regval &= ~UART_BAUD_DIV_X_ONE;
    
           for (divx = 8; divx < 16; divx++)
             {
-              brd = (clksperbit % (divx + 1));
+              brd = clksperbit % (divx + 1);
               if (brd < 3)
                 {
                   regval &= ~UART_BAUD_DIVIDER_X_MASK;
@@ -355,6 +374,5 @@ void nuc_setbaud(uintptr_t base, uint32_t baud)
   regval &= ~UART_BAUD_BRD_MASK;
   regval |= UART_BAUD_BRD(brd);
   putreg32(regval, base + NUC_UART_BAUD_OFFSET);
-
 }
 #endif /* HAVE_UART */

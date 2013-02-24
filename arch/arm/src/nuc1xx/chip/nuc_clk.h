@@ -47,6 +47,11 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
+/* Well-known clock frequencies *************************************************************/
+
+#define NUC_INTHI_FREQUENCY        22118400
+#define NUC_INTLO_FREQUENCY        10000
+
 /* Register offsets *************************************************************************/
 
 #define NUC_CLK_PWRCON_OFFSET      0x0000 /* System power down control register */

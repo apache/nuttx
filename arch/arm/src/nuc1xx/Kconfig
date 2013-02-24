@@ -349,3 +349,49 @@ config NUC_I2S
 	default n
 
 endmenu
+
+config NUC_XTALLO
+	bool
+
+config NUC_INTHI
+	bool
+
+choice
+	prompt "SysTick clock source"
+	default NUC_SYSTICK_XTALHI
+
+config NUC_SYSTICK_XTALHI
+	bool "High speed XTAL clock"
+
+config NUC_SYSTICK_XTALLO
+	bool "Low speed XTAL clock"
+	select NUC_XTALLO
+
+config NUC_SYSTICK_XTALHId2
+	bool "High speed XTAL clock/2"
+
+config NUC_SYSTICK_HCLKd2
+	bool "HCLK/2"
+
+config NUC_SYSTICK_INTHId2
+	bool "Internal high speed clock/2"
+	select NUC_INTHI
+
+endchoice
+
+choice
+	prompt "NUC UART clock source"
+	default NUC_UARTCLK_INTHI
+	depends on NUC_UART0 || NUC_UART1 || NUC_UART2
+
+config NUC_UARTCLK_XTALHI
+	bool "External 4-24MHz high speed crystal"
+
+config NUC_UARTCLK_PLL
+	bool "PLL output"
+
+config NUC_UARTCLK_INTHI
+	bool "Internal 22.1184 high speed clock"
+	select NUC_INTHI
+
+endchoice
