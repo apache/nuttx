@@ -101,7 +101,7 @@ int nuc_configgpio(gpio_cfgset_t cfgset)
 
   /* Set the the GPIO PMD register */
 
-  regaddr = base + NUC_GPIOA_PMD_OFFSET;
+  regaddr = base + NUC_GPIO_PMD_OFFSET;
   regval = getreg32(regaddr);
   regval &= ~GPIO_PMD_MASK(pin);
 
@@ -131,7 +131,7 @@ int nuc_configgpio(gpio_cfgset_t cfgset)
   /* Check if we need to disable the digital input path */
 
   regaddr = base + NUC_GPIO_OFFD_OFFSET;
-  regval = getreg32(regaddr);
+  regval  = getreg32(regaddr);
   regval &= ~GPIO_OFFD(pin);
 
   if ((cfgset & GPIO_ANALOG) != 0)
@@ -144,7 +144,7 @@ int nuc_configgpio(gpio_cfgset_t cfgset)
   /* Check if we need to enable debouncing */
 
   regaddr = base + NUC_GPIO_DBEN_OFFSET;
-  regval = getreg32(regaddr);
+  regval  = getreg32(regaddr);
   regval &= ~GPIO_DBEN(pin);
 
   if ((cfgset & GPIO_DEBOUNCE) != 0)
@@ -174,24 +174,24 @@ int nuc_configgpio(gpio_cfgset_t cfgset)
 
     case GPIO_INTERRUPT_FALLING_EDGE:
       isrc |= GPIO_ISRC(pin);
-      ien |= GPIO_IF_EN(pin);
+      ien  |= GPIO_IF_EN(pin);
       break;
 
     case GPIO_INTERRUPT_BOTH_EDGES:
       isrc |= GPIO_ISRC(pin);
-      ien |= (GPIO_IF_EN(pin) | GPIO_IR_EN(pin));
+      ien  |= (GPIO_IF_EN(pin) | GPIO_IR_EN(pin));
       break;
 
     case GPIO_INTERRUPT_HIGH_LEVEL:
       isrc |= GPIO_ISRC(pin);
-      imd |= GPIO_IMD(pin);
-      ien |= GPIO_IR_EN(pin);
+      imd  |= GPIO_IMD(pin);
+      ien  |= GPIO_IR_EN(pin);
       break;
 
     case GPIO_INTERRUPT_LOW_LEVEL:
       isrc |= GPIO_ISRC(pin);
-      imd |= GPIO_IMD(pin);
-      ien |= GPIO_IF_EN(pin);
+      imd  |= GPIO_IMD(pin);
+      ien  |= GPIO_IF_EN(pin);
       break;
 
     default:
@@ -201,6 +201,14 @@ int nuc_configgpio(gpio_cfgset_t cfgset)
   putreg32(ien, base + NUC_GPIO_IEN_OFFSET);
   putreg32(imd, base + NUC_GPIO_IMD_OFFSET);
   putreg32(isrc, base + NUC_GPIO_ISRC_OFFSET);
+
+  /* If the pin is an output, set the initial output value */
+
+  if ((cfgset & GPIO_MODE_MASK) == GPIO_OUTPUT)
+    {
+      nuc_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0);
+    }
+
   return 0;
 }
 

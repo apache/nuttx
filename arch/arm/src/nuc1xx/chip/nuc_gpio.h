@@ -426,7 +426,7 @@
 #define GPIO_PMD_OPENDRAIN         2 /* Open drain output */
 #define GPIO_PMD_BIDI              3 /* Quasi bi-directional */
 
-#define GPIO_PMD_SHIFT(n)          ((n) << 1) /* Bits 2n-2n+_1: GPIOx Pin[n] mode control */ 
+#define GPIO_PMD_SHIFT(n)          ((n) << 1) /* Bits 2n-2n+1: GPIOx Pin[n] mode control */ 
 #define GPIO_PMD_MASK(n)           (3 << GPIO_PMD_SHIFT(n))
 #  define GPIO_PMD(n,v)            ((v) << GPIO_PMD_SHIFT(n))
 
