@@ -68,10 +68,10 @@
  *   LED_SIGNAL           In a signal handler      LED might glow
  *   LED_ASSERTION        An assertion failed      LED ON while handling the assertion
  *   LED_PANIC            The system has crashed   LED Blinking at 2Hz
- *   LED_IDLE             NUC1XX is is sleep mode   (Optional, not used)
+ *   LED_IDLE             NUC1XX is in sleep mode   (Optional, not used)
  */
 
-#define GPIO_LED (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN8)
+#define GPIO_LED (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN0)
 
 /* Button definitions ***************************************************************/
 /* The NuTiny has no buttons */
