@@ -93,7 +93,7 @@ exception_common:
 	 */
 
 	mov		r0, r14					/* Copy high register to low register */
-	lsl		r1, r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
+	lsl		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		1f						/* Test bit 31 */
 	mrs		r1, msp					/* R1=The main stack pointer */
 	b		2f
@@ -191,7 +191,7 @@ exception_common:
 	/* Recover R8-R11 and EXEC_RETURN (5 registers) */
 
 	mov		r2, #(4*REG_R8)			/* R2=Offset to R8 storage */
-	sub		r0, r1, r2				/* R0=Address of R8 storage */
+	add		r0, r1, r2				/* R0=Address of R8 storage */
 	ldmia	r0!, {r2-r6}			/* Recover R8-R11 and R14 (5 registers)*/
 	mov		r8, r2					/* Move to position in high registers */
 	mov		r9, r3
@@ -199,21 +199,20 @@ exception_common:
 	mov		r11, r5
 	mov		r14, r6					/* EXEC_RETURN */
 
-	/* Recover SP (R2), BASEPRI (R3), and R4-R7.  The size of the sofware saved
-	 * portion is 11 words.  5 were recovered above; 6 are recovered by the
-	 * ldmia below.  So adding (4*5) to r1 accounts for all of the software
-	 * saved registers.
+	/* Recover SP (R2), BASEPRI (R3), and R4-R7. Determine the value of
+	 * the stack pointer as it was on entry to the exception handler.
 	 */
 
 	ldmia	r1!, {r2-r7}			/* Recover R4-R7 + 2 temp values */
-	add		r1, #(4*5)				/* R1=Value of MSP/PSP on exception entry */
+	mov		r1, #HW_XCPT_SIZE		/* R1=Size of hardware-saved portion of the context array */
+	sub		r1, r2, r1				/* R1=Value of MSP/PSP on exception entry */
 
 	/* Restore the stack pointer.  The EXC_RETURN value tells us whether the
 	 * context is on the MSP or PSP.
 	 */
 
 	mov		r0, r14					/* Copy high register to low register */
-	lsl		r1, r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
+	lsl		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		5f						/* Test bit 31 */
 	msr		msp, r1					/* R1=The main stack pointer */
 	b		6f

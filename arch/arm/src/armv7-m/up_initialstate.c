@@ -155,7 +155,7 @@ void up_initial_state(struct tcb_s *tcb)
     {
       /* It is a normal task or a pthread.  Set user mode */
 
-      xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PROCESS_STACK;
+      xcp->regs[REG_EXC_RETURN] |= EXC_RETURN_PROCESS_STACK;
     }
 #endif /* CONFIG_NUTTX_KERNEL */
 

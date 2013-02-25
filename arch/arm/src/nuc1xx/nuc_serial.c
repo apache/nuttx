@@ -159,7 +159,7 @@ static struct nuc_dev_s g_uart0priv =
   .irq            = NUC_IRQ_UART0,
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
-  .depth          = UART0_FIFO_DEPTH,
+  .depth          = (UART0_FIFO_DEPTH-1),
   .stopbits2      = CONFIG_UART0_2STOP,
 };
 
@@ -190,7 +190,7 @@ static struct nuc_dev_s g_uart1priv =
   .irq            = NUC_IRQ_UART1,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
-  .depth          = UART1_FIFO_DEPTH,
+  .depth          = (UART1_FIFO_DEPTH-1),
   .stopbits2      = CONFIG_UART1_2STOP,
 };
 
@@ -221,7 +221,7 @@ static struct nuc_dev_s g_uart2priv =
   .irq            = NUC_IRQ_UART2,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
-  .depth          = UART2_FIFO_DEPTH,
+  .depth          = (UART2_FIFO_DEPTH-1),
   .stopbits2      = CONFIG_UART2_2STOP,
 };
 

@@ -63,18 +63,21 @@
 #ifdef HAVE_SERIAL_CONSOLE
 #  if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #    define NUC_CONSOLE_BASE     NUC_UART0_BASE
+#    define NUC_CONSOLE_DEPTH    UART0_FIFO_DEPTH
 #    define NUC_CONSOLE_BAUD     CONFIG_UART0_BAUD
 #    define NUC_CONSOLE_BITS     CONFIG_UART0_BITS
 #    define NUC_CONSOLE_PARITY   CONFIG_UART0_PARITY
 #    define NUC_CONSOLE_2STOP    CONFIG_UART0_2STOP
 #  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #    define NUC_CONSOLE_BASE     NUC_UART1_BASE
+#    define NUC_CONSOLE_DEPTH    UART1_FIFO_DEPTH
 #    define NUC_CONSOLE_BAUD     CONFIG_UART1_BAUD
 #    define NUC_CONSOLE_BITS     CONFIG_UART1_BITS
 #    define NUC_CONSOLE_PARITY   CONFIG_UART1_PARITY
 #    define NUC_CONSOLE_2STOP    CONFIG_UART1_2STOP
 #  elif defined(CONFIG_UART2_SERIAL_CONSOLE)
 #    define NUC_CONSOLE_BASE     NUC_UART2_BASE
+#    define NUC_CONSOLE_DEPTH    UART2_FIFO_DEPTH
 #    define NUC_CONSOLE_BAUD     CONFIG_UART2_BAUD
 #    define NUC_CONSOLE_BITS     CONFIG_UART2_BITS
 #    define NUC_CONSOLE_PARITY   CONFIG_UART2_PARITY
@@ -97,6 +100,38 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nuc_console_ready
+ *
+ * Description:
+ *   Wait until the console is ready to add another character to the TX
+ *   FIFO.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_SERIAL_CONSOLE
+static inline void nuc_console_ready(void)
+{
+#if 1
+  /* Wait for the TX FIFO to be empty (excessive!) */
+
+  while ((getreg32(NUC_CONSOLE_BASE + NUC_UART_FSR_OFFSET) & UART_FSR_TX_EMPTY) == 0);
+#else
+  uint32_t depth;
+
+  /* Wait until there is space in the TX FIFO */
+
+  do
+    {
+      register uint32_t regval = getreg32(NUC_CONSOLE_BASE + NUC_UART_FSR_OFFSET);
+      depth  = (regval & UART_FSR_TX_POINTER_MASK) >> UART_FSR_TX_POINTER_SHIFT;
+    }
+  while (depth >= (NUC_CONSOLE_DEPTH-1));
+#endif
+}
+#endif /* HAVE_SERIAL_CONSOLE */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -293,9 +328,9 @@ void nuc_lowsetup(void)
 void nuc_lowputc(uint32_t ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Wait for the TX FIFO to be empty (excessive!) */
+  /* Wait for the TX FIFO to become available */
 
-  while ((getreg32(NUC_CONSOLE_BASE + NUC_UART_FSR_OFFSET) & UART_FSR_TX_EMPTY) == 0);
+  nuc_console_ready();
 
   /* Then write the character to to the TX FIFO */
 

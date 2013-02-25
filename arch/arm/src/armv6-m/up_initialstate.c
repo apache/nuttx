@@ -115,10 +115,10 @@ void up_initial_state(struct tcb_s *tcb)
       xcp->regs[REG_PIC] = (uint32_t)tcb->dspace->region;
     }
 
-  /* Make certain that bit 0 is set in the main entry address.  This
-   * is only an issue when NXFLAT is enabled.  NXFLAT doesn't know
-   * anything about thumb; the addresses that NXFLAT sets are based
-   * on file header info and won't have bit 0 set.
+  /* Make certain that bit 0 is set in the main entry address.  This is
+   * only an issue when NXFLAT is enabled.  NXFLAT doesn't know anything
+   * about thumb; the addresses that NXFLAT sets are based on file header
+   * info and won't have bit 0 set.
    */
 
 #ifdef CONFIG_NXFLAT
@@ -128,22 +128,24 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Set privileged- or unprivileged-mode, depending on how NuttX is
    * configured and what kind of thread is being started.
-   *
-   * If the kernel build is not selected, then all threads run in
-   * privileged thread mode.
    */
-
-  xcp->regs[REG_EXC_RETURN] = EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE;
-  xcp->regs[REG_EXC_RETURN] |= EXC_RETURN_STD_CONTEXT;
 
 #ifdef CONFIG_NUTTX_KERNEL
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       /* It is a normal task or a pthread.  Set user mode */
 
-      xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PROCESS_STACK;
+      xcp->regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
     }
+  else
 #endif /* CONFIG_NUTTX_KERNEL */
+    {
+      /* If the kernel build is not selected -OR- if this is a kernel
+       * thread, then start it in privileged thread mode.
+       */
+
+      xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
+    }
 
   /* Enable or disable interrupts, based on user configuration */
 
