@@ -138,7 +138,6 @@ void up_initial_state(struct tcb_s *tcb)
       xcp->regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
     }
   else
-#endif /* CONFIG_NUTTX_KERNEL */
     {
       /* If the kernel build is not selected -OR- if this is a kernel
        * thread, then start it in privileged thread mode.
@@ -146,6 +145,7 @@ void up_initial_state(struct tcb_s *tcb)
 
       xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
     }
+#endif /* CONFIG_NUTTX_KERNEL */
 
   /* Enable or disable interrupts, based on user configuration */
 

@@ -92,6 +92,7 @@ exception_common:
 	 * the context is on the MSP or PSP.
 	 */
 
+#ifdef CONFIG_NUTTX_KERNEL
 	mov		r0, r14					/* Copy high register to low register */
 	lsl		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		1f						/* Test bit 31 */
@@ -100,6 +101,9 @@ exception_common:
 
 1:
 	mrs		r1, psp					/* R1=The process stack pointer */
+#else
+	mrs		r1, msp					/* R1=The main stack pointer */
+#endif
 
 	/* R1 is the current stack pointer.  HW_XCPT_REGS were pushed onto the stack
 	 * when the interrupt was taken so (R1)+HW_XCPT_SIZE is the value of the
@@ -125,8 +129,12 @@ exception_common:
 	mov		r3, r9
 	mov		r4, r10
 	mov		r5, r11
+#ifdef CONFIG_NUTTX_KERNEL
 	mov		r6, r14
 	stmia	r0!, {r2-r6}			/* Save the high registers r8-r11 and r14 */
+#else
+	stmia	r0!, {r2-r5}			/* Save the high registers r8-r11 */
+#endif
 
 	/* Get the exception number in R0=IRQ, R1=register save area on stack */
 
@@ -170,10 +178,10 @@ exception_common:
 
 	/* Copy the hardware-saved context to the new stack */
 
-	mov		r2, #SW_XCPT_SIZE		/* R2=Size of sofware-saved portion of the context array */
+	mov		r2, #SW_XCPT_SIZE		/* R2=Size of software-saved portion of the context array */
 	add		r1, r0, r2				/* R1=Address of HW save area in reg array */
-	ldr		r2, [r0, #(4*REG_SP)]	/* R1=Value of SP before interrupt */
-	sub		r2, #HW_XCPT_SIZE		/* R1=Address of HW save area on stack */
+	ldr		r2, [r0, #(4*REG_SP)]	/* R2=Value of SP before the interrupt */
+	sub		r2, #HW_XCPT_SIZE		/* R2=Address of HW save area on the return stack */
 	ldmia	r1!, {r4-r7}			/* Fetch four registers from the HW save area */
 	stmia	r2!, {r4-r7}			/* Copy four registers to the return stack */
 	ldmia	r1!, {r4-r7}			/* Fetch four registers from the HW save area */
@@ -192,12 +200,20 @@ exception_common:
 
 	mov		r2, #(4*REG_R8)			/* R2=Offset to R8 storage */
 	add		r0, r1, r2				/* R0=Address of R8 storage */
+#ifdef CONFIG_NUTTX_KERNEL
 	ldmia	r0!, {r2-r6}			/* Recover R8-R11 and R14 (5 registers)*/
 	mov		r8, r2					/* Move to position in high registers */
 	mov		r9, r3
 	mov		r10, r4
 	mov		r11, r5
 	mov		r14, r6					/* EXEC_RETURN */
+#else
+	ldmia	r0!, {r2-r5}			/* Recover R8-R11 and R14 (5 registers)*/
+	mov		r8, r2					/* Move to position in high registers */
+	mov		r9, r3
+	mov		r10, r4
+	mov		r11, r5
+#endif
 
 	/* Recover SP (R2), BASEPRI (R3), and R4-R7. Determine the value of
 	 * the stack pointer as it was on entry to the exception handler.
@@ -211,6 +227,7 @@ exception_common:
 	 * context is on the MSP or PSP.
 	 */
 
+#ifdef CONFIG_NUTTX_KERNEL
 	mov		r0, r14					/* Copy high register to low register */
 	lsl		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		5f						/* Test bit 31 */
@@ -221,6 +238,12 @@ exception_common:
 	msr		psp, r1					/* R1=The process stack pointer */
 
 6:
+#else
+	msr		msp, r1					/* R1=The main stack pointer */
+	ldr		r0, =EXC_RETURN_PRIVTHR	/* R0=EXC_RETURN to privileged mode */
+	mov		r14, r0					/* R14=EXC_RETURN to privileged mode */
+#endif
+
 	/* Restore the interrupt state */
 
 	msr		basepri, r3				/* Restore interrupts priority masking*/

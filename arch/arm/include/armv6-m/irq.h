@@ -74,11 +74,20 @@
 #define REG_R9              (7)  /* R9 */
 #define REG_R10             (8)  /* R10 */
 #define REG_R11             (9)  /* R11 */
-#define REG_EXC_RETURN      (10) /* EXC_RETURN */
+
+/* In the kernel build, we may return to either privileged or unprivileged
+ * modes.
+ */
+
+#ifdef CONFIG_NUTTX_KERNEL
+#  define REG_EXC_RETURN    (10) /* EXC_RETURN */
+#  define SW_XCPT_REGS      (11)
+#else
+#  define SW_XCPT_REGS      (10)
+#endif
 
 /* The total number of registers saved by software */
 
-#define SW_XCPT_REGS        (11)
 #define SW_XCPT_SIZE        (4 * SW_XCPT_REGS)
 
 /* On entry into an IRQ, the hardware automatically saves the following

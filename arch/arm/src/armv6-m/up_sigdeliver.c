@@ -81,8 +81,13 @@
 
 void up_sigdeliver(void)
 {
+  /* NOTE the "magic" guard space added to regs.  This is a little kludge
+   * because up_fullcontextrestore (called below) will do a stack-to-stack
+   * copy an may overwrite the regs[] array contents.  Sorry.
+   */
+
   struct tcb_s  *rtcb = (struct tcb_s*)g_readytorun.head;
-  uint32_t regs[XCPTCONTEXT_REGS];
+  uint32_t regs[XCPTCONTEXT_REGS + 4];
   sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the signal handling

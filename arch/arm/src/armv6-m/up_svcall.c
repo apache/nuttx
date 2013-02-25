@@ -249,7 +249,13 @@ int up_svcall(int irq, FAR void *context)
   svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcdbg("  PSR=%08x\n", regs[REG_XPSR]);
+#ifdef CONFIG_NUTTX_KERNEL
+  svcdbg("xPSR: %08x BASEPRI: %08x EXEC_RETURN: %08x\n",
+         regs[REG_XPSR], regs[REG_BASEPRI], regs[REG_EXC_RETURN]);
+#else
+  svcdbg("xPSR: %08x BASEPRI: %08x\n",
+         regs[REG_XPSR], regs[REG_BASEPRI]);
+#endif
 
   /* Handle the SVCall according to the command in R0 */
 
@@ -346,7 +352,13 @@ int up_svcall(int irq, FAR void *context)
       svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
              current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
-      svcdbg("  PSR=%08x\n", current_regs[REG_XPSR]);
+#ifdef CONFIG_NUTTX_KERNEL
+      svcdbg("xPSR: %08x BASEPRI: %08x EXEC_RETURN: %08x\n",
+             current_regs[REG_XPSR], current_regs[REG_BASEPRI], current_regs[REG_EXC_RETURN]);
+#else
+      svcdbg("xPSR: %08x BASEPRI: %08x\n",
+             current_regs[REG_XPSR], current_regs[REG_BASEPRI]);
+#endif
     }
   else
     {
