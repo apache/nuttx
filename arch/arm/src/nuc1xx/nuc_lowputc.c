@@ -299,7 +299,7 @@ void nuc_lowsetup(void)
 #endif
 
 #if NUC_CONSOLE_2STOP != 0
-  revgval |= UART_LCR_NSB;
+  regval |= UART_LCR_NSB;
 #endif
 
   putreg32(regval, NUC_CONSOLE_BASE + NUC_UART_LCR_OFFSET);

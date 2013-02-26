@@ -242,86 +242,64 @@ static uart_dev_t g_uart2port =
 };
 #endif /* CONFIG_NUC_UART2 */
 
-/* Which UART with be tty0/console and which tty1? tty2? */
+/* Which UART with be tty0/console and which tty1? tty2? The console, if it
+ * exists, will always be ttyS0.  If there is no console then will use the
+ * lowest numbered UART.
+ */
 
-#ifdef HAVE_CONSOLE
-#  if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart0port     /* UART0=console */
-#    define TTYS0_DEV       g_uart0port     /* UART0=ttyS0 */
-#    ifdef CONFIG_NUC_UART1
-#      define TTYS1_DEV     g_uart1port     /* UART0=ttyS0;UART1=ttyS1 */
-#      ifdef CONFIG_NUC_UART2
-#        define TTYS2_DEV   g_uart2port     /* UART0=ttyS0;UART1=ttyS1;UART2=ttyS2 */
-#      else
-#        undef  TTYS2_DEV                   /* UART0=ttyS0;UART1=ttyS1;No ttyS2*/
-#      endif
-#    else
-#      ifdef CONFIG_NUC_UART2
-#        define TTYS1_DEV   g_uart2port     /* UART0=ttyS0;UART2=ttyS1 */
-#        undef  TTYS2_DEV                   /* UART0=ttyS0;UART2=ttyS1;No ttyS2*/
-#      else
-#        undef  TTYS1_DEV                   /* UART0=ttyS0;No ttyS1;No ttyS2 */
-#        undef  TTYS2_DEV                   /* No ttyS2 */
-#      endif
-#    endif
-#  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart1port     /* UART1=console */
-#    define TTYS0_DEV       g_uart1port     /* UART1=ttyS0 */
-#    ifdef CONFIG_NUC_UART0
-#      define TTYS1_DEV     g_uart0port     /* UART1=ttyS0;UART0=ttyS1 */
-#      ifdef CONFIG_NUC_UART2
-#        define TTYS2_DEV   g_uart2port     /* UART1=ttyS0;UART0=ttyS1;UART2=ttyS2 */
-#      else
-#        undef  TTYS2_DEV                   /* UART1=ttyS0;UART0=ttyS1;No ttyS2 */
-#      endif
-#    else
-#      ifdef CONFIG_NUC_UART2
-#        define TTYS1_DEV   g_uart2port     /* UART1=ttyS0;UART2=ttyS1 */
-#        undef  TTYS2_DEV                   /* UART1=ttyS0;UART2=ttyS1;No ttyS2 */
-#      else
-#        undef  TTYS1_DEV                   /* UART1=ttyS0;No ttyS1;No ttyS2 */
-#        undef  TTYS2_DEV                   /* No ttyS2 */
-#      endif
-#    endif
-#  elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart2port     /* UART2=console */
-#    define TTYS0_DEV       g_uart2port     /* UART2=ttyS0 */
-#    ifdef CONFIG_NUC_UART2
-#      define TTYS1_DEV     g_uart0port     /* UART2=ttyS0;UART0=ttyS1 */
-#      ifdef CONFIG_NUC_UART1
-#        define TTYS2_DEV   g_uart1port     /* UART2=ttyS0;UART0=ttyS1;UART1=ttyS2 */
-#      else
-#        undef  TTYS2_DEV                   /* UART2=ttyS0;UART0=ttyS1;No ttyS2 */
-#      endif
-#    else
-#      ifdef CONFIG_NUC_UART1
-#        define TTYS1_DEV   g_uart1port     /* UART2=ttyS0;UART1=ttyS1 */
-#        undef TTYS2_DEV                    /* UART2=ttyS0;UART1=ttyS1;No ttyS2 */
-#      else
-#        undef TTYS1_DEV                    /* UART2=ttyS0;No ttyS1;No ttyS2 */
-#        undef TTYS2_DEV                    /* No ttyS2 */
-#      endif
-#    endif
+/* First pick the console and ttys0.  This could be any of UART0-2 */
+
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart0port /* UART0 is console */
+#    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#    define UART0_ASSIGNED      1
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart1port /* UART1 is console */
+#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define UART1_ASSIGNED      1
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart2port /* UART2 is console */
+#    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
+#    define UART2_ASSIGNED      1
+#else
+#  undef CONSOLE_DEV                        /* No console */
+#  if defined(CONFIG_NUC_UART0)
+#    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#    define UART0_ASSIGNED      1
+#  elif defined(CONFIG_NUC_UART1)
+#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define UART1_ASSIGNED      1
+#  elif defined(CONFIG_NUC_UART2)
+#    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
+#    define UART2_ASSIGNED      1
 #  endif
-#else /* No console */
-#  define TTYS0_DEV       g_uart0port       /* UART0=ttyS0 */
-#  ifdef CONFIG_NUC_UART1
-#    define TTYS1_DEV     g_uart1port       /* UART0=ttyS0;UART1=ttyS1 */
-#    ifdef CONFIG_NUC_UART2
-#      define TTYS2_DEV   g_uart2port       /* UART0=ttyS0;UART1=ttyS1;UART2=ttyS2 */
-#    else
-#      undef  TTYS2_DEV                     /* UART0=ttyS0;UART1=ttyS1;No ttyS2 */
-#    endif
-#  else
-#    ifdef CONFIG_NUC_UART2
-#      define TTYS1_DEV   g_uart2port       /* UART0=ttyS0;UART2=ttyS1 */
-#      undef  TTYS2_DEV                     /* UART0=ttyS0;UART2=ttyS1;No ttyS2 */
-#    else
-#      undef TTYS1_DEV                      /* UART0=ttyS0;No ttyS1;No ttyS2 */
-#      undef TTYS2_DEV                      /* No ttyS2 */
-#    endif
-#  endif
-#endif /* HAVE_CONSOLE */
+#endif
+
+/* Pick ttys1.  This could be any two of UART0-2 excluding the console UART. */
+
+#if defined(CONFIG_NUC_UART0) && !defined(UART0_ASSIGNED)
+#  define TTYS1_DEV           g_uart0port /* UART0 is ttyS1 */
+#  define UART0_ASSIGNED      1
+#elif defined(CONFIG_NUC_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS1_DEV           g_uart1port /* UART1 is ttyS1 */
+#  define UART1_ASSIGNED      1
+#elif defined(CONFIG_NUC_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS1_DEV           g_uart2port /* UART2 is ttyS1 */
+#  define UART2_ASSIGNED      1
+#endif
+
+/* Pick ttys2.  This could be one of UART1-2. It can't be UART0 because that
+ * was either assigned as ttyS0 or ttys1.  One of UART 1-2 could also be the
+ * console.
+ */
+
+#if defined(CONFIG_NUC_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS2_DEV           g_uart1port /* UART1 is ttyS2 */
+#  define UART1_ASSIGNED      1
+#elif defined(CONFIG_NUC_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS2_DEV           g_uart2port /* UART2 is ttyS2 */
+#  define UART2_ASSIGNED      1
+#endif
 
 /****************************************************************************
  * Inline Functions
@@ -391,46 +369,61 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Reset the TX FIFO */
 
-  regval = up_serialin(priv, NUC_UART_FCR_OFFSET
-  regval |= UART_FCR_TFR
-  up_serialout(priv, NUC_UART_FCR_OFFSET, regval);
+  regval = up_serialin(priv, NUC_UART_FCR_OFFSET);
+  up_serialout(priv, NUC_UART_FCR_OFFSET, regval | UART_FCR_TFR);
 
   /* Reset the RX FIFO */
 
-  regval = up_serialin(priv, NUC_UART_FCR_OFFSET
-  regval |= UART_FCR_RFR
-  up_serialout(priv, NUC_UART_FCR_OFFSET, regval);
+  up_serialout(priv, NUC_UART_FCR_OFFSET, regval | UART_FCR_RFR);
 
   /* Set Rx Trigger Level */
 
-  regval &= ~UART_FCR_FRITL_MASK;
+  regval &= ~(UART_FCR_FRITL_MASK | UART_FCR_TFR | UART_FCR_RFR);
   regval |= UART_FCR_FRITL_4;
   up_serialout(priv, NUC_UART_FCR_OFFSET, regval);
 
   /* Set Parity & Data bits and Stop bits */
 
   regval = 0;
-#if NUC_CONSOLE_BITS  == 5
-  regval |= UART_LCR_WLS_5;
-#elif NUC_CONSOLE_BITS  == 6
-  regval |= UART_LCR_WLS_6;
-#elif NUC_CONSOLE_BITS  == 7
-  regval |= UART_LCR_WLS_7;
-#elif NUC_CONSOLE_BITS  == 8
-  regval |= UART_LCR_WLS_8;
-#else
-  error "Unknown console UART data width"
-#endif
+  switch (priv->bits)
+    {
+    case 5:
+      regval |= UART_LCR_WLS_5;
+      break;
 
-#if NUC_CONSOLE_PARITY == 1
-  regval |= UART_LCR_PBE;
-#elif NUC_CONSOLE_PARITY == 2
-  regval |= (UART_LCR_PBE | UART_LCR_EPE);
-#endif
+    case 6:
+      regval |= UART_LCR_WLS_6;
+      break;
 
-#if NUC_CONSOLE_2STOP != 0
-  revgval |= UART_LCR_NSB;
-#endif
+    case 7:
+      regval |= UART_LCR_WLS_7;
+      break;
+
+    default:
+    case 8:
+      regval |= UART_LCR_WLS_8;
+      break;
+    }
+
+  switch (priv->parity)
+    {
+    default:
+    case 0:
+      break;
+
+    case 1:
+      regval |= UART_LCR_PBE;
+      break;
+
+    case 2:
+      regval |= (UART_LCR_PBE | UART_LCR_EPE);
+      break;
+    }
+
+  if (priv->stopbits2)
+    {
+      regval |= UART_LCR_NSB;
+    }
 
   up_serialout(priv, NUC_UART_LCR_OFFSET, regval);
 
@@ -441,7 +434,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Set the baud */
 
-  nuc_setbaud(CONSOLE_BASE, CONSOLE_BAUD);
+  nuc_setbaud(priv->uartbase, priv->baud);
 
   /* Set up the IER */
 
@@ -597,28 +590,25 @@ static int up_interrupt(int irq, void *context)
         {
           /* REVISIT:  Do we clear this be reading the modem status register? */
 
-          volatile uint32_t status = up_serialin(priv, NUC_UART_MSR_OFFSET);
-          vdbg("MSR: %08x\n", status);
+          (void)up_serialin(priv, NUC_UART_MSR_OFFSET);
         }
       
       /* Check for line status */
 
       if ((status & UART_ISR_RLS_INT) != 0)
         {
-          /* REVISIT:  Do we clear this be reading the line status register? */
+          /* REVISIT:  Do we clear this be reading the FIFO status register? */
 
-          volatile uint32_t status = up_serialin(priv, NUC_UART_FSR_OFFSET);
-          vdbg("LSR: %08x\n", status);
+          (void)up_serialin(priv, NUC_UART_FSR_OFFSET);
         }
 
       /* Check for buffer errors */
 
       if ((status & UART_ISR_BUF_ERR_INT) != 0)
         {
-          /* REVISIT:  Do we clear this be reading the line status register? */
+          /* REVISIT:  Do we clear this by reading the FIFO status register? */
 
-          volatile uint32_t status = up_serialin(priv, NUC_UART_MSR_OFFSET);
-          vdbg("MSR: %08x\n", status);
+          (void)up_serialin(priv, NUC_UART_FSR_OFFSET);
         }
     }
 
@@ -651,7 +641,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
           }
         else
           {
-            memcpy(user, dev, sizeof(struct nuc_dev_s));
+            memcpy(user, priv, sizeof(struct nuc_dev_s));
           }
       }
       break;
@@ -754,7 +744,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->ier |= (UART_IER_RDA_IEN | UART_IER_RLS_IEN | UART_IER_RTO_IEN |
-                    UART_IER_BUF_ERR_IEN  UART_IER_TIME_OUT_EN);
+                    UART_IER_BUF_ERR_IEN | UART_IER_TIME_OUT_EN);
 #endif
     }
   else
