@@ -119,9 +119,8 @@ vfork:
 	mov		r6, r10
 	mov		r7, fp
 	stmia	r1!, {r4-r7}			/* Save r8-r10 and fp in the structure */
-	str		r0, [r1, #0]			/* Save the stack pointer in the structure */
-	mov		r0, r14					/* Copy lr to a low registers */
-	str		r0, [r1, #0]			/* Save the stack pointer in the structure */
+	mov		r5, lr					/* Copy lr to a low register */
+	stmia	r1!, {r0,r5}			/* Save sp and lr in the structure */
 
 	/* Then, call up_vfork(), passing it a pointer to the stack structure */
 
