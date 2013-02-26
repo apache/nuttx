@@ -112,11 +112,15 @@
 
 /* Macros to handle saving and restoring interrupt state.  In the current ARM
  * model, the state is always copied to and from the stack and TCB.  In the
- * Cortex-M3 model, the state is copied from the stack to the TCB, but only
- * a referenced is passed to get the state from the TCB.
+ * Cortex-M0/3 model, the state is copied from the stack to the TCB, but only
+ * a referenced is passed to get the state from the TCB.  Cortex-M4 is the
+ * same, but may have additional complexity for floating point support in
+ * some configurations.
  */
 
-#if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM3) || \
+    defined(CONFIG_ARCH_CORTEXM4)
+
 #  if defined(CONFIG_ARCH_FPU) && !defined(CONFIG_ARMV7M_CMNVECTOR)
 #    define up_savestate(regs) \
        do { \
@@ -128,9 +132,12 @@
 #    define up_savestate(regs)  up_copystate(regs, (uint32_t*)current_regs)
 #  endif
 #  define up_restorestate(regs) (current_regs = regs)
+
 #else
+
 #  define up_savestate(regs)    up_copystate(regs, (uint32_t*)current_regs)
 #  define up_restorestate(regs) up_copystate((uint32_t*)current_regs, regs)
+
 #endif
 
 /****************************************************************************
@@ -164,7 +171,8 @@ extern const uint32_t g_heapbase;
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-#if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM3) || \
+    defined(CONFIG_ARCH_CORTEXM4)
 extern uint32_t g_intstackbase;
 #  else
 extern uint32_t g_userstack;
@@ -254,7 +262,8 @@ void up_pminitialize(void);
 #  define up_pminitialize()
 #endif
 
-#if defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM3) || \
+    defined(CONFIG_ARCH_CORTEXM4)
 void up_systemreset(void) noreturn_function;
 #endif
 
@@ -290,7 +299,7 @@ void up_prefetchabort(uint32_t *regs);
 void up_syscall(uint32_t *regs);
 void up_undefinedinsn(uint32_t *regs);
 
-#endif /* CONFIG_ARCH_CORTEXM3 || CONFIG_ARCH_CORTEXM4 */
+#endif /* CONFIG_ARCH_CORTEXM0 || CONFIG_ARCH_CORTEXM3 || CONFIG_ARCH_CORTEXM4 */
 
 void up_vectorundefinsn(void);
 void up_vectorswi(void);
