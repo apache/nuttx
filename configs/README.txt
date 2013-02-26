@@ -2036,6 +2036,10 @@ configs/zp214xpa
   ZPA213X/4XPA development board. Includes support for the
   UG-2864AMBAG01 OLED also from The0.net
 
+configs/zkit-arm-1769
+  Zilogic System's ARM development Kit, ZKIT-ARM-1769.  This board is based
+  on the NXP LPC1769.  The Nuttx Buildroot toolchain is used by default.
+
 Configuring NuttX
 ^^^^^^^^^^^^^^^^^
 

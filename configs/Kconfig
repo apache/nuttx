@@ -653,6 +653,13 @@ config ARCH_BOARD_ZP214XPA
 		ZPA213X/4XPA development board. Includes support for the
 		UG-2864AMBAG01 OLED also from The0.net
 
+config ARCH_BOARD_ZKITARM
+	bool "Zilogic ZKit-ARM-1769 Development Kit"
+	depends on ARCH_CHIP_LPC1768
+	---help---
+		Zilogic System's ARM development Kit, ZKIT-ARM-1769.  This board is based
+		on the NXP LPC1769.  The Nuttx Buildroot toolchain is used by default.
+
 config ARCH_BOARD_SIM
 	bool "User mode simulation"
 	depends on ARCH_SIM
@@ -738,6 +745,7 @@ config ARCH_BOARD
 	default "z8encore000zco"      if ARCH_BOARD_Z8ENCORE000ZCO
 	default "z8f64200100kit"      if ARCH_BOARD_Z8F64200100KIT
 	default "zp214xpa"            if ARCH_BOARD_ZP214XPA
+	default "zkit-arm-1769"       if ARCH_BOARD_ZKITARM
 	default "sim"                 if ARCH_BOARD_SIM
 	default ""                    if ARCH_BOARD_CUSTOM
 
@@ -981,6 +989,9 @@ source "configs/z8f64200100kit/Kconfig"
 endif
 if ARCH_BOARD_ZP214XPA
 source "configs/zp214xpa/Kconfig"
+endif
+if ARCH_BOARD_ZKITARM
+source "configs/zkit-arm-1769/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "configs/sim/Kconfig"
