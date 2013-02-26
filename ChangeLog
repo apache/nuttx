@@ -4206,3 +4206,6 @@
 	  converted to use the mconf configuration tool.
 	* configs/zkit-arm-1769:  Add support for Zilogic System's ARM development
 	  Kit, ZKIT-ARM-1769.
+	* configs/zkit-arm-1769/hello:  Add a "Hello, World!" configuration for
+	  the KBIT-ARM-1769 board.
+
