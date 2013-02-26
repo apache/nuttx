@@ -303,12 +303,22 @@ config ARCH_RAMFUNCS
 comment "Board Settings"
 
 config BOARD_LOOPSPERMSEC
-	int "Loops per millisecond"
-	help
-		Must be calibrated for correct operation of delay loops.
-		You simply use a stop watch to measure the 100 second delay
-		then adjust CONFIG_BOARD_LOOPSPERMSEC until it is actually
-		is 100 seconds.
+	int "Delay loops per millisecond"
+	default 5000
+	---help---
+		Simple delay loops are used by some logic, especially during boot-up,
+		driver initialization.  These delay loops must be calibrated for each
+		board in order to assure accurate timing by the delay loops.
+
+config ARCH_CALIBRATION
+	bool "Calibrate delay loop"
+	default n
+	---help---
+		Enables some built in instrumentation that causes a 100 second delay
+		during boot-up.  This 100 second delay serves no purpose other than it
+		allows you to calibratre BOARD_LOOPSPERMSEC.  You simply use a stop
+		watch to measure the actual delay then adjust BOARD_LOOPSPERMSEC until
+		the actual delay is 100 seconds.
 
 config DRAM_START
 	hex "DRAM start physical address"

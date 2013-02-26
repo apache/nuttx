@@ -251,22 +251,6 @@ config PAGING
 		If set =y in your configation file, this setting will enable the on-demand
 		paging feature as described in http://www.nuttx.org/NuttXDemandPaging.html.
 
-config BOARD_LOOPSPERMSEC
-	int "Delay loops per millisecond"
-	default 5000
-	---help---
-		Delay loops nust be calibrated for correct operation.
-
-config ARCH_CALIBRATION
-	bool "Calibrate delay loop"
-	default n
-	---help---
-		Enables some built in instrumentation that causes a 100 second delay
-		during boot-up.  This 100 second delay serves no purpose other than it
-		allows you to calibratre BOARD_LOOPSPERMSEC.  You simply use a stop
-		watch to measure the 100 second delay then adjust BOARD_LOOPSPERMSEC until
-		the delay actually is 100 seconds.
-
 config DEBUG_HARDFAULT
 	bool "Verbose Hard-Fault Debug"
 	default n

@@ -32,22 +32,6 @@ config ARCH_CHIP
 	string
 	default "pic32mx"	if ARCH_CHIP_PIC32MX
 
-config BOARD_LOOPSPERMSEC
-	int "Delay loops per millisecond"
-	default 5000
-	---help---
-		Delay loops nust be calibrated for correct operation.
-
-config ARCH_CALIBRATION
-	bool "Calibrate delay loop"
-	default n
-	---help---
-		Enables some built in instrumentation that causes a 100 second delay
-		during boot-up.  This 100 second delay serves no purpose other than it
-		allows you to calibratre BOARD_LOOPSPERMSEC.  You simply use a stop
-		watch to measure the 100 second delay then adjust BOARD_LOOPSPERMSEC until
-		the delay actually is 100 seconds.
-
 source arch/mips/src/common/Kconfig
 source arch/mips/src/mips32/Kconfig
 source arch/mips/src/pic32mx/Kconfig
