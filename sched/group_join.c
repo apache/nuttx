@@ -116,6 +116,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
 
       if (!newmembers)
         {
+          sdbg("ERROR: Failed to reallocate tg_members\n");
           return -ENOMEM;
         }
 

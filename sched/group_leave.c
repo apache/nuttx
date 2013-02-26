@@ -245,7 +245,7 @@ static inline void group_release(FAR struct task_group_s *group)
  *****************************************************************************/
 
 #ifdef HAVE_GROUP_MEMBERS
-static inline int group_removemember(FAR struct task_group_s *group, pid_t pid)
+static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
 {
   irqstate_t flags;
   int i;
@@ -269,12 +269,8 @@ static inline int group_removemember(FAR struct task_group_s *group, pid_t pid)
           group->tg_members[i] = group->tg_members[group->tg_nmembers - 1];
           group->tg_nmembers--;
           irqrestore(flags);
-
-          return group->tg_nmembers;
         }
     }
-
-  return -ENOENT;
 }
 #endif /* HAVE_GROUP_MEMBERS */
 
@@ -310,21 +306,24 @@ void group_leave(FAR struct tcb_s *tcb)
 
   DEBUGASSERT(tcb);
 
-  /* Make sure that we have a group */
+  /* Make sure that we have a group. */
 
   group = tcb->group;
   if (group)
     {
-      /* Remove the member from group */
+      /* Remove the member from group.  This function may be called
+       * during certain error handling before the PID has been
+       * added to the group.  In this case tcb->pid will be uninitialized
+       * group_removemember() will fail.
+       */
 
-      int ret = group_removemember(group, tcb->pid);
-      DEBUGASSERT(ret >= 0);
+      group_removemember(group, tcb->pid);
 
-      /* Is the group now empty? */
+      /* Have all of the members left the group? */
 
-      if (ret == 0)
+      if (group->tg_nmembers == 0)
         {
-          /* Release all of the resource held by the task group */
+          /* Yes.. Release all of the resource held by the task group */
 
           group_release(group);
         }
