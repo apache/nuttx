@@ -163,12 +163,13 @@ GNU Toolchain Options
   the other toolchain, you simply need add one of the following configuration
   options to your .config (or defconfig) file:
 
-    CONFIG_LPC17_CODESOURCERYW=y   : CodeSourcery under Windows
-    CONFIG_LPC17_CODESOURCERYL=y   : CodeSourcery under Linux
-    CONFIG_LPC17_DEVKITARM=y       : devkitARM under Windows
-    CONFIG_LPC17_BUILDROOT=y       : NuttX buildroot under Linux or Cygwin (default)
-    CONFIG_LPC17_CODEREDW=n        : Code Red toolchain under Windows
-    CONFIG_LPC17_CODEREDL=y        : Code Red toolchain under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y     : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y     : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_CODEREDW=y      : Code Red toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODEREDL=y      : Code Red toolchain under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y       : The Atollic toolchain
 
   You may also have to modify the PATH in the setenv.h file if your make cannot
   find the tools.
@@ -547,9 +548,41 @@ Where <subdir> is one of the following:
     This builds an example application using apps/examples/hello.  See
     apps/examples/README.txt for information about the examples.
 
+    NOTES:
+ 
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Default toolchain:
+
+       CONFIG_HOST_LINUX=y                 : Builds under Windows (or Cygwin)
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : NuttX buildroot toolchain
+
   thttpd:
     This builds the THTTPD web server example using the THTTPD and
     the apps/examples/thttpd application.
 
-    NOTE:  You will need to build the NXFLAT toolchain as described
-    above in order to use this example.
+    NOTES:
+ 
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Default toolchain:
+
+       CONFIG_HOST_LINUX=y                 : Builds under Windows (or Cygwin)
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : NuttX buildroot toolchain
+
+    3. You will need to build the NXFLAT toolchain as described above in
+       order to use this example.
