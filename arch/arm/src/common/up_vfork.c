@@ -134,11 +134,12 @@ pid_t up_vfork(const struct vfork_s *context)
   uint32_t stackutil;
   int ret;
 
-  svdbg("r4:%08x r5:%08x r6:%08x r7:%08x\n",
+  svdbg("vfork context [%p]:\n", context);
+  svdbg("  r4:%08x r5:%08x r6:%08x r7:%08x\n",
         context->r4, context->r5, context->r6, context->r7);
-  svdbg("r8:%08x r9:%08x r10:%08x\n",
+  svdbg("  r8:%08x r9:%08x r10:%08x\n",
         context->r8, context->r9, context->r10);
-  svdbg("fp:%08x sp:%08x lr:%08x\n",
+  svdbg("  fp:%08x sp:%08x lr:%08x\n",
         context->fp, context->sp, context->lr);
 
   /* Allocate and initialize a TCB for the child task. */
