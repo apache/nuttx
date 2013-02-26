@@ -94,7 +94,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-struct task_group_s; /* Forward reference */
+struct pthread_tcb_s; /* Forward reference */
+struct task_group_s;  /* Forward reference */
 
 void weak_function pthread_initialize(void);
 int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority, start_t start,

@@ -1,7 +1,12 @@
 ############################################################################
-# configs/lpcxpresso-lpc1768/ostest/Make.defs
+# configs/zkit-arm-1769/thttpd/Make.defs
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013 Zilogic Systems. All rights reserved.
+#   Author: BabuSubashChandar <code@zilogic.com>
+#
+# Based on configs/lpcxpresso-lpc1768/thttpd/Make.defs
+#
+#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,12 +51,14 @@ ifeq ($(WINTOOL),y)
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/ld.script}"
   MAXOPTIMIZATION = -O2
+  NXFLATLDSCRIPT = -T "${shell cygpath -w $(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld}"
 else
   # Linux/Cygwin-native toolchain
   MKDEP = $(TOPDIR)/tools/mkdeps.sh
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
   ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/ld.script
+  NXFLATLDSCRIPT = -T"$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld"
 endif
 
 CC = $(CROSSDEV)gcc
@@ -62,6 +69,9 @@ AR = $(CROSSDEV)ar rcs
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
+
+MKNXFLAT = mknxflat
+LDNXFLAT = ldnxflat
 
 ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
 ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
@@ -87,7 +97,7 @@ CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
 AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 
 NXFLATLDFLAGS1 = -r -d -warn-common
-NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) $(NXFLATLDSCRIPT) -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
 OBJEXT = .o
@@ -96,11 +106,6 @@ EXEEXT =
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
-else
-ifneq ($(CROSSDEV),arm-nuttx-eabi-)
-  LDFLAGS += -nostartfiles -nodefaultlibs
-endif
-
 endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g

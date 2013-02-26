@@ -54,7 +54,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "lpc17_internal.h"
+#include "lpc17_ssp.h"
 #include "zkitarm_internal.h"
 
 #if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
@@ -122,7 +122,7 @@ void weak_function lpc17_sspinitialize(void)
 #ifdef CONFIG_NX_LCDDRIVER
   (void)lpc17_configgpio(ZKITARM_OLED_CS);
 #endif
-#endif
+#endif /* CONFIG_LPC17_SSP0 */
 
   ssp_dumpgpio("lpc17_sspinitialize() Exit");
 }
@@ -168,7 +168,7 @@ uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
   sspdbg("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
 }
-#endif
+#endif /* CONFIG_LPC17_SSP1 */
 
 #ifdef CONFIG_LPC17_SSP0
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
@@ -209,6 +209,6 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
   sspdbg("Returning zero\n");
   return 0;
 }
-#endif
 
+#endif /* CONFIG_LPC17_SSP0 */
 #endif /* CONFIG_LPC17_SSP0 || CONFIG_LPC17_SSP1 */

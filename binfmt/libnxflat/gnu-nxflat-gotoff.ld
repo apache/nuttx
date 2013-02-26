@@ -107,8 +107,8 @@ SECTIONS
 
   .data 0x00000000 :
     {
-      /* In this model, .rodata is access using PC-relative addressing
-       * and, hence, must also reside in the .text section.
+      /* In this model, .rodata is access using GOT-relative addressing
+       * and, hence, must also reside in the .data section.
        */
 
       __data_start = . ;
