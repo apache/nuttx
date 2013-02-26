@@ -974,6 +974,8 @@ nuttx
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
+ |   |- cloudctrl
+ |   |   `- README.txt
  |   |- compal_e88
  |   |   `- README.txt
  |   |- compal_e99
@@ -1007,9 +1009,9 @@ nuttx
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
- |   |- lincoln60/
- |   |   `- README.txt
  |   |- kwikstik-k40/
+ |   |   `- README.txt
+ |   |- lincoln60/
  |   |   `- README.txt
  |   |- lm3s6432-s2e/
  |   |   |- include/README.txt
@@ -1023,9 +1025,9 @@ nuttx
  |   |   |- include/README.txt
  |   |   |- src/README.txt
  |   |   `- README.txt
- |   |- lpcxpresso-lpc1768/
- |   |   `- README.txt
  |   |- lpc4330-xplorer/
+ |   |   `- README.txt
+ |   |- lpcxpresso-lpc1768/
  |   |   `- README.txt
  |   |- m68332evb/
  |   |   |- include/README.txt
@@ -1072,6 +1074,8 @@ nuttx
  |   |   `- README.txt
  |   |- pic32-starterkit/
  |   |   `- README.txt
+ |   |- pic32mx7mmb/
+ |   |   `- README.txt
  |   |- pjrc-8051/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
@@ -1107,6 +1111,8 @@ nuttx
  |   |   `- README.txt
  |   |- stm32f100rc_generic/
  |   |   `- README.txt
+ |   |- stm32f3discovery/
+ |   |   `- README.txt
  |   |- stm32f4discovery/
  |   |   `- README.txt
  |   |- sure-pic32mx/
@@ -1114,6 +1120,8 @@ nuttx
  |   |- teensy/
  |   |   `- README.txt
  |   |- twr-k60n512/
+ |   |   `- README.txt
+ |   |- ubw32/
  |   |   `- README.txt
  |   |- us7032evb1/
  |   |   |- bin/README.txt
@@ -1140,6 +1148,10 @@ nuttx
  |   |   `- README.txt
  |   |- z8f64200100kit/
  |   |   |- ostest/README.txt
+ |   |   `- README.txt
+ |   |- zkit-arm-1769/
+ |   |   `- README.txt
+ |   |- zp214xpa/
  |   |   `- README.txt
  |   `- README.txt
  |- drivers/
