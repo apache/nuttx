@@ -199,7 +199,6 @@ void up_irqinitialize(void)
 
   putreg32(DEFPRIORITY32, ARMV6M_SYSCON_SHPR2);
   putreg32(DEFPRIORITY32, ARMV6M_SYSCON_SHPR3);
-  putreg32(DEFPRIORITY32, ARMV6M_SYSCON_SHPR3);
 
   /* Now set all of the interrupt lines to the default priority */
 

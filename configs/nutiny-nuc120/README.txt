@@ -95,6 +95,12 @@ LEDs
 Serial Console
 ==============
 
+As with most NuttX configurations, the NuTiny-SKD-NUC120 configurations
+depend on having a serial console to interact with the software.  The
+NuTiny-SDK-NUC120, however, has not on-board RS-232 drivers so will be
+necessary to connect the NuTiny-SDK-NUC120 UART pins to an external
+RS-232 driver board or TTL-to-Serial USB adaptor.
+
 By default UART1 is used as the serial console on these boards.  NUC120LE3AN
 is provided as an LQFP48 package and, for this case, the UART1 RX signal
 (RXD1) is on PB.4, pin 8, and the TX signal (TXD1) is on PB.5, pin 9.
@@ -300,7 +306,8 @@ Where <subdir> is one of the following:
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
        CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
-    3. Serial Console.  The serial console is on UART1 which is available
+    3. Serial Console.  A serial console is required to see the OS test
+       output.  The serial console is configured on UART1 which is available
        on JP5:
 
        UART1 RX signal (RXD1) is on PB.4, pin 8, and
@@ -331,11 +338,16 @@ Where <subdir> is one of the following:
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
-    3. Serial Console.  The serial console is on UART1 which is available
+    3. Serial Console.  A serial console is necessary to interrupt with
+       NSH. The serial console is configured on UART1 which is available
        on JP5:
 
        UART1 RX signal (RXD1) is on PB.4, pin 8, and
        UART1 TX signal (TXD1) is on PB.5, pin 9.
+
+       It is possible to configure NSH to use a USB serial console instead
+       of an RS-232 serial console.  However, that configuration has not
+       been impelmented as of this writing.
 
     4. This configuration includes USB Support (CDC/ACM device)
 
