@@ -358,7 +358,10 @@ config NUC_INTHI
 
 choice
 	prompt "SysTick clock source"
-	default NUC_SYSTICK_XTALHI
+	default NUC_SYSTICK_CORECLK
+
+config NUC_SYSTICK_CORECLK
+	bool "Cortex-M0 core clock"
 
 config NUC_SYSTICK_XTALHI
 	bool "High speed XTAL clock"
