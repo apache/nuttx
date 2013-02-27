@@ -58,3 +58,7 @@ endif
 CHIP_ASRCS  = 
 CHIP_CSRCS  = nuc_clockconfig.c nuc_gpio.c nuc_idle.c nuc_irq.c nuc_lowputc.c
 CHIP_CSRCS += nuc_serial.c nuc_start.c nuc_timerisr.c
+
+ifeq ($(CONFIG_DEBUG),y)
+CHIP_CSRCS += nuc_dumpgpio.c
+endif

@@ -56,13 +56,11 @@
  * Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef LED_DEBUG  /* Define to enable debug */
-
-#ifdef LED_DEBUG
+#ifdef CONFIG_DEBUG_LEDS
 #  define leddbg  lldbg
 #  define ledvdbg llvdbg
 #else

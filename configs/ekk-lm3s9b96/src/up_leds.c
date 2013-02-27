@@ -2,7 +2,7 @@
  * configs/lm3s6965-ek/src/up_leds.c
  * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Jose Pablo Rojas V. <jrojas@nx-engineering.com>
  *
@@ -56,13 +56,11 @@
  * Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef LED_DEBUG  /* Define to enable debug */
-
-#ifdef LED_DEBUG
+#ifdef CONFIG_DEBUG_LEDS
 #  define leddbg  lldbg
 #  define ledvdbg llvdbg
 #else
@@ -72,7 +70,7 @@
 
 /* Dump GPIO registers */
 
-#ifdef LED_DEBUG
+#ifdef CONFIG_DEBUG_LEDS
 #  define led_dumpgpio(m) lm_dumpgpio(LED_GPIO, m)
 #else
 #  define led_dumpgpio(m)

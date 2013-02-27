@@ -55,6 +55,8 @@
 #define NUC_GPIO_PORTD             3
 #define NUC_GPIO_PORTE             4
 
+#define NUC_GPIO_NPORTS            5
+
 /* GPIO control registers */
 
 #define NUC_GPIO_CTRL_OFFSET(n)   (0x0000 + ((n) << 6))

@@ -76,18 +76,28 @@
  * Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef LED_DEBUG  /* Define to enable debug */
-
-#ifdef LED_DEBUG
+#ifdef CONFIG_DEBUG_LEDS
 #  define leddbg  lldbg
-#  define ledvdbg llvdbg
+#  ifdef CONFIG_DEBUG_VERBOSE
+#    define ledvdbg lldbg
+#  else
+#    define ledvdbg(x...)
+#  endif
 #else
 #  define leddbg(x...)
 #  define ledvdbg(x...)
+#endif
+
+/* Dump GPIO registers */
+
+#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_LEDS)
+#  define led_dumpgpio(m) nuc_dumpgpio(GPIO_LED, m)
+#else
+#  define led_dumpgpio(m)
 #endif
 
 /****************************************************************************
@@ -112,7 +122,9 @@
 
 void nuc_ledinit(void)
 {
+  led_dumpgpio("Before configuration");
   nuc_configgpio(GPIO_LED);
+  led_dumpgpio("After configuration");
 }
 
 /****************************************************************************

@@ -584,5 +584,11 @@ Where <subdir> is one of the following:
        CONFIG_HOST_LINUX=y                 : Builds under Windows (or Cygwin)
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : NuttX buildroot toolchain
 
-    3. You will need to build the NXFLAT toolchain as described above in
+    3. TCP/IP (only) networking is enabled with this configuration:
+
+       CONFIG_EXAMPLES_THTTPD_NOMAC=y             : Will use MAC 00:e0:de:ad:be:ef
+       CONFIG_EXAMPLES_THTTPD_DRIPADDR=0xac100002 : Gateway 172.16.00.02
+       CONFIG_EXAMPLES_THTTPD_NETMASK=0xffffff00  : Netmask 255.255.255.0
+
+    4. You will need to build the NXFLAT toolchain as described above in
        order to use this example.

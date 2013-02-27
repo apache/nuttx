@@ -2,7 +2,7 @@
  * configs/twr-k60n512/src/up_leds.c
  * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,13 +118,11 @@
 #define LED_PANIC_OFF_SETBITS        ((0) << OFF_SETBITS_SHIFT)
 #define LED_PANIC_OFF_CLRBITS        ((K60_LED4) << OFF_CLRBITS_SHIFT)
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef LED_DEBUG  /* Define to enable debug */
-
-#ifdef LED_DEBUG
+#ifdef CONFIG_DEBUG_LEDS
 #  define leddbg  lldbg
 #  define ledvdbg llvdbg
 #else

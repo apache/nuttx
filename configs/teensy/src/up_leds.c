@@ -2,7 +2,7 @@
  * configs/teensy/src/up_leds.c
  * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,22 +56,18 @@
  * Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef LED_DEBUG   /* Define to enable debug */
-#undef LED_VERBOSE /* Define to enable verbose debug */
-
-#ifdef LED_DEBUG
+#ifdef CONFIG_DEBUG_LEDS
 #  define leddbg  lldbg
-#  ifdef LED_VERBOSE
+#  ifdef CONFIG_DEBUG_VERBOSE
 #    define ledvdbg lldbg
 #  else
 #    define ledvdbg(x...)
 #  endif
 #else
-#  undef LED_VERBOSE
 #  define leddbg(x...)
 #  define ledvdbg(x...)
 #endif

@@ -2,7 +2,7 @@
  * configs/lpc4330-xplorer/src/up_autoleds.c
  * arch/arm/src/board/up_autoleds.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,11 +90,11 @@
  */
 
 /* Debug definitions ********************************************************/
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
  */
 
-#ifdef CONFIG_DEBUG_LED
+#ifdef CONFIG_DEBUG_LEDS
 #  define leddbg  lldbg
 #  ifdef CONFIG_DEBUG_VERBOSE
 #    define LED_VERBOSE 1

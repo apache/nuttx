@@ -43,6 +43,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arch/nuc1xx/chip.h>
+
 #include "up_arch.h"
 
 #include "chip.h"
@@ -222,6 +224,10 @@ int nuc_configgpio(gpio_cfgset_t cfgset)
 
 void nuc_gpiowrite(gpio_cfgset_t pinset, bool value)
 {
+#ifndef NUC_LOW
+  irqstate_t flags;
+  uintptr_t base;
+#endif
   int port;
   int pin;
 
@@ -233,7 +239,31 @@ void nuc_gpiowrite(gpio_cfgset_t pinset, bool value)
   pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
 
   DEBUGASSERT((unsigned)port <= NUC_GPIO_PORTE);
+
+  /* Only the low density NUC100/120 chips support bit-band access to GPIO
+   * pins.
+   */
+
+#ifdef NUC_LOW
   putreg32((uint32_t)value, NUC_PORT_PDIO(port, pin));
+#else
+  /* Get the base address of the GPIO port registers */
+
+  base = NUC_GPIO_CTRL_BASE(port);
+
+  /* Disable interrupts -- the following operations must be atomic */
+
+  flags = irqsave();
+
+  /* Allow writing only to the selected pin in the DOUT register */
+
+  putreg32(~(1 << pin), base + NUC_GPIO_DMASK_OFFSET);
+
+  /* Set the pin to the selected value and re-enable interrupts */
+
+  putreg32(((uint32_t)value << pin), base + NUC_GPIO_DOUT_OFFSET);
+  irqrestore(flags);
+#endif
 }
 
 /****************************************************************************
@@ -246,6 +276,9 @@ void nuc_gpiowrite(gpio_cfgset_t pinset, bool value)
 
 bool nuc_gpioread(gpio_cfgset_t pinset)
 {
+#ifndef NUC_LOW
+  uintptr_t base;
+#endif
   int port;
   int pin;
 
@@ -257,5 +290,20 @@ bool nuc_gpioread(gpio_cfgset_t pinset)
   pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
 
   DEBUGASSERT((unsigned)port <= NUC_GPIO_PORTE);
+
+  /* Only the low density NUC100/120 chips support bit-band access to GPIO
+   * pins.
+   */
+
+#ifdef NUC_LOW
   return (getreg32(NUC_PORT_PDIO(port, pin)) & PORT_MASK) != 0;
+#else
+  /* Get the base address of the GPIO port registers */
+
+  base = NUC_GPIO_CTRL_BASE(port);
+
+  /* Return the state of the selected pin */
+
+ return (getreg32(base + NUC_GPIO_PIN_OFFSET) & (1 << pin)) != 0;
+#endif
 }

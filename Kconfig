@@ -381,6 +381,13 @@ config DEBUG_LCD
 	---help---
 		Enable low level debug SYSLOG output from the LCD driver (disabled by default)
 
+config DEBUG_LEDS
+	bool "Enable Low-level LED Debug Output"
+	default n
+	depends on ARCH_HAVE_LEDS
+	---help---
+		Enable low level debug from board-specific LED logic
+
 config DEBUG_INPUT
 	bool "Enable Input Device Debug Output"
 	default n

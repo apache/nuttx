@@ -1,8 +1,7 @@
 /****************************************************************************
- * configs/ea3131/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * arch/arm/src/nuc/nuc_gpio.c
  *
- *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,35 +39,52 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <sys/types.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
+#include "up_arch.h"
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
-#include "lpc31_internal.h"
+#include "nuc_gpio.h"
 
-/****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
- * with CONFIG_DEBUG_VERBOSE too)
- */
-
-#ifdef CONFIG_DEBUG_LEDS
-#  define leddbg  lldbg
-#  define ledvdbg llvdbg
-#else
-#  define leddbg(x...)
-#  define ledvdbg(x...)
-#endif
+#ifdef CONFIG_DEBUG
 
 /****************************************************************************
  * Private Data
+ ****************************************************************************/
+/* Port letters for prettier debug output */
+
+#ifdef CONFIG_DEBUG
+static const char g_portchar[NUC_GPIO_NPORTS] =
+{
+#if NUC_GPIO_NPORTS > 9
+#  error "Additional support required for this number of GPIOs"
+#elif NUC_GPIO_NPORTS > 8
+  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'
+#elif NUC_GPIO_NPORTS > 7
+  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
+#elif NUC_GPIO_NPORTS > 6
+  'A', 'B', 'C', 'D', 'E', 'F', 'G'
+#elif NUC_GPIO_NPORTS > 5
+  'A', 'B', 'C', 'D', 'E', 'F'
+#elif NUC_GPIO_NPORTS > 4
+  'A', 'B', 'C', 'D', 'E'
+#elif NUC_GPIO_NPORTS > 3
+  'A', 'B', 'C', 'D'
+#elif NUC_GPIO_NPORTS > 2
+  'A', 'B', 'C'
+#elif NUC_GPIO_NPORTS > 1
+  'A', 'B'
+#elif NUC_GPIO_NPORTS > 0
+  'A'
+#else
+#  error "Bad number of GPIOs"
+#endif
+};
+#endif
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -80,28 +96,49 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Function:  nuc_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the provided pin description
+ *   along with a descriptive messasge.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+int nuc_dumpgpio(gpio_cfgset_t pinset, const char *msg)
 {
+  irqstate_t flags;
+  uintptr_t base;
+  int port;
+
+  /* Decode the port and pin.  Use the port number to get the GPIO base
+   * address.
+   */
+
+  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  DEBUGASSERT((unsigned)port <= NUC_GPIO_PORTE);
+  base = NUC_GPIO_CTRL_BASE(port);
+
+  /* The following requires exclusive access to the GPIO registers */
+
+  flags = irqsave();
+
+  lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
+        g_portchar[port], pinset, base, msg);
+  lldbg("  PMD: %08x  OFFD: %08x  DOUT: %08x DMASK: %08x\n",
+        getreg32(base + NUC_GPIO_PMD_OFFSET),
+        getreg32(base + NUC_GPIO_OFFD_OFFSET),
+        getreg32(base + NUC_GPIO_DOUT_OFFSET),
+        getreg32(base + NUC_GPIO_DMASK_OFFSET));
+  lldbg("  PIN: %08x  DBEN: %08x   IMD: %08x   IEN: %08x\n",
+        getreg32(base + NUC_GPIO_PIN_OFFSET),
+        getreg32(base + NUC_GPIO_DBEN_OFFSET),
+        getreg32(base + NUC_GPIO_IMD_OFFSET),
+        getreg32(base + NUC_GPIO_IEN_OFFSET));
+  lldbg(" ISRC: %08x\n",
+        getreg32(base + NUC_GPIO_ISRC_OFFSET));
+
+  irqrestore(flags);
+  return OK;
 }
 
-/****************************************************************************
- * Name: up_ledon
- ****************************************************************************/
-
-void up_ledon(int led)
-{
-}
-
-/****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
-
-void up_ledoff(int led)
-{
-}
-
-#endif /* CONFIG_ARCH_LEDS */
+#endif /* CONFIG_DEBUG */
