@@ -2,7 +2,7 @@
  * configs/hymini-stm32v/src/up_leds.c
  * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Laurent Latil <laurent@latil.nom.fr>
  *
@@ -57,13 +57,11 @@
  * Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef LED_DEBUG  /* Define to enable debug */
-
-#ifdef LED_DEBUG
+#ifdef CONFIG_DEBUG_LEDS
 #  define leddbg  lldbg
 #  define ledvdbg llvdbg
 #else

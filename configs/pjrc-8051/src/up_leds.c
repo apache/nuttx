@@ -1,7 +1,7 @@
 /************************************************************************
  * up_leds.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ static uint8_t g_ledstate;
  * Private Functions
  ************************************************************************/
 
-#if defined(CONFIG_LED_DEBUG) && defined(CONFIG_ARCH_LEDS)
+#if defined(CONFIG_DEBUG_LEDS) && defined(CONFIG_ARCH_LEDS)
 static void _up_puthex(uint8_t hex) __naked
 {
   hex; /* To avoid unreferenced argument warning */

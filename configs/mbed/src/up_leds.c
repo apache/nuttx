@@ -60,29 +60,25 @@
  * Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef LED_DEBUG   /* Define to enable debug */
-#undef LED_VERBOSE /* Define to enable verbose debug */
-
-#ifdef LED_DEBUG
+#ifdef CONFIG_DEBUG_LEDS
 #  define leddbg  lldbg
-#  ifdef LED_VERBOSE
+#  ifdef CONFIG_DEBUG_VERBOSE
 #    define ledvdbg lldbg
 #  else
 #    define ledvdbg(x...)
 #  endif
 #else
-#  undef LED_VERBOSE
 #  define leddbg(x...)
 #  define ledvdbg(x...)
 #endif
 
 /* Dump GPIO registers */
 
-#ifdef LED_VERBOSE
+#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_LEDS)
 #  define led_dumpgpio(m) lpc17_dumpgpio(MBED_LED3, m)
 #else
 #  define led_dumpgpio(m)

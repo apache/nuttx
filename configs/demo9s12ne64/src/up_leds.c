@@ -2,7 +2,7 @@
  * configs/demo9s12ne64/src/up_leds.c
  * arch/arm/src/board/up_leds.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,13 +50,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG with
- * CONFIG_DEBUG_VERBOSE too)
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
  */
 
-#undef LED_DEBUG  /* Define to enable debug */
-
-#ifdef LED_DEBUG
+#ifdef CONFIG_DEBUG_LEDS
 #  define leddbg  lldbg
 #  define ledvdbg llvdbg
 #else
