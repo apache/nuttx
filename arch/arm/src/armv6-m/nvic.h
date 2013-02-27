@@ -58,19 +58,19 @@
 /* NVIC register offsets ****************************************************************************/
 /* NVIC register offsets (all relative to ARMV6M_NVIC1_BASE) */
 
-#define ARMV6M_NVIC_ISER_OFFSET        0x0100  /* Interrupt set-enable register */
-#define ARMV6M_NVIC_ICER_OFFSET        0x0180  /* Interrupt clear-enable register */
-#define ARMV6M_NVIC_ISPR_OFFSET        0x0200  /* Interrupt set-pending register */
-#define ARMV6M_NVIC_ICPR_OFFSET        0x0280  /* Interrupt clear-pending register */
-#define ARMV6M_NVIC_IPR_OFFSET(n)      (0x0400 + ((n) << 2))
-#  define ARMV6M_NVIC_IPR0_OFFSET      0x0400  /* Interrupt priority register 0 */
-#  define ARMV6M_NVIC_IPR1_OFFSET      0x0404  /* Interrupt priority register 1 */
-#  define ARMV6M_NVIC_IPR2_OFFSET      0x0408  /* Interrupt priority register 2 */
-#  define ARMV6M_NVIC_IPR3_OFFSET      0x040c  /* Interrupt priority register 3 */
-#  define ARMV6M_NVIC_IPR4_OFFSET      0x0410  /* Interrupt priority register 4 */
-#  define ARMV6M_NVIC_IPR5_OFFSET      0x0414  /* Interrupt priority register 5 */
-#  define ARMV6M_NVIC_IPR6_OFFSET      0x0418  /* Interrupt priority register 6 */
-#  define ARMV6M_NVIC_IPR7_OFFSET      0x041c  /* Interrupt priority register 7 */
+#define ARMV6M_NVIC_ISER_OFFSET        0x0000  /* Interrupt set-enable register */
+#define ARMV6M_NVIC_ICER_OFFSET        0x0080  /* Interrupt clear-enable register */
+#define ARMV6M_NVIC_ISPR_OFFSET        0x0100  /* Interrupt set-pending register */
+#define ARMV6M_NVIC_ICPR_OFFSET        0x0180  /* Interrupt clear-pending register */
+#define ARMV6M_NVIC_IPR_OFFSET(n)      (0x0300 + ((n) << 2))
+#  define ARMV6M_NVIC_IPR0_OFFSET      0x0300  /* Interrupt priority register 0 */
+#  define ARMV6M_NVIC_IPR1_OFFSET      0x0304  /* Interrupt priority register 1 */
+#  define ARMV6M_NVIC_IPR2_OFFSET      0x0308  /* Interrupt priority register 2 */
+#  define ARMV6M_NVIC_IPR3_OFFSET      0x030c  /* Interrupt priority register 3 */
+#  define ARMV6M_NVIC_IPR4_OFFSET      0x0310  /* Interrupt priority register 4 */
+#  define ARMV6M_NVIC_IPR5_OFFSET      0x0314  /* Interrupt priority register 5 */
+#  define ARMV6M_NVIC_IPR6_OFFSET      0x0318  /* Interrupt priority register 6 */
+#  define ARMV6M_NVIC_IPR7_OFFSET      0x031c  /* Interrupt priority register 7 */
 
 /* System control register offsets (all relative to ARMV6M_SYSCON2_BASE) */
 
@@ -364,8 +364,37 @@
  * Public Data
  ****************************************************************************************************/
 
+#ifndef __ASSEMBLY__
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" 
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************************************
  * Public Function Prototypes
  ****************************************************************************************************/
 
+/****************************************************************************************************
+ * Function:  up_dumpnvic
+ *
+ * Description:
+ *   Dump all NVIC and SYSCON registers along with a user message.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_DEBUG
+void up_dumpnvic(FAR const char *msg);
+#else
+#  define up_dumpnvic(m)
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_COMMON_ARMV6_M_NVIC_H */
