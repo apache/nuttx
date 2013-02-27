@@ -52,6 +52,8 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
+#include "nuc_irq.h"
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -176,6 +178,34 @@ static inline void nuc_prioritize_syscall(int priority)
   regval &= ~SYSCON_SHPR2_PRI_11_MASK;
   regval |= (priority << SYSCON_SHPR2_PRI_11_SHIFT);
   putreg32(regval, ARMV6M_SYSCON_SHPR2);
+}
+
+/****************************************************************************
+ * Name: nuc_clrpend
+ *
+ * Description:
+ *   Clear a pending interrupt at the NVIC.
+ *
+ ****************************************************************************/
+
+static inline void nuc_clrpend(int irq)
+{
+  /* This will be called on each interrupt exit whether the interrupt can be
+   * enambled or not.  So this assertion is necessarily lame.
+   */
+
+  DEBUGASSERT((unsigned)irq < NR_IRQS);
+
+  /* Check for an external interrupt */
+
+  if (irq >= NUC_IRQ_INTERRUPT && irq < NUC_IRQ_INTERRUPT + 32)
+    {
+      /* Set the appropriate bit in the ISER register to enable the
+       * interrupt
+       */
+
+      putreg32((1 << (irq - NUC_IRQ_INTERRUPT)), ARMV6M_NVIC_ICPR);
+    }
 }
 
 /****************************************************************************
@@ -332,6 +362,7 @@ void up_enable_irq(int irq)
 void up_maskack_irq(int irq)
 {
   up_disable_irq(irq);
+  nuc_clrpend(irq);
 }
 
 /****************************************************************************

@@ -273,8 +273,8 @@ void nuc_lowsetup(void)
 
   /* Set Rx Trigger Level */
 
-  regval &= ~UART_FCR_FRITL_MASK;
-  regval |= UART_FCR_FRITL_4;
+  regval &= ~UART_FCR_RFITL_MASK;
+  regval |= UART_FCR_RFITL_4;
   putreg32(regval, NUC_CONSOLE_BASE + NUC_UART_FCR_OFFSET);
 
   /* Set Parity & Data bits and Stop bits */

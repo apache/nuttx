@@ -129,28 +129,29 @@
 #define UART_IER_MODEM_IEN         (1 << 3)  /* Bit 3:  Modem status interrupt enable (UART0/1) */
 #define UART_IER_RTO_IEN           (1 << 4)  /* Bit 4:  RX timeout interrupt enable */
 #define UART_IER_BUF_ERR_IEN       (1 << 5)  /* Bit 5:  Buffer error interrupt enable */
-#define UART_IER_WAKE_EN           (1 << 6)  /* Bit 6:  UART wake-up function enabled (UART0/1) */
+#define UART_IER_WAKE_EN           (1 << 6)  /* Bit 6:  UART wake-up function enable (UART0/1) */
 #define UART_IER_TIME_OUT_EN       (1 << 11) /* Bit 11: Time out counter enable */
 #define UART_IER_AUTO_RTS_EN       (1 << 12) /* Bit 12: RTS auto flow control enable (UART0/1) */
 #define UART_IER_AUTO_CTS_EN       (1 << 13) /* Bit 13: CTS auto flow control enable (UART0/1) */
 #define UART_IER_DMA_TX_EN         (1 << 14) /* Bit 14: TX DMA enable (UART0/1) */
 #define UART_IER_DMA_RX_EN         (1 << 15) /* Bit 15: RX DMA enable (UART0/1) */
 
-#define UART_IER_ALLIE             (0x0000f87f)
+#define UART_IER_ALLIE             (0x0000003f)
+#define UART_IER_ALLBITS           (0x0000f87f)
 
 /* UART FIFO control register */
 
 #define UART_FCR_RFR               (1 << 1)  /* Bit 1:  RX FIFO software reset */
 #define UART_FCR_TFR               (1 << 2)  /* Bit 2:  TX FIFO software reset */
-#define UART_FCR_FRITL_SHIFT       (4)       /* Bits 4-7: RX FIFO interrupt trigger level */
-#define UART_FCR_FRITL_MASK        (15 << UART_FCR_FRITL_SHIFT)
-#  define UART_FCR_FRITL_1         (0 << UART_FCR_FRITL_SHIFT)
-#  define UART_FCR_FRITL_4         (1 << UART_FCR_FRITL_SHIFT)
-#  define UART_FCR_FRITL_8         (2 << UART_FCR_FRITL_SHIFT)
-#  define UART_FCR_FRITL_14        (3 << UART_FCR_FRITL_SHIFT)
-#  define UART_FCR_FRITL_30        (4 << UART_FCR_FRITL_SHIFT) /* High speed */
-#  define UART_FCR_FRITL_46        (5 << UART_FCR_FRITL_SHIFT) /* High speed */
-#  define UART_FCR_FRITL_62        (6 << UART_FCR_FRITL_SHIFT) /* High speed */
+#define UART_FCR_RFITL_SHIFT       (4)       /* Bits 4-7: RX FIFO interrupt trigger level */
+#define UART_FCR_RFITL_MASK        (15 << UART_FCR_RFITL_SHIFT)
+#  define UART_FCR_RFITL_1         (0 << UART_FCR_RFITL_SHIFT)
+#  define UART_FCR_RFITL_4         (1 << UART_FCR_RFITL_SHIFT)
+#  define UART_FCR_RFITL_8         (2 << UART_FCR_RFITL_SHIFT)
+#  define UART_FCR_RFITL_14        (3 << UART_FCR_RFITL_SHIFT)
+#  define UART_FCR_RFITL_30        (4 << UART_FCR_RFITL_SHIFT) /* High speed */
+#  define UART_FCR_RFITL_46        (5 << UART_FCR_RFITL_SHIFT) /* High speed */
+#  define UART_FCR_RFITL_62        (6 << UART_FCR_RFITL_SHIFT) /* High speed */
 #define UART_FCR_RX_DIS            (1 << 8)  /* Bit 8:  Recive disable register */
 #define UART_FCR_RTS_TRI_LEV_SHIFT (16)      /* Bits 16-19: RTS trigger level for auto flow control */
 #define UART_FCR_RTS_TRI_LEV_MASK  (15 << UART_FCR_RTS_TRI_LEV_SHIFT)
