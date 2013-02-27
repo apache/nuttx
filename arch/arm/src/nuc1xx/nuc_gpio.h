@@ -74,7 +74,7 @@
  * MM.. .... .... ....
  */
 
-#define GPIO_MODE_SHIFT               (14)      /* Bits 145_15: GPIO mode */
+#define GPIO_MODE_SHIFT               (14)      /* Bits 14-15: GPIO mode */
 #define GPIO_MODE_MASK                (3 << GPIO_MODE_SHIFT)
 #  define GPIO_INPUT                  (0 << GPIO_MODE_SHIFT) /* Input */
 #  define GPIO_OUTPUT                 (1 << GPIO_MODE_SHIFT) /* Push-pull output */
@@ -146,6 +146,7 @@
 #  define GPIO_PORTD                  (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
 #  define GPIO_PORTE                  (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
 #
+
 /* This identifies the bit in the port:
  *
  * 1111 1100 0000 0000
@@ -233,6 +234,21 @@ void nuc_gpiowrite(gpio_cfgset_t pinset, bool value);
  ****************************************************************************/
 
 bool nuc_gpioread(gpio_cfgset_t pinset);
+
+/****************************************************************************
+ * Function:  nuc_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the provided pin description
+ *   along with a descriptive messasge.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG
+int nuc_dumpgpio(gpio_cfgset_t pinset, const char *msg);
+#else
+#  define nuc_dumpgpio(p,m)
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
