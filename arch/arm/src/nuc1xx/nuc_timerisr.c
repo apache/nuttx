@@ -52,13 +52,16 @@
 
 #include "chip.h"
 #include "chip/nuc_clk.h"
+#include "chip/nuc_gcr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Get the frequency of the selected clock source */
 
-#if defined(CONFIG_NUC_SYSTICK_XTALHI)
+#if defined(CONFIG_NUC_SYSTICK_CORECLK)
+#  define SYSTICK_CLOCK BOARD_HCLK_FREQUENCY       /* Core clock */
+#elif defined(CONFIG_NUC_SYSTICK_XTALHI)
 #  define SYSTICK_CLOCK BOARD_XTALHI_FREQUENCY     /* High speed XTAL clock */
 #elif defined(CONFIG_NUC_SYSTICK_XTALLO)
 #  define SYSTICK_CLOCK BOARD_XTALLO_FREQUENCY     /* Low speed XTAL clock */
@@ -105,6 +108,50 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nuc_unlock
+ *
+ * Description:
+ *   Unlock registers
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NUC_SYSTICK_CORECLK
+static inline void nuc_unlock(void)
+{
+  putreg32(0x59, NUC_GCR_REGWRPROT);
+  putreg32(0x16, NUC_GCR_REGWRPROT);
+  putreg32(0x88, NUC_GCR_REGWRPROT);
+}
+#endif
+
+/****************************************************************************
+ * Name: nuclock
+ *
+ * Description:
+ *   Lok registers
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NUC_SYSTICK_CORECLK
+static inline void nuc_lock(void)
+{
+  putreg32(0, NUC_GCR_REGWRPROT);
+}
+#endif
+
+/****************************************************************************
  * Global Functions
  ****************************************************************************/
 
@@ -138,7 +185,17 @@ void up_timerinit(void)
 {
   uint32_t regval;
 
-  /* Configure the SysTick clock source.*/
+  /* Configure the SysTick clock source. This is only necessary if we are not
+   * using the Cortex-M0 core clock as the frequency source.
+   */
+
+#ifndef CONFIG_NUC_SYSTICK_CORECLK
+
+  /* This field is write protected and must be unlocked */
+
+  nuc_unlock();
+
+  /* Read the CLKSEL0 register and set the STCLK_S field appropriately */
 
   regval  = getreg32(NUC_CLK_CLKSEL0);
   regval &= ~CLK_CLKSEL0_STCLK_S_MASK;
@@ -155,6 +212,11 @@ void up_timerinit(void)
 #endif
   putreg32(regval, NUC_CLK_CLKSEL0);
 
+  /* Re-lock the register */
+
+  nuc_lock();
+#endif
+
   /* Set the SysTick interrupt to the default priority */
 
   regval = getreg32(ARMV6M_SYSCON_SHPR3);
@@ -170,10 +232,16 @@ void up_timerinit(void)
 
   (void)irq_attach(NUC_IRQ_SYSTICK, (xcpt_t)up_timerisr);
 
-  /* Enable SysTick interrupts */
+  /* Enable SysTick interrupts.  We need to select the core clock here if
+   * we are not using one of the alternative clock sources above.
+   */
 
+#ifdef CONFIG_NUC_SYSTICK_CORECLK
   putreg32((SYSTICK_CSR_CLKSOURCE | SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE),
            ARMV6M_SYSTICK_CSR);
+#else
+  putreg32((SYSTICK_CSR_TICKINT | SYSTICK_CSR_ENABLE), ARMV6M_SYSTICK_CSR);
+#endif
 
   /* And enable the timer interrupt */
 
