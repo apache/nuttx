@@ -112,7 +112,7 @@ static bool z8_txempty(FAR struct uart_dev_s *dev);
  * Private Variables
  ****************************************************************************/
 
-struct uart_ops_s g_uart_ops =
+static const struct uart_ops_s g_uart_ops =
 {
   z8_setup,          /* setup */
   z8_shutdown,       /* shutdown */
