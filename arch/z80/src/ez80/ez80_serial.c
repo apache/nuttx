@@ -100,7 +100,7 @@ static bool ez80_txempty(struct uart_dev_s *dev);
  * Private Variables
  ****************************************************************************/
 
-struct uart_ops_s g_uart_ops =
+static const struct uart_ops_s g_uart_ops =
 {
   ez80_setup,          /* setup */
   ez80_shutdown,       /* shutdown */

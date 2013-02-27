@@ -104,7 +104,7 @@ static bool z180_txempty(struct uart_dev_s *dev);
  * Private Variables
  ****************************************************************************/
 
-struct uart_ops_s g_uart_ops =
+static const struct uart_ops_s g_uart_ops =
 {
   z180_setup,          /* setup */
   z180_shutdown,       /* shutdown */
