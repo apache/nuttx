@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/cfgdefine.c
  *
- *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,8 @@ static const char *dequote_list[] =
   /* NxWidgets/NxWM */
 
   "CONFIG_NXWM_BACKGROUND_IMAGE",      /* Name of bitmap image class */
+  "CONFIG_NXWM_STOP_BITMAP",           /* Name of bitmap image class */
+  "CONFIG_NXWM_MINIMIZE_BITMAP",       /* Name of bitmap image class */
   "CONFIG_NXWM_STARTWINDOW_ICON",      /* Name of bitmap image class */
   "CONFIG_NXWM_NXCONSOLE_ICON",        /* Name of bitmap image class */
   "CONFIG_NXWM_CALIBRATION_ICON",      /* Name of bitmap image class */
@@ -82,7 +84,7 @@ static const char *dequote_list[] =
  ****************************************************************************/
 
  /* Skip over any spaces */
- 
+
 static char *skip_space(char *ptr)
 {
   while (*ptr && isspace((int)*ptr)) ptr++;
@@ -184,7 +186,7 @@ static void parse_line(char *ptr, char **varname, char **varval)
       /* The variable value should follow =, perhaps separated by some
        * white space.
        */
- 
+
       ptr = skip_space(ptr + 1);
       if (*ptr)
         {

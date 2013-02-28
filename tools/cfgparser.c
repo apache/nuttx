@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/cfgpaser.c
  *
- *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,7 @@ char line[LINESIZE+1];
  ****************************************************************************/
 
  /* Skip over any spaces */
- 
+
 static char *skip_space(char *ptr)
 {
   while (*ptr && isspace((int)*ptr)) ptr++;
@@ -164,7 +164,7 @@ static void parse_line(char *ptr, char **varname, char **varval)
       /* The variable value should follow =, perhaps separated by some
        * white space.
        */
- 
+
       ptr = skip_space(ptr + 1);
       if (*ptr)
         {
@@ -287,7 +287,7 @@ struct variable_s *find_variable(const char *varname, struct variable_s *list)
         {
           return list;
         }
-      
+
       list = list->flink;
     }
 
