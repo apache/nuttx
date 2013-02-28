@@ -777,7 +777,7 @@ static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16_t setbits, uin
   spi_putreg(priv, STM32_SPI_CR1_OFFSET, cr1);
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: spi_lock
  *
  * Description:
@@ -796,7 +796,7 @@ static void spi_modifycr1(FAR struct stm32_spidev_s *priv, uint16_t setbits, uin
  * Returned Value:
  *   None
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
@@ -1049,12 +1049,14 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
           return;
         }
 
-        spi_modifycr1(priv, setbits, clrbits);
-
-        /* Save the selection so the subsequence re-configurations will be faster */
+      spi_modifycr1(priv, 0, SPI_CR1_SPE);
+      spi_modifycr1(priv, setbits, clrbits);
+      spi_modifycr1(priv, SPI_CR1_SPE, 0);
+      
+      /* Save the selection so the subsequence re-configurations will be faster */
 
 #ifndef CONFIG_SPI_OWNBUS
-        priv->nbits = nbits;
+      priv->nbits = nbits;
     }
 #endif
 }
@@ -1078,6 +1080,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+  uint32_t regval;
   uint16_t ret;
 
   DEBUGASSERT(priv && priv->spibase);
@@ -1085,11 +1088,15 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   spi_writeword(priv, wd);
   ret = spi_readword(priv);
 
-  spivdbg("Sent: %04x Return: %04x\n", wd, ret);
+  /* Check and clear any error flags (Reading from the SR clears the error flags) */
+
+  regval = spi_getreg(priv, STM32_SPI_SR_OFFSET);
+  spivdbg("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
+
   return ret;
 }
 
-/*************************************************************************
+/************************************************************************************
  * Name: spi_exchange (no DMA)
  *
  * Description:
