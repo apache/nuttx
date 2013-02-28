@@ -349,34 +349,35 @@ Where <subdir> is one of the following:
        of an RS-232 serial console.  However, that configuration has not
        been impelmented as of this writing.
 
-    4. This configuration includes USB Support (CDC/ACM device)
+    4. Memory Usage.  The size command gives us the static memory usage.
+       This is what I get:
 
-       CONFIG_STM32_USB=y            : STM32 USB device support
-       CONFIG_USBDEV=y               : USB device support must be enabled
-       CONFIG_CDCACM=y               : The CDC/ACM driver must be built
-       CONFIG_NSH_BUILTIN_APPS=y     : NSH built-in application support must be enabled
-       CONFIG_NSH_ARCHINIT=y         : To perform USB initialization
+       $ size nuttx
+          text    data     bss     dec     hex filename
+         35037     106    1092   36235    8d8b nuttx
 
-       The CDC/ACM example is included as two NSH "built-in" commands.
- 
-       CONFIG_EXAMPLES_CDCACM=y      : Enable apps/examples/cdcacm
-  
-       The two commands are:
- 
-       sercon : Connect the serial device a create /dev/ttyACM0
-       serdis : Disconnect the serial device.        
+       And we can get the runtime memory usage from the NSH free command:
 
-       NOTE:  The serial connections/disconnections do not work as advertised.
-       This is because the NuTiny-SDK-NUC120 board does not provide circuitry for
-       control of the "soft connect" USB pullup.  As a result, the host PC
-       does not know the USB has been logically connected or disconnected.  You
-       have to follow these steps to use USB:
+       NuttShell (NSH) NuttX-6.25
+       nsh> free
+            total  used free  largest
+       Mem: 14160  3944 10216 10216
+       nsh>
 
-       1) Start NSH with USB disconnected
-       2) enter to 'sercon' command to start the CDC/ACM device, then
-       3) Connect the USB device to the host.
- 
-       and to close the connection:
+       Summary:
 
-       4) Disconnect the USB device from the host
-       5) Enter the 'serdis' command
+       - This slightly tuned NSH example uses 34.2KB of FLASH leaving 93.8KB
+         of FLASH (72%) free from additional application development.
+
+         I did not do all of the arithmetic, but it appears to me that of this
+         34+KB of FLASH usage, probably 20-30% of the FLASH is used by libgcc!
+         libgcc has gotten very fat!
+
+       - Static SRAM usage is about 1.2KB (<4%).
+
+       - At run time, 10.0KB of SRAM (62%) is still available for additional
+         applications. Most of the memory used at runtime is allocated I/O
+         buffers and the stack for the NSH main thread (1.5KB).
+
+       There is probably enough free memroy to support 3 or 4 application
+       threads in addition to NSH.

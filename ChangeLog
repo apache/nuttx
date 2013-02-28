@@ -4212,3 +4212,5 @@
 	  KBIT-ARM-1769 board.
 	* 2013-02-27: All configurations for the Cortex-M0 NuTINY-SDK-NUC120
 	  appear to be functional and stable.
+	* configs/zkit-arm-1769/nsh:  Add an NSH configuration for the
+	  KBIT-ARM-1769 board.
