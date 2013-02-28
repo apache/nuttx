@@ -122,6 +122,7 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
   child = (FAR struct task_tcb_s *)kzalloc(sizeof(struct task_tcb_s));
   if (!child)
     {
+      sdbg("ERROR: Failed to allocate TCB\n");
       set_errno(ENOMEM);
       return NULL;
     }

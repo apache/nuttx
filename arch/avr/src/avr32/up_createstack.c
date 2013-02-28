@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/avr32/up_createstack.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@
  *
  * Description:
  *   Allocate a stack for a new thread and setup up stack-related
- *  information in the TCB.
+ *   information in the TCB.
  *
  *   The following TCB fields must be initialized:
  *   adj_stack_size: Stack size after adjustment for hardware, processor,
@@ -88,50 +88,76 @@
 
 int up_create_stack(struct tcb_s *tcb, size_t stack_size)
 {
-  if (tcb->stack_alloc_ptr &&
-      tcb->adj_stack_size != stack_size)
+  /* Is there already a stack allocated of a different size? */
+
+  if (tcb->stack_alloc_ptr && tcb->adj_stack_size != stack_size)
     {
+      /* Yes.. free it */
+
       sched_free(tcb->stack_alloc_ptr);
       tcb->stack_alloc_ptr = NULL;
     }
 
-   if (!tcb->stack_alloc_ptr)
-     {
-#ifdef CONFIG_DEBUG
-       tcb->stack_alloc_ptr = (FAR void *)zalloc(stack_size);
+  /* Do we need to allocate a stack? */
+
+  if (!tcb->stack_alloc_ptr)
+    {
+      /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
+       * then create a zeroed stack to make stack dumps easier to trace.
+       */
+
+#if defined(CONFIG_DEBUG) && !defined(CONFIG_DEBUG_STACK)
+      tcb->stack_alloc_ptr = (FAR void *)kzalloc(stack_size);
 #else
-       tcb->stack_alloc_ptr = (FAR void *)malloc(stack_size);
+      tcb->stack_alloc_ptr = (FAR void *)kmalloc(stack_size);
 #endif
-     }
+#ifdef CONFIG_DEBUG
+      if (!tcb->stack_alloc_ptr)
+        {
+          sdbg("ERROR: Failed to allocate stack, size %d\n", stack_size);
+        }
+#endif
+    }
 
-   if (tcb->stack_alloc_ptr)
-     {
-       size_t top_of_stack;
-       size_t size_of_stack;
+  /* Did we successfully allocate a stack? */
 
-       /* The AVR32 uses a push-down stack:  the stack grows toward lower
-	    * addresses in memory.  The stack pointer register, points to the
-		* lowest, valid work address (the "top" of the stack).  Items on
-		* the stack are referenced as positive word offsets from sp.
-        */
+  if (tcb->stack_alloc_ptr)
+    {
+      size_t top_of_stack;
+      size_t size_of_stack;
 
-       top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 4;
+      /* Yes.. If stack debug is enabled, then fill the stack with a
+       * recognizable value that we can use later to test for high
+       * water marks.
+       */
 
-       /* The AVR32 stack must be aligned at word (4 byte) boundaries. If
-	   * necessary top_of_stack must be rounded down to the next boundary
-        */
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+      memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
+#endif
 
-       top_of_stack &= ~3;
-       size_of_stack = top_of_stack - (size_t)tcb->stack_alloc_ptr + 4;
+      /* The AVR32 uses a push-down stack:  the stack grows toward lower
+       * addresses in memory.  The stack pointer register, points to the
+       * lowest, valid work address (the "top" of the stack).  Items on
+       * the stack are referenced as positive word offsets from sp.
+       */
 
-       /* Save the adjusted stack values in the struct tcb_s */
+      top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 4;
 
-       tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
-       tcb->adj_stack_size = size_of_stack;
+      /* The AVR32 stack must be aligned at word (4 byte) boundaries. If
+       * necessary top_of_stack must be rounded down to the next boundary
+       */
 
-       up_ledon(LED_STACKCREATED);
-       return OK;
-     }
+      top_of_stack &= ~3;
+      size_of_stack = top_of_stack - (size_t)tcb->stack_alloc_ptr + 4;
+
+      /* Save the adjusted stack values in the struct tcb_s */
+
+      tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
+      tcb->adj_stack_size = size_of_stack;
+
+      up_ledon(LED_STACKCREATED);
+      return OK;
+    }
 
    return ERROR;
 }

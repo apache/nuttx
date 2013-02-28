@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_malloc.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013  Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,6 +196,21 @@ FAR void *malloc(size_t size)
     }
 
   mm_givesemaphore();
-  mvdbg("Allocated %p, size %d\n", ret, size);
+
+  /* If CONFIG_DEBUG_MM is defined, then output the result of the allocation
+   * to the SYSLOG.
+   */
+
+#ifdef CONFIG_DEBUG_MM
+  if (!ret)
+    {
+      mdbg("Allocation failed, size %d\n", size);
+    }
+  else
+    {
+      mvdbg("Allocated %p, size %d\n", ret, size);
+    }
+#endif
+
   return ret;
 }

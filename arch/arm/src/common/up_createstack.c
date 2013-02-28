@@ -111,40 +111,57 @@ static void *memset32(void *s, uint32_t  c, size_t n)
  * Name: up_create_stack
  *
  * Description:
- *   Allocate a stack for a new thread and setup
- *   up stack-related information in the TCB.
+ *   Allocate a stack for a new thread and setup up stack-related
+ *   information in the TCB.
  *
  *   The following TCB fields must be initialized:
- *   adj_stack_size: Stack size after adjustment for hardware,
- *     processor, etc.  This value is retained only for debug
- *     purposes.
+ *   adj_stack_size: Stack size after adjustment for hardware, processor,
+ *     etc.  This value is retained only for debug purposes.
  *   stack_alloc_ptr: Pointer to allocated stack
- *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
- *     initial value of the stack pointer.
+ *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *     the stack pointer.
  *
- * Inputs:
+ * Input Parameters:
  *   tcb: The TCB of new task
- *   stack_size:  The requested stack size.  At least this much
- *     must be allocated.
+ *   stack_size:  The requested stack size.  At least this how much must be
+ *     allocated.
+ *
  ****************************************************************************/
 
 int up_create_stack(struct tcb_s *tcb, size_t stack_size)
 {
-  if (tcb->stack_alloc_ptr &&
-      tcb->adj_stack_size != stack_size)
+  /* Is there already a stack allocated of a different size? */
+
+  if (tcb->stack_alloc_ptr && tcb->adj_stack_size != stack_size)
     {
+      /* Yes.. free it */
+
       sched_free(tcb->stack_alloc_ptr);
       tcb->stack_alloc_ptr = NULL;
     }
 
+  /* Do we need to allocate a stack? */
+ 
   if (!tcb->stack_alloc_ptr)
     {
-#ifdef CONFIG_DEBUG
-      tcb->stack_alloc_ptr = (uint32_t*)kzalloc(stack_size);
+      /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
+       * then create a zeroed stack to make stack dumps easier to trace.
+       */
+
+#if defined(CONFIG_DEBUG) && !defined(CONFIG_DEBUG_STACK)
+      tcb->stack_alloc_ptr = (uint32_t *)kzalloc(stack_size);
 #else
-      tcb->stack_alloc_ptr = (uint32_t*)kmalloc(stack_size);
+      tcb->stack_alloc_ptr = (uint32_t *)kmalloc(stack_size);
+#endif
+#ifdef CONFIG_DEBUG
+      if (!tcb->stack_alloc_ptr)
+        {
+          sdbg("ERROR: Failed to allocate stack, size %d\n", stack_size);
+        }
 #endif
     }
+
+  /* Did we successfully allocate a stack? */
 
   if (tcb->stack_alloc_ptr)
     {
@@ -194,4 +211,3 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size)
 
    return ERROR;
 }
-

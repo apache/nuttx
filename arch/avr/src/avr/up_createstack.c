@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/avr/up_createstack.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@
  *
  * Description:
  *   Allocate a stack for a new thread and setup up stack-related
- *  information in the TCB.
+ *   information in the TCB.
  *
  *   The following TCB fields must be initialized:
  *   adj_stack_size: Stack size after adjustment for hardware, processor,
@@ -99,52 +99,58 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size)
       tcb->stack_alloc_ptr = NULL;
     }
 
-   /* Do we need to allocate a stack? */
- 
-   if (!tcb->stack_alloc_ptr)
-     {
-       /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
-        * then create a zeroed stack to make stack dumps easier to trace.
-        */
+  /* Do we need to allocate a stack? */
+
+  if (!tcb->stack_alloc_ptr)
+    {
+      /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
+       * then create a zeroed stack to make stack dumps easier to trace.
+       */
 
 #if defined(CONFIG_DEBUG) && !defined(CONFIG_DEBUG_STACK)
-       tcb->stack_alloc_ptr = (FAR void *)zalloc(stack_size);
+      tcb->stack_alloc_ptr = (FAR void *)kzalloc(stack_size);
 #else
-       tcb->stack_alloc_ptr = (FAR void *)malloc(stack_size);
+      tcb->stack_alloc_ptr = (FAR void *)kmalloc(stack_size);
 #endif
-     }
+#ifdef CONFIG_DEBUG
+      if (!tcb->stack_alloc_ptr)
+        {
+          sdbg("ERROR: Failed to allocate stack, size %d\n", stack_size);
+        }
+#endif
+    }
 
-   /* Did we successfully allocate a stack? */
+  /* Did we successfully allocate a stack? */
 
-   if (tcb->stack_alloc_ptr)
-     {
-       size_t top_of_stack;
+  if (tcb->stack_alloc_ptr)
+    {
+      size_t top_of_stack;
 
-       /* Yes.. If stack debug is enabled, then fill the stack with a
-        * recognizable value that we can use later to test for high
-        * water marks.
-        */
+      /* Yes.. If stack debug is enabled, then fill the stack with a
+       * recognizable value that we can use later to test for high
+       * water marks.
+       */
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
-       memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
+      memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
 #endif
 
-       /* The AVR uses a push-down stack:  the stack grows toward lower
-        * addresses in memory.  The stack pointer register, points to the
-        * lowest, valid work address (the "top" of the stack).  Items on the
-        * stack are referenced as positive word offsets from sp.
-        */
+      /* The AVR uses a push-down stack:  the stack grows toward lower
+       * addresses in memory.  The stack pointer register, points to the
+       * lowest, valid work address (the "top" of the stack).  Items on the
+       * stack are referenced as positive word offsets from sp.
+       */
 
-       top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 1;
+      top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 1;
 
-       /* Save the adjusted stack values in the struct tcb_s */
+      /* Save the adjusted stack values in the struct tcb_s */
 
-       tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
-       tcb->adj_stack_size = stack_size;
+      tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
+      tcb->adj_stack_size = stack_size;
 
-       up_ledon(LED_STACKCREATED);
-       return OK;
-     }
+      up_ledon(LED_STACKCREATED);
+      return OK;
+    }
 
    return ERROR;
 }

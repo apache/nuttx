@@ -116,6 +116,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
   tcb = (FAR struct task_tcb_s *)kzalloc(sizeof(struct task_tcb_s));
   if (!tcb)
     {
+      sdbg("ERROR: Failed to allocate TCB\n");
       errcode = ENOMEM;
       goto errout;
     }
