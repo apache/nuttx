@@ -4205,12 +4205,23 @@
 	* configs/ekk-lm3s9b96/ostest and nsh:  All EKK-LM3S9B96 configurations
 	  converted to use the mconf configuration tool.
 	* configs/zkit-arm-1769:  Add support for Zilogic System's ARM development
-	  Kit, ZKIT-ARM-1769.
+	  Kit, ZKIT-ARM-1769.  From Rashid.
 	* configs/zkit-arm-1769/hello:  Add a "Hello, World!" configuration for
-	  the KBIT-ARM-1769 board.
+	  the KBIT-ARM-1769 board.  From Rashid.
 	* configs/zkit-arm-1769/thttpd:  Add a THTTPD configuration for the
-	  KBIT-ARM-1769 board.
+	  KBIT-ARM-1769 board.  From Rashid.
 	* 2013-02-27: All configurations for the Cortex-M0 NuTINY-SDK-NUC120
 	  appear to be functional and stable.
 	* configs/zkit-arm-1769/nsh:  Add an NSH configuration for the
-	  KBIT-ARM-1769 board.
+	  KBIT-ARM-1769 board.  From Rashid.
+	* arch/arm/src/stm32/stm32_otgfsdev.c:  Fixes from Petterri Aimonen
+	  related to corner cases that can cause infinite interrupts.
+	* drivers/usbdev/usbmsc_scsi.c:  Change to allow the full name in the
+	  USB descriptor but a truncated, 8-byte name in the SCSI field.
+	  From Petteri Aimonen.
+	* arch/arm/src/stm32/stm32_spi.c: Need to clear error flags to prevent
+	  corruption of subsequent transfers.  Also, bit count should not be
+	  changed while the SPI peripheral is enabled.  From Petteri Aimonen.
+	* drivers/mmcsd/mmcsd_spi.c:  When bus is shared, the speed has to be
+	  set every time.  Also SD cards require a few dummy clocks to react
+	  into CS release.  From Petteri Aimonen.

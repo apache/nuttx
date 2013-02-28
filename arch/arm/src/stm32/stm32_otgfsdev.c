@@ -4050,7 +4050,7 @@ static void stm32_epout_disable(FAR struct stm32_ep_s *privep)
   up_mdelay(50);
 #endif
 
-  /* Clear the EPDISD interrupt */
+  /* Clear the EPDISD interrupt indication */
 
   stm32_putreg(OTGFS_DOEPINT_EPDISD, STM32_OTGFS_DOEPINT(privep->epphy));
 
@@ -4124,6 +4124,9 @@ static void stm32_epin_disable(FAR struct stm32_ep_s *privep)
 
   regaddr = STM32_OTGFS_DIEPINT(privep->epphy);
   while ((stm32_getreg(regaddr) & OTGFS_DIEPINT_INEPNE) == 0);
+
+  /* Clear the INEPNE interrupt indication */
+
   stm32_putreg(OTGFS_DIEPINT_INEPNE, regaddr);
 
 #endif
@@ -4146,7 +4149,7 @@ static void stm32_epin_disable(FAR struct stm32_ep_s *privep)
   regaddr = STM32_OTGFS_DIEPINT(privep->epphy);
   while ((stm32_getreg(regaddr) & OTGFS_DIEPINT_EPDISD) == 0);
 
-  /* Clear the EPDISD interrupt */
+  /* Clear the EPDISD interrupt indication */
 
   stm32_putreg(OTGFS_DIEPINT_EPDISD, stm32_getreg(regaddr));
 

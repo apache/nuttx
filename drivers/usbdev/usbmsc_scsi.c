@@ -607,15 +607,27 @@ static inline int usbmsc_cmdinquiry(FAR struct usbmsc_dev_s *priv,
           memset(response->vendorid, ' ', 8+16+4);
 
           len = strlen(g_mscvendorstr);
-          DEBUGASSERT(len <= 8);
+          if (len > 8)
+            {
+              len = 8;
+            }
+
           memcpy(response->vendorid, g_mscvendorstr, len);
 
           len = strlen(g_mscproductstr);
-          DEBUGASSERT(len <= 16);
+          if (len > 16)
+            {
+              len = 16;
+            }
+
           memcpy(response->productid, g_mscproductstr, len);
 
           len = strlen(g_mscserialstr);
-          DEBUGASSERT(len <= 4);
+          if (len > 4)
+            {
+              len = 4;
+            }
+
           memcpy(response->revision, g_mscserialstr, len);
         }
     }
