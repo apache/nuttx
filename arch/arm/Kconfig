@@ -55,7 +55,7 @@ config ARCH_CHIP_LM
 	bool "TI Stellaris"
 	select ARCH_HAVE_MPU
 	---help---
-		TI Stellaris LMS3 architecutres (ARM Cortex-M3)
+		TI Stellaris LMS3 and LM4F architecutres (ARM Cortex-M3/4)
 
 config ARCH_CHIP_LPC17XX
 	bool "NXP LPC17xx"

@@ -36,6 +36,11 @@ config ARCH_CHIP_LM3S8962
 	select ARCH_CORTEXM3
 	select ARCH_CHIP_LM3S
 
+config ARCH_CHIP_LM4F120
+	bool "LM4F120"
+	select ARCH_CORTEXM4
+	select ARCH_CHIP_LM4F
+
 endchoice
 
 # Chip families

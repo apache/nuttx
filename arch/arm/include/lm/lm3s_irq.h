@@ -82,8 +82,8 @@
 #  define LM_IRQ_TIMER1A   (37) /* Vector 37: Timer 1 A */
 #  define LM_IRQ_TIMER1B   (38) /* Vector 38: Timer 1 B */
 #  define LM_IRQ_TIMER2A   (39) /* Vector 39: Timer 2 A */
-#  define LM_IRQ_TIMER2B   (40) /* Vector 40: Timer 3 B */
 
+#  define LM_IRQ_TIMER2B   (40) /* Vector 40: Timer 2 B */
 #  define LM_IRQ_COMPARE0  (41) /* Vector 41: Analog Comparator 0 */
 #  define LM_IRQ_COMPARE1  (42) /* Vector 42: Analog Comparator 1 */
 #  define LM_RESERVED_43   (43) /* Vector 43: Reserved */
@@ -148,7 +148,7 @@
 #  define LM_IRQ_TIMER1B   (38) /* Vector 38: Timer 1 B */
 #  define LM_IRQ_TIMER2A   (39) /* Vector 39: Timer 2 A */
 
-#  define LM_IRQ_TIMER2B   (40) /* Vector 40: Timer 3 B */
+#  define LM_IRQ_TIMER2B   (40) /* Vector 40: Timer 2 B */
 #  define LM_IRQ_COMPARE0  (41) /* Vector 41: Analog Comparator 0 */
 #  define LM_IRQ_COMPARE1  (42) /* Vector 42: Analog Comparator 1 */
 #  define LM_RESERVED_43   (43) /* Vector 43: Reserved */
@@ -212,7 +212,7 @@
 #  define LM_IRQ_TIMER1B   (38) /* Vector 38: Timer 1 B */
 #  define LM_IRQ_TIMER2A   (39) /* Vector 39: Timer 2 A */
 
-#  define LM_IRQ_TIMER2B   (40) /* Vector 40: Timer 3 B */
+#  define LM_IRQ_TIMER2B   (40) /* Vector 40: Timer 2 B */
 #  define LM_IRQ_COMPARE0  (41) /* Vector 41: Analog Comparator 0 */
 #  define LM_IRQ_COMPARE1  (42) /* Vector 42: Analog Comparator 1 */
 #  define LM_RESERVED_43   (43) /* Vector 43: Reserved */
@@ -276,7 +276,7 @@
 #  define LM_IRQ_TIMER1B   (38) /* Vector 38: Timer 1 B */
 #  define LM_IRQ_TIMER2A   (39) /* Vector 39: Timer 2 A */
 
-#  define LM_IRQ_TIMER2B   (40) /* Vector 40: Timer 3 B */
+#  define LM_IRQ_TIMER2B   (40) /* Vector 40: Timer 2 B */
 #  define LM_IRQ_COMPARE0  (41) /* Vector 41: Analog Comparator 0 */
 #  define LM_IRQ_COMPARE1  (42) /* Vector 42: Analog Comparator 1 */
 #  define LM_IRQ_COMPARE2  (43) /* Vector 43: Analog Comparator 3 */
@@ -340,8 +340,8 @@
 #  define LM_IRQ_TIMER1A   (37) /* Vector 37: Timer 1 A */
 #  define LM_IRQ_TIMER1B   (38) /* Vector 38: Timer 1 B */
 #  define LM_IRQ_TIMER2A   (39) /* Vector 39: Timer 2 A */
-#  define LM_IRQ_TIMER2B   (40) /* Vector 40: Timer 3 B */
 
+#  define LM_IRQ_TIMER2B   (40) /* Vector 40: Timer 2 B */
 #  define LM_IRQ_COMPARE0  (41) /* Vector 41: Analog Comparator 0 */
 #  define LM_RESERVED_42   (42) /* Vector 42: Reserved */
 #  define LM_RESERVED_43   (43) /* Vector 43: Reserved */
