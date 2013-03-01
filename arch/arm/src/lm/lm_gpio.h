@@ -135,12 +135,20 @@
 #define GPIO_PORTH                    (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
 #define GPIO_PORTJ                    (8 << GPIO_PORT_SHIFT)     /*   GPIOJ */
 
-/* This identifies the bit in the port:
+/* This identifies the pin number in the port:
  * nnnn nnnn nnnn nnnn nnnn nnnn nnnn nBBB
  */
 
-#define GPIO_NUMBER_SHIFT             0                           /* Bits 0-2: GPIO number: 0-7 */
-#define GPIO_NUMBER_MASK              (7 << GPIO_NUMBER_SHIFT)
+#define GPIO_PIN_SHIFT                 0                           /* Bits 0-2: GPIO pin: 0-7 */
+#define GPIO_PIN_MASK                 (7 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN_0                  (0 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN_1                  (1 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN_2                  (2 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN_3                  (3 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN_4                  (4 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN_5                  (5 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN_6                  (6 << GPIO_PIN_SHIFT)
+#  define GPIO_PIN_7                  (7 << GPIO_PIN_SHIFT)
 
 /************************************************************************************
  * Public Types
