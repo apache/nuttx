@@ -136,7 +136,19 @@
  *
  ************************************************************************************/
 
-extern void weak_function lm4f_ssiinitialize(void);
+void weak_function lm4f_ssiinitialize(void);
+
+/****************************************************************************
+ * Name: lm4f_ledinit
+ *
+ * Description:
+ *   Called to initialize the on-board LEDs.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+void lm4f_ledinit(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_LM4F120_LAUNCHPAD_LM4F120_LAUNCHPAD_H */

@@ -55,7 +55,7 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_ARCH_BOARD_LM4FLAUNCHPAD
+#ifdef CONFIG_ARCH_BOARD_LM4F120_LAUNCHPAD
 #  undef NSH_HAVEUSBDEV
 #else
 #  error "Unrecognized lm3s board"

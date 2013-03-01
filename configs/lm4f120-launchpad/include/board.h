@@ -142,7 +142,7 @@
 #define LED_INIRQ         2     /* NC   NC    ON  (momentary)    */
 #define LED_SIGNAL        2     /* NC   NC    ON  (momentary)    */
 #define LED_ASSERTION     3     /* ON   NC    NC  (momentary)    */
-#define LED_PANIC         3     /* ON   OFF   OFF (flashing 2Hz) */
+#define LED_PANIC         4     /* ON   OFF   OFF (flashing 2Hz) */
 
 /* LED definitions ******************************************************************/
 /* The LM32F120 has a two buttons:

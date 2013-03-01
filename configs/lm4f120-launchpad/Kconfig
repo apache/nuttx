@@ -3,11 +3,5 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-if ARCH_BOARD_LM4FLAUNCHPAD
-config ARCH_LEDS
-	bool "NuttX LED support"
-	default n
-	---help---
-		"Support control of board LEDs by NuttX to indicate system state"
-
+if ARCH_BOARD_LM4F120_LAUNCHPAD
 endif
