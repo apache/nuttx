@@ -512,7 +512,7 @@ LM4F120 LaunchPad Configuration Options
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_LM4FLAUNCHPAD
+       CONFIG_ARCH_BOARD_LM4F120_LAUNCHPAD
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops

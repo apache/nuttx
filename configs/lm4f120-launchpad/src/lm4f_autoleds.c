@@ -93,7 +93,7 @@
  * LED_INIRQ         2      NC   NC    ON  (momentary)
  * LED_SIGNAL        2      NC   NC    ON  (momentary)
  * LED_ASSERTION     3      ON   NC    NC  (momentary)
- * LED_PANIC         3      ON   OFF   OFF (flashing 2Hz)
+ * LED_PANIC         4      ON   OFF   OFF (flashing 2Hz)
  */
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
@@ -130,6 +130,10 @@
 
 /****************************************************************************
  * Name: lm4f_ledinit
+ *
+ * Description:
+ *   Called to initialize the on-board LEDs.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
@@ -157,35 +161,31 @@ void up_ledon(int led)
       /* All components stay off until the file initialization step */
 
       default:
-      case LED_STARTED:
-      case LED_HEAPALLOCATE:
-      case LED_IRQSENABLED:
-      default:
+      case 0:
         break;
 
       /* The GREEN component is illuminated at the final initialization step */
 
-      case LED_STACKCREATED:
-        lm_gpiowrite(GPIO_LED_GREEN, false);
+      case 1:
+        lm_gpiowrite(GPIO_LED_G, false);
         break;
 
       /* These will illuminate the BLUE component with on effect no RED and GREEN */
 
-      case LED_INIRQ:
-      case LED_SIGNAL:
-        lm_gpiowrite(GPIO_LED_BLUE, false);
+      case 2:
+        lm_gpiowrite(GPIO_LED_B, false);
         break;
 
       /* This will turn off RED and GREEN and turn RED on */
 
-      case LED_PANIC:
-        lm_gpiowrite(GPIO_LED_GREEN, true);
-        lm_gpiowrite(GPIO_LED_BLUE, true);
+      case 4:
+        lm_gpiowrite(GPIO_LED_G, true);
+        lm_gpiowrite(GPIO_LED_B, true);
 
       /* This will illuminate the RED component with no effect on RED and GREEN */
 
-      case LED_ASSERTION:
-        lm_gpiowrite(GPIO_LED_RED, false);
+      case 3:
+        lm_gpiowrite(GPIO_LED_R, false);
         break;
     }
 }
@@ -201,25 +201,21 @@ void up_ledoff(int led)
       /* These should not happen and are ignored */
 
       default:
-      case LED_STARTED:
-      case LED_HEAPALLOCATE:
-      case LED_IRQSENABLED:
-      case LED_STACKCREATED:
-      default:
+      case 0:
+      case 1:
         break;
 
       /* These will extinguish the BLUE component with no effect on RED and GREEN */
 
-      case LED_INIRQ:
-      case LED_SIGNAL:
-        lm_gpiowrite(GPIO_LED_BLUE, true);
+      case 2:
+        lm_gpiowrite(GPIO_LED_B, true);
         break;
 
       /* These will extinguish the RED component with on effect on RED and GREEN */
 
-      case LED_INIRQ:
-      case LED_SIGNAL:
-        lm_gpiowrite(GPIO_LED_RED, true);
+      case 3:
+      case 4:
+        lm_gpiowrite(GPIO_LED_R, true);
         break;
     }
 }

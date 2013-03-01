@@ -200,6 +200,15 @@ config ARCH_BOARD_LM3S8962EK
 	---help---
 		Stellaris LMS38962 Evaluation Kit.
 
+config ARCH_BOARD_LM4F120_LAUNCHPAD
+	bool "Stellaris LM4F120 LaunchPad"
+	depends on ARCH_CHIP_LM4F120
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Stellaris LM4F120 LaunchPad.
+
 config ARCH_BOARD_LPCXPRESSO
 	bool "NXP LPCExpresso LPC1768"
 	depends on ARCH_CHIP_LPC1768
@@ -700,6 +709,7 @@ config ARCH_BOARD
 	default "lm3s6432-s2e"        if ARCH_BOARD_LM3S6432S2E
 	default "lm3s6965-ek"         if ARCH_BOARD_LM3S6965EK
 	default "lm3s8962-ek"         if ARCH_BOARD_LM3S8962EK
+	default "lm4f120-launchpad"   if ARCH_BOARD_LM4F120_LAUNCHPAD
 	default "lpc4330-xplorer"     if ARCH_BOARD_LPC4330_XPLORER
 	default "lpcxpresso-lpc1768"  if ARCH_BOARD_LPCXPRESSO
 	default "m68322evb"           if ARCH_BOARD_M68332EVB
@@ -860,6 +870,9 @@ source "configs/lm3s6965-ek/Kconfig"
 endif
 if ARCH_BOARD_LM3S8962EK
 source "configs/lm3s8962-ek/Kconfig"
+endif
+if ARCH_BOARD_LM3S8962EK
+source "configs/lm4f120-launchpad/Kconfig"
 endif
 if ARCH_BOARD_LPC4330_XPLORER
 source "configs/lpc4330-xplorer/Kconfig"

@@ -1781,6 +1781,12 @@ configs/lm3s6965-ek
 configs/lm3s8962-ek
   Stellaris LMS38962 Evaluation Kit.
 
+configs/lm4f120-launchpad
+  This is the port of NuttX to the Stellaris LM4F120 LaunchPad.  The
+  Stellaris® LM4F120 LaunchPad Evaluation Board is a low-cost evaluation
+  platform for ARM® Cortex™-M4F-based microcontrollers from Texas\
+  Instruments.
+
 configs/lpcxpresso-lpc1768
   Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
   is based on the NXP LPC1768.  The Code Red toolchain is used by default.
@@ -1845,6 +1851,10 @@ configs/nucleus2g
   This port uses the Nucleus 2G board (with Babel CAN board).  This board
   features an NXP LPC1768 processor.  See the 2G website (http://www.2g-eng.com/)
   for more information about the Nucleus 2G.
+
+configs/nutiny-nuc120
+  This is the port of NuttX to the NuvoTon NuTiny-SDK-NUC120 board.  This
+  board has the NUC120LE3AN chip with a built-in NuLink debugger.
 
 configs/olimex-lpc1766stk
   This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain* under

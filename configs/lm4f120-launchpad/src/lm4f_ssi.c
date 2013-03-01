@@ -54,7 +54,7 @@
 
 /* The LM4F LaunchPad microSD CS is on SSI0 */
 
-#if !defined(CONFIG_SSI0_DISABLE)  || !defined(CONFIG_SSI1_DISABLE)
+#if !defined(CONFIG_SSI0_DISABLE) || !defined(CONFIG_SSI1_DISABLE)
 
 /************************************************************************************
  * Definitions
@@ -64,7 +64,6 @@
 
 #ifdef CONFIG_DEBUG_SPI
 #  define ssidbg lldbg
-#  endif
 #else
 #  define ssidbg(x...)
 #endif
