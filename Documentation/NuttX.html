@@ -2017,16 +2017,33 @@ svn checkout -r5595 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
         As of this writing, more device drivers are needed to make this a more complete port.
       </p>
       <p>
-        For a full-featured RTOS such as NuttX, providing support in a usable and meaningful way within the tiny memories of the NUC120 demonstrates the scalability of NuttX (128KB FLASH and 16KB of SRAM in a 48-pin package).
-        When running the NSH configuration (a full up application), there is still more than 9KB or SRAM available:
+        <b>Memory Usage</b>.
+        For a full-featured RTOS such as NuttX, providing support in a usable and meaningful way within the tiny memories of the NUC120 demonstrates the scalability of NuttX.  The NUC120LE2AN comes in a 48-pin package and has 128KB FLASH and 16KB of SRAM.
+        When running the NSH configuration (itself a full up application), there is still more than 90KB of FLASH and 10KB or SRAM available for further application development).
+      </p>
+      <p>
+        Static memory usage can be shown with <code>size</code> command:
+      </p>
+      <ul><pre>
+$ size nuttx
+   text    data     bss     dec     hex filename
+  35037     106    1092   36235    8d8b nuttx
+</pre></ul>
+      <p>
+        NuttX, the NSH application, and GCC libraries use 34.2KB of FLASH leaving 93.8KB of FLASH (72%) free from additional application development.
+        Static SRAM usage is about 1.2KB (&lt;4%) and leaves 13.8KB (86%) available for heap at runtime.
+        SRAM usage at run-time can be shown with the NSH <code>free</code> command:
       </p>
       <ul><pre>
 NuttShell (NSH) NuttX-6.26
 nsh> free
              total       used       free    largest
-Mem:         13344       3944       9400       9400
+Mem:         14160       3944      10216       10216
 nsh>
-    </ul>
+</pre></ul>
+    <p>
+      You can see that 10.0KB (62%) is available for further application development.
+    </p>
     <p>
       <b>Development Environments:</b>
       1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS
