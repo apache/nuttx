@@ -715,7 +715,7 @@ int lm_configgpio(uint32_t cfgset)
 
   func  = (cfgset & GPIO_FUNC_MASK) >> GPIO_FUNC_SHIFT;
   port  = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pinno = (cfgset & GPIO_NUMBER_MASK);
+  pinno = (cfgset & GPIO_PIN_MASK);
   pin   = (1 <<pinno);
 
   DEBUGASSERT(func <= GPIO_FUNC_MAX);
@@ -792,7 +792,7 @@ void lm_gpiowrite(uint32_t pinset, bool value)
   /* Decode the basics */
 
   port  = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pinno = (pinset & GPIO_NUMBER_MASK);
+  pinno = (pinset & GPIO_PIN_MASK);
 
   /* Get the base address associated with the GPIO port */
 
@@ -830,7 +830,7 @@ bool lm_gpioread(uint32_t pinset, bool value)
   /* Decode the basics */
 
   port  = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pinno = (pinset & GPIO_NUMBER_MASK);
+  pinno = (pinset & GPIO_PIN_MASK);
 
   /* Get the base address associated with the GPIO port */
 

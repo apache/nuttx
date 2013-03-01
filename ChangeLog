@@ -4225,3 +4225,7 @@
 	* drivers/mmcsd/mmcsd_spi.c:  When bus is shared, the speed has to be
 	  set every time.  Also SD cards require a few dummy clocks to react
 	  into CS release.  From Petteri Aimonen.
+	* configs/lm4f120-launchpad: In initial configuration for testing
+	  the LM4F120 LaunchPad port.  This is to support testing only and
+	  is not yet a functional board port (as of 2013-03-01).
+
