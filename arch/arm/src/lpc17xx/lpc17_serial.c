@@ -1242,9 +1242,11 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         priv->baud = cfgetispeed(termiosp);
 
-        /* Re-calculate the optimal CCLK divisor for the new baud */
+        /* TODO: Re-calculate the optimal CCLK divisor for the new baud and
+         * and reset the divider in the CLKSEL0/1 register.
+         */
 
-#ifdef LPC176x
+#if 0 // ifdef LPC176x
         priv->cclkdiv = lpc17_uartcclkdiv(priv->baud);
 #endif
         /* DLAB open latch */
