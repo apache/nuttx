@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_serial.c
  *
- *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,7 +91,9 @@ struct up_dev_s
   uint8_t  irq;       /* IRQ associated with this UART */
   uint8_t  parity;    /* 0=none, 1=odd, 2=even */
   uint8_t  bits;      /* Number of bits (7 or 8) */
+#ifdef LPC176x
   uint8_t  cclkdiv;   /* Divisor needed to get PCLK from CCLK */
+#endif
   bool     stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 };
 
@@ -554,7 +556,17 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
  *     PCLK = CCLK / divisor
  *     BAUD = PCLK / (16 * DL)
  *
- *   Ignoring the fractional divider for now.
+ *   Ignoring the fractional divider for now. (If you want to extend this driver
+ *   to support the fractional divider, see lpc43xx_uart.c.  The LPC43xx uses
+ *   the same peripheral and that logic could easily leveraged here).
+ *
+ *   For the LPC176x the PCLK is determined by the UART-specific divisor in
+ *   PCLKSEL0 or PCLKSEL1:
+ *
+ *     PCLK = CCLK / divisor
+ *
+ *   For the LPC178x, the PCLK is determined by the global divisor setting in
+ *   the PLKSEL register (and, in that case, this function is not needed).
  *
  *   NOTE:  This is an inline function.  If a typical optimization level is used and
  *   a constant is provided for the desired frequency, then most of the following
@@ -562,6 +574,7 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
  *
  ************************************************************************************/
 
+#ifdef LPC176x
 static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
 {
   /* Ignoring the fractional divider, the BAUD is given by:
@@ -569,11 +582,17 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
    *   BAUD = PCLK / (16 * DL), or
    *   DL   = PCLK / BAUD / 16
    *
-   * Where:
+   * Where for the LPC176x the PCLK is determined by the UART-specific divisor in
+   * PCLKSEL0 or PCLKSEL1:
    *
-   *   PCLK = CCLK / divisor.
+   *   PCLK = CCLK / divisor
    *
-   * Check divisor == 1.  This works if the upper limit is met	
+   * And for the LPC178x, the PCLK is determined by the global divisor setting in
+   * the PLKSEL register (and, in that case, this function is not needed).
+   */
+
+  /* Calculate and optimal PCLKSEL0/1 divisor.
+   * First, check divisor == 1.  This works if the upper limit is met:
    *
    *   DL < 0xffff, or
    *   PCLK / BAUD / 16 < 0xffff, or
@@ -641,6 +660,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
       return SYSCON_PCLKSEL_CCLK8;
     }
 }
+#endif /* LPC176x */
 
 /************************************************************************************
  * Name: lpc17_uart0config, uart1config, uart2config, and uart3config
@@ -661,7 +681,7 @@ static inline uint32_t lpc17_uartcclkdiv(uint32_t baud)
  ************************************************************************************/
 
 #ifdef CONFIG_LPC17_UART0
-static inline void lpc17_uart0config(uint32_t clkdiv)
+static inline void lpc17_uart0config(void)
 {
   uint32_t   regval;
   irqstate_t flags;
@@ -675,10 +695,12 @@ static inline void lpc17_uart0config(uint32_t clkdiv)
 
   /* Step 2: Enable clocking on UART */
 
+#ifdef LPC176x
   regval = getreg32(LPC17_SYSCON_PCLKSEL0);
   regval &= ~SYSCON_PCLKSEL0_UART0_MASK;
-  regval |= (clkdiv << SYSCON_PCLKSEL0_UART0_SHIFT);
+  regval |= ((uint32_t)g_uart0priv.cclkdiv << SYSCON_PCLKSEL0_UART0_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL0);
+#endif
 
   /* Step 3: Configure I/O pins */
 
@@ -689,7 +711,7 @@ static inline void lpc17_uart0config(uint32_t clkdiv)
 #endif
 
 #ifdef CONFIG_LPC17_UART1
-static inline void lpc17_uart1config(uint32_t clkdiv)
+static inline void lpc17_uart1config(void)
 {
   uint32_t   regval;
   irqstate_t flags;
@@ -703,10 +725,12 @@ static inline void lpc17_uart1config(uint32_t clkdiv)
 
   /* Step 2: Enable clocking on UART */
 
+#ifdef LPC176x
   regval = getreg32(LPC17_SYSCON_PCLKSEL0);
   regval &= ~SYSCON_PCLKSEL0_UART1_MASK;
-  regval |= (clkdiv << SYSCON_PCLKSEL0_UART1_SHIFT);
+  regval |= ((uint32_t)g_uart1priv.cclkdiv << SYSCON_PCLKSEL0_UART1_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL0);
+#endif
 
   /* Step 3: Configure I/O pins */
 
@@ -727,7 +751,7 @@ static inline void lpc17_uart1config(uint32_t clkdiv)
 #endif
 
 #ifdef CONFIG_LPC17_UART2
-static inline void lpc17_uart2config(uint32_t clkdiv)
+static inline void lpc17_uart2config(void)
 {
   uint32_t   regval;
   irqstate_t flags;
@@ -741,10 +765,12 @@ static inline void lpc17_uart2config(uint32_t clkdiv)
 
   /* Step 2: Enable clocking on UART */
 
+#ifdef LPC176x
   regval = getreg32(LPC17_SYSCON_PCLKSEL1);
   regval &= ~SYSCON_PCLKSEL1_UART2_MASK;
-  regval |= (clkdiv << SYSCON_PCLKSEL1_UART2_SHIFT);
+  regval |= ((uint32_t)g_uart2priv.cclkdiv << SYSCON_PCLKSEL1_UART2_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
+#endif
 
   /* Step 3: Configure I/O pins */
 
@@ -755,7 +781,7 @@ static inline void lpc17_uart2config(uint32_t clkdiv)
 #endif
 
 #ifdef CONFIG_LPC17_UART3
-static inline void lpc17_uart3config(uint32_t clkdiv)
+static inline void lpc17_uart3config(void)
 {
   uint32_t   regval;
   irqstate_t flags;
@@ -769,10 +795,12 @@ static inline void lpc17_uart3config(uint32_t clkdiv)
 
   /* Step 2: Enable clocking on UART */
 
+#ifdef LPC176x
   regval = getreg32(LPC17_SYSCON_PCLKSEL1);
   regval &= ~SYSCON_PCLKSEL1_UART3_MASK;
-  regval |= (clkdiv << SYSCON_PCLKSEL1_UART3_SHIFT);
+  regval |= ((uint32_t)g_uart3priv.cclkdiv << SYSCON_PCLKSEL1_UART3_SHIFT);
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
+#endif
 
   /* Step 3: Configure I/O pins */
 
@@ -797,6 +825,7 @@ static inline void lpc17_uart3config(uint32_t clkdiv)
  *
  ************************************************************************************/
 
+#ifdef LPC176x
 static inline uint32_t lpc17_uartdl(uint32_t baud, uint8_t divcode)
 {
   uint32_t num;
@@ -823,6 +852,12 @@ static inline uint32_t lpc17_uartdl(uint32_t baud, uint8_t divcode)
 
   return num / (baud << 4);
 }
+#else
+static inline uint32_t lpc17_uartdl(uint32_t baud)
+{
+  return (uint32_t)BOARD_PCLK / (baud << 4);
+}
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -889,7 +924,11 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Set the BAUD divisor */
 
+#ifdef LPC176x
   dl = lpc17_uartdl(priv->baud, priv->cclkdiv);
+#else
+  dl = lpc17_uartdl(priv->baud);
+#endif
   up_serialout(priv, LPC17_UART_DLM_OFFSET, dl >> 8);
   up_serialout(priv, LPC17_UART_DLL_OFFSET, dl & 0xff);
 
@@ -1203,14 +1242,24 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         priv->baud = cfgetispeed(termiosp);
 
+        /* Re-calculate the optimal CCLK divisor for the new baud */
+
+#ifdef LPC176x
+        priv->cclkdiv = lpc17_uartcclkdiv(priv->baud);
+#endif
         /* DLAB open latch */
+        /* REVISIT:  Shouldn't we just call up_setup() to do all of the following? */
 
         lcr = getreg32(priv->uartbase + LPC17_UART_LCR_OFFSET);
         up_serialout(priv, LPC17_UART_LCR_OFFSET, (lcr | UART_LCR_DLAB));
 
         /* Set the BAUD divisor */
 
+#ifdef LPC176x
         dl = lpc17_uartdl(priv->baud, priv->cclkdiv);
+#else
+        dl = lpc17_uartdl(priv->baud);
+#endif
         up_serialout(priv, LPC17_UART_DLM_OFFSET, dl >> 8);
         up_serialout(priv, LPC17_UART_DLL_OFFSET, dl & 0xff);
 
@@ -1388,33 +1437,42 @@ void up_earlyserialinit(void)
   /* Configure all UARTs (except the CONSOLE UART) and disable interrupts */
 
 #ifdef CONFIG_LPC17_UART0
+#ifdef LPC176x
   g_uart0priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART0_BAUD);
+#endif
 #ifndef CONFIG_UART0_SERIAL_CONSOLE
-  lpc17_uart0config(g_uart0priv.cclkdiv);
+  lpc17_uart0config();
 #endif
   up_disableuartint(&g_uart0priv, NULL);
 #endif
 
 #ifdef CONFIG_LPC17_UART1
+#ifdef LPC176x
   g_uart1priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART1_BAUD);
+#endif
 #ifndef CONFIG_UART1_SERIAL_CONSOLE
-  lpc17_uart1config(g_uart1priv.cclkdiv);
+  lpc17_uart1config();
+#else
 #endif
   up_disableuartint(&g_uart1priv, NULL);
 #endif
 
 #ifdef CONFIG_LPC17_UART2
+#ifdef LPC176x
   g_uart2priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART2_BAUD);
+#endif
 #ifndef CONFIG_UART2_SERIAL_CONSOLE
-  lpc17_uart2config(g_uart2priv.cclkdiv);
+  lpc17_uart2config();
 #endif
   up_disableuartint(&g_uart2priv, NULL);
 #endif
 
 #ifdef CONFIG_LPC17_UART3
+#ifdef LPC176x
   g_uart3priv.cclkdiv = lpc17_uartcclkdiv(CONFIG_UART3_BAUD);
+#endif
 #ifndef CONFIG_UART3_SERIAL_CONSOLE
-  lpc17_uart3config(g_uart3priv.cclkdiv);
+  lpc17_uart3config();
 #endif
   up_disableuartint(&g_uart3priv, NULL);
 #endif

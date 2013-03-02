@@ -139,82 +139,95 @@
  *   BAUD = PCLK / (16 * DL), or
  *   DL   = PCLK / BAUD / 16
  *
- * Where:
+ * Where for the LPC176x the PCLK is determined by the UART-specific divisor in
+ * PCLKSEL0 or PCLKSEL1:
  *
  *   PCLK = CCLK / divisor
+ *
+ * And for the LPC178x, the PCLK is determined by the global divisor setting in
+ * the PLKSEL register.
  *
  * Ignoring the fractional divider for now. (If you want to extend this driver
  * to support the fractional divider, see lpc43xx_uart.c.  The LPC43xx uses
  * the same peripheral and that logic could easily leveraged here).
- *
- * Check divisor == 1.  This works if the upper limit is met:
- *
- *   DL < 0xffff, or
- *   PCLK / BAUD / 16 < 0xffff, or
- *   CCLK / BAUD / 16 < 0xffff, or
- *   CCLK < BAUD * 0xffff * 16
- *   BAUD > CCLK / 0xffff / 16
- *
- * And the lower limit is met (we can't allow DL to get very close to one).
- *
- *   DL >= MinDL
- *   CCLK / BAUD / 16 >= MinDL, or
- *   BAUD <= CCLK / 16 / MinDL
  */
 
-#if CONSOLE_BAUD < (LPC17_CCLK / 16 / UART_MINDL)
-#  define CONSOLE_CCLKDIV  SYSCON_PCLKSEL_CCLK
-#  define CONSOLE_NUMERATOR (LPC17_CCLK)
+#ifdef LPC178x
+  /* Use the global PCLK frequency */
 
-/* Check divisor == 2.  This works if:
- *
- *   2 * CCLK / BAUD / 16 < 0xffff, or
- *   BAUD > CCLK / 0xffff / 8
- *
- * And
- *
- *   2 * CCLK / BAUD / 16 >= MinDL, or
- *   BAUD <= CCLK / 8 / MinDL
- */
+# define CONSOLE_NUMERATOR BOARD_PCLK_FREQUENCY
 
-#elif CONSOLE_BAUD < (LPC17_CCLK / 8 / UART_MINDL)
-#  define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK2
-#  define CONSOLE_NUMERATOR (LPC17_CCLK / 2)
+#else
+  /* Calculate and optimal PCLKSEL0/1 divisor.
+   * First, check divisor == 1.  This works if the upper limit is met:
+   *
+   *   DL < 0xffff, or
+   *   PCLK / BAUD / 16 < 0xffff, or
+   *   CCLK / BAUD / 16 < 0xffff, or
+   *   CCLK < BAUD * 0xffff * 16
+   *   BAUD > CCLK / 0xffff / 16
+   *
+   * And the lower limit is met (we can't allow DL to get very close to one).
+   *
+   *   DL >= MinDL
+   *   CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 16 / MinDL
+   */
 
-/* Check divisor == 4.  This works if:
- *
- *   4 * CCLK / BAUD / 16 < 0xffff, or
- *   BAUD > CCLK / 0xffff / 4
- *
- * And
- *
- *   4 * CCLK / BAUD / 16 >= MinDL, or
- *   BAUD <= CCLK / 4 / MinDL
- */
+#  if CONSOLE_BAUD < (LPC17_CCLK / 16 / UART_MINDL)
+#    define CONSOLE_CCLKDIV  SYSCON_PCLKSEL_CCLK
+#    define CONSOLE_NUMERATOR (LPC17_CCLK)
 
-#elif CONSOLE_BAUD < (LPC17_CCLK / 4 / UART_MINDL)
-#  define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK4
-#  define CONSOLE_NUMERATOR (LPC17_CCLK / 4)
+  /* Check divisor == 2.  This works if:
+   *
+   *   2 * CCLK / BAUD / 16 < 0xffff, or
+   *   BAUD > CCLK / 0xffff / 8
+   *
+   * And
+   *
+   *   2 * CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 8 / MinDL
+   */
 
-/* Check divisor == 8.  This works if:
- *
- *   8 * CCLK / BAUD / 16 < 0xffff, or
- *   BAUD > CCLK / 0xffff / 2
- *
- * And
- *
- *   8 * CCLK / BAUD / 16 >= MinDL, or
- *   BAUD <= CCLK / 2 / MinDL
- */
+#  elif CONSOLE_BAUD < (LPC17_CCLK / 8 / UART_MINDL)
+#    define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK2
+#    define CONSOLE_NUMERATOR (LPC17_CCLK / 2)
 
-#else /* if CONSOLE_BAUD < (LPC17_CCLK / 2 / UART_MINDL) */
-#  define CONSOLE_CCLKDIV   SYSCON_PCLKSEL_CCLK8
-#  define CONSOLE_NUMERATOR (LPC17_CCLK /  8)
-#endif
+  /* Check divisor == 4.  This works if:
+   *
+   *   4 * CCLK / BAUD / 16 < 0xffff, or
+   *   BAUD > CCLK / 0xffff / 4
+   *
+   * And
+   *
+   *   4 * CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 4 / MinDL
+   */
+
+#  elif CONSOLE_BAUD < (LPC17_CCLK / 4 / UART_MINDL)
+#   define CONSOLE_CCLKDIV SYSCON_PCLKSEL_CCLK4
+#    define CONSOLE_NUMERATOR (LPC17_CCLK / 4)
+
+  /* Check divisor == 8.  This works if:
+   *
+   *   8 * CCLK / BAUD / 16 < 0xffff, or
+   *   BAUD > CCLK / 0xffff / 2
+   *
+   * And
+   *
+   *   8 * CCLK / BAUD / 16 >= MinDL, or
+   *   BAUD <= CCLK / 2 / MinDL
+  */
+
+#  else /* if CONSOLE_BAUD < (LPC17_CCLK / 2 / UART_MINDL) */
+#    define CONSOLE_CCLKDIV   SYSCON_PCLKSEL_CCLK8
+#    define CONSOLE_NUMERATOR (LPC17_CCLK /  8)
+#  endif
+#endif /* LPC178x */
 
 /* Then this is the value to use for the DLM and DLL registers */
 
-#define CONSOLE_DL          (CONSOLE_NUMERATOR / (CONSOLE_BAUD << 4))
+#define CONSOLE_DL (CONSOLE_NUMERATOR / (CONSOLE_BAUD << 4))
 
 /**************************************************************************
  * Private Types
