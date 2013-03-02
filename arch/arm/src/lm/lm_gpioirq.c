@@ -70,45 +70,40 @@ static FAR xcpt_t g_gpioirqvector[NR_GPIO_IRQS];
  * must carefully match the IRQ numbers assigned in arch/arm/include/lm3s/irq.h
  */
 
-static const uint32_t g_gpiobase[] =
+static const uintptr_t g_gpiobase[] =
 {
 #ifndef CONFIG_LM_DISABLE_GPIOA_IRQS
-   LM_GPIOA_BASE,
+    LM_GPIOA_BASE
+#else
+    0
 #endif
 #ifndef CONFIG_LM_DISABLE_GPIOB_IRQS
-  LM_GPIOB_BASE,
+  , LM_GPIOB_BASE
 #endif
 #ifndef CONFIG_LM_DISABLE_GPIOC_IRQS
-  LM_GPIOC_BASE,
+  , LM_GPIOC_BASE
 #endif
 #ifndef CONFIG_LM_DISABLE_GPIOD_IRQS
-  LM_GPIOD_BASE,
+  , LM_GPIOD_BASE
 #endif
 #ifndef CONFIG_LM_DISABLE_GPIOE_IRQS
-  LM_GPIOE_BASE,
+  , LM_GPIOE_BASE
 #endif
 #ifndef CONFIG_LM_DISABLE_GPIOF_IRQS
-  LM_GPIOF_BASE,
+  , LM_GPIOF_BASE
 #endif
 #ifndef CONFIG_LM_DISABLE_GPIOG_IRQS
-  LM_GPIOG_BASE,
+  , LM_GPIOG_BASE
 #endif
-
-  /* NOTE: Not all Stellaris architectures support GPIOs above GPIOG.  If the
-   * chip does not support these higher ports, then they must be disabled in
-   * the configuration.  Otherwise, the following will likely cause compilation
-   * errors!
-   */
-
 #ifndef CONFIG_LM_DISABLE_GPIOH_IRQS
-  LM_GPIOH_BASE,
+  , LM_GPIOH_BASE
 #endif
 #ifndef CONFIG_LM_DISABLE_GPIOJ_IRQS
-  LM_GPIOJ_BASE,
+  , LM_GPIOJ_BASE
 #endif
 };
 
-#define GPIO_NADDRS (sizeof(g_gpiobase)/sizeof(uint32_t))
+#define GPIO_NADDRS (sizeof(g_gpiobase)/sizeof(uintptr_t))
 
 /****************************************************************************
  * Public Data
@@ -131,13 +126,14 @@ static const uint32_t g_gpiobase[] =
  *
  ****************************************************************************/
 
-static uint32_t lm_gpiobaseaddress(unsigned int gpioirq)
+static uintptr_t lm_gpiobaseaddress(unsigned int gpioirq)
 {
   unsigned int ndx = gpioirq >> 3;
   if (ndx < GPIO_NADDRS)
     {
       return g_gpiobase[ndx];
     }
+
   return 0;
 }
 
@@ -366,7 +362,7 @@ void gpio_irqenable(int irq)
 {
   irqstate_t flags;
   int        gpioirq = irq - NR_IRQS;
-  uint32_t   base;
+  uintptr_t  base;
   uint32_t   regval;
   int        pin;
 
@@ -405,7 +401,7 @@ void gpio_irqdisable(int irq)
 {
   irqstate_t flags;
   int        gpioirq = irq - NR_IRQS;
-  uint32_t   base;
+  uintptr_t  base;
   uint32_t   regval;
   int        pin;
 

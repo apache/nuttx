@@ -140,23 +140,36 @@ static const struct gpio_func_s g_funcbits[] =
   {GPIO_INTERRUPT_SETBITS, GPIO_INTERRUPT_CLRBITS}, /* GPIO_FUNC_INTERRUPT */
 };
 
-static const uint32_t g_gpiobase[LM_NPORTS] =
+/* NOTE: this is duplicated in lm_dumpgpio.c */
+
+static const uintptr_t g_gpiobase[LM_NPORTS] =
 {
-  /* All support Stellaris parts have at least 7 ports, GPIOA-G */
-
-  LM_GPIOA_BASE, LM_GPIOB_BASE, LM_GPIOC_BASE, LM_GPIOD_BASE,
-  LM_GPIOE_BASE, LM_GPIOF_BASE, LM_GPIOG_BASE,
-
-  /* GPIOH exists on the LM3S6918 and th LM3S6B96, but not on the LM3S6965 or LM3S8962*/
-
-#if LM_NPORTS > 7
-  LM_GPIOH_BASE,
+#if LM_NPORTS > 0
+    LM_GPIOA_BASE
 #endif
-
-  /* GPIOJ exists on the LM3S6B96, but not on the LM3S6918 or LM3S6965 or LM3S8962*/
-
+#if LM_NPORTS > 1
+  , LM_GPIOB_BASE
+#endif
+#if LM_NPORTS > 2
+  , LM_GPIOC_BASE
+#endif
+#if LM_NPORTS > 3
+  , LM_GPIOD_BASE
+#endif
+#if LM_NPORTS > 4
+  , LM_GPIOE_BASE
+#endif
+#if LM_NPORTS > 5
+  , LM_GPIOF_BASE
+#endif
+#if LM_NPORTS > 6
+  , LM_GPIOG_BASE
+#endif
+#if LM_NPORTS > 7
+  , LM_GPIOH_BASE
+#endif
 #if LM_NPORTS > 8
-  LM_GPIOJ_BASE,
+  , LM_GPIOJ_BASE
 #endif
 };
 
@@ -177,13 +190,14 @@ static const uint32_t g_gpiobase[LM_NPORTS] =
  *
  ****************************************************************************/
 
-static uint32_t lm_gpiobaseaddress(unsigned int port)
+static uintptr_t lm_gpiobaseaddress(unsigned int port)
 {
-  uint32_t gpiobase = 0;
+  uintptr_t gpiobase = 0;
   if (port < LM_NPORTS)
     {
       gpiobase = g_gpiobase[port];
     }
+
   return gpiobase;
 }
 
@@ -707,8 +721,8 @@ int lm_configgpio(uint32_t cfgset)
   unsigned int func;
   unsigned int port;
   unsigned int pinno;
+  uintptr_t    base;
   uint32_t     pin;
-  uint32_t     base;
   uint32_t     regval;
 
   /* Decode the basics */
@@ -787,7 +801,7 @@ void lm_gpiowrite(uint32_t pinset, bool value)
 {
   unsigned int port;
   unsigned int pinno;
-  uint32_t     base;
+  uintptr_t    base;
 
   /* Decode the basics */
 
@@ -825,7 +839,7 @@ bool lm_gpioread(uint32_t pinset, bool value)
 {
   unsigned int port;
   unsigned int pinno;
-  uint32_t     base;
+  uintptr_t    base;
 
   /* Decode the basics */
 

@@ -4228,4 +4228,9 @@
 	* configs/lm4f120-launchpad: In initial configuration for testing
 	  the LM4F120 LaunchPad port.  This is to support testing only and
 	  is not yet a functional board port (as of 2013-03-01).
+	* arch/arm/include/lm/lm4f_irq.h and arch/arm/src/lm/chip/lm4f_vector.h:
+	  Add interrupt vector/IRQ number definitions for the LM4F120.
+	* arch/arm/src/stm32f20xxx_dma.c and stm32f40xxx_dma.c:  Fix a typo
+	  in assigned base register addresses for each DMA channel.  From
+	  Yan T.
 

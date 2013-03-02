@@ -42,10 +42,32 @@
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
+#include <arch/lm/chip.h>
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+ /* Mark GPIO interrupts as disabled for non-existent GPIO ports. */
+
+#if LM_NPORTS < 1 && !defined(CONFIG_LM_DISABLE_GPIOA_IRQS)
+#  define CONFIG_LM_DISABLE_GPIOA_IRQS
+#elif LM_NPORTS < 2 && !defined(CONFIG_LM_DISABLE_GPIOB_IRQS)
+#  define CONFIG_LM_DISABLE_GPIOB_IRQS
+#elif LM_NPORTS < 3 && !defined(CONFIG_LM_DISABLE_GPIOC_IRQS)
+#  define CONFIG_LM_DISABLE_GPIOC_IRQS
+#elif LM_NPORTS < 4 && !defined(CONFIG_LM_DISABLE_GPIOD_IRQS)
+#  define CONFIG_LM_DISABLE_GPIOD_IRQS
+#elif LM_NPORTS < 5 && !defined(CONFIG_LM_DISABLE_GPIOE_IRQS)
+#  define CONFIG_LM_DISABLE_GPIOE_IRQS
+#elif LM_NPORTS < 6 && !defined(CONFIG_LM_DISABLE_GPIOF_IRQS)
+#  define CONFIG_LM_DISABLE_GPIOF_IRQS
+#elif LM_NPORTS < 7 && !defined(CONFIG_LM_DISABLE_GPIOG_IRQS)
+#  define CONFIG_LM_DISABLE_GPIOG_IRQS
+#elif LM_NPORTS < 8 && !defined(CONFIG_LM_DISABLE_GPIOH_IRQS)
+#  define CONFIG_LM_DISABLE_GPIOH_IRQS
+#elif LM_NPORTS < 9 && !defined(CONFIG_LM_DISABLE_GPIOJ_IRQS)
+#  define CONFIG_LM_DISABLE_GPIOJ_IRQS
+#endif
 
 /* Processor Exceptions (vectors 0-15) */
 
