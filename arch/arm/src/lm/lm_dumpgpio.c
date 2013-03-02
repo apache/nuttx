@@ -60,23 +60,67 @@
 
 /* NOTE: this is duplicated in lm_gpio.c */
 
-#ifdef LM_GPIOH_BASE
-static const uint32_t g_gpiobase[8] =
+static const uintptr_t g_gpiobase[LM_NPORTS] =
 {
-  LM_GPIOA_BASE, LM_GPIOB_BASE, LM_GPIOC_BASE, LM_GPIOD_BASE,
-  LM_GPIOE_BASE, LM_GPIOF_BASE, LM_GPIOG_BASE, LM_GPIOH_BASE,
-};
-
-static const char g_portchar[8]   = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
-#else
-static const uint32_t g_gpiobase[8] =
-{
-  LM_GPIOA_BASE, LM_GPIOB_BASE, LM_GPIOC_BASE, LM_GPIOD_BASE,
-  LM_GPIOE_BASE, LM_GPIOF_BASE, LM_GPIOG_BASE, 0,
-};
-
-static const char g_portchar[8]   = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', '?' };
+#if LM_NPORTS > 0
+    LM_GPIOA_BASE
 #endif
+#if LM_NPORTS > 1
+  , LM_GPIOB_BASE
+#endif
+#if LM_NPORTS > 2
+  , LM_GPIOC_BASE
+#endif
+#if LM_NPORTS > 3
+  , LM_GPIOD_BASE
+#endif
+#if LM_NPORTS > 4
+  , LM_GPIOE_BASE
+#endif
+#if LM_NPORTS > 5
+  , LM_GPIOF_BASE
+#endif
+#if LM_NPORTS > 6
+  , LM_GPIOG_BASE
+#endif
+#if LM_NPORTS > 7
+  , LM_GPIOH_BASE
+#endif
+#if LM_NPORTS > 8
+  , LM_GPIOJ_BASE
+#endif
+};
+
+static const char g_portchar[LM_NPORTS] =
+{
+#if LM_NPORTS > 0
+    'A'
+#endif
+#if LM_NPORTS > 1
+  , 'B'
+#endif
+#if LM_NPORTS > 2
+  , 'C'
+#endif
+#if LM_NPORTS > 3
+  , 'D'
+#endif
+#if LM_NPORTS > 4
+  , 'E'
+#endif
+#if LM_NPORTS > 5
+  , 'F'
+#endif
+#if LM_NPORTS > 6
+  , 'G'
+#endif
+#if LM_NPORTS > 7
+  , 'H'
+#endif
+#if LM_NPORTS > 8
+  , 'J'
+#endif
+};
 
 /****************************************************************************
  * Private Functions
@@ -91,9 +135,9 @@ static const char g_portchar[8]   = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', '?' };
  *
  ****************************************************************************/
 
-static inline uint32_t lm_gpiobaseaddress(int port)
+static inline uintptr_t lm_gpiobaseaddress(int port)
 {
-  return g_gpiobase[port & 7];
+  return port < LM_NPORTS ? g_gpiobase[port] : 0;
 }
 
 /****************************************************************************
@@ -107,7 +151,7 @@ static inline uint32_t lm_gpiobaseaddress(int port)
 
 static inline uint8_t lm_gpioport(int port)
 {
-  return g_portchar[port & 7];
+  return port < LM_NPORTS ? g_portchar[port] : '?';
 }
 
 /****************************************************************************
@@ -126,7 +170,7 @@ int lm_dumpgpio(uint32_t pinset, const char *msg)
 {
   irqstate_t   flags;
   unsigned int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  uint32_t     base;
+  uintptr_t    base;
   uint32_t     rcgc2;
   bool         enabled;
 
