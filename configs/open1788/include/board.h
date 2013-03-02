@@ -85,8 +85,8 @@
  * The input to the divider (PLLCLK) will be determined by the PLL output.
  */
 
-#define BOARD_CCLKCFG_DIVIDER      6
-#define BOARD_CCLKCFG_VALUE        ((BOARD_CCLKCFG_DIVIDER-1) << SYSCON_CCLKCFG_CCLKDIV_SHIFT)
+#define BOARD_CCLKCFG_DIVIDER      1
+#define BOARD_CCLKCFG_VALUE        (BOARD_CCLKCFG_DIVIDER | SYSCON_CCLKCFG_CCLKSEL)
 
 /* PLL0.  PLL0 is used to generate the CPU clock (PLLCLK).
  *
@@ -109,11 +109,11 @@
 
 /* PLL1 : PLL1 is used to generate clock for the USB */
 
- #undef CONFIG_LPC17_PLL1
- #define CONFIG_LPC17_PLL1         1
- #define BOARD_PLL1CFG_MSEL        4
- #define BOARD_PLL1CFG_PSEL        2
- #define BOARD_PLL1CFG_VALUE \
+#undef  CONFIG_LPC17_PLL1
+//~ #define CONFIG_LPC17_PLL1         1
+#define BOARD_PLL1CFG_MSEL        4
+#define BOARD_PLL1CFG_PSEL        2
+#define BOARD_PLL1CFG_VALUE \
   (((BOARD_PLL1CFG_MSEL-1) << SYSCON_PLLCFG_MSEL_SHIFT) | \
    ((BOARD_PLL1CFG_PSEL-1) << SYSCON_PLLCFG_PSEL_SHIFT))
 
@@ -135,7 +135,7 @@
 
 /* Flash access use 6 CPU clocks - Safe for any allowed conditions */
 
-#define BOARD_FLASHCFG_VALUE       SYSCON_FLASHCFG_TIM_5
+#define BOARD_FLASHCFG_VALUE       (SYSCON_FLASHCFG_TIM_5 | 0x03a)
 
 /* Ethernet configuration */
 
