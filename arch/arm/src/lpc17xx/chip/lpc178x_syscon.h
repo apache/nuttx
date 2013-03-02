@@ -57,7 +57,7 @@
 
 /* Memory Mapping Control register (MEMMAP - 0x400F C040) */
 
-#define LPC17_SYSCON_MEMMAP_OFFSET       0x0040 /* Memory Mapping Control register */
+#define LPC17_SYSCON_MEMMAP_OFFSET       0x0040 /* Memory Mapping Control Register */
 
 /* Clocking and power control - Phase locked loops */
 
@@ -289,16 +289,16 @@
                                                    /* Bits 9-31:  Reserved */
 /* USB Clock Configuration register */
 
-#define SYSCON_USBCLKSEL_USBDIV_SHIFT    (0)       /* Bits 0-4: PLL0/1 divide value USB clock */
-#define SYSCON_USBCLKSEL_USBDIV_MASK     (0x1f << SYSCON_USBCLKSEL_USBDIV_SHIFT)
-#  define SYSCON_USBCLKSEL_USBDIV_DIV1   (1 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 48MHz */
-#  define SYSCON_USBCLKSEL_USBDIV_DIV2   (2 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 96MHz */
-#  define SYSCON_USBCLKSEL_USBDIV_DIV3   (3 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 144MHz */
+#define SYSCON_USBCLKCFG_USBDIV_SHIFT    (0)       /* Bits 0-4: PLL0/1 divide value USB clock */
+#define SYSCON_USBCLKCFG_USBDIV_MASK     (0x1f << SYSCON_USBCLKCFG_USBDIV_SHIFT)
+#  define SYSCON_USBCLKCFG_USBDIV_DIV1   (1 << SYSCON_USBCLKCFG_USBDIV_SHIFT) /* PLL0/1 output must be 48MHz */
+#  define SYSCON_USBCLKCFG_USBDIV_DIV2   (2 << SYSCON_USBCLKCFG_USBDIV_SHIFT) /* PLL0/1 output must be 96MHz */
+#  define SYSCON_USBCLKCFG_USBDIV_DIV3   (3 << SYSCON_USBCLKCFG_USBDIV_SHIFT) /* PLL0/1 output must be 144MHz */
                                                    /* Bits 5-7:  Reserved */
-#define SYSCON_USBCLKSEL_USBSEL_SHIFT    (8)       /* Bits 8-9: Input clock to USBDIV */
-#define SYSCON_USBCLKSEL_USBSEL_MASK     (3 << SYSCON_USBCLKSEL_USBSEL_SHIFT)
-#define SYSCON_USBCLKSEL_USBSEL_PLL0     (1 << SYSCON_USBCLKSEL_USBSEL_SHIFT)  /* 01: PLL0 is used as input clock to USBDIV */
-#define SYSCON_USBCLKSEL_USBSEL_PLL1     (2 << SYSCON_USBCLKSEL_USBSEL_SHIFT)  /* 10: PLL1 is used as input clock to USBDIV */
+#define SYSCON_USBCLKCFG_USBSEL_SHIFT    (8)       /* Bits 8-9: Input clock to USBDIV */
+#define SYSCON_USBCLKCFG_USBSEL_MASK     (3 << SYSCON_USBCLKCFG_USBSEL_SHIFT)
+#define SYSCON_USBCLKCFG_USBSEL_PLL0     (1 << SYSCON_USBCLKCFG_USBSEL_SHIFT)  /* 01: PLL0 is used as input clock to USBDIV */
+#define SYSCON_USBCLKCFG_USBSEL_PLL1     (2 << SYSCON_USBCLKCFG_USBSEL_SHIFT)  /* 10: PLL1 is used as input clock to USBDIV */
                                                                                /* 11: unused */
                                                    /* Bits 10-31:  Reserved */
 /* CAN0/1 Sleep Clear Register */

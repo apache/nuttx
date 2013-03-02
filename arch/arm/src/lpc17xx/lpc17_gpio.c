@@ -273,8 +273,8 @@ static int lpc17_configiocon(unsigned int port, unsigned int pin,
 
   regaddr = LPC17_IOCON_P(port, pin);
   regval  = getreg32(regaddr);
-  regval &= value;
-  regval &= ~typemask;
+  regval |= value;
+  regval &= typemask;
   putreg32(regval, regaddr);
 
   return OK;
@@ -702,27 +702,16 @@ static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
 #elif defined(LPC178x)
   uint32_t regval = 0;
 
+  /* Set the alternate pin */
+
+  regval |= (alt & IOCON_FUNC_MASK);
+
   /* Select open drain output */
 
   if ((cfgset & GPIO_OPEN_DRAIN) != 0)
     {
       regval |= IOCON_OD_MASK;
     }
-
-  //~ /* Select slew output */
-  //~
-  //~ if ((cfgset & GPIO_SLEW) != 0)
-  //~ {
-  //~   regval |= IOCON_SLEW_MASK;
-  //~ }
-
-  /* Set pull-up mode */
-
-  regval |= ((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT);
-
-  /* Set the alternate pin */
-
-  regval |= (alt & ~IOCON_FUNC_MASK);
 
   /* Set IOCON register */
 

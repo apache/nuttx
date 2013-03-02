@@ -69,7 +69,7 @@
  *   Port number:    PPP (0-4)
  *   Pin number:     NNNNN (0-31)
  */
- 
+
 /* Pin Function bits: FFF
  * Only meaningful when the GPIO function is GPIO_PIN
  */
@@ -173,7 +173,7 @@
 #elif defined(LPC178x)
 
 /* Encoding: TTTT TTTT FFFF MMOV PPPN NNNN
- *   
+ *
  *   Special Pin Functions: TTTT TTTT
  *   Pin Function:           FFFF
  *   Pin Mode bits:          MM
@@ -182,7 +182,7 @@
  *   Port number:            PPP (0-4)
  *   Pin number:             NNNNN (0-31)
  */
- 
+
 /* Special Pin Functions
  * For pins that has ADC/DAC, USB, I2C
  */
@@ -241,13 +241,13 @@
 
 /* Pin Mode: MM */
 
-#define GPIO_PINMODE_SHIFT	 (7)
+#define GPIO_PINMODE_SHIFT   (7)
 #define GPIO_PUMODE_SHIFT    (10)      /* Bits 10-11: Pin pull-up mode */
 #define GPIO_PUMODE_MASK     (3 << GPIO_PUMODE_SHIFT)
-#  define GPIO_FLOAT         (0 << GPIO_PUMODE_SHIFT) /* Pull-up resistor enabled */
-#  define GPIO_PULLDN        (1 << GPIO_PUMODE_SHIFT) /* Repeater mode enabled */
-#  define GPIO_PULLUP        (2 << GPIO_PUMODE_SHIFT) /* Neither pull-up nor -down */
-#  define GPIO_REPEATER      (3 << GPIO_PUMODE_SHIFT) /* Pull-down resistor enabled */
+#  define GPIO_FLOAT         (0 << GPIO_PUMODE_SHIFT) /* Neither pull-up nor -down */
+#  define GPIO_PULLDN        (1 << GPIO_PUMODE_SHIFT) /* Pull-down resistor enabled */
+#  define GPIO_PULLUP        (2 << GPIO_PUMODE_SHIFT) /* Pull-up resistor enabled */
+#  define GPIO_REPEATER      (3 << GPIO_PUMODE_SHIFT) /* Repeater mode enabled */
 
 /* Open drain: O */
 
