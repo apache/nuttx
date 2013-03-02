@@ -318,7 +318,7 @@ void lpc17_lowsetup(void)
  * clocking for all other UARTs
  */
 
-#if defined(LPC176x)
+#ifdef LPC176x
   regval = getreg32(LPC17_SYSCON_PCLKSEL0);
   regval &= ~(SYSCON_PCLKSEL0_UART0_MASK|SYSCON_PCLKSEL0_UART1_MASK);
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
@@ -336,9 +336,6 @@ void lpc17_lowsetup(void)
   regval |= (CONSOLE_CCLKDIV << SYSCON_PCLKSEL1_UART3_SHIFT);
 #endif
   putreg32(regval, LPC17_SYSCON_PCLKSEL1);
-
-#elif defined(LPC178x)
-  putreg32(LPC17_PCLKDIV, LPC17_SYSCON_PCLKSEL);
 #endif
 
   /* Configure UART pins for the selected CONSOLE */

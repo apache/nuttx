@@ -71,7 +71,7 @@
  */
 
 #define LPC17_CCLK                 120000000 /* 120Mhz */
-#define LPC17_PCLKDIV              2         /* Peripheral clock = LPC17_CCLK/2 */
+#define BOARD_PCLKDIV              2         /* Peripheral clock = LPC17_CCLK/2 */
 
 /* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
  * of the main oscillator.

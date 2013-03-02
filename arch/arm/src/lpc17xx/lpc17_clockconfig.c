@@ -127,6 +127,7 @@ void lpc17_clockconfig(void)
 
   while ((getreg32(LPC17_SYSCON_PLL0STAT) & SYSCON_PLL0STAT_PLOCK) == 0);
 
+#  if defined(LPC176x)
   /* Enable and connect PLL0 */
 
   putreg32(SYSCON_PLLCON_PLLE|SYSCON_PLLCON_PLLC, LPC17_SYSCON_PLL0CON);
@@ -134,14 +135,12 @@ void lpc17_clockconfig(void)
   putreg32(0x55, LPC17_SYSCON_PLL0FEED);
 
   /* Wait for PLL to report that it is connected and enabled */
-#   if defined(LPC176x)
+
   while ((getreg32(LPC17_SYSCON_PLL0STAT) & (SYSCON_PLL0STAT_PLLE|SYSCON_PLL0STAT_PLLC))
           != (SYSCON_PLL0STAT_PLLE|SYSCON_PLL0STAT_PLLC));
-#   elif defined(LPC178x)
-  while ((getreg32(LPC17_SYSCON_PLL0STAT) & (SYSCON_PLL0STAT_PLLE))
-          != (SYSCON_PLL0STAT_PLLE));
-#   endif
-#endif
+
+#  endif /* LPC176x */
+#endif /* CONFIG_LPC17_PLL0 */
 
   /* PLL1 receives its clock input from the main oscillator only and can be used to
    * provide a fixed 48 MHz clock only to the USB subsystem (if that clock cannot be
@@ -170,6 +169,7 @@ void lpc17_clockconfig(void)
 
   while ((getreg32(LPC17_SYSCON_PLL1STAT) & SYSCON_PLL1STAT_PLOCK) == 0);
 
+#  if defined(LPC176x)
   /* Enable and connect PLL1 */
 
   putreg32(SYSCON_PLLCON_PLLE|SYSCON_PLLCON_PLLC, LPC17_SYSCON_PLL1CON);
@@ -177,30 +177,34 @@ void lpc17_clockconfig(void)
   putreg32(0x55, LPC17_SYSCON_PLL1FEED);
 
   /* Wait for PLL to report that it is connected and enabled */
-#   if defined(LPC176x)
+
   while ((getreg32(LPC17_SYSCON_PLL1STAT) & (SYSCON_PLL1STAT_PLLE|SYSCON_PLL1STAT_PLLC))
          != (SYSCON_PLL1STAT_PLLE|SYSCON_PLL1STAT_PLLC));
-#   elif defined(LPC178x)
-  while ((getreg32(LPC17_SYSCON_PLL1STAT) & (SYSCON_PLL1STAT_PLLE))
-          != (SYSCON_PLL1STAT_PLLE));
-#   endif
-#else
+
+#  endif
+#else /* CONFIG_LPC17_PLL1 */
+
   /* Otherwise, setup up the USB clock divider to generate the USB clock from PLL0 */
+
 #ifdef LPC176x
   putreg32(BOARD_USBCLKCFG_VALUE, LPC17_SYSCON_USBCLKCFG);
 #endif
-#endif /* LPC176x */
+#endif /* CONFIG_LPC17_PLL1 */
 
   /* Disable all peripheral clocks.  They must be configured by each device driver
    * when the device driver is initialized.
    */
 
-# if defined(LPC176x)
+#ifdef LPC176x
   putreg32(0, LPC17_SYSCON_PCLKSEL0);
   putreg32(0, LPC17_SYSCON_PCLKSEL1);
-# elif defined(LPC178x)
-  putreg32(0, LPC17_SYSCON_PCLKSEL);
-# endif
+#endif
+
+  /* Set the peripheral clock (PCLK) divider that is used by all APB peripherals. */
+
+#ifdef LPC178x
+  putreg32(BOARD_PCLKDIV, LPC17_SYSCON_PCLKSEL);
+#endif
 
   /* Disable power to all peripherals (execpt GPIO).  Peripherals must be re-powered
    * one at a time by each device driver when the driver is initialized.
