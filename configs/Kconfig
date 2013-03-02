@@ -212,6 +212,7 @@ config ARCH_BOARD_LM4F120_LAUNCHPAD
 config ARCH_BOARD_LPCXPRESSO
 	bool "NXP LPCExpresso LPC1768"
 	depends on ARCH_CHIP_LPC1768
+	select ARCH_HAVE_LEDS
 	---help---
 		Embedded Artists base board with NXP LPCExpresso LPC1768.  This board
 		is based on the NXP LPC1768.  The Code Red toolchain is used by default.
@@ -665,6 +666,7 @@ config ARCH_BOARD_ZP214XPA
 config ARCH_BOARD_ZKITARM
 	bool "Zilogic ZKit-ARM-1769 Development Kit"
 	depends on ARCH_CHIP_LPC1768
+	select ARCH_HAVE_LEDS
 	---help---
 		Zilogic System's ARM development Kit, ZKIT-ARM-1769.  This board is based
 		on the NXP LPC1769.  The Nuttx Buildroot toolchain is used by default.
