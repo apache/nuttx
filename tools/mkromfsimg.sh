@@ -246,7 +246,7 @@ cat $rcstemplate | \
 
 # And install it at the specified relative location
 
-install -D --mode=0755 $rcsfile $workingdir/$uinitscript || \
+install -D -m 0755 $rcsfile $workingdir/$uinitscript || \
     { echo "Failed to install $rcsfile at $workingdir/$uinitscript"; rm -f $rcsfile; exit 1; }
 rm -f $rcsfile
 

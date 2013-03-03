@@ -55,7 +55,7 @@
 #    define STM32_NEXTI          19
 #    define STM32_EXTI_MASK      0x0007ffff
 #  endif
-#eif defined(CONFIG_STM32_STM32F30XX)
+#elif defined(CONFIG_STM32_STM32F30XX)
 #    define STM32_NEXTI1         31
 #    define STM32_EXTI1_MASK     0xffffffff
 #    define STM32_NEXTI2         4
