@@ -44,7 +44,7 @@ $(BIN)$(EXEEXT): $(SRC)
 	$(HOSTCC) $(HOSTCFLAGS) $^ -o $@
 
 ..$(DELIM)bin$(DELIM)$(BIN)$(EXEEXT): $(BIN)$(EXEEXT)
-	install --mode 0755 $^ $@
+	install -m 0755 $^ $@
  
 clean:
 	$(call DELFILE, $(BIN)$(EXEEXT))
