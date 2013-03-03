@@ -448,7 +448,7 @@
 /* System control registers -- Syscon Miscellaneous Registers */
 
                                                   /* Bits 0-3: Reserved */
-#define SYSCON_SCS_OSCRANGE           (1 << 4)    /* Bit 4:  Main oscillator range select */
+#define SYSCON_SCS_OSCRS              (1 << 4)    /* Bit 4:  Main oscillator range select */
 #define SYSCON_SCS_OSCEN              (1 << 5)    /* Bit 5:  Main oscillator enable */
 #define SYSCON_SCS_OSCSTAT            (1 << 6)    /* Bit 6:  Main oscillator status */
                                                   /* Bits 7-31: Reserved */
