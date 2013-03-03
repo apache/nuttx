@@ -56,11 +56,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define RCC_OSCMASK   (SYSCON_RCC_IOSCDIS|SYSCON_RCC_MOSCDIS)
-#define RCC_XTALMASK  (SYSCON_RCC_XTAL_MASK|SYSCON_RCC_OSCSRC_MASK|SYSCON_RCC_PWRDN)
-#define RCC2_XTALMASK (SYSCON_RCC2_USERCC2|SYSCON_RCC2_OSCSRC2_MASK|SYSCON_RCC2_PWRDN2)
-#define RCC_DIVMASK   (SYSCON_RCC_SYSDIV_MASK|SYSCON_RCC_USESYSDIV|SYSCON_RCC_IOSCDIS|SYSCON_RCC_MOSCDIS)
+#ifdef LM4F
+#  define RCC_OSCMASK (SYSCON_RCC_MOSCDIS)
+#else
+#  define RCC_OSCMASK (SYSCON_RCC_IOSCDIS|SYSCON_RCC_MOSCDIS)
+#endif
+#define RCC_XTALMASK  (SYSCON_RCC_XTAL_MASK|SYSCON_RCC_OSCSRC_MASK|\
+                       SYSCON_RCC_PWRDN)
+#define RCC2_XTALMASK (SYSCON_RCC2_USERCC2|SYSCON_RCC2_OSCSRC2_MASK|\
+                       SYSCON_RCC2_PWRDN2)
+#ifdef LM4F
+#  define RCC_DIVMASK (SYSCON_RCC_SYSDIV_MASK|SYSCON_RCC_USESYSDIV|\
+                       SYSCON_RCC_MOSCDIS)
+#else
+#  define RCC_DIVMASK (SYSCON_RCC_SYSDIV_MASK|SYSCON_RCC_USESYSDIV|\
+                       SYSCON_RCC_IOSCDIS|SYSCON_RCC_MOSCDIS)
+#endif
 #define RCC2_DIVMASK  (SYSCON_RCC2_SYSDIV2_MASK)
+
 #define FAST_OSCDELAY (512*1024)
 #define SLOW_OSCDELAY (4*1024)
 #define PLLLOCK_DELAY (32*1024)
@@ -118,8 +131,8 @@ static inline void lm_oscdelay(uint32_t rcc, uint32_t rcc2)
   if ((rcc2 & SYSCON_RCC2_USERCC2) != 0)
     {
       uint32_t rcc2src = rcc2 & SYSCON_RCC2_OSCSRC2_MASK;
-      if ((rcc2src == SYSCON_RCC2_OSCSRC2_30KHZ) ||
-          (rcc2src == SYSCON_RCC2_OSCSRC2_32KHZ))
+      if ((rcc2src == SYSCON_RCC2_OSCSRC2_LFIOSC) ||
+          (rcc2src == SYSCON_RCC2_OSCSRC2_32768HZ))
         {
           delay = SLOW_OSCDELAY;
         }
@@ -130,7 +143,7 @@ static inline void lm_oscdelay(uint32_t rcc, uint32_t rcc2)
   else
     {
       uint32_t rccsrc  = rcc  & SYSCON_RCC_OSCSRC_MASK;
-      if (rccsrc == SYSCON_RCC_OSCSRC_30KHZ)
+      if (rccsrc == SYSCON_RCC_OSCSRC_LFIOSC)
         {
           delay = SLOW_OSCDELAY;
         }
@@ -208,8 +221,12 @@ void lm_clockconfig(uint32_t newrcc, uint32_t newrcc2)
    * on rest and if that is selected, most likely nothing needs to be done.
    */
 
+#ifdef LM4F
+  if ((rcc & SYSCON_RCC_MOSCDIS) && !(newrcc & SYSCON_RCC_MOSCDIS))
+#else
   if (((rcc & SYSCON_RCC_MOSCDIS) && !(newrcc & SYSCON_RCC_MOSCDIS)) ||
       ((rcc & SYSCON_RCC_IOSCDIS) && !(newrcc & SYSCON_RCC_IOSCDIS)))
+#endif
     {
       /* Enable any selected osciallators (but don't disable any yet) */
 
