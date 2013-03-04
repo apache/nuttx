@@ -48,6 +48,8 @@
 #include "up_internal.h"
 
 #include "lpc17_ssp.h"
+#include "lpc17_gpio.h"
+
 #include "nucleus2g_internal.h"
 
 /************************************************************************************
