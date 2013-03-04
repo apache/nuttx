@@ -86,8 +86,8 @@
  * The input to the divider (PLLCLK) will be determined by the PLL output.
  */
 
-#define BOARD_CCLKCFG_DIVIDER      1
-#define BOARD_CCLKCFG_VALUE        (BOARD_CCLKCFG_DIVIDER | SYSCON_CCLKCFG_CCLKSEL)
+#define BOARD_CCLKSEL_DIVIDER      1
+#define BOARD_CCLKSEL_VALUE        (BOARD_CCLKSEL_DIVIDER | SYSCON_CCLKSEL_CCLKSEL)
 
 /* PLL0.  PLL0 is used to generate the CPU clock (PLLCLK).
  *
@@ -125,7 +125,7 @@
  *  USBCLK = PLL1CLK = (SYSCLK * 4)  = 48MHz
  */
 
-#define BOARD_USBCLKCFG_VALUE      (SYSCON_USBCLKSEL_USBDIV_DIV1 | \
+#define BOARD_USBCLKSEL_VALUE      (SYSCON_USBCLKSEL_USBDIV_DIV1 | \
                                     SYSCON_USBCLKSEL_USBSEL_PLL1)
 #endif
 
