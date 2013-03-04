@@ -417,6 +417,13 @@ config DEBUG_SPI
 	---help---
 		Enable I2C driver debug SYSLOG output (disabled by default)
 
+config DEBUG_CAN
+	bool "Enable CAN Debug Output"
+	default n
+	depends on CAN
+	---help---
+		Enable CAN driver debug SYSLOG output (disabled by default)
+
 config DEBUG_DMA
 	bool "Enable DMA Debug Output"
 	default n

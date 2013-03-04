@@ -51,6 +51,10 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += up_usbmsc.c
 endif
 
+ifeq ($(CONFIG_CAN),y)
+CSRCS += up_can.c
+endif
+
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
