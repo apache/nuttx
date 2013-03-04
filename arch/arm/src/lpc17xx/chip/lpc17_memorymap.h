@@ -42,6 +42,10 @@
 
 #include <nuttx/config.h>
 
+/* This file is only a thin shell that includes the correct memory map definitions
+ * for the selected LPC17xx family.
+ */
+
 #include <arch/lpc17xx/chip.h>
 
 #if defined(LPC176x)
