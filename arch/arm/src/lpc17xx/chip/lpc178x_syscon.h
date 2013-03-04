@@ -78,9 +78,9 @@
 
 /* Clocking and power control -- Clock dividers */
 
-#define LPC17_SYSCON_EMCCLKCFG_OFFSET    0x0100 /* EMC Clock Configuration Register */
-#define LPC17_SYSCON_CCLKCFG_OFFSET      0x0104 /* CPU Clock Configuration Register */
-#define LPC17_SYSCON_USBCLKCFG_OFFSET    0x0108 /* USB Clock Configuration Register */
+#define LPC17_SYSCON_EMCCLKSEL_OFFSET    0x0100 /* EMC Clock Selection Register */
+#define LPC17_SYSCON_CCLKSEL_OFFSET      0x0104 /* CPU Clock Selection Register */
+#define LPC17_SYSCON_USBCLKSEL_OFFSET    0x0108 /* USB Clock Selection Register */
 
 /* 0x400f c110 - 0x400f c114: CAN Wake and Sleep Registers */
 
@@ -160,9 +160,9 @@
 
 /* Clocking and power control -- Clock dividers */
 
-#define LPC17_SYSCON_EMCCLKCFG           (LPC17_SYSCON_BASE+LPC17_SYSCON_EMCCLKCFG_OFFSET)
-#define LPC17_SYSCON_CCLKCFG             (LPC17_SYSCON_BASE+LPC17_SYSCON_CCLKCFG_OFFSET)
-#define LPC17_SYSCON_USBCLKCFG           (LPC17_SYSCON_BASE+LPC17_SYSCON_USBCLKCFG_OFFSET)
+#define LPC17_SYSCON_EMCCLKSEL           (LPC17_SYSCON_BASE+LPC17_SYSCON_EMCCLKSEL_OFFSET)
+#define LPC17_SYSCON_CCLKSEL             (LPC17_SYSCON_BASE+LPC17_SYSCON_CCLKSEL_OFFSET)
+#define LPC17_SYSCON_USBCLKSEL           (LPC17_SYSCON_BASE+LPC17_SYSCON_USBCLKSEL_OFFSET)
 
 /* 0x400f c110 - 0x400f c114: CAN Wake and Sleep Registers */
 
@@ -277,28 +277,28 @@
                                                    /* 0: EMC uses same clock as CPU */
                                                    /* 1: EMC uses half the rate of CPU */
                                                    /* Bits 1-31: Reserved */
-/* CPU Clock Configuration register */
+/* CPU Clock Selection register */
 
-#define SYSCON_CCLKCFG_CCLKDIV_SHIFT     (0)       /* 0-4: Divide value for CPU clock (CCLK) */
-#define SYSCON_CCLKCFG_CCLKDIV_MASK      (0x1f << SYSCON_CCLKCFG_CCLKDIV_SHIFT)
-#  define SYSCON_CCLKCFG_CCLKDIV(n)      ((n-1) << SYSCON_CCLKCFG_CCLKDIV_SHIFT) /* n = 2 - 31 */
+#define SYSCON_CCLKSEL_CCLKDIV_SHIFT     (0)       /* 0-4: Divide value for CPU clock (CCLK) */
+#define SYSCON_CCLKSEL_CCLKDIV_MASK      (0x1f << SYSCON_CCLKSEL_CCLKDIV_SHIFT)
+#  define SYSCON_CCLKSEL_CCLKDIV(n)      ((n-1) << SYSCON_CCLKSEL_CCLKDIV_SHIFT) /* n = 2 - 31 */
                                                    /* Bits 5-7:  Reserved */
-#define SYSCON_CCLKCFG_CCLKSEL           (1 << 8)  /* Bit 8: Select input clock to CPU clock divider */
+#define SYSCON_CCLKSEL_CCLKSEL           (1 << 8)  /* Bit 8: Select input clock to CPU clock divider */
                                                    /* 0: Sysclk used as input to CCLKDIV */
                                                    /* 1: Main PLL used as input to CCLKDIV */
                                                    /* Bits 9-31:  Reserved */
-/* USB Clock Configuration register */
+/* USB Clock Selection register */
 
-#define SYSCON_USBCLKCFG_USBDIV_SHIFT    (0)       /* Bits 0-4: PLL0/1 divide value USB clock */
-#define SYSCON_USBCLKCFG_USBDIV_MASK     (0x1f << SYSCON_USBCLKCFG_USBDIV_SHIFT)
-#  define SYSCON_USBCLKCFG_USBDIV_DIV1   (1 << SYSCON_USBCLKCFG_USBDIV_SHIFT) /* PLL0/1 output must be 48MHz */
-#  define SYSCON_USBCLKCFG_USBDIV_DIV2   (2 << SYSCON_USBCLKCFG_USBDIV_SHIFT) /* PLL0/1 output must be 96MHz */
-#  define SYSCON_USBCLKCFG_USBDIV_DIV3   (3 << SYSCON_USBCLKCFG_USBDIV_SHIFT) /* PLL0/1 output must be 144MHz */
+#define SYSCON_USBCLKSEL_USBDIV_SHIFT    (0)       /* Bits 0-4: PLL0/1 divide value USB clock */
+#define SYSCON_USBCLKSEL_USBDIV_MASK     (0x1f << SYSCON_USBCLKSEL_USBDIV_SHIFT)
+#  define SYSCON_USBCLKSEL_USBDIV_DIV1   (1 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 48MHz */
+#  define SYSCON_USBCLKSEL_USBDIV_DIV2   (2 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 96MHz */
+#  define SYSCON_USBCLKSEL_USBDIV_DIV3   (3 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 144MHz */
                                                    /* Bits 5-7:  Reserved */
-#define SYSCON_USBCLKCFG_USBSEL_SHIFT    (8)       /* Bits 8-9: Input clock to USBDIV */
-#define SYSCON_USBCLKCFG_USBSEL_MASK     (3 << SYSCON_USBCLKCFG_USBSEL_SHIFT)
-#define SYSCON_USBCLKCFG_USBSEL_PLL0     (1 << SYSCON_USBCLKCFG_USBSEL_SHIFT)  /* 01: PLL0 is used as input clock to USBDIV */
-#define SYSCON_USBCLKCFG_USBSEL_PLL1     (2 << SYSCON_USBCLKCFG_USBSEL_SHIFT)  /* 10: PLL1 is used as input clock to USBDIV */
+#define SYSCON_USBCLKSEL_USBSEL_SHIFT    (8)       /* Bits 8-9: Input clock to USBDIV */
+#define SYSCON_USBCLKSEL_USBSEL_MASK     (3 << SYSCON_USBCLKSEL_USBSEL_SHIFT)
+#define SYSCON_USBCLKSEL_USBSEL_PLL0     (1 << SYSCON_USBCLKSEL_USBSEL_SHIFT)  /* 01: PLL0 is used as input clock to USBDIV */
+#define SYSCON_USBCLKSEL_USBSEL_PLL1     (2 << SYSCON_USBCLKSEL_USBSEL_SHIFT)  /* 10: PLL1 is used as input clock to USBDIV */
                                                                                /* 11: unused */
                                                    /* Bits 10-31:  Reserved */
 /* CAN0/1 Sleep Clear Register */

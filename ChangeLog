@@ -4233,4 +4233,11 @@
 	* arch/arm/src/stm32f20xxx_dma.c and stm32f40xxx_dma.c:  Fix a typo
 	  in assigned base register addresses for each DMA channel.  From
 	  Yan T.
-
+	* Several build fixes from Mike Smithe were incorporated.  These were
+	  mostly compilation errors introduced into the system because of the
+	  large number of recent changes with broad scope (2013-03-04).
+	* configs/zkit-arm-17969/src/up_can.c:  Add CAN support to the
+	  Zilogics Technologies ZKIT-ARM-1769 board (From Rashid Fatah, (2013-03-04)).
+	* arch/arm/src/lpc17/lpc17*_clockconfig.c:  The WaveShare Open1788
+	  board now boots and passes the OS test.  This is the work of
+	  Rommel Marcelo (2013-03-04).

@@ -855,7 +855,7 @@ static inline uint32_t lpc17_uartdl(uint32_t baud, uint8_t divcode)
 #else
 static inline uint32_t lpc17_uartdl(uint32_t baud)
 {
-  return (uint32_t)BOARD_PCLK / (baud << 4);
+  return (uint32_t)BOARD_PCLK_FREQUENCY / (baud << 4);
 }
 #endif
 

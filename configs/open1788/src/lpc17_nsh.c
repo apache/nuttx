@@ -2,7 +2,7 @@
  * config/open1788/src/lpc17_nsh.c
  * arch/arm/src/board/lpc17_nsh.c
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,66 +58,84 @@
 
 /* Configuration ************************************************************/
 
-/* PORT and SLOT number probably depend on the board configuration */
+#define NSH_HAVE_MMCSD    1
+#define NSH_HAVE_USBHOST  1
+#define NSH_HAVE_USBHDEV  1
 
-#ifdef CONFIG_ARCH_BOARD_OPEN1788
-#  define NSH_HAVEMMCSD  1
-#  define NSH_HAVEUSBHOST  1
-#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 1
-#    error "The Open1788 MMC/SD is on SSP1"
-#    undef CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO 1
-#  endif
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "The Open1788 MMC/SD is only one slot (0)"
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#  ifndef CONFIG_LPC17_SSP1
-#    warning "CONFIG_LPC17_SSP1 is not enabled"
-#    undef NSH_HAVEMMCSD
-#  endif
-#else
-#  error "Unrecognized board"
-#  undef NSH_HAVEMMCSD
-#  undef NSH_HAVEUSBHOST
+/* MMC/SD support */
+
+#if !defined(CONFIG_MMCSD) && !defined(CONFIG_MMCD_SPI)
+#  undef NSH_HAVE_MMCSD
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef NSH_HAVEMMCSD
+#  undef NSH_HAVE_MMCSD
 #endif
 
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
+/* MMC/SD support requires that an SPI support is enabled and an SPI port is selected */
+
+#ifdef NSH_HAVE_MMCSD
+#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO)
+#     error "No SSP port number is provided for MMC/SD support"
+#     undef NSH_HAVE_MMCSD
+#  elif CONFIG_NSH_MMCSDSPIPORTNO == 0 && !defined(CONFIG_LPC17_SSP0)
+#     error "SSP port 0 is selected but SSP0 is not enabled"
+#     undef NSH_HAVE_MMCSD
+#  elif CONFIG_NSH_MMCSDSPIPORTNO == 1 && !defined(CONFIG_LPC17_SSP1)
+#     error "SSP port 1 is selected but SSP1 is not enabled"
+#     undef NSH_HAVE_MMCSD
+#  elif CONFIG_NSH_MMCSDSPIPORTNO == 2 && !defined(CONFIG_LPC17_SSP2)
+#     error "SSP port 2 is selected but SSP2 is not enabled"
+#     undef NSH_HAVE_MMCSD
+#  elif CONFIG_NSH_MMCSDSPIPORTNO > 2
+#     error "SSP port number is out of range"
+#     undef NSH_HAVE_MMCSD
+#  endif
+#endif
+
+#ifdef NSH_HAVE_MMCSD
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
+#    warning "Assuming slot MMC/SD slot 0"
+#    define CONFIG_NSH_MMCSDSLOTNO 0
+#  endif
+#endif
+
+#ifdef NSH_HAVE_MMCSD
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
+#    warning "Assuming /dev/mmcsd0"
+#    define CONFIG_NSH_MMCSDMINOR 0
+#  endif
 #endif
 
 /* USB Host */
 
-#ifdef CONFIG_USBHOST
-#  ifndef CONFIG_LPC17_USBHOST
-#    error "CONFIG_LPC17_USBHOST is not selected"
-#  endif
+#ifndef CONFIG_USBHOST
+#  undef NSH_HAVE_USBHOST
 #endif
 
-#ifdef CONFIG_LPC17_USBHOST
-#  ifndef CONFIG_USBHOST
-#    warning "CONFIG_USBHOST is not selected"
-#  endif
+#ifndef CONFIG_LPC17_USBHOST
+#  undef NSH_HAVE_USBHOST
 #endif
 
-#if !defined(CONFIG_USBHOST) || !defined(CONFIG_LPC17_USBHOST)
-#  undef NSH_HAVEUSBHOST
-#endif
-
-#ifdef NSH_HAVEUSBHOST
+#ifdef NSH_HAVE_USBHOST
 #  ifndef CONFIG_USBHOST_DEFPRIO
 #    define CONFIG_USBHOST_DEFPRIO 50
 #  endif
 #  ifndef CONFIG_USBHOST_STACKSIZE
 #    define CONFIG_USBHOST_STACKSIZE 1024
 #  endif
+#endif
+
+/* USB Device */
+
+#ifndef CONFIG_USBDEV
+#  undef NSH_HAVE_USBDEV
+#endif
+
+#ifndef CONFIG_LPC17_USBDEV
+#  undef NSH_HAVE_USBDEV
 #endif
 
 /* Debug ********************************************************************/
@@ -140,7 +158,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef NSH_HAVEUSBHOST
+#ifdef NSH_HAVE_USBHOST
 static struct usbhost_driver_s *g_drvr;
 #endif
 
@@ -156,7 +174,7 @@ static struct usbhost_driver_s *g_drvr;
  *
  ****************************************************************************/
 
-#ifdef NSH_HAVEUSBHOST
+#ifdef NSH_HAVE_USBHOST
 static int nsh_waiter(int argc, char *argv[])
 {
   bool connected = false;
@@ -197,7 +215,7 @@ static int nsh_waiter(int argc, char *argv[])
  *
  ****************************************************************************/
 
-#ifdef NSH_HAVEMMCSD
+#ifdef NSH_HAVE_MMCSD
 static int nsh_sdinitialize(void)
 {
   FAR struct spi_dev_s *ssp;
@@ -257,7 +275,7 @@ errout:
  *
  ****************************************************************************/
 
-#ifdef NSH_HAVEUSBHOST
+#ifdef NSH_HAVE_USBHOST
 static int nsh_usbhostinitialize(void)
 {
   int pid;
@@ -325,5 +343,6 @@ int nsh_archinitialize(void)
 
       ret = nsh_usbhostinitialize();
     }
+
   return ret;
 }
