@@ -50,8 +50,8 @@
 #include <nuttx/lcd/nokia6100.h>
 
 #include "up_arch.h"
-#include "lpc17_syscon.h"
-#include "lpc17_pwm.h"
+#include "chip/lpc17_syscon.h"
+#include "chip/lpc17_pwm.h"
 #include "lpc17_gpio.h"
 #include "lpc1766stk_internal.h"
 

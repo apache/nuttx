@@ -47,9 +47,10 @@ CONFIGURED_APPS += system/readline
 CONFIGURED_APPS += nshlib
 CONFIGURED_APPS += netutils/ftpc
 
-# Optional networking support
+# Additional networking support
 
 CONFIGURED_APPS += netutils/uiplib
+CONFIGURED_APPS += netutils/resolv
 
 ifeq ($(CONFIG_NSH_TELNET),y)
 CONFIGURED_APPS += netutils/telnetd

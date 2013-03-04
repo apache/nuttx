@@ -55,6 +55,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "lpc17_ssp.h"
+#include "lpc17_gpio.h"
 #include "zkitarm_internal.h"
 
 #if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
