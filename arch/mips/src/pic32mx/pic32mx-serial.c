@@ -188,7 +188,7 @@ static bool up_txempty(struct uart_dev_s *dev);
  * Private Variables
  ****************************************************************************/
 
-static const struct struct uart_ops_s g_uart_ops =
+static const struct uart_ops_s g_uart_ops =
 {
   .setup          = up_setup,
   .shutdown       = up_shutdown,
