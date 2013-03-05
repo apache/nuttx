@@ -128,6 +128,7 @@ CONFIG_LPC17_PLL0=y
 CONFIG_LPC17_PLL1=y
 # CONFIG_LPC17_EMC is not set
 # CONFIG_LPC17_ETHERNET is not set
+# CONFIG_LPC17_LCD is not set
 # CONFIG_LPC17_USBHOST is not set
 # CONFIG_LPC17_USBDEV is not set
 # CONFIG_LPC17_SDCARD=y
@@ -135,11 +136,12 @@ CONFIG_LPC17_UART0=y
 # CONFIG_LPC17_UART1 is not set
 # CONFIG_LPC17_UART2 is not set
 # CONFIG_LPC17_UART3 is not set
+# CONFIG_LPC17_UART4 is not set
 # CONFIG_LPC17_CAN1 is not set
 # CONFIG_LPC17_CAN2 is not set
-# CONFIG_LPC17_SPI is not set
 # CONFIG_LPC17_SSP0 is not set
 # CONFIG_LPC17_SSP1 is not set
+# CONFIG_LPC17_SSP2 is not set
 # CONFIG_LPC17_I2C0 is not set
 # CONFIG_LPC17_I2C1 is not set
 # CONFIG_LPC17_I2C2 is not set
@@ -149,15 +151,17 @@ CONFIG_LPC17_UART0=y
 # CONFIG_LPC17_TMR2 is not set
 # CONFIG_LPC17_TMR3 is not set
 # CONFIG_LPC17_RIT is not set
-# CONFIG_LPC17_PWM is not set
-# CONFIG_LPC17_MCPWM is not set
+# CONFIG_LPC17_PWM0 is not set
+# CONFIG_LPC17_PWM1 is not set
 # CONFIG_LPC17_QEI is not set
 # CONFIG_LPC17_RTC is not set
 # CONFIG_LPC17_WDT is not set
 # CONFIG_LPC17_ADC is not set
 # CONFIG_LPC17_DAC is not set
 CONFIG_LPC17_GPDMA=y
+# CONFIG_LPC17_CRC is not set
 # CONFIG_LPC17_FLASH is not set
+# CONFIG_LPC17_EEPROM is not set
 
 #
 # Serial driver options

@@ -634,7 +634,7 @@ LPCXpresso Configuration Options
       CONFIG_LPC17_TMR2=n
       CONFIG_LPC17_TMR3=n
       CONFIG_LPC17_RIT=n
-      CONFIG_LPC17_PWM=n
+      CONFIG_LPC17_PWM0=n
       CONFIG_LPC17_MCPWM=n
       CONFIG_LPC17_QEI=n
       CONFIG_LPC17_RTC=n
