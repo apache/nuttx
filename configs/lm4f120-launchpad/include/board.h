@@ -63,12 +63,11 @@
 #define OSCSRC_FREQUENCY     XTAL_FREQUENCY
 
 /* Use system divider = 4; this corresponds to a system clock frequency
- * of (400 / 2) / 4 = 50MHz
+ * of (400 / 1) / 5 = 80MHz (Using RCC2 and DIV400).
  */
 
-#define LM_SYSDIV            4
-#define SYSCLK_FREQUENCY     50000000  /* 50MHz */
-#warning "FIXME: LM4F120 should run at 80MHz"
+#define LM_SYSDIV            5
+#define SYSCLK_FREQUENCY     80000000  /* 80MHz */
 
 /* Other RCC settings:
  *
@@ -87,7 +86,7 @@
  * - Not using RCC2
  */
 
-#define LM_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV(LM_SYSDIV))
+#define LM_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV(LM_SYSDIV) | SYSCON_RCC2_DIV400)
 
 /* LED definitions ******************************************************************/
 /* The LM32F120 has a single RGB LED.  There is only one visible LED which will vary
