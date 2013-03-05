@@ -481,6 +481,30 @@
 
 #endif /* LM_NPORTS */
 
+/* GPIO Register Bitfield Definitions ***********************************************/
+
+#ifdef LM4F
+#  define GPIO_PCTL_PMC_SHIFT(n)    ((n) << 2)
+#  define GPIO_PCTL_PMC_MASK(n)     (15 << GPIO_PCTL_PMC_SHIFT(n))
+
+#  define GPIO_PCTL_PMC0_SHIFT      (0)     /* Bits 0-3: Port Mux Control 0 */
+#  define GPIO_PCTL_PMC0_MASK       (15 << GPIO_PCTL_PMC0_SHIFT)
+#  define GPIO_PCTL_PMC1_SHIFT      (4)     /* Bits 4-7: Port Mux Control 0 */
+#  define GPIO_PCTL_PMC1_MASK       (15 << GPIO_PCTL_PMC1_SHIFT)
+#  define GPIO_PCTL_PMC2_SHIFT      (8)     /* Bits 8-11: Port Mux Control 0 */
+#  define GPIO_PCTL_PMC2_MASK       (15 << GPIO_PCTL_PMC2_SHIFT)
+#  define GPIO_PCTL_PMC3_SHIFT      (12)    /* Bits 12-15: Port Mux Control 0 */
+#  define GPIO_PCTL_PMC3_MASK       (15 << GPIO_PCTL_PMC3_SHIFT)
+#  define GPIO_PCTL_PMC4_SHIFT      (16)    /* Bits 16-19: Port Mux Control 0 */
+#  define GPIO_PCTL_PMC4_MASK       (15 << GPIO_PCTL_PMC4_SHIFT)
+#  define GPIO_PCTL_PMC5_SHIFT      (20)    /* Bits 20-23: Port Mux Control 0 */
+#  define GPIO_PCTL_PMC5_MASK       (15 << GPIO_PCTL_PMC5_SHIFT)
+#  define GPIO_PCTL_PMC6_SHIFT      (24)    /* Bits 24-27: Port Mux Control 0 */
+#  define GPIO_PCTL_PMC6_MASK       (15 << GPIO_PCTL_PMC6_SHIFT)
+#  define GPIO_PCTL_PMC7_SHIFT      (28)    /* Bits 28-31: Port Mux Control 0 */
+#  define GPIO_PCTL_PMC7_MASK       (15 << GPIO_PCTL_PMC7_SHIFT)
+#endif
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
