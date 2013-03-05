@@ -60,8 +60,11 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "lpc17_dma.h"
+#include "lpc17_gpdma.h"
+#include "lpc17_gpio.h"
 #include "lpc17_sdcard.h"
+
+#include "chip/lpc17_pinconfig.h"
 
 #if CONFIG_LPC17_SDCARD
 
@@ -74,7 +77,7 @@
  *
  *   CONFIG_ARCH_DMA - Enable architecture-specific DMA subsystem
  *     initialization.  Required if CONFIG_SDIO_DMA is enabled.
- *   CONFIG_LPC17_GPDMA - Enable LPC17XX DMA2 support.  Required if
+ *   CONFIG_LPC17_GPDMA - Enable LPC17XX GPDMA support.  Required if
  *     CONFIG_SDIO_DMA is enabled
  *   CONFIG_SCHED_WORKQUEUE -- Callback support requires work queue support.
  *
@@ -1432,11 +1435,16 @@ static void lpc17_reset(FAR struct sdio_dev_s *dev)
 {
   FAR struct lpc17_dev_s *priv = (FAR struct lpc17_dev_s *)dev;
   irqstate_t flags;
+  uint32_t regval;
 
   /* Disable clocking */
 
   flags = irqsave();
-  putreg32(0, SDCARD_CLOCK_CLKEN_BB);
+
+  regval = getreg32(LPC17_SDCARD_CLOCK);
+  regval &= ~SDCARD_CLOCK_CLKEN;
+  putreg32(regval, LPC17_SDCARD_CLOCK);
+
   lpc17_setpwrctrl(SDCARD_PWR_CTRL_OFF);
 
   /* Put SD card registers in their default, reset state */
@@ -1544,7 +1552,7 @@ static void lpc17_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
       /* Disable clocking (with default ID mode divisor) */
 
       default:
-      case CLOCK_SDCARD_DISABLED:
+      case CLOCK_SDIO_DISABLED:
         clock = LPC17_CLCKCR_INIT;
         return;
 
@@ -1600,7 +1608,7 @@ static int lpc17_attach(FAR struct sdio_dev_s *dev)
 
   /* Attach the SD card interrupt handler */
 
-  ret = irq_attach(LPC17_IRQ_SDCARD, lpc17_interrupt);
+  ret = irq_attach(LPC17_IRQ_MCI, lpc17_interrupt);
   if (ret == OK)
     {
 
@@ -1615,11 +1623,7 @@ static int lpc17_attach(FAR struct sdio_dev_s *dev)
        * the SD card controller as needed.
        */
 
-      up_enable_irq(LPC17_IRQ_SDCARD);
-
-      /* Set the interrrupt priority */
-
-      up_prioritize_irq(LPC17_IRQ_SDCARD, CONFIG_SDCARD_PRI);
+      up_enable_irq(LPC17_IRQ_MCI);
     }
 
   return ret;
@@ -2080,7 +2084,7 @@ static int lpc17_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
       rlong[0] = getreg32(LPC17_SDCARD_RESP0);
       rlong[1] = getreg32(LPC17_SDCARD_RESP1);
       rlong[2] = getreg32(LPC17_SDCARD_RESP2);
-      rlong[3] = getreg32(LPC17_SDCARD_RESP4);
+      rlong[3] = getreg32(LPC17_SDCARD_RESP3);
     }
   return ret;
 }
@@ -2426,6 +2430,7 @@ static int lpc17_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 {
   struct lpc17_dev_s *priv = (struct lpc17_dev_s *)dev;
   uint32_t dblocksize;
+  uint32_t regval;
   int ret = -EINVAL;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
@@ -2457,7 +2462,10 @@ static int lpc17_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       lpc17_configxfrints(priv, SDCARD_DMARECV_MASK);
 
-      putreg32(1, SDCARD_DCTRL_DMAEN_BB);
+      regval = getreg32(LPC17_SDCARD_DCTRL);
+      regval |= SDCARD_DCTRL_DMAEN;
+      putreg32(regval, LPC17_SDCARD_DCTRL);
+
       lpc17_dmasetup(priv->dma, LPC17_SDCARD_FIFO, (uint32_t)buffer,
                      (buflen + 3) >> 2, SDCARD_RXDMA32_CONFIG);
  
@@ -2498,6 +2506,7 @@ static int lpc17_dmasendsetup(FAR struct sdio_dev_s *dev,
 {
   struct lpc17_dev_s *priv = (struct lpc17_dev_s *)dev;
   uint32_t dblocksize;
+  uint32_t regval;
   int ret = -EINVAL;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
@@ -2531,7 +2540,10 @@ static int lpc17_dmasendsetup(FAR struct sdio_dev_s *dev,
                      (buflen + 3) >> 2, SDCARD_TXDMA32_CONFIG);
 
       lpc17_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-      putreg32(1, SDCARD_DCTRL_DMAEN_BB);
+
+      regval = getreg32(LPC17_SDCARD_DCTRL);
+      regval |= SDCARD_DCTRL_DMAEN;
+      putreg32(regval, LPC17_SDCARD_DCTRL);
 
       /* Start the DMA */
 
@@ -2579,7 +2591,7 @@ static void lpc17_callback(void *arg)
     {
       /* Yes.. Check for enabled callback events */
 
-      if ((priv->cdstatus & SDCARD_STATUS_PRESENT) != 0)
+      if ((priv->cdstatus & SDIO_STATUS_PRESENT) != 0)
         {
           /* Media is present.  Is the media inserted event enabled? */
 
@@ -2696,14 +2708,14 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
 #ifndef CONFIG_SDIO_MUXBUS
-  lpc17_configgpio(GPIO_SDCARD_D0);
+  lpc17_configgpio(GPIO_SD_DAT0);
 #ifndef CONFIG_SDIO_WIDTH_D1_ONLY
-  lpc17_configgpio(GPIO_SDCARD_D1);
-  lpc17_configgpio(GPIO_SDCARD_D2);
-  lpc17_configgpio(GPIO_SDCARD_D3);
+  lpc17_configgpio(GPIO_SD_DAT1);
+  lpc17_configgpio(GPIO_SD_DAT2);
+  lpc17_configgpio(GPIO_SD_DAT3);
 #endif
-  lpc17_configgpio(GPIO_SDCARD_CK);
-  lpc17_configgpio(GPIO_SDCARD_CMD);
+  lpc17_configgpio(GPIO_SD_CLK);
+  lpc17_configgpio(GPIO_SD_CMD);
 #endif
 
   /* Reset the card and assure that it is in the initial, unconfigured
@@ -2745,11 +2757,11 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
   cdstatus = priv->cdstatus;
   if (cardinslot)
     {
-      priv->cdstatus |= SDCARD_STATUS_PRESENT;
+      priv->cdstatus |= SDIO_STATUS_PRESENT;
     }
   else
     {
-      priv->cdstatus &= ~SDCARD_STATUS_PRESENT;
+      priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
   fvdbg("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
@@ -2788,11 +2800,11 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
   flags = irqsave();
   if (wrprotect)
     {
-      priv->cdstatus |= SDCARD_STATUS_WRPROTECTED;
+      priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
     }
   else
     {
-      priv->cdstatus &= ~SDCARD_STATUS_WRPROTECTED;
+      priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
   fvdbg("cdstatus: %02x\n", priv->cdstatus);
   irqrestore(flags);

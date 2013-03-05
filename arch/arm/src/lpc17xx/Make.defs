@@ -115,6 +115,10 @@ ifeq ($(CONFIG_LPC17_GPDMA),y)
 CHIP_CSRCS += lpc17_gpdma.c
 endif
 
+ifeq ($(CONFIG_LPC17_SDCARD),y)
+CHIP_CSRCS += lpc17_sdcard.c
+endif
+
 ifeq ($(CONFIG_NET),y)
 ifeq ($(CONFIG_LPC17_ETHERNET),y)
 CHIP_CSRCS += lpc17_ethernet.c
