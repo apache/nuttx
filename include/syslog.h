@@ -44,6 +44,7 @@
 
 #include <stdint.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions
