@@ -142,6 +142,36 @@
 
 #define ETH_MCFG_CLKSEL_DIV        ETH_MCFG_CLKSEL_DIV20
 
+/* SDIO dividers.  Note that slower clocking is required when DMA is disabled 
+ * in order to avoid RX overrun/TX underrun errors due to delayed responses
+ * to service FIFOs in interrupt driven mode.  These values have not been
+ * tuned!!!
+ *
+ * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
+ */
+  
+#define SDCARD_INIT_CLKDIV         (118 << SDCARD_CLOCK_CLKDIV_SHIFT)
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define SDCARD_MMCXFR_CLKDIV     (1 << SDCARD_CLOCK_CLKDIV_SHIFT) 
+#else
+#  define SDCARD_MMCXFR_CLKDIV     (2 << SDCARD_CLOCK_CLKDIV_SHIFT) 
+#endif
+
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
+#ifdef CONFIG_SDIO_DMA
+#  define SDCARD_SDXFR_CLKDIV      (1 << SDCARD_CLOCK_CLKDIV_SHIFT)
+#else
+#  define SDCARD_SDXFR_CLKDIV      (2 << SDCARD_CLOCK_CLKDIV_SHIFT)
+#endif
+
 /* Set EMC delay values:
  *
  * CMDDLY: Programmable delay value for EMC outputs in command delayed
@@ -260,6 +290,13 @@
 
 #define GPIO_UART0_TXD             GPIO_UART0_TXD_2
 #define GPIO_UART0_RXD             GPIO_UART0_RXD_2
+
+#define GPIO_SD_DAT0               GPIO_SD_DAT0_1 /* REVISIT */
+#define GPIO_SD_DAT1               GPIO_SD_DAT1_1
+#define GPIO_SD_DAT2               GPIO_SD_DAT2_1
+#define GPIO_SD_DAT3               GPIO_SD_DAT3_1
+#define GPIO_SD_CLK                GPIO_SD_CLK_1
+#define GPIO_SD_CMD                GPIO_SD_CMD_1
 
 /************************************************************************************
  * Public Types

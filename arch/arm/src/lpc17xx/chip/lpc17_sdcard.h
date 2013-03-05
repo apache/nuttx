@@ -64,25 +64,25 @@
 
 /* Register Addresses ***************************************************************/
 
-#define LPC17_SDCARD_PWR              (LPC17_SDCARD_BASE+LPC17_SDCARD_PWR_OFFSET)
-#define LPC17_SDCARD_CLOCK            (LPC17_SDCARD_BASE+LPC17_SDCARD_CLOCK_OFFSET)
-#define LPC17_SDCARD_ARG              (LPC17_SDCARD_BASE+LPC17_SDCARD_ARG_OFFSET)
-#define LPC17_SDCARD_CMD              (LPC17_SDCARD_BASE+LPC17_SDCARD_CMD_OFFSET)
-#define LPC17_SDCARD_RESPCMD          (LPC17_SDCARD_BASE+LPC17_SDCARD_RESPCMD_OFFSET)
-#define LPC17_SDCARD_RESP(n)          (LPC17_SDCARD_BASE+LPC17_SDCARD_RESP_OFFSET(n))
-#define LPC17_SDCARD_RESP0            (LPC17_SDCARD_BASE+LPC17_SDCARD_RESP0_OFFSET)
-#define LPC17_SDCARD_RESP1            (LPC17_SDCARD_BASE+LPC17_SDCARD_RESP1_OFFSET)
-#define LPC17_SDCARD_RESP2            (LPC17_SDCARD_BASE+LPC17_SDCARD_RESP2_OFFSET)
-#define LPC17_SDCARD_RESP3            (LPC17_SDCARD_BASE+LPC17_SDCARD_RESP3_OFFSET)
-#define LPC17_SDCARD_DTIMER           (LPC17_SDCARD_BASE+LPC17_SDCARD_DTIMER_OFFSET)
-#define LPC17_SDCARD_DLEN             (LPC17_SDCARD_BASE+LPC17_SDCARD_DLEN_OFFSET)
-#define LPC17_SDCARD_DCTRL            (LPC17_SDCARD_BASE+LPC17_SDCARD_DCTRL_OFFSET)
-#define LPC17_SDCARD_DCOUNT           (LPC17_SDCARD_BASE+LPC17_SDCARD_DCOUNT_OFFSET)
-#define LPC17_SDCARD_STATUS           (LPC17_SDCARD_BASE+LPC17_SDCARD_STATUS_OFFSET)
-#define LPC17_SDCARD_CLEAR            (LPC17_SDCARD_BASE+LPC17_SDCARD_CLEAR_OFFSET)
-#define LPC17_SDCARD_MASK0            (LPC17_SDCARD_BASE+LPC17_SDCARD_MASK0_OFFSET)
-#define LPC17_SDCARD_FIFOCNT          (LPC17_SDCARD_BASE+LPC17_SDCARD_FIFOCNT_OFFSET)
-#define LPC17_SDCARD_FIFO             (LPC17_SDCARD_BASE+LPC17_SDCARD_FIFO_OFFSET)
+#define LPC17_SDCARD_PWR              (LPC17_MCI_BASE+LPC17_SDCARD_PWR_OFFSET)
+#define LPC17_SDCARD_CLOCK            (LPC17_MCI_BASE+LPC17_SDCARD_CLOCK_OFFSET)
+#define LPC17_SDCARD_ARG              (LPC17_MCI_BASE+LPC17_SDCARD_ARG_OFFSET)
+#define LPC17_SDCARD_CMD              (LPC17_MCI_BASE+LPC17_SDCARD_CMD_OFFSET)
+#define LPC17_SDCARD_RESPCMD          (LPC17_MCI_BASE+LPC17_SDCARD_RESPCMD_OFFSET)
+#define LPC17_SDCARD_RESP(n)          (LPC17_MCI_BASE+LPC17_SDCARD_RESP_OFFSET(n))
+#define LPC17_SDCARD_RESP0            (LPC17_MCI_BASE+LPC17_SDCARD_RESP0_OFFSET)
+#define LPC17_SDCARD_RESP1            (LPC17_MCI_BASE+LPC17_SDCARD_RESP1_OFFSET)
+#define LPC17_SDCARD_RESP2            (LPC17_MCI_BASE+LPC17_SDCARD_RESP2_OFFSET)
+#define LPC17_SDCARD_RESP3            (LPC17_MCI_BASE+LPC17_SDCARD_RESP3_OFFSET)
+#define LPC17_SDCARD_DTIMER           (LPC17_MCI_BASE+LPC17_SDCARD_DTIMER_OFFSET)
+#define LPC17_SDCARD_DLEN             (LPC17_MCI_BASE+LPC17_SDCARD_DLEN_OFFSET)
+#define LPC17_SDCARD_DCTRL            (LPC17_MCI_BASE+LPC17_SDCARD_DCTRL_OFFSET)
+#define LPC17_SDCARD_DCOUNT           (LPC17_MCI_BASE+LPC17_SDCARD_DCOUNT_OFFSET)
+#define LPC17_SDCARD_STATUS           (LPC17_MCI_BASE+LPC17_SDCARD_STATUS_OFFSET)
+#define LPC17_SDCARD_CLEAR            (LPC17_MCI_BASE+LPC17_SDCARD_CLEAR_OFFSET)
+#define LPC17_SDCARD_MASK0            (LPC17_MCI_BASE+LPC17_SDCARD_MASK0_OFFSET)
+#define LPC17_SDCARD_FIFOCNT          (LPC17_MCI_BASE+LPC17_SDCARD_FIFOCNT_OFFSET)
+#define LPC17_SDCARD_FIFO             (LPC17_MCI_BASE+LPC17_SDCARD_FIFO_OFFSET)
 
 /* Register Bitfield Definitions ****************************************************/
 
@@ -210,32 +210,32 @@
 #define SDCARD_CLEAR_RESET            0x00c007ff
 #define SDCARD_CLEAR_STATICFLAGS      0x000005ff
 
-#define SDCARD_MASK_CCRCFAILIE        (1 << 0)  /* Bit 0: Command CRC fail interrupt enable */
-#define SDCARD_MASK_DCRCFAILIE        (1 << 1)  /* Bit 1: Data CRC fail interrupt enable */
-#define SDCARD_MASK_CTIMEOUTIE        (1 << 2)  /* Bit 2: Command timeout interrupt enable */
-#define SDCARD_MASK_DTIMEOUTIE        (1 << 3)  /* Bit 3: Data timeout interrupt enable */
-#define SDCARD_MASK_TXUNDERRIE        (1 << 4)  /* Bit 4: Tx FIFO underrun error interrupt enable */
-#define SDCARD_MASK_RXOVERRIE         (1 << 5)  /* Bit 5: Rx FIFO overrun error interrupt enable */
-#define SDCARD_MASK_CMDRENDIE         (1 << 6)  /* Bit 6: Command response received interrupt enable */
-#define SDCARD_MASK_CMDSENTIE         (1 << 7)  /* Bit 7: Command sent interrupt enable */
-#define SDCARD_MASK_DATAENDIE         (1 << 8)  /* Bit 8: Data end interrupt enable */
-#define SDCARD_MASK_STBITERRIE        (1 << 9)  /* Bit 9: Start bit error interrupt enable */
-#define SDCARD_MASK_DBCKENDIE         (1 << 10) /* Bit 10: Data block end interrupt enable */
-#define SDCARD_MASK_CMDACTIE          (1 << 11) /* Bit 11: Command acting interrupt enable */
-#define SDCARD_MASK_TXACTIE           (1 << 12) /* Bit 12: Data transmit acting interrupt enable */
-#define SDCARD_MASK_RXACTIE           (1 << 13) /* Bit 13: Data receive acting interrupt enable */
-#define SDCARD_MASK_TXFIFOHEIE        (1 << 14) /* Bit 14: Tx FIFO half empty interrupt enable */
-#define SDCARD_MASK_RXFIFOHFIE        (1 << 15) /* Bit 15: Rx FIFO half full interrupt enable */
-#define SDCARD_MASK_TXFIFOFIE         (1 << 16) /* Bit 16: Tx FIFO full interrupt enable */
-#define SDCARD_MASK_RXFIFOFIE         (1 << 17) /* Bit 17: Rx FIFO full interrupt enable */
-#define SDCARD_MASK_TXFIFOEIE         (1 << 18) /* Bit 18: Tx FIFO empty interrupt enable */
-#define SDCARD_MASK_RXFIFOEIE         (1 << 19) /* Bit 19: Rx FIFO empty interrupt enable */
-#define SDCARD_MASK_TXDAVLIE          (1 << 20) /* Bit 20: Data available in Tx FIFO interrupt enable */
-#define SDCARD_MASK_RXDAVLIE          (1 << 21) /* Bit 21: Data available in Rx FIFO interrupt enable */
-#define SDCARD_MASK_SDIOITIE          (1 << 22) /* Bit 22: SDIO mode interrupt received interrupt enable */
-#define SDCARD_MASK_CEATAENDIE        (1 << 23) /* Bit 23: CE-ATA command completion interrupt enable */
+#define SDCARD_MASK0_CCRCFAILIE       (1 << 0)  /* Bit 0: Command CRC fail interrupt enable */
+#define SDCARD_MASK0_DCRCFAILIE       (1 << 1)  /* Bit 1: Data CRC fail interrupt enable */
+#define SDCARD_MASK0_CTIMEOUTIE       (1 << 2)  /* Bit 2: Command timeout interrupt enable */
+#define SDCARD_MASK0_DTIMEOUTIE       (1 << 3)  /* Bit 3: Data timeout interrupt enable */
+#define SDCARD_MASK0_TXUNDERRIE       (1 << 4)  /* Bit 4: Tx FIFO underrun error interrupt enable */
+#define SDCARD_MASK0_RXOVERRIE        (1 << 5)  /* Bit 5: Rx FIFO overrun error interrupt enable */
+#define SDCARD_MASK0_CMDRENDIE        (1 << 6)  /* Bit 6: Command response received interrupt enable */
+#define SDCARD_MASK0_CMDSENTIE        (1 << 7)  /* Bit 7: Command sent interrupt enable */
+#define SDCARD_MASK0_DATAENDIE        (1 << 8)  /* Bit 8: Data end interrupt enable */
+#define SDCARD_MASK0_STBITERRIE       (1 << 9)  /* Bit 9: Start bit error interrupt enable */
+#define SDCARD_MASK0_DBCKENDIE        (1 << 10) /* Bit 10: Data block end interrupt enable */
+#define SDCARD_MASK0_CMDACTIE         (1 << 11) /* Bit 11: Command acting interrupt enable */
+#define SDCARD_MASK0_TXACTIE          (1 << 12) /* Bit 12: Data transmit acting interrupt enable */
+#define SDCARD_MASK0_RXACTIE          (1 << 13) /* Bit 13: Data receive acting interrupt enable */
+#define SDCARD_MASK0_TXFIFOHEIE       (1 << 14) /* Bit 14: Tx FIFO half empty interrupt enable */
+#define SDCARD_MASK0_RXFIFOHFIE       (1 << 15) /* Bit 15: Rx FIFO half full interrupt enable */
+#define SDCARD_MASK0_TXFIFOFIE        (1 << 16) /* Bit 16: Tx FIFO full interrupt enable */
+#define SDCARD_MASK0_RXFIFOFIE        (1 << 17) /* Bit 17: Rx FIFO full interrupt enable */
+#define SDCARD_MASK0_TXFIFOEIE        (1 << 18) /* Bit 18: Tx FIFO empty interrupt enable */
+#define SDCARD_MASK0_RXFIFOEIE        (1 << 19) /* Bit 19: Rx FIFO empty interrupt enable */
+#define SDCARD_MASK0_TXDAVLIE         (1 << 20) /* Bit 20: Data available in Tx FIFO interrupt enable */
+#define SDCARD_MASK0_RXDAVLIE         (1 << 21) /* Bit 21: Data available in Rx FIFO interrupt enable */
+#define SDCARD_MASK0_SDIOITIE         (1 << 22) /* Bit 22: SDIO mode interrupt received interrupt enable */
+#define SDCARD_MASK0_CEATAENDIE       (1 << 23) /* Bit 23: CE-ATA command completion interrupt enable */
 
-#define SDCARD_MASK_RESET             (0)
+#define SDCARD_MASK0_RESET            (0)
 
 #define SDCARD_FIFOCNT_SHIFT          (0)
 #define SDCARD_FIFOCNT_MASK           (0x01ffffff << SDCARD_FIFOCNT_SHIFT)
