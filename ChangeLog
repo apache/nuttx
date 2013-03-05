@@ -4241,3 +4241,9 @@
 	* arch/arm/src/lpc17/lpc17*_clockconfig.c:  The WaveShare Open1788
 	  board now boots and passes the OS test.  This is the work of
 	  Rommel Marcelo (2013-03-04).
+	* arch/arm/src/lm/lm_gpio.c, lm_gpio.h, and chip/lm4f_pinconfig.h
+	  Extend GPIO logic to handle LM4F.  Add LM4F pin configuration header
+	  file (2013-03-04).
+	* configs/open1788:  Enable LED support in all configurations.
+	  (2013-03-04)
+

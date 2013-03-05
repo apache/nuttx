@@ -368,6 +368,9 @@ config ARCH_BOARD_OLIMEX_STM32P107
 config ARCH_BOARD_OPEN1788
 	bool "Wave Share Open1788"
 	depends on ARCH_CHIP_LPC1788
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This port uses the Wave Share Open1788 board. See the
 		http://wvshare.com/product/Open1788-Standard.htm for further
