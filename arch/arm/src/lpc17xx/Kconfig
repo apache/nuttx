@@ -61,6 +61,7 @@ config ARCH_CHIP_LPC1769
 config ARCH_CHIP_LPC1773
 	bool "LPC1773"
 	select ARCH_FAMILY_LPC177X
+	select ARCH_HAVE_SPIFI
 
 config ARCH_CHIP_LPC1774
 	bool "LPC1774"
@@ -108,6 +109,7 @@ config ARCH_FAMILY_LPC177X
 	select ARCH_HAVE_EXTSRAM0
 	select ARCH_HAVE_EXTDRAM
 	select ARCH_HAVE_EXTNOR
+	select ARCH_HAVE_SDIO
 
 config ARCH_FAMILY_LPC178X
 	bool
@@ -115,6 +117,13 @@ config ARCH_FAMILY_LPC178X
 	select ARCH_HAVE_EXTSRAM0
 	select ARCH_HAVE_EXTDRAM
 	select ARCH_HAVE_EXTNOR
+	select ARCH_HAVE_SDIO
+
+config ARCH_HAVE_SPIFI
+	bool
+
+config ARCH_HAVE_SDIO
+	bool
 
 menu "LPC17xx Peripheral Support"
 
@@ -156,6 +165,11 @@ config LPC17_USBOTG
 	default n
 	depends on LPC17_USBHOST && LPC17_USBDEV
 
+config LPC17_SDCARD
+	bool "SD Card Interface"
+	depends on ARCH_HAVE_SDIO
+	default n
+
 config LPC17_UART0
 	bool "UART0"
 	select ARCH_HAVE_UART0
@@ -195,6 +209,11 @@ config LPC17_SSP0
 
 config LPC17_SSP1
 	bool "SSP1"
+	default n
+
+config LPC17_SPIFI
+	bool "SPIFI Interface"
+	depends on ARCH_HAVE_SPIFI
 	default n
 
 config LPC17_I2C0
@@ -434,6 +453,36 @@ config I2C2_FREQ
 	int "I2C2 frequency"
 	depends on LPC17_I2C2
 	default 100000
+
+endmenu
+
+menu "SDIO Configuration"
+	depends on LPC17_SDCARD
+
+config SDIO_DMA
+	bool "Support DMA data transfers"
+	default y if LPC17_GPDMA
+	depends on LPC17_GPDMA
+	---help---
+		Support DMA data transfers.  
+		Enable SD card DMA data transfers.  This is a marginally optional.
+		For most usages, SD accesses will cause data overruns if used without
+		DMA.  Requires LPC17_SDCARD and config LPC17_GPDMA.
+
+config SDIO_DMAPRIO
+	hex "SDIO DMA priority"
+	default 0x0
+	depends on LPC17_GPDMA
+	---help---
+		Select SDIO DMA prority.
+
+config SDIO_WIDTH_D1_ONLY
+	bool "Use D1 only"
+	default n
+	---help---
+		Select 1-bit transfer mode.  This may be selected to force the driver
+		operate with only a single data line (the default is to use all
+ 		4 SD data lines).Default: 4-bit transfer mode.
 
 endmenu
 
