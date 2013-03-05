@@ -4246,8 +4246,14 @@
 	  file (2013-03-04).
 	* configs/open1788:  Enable LED support in all configurations.
 	  (2013-03-04)
+	* configs/open1788/nsh:  NSH configuration verified function.  By Rommel
+	  Marcelo (2013-03-05).
 	* configs/open1788/src/lpc17_nsh.c:  Use the SD card interface, not SPI
-	  to interface with SD cards.
+	  to interface with SD cards (2013-03-05.
 	* arch/arm/src/lpc17xx/lpc17_sdcard.c and header files:  Clone the STM32
 	  SD card interface to the LPC1788.  It appears to be the same IP.
+	  (2013-03-05)
+	* libc/wqueue:  Work queue logic moved from sched/ to libc/wqueue.  It
+	  is not really core OS functionality and this move helps prepare for
+	  user-space work queues.
 

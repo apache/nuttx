@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/work_thread.c
+ * libc/wqueue/work_thread.c
  *
- *   Copyright (C) 2009-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,9 +49,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
-
-#include "os_internal.h"
-#include "work_internal.h"
+#include <nuttx/kmalloc.h>
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 

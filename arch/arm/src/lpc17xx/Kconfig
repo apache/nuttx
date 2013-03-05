@@ -150,6 +150,11 @@ config LPC17_ETHERNET
 	select ARCH_HAVE_PHY
 	default n
 
+config LPC17_LCD
+	bool "LCD controller"
+	default n
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
+
 config LPC17_USBHOST
 	bool "USB host"
 	select USBHOST
@@ -190,6 +195,11 @@ config LPC17_UART3
 	select ARCH_HAVE_UART3
 	default n
 
+config LPC17_UART4
+	bool "UART4"
+	select ARCH_HAVE_UART4
+	default n
+
 config LPC17_CAN1
 	bool "CAN1"
 	select ARCH_HAVE_UART4
@@ -202,6 +212,7 @@ config LPC17_CAN2
 config LPC17_SPI
 	bool "SPI"
 	default n
+	depends on ARCH_FAMILY_LPC175X || ARCH_FAMILY_LPC176X
 
 config LPC17_SSP0
 	bool "SSP0"
@@ -210,6 +221,11 @@ config LPC17_SSP0
 config LPC17_SSP1
 	bool "SSP1"
 	default n
+
+config LPC17_SSP2
+	bool "SSP1"
+	default n
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
 
 config LPC17_SPIFI
 	bool "SPIFI Interface"
@@ -252,13 +268,19 @@ config LPC17_RIT
 	bool "RIT"
 	default n
 
-config LPC17_PWM
-	bool "PWM"
+config LPC17_PWM0
+	bool "PWM0"
 	default n
+
+config LPC17_PWM1
+	bool "PWM1"
+	default n
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
 
 config LPC17_MCPWM
 	bool "MCPWM"
 	default n
+	depends on ARCH_FAMILY_LPC175X || ARCH_FAMILY_LPC176X
 
 config LPC17_QEI
 	bool "QEI"
@@ -267,6 +289,11 @@ config LPC17_QEI
 config LPC17_RTC
 	bool "RTC"
 	default n
+
+config LPC17_RTCEV
+	bool "RTC event monitor"
+	default n
+	depends on LPC17_RTC
 
 config LPC17_WDT
 	bool "WDT"
@@ -284,9 +311,19 @@ config LPC17_GPDMA
 	bool "GPDMA"
 	default n
 
+config LPC17_CRC
+	bool "CRC engine"
+	default n
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
+
 config LPC17_FLASH
 	bool "FLASH"
 	default n
+
+config LPC17_EEPROM
+	bool "EEPROM"
+	default n
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
 
 endmenu
 

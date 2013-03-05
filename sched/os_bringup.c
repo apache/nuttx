@@ -54,9 +54,6 @@
 #ifdef CONFIG_PAGING
 # include "pg_internal.h"
 #endif
-#ifdef CONFIG_SCHED_WORKQUEUE
-# include "work_internal.h"
-#endif
 #ifdef CONFIG_NUTTX_KERNEL
 # include "arch/board/user_map.h"
 #endif

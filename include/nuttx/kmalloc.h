@@ -88,15 +88,15 @@ extern "C" {
 
 #else
 
-KMALLOC_EXTERN void kmm_initialize(FAR void *heap_start, size_t heap_size);
-KMALLOC_EXTERN void kmm_addregion(FAR void *heapstart, size_t heapsize);
-KMALLOC_EXTERN int kmm_trysemaphore(void);
-KMALLOC_EXTERN void kmm_givesemaphore(void);
+void kmm_initialize(FAR void *heap_start, size_t heap_size);
+void kmm_addregion(FAR void *heapstart, size_t heapsize);
+int kmm_trysemaphore(void);
+void kmm_givesemaphore(void);
 
-KMALLOC_EXTERN FAR void *kmalloc(size_t);
-KMALLOC_EXTERN FAR void *kzalloc(size_t);
-KMALLOC_EXTERN FAR void *krealloc(FAR void*, size_t);
-KMALLOC_EXTERN void kfree(FAR void*);
+FAR void *kmalloc(size_t);
+FAR void *kzalloc(size_t);
+FAR void *krealloc(FAR void*, size_t);
+void kfree(FAR void*);
 
 #endif
 
@@ -104,7 +104,15 @@ KMALLOC_EXTERN void kfree(FAR void*);
 
 /* Handles memory freed from an interrupt handler */
 
-KMALLOC_EXTERN void sched_free(FAR void *address);
+void sched_free(FAR void *address);
+
+/* Functions defined in os_list.c *******************************************/
+
+/* Must be called periodically to clean up deallocations delayed by
+ * sched_free()
+ */
+
+void sched_garbagecollection(void);
 
 #undef KMALLOC_EXTERN
 #if defined(__cplusplus)

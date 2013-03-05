@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/work_signal.c
+ * libc/wqueue/work_signal.c
  *
- *   Copyright (C) 2009-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,6 @@
 #include <assert.h>
 
 #include <nuttx/wqueue.h>
-
-#include "work_internal.h"
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 

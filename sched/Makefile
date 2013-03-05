@@ -175,10 +175,6 @@ TIMER_SRCS += timer_initialize.c timer_create.c timer_delete.c timer_getoverrun.
 TIMER_SRCS += timer_gettime.c timer_settime.c timer_release.c
 endif
 
-ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
-WORK_SRCS = work_thread.c work_queue.c work_cancel.c work_signal.c
-endif
-
 ifeq ($(CONFIG_PAGING),y)
 PGFILL_SRCS = pg_miss.c pg_worker.c
 endif
@@ -189,7 +185,7 @@ KMM_SRCS = kmm_initialize.c kmm_addregion.c kmm_semaphore.c
 KMM_SRCS = kmm_kmalloc.c kmm_kzalloc.c kmm_krealloc.c kmm_kfree.c
 
 CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(GRP_SRCS) $(SCHED_SRCS) $(WDOG_SRCS)
-CSRCS += $(TIME_SRCS) $(SEM_SRCS) $(TIMER_SRCS) $(WORK_SRCS) $(PGFILL_SRCS)
+CSRCS += $(TIME_SRCS) $(SEM_SRCS) $(TIMER_SRCS) $(PGFILL_SRCS)
 CSRCS += $(IRQ_SRCS)
 
 ifneq ($(CONFIG_DISABLE_CLOCK),y)

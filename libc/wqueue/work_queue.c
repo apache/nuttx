@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/work_cancel.c
+ * libc/wqueue/work_queue.c
  *
- *   Copyright (C) 2009-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,15 +39,15 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <queue.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
-
-#include "work_internal.h"
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
@@ -76,49 +76,58 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_cancel
+ * Name: work_queue
  *
  * Description:
- *   Cancel previously queued work.  This removes work from the work queue.
- *   After work has been canceled, it may be re-queue by calling work_queue()
- *   again.
+ *   Queue work to be performed at a later time.  All queued work will be
+ *   performed on the worker thread of of execution (not the caller's).
+ *
+ *   The work structure is allocated by caller, but completely managed by
+ *   the work queue logic.  The caller should never modify the contents of
+ *   the work queue structure; the caller should not call work_queue()
+ *   again until either (1) the previous work has been performed and removed
+ *   from the queue, or (2) work_cancel() has been called to cancel the work
+ *   and remove it from the work queue.
  *
  * Input parameters:
- *   qid    - The work queue ID
- *   work   - The previously queue work structure to cancel
+ *   qid    - The work queue ID (index)
+ *   work   - The work structure to queue
+ *   worker - The worker callback to be invoked.  The callback will invoked
+ *            on the worker thread of execution.
+ *   arg    - The argument that will be passed to the workder callback when
+ *            int is invoked.
+ *   delay  - Delay (in clock ticks) from the time queue until the worker
+ *            is invoked. Zero means to perform the work immediately.
  *
  * Returned Value:
  *   Zero on success, a negated errno on failure
  *
  ****************************************************************************/
 
-int work_cancel(int qid, FAR struct work_s *work)
+int work_queue(int qid, FAR struct work_s *work, worker_t worker,
+               FAR void *arg, uint32_t delay)
 {
   FAR struct wqueue_s *wqueue = &g_work[qid];
   irqstate_t flags;
 
   DEBUGASSERT(work != NULL && (unsigned)qid < NWORKERS);
 
-  /* Cancelling the work is simply a matter of removing the work structure
-   * from the work queue.  This must be done with interrupts disabled because
-   * new work is typically added to the work queue from interrupt handlers.
+  /* First, initialize the work structure */
+
+  work->worker = worker;           /* Work callback */
+  work->arg    = arg;              /* Callback argument */
+  work->delay  = delay;            /* Delay until work performed */
+
+  /* Now, time-tag that entry and put it in the work queue.  This must be
+   * done with interrupts disabled.  This permits this function to be called
+   * from with task logic or interrupt handlers.
    */
 
-  flags = irqsave();
-  if (work->worker != NULL)
-    {
-      /* A little test of the integrity of the work queue */
+  flags        = irqsave();
+  work->qtime  = clock_systimer(); /* Time work queued */
 
-      DEBUGASSERT(work->dq.flink ||(FAR dq_entry_t *)work == wqueue->q.tail);
-      DEBUGASSERT(work->dq.blink ||(FAR dq_entry_t *)work == wqueue->q.head);
-
-      /* Remove the entry from the work queue and make sure that it is
-       * mark as availalbe (i.e., the worker field is nullified).
-       */
-
-      dq_rem((FAR dq_entry_t *)work, &wqueue->q);
-      work->worker = NULL;
-    }
+  dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
+  kill(wqueue->pid, SIGWORK);      /* Wake up the worker thread */
 
   irqrestore(flags);
   return OK;

@@ -287,6 +287,5 @@ FAR struct tcb_s *sched_gettcb(pid_t pid);
 bool sched_verifytcb(FAR struct tcb_s *tcb);
 
 int  sched_releasetcb(FAR struct tcb_s *tcb);
-void sched_garbagecollection(void);
 
 #endif /* __SCHED_OS_INTERNAL_H */

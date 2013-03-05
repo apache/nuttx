@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/wqueue.h
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,6 +83,10 @@
  *   priority worker thread.  Default: CONFIG_IDLETHREAD_STACKSIZE.
  */
 
+#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_DISABLE_SIGNALS)
+#  warning "Worker thread support requires signals"
+#endif
+
 #ifndef CONFIG_SCHED_WORKPRIORITY
 #  define CONFIG_SCHED_WORKPRIORITY 192
 #endif
@@ -107,6 +111,14 @@
 #  ifndef CONFIG_SCHED_LPWORKSTACKSIZE
 #    define CONFIG_SCHED_LPWORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
 #  endif
+#endif
+
+/* How many worker threads are there? */
+
+#ifdef CONFIG_SCHED_LPWORK
+#  define NWORKERS 2
+#else
+#  define NWORKERS 1
 #endif
 
 /* Work queue IDs (indices):
@@ -144,6 +156,17 @@
 
 #ifndef __ASSEMBLY__
 
+/* This structure defines the state on one work queue.  This structure is
+ * used internally by the OS and worker queue logic and should not be
+ * accessed by application logic.
+ */
+
+struct wqueue_s
+{
+  pid_t             pid; /* The task ID of the worker thread */
+  struct dq_queue_s q;   /* The queue of pending work */
+};
+
 /* Defines the work callback */
 
 typedef void (*worker_t)(FAR void *arg);
@@ -155,11 +178,11 @@ typedef void (*worker_t)(FAR void *arg);
 
 struct work_s
 {
-  struct dq_entry_s dq; /* Implements a doubly linked list */
-  worker_t  worker;     /* Work callback */
-  FAR void *arg;        /* Callback argument */
-  uint32_t  qtime;      /* Time work queued */
-  uint32_t  delay;      /* Delay until work performed */
+  struct dq_entry_s dq;  /* Implements a doubly linked list */
+  worker_t  worker;      /* Work callback */
+  FAR void *arg;         /* Callback argument */
+  uint32_t  qtime;       /* Time work queued */
+  uint32_t  delay;       /* Delay until work performed */
 };
 
 /****************************************************************************
@@ -168,14 +191,47 @@ struct work_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
+/* The state of each work queue.  This data structure is used internally by
+ * the OS and worker queue logic and should not be accessed by application
+ * logic.
+ */
+
+EXTERN struct wqueue_s g_work[NWORKERS];
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_hpthread and work_lpthread
+ *
+ * Description:
+ *   These are the main worker threads that performs actions placed on the
+ *   work lists.  One thread also performs periodic garbage collection (that
+ *   is performed by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).
+ *
+ *   These entrypoints are referenced by OS internally and should not be
+ *   accessed by application logic.
+ *
+ * Input parameters:
+ *   argc, argv (not used)
+ *
+ * Returned Value:
+ *   Does not return
+ *
+ ****************************************************************************/
+
+int work_hpthread(int argc, char *argv[]);
+
+#ifdef CONFIG_SCHED_LPWORK
+int work_lpthread(int argc, char *argv[]);
+#endif
 
 /****************************************************************************
  * Name: work_queue
@@ -206,8 +262,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int work_queue(int qid, FAR struct work_s *work, worker_t worker,
-                      FAR void *arg, uint32_t delay);
+int work_queue(int qid, FAR struct work_s *work, worker_t worker,
+               FAR void *arg, uint32_t delay);
 
 /****************************************************************************
  * Name: work_cancel
@@ -226,7 +282,7 @@ EXTERN int work_queue(int qid, FAR struct work_s *work, worker_t worker,
  *
  ****************************************************************************/
 
-EXTERN int work_cancel(int qid, FAR struct work_s *work);
+int work_cancel(int qid, FAR struct work_s *work);
 
 /****************************************************************************
  * Name: work_signal
@@ -244,7 +300,7 @@ EXTERN int work_cancel(int qid, FAR struct work_s *work);
  *
  ****************************************************************************/
 
-EXTERN int work_signal(int qid);
+int work_signal(int qid);
 
 /****************************************************************************
  * Name: work_available
