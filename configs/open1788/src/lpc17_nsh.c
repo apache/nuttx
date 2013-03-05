@@ -45,7 +45,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/usb/usbhost.h>
 
@@ -64,7 +64,7 @@
 
 /* MMC/SD support */
 
-#if !defined(CONFIG_MMCSD) && !defined(CONFIG_MMCD_SPI)
+#if !defined(CONFIG_LPC17_SDCARD) || !defined(CONFIG_MMCSD) && !defined(CONFIG_MMCD_SDIO)
 #  undef NSH_HAVE_MMCSD
 #endif
 
@@ -77,35 +77,16 @@
 /* MMC/SD support requires that an SPI support is enabled and an SPI port is selected */
 
 #ifdef NSH_HAVE_MMCSD
-#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO)
-#     error "No SSP port number is provided for MMC/SD support"
-#     undef NSH_HAVE_MMCSD
-#  elif CONFIG_NSH_MMCSDSPIPORTNO == 0 && !defined(CONFIG_LPC17_SSP0)
-#     error "SSP port 0 is selected but SSP0 is not enabled"
-#     undef NSH_HAVE_MMCSD
-#  elif CONFIG_NSH_MMCSDSPIPORTNO == 1 && !defined(CONFIG_LPC17_SSP1)
-#     error "SSP port 1 is selected but SSP1 is not enabled"
-#     undef NSH_HAVE_MMCSD
-#  elif CONFIG_NSH_MMCSDSPIPORTNO == 2 && !defined(CONFIG_LPC17_SSP2)
-#     error "SSP port 2 is selected but SSP2 is not enabled"
-#     undef NSH_HAVE_MMCSD
-#  elif CONFIG_NSH_MMCSDSPIPORTNO > 2
-#     error "SSP port number is out of range"
-#     undef NSH_HAVE_MMCSD
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
+#     warning "Assuming slot MMC/SD slot 0"
+#     define CONFIG_NSH_MMCSDSLOTNO 0
 #  endif
 #endif
 
 #ifdef NSH_HAVE_MMCSD
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
-#    warning "Assuming slot MMC/SD slot 0"
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#endif
-
-#ifdef NSH_HAVE_MMCSD
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
-#    warning "Assuming /dev/mmcsd0"
-#    define CONFIG_NSH_MMCSDMINOR 0
+#  if !defined(CONFIG_NSH_MMCSDMINOR)
+#     warning "Assuming /dev/mmcsd0"
+#     define CONFIG_NSH_MMCSDMINOR 0
 #  endif
 #endif
 
@@ -218,50 +199,39 @@ static int nsh_waiter(int argc, char *argv[])
 #ifdef NSH_HAVE_MMCSD
 static int nsh_sdinitialize(void)
 {
-  FAR struct spi_dev_s *ssp;
+  FAR struct sdio_dev_s *sdio;
   int ret;
 
   /* Enable power to the SD/MMC via a GPIO. LOW enables SD/MMC. */
 
   lpc17_gpiowrite(OPEN1788_MMC_PWR, false);
+#warning "This is wrong"
 
-  /* Get the SSP port */
+  /* First, get an instance of the SDIO interface */
 
-  ssp = up_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
-  if (!ssp)
+  sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  if (!sdio)
     {
-      message("nsh_archinitialize: Failed to initialize SSP port %d\n",
-              CONFIG_NSH_MMCSDSPIPORTNO);
-      ret = -ENODEV;
-      goto errout;
+      message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
+              CONFIG_NSH_MMCSDSLOTNO);
+      return -ENODEV;
     }
 
-  message("Successfully initialized SSP port %d\n",
-          CONFIG_NSH_MMCSDSPIPORTNO);
+  /* Now bind the SDIO interface to the MMC/SD driver */
 
-  /* Bind the SSP port to the slot */
-
-  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
-                               CONFIG_NSH_MMCSDSLOTNO, ssp);
-  if (ret < 0)
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
+  if (ret != OK)
     {
-      message("nsh_sdinitialize: "
-              "Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
-              CONFIG_NSH_MMCSDSPIPORTNO,
-              CONFIG_NSH_MMCSDSLOTNO, ret);
-      goto errout;
+      message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      return ret;
     }
+  
+  /* Then let's guess and say that there is a card in the slot.  I need to check to
+   * see if the STM3240G-EVAL board supports a GPIO to detect if there is a card in
+   * the slot.
+   */
 
-  message("Successfuly bound SSP port %d to MMC/SD slot %d\n",
-          CONFIG_NSH_MMCSDSPIPORTNO,
-          CONFIG_NSH_MMCSDSLOTNO);
-  return OK;
-
-  /* Disable power to the SD/MMC via a GPIO. HIGH disables SD/MMC. */
-
-errout:
-  lpc17_gpiowrite(OPEN1788_MMC_PWR, true);
-  return ret;
+   sdio_mediachange(sdio, true);
 }
 #else
 #  define nsh_sdinitialize() (OK)
