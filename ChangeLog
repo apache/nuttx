@@ -4259,4 +4259,6 @@
 	* libc/wqueue:  Implemented user-space work queues.  These will not
 	  get tested until the next time I attempt a NuttX kernel build.
 	  (2013-03-05).
-
+	* arch/arm: Correct some bad syscall dispatching logic.  This change
+	  cannot be fully tested until there is a fielded NuttX kernel build.
+	  (2013-03-06).

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/armv7-m/svcall.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,15 +51,15 @@
  ************************************************************************************/
 
 /* Configuration ********************************************************************/
-/* This logic uses three system calls {0,1,2} for context switching.  The first three
- * syscall values must be reserved.
+/* This logic uses three system calls {0,1,2} for context switching and one for the
+ * syscall return.  The first four syscall values must be reserved.
  */
 
 #ifdef CONFIG_NUTTX_KERNEL
 #  ifndef CONFIG_SYS_RESERVED
-#    error "CONFIG_SYS_RESERVED must be defined to the value 3"
-#  elif CONFIG_SYS_RESERVED != 3
-#    error "CONFIG_SYS_RESERVED must have the value 3"
+#    error "CONFIG_SYS_RESERVED must be defined to the value 4"
+#  elif CONFIG_SYS_RESERVED != 4
+#    error "CONFIG_SYS_RESERVED must have the value 4"
 #  endif
 #endif
 
@@ -85,6 +85,15 @@
  */
 
 #define SYS_switch_context  (2)
+
+#ifdef CONFIG_NUTTX_KERNEL
+/* SYS call 3:
+ *
+ * void up_syscall_return(void);
+ */
+
+#define SYS_syscall_return  (3)
+#endif
 
 /************************************************************************************
  * Inline Functions

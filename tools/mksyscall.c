@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/mksyscall.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -433,46 +433,30 @@ static void generate_stub(int nparms)
     {
       fprintf(stream, "static inline ");
     }
-  fprintf(stream, "uintptr_t STUB_%s(", g_parm[NAME_INDEX]);
+ 
+  fprintf(stream, "uintptr_t STUB_%s(int nbr", g_parm[NAME_INDEX]);
 
-  /* Generate the formal parameter list.  A function received no parameters is a special case. */
+  /* Generate the formal parameter list */
 
-  if (nparms <= 0)
+  for (i = 0; i < nparms; i++)
     {
-      fprintf(stream, "void");
-    }
-  else
-    {
-      for (i = 0; i < nparms; i++)
+      /* Check for a variable number of arguments */
+
+      if (is_vararg(g_parm[PARM1_INDEX+i], i, nparms))
         {
-          /* Treat the first argument in the list differently from the others..
-           * It does not need a comma before it.
-           */
+          /* Always receive six arguments in this case */
 
-          if (i > 0)
+          for (j = i+1; j <= 6; j++)
             {
-              /* Check for a variable number of arguments */
-
-              if (is_vararg(g_parm[PARM1_INDEX+i], i, nparms))
-                {
-                  /* Always receive six arguments in this case */
-
-                  for (j = i+1; j <= 6; j++)
-                    {
-                      fprintf(stream, ", uintptr_t parm%d", j);
-                    }
-                }
-              else
-                {
-                  fprintf(stream, ", uintptr_t parm%d", i+1);
-                }
-            }
-          else
-            {
-              fprintf(stream, "uintptr_t parm%d", i+1);
+              fprintf(stream, ", uintptr_t parm%d", j);
             }
         }
+      else
+        {
+          fprintf(stream, ", uintptr_t parm%d", i+1);
+        }
     }
+
   fprintf(stream, ")\n{\n");
 
   /* Then call the proxied function.  Functions that have no return value are

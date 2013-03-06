@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 5, 2013)
+NuttX TODO List (Last updated March 6, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
@@ -21,7 +21,7 @@ nuttx/
   (1)  Documentation (Documentation/)
   (7)  Build system / Toolchains
   (5)  Linux/Cywgin simulation (arch/sim)
-  (5)  ARM (arch/arm/)
+  (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/i.MX (arch/arm/src/imx/)
@@ -1161,7 +1161,7 @@ o ARM (arch/arm/)
   Priority:    Low
 
   Title:       ARM INTERRUPTS AND USER MODE
-  Description: The ARM interrupt handling (arch/arm/src/arm/up_vectors.S) returns
+  Description: The ARM7/9 interrupt handling (arch/arm/src/arm/up_vectors.S) returns
                using 'ldmia   sp, {r0-r15}^'  My understanding is that this works
                fine because everything is in kernel-mode.  In an operating model
                where applications run in user mode and interrupts/traps run in
@@ -1170,8 +1170,8 @@ o ARM (arch/arm/)
                is built as a monolithic, protected kernel and user mode programs
                trap into the kernel.
   Status:      Open
-  Priority:    Low until I get around to implementng security or kernel mode for
-               the ARM platform.
+  Priority:    Low until I get around to implementing security or kernel mode for
+               an ARM7/9 platform.
 
   Title:       CORTEX-M3 STACK OVERFLOW
   Description: There is bit bit logic inf up_fullcontextrestore() that executes on
@@ -1210,20 +1210,6 @@ o ARM (arch/arm/)
   Priority:    Low.  The conditions of continous interrupts is really the problem.
                If your design needs continous interrupts like this, please try
                the above change and, please, submit a patch with the working fix.
-
-  Title:       KERNEL MODE ISSUES - HANDLERS
-  Description: The is a design flaw in the ARM/Cortex trap handlers.  Currently,
-               they try to process the SYSCALL within the trap handler.  That
-               cannot work.  There are two possibilities to fix this.
-               1) Just enable interrupts in the trap handler and make sure that
-                  that sufficient protection is in place to handler the nested
-                  interrupts, or
-               3) Return from the exception via a trampoline (such as is
-                  currently done for signal handlers).  In the trampoline,
-                  the trap would processed in supervisor mode with interrupts
-                  enabled.
-  Status:      Open
-  Priority:    medium-high.
 
 o ARM/C5471 (arch/arm/src/c5471/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/common/sam3u_userspace.c
+ * syscall/syscall_funclookup.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,21 +38,64 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <syscall.h>
 
-#include <stdint.h>
+/* The content of this file is only meaningful during the kernel phase of
+ * a kernel build.
+ */
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
+
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/statfs.h>
+#include <sys/prctl.h>
+#include <sys/socket.h>
+#include <sys/mount.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <poll.h>
+#include <time.h>
+#include <sched.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <signal.h>
+#include <mqueue.h>
+#include <spawn.h>
 #include <assert.h>
-
-#include <arch/board/user_map.h>
-
-#ifdef CONFIG_NUTTX_KERNEL
+#include <errno.h>
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
+
+/* Function lookup tables.  This table is indexed by the system call numbers
+ * defined above.  Given the system call number, this table provides the
+ * address of the corresponding system function.
+ *
+ * This table is only available during the kernel phase of a kernel build.
+ */
+
+const uintptr_t g_funclookup[SYS_nsyscalls] =
+{
+#  undef SYSCALL_LOOKUP1
+#  define SYSCALL_LOOKUP1(f,n,p) (uintptr_t)f
+#  undef SYSCALL_LOOKUP
+#  define SYSCALL_LOOKUP(f,n,p)  , (uintptr_t)f
+#  include "syscall_lookup.h"
+};
 
 /****************************************************************************
  * Private Functions
@@ -62,48 +105,4 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: sam3u_userspace
- *
- * Description:
- *   For the case of the separate user-/kernel-space build, perform whatever
- *   platform specific initialization of the user memory is required.
- *   Normally this just means initializing the user space .data and .bss
- *   segements.
- *
- ****************************************************************************/
-
-void sam3u_userspace(void)
-{
-  uint8_t *src;
-  uint8_t *dest;
-  uint8_t *end;
-
-  /* Clear all of user-space .bss */
-
-  DEBUGASSERT((uintptr_t)CONFIG_USER_DATADESTSTART <= CONFIG_USER_DATADESTEND);
-
-  dest = (uint8_t*)CONFIG_USER_BSSSTART;
-  end  = (uint8_t*)CONFIG_USER_BSSEND;
-
-  while (dest != end)
-    {
-      *dest++ = 0;
-    }
-
-  /* Initialize all of user-space .data */
-
-  DEBUGASSERT((uintptr_t)CONFIG_USER_DATADESTSTART <= CONFIG_USER_DATADESTEND);
-
-  src  = (uint8_t*)CONFIG_USER_DATASOURCE;
-  dest = (uint8_t*)CONFIG_USER_DATADESTSTART;
-  end  = (uint8_t*)CONFIG_USER_DATADESTEND;
-
-  while (dest != end)
-    {
-      *dest++ = *src++;
-    }
-}
-
-#endif /* CONFIG_NUTTX_KERNEL */
-
+#endif /* CONFIG_NUTTX_KERNEL && __KERNEL__ */

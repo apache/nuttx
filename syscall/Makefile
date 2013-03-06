@@ -1,7 +1,7 @@
 ############################################################################
 # syscall/Makefile
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -9,14 +9,14 @@
 # are met:
 #
 # 1. Redistributions of source code must retain the above copyright
-#	notice, this list of conditions and the following disclaimer.
+#    notice, this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright
-#	notice, this list of conditions and the following disclaimer in
-#	the documentation and/or other materials provided with the
-#	distribution.
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
 # 3. Neither the name NuttX nor the names of its contributors may be
-#	used to endorse or promote products derived from this software
-#	without specific prior written permission.
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -42,7 +42,7 @@ include stubs$(DELIM)Make.defs
 MKSYSCALL = "$(TOPDIR)$(DELIM)tools$(DELIM)mksyscall$(EXEEXT)"
 CSVFILE = "$(TOPDIR)$(DELIM)syscall$(DELIM)syscall.csv"
 
-STUB_SRCS += stub_lookup.c
+STUB_SRCS += syscall_funclookup.c syscall_stublookup.c syscall_nparms.c
 
 ASRCS = 
 AOBJS = $(ASRCS:.S=$(OBJEXT))

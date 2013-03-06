@@ -147,11 +147,11 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
+#ifndef CONFIG_DISABLE_SIGNALS
   /* The following function pointer is non-zero if there
    * are pending signals to be processed.
    */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
 
   /* These are saved copies of LR, PRIMASK, and xPSR used during
@@ -161,6 +161,12 @@ struct xcptcontext
   uint32_t saved_pc;
   uint32_t saved_basepri;
   uint32_t saved_xpsr;
+#endif
+
+#ifdef CONFIG_NUTTX_KERNEL
+  /* The following holds the return address from a system call */
+
+  uint32_t sysreturn;
 #endif
 
   /* Register save area */

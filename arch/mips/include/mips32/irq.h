@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/include/mips32/irq.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -310,11 +310,11 @@
 
 struct xcptcontext
 {
+#ifndef CONFIG_DISABLE_SIGNALS
   /* The following function pointer is non-NULL if there are pending signals
    * to be processed.
    */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
 
   /* These additional register save locations are used to implement the
@@ -323,6 +323,12 @@ struct xcptcontext
 
   uint32_t saved_epc;    /* Trampoline PC */
   uint32_t saved_status; /* Status with interrupts disabled. */
+#endif
+
+#ifdef CONFIG_NUTTX_KERNEL
+  /* The following holds the return address from a system call */
+
+  uint32_t sysreturn;
 #endif
 
   /* Register save area */

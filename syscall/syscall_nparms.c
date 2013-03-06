@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/common/sam3u_userspace.c
+ * syscall/syscall_stublookup.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,21 +38,33 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <syscall.h>
 
-#include <stdint.h>
-#include <assert.h>
-
-#include <arch/board/user_map.h>
+/* The content of this file is only meaning for the case of a kernel build. */
 
 #ifdef CONFIG_NUTTX_KERNEL
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
+
+/* Stub lookup tables.  This table is indexed by the system call numbers
+ * defined above.  Given the system call number, the corresponding entry in
+ * this table provides the number of parameters needed by the function.
+ */
+
+const uint8_t g_funcnparms[SYS_nsyscalls] =
+{
+#  undef SYSCALL_LOOKUP1
+#  define SYSCALL_LOOKUP1(f,n,p) n
+#  undef SYSCALL_LOOKUP
+#  define SYSCALL_LOOKUP(f,n,p)  , n
+#  include "syscall_lookup.h"
+};
 
 /****************************************************************************
  * Private Functions
@@ -62,48 +74,5 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: sam3u_userspace
- *
- * Description:
- *   For the case of the separate user-/kernel-space build, perform whatever
- *   platform specific initialization of the user memory is required.
- *   Normally this just means initializing the user space .data and .bss
- *   segements.
- *
- ****************************************************************************/
-
-void sam3u_userspace(void)
-{
-  uint8_t *src;
-  uint8_t *dest;
-  uint8_t *end;
-
-  /* Clear all of user-space .bss */
-
-  DEBUGASSERT((uintptr_t)CONFIG_USER_DATADESTSTART <= CONFIG_USER_DATADESTEND);
-
-  dest = (uint8_t*)CONFIG_USER_BSSSTART;
-  end  = (uint8_t*)CONFIG_USER_BSSEND;
-
-  while (dest != end)
-    {
-      *dest++ = 0;
-    }
-
-  /* Initialize all of user-space .data */
-
-  DEBUGASSERT((uintptr_t)CONFIG_USER_DATADESTSTART <= CONFIG_USER_DATADESTEND);
-
-  src  = (uint8_t*)CONFIG_USER_DATASOURCE;
-  dest = (uint8_t*)CONFIG_USER_DATADESTSTART;
-  end  = (uint8_t*)CONFIG_USER_DATADESTEND;
-
-  while (dest != end)
-    {
-      *dest++ = *src++;
-    }
-}
-
-#endif /* CONFIG_NUTTX_KERNEL */
-
+ #endif /* CONFIG_NUTTX_KERNEL */
+ 

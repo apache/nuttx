@@ -2,7 +2,7 @@
  * include/sys/syscall.h
  * This file contains the system call numbers.
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,10 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
+
+/* The content of this file is only meaningful for the case of a kernel build. */
+
+#ifdef CONFIG_NUTTX_KERNEL
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -91,9 +95,16 @@
 #define SYS_task_restart               (CONFIG_SYS_RESERVED+23)
 #define SYS_up_assert                  (CONFIG_SYS_RESERVED+24)
 #define SYS_up_assert_code             (CONFIG_SYS_RESERVED+25)
-#define __SYS_atexit                   (CONFIG_SYS_RESERVED+26)
+#define __SYS_vfork                    (CONFIG_SYS_RESERVED+26)
 
 /* The following can be individually enabled */
+
+#ifdef CONFIG_ARCH_HAVE_VFORK
+#  define SYS_vfork                    __SYS_vfork
+#  define __SYS_atexit                (__SYS_vfork+1)
+#else
+#  define __SYS_atexit                __SYS_vfork
+#endif
 
 #ifdef CONFIG_SCHED_ATEXIT
 #  define SYS_atexit                   __SYS_atexit
@@ -104,16 +115,39 @@
 
 #ifdef CONFIG_SCHED_ONEXIT
 #  define SYS_onexit                   __SYS_onexit
-#  define __SYS_waitpaid               (__SYS_onexit+1)
+#  define __SYS_waitpid                (__SYS_onexit+1)
 #else
-#  define __SYS_waitpaid               __SYS_onexit
+#  define __SYS_waitpid                __SYS_onexit
 #endif
 
 #ifdef CONFIG_SCHED_WAITPID
-#  define SYS_waitpid                  __SYS_waitpaid
-#  define __SYS_signals               (__SYS_waitpaid+1)
+#  define SYS_waitpid                  __SYS_waitpid
+#  ifdef CONFIG_SCHED_HAVE_PARENT
+#    define SYS_wait                   (__SYS_waitpid+1)
+#    define SYS_waitid                 (__SYS_waitpid+2)
+#    define __SYS_posixspawn           (__SYS_waitpid+3)
+#  else
+#    define __SYS_posixspawn           (__SYS_waitpid+1)
+#endif
 #else
-#  define __SYS_signals                __SYS_waitpaid
+#  define __SYS_posixspawn             __SYS_waitpid
+#endif
+
+/* The following can only be defined if we are configured to execute
+ * programs from a file system.
+ */
+
+#if defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)
+#  ifdef CONFIG_BINFMT_EXEPATH
+#    define SYS_posixspawnp            __SYS_posixspawn
+#  else
+#    define SYS_posixspawn             __SYS_posixspawn
+#  endif
+#  define SYS_execv                    (__SYS_posixspawn+1)
+#  define SYS_execl                    (__SYS_posixspawn+2)
+#  define __SYS_signals                (__SYS_posixspawn+3)
+#else
+#  define __SYS_signals                __SYS_posixspawn
 #endif
 
 /* The following are only defined is signals are supported in the NuttX
@@ -347,27 +381,11 @@
  * Public Type Definitions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-/* This is the union of all possible stub function types */
-
-union syscall_stubfunc_u
-{
-  uintptr_t (*stub0)(void);
-  uintptr_t (*stub1)(uintptr_t parm1);
-  uintptr_t (*stub2)(uintptr_t parm1, uintptr_t parm2);
-  uintptr_t (*stub3)(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3);
-  uintptr_t (*stub4)(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3,
-                     uintptr_t parm4);
-  uintptr_t (*stub5)(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3,
-                     uintptr_t parm4, uintptr_t parm5);
-  uintptr_t (*stub6)(uintptr_t parm1, uintptr_t parm2, uintptr_t parm3,
-                     uintptr_t parm4, uintptr_t parm5, uintptr_t parm6);
-};
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -376,13 +394,32 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/* Stub lookup tables.  Each table is indexed by the system call numbers
- * defined above.  Given the system call number, the corresponding entry in
- * these tables describes how to call the stub dispatch function.
+#ifdef __KERNEL__
+
+/* Function lookup tables.  This table is indexed by the system call numbers
+ * defined above.  Given the system call number, this table provides the
+ * address of the corresponding system function.
+ *
+ * This table is only available during the kernel phase of a kernel build.
  */
 
-EXTERN const union syscall_stubfunc_u g_stublookup[SYS_nsyscalls];
-EXTERN const uint8_t                  g_stubnparms[SYS_nsyscalls];
+EXTERN const uintptr_t g_funclookup[SYS_nsyscalls];
+
+/* Given the system call number, the corresponding entry in this table
+ * provides the address of the stub function.
+ *
+ * This table is only available during the kernel phase of a kernel build.
+ */
+
+EXTERN const uintptr_t g_stublookup[SYS_nsyscalls];
+
+#endif
+
+/* Given the system call number, the corresponding entry in this table
+ * provides the number of parameters needed by the function.
+ */
+
+EXTERN const uint8_t g_funcnparms[SYS_nsyscalls];
 
 /****************************************************************************
  * Public Functions
@@ -394,5 +431,6 @@ EXTERN const uint8_t                  g_stubnparms[SYS_nsyscalls];
 #endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* CONFIG_NUTTX_KERNEL */
 #endif /* __INCLUDE_SYS_SYSCALL_H */
 
