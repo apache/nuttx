@@ -92,6 +92,16 @@
  * Description:
  *   Call the stub function corresponding to the system call.
  *
+ *   R0 - Need not be preserved until after the stub is called.
+ *   R1-R3 - Need to be preserved until the stub is called.  The values of
+ *     R0 and R1 returned by the stub must be preserved.
+ *   R4-R11 must be preserved to support the expectations of the user-space
+ *     callee
+ *   R12 - Need not be preserved
+ *   R13 - (stack pointer)
+ *   R14 - Need not be preserved
+ *   R15 - (PC)
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_NUTTX_KERNEL
@@ -100,15 +110,13 @@ static void dispatch_syscall(void)
 {
   __asm__ __volatile__
   (
-    " push {r4-r6}\n"             /* Save R4, R5 and R6 */
-    " mov r6, r14\n"              /* Save LR in R6 */
-    " ldr r4, =g_stublookup\n"    /* Get the base of the stub lookup table */
-    " lsl r3, r0, #2\n"           /* Get the offset of the stub for this syscall */
-    " ldr r3, [r4, r3]\n"         /* Load the entry of the stub for this syscall */
-    " blx r3\n"                   /* Call the stub */
-    " mov r14, r6\n"              /* Restore R14 */
-    " pop {r4-r6}\n"              /* Restore R4, R5, and R6 */
-    " mov r2, r0\n"               /* Save the return value in R0 in R2 for now */
+    " push {r4}\n"                /* Save R4 */
+    " ldr r4, =g_stublookup\n"    /* R4=The base of the stub lookup table */
+    " lsl r0, r0, #2\n"           /* R0=Offset of the stub for this syscall */
+    " ldr r4, [r4, r0]\n"         /* R4=Address of the stub for this syscall */
+    " blx r5\n"                   /* Call the stub (modifies R14) */
+    " pop {r4}\n"                 /* Restore R4 */
+    " mov r2, r0\n"               /* R2=Saves return value in R0 */
     " mov r0, #3\n"               /* R0=SYS_syscall_return */
     " svc 0"                      /* Return from the syscall */
     :::
