@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/include/mips32/syscall.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,15 +57,17 @@
 #define SYS_syscall 0x00
 
 /* Configuration ********************************************************************/
-/* This logic uses three system calls {0,1,2} for context switching.  The first three
- * syscall values must be reserved.
+/* SYS call 1 and 2 are defined for internal use by the PIC32MX port (see
+ * arch/mips/include/mips32/syscall.h).  In addition, SYS call 3 is the return from
+ * a SYS call in kernel mode.  The first four syscall values must, therefore, be
+ * reserved (0 is not used).
  */
-
+ 
 #ifdef CONFIG_NUTTX_KERNEL
 #  ifndef CONFIG_SYS_RESERVED
-#    error "CONFIG_SYS_RESERVED must be defined to the value 2"
-#  elif CONFIG_SYS_RESERVED != 2
-#    error "CONFIG_SYS_RESERVED must have the value 2"
+#    error "CONFIG_SYS_RESERVED must be defined to the value 4"
+#  elif CONFIG_SYS_RESERVED != 4
+#    error "CONFIG_SYS_RESERVED must have the value 4"
 #  endif
 #endif
 
@@ -148,6 +150,8 @@
 
 /* Context switching system calls ***************************************************/
 
+/* SYS call 0: (not used) */
+
 /* SYS call 1:
  *
  * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
@@ -166,6 +170,16 @@
 #define up_switchcontext(saveregs, restoreregs) \
   (void)sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
 
+#ifdef CONFIG_NUTTX_KERNEL
+/* SYS call 3:
+ *
+ * void up_syscall_return(void);
+ */
+
+#define SYS_syscall_return (3)
+#define up_syscall_return() (void)sys_call0(SYS_syscall_return)
+
+#endif
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************

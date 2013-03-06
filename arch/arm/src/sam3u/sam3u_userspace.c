@@ -38,6 +38,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
+#include <assert.h>
+
 #include <arch/board/user_map.h>
 
 #ifdef CONFIG_NUTTX_KERNEL
