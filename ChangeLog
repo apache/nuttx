@@ -4255,5 +4255,8 @@
 	  (2013-03-05)
 	* libc/wqueue:  Work queue logic moved from sched/ to libc/wqueue.  It
 	  is not really core OS functionality and this move helps prepare for
-	  user-space work queues.
+	  user-space work queues. (2013-03-05)
+	* libc/wqueue:  Implemented user-space work queues.  These will not
+	  get tested until the next time I attempt a NuttX kernel build.
+	  (2013-03-05).
 

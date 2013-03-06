@@ -62,10 +62,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If NuttX is built as a separately compiled module, then the the header
+/* If NuttX is built as a separately compiled module, then the config.h header
  * file should contain the address of the user module entry point.  If not
  * then the default entry point is user_start.
  */
+
+/* Customize some strings */
+
+#ifdef CONFIG_SCHED_WORKQUEUE
+#  ifdef CONFIG_SCHED_HPWORK
+#    if defined(CONFIG_SCHED_LPWORK)
+#      define HPWORKNAME "hpwork"
+#      define LPWORKNAME "lpwork"
+#    elif defined(CONFIG_SCHED_USRWORK)
+#      define HPWORKNAME "knlwork"
+#    else
+#      define HPWORKNAME "work"
+#    endif
+#  endif
+#endif
 
 /****************************************************************************
  * Private Types
@@ -147,9 +162,15 @@ int os_bringup(void)
    */
 
 #ifdef CONFIG_SCHED_WORKQUEUE
-  svdbg("Starting worker thread\n");
+#ifdef CONFIG_SCHED_HPWORK
 
-  g_work[HPWORK].pid = KERNEL_THREAD("work0", CONFIG_SCHED_WORKPRIORITY,
+#ifdef CONFIG_SCHED_LPWORK
+  svdbg("Starting high-priority kernel worker thread\n");
+#else
+  svdbg("Starting kernel worker thread\n");
+#endif
+
+  g_work[HPWORK].pid = KERNEL_THREAD(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
                                      CONFIG_SCHED_WORKSTACKSIZE,
                                      (main_t)work_hpthread, (FAR char * const *)NULL);
   ASSERT(g_work[HPWORK].pid > 0);
@@ -159,14 +180,17 @@ int os_bringup(void)
    */
 
 #ifdef CONFIG_SCHED_LPWORK
-  svdbg("Starting worker thread\n");
 
-  g_work[LPWORK].pid = KERNEL_THREAD("work1", CONFIG_SCHED_LPWORKPRIORITY,
+  svdbg("Starting low-priority kernel worker thread\n");
+
+  g_work[LPWORK].pid = KERNEL_THREAD(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
                                      CONFIG_SCHED_LPWORKSTACKSIZE,
                                      (main_t)work_lpthread, (FAR char * const *)NULL);
   ASSERT(g_work[LPWORK].pid > 0);
-#endif
-#endif
+
+#endif /* CONFIG_SCHED_LPWORK */
+#endif /* CONFIG_SCHED_HPWORK */
+#endif /* CONFIG_SCHED_WORKQUEUE */
 
   /* Once the operating system has been initialized, the system must be
    * started by spawning the user init thread of execution.  This is the

@@ -61,6 +61,10 @@
  *   (which runs at the lowest of priority and may not be appropriate
  *   if memory reclamation is of high priority).  If CONFIG_SCHED_WORKQUEUE
  *   is enabled, then the following options can also be used:
+ * CONFIG_SCHED_HPWORK - Build the high priority work queue. To preserve
+ *   legacy behavior, CONFIG_SCHED_HPWORK is assumed to be true in a flat
+ *   build (CONFIG_SCHED_KERNEL=n) but must be defined in kernel mode
+ *   in order to build the high priority work queue.
  * CONFIG_SCHED_WORKPRIORITY - The execution priority of the worker
  *   thread.  Default: 192
  * CONFIG_SCHED_WORKPERIOD - How often the worker thread checks for
@@ -83,23 +87,85 @@
  *   priority worker thread.  Default: CONFIG_IDLETHREAD_STACKSIZE.
  */
 
+/* Is this a kernel build (CONFIG_NUTTX_KERNEL=y) */
+
+#ifdef CONFIG_NUTTX_KERNEL
+
+  /* Yes.. kernel worker threads are not built in a kernel build when we are
+   * building the user-space libraries.
+   */
+
+#  ifndef __KERNEL__
+#    undef CONFIG_SCHED_HPWORK
+#    undef CONFIG_SCHED_LPWORK
+
+  /* User-space worker threads are not built in a kernel build when we are
+   * building the kernel-space libraries.
+   */
+
+#  else
+#    undef CONFIG_SCHED_USRWORK
+#  endif
+
+  /* User-space worker threads are not built in a flat build
+   * (CONFIG_NUTTX_KERNEL=n)
+   */
+
+#else
+
+  /* To preserve legacy behavior, CONFIG_SCHED_HPWORK is assumed to be true
+   * in a flat build (CONFIG_SCHED_KERNEL=n) but must be defined in kernel
+   * mode in order to build the high priority work queue.
+   */
+
+#  undef CONFIG_SCHED_HPWORK
+#  undef CONFIG_SCHED_USRWORK
+#  define CONFIG_SCHED_HPWORK 1
+#endif
+
+/* We never build the low priority work queue without building the high
+ * priority work queue.
+ */
+
+#if defined(CONFIG_SCHED_LPWORK) && !defined(CONFIG_SCHED_HPWORK)
+#  error "CONFIG_SCHED_LPWORK defined, but CONFIG_SCHED_HPWORK not defined"
+#  undef CONFIG_SCHED_LPWORK
+#endif
+
+/* We might not be building any work queue support in this context */
+
+#if !defined(CONFIG_SCHED_HPWORK) && !defined(CONFIG_SCHED_LPWORK) && !defined(CONFIG_SCHED_USRWORK)
+#  undef CONFIG_SCHED_WORKQUEUE
+#endif
+
+#ifdef CONFIG_SCHED_WORKQUEUE
+
+/* We are building work queues... Work queues need signal support */
+
 #if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_DISABLE_SIGNALS)
 #  warning "Worker thread support requires signals"
 #endif
 
-#ifndef CONFIG_SCHED_WORKPRIORITY
-#  define CONFIG_SCHED_WORKPRIORITY 192
-#endif
+/* High priority, kernel work queue configuration ***************************/
 
-#ifndef CONFIG_SCHED_WORKPERIOD
-#  define CONFIG_SCHED_WORKPERIOD (50*1000) /* 50 milliseconds */
-#endif
+#ifdef CONFIG_SCHED_HPWORK
 
-#ifndef CONFIG_SCHED_WORKSTACKSIZE
-#  define CONFIG_SCHED_WORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
-#endif
+#  ifndef CONFIG_SCHED_WORKPRIORITY
+#    define CONFIG_SCHED_WORKPRIORITY 192
+#  endif
+
+#  ifndef CONFIG_SCHED_WORKPERIOD
+#    define CONFIG_SCHED_WORKPERIOD (50*1000) /* 50 milliseconds */
+#  endif
+
+#  ifndef CONFIG_SCHED_WORKSTACKSIZE
+#    define CONFIG_SCHED_WORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
+#  endif
+
+/* Low priority kernel work queue configuration *****************************/
 
 #ifdef CONFIG_SCHED_LPWORK
+
 #  ifndef CONFIG_SCHED_LPWORKPRIORITY
 #    define CONFIG_SCHED_LPWORKPRIORITY 50
 #  endif
@@ -111,44 +177,88 @@
 #  ifndef CONFIG_SCHED_LPWORKSTACKSIZE
 #    define CONFIG_SCHED_LPWORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
 #  endif
-#endif
 
-/* How many worker threads are there? */
-
-#ifdef CONFIG_SCHED_LPWORK
-#  define NWORKERS 2
-#else
-#  define NWORKERS 1
-#endif
-
-/* Work queue IDs (indices):
- *
- * Kernel Work Queues:
- *   HPWORK: This ID of the high priority work queue that should only be used for
- *   hi-priority, time-critical, driver bottom-half functions.
- *
- *   LPWORK: This is the ID of the low priority work queue that can be used for any
- *   purpose.  if CONFIG_SCHED_LPWORK is not defined, then there is only one kernel
- *   work queue and LPWORK == HPWORK.
- *
- * User Work Queue:
- *   USRWORK:  CONFIG_NUTTX_KERNEL and CONFIG_SCHED_USRWORK are defined, then NuttX
- *   will also support a user-accessible work queue.  Otherwise, USRWORK == LPWORK.
+/* The high priority worker thread should be higher priority than the low
+ * priority worker thread.
  */
 
-#define HPWORK 0
-#ifdef CONFIG_SCHED_LPWORK
-#  define LPWORK (HPWORK+1)
-#else
-#  define LPWORK HPWORK
+#if CONFIG_SCHED_LPWORKPRIORITY > CONFIG_SCHED_WORKPRIORITY
+#  warning "The Lower priority worker thread has the higher priority"
 #endif
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_SCHED_USRWORK)
-#  warning "Feature not implemented"
-#  define USRWORK (LPWORK+1)
+#endif /* CONFIG_SCHED_LPWORK */
+#endif /* CONFIG_SCHED_HPWORK */
+
+/* User space work queue configuration **************************************/
+
+#ifdef CONFIG_SCHED_USRWORK
+
+#  ifndef CONFIG_SCHED_USRWORKPRIORITY
+#    define CONFIG_SCHED_USRWORKPRIORITY 50
+#  endif
+
+#  ifndef CONFIG_SCHED_USRWORKPERIOD
+#    define CONFIG_SCHED_USRWORKPERIOD (50*1000) /* 50 milliseconds */
+#  endif
+
+#  ifndef CONFIG_SCHED_USRWORKSTACKSIZE
+#    define CONFIG_SCHED_USRWORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
+#  endif
+
+#endif /* CONFIG_SCHED_USRWORK */
+
+/* How many worker threads are there?  In the user-space phase of a kernel
+ * build, there will be no more than one.
+ *
+ * Work queue IDs (indices):
+ *
+ *   Kernel Work Queues:  There are none and any attempts to use them
+ *     should generate errors.
+ *
+ *   User Work Queue:  Will be available if CONFIG_SCHED_USRWORK is defined
+ */
+
+#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+#  ifdef CONFIG_SCHED_USRWORK
+#    define NWORKERS 1
+#    define USRWORK 0
+#  endif
 #else
-#  define USRWORK LPWORK
-#endif
+
+  /* In a flat build (CONFIG_NUTTX_KERNEL=n) or during the kernel phase of
+   * the kernel build, there may be 0, 1, or 2 work queues.
+   *
+   * Work queue IDs (indices):
+   *
+   * Kernel Work Queues:
+   *   HPWORK: This ID of the high priority work queue that should only be
+   *     used for hi-priority, time-critical, driver bottom-half functions.
+   *
+   *   LPWORK: This is the ID of the low priority work queue that can be
+   *     used for any purpose.  if CONFIG_SCHED_LPWORK is not defined, then
+   *     there is only one kernel work queue and LPWORK == HPWORK.
+   *
+   * User Work Queue:
+   *   USRWORK:  In the kernel phase a a kernel build, there should be no
+   *     references to user-space work queues.  That would be an error. 
+   *     Otherwise, in a flat build, user applications will use the lower
+   *     priority work queue (if there is one).
+   */
+
+#  define HPWORK 0
+#  ifdef CONFIG_SCHED_LPWORK
+#    define LPWORK (HPWORK+1)
+#    define NWORKERS 2
+#  else
+#    define LPWORK HPWORK
+#    define NWORKERS 1
+#  endif
+
+#  ifndef CONFIG_NUTTX_KERNEL
+#    define USRWORK LPWORK
+#  endif
+
+#endif /* CONFIG_NUTTX_KERNEL && !__KERNEL__ */
 
 /****************************************************************************
  * Public Types
@@ -202,22 +312,50 @@ extern "C"
  * logic.
  */
 
+#ifdef CONFIG_NUTTX_KERNEL
+
+  /* Play some games in the kernel mode build to assure that different
+   * naming is used for the global work queue data structures.  This may
+   * not be necessary but it safer.
+   */
+
+#  ifdef __KERNEL__
+EXTERN struct wqueue_s g_kernelwork[NWORKERS];
+#    define g_work g_kernelwork
+#  else
+EXTERN struct wqueue_s g_usrwork[NWORKERS];
+#    define g_work g_usrwork
+#  endif
+
+#else /* CONFIG_NUTTX_KERNEL */
+
 EXTERN struct wqueue_s g_work[NWORKERS];
+
+#endif /* CONFIG_NUTTX_KERNEL */
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_hpthread and work_lpthread
+ * Name: work_hpthread, work_lpthread, and work_usrthread
  *
  * Description:
- *   These are the main worker threads that performs actions placed on the
- *   work lists.  One thread also performs periodic garbage collection (that
- *   is performed by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).
+ *   These are the worker threads that performs actions placed on the work
+ *   lists.
  *
- *   These entrypoints are referenced by OS internally and should not be
- *   accessed by application logic.
+ *   work_hpthread and work_lpthread:  These are the kernel mode work queues
+ *     (also build in the flat build).  One of these threads also performs
+ *     periodic garbage collection (that is otherwise performed by the idle
+ *     thread if CONFIG_SCHED_WORKQUEUE is not defined).
+ *
+ *     These worker threads are started by the OS during normal bringup.
+ *
+ *   work_usrthread:  This is a user mode work queue.  It must be started
+ *     by application code by calling work_usrstart().
+ *
+ *   All of these entrypoints are referenced by OS internally and should not
+ *   not be accessed by application logic.
  *
  * Input parameters:
  *   argc, argv (not used)
@@ -227,10 +365,35 @@ EXTERN struct wqueue_s g_work[NWORKERS];
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SCHED_HPWORK
 int work_hpthread(int argc, char *argv[]);
+#endif
 
 #ifdef CONFIG_SCHED_LPWORK
 int work_lpthread(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_SCHED_USRWORK
+int work_usrthread(int argc, char *argv[]);
+#endif
+
+/****************************************************************************
+ * Name: work_usrstart
+ *
+ * Description:
+ *   Start the user mode work queue.
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The task ID of the worker thread is returned on success.  A negated
+ *   errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_USRWORK
+int work_usrstart(void);
 #endif
 
 /****************************************************************************
@@ -324,4 +487,5 @@ int work_signal(int qid);
 #endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* CONFIG_SCHED_WORKQUEUE */
 #endif /* __INCLUDE_NUTTX_WQUEUE_H */

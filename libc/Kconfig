@@ -346,7 +346,118 @@ config ARCH_BZERO
 
 endif
 
-comment "Non-standard Helper Functions"
+comment "Non-standard Library Support"
+
+config SCHED_WORKQUEUE
+	bool "Enable worker thread"
+	default n
+	depends on !DISABLE_SIGNALS
+	---help---
+		Create a dedicated "worker" thread to handle delayed processing from interrupt
+		handlers.  This feature is required for some drivers but, if there are no
+		complaints, can be safely disabled.  The worker thread also performs
+		garbage collection -- completing any delayed memory deallocations from
+		interrupt handlers.  If the worker thread is disabled, then that clean up will
+		be performed by the IDLE thread instead (which runs at the lowest of priority
+		and may not be appropriate if memory reclamation is of high priority).
+
+if SCHED_WORKQUEUE
+
+config SCHED_HPWORK
+	bool "High priority (kernel) worker thread"
+	default y
+	---help---
+		If SCHED_WORKQUEUE is defined, then a single, high priority work queue is
+		created by default.  This high priority worker thread is intended to serve
+		as the "bottom half" for driver interrupt handling.
+
+if SCHED_HPWORK
+config SCHED_WORKPRIORITY
+	int "High priority worker thread priority"
+	default 192
+	---help---
+		The execution priority of the worker thread.  Default: 192
+
+config SCHED_WORKPERIOD
+	int "High priority worker thread period"
+	default 50000
+	---help---
+		How often the worker thread checks for work in units of microseconds.
+		Default: 50*1000 (50 MS).
+
+config SCHED_WORKSTACKSIZE
+	int "High priority worker thread stack size"
+	default 2048
+	depends on SCHED_WORKQUEUE
+	---help---
+		The stack size allocated for the worker thread.  Default: 2K.
+
+config SCHED_LPWORK
+	bool "Low priority (kernel) worker thread"
+	default n
+	---help---
+		If SCHED_WORKQUEUE is defined, then a single work queue is created by
+		default.  If SCHED_LPWORK is also defined then an additional, lower-
+		priority work queue will also be created.  This lower priority work
+		queue is better suited for more extended processing (such as file system
+		clean-up operations)
+
+if SCHED_LPWORK
+
+config SCHED_LPWORKPRIORITY
+	int "Low priority worker thread priority"
+	default 50
+	---help---
+		The execution priority of the lopwer priority worker thread.  Default: 192
+
+config SCHED_LPWORKPERIOD
+	int "Low priority worker thread period"
+	default 50000
+	---help---
+		How often the lower priority worker thread checks for work in units
+		of microseconds. Default: 50*1000 (50 MS).
+
+config SCHED_LPWORKSTACKSIZE
+	int "Low priority worker thread stack size"
+	default 2048
+	---help---
+		The stack size allocated for the lower priority worker thread.  Default: 2K.
+
+endif # SCHED_LPWORK
+endif # SCHED_HPWORK
+
+if NUTTX_KERNEL
+
+config SCHED_USRWORK
+	bool "User mode worker thread"
+	default n
+	---help---
+		User space work queues can also be made available for deferred processing in the NuttX kernel build.
+
+if SCHED_USRWORK
+
+config SCHED_LPWORKPRIORITY
+	int "User mode priority worker thread priority"
+	default 50
+	---help---
+		The execution priority of the lopwer priority worker thread.  Default: 192
+
+config SCHED_LPWORKPERIOD
+	int "User mode worker thread period"
+	default 50000
+	---help---
+		How often the lower priority worker thread checks for work in units
+		of microseconds. Default: 50*1000 (50 MS).
+
+config SCHED_LPWORKSTACKSIZE
+	int "User mode worker thread stack size"
+	default 2048
+	---help---
+		The stack size allocated for the lower priority worker thread.  Default: 2K.
+
+endif # SCHED_USRWORK
+endif # NUTTX_KERNEL
+endif # SCHED_WORKQUEUE
 
 config LIB_KBDCODEC
 	bool "Keyboard CODEC"

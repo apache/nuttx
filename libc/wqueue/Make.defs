@@ -39,6 +39,10 @@ ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
 
 CSRCS += work_thread.c work_queue.c work_cancel.c work_signal.c
 
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CSRCS += work_usrstart.c
+endif
+
 # Add the wqueue directory to the build
 
 DEPPATH += --dep-path wqueue

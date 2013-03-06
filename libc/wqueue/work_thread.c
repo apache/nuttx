@@ -65,9 +65,29 @@
  * Public Variables
  ****************************************************************************/
 
-/* The state of each work queue */
+/* The state of each work queue. */
+
+#ifdef CONFIG_NUTTX_KERNEL
+
+  /* Play some games in the kernel mode build to assure that different
+   * naming is used for the global work queue data structures.  This may
+   * not be necessary but it safer.
+   *
+   * In this case g_work is #define'd to be either g_kernelwork or
+   * g_usrwork in include/nuttx/wqueue.h
+   */
+
+#  ifdef __KERNEL__
+struct wqueue_s g_kernelwork[NWORKERS];
+#  else
+struct wqueue_s g_usrwork[NWORKERS];
+#  endif
+
+#else /* CONFIG_NUTTX_KERNEL */
 
 struct wqueue_s g_work[NWORKERS];
+
+#endif /* CONFIG_NUTTX_KERNEL */
 
 /****************************************************************************
  * Private Variables
@@ -181,12 +201,24 @@ static void work_process(FAR struct wqueue_s *wqueue)
  * Public Functions
  ****************************************************************************/
 /****************************************************************************
- * Name: work_hpthread and work_lpthread
+ * Name: work_hpthread, work_lpthread, and work_usrthread
  *
  * Description:
- *   These are the main worker threads that performs actions placed on the
- *   work lists.  One thread also performs periodic garbage collection (that
- *   is performed by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).
+ *   These are the worker threads that performs actions placed on the work
+ *   lists.
+ *
+ *   work_hpthread and work_lpthread:  These are the kernel mode work queues
+ *     (also build in the flat build).  One of these threads also performs
+ *     periodic garbage collection (that is otherwise performed by the idle
+ *     thread if CONFIG_SCHED_WORKQUEUE is not defined).
+ *
+ *     These worker threads are started by the OS during normal bringup.
+ *
+ *   work_usrthread:  This is a user mode work queue.  It must be started
+ *     by application code by calling work_usrstart().
+ *
+ *   All of these entrypoints are referenced by OS internally and should not
+ *   not be accessed by application logic.
  *
  * Input parameters:
  *   argc, argv (not used)
@@ -195,6 +227,8 @@ static void work_process(FAR struct wqueue_s *wqueue)
  *   Does not return
  *
  ****************************************************************************/
+
+#ifdef CONFIG_SCHED_HPWORK
 
 int work_hpthread(int argc, char *argv[])
 {
@@ -224,6 +258,7 @@ int work_hpthread(int argc, char *argv[])
 }
 
 #ifdef CONFIG_SCHED_LPWORK
+
 int work_lpthread(int argc, char *argv[])
 {
   /* Loop forever */
@@ -250,5 +285,26 @@ int work_lpthread(int argc, char *argv[])
 }
 
 #endif /* CONFIG_SCHED_LPWORK */
+#endif /* CONFIG_SCHED_HPWORK */
+
+#ifdef CONFIG_SCHED_USRWORK
+
+int work_usrthread(int argc, char *argv[])
+{
+  /* Loop forever */
+
+  for (;;)
+    {
+      /* Then process queued work.  We need to keep interrupts disabled while
+       * we process items in the work list.
+       */
+
+      work_process(&g_work[USRWORK]);
+    }
+
+  return OK; /* To keep some compilers happy */
+}
+
+#endif /* CONFIG_SCHED_USRWORK */
 
 #endif /* CONFIG_SCHED_WORKQUEUE */
