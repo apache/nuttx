@@ -13,15 +13,21 @@ fi
 
 # Assume that OpenOCD was installed and at /usr/local/bin.  Uncomment
 # the following to run directly from the build directory
-#OPENOCD_PATH="/home/OpenOCD/openocd/src"
-#TARGET_PATH="/home/OpenOCD/openocd/tcl"
-OPENOCD_PATH="/usr/bin"
-TARGET_PATH="/usr/share/openocd/scripts"
+
+# OPENOCD_PATH="/home/OpenOCD/openocd/src"
+# OPENOCD_PATH="/usr/bin"
+OPENOCD_PATH="/usr/local/bin"
+
+# TARGET_PATH="/home/OpenOCD/openocd/tcl"
+# TARGET_PATH="/usr/share/openocd/scripts"
+TARGET_PATH="/usr/local/share/openocd/scripts"
 
 # Assume a Unix development environment.  Uncomment to use a Windows
 # like environment
-#OPENOCD_EXE=openocd.exe
-OPENOCD_EXE=openocd
+
+OPENOCD_EXE=openocd.exe
+# OPENOCD_EXE=openocd
+
 OPENOCD_CFG="${TOPDIR}/configs/lm3s6965-ek/tools/lm3s6965-ek.cfg"
 OPENOCD_ARGS="-f ${OPENOCD_CFG} -s ${TARGET_PATH}"
 
