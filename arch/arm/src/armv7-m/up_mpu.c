@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_mpu.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 
 #include "mpu.h"
 #include "up_internal.h"
@@ -58,7 +59,7 @@
  * regions (0xff), and 0 means all subregions but one (0x00).
  */
 
-static const void uint8_t g_regionmap[9] = 
+static const uint8_t g_regionmap[9] = 
 {
   0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01, 0x00
 };
@@ -106,9 +107,10 @@ unsigned int mpu_allocregion(void)
 
 uint8_t mpu_log2regionsize(size_t size)
 {
+  uint32_t l2size;
+
   /* The minimum permitted region size is 16 bytes (log2(16) = 4. */
 
-  uint32_t l2size;
   for (l2size = 4; l2size < 32 && size > (1 << l2size); size++);
   return l2size;
 }
@@ -129,7 +131,7 @@ uint8_t mpu_log2regionsize(size_t size)
 
 uint32_t mpu_subregion(size_t size, uint8_t l2size)
 {
-  unsigned int nsrs
+  unsigned int nsrs;
   uint32_t     asize;
   uint32_t     mask;
 
@@ -140,7 +142,7 @@ uint32_t mpu_subregion(size_t size, uint8_t l2size)
    * l2size: Log2 of the actual region size is <= (1 << l2size);
    */
 
-  DEBUGASSERT(lsize > 3 && size <= (1 << l2size));
+  DEBUGASSERT(l2size > 3 && size <= (1 << l2size));
 
   /* Examples with l2size = 12:
    *
@@ -153,7 +155,7 @@ uint32_t mpu_subregion(size_t size, uint8_t l2size)
 
   if (l2size < 32)
     {
-      mask  = ((1 << lsize)-1) >> 3; /* Shifted mask */
+      mask  = ((1 << l2size)-1) >> 3; /* Shifted mask */
     }
 
   /* The 4Gb region size is a special case */
@@ -168,9 +170,6 @@ uint32_t mpu_subregion(size_t size, uint8_t l2size)
     }
 
   asize = (size + mask) & ~mask; /* Adjusted size */
-  nsrs  = asize >> (lsize-3);    /* Number of subregions */
+  nsrs  = asize >> (l2size-3);   /* Number of subregions */
   return g_regionmap[nsrs];
 }
-
-
-

@@ -244,7 +244,7 @@ int up_swint0(int irq, FAR void *context)
            */
 
 #error "Missing logic -- need to test for privileged mode"
-          DEBUGASSERT(rtcb->xcp.sysreturn != NULL && ???);
+          DEBUGASSERT(rtcb->xcp.sysreturn != 0 && ???);
 
           /* Setup to return to the saved syscall return address in
            * unprivileged mode.
@@ -252,7 +252,7 @@ int up_swint0(int irq, FAR void *context)
 
           current_regs[REG_EPC] = rtcb->xcp.sysreturn;
 #error "Missing logic -- need to set for unprivileged mode"
-          rtcb->sysreturn       = NULL;
+          rtcb->sysreturn       = 0;
         }
         break;
 #endif
@@ -276,7 +276,7 @@ int up_swint0(int irq, FAR void *context)
            */
 
 #error "Missing logic -- Need to set unprivileged mode"
-          DEBUGASSERT(rtcb->xcp.sysreturn == NULL && ???);
+          DEBUGASSERT(rtcb->xcp.sysreturn == 0 && ???);
 
           /* Setup to return to dispatch_syscall in privileged mode. */
 
