@@ -64,6 +64,7 @@
 #include "lpc17_gpio.h"
 #include "lpc17_sdcard.h"
 
+#include "chip/lpc17_syscon.h"
 #include "chip/lpc17_pinconfig.h"
 
 #if CONFIG_LPC17_SDCARD
@@ -123,22 +124,16 @@
 
 /* Friendly CLKCR bit re-definitions ****************************************/
 
-#define SDCARD_CLOCK_RISINGEDGE   (0)
-#define SDCARD_CLOCK_FALLINGEDGE  SDCARD_CLOCK_NEGEDGE
-
 /* Mode dependent settings.  These depend on clock devisor settings that must
  * be defined in the board-specific board.h header file: SDCARD_INIT_CLKDIV,
  * SDCARD_MMCXFR_CLKDIV, and SDCARD_SDXFR_CLKDIV.
  */
 
-#define LPC17_CLCKCR_INIT         (SDCARD_INIT_CLKDIV|SDCARD_CLOCK_RISINGEDGE|\
-                                   SDCARD_CLOCK_WIDBUS_D1)
-#define SDCARD_CLOCK_MMCXFR       (SDCARD_MMCXFR_CLKDIV|SDCARD_CLOCK_RISINGEDGE|\
-                                   SDCARD_CLOCK_WIDBUS_D1)
-#define SDCARD_CLOCK_SDXFR        (SDCARD_SDXFR_CLKDIV|SDCARD_CLOCK_RISINGEDGE|\
-                                   SDCARD_CLOCK_WIDBUS_D1)
-#define SDCARD_CLOCK_SDWIDEXFR    (SDCARD_SDXFR_CLKDIV|SDCARD_CLOCK_RISINGEDGE|\
-                                   SDCARD_CLOCK_WIDBUS_D4)
+#define LPC17_CLCKCR_INIT         (SDCARD_INIT_CLKDIV|SDCARD_CLOCK_WIDBUS_D1)
+#define SDCARD_CLOCK_MMCXFR       (SDCARD_MMCXFR_CLKDIV|SDCARD_CLOCK_WIDBUS_D1)
+#define SDCARD_CLOCK_SDXFR        (SDCARD_SDXFR_CLKDIV|SDCARD_CLOCK_WIDBUS_D1)
+#define SDCARD_CLOCK_SDWIDEXFR    (SDCARD_SDXFR_CLKDIV|SDCARD_CLOCK_WIDBUS_D4)
+
 /* Timing */
 
 #define SDCARD_CMDTIMEOUT         (100000)
@@ -250,7 +245,7 @@
 struct lpc17_dev_s
 {
   struct sdio_dev_s  dev;        /* Standard, base SD card interface */
-  
+
   /* LPC17XX-specific extensions */
   /* Event support */
 
@@ -511,7 +506,7 @@ static void lpc17_takesem(struct lpc17_dev_s *priv)
  *   Modify oft-changed bits in the CLKCR register.  Only the following bit-
  *   fields are changed:
  *
- *   CLKDIV, PWRSAV, BYPASS, WIDBUS, NEGEDGE, and HWFC_EN
+ *   CLKDIV, PWRSAV, BYPASS, and WIDBUS
  *
  * Input Parameters:
  *   clkcr - A new CLKCR setting for the above mentions bits (other bits
@@ -525,18 +520,16 @@ static void lpc17_takesem(struct lpc17_dev_s *priv)
 static inline void lpc17_setclock(uint32_t clkcr)
 {
   uint32_t regval = getreg32(LPC17_SDCARD_CLOCK);
-    
-  /* Clear CLKDIV, PWRSAV, BYPASS, WIDBUS, NEGEDGE, HWFC_EN bits */
+
+  /* Clear CLKDIV, PWRSAV, BYPASS, and WIDBUS bits */
 
   regval &= ~(SDCARD_CLOCK_CLKDIV_MASK|SDCARD_CLOCK_PWRSAV|SDCARD_CLOCK_BYPASS|
-              SDCARD_CLOCK_WIDBUS_MASK|SDCARD_CLOCK_NEGEDGE|SDCARD_CLOCK_HWFC_EN|
-              SDCARD_CLOCK_CLKEN);
+              SDCARD_CLOCK_WIDBUS|SDCARD_CLOCK_CLKEN);
 
   /* Replace with user provided settings */
 
   clkcr  &=  (SDCARD_CLOCK_CLKDIV_MASK|SDCARD_CLOCK_PWRSAV|SDCARD_CLOCK_BYPASS|
-              SDCARD_CLOCK_WIDBUS_MASK|SDCARD_CLOCK_NEGEDGE|SDCARD_CLOCK_HWFC_EN|
-              SDCARD_CLOCK_CLKEN);
+              SDCARD_CLOCK_WIDBUS|SDCARD_CLOCK_CLKEN);
 
   regval |=  clkcr;
   putreg32(regval, LPC17_SDCARD_CLOCK);
@@ -979,7 +972,7 @@ static void lpc17_sendfifo(struct lpc17_dev_s *priv)
              {
                 data.b[i] = *ptr++;
              }
- 
+
            /* Now the transfer is finished */
 
            priv->remaining = 0;
@@ -1147,7 +1140,7 @@ static void lpc17_endtransfer(struct lpc17_dev_s *priv, sdio_eventset_t wkupeven
   lpc17_configxfrints(priv, 0);
 
   /* Clearing pending interrupt status on all transfer related interrupts */
- 
+
   putreg32(SDCARD_XFRDONE_ICR, LPC17_SDCARD_CLEAR);
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
@@ -1407,7 +1400,7 @@ static int lpc17_interrupt(int irq, void *context)
 
 #ifdef CONFIG_SDIO_MUXBUS
 static int lpc17_lock(FAR struct sdio_dev_s *dev, bool lock)
-{  
+{
   /* Single SD card instance so there is only one possibility.  The multiplex
    * bus is part of board support package.
    */
@@ -1440,6 +1433,8 @@ static void lpc17_reset(FAR struct sdio_dev_s *dev)
   /* Disable clocking */
 
   flags = irqsave();
+
+  /* Disable the SD Interface */
 
   regval = getreg32(LPC17_SDCARD_CLOCK);
   regval &= ~SDCARD_CLOCK_CLKEN;
@@ -1475,9 +1470,9 @@ static void lpc17_reset(FAR struct sdio_dev_s *dev)
   priv->dmamode    = false;  /* true: DMA mode transfer */
 #endif
 
-  /* Configure the SD card peripheral */
+  /* Configure and enable the SD card peripheral */
 
-  lpc17_setclock(LPC17_CLCKCR_INIT | SDCARD_CLOCK_CLKEN);
+  lpc17_setclock(LPC17_CLCKCR_INIT|SDCARD_CLOCK_CLKEN);
   lpc17_setpwrctrl(SDCARD_PWR_CTRL_ON);
   irqrestore(flags);
 
@@ -1558,7 +1553,7 @@ static void lpc17_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       /* Enable in initial ID mode clocking (<400KHz) */
 
-      case CLOCK_IDMODE:            
+      case CLOCK_IDMODE:
         clock = (LPC17_CLCKCR_INIT | SDCARD_CLOCK_CLKEN);
         break;
 
@@ -1687,7 +1682,7 @@ static int lpc17_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 
   cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
   regval |= cmdidx | SDCARD_CMD_CPSMEN;
-  
+
   fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
 
   /* Write the SD card CMD */
@@ -1836,7 +1831,7 @@ static int lpc17_cancel(FAR struct sdio_dev_s *dev)
   /* Clearing pending interrupt status on all transfer- and event- related
    * interrupts
    */
- 
+
   putreg32(SDCARD_WAITALL_ICR, LPC17_SDCARD_CLEAR);
 
   /* Cancel any watchdog timeout */
@@ -2075,7 +2070,7 @@ static int lpc17_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
           ret = -EIO;
         }
     }
-    
+
   /* Return the long response */
 
   putreg32(SDCARD_RESPDONE_ICR|SDCARD_CMDDONE_ICR, LPC17_SDCARD_CLEAR);
@@ -2172,7 +2167,7 @@ static void lpc17_waitenable(FAR struct sdio_dev_s *dev,
 {
   struct lpc17_dev_s *priv = (struct lpc17_dev_s*)dev;
   uint32_t waitmask;
- 
+
   DEBUGASSERT(priv != NULL);
 
   /* Disable event-related interrupts */
@@ -2286,7 +2281,7 @@ static sdio_eventset_t lpc17_eventwait(FAR struct sdio_dev_s *dev,
 
       lpc17_takesem(priv);
       wkupevent = priv->wkupevent;
- 
+
       /* Check if the event has occurred.  When the event has occurred, then
        * evenset will be set to 0 and wkupevent will be set to a nonzero value.
        */
@@ -2468,7 +2463,7 @@ static int lpc17_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       lpc17_dmasetup(priv->dma, LPC17_SDCARD_FIFO, (uint32_t)buffer,
                      (buflen + 3) >> 2, SDCARD_RXDMA32_CONFIG);
- 
+
       /* Start the DMA */
 
       lpc17_sample(priv, SAMPLENDX_BEFORE_ENABLE);
@@ -2683,9 +2678,17 @@ static void lpc17_default(void)
 
 FAR struct sdio_dev_s *sdio_initialize(int slotno)
 {
+  uint32_t   regval;
+
   /* There is only one slot */
 
   struct lpc17_dev_s *priv = &g_scard_dev;
+
+  /* Enable power on SD Interface */
+
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval |= SYSCON_PCONP_PCSDC;
+  putreg32(regval, LPC17_SYSCON_PCONP);
 
   /* Initialize the SD card slot structure */
 
@@ -2700,9 +2703,8 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   DEBUGASSERT(priv->dma);
 #endif
 
-  /* Configure GPIOs for 4-bit, wide-bus operation (the chip is capable of
-   * 8-bit wide bus operation but D4-D7 are not configured).
-   * 
+  /* Configure GPIOs for 4-bit, wide-bus operation.
+   *
    * If bus is multiplexed then there is a custom bus configuration utility
    * in the scope of the board support package.
    */
@@ -2723,6 +2725,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
   lpc17_reset(&priv->dev);
+
   return &g_scard_dev.dev;
 }
 
@@ -2736,7 +2739,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
  *
  * Input Parameters:
  *   dev        - An instance of the SD card driver device state structure.
- *   cardinslot - true is a card has been detected in the slot; false if a 
+ *   cardinslot - true is a card has been detected in the slot; false if a
  *                card has been removed from the slot.  Only transitions
  *                (inserted->removed or removed->inserted should be reported)
  *
