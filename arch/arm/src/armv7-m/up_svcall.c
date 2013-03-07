@@ -250,7 +250,7 @@ int up_svcall(int irq, FAR void *context)
            * that there is a saved syscall return address.
            */
 
-          DEBUGASSERT(rtcb->xcp.sysreturn != NULL &&
+          DEBUGASSERT(rtcb->xcp.sysreturn != 0 &&
                       regs[REG_EXC_RETURN] == EXC_RETURN_PRIVTHR);
 
           /* Setup to return to the saved syscall return address in
@@ -259,7 +259,7 @@ int up_svcall(int irq, FAR void *context)
 
           current_regs[REG_PC]         = rtcb->xcp.sysreturn;
           current_regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
-          rtcb->xcp.sysreturn          = NULL;
+          rtcb->xcp.sysreturn          = 0;
 
           /* The return value must be in R0-R1.  dispatch_syscall() temporarily
            * moved the value to R2.
@@ -288,7 +288,7 @@ int up_svcall(int irq, FAR void *context)
            * there is a no saved syscall return address.
            */
 
-          DEBUGASSERT(rtcb->xcp.sysreturn == NULL &&
+          DEBUGASSERT(rtcb->xcp.sysreturn == 0 &&
                       regs[REG_EXC_RETURN] == EXC_RETURN_UNPRIVTHR);
 
           /* Setup to return to dispatch_syscall in privileged mode. */

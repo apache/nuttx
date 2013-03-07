@@ -76,6 +76,9 @@
 
 /* Select the main oscillator as the frequency source.  SYSCLK is then the frequency
  * of the main oscillator.
+ *
+ * If BOARD_XTAL_FREQUENCY > 15000000, then the SCS OSCRS bit (bit 4) should also
+ * be set in the BOARD_SCS_VALUE.
  */
 
 #undef CONFIG_LPC17_MAINOSC

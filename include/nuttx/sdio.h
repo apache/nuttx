@@ -45,6 +45,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <nuttx/wqueue.h>
 
 /****************************************************************************
@@ -658,7 +659,9 @@
  *   thread.
  *
  *   When this method is called, all callbacks should be disabled until they
- *   are enabled via a call to SDIO_CALLBACKENABLE
+ *   are enabled via a call to SDIO_CALLBACKENABLE.
+ *
+ *   NOTE: High-priority work queue support is required.
  *
  * Input Parameters:
  *   dev -      Device-specific state data
@@ -670,7 +673,9 @@
  *
  ****************************************************************************/
 
-#define SDIO_REGISTERCALLBACK(d,c,a) ((d)->registercallback(d,c,a))
+#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
+#  define SDIO_REGISTERCALLBACK(d,c,a) ((d)->registercallback(d,c,a))
+#endif
 
 /****************************************************************************
  * Name: SDIO_DMASUPPORTED
@@ -819,8 +824,11 @@ struct sdio_dev_s
   sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev, uint32_t timeout);
   void  (*callbackenable)(FAR struct sdio_dev_s *dev,
           sdio_eventset_t eventset);
+
+#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
   int   (*registercallback)(FAR struct sdio_dev_s *dev,
           worker_t callback, void *arg);
+#endif
 
   /* DMA.  CONFIG_SDIO_DMA should be set if the driver supports BOTH DMA
    * and non-DMA transfer modes.  If the driver supports only one mode

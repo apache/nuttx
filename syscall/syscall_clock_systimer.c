@@ -1,7 +1,7 @@
 /****************************************************************************
- * syscall/syscall_funclookup.c
+ * syscall/syscall_stublookup.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,56 +38,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <syscall.h>
 
-/* The content of this file is only meaningful during the kernel phase of
- * a kernel build.
- */
-
-#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
-
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
-#include <sys/select.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/statfs.h>
-#include <sys/prctl.h>
-#include <sys/socket.h>
-#include <sys/mount.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <poll.h>
-#include <time.h>
-#include <sched.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <signal.h>
-#include <mqueue.h>
-#include <spawn.h>
-#include <assert.h>
-#include <errno.h>
+#include <stdint.h>
 
 #include <nuttx/clock.h>
 
-/* clock_systimer is a special case:  In the kernel build, proxying for
- * clock_systimer() must be handled specially.  In the kernel phase of
- * the build, clock_systimer() is macro that simply accesses a global
- * variable.  In the user phase of the kernel build, clock_systimer()
- * is a proxy function.
- *
- * In order to fill out the table g_funclookup[], this function will stand
- * in during the kernel phase of the build so that clock_systemer() will
- * have an address that can be included in the g_funclookup[] table.
- */
-
-uint32_t syscall_clock_systimer(void);
+#ifndef CONFIG_DISABLE_CLOCK
 
 /****************************************************************************
  * Pre-processor definitions
@@ -97,22 +53,6 @@ uint32_t syscall_clock_systimer(void);
  * Public Data
  ****************************************************************************/
 
-/* Function lookup tables.  This table is indexed by the system call numbers
- * defined above.  Given the system call number, this table provides the
- * address of the corresponding system function.
- *
- * This table is only available during the kernel phase of a kernel build.
- */
-
-const uintptr_t g_funclookup[SYS_nsyscalls] =
-{
-#  undef SYSCALL_LOOKUP1
-#  define SYSCALL_LOOKUP1(f,n,p) (uintptr_t)f
-#  undef SYSCALL_LOOKUP
-#  define SYSCALL_LOOKUP(f,n,p)  , (uintptr_t)f
-#  include "syscall_lookup.h"
-};
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -121,4 +61,24 @@ const uintptr_t g_funclookup[SYS_nsyscalls] =
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_NUTTX_KERNEL && __KERNEL__ */
+/****************************************************************************
+ * Name: syscall_clock_systimer
+ *
+ * Description:
+ *   In the kernel build, proxying for clock_systimer() must be handled
+ *   specially.  In the kernel phase of the build, clock_systimer() is
+ *   macro that simply accesses a global variable.  In the user phase of
+ *   the kernel build, clock_systimer() is a proxy function.
+ *
+ *   In order to fill out the table g_funclookup[], this function will stand
+ *   in during the kernel phase of the build so that clock_systemer() will
+ *   have an address that can be included in the g_funclookup[] table.
+ *
+ ****************************************************************************/
+
+uint32_t syscall_clock_systimer(void)
+{
+  return clock_systimer();
+}
+
+#endif /* !CONFIG_DISABLE_CLOCK */

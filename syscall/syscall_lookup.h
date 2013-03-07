@@ -128,7 +128,7 @@ SYSCALL_LOOKUP(up_assert_code,            3, STUB_up_assert_code)
  */
 
 #ifndef CONFIG_DISABLE_CLOCK
-  SYSCALL_LOOKUP(clock_systimer,          0, STUB_clock_systimer)
+  SYSCALL_LOOKUP(syscall_clock_systimer,  0, STUB_clock_systimer)
   SYSCALL_LOOKUP(clock_getres,            2, STUB_clock_getres)
   SYSCALL_LOOKUP(clock_gettime,           2, STUB_clock_gettime)
   SYSCALL_LOOKUP(clock_settime,           2, STUB_clock_settime)

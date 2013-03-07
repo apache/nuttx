@@ -43,6 +43,7 @@ MKSYSCALL = "$(TOPDIR)$(DELIM)tools$(DELIM)mksyscall$(EXEEXT)"
 CSVFILE = "$(TOPDIR)$(DELIM)syscall$(DELIM)syscall.csv"
 
 STUB_SRCS += syscall_funclookup.c syscall_stublookup.c syscall_nparms.c
+STUB_SRCS += syscall_clock_systimer.c
 
 ASRCS = 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
@@ -77,7 +78,7 @@ $(BIN1): $(PROXY_OBJS)
 	$(call ARCHIVE, $@, $(PROXY_OBJS))
 
 $(BIN2): $(STUB_OBJS)
-	$(call ARCHIVE, $@, "$(STUB_OBJS)")
+	$(call ARCHIVE, $@, $(STUB_OBJS))
 
 .depend: Makefile $(SRCS)
 	$(Q) $(MKDEP) $(ROOTDEPPATH) $(PROXYDEPPATH) $(STUBDEPPATH) \

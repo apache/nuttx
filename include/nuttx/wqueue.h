@@ -116,6 +116,10 @@
   /* To preserve legacy behavior, CONFIG_SCHED_HPWORK is assumed to be true
    * in a flat build (CONFIG_SCHED_KERNEL=n) but must be defined in kernel
    * mode in order to build the high priority work queue.
+   *
+   * In the kernel build, it is possible that no kernel work queues will be
+   * built.  But in the flat build, the high priority work queue will always
+   * be built.
    */
 
 #  undef CONFIG_SCHED_HPWORK
