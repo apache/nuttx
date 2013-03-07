@@ -202,11 +202,6 @@ static int nsh_sdinitialize(void)
   FAR struct sdio_dev_s *sdio;
   int ret;
 
-  /* Enable power to the SD/MMC via a GPIO. LOW enables SD/MMC. */
-
-  lpc17_gpiowrite(OPEN1788_MMC_PWR, false);
-#warning "This is wrong"
-
   /* First, get an instance of the SDIO interface */
 
   sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
@@ -225,7 +220,7 @@ static int nsh_sdinitialize(void)
       message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
-  
+
   /* Then let's guess and say that there is a card in the slot.  I need to check to
    * see if the STM3240G-EVAL board supports a GPIO to detect if there is a card in
    * the slot.

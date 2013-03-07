@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam3u-ek/kernal/kernel.ld
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,10 +62,6 @@ MEMORY
     sram2 (rwx) : ORIGIN = 0x20080000, LENGTH = 16K
 }
 
-/* Force user_start into the link.  This is the application entry point */
-
-EXTERN(user_start)
-
 /* Make sure that the critical memory management functions are in user-space.
  * Currently, the plan is that the memory manager will reside in user-space
  * but be usable both by kernel- and user-space code
@@ -82,7 +78,6 @@ EXTERN(zalloc)
 EXTERN(free)
 
 OUTPUT_ARCH(arm)
-ENTRY(user_start)
 
 SECTIONS
 {
