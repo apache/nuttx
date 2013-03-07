@@ -100,16 +100,22 @@ void kfree(FAR void*);
 
 #endif
 
-/* Functions defined in os_list.c *******************************************/
+/* Functions defined in sched/sched_free.c **********************************/
 
-/* Handles memory freed from an interrupt handler */
+/* Handles memory freed from an interrupt handler.  In that context, kfree()
+ * cannot be called.  Instead, the allocations are saved in a list of
+ * delayed allocations that will be periodically cleaned up by
+ * sched_garbagecollection().
+ */
 
 void sched_free(FAR void *address);
 
-/* Functions defined in os_list.c *******************************************/
+/* Functions defined in sched/sched_garbage *********************************/
 
 /* Must be called periodically to clean up deallocations delayed by
- * sched_free()
+ * sched_free().  This may be done from either the IDLE thread or from a
+ * worker thread.  The IDLE thread has very low priority and could starve
+ * the system for memory in some context.
  */
 
 void sched_garbagecollection(void);

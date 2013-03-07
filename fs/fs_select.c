@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_select.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,9 +109,27 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
   int ndx;
   int ret;
 
+  /* How many pollfd structures do we need to allocate? */
+
+  /* Initialize the descriptor list for poll() */
+
+  for (fd = 0, npfds = 0; fd < nfds; fd++)
+    {
+      /* Check if any monitor operation is requested on this fd */
+
+      if (readfds && FD_ISSET(fd, readfds) ||
+          writefds && FD_ISSET(fd, writefds) ||
+          exceptfds && FD_ISSET(fd, exceptfds))
+        {
+          /* Yes.. increment the count of pollfds structures needed */
+
+          npfds++;
+        }
+    }
+
   /* Allocate the descriptor list for poll() */
 
-  pollset = (struct pollfd *)kzalloc(nfds * sizeof(struct pollfd));
+  pollset = (struct pollfd *)kzalloc(npfds * sizeof(struct pollfd));
   if (!pollset)
     {
       set_errno(ENOMEM);
@@ -120,7 +138,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   /* Initialize the descriptor list for poll() */
 
-  for (fd = 0, npfds = 0; fd < nfds; fd++)
+  for (fd = 0, ndx = 0; fd < nfds; fd++)
     {
       int incr = 0;
 
@@ -133,9 +151,9 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
       if (readfds && FD_ISSET(fd, readfds))
         {
-          pollset[npfds].fd      = fd;
-          pollset[npfds].events |= POLLIN;
-          incr                   = 1;
+          pollset[ndx].fd      = fd;
+          pollset[ndx].events |= POLLIN;
+          incr                 = 1;
         }
 
       /* The writefds set holds the set of FDs that the caller can be assured
@@ -144,25 +162,38 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
       if (writefds && FD_ISSET(fd, writefds))
         {
-          pollset[npfds].fd      = fd;
-          pollset[npfds].events |= POLLOUT;
-          incr                   = 1;
+          pollset[ndx].fd      = fd;
+          pollset[ndx].events |= POLLOUT;
+          incr                 = 1;
         }
 
       /* The exceptfds set holds the set of FDs that are watched for exceptions */
 
       if (exceptfds && FD_ISSET(fd, exceptfds))
         {
-          pollset[npfds].fd      = fd;
-          incr                   = 1;
+          pollset[ndx].fd      = fd;
+          incr                  = 1;
         }
 
-      npfds += incr;
+      ndx += incr;
     }
+
+  DEBUGASSERT(ndx == npfds);
 
   /* Convert the timeout to milliseconds */
 
-  msec = timeout->tv_sec * 1000 + timeout->tv_usec / 1000;
+  if (timeout)
+    {
+      /* Calculate the timeout in milliseconds */
+
+      msec = timeout->tv_sec * 1000 + timeout->tv_usec / 1000;
+    }
+  else
+    {
+      /* Any negative value of msec means no timeout */
+
+      msec = -1;
+    }
 
   /* Then let poll do all of the real work. */
 

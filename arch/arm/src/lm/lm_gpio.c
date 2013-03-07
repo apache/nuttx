@@ -764,7 +764,7 @@ static inline void lm_portcontrol(uint32_t base, uint32_t pinno,
   putreg32(regval, base + LM_GPIO_PCTL_OFFSET);
 }
 #else
-#  define lm_portcontrol(b,p,f)
+#  define lm_portcontrol(b,p,c,f)
 #endif
 
 /****************************************************************************
