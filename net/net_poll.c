@@ -258,20 +258,48 @@ static inline int net_pollsetup(FAR struct socket *psock,
    *
    * 1) The socket is connected and we are waiting for data availability
    *    events.
+   *
+   *    __SS_ISCONNECTED(f) == true
+   *    __SS_ISLISTENING(f) == false
+   *    __SS_ISCLOSED(f)    == false
+   *
+   *    Action: Wait for data availability events
+   *
    * 2) This is a listener socket that was never connected and we are
    *    waiting for connection events.
+   *
+   *    __SS_ISCONNECTED(f) == false
+   *    __SS_ISLISTENING(f) == true
+   *    __SS_ISCLOSED(f)    == false
+   *
+   *    Action: Wait for connection events
+   *
    * 3) This socket was previously connected, but the peer has gracefully
    *    closed the connection.
+   *
+   *    __SS_ISCONNECTED(f) == false
+   *    __SS_ISLISTENING(f) == false
+   *    __SS_ISCLOSED(f)    == true
+   *
+   *    Action: Return with POLLHUP|POLLERR events
+   *
    * 4) This socket was previously connected, but we lost the connection
    *    due to some exceptional event.
    *
-   * We can detect 1) and 3), but 2) and 4) appear the same.  So we
-   * do the best we can for now:  We will report POLLHUP if the socket
-   * has been gracefully closed.
+   *    __SS_ISCONNECTED(f) == false
+   *    __SS_ISLISTENING(f) == false
+   *    __SS_ISCLOSED(f)    == false
+   *
+   *    Action: Return with POLLHUP|POLLERR events
    */
 
-  if (_SS_ISCLOSED(psock->s_flags))
+  if (!_SS_ISCONNECTED(psock->s_flags) && !_SS_ISLISTENING(psock->s_flags))
     {
+      /* We were previously connected but lost the connection either due
+       * to a graceful shutdown by the remote peer or because of some
+       * exceptional event.
+       */
+
       fds->revents |= (POLLERR | POLLHUP);
     }
 

@@ -4262,3 +4262,22 @@
 	* arch/arm: Correct some bad syscall dispatching logic.  This change
 	  cannot be fully tested until there is a fielded NuttX kernel build.
 	  (2013-03-06).
+	* net/net_poll.c:  Correct logic that checks if the socket is
+	  disconnected when the poll is setup.  That is bad logic:  Listen
+	  sockets, for example, are not connected.  In that case, the purpose of
+	  the poll is to wait for connection events.  As a result of this,
+	  poll/select would return immediately with POLLHUP with it was used to
+	  detect connection events.  This fix for now was to check instead if
+	  the socket is closed (meaning that it was connected at one time but
+	  was closed by the remote peer).  That excludes the listen socket which
+	  was never connected.  This does introduce a new problem, however.  If
+	  the socket was not closed, but lost the connection through an abnormal
+	  event, then poll/select will hang.  That needs to be revisited.\
+	  (2013-03-07)
+	* fs/fs_selected.c:  Was not checking if the timeout parameter was NULL
+	  but would, instead, setup a bogus timeout based on whatever it found at
+	  address zero.  Also, improved some of the memory allocation logic so
+	  that it will not use so much memory. (2013-03-07)
+	* net/net_poll.c:  Handle the missing case.  Now tests for not connected
+	  AND not listening.  I think that now covers all of the cases including
+	  the missing case noted above. (2013-03-07)

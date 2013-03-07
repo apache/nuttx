@@ -97,7 +97,7 @@ struct socket
   socktimeo_t   s_sndtimeo;  /* Send timeout value (in deciseconds) */
 #endif
 #endif
-  void         *s_conn;      /* Connection: struct uip_conn or uip_udp_conn */
+  FAR void     *s_conn;      /* Connection: struct uip_conn or uip_udp_conn */
 };
 
 /* This defines a list of sockets indexed by the socket descriptor */
