@@ -38,7 +38,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <assert.h>
+
 #include <arch/board/user_map.h>
+
 #include "mpu.h"
 
 #ifdef CONFIG_NUTTX_KERNEL
@@ -78,18 +82,10 @@
 
 void sam3u_mpuinitialize(void)
 {
-  uintptr_t datastart = MIN(ONFIG_USER_DATADESTSTART, CONFIG_USER_BSSSTART);
-  uintptr_t dataend   = MAX(ONFIG_USER_DATADESTEND,   CONFIG_USER_BSSEND);
+  uintptr_t datastart = MIN(CONFIG_USER_DATADESTSTART, CONFIG_USER_BSSSTART);
+  uintptr_t dataend   = MAX(CONFIG_USER_DATADESTEND,   CONFIG_USER_BSSEND);
 
   DEBUGASSERT(CONFIG_USER_TEXTEND >= CONFIG_USER_TEXTSTART && dataend >= datastart);
-
-	@echo "#define C     0x`grep \" _stext\"       $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define        0x`grep \" _etext$\"      $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define CONFIG_USER_DATASOURCE    0x`grep \" _eronly$\"    $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define C 0x`grep \" _sdata$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define CONFIG_USER_   0x`grep \" _edata$\"     $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define       0x`grep \" _sbss\"       $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
-	@echo "#define CONFIG_USER_        0x`grep \" _ebss$\"      $(TOPDIR)/User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)/user_map.h
 
   /* Show MPU information */
 

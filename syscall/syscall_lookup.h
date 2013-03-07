@@ -192,7 +192,7 @@ SYSCALL_LOOKUP(up_assert_code,            3, STUB_up_assert_code)
   SYSCALL_LOOKUP(rename,                  2, STUB_rename)
   SYSCALL_LOOKUP(rmdir,                   1, STUB_rmdir)
   SYSCALL_LOOKUP(umount,                  1, STUB_umount)
-  SYSCALL_LOOKUP(unlink                   1, STUB_unlink)
+  SYSCALL_LOOKUP(unlink,                  1, STUB_unlink)
 #  endif
 #endif
 

@@ -142,34 +142,28 @@
 
 #define ETH_MCFG_CLKSEL_DIV        ETH_MCFG_CLKSEL_DIV20
 
-/* SDIO dividers.  Note that slower clocking is required when DMA is disabled 
+/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
  * in order to avoid RX overrun/TX underrun errors due to delayed responses
- * to service FIFOs in interrupt driven mode.  These values have not been
- * tuned!!!
- *
- * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
+ * to service FIFOs in interrupt driven mode.
+ * SDCARD_CLOCK=PCLK/(2*(SDCARD_CLKDIV+1))
  */
-  
-#define SDCARD_INIT_CLKDIV         (118 << SDCARD_CLOCK_CLKDIV_SHIFT)
 
-/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
- * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
- */
+#define SDCARD_SLOW_CLKDIV         74   /* 400Khz  */
+#define SDCARD_INIT_CLKDIV         (BOARD_PCLK_FREQUENCY/(2*(SDCARD_SLOW_CLKDIV+1)))
+
+#define SDCARD_NORMAL_CLKDIV       1    /* DMA ON:  SDCARD_CLOCK=15MHz */
+#define SDCARD_SLOW_CLKDIV         2    /* DMA OFF: SDCARD_CLOCK=10MHz */
 
 #ifdef CONFIG_SDIO_DMA
-#  define SDCARD_MMCXFR_CLKDIV     (1 << SDCARD_CLOCK_CLKDIV_SHIFT) 
+#  define SDCARD_MMCXFR_CLKDIV     (BOARD_PCLK_FREQUENCY/(2*(SDCARD_NORMAL_CLKDIV+1)))
 #else
-#  define SDCARD_MMCXFR_CLKDIV     (2 << SDCARD_CLOCK_CLKDIV_SHIFT) 
+#  define SDCARD_MMCXFR_CLKDIV     (BOARD_PCLK_FREQUENCY/(2*(SDCARD_SLOW_CLKDIV+1)))
 #endif
 
-/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
- * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
- */
-
 #ifdef CONFIG_SDIO_DMA
-#  define SDCARD_SDXFR_CLKDIV      (1 << SDCARD_CLOCK_CLKDIV_SHIFT)
+#  define SDCARD_SDXFR_CLKDIV      (BOARD_PCLK_FREQUENCY/(2*(SDCARD_NORMAL_CLKDIV+1)))
 #else
-#  define SDCARD_SDXFR_CLKDIV      (2 << SDCARD_CLOCK_CLKDIV_SHIFT)
+#  define SDCARD_SDXFR_CLKDIV      (BOARD_PCLK_FREQUENCY/(2*(SDCARD_SLOW_CLKDIV+1)))
 #endif
 
 /* Set EMC delay values:
@@ -288,15 +282,31 @@
 
 /* Alternate pin selections *********************************************************/
 
+/* UART0:
+ *
+ *   TX --- Connected to  P0[2]
+ *   RX --- Connected to  P0[3]
+ */
+
 #define GPIO_UART0_TXD             GPIO_UART0_TXD_2
 #define GPIO_UART0_RXD             GPIO_UART0_RXD_2
 
-#define GPIO_SD_DAT0               GPIO_SD_DAT0_1 /* REVISIT */
-#define GPIO_SD_DAT1               GPIO_SD_DAT1_1
-#define GPIO_SD_DAT2               GPIO_SD_DAT2_1
-#define GPIO_SD_DAT3               GPIO_SD_DAT3_1
-#define GPIO_SD_CLK                GPIO_SD_CLK_1
-#define GPIO_SD_CMD                GPIO_SD_CMD_1
+/* MCI-SDIO:
+ *
+ *   D0 --- Connected to  P1[6]
+ *   D1 --- Connected to  P2[11]
+ *   D2 --- Connected to  P2[12]
+ *   D3 --- Connected to  P2[13]
+ *   CLK--- Connected to  P1[2]
+ *   CMD--- Connected to  P1[3]
+ */
+
+#define GPIO_SD_DAT0               GPIO_SD_DAT0_2
+#define GPIO_SD_DAT1               GPIO_SD_DAT1_2
+#define GPIO_SD_DAT2               GPIO_SD_DAT2_2
+#define GPIO_SD_DAT3               GPIO_SD_DAT3_2
+#define GPIO_SD_CLK                GPIO_SD_CLK_2
+#define GPIO_SD_CMD                GPIO_SD_CMD_2
 
 /************************************************************************************
  * Public Types

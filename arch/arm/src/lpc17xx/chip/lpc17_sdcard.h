@@ -86,62 +86,83 @@
 
 /* Register Bitfield Definitions ****************************************************/
 
+/* MCI Power Control Registers - PWR - 0x400c 0000*/
+
 #define SDCARD_PWR_CTRL_SHIFT         (0)       /* Bits 0-1: Power supply control bits */
 #define SDCARD_PWR_CTRL_MASK          (3 << SDCARD_PWR_CTRL_SHIFT)
 #  define SDCARD_PWR_CTRL_OFF         (0 << SDCARD_PWR_CTRL_SHIFT) /* 00: Power-off: card clock stopped */
 #  define SDCARD_PWR_CTRL_PWRUP       (2 << SDCARD_PWR_CTRL_SHIFT) /* 10: Reserved power-up */
 #  define SDCARD_PWR_CTRL_ON          (3 << SDCARD_PWR_CTRL_SHIFT) /* 11: Power-on: card is clocked */
-
+                                                /* Bits 2-5 Reserved */
+#define SDCARD_PWR_OPENDRAIN          (1 << 6)  /* SD_CMD Output Control */
+#define SDCARD_PWR_ROD                (1 << 7)  /* Rod Control */
+                                                /* Bits 8-31: Reserved */
 #define SDCARD_PWR_RESET              (0)       /* Reset value */
+
+/* MCI Clock Control Register - CLOCK - 0x400c 0004 */
 
 #define SDCARD_CLOCK_CLKDIV_SHIFT     (0)       /* Bits 7-0: Clock divide factor */
 #define SDCARD_CLOCK_CLKDIV_MASK      (0xff << SDCARD_CLOCK_CLKDIV_SHIFT)
 #define SDCARD_CLOCK_CLKEN            (1 << 8)  /* Bit 8: Clock enable bit */
 #define SDCARD_CLOCK_PWRSAV           (1 << 9)  /* Bit 9: Power saving configuration bit */
 #define SDCARD_CLOCK_BYPASS           (1 << 10) /* Bit 10: Clock divider bypass enable bit */
-#define SDCARD_CLOCK_WIDBUS_SHIFT     (11)      /* Bits 12-11: Wide bus mode enable bits */
-#define SDCARD_CLOCK_WIDBUS_MASK      (3 << SDCARD_CLOCK_WIDBUS_SHIFT)
-#  define SDCARD_CLOCK_WIDBUS_D1      (0 << SDCARD_CLOCK_WIDBUS_SHIFT) /* 00: Default (SDIO_D0) */
-#  define SDCARD_CLOCK_WIDBUS_D4      (1 << SDCARD_CLOCK_WIDBUS_SHIFT) /* 01: 4-wide (SDIO_D[3:0]) */
-#  define SDCARD_CLOCK_WIDBUS_D8      (2 << SDCARD_CLOCK_WIDBUS_SHIFT) /* 10: 8-wide (SDIO_D[7:0]) */
-#define SDCARD_CLOCK_NEGEDGE          (1 << 13) /* Bit 13: SDIO_CK dephasing selection bit */
-#define SDCARD_CLOCK_HWFC_EN          (1 << 14) /* Bit 14: HW Flow Control enable */
+#define SDCARD_CLOCK_WIDBUS           (1 << 11) /* Bit 11: Wide bus mode enable bit */
+#  define SDCARD_CLOCK_WIDBUS_D1      (0)       /* 0: Default (SDIO_D0) */
+#  define SDCARD_CLOCK_WIDBUS_D4      (SDCARD_CLOCK_WIDBUS) /* 1: 4-wide (SDIO_D[3:0]) */
+                                                /* Bits 12-31: Reserved */
 
 #define SDCARD_CLOCK_RESET            (0)       /* Reset value */
+
+/* MCI Argument Register - ARGUMENT - 0x400c 0008 has no bitfields */
+
 #define SDCARD_ARG_RESET              (0)       /* Reset value */
 
-#define SDCARD_CMD_INDEX_SHIFT        (0)
+/* MCI Command Register - COMMAND - 0x400c 000c */
+
+#define SDCARD_CMD_INDEX_SHIFT        (0)       /* Bits 0-5: Command Index */
 #define SDCARD_CMD_INDEX_MASK         (0x3f << SDCARD_CMD_INDEX_SHIFT)
 #define SDCARD_CMD_WAITRESP_SHIFT     (6)       /* Bits 7-6: Wait for response bits */
 #define SDCARD_CMD_WAITRESP_MASK      (3 << SDCARD_CMD_WAITRESP_SHIFT)
-#  define SDCARD_CMD_NORESPONSE       (0 << SDCARD_CMD_WAITRESP_SHIFT) /* 00/10: No response */
-#  define SDCARD_CMD_SHORTRESPONSE    (1 << SDCARD_CMD_WAITRESP_SHIFT) /* 01: Short response */
+#  define SDCARD_CMD_NORESPONSE       (0 << SDCARD_CMD_WAITRESP_SHIFT) /* 00/01: No response */
+#  define SDCARD_CMD_SHORTRESPONSE    (1 << SDCARD_CMD_WAITRESP_SHIFT) /* 10: Short response */
 #  define SDCARD_CMD_LONGRESPONSE     (3 << SDCARD_CMD_WAITRESP_SHIFT) /* 11: Long response */
 #define SDCARD_CMD_WAITINT            (1 << 8)  /* Bit 8: CPSM waits for interrupt request */
 #define SDCARD_CMD_WAITPEND           (1 << 9)  /* Bit 9: CPSM Waits for ends of data transfer */
 #define SDCARD_CMD_CPSMEN             (1 << 10) /* Bit 10: Command path state machine enable */
-#define SDCARD_CMD_SUSPEND            (1 << 11) /* Bit 11: SD I/O suspend command */
-#define SDCARD_CMD_ENDCMD             (1 << 12) /* Bit 12: Enable CMD completion */
-#define SDCARD_CMD_NIEN               (1 << 13) /* Bit 13: not Interrupt Enable */
-#define SDCARD_CMD_ATACMD             (1 << 14) /* Bit 14: CE-ATA command */
+                                                /* Bits 11-31: Reserved */
 
 #define SDCARD_CMD_RESET              (0)       /* Reset value */
 
-#define SDCARD_RESPCMD_SHIFT          (0)
+/* MCI Command Response Register - RESPCOMMAND - 0x400c 0010 */
+
+#define SDCARD_RESPCMD_SHIFT          (0)       /* Bits 0-5: Resopnse Command index */
 #define SDCARD_RESPCMD_MASK           (0x3f << SDCARD_RESPCMD_SHIFT)
+                                                /* Bits 6-31: Reserved */
+
+/* MCI Response Registers RESPONSE0-3 - 0x400c 0014, 0x400c 0018,
+   No bitfields                         0x400c 001c, 0x400c 0020 */
+
+
+/* MCI - Data Timer Register DATATIMER - 0x400c 0024 */
+/* No bitfields */
 
 #define SDCARD_DTIMER_RESET           (0)       /* Reset value */
 
-#define SDCARD_DLEN_SHIFT             (0)
-#define SDCARD_DLEN_MASK              (0x01ffffff << SDCARD_DLEN_SHIFT)
+/* MCI - Data Length Register DATALENGTH - 0x400C 0028 */
+
+#define SDCARD_DATALENGTH_SHIFT       (0)       /* Bits 0-15: Data length value */
+#define SDCARD_DATALENGTH_MASK        (0xffff << SDCARD_DATALENGTH_MASK)
+                                                /* Bits 16-31: Reserved */
 
 #define SDCARD_DLEN_RESET             (0)       /* Reset value */
+
+/* MCI - Data Control Register - DATACTRL - 0x400c 002c */
 
 #define SDCARD_DCTRL_DTEN             (1 << 0)  /* Bit 0: Data transfer enabled bit */
 #define SDCARD_DCTRL_DTDIR            (1 << 1)  /* Bit 1: Data transfer direction */
 #define SDCARD_DCTRL_DTMODE           (1 << 2)  /* Bit 2: Data transfer mode */
 #define SDCARD_DCTRL_DMAEN            (1 << 3)  /* Bit 3: DMA enable bit */
-#define SDCARD_DCTRL_DBLOCKSIZE_SHIFT (4)       /* Bits 7-4: Data block size */
+#define SDCARD_DCTRL_DBLOCKSIZE_SHIFT (4)       /* Bits 4-7: Data block size */
 #define SDCARD_DCTRL_DBLOCKSIZE_MASK  (15 << SDCARD_DCTRL_DBLOCKSIZE_SHIFT)
 #  define SDCARD_DCTRL_1BYTE          (0 << SDCARD_DCTRL_DBLOCKSIZE_SHIFT)
 #  define SDCARD_DCTRL_2BYTES         (1 << SDCARD_DCTRL_DBLOCKSIZE_SHIFT)
@@ -155,18 +176,17 @@
 #  define SDCARD_DCTRL_512BYTES       (9 << SDCARD_DCTRL_DBLOCKSIZE_SHIFT)
 #  define SDCARD_DCTRL_1KBYTE         (10 << SDCARD_DCTRL_DBLOCKSIZE_SHIFT)
 #  define SDCARD_DCTRL_2KBYTES        (11 << SDCARD_DCTRL_DBLOCKSIZE_SHIFT)
-#  define SDCARD_DCTRL_4KBYTES        (12 << SDCARD_DCTRL_DBLOCKSIZE_SHIFT)
-#  define SDCARD_DCTRL_8KBYTES        (13 << SDCARD_DCTRL_DBLOCKSIZE_SHIFT)
-#  define SDCARD_DCTRL_16KBYTES       (14 << SDCARD_DCTRL_DBLOCKSIZE_SHIFT)
-#define SDCARD_DCTRL_RWSTART          (1 << 8)  /* Bit 8: Read wait start */
-#define SDCARD_DCTRL_RWSTOP           (1 << 9)  /* Bit 9: Read wait stop */
-#define SDCARD_DCTRL_RWMOD            (1 << 10) /* Bit 10: Read wait mode */
-#define SDCARD_DCTRL_SDIOEN           (1 << 11) /* Bit 11: SD I/O enable functions */
+                                                /* Bits 8-31: Reserved */
 
 #define SDCARD_DCTRL_RESET            (0)       /* Reset value */
 
-#define SDCARD_DATACOUNT_SHIFT        (0)
-#define SDCARD_DATACOUNT_MASK         (0x01ffffff << SDCARD_DATACOUNT_SHIFT)
+/* MCI - Data Length Register DATALENGTH - 0x400c 0028 */
+
+#define SDCARD_DATACOUNT_SHIFT        (0)        /* Bits 0-15: Remaining data */
+#define SDCARD_DATACOUNT_MASK         (0xffff << SDCARD_DATACOUNT_SHIFT)
+                                                /* Bits 16-31: Reserved */
+
+/* MCI - Status Register -Status - 0x400c 0034 */
 
 #define SDCARD_STATUS_CCRCFAIL        (1 << 0)  /* Bit 0: Command response CRC fail */
 #define SDCARD_STATUS_DCRCFAIL        (1 << 1)  /* Bit 1: Data block CRC fail */
@@ -190,8 +210,9 @@
 #define SDCARD_STATUS_RXFIFOE         (1 << 19) /* Bit 19: Receive FIFO empty */
 #define SDCARD_STATUS_TXDAVL          (1 << 20) /* Bit 20: Data available in transmit FIFO */
 #define SDCARD_STATUS_RXDAVL          (1 << 21) /* Bit 21: Data available in receive FIFO */
-#define SDCARD_STATUS_SDIOIT          (1 << 22) /* Bit 22: SDIO interrupt received */
-#define SDCARD_STATUS_CEATAEND        (1 << 23) /* Bit 23: CMD6 CE-ATA command completion */
+                                                /* Bits 22-31: Reserved */
+
+/* MCI - Clear Register CLEAR - 0x400c 0038 */
 
 #define SDCARD_CLEAR_CCRCFAILC        (1 << 0)  /* Bit 0: CCRCFAIL flag clear bit */
 #define SDCARD_CLEAR_DCRCFAILC        (1 << 1)  /* Bit 1: DCRCFAIL flag clear bit */
@@ -204,11 +225,12 @@
 #define SDCARD_CLEAR_DATAENDC         (1 << 8)  /* Bit 8: DATAEND flag clear bit */
 #define SDCARD_CLEAR_STBITERRC        (1 << 9)  /* Bit 9: STBITERR flag clear bit */
 #define SDCARD_CLEAR_DBCKENDC         (1 << 10) /* Bit 10: DBCKEND flag clear bit */
-#define SDCARD_CLEAR_SDIOITC          (1 << 22) /* Bit 22: SDIOIT flag clear bit */
-#define SDCARD_CLEAR_CEATAENDC        (1 << 23) /* Bit 23: CEATAEND flag clear bit */
+                                                /* Bits 11-31: Reserved */
 
-#define SDCARD_CLEAR_RESET            0x00c007ff
+#define SDCARD_CLEAR_RESET            0x000005ff
 #define SDCARD_CLEAR_STATICFLAGS      0x000005ff
+
+/* MCI - Interrupt Mask Registers - MASK0 - 0x400c 003c */
 
 #define SDCARD_MASK0_CCRCFAILIE       (1 << 0)  /* Bit 0: Command CRC fail interrupt enable */
 #define SDCARD_MASK0_DCRCFAILIE       (1 << 1)  /* Bit 1: Data CRC fail interrupt enable */
@@ -232,13 +254,19 @@
 #define SDCARD_MASK0_RXFIFOEIE        (1 << 19) /* Bit 19: Rx FIFO empty interrupt enable */
 #define SDCARD_MASK0_TXDAVLIE         (1 << 20) /* Bit 20: Data available in Tx FIFO interrupt enable */
 #define SDCARD_MASK0_RXDAVLIE         (1 << 21) /* Bit 21: Data available in Rx FIFO interrupt enable */
-#define SDCARD_MASK0_SDIOITIE         (1 << 22) /* Bit 22: SDIO mode interrupt received interrupt enable */
-#define SDCARD_MASK0_CEATAENDIE       (1 << 23) /* Bit 23: CE-ATA command completion interrupt enable */
-
+                                                /* Bits 22-31: Reserved */
 #define SDCARD_MASK0_RESET            (0)
 
-#define SDCARD_FIFOCNT_SHIFT          (0)
-#define SDCARD_FIFOCNT_MASK           (0x01ffffff << SDCARD_FIFOCNT_SHIFT)
+/* MCI - FIFO Counter Register (FIFOCNT - 0x400c 0048 */
+
+#define SDCARD_FIFOCNT_SHIFT          (0)       /* Bits 0-14: Remaining data */
+#define SDCARD_FIFOCNT_MASK           (0x7fff << SDCARD_FIFOCNT_SHIFT)
+                                                /* Bits 15-31: Reserved */
+
+/* MCI - Data FIFO Register - FIFO - 0x400c 0080 to 0x400c 00bc */
+/* The receive and transmit FIFOs can be read or written as 32 bit wide registers.
+ * The FIFOs contain 16 entries on 16 sequential addresses.
+ */
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_SDCARD_H */
 

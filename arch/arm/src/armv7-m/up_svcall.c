@@ -118,7 +118,6 @@ static void dispatch_syscall(void)
     " mov r2, r0\n"                /* R2=Saved return value in R0 */
     " mov r0, #3\n"                /* R0=SYS_syscall_return */
     " svc 0"                       /* Return from the syscall */
-    :::
   );
 }
 #endif
@@ -260,7 +259,7 @@ int up_svcall(int irq, FAR void *context)
 
           current_regs[REG_PC]         = rtcb->xcp.sysreturn;
           current_regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
-          rtcb->sysreturn              = NULL;
+          rtcb->xcp.sysreturn          = NULL;
 
           /* The return value must be in R0-R1.  dispatch_syscall() temporarily
            * moved the value to R2.
@@ -294,7 +293,7 @@ int up_svcall(int irq, FAR void *context)
 
           /* Setup to return to dispatch_syscall in privileged mode. */
 
-          rtcb->sysreturn              = regs[REG_PC]
+          rtcb->xcp.sysreturn          = regs[REG_PC];
           regs[REG_PC]                 = (uint32_t)dispatch_syscall;
           current_regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
 
