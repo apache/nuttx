@@ -63,7 +63,7 @@ CONFIG_ARCH_BOARD_RGMP=y
 # CONFIG_MM_REGIONS - If the architecture includes multiple
 #   regions of memory to allocate from, this specifies the
 #   number of memory regions that the memory manager must
-#   handle and enables the API mm_addregion(start, end);
+#   handle and enables the API mm_addregion(heap, start, end);
 # CONFIG_ARCH_LOWPUTC - architecture supports low-level, boot
 #   time console output
 # CONFIG_MSEC_PER_TICK - The default system timer is 100Hz
