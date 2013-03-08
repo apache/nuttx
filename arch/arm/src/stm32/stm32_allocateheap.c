@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/up_allocateheap.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/mm.h>
+#include <nuttx/kmalloc.h>
 
 #include <arch/board/board.h>
 
@@ -385,13 +385,13 @@ void up_addregion(void)
   /* Add the STM32F20xxx/STM32F40xxx CCM SRAM heap region. */
 
 #ifndef CONFIG_STM32_CCMEXCLUDE
-   mm_addregion((FAR void*)SRAM2_START, SRAM2_END-SRAM2_START);
+   kmm_addregion((FAR void*)SRAM2_START, SRAM2_END-SRAM2_START);
 #endif
 
    /* Add the external FSMC SRAM heap region. */
 
 #ifdef CONFIG_STM32_FSMC_SRAM
-   mm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+   kmm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 #endif
 }
 #endif

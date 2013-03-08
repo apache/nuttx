@@ -77,8 +77,8 @@ extern "C"
 
 #ifndef CONFIG_NUTTX_KERNEL
 
-# define kmm_initialize(h,s)    mm_initialize(h,s)
-# define kmm_addregion(h,s)     mm_addregion(h,s)
+# define kmm_initialize(h,s)    mm_initialize(&g_mmheap,h,s)
+# define kmm_addregion(h,s)     mm_addregion(&g_mmheap,h,s)
 # define kmm_trysemaphore()     mm_trysemaphore(&g_mmheap)
 # define kmm_givesemaphore()    mm_givesemaphore(&g_mmheap)
 

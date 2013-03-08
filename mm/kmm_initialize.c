@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/kmm_addregion.c
+ * mm/kmm_initialize.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
 
 /* This logic is all tentatively and, hopefully, will grow in usability.
  * For now, the kernel-mode build uses the memory manager that is
@@ -67,13 +67,13 @@
 
 /* This value is obtained from user_map.h */
 
-#define KADDREGION(h,s) ((kmaddregion_t)CONFIG_USER_MMADDREGION)(h,s)
+#define KINITIALIZE(h,s) ((kminitialize_t)CONFIG_USER_MMINIT)(h,s)
 
 /************************************************************************
  * Private Types
  ************************************************************************/
 
-typedef void (*kmaddregion_t)(FAR void*, size_t);
+typedef void (*kminitialize_t)(FAR void*, size_t);
 
 /************************************************************************
  * Private Functions
@@ -84,30 +84,30 @@ typedef void (*kmaddregion_t)(FAR void*, size_t);
  ************************************************************************/
 
 /************************************************************************
- * Name: kmm_addregion
+ * Name: kmm_initialize
  *
  * Description:
- *   This is a simple redirection to the user-space mm_addregion()
+ *   This is a simple redirection to the user-space mm_initialize()
  *   function.
  *
  * Parameters:
- *   heap_start - Address of the beginning of the memory region
- *   heap_size  - The size (in bytes) if the memory region.
+ *   heap_start - Address of the beginning of the (initial) memory region
+ *   heap_size  - The size (in bytes) if the (initial) memory region.
  *
  * Return Value:
  *   None
  *
  * Assumptions:
- *   1. mm_addregion() resides in user-space
- *   2. The address of the user space mm_addregion() is provided in
+ *   1. mm_initialize() resides in user-space
+ *   2. The address of the user space mm_initialize() is provided in
  *      user_map.h
- *   3. The user-space mm_addregion() is callable from kernel-space.
+ *   3. The user-space mm_initialize() is callable from kernel-space.
  *
  ************************************************************************/
 
-void kmm_addregion(FAR void *heap_start, size_t heap_size)
+void kmm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  return KADDREGION(heap_start, heap_size);
+  return KINITIALIZE(heap_start, heap_size);
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_NUTTX_KERNEL && __KERNEL__ */

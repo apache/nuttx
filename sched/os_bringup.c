@@ -195,6 +195,12 @@ int os_bringup(void)
   /* Once the operating system has been initialized, the system must be
    * started by spawning the user init thread of execution.  This is the
    * first user-mode thead.
+   *
+   * In a kernel build (CONFIG_NUTTX_KERNEL), it is expected that this user
+   * initialization function will:
+   *
+   * - Call mm_initialized() to initialize the user memmory manager, and
+   * - Is so configured, call work_usrstart() to start the user work thread.
    */
 
   svdbg("Starting init thread\n");

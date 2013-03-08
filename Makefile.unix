@@ -198,10 +198,10 @@ USERLIBS =
 # is placed in user space (only).
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
-NUTTXLIBS += lib/libstubs$(LIBEXT) lib/libkc$(LIBEXT)
-USERLIBS += lib/libproxies$(LIBEXT) lib/libuc$(LIBEXT) lib/libmm$(LIBEXT)
+NUTTXLIBS += lib/libstubs$(LIBEXT) lib/libkc$(LIBEXT) lib/libkmm$(LIBEXT)
+USERLIBS += lib/libproxies$(LIBEXT) lib/libuc$(LIBEXT) lib/libumm$(LIBEXT)
 else
-NUTTXLIBS += lib/libmm$(LIBEXT) lib/libc$(LIBEXT)
+NUTTXLIBS += lib/libc$(LIBEXT) lib/libmm$(LIBEXT)
 endif
 
 # Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
@@ -457,6 +457,12 @@ libc/libkc$(LIBEXT): context
 lib/libkc$(LIBEXT): libc/libkc$(LIBEXT)
 	$(Q) install libc/libkc$(LIBEXT) lib/libkc$(LIBEXT)
 
+mm/libkmm$(LIBEXT): context
+	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libkmm$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+lib/libkmm$(LIBEXT): mm/libkmm$(LIBEXT)
+	$(Q) install mm/libkmm$(LIBEXT) lib/libkmm$(LIBEXT)
+
 sched/libsched$(LIBEXT): context
 	$(Q) $(MAKE) -C sched TOPDIR="$(TOPDIR)" libsched$(LIBEXT) EXTRADEFINES=$(KDEFINE)
 
@@ -513,17 +519,17 @@ libc/libuc$(LIBEXT): context
 lib/libuc$(LIBEXT): libc/libuc$(LIBEXT)
 	$(Q) install libc/libuc$(LIBEXT) lib/libuc$(LIBEXT)
 
+mm/libumm$(LIBEXT): context
+	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libumm$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+lib/libumm$(LIBEXT): mm/libumm$(LIBEXT)
+	$(Q) install mm/libumm$(LIBEXT) lib/libumm$(LIBEXT)
+
 libxx/libcxx$(LIBEXT): context
 	$(Q) $(MAKE) -C libxx TOPDIR="$(TOPDIR)" libcxx$(LIBEXT)
 
 lib/libcxx$(LIBEXT): libxx/libcxx$(LIBEXT)
 	$(Q) install libxx/libcxx$(LIBEXT) lib/libcxx$(LIBEXT)
-
-mm/libmm$(LIBEXT): context
-	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT) EXTRADEFINES=$(KDEFINE)
-
-lib/libmm$(LIBEXT): mm/libmm$(LIBEXT)
-	$(Q) install mm/libmm$(LIBEXT) lib/libmm$(LIBEXT)
 
 $(APPDIR)/libapps$(LIBEXT): context
 	$(Q) $(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)" libapps$(LIBEXT)
@@ -544,6 +550,12 @@ libc/libc$(LIBEXT): context
 
 lib/libc$(LIBEXT): libc/libc$(LIBEXT)
 	$(Q) install libc/libc$(LIBEXT) lib/libc$(LIBEXT)
+
+mm/libmm$(LIBEXT): context
+	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+lib/libmm$(LIBEXT): mm/libmm$(LIBEXT)
+	$(Q) install mm/libmm$(LIBEXT) lib/libmm$(LIBEXT)
 
 # pass1 and pass2
 #
@@ -680,7 +692,6 @@ subdir_clean:
 		fi \
 	done
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" clean
-	$(Q) $(MAKE) -C mm -f Makefile.test TOPDIR="$(TOPDIR)" clean
 ifeq ($(CONFIG_BUILD_2PASS),y)
 	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" clean
 endif

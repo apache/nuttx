@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/kmm_kfree.c
+ * mm/kmm_kzalloc.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
 
 /* This logic is all tentatively and, hopefully, will grow in usability.
  * For now, the kernel-mode build uses the memory manager that is
@@ -67,13 +67,13 @@
 
 /* This value is obtained from user_map.h */
 
-#define KFREE(p) ((kfree_t)CONFIG_USER_FREE)(p)
+#define KZALLOC(s) ((kzalloc_t)CONFIG_USER_ZALLOC)(s)
 
 /************************************************************************
  * Private Types
  ************************************************************************/
 
-typedef void (*kfree_t)(FAR void *);
+typedef FAR void *(*kzalloc_t)(size_t);
 
 /************************************************************************
  * Private Functions
@@ -84,27 +84,27 @@ typedef void (*kfree_t)(FAR void *);
  ************************************************************************/
 
 /************************************************************************
- * Name: kfree
+ * Name: kzalloc
  *
  * Description:
- *   This is a simple redirection to the user-space free() function.
+ *   This is a simple redirection to the user-space zalloc() function.
  *
  * Parameters:
- *   None
+ *   size - Size (in bytes) of the memory region to be allocated.
  *
  * Return Value:
- *   None
+ *   The address of the allocated memory (NULL on failure to allocate)
  *
  * Assumptions:
- *   1. free() resides in user-space
- *   2. The address of the user space free() is provided in user_map.h
- *   3. The user-space free() is callable from kernel-space.
+ *   1. zalloc() resides in user-space
+ *   2. The address of the user space zalloc() is provided in user_map.h
+ *   3. The user-space zalloc() is callable from kernel-space.
  *
  ************************************************************************/
 
-void kfree(FAR void *mem)
+FAR void *kzalloc(size_t size)
 {
-  return KFREE(mem);
+  return KZALLOC(size);
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_NUTTX_KERNEL && __KERNEL__ */

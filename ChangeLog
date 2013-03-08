@@ -4284,6 +4284,10 @@
 	* mm/:  Move all memory manager globals into a structure.  A reference
 	  to this structure is now passed internally between mm APIs. This
 	  change will (eventually) support multiple heaps and heap allocators.
-	  (2013-03-07).
+	  (2013-03-08).
 	* mm/ and include/nuttx/mm.h:  Implement support for multiple heaps.
-	  (2013-03-07).
+	  (2013-03-08).
+	* arch/*/src: xyz_addregion() needs to call kmm_addregion, not mm_addretion.
+	  (2013-03-08).
+	* sched/kmm*.c:  Move this garbage kmm*.c file to mm/. until I decide what
+	  to do with them (which is probably to just delete them). (2013-03-08).

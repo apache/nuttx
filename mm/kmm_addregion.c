@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/kmm_kmalloc.c
+ * mm/kmm_addregion.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
 
 /* This logic is all tentatively and, hopefully, will grow in usability.
  * For now, the kernel-mode build uses the memory manager that is
@@ -67,13 +67,13 @@
 
 /* This value is obtained from user_map.h */
 
-#define KMALLOC(s) ((kmalloc_t)CONFIG_USER_MALLOC)(s)
+#define KADDREGION(h,s) ((kmaddregion_t)CONFIG_USER_MMADDREGION)(h,s)
 
 /************************************************************************
  * Private Types
  ************************************************************************/
 
-typedef FAR void *(*kmalloc_t)(size_t);
+typedef void (*kmaddregion_t)(FAR void*, size_t);
 
 /************************************************************************
  * Private Functions
@@ -84,27 +84,30 @@ typedef FAR void *(*kmalloc_t)(size_t);
  ************************************************************************/
 
 /************************************************************************
- * Name: kmalloc
+ * Name: kmm_addregion
  *
  * Description:
- *   This is a simple redirection to the user-space malloc() function.
+ *   This is a simple redirection to the user-space mm_addregion()
+ *   function.
  *
  * Parameters:
- *   size - Size (in bytes) of the memory region to be allocated.
+ *   heap_start - Address of the beginning of the memory region
+ *   heap_size  - The size (in bytes) if the memory region.
  *
  * Return Value:
- *   The address of the allocated memory (NULL on failure to allocate)
+ *   None
  *
  * Assumptions:
- *   1. malloc() resides in user-space
- *   2. The address of the user space malloc() is provided in user_map.h
- *   3. The user-space malloc() is callable from kernel-space.
+ *   1. mm_addregion() resides in user-space
+ *   2. The address of the user space mm_addregion() is provided in
+ *      user_map.h
+ *   3. The user-space mm_addregion() is callable from kernel-space.
  *
  ************************************************************************/
 
-FAR void *kmalloc(size_t size)
+void kmm_addregion(FAR void *heap_start, size_t heap_size)
 {
-  return KMALLOC(size);
+  return KADDREGION(&g_kmmheap, heap_start, heap_size);
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_NUTTX_KERNEL && __KERNEL__ */

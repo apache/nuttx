@@ -284,7 +284,7 @@ defconfig -- This is a configuration file similar to the Linux
     CONFIG_MM_REGIONS - If the architecture includes multiple
       regions of memory to allocate from, this specifies the
       number of memory regions that the memory manager must
-      handle and enables the API mm_addregion(start, end);
+      handle and enables the API mm_addregion(heap, start, end);
     CONFIG_MM_SMALL - Each memory allocation has a small allocation
       overhead.  The size of that overhead is normally determined by
       the "width" of the address support by the MCU.  MCUs that support

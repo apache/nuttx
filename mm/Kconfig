@@ -37,7 +37,7 @@ config MM_REGIONS
 		If the architecture includes multiple, non-contiguous regions of
 		memory to allocate from, this specifies the number of memory regions
 		that the memory manager must handle and enables the API
-		mm_addregion(start, end);
+		mm_addregion(heap, start, end);
 
 		NOTE: If MM_MULTIHEAP is selected, then this maximum number of regions
 		applies to all heaps.

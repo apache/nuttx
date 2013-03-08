@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/kmm_krealloc.c
+ * mm/kmm_semaphore.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
 
 /* This logic is all tentatively and, hopefully, will grow in usability.
  * For now, the kernel-mode build uses the memory manager that is
@@ -65,15 +65,17 @@
  * Pre-processor definition
  ************************************************************************/
 
-/* This value is obtained from user_map.h */
+/* These values are obtained from user_map.h */
 
-#define KREALLOC(p,s) ((krealloc_t)CONFIG_USER_REALLOC)(p,s)
+#define KTRYSEMAPHORE()  ((kmtrysemaphore_t) CONFIG_USER_MMTRYSEM )()
+#define KGIVESEMAPHORE() ((kmgivesemaphore_t)CONFIG_USER_MMGIVESEM)()
 
 /************************************************************************
  * Private Types
  ************************************************************************/
 
-typedef FAR void *(*krealloc_t)(FAR void*, size_t);
+typedef int  (*kmtrysemaphore_t)(void);
+typedef void (*kmgivesemaphore_t)(void);
 
 /************************************************************************
  * Private Functions
@@ -84,28 +86,55 @@ typedef FAR void *(*krealloc_t)(FAR void*, size_t);
  ************************************************************************/
 
 /************************************************************************
- * Name: krealloc
+ * Name: kmm_trysemaphore
  *
  * Description:
- *   This is a simple redirection to the user-space realloc() function.
+ *   This is a simple redirection to the user-space mm_trysemaphore()
+ *   function.
  *
  * Parameters:
- *   oldmem - The old memory allocated
- *   size   - Size (in bytes) of the new memory region to be re-allocated.
+ *   None
  *
  * Return Value:
- *   The address of the re-allocated memory (NULL on failure to re-allocate)
+ *   OK on success; a negated errno on failure
  *
  * Assumptions:
- *   1. realloc() resides in user-space
- *   2. The address of the user space realloc() is provided in user_map.h
- *   3. The user-space realloc() is callable from kernel-space.
+ *   1. mm_trysemaphore() resides in user-space
+ *   2. The address of the user space mm_trysemaphore() is provided in
+ *      user_map.h
+ *   3. The user-space mm_semaphore() is callable from kernel-space.
  *
  ************************************************************************/
 
-FAR void *krealloc(FAR void *oldmem, size_t size)
+int kmm_trysemaphore(void)
 {
-  return KREALLOC(oldmem, size);
+  return KTRYSEMAPHORE();
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+/************************************************************************
+ * Name: kmm_givesemaphore
+ *
+ * Description:
+ *   This is a simple redirection to the user-space mm_givesemaphore()
+ *   function.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   OK on success; a negated errno on failure
+ *
+ * Assumptions:
+ *   1. mm_givesemaphore() resides in user-space
+ *   2. The address of the user space mm_givesemaphore() is provided in
+ *      user_map.h
+ *   3. The user-space mm_semaphore() is callable from kernel-space.
+ *
+ ************************************************************************/
+
+void kmm_givesemaphore(void)
+{
+  KGIVESEMAPHORE();
+}
+
+#endif /* CONFIG_NUTTX_KERNEL && __KERNEL__ */

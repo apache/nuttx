@@ -65,7 +65,11 @@ struct mm_heap_s g_mmheap;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _mm_addregion
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mm_addregion
  *
  * Description:
  *   This function adds a region of contiguous memory to the selected heap.
@@ -82,8 +86,8 @@ struct mm_heap_s g_mmheap;
  *
  ****************************************************************************/
 
-static inline void _mm_addregion(FAR struct mm_heap_s *heap,
-                                 FAR void *heapstart, size_t heapsize)
+void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
+                  size_t heapsize)
 {
   FAR struct mm_freenode_s *node;
   uintptr_t heapbase;
@@ -149,7 +153,7 @@ static inline void _mm_addregion(FAR struct mm_heap_s *heap,
 }
 
 /****************************************************************************
- * Name: _mm_initialize
+ * Name: mm_initialize
  *
  * Description:
  *   Initialize the selected heap data structures, providing the initial
@@ -167,8 +171,8 @@ static inline void _mm_addregion(FAR struct mm_heap_s *heap,
  *
  ****************************************************************************/
 
-static inline void _mm_initialize(FAR struct mm_heap_s *heap,
-                                  FAR void *heapstart, size_t heapsize)
+void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
+                   size_t heapsize)
 {
   int i;
 
@@ -209,62 +213,5 @@ static inline void _mm_initialize(FAR struct mm_heap_s *heap,
 
   /* Add the initial region of memory to the heap */
 
-  _mm_addregion(heap, heapstart, heapsize);
+  mm_addregion(heap, heapstart, heapsize);
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name:  mm_initialize
- *
- * Description:
- *   This this function is called during initialization to initialize the
- *   user heap.
- *
- * Parameters:
- *   heapstart - Start of the initial heap region
- *   heapsize  - Size of the initial heap region
- *
- * Return Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
-
-void mm_initialize(FAR void *heapstart, size_t heapsize)
-{
-  _mm_initialize(&g_mmheap, heapstart, heapsize);
-}
-
-#endif
-
-/****************************************************************************
- * Name: mm_addregion
- *
- * Description:
- *   This function adds a region of contiguous memory to the user heap.
- *
- * Parameters:
- *   heapstart - Start of the heap region
- *   heapsize  - Size of the heap region
- *
- * Return Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
-
-void mm_addregion(FAR void *heapstart, size_t heapsize)
-{
-  _mm_addregion(&g_mmheap, heapstart, heapsize);
-}
-
-#endif

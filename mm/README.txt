@@ -32,19 +32,7 @@ This directory contains the NuttX memory management logic.  This include:
    o Alignment:  All allocations are aligned to 8- or 4-bytes for large
      and small models, respectively.
 
-2) Test Program.  There is also a host-best test program that can be
-   used to verify the memory manager.  These are the file:
-
-   Makefile.test, mm_test.c, and mm_environment.h.
-
-   Build instructions:
-
-   make -f Makefile.test
-
-   The executable will be built in the top-level directory as nuttx/mm_text
-   (or mm_test.exe under Cygwin).
-
-3) Granule Allocator.  A non-standard granule allocator is also available
+2) Granule Allocator.  A non-standard granule allocator is also available
    in this directory  The granule allocator allocates memory in units
    of a fixed sized block ("granule").  Allocations may be aligned to a user-
    provided address boundary.

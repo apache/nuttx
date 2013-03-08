@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/kmm_semaphore.c
+ * mm/kmm_kmalloc.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
 
 /* This logic is all tentatively and, hopefully, will grow in usability.
  * For now, the kernel-mode build uses the memory manager that is
@@ -65,17 +65,15 @@
  * Pre-processor definition
  ************************************************************************/
 
-/* These values are obtained from user_map.h */
+/* This value is obtained from user_map.h */
 
-#define KTRYSEMAPHORE()  ((kmtrysemaphore_t) CONFIG_USER_MMTRYSEM )()
-#define KGIVESEMAPHORE() ((kmgivesemaphore_t)CONFIG_USER_MMGIVESEM)()
+#define KMALLOC(s) ((kmalloc_t)CONFIG_USER_MALLOC)(s)
 
 /************************************************************************
  * Private Types
  ************************************************************************/
 
-typedef int  (*kmtrysemaphore_t)(void);
-typedef void (*kmgivesemaphore_t)(void);
+typedef FAR void *(*kmalloc_t)(size_t);
 
 /************************************************************************
  * Private Functions
@@ -86,55 +84,27 @@ typedef void (*kmgivesemaphore_t)(void);
  ************************************************************************/
 
 /************************************************************************
- * Name: kmm_trysemaphore
+ * Name: kmalloc
  *
  * Description:
- *   This is a simple redirection to the user-space mm_trysemaphore()
- *   function.
+ *   This is a simple redirection to the user-space malloc() function.
  *
  * Parameters:
- *   None
+ *   size - Size (in bytes) of the memory region to be allocated.
  *
  * Return Value:
- *   OK on success; a negated errno on failure
+ *   The address of the allocated memory (NULL on failure to allocate)
  *
  * Assumptions:
- *   1. mm_trysemaphore() resides in user-space
- *   2. The address of the user space mm_trysemaphore() is provided in
- *      user_map.h
- *   3. The user-space mm_semaphore() is callable from kernel-space.
+ *   1. malloc() resides in user-space
+ *   2. The address of the user space malloc() is provided in user_map.h
+ *   3. The user-space malloc() is callable from kernel-space.
  *
  ************************************************************************/
 
-int kmm_trysemaphore(void)
+FAR void *kmalloc(size_t size)
 {
-  return KTRYSEMAPHORE();
+  return KMALLOC(size);
 }
 
-/************************************************************************
- * Name: kmm_givesemaphore
- *
- * Description:
- *   This is a simple redirection to the user-space mm_givesemaphore()
- *   function.
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   1. mm_givesemaphore() resides in user-space
- *   2. The address of the user space mm_givesemaphore() is provided in
- *      user_map.h
- *   3. The user-space mm_semaphore() is callable from kernel-space.
- *
- ************************************************************************/
-
-void kmm_givesemaphore(void)
-{
-  KGIVESEMAPHORE();
-}
-
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_NUTTX_KERNEL && __KERNEL__ */
