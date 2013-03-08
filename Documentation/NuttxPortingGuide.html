@@ -4396,7 +4396,7 @@ build
     <code>CONFIG_MM_REGIONS</code>: If the architecture includes multiple
     regions of memory to allocate from, this specifies the
     number of memory regions that the memory manager must
-    handle and enables the API mm_addregion(start, end);
+    handle and enables the API <code>mm_addregion(heap, start, end)</code>.
   </li>
   <li>
     <code>CONFIG_MM_SMALL</code>: Each memory allocation has a small allocation
