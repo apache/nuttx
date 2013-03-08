@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_mallinfo.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,22 +55,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mallinfo
+ * Name: _mm_mallinfo
  *
  * Description:
- *   mallinfo returns a copy of updated current mallinfo.
+ *   mallinfo returns a copy of updated current heap information.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-struct mallinfo mallinfo(void)
-#else
-int mallinfo(struct mallinfo *info)
-#endif
+static inline int _mm_mallinfo(FAR struct mm_heap_s *heap,
+                               FAR struct mallinfo *info)
 {
   struct mm_allocnode_s *node;
   size_t mxordblk = 0; 
@@ -83,29 +76,22 @@ int mallinfo(struct mallinfo *info)
 # define region 0
 #endif
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  static struct mallinfo info;
-#else
-  if (!info)
-    {
-      return ERROR;
-    }
-#endif
+  DEBUGASSERT(info);
 
   /* Visit each region */
 
 #if CONFIG_MM_REGIONS > 1
-  for (region = 0; region < g_nregions; region++)
+  for (region = 0; region < heap->mm_nregions; region++)
 #endif
     {
       /* Visit each node in the region
        * Retake the semaphore for each region to reduce latencies
        */
       
-      mm_takesemaphore();
+      mm_takesemaphore(heap);
 
-      for (node = g_heapstart[region];
-           node < g_heapend[region];
+      for (node = heap->mm_heapstart[region];
+           node < heap->mm_heapend[region];
            node = (struct mm_allocnode_s *)((char*)node + node->size))
         {
           mvdbg("region=%d node=%p size=%p preceding=%p\n", region, node, node->size, node->preceding);
@@ -124,29 +110,54 @@ int mallinfo(struct mallinfo *info)
             }
         }
 
-      mm_givesemaphore();
+      mm_givesemaphore(heap);
         
-      mvdbg("region=%d node=%p g_heapend=%p\n", region, node, g_heapend[region]);
-      DEBUGASSERT(node == g_heapend[region]);
+      mvdbg("region=%d node=%p heapend=%p\n", region, node, heap->mm_heapend[region]);
+      DEBUGASSERT(node == heap->mm_heapend[region]);
       uordblks += SIZEOF_MM_ALLOCNODE; /* account for the tail node */
     }
 #undef region
 
-  DEBUGASSERT(uordblks + fordblks == g_heapsize);
+  DEBUGASSERT(uordblks + fordblks == heap->mm_heapsize);
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  info.arena    = g_heapsize;
-  info.ordblks  = ordblks;
-  info.mxordblk = mxordblk;
-  info.uordblks = uordblks;
-  info.fordblks = fordblks;
-  return info;
-#else
-  info->arena    = g_heapsize;
+  info->arena    = heap->mm_heapsize;
   info->ordblks  = ordblks;
   info->mxordblk = mxordblk;
   info->uordblks = uordblks;
   info->fordblks = fordblks;
   return OK;
-#endif
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: kmallinfo and mallinfo
+ *
+ * Description:
+ *   mallinfo returns a copy of updated current heap information for either
+ *   the user heap (mallinfo) or the kernel heap (kmallinfo).
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+#  ifdef CONFIG_CAN_PASS_STRUCTS
+
+struct mallinfo mallinfo(void)
+{
+  struct mallinfo info;
+
+  _mm_mallinfo(&g_mmheap, &info);
+  return info;
+}
+
+#  else
+
+int mallinfo(struct mallinfo *info)
+{
+  return _mm_mallinfo(&g_mmheap, info);
+}
+
+#endif
+#endif /* !CONFIG_NUTTX_KERNEL || !__KERNEL__ */

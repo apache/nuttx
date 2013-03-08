@@ -1,7 +1,7 @@
 /************************************************************************
  * mm/mm_test.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <semaphore.h>
 
 /************************************************************************
  * Pre-processor Definitions
@@ -133,7 +134,7 @@ static int mm_findinfreelist(struct mm_freenode_s *node)
 {
   struct mm_freenode_s *list;
 
-  for(list = &g_nodelist[0];
+  for(list = &g_mmheap.mm_nodelist[0];
       list;
       list = list->flink)
     {
@@ -165,13 +166,13 @@ static void mm_showchunkinfo(void)
   /* Visit each region */
 
 #if CONFIG_MM_REGIONS > 1
-  for (region = 0; region < g_nregions; region++)
+  for (region = 0; region < g_mmheap.mm_nregions; region++)
 #endif
     {
       /* Visit each node in each region */
 
-      for (node = g_heapstart[region];
-           node < g_heapend[region];
+      for (node = g_mmheap.mm_heapstart[region];
+           node < g_mmheap.mm_heapend[region];
            node = (struct mm_allocnode_s *)((char*)node + node->size))
         {
           printf("       %p 0x%08x 0x%08x %s",
@@ -206,7 +207,7 @@ static void mm_showfreelist(void)
   int i = 0;
 
   printf("     FREE NODE LIST:\n");
-  for(prev = NULL, node = &g_nodelist[0];
+  for(prev = NULL, node = &g_mmheap.mm_nodelist[0];
       node;
       prev = node, node = node->flink)
     {
@@ -258,7 +259,7 @@ static void mm_showmallinfo(void)
   printf("       Total non-inuse space             = %ld\n",
          alloc_info.fordblks);
 
-  sval = mm_getsemaphore();
+  sval = mm_getsemaphore(&g_mmheap);
   if (sval != 1)
     {
       fprintf(stderr, "After mallinfo, semaphore count=%d, should be 1\n", sval);
@@ -322,7 +323,7 @@ static void do_mallocs(void **mem, const int *size, const int *rand,
               memset(mem[j], 0xAA, size[j]);
             }
 
-          sval = mm_getsemaphore();
+          sval = mm_getsemaphore(&g_mmheap);
           if (sval != 1)
             {
               fprintf(stderr, "   After malloc semaphore count=%d, should be 1\n", sval);
@@ -371,7 +372,7 @@ static void do_reallocs(void **mem, const int *oldsize,
           memset(mem[j], 0x55, newsize[j]);
         }
 
-      sval = mm_getsemaphore();
+      sval = mm_getsemaphore(&g_mmheap);
       if (sval != 1)
         {
           fprintf(stderr, "   After realloc semaphore count=%d, should be 1\n", sval);
@@ -419,7 +420,7 @@ static void do_memaligns(void **mem, const int *size, const int *align,
           memset(mem[j], 0x33, size[j]);
         }
 
-      sval = mm_getsemaphore();
+      sval = mm_getsemaphore(&g_mmheap);
       if (sval != 1)
         {
           fprintf(stderr, "   After memalign semaphore count=%d, should be 1\n", sval);
@@ -448,7 +449,7 @@ static void do_frees(void **mem, const int *size, const int *rand, int n)
       mm_free(mem[j]);
       mem[j] = NULL;
 
-      sval = mm_getsemaphore();
+      sval = mm_getsemaphore(&g_mmheap);
       if (sval != 1)
         {
           fprintf(stderr, "   After free semaphore count=%d, should be 1\n", sval);

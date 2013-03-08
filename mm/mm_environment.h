@@ -40,7 +40,7 @@
  * Included Files
  ****************************************************************************/
 
-/* The platform configuratioin file will not be included when the memory
+/* The platform configuration file will not be included when the memory
  * manager is built for the host-based test harness.
  */
 
@@ -50,13 +50,17 @@
 #  include <sys/types.h>
 #  include <stdlib.h>
 #  include <string.h>
-#  include <debug.h>
+#  include <semaphore.h>
 #  include <errno.h>
 #  include <assert.h>
 #  include <nuttx/mm.h>
+#  include <debug.h>
 #else
 #  include <sys/types.h>
+
+#  include <stdio.h>
 #  include <string.h>
+#  include <semaphore.h>
 #  include <assert.h>
 #endif
 
@@ -79,7 +83,7 @@
 # define CONFIG_CAN_PASS_STRUCTS 1  /* Normally in config.h */
 # undef  CONFIG_SMALL_MEMORY        /* Normally in config.h */
 
-extern void mm_addregion(FAR void *heapstart, size_t heapsize);
+void mm_addregion(FAR void *heapstart, size_t heapsize);
 
 /* Use the real system errno */
 
@@ -102,6 +106,10 @@ extern void mm_addregion(FAR void *heapstart, size_t heapsize);
 # define ASSERT(e)      assert(e)
 # undef DEBUGASSERT
 # define DEBUGASSERT(e) assert(e)
+
+/* Misc. NuttX-isms */
+
+#define OK         0
 
 /* Debug macros are always on */
 

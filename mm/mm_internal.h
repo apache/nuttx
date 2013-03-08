@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_internal.h
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,7 @@
  * Public Types
  ****************************************************************************/
 
-/* Determine the size of the chunk size/offset type */
+/* Determines the size of the chunk size/offset type */
 
 #ifdef CONFIG_MM_SMALL
    typedef uint16_t mmsize_t;
@@ -170,6 +170,39 @@ struct mm_freenode_s
 #define CHECK_FREENODE_SIZE \
   DEBUGASSERT(sizeof(struct mm_freenode_s) == SIZEOF_MM_FREENODE)
 
+/* This describes one heap (possibly with multiple regions) */
+
+struct mm_heap_s
+{
+  /* Mutually exclusive access to this data set is enforced with
+   * the following un-named semaphore.
+   */
+
+  sem_t mm_semaphore;
+  pid_t mm_holder;
+  int   mm_counts_held;
+
+  /* This is the size of the heap provided to mm */
+
+  size_t  mm_heapsize;
+
+  /* This is the first and last nodes of the heap */
+
+  FAR struct mm_allocnode_s *mm_heapstart[CONFIG_MM_REGIONS];
+  FAR struct mm_allocnode_s *mm_heapend[CONFIG_MM_REGIONS];
+
+#if CONFIG_MM_REGIONS > 1
+  int mm_nregions;
+#endif
+
+  /* All free nodes are maintained in a doubly linked list.  This
+   * array provides some hooks into the list at various points to
+   * speed searches for free nodes.
+   */
+
+  struct mm_freenode_s mm_nodelist[MM_NNODES];
+};
+
 /* Normally defined in stdlib.h */
 
 #ifdef MM_TEST
@@ -187,57 +220,58 @@ struct mallinfo
 #endif
 
 /****************************************************************************
- * Global Variables
+ * Public Variables
  ****************************************************************************/
 
-/* This is the size of the heap provided to mm */
-
-extern size_t  g_heapsize;
-
-/* This is the first and last nodes of the heap */
-
-extern FAR struct mm_allocnode_s *g_heapstart[CONFIG_MM_REGIONS];
-extern FAR struct mm_allocnode_s *g_heapend[CONFIG_MM_REGIONS];
-
-#if CONFIG_MM_REGIONS > 1
-extern int g_nregions;
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
 #else
-# define g_nregions 1
+#define EXTERN extern
 #endif
 
-/* All free nodes are maintained in a doubly linked list.  This
- * array provides some hooks into the list at various points to
- * speed searches for free nodes.
- */
+#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+/* This is the user heap */
 
-extern FAR struct mm_freenode_s g_nodelist[MM_NNODES];
+EXTERN struct mm_heap_s g_mmheap;
+
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 #ifdef MM_TEST
-FAR void  *mm_malloc(size_t);
-void       mm_free(void*);
-FAR void  *mm_realloc(void*, size_t);
-FAR void  *mm_memalign(size_t, size_t);
-FAR void  *mm_zalloc(size_t);
-FAR void  *mm_calloc(size_t, size_t);
+FAR void *mm_malloc(size_t);
+void      mm_free(void*);
+FAR void *mm_realloc(void*, size_t);
+FAR void *mm_memalign(size_t, size_t);
+FAR void *mm_zalloc(size_t);
+FAR void *mm_calloc(size_t, size_t);
 #ifdef CONFIG_CAN_PASS_STRUCTS
 struct mallinfo mallinfo(void);
 #else
-int        mallinfo(struct mallinfo *info);
+int       mallinfo(struct mallinfo *info);
 #endif
 #endif
 
-void       mm_shrinkchunk(FAR struct mm_allocnode_s *node, size_t size);
-void       mm_addfreechunk(FAR struct mm_freenode_s *node);
-int        mm_size2ndx(size_t size);
-void       mm_seminitialize(void);
-void       mm_takesemaphore(void);
-void       mm_givesemaphore(void);
+void      mm_shrinkchunk(FAR struct mm_heap_s *heap,
+            FAR struct mm_allocnode_s *node, size_t size);
+void      mm_addfreechunk(FAR struct mm_heap_s *heap,
+            FAR struct mm_freenode_s *node);
+int       mm_size2ndx(size_t size);
+void      mm_seminitialize(FAR struct mm_heap_s *heap);
+void      mm_takesemaphore(FAR struct mm_heap_s *heap);
+void      mm_givesemaphore(FAR struct mm_heap_s *heap);
 #ifdef MM_TEST
-int        mm_getsemaphore(void);
+int       mm_getsemaphore(FAR struct mm_heap_s *heap);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __MM_MM_INTERNAL_H */

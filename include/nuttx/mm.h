@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/mm.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,20 +61,22 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /* Functions contained in mm_initialize.c ***********************************/
 
-EXTERN void   mm_initialize(FAR void *heap_start, size_t heap_size);
-EXTERN void   mm_addregion(FAR void *heapstart, size_t heapsize);
+void mm_initialize(FAR void *heap_start, size_t heap_size);
+void mm_addregion(FAR void *heapstart, size_t heapsize);
 
 /* Functions contained in mm_sem.c ******************************************/
 
-EXTERN int mm_trysemaphore(void);
-EXTERN void mm_givesemaphore(void);
+struct mm_heap_s;
+int mm_trysemaphore(FAR struct mm_heap_s *heap);
+void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
 #undef EXTERN
 #ifdef __cplusplus

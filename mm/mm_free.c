@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_free.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,19 +51,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: free
+ * Name: _mm_free
  *
  * Description:
- *   Returns a chunk of memory into the list of free nodes,  merging with
+ *   Returns a chunk of memory to the list of free nodes,  merging with
  *   adjacent free chunks if possible.
  *
  ****************************************************************************/
 
-void free(FAR void *mem)
+static inline void _mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 {
   FAR struct mm_freenode_s *node;
   FAR struct mm_freenode_s *prev;
@@ -82,7 +78,7 @@ void free(FAR void *mem)
    * nodelist.
    */
 
-  mm_takesemaphore();
+  mm_takesemaphore(heap);
 
   /* Map the memory chunk into a free node */
 
@@ -148,6 +144,26 @@ void free(FAR void *mem)
 
   /* Add the merged node to the nodelist */
 
-  mm_addfreechunk(node);
-  mm_givesemaphore();
+  mm_addfreechunk(heap, node);
+  mm_givesemaphore(heap);
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: free
+ *
+ * Description:
+ *   Returns a chunk of memory to the list of free nodes,  merging with
+ *   adjacent free chunks if possible.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+void free(FAR void *mem)
+{
+  _mm_free(&g_mmheap, mem);
+}
+#endif

@@ -60,7 +60,8 @@
 #undef KMALLOC_EXTERN
 #if defined(__cplusplus)
 # define KMALLOC_EXTERN extern "C"
-extern "C" {
+extern "C" 
+{
 #else
 # define KMALLOC_EXTERN extern
 #endif
@@ -76,10 +77,13 @@ extern "C" {
 
 #ifndef CONFIG_NUTTX_KERNEL
 
+struct mm_heap_s;
+extern struct mm_heap_s g_mmheap;
+
 # define kmm_initialize(h,s)    mm_initialize(h,s)
 # define kmm_addregion(h,s)     mm_addregion(h,s)
-# define kmm_trysemaphore()     mm_trysemaphore()
-# define kmm_givesemaphore()    mm_givesemaphore()
+# define kmm_trysemaphore()     mm_trysemaphore(&g_mmheap)
+# define kmm_givesemaphore()    mm_givesemaphore(&g_mmheap)
 
 # define kmalloc(s)             malloc(s)
 # define kzalloc(s)             zalloc(s)

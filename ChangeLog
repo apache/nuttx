@@ -4281,3 +4281,7 @@
 	* net/net_poll.c:  Handle the missing case.  Now tests for not connected
 	  AND not listening.  I think that now covers all of the cases including
 	  the missing case noted above. (2013-03-07)
+	* mm/:  Move all memory manager globals into a structure.  A reference
+	  to this structure is now passed internally between mm APIs. This
+	  change will (eventually) support multiple heaps and heap allocators.
+

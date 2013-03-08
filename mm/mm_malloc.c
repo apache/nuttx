@@ -71,11 +71,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: malloc
+ * Name: _mm_malloc
  *
  * Description:
  *  Find the smallest chunk that satisfies the request. Take the memory from
@@ -85,7 +81,7 @@
  *
  ****************************************************************************/
 
-FAR void *malloc(size_t size)
+static inline FAR void *_mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
   FAR struct mm_freenode_s *node;
   void *ret = NULL;
@@ -106,7 +102,7 @@ FAR void *malloc(size_t size)
 
   /* We need to hold the MM semaphore while we muck with the nodelist. */
 
-  mm_takesemaphore();
+  mm_takesemaphore(heap);
 
   /* Get the location in the node list to start the search. Special case
    * really big allocations
@@ -125,10 +121,10 @@ FAR void *malloc(size_t size)
 
   /* Search for a large enough chunk in the list of nodes. This list is
    * ordered by size, but will have occasional zero sized nodes as we visit
-   * other g_nodelist[] entries.
+   * other mm_nodelist[] entries.
    */
 
-  for (node = g_nodelist[ndx].flink;
+  for (node = heap->mm_nodelist[ndx].flink;
        node && node->size < size;
        node = node->flink);
 
@@ -186,7 +182,7 @@ FAR void *malloc(size_t size)
 
           /* Add the remainder back into the nodelist */
 
-          mm_addfreechunk(remainder);
+          mm_addfreechunk(heap, remainder);
         }
 
       /* Handle the case of an exact size match */
@@ -195,7 +191,7 @@ FAR void *malloc(size_t size)
       ret = (void*)((char*)node + SIZEOF_MM_ALLOCNODE);
     }
 
-  mm_givesemaphore();
+  mm_givesemaphore(heap);
 
   /* If CONFIG_DEBUG_MM is defined, then output the result of the allocation
    * to the SYSLOG.
@@ -214,3 +210,26 @@ FAR void *malloc(size_t size)
 
   return ret;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: malloc
+ *
+ * Description:
+ *  Find the smallest chunk that satisfies the request. Take the memory from
+ *  that chunk, save the remaining, smaller chunk (if any).
+ *
+ *  8-byte alignment of the allocated data is assured.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+FAR void *malloc(size_t size)
+{
+  return _mm_malloc(&g_mmheap, size);
+}
+#endif
+

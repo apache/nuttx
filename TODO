@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 6, 2013)
+NuttX TODO List (Last updated March 8, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
@@ -7,8 +7,8 @@ standards, things that could be improved, and ideas for enhancements.
 nuttx/
 
  (10)  Task/Scheduler (sched/)
-  (1)  Memory Managment (mm/)
-  (3)  Signals (sched/, arch/)
+  (2)  Memory Managment (mm/)
+  (4)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
   (2)  C++ Support
   (6)  Binary loaders (binfmt/)
@@ -99,7 +99,7 @@ o Task/Scheduler (sched/)
   Status:      Open.
   Priority:    Medium Low.
 
-  Title:       ON-DEMAND PAGE INCOMPLETE
+  Title:       ON-DEMAND PAGING INCOMPLETE
   Description: On-demand paging has recently been incorporated into the RTOS.
                The design of this feature is described here:
                http://www.nuttx.org/NuttXDemandPaging.html.
@@ -253,6 +253,53 @@ o Memory Managment (mm/)
   Priority:    Medium/Low, a good feature to prevent memory leaks but would
                have negative impact on memory usage and code size.
 
+  Title:       MEMORY MANAGEMENT IN THE KERNEL BUILD
+  Description: If the option CONFIG_NUTTX_KERNEL is selected, then NuttX will
+               built as two separate blobs:  (1) a monolithic, NuttX kernel,
+               and (2) a user-space application blob.  Communication between
+               the two is via traps in order to get from user-mode to kernel-
+               mode.
+
+               At present, the final link of the kernel build fails because
+               of undefined memory allocation logic:  kmm_initialize, kmm_addregion,
+               kmalloc, etc.  In the flat build, these map to mm_initialize,
+               mm_addregion, malloc, etc.  but they are undefined in the kernel
+               build.
+
+               It has not been fully decided how to handle kernel- and user-
+               memory allocations.  Here are some ideas:
+
+               1) Have only a single user-space heap and heap allocator that
+                  is shared by both kernel- and user-modes.  PROs:  Simpler,
+                  CONs:  Awkward architecture and no security for kernel-mode
+                  allocations.
+
+               2) Have two separate heap partitions and two copies of the
+                  memory allocators.  PROs:  Not two difficult, CONs:  Partitioning
+                  the heap will not make the best use of heap memory.
+
+                  A complication is that the kernel needs to allocate both
+                  protected, kernel private as well as user accessible memory
+                  (such as for stacks).  Perhaps this approach would require
+                  three heap partitions.
+
+               3) Have a classes of two allocators:  (1) one that allocates large
+                  regions/pages of memory that can be protected or not, and
+                  (2) the current memory allocator extended to support sbrk().
+                  The would still be kernel- and user-mode instances of the
+                  memory allocators.  Each would sbrk() as necessary to extend
+                  their heap; the pages allocated for the kerne-mode allocator
+                  would be protected but the pages allocated for the user-mode
+                  allocator would not.  PROs:  Meets all of the needs.  CONs:
+                  would limit the size of allocations due to the physical
+                  pages.  Complex.  There would likely be some small memory
+                  inefficiencies due to quantization to pages.  This really
+                  feels like overkill for this class of processor.
+
+               See other kernel build issues under "Build system"
+  Status:      Open
+  Priority:    Low, unless you need a working kernel build now.
+
 o Signals (sched/, arch/)
   ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -280,6 +327,14 @@ o Signals (sched/, arch/)
                to map bits appropriately.
   Status:      Open
   Priority:    Low. Even if there are only 31 usable signals, that is still a lot.
+
+  Title:       USER-MODE SIGNALS
+  Description: In a kernel build (CONFIG_NUTTX_KERNEL). Signal handlers should
+               execute in user mode.  This is to prevent a security hole where
+               user code can get control of the system in kernel mode if the signal
+               executes in kernel mode.
+  Status:      Open
+  Priority:    Low
 
 o pthreads (sched/)
   ^^^^^^^^^^^^^^^^^
@@ -1054,6 +1109,8 @@ o Build system
                A similar issue exists in NSH that uses some internal OS
                interfaces that would not be available in a kernel build
                (such as foreach_task, foreach_mountpoint, etc.).
+
+               See also "Memory Management" for another kernel build issue.
   Status:      Open
   Priority:    Low -- the kernel build configuration is not fully fielded
                yet.
@@ -1772,7 +1829,7 @@ o z80/z8/ez80/z180 (arch/z80)
 
   Title:       ZDS-II COMPILER PROBLEMS
   Description: The ZDS-II compiler (version 4.10.1) fails with an internal error
-               while compiler mm/mm_initialize.  This has been reported as
+               while compiling mm/mm_initialize.c.  This has been reported as
                incident 81509.
 
                I have found the following workaround that I use to build for the

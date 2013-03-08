@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_memalign.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,11 +47,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: memalign
+ * Name: _mm_memalign
  *
  * Description:
  *   memalign requests more than enough space from malloc, finds a region
@@ -63,7 +63,8 @@
  *
  ****************************************************************************/
 
-FAR void *memalign(size_t alignment, size_t size)
+static inline FAR void *_mm_memalign(FAR struct mm_heap_s *heap,
+                                     size_t alignment, size_t size)
 {
   FAR struct mm_allocnode_s *node;
   size_t rawchunk;
@@ -107,7 +108,7 @@ FAR void *memalign(size_t alignment, size_t size)
    * nodelist.
    */
 
-  mm_takesemaphore();
+  mm_takesemaphore(heap);
 
   /* Get the node associated with the allocation and the next node after
    * the allocation.
@@ -182,7 +183,7 @@ FAR void *memalign(size_t alignment, size_t size)
 
       /* Add the original, newly freed node to the free nodelist */
 
-      mm_addfreechunk((FAR struct mm_freenode_s *)node);
+      mm_addfreechunk(heap, (FAR struct mm_freenode_s *)node);
 
       /* Replace the original node with the newlay realloaced,
        * aligned node
@@ -200,9 +201,35 @@ FAR void *memalign(size_t alignment, size_t size)
        * malloc-compatible sizes that we have.
        */
 
-      mm_shrinkchunk(node, size + SIZEOF_MM_ALLOCNODE);
+      mm_shrinkchunk(heap, node, size + SIZEOF_MM_ALLOCNODE);
     }
 
-  mm_givesemaphore();
+  mm_givesemaphore(heap);
   return (FAR void*)alignedchunk;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: _mm_memalign
+ *
+ * Description:
+ *   memalign requests more than enough space from malloc, finds a region
+ *   within that chunk that meets the alignment request and then frees any
+ *   leading or trailing space. 
+ *
+ *   The alignment argument must be a power of two (not checked).  8-byte
+ *   alignment is guaranteed by normal malloc calls.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+
+FAR void *memalign(size_t alignment, size_t size)
+{
+  return _mm_memalign(&g_mmheap, alignment, size);
+}
+
+#endif

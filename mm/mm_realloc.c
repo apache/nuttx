@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_realloc.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,11 +47,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: realloc
+ * Name: _mm_realloc
  *
  * Description:
  *   If the reallocation is for less space, then:
@@ -73,7 +73,8 @@
  *
  ****************************************************************************/
 
-FAR void *realloc(FAR void *oldmem, size_t size)
+static inline FAR void *_mm_realloc(FAR struct mm_heap_s *heap,
+                                    FAR void *oldmem, size_t size)
 {
   FAR struct mm_allocnode_s *oldnode;
   FAR struct mm_freenode_s  *prev;
@@ -110,7 +111,7 @@ FAR void *realloc(FAR void *oldmem, size_t size)
 
   /* We need to hold the MM semaphore while we muck with the nodelist. */
 
-  mm_takesemaphore();
+  mm_takesemaphore(heap);
 
   /* Check if this is a request to reduce the size of the allocation. */
 
@@ -123,12 +124,12 @@ FAR void *realloc(FAR void *oldmem, size_t size)
 
       if (size < oldsize)
         {
-          mm_shrinkchunk(oldnode, size);
+          mm_shrinkchunk(heap, oldnode, size);
         }
 
       /* Then return the original address */
 
-      mm_givesemaphore();
+      mm_givesemaphore(heap);
       return oldmem;
     }
 
@@ -248,7 +249,7 @@ FAR void *realloc(FAR void *oldmem, size_t size)
 
               /* Return the previous free node to the nodelist (with the new size) */
 
-              mm_addfreechunk(prev);
+              mm_addfreechunk(heap, prev);
 
              /* Now we want to return newnode */
 
@@ -317,7 +318,7 @@ FAR void *realloc(FAR void *oldmem, size_t size)
 
               /* Add the new free node to the nodelist (with the new size) */
 
-              mm_addfreechunk(newnode);
+              mm_addfreechunk(heap, newnode);
             }
           else
             {
@@ -327,7 +328,7 @@ FAR void *realloc(FAR void *oldmem, size_t size)
             }
         }
 
-      mm_givesemaphore();
+      mm_givesemaphore(heap);
       return newmem;
     }
 
@@ -339,7 +340,7 @@ FAR void *realloc(FAR void *oldmem, size_t size)
        * leave the original memory in place.
        */
 
-      mm_givesemaphore();
+      mm_givesemaphore(heap);
       newmem = (FAR void*)malloc(size);
       if (newmem)
         {
@@ -350,3 +351,40 @@ FAR void *realloc(FAR void *oldmem, size_t size)
       return newmem;
     }
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: realloc
+ *
+ * Description:
+ *   If the reallocation is for less space, then:
+ *
+ *     (1) the current allocation is reduced in size
+ *     (2) the remainder at the end of the allocation is returned to the
+ *         free list.
+ *
+ *  If the request is for more space and the current allocation can be
+ *  extended, it will be extended by:
+ *
+ *     (1) Taking the additional space from the following free chunk, or
+ *     (2) Taking the additional space from the preceding free chunk.
+ *     (3) Or both
+ *
+ *  If the request is for more space but the current chunk cannot be
+ *  extended, then malloc a new buffer, copy the data into the new buffer,
+ *  and free the old buffer.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+
+FAR void *realloc(FAR void *oldmem, size_t size)
+{
+  return _mm_realloc(&g_mmheap, oldmem, size);
+}
+
+#endif
+
