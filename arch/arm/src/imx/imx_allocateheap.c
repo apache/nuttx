@@ -2,7 +2,7 @@
  * arch/arm/src/imx/imx_allocateheap.c
  * arch/arm/src/chip/imx_allocateheap.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/mm.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
@@ -105,14 +105,14 @@ void up_addregion(void)
 #  if (CONFIG_DRAM_NUTTXENTRY & 0xffff0000) != CONFIG_DRAM_VSTART
   uint32_t start = CONFIG_DRAM_VSTART + 0x1000;
   uint32_t end   = (CONFIG_DRAM_NUTTXENTRY & 0xffff0000);
-  mm_addregion((FAR void*)start, end - start);
+  kmm_addregion((FAR void*)start, end - start);
 #  endif
 #endif
 
   /* Check for any additional memory regions */
 
 #if defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_SIZE)
-  mm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+  kmm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 #endif
 }
 #endif

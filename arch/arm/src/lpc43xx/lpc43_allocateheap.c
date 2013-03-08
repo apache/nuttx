@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_allocateheap.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/mm.h>
+#include <nuttx/kmalloc.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -259,7 +259,7 @@ void up_addregion(void)
 #if CONFIG_MM_REGIONS > 1
  /* Add the next SRAM region (which should exist) */
  
- mm_addregion((FAR void*)MM_REGION2_BASE, MM_REGION2_SIZE);
+ kmm_addregion((FAR void*)MM_REGION2_BASE, MM_REGION2_SIZE);
 
 #ifdef MM_REGION3_BASE
  /* Add the third SRAM region (which will not exist in configuration B) */
@@ -267,12 +267,12 @@ void up_addregion(void)
 #if CONFIG_MM_REGIONS > 2
  /* Add the third SRAM region (which may not exist) */
  
- mm_addregion((FAR void*)MM_REGION3_BASE, MM_REGION3_SIZE);
+ kmm_addregion((FAR void*)MM_REGION3_BASE, MM_REGION3_SIZE);
 
 #if CONFIG_MM_REGIONS > 3 && defined(MM_DMAHEAP_BASE)
  /* Add the DMA region (which may not be available) */
  
- mm_addregion((FAR void*)MM_DMAHEAP_BASE, MM_DMAHEAP_SIZE);
+ kmm_addregion((FAR void*)MM_DMAHEAP_BASE, MM_DMAHEAP_SIZE);
 
 #endif /* CONFIG_MM_REGIONS > 3 && defined(MM_DMAHEAP_BASE) */
 #endif /* CONFIG_MM_REGIONS > 2 */
@@ -281,7 +281,7 @@ void up_addregion(void)
 #if CONFIG_MM_REGIONS > 2 && defined(MM_DMAHEAP_BASE)
  /* Add the DMA region (which may not be available) */
  
- mm_addregion((FAR void*)MM_DMAHEAP_BASE, MM_DMAHEAP_SIZE);
+ kmm_addregion((FAR void*)MM_DMAHEAP_BASE, MM_DMAHEAP_SIZE);
 
 #endif /* CONFIG_MM_REGIONS > 3 && defined(MM_DMAHEAP_BASE) */
 #endif /* MM_REGION3_BASE */

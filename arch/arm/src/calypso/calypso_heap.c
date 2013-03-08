@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/mm.h>
+#include <nuttx/kmalloc.h>
 
 #include <sys/types.h>
 #include <debug.h>
@@ -96,7 +96,6 @@ void up_addregion(void)
   /* Configure the RHEA bridge with some sane default values */
   calypso_rhea_cfg(0, 0, 0xff, 0, 1, 0, 0);
 
-  mm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
-
+  kmm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 }
 #endif

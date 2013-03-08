@@ -1,7 +1,7 @@
 /************************************************************************
  * arch/arm/src/lpc31xx/lpc31_allocateheap.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <arch/board/board.h>
 
 #include "arm.h"
@@ -192,15 +193,15 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 void up_addregion(void)
 {
 #if defined(CONFIG_ARCH_EXTSRAM0) && defined(CONFIG_ARCH_EXTSRAM0HEAP)
-  mm_addregion((FAR void*)LPC31_EXTSRAM0_VSECTION, CONFIG_ARCH_EXTSRAM0SIZE);
+  kmm_addregion((FAR void*)LPC31_EXTSRAM0_VSECTION, CONFIG_ARCH_EXTSRAM0SIZE);
 #endif
 
 #if defined(CONFIG_ARCH_EXTSRAM1) && defined(CONFIG_ARCH_EXTSRAM1HEAP)
-  mm_addregion((FAR void*)LPC31_EXTSRAM1_VSECTION, CONFIG_ARCH_EXTSRAM1SIZE);
+  kmm_addregion((FAR void*)LPC31_EXTSRAM1_VSECTION, CONFIG_ARCH_EXTSRAM1SIZE);
 #endif
 
 #if defined(CONFIG_ARCH_EXTDRAM) && defined(CONFIG_ARCH_EXTDRAMHEAP)
-  mm_addregion((FAR void*)LPC31_EXTSDRAM_VSECTION, CONFIG_ARCH_EXTDRAMSIZE);
+  kmm_addregion((FAR void*)LPC31_EXTSDRAM_VSECTION, CONFIG_ARCH_EXTDRAMSIZE);
 #endif
 }
 #endif
