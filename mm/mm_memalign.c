@@ -37,10 +37,12 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <stdlib.h>
 #include <assert.h>
 
-#include "mm_environment.h"
-#include "mm_internal.h"
+#include <nuttx/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -51,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _mm_memalign
+ * Name: mm_memalign
  *
  * Description:
  *   memalign requests more than enough space from malloc, finds a region
@@ -63,8 +65,11 @@
  *
  ****************************************************************************/
 
-static inline FAR void *_mm_memalign(FAR struct mm_heap_s *heap,
-                                     size_t alignment, size_t size)
+#ifndef CONFIG_MM_MULTIHEAP
+static inline
+#endif
+FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
+                      size_t size)
 {
   FAR struct mm_allocnode_s *node;
   size_t rawchunk;
@@ -213,7 +218,7 @@ static inline FAR void *_mm_memalign(FAR struct mm_heap_s *heap,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _mm_memalign
+ * Name: memalign
  *
  * Description:
  *   memalign requests more than enough space from malloc, finds a region
@@ -229,7 +234,7 @@ static inline FAR void *_mm_memalign(FAR struct mm_heap_s *heap,
 
 FAR void *memalign(size_t alignment, size_t size)
 {
-  return _mm_memalign(&g_mmheap, alignment, size);
+  return mm_memalign(&g_mmheap, alignment, size);
 }
 
 #endif

@@ -3,6 +3,18 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+config MM_MULTIHEAP
+	bool "Build support for multiple heaps"
+	default n
+	---help---
+		Build interfaces to support multiple heaps.  This should not be
+		confused with memory regions.  One heap may be composed of multiple,
+		non-contiguous memory regions.  The fact that the heap is composed
+		of such multiple regions is invisible to the end-user (other than
+		the heap comes pre-fragemented).  Multiple heaps, on the other hand,
+		supports a separate set of allocators that operate on a separate set
+		of memory regions.
+
 config MM_SMALL
 	bool "Small memory model"
 	default n
@@ -16,6 +28,8 @@ config MM_SMALL
 		CONFIG_MM_SMALL can be defined so that those MCUs will also benefit
 		from the smaller, 16-bit-based allocation overhead.
 
+		NOTE: If MM_MULTIHEAP is selected, then this applies to all heaps.
+
 config MM_REGIONS
 	int "Number of memory regions"
 	default 1
@@ -25,18 +39,21 @@ config MM_REGIONS
 		that the memory manager must handle and enables the API
 		mm_addregion(start, end);
 
+		NOTE: If MM_MULTIHEAP is selected, then this maximum number of regions
+		applies to all heaps.
+
 config ARCH_HAVE_HEAP2
 	bool
 
 config HEAP2_BASE
-	hex "Start address of second heap region"
+	hex "Start address of second user heap region"
 	default 0x00000000
 	depends on ARCH_HAVE_HEAP2
 	---help---
 		The base address of the second heap region.
 
 config HEAP2_SIZE
-	int "Size of the second heap region"
+	int "Size of the second user heap region"
 	default 0
 	depends on ARCH_HAVE_HEAP2
 	---help---

@@ -37,10 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <assert.h>
+#include <nuttx/config.h>
 
-#include "mm_environment.h"
-#include "mm_internal.h"
+#include <stdlib.h>
+#include <assert.h>
+#include <debug.h>
+
+#include <nuttx/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -51,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _mm_free
+ * Name: mm_free
  *
  * Description:
  *   Returns a chunk of memory to the list of free nodes,  merging with
@@ -59,7 +62,10 @@
  *
  ****************************************************************************/
 
-static inline void _mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
+#ifndef CONFIG_MM_MULTIHEAP
+static inline
+#endif
+void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 {
   FAR struct mm_freenode_s *node;
   FAR struct mm_freenode_s *prev;
@@ -164,6 +170,6 @@ static inline void _mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 #if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
 void free(FAR void *mem)
 {
-  _mm_free(&g_mmheap, mem);
+  mm_free(&g_mmheap, mem);
 }
 #endif

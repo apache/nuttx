@@ -107,47 +107,48 @@ struct mallinfo
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /* Random number generation */
 
-EXTERN void      srand(unsigned int seed);
-EXTERN int       rand(void);
+void      srand(unsigned int seed);
+int       rand(void);
 
 /* Environment variable support */
 
 #ifndef CONFIG_DISABLE_ENIVRON
-EXTERN FAR char **get_environ_ptr( void );
-EXTERN FAR char *getenv(FAR const char *name);
-EXTERN int       putenv(FAR const char *string);
-EXTERN int       clearenv(void);
-EXTERN int       setenv(const char *name, const char *value, int overwrite);
-EXTERN int       unsetenv(const char *name);
+FAR char **get_environ_ptr( void );
+FAR char *getenv(FAR const char *name);
+int       putenv(FAR const char *string);
+int       clearenv(void);
+int       setenv(const char *name, const char *value, int overwrite);
+int       unsetenv(const char *name);
 #endif
 
 /* Process exit functions */
 
-EXTERN void      exit(int status) noreturn_function;
-EXTERN void      abort(void) noreturn_function;
+void      exit(int status) noreturn_function;
+void      abort(void) noreturn_function;
 #ifdef CONFIG_SCHED_ATEXIT
-EXTERN int       atexit(CODE void (*func)(void));
+int       atexit(CODE void (*func)(void));
 #endif
 #ifdef CONFIG_SCHED_ONEXIT
-EXTERN int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
+int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
 #endif
 
 /* String to binary conversions */
 
-EXTERN long      strtol(const char *, char **, int);
-EXTERN unsigned long strtoul(const char *, char **, int);
+long      strtol(const char *, char **, int);
+unsigned long strtoul(const char *, char **, int);
 #ifdef CONFIG_HAVE_LONG_LONG
-EXTERN long long strtoll(const char *, char **, int);
-EXTERN unsigned long long strtoull(const char *, char **, int);
+long long strtoll(const char *, char **, int);
+unsigned long long strtoull(const char *, char **, int);
 #endif
-EXTERN double_t   strtod(const char *, char **);
+double_t  strtod(const char *, char **);
 
 #define atoi(nptr)  strtol((nptr), NULL, 10)
 #define atol(nptr)  strtol((nptr), NULL, 10)
@@ -158,30 +159,30 @@ EXTERN double_t   strtod(const char *, char **);
 
 /* Memory Management */
 
-EXTERN FAR void  *malloc(size_t);
-EXTERN void       free(FAR void*);
-EXTERN FAR void  *realloc(FAR void*, size_t);
-EXTERN FAR void  *memalign(size_t, size_t);
-EXTERN FAR void  *zalloc(size_t);
-EXTERN FAR void  *calloc(size_t, size_t);
+FAR void *malloc(size_t);
+void      free(FAR void*);
+FAR void *realloc(FAR void*, size_t);
+FAR void *memalign(size_t, size_t);
+FAR void *zalloc(size_t);
+FAR void *calloc(size_t, size_t);
 
 /* Misc */
 
-EXTERN int        abs(int j);
-EXTERN long int   labs(long int j);
+int      abs(int j);
+long int labs(long int j);
 #ifdef CONFIG_HAVE_LONG_LONG
-EXTERN long long int llabs(long long int j);
+long long int llabs(long long int j);
 #endif
 
 /* Sorting */
 
-EXTERN void       qsort(void *base, size_t nmemb, size_t size,
-                        int(*compar)(const void *, const void *));
+void     qsort(void *base, size_t nmemb, size_t size,
+               int(*compar)(const void *, const void *));
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-EXTERN struct mallinfo mallinfo(void);
+struct mallinfo mallinfo(void);
 #else
-EXTERN int        mallinfo(struct mallinfo *info);
+int      mallinfo(struct mallinfo *info);
 #endif
 
 #undef EXTERN

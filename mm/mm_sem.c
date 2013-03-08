@@ -37,13 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include "mm_environment.h"
+#include <nuttx/config.h>
 
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
 
-#include "mm_internal.h"
+#include <nuttx/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -106,7 +106,6 @@ void mm_seminitialize(FAR struct mm_heap_s *heap)
  *
  ****************************************************************************/
 
-#ifndef MM_TEST
 int mm_trysemaphore(FAR struct mm_heap_s *heap)
 {
   pid_t my_pid = getpid();
@@ -136,7 +135,6 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
       return OK;
     }
 }
-#endif
 
 /****************************************************************************
  * Name: mm_takesemaphore
@@ -170,7 +168,7 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
            * the wait was awakened by a signal.
            */
 
-          ASSERT(mm_errno == EINTR);
+          ASSERT(errno == EINTR);
         }
 
       /* We have it.  Claim the stake and return */
@@ -219,21 +217,4 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
       ASSERT(sem_post(&heap->mm_semaphore) == 0);
     }
 }
-
-/****************************************************************************
- * Name: mm_getsemaphore
- *
- * Description:
- *   Return the current value of the MM semaphore (for test purposes only)
- *
- ****************************************************************************/
-
-#ifdef MM_TEST
-int mm_getsemaphore(FAR struct mm_heap_s *heap)
-{
-  int sval;
-  sem_getvalue(&heap->mm_semaphore, &sval);
-  return sval;
-}
-#endif
 

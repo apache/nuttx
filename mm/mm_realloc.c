@@ -37,10 +37,14 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <stdlib.h>
 #include <string.h>
-#include "mm_environment.h"
 #include <stdio.h>
-#include "mm_internal.h"
+#include <assert.h>
+
+#include <nuttx/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -51,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _mm_realloc
+ * Name: mm_realloc
  *
  * Description:
  *   If the reallocation is for less space, then:
@@ -73,8 +77,11 @@
  *
  ****************************************************************************/
 
-static inline FAR void *_mm_realloc(FAR struct mm_heap_s *heap,
-                                    FAR void *oldmem, size_t size)
+#ifndef CONFIG_MM_MULTIHEAP
+static inline
+#endif
+FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
+                     size_t size)
 {
   FAR struct mm_allocnode_s *oldnode;
   FAR struct mm_freenode_s  *prev;
@@ -383,7 +390,7 @@ static inline FAR void *_mm_realloc(FAR struct mm_heap_s *heap,
 
 FAR void *realloc(FAR void *oldmem, size_t size)
 {
-  return _mm_realloc(&g_mmheap, oldmem, size);
+  return mm_realloc(&g_mmheap, oldmem, size);
 }
 
 #endif

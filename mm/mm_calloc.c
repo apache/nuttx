@@ -37,8 +37,11 @@
  * Included Files
  ****************************************************************************/
 
-#include "mm_environment.h"
-#include "mm_internal.h"
+#include <nuttx/config.h>
+
+#include <stdlib.h>
+
+#include <nuttx/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -49,6 +52,28 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mm_calloc
+ *
+ * Descripton:
+ *   calloc calculates the size of the allocation and calls zalloc
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_MULTIHEAP
+FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size)
+{
+  FAR void *ret = NULL;
+
+  if (n > 0 && elem_size > 0)
+    {
+      ret = mm_zalloc(heap, n * elem_size);
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: calloc
  *
  * Descripton:
@@ -56,8 +81,12 @@
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
 FAR void *calloc(size_t n, size_t elem_size)
 {
+#ifdef CONFIG_MM_MULTIHEAP
+  return mm_calloc(&g_mmheap, n, elem_size);
+#else
   FAR void *ret = NULL;
 
   if (n > 0 && elem_size > 0)
@@ -66,4 +95,6 @@ FAR void *calloc(size_t n, size_t elem_size)
     }
 
   return ret;
+#endif
 }
+#endif

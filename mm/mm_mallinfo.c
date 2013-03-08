@@ -37,10 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <assert.h>
+#include <nuttx/config.h>
 
-#include "mm_environment.h"
-#include "mm_internal.h"
+#include <stdlib.h>
+#include <assert.h>
+#include <debug.h>
+
+#include <nuttx/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -55,15 +58,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _mm_mallinfo
+ * Name: mm_mallinfo
  *
  * Description:
  *   mallinfo returns a copy of updated current heap information.
  *
  ****************************************************************************/
 
-static inline int _mm_mallinfo(FAR struct mm_heap_s *heap,
-                               FAR struct mallinfo *info)
+#ifndef CONFIG_MM_MULTIHEAP
+static inline
+#endif
+int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 {
   struct mm_allocnode_s *node;
   size_t mxordblk = 0; 
@@ -148,7 +153,7 @@ struct mallinfo mallinfo(void)
 {
   struct mallinfo info;
 
-  _mm_mallinfo(&g_mmheap, &info);
+  mm_mallinfo(&g_mmheap, &info);
   return info;
 }
 
@@ -156,7 +161,7 @@ struct mallinfo mallinfo(void)
 
 int mallinfo(struct mallinfo *info)
 {
-  return _mm_mallinfo(&g_mmheap, info);
+  return mm_mallinfo(&g_mmheap, info);
 }
 
 #endif

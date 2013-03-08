@@ -77,9 +77,6 @@ extern "C"
 
 #ifndef CONFIG_NUTTX_KERNEL
 
-struct mm_heap_s;
-extern struct mm_heap_s g_mmheap;
-
 # define kmm_initialize(h,s)    mm_initialize(h,s)
 # define kmm_addregion(h,s)     mm_addregion(h,s)
 # define kmm_trysemaphore()     mm_trysemaphore(&g_mmheap)
@@ -94,7 +91,7 @@ extern struct mm_heap_s g_mmheap;
 
 void kmm_initialize(FAR void *heap_start, size_t heap_size);
 void kmm_addregion(FAR void *heapstart, size_t heapsize);
-int kmm_trysemaphore(void);
+int  kmm_trysemaphore(void);
 void kmm_givesemaphore(void);
 
 FAR void *kmalloc(size_t);

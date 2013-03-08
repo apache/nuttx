@@ -37,8 +37,9 @@
  * Included Files
  ****************************************************************************/
 
-#include "mm_environment.h"
-#include "mm_internal.h"
+#include <nuttx/config.h>
+
+#include <nuttx/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -4272,7 +4272,7 @@
 	  was closed by the remote peer).  That excludes the listen socket which
 	  was never connected.  This does introduce a new problem, however.  If
 	  the socket was not closed, but lost the connection through an abnormal
-	  event, then poll/select will hang.  That needs to be revisited.\
+	  event, then poll/select will hang.  That needs to be revisited.
 	  (2013-03-07)
 	* fs/fs_selected.c:  Was not checking if the timeout parameter was NULL
 	  but would, instead, setup a bogus timeout based on whatever it found at
@@ -4284,4 +4284,6 @@
 	* mm/:  Move all memory manager globals into a structure.  A reference
 	  to this structure is now passed internally between mm APIs. This
 	  change will (eventually) support multiple heaps and heap allocators.
-
+	  (2013-03-07).
+	* mm/ and include/nuttx/mm.h:  Implement support for multiple heaps.
+	  (2013-03-07).

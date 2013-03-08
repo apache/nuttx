@@ -37,14 +37,12 @@
  * Included Files
  ****************************************************************************/
 
-/* Special definitions when we operate in the normal vs. the host-pc test
- * environement.
- */
+#include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <assert.h>
 
-#include "mm_environment.h"
-#include "mm_internal.h"
+#include <nuttx/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,7 +69,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _mm_malloc
+ * Name: mm_malloc
  *
  * Description:
  *  Find the smallest chunk that satisfies the request. Take the memory from
@@ -81,7 +79,10 @@
  *
  ****************************************************************************/
 
-static inline FAR void *_mm_malloc(FAR struct mm_heap_s *heap, size_t size)
+#ifndef CONFIG_MM_MULTIHEAP
+static inline
+#endif
+FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
   FAR struct mm_freenode_s *node;
   void *ret = NULL;
@@ -229,7 +230,7 @@ static inline FAR void *_mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
 FAR void *malloc(size_t size)
 {
-  return _mm_malloc(&g_mmheap, size);
+  return mm_malloc(&g_mmheap, size);
 }
 #endif
 
