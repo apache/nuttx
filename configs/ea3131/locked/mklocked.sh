@@ -2,7 +2,7 @@
 ###########################################################################
 # configs/ea3131/locked/mklocked.sh
 #
-#   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -155,12 +155,7 @@ fi
 
 echo "EXTERN(dq_addfirst)" >>ld-locked.inc
 echo "EXTERN(up_initial_state)" >>ld-locked.inc
-
-answer=$(checkconfig CONFIG_HEAP_BASE)
-if [ $answer = n ]; then
-	echo "EXTERN(up_allocate_heap)" >>ld-locked.inc
-fi
-
+echo "EXTERN(up_allocate_heap)" >>ld-locked.inc
 echo "EXTERN(mm_initialize)" >>ld-locked.inc
 echo "EXTERN(irq_initialize)" >>ld-locked.inc
 echo "EXTERN(wd_initialize)" >>ld-locked.inc
