@@ -73,6 +73,7 @@ KBIN = libkc$(LIBEXT)
 BIN  = libc$(LIBEXT)
 
 all: $(BIN)
+.PHONY: kclean uclean clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -84,19 +85,15 @@ $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 ifneq ($(BIN),$(UBIN))
-.userlib:
+$(UBIN): kclean
 	$(Q) $(MAKE) $(UBIN) BIN=$(UBIN) TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
 	$(Q) touch .userlib
-
-$(UBIN): kclean .userlib
 endif
 
 ifneq ($(BIN),$(KBIN))
-.kernlib:
+$(KBIN): uclean
 	$(Q) $(MAKE) $(KBIN) BIN=$(KBIN) TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
 	$(Q) touch .kernlib
-
-$(KBIN): uclean .kernlib
 endif
 
 .depend: Makefile $(SRCS)

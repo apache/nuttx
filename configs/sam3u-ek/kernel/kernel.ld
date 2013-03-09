@@ -67,10 +67,10 @@ MEMORY
  * but be usable both by kernel- and user-space code
  */
 
-EXTERN(mm_initialize)
-EXTERN(mm_addregion)
-EXTERN(mm_trysemaphore)
-EXTERN(mm_givesemaphore)
+EXTERN(umm_initialize)
+EXTERN(umm_addregion)
+EXTERN(umm_trysemaphore)
+EXTERN(umm_givesemaphore)
 
 EXTERN(malloc)
 EXTERN(realloc)

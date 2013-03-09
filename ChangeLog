@@ -4287,7 +4287,12 @@
 	  (2013-03-08).
 	* mm/ and include/nuttx/mm.h:  Implement support for multiple heaps.
 	  (2013-03-08).
-	* arch/*/src: xyz_addregion() needs to call kmm_addregion, not mm_addretion.
+	* arch/*/src: xyz_addregion() needs to call kmm_addregion, not mm_addregion.
 	  (2013-03-08).
 	* sched/kmm*.c:  Move this garbage kmm*.c file to mm/. until I decide what
 	  to do with them (which is probably to just delete them). (2013-03-08).
+	* mm/mm_test.c and Makefile.test:  Deleted the memory test.  This was
+	  a good test and helped me a lot when I wrote the memory manager, but
+	  now it is in the way and paralyzing other efforts.  So the memory unit
+	  test was deleted. (2013-03-08)
+

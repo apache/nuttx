@@ -520,7 +520,7 @@ lib/libuc$(LIBEXT): libc/libuc$(LIBEXT)
 	$(Q) install libc/libuc$(LIBEXT) lib/libuc$(LIBEXT)
 
 mm/libumm$(LIBEXT): context
-	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libumm$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libumm$(LIBEXT)
 
 lib/libumm$(LIBEXT): mm/libumm$(LIBEXT)
 	$(Q) install mm/libumm$(LIBEXT) lib/libumm$(LIBEXT)
@@ -552,7 +552,7 @@ lib/libc$(LIBEXT): libc/libc$(LIBEXT)
 	$(Q) install libc/libc$(LIBEXT) lib/libc$(LIBEXT)
 
 mm/libmm$(LIBEXT): context
-	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT)
 
 lib/libmm$(LIBEXT): mm/libmm$(LIBEXT)
 	$(Q) install mm/libmm$(LIBEXT) lib/libmm$(LIBEXT)

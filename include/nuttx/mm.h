@@ -238,12 +238,31 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heap_start,
 void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
                   size_t heapsize);
 
+/* Functions contained in umm_initialize.c **********************************/
+
+#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+void umm_initialize(FAR void *heap_start, size_t heap_size);
+#endif
+
+/* Functions contained in umm_addregion.c ***********************************/
+
+#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+void umm_addregion(FAR void *heapstart, size_t heapsize);
+#endif
+
 /* Functions contained in mm_sem.c ******************************************/
 
 void mm_seminitialize(FAR struct mm_heap_s *heap);
 void mm_takesemaphore(FAR struct mm_heap_s *heap);
 int  mm_trysemaphore(FAR struct mm_heap_s *heap);
 void mm_givesemaphore(FAR struct mm_heap_s *heap);
+
+/* Functions contained in umm_semaphore.c ***********************************/
+
+#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+int  umm_trysemaphore(void);
+void umm_givesemaphore(void);
+#endif
 
 /* Functions contained in mm_malloc.c ***************************************/
 

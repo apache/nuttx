@@ -1,7 +1,7 @@
 /************************************************************************
- * mm/kmm_addregion.c
+ * mm/umm_initialize.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,42 +38,17 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/kmalloc.h>
+#include <nuttx/mm.h>
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
-
-/* This logic is all tentatively and, hopefully, will grow in usability.
- * For now, the kernel-mode build uses the memory manager that is
- * provided in the user-space build.  That is awkward but reasonable for
- * the current level of support:  At present, only memory protection is
- * provided.  Kernel-mode code may call into user-mode code, but not
- * vice-versa.  So hosting the memory manager in user-space allows the
- * memory manager to be shared in both kernel- and user-mode spaces.
- *
- * In the longer run, if an MMU is support that can provide virtualized
- * memory, then some SLAB memory manager will be required in kernel-space
- * with some kind of brk() system call to obtain mapped heap space.
- *
- * In the current build model, the user-space module is built first. The
- * file user_map.h is generated in the first pass and contains the
- * addresses of the memory manager needed in this file:
- */
-
-#include <arch/board/user_map.h>
+#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
 
 /************************************************************************
  * Pre-processor definition
  ************************************************************************/
 
-/* This value is obtained from user_map.h */
-
-#define KADDREGION(h,s) ((kmaddregion_t)CONFIG_USER_MMADDREGION)(h,s)
-
 /************************************************************************
  * Private Types
  ************************************************************************/
-
-typedef void (*kmaddregion_t)(FAR void*, size_t);
 
 /************************************************************************
  * Private Functions
@@ -84,30 +59,23 @@ typedef void (*kmaddregion_t)(FAR void*, size_t);
  ************************************************************************/
 
 /************************************************************************
- * Name: kmm_addregion
+ * Name: umm_initialize
  *
  * Description:
- *   This is a simple redirection to the user-space mm_addregion()
- *   function.
+ *   This is a simple wrapper for the mm_initialize() function.
  *
  * Parameters:
- *   heap_start - Address of the beginning of the memory region
- *   heap_size  - The size (in bytes) if the memory region.
+ *   heap_start - Address of the beginning of the (initial) memory region
+ *   heap_size  - The size (in bytes) if the (initial) memory region.
  *
  * Return Value:
  *   None
  *
- * Assumptions:
- *   1. mm_addregion() resides in user-space
- *   2. The address of the user space mm_addregion() is provided in
- *      user_map.h
- *   3. The user-space mm_addregion() is callable from kernel-space.
- *
  ************************************************************************/
 
-void kmm_addregion(FAR void *heap_start, size_t heap_size)
+void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  return KADDREGION(heap_start, heap_size);
+  mm_initialize(&g_mmheap, heap_start, heap_size);
 }
 
-#endif /* CONFIG_NUTTX_KERNEL && __KERNEL__ */
+#endif /* !CONFIG_NUTTX_KERNEL || !__KERNEL__ */

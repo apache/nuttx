@@ -40,6 +40,8 @@ CSRCS  = mm_initialize.c mm_sem.c  mm_addfreechunk.c mm_size2ndx.c
 CSRCS += mm_shrinkchunk.c mm_malloc.c mm_zalloc.c mm_calloc.c mm_realloc.c
 CSRCS += mm_memalign.c mm_free.c mm_mallinfo.c
 
+CSRCS += umm_initialize.c umm_addregion.c umm_semaphore.c
+
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CSRCS += kmm_initialize.c kmm_addregion.c kmm_semaphore.c
 CSRCS += kmm_kmalloc.c kmm_kzalloc.c kmm_krealloc.c kmm_kfree.c
@@ -60,6 +62,7 @@ KBIN = libkmm$(LIBEXT)
 BIN = libmm$(LIBEXT)
 
 all:	$(BIN)
+.PHONY: kclean uclean clean distclean 
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -71,19 +74,15 @@ $(BIN):	$(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 ifneq ($(BIN),$(UBIN))
-.userlib:
+$(UBIN): kclean
 	$(Q) $(MAKE) $(UBIN) BIN=$(UBIN) TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
 	$(Q) touch .userlib
-
-$(UBIN): kclean .userlib
 endif
 
 ifneq ($(BIN),$(KBIN))
-.kernlib:
+$(KBIN): uclean
 	$(Q) $(MAKE) $(KBIN) BIN=$(KBIN) TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
 	$(Q) touch .kernlib
-
-$(KBIN): uclean .kernlib
 endif
 
 .depend: Makefile $(SRCS)
