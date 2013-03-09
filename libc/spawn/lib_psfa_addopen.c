@@ -47,6 +47,8 @@
 
 #include <nuttx/spawn.h>
 
+#include "lib_internal.h"
+
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
@@ -97,8 +99,7 @@ int posix_spawn_file_actions_addopen(FAR posix_spawn_file_actions_t *file_action
 
   /* Allocate the action list entry of this size */
 
-  entry = (FAR struct spawn_open_file_action_s *)zalloc(alloc);
-
+  entry = (FAR struct spawn_open_file_action_s *)lib_zalloc(alloc);
   if (!entry)
     {
       return ENOMEM;

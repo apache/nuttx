@@ -46,6 +46,8 @@
 
 #include <nuttx/spawn.h>
 
+#include "lib_internal.h"
+
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
@@ -81,7 +83,7 @@ int posix_spawn_file_actions_addclose(FAR posix_spawn_file_actions_t *file_actio
   /* Allocate the action list entry */
 
   entry = (FAR struct spawn_close_file_action_s *)
-    zalloc(sizeof(struct spawn_close_file_action_s));
+    lib_zalloc(sizeof(struct spawn_close_file_action_s));
 
   if (!entry)
     {

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched_garbage.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,7 +90,7 @@
 void sched_garbagecollection(void)
 {
    irqstate_t flags;
-   void *address;
+   FAR void *address;
 
    /* Test if the delayed deallocation queue is empty.  No special protection
     * is needed because this is an atomic test.
@@ -103,14 +103,34 @@ void sched_garbagecollection(void)
        */
 
       flags = irqsave();
-      address = (void*)sq_remfirst((FAR sq_queue_t*)&g_delayeddeallocations);
+      address = (FAR void*)sq_remfirst((FAR sq_queue_t*)&g_delayeddeallocations);
       irqrestore(flags);
 
-      /* Then deallocate it. */
+      /* The address should always be non-NULL since that was checked in the
+       * 'while' condition above.
+       */
 
       if (address)
         {
-          kfree(address);
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+          /* Does the address to be freed lie in the kernel heap? */
+
+          if (kmm_heapmember(address))
+            {
+              /* Yes.. return the memory to the kernel heap */
+
+              kfree(address);
+            }
+
+          /* No.. then the address must lie in the user heap (unchecked) */
+
+          else
+#endif
+            {
+              /* Return the memory to the user heap */
+
+              kufree(address);
+            }
         }
     }
 }

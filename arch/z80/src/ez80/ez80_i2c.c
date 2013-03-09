@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_i2c.c
  *
- *   Copyright(C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/i2c.h>
+#include <nuttx/kmalloc.h>
 #include <arch/io.h>
 #include <arch/board/board.h>
 
@@ -747,10 +748,10 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 
   for (retry = 0; retry < 100; retry++)    
     {
-       /* Enter MASTER TRANSMIT mode by setting the STA bit in the I2C_CTL
-        * register to 1. The I2C then tests the I2C bus and transmits a START
-        * condition when the bus is free.
-        */
+      /* Enter MASTER TRANSMIT mode by setting the STA bit in the I2C_CTL
+       * register to 1. The I2C then tests the I2C bus and transmits a START
+       * condition when the bus is free.
+       */
 
       i2c_start();
 
@@ -920,7 +921,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
 
   /* Now, allocate an I2C instance for this caller */
 
-  i2c = (FAR struct ez80_i2cdev_s *)malloc(sizeof(FAR struct ez80_i2cdev_s));
+  i2c = (FAR struct ez80_i2cdev_s *)kmalloc(sizeof(FAR struct ez80_i2cdev_s));
   if (i2c)
     {
       /* Initialize the allocated instance */

@@ -1,7 +1,7 @@
 /************************************************************************
  * libc/misc/lib_streamsem.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+
+#include "lib_internal.h"
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0 || CONFIG_NFILE_DESCRIPTORS > 0
 
@@ -143,7 +145,7 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
 
   /* Allocate an I/O buffer */
 
-  iobuffer = (FAR void *)malloc(CONFIG_LIB_SENDFILE_BUFSIZE);
+  iobuffer = (FAR void *)lib_malloc(CONFIG_LIB_SENDFILE_BUFSIZE);
   if (!iobuffer)
     {
       set_errno(ENOMEM);
@@ -261,7 +263,7 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
 
   /* Release the I/O buffer */
 
-  free(iobuffer);
+  lib_free(iobuffer);
 
   /* Return the current file position */
 

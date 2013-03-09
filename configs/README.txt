@@ -1671,8 +1671,6 @@ defconfig -- This is a configuration file similar to the Linux
       for the main user thread that begins at the user_start() entry point.
     CONFIG_PTHREAD_STACK_MIN - Minimum pthread stack size
     CONFIG_PTHREAD_STACK_DEFAULT - Default pthread stack size
-    CONFIG_HEAP_BASE - The beginning of the heap
-    CONFIG_HEAP_SIZE - The size of the heap
 
 appconfig -- This is another configuration file that is specific to the
   application.  This file is copied into the application build directory

@@ -1,7 +1,7 @@
 /****************************************************************************
  * rm/romfs/fs_romfsutil.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -51,6 +51,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/fs/dirent.h>
 
@@ -555,7 +556,7 @@ int romfs_hwconfigure(struct romfs_mountpt_s *rm)
 
   /* Allocate the device cache buffer for normal sector accesses */
 
-  rm->rm_buffer = (uint8_t*)malloc(rm->rm_hwsectorsize);
+  rm->rm_buffer = (uint8_t*)kmalloc(rm->rm_hwsectorsize);
   if (!rm->rm_buffer)
     {
       return -ENOMEM;
@@ -643,7 +644,7 @@ int romfs_fileconfigure(struct romfs_mountpt_s *rm, struct romfs_file_s *rf)
 
       /* Create a file buffer to support partial sector accesses */
 
-      rf->rf_buffer = (uint8_t*)malloc(rm->rm_hwsectorsize);
+      rf->rf_buffer = (uint8_t*)kmalloc(rm->rm_hwsectorsize);
       if (!rf->rf_buffer)
         {
           return -ENOMEM;

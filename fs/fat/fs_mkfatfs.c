@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_writefat.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/fat.h>
 #include <nuttx/fs/mkfatfs.h>
@@ -277,7 +278,7 @@ int mkfatfs(FAR const char *pathname, FAR struct fat_format_s *fmt)
 
   /* Allocate a buffer that will be working sector memory */
 
-  var.fv_sect = (uint8_t*)malloc(var.fv_sectorsize);
+  var.fv_sect = (uint8_t*)kmalloc(var.fv_sectorsize);
   if (!var.fv_sect)
     {
       fdbg("Failed to allocate working buffers\n");
@@ -298,15 +299,16 @@ errout:
 
   if (var.fv_sect)
     {
-      free(var.fv_sect);
+      kfree(var.fv_sect);
     }
 
-    /* Return any reported errors */
+  /* Return any reported errors */
 
-    if (ret < 0)
-      {
-        errno = -ret;
-        return ERROR; 
-      }
-    return OK;
+  if (ret < 0)
+    {
+      errno = -ret;
+      return ERROR; 
+    }
+
+  return OK;
 }

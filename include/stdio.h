@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdio.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,65 +88,66 @@ typedef struct file_struct FILE;
  * Public Variables
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /* ANSI-like File System Interfaces */
 
 /* Operations on streams (FILE) */
 
-EXTERN void   clearerr(register FILE *stream);
-EXTERN int    fclose(FAR FILE *stream);
-EXTERN int    fflush(FAR FILE *stream);
-EXTERN int    feof(FAR FILE *stream);
-EXTERN int    ferror(FAR FILE *stream);
-EXTERN int    fileno(FAR FILE *stream);
-EXTERN int    fgetc(FAR FILE *stream);
-EXTERN int    fgetpos(FAR FILE *stream, FAR fpos_t *pos);
-EXTERN char  *fgets(FAR char *s, int n, FAR FILE *stream);
-EXTERN FAR FILE *fopen(FAR const char *path, FAR const char *type);
-EXTERN int    fprintf(FAR FILE *stream, FAR const char *format, ...);
-EXTERN int    fputc(int c, FAR FILE *stream);
-EXTERN int    fputs(FAR const char *s, FAR FILE *stream);
-EXTERN size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream);
-EXTERN int    fseek(FAR FILE *stream, long int offset, int whence);
-EXTERN int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
-EXTERN long   ftell(FAR FILE *stream);
-EXTERN size_t fwrite(FAR const void *ptr, size_t size, size_t n_items, FAR FILE *stream);
-EXTERN FAR char *gets(FAR char *s);
-EXTERN int    ungetc(int c, FAR FILE *stream);
+void   clearerr(register FILE *stream);
+int    fclose(FAR FILE *stream);
+int    fflush(FAR FILE *stream);
+int    feof(FAR FILE *stream);
+int    ferror(FAR FILE *stream);
+int    fileno(FAR FILE *stream);
+int    fgetc(FAR FILE *stream);
+int    fgetpos(FAR FILE *stream, FAR fpos_t *pos);
+char  *fgets(FAR char *s, int n, FAR FILE *stream);
+FAR FILE *fopen(FAR const char *path, FAR const char *type);
+int    fprintf(FAR FILE *stream, FAR const char *format, ...);
+int    fputc(int c, FAR FILE *stream);
+int    fputs(FAR const char *s, FAR FILE *stream);
+size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream);
+int    fseek(FAR FILE *stream, long int offset, int whence);
+int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
+long   ftell(FAR FILE *stream);
+size_t fwrite(FAR const void *ptr, size_t size, size_t n_items, FAR FILE *stream);
+FAR char *gets(FAR char *s);
+int    ungetc(int c, FAR FILE *stream);
 
 /* Operations on the stdout stream, buffers, paths, and the whole printf-family */
 
-EXTERN int    printf(const char *format, ...);
-EXTERN int    puts(FAR const char *s);
-EXTERN int    rename(FAR const char *oldpath, FAR const char *newpath);
-EXTERN int    sprintf(FAR char *buf, const char *format, ...);
-EXTERN int    asprintf (FAR char **ptr, const char *fmt, ...);
-EXTERN int    snprintf(FAR char *buf, size_t size, const char *format, ...);
-EXTERN int    sscanf(const char *buf, const char *fmt, ...);
-EXTERN void   perror(FAR const char *s);
+int    printf(const char *format, ...);
+int    puts(FAR const char *s);
+int    rename(FAR const char *oldpath, FAR const char *newpath);
+int    sprintf(FAR char *buf, const char *format, ...);
+int    asprintf (FAR char **ptr, const char *fmt, ...);
+int    snprintf(FAR char *buf, size_t size, const char *format, ...);
+int    sscanf(const char *buf, const char *fmt, ...);
+void   perror(FAR const char *s);
 
-EXTERN int    vprintf(FAR const char *format, va_list ap);
-EXTERN int    vfprintf(FAR FILE *stream, const char *format, va_list ap);
-EXTERN int    vsprintf(FAR char *buf, const char *format, va_list ap);
-EXTERN int    avsprintf(FAR char **ptr, const char *fmt, va_list ap);
-EXTERN int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
-EXTERN int    vsscanf(char *buf, const char *s, va_list ap);
+int    vprintf(FAR const char *format, va_list ap);
+int    vfprintf(FAR FILE *stream, const char *format, va_list ap);
+int    vsprintf(FAR char *buf, const char *format, va_list ap);
+int    avsprintf(FAR char **ptr, const char *fmt, va_list ap);
+int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
+int    vsscanf(char *buf, const char *s, va_list ap);
 
 /* POSIX-like File System Interfaces */
 
-EXTERN FAR FILE *fdopen(int fd, FAR const char *type);
-EXTERN int    statfs(FAR const char *path, FAR struct statfs *buf);
+FAR FILE *fdopen(int fd, FAR const char *type);
+int    statfs(FAR const char *path, FAR struct statfs *buf);
 
 #undef EXTERN
 #if defined(__cplusplus)

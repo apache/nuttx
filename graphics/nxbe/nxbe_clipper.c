@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_clipper.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,9 @@
 #include <stdlib.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nxglib.h>
+
 #include "nxbe.h"
 
 /****************************************************************************
@@ -113,7 +115,7 @@ static inline void nxbe_pushrectangle(FAR struct nxbe_clipstack_s *stack,
       int mxrects = stack->mxrects ? 2 * stack->mxrects : NX_INITIAL_STACKSIZE;
       struct nxbe_cliprect_s *newstack;
 
-      newstack = realloc(stack->stack, sizeof(struct nxbe_cliprect_s) * mxrects);
+      newstack = krealloc(stack->stack, sizeof(struct nxbe_cliprect_s) * mxrects);
       if (!newstack)
         {
           gdbg("Failed to reallocate stack\n");
@@ -258,7 +260,7 @@ void nxbe_clipper(FAR struct nxbe_window_s *wnd,
 
   if (stack.stack)
     {
-      free(stack.stack);
+      kfree(stack.stack);
     }
 }
 

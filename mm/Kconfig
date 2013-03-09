@@ -27,6 +27,12 @@ config MM_KERNEL_HEAP
 		necessary.  If you wish to secure the kernel data as well, then
 		this option should be selected.
 
+		The kernel heap size that is used is provided a a platform-specific
+		up_allocate_kheap() interface.  This configuration setting is made
+		available to that platform specific code.  However, the
+		up_allocate_kheap() interface may chose to ignore this setting if it
+		has a more appropriate heap allocation strategy.
+
 config MM_KERNEL_HEAPSIZE
 	int "Kernal heap size"
 	default 8192

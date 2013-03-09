@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_closedir.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -135,13 +135,13 @@ int closedir(FAR DIR *dirp)
 
   /* Then release the container */
 
-  kfree(idir);
+  kufree(idir);
   return OK;
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 errout_with_inode:
   inode_release(inode);
-  kfree(idir);
+  kufree(idir);
 #endif
 
 errout:

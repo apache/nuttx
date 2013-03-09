@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nx_connect.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nx.h>
+
 #include "nxfe.h"
 
 /****************************************************************************
@@ -130,7 +132,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
 
   /* Allocate the NX client structure */
 
-  conn = (FAR struct nxfe_conn_s *)zalloc(sizeof(struct nxfe_conn_s));
+  conn = (FAR struct nxfe_conn_s *)kzalloc(sizeof(struct nxfe_conn_s));
   if (!conn)
     {
       errno = ENOMEM;
@@ -213,7 +215,7 @@ errout_with_wmq:
 errout_with_rmq:
   mq_close(conn->crdmq);
 errout_with_conn:
-  free(conn);
+  kfree(conn);
 errout:
   return NULL;
 }

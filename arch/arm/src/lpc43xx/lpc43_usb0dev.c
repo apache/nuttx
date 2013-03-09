@@ -58,6 +58,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -1949,7 +1950,7 @@ static FAR struct usbdev_req_s *lpc43_epallocreq(FAR struct usbdev_ep_s *ep)
 #endif
   usbtrace(TRACE_EPALLOCREQ, ((FAR struct lpc43_ep_s *)ep)->epphy);
 
-  privreq = (FAR struct lpc43_req_s *)malloc(sizeof(struct lpc43_req_s));
+  privreq = (FAR struct lpc43_req_s *)kmalloc(sizeof(struct lpc43_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_ALLOCFAIL), 0);
@@ -1981,7 +1982,7 @@ static void lpc43_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 #endif
 
   usbtrace(TRACE_EPFREEREQ, ((FAR struct lpc43_ep_s *)ep)->epphy);
-  free(privreq);
+  kfree(privreq);
 }
 
 /*******************************************************************************
@@ -2000,7 +2001,7 @@ static void *lpc43_epallocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
 #ifdef CONFIG_USBDEV_DMAMEMORY
   return usbdev_dma_alloc(bytes);
 #else
-  return malloc(bytes);
+  return kmalloc(bytes);
 #endif
 }
 #endif
@@ -2021,7 +2022,7 @@ static void lpc43_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 #ifdef CONFIG_USBDEV_DMAMEMORY
   usbdev_dma_free(buf);
 #else
-  free(buf);
+  kfree(buf);
 #endif
 }
 #endif

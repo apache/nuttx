@@ -222,7 +222,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
           /* Allocate the IO buffer */
 
-          stream->fs_bufstart = kmalloc(CONFIG_STDIO_BUFFER_SIZE);
+          stream->fs_bufstart = kumalloc(CONFIG_STDIO_BUFFER_SIZE);
           if (!stream->fs_bufstart)
             {
               err = ENOMEM;

@@ -166,7 +166,7 @@ int exec_module(FAR const struct binary_s *binp)
   /* Allocate the stack for the new task */
 
 #ifndef CONFIG_CUSTOM_STACK
-  stack = (FAR uint32_t*)kmalloc(binp->stacksize);
+  stack = (FAR uint32_t*)kumalloc(binp->stacksize);
   if (!tcb)
     {
       err = ENOMEM;
@@ -246,7 +246,7 @@ errout_with_stack:
 #ifndef CONFIG_CUSTOM_STACK
   tcb->cmn.stack_alloc_ptr = NULL;
   sched_releasetcb(&tcb->cmn);
-  kfree(stack);
+  kufree(stack);
 #else
   sched_releasetcb(&tcb->cmn);
 #endif

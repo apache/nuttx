@@ -1472,7 +1472,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
   else if (priv->iosize < geo.geo_sectorsize)
     {
       void *tmp;
-      tmp = (uint8_t*)realloc(priv->iobuffer, geo.geo_sectorsize);
+      tmp = (uint8_t*)krealloc(priv->iobuffer, geo.geo_sectorsize);
       if (!tmp)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_REALLOCIOBUFFER), geo.geo_sectorsize);

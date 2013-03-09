@@ -35,17 +35,24 @@
 
 -include $(TOPDIR)/Make.defs
 
+# Core allocator logic
+
 ASRCS  = 
 CSRCS  = mm_initialize.c mm_sem.c  mm_addfreechunk.c mm_size2ndx.c
 CSRCS += mm_shrinkchunk.c mm_malloc.c mm_zalloc.c mm_calloc.c mm_realloc.c
 CSRCS += mm_memalign.c mm_free.c mm_mallinfo.c
 
-CSRCS += umm_initialize.c umm_addregion.c umm_semaphore.c
+# Allocator instances
 
+CSRCS += mm_user.c
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
-CSRCS += kmm_initialize.c kmm_addregion.c kmm_semaphore.c
-CSRCS += kmm_kmalloc.c kmm_kzalloc.c kmm_krealloc.c kmm_kfree.c
+CSRCS += mm_kerneluser.c
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CSRCS += mm_kernel.c
 endif
+endif
+
+# An optional granule allocator
 
 ifeq ($(CONFIG_GRAN),y)
 CSRCS += mm_graninit.c mm_granalloc.c mm_granfree.c mm_grancritical.c

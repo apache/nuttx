@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <cstdlib>
 #include <cassert>
 
 #include "libxx_internal.hxx"
@@ -91,7 +90,7 @@ extern "C"
     DEBUGASSERT(alloc && alloc->func);
 
     alloc->func(alloc->arg);
-    free(alloc);
+    lib_free(alloc);
   }
 #endif
 
@@ -124,7 +123,7 @@ extern "C"
       // information.
 
       FAR struct __cxa_atexit_s *alloc =
-        (FAR struct __cxa_atexit_s *)malloc(sizeof(struct __cxa_atexit_s));
+        (FAR struct __cxa_atexit_s *)lib_malloc(sizeof(struct __cxa_atexit_s));
 
       if (alloc)
         {

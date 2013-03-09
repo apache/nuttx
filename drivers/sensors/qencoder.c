@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/sensors/qencoder.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/sensors/qencoder.h>
@@ -381,14 +382,14 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower)
 
   /* Allocate the upper-half data structure */
 
-  upper = (FAR struct qe_upperhalf_s *)zalloc(sizeof(struct qe_upperhalf_s));
+  upper = (FAR struct qe_upperhalf_s *)kzalloc(sizeof(struct qe_upperhalf_s));
   if (!upper)
     {
       qedbg("Allocation failed\n");
       return -ENOMEM;
     }
 
-  /* Initialize the PWM device structure (it was already zeroed by zalloc()) */
+  /* Initialize the PWM device structure (it was already zeroed by kzalloc()) */
 
   sem_init(&upper->exclsem, 0, 1);
   upper->lower = lower;

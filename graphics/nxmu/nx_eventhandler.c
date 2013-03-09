@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nx_eventhandler.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nx.h>
+
 #include "nxfe.h"
 
 /****************************************************************************
@@ -96,7 +98,7 @@ static inline void nx_disconnected(FAR struct nxfe_conn_s *conn)
 
   /* And free the client structure */
 
-  free(conn);
+  kfree(conn);
 }
 
 /****************************************************************************

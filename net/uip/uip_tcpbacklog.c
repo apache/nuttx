@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpbacklog.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <queue.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-tcp.h>
 
@@ -113,7 +114,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
 
       /* Then allocate that much */
 
-      bls = (FAR struct uip_backlog_s *)zalloc(size);
+      bls = (FAR struct uip_backlog_s *)kzalloc(size);
       if (!bls)
         {
           nlldbg("Failed to allocate backlog\n");
@@ -203,7 +204,7 @@ int uip_backlogdestroy(FAR struct uip_conn *conn)
 
        /* Then free the entire backlog structure */
 
-       free(blg);
+       lib_free(blg);
     }
 
   return OK;

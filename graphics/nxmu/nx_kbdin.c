@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxmu/nx_kbdin.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nx.h>
+
 #include "nxfe.h"
 
 #ifdef CONFIG_NX_KBD
@@ -96,7 +98,7 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch)
    */
 
   size = sizeof(struct nxsvrmsg_kbdin_s) + nch - 1;
-  outmsg = (FAR struct nxsvrmsg_kbdin_s *)malloc(size);
+  outmsg = (FAR struct nxsvrmsg_kbdin_s *)kmalloc(size);
   if (!outmsg)
     {
       errno = ENOMEM;
@@ -115,7 +117,7 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch)
 
   ret = nxmu_sendserver(conn, outmsg, size);
 
-  free(outmsg);
+  kfree(outmsg);
   return ret;
 }
 

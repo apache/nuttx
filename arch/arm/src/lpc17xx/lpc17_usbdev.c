@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -2658,7 +2659,7 @@ static FAR struct usbdev_req_s *lpc17_epallocreq(FAR struct usbdev_ep_s *ep)
 #endif
   usbtrace(TRACE_EPALLOCREQ, ((FAR struct lpc17_ep_s *)ep)->epphy);
 
-  privreq = (FAR struct lpc17_req_s *)malloc(sizeof(struct lpc17_req_s));
+  privreq = (FAR struct lpc17_req_s *)kmalloc(sizeof(struct lpc17_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(LPC17_TRACEERR_ALLOCFAIL), 0);
@@ -2690,7 +2691,7 @@ static void lpc17_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 #endif
   usbtrace(TRACE_EPFREEREQ, ((FAR struct lpc17_ep_s *)ep)->epphy);
 
-  free(privreq);
+  kfree(privreq);
 }
 
 /*******************************************************************************
@@ -2711,7 +2712,7 @@ static FAR void *lpc17_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16_t nbytes
 
   usbtrace(TRACE_EPALLOCBUFFER, privep->epphy);
 
-  /* Find a free  DMA description */
+  /* Find a free DMA description */
 
 #error "LOGIC INCOMPLETE"
 
@@ -2728,7 +2729,7 @@ static FAR void *lpc17_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16_t nbytes
 #else
 
   usbtrace(TRACE_EPALLOCBUFFER, privep->epphy);
-  return malloc(bytes);
+  return kmalloc(bytes);
 
 #endif
 }
@@ -2767,7 +2768,7 @@ static void lpc17_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 #else
 
   usbtrace(TRACE_EPFREEBUFFER, privep->epphy);
-  free(buf);
+  kfree(buf);
 
 #endif
 }

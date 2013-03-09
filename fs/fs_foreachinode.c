@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_foreachinode.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 
 #include "fs_internal.h"
@@ -187,7 +188,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
 
   /* Allocate the mountpoint info structure */
 
-  info = (FAR struct inode_path_s *)malloc(sizeof(struct inode_path_s));
+  info = (FAR struct inode_path_s *)kmalloc(sizeof(struct inode_path_s));
   if (!info)
     {
       return -ENOMEM;
@@ -207,7 +208,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
 
   /* Free the info structure and return the result */
 
-  free(info);
+  kfree(info);
   return ret;
 
 #else

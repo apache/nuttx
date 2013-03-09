@@ -257,7 +257,7 @@ int group_initialize(FAR struct task_tcb_s *tcb)
   group->tg_members = (FAR pid_t *)kmalloc(GROUP_INITIAL_MEMBERS*sizeof(pid_t));
   if (!group->tg_members)
     {
-      free(group);
+      kfree(group);
       return -ENOMEM;
     }
 

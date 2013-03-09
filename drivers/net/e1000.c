@@ -52,6 +52,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arp.h>

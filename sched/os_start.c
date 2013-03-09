@@ -305,16 +305,26 @@ void os_start(void)
 
   /* Initialize the memory manager */
 
-#ifndef CONFIG_HEAP_BASE
   {
     FAR void *heap_start;
     size_t heap_size;
+
+    /* Get the user-mode heap from the platform specific code and configure
+     * the user-mode memory allocator.
+     */
+
     up_allocate_heap(&heap_start, &heap_size);
+    kumm_initialize(heap_start, heap_size);
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+    /* Get the kernel-mode heap from the platform specific code and configure
+     * the kernel-mode memory allocator.
+     */
+
+    up_allocate_kheap(&heap_start, &heap_size);
     kmm_initialize(heap_start, heap_size);
-  }
-#else
-  kmm_initialize((void*)CONFIG_HEAP_BASE, CONFIG_HEAP_SIZE);
 #endif
+  }
 
   /* Initialize tasking data structures */
 

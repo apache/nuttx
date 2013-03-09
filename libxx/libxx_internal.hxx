@@ -1,7 +1,7 @@
 //***************************************************************************
 // lib/libxx_internal.h
 //
-//   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,26 @@
 //***************************************************************************
 // Definitions
 //***************************************************************************
+
+// The NuttX C library an be build in two modes: (1) as a standard, C-libary
+// that can be used by normal, user-space applications, or (2) as a special,
+// kernel-mode C-library only used within the OS.  If NuttX is not being
+// built as separated kernel- and user-space modules, then only the first
+// mode is supported.
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
+#  include <nuttx/kmalloc.h>
+#  define lib_malloc(s)    kmalloc(s)
+#  define lib_zalloc(s)    kzalloc(s)
+#  define lib_realloc(p,s) krealloc(p,s)
+#  define lib_free(p)      kfree(p)
+#else
+#  include <cstdlib>
+#  define lib_malloc(s)    malloc(s)
+#  define lib_zalloc(s)    zalloc(s)
+#  define lib_realloc(p,s) realloc(p,s)
+#  define lib_free(p)      free(p)
+#endif
 
 //***************************************************************************
 // Public Types

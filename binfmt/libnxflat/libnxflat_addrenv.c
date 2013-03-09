@@ -69,7 +69,7 @@
  *
  * Description:
  *   Allocate memory for the ELF image (elfalloc). If CONFIG_ADDRENV=n,
- *   elfalloc will be allocated using kzalloc().  If CONFIG_ADDRENV-y, then
+ *   elfalloc will be allocated using kuzalloc().  If CONFIG_ADDRENV-y, then
  *   elfalloc will be allocated using up_addrenv_create().  In either case,
  *   there will be a unique instance of elfalloc (and stack) for each
  *   instance of a process.
@@ -164,7 +164,7 @@ errout_with_dspace:
 #else
   /* Allocate (and zero) memory to hold the ELF image */
 
-  dspace->region = (FAR uint8_t *)kzalloc(envsize);
+  dspace->region = (FAR uint8_t *)kuzalloc(envsize);
   if (!dspace->region)
     {
       kfree(dspace);
@@ -222,7 +222,7 @@ void nxflat_addrenv_free(FAR struct nxflat_loadinfo_s *loadinfo)
 
       if (dspace->region)
         {
-          kfree(dspace->region);
+          kufree(dspace->region);
         }
 #endif
 

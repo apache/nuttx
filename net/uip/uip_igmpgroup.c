@@ -2,7 +2,7 @@
  * net/uip/uip_igmpgroup.c
  * IGMP group data structure management logic
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -114,7 +114,7 @@
  * Private Data
  ****************************************************************************/
 
-/* malloc() cannot be called from an interrupt handler.  To work around this,
+/* kmalloc() cannot be called from an interrupt handler.  To work around this,
  * a small number of IGMP groups are preallocated just for use in interrupt
  * handling logic.
  */
@@ -139,13 +139,13 @@ static FAR sq_queue_t g_freelist;
  *   Allocate a new group from heap memory.
  *
  * Assumptions:
- *   Calls malloc and so cannot be called from an interrupt handler.
+ *   Calls kmalloc and so cannot be called from an interrupt handler.
  *
  ****************************************************************************/
 
 static inline FAR struct igmp_group_s *uip_grpheapalloc(void)
 {
-  return (FAR struct igmp_group_s *)zalloc(sizeof(struct igmp_group_s));
+  return (FAR struct igmp_group_s *)kzalloc(sizeof(struct igmp_group_s));
 }
 
 /****************************************************************************

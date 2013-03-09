@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/pwm.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/pwm.h>
@@ -587,14 +588,14 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
 
   /* Allocate the upper-half data structure */
 
-  upper = (FAR struct pwm_upperhalf_s *)zalloc(sizeof(struct pwm_upperhalf_s));
+  upper = (FAR struct pwm_upperhalf_s *)kzalloc(sizeof(struct pwm_upperhalf_s));
   if (!upper)
     {
       pwmdbg("Allocation failed\n");
       return -ENOMEM;
     }
 
-  /* Initialize the PWM device structure (it was already zeroed by zalloc()) */
+  /* Initialize the PWM device structure (it was already zeroed by kzalloc()) */
 
   sem_init(&upper->exclsem, 0, 1);
 #ifdef CONFIG_PWM_PULSECOUNT

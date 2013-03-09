@@ -43,7 +43,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nx.h>
+
 #include "nxfe.h"
 
 /****************************************************************************
@@ -81,10 +83,10 @@
  *   inheritance:  The caller's window structure may include extensions that
  *   are not visible to NX.
  *
- *   NOTE:  wnd must have been allocated using malloc() (or related allocators)
+ *   NOTE:  wnd must have been allocated using kmalloc() (or related allocators)
  *   Once provided to nxfe_constructwindow() that memory is owned and managed
  *   by NX.  On certain error conditions or when the window is closed, NX will
- *   free() the window.
+ *   free the window.
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
@@ -113,7 +115,7 @@ int nxfe_constructwindow(NXHANDLE handle, FAR struct nxbe_window_s *wnd,
 
   if (!conn || !cb)
     {
-      free(wnd);
+      kfree(wnd);
       errno = EINVAL;
       return ERROR;
     }

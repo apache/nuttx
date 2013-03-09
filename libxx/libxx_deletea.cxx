@@ -1,7 +1,7 @@
 //***************************************************************************
 // libxx/libxx_newa.cxx
 //
-//   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,8 @@
 //***************************************************************************
 
 #include <nuttx/config.h>
-#include <cstdlib>
+
+#include "libxx_internal.hxx"
 
 //***************************************************************************
 // Definitions
@@ -58,5 +59,5 @@
 
 void operator delete[](void *ptr)
 {
-  free(ptr);
+  lib_free(ptr);
 }

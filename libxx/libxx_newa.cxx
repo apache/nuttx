@@ -39,8 +39,9 @@
 
 #include <nuttx/config.h>
 #include <cstddef>
-#include <cstdlib>
 #include <debug.h>
+
+#include "libxx_internal.hxx"
 
 //***************************************************************************
 // Definitions
@@ -84,7 +85,7 @@ void *operator new[](unsigned int nbytes)
 
   // Perform the allocation
 
-  void *alloc = malloc(nbytes);
+  void *alloc = lib_malloc(nbytes);
 
 #ifdef CONFIG_DEBUG
   if (alloc == 0)

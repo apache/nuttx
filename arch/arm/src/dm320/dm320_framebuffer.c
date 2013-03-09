@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/dm320/dm320_framebuffer.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/fb.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nxglib.h>
 
 #include "up_arch.h"
@@ -674,10 +675,10 @@ static int dm320_allocvideomemory(void)
 {
 #ifndef CONFIG_DM320_VID0_DISABLE
 #ifndef CONFIG_DM320_DISABLE_PINGPONG
-  g_vid0base   = (FAR void *)malloc(2 * DM320_VID0_FBLEN);
+  g_vid0base   = (FAR void *)kmalloc(2 * DM320_VID0_FBLEN);
   g_vid0ppbase = (FAR char*)g_vid0base + DM320_VID0_FBLEN;
 #else
-  g_vid0base   = (FAR void *)malloc(DM320_VID0_FBLEN);
+  g_vid0base   = (FAR void *)kmalloc(DM320_VID0_FBLEN);
 #endif
   if (!g_vid0base)
     {
@@ -686,7 +687,7 @@ static int dm320_allocvideomemory(void)
 #endif
 
 #ifndef CONFIG_DM320_VID1_DISABLE
-  g_vid1base = (FAR void *)malloc(DM320_VID1_FBLEN);
+  g_vid1base = (FAR void *)kmalloc(DM320_VID1_FBLEN);
   if (!g_vid1base)
     {
       goto errout;
@@ -694,7 +695,7 @@ static int dm320_allocvideomemory(void)
 #endif
 
 #ifndef CONFIG_DM320_OSD0_DISABLE
-  g_osd0base = (FAR void *)malloc(DM320_OSD0_FBLEN);
+  g_osd0base = (FAR void *)kmalloc(DM320_OSD0_FBLEN);
   if (!g_osd0base)
     {
       goto errout;
@@ -702,7 +703,7 @@ static int dm320_allocvideomemory(void)
 #endif
 
 #ifndef CONFIG_DM320_OSD1_DISABLE
-  g_osd1base = (FAR void *)malloc(DM320_OSD1_FBLEN);
+  g_osd1base = (FAR void *)kmalloc(DM320_OSD1_FBLEN);
   if (!g_osd1base)
     {
       goto errout;
@@ -725,7 +726,7 @@ static void dm320_freevideomemory(void)
 #ifndef CONFIG_DM320_VID0_DISABLE
   if (g_vid0base)
     {
-      free(g_vid0base);
+      kfree(g_vid0base);
       g_vid0base = NULL;
 #ifndef CONFIG_DM320_DISABLE_PINGPONG
       g_vid0ppbase = NULL;
@@ -736,7 +737,7 @@ static void dm320_freevideomemory(void)
 #ifndef CONFIG_DM320_VID1_DISABLE
   if (g_vid1base != 0)
     {
-      free(g_vid1base);
+      kfree(g_vid1base);
       g_vid1base = NULL;
     }
 #endif
@@ -744,7 +745,7 @@ static void dm320_freevideomemory(void)
 #ifndef CONFIG_DM320_OSD0_DISABLE
   if (g_osd0base != 0)
     {
-      free(g_osd0base);
+      kfree(g_osd0base);
       g_osd0base = NULL;
     }
 #endif
@@ -752,7 +753,7 @@ static void dm320_freevideomemory(void)
 #ifndef CONFIG_DM320_OSD1_DISABLE
   if (g_osd1base != 0)
     {
-      free(g_osd1base);
+      kfree(g_osd1base);
       g_osd1base = NULL;
     }
 #endif

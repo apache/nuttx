@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_opendir.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -232,7 +232,7 @@ FAR DIR *opendir(FAR const char *path)
    * container.
    */
 
-  dir = (FAR struct fs_dirent_s *)kzalloc(sizeof(struct fs_dirent_s));
+  dir = (FAR struct fs_dirent_s *)kuzalloc(sizeof(struct fs_dirent_s));
   if (!dir)
     {
       /* Insufficient memory to complete the operation.*/
@@ -303,7 +303,7 @@ FAR DIR *opendir(FAR const char *path)
   /* Nasty goto's make error handling simpler */
 
 errout_with_direntry:
-  kfree(dir);
+  kufree(dir);
 
 errout_with_semaphore:
   inode_semgive();

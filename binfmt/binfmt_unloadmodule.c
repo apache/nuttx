@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_loadmodule.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/binfmt.h>
 
 #include "binfmt_internal.h"
@@ -183,7 +184,7 @@ int unload_module(FAR const struct binary_s *binp)
           if (binp->alloc[i])
             {
               bvdbg("Freeing alloc[%d]: %p\n", i, binp->alloc[i]);
-              free((FAR void *)binp->alloc[i]);
+              kufree((FAR void *)binp->alloc[i]);
             }
         }
 

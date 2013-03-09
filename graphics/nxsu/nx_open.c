@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxsu/nx_open.c
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nx.h>
+
 #include "nxfe.h"
 
 /****************************************************************************
@@ -195,7 +197,7 @@ NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev)
 
   /* Allocate the NX state structure */
 
-  fe = (FAR struct nxfe_state_s *)zalloc(sizeof(struct nxfe_state_s));
+  fe = (FAR struct nxfe_state_s *)kzalloc(sizeof(struct nxfe_state_s));
   if (!fe)
     {
       errno = ENOMEM;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpreadahead.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,7 @@ void uip_tcpreadaheadinit(void)
  *   Allocate a TCP read-ahead buffer by taking a pre-allocated buffer from
  *   the free list.  This function is called from TCP logic when new,
  *   incoming TCP data is received but there is no user logic recving the
- *   the data.  Note: malloc() cannot be used because this function is
+ *   the data.  Note: kmalloc() cannot be used because this function is
  *   called from interrupt level.
  *
  * Assumptions:

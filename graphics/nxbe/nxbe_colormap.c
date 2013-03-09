@@ -45,6 +45,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
+
 #include "nxbe.h"
 
 /****************************************************************************
@@ -100,11 +102,12 @@ int nxbe_colormap(FAR NX_DRIVERTYPE *dev)
    */
 
   size  = 3 * CONFIG_NX_NCOLORS * sizeof(uint8_t);
-  alloc = (uint8_t*)malloc(size);
+  alloc = (uint8_t*)kmalloc(size);
   if (alloc == NULL)
     {
       return -ENOMEM;
     }
+
   memset(alloc, 0xff, size);
 
   /* Then get pointers to each color table */
@@ -149,7 +152,7 @@ int nxbe_colormap(FAR NX_DRIVERTYPE *dev)
 
   ret = dev->putcmap(dev, &cmap);
 
-  free(alloc);
+  kfree(alloc);
   return ret;
 }
 #endif

@@ -197,10 +197,8 @@ int os_bringup(void)
    * first user-mode thead.
    *
    * In a kernel build (CONFIG_NUTTX_KERNEL), it is expected that this user
-   * initialization function will:
-   *
-   * - Call mm_initialized() to initialize the user memmory manager, and
-   * - Is so configured, call work_usrstart() to start the user work thread.
+   * initialization function will call work_usrstart() to start the user
+   * work thread (if so configured).
    */
 
   svdbg("Starting init thread\n");

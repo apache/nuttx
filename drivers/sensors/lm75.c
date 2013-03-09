@@ -2,7 +2,7 @@
  * drivers/sensors/lm75.c
  * Character driver for the STMicro LM-75 Temperature Sensor
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c.h>
 #include <nuttx/sensors/lm75.h>
@@ -513,7 +514,7 @@ int lm75_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c, uint8_t ad
 
   /* Initialize the LM-75 device structure */
 
-  priv = (FAR struct lm75_dev_s *)malloc(sizeof(struct lm75_dev_s));
+  priv = (FAR struct lm75_dev_s *)kmalloc(sizeof(struct lm75_dev_s));
   if (!priv)
     {
       lm75dbg("Failed to allocate instance\n");
@@ -530,8 +531,9 @@ int lm75_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c, uint8_t ad
   if (ret < 0)
     {
       lm75dbg("Failed to register driver: %d\n", ret);
-      free(priv);
+      kfree(priv);
     }
+
   return ret;
 }
 #endif /* CONFIG_I2C && CONFIG_I2C_LM75 */

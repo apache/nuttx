@@ -1,5 +1,5 @@
 /************************************************************************
- * mm/umm_initialize.c
+ * mm/mm_user.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,6 +51,14 @@
  ************************************************************************/
 
 /************************************************************************
+ * Public Data
+ ************************************************************************/
+
+/* This is the user heap */
+
+struct mm_heap_s g_mmheap;
+
+/************************************************************************
  * Private Functions
  ************************************************************************/
 
@@ -62,7 +70,9 @@
  * Name: umm_initialize
  *
  * Description:
- *   This is a simple wrapper for the mm_initialize() function.
+ *   This is a simple wrapper for the mm_initialize() function.  This
+ *   function is exported from the user-space blob so that the kernel
+ *   can initialize the user-mode allocator.
  *
  * Parameters:
  *   heap_start - Address of the beginning of the (initial) memory region
@@ -76,6 +86,70 @@
 void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
   mm_initialize(&g_mmheap, heap_start, heap_size);
+}
+
+/************************************************************************
+ * Name: umm_addregion
+ *
+ * Description:
+ *   This is a simple wrapper for the mm_addregion() function.  This
+ *   function is exported from the user-space blob so that the kernel
+ *   can initialize the user-mode allocator.
+ *
+ * Parameters:
+ *   heap_start - Address of the beginning of the memory region
+ *   heap_size  - The size (in bytes) if the memory region.
+ *
+ * Return Value:
+ *   None
+ *
+ ************************************************************************/
+
+void umm_addregion(FAR void *heap_start, size_t heap_size)
+{
+  mm_addregion(&g_mmheap, heap_start, heap_size);
+}
+
+/************************************************************************
+ * Name: umm_trysemaphore
+ *
+ * Description:
+ *   This is a simple wrapper for the mm_trysemaphore() function.  This
+ *   function is exported from the user-space blob so that the kernel
+ *   can manage the user-mode allocator.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   OK on success; a negated errno on failure
+ *
+ ************************************************************************/
+
+int umm_trysemaphore(void)
+{
+  return mm_trysemaphore(&g_mmheap);
+}
+
+/************************************************************************
+ * Name: umm_givesemaphore
+ *
+ * Description:
+ *   This is a simple wrapper for the mm_givesemaphore() function.  This
+ *   function is exported from the user-space blob so that the kernel
+ *   can manage the user-mode allocator.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   OK on success; a negated errno on failure
+ *
+ ************************************************************************/
+
+void umm_givesemaphore(void)
+{
+  mm_givesemaphore(&g_mmheap);
 }
 
 #endif /* !CONFIG_NUTTX_KERNEL || !__KERNEL__ */

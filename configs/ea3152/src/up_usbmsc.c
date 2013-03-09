@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/mkfatfs.h>
 #include <nuttx/ramdisk.h>
@@ -88,7 +89,7 @@ int usbmsc_archinitialize(void)
   uint8_t *pbuffer;
   int ret;
 
-  pbuffer = (uint8_t *) malloc (BUFFER_SIZE);
+  pbuffer = (uint8_t *)kmalloc(BUFFER_SIZE);
   if (!pbuffer)
     {
       lowsyslog("usbmsc_archinitialize: Failed to allocate ramdisk of size %d\n",
@@ -107,7 +108,7 @@ int usbmsc_archinitialize(void)
     {
       printf("create_ramdisk: Failed to register ramdisk at %s: %d\n",
              g_source, -ret);
-      free(pbuffer);
+      kfree(pbuffer);
       return ret;
     }
 
@@ -118,7 +119,7 @@ int usbmsc_archinitialize(void)
     {
       printf("create_ramdisk: Failed to create FAT filesystem on ramdisk at %s\n",
              g_source);
-      /* free(pbuffer); -- RAM disk is registered */
+      /* kfree(pbuffer); -- RAM disk is registered */
       return ret;
     }
 

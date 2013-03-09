@@ -45,6 +45,8 @@
 
 #include <nuttx/spawn.h>
 
+#include "lib_internal.h"
+
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
@@ -86,7 +88,7 @@ int posix_spawn_file_actions_destroy(FAR posix_spawn_file_actions_t *file_action
       /* Get the pointer to the next element before destroying the current one */
 
       next = curr->flink;
-      free(curr);
+      lib_free(curr);
     }
 
   /* Mark the list empty */

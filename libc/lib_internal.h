@@ -104,10 +104,19 @@
  * Public Variables
  ****************************************************************************/
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /* Debug output is initially disabled */
 
 #ifdef CONFIG_SYSLOG_ENABLE
-extern bool g_syslogenable;
+EXTERN bool g_syslogenable;
 #endif
 
 /****************************************************************************
@@ -198,6 +207,11 @@ double lib_expi(size_t n);
 
 #ifdef CONFIG_LIBM
 float lib_sqrtapprox(float x);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __LIB_LIB_INTERNAL_H */

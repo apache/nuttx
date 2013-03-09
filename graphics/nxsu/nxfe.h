@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxsu/nxfe.h
  *
- *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,10 +103,10 @@ EXTERN const struct nx_callback_s g_bkgdcb;
  *   inheritance:  The caller's window structure may include extensions that
  *   are not visible to NX.
  *
- *   NOTE:  wnd must have been allocated using malloc() (or related allocators)
+ *   NOTE:  wnd must have been allocated using kmalloc() (or related allocators)
  *   Once provided to nxfe_constructwindow() that memory is owned and managed
  *   by NX.  On certain error conditions or when the window is closed, NX will
- *   free() the window.
+ *   free the window.
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect

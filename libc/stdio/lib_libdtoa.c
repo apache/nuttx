@@ -44,6 +44,8 @@
  * Included Files
  ****************************************************************************/
 
+#include "lib_internal.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -293,7 +295,7 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
 #if 0
   if (digalloc)
     {
-      free(digalloc);
+      lib_free(digalloc);
     }
 #endif
 }

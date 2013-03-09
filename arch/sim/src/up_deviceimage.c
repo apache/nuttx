@@ -43,9 +43,13 @@
 # include <zlib.h>
 #else
 # include <nuttx/config.h>
+
 # include <stdlib.h>
 # include <debug.h>
 # include <zlib.h>
+
+# include <nuttx/kmalloc.h>
+
 # include "up_internal.h"
 #endif
 
@@ -55,6 +59,8 @@
 
 #ifdef VFAT_STANDALONE
 # define sdbg(format, arg...) printf(format, ##arg)
+# define kmalloc(size)        malloc(size)
+# define kfree(mem)           free(mem)
 #endif
 
 /****************************************************************************
@@ -224,7 +230,8 @@ char *up_deviceimage(void)
     /* Allocate a buffer to hold the decompressed buffer.  We may have
      * to reallocate this a few times to get the size right.
      */
-    pbuffer = (char*)malloc(bufsize);
+
+    pbuffer = (char*)kmalloc(bufsize);
 
     /* Set up the input buffer */
 
@@ -253,7 +260,7 @@ char *up_deviceimage(void)
             case Z_STREAM_ERROR:
                 sdbg("inflate FAILED: ret=%d msg=\"%s\"\n", ret, strm.msg ? strm.msg : "No message" );
                 (void)inflateEnd(&strm);
-                free(pbuffer);
+                kfree(pbuffer);
                 return NULL;
           }
 
@@ -265,10 +272,10 @@ char *up_deviceimage(void)
         if (strm.avail_out == 0)
           {
             int newbufsize = bufsize + 128*1024;
-            char *newbuffer = realloc(pbuffer, newbufsize);
+            char *newbuffer = krealloc(pbuffer, newbufsize);
             if (!newbuffer)
               {
-                free(pbuffer);
+                kfree(pbuffer);
                 return NULL;
               }
             else
@@ -285,10 +292,10 @@ char *up_deviceimage(void)
               */
 
              int newbufsize = bufsize - strm.avail_out;
-             char *newbuffer = realloc(pbuffer, newbufsize);
+             char *newbuffer = krealloc(pbuffer, newbufsize);
              if (!newbuffer)
                {
-                free(pbuffer);
+                kfree(pbuffer);
                 return NULL;
               }
             else
@@ -344,7 +351,7 @@ int main(int argc, char **argv, char **envp)
     if (deviceimage)
     {
         printf("Inflate SUCCEEDED\n");
-        free(deviceimage);
+        kfree(deviceimage);
         return 0;
     }
     else

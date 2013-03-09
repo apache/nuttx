@@ -47,6 +47,8 @@
 
 #include <nuttx/mm.h>
 
+#if !defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -73,9 +75,43 @@ extern "C"
  * be used for both the kernel- and user-mode objects.
  */
 
+/* This familiy of allocators is used to manage user-accessible memory
+ * from the kernel.
+ */
+
 #ifndef CONFIG_NUTTX_KERNEL
 
-# define kmm_initialize(h,s)    umm_initialize(h,s)
+# define kumm_initialize(h,s)    umm_initialize(h,s)
+# define kumm_addregion(h,s)     umm_addregion(h,s)
+# define kumm_trysemaphore()     umm_trysemaphore()
+# define kumm_givesemaphore()    umm_givesemaphore()
+
+# define kumalloc(s)             malloc(s)
+# define kuzalloc(s)             zalloc(s)
+# define kurealloc(p,s)          realloc(p,s)
+# define kufree(p)               free(p)
+
+#else
+
+/* This familiy of allocators is used to manage kernel protected memory */
+
+void kumm_initialize(FAR void *heap_start, size_t heap_size);
+void kumm_addregion(FAR void *heapstart, size_t heapsize);
+int  kumm_trysemaphore(void);
+void kumm_givesemaphore(void);
+
+FAR void *kumalloc(size_t size);
+FAR void *kuzalloc(size_t size);
+FAR void *kurealloc(FAR void *oldmem, size_t newsize);
+void kufree(FAR void *mem);
+
+#endif
+
+/* This familiy of allocators is used to manage kernel protected memory */
+
+#ifndef CONFIG_NUTTX_KERNEL
+
+# define kmm_initialize(h,s)    /* Initialization done by kumm_initialize */
 # define kmm_addregion(h,s)     umm_addregion(h,s)
 # define kmm_trysemaphore()     umm_trysemaphore()
 # define kmm_givesemaphore()    umm_givesemaphore()
@@ -85,6 +121,18 @@ extern "C"
 # define krealloc(p,s)          realloc(p,s)
 # define kfree(p)               free(p)
 
+#elif !defined(CONFIG_MM_KERNEL_HEAP)
+
+# define kmm_initialize(h,s)    /* Initialization done by kumm_initialize */
+# define kmm_addregion(h,s)     kumm_addregion(h,s)
+# define kmm_trysemaphore()     kumm_trysemaphore()
+# define kmm_givesemaphore()    kumm_givesemaphore()
+
+# define kmalloc(s)             kumalloc(s)
+# define kzalloc(s)             kuzalloc(s)
+# define krealloc(p,s)          kurealloc(p,s)
+# define kfree(p)               kufree(p)
+
 #else
 
 void kmm_initialize(FAR void *heap_start, size_t heap_size);
@@ -92,10 +140,12 @@ void kmm_addregion(FAR void *heapstart, size_t heapsize);
 int  kmm_trysemaphore(void);
 void kmm_givesemaphore(void);
 
-FAR void *kmalloc(size_t);
-FAR void *kzalloc(size_t);
-FAR void *krealloc(FAR void*, size_t);
-void kfree(FAR void*);
+FAR void *kmalloc(size_t size);
+FAR void *kzalloc(size_t size);
+FAR void *krealloc(FAR void *oldmem, size_t newsize);
+void kfree(FAR void *mem);
+
+bool kmm_heapmember(FAR void *mem);
 
 #endif
 
@@ -124,4 +174,5 @@ void sched_garbagecollection(void);
 }
 #endif
 
+#endif /* !CONFIG_NUTTX_KERNEL || __KERNEL__ */
 #endif /* __INCLUDE_NUTTX_KMALLOC_H */
