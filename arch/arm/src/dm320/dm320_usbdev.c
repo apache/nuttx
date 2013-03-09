@@ -1,7 +1,7 @@
 /*******************************************************************************
  * arch/arm/src/dm320/dm320_usbdev.c
  *
- *   Copyright (C) 2008-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -1936,7 +1937,7 @@ static FAR struct usbdev_req_s *dm320_epallocreq(FAR struct usbdev_ep_s *ep)
 #endif
   usbtrace(TRACE_EPALLOCREQ, ((FAR struct dm320_ep_s *)ep)->epphy);
 
-  privreq = (FAR struct dm320_req_s *)malloc(sizeof(struct dm320_req_s));
+  privreq = (FAR struct dm320_req_s *)kmalloc(sizeof(struct dm320_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(DM320_TRACEERR_ALLOCFAIL), 0);
@@ -1968,7 +1969,7 @@ static void dm320_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 #endif
 
   usbtrace(TRACE_EPFREEREQ, ((FAR struct dm320_ep_s *)ep)->epphy);
-  free(privreq);
+  kfree(privreq);
 }
 
 /*******************************************************************************
@@ -1987,7 +1988,7 @@ static void *dm320_epallocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
 #ifdef CONFIG_USBDEV_DMAMEMORY
   return usbdev_dma_alloc(bytes);
 #else
-  return malloc(bytes);
+  return kmalloc(bytes);
 #endif
 }
 #endif
@@ -2008,7 +2009,7 @@ static void dm320_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 #ifdef CONFIG_USBDEV_DMAMEMORY
   usbdev_dma_free(buf);
 #else
-  free(buf);
+  kfree(buf);
 #endif
 }
 #endif

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_i2c.c
  *
- *   Copyright(C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 #include <debug.h>
 
 #include <nuttx/i2c.h>
+#include <nuttx/kmalloc.h>
 #include <arch/board/board.h>
 
 #include <eZ8.h>  /* eZ8 Register definitions */
@@ -592,7 +593,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
 
   /* Now, allocate an I2C instance for this caller */
 
-  i2c = (FAR struct z8_i2cdev_s *)malloc(sizeof(FAR struct z8_i2cdev_s));
+  i2c = (FAR struct z8_i2cdev_s *)kmalloc(sizeof(FAR struct z8_i2cdev_s));
   if (i2c)
     {
       /* Initialize the allocated instance */
@@ -600,5 +601,6 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
       i2c->ops = &g_ops;
       i2c->brg = g_currbrg;
     }
+
   return (FAR struct i2c_dev_s *)i2c;
 } 

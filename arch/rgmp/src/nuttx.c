@@ -161,7 +161,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 void up_release_stack(struct tcb_s *dtcb)
 {
     if (dtcb->stack_alloc_ptr) {
-		free(dtcb->stack_alloc_ptr);
+		kfree(dtcb->stack_alloc_ptr);
     }
 
     dtcb->stack_alloc_ptr = NULL;
