@@ -51,6 +51,14 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += up_usbmsc.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS += up_adc.c
+endif
+
+ifeq ($(CONFIG_DAC),y)
+CSRCS += up_dac.c
+endif
+
 ifeq ($(CONFIG_CAN),y)
 CSRCS += up_can.c
 endif
