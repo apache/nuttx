@@ -1870,14 +1870,11 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <p><b>Prototype</b>: <code>void up_allocate_heap(FAR void **heap_start, size_t *heap_size);</code></p>
 
 <p><b>Description</b>.
-  The heap may be statically allocated by
-  defining CONFIG_HEAP_BASE and CONFIG_HEAP_SIZE.  If these
-  are not defined, then this function will be called to
-  dynamically set aside the heap region.
+  This function will be called to dynamically set aside the heap region.
 </p>
 <p>
-  This API is <i>NOT</i> required if <code>CONFIG_HEAP_BASE</code>
-  is defined.
+  For the kernel build (<code>CONFIG_NUTTX_KERNEL</code>=y) with both kernel- and user-space heaps (<code>CONFIG_MM_KERNEL_HEAP</code>=y), this function provides the size of the unprotected, user-space heap.
+  If a protected kernel-space heap is provided, the kernel heap must be allocated (and protected) by an analogous <code>up_allocate_kheap()</code>.
 </p>
 
 <h3><a name="upinterruptcontext">4.1.15 <code>up_interrupt_context()</code></a></h3>
@@ -6550,12 +6547,6 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
   </li>
   <li>
     <code>CONFIG_PTHREAD_STACK_DEFAULT</code>: Default pthread stack size
-  </li>
-  <li>
-    <code>CONFIG_HEAP_BASE</code>: The beginning of the heap
-  </li>
-  <li>
-    <code>CONFIG_HEAP_SIZE</code>: The size of the heap
   </li>
 </ul>
 
