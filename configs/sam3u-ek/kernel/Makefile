@@ -116,10 +116,10 @@ $(BOARD_INCLUDE)$(DELIM)user_map.h: $(TOPDIR)$(DELIM)User.map
 	$(Q) echo "" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
 	$(Q) echo "/* Memory manager entry points */" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
 	$(Q) echo "" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
-	$(Q) echo "#define CONFIG_USER_MMINIT        0x`grep \" mm_initialize$\"    $(TOPDIR)$(DELIM)User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
-	$(Q) echo "#define CONFIG_USER_MMADDREGION   0x`grep \" mm_addregion$\"     $(TOPDIR)$(DELIM)User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
-	$(Q) echo "#define CONFIG_USER_MMTRYSEM      0x`grep \" mm_trysemaphore$\"  $(TOPDIR)$(DELIM)User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
-	$(Q) echo "#define CONFIG_USER_MMGIVESEM     0x`grep \" mm_givesemaphore$\" $(TOPDIR)$(DELIM)User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
+	$(Q) echo "#define CONFIG_USER_MMINIT        0x`grep \" umm_initialize$\"    $(TOPDIR)$(DELIM)User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
+	$(Q) echo "#define CONFIG_USER_MMADDREGION   0x`grep \" umm_addregion$\"     $(TOPDIR)$(DELIM)User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
+	$(Q) echo "#define CONFIG_USER_MMTRYSEM      0x`grep \" umm_trysemaphore$\"  $(TOPDIR)$(DELIM)User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
+	$(Q) echo "#define CONFIG_USER_MMGIVESEM     0x`grep \" umm_givesemaphore$\" $(TOPDIR)$(DELIM)User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
 	$(Q) echo "" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
 	$(Q) echo "#define CONFIG_USER_MALLOC        0x`grep \" malloc$\"  $(TOPDIR)$(DELIM)User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
 	$(Q) echo "#define CONFIG_USER_REALLOC       0x`grep \" realloc$\" $(TOPDIR)$(DELIM)User.map | cut -d' ' -f1`" >> $(BOARD_INCLUDE)$(DELIM)user_map.h
