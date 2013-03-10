@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/sam3u_mpuinit.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,17 +102,26 @@ void sam3u_mpuinitialize(void)
 }
 
 /****************************************************************************
- * Name: sam3u_mpuheap
+ * Name: sam3u_mpu_uheap and sam3u_mpu_uheap
  *
  * Description:
- *  Map a heap region (probably needs to extension to handle external SRAM).
+ *  Map a user- or kernel-heap region.
+ *
+ *  This logic may need an extension to handle external SRAM).
  *
  ****************************************************************************/
 
-void sam3u_mpuheap(uintptr_t start, size_t size)
+void sam3u_mpu_uheap(uintptr_t start, size_t size)
 {
   mpu_userintsram(start, size);
 }
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+void sam3u_mpu_kheap(uintptr_t start, size_t size)
+{
+  mpu_privintsram(start, size);
+}
+#endif
 
 #endif /* CONFIG_NUTTX_KERNEL */
 

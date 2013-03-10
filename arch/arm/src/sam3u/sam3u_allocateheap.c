@@ -78,6 +78,68 @@
 #  warning "CONFIG_DRAM_END is before end of SRAM0... not all of SRAM0 used"
 #endif
 
+#ifdef CONFIG_MM_KERNEL_HEAPSIZE
+#  if CONFIG_MM_KERNEL_HEAPSIZE < (1 << 5)     /* Kernel heap size < 2**5 */
+#    define KHEAP_SIZE (1 << 4)                /*   Use size 2**4 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 6)   /* Kernel heap size < 2**6 */
+#    define KHEAP_SIZE (1 << 5)                /*   Use size 2**5 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 7)   /* Kernel heap size < 2**7 */
+#    define KHEAP_SIZE (1 << 6)                /*   Use size 2**6 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 8)   /* Kernel heap size < 2**8 */
+#    define KHEAP_SIZE (1 << 7)                /*   Use size 2**7 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 9)   /* Kernel heap size < 2**9 */
+#    define KHEAP_SIZE (1 << 8)                /*   Use size 2**8 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 10)  /* Kernel heap size < 2**10 */
+#    define KHEAP_SIZE (1 << 9)                /*   Use size 2**9 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 11)  /* Kernel heap size < 2**11 */
+#    define KHEAP_SIZE (1 << 10)               /*   Use size 2**10 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 12)  /* Kernel heap size < 2**12 */
+#    define KHEAP_SIZE (1 << 11)               /*   Use size 2**11 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 13)  /* Kernel heap size < 2**13 */
+#    define KHEAP_SIZE (1 << 12)               /*   Use size 2**12 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 14)  /* Kernel heap size < 2**14 */
+#    define KHEAP_SIZE (1 << 13)               /*   Use size 2**13 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 15)  /* Kernel heap size < 2**15 */
+#    define KHEAP_SIZE (1 << 14)               /*   Use size 2**14 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 16)  /* Kernel heap size < 2**16 */
+#    define KHEAP_SIZE (1 << 15)               /*   Use size 2**15 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 17)  /* Kernel heap size < 2**17 */
+#    define KHEAP_SIZE (1 << 16)               /*   Use size 2**16 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 18)  /* Kernel heap size < 2**18 */
+#    define KHEAP_SIZE (1 << 17)               /*   Use size 2**17 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 19)  /* Kernel heap size < 2**19 */
+#    define KHEAP_SIZE (1 << 18)               /*   Use size 2**18 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 20)  /* Kernel heap size < 2**20 */
+#    define KHEAP_SIZE (1 << 19)               /*   Use size 2**19 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 21)  /* Kernel heap size < 2**21 */
+#    define KHEAP_SIZE (1 << 20)               /*   Use size 2**20 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 22)  /* Kernel heap size < 2**22 */
+#    define KHEAP_SIZE (1 << 21)               /*   Use size 2**21 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 23)  /* Kernel heap size < 2**23 */
+#    define KHEAP_SIZE (1 << 22)               /*   Use size 2**22 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 24)  /* Kernel heap size < 2**24 */
+#    define KHEAP_SIZE (1 << 23)               /*   Use size 2**23 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 25)  /* Kernel heap size < 2**25 */
+#    define KHEAP_SIZE (1 << 24)               /*   Use size 2**24 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 26)  /* Kernel heap size < 2**26 */
+#    define KHEAP_SIZE (1 << 25)               /*   Use size 2**25 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 27)  /* Kernel heap size < 2**27 */
+#    define KHEAP_SIZE (1 << 26)               /*   Use size 2**26 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 28)  /* Kernel heap size < 2**28 */
+#    define KHEAP_SIZE (1 << 27)               /*   Use size 2**27 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 29)  /* Kernel heap size < 2**29 */
+#    define KHEAP_SIZE (1 << 28)               /*   Use size 2**28 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 30)  /* Kernel heap size < 2**30 */
+#    define KHEAP_SIZE (1 << 29)               /*   Use size 2**29 */
+#  elif CONFIG_MM_KERNEL_HEAPSIZE < (1 << 31)  /* Kernel heap size < 2**31 */
+#    define KHEAP_SIZE (1 << 30)               /*   Use size 2**30 */
+#  else
+#    define KHEAP_SIZE (1 << 31)               /*   Use size 2**31 */
+#  endif
+
+#  define KHEAP_MASK   (KHEAP_SIZE - 1)
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -107,6 +169,24 @@
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+  uintptr_t kbase = ((uintptr_t)g_heapbase + KHEAP_MASK) & ~KHEAP_MASK;
+  uintptr_t ubase = kbase + KHEAP_SIZE;
+  size_t    usize = CONFIG_DRAM_END - ubase;
+
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_DRAM_END);
+
+  /* Return the heap settings */
+
+  up_ledon(LED_HEAPALLOCATE);
+  *heap_start = (FAR void*)ubase;
+  *heap_size  = usize;
+
+  /* Allow access to the heap memory */
+
+   sam3u_mpu_uheap((uintptr_t)ubase, usize);
+#else
+
   size_t size = CONFIG_DRAM_END - g_heapbase;
 
   /* Return the heap settings */
@@ -115,10 +195,40 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   *heap_start = (FAR void*)g_heapbase;
   *heap_size  = size;
 
-  /* Allow access to the heap memory */
+  /* Allow user access to the user heap memory */
 
-   sam3u_mpuheap((uintptr_t)g_heapbase, size);
+   sam3u_mpu_uheap((uintptr_t)g_heapbase, size);
+   
+#endif
 }
+
+/****************************************************************************
+ * Name: up_allocate_kheap
+ *
+ * Description:
+ *   For the kernel build (CONFIG_NUTTX_KERNEL=y) with both kernel- and
+ *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
+ *   (and protects) the kernel-space heap.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+{
+  uintptr_t kbase = ((uintptr_t)g_heapbase + KHEAP_MASK) & ~KHEAP_MASK;
+
+  DEBUGASSERT((kbase + KHEAP_SIZE) < (uintptr_t)CONFIG_DRAM_END);
+
+  /* Return the heap settings */
+
+  *heap_start = (FAR void*)kbase;
+  *heap_size  = KHEAP_SIZE;
+
+  /* Prohibit user access to the kernel heap memory */
+
+   sam3u_mpu_kheap((uintptr_t)kbase, KHEAP_SIZE);
+}
+#endif
 
 /************************************************************************
  * Name: up_addregion
@@ -136,18 +246,18 @@ void up_addregion(void)
 
   kmm_addregion((FAR void*)SAM3U_INTSRAM1_BASE, CONFIG_SAM3U_SRAM1_SIZE);
 
-  /* Allow access to the heap memory */
+  /* Allow user access to the heap memory */
 
-  sam3u_mpuheap(SAM3U_INTSRAM1_BASE, CONFIG_SAM3U_SRAM1_SIZE);
+  sam3u_mpu_uheap(SAM3U_INTSRAM1_BASE, CONFIG_SAM3U_SRAM1_SIZE);
 
   /* Add the region */
 
 #if CONFIG_MM_REGIONS > 2
   kmm_addregion((FAR void*)SAM3U_NFCSRAM_BASE, CONFIG_SAM3U_NFCSRAM_SIZE);
 
-  /* Allow access to the heap memory */
+  /* Allow user access to the heap memory */
 
-  sam3u_mpuheap(SAM3U_NFCSRAM_BASE, CONFIG_SAM3U_NFCSRAM_SIZE);
+  sam3u_mpu_uheap(SAM3U_NFCSRAM_BASE, CONFIG_SAM3U_NFCSRAM_SIZE);
 #endif
 }
 #endif

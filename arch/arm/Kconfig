@@ -104,11 +104,11 @@ config ARCH_CHIP_NUC1XX
 		NPX LPC43XX architectures (ARM Cortex-M4).
 
 config ARCH_CHIP_SAM3U
-	bool "Atmel AT91SAM3U"
+	bool "Atmel AT91SAM3"
 	select ARCH_CORTEXM3
 	select ARCH_HAVE_MPU
 	---help---
-		Atmel AT91SAM3U architectures (ARM Cortex-M3)
+		Atmel AT91SAM3 architectures (ARM Cortex-M3)
 
 config ARCH_CHIP_STM32
 	bool "STMicro STM32"
