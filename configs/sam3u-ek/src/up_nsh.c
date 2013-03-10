@@ -61,27 +61,22 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_ARCH_BOARD_SAM3UEK
-#  define NSH_HAVEUSBDEV 1
-#  define NSH_HAVEMMCSD  1
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "Only one MMC/SD slot"
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#  endif
-#  ifndef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#else
-   /* Add configuration for new SAM3U boards here */
-#  error "Unrecognized SAM3U board"
-#  undef NSH_HAVEUSBDEV
-#  undef NSH_HAVEMMCSD
+#define NSH_HAVE_USBDEV 1
+#define NSH_HAVE_MMCSD  1
+
+#if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#  error "Only one MMC/SD slot"
+#  undef CONFIG_NSH_MMCSDSLOTNO
+#endif
+
+#ifndef CONFIG_NSH_MMCSDSLOTNO
+#  define CONFIG_NSH_MMCSDSLOTNO 0
 #endif
 
 /* Can't support USB features if USB is not enabled */
 
 #ifndef CONFIG_USBDEV
-#  undef NSH_HAVEUSBDEV
+#  undef NSH_HAVE_USBDEV
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
@@ -89,7 +84,7 @@
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAM3U_HSMCI)
-#  undef NSH_HAVEMMCSD
+#  undef NSH_HAVE_MMCSD
 #endif
 
 #ifndef CONFIG_NSH_MMCSDMINOR
@@ -126,7 +121,7 @@
 
 int nsh_archinitialize(void)
 {
-#ifdef NSH_HAVEMMCSD
+#ifdef NSH_HAVE_MMCSD
   FAR struct sdio_dev_s *sdio;
   int ret;
 
