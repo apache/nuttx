@@ -89,7 +89,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   if (tcb->stack_alloc_ptr)
     {
-      sched_free(tcb->stack_alloc_ptr);
+      sched_ufree(tcb->stack_alloc_ptr);
     }
 
   /* Save the stack allocation */
