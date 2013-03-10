@@ -95,14 +95,14 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   if (!oldmem)
     {
-      return malloc(size);
+      return mm_malloc(heap, size);
     }
 
   /* If size is zero, then realloc is equivalent to free */
 
   if (size <= 0)
     {
-      free(oldmem);
+      mm_free(heap, oldmem);
       return NULL;
     }
 
@@ -348,11 +348,11 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
        */
 
       mm_givesemaphore(heap);
-      newmem = (FAR void*)malloc(size);
+      newmem = (FAR void*)mm_malloc(heap, size);
       if (newmem)
         {
           memcpy(newmem, oldmem, oldsize);
-          free(oldmem);
+          mm_free(heap, oldmem);
         }
 
       return newmem;

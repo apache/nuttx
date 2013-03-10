@@ -38,6 +38,9 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <assert.h>
+
 #include <nuttx/kmalloc.h>
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
@@ -245,7 +248,7 @@ FAR void *kurealloc(FAR void *oldmem, size_t newsize)
 
 void kufree(FAR void *mem)
 {
-#ifdef CONFIG_MM_KERNEL_HEAP
+#if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_DEBUG)
   DEBUGASSERT(!kmm_heapmember(mem));
 #endif
   return KFREE(mem);

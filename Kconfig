@@ -150,7 +150,7 @@ config BUILD_2PASS
 if BUILD_2PASS
 config PASS1_TARGET
 	string "Pass one target"
-	default ""
+	default "all"
 	---help---
 		The name of the first pass build target.  This
 		can be specific build target, a special build target (all, default, etc.)
@@ -458,6 +458,9 @@ endmenu
 
 menu "RTOS Features"
 source sched/Kconfig
+if NUTTX_KERNEL
+source syscall/Kconfig
+endif
 endmenu
 
 menu "Device Drivers"

@@ -65,6 +65,8 @@ static const char *dequote_list[] =
 
   "CONFIG_USER_ENTRYPOINT",            /* Name of entry point function */
   "CONFIG_EXECFUNCS_SYMTAB",           /* Symbol table used by exec[l|v] */
+  "CONFIG_PASS1_BUILDIR",              /* Pass1 build directory */
+  "CONFIG_PASS1_TARGET",               /* Pass1 build target */
 
   /* NxWidgets/NxWM */
 

@@ -38,6 +38,9 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <assert.h>
+
 #include <nuttx/kmalloc.h>
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP) && defined(__KERNEL__)

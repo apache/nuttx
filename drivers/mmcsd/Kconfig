@@ -75,5 +75,13 @@ config SDIO_WIDTH_D1_ONLY
 	---help---
 		Select 1-bit transfer mode.  Default:
 		4-bit transfer mode.
+
+config SDIO_BLOCKSETUP
+	bool "SDIO block setup"
+	default n
+	---help---
+		Some hardward needs to be informed of the selected blocksize and the
+		number of blocks.  Others just work on the byte stream.  This option
+		enables the block setup method in the SDIO vtable.
+
 endif
-		

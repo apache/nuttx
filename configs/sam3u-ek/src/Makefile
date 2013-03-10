@@ -35,36 +35,47 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS		= 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
+ASRCS = 
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= up_boot.c up_leds.c up_buttons.c up_spi.c up_usbdev.c up_lcd.c
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
-endif
+CSRCS = up_boot.c up_leds.c up_buttons.c up_spi.c up_usbdev.c
+
 ifeq ($(CONFIG_SAM3U_HSMCI),y)
-CSRCS		+= up_mmcsd.c
+CSRCS += up_lcd.c
 endif
+
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS += up_nsh.c
+endif
+
+ifeq ($(CONFIG_SAM3U_HSMCI),y)
+CSRCS += up_mmcsd.c
+endif
+
 ifeq ($(CONFIG_USBMSC),y)
-CSRCS		+= up_usbmsc.c
+CSRCS += up_usbmsc.c
 endif
+
 ifeq ($(CONFIG_INPUT_ADS7843E),y)
-CSRCS		+= up_touchscreen.c
+CSRCS += up_touchscreen.c
 endif
-COBJS		= $(CSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
+
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
 else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
+  CFLAGS += -I$(ARCH_SRCDIR)/chip
+  CFLAGS += -I$(ARCH_SRCDIR)/common
+  CFLAGS += -I$(ARCH_SRCDIR)/armv7-m
 endif
 
 all: libboard$(LIBEXT)

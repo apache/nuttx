@@ -3,4 +3,95 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-comment "AT91SAM3U Configuration Options"
+comment "AT91SAM3 Configuration Options"
+
+choice
+	prompt "AT91SAM3 Chip Selection"
+	default ARCH_CHIP_AT91SAM3U4E
+	depends on ARCH_CHIP_SAM3U
+
+config ARCH_CHIP_AT91SAM3U4E
+	bool "AT91SAM3U4E"
+
+endchoice
+
+menu "AT91SAM3 Peripheral Support"
+
+config SAM3U_DMA
+	bool "DMA"
+	default n
+
+config SAM3U_NAND
+	bool "NAND support"
+	default n
+
+config SAM3U_HSMCI
+	bool "HSMCI"
+	default n
+
+config SAM3U_UART
+	bool "UART"
+	default y
+	select ARCH_HAVE_UART
+
+config SAM3U_USART0
+	bool "USART0"
+	default n
+
+config SAM3U_USART1
+	bool "USART1"
+	default n
+
+config SAM3U_USART2
+	bool "USART2"
+	default n
+
+config SAM3U_USART3
+	bool "USART3"
+	default n
+
+endmenu
+
+menu "AT91SAM3 UART Configuration"
+
+config USART0_ISUART
+	bool "USART0 is a UART"
+	default y
+	depends on SAM3U_USART0
+	select ARCH_HAVE_USART0
+
+config USART1_ISUART
+	bool "USART1 is a UART"
+	default y
+	depends on SAM3U_USART1
+	select ARCH_HAVE_USART1
+
+config USART2_ISUART
+	bool "USART2 is a UART"
+	default n
+	depends on SAM3U_USART2
+	select ARCH_HAVE_USART2
+
+config USART3_ISUART
+	bool "USART3 is a UART"
+	default y
+	depends on SAM3U_USART3
+	select ARCH_HAVE_USART2
+
+endmenu
+
+menu "AT91SAM3 GPIO Interrupt Configuration"
+
+config GPIOA_IRQ
+	bool "GPIOA interrupts"
+	default n
+
+config GPIOB_IRQ
+	bool "GPIOB interrupts"
+	default n
+
+config GPIOC_IRQ
+	bool "GPIOC interrupts"
+	default n
+
+endmenu

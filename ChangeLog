@@ -4274,7 +4274,7 @@
 	  the socket was not closed, but lost the connection through an abnormal
 	  event, then poll/select will hang.  That needs to be revisited.
 	  (2013-03-07)
-	* fs/fs_selected.c:  Was not checking if the timeout parameter was NULL
+	* fs/fs_select.c:  Was not checking if the timeout parameter was NULL
 	  but would, instead, setup a bogus timeout based on whatever it found at
 	  address zero.  Also, improved some of the memory allocation logic so
 	  that it will not use so much memory. (2013-03-07)
@@ -4295,4 +4295,11 @@
 	  a good test and helped me a lot when I wrote the memory manager, but
 	  now it is in the way and paralyzing other efforts.  So the memory unit
 	  test was deleted. (2013-03-08)
+	* sched/sched_free.c:  Rename sched_free() to sched_ufree(); Add
+	  sched_kfree() to handler deferred kernel heap allocations. (2013-03-10)
+	* arch/:  User user-accessible heap to allocate all stacks. (2013-03-10)
+	* arch/arm/src/sam3u:  The AT91SAM3U will now support a kernel heap if
+	  so configured. (2013-03-10)
+	* configs/sam3u-ek/knsh:  This configuration was converted to use the
+	  kconfigs-frontends build tool. (2013-03-10)
 
