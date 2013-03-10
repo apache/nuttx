@@ -81,6 +81,10 @@ OUTPUT_ARCH(arm)
 
 SECTIONS
 {
+	.userspace : {
+		*(.userspace)
+	} > uflash
+
 	.text : {
 		_stext = ABSOLUTE(.);
 		*(.vectors)
