@@ -214,8 +214,11 @@ static void work_process(FAR struct wqueue_s *wqueue)
  *
  *     These worker threads are started by the OS during normal bringup.
  *
- *   work_usrthread:  This is a user mode work queue.  It must be started
- *     by application code by calling work_usrstart().
+ *   work_usrthread:  This is a user mode work queue.  It must be built into
+ *     the applicatino blob during the user phase of a kernel build.  The
+ *     user work thread will then automatically be started when the system
+ *     boots by calling through the pointer found in the header on the user
+ *     space blob.
  *
  *   All of these entrypoints are referenced by OS internally and should not
  *   not be accessed by application logic.

@@ -477,10 +477,10 @@ void sam3u_mpuinitialize(void);
 #endif
 
 /****************************************************************************
- * Name: sam3u_mpu_uheap and sam3u_mpu_uheap
+ * Name: sam3u_mpu_uheap
  *
  * Description:
- *  Map a user- or kernel-heap region.
+ *  Map the user heap region.
  *
  ****************************************************************************/
 
@@ -488,12 +488,6 @@ void sam3u_mpuinitialize(void);
 void sam3u_mpu_uheap(uintptr_t start, size_t size);
 #else
 #  define sam3u_mpu_uheap(start,size)
-#endif
-
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-void sam3u_mpu_kheap(uintptr_t start, size_t size);
-#else
-#  define sam3u_mpu_kheap(start,size)
 #endif
 
 /************************************************************************************

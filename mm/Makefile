@@ -46,8 +46,7 @@ CSRCS += mm_memalign.c mm_free.c mm_mallinfo.c
 
 CSRCS += mm_user.c
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
-CSRCS += mm_kerneluser.c
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
 CSRCS += mm_kernel.c
 endif
 endif

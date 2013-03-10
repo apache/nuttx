@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/sam3u_userspace.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,9 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include <arch/board/user_map.h>
+#include <nuttx/userspace.h>
+
+#include "sam3u_internal.h"
 
 #ifdef CONFIG_NUTTX_KERNEL
 
@@ -81,10 +83,11 @@ void sam3u_userspace(void)
 
   /* Clear all of user-space .bss */
 
-  DEBUGASSERT((uintptr_t)CONFIG_USER_DATADESTSTART <= CONFIG_USER_DATADESTEND);
+  DEBUGASSERT(USERSPACE->us_bssstart != 0 && USERSPACE->us_bssend != 0 &&
+              USERSPACE->us_bssstart <= USERSPACE->us_bssend);
 
-  dest = (uint8_t*)CONFIG_USER_BSSSTART;
-  end  = (uint8_t*)CONFIG_USER_BSSEND;
+  dest = (uint8_t*)USERSPACE->us_bssstart;
+  end  = (uint8_t*)USERSPACE->us_bssend;
 
   while (dest != end)
     {
@@ -93,16 +96,22 @@ void sam3u_userspace(void)
 
   /* Initialize all of user-space .data */
 
-  DEBUGASSERT((uintptr_t)CONFIG_USER_DATADESTSTART <= CONFIG_USER_DATADESTEND);
+  DEBUGASSERT(USERSPACE->us_datasource != 0 &&
+              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 && 
+              USERSPACE->us_datastart <= USERSPACE->us_dataend);
 
-  src  = (uint8_t*)CONFIG_USER_DATASOURCE;
-  dest = (uint8_t*)CONFIG_USER_DATADESTSTART;
-  end  = (uint8_t*)CONFIG_USER_DATADESTEND;
+  src  = (uint8_t*)USERSPACE->us_datasource;
+  dest = (uint8_t*)USERSPACE->us_datastart;
+  end  = (uint8_t*)USERSPACE->us_dataend;
 
   while (dest != end)
     {
       *dest++ = *src++;
     }
+
+  /* Configure the MPU to permit user-space access to its FLASH and RAM */
+
+  sam3u_mpuinitialize();
 }
 
 #endif /* CONFIG_NUTTX_KERNEL */

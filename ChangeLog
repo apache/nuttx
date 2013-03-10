@@ -4302,4 +4302,12 @@
 	  so configured. (2013-03-10)
 	* configs/sam3u-ek/knsh:  This configuration was converted to use the
 	  kconfigs-frontends build tool. (2013-03-10)
+	* configs/*/include/user_map.h and include/nuttx/userspace.h:  Remove
+	  the very kludgy user_map.h file and replace it with a header that
+	  is expected at the beginning of the user-space blob. (2013-03-10)
+	* configs/sam3u-ek/kernel/up_userspace.c:  This is the header for
+	  the SAM3U-EK's user space.  (2013-03-10)
+	* sched/os_bringup.c:  In the kernel build, os_bringup() now uses the
+	  user-space header to automatically start the user-space work queue,
+	  if so configured. (2013-03-10)
 

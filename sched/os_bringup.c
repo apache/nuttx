@@ -49,13 +49,11 @@
 
 #include <nuttx/init.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/userspace.h>
 
 #include "os_internal.h"
 #ifdef CONFIG_PAGING
 # include "pg_internal.h"
-#endif
-#ifdef CONFIG_NUTTX_KERNEL
-# include "arch/board/user_map.h"
 #endif
 
 /****************************************************************************
@@ -130,7 +128,7 @@
 
 int os_bringup(void)
 {
-  int init_taskid;
+  int taskid;
 
   /* Setup up the initial environment for the idle task.  At present, this
    * may consist of only the initial PATH variable.  The PATH variable is
@@ -154,7 +152,7 @@ int os_bringup(void)
   g_pgworker = KERNEL_THREAD("pgfill", CONFIG_PAGING_DEFPRIO,
                              CONFIG_PAGING_STACKSIZE,
                              (main_t)pg_worker, (FAR char * const *)NULL);
-  ASSERT(g_pgworker > 0);
+  DEBUGASSERT(g_pgworker > 0);
 #endif
 
   /* Start the worker thread that will serve as the device driver "bottom-
@@ -173,7 +171,7 @@ int os_bringup(void)
   g_work[HPWORK].pid = KERNEL_THREAD(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
                                      CONFIG_SCHED_WORKSTACKSIZE,
                                      (main_t)work_hpthread, (FAR char * const *)NULL);
-  ASSERT(g_work[HPWORK].pid > 0);
+  DEBUGASSERT(g_work[HPWORK].pid > 0);
 
   /* Start a lower priority worker thread for other, non-critical continuation
    * tasks
@@ -186,29 +184,46 @@ int os_bringup(void)
   g_work[LPWORK].pid = KERNEL_THREAD(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
                                      CONFIG_SCHED_LPWORKSTACKSIZE,
                                      (main_t)work_lpthread, (FAR char * const *)NULL);
-  ASSERT(g_work[LPWORK].pid > 0);
+  DEBUGASSERT(g_work[LPWORK].pid > 0);
 
 #endif /* CONFIG_SCHED_LPWORK */
 #endif /* CONFIG_SCHED_HPWORK */
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_SCHED_USRWORK)
+  /* Start the user-space work queue */
+
+  DEBUGASSERT(USERSPACE->work_usrstart != NULL);
+  taskid = USERSPACE->work_usrstart();
+  DEBUGASSERT(taskid > 0);
+#endif
+
 #endif /* CONFIG_SCHED_WORKQUEUE */
 
   /* Once the operating system has been initialized, the system must be
    * started by spawning the user init thread of execution.  This is the
    * first user-mode thead.
-   *
-   * In a kernel build (CONFIG_NUTTX_KERNEL), it is expected that this user
-   * initialization function will call work_usrstart() to start the user
-   * work thread (if so configured).
    */
 
   svdbg("Starting init thread\n");
 
-  /* Start the default application at CONFIG_USER_ENTRYPOINT() */
+  /* Start the default application.  In a flat build, this is entrypoint
+   * is given by the definitions, CONFIG_USER_ENTRYPOINT.  In the kernel
+   * build, however, we must get the address of the entrypoint from the
+   * header at the beginning of the user-space blob.
+   */
 
-  init_taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
-                            CONFIG_USERMAIN_STACKSIZE,
-                            (main_t)CONFIG_USER_ENTRYPOINT, (FAR char * const *)NULL);
-  ASSERT(init_taskid > 0);
+#ifdef CONFIG_NUTTX_KERNEL
+  DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
+  taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
+                       CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,
+                       (FAR char * const *)NULL);
+#else
+  taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
+                       CONFIG_USERMAIN_STACKSIZE,
+                       (main_t)CONFIG_USER_ENTRYPOINT,
+                       (FAR char * const *)NULL);
+#endif
+  DEBUGASSERT(taskid > 0);
 
   /* We an save a few bytes by discarding the IDLE thread's environment. */
 

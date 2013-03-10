@@ -180,6 +180,17 @@ config NUTTX_KERNEL
 	default n
 	---help---
 		Builds NuttX as a separately compiled kernel.
+
+config NUTTX_USERSPACE
+	hex "Beginning of user-space blob"
+	default 0x0
+	depends on NUTTX_KERNEL
+	---help---
+		In the kernel build, the NuttX kernel and the user-space blob are
+		built separately linked objects.  NUTTX_USERSPACE provides the
+		address where the user-space blob is loaded into memory.  NuttX will
+		expect to find and instance of struct userspace_s at this location.
+
 endif
 endmenu
 

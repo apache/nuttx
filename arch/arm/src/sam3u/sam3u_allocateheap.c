@@ -223,10 +223,6 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 
   *heap_start = (FAR void*)kbase;
   *heap_size  = KHEAP_SIZE;
-
-  /* Prohibit user access to the kernel heap memory */
-
-   sam3u_mpu_kheap((uintptr_t)kbase, KHEAP_SIZE);
 }
 #endif
 

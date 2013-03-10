@@ -41,7 +41,7 @@
 
 #include <assert.h>
 
-#include <arch/board/user_map.h>
+#include <nuttx/userspace.h>
 
 #include "mpu.h"
 
@@ -82,10 +82,11 @@
 
 void sam3u_mpuinitialize(void)
 {
-  uintptr_t datastart = MIN(CONFIG_USER_DATADESTSTART, CONFIG_USER_BSSSTART);
-  uintptr_t dataend   = MAX(CONFIG_USER_DATADESTEND,   CONFIG_USER_BSSEND);
+  uintptr_t datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
+  uintptr_t dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
 
-  DEBUGASSERT(CONFIG_USER_TEXTEND >= CONFIG_USER_TEXTSTART && dataend >= datastart);
+  DEBUGASSERT(USERSPACE->us_textend >= USERSPACE->us_textstart &&
+              dataend >= datastart);
 
   /* Show MPU information */
 
@@ -93,7 +94,9 @@ void sam3u_mpuinitialize(void)
 
   /* Configure user flash and SRAM space */
 
-  mpu_userflash(CONFIG_USER_TEXTSTART, CONFIG_USER_TEXTEND - CONFIG_USER_TEXTSTART);
+  mpu_userflash(USERSPACE->us_textstart,
+                USERSPACE->us_textend - USERSPACE->us_textstart);
+
   mpu_userintsram(datastart, dataend - datastart);
 
   /* Then enable the MPU */
@@ -115,13 +118,6 @@ void sam3u_mpu_uheap(uintptr_t start, size_t size)
 {
   mpu_userintsram(start, size);
 }
-
-#ifdef CONFIG_MM_KERNEL_HEAP
-void sam3u_mpu_kheap(uintptr_t start, size_t size)
-{
-  mpu_privintsram(start, size);
-}
-#endif
 
 #endif /* CONFIG_NUTTX_KERNEL */
 

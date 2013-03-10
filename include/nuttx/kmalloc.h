@@ -46,6 +46,7 @@
 #include <stdlib.h>
 
 #include <nuttx/mm.h>
+#include <nuttx/userspace.h>
 
 #if !defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__)
 
@@ -76,15 +77,21 @@ extern "C"
  */
 
 /* This familiy of allocators is used to manage user-accessible memory
- * from the kernel.
+ * from the kernel.  In the flat build, the following are declared in
+ * stdlib.h and are directly callable.  In the kernel-phase of the kernel
+ * build, the following are defined in userspace.h as macros that call
+ * into user-space via a header at the begining of the user-space blob.
  */
 
-#ifndef CONFIG_NUTTX_KERNEL
+#define kumm_initialize(h,s)     umm_initialize(h,s)
+#define kumm_addregion(h,s)      umm_addregion(h,s)
+#define kumm_trysemaphore()      umm_trysemaphore()
+#define kumm_givesemaphore()     umm_givesemaphore()
 
-# define kumm_initialize(h,s)    umm_initialize(h,s)
-# define kumm_addregion(h,s)     umm_addregion(h,s)
-# define kumm_trysemaphore()     umm_trysemaphore()
-# define kumm_givesemaphore()    umm_givesemaphore()
+#ifndef CONFIG_NUTTX_KERNEL
+/* In the flat build, the following are declared in stdlib.h and are
+ * directly callable.
+ */
 
 # define kumalloc(s)             malloc(s)
 # define kuzalloc(s)             zalloc(s)
@@ -92,24 +99,24 @@ extern "C"
 # define kufree(p)               free(p)
 
 #else
+/* In the kernel-phase of the kernel build, the following are defined
+ * in userspace.h as macros that call into user-space via a header at
+ * the begining of the user-space blob.
+ */
 
-/* This familiy of allocators is used to manage kernel protected memory */
-
-void kumm_initialize(FAR void *heap_start, size_t heap_size);
-void kumm_addregion(FAR void *heapstart, size_t heapsize);
-int  kumm_trysemaphore(void);
-void kumm_givesemaphore(void);
-
-FAR void *kumalloc(size_t size);
-FAR void *kuzalloc(size_t size);
-FAR void *kurealloc(FAR void *oldmem, size_t newsize);
-void kufree(FAR void *mem);
+# define kumalloc(s)             umm_malloc(s)
+# define kuzalloc(s)             umm_zalloc(s)
+# define kurealloc(p,s)          umm_realloc(p,s)
+# define kufree(p)               umm_free(p)
 
 #endif
 
 /* This familiy of allocators is used to manage kernel protected memory */
 
 #ifndef CONFIG_NUTTX_KERNEL
+/* If this is not a kernel build, then these map to the same interfaces
+ * as were used for the user-mode function.
+ */
 
 # define kmm_initialize(h,s)    /* Initialization done by kumm_initialize */
 # define kmm_addregion(h,s)     umm_addregion(h,s)
@@ -122,18 +129,25 @@ void kufree(FAR void *mem);
 # define kfree(p)               free(p)
 
 #elif !defined(CONFIG_MM_KERNEL_HEAP)
+/* If this the kernel phase of a kernel build, and there are only user-space
+ * allocators, then the following are defined in userspace.h as macros that
+ * call into user-space via a header at the begining of the user-space blob.
+ */
 
 # define kmm_initialize(h,s)    /* Initialization done by kumm_initialize */
-# define kmm_addregion(h,s)     kumm_addregion(h,s)
-# define kmm_trysemaphore()     kumm_trysemaphore()
-# define kmm_givesemaphore()    kumm_givesemaphore()
+# define kmm_addregion(h,s)     umm_addregion(h,s)
+# define kmm_trysemaphore()     umm_trysemaphore()
+# define kmm_givesemaphore()    umm_givesemaphore()
 
-# define kmalloc(s)             kumalloc(s)
-# define kzalloc(s)             kuzalloc(s)
-# define krealloc(p,s)          kurealloc(p,s)
-# define kfree(p)               kufree(p)
+# define kmalloc(s)             umm_malloc(s)
+# define kzalloc(s)             umm_zalloc(s)
+# define krealloc(p,s)          umm_realloc(p,s)
+# define kfree(p)               umm_free(p)
 
 #else
+/* Otherwise, the kernel-space allocators are declared here and we can call
+ * them directly.
+ */
 
 void kmm_initialize(FAR void *heap_start, size_t heap_size);
 void kmm_addregion(FAR void *heapstart, size_t heapsize);

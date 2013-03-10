@@ -92,9 +92,7 @@ int work_usrstart(void)
 
   DEBUGASSERT(g_usrwork[USRWORK] == NULL);
 
-  /* Start a lower priority worker thread for other, non-critical continuation
-   * tasks
-   */
+  /* Start a user-mode worker thread for use by applications. */
 
   svdbg("Starting user-mode worker thread\n");
 
