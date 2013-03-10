@@ -114,7 +114,7 @@ void pthread_release(FAR struct task_group_s *group)
 
       /* And deallocate the join structure */
 
-      sched_free(join);
+      sched_kfree(join);
     }
 
   /* Destroy the join list semaphore */

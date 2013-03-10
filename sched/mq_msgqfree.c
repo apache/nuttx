@@ -104,5 +104,5 @@ void mq_msgqfree(FAR msgq_t *msgq)
 
   /* Then deallocate the message queue itself */
 
-  sched_free(msgq);
+  sched_kfree(msgq);
 }

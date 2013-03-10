@@ -125,7 +125,7 @@ void mq_msgfree(FAR mqmsg_t *mqmsg)
 
   else if (mqmsg->type == MQ_ALLOC_DYN)
     {
-      sched_free(mqmsg);
+      sched_kfree(mqmsg);
     }
   else
     {

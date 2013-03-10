@@ -126,6 +126,6 @@ void sig_releasependingsignal(FAR sigpendq_t *sigpend)
 
   else if (sigpend->type == SIG_ALLOC_DYN)
     {
-      sched_free(sigpend);
+      sched_kfree(sigpend);
     }
 }

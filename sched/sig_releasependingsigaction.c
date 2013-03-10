@@ -115,6 +115,6 @@ void sig_releasependingsigaction(FAR sigq_t *sigq)
 
   else if (sigq->type == SIG_ALLOC_DYN)
     {
-      sched_free(sigq);
+      sched_kfree(sigq);
     }
 }

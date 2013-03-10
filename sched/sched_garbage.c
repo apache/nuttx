@@ -63,6 +63,102 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: sched_kucleanup
+ *
+ * Description:
+ *   Clean-up deferred de-allocations of user memory
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void sched_kucleanup(void)
+{
+   irqstate_t flags;
+   FAR void *address;
+
+   /* Test if the delayed deallocation queue is empty.  No special protection
+    * is needed because this is an atomic test.
+    */
+ 
+   while (g_delayed_kufree.head)
+    {
+      /* Remove the first delayed deallocation.  This is not atomic and so
+       * we must disable interrupts around the queue operation.
+       */
+
+      flags = irqsave();
+      address = (FAR void*)sq_remfirst((FAR sq_queue_t*)&g_delayed_kufree);
+      irqrestore(flags);
+
+      /* The address should always be non-NULL since that was checked in the
+       * 'while' condition above.
+       */
+
+      if (address)
+        {
+          /* Return the memory to the user heap */
+
+          kufree(address);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: sched_kcleanup
+ *
+ * Description:
+ *   Clean-up deferred de-allocations of kernel memory
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+static inline void sched_kcleanup(void)
+{
+   irqstate_t flags;
+   FAR void *address;
+
+   /* Test if the delayed deallocation queue is empty.  No special protection
+    * is needed because this is an atomic test.
+    */
+ 
+   while (g_delayed_kfree.head)
+    {
+      /* Remove the first delayed deallocation.  This is not atomic and so
+       * we must disable interrupts around the queue operation.
+       */
+
+      flags = irqsave();
+      address = (FAR void*)sq_remfirst((FAR sq_queue_t*)&g_delayed_kfree);
+      irqrestore(flags);
+
+      /* The address should always be non-NULL since that was checked in the
+       * 'while' condition above.
+       */
+
+      if (address)
+        {
+          /* Return the memory to the kernel heap */
+
+          kfree(address);
+        }
+    }
+}
+#else
+#  define sched_kcleanup()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 /****************************************************************************
@@ -89,49 +185,11 @@
 
 void sched_garbagecollection(void)
 {
-   irqstate_t flags;
-   FAR void *address;
+  /* Handle deferred deallocations for the kernel heap */
 
-   /* Test if the delayed deallocation queue is empty.  No special protection
-    * is needed because this is an atomic test.
-    */
- 
-   while (g_delayeddeallocations.head)
-    {
-      /* Remove the first delayed deallocation.  This is not atomic and so
-       * we must disable interrupts around the queue operation.
-       */
+  sched_kcleanup();
 
-      flags = irqsave();
-      address = (FAR void*)sq_remfirst((FAR sq_queue_t*)&g_delayeddeallocations);
-      irqrestore(flags);
+  /* Handle deferred dealloctions for the user heap */
 
-      /* The address should always be non-NULL since that was checked in the
-       * 'while' condition above.
-       */
-
-      if (address)
-        {
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-          /* Does the address to be freed lie in the kernel heap? */
-
-          if (kmm_heapmember(address))
-            {
-              /* Yes.. return the memory to the kernel heap */
-
-              kfree(address);
-            }
-
-          /* No.. then the address must lie in the user heap (unchecked) */
-
-          else
-#endif
-            {
-              /* Return the memory to the user heap */
-
-              kufree(address);
-            }
-        }
-    }
+  sched_kucleanup();
 }
-

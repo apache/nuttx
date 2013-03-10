@@ -118,7 +118,7 @@ int sem_unlink(FAR const char *name)
           if (!psem->nconnect)
             {
               dq_rem((FAR dq_entry_t*)psem, &g_nsems);
-              sched_free(psem);
+              sched_kfree(psem);
             }
 
           /* If one or more process still has the semaphore open,

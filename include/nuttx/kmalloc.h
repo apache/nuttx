@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/kmalloc.h
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -145,24 +145,31 @@ FAR void *kzalloc(size_t size);
 FAR void *krealloc(FAR void *oldmem, size_t newsize);
 void kfree(FAR void *mem);
 
+#ifdef CONFIG_DEBUG
 bool kmm_heapmember(FAR void *mem);
-
+#endif
 #endif
 
-/* Functions defined in sched/sched_free.c **********************************/
+/* Functions defined in sched/sched_kfree.c **********************************/
 
 /* Handles memory freed from an interrupt handler.  In that context, kfree()
- * cannot be called.  Instead, the allocations are saved in a list of
- * delayed allocations that will be periodically cleaned up by
+ * (or kufree()) cannot be called.  Instead, the allocations are saved in a
+ * list of delayed allocations that will be periodically cleaned up by
  * sched_garbagecollection().
  */
 
-void sched_free(FAR void *address);
+void sched_ufree(FAR void *address);
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+void sched_kfree(FAR void *address);
+#else
+#  define sched_kfree(a) sched_ufree(a)
+#endif
 
 /* Functions defined in sched/sched_garbage *********************************/
 
 /* Must be called periodically to clean up deallocations delayed by
- * sched_free().  This may be done from either the IDLE thread or from a
+ * sched_kfree().  This may be done from either the IDLE thread or from a
  * worker thread.  The IDLE thread has very low priority and could starve
  * the system for memory in some context.
  */

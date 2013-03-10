@@ -213,14 +213,14 @@ static inline void group_release(FAR struct task_group_s *group)
 
   if (group->tg_members)
     {
-      sched_free(group->tg_members);
+      sched_kfree(group->tg_members);
       group->tg_members = NULL;
     }
 #endif
 
   /* Release the group container itself */
 
-  sched_free(group);
+  sched_kfree(group);
 }
 
 /*****************************************************************************

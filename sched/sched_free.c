@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sched_free.c
  *
- *   Copyright (C) 2007, 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,18 +72,61 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sched_free
+ * Name: sched_ufree and sched_kfree
  *
  * Description:
- *   This function performs deallocations that the operating system may
- *   need to make.  This special interface to free is used to handling
+ *   These function performs deallocations that the operating system may
+ *   need to make.  This special interface to free is used in handling
  *   corner cases where the operating system may have to perform
  *   deallocations from within an interrupt handler.
  *
  ************************************************************************/
 
-void sched_free(FAR void *address)
+void sched_ufree(FAR void *address)
 {
+  irqstate_t flags;
+
+  /* Check if this is an attempt to deallocate memory from an exception
+   * handler.  If this function is called from the IDLE task, then we
+   * must have exclusive access to the memory manager to do this.
+   */
+
+  if (up_interrupt_context() || kumm_trysemaphore() != 0)
+    {
+      /* Yes.. Make sure that this is not a attempt to free kernel memory
+       * using the user deallocator.
+       */
+
+      flags = irqsave();
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+      DEBUGASSERT(!kmm_heapmember(address));
+#endif
+
+      /* Delay the deallocation until a more appropriate time. */
+
+      sq_addlast((FAR sq_entry_t*)address, (sq_queue_t*)&g_delayed_kufree);
+
+      /* Signal the worker thread that is has some clean up to do */
+
+#ifdef CONFIG_SCHED_WORKQUEUE
+      work_signal(LPWORK);
+#endif
+      irqrestore(flags);
+    }
+  else
+    {
+      /* No.. just deallocate the memory now. */
+
+      kufree(address);
+      kumm_givesemaphore();
+    }
+}
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+void sched_kfree(FAR void *address)
+{
+  irqstate_t flags;
+
   /* Check if this is an attempt to deallocate memory from an exception
    * handler.  If this function is called from the IDLE task, then we
    * must have exclusive access to the memory manager to do this.
@@ -91,17 +134,23 @@ void sched_free(FAR void *address)
 
   if (up_interrupt_context() || kmm_trysemaphore() != 0)
     {
-      /* Yes.. Delay the deallocation until a more appropriate time. */
+      /* Yes.. Make sure that this is not a attempt to free user memory
+       * using the kernel deallocator.
+       */
 
-      irqstate_t saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)address, (sq_queue_t*)&g_delayeddeallocations);
+      flags = irqsave();
+      DEBUGASSERT(kmm_heapmember(address));
+
+      /* Delay the deallocation until a more appropriate time. */
+
+      sq_addlast((FAR sq_entry_t*)address, (sq_queue_t*)&g_delayed_kfree);
 
       /* Signal the worker thread that is has some clean up to do */
 
 #ifdef CONFIG_SCHED_WORKQUEUE
       work_signal(LPWORK);
 #endif
-      irqrestore(saved_state);
+      irqrestore(flags);
     }
   else
     {
@@ -111,4 +160,4 @@ void sched_free(FAR void *address)
       kmm_givesemaphore();
     }
 }
-
+#endif

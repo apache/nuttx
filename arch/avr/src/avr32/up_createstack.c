@@ -94,7 +94,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size)
     {
       /* Yes.. free it */
 
-      sched_free(tcb->stack_alloc_ptr);
+      sched_ufree(tcb->stack_alloc_ptr);
       tcb->stack_alloc_ptr = NULL;
     }
 
@@ -107,9 +107,9 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size)
        */
 
 #if defined(CONFIG_DEBUG) && !defined(CONFIG_DEBUG_STACK)
-      tcb->stack_alloc_ptr = (FAR void *)kzalloc(stack_size);
+      tcb->stack_alloc_ptr = (FAR void *)kuzalloc(stack_size);
 #else
-      tcb->stack_alloc_ptr = (FAR void *)kmalloc(stack_size);
+      tcb->stack_alloc_ptr = (FAR void *)kumalloc(stack_size);
 #endif
 #ifdef CONFIG_DEBUG
       if (!tcb->stack_alloc_ptr)

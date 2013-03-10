@@ -123,7 +123,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size)
 
     /* Allocate the memory for the stack */
 
-    uint32_t *stack_alloc_ptr = (uint32_t*)kmalloc(adj_stack_size);
+    uint32_t *stack_alloc_ptr = (uint32_t*)kumalloc(adj_stack_size);
     if (stack_alloc_ptr) {
 		/* This is the address of the last word in the allocation */
 
@@ -161,7 +161,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 void up_release_stack(struct tcb_s *dtcb)
 {
     if (dtcb->stack_alloc_ptr) {
-		kfree(dtcb->stack_alloc_ptr);
+		kufree(dtcb->stack_alloc_ptr);
     }
 
     dtcb->stack_alloc_ptr = NULL;

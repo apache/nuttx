@@ -215,7 +215,7 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
                        * uninitialized, mq_deallocate() is not used.
                        */
 
-                      sched_free(msgq);
+                      sched_kfree(msgq);
                     }
                 }
             }

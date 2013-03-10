@@ -141,13 +141,17 @@ volatile dq_queue_t g_waitingforfill;
 
 volatile dq_queue_t g_inactivetasks;
 
-/* This is the list of dayed memory deallocations that need to be handled
- * within the IDLE loop.  These deallocations get queued by sched_free()
- * if the OS attempts to deallocate memory while it is within an interrupt
- * handler.
+/* These are lists of dayed memory deallocations that need to be handled
+ * within the IDLE loop or worker thread.  These deallocations get queued
+ * by sched_kufree and sched_kfree() if the OS needs to deallocate memory
+ * while it is within an interrupt handler.
  */
 
-volatile sq_queue_t g_delayeddeallocations;
+volatile sq_queue_t g_delayed_kufree;
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+volatile sq_queue_t g_delayed_kfree;
+#endif
 
 /* This is the value of the last process ID assigned to a task */
 
@@ -249,7 +253,10 @@ void os_start(void)
   dq_init(&g_waitingforfill);
 #endif
   dq_init(&g_inactivetasks);
-  sq_init(&g_delayeddeallocations);
+  sq_init(&g_delayed_kufree);
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+  sq_init(&g_delayed_kfree);
+#endif
 
   /* Initialize the logic that determine unique process IDs. */
 

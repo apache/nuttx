@@ -49,6 +49,8 @@
 
 #include "lib_internal.h"
 
+#if !defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__)
+
 /************************************************************
  * Definitions
  ************************************************************/
@@ -138,12 +140,13 @@ void lib_releaselist(FAR struct streamlist *list)
 
       if (list->sl_streams[i].fs_bufstart)
         {
-          sched_free(list->sl_streams[i].fs_bufstart);
+          sched_ufree(list->sl_streams[i].fs_bufstart);
         }
     }
 #endif
 }
 
+#endif /* !CONFIG_NUTTX_KERNEL || __KERNEL__ */
 #endif /* CONFIG_NFILE_STREAMS */
 
 

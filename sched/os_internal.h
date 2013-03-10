@@ -216,13 +216,17 @@ extern volatile dq_queue_t g_waitingforfill;
 
 extern volatile dq_queue_t g_inactivetasks;
 
-/* This is the list of dayed memory deallocations that need to be handled
- * within the IDLE loop.  These deallocations get queued by sched_free()
- * if the OS attempts to deallocate memory while it is within an interrupt
- * handler.
+/* These are lists of dayed memory deallocations that need to be handled
+ * within the IDLE loop or worker thread.  These deallocations get queued
+ * by sched_kufree and sched_kfree() if the OS needs to deallocate memory
+ * while it is within an interrupt handler.
  */
 
-extern volatile sq_queue_t g_delayeddeallocations;
+extern volatile sq_queue_t g_delayed_kufree;
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+extern volatile sq_queue_t g_delayed_kfree;
+#endif
 
 /* This is the value of the last process ID assigned to a task */
 

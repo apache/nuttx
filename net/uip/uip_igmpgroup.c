@@ -378,13 +378,13 @@ void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
   else
 #endif
     {
-      /* No.. deallocate the group structure.  Use sched_free() just in case
+      /* No.. deallocate the group structure.  Use sched_kfree() just in case
        * this function is executing within an interrupt handler.
        */
 
       uip_unlock(flags);
-      grplldbg("Call sched_free()\n");
-      sched_free(group);
+      grplldbg("Call sched_kfree()\n");
+      sched_kfree(group);
     }
 }
 

@@ -239,6 +239,7 @@ void kmm_givesemaphore(void)
  *
  ************************************************************************/
 
+#ifdef CONFIG_DEBUG
 bool kmm_heapmember(FAR void *mem)
 {
 #if CONFIG_MM_REGIONS > 1
@@ -278,5 +279,6 @@ bool kmm_heapmember(FAR void *mem)
 
 #endif
 }
+#endif
 
 #endif /* CONFIG_NUTTX_KERNEL && CONFIG_MM_KERNEL_HEAP && __KERNEL__ */

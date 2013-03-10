@@ -142,7 +142,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb)
         {
           if (tcb->dspace->crefs <= 1)
             {
-              sched_free(tcb->dspace);
+              sched_kfree(tcb->dspace);
             }
           else
             {
@@ -162,7 +162,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb)
           FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
           for (i = 1; i < CONFIG_MAX_TASK_ARGS+1 && ttcb->argv[i]; i++)
             {
-              sched_free((FAR void*)ttcb->argv[i]);
+              sched_kfree((FAR void*)ttcb->argv[i]);
             }
         }
 
@@ -179,7 +179,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb)
 #endif
       /* And, finally, release the TCB itself */
 
-      sched_free(tcb);
+      sched_kfree(tcb);
     }
 
   return ret;
