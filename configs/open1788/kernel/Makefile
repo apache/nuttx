@@ -1,7 +1,7 @@
 ############################################################################
-# configs/sam3u-ek/kernel/Makefile
+# configs/open1788/kernel/Makefile
 #
-#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without

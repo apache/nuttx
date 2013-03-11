@@ -386,10 +386,10 @@ must be is one of the following:
     This is required because in the normal case (just 'make'), make will
     create all dependencies then execute the pass1 and pass2 targets.  But
     this example, pass2 depends on auto-generatd files produced during pass1.
-    This specall make command ('make pass1 pass2') will make the dependencies
+    This special make command ('make pass1 pass2') will make the dependencies
     separately for each pass.
 
-    At there end of the build, there four files will top-level build
+    At the end of the build, there four files will top-level build
     directory:
 
     nuttx_user.elf    - The pass1 ELF file

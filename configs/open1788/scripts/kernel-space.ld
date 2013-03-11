@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam3u-ek/scripts/kernel.ld
+ * configs/open1788/scripts/kernel-space.ld
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,7 +42,7 @@
  *
  * For MPU support, the kernel-mode NuttX section is assumed to be 64Kb of
  * FLASH and 4Kb of SRAM.  That, of course, can be optimized as needed (See
- * also configs/sam3u-ek/knsh/ld.script
+ * also configs/open1788/scripts/kernel.ld).
  */
 
 MEMORY
@@ -54,99 +54,81 @@ MEMORY
 
     /* 32Kb SRAM */
 
-    ksram1 (rwx) : ORIGIN = 0x20000000, LENGTH = 4K
-    usram1 (rwx) : ORIGIN = 0x20001000, LENGTH = 28K
+    ksram  (rwx) : ORIGIN = 0x20000000, LENGTH = 4K
+    usram  (rwx) : ORIGIN = 0x20001000, LENGTH = 28K
 
     /* 16Kb SRAM */
 
     sram2 (rwx) : ORIGIN = 0x20080000, LENGTH = 16K
 }
 
-/* Make sure that the critical memory management functions are in user-space.
- * Currently, the plan is that the memory manager will reside in user-space
- * but be usable both by kernel- and user-space code
- */
-
-EXTERN(umm_initialize)
-EXTERN(umm_addregion)
-EXTERN(umm_trysemaphore)
-EXTERN(umm_givesemaphore)
-
-EXTERN(malloc)
-EXTERN(realloc)
-EXTERN(zalloc)
-EXTERN(free)
-
 OUTPUT_ARCH(arm)
-
+ENTRY(_stext)
 SECTIONS
 {
-	.userspace : {
-		*(.userspace)
-	} > uflash
+    .text : {
+        _stext = ABSOLUTE(.);
+        *(.vectors)
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        _etext = ABSOLUTE(.);
+    } > kflash
 
-	.text : {
-		_stext = ABSOLUTE(.);
-		*(.vectors)
-		*(.text .text.*)
-		*(.fixup)
-		*(.gnu.warning)
-		*(.rodata .rodata.*)
-		*(.gnu.linkonce.t.*)
-		*(.glue_7)
-		*(.glue_7t)
-		*(.got)
-		*(.gcc_except_table)
-		*(.gnu.linkonce.r.*)
-		_etext = ABSOLUTE(.);
-	} > uflash
+    .init_section : {
+        _sinit = ABSOLUTE(.);
+        *(.init_array .init_array.*)
+        _einit = ABSOLUTE(.);
+    } > kflash
 
-	.init_section : {
-		_sinit = ABSOLUTE(.);
-		*(.init_array .init_array.*)
-		_einit = ABSOLUTE(.);
-	} > uflash
+    .ARM.extab : {
+        *(.ARM.extab*)
+    } > kflash
 
-	.ARM.extab : {
-		*(.ARM.extab*)
-	} > uflash
+    __exidx_start = ABSOLUTE(.);
+    .ARM.exidx : {
+        *(.ARM.exidx*)
+    } > kflash
 
-	__exidx_start = ABSOLUTE(.);
-	.ARM.exidx : {
-		*(.ARM.exidx*)
-	} > uflash
-	__exidx_end = ABSOLUTE(.);
+    __exidx_end = ABSOLUTE(.);
 
-	_eronly = ABSOLUTE(.);
+    _eronly = ABSOLUTE(.);
 
-	.data : {
-		_sdata = ABSOLUTE(.);
-		*(.data .data.*)
-		*(.gnu.linkonce.d.*)
-		CONSTRUCTORS
-		_edata = ABSOLUTE(.);
-	} > usram1 AT > uflash
+    .data : {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.gnu.linkonce.d.*)
+        CONSTRUCTORS
+        _edata = ABSOLUTE(.);
+    } > ksram AT > kflash
 
-	.bss : {
-		_sbss = ABSOLUTE(.);
-		*(.bss .bss.*)
-		*(.gnu.linkonce.b.*)
-		*(COMMON)
-		_ebss = ABSOLUTE(.);
-	} > usram1
+    .bss : {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.gnu.linkonce.b.*)
+        *(COMMON)
+        _ebss = ABSOLUTE(.);
+    } > ksram
 
-	/* Stabs debugging sections.	*/
+    /* Stabs debugging sections */
 
-	.stab 0 : { *(.stab) }
-	.stabstr 0 : { *(.stabstr) }
-	.stab.excl 0 : { *(.stab.excl) }
-	.stab.exclstr 0 : { *(.stab.exclstr) }
-	.stab.index 0 : { *(.stab.index) }
-	.stab.indexstr 0 : { *(.stab.indexstr) }
-	.comment 0 : { *(.comment) }
-	.debug_abbrev 0 : { *(.debug_abbrev) }
-	.debug_info 0 : { *(.debug_info) }
-	.debug_line 0 : { *(.debug_line) }
-	.debug_pubnames 0 : { *(.debug_pubnames) }
-	.debug_aranges 0 : { *(.debug_aranges) }
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
 }

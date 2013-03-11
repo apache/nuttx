@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam3u-ek/scripts/ld.script
+ * configs/sam3u-ek/scripts/kernel-space.ld
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,7 +42,7 @@
  *
  * For MPU support, the kernel-mode NuttX section is assumed to be 64Kb of
  * FLASH and 4Kb of SRAM.  That, of course, can be optimized as needed (See
- * also configs/sam3u-ek/kernel/kernel.ld.
+ * also configs/sam3u-ek/scripts/user-space.ld).
  */
 
 MEMORY

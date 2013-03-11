@@ -163,6 +163,25 @@ void lpc17_nand_initialize(void);
 #endif
 #endif /* CONFIG_LPC17_EMC */
 
+/****************************************************************************
+ * Name: nsh_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization for NSH.
+ *
+ *   CONFIG_NSH_ARCHINIT=y :
+ *     Called from the NSH library
+ *
+ *   CONFIG_BOARD_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
+ *   CONFIG_NSH_ARCHINIT=n:
+ *     Called from board_initialize().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NSH_LIBRARY
+int nsh_archinitialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_OPEN1788_SRC_OPEN1788_H */
 
