@@ -49,6 +49,19 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* If multiple heaps are used, then the heap must be passed as a paramter to
+ * mm_malloc() and mm_free().  If the single heap case, mm_malloc() and
+ * mm_free() are not available and we have to use malloc() and free() (which,
+ * internally will use the same heap).
+ */
+
+#ifdef CONFIG_MM_MULTIHEAP
+#  define MM_MALLOC(h,s) mm_malloc(h,s)
+#  define MM_FREE(h,m)   mm_free(h,m)
+#else
+#  define MM_MALLOC(h,s) malloc(s)
+#  define MM_FREE(h,m)   free(m)
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -95,14 +108,14 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   if (!oldmem)
     {
-      return mm_malloc(heap, size);
+      return MM_MALLOC(heap, size);
     }
 
   /* If size is zero, then realloc is equivalent to free */
 
   if (size <= 0)
     {
-      mm_free(heap, oldmem);
+      MM_FREE(heap, oldmem);
       return NULL;
     }
 
@@ -348,11 +361,11 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
        */
 
       mm_givesemaphore(heap);
-      newmem = (FAR void*)mm_malloc(heap, size);
+      newmem = (FAR void*)MM_MALLOC(heap, size);
       if (newmem)
         {
           memcpy(newmem, oldmem, oldsize);
-          mm_free(heap, oldmem);
+          MM_FREE(heap, oldmem);
         }
 
       return newmem;
