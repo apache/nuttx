@@ -43,7 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/mm.h>
+#include <nuttx/kmalloc.h>
 #include <arch/board/board.h>
 
 #include "chip.h"

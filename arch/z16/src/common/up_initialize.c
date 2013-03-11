@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_initialize.c
+ * arch/z16/src/common/up_initialize.c
  *
  *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,23 +43,16 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/mm.h>
 #include <nuttx/ramlog.h>
 
 #include <arch/board/board.h>
 
+#include "up_arch.h"
 #include "up_internal.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-
-/* Define to enable timing loop calibration.  CONFIG_DEBUG and
- * CONFIG_ARCH_LOWPUTC must also be enabled in the .config file because
- * the logic uses lldbg()
- */
-
-#undef CONFIG_ARCH_CALIBRATION
 
 /****************************************************************************
  * Public Data
@@ -94,7 +87,7 @@ volatile FAR chipreg_t *current_regs;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG) && defined(CONFIG_ARCH_LOWPUTC)
+#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG)
 static void up_calibratedelay(void)
 {
   int i;
@@ -140,7 +133,7 @@ void up_initialize(void)
 
   up_calibratedelay();
 
-  /* Add extra memory fragments to the memory manager */
+  /* Add any extra memory fragments to the memory manager */
 
 #if CONFIG_MM_REGIONS > 1
   up_addregion();

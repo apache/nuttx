@@ -43,30 +43,19 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/mm.h>
+
 #include <arch/board/board.h>
 
 #include "chip/switch.h"
+#include "up_arch.h"
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/* Define to enable timing loop calibration */
-
-#undef CONFIG_ARCH_CALIBRATION
-
-/****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -83,7 +72,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CALIBRATION) & defined(CONFIG_DEBUG)
+#if defined(CONFIG_ARCH_CALIBRATION) && defined(CONFIG_DEBUG)
 static void up_calibratedelay(void)
 {
   int i;
@@ -129,7 +118,7 @@ void up_initialize(void)
 
   up_calibratedelay();
 
-  /* Add extra memory fragments to the memory manager */
+  /* Add any extra memory fragments to the memory manager */
 
 #if CONFIG_MM_REGIONS > 1
   up_addregion();
