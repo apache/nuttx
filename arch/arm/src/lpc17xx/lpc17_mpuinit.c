@@ -44,7 +44,7 @@
 #include <nuttx/userspace.h>
 
 #include "mpu.h"
-#include "lp17_mpuinit.h"
+#include "lpc17_mpuinit.h"
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_ARMV7M_MPU)
 
