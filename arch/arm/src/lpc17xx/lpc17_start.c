@@ -2,7 +2,7 @@
  * arch/arm/src/lpc17xx/lpc17_start.c
  * arch/arm/src/chip/lpc17_start.c
  *
- *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 
 #include "lpc17_clockconfig.h"
 #include "lpc17_lowputc.h"
+#include "lpc17_userspace.h"
 
 #ifdef CONFIG_ARCH_FPU
 #  include "nvic.h"
@@ -230,10 +231,21 @@ void __start(void)
 #endif
   showprogress('D');
 
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segements.
+   */
+
+#ifdef CONFIG_NUTTX_KERNEL
+  lpc17_userspace();
+  showprogress('E');
+#endif
+
   /* Initialize onboard resources */
 
   lpc17_boardinitialize();
-  showprogress('E');
+  showprogress('F');
 
   /* Then start NuttX */
 

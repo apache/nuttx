@@ -63,6 +63,10 @@ ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS += up_memcpy.S
 endif
 
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CMN_CSRCS += up_mpu.c
+endif
+
 ifeq ($(CONFIG_NET),y)
 ifneq ($(CONFIG_LPC17_ETHERNET),y)
 CMN_CSRCS += up_etherstub.c
@@ -89,6 +93,10 @@ CHIP_CSRCS += lpc17_serial.c lpc17_spi.c lpc17_ssp.c lpc17_start.c lpc17_timeris
 
 ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 CHIP_ASRCS += lpc17_vectors.S
+endif
+
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CHIP_CSRCS += lpc17_userspace.c lpc17_mpuinit.c
 endif
 
 ifeq ($(CONFIG_LPC17_EMC),y)

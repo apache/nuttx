@@ -48,6 +48,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_ARMV7M_MPU_NREGIONS
+#  define CONFIG_ARMV7M_MPU_NREGIONS 8
+#endif
 
 /****************************************************************************
  * Private Data
@@ -84,13 +89,14 @@ static uint8_t g_region;
  *
  * Assumptions:
  *   - Regions are never deallocated
- *   - Regions are only allocated early in initialization, so nothing
- *     special is require;
+ *   - Regions are only allocated early in initialization, so no special
+ *     protection against re-entrancy is required;
  *
  ****************************************************************************/
 
 unsigned int mpu_allocregion(void)
 {
+  DEBUGASSERT(g_region < CONFIG_ARMV7M_MPU_NREGIONS);
   return (unsigned int)g_region++;
 }
 

@@ -142,12 +142,13 @@ void __start(void)
 
 #ifdef CONFIG_NUTTX_KERNEL
   sam3u_userspace();
+  showprogress('E');
 #endif
 
   /* Initialize onboard resources */
 
   sam3u_boardinitialize();
-  showprogress('E');
+  showprogress('F');
 
   /* Then start NuttX */
 

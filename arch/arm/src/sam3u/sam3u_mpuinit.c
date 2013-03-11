@@ -45,7 +45,7 @@
 
 #include "mpu.h"
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_ARMV7M_MPU)
 
 /****************************************************************************
  * Private Definitions
@@ -105,12 +105,12 @@ void sam3u_mpuinitialize(void)
 }
 
 /****************************************************************************
- * Name: sam3u_mpu_uheap and sam3u_mpu_uheap
+ * Name: sam3u_mpu_uheap
  *
  * Description:
- *  Map a user- or kernel-heap region.
+ *  Map the user-heap region.
  *
- *  This logic may need an extension to handle external SRAM).
+ *  This logic may need an extension to handle external SDRAM).
  *
  ****************************************************************************/
 
@@ -119,5 +119,5 @@ void sam3u_mpu_uheap(uintptr_t start, size_t size)
   mpu_userintsram(start, size);
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_NUTTX_KERNEL && CONFIG_ARMV7M_MPU */
 
