@@ -48,6 +48,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
+#include "mpu.h"
 #include "up_arch.h"
 #include "up_internal.h"
 #include "sam3u_internal.h"
@@ -125,7 +126,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
 
   usize = (1 << log2);
-  ubase = CONFIG_DRAM_END - usize 
+  ubase = CONFIG_DRAM_END - usize;
 
   /* Return the user-space heap settings */
 
@@ -176,7 +177,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
   DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
 
   usize = (1 << log2);
-  ubase = CONFIG_DRAM_END - usize 
+  ubase = CONFIG_DRAM_END - usize;
 
   /* Return the kernel heap settings */
 

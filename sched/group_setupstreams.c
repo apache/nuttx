@@ -78,7 +78,11 @@ int group_setupstreams(FAR struct task_tcb_s *tcb)
 
   /* Initialize file streams for the task group */
 
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+  lib_streaminit(tcb->cmn.group->tg_streamlist);
+#else
   lib_streaminit(&tcb->cmn.group->tg_streamlist);
+#endif
 
   /* fdopen to get the stdin, stdout and stderr streams. The following logic
    * depends on the fact that the library layer will allocate FILEs in order.

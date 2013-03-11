@@ -140,7 +140,7 @@ config LPC17_PLL1
 	default y
 
 config LPC17_EMC
-	bool "PLL1"
+	bool "EMC"
 	default y
 	depends on ARCH_FAMILY_LPC178X
 

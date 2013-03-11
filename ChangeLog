@@ -4310,4 +4310,13 @@
 	* sched/os_bringup.c:  In the kernel build, os_bringup() now uses the
 	  user-space header to automatically start the user-space work queue,
 	  if so configured. (2013-03-10)
-
+	* arch/arm/src/lpc17xx/lpc17_mpuinit.c and lpc17_userpace.c:  Add
+	  support for the MPU and kernel build for the LPC17xx family.
+	  (2013-03-11)
+	* configs/open1788/kernel and knsh:  Add kernel build support and
+	  a kernel NSH configuration for the WaveShare Open1788 board.
+	  (2013-03-11)
+	* configs/sam3u_ek/kernel, knsh, and scripts:  Move some files around
+	  for better supportability. (2013-03-11)
+	* configs/open1788/kernel, knsh, and scripts:  Add a kernel mode build
+	  configuration for the WaveShare Open1788 board. (2013-03-11)

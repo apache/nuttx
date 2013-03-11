@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam3u-ek/kernel/up_userspace.c
+ * configs/open1788/kernel/up_userspace.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,8 +56,8 @@
 #  error "CONFIG_NUTTX_USERSPACE not defined"
 #endif
 
-#if CONFIG_NUTTX_USERSPACE != 0x00090000
-#  error "CONFIG_NUTTX_USERSPACE must be 0x00090000 to match user-space.ld"
+#if CONFIG_NUTTX_USERSPACE != 0x00010000
+#  error "CONFIG_NUTTX_USERSPACE must be 0x00010000 to match user-space.ld"
 #endif
 
 /****************************************************************************

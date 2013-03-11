@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/init.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/userspace.h>
@@ -205,6 +206,14 @@ int os_bringup(void)
    */
 
   svdbg("Starting init thread\n");
+
+  /* Perform any last-minute, board-specific initialization, if so
+   * configured.
+   */
+
+#ifdef CONFIG_BOARD_INITIALIZE
+  board_initialize();
+#endif
 
   /* Start the default application.  In a flat build, this is entrypoint
    * is given by the definitions, CONFIG_USER_ENTRYPOINT.  In the kernel

@@ -609,7 +609,11 @@ void task_exithook(FAR struct tcb_s *tcb, int status)
    */
 
 #if CONFIG_NFILE_STREAMS > 0
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+  (void)lib_flushall(tcb->group->tg_streamlist);
+#else
   (void)lib_flushall(&tcb->group->tg_streamlist);
+#endif
 #endif
 
   /* Leave the task group.  Perhaps discarding any un-reaped child

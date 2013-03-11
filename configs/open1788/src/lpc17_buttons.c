@@ -59,14 +59,33 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+/* The Open1788 supports several buttons.  All will read "1" when open and "0"
+ * when closed
+ *
+ * USER1           -- Connected to P4[26]
+ * USER2           -- Connected to P2[22]
+ * USER3           -- Connected to P0[10]
+ *
+ * And a Joystick
+ *
+ * JOY_A           -- Connected to P2[25]
+ * JOY_B           -- Connected to P2[26]
+ * JOY_C           -- Connected to P2[23]
+ * JOY_D           -- Connected to P2[19]
+ * JOY_CTR         -- Connected to P0[14]
+ *
+ * The switches are all connected to ground and should be pulled up and sensed
+ * with a value of '0' when closed.
+ */
+
 /* Pin configuration for each Open1788 button.  This array is indexed by
  * the BUTTON_* and JOYSTICK_* definitions in board.h
  */
 
 static const lpc17_pinset_t g_buttoncfg[BOARD_NUM_BUTTONS] =
 {
-  GPIO_USER1, GPIO_USER2, GPIO_WAKEUP, GPIO_USER3,
-  GPIO_JOY_A, GPIO_JOY_B, GPIO_JOY_C,  GPIO_JOY_D, GPIO_JOY_CTR
+  GPIO_USER1, GPIO_USER2, GPIO_USER3, GPIO_JOY_A,
+  GPIO_JOY_B, GPIO_JOY_C, GPIO_JOY_D, GPIO_JOY_CTR
 };
 
 /* This array defines all of the interupt handlers current attached to

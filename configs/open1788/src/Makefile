@@ -35,50 +35,52 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS		= 
-CSRCS		= lpc17_boardinitialize.c
+ASRCS = 
+CSRCS = lpc17_boardinitialize.c
 
 ifeq ($(CONFIG_LPC17_EMC_NOR),y)
-CSRCS		+= lpc17_norinitialize.c
+  CSRCS += lpc17_norinitialize.c
 endif
 
 ifeq ($(CONFIG_LPC17_EMC_NAND),y)
-CSRCS		+= lpc17_nandinitialize.c
+  CSRCS += lpc17_nandinitialize.c
 endif
 
 ifeq ($(CONFIG_LPC17_EMC_SDRM),y)
-CSRCS		+= lpc17_sdraminitialize.c
+  CSRCS += lpc17_sdraminitialize.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= lpc17_nsh.c
+ifeq ($(CONFIG_NSH_LIBRARY),y)
+  CSRCS += lpc17_nsh.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS		+= lpc17_autoleds.c
+  CSRCS += lpc17_autoleds.c
 else
-CSRCS		+= lpc17_userleds.c
+  CSRCS += lpc17_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS		+= up_buttons.c
+  CSRCS += lpc17_buttons.c
 endif
 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
 else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
+  CFLAGS += -I$(ARCH_SRCDIR)/chip
+  CFLAGS += -I$(ARCH_SRCDIR)/common
+  CFLAGS += -I$(ARCH_SRCDIR)/armv7-m
 endif
 
 all: libboard$(LIBEXT)

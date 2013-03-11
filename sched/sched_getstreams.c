@@ -73,7 +73,12 @@ FAR struct streamlist *sched_getstreams(void)
   FAR struct task_group_s *group = rtcb->group;
 
   DEBUGASSERT(group);
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+  return group->tg_streamlist;
+#else
   return &group->tg_streamlist;
+#endif
 } 
 
 #endif /* CONFIG_NFILE_DESCRIPTORS && CONFIG_NFILE_STREAMS */

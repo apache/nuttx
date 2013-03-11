@@ -451,12 +451,6 @@ void os_start(void)
 
   up_initialize();
 
-  /* Perform any special board-specific initialization, if so configured. */
-
-#ifdef CONFIG_BOARD_INITIALIZE
-  board_initialize();
-#endif
-
   /* Initialize the C libraries (if included in the link).  This
    * is done last because the libraries may depend on the above.
    */
