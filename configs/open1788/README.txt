@@ -11,6 +11,7 @@ CONTENTS
   o LEDs
   o Buttons
   o FPU
+  o Using OpenOCD with the Olimex ARM-USB-OCD
   o Configuration
 
 LEDs
@@ -152,8 +153,122 @@ See the section above on Toolchains, NOTE 2, for explanations for some of
 the configuration settings.  Some of the usual settings are just not supported
 by the "Lite" version of the Atollic toolchain.
 
-CONFIGURURATION
-===============
+Using OpenOCD with the Olimex ARM-USB-OCD
+=========================================
+
+  Building OpenOCD under Cygwin:
+
+    Refer to configs/olimex-lpc1766stk/README.txt
+
+  Installing OpenOCD in Ubuntu Linux:
+
+    sudo apt-get install openocd
+
+  Helper Scripts.
+
+    I have been using the Olimex ARM-USB-OCD debugger.  OpenOCD
+    requires a configuration file.  I keep the one I used last here:
+    
+      configs/open1788/tools/open1788.cfg
+
+    However, the "correct" configuration script to use with OpenOCD may
+    change as the features of OpenOCD evolve.  So you should at least
+    compare that open1788.cfg file with configuration files in
+    /usr/share/openocd/scripts.  As of this writing, the configuration
+    files of interest were:
+
+      /usr/local/share/openocd/scripts/interface/openocd-usb.cfg
+        This is the configuration file for the Olimex ARM-USB-OCD
+        debugger.  Select a different file if you are using some
+        other debugger supported by OpenOCD.
+
+      /usr/local/share/openocd/scripts/board/?
+        I don't see a board configuration file for the WaveShare
+        Open1788 board.
+
+      /usr/local/share/openocd/scripts/target/lpc1788.cfg
+        This is the configuration file for the the LPC1788 target.
+        It just sets up a few parameters then sources lpc17xx.cfg
+
+      /usr/local/share/openocd/scripts/target/lpc17xx.cfg
+        This is the generic LPC configuration for the LPC17xx
+        family.  It is included by lpc1788.cfg.
+
+    NOTE:  These files could also be located under /usr/share in some
+    installations.  They could be most anywhwere if you are using a
+    windows version of OpenOCD.
+ 
+      configs/open1788/tools/open1788.cfg
+        This is simply openocd-usb.cfg, lpc1788.cfg, and lpc17xx.cfg
+        concatenated into one file for convenience.  Don't use it
+        unless you have to.
+
+    There is also a script on the tools/ directory that I use to start
+    the OpenOCD daemon on my system called oocd.sh.  That script will
+    probably require some modifications to work in another environment:
+  
+    - Possibly the value of OPENOCD_PATH and TARGET_PATH
+    - It assumes that the correct script to use is the one at
+      configs/open1788/tools/open1788.cfg
+
+  Starting OpenOCD
+
+    Then you should be able to start the OpenOCD daemon as follows.  This
+    assumes that you have already CD'ed to the NuttX build directory:
+
+      . ./setenv.sh
+      oocd.sh $PWD
+
+    The setenv.sh script is a convenience script that you may choose to
+    use or not.  It simply sets up the PATH variable so that you can
+    automatically find oocd.sh.  You could also do:
+
+      configs/open1788/tools/oocd.sh $PWD
+
+  Connecting GDB
+
+    Once the OpenOCD daemon has been started, you can connect to it via
+    GDB using the following GDB command:
+
+      arm-nuttx-elf-gdb
+      (gdb) target remote localhost:3333
+
+    NOTE:  The name of your GDB program may differ.  For example, with the
+    CodeSourcery toolchain, the ARM GDB would be called arm-none-eabi-gdb.
+
+    OpenOCD will support several special 'monitor' sub-commands.  You can
+    use the 'monitor' (or simply 'mon') command to invoke these sub-
+    commands. These GDB commands will send comments to the OpenOCD monitor.
+    Here are a couple that you will need to use:
+  
+     (gdb) monitor reset
+     (gdb) monitor halt
+
+    NOTES:
+    1. The MCU must be halted using 'monitor halt' prior to loading code.
+    2. 'monitor reset' will restart the processor after loading code.
+    3. The 'monitor' command can be abbreviated as just 'mon'.
+
+    After starting GDB, you can load the NuttX ELF file:
+
+      (gdb) mon halt
+      (gdb) load nuttx
+
+    NOTES:
+    1. NuttX should have been built so that it has debugging symbols
+       (by setting CONFIG_DEBUG_SYMBOLS=y in the .config file).
+    2. The MCU must be halted prior to loading code.
+    3. I find that there are often undetected write failures.  I usually
+       load nuttx twice to assure good FLASH contents:
+ 
+      (gdb) mon halt
+      (gdb) load nuttx
+      (gdb) mon reset
+      (gdb) mon halt
+      (gdb) load nuttx
+
+CONFIGURATION
+=============
 
   ostest
   ------ 
