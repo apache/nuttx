@@ -113,7 +113,7 @@ extern "C"
 
 /* This familiy of allocators is used to manage kernel protected memory */
 
-#ifndef CONFIG_NUTTX_KERNEL
+#if !defined(CONFIG_NUTTX_KERNEL)
 /* If this is not a kernel build, then these map to the same interfaces
  * as were used for the user-mode function.
  */

@@ -254,47 +254,38 @@ o Memory Managment (mm/)
                have negative impact on memory usage and code size.
 
   Title:       MEMORY MANAGEMENT IN THE KERNEL BUILD
-  Description: If the option CONFIG_NUTTX_KERNEL is selected, then NuttX will
-               built as two separate blobs:  (1) a monolithic, NuttX kernel,
-               and (2) a user-space application blob.  Communication between
-               the two is via traps in order to get from user-mode to kernel-
-               mode.
-
-               At present, the final link of the kernel build fails because
-               of undefined memory allocation logic:  kmm_initialize, kmm_addregion,
-               kmalloc, etc.  In the flat build, these map to mm_initialize,
-               mm_addregion, malloc, etc.  but they are undefined in the kernel
-               build.
-
-               It has not been fully decided how to handle kernel- and user-
-               memory allocations.  Here are some ideas:
+  Description: At present, there are two options for memory management in
+               the NuttX kernel build:
 
                1) Have only a single user-space heap and heap allocator that
-                  is shared by both kernel- and user-modes.  PROs:  Simpler,
+                  is shared by both kernel- and user-modes.  PROs:  Simple,
                   CONs:  Awkward architecture and no security for kernel-mode
                   allocations.
 
-               2) Have two separate heap partitions and two copies of the
-                  memory allocators.  PROs:  Not two difficult, CONs:  Partitioning
+               2) Two separate heap partitions and two copies of the memory
+                  allocators.  One heap partition is protected and the the
+                  is user accessible.  PROs: Still simple, CONs:  Partitioning
                   the heap will not make the best use of heap memory.
 
-                  A complication is that the kernel needs to allocate both
-                  protected, kernel private as well as user accessible memory
-                  (such as for stacks).  Perhaps this approach would require
-                  three heap partitions.
+                A complication is that the kernel needs to allocate both
+                protected, kernel private as well as user accessible memory
+                (such as for stacks).  A more traditional approarch would be
+                something like:
 
-               3) Have a classes of two allocators:  (1) one that allocates large
-                  regions/pages of memory that can be protected or not, and
-                  (2) the current memory allocator extended to support sbrk().
-                  The would still be kernel- and user-mode instances of the
-                  memory allocators.  Each would sbrk() as necessary to extend
-                  their heap; the pages allocated for the kerne-mode allocator
-                  would be protected but the pages allocated for the user-mode
-                  allocator would not.  PROs:  Meets all of the needs.  CONs:
-                  would limit the size of allocations due to the physical
-                  pages.  Complex.  There would likely be some small memory
-                  inefficiencies due to quantization to pages.  This really
-                  feels like overkill for this class of processor.
+               3) Implement sbrk(). The would still be kernel- and user-mode
+                  instances of the memory allocators.  Each would sbrk() as
+                  necessary to extend their heap; the pages allocated for
+                  the kernel-mode allocator would be protected but the pages
+                  allocated for the user-mode allocator would not.  PROs:
+                  Meets all of the needs.  CONs:  Complex. Memory losses,
+                  due to quanitization.  sbrk'ed memory would not be 
+                  contiguous; this would limit the sizes of allocations
+                  due to the physical pages.
+
+                  This feels like overkill for this class of processor.
+                  This approach probably could not be implemented using
+                  a simple memory protection unit (such as that of the
+                  ARM Cortex-M family).
 
                See other kernel build issues under "Build system"
   Status:      Open

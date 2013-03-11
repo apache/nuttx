@@ -189,6 +189,25 @@ int group_allocate(FAR struct task_tcb_s *tcb)
       return -ENOMEM;
     }
 
+#if CONFIG_NFILE_STREAMS > 0 && defined(CONFIG_NUTTX_KERNEL) && \
+    defined(CONFIG_MM_KERNEL_HEAP)
+
+  /* In a flat, single-heap build.  The stream list is allocated with the
+   * group structure.  But in a kernel build with a kernel allocator, it
+   * must be separately allocated using a user-space allocator.
+   */
+
+  group->tg_streamlist = (FAR struct streamlist *)
+    kuzalloc(sizeof(struct streamlist));
+
+  if (!group->tg_streamlist)
+    {
+      kfree(group);
+      return -ENOMEM;
+    }
+
+#endif
+
   /* Attach the group to the TCB */
 
   tcb->cmn.group = group;

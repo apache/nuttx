@@ -383,10 +383,18 @@ struct task_group_s
 #endif
 
   /* FILE streams ***************************************************************/
+  /* In a flat, single-heap build.  The stream list is allocated with this
+   * structure.  But kernel mode with a kernel allocator, it must be separately
+   * allocated using a user-space allocator.
+   */
 
 #if CONFIG_NFILE_STREAMS > 0
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+  FAR struct streamlist *tg_streamlist;
+#else
   struct streamlist tg_streamlist;  /* Holds C buffered I/O info                */
-#endif /* CONFIG_NFILE_STREAMS */
+#endif
+#endif
 
   /* Sockets ********************************************************************/
 
