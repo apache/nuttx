@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam3u-ek/kernal/kernel.ld
+ * configs/sam3u-ek/scripts/kernel.ld
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

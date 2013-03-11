@@ -53,6 +53,7 @@
 #include "chip/lpc17_memorymap.h"
 #include "lpc17_emacram.h"
 #include "lpc17_ohciram.h"
+#include "lpc17_mpuinit.h"
 
 /****************************************************************************
  * Private Definitions
@@ -195,10 +196,83 @@
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Get the unaligned size of the user-space heap */
+
+  uintptr_t ubase = (uintptr_t)g_heapbase + CONFIG_MM_KERNEL_HEAPSIZE;
+  size_t    usize = CONFIG_DRAM_END - ubase;
+  int       log2;
+
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_DRAM_END);
+
+  /* Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the CONFIG_DRAM_END
+   * is aligned to the MPU requirement.
+   */
+
+  log2  = (int)mpu_log2regionsize(usize);
+  DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
+
+  usize = (1 << log2);
+  ubase = CONFIG_DRAM_END - usize 
+
+  /* Return the user-space heap settings */
+
+  up_ledon(LED_HEAPALLOCATE);
+  *heap_start = (FAR void*)ubase;
+  *heap_size  = usize;
+
+  /* Allow user-mode access to the user heap memory */
+
+   lpc17_mpu_uheap((uintptr_t)ubase, usize);
+#else
+
+  /* Return the heap settings */
+
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_heapbase;
-  *heap_size = CONFIG_DRAM_END - g_heapbase;
+  *heap_size  = CONFIG_DRAM_END - g_heapbase;
+#endif
 }
+
+/****************************************************************************
+ * Name: up_allocate_kheap
+ *
+ * Description:
+ *   For the kernel build (CONFIG_NUTTX_KERNEL=y) with both kernel- and
+ *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
+ *   (and protects) the kernel-space heap.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+{
+  /* Get the unaligned size of the user-space heap */
+
+  uintptr_t ubase = (uintptr_t)g_heapbase + CONFIG_MM_KERNEL_HEAPSIZE;
+  size_t    usize = CONFIG_DRAM_END - ubase;
+  int       log2;
+
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_DRAM_END);
+
+  /* Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the CONFIG_DRAM_END
+   * is aligned to the MPU requirement.
+   */
+
+  log2  = (int)mpu_log2regionsize(usize);
+  DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
+
+  usize = (1 << log2);
+  ubase = CONFIG_DRAM_END - usize 
+
+  /* Return the kernel heap settings */
+
+  *heap_start = (FAR void*)g_heapbase;
+  *heap_size  = ubase - (uintptr_t)g_heapbase;
+}
+#endif
 
 /************************************************************************
  * Name: up_addregion

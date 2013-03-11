@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_userspace.c
+ * arch/arm/src/lpc17xx/lpc17_userspace.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,8 @@
 
 #include <nuttx/userspace.h>
 
-#include "sam3u_internal.h"
+#include "lpc17_mpuinit.h"
+#include "lpc17_userspace.h"
 
 #ifdef CONFIG_NUTTX_KERNEL
 
@@ -65,7 +66,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_userspace
+ * Name: lpc17_userspace
  *
  * Description:
  *   For the case of the separate user-/kernel-space build, perform whatever
@@ -75,7 +76,7 @@
  *
  ****************************************************************************/
 
-void sam3u_userspace(void)
+void lpc17_userspace(void)
 {
   uint8_t *src;
   uint8_t *dest;
@@ -111,7 +112,7 @@ void sam3u_userspace(void)
 
   /* Configure the MPU to permit user-space access to its FLASH and RAM */
 
-  sam3u_mpuinitialize();
+  lpc17_mpuinitialize();
 }
 
 #endif /* CONFIG_NUTTX_KERNEL */

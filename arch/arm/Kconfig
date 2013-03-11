@@ -216,6 +216,13 @@ config ARMV7M_MPU
 		Build in support for the ARM Cortex-M3/4 Memory Protection Unit (MPU).
 		Check your chip specifications first; not all Cortex-M3/4 chips support the MPU.
 
+config ARMV7M_MPU_NREGIONS
+	int "Number of MPU regions"
+	default 8
+	depends on ARMV7M_MPU
+	---help---
+	This is the number of protection regions supported by the MPU.
+
 config ARCH_HAVE_LOWVECTORS
 	bool
 
