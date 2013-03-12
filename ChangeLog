@@ -4320,3 +4320,5 @@
 	  for better supportability. (2013-03-11)
 	* configs/open1788/kernel, knsh, and scripts:  Add a kernel mode build
 	  configuration for the WaveShare Open1788 board. (2013-03-11)
+	* arch/arm/src/armv7-m/up_mpu.c:  Several fixes to MPU logic.
+	  (2013-03-12).
