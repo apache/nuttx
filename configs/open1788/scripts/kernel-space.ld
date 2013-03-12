@@ -33,33 +33,34 @@
  *
  ****************************************************************************/
 
-/* The AT91SAM3U-4 has 256Kb of FLASH beginning at address 0x0008:0000,
- * 32Kb of SRAM beginning at address 0x2000:0000, and 16Kb of SRAM beginning
- * at address 0x2008:000 (used only for heap).  When booting from FLASH,
- * FLASH memory is aliased to address 0x0000:0000 where the code expects to
- * begin execution by jumping to the entry point in the 0x0800:0000 address
- * range.
+/* The LPC1788 has 512Kb of FLASH beginning at address 0x0000:0000 and
+ * 96Kb of total SRAM: 64Kb of SRAM in the CPU block beginning at address
+ * 0x10000000 and 32Kb of Peripheral SRAM in two banks, 8Kb at addresses
+ * 0x20000000 bank0 first and 8kb at 0x20002000 at bank0 second. And 16Kb
+ * at 0x20004000 on bank1.
  *
  * For MPU support, the kernel-mode NuttX section is assumed to be 64Kb of
  * FLASH and 4Kb of SRAM.  That, of course, can be optimized as needed (See
- * also configs/open1788/scripts/kernel.ld).
+ * also configs/open1788/scripts/kernel-space.ld).
  */
 
 MEMORY
 {
     /* 256Kb FLASH */
 
-    kflash (rx)  : ORIGIN = 0x00080000, LENGTH = 64K
-    uflash (rx)  : ORIGIN = 0x00090000, LENGTH = 192K
+    kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 64K
+    uflash (rx)      : ORIGIN = 0x00010000, LENGTH = 448K
 
-    /* 32Kb SRAM */
+    /* 64Kb of SRAM in the CPU block */
 
-    ksram  (rwx) : ORIGIN = 0x20000000, LENGTH = 4K
-    usram  (rwx) : ORIGIN = 0x20001000, LENGTH = 28K
+    ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 4K
+    usram (rwx)      : ORIGIN = 0x10001000, LENGTH = 60K
 
-    /* 16Kb SRAM */
+    /* Other peripheral memory (free, nothing is linked here) */
 
-    sram2 (rwx) : ORIGIN = 0x20080000, LENGTH = 16K
+    ahbram8_b0a(rwx) : ORIGIN = 0x20000000, LENGTH = 8K
+    ahbram8_b0b(rwx) : ORIGIN = 0x20002000, LENGTH = 8K
+    ahbram16(rwx)    : ORIGIN = 0x20004000, LENGTH = 16K
 }
 
 OUTPUT_ARCH(arm)

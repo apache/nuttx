@@ -296,16 +296,16 @@ CONFIGURATION
   ----
     This is identical to the nsh configuration below except that NuttX
     is built as a kernel-mode, monolithic module and the user applications
-    are built separately.  This build requires a special make command; not
-    just 'make' but make with the following two arguments:
+    are built separately.  It is recommends to use a special make command;
+    not just 'make' but make with the following two arguments:
 
         make pass1 pass2
 
-    This is required because in the normal case (just 'make'), make will
-    create all dependencies then execute the pass1 and pass2 targets.  But
-    this example, pass2 depends on auto-generatd files produced during pass1.
-    This special make command ('make pass1 pass2') will make the dependencies
-    separately for each pass.
+    In the normal case (just 'make'), make will attempt to build both user-
+    and kernel-mode blobs more or less interleaved.  This actual works!
+    However, for me it is very confusing so I prefer the above make command:
+    Make the user-space binaries first (pass1), then make the the kernel-space
+    binaries (pass2)
 
     NOTES:
  
@@ -324,15 +324,23 @@ CONFIGURATION
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
 
-    3. At the end of the build, there four files will top-level build
-       directory:
+    3. At the end of the build, there will be several files in the top-level
+       NuttX build directory:
 
-       nuttx_user.elf    - The pass1 user-space ELF file
-       nuttx             - The pass2 kernel-space ELF file
-       nuttx_user.hex    - The pass1 Intel HEX format file
-       nuttx.hex         - The pass2 Intel HEX file
-       System.map        - Symbols in the kernel-space ELF file
-       User.map          - Symbols in the user-space ELF file
+       PASS1:
+         nuttx_user.elf    - The pass1 user-space ELF file
+         nuttx_user.hex    - The pass1 Intel HEX format file (selected in defconfig)
+         User.map          - Symbols in the user-space ELF file
+
+       PASS2:
+         nuttx             - The pass2 kernel-space ELF file
+         nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
+         System.map        - Symbols in the kernel-space ELF file
+
+       Loading these .elf files with OpenOCD is tricky.  It appears to me
+       that when nuttx_user.elf is loaded, it destroys the the nuttx image
+       in FLASH.  But loading the nuttx ELF does not harm the nuttx_user.elf
+       in FLASH.  Conclusion:  Always load nuttx_user.elf before nuttx.
 
   nsh
   ---
@@ -345,7 +353,7 @@ CONFIGURATION
        change this configuration using that tool, you should:
 
        a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
+          and misc/tools//README.txt.
 
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
