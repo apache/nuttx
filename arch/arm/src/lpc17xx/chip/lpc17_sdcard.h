@@ -48,10 +48,10 @@
 #define LPC17_SDCARD_CMD_OFFSET       0x000c /* SD card command register */
 #define LPC17_SDCARD_RESPCMD_OFFSET   0x0010 /* SD card command response register */
 #define LPC17_SDCARD_RESP_OFFSET(n)   (0x0010+4*(n))
-#define LPC17_SDCARD_RESP0_OFFSET     0x0014 /* SD card response 1 register */
-#define LPC17_SDCARD_RESP1_OFFSET     0x0018 /* SD card response 2 register */
-#define LPC17_SDCARD_RESP2_OFFSET     0x001c /* SD card response 3 register */
-#define LPC17_SDCARD_RESP3_OFFSET     0x0020 /* SD card response 4 register */
+#  define LPC17_SDCARD_RESP0_OFFSET   0x0014 /* SD card response 1 register */
+#  define LPC17_SDCARD_RESP1_OFFSET   0x0018 /* SD card response 2 register */
+#  define LPC17_SDCARD_RESP2_OFFSET   0x001c /* SD card response 3 register */
+#  define LPC17_SDCARD_RESP3_OFFSET   0x0020 /* SD card response 4 register */
 #define LPC17_SDCARD_DTIMER_OFFSET    0x0024 /* SD card data timer register */
 #define LPC17_SDCARD_DLEN_OFFSET      0x0028 /* SD card data length register */
 #define LPC17_SDCARD_DCTRL_OFFSET     0x002c /* SD card data control register */
@@ -151,7 +151,7 @@
 /* MCI - Data Length Register DATALENGTH - 0x400C 0028 */
 
 #define SDCARD_DATALENGTH_SHIFT       (0)       /* Bits 0-15: Data length value */
-#define SDCARD_DATALENGTH_MASK        (0xffff << SDCARD_DATALENGTH_MASK)
+#define SDCARD_DATALENGTH_MASK        (0xffff << SDCARD_DATALENGTH_SHIFT)
                                                 /* Bits 16-31: Reserved */
 
 #define SDCARD_DLEN_RESET             (0)       /* Reset value */
@@ -227,7 +227,7 @@
 #define SDCARD_CLEAR_DBCKENDC         (1 << 10) /* Bit 10: DBCKEND flag clear bit */
                                                 /* Bits 11-31: Reserved */
 
-#define SDCARD_CLEAR_RESET            0x000005ff
+#define SDCARD_CLEAR_RESET            0x000007ff
 #define SDCARD_CLEAR_STATICFLAGS      0x000005ff
 
 /* MCI - Interrupt Mask Registers - MASK0 - 0x400c 003c */

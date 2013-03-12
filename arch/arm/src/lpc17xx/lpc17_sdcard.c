@@ -619,8 +619,12 @@ static void lpc17_setpwrctrl(uint32_t pwrctrl)
 {
   uint32_t regval;
 
+  /* Set the new value of the PWRCTRL field of the PWR register.  Also, as a
+   * side-effect, clear the OPENDRAIN and ROD bits as well.
+   */
+ 
   regval  = getreg32(LPC17_SDCARD_PWR);
-  regval &= ~SDCARD_PWR_CTRL_MASK;
+  regval &= ~(SDCARD_PWR_CTRL_MASK | SDCARD_PWR_OPENDRAIN |  SDCARD_PWR_ROD);
   regval |= pwrctrl;
   putreg32(regval, LPC17_SDCARD_PWR);
 }
@@ -643,6 +647,8 @@ static void lpc17_setpwrctrl(uint32_t pwrctrl)
 
 static inline uint32_t lpc17_getpwrctrl(void)
 {
+  /* Extract and return the PWRCTRL field of the PWR register. */
+
   return getreg32(LPC17_SDCARD_PWR) & SDCARD_PWR_CTRL_MASK;
 }
 
