@@ -144,6 +144,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
     {
       tcb = sched_self();
     }
+
   DEBUGASSERT(tcb && tcb->group);
 
   /* Verify that this is a valid file/socket descriptor and that the
@@ -192,7 +193,11 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
   /* Get the stream list from the TCB */
 
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+  slist = tcb->group->tg_streamlist;
+#else
   slist = &tcb->group->tg_streamlist;
+#endif
 
   /* Find an unallocated FILE structure in the stream list */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_svcall.c
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -151,7 +151,11 @@ int up_svcall(int irq, FAR void *context)
   svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcdbg("  PSR=%08x\n", regs[REG_XPSR]);
+#ifdef REG_EXC_RETURN
+  svcdbg("  PSR: %08x LR: %08x\n", regs[REG_XPSR], current_regs[REG_EXC_RETURN]);
+#else
+  svcdbg("  PSR: %08x\n", regs[REG_XPSR]);
+#endif
 
   /* Handle the SVCall according to the command in R0 */
 
@@ -246,23 +250,22 @@ int up_svcall(int irq, FAR void *context)
         {
           struct tcb_s *rtcb = sched_self();
 
-          /* Make sure that we got here from a privileged thread and
-           * that there is a saved syscall return address.
-           */
+          /* Make sure that there is a saved syscall return address. */
 
-          DEBUGASSERT(rtcb->xcp.sysreturn != 0 &&
-                      regs[REG_EXC_RETURN] == EXC_RETURN_PRIVTHR);
+          svcdbg("sysreturn: %08x excreturn: %08x\n",
+                 rtcb->xcp.sysreturn, rtcb->xcp.excreturn);
+          DEBUGASSERT(rtcb->xcp.sysreturn != 0);
 
           /* Setup to return to the saved syscall return address in
-           * unprivileged mode.
+           * the original mode.
            */
 
           current_regs[REG_PC]         = rtcb->xcp.sysreturn;
-          current_regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
+          current_regs[REG_EXC_RETURN] = rtcb->xcp.excreturn;
           rtcb->xcp.sysreturn          = 0;
 
           /* The return value must be in R0-R1.  dispatch_syscall() temporarily
-           * moved the value to R2.
+           * moved the value for R0 to R2.
            */
 
           current_regs[REG_R0]         = current_regs[REG_R2];
@@ -280,21 +283,22 @@ int up_svcall(int irq, FAR void *context)
 #ifdef CONFIG_NUTTX_KERNEL
           FAR struct tcb_s *rtcb = sched_self();
 
-          /* Verify the the SYS call number is within range */
+          /* Verify that the SYS call number is within range */
 
           DEBUGASSERT(current_regs[REG_R0] < SYS_maxsyscall);
 
-          /* Make sure that we got here from a unprivileged thread and that
-           * there is a no saved syscall return address.
+          /* Make sure that we got here that there is a no saved syscall
+           * return address.  We cannot yet handle nested system calls.
            */
 
-          DEBUGASSERT(rtcb->xcp.sysreturn == 0 &&
-                      regs[REG_EXC_RETURN] == EXC_RETURN_UNPRIVTHR);
+          DEBUGASSERT(rtcb->xcp.sysreturn == 0);
 
           /* Setup to return to dispatch_syscall in privileged mode. */
 
           rtcb->xcp.sysreturn          = regs[REG_PC];
-          regs[REG_PC]                 = (uint32_t)dispatch_syscall;
+          rtcb->xcp.excreturn          = current_regs[REG_EXC_RETURN];
+
+          current_regs[REG_PC]         = (uint32_t)dispatch_syscall;
           current_regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
 
           /* Offset R0 to account for the reserved values */

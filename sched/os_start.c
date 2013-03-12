@@ -237,6 +237,7 @@ void os_start(void)
 
   slldbg("Entry\n");
 
+  /* Initialize RTOS Data ***************************************************/
   /* Initialize all task lists */
 
   dq_init(&g_readytorun);
@@ -272,6 +273,7 @@ void os_start(void)
   g_pidhash[ PIDHASH(0)].tcb = &g_idletcb.cmn;
   g_pidhash[ PIDHASH(0)].pid = 0;
 
+  /* Initialize the IDLE task TCB *******************************************/
   /* Initialize a TCB for this thread of execution.  NOTE:  The default
    * value for most components of the g_idletcb are zero.  The entire
    * structure is set to zero.  Then only the (potentially) non-zero
@@ -298,6 +300,7 @@ void os_start(void)
 
   up_initial_state(&g_idletcb.cmn);
 
+  /* Initialize RTOS facilities *********************************************/
   /* Initialize the semaphore facility(if in link).  This has to be done
    * very early because many subsystems depend upon fully functional
    * semaphores.
@@ -342,12 +345,6 @@ void os_start(void)
     {
       task_initialize();
     }
-#endif
-
-  /* Allocate the IDLE group and suppress child status. */
-
-#ifdef HAVE_TASK_GROUP
-  (void)group_allocate(&g_idletcb);
 #endif
 
   /* Initialize the interrupt handling subsystem (if included) */
@@ -462,6 +459,13 @@ void os_start(void)
       lib_initialize();
     }
 
+  /* IDLE Group Initialization **********************************************/
+  /* Allocate the IDLE group and suppress child status. */
+
+#ifdef HAVE_TASK_GROUP
+  (void)group_allocate(&g_idletcb);
+#endif
+
   /* Create stdout, stderr, stdin on the IDLE task.  These will be
    * inherited by all of the threads created by the IDLE task.
    */
@@ -477,10 +481,12 @@ void os_start(void)
   g_idletcb.cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
 #endif
 
+  /* Bring Up the System ****************************************************/
   /* Create initial tasks and bring-up the system */
 
   (void)os_bringup();
 
+  /* The IDLE Loop **********************************************************/
   /* When control is return to this point, the system is idle. */
 
   sdbg("Beginning Idle Loop\n");

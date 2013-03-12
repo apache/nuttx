@@ -107,7 +107,7 @@ depend: .depend
 
 clean:
 	$(call DELFILE, nuttx_user.elf)
-	$(call DELFILE, "$(TOPDIR)$(DELIM)nuttx_user.elf")
+	$(call DELFILE, "$(TOPDIR)$(DELIM)nuttx_user.*")
 	$(call DELFILE, "$(TOPDIR)$(DELIM)User.map")
 	$(call CLEAN)
 

@@ -342,6 +342,10 @@ CONFIGURATION
        in FLASH.  But loading the nuttx ELF does not harm the nuttx_user.elf
        in FLASH.  Conclusion:  Always load nuttx_user.elf before nuttx.
 
+       Just to complicate matters, it is sometimes the case that you need
+       load objects twice to account for write failures.  I have not yet
+       found a simple foolproof way to reliably get the code into FLASH.
+
   nsh
   ---
     Configures the NuttShell (nsh) located at examples/nsh.  The
