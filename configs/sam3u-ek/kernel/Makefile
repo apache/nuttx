@@ -1,7 +1,7 @@
 ############################################################################
 # configs/sam3u-ek/kernel/Makefile
 #
-#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -107,7 +107,7 @@ depend: .depend
 
 clean:
 	$(call DELFILE, nuttx_user.elf)
-	$(call DELFILE, "$(TOPDIR)$(DELIM)nuttx_user.elf")
+	$(call DELFILE, "$(TOPDIR)$(DELIM)nuttx_user.*")
 	$(call DELFILE, "$(TOPDIR)$(DELIM)User.map")
 	$(call CLEAN)
 
