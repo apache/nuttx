@@ -101,6 +101,18 @@
 #define GPIO_JOY_D   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN19)
 #define GPIO_JOY_CTR (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN14)
 
+/* SD Card **************************************************************************/
+/* The SD card detect (CD) signal is on P0[13].  This signal is shared.  It is also
+ * used for MOSI1 and USB_UP_LED.  The CD pin may be disconnected.  There is a jumper
+ * on board that enables the CD pin.
+ */
+
+#if 0 /* The CD pin may be interrupting */
+#  define GPIO_SD_CD (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN13)
+#else
+#  define GPIO_SD_CD (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN13)
+#endif
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

@@ -50,17 +50,20 @@
 #include <nuttx/usb/usbhost.h>
 
 #include "lpc17_gpio.h"
+#include "lpc17_sdcard.h"
 #include "open1788.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
 /* Configuration ************************************************************/
 
-#define NSH_HAVE_MMCSD    1
-#define NSH_HAVE_USBHOST  1
-#define NSH_HAVE_USBHDEV  1
+#define NSH_HAVE_MMCSD      1
+#define NSH_HAVE_USBHOST    1
+#define NSH_HAVE_USBHDEV    1
+
+#undef NSH_HAVE_MMCSD_CD
+#undef NSH_HAVE_MMCSD_CDINT
 
 /* MMC/SD support */
 
@@ -88,6 +91,25 @@
 #     warning "Assuming /dev/mmcsd0"
 #     define CONFIG_NSH_MMCSDMINOR 0
 #  endif
+#endif
+
+/* The SD card detect (CD) signal is on P0[13].  This signal is shared.  It is also
+ * used for MOSI1 and USB_UP_LED.  The CD pin may be disconnected.  There is a jumper
+ * on board that enables the CD pin.
+ */
+
+#ifdef NSH_HAVE_MMCSD
+#  ifdef CONFIG_MMCSD_HAVECARDDETECT
+#    define NSH_HAVE_MMCSD_CD 1
+#    ifdef CONFIG_GPIO_IRQ
+#      define NSH_HAVE_MMCSD_CDINT 1
+#    endif
+#  endif
+#endif
+
+#if defined(NSH_HAVE_MMCSD_CD) && \
+    (defined(CONFIG_LPC17_SSP1) || defined(CONFIG_LPC17_USBDEV))
+#  warning "Use of SD Card Detect pin conflicts with SSP1 and/or USB device"
 #endif
 
 /* USB Host */
@@ -189,6 +211,31 @@ static int nsh_waiter(int argc, char *argv[])
 #endif
 
 /****************************************************************************
+ * Name: nsh_cdinterrupt
+ *
+ * Description:
+ *   Card detect interrupt handler.
+ *
+ ****************************************************************************/
+
+#ifdef NSH_HAVE_MMCSD_CDINT
+static int nsh_cdinterrupt(int irq, FAR void *context)
+{
+  static bool inserted = 0xff; /* Impossible value */
+  bool present;
+
+  present = !lpc17_gpioread(GPIO_SD_CD);
+  if (present != inserted)
+    {
+      sdio_mediachange(sdio, preset);
+      inserted = present;
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: nsh_sdinitialize
  *
  * Description:
@@ -201,6 +248,23 @@ static int nsh_sdinitialize(void)
 {
   FAR struct sdio_dev_s *sdio;
   int ret;
+
+#ifdef NSH_HAVE_MMCSD_CD
+  /* Configure the SD card detect GPIO */
+
+  lpc17_configgpio(GPIO_SD_CD);
+
+  /* Attach an interrupt handler to get notifications when a card is
+   * inserted or deleted.
+   */
+
+#if NSH_HAVE_MMCSD_CDINT
+
+   (void)irq_attach(LPC17_IRQ_P0p13, nsh_cdinterrupt);
+   up_enable_irq(LPC17_IRQ_P0p13);
+
+#endif
+#endif
 
   /* First, get an instance of the SDIO interface */
 
@@ -217,16 +281,24 @@ static int nsh_sdinitialize(void)
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      message("nsh_archinitialize: "
+              "Failed to bind SDIO to the MMC/SD driver: %d\n",
+              ret);
+
       return ret;
     }
 
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the STM3240G-EVAL board supports a GPIO to detect if there is a card in
-   * the slot.
+  /* Check if there is a card in the slot and inform the SDCARD driver.  If
+   * we do not support the card  detect, then let's assume that there is
+   * one.
    */
 
-   sdio_mediachange(sdio, true);
+#ifdef NSH_HAVE_MMCSD_CD
+  sdio_mediachange(sdio, !lpc17_gpioread(GPIO_SD_CD));
+#else
+  sdio_mediachange(sdio, true);
+#endif
+  return OK;
 }
 #else
 #  define nsh_sdinitialize() (OK)
