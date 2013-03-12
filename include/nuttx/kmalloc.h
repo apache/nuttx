@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include <nuttx/mm.h>

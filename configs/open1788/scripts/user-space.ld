@@ -53,8 +53,8 @@ MEMORY
 
     /* 64Kb of SRAM in the CPU block */
 
-    ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 4K
-    usram (rwx)      : ORIGIN = 0x20001000, LENGTH = 60K
+    ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 4K
+    usram (rwx)      : ORIGIN = 0x10001000, LENGTH = 60K
 
     /* Other peripheral memory (free, nothing is linked here) */
 

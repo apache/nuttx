@@ -182,7 +182,7 @@ static inline void group_release(FAR struct task_group_s *group)
   /* Free resource held by the stream list */
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-  lib_releaselist(&group->tg_streamlist);
+  lib_releaselist(group->tg_streamlist);
 #else
   lib_releaselist(&group->tg_streamlist);
 #endif
