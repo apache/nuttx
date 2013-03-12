@@ -211,7 +211,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    * is aligned to the MPU requirement.
    */
 
-  log2  = (int)mpu_log2regionsize(usize);
+  log2  = (int)mpu_log2regionfloor(usize);
   DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
 
   usize = (1 << log2);
@@ -262,7 +262,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * is aligned to the MPU requirement.
    */
 
-  log2  = (int)mpu_log2regionsize(usize);
+  log2  = (int)mpu_log2regionfloor(usize);
   DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
 
   usize = (1 << log2);
