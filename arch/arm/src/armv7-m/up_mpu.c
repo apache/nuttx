@@ -117,7 +117,7 @@ uint8_t mpu_log2regionsize(size_t size)
 
   /* The minimum permitted region size is 16 bytes (log2(16) = 4. */
 
-  for (l2size = 4; l2size < 32 && size > (1 << l2size); size++);
+  for (l2size = 4; l2size < 32 && size > (1 << l2size); l2size++);
   return l2size;
 }
 
