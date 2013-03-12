@@ -239,19 +239,16 @@ int up_swint0(int irq, FAR void *context)
         {
           struct tcb_s *rtcb = sched_self();
 
-          /* Make sure that we got here from a privileged thread and
-           * that there is a saved syscall return address.
-           */
+          /* Make sure that there is a saved syscall return address. */
 
-#error "Missing logic -- need to test for privileged mode"
-          DEBUGASSERT(rtcb->xcp.sysreturn != 0 && ???);
+          DEBUGASSERT(rtcb->xcp.sysreturn != 0);
 
           /* Setup to return to the saved syscall return address in
-           * unprivileged mode.
+           * the original mode.
            */
 
           current_regs[REG_EPC] = rtcb->xcp.sysreturn;
-#error "Missing logic -- need to set for unprivileged mode"
+#error "Missing logic -- need to restore the original mode"
           rtcb->sysreturn       = 0;
         }
         break;
@@ -267,20 +264,19 @@ int up_swint0(int irq, FAR void *context)
 #ifdef CONFIG_NUTTX_KERNEL
           FAR struct tcb_s *rtcb = sched_self();
 
-          /* Verify the the SYS call number is within range */
+          /* Verify that the SYS call number is within range */
 
           DEBUGASSERT(current_regs[REG_A0] < SYS_maxsyscall);
 
-          /* Make sure that we got here from an unprivileged thread and that
-           * there is a no saved syscall return address.
+          /* Make sure that we got here that there is a no saved syscall
+           * return address.  We cannot yet handle nested system calls.
            */
 
-#error "Missing logic -- Need to set unprivileged mode"
-          DEBUGASSERT(rtcb->xcp.sysreturn == 0 && ???);
+          DEBUGASSERT(rtcb->xcp.sysreturn == 0);
 
           /* Setup to return to dispatch_syscall in privileged mode. */
 
-          rtcb->sysreturn              = regs[REG_EPC]
+          rtcb->sysreturn              = regs[REG_EPC];
           regs[REG_EPC]                = (uint32_t)dispatch_syscall;
 #error "Missing logic -- Need to set privileged mode"
 
