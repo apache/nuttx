@@ -39,8 +39,9 @@
 
 #include  <sys/types.h>
 #include  <stdbool.h>
-#include  <debug.h>
 #include  <string.h>
+#include  <assert.h>
+#include  <debug.h>
 
 #include  <nuttx/arch.h>
 #include  <nuttx/compiler.h>
@@ -463,28 +464,28 @@ void os_start(void)
   /* Allocate the IDLE group and suppress child status. */
 
 #ifdef HAVE_TASK_GROUP
-  (void)group_allocate(&g_idletcb);
+  DEBUGVERIFY(group_allocate(&g_idletcb));
 #endif
 
   /* Create stdout, stderr, stdin on the IDLE task.  These will be
    * inherited by all of the threads created by the IDLE task.
    */
 
-  (void)group_setupidlefiles(&g_idletcb);
+  DEBUGVERIFY(group_setupidlefiles(&g_idletcb));
 
   /* Complete initialization of the IDLE group.  Suppress retention
    * of child status in the IDLE group.
    */
 
 #ifdef HAVE_TASK_GROUP
-  (void)group_initialize(&g_idletcb);
+  DEBUGVERIFY(group_initialize(&g_idletcb));
   g_idletcb.cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
 #endif
 
   /* Bring Up the System ****************************************************/
   /* Create initial tasks and bring-up the system */
 
-  (void)os_bringup();
+  DEBUGVERIFY(os_bringup());
 
   /* The IDLE Loop **********************************************************/
   /* When control is return to this point, the system is idle. */

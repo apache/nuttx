@@ -110,12 +110,14 @@ static void dispatch_syscall(void)
 {
   __asm__ __volatile__
   (
-    " push {r4}\n"                /* Save R4 */
+    " push {r4, r5}\n"            /* Save R4 and R5 */
+    " mov r5, lr\n"               /* Save lr in R5 */
     " ldr r4, =g_stublookup\n"    /* R4=The base of the stub lookup table */
     " lsl r0, r0, #2\n"           /* R0=Offset of the stub for this syscall */
     " ldr r4, [r4, r0]\n"         /* R4=Address of the stub for this syscall */
-    " blx r5\n"                   /* Call the stub (modifies R14) */
-    " pop {r4}\n"                 /* Restore R4 */
+    " blx r5\n"                   /* Call the stub (modifies lr) */
+    " mov lr, r5\n"               /* Restore lr */
+    " pop {r4, r5}\n"             /* Restore R4 and R5*/
     " mov r2, r0\n"               /* R2=Saves return value in R0 */
     " mov r0, #3\n"               /* R0=SYS_syscall_return */
     " svc 0"                      /* Return from the syscall */
@@ -321,7 +323,8 @@ int up_svcall(int irq, FAR void *context)
              current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
 #ifdef CONFIG_NUTTX_KERNEL
       svcdbg("xPSR: %08x BASEPRI: %08x EXEC_RETURN: %08x\n",
-             current_regs[REG_XPSR], current_regs[REG_BASEPRI], current_regs[REG_EXC_RETURN]);
+             current_regs[REG_XPSR], current_regs[REG_BASEPRI],
+             current_regs[REG_EXC_RETURN]);
 #else
       svcdbg("xPSR: %08x BASEPRI: %08x\n",
              current_regs[REG_XPSR], current_regs[REG_BASEPRI]);

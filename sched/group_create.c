@@ -225,6 +225,10 @@ int group_allocate(FAR struct task_tcb_s *tcb)
   ret = env_dup(group);
   if (ret < 0)
     {
+#if CONFIG_NFILE_STREAMS > 0 && defined(CONFIG_NUTTX_KERNEL) && \
+    defined(CONFIG_MM_KERNEL_HEAP)
+      kufree(group->tg_streamlist);
+#endif
       kfree(group);
       tcb->cmn.group = NULL;
       return ret;

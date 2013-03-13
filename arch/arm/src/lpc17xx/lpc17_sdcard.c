@@ -1546,7 +1546,7 @@ static void lpc17_widebus(FAR struct sdio_dev_s *dev, bool wide)
 
 static void lpc17_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
-  uint32_t clock;
+  uint32_t clkcr;
 
   switch (rate)
     {
@@ -1554,39 +1554,39 @@ static void lpc17_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       default:
       case CLOCK_SDIO_DISABLED:
-        clock = LPC17_CLCKCR_INIT;
+        clkcr = LPC17_CLCKCR_INIT;
         return;
 
       /* Enable in initial ID mode clocking (<400KHz) */
 
       case CLOCK_IDMODE:
-        clock = (LPC17_CLCKCR_INIT | SDCARD_CLOCK_CLKEN);
+        clkcr = (LPC17_CLCKCR_INIT | SDCARD_CLOCK_CLKEN);
         break;
 
       /* Enable in MMC normal operation clocking */
 
       case CLOCK_MMC_TRANSFER:
-        clock = (SDCARD_CLOCK_MMCXFR | SDCARD_CLOCK_CLKEN);
+        clkcr = (SDCARD_CLOCK_MMCXFR | SDCARD_CLOCK_CLKEN);
         break;
 
       /* SD normal operation clocking (wide 4-bit mode) */
 
       case CLOCK_SD_TRANSFER_4BIT:
 #ifndef CONFIG_SDIO_WIDTH_D1_ONLY
-        clock = (SDCARD_CLOCK_SDWIDEXFR | SDCARD_CLOCK_CLKEN);
+        clkcr = (SDCARD_CLOCK_SDWIDEXFR | SDCARD_CLOCK_CLKEN);
         break;
 #endif
 
       /* SD normal operation clocking (narrow 1-bit mode) */
 
       case CLOCK_SD_TRANSFER_1BIT:
-        clock = (SDCARD_CLOCK_SDXFR | SDCARD_CLOCK_CLKEN);
+        clkcr = (SDCARD_CLOCK_SDXFR | SDCARD_CLOCK_CLKEN);
         break;
     }
 
   /* Set the new clock frequency along with the clock enable/disable bit */
 
-  lpc17_setclock(clock);
+  lpc17_setclock(clkcr);
 }
 
 /****************************************************************************

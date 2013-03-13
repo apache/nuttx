@@ -112,9 +112,13 @@ static void dispatch_syscall(void)
 {
   __asm__ __volatile__
   (
+    " push {r4}\n"                 /* Save R4 */
+    " mov r4, lr\n"                /* Save lr in R4 */
     " ldr ip, =g_stublookup\n"     /* R12=The base of the stub lookup table */
     " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this syscall */
-    " blx ip\n"                    /* Call the stub (modifies R14)*/
+    " blx ip\n"                    /* Call the stub (modifies lr)*/
+    " mov lr, r4\n"                /* Restore lr */
+    " pop {r4}\n"                  /* Restore r4 */
     " mov r2, r0\n"                /* R2=Saved return value in R0 */
     " mov r0, #3\n"                /* R0=SYS_syscall_return */
     " svc 0"                       /* Return from the syscall */
@@ -152,7 +156,7 @@ int up_svcall(int irq, FAR void *context)
          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
 #ifdef REG_EXC_RETURN
-  svcdbg("  PSR: %08x LR: %08x\n", regs[REG_XPSR], current_regs[REG_EXC_RETURN]);
+  svcdbg("  PSR: %08x LR: %08x\n", regs[REG_XPSR], regs[REG_EXC_RETURN]);
 #else
   svcdbg("  PSR: %08x\n", regs[REG_XPSR]);
 #endif
@@ -265,7 +269,7 @@ int up_svcall(int irq, FAR void *context)
           rtcb->xcp.sysreturn          = 0;
 
           /* The return value must be in R0-R1.  dispatch_syscall() temporarily
-           * moved the value for R0 to R2.
+           * moved the value for R0 into R2.
            */
 
           current_regs[REG_R0]         = current_regs[REG_R2];
@@ -322,7 +326,12 @@ int up_svcall(int irq, FAR void *context)
       svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
              current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
-      svcdbg("  PSR=%08x\n", current_regs[REG_XPSR]);
+#ifdef REG_EXC_RETURN
+      svcdbg("  PSR: %08x LR: %08x\n",
+             current_regs[REG_XPSR], current_regs[REG_EXC_RETURN]);
+#else
+      svcdbg("  PSR: %08x\n", current_regs[REG_XPSR]);
+#endif
     }
   else
     {

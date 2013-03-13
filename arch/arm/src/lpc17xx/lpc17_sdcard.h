@@ -124,4 +124,3 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_SDCARD_H */
-

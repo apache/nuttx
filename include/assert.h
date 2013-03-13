@@ -49,10 +49,12 @@
 
 /* Macro Name: ASSERT, ASSERTCODE, et al. */
 
-#undef ASSERT
-#undef ASSERTCODE
-#undef DEBUGASSERT
-#undef PANIC
+#undef ASSERT       - Assert if the condition is not true
+#undef ASSERTCODE   - Assert with an error code if the condition is not true
+#undef VERIFY       - Assert if a function returns a negative value
+#undef DEBUGASSERT  - Like ASSERT, but only if CONFIG_DEBUG is defined
+#undef DEBUGVERIFY  - Like VERIFY, but only if CONFIG_DEBUG is defined
+#undef PANIC        - Unconditional error with code
 
 #ifdef CONFIG_HAVE_FILENAME
 
@@ -62,11 +64,17 @@
 #  define ASSERTCODE(f, code) \
      { if (!(f)) up_assert_code((const uint8_t *)__FILE__, (int)__LINE__, code); }
 
+#  define VERIFY(f) \
+     { if ((f) < 0) up_assert((const uint8_t *)__FILE__, (int)__LINE__); }
+
 #  ifdef CONFIG_DEBUG
 #    define DEBUGASSERT(f) \
        { if (!(f)) up_assert((const uint8_t *)__FILE__, (int)__LINE__); }
+#    define DEBUGVERIFY(f) \
+       { if ((f) < 0) up_assert((const uint8_t *)__FILE__, (int)__LINE__); }
 #  else
 #    define DEBUGASSERT(f)
+#    define DEBUGVERIFY(f) ((void)(f))
 #  endif /* CONFIG_DEBUG */
 
 #  define PANIC(code) \
@@ -79,11 +87,17 @@
 #  define ASSERTCODE(f, code) \
      { if (!(f)) up_assert_code(code); }
 
+#    define VERIFY(f) \
+       { if ((f) < 0) up_assert(); }
+
 #  ifdef CONFIG_DEBUG
 #    define DEBUGASSERT(f) \
        { if (!(f)) up_assert(); }
+#    define DEBUGVERIFY(f) \
+       { if ((f) < 0) up_assert(); }
 #  else
 #    define DEBUGASSERT(f)
+#    define DEBUGVERIFY(f) ((void)(f))
 #  endif /* CONFIG_DEBUG */
 
 #  define PANIC(code) \

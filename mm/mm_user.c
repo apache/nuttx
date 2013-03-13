@@ -38,6 +38,7 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
+#include <assert.h>
 #include <nuttx/mm.h>
 
 #if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
