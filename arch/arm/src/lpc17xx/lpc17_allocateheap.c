@@ -300,10 +300,18 @@ void up_addregion(void)
    */
 
 #ifdef LPC17_AHB_HEAPBASE
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
 
-  /* Yes... Add the AHB SRAM heap region. */
+  /* Yes.. allow user-mode access to the AHB SRAM user heap memory */
 
-   kmm_addregion((FAR void*)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
+   lpc17_mpu_uheap((uintptr_t)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
+
+#endif
+
+  /* Add the AHB SRAM user heap region. */
+
+   kumm_addregion((FAR void*)LPC17_AHB_HEAPBASE, LPC17_AHB_HEAPSIZE);
+
 #endif
 }
 #endif
