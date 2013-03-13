@@ -70,7 +70,7 @@ OBJS  = $(COBJS)
 # Targets:
 
 all: $(TOPDIR)$(DELIM)nuttx_user.elf $(TOPDIR)$(DELIM)User.map
-.PHONY: depend clean distclean
+.PHONY: nuttx_user.elf depend clean distclean
 
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
