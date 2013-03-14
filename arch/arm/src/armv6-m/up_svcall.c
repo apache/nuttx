@@ -232,9 +232,9 @@ int up_svcall(int irq, FAR void *context)
         }
         break;
 
-      /* R0=SYS_syscall_return: This a switch context command:
+      /* R0=SYS_syscall_return: This a syscall return command:
        *
-       *   void up_sycall_return(void);
+       *   void up_syscall_return(void);
        *
        * At this point, the following values are saved in context:
        *
@@ -260,15 +260,48 @@ int up_svcall(int irq, FAR void *context)
            * unprivileged mode.
            */
 
-          current_regs[REG_PC]         = rtcb->xcp.sysreturn;
-          current_regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
-          rtcb->xcp.sysreturn          = 0;
+          regs[REG_PC]         = rtcb->xcp.sysreturn;
+          regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
+          rtcb->xcp.sysreturn  = 0;
 
           /* The return value must be in R0-R1.  dispatch_syscall() temporarily
            * moved the value to R2.
            */
 
-          current_regs[REG_R0]         = current_regs[REG_R2];
+          regs[REG_R0]         = regs[REG_R2];
+        }
+        break;
+#endif
+
+      /* R0=SYS_task_start: This a user task start
+       *
+       *   void up_task_start(main_t taskentry, int argc, FAR char *argv[]) noreturn_function;
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_task_start
+       *   R1 = taskentry
+       *   R2 = argc
+       *   R3 = argv
+       */
+
+#ifdef CONFIG_NUTTX_KERNEL
+      case SYS_task_start:
+        {
+          /* Set up to return to the user-space task start-up function in
+           * unprivileged mode.
+           */
+
+          regs[REG_PC]         = (uint32_t)USERSPACE->task_startup;
+          regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
+
+          /* Change the paramter ordering to match the expection of struct
+           * userpace_s task_startup:
+           */
+
+          regs[REG_R0]         = regs[REG_R1]; /* Task entry */
+          regs[REG_R1]         = regs[REG_R2]; /* argc */
+          regs[REG_R2]         = regs[REG_R3]; /* argv */
         }
         break;
 #endif
@@ -285,7 +318,7 @@ int up_svcall(int irq, FAR void *context)
 
           /* Verify the the SYS call number is within range */
 
-          DEBUGASSERT(current_regs[REG_R0] < SYS_maxsyscall);
+          DEBUGASSERT(regs[REG_R0] < SYS_maxsyscall);
 
           /* Make sure that we got here from an unprivileged thread and that
            * there is a no saved syscall return address.
@@ -296,13 +329,13 @@ int up_svcall(int irq, FAR void *context)
 
           /* Setup to return to dispatch_syscall in privileged mode. */
 
-          rtcb->xcp.sysreturn          = regs[REG_PC];
-          regs[REG_PC]                 = (uint32_t)dispatch_syscall;
-          current_regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
+          rtcb->xcp.sysreturn  = regs[REG_PC];
+          regs[REG_PC]         = (uint32_t)dispatch_syscall;
+          regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
 
           /* Offset R0 to account for the reserved values */
 
-          current_regs[REG_R0]        -= CONFIG_SYS_RESERVED;
+          regs[REG_R0]        -= CONFIG_SYS_RESERVED;
 #else
           slldbg("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif
