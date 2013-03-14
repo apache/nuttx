@@ -600,11 +600,24 @@ extern "C"
  * Public Function Prototypes
  ********************************************************************************/
 
-/* TCB helpers */
+/* TCB helpers ******************************************************************/
+/* sched_self() returns the TCB of the currently running task (i.e., the
+ * caller)
+ */
 
 FAR struct tcb_s *sched_self(void);
 
-/* File system helpers */
+/* sched_foreach will enumerate over each task and provide the TCB of each task
+ * or thread to a callback function.  Interrupts will be disabled throughout
+ * this enumeration!
+ */
+
+void sched_foreach(sched_foreach_t handler, FAR void *arg);
+
+/* File system helpers **********************************************************/
+/* These functions all extract lists from the group structure assocated with the
+ * currently executing task.
+ */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 FAR struct filelist *sched_getfiles(void);
@@ -617,13 +630,32 @@ FAR struct streamlist *sched_getstreams(void);
 FAR struct socketlist *sched_getsockets(void);
 #endif /* CONFIG_NSOCKET_DESCRIPTORS */
 
-/* Setup up a start hook */
+/********************************************************************************
+ * Name: task_starthook
+ *
+ * Description:
+ *   Configure a start hook... a function that will be called on the thread
+ *   of the new task before the new task's main entry point is called.
+ *   The start hook is useful, for example, for setting up automatic
+ *   configuration of C++ constructors.
+ *
+ * Inputs:
+ *   tcb - The new, unstarted task task that needs the start hook
+ *   starthook - The pointer to the start hook function
+ *   arg - The argument to pass to the start hook function.
+ *
+ * Return:
+ *   None
+ *
+ ********************************************************************************/
 
 #ifdef CONFIG_SCHED_STARTHOOK
-void task_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook, FAR void *arg);
+void task_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
+                    FAR void *arg);
 #endif
 
-/* Internal vfork support.The  overall sequence is:
+/********************************************************************************
+ * Internal vfork support.  The overall sequence is:
  *
  * 1) User code calls vfork().  vfork() is provided in architecture-specific
  *    code.
@@ -643,18 +675,32 @@ void task_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook, FAR void 
  * 6) task_vforkstart() then executes the child thread.
  *
  * task_vforkabort() may be called if an error occurs between steps 3 and 6.
- */
+ *
+ ********************************************************************************/
 
 FAR struct task_tcb_s *task_vforksetup(start_t retaddr);
 pid_t task_vforkstart(FAR struct task_tcb_s *child);
 void task_vforkabort(FAR struct task_tcb_s *child, int errcode);
 
-/* sched_foreach will enumerate over each task and provide the
- * TCB of each task to a user callback functions.  Interrupts
- * will be disabled throughout this enumeration!
- */
+/****************************************************************************
+ * Name: task_startup
+ *
+ * Description:
+ *   This function is the user-space, task startup function.  It is called
+ *   from up_task_start() in user-mode.
+ *
+ * Inputs:
+ *   entrypt - The user-space address of the task entry point
+ *   argc and argv - Standard arguments for the task entry point
+ *
+ * Return:
+ *   None.  This function does not return.
+ *
+ ****************************************************************************/
 
-void sched_foreach(sched_foreach_t handler, FAR void *arg);
+#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+void task_startup(main_t entrypt, int argc, FAR char *argv[]);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

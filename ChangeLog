@@ -4322,3 +4322,11 @@
 	  configuration for the WaveShare Open1788 board. (2013-03-11)
 	* arch/arm/src/armv7-m/up_mpu.c:  Several fixes to MPU logic.
 	  (2013-03-12).
+	* arch/arm, configs/sam3u-ek, configs/open1788:  Fix memory map for
+	  kernel mode build; Some regions were overlapping. (2013-03-13).
+	* arch/:  Rename g_heapbase to g_idle_topstack.  This is the same value
+	  however:  The top of the IDLE stack is the same as the base of the
+	  heap in the flat build.  But not in the kernel build:  The base of
+	  the heap is elsewhere so the naming was wrong. (2013-03-13).
+	* libc/stdlib/lib_itoa.c:  Implementation of itoa() contributed by
+	  Ryan Sundberg. (2013-03-14).

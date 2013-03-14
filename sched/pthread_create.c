@@ -174,9 +174,7 @@ static void pthread_start(void)
 
   DEBUGASSERT(group && pjoin);
 
-  /* Sucessfully spawned, add the pjoin to our data set.
-   * Don't re-enable pre-emption until this is done.
-   */
+  /* Sucessfully spawned, add the pjoin to our data set. */
 
   (void)pthread_takesemaphore(&group->tg_joinsem);
   pthread_addjoininfo(group, pjoin);
@@ -187,10 +185,7 @@ static void pthread_start(void)
   pjoin->started = true;
   (void)pthread_givesemaphore(&pjoin->data_sem);
 
-  /* Pass control to the thread entry point.  The argument is
-   * argv[1].  argv[0] (the thread name) and argv[2-4] are not made
-   * available to the pthread.
-   */
+  /* Pass control to the thread entry point. */
 
   exit_status = (*ptcb->cmn.entry.pthread)(ptcb->arg);
 

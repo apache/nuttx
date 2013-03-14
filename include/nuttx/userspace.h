@@ -111,6 +111,10 @@ struct userspace_s
   uintptr_t us_bssstart;
   uintptr_t us_bssend;
 
+  /* Task/thread startup stubs */
+
+  void (*task_startup)(main_t entrypt, int argc, FAR char *argv[]) noreturn_function;
+
   /* Memory manager entry points */
 
   void (*mm_initialize)(FAR void *heap_start, size_t heap_size);

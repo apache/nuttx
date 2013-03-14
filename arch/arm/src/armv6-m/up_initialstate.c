@@ -126,26 +126,13 @@ void up_initial_state(struct tcb_s *tcb)
 #endif
 #endif /* CONFIG_PIC */
 
-  /* Set privileged- or unprivileged-mode, depending on how NuttX is
-   * configured and what kind of thread is being started.
+  /* All tasks start via a stub function in kernel space.  So all
+   * tasks must start in privileged thread mode.  If CONFIG_NUTTX_KERNEL
+   * is defined, then that stub function will switch to unprivileged
+   * mode before transferring control to the user task.
    */
 
-#ifdef CONFIG_NUTTX_KERNEL
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
-    {
-      /* It is a normal task or a pthread.  Set user mode */
-
-      xcp->regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
-    }
-  else
-    {
-      /* If the kernel build is not selected -OR- if this is a kernel
-       * thread, then start it in privileged thread mode.
-       */
-
-      xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
-    }
-#endif /* CONFIG_NUTTX_KERNEL */
+  xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
 
   /* Enable or disable interrupts, based on user configuration */
 

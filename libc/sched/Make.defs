@@ -37,6 +37,10 @@
 
 CSRCS += sched_getprioritymax.c sched_getprioritymin.c
 
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CSRCS += task_startup.c
+endif
+
 # Add the sched directory to the build
 
 DEPPATH += --dep-path sched

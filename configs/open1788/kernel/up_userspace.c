@@ -44,6 +44,7 @@
 #include <nuttx/userspace.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mm.h>
+#include <nuttx/sched.h>
 
 #if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
 
@@ -100,6 +101,10 @@ const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
   .us_dataend       = (uintptr_t)&_edata,
   .us_bssstart      = (uintptr_t)&_sbss,
   .us_bssend        = (uintptr_t)&_ebss,
+
+  /* Task/thread startup stubs */
+
+  .task_startup     = task_startup,
 
   /* Memory manager entry points (declared in include/nuttx/mm.h) */
 
