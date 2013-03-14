@@ -190,11 +190,11 @@
 #define BOARD_BUTTON_5             4
 #define BOARD_NUM_BUTTONS          5
 
-#define BOARD_BUTTON_BUTTON1_BIT   (1 << BOARD_BUTTON_1)
-#define BOARD_BUTTON_BUTTON2_BIT   (1 << BOARD_BUTTON_2)
-#define BOARD_BUTTON_BUTTON3_BIT   (1 << BOARD_BUTTON_3)
-#define BOARD_BUTTON_BUTTON4_BIT   (1 << BOARD_BUTTON_4)
-#define BOARD_BUTTON_BUTTON5_BIT   (1 << BOARD_BUTTON_5)
+#define BOARD_BUTTON1_BIT          (1 << BOARD_BUTTON_1)
+#define BOARD_BUTTON2_BIT          (1 << BOARD_BUTTON_2)
+#define BOARD_BUTTON3_BIT          (1 << BOARD_BUTTON_3)
+#define BOARD_BUTTON4_BIT          (1 << BOARD_BUTTON_4)
+#define BOARD_BUTTON5_BIT          (1 << BOARD_BUTTON_5)
 
 /* Alternate pin selections *********************************************************/
 /* Pin Description                      On Board       Connector
