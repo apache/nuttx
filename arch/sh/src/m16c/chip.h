@@ -253,20 +253,20 @@
 
 #ifndef __ASSEMBLY__
 
-extern uint16_t g_snbss;		/* Start of near .bss */
-extern uint16_t g_enbss;		/* End+1 of near .bss */
-extern uint16_t g_sndata;		/* Start of near .data */
-extern uint16_t g_endata;		/* End+1 of near .data */
-extern uint32_t g_enronly;		/* Start of relocated read-only data in FLASH */
+extern uint16_t g_snbss;         /* Start of near .bss */
+extern uint16_t g_enbss;         /* End+1 of near .bss */
+extern uint16_t g_sndata;        /* Start of near .data */
+extern uint16_t g_endata;        /* End+1 of near .data */
+extern uint32_t g_enronly;       /* Start of relocated read-only data in FLASH */
 #ifdef CONFIG_M16C_HAVEFARRAM
-  extern uint32_t g_sfbss;		/* Start of far .bss */
-  extern uint32_t g_efbss;		/* End+1 of far .bss */
-  extern uint32_t g_sfdata;		/* Start of far .data */
-  extern uint32_t g_efdata;		/* End_1 of far .data */
-  extern uint32_t g_efronly;	/* Start of relocated read-only data in FLASH */
+  extern uint32_t g_sfbss;       /* Start of far .bss */
+  extern uint32_t g_efbss;       /* End+1 of far .bss */
+  extern uint32_t g_sfdata;      /* Start of far .data */
+  extern uint32_t g_efdata;      /* End_1 of far .data */
+  extern uint32_t g_efronly;     /* Start of relocated read-only data in FLASH */
 #endif
-extern uint32_t g_svarvect;		/* Start of variable vectors */
-extern uint32_t g_heapbase;		/* Start of the heap */
+extern uint32_t g_svarvect;      /* Start of variable vectors */
+extern uint32_t g_idle_topstack; /* Start of the heap */
 
 /* Address of the saved user stack pointer */
 

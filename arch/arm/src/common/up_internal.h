@@ -166,7 +166,7 @@ extern volatile uint32_t *current_regs;
  * CONFIG_DRAM_END
  */
 
-extern const uint32_t g_heapbase;
+extern const uint32_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 

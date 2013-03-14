@@ -81,7 +81,7 @@ extern volatile uint8_t *current_regs;
  * heap is CONFIG_DRAM_END
  */
 
-extern uint16_t g_heapbase;
+extern uint16_t g_idle_topstack;
 
 #endif /* __ASSEMBLY__ */
 

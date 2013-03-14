@@ -141,7 +141,7 @@ extern volatile uint8_t *current_regs;
  * The end of the heap is CONFIG_DRAM_END
  */
 
-extern uint16_t g_heapbase;
+extern uint16_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 

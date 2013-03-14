@@ -180,7 +180,7 @@ static void up_dumpstate(void)
 
   if (rtcb->pid == 0)
     {
-      ustackbase = g_heapbase - 4;
+      ustackbase = g_idle_topstack - 4;
       ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
     }
   else

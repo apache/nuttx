@@ -88,7 +88,7 @@
 #endif
 
 /* For the STM312F10xxx family, all internal SRAM is in one contiguous block
- * starting at g_heapbase and extending through CONFIG_DRAM_END (my apologies for
+ * starting at g_idle_topstack and extending through CONFIG_DRAM_END (my apologies for
  * the bad naming).  In addition, external FSMC SRAM may be available.
  */
 
@@ -198,7 +198,7 @@
  *
  * 3)  64Kb of CCM SRAM beginning at address 0x1000:0000
  *
- * As determined by ld.script, g_heapbase lies in the 112Kb memory
+ * As determined by ld.script, g_idle_topstack lies in the 112Kb memory
  * region and that extends to 0x2001:0000.  But the  first and second memory
  * regions are contiguous and treated as one in this logic that extends to
  * 0x2002:0000.
@@ -370,8 +370,8 @@
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   up_ledon(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)g_heapbase;
-  *heap_size  = SRAM1_END - g_heapbase;
+  *heap_start = (FAR void*)g_idle_topstack;
+  *heap_size  = SRAM1_END - g_idle_topstack;
 }
 
 /****************************************************************************

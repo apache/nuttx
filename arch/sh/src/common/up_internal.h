@@ -140,7 +140,7 @@ extern volatile uint32_t *current_regs;
  * CONFIG_DRAM_END
  */
 
-extern uint32_t g_heapbase;
+extern uint32_t g_idle_topstack;
 #endif
 
 /****************************************************************************
