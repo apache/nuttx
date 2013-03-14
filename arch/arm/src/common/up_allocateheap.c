@@ -82,6 +82,6 @@
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   up_ledon(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)g_heapbase;
-  *heap_size = CONFIG_DRAM_END - g_heapbase;
+  *heap_start = (FAR void*)g_idle_topstack;
+  *heap_size = CONFIG_DRAM_END - g_idle_topstack;
 }

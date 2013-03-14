@@ -66,7 +66,7 @@
 /* MPU Type Register Bit Definitions */
 
 #define MPU_TYPE_SEPARATE       (1 << 0) /* Bit 0: 0:unified or 1:separate memory maps */
-#define MPU_TYPE_DREGION_SHIFT  (8)      /* Bits 8-15: Number MPU data regsion */
+#define MPU_TYPE_DREGION_SHIFT  (8)      /* Bits 8-15: Number MPU data regions */
 #define MPU_TYPE_DREGION_MASK   (0xff << MPU_TYPE_DREGION_SHIFT)
 #define MPU_TYPE_IREGION_SHIFT  (16)     /* Bits 16-23: Number MPU instruction regions */
 #define MPU_TYPE_IREGION_MASK   (0xff << MPU_TYPE_IREGION_SHIFT)
@@ -104,11 +104,11 @@
 #  define MPU_RASR_SRD_5        (0x20 << MPU_RASR_SRD_SHIFT)
 #  define MPU_RASR_SRD_6        (0x40 << MPU_RASR_SRD_SHIFT)
 #  define MPU_RASR_SRD_7        (0x80 << MPU_RASR_SRD_SHIFT)
-#define MPU_RASR_ATTR_SHIFT     (21)      /* Bits 19-21: TEX Address Permisson */
-#define MPU_RASR_ATTR__MASK     (7 << MPU_RASR_ATTR_SHIFT)
-#define MPU_RASR_S              (1 << 18) /* Bit 18: Shareable */
-#define MPU_RASR_C              (1 << 17) /* Bit 17: Cacheable */
 #define MPU_RASR_B              (1 << 16) /* Bit 16: Bufferable */
+#define MPU_RASR_C              (1 << 17) /* Bit 17: Cacheable */
+#define MPU_RASR_S              (1 << 18) /* Bit 18: Shareable */
+#define MPU_RASR_ATTR_SHIFT     (19)      /* Bits 19-21: TEX Address Permisson */
+#define MPU_RASR_ATTR_MASK      (7 << MPU_RASR_ATTR_SHIFT)
 #define MPU_RASR_AP_SHIFT       (24)      /* Bits 24-26: Access permission */
 #define MPU_RASR_AP_MASK        (7 << MPU_RASR_AP_SHIFT)
 #  define MPU_RASR_AP_NONO      (0 << MPU_RASR_AP_SHIFT) /* P:None U:None */

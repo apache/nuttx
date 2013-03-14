@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/open1788/scripts/user-space.ld
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,39 +33,13 @@
  *
  ****************************************************************************/
 
-/* The LPC1788 has 512Kb of FLASH beginning at address 0x0000:0000 and
- * 96Kb of total SRAM: 64Kb of SRAM in the CPU block beginning at address
- * 0x10000000 and 32Kb of Peripheral SRAM in two banks, 8Kb at addresses
- * 0x20000000 bank0 first and 8kb at 0x20002000 at bank0 second. And 16Kb
- * at 0x20004000 on bank1.
- *
- * For MPU support, the kernel-mode NuttX section is assumed to be 64Kb of
- * FLASH and 4Kb of SRAM.  That, of course, can be optimized as needed (See
- * also configs/open1788/scripts/kernel-space.ld).
+/* NOTE:  This depends on the memory.ld script having been included prior to
+ * this script.
  */
 
-MEMORY
-{
-    /* 256Kb FLASH */
-
-    kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 64K
-    uflash (rx)      : ORIGIN = 0x00010000, LENGTH = 448K
-
-    /* 64Kb of SRAM in the CPU block */
-
-    ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 4K
-    usram (rwx)      : ORIGIN = 0x10001000, LENGTH = 60K
-
-    /* Other peripheral memory (free, nothing is linked here) */
-
-    ahbram8_b0a(rwx) : ORIGIN = 0x20000000, LENGTH = 8K
-    ahbram8_b0b(rwx) : ORIGIN = 0x20002000, LENGTH = 8K
-    ahbram16(rwx)    : ORIGIN = 0x20004000, LENGTH = 16K
-}
-
 /* Make sure that the critical memory management functions are in user-space.
- * Currently, the plan is that the memory manager will reside in user-space
- * but be usable both by kernel- and user-space code
+ * the user heap memory manager will reside in user-space but be usable both
+ * by kernel- and user-space code
  */
 
 EXTERN(umm_initialize)
@@ -79,7 +53,6 @@ EXTERN(zalloc)
 EXTERN(free)
 
 OUTPUT_ARCH(arm)
-
 SECTIONS
 {
     .userspace : {

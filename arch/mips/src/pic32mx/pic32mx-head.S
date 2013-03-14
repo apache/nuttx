@@ -122,7 +122,7 @@
 	.global	g_nestlevel
 #endif
 #endif
-	.global	g_heapbase
+	.global	g_idle_topstack
 
 	/* Imported symbols */
 
@@ -698,13 +698,13 @@ g_nestlevel:
 #endif
 #endif
 
-/* This global variable is unsigned int g_heapbase and is exported here only
+/* This global variable is unsigned int g_idle_topstack and is exported here only
  * because of its coupling to idle thread stack.
  */
 
 	.sdata
-	.type	g_heapbase, object
-g_heapbase:
+	.type	g_idle_topstack, object
+g_idle_topstack:
 	.long	PIC32MX_HEAP_BASE
-	.size	g_heapbase, .-g_heapbase
+	.size	g_idle_topstack, .-g_idle_topstack
 

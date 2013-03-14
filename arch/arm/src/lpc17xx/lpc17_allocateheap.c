@@ -198,9 +198,12 @@
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-  /* Get the unaligned size of the user-space heap */
+  /* Get the unaligned size and position of the user-space heap.
+   * This heap begins after the user-space .bss section at an offset
+   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
+   */
 
-  uintptr_t ubase = (uintptr_t)g_heapbase + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = CONFIG_DRAM_END - ubase;
   int       log2;
 
@@ -231,8 +234,8 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   /* Return the heap settings */
 
   up_ledon(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)g_heapbase;
-  *heap_size  = CONFIG_DRAM_END - g_heapbase;
+  *heap_start = (FAR void*)g_idle_topstack;
+  *heap_size  = CONFIG_DRAM_END - g_idle_topstack;
 #endif
 }
 
@@ -249,9 +252,12 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
 void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 {
-  /* Get the unaligned size of the user-space heap */
+  /* Get the unaligned size and position of the user-space heap.
+   * This heap begins after the user-space .bss section at an offset
+   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
+   */
 
-  uintptr_t ubase = (uintptr_t)g_heapbase + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = CONFIG_DRAM_END - ubase;
   int       log2;
 
@@ -268,10 +274,12 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
   usize = (1 << log2);
   ubase = CONFIG_DRAM_END - usize;
 
-  /* Return the kernel heap settings */
+  /* Return the kernel heap settings (i.e., the part of the heap region
+   * that was not dedicated to the user heap).
+   */
 
-  *heap_start = (FAR void*)g_heapbase;
-  *heap_size  = ubase - (uintptr_t)g_heapbase;
+  *heap_start = (FAR void*)USERSPACE->us_bssend;
+  *heap_size  = ubase - (uintptr_t)USERSPACE->us_bssend;
 }
 #endif
 

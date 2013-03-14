@@ -147,11 +147,11 @@ _g_svarvect:
 	.long	_svarvect
 	.size	_g_svarvect, .-_g_svarvect
 
-	.globl	_g_heapbase
-	.type	_g_heapbase, object
-_g_heapbase:
+	.globl	_g_idle_topstack
+	.type	_g_idle_topstack, object
+_g_idle_topstack:
 	.long	_enbss+CONFIG_ARCH_INTERRUPTSTACK+CONFIG_IDLETHREAD_STACKSIZE
-	.size	_g_heapbase, .-_g_heapbase
+	.size	_g_idle_topstack, .-_g_idle_topstack
 
 /************************************************************************************
  * Code

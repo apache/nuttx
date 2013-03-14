@@ -189,6 +189,7 @@
 #define BOARD_BUTTON_4             3
 #define BOARD_BUTTON_5             4
 #define BOARD_NUM_BUTTONS          5
+
 #define BOARD_BUTTON_BUTTON1_BIT   (1 << BOARD_BUTTON_1)
 #define BOARD_BUTTON_BUTTON2_BIT   (1 << BOARD_BUTTON_2)
 #define BOARD_BUTTON_BUTTON3_BIT   (1 << BOARD_BUTTON_3)

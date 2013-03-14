@@ -260,14 +260,14 @@ __do_clear_bss:
  * Heap Base
  ****************************************************************************/
 
-	/* This global variable is unsigned long g_heapbase and is exported from
+	/* This global variable is unsigned long g_idle_topstack and is exported from
 	 * here only because of its coupling to other uses of _enoinit in this file
 	 */
 
 	.data
-	.globl	g_heapbase
-	.type	g_heapbase, object
-g_heapbase:
+	.globl	g_idle_topstack
+	.type	g_idle_topstack, object
+g_idle_topstack:
 	.word	_enoinit+CONFIG_IDLETHREAD_STACKSIZE
-	.size	g_heapbase, .-g_heapbase
+	.size	g_idle_topstack, .-g_idle_topstack
 	.end

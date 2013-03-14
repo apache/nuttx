@@ -211,10 +211,10 @@
  * thread is the thread that the system boots on and, eventually, becomes the
  * idle, do nothing task that runs only when there is nothing else to run.
  * The heap continues from there until the configured end of memory.
- * g_heapbase is the beginning of this heap region (not necessarily aligned).
+ * g_idle_topstack is the beginning of this heap region (not necessarily aligned).
  */
 
-const uint32_t g_heapbase = (uint32_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
+const uint32_t g_idle_topstack = (uint32_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
 
 /****************************************************************************
  * Private Functions
@@ -244,8 +244,8 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   /* Start with the first SRAM region */
 
   up_ledon(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)g_heapbase;
-  *heap_size = CONFIG_DRAM_END - g_heapbase;
+  *heap_start = (FAR void*)g_idle_topstack;
+  *heap_size = CONFIG_DRAM_END - g_idle_topstack;
 }
 
 /************************************************************************

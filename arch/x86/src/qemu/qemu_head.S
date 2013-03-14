@@ -50,7 +50,7 @@
  * the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread
  * is the thread that the system boots on and, eventually, becomes the idle,
  * do nothing task that runs only when there is nothing else to run.  The
- * heap continues from there until the end of memory.  See g_heapbase below.
+ * heap continues from there until the end of memory.  See g_idle_topstack below.
  */
 
 #define STACKBASE	((_ebss + 0x1f) & 0xffffffe0)
@@ -78,7 +78,7 @@
 	.global	__start						/* Making entry point visible to linker */
 	.global	os_start					/* os_start is defined elsewhere */
 	.global	up_lowsetup					/* up_lowsetup is defined elsewhere */
-	.global	g_heapbase					/* The start of the heap */
+	.global	g_idle_topstack				/* The start of the heap */
 
 /****************************************************************************
  * .text
@@ -154,8 +154,8 @@ hang:
  * until the end of memory.
  */
 
-	.type	g_heapbase, @object
-g_heapbase:
+	.type	g_idle_topstack, @object
+g_idle_topstack:
 	.long	_ebss
-	.size	g_heapbase, . - g_heapbase
+	.size	g_idle_topstack, . - g_idle_topstack
 	.end

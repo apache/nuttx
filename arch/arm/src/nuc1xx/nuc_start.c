@@ -77,7 +77,7 @@
  * Public Data
  ****************************************************************************/
 
-const uint32_t g_heapbase = HEAP_BASE;
+const uint32_t g_idle_topstack = HEAP_BASE;
 
 /****************************************************************************
  * Private Functions

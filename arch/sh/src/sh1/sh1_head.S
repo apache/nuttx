@@ -507,18 +507,18 @@ __start0:
 
 	.section	.data
 
-	/* This global variable is unsigned long g_heapbase and is
+	/* This global variable is unsigned long g_idle_topstack and is
 	 * exported from here only because of its coupling to the stack
 	 * above.
 	 */
 
 	.data
 	.align	4
-	.globl	_g_heapbase
-	.type	_g_heapbase, object
-_g_heapbase:
+	.globl	_g_idle_topstack
+	.type	_g_idle_topstack, object
+_g_idle_topstack:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
-	.size	_g_heapbase, .-_g_heapbase
+	.size	_g_idle_topstack, .-_g_idle_topstack
 
 	.end
 

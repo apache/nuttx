@@ -604,7 +604,7 @@ __start:
 	 * _ebss is the end of the BSS regsion (see ld.script)
 	 * The idle task stack starts at the end of BSS and is
 	 * of size CONFIG_IDLETHREAD_STACKSIZE.  The heap continues
-	 * from there until the end of memory.  See g_heapbase
+	 * from there until the end of memory.  See g_idle_topstack
 	 * below.
 	 */
 
@@ -617,18 +617,18 @@ LC2:	.long	_eronly	/* Where .data defaults are stored in FLASH */
 	.long	_edata
 	.size	__start, .-__start
 
-	/* This global variable is unsigned long g_heapbase and is
+	/* This global variable is unsigned long g_idle_topstack and is
 	 * exported from here only because of its coupling to LCO
 	 * above.
 	 */
 
 	.data
 	.align	4
-	.globl	g_heapbase
-	.type	g_heapbase, object
-g_heapbase:
+	.globl	g_idle_topstack
+	.type	g_idle_topstack, object
+g_idle_topstack:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
-	.size	g_heapbase, .-g_heapbase
+	.size	g_idle_topstack, .-g_idle_topstack
 
 	.end
 
