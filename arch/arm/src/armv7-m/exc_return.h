@@ -93,13 +93,24 @@
  * state from the main stack. Execution uses MSP after return.
  */
 
-#define EXC_RETURN_PRIVTHR       0xfffffff9
+#if defined(CONFIG_ARMV7M_CMNVECTOR) && defined(CONFIG_ARCH_FPU)
+#  define EXC_RETURN_PRIVTHR       (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE)
+#else
+#  define EXC_RETURN_PRIVTHR       (EXC_RETURN_BASE | EXC_RETURN_STD_CONTEXT | \
+                                    EXC_RETURN_THREAD_MODE)
+#endif
 
 /* EXC_RETURN_UNPRIVTHR: Return to unprivileged thread mode. Exception return gets
  * state from the process stack. Execution uses PSP after return.
  */
 
-#define EXC_RETURN_UNPRIVTHR     0xfffffffd
+#if defined(CONFIG_ARMV7M_CMNVECTOR) && defined(CONFIG_ARCH_FPU)
+#  define EXC_RETURN_UNPRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE | \
+                                    EXC_RETURN_PROCESS_STACK)
+#else
+#  define EXC_RETURN_UNPRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_STD_CONTEXT | \
+                                    EXC_RETURN_THREAD_MODE | EXC_RETURN_PROCESS_STACK)
+#endif
 
 /* In the kernel build is not selected, then all threads run in privileged thread
  * mode.
