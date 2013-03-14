@@ -52,7 +52,8 @@
  *   ------- ----   Padded to 4KB
  *   0x10000 1000:  User .data region.  Size is variable.
  *   ------- ----   User .bss region  Size is variable.
- *   ------- ----   Beginning of kernel heap
+ *   ------- ----   Beginning of kernel heap.  Size determined by
+ *                  CONFIG_MM_KERNEL_HEAPSIZE.
  *   0x10000 8000:  Beginning of user heap.  Can vary with other settings.
  *   0x10001 0000:  End+1 of CPU RAM
  */
