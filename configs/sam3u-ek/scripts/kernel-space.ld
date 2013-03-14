@@ -33,34 +33,9 @@
  *
  ****************************************************************************/
 
-/* The AT91SAM3U-4 has 256Kb of FLASH beginning at address 0x0008:0000,
- * 32Kb of SRAM beginning at address 0x2000:0000, and 16Kb of SRAM beginning
- * at address 0x2008:000 (used only for heap).  When booting from FLASH,
- * FLASH memory is aliased to address 0x0000:0000 where the code expects to
- * begin execution by jumping to the entry point in the 0x0800:0000 address
- * range.
- *
- * For MPU support, the kernel-mode NuttX section is assumed to be 64Kb of
- * FLASH and 4Kb of SRAM.  That, of course, can be optimized as needed (See
- * also configs/sam3u-ek/scripts/user-space.ld).
+/* NOTE:  This depends on the memory.ld script having been included prior to
+ * this script.
  */
-
-MEMORY
-{
-    /* 256Kb FLASH */
-
-    kflash (rx)  : ORIGIN = 0x00080000, LENGTH = 64K
-    uflash (rx)  : ORIGIN = 0x00090000, LENGTH = 192K
-
-    /* 32Kb SRAM */
-
-    ksram1 (rwx) : ORIGIN = 0x20000000, LENGTH = 4K
-    usram1 (rwx) : ORIGIN = 0x20001000, LENGTH = 28K
-
-    /* 16Kb SRAM */
-
-    sram2 (rwx) : ORIGIN = 0x20080000, LENGTH = 16K
-}
 
 OUTPUT_ARCH(arm)
 ENTRY(_stext)
