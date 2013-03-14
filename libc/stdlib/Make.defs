@@ -35,8 +35,8 @@
 
 # Add the stdlib C files to the build
 
-CSRCS += lib_abs.c lib_abort.c lib_imaxabs.c lib_labs.c lib_llabs.c \
-		  lib_rand.c lib_qsort.c
+CSRCS += lib_abs.c lib_abort.c lib_imaxabs.c lib_itoa.c lib_labs.c \
+		 lib_llabs.c lib_rand.c lib_qsort.c
 
 # Add the stdlib directory to the build
 

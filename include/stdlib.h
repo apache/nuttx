@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdlib.h
  *
- *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -156,6 +156,10 @@ double_t  strtod(const char *, char **);
 #define atoll(nptr) strtoll((nptr), NULL, 10)
 #endif
 #define atof(nptr)  strtod((nptr), NULL)
+
+/* Binary to string conversions */
+
+char     *itoa(int value, char *str, int base);
 
 /* Memory Management */
 

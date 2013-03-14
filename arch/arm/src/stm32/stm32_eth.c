@@ -1719,7 +1719,7 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
 
           /* Check if this is the last segement of a TX frame */
 
-          if ((txdesc->tdes0 & ETH_TDES0_FS) != 0)
+          if ((txdesc->tdes0 & ETH_TDES0_LS) != 0)
             {
               /* Yes.. Decrement the number of frames "in-flight". */
 
