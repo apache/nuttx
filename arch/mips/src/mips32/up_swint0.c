@@ -130,7 +130,7 @@ static void dispatch_syscall(void)
 
 /* Refer to arch/arm/src/armv7-m/up_svcall.h for how this is done for ARM */
 /*  __asm__ __volatile__ */
-/* (
+/* ( */
 /*   Save registers */
 /*   Get the base of the stub lookup table */
 /*   Get the offset of the stub for this syscall */

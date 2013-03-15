@@ -232,7 +232,7 @@ int os_bringup(void)
                        (main_t)CONFIG_USER_ENTRYPOINT,
                        (FAR char * const *)NULL);
 #endif
-  DEBUGASSERT(taskid > 0);
+  ASSERT(taskid > 0);
 
   /* We an save a few bytes by discarding the IDLE thread's environment. */
 
