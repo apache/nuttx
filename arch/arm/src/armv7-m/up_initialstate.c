@@ -115,13 +115,13 @@ void up_initial_state(struct tcb_s *tcb)
       xcp->regs[REG_PIC] = (uint32_t)tcb->dspace->region;
     }
 
+#ifdef CONFIG_NXFLAT
   /* Make certain that bit 0 is set in the main entry address.  This
    * is only an issue when NXFLAT is enabled.  NXFLAT doesn't know
    * anything about thumb; the addresses that NXFLAT sets are based
    * on file header info and won't have bit 0 set.
    */
 
-#ifdef CONFIG_NXFLAT
   tcb->entry.main = (main_t)((uint32_t)tcb->entry.main | 1);
 #endif
 #endif /* CONFIG_PIC */
