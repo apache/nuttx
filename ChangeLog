@@ -4096,7 +4096,7 @@
 	  STM32F4. Includes untested additions for the F1 implementation as
 	  well.  From Petteri Aimonen.
 
-6.26 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+6.26 2013-03-15 Gregory Nutt <gnutt@nuttx.org>
 
 	* drivers/serial/serial.c:  Correct some race conditions when checking
 	  for disconnection of a removable serial device.
@@ -4175,7 +4175,7 @@
 	  example "+-" would look weird. From Petteri Aimonen.
 	* mm/mm_mallinfo.c:  Take MM semaphore in mm_mallinfo. From Petteri
 	  Aimonen.
-	* configs/stm32f3discovery/nsh/defconfig:  Disable SPI.  It is nto
+	* configs/stm32f3discovery/nsh/defconfig:  Disable SPI.  It is not
 	  used.
 	* drivers/mtd/sst39vf:  Add a driver for the SST29VF NOR FLASH parts.
 	* sched/os_start.c:  Add an additional call-out to support board-
@@ -4233,7 +4233,7 @@
 	* arch/arm/src/stm32f20xxx_dma.c and stm32f40xxx_dma.c:  Fix a typo
 	  in assigned base register addresses for each DMA channel.  From
 	  Yan T.
-	* Several build fixes from Mike Smithe were incorporated.  These were
+	* Several build fixes from Mike Smith were incorporated.  These were
 	  mostly compilation errors introduced into the system because of the
 	  large number of recent changes with broad scope (2013-03-04).
 	* configs/zkit-arm-17969/src/up_can.c:  Add CAN support to the
@@ -4330,3 +4330,5 @@
 	  the heap is elsewhere so the naming was wrong. (2013-03-13).
 	* libc/stdlib/lib_itoa.c:  Implementation of itoa() contributed by
 	  Ryan Sundberg. (2013-03-14).
+
+6.27 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>

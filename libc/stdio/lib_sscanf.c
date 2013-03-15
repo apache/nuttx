@@ -197,6 +197,11 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
   noassign = false;
   lflag    = false;
 
+  /* NOTE that there is a flaw in this loop logic:  The fmt string often
+   * terminates with %n which would have to be processes at the end of the
+   * buf string.  That won't happen here.
+   */
+
   while (*fmt && *buf)
     {
       /* Skip over white space */

@@ -3760,3 +3760,243 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
       - Others as detailed in the ChangeLog: HID keyboard, LPC17xx bit
         definitions, strndup(), PL2303, SYSLOG error handling, AT25,
         apps/examples.
+
+NuttX-6.26
+^^^^^^^^^^
+
+The 93rd release of NuttX, Version 6.26, was made on March 15, 2013,
+and is available for download from the SourceForge website.  Note
+that release consists of two tarballs:  nuttx-6.26.tar.gz and
+apps-6.26.tar.gz.  Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+This release corresponds with SVN release number: r5745
+
+Note that all SVN information has been stripped from the tarballs.  If you
+need the SVN configuration information, you should check out directly from
+SVN.  Revision r5745 should equivalent to release 6.26 of NuttX:
+
+    svn checkout -r5745 svn://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
+
+Or (HTTP):
+
+    svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
+
+Additional new features and extended functionality:
+
+    * OS Initialization:
+
+      - Add an additional call-out to support board-specific driver
+        initialization during the boot-up phase (available with
+        CONFIG_BOARD_INITIALIZE=y).
+
+    * Tasking:
+
+      - New interface task_spawn() that is like posix_spawn(), but uses
+        entry point addresses like task_create().
+      - Additional data restructuring as a continuation of the task group
+        changes of NuttX 6.25.  These data structures were moved from the
+        TCB structure into the task group:  pthread join data,
+        atexit/on_exit callbacks, waitpid data structures, and message
+        queues.
+      - TCBs for tasks and pthreads are now separate structures.  This
+        saves a little memory since tasks do not have to carry the overhead
+        for threads and vice versa.
+
+    * Kernel Build:
+
+      - Extensive changes were made to support the kernel build mode.  In
+        this mode, NuttX is built as a monolithic kernel.  NuttX is built
+        as a separate kernel mode "blob" and the applications are built
+        as a separate user mode "blob".  The kernel runs in kernel mode and
+        the applications run in user mode (with the MPU restricting user
+        mode accesses).  Access to the kernel from the user blob is only
+        via system calls (SVCalls).
+      - Extensive changes were made to the syscall, SVCall, and trapping
+        logic.  Many internal interfaces were renamed.
+      - The memory manager was extended to support both kernel- and user-
+        mode allocations.  Logic within the kernel needs to use the
+        correct kernel- or user-space allocator, depending upon the user
+        of the allocated memory.
+      - The user-space blob now contains a header built in at the beginning
+        of the block that provides the same information that was previously
+        provided by a kludgy, auto-generated header file (user_map.h).
+      - Basic support implemented for the ARMv7-M family with fragments
+        also implemetned for the ARMv6-M and MIPS32 families.
+      - Kernel build supported added for the LPC17xx Open1788 and for
+        the Atmel SAM3U-EK board.  All testing is being performed on the
+        Open1788 board.
+
+    * Signals:
+
+      - Delivery of signals to threads within a task group is now compatible
+        with the way that signals are delivered to threads within a process.
+
+    * Drivers:
+
+      - Add a driver for the SST29VF NOR FLASH parts.
+      - USB device trace/debug feature extended to decode device-specific
+        trace events to make the trace output more readable (from Petteri
+        Aimonen).
+      - USB MSC device driver can not support names of differing sizes
+        in the USB descriptor and the SCSI fields (from Petteri Aimonen).
+      - Locking added to MMC/SD SPI drivers so that MMC/SD can co-exist on
+        the same bus as other SPI devices.  Frequency is reset each time
+        that the MMC/SD SPI has the bus locked. (from Petteri Aimonen).
+
+    * ARMv6-M (Cortex-M0):
+ 
+       - Added support for the ARM Cortex-M0 family.
+
+    * nuvoTon NUC120:
+ 
+       - Added support for the nuvoTon NUC120 MCU (Cortex-M0).
+
+    * nuvoTon NUC120 Boards:
+ 
+       - Added basic support for the nuvoTon NuTiny-SDK-NUC120 board (Cortex-M0).
+
+    * LPC17xx:
+
+      - Added support for the LPC177x and LPC178x families.  Most of this is
+        the work of Rommel Marcelo.
+
+    * LPC17xx Boards:
+
+      - Added support for Zilogic System's ARM development Kit, ZKIT-ARM-1769.
+        From Rashid.
+      - The port for the WaveShare Open1788 board is now functional.  Basic
+        OS test and NuttShell (NSH) configurations are functional. More
+        driver development and testing is needed (from Rommel Marcelo).
+
+    * LPC17xx Drivers:
+
+      - Added an SD card MSI driver for the LPC178x.  The driver is marginally
+        functional but requires DMA capability to be reliable.
+
+    * STM32
+
+      - Support extended to handle the STM32 F3 family (Cortex-M4 with F1-like
+        peripherals).
+
+    * STM32 Boards
+
+      - Added support the STMicro STM32F3Discovery board (STM32 F3).
+
+    * Stellaris LM3S/LM4F
+
+      - Basic support for the LM4F120 family is in place, but untested (mostly
+        from Jose Pablo Carballo).
+
+    * Stellaris LM4F Boards
+ 
+      - Add support for the LM4F120 LaunchPad (untested).
+
+    * Networking:
+
+      - select() should now allocate a little less memory.
+
+    * Memory Management:
+
+      - Extended to support multiple heaps.  This is used as part of
+        the kernel build in order to support separater user- and
+        kernel-mode heaps.
+      - The stand-alone memory manger test had to be removed.  It
+        was too entangled and made extension of the memory manager
+        nearly impossible.  This is a loss.
+
+    * Build System:
+
+      - Several configurations converted to use the kconfig-frontends
+        configuration tool.  There are still many more that need to
+        be converted.
+
+    * C Library:
+
+      - Move the workqueue logic into the C library.  There is now a
+        special user-space version of the work queue (which will only
+        be used with a NuttX kernel build).
+      - Implementation of itoa() contributed by Ryan Sundberg.
+
+    * Applications:
+
+      - The NSH builtin task logic now uses task_spawn() to start builtin
+        applications.
+      - The OS test now includes a test cased to verify task_restart().
+
+Efforts In Progress.  The following are features that are partially
+implemented but present in this release.  Most are expected to be fully
+available in NuttX 6.27.
+
+    * LM4F120 LaunchPad port.  Code is in place, but nothing has been tested.
+
+    * WaveShare Open1788 port.  This port as actually complete and
+      functional. However, there is still ongoing development and
+      testing of drivers.
+
+    * Kernel Build.  Much progress has been made, but there kernel build is
+      not yet fully functional due to several user resources that are not yet
+      properly disentangled from the kernel blob.
+
+    * Conversion of old configurations to use the kconfig-frontends
+      tool is an ongoing effort that will continue for some time.
+
+Bugfixes (see the ChangeLog for details).  Some of these are very important:
+
+    * Tasking:
+
+      - The wrong PID was being signalled with SIGCHILD.  It should be
+        the PID of the task that create the task group, not the ID of
+        the last thread to leave the task group.
+      - Added logic so that some internal resources and states are recovered
+        when tasks are deleted or restarted.  Handle cases where there are
+        outstanding timed events pending when tasks are deleted or restarted.
+
+    * ARMv7-M:
+
+      - Several fixes to the MPU control logic.
+
+    * Drivers:
+
+      - Removable serial drivers race conditions fixed.
+      - MAX11802 timing bug (from Petteri Aimonen).
+
+    * STM32 Drivers:
+
+      - Handle cases were SPI DMA logic fails if sem_wait is awakened
+        by a signal.  Need to clear error flags to prevent corruption of
+        subsequent transfers.  Also, bit count should not be changed while
+        the SPI peripheral is enabled (from Petteri Aimonen).
+      - Fixes to the OTG FS device driver from Petteri Aimonen.
+      - Fix typos in DMA register header file (from Yan T.)
+
+    * Graphics:
+
+      - Correction to the hyphen in the SANS 17x22 font (from Petteri
+        Aimonen).
+
+    * Networking:
+
+      - Corrected errors in the socket poll/select logic.  Additional
+        state logic was needed to detect if the socket is still connected
+        before starting the poll wait. (bug reported by Qiang Yu).
+
+    * Memory Management:
+
+      - mallinfo() should hold the memory manager semaphore (from Petteri
+        Aimonen.
+
+    * Build System:
+
+      - Resolved several build errors reported by Mike Smith.
+
+    * Applications:
+
+      - Fixed an NSH memory leak:  Needed to detach after creating each
+        pthread.
+      - readline() now returns EOF on any failure (instead of a negated
+        errno value).  This is because the underlying read is based on
+        logic similar to getc.  The value zero  (meaning end-of-file)
+        was being confused with a NUL.  So if a NUL was received, the
+        NSH session would terminate because it thought it was the end of
+        file.
