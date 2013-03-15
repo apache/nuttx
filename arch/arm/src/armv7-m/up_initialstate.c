@@ -126,6 +126,7 @@ void up_initial_state(struct tcb_s *tcb)
 #endif
 #endif /* CONFIG_PIC */
 
+#if defined(CONFIG_ARMV7M_CMNVECTOR) || defined(CONFIG_NUTTX_KERNEL)
   /* All tasks start via a stub function in kernel space.  So all
    * tasks must start in privileged thread mode.  If CONFIG_NUTTX_KERNEL
    * is defined, then that stub function will switch to unprivileged
@@ -133,6 +134,8 @@ void up_initial_state(struct tcb_s *tcb)
    */
 
   xcp->regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
+
+#endif /* CONFIG_ARMV7M_CMNVECTOR || CONFIG_NUTTX_KERNEL */
 
 #if defined(CONFIG_ARMV7M_CMNVECTOR) && defined(CONFIG_ARCH_FPU)
 
