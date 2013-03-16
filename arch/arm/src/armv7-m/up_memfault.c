@@ -103,7 +103,12 @@ int up_memfault(int irq, FAR void *context)
   mfdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  mfdbg("  PSR=%08x\n", regs[REG_XPSR]);
+#ifdef REG_EXC_RETURN
+  mfdbg("  PSR: %08x EXC_RETURN: %08x\n",
+        regs[REG_XPSR], regs[REG_EXC_RETURN]);
+#else
+  mfdbg("  PSR: %08x\n", regs[REG_XPSR]);
+#endif
 
   PANIC(OSERR_UNEXPECTEDISR);
   return OK;
