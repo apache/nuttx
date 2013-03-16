@@ -101,6 +101,13 @@ const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
   .us_bssstart      = (uintptr_t)&_sbss,
   .us_bssend        = (uintptr_t)&_ebss,
 
+  /* Task/thread startup stubs */
+
+  .task_startup     = task_startup,
+#ifndef CONFIG_DISABLE_PTHREAD
+  .pthread_startup  = pthread_startup,
+#endif
+
   /* Memory manager entry points (declared in include/nuttx/mm.h) */
 
   .mm_initialize    = umm_initialize,
