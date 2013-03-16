@@ -65,10 +65,11 @@
 /* Debug output from this file may interfere with context switching!  To get
  * debug output you must enabled the following in your NuttX configuration:
  *
- * CONFIG_DEBUG and CONFIG_DEBUG_SYSCALL
+ * - CONFIG_DEBUG and CONFIG_DEBUG_SYSCALL (shows only syscalls)
+ * - CONFIG_DEBUG and CONFIG_DEBUG_SVCALL  (shows everything)
  */
 
-#ifdef CONFIG_DEBUG_SYSCALL
+#if defined(CONFIG_DEBUG_SYSCALL) || defined(CONFIG_DEBUG_SVCALL)
 # define svcdbg(format, arg...) lldbg(format, ##arg)
 #else
 # define svcdbg(x...)
@@ -91,8 +92,6 @@
  *
  * Description:
  *   Call the stub function corresponding to the system call.
- *
- *   Here we need to preserve registers:
  *
  *   R0 - Need not be preserved until after the stub is called.
  *   R1-R3 - Need to be preserved until the stub is called.  The values of
@@ -141,29 +140,39 @@ static void dispatch_syscall(void)
 int up_svcall(int irq, FAR void *context)
 {
   uint32_t *regs = (uint32_t*)context;
+  uint32_t cmd;
 
   DEBUGASSERT(regs && regs == current_regs);
+  cmd = regs[REG_R0];
 
   /* The SVCall software interrupt is called with R0 = system call command
    * and R1..R7 =  variable number of arguments depending on the system call.
    */
 
-  svcdbg("SVCALL Entry: regs: %p cmd: %d\n", regs, regs[REG_R0]);
-  svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-#ifdef REG_EXC_RETURN
-  svcdbg("  PSR: %08x LR: %08x\n", regs[REG_XPSR], regs[REG_EXC_RETURN]);
-#else
-  svcdbg("  PSR: %08x\n", regs[REG_XPSR]);
+#if defined(CONFIG_DEBUG_SYSCALL) || defined(CONFIG_DEBUG_SVCALL)
+# ifndef CONFIG_DEBUG_SVCALL
+  if (cmd > SYS_switch_context)
+# endif
+    {
+      svcdbg("SVCALL Entry: regs: %p cmd: %d\n", regs, cmd);
+      svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+             regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+             regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+      svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+             regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+             regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+# ifdef REG_EXC_RETURN
+      svcdbg(" PSR: %08x EXC_RETURN: %08x\n",
+             regs[REG_XPSR], regs[REG_EXC_RETURN]);
+# else
+      svcdbg(" PSR: %08x\n", regs[REG_XPSR]);
+# endif
+    }
 #endif
 
   /* Handle the SVCall according to the command in R0 */
 
-  switch (regs[REG_R0])
+  switch (cmd)
     {
       /* R0=SYS_save_context:  This is a save context command:
        *
@@ -216,7 +225,7 @@ int up_svcall(int irq, FAR void *context)
        *
        * At this point, the following values are saved in context:
        *
-       *   R0 = 1
+       *   R0 = SYS_switch_context
        *   R1 = saveregs
        *   R2 = restoreregs
        *
@@ -297,7 +306,7 @@ int up_svcall(int irq, FAR void *context)
           regs[REG_PC]         = (uint32_t)USERSPACE->task_startup;
           regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
 
-          /* Change the paramter ordering to match the expection of struct
+          /* Change the parameter ordering to match the expectation of struct
            * userpace_s task_startup:
            */
 
@@ -320,10 +329,10 @@ int up_svcall(int irq, FAR void *context)
 
           /* Verify that the SYS call number is within range */
 
-          DEBUGASSERT(regs[REG_R0] < SYS_maxsyscall);
+          DEBUGASSERT(cmd < SYS_maxsyscall);
 
-          /* Make sure that we got here that there is a no saved syscall
-           * return address.  We cannot yet handle nested system calls.
+          /* Make sure that there is a no saved syscall return address.  We
+           * cannot yet handle nested system calls.
            */
 
           DEBUGASSERT(rtcb->xcp.sysreturn == 0);
@@ -348,26 +357,34 @@ int up_svcall(int irq, FAR void *context)
 
   /* Report what happened.  That might difficult in the case of a context switch */
 
+#if defined(CONFIG_DEBUG_SYSCALL) || defined(CONFIG_DEBUG_SVCALL)
+# ifndef CONFIG_DEBUG_SVCALL
+  if (cmd > SYS_switch_context)
+# elif
   if (regs != current_regs)
+# endif
     {
-      svcdbg("SVCall Return: Context switch!\n");
+      svcdbg("SVCall Return:\n");
       svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              current_regs[REG_R0],  current_regs[REG_R1],  current_regs[REG_R2],  current_regs[REG_R3],
              current_regs[REG_R4],  current_regs[REG_R5],  current_regs[REG_R6],  current_regs[REG_R7]);
       svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
              current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
-#ifdef REG_EXC_RETURN
-      svcdbg("  PSR: %08x LR: %08x\n",
+# ifdef REG_EXC_RETURN
+      svcdbg(" PSR: %08x EXC_RETURN: %08x\n",
              current_regs[REG_XPSR], current_regs[REG_EXC_RETURN]);
-#else
-      svcdbg("  PSR: %08x\n", current_regs[REG_XPSR]);
-#endif
+# else
+      svcdbg(" PSR: %08x\n", current_regs[REG_XPSR]);
+# endif
     }
+# ifdef CONFIG_DEBUG_SVCALL
   else
     {
       svcdbg("SVCall Return: %d\n", regs[REG_R0]);
     }
+# endif
+#endif
 
   return OK;
 }

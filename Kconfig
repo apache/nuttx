@@ -383,6 +383,13 @@ config DEBUG_GRAPHICS
 	---help---
 		Enable NX graphics debug SYSLOG output (disabled by default)
 
+config DEBUG_SYSCALL
+	bool "Enable SYSCALL Debug Output"
+	default n
+	depends on NUTTX_KERNEL
+	---help---
+		Enable very low level output related to system calls
+
 comment "Driver Debug Options"
 
 config DEBUG_LCD

@@ -128,7 +128,7 @@ struct xcptcontext
 
 #ifdef CONFIG_NUTTX_KERNEL
   /* The following holds the return address and the exc_return value needed
-   * return from a system call.
+   * to return from a system call.
    */
 
   uint32_t excreturn;
