@@ -390,8 +390,36 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
 void up_task_start(main_t taskentry, int argc, FAR char *argv[]) noreturn_function;
+#endif
+
+/****************************************************************************
+ * Name: up_pthread_start
+ *
+ * Description:
+ *   In this kernel mode build, this function will be called to execute a
+ *   pthread in user-space.  When the pthread is first started, a kernel-mode
+ *   stub will first run to perform some housekeeping functions.  This
+ *   kernel-mode stub will then be called transfer control to the user-mode
+ *   pthread.
+ *
+ *   Normally the a user-mode start-up stub will also execute before the
+ *   pthread actually starts.  See libc/pthread/pthread_startup.c
+ *
+ * Input Parameters:
+ *   entrypt - The user-space address of the pthread entry point
+ *   arg     - Standard argument for the pthread entry point
+ *
+ * Returned Value:
+ *   This function should not return.  It should call the user-mode start-up
+ *   stub and that stub should call pthread_exit if/when the user pthread
+ *   terminates.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
+void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg) noreturn_function;
 #endif
 
 /****************************************************************************

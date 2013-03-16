@@ -57,9 +57,9 @@
 
 #ifdef CONFIG_NUTTX_KERNEL
 #  ifndef CONFIG_SYS_RESERVED
-#    error "CONFIG_SYS_RESERVED must be defined to the value 5"
-#  elif CONFIG_SYS_RESERVED != 5
-#    error "CONFIG_SYS_RESERVED must have the value 5"
+#    error "CONFIG_SYS_RESERVED must be defined to the value 6"
+#  elif CONFIG_SYS_RESERVED != 6
+#    error "CONFIG_SYS_RESERVED must have the value 6"
 #  endif
 #endif
 
@@ -94,12 +94,19 @@
 
 #define SYS_syscall_return  (3)
 
-/* SYS call 3:
+/* SYS call 4:
  *
  * void up_task_start(main_t taskentry, int argc, FAR char *argv[]) noreturn_function;
  */
 
 #define SYS_task_start      (4)
+
+/* SYS call 5:
+ *
+ * void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg) noreturn_function
+ */
+
+#define SYS_pthread_start   (5)
 #endif
 
 /************************************************************************************

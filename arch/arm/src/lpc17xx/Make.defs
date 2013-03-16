@@ -64,7 +64,7 @@ CMN_ASRCS += up_memcpy.S
 endif
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
-CMN_CSRCS += up_mpu.c up_task_start.c
+CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
 endif
 
 ifeq ($(CONFIG_NET),y)

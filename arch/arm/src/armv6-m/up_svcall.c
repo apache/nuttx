@@ -196,7 +196,7 @@ int up_svcall(int irq, FAR void *context)
         }
         break;
 
-      /* R0=SYS_restore_context: This a restore context command:
+      /* R0=SYS_restore_context:  This a restore context command:
        *
        *   void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
        *
@@ -218,7 +218,7 @@ int up_svcall(int irq, FAR void *context)
         }
         break;
 
-      /* R0=SYS_switch_context: This a switch context command:
+      /* R0=SYS_switch_context:  This a switch context command:
        *
        *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
        *
@@ -242,7 +242,7 @@ int up_svcall(int irq, FAR void *context)
         }
         break;
 
-      /* R0=SYS_syscall_return: This a syscall return command:
+      /* R0=SYS_syscall_return:  This a syscall return command:
        *
        *   void up_syscall_return(void);
        *
@@ -280,7 +280,7 @@ int up_svcall(int irq, FAR void *context)
         break;
 #endif
 
-      /* R0=SYS_task_start: This a user task start
+      /* R0=SYS_task_start:  This a user task start
        *
        *   void up_task_start(main_t taskentry, int argc, FAR char *argv[]) noreturn_function;
        *
@@ -309,6 +309,37 @@ int up_svcall(int irq, FAR void *context)
           regs[REG_R0]         = regs[REG_R1]; /* Task entry */
           regs[REG_R1]         = regs[REG_R2]; /* argc */
           regs[REG_R2]         = regs[REG_R3]; /* argv */
+        }
+        break;
+#endif
+
+      /* R0=SYS_pthread_start:  This a user pthread start
+       *
+       *   void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg) noreturn_function;
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_pthread_start
+       *   R1 = entrypt
+       *   R2 = arg
+       */
+
+#if defined(CONFIG_NUTTX_KERNEL) && !defined(CONFIG_DISABLE_PTHREAD)
+      case SYS_pthread_start:
+        {
+          /* Set up to return to the user-space pthread start-up function in
+           * unprivileged mode.
+           */
+
+          regs[REG_PC]         = (uint32_t)USERSPACE->pthread_startup;
+          regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
+
+          /* Change the parameter ordering to match the expectation of struct
+           * userpace_s pthread_startup:
+           */
+
+          regs[REG_R0]         = regs[REG_R1]; /* pthread entry */
+          regs[REG_R1]         = regs[REG_R2]; /* arg */
         }
         break;
 #endif

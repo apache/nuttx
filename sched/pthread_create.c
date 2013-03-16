@@ -185,11 +185,19 @@ static void pthread_start(void)
   pjoin->started = true;
   (void)pthread_givesemaphore(&pjoin->data_sem);
 
-  /* Pass control to the thread entry point. */
+  /* Pass control to the thread entry point. In the kernel build this has to
+   * be handled differently if we are starting a user-space pthread; we have
+   * to switch to user-mode before calling into the pthread.
+   */
 
+#ifdef CONFIG_NUTTX_KERNEL
+  up_pthread_start(ptcb->cmn.entry.pthread, ptcb->arg);
+  exit_status = NULL;
+#else
   exit_status = (*ptcb->cmn.entry.pthread)(ptcb->arg);
+#endif
 
-  /* The thread has returned */
+  /* The thread has returned (should never happen in the kernel mode case) */
 
   pthread_exit(exit_status);
 }

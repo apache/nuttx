@@ -44,6 +44,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <pthread.h>
 
 #ifdef CONFIG_NUTTX_KERNEL
 
@@ -111,9 +112,12 @@ struct userspace_s
   uintptr_t us_bssstart;
   uintptr_t us_bssend;
 
-  /* Task/thread startup stubs */
+  /* Task/thread startup routines */
 
   void (*task_startup)(main_t entrypt, int argc, FAR char *argv[]) noreturn_function;
+#ifndef CONFIG_DISABLE_PTHREAD
+  void (*pthread_startup)(pthread_startroutine_t entrypt, pthread_addr_t arg);
+#endif
 
   /* Memory manager entry points */
 

@@ -702,6 +702,26 @@ void task_vforkabort(FAR struct task_tcb_s *child, int errcode);
 void task_startup(main_t entrypt, int argc, FAR char *argv[]);
 #endif
 
+/****************************************************************************
+ * Name: pthread_startup
+ *
+ * Description:
+ *   This function is the user-space, pthread startup function.  It is called
+ *   from up_pthread_start() in user-mode.
+ *
+ * Inputs:
+ *   entrypt - The user-space address of the pthread entry point
+ *   arg     - Standard argument for the pthread entry point
+ *
+ * Return:
+ *   None.  This function does not return.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
+void pthread_startup(pthread_startroutine_t entrypt, pthread_addr_t arg);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

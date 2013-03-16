@@ -4332,3 +4332,16 @@
 	  Ryan Sundberg. (2013-03-14).
 
 6.27 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/armv7-m/up_mpu.c:  Correct MPU sub-region settings for
+	  unaligned regions (2013-03-15).
+	* arch/arm/src/armv6-m/up_svcall.c:  Bring up to equivalent to the
+	  ARMv7-M version (2013-03-15).
+	* configs/lm4f120-launchpad/tools:  Add scripts and instructions to
+	  simplify use of OpenOCD with ICDI (from JP Carballo, 2013-03-15).
+	* tools/mkconfig.c:  Logic that attempts to suppressed buffered I/O
+	  within the kernel is wrong.  sizeof(struct file_struct) must be
+	  the same in both kernel- and user-spaces (2013-03-16).
+	* arch/arm/src/common/up_pthread_start.c, nuttx/libc/pthread/pthread_startup.c,
+	  and related files:  Implement switch to user-space and user-space
+	  pthread start-up function  (2013-03-16).

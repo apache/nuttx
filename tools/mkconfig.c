@@ -191,15 +191,6 @@ int main(int argc, char **argv, char **envp)
   printf("# undef CONFIG_STDIO_BUFFER_SIZE\n");
   printf("# define CONFIG_STDIO_BUFFER_SIZE 0\n");
   printf("#endif\n\n");
-  printf("/* We are building a kernel version of the C library, then some user-space features\n");
-  printf(" * need to be disabled\n");
-  printf(" */\n\n");
-  printf("#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)\n");
-  printf("# undef CONFIG_STDIO_BUFFER_SIZE\n");
-  printf("# define CONFIG_STDIO_BUFFER_SIZE 0\n");
-  printf("# undef CONFIG_NUNGET_CHARS\n");
-  printf("# define CONFIG_NUNGET_CHARS 0\n");
-  printf("#endif\n\n");
   printf("/* If no standard C buffered I/O is not supported, then line-oriented buffering\n");
   printf(" * cannot be supported.\n");
   printf(" */\n\n");

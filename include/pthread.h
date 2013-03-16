@@ -167,7 +167,7 @@ typedef FAR void       *pthread_addr_t;
 typedef pthread_addr_t  any_t;
 
 typedef pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
-typedef pthread_startroutine_t  pthread_func_t;
+typedef pthread_startroutine_t pthread_func_t;
 
 struct pthread_attr_s
 {
