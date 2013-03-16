@@ -136,16 +136,33 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
   Building OpenOCD under Cygwin:
 
-    Refer to configs/lm4f120-launchpad/README.txt
+    Refer to configs/olimex-lpc1766stk/README.txt
 
   Installing OpenOCD in Linux:
 
-    sudo apt-get install openocd
+      sudo apt-get install openocd
+
+    As of this writing, there is no support for the lm4f120 in the package
+    above. You will have to build openocd from its source (as of this writing
+    the latest commit was b9b4bd1a6410ff1b2885d9c2abe16a4ae7cb885f):
+
+      git clone http://git.code.sf.net/p/openocd/code openocd
+      cd openocd
+
+    Then, add the patches provided by http://openocd.zylin.com/922:
+
+      git fetch http://openocd.zylin.com/openocd refs/changes/22/922/14 && git checkout FETCH_HEAD
+      ./bootstrap
+      ./configure --enable-maintainer-mode --enable-ti-icdi
+      make 
+      sudo make install
+
+    For additional help, see http://processors.wiki.ti.com/index.php/Stellaris_Launchpad_with_OpenOCD_and_Linux
 
   Helper Scripts.
 
-    I have been using the on-board FT2232 JTAG/SWD/SWO interface.  OpenOCD
-    requires a configuration file.  I keep the one I used last here:
+    I have been using the on-board In-Circuit Debug Interface (ICDI) interface.
+    OpenOCD requires a configuration file.  I keep the one I used last here:
     
       configs/lm4f120-launchpad/tools/lm4f120-launchpad.cfg
 
@@ -155,9 +172,9 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     /usr/share/openocd/scripts.  As of this writing, the configuration
     files of interest were:
 
-      /usr/share/openocd/scripts/interface/luminary.cfg
-      /usr/share/openocd/scripts/board/ek-lm3s6965.cfg
-      /usr/share/openocd/scripts/target/stellaris.cfg
+      /usr/local/share/openocd/scripts/board/ek-lm4f120xl.cfg
+      /usr/local/share/openocd/scripts/interface/ti-icdi.cfg
+      /usr/local/share/openocd/scripts/target/stellaris_icdi.cfg
 
     There is also a script on the tools/ directory that I use to start
     the OpenOCD daemon on my system called oocd.sh.  That script will
@@ -169,9 +186,14 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
   Starting OpenOCD
 
-    Then you should be able to start the OpenOCD daemon like:
+    If you are in the top-level NuttX build directlory then you should
+    be able to start the OpenOCD daemon like:
 
-      configs/lm4f120-launchpad/tools/oocd.sh $PWD
+      oocd.sh $PWD
+
+    The relative path to the oocd.sh script is configs/lm4f120-launchpad/tools,
+    but that should have been added to your PATH variable when you sourced
+    the setenv.sh script.
 
   Connecting GDB
 
