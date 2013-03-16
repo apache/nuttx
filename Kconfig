@@ -388,7 +388,8 @@ config DEBUG_SYSCALL
 	default n
 	depends on NUTTX_KERNEL
 	---help---
-		Enable very low level output related to system calls
+		Enable very low level output related to system calls.  This gives
+		you basically a poor man's version of strace.
 
 comment "Driver Debug Options"
 

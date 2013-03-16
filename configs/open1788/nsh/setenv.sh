@@ -64,7 +64,7 @@ fi
 # toolchain.
 export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 
-# The Olimex-lpc1766stk/tools directory
+# The open1788/tools directory
 export LPCTOOL_DIR="${WD}/configs/open1788/tools"
 
 # Add the path to the toolchain and tools directory to the PATH varialble

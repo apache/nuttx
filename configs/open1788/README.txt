@@ -307,6 +307,9 @@ CONFIGURATION
     Make the user-space binaries first (pass1), then make the the kernel-space
     binaries (pass2)
 
+    There are ordering dependencies so, for example, 'make -j 6' fails.
+    'make -j 6 pass1 pass2' does work fine, however.
+
     NOTES:
  
     1. This configuration uses the mconf-based configuration tool.  To

@@ -1,7 +1,7 @@
 #!/bin/bash
 # configs/lm4f120-launchpad/ostest/setenv.sh
 #
-#   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,10 @@ fi
 # toolchain.
 export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 
-# Add the path to the toolchain to the PATH varialble
-export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+# The lm4f120-launchpad/tools directory
+export TOOL_DIR="${WD}/configs/lm4f120-launchpad/tools"
+
+# Add the path to the toolchain and tools directory to the PATH varialble
+export PATH="${TOOLCHAIN_BIN}:${TOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"
