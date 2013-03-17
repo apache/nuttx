@@ -124,6 +124,14 @@ struct xcptcontext
   uint32_t saved_primask;
 #endif
   uint32_t saved_xpsr;
+
+# ifdef CONFIG_NUTTX_KERNEL
+  /* This is the saved address to use when returning from a user-space
+   * signal handler.
+   */
+
+  uint32_t sigreturn;
+# endif
 #endif
 
 #ifdef CONFIG_NUTTX_KERNEL

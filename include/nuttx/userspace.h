@@ -44,6 +44,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <signal.h>
 #include <pthread.h>
 
 #ifdef CONFIG_NUTTX_KERNEL
@@ -114,9 +115,18 @@ struct userspace_s
 
   /* Task/thread startup routines */
 
-  void (*task_startup)(main_t entrypt, int argc, FAR char *argv[]) noreturn_function;
+  void (*task_startup)(main_t entrypt, int argc, FAR char *argv[])
+    noreturn_function;
 #ifndef CONFIG_DISABLE_PTHREAD
-  void (*pthread_startup)(pthread_startroutine_t entrypt, pthread_addr_t arg);
+  void (*pthread_startup)(pthread_startroutine_t entrypt,
+    pthread_addr_t arg);
+#endif
+
+  /* Signal handler trampoline */
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  void (*signal_handler)(_sa_sigaction_t sighand, int signo,
+    FAR siginfo_t *info, FAR void *ucontext);
 #endif
 
   /* Memory manager entry points */
@@ -153,6 +163,69 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: task_startup
+ *
+ * Description:
+ *   This function is the user-space, task startup function.  It is called
+ *   from up_task_start() in user-mode.
+ *
+ * Inputs:
+ *   entrypt - The user-space address of the task entry point
+ *   argc and argv - Standard arguments for the task entry point
+ *
+ * Return:
+ *   None.  This function does not return.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+void task_startup(main_t entrypt, int argc, FAR char *argv[]);
+#endif
+
+/****************************************************************************
+ * Name: pthread_startup
+ *
+ * Description:
+ *   This function is the user-space, pthread startup function.  It is called
+ *   from up_pthread_start() in user-mode.
+ *
+ * Inputs:
+ *   entrypt - The user-space address of the pthread entry point
+ *   arg     - Standard argument for the pthread entry point
+ *
+ * Return:
+ *   None.  This function does not return.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
+void pthread_startup(pthread_startroutine_t entrypt, pthread_addr_t arg);
+#endif
+
+/****************************************************************************
+ * Name: signal_handler
+ *
+ * Description:
+ *   This function is the user-space, signal handler trampoline function.  It
+ *   is called from up_signal_handler() in user-mode.
+ *
+ * Inputs:
+ *   sighand - The address user-space signal handling function
+ *   signo, info, and ucontext - Standard arguments to be passed to the
+ *     signal handling function.
+ *
+ * Return:
+ *   None.  This function does not return in the normal sense.  It returns
+ *   via signal_handler_return (see include/nuttx/arch.h)
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__) && !defined(CONFIG_DISABLE_SIGNALS)
+void signal_handler(_sa_sigaction_t sighand, int signo, FAR siginfo_t *info,
+                    FAR void *ucontext);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

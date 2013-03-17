@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/signal.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -206,18 +206,27 @@ struct siginfo
 
 typedef struct siginfo siginfo_t;
 
+/* Non-standard convenience definition of signal handling function types.
+ * These should be used only internally within the NuttX signal logic.
+ */
+
+typedef CODE void (*_sa_handler_t)(int);
+typedef CODE void (*_sa_sigaction_t)(int, FAR siginfo_t *, FAR void *);
+
 /* The following structure defines the action to take for given signal */
 
 struct sigaction
 {
   union
   {
-    CODE void (*_sa_handler)(int);
-    CODE void (*_sa_sigaction)(int, FAR siginfo_t *, FAR void *);
+    _sa_handler_t   _sa_handler;
+    _sa_sigaction_t _sa_sigaction;
   } sa_u;
-  sigset_t         sa_mask;
-  int              sa_flags;
+  sigset_t          sa_mask;
+  int               sa_flags;
 };
+
+/* Definitions that adjust the non-standard naming */
 
 #define sa_handler   sa_u._sa_handler
 #define sa_sigaction sa_u._sa_sigaction

@@ -373,7 +373,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);
  *   task in user-space.  When the task is first started, a kernel-mode
  *   stub will first run to perform some housekeeping functions.  This
  *   kernel-mode stub will then be called transfer control to the user-mode
- *   task.
+ *   task by calling this function.
  *
  *   Normally the a user-mode start-up stub will also execute before the
  *   task actually starts.  See libc/sched/task_startup.c
@@ -391,7 +391,8 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);
  ****************************************************************************/
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
-void up_task_start(main_t taskentry, int argc, FAR char *argv[]) noreturn_function;
+void up_task_start(main_t taskentry, int argc, FAR char *argv[])
+       noreturn_function;
 #endif
 
 /****************************************************************************
@@ -402,7 +403,7 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[]) noreturn_functi
  *   pthread in user-space.  When the pthread is first started, a kernel-mode
  *   stub will first run to perform some housekeeping functions.  This
  *   kernel-mode stub will then be called transfer control to the user-mode
- *   pthread.
+ *   pthread by calling this function.
  *
  *   Normally the a user-mode start-up stub will also execute before the
  *   pthread actually starts.  See libc/pthread/pthread_startup.c
@@ -419,8 +420,63 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[]) noreturn_functi
  ****************************************************************************/
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
-void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg) noreturn_function;
+void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
+       noreturn_function;
 #endif
+
+/****************************************************************************
+ * Name: up_signal_handler
+ *
+ * Description:
+ *   In this kernel mode build, this function will be called to execute a
+ *   a signal handler in user-space.  When the signal is delivered, a
+ *   kernel-mode stub will first run to perform some housekeeping functions.
+ *   This kernel-mode stub will then be called transfer control to the user
+ *   mode signal handler by calling this function.
+ *
+ *   Normally the a user-mode signalling handling stub will also execute
+ *   before the ultimate signal handler is called.  See
+ *   libc/signal/signal_handler.c  This function is the user-space, signal
+ *   handler trampoline function.  It is called from up_signal_handler() in
+ *   user-mode.
+ *
+ * Inputs:
+ *   sighand - The address user-space signal handling function
+ *   signo, info, and ucontext - Standard arguments to be passed to the
+ *     signal handling function.
+ *
+ * Return:
+ *   None.  This function does not return in the normal sense.  It returns
+ *   via signal_handler_return (below)
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__) && !defined(CONFIG_DISABLE_SIGNALS)
+void up_signal_handler(_sa_sigaction_t sighand, int signo,
+                       FAR siginfo_t *info, FAR void *ucontext);
+#endif
+
+/****************************************************************************
+ * Name: signal_handler_return
+ *
+ * Description:
+ *   This function is the user-space, signal handler return function.  It
+ *   is called from the signal_handler() in user-mode.  This function has the
+ *   general prototype:
+ *
+ *     void signal_handler_return(void);
+ *
+ *   However, it it not prototyped here because it should be implemented as
+ *   an inline function or macro that can be obtain by including the file
+ *   include/arch/syscall.h.
+ *
+ * Inputs:
+ *   None.
+ *
+ * Return:
+ *   None.  This function does not return.
+ *
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: up_allocate_heap

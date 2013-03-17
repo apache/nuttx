@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sig_deliver.c
  *
- *   Copyright (C) 2007, 2008, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -127,9 +127,24 @@ void sig_deliver(FAR struct tcb_s *stcb)
       savesigprocmask = stcb->sigprocmask;
       stcb->sigprocmask = savesigprocmask | sigq->mask | SIGNO2SET(sigq->info.si_signo);
 
-      /* Deliver the signal */
+      /* Deliver the signal.  In the kernel build this has to be handled
+       * differently if we are dispatching to a signal handler in a user-
+       * space task or thread; we have to switch to user-mode before
+       * calling the task.
+       */
 
-      (*sigq->action.sighandler)(sigq->info.si_signo, &sigq->info, NULL);
+#ifdef CONFIG_NUTTX_KERNEL
+      if ((stcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+        {
+          up_signal_handler(sigq->action.sighandler, sigq->info.si_signo,
+                            &sigq->info, NULL);
+        }
+      else
+#endif
+        {
+          (*sigq->action.sighandler)(sigq->info.si_signo, &sigq->info,
+                                     NULL);
+        }
 
       /* Restore the original sigprocmask */
 

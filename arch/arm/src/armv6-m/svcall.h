@@ -57,9 +57,9 @@
 
 #ifdef CONFIG_NUTTX_KERNEL
 #  ifndef CONFIG_SYS_RESERVED
-#    error "CONFIG_SYS_RESERVED must be defined to the value 6"
-#  elif CONFIG_SYS_RESERVED != 6
-#    error "CONFIG_SYS_RESERVED must have the value 6"
+#    error "CONFIG_SYS_RESERVED must be defined to have the value 8"
+#  elif CONFIG_SYS_RESERVED != 8
+#    error "CONFIG_SYS_RESERVED must have the value 8"
 #  endif
 #endif
 
@@ -70,21 +70,21 @@
  * int up_saveusercontext(uint32_t *saveregs);
  */
 
-#define SYS_save_context    (0)
+#define SYS_save_context          (0)
 
 /* SYS call 1:
  *
  * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
  */
 
-#define SYS_restore_context (1)
+#define SYS_restore_context       (1)
 
 /* SYS call 2:
  *
  * void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
  */
 
-#define SYS_switch_context  (2)
+#define SYS_switch_context        (2)
 
 #ifdef CONFIG_NUTTX_KERNEL
 /* SYS call 3:
@@ -92,21 +92,38 @@
  * void up_syscall_return(void);
  */
 
-#define SYS_syscall_return  (3)
+#define SYS_syscall_return        (3)
 
 /* SYS call 4:
  *
- * void up_task_start(main_t taskentry, int argc, FAR char *argv[]) noreturn_function;
+ * void up_task_start(main_t taskentry, int argc, FAR char *argv[])
+ *        noreturn_function;
  */
 
-#define SYS_task_start      (4)
+#define SYS_task_start            (4)
 
 /* SYS call 5:
  *
- * void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg) noreturn_function
+ * void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
+ *        noreturn_function
  */
 
-#define SYS_pthread_start   (5)
+#define SYS_pthread_start         (5)
+
+/* SYS call 6:
+ *
+ * void signal_handler(_sa_sigaction_t sighand, int signo, FAR siginfo_t *info,
+ *                     FAR void *ucontext);
+ */
+
+#define SYS_signal_handler        (6)
+
+/* SYS call 7:
+ *
+ * void signal_handler_return(void);
+ */
+
+#define SYS_signal_handler_return (7)
 #endif
 
 /************************************************************************************

@@ -54,7 +54,21 @@
  * Pro-processor Definitions
  ****************************************************************************/
 
+/* This is the value used as the argument to the SVC instruction.  It is not
+ * used.
+ */
+
 #define SYS_syscall 0x00
+
+/* The SYS_signal_handler_return is executed here... its value is not always
+ * available in this context and so is assumed to be 7.
+ */
+
+#ifndef SYS_signal_handler_return
+#  define SYS_signal_handler_return (7)
+#elif SYS_signal_handler_return != 7
+#  error "SYS_signal_handler_return was assumed to be 7"
+#endif
 
 /****************************************************************************
  * Public Types
@@ -217,6 +231,18 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   return reg0;
 }
+
+/* This inline function is used by user-space code in order to return from
+ * a signal handler.
+ */
+
+#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+static inline void signal_handler_return(void) noreturn_function;
+static inline void signal_handler_return(void)
+{
+  sys_call0(SYS_signal_handler_return);
+}
+#endif
 
 /****************************************************************************
  * Public Variables

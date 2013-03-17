@@ -125,7 +125,7 @@ void up_sigdeliver(void)
   irqrestore((uint16_t)regs[REG_PRIMASK]);
 #endif
 
-  /* Deliver the signals */
+  /* Deliver the signal */
 
   sigdeliver(rtcb);
 
