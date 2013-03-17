@@ -4342,6 +4342,18 @@
 	* tools/mkconfig.c:  Logic that attempts to suppressed buffered I/O
 	  within the kernel is wrong.  sizeof(struct file_struct) must be
 	  the same in both kernel- and user-spaces (2013-03-16).
-	* arch/arm/src/common/up_pthread_start.c, nuttx/libc/pthread/pthread_startup.c,
+	* arch/arm/src/common/up_pthread_start.c, libc/pthread/pthread_startup.c,
 	  and related files:  Implement switch to user-space and user-space
-	  pthread start-up function  (2013-03-16).
+	  pthread start-up function (2013-03-16).
+	* arch/arm/src/common/up_signal_handler.c, libc/pthread/pthread_startup.c,
+	  and related files:  Implement switch to user-space and user-space
+	  pthread start-up function (2013-03-16).
+	* arch/arm/src/common/up_signal_handler.c, libc/signal/signal_handler.c,
+	  arch/arm/src/armv[6|7]-m/up_svcall.c, arch/arm/include/armv[6|7]-m/svcall.h,
+	  include/nuttx/userspace.h, and sched/sig_deliver.c:  Implement switch
+	  to user-space from kernel signal delivery trampoline before calling user-
+	  space signal handler.  Return from user-space signal handler using a
+	  system call (2013-03-16).
+	* arch/arm/src/armv[6|7]-m/up_schedulesigaction.c: Need make sure we are
+	  in kernel mode before switching to kernel-mode signal handler
+	  trampoline.
