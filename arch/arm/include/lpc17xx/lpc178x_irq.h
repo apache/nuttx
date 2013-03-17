@@ -48,7 +48,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
- 
+
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map
  * directly to bits in the NVIC.  This does, however, waste several words of
  * memory in the IRQ to handle mapping tables.
@@ -167,8 +167,8 @@
  */
 
 #ifdef CONFIG_GPIO_IRQ
-//~ #  define LPC17_VALID_GPIOINT0  (0x7fff8ffful) /* GPIO port 0 interrrupt set */
-//~ #  define LPC17_VALID_GPIOINT2  (0x00003ffful) /* GPIO port 2 interrupt set */
+#  define LPC17_VALID_GPIOINT0  (0xfffffffful) /* GPIO port 0 interrrupt set */
+#  define LPC17_VALID_GPIOINT2  (0xfffffffful) /* GPIO port 2 interrupt set */
 
    /* Set 1: 16 interrupts p0.0-p0.15 */
 
@@ -264,7 +264,7 @@
 #  define LPC17_IRQ_P2p30       (LPC17_VALID_FIRST2H+14)
 #  define LPC17_IRQ_P2p31       (LPC17_VALID_FIRST2H+15)
 #  define LPC17_VALID_NIRQS2H   (16)
-   
+
 #  define LPC17_NGPIOAIRQS      (LPC17_VALID_NIRQS0L+LPC17_VALID_NIRQS0H+LPC17_VALID_NIRQS2L+LPC17_VALID_NIRQS2H)
 #else
 #  define LPC17_NGPIOAIRQS      (0)
