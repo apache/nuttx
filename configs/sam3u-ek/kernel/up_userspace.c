@@ -101,11 +101,17 @@ const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
   .us_bssstart      = (uintptr_t)&_sbss,
   .us_bssend        = (uintptr_t)&_ebss,
 
-  /* Task/thread startup stubs */
+  /* Task/thread startup routines */
 
   .task_startup     = task_startup,
 #ifndef CONFIG_DISABLE_PTHREAD
   .pthread_startup  = pthread_startup,
+#endif
+
+  /* Signal handler trampoline */
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  .signal_handler   = signal_handler,
 #endif
 
   /* Memory manager entry points (declared in include/nuttx/mm.h) */
