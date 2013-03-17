@@ -169,12 +169,31 @@ static int lpc17_irq2port(int irq)
       return 0;
     }
 
+#if defined (LPC176x)
   /* Set 3: 14 interrupts p2.0-p2.13 */
 
   else if (irq >= LPC17_VALID_FIRST2 && irq < (LPC17_VALID_FIRST2+LPC17_VALID_NIRQS2))
     {
       return 2;
     }
+
+#elif defined (LPC178x)
+  /* Set 3: 15 interrupts p2.0-p2.15 */
+
+  else if (irq >= LPC17_VALID_FIRST2L && irq < (LPC17_VALID_FIRST2L+LPC17_VALID_NIRQS2L))
+    {
+      return 2;
+    }
+
+  /* Set 4: 15 interrupts p2.16-p2.30 */
+
+  else if (irq >= LPC17_VALID_FIRST2H && irq < (LPC17_VALID_FIRST2L+LPC17_VALID_NIRQS2H))
+    {
+      return 2;
+    }
+
+#endif
+
   return -EINVAL;
 }
 
@@ -189,7 +208,7 @@ static int lpc17_irq2port(int irq)
 static int lpc17_irq2pin(int irq)
 {
   /* Set 1: 12 interrupts p0.0-p0.11
-   * 
+   *
    * See arch/arm/include/lpc17xx/irq.h:
    * LPC17_VALID_SHIFT0L   0    - Bit 0 is thre first bit in the group of 12 interrupts
    * LPC17_VALID_FIRST0L   irq  - IRQ number associated with p0.0
@@ -202,7 +221,7 @@ static int lpc17_irq2pin(int irq)
     }
 
   /* Set 2: 16 interrupts p0.15-p0.30
-   * 
+   *
    * LPC17_VALID_SHIFT0H   15   - Bit 15 is the first bit in a group of 16 interrupts
    * LPC17_VALID_FIRST0L   irq  - IRQ number associated with p0.15
    * LPC17_VALID_NIRQS0L   16   - 16 interrupt bits in the group
@@ -213,8 +232,9 @@ static int lpc17_irq2pin(int irq)
       return irq - LPC17_VALID_FIRST0H + LPC17_VALID_SHIFT0H;
     }
 
+#if defined(LPC176x)
   /* Set 3: 14 interrupts p2.0-p2.13
-   * 
+   *
    * LPC17_VALID_SHIFT2    0    - Bit 0 is the first bit in a group of 14 interrupts
    * LPC17_VALID_FIRST2    irq  - IRQ number associated with p2.0
    * LPC17_VALID_NIRQS2    14   - 14 interrupt bits in the group
@@ -224,9 +244,38 @@ static int lpc17_irq2pin(int irq)
     {
       return irq - LPC17_VALID_FIRST2 + LPC17_VALID_SHIFT2;
     }
+
+#elif defined(LPC178x)
+
+  /* Set 3: 15 interrupts p2.0-p2.15
+   *
+   * LPC17_VALID_SHIFT2L    0    - Bit 0 is the first bit in a group of 14 interrupts
+   * LPC17_VALID_FIRST2L    irq  - IRQ number associated with p2.0
+   * LPC17_VALID_NIRQS2L    15   - 15 interrupt bits in the group
+   */
+
+  else if (irq >= LPC17_VALID_FIRST2L && irq < (LPC17_VALID_FIRST2L+LPC17_VALID_NIRQS2L))
+    {
+      return irq - LPC17_VALID_FIRST2L + LPC17_VALID_SHIFT2L;
+    }
+
+  /* Set 3: 15 interrupts p2.16-p2.30
+   *
+   * LPC17_VALID_SHIFT2H    0    - Bit 0 is the first bit in a group of 14 interrupts
+   * LPC17_VALID_FIRST2H    irq  - IRQ number associated with p2.0
+   * LPC17_VALID_NIRQS2H    15   - 15 interrupt bits in the group
+   */
+
+  else if (irq >= LPC17_VALID_FIRST2H && irq < (LPC17_VALID_FIRST2H+LPC17_VALID_NIRQS2H))
+    {
+      return irq - LPC17_VALID_FIRST2H + LPC17_VALID_SHIFT2H;
+    }
+
+#endif
+
   return -EINVAL;
 }
-   
+
 /****************************************************************************
  * Name: lpc17_gpiodemux
  *
@@ -292,7 +341,7 @@ static void lpc17_gpiodemux(uint32_t intbase, uint32_t intmask,
 
            irq++;
         }
- 
+
       /* Next bit */
 
       intstatus &= ~bit;
@@ -324,6 +373,7 @@ static int lpc17_gpiointerrupt(int irq, void *context)
                       LPC17_VALID_FIRST0L, context);
     }
 
+#if defined(LPC176x)
   /* Check for an interrupt on GPIO2 */
 
   if ((intstatus & GPIOINT_IOINTSTATUS_P2INT) != 0)
@@ -331,6 +381,17 @@ static int lpc17_gpiointerrupt(int irq, void *context)
       lpc17_gpiodemux(LPC17_GPIOINT2_BASE, LPC17_VALID_GPIOINT2,
                       LPC17_VALID_FIRST2, context);
     }
+
+#elif defined(LPC178x)
+  /* Check for an interrupt on GPIO2 */
+
+  if ((intstatus & GPIOINT_IOINTSTATUS_P2INT) != 0)
+    {
+      lpc17_gpiodemux(LPC17_GPIOINT2_BASE, LPC17_VALID_GPIOINT2,
+                      LPC17_VALID_FIRST2L, context);
+    }
+
+#endif
 
   return OK;
 }

@@ -622,7 +622,7 @@ static void lpc17_setpwrctrl(uint32_t pwrctrl)
   /* Set the new value of the PWRCTRL field of the PWR register.  Also, as a
    * side-effect, clear the OPENDRAIN and ROD bits as well.
    */
- 
+
   regval  = getreg32(LPC17_SDCARD_PWR);
   regval &= ~(SDCARD_PWR_CTRL_MASK | SDCARD_PWR_OPENDRAIN |  SDCARD_PWR_ROD);
   regval |= pwrctrl;
@@ -1567,6 +1567,7 @@ static void lpc17_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
       case CLOCK_MMC_TRANSFER:
         clkcr = (SDCARD_CLOCK_MMCXFR | SDCARD_CLOCK_CLKEN);
+        lpc17_setpwrctrl(SDCARD_PWR_OPENDRAIN);
         break;
 
       /* SD normal operation clocking (wide 4-bit mode) */

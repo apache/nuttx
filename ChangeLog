@@ -4359,6 +4359,6 @@
 	  trampoline (2013-03-16).
 	* arch/arm/include/armv[6|7]-m/irq.h, and arch/arm/src/armv[6|7]-m/up_svcall.c:
 	  Add support for nested system calls.  In the current design, this can
-	  happen only under one condition: When the kernel system function calls
+	  happen only under one condition:  When the kernel system call logic calls
 	  back into user space in order to allocate user space memory.  So it is
-	  expected that the maximum nesting level will be only 2.
+	  expected that the maximum nesting level will be only 2 (2013-03-17).
