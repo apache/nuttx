@@ -258,18 +258,19 @@ int up_svcall(int irq, FAR void *context)
       case SYS_syscall_return:
         {
           struct tcb_s *rtcb = sched_self();
+          int index = (int)rtcb->xcp.nsyscalls - 1;
 
           /* Make sure that there is a saved syscall return address. */
 
-          DEBUGASSERT(rtcb->xcp.sysreturn != 0);
+          DEBUGASSERT(index >= 0);
 
           /* Setup to return to the saved syscall return address in
            * the original mode.
            */
 
-          regs[REG_PC]         = rtcb->xcp.sysreturn;
-          regs[REG_EXC_RETURN] = rtcb->xcp.excreturn;
-          rtcb->xcp.sysreturn  = 0;
+          regs[REG_PC]         = rtcb->xcp.syscall[index].sysreturn;
+          regs[REG_EXC_RETURN] = rtcb->xcp.syscall[index].excreturn;
+          rtcb->xcp.nsyscalls  = index;
 
           /* The return value must be in R0-R1.  dispatch_syscall() temporarily
            * moved the value for R0 into R2.
@@ -425,6 +426,7 @@ int up_svcall(int irq, FAR void *context)
         {
 #ifdef CONFIG_NUTTX_KERNEL
           FAR struct tcb_s *rtcb = sched_self();
+          int index = rtcb->xcp.nsyscalls;
 
           /* Verify that the SYS call number is within range */
 
@@ -434,19 +436,20 @@ int up_svcall(int irq, FAR void *context)
            * cannot yet handle nested system calls.
            */
 
-          DEBUGASSERT(rtcb->xcp.sysreturn == 0);
+          DEBUGASSERT(index < CONFIG_SYS_NNEST);
 
           /* Setup to return to dispatch_syscall in privileged mode. */
 
-          rtcb->xcp.sysreturn  = regs[REG_PC];
-          rtcb->xcp.excreturn  = regs[REG_EXC_RETURN];
+          rtcb->xcp.syscall[index].sysreturn  = regs[REG_PC];
+          rtcb->xcp.syscall[index].excreturn  = regs[REG_EXC_RETURN];
+          rtcb->xcp.nsyscalls  = index + 1;
 
           regs[REG_PC]         = (uint32_t)dispatch_syscall;
           regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
 
           /* Offset R0 to account for the reserved values */
 
-          regs[REG_R0]        -= CONFIG_SYS_RESERVED;
+          regs[REG_R0] -= CONFIG_SYS_RESERVED;
 #else
           slldbg("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif
