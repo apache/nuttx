@@ -61,6 +61,12 @@
 #  define MIPS32_SAVE_GP 1
 #endif
 
+/* If this is a kernel build, how many nested system calls should we support? */
+
+#ifndef CONFIG_SYS_NNEST
+#  define CONFIG_SYS_NNEST 2
+#endif
+
 /* Register save state structure ********************************************/
 /* Co processor registers */
 
@@ -308,6 +314,19 @@
 
 #ifndef __ASSEMBLY__
 
+/* This structure represents the return state from a system call */
+
+#ifdef CONFIG_NUTTX_KERNEL
+struct xcpt_syscall_s
+{
+  uint32_t sysreturn;   /* The return PC */
+};
+#endif
+
+/* The following structure is included in the TCB and defines the complete
+ * state of the thread.
+ */
+
 struct xcptcontext
 {
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -323,12 +342,25 @@ struct xcptcontext
 
   uint32_t saved_epc;    /* Trampoline PC */
   uint32_t saved_status; /* Status with interrupts disabled. */
+
+# ifdef CONFIG_NUTTX_KERNEL
+  /* This is the saved address to use when returning from a user-space
+   * signal handler.
+   */
+
+  uint32_t sigreturn;
+
+# endif
 #endif
 
 #ifdef CONFIG_NUTTX_KERNEL
-  /* The following holds the return address from a system call */
+  /* The following array holds information needed to return from each nested
+   * system call.
+   */
 
-  uint32_t sysreturn;
+  uint8_t nsyscalls;
+  struct xcpt_syscall_s syscall[CONFIG_SYS_NNEST];
+
 #endif
 
   /* Register save area */

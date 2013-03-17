@@ -5,6 +5,8 @@
 
 if NUTTX_KERNEL
 
+comment "System call configuration"
+
 config SYS_RESERVED
 	int "Number of reserved system calls"
 	default 0
@@ -15,5 +17,21 @@ config SYS_RESERVED
 		value specifies the number of reserved software traps used by the
 		architecture; number of the kernel system calls will begin with this
 		number.
+
+config SYS_NNEST
+	int "Number of nested system calls"
+	default 2
+	---help---
+		This is architecture dependent.  Most architectures allocate
+		resources to manage a fixed, maximum number of nested system calls.
+		A nested system call occurs in the following scenario:  (1) A non-
+		privileged user thread executes a system call, (2) part of the
+		system call processing cause a call back into the user space code,
+		and (3) the user space code performs another system call.
+
+		In the current design, this can happen only under one condition:
+		When the kernel calls back into user space in order to allocate user
+		space memory.  So it is expected that the maximum nesting level will
+		be only 2.
 
 endif

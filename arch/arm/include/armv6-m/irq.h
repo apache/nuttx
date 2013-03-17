@@ -57,8 +57,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* If this is a kernel build, how many nested system calls should we support? */
 
-/* IRQ Stack Frame Format:
+#ifndef CONFIG_SYS_NNEST
+#  define CONFIG_SYS_NNEST 2
+#endif
+
+/* IRQ Stack Frame Format ***************************************************
  *
  * The following additional registers are stored by the interrupt handling
  * logic.
@@ -140,11 +146,22 @@
  * Public Types
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+/* This structure represents the return state from a system call */
+
+#ifdef CONFIG_NUTTX_KERNEL
+struct xcpt_syscall_s
+{
+  uint32_t excreturn;   /* The EXC_RETURN value */
+  uint32_t sysreturn;   /* The return PC */
+};
+#endif
+
 /* The following structure is included in the TCB and defines the complete
  * state of the thread.
  */
 
-#ifndef __ASSEMBLY__
 struct xcptcontext
 {
 #ifndef CONFIG_DISABLE_SIGNALS
@@ -168,16 +185,17 @@ struct xcptcontext
    */
 
   uint32_t sigreturn;
+
 # endif
 #endif
 
 #ifdef CONFIG_NUTTX_KERNEL
-  /* The following holds the return address and the exc_return value needed
-   * to return from a system call.
+  /* The following array holds the return address and the exc_return value
+   * needed to return from each nested system call.
    */
 
-  uint32_t excreturn;
-  uint32_t sysreturn;
+  uint8_t nsyscalls;
+  struct xcpt_syscall_s syscall[CONFIG_SYS_NNEST];
 #endif
 
   /* Register save area */
