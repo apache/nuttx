@@ -348,6 +348,78 @@ int up_svcall(int irq, FAR void *context)
         break;
 #endif
 
+      /* R0=SYS_signal_handler:  This a user signal handler callback
+       *
+       * void signal_handler(_sa_sigaction_t sighand, int signo,
+       *                     FAR siginfo_t *info, FAR void *ucontext);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_signal_handler
+       *   R1 = sighand
+       *   R2 = signo
+       *   R3 = info
+       *        ucontext (on the stack)
+       */
+
+#if defined(CONFIG_NUTTX_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
+      case SYS_signal_handler:
+        {
+          struct tcb_s *rtcb   = sched_self();
+
+          /* Remember the caller's return address */
+
+          DEBUGASSERT(rtcb->xcp.sigreturn == 0);
+          rtcb->xcp.sigreturn  = regs[REG_PC];
+
+          /* Set up to return to the user-space pthread start-up function in
+           * unprivileged mode.
+           */
+
+          regs[REG_PC]         = (uint32_t)USERSPACE->signal_handler;
+          regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
+
+          /* Change the parameter ordering to match the expectation of struct
+           * userpace_s signal_handler.
+           */
+
+          regs[REG_R0]         = regs[REG_R1]; /* sighand */
+          regs[REG_R1]         = regs[REG_R2]; /* signal */
+          regs[REG_R2]         = regs[REG_R3]; /* info */
+
+          /* The last parameter, arg, is trickier.  The arg parameter will
+           * reside at an offset of 4 from the stack pointer.
+           */
+
+          regs[REG_R3]         = *(uint32_t*)(regs[REG_SP+4]);
+        }
+        break;
+#endif
+
+      /* R0=SYS_signal_handler_return:  This a user signal handler callback
+       *
+       *   void signal_handler_return(void);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_signal_handler_return
+       */
+
+#if defined(CONFIG_NUTTX_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
+      case SYS_signal_handler_return:
+        {
+          struct tcb_s *rtcb   = sched_self();
+
+          /* Set up to return to the kernel-mode signal dispatching logic. */
+
+          DEBUGASSERT(rtcb->xcp.sigreturn != 0);
+
+          regs[REG_PC]         = rtcb->xcp.sigreturn;
+          regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
+        }
+        break;
+#endif
+
       /* This is not an architecture-specific system call.  If NuttX is built
        * as a standalone kernel with a system call interface, then all of the
        * additional system calls must be handled as in the default case.
@@ -360,7 +432,7 @@ int up_svcall(int irq, FAR void *context)
 
           /* Verify that the SYS call number is within range */
 
-          DEBUGASSERT(cmd < SYS_maxsyscall);
+          DEBUGASSERT(cmd >= CONFIG_SYS_RESERVED && cmd < SYS_maxsyscall);
 
           /* Make sure that there is a no saved syscall return address.  We
            * cannot yet handle nested system calls.

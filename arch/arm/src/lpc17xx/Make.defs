@@ -65,6 +65,9 @@ endif
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+CMN_CSRCS += up_signal_handler.c
+endif
 endif
 
 ifeq ($(CONFIG_NET),y)

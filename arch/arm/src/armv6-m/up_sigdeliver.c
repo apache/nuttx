@@ -122,7 +122,7 @@ void up_sigdeliver(void)
 
   irqrestore((uint8_t)regs[REG_BASEPRI]);
 
-  /* Deliver the signals */
+  /* Deliver the signal */
 
   sigdeliver(rtcb);
 

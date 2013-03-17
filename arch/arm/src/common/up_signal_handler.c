@@ -43,7 +43,7 @@
 #include "svcall.h"
 #include "up_internal.h"
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__) && !defined(CONFIG_DISABLE_SIGNALS)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,36 +62,39 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_task_start
+ * Name: up_signal_handler
  *
  * Description:
  *   In this kernel mode build, this function will be called to execute a
- *   task in user-space.  When the task is first started, a kernel-mode
- *   stub will first run to perform some housekeeping functions.  This
- *   kernel-mode stub will then be called transfer control to the user-mode
- *   task.
+ *   a signal handler in user-space.  When the signal is delivered, a
+ *   kernel-mode stub will first run to perform some housekeeping functions.
+ *   This kernel-mode stub will then be called transfer control to the user
+ *   mode signal handler by calling this function.
  *
- *   Normally the a user-mode start-up stub will also execute before the
- *   task actually starts.  See libc/sched/task_startup.c
+ *   Normally the a user-mode signalling handling stub will also execute
+ *   before the ultimate signal handler is called.  See
+ *   libc/signal/signal_handler.c  This function is the user-space, signal
+ *   handler trampoline function.  It is called from up_signal_handler() in
+ *   user-mode.
  *
- * Input Parameters:
- *   taskentry - The user-space entry point of the task.
- *   argc - The number of parameters being passed.
- *   argv - The parameters being passed. These lie in kernel-space memory
- *     and will have to be reallocated  in user-space memory.
+ * Inputs:
+ *   sighand - The address user-space signal handling function
+ *   signo, info, and ucontext - Standard arguments to be passed to the
+ *     signal handling function.
  *
- * Returned Value:
- *   This function should not return.  It should call the user-mode start-up
- *   stub and that stub should call exit if/when the user task terminates.
+ * Return:
+ *   None.  This function does not return in the normal sense.  It returns
+ *   via signal_handler_return (below)
  *
  ****************************************************************************/
 
-void up_task_start(main_t taskentry, int argc, FAR char *argv[])
+void up_signal_handler(_sa_sigaction_t sighand, int signo,
+                       FAR siginfo_t *info, FAR void *ucontext)
 {
-  /* Let sys_call3() do all of the work */
+  /* Let sys_call4() do all of the work */
 
-  sys_call3(SYS_task_start, (uintptr_t)taskentry, (uintptr_t)argc,
-            (uintptr_t)argv);
+  sys_call4(SYS_signal_handler, (uintptr_t)sighand, (uintptr_t)signo,
+            (uintptr_t)info, (uintptr_t)ucontext);
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_NUTTX_KERNEL && __KERNEL__ && !CONFIG_DISABLE_SIGNALS */
