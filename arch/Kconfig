@@ -300,6 +300,18 @@ config ARCH_RAMFUNCS
 		so that FLASH can be reconfigured while the MCU executes out of
 		SRAM.
 
+config ARCH_HAVE_RAMVECTORS
+	bool
+	default n
+
+config ARCH_RAMVECTORS
+	bool "Support RAM interrupt vectors"
+	default n
+	depends on ARCH_HAVE_RAMVECTORS
+	---help---
+		If ARCH_RAMVECTORS is defined, then the architecture will support
+		modifiable vectors in a RAM-based vector table.
+
 comment "Board Settings"
 
 config BOARD_LOOPSPERMSEC

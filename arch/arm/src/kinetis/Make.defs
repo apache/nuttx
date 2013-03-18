@@ -50,6 +50,10 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 			  up_doirq.c up_hardfault.c up_svcall.c up_checkstack.c \
 			  up_vfork.c
 
+ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
+CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
+endif
+
 ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS	+= up_memcpy.S
 endif

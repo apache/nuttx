@@ -143,10 +143,12 @@ config ARCH_CORTEXM0
 config ARCH_CORTEXM3
 	bool
 	select ARCH_IRQPRIO
+	select ARCH_HAVE_RAMVECTORS
 
 config ARCH_CORTEXM4
 	bool
 	select ARCH_IRQPRIO
+	select ARCH_HAVE_RAMVECTORS
 
 config ARCH_FAMILY
 	string
