@@ -197,12 +197,12 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
   noassign = false;
   lflag    = false;
 
-  /* NOTE that there is a flaw in this loop logic:  The fmt string often
-   * terminates with %n which would have to be processes at the end of the
-   * buf string.  That won't happen here.
+  /* Loop until all characters in the fmt string have been processed.  We
+   * may have to continue loop after reaching the end the input data in
+   * order to handle trailing %n format specifiers.
    */
 
-  while (*fmt && *buf)
+  while (*fmt)
     {
       /* Skip over white space */
 
@@ -218,6 +218,7 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
           lvdbg("vsscanf: Specifier found\n");
 
           /* Check for qualifiers on the conversion specifier */
+
           fmt++;
           for (; *fmt; fmt++)
             {
@@ -254,28 +255,50 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
             {
               lvdbg("vsscanf: Performing string conversion\n");
 
-              while (isspace(*buf))
-                {
-                  buf++;
-                }
+              /* Get a pointer to the char * value.  We need to do this even
+               * if we have reached the end of the input data in order to
+               * update the 'ap' variable.
+               */
 
-              /* Was a fieldwidth specified? */
-
-              if (!width)
-                {
-                  /* No... Guess a field width using some heuristics */
-
-                  width = findwidth(buf, fmt);
-                }
-
+              tv = NULL;      /* To avoid warnings about beign uninitialized */
               if (!noassign)
                 {
-                  tv = va_arg(ap, char*);
-                  strncpy(tv, buf, width);
-                  tv[width] = '\0';
+                  tv    = va_arg(ap, char*);
+                  tv[0] = '\0';
                 }
 
-              buf += width;
+              /* But we only perform the data conversion is we still have
+               * bytes remaining in the input data stream.
+               */
+
+              if (*buf)
+                {
+                  while (isspace(*buf))
+                    {
+                      buf++;
+                    }
+
+                  /* Was a fieldwidth specified? */
+
+                  if (!width)
+                    {
+                      /* No... Guess a field width using some heuristics */
+
+                      width = findwidth(buf, fmt);
+                    }
+
+                  /* Copy the string (if we are making an assignment) */
+
+                  if (!noassign)
+                    {
+                      strncpy(tv, buf, width);
+                      tv[width] = '\0';
+                    }
+
+                  /* Update the buffer pointer past the string in the input */
+
+                  buf += width;
+                }
             }
 
           /* Process %c:  Character conversion */
@@ -284,23 +307,47 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
             {
               lvdbg("vsscanf: Performing character conversion\n");
 
-              /* Was a fieldwidth specified? */
+              /* Get a pointer to the char * value.  We need to do this even
+               * if we have reached the end of the input data in order to
+               * update the 'ap' variable.
+               */
 
-              if (!width)
-                {
-                  /* No, then width is this one single character */
-
-                  width = 1;
-                }
-
+              tv = NULL;      /* To avoid warnings about beign uninitialized */
               if (!noassign)
                 {
-                  tv = va_arg(ap, char*);
-                  strncpy(tv, buf, width);
-                  tv[width] = '\0';
+                  tv    = va_arg(ap, char*);
+                  tv[0] = '\0';
                 }
 
-              buf += width;
+              /* But we only perform the data conversion is we still have
+               * bytes remaining in the input data stream.
+               */
+
+              if (*buf)
+                {
+                  /* Was a fieldwidth specified? */
+
+                  if (!width)
+                    {
+                      /* No, then width is this one single character */
+
+                      width = 1;
+                    }
+
+                  /* Copy the character(s) (if we are making an assignment) */
+
+                  if (!noassign)
+                    {
+                      strncpy(tv, buf, width);
+                      tv[width] = '\0';
+                    }
+
+                  /* Update the buffer pointer past the character(s) in the
+                   * input
+                   */
+
+                  buf += width;
+                }
             }
 
           /* Process %d, %o, %b, %x, %u:  Various integer conversions */
@@ -309,72 +356,110 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
             {
               lvdbg("vsscanf: Performing integer conversion\n");
 
-              /* Skip over any white space before the integer string */
-
-              while (isspace(*buf))
-                {
-                  buf++;
-                }
-
-              /* The base of the integer conversion depends on the specific
-               * conversion specification.
+              /* Get a pointer to the integer value.  We need to do this even
+               * if we have reached the end of the input data in order to
+               * update the 'ap' variable.
                */
 
-              if (*fmt == 'd' || *fmt == 'u')
-                {
-                  base = 10;
-                }
-              else if (*fmt == 'x')
-                {
-                  base = 16;
-                }
-              else if (*fmt == 'o')
-                {
-                  base = 8;
-                }
-              else if (*fmt == 'b')
-                {
-                  base = 2;
-                }
-
-              /* Was a fieldwidth specified? */
-
-              if (!width)
-                {
-                  /* No... Guess a field width using some heuristics */
-
-                  width = findwidth(buf, fmt);
-                }
-
-              /* Copy the numeric string into a temporary working buffer. */
-
-              strncpy(tmp, buf, width);
-              tmp[width] = '\0';
-
-              lvdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
-
-              /* Perform the integer conversion */
-
-              buf += width;
+              FAR long *plong = NULL;
+              FAR int  *pint  = NULL;
               if (!noassign)
                 {
-#ifdef SDCC
-                  char *endptr;
-                  long tmplong = strtol(tmp, &endptr, base);
-#else
-                  long tmplong = strtol(tmp, NULL, base);
-#endif
+                  /* We have to check whether we need to return a long or an
+                   * int.
+                   */
+
                   if (lflag)
                     {
-                      long *plong = va_arg(ap, long*);
-                      lvdbg("vsscanf: Return %ld to 0x%p\n", tmplong, plong);
-                      *plong = tmplong;
+                      plong = va_arg(ap, long*);
+                      *plong = 0;
                     }
                   else
                     {
-                      int *pint = va_arg(ap, int*);
-                      lvdbg("vsscanf: Return %ld to 0x%p\n", tmplong, pint);
-                      *pint = (int)tmplong;
+                      pint = va_arg(ap, int*);
+                      *pint = 0;
+                    }
+                }
+
+              /* But we only perform the data conversion is we still have
+               * bytes remaining in the input data stream.
+               */
+
+              if (*buf)
+                {
+                  /* Skip over any white space before the integer string */
+
+                  while (isspace(*buf))
+                    {
+                      buf++;
+                    }
+
+                  /* The base of the integer conversion depends on the
+                   * specific conversion specification.
+                   */
+
+                  if (*fmt == 'd' || *fmt == 'u')
+                    {
+                      base = 10;
+                    }
+                  else if (*fmt == 'x')
+                    {
+                      base = 16;
+                    }
+                  else if (*fmt == 'o')
+                    {
+                      base = 8;
+                    }
+                  else if (*fmt == 'b')
+                    {
+                      base = 2;
+                    }
+
+                  /* Was a fieldwidth specified? */
+
+                  if (!width)
+                    {
+                      /* No... Guess a field width using some heuristics */
+
+                      width = findwidth(buf, fmt);
+                    }
+
+                  /* Copy the numeric string into a temporary working
+                   * buffer.
+                   */
+
+                  strncpy(tmp, buf, width);
+                  tmp[width] = '\0';
+
+                  lvdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
+
+                  /* Perform the integer conversion */
+
+                  buf += width;
+                  if (!noassign)
+                    {
+#ifdef SDCC
+                      char *endptr;
+                      long tmplong = strtol(tmp, &endptr, base);
+#else
+                      long tmplong = strtol(tmp, NULL, base);
+#endif
+                      /* We have to check whether we need to return a long
+                       * or an int.
+                       */
+
+                      if (lflag)
+                        {
+                          lvdbg("vsscanf: Return %ld to 0x%p\n",
+                                tmplong, plong);
+                          *plong = tmplong;
+                        }
+                      else
+                        {
+                          lvdbg("vsscanf: Return %ld to 0x%p\n",
+                                tmplong, pint);
+                          *pint = (int)tmplong;
+                        }
                     }
                 }
             }
@@ -383,68 +468,95 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
 
           else if (*fmt == 'f')
             {
-#ifndef CONFIG_LIBC_FLOATINGPOINT
-              /* No floating point conversions */
-
-              void *pv = va_arg(ap, void*);
-
-              lvdbg("vsscanf: Return 0.0 to %p\n", pv);
-              *((double_t*)pv) = 0.0;
-#else
               lvdbg("vsscanf: Performing floating point conversion\n");
 
-              /* Skip over any white space before the real string */
+              /* Get a pointer to the double value.  We need to do this even
+               * if we have reached the end of the input data in order to
+               * update the 'ap' variable.
+               */
 
-              while (isspace(*buf))
-                {
-                  buf++;
-                }
-
-              /* Was a fieldwidth specified? */
-
-              if (!width)
-                {
-                  /* No... Guess a field width using some heuristics */
-
-                  width = findwidth(buf, fmt);
-                }
-
-              /* Copy the real string into a temporary working buffer. */
-
-              strncpy(tmp, buf, width);
-              tmp[width] = '\0';
-              buf += width;
-
-              lvdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
-
-              /* Perform the floating point conversion */
-
+#ifdef CONFIG_HAVE_DOUBLE
+              FAR double_t *pd = NULL;
+#endif
+              FAR float    *pf = NULL;
               if (!noassign)
                 {
-                  /* strtod always returns a double */
-#ifdef SDCC
-                  char *endptr;
-                  double_t dvalue = strtod(tmp,&endptr);
-#else
-                  double_t dvalue = strtod(tmp, NULL);
-#endif
-                  void *pv = va_arg(ap, void*);
-
-                  lvdbg("vsscanf: Return %f to %p\n", dvalue, pv);
-
-                  /* But we have to check whether we need to return a
-                   * float or a double.
+                  /* We have to check whether we need to return a float or a
+                   * double.
                    */
 
 #ifdef CONFIG_HAVE_DOUBLE
                   if (lflag)
                     {
-                      *((double_t*)pv) = dvalue;
+                      pd  = va_arg(ap, double_t*);
+                      *pd = 0.0;
                     }
                   else
 #endif
                     {
-                      *((float*)pv) = (float)dvalue;
+                      pf  = va_arg(ap, float*);
+                      *pf = 0.0;
+                    }
+                }
+
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+              /* But we only perform the data conversion is we still have
+               * bytes remaining in the input data stream.
+               */
+
+              if (*buf)
+                {
+                  /* Skip over any white space before the real string */
+
+                  while (isspace(*buf))
+                    {
+                      buf++;
+                    }
+
+                  /* Was a fieldwidth specified? */
+
+                  if (!width)
+                    {
+                      /* No... Guess a field width using some heuristics */
+
+                      width = findwidth(buf, fmt);
+                    }
+
+                  /* Copy the real string into a temporary working buffer. */
+
+                  strncpy(tmp, buf, width);
+                  tmp[width] = '\0';
+                  buf += width;
+
+                  lvdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
+
+                  /* Perform the floating point conversion */
+
+                  if (!noassign)
+                    {
+                      /* strtod always returns a double */
+#ifdef SDCC
+                      FAR char *endptr;
+                      double_t dvalue = strtod(tmp,&endptr);
+#else
+                      double_t dvalue = strtod(tmp, NULL);
+#endif
+                      /* We have to check whether we need to return a float
+                       * or a double.
+                       */
+
+#ifdef CONFIG_HAVE_DOUBLE
+                      if (lflag)
+                        {
+                          lvdbg("vsscanf: Return %f to %p\n", dvalue, pd);
+                          *pd = dvalue;
+                        }
+                      else
+#endif
+                        {
+                          lvdbg("vsscanf: Return %f to %p\n", dvalue, pf);
+                          *pf = (float)dvalue;
+                        }
                     }
                 }
 #endif
@@ -462,12 +574,12 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
 
                   if (lflag)
                     {
-                      long *plong = va_arg(ap, long*);
+                      FAR long *plong = va_arg(ap, long*);
                       *plong = (long)nchars;
                     }
                   else
                     {
-                      int *pint = va_arg(ap, int*);
+                      FAR int *pint = va_arg(ap, int*);
                       *pint = (int)nchars;
                     }
                 }
@@ -489,12 +601,16 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
 
     /* Its is not a conversion specifier */
 
-      else
+      else if (*buf)
         {
+          /* Skip over any leading spaces in the input buffer */
+
           while (isspace(*buf))
             {
               buf++;
             }
+
+          /* Skip over matching characters in the buffer and format */
 
           if (*fmt != *buf)
             {

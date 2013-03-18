@@ -4362,3 +4362,7 @@
 	  happen only under one condition:  When the kernel system call logic calls
 	  back into user space in order to allocate user space memory.  So it is
 	  expected that the maximum nesting level will be only 2 (2013-03-17).
+	* libc/stdio/lib_sccanf.c:  Correct an error in sscanf.  If %n occurs in
+	  the format statement after the input data stream has been fully
+	  parsed, the %n format specifier will not be handled.  Reported by
+	  Lorenz Meier (and also earlier by Kate) (2013-03-17).
