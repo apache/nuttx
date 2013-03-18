@@ -178,7 +178,7 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
  * Name: uart_putxmitchar
  ************************************************************************************/
 
-static int uart_putxmitchar(FAR uart_dev_t *dev, int ch)
+static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 {
   irqstate_t flags;
   int nexthead;
@@ -204,7 +204,13 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch)
           dev->xmit.head = nexthead;
           return OK;
         }
-      else
+
+      /* The buffer is full and no data is available now.  Should be block,
+       * waiting for the the hardware to remove some data from the TX
+       * buffer?
+       */
+
+      else if (oktoblock)
         {
           /* Inform the interrupt level logic that we are waiting. This and
            * the following steps must be atomic.
@@ -260,6 +266,15 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch)
               return -EINTR;
             }
         }
+
+      /* The caller has request that we not block for data.  So return the
+       * EAGAIN error to signal this situation.
+       */
+
+      else
+        {
+          return -EAGAIN;
+        }
     }
 
   /* We won't get here.  Some compilers may complain that this code is
@@ -307,6 +322,7 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t
   FAR struct inode *inode  = filep->f_inode;
   FAR uart_dev_t   *dev    = inode->i_private;
   ssize_t           nread  = buflen;
+  bool              oktoblock;
   int               ret;
 
   /* We may receive console writes through this path from interrupt handlers and
@@ -371,6 +387,12 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t
     }
 #endif
 
+  /* Can the following loop block, waiting for space in the TX
+   * buffer?
+   */
+
+  oktoblock = ((filep->f_oflags & O_NONBLOCK) == 0);
+
   /* Loop while we still have data to copy to the transmit buffer.
    * we add data to the head of the buffer; uart_xmitchars takes the
    * data from the end of the buffer.
@@ -386,22 +408,24 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer, size_t
       ret = OK;
       if (dev->isconsole && ch == '\n')
         {
-          ret = uart_putxmitchar(dev, '\r');
+          ret = uart_putxmitchar(dev, '\r', oktoblock);
         }
 
       /* Put the character into the transmit buffer */
 
       if (ret == OK)
         {
-          ret = uart_putxmitchar(dev, ch);
+          ret = uart_putxmitchar(dev, ch, oktoblock);
         }
 
       /* uart_putxmitchar() might return an error under one of two
        * conditions:  (1) The wait for buffer space might have been
-       * interrupted by a signal (ret should be -EINTR), or (2) if
+       * interrupted by a signal (ret should be -EINTR), (2) if
        * CONFIG_SERIAL_REMOVABLE is defined, then uart_putxmitchar()
        * might also return if the serial device was disconnected
-       * (with -ENOTCONN).
+       * (with -ENOTCONN), or (3) if O_NONBLOCK is specified, then
+       * then uart_putxmitchar() might return -EAGAIN if the output
+       * TX buffer is full.
        */
 
       if (ret < 0)
