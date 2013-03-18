@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/irq.h
+ * arch/arm/irq/up_ramvec_attach.c
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,75 +33,93 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_IRQ_H
-#define __INCLUDE_NUTTX_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-# include <assert.h>
-#endif
+#include <nuttx/config.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
+#include "ram_vectors.h"
+
+#ifdef CONFIG_ARCH_RAMVECTORS
 
 /****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-/* IRQ detach is a convenience definition.  Detaching an interrupt handler
- * is equivalent to setting a NULL interrupt handler.
- */
-
-#ifndef __ASSEMBLY__
-# define irq_detach(isr) irq_attach(isr, NULL)
-#endif
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This struct defines the way the registers are stored */
-
-#ifndef __ASSEMBLY__
-typedef int (*xcpt_t)(int irq, FAR void *context);
-#endif
-
-/* Now include architecture-specific types */
-
-#include <arch/irq.h>
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: irq_attach
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/* Common exception entrypoint */
+
+void exception_common(void);
+
+/****************************************************************************
+ * Name: up_ramvec_attach
  *
  * Description:
- *   Configure the IRQ subsystem so that IRQ number 'irq' is dispatched to
- *   'isr'
+ *   Configure the ram vector table so that IRQ number 'irq' will be
+ *   dipatched by hardware to 'vector'
  *
  ****************************************************************************/
 
-int irq_attach(int irq, xcpt_t isr);
+int up_ramvec_attach(int irq, up_vector_t vector)
+{
+  int ret = ERROR;
 
-#undef EXTERN
-#ifdef __cplusplus
+  if ((unsigned)irq < ARMV7M_PERIPHERAL_INTERRUPTS)
+    {
+      irqstate_t flags;
+
+      /* If the new vector is NULL, then the vector is being detached. In
+       * this case, disable the itnerrupt and direct any interrupts to the
+       * common exception handler.
+       */
+
+      flags = irqsave();
+      if (vector == NULL)
+        {
+          /* Disable the interrupt if we can before detaching it.  We might
+           * not be able to do this for all interrupts.
+           */
+
+          up_disable_irq(irq);
+
+          /* Detaching the vector really means re-attaching it to the
+           * common exception handler.
+           */
+
+           vector = exception_common;
+        }
+
+      /* Save the new vector in the vector table. */
+
+      g_ram_vectors[irq] = vector;
+      irqrestore(flags);
+      ret = OK;
+    }
+
+  return ret;
 }
-#endif
-#endif
 
-#endif /* __INCLUDE_NUTTX_IRQ_H */
-
+#endif /* !CONFIG_ARCH_RAMVECTORS */

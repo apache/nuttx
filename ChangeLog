@@ -4371,4 +4371,7 @@
 	  because UART TX is almost always available, but it does become an
 	  if the UART uses hardware flow control or if the a "lower half" is
 	  something like the USB CDC/ACM driver that may need to block for
-	  significant amounts of time.
+	  significant amounts of time (2013-03-18).
+	* arch/arm/src/armv7-h/ram_vectors.h, up_ramvec_*.c, arch/arm/src/*/*_irq.c,
+	  and Make.defs:  Add support for modifiable interrupt vectors in RAM
+      (2013-03-18).

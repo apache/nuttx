@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/irq_internal.h
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,13 +66,14 @@ extern FAR xcpt_t g_irqvector[NR_IRQS+1];
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN void weak_function irq_initialize(void);
-EXTERN int irq_unexpected_isr(int irq, FAR void *context);
+void weak_function irq_initialize(void);
+int irq_unexpected_isr(int irq, FAR void *context);
 
 #undef EXTERN
 #ifdef __cplusplus

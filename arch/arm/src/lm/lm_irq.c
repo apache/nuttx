@@ -48,6 +48,7 @@
 #include <arch/irq.h>
 
 #include "nvic.h"
+#include "ram_vectors.h"
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
@@ -291,6 +292,14 @@ void up_irqinitialize(void)
 
   putreg32(0, NVIC_IRQ0_31_ENABLE);
   putreg32(0, NVIC_IRQ32_63_ENABLE);
+
+  /* If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
+   * vector table that requires special initialization.
+   */
+
+#ifdef CONFIG_ARCH_RAMVECTORS
+  up_ramvec_initialize();
+#endif
 
   /* Set all interrrupts (and exceptions) to the default priority */
 

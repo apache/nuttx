@@ -49,6 +49,7 @@
 
 #include "chip.h"
 #include "nvic.h"
+#include "ram_vectors.h"
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
@@ -309,9 +310,16 @@ void up_irqinitialize(void)
    * positioned in SRAM or in external FLASH, then we may need to reset
    * the interrupt vector so that it refers to the table in SRAM or in
    * external FLASH.
+   *
+   * If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
+   * vector table that requires special initialization.
    */
 
+#ifdef CONFIG_ARCH_RAMVECTORS
+  up_ramvec_initialize();
+#else
   putreg32((uint32_t)_vectors, NVIC_VECTAB);
+#endif
 
   /* Set all interrupts (and exceptions) to the default priority */
 

@@ -48,6 +48,7 @@
 #include <arch/irq.h>
 
 #include "nvic.h"
+#include "ram_vectors.h"
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
@@ -302,9 +303,14 @@ void up_irqinitialize(void)
    * at address 0x0800:0000.  If we are using the STMicro DFU bootloader, then
    * the vector table will be offset to a different location in FLASH and we
    * will need to set the NVIC vector location to this alternative location.
+   *
+   * If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
+   * vector table that requires special initialization.
    */
 
-#ifdef CONFIG_STM32_DFU
+#if defined(CONFIG_ARCH_RAMVECTORS)
+  up_ramvec_initialize();
+#elif defined(CONFIG_STM32_DFU)
   putreg32((uint32_t)stm32_vectors, NVIC_VECTAB);
 #endif
 

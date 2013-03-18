@@ -894,9 +894,9 @@ void sched_process_timer(void);
  * Name: irq_dispatch
  *
  * Description:
- *   This function must be called from the achitecture-
- *   specific logic in order to dispatch an interrupt to
- *   the appropriate, registered handling logic.
+ *   This function must be called from the achitecture-specific logic in
+ *   order to dispatch an interrupt to the appropriate, registered handling
+ *   logic.
  *
  ***************************************************************************/
 

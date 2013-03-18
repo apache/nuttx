@@ -51,6 +51,10 @@ CMN_CSRCS += up_hardfault.c up_svcall.c up_vfork.c
 
 # Configuration-dependent common files
 
+ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
+CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
+endif
+
 ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS += up_memcpy.S
 endif

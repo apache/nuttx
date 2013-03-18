@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/irq.h
+ * arm/arm/src/armv7-m/up_ramvec_initialize.c
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,75 +33,92 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_IRQ_H
-#define __INCLUDE_NUTTX_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-# include <assert.h>
-#endif
+#include <nuttx/config.h>
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+
+#include "nvic.h"
+#include "ram_vectors.h"
+#include "up_arch.h"
+#include "up_internal.h"
+
+#ifdef CONFIG_ARCH_RAMVECTORS
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Definitions
  ****************************************************************************/
-/* IRQ detach is a convenience definition.  Detaching an interrupt handler
- * is equivalent to setting a NULL interrupt handler.
+
+/****************************************************************************
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/* If CONFIG_ARCH_RAMVECTORS is defined, then the ARM logic must provide
+ * ARM-specific implementations of up_ramvec_initialize(), irq_attach(), and
+ * irq_dispatch.  In this case, it is also assumed that the ARM vector
+ * table resides in RAM, has the the name up_ram_vectors, and has been
+ * properly positioned and aligned in memory by the linker script.
  */
 
-#ifndef __ASSEMBLY__
-# define irq_detach(isr) irq_attach(isr, NULL)
-#endif
+up_vector_t g_ram_vectors[ARMV7M_VECTAB_SIZE]
+  __attribute__((section(".ram_vectors")));
 
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This struct defines the way the registers are stored */
-
-#ifndef __ASSEMBLY__
-typedef int (*xcpt_t)(int irq, FAR void *context);
-#endif
-
-/* Now include architecture-specific types */
-
-#include <arch/irq.h>
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
+ * Private Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Name: irq_attach
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_ramvec_initialize
  *
  * Description:
- *   Configure the IRQ subsystem so that IRQ number 'irq' is dispatched to
- *   'isr'
+ *   Copy vectors to RAM an configure the NVIC to use the RAM vectors.
  *
  ****************************************************************************/
 
-int irq_attach(int irq, xcpt_t isr);
+void up_ramvec_initialize(void)
+{
+  const up_vector_t *src;
+  up_vector_t *dest;
+  int i;
 
-#undef EXTERN
-#ifdef __cplusplus
+  /* The vector table must be aligned */
+
+  DEBUGASSERT(((uintptr)g_ram_vectors & 0x3f) == 0);
+
+  /* Copy the ROM vector table at address zero to RAM vector table.
+   *
+   * This must be done BEFORE the MPU is enable if the MPU is being used to
+   * protect against NULL pointer references.
+   */
+
+  src  = (const CODE up_vector_t *)0;
+  dest = g_ram_vectors;
+
+  for (i = 0; i < ARMV7M_VECTAB_SIZE; i++)
+    {
+      *dest++ = *src++;
+    }
+
+  /* Now configure the NVIC to use the new vector table.  Bit 29 indicates
+   * that the vector table is in RAM.
+   */
+
+  putreg32((uint32_t)g_ram_vectors | (1 << 29), NVIC_VECTAB);
 }
-#endif
-#endif
 
-#endif /* __INCLUDE_NUTTX_IRQ_H */
-
+#endif /* !CONFIG_ARCH_RAMVECTORS */
