@@ -43,6 +43,8 @@
 
 #include "nvic.h"
 #include "ram_vectors.h"
+
+#include "chip.h"             /* May redefine VECTAB fields */
 #include "up_arch.h"
 #include "up_internal.h"
 
@@ -98,7 +100,7 @@ void up_ramvec_initialize(void)
 
   /* The vector table must be aligned */
 
-  DEBUGASSERT(((uintptr)g_ram_vectors & 0x3f) == 0);
+  DEBUGASSERT(((uintptr)g_ram_vectors & NVIC_VECTAB_ALIGN_MASK) == 0);
 
   /* Copy the ROM vector table at address zero to RAM vector table.
    *
@@ -114,11 +116,13 @@ void up_ramvec_initialize(void)
       *dest++ = *src++;
     }
 
-  /* Now configure the NVIC to use the new vector table.  Bit 29 indicates
-   * that the vector table is in RAM.
+  /* Now configure the NVIC to use the new vector table.  The TBLBASE bit
+   * indicates that the vectors are in RAM.  NOTE: These fields appear to
+   * differ among various ARMv7-M implementations.
    */
 
-  putreg32((uint32_t)g_ram_vectors | (1 << 29), NVIC_VECTAB);
+  putreg32(((uint32_t)g_ram_vectors & NVIC_VECTAB_TBLOFF_MASK) | NVIC_VECTAB_TBLBASE,
+           NVIC_VECTAB);
 }
 
 #endif /* !CONFIG_ARCH_RAMVECTORS */
