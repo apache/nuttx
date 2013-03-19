@@ -4382,3 +4382,10 @@
 	  by the EXC_RETURN.  Silly me (2013-03-18).
 	* arch/arm/src/lpc17_adc.c:  Add a work-around for an ADC errata.  From
 	  Chris Taglia (2013-93-19).
+	* arch/arm/src/armv7-m/up_hardfault.c:  If the PRIMASK is used to disable
+	  interrupts, then additional logic is required in the hard fault handler
+	  (2013-93-19).
+	* libc/ and mm/: Directories where the same sources files are used to
+	  build different objects in the first and second pass kernel builds need
+	  to keep those objects in separate directories so that they are not
+	  constantly rebuilt (2013-93-19).

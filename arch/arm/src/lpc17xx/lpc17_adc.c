@@ -329,12 +329,12 @@ static int adc_interrupt(int irq, void *context)
   int i;
 
   regval = getreg32(LPC17_ADC_GDR);
-  for(i = 0; i < CONFIG_ADC_NCHANNELS; i++
+  for (i = 0; i < CONFIG_ADC_NCHANNELS; i++)
     {
-      ch      = g_adc_chanlist[i];
+      ch     = g_adc_chanlist[i];
       regval = getreg32(LPC17_ADC_DR(ch));
 
-      if(regval&ADC_DR_DONE)
+      if (regval&ADC_DR_DONE)
         {
           priv->count[ch]++;
           priv->buf[ch] += regval & 0xfff0;

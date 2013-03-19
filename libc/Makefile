@@ -62,74 +62,60 @@ include queue/Make.defs
 include wqueue/Make.defs
 include misc/Make.defs
 
-AOBJS = $(ASRCS:.S=$(OBJEXT))
-COBJS = $(CSRCS:.c=$(OBJEXT))
+BINDIR ?= bin
+
+AOBJS = $(patsubst %.S, $(BINDIR)$(DELIM)%$(OBJEXT), $(ASRCS))
+COBJS = $(patsubst %.c, $(BINDIR)$(DELIM)%$(OBJEXT), $(CSRCS))
 
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
 UBIN = libuc$(LIBEXT)
 KBIN = libkc$(LIBEXT)
-BIN  = libc$(LIBEXT)
+BIN ?= libc$(LIBEXT)
 
 all: $(BIN)
-.PHONY: kclean uclean clean distclean
+.PHONY: clean distclean
 
-$(AOBJS): %$(OBJEXT): %.S
+$(AOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
-$(COBJS): %$(OBJEXT): %.c
+$(COBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
+
+# C library for the flat build
 
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
+# C library for the user phase of the two-pass kernel build
+
 ifneq ($(BIN),$(UBIN))
-$(UBIN): kclean
-	$(Q) $(MAKE) $(UBIN) BIN=$(UBIN) TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
-	$(Q) touch .userlib
+$(UBIN):
+	$(Q) $(MAKE) $(UBIN) BIN=$(UBIN) BINDIR=ubin TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
 endif
 
+# C library for the kernel phase of the two-pass kernel build
+
 ifneq ($(BIN),$(KBIN))
-$(KBIN): uclean
-	$(Q) $(MAKE) $(KBIN) BIN=$(KBIN) TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
-	$(Q) touch .kernlib
+$(KBIN):
+	$(Q) $(MAKE) $(KBIN) BIN=$(KBIN) BINDIR=kbin TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
 endif
+
+# Dependencies
 
 .depend: Makefile $(SRCS)
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 	$(Q) touch $@
 
-depend: .depend
+depend: $(BINDIR)$(DELIM).depend
 
-# Clean Targets:
-# Clean user-mode temporary files (retaining the UBIN binary)
+# Clean most derived files, retaining the configuration
 
-uclean:
-ifneq ($(OBJEXT),)
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-	$(Q) if exist .userlib ]; then del *$(OBJEXT)
-else
-	$(Q) ( if [ -f .userlib ]; then rm -f *$(OBJEXT); fi )
-endif
-endif
-	$(call DELFILE, .userlib)
-
-# Clean kernel-mode temporary files (retaining the KBIN binary)
-
-kclean:
-ifneq ($(OBJEXT),)
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-	$(Q) if exist .kernlib ]; then del *$(OBJEXT)
-else
-	$(Q) ( if [ -f .kernlib ]; then rm -f *$(OBJEXT); fi )
-endif
-endif
-	$(call DELFILE, .kernlib)
-
-# Really clean everything
-
-clean: uclean kclean
+clean:
+	$(Q) $(MAKE) -C bin  clean TOPDIR=$(TOPDIR)
+	$(Q) $(MAKE) -C ubin clean TOPDIR=$(TOPDIR)
+	$(Q) $(MAKE) -C kbin clean TOPDIR=$(TOPDIR)
 	$(call DELFILE, $(BIN))
 	$(call DELFILE, $(UBIN))
 	$(call DELFILE, $(KBIN))
@@ -138,6 +124,9 @@ clean: uclean kclean
 # Deep clean -- removes all traces of the configuration
 
 distclean: clean
+	$(Q) $(MAKE) -C bin  distclean TOPDIR=$(TOPDIR)
+	$(Q) $(MAKE) -C ubin distclean TOPDIR=$(TOPDIR)
+	$(Q) $(MAKE) -C kbin distclean TOPDIR=$(TOPDIR)
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 

@@ -57,7 +57,7 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
-ROOTDEPPATH	= --dep-path .
+ROOTDEPPATH = --dep-path .
 PROXYDEPPATH = --dep-path proxies
 STUBDEPPATH = --dep-path stubs
 VPATH = proxies:stubs
