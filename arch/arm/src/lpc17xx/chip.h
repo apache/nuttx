@@ -61,17 +61,15 @@
 #  endif
 #endif
 
-/* Vector Table Offset Register (VECTAB).  Redefine some bits defined in
+/* Vector Table Offset Register (VECTAB).  Redefine the mask defined in
  * arch/arm/src/armv7-m/nvic.h; The LPC178x/7x User manual definitions
- * do not match the ARMv7M field definitions.
+ * do not match the ARMv7M field definitions.  Any bits set above bit
+ * 29 would be an error and apparently the register wants 8- not 6-bit
+ * alignment.
  */
 
 #undef  NVIC_VECTAB_TBLOFF_MASK
 #define NVIC_VECTAB_TBLOFF_MASK         (0x3fffff00)
-#undef  NVIC_VECTAB_TBLBASE
-#define NVIC_VECTAB_TBLBASE             (1 << 29)
-#undef  NVIC_VECTAB_ALIGN_MASK
-#define NVIC_VECTAB_ALIGN_MASK          (0x000000ff)
 
 /* Include the memory map file.  Other chip hardware files should then include
  * this file for the proper setup.
