@@ -395,7 +395,7 @@ config ADC0_SPS
 config ADC_CHANLIST
 	bool "Use ADC channel list"
 	default n
-	---help--
+	---help---
 		The errata that states: "A/D Global Data register should not be used
 		with burst mode or hardware triggering".  If this option is selected,
 		then the ADC driver will grab from the individual channel registers
@@ -415,7 +415,7 @@ config ADC_NCHANNELS
 	int "ADC0 number of channels"
 	depends on LPC17_ADC
 	default 0  
-	---help--
+	---help---
 		If CONFIG_ADC_CHANLIST is enabled, then the platform specific code
 		must do two things:  (1) define ADC_NCHANNELS in the configuration
 		file and (2) provide an array g_adc_chanlist[] with the channel

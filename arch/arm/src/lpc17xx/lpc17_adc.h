@@ -94,7 +94,7 @@ extern "C"
 
 #ifdef CONFIG_ADC_CHANLIST 
 EXTERN uint8_t g_adc_chanlist[CONFIG_ADC_NCHANNELS];
-#endiff
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -119,6 +119,5 @@ FAR struct adc_dev_s *lpc17_adcinitialize(void);
 #ifdef __cplusplus
 }
 #endif
-#endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_ADC_H */
