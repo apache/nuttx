@@ -4380,3 +4380,5 @@
 	  need to explicity set and cleare the privilege bit in the CONTROL
 	  register on return.  I assumed this would be handled automatically
 	  by the EXC_RETURN.  Silly me (2013-03-18).
+	* arch/arm/src/lpc17_adc.c:  Add a work-around for an ADC errata.  From
+	  Chris Taglia (2013-93-19).

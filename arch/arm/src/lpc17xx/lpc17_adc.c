@@ -4,7 +4,7 @@
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-05 initial version
- * 
+ *
  * This file is a part of NuttX:
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
@@ -202,7 +202,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
     {
       lpc17_configgpio(GPIO_AD0p7);
     }
-    
+
   irqrestore(flags);
 }
 
@@ -276,7 +276,18 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 
   if (enable)
     {
+#ifdef CONFIG_ADC_CHANLIST
+      /* Trigger interrupt at the end of conversion on the last A/D channel
+       * in the channel list.
+       */
+
+      putreg32(ADC_INTEN_CHAN(g_adc_chanlist[CONFIG_ADC_NCHANNELS - 1]),
+               LPC17_ADC_INTEN);
+#else
+      /* Trigger interrupt using the global DONE flag. */
+
       putreg32(ADC_INTEN_GLOBAL, LPC17_ADC_INTEN);
+#endif
     }
   else
     {
@@ -309,11 +320,45 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 
 static int adc_interrupt(int irq, void *context)
 {
+#ifdef CONFIG_ADC_CHANLIST
+
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
   uint32_t regval;
   unsigned char ch;
   int32_t value;
-    
+  int i;
+
+  regval = getreg32(LPC17_ADC_GDR);
+  for(i = 0; i < CONFIG_ADC_NCHANNELS; i++
+    {
+      ch      = g_adc_chanlist[i];
+      regval = getreg32(LPC17_ADC_DR(ch));
+
+      if(regval&ADC_DR_DONE)
+        {
+          priv->count[ch]++;
+          priv->buf[ch] += regval & 0xfff0;
+
+          if (priv->count[ch] >= CONFIG_ADC0_AVERAGE)
+            {
+              value           = priv->buf[ch] / priv->count[ch];
+              value         <<= 15;
+              adc_receive(&g_adcdev,ch,value);
+              priv->buf[ch]   = 0;
+              priv->count[ch] = 0;
+            }
+        }
+    }
+
+  return OK;
+
+#else
+
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
+  uint32_t regval;
+  unsigned char ch;
+  int32_t value;
+
   regval              = getreg32(LPC17_ADC_GDR);
   ch                  = (regval >> 24) & 0x07;
   priv->buf[ch]      += regval & 0xfff0;
@@ -329,6 +374,8 @@ static int adc_interrupt(int irq, void *context)
     }
 
   return OK;
+
+#endif
 }
 
 /****************************************************************************

@@ -392,6 +392,35 @@ config ADC0_SPS
 	depends on LPC17_ADC
 	default 1000
 
+config ADC_CHANLIST
+	bool "Use ADC channel list"
+	default n
+	---help--
+		The errata that states: "A/D Global Data register should not be used
+		with burst mode or hardware triggering".  If this option is selected,
+		then the ADC driver will grab from the individual channel registers
+		rather than from the global data register as this is the stated
+		workaround in the errata.
+
+		The ADC interrupt will trigger on conversion complete on the last
+		channel listed in the array g_adc_chanlist[] (as opposed to
+		triggering interrupt from the global DONE flag).
+
+		If this option is enabled, then the platform specific code must do
+		two things:  (1) define ADC_NCHANNELS in the configuration file and
+		(2) provide an array g_adc_chanlist[] with the channel numbers
+		matching the ADC0_MASK within the board-specific library.
+
+config ADC_NCHANNELS
+	int "ADC0 number of channels"
+	depends on LPC17_ADC
+	default 0  
+	---help--
+		If CONFIG_ADC_CHANLIST is enabled, then the platform specific code
+		must do two things:  (1) define ADC_NCHANNELS in the configuration
+		file and (2) provide an array g_adc_chanlist[] with the channel
+		numbers matching the ADC0_MASK within the board-specific library.
+
 endmenu
 
 menu "CAN driver options"
