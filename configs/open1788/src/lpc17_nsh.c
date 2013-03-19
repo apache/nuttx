@@ -164,6 +164,9 @@
 #ifdef NSH_HAVE_USBHOST
 static struct usbhost_driver_s *g_drvr;
 #endif
+#ifdef NSH_HAVE_MMCSD
+static FAR struct sdio_dev_s *g_sdiodev;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -227,7 +230,7 @@ static int nsh_cdinterrupt(int irq, FAR void *context)
   present = !lpc17_gpioread(GPIO_SD_CD);
   if (present != inserted)
     {
-      sdio_mediachange(sdio, preset);
+      sdio_mediachange(g_sdiodev, present);
       inserted = present;
     }
 
@@ -246,7 +249,6 @@ static int nsh_cdinterrupt(int irq, FAR void *context)
 #ifdef NSH_HAVE_MMCSD
 static int nsh_sdinitialize(void)
 {
-  FAR struct sdio_dev_s *sdio;
   int ret;
 
 #ifdef NSH_HAVE_MMCSD_CD
@@ -268,8 +270,8 @@ static int nsh_sdinitialize(void)
 
   /* First, get an instance of the SDIO interface */
 
-  sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
-  if (!sdio)
+  g_sdiodev = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  if (!g_sdiodev)
     {
       message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
               CONFIG_NSH_MMCSDSLOTNO);
@@ -278,7 +280,7 @@ static int nsh_sdinitialize(void)
 
   /* Now bind the SDIO interface to the MMC/SD driver */
 
-  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdiodev);
   if (ret != OK)
     {
       message("nsh_archinitialize: "
@@ -294,9 +296,9 @@ static int nsh_sdinitialize(void)
    */
 
 #ifdef NSH_HAVE_MMCSD_CD
-  sdio_mediachange(sdio, !lpc17_gpioread(GPIO_SD_CD));
+  sdio_mediachange(g_sdiodev, !lpc17_gpioread(GPIO_SD_CD));
 #else
-  sdio_mediachange(sdio, true);
+  sdio_mediachange(g_sdiodev, true);
 #endif
   return OK;
 }

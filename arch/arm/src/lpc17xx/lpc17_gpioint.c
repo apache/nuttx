@@ -261,9 +261,9 @@ static int lpc17_irq2pin(int irq)
 
   /* Set 3: 15 interrupts p2.16-p2.30
    *
-   * LPC17_VALID_SHIFT2H    0    - Bit 0 is the first bit in a group of 14 interrupts
-   * LPC17_VALID_FIRST2H    irq  - IRQ number associated with p2.0
-   * LPC17_VALID_NIRQS2H    15   - 15 interrupt bits in the group
+   * LPC17_VALID_SHIFT2L    0    - Bit 0 is the first bit in a group of 14 interrupts
+   * LPC17_VALID_FIRST2L    irq  - IRQ number associated with p2.0
+   * LPC17_VALID_NIRQS2L    15   - 15 interrupt bits in the group
    */
 
   else if (irq >= LPC17_VALID_FIRST2H && irq < (LPC17_VALID_FIRST2H+LPC17_VALID_NIRQS2H))
@@ -418,12 +418,22 @@ void lpc17_gpioirqinitialize(void)
   putreg32(0, LPC17_GPIOINT2_INTENR);
   putreg32(0, LPC17_GPIOINT2_INTENF);
 
-  /* Attach and enable the GPIO IRQ.  Note:  GPIO0 and GPIO2 interrupts share
-   * the same position in the NVIC with External Interrupt 3
+  /* Attach and enable the GPIO IRQ. */
+
+#if defined(LPC176x)
+  /* For the LPC176x family, GPIO0 and GPIO2 interrupts share the same
+   * position in the NVIC with External Interrupt 3
    */
 
   (void)irq_attach(LPC17_IRQ_EINT3, lpc17_gpiointerrupt);
   up_enable_irq(LPC17_IRQ_EINT3);
+
+#elif defined(LPC178x)
+
+  (void)irq_attach(LPC17_IRQ_GPIO, lpc17_gpiointerrupt);
+  up_enable_irq(LPC17_IRQ_GPIO);
+
+#endif
 }
 
 /****************************************************************************

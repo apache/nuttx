@@ -483,11 +483,12 @@
 #define NVIC_SYSH_PRIORITY_PR15_SHIFT   24
 #define NVIC_SYSH_PRIORITY_PR15_MASK    (0xff << NVIC_SYSH_PRIORITY_PR15_SHIFT)
 
-/* Vector Table Offset Register (VECTAB) */
+/* Vector Table Offset Register (VECTAB).  This mask seems to vary among
+ * ARMv7-M implementations.  It may be be redefined in the architecture-
+ * specific chip.h header file.
+ */
 
 #define NVIC_VECTAB_TBLOFF_MASK         (0xffffffc0)
-#define NVIC_VECTAB_TBLBASE             (0)
-#define NVIC_VECTAB_ALIGN_MASK          (0x0000003f)
 
 /* Application Interrupt and Reset Control Register (AIRCR) */
 

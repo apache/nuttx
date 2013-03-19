@@ -105,13 +105,11 @@
 /* The SD card detect (CD) signal is on P0[13].  This signal is shared.  It is also
  * used for MOSI1 and USB_UP_LED.  The CD pin may be disconnected.  There is a jumper
  * on board that enables the CD pin.
+ *
+ * The CD pin is interrupting:
  */
 
-#if 0 /* The CD pin may be interrupting */
-#  define GPIO_SD_CD (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN13)
-#else
-#  define GPIO_SD_CD (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN13)
-#endif
+#define GPIO_SD_CD   (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN13)
 
 /************************************************************************************
  * Public Types
