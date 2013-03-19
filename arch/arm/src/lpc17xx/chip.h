@@ -41,6 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "nvic.h"
 
 /* Include the chip capabilities file */
 
@@ -59,6 +60,18 @@
 #    error "No vector file for this LPC17xx family"
 #  endif
 #endif
+
+/* Vector Table Offset Register (VECTAB).  Redefine some bits defined in
+ * arch/arm/src/armv7-m/nvic.h; The LPC178x/7x User manual definitions
+ * do not match the ARMv7M field definitions.
+ */
+
+#undef  NVIC_VECTAB_TBLOFF_MASK
+#define NVIC_VECTAB_TBLOFF_MASK         (0x3fffff00)
+#undef  NVIC_VECTAB_TBLBASE
+#define NVIC_VECTAB_TBLBASE             (1 << 29)
+#undef  NVIC_VECTAB_ALIGN_MASK
+#define NVIC_VECTAB_ALIGN_MASK          (0x000000ff)
 
 /* Include the memory map file.  Other chip hardware files should then include
  * this file for the proper setup.
