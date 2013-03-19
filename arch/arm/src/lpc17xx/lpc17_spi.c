@@ -63,28 +63,35 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* This driver does not support the SPI exchange method. */
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+#ifdef CONFIG_SPI_EXCHANGE
+#  error "CONFIG_SPI_EXCHANGE must not be defined in the configuration"
+#endif
 
-#undef SPI_DEBUG     /* Define to enable debug */
-#undef SPI_VERBOSE   /* Define to enable verbose debug */
+/* Debug ********************************************************************/
+/* The following enable debug output from this file:
+ * 
+ * CONFIG_DEBUG         - Define to enable general debug features
+ * CONFIG_DEBUG_SPI     - Define to enable basic SSP debug (needs CONFIG_DEBUG)
+ * CONFIG_DEBUG_VERBOSE - Define to enable verbose SSP debug
+ */
 
-#ifdef SPI_DEBUG
+#ifdef CONFIG_DEBUG_SPI
 #  define spidbg  lldbg
-#  ifdef SPI_VERBOSE
+#  ifdef CONFIG_DEBUG_VERBOSE
 #    define spivdbg lldbg
 #  else
 #    define spivdbg(x...)
 #  endif
 #else
-#  undef SPI_VERBOSE
 #  define spidbg(x...)
 #  define spivdbg(x...)
 #endif
 
-/* SPI Clocking.
- *
- * The CPU clock by 1, 2, 4, or 8 to get the SPI peripheral clock (SPI_CLOCK).
+/* SSP Clocking *************************************************************/
+/* The CPU clock by 1, 2, 4, or 8 to get the SPI peripheral clock (SPI_CLOCK).
  * SPI_CLOCK may be further divided by 8-254 to get the SPI clock.  If we
  * want a usable range of 4KHz to 25MHz for the SPI, then:
  *
