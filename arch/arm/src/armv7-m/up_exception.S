@@ -201,10 +201,30 @@ exception_common:
 	/* The EXC_RETURN value tells us whether we are returning on the MSP or PSP 
 	 */
 
+#ifdef CONFIG_NUTTX_KERNEL
+	/* The EXC_RETURN value will be 0xfffffff9 (privileged thread) or 0xfffffff1
+	 * (handler mode) if the stack is on the MSP.  It can only be on the PSP if
+	 * EXC_RETURN is 0xfffffffd (unprivileged thread)
+	 */
+
+	mrs		r2, control				/* R2=Contents of the control register */
+	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
+	beq		3f						/* Branch if privileged */
+
+	orr		r2, r2, #1				/* Unprivileged mode */
+	msr		psp, r1					/* R1=The process stack pointer */
+	b		4f
+3:
+	bic		r2, r2, #1				/* Privileged mode */
+	msr		msp, r1					/* R1=The main stack pointer */
+4:
+	msr		control, r2				/* Save the updated control register */
+#else
 	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
 	ite		eq						/* next two instructions conditional */
 	msreq	msp, r1					/* R1=The main stack pointer */
 	msrne	psp, r1					/* R1=The process stack pointer */
+#endif
 
 	/* Restore the interrupt state */
 

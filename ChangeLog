@@ -4375,3 +4375,8 @@
 	* arch/arm/src/armv7-h/ram_vectors.h, up_ramvec_*.c, arch/arm/src/*/*_irq.c,
 	  and Make.defs:  Add support for modifiable interrupt vectors in RAM
       (2013-03-18).
+	* arch/arm/src/armv7-m/up_exception.S, sam3u/sam3u_vectors.S, and
+	  lpc17xx/lpc17_vectors.S: In exception handling with CONFIG_NUTTX_KERNEL,
+	  need to explicity set and cleare the privilege bit in the CONTROL
+	  register on return.  I assumed this would be handled automatically
+	  by the EXC_RETURN.  Silly me (2013-03-18).
