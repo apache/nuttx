@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/avr/up_usestack.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,12 +98,12 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   if (tcb->stack_alloc_ptr)
     {
-      /* Yes.. free it */
+      /* Yes.. Release the old stack allocation */
 
-      sched_ufree(tcb->stack_alloc_ptr);
+      up_release_stack(tcb, tcb->flags & TCB_FLAG_TTYPE_MASK);
     }
 
-  /* Save the stack allocation */
+  /* Save the new stack allocation */
 
   tcb->stack_alloc_ptr = stack;
 

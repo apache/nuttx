@@ -4402,4 +4402,7 @@
 	  big, initial checkin.  The next step will be to add logic to
 	  allocate stacks for kernel threads from protected kernel memory
 	  and all other task types from unprotected user memory (2013-03-20).
-
+	* arch/*/src/common/up_createstack.c, up_use_stack.c, and
+	  up_release_stack.c:  If creating or releasing the stack for a kernel
+	  thread, use the kernel allocator so that the kernel thread stacks
+	  are protected from user application meddling (2013-03-20).

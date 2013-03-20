@@ -121,12 +121,16 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
   size_t top_of_stack;
   size_t size_of_stack;
 
+  /* Is there already a stack allocated? */
+
   if (tcb->stack_alloc_ptr)
     {
-      sched_ufree(tcb->stack_alloc_ptr);
+      /* Yes... Release the old stack allocation */
+
+      up_release_stack(tcb, tcb->flags & TCB_FLAG_TTYPE_MASK);
     }
 
-  /* Save the stack allocation */
+  /* Save the new stack allocation */
 
   tcb->stack_alloc_ptr = stack;
 
