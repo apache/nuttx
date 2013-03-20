@@ -194,6 +194,9 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     The relative path to the oocd.sh script is configs/lm4f120-launchpad/tools,
     but that should have been added to your PATH variable when you sourced
     the setenv.sh script.
+    
+    Note that OpenOCD needs to be run with administrator privileges in
+    some environments (sudo).
 
   Connecting GDB
 
@@ -432,7 +435,7 @@ NXFLAT Toolchain
 
 LEDs
 ^^^^
-  The LM32F120 has a single RGB LED.  If CONFIG_ARCH_LEDS is defined, then
+  The LM4F120 has a single RGB LED.  If CONFIG_ARCH_LEDS is defined, then
   support for the LaunchPad LEDs will be included in the build.  See:
 
   - configs/lm4f120-launchpad/include/board.h - Defines LED constants, types and
