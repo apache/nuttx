@@ -70,24 +70,40 @@
  * Name: up_create_stack
  *
  * Description:
- *   Allocate a stack for a new thread and setup up stack-related
- *   information in the TCB.
+ *   Allocate a stack for a new thread and setup up stack-related information
+ *   in the TCB.
  *
- *   The following TCB fields must be initialized:
- *   adj_stack_size: Stack size after adjustment for hardware, processor,
+ *   The following TCB fields must be initialized by this function:
+ *
+ *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
- *   stack_alloc_ptr: Pointer to allocated stack
- *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *   - stack_alloc_ptr: Pointer to allocated stack
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
  *     the stack pointer.
  *
- * Input Parameters:
- *   tcb: The TCB of new task
- *   stack_size:  The requested stack size.  At least this how much must be
- *     allocated.
+ * Inputs:
+ *   - tcb: The TCB of new task
+ *   - stack_size:  The requested stack size.  At least this much
+ *     must be allocated.
+ *   - ttype:  The thread type.  This may be one of following (defined in
+ *     include/nuttx/sched.h):
+ *
+ *       TCB_FLAG_TTYPE_TASK     Normal user task
+ *       TCB_FLAG_TTYPE_PTHREAD  User pthread
+ *       TCB_FLAG_TTYPE_KERNEL   Kernel thread
+ *
+ *     This thread type is normally available in the flags field of the TCB,
+ *     however, there are certain contexts where the TCB may not be fully
+ *     initialized when up_create_stack is called.
+ *
+ *     If CONFIG_NUTTX_KERNEL is defined, then this thread type may affect
+ *     how the stack is allocated.  For example, kernel thread stacks should
+ *     be allocated from protected kernel memory.  Stacks for user tasks and
+ *     threads must come from memory that is accessible to user code.
  *
  ****************************************************************************/
 
-int up_create_stack(struct tcb_s *tcb, size_t stack_size)
+int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
   /* Is there already a stack allocated of a different size? */
 

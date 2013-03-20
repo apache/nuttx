@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/up_usestack.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,20 +92,27 @@
  * Name: up_use_stack
  *
  * Description:
- *   Setup up stack-related information in the TCB
- *   using pre-allocated stack memory
+ *   Setup up stack-related information in the TCB using pre-allocated stack
+ *   memory.  This function is called only from task_init() when a task or
+ *   kernel thread is started (never for pthreads).
  *
  *   The following TCB fields must be initialized:
- *   adj_stack_size: Stack size after adjustment for hardware,
+ *
+ *   - adj_stack_size: Stack size after adjustment for hardware,
  *     processor, etc.  This value is retained only for debug
  *     purposes.
- *   stack_alloc_ptr: Pointer to allocated stack
- *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
+ *   - stack_alloc_ptr: Pointer to allocated stack
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
  *     initial value of the stack pointer.
  *
  * Inputs:
- *   tcb: The TCB of new task
- *   stack_size:  The allocated stack size.
+ *   - tcb: The TCB of new task
+ *   - stack_size:  The allocated stack size.
+ *
+ *   NOTE:  Unlike up_stack_create() and up_stack_release, this function
+ *   does not require the task type (ttype) parameter.  The TCB flags will
+ *   always be set to provide the task type to up_use_stack() if it needs
+ *   that information.
  *
  ****************************************************************************/
 
