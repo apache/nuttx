@@ -153,7 +153,7 @@
 
 #define ETHBUF ((struct uip_eth_hdr *)priv->ld_dev.d_buf)
 
-#define LM32S_MAX_MDCCLK 2500000
+#define LM_MAX_MDCCLK 2500000
 
 /****************************************************************************
  * Private Types
@@ -1047,10 +1047,10 @@ static int lm_ifup(struct uip_driver_s *dev)
    *   div = (SYSCLK_FREQUENCY / 2 / MDCCLK_FREQUENCY) - 1
    *
    * Where the maximum value for MDCCLK_FREQUENCY is 2,500,000.  We will
-   * add 1 to assure the max LM32S_MAX_MDCCLK is not exceeded.
+   * add 1 to assure the max LM_MAX_MDCCLK is not exceeded.
    */
 
-  div = SYSCLK_FREQUENCY / 2 / LM32S_MAX_MDCCLK;
+  div = SYSCLK_FREQUENCY / 2 / LM_MAX_MDCCLK;
   lm_ethout(priv, LM_MAC_MDV_OFFSET, div);
   nllvdbg("MDV:   %08x\n", div);
 
