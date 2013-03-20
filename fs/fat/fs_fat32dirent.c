@@ -2343,6 +2343,17 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
       if (ret < 0)
         {
+          /* A return value of -ENOENT would mean that the path segement
+           * was not found.  Let's distinguish to cases:  (1) the final
+           * file was not found in the directory (-ENOENT), or (2) one
+           * of the directory path segments does not exist (-ENOTDIR)
+           */
+
+          if (ret == -ENOENT && terminator != '\0')
+            {
+              return -ENOTDIR;
+            }
+
           return ret;
         }
 
@@ -2351,7 +2362,7 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
        * the path.
        */
 
-      if (!terminator)
+      if (terminator == '\0')
         {
           /* Return success meaning that the description the matching
            * directory entry is in dirinfo.
@@ -2795,7 +2806,7 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory)
   ret = fat_finddirentry(fs, &dirinfo, relpath);
   if (ret != OK)
     {
-      /* No such path */
+      /* Most likely, some element of the path does not exist. */
 
       return -ENOENT;
     }

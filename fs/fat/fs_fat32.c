@@ -260,6 +260,12 @@ static int fat_open(FAR struct file *filep, const char *relpath,
 
       /* fall through to finish the file open operations */
     }
+
+  /* ENOENT would be returned by fat_finddirentry() if the full
+   * directory path was found, but the file was not found in the
+   * final directory.
+   */
+ 
   else if (ret == -ENOENT)
     {
       /* The file does not exist.  Were we asked to create it? */
@@ -284,6 +290,9 @@ static int fat_open(FAR struct file *filep, const char *relpath,
       
       direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
     }
+
+  /* No other error is handled */
+
   else
     {
       /* An error occurred while checking for file existence --
@@ -1406,6 +1415,7 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct fs_dir
     {
       goto errout_with_semaphore;
     }
+
   direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
 
   /* Check if this is the root directory */
@@ -1942,11 +1952,20 @@ static int fat_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
 
   ret = fat_finddirentry(fs, &dirinfo, relpath);
 
-  /* If anything exists at this location, then we fail with EEXIST */
+  /* Or if any error occurs other -ENOENT, then return the error.  For
+   * example, if one of the earlier directory path segments was not found
+   * then ENOTDIR will be returned.
+   */
 
-  if (ret == OK)
+  if (ret != -ENOENT)
     {
-      ret = -EEXIST;
+      /* If anything exists at this location, then we fail with EEXIST */
+
+      if (ret == OK)
+        {
+          ret = -EEXIST;
+        }
+
       goto errout_with_semaphore;
     }
 
@@ -2224,13 +2243,6 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
   /* Now find the directory where we should create the newpath object */
 
   ret = fat_finddirentry(fs, &dirinfo, newrelpath);
-  if (ret == OK)
-    {
-      /* It is an error if the object at newrelpath already exists */
-
-      ret = -EEXIST;
-      goto errout_with_semaphore;
-    }
 
   /* What we expect is -ENOENT mean that the full directory path was
    * followed but that the object does not exists in the terminal directory.
@@ -2238,6 +2250,13 @@ int fat_rename(struct inode *mountpt, const char *oldrelpath,
 
   if (ret != -ENOENT)
     {
+      if (ret == OK)
+        {
+          /* It is an error if the object at newrelpath already exists */
+
+          ret = -EEXIST;
+        }
+
       goto errout_with_semaphore;
     }
 

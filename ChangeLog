@@ -4389,3 +4389,9 @@
 	  build different objects in the first and second pass kernel builds need
 	  to keep those objects in separate directories so that they are not
 	  constantly rebuilt (2013-93-19).
+	* fs/fat:  Create an error in FAT file creation.  The FAT logic was
+	  not making a distinction between directory non-existence and file
+	  non-existence so when it you try to create a file in a non-existent
+	  directory, it would create a file with the nameof the missing
+	  directory.  Reported by Andrew Tridgell.
+
