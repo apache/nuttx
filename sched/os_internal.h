@@ -290,6 +290,6 @@ int  sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 FAR struct tcb_s *sched_gettcb(pid_t pid);
 bool sched_verifytcb(FAR struct tcb_s *tcb);
 
-int  sched_releasetcb(FAR struct tcb_s *tcb);
+int  sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype);
 
 #endif /* __SCHED_OS_INTERNAL_H */

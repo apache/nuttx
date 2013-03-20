@@ -111,7 +111,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
     *heap_size = KERNBASE + kmem_size - (uint32_t)boot_freemem;
 }
 
-int up_create_stack(struct tcb_s *tcb, size_t stack_size)
+int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
     int ret = ERROR;
     size_t *adj_stack_ptr;
@@ -158,7 +158,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
     return OK;
 }
 
-void up_release_stack(struct tcb_s *dtcb)
+void up_release_stack(struct tcb_s *dtcb, uint8_t ttype)
 {
     if (dtcb->stack_alloc_ptr) {
 		kufree(dtcb->stack_alloc_ptr);

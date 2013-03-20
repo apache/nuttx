@@ -188,7 +188,7 @@ int task_delete(pid_t pid)
 
   /* Deallocate its TCB */
 
-  sched_releasetcb(dtcb);
+  sched_releasetcb(dtcb, dtcb->flags & TCB_FLAG_TTYPE_MASK);
   return ret;
 }
 

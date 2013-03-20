@@ -294,7 +294,8 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Allocate the stack for the TCB */
 
-  ret = up_create_stack((FAR struct tcb_s *)ptcb, attr->stacksize);
+  ret = up_create_stack((FAR struct tcb_s *)ptcb, attr->stacksize,
+                        TCB_FLAG_TTYPE_PTHREAD);
   if (ret != OK)
     {
       errcode = ENOMEM;
@@ -308,9 +309,10 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   if (attr->inheritsched == PTHREAD_INHERIT_SCHED)
     {
+      struct sched_param param;
+
       /* Get the priority for this thread. */
 
-      struct sched_param param;
       ret = sched_getparam(0, &param);
       if (ret == OK)
         {
@@ -448,6 +450,6 @@ errout_with_join:
   ptcb->joininfo = NULL;
 
 errout_with_tcb:
-  sched_releasetcb((FAR struct tcb_s *)ptcb);
+  sched_releasetcb((FAR struct tcb_s *)ptcb, TCB_FLAG_TTYPE_PTHREAD);
   return errcode;
 }

@@ -112,10 +112,26 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
 {
   struct tcb_s *parent = (FAR struct tcb_s *)g_readytorun.head;
   struct task_tcb_s *child;
+  uint8_t ttype;
   int priority;
   int ret;
 
   DEBUGASSERT(retaddr);
+
+  /* Get the type of the fork'ed task (kernel or user) */
+
+  if ((parent->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+    {
+      /* Fork'ed from a kernel thread */
+
+      ttype = TCB_FLAG_TTYPE_KERNEL;
+    }
+  else
+    {
+      /* Fork'ed from a user task or pthread */
+
+      ttype = TCB_FLAG_TTYPE_TASK;
+    }
 
   /* Allocate a TCB for the child task. */
 
@@ -158,8 +174,7 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
   /* Initialize the task control block.  This calls up_initial_state() */
 
   svdbg("Child priority=%d start=%p\n", priority, retaddr);
-  ret = task_schedsetup(child, priority, retaddr, parent->entry.main,
-                        TCB_FLAG_TTYPE_TASK);
+  ret = task_schedsetup(child, priority, retaddr, parent->entry.main, ttype);
   if (ret < OK)
     {
       goto errout_with_tcb;
@@ -169,7 +184,7 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
   return child;
 
 errout_with_tcb:
-  sched_releasetcb((FAR struct tcb_s *)child);
+  sched_releasetcb((FAR struct tcb_s *)child, ttype);
   set_errno(-ret);
   return NULL;
 }
@@ -321,7 +336,8 @@ void task_vforkabort(FAR struct task_tcb_s *child, int errcode)
 
   /* Release the TCB */
 
-  sched_releasetcb((FAR struct tcb_s *)child);
+  sched_releasetcb((FAR struct tcb_s *)child,
+                   child->cmn.flags & TCB_FLAG_TTYPE_MASK);
   set_errno(errcode);
 }
 

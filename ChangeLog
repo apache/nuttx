@@ -4392,6 +4392,14 @@
 	* fs/fat:  Create an error in FAT file creation.  The FAT logic was
 	  not making a distinction between directory non-existence and file
 	  non-existence so when it you try to create a file in a non-existent
-	  directory, it would create a file with the nameof the missing
-	  directory.  Reported by Andrew Tridgell.
+	  directory, it would create a file with the name of the missing
+	  directory.  Reported by Andrew Tridgell (2013-03-30).
+	* Numerous files:  Changed the protoypes of up_create_stack() and
+	  up_release_stack() so that is includes a task type.  Normally you
+	  can get this type from the TCB parameter, but there are certain
+	  conditions when the task type is not valid in the TCB when these
+	  functions are called.  Only the prototypes were changed on this
+	  big, initial checkin.  The next step will be to add logic to
+	  allocate stacks for kernel threads from protected kernel memory
+	  and all other task types from unprotected user memory (2013-03-20).
 

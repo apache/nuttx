@@ -83,7 +83,12 @@ static void sched_releasepid(pid_t pid)
  *   Free all resources contained in a TCB
  *
  * Parameters:
- *   None
+ *   tcb - The TCB to be released
+ *   ttype - The type of the TCB to be released
+ *
+ *   This thread type is normally available in the flags field of the TCB,
+ *   however, there are certain error recovery contexts where the TCB my
+ *   not be fully initialized when sched_releasetcb is called.
  *
  * Return Value:
  *   OK on success; ERROR on failure
@@ -93,7 +98,7 @@ static void sched_releasepid(pid_t pid)
  *
  ************************************************************************/
 
-int sched_releasetcb(FAR struct tcb_s *tcb)
+int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
 {
   int ret = OK;
   int i;
@@ -131,7 +136,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb)
 #ifndef CONFIG_CUSTOM_STACK
       if (tcb->stack_alloc_ptr)
         {
-          up_release_stack(tcb);
+          up_release_stack(tcb, ttype);
         }
 #endif
 

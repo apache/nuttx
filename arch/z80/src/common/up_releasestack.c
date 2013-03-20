@@ -1,4 +1,4 @@
-/************************************************************
+/****************************************************************************
  * common/up_releasestack.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,28 +46,50 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
-/************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Global Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: up_release_stack
  *
  * Description:
- *   A task has been stopped. Free all stack
- *   related resources retained int the defunct TCB.
+ *   A task has been stopped. Free all stack related resources retained in
+ *   the defunct TCB.
  *
- ************************************************************/
+ * Input Parmeters
+ *   - dtcb:  The TCB containing information about the stack to be released
+ *   - ttype:  The thread type.  This may be one of following (defined in
+ *     include/nuttx/sched.h):
+ *
+ *       TCB_FLAG_TTYPE_TASK     Normal user task
+ *       TCB_FLAG_TTYPE_PTHREAD  User pthread
+ *       TCB_FLAG_TTYPE_KERNEL   Kernel thread
+ *
+ *     This thread type is normally available in the flags field of the TCB,
+ *     however, there are certain error recovery contexts where the TCB may
+ *     not be fully initialized when up_release_stack is called.
+ *
+ *     If CONFIG_NUTTX_KERNEL is defined, then this thread type may affect
+ *     how the stack is freed.  For example, kernel thread stacks may have
+ *     been allocated from protected kernel memory.  Stacks for user tasks
+ *     and threads must have come from memory that is accessible to user
+ *     code.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-void up_release_stack(struct tcb_s *dtcb)
+void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype)
 {
   if (dtcb->stack_alloc_ptr)
     {

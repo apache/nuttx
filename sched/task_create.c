@@ -99,10 +99,10 @@
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-static int thread_create(const char *name, uint8_t ttype, int priority,
+static int thread_create(FAR const char *name, uint8_t ttype, int priority,
                          int stack_size, main_t entry, FAR char * const argv[])
 #else
-static int thread_create(const char *name, uint8_t ttype, int priority,
+static int thread_create(FAR const char *name, uint8_t ttype, int priority,
                          main_t entry, FAR char * const argv[])
 #endif
 {
@@ -146,7 +146,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
   /* Allocate the stack for the TCB */
 
 #ifndef CONFIG_CUSTOM_STACK
-  ret = up_create_stack((FAR struct tcb_s *)tcb, stack_size);
+  ret = up_create_stack((FAR struct tcb_s *)tcb, stack_size, ttype);
   if (ret < OK)
     {
       errcode = -ret;
@@ -198,7 +198,7 @@ static int thread_create(const char *name, uint8_t ttype, int priority,
   return pid;
 
 errout_with_tcb:
-  sched_releasetcb((FAR struct tcb_s *)tcb);
+  sched_releasetcb((FAR struct tcb_s *)tcb, ttype);
 
 errout:
   set_errno(errcode);
@@ -244,10 +244,10 @@ errout:
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-int task_create(const char *name, int priority,
+int task_create(FAR const char *name, int priority,
                 int stack_size, main_t entry, FAR char * const argv[])
 #else
-int task_create(const char *name, int priority,
+int task_create(FAR const char *name, int priority,
                 main_t entry, FAR char * const argv[])
 #endif
 {
@@ -275,10 +275,10 @@ int task_create(const char *name, int priority,
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-int kernel_thread(const char *name, int priority,
+int kernel_thread(FAR const char *name, int priority,
                   int stack_size, main_t entry, FAR char * const argv[])
 #else
-int kernel_thread(const char *name, int priority,
+int kernel_thread(FAR const char *name, int priority,
                   main_t entry, FAR char * const argv[])
 #endif
 {

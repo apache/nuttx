@@ -163,7 +163,7 @@ int exec_module(FAR const struct binary_s *binp)
       goto errout;
     }
 
-  /* Allocate the stack for the new task */
+  /* Allocate the stack for the new task (always from the user heap) */
 
 #ifndef CONFIG_CUSTOM_STACK
   stack = (FAR uint32_t*)kumalloc(binp->stacksize);

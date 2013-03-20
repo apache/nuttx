@@ -162,7 +162,8 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Allocate the stack for the TCB */
 
-  ret = up_create_stack((FAR struct tcb_s *)child, stacksize);
+  ret = up_create_stack((FAR struct tcb_s *)child, stacksize,
+                        parent->flags & TCB_FLAG_TTYPE_MASK);
   if (ret != OK)
     {
       sdbg("up_create_stack failed: %d\n", ret);

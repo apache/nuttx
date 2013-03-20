@@ -149,46 +149,68 @@ void up_initial_state(FAR struct tcb_s *tcb);
  * Name: up_create_stack
  *
  * Description:
- *   Allocate a stack for a new thread and setup
- *   up stack-related information in the TCB.
+ *   Allocate a stack for a new thread and setup up stack-related information
+ *   in the TCB.
  *
- *   The following TCB fields must be initialized:
- *   adj_stack_size: Stack size after adjustment for hardware,
- *     processor, etc.  This value is retained only for debug
- *     purposes.
- *   stack_alloc_ptr: Pointer to allocated stack
- *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
- *     initial value of the stack pointer.
+ *   The following TCB fields must be initialized by this function:
+ *
+ *   - adj_stack_size: Stack size after adjustment for hardware, processor,
+ *     etc.  This value is retained only for debug purposes.
+ *   - stack_alloc_ptr: Pointer to allocated stack
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *     the stack pointer.
  *
  * Inputs:
- *   tcb: The TCB of new task
- *   stack_size:  The requested stack size.  At least this much
+ *   - tcb: The TCB of new task
+ *   - stack_size:  The requested stack size.  At least this much
  *     must be allocated.
+ *   - ttype:  The thread type.  This may be one of following (defined in
+ *     include/nuttx/sched.h):
+ *
+ *       TCB_FLAG_TTYPE_TASK     Normal user task
+ *       TCB_FLAG_TTYPE_PTHREAD  User pthread
+ *       TCB_FLAG_TTYPE_KERNEL   Kernel thread
+ *
+ *     This thread type is normally available in the flags field of the TCB,
+ *     however, there are certain contexts where the TCB may not be fully
+ *     initialized when up_create_stack is called.
+ *
+ *     If CONFIG_NUTTX_KERNEL is defined, then this thread type may affect
+ *     how the stack is allocated.  For example, kernel thread stacks should
+ *     be allocated from protected kernel memory.  Stacks for user tasks and
+ *     threads must come from memory that is accessible to user code.
  *
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size);
+int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);
 #endif
 
 /****************************************************************************
  * Name: up_use_stack
  *
  * Description:
- *   Setup up stack-related information in the TCB
- *   using pre-allocated stack memory
+ *   Setup up stack-related information in the TCB using pre-allocated stack
+ *   memory.  This function is called only from task_init() when a task or
+ *   kernel thread is started (never for pthreads).
  *
  *   The following TCB fields must be initialized:
- *   adj_stack_size: Stack size after adjustment for hardware,
+ *
+ *   - adj_stack_size: Stack size after adjustment for hardware,
  *     processor, etc.  This value is retained only for debug
  *     purposes.
- *   stack_alloc_ptr: Pointer to allocated stack
- *   adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
+ *   - stack_alloc_ptr: Pointer to allocated stack
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
  *     initial value of the stack pointer.
  *
  * Inputs:
- *   tcb: The TCB of new task
- *   stack_size:  The allocated stack size.
+ *   - tcb: The TCB of new task
+ *   - stack_size:  The allocated stack size.
+ *
+ *   NOTE:  Unlike up_stack_create() and up_stack_release, this function
+ *   does not require the task type (ttype) parameter.  The TCB flags will
+ *   always be set to provide the task type to up_use_stack() if it needs
+ *   that information.
  *
  ****************************************************************************/
 
@@ -200,13 +222,35 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);
  * Name: up_release_stack
  *
  * Description:
- *   A task has been stopped. Free all stack
- *   related resources retained int the defunct TCB.
+ *   A task has been stopped. Free all stack related resources retained in
+ *   the defunct TCB.
+ *
+ * Input Parmeters
+ *   - dtcb:  The TCB containing information about the stack to be released
+ *   - ttype:  The thread type.  This may be one of following (defined in
+ *     include/nuttx/sched.h):
+ *
+ *       TCB_FLAG_TTYPE_TASK     Normal user task
+ *       TCB_FLAG_TTYPE_PTHREAD  User pthread
+ *       TCB_FLAG_TTYPE_KERNEL   Kernel thread
+ *
+ *     This thread type is normally available in the flags field of the TCB,
+ *     however, there are certain error recovery contexts where the TCB may
+ *     not be fully initialized when up_release_stack is called.
+ *
+ *     If CONFIG_NUTTX_KERNEL is defined, then this thread type may affect
+ *     how the stack is freed.  For example, kernel thread stacks may have
+ *     been allocated from protected kernel memory.  Stacks for user tasks
+ *     and threads must have come from memory that is accessible to user
+ *     code.
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
 #ifndef CONFIG_CUSTOM_STACK
-void up_release_stack(FAR struct tcb_s *dtcb);
+void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype);
 #endif
 
 /****************************************************************************

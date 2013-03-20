@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: February 4, 2013</p>
+      <p>Last Updated: March 20, 2013</p>
     </td>
   </tr>
 </table>
@@ -1613,11 +1613,10 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upcreatestack">4.1.4 <code>up_create_stack()</code></a></h3>
-<p><b>Prototype</b>: <code>STATUS up_create_stack(FAR struct tcb_s *tcb, size_t stack_size);</code></p>
+<p><b>Prototype</b>: <code>STATUS up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);</code></p>
 
 <p><b>Description</b>.
-  Allocate a stack for a new thread and setup
-  up stack-related information in the TCB.
+  Allocate a stack for a new thread and setup up stack-related information in the TCB.
 </p>
 <p>
   The following TCB fields must be initialized:
@@ -1631,18 +1630,37 @@ The system can be re-made subsequently by just typing <code>make</code>.
     initial value of the stack pointer.
 </ul>
 <p>
-  This API is <i>NOT</i> required if <code>CONFIG_CUSTOM_STACK</code>
-  is defined.
+  This API is <i>NOT</i> required if <code>CONFIG_CUSTOM_STACK</code> is defined.
 </p>
 
 <p><b>Input Parameters</b>:</p>
 <ul>
   <li>
-    <code>tcb</code>: The TCB of new task.
+    <p>
+      <code>tcb</code>: The TCB of new task.
+    </p>
   </li>
   <li>
-    <code>stack_size</code>:  The requested stack size.  At least this much
-    must be allocated.
+    <p>
+      <code>stack_size</code>:  The requested stack size.  At least this much must be allocated.
+    </p>
+  </li>
+  <li>
+    <p>
+      <code>ttype</code>:  The thread type.
+      This may be one of following (defined in <code>include/nuttx/sched.h</code>):
+    </p>
+    <ul>
+      <li><code>TCB_FLAG_TTYPE_TASK</code>: Normal user task</li>
+      <li><code>TCB_FLAG_TTYPE_PTHREAD</code>: User pthread</li>
+      <li><code>TCB_FLAG_TTYPE_KERNEL</code>: Kernel thread</li>
+    </ul>
+    <p>
+      This thread type is normally available in the flags field of the TCB, however, there are certain contexts where the TCB may not be fully initialized when up_create_stack is called.
+    </p>
+    <p>
+      If <code>CONFIG_NUTTX_KERNEL</code> is defined, then this thread type may affect how the stack is allocated.  For example, kernel thread stacks should be allocated from protected kernel memory.  Stacks for user tasks and threads must come from memory that is accessible to user code.
+    </p>
   </li>
 </ul>
 
@@ -1652,8 +1670,8 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <p><b>Description</b>.
-  Setup up stack-related information in the TCB
-  using pre-allocated stack memory.
+  Setup up stack-related information in the TCB using pre-allocated stack memory.
+  This function is called only from <code>task_init()</code> when a task or kernel thread is started (never for pthreads).
 </p>
 <p>
   The following TCB fields must be initialized:
@@ -1667,8 +1685,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
     initial value of the stack pointer.
 </ul>
 <p>
-  This API is <i>NOT</i> required if <code>CONFIG_CUSTOM_STACK</code>
-  is defined.
+  This API is <i>NOT</i> required if <code>CONFIG_CUSTOM_STACK</code> is defined.
 </p>
 
 <p><b>Input Parameters:</b></p>
@@ -1680,18 +1697,48 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <code>stack_size</code>:  The allocated stack size.
   </li>
 </ul>
+<p>
+  NOTE:  Unlike <code>up_stack_create()</code> and <code>up_stack_release</code>, this function does not require the task type (<code>ttype</code>) parameter.
+  The TCB flags will always be set to provide the task type to <code>up_use_stack()</code> if the information needs that information.
+</p>
 
 <h3><a name="upreleasestack">4.1.6 <code>up_release_stack()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_release_stack(FAR struct tcb_s *dtcb);</code></p>
 
 <p><b>Description</b>.
-  A task has been stopped. Free all stack
-  related resources retained int the defunct TCB.
+  A task has been stopped.
+  Free all stack related resources retained int the defunct TCB.
 </p>
 <p>
-  This API is <i>NOT</i> required if <code>CONFIG_CUSTOM_STACK</code>
-  is defined.
+  This API is <i>NOT</i> required if <code>CONFIG_CUSTOM_STACK</code> is defined.
 </p>
+<p><b>Input Parameters:</b></p>
+<ul>
+  <li>
+    <p>
+      <code>dtcb</code>:
+      The TCB containing information about the stack to be released.
+  </li>
+  <li>
+    <p>
+      <code>ttype</code>:  The thread type.
+      This may be one of following (defined in <code>include/nuttx/sched.h</code>):
+    </p>
+    <ul>
+      <li><code>TCB_FLAG_TTYPE_TASK</code>: Normal user task</li>
+      <li><code>TCB_FLAG_TTYPE_PTHREAD</code>: User pthread</li>
+      <li><code>TCB_FLAG_TTYPE_KERNEL</code>: Kernel thread</li>
+    </ul>
+    <p>
+      This thread type is normally available in the flags field of the TCB, however, there are certain error recovery contexts where the TCB may not be fully initialized when up_release_stack is called.
+    </p>
+    <p>
+      If <code>CONFIG_NUTTX_KERNEL</code> is defined, then this thread type may affect how the stack is freed.
+      For example, kernel thread stacks may have been allocated from protected kernel memory.
+      Stacks for user tasks and threads must have come from memory that is accessible to user
+    </p>
+  </li>
+</ul>
 
 <h3><a name="upunblocktask">4.1.7 <code>up_unblock_task()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_unblock_task(FAR struct tcb_s *tcb);</code></p>

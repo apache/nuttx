@@ -2344,14 +2344,14 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
       if (ret < 0)
         {
           /* A return value of -ENOENT would mean that the path segement
-           * was not found.  Let's distinguish to cases:  (1) the final
+           * was not found.  Let's distinguish two cases:  (1) the final
            * file was not found in the directory (-ENOENT), or (2) one
            * of the directory path segments does not exist (-ENOTDIR)
            */
 
           if (ret == -ENOENT && terminator != '\0')
             {
-              return -ENOTDIR;
+              ret = -ENOTDIR;
             }
 
           return ret;
