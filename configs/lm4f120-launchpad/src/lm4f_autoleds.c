@@ -54,8 +54,9 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-/* The LM32F120 has a single RGB LED.  There is only one visible LED which will vary
- * in color.  But, from the standpoint of the firmware, this appears as three LEDs:
+/* The LM4F120 LaunchPad has a single RGB LED.  There is only one visible LED
+ * which will vary in color.  But, from the standpoint of the firmware, this
+ * appears as three LEDs:
  *
  *   BOARD_LED_R    -- Connected to PF1
  *   BOARD_LED_G    -- Connected to PF3

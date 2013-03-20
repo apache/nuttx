@@ -53,7 +53,7 @@
  *   32.768kHz connected to XOSC0/1 (pins 34/36)
  */
 
-#define SYSCON_RCC_XTAL      SYSCON_RCC_XTAL16000KHZ /* On-board crystall is 16 MHz */
+#define SYSCON_RCC_XTAL      SYSCON_RCC_XTAL16000KHZ /* On-board crystal is 16 MHz */
 #define XTAL_FREQUENCY       16000000
 
 /* Oscillator source is the main oscillator */
@@ -89,8 +89,9 @@
 #define LM_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV(LM_SYSDIV) | SYSCON_RCC2_DIV400)
 
 /* LED definitions ******************************************************************/
-/* The LM32F120 has a single RGB LED.  There is only one visible LED which will vary
- * in color.  But, from the standpoint of the firmware, this appears as three LEDs:
+/* The LM4F120 LaunchPad has a single RGB LED.  There is only one visible LED which
+ * will vary in color.  But, from the standpoint of the firmware, this appears as
+ * three LEDs:
  *
  *   BOARD_LED_R    -- Connected to PF1
  *   BOARD_LED_G    -- Connected to PF3
@@ -144,7 +145,7 @@
 #define LED_PANIC         4     /* ON   OFF   OFF (flashing 2Hz) */
 
 /* LED definitions ******************************************************************/
-/* The LM32F120 has a two buttons:
+/* The LM4F120 LaunchPad has a two buttons:
  *
  *   BOARD_SW1    -- Connected to PF4
  *   BOARD_SW2    -- Connected to PF0

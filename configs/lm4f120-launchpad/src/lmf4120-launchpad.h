@@ -67,8 +67,9 @@
 #endif
 
 /* LM4F LaunchPad *******************************************************************/
-/* The LM32F120 has a single RGB LED.  There is only one visible LED which will vary
- * in color.  But, from the standpoint of the firmware, this appears as three LEDs:
+/* The LM4F120 LaunchPad has a single RGB LED.  There is only one visible LED which
+ * will vary in color.  But, from the standpoint of the firmware, this appears as
+ * three LEDs:
  *
  *   BOARD_LED_R    -- Connected to PF1
  *   BOARD_LED_G    -- Connected to PF3
@@ -113,7 +114,7 @@
 #define GPIO_LED_G   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | GPIO_PIN_3)
 #define GPIO_LED_B   (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | GPIO_PIN_2)
 
-/* The LM32F120 has a two buttons:
+/* The LM4F120 LaunchPad has a two buttons:
  *
  *   BOARD_SW1    -- Connected to PF4
  *   BOARD_SW2    -- Connected to PF0
