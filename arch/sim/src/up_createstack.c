@@ -102,6 +102,7 @@
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
+  uint32_t *stack_alloc_ptr;
   int ret = ERROR;
 
   /* Move up to next even word boundary if necessary */
@@ -111,7 +112,21 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   /* Allocate the memory for the stack */
 
-  uint32_t *stack_alloc_ptr = (uint32_t*)kumalloc(adj_stack_size);
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Use the kernel allocator if this is a kernel thread */
+
+  if (ttype == TCB_FLAG_TTYPE_KERNEL)
+    {
+      stack_alloc_ptr = (uint32_t *)kmalloc(stack_size);
+    }
+  else
+#endif
+    {
+      stack_alloc_ptr = (uint32_t*)kumalloc(adj_stack_size);
+    }
+
+  /* Was the allocation successful? */
+
   if (stack_alloc_ptr)
     {
       /* This is the address of the last word in the allocation */

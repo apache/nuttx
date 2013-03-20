@@ -146,17 +146,19 @@ static void *memset32(void *s, uint32_t  c, size_t n)
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
-  /* Is there already a stack allocated of a different size? */
+  /* Is there already a stack allocated of a different size?  Because of
+   * alignment issues, stack_size might erroneously appear to be of a
+   * different size.  Fortunately, this is not a critical operation.
+   */
 
   if (tcb->stack_alloc_ptr && tcb->adj_stack_size != stack_size)
     {
-      /* Yes.. free it */
+      /* Yes.. Release the old stack */
 
-      sched_ufree(tcb->stack_alloc_ptr);
-      tcb->stack_alloc_ptr = NULL;
+      up_release_stack(tcb, ttype);
     }
 
-  /* Do we need to allocate a stack? */
+  /* Do we need to allocate a new stack? */
  
   if (!tcb->stack_alloc_ptr)
     {
@@ -164,12 +166,32 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * then create a zeroed stack to make stack dumps easier to trace.
        */
 
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+      /* Use the kernel allocator if this is a kernel thread */
+
+      if (ttype == TCB_FLAG_TTYPE_KERNEL)
+        {
 #if defined(CONFIG_DEBUG) && !defined(CONFIG_DEBUG_STACK)
-      tcb->stack_alloc_ptr = (uint32_t *)kuzalloc(stack_size);
+          tcb->stack_alloc_ptr = (uint32_t *)kzalloc(stack_size);
 #else
-      tcb->stack_alloc_ptr = (uint32_t *)kumalloc(stack_size);
+          tcb->stack_alloc_ptr = (uint32_t *)kmalloc(stack_size);
 #endif
+        }
+      else
+#endif
+        {
+          /* Use the user-space allocator if this is a task or pthread */
+
+#if defined(CONFIG_DEBUG) && !defined(CONFIG_DEBUG_STACK)
+          tcb->stack_alloc_ptr = (uint32_t *)kuzalloc(stack_size);
+#else
+          tcb->stack_alloc_ptr = (uint32_t *)kumalloc(stack_size);
+#endif
+        }
+
 #ifdef CONFIG_DEBUG
+      /* Was the allocation successful? */
+
       if (!tcb->stack_alloc_ptr)
         {
           sdbg("ERROR: Failed to allocate stack, size %d\n", stack_size);
@@ -218,7 +240,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        */
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
-      memset32(tcb->stack_alloc_ptr, 0xDEADBEEF, tcb->adj_stack_size/4);
+      memset32(tcb->stack_alloc_ptr, 0xdeadbeef, tcb->adj_stack_size/4);
 #endif
 
       up_ledon(LED_STACKCREATED);

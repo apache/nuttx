@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_releasestack.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,10 +93,27 @@
 
 void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype)
 {
+  /* Is there a stack allocated? */
+
   if (dtcb->stack_alloc_ptr)
     {
-      free(dtcb->stack_alloc_ptr);
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+      /* Use the kernel allocator if this is a kernel thread */
+
+      if (ttype == TCB_FLAG_TTYPE_KERNEL)
+        {
+          sched_kfree(dtcb->stack_alloc_ptr);
+        }
+      else
+#endif
+        {
+          /* Use the user-space allocator if this is a task or pthread */
+
+          sched_ufree(dtcb->stack_alloc_ptr);
+        }
     }
+
+  /* Mark the stack freed */
 
   dtcb->stack_alloc_ptr = NULL;
   dtcb->adj_stack_size  = 0;
