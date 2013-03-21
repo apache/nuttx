@@ -88,20 +88,32 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dispatch_syscall
+ *   Call the stub function corresponding to the system call.  NOTE the non-
+ *   standard parameter passing:
  *
- * Description:
- *   Call the stub function corresponding to the system call.
+ *     R0 = SYS_ call number
+ *     R1 = parm0
+ *     R2 = parm1
+ *     R3 = parm2
+ *     R4 = parm3
+ *     R5 = parm4
+ *     R6 = parm5
  *
- *   R0 - Need not be preserved until after the stub is called.
- *   R1-R3 - Need to be preserved until the stub is called.  The values of
- *     R0 and R1 returned by the stub must be preserved.
- *   R4-R11 must be preserved to support the expectations of the user-space
- *     callee
- *   R12 - Need not be preserved
- *   R13 - (stack pointer)
- *   R14 - Need not be preserved
- *   R15 - (PC)
+ *   The values of R4-R5 may be preserved in the proxy called by the user
+ *   code if they are used (but otherwise will not be).
+ *
+ *   Register usage:
+ *
+ *     R0 - Need not be preserved.
+ *     R1-R3 - Need to be preserved until the stub is called.  The values of
+ *       R0 and R1 returned by the stub must be preserved.
+ *     R4-R11 must be preserved to support the expectations of the user-space
+ *       callee.  R4-R6 may have been preserved by the proxy, but don't know
+ *       for sure.
+ *     R12 - Need not be preserved
+ *     R13 - (stack pointer)
+ *     R14 - Need not be preserved
+ *     R15 - (PC)
  *
  ****************************************************************************/
 
@@ -111,14 +123,17 @@ static void dispatch_syscall(void)
 {
   __asm__ __volatile__
   (
-    " push {r4}\n"                 /* Save R4 */
-    " mov r4, lr\n"                /* Save lr in R4 */
+    " sub sp, sp, #16\n"           /* Create a stack frame to hold 3 parms + lr */
+    " str r4, [sp, #0]\n"          /* Move parameter 4 (if any) into position */
+    " str r5, [sp, #4]\n"          /* Move parameter 5 (if any) into position */
+    " str r6, [sp, #8]\n"          /* Move parameter 6 (if any) into position */
+    " str lr, [sp, #12]\n"         /* Save lr in the stack frame */
     " ldr ip, =g_stublookup\n"     /* R12=The base of the stub lookup table */
     " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this syscall */
     " blx ip\n"                    /* Call the stub (modifies lr)*/
-    " mov lr, r4\n"                /* Restore lr */
-    " pop {r4}\n"                  /* Restore r4 */
-    " mov r2, r0\n"                /* R2=Saved return value in R0 */
+    " ldr lr, [sp, #12]\n"         /* Restore lr */
+    " add sp, sp, #16\n"           /* Destroy the stack frame */
+    " mov r2, r0\n"                /* R2=Save return value in R2 */
     " mov r0, #3\n"                /* R0=SYS_syscall_return */
     " svc 0"                       /* Return from the syscall */
   );
