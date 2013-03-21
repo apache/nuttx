@@ -4406,3 +4406,6 @@
 	  up_release_stack.c:  If creating or releasing the stack for a kernel
 	  thread, use the kernel allocator so that the kernel thread stacks
 	  are protected from user application meddling (2013-03-20).
+	* arch/arm/src/armv[6|7]-m/up_scall.c:  Fix parameter passing for
+          all system call inline functions with > 3 parameters (2013-03-20)
+
