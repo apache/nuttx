@@ -4407,5 +4407,7 @@
 	  thread, use the kernel allocator so that the kernel thread stacks
 	  are protected from user application meddling (2013-03-20).
 	* arch/arm/src/armv[6|7]-m/up_scall.c:  Fix parameter passing for
-          all system call inline functions with > 3 parameters (2013-03-20)
-
+	  all system call inline functions with > 3 parameters (2013-03-20)
+	* arch/*/src/common/up_stackframe.c and include/nuttx/arch.h:  Add
+	  and new interface to set aside memory on the stack.  This will be
+	  used at least in the kernel build to hold task arguments 2013-03-21).

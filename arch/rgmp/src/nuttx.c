@@ -168,6 +168,31 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
     return OK;
 }
 
+#ifdef CONFIG_NUTTX_KERNEL
+FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
+{
+  uintptr_t topaddr;
+
+  /* Align the frame_size */
+
+  frame_size = (frame_size + 3) & ~3;
+  
+  /* Is there already a stack allocated? Is it big enough? */
+
+  if (!tcb->stack_alloc_ptr || tcb->adj_stack_size <= frame_size) {
+      return NULL;
+  }
+
+  /* Save the adjusted stack values in the struct tcb_s */
+
+  topaddr              = (uintptr_t)tcb->adj_stack_ptr - frame_size;
+  tcb->adj_stack_ptr   = (FAR void *)topaddr;
+  tcb->adj_stack_size -= frame_size;
+
+  return (FAR void *)(topaddr + sizeof(uint32_t));
+}
+#endif
+
 void up_release_stack(struct tcb_s *dtcb, uint8_t ttype)
 {
   /* Is there a stack allocated? */

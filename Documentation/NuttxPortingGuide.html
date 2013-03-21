@@ -78,22 +78,23 @@
       <a href="#upinitialstate">4.1.3 <code>up_initial_state()</code></a><br>
       <a href="#upcreatestack">4.1.4 <code>up_create_stack()</code></a><br>
       <a href="#upusestack">4.1.5 <code>up_use_stack()</code></a><br>
-      <a href="#upreleasestack">4.1.6 <code>up_release_stack()</code></a><br>
-      <a href="#upunblocktask">4.1.7 <code>up_unblock_task()</code></a><br>
-      <a href="#upblocktask">4.1.8 <code>up_block_task()</code></a><br>
-      <a href="#upreleasepending">4.1.9 <code>up_release_pending()</code></a><br>
-      <a href="#upreprioritizertr">4.1.10 <code>up_reprioritize_rtr()</code></a><br>
-      <a href="#_exit">4.1.11 <code>_exit()</code></a><br>
-      <a href="#upassert">4.1.12 <code>up_assert()</code></a><br>
-      <a href="#upschedulesigaction">4.1.13 <code>up_schedule_sigaction()</code></a><br>
-      <a href="#upallocateheap">4.1.14 <code>up_allocate_heap()</code></a><br>
-      <a href="#upinterruptcontext">4.1.15 <code>up_interrupt_context()</code></a><br>
-      <a href="#updisableirq">4.1.16 <code>up_disable_irq()</code></a><br>
-      <a href="#upenableirq">4.1.17 <code>up_enable_irq()</code></a><br>
-      <a href="#upprioritizeirq">4.1.18 <code>up_prioritize_irq()</code></a></br>
-      <a href="#upputc">4.1.19 <code>up_putc()</code></a></br>
-      <a href="#systemtime">4.1.20 System Time and Clock</a><br>
-      <a href="#addrenv">4.1.21 Address Environments</a>
+      <a href="#upstackframe">4.1.6 <code>up_stack_frame()</code></a><br>
+      <a href="#upreleasestack">4.1.7 <code>up_release_stack()</code></a><br>
+      <a href="#upunblocktask">4.1.8 <code>up_unblock_task()</code></a><br>
+      <a href="#upblocktask">4.1.9 <code>up_block_task()</code></a><br>
+      <a href="#upreleasepending">4.1.10 <code>up_release_pending()</code></a><br>
+      <a href="#upreprioritizertr">4.1.11 <code>up_reprioritize_rtr()</code></a><br>
+      <a href="#_exit">4.1.12 <code>_exit()</code></a><br>
+      <a href="#upassert">4.1.13 <code>up_assert()</code></a><br>
+      <a href="#upschedulesigaction">4.1.14 <code>up_schedule_sigaction()</code></a><br>
+      <a href="#upallocateheap">4.1.15 <code>up_allocate_heap()</code></a><br>
+      <a href="#upinterruptcontext">4.1.16 <code>up_interrupt_context()</code></a><br>
+      <a href="#updisableirq">4.1.17 <code>up_disable_irq()</code></a><br>
+      <a href="#upenableirq">4.1.18 <code>up_enable_irq()</code></a><br>
+      <a href="#upprioritizeirq">4.1.19 <code>up_prioritize_irq()</code></a></br>
+      <a href="#upputc">4.1.20 <code>up_putc()</code></a></br>
+      <a href="#systemtime">4.1.21 System Time and Clock</a><br>
+      <a href="#addrenv">4.1.22 Address Environments</a>
     </ul>
     <a href="#exports">4.2 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
@@ -1702,7 +1703,58 @@ The system can be re-made subsequently by just typing <code>make</code>.
   The TCB flags will always be set to provide the task type to <code>up_use_stack()</code> if the information needs that information.
 </p>
 
-<h3><a name="upreleasestack">4.1.6 <code>up_release_stack()</code></a></h3>
+
+<h3><a name="upstackframe">4.1.6 <code>up_stack_frame()</code></a></h3>
+<p><b>Prototype</b>: <code>FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);</code></p>
+
+<p>
+  <b>Description</b>.
+  Allocate a stack frame in the TCB's stack to hold thread-specific data.
+  This function may be called anytime after <code>up_create_stack()</code> or <code>up_use_stack()</code> have been called but before the task has been started.
+</p>
+<p>
+  Thread data may be kept in the stack (instead of in the TCB) if it is accessed by the user code directory.
+  This includes such things as <code>argv[]</code>.
+  The stack memory is guaranteed to be in the same protection domain as the thread.
+</p>
+<p>
+  The following TCB fields will be re-initialized:
+</p>
+<ul>
+  <li>
+    <code>adj_stack_size</code>: Stack size after removal of the stack frame from the stack.
+  </li>
+  <li>
+    <code>adj_stack_ptr</code>: Adjusted initial stack pointer after the frame has been removed from the stack.
+    This will still be the initial value of the stack pointer when the task is started.
+  </li>
+</ul>
+<p>
+  This API is <i>NOT</i> required if <code>CONFIG_NUTTX_KERNEL</code> is undefined or if <code>CONFIG_CUSTOM_STACK</code> is defined.
+</p>
+<p><b>Input Parameters:</b></p>
+<ul>
+  <li>
+    <p>
+      <code>tcb</code>:
+      The TCB of new task.
+    </p>
+  </li>
+  <li>
+    <p>
+      <code>frame_size</code>:
+      The size of the stack frame to allocate.
+    </p>
+  </li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+   A pointer to bottom of the allocated stack frame.
+   NULL will be returned on any failures.
+   The alignment of the returned value is the same as the alignment of the stack itself
+</p>
+
+<h3><a name="upreleasestack">4.1.7 <code>up_release_stack()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_release_stack(FAR struct tcb_s *dtcb);</code></p>
 
 <p><b>Description</b>.
@@ -1718,6 +1770,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
     <p>
       <code>dtcb</code>:
       The TCB containing information about the stack to be released.
+    </p>
   </li>
   <li>
     <p>
@@ -1740,7 +1793,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h3><a name="upunblocktask">4.1.7 <code>up_unblock_task()</code></a></h3>
+<h3><a name="upunblocktask">4.1.8 <code>up_unblock_task()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_unblock_task(FAR struct tcb_s *tcb);</code></p>
 
 <p><b>Description</b>.
@@ -1763,7 +1816,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h3><a name="upblocktask">4.1.8 <code>up_block_task()</code></a></h3>
+<h3><a name="upblocktask">4.1.9 <code>up_block_task()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state);</code></p>
 
 <p><b>Description</b>.
@@ -1789,7 +1842,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h3><a name="upreleasepending">4.1.9 <code>up_release_pending()</code></a></h3>
+<h3><a name="upreleasepending">4.1.10 <code>up_release_pending()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_release_pending(void);</code></p>
 
 <p><b>Description</b>.
@@ -1806,7 +1859,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   function is called.
 </p>
 
-<h3><a name="upreprioritizertr">4.1.10 <code>up_reprioritize_rtr()</code></a></h3>
+<h3><a name="upreprioritizertr">4.1.11 <code>up_reprioritize_rtr()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);</code></p>
 
 <p><b>Description</b>.
@@ -1841,7 +1894,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h3><a name="_exit">4.1.11 <code>_exit()</code></a></h3>
+<h3><a name="_exit">4.1.12 <code>_exit()</code></a></h3>
 <p><b>Prototype</b>: <code>void _exit(int status) noreturn_function;</code></p>
 
 <p><b>Description</b>.
@@ -1855,7 +1908,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   before performing scheduling operations.
 </p>
 
-<h3><a name="upassert">4.1.12 <code>up_assert()</code></a></h3>
+<h3><a name="upassert">4.1.13 <code>up_assert()</code></a></h3>
 <p><b>Prototype</b>:<br>
   <code>void up_assert(FAR const uint8_t *filename, int linenum);</code></br>
   <code>void up_assert_code(FAR const uint8_t *filename, int linenum, int error_code);</code></br>
@@ -1866,7 +1919,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   way.
 </p>
 
-<h3><a name="upschedulesigaction">4.1.13 <code>up_schedule_sigaction()</code></a></h3>
+<h3><a name="upschedulesigaction">4.1.14 <code>up_schedule_sigaction()</code></a></h3>
 <p><b>Prototype</b>:
   <code>void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);</code>
 </p>
@@ -1913,7 +1966,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   is defined.
 </p>
 
-<h3><a name="upallocateheap">4.1.14 <code>up_allocate_heap()</code></a></h3>
+<h3><a name="upallocateheap">4.1.15 <code>up_allocate_heap()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_allocate_heap(FAR void **heap_start, size_t *heap_size);</code></p>
 
 <p><b>Description</b>.
@@ -1924,14 +1977,14 @@ The system can be re-made subsequently by just typing <code>make</code>.
   If a protected kernel-space heap is provided, the kernel heap must be allocated (and protected) by an analogous <code>up_allocate_kheap()</code>.
 </p>
 
-<h3><a name="upinterruptcontext">4.1.15 <code>up_interrupt_context()</code></a></h3>
+<h3><a name="upinterruptcontext">4.1.16 <code>up_interrupt_context()</code></a></h3>
 <p><b>Prototype</b>: <code>bool up_interrupt_context(void)</code></p>
 
 <p><b>Description</b>.
   Return true if we are currently executing in the interrupt handler context.
 </p>
 
-<h3><a name="updisableirq">4.1.16 <code>up_disable_irq()</code></a></h3>
+<h3><a name="updisableirq">4.1.17 <code>up_disable_irq()</code></a></h3>
 <p><b>Prototype</b>:</p>
 <ul><pre>
 #ifndef CONFIG_ARCH_NOINTC
@@ -1958,7 +2011,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   avoided in common implementations where possible.
 </p>
 
-<h3><a name="upenableirq">4.1.17 <code>up_enable_irq()</code></a></h3>
+<h3><a name="upenableirq">4.1.18 <code>up_enable_irq()</code></a></h3>
 <p><b>Prototype</b>:</p>
 <ul><pre>
 #ifndef CONFIG_ARCH_NOINTC
@@ -1979,7 +2032,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   avoided in common implementations where possible.
 </p>
 
-<h3><a name="upprioritizeirq">4.1.18 <code>up_prioritize_irq()</code></a></h3>
+<h3><a name="upprioritizeirq">4.1.19 <code>up_prioritize_irq()</code></a></h3>
 <p><b>Prototype</b>:</p>
 <ul><pre>
 #ifdef CONFIG_ARCH_IRQPRIO
@@ -1996,7 +2049,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   avoided in common implementations where possible.
 </p>
 
-<h3><a name="upputc">4.1.19 <code>up_putc()</code></a></h3>
+<h3><a name="upputc">4.1.20 <code>up_putc()</code></a></h3>
 
 <p><b>Prototype</b>: <code>int up_putc(int ch);</code></p>
 <p><b>Description</b>.
@@ -2004,9 +2057,9 @@ The system can be re-made subsequently by just typing <code>make</code>.
   Output one character on the console
 </p>
 
-<h3><a name="systemtime">4.1.20 System Time and Clock</a></h3>
+<h3><a name="systemtime">4.1.21 System Time and Clock</a></h3>
 
-<h4>4.1.20.1 Basic System Timer</h4>
+<h4>4.1.21.1 Basic System Timer</h4>
 
 <p><b>System Timer</b>
   In most implementations, system time is provided by a timer interrupt.
@@ -2089,7 +2142,7 @@ else
   In this way, the timer interval is controlled from interrupt-to-interrupt to produce an average frequency of exactly 100Hz.
 </p>
 
-<h4>4.1.20.1 Hardware</h4>
+<h4>4.1.21.2 Hardware</h4>
 <p>
   To enable hardware module use the following configuration options:
 <p>
@@ -2144,7 +2197,7 @@ else
   </li>
 </ul>
 
-<h4>4.1.20.2 System Tick and Time</h4>
+<h4>4.1.21.3 System Tick and Time</h4>
 <p>
   The system tick is represented by::
 </p>
@@ -2167,7 +2220,7 @@ else
   To retrieve that variable use:
 </p>
 
-<h3><a name="addrenv">4.1.21 Address Environments</a></h3>
+<h3><a name="addrenv">4.1.22 Address Environments</a></h3>
 
 <p>
   CPUs that support memory management units (MMUs) may provide <i>address environments</i> within which tasks and their child threads execute.
@@ -2191,27 +2244,27 @@ else
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_create">4.1.21.1 <code>up_addrenv_create()</code></a>:
+        <a href="#up_addrenv_create">4.1.22.1 <code>up_addrenv_create()</code></a>:
         Create an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_vaddr">4.1.21.2 <code>up_addrenv_vaddr()</code></a>:
+        <a href="#up_addrenv_vaddr">4.1.22.2 <code>up_addrenv_vaddr()</code></a>:
         Returns the virtual base address of the address environment.
       </li>
       <li>
-        <a href="#up_addrenv_select">4.1.21.3 <code>up_addrenv_select()</code></a>: 
+        <a href="#up_addrenv_select">4.1.22.3 <code>up_addrenv_select()</code></a>: 
         Instantiate an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_restore">4.1.21.4 <code>up_addrenv_restore()</code></a>: 
+        <a href="#up_addrenv_restore">4.1.22.4 <code>up_addrenv_restore()</code></a>: 
         Restore an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_destroy">4.1.21.5 <code>up_addrenv_destroy()</code></a>:
+        <a href="#up_addrenv_destroy">4.1.22.5 <code>up_addrenv_destroy()</code></a>:
         Destroy an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_assign">4.1.21.6 <code>up_addrenv_assign()</code></a>:
+        <a href="#up_addrenv_assign">4.1.22.6 <code>up_addrenv_assign()</code></a>:
         Assign an address environment to a TCB.
       </li>
     </ul>
@@ -2224,12 +2277,12 @@ else
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_share">4.1.21.7 <code>up_addrenv_share()</code></a>:
+        <a href="#up_addrenv_share">4.1.22.7 <code>up_addrenv_share()</code></a>:
         Clone the address environment assigned to one TCB to another.
         This operation is done when a pthread is created that share's the same address environment.
       </li>
       <li>
-        <a href="#up_addrenv_release">4.1.21.8 <code>up_addrenv_release()</code></a>:
+        <a href="#up_addrenv_release">4.1.22.8 <code>up_addrenv_release()</code></a>:
         Release the TCB's reference to an address environment when a task/thread exits.
       </li>
     </ul>
@@ -2237,7 +2290,7 @@ else
 </ol>
 
 
-<h4><a name="up_addrenv_create">4.1.21.1 <code>up_addrenv_create()</code></a></h4>
+<h4><a name="up_addrenv_create">4.1.22.1 <code>up_addrenv_create()</code></a></h4>
 <p><b>Prototype</b>:</p>
 <ul>
   <code>int up_addrenv_create(size_t envsize, FAR task_addrenv_t *addrenv);</code>
@@ -2257,7 +2310,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_vaddr">4.1.21.2 <code>up_addrenv_vaddr()</code></a></h4>
+<h4><a name="up_addrenv_vaddr">4.1.22.2 <code>up_addrenv_vaddr()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_vaddr(FAR task_addrenv_t addrenv, FAR void **vaddr);</code>
@@ -2277,7 +2330,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_select">4.1.21.3 <code>up_addrenv_select()</code></a></h4>
+<h4><a name="up_addrenv_select">4.1.22.3 <code>up_addrenv_select()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_select(task_addrenv_t addrenv, hw_addrenv_t *oldenv);</code>
@@ -2301,7 +2354,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_restore">4.1.21.4 <code>up_addrenv_restore()</code></a></h4>
+<h4><a name="up_addrenv_restore">4.1.22.4 <code>up_addrenv_restore()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_restore(hw_addrenv_t oldenv);</code>
@@ -2320,7 +2373,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_destroy">4.1.21.5 <code>up_addrenv_destroy()</code></a></h4>
+<h4><a name="up_addrenv_destroy">4.1.22.5 <code>up_addrenv_destroy()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_destroy(task_addrenv_t addrenv);</code>
@@ -2338,7 +2391,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_assign">4.1.21.6 <code>up_addrenv_assign()</code></a></h4>
+<h4><a name="up_addrenv_assign">4.1.22.6 <code>up_addrenv_assign()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb);</code>
@@ -2357,7 +2410,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_share">4.1.21.7 <code>up_addrenv_share()</code></a></h4>
+<h4><a name="up_addrenv_share">4.1.22.7 <code>up_addrenv_share()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb);</code>
@@ -2377,7 +2430,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_release">4.1.21.8 <code>up_addrenv_release()</code></a></h4>
+<h4><a name="up_addrenv_release">4.1.22.8 <code>up_addrenv_release()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_release(FAR struct tcb_s *tcb);</code>

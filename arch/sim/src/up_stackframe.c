@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z80/src/common/up_usestack.c
+ * arch/sim/src/up_stackframe.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,10 +43,26 @@
 #include <stdint.h>
 #include <sched.h>
 #include <debug.h>
-#include <nuttx/kmalloc.h>
+
 #include <nuttx/arch.h>
 
 #include "up_internal.h"
+
+/****************************************************************************
+ * Pre-processor Macros
+ ****************************************************************************/
+
+/* Use a stack alignment of 4 bytes.  If necessary frame_size must be rounded
+ * up to the next boundary
+ */
+
+#define STACK_ALIGNMENT     4
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
 /****************************************************************************
  * Private Types
@@ -61,70 +77,57 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_use_stack
+ * Name: up_stack_frame
  *
  * Description:
- *   Setup up stack-related information in the TCB using pre-allocated stack
- *   memory.  This function is called only from task_init() when a task or
- *   kernel thread is started (never for pthreads).
+ *   Allocate a stack frame in the TCB's stack to hold thread-specific data.
+ *   This function may be called anytime after up_create_stack() or
+ *   up_use_stack() have been called but before the task has been started.
  *
- *   The following TCB fields must be initialized:
+ *   Thread data may be kept in the stack (instead of in the TCB) if it is
+ *   accessed by the user code directory.  This includes such things as
+ *   argv[].  The stack memory is guaranteed to be in the same protection
+ *   domain as the thread.
  *
- *   - adj_stack_size: Stack size after adjustment for hardware,
- *     processor, etc.  This value is retained only for debug
- *     purposes.
- *   - stack_alloc_ptr: Pointer to allocated stack
- *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
- *     initial value of the stack pointer.
+ *   The following TCB fields will be re-initialized:
+ *
+ *   - adj_stack_size: Stack size after removal of the stack frame from
+ *     the stack
+ *   - adj_stack_ptr: Adjusted initial stack pointer after the frame has
+ *     been removed from the stack.  This will still be the initial value
+ *     of the stack pointer when the task is started.
  *
  * Inputs:
- *   - tcb: The TCB of new task
- *   - stack_size:  The allocated stack size.
+ *   - tcb:  The TCB of new task
+ *   - frame_size:  The size of the stack frame to allocate.
  *
- *   NOTE:  Unlike up_stack_create() and up_stack_release, this function
- *   does not require the task type (ttype) parameter.  The TCB flags will
- *   always be set to provide the task type to up_use_stack() if it needs
- *   that information.
+ *  Returned Value:
+ *   - A pointer to bottom of the allocated stack frame.  NULL will be
+ *     returned on any failures.  The alignment of the returned value is
+ *     the same as the alignment of the stack itself.
  *
  ****************************************************************************/
 
-int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
+FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 {
-  size_t top_of_stack;
-  size_t size_of_stack;
+  uintptr_t topaddr;
 
-  /* Is there already a stack allocated? */
+  /* Align the frame_size */
 
-  if (tcb->stack_alloc_ptr)
+  frame_size = STACK_ALIGN_UP(frame_size);
+  
+  /* Is there already a stack allocated? Is it big enough? */
+
+  if (!tcb->stack_alloc_ptr || tcb->adj_stack_size <= frame_size)
     {
-      /* Yes.. Release the old stack allocation */
-
-      up_release_stack(tcb, tcb->flags & TCB_FLAG_TTYPE_MASK);
+      return NULL;
     }
-
-  /* Save the new stack allocation */
-
-  tcb->stack_alloc_ptr = stack;
-
-  /* The Z80 uses a push-down stack:  the stack grows toward lower
-   * addresses in memory.  The stack pointer register, points to the
-   * lowest, valid work address (the "top" of the stack).  Items on
-   * the stack are* referenced as positive word offsets from sp.
-   */
-
-  top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
-
-  /* The Z80 stack does not need to be aligned.  Here is is aligned at
-   * word (4 byte) boundary.
-   */
-
-  top_of_stack &= ~3;
-  size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->adj_stack_size = top_of_stack;
-  tcb->adj_stack_size = size_of_stack;
+  topaddr              = (uintptr_t)tcb->adj_stack_ptr - frame_size;
+  tcb->adj_stack_ptr   = (FAR void *)topaddr;
+  tcb->adj_stack_size -= frame_size;
 
-  return OK;
+  return (FAR void *)(topaddr + sizeof(uint32_t));
 }

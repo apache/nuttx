@@ -171,18 +171,16 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
 #endif
 
-      /* The ZNeo uses a push-down stack:  the stack grows
-       * toward loweraddresses in memory.  The stack pointer
-       * register, points to the lowest, valid work address
-       * (the "top" of the stack).  Items on the stack are
-       * referenced as positive word offsets from sp.
+      /* The ZNeo uses a push-down stack:  the stack grows toward lower
+       * addresses in memory.  The stack pointer register, points to the
+       * lowest, valid work address (the "top" of the stack).  Items on
+       * the stack are referenced as positive word offsets from sp.
        */
 
       top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
 
-      /* The ZNeo stack must be aligned at word (4 byte)
-       * boundaries. If necessary top_of_stack must be rounded
-       * down to the next boundary
+      /* Align the stack to word (4 byte) boundaries.  This is probably
+       * a greater alignement than is required.
        */
 
       top_of_stack &= ~3;

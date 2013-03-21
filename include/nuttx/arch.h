@@ -204,7 +204,8 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);
  *     initial value of the stack pointer.
  *
  * Inputs:
- *   - tcb: The TCB of new task
+ *   - tcb:  The TCB of new task
+ *   - stack:  The new stack to be used.
  *   - stack_size:  The allocated stack size.
  *
  *   NOTE:  Unlike up_stack_create() and up_stack_release, this function
@@ -216,6 +217,42 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);
 
 #ifndef CONFIG_CUSTOM_STACK
 int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);
+#endif
+
+/****************************************************************************
+ * Name: up_stack_frame
+ *
+ * Description:
+ *   Allocate a stack frame in the TCB's stack to hold thread-specific data.
+ *   This function may be called anytime after up_create_stack() or
+ *   up_use_stack() have been called but before the task has been started.
+ *
+ *   Thread data may be kept in the stack (instead of in the TCB) if it is
+ *   accessed by the user code directory.  This includes such things as
+ *   argv[].  The stack memory is guaranteed to be in the same protection
+ *   domain as the thread.
+ *
+ *   The following TCB fields will be re-initialized:
+ *
+ *   - adj_stack_size: Stack size after removal of the stack frame from
+ *     the stack
+ *   - adj_stack_ptr: Adjusted initial stack pointer after the frame has
+ *     been removed from the stack.  This will still be the initial value
+ *     of the stack pointer when the task is started.
+ *
+ * Inputs:
+ *   - tcb:  The TCB of new task
+ *   - frame_size:  The size of the stack frame to allocate.
+ *
+ *  Returned Value:
+ *   - A pointer to bottom of the allocated stack frame.  NULL will be
+ *     returned on any failures.  The alignment of the returned value is
+ *     the same as the alignment of the stack itself.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_CUSTOM_STACK) && defined(CONFIG_NUTTX_KERNEL)
+FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);
 #endif
 
 /****************************************************************************
