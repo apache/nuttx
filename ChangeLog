@@ -4410,4 +4410,9 @@
 	  all system call inline functions with > 3 parameters (2013-03-20)
 	* arch/*/src/common/up_stackframe.c and include/nuttx/arch.h:  Add
 	  and new interface to set aside memory on the stack.  This will be
-	  used at least in the kernel build to hold task arguments 2013-03-21).
+	  used at least in the kernel build to hold task arguments (2013-03-21).
+	* sched/sig_deliver.c:  When dispatching signals to user threads,
+	  copy the siginfo_t from the sigq to the stack.  The signal queue
+	  is allocated from kernel memory; however, the current stack is
+	  the user's stack and the user code will be able to access the
+	  signinfo_t data from the stack copy (2013-03-21).

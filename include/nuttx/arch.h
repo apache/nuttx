@@ -228,7 +228,7 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);
  *   up_use_stack() have been called but before the task has been started.
  *
  *   Thread data may be kept in the stack (instead of in the TCB) if it is
- *   accessed by the user code directory.  This includes such things as
+ *   accessed by the user code directly.  This includes such things as
  *   argv[].  The stack memory is guaranteed to be in the same protection
  *   domain as the thread.
  *
