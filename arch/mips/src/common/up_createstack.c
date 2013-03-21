@@ -60,14 +60,14 @@
  */
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
-#  define CONFIG_STACK_ALIGNMENT 8
+#  define STACK_ALIGNMENT   8
 #else
-#  define CONFIG_STACK_ALIGNMENT 4
+#  define STACK_ALIGNMENT   4
 #endif
 
 /* Stack alignment macros */
 
-#define STACK_ALIGN_MASK    (CONFIG_STACK_ALIGNMENT-1)
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 

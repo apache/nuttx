@@ -50,6 +50,26 @@
 #include "up_internal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* MIPS requires at least a 4-byte stack alignment.  For floating point use, 
+ * however, the stack must be aligned to 8-byte addresses.
+ */
+
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+#  define STACK_ALIGNMENT   8
+#else
+#  define STACK_ALIGNMENT   4
+#endif
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -107,21 +127,20 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   tcb->stack_alloc_ptr = stack;
 
-  /* MIPS uses a push-down stack:  the stack grows
-   * toward loweraddresses in memory.  The stack pointer
-   * register, points to the lowest, valid work address
-   * (the "top" of the stack).  Items on the stack are
-   * referenced as positive word offsets from sp.
+  /* MIPS uses a push-down stack:  the stack grows toward loweraddresses in
+   * memory.  The stack pointer register, points to the lowest, valid work
+   * address (the "top" of the stack).  Items on the stack are referenced
+   * as positive word offsets from sp.
    */
 
   top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
 
-  /* The MIPS stack must be aligned at word (4 byte)
-   * boundaries. If necessary top_of_stack must be rounded
-   * down to the next boundary
+  /* The MIPS stack must be aligned at word (4 byte) or double word (8 byte)
+   * boundaries. If necessary top_of_stack must be rounded down to the
+   * next boundary
    */
 
-  top_of_stack &= ~3;
+  top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
   size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
 
   /* Save the adjusted stack values in the struct tcb_s */

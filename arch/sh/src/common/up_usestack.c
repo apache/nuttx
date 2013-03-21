@@ -107,18 +107,16 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
  
   tcb->stack_alloc_ptr = stack;
 
-  /* The Arm7Tdmi uses a push-down stack:  the stack grows
-   * toward loweraddresses in memory.  The stack pointer
-   * register, points to the lowest, valid work address
-   * (the "top" of the stack).  Items on the stack are
-   * referenced as positive word offsets from sp.
+  /* The SH family uses a push-down stack:  the stack grows toward lower
+   * addresses in memory.  The stack pointer register, points to the
+   * lowest, valid work address (the "top" of the stack).  Items on the
+   * stack are referenced as positive word offsets from sp.
    */
 
   top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
 
-  /* The Arm7Tdmi stack must be aligned at word (4 byte)
-   * boundaries. If necessary top_of_stack must be rounded
-   * down to the next boundary
+  /* The SH stack must be aligned at word (4 byte) boundaries. If necessary
+   * top_of_stack must be rounded down to the next boundary
    */
 
   top_of_stack &= ~3;
