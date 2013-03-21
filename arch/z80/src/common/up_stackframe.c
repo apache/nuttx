@@ -128,5 +128,11 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
   tcb->adj_stack_ptr   = (FAR void *)topaddr;
   tcb->adj_stack_size -= frame_size;
 
+  /* Reset the initial state */
+
+  up_initial_state(tcb);
+
+  /* And return a pointer to the allocated memory */
+
   return (FAR void *)(topaddr + sizeof(uint32_t));
 }

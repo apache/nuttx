@@ -101,7 +101,9 @@ static void sched_releasepid(pid_t pid)
 int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
 {
   int ret = OK;
+#if defined(CONFIG_CUSTOM_STACK) || !defined(CONFIG_NUTTX_KERNEL)
   int i;
+#endif
 
   if (tcb)
     {
@@ -156,7 +158,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
         }
 #endif
 
-#if !defined(CONFIG_CUSTOM_STACK) && defined(CONFIG_NUTTX_KERNEL)
+#if defined(CONFIG_CUSTOM_STACK) || !defined(CONFIG_NUTTX_KERNEL)
       /* Release command line arguments that were allocated for task
        * start/re-start.
        *
@@ -176,7 +178,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
             }
         }
 
-#endif /* !CONFIG_CUSTOM_STACK && CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_CUSTOM_STACK || !CONFIG_NUTTX_KERNEL */
 
       /* Release this thread's reference to the address environment */
 

@@ -286,12 +286,27 @@ void os_start(void)
   g_idletcb.cmn.task_state = TSTATE_TASK_RUNNING;
   g_idletcb.cmn.entry.main = (main_t)os_start;
 
+  /* Set the IDLE task name */
+
 #if CONFIG_TASK_NAME_SIZE > 0
   strncpy(g_idletcb.cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE-1);
+#endif /* CONFIG_TASK_NAME_SIZE */
+
+  /* Configure the task name in the argument list.  The IDLE task does
+   * not really have an argument list, but this name is still useful
+   * for things like the NSH PS command.
+   *
+   * In the kernel mode build, the arguments are saved on the task's stack
+   * and there is no support that yet.
+   */
+
+#if defined(CONFIG_CUSTOM_STACK) || !defined(CONFIG_NUTTX_KERNEL)
+#if CONFIG_TASK_NAME_SIZE > 0
   g_idletcb.argv[0] = g_idletcb.cmn.name;
 #else
   g_idletcb.argv[0] = (char*)g_idlename;
 #endif /* CONFIG_TASK_NAME_SIZE */
+#endif /* CONFIG_CUSTOM_STACK || !CONFIG_NUTTX_KERNEL */
 
   /* Then add the idle task's TCB to the head of the ready to run list */
 

@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <arch/irq.h>
 
 #include "up_internal.h"
 
@@ -136,9 +137,15 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  topaddr              = (uintptr_t)tcb->adj_stack_ptr - frame_size;
-  tcb->adj_stack_ptr   = (FAR void *)topaddr;
-  tcb->adj_stack_size -= frame_size;
+  topaddr               = (uintptr_t)tcb->adj_stack_ptr - frame_size;
+  tcb->adj_stack_ptr    = (FAR void *)topaddr;
+  tcb->adj_stack_size  -= frame_size;
+
+  /* Reset the initial stack pointer */
+
+  tcb->xcp.regs[REG_SP] = (uint32_t)tcb->adj_stack_ptr;
+
+  /* And return the pointer to the allocated region */
 
   return (FAR void *)(topaddr + sizeof(uint32_t));
 }
