@@ -543,7 +543,17 @@ struct task_tcb_s
   /* Values needed to restart a task ********************************************/
 
   uint8_t  init_priority;                /* Initial priority of the task        */
+
+#if !defined(CONFIG_CUSTOM_STACK) && defined(CONFIG_NUTTX_KERNEL)
+  /* In the kernel mode build, the arguments are saved on the task's stack      */
+
+  FAR char **argv;                       /* Name+start-up parameters            */
+#else
+  /* Otherwise, the arguments are strdup'ed and the argv[] is statically        */
+  /* defined here:                                                              */
+
   char    *argv[CONFIG_MAX_TASK_ARGS+1]; /* Name+start-up parameters            */
+#endif
 };
 
 /* struct pthread_tcb_s **********************************************************/

@@ -108,7 +108,7 @@ endif
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 	$(Q) touch $@
 
-depend: $(BINDIR)$(DELIM).depend
+depend: .depend
 
 # Clean most derived files, retaining the configuration
 

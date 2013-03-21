@@ -387,6 +387,232 @@ static int thread_schedsetup(FAR struct tcb_s *tcb, int priority,
 }
 
 /****************************************************************************
+ * Name: task_namesetup
+ *
+ * Description:
+ *   Assign the task name.
+ *
+ * Input Parameters:
+ *   tcb        - Address of the new task's TCB
+ *   name       - Name of the new task
+ *
+ * Return Value:
+ *  None
+ *
+ ****************************************************************************/
+
+#if CONFIG_TASK_NAME_SIZE > 0
+static void task_namesetup(FAR struct task_tcb_s *tcb, FAR const char *name)
+{
+  /* Give a name to the unnamed tasks */
+
+  if (!name)
+    {
+      name = (FAR char *)g_noname;
+    }
+
+  /* Copy the name into the TCB */
+
+  strncpy(tcb->cmn.name, name, CONFIG_TASK_NAME_SIZE);
+}
+#else
+#  define task_namesetup(t,n)
+#endif /* CONFIG_TASK_NAME_SIZE */
+
+/****************************************************************************
+ * Name: task_tcbargsetup
+ *
+ * Description:
+ *   This functions is called only from task_argsetup() in the "normal"
+ *   case, where the argv[] array is a structure in the TCB.  This function
+ *   will clone all of the arguments using strdup.
+ *
+ * Input Parameters:
+ *   tcb        - Address of the new task's TCB
+ *   argv       - A pointer to an array of input parameters.
+ *                Up to CONFIG_MAX_TASK_ARG parameters may be
+ *                provided. If fewer than CONFIG_MAX_TASK_ARG
+ *                parameters are passed, the list should be
+ *                terminated with a NULL argv[] value.
+ *                If no parameters are required, argv may be NULL.
+ *
+ * Return Value:
+ *  OK.  This function always succeeds.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_CUSTOM_STACK) || !defined(CONFIG_NUTTX_KERNEL)
+static int task_tcbargsetup(FAR struct task_tcb_s *tcb,
+                            FAR char * const argv[])
+{
+  int i;
+
+  /* Save the name as the first argument */
+
+#if CONFIG_TASK_NAME_SIZE > 0
+  tcb->argv[0] = tcb->cmn.name;
+#else
+  tcb->argv[0] = (FAR char *)g_noname;
+#endif /* CONFIG_TASK_NAME_SIZE */
+
+  /* For tasks, the life of the argument must be as long as the life of the
+   * task and the arguments must be strings. So for tasks, we have to to
+   * dup the strings.
+   *
+   * The first NULL argument terminates the list of arguments.  The argv
+   * pointer may be NULL if no parameters are passed.
+   */
+
+  i = 1;
+  if (argv)
+    {
+      for (; i < CONFIG_MAX_TASK_ARGS+1 && argv[i-1]; i++)
+        {
+          tcb->argv[i] = strdup(argv[i-1]);
+        }
+    }
+
+  /* Nullify any unused argument storage */
+
+  for (; i < CONFIG_MAX_TASK_ARGS+1; i++)
+    {
+      tcb->argv[i] = NULL;
+    }
+
+  return OK;
+}
+#endif /* CONFIG_CUSTOM_STACK || !CONFIG_NUTTX_KERNEL */
+
+/****************************************************************************
+ * Name: task_stackargsetup
+ *
+ * Description:
+ *   This functions is called only from task_argsetup() for the case of the
+ *   kernel build where the argv[] array and all strings are copied to the
+ *   task's stack.  This is done because the TCB (and kernal allocated
+ *   strings) are only accessible in kernel-mode.  Data on the stack, on the
+ *   other hand, is guaranteed to be accessible no matter what mode the
+ *   task runs in.
+ *
+ * Input Parameters:
+ *   tcb        - Address of the new task's TCB
+ *   argv       - A pointer to an array of input parameters.
+ *                Up to CONFIG_MAX_TASK_ARG parameters may be
+ *                provided. If fewer than CONFIG_MAX_TASK_ARG
+ *                parameters are passed, the list should be
+ *                terminated with a NULL argv[] value.
+ *                If no parameters are required, argv may be NULL.
+ *
+ * Return Value:
+ *  zero on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_CUSTOM_STACK) && defined(CONFIG_NUTTX_KERNEL)
+static int task_stackargsetup(FAR struct task_tcb_s *tcb, 
+                              FAR char * const argv[])
+{
+  FAR char **stackargv;
+  FAR const char *name;
+  FAR char *str;
+  size_t strtablen;
+  size_t argvlen;
+  int nbytes;
+  int argc;
+  int i;
+
+  /* Get the name string that we will use as the first argument */
+
+#if CONFIG_TASK_NAME_SIZE > 0
+  name = tcb->cmn.name;
+#else
+  name = (FAR const char *)g_noname;
+#endif /* CONFIG_TASK_NAME_SIZE */
+
+  /* Get the size of the task name (including the NUL terminator) */
+
+  strtablen = (strlen(name) + 1);
+
+  /* Count the number of arguments and get the accumulated size of the
+   * argument strings (including the null terminators).  The argument count
+   * does not include the task name in that will be in argv[0].
+   */
+
+  argc = 0;
+  if (argv)
+    {
+      for (; argc <= CONFIG_MAX_TASK_ARGS; argc++)
+        {
+          /* A NULL argument terminates the list */
+
+          if (!tcb->argv[argc])
+            {
+              break;
+            }
+
+          /* Add the size of this argument (with NUL terminator) */
+
+          strtablen += (strlen(argv[argc]) + 1);
+        }
+    }
+
+  /* Allocate a stack frame to hold argv[] array and the strings.  NOTE
+   * that argc + 2 entries are needed:  The number of arguments plus the
+   * task name plus a NULL argv[] entry to terminate the list.
+   */
+
+  argvlen = (argc + 2)*sizeof(FAR char*);
+  stackargv    = (FAR char **)up_stack_frame(&tcb->cmn, argvlen + strtablen);
+
+  DEBUGASSERT(stackargv != NULL);
+  if (stackargv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  /* Get the address of the string table that will lie immediately after
+   * the argv[] array and mark it as a null string.
+   */
+
+  str          = (FAR char *)stackargv + argvlen;
+  
+  /* Copy the task name.  Increment str to skip over the task name and its
+   * NUL terminator in the string buffer.
+   */
+
+  stackargv[0] = str;
+  nbytes       = strlen(name) + 1;
+  strcpy(str, name);
+  str         += nbytes;
+
+  /* Copy each argument */
+
+  for (i = 0; i < argc; i++)
+    {
+      /* Save the pointer to the location in the string buffer and copy
+       * the argument into the buffer.  Increment str to skip over the
+       * argument and its NUL terminator in the string buffer.
+       */
+
+      stackargv[i+1] = str;
+      nbytes         = strlen(argv[i]) + 1;
+      strcpy(str, argv[i]);
+      str           += nbytes;
+    }
+
+  /* Put a terminator entry at the end of the argv[] array.  Then save the
+   * argv[] arry pointer in the TCB where it will be recovered later by
+   * task_start().
+   */
+
+  stackargv[argc + 1] = NULL;
+  tcb->argv = stackargv;
+
+  return OK;
+}
+#endif /* !CONFIG_CUSTOM_STACK && CONFIG_NUTTX_KERNEL */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -472,12 +698,18 @@ int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority, start_t star
  * Name: task_argsetup
  *
  * Description:
- *   This functions sets up parameters in the Task Control
- *   Block (TCB) in preparation for starting a new thread.
+ *   This functions sets up parameters in the Task Control Block (TCB) in
+ *   preparation for starting a new thread.
  *
- *   task_argsetup() is called only from task_init() and
- *   task_start() to create a new task.  Argumens are
- *   cloned via strdup.
+ *   task_argsetup() is called only from task_init() and task_start() to
+ *   create a new task.  In the "normal" case, the argv[] array is a
+ *   structure in the TCB, the arguments are cloned via strdup.
+ *
+ *   In the kernel build case, the argv[] array and all strings are copied
+ *   to the task's stack.  This is done because the TCB (and kernal allocated
+ *   strings) are only accessible in kernel-mode.  Data on the stack, on the
+ *   other hand, is guaranteed to be accessible no matter what mode the
+ *   task runs in.
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
@@ -494,56 +726,33 @@ int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority, start_t star
  *
  ****************************************************************************/
 
-int task_argsetup(FAR struct task_tcb_s *tcb, const char *name,
+int task_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name,
                   FAR char * const argv[])
 {
-  int i;
+  int ret;
 
-#if CONFIG_TASK_NAME_SIZE > 0
-  /* Give a name to the unnamed tasks */
+  /* Setup the task name */
 
-  if (!name)
-    {
-      name = (FAR char *)g_noname;
-    }
+  task_namesetup(tcb, name);
 
-  /* Copy the name into the TCB */
-
-  strncpy(tcb->cmn.name, name, CONFIG_TASK_NAME_SIZE);
-
-  /* Save the name as the first argument */
-
-  tcb->argv[0] = tcb->cmn.name;
-#else
-  /* Save the name as the first argument */
-
-  tcb->argv[0] = (char *)g_noname;
-#endif /* CONFIG_TASK_NAME_SIZE */
-
-  /* For tasks, the life of the argument must be as long as
-   * the life of the task and the arguments must be strings.
-   * So for tasks, we have to to dup the strings.
-   *
-   * The first NULL argument terminates the list of 
-   * arguments.  The argv pointer may be NULL if no
-   * parameters are passed.
+#if !defined(CONFIG_CUSTOM_STACK) && defined(CONFIG_NUTTX_KERNEL)
+  /*   In the kernel build case, the argv[] array and all strings are copied
+   *   to the task's stack.  This is done because the TCB (and kernal allocated
+   *   strings) are only accessible in kernel-mode.  Data on the stack, on the
+   *   other hand, is guaranteed to be accessible no matter what mode the
+   *   task runs in.
    */
 
-  i = 1;
-  if (argv)
-    {
-      for (; i < CONFIG_MAX_TASK_ARGS+1 && argv[i-1]; i++)
-        {
-          tcb->argv[i] = strdup(argv[i-1]);
-        }
-    }
+  ret = task_stackargsetup(tcb, argv);
 
-  /* Nullify any unused argument storage */
+#else
+  /* In the "normal" case, the argv[] array is a structure in the TCB, the
+   * arguments are cloned via strdup.
+   */
 
-  for (; i < CONFIG_MAX_TASK_ARGS+1; i++)
-    {
-      tcb->argv[i] = NULL;
-    }
+  ret = task_tcbargsetup(tcb, argv);
 
-  return OK;
+#endif /* !CONFIG_CUSTOM_STACK && CONFIG_NUTTX_KERNEL */
+
+  return ret;
 }

@@ -156,8 +156,13 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
         }
 #endif
 
+#if !defined(CONFIG_CUSTOM_STACK) && defined(CONFIG_NUTTX_KERNEL)
       /* Release command line arguments that were allocated for task
        * start/re-start.
+       *
+       * NOTE: In the kernel mode build, the arguments were saved on
+       * the task's stack and will be cleaned up when the stack memory
+       * is released.  Nothing need be done here in that case.
        */
 
 #ifndef CONFIG_DISABLE_PTHREAD
@@ -170,6 +175,8 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
               sched_kfree((FAR void*)ttcb->argv[i]);
             }
         }
+
+#endif /* !CONFIG_CUSTOM_STACK && CONFIG_NUTTX_KERNEL */
 
       /* Release this thread's reference to the address environment */
 
