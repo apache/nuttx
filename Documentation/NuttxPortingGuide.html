@@ -1713,7 +1713,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   This function may be called anytime after <code>up_create_stack()</code> or <code>up_use_stack()</code> have been called but before the task has been started.
 </p>
 <p>
-  Thread data may be kept in the stack (instead of in the TCB) if it is accessed by the user code directory.
+  Thread data may be kept in the stack (instead of in the TCB) if it is accessed by the user code directly.
   This includes such things as <code>argv[]</code>.
   The stack memory is guaranteed to be in the same protection domain as the thread.
 </p>
