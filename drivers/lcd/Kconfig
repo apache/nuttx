@@ -227,6 +227,63 @@ config UG9664HSWAG01_POWER
 
 endif
 
+config LCD_ST7567
+	bool "ST7567 LCD Display Module"
+	default n
+	---help---
+		LCD Display Module, ST7567, Univision Technology Inc.  Used
+		with the LPCXpresso and Embedded Artists base board.
+
+		Required LCD driver settings:
+		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+		LCD_MAXPOWER should be 1:  0=off, 1=on
+
+		Required SPI driver settings:
+		SPI_CMDDATA - Include support for cmd/data selection.
+
+if LCD_ST7567
+
+config ST7567_SPIMODE
+	int "ST7567 SPI Mode"
+	default 0
+	---help---
+		Controls the SPI mode
+
+config ST7567_FREQUENCY
+	int "ST7567 SPI Frequency"
+	default 3500000
+	---help---
+		Define to use a different bus frequency
+
+config ST7567_NINTERFACES
+	int "Number of ST7567 Devices"
+	default 1
+	---help---
+		Specifies the number of physical ST7567 devices that will be
+		supported.  NOTE:  At present, this must be undefined or defined to be 1.
+
+config ST7567_POWER
+	bool "Power control"
+	default n
+	---help---
+		If the hardware supports a controllable LCD a power supply, this
+		configuration should be defined.  In this case the system must
+		provide an interface ug_power().
+
+config ST7567_XRES
+	int "ST7567 X Resolution"
+	default 128
+	---help---
+		Specifies the X resolution of the LCD.
+
+config ST7567_YRES
+	int "ST7567 Y Resolution"
+	default 64
+	---help---
+		Specifies the Y resolution of the LCD.
+
+endif
+
 config LCD_UG2864AMBAG01
 	bool "UG-2864AMBAG01 OLED Display Module"
 	default n

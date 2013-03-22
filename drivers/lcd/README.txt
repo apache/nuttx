@@ -107,6 +107,9 @@ Re-usable LCD drivers reside in the drivers/lcd directory:
     that you will proably ahve to customize for any particular LCD
     hardware. (see also configs/hymini-stm32v/src/ssd1289.c below).
 
+  st7567.c.  LCD Display Module, ST7567, Univision Technology Inc. Used
+    with the LPCXpresso and Embedded Artists base board.
+
   ug-9664hswag01.c.  OLED Display Module, UG-9664HSWAG01", Univision
     Technology Inc.  Used with the LPC Xpresso and Embedded Artists
     base board.

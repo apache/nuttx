@@ -212,6 +212,9 @@
 #define ZKITARM_OLED_CS    (GPIO_OUTPUT | GPIO_VALUE_ONE  | GPIO_PORT0 | GPIO_PIN6)
 #define ZKITARM_OLED_DC    (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN7)
 #endif
+#define ZKITARM_OLED_RST   (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN25)
+#define ZKITARM_OLED_CS    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN21)
+#define ZKITARM_OLED_RS    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN22)
 
 /************************************************************************************
  * Public Types
