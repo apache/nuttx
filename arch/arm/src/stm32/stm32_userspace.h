@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx/lpc17_qei.h
+ * arch/arm/src/stm32/stm32_qei.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_LPC17_USERSPACE_H
-#define __ARCH_ARM_SRC_LPC17XX_LPC17_USERSPACE_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H
+#define __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H
 
 /************************************************************************************
  * Included Files
@@ -59,7 +59,7 @@
  ************************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_userspace
+ * Name: stm32_userspace
  *
  * Description:
  *   For the case of the separate user-/kernel-space build, perform whatever
@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NUTTX_KERNEL
-void lpc17_userspace(void);
+void stm32_userspace(void);
 #endif
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_USERSPACE_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H */

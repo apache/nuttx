@@ -61,7 +61,7 @@
  * 0x1000:7fff - End of CPU SRAM and end of heap (1st region)
  */
 
-#define IDLE_STACK		(_ebss+CONFIG_IDLETHREAD_STACKSIZE)
+#define IDLE_STACK		(_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
 #define HEAP_BASE		(_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 
 /* The Cortex-M3 return from interrupt is unusual.  We provide the following special
@@ -306,8 +306,8 @@ lpc17_common:
 #endif
 
 	/* We are returning with a pending context switch.  This case is different
-	 * because in this case, the register save structure does not lie on the
-	 * stack but, rather, are within a TCB structure.  We'll have to copy some
+	 * because in this case, the register save structure does not lie in the
+	 * stack but, rather, within a TCB structure.  We'll have to copy some
 	 * values to the stack.
 	 */
 

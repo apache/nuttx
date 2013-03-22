@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc17xx/lpc17_mpuinit.c
+ * arch/arm/src/stm32/stm32_mpuinit.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <nuttx/userspace.h>
 
 #include "mpu.h"
-#include "lpc17_mpuinit.h"
+#include "stm32_mpuinit.h"
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_ARMV7M_MPU)
 
@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_mpuinitialize
+ * Name: stm32_mpuinitialize
  *
  * Description:
  *   Configure the MPU to permit user-space access to only restricted SAM3U
@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-void lpc17_mpuinitialize(void)
+void stm32_mpuinitialize(void)
 {
   uintptr_t datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
   uintptr_t dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
@@ -106,7 +106,7 @@ void lpc17_mpuinitialize(void)
 }
 
 /****************************************************************************
- * Name: lpc17_mpu_uheap
+ * Name: stm32_mpu_uheap
  *
  * Description:
  *  Map the user-heap region.
@@ -115,7 +115,7 @@ void lpc17_mpuinitialize(void)
  *
  ****************************************************************************/
 
-void lpc17_mpu_uheap(uintptr_t start, size_t size)
+void stm32_mpu_uheap(uintptr_t start, size_t size)
 {
   mpu_userintsram(start, size);
 }

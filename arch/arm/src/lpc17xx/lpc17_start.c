@@ -236,7 +236,7 @@ void __start(void)
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
    * Normally this just means initializing the user space .data and .bss
-   * segements.
+   * segments.
    */
 
 #ifdef CONFIG_NUTTX_KERNEL

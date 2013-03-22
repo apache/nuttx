@@ -69,8 +69,8 @@
  * 0x2000:ffff - End of SRAM and end of heap
  */
 
-#define IDLE_STACK      (_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-#define HEAP_BASE       (_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
+#define IDLE_STACK		(_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
+#define HEAP_BASE		(_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 
 /* The Cortex-M3 return from interrupt is unusual.  We provide the following special
  * address to the BX instruction.  The particular value also forces a return to
@@ -219,7 +219,7 @@ stm32_common:
 
 #ifdef CONFIG_NUTTX_KERNEL
 	/* The EXC_RETURN value will be 0xfffffff9 (privileged thread) or 0xfffffff1
-	 * (handler mode) if the state is on the MSP.  It can only be on the PSP if
+	 * (handler mode) if the stack is on the MSP.  It can only be on the PSP if
 	 * EXC_RETURN is 0xfffffffd (unprivileged thread)
 	 */
 
@@ -314,10 +314,10 @@ stm32_common:
 	bl		up_restorefpu			/* Restore the FPU registers */
 #endif
 
-	/* Returning with a pending context switch is different from the normal
-	 * return because in this case, the register save structure does not lie
-	 * on the stack but, rather, are within a TCB structure.  We'll have to
-	 * copy somevalues to the new stack.
+	/* We are returning with a pending context switch.  This case is different
+	 * because in this case, the register save structure does not lie in the
+	 * stack but, rather, within a TCB structure.  We'll have to copy some
+	 * values to the stack.
 	 */
 
 	add		r1, r0, #SW_XCPT_SIZE	/* R1=Address of HW save area in reg array */
@@ -343,6 +343,7 @@ stm32_common:
 #else
 	ldmia	r1!, {r2-r11}			/* Recover R4-R11 + 2 temp values */
 #endif
+
 #ifdef CONFIG_ARCH_FPU
 	/* Skip over the block of memory reserved for floating pointer register
 	 * save. Then R1 is the address of the HW save area
@@ -360,16 +361,25 @@ stm32_common:
 	 *   r4-r11 = restored register values
 	 */
 2:
+
 #ifdef CONFIG_NUTTX_KERNEL
 	/* The EXC_RETURN value will be 0xfffffff9 (privileged thread) or 0xfffffff1
-	 * (handler mode) if the state is on the MSP.  It can only be on the PSP if
+	 * (handler mode) if the stack is on the MSP.  It can only be on the PSP if
 	 * EXC_RETURN is 0xfffffffd (unprivileged thread)
 	 */
 
-	adds	r0, r14, #3				/* If R14=0xfffffffd, then r0 == 0 */
-	ite		ne						/* Next two instructions are condition */
-	msrne	msp, r1					/* R1=The main stack pointer */
-	msreq	psp, r1					/* R1=The process stack pointer */
+	mrs		r2, control				/* R2=Contents of the control register */
+	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
+	beq		3f						/* Branch if privileged */
+
+	orr		r2, r2, #1				/* Unprivileged mode */
+	msr		psp, r1					/* R1=The process stack pointer */
+	b		4f
+3:
+	bic		r2, r2, #1				/* Privileged mode */
+	msr		msp, r1					/* R1=The main stack pointer */
+4:
+	msr		control, r2				/* Save the updated control register */
 #else
 	msr		msp, r1					/* Recover the return MSP value */
 
@@ -432,8 +442,7 @@ g_intstackbase:
 	.globl	g_idle_topstack
 	.type	g_idle_topstack, object
 g_idle_topstack:
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
+	.word	HEAP_BASE
 	.size	g_idle_topstack, .-g_idle_topstack
 
 	.end
-
