@@ -4416,3 +4416,13 @@
 	  is allocated from kernel memory; however, the current stack is
 	  the user's stack and the user code will be able to access the
 	  signinfo_t data from the stack copy (2013-03-21).
+	* arch/arm/src/stm32:  Added support for the kernel mode build
+	  (cloned from the lpc17xx).  (2013-03-21).
+	* configs/stme32f4discovery/kernel and scripts:  Add support for
+	  the kernel mode build on the STM32F4Discovery  (2013-03-21).
+	* drivers/st7567.c/h and include/nuttx/lcd/st7567.h:  Driver for
+	  the the ST7567 LCD Display Module from Univision Technology Inc.
+	  contributed by Manikandan.S (2013-03-22).
+	* configs/zkit-arm-1769:  Now supports the ST7567 LCD display\
+	  module.  Added an nxhello configurtion for testing (Manikandan.S,
+	  2013-03-22).

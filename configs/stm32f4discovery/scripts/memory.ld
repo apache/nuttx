@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/open1788/scripts/memory.ld
+ * configs/stm32f4discovery/scripts/memory.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,46 +33,46 @@
  *
  ****************************************************************************/
 
-/* The LPC1788 has 512Kb of FLASH beginning at address 0x0000:0000 and
- * 96Kb of total SRAM: 64Kb of SRAM in the CPU block beginning at address
- * 0x10000000 and 32Kb of Peripheral SRAM in two banks, 8Kb at addresses
- * 0x20000000 bank0 first and 8kb at 0x20002000 at bank0 second. And 16Kb
- * at 0x20004000 on bank1.
+/* The STM32F407VG has 1024Kb of FLASH beginning at address 0x0800:0000 and
+ * 192Kb of SRAM. SRAM is split up into three blocks:
  *
- * For MPU support, the kernel-mode NuttX section is assumed to be 64Kb of
+ * 1) 112Kb of SRAM beginning at address 0x2000:0000
+ * 2)  16Kb of SRAM beginning at address 0x2001:c000
+ * 3)  64Kb of CCM SRAM beginning at address 0x1000:0000
+ *
+ * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
+ * where the code expects to begin execution by jumping to the entry point in
+ * the 0x0800:0000 address
+ * range.
+ *
+ * For MPU support, the kernel-mode NuttX section is assumed to be 96Kb of
  * FLASH and 4Kb of SRAM.  That, of course, can be optimized as needed (See
- * also configs/open1788/scripts/kernel-space.ld).  A detailed memory map
+ * also configs/stm32f4discovery/scripts/kernel-space.ld).  A detailed memory map
  * for the CPU SRAM region is as follows:
  *
- *   0x10000 0000:  Kernel .data region.  Typical size: 0.1KB
+ *   0x20000 0000:  Kernel .data region.  Typical size: 0.1KB
  *   ------- ----   Kernel .bss  region.  Typical size: 1.8KB
- *   0x10000 0800:  Kernel IDLE thread stack (approximate).  Size is
+ *   0x20000 0800:  Kernel IDLE thread stack (approximate).  Size is
  *                  determined by CONFIG_IDLETHREAD_STACKSIZE and
  *                  adjustments for alignment.  Typical is 1KB.
  *   ------- ----   Padded to 4KB
- *   0x10000 1000:  User .data region.  Size is variable.
+ *   0x20000 1000:  User .data region.  Size is variable.
  *   ------- ----   User .bss region  Size is variable.
  *   ------- ----   Beginning of kernel heap.  Size determined by
  *                  CONFIG_MM_KERNEL_HEAPSIZE.
- *   0x10000 8000:  Beginning of user heap.  Can vary with other settings.
- *   0x10001 0000:  End+1 of CPU RAM
+ *   ------- ----   Beginning of user heap.  Can vary with other settings.
+ *   0x20001 c000:  End+1 of CPU RAM
  */
 
 MEMORY
 {
-    /* 256Kb FLASH */
+    /* 1024Kb FLASH */
 
-    kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 64K
-    uflash (rx)      : ORIGIN = 0x00010000, LENGTH = 448K
+    kflash (rx)      : ORIGIN = 0x08000000, LENGTH = 96K
+    uflash (rx)      : ORIGIN = 0x08018000, LENGTH = 928K
 
-    /* 64Kb of SRAM in the CPU block */
+    /* 112Kb of contiguous SRAM */
 
-    ksram (rwx)      : ORIGIN = 0x10000000, LENGTH = 4K
-    usram (rwx)      : ORIGIN = 0x10001000, LENGTH = 60K
-
-    /* Other peripheral memory (free, nothing is linked here) */
-
-    ahbram8_b0a(rwx) : ORIGIN = 0x20000000, LENGTH = 8K
-    ahbram8_b0b(rwx) : ORIGIN = 0x20002000, LENGTH = 8K
-    ahbram16(rwx)    : ORIGIN = 0x20004000, LENGTH = 16K
+    ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 4K
+    usram (rwx)      : ORIGIN = 0x20001000, LENGTH = 108K
 }

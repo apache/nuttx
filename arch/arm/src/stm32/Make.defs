@@ -64,6 +64,13 @@ ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS += up_memcpy.S
 endif
 
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c up_stackframe.c
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+CMN_CSRCS += up_signal_handler.c
+endif
+endif
+
 ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif
@@ -85,6 +92,10 @@ CHIP_CSRCS += stm32_spi.c stm32_sdio.c stm32_tim.c stm32_i2c.c stm32_waste.c
 
 ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 CHIP_ASRCS += stm32_vectors.S
+endif
+
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CHIP_CSRCS += stm32_userspace.c stm32_mpuinit.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)

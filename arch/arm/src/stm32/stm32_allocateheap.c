@@ -58,7 +58,7 @@
  * following definitions must be provided to specify the size and
  * location of internal(system) SRAM:
  *
- * CONFIG_DRAM_END            : End address (+1) of SRAM (F1 family only, the
+ * SRAM1_END            : End address (+1) of SRAM (F1 family only, the
  *                            : F4 family uses the a priori end of SRAM)
  *
  * The F4 family also contains internal CCM SRAM.  This SRAM is different
@@ -88,7 +88,7 @@
 #endif
 
 /* For the STM312F10xxx family, all internal SRAM is in one contiguous block
- * starting at g_idle_topstack and extending through CONFIG_DRAM_END (my apologies for
+ * starting at g_idle_topstack and extending through SRAM1_END (my apologies for
  * the bad naming).  In addition, external FSMC SRAM may be available.
  */
 
@@ -96,7 +96,7 @@
 
    /* Set the end of system SRAM */
 
-#  define SRAM1_END CONFIG_DRAM_END
+#  define SRAM1_END SRAM1_END
 
    /* Check if external FSMC SRAM is provided */
 
@@ -130,7 +130,7 @@
 
    /* Set the end of system SRAM */
 
-#  define SRAM1_END CONFIG_DRAM_END
+#  define SRAM1_END SRAM1_END
 
    /* Set the range of CCM SRAM as well (although we may not use it) */
 
@@ -365,14 +365,113 @@
  *   If a protected kernel-space heap is provided, the kernel heap must be
  *   allocated (and protected) by an analogous up_allocate_kheap().
  *
+ *   The following memory map is assumed for the flat build:
+ *
+ *     .data region.  Size determined at link time.
+ *     .bss  region  Size determined at link time.
+ *     IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
+ *     Heap.  Extends to the end of SRAM.
+ *
+ *   The following memory map is assumed for the kernel build:
+ *
+ *     Kernel .data region.  Size determined at link time.
+ *     Kernel .bss  region  Size determined at link time.
+ *     Kernel IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
+ *     Padding for alignment
+ *     User .data region.  Size determined at link time.
+ *     User .bss region  Size determined at link time.
+ *     Kernel heap.  Size determined by CONFIG_MM_KERNEL_HEAPSIZE.
+ *     User heap.  Extends to the end of SRAM.
+ *
  ****************************************************************************/
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* Get the unaligned size and position of the user-space heap.
+   * This heap begins after the user-space .bss section at an offset
+   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
+   */
+
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  size_t    usize = SRAM1_END - ubase;
+  int       log2;
+
+  DEBUGASSERT(ubase < (uintptr_t)SRAM1_END);
+
+  /* Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the SRAM1_END
+   * is aligned to the MPU requirement.
+   */
+
+  log2  = (int)mpu_log2regionfloor(usize);
+  DEBUGASSERT((SRAM1_END & ((1 << log2) - 1)) == 0);
+
+  usize = (1 << log2);
+  ubase = SRAM1_END - usize;
+
+  /* Return the user-space heap settings */
+
+  up_ledon(LED_HEAPALLOCATE);
+  *heap_start = (FAR void*)ubase;
+  *heap_size  = usize;
+
+  /* Allow user-mode access to the user heap memory */
+
+   stm32_mpu_uheap((uintptr_t)ubase, usize);
+#else
+
+  /* Return the heap settings */
+
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
   *heap_size  = SRAM1_END - g_idle_topstack;
+#endif
 }
+
+/****************************************************************************
+ * Name: up_allocate_kheap
+ *
+ * Description:
+ *   For the kernel build (CONFIG_NUTTX_KERNEL=y) with both kernel- and
+ *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
+ *   (and protects) the kernel-space heap.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+{
+  /* Get the unaligned size and position of the user-space heap.
+   * This heap begins after the user-space .bss section at an offset
+   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
+   */
+
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  size_t    usize = SRAM1_END - ubase;
+  int       log2;
+
+  DEBUGASSERT(ubase < (uintptr_t)SRAM1_END);
+
+  /* Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the SRAM1_END
+   * is aligned to the MPU requirement.
+   */
+
+  log2  = (int)mpu_log2regionfloor(usize);
+  DEBUGASSERT((SRAM1_END & ((1 << log2) - 1)) == 0);
+
+  usize = (1 << log2);
+  ubase = SRAM1_END - usize;
+
+  /* Return the kernel heap settings (i.e., the part of the heap region
+   * that was not dedicated to the user heap).
+   */
+
+  *heap_start = (FAR void*)USERSPACE->us_bssend;
+  *heap_size  = ubase - (uintptr_t)USERSPACE->us_bssend;
+}
+#endif
 
 /****************************************************************************
  * Name: up_addregion
@@ -386,16 +485,32 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-  /* Add the STM32F20xxx/STM32F40xxx CCM SRAM heap region. */
-
 #ifndef CONFIG_STM32_CCMEXCLUDE
-   kmm_addregion((FAR void*)SRAM2_START, SRAM2_END-SRAM2_START);
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+
+  /* Allow user-mode access to the STM32F20xxx/STM32F40xxx CCM SRAM heap */
+
+  stm32_mpu_uheap((uintptr_t)SRAM2_START, SRAM2_END-SRAM2_START);
+
 #endif
 
-   /* Add the external FSMC SRAM heap region. */
+  /* Add the STM32F20xxx/STM32F40xxx CCM SRAM user heap region. */
+
+  kumm_addregion((FAR void*)SRAM2_START, SRAM2_END-SRAM2_START);
+#endif
 
 #ifdef CONFIG_STM32_FSMC_SRAM
-   kmm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+
+  /* Allow user-mode access to the FSMC SRAM user heap memory */
+
+   stm32_mpu_uheap((uintptr_t)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+
+#endif
+
+   /* Add the external FSMC SRAM user heap region. */
+
+   kumm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 #endif
 }
 #endif
