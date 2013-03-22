@@ -52,11 +52,17 @@ ifeq ($(WINTOOL),y)
   USER_LIBPATHS = ${shell for path in $(USERLIBS); do dir=`dirname $(TOPDIR)$(DELIM)$$path`;echo "-L\"`cygpath -w $$dir`\"";done}
   USER_LDSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)memory.ld}"
   USER_LDSCRIPT += -T "${shell cygpath -w $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)user-space.ld}"
+  USER_HEXFILE += "${shell cygpath -w $(TOPDIR)$(DELIM)nuttx_user.hex}"
+  USER_SRECFILE += "${shell cygpath -w $(TOPDIR)$(DELIM)nuttx_user.srec}"
+  USER_BINFILE += "${shell cygpath -w $(TOPDIR)$(DELIM)nuttx_user.bin}"
 else
   # Linux/Cygwin-native toolchain 
   USER_LIBPATHS = $(addprefix -L$(TOPDIR)$(DELIM),$(dir $(USERLIBS)))
   USER_LDSCRIPT = -T$(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)memory.ld
   USER_LDSCRIPT += -T$(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)user-space.ld
+  USER_HEXFILE += "$(TOPDIR)$(DELIM)nuttx_user.hex"
+  USER_SRECFILE += "$(TOPDIR)$(DELIM)nuttx_user.srec"
+  USER_BINFILE += "$(TOPDIR)$(DELIM)nuttx_user.bin"
 endif
 
 USER_LDFLAGS = --undefined=$(ENTRYPT) --entry=$(ENTRYPT) $(USER_LDSCRIPT)
@@ -87,15 +93,15 @@ $(TOPDIR)$(DELIM)nuttx_user.elf: nuttx_user.elf
 	$(Q) cp -a nuttx_user.elf $(TOPDIR)$(DELIM)nuttx_user.elf
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
 	@echo "CP: nuttx_user.hex"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex nuttx_user.elf $(TOPDIR)$(DELIM)nuttx_user.hex
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex nuttx_user.elf $(USER_HEXFILE)
 endif
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
 	@echo "CP: nuttx_user.srec"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O srec nuttx_user.elf $(TOPDIR)$(DELIM)nuttx_user.srec
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O srec nuttx_user.elf $(USER_SRECFILE)
 endif
 ifeq ($(CONFIG_RAW_BINARY),y)
 	@echo "CP: nuttx_user.bin"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary nuttx_user.elf $(TOPDIR)$(DELIM)nuttx_user.bin
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary nuttx_user.elf $(USER_BINFILE)
 endif
 
 $(TOPDIR)$(DELIM)User.map: nuttx_user.elf

@@ -107,6 +107,7 @@ void lpc17_boardinitialize(void)
   up_ledinit();
 #endif
 }
+
 /****************************************************************************
  * Name: board_initialize
  *

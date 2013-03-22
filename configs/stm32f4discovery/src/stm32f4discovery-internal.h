@@ -280,6 +280,25 @@ void up_ledpminitialize(void);
 void up_pmbuttons(void);
 #endif
 
+/****************************************************************************
+ * Name: nsh_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization for NSH.
+ *
+ *   CONFIG_NSH_ARCHINIT=y :
+ *     Called from the NSH library
+ *
+ *   CONFIG_BOARD_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
+ *   CONFIG_NSH_ARCHINIT=n :
+ *     Called from board_initialize().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NSH_LIBRARY
+int nsh_archinitialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_INTERNAL_H */
 

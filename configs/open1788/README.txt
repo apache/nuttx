@@ -296,7 +296,7 @@ CONFIGURATION
   ----
     This is identical to the nsh configuration below except that NuttX
     is built as a kernel-mode, monolithic module and the user applications
-    are built separately.  It is recommends to use a special make command;
+    are built separately.  Is is recommened to use a special make command;
     not just 'make' but make with the following two arguments:
 
         make pass1 pass2
@@ -306,9 +306,6 @@ CONFIGURATION
     However, for me it is very confusing so I prefer the above make command:
     Make the user-space binaries first (pass1), then make the the kernel-space
     binaries (pass2)
-
-    There are ordering dependencies so, for example, 'make -j 6' fails.
-    'make -j 6 pass1 pass2' does work fine, however.
 
     NOTES:
  

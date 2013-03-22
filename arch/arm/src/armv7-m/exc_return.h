@@ -94,10 +94,10 @@
  */
 
 #if defined(CONFIG_ARMV7M_CMNVECTOR) && defined(CONFIG_ARCH_FPU)
-#  define EXC_RETURN_PRIVTHR       (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE)
+#  define EXC_RETURN_PRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE)
 #else
-#  define EXC_RETURN_PRIVTHR       (EXC_RETURN_BASE | EXC_RETURN_STD_CONTEXT | \
-                                    EXC_RETURN_THREAD_MODE)
+#  define EXC_RETURN_PRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_STD_CONTEXT | \
+                                  EXC_RETURN_THREAD_MODE)
 #endif
 
 /* EXC_RETURN_UNPRIVTHR: Return to unprivileged thread mode. Exception return gets
@@ -105,19 +105,11 @@
  */
 
 #if defined(CONFIG_ARMV7M_CMNVECTOR) && defined(CONFIG_ARCH_FPU)
-#  define EXC_RETURN_UNPRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE | \
-                                    EXC_RETURN_PROCESS_STACK)
+#  define EXC_RETURN_UNPRIVTHR   (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE | \
+                                  EXC_RETURN_PROCESS_STACK)
 #else
-#  define EXC_RETURN_UNPRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_STD_CONTEXT | \
-                                    EXC_RETURN_THREAD_MODE | EXC_RETURN_PROCESS_STACK)
-#endif
-
-/* In the kernel build is not selected, then all threads run in privileged thread
- * mode.
- */
-
-#ifdef CONFIG_NUTTX_KERNEL
-#  define EXC_RETURN             0xfffffff9
+#  define EXC_RETURN_UNPRIVTHR   (EXC_RETURN_BASE | EXC_RETURN_STD_CONTEXT | \
+                                  EXC_RETURN_THREAD_MODE | EXC_RETURN_PROCESS_STACK)
 #endif
 
 /************************Th************************************************************

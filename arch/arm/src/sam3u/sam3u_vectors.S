@@ -65,13 +65,6 @@
 #define IDLE_STACK		(_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 #define HEAP_BASE		(_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 
-/* The Cortex-M3 return from interrupt is unusual.  We provide the following special
- * address to the BX instruction.  The particular value also forces a return to
- * thread mode and covers state from the main stack point, the MSP (vs. the MSP).
- */
-
-#define EXC_RETURN		0xfffffff9
-
 /************************************************************************************************
  * Global Symbols
  ************************************************************************************************/
@@ -406,7 +399,7 @@ sam3u_common:
 	 * actually occurs with interrupts still disabled).
 	 */
 
-	ldr		r14, =EXC_RETURN		/* Load the special value */
+	ldr		r14, =EXC_RETURN_PRIVTHR	/* Load the special value */
 #endif
 
     /* Restore the interrupt state */

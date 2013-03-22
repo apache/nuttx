@@ -181,7 +181,7 @@ extern "C"
  ****************************************************************************/
 
 #if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
-void task_startup(main_t entrypt, int argc, FAR char *argv[]);
+void task_startup(main_t entrypt, int argc, FAR char *argv[]) noreturn_function;
 #endif
 
 /****************************************************************************

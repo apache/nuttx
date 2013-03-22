@@ -4423,6 +4423,8 @@
 	* drivers/st7567.c/h and include/nuttx/lcd/st7567.h:  Driver for
 	  the the ST7567 LCD Display Module from Univision Technology Inc.
 	  contributed by Manikandan.S (2013-03-22).
-	* configs/zkit-arm-1769:  Now supports the ST7567 LCD display\
+	* configs/zkit-arm-1769:  Now supports the ST7567 LCD display
 	  module.  Added an nxhello configurtion for testing (Manikandan.S,
 	  2013-03-22).
+	* configs/stm32f4discovery/kostest:  Add a kernel mode version
+	  of the OS test for the STM32F4Discovery board (2013-03-22).
