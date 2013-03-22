@@ -1,10 +1,10 @@
-############################################################################
-# configs/zkit-arm-1769/src/Makefile
+#!/bin/bash
+# configs/zkit-arm-1769/nxhello/setenv.sh
 #
 #   Copyright (C) 2013 Zilogic Systems. All rights reserved.
-#   Author: BabuSubashChandar <code@zilogic.com>
+#   Author: Manikandan <code@zilogic.com>
 #
-# Based on configs/lpcxpresso-lpc1768/src/Makefile
+# Based on configs/lpcxpresso-lpc1768/thttpd/setenv.sh
 #
 #   Copyright (C) 2011 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -36,75 +36,37 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
--include $(TOPDIR)/Make.defs
+if [ "$_" = "$0" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-ASRCS =
-CSRCS = up_boot.c up_leds.c up_ssp.c up_buttons.c up_lcd.c
+WD=`pwd`
+if [ ! -x "setenv.sh" ]; then
+  echo "This script must be executed from the top-level NuttX build directory"
+  exit 1
+fi
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += up_nsh.c
-endif
+if [ -z "${PATH_ORIG}" ]; then
+  export PATH_ORIG="${PATH}"
+fi
 
-ifeq ($(CONFIG_USBMSC),y)
-CSRCS += up_usbmsc.c
-endif
+# This is where the buildroot might reside on a Linux or Cygwin system
+# A minimal buildroot version with the NXFLAT tools is always required
+# for this configuration in order to buildthe THTTPD CGI programs
+export BUILDROOT_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 
-ifeq ($(CONFIG_ADC),y)
-CSRCS += up_adc.c
-endif
+# This is the default install location for Code Red on Linux
+#export TOOLCHAIN_BIN="/usr/local/LPCXpresso/tools/bin"
 
-ifeq ($(CONFIG_DAC),y)
-CSRCS += up_dac.c
-endif
+# This the Cygwin path to the LPCXpresso 3.6 install location under Windows
+#export TOOLCHAIN_BIN="/cygdrive/c/nxp/lpcxpresso_3.6/Tools/bin"
 
-ifeq ($(CONFIG_CAN),y)
-CSRCS += up_can.c
-endif
+# This is the path to the LPCXpression tool subdirectory
+export LPCTOOL_DIR="${WD}/configs/zkit-arm-1769/tools"
 
-AOBJS = $(ASRCS:.S=$(OBJEXT))
-COBJS = $(CSRCS:.c=$(OBJEXT))
+# Add the path to the toolchain to the PATH varialble
+export PATH="${LPCTOOL_DIR}:${BUILDROOT_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
-
-ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(WINTOOL),y)
-  CFLAGS += -I "${shell cygpath -w $(TOPDIR)/sched}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
-else
-  CFLAGS += -I$(TOPDIR)/sched
-  CFLAGS += -I$(ARCH_SRCDIR)/chip
-  CFLAGS += -I$(ARCH_SRCDIR)/common
-  CFLAGS += -I$(ARCH_SRCDIR)/armv7-m
-endif
-
-all: libboard$(LIBEXT)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
-
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
-
-depend: .depend
-
-clean:
-	$(call DELFILE, libboard$(LIBEXT))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep
+echo "PATH : ${PATH}"
