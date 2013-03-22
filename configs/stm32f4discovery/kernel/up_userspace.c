@@ -56,8 +56,8 @@
 #  error "CONFIG_NUTTX_USERSPACE not defined"
 #endif
 
-#if CONFIG_NUTTX_USERSPACE != 0x08018000
-#  error "CONFIG_NUTTX_USERSPACE must be 0x08018000 to match memory.ld"
+#if CONFIG_NUTTX_USERSPACE != 0x08020000
+#  error "CONFIG_NUTTX_USERSPACE must be 0x08020000 to match memory.ld"
 #endif
 
 /****************************************************************************

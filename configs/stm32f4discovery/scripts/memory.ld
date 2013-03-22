@@ -36,19 +36,35 @@
 /* The STM32F407VG has 1024Kb of FLASH beginning at address 0x0800:0000 and
  * 192Kb of SRAM. SRAM is split up into three blocks:
  *
- * 1) 112Kb of SRAM beginning at address 0x2000:0000
- * 2)  16Kb of SRAM beginning at address 0x2001:c000
- * 3)  64Kb of CCM SRAM beginning at address 0x1000:0000
+ * 1) 112KB of SRAM beginning at address 0x2000:0000
+ * 2)  16KB of SRAM beginning at address 0x2001:c000
+ * 3)  64KB of CCM SRAM beginning at address 0x1000:0000
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in
  * the 0x0800:0000 address
  * range.
  *
- * For MPU support, the kernel-mode NuttX section is assumed to be 96Kb of
- * FLASH and 4Kb of SRAM.  That, of course, can be optimized as needed (See
- * also configs/stm32f4discovery/scripts/kernel-space.ld).  A detailed memory map
- * for the CPU SRAM region is as follows:
+ * For MPU support, the kernel-mode NuttX section is assumed to be 128Kb of
+ * FLASH and 4Kb of SRAM.  That is an excessive amount for the kernel which
+ * should fit into 64KB and, of course, can be optimized as needed (See
+ * also configs/stm32f4discovery/scripts/kernel-space.ld).  Allowing the
+ * additional does permit addition debug instrumentation to be added to the
+ * kernel space without overflowing the partition.
+ *
+ * Alignment of the user space FLASH partition is also a critical factor:
+ * The user space FLASH partition will be spanned with a single region of
+ * size 2**n bytes.  The alignment of the user-space region must be the same.
+ * As a consequence, as the user-space increases in size, the alignmment
+ * requirement also increases.
+ *
+ * This alignment requirement means that the largest user space FLASH region
+ * you can have will be 512KB at it would have to be positioned at
+ * 0x08800000.  If you change this address, don't forget to chagne the
+ * CONFIG_NUTTX_USERSPACE configuration setting to match and to modify
+ * the check in kernel/userspace.c.
+ *
+ * A detailed memory map for the 112KB SRAM region is as follows:
  *
  *   0x20000 0000:  Kernel .data region.  Typical size: 0.1KB
  *   ------- ----   Kernel .bss  region.  Typical size: 1.8KB
@@ -68,8 +84,8 @@ MEMORY
 {
     /* 1024Kb FLASH */
 
-    kflash (rx)      : ORIGIN = 0x08000000, LENGTH = 96K
-    uflash (rx)      : ORIGIN = 0x08018000, LENGTH = 928K
+    kflash (rx)      : ORIGIN = 0x08000000, LENGTH = 128K
+    uflash (rx)      : ORIGIN = 0x08020000, LENGTH = 896K
 
     /* 112Kb of contiguous SRAM */
 

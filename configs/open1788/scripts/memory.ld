@@ -34,15 +34,28 @@
  ****************************************************************************/
 
 /* The LPC1788 has 512Kb of FLASH beginning at address 0x0000:0000 and
- * 96Kb of total SRAM: 64Kb of SRAM in the CPU block beginning at address
- * 0x10000000 and 32Kb of Peripheral SRAM in two banks, 8Kb at addresses
- * 0x20000000 bank0 first and 8kb at 0x20002000 at bank0 second. And 16Kb
+ * 96KB of total SRAM: 64KB of SRAM in the CPU block beginning at address
+ * 0x10000000 and 32Kb of Peripheral SRAM in two banks, 8KB at addresses
+ * 0x20000000 bank0 first and 8KB at 0x20002000 at bank0 second. And 16KB
  * at 0x20004000 on bank1.
  *
- * For MPU support, the kernel-mode NuttX section is assumed to be 64Kb of
- * FLASH and 4Kb of SRAM.  That, of course, can be optimized as needed (See
- * also configs/open1788/scripts/kernel-space.ld).  A detailed memory map
- * for the CPU SRAM region is as follows:
+ * For MPU support, the kernel-mode NuttX section is assumed to be 64KB of
+ * FLASH and 4KB of SRAM.  That, of course, can be optimized as needed (See
+ * also configs/open1788/scripts/kernel-space.ld).
+ *
+ * Alignment of the user space FLASH partition is a critical factor: The
+ * user space FLASH partition will be spanned with a single region of size
+ * 2**n bytes.  The alignment of the user-space region must be the same.  As
+ * a consequence, as the user-space increases in size, the alignmment
+ * requirement also increases.
+ *
+ * This alignment requirement means that the largest user space FLASH region
+ * you can have will be 256KB at it would have to be positioned at
+ * 0x00400000.  If you change this address, don't forget to chagne the
+ * CONFIG_NUTTX_USERSPACE configuration setting to match and to modify
+ * the check in kernel/userspace.c.
+ *
+ * A detailed memory map for the 64KB CPU SRAM region is as follows:
  *
  *   0x10000 0000:  Kernel .data region.  Typical size: 0.1KB
  *   ------- ----   Kernel .bss  region.  Typical size: 1.8KB
