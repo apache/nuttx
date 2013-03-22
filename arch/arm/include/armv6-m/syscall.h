@@ -249,7 +249,14 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 static inline void signal_handler_return(void) noreturn_function;
 static inline void signal_handler_return(void)
 {
-  sys_call0(SYS_signal_handler_return);
+  __asm__ __volatile__
+  (
+    " mov r0, %0\n"
+    " svc %1\n"
+    :
+    : "i" (SYS_signal_handler_return), "i"(SYS_syscall)
+    : "memory"
+  );
 }
 #endif
 

@@ -404,8 +404,8 @@ int up_svcall(int irq, FAR void *context)
           regs[REG_R1]         = regs[REG_R2]; /* signal */
           regs[REG_R2]         = regs[REG_R3]; /* info */
 
-          /* The last parameter, arg, is trickier.  The arg parameter will
-           * reside at an offset of 4 from the stack pointer.
+          /* The last parameter, ucontext, is trickier.  The ucontext
+           * parameter will reside at an offset of 4 from the stack pointer.
            */
 
           regs[REG_R3]         = *(uint32_t*)(regs[REG_SP+4]);
@@ -433,6 +433,7 @@ int up_svcall(int irq, FAR void *context)
 
           regs[REG_PC]         = rtcb->xcp.sigreturn;
           regs[REG_EXC_RETURN] = EXC_RETURN_PRIVTHR;
+          rtcb->xcp.sigreturn  = 0;
         }
         break;
 #endif
@@ -482,7 +483,7 @@ int up_svcall(int irq, FAR void *context)
 #if defined(CONFIG_DEBUG_SYSCALL) || defined(CONFIG_DEBUG_SVCALL)
 # ifndef CONFIG_DEBUG_SVCALL
   if (cmd > SYS_switch_context)
-# elif
+# else
   if (regs != current_regs)
 # endif
     {

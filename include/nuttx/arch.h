@@ -534,7 +534,7 @@ void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__) && !defined(CONFIG_DISABLE_SIGNALS)
 void up_signal_handler(_sa_sigaction_t sighand, int signo,
-                       FAR siginfo_t *info, FAR void *ucontext);
+                       FAR siginfo_t *info, FAR void *ucontext) noreturn_function;
 #endif
 
 /****************************************************************************

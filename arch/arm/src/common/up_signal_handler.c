@@ -93,8 +93,8 @@ void up_signal_handler(_sa_sigaction_t sighand, int signo,
 {
   /* Let sys_call4() do all of the work */
 
-  sys_call4(SYS_signal_handler, (uintptr_t)sighand, (uintptr_t)signo,
-            (uintptr_t)info, (uintptr_t)ucontext);
+  (void)sys_call4(SYS_signal_handler, (uintptr_t)sighand, (uintptr_t)signo,
+                  (uintptr_t)info, (uintptr_t)ucontext);
 }
 
 #endif /* CONFIG_NUTTX_KERNEL && __KERNEL__ && !CONFIG_DISABLE_SIGNALS */
