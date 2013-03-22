@@ -60,7 +60,7 @@
  * following definitions must be provided to specify the size and
  * location of internal(system) SRAM:
  *
- * SRAM1_END            : End address (+1) of SRAM (F1 family only, the
+ * CONFIG_DRAM_END            : End address (+1) of SRAM (F1 family only, the
  *                            : F4 family uses the a priori end of SRAM)
  *
  * The F4 family also contains internal CCM SRAM.  This SRAM is different
@@ -90,7 +90,7 @@
 #endif
 
 /* For the STM312F10xxx family, all internal SRAM is in one contiguous block
- * starting at g_idle_topstack and extending through SRAM1_END (my apologies for
+ * starting at g_idle_topstack and extending through CONFIG_DRAM_END (my apologies for
  * the bad naming).  In addition, external FSMC SRAM may be available.
  */
 
@@ -98,7 +98,7 @@
 
    /* Set the end of system SRAM */
 
-#  define SRAM1_END SRAM1_END
+#  define SRAM1_END CONFIG_DRAM_END
 
    /* Check if external FSMC SRAM is provided */
 
@@ -132,7 +132,7 @@
 
    /* Set the end of system SRAM */
 
-#  define SRAM1_END SRAM1_END
+#  define SRAM1_END CONFIG_DRAM_END
 
    /* Set the range of CCM SRAM as well (although we may not use it) */
 
