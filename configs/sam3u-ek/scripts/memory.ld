@@ -33,17 +33,30 @@
  *
  ****************************************************************************/
 
-/* The AT91SAM3U-4 has 256Kb of FLASH beginning at address 0x0008:0000,
- * 32Kb of SRAM beginning at address 0x2000:0000, and 16Kb of SRAM beginning
+/* The AT91SAM3U-4 has 256KB of FLASH beginning at address 0x0008:0000,
+ * 32KB of SRAM beginning at address 0x2000:0000, and 16Kb of SRAM beginning
  * at address 0x2008:000 (used only for heap).  When booting from FLASH,
  * FLASH memory is aliased to address 0x0000:0000 where the code expects to
  * begin execution by jumping to the entry point in the 0x0800:0000 address
  * range.
  *
- * For MPU support, the kernel-mode NuttX section is assumed to be 64Kb of
- * FLASH and 4Kb of SRAM.  That, of course, can be optimized as needed (See
- * also configs/open1788/scripts/kernel-space.ld).  A detailed memory map
- * for the CPU SRAM region is as follows:
+ * For MPU support, the kernel-mode NuttX section is assumed to be 64KB of
+ * FLASH and 4KB of SRAM.  That, of course, can be optimized as needed (See
+ * also configs/open1788/scripts/kernel-space.ld).
+ *
+ * Alignment of the user space FLASH partition is a critical factor: The
+ * user space FLASH partition will be spanned with a single region of size
+ * 2**n bytes.  The alignment of the user-space region must be the same.  As
+ * a consequence, as the user-space increases in size, the alignmment
+ * requirement also increases.
+ *
+ * This alignment requirement means that the largest user space FLASH region
+ * you can have will be 2128KB at it would have to be positioned at
+ * 0x000a0000.  If you change this address, don't forget to chagne the
+ * CONFIG_NUTTX_USERSPACE configuration setting to match and to modify
+ * the check in kernel/userspace.c.
+ *
+ * A detailed memory map for the 16Kb SRAM region is as follows:
  *
  *   0x20000 0000:  Kernel .data region.  Typical size: 0.1KB
  *   ------- ----   Kernel .bss  region.  Typical size: 1.8KB
