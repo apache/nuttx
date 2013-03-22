@@ -1,7 +1,7 @@
 ############################################################################
 # configs/stm32f4discovery/src/Makefile
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@ ifeq ($(CONFIG_WATCHDOG),y)
 CSRCS += up_watchdog.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
+ifeq ($(CONFIG_NSH_LIBRARY),y)
 CSRCS += up_nsh.c
 endif
 

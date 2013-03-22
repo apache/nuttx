@@ -1109,10 +1109,20 @@ Where <subdir> is one of the following:
        on your system and that you have the full path to the installed genromfs
        executable in PATH variable (see apps/examples/README.txt)
 
-  ostest:
-  ------
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
+  kostest:
+  -------
+    This is identical to the ostest configuration below except that NuttX
+    is built as a kernel-mode, monolithic module and the user applications
+    are built separately.  Is is recommened to use a special make command;
+    not just 'make' but make with the following two arguments:
+
+        make pass1 pass2
+
+    In the normal case (just 'make'), make will attempt to build both user-
+    and kernel-mode blobs more or less interleaved.  This actual works!
+    However, for me it is very confusing so I prefer the above make command:
+    Make the user-space binaries first (pass1), then make the the kernel-space
+    binaries (pass2)
 
     NOTES:
  
@@ -1125,41 +1135,27 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. Default toolchain:
+    2. This is the default platform/toolchain in the configuration:
 
-       CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux / Mac OS X
+       CONFIG_HOST_WINDOWS=y                   : Windows
+       CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
 
-    3. By default, this project assumes that you are *NOT* using the DFU
-       bootloader.
- 
-    4. If you use the Atollic toolchain, then the FPU test can be enabled in the
-      examples/ostest by adding the following your NuttX configuration file:
+       This is easily changed by modifying the configuration.
 
-      -CONFIG_ARCH_FPU=n              : Enable FPU support
-      +CONFIG_ARCH_FPU=y
+    3. At the end of the build, there will be several files in the top-level
+       NuttX build directory:
 
-      -CONFIG_STM32_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
-      +CONFIG_STM32_CODESOURCERYW=n
+       PASS1:
+         nuttx_user.elf    - The pass1 user-space ELF file
+         nuttx_user.hex    - The pass1 Intel HEX format file (selected in defconfig)
+         User.map          - Symbols in the user-space ELF file
 
-      -CONFIG_STM32_ATOLLIC_LITE=n   : Enable *one* the Atollic toolchains
-       CONFIG_STM32_ATOLLIC_PRO=n
-      -CONFIG_STM32_ATOLLIC_LITE=y   : The "Lite" version
-       CONFIG_STM32_ATOLLIC_PRO=n    : The "Pro" version
+       PASS2:
+         nuttx             - The pass2 kernel-space ELF file
+         nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
+         System.map        - Symbols in the kernel-space ELF file
 
-      -CONFIG_INTELHEX_BINARY=y       : Suppress generation FLASH download formats
-      +CONFIG_INTELHEX_BINARY=n       : (Only necessary with the "Lite" version)
-
-      -CONFIG_HAVE_CXX=y              : Suppress generation of C++ code
-      +CONFIG_HAVE_CXX=n              : (Only necessary with the "Lite" version)
-
-      -CONFIG_SCHED_WAITPID=y         : Enable the waitpid() API needed by the FPU test
-      +CONFIG_SCHED_WAITPID=n
-
-      The FPU test also needs to know the size of the FPU registers save area in
-      bytes (see arch/arm/include/armv7-m/irq_lazyfpu.h):
-
-      -CONFIG_EXAMPLES_OSTEST_FPUSIZE=(4*33)
- 
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
@@ -1427,6 +1423,57 @@ Where <subdir> is one of the following:
      http://www.nuttx.org/doku.php?id=wiki:graphics:nxgraphics for a description
      of the fat, flat line bug.
 
+  ostest:
+  ------
+    This configuration directory, performs a simple OS test using
+    apps/examples/ostest.
+
+    NOTES:
+ 
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Default toolchain:
+
+       CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux / Mac OS X
+
+    3. By default, this project assumes that you are *NOT* using the DFU
+       bootloader.
+ 
+    4. If you use the Atollic toolchain, then the FPU test can be enabled in the
+      examples/ostest by adding the following your NuttX configuration file:
+
+      -CONFIG_ARCH_FPU=n              : Enable FPU support
+      +CONFIG_ARCH_FPU=y
+
+      -CONFIG_STM32_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
+      +CONFIG_STM32_CODESOURCERYW=n
+
+      -CONFIG_STM32_ATOLLIC_LITE=n   : Enable *one* the Atollic toolchains
+       CONFIG_STM32_ATOLLIC_PRO=n
+      -CONFIG_STM32_ATOLLIC_LITE=y   : The "Lite" version
+       CONFIG_STM32_ATOLLIC_PRO=n    : The "Pro" version
+
+      -CONFIG_INTELHEX_BINARY=y       : Suppress generation FLASH download formats
+      +CONFIG_INTELHEX_BINARY=n       : (Only necessary with the "Lite" version)
+
+      -CONFIG_HAVE_CXX=y              : Suppress generation of C++ code
+      +CONFIG_HAVE_CXX=n              : (Only necessary with the "Lite" version)
+
+      -CONFIG_SCHED_WAITPID=y         : Enable the waitpid() API needed by the FPU test
+      +CONFIG_SCHED_WAITPID=n
+
+      The FPU test also needs to know the size of the FPU registers save area in
+      bytes (see arch/arm/include/armv7-m/irq_lazyfpu.h):
+
+      -CONFIG_EXAMPLES_OSTEST_FPUSIZE=(4*33)
+ 
   pm:
   --
     This is a configuration that is used to test STM32 power management, i.e.,

@@ -101,13 +101,13 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
+#  if defined(CONFIG_DEBUG) || !defined(CONFIG_NSH_ARCHINIT)
 #    define message(...) lowsyslog(__VA_ARGS__)
 #  else
 #    define message(...) printf(__VA_ARGS__)
 #  endif
 #else
-#  ifdef CONFIG_DEBUG
+#  if defined(CONFIG_DEBUG) || !defined(CONFIG_NSH_ARCHINIT)
 #    define message lowsyslog
 #  else
 #    define message printf
@@ -123,6 +123,13 @@
  *
  * Description:
  *   Perform architecture specific initialization
+ *
+ *   CONFIG_NSH_ARCHINIT=y :
+ *     Called from the NSH library
+ *
+ *   CONFIG_BOARD_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
+ *   CONFIG_NSH_ARCHINIT=n :
+ *     Called from board_initialize().
  *
  ****************************************************************************/
 
