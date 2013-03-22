@@ -48,8 +48,10 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
+#include "mpu.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "stm32_mpuinit.h"
 
 /****************************************************************************
  * Private Definitions
