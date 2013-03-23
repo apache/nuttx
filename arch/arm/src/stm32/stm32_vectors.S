@@ -52,8 +52,6 @@
  * arch/arm/src/armv7-m/up_vectors.S)
  */
 
-#ifndef CONFIG_ARMV7M_CMNVECTOR
-
 /************************************************************************************
  * Preprocessor Definitions
  ************************************************************************************/
@@ -77,11 +75,15 @@
  * Global Symbols
  ************************************************************************************/
 
-	.globl		__start
-
 	.syntax		unified
 	.thumb
 	.file		"stm32_vectors.S"
+
+/* Check if common ARMv7 interrupt vectoring is used (see arch/arm/src/armv7-m/up_vectors.S) */
+
+#ifndef CONFIG_ARMV7M_CMNVECTOR
+
+	globl		__start
 
 /************************************************************************************
  * Macros
