@@ -4434,4 +4434,10 @@
 	  in the kernel build.  The original implementation was C-based
 	  and simpler.  However, the C code intermixed with SVC calls was
 	  not properly preserving registers.  The more complex, assembly
-	  language version does not suffer from these issues  (2013-03-23).
+	  language version does not suffer from these issues.  I believe
+	  the the kernel build can not be called "feature complete"
+	  (2013-03-23).
+	* binfmt/binfmt_execmodule.c:  Here is a place where I forget
+	  to update the call to sched_releasetcb() to pass the thread
+	  type as the second parameter (2013-03-23).
+
