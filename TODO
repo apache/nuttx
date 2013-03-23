@@ -10,7 +10,7 @@ nuttx/
   (1)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
-  (5)  Kernel Build
+  (6)  Kernel Build
   (2)  C++ Support
   (6)  Binary loaders (binfmt/)
  (16)  Network (net/, drivers/net)
@@ -424,6 +424,18 @@ o Kernel Build
   Status:      Open
   Priority:    Low-Medium.  Right now, I do not know if these syscalls are a
                real performance issue or not.
+
+  Title:       ARMv6/7-M SYSCALL PERFORMANCE IMPROVEMENT
+  Description: Currently the code issues an SVCall to go from user- to kernel-mode
+               and another go return to user-mode.  The second is unnecessary:
+               If there were a stub in user-space that just set the unprivileged
+               mode in the CONTROL register and returned, then the dispatch_syscall()
+               function could just jump to the stub instead of using second SVCall.
+               Hmmm... would this expose a security whole by executing in user-space
+               with privileges?  That already happens when the userspace memory
+               allocators are called.
+  Status:      Open
+  Priority:    Low (unless performance becomes an issue).
 
 o C++ Support
   ^^^^^^^^^^^
