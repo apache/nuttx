@@ -57,7 +57,8 @@
  *
  * For the same reasons, the maximum size of the SRAM mapping is limited to
  * 4KB.  Both of these alignment limitations could be reduced by using
- * multiple regions to map the FLASH/SDRAM range.
+ * multiple regions to map the FLASH/SDRAM range or perhaps with some
+ * clever use of subregions.
  *
  * A detailed memory map for the 64KB CPU SRAM region is as follows:
  *
