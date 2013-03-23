@@ -7,9 +7,10 @@ standards, things that could be improved, and ideas for enhancements.
 nuttx/
 
  (10)  Task/Scheduler (sched/)
-  (2)  Memory Managment (mm/)
-  (4)  Signals (sched/, arch/)
+  (1)  Memory Managment (mm/)
+  (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
+  (5)  Kernel Build
   (2)  C++ Support
   (6)  Binary loaders (binfmt/)
  (16)  Network (net/, drivers/net)
@@ -19,7 +20,7 @@ nuttx/
   (5)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
-  (7)  Build system / Toolchains
+  (6)  Build system / Toolchains
   (5)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
@@ -253,44 +254,6 @@ o Memory Managment (mm/)
   Priority:    Medium/Low, a good feature to prevent memory leaks but would
                have negative impact on memory usage and code size.
 
-  Title:       MEMORY MANAGEMENT IN THE KERNEL BUILD
-  Description: At present, there are two options for memory management in
-               the NuttX kernel build:
-
-               1) Have only a single user-space heap and heap allocator that
-                  is shared by both kernel- and user-modes.  PROs:  Simple,
-                  CONs:  Awkward architecture and no security for kernel-mode
-                  allocations.
-
-               2) Two separate heap partitions and two copies of the memory
-                  allocators.  One heap partition is protected and the the
-                  is user accessible.  PROs: Still simple, CONs:  Partitioning
-                  the heap will not make the best use of heap memory.
-
-                A complication is that the kernel needs to allocate both
-                protected, kernel private as well as user accessible memory
-                (such as for stacks).  A more traditional approarch would be
-                something like:
-
-               3) Implement sbrk(). The would still be kernel- and user-mode
-                  instances of the memory allocators.  Each would sbrk() as
-                  necessary to extend their heap; the pages allocated for
-                  the kernel-mode allocator would be protected but the pages
-                  allocated for the user-mode allocator would not.  PROs:
-                  Meets all of the needs.  CONs:  Complex. Memory losses,
-                  due to quanitization.  sbrk'ed memory would not be 
-                  contiguous; this would limit the sizes of allocations
-                  due to the physical pages.
-
-                  This feels like overkill for this class of processor.
-                  This approach probably could not be implemented using
-                  a simple memory protection unit (such as that of the
-                  ARM Cortex-M family).
-
-               See other kernel build issues under "Build system"
-  Status:      Open
-  Priority:    Low, unless you need a working kernel build now.
-
 o Signals (sched/, arch/)
   ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -318,14 +281,6 @@ o Signals (sched/, arch/)
                to map bits appropriately.
   Status:      Open
   Priority:    Low. Even if there are only 31 usable signals, that is still a lot.
-
-  Title:       USER-MODE SIGNALS
-  Description: In a kernel build (CONFIG_NUTTX_KERNEL). Signal handlers should
-               execute in user mode.  This is to prevent a security hole where
-               user code can get control of the system in kernel mode if the signal
-               executes in kernel mode.
-  Status:      Open
-  Priority:    Low
 
 o pthreads (sched/)
   ^^^^^^^^^^^^^^^^^
@@ -393,6 +348,82 @@ o pthreads (sched/)
                complexity; in all other ways I believe that it is the inferior
                solution. So I discarded a few hours of programming. Not a
                big loss from the experience I gained."
+
+o Kernel Build
+  ^^^^^^^^^^^^
+
+  Title:       KERNEL BUILD MODE ISSUES - GRAPHICS/NSH PARTITIONING.
+  Description: In the kernel build mode (where NuttX is built as a monlithic
+               kernel and user code must trap into the protected kernel via
+               syscalls), the single user mode cannot be supported.  In this
+               built configuration, only the multiple user mode can be supported
+               with the NX server residing inside of the kernel space.  In
+               this case, most of the user end functions in graphics/nxmu
+               must be moved to libc/nx and those functions must be built into
+               libuser.a to be linked with the user-space code.
+               A similar issue exists in NSH that uses some internal OS
+               interfaces that would not be available in a kernel build
+               (such as foreach_task, foreach_mountpoint, etc.).
+
+               See also "Memory Management" for another kernel build issue.
+  Status:      Open
+  Priority:    Low -- the kernel build configuration is not fully fielded
+               yet.
+
+  Title:       NSH ps AND mount COMMANDS DISABLED
+  Description: NSH's ps and mount command (with not arguments) cannot currently
+               be supported in the kernel build.  That is because these commands
+               depend on kernel internal, non-standard interfaces that are not
+               accessible in user-space.  These are both critical NSH commands
+               and need to be supported.
+  Status:      Open
+  Priority:    High.  I really like these commands!
+
+  Title:       LOAD-ABLE MODULE SUPPORT UNVERIFIED
+  Description: It has not been verified if NXFLAT and ELF modules work correctly
+               in the kernel build.  They should load into user-space memory.
+  Status:      Open
+  Priority:    Medium.  There is no configuration that uses NXFLAT or ELF with
+               a kernel build now.
+
+  Title:       C++ CONSTRUCTORS HAVE TOO MANY PRIVILEGES
+  Description: When a C++ ELF module is loaded, its C++ constructors are called
+               via sched/task_starthook.c logic.  This logic runs in kernel mode.
+               The is a security hole because the user code runs with kernel-
+               priviledges when the constuctor executes.
+
+               Destructors likely have the opposite problem.  The probably try to
+               execute some kernel logic in user mode?  Obviously this needs to
+               be investigated further.
+  Status:      Open
+  Priority:    Low (unless you need build a secure C++ system).
+
+  Title:       TOO MANY SYSCALLS
+  Description: There are a few syscalls that operate very often in user space.
+               Since syscalls are (relatively) time consuming this could be
+               a performance issue.  Here is some numbers that I collected
+               in an application that was doing mostly printf outout:
+
+                 sem_post - 18% of syscalls
+                 sem_wait - 18% of syscalls
+                 getpid   - 59% of syscalls
+                 --------------------------
+                            95% of syscalls
+
+               Obviously system performance could be improved greatly by simply
+               optimizing these functions so that they do not need to system calls
+               so frequently.  getpid() is (I believe) part of the re-entrant
+               semaphore logic.  Something like TLS might be used to retain the
+               thread's ID locally.
+
+               Linux, for example, has functions call up() and down().  up()
+               increments the semaphore count but does not call into the kernel
+               unless incrementing the count unblocks a task; similarly, down
+               decrements the count and does not call into the the kernel unless
+               the count becomes negative the caller must be blocked.
+  Status:      Open
+  Priority:    Low-Medium.  Right now, I do not know if these syscalls are a
+               real performance issue or not.
 
 o C++ Support
   ^^^^^^^^^^^
@@ -1087,24 +1118,6 @@ o Build system
                   some new argument, perhaps -u.
   Status:      Open
   Priority:    Low.
-
-  Title:       KERNEL BUILD MODE ISSUES - GRAPHICS/NSH PARTITIONING.
-  Description: In the kernel build mode (where NuttX is built as a monlithic
-               kernel and user code must trap into the protected kernel via
-               syscalls), the single user mode cannot be supported.  In this
-               built configuration, only the multiple user mode can be supported
-               with the NX server residing inside of the kernel space.  In
-               this case, most of the user end functions in graphics/nxmu
-               must be moved to libc/nx and those functions must be built into
-               libuser.a to be linked with the user-space code.
-               A similar issue exists in NSH that uses some internal OS
-               interfaces that would not be available in a kernel build
-               (such as foreach_task, foreach_mountpoint, etc.).
-
-               See also "Memory Management" for another kernel build issue.
-  Status:      Open
-  Priority:    Low -- the kernel build configuration is not fully fielded
-               yet.
 
   Title:       kconfig-mconf NOT AVAILABLE IN NATIVE WINDOWS BUILD
   Description: NuttX is migrating to the use of the kconfig-frontends kconfig-mconf

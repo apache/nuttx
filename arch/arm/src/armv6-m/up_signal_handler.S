@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/signal/signal_handler.c
+ * arch/arm/srcm/armv6-m/up_signal_handler.S
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,33 +39,16 @@
 
 #include <nuttx/config.h>
 
-#include <signal.h>
-#include <assert.h>
-
 #include <arch/syscall.h>
-#include <nuttx/userspace.h>
 
 #if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
 
 /****************************************************************************
- * Pre-processor Definitions
+ * File info
  ****************************************************************************/
 
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+	.cpu	cortex-m0
+	.file	"up_signal_handler.S"
 
 /****************************************************************************
  * Private Functions
@@ -76,35 +59,57 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: signal_handler
+ * Name: up_signal_handler
  *
  * Description:
  *   This function is the user-space, signal handler trampoline function.  It
- *   is called from up_signal_handler() in user-mode.
+ *   is called from up_signal_dispatch() in user-mode.
  *
  * Inputs:
- *   sighand - The address user-space signal handling function
- *   signo, info, and ucontext - Standard arguments to be passed to the
- *     signal handling function.
+ *   R0 = sighand
+ *     The address user-space signal handling function
+ *   R1-R3 = signo, info, and ucontext
+ *     Standard arguments to be passed to the signal handling function.
  *
  * Return:
  *   None.  This function does not return in the normal sense.  It returns
- *   via signal_handler_return (see include/nuttx/arch.h)
+ *   via the SYS_signal_handler_return (see svcall.h)
  *
  ****************************************************************************/
 
-void signal_handler(_sa_sigaction_t sighand, int signo, FAR siginfo_t *info,
-                    FAR void *ucontext)
-{
-  DEBUGASSERT(sighand);
+	.text
+	.align	2
+	.code	16
+	.thumb_func
+	.globl	up_signal_handler
+	.type	up_signal_handler, function
+up_signal_handler:
 
-  /* Execute the signal handler. */
+	/* Save some register */
 
-  sighand(signo, info, ucontext);
+	push	{r4, r5			/* Save R4 and R5 on the stack */
+	mov		r5, lr			/* Save LR in R5 */
 
-  /* And return from the signal handler */
+	/* Call the signal handler */
 
-  signal_handler_return();
-}
+	mov		r4, r0			/* R4=sighand */
+	mov		r0, r1			/* R0=signo */
+	mov		r1, r2			/* R1=info */
+	mov		r2, r3			/* R2=ucontext */
+	blx		r4				/* Call the signal handler */
+
+	/* Restore the registers */
+
+	mov		lr, r5			/* Restore LR */
+	pop		{r4, r5}		/* Restore R4 and R5 */
+
+	/* Execute the SYS_signal_handler_return SVCall (will not return) */
+
+	mov		r0, #SYS_signal_handler_return
+	svc		0
+	nop
+
+	.size	up_signal_handler, .-up_signal_handler
+	.end
 
 #endif /* CONFIG_NUTTX_KERNEL && !__KERNEL__ */

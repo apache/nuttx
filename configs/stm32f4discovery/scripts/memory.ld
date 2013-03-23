@@ -42,8 +42,7 @@
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in
- * the 0x0800:0000 address
- * range.
+ * the 0x0800:0000 address range.
  *
  * For MPU support, the kernel-mode NuttX section is assumed to be 128Kb of
  * FLASH and 4Kb of SRAM.  That is an excessive amount for the kernel which
@@ -60,9 +59,13 @@
  *
  * This alignment requirement means that the largest user space FLASH region
  * you can have will be 512KB at it would have to be positioned at
- * 0x08800000.  If you change this address, don't forget to chagne the
+ * 0x08800000.  If you change this address, don't forget to change the
  * CONFIG_NUTTX_USERSPACE configuration setting to match and to modify
  * the check in kernel/userspace.c.
+ *
+ * For the same reasons, the maximum size of the SRAM mapping is limited to
+ * 4KB.  Both of these alignment limitations could be reduced by using
+ * multiple regions to map the FLASH/SDRAM range.
  *
  * A detailed memory map for the 112KB SRAM region is as follows:
  *
@@ -74,7 +77,7 @@
  *   ------- ----   Padded to 4KB
  *   0x20000 1000:  User .data region.  Size is variable.
  *   ------- ----   User .bss region  Size is variable.
- *   ------- ----   Beginning of kernel heap.  Size determined by
+ *   0x20000 2000:  Beginning of kernel heap.  Size determined by
  *                  CONFIG_MM_KERNEL_HEAPSIZE.
  *   ------- ----   Beginning of user heap.  Can vary with other settings.
  *   0x20001 c000:  End+1 of CPU RAM
@@ -85,10 +88,12 @@ MEMORY
     /* 1024Kb FLASH */
 
     kflash (rx)      : ORIGIN = 0x08000000, LENGTH = 128K
-    uflash (rx)      : ORIGIN = 0x08020000, LENGTH = 896K
+    uflash (rx)      : ORIGIN = 0x08020000, LENGTH = 128K
+    xflash (rx)      : ORIGIN = 0x08040000, LENGTH = 768K
 
     /* 112Kb of contiguous SRAM */
 
     ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 4K
-    usram (rwx)      : ORIGIN = 0x20001000, LENGTH = 108K
+    usram (rwx)      : ORIGIN = 0x20001000, LENGTH = 4K
+    xsram (rwx)      : ORIGIN = 0x20001000, LENGTH = 104K
 }

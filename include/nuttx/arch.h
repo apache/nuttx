@@ -506,7 +506,7 @@ void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
 #endif
 
 /****************************************************************************
- * Name: up_signal_handler
+ * Name: up_signal_dispatch
  *
  * Description:
  *   In this kernel mode build, this function will be called to execute a
@@ -515,11 +515,10 @@ void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
  *   This kernel-mode stub will then be called transfer control to the user
  *   mode signal handler by calling this function.
  *
- *   Normally the a user-mode signalling handling stub will also execute
- *   before the ultimate signal handler is called.  See
- *   libc/signal/signal_handler.c  This function is the user-space, signal
- *   handler trampoline function.  It is called from up_signal_handler() in
- *   user-mode.
+ *   Normally the a architecture, user-mode signal handling stub will also
+ *   execute before the ultimate signal handler is called.  That stub
+ *   function is the user-space, signal handler trampoline function.  It is
+ *   called from up_signal_dispatch() in user-mode.
  *
  * Inputs:
  *   sighand - The address user-space signal handling function
@@ -528,36 +527,41 @@ void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
  *
  * Return:
  *   None.  This function does not return in the normal sense.  It returns
- *   via signal_handler_return (below)
+ *   via an architecture specific system call made by up_signal_handler()
+ *   (see below).  However, this will look like a normal return by the
+ *   caller of up_signal_dispatch.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__) && !defined(CONFIG_DISABLE_SIGNALS)
-void up_signal_handler(_sa_sigaction_t sighand, int signo,
-                       FAR siginfo_t *info, FAR void *ucontext) noreturn_function;
+void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
+                        FAR siginfo_t *info, FAR void *ucontext);
 #endif
 
 /****************************************************************************
- * Name: signal_handler_return
+ * Name: up_signal_handler
  *
  * Description:
- *   This function is the user-space, signal handler return function.  It
- *   is called from the signal_handler() in user-mode.  This function has the
- *   general prototype:
- *
- *     void signal_handler_return(void);
- *
- *   However, it it not prototyped here because it should be implemented as
- *   an inline function or macro that can be obtain by including the file
- *   include/arch/syscall.h.
+ *   This function is the user-space, signal handler trampoline function that
+ *   must be provided by architecture-specific logic.  It is called from
+ *   up_signal_dispatch() in user-mode.
  *
  * Inputs:
- *   None.
+ *   sighand - The address user-space signal handling function
+ *   signo, info, and ucontext - Standard arguments to be passed to the
+ *     signal handling function.
  *
  * Return:
- *   None.  This function does not return.
+ *   None.  This function does not return in the normal sense.  It returns
+ *   via an architecture specific system call.
  *
  ****************************************************************************/
+
+#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__) && !defined(CONFIG_DISABLE_SIGNALS)
+void up_signal_handler(_sa_sigaction_t sighand, int signo,
+                       FAR siginfo_t *info, FAR void *ucontext)
+       noreturn_function;
+#endif
 
 /****************************************************************************
  * Name: up_allocate_heap

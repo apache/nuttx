@@ -190,7 +190,7 @@ endif
 # USERLIBS is the list of libraries used to build the final user-space
 #   application
 
-NUTTXLIBS = lib/libsched$(LIBEXT) lib/libarch$(LIBEXT)
+NUTTXLIBS = lib/libsched$(LIBEXT)
 USERLIBS =
 
 # Add libraries for syscall support.  The C library will be needed by
@@ -199,9 +199,11 @@ USERLIBS =
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 NUTTXLIBS += lib/libstubs$(LIBEXT) lib/libkc$(LIBEXT) lib/libkmm$(LIBEXT)
-USERLIBS += lib/libproxies$(LIBEXT) lib/libuc$(LIBEXT) lib/libumm$(LIBEXT)
+NUTTXLIBS += lib/libkarch$(LIBEXT)
+USERLIBS  += lib/libproxies$(LIBEXT) lib/libuc$(LIBEXT) lib/libumm$(LIBEXT)
+USERLIBS  += lib/libuarch$(LIBEXT)
 else
-NUTTXLIBS += lib/libc$(LIBEXT) lib/libmm$(LIBEXT)
+NUTTXLIBS += lib/libc$(LIBEXT) lib/libmm$(LIBEXT) lib/libarch$(LIBEXT)
 endif
 
 # Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
@@ -463,17 +465,18 @@ mm/libkmm$(LIBEXT): context
 lib/libkmm$(LIBEXT): mm/libkmm$(LIBEXT)
 	$(Q) install mm/libkmm$(LIBEXT) lib/libkmm$(LIBEXT)
 
+$(ARCH_SRC)/libkarch$(LIBEXT): context
+	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libkarch$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+lib/libkarch$(LIBEXT): $(ARCH_SRC)/libkarch$(LIBEXT)
+	$(Q) install $(ARCH_SRC)/libkarch$(LIBEXT) lib/libkarch$(LIBEXT)
+
+
 sched/libsched$(LIBEXT): context
 	$(Q) $(MAKE) -C sched TOPDIR="$(TOPDIR)" libsched$(LIBEXT) EXTRADEFINES=$(KDEFINE)
 
 lib/libsched$(LIBEXT): sched/libsched$(LIBEXT)
 	$(Q) install sched/libsched$(LIBEXT) lib/libsched$(LIBEXT)
-
-$(ARCH_SRC)/libarch$(LIBEXT): context
-	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT) EXTRADEFINES=$(KDEFINE)
-
-lib/libarch$(LIBEXT): $(ARCH_SRC)/libarch$(LIBEXT)
-	$(Q) install $(ARCH_SRC)/libarch$(LIBEXT) lib/libarch$(LIBEXT)
 
 net/libnet$(LIBEXT): context
 	$(Q) $(MAKE) -C net TOPDIR="$(TOPDIR)" libnet$(LIBEXT) EXTRADEFINES=$(KDEFINE)
@@ -525,6 +528,13 @@ mm/libumm$(LIBEXT): context
 lib/libumm$(LIBEXT): mm/libumm$(LIBEXT)
 	$(Q) install mm/libumm$(LIBEXT) lib/libumm$(LIBEXT)
 
+$(ARCH_SRC)/libuarch$(LIBEXT): context
+	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libuarch$(LIBEXT)
+
+lib/libuarch$(LIBEXT): $(ARCH_SRC)/libuarch$(LIBEXT)
+	$(Q) install $(ARCH_SRC)/libuarch$(LIBEXT) lib/libuarch$(LIBEXT)
+
+
 libxx/libcxx$(LIBEXT): context
 	$(Q) $(MAKE) -C libxx TOPDIR="$(TOPDIR)" libcxx$(LIBEXT)
 
@@ -556,6 +566,12 @@ mm/libmm$(LIBEXT): context
 
 lib/libmm$(LIBEXT): mm/libmm$(LIBEXT)
 	$(Q) install mm/libmm$(LIBEXT) lib/libmm$(LIBEXT)
+
+$(ARCH_SRC)/libarch$(LIBEXT): context
+	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT)
+
+lib/libarch$(LIBEXT): $(ARCH_SRC)/libarch$(LIBEXT)
+	$(Q) install $(ARCH_SRC)/libarch$(LIBEXT) lib/libarch$(LIBEXT)
 
 # pass1 and pass2
 #

@@ -43,6 +43,9 @@ endif
 
 # Common ARM and Cortex-M3 files
 
+CMN_UASRCS =
+CMN_UCSRCS =
+
 CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
 CMN_ASRCS += vfork.S
 
@@ -70,7 +73,8 @@ endif
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c up_stackframe.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CMN_CSRCS += up_signal_handler.c
+CMN_CSRCS += up_signal_dispatch.c
+CMN_UASRCS += up_signal_handler.S
 endif
 endif
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/up_task_start.c
+ * arch/arm/src/common/up_signal_dispatch.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -62,7 +62,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_signal_handler
+ * Name: up_signal_dispatch
  *
  * Description:
  *   In this kernel mode build, this function will be called to execute a
@@ -73,9 +73,9 @@
  *
  *   Normally the a user-mode signalling handling stub will also execute
  *   before the ultimate signal handler is called.  See
- *   libc/signal/signal_handler.c  This function is the user-space, signal
- *   handler trampoline function.  It is called from up_signal_handler() in
- *   user-mode.
+ *   arch/arm/src/armv[6\7]/up_signal_handler.  This function is the 
+ *   user-space, signal handler trampoline function.  It is called from
+ *   up_signal_dispatch() in user-mode.
  *
  * Inputs:
  *   sighand - The address user-space signal handling function
@@ -84,12 +84,14 @@
  *
  * Return:
  *   None.  This function does not return in the normal sense.  It returns
- *   via signal_handler_return (below)
+ *   via an architecture specific system call made by up_signal_handler().
+ *   However, this will look like a normal return by the caller of
+ *   up_signal_dispatch.
  *
  ****************************************************************************/
 
-void up_signal_handler(_sa_sigaction_t sighand, int signo,
-                       FAR siginfo_t *info, FAR void *ucontext)
+void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
+                        FAR siginfo_t *info, FAR void *ucontext)
 {
   /* Let sys_call4() do all of the work */
 

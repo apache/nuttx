@@ -47,6 +47,8 @@
 #include <signal.h>
 #include <pthread.h>
 
+#include <nuttx/arch.h>
+
 #ifdef CONFIG_NUTTX_KERNEL
 
 /****************************************************************************
@@ -202,29 +204,6 @@ void task_startup(main_t entrypt, int argc, FAR char *argv[]) noreturn_function;
 
 #if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
 void pthread_startup(pthread_startroutine_t entrypt, pthread_addr_t arg);
-#endif
-
-/****************************************************************************
- * Name: signal_handler
- *
- * Description:
- *   This function is the user-space, signal handler trampoline function.  It
- *   is called from up_signal_handler() in user-mode.
- *
- * Inputs:
- *   sighand - The address user-space signal handling function
- *   signo, info, and ucontext - Standard arguments to be passed to the
- *     signal handling function.
- *
- * Return:
- *   None.  This function does not return in the normal sense.  It returns
- *   via signal_handler_return (see include/nuttx/arch.h)
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__) && !defined(CONFIG_DISABLE_SIGNALS)
-void signal_handler(_sa_sigaction_t sighand, int signo, FAR siginfo_t *info,
-                    FAR void *ucontext);
 #endif
 
 #undef EXTERN

@@ -101,4 +101,3 @@ up_saveusercontext:
 									 * context switch with r0=1 */
 	.size	up_saveusercontext, .-up_saveusercontext
 	.end
-

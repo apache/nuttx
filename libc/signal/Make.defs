@@ -39,10 +39,6 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 
 CSRCS += sig_emptyset.c sig_fillset.c sig_addset.c sig_delset.c sig_ismember.c
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
-CSRCS += signal_handler.c
-endif
-
 # Add the signal directory to the build
 
 DEPPATH += --dep-path signal

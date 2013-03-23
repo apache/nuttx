@@ -148,8 +148,8 @@ void sig_deliver(FAR struct tcb_s *stcb)
           siginfo_t info;
           memcpy(&info, &sigq->info, sizeof(siginfo_t));
 
-          up_signal_handler(sigq->action.sighandler, sigq->info.si_signo,
-                            &info, NULL);
+          up_signal_dispatch(sigq->action.sighandler, sigq->info.si_signo,
+                             &info, NULL);
         }
       else
 #endif

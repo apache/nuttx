@@ -241,25 +241,6 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
   return reg0;
 }
 
-/* This inline function is used by user-space code in order to return from
- * a signal handler.
- */
-
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
-static inline void signal_handler_return(void) noreturn_function;
-static inline void signal_handler_return(void)
-{
-  __asm__ __volatile__
-  (
-    " mov r0, %0\n"
-    " svc %1\n"
-    :
-    : "i" (SYS_signal_handler_return), "i"(SYS_syscall)
-    : "memory"
-  );
-}
-#endif
-
 /****************************************************************************
  * Public Variables
  ****************************************************************************/

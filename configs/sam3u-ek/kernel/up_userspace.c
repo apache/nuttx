@@ -111,7 +111,7 @@ const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
   /* Signal handler trampoline */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  .signal_handler   = signal_handler,
+  .signal_handler   = up_signal_handler,
 #endif
 
   /* Memory manager entry points (declared in include/nuttx/mm.h) */

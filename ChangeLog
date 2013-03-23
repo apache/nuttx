@@ -4428,3 +4428,10 @@
 	  2013-03-22).
 	* configs/stm32f4discovery/kostest:  Add a kernel mode version
 	  of the OS test for the STM32F4Discovery board (2013-03-22).
+	* nuttx/include/nuttx,  nuttx/configs/sam3u-ek, nuttx/configs/open1788,
+	  nuttx/configs/stm32f4discovery, and nuttx/arch/arm:  Complete
+	  re-archtecting of how signals are dispatched to user-space code
+	  in the kernel build.  The original implementation was C-based
+	  and simpler.  However, the C code intermixed with SVC calls was
+	  not properly preserving registers.  The more complex, assembly
+	  language version does not suffer from these issues  (2013-03-23).
