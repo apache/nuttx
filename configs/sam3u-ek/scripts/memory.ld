@@ -51,10 +51,14 @@
  * requirement also increases.
  *
  * This alignment requirement means that the largest user space FLASH region
- * you can have will be 2128KB at it would have to be positioned at
- * 0x000a0000.  If you change this address, don't forget to chagne the
+ * you can have will be 128KB at it would have to be positioned at
+ * 0x000a0000.  If you change this address, don't forget to change the
  * CONFIG_NUTTX_USERSPACE configuration setting to match and to modify
  * the check in kernel/userspace.c.
+ *
+ * For the same reasons, the maximum size of the SRAM mapping is limited to
+ * 4KB.  Both of these alignment limitations could be reduced by using
+ * multiple regions to map the FLASH/SDRAM range.
  *
  * A detailed memory map for the 16Kb SRAM region is as follows:
  *
@@ -77,12 +81,14 @@ MEMORY
     /* 256Kb FLASH */
 
     kflash (rx)  : ORIGIN = 0x00080000, LENGTH = 64K
-    uflash (rx)  : ORIGIN = 0x00090000, LENGTH = 192K
+    uflash (rx)  : ORIGIN = 0x00090000, LENGTH = 64K
+    xflash (rx)  : ORIGIN = 0x000a0000, LENGTH = 128K
 
     /* 32Kb SRAM */
 
     ksram1 (rwx) : ORIGIN = 0x20000000, LENGTH = 4K
-    usram1 (rwx) : ORIGIN = 0x20001000, LENGTH = 28K
+    usram1 (rwx) : ORIGIN = 0x20001000, LENGTH = 4K
+    xsram1 (rwx) : ORIGIN = 0x20001000, LENGTH = 24K
 
     /* 16Kb SRAM */
 
