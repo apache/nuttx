@@ -15,6 +15,7 @@ Contents
   NuttX OABI "buildroot" Toolchain
   NXFLAT Toolchain
   LEDs
+  Serial Console
   USB Device Controller Functions
   Using OpenOCD and GDB with an FT2232 JTAG emulator
   LM4F120 LaunchPad Configuration Options
@@ -465,6 +466,50 @@ LEDs
   Flashing RED:
   - In the event of a fatal crash, the BLUE and GREEN components will be
     extinguished and the RED component will FLASH at a 2Hz rate.
+
+Serial Console
+^^^^^^^^^^^^^^
+
+  By default, all configurations use UART0 which connects to the USB VCOM
+  on the DEBUG port on the LM4F120 LaunchPad:
+
+    UART0 RX - PA.0
+    UART0 TX - PA.1
+
+  However, if you use an external RS232 driver, then other options are
+  available.  UART1 has option pin settings and flow control capabilities
+  that are not available with the other UARTS::
+
+    UART1 RX - PB.0 or PC.4 (Need disambiguation in board.h)
+    UART1 TX - PB.1 or PC.5 ("  " "            " "" "     ")
+
+    UART1_RTS - PF.0 or PC.4
+    UART1_CTS - PF.1 or PC.5
+
+  NOTE: board.h currently selects PB.0, PB.1, PF.0 and PF.1 for UART1, but
+  that can be changed by editting board.h
+
+  UART2-5, 7 are also available, UART2 is not recommended because it shares
+  some pin usage with USB device mode.  UART6 is not available because its
+  only RX/TX pin options are dedicated to USB support.
+
+    UART2 RX - PD.6
+    UART2 TX - PD.7 (Also used for USB VBUS detection)
+
+    UART3 RX - PC.6
+    UART3 TX - PC.7
+
+    UART4 RX - PC.4
+    UART4 TX - PC.5
+
+    UART5 RX - PE.4
+    UART5 TX - PE.5
+
+    UART6 RX - PD.4, Not available.  Dedicated for USB_DM
+    UART6 TX - PD.5, Not available.  Dedicated for USB_DP
+
+    UART7 RX - PE.0
+    UART7 TX - PE.1
 
 USB Device Controller Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

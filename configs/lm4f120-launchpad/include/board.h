@@ -158,6 +158,13 @@
 #define BUTTON_SW1_BIT    (1 << BUTTON_SW1)
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 
+/* Pin Multiplexing Disambiguation **************************************************/
+
+#define GPIO_UART1_CTS    GPIO_UART1_CTS_1
+#define GPIO_UART1_RTS    GPIO_UART1_RTS_1
+#define GPIO_UART1_RX     GPIO_UART1_RX_1
+#define GPIO_UART1_TX     GPIO_UART1_TX_1
+
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
