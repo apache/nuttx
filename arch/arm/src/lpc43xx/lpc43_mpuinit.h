@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_userspace.h
+ * arch/arm/src/lpc43xx/lpc43_mpuinit.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H
-#define __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_MPUINIT_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_MPUINIT_H
 
 /************************************************************************************
  * Included Files
@@ -59,18 +59,32 @@
  ************************************************************************************/
 
 /****************************************************************************
- * Name: stm32_userspace
+ * Name: lpc43_mpuinitialize
  *
  * Description:
- *   For the case of the separate user-/kernel-space build, perform whatever
- *   platform specific initialization of the user memory is required.
- *   Normally this just means initializing the user space .data and .bss
- *   segments.
+ *   Configure the MPU to permit user-space access to only unrestricted MCU
+ *   resources.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NUTTX_KERNEL
-void stm32_userspace(void);
+void lpc43_mpuinitialize(void);
+#else
+#  define lpc43_mpuinitialize()
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H */
+/****************************************************************************
+ * Name: lpc43_mpu_uheap
+ *
+ * Description:
+ *  Map the user heap region.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NUTTX_KERNEL
+void lpc43_mpu_uheap(uintptr_t start, size_t size);
+#else
+#  define lpc43_mpu_uheap(start,size)
+#endif
+
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_MPUINIT_H */

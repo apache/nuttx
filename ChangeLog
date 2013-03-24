@@ -4440,4 +4440,7 @@
 	* binfmt/binfmt_execmodule.c:  Here is a place where I forget
 	  to update the call to sched_releasetcb() to pass the thread
 	  type as the second parameter (2013-03-23).
+	* arch/arm/src/lm, kinetis, lpc32, and nuc1xx:  Add kernel build
+	  support to all ARMv7-M and ARMv6-M chips.  There are no
+	  configurations in place to to verify these additions!
 

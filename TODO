@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated March 8, 2013)
+NuttX TODO List (Last updated March 24, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
@@ -10,7 +10,7 @@ nuttx/
   (1)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
-  (6)  Kernel Build
+  (7)  Kernel Build
   (2)  C++ Support
   (6)  Binary loaders (binfmt/)
  (16)  Network (net/, drivers/net)
@@ -376,6 +376,9 @@ o Kernel Build
                depend on kernel internal, non-standard interfaces that are not
                accessible in user-space.  These are both critical NSH commands
                and need to be supported.
+
+               In addition, the NSH 'free' command only shows memory usage in
+               the user headp, not useage in the kernel heap.
   Status:      Open
   Priority:    High.  I really like these commands!
 
@@ -436,6 +439,18 @@ o Kernel Build
                allocators are called.
   Status:      Open
   Priority:    Low (unless performance becomes an issue).
+
+  Title:       MEMORY MANAGER SECURITY ISSUE
+  Description: In the current designed, the kernel code calls into the user-space
+               allocators to allocate user-space memory.  It is a security risk to
+               call into user-space in kernel-mode because that could be exploited
+               to gain control of the system.  That could be fixed by dropping to
+               user mode before trapping into the memory allocators; the memory
+               allocators would then need to trap in order to return (this is
+               already done to return from signal handlers; that logic could be
+               renamed more generally and just used for a generic return trap).
+  Status:      Open
+  Priority:    Low (unless security becomes an issue).
 
 o C++ Support
   ^^^^^^^^^^^

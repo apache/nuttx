@@ -1,5 +1,5 @@
-/************************************************************************************
- * arch/arm/src/stm32/stm32_userspace.h
+/****************************************************************************
+ * arch/arm/src/nuc1xx/nuc_userspace.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,35 +31,41 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H
-#define __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H
-
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+#include <stdint.h>
+#include <assert.h>
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+#include <nuttx/userspace.h>
 
-/************************************************************************************
- * Public Data
- ************************************************************************************/
+#include "nuc_userspace.h"
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+#ifdef CONFIG_NUTTX_KERNEL
 
 /****************************************************************************
- * Name: stm32_userspace
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nuc_userspace
  *
  * Description:
  *   For the case of the separate user-/kernel-space build, perform whatever
@@ -69,8 +75,40 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
-void stm32_userspace(void);
-#endif
+void nuc_userspace(void)
+{
+  uint8_t *src;
+  uint8_t *dest;
+  uint8_t *end;
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H */
+  /* Clear all of user-space .bss */
+
+  DEBUGASSERT(USERSPACE->us_bssstart != 0 && USERSPACE->us_bssend != 0 &&
+              USERSPACE->us_bssstart <= USERSPACE->us_bssend);
+
+  dest = (uint8_t*)USERSPACE->us_bssstart;
+  end  = (uint8_t*)USERSPACE->us_bssend;
+
+  while (dest != end)
+    {
+      *dest++ = 0;
+    }
+
+  /* Initialize all of user-space .data */
+
+  DEBUGASSERT(USERSPACE->us_datasource != 0 &&
+              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 && 
+              USERSPACE->us_datastart <= USERSPACE->us_dataend);
+
+  src  = (uint8_t*)USERSPACE->us_datasource;
+  dest = (uint8_t*)USERSPACE->us_datastart;
+  end  = (uint8_t*)USERSPACE->us_dataend;
+
+  while (dest != end)
+    {
+      *dest++ = *src++;
+    }
+}
+
+#endif /* CONFIG_NUTTX_KERNEL */
+

@@ -52,6 +52,7 @@
 
 #include "kinetis_internal.h"
 #include "kinetis_smc.h"
+#include "kinetis_userspace.h"
 
 /****************************************************************************
  * Private Definitions
@@ -137,6 +138,16 @@ void __start(void)
   kinetis_lowsetup();
 #ifdef USE_EARLYSERIALINIT
   up_earlyserialinit();
+#endif
+
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segments.
+   */
+
+#ifdef CONFIG_NUTTX_KERNEL
+  kinetis_userspace();
 #endif
 
   /* Initialize other on-board resources */

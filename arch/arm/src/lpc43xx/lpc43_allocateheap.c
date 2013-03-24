@@ -40,10 +40,14 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/userspace.h>
+
 #include <arch/board/board.h>
 
 #include "chip.h"

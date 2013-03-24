@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_userspace.h
+ * arch/arm/src/nuc1xx/nuc_userspace.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H
-#define __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H
+#ifndef __ARCH_ARM_SRC_NUC1XX_NUC_USERSPACE_H
+#define __ARCH_ARM_SRC_NUC1XX_NUC_USERSPACE_H
 
 /************************************************************************************
  * Included Files
@@ -59,7 +59,7 @@
  ************************************************************************************/
 
 /****************************************************************************
- * Name: stm32_userspace
+ * Name: nuc_userspace
  *
  * Description:
  *   For the case of the separate user-/kernel-space build, perform whatever
@@ -70,7 +70,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NUTTX_KERNEL
-void stm32_userspace(void);
+void nuc_userspace(void);
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_USERSPACE_H */
+#endif /* __ARCH_ARM_SRC_NUC1XX_NUC_USERSPACE_H */
