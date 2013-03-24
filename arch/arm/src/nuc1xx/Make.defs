@@ -47,6 +47,14 @@ CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_systemreset.c
 CMN_CSRCS += up_unblocktask.c up_usestack.c up_doirq.c up_hardfault.c
 CMN_CSRCS += up_svcall.c up_vectors.c up_vfork.c
 
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CMN_CSRCS += up_task_start.c up_pthread_start.c up_stackframe.c
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+CMN_CSRCS += up_signal_dispatch.c
+CMN_UASRCS += up_signal_handler.S
+endif
+endif
+
 ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif
@@ -62,6 +70,10 @@ endif
 CHIP_ASRCS  = 
 CHIP_CSRCS  = nuc_clockconfig.c nuc_gpio.c nuc_idle.c nuc_irq.c nuc_lowputc.c
 CHIP_CSRCS += nuc_serial.c nuc_start.c nuc_timerisr.c
+
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CHIP_CSRCS += nuc_userspace.c
+endif
 
 ifeq ($(CONFIG_DEBUG),y)
 CHIP_CSRCS += nuc_dumpgpio.c

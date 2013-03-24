@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lm/lm_start.c
- * arch/arm/src/chip/lm_start.c
+ * arch/arm/src/lpc43xx/lpc43_mpuinit.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,127 +39,86 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <assert.h>
-#include <debug.h>
 
-#include <nuttx/init.h>
-#include <arch/board/board.h>
+#include <nuttx/userspace.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "mpu.h"
+#include "lpc43_mpuinit.h"
 
-#include "lm_lowputc.h"
-#include "lm_syscontrol.h"
-#include "lm_userspace.h"
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_ARMV7M_MPU)
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Definitions
  ****************************************************************************/
+
+#ifndef MAX
+#  define MAX(a,b) a > b ? a : b
+#endif
+
+#ifndef MIN
+#  define MIN(a,b) a < b ? a : b
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-extern void lm_vectors(void);
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: lpc43_mpuinitialize
  *
  * Description:
- *   This is the reset entry point.
+ *   Configure the MPU to permit user-space access to only restricted SAM3U
+ *   resources.
  *
  ****************************************************************************/
 
-void __start(void)
+void lpc43_mpuinitialize(void)
 {
-  const uint32_t *src;
-  uint32_t *dest;
+  uintptr_t datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
+  uintptr_t dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
 
-  /* Configure the uart so that we can get debug output as soon as possible */
+  DEBUGASSERT(USERSPACE->us_textend >= USERSPACE->us_textstart &&
+              dataend >= datastart);
 
-  up_clockconfig();
-  up_lowsetup();
-  showprogress('A');
+  /* Show MPU information */
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
+  mpu_showtype();
 
-  for (dest = &_sbss; dest < &_ebss; )
-    {
-      *dest++ = 0;
-    }
-  showprogress('B');
+  /* Configure user flash and SRAM space */
 
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
+  mpu_userflash(USERSPACE->us_textstart,
+                USERSPACE->us_textend - USERSPACE->us_textstart);
 
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-  showprogress('C');
+  mpu_userintsram(datastart, dataend - datastart);
 
-  /* Perform early serial initialization */
+  /* Then enable the MPU */
 
-#ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
-#endif
-  showprogress('D');
-
-  /* For the case of the separate user-/kernel-space build, perform whatever
-   * platform specific initialization of the user memory is required.
-   * Normally this just means initializing the user space .data and .bss
-   * segments.
-   */
-
-#ifdef CONFIG_NUTTX_KERNEL
-  lm_userspace();
-  showprogress('E');
-#endif
-
-  /* Initialize onboard resources */
-
-  lm_boardinitialize();
-  showprogress('F');
-
-  /* Then start NuttX */
-
-  showprogress('\r');
-  showprogress('\n');
-  os_start();
-
-  /* Shoulnd't get here */
-
-  for(;;);
+  mpu_control(true, false, true);
 }
+
+/****************************************************************************
+ * Name: lpc43_mpu_uheap
+ *
+ * Description:
+ *  Map the user-heap region.
+ *
+ *  This logic may need an extension to handle external SDRAM).
+ *
+ ****************************************************************************/
+
+void lpc43_mpu_uheap(uintptr_t start, size_t size)
+{
+  mpu_userintsram(start, size);
+}
+
+#endif /* CONFIG_NUTTX_KERNEL && CONFIG_ARMV7M_MPU */
+

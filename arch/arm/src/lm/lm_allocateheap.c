@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/common/up_allocateheap.c
+ * arch/arm/src/lm/lm_allocateheap.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +49,10 @@
 
 #include <arch/board/board.h>
 
+#include "mpu.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "lm_mpuinit.h"
 
 /****************************************************************************
  * Private Definitions
@@ -79,8 +81,7 @@
  *   size of the unprotected, user-space heap.
  *
  *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated by an analogous up_allocate_kheap(). A custom version of this
- *   file is needed if memory protection of the kernel heap is required.
+ *   allocated (and protected) by an analogous up_allocate_kheap().
  *
  *   The following memory map is assumed for the flat build:
  *
@@ -116,11 +117,26 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   DEBUGASSERT(ubase < (uintptr_t)CONFIG_DRAM_END);
 
+  /* Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the CONFIG_DRAM_END
+   * is aligned to the MPU requirement.
+   */
+
+  log2  = (int)mpu_log2regionfloor(usize);
+  DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
+
+  usize = (1 << log2);
+  ubase = CONFIG_DRAM_END - usize;
+
   /* Return the user-space heap settings */
 
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)ubase;
   *heap_size  = usize;
+
+  /* Allow user-mode access to the user heap memory */
+
+   lm_mpu_uheap((uintptr_t)ubase, usize);
 #else
 
   /* Return the heap settings */
@@ -137,8 +153,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
  * Description:
  *   For the kernel build (CONFIG_NUTTX_KERNEL=y) with both kernel- and
  *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
- *   the kernel-space heap.  A custom version of this function is need if
- *   memory protection of the kernel heap is required.
+ *   (and protects) the kernel-space heap.
  *
  ****************************************************************************/
 
@@ -155,6 +170,17 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
   int       log2;
 
   DEBUGASSERT(ubase < (uintptr_t)CONFIG_DRAM_END);
+
+  /* Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the CONFIG_DRAM_END
+   * is aligned to the MPU requirement.
+   */
+
+  log2  = (int)mpu_log2regionfloor(usize);
+  DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
+
+  usize = (1 << log2);
+  ubase = CONFIG_DRAM_END - usize;
 
   /* Return the kernel heap settings (i.e., the part of the heap region
    * that was not dedicated to the user heap).

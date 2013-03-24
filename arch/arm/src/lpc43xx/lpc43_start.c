@@ -74,6 +74,7 @@
 #include "lpc43_cgu.h"
 #include "lpc43_emc.h"
 #include "lpc43_uart.h"
+#include "lpc43_userspace.h"
 
 /****************************************************************************
  * Preprocessor Definitions
@@ -332,10 +333,21 @@ void __start(void)
 #endif
   showprogress('E');
 
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segments.
+   */
+
+#ifdef CONFIG_NUTTX_KERNEL
+  lpc43_userspace();
+  showprogress('F');
+#endif
+
   /* Initialize onboard resources */
 
   lpc43_boardinitialize();
-  showprogress('F');
+  showprogress('G');
 
   /* Then start NuttX */
 

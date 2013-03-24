@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/src/lm/lm_start.c
- * arch/arm/src/chip/lm_start.c
+ * arch/arm/src/lm/lm_userspace.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,17 +41,13 @@
 
 #include <stdint.h>
 #include <assert.h>
-#include <debug.h>
 
-#include <nuttx/init.h>
-#include <arch/board/board.h>
+#include <nuttx/userspace.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "lm_lowputc.h"
-#include "lm_syscontrol.h"
+#include "lm_mpuinit.h"
 #include "lm_userspace.h"
+
+#ifdef CONFIG_NUTTX_KERNEL
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -63,104 +58,62 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-extern void lm_vectors(void);
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: lm_userspace
  *
  * Description:
- *   This is the reset entry point.
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segments.
  *
  ****************************************************************************/
 
-void __start(void)
+void lm_userspace(void)
 {
-  const uint32_t *src;
-  uint32_t *dest;
+  uint8_t *src;
+  uint8_t *dest;
+  uint8_t *end;
 
-  /* Configure the uart so that we can get debug output as soon as possible */
+  /* Clear all of user-space .bss */
 
-  up_clockconfig();
-  up_lowsetup();
-  showprogress('A');
+  DEBUGASSERT(USERSPACE->us_bssstart != 0 && USERSPACE->us_bssend != 0 &&
+              USERSPACE->us_bssstart <= USERSPACE->us_bssend);
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
+  dest = (uint8_t*)USERSPACE->us_bssstart;
+  end  = (uint8_t*)USERSPACE->us_bssend;
 
-  for (dest = &_sbss; dest < &_ebss; )
+  while (dest != end)
     {
       *dest++ = 0;
     }
-  showprogress('B');
 
-  /* Move the intialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
+  /* Initialize all of user-space .data */
 
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
+  DEBUGASSERT(USERSPACE->us_datasource != 0 &&
+              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 && 
+              USERSPACE->us_datastart <= USERSPACE->us_dataend);
+
+  src  = (uint8_t*)USERSPACE->us_datasource;
+  dest = (uint8_t*)USERSPACE->us_datastart;
+  end  = (uint8_t*)USERSPACE->us_dataend;
+
+  while (dest != end)
     {
       *dest++ = *src++;
     }
-  showprogress('C');
 
-  /* Perform early serial initialization */
+  /* Configure the MPU to permit user-space access to its FLASH and RAM */
 
-#ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
-#endif
-  showprogress('D');
-
-  /* For the case of the separate user-/kernel-space build, perform whatever
-   * platform specific initialization of the user memory is required.
-   * Normally this just means initializing the user space .data and .bss
-   * segments.
-   */
-
-#ifdef CONFIG_NUTTX_KERNEL
-  lm_userspace();
-  showprogress('E');
-#endif
-
-  /* Initialize onboard resources */
-
-  lm_boardinitialize();
-  showprogress('F');
-
-  /* Then start NuttX */
-
-  showprogress('\r');
-  showprogress('\n');
-  os_start();
-
-  /* Shoulnd't get here */
-
-  for(;;);
+  lm_mpuinitialize();
 }
+
+#endif /* CONFIG_NUTTX_KERNEL */
+
