@@ -685,9 +685,36 @@ sub-directory and can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  nsh:
+  ---
+    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
+    configuration enables the serial VCOM interfaces on UART0.  Support for
+    builtin applications is enabled, but in the base configuration no
+    builtin applications are selected.
+
+    NOTES:
+ 
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. By default, this configuration uses the CodeSourcery toolchain
+       for Windows and builds under Cygwin (or probably MSYS).  That
+       can easily be reconfigured, of course.
+
+       CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
+       CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
+
   ostest:
     This configuration directory, performs a simple OS test using
-    examples/ostest.
+    examples/ostest. The configuration enables the serial VCOM interfaces
+    on UART0. 
 
     NOTES:
     1. This configuration uses the mconf-based configuration tool.  To

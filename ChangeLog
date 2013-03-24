@@ -4445,7 +4445,12 @@
 	  configurations in place to to verify these additions!
 	  (2013-03-24).
 	* arch/arm/src/lm/lm_gpio.h:  Correct typos in alternate function
-	  definitions (2013-03-23).
+	  definitions (2013-03-24).
 	* arch/arm/src/lm/lm_lowputc.c and lm_serial.c:  Add support for
-	  the 7 UARTs on the LM4F120 (2013-03-23).
-  
+	  the 7 UARTs on the LM4F120 (2013-03-24).
+	* configs/lm4f120-launchpad/ostest/defconfig:  Fix the configured
+	  RAM size.  This appears to be the last show-stopper bug:  The
+	  LaunchPad now runs NuttX!  (2013-03-24).
+	* configs/lm4f120-launchpad/nsh:  Add an NSH configuration for the
+	  LaunchPad (2013-03-24).
+
