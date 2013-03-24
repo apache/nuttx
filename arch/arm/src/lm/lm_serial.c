@@ -60,48 +60,20 @@
 #include "up_internal.h"
 #include "os_internal.h"
 
+#include "lm_lowputc.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /* Some sanity checks *******************************************************/
 
-#if LM_NUARTS < 2
-#  undef  CONFIG_LM_UART1
-#  undef  CONFIG_UART1_SERIAL_CONSOLE
-#endif
-
-#if LM_NUARTS < 3
-#  undef  CONFIG_LM_UART2
-#  undef  CONFIG_UART2_SERIAL_CONSOLE
-#endif
-
 /* Is there a UART enabled? */
 
-#if !defined(CONFIG_LM_UART0) && !defined(CONFIG_LM_UART1) && !defined(CONFIG_LM_UART2)
+#if !defined(CONFIG_LM_UART0) && !defined(CONFIG_LM_UART1) && !defined(CONFIG_LM_UART2) && \
+    !defined(CONFIG_LM_UART3) && !defined(CONFIG_LM_UART4) && !defined(CONFIG_LM_UART5) && \
+    !defined(CONFIG_LM_UART6) && !defined(CONFIG_LM_UART7)
 #  error "No UARTs enabled"
-#endif
-
-/* Is there a serial console? */
-
-#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_LM_UART0)
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_LM_UART1)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_LM_UART2)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
-#else
-#  warning "No valid CONFIG_UARTn_SERIAL_CONSOLE Setting"
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef HAVE_CONSOLE
 #endif
 
 /* If we are not using the serial driver for the console, then we
@@ -110,100 +82,219 @@
 
 #ifdef USE_SERIALDRIVER
 
-/* Which UART with be tty0/console and which tty1? */
+/* Which UART with be tty0/console and which tty1-7?  The console will always
+ * be ttyS0.  If there is no console then will use the lowest numbered UART.
+ */
+
+/* First pick the console and ttys0.  This could be any of UART0-5 */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart0port     /* UART0 is console */
-#  define TTYS0_DEV       g_uart0port     /* UART0 is ttyS0 */
-#  ifdef CONFIG_LM_UART1
-#    define TTYS1_DEV     g_uart1port     /* UART1 is ttyS1 */
-#    ifdef CONFIG_LM_UART2
-#      define TTYS2_DEV   g_uart2port     /* UART2 is ttyS2 */
-#    else
-#      undef TTYS2_DEV                    /* No ttyS2 */
-#    endif
-#  else
-#    undef TTYS2_DEV                      /* No ttyS2 */
-#    ifdef CONFIG_LM_UART2
-#      define TTYS1_DEV   g_uart2port     /* UART2 is ttyS1 */
-#    else
-#      undef TTYS1_DEV                    /* No ttyS1 */
-#    endif
-#  endif
+#    define CONSOLE_DEV         g_uart0port /* UART0 is console */
+#    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#    define UART0_ASSIGNED      1
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart1port     /* UART1 is console */
-#  define TTYS0_DEV       g_uart1port     /* UART1 is ttyS0 */
-#  ifdef CONFIG_LM_UART0
-#    define TTYS1_DEV     g_uart0port     /* UART0 is ttyS1 */
-#    ifdef CONFIG_LM_UART2
-#      define TTYS2_DEV   g_uart2port     /* UART2 is ttyS2 */
-#    else
-#      undef TTYS2_DEV                    /* No ttyS2 */
-#    endif
-#  else
-#    undef TTYS2_DEV                      /* No ttyS2 */
-#    ifdef CONFIG_LM_UART2
-#      define TTYS1_DEV   g_uart2port     /* UART2 is ttyS1 */
-#    else
-#      undef TTYS1_DEV                    /* No ttyS1 */
-#    endif
-#  endif
+#    define CONSOLE_DEV         g_uart1port /* UART1 is console */
+#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define UART1_ASSIGNED      1
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart2port     /* UART2 is console */
-#  define TTYS0_DEV       g_uart2port     /* UART2 is ttyS0 */
-#  ifdef CONFIG_LM_UART0
-#    define TTYS1_DEV     g_uart0port     /* UART0 is ttyS1 */
-#    ifdef CONFIG_LM_UART2
-#      define TTYS2_DEV   g_uart2port     /* UART2 is ttyS2 */
-#    else
-#      undef TTYS2_DEV                    /* No ttyS2 */
-#    endif
-#  else
-#    undef TTYS2_DEV                      /* No ttyS2 */
-#    ifdef CONFIG_LM_UART2
-#      define TTYS1_DEV   g_uart2port     /* UART2 is ttyS1 */
-#    else
-#      undef TTYS1_DEV                    /* No ttyS1 */
-#    endif
-#  endif
-#elifdefined(CONFIG_LM_UART0)
-#  undef  CONSOLE_DEV                     /* No console device */
-#  define TTYS0_DEV       g_uart1port     /* UART1 is ttyS0 */
-#  ifdef CONFIG_LM_UART1
-#    define TTYS1_DEV     g_uart1port     /* UART1 is ttyS1 */
-#    ifdef CONFIG_LM_UART2
-#      define TTYS2_DEV   g_uart2port     /* UART2 is ttyS2 */
-#    else
-#      undef TTYS2_DEV                    /* No ttyS2 */
-#    endif
-#  else
-#    undef TTYS2_DEV                      /* No ttyS2 */
-#    ifdef CONFIG_LM_UART2
-#      define TTYS1_DEV   g_uart2port     /* UART2 is ttyS1 */
-#    else
-#      undef TTYS1_DEV                    /* No ttyS1 */
-#    endif
-#  endif
-#elifdefined(CONFIG_LM_UART1)
-#  undef  CONSOLE_DEV                     /* No console device */
-#  define TTYS0_DEV       g_uart1port     /* UART1 is ttyS0 */
-#  undef TTYS2_DEV                        /* No ttyS2 */
-#  ifdef CONFIG_LM_UART2
-#    define TTYS1_DEV     g_uart2port     /* UART2 is ttyS1 */
-#  else
-#    undef TTYS1_DEV                      /* No ttyS1 */
-#  endif
-#elifdefined(CONFIG_LM_UART2)
-#  undef  CONSOLE_DEV                     /* No console device */
-#  define TTYS0_DEV       g_uart2port     /* UART2 is ttyS0 */
-#  undef  TTYS1_DEV                       /* No ttyS1 */
-#  undef  TTYS2_DEV                       /* No ttyS2 */
+#    define CONSOLE_DEV         g_uart2port /* UART2 is console */
+#    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
+#    define UART2_ASSIGNED      1
+#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart3port /* UART3 is console */
+#    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
+#    define UART3_ASSIGNED      1
+#elif defined(CONFIG_UART4_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart4port /* UART4 is console */
+#    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
+#    define UART4_ASSIGNED      1
+#elif defined(CONFIG_UART5_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart5port /* UART5 is console */
+#    define TTYS5_DEV           g_uart5port /* UART5 is ttyS0 */
+#elif defined(CONFIG_UART6_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart6port /* UART6 is console */
+#    define TTYS5_DEV           g_uart6port /* UART6 is ttyS0 */
+#elif defined(CONFIG_UART7_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart7port /* UART7 is console */
+#    define TTYS5_DEV           g_uart7port /* UART7 is ttyS0 */
 #else
-#  error "No valid TTY devices"
-#  undef  CONSOLE_DEV                     /* No console device */
-#  undef  TTYS0_DEV                       /* No ttyS0 */
-#  undef  TTYS1_DEV                       /* No ttyS1 */
-#  undef  TTYS2_DEV                       /* No ttyS2 */
+#  undef CONSOLE_DEV                        /* No console */
+#  if defined(CONFIG_KINETIS_UART0)
+#    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#    define UART0_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART1)
+#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define UART1_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART2)
+#    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
+#    define UART2_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART3)
+#    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
+#    define UART3_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART4)
+#    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
+#    define UART4_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART5)
+#    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
+#    define UART5_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART6)
+#    define TTYS0_DEV           g_uart6port /* UART5 is ttyS0 */
+#    define UART6_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART7)
+#    define TTYS0_DEV           g_uart7port /* UART5 is ttyS0 */
+#    define UART7_ASSIGNED      1
+#  endif
+#endif
+
+/* Pick ttys1.  This could be any of UART0-7 excluding the console UART. */
+
+#if defined(CONFIG_KINETIS_UART0) && !defined(UART0_ASSIGNED)
+#  define TTYS1_DEV           g_uart0port /* UART0 is ttyS1 */
+#  define UART0_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS1_DEV           g_uart1port /* UART1 is ttyS1 */
+#  define UART1_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS1_DEV           g_uart2port /* UART2 is ttyS1 */
+#  define UART2_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#  define TTYS1_DEV           g_uart3port /* UART3 is ttyS1 */
+#  define UART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS1_DEV           g_uart4port /* UART4 is ttyS1 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS1_DEV           g_uart5port /* UART5 is ttyS1 */
+#  define UART5_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#  define TTYS1_DEV           g_uart6port /* UART6 is ttyS1 */
+#  define UART6_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#  define TTYS1_DEV           g_uart7port /* UART7 is ttyS1 */
+#  define UART7_ASSIGNED      1
+#endif
+
+/* Pick ttys2.  This could be one of UART1-7. It can't be UART0 because that
+ * was either assigned as ttyS0 or ttys1.  One of UART 1-7 could also be the
+ * console.
+ */
+
+#if defined(CONFIG_KINETIS_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS2_DEV           g_uart1port /* UART1 is ttyS2 */
+#  define UART1_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS2_DEV           g_uart2port /* UART2 is ttyS2 */
+#  define UART2_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#  define TTYS2_DEV           g_uart3port /* UART3 is ttyS2 */
+#  define UART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS2_DEV           g_uart4port /* UART4 is ttyS2 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS2_DEV           g_uart5port /* UART5 is ttyS2 */
+#  define UART5_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#  define TTYS2_DEV           g_uart6port /* UART6 is ttyS2 */
+#  define UART6_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#  define TTYS2_DEV           g_uart7port /* UART7 is ttyS2 */
+#  define UART7_ASSIGNED      1
+#endif
+
+/* Pick ttys3. This could be one of UART2-7. It can't be UART0-1 because
+ * those have already been assigned to ttsyS0, 1, or 2.  One of
+ * UART 2-7 could also be the console.
+ */
+
+#if defined(CONFIG_KINETIS_UART2) && !defined(UART2_ASSIGNED)
+#  define TTYS3_DEV           g_uart2port /* UART2 is ttyS3 */
+#  define UART2_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#  define TTYS3_DEV           g_uart3port /* UART3 is ttyS3 */
+#  define UART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS3_DEV           g_uart4port /* UART4 is ttyS3 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS3_DEV           g_uart5port /* UART5 is ttyS3 */
+#  define UART5_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#  define TTYS3_DEV           g_uart6port /* UART6 is ttyS3 */
+#  define UART6_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#  define TTYS3_DEV           g_uart7port /* UART7 is ttyS3 */
+#  define UART7_ASSIGNED      1
+#endif
+
+/* Pick ttys4. This could be one of UART3-7. It can't be UART0-2 because
+ * those have already been assigned to ttsyS0, 1, 2 or 3.  One of
+ * UART 3-7 could also be the console.
+ */
+
+#if defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#  define TTYS4_DEV           g_uart3port /* UART3 is ttyS4 */
+#  define UART3_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS4_DEV           g_uart4port /* UART4 is ttyS4 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS4_DEV           g_uart5port /* UART5 is ttyS4 */
+#  define UART5_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#  define TTYS4_DEV           g_uart6port /* UART6 is ttyS4 */
+#  define UART6_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#  define TTYS4_DEV           g_uart7port /* UART7 is ttyS4 */
+#  define UART7_ASSIGNED      1
+#endif
+
+/* Pick ttys5. This could be one of UART4-7. It can't be UART0-3 because
+ * those have already been assigned to ttsyS0, 1, 2, 3 or 4.  One of
+ * UART 4-7 could also be the console.
+ */
+
+#if defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#  define TTYS5_DEV           g_uart4port /* UART4 is ttyS5 */
+#  define UART4_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS5_DEV           g_uart5port /* UART5 is ttyS5 */
+#  define UART5_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#  define TTYS5_DEV           g_uart6port /* UART6 is ttyS5 */
+#  define UART6_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#  define TTYS5_DEV           g_uart7port /* UART7 is ttyS5 */
+#  define UART7_ASSIGNED      1
+#endif
+
+/* Pick ttys6. This could be one of UART5-7. It can't be UART0-4 because
+ * those have already been assigned to ttsyS0, 1, 2, 3, 4, or 5.  One of
+ * UART 5-7 could also be the console.
+ */
+
+#if defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#  define TTYS6_DEV           g_uart5port /* UART5 is ttyS6 */
+#  define UART5_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#  define TTYS6_DEV           g_uart6port /* UART6 is ttyS6 */
+#  define UART6_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#  define TTYS6_DEV           g_uart7port /* UART7 is ttyS6 */
+#  define UART7_ASSIGNED      1
+#endif
+
+/* Pick ttys7. This could be one of UART6-7. It can't be UART0-5 because
+ * those have already been assigned to ttsyS0, 1, 2, 3, 4, or 6.  One of
+ * UART 6-7 could also be the console.
+ */
+
+#if defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#  define TTYS7_DEV           g_uart6port /* UART6 is ttyS7 */
+#  define UART6_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#  define TTYS7_DEV           g_uart7port /* UART7 is ttyS7 */
+#  define UART7_ASSIGNED      1
 #endif
 
 /****************************************************************************
@@ -273,6 +364,26 @@ static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 #endif
+#ifdef CONFIG_LM_UART3
+static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
+static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
+#endif
+#ifdef CONFIG_LM_UART4
+static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
+static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
+#endif
+#ifdef CONFIG_LM_UART5
+static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
+static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
+#endif
+#ifdef CONFIG_LM_UART6
+static char g_uart6rxbuffer[CONFIG_UART6_RXBUFSIZE];
+static char g_uart6txbuffer[CONFIG_UART6_TXBUFSIZE];
+#endif
+#ifdef CONFIG_LM_UART7
+static char g_uart7rxbuffer[CONFIG_UART7_RXBUFSIZE];
+static char g_uart7txbuffer[CONFIG_UART7_TXBUFSIZE];
+#endif
 
 /* This describes the state of the Stellaris uart0 port. */
 
@@ -334,7 +445,7 @@ static uart_dev_t g_uart1port =
 };
 #endif
 
-/* This describes the state of the Stellaris uart1 port. */
+/* This describes the state of the Stellaris uart2 port. */
 
 #ifdef CONFIG_LM_UART2
 static struct up_dev_s g_uart2priv =
@@ -361,6 +472,156 @@ static uart_dev_t g_uart2port =
    },
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
+};
+#endif
+
+/* This describes the state of the Stellaris uart3 port. */
+
+#ifdef CONFIG_LM_UART3
+static struct up_dev_s g_uart3priv =
+{
+  .uartbase       = LM_UART3_BASE,
+  .baud           = CONFIG_UART3_BAUD,
+  .irq            = LM_IRQ_UART3,
+  .parity         = CONFIG_UART3_PARITY,
+  .bits           = CONFIG_UART3_BITS,
+  .stopbits2      = CONFIG_UART3_2STOP,
+};
+
+static uart_dev_t g_uart3port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART3_RXBUFSIZE,
+    .buffer = g_uart3rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART3_TXBUFSIZE,
+    .buffer = g_uart3txbuffer,
+  },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart3priv,
+};
+#endif
+
+/* This describes the state of the Stellaris uart4 port. */
+
+#ifdef CONFIG_LM_UART4
+static struct up_dev_s g_uart4priv =
+{
+  .uartbase       = LM_UART4_BASE,
+  .baud           = CONFIG_UART4_BAUD,
+  .irq            = LM_IRQ_UART4,
+  .parity         = CONFIG_UART4_PARITY,
+  .bits           = CONFIG_UART4_BITS,
+  .stopbits2      = CONFIG_UART4_2STOP,
+};
+
+static uart_dev_t g_uart4port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART4_RXBUFSIZE,
+    .buffer = g_uart4rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART4_TXBUFSIZE,
+    .buffer = g_uart4txbuffer,
+  },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart4priv,
+};
+#endif
+
+/* This describes the state of the Stellaris uart5 port. */
+
+#ifdef CONFIG_LM_UART5
+static struct up_dev_s g_uart5priv =
+{
+  .uartbase       = LM_UART5_BASE,
+  .baud           = CONFIG_UART5_BAUD,
+  .irq            = LM_IRQ_UART5,
+  .parity         = CONFIG_UART5_PARITY,
+  .bits           = CONFIG_UART5_BITS,
+  .stopbits2      = CONFIG_UART5_2STOP,
+};
+
+static uart_dev_t g_uart5port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART5_RXBUFSIZE,
+    .buffer = g_uart5rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART5_TXBUFSIZE,
+    .buffer = g_uart5txbuffer,
+  },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart5priv,
+};
+#endif
+
+/* This describes the state of the Stellaris uart6 port. */
+
+#ifdef CONFIG_LM_UART6
+static struct up_dev_s g_uart6priv =
+{
+  .uartbase       = LM_UART6_BASE,
+  .baud           = CONFIG_UART6_BAUD,
+  .irq            = LM_IRQ_UART6,
+  .parity         = CONFIG_UART6_PARITY,
+  .bits           = CONFIG_UART6_BITS,
+  .stopbits2      = CONFIG_UART6_2STOP,
+};
+
+static uart_dev_t g_uart6port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART6_RXBUFSIZE,
+    .buffer = g_uart6rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART6_TXBUFSIZE,
+    .buffer = g_uart6txbuffer,
+  },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart6priv,
+};
+#endif
+
+/* This describes the state of the Stellaris uart7 port. */
+
+#ifdef CONFIG_LM_UART7
+static struct up_dev_s g_uart7priv =
+{
+  .uartbase       = LM_UART7_BASE,
+  .baud           = CONFIG_UART7_BAUD,
+  .irq            = LM_IRQ_UART7,
+  .parity         = CONFIG_UART7_PARITY,
+  .bits           = CONFIG_UART7_BITS,
+  .stopbits2      = CONFIG_UART7_2STOP,
+};
+
+static uart_dev_t g_uart7port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_UART7_RXBUFSIZE,
+    .buffer = g_uart7rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_UART7_TXBUFSIZE,
+    .buffer = g_uart7txbuffer,
+  },
+  .ops      = &g_uart_ops,
+  .priv     = &g_uart7priv,
 };
 #endif
 
@@ -419,7 +680,7 @@ static inline void up_restoreuartint(struct up_dev_s *priv, uint32_t im)
  * Name: up_waittxnotfull
  ****************************************************************************/
 
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
 static inline void up_waittxnotfull(struct up_dev_s *priv)
 {
   int tmp;
@@ -963,10 +1224,25 @@ void up_earlyserialinit(void)
 #ifdef TTYS2_DEV
   up_disableuartint(TTYS2_DEV.priv, NULL);
 #endif
+#ifdef TTYS3_DEV
+  up_disableuartint(TTYS3_DEV.priv, NULL);
+#endif
+#ifdef TTYS4_DEV
+  up_disableuartint(TTYS4_DEV.priv, NULL);
+#endif
+#ifdef TTYS5_DEV
+  up_disableuartint(TTYS5_DEV.priv, NULL);
+#endif
+#ifdef TTYS6_DEV
+  up_disableuartint(TTYS6_DEV.priv, NULL);
+#endif
+#ifdef TTYS7_DEV
+  up_disableuartint(TTYS7_DEV.priv, NULL);
+#endif
 
   /* Configuration whichever one is the console */
 
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   CONSOLE_DEV.isconsole = true;
   up_setup(&CONSOLE_DEV);
 #endif
@@ -985,7 +1261,7 @@ void up_serialinit(void)
 {
   /* Register the console */
 
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   (void)uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
@@ -997,6 +1273,21 @@ void up_serialinit(void)
 #endif
 #ifdef TTYS2_DEV
   (void)uart_register("/dev/ttyS2", &TTYS2_DEV);
+#endif
+#ifdef TTYS3_DEV
+  (void)uart_register("/dev/ttyS3", &TTYS3_DEV);
+#endif
+#ifdef TTYS4_DEV
+  (void)uart_register("/dev/ttyS4", &TTYS4_DEV);
+#endif
+#ifdef TTYS5_DEV
+  (void)uart_register("/dev/ttyS5", &TTYS5_DEV);
+#endif
+#ifdef TTYS6_DEV
+  (void)uart_register("/dev/ttyS6", &TTYS6_DEV);
+#endif
+#ifdef TTYS7_DEV
+  (void)uart_register("/dev/ttyS7", &TTYS7_DEV);
 #endif
 }
 
@@ -1010,7 +1301,7 @@ void up_serialinit(void)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
   uint32_t im;
 
@@ -1046,7 +1337,7 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   /* Check for LF */
 
   if (ch == '\n')

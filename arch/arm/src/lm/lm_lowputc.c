@@ -54,40 +54,7 @@
 /**************************************************************************
  * Pre-processor Definitions
  **************************************************************************/
-
 /* Configuration **********************************************************/
-
-#if LM_NUARTS < 2
-#  undef  CONFIG_LM_UART1
-#  undef  CONFIG_UART1_SERIAL_CONSOLE
-#endif
-
-#if LM_NUARTS < 3
-#  undef  CONFIG_LM_UART2
-#  undef  CONFIG_UART2_SERIAL_CONSOLE
-#endif
-
-/* Is there a serial console? */
-
-#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_LM_UART0)
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_LM_UART1)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_LM_UART2)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
-#else
-#  warning "No valid CONFIG_UARTn_SERIAL_CONSOLE Setting"
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef HAVE_CONSOLE
-#endif
 
 /* Select UART parameters for the selected console */
 
@@ -109,6 +76,36 @@
 #  define LM_CONSOLE_BITS     CONFIG_UART2_BITS
 #  define LM_CONSOLE_PARITY   CONFIG_UART2_PARITY
 #  define LM_CONSOLE_2STOP    CONFIG_UART2_2STOP
+#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
+#  define LM_CONSOLE_BASE     LM_UART2_BASE
+#  define LM_CONSOLE_BAUD     CONFIG_UART3_BAUD
+#  define LM_CONSOLE_BITS     CONFIG_UART3_BITS
+#  define LM_CONSOLE_PARITY   CONFIG_UART3_PARITY
+#  define LM_CONSOLE_2STOP    CONFIG_UART3_2STOP
+#elif defined(CONFIG_UART4_SERIAL_CONSOLE)
+#  define LM_CONSOLE_BASE     LM_UART2_BASE
+#  define LM_CONSOLE_BAUD     CONFIG_UART4_BAUD
+#  define LM_CONSOLE_BITS     CONFIG_UART4_BITS
+#  define LM_CONSOLE_PARITY   CONFIG_UART4_PARITY
+#  define LM_CONSOLE_2STOP    CONFIG_UART4_2STOP
+#elif defined(CONFIG_UART5_SERIAL_CONSOLE)
+#  define LM_CONSOLE_BASE     LM_UART2_BASE
+#  define LM_CONSOLE_BAUD     CONFIG_UART5_BAUD
+#  define LM_CONSOLE_BITS     CONFIG_UART5_BITS
+#  define LM_CONSOLE_PARITY   CONFIG_UART5_PARITY
+#  define LM_CONSOLE_2STOP    CONFIG_UART5_2STOP
+#elif defined(CONFIG_UART6_SERIAL_CONSOLE)
+#  define LM_CONSOLE_BASE     LM_UART2_BASE
+#  define LM_CONSOLE_BAUD     CONFIG_UART6_BAUD
+#  define LM_CONSOLE_BITS     CONFIG_UART6_BITS
+#  define LM_CONSOLE_PARITY   CONFIG_UART6_PARITY
+#  define LM_CONSOLE_2STOP    CONFIG_UART6_2STOP
+#elif defined(CONFIG_UART7_SERIAL_CONSOLE)
+#  define LM_CONSOLE_BASE     LM_UART2_BASE
+#  define LM_CONSOLE_BAUD     CONFIG_UART7_BAUD
+#  define LM_CONSOLE_BITS     CONFIG_UART7_BITS
+#  define LM_CONSOLE_PARITY   CONFIG_UART7_PARITY
+#  define LM_CONSOLE_2STOP    CONFIG_UART7_2STOP
 #else
 #  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
@@ -226,7 +223,7 @@
 
 void up_lowputc(char ch)
 {
-#ifdef HAVE_CONSOLE
+#ifdef HAVE_SERIAL_CONSOLE
   /* Wait until the TX FIFO is not full */
 
   while ((getreg32(LM_CONSOLE_BASE+LM_UART_FR_OFFSET) & UART_FR_TXFF) != 0);
@@ -250,11 +247,11 @@ void up_lowputc(char ch)
 void up_lowsetup(void)
 {
   uint32_t regval;
-#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+#if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t ctl;
 #endif
 
-  /* Enable the selected UARTs and configure GPIO pins to need by the
+  /* Enable the selected UARTs and configure GPIO pins needed by the
    * the selected UARTs.  NOTE: The serial driver later depends on
    * this pin configuration -- whether or not a serial console is selected.
    */
@@ -277,9 +274,63 @@ void up_lowsetup(void)
   lm_configgpio(GPIO_UART1_TX);
 #endif
 
+#ifdef CONFIG_LM_UART2
+  regval  = getreg32(LM_SYSCON_RCGC1);
+  regval |= SYSCON_RCGC1_UART2;
+  putreg32(regval, LM_SYSCON_RCGC1);
+
+  lm_configgpio(GPIO_UART2_RX);
+  lm_configgpio(GPIO_UART2_TX);
+#endif
+
+#ifdef CONFIG_LM_UART3
+  regval  = getreg32(LM_SYSCON_RCGCUART);
+  regval |= SYSCON_RCGCUART_R3;
+  putreg32(regval, LM_SYSCON_RCGCUART);
+
+  lm_configgpio(GPIO_UART3_RX);
+  lm_configgpio(GPIO_UART3_TX);
+#endif
+
+#ifdef CONFIG_LM_UART4
+  regval  = getreg32(LM_SYSCON_RCGCUART);
+  regval |= SYSCON_RCGCUART_R4;
+  putreg32(regval, LM_SYSCON_RCGCUART);
+
+  lm_configgpio(GPIO_UART4_RX);
+  lm_configgpio(GPIO_UART4_TX);
+#endif
+
+#ifdef CONFIG_LM_UART5
+  regval  = getreg32(LM_SYSCON_RCGCUART);
+  regval |= SYSCON_RCGCUART_R5;
+  putreg32(regval, LM_SYSCON_RCGCUART);
+
+  lm_configgpio(GPIO_UART5_RX);
+  lm_configgpio(GPIO_UART5_TX);
+#endif
+
+#ifdef CONFIG_LM_UART6
+  regval  = getreg32(LM_SYSCON_RCGCUART);
+  regval |= SYSCON_RCGCUART_R6;
+  putreg32(regval, LM_SYSCON_RCGCUART);
+
+  lm_configgpio(GPIO_UART6_RX);
+  lm_configgpio(GPIO_UART6_TX);
+#endif
+
+#ifdef CONFIG_LM_UART7
+  regval  = getreg32(LM_SYSCON_RCGCUART);
+  regval |= SYSCON_RCGCUART_R7;
+  putreg32(regval, LM_SYSCON_RCGCUART);
+
+  lm_configgpio(GPIO_UART7_RX);
+  lm_configgpio(GPIO_UART7_TX);
+#endif
+
   /* Enable the selected console device */
 
-#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+#if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   /* Disable the UART by clearing the UARTEN bit in the UART CTL register */
 
   ctl = getreg32(LM_CONSOLE_BASE+LM_UART_CTL_OFFSET);
