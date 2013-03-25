@@ -340,36 +340,36 @@ endmenu
 comment "Kinetis GPIO Interrupt Configuration"
 
 config GPIO_IRQ
-	bool "GPIO interrupts"
+	bool "GPIO pin interrupts"
 	---help---
-		Enable support for interrupt GPIO pins
+		Enable support for interrupting GPIO pins
 
 if GPIO_IRQ
 
 config KINETIS_PORTAINTS
 	bool "GPIOA interrupts"
 	---help---
-		Enable support for interrupts from GPIO port A pins
+		Enable support for 32 interrupts from GPIO port A pins
 
 config KINETIS_PORTBINTS
 	bool "GPIOB interrupts"
 	---help---
-		Enable support for interrupts from GPIO port B pins
+		Enable support for 32 interrupts from GPIO port B pins
 
 config KINETIS_PORTCINTS
 	bool "GPIOC interrupts"
 	---help---
-		Enable support for interrupts from GPIO port C pins
+		Enable support for 32 interrupts from GPIO port C pins
 
 config KINETIS_PORTDINTS
 	bool "GPIOD interrupts"
 	---help---
-		Enable support for interrupts from GPIO port D pins
+		Enable support for 32 interrupts from GPIO port D pins
 
 config KINETIS_PORTEINTS
 	bool "GPIOE interrupts"
 	---help---
-		Enable support for interrupts from GPIO port E pins
+		Enable support for 32 interrupts from GPIO port E pins
 
 endif
 
@@ -394,13 +394,15 @@ config ENET_NRXBUFFERS
 	int "Number of Ethernet Rx buffers"
 	default 6
 	---help---
-		Number of Ethernet Rx buffers to use.
+		Number of Ethernet Rx buffers to use.  The size of one buffer is
+		determined by CONFIG_NET_BUFSIZE
 
 config ENET_NTXBUFFERS
 	int "Number of Ethernet Tx buffers"
 	default 2
 	---help---
-		Number of Ethernet Tx buffers to use.
+		Number of Ethernet Tx buffers to use. The size of one buffer is
+		determined by CONFIG_NET_BUFSIZE
 
 config ENET_PHYADDR
 	int "PHY address"

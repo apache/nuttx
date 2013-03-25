@@ -595,7 +595,9 @@ TWR-K60N512-specific Configuration Options
     CONFIG_KINETIS_PIT      -- Support Programmable Interval Timers
     CONFIG_ARMV7M_MPU       -- Support the MPU
 
-  Kinetis interrupt priorities (Default is the mid priority)
+  Kinetis interrupt priorities (Default is the mid priority).  These should
+  not be set because they can cause unhandled, nested interrupts.  All
+  interrupts need to be at the default priority in the current design.
 
     CONFIG_KINETIS_UART0PRIO
     CONFIG_KINETIS_UART1PRIO
@@ -613,7 +615,7 @@ TWR-K60N512-specific Configuration Options
 
   PIN Interrupt Support
 
-    CONFIG_GPIO_IRQ          -- Enable pin interrtup support.  Also needs
+    CONFIG_GPIO_IRQ          -- Enable pin interrupt support.  Also needs
       one or more of the following:
     CONFIG_KINETIS_PORTAINTS -- Support 32 Port A interrupts
     CONFIG_KINETIS_PORTBINTS -- Support 32 Port B interrupts
@@ -639,7 +641,7 @@ TWR-K60N512-specific Configuration Options
         buffer is determined by CONFIG_NET_BUFSIZE.  Default: 6
     CONFIG_ENET_NTXBUFFERS - Number of TX buffers.  The size of one
         buffer is determined by CONFIG_NET_BUFSIZE.  Default: 2
-    CONFIG_ENET_USEMII - Usee MII mode.  Default: RMII mode.
+    CONFIG_ENET_USEMII - Use MII mode.  Default: RMII mode.
     CONFIG_ENET_PHYADDR - PHY address
  
 Configurations
@@ -660,7 +662,23 @@ Where <subdir> is one of the following:
     This configuration directory, performs a simple OS test using
     examples/ostest.
 
-    CONFIG_KINETIS_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Default platform/toolchain:
+
+       CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
+       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : The older OABI version
+       CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
 
   nsh:
   ---
@@ -669,23 +687,42 @@ Where <subdir> is one of the following:
     Support for the board's SPI-based MicroSD card is included
     (but not passing tests as of this writing).
 
-    NOTE: An SDHC driver is underwork and can be enabled in the NSH
-    configuration for further testing be setting the following
-    configuration faluesas follows:
+    NOTES:
 
-      -CONFIG_KINETIS_SDHC=n
-      +CONFIG_KINETIS_SDHC=y         # Enable the SDHC driver
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
 
-      -CONFIG_GPIO_IRQ=n
-      +CONFIG_GPIO_IRQ=y             # Enable GPIO interrupts
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
 
-      -CONFIG_KINETIS_PORTEINTS=n
-      +CONFIG_KINETIS_PORTEINTS=y    # Enable PortE GPIO interrupts
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
 
-      -CONFIG_SCHED_WORKQUEUE=n
-      +CONFIG_SCHED_WORKQUEUE=y      # Enable the NuttX workqueue
+    2. Default platform/toolchain:
 
-      -CONFIG_NSH_ARCHINIT=n
-      +CONFIG_NSH_ARCHINIT=y         # Provide NSH intialization logic
+       CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
+       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : The older OABI version
+       CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
 
+    3. An SDHC driver is under work and can be enabled in the NSH configuration
+       for further testing be setting the following configuration values as
+       follows:
 
+      CONFIG_KINETIS_SDHC=y                : Enable the SDHC driver
+
+      CONFIG_MMCSD=y                       : Enable MMC/SD support
+      CONFIG_MMCSD_SDIO=y                  : Use the SDIO-based MMC/SD driver
+      CONFIG_MMCSD_NSLOTS=1                : One MMC/SD slot
+
+      CONFIG_FAT=y                         : Eable FAT file system
+      CONFIG_FAT_LCNAMES=y                 : FAT lower case name support
+      CONFIG_FAT_LFN=y                     : FAT long file name support
+      CONFIG_FAT_MAXFNAME=32               : Maximum lenght of a long file name
+
+      CONFIG_GPIO_IRQ=y                    : Enable GPIO interrupts
+      CONFIG_KINETIS_PORTEINTS=y           : Enable PortE GPIO interrupts
+
+      CONFIG_SCHED_WORKQUEUE=y             : Enable the NuttX workqueue
+
+      CONFIG_NSH_ARCHINIT=y                : Provide NSH intialization logic

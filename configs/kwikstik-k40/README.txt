@@ -458,7 +458,9 @@ KwikStik-K40-specific Configuration Options
     CONFIG_KINETIS_PIT      -- Support Programmable Interval Timers
     CONFIG_ARMV7M_MPU       -- Support the MPU
 
-  Kinetis interrupt priorities (Default is the mid priority)
+  Kinetis interrupt priorities (Default is the mid priority)  These should
+  not be set because they can cause unhandled, nested interrupts.  All
+  interrupts need to be at the default priority in the current design.
 
     CONFIG_KINETIS_UART0PRIO
     CONFIG_KINETIS_UART1PRIO
