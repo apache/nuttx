@@ -572,6 +572,7 @@ Where <subdir> is one of the following:
 
        CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
+       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : The older OABI version
        CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
 
     3. As it is configured now, you MUST have a network connected.

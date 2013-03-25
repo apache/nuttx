@@ -4,3 +4,475 @@
 #
 
 comment "Kinetis Configuration Options"
+
+choice
+	prompt "Kinetis Chip Selection"
+	default ARCH_CHIP_MK60N512VMD100
+	depends on ARCH_CHIP_KINETIS
+
+config ARCH_CHIP_MK40N512VLQ100
+	bool "MK40N512VLQ100"
+	select ARCH_FAMILY_K40
+
+config ARCH_CHIP_MK40N512VMD100
+	bool "MK40N512VMD100"
+	select ARCH_FAMILY_K40
+
+config ARCH_CHIP_MK40X128VLQ100
+	bool "MK40X128VLQ100"
+	select ARCH_FAMILY_K40
+
+config ARCH_CHIP_MK40X128VMD100
+	bool "MK40X128VMD100"
+	select ARCH_FAMILY_K40
+
+config ARCH_CHIP_MK40X256VLQ100
+	bool "MK40X256VLQ100"
+	select ARCH_FAMILY_K40
+
+config ARCH_CHIP_MK40X256VMD100
+	bool "MK40X256VMD100"
+	select ARCH_FAMILY_K40
+
+config ARCH_CHIP_MK60N256VLQ100
+	bool "MK60N256VLQ100"
+	select ARCH_FAMILY_K60
+
+config ARCH_CHIP_MK60N256VMD100
+	bool "MK60N256VMD100"
+	select ARCH_FAMILY_K60
+
+config ARCH_CHIP_MK60N512VLQ100
+	bool "MK60N512VLQ100"
+	select ARCH_FAMILY_K60
+
+config ARCH_CHIP_MK60N512VMD100
+	bool "MK60N512VMD100"
+	select ARCH_FAMILY_K60
+
+config ARCH_CHIP_MK60X256VLQ100
+	bool "MK60X256VLQ100"
+	select ARCH_FAMILY_K60
+
+config ARCH_CHIP_MK60X256VMD100
+	bool "MK60X256VMD100"
+	select ARCH_FAMILY_K60
+
+endchoice
+
+# Chip families
+
+config ARCH_FAMILY_K40
+	bool
+	default n
+
+config ARCH_FAMILY_K60
+	bool
+	default n
+
+menu "Kinetis Peripheral Support"
+
+config KINETIS_TRACE
+	bool "Trace"
+	default n
+	---help---
+		Enable trace clocking on power up.
+
+config KINETIS_FLEXBUS
+	bool "FlexBus"
+	default n
+	---help---
+		Enable flexbus clocking on power up.
+
+config KINETIS_UART0
+	bool "UART0"
+	default n
+	select ARCH_HAVE_UART0
+	---help---
+		Support UART0
+
+config KINETIS_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+	---help---
+		Support UART1
+
+config KINETIS_UART2
+	bool "UART2"
+	default n
+	select ARCH_HAVE_UART2
+	---help---
+		Support UART2
+
+config KINETIS_UART3
+	bool "UART3"
+	default n
+	select ARCH_HAVE_UART3
+	---help---
+		Support UART3
+
+config KINETIS_UART4
+	bool "UART4"
+	default n
+	select ARCH_HAVE_UART4
+	---help---
+		Support UART4
+
+config KINETIS_UART5
+	bool "UART5"
+	default n
+	select ARCH_HAVE_UART5
+	---help---
+		Support UART5
+
+config KINETIS_ENET
+	bool "Ethernet"
+	default n
+	depends on ARCH_FAMILY_K60
+	select NET
+	---help---
+		Support Ethernet (K60 only)
+
+config KINETIS_RNGB
+	bool "Random number generator"
+	default n
+	depends on ARCH_FAMILY_K60
+	---help---
+		Support the random number generator(K60 only)
+
+config KINETIS_FLEXCAN0
+	bool "FlexCAN0"
+	default n
+	---help---
+		Support FlexCAN0
+
+config KINETIS_FLEXCAN1
+	bool "FlexCAN1"
+	default n
+	---help---
+		Support FlexCAN1
+
+config KINETIS_SPI0
+	bool "SPI0"
+	default n
+	---help---
+		Support SPI0
+
+config KINETIS_SPI1
+	bool "SPI1"
+	default n
+	---help---
+		Support SPI1
+
+config KINETIS_SPI2
+	bool "SPI2"
+	default n
+	---help---
+		Support SPI2
+
+config KINETIS_I2C0
+	bool "I2C0"
+	default n
+	---help---
+		Support I2C0
+
+config KINETIS_I2C1
+	bool "I2C1"
+	default n
+	---help---
+		Support I2C1
+
+config KINETIS_I2S
+	bool "I2S"
+	default n
+	---help---
+		Support I2S
+
+config KINETIS_DAC0
+	bool "DAC0"
+	default n
+	---help---
+		Support DAC0
+
+config KINETIS_DAC1
+	bool "DAC1"
+	default n
+	---help---
+		Support DAC1
+
+config KINETIS_ADC0
+	bool "ADC0"
+	default n
+	---help---
+		Support ADC0
+
+config KINETIS_ADC1
+	bool "ADC1"
+	default n
+	---help---
+		Support ADC1
+
+config KINETIS_CMP
+	bool "CMP"
+	default n
+	---help---
+		Support CMP
+
+config KINETIS_VREF
+	bool "VREF"
+	default n
+	---help---
+		Support VREF
+
+config KINETIS_SDHC
+	bool "SDHC"
+	default n
+	select MMCSD_SDIO
+	---help---
+		Support SD host controller
+
+config KINETIS_FTM0
+	bool "FTM0"
+	default n
+	---help---
+		Support FlexTimer 0
+
+config KINETIS_FTM1
+	bool "FTM1"
+	default n
+	---help---
+		Support FlexTimer 1
+
+config KINETIS_FTM2
+	bool "FTM2"
+	default n
+	---help---
+		Support FlexTimer 2
+
+config KINETIS_LPTIMER
+	bool "Low power timer (LPTIMER)"
+	default n
+	---help---
+		Support the low power timer
+
+config KINETIS_RTC
+	bool "RTC"
+	default n
+	---help---
+		Support RTC
+
+config KINETIS_SLCD
+	bool "Segment LCD (SLCD)"
+	default n
+	depends on ARCH_FAMILY_K40
+	---help---
+		Support the segment LCD (K40 only)
+
+config KINETIS_EWM
+	bool "External watchdog (WVM)"
+	default n
+	---help---
+		Support the external watchdog
+
+config KINETIS_CMT
+	bool "Carrier modulator transmitter (CMT)"
+	default n
+	---help---
+		Support Carrier Modulator Transmitter
+
+config KINETIS_USBOTG
+	bool "USB OTG"
+	default n
+	---help---
+		Support USB OTG (see also USBHOST and USBDEV)
+
+config KINETIS_USBDCD
+	bool "USB device controller"
+	default n
+	---help---
+		Support the USB Device Charger Detection module
+
+config KINETIS_LLWU
+	bool "Low leakage wake-up unit (LLWU)"
+	default n
+	---help---
+		Support the Low Leakage Wake-Up Unit
+
+config KINETIS_TSI
+	bool "Touchscreen interface (TSI)"
+	default n
+	---help---
+		Support the touch screeen interface
+
+config KINETIS_FTFL
+	bool "FLASH (FTFL)"
+	default n
+	---help---
+		Support FLASH
+
+config KINETIS_DMA
+	bool "DMA"
+	default n
+	---help---
+		Support DMA
+
+config KINETIS_CRC
+	bool "CRC"
+	default n
+	---help---
+		Support CRC
+
+config KINETIS_PDB
+	bool "Programmable delay block (PDB)"
+	default n
+	---help---
+		Support the Programmable Delay Block
+
+config KINETIS_PIT
+	bool "Programmable interval timer (PIT)"
+	default n
+	---help---
+		Support Programmable Interval Timers
+
+endmenu
+
+comment "Kinetis GPIO Interrupt Configuration"
+
+config GPIO_IRQ
+	bool "GPIO interrupts"
+	---help---
+		Enable support for interrupt GPIO pins
+
+if GPIO_IRQ
+
+config KINETIS_PORTAINTS
+	bool "GPIOA interrupts"
+	---help---
+		Enable support for interrupts from GPIO port A pins
+
+config KINETIS_PORTBINTS
+	bool "GPIOB interrupts"
+	---help---
+		Enable support for interrupts from GPIO port B pins
+
+config KINETIS_PORTCINTS
+	bool "GPIOC interrupts"
+	---help---
+		Enable support for interrupts from GPIO port C pins
+
+config KINETIS_PORTDINTS
+	bool "GPIOD interrupts"
+	---help---
+		Enable support for interrupts from GPIO port D pins
+
+config KINETIS_PORTEINTS
+	bool "GPIOE interrupts"
+	---help---
+		Enable support for interrupts from GPIO port E pins
+
+endif
+
+if KINETIS_ENET
+
+comment "Kinetis Ethernet Configuration"
+
+config ENET_ENHANCEDBD
+	bool "Use enhanced buffer descriptors"
+	default n
+	---help---
+		Use enhanced, 32-byte buffer descriptors
+
+config ENET_NETHIFS
+	int "Number of Ethernet interfaces"
+	default 1
+	---help---
+		Number of Ethernet interfaces supported by the hardware.  Must be
+		one for now.
+
+config ENET_NRXBUFFERS
+	int "Number of Ethernet Rx buffers"
+	default 6
+	---help---
+		Number of Ethernet Rx buffers to use.
+
+config ENET_NTXBUFFERS
+	int "Number of Ethernet Tx buffers"
+	default 2
+	---help---
+		Number of Ethernet Tx buffers to use.
+
+config ENET_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		MII/RMII address of the PHY
+
+config ENET_USEMII
+	bool "Use MII interface"
+	default n
+	---help---
+		The the MII PHY interface.  Default:  Use RMII interface
+
+endif
+
+if KINETIS_SDHC
+
+comment "Kinetis SDHC Configuration"
+
+config KINETIS_SDHC_ABSFREQ
+	bool "Custom transfer frequencies"
+	default n
+	---help---
+		Select SDCLK frequencies corresponding to various modes of operation.
+		These values may be provided in either the NuttX configuration file
+		or in the board.h file
+
+		NOTE:  These settings are not currently used.  Since there are only
+		four frequencies, it makes more sense to just "can" the fixed
+		frequency prescaler and divider values.
+
+if KINETIS_SDHC_ABSFREQ
+
+config KINETIS_IDMODE_FREQ
+	int "ID mode frequency"
+	default 400000
+	---help---
+		Initial, ID mode SD frequency
+
+config KINETIS_MMCXFR_FREQ
+	int "MMC transfer frequency"
+	default 20000000
+	---help---
+		Frequency to use for transferring data to/from an MMC card
+
+config KINETIS_SD1BIT_FREQ
+	int "SD 1-bit transfer frequency"
+	default 20000000
+	depends on CONFIG_SDIO_WIDTH_D1_ONLY
+	---help---
+		Frequency to use for transferring data to/from an SD card using on a single data liune.
+
+config KINETIS_SD4BIT_FREQ
+	int "SD 4-bit transfer frequency"
+	default 20000000
+	depends on !CONFIG_SDIO_WIDTH_D1_ONLY
+	---help---
+		Frequency to use for transferring data to/from an SD card using all four data lines.
+
+endif
+
+config KINETIS_SDHC_DMAPRIO
+	int "SDHC DMA priority"
+	depends on SDIO_DMA
+	---help---
+		SDHC DMA priority
+
+endif
+
+comment "Kinetis UART Configuration"
+
+config KINETIS_UARTFIFOS
+	bool "Enable UART0 FIFO"
+	default n
+	depends on KINETIS_UART0

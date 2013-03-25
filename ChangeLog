@@ -4453,4 +4453,8 @@
 	  LaunchPad now runs NuttX!  (2013-03-24).
 	* configs/lm4f120-launchpad/nsh:  Add an NSH configuration for the
 	  LaunchPad (2013-03-24).
+	* configs/kwikstik-k40:  Converted configurations to use the
+	  konfig-frontends tool (2013-03-25).
+	* configs/twr-k60n512:  Converted configurations to use the
+	  konfig-frontends tool (2013-03-25).
 

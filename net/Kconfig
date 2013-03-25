@@ -56,6 +56,13 @@ config NET_MULTIBUFFER
 		Or, as another example, the driver may support queuing of concurrent
 		input/ouput and output transfers for better performance.
 
+config NET_PROMISCUOUS
+	bool "Promiscuous mode"
+	default n
+	---help---
+		Force the Ethernet driver to operate in promiscuous mode (if supported
+		by the Ethernet driver).
+
 config NET_IPv6
 	bool "IPv6"
 	default n

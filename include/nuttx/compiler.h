@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/compiler.h
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,6 +80,12 @@
 /* The noreturn attribute informs GCC that the function will not return. */
 
 # define noreturn_function __attribute__ ((noreturn))
+
+/* The farcall_function attribute informs GCC that is should use long calls
+ * (even though -mlong-calls does not appear in the compilation options)
+ */
+
+# define farcall_function __attribute__ ((long_call))
 
 /* The packed attribute informs GCC that the stucture elements are packed,
  * ignoring other alignment rules.
@@ -239,6 +245,10 @@
 # define noreturn_function
 # define packed_struct
 
+/* REVISIT: */
+
+# define farcall_function
+
 /* SDCC does support "naked" functions */
 
 # define naked_function __naked
@@ -350,6 +360,10 @@
 # define inline_function
 # define noinline_function
 
+/* REVISIT: */
+
+# define farcall_function
+
 /* The Zilog compiler does not support the reentrant attribute */
 
 # define reentrant_function
@@ -429,6 +443,7 @@
 # define weak_function
 # define weak_const_function
 # define noreturn_function
+# define farcall_function
 # define packed_struct
 # define reentrant_function
 # define naked_function
