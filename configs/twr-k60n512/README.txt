@@ -553,14 +553,14 @@ TWR-K60N512-specific Configuration Options
 
     CONFIG_KINETIS_TRACE    -- Enable trace clocking on power up.
     CONFIG_KINETIS_FLEXBUS  -- Enable flexbus clocking on power up.
-      CONFIG_KINETIS_UART0    -- Support UART0
-      CONFIG_KINETIS_UART1    -- Support UART1
-      CONFIG_KINETIS_UART2    -- Support UART2
-      CONFIG_KINETIS_UART3    -- Support UART3
-      CONFIG_KINETIS_UART4    -- Support UART4
-      CONFIG_KINETIS_UART5    -- Support UART5
-      CONFIG_KINETIS_ENET     -- Support Ethernet (K60 only)
-      CONFIG_KINETIS_RNGB     -- Support the random number generator(K60 only)
+    CONFIG_KINETIS_UART0    -- Support UART0
+    CONFIG_KINETIS_UART1    -- Support UART1
+    CONFIG_KINETIS_UART2    -- Support UART2
+    CONFIG_KINETIS_UART3    -- Support UART3
+    CONFIG_KINETIS_UART4    -- Support UART4
+    CONFIG_KINETIS_UART5    -- Support UART5
+    CONFIG_KINETIS_ENET     -- Support Ethernet (K60 only)
+    CONFIG_KINETIS_RNGB     -- Support the random number generator(K60 only)
     CONFIG_KINETIS_FLEXCAN0 -- Support FlexCAN0
     CONFIG_KINETIS_FLEXCAN1 -- Support FlexCAN1
     CONFIG_KINETIS_SPI0     -- Support SPI0
@@ -569,8 +569,8 @@ TWR-K60N512-specific Configuration Options
     CONFIG_KINETIS_I2C0     -- Support I2C0
     CONFIG_KINETIS_I2C1     -- Support I2C1
     CONFIG_KINETIS_I2S      -- Support I2S
-      CONFIG_KINETIS_DAC0     -- Support DAC0
-      CONFIG_KINETIS_DAC1     -- Support DAC1
+    CONFIG_KINETIS_DAC0     -- Support DAC0
+    CONFIG_KINETIS_DAC1     -- Support DAC1
     CONFIG_KINETIS_ADC0     -- Support ADC0
     CONFIG_KINETIS_ADC1     -- Support ADC1
     CONFIG_KINETIS_CMP      -- Support CMP
@@ -658,8 +658,7 @@ Where <subdir> is one of the following:
   ostest:
   ------
     This configuration directory, performs a simple OS test using
-    examples/ostest.  By default, this project assumes that you are
-    using the DFU bootloader.
+    examples/ostest.
 
     CONFIG_KINETIS_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin
 
