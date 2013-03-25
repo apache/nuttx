@@ -344,7 +344,8 @@ struct kinetis_dmaregs_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -363,7 +364,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void kinetis_clockconfig(void);
+void kinetis_clockconfig(void);
 
 /************************************************************************************
  * Name: kinetis_lowsetup
@@ -375,7 +376,7 @@ EXTERN void kinetis_clockconfig(void);
  *
  ************************************************************************************/
 
-EXTERN void kinetis_lowsetup(void);
+void kinetis_lowsetup(void);
 
 /******************************************************************************
  * Name: kinetis_uartreset
@@ -386,7 +387,7 @@ EXTERN void kinetis_lowsetup(void);
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-EXTERN void kinetis_uartreset(uintptr_t uart_base);
+void kinetis_uartreset(uintptr_t uart_base);
 #endif
 
 /******************************************************************************
@@ -398,9 +399,8 @@ EXTERN void kinetis_uartreset(uintptr_t uart_base);
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-EXTERN void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
-                                  uint32_t clock, unsigned int parity,
-                                  unsigned int nbits);
+void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
+                           unsigned int parity, unsigned int nbits);
 #endif
 
 /************************************************************************************
@@ -411,7 +411,7 @@ EXTERN void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
  *
  ************************************************************************************/
 
-EXTERN void kinetis_wddisable(void);
+void kinetis_wddisable(void);
 
 /************************************************************************************
  * Name: kinetis_pinconfig
@@ -421,7 +421,7 @@ EXTERN void kinetis_wddisable(void);
  *
  ************************************************************************************/
 
-EXTERN int kinetis_pinconfig(uint32_t cfgset);
+int kinetis_pinconfig(uint32_t cfgset);
 
 /************************************************************************************
  * Name: kinetis_pinfilter
@@ -438,7 +438,7 @@ EXTERN int kinetis_pinconfig(uint32_t cfgset);
  *
  ************************************************************************************/
 
-EXTERN int kinetis_pinfilter(unsigned int port, bool lpo, unsigned int width);
+int kinetis_pinfilter(unsigned int port, bool lpo, unsigned int width);
 
 /************************************************************************************
  * Name: kinetis_gpiowrite
@@ -448,7 +448,7 @@ EXTERN int kinetis_pinfilter(unsigned int port, bool lpo, unsigned int width);
  *
  ************************************************************************************/
 
-EXTERN void kinetis_gpiowrite(uint32_t pinset, bool value);
+void kinetis_gpiowrite(uint32_t pinset, bool value);
 
 /************************************************************************************
  * Name: kinetis_gpioread
@@ -458,7 +458,7 @@ EXTERN void kinetis_gpiowrite(uint32_t pinset, bool value);
  *
  ************************************************************************************/
 
-EXTERN bool kinetis_gpioread(uint32_t pinset);
+bool kinetis_gpioread(uint32_t pinset);
 
 /************************************************************************************
  * Name: kinetis_pinirqinitialize
@@ -469,7 +469,7 @@ EXTERN bool kinetis_gpioread(uint32_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN void kinetis_pinirqinitialize(void);
+void kinetis_pinirqinitialize(void);
 #else
 #  define kinetis_pinirqinitialize()
 #endif
@@ -496,7 +496,7 @@ EXTERN void kinetis_pinirqinitialize(void);
  *
  ************************************************************************************/
 
-EXTERN xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr);
+xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr);
 
 /************************************************************************************
  * Name: kinetis_pinirqenable
@@ -507,7 +507,7 @@ EXTERN xcpt_t kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN void kinetis_pinirqenable(uint32_t pinset);
+void kinetis_pinirqenable(uint32_t pinset);
 #else
 #  define kinetis_pinirqenable(pinset)
 #endif
@@ -521,7 +521,7 @@ EXTERN void kinetis_pinirqenable(uint32_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIO_IRQ
-EXTERN void kinetis_pinirqdisable(uint32_t pinset);
+void kinetis_pinirqdisable(uint32_t pinset);
 #else
 #  define kinetis_pinirqdisable(pinset)
 #endif
@@ -535,7 +535,7 @@ EXTERN void kinetis_pinirqdisable(uint32_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_DMA
-EXTERN void kinetis_pindmaenable(uint32_t pinset);
+void kinetis_pindmaenable(uint32_t pinset);
 #endif
 
 /************************************************************************************
@@ -547,7 +547,7 @@ EXTERN void kinetis_pindmaenable(uint32_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_DMA
-EXTERN void kinetis_pindmadisable(uint32_t pinset);
+void kinetis_pindmadisable(uint32_t pinset);
 #endif
 
 /************************************************************************************
@@ -559,7 +559,7 @@ EXTERN void kinetis_pindmadisable(uint32_t pinset);
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO
-EXTERN int kinetis_pindump(uint32_t pinset, const char *msg);
+int kinetis_pindump(uint32_t pinset, const char *msg);
 #else
 #  define kinetis_pindump(p,m)
 #endif
@@ -573,11 +573,10 @@ EXTERN int kinetis_pindump(uint32_t pinset, const char *msg);
  *
  ************************************************************************************/
 
-EXTERN void kinetis_clrpend(int irq);
+void kinetis_clrpend(int irq);
 
 /************************************************************************************
- * Name:  kinetis_spi/ssp0/ssp1select, kinetis_spi/ssp0/ssp1status, and
- *        kinetis_spi/ssp0/ssp1cmddata
+ * Name:  kinetis_spi[n]select, kinetis_spi[n]status, and kinetis_spi[n]cmddata
  *
  * Description:
  *   These external functions must be provided by board-specific logic.  They are
@@ -586,13 +585,13 @@ EXTERN void kinetis_clrpend(int irq);
  *   including up_spiinitialize()) are provided by common Kinetis logic.  To use
  *   this common SPI logic on your board:
  *
- *   1. Provide logic in kinetis_boardinitialize() to configure SPI/SSP chip select
+ *   1. Provide logic in kinetis_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide kinetis_spi/ssp0/ssp1select() and kinetis_spi/ssp0/ssp1status() functions
+ *   2. Provide kinetis_spi[n]select() and kinetis_spi[n]status() functions
  *      in your board-specific logic.  These functions will perform chip selection
  *      and status operations using GPIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
- *      kinetis_spi/ssp0/ssp1cmddata() functions in your board-specific logic.  These
+ *      kinetis_spi[n]cmddata() functions in your board-specific logic.  These
  *      functions will perform cmd/data selection operations using GPIOs in the way
  *      your board is configured.
  *   3. Add a call to up_spiinitialize() in your low level application
@@ -607,25 +606,25 @@ EXTERN void kinetis_clrpend(int irq);
 struct spi_dev_s;
 enum spi_dev_e;
 
-#ifdef CONFIG_KINETIS_SPI
-EXTERN void  kinetis_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-EXTERN uint8_t kinetis_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_KINETIS_SPI0
+void  kinetis_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int kinetis_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int kinetis_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
-#ifdef CONFIG_KINETIS_SSP0
-EXTERN void  kinetis_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-EXTERN uint8_t kinetis_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_KINETIS_SPI1
+void  kinetis_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int kinetis_ssp0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int kinetis_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
-#ifdef CONFIG_KINETIS_SSP1
-EXTERN void  kinetis_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-EXTERN uint8_t kinetis_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_KINETIS_SPI2
+void  kinetis_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t kinetis_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int kinetis_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int kinetis_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
 
@@ -634,7 +633,7 @@ EXTERN int kinetis_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, 
  *
  * Description:
  *   Flush and discard any words left in the RX fifo.  This can be called
- *   from ssp0/1select after a device is deselected (if you worry about such
+ *   from spi[n]select after a device is deselected (if you worry about such
  *   things).
  *
  * Input Parameters:
@@ -645,12 +644,9 @@ EXTERN int kinetis_ssp1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, 
  *
  ****************************************************************************/
 
+#if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI2)
 struct spi_dev_s;
-#ifdef CONFIG_KINETIS_SPI
-EXTERN void spi_flush(FAR struct spi_dev_s *dev);
-#endif
-#if defined(CONFIG_KINETIS_SSP0) || defined(CONFIG_KINETIS_SSP1)
-EXTERN void ssp_flush(FAR struct spi_dev_s *dev);
+void spi_flush(FAR struct spi_dev_s *dev);
 #endif
 
 /****************************************************************************
@@ -664,8 +660,8 @@ EXTERN void ssp_flush(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_KINETIS_GPDMA
-EXTERN void kinetis_dmainitilaize(void);
+#ifdef CONFIG_KINETIS_DMA
+void kinetis_dmainitilaize(void);
 #endif
 
 /****************************************************************************
@@ -682,8 +678,8 @@ EXTERN void kinetis_dmainitilaize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_KINETIS_GPDMA
-EXTERN DMA_HANDLE kinetis_dmachannel(void);
+#ifdef CONFIG_KINETIS_DMA
+DMA_HANDLE kinetis_dmachannel(void);
 #endif
 
 /****************************************************************************
@@ -699,8 +695,8 @@ EXTERN DMA_HANDLE kinetis_dmachannel(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_KINETIS_GPDMA
-EXTERN void kinetis_dmafree(DMA_HANDLE handle);
+#ifdef CONFIG_KINETIS_DMA
+void kinetis_dmafree(DMA_HANDLE handle);
 #endif
 
 /****************************************************************************
@@ -711,11 +707,9 @@ EXTERN void kinetis_dmafree(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_KINETIS_GPDMA
-EXTERN int kinetis_dmarxsetup(DMA_HANDLE handle,
-                            uint32_t control, uint32_t config,
-                            uint32_t srcaddr, uint32_t destaddr,
-                            size_t nbytes);
+#ifdef CONFIG_KINETIS_DMA
+int kinetis_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
+                       uint32_t srcaddr, uint32_t destaddr, size_t nbytes);
 #endif
 
 /****************************************************************************
@@ -726,8 +720,8 @@ EXTERN int kinetis_dmarxsetup(DMA_HANDLE handle,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_KINETIS_GPDMA
-EXTERN int kinetis_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
+#ifdef CONFIG_KINETIS_DMA
+int kinetis_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
 #endif
 
 /****************************************************************************
@@ -740,8 +734,8 @@ EXTERN int kinetis_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *ar
  *
  ****************************************************************************/
 
-#ifdef CONFIG_KINETIS_GPDMA
-EXTERN void kinetis_dmastop(DMA_HANDLE handle);
+#ifdef CONFIG_KINETIS_DMA
+void kinetis_dmastop(DMA_HANDLE handle);
 #endif
 
 /****************************************************************************
@@ -752,9 +746,9 @@ EXTERN void kinetis_dmastop(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_KINETIS_GPDMA
+#ifdef CONFIG_KINETIS_DMA
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void kinetis_dmasample(DMA_HANDLE handle, struct kinetis_dmaregs_s *regs);
+void kinetis_dmasample(DMA_HANDLE handle, struct kinetis_dmaregs_s *regs);
 #else
 #  define kinetis_dmasample(handle,regs)
 #endif
@@ -768,10 +762,10 @@ EXTERN void kinetis_dmasample(DMA_HANDLE handle, struct kinetis_dmaregs_s *regs)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_KINETIS_GPDMA
+#ifdef CONFIG_KINETIS_DMA
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void kinetis_dmadump(DMA_HANDLE handle, const struct kinetis_dmaregs_s *regs,
-                          const char *msg);
+void kinetis_dmadump(DMA_HANDLE handle, const struct kinetis_dmaregs_s *regs,
+                     const char *msg);
 #else
 #  define kinetis_dmadump(handle,regs,msg)
 #endif
@@ -793,7 +787,7 @@ EXTERN void kinetis_dmadump(DMA_HANDLE handle, const struct kinetis_dmaregs_s *r
 
 #ifdef CONFIG_KINETIS_SDHC
 struct sdio_dev_s;
-EXTERN FAR struct sdio_dev_s *sdhc_initialize(int slotno);
+FAR struct sdio_dev_s *sdhc_initialize(int slotno);
 #endif
 
 /****************************************************************************
@@ -816,7 +810,7 @@ EXTERN FAR struct sdio_dev_s *sdhc_initialize(int slotno);
  ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_SDHC
-EXTERN void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
+void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
 #endif
 
 /****************************************************************************
@@ -836,7 +830,7 @@ EXTERN void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
  ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_SDHC
-EXTERN void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
+void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 #endif
 #undef EXTERN
 #if defined(__cplusplus)

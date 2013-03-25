@@ -73,6 +73,41 @@ config LM_UART1
 	select ARCH_HAVE_UART1
 	default n
 
+config LM_UART2
+	bool "UART2"
+	select ARCH_HAVE_UART2
+	default n
+
+config LM_UART3
+	bool "UART3"
+	default n
+	depends on ARCH_CHIP_LM4F
+	select ARCH_HAVE_UART3
+
+config LM_UART4
+	bool "UART4"
+	default n
+	depends on ARCH_CHIP_LM4F
+	select ARCH_HAVE_UART4
+
+config LM_UART5
+	bool "UART5"
+	default n
+	depends on ARCH_CHIP_LM4F
+	select ARCH_HAVE_UART5
+
+config LM_UART6
+	bool "UART6"
+	default n
+	depends on ARCH_CHIP_LM4F
+	select ARCH_HAVE_UART6
+
+config LM_UART7
+	bool "UART7"
+	default n
+	depends on ARCH_CHIP_LM4F
+	select ARCH_HAVE_UART7
+
 config SSI0_DISABLE
 	bool "Disable SSI0"
 	default y
@@ -80,11 +115,6 @@ config SSI0_DISABLE
 config SSI1_DISABLE
 	bool "Disable SSI1"
 	default y
-
-config LM_UART2
-	bool "UART2"
-	select ARCH_HAVE_UART2
-	default n
 
 config LM_ETHERNET
 	bool "Stellaris Ethernet"
