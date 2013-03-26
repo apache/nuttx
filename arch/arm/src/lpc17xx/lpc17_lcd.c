@@ -56,6 +56,11 @@
 #define FB_WIDTH ((CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_BPP + 7) / 8)
 #define FB_SIZE  (FB_WIDTH * CONFIG_LPC17_LCD_VHEIGHT)
 
+/* Delays */
+
+#define LPC17_LCD_PWRDIS_DELAY 10000
+#define LPC17_LCD_PWREN_DELAY  10000
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -113,7 +118,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct fb_planeinfo_s g_planeinfo =
 {
-  .fbmem    = (FAR void *)LCD_VRAM_BASE,
+  .fbmem    = (FAR void *)CONFIG_LPC17_LCD_VRAMBASE,
   .fblen    = FB_SIZE,
   .stride   = FB_WIDTH,
   .bpp      = CONFIG_LPC17_LCD_BPP,
@@ -198,30 +203,72 @@ static int lpc17_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int lpc17_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap)
+static int lpc17_getcmap(FAR struct fb_vtable_s *vtable,
+                         FAR struct fb_cmap_s *cmap)
 {
-  int len;
+  uint32_t *pal;
+  uint32_t rgb;
+  int last;
   int i;
 
-  dbg("vtable=%p cmap=%p len=%d\n", vtable, cmap, cmap->len);
-  if (vtable && cmap)
-    {
-      for (i = cmap->first, len = 0; i < 256 && len < cmap->len; i++, len++)
-        {
-          cmap->red[i]    = i;
-          cmap->green[i]  = i;
-          cmap->blue[i]   = i;
-#ifdef CONFIG_FB_TRANSPARENCY
-          cmap->transp[i] = i;
-#endif
-        }
+  dbg("vtable=%p cmap=%p first=%d len=%d\n",
+      vtable, cmap, cmap->first, cmap->len);
 
-      cmap->len = len;
-      return OK;
+  DEBUGASSERT(vtable && cmap &&
+              cmap->first < 256 && (cmap->first + cmap->len) < 256);
+
+  pal  = (uint32_t *)LPC17_LCD_PAL(cmap->first >> 1);
+  last = cmap->first + cmap->len;
+
+  /* Handle the case where the first color starts on an odd boundary */
+
+  i = cmap->first;
+  if ((i & 1) != 0)
+    {
+      rgb  = *pal++;
+      i++;
+
+      /* Save the odd palette value */
+
+      cmap->red[i]    = (rgb & LCD_PAL_R1_MASK) >> LCD_PAL_R1_SHIFT;
+      cmap->green[i]  = (rgb & LCD_PAL_G1_MASK) >> LCD_PAL_G1_SHIFT;
+      cmap->blue[i]   = (rgb & LCD_PAL_B1_MASK) >> LCD_PAL_B1_SHIFT;
+#ifdef CONFIG_FB_TRANSPARENCY
+      cmap->transp[i] = 0;
+#endif
     }
 
-  dbg("Returning EINVAL\n");
-  return -EINVAL;
+  /* Handle even colors */
+
+  for (; i < last; i += 2)
+    {
+      rgb  = *pal++;
+
+      /* Save the even palette value */
+
+      cmap->red[i]    = (rgb & LCD_PAL_R0_MASK) >> LCD_PAL_R0_SHIFT;
+      cmap->green[i]  = (rgb & LCD_PAL_G0_MASK) >> LCD_PAL_G0_SHIFT;
+      cmap->blue[i]   = (rgb & LCD_PAL_B0_MASK) >> LCD_PAL_B0_SHIFT;
+#ifdef CONFIG_FB_TRANSPARENCY
+      cmap->transp[i] = 0;
+#endif
+
+      /* Handle the case where the len ends on an odd boudary */
+
+      if ((i + 1) < last)
+        {
+          /* Save the even palette value */
+
+          cmap->red[i+1]    = (rgb & LCD_PAL_R1_MASK) >> LCD_PAL_R1_SHIFT;
+          cmap->green[i+1]  = (rgb & LCD_PAL_G1_MASK) >> LCD_PAL_G1_SHIFT;
+          cmap->blue[i+1]   = (rgb & LCD_PAL_B1_MASK) >> LCD_PAL_B1_SHIFT;
+#ifdef CONFIG_FB_TRANSPARENCY
+          cmap->transp[i+1] = 0;
+#endif
+        }
+    }
+
+  return OK;
 }
 #endif
 
@@ -230,16 +277,68 @@ static int lpc17_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *c
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int lpc17_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s *cmap)
+static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
+                         FAR const struct fb_cmap_s *cmap)
 {
-  dbg("vtable=%p cmap=%p len=%d\n", vtable, cmap, cmap->len);
-  if (vtable && cmap)
+  uint32_t *pal;
+  uint32_t rgb0;
+  uint32_t rgb1;
+  int last;
+  int i;
+
+  dbg("vtable=%p cmap=%p first=%d len=%d\n",
+      vtable, cmap, cmap->first, cmap->len);
+
+  DEBUGASSERT(vtable && cmap);
+
+  pal  = (uint32_t *)LPC17_LCD_PAL(cmap->first >> 1);
+  last = cmap->first + cmap->len;
+
+  /* Handle the case where the first color starts on an odd boundary */
+
+  i = cmap->first;
+  if ((i & 1) != 0)
     {
-      return OK;
+      rgb0  = *pal;
+      rgb0 &= (LCD_PAL_R0_MASK | LCD_PAL_G0_MASK | LCD_PAL_B0_MASK | LCD_PAL_I0); 
+      rgb1 |= ((uint32_t)cmap->red[i]   << LCD_PAL_R0_SHIFT |
+               (uint32_t)cmap->green[i] << LCD_PAL_G0_SHIFT |
+               (uint32_t)cmap->blue[i]  << LCD_PAL_B0_SHIFT);
+
+      /* Save the new palette value */
+
+      *pal++ = (rgb0 | rgb1);
+      i++;
     }
 
-  dbg("Returning EINVAL\n");
-  return -EINVAL;
+  /* Handle even colors */
+
+  for (; i < last; i += 2)
+    {
+      uint32_t rgb0 = ((uint32_t)cmap->red[i]   << LCD_PAL_R0_SHIFT |
+                       (uint32_t)cmap->green[i] << LCD_PAL_G0_SHIFT |
+                       (uint32_t)cmap->blue[i]  << LCD_PAL_B0_SHIFT);
+
+      /* Handle the case where the len ends on an odd boudary */
+
+      if ((i + 1) >= last)
+        {
+          rgb1  = *pal;
+          rgb1 &= (LCD_PAL_R1_MASK | LCD_PAL_G1_MASK | LCD_PAL_B1_MASK | LCD_PAL_I1); 
+        }
+      else
+        {
+          rgb1  = ((uint32_t)cmap->red[i+1]   << LCD_PAL_R1_SHIFT |
+                   (uint32_t)cmap->green[i+1] << LCD_PAL_G1_SHIFT |
+                   (uint32_t)cmap->blue[i+1]  << LCD_PAL_B1_SHIFT);
+        }
+
+      /* Save the new pallete value */
+
+      *pal++ = (rgb0 | rgb1);
+    }
+
+  return OK;
 }
 #endif
 
@@ -326,11 +425,21 @@ static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
 
 int up_fbinitialize(void)
 {
+  int i;
+
   /* Disable LCD controller */
-#warning "Missing logioc"
+
+  regval = getreg32(LPC17_LCD_CTRL);
+  regval &= ~LCD_CTRL_LCDPWR;
+  putreg32(regval, LPC17_LCD_CTRL);
+ 
+  for (i = LPC17_LCD_PWRDIS_DELAY; i; i--);
+
+  regval &= ~LCD_CTRL_LCDEN;
+  putreg32(regval, LPC17_LCD_CTRL);
 
   /* Configure pins */
-  /* R */
+  /* Video data */
 
   lpc17_configgpio(GPIO_LCD_VD0);
   lpc17_configgpio(GPIO_LCD_VD1);
@@ -341,8 +450,6 @@ int up_fbinitialize(void)
   lpc17_configgpio(GPIO_LCD_VD6);
   lpc17_configgpio(GPIO_LCD_VD7);
 
-  /* G */     
-
   lpc17_configgpio(GPIO_LCD_VD8);
   lpc17_configgpio(GPIO_LCD_VD9);
   lpc17_configgpio(GPIO_LCD_VD10);
@@ -352,8 +459,7 @@ int up_fbinitialize(void)
   lpc17_configgpio(GPIO_LCD_VD14);
   lpc17_configgpio(GPIO_LCD_VD15);
 
-  /* B */
-
+#if CONFIG_LPC17_LCD_BPP == 24
   lpc17_configgpio(GPIO_LCD_VD16);
   lpc17_configgpio(GPIO_LCD_VD17);
   lpc17_configgpio(GPIO_LCD_VD18);
@@ -362,6 +468,7 @@ int up_fbinitialize(void)
   lpc17_configgpio(GPIO_LCD_VD21);
   lpc17_configgpio(GPIO_LCD_VD22);
   lpc17_configgpio(GPIO_LCD_VD23);
+#endif
 
   /* Other pins */
 
@@ -370,6 +477,24 @@ int up_fbinitialize(void)
   lpc17_configgpio(GPIO_LCD_FP);
   lpc17_configgpio(GPIO_LCD_ENABM);
   lpc17_configgpio(GPIO_LCD_PWR);
+
+#warning "Missing logic"
+
+  /* Clear the display */
+
+  lpc17_lcdclear(CONFIG_LPC17_LCD_BACKCOLOR);
+  for (i = LPC17_LCD_PWREN_DELAY; i; i--);
+
+  /* Enable LCD */
+
+  regval = getreg32(LPC17_LCD_CTRL);
+  regval |= LCD_CTRL_LCDEN;
+  putreg32(regval, LPC17_LCD_CTRL);
+ 
+  for (i = LPC17_LCD_PWREN_DELAY; i; i--);
+
+  regval |= LCD_CTRL_LCDPWR;
+  putreg32(regval, LPC17_LCD_CTRL);
 
   return OK;
 }
@@ -414,3 +539,29 @@ void fb_uninitialize(void)
   return OK;
 }
 
+/************************************************************************************
+ * Name:  lpc17_lcdclear
+ *
+ * Description:
+ *   This is a non-standard LCD interface just for the LPC17xx.  Clearing the display
+ *   in the normal way by writing a sequences of runs that covers the entire display
+ *   can be slow.  Here the dispaly is cleared by simply setting all VRAM memory to
+ *   the specified color.
+ *
+ ************************************************************************************/
+
+void lpc17_lcdclear(nxgl_pixel_t color)
+{
+#if CONFIG_LPC17_LCD_BPP == 16
+  uint16_t *dest;
+#else
+  uint32_t *dest;
+#endif
+  int i;
+
+  dest = (uint32_t *) CONFIG_LPC17_LCD_VRAMBASE;
+  for (i = 0; (CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT) > i; i++)
+    {
+      *dest++ = color;
+    }
+}
