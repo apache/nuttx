@@ -287,8 +287,8 @@
 
 /* UART0:
  *
- *   TX --- Connected to  P0[2]
- *   RX --- Connected to  P0[3]
+ * TX    --- Connected to P0[2]
+ * RX    --- Connected to P0[3]
  */
 
 #define GPIO_UART0_TXD             GPIO_UART0_TXD_2
@@ -296,12 +296,12 @@
 
 /* MCI-SDIO:
  *
- *   D0 --- Connected to  P1[6]
- *   D1 --- Connected to  P2[11]
- *   D2 --- Connected to  P2[12]
- *   D3 --- Connected to  P2[13]
- *   CLK--- Connected to  P1[2]
- *   CMD--- Connected to  P1[3]
+ * D0    --- Connected to P1[6]
+ * D1    --- Connected to P2[11]
+ * D2    --- Connected to P2[12]
+ * D3    --- Connected to P2[13]
+ * CLK   --- Connected to P1[2]
+ * CMD   --- Connected to P1[3]
  */
 
 #define GPIO_SD_DAT0               GPIO_SD_DAT0_2
@@ -310,6 +310,66 @@
 #define GPIO_SD_DAT3               GPIO_SD_DAT3_2
 #define GPIO_SD_CLK                GPIO_SD_CLK_2
 #define GPIO_SD_CMD                GPIO_SD_CMD_2
+
+/* LCD R:
+ *
+ * VD0   --- Connected to P0[4]
+ * VD1   --- Connected to P0[5]
+ * VD2   --- Connected to P4[28]
+ * VD3   --- Connected to P4[29]
+ * VD4   --- Connected to P2[6]
+ * VD5   --- Connected to P2[7]
+ * VD6   --- Connected to P2[8]
+ * VD7   --- Connected to P2[9]
+ */
+
+#define GPIO_LCD_VD0                GPIO_LCD_VD0_1
+#define GPIO_LCD_VD1                GPIO_LCD_VD1_1
+#define GPIO_LCD_VD2                GPIO_LCD_VD2_2
+#define GPIO_LCD_VD3                GPIO_LCD_VD3_3
+#define GPIO_LCD_VD4                GPIO_LCD_VD4_1
+#define GPIO_LCD_VD5                GPIO_LCD_VD5_1
+#define GPIO_LCD_VD6                GPIO_LCD_VD6_2
+#define GPIO_LCD_VD7                GPIO_LCD_VD7_2
+
+/* LED G:
+ *
+ * VD8    --- Connected to P0[6]
+ * VD9    --- Connected to P0[7]
+ * VD10   --- Connected to P1[20]
+ * VD11   --- Connected to P1[21]
+ * VD12   --- Connected to P1[22]
+ * VD13   --- Connected to P1[23]
+ * VD14   --- Connected to P1[24]
+ * VD15   --- Connected to P1[25]
+ */
+   
+#define GPIO_LCD_VD8                GPIO_LCD_VD8_1
+#define GPIO_LCD_VD9                GPIO_LCD_VD9_1
+#define GPIO_LCD_VD10               GPIO_LCD_VD10_1
+#define GPIO_LCD_VD11               GPIO_LCD_VD11_1
+#define GPIO_LCD_VD12               GPIO_LCD_VD12_1
+#define GPIO_LCD_VD13               GPIO_LCD_VD13_1
+#define GPIO_LCD_VD14               GPIO_LCD_VD14_1
+#define GPIO_LCD_VD15               GPIO_LCD_VD15_1
+
+/* LCD B:
+ *
+ * VD16   --- Connected to  P0[8]
+ * VD17   --- Connected to  P0[9]
+ * VD18   --- Connected to  P2[12]
+ * VD19   --- Connected to  P2[13]
+ * VD20   --- Connected to  P1[26]
+ * VD21   --- Connected to  P1[27]
+ * VD22   --- Connected to  P1[28]
+ * VD23   --- Connected to  P1[29]
+ *
+ * DCLK   --- Connected to P2[2]
+ * LP     --- Connected to P2[5]
+ * FP     --- Connected to P2[3]
+ * ENAB_M --- Connected to P2[4]
+ * PWR    --- Connected to P2[0]
+ */
 
 /************************************************************************************
  * Public Types
