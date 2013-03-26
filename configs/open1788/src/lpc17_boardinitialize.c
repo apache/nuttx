@@ -48,6 +48,7 @@
 #include "up_internal.h"
 
 #include "lpc17_emc.h"
+#include "lpc17_gpio.h"
 
 #include "open1788.h"
 
@@ -106,6 +107,14 @@ void lpc17_boardinitialize(void)
 #ifdef CONFIG_ARCH_LEDS
   up_ledinit();
 #endif
+
+  /* Enable the LCD backlight (unless we can defer this to a later
+   * initialization phase.
+   */
+
+#if defined(CONFIG_LPC17_LCD) && !defined(CONFIG_BOARD_INITIALIZE)
+  lpc17_configgpio(GPIO_LCD_BL);
+#endif
 }
 
 /****************************************************************************
@@ -124,6 +133,12 @@ void lpc17_boardinitialize(void)
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
+  /* Enable the LCD backlight */
+
+#ifdef CONFIG_LPC17_LCD
+  lpc17_configgpio(GPIO_LCD_BL);
+#endif
+
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in user-space
    * but the initialization function must run in kernel space.

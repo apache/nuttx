@@ -856,6 +856,7 @@ void lpc17_gpiowrite(lpc17_pinset_t pinset, bool value)
         {
           offset = LPC17_FIO_CLR_OFFSET;
         }
+
       putreg32((1 << pin), fiobase + offset);
     }
 }

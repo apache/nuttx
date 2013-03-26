@@ -122,6 +122,10 @@ ifeq ($(CONFIG_DEBUG_GPIO),y)
 CHIP_CSRCS += lpc17_gpiodbg.c
 endif
 
+ifeq ($(CONFIG_LPC17_LCD),y)
+CHIP_CSRCS += lpc17_lcd.c
+endif
+
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS += lpc17_usbdev.c
 endif

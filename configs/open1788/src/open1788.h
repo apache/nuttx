@@ -111,6 +111,11 @@
 
 #define GPIO_SD_CD   (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN13)
 
+/* LCD ******************************************************************************/
+/* Backlight enable, P2[1].  Initial state is ON */
+
+#define GPIO_LCD_BL  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT2 | GPIO_PIN1)
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
