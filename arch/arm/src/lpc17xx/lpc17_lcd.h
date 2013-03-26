@@ -65,7 +65,7 @@
 /* Bits per pixel */
 
 #ifndef CONFIG_LPC17_LCD_BPP
-#  define CONFIG_LPC17_LCD_BPP 16  /* Bits per pixel */
+#  define CONFIG_LPC17_LCD_BPP 24  /* Bits per pixel */
 #endif
 
 /* Color format */
