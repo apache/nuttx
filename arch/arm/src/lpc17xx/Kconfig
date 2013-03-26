@@ -644,11 +644,47 @@ config LPC17_LCD_REFRESH_FREQ
 	---help---
 		LCD refesh rate (Hz)
 
-config LPC17_LCD_BPP
-	int "Bits per pixel"
-	default 24
+config LPC17_LCD_TFTPANEL
+	bool "TFT Panel"
+	default y
 	---help---
-		Bits per pixel
+		TFT Panel vs. STN display.  STN display panels require algorithmic
+		pixel pattern generation to provide pseudo gray scaling on
+		monochrome displays, or color creation on color displays.  TFT
+		display panels require the digital color value of each pixel to be
+		applied to the display data inputs.
+
+choice
+	prompt "Bits per pixel"
+	default LPC17_LCD_BPP24 if LPC17_LCD_TFTPANEL
+	default LPC17_LCD_BPP16_565 if !LPC17_LCD_TFTPANEL
+
+config LPC17_LCD_BPP1
+	bool "1 bit per pixel"
+
+config LPC17_LCD_BPP2
+	bool "2 bit per pixel"
+
+config LPC17_LCD_BPP4
+	bool "4 bit per pixel"
+
+config LPC17_LCD_BPP8
+	bool "8 bit per pixel"
+
+config LPC17_LCD_BPP16
+	bool "16 bit per pixel"
+
+config LPC17_LCD_BPP24
+	bool "24 bit per pixel"
+	depends on LPC17_LCD_TFTPANEL
+
+config LPC17_LCD_BPP16_565
+	bool "16 bpp, 5:6:5 mode"
+
+config LPC17_LCD_BPP12_444
+	bool "12 bpp, 4:4:4 mode"
+
+endchoice
 
 config LPC17_LCD_BACKCOLOR
 	hex "Initial background color"
