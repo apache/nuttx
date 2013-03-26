@@ -62,15 +62,25 @@
 
 /* Framebuffer characteristics in bytes */
 
-#if CONFIG_LPC17_LCD_BPP == 16
-#  define FB_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * sizeof(uint16_t) + 7) / 8)
-#elif CONFIG_LPC17_LCD_BPP == 24
-#  define FB_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * sizeof(uint32_t) + 7) / 8)
-#else
-#  error "Unsupported BPP"
+#if defined(CONFIG_LPC17_LCD_BPP1)
+#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 1 + 7) / 8)
+#elif defined(CONFIG_LPC17_LCD_BPP2)
+#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 2 + 7) / 8)
+#elif defined(CONFIG_LPC17_LCD_BPP4)
+#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 4 + 7) / 8)
+#elif defined(CONFIG_LPC17_LCD_BPP8)
+#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 8 + 7) / 8)
+#elif defined(CONFIG_LPC17_LCD_BPP16)
+#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 16 + 7) / 8)
+#elif defined(CONFIG_LPC17_LCD_BPP24)
+#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 32 + 7) / 8)
+#elif defined(CONFIG_LPC17_LCD_BPP16_565)
+#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 16 + 7) / 8)
+#else /* defined(CONFIG_LPC17_LCD_BPP12_444) */
+#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 16 + 7) / 8)
 #endif
 
-#define FB_SIZE (FB_STRIDE * CONFIG_LPC17_LCD_VHEIGHT)
+#define LPC17_FBSIZE (LPC17_STRIDE * CONFIG_LPC17_LCD_VHEIGHT)
 
 /* Delays */
 
@@ -124,7 +134,7 @@ static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt      = FB_FMT,
+  .fmt      = LPC17_COLOR_FMT,
   .xres     = CONFIG_LPC17_LCD_HWIDTH,
   .yres     = CONFIG_LPC17_LCD_VHEIGHT,
   .nplanes  = 1,
@@ -135,9 +145,9 @@ static const struct fb_videoinfo_s g_videoinfo =
 static const struct fb_planeinfo_s g_planeinfo =
 {
   .fbmem    = (FAR void *)CONFIG_LPC17_LCD_VRAMBASE,
-  .fblen    = FB_SIZE,
-  .stride   = FB_STRIDE,
-  .bpp      = CONFIG_LPC17_LCD_BPP,
+  .fblen    = LPC17_FBSIZE,
+  .stride   = LPC17_STRIDE,
+  .bpp      = LPC17_BPP,
 };
 
 /* Current cursor position */
@@ -316,7 +326,7 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
   if ((i & 1) != 0)
     {
       rgb0  = *pal;
-      rgb0 &= (LCD_PAL_R0_MASK | LCD_PAL_G0_MASK | LCD_PAL_B0_MASK | LCD_PAL_I0); 
+      rgb0 &= (LCD_PAL_R0_MASK | LCD_PAL_G0_MASK | LCD_PAL_B0_MASK | LCD_PAL_I0);
       rgb1 |= ((uint32_t)cmap->red[i]   << LCD_PAL_R0_SHIFT |
                (uint32_t)cmap->green[i] << LCD_PAL_G0_SHIFT |
                (uint32_t)cmap->blue[i]  << LCD_PAL_B0_SHIFT);
@@ -340,7 +350,7 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
       if ((i + 1) >= last)
         {
           rgb1  = *pal;
-          rgb1 &= (LCD_PAL_R1_MASK | LCD_PAL_G1_MASK | LCD_PAL_B1_MASK | LCD_PAL_I1); 
+          rgb1 &= (LCD_PAL_R1_MASK | LCD_PAL_G1_MASK | LCD_PAL_B1_MASK | LCD_PAL_I1);
         }
       else
         {
@@ -370,7 +380,7 @@ static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
   if (vtable && attrib)
     {
 #ifdef CONFIG_FB_HWCURSORIMAGE
-      attrib->fmt      = FB_FMT;
+      attrib->fmt      = LPC17_COLOR_FMT;
 #endif
       dbg("pos:      (x=%d, y=%d)\n", g_cpos.x, g_cpos.y);
       attrib->pos      = g_cpos;
@@ -449,7 +459,7 @@ int up_fbinitialize(void)
   regval = getreg32(LPC17_LCD_CTRL);
   regval &= ~LCD_CTRL_LCDPWR;
   putreg32(regval, LPC17_LCD_CTRL);
- 
+
   for (i = LPC17_LCD_PWRDIS_DELAY; i; i--);
 
   regval &= ~LCD_CTRL_LCDEN;
@@ -476,7 +486,7 @@ int up_fbinitialize(void)
   lpc17_configgpio(GPIO_LCD_VD14);
   lpc17_configgpio(GPIO_LCD_VD15);
 
-#if CONFIG_LPC17_LCD_BPP == 24
+#if LPC17_BPP > 16
   lpc17_configgpio(GPIO_LCD_VD16);
   lpc17_configgpio(GPIO_LCD_VD17);
   lpc17_configgpio(GPIO_LCD_VD18);
@@ -515,14 +525,33 @@ int up_fbinitialize(void)
 
   regval  = getreg32(LPC17_LCD_CTRL);
   regval &= ~LCD_CTRL_LCDBPP_MASK;
-  
-#if CONFIG_LPC17_LCD_BPP == 16
-  regval |= LCD_CTRL_LCDBPP_565;    /* 16-bit 5:6:5 */
-#else /* if CONFIG_LPC17_LCD_BPP == 24 */
+
+#if defined(CONFIG_LPC17_LCD_BPP1)
+  regval |= LCD_CTRL_LCDBPP_1;      /* 1 bpp */
+#elif defined(CONFIG_LPC17_LCD_BPP2)
+  regval |= LCD_CTRL_LCDBPP_2;      /* 2 bpp */
+#elif defined(CONFIG_LPC17_LCD_BPP4)
+  regval |= LCD_CTRL_LCDBPP_4;      /* 4 bpp */
+#elif defined(CONFIG_LPC17_LCD_BPP8)
+  regval |= LCD_CTRL_LCDBPP_8;      /* 8 bpp */
+#elif defined(CONFIG_LPC17_LCD_BPP16)
+  regval |= LCD_CTRL_LCDBPP_16;     /* 16 bpp */
+#elif defined(CONFIG_LPC17_LCD_BPP24)
   regval |= LCD_CTRL_LCDBPP_24;     /* 24-bit TFT panel only */
-  regval |= LCD_CTRL_LCDTFT;
+#elif defined(CONFIG_LPC17_LCD_BPP16_565)
+  regval |= LCD_CTRL_LCDBPP_565;    /* 16 bpp, 5:6:5 mode */
+#else /* defined(CONFIG_LPC17_LCD_BPP12_444) */
+  regval |= LCD_CTRL_LCDBPP_444;    /* 12 bpp, 4:4:4 mode */
 #endif
+
   putreg32(regval, LPC17_LCD_CTRL);
+
+  /* TFT panel */
+
+#if CONFIG_LPC17_LCD_TFTPANEL
+  regval |= LCD_CTRL_LCDTFT;
+  putreg32(regval, LPC17_LCD_CTRL);
+#endif
 
   /* Single panel */
 
@@ -603,7 +632,7 @@ int up_fbinitialize(void)
   putreg32(0, LPC17_LCD_TIMV);
 
   regval = ((CONFIG_LPC17_LCD_VHEIGHT - 1) << LCD_TIMV_LPP_SHIFT |
-            (CONFIG_LPC17_LCD_VPULSE - 1)  << LCD_TIMV_VSW_SHIFT | 
+            (CONFIG_LPC17_LCD_VPULSE - 1)  << LCD_TIMV_VSW_SHIFT |
             (CONFIG_LPC17_LCD_VFRONTPORCH) << LCD_TIMV_VFP_SHIFT |
             (CONFIG_LPC17_LCD_VBACKPORCH)  << LCD_TIMV_VBP_SHIFT);
 
@@ -622,7 +651,7 @@ int up_fbinitialize(void)
   regval  = getreg32(LPC17_LCD_CTRL);
   regval |= LCD_CTRL_LCDEN;
   putreg32(regval, LPC17_LCD_CTRL);
- 
+
   for (i = LPC17_LCD_PWREN_DELAY; i; i--);
 
   regval |= LCD_CTRL_LCDPWR;
@@ -684,10 +713,10 @@ void fb_uninitialize(void)
 
 void lpc17_lcdclear(nxgl_mxpixel_t color)
 {
-#if CONFIG_LPC17_LCD_BPP == 16
-  uint16_t *dest;
-#else
+#if LPC17_BPP > 16
   uint32_t *dest;
+#else
+  uint16_t *dest;
 #endif
   int i;
 

@@ -62,22 +62,51 @@
 #  define CONFIG_LPC17_LCD_REFRESH_FREQ (50) /* Hz */
 #endif
 
-/* Bits per pixel */
+/* Bits per pixel / color format */
 
-#ifndef CONFIG_LPC17_LCD_BPP
-#  define CONFIG_LPC17_LCD_BPP 24  /* Bits per pixel */
-#endif
-
-/* Color format */
-
-#undef FB_FMT
-#if CONFIG_LPC17_LCD_BPP == 16
-#  define FB_FMT FB_FMT_RGB16_565
-#elif CONFIG_LPC17_LCD_BPP == 24
-#  define FB_FMT FB_FMT_RGB24
+#undef LPC17_COLOR_FMT
+#if defined(CONFIG_LPC17_LCD_BPP1)
+#  define LPC17_BPP                    1
+#  define LPC17_COLOR_FMT              FB_FMT_Y1
+#elif defined(CONFIG_LPC17_LCD_BPP2)
+#  define LPC17_BPP                    2
+#  define LPC17_COLOR_FMT              FB_FMT_Y2
+#elif defined(CONFIG_LPC17_LCD_BPP4)
+#  define LPC17_BPP                    4
+#  define LPC17_COLOR_FMT              FB_FMT_Y4
+#elif defined(CONFIG_LPC17_LCD_BPP8)
+#  define LPC17_BPP                    8
+#  define LPC17_COLOR_FMT              FB_FMT_Y8
+#elif defined(CONFIG_LPC17_LCD_BPP16)
+#  define LPC17_BPP                    16
+#  define LPC17_COLOR_FMT              FB_FMT_Y16
+#elif defined(CONFIG_LPC17_LCD_BPP24)
+#  define LPC17_BPP                    24
+#  define LPC17_COLOR_FMT              FB_FMT_RGB24
+#  ifndef CONFIG_LPC17_LCD_TFTPANEL
+#    error "24 BPP is only available for a TFT panel"
+#  endif
+#elif defined(CONFIG_LPC17_LCD_BPP16_565)
+#  define LPC17_BPP                    16
+#  define LPC17_COLOR_FMT              FB_FMT_RGB16_565
+#elif defined(CONFIG_LPC17_LCD_BPP12_444)
+#  define LPC17_BPP       1             2
+#  define LPC17_COLOR_FMT              FB_FMT_RGB12_444
 #else
-#  error "Unsupported BPP"
+#  ifndef CONFIG_LPC17_LCD_TFTPANEL
+#    warning "Assuming 24 BPP"
+#    define LPC17_BPP                  24
+#    define CONFIG_LPC17_LCD_BPP24     1
+#    define LPC17_COLOR_FMT            FB_FMT_RGB24
+#  else
+#    warning "Assuming 16 BPP 5:6:5"
+#    define LPC17_BPP                  16
+#    define CONFIG_LPC17_LCD_BPP16_565 1
+#    define LPC17_COLOR_FMT            FB_FMT_RGB16_565
+#  endif
 #endif
+
+/* Background color */
 
 #ifndef CONFIG_LPC17_LCD_BACKCOLOR
 #  define CONFIG_LPC17_LCD_BACKCOLOR 0  /* Initial background color */
