@@ -178,6 +178,14 @@
 #define LCD_CTRL_LCDEN                  (1 << 0)  /* Bit 0: LCD enable control bit */
 #define LCD_CTRL_LCDBPP_SHIFT           (1)       /* Bits 1-3: LCD bits per pixel */
 #define LCD_CTRL_LCDBPP_MASK            (7 << LCD_CTRL_LCDBPP_SHIFT)
+#  define LCD_CTRL_LCDBPP_1             (0 << LCD_CTRL_LCDBPP_SHIFT) /* 1 bpp */
+#  define LCD_CTRL_LCDBPP_2             (1 << LCD_CTRL_LCDBPP_SHIFT) /* 2 bpp */
+#  define LCD_CTRL_LCDBPP_4             (2 << LCD_CTRL_LCDBPP_SHIFT) /* 4 bpp */
+#  define LCD_CTRL_LCDBPP_8             (3 << LCD_CTRL_LCDBPP_SHIFT) /* 8 bpp */
+#  define LCD_CTRL_LCDBPP_16            (4 << LCD_CTRL_LCDBPP_SHIFT) /* 16 bpp */
+#  define LCD_CTRL_LCDBPP_24            (5 << LCD_CTRL_LCDBPP_SHIFT) /* 24 bpp (TFT panel only) */
+#  define LCD_CTRL_LCDBPP_565           (6 << LCD_CTRL_LCDBPP_SHIFT) /* 16 bpp, 5:6:5 mode */
+#  define LCD_CTRL_LCDBPP_444           (7 << LCD_CTRL_LCDBPP_SHIFT) /* 12 bpp, 4:4:4 mode */
 #define LCD_CTRL_LCDBW                  (1 << 4)  /* Bit 4: STN LCD monochrome/color selection */
 #define LCD_CTRL_LCDTFT                 (1 << 5)  /* Bit 5: LCD TFT type selection */
 #define LCD_CTRL_LCDMONO8               (1 << 6)  /* Bit 6: Monochrome LCD interface bit */
@@ -250,7 +258,6 @@
 /* LCD CRSR_CTRL - Cursor Control Register */
 
 #define LCD_CRSR_CTRL_CRSON             (1 << 0)  /* Bit 0: Cursor enable */
-#define LCD_CRSR_CTRL_CRSON_MASK        (1 << LCD_CRSR_CTRL_CRSON_SHIFT)
                                                   /* Bits 1-3: Reserved */
 #define LCD_CRSR_CTRL_CRSRNUM_SHIFT     (4)       /* Bits 4-5: Cursor image number */
 #define LCD_CRSR_CTRL_CRSRNUM_MASK      (3 << LCD_CRSR_CTRL_CRSRNUM1_0_SHIFT)

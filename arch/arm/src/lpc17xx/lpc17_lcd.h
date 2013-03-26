@@ -59,13 +59,13 @@
 /* LCD refresh rate */
 
 #ifndef CONFIG_LPC17_LCD_REFRESH_FREQ
-#  define CONFIG_LPC17_LCD_REFRESH_FREQ (50)    /* Hz */
+#  define CONFIG_LPC17_LCD_REFRESH_FREQ (50) /* Hz */
 #endif
 
 /* Bits per pixel */
 
 #ifndef CONFIG_LPC17_LCD_BPP
-#  define CONFIG_LPC17_LCD_BPP 16  /* Bytes per pixel */
+#  define CONFIG_LPC17_LCD_BPP 16  /* Bits per pixel */
 #endif
 
 /* Color format */
@@ -107,7 +107,7 @@
 #  define CONFIG_LPC17_LCD_VHEIGHT 272 /* Height in rows */
 #endif
 
-#define CONFIG_LPC17_LCD_VPULSE
+#ifndef CONFIG_LPC17_LCD_VPULSE
 #  define CONFIG_LPC17_LCD_VPULSE 2
 #endif
 

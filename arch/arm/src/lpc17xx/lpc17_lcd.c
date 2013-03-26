@@ -45,16 +45,32 @@
 #include <debug.h>
 
 #include <nuttx/fb.h>
-#include "lpc17_internal.h"
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "chip/lpc17_syscon.h"
+#include "lpc17_gpio.h"
+#include "lpc17_lcd.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
+#define LPC17_LCD_CLK_PER_LINE     (CONFIG_LPC17_LCD_HWIDTH + CONFIG_LPC17_LCD_HPULSE + CONFIG_LPC17_LCD_HFRONTPORCH + CONFIG_LPC17_LCD_HBACKPORCH)
+#define LPC17_LCD_LINES_PER_FRAME  (CONFIG_LPC17_LCD_VHEIGHT + CONFIG_LPC17_LCD_VPULSE + CONFIG_LPC17_LCD_VFRONTPORCH + CONFIG_LPC17_LCD_VBACKPORCH)
+#define LPC17_LCD_PIXEL_CLOCK          (LPC17_LCD_CLK_PER_LINE * LPC17_LCD_LINES_PER_FRAME * CONFIG_LPC17_LCD_REFRESH_FREQ)
+
 /* Framebuffer characteristics in bytes */
 
-#define FB_WIDTH ((CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_BPP + 7) / 8)
-#define FB_SIZE  (FB_WIDTH * CONFIG_LPC17_LCD_VHEIGHT)
+#if CONFIG_LPC17_LCD_BPP == 16
+#  define FB_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * sizeof(uint16_t) + 7) / 8)
+#elif CONFIG_LPC17_LCD_BPP == 24
+#  define FB_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * sizeof(uint32_t) + 7) / 8)
+#else
+#  error "Unsupported BPP"
+#endif
+
+#define FB_SIZE (FB_STRIDE * CONFIG_LPC17_LCD_VHEIGHT)
 
 /* Delays */
 
@@ -120,7 +136,7 @@ static const struct fb_planeinfo_s g_planeinfo =
 {
   .fbmem    = (FAR void *)CONFIG_LPC17_LCD_VRAMBASE,
   .fblen    = FB_SIZE,
-  .stride   = FB_WIDTH,
+  .stride   = FB_STRIDE,
   .bpp      = CONFIG_LPC17_LCD_BPP,
 };
 
@@ -425,6 +441,7 @@ static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
 
 int up_fbinitialize(void)
 {
+  uint32_t regval;
   int i;
 
   /* Disable LCD controller */
@@ -478,7 +495,122 @@ int up_fbinitialize(void)
   lpc17_configgpio(GPIO_LCD_ENABM);
   lpc17_configgpio(GPIO_LCD_PWR);
 
-#warning "Missing logic"
+  /* Turn on LCD clock */
+
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval |= SYSCON_PCONP_PCLCD;
+  putreg32(regval, LPC17_SYSCON_PCONP);
+
+  /* Disable the cursor */
+
+  regval  = getreg32(LPC17_LCD_CRSR_CRTL);
+  regval &= ~LCD_CRSR_CTRL_CRSON;
+  putreg32(regval, LPC17_LCD_CRSR_CRTL);
+
+  /* Disable GLCD controller */
+
+  putreg32(0, LPC17_LCD_CTRL);
+
+  /* Set the bits per pixel */
+
+  regval  = getreg32(LPC17_LCD_CTRL);
+  regval &= ~LCD_CTRL_LCDBPP_MASK;
+  
+#if CONFIG_LPC17_LCD_BPP == 16
+  regval |= LCD_CTRL_LCDBPP_565;    /* 16-bit 5:6:5 */
+#else /* if CONFIG_LPC17_LCD_BPP == 24 */
+  regval |= LCD_CTRL_LCDBPP_24;     /* 24-bit TFT panel only */
+  regval |= LCD_CTRL_LCDTFT;
+#endif
+  putreg32(regval, LPC17_LCD_CTRL);
+
+  /* Single panel */
+
+  regval &= ~LCD_CTRL_LCDDUAL;
+  putreg32(regval, LPC17_LCD_CTRL);
+
+  /* Normal RGB output */
+
+  regval &= ~LCD_CTRL_BGR;
+  putreg32(regval, LPC17_LCD_CTRL);
+
+  /* Little endian byte order */
+
+  regval &= ~LCD_CTRL_BEBO;
+  putreg32(regval, LPC17_LCD_CTRL);
+
+  /* Little endian pixel order */
+
+  regval &= ~LCD_CTRL_BEPO;
+  putreg32(regval, LPC17_LCD_CTRL);
+
+  /* Disable power */
+
+  regval &= ~LCD_CTRL_LCDPWR;
+  putreg32(regval, LPC17_LCD_CTRL);
+
+  /* Initialize pixel clock (assuming clock source is CCLK) */
+
+  putreg32(LPC17_CCLK / LPC17_LCD_PIXEL_CLOCK, LPC17_SYSCON_LCDCFG);
+
+  /* Bypass internal pixel clock divider */
+
+  regval  = getreg32(LPC17_LCD_POL);
+  regval |= LCD_POL_BCD;
+  putreg32(regval, LPC17_LCD_POL);
+
+  /* Select the CCLK for the LCD block clock source */
+
+  regval &= ~LCD_POL_CLKSEL;
+  putreg32(regval, LPC17_LCD_POL);
+
+  /* LCDFP pin is active LOW and inactive HIGH */
+
+  regval |= LCD_POL_IVS;
+  putreg32(regval, LPC17_LCD_POL);
+
+  /* LCDLP pin is active LOW and inactive HIGH */
+
+  regval |= LCD_POL_IHS;
+  putreg32(regval, LPC17_LCD_POL);
+
+  /* Data is driven out into the LCD on the falling edge */
+
+  regval &= ~LCD_POL_IPC;
+  putreg32(regval, LPC17_LCD_POL);
+
+  /* Active high */
+
+  regval &= ~LCD_POL_IOE;
+  putreg32(regval, LPC17_LCD_POL);
+
+  regval &= ~LCD_POL_CPL_MASK;
+  regval |= (CONFIG_LPC17_LCD_HWIDTH-1) << LCD_POL_CPL_SHIFT;
+  putreg32(regval, LPC17_LCD_POL);
+
+  /* Initialize horizontal timing */
+
+  putreg32(0, LPC17_LCD_TIMH);
+
+  regval = (((CONFIG_LPC17_LCD_HWIDTH/16) - 1) << LCD_TIMH_PPL_SHIFT |
+            (CONFIG_LPC17_LCD_HPULSE - 1)      << LCD_TIMH_HSW_SHIFT |
+            (CONFIG_LPC17_LCD_HFRONTPORCH - 1) << LCD_TIMH_HFP_SHIFT |
+            (CONFIG_LPC17_LCD_HBACKPORCH - 1)  << LCD_TIMH_HBP_SHIFT);
+  putreg32(regval, LPC17_LCD_TIMH);
+
+  /* Initialize vertical timing */
+
+  putreg32(0, LPC17_LCD_TIMV);
+
+  regval = ((CONFIG_LPC17_LCD_VHEIGHT - 1) << LCD_TIMV_LPP_SHIFT |
+            (CONFIG_LPC17_LCD_VPULSE - 1)  << LCD_TIMV_VSW_SHIFT | 
+            (CONFIG_LPC17_LCD_VFRONTPORCH) << LCD_TIMV_VFP_SHIFT |
+            (CONFIG_LPC17_LCD_VBACKPORCH)  << LCD_TIMV_VBP_SHIFT);
+
+  /* Frame base address doubleword aligned */
+
+  putreg32(CONFIG_LPC17_LCD_VRAMBASE & ~7, LPC17_LCD_UPBASE);
+  putreg32(CONFIG_LPC17_LCD_VRAMBASE & ~7, LPC17_LCD_LPBASE);
 
   /* Clear the display */
 
@@ -487,7 +619,7 @@ int up_fbinitialize(void)
 
   /* Enable LCD */
 
-  regval = getreg32(LPC17_LCD_CTRL);
+  regval  = getreg32(LPC17_LCD_CTRL);
   regval |= LCD_CTRL_LCDEN;
   putreg32(regval, LPC17_LCD_CTRL);
  
@@ -550,7 +682,7 @@ void fb_uninitialize(void)
  *
  ************************************************************************************/
 
-void lpc17_lcdclear(nxgl_pixel_t color)
+void lpc17_lcdclear(nxgl_mxpixel_t color)
 {
 #if CONFIG_LPC17_LCD_BPP == 16
   uint16_t *dest;

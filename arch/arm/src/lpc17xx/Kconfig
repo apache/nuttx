@@ -328,6 +328,7 @@ config LPC17_EEPROM
 endmenu
 
 menu "Serial driver options"
+	depends on LPC17_UART0 || LPC17_UART1 || LPC17_UART2 || LPC17_UART3 || LPC17_UART4
 
 config SERIAL_TERMIOS
 	bool "Serial driver TERMIOS supported"
@@ -376,20 +377,18 @@ config UART3_FLOWCONTROL
 endmenu
 
 menu "ADC driver options"
+	depends on LPC17_ADC
 
 config ADC0_AVERAGE
 	int "ADC0 average"
-	depends on LPC17_ADC
 	default 200
 
 config ADC0_MASK
 	int "ADC0 mask"
-	depends on LPC17_ADC
 	default 1
 
 config ADC0_SPS
 	int "ADC0 SPS"
-	depends on LPC17_ADC
 	default 1000
 
 config ADC_CHANLIST
@@ -413,10 +412,10 @@ config ADC_CHANLIST
 
 config ADC_NCHANNELS
 	int "ADC0 number of channels"
-	depends on LPC17_ADC
+	depends on ADC_CHANLIST
 	default 0  
 	---help---
-		If CONFIG_ADC_CHANLIST is enabled, then the platform specific code
+		If ADC_CHANLIST is enabled, then the platform specific code
 		must do two things:  (1) define ADC_NCHANNELS in the configuration
 		file and (2) provide an array g_adc_chanlist[] with the channel
 		numbers matching the ADC0_MASK within the board-specific library.
@@ -424,10 +423,10 @@ config ADC_NCHANNELS
 endmenu
 
 menu "CAN driver options"
+	depends on LPC17_CAN1 || LPC17_CAN2
 
 config CAN_EXTID
 	bool "CAN extended IDs"
-	depends on LPC17_CAN1 || LPC17_CAN2
 	default n
 	---help---
 		Enables support for the 29-bit extended ID.  Default Standard 11-bit IDs.
@@ -462,35 +461,31 @@ config CAN2_DIVISOR
 
 config CAN_TSEG1
 	int "TSEG1 quanta"
-	depends on LPC17_CAN1 || LPC17_CAN2
 	default 6
 	---help---
 		The number of CAN time quanta in segment 1. Default: 6
 
 config CAN_TSEG2
 	int "TSEG2 quanta"
-	depends on LPC17_CAN1 || LPC17_CAN2
 	default 4
 	---help---
 		The number of CAN time quanta in segment 2. Default: 7
 
 config CAN_SAM
 	bool "CAN sampling"
-	depends on LPC17_CAN1 || LPC17_CAN2
 	default n
 	---help---
 		The bus is sampled 3 times (recommended for low to medium speed buses to spikes on the bus-line).
 
 config CAN_LOOPBACK
 	bool "CAN looopback mode"
-	depends on LPC17_CAN1 || LPC17_CAN2
 	default n
 	---help---
 		Enable CAN loopback mode
 
 config CAN_REGDEBUG
 	bool "Register level debug"
-	depends on LPC17_CAN1 || LPC17_CAN2
+	depends on DEBUG
 	default n
 	---help---
 		Output detailed register-level CAN debug information.  Requires also DEBUG and DEBUG_CAN.
@@ -504,6 +499,7 @@ config GPIO_IRQ
 		Enable support for GPIO interrupts
 
 menu "I2C driver options"
+	depends on LPC17_I2C0 || LPC17_I2C1 || LPC17_I2C2
 
 config I2C0_FREQ
 	int "I2C0 frequency"
@@ -553,84 +549,77 @@ config SDIO_WIDTH_D1_ONLY
 endmenu
 
 menu "Ethernet driver options"
+	depends on LPC17_ETHERNET
 
 config PHY_AUTONEG
 	bool "Autonegiation"
-	depends on LPC17_ETHERNET
 	---help---
 		Enable auto-negotion
 
 config PHY_SPEED100
 	bool "100Mbit/Sec"
-	depends on LPC17_ETHERNET && !PHY_AUTONEG
+	depends on !PHY_AUTONEG
 	---help---
 		Select 100Mbit vs. 10Mbit speed.
 
 config PHY_FDUPLEX
 	bool "Full duplex"
-	depends on LPC17_ETHERNET && !PHY_AUTONEG
+	depends on !PHY_AUTONEG
 	---help---
 		Select full (vs. half) duplex
 
 config NET_EMACRAM_SIZE
 	int "EMAC RAM Size"
-	depends on LPC17_ETHERNET
 	default 16384
 	---help---
 		Size of EMAC RAM.  Default: 16384 bytes
 
 config NET_NTXDESC
 	int "Number of Tx descriptors"
-	depends on LPC17_ETHERNET
 	default 18
 	---help---
 		Configured number of Tx descriptors. Default: 18
 
 config NET_NRXDESC
 	int "Number of Rx descriptors"
-	depends on LPC17_ETHERNET
 	default 18
 	---help---
 		Configured number of Rx descriptors. Default: 18
 
 config NET_PRIORITY
 	int "Ethernet interrupt priority"
-	depends on LPC17_ETHERNET
 	default 0
 	---help---
 		Ethernet interrupt priority.  The is default is the higest priority (0).
 
 config NET_WOL
 	bool "Wake-up on LAN"
-	depends on LPC17_ETHERNET
 	default n
 	---help---
 		Enable Wake-up on Lan (not fully implemented).
 
 config NET_REGDEBUG
 	bool "Ethernet register-level debug"
-	depends on LPC17_ETHERNET && DEBUG
+	depends on DEBUG
 	default n
 	---help---
 		Enable low level register debug.  Also needs DEBUG.
 
 config NET_DUMPPACKET
 	bool "Enable packet dumping"
-	depends on LPC17_ETHERNET && DEBUG
+	depends on DEBUG
 	default n
 	---help---
 		Dump all received and transmitted packets. Also needs DEBUG.
 
 config NET_HASH
 	bool "Hashing"
-	depends on LPC17_ETHERNET
 	default n
 	---help---
 		Enable receipt of near-perfect match frames.
 
 config NET_MULTICAST
 	bool "Multicast"
-	depends on LPC17_ETHERNET
 	default y if NET_IGMP
 	default n if !NET_IGMP
 	---help---
@@ -639,18 +628,83 @@ config NET_MULTICAST
 
 endmenu
 
+menu "LCD device driver options"
+	depends on LPC17_LCD
+
+config LPC17_LCD_VRAMBASE
+	hex "Video RAM base address"
+	default 0xa0010000
+	---help---
+		Base address of the video RAM frame buffer.  The default is
+		(LPC17_EXTDRAM_CS0 + 0x00010000)
+
+config LPC17_LCD_REFRESH_FREQ
+	int "LCD refesh rate (Hz)"
+	default 50
+	---help---
+		LCD refesh rate (Hz)
+
+config LPC17_LCD_BPP
+	int "Bits per pixel"
+	default 16
+	---help---
+		Bits per pixel
+
+config LPC17_LCD_BACKCOLOR
+	hex "Initial background color"
+	default 0x0
+	---help---
+		Initial background color
+
+config LPC17_LCD_HWIDTH
+	int "Display width (pixels)"
+	default 480
+	---help---
+		Horizontal width the display in pixels
+
+config LPC17_LCD_HPULSE
+	int "Horizontal pulse"
+	default 2
+
+config LPC17_LCD_HFRONTPORCH
+	int "Horizontal front porch"
+	default 5
+
+config LPC17_LCD_HBACKPORCH
+	int "Horizontal back porch"
+	default 40
+
+config LPC17_LCD_VHEIGHT
+	int "Display height (rows)"
+	default 272
+	---help---
+		Vertical height of the display in rows
+
+config LPC17_LCD_VPULSE
+	int "Vertical pulse"
+	default 2
+
+config LPC17_LCD_VFRONTPORCH
+	int "Vertical front porch"
+	default 8
+
+config LPC17_LCD_VBACKPORCH
+	int "Vertical back porch"
+	default 8
+
+endmenu
+
 menu "USB device driver options"
+	depends on LPC17_USBDEV
 
 config LPC17_USBDEV_EP0_MAXSIZE
 	int "EP0 Max packet size"
-	depends on LPC17_USBDEV
 	default 64
 	---help---
 		Endpoint 0 maximum packet size.  Default: 64
 
 config LPC17_USBDEV_FRAME_INTERRUPT
 	bool "USB frame interrupt"
-	depends on LPC17_USBDEV
 	default n
 	---help---
 		Handle USB Start-Of-Frame events.  Enable reading SOF from interrupt
@@ -659,42 +713,37 @@ config LPC17_USBDEV_FRAME_INTERRUPT
 
 config LPC17_USBDEV_EPFAST_INTERRUPT
 	bool "EP fast interrupt handling"
-	depends on LPC17_USBDEV
 	default n
 	---help---
 		Enable high priority interrupts.  I have no idea why you might want to do that
 
 config LPC17_USBDEV_NDMADESCRIPTORS
 	int "Number of DMA descriptors"
-	depends on LPC17_USBDEV
 	default 8
 	---help---
 		Number of DMA descriptors to allocate in SRAM.  Default: 8
 
 config LPC17_USBDEV_DMA
 	bool "Enable USB device DMA"
-	depends on LPC17_USBDEV
 	default n
 	---help---
 		Enable lpc17xx-specific DMA support
 
 config LPC17_USBDEV_NOVBUS
 	bool "Disable VBUS support"
-	depends on LPC17_USBDEV
 	default n
 	---help---
 		Define if the hardware implementation does not support the VBUS signal
 
 config LPC17_USBDEV_NOLED
 	bool "Disable USB device LCD support"
-	depends on LPC17_USBDEV
 	default n
 	---help---
 		Define if the hardware implementation does not support the LED output
 
 config LPC17_USBDEV_REGDEBUG
 	bool "Register level debug"
-	depends on LPC17_USBDEV && DEBUG
+	depends on DEBUG
 	default n
 	---help---
 		Output detailed register-level USB device debug information.  Requires also DEBUG.
@@ -702,45 +751,40 @@ config LPC17_USBDEV_REGDEBUG
 endmenu
 
 menu "USB host driver options"
+	depends on LPC17_USBHOST
 
 config USBHOST_OHCIRAM_SIZE
 	int "OHCI RAM Size"
-	depends on LPC17_USBHOST
 	default 16384
 	---help---
 		Total size of OHCI RAM (in AHB SRAM Bank 1).  Default: 16384
 
 config USBHOST_NEDS
 	int "Number of Endpoint Descriptors"
-	depends on LPC17_USBHOST
 	default 2
 	---help---
 		Number of endpoint descriptors.  Default: 2
 
 config USBHOST_NTDS
 	int "Number of transfer descriptors"
-	depends on LPC17_USBHOST
 	default 3
 	---help---
 		Number of transfer descriptors. Default: 3
 
 config USBHOST_TDBUFFERS
 	int "Number of descriptor buffers"
-	depends on LPC17_USBHOST
 	default 2
 	---help---
 		Number of transfer descriptor buffers.  Default: 2
 
 config USBHOST_TDBUFSIZE
 	int "Descriptor buffer size"
-	depends on LPC17_USBHOST
 	default 128
 	---help---
 		Size of one transfer descriptor buffer.  Default 128
 
 config USBHOST_IOBUFSIZE
 	int "I/O buffer size"
-	depends on LPC17_USBHOST
 	default 512
 	---help---
 		Size of one end-user I/O buffer.  This can be zero if the application
@@ -748,28 +792,25 @@ config USBHOST_IOBUFSIZE
 
 config USBHOST_BULK_DISABLE
 	bool "Disable bulk EPs"
-	depends on LPC17_USBHOST
 	default n
 	---help---
 		Disable support for bulk endpoints.
 
 config USBHOST_INT_DISABLE
 	bool "Disable interupt EPs"
-	depends on LPC17_USBHOST
 	default n
 	---help---
 		Disable support for interrupt endpoints.
 
 config USBHOST_ISOC_DISABLE
 	bool "Disable isochronous EPs"
-	depends on LPC17_USBHOST
 	default n
 	---help---
 		Disable support for isochronous endpoints.
 
 config LPC17_USBHOST_REGDEBUG
 	bool "Register level debug"
-	depends on LPC17_USBHOST && DEBUG
+	depends on DEBUG
 	default n
 	---help---
 		Output detailed register-level USB host debug information.  Requires also DEBUG.
