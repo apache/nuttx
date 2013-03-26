@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fb.h
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -317,15 +317,20 @@ struct fb_vtable_s
 };
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: up_fbinitialize, up_fbuninitialize, up_fbgetvplane
@@ -342,9 +347,9 @@ extern "C" {
  *
  ***************************************************************************/
 
-EXTERN int up_fbinitialize(void);
-EXTERN FAR struct fb_vtable_s *up_fbgetvplane(int vplane);
-EXTERN void fb_uninitialize(void);
+int up_fbinitialize(void);
+FAR struct fb_vtable_s *up_fbgetvplane(int vplane);
+void fb_uninitialize(void);
 
 #undef EXTERN
 #ifdef __cplusplus
