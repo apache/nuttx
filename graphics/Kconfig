@@ -41,7 +41,7 @@ config NX_WRITEONLY
 menu "Supported Pixel Depths"
 
 config NX_DISABLE_1BPP
-	bool "1 BPP"
+	bool "Disable 1 BPP"
 	default y
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
@@ -49,7 +49,7 @@ config NX_DISABLE_1BPP
 		pixel depth.
 
 config NX_DISABLE_2BPP
-	bool "2 BPP"
+	bool "Disable 2 BPP"
 	default y
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
@@ -57,7 +57,7 @@ config NX_DISABLE_2BPP
 		pixel depth.
 
 config NX_DISABLE_4BPP
-	bool "4 BPP"
+	bool "Disable 4 BPP"
 	default y
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
@@ -65,7 +65,7 @@ config NX_DISABLE_4BPP
 		pixel depth.
 
 config NX_DISABLE_8BPP
-	bool "8 BPP"
+	bool "Disable 8 BPP"
 	default y
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
@@ -73,7 +73,7 @@ config NX_DISABLE_8BPP
 		pixel depth.
 
 config NX_DISABLE_16BPP
-	bool "16 BPP"
+	bool "Disable 16 BPP"
 	default y
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
@@ -81,7 +81,7 @@ config NX_DISABLE_16BPP
 		pixel depth.
 
 config NX_DISABLE_24BPP
-	bool "24 BPP"
+	bool "Disable 24 BPP"
 	default y
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling
@@ -89,7 +89,7 @@ config NX_DISABLE_24BPP
 		pixel depth.
 
 config NX_DISABLE_32BPP
-	bool "32 BPP"
+	bool "Disable 32 BPP"
 	default y
 	---help---
 		NX supports a variety of pixel depths.  You can save some memory by disabling

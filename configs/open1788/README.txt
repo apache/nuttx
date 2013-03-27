@@ -393,7 +393,7 @@ CONFIGURATION
   nsh
   ---
     Configures the NuttShell (nsh) located at examples/nsh.  The
-    Configuration enables both the serial NSH interface.
+    Configuration enables only the serial NSH interface.
 
     NOTES:
  
@@ -427,4 +427,31 @@ CONFIGURATION
        not excessible to the applications.  So the RAM test can be
        freely executed against the SRAM memory beginning at address
        0xa000:0000 (CS0).
+
+  nxlines
+  -------
+    Configures the graphics example located at examples/nsh.  This
+    configuration enables SDRAM to hold the LCD framebuffer and enables
+    the LPC178x LCD driver in order to support the WaveShare 4.3 inch TFT
+    panel.
+
+    NOTES:
+ 
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools//README.txt.
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Uses the older, OABI, buildroot toolchain.  But that is easily
+       reconfigured:
+
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+
+    3. In this configuration, the SDRAM is not added to heap but is
+       dedicated to supporting an LCD frame buffer at address 0xa0010000.
 

@@ -4458,5 +4458,13 @@
 	* configs/twr-k60n512:  Converted configurations to use the
 	  konfig-frontends tool (2013-03-25).
 	* arch/arm/src/lpc17xx/lpc17_lcd.c:  Add an LCD framebuffer drier
-	  for the LPC177x/8x family.
-
+	  for the LPC177x/8x family (2103-3-26).
+	* arch/arm/src/lpc17xx/lpc17_emc.c and
+	  configs/open1788/src/lpc17_sdraminitialize.c:  Began testing the
+	  Open1788 SDRAM.  The SDRAM is basically functional, but there are
+	  failures with the SDRAM is stressed by the memory test at
+	  apps/example/ramtest (SDRAM support and the RAM test can be configured
+	  into the base configs/open1788/nsh configuration as described in
+	  configs/open1788/READMT.txt (2103-3-27).
+	* configs/open1788/nxlines:  Add a configuration to test both the
+	  Open1788 LCD and SDRAM which is used as a framebuffer (2013-3-27).
