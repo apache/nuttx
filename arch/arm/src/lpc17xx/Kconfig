@@ -105,19 +105,9 @@ config ARCH_FAMILY_LPC176X
 
 config ARCH_FAMILY_LPC177X
 	bool
-	select ARCH_HAVE_EXTNAND
-	select ARCH_HAVE_EXTSRAM0
-	select ARCH_HAVE_EXTDRAM
-	select ARCH_HAVE_EXTNOR
-	select ARCH_HAVE_SDIO
 
 config ARCH_FAMILY_LPC178X
 	bool
-	select ARCH_HAVE_EXTNAND
-	select ARCH_HAVE_EXTSRAM0
-	select ARCH_HAVE_EXTDRAM
-	select ARCH_HAVE_EXTNOR
-	select ARCH_HAVE_SDIO
 
 config ARCH_HAVE_SPIFI
 	bool
@@ -143,6 +133,10 @@ config LPC17_EMC
 	bool "EMC"
 	default y
 	depends on ARCH_FAMILY_LPC178X
+	select ARCH_HAVE_EXTNAND
+	select ARCH_HAVE_EXTSRAM0
+	select ARCH_HAVE_EXTDRAM
+	select ARCH_HAVE_EXTNOR
 
 config LPC17_ETHERNET
 	bool "Ethernet"
@@ -172,7 +166,8 @@ config LPC17_USBOTG
 
 config LPC17_SDCARD
 	bool "SD Card Interface"
-	depends on ARCH_HAVE_SDIO
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
+	select ARCH_HAVE_SDIO
 	default n
 
 config LPC17_UART0
