@@ -411,3 +411,19 @@ CONFIGURATION
 
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+
+    3. This NSH has support for built-in applications enabled, however,
+       no built-in configurations are built in the defulat configuration.
+
+    4. This configuration has been used for verifying SDRAM by modifying
+       the configuration in the following ways:
+
+       CONFIG_LPC17_EMC=y                  : Enable the EMC
+       CONFIG_ARCH_EXTDRAM=y               : Configure external DRAM
+       CONFIG_ARCH_EXTDRAMSIZE=67108864    : DRAM size 2x256/8 = 64MB
+       CONFIG_SYSTEM_RAMTEST=y             : Enable the RAM test built-in
+
+       In this configuration, the SDRAM is not added to heap and so is
+       not excessible to the applications.  So the RAM test can be
+       freely executed against the SRAM memory beginning at address
+       0xa000:0000 (CS0).
