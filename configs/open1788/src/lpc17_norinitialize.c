@@ -49,7 +49,7 @@
 
 #include "open1788.h"
 
-#if defined(CONFIG_LPC17_EMC) && defined(CONFIG_LPC17_EMC_NOR)
+#if defined(CONFIG_LPC17_EMC) && defined(CONFIG_ARCH_EXTNOR)
 
 /************************************************************************************
  * Definitions
@@ -94,4 +94,4 @@ void lpc17_nor_initialize(void)
   up_mdelay(10);
 }
 
-#endif /* CONFIG_LPC17_EMC && CONFIG_LPC17_EMC_NOR */
+#endif /* CONFIG_LPC17_EMC && CONFIG_ARCH_EXTNOR */

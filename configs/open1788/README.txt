@@ -427,3 +427,4 @@ CONFIGURATION
        not excessible to the applications.  So the RAM test can be
        freely executed against the SRAM memory beginning at address
        0xa000:0000 (CS0).
+

@@ -197,7 +197,8 @@
  * Needed for NAND and SDRAM: {17,1,2,1}
  */
 
-#if defined(CONFIG_LPC17_EMC_NAND) || defined(CONFIG_LPC17_EMC_SDRAM)
+#ifdef CONFIG_LPC17_EMC
+#if defined(CONFIG_ARCH_EXTNAND) || defined(CONFIG_ARCH_EXTDRAM)
 #  define BOARD_CMDDLY             17
 #  define BOARD_FBCLKDLY           17
 #  define BOARD_CLKOUT0DLY         1
@@ -207,6 +208,7 @@
 #  define BOARD_FBCLKDLY           1
 #  define BOARD_CLKOUT0DLY         1
 #  define BOARD_CLKOUT1DLY         1
+#endif
 #endif
 
 /* LED definitions ******************************************************************/
