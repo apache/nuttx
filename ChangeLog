@@ -4457,4 +4457,6 @@
 	  konfig-frontends tool (2013-03-25).
 	* configs/twr-k60n512:  Converted configurations to use the
 	  konfig-frontends tool (2013-03-25).
+	* arch/arm/src/lpc17xx/lpc17_lcd.c:  Add an LCD framebuffer drier
+	  for the LPC177x/8x family.
 

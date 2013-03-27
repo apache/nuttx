@@ -117,9 +117,9 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
     {
       /* Check if any monitor operation is requested on this fd */
 
-      if (readfds && FD_ISSET(fd, readfds) ||
-          writefds && FD_ISSET(fd, writefds) ||
-          exceptfds && FD_ISSET(fd, exceptfds))
+      if ((readfds   && FD_ISSET(fd, readfds))  ||
+          (writefds  && FD_ISSET(fd, writefds)) ||
+          (exceptfds && FD_ISSET(fd, exceptfds)))
         {
           /* Yes.. increment the count of pollfds structures needed */
 
