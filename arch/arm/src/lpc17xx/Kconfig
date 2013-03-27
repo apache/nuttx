@@ -654,6 +654,14 @@ config LPC17_LCD_TFTPANEL
 		display panels require the digital color value of each pixel to be
 		applied to the display data inputs.
 
+config LPC17_LCD_MONOCHROME
+	bool "Monochrome LCD"
+	default n
+	depends on !LPC17_LCD_TFTPANEL
+	---help---
+		STN LCD monochrome/color selection.  Selects monochrome LCD.  This
+		selection has no meaning for a TFT panel.
+
 choice
 	prompt "Bits per pixel"
 	default LPC17_LCD_BPP24 if LPC17_LCD_TFTPANEL
@@ -673,6 +681,7 @@ config LPC17_LCD_BPP8
 
 config LPC17_LCD_BPP16
 	bool "16 bit per pixel"
+	depends on !LPC17_LCD_MONOCHROME
 
 config LPC17_LCD_BPP24
 	bool "24 bit per pixel"
@@ -680,9 +689,11 @@ config LPC17_LCD_BPP24
 
 config LPC17_LCD_BPP16_565
 	bool "16 bpp, 5:6:5 mode"
+	depends on !LPC17_LCD_MONOCHROME
 
 config LPC17_LCD_BPP12_444
 	bool "12 bpp, 4:4:4 mode"
+	depends on !LPC17_LCD_MONOCHROME
 
 endchoice
 

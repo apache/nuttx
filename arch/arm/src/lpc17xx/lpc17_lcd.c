@@ -563,6 +563,30 @@ int up_fbinitialize(void)
   regval &= ~LCD_CTRL_BGR;
   putreg32(regval, LPC17_LCD_CTRL);
 
+  /* Select monochrome or color LCD */
+
+#ifdef CONFIG_LPC17_LCD_MONOCHROME
+  /* Select monochrome LCD */
+
+  regval &= ~LCD_CTRL_BGR;
+  putreg32(regval, LPC17_LCD_CTRL);
+
+  /* Select 4- or 8-bit monochrome interface */
+
+#if LPC17_BPP > 4
+  regval |= LCD_CTRL_LCDMONO8;
+#else
+  regval &= ~LCD_CTRL_LCDMONO8;
+#endif
+  putreg32(regval, LPC17_LCD_CTRL);
+
+#else
+  /* Select color LCD */
+
+  regval &= ~(LCD_CTRL_LCDBW | LCD_CTRL_LCDMONO8);
+  putreg32(regval, LPC17_LCD_CTRL);
+#endif
+
   /* Little endian byte order */
 
   regval &= ~LCD_CTRL_BEBO;
