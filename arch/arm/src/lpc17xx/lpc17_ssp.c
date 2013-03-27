@@ -495,7 +495,7 @@ static void ssp_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval = ssp_getreg(priv, LPC17_SSP_CR0_OFFSET);
       regval &= ~SSP_CR0_DSS_MASK;
       regval |= ((nbits - 1) << SSP_CR0_DSS_SHIFT);
-      regval = ssp_getreg(priv, LPC17_SSP_CR0_OFFSET);
+      ssp_putreg(priv, LPC17_SSP_CR0_OFFSET, regval);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
