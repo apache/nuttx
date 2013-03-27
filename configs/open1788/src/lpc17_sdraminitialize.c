@@ -42,14 +42,17 @@
 
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "chip/lpc17_syscon.h"
+#include "lpc17_emc.h"
 
 #include "open1788.h"
 
-#if defined(CONFIG_LPC17_EMC) && defined(CONFIG_LPC17_EMC_SDRAM)
+#if defined(CONFIG_LPC17_EMC) && defined(CONFIG_ARCH_EXTDRAM)
 
 /************************************************************************************
  * Definitions
@@ -139,8 +142,8 @@ void lpc17_sdram_initialize(void)
   putreg32(                 1, LPC17_EMC_DYNAMICAPR);  /* TAPR  = 2 clocks? */
   putreg32(EMC_NS2CLK(20) + 2, LPC17_EMC_DYNAMICDAL);  /* TDAL  = TRP + TDPL = 20ns + 2clk  */
   putreg32(                 1, LPC17_EMC_DYNAMICWR);   /* TWR   = 2 clocks */
-  putreg32(     EMC_NS2CLK(63), LPC17_EMC_DYNAMICRC);  /* H57V2562GTR-75C TRC = 63ns(min)*/
-  putreg32(     EMC_NS2CLK(63, LPC17_EMC_DYNAMICRFC);  /* H57V2562GTR-75C TRFC = TRC */
+  putreg32(    EMC_NS2CLK(63), LPC17_EMC_DYNAMICRC);   /* H57V2562GTR-75C TRC = 63ns(min)*/
+  putreg32(    EMC_NS2CLK(63), LPC17_EMC_DYNAMICRFC);  /* H57V2562GTR-75C TRFC = TRC */
   putreg32(                15, LPC17_EMC_DYNAMICXSR);  /* Exit self-refresh to active */
   putreg32(    EMC_NS2CLK(63), LPC17_EMC_DYNAMICRRD);  /* 3 clock, TRRD = 15ns (min) */
   putreg32(                 1, LPC17_EMC_DYNAMICMRD);  /* 2 clock, TMRD = 2 clocks (min) */
@@ -207,7 +210,7 @@ void lpc17_sdram_initialize(void)
 #ifdef CONFIG_ARCH_SDRAM_16BIT
   dummy = getreg16(SDRAM_BASE | (0x33 << 12));  /* 8 burst, 3 CAS latency */
 #elif defined CONFIG_ARCH_SDRAM_32BIT
-  dummy = getreg32(SDRAM_BASE | (0x32 << 13))); /* 4 burst, 3 CAS latency */
+  dummy = getreg32(SDRAM_BASE | (0x32 << 13)); /* 4 burst, 3 CAS latency */
 #endif
 
   /* Issue NORMAL command */
@@ -227,4 +230,4 @@ void lpc17_sdram_initialize(void)
   putreg32(regval, LPC17_SYSCON_EMCDLYCTL);
 }
 
-#endif /* CONFIG_LPC17_EMC && CONFIG_LPC17_EMC_SDRAM */
+#endif /* CONFIG_LPC17_EMC && CONFIG_ARCH_EXTDRAM */

@@ -80,13 +80,13 @@ void lpc17_boardinitialize(void)
 
 #ifdef CONFIG_LPC17_EMC
   lpc17_emcinitialize();
-#ifdef CONFIG_LPC17_EMC_SDRAM
+#ifdef CONFIG_ARCH_EXTDRAM
   lpc17_sdram_initialize();
 #endif
-#ifdef CONFIG_LPC17_EMC_NOR
+#ifdef CONFIG_ARCH_EXTNOR
   lpc17_nor_initialize();
 #endif
-#ifdef CONFIG_LPC17_EMC_NAND
+#ifdef CONFIG_ARCH_EXTNAND
   lpc17_nand_initialize();
 #endif
 #endif

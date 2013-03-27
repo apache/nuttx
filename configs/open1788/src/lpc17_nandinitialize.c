@@ -49,7 +49,7 @@
 
 #include "open1788.h"
 
-#if defined(CONFIG_LPC17_EMC) && defined(CONFIG_LPC17_EMC_NAND)
+#if defined(CONFIG_LPC17_EMC) && defined(CONFIG_ARCH_EXTNAND)
 
 /************************************************************************************
  * Definitions
@@ -98,4 +98,4 @@ void lpc17_nand_initialize(void)
   lpc17_gpioconfig(GPIO_NAND_RB);
 }
 
-#endif /* CONFIG_LPC17_EMC && CONFIG_LPC17_EMC_NAND */
+#endif /* CONFIG_LPC17_EMC && CONFIG_ARCH_EXTNAND */

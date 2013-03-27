@@ -149,7 +149,7 @@ void weak_function lpc17_sspinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_LPC17_EMC
-#ifdef CONFIG_LPC17_EMC_SDRAM
+#ifdef CONFIG_ARCH_EXTDRAM
 void lpc17_sdram_initialize(void);
 #endif
 
@@ -161,7 +161,7 @@ void lpc17_sdram_initialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_LPC17_EMC_NOR
+#ifdef CONFIG_ARCH_EXTNOR
 void lpc17_nor_initialize(void);
 #endif
 
@@ -173,7 +173,7 @@ void lpc17_nor_initialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_LPC17_EMC_NAND
+#ifdef CONFIG_ARCH_EXTNAND
 void lpc17_nand_initialize(void);
 #endif
 #endif /* CONFIG_LPC17_EMC */
