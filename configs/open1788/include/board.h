@@ -114,21 +114,29 @@
 /* PLL1 : PLL1 is used to generate clock for the USB */
 
 #undef  CONFIG_LPC17_PLL1
-//~ #define CONFIG_LPC17_PLL1         1
 #define BOARD_PLL1CFG_MSEL        4
 #define BOARD_PLL1CFG_PSEL        2
 #define BOARD_PLL1CFG_VALUE \
   (((BOARD_PLL1CFG_MSEL-1) << SYSCON_PLLCFG_MSEL_SHIFT) | \
    ((BOARD_PLL1CFG_PSEL-1) << SYSCON_PLLCFG_PSEL_SHIFT))
 
-#if defined(CONFIG_LPC17_USBHOST) || (CONFIG_LPC17_USBDEV)
+#ifdef CONFIG_LPC17_EMC
+/* EMC clock selection.
+ *
+ * The EMC uses the CPU clock undivided.
+ */
 
- /* USB divider.  The output of the PLL is used as the USB clock
+#  define BOARD_EMCCLKSEL_VALUE    SYSCON_EMCCLKSEL_CCLK_DIV1
+#  define LPC17_EMCCLK             LPC17_CCLK
+#endif
+
+#if defined(CONFIG_LPC17_USBHOST) || (CONFIG_LPC17_USBDEV)
+/* USB divider.  The output of the PLL is used as the USB clock
  *
  *  USBCLK = PLL1CLK = (SYSCLK * 4)  = 48MHz
  */
 
-#define BOARD_USBCLKSEL_VALUE      (SYSCON_USBCLKSEL_USBDIV_DIV1 | \
+#  define BOARD_USBCLKSEL_VALUE    (SYSCON_USBCLKSEL_USBDIV_DIV1 | \
                                     SYSCON_USBCLKSEL_USBSEL_PLL1)
 #endif
 
@@ -145,28 +153,30 @@
 
 #define ETH_MCFG_CLKSEL_DIV        ETH_MCFG_CLKSEL_DIV20
 
+#ifdef CONFIG_LPC17_SDCARD
 /* SDIO dividers.  Note that slower clocking is required when DMA is disabled
  * in order to avoid RX overrun/TX underrun errors due to delayed responses
  * to service FIFOs in interrupt driven mode.
  * SDCARD_CLOCK=PCLK/(2*(SDCARD_CLKDIV+1))
  */
 
-#define SDCARD_CLKDIV_INIT         74   /* 400Khz  */
-#define SDCARD_INIT_CLKDIV         (SDCARD_CLKDIV_INIT)
+#  define SDCARD_CLKDIV_INIT       74   /* 400Khz  */
+#  define SDCARD_INIT_CLKDIV       (SDCARD_CLKDIV_INIT)
 
-#define SDCARD_NORMAL_CLKDIV       1    /* DMA ON:  SDCARD_CLOCK=15MHz */
+#  define SDCARD_NORMAL_CLKDIV     1    /* DMA ON:  SDCARD_CLOCK=15MHz */
 #define SDCARD_SLOW_CLKDIV         14   /* DMA OFF: SDCARD_CLOCK=2MHz */
 
-#ifdef CONFIG_SDIO_DMA
-#  define SDCARD_MMCXFR_CLKDIV     (SDCARD_NORMAL_CLKDIV)
-#else
-#  define SDCARD_MMCXFR_CLKDIV     (SDCARD_SLOW_CLKDIV)
-#endif
+#  ifdef CONFIG_SDIO_DMA
+#    define SDCARD_MMCXFR_CLKDIV   (SDCARD_NORMAL_CLKDIV)
+#  else
+#    define SDCARD_MMCXFR_CLKDIV   (SDCARD_SLOW_CLKDIV)
+#  endif
 
-#ifdef CONFIG_SDIO_DMA
-#  define SDCARD_SDXFR_CLKDIV      (SDCARD_NORMAL_CLKDIV)
-#else
-#  define SDCARD_SDXFR_CLKDIV      (SDCARD_SLOW_CLKDIV)
+#  ifdef CONFIG_SDIO_DMA
+#    define SDCARD_SDXFR_CLKDIV    (SDCARD_NORMAL_CLKDIV)
+#  else
+#    define SDCARD_SDXFR_CLKDIV    (SDCARD_SLOW_CLKDIV)
+#  endif
 #endif
 
 /* Set EMC delay values:

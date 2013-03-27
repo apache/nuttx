@@ -54,9 +54,23 @@
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+/* The core clock is LPC17_EMCCLK which may be either LPC17_CCLK* (undivided), or
+ * LPC17_CCLK / 2 as determined by settings in the board.h header file.
+ *
+ * For example:
+ *   LPC17_CCLCK      =  120,000,000
+ *   EMCCLKSEL        -> use LPC17_CCLK undivided
+ *   LPC17_EMCCLK     =  120,000,000
+ *   LPC17_EMCCLK_MHZ =  120 (rounded)
+ *   EMC_NSPERCLK     =  8   (rounded)
+ */
 
-#define EMC_NS2CLK(ns, npc) ((ns + npc - 1) / npc)
+#define LPC17_EMCCLK_MHZ    ((LPC17_EMCCLK + 500000) / 1000000)
+#define EMC_NSPERCLK        ((1000 + (LPC17_EMCCLK_MHZ >> 1)) / LPC17_EMCCLK_MHZ)
+#define EMC_NS2CLK(ns)      ((ns + (EMC_NSPERCLK - 1)) / EMC_NSPERCLK)
 #define MDKCFG_RASCAS0VAL   0x00000303
+
+/* Set up for 32-bit SDRAM at CS0 */
 
 #define CONFIG_ARCH_SDRAM_32BIT
 
@@ -88,8 +102,6 @@
 
 void lpc17_sdram_initialize(void)
 {
-  uint32_t mhz;
-  uint32_t ns_per_clk;
   uint32_t regval;
 #ifdef CONFIG_ARCH_SDRAM_16BIT
   volatile uint16_t dummy;
@@ -119,30 +131,19 @@ void lpc17_sdram_initialize(void)
            SYSCON_EMCDLYCTL_CLKOUT1DLY(1);
   putreg32(regval, LPC17_SYSCON_EMCDLYCTL);
 
-  /* The core clock is PLL0CLK:
-   *
-   * PLL0CLK = (2 * PLL0_M * SYSCLK) / PLL0_D
-   */
-
-  mhz = PLL0CLK / 1000000;
-#if BOARD_CLKSRCSEL_VALUE == SYSCON_CLKSRCSEL_MAIN
-  mhz >>= 1;
-#endif
-  ns_per_clk = 1000 / mhz;
-
   /* Configure the SDRAM */
 
-  putreg32(    EMC_NS2CLK(20, ns_per_clk), LPC17_EMC_DYNAMICRP);   /* TRP   = 20 nS */
-  putreg32(                            15, LPC17_EMC_DYNAMICRAS);  /* RAS   = 42ns to 100K ns,  */
-  putreg32(                             0, LPC17_EMC_DYNAMICSREX); /* TSREX = 1 clock */
-  putreg32(                             1, LPC17_EMC_DYNAMICAPR);  /* TAPR  = 2 clocks? */
-  putreg32(EMC_NS2CLK(20, ns_per_clk) + 2, LPC17_EMC_DYNAMICDAL);  /* TDAL  = TRP + TDPL = 20ns + 2clk  */
-  putreg32(                             1, LPC17_EMC_DYNAMICWR);   /* TWR   = 2 clocks */
-  putreg32(     EMC_NS2CLK(63, ns_per_clk), LPC17_EMC_DYNAMICRC);  /* H57V2562GTR-75C TRC = 63ns(min)*/
-  putreg32(     EMC_NS2CLK(63, ns_per_clk, LPC17_EMC_DYNAMICRFC);  /* H57V2562GTR-75C TRFC = TRC */
-  putreg32(                            15, LPC17_EMC_DYNAMICXSR);  /* Exit self-refresh to active */
-  putreg32(    EMC_NS2CLK(63, ns_per_clk), LPC17_EMC_DYNAMICRRD);  /* 3 clock, TRRD = 15ns (min) */
-  putreg32(                             1, LPC17_EMC_DYNAMICMRD);  /* 2 clock, TMRD = 2 clocks (min) */
+  putreg32(    EMC_NS2CLK(20), LPC17_EMC_DYNAMICRP);   /* TRP   = 20 nS */
+  putreg32(                15, LPC17_EMC_DYNAMICRAS);  /* RAS   = 42ns to 100K ns,  */
+  putreg32(                 0, LPC17_EMC_DYNAMICSREX); /* TSREX = 1 clock */
+  putreg32(                 1, LPC17_EMC_DYNAMICAPR);  /* TAPR  = 2 clocks? */
+  putreg32(EMC_NS2CLK(20) + 2, LPC17_EMC_DYNAMICDAL);  /* TDAL  = TRP + TDPL = 20ns + 2clk  */
+  putreg32(                 1, LPC17_EMC_DYNAMICWR);   /* TWR   = 2 clocks */
+  putreg32(     EMC_NS2CLK(63), LPC17_EMC_DYNAMICRC);  /* H57V2562GTR-75C TRC = 63ns(min)*/
+  putreg32(     EMC_NS2CLK(63, LPC17_EMC_DYNAMICRFC);  /* H57V2562GTR-75C TRFC = TRC */
+  putreg32(                15, LPC17_EMC_DYNAMICXSR);  /* Exit self-refresh to active */
+  putreg32(    EMC_NS2CLK(63), LPC17_EMC_DYNAMICRRD);  /* 3 clock, TRRD = 15ns (min) */
+  putreg32(                 1, LPC17_EMC_DYNAMICMRD);  /* 2 clock, TMRD = 2 clocks (min) */
 
   /* Command delayed strategy, using EMCCLKDELAY */
 
@@ -195,7 +196,7 @@ void lpc17_sdram_initialize(void)
   regval = 64000000 / (1 << 13);
   regval -= 16;
   regval >>= 4;
-  regval = regval * mhz / 1000;
+  regval = regval * LPC17_EMCCLK_MHZ / 1000;
   putreg32(regval, LPC17_EMC_DYNAMICREFRESH);
 
   /* Issue MODE command */

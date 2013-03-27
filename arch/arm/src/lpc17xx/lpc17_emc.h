@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_EMC_H
-#define __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_EMC_H
+#ifndef __ARCH_ARM_SRC_LPC17XX_LPC17_EMC_H
+#define __ARCH_ARM_SRC_LPC17XX_LPC17_EMC_H
 
 /****************************************************************************
  * Included Files
@@ -71,4 +71,4 @@
 
 void lpc17_emcinitialize(void);
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_CHIP_LPC17_EMC_H */
+#endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_EMC_H */

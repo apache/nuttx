@@ -42,7 +42,12 @@
 
 #include <arch/irq.h>
 
-#include "lpc17_syscon.h"
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+
+#include "chip/lpc17_syscon.h"
+#include "lpc17_gpio.h"
 #include "lpc17_emc.h"
 
 /****************************************************************************

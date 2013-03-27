@@ -277,7 +277,12 @@
                                                    /* 0: EMC uses same clock as CPU */
                                                    /* 1: EMC uses half the rate of CPU */
                                                    /* Bits 1-31: Reserved */
-/* CPU Clock Selection register */
+/* EMC Clock Selection Register */
+
+#define SYSCON_EMCCLKSEL_CCLK_DIV2       (1 << 0) /* Bit 0: 1=EMC used CPU clock / 2 */
+#define SYSCON_EMCCLKSEL_CCLK_DIV1       (0)      /*        0=EMC used CPU clock */
+
+/* CPU Clock Selection Register */
 
 #define SYSCON_CCLKSEL_CCLKDIV_SHIFT     (0)       /* 0-4: Divide value for CPU clock (CCLK) */
 #define SYSCON_CCLKSEL_CCLKDIV_MASK      (0x1f << SYSCON_CCLKSEL_CCLKDIV_SHIFT)
