@@ -56,9 +56,15 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#define LPC17_LCD_CLK_PER_LINE     (CONFIG_LPC17_LCD_HWIDTH + CONFIG_LPC17_LCD_HPULSE + CONFIG_LPC17_LCD_HFRONTPORCH + CONFIG_LPC17_LCD_HBACKPORCH)
-#define LPC17_LCD_LINES_PER_FRAME  (CONFIG_LPC17_LCD_VHEIGHT + CONFIG_LPC17_LCD_VPULSE + CONFIG_LPC17_LCD_VFRONTPORCH + CONFIG_LPC17_LCD_VBACKPORCH)
-#define LPC17_LCD_PIXEL_CLOCK          (LPC17_LCD_CLK_PER_LINE * LPC17_LCD_LINES_PER_FRAME * CONFIG_LPC17_LCD_REFRESH_FREQ)
+#define LPC17_LCD_CLK_PER_LINE \
+  (CONFIG_LPC17_LCD_HWIDTH + CONFIG_LPC17_LCD_HPULSE + \
+   CONFIG_LPC17_LCD_HFRONTPORCH + CONFIG_LPC17_LCD_HBACKPORCH)
+#define LPC17_LCD_LINES_PER_FRAME \
+  (CONFIG_LPC17_LCD_VHEIGHT + CONFIG_LPC17_LCD_VPULSE + \
+   CONFIG_LPC17_LCD_VFRONTPORCH + CONFIG_LPC17_LCD_VBACKPORCH)
+#define LPC17_LCD_PIXEL_CLOCK \
+  (LPC17_LCD_CLK_PER_LINE * LPC17_LCD_LINES_PER_FRAME * \
+   CONFIG_LPC17_LCD_REFRESH_FREQ)
 
 /* Framebuffer characteristics in bytes */
 
@@ -195,14 +201,14 @@ struct fb_vtable_s g_fbobject =
 static int lpc17_getvideoinfo(FAR struct fb_vtable_s *vtable,
                               FAR struct fb_videoinfo_s *vinfo)
 {
-  dbg("vtable=%p vinfo=%p\n", vtable, vinfo);
+  gvdbg("vtable=%p vinfo=%p\n", vtable, vinfo);
   if (vtable && vinfo)
     {
       memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
       return OK;
     }
 
-  dbg("Returning EINVAL\n");
+  gdbg("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -213,14 +219,14 @@ static int lpc17_getvideoinfo(FAR struct fb_vtable_s *vtable,
 static int lpc17_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
                               FAR struct fb_planeinfo_s *pinfo)
 {
-  dbg("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
+  gvdbg("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
     {
       memcpy(pinfo, &g_planeinfo, sizeof(struct fb_planeinfo_s));
       return OK;
     }
 
-  dbg("Returning EINVAL\n");
+  gdbg("Returning EINVAL\n");
   return -EINVAL;
 }
 
@@ -237,8 +243,8 @@ static int lpc17_getcmap(FAR struct fb_vtable_s *vtable,
   int last;
   int i;
 
-  dbg("vtable=%p cmap=%p first=%d len=%d\n",
-      vtable, cmap, cmap->first, cmap->len);
+  gvdbg("vtable=%p cmap=%p first=%d len=%d\n",
+        vtable, cmap, cmap->first, cmap->len);
 
   DEBUGASSERT(vtable && cmap &&
               cmap->first < 256 && (cmap->first + cmap->len) < 256);
@@ -312,8 +318,8 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
   int last;
   int i;
 
-  dbg("vtable=%p cmap=%p first=%d len=%d\n",
-      vtable, cmap, cmap->first, cmap->len);
+  gvdbg("vtable=%p cmap=%p first=%d len=%d\n",
+        vtable, cmap, cmap->first, cmap->len);
 
   DEBUGASSERT(vtable && cmap);
 
@@ -376,24 +382,27 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
 static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
                         FAR struct fb_cursorattrib_s *attrib)
 {
-  dbg("vtable=%p attrib=%p\n", vtable, attrib);
+  gvdbg("vtable=%p attrib=%p\n", vtable, attrib);
   if (vtable && attrib)
     {
 #ifdef CONFIG_FB_HWCURSORIMAGE
-      attrib->fmt      = LPC17_COLOR_FMT;
+      attrib->fmt = LPC17_COLOR_FMT;
 #endif
-      dbg("pos:      (x=%d, y=%d)\n", g_cpos.x, g_cpos.y);
-      attrib->pos      = g_cpos;
+
+      gvdbg("pos: (x=%d, y=%d)\n", g_cpos.x, g_cpos.y);
+      attrib->pos = g_cpos;
+
 #ifdef CONFIG_FB_HWCURSORSIZE
       attrib->mxsize.h = CONFIG_LPC17_LCD_VHEIGHT;
       attrib->mxsize.w = CONFIG_LPC17_LCD_HWIDTH;
-      dbg("size:     (h=%d, w=%d)\n", g_csize.h, g_csize.w);
-      attrib->size     = g_csize;
+
+      gvdbg("size: (h=%d, w=%d)\n", g_csize.h, g_csize.w);
+      attrib->size = g_csize;
 #endif
       return OK;
     }
 
-  dbg("Returning EINVAL\n");
+  gdbg("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -406,33 +415,34 @@ static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
 static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
                        FAR struct fb_setcursor_s *setttings)
 {
-  dbg("vtable=%p setttings=%p\n", vtable, setttings);
+  gvdbg("vtable=%p setttings=%p\n", vtable, setttings);
   if (vtable && setttings)
     {
-      dbg("flags:   %02x\n", settings->flags);
+      gvdbg("flags: %02x\n", settings->flags);
       if ((flags & FB_CUR_SETPOSITION) != 0)
         {
           g_cpos = settings->pos;
-          dbg("pos:     (h:%d, w:%d)\n", g_cpos.x, g_cpos.y);
+          gvdbg("pos: (h:%d, w:%d)\n", g_cpos.x, g_cpos.y);
         }
 #ifdef CONFIG_FB_HWCURSORSIZE
       if ((flags & FB_CUR_SETSIZE) != 0)
         {
           g_csize = settings->size;
-          dbg("size:    (h:%d, w:%d)\n", g_csize.h, g_csize.w);
+          gvdbg("size: (h:%d, w:%d)\n", g_csize.h, g_csize.w);
         }
 #endif
 #ifdef CONFIG_FB_HWCURSORIMAGE
       if ((flags & FB_CUR_SETIMAGE) != 0)
         {
-          dbg("image:   (h:%d, w:%d) @ %p\n",
-              settings->img.height, settings->img.width, settings->img.image);
+          gvdbg("image: (h:%d, w:%d) @ %p\n",
+                settings->img.height, settings->img.width,
+                settings->img.image);
         }
 #endif
       return OK;
     }
 
-  dbg("Returning EINVAL\n");
+  gdbg("Returning EINVAL\n");
   return -EINVAL;
 }
 #endif
@@ -454,6 +464,8 @@ int up_fbinitialize(void)
   uint32_t regval;
   int i;
 
+  gvdbg("Entry\n");
+
   /* Disable LCD controller */
 
   regval = getreg32(LPC17_LCD_CTRL);
@@ -467,6 +479,8 @@ int up_fbinitialize(void)
 
   /* Configure pins */
   /* Video data */
+
+  gvdbg("Configuring pins\n");
 
   lpc17_configgpio(GPIO_LCD_VD0);
   lpc17_configgpio(GPIO_LCD_VD1);
@@ -504,6 +518,8 @@ int up_fbinitialize(void)
   lpc17_configgpio(GPIO_LCD_FP);
   lpc17_configgpio(GPIO_LCD_ENABM);
   lpc17_configgpio(GPIO_LCD_PWR);
+
+  gvdbg("Configuring the LCD controller\n");
 
   /* Turn on LCD clock */
 
@@ -672,6 +688,8 @@ int up_fbinitialize(void)
 
   /* Enable LCD */
 
+  gvdbg("Enabling the display\n");
+
   regval  = getreg32(LPC17_LCD_CTRL);
   regval |= LCD_CTRL_LCDEN;
   putreg32(regval, LPC17_LCD_CTRL);
@@ -701,6 +719,7 @@ int up_fbinitialize(void)
 
 FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
 {
+  gvdbg("vplane: %d\n", vplane);
   if (vplane == 0)
     {
       return &g_fbobject;
@@ -721,6 +740,7 @@ FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
 
 void fb_uninitialize(void)
 {
+  gdbg("Not implemented!\n");
   return OK;
 }
 
@@ -730,22 +750,30 @@ void fb_uninitialize(void)
  * Description:
  *   This is a non-standard LCD interface just for the LPC17xx.  Clearing the display
  *   in the normal way by writing a sequences of runs that covers the entire display
- *   can be slow.  Here the dispaly is cleared by simply setting all VRAM memory to
+ *   can be slow.  Here the display is cleared by simply setting all VRAM memory to
  *   the specified color.
  *
  ************************************************************************************/
 
 void lpc17_lcdclear(nxgl_mxpixel_t color)
 {
-#if LPC17_BPP > 16
-  uint32_t *dest;
-#else
-  uint16_t *dest;
-#endif
   int i;
+#if LPC17_BPP > 16
+  uint32_t *dest = (uint32_t*)CONFIG_LPC17_LCD_VRAMBASE;
 
-  dest = (uint32_t *) CONFIG_LPC17_LCD_VRAMBASE;
-  for (i = 0; (CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT) > i; i++)
+  gvdbg("Clearing display: color=%08x VRAM=%08x size=%d\n",
+        color, CONFIG_LPC17_LCD_VRAMBASE,
+        CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT * sizeof(uint32_t));
+
+#else
+  uint16_t *dest = (uint16_t*)CONFIG_LPC17_LCD_VRAMBASE;
+
+  gvdbg("Clearing display: color=%08x VRAM=%08x size=%d\n",
+        color, CONFIG_LPC17_LCD_VRAMBASE,
+        CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT * sizeof(uint16_t));
+#endif
+
+  for (i = 0; i < (CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT); i++)
     {
       *dest++ = color;
     }

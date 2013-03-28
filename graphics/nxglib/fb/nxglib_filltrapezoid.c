@@ -230,7 +230,7 @@ void NXGL_FUNCNAME(nxgl_filltrapezoid,NXGLIB_SUFFIX)(
           /* Handle masking of the fractional initial byte */
 
 #ifdef CONFIG_NX_PACKEDMSFIRST
-          mask  = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(ix1));
+          mask  = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(ix1)));
 #else
           mask  = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(ix1)));
 #endif
