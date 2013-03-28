@@ -41,6 +41,9 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdbool.h>
+
 #include <nuttx/nx/nxglib.h>
 
 #include "chip/lpc17_lcd.h"
@@ -81,7 +84,7 @@
 #  define LPC17_BPP                    16
 #  define LPC17_COLOR_FMT              FB_FMT_Y16
 #elif defined(CONFIG_LPC17_LCD_BPP24)
-#  define LPC17_BPP                    24
+#  define LPC17_BPP                    32  /* Only 24 of 32 bits used for RGB */
 #  define LPC17_COLOR_FMT              FB_FMT_RGB24
 #  ifndef CONFIG_LPC17_LCD_TFTPANEL
 #    error "24 BPP is only available for a TFT panel"
@@ -164,7 +167,7 @@
  */
 
 /************************************************************************************
- * Name:  lpc17_lcdclear
+ * Name: lpc17_lcdclear
  *
  * Description:
  *   This is a non-standard LCD interface just for the LPC17xx.  Clearing the display
@@ -175,5 +178,18 @@
  ************************************************************************************/
 
 void lpc17_lcdclear(nxgl_mxpixel_t color);
+
+/************************************************************************************
+ * Name: lpc17_backlight
+ *
+ * Description:
+ *   If CONFIG_LPC17_LCD_BACKLIGHT is defined, then the board-specific logic must
+ *   provide this interface to turn the backlight on and off.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_LPC17_LCD_BACKLIGHT
+void lpc17_backlight(bool blon);
+#endif
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_LCD_H */
