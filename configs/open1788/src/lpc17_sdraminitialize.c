@@ -62,15 +62,18 @@
  *
  * For example:
  *   LPC17_CCLCK      =  120,000,000
- *   EMCCLKSEL        -> use LPC17_CCLK undivided
- *   LPC17_EMCCLK     =  120,000,000
- *   LPC17_EMCCLK_MHZ =  120 (rounded)
- *   EMC_NSPERCLK     =  8   (rounded)
+ *   EMCCLKSEL        -> LPC17_CCLK divided by 2
+ *   LPC17_EMCCLK     =  60,000,000
+ *   LPC17_EMCCLK_MHZ =  60 (Rounded to an integer)
+ *   EMC_NSPERCLK     =  16.667 (Represented with 4 bits of fraction, 267)
+ *
+ *   EMC_NS2CLK(63)   = ((63 << 4) + 266) / 267 = 4 (actual 3.78)
+ *   EMC_NS2CLK(20)   = ((20 << 4) + 266) / 267 = 2 (actual 1.20)
  */
 
 #define LPC17_EMCCLK_MHZ    ((LPC17_EMCCLK + 500000) / 1000000)
-#define EMC_NSPERCLK        ((1000 + (LPC17_EMCCLK_MHZ >> 1)) / LPC17_EMCCLK_MHZ)
-#define EMC_NS2CLK(ns)      ((ns + (EMC_NSPERCLK - 1)) / EMC_NSPERCLK)
+#define EMC_NSPERCLK_B4     (((1000 << 4) + (LPC17_EMCCLK_MHZ >> 1)) / LPC17_EMCCLK_MHZ)
+#define EMC_NS2CLK(ns)      (((ns << 4) + (EMC_NSPERCLK_B4 - 1)) / EMC_NSPERCLK_B4)
 #define MDKCFG_RASCAS0VAL   0x00000303
 
 /* Set up for 32-bit SDRAM at CS0 */

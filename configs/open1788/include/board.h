@@ -123,11 +123,13 @@
 #ifdef CONFIG_LPC17_EMC
 /* EMC clock selection.
  *
- * The EMC uses the CPU clock undivided.
+ * The EMC clock should not be driven above 80MHz.  As a result the EMC
+ * uses the CPU clock divided by two.
  */
 
-#  define BOARD_EMCCLKSEL_VALUE    SYSCON_EMCCLKSEL_CCLK_DIV1
-#  define LPC17_EMCCLK             LPC17_CCLK
+#  define BOARD_EMCCLKSEL_DIVIDER  2
+#  define BOARD_EMCCLKSEL_VALUE    SYSCON_EMCCLKSEL_CCLK_DIV2
+#  define LPC17_EMCCLK             (LPC17_CCLK / BOARD_EMCCLKSEL_DIVIDER)
 #endif
 
 #if defined(CONFIG_LPC17_USBHOST) || (CONFIG_LPC17_USBDEV)
@@ -136,6 +138,7 @@
  *  USBCLK = PLL1CLK = (SYSCLK * 4)  = 48MHz
  */
 
+#  define BOARD_USBCLKSEL_DIVIDER  1
 #  define BOARD_USBCLKSEL_VALUE    (SYSCON_USBCLKSEL_USBDIV_DIV1 | \
                                     SYSCON_USBCLKSEL_USBSEL_PLL1)
 #endif
