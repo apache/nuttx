@@ -112,9 +112,9 @@
 #define GPIO_SD_CD   (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN13)
 
 /* LCD ******************************************************************************/
-/* Backlight enable, P2[1].  Initial state is ON */
+/* Backlight enable, P2[1].  Initial state is OFF (zero) */
 
-#define GPIO_LCD_BL  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT2 | GPIO_PIN1)
+#define GPIO_LCD_BL  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN1)
 
 /************************************************************************************
  * Public Types
@@ -178,7 +178,19 @@ void lpc17_nand_initialize(void);
 #endif
 #endif /* CONFIG_LPC17_EMC */
 
-/****************************************************************************
+/************************************************************************************
+ * Name: lpc17_lcdinitialize
+ *
+ * Description:
+ *   Initialize the LCD.  Setup backlight (initially off)
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_LPC17_LCD
+void lpc17_lcdinitialize(void);
+#endif
+
+/************************************************************************************
  * Name: nsh_archinitialize
  *
  * Description:
@@ -191,7 +203,7 @@ void lpc17_nand_initialize(void);
  *   CONFIG_NSH_ARCHINIT=n:
  *     Called from board_initialize().
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_NSH_LIBRARY
 int nsh_archinitialize(void);
@@ -199,4 +211,3 @@ int nsh_archinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_OPEN1788_SRC_OPEN1788_H */
-

@@ -1,6 +1,6 @@
 /************************************************************************************
- * configs/open1788/src/lpc17_boardinitialize.c
- * arch/arm/src/board/lpc17_boardinitialize.c
+ * configs/open1788/src/lpc17_lcd.c
+ * arch/arm/src/board/lpc17_lcd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,16 +40,15 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "lpc17_emc.h"
+#include "lpc17_lcd.h"
+#include "lpc17_gpio.h"
 
 #include "open1788.h"
+
+#ifdef CONFIG_LPC17_LCD
 
 /************************************************************************************
  * Definitions
@@ -64,79 +63,34 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_boardinitialize
+ * Name: lpc17_lcdinitialize
  *
  * Description:
- *   All LPC17xx architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Initialize the LCD.  Setup backlight (initially off)
  *
  ************************************************************************************/
 
-void lpc17_boardinitialize(void)
+void lpc17_lcdinitialize(void)
 {
-  /* Initialize the EMC, SDRAM, NOR FLASH, and NAND FLASH */
+  /* Configure the LCD backlight (and turn the backlight off) */
 
-#ifdef CONFIG_LPC17_EMC
-  lpc17_emcinitialize();
-#ifdef CONFIG_ARCH_EXTDRAM
-  lpc17_sdram_initialize();
-#endif
-#ifdef CONFIG_ARCH_EXTNOR
-  lpc17_nor_initialize();
-#endif
-#ifdef CONFIG_ARCH_EXTNAND
-  lpc17_nand_initialize();
-#endif
-#endif
-
-  /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function lpc17_sspinitialize() has been brought into the link.
-   */
-
-#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
-  if (lpc17_sspinitialize)
-    {
-      lpc17_sspinitialize();
-    }
-#endif
-
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
-#endif
-
-  /* Configure the LCD GPIOs if LCD support has been selected. */
-
-#ifdef CONFIG_LPC17_LCD
-  lpc17_lcdinitialize();
-#endif
+  lpc17_configgpio(GPIO_LCD_BL);
 }
 
-/****************************************************************************
- * Name: board_initialize
+/************************************************************************************
+ * Name: lpc17_backlight
  *
  * Description:
- *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_intiialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   If CONFIG_LPC17_LCD_BACKLIGHT is defined, then the board-specific logic must
+ *   provide this interface to turn the backlight on and off.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void)
+#ifdef CONFIG_LPC17_LCD_BACKLIGHT
+void lpc17_backlight(bool blon)
 {
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in user-space
-   * but the initialization function must run in kernel space.
-   */
-
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
-  (void)nsh_archinitialize();
-#endif
+  lpc17_gpiowrite(GPIO_LCD_BL, blon);
 }
 #endif
+
+#endif /* CONFIG_LPC17_LCD */
