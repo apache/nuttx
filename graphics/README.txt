@@ -363,7 +363,7 @@ CONFIG_NXCONSOLE_CACHESIZE
   a lot of data or scrolling), then increasing the value of CONFIG_NXCONSOLE_CACHESIZE
   is something that you should try.  Alternatively, you can reduce the size of
   CONFIG_MQ_MAXMSGSIZE which will force NxConsole task to pace the server task.
-  CONFIG_NXCONSOLE_CACHESIZE should be larger than ONFIG_MQ_MAXMSGSIZE in any event.
+  CONFIG_NXCONSOLE_CACHESIZE should be larger than CONFIG_MQ_MAXMSGSIZE in any event.
 CONFIG_NXCONSOLE_LINESEPARATION
   This the space (in rows) between each row of test.  Default: 0
 CONFIG_NXCONSOLE_NOWRAP

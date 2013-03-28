@@ -639,6 +639,19 @@ config LPC17_LCD_REFRESH_FREQ
 	---help---
 		LCD refesh rate (Hz)
 
+config LPC17_LCD_BACKLIGHT
+	bool "Enable backlight"
+	default y
+	---help---
+		Enable backlight support.  If LPC17_LCD_BACKLIGHT is selected, then
+		the board-specific logic must provide this lpc17_backlight()
+		interface so that the LCD driver can turn the backlight on and off
+		as necessary.  You should select this option and implement
+		lpc17_backlight() if your board provides GPIO control over the
+		backlight.  This interface provides only ON/OFF control of the
+		backlight.  If you want finer control over the backlight level (for
+		example, using PWM), then this interface would need to be extended.
+
 config LPC17_LCD_TFTPANEL
 	bool "TFT Panel"
 	default y

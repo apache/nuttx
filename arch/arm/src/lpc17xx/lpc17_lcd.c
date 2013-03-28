@@ -523,9 +523,7 @@ int up_fbinitialize(void)
 
   /* Turn on LCD clock */
 
-  regval  = getreg32(LPC17_SYSCON_PCONP);
-  regval |= SYSCON_PCONP_PCLCD;
-  putreg32(regval, LPC17_SYSCON_PCONP);
+  modifyreg32(LPC17_SYSCON_PCONP, 0, SYSCON_PCONP_PCLCD);
 
   /* Disable the cursor */
 
@@ -699,6 +697,11 @@ int up_fbinitialize(void)
   regval |= LCD_CTRL_LCDPWR;
   putreg32(regval, LPC17_LCD_CTRL);
 
+#ifdef CONFIG_LPC17_LCD_BACKLIGHT
+  /* Turn on the back light */
+
+  lpc17_backlight(true);
+#endif
   return OK;
 }
 
@@ -740,7 +743,33 @@ FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
 
 void fb_uninitialize(void)
 {
-  gdbg("Not implemented!\n");
+  uint32_t regval;
+  int i;
+
+  /* We assume there is only one use of the LCD and so we do not need to
+   * worry about mutually exclusive access to the LCD hardware.
+   */
+
+#ifdef CONFIG_LPC17_LCD_BACKLIGHT
+  /* Turn off the back light */
+
+  lpc17_backlight(false);
+#endif
+
+  /* Disable the LCD controller */
+
+  regval = getreg32(LPC17_LCD_CTRL);
+  regval &= ~LCD_CTRL_LCDPWR;
+  putreg32(regval, LPC17_LCD_CTRL);
+
+  for (i = LPC17_LCD_PWRDIS_DELAY; i; i--);
+
+  regval &= ~LCD_CTRL_LCDEN;
+  putreg32(regval, LPC17_LCD_CTRL);
+
+  /* Turn off clocking to the LCD. modifyreg32() can do this atomically. */
+
+  modifyreg32(LPC17_SYSCON_PCONP, SYSCON_PCONP_PCLCD, 0);
   return OK;
 }
 

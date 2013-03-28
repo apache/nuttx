@@ -52,6 +52,10 @@ ifeq ($(CONFIG_ARCH_EXTDRAM),y)
   CSRCS += lpc17_sdraminitialize.c
 endif
 
+ifeq ($(CONFIG_LPC17_LCD),y)
+  CSRCS += lpc17_lcd.c
+endif
+
 ifeq ($(CONFIG_NSH_LIBRARY),y)
   CSRCS += lpc17_nsh.c
 endif
