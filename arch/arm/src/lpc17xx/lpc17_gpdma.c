@@ -42,7 +42,9 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <semaphore.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
@@ -82,6 +84,25 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+/* This structure represents the state of one DMA channel */
+
+struct lpc17_dmach_s
+{
+  bool inuse;              /* True: The channel is in use */
+  dma_callback_t callback; /* DMA completion callback function */
+  void *arg;               /* Argument to pass to the callback function */
+};
+
+/* This structure represents the state of the LPC17 DMA block */
+
+struct lpc17_gpdma_s
+{
+  sem_t exclsem;           /* For exclusive access to the DMA channel list */
+
+  /* This is the state of each DMA channel */
+
+  struct lpc17_dmach_s dmach[LPC17_NDMACH];
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -90,6 +111,9 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+/* The state of the LPC17 DMA block */
+
+static struct lpc17_gpdma_s g_gpdma;
 
 /****************************************************************************
  * Public Data
@@ -116,6 +140,75 @@
 
 void lpc17_dmainitilaize(void)
 {
+  uint32_t regval;
+  int i;
+
+  /* Enable clocking to the GPDMA block */
+
+  regval  = getreg32(LPC17_SYSCON_PCONP);
+  regval |= SYSCON_PCONP_PCGPDMA;
+  putreg32(regval, LPC17_SYSCON_PCONP);
+
+  /* Reset all channel configurations */
+
+  for (i = 0; i < LPC17_NDMACH; i++)
+    {
+      putreg32(0, LPC17_DMACH_CONFIG(i));
+    }
+
+  /* Clear all DMA interrupts */
+
+  putreg32(DMACH_ALL, LPC17_DMA_INTTCCLR);
+  putreg32(DMACH_ALL, LPC17_DMA_INTERRCLR);
+
+  /* Initialize the DMA state structure */
+
+  sem_init(&g_gpdma.exclsem, 0, 1);
+}
+
+/****************************************************************************
+ * Name: lpc17_dmaconfigure
+ *
+ * Description:
+ *   Configure a DMA request.  Each DMA request may have two different DMA
+ *   request sources.  This associates one of the sources with a DMA request.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void lpc17_dmaconfigure(uint8_t dmarequest, bool alternate)
+{
+  uint32_t regval;
+
+  DEBUGASSERT(dmarequest < LPC17_NDMAREQ);
+
+#ifdef LPC176x
+  /* For the LPC176x family, only request numbers 8-15 have DMASEL bits */
+
+  if (dmarequest < 8)
+    {
+      return;
+    }
+
+  dmarequest -= 8;
+#endif
+
+  /* Set or clear the DMASEL bit corresponding to the request number */
+
+  regval = getreg32(LPC17_SYSCON_DMAREQSEL);
+
+  if (alternate)
+    {
+      regval |= (1 << dmarequest);
+    }
+  else
+    {
+      regval &= ~(1 << dmarequest);
+    }
+
+  putreg32(regval, LPC17_SYSCON_DMAREQSEL);
 }
 
 /****************************************************************************
@@ -134,7 +227,37 @@ void lpc17_dmainitilaize(void)
 
 DMA_HANDLE lpc17_dmachannel(void)
 {
-  return NULL;
+  struct lpc17_dmach_s *dmach = NULL;
+  int ret;
+  int i;
+
+  /* Get exclusive access to the GPDMA state structure */
+
+  do
+    {
+      ret = sem_wait(&g_gpdma.exclsem);
+      DEBUGASSERT(ret == 0 || errno == EINTR);
+    }
+  while (ret < 0);
+
+  /* Find an available DMA channel */
+
+  for (i = 0; i < LPC17_NDMACH; i++)
+    {
+      if (!g_gpdma.dmach[i].inuse)
+        {
+          /* Found one! */
+
+          dmach = &g_gpdma.dmach[i];
+          g_gpdma.dmach[i].inuse = true;
+          break;
+        }
+    }
+
+  /* Return what we found (or not) */
+
+  sem_post(&g_gpdma.exclsem);
+  return (DMA_HANDLE)dmach;
 }
 
 /****************************************************************************
@@ -152,6 +275,15 @@ DMA_HANDLE lpc17_dmachannel(void)
 
 void lpc17_dmafree(DMA_HANDLE handle)
 {
+  struct lpc17_dmach_s *dmach = (DMA_HANDLE)handle;
+
+  DEBUGASSERT(dmach && dmach->inuse);
+
+  /* Mark the channel available.  This is an atomic operation and needs no
+   * special protection.
+   */
+
+  dmach->inuse = false;
 }
 
 /****************************************************************************
@@ -163,8 +295,13 @@ void lpc17_dmafree(DMA_HANDLE handle)
  ****************************************************************************/
 
 int lpc17_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
-                   uint32_t srcaddr, uint32_t destaddr, size_t nbytes)
+                   uint32_t srcaddr, uint32_t destaddr, size_t nxfrs)
 {
+  struct lpc17_dmach_s *dmach = (DMA_HANDLE)handle;
+
+  DEBUGASSERT(dmach && dmach->inuse);
+#warning "Missing logic"
+
   return -ENOSYS;
 }
 
@@ -178,6 +315,17 @@ int lpc17_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
 
 int lpc17_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 {
+  struct lpc17_dmach_s *dmach = (DMA_HANDLE)handle;
+
+  DEBUGASSERT(dmach && dmach->inuse && callback);
+
+  /* Save the callback information */
+
+  dmach->callback = callback;
+  dmach->arg      = arg;
+
+  /* Start the DMA */
+#warning "Missing logic"
   return -ENOSYS;
 }
 
@@ -193,6 +341,10 @@ int lpc17_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
 void lpc17_dmastop(DMA_HANDLE handle)
 {
+  struct lpc17_dmach_s *dmach = (DMA_HANDLE)handle;
+
+  DEBUGASSERT(dmach && dmach->inuse);
+#warning "Missing logic"
 }
 
 /****************************************************************************
@@ -206,6 +358,10 @@ void lpc17_dmastop(DMA_HANDLE handle)
 #ifdef CONFIG_DEBUG_DMA
 void lpc17_dmasample(DMA_HANDLE handle, struct lpc17_dmaregs_s *regs)
 {
+  struct lpc17_dmach_s *dmach = (DMA_HANDLE)handle;
+
+  DEBUGASSERT(dmach && dmach->inuse);
+#warning "Missing logic"
 }
 #endif /* CONFIG_DEBUG_DMA */
 
@@ -220,6 +376,10 @@ void lpc17_dmasample(DMA_HANDLE handle, struct lpc17_dmaregs_s *regs)
 #ifdef CONFIG_DEBUG_DMA
 void lpc17_dmadump(DMA_HANDLE handle, const struct lpc17_dmaregs_s *regs, const char *msg)
 {
+  struct lpc17_dmach_s *dmach = (DMA_HANDLE)handle;
+
+  DEBUGASSERT(dmach && dmach->inuse);
+#warning "Missing logic"
 }
 #endif /* CONFIG_DEBUG_DMA */
 
