@@ -52,8 +52,17 @@
  ************************************************************************************/
 
 #ifdef CONFIG_LPC17_GPDMA
+/* DMA_HANDLE is an opaque reference to an allocated DMA channel */
 
 typedef FAR void *DMA_HANDLE;
+
+/* dma_callback_t a function pointer provided to lp17_dmastart.  This function is
+ * called at the completion of the DMA transfer.  'arg' is the same 'arg' value
+ * that was provided when lpc17_dmastart() was called and result indicates the result
+ * of the transfer:  Zero indicates a successful tranfers.  On failure, a negated
+ * errno is returned indicating the general nature of the DMA faiure.
+ */
+
 typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 
 /* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
@@ -167,8 +176,8 @@ void lpc17_dmafree(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-int lpc17_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
-                     uint32_t srcaddr, uint32_t destaddr, size_t nbytes);
+int lpc17_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
+                   uint32_t srcaddr, uint32_t destaddr, size_t nbytes);
 
 /****************************************************************************
  * Name: lpc17_dmastart
