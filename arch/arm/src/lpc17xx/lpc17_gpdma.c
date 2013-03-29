@@ -162,8 +162,8 @@ void lpc17_dmafree(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-int lpc17_dmarxsetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
-                     uint32_t srcaddr, uint32_t destaddr, size_t nbytes)
+int lpc17_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
+                   uint32_t srcaddr, uint32_t destaddr, size_t nbytes)
 {
   return -ENOSYS;
 }

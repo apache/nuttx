@@ -152,16 +152,21 @@
  * - Memory burst size (F4 only)
  */
 
-/* Stream configuration register (SCR) settings. */
+/* DMA control register settings */
 
-#define SDCARD_RXDMA32_CONFIG     (DMA_SCR_PFCTRL|DMA_SCR_DIR_P2M|DMA_SCR_MINC|\
-                                   DMA_SCR_PSIZE_32BITS|DMA_SCR_MSIZE_32BITS|\
-                                   CONFIG_SDCARD_DMAPRIO|DMA_SCR_PBURST_INCR4|\
-                                   DMA_SCR_MBURST_INCR4)
-#define SDCARD_TXDMA32_CONFIG     (DMA_SCR_PFCTRL|DMA_SCR_DIR_M2P|DMA_SCR_MINC|\
-                                   DMA_SCR_PSIZE_32BITS|DMA_SCR_MSIZE_32BITS|\
-                                   CONFIG_SDCARD_DMAPRIO|DMA_SCR_PBURST_INCR4|\
-                                   DMA_SCR_MBURST_INCR4)
+#define SDCARD_RXDMA32_CONTROL    (DMACH_CONTROL_SBSIZE_4|DMACH_CONTROL_DBSIZE_4|\
+                                   DMACH_CONTROL_SWIDTH_32BIT|DMACH_CONTROL_DWIDTH_32BIT|\
+                                   DMACH_CONTROL_DI)
+#define SDCARD_TXDMA32_CONTROL    (DMACH_CONTROL_SBSIZE_4|DMACH_CONTROL_DBSIZE_4|\
+                                   DMACH_CONTROL_SWIDTH_32BIT|DMACH_CONTROL_DWIDTH_32BIT|\
+                                   DMACH_CONTROL_SI)
+
+/* DMA configuration register settings */
+
+#define SDCARD_RXDMA32_CONFIG     (DMACH_CONFIG_E|DMACH_CONFIG_SRCPER_SDCARD|\
+                                   DMACH_CONFIG_XFRTYPE_P2M)
+#define SDCARD_TXDMA32_CONFIG     (DMACH_CONFIG_E|DMACH_CONFIG_DSTPER_SDCARD|\
+                                   DMACH_CONFIG_XFRTYPE_M2P)
 
 /* SD card DMA Channel/Stream selection.  For the the case of the LPC17XX F4, there
  * are multiple DMA stream options that must be dis-ambiguated in the board.h
@@ -336,7 +341,7 @@ static void lpc17_dumpsamples(struct lpc17_dev_s *priv);
 #endif
 
 #ifdef CONFIG_SDIO_DMA
-static void lpc17_dmacallback(DMA_HANDLE handle, uint8_t status, void *arg);
+static void lpc17_dmacallback(DMA_HANDLE handle, void *arg, int status);
 #endif
 
 /* Data Transfer Helpers ****************************************************/
@@ -800,7 +805,7 @@ static void lpc17_dumpsamples(struct lpc17_dev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static void lpc17_dmacallback(DMA_HANDLE handle, uint8_t status, void *arg)
+static void lpc17_dmacallback(DMA_HANDLE handle, void *arg, int status)
 {
   FAR struct lpc17_dev_s *priv = (FAR struct lpc17_dev_s *)arg;
   DEBUGASSERT(priv->dmamode);
@@ -816,9 +821,9 @@ static void lpc17_dmacallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   /* Get the result of the DMA transfer */
 
-  if ((status & DMA_STATUS_ERROR) != 0)
+  if (status < 0)
     {
-      flldbg("DMA error %02x, remaining: %d\n", status, priv->remaining);
+      flldbg("DMA error %d, remaining: %d\n", status, priv->remaining);
       result = SDIOWAIT_ERROR;
     }
   else
@@ -2468,15 +2473,17 @@ static int lpc17_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
       regval |= SDCARD_DCTRL_DMAEN;
       putreg32(regval, LPC17_SDCARD_DCTRL);
 
-      lpc17_dmasetup(priv->dma, LPC17_SDCARD_FIFO, (uint32_t)buffer,
-                     (buflen + 3) >> 2, SDCARD_RXDMA32_CONFIG);
+      ret = lpc17_dmasetup(priv->dma, SDCARD_RXDMA32_CONTROL,
+                           SDCARD_RXDMA32_CONFIG, LPC17_SDCARD_FIFO,
+                           (uint32_t)buffer, buflen);
+      if (ret == OK)
+        {
+          /* Start the DMA */
 
-      /* Start the DMA */
-
-      lpc17_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-      lpc17_dmastart(priv->dma, lpc17_dmacallback, priv, false);
-      lpc17_sample(priv, SAMPLENDX_AFTER_SETUP);
-      ret = OK;
+          lpc17_sample(priv, SAMPLENDX_BEFORE_ENABLE);
+          lpc17_dmastart(priv->dma, lpc17_dmacallback, priv);
+          lpc17_sample(priv, SAMPLENDX_AFTER_SETUP);
+        }
     }
 
   return ret;
@@ -2538,25 +2545,26 @@ static int lpc17_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Configure the TX DMA */
 
-      lpc17_dmasetup(priv->dma, LPC17_SDCARD_FIFO, (uint32_t)buffer,
-                     (buflen + 3) >> 2, SDCARD_TXDMA32_CONFIG);
+      ret = lpc17_dmasetup(priv->dma, SDCARD_TXDMA32_CONTROL,
+                           SDCARD_TXDMA32_CONFIG, (uint32_t)buffer,
+                           LPC17_SDCARD_FIFO, buflen);
+      if (ret == OK)
+        {
+          lpc17_sample(priv, SAMPLENDX_BEFORE_ENABLE);
 
-      lpc17_sample(priv, SAMPLENDX_BEFORE_ENABLE);
+          regval = getreg32(LPC17_SDCARD_DCTRL);
+          regval |= SDCARD_DCTRL_DMAEN;
+          putreg32(regval, LPC17_SDCARD_DCTRL);
 
-      regval = getreg32(LPC17_SDCARD_DCTRL);
-      regval |= SDCARD_DCTRL_DMAEN;
-      putreg32(regval, LPC17_SDCARD_DCTRL);
+          /* Start the DMA */
 
-      /* Start the DMA */
+          lpc17_dmastart(priv->dma, lpc17_dmacallback, priv);
+          lpc17_sample(priv, SAMPLENDX_AFTER_SETUP);
 
-      lpc17_dmastart(priv->dma, lpc17_dmacallback, priv, false);
-      lpc17_sample(priv, SAMPLENDX_AFTER_SETUP);
+          /* Enable TX interrrupts */
 
-      /* Enable TX interrrupts */
-
-      lpc17_configxfrints(priv, SDCARD_DMASEND_MASK);
-
-      ret = OK;
+          lpc17_configxfrints(priv, SDCARD_DMASEND_MASK);
+        }
     }
 
   return ret;
@@ -2706,7 +2714,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   /* Allocate a DMA channel */
 
 #ifdef CONFIG_SDIO_DMA
-  priv->dma = lpc17_dmachannel(SDCARD_DMACHAN);
+  priv->dma = lpc17_dmachannel();
   DEBUGASSERT(priv->dma);
 #endif
 

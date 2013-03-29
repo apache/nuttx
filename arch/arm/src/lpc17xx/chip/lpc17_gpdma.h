@@ -48,7 +48,6 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-
 /* Register offsets *****************************************************************/
 
 /* General registers (see also LPC17_SYSCON_DMAREQSEL_OFFSET in lpc17_syscon.h) */
@@ -203,34 +202,75 @@
 #define LPC17_DMACH7_CONFIG           (LPC17_GPDMA_BASE+LPC17_DMACH7_CONFIG_OFFSET)
 
 /* Register bit definitions *********************************************************/
-/* DMA request connections */
+/* DMA Request Connections **********************************************************/
 
-#define DMA_REQ_SSP0TX                (0)
-#define DMA_REQ_SSP0RX                (1)
-#define DMA_REQ_SSP1TX                (2)
-#define DMA_REQ_SSP1RX                (3)
-#define DMA_REQ_ADC                   (4)
-#define DMA_REQ_I2SCH0                (5)
-#define DMA_REQ_I2SCH1                (6)
-#define DMA_REQ_DAC                   (7)
+#if defined(LPC176x)
+#  define DMA_REQ_SSP0TX              (0)
+#  define DMA_REQ_SSP0RX              (1)
+#  define DMA_REQ_SSP1TX              (2)
+#  define DMA_REQ_SSP1RX              (3)
 
-#define DMA_REQ_UART0TX               (8)
-#define DMA_REQ_UART0RX               (9)
-#define DMA_REQ_UART1TX               (10)
-#define DMA_REQ_UART1RX               (11)
-#define DMA_REQ_UART2TX               (12)
-#define DMA_REQ_UART2RX               (13)
-#define DMA_REQ_UART3TX               (14)
-#define DMA_REQ_UART3RX               (15)
+#  define DMA_REQ_ADC                 (4)
 
-#define DMA_REQ_MAT0p0                (8)
-#define DMA_REQ_MAT0p1                (9)
-#define DMA_REQ_MAT1p0                (10)
-#define DMA_REQ_MAT1p1                (11)
-#define DMA_REQ_MAT2p0                (12)
-#define DMA_REQ_MAT2p1                (13)
-#define DMA_REQ_MAT3p0                (14)
-#define DMA_REQ_MAT3p1                (15)
+#  define DMA_REQ_I2SCH0              (5)
+#  define DMA_REQ_I2SCH1              (6)
+
+#  define DMA_REQ_DAC                 (7)
+
+#  define DMA_REQ_UART0TX             (8)
+#  define DMA_REQ_UART0RX             (9)
+#  define DMA_REQ_UART1TX             (10)
+#  define DMA_REQ_UART1RX             (11)
+#  define DMA_REQ_UART2TX             (12)
+#  define DMA_REQ_UART2RX             (13)
+#  define DMA_REQ_UART3TX             (14)
+#  define DMA_REQ_UART3RX             (15)
+
+#  define DMA_REQ_MAT0p0              (8)
+#  define DMA_REQ_MAT0p1              (9)
+#  define DMA_REQ_MAT1p0              (10)
+#  define DMA_REQ_MAT1p1              (11)
+#  define DMA_REQ_MAT2p0              (12)
+#  define DMA_REQ_MAT2p1              (13)
+#  define DMA_REQ_MAT3p0              (14)
+#  define DMA_REQ_MAT3p1              (15)
+
+#elif defined(LPC178x)
+#  define DMA_REQ_SDCARD              (1)  /* DMASEL01=0 */
+
+#  define DMA_REQ_SSP0TX              (2)  /* DMASEL02=0 */
+#  define DMA_REQ_SSP0RX              (3)  /* DMASEL03=0 */
+#  define DMA_REQ_SSP1TX              (4)  /* DMASEL04=0 */
+#  define DMA_REQ_SSP1RX              (5)  /* DMASEL05=0 */
+#  define DMA_REQ_SSP2TX              (6)  /* DMASEL06=0 */
+#  define DMA_REQ_SSP2RX              (7)  /* DMASEL07=0 */
+
+#  define DMA_REQ_MAT0p0              (0)  /* DMASEL00=1 */
+#  define DMA_REQ_MAT0p1              (1)  /* DMASEL01=1 */
+#  define DMA_REQ_MAT1p0              (2)  /* DMASEL02=1 */
+#  define DMA_REQ_MAT1p1              (3)  /* DMASEL03=1 */
+#  define DMA_REQ_MAT2p0              (4)  /* DMASEL04=1 */
+#  define DMA_REQ_MAT2p1              (5)  /* DMASEL05=1 */
+#  define DMA_REQ_MAT3p0              (14) /* DMASEL14=0 */
+#  define DMA_REQ_MAT3p1              (15) /* DMASEL15=0 */
+
+#  define DMA_REQ_I2SCH0              (6)  /* DMASEL06=1 */
+#  define DMA_REQ_I2SCH1              (7)  /* DMASEL07=1 */
+
+#  define DMA_REQ_ADC                 (8)
+#  define DMA_REQ_DAC                 (9)
+
+#  define DMA_REQ_UART0TX             (10)  /* DMASEL10=1 */
+#  define DMA_REQ_UART0RX             (11)  /* DMASEL11=1 */
+#  define DMA_REQ_UART1TX             (12)  /* DMASEL12=1 */
+#  define DMA_REQ_UART1RX             (13)  /* DMASEL13=1 */
+#  define DMA_REQ_UART2TX             (14)  /* DMASEL14=1 */
+#  define DMA_REQ_UART2RX             (15)  /* DMASEL15=1 */
+#  define DMA_REQ_UART3TX             (10)  /* DMASEL10=0 */
+#  define DMA_REQ_UART3RX             (11)  /* DMASEL11=0 */
+#  define DMA_REQ_UART4TX             (12)  /* DMASEL12=0 */
+#  define DMA_REQ_UART4RX             (13)  /* DMASEL13=0 */
+#endif
 
 /* General registers (see also LPC17_SYSCON_DMAREQSEL in lpc17_syscon.h) */
 /* Fach of the following registers, bits 0-7 controls DMA channels 9-7,
@@ -258,32 +298,69 @@
  *   DMA Synchronization Register
  */
 
-#define DMA_REQ_SSP0TX_BIT            (1 << DMA_REQ_SSP0TX)
-#define DMA_REQ_SSP0RX_BIT            (1 << DMA_REQ_SSP0RX)
-#define DMA_REQ_SSP1TX_BIT            (1 << DMA_REQ_SSP1TX)
-#define DMA_REQ_SSP1RX_BIT            (1 << DMA_REQ_SSP0RX)
-#define DMA_REQ_ADC_BIT               (1 << DMA_REQ_ADC)
-#define DMA_REQ_I2SCH0_BIT            (1 << DMA_REQ_I2SCH0)
-#define DMA_REQ_I2SCH1_BIT            (1 << DMA_REQ_I2SCH1)
-#define DMA_REQ_DAC_BIT               (1 << DMA_REQ_DAC)
+#if defined(LPC176x)
+#  define DMA_REQ_SSP0TX_BIT          (1 << DMA_REQ_SSP0TX)
+#  define DMA_REQ_SSP0RX_BIT          (1 << DMA_REQ_SSP0RX)
+#  define DMA_REQ_SSP1TX_BIT          (1 << DMA_REQ_SSP1TX)
+#  define DMA_REQ_SSP1RX_BIT          (1 << DMA_REQ_SSP0RX)
+#  define DMA_REQ_ADC_BIT             (1 << DMA_REQ_ADC)
+#  define DMA_REQ_I2SCH0_BIT          (1 << DMA_REQ_I2SCH0)
+#  define DMA_REQ_I2SCH1_BIT          (1 << DMA_REQ_I2SCH1)
+#  define DMA_REQ_DAC_BIT             (1 << DMA_REQ_DAC)
 
-#define DMA_REQ_UART0TX_BIT           (1 << DMA_REQ_UART0TX)
-#define DMA_REQ_UART0RX_BIT           (1 << DMA_REQ_UART0RX)
-#define DMA_REQ_UART1TX_BIT           (1 << DMA_REQ_UART1TX)
-#define DMA_REQ_UART1RX_BIT           (1 << DMA_REQ_UART1RX)
-#define DMA_REQ_UART2TX_BIT           (1 << DMA_REQ_UART2TX)
-#define DMA_REQ_UART2RX_BIT           (1 << DMA_REQ_UART2RX)
-#define DMA_REQ_UART3TX_BIT           (1 << DMA_REQ_UART3TX)
-#define DMA_REQ_UART3RX_BIT           (1 << DMA_REQ_UART3RX)
+#  define DMA_REQ_UART0TX_BIT         (1 << DMA_REQ_UART0TX)
+#  define DMA_REQ_UART0RX_BIT         (1 << DMA_REQ_UART0RX)
+#  define DMA_REQ_UART1TX_BIT         (1 << DMA_REQ_UART1TX)
+#  define DMA_REQ_UART1RX_BIT         (1 << DMA_REQ_UART1RX)
+#  define DMA_REQ_UART2TX_BIT         (1 << DMA_REQ_UART2TX)
+#  define DMA_REQ_UART2RX_BIT         (1 << DMA_REQ_UART2RX)
+#  define DMA_REQ_UART3TX_BIT         (1 << DMA_REQ_UART3TX)
+#  define DMA_REQ_UART3RX_BIT         (1 << DMA_REQ_UART3RX)
 
-#define DMA_REQ_MAT0p0_BIT            (1 << DMA_REQ_MAT0p0)
-#define DMA_REQ_MAT0p1_BIT            (1 << DMA_REQ_MAT0p1)
-#define DMA_REQ_MAT1p0_BIT            (1 << DMA_REQ_MAT1p0)
-#define DMA_REQ_MAT1p1_BIT            (1 << DMA_REQ_MAT1p1)
-#define DMA_REQ_MAT2p0_BIT            (1 << DMA_REQ_MAT2p0)
-#define DMA_REQ_MAT2p1_BIT            (1 << DMA_REQ_MAT2p1)
-#define DMA_REQ_MAT3p0_BIT            (1 << DMA_REQ_MAT3p0)
-#define DMA_REQ_MAT3p1_BIT            (1 << DMA_REQ_MAT3p1)
+#  define DMA_REQ_MAT0p0_BIT          (1 << DMA_REQ_MAT0p0)
+#  define DMA_REQ_MAT0p1_BIT          (1 << DMA_REQ_MAT0p1)
+#  define DMA_REQ_MAT1p0_BIT          (1 << DMA_REQ_MAT1p0)
+#  define DMA_REQ_MAT1p1_BIT          (1 << DMA_REQ_MAT1p1)
+#  define DMA_REQ_MAT2p0_BIT          (1 << DMA_REQ_MAT2p0)
+#  define DMA_REQ_MAT2p1_BIT          (1 << DMA_REQ_MAT2p1)
+#  define DMA_REQ_MAT3p0_BIT          (1 << DMA_REQ_MAT3p0)
+#  define DMA_REQ_MAT3p1_BIT          (1 << DMA_REQ_MAT3p1)
+#elif defined(LPC178x)
+#  define DMA_REQ_SDCARD_BIT          (1 << DMA_REQ_SDCARD)
+
+#  define DMA_REQ_SSP0TX_BIT          (1 << DMA_REQ_SSP0TX)
+#  define DMA_REQ_SSP0RX_BIT          (1 << DMA_REQ_SSP0RX)
+#  define DMA_REQ_SSP1TX_BIT          (1 << DMA_REQ_SSP1TX)
+#  define DMA_REQ_SSP1RX_BIT          (1 << DMA_REQ_SSP1RX)
+#  define DMA_REQ_SSP2TX_BIT          (1 << DMA_REQ_SSP2TX)
+#  define DMA_REQ_SSP2RX_BIT          (1 << DMA_REQ_SSP2RX)
+
+#  define DMA_REQ_MAT0p0_BIT          (1 << DMA_REQ_MAT0p0)
+#  define DMA_REQ_MAT0p1_BIT          (1 << DMA_REQ_MAT0p1)
+#  define DMA_REQ_MAT1p0_BIT          (1 << DMA_REQ_MAT1p0)
+#  define DMA_REQ_MAT1p1_BIT          (1 << DMA_REQ_MAT1p1)
+#  define DMA_REQ_MAT2p0_BIT          (1 << DMA_REQ_MAT2p0)
+#  define DMA_REQ_MAT2p1_BIT          (1 << DMA_REQ_MAT2p1)
+#  define DMA_REQ_MAT3p0_BIT          (1 << DMA_REQ_MAT3p0)
+#  define DMA_REQ_MAT3p1_BIT          (1 << DMA_REQ_MAT3p1)
+
+#  define DMA_REQ_I2SCH0_BIT          (1 << DMA_REQ_I2SCH0)
+#  define DMA_REQ_I2SCH1_BIT          (1 << DMA_REQ_I2SCH1)
+
+#  define DMA_REQ_ADC_BIT             (1 << DMA_REQ_ADC)
+#  define DMA_REQ_DAC_BIT             (1 << DMA_REQ_DAC)
+
+#  define DMA_REQ_UART0TX_BIT         (1 << DMA_REQ_UART0TX)
+#  define DMA_REQ_UART0RX_BIT         (1 << DMA_REQ_UART0RX)
+#  define DMA_REQ_UART1TX_BIT         (1 << DMA_REQ_UART1TX)
+#  define DMA_REQ_UART1RX_BIT         (1 << DMA_REQ_UART1RX)
+#  define DMA_REQ_UART2TX_BIT         (1 << DMA_REQ_UART2TX)
+#  define DMA_REQ_UART2RX_BIT         (1 << DMA_REQ_UART2RX)
+#  define DMA_REQ_UART3TX_BIT         (1 << DMA_REQ_UART3TX)
+#  define DMA_REQ_UART3RX_BIT         (1 << DMA_REQ_UART3RX)
+#  define DMA_REQ_UART4TX_BIT         (1 << DMA_REQ_UART4TX)
+#  define DMA_REQ_UART4RX_BIT         (1 << DMA_REQ_UART4RX)
+#endif
 
 /* DMA Configuration Register */
 
@@ -302,6 +379,7 @@
 
 #define DMACH_CONTROL_XFRSIZE_SHIFT   (0)       /* Bits 0-11: Transfer size */
 #define DMACH_CONTROL_XFRSIZE_MASK    (0x0fff << DMACH_CONTROL_XFRSIZE_SHIFT)
+#  define DMACH_CONTROL_XFRSIZE(n)    ((n) << DMACH_CONTROL_XFRSIZE_SHIFT)
 #define DMACH_CONTROL_SBSIZE_SHIFT    (12)      /* Bits 12-14: Source burst size */
 #define DMACH_CONTROL_SBSIZE_MASK     (7 << DMACH_CONTROL_SBSIZE_SHIFT)
 #  define DMACH_CONTROL_SBSIZE_1      (0 << DMACH_CONTROL_SBSIZE_SHIFT)
@@ -324,8 +402,14 @@
 #  define DMACH_CONTROL_DBSIZE_256    (7 << DMACH_CONTROL_DBSIZE_SHIFT)
 #define DMACH_CONTROL_SWIDTH_SHIFT    (18)      /* Bits 18-20: Source transfer width */
 #define DMACH_CONTROL_SWIDTH_MASK     (7 << DMACH_CONTROL_SWIDTH_SHIFT)
+#  define DMACH_CONTROL_SWIDTH_8BIT   (0 << DMACH_CONTROL_SWIDTH_SHIFT) /* Byte (8-bit) */
+#  define DMACH_CONTROL_SWIDTH_16BIT  (1 << DMACH_CONTROL_SWIDTH_SHIFT) /* Halfword (16-bit) */
+#  define DMACH_CONTROL_SWIDTH_32BIT  (2 << DMACH_CONTROL_SWIDTH_SHIFT) /* Word (32-bit) */
 #define DMACH_CONTROL_DWIDTH_SHIFT    (21)      /* Bits 21-23: Destination transfer width */
 #define DMACH_CONTROL_DWIDTH_MASK     (7 << DMACH_CONTROL_DWIDTH_SHIFT)
+#  define DMACH_CONTROL_DWIDTH_8BIT   (0 << DMACH_CONTROL_DWIDTH_SHIFT) /* Byte (8-bit) */
+#  define DMACH_CONTROL_DWIDTH_16BIT  (1 << DMACH_CONTROL_DWIDTH_SHIFT) /* Halfword (16-bit) */
+#  define DMACH_CONTROL_DWIDTH_32BIT  (2 << DMACH_CONTROL_DWIDTH_SHIFT) /* Word (32-bit) */
 #define DMACH_CONTROL_SI              (1 << 26) /* Bit 26: Source increment */
 #define DMACH_CONTROL_DI              (1 << 27) /* Bit 27: Destination increment */
 #define DMACH_CONTROL_PROT1           (1 << 28) /* Bit 28: User/priviledged mode */
@@ -335,17 +419,19 @@
 
 /* DMA Channel Configuration Register */
 
-
 #define DMACH_CONFIG_E                (1 << 0) /* Bit 0: Channel enable */
 #define DMACH_CONFIG_SRCPER_SHIFT     (1)      /* Bits 1-5: Source peripheral */
 #define DMACH_CONFIG_SRCPER_MASK      (31 << DMACH_CONFIG_SRCPER_SHIFT)
+#  define DMACH_CONFIG_SRCPER_SDCARD  (DMA_REQ_SDCARD << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_SSP0TX  (DMA_REQ_SSP0TX << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_SSP0RX  (DMA_REQ_SSP0RX << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_SSP1TX  (DMA_REQ_SSP1TX << DMACH_CONFIG_SRCPER_SHIFT)
-#  define DMACH_CONFIG_SRCPER_SSP1RX  (DMA_REQ_SSP0RX << DMACH_CONFIG_SRCPER_SHIFT)
-#  define DMACH_CONFIG_SRCPER_ADC     (DMA_REQ_ADC << DMACH_CONFIG_SRCPER_SHIFT)
+#  define DMACH_CONFIG_SRCPER_SSP1RX  (DMA_REQ_SSP1RX << DMACH_CONFIG_SRCPER_SHIFT)
+#  define DMACH_CONFIG_SRCPER_SSP2TX  (DMA_REQ_SSP2TX << DMACH_CONFIG_SRCPER_SHIFT)
+#  define DMACH_CONFIG_SRCPER_SSP2RX  (DMA_REQ_SSP2RX << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_I2SCH0  (DMA_REQ_I2SCH0 << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_I2SCH1  (DMA_REQ_I2SCH1 << DMACH_CONFIG_SRCPER_SHIFT)
+#  define DMACH_CONFIG_SRCPER_ADC     (DMA_REQ_ADC << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_DAC     (DMA_REQ_DAC << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_UART0TX (DMA_REQ_UART0TX << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_UART0RX (DMA_REQ_UART0RX << DMACH_CONFIG_SRCPER_SHIFT)
@@ -355,6 +441,8 @@
 #  define DMACH_CONFIG_SRCPER_UART2RX (DMA_REQ_UART2RX << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_UART3TX (DMA_REQ_UART3TX << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_UART3RX (DMA_REQ_UART3RX << DMACH_CONFIG_SRCPER_SHIFT)
+#  define DMACH_CONFIG_SRCPER_UART4TX (DMA_REQ_UART4TX << DMACH_CONFIG_SRCPER_SHIFT)
+#  define DMACH_CONFIG_SRCPER_UART4RX (DMA_REQ_UART4RX << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_MAT0p0  (DMA_REQ_MAT0p0 << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_MAT0p1  (DMA_REQ_MAT0p1 << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_MAT1p0  (DMA_REQ_MAT1p0 << DMACH_CONFIG_SRCPER_SHIFT)
@@ -363,15 +451,18 @@
 #  define DMACH_CONFIG_SRCPER_MAT2p1  (DMA_REQ_MAT2p1 << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_MAT3p0  (DMA_REQ_MAT3p0 << DMACH_CONFIG_SRCPER_SHIFT)
 #  define DMACH_CONFIG_SRCPER_MAT3p1  (DMA_REQ_MAT3p1 << DMACH_CONFIG_SRCPER_SHIFT)
-#define DMACH_CONFIG_DSTPER_SHIFT     (6)      /* Bits 6-10: Source peripheral */
+#define DMACH_CONFIG_DSTPER_SHIFT     (6)      /* Bits 6-10: Destination peripheral */
 #define DMACH_CONFIG_DSTPER_MASK      (31 << DMACH_CONFIG_DSTPER_SHIFT)
+#  define DMACH_CONFIG_DSTPER_SDCARD  (DMA_REQ_SDCARD << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_SSP0TX  (DMA_REQ_SSP0TX << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_SSP0RX  (DMA_REQ_SSP0RX << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_SSP1TX  (DMA_REQ_SSP1TX << DMACH_CONFIG_DSTPER_SHIFT)
-#  define DMACH_CONFIG_DSTPER_SSP1RX  (DMA_REQ_SSP0RX << DMACH_CONFIG_DSTPER_SHIFT)
-#  define DMACH_CONFIG_DSTPER_ADC     (DMA_REQ_ADC << DMACH_CONFIG_DSTPER_SHIFT)
+#  define DMACH_CONFIG_DSTPER_SSP1RX  (DMA_REQ_SSP1RX << DMACH_CONFIG_DSTPER_SHIFT)
+#  define DMACH_CONFIG_DSTPER_SSP2TX  (DMA_REQ_SSP2TX << DMACH_CONFIG_DSTPER_SHIFT)
+#  define DMACH_CONFIG_DSTPER_SSP2RX  (DMA_REQ_SSP2RX << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_I2SCH0  (DMA_REQ_I2SCH0 << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_I2SCH1  (DMA_REQ_I2SCH1 << DMACH_CONFIG_DSTPER_SHIFT)
+#  define DMACH_CONFIG_DSTPER_ADC     (DMA_REQ_ADC << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_DAC     (DMA_REQ_DAC << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_UART0TX (DMA_REQ_UART0TX << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_UART0RX (DMA_REQ_UART0RX << DMACH_CONFIG_DSTPER_SHIFT)
@@ -381,6 +472,8 @@
 #  define DMACH_CONFIG_DSTPER_UART2RX (DMA_REQ_UART2RX << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_UART3TX (DMA_REQ_UART3TX << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_UART3RX (DMA_REQ_UART3RX << DMACH_CONFIG_DSTPER_SHIFT)
+#  define DMACH_CONFIG_DSTPER_UART4TX (DMA_REQ_UART4TX << DMACH_CONFIG_DSTPER_SHIFT)
+#  define DMACH_CONFIG_DSTPER_UART4RX (DMA_REQ_UART4RX << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_MAT0p0  (DMA_REQ_MAT0p0 << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_MAT0p1  (DMA_REQ_MAT0p1 << DMACH_CONFIG_DSTPER_SHIFT)
 #  define DMACH_CONFIG_DSTPER_MAT1p0  (DMA_REQ_MAT1p0 << DMACH_CONFIG_DSTPER_SHIFT)
@@ -396,7 +489,7 @@
 #  define DMACH_CONFIG_XFRTYPE_P2M    (2 << DMACH_CONFIG_XFRTYPE_SHIFT) /* Peripheral to memory DMA */
 #  define DMACH_CONFIG_XFRTYPE_P2P    (3 << DMACH_CONFIG_XFRTYPE_SHIFT) /* Peripheral to peripheral DMA */
 #define DMACH_CONFIG_IE               (1 << 14) /* Bit 14: Interrupt error mask */
-#define DMACH_CONFIG_ ITC             (1 << 15) /* Bit 15: Terminal count interrupt mask */
+#define DMACH_CONFIG_ITC              (1 << 15) /* Bit 15: Terminal count interrupt mask */
 #define DMACH_CONFIG_L                (1 << 16) /* Bit 16: Lock */
 #define DMACH_CONFIG_A                (1 << 17) /* Bit 17: Active */
 #define DMACH_CONFIG_H                (1 << 18) /* Bit 18: Halt */
