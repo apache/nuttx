@@ -138,6 +138,20 @@ extern "C"
 void lpc17_dmainitilaize(void);
 
 /****************************************************************************
+ * Name: lpc17_dmaconfigure
+ *
+ * Description:
+ *   Configure a DMA request.  Each DMA request may have two different DMA
+ *   request sources.  This associates one of the sources with a DMA request.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void lpc17_dmaconfigure(uint8_t dmarequest, bool alternate);
+
+/****************************************************************************
  * Name: lpc17_dmachannel
  *
  * Description:
@@ -177,7 +191,7 @@ void lpc17_dmafree(DMA_HANDLE handle);
  ****************************************************************************/
 
 int lpc17_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
-                   uint32_t srcaddr, uint32_t destaddr, size_t nbytes);
+                   uint32_t srcaddr, uint32_t destaddr, size_t nxfrs);
 
 /****************************************************************************
  * Name: lpc17_dmastart

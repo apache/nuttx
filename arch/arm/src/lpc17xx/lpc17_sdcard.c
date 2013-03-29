@@ -2475,7 +2475,7 @@ static int lpc17_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       ret = lpc17_dmasetup(priv->dma, SDCARD_RXDMA32_CONTROL,
                            SDCARD_RXDMA32_CONFIG, LPC17_SDCARD_FIFO,
-                           (uint32_t)buffer, buflen);
+                           (uint32_t)buffer, (buflen + 3) >> 2);
       if (ret == OK)
         {
           /* Start the DMA */
@@ -2547,7 +2547,7 @@ static int lpc17_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       ret = lpc17_dmasetup(priv->dma, SDCARD_TXDMA32_CONTROL,
                            SDCARD_TXDMA32_CONFIG, (uint32_t)buffer,
-                           LPC17_SDCARD_FIFO, buflen);
+                           LPC17_SDCARD_FIFO, (buflen + 3) >> 2);
       if (ret == OK)
         {
           lpc17_sample(priv, SAMPLENDX_BEFORE_ENABLE);
@@ -2711,9 +2711,13 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
   priv->waitwdog = wd_create();
   DEBUGASSERT(priv->waitwdog);
 
-  /* Allocate a DMA channel */
-
 #ifdef CONFIG_SDIO_DMA
+  /* Configure the SDCARD DMA request */
+
+  lpc17_dmaconfigure(DMA_REQ_SDCARD, DMA_DMASEL_SDCARD);
+
+  /* Allocate a DMA channel for SDCARD DMA */
+
   priv->dma = lpc17_dmachannel();
   DEBUGASSERT(priv->dma);
 #endif

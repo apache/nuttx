@@ -69,7 +69,8 @@
 
 /* Channel Registers */
 
-#define LPC17_DMA_CHAN_OFFSET(n)      (0x0100 + ((n) << 5)) /* n=0,1,...7 */
+#define LPC17_NDMACH                  8      /* Eight DMA channels */
+#define LPC17_DMA_CHAN_OFFSET(n)      (0x0100 + ((n) << 5)) /* n=0,1,...,(LPC17_NDMACH-1) */
 
 #define LPC17_DMACH_SRCADDR_OFFSET    0x0000 /* DMA Channel Source Address Register */
 #define LPC17_DMACH_DESTADDR_OFFSET   0x0004 /* DMA Channel Destination Address Register */
@@ -204,7 +205,10 @@
 /* Register bit definitions *********************************************************/
 /* DMA Request Connections **********************************************************/
 
+#define LPC17_NDMAREQ                 (16) /* The number of DMA requests */
 #if defined(LPC176x)
+/* Request Numbers */
+
 #  define DMA_REQ_SSP0TX              (0)
 #  define DMA_REQ_SSP0RX              (1)
 #  define DMA_REQ_SSP1TX              (2)
@@ -217,25 +221,61 @@
 
 #  define DMA_REQ_DAC                 (7)
 
-#  define DMA_REQ_UART0TX             (8)
-#  define DMA_REQ_UART0RX             (9)
-#  define DMA_REQ_UART1TX             (10)
-#  define DMA_REQ_UART1RX             (11)
-#  define DMA_REQ_UART2TX             (12)
-#  define DMA_REQ_UART2RX             (13)
-#  define DMA_REQ_UART3TX             (14)
-#  define DMA_REQ_UART3RX             (15)
+#  define DMA_REQ_UART0TX             (8)  /* DMASEL08=0*/
+#  define DMA_REQ_UART0RX             (9)  /* DMASEL09=0*/
+#  define DMA_REQ_UART1TX             (10) /* DMASEL010=0*/
+#  define DMA_REQ_UART1RX             (11) /* DMASEL011=0*/
+#  define DMA_REQ_UART2TX             (12) /* DMASEL012=0*/
+#  define DMA_REQ_UART2RX             (13) /* DMASEL013=0*/
+#  define DMA_REQ_UART3TX             (14) /* DMASEL014=0*/
+#  define DMA_REQ_UART3RX             (15) /* DMASEL015=0*/
 
-#  define DMA_REQ_MAT0p0              (8)
-#  define DMA_REQ_MAT0p1              (9)
-#  define DMA_REQ_MAT1p0              (10)
-#  define DMA_REQ_MAT1p1              (11)
-#  define DMA_REQ_MAT2p0              (12)
-#  define DMA_REQ_MAT2p1              (13)
-#  define DMA_REQ_MAT3p0              (14)
-#  define DMA_REQ_MAT3p1              (15)
+#  define DMA_REQ_MAT0p0              (8)  /* DMASEL08=1 */
+#  define DMA_REQ_MAT0p1              (9)  /* DMASEL09=1 */
+#  define DMA_REQ_MAT1p0              (10) /* DMASEL010=1 */
+#  define DMA_REQ_MAT1p1              (11) /* DMASEL011=1 */
+#  define DMA_REQ_MAT2p0              (12) /* DMASEL012=1 */
+#  define DMA_REQ_MAT2p1              (13) /* DMASEL013=1 */
+#  define DMA_REQ_MAT3p0              (14) /* DMASEL014=1 */
+#  define DMA_REQ_MAT3p1              (15) /* DMASEL015=1 */
+
+/* DMASEL values.  For the LPC176x family, only request numbers 8-15 have
+ * DMASEL bits.
+ */
+
+#  define DMA_DMASEL_SSP0TX           (0)  /* Not applicable */
+#  define DMA_DMASEL_SSP0RX           (0)  /* Not applicable */
+#  define DMA_DMASEL_SSP1TX           (0)  /* Not applicable */
+#  define DMA_DMASEL_SSP1RX           (0)  /* Not applicable */
+
+#  define DMA_DMASEL_ADC              (0)  /* Not applicable */
+
+#  define DMA_DMASEL_I2SCH0           (0)  /* Not applicable */
+#  define DMA_DMASEL_I2SCH1           (0)  /* Not applicable */
+
+#  define DMA_DMASEL_DAC              (0)  /* Not applicable */
+
+#  define DMA_DMASEL_UART0TX          (0)
+#  define DMA_DMASEL_UART0RX          (0)
+#  define DMA_DMASEL_UART1TX          (0)
+#  define DMA_DMASEL_UART1RX          (0)
+#  define DMA_DMASEL_UART2TX          (0)
+#  define DMA_DMASEL_UART2RX          (0)
+#  define DMA_DMASEL_UART3TX          (0)
+#  define DMA_DMASEL_UART3RX          (0)
+
+#  define DMA_DMASEL_MAT0p0           (1)
+#  define DMA_DMASEL_MAT0p1           (1)
+#  define DMA_DMASEL_MAT1p0           (1)
+#  define DMA_DMASEL_MAT1p1           (1)
+#  define DMA_DMASEL_MAT2p0           (1)
+#  define DMA_DMASEL_MAT2p1           (1)
+#  define DMA_DMASEL_MAT3p0           (1)
+#  define DMA_DMASEL_MAT3p1           (1)
 
 #elif defined(LPC178x)
+/* Request Numbers */
+
 #  define DMA_REQ_SDCARD              (1)  /* DMASEL01=0 */
 
 #  define DMA_REQ_SSP0TX              (2)  /* DMASEL02=0 */
@@ -251,25 +291,62 @@
 #  define DMA_REQ_MAT1p1              (3)  /* DMASEL03=1 */
 #  define DMA_REQ_MAT2p0              (4)  /* DMASEL04=1 */
 #  define DMA_REQ_MAT2p1              (5)  /* DMASEL05=1 */
-#  define DMA_REQ_MAT3p0              (14) /* DMASEL14=0 */
-#  define DMA_REQ_MAT3p1              (15) /* DMASEL15=0 */
+#  define DMA_REQ_MAT3p0              (14) /* DMASEL14=1 */
+#  define DMA_REQ_MAT3p1              (15) /* DMASEL15=1 */
 
 #  define DMA_REQ_I2SCH0              (6)  /* DMASEL06=1 */
 #  define DMA_REQ_I2SCH1              (7)  /* DMASEL07=1 */
 
-#  define DMA_REQ_ADC                 (8)
-#  define DMA_REQ_DAC                 (9)
+#  define DMA_REQ_ADC                 (8)  /* Not applicable */
+#  define DMA_REQ_DAC                 (9)  /* Not applicable */
 
-#  define DMA_REQ_UART0TX             (10)  /* DMASEL10=1 */
-#  define DMA_REQ_UART0RX             (11)  /* DMASEL11=1 */
-#  define DMA_REQ_UART1TX             (12)  /* DMASEL12=1 */
-#  define DMA_REQ_UART1RX             (13)  /* DMASEL13=1 */
-#  define DMA_REQ_UART2TX             (14)  /* DMASEL14=1 */
-#  define DMA_REQ_UART2RX             (15)  /* DMASEL15=1 */
-#  define DMA_REQ_UART3TX             (10)  /* DMASEL10=0 */
-#  define DMA_REQ_UART3RX             (11)  /* DMASEL11=0 */
-#  define DMA_REQ_UART4TX             (12)  /* DMASEL12=0 */
-#  define DMA_REQ_UART4RX             (13)  /* DMASEL13=0 */
+#  define DMA_REQ_UART0TX             (10)  /* DMASEL10=0 */
+#  define DMA_REQ_UART0RX             (11)  /* DMASEL11=0 */
+#  define DMA_REQ_UART1TX             (12)  /* DMASEL12=0 */
+#  define DMA_REQ_UART1RX             (13)  /* DMASEL13=0 */
+#  define DMA_REQ_UART2TX             (14)  /* DMASEL14=0 */
+#  define DMA_REQ_UART2RX             (15)  /* DMASEL15=0 */
+#  define DMA_REQ_UART3TX             (10)  /* DMASEL10=1 */
+#  define DMA_REQ_UART3RX             (11)  /* DMASEL11=1 */
+#  define DMA_REQ_UART4TX             (12)  /* DMASEL12=1 */
+#  define DMA_REQ_UART4RX             (13)  /* DMASEL13=1 */
+
+/* DMASEL values */
+
+#  define DMA_DMASEL_SDCARD           (0)
+
+#  define DMA_DMASEL_SSP0TX           (0)
+#  define DMA_DMASEL_SSP0RX           (0)
+#  define DMA_DMASEL_SSP1TX           (0)
+#  define DMA_DMASEL_SSP1RX           (0)
+#  define DMA_DMASEL_SSP2TX           (0)
+#  define DMA_DMASEL_SSP2RX           (0)
+
+#  define DMA_DMASEL_MAT0p0           (1)
+#  define DMA_DMASEL_MAT0p1           (1)
+#  define DMA_DMASEL_MAT1p0           (1)
+#  define DMA_DMASEL_MAT1p1           (1)
+#  define DMA_DMASEL_MAT2p0           (1)
+#  define DMA_DMASEL_MAT2p1           (1)
+#  define DMA_DMASEL_MAT3p0           (1)
+#  define DMA_DMASEL_MAT3p1           (1)
+
+#  define DMA_DMASEL_I2SCH0           (1)
+#  define DMA_DMASEL_I2SCH1           (1)
+
+#  define DMA_DMASEL_ADC              (0)  /* Not applicable */
+#  define DMA_DMASEL_DAC              (0)  /* Not applicable */
+
+#  define DMA_DMASEL_UART0TX          (0)
+#  define DMA_DMASEL_UART0RX          (0)
+#  define DMA_DMASEL_UART1TX          (0)
+#  define DMA_DMASEL_UART1RX          (0)
+#  define DMA_DMASEL_UART2TX          (0)
+#  define DMA_DMASEL_UART2RX          (0)
+#  define DMA_DMASEL_UART3TX          (1)
+#  define DMA_DMASEL_UART3RX          (1)
+#  define DMA_DMASEL_UART4TX          (1)
+#  define DMA_DMASEL_UART4RX          (1)
 #endif
 
 /* General registers (see also LPC17_SYSCON_DMAREQSEL in lpc17_syscon.h) */
@@ -287,6 +364,7 @@
  */
 
 #define DMACH(n)                      (1 << (n)) /* n=0,1,...7 */
+#define DMACH_ALL                     (0xff)
 
 /* For each of the following registers, bits 0-15 represent a set of encoded
  * DMA sources. Bits 16-31 are reserved in each case.
