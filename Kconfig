@@ -443,9 +443,17 @@ config DEBUG_CAN
 	---help---
 		Enable CAN driver debug SYSLOG output (disabled by default)
 
+config DEBUG_SDIO
+	bool "Enable SDIO Debug Output"
+	default n
+	depends on MMCSD_SDIO
+	---help---
+		Enable SDIO driver debug SYSLOG output (disabled by default)
+
 config DEBUG_DMA
 	bool "Enable DMA Debug Output"
 	default n
+	depends on ARCH_DMA
 	---help---
 		Enable DMA-releated debug SYSLOG output (disabled by default)
 

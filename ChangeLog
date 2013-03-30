@@ -4470,4 +4470,6 @@
 	  Open1788 LCD and SDRAM which is used as a framebuffer (2013-3-27).
 	* arch/arm/src/lpc17xx/lpc17_gdma.c and lpc17_sdcard.c:  Began
 	  implementation of the LPC17 DMA and integration into the SDCARD
-	  driver (2013-3029).
+	  driver (2013-3-29).
+	* arch/arm/src/lpc17xx/lpc17_gdma.c: LPC17 DMA is code complete and
+	  under test.  Does not yet work (2013-3-30).

@@ -152,7 +152,11 @@
  * - Memory burst size (F4 only)
  */
 
-/* DMA control register settings */
+/* DMA control register settings.  All CONTROL register fields need to be
+ * specified except for the transfer size which is passed as a separate
+ * parameter and for the terminal count interrupt enable bit which is
+ * controlled by the driver.
+ */
 
 #define SDCARD_RXDMA32_CONTROL    (DMACH_CONTROL_SBSIZE_4|DMACH_CONTROL_DBSIZE_4|\
                                    DMACH_CONTROL_SWIDTH_32BIT|DMACH_CONTROL_DWIDTH_32BIT|\
@@ -161,19 +165,12 @@
                                    DMACH_CONTROL_SWIDTH_32BIT|DMACH_CONTROL_DWIDTH_32BIT|\
                                    DMACH_CONTROL_SI)
 
-/* DMA configuration register settings */
-
-#define SDCARD_RXDMA32_CONFIG     (DMACH_CONFIG_E|DMACH_CONFIG_SRCPER_SDCARD|\
-                                   DMACH_CONFIG_XFRTYPE_P2M)
-#define SDCARD_TXDMA32_CONFIG     (DMACH_CONFIG_E|DMACH_CONFIG_DSTPER_SDCARD|\
-                                   DMACH_CONFIG_XFRTYPE_M2P)
-
-/* SD card DMA Channel/Stream selection.  For the the case of the LPC17XX F4, there
- * are multiple DMA stream options that must be dis-ambiguated in the board.h
- * file.
+/* DMA configuration register settings.  Only the SRCPER, DSTPER, and
+ * XFRTTYPE fields of the CONFIG register need be specified.
  */
 
-#define SDCARD_DMACHAN            DMAMAP_SDCARD
+#define SDCARD_RXDMA32_CONFIG     (DMACH_CONFIG_SRCPER_SDCARD|DMACH_CONFIG_XFRTYPE_P2M)
+#define SDCARD_TXDMA32_CONFIG     (DMACH_CONFIG_DSTPER_SDCARD|DMACH_CONFIG_XFRTYPE_M2P)
 
 /* FIFO sizes */
 

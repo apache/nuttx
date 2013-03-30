@@ -20,6 +20,7 @@ menu "AT91SAM3 Peripheral Support"
 config SAM3U_DMA
 	bool "DMA"
 	default n
+	select ARCH_DMA
 
 config SAM3U_NAND
 	bool "NAND support"
