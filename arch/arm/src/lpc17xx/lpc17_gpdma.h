@@ -125,17 +125,17 @@ extern "C"
  ************************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_dmainitialize
+ * Name: up_dmainitialize
  *
  * Description:
- *   Initialize the GPDMA subsystem.
+ *   Initialize the GPDMA subsystem (also prototyped in up_internal.h).
  *
  * Returned Value:
- *   None
+ *   Zero on success; A negated errno value on failure.
  *
  ****************************************************************************/
 
-void lpc17_dmainitilaize(void);
+void weak_function up_dmainitialize(void);
 
 /****************************************************************************
  * Name: lpc17_dmaconfigure
@@ -224,7 +224,7 @@ void lpc17_dmastop(DMA_HANDLE handle);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void lpc17_dmasample(DMA_HANDLE handle, struct lpc17_dmaregs_s *regs);
+void lpc17_dmasample(DMA_HANDLE handle, struct lpc17_dmaregs_s *regs);
 #else
 #  define lpc17_dmasample(handle,regs)
 #endif
@@ -238,8 +238,8 @@ EXTERN void lpc17_dmasample(DMA_HANDLE handle, struct lpc17_dmaregs_s *regs);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void lpc17_dmadump(DMA_HANDLE handle, const struct lpc17_dmaregs_s *regs,
-                          const char *msg);
+void lpc17_dmadump(DMA_HANDLE handle, const struct lpc17_dmaregs_s *regs,
+                   const char *msg);
 #else
 #  define lpc17_dmadump(handle,regs,msg)
 #endif
