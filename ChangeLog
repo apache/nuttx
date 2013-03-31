@@ -4478,3 +4478,7 @@
 	  logic to extend directory clusters for the case of long file names
 	  but also include a few important general fixes (such as for storing
 	  32 bit FAT values) (2013-03-31).
+	* arch/arm/src/lpc17xx/lpc17_gdma.c and lpc17_sdcard.c:  SD card DMA
+	  is now functional.  Thre may be some issues with DMA from CPU SRAM
+	  which is apparently disabled in sleep mode; up_idle() always enters
+	  sleep mode (2013-03-31).
