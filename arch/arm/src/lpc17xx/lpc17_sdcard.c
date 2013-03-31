@@ -2466,7 +2466,7 @@ static int lpc17_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       lpc17_configxfrints(priv, SDCARD_DMARECV_MASK);
 
-      regval = getreg32(LPC17_SDCARD_DCTRL);
+      regval  = getreg32(LPC17_SDCARD_DCTRL);
       regval |= SDCARD_DCTRL_DMAEN;
       putreg32(regval, LPC17_SDCARD_DCTRL);
 
@@ -2549,7 +2549,7 @@ static int lpc17_dmasendsetup(FAR struct sdio_dev_s *dev,
         {
           lpc17_sample(priv, SAMPLENDX_BEFORE_ENABLE);
 
-          regval = getreg32(LPC17_SDCARD_DCTRL);
+          regval  = getreg32(LPC17_SDCARD_DCTRL);
           regval |= SDCARD_DCTRL_DMAEN;
           putreg32(regval, LPC17_SDCARD_DCTRL);
 
