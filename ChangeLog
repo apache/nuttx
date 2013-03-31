@@ -4473,3 +4473,8 @@
 	  driver (2013-3-29).
 	* arch/arm/src/lpc17xx/lpc17_gdma.c: LPC17 DMA is code complete and
 	  under test.  Does not yet work (2013-3-30).
+	* fs/fat/fs_fat32dirent.c and fs_fat32util.c:  Several fixes to the
+	  FAT file system from Ronen Vainish.  These fixes mostly involve the
+	  logic to extend directory clusters for the case of long file names
+	  but also include a few important general fixes (such as for storing
+	  32 bit FAT values) (2013-03-31).

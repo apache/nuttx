@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_fat32util.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -275,7 +275,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
     }
   else
     {
-      fs->fs_rootbase = fs->fs_fatbase + ntotalfatsects; 
+      fs->fs_rootbase = fs->fs_fatbase + ntotalfatsects;
     }
 
   fs->fs_database     = fs->fs_fatbase + ntotalfatsects + fs->fs_rootentcnt / DIRSEC_NDIRS(fs);
@@ -349,16 +349,17 @@ void fat_putuint16(uint8_t *ptr, uint16_t value16)
 void fat_putuint32(uint8_t *ptr, uint32_t value32)
 {
   uint16_t *val = (uint16_t*)&value32;
+
 #ifdef CONFIG_ENDIAN_BIG
   /* The bytes always have to be swapped if the target is big-endian */
 
-  fat_putuint16(&ptr[0], val[2]);
+  fat_putuint16(&ptr[0], val[1]);
   fat_putuint16(&ptr[2], val[0]);
 #else
   /* Byte-by-byte transfer is still necessary if the address is un-aligned */
 
   fat_putuint16(&ptr[0], val[0]);
-  fat_putuint16(&ptr[2], val[2]);
+  fat_putuint16(&ptr[2], val[1]);
 #endif
 }
 
@@ -579,7 +580,7 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
            /* Check if the partition exists and, if so, get the bootsector for that
             * partition and see if we can find the boot record there.
             */
- 
+
           uint8_t part = PART_GETTYPE(i, fs->fs_buffer);
           fvdbg("Partition %d, offset %d, type %d\n", i, PART_ENTRY(i), part);
 
@@ -670,6 +671,7 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
  errout_with_buffer:
   fat_io_free(fs->fs_buffer, fs->fs_hwsectorsize);
   fs->fs_buffer = 0;
+
  errout:
   fs->fs_mounted = false;
   return ret;
@@ -886,6 +888,7 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
 
                   cluster &= 0x0fff;
                 }
+
               return cluster;
             }
 
@@ -898,8 +901,10 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
               if (fat_fscacheread(fs, fatsector) < 0)
                 {
                   /* Read error */
+
                   break;
                 }
+
               return FAT_GETFAT16(fs->fs_buffer, fatindex);
             }
 
@@ -912,10 +917,13 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
               if (fat_fscacheread(fs, fatsector) < 0)
                 {
                   /* Read error */
+
                   break;
                 }
+
               return FAT_GETFAT32(fs->fs_buffer, fatindex) & 0x0fffffff;
             }
+
           default:
               break;
         }
@@ -1046,6 +1054,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextclust
 
                   break;
                 }
+
               FAT_PUTFAT16(fs->fs_buffer, fatindex, nextcluster & 0xffff);
             }
           break;
@@ -1055,6 +1064,7 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextclust
               unsigned int fatoffset = 4 * clusterno;
               off_t        fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
               unsigned int fatindex  = fatoffset & SEC_NDXMASK(fs);
+              uint32_t     val;
 
               if (fat_fscacheread(fs, fatsector) < 0)
                 {
@@ -1062,7 +1072,11 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno, off_t nextclust
 
                   break;
                 }
-              FAT_PUTFAT32(fs->fs_buffer, fatindex, nextcluster & 0x0fffffff);
+
+              /* Keep the top 4 bits */
+
+              val = FAT_GETFAT32(fs->fs_buffer, fatindex) & 0xf0000000;
+              FAT_PUTFAT32(fs->fs_buffer, fatindex, val | (nextcluster & 0x0fffffff));
             }
           break;
 
@@ -1228,12 +1242,14 @@ int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster)
       startsector = fat_getcluster(fs, newcluster);
       if (startsector == 0)
         {
-          /* Found have found a free cluster break out*/
+          /* Found have found a free cluster break out */
+
           break;
         }
       else if (startsector < 0)
         {
           /* Some error occurred, return the error number */
+
           return startsector;
         }
 
@@ -1254,7 +1270,8 @@ int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster)
   ret = fat_putcluster(fs, newcluster, 0x0fffffff);
   if (ret < 0)
     {
-      /* An error occurred */ 
+      /* An error occurred */
+
       return ret;
     }
 
@@ -1290,7 +1307,7 @@ int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster)
  *
  * Desciption: Read the next directory entry from the sector in cache,
  *   reading the next sector(s) in the cluster as necessary.  This function
- *   must return -ENOSPC if if fails because there are no further entries
+ *   must return -ENOSPC if it fails because there are no further entries
  *   available in the directory.
  *
  ****************************************************************************/
@@ -1368,6 +1385,7 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
 
               dir->fd_currcluster = cluster;
               dir->fd_currsector  = fat_cluster2sector(fs, cluster);
+              ndx                 = 0;
             }
         }
     }
@@ -1416,7 +1434,7 @@ int  fat_dirtruncate(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
   /* Set the ARCHIVE attribute and update the write time */
 
   DIR_PUTATTRIBUTES(direntry, FATATTR_ARCHIVE);
- 
+
   writetime = fat_systime2fattime();
   DIR_PUTWRTTIME(direntry, writetime & 0xffff);
   DIR_PUTWRTDATE(direntry, writetime > 16);
@@ -1477,7 +1495,7 @@ int fat_fscacheflush(struct fat_mountpt_s *fs)
           int i;
 
           for (i = fs->fs_fatnumfats; i >= 2; i--)
-            { 
+            {
               fs->fs_currentsector += fs->fs_nfatsects;
               ret = fat_hwwrite(fs, fs->fs_buffer, fs->fs_currentsector, 1);
               if (ret < 0)
@@ -1591,31 +1609,32 @@ int fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, off_t secto
    */
 
   if (ff->ff_cachesector != sector || (ff->ff_bflags & FFBUFF_VALID) == 0)
-      {
-        /* We will need to read the new sector.  First, flush the cached
-         * sector if it is dirty.
-         */
+    {
+      /* We will need to read the new sector.  First, flush the cached
+       * sector if it is dirty.
+       */
 
-        ret = fat_ffcacheflush(fs, ff);
-        if (ret < 0)
-          {
-              return ret;
-          }
+      ret = fat_ffcacheflush(fs, ff);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
-        /* Then read the specified sector into the cache */
+      /* Then read the specified sector into the cache */
 
-        ret = fat_hwread(fs, ff->ff_buffer, sector, 1);
-        if (ret < 0)
-          {
-            return ret;
-          }
+      ret = fat_hwread(fs, ff->ff_buffer, sector, 1);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
-        /* Update the cached sector number */
+      /* Update the cached sector number */
 
-        ff->ff_cachesector = sector;
-        ff->ff_bflags |= FFBUFF_VALID;
+      ff->ff_cachesector = sector;
+      ff->ff_bflags |= FFBUFF_VALID;
     }
-    return OK;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1632,21 +1651,22 @@ int fat_ffcacheinvalidate(struct fat_mountpt_s *fs, struct fat_file_s *ff)
   /* Is there anything valid in the buffer now? */
 
   if ((ff->ff_bflags & FFBUFF_VALID) != 0)
-      {
-        /* We will invalidate the buffered sector */
+    {
+      /* We will invalidate the buffered sector */
 
-        ret = fat_ffcacheflush(fs, ff);
-        if (ret < 0)
-          {
-              return ret;
-          }
+      ret = fat_ffcacheflush(fs, ff);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
-        /* Then discard the current cache contents */
+      /* Then discard the current cache contents */
 
-        ff->ff_bflags     &= ~FFBUFF_VALID;
-        ff->ff_cachesector = 0;
+      ff->ff_bflags     &= ~FFBUFF_VALID;
+      ff->ff_cachesector = 0;
     }
-    return OK;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1694,6 +1714,7 @@ int fat_updatefsinfo(struct fat_mountpt_s *fs)
           fs->fs_fsidirty = false;
         }
     }
+
   return ret;
 }
 
