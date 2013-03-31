@@ -247,6 +247,10 @@ void weak_function up_dmainitialize(void)
     {
       up_enable_irq(LPC17_IRQ_GPDMA);
     }
+
+  /* Enable the DMA controller (for little endian operation) */
+
+  putreg32(DMA_CONFIG_E, LPC17_DMA_CONFIG);
 }
 
 /****************************************************************************
