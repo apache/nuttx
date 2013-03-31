@@ -562,10 +562,19 @@
 #  define DMACH_CONFIG_DSTPER_MAT3p1  (DMA_REQ_MAT3p1 << DMACH_CONFIG_DSTPER_SHIFT)
 #define DMACH_CONFIG_XFRTYPE_SHIFT    (11)      /* Bits 11-13: Type of transfer */
 #define DMACH_CONFIG_XFRTYPE_MASK     (7 << DMACH_CONFIG_XFRTYPE_SHIFT)
-#  define DMACH_CONFIG_XFRTYPE_M2M    (0 << DMACH_CONFIG_XFRTYPE_SHIFT) /* Memory to memory DMA */
-#  define DMACH_CONFIG_XFRTYPE_M2P    (1 << DMACH_CONFIG_XFRTYPE_SHIFT) /* Memory to peripheral DMA */
-#  define DMACH_CONFIG_XFRTYPE_P2M    (2 << DMACH_CONFIG_XFRTYPE_SHIFT) /* Peripheral to memory DMA */
-#  define DMACH_CONFIG_XFRTYPE_P2P    (3 << DMACH_CONFIG_XFRTYPE_SHIFT) /* Peripheral to peripheral DMA */
+                                                                        /* Flow controller = DMA controller */
+#  define DMACH_CONFIG_XFRTYPE_M2M    (0 << DMACH_CONFIG_XFRTYPE_SHIFT) /*   Memory to memory */
+#  define DMACH_CONFIG_XFRTYPE_M2P    (1 << DMACH_CONFIG_XFRTYPE_SHIFT) /*   Memory to peripheral */
+#  define DMACH_CONFIG_XFRTYPE_P2M    (2 << DMACH_CONFIG_XFRTYPE_SHIFT) /*   Peripheral to memory */
+#  define DMACH_CONFIG_XFRTYPE_P2P    (3 << DMACH_CONFIG_XFRTYPE_SHIFT) /*   Peripheral to peripheral */
+#ifdef LPC178x
+                                                                        /* Flow controller = Dest peripheral */
+#  define DMACH_CONFIG_XFRTYPE_M2M_DC (4 << DMACH_CONFIG_XFRTYPE_SHIFT) /* Memory to memory */
+#  define DMACH_CONFIG_XFRTYPE_M2P_DC (5 << DMACH_CONFIG_XFRTYPE_SHIFT) /* Memory to peripheral */
+                                                                        /* Flow controller = Source peripheral */
+#  define DMACH_CONFIG_XFRTYPE_P2M_SC (6 << DMACH_CONFIG_XFRTYPE_SHIFT) /* Peripheral to memory */
+#  define DMACH_CONFIG_XFRTYPE_P2P_SC (7 << DMACH_CONFIG_XFRTYPE_SHIFT) /* Peripheral to peripheral */
+#endif
 #define DMACH_CONFIG_IE               (1 << 14) /* Bit 14: Interrupt error mask */
 #define DMACH_CONFIG_ITC              (1 << 15) /* Bit 15: Terminal count interrupt mask */
 #define DMACH_CONFIG_L                (1 << 16) /* Bit 16: Lock */
