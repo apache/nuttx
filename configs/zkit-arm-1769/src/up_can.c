@@ -5,7 +5,7 @@
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: Raashid Muhammed <code@zilogic.com>
  *
- *   Based on configs/olimex-lpc1766stk/src/up_can.c 
+ *   Based on configs/olimex-lpc1766stk/src/up_can.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -63,21 +63,9 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
+#define CAN_PORT1 1
+#define CAN_PORT2 2
 
-#if defined(CONFIG_LPC17_CAN1) && defined(CONFIG_LPC17_CAN2)
-#  warning "Both CAN1 and CAN2 are enabled.  Assuming only CAN1."
-#  undef CONFIG_LPC17_CAN2
-#endif
-
-#ifdef CONFIG_LPC17_CAN2
-#  warning "CAN2 is not connected on the ZKIT-ARM-1769"
-#endif
-
-#ifdef CONFIG_LPC17_CAN1
-#  define CAN_PORT 1
-#else
-#  define CAN_PORT 2
-#endif
 
 /* Debug ***************************************************************************/
 /* Non-standard debug that may be enabled just for testing CAN */
@@ -121,23 +109,45 @@ int can_devinit(void)
 
   if (!initialized)
     {
-      /* Call lpc17_caninitialize() to get an instance of the CAN interface */
+#ifdef CONFIG_LPC17_CAN1
+      /* Call lpc17_caninitialize() to get an instance of the CAN1 interface */
 
-      can = lpc17_caninitialize(CAN_PORT);
+      can = lpc17_caninitialize(CAN_PORT1);
       if (can == NULL)
         {
-          candbg("ERROR:  Failed to get CAN interface\n");
+          candbg("ERROR:  Failed to get CAN1 interface\n");
           return -ENODEV;
         }
 
-      /* Register the CAN driver at "/dev/can0" */
+      /* Register the CAN1 driver at "/dev/can0" */
 
       ret = can_register("/dev/can0", can);
       if (ret < 0)
         {
-          candbg("ERROR: can_register failed: %d\n", ret);
+          candbg("ERROR: CAN1 register failed: %d\n", ret);
           return ret;
         }
+#endif
+
+#ifdef CONFIG_LPC17_CAN2
+      /* Call lpc17_caninitialize() to get an instance of the CAN2 interface */
+
+      can = lpc17_caninitialize(CAN_PORT2);
+      if (can == NULL)
+        {
+          candbg("ERROR:  Failed to get CAN2 interface\n");
+          return -ENODEV;
+        }
+
+      /* Register the CAN2 driver at "/dev/can1" */
+
+      ret = can_register("/dev/can1", can);
+      if (ret < 0)
+        {
+          candbg("ERROR: CAN2 register failed: %d\n", ret);
+          return ret;
+        }
+#endif
 
       /* Now we are initialized */
 
