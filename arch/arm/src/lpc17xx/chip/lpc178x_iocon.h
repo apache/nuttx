@@ -332,9 +332,9 @@
 /* Pin modes */
 
 #define IOCON_MODE_FLOAT            (0)      /* 00: pin has neither pull-up nor pull-down */
-#define IOCON_MODE_PD               (1)      /* 00: pin has a pull-down resistor enabled */
-#define IOCON_MODE_PU               (2)      /* 00: pin has a pull-up resistor enabled */
-#define IOCON_MODE_RM               (3)      /* 00: pin has repeater mode enabled */
+#define IOCON_MODE_PD               (1)      /* 01: pin has a pull-down resistor enabled */
+#define IOCON_MODE_PU               (2)      /* 10: pin has a pull-up resistor enabled */
+#define IOCON_MODE_RM               (3)      /* 11: pin has repeater mode enabled */
 
 /************************************************************************************
  * Public Types

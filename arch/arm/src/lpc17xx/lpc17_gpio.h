@@ -194,8 +194,8 @@
 #define GPIO_IOCON_TYPE_W_MASK (0x000007ff) /* I2S P0:7-9 */
 
 #define GPIO_IOCON_MASK       (0x00FF0000)
-#  define GPIO_HYS            (1 << 16) /* Bit 16: HYSTERESIS: 0-Disable, 1-Enabled */
-#  define GPIO_INV            (1 << 17) /* Bit 17: Input: 0-Not Inverted, 1-Inverted */
+#  define GPIO_HYSTERESIS     (1 << 16) /* Bit 16: HYSTERESIS: 0-Disable, 1-Enabled */
+#  define GPIO_INVERT         (1 << 17) /* Bit 17: Input: 0-Not Inverted, 1-Inverted */
 #  define GPIO_SLEW           (1 << 18) /* Bit 18: Rate Control: 0-Standard mode, 1-Fast mode */
 #  define GPIO_ADMODE         (1 << 19) /* Bit 19: A/D Modes: 0-Analog, 1-Digital  */
 #  define GPIO_FILTER         (1 << 20) /* Bit 20: Filter: 0-Off, 1-ON */

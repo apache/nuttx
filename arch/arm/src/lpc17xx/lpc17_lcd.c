@@ -616,9 +616,9 @@ int up_fbinitialize(void)
   regval &= ~LCD_CTRL_LCDPWR;
   putreg32(regval, LPC17_LCD_CTRL);
 
-  /* Initialize pixel clock (assuming clock source is CCLK) */
+  /* Initialize pixel clock (assuming clock source is the peripheral clock) */
 
-  putreg32(LPC17_CCLK / LPC17_LCD_PIXEL_CLOCK, LPC17_SYSCON_LCDCFG);
+  putreg32(BOARD_PCLK_FREQUENCY / LPC17_LCD_PIXEL_CLOCK, LPC17_SYSCON_LCDCFG);
 
   /* Bypass internal pixel clock divider */
 
