@@ -39,7 +39,7 @@ the LEDs:
   LED_SIGNAL                 LED3 glows, on while in signal handler
   LED_ASSERTION              LED3 glows, on while in assertion
   LED_PANIC                  LED3 Flashes at 2Hz
-  LED_IDLE                   LED glows, ON while sleeping
+  LED_IDLE                   LED glows: ON while active; OFF while sleeping
 
 Buttons
 =======

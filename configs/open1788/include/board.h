@@ -254,7 +254,8 @@
 #define LED_SIGNAL                 4  /*  LED3 glows, on while in signal handler    */
 #define LED_ASSERTION              4  /*  LED3 glows, on while in assertion         */
 #define LED_PANIC                  4  /*  LED3 Flashes at 2Hz                       */
-#define LED_IDLE                   5  /*  LED4 glows, ON while sleeping             */
+#define LED_IDLE                   5  /*  LED4 glows: ON while active               *
+                                       *              OFF while sleeping            */
 
 /* Button definitions ***************************************************************/
 /* The Open1788 supports several buttons.  All will read "1" when open and "0"
