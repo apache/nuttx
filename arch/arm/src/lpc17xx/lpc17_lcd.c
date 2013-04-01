@@ -626,7 +626,7 @@ int up_fbinitialize(void)
   regval |= LCD_POL_BCD;
   putreg32(regval, LPC17_LCD_POL);
 
-  /* Select the CCLK for the LCD block clock source */
+  /* Select the PCLK for the LCD block clock source */
 
   regval &= ~LCD_POL_CLKSEL;
   putreg32(regval, LPC17_LCD_POL);

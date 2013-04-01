@@ -142,7 +142,7 @@
 
 #define LCD_POL_PCDLO_SHIFT             (0)       /* Bits 0-4: Lower 5 bits of panel clock divisor */
 #define LCD_POL_PCDLO_MASK              (0x1f << LCD_POL_PCDLO_SHIFT)
-#define LCD_POL_CLKSEL                  (1 << 5)  /* Bit 5: Clock select- 0=CCLK, 1=LCD_CLKIN */
+#define LCD_POL_CLKSEL                  (1 << 5)  /* Bit 5: Clock select- 0=PCLK, 1=LCD_CLKIN */
 #define LCD_POL_ACB_SHIFT               (6)       /* Bits 6-10: AC bias pin frequency */
 #define LCD_POL_ACB_MASK                (0x1f << LCD_POL_ACB_SHIFT)
 #define LCD_POL_IVS                     (1 << 11) /* Bit 11: Invert vertical sync */

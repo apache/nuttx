@@ -294,6 +294,8 @@ config ARCH_HAVE_UART6
        bool
 config ARCH_HAVE_UART7
        bool
+config ARCH_HAVE_UART8
+       bool
 
 config ARCH_HAVE_USART0
        bool
@@ -311,6 +313,8 @@ config ARCH_HAVE_USART6
        bool
 config ARCH_HAVE_USART7
        bool
+config ARCH_HAVE_USART8
+       bool
 
 config MCU_SERIAL
 	bool
@@ -318,7 +322,7 @@ config MCU_SERIAL
 	ARCH_HAVE_UART1 || ARCH_HAVE_USART1 || ARCH_HAVE_UART2 || ARCH_HAVE_USART2 || \
 	ARCH_HAVE_UART3 || ARCH_HAVE_USART3 || ARCH_HAVE_UART4 || ARCH_HAVE_USART4 || \
 	ARCH_HAVE_UART5 || ARCH_HAVE_USART5 || ARCH_HAVE_UART6 || ARCH_HAVE_USART6 || \
-	ARCH_HAVE_UART7 || ARCH_HAVE_USART7
+	ARCH_HAVE_UART7 || ARCH_HAVE_USART7 || ARCH_HAVE_UART8 || ARCH_HAVE_USART8
 
 #
 # Standard serial driver configuration
@@ -417,6 +421,14 @@ config USART7_SERIAL_CONSOLE
 	bool "USART7"
 	depends on ARCH_HAVE_USART7
 
+config UART8_SERIAL_CONSOLE
+	bool "UART8"
+	depends on ARCH_HAVE_UART8
+
+config USART8_SERIAL_CONSOLE
+	bool "USART8"
+	depends on ARCH_HAVE_USART8
+
 config NO_SERIAL_CONSOLE
 	bool "No serial console"
 
@@ -433,7 +445,7 @@ config UART_RXBUFSIZE
 	  the size of the receive buffer.
 
 config UART_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -476,7 +488,7 @@ config UART0_RXBUFSIZE
 	  the size of the receive buffer.
 
 config UART0_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -519,7 +531,7 @@ config USART0_RXBUFSIZE
 	  the size of the receive buffer.
 
 config USART0_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -562,7 +574,7 @@ config UART1_RXBUFSIZE
 	  the size of the receive buffer.
 
 config UART1_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -605,7 +617,7 @@ config USART1_RXBUFSIZE
 	  the size of the receive buffer.
 
 config USART1_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -648,7 +660,7 @@ config UART2_RXBUFSIZE
 	  the size of the receive buffer.
 
 config UART2_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -691,7 +703,7 @@ config USART2_RXBUFSIZE
 	  the size of the receive buffer.
 
 config USART2_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -734,7 +746,7 @@ config UART3_RXBUFSIZE
 	  the size of the receive buffer.
 
 config UART3_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -777,7 +789,7 @@ config USART3_RXBUFSIZE
 	  the size of the receive buffer.
 
 config USART3_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -820,7 +832,7 @@ config UART4_RXBUFSIZE
 	  the size of the receive buffer.
 
 config UART4_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -863,7 +875,7 @@ config USART4_RXBUFSIZE
 	  the size of the receive buffer.
 
 config USART4_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -906,7 +918,7 @@ config UART5_RXBUFSIZE
 	  the size of the receive buffer.
 
 config UART5_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -949,7 +961,7 @@ config USART5_RXBUFSIZE
 	  the size of the receive buffer.
 
 config USART5_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -992,7 +1004,7 @@ config USART6_RXBUFSIZE
 	  the size of the receive buffer.
 
 config USART6_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -1035,7 +1047,7 @@ config UART6_RXBUFSIZE
 	  the size of the receive buffer.
 
 config UART6_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -1078,7 +1090,7 @@ config USART7_RXBUFSIZE
 	  the size of the receive buffer.
 
 config USART7_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -1121,7 +1133,7 @@ config UART7_RXBUFSIZE
 	  the size of the receive buffer.
 
 config UART7_TXBUFSIZE
-	int "Trasmitt buffer size"
+	int "Transmit buffer size"
 	default 256
 	help
 	  Characters are buffered before being sent.  This specifies
@@ -1146,6 +1158,92 @@ config UART7_PARITY
 	  0=no parity, 1=odd parity, 2=even parity
 
 config UART7_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	help
+	  1=Two stop bits
+
+endmenu
+
+menu "USART8 Configuration"
+	depends on ARCH_HAVE_USART8
+
+config USART8_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	help
+	  Characters are buffered as they are received. This specifies
+	  the size of the receive buffer.
+
+config USART8_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	help
+	  Characters are buffered before being sent.  This specifies
+	  the size of the transmit buffer.
+
+config USART8_BAUD
+	int "BAUD rate"
+	default 115200
+	help
+	  The configured BAUD of the USART.
+
+config USART8_BITS
+	int "Character size"
+	default 8
+	help
+	  The number of bits.  Must be either 7 or 8.
+
+config USART8_PARITY
+	int "Parity setting"
+	default 0
+	help
+	  0=no parity, 1=odd parity, 2=even parity
+
+config USART8_2STOP
+	int "Uses 2 stop bits"
+	default 0
+	help
+	  1=Two stop bits
+
+endmenu
+
+menu "UART8 Configuration"
+	depends on ARCH_HAVE_UART8
+
+config UART8_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	help
+	  Characters are buffered as they are received. This specifies
+	  the size of the receive buffer.
+
+config UART8_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	help
+	  Characters are buffered before being sent.  This specifies
+	  the size of the transmit buffer.
+
+config UART8_BAUD
+	int "BAUD rate"
+	default 115200
+	help
+	  The configured BAUD of the UART.
+
+config UART8_BITS
+	int "Character size"
+	default 8
+	help
+	  The number of bits.  Must be either 7 or 8.
+
+config UART8_PARITY
+	int "Parity setting"
+	default 0
+	help
+	  0=no parity, 1=odd parity, 2=even parity
+
+config UART8_2STOP
 	int "Uses 2 stop bits"
 	default 0
 	help

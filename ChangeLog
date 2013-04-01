@@ -4482,3 +4482,5 @@
 	  is now functional.  Thre may be some issues with DMA from CPU SRAM
 	  which is apparently disabled in sleep mode; up_idle() always enters
 	  sleep mode (2013-03-31).
+	* arch/arm/src/stm32:  Add architecure support for the STM32 F427/F437
+	  chips. Contributed by Mike Smith (2014-4-01).
