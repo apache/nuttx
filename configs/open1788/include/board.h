@@ -387,6 +387,32 @@
  * PWR    --- Connected to P2[0]
  */
 
+/* XPT2046 Touchscreen:
+ *
+ * -------------- -------------------- ------------ --------------
+ * XTPT2046       Module               Module       Open1788 LED
+ *                Signal               Connector    Connector
+ * -------------- -------------------- ------------ --------------
+ * Pin 11 PENIRQ\ PENIRQ (pulled high) PORT3 Pin 1  P2.15 PENIRQ
+ * Pin 12 DOUT    MISO                 PORT3 Pin 4  P1.18 MISO1
+ * Pin 13 BUSY    BUSY (pulled high)   PORT3 Pin 9  P2.14 BUSY
+ * Pin 14 DIN     MOSI                 PORT3 Pin 3  P0.13 MOSI1
+ * Pin 15 CS\     SSEL (pulled high)   PORT3 Pin 6  P1.8  GPIO
+ * Pin 16 DCLK    SCK                  PORT3 Pin 5  P1.19 SCK1
+ * -------------- -------------------- ------------ --------------
+ */
+
+
+#define GPIO_SSP1_MISO   GPIO_SSP1_MISO_3
+#define GPIO_SSP1_MOSI   GPIO_SSP1_MOSI_2
+#define GPIO_SSP1_SCK    GPIO_SSP1_SCK_2
+
+#define GPIO_SSP1_SSEL_1   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN6)
+#define GPIO_SSP1_SSEL_2   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN14)
+#define GPIO_SSP1_SSEL_3   (GPIO_ALT5 | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN26)
+#define GPIO_SSP1_SSEL_4   (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT4 | GPIO_PIN21)
+
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

@@ -1,8 +1,8 @@
-/************************************************************************************
- * configs/lpcxpresso-lpc1768/src/up_ssp.c
- * arch/arm/src/board/up_ssp.c
+/****************************************************************************
+ * configs/open1788/src/lpc17_ssp.c
+ * arch/arm/src/board/lpc17_ssp.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -45,93 +45,96 @@
 #include <debug.h>
 
 #include <nuttx/spi.h>
+
 #include <arch/board/board.h>
 
 #include "up_arch.h"
 #include "chip.h"
 #include "lpc17_gpio.h"
 #include "lpc17_ssp.h"
-#include "lpcxpresso_internal.h"
+#include "open1788.h"
 
-#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
+#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1) || \
+    defined(CONFIG_LPC17_SSP2)
 
-/************************************************************************************
+/****************************************************************************
  * Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
+/* Debug ********************************************************************/
 
-#undef SSP_DEBUG   /* Define to enable debug */
-#undef SSP_VERBOSE /* Define to enable verbose debug */
-
-#ifdef SSP_DEBUG
+#ifdef CONFIG_DEBUG_SPI
 #  define sspdbg  lldbg
-#  ifdef SSP_VERBOSE
+#  ifdef CONFIG_DEBUG_VERBOSE
 #    define sspvdbg lldbg
 #  else
 #    define sspvdbg(x...)
 #  endif
 #else
-#  undef SSP_VERBOSE
 #  define sspdbg(x...)
 #  define sspvdbg(x...)
 #endif
 
 /* Dump GPIO registers */
 
-#ifdef SSP_VERBOSE
-#  define ssp_dumpgpio(m) lpc17_dumpgpio(SDCCS_GPIO, m)
+#ifdef CONFIG_DEBUG_VERBOSE
+#  define ssp_dumpgpio(p,m) lpc17_dumpgpio(p,m)
 #else
-#  define ssp_dumpgpio(m)
+#  define ssp_dumpgpio(p,m)
 #endif
 
-/************************************************************************************
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Name: lpcxpresso_sspinitialize
+/****************************************************************************
+ * Name: open1788_sspinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the LPCXpresso.
+ *   Called to configure SPI chip select GPIO pins for the LPC1766-STK.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-void weak_function lpcxpresso_sspinitialize(void)
+void weak_function open1788_sspinitialize(void)
 {
-  /* Configure the SPI-based microSD CS GPIO */
+  /* Configure the SSP0 chip select GPIOs. */
 
-  ssp_dumpgpio("lpcxpresso_sspinitialize() Entry)");
+#ifdef CONFIG_LPC17_SSP0
+#endif
 
-  /* Configure card detect and chip select for the SD slot.  NOTE:  Jumper J55 must
-   * be set correctly for the SD slot chip select.
+  /* Configure SSP1 chip select GPIOs.  This includes the touchscreen on the
+   * the LCD module.
    */
 
 #ifdef CONFIG_LPC17_SSP1
-  (void)lpc17_configgpio(LPCXPRESSO_SD_CS);
-  (void)lpc17_configgpio(LPCXPRESSO_SD_CD);
-
-  /* Configure chip select for the OLED. For the SPI interface, insert jumpers in
-   * J42, J43, J45 pin1-2 and J46 pin 1-2.
-   */
-
-#ifdef CONFIG_NX_LCDDRIVER
-  (void)lpc17_configgpio(LPCXPRESSO_OLED_CS);
-#endif
+  ssp_dumpgpio(GPIO_TC_CS, "BEFORE SSP1 Initialization");
+  lpc17_configgpio(GPIO_TC_CS);
+  ssp_dumpgpio(GPIO_TC_CS, "AFTER SSP1 Initialization");
 #endif
 
-  ssp_dumpgpio("lpcxpresso_sspinitialize() Exit");
+  /* Configure the SSP2 chip select GPIOs. */
+
+#ifdef CONFIG_LPC17_SSP2
+#endif
 }
 
 /************************************************************************************
- * Name:  lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status
+ * Name:  lpc17_ssp0/1/2select and lpc17_ssp0/1/2status
  *
  * Description:
- *   The external functions, lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status 
+ *   The external functions, lpc17_ssp0/1/2select and lpc17_ssp0/1/2status 
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
  *   include/nuttx/spi.h). All other methods (including lpc17_sspinitialize())
@@ -140,7 +143,7 @@ void weak_function lpcxpresso_sspinitialize(void)
  *
  *   1. Provide logic in lpc17_boardinitialize() to configure SPI/SSP chip select
  *      pins.
- *   2. Provide lpc17_ssp0/ssp1select() and lpc17_ssp0/ssp1status() functions
+ *   2. Provide lpc17_ssp0/1/2select() and lpc17_ssp0/1/2status() functions
  *      in your board-specific logic.  These functions will perform chip selection
  *      and status operations using GPIOs in the way your board is configured.
  *   3. Add a calls to lpc17_sspinitialize() in your low level application
@@ -156,17 +159,12 @@ void weak_function lpcxpresso_sspinitialize(void)
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssp_dumpgpio("lpc17_ssp0select() Entry");
-
-#warning "Assert CS here (false)"
-
-  ssp_dumpgpio("lpc17_ssp0select() Exit");
 }
 
 uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning SPI_STATUS_PRESENT\n");
-  return SPI_STATUS_PRESENT;
+  sspdbg("Returning nothing\n");
+  return 0;
 }
 #endif
 
@@ -174,41 +172,34 @@ uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssp_dumpgpio("lpc17_ssp1select() Entry");
-
-  if (devid == SPIDEV_MMCSD)
+  if (devid == SPIDEV_TOUCHSCREEN)
     {
       /* Assert/de-assert the CS pin to the card */
 
-      (void)lpc17_gpiowrite(LPCXPRESSO_SD_CS, !selected);
+      ssp_dumpgpio(GPIO_TC_CS, "lpc17_ssp1select() Entry");
+      lpc17_gpiowrite(GPIO_TC_CS, !selected);
+      ssp_dumpgpio(GPIO_TC_CS, "lpc17_ssp1select() Exit");
     }
-#ifdef CONFIG_NX_LCDDRIVER
-  else if (devid == SPIDEV_DISPLAY)
-    {
-      /* Assert the CS pin to the OLED display */
-
-      (void)lpc17_gpiowrite(LPCXPRESSO_OLED_CS, !selected);
-    }
-#endif
-  ssp_dumpgpio("lpc17_ssp1select() Exit");
 }
 
 uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  if (devid == SPIDEV_MMCSD)
-    {
-      /* Read the state of the card-detect bit */
-
-      if (lpc17_gpioread(LPCXPRESSO_SD_CD) == 0)
-        {
-          sspdbg("Returning SPI_STATUS_PRESENT\n");
-          return SPI_STATUS_PRESENT;
-        }
-    }
-
-  sspdbg("Returning zero\n");
+  sspdbg("Returning nothing\n");
   return 0;
 }
 #endif
 
-#endif /* CONFIG_LPC17_SSP0 || CONFIG_LPC17_SSP1 */
+#ifdef CONFIG_LPC17_SSP2
+void  lpc17_ssp2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+}
+
+uint8_t lpc17_ssp2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  sspdbg("Returning nothing\n");
+  return 0;
+}
+#endif
+
+#endif /* CONFIG_LPC17_SSP0 || CONFIG_LPC17_SSP1  || CONFIG_LPC17_SSP2 */

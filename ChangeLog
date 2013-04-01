@@ -4483,9 +4483,9 @@
 	  which is apparently disabled in sleep mode; up_idle() always enters
 	  sleep mode (2013-03-31).
 	* arch/arm/src/stm32:  Add architecure support for the STM32 F427/F437
-	  chips. Contributed by Mike Smith (2014-4-01).
+	  chips. Contributed by Mike Smith (2013-4-01).
 	* configs/zkit-arm-1769/src/up_can.c:  Add support for both CAN1
-	  and CAN2.  Contributed by M.Kannan (2014-4-01).
+	  and CAN2.  Contributed by M.Kannan (2013-4-01).
 	* arch/arm/src/lpc17xx/lpc17_spi.c and lpc17_ssp.c and
 	  configs/olimex-lpc1766stk, nucleus2g, zkit-arm-1769, and
 	  lpcxpresso-lpc1768:  The initialization function for both the LPC17xx
@@ -4495,13 +4495,19 @@
 	  LPC17xx (and also as does other architectures like STM32 that have
 	  USARTs that can serve as SPI interfaces as well).  These were renamed
 	  to lpc17_spiinitialize() and lpc17_sspinitialize() in this case.
-	  Problem reported by M. Kannan (2014-4-01).
+	  Problem reported by M. Kannan (2013-4-01).
 	* arch/arm/src/lpc17xx/lpc17_gpdma.c and lpc17_idle.c:  In sleep mode,
 	  DMA can only be performed from peripheral SRAM.  CPU SRAM is shutdown
 	  in sleep mode.  In order to simplify DMA memory allocation, the LPC17xx
-	  IDLE will not hold off going to sleep mode if there is a DMA in progress
-	 (2014-4-01).
+	  IDLE will now hold off going to sleep mode if there is a DMA in progress
+	 (2013-4-01).
 	* configs/open1788/src/lpc17_autoleds.c:  Reversed sense of the IDLE LCD.
 	  It is now off when the LPC17 is sleeping and on when awake.  That is
 	  much more useful because it provides a good visual indication of the
-	  dynamic CPU load (2014-4-01).
+	  dynamic CPU load (2013-4-01).
+	* configs/open1788/src/lpc17_touchscreen.c and lpc17_ssp.c:  Add
+	  support for the touschscreen on the WaveShare LCD (2013-4-01).
+	* configs/several:  There were already some functions called
+	  lpc17_sspinitialize().  So they had to be renamed (2013-4-01).
+	* arch/arm/src/lpc17xx/lpc17_ssp.c:  Adapted to work the the LPC178x
+	  family (2013-4-01).

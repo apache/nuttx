@@ -193,7 +193,7 @@
 #define GPIO_IOCON_TYPE_I_MASK (0x00000347) /* I2C/USB P0:27-28, P5:2-3  */
 #define GPIO_IOCON_TYPE_W_MASK (0x000007ff) /* I2S P0:7-9 */
 
-#define GPIO_IOCON_MASK       (0x00FF0000)
+#define GPIO_IOCON_MASK       (0x00ff0000)
 #  define GPIO_HYSTERESIS     (1 << 16) /* Bit 16: HYSTERESIS: 0-Disable, 1-Enabled */
 #  define GPIO_INVERT         (1 << 17) /* Bit 17: Input: 0-Not Inverted, 1-Inverted */
 #  define GPIO_SLEW           (1 << 18) /* Bit 18: Rate Control: 0-Standard mode, 1-Fast mode */
@@ -259,7 +259,7 @@
 #define GPIO_VALUE_ONE       GPIO_VALUE
 #define GPIO_VALUE_ZERO      (0)
 
-/* Port number:    PPP (0-5) */
+/* Port number: PPP (0-5) */
 
 #define GPIO_PORT_SHIFT      (5)         /* Bit 5-7:  Port number */
 #define GPIO_PORT_MASK       (7 << GPIO_PORT_SHIFT)
@@ -272,7 +272,7 @@
 
 #define GPIO_NPORTS          6
 
-/* Pin number:     NNNNN (0-31) */
+/* Pin number: NNNNN (0-31) */
 
 #define GPIO_PIN_SHIFT       0        /* Bits 0-4: GPIO number: 0-31 */
 #define GPIO_PIN_MASK        (31 << GPIO_PIN_SHIFT)

@@ -80,24 +80,24 @@ void lpc17_boardinitialize(void)
 #ifdef CONFIG_LPC17_EMC
   lpc17_emcinitialize();
 #ifdef CONFIG_ARCH_EXTDRAM
-  lpc17_sdram_initialize();
+  open1788_sdram_initialize();
 #endif
 #ifdef CONFIG_ARCH_EXTNOR
-  lpc17_nor_initialize();
+  open1788_nor_initialize();
 #endif
 #ifdef CONFIG_ARCH_EXTNAND
-  lpc17_nand_initialize();
+  open1788_nand_initialize();
 #endif
 #endif
 
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function lpc17_sspinitialize() has been brought into the link.
+   * function open1788_sspinitialize() has been brought into the link.
    */
 
 #if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
-  if (lpc17_sspinitialize)
+  if (open1788_sspinitialize)
     {
-      lpc17_sspinitialize();
+      open1788_sspinitialize();
     }
 #endif
 
@@ -110,7 +110,7 @@ void lpc17_boardinitialize(void)
   /* Configure the LCD GPIOs if LCD support has been selected. */
 
 #ifdef CONFIG_LPC17_LCD
-  lpc17_lcdinitialize();
+  open1788_lcd_initialize();
 #endif
 }
 

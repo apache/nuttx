@@ -312,15 +312,15 @@
 #define IOCON_FUNC_MASK             (7 << IOCON_FUNC_SHIFT)
 #define IOCON_MODE_SHIFT            (3)   /* Bits 3-4: Type D,A,W */
 #define IOCON_MODE_MASK             (3 << IOCON_MODE_SHIFT )
-#define IOCON_HYS_SHIFT             (5)   /* Bit 5: Type D,W  */
+#define IOCON_HYS_SHIFT             (5)   /* Bit 5: Type D,W */
 #define IOCON_HYS_MASK              (1 << IOCON_HYS_SHIFT)
-#define IOCON_INV_SHIFT             (6)   /* Bit 6: Typ D,A,I,W  */
+#define IOCON_INV_SHIFT             (6)   /* Bit 6: Type D,A,I,W */
 #define IOCON_INV_MASK              (1 << IOCON_INV_SHIFT)
 #define IOCON_ADMODE_SHIFT          (7)   /* Bit 7: Type A */
 #define IOCON_ADMODE_MASK           (1 << IOCON_ADMODE_SHIFT)
 #define IOCON_FILTER_SHIFT          (8)   /* Bit 8: Type A */
 #define IOCON_FILTER_MASK           (1 << IOCON_FILTER_SHIFT)
-#define IOCON_SLEW_SHIFT            (9)   /* Bit 9: Type W*/
+#define IOCON_SLEW_SHIFT            (9)   /* Bit 9: Type W */
 #define IOCON_SLEW_MASK             (1 << IOCON_SLEW_SHIFT)
 #define IOCON_HIDRIVE_SHIFT         (9)   /* Bit 9: Type I */
 #define IOCON_HIDRIVE_MASK          (1 << IOCON_HIDRIVE_SHIFT)

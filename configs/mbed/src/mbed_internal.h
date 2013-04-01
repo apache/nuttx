@@ -80,14 +80,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_sspinitialize
+ * Name: mbed_sspinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the NUCLEUS-2G board.
  *
  ************************************************************************************/
 
-extern void weak_function lpc17_sspinitialize(void);
+void weak_function mbed_sspinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_MBED_SRC_MBED_INTERNAL_H */

@@ -95,18 +95,18 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_sspinitialize
+ * Name: zkit_sspinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LM3S6965 Eval Kit.
  *
  ************************************************************************************/
 
-void weak_function lpc17_sspinitialize(void)
+void weak_function zkit_sspinitialize(void)
 {
   /* Configure the SPI-based microSD CS GPIO */
 
-  ssp_dumpgpio("lpc17_sspinitialize() Entry)");
+  ssp_dumpgpio("zkit_sspinitialize() Entry)");
 
   /* Configure card detect and chip select for the SD slot.  NOTE:  Jumper J55 must
    * be set correctly for the SD slot chip select.
@@ -125,7 +125,7 @@ void weak_function lpc17_sspinitialize(void)
 #endif
 #endif /* CONFIG_LPC17_SSP0 */
 
-  ssp_dumpgpio("lpc17_sspinitialize() Exit");
+  ssp_dumpgpio("zkit_sspinitialize() Exit");
 }
 
 /************************************************************************************

@@ -140,16 +140,16 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_sspinitialize
+ * Name: nucleus2g_sspinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the NUCLEUS-2G board.
  *
  ************************************************************************************/
 
-extern void weak_function lpc17_sspinitialize(void);
+void weak_function nucleus2g_sspinitialize(void);
 
-extern void up_relayinit(void);
+void up_relayinit(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_NUCLEUS2G_SRC_NUCLEUS2G_INTERNAL_H */

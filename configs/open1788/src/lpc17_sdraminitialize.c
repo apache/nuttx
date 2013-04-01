@@ -99,14 +99,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_sdram_initialize
+ * Name: open1788_sdram_initialize
  *
  * Description:
  *   Initialize SDRAM
  *
  ************************************************************************************/
 
-void lpc17_sdram_initialize(void)
+void open1788_sdram_initialize(void)
 {
   uint32_t regval;
 #ifdef CONFIG_ARCH_SDRAM_16BIT

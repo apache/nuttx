@@ -117,7 +117,7 @@ int up_lcdinitialize(void)
   spi = lpc17_sspinitialize(0);
   if (!spi)
     {
-      glldbg("Failed to initialize SSI port 0\n");
+      glldbg("Failed to initialize SSP port 0\n");
       return 0;
     }
 

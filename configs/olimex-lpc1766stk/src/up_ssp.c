@@ -212,14 +212,14 @@ static int ssp1_cdinterrupt(int irq, FAR void *context)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_sspinitialize
+ * Name: lpc1766stk_sspinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LPC1766-STK.
  *
  ************************************************************************************/
 
-void weak_function lpc17_sspinitialize(void)
+void weak_function lpc1766stk_sspinitialize(void)
 {
   /* Configure the SSP0 chip select GPIOs.  Only the Nokia LCD is connected to SSP0 */
 
