@@ -209,7 +209,7 @@ static int nsh_sdinitialize(void)
 
   /* Get the SSP port */
 
-  ssp = up_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  ssp = lpc17_sspinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!ssp)
     {
       message("nsh_archinitialize: Failed to initialize SSP port %d\n",

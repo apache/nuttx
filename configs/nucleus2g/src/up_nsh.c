@@ -2,7 +2,7 @@
  * config/nucleus2g/src/up_nsh.c
  * arch/arm/src/board/up_nsh.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -136,7 +136,7 @@ int nsh_archinitialize(void)
 
   /* Get the SSP port */
 
-  ssp = up_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  ssp = lpc17_sspinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!ssp)
     {
       message("nsh_archinitialize: Failed to initialize SSP port %d\n",

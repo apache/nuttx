@@ -123,25 +123,25 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
 
   oleddc_dumpgpio("up_nxdrvinit: After OLED Power/DC setup");
 
-  /* Get the SSI port (configure as a Freescale SPI port) */
+  /* Get the SPI1 port (configure as a Freescale SPI port) */
 
-  spi = up_spiinitialize(1);
+  spi = lpc17_sspinitialize(1);
   if (!spi)
     {
-      glldbg("Failed to initialize SSI port 1\n");
+      glldbg("Failed to initialize SPI port 1\n");
     }
   else
     {
-      /* Bind the SSI port to the OLED */
+      /* Bind the SPI port to the OLED */
 
       dev = ug_initialize(spi, devno);
       if (!dev)
         {
-          glldbg("Failed to bind SSI port 1 to OLED %d: %d\n", devno);
+          glldbg("Failed to bind SPI port 1 to OLED %d: %d\n", devno);
         }
      else
         {
-          gllvdbg("Bound SSI port 1 to OLED %d\n", devno);
+          gllvdbg("Bound SPI port 1 to OLED %d\n", devno);
 
           /* And turn the OLED on (dim) */
 

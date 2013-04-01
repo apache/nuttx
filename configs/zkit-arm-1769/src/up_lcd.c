@@ -85,6 +85,7 @@
 #  define leddbg(x...)
 #  define ledvdbg(x...)
 #endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -113,12 +114,13 @@ int up_lcdinitialize(void)
   lpc17_gpiowrite(ZKITARM_OLED_CS, 1);
   lpc17_gpiowrite(ZKITARM_OLED_RS, 1);
 
-  spi = up_spiinitialize(0);
+  spi = lpc17_sspinitialize(0);
   if (!spi)
     {
       glldbg("Failed to initialize SSI port 0\n");
       return 0;
     }
+
   lpc17_gpiowrite(ZKITARM_OLED_RST, 0);
   up_mdelay(1);
   lpc17_gpiowrite(ZKITARM_OLED_RST, 1);
@@ -144,6 +146,7 @@ FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
       (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
       return dev;
     }
+ 
   return NULL;
 }
 

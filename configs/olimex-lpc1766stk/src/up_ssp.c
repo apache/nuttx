@@ -2,7 +2,7 @@
  * configs/olimex-lpc1766stk/src/up_ssp.c
  * arch/arm/src/board/up_ssp.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -258,7 +258,7 @@ void weak_function lpc17_sspinitialize(void)
  *   The external functions, lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status 
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
+ *   include/nuttx/spi.h). All other methods (including lpc17_sspinitialize())
  *   are provided by common LPC17xx logic.  To use this common SPI logic on your
  *   board:
  *
@@ -267,9 +267,9 @@ void weak_function lpc17_sspinitialize(void)
  *   2. Provide lpc17_ssp0/ssp1select() and lpc17_ssp0/ssp1status() functions
  *      in your board-specific logic.  These functions will perform chip selection
  *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to up_spiinitialize() in your low level application
+ *   3. Add a calls to lpc17_sspinitialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by lpc17_sspinitialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling 
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
