@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_gpdma.h
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
@@ -31,36 +31,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_LPC17_GPDMA_H
 #define __ARCH_ARM_SRC_LPC17XX_LPC17_GPDMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip/lpc17_gpdma.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_GPDMA
 /* DMA_HANDLE is an opaque reference to an allocated DMA channel */
 
 typedef FAR void *DMA_HANDLE;
 
-/* dma_callback_t a function pointer provided to lpc17_dmastart.  This function is
- * called at the completion of the DMA transfer.  'arg' is the same 'arg' value
- * that was provided when lpc17_dmastart() was called and result indicates the result
- * of the transfer:  Zero indicates a successful tranfers.  On failure, a negated
- * errno is returned indicating the general nature of the DMA faiure.
+/* dma_callback_t a function pointer provided to lpc17_dmastart.  This
+ * function is called at the completion of the DMA transfer.  'arg' is the
+ * same 'arg' value that was provided when lpc17_dmastart() was called and
+ * result indicates the result of the transfer:  Zero indicates a successful
+ * tranfers.  On failure, a negated errno is returned indicating the general
+ * nature of the DMA faiure.
  */
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
@@ -110,19 +111,34 @@ struct lpc17_dmaregs_s
 
 #endif /* CONFIG_DEBUG_DMA */
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-#ifdef __cplusplus
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
 extern "C"
 {
+#else
+#define EXTERN extern
 #endif
 
-/************************************************************************************
+/* If the following value is zero, then there is no DMA in progress. This
+ * value is needed in the IDLE loop to determine if the IDLE loop should
+ * go into lower power power consumption modes.  According to the LPC17xx
+ * User Manual: "The DMA controller can continue to work in Sleep mode, and
+ * has access to the peripheral SRAMs and all peripheral registers. The
+ * flash memory and the Main SRAM are not available in Sleep mode, they are
+ * disabled in order to save power."
+ */
+
+EXTERN volatile uint8_t g_dma_inprogress;
+
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: up_dmainitialize
@@ -244,6 +260,7 @@ void lpc17_dmadump(DMA_HANDLE handle, const struct lpc17_dmaregs_s *regs,
 #  define lpc17_dmadump(handle,regs,msg)
 #endif
 
+#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

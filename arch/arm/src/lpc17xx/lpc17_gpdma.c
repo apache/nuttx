@@ -70,8 +70,9 @@
 
 struct lpc17_dmach_s
 {
+  uint8_t chn;             /* The DMA channel number */
   bool inuse;              /* True: The channel is in use */
-  uint8_t chn;             /* Channel number */
+  bool inprogress;         /* True: DMA is in progress on this channel */
   dma_callback_t callback; /* DMA completion callback function */
   void *arg;               /* Argument to pass to the callback function */
 };
@@ -102,9 +103,79 @@ static struct lpc17_gpdma_s g_gpdma;
  * Public Data
  ****************************************************************************/
 
+/* If the following value is zero, then there is no DMA in progress. This
+ * value is needed in the IDLE loop to determine if the IDLE loop should
+ * go into lower power power consumption modes.  According to the LPC17xx
+ * User Manual: "The DMA controller can continue to work in Sleep mode, and
+ * has access to the peripheral SRAMs and all peripheral registers. The
+ * flash memory and the Main SRAM are not available in Sleep mode, they are
+ * disabled in order to save power."
+ */
+
+volatile uint8_t g_dma_inprogress;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc17_dmainprogress
+ *
+ * Description:
+ *   Another DMA has started. Increment the g_dma_inprogress counter.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc17_dmainprogress(struct lpc17_dmach_s *dmach)
+{
+  irqstate_t flags;
+
+  /* Increment the DMA in progress counter */
+
+  flags = irqsave();
+  DEBUGASSERT(!dmach->inprogress && g_dma_inprogress < LPC17_NDMACH);
+  g_dma_inprogress++;
+  dmach->inprogress = true;
+  irqrestore(flags);
+}
+
+/****************************************************************************
+ * Name: lpc17_dmadone
+ *
+ * Description:
+ *   A DMA has completed. Decrement the g_dma_inprogress counter.
+ *
+ *   This function is called only from lpc17_dmastop which, in turn, will be
+ *   called either by the user directly, by the user indirectly via
+ *   lpc17_dmafree(), or from gpdma_interrupt when the transfer completes.
+ *
+ *   NOTE: In the first two cases, we must be able to handle the case where
+ *   there is no DMA in progress and gracefully ignore the call.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void lpc17_dmadone(struct lpc17_dmach_s *dmach)
+{
+  irqstate_t flags;
+
+  /* Increment the DMA in progress counter */
+
+  flags = irqsave();
+  if (dmach->inprogress)
+    {
+      DEBUGASSERT(g_dma_inprogress > 0);
+      dmach->inprogress = false;
+      g_dma_inprogress--;
+    }
+
+  irqrestore(flags);
+}
 
 /****************************************************************************
  * Name: gpdma_interrupt
@@ -488,6 +559,14 @@ int lpc17_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   dmach->callback = callback;
   dmach->arg      = arg;
 
+  /* Increment the count of DMAs in-progress.  This count will be
+   * decremented when lpc17_dmastop() is called, either by the user,
+   * indirectly via lpc17_dmafree(), or from gpdma_interrupt when the
+   * transfer completes.
+   */
+
+  lpc17_dmainprogress(dmach);
+
   /* Clear any pending DMA interrupts */
 
   chbit = DMACH((uint32_t)dmach->chn);
@@ -521,6 +600,10 @@ int lpc17_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
  *   reset and lpc17_dmasetup() must be called before lpc17_dmastart() can be
  *   called again
  *
+ *   This function will be called either by the user directly, by the user
+ *   indirectly via lpc17_dmafree(), or from gpdma_interrupt when the
+ *   transfer completes.
+ *
  ****************************************************************************/
 
 void lpc17_dmastop(DMA_HANDLE handle)
@@ -547,6 +630,10 @@ void lpc17_dmastop(DMA_HANDLE handle)
   chbit = DMACH((uint32_t)dmach->chn);
   putreg32(chbit, LPC17_DMA_INTTCCLR);
   putreg32(chbit, LPC17_DMA_INTERRCLR);
+
+  /* Decrement the count of DMAs in progress */
+
+  lpc17_dmadone(dmach);
 }
 
 /****************************************************************************

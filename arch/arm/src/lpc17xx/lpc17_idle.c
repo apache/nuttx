@@ -41,7 +41,9 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
+
 #include "up_internal.h"
+#include "lpc17_gpdma.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -94,11 +96,25 @@ void up_idle(void)
   sched_process_timer();
 #else
 
-  /* Sleep until an interrupt occurs to save power */
+/* If the g_dma_inprogress is zero, then there is no DMA in progress.  This
+ * value is needed in the IDLE loop to determine if the IDLE loop should
+ * go into lower power power consumption modes.  According to the LPC17xx
+ * User Manual: "The DMA controller can continue to work in Sleep mode, and
+ * has access to the peripheral SRAMs and all peripheral registers. The
+ * flash memory and the Main SRAM are not available in Sleep mode, they are
+ * disabled in order to save power."
+ */
 
-  BEGIN_IDLE();
-  asm("WFI");
-  END_IDLE();
+#ifdef CONFIG_LPC17_GPDMA
+  if (g_dma_inprogress == 0)
+#endif
+    {
+      /* Sleep until an interrupt occurs in order to save power */
+
+      BEGIN_IDLE();
+      asm("WFI");
+      END_IDLE();
+    }
 #endif
 }
 
