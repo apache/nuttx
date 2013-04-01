@@ -231,6 +231,8 @@
 
 #define GPIO_CAN1_RD       GPIO_CAN1_RD_1
 #define GPIO_CAN1_TD       GPIO_CAN1_TD_1
+#define GPIO_CAN2_RD       GPIO_CAN2_RD_2 
+#define GPIO_CAN2_TD       GPIO_CAN2_TD_2
 #define GPIO_I2C1_SDA      GPIO_I2C0_SDA
 #define GPIO_I2C1_SCL      GPIO_I2C0_SCL
 #define GPIO_SSP1_SCK      GPIO_SSP1_SCK_1

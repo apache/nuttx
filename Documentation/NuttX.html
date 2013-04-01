@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: March 15, 2013</p>
+      <p>Last Updated: April 1, 2013</p>
     </td>
   </tr>
 </table>
@@ -2418,8 +2418,10 @@ nsh>
     <ul>
       <b>STATUS:</b>
       This is still a work in progess.
-      At present there is a working basic port with OS verification and Nuttshell (<a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>) configurations.
-      This is stablilizing nicely now and the next steps will involve getting solid driver support for the SD slot and the LCD on the WaveShare board.
+      At present there is a working basic port with OS verification, Nuttshell (<a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>) configurations, and a graphics test configuration.
+      The NSH configuration includes verfied support for (DMA-based) SD card interface.
+      SDRAM is working.
+      The LCD driver is not functional as of this writing, but is actively underwork and is expected to be available in the NuttX-6.27 release.
       </ul>
    </td>
 </tr>
@@ -2542,6 +2544,25 @@ nsh>
         All drivers listed for the STM3240G-EVAL are usable on this plaform as well.
       </p>
     </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>STMicro STM32 F427/437</b>.
+      General architectural support was provided for the F427/437 family in NuttX 4.27.
+      Specific support includes the STM32F427I, STM32F427Z, and STM32F427V chips.
+      This is <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but not support for any publically available boards is included..
+      This support was contributed by Mike Smith.
+    </p>
+    <p>
+      The F427/f37 port adds (1) additional SPI ports, (2) additional UART ports, (3) analog and digital noise filters on the I2C ports, (4) up to 2MB of flash, (5) an additional lower-power mode for the internal voltage regulator, (6) a new prescaling option for timer clock, (7) a larger FSMSC write FIFO, and (8) additional crypto modes (F437 only).
+    </p>
   </td>
 </tr>
 <tr>
