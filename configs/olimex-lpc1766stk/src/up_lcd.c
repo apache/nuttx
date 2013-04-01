@@ -2,7 +2,7 @@
  * config/olimex-lpc1766stk/src/up_lcd.c
  * arch/arm/src/board/up_lcd.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -207,9 +207,9 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
 
   nokia_blinitialize();
 
-  /* Get the SSP port (configure as a Freescale SPI port) */
+  /* Get the SSP0 port (configure as a Freescale SPI port) */
 
-  spi = up_spiinitialize(0);
+  spi = lpc17_sspinitialize(0);
   if (!spi)
     {
       glldbg("Failed to initialize SSP port 0\n");

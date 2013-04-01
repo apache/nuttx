@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/lpcxpresso-lpc1768/src/up_usbmsc.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the LPC17xx MMC/SD SPI block driver.
@@ -113,7 +113,7 @@ int usbmsc_archinitialize(void)
   message("usbmsc_archinitialize: Initializing SPI port %d\n",
           LPC17XX_MMCSDSPIPORTNO);
 
-  spi = up_spiinitialize(LPC17XX_MMCSDSPIPORTNO);
+  spi = lpc17_sspinitialize(LPC17XX_MMCSDSPIPORTNO);
   if (!spi)
     {
       message("usbmsc_archinitialize: Failed to initialize SPI port %d\n",

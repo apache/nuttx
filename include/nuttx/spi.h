@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/spi.h
  *
- *   Copyright(C) 2008-2012 Gregory Nutt. All rights reserved.
+ *   Copyright(C) 2008-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -418,7 +418,8 @@ struct spi_dev_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -429,15 +430,35 @@ extern "C" {
  * Description:
  *   Initialize the selected SPI port.
  *
+ *   This is a generic prototype for the SPI initialize logic.  Specific
+ *   architectures may support different SPI initialization functions if,
+ *   for example, those architectures support multiple, incompatible SPI
+ *   implementations.  In any event, the prototype of those architecture-
+ *   specific initialization functions should be the same as
+ *   up_spiinitialize()
+ *
+ *   As an example, the LPC17xx family supports an SPI block and several SSP
+ *   blocks that may be programmed to support the SPI function.  In this
+ *   case, the LPC17xx architecture supports these two initialization
+ *   functions:
+ *
+ *     FAR struct spi_dev_s *lpc17_spiinitialize(int port);
+ *     FAR struct spi_dev_s *lpc17_sspinitialize(int port);
+ *
+ *   Another example would be the STM32 families that support both SPI
+ *   blocks as well as USARTs that can be configured to perform the SPI
+ *   function as well (the STM32 USARTs do not suppor SPI as of this
+ *   writing).
+ *
  * Input Parameter:
  *   Port number (for hardware that has mutiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structre reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on succcess; a NULL on failure
  *
  ****************************************************************************/
 
-EXTERN FAR struct spi_dev_s *up_spiinitialize(int port);
+FAR struct spi_dev_s *up_spiinitialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)

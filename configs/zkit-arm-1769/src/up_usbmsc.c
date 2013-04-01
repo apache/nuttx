@@ -117,7 +117,7 @@ int usbmsc_archinitialize(void)
   message("usbmsc_archinitialize: Initializing SPI port %d\n",
           LPC17XX_MMCSDSPIPORTNO);
 
-  spi = up_spiinitialize(LPC17XX_MMCSDSPIPORTNO);
+  spi = lpc17_sspinitialize(LPC17XX_MMCSDSPIPORTNO);
   if (!spi)
     {
       message("usbmsc_archinitialize: Failed to initialize SPI port %d\n",

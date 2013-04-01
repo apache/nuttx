@@ -4486,4 +4486,13 @@
 	  chips. Contributed by Mike Smith (2014-4-01).
 	* configs/zkit-arm-1769/src/up_can.c:  Add support for both CAN1
 	  and CAN2.  Contributed by M.Kannan (2014-4-01).
-
+	* arch/arm/src/lpc17xx/lpc17_spi.c and lpc17_ssp.c and
+	  configs/olimex-lpc1766stk, nucleus2g, zkit-arm-1769, and
+	  lpcxpresso-lpc1768:  The initialization function for both the LPC17xx
+	  SPI and SSP blocks was called up_spinitialize() which is the common API
+	  definition of include/nuttx/spi.h.  But this raises a problem when the
+	  MCU has multiple blocks for differ SPI implementatins as does the
+	  LPC17xx (and also as does other architectures like STM32 that have
+	  USARTs that can serve as SPI interfaces as well).  These were renamed
+	  to lpc17_spiinitialize() and lpc17_sspinitialize() in this case.
+	  Problem reported by M. Kannan (2014-4-01).
