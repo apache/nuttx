@@ -814,10 +814,10 @@ static inline FAR struct lpc17_sspdev_s *lpc17_ssp1initialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: lpc17_sspinitialize
  *
  * Description:
- *   Initialize the selected SPI port
+ *   Initialize the selected SSP port.
  *
  * Input Parameter:
  *   Port number (for hardware that has mutiple SPI interfaces)
@@ -827,7 +827,7 @@ static inline FAR struct lpc17_sspdev_s *lpc17_ssp1initialize(void)
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *lpc17_sspinitialize(int port)
 {
   FAR struct lpc17_sspdev_s *priv;
   uint32_t regval;

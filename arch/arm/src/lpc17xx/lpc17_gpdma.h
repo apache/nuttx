@@ -56,7 +56,7 @@
 
 typedef FAR void *DMA_HANDLE;
 
-/* dma_callback_t a function pointer provided to lp17_dmastart.  This function is
+/* dma_callback_t a function pointer provided to lpc17_dmastart.  This function is
  * called at the completion of the DMA transfer.  'arg' is the same 'arg' value
  * that was provided when lpc17_dmastart() was called and result indicates the result
  * of the transfer:  Zero indicates a successful tranfers.  On failure, a negated
