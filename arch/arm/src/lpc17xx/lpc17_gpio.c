@@ -540,18 +540,31 @@ static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port, un
   lpc17_clropendrain(port, pin);
 
 #elif defined(LPC178x)
-
-  /* Configure as GPIO */
+  /* Configure the pin as a GPIO.  Clear opendrain, input inversion,
+   * hysteris, slew.  Set analog pins as digital.
+   */
 
   regval = IOCON_FUNC_GPIO;
 
-  /* Set pull-up mode */
+  /* Set pull-up mode.  Isolate the field from the cfgset and move it
+   * into the correct position in the register value.
+   */
 
-  regval |= ((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT);
+  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT) << IOCON_MODE_SHIFT);
 
-  /* Clear opendrain, input hysteresis, invertion, slew */
+  /* Select input polarity */
 
-  regval &= ~(IOCON_HYS_MASK | IOCON_INV_MASK | IOCON_SLEW_MASK | IOCON_OD_MASK);
+  if ((cfgset & GPIO_INVERT) != 0)
+  {
+    regval |= IOCON_INV_MASK;
+  }
+
+  /* Select hysteresis enable */
+
+  if ((cfgset & GPIO_HYSTERESIS) != 0)
+  {
+    regval |= IOCON_HYS_MASK;
+  }
 
   /* Set IOCON register */
 
@@ -631,7 +644,11 @@ static inline int lpc17_configoutput(lpc17_pinset_t cfgset, unsigned int port,
     }
 
 #elif defined(LPC178x)
-  regval = 0;
+  /* Configure the pin as a GPIO.  Clear opendrain, input inversion,
+   * hysteris, slew.  Set analog pins as digital.
+   */
+
+  regval = IOCON_FUNC_GPIO;
 
   /* Select open drain output */
 
@@ -647,9 +664,11 @@ static inline int lpc17_configoutput(lpc17_pinset_t cfgset, unsigned int port,
       regval |= IOCON_SLEW_MASK;
     }
 
-  /* Set pull-up mode */
+  /* Set pull-up mode.  Isolate the field from the cfgset and move it
+   * into the correct position in the register value.
+   */
 
-  regval |= ((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT);
+  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT) << IOCON_MODE_SHIFT);
 
   /* Set IOCON register */
 
@@ -702,9 +721,22 @@ static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
 #elif defined(LPC178x)
   uint32_t regval = 0;
 
-  /* Set the alternate pin */
+  /* Select the alternate pin */
 
   regval |= (alt & IOCON_FUNC_MASK);
+
+  /* Select analog mode */
+
+  if ((cfgset & GPIO_ADMODE) != 0)
+  {
+    regval |= IOCON_ADMODE_MASK;
+  }
+
+  /* Set pull-up mode.  Isolate the field from the cfgset and move it
+   * into the correct position in the register value.
+   */
+
+  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT) << IOCON_MODE_SHIFT);
 
   /* Select open drain output */
 
