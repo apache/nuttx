@@ -252,14 +252,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_sspinitialize
+ * Name: lpc1766stk_sspinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Olimex LPC1766-STK board.
  *
  ************************************************************************************/
 
-void weak_function lpc17_sspinitialize(void);
+void weak_function lpc1766stk_sspinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_OLIMEX_LPC1766STK_SRC_LPC1766STK_INTERNAL_H */

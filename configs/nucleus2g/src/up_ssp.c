@@ -94,18 +94,18 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_sspinitialize
+ * Name: nucleus2g_sspinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Nucleus 2G.
  *
  ************************************************************************************/
 
-void weak_function lpc17_sspinitialize(void)
+void weak_function nucleus2g_sspinitialize(void)
 {
   /* Configure the SPI-based microSD CS GPIO */
 
-  ssp_dumpgpio("lpc17_sspinitialize() Entry)");
+  ssp_dumpgpio("nucleus2g_sspinitialize() Entry)");
 
   /* SSP0 connects only to the MMC/SD slot on the Nucleus 1G board.
    * P0[15]/TXD1/SCK0/SCK              MMC_CLK
@@ -127,7 +127,7 @@ void weak_function lpc17_sspinitialize(void)
 #ifdef CONFIG_LPC17_SSP1
 # warning "SSP1 chip selects not known"
 #endif
-  ssp_dumpgpio("lpc17_sspinitialize() Exit");
+  ssp_dumpgpio("nucleus2g_sspinitialize() Exit");
 }
 
 /************************************************************************************

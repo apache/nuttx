@@ -91,14 +91,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_sspinitialize
+ * Name: lincoln60_sspinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Lincoln 60 board.
  *
  ****************************************************************************/
 
-extern void weak_function lpc17_sspinitialize(void);
+void weak_function lincoln60_sspinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_LINCOLN60_SRC_LINCOLN60_INTERNAL_H */

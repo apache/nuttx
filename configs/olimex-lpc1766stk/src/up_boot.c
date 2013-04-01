@@ -75,13 +75,13 @@
 void lpc17_boardinitialize(void)
 {
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function lpc17_sspinitialize() has been brought into the link.
+   * function lpc1766stk_sspinitialize() has been brought into the link.
    */
 
 #if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
-  if (lpc17_sspinitialize)
+  if (lpc1766stk_sspinitialize)
     {
-      lpc17_sspinitialize();
+      lpc1766stk_sspinitialize();
     }
 #endif
 

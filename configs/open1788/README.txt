@@ -324,7 +324,17 @@ CONFIGURATION
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
 
-    3. At the end of the build, there will be several files in the top-level
+    3. This configuration has DMA-based SD card support enabled by
+       default.  That support can be disabled as follow:
+
+       CONFIG_LPC17_GPDMA=n                : No DMA
+       CONFIG_ARCH_DMA=n
+       CONFIG_LPC17_SDCARD=n               : No SD card driver
+       CONFIG_SDIO_DMA=n                   : No SD card DMA
+       CONFIG_MMCSD=n                      : No MMC/SD driver support
+       CONFIG_FS_FAT=n                     : No FAT file system support
+
+    4. At the end of the build, there will be several files in the top-level
        NuttX build directory:
 
        PASS1:
@@ -346,7 +356,7 @@ CONFIGURATION
        load objects twice to account for write failures.  I have not yet
        found a simple foolproof way to reliably get the code into FLASH.
 
-    4. Combining .hex files.  If you plan to use the .hex files with your
+    5. Combining .hex files.  If you plan to use the .hex files with your
        debugger or FLASH utility, then you may need to combine the two hex
        files into a single .hex file.  Here is how you can do that.
 
@@ -415,7 +425,17 @@ CONFIGURATION
     3. This NSH has support for built-in applications enabled, however,
        no built-in configurations are built in the defulat configuration.
 
-    4. This configuration has been used for verifying SDRAM by modifying
+    4. This configuration has DMA-based SD card support enabled by
+       default.  That support can be disabled as follow:
+
+       CONFIG_LPC17_GPDMA=n                : No DMA
+       CONFIG_ARCH_DMA=n
+       CONFIG_LPC17_SDCARD=n               : No SD card driver
+       CONFIG_SDIO_DMA=n                   : No SD card DMA
+       CONFIG_MMCSD=n                      : No MMC/SD driver support
+       CONFIG_FS_FAT=n                     : No FAT file system support
+
+    5. This configuration has been used for verifying SDRAM by modifying
        the configuration in the following ways:
 
        CONFIG_LPC17_EMC=y                  : Enable the EMC
@@ -427,6 +447,39 @@ CONFIGURATION
        not excessible to the applications.  So the RAM test can be
        freely executed against the SRAM memory beginning at address
        0xa000:0000 (CS0).
+
+    6. This configuration has been used for verifying the touchscreen on
+       on the 4.3" LCD module by modifying the configuration in the
+       following ways:
+
+       CONFIG_INPUT=y                      : Enable support for input devices
+       CONFIG_GPIO_IRQ=y                   : GPIO interrupt support
+       CONFIG_INPUT_ADS7843E=y             : Enable support for the XPT2048
+       CONFIG_SPI=y                        : Enable SPI support
+       CONFIG_SPI_EXCHANGE=n               : exchange() method is not supported
+       CONFIG_LPC17_SSP1=y                 : Enable support for SSP1
+       CONFIG_EXAMPLES_TOUCHSCREEN=y       : Enable the touchscreen built-int test
+       CONFIG_EXAMPLES_TOUCHSCREEN_BUILTIN=y
+
+       Defaults should be okay for related touchscreen settings.
+
+       You will also have to disable SD card support to use this test.  The
+       SD card detect (CD) signal is on P0[13].  This signal is shared.  It
+       is also used for MOSI1 and USB_UP_LED.  The CD pin may be disconnected.
+       There is a jumper on board that enables the CD pin.
+
+       CONFIG_LPC17_GPDMA=n                : No DMA
+       CONFIG_ARCH_DMA=n
+       CONFIG_LPC17_SDCARD=n               : No SD card driver
+       CONFIG_SDIO_DMA=n                   : No SD card DMA
+       CONFIG_MMCSD=n                      : No MMC/SD driver support
+       CONFIG_FS_FAT=n                     : No FAT file system support
+
+       For touchscreen debug output:
+
+       CONFIG_DEBUG=y
+       CONFIG_DEBUG_VERBOSE=y
+       CONFIG_DEBUG_INPUT=y
 
   nxlines
   -------

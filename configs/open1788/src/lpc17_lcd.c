@@ -63,14 +63,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_lcdinitialize
+ * Name: open1788_lcd_initialize
  *
  * Description:
  *   Initialize the LCD.  Setup backlight (initially off)
  *
  ************************************************************************************/
 
-void lpc17_lcdinitialize(void)
+void open1788_lcd_initialize(void)
 {
   /* Configure the LCD backlight (and turn the backlight off) */
 

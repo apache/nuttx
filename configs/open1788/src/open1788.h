@@ -116,6 +116,28 @@
 
 #define GPIO_LCD_BL  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN1)
 
+/* XPT2046 Touchscreen **************************************************************/
+/* -------------- -------------------- ------------ --------------
+ * XTPT2046       Module               Module       Open1788 LED
+ *                Signal               Connector    Connector
+ * -------------- -------------------- ------------ --------------
+ * Pin 11 PENIRQ\ PENIRQ (pulled high) PORT3 Pin 1  P2.15 PENIRQ
+ * Pin 12 DOUT    MISO                 PORT3 Pin 4  P1.18 MISO1
+ * Pin 13 BUSY    BUSY (pulled high)   PORT3 Pin 9  P2.14 BUSY
+ * Pin 14 DIN     MOSI                 PORT3 Pin 3  P0.13 MOSI1
+ * Pin 15 CS\     SSEL (pulled high)   PORT3 Pin 6  P1.8  GPIO
+ * Pin 16 DCLK    SCK                  PORT3 Pin 5  P1.19 SCK1
+ * -------------- -------------------- ------------ --------------
+ *
+ * Pins are configured as floating because there are pullups on the module.
+ */
+
+#define GPIO_TC_PENIRQ   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN15)
+#define GPIO_TC_BUSY     (GPIO_INPUT | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN14)
+#define GPIO_TC_CS       (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN8)
+
+#define LPC17_IRQ_PENIRQ LPC17_IRQ_P2p15
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -131,17 +153,17 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_sspinitialize
+ * Name: open1788_sspinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the WaveShare Open1788 board.
  *
  ************************************************************************************/
 
-void weak_function lpc17_sspinitialize(void);
+void weak_function open1788_sspinitialize(void);
 
 /************************************************************************************
- * Name: lpc17_sdram_initialize
+ * Name: open1788_sdram_initialize
  *
  * Description:
  *   Initialize SDRAM
@@ -150,11 +172,11 @@ void weak_function lpc17_sspinitialize(void);
 
 #ifdef CONFIG_LPC17_EMC
 #ifdef CONFIG_ARCH_EXTDRAM
-void lpc17_sdram_initialize(void);
+void open1788_sdram_initialize(void);
 #endif
 
 /************************************************************************************
- * Name: lpc17_nor_initialize
+ * Name: open1788_nor_initialize
  *
  * Description:
  *   Initialize NOR FLASH
@@ -162,11 +184,11 @@ void lpc17_sdram_initialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_EXTNOR
-void lpc17_nor_initialize(void);
+void open1788_nor_initialize(void);
 #endif
 
 /************************************************************************************
- * Name: lpc17_nand_initialize
+ * Name: open1788_nand_initialize
  *
  * Description:
  *   Initialize NAND FLASH
@@ -174,12 +196,12 @@ void lpc17_nor_initialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_EXTNAND
-void lpc17_nand_initialize(void);
+void open1788_nand_initialize(void);
 #endif
 #endif /* CONFIG_LPC17_EMC */
 
 /************************************************************************************
- * Name: lpc17_lcdinitialize
+ * Name: open1788_lcd_initialize
  *
  * Description:
  *   Initialize the LCD.  Setup backlight (initially off)
@@ -187,7 +209,7 @@ void lpc17_nand_initialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_LPC17_LCD
-void lpc17_lcdinitialize(void);
+void open1788_lcd_initialize(void);
 #endif
 
 /************************************************************************************

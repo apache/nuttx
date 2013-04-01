@@ -38,7 +38,7 @@
 CFLAGS += -I$(TOPDIR)/sched
 
 ASRCS = 
-CSRCS = lpc17_boardinitialize.c
+CSRCS = lpc17_boardinitialize.c lpc17_ssp.c
 
 ifeq ($(CONFIG_ARCH_EXTNOR),y)
   CSRCS += lpc17_norinitialize.c
@@ -68,6 +68,10 @@ endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
   CSRCS += lpc17_buttons.c
+endif
+
+ifeq ($(CONFIG_INPUT_ADS7843E),y)
+  CSRCS += lpc17_touchscreen.c
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))

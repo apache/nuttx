@@ -64,14 +64,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_nand_initialize
+ * Name: open1788_nand_initialize
  *
  * Description:
  *   Initialize NAND FLASH
  *
  ************************************************************************************/
 
-void lpc17_nand_initialize(void)
+void open1788_nand_initialize(void)
 {
   uint32_t regval;
 

@@ -231,14 +231,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpc17_sspinitialize
+ * Name: zkit_sspinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LPCXpresso board.
  *
  ************************************************************************************/
 
-void weak_function lpc17_sspinitialize(void);
+void weak_function zkit_sspinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_INTERNAL_H */
