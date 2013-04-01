@@ -1161,7 +1161,7 @@
 	  for SPI-based MMC/SD cards and integrate into the NSH example.
 	* arch/arm/src/lm3s/lm3s_vectors.S: Correct vectors for GPIOC & D
 	  interrupts.
-	* arch/arm/src/lpc17xx/lp17_clockconfig.c: Power was not being
+	* arch/arm/src/lpc17xx/lpc17_clockconfig.c: Power was not being
 	  provided to GPIO module.  This is a critical bugfix!
 	* arch/arm/src/lpc17xx/lpc17_serial.c: Improved logic to handle
 	  missed TX interrupts.
@@ -1508,7 +1508,7 @@
 	  makes it impossible to kill a background pipe operation from NSH.
 	* include/stdint.h: Correct some errors in conditional compilation (submitted
 	  by Johannes Hampel).
-	* arch/arm/lpc17xx/lp17_idle.c: Uses the same logic as the STM32: uses the
+	* arch/arm/lpc17xx/lpc17_idle.c: Uses the same logic as the STM32: uses the
 	  WFI instruction to sleep in a reduced power mode until the next interrupt
 	  occurs.
 	* configs/olimex-lpc1766stk: Added an LED encoded to indicate if the LPC1766
@@ -4496,3 +4496,12 @@
 	  USARTs that can serve as SPI interfaces as well).  These were renamed
 	  to lpc17_spiinitialize() and lpc17_sspinitialize() in this case.
 	  Problem reported by M. Kannan (2014-4-01).
+	* arch/arm/src/lpc17xx/lpc17_gpdma.c and lpc17_idle.c:  In sleep mode,
+	  DMA can only be performed from peripheral SRAM.  CPU SRAM is shutdown
+	  in sleep mode.  In order to simplify DMA memory allocation, the LPC17xx
+	  IDLE will not hold off going to sleep mode if there is a DMA in progress
+	 (2014-4-01).
+	* configs/open1788/src/lpc17_autoleds.c:  Reversed sense of the IDLE LCD.
+	  It is now off when the LPC17 is sleeping and on when awake.  That is
+	  much more useful because it provides a good visual indication of the
+	  dynamic CPU load (2014-4-01).
