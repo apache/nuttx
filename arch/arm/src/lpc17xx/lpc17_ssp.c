@@ -92,6 +92,7 @@
 #endif
 
 /* SSP Clocking *************************************************************/
+
 #if defined(LPC176x)
 /* The CPU clock by 1, 2, 4, or 8 to get the SSP peripheral clock (SSP_CLOCK).
  * SSP_CLOCK may be further divided by 2-254 to get the SSP clock.  If we
@@ -106,16 +107,15 @@
 
 #  if LPC17_CCLK > 100000000
 #    error "CCLK <= 100,000,000 assumed"
-# endif
+#  endif
 
 #  define SSP_PCLKSET_DIV    SYSCON_PCLKSEL_CCLK
 #  define SSP_CLOCK          LPC17_CCLK
 
+#elif defined(LPC178x)
 /* All peripherals are clocked by the same peripheral clock in the LPC178x
  * family.
  */
-
-#elif defined(LPC178x)
 
 #  define SSP_CLOCK          BOARD_PCLK_FREQUENCY
 
@@ -397,10 +397,12 @@ static int ssp_lock(FAR struct spi_dev_s *dev, bool lock)
 static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   FAR struct lpc17_sspdev_s *priv = (FAR struct lpc17_sspdev_s *)dev;
-  uint32_t divisor;
+  uint32_t cpsdvsr;
+  uint32_t scr;
+  uint32_t regval;
   uint32_t actual;
 
-  /* Check if the requested frequence is the same as the frequency selection */
+  /* Check if the requested frequency is the same as the frequency selection */
 
   DEBUGASSERT(priv && frequency <= SSP_CLOCK / 2);
 #ifndef CONFIG_SPI_OWNBUS
@@ -412,30 +414,65 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
     }
 #endif
 
-  /* frequency = SSP_CLOCK / divisor, or divisor = SSP_CLOCK / frequency */
+  /* The SSP bit frequency is given by:
+   *
+   *   frequency = SSP_CLOCK / (CPSDVSR * (SCR+1)).
+   *
+   * Let's try for a solution with the smallest value of SCR.  NOTES:
+   * (1) In the calculations below, the value of the variable 'scr' is
+   * (SCR+1) in the above equation. (2) On slower LPC17xx parts, SCR
+   * will probably always be zero.
+   */
 
-  divisor = SSP_CLOCK / frequency;
-
-   /* "In master mode, CPSDVSRmin = 2 or larger (even numbers only)" */
-
-  if (divisor < 2)
+  for (scr = 1; scr <= 256; scr++)
     {
-      divisor = 2;
+      /* CPSDVSR = SSP_CLOCK / (SCR + 1) / frequency */
+
+      cpsdvsr = SSP_CLOCK / (scr * frequency);
+
+      /* Break out on the first solution we find with the smallest value
+       * of SCR and with CPSDVSR within the maximum range or 254.
+       */
+
+      if (cpsdvsr < 255)
+        {
+          break;
+        }
     }
-  else if (divisor > 254)
+
+  DEBUGASSERT(scr <= 256 && cpsdvsr <= 255);
+
+  /* "In master mode, CPSDVSRmin = 2 or larger (even numbers only)" */
+
+  if (cpsdvsr < 2)
     {
-      divisor = 254;
+      /* Clip to the minimum value. */
+
+      cpsdvsr = 2;
+    }
+  else if (cpsdvsr > 254)
+    {
+      /* This should never happen */
+
+      cpsdvsr = 254;
     }
 
-  divisor = (divisor + 1) & ~1;
+  /* Force even */
 
-  /* Save the new divisor value */
+  cpsdvsr = (cpsdvsr + 1) & ~1;
+
+  /* Save the new CPSDVSR and SCR values */
   
-  ssp_putreg(priv, LPC17_SSP_CPSR_OFFSET, divisor);
+  ssp_putreg(priv, LPC17_SSP_CPSR_OFFSET, cpsdvsr);
+
+  regval  = ssp_getreg(priv, LPC17_SSP_CR0_OFFSET);
+  regval &= ~SSP_CR0_SCR_MASK;
+  regval |= ((scr - 1) << SSP_CR0_SCR_SHIFT);
+  ssp_putreg(priv, LPC17_SSP_CR0_OFFSET, regval);
 
   /* Calculate the new actual */
 
-  actual = SSP_CLOCK / divisor;
+  actual = SSP_CLOCK / (cpsdvsr * scr);
 
   /* Save the frequency setting */
 
