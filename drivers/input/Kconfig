@@ -57,13 +57,27 @@ config ADS7843E_NPOLLWAITERS
 	---help---
 		Maximum number of threads that can be waiting on poll()
 
+config ADS7843E_SPIDEV
+	int "SPI bus number"
+	default 0
+	---help---
+		Selects the SPI bus number identying that SPI interface that
+		connects the ADS843E to the MCU.
+
+config ADS7843E_DEVMINOR
+	int "Input device minor number"
+	default 0
+	---help---
+		The ADS7843E device will be registered as /dev/inputN where N is the
+		value provided by this setting.
+
 config ADS7843E_SPIMODE
 	int "SPI mode"
 	default 0
 	range 0,3
 	---help---
-		Controls the SPI mode.  The device should work in mode 0, but sometimes
-		you need to experiment.
+		Controls the SPI mode.  The device should work in mode 0, but
+		sometimes you need to experiment.
 
 config ADS7843E_FREQUENCY
 	int "SPI frequency"

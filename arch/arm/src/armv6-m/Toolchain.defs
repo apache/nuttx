@@ -160,6 +160,6 @@ endif
 ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION = -O3
+  MAXOPTIMIZATION = -Os
   ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -march=armv6-m -mfloat-abi=soft
 endif  
