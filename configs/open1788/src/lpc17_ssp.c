@@ -174,7 +174,7 @@ void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_TOUCHSCREEN)
     {
-      /* Assert/de-assert the CS pin to the card */
+      /* Assert/de-assert the CS pin to the touchscreen */
 
       ssp_dumpgpio(GPIO_TC_CS, "lpc17_ssp1select() Entry");
       lpc17_gpiowrite(GPIO_TC_CS, !selected);

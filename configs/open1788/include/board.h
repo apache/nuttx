@@ -407,12 +407,6 @@
 #define GPIO_SSP1_MOSI   GPIO_SSP1_MOSI_2
 #define GPIO_SSP1_SCK    GPIO_SSP1_SCK_2
 
-#define GPIO_SSP1_SSEL_1   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN6)
-#define GPIO_SSP1_SSEL_2   (GPIO_ALT2 | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN14)
-#define GPIO_SSP1_SSEL_3   (GPIO_ALT5 | GPIO_PULLUP | GPIO_PORT1 | GPIO_PIN26)
-#define GPIO_SSP1_SSEL_4   (GPIO_ALT3 | GPIO_PULLUP | GPIO_PORT4 | GPIO_PIN21)
-
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/

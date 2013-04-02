@@ -80,16 +80,26 @@
 #endif
 
 #ifndef CONFIG_ADS7843E_SPIDEV
-#  define CONFIG_ADS7843E_SPIDEV 3
+#  define CONFIG_ADS7843E_SPIDEV 1
 #endif
 
-#if CONFIG_ADS7843E_SPIDEV != 3
-#  error "CONFIG_ADS7843E_SPIDEV must be three"
+#if CONFIG_ADS7843E_SPIDEV != 1
+#  error "CONFIG_ADS7843E_SPIDEV must be one"
 #endif
 
 #ifndef CONFIG_ADS7843E_DEVMINOR
 #  define CONFIG_ADS7843E_DEVMINOR 0
 #endif
+
+/* REVISIT:  Currently, XPT2046 reports BUSY all of the time.  This is
+ * probably GPIO setting issues.  But there is this cryptic statement in
+ * the XPT2046 spec:  "No DCLK delay required with dedicated serial port."
+ *
+ * The busy state is used by the XPT2046 driver to control the delay
+ * between sending the command, then reading the returned data.
+ */
+
+#define XPT2046_NO_BUSY 1
 
 /****************************************************************************
  * Private Types
@@ -100,12 +110,12 @@
  ****************************************************************************/
 
 /* IRQ/GPIO access callbacks.  These operations all hidden behind
- * callbacks to isolate the ADS7843E driver from differences in GPIO
+ * callbacks to isolate the XPT2046 driver from differences in GPIO
  * interrupt handling by varying boards and MCUs.  If possible,
  * interrupts should be configured on both rising and falling edges
  * so that contact and loss-of-contact events can be detected.
  *
- * attach  - Attach the ADS7843E interrupt handler to the GPIO interrupt
+ * attach  - Attach the XPT2046 interrupt handler to the GPIO interrupt
  * enable  - Enable or disable the GPIO interrupt
  * clear   - Acknowledge/clear any pending GPIO interrupt
  * pendown - Return the state of the pen down GPIO input
@@ -121,9 +131,9 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state);
  * Private Data
  ****************************************************************************/
 
-/* A reference to a structure of this type must be passed to the ADS7843E
+/* A reference to a structure of this type must be passed to the XPT2046
  * driver.  This structure provides information about the configuration
- * of the ADS7843E and provides some board-specific hooks.
+ * of the XPT2046 and provides some board-specific hooks.
  *
  * Memory for this structure is provided by the caller.  It is not copied
  * by the driver and is presumed to persist while the driver is active.
@@ -144,12 +154,12 @@ static struct ads7843e_config_s g_tscinfo =
  ****************************************************************************/
 
 /* IRQ/GPIO access callbacks.  These operations all hidden behind
- * callbacks to isolate the ADS7843E driver from differences in GPIO
+ * callbacks to isolate the XPT2046 driver from differences in GPIO
  * interrupt handling by varying boards and MCUs.  If possible,
  * interrupts should be configured on both rising and falling edges
  * so that contact and loss-of-contact events can be detected.
  *
- * attach  - Attach the ADS7843E interrupt handler to the GPIO interrupt
+ * attach  - Attach the XPT2046 interrupt handler to the GPIO interrupt
  * enable  - Enable or disable the GPIO interrupt
  * clear   - Acknowledge/clear any pending GPIO interrupt
  * pendown - Return the state of the pen down GPIO input
@@ -183,6 +193,20 @@ static void tsc_clear(FAR struct ads7843e_config_s *state)
 
 static bool tsc_busy(FAR struct ads7843e_config_s *state)
 {
+/* The busy state is used by the XPT2046 driver to control the delay
+ * between sending the command, then reading the returned data.
+ */
+
+#ifdef XPT2046_NO_BUSY
+/* REVISIT:  Currently, XPT2046 reports BUSY all of the time.  This is
+ * probably GPIO setting issues.  But there is this cryptic statement in
+ * the XPT2046 spec:  "No DCLK delay required with dedicated serial port."
+ */
+
+  return false;
+
+#else /* XPT2046_NO_BUSY */
+
 #if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_VERBOSE)
   static bool last = (bool)-1;
 #endif
@@ -199,6 +223,8 @@ static bool tsc_busy(FAR struct ads7843e_config_s *state)
 #endif
 
   return busy;
+
+#endif /* XPT2046_NO_BUSY */
 }
 
 static bool tsc_pendown(FAR struct ads7843e_config_s *state)
@@ -237,37 +263,50 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
 
 int arch_tcinitialize(int minor)
 {
+  static bool initialized = false;
   FAR struct spi_dev_s *dev;
   int ret;
 
-  idbg("minor %d\n", minor);
+  idbg("initialized:%d minor:%d\n", initialized, minor);
   DEBUGASSERT(minor == 0);
 
-  /* Configure and enable the ADS7843E PENIRQ pin as an interrupting input. */
+  /* Since there is no uninitialized logic, this initialization can be
+   * performed only one time.
+   */
 
-  (void)lpc17_configgpio(GPIO_TC_PENIRQ);
-
-  /* Configure the ADS7843E BUSY pin as a normal input. */
-
-  (void)lpc17_configgpio(GPIO_TC_BUSY);
-
-  /* Get an instance of the SPI interface */
-
-  dev = lpc17_sspinitialize(CONFIG_ADS7843E_SPIDEV);
-  if (!dev)
+  if (!initialized)
     {
-      idbg("Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
-      return -ENODEV;
-    }
+      /* Configure and enable the XPT2046 PENIRQ pin as an interrupting input. */
 
-  /* Initialize and register the SPI touschscreen device */
+      (void)lpc17_configgpio(GPIO_TC_PENIRQ);
 
-  ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
-  if (ret < 0)
-    {
-      idbg("Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
-      /* up_spiuninitialize(dev); */
-      return -ENODEV;
+      /* Configure the XPT2046 BUSY pin as a normal input. */
+
+#ifndef XPT2046_NO_BUSY
+      (void)lpc17_configgpio(GPIO_TC_BUSY);
+#endif
+
+      /* Get an instance of the SPI interface */
+
+      dev = lpc17_sspinitialize(CONFIG_ADS7843E_SPIDEV);
+      if (!dev)
+        {
+          idbg("Failed to initialize SPI bus %d\n", CONFIG_ADS7843E_SPIDEV);
+          return -ENODEV;
+        }
+
+      /* Initialize and register the SPI touchscreen device */
+
+      ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
+      if (ret < 0)
+        {
+          idbg("Failed to register touchscreen device minor=%d\n",
+               CONFIG_ADS7843E_DEVMINOR);
+          /* up_spiuninitialize(dev); */
+          return -ENODEV;
+        }
+
+      initialized = true;
     }
 
   return OK;
@@ -291,7 +330,7 @@ int arch_tcinitialize(int minor)
 
 void arch_tcuninitialize(void)
 {
-  /* No support for un-initializing the touchscreen ADS7843E device yet */
+  /* No support for un-initializing the touchscreen XPT2046 device yet */
 }
 
 #endif /* CONFIG_INPUT_ADS7843E */

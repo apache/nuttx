@@ -453,10 +453,11 @@ CONFIGURATION
        following ways:
 
        CONFIG_INPUT=y                      : Enable support for input devices
-       CONFIG_GPIO_IRQ=y                   : GPIO interrupt support
        CONFIG_INPUT_ADS7843E=y             : Enable support for the XPT2048
+       CONFIG_ADS7843E_SPIDEV=1            : Use SSP1 for communication
        CONFIG_SPI=y                        : Enable SPI support
        CONFIG_SPI_EXCHANGE=n               : exchange() method is not supported
+       CONFIG_GPIO_IRQ=y                   : GPIO interrupt support
        CONFIG_LPC17_SSP1=y                 : Enable support for SSP1
        CONFIG_EXAMPLES_TOUCHSCREEN=y       : Enable the touchscreen built-int test
        CONFIG_EXAMPLES_TOUCHSCREEN_BUILTIN=y
@@ -466,7 +467,8 @@ CONFIGURATION
        You will also have to disable SD card support to use this test.  The
        SD card detect (CD) signal is on P0[13].  This signal is shared.  It
        is also used for MOSI1 and USB_UP_LED.  The CD pin may be disconnected.
-       There is a jumper on board that enables the CD pin.
+       There is a jumper on board that enables the CD pin.  OR, you can simply
+       remove the SD module so that it does not drive the CD pin.
 
        CONFIG_LPC17_GPDMA=n                : No DMA
        CONFIG_ARCH_DMA=n
