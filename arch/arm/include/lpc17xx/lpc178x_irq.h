@@ -172,7 +172,6 @@
 
    /* Set 1: 16 interrupts p0.0-p0.15 */
 
-//~ #  define LPC17_VALID_GPIOINT0L (0x00000ffful)
 #  define LPC17_VALID_SHIFT0L   (0)
 #  define LPC17_VALID_FIRST0L   (LPC17_IRQ_EXTINT+LPC17_IRQ_NEXTINT)
 
@@ -196,8 +195,7 @@
 
    /* Set 2: 16 interrupts p0.16-p0.31 */
 
-//~ #  define LPC17_VALID_GPIOINT0H (0x7fff8000ull)
-#  define LPC17_VALID_SHIFT0H   (15)
+#  define LPC17_VALID_SHIFT0H   (16)
 #  define LPC17_VALID_FIRST0H   (LPC17_VALID_FIRST0L+LPC17_VALID_NIRQS0L)
 
 #  define LPC17_IRQ_P0p16       (LPC17_VALID_FIRST0H+0)
@@ -220,7 +218,6 @@
 
    /* Set 3: 16 interrupts p2.0-p2.15 */
 
-//~ #  define LPC17_VALID_GPIOINT2  (0x00003ffful)
 #  define LPC17_VALID_SHIFT2L   (0)
 #  define LPC17_VALID_FIRST2L   (LPC17_VALID_FIRST0H+LPC17_VALID_NIRQS0H)
 
@@ -242,9 +239,9 @@
 #  define LPC17_IRQ_P2p15       (LPC17_VALID_FIRST2L+15)
 #  define LPC17_VALID_NIRQS2L   (16)
 
-   /* Set 3: 16 interrupts p2.16 - p2.31 */
+   /* Set 4: 16 interrupts p2.16 - p2.31 */
 
-#  define LPC17_VALID_SHIFT2H   (15)
+#  define LPC17_VALID_SHIFT2H   (16)
 #  define LPC17_VALID_FIRST2H   (LPC17_VALID_FIRST2L+LPC17_VALID_NIRQS2L)
 
 #  define LPC17_IRQ_P2p16       (LPC17_VALID_FIRST2H+0)

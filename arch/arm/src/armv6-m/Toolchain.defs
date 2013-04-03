@@ -130,7 +130,7 @@ ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CODESOURCERYL)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
   ARCHCPUFLAGS = -mcpu=cortex-m0 -mthumb -march=armv6-m -mfloat-abi=soft
-  MAXOPTIMIZATION = -O2
+  MAXOPTIMIZATION = -Os
 endif
 
 # CodeSourcery under Windows

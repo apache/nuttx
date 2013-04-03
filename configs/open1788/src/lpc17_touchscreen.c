@@ -188,7 +188,9 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
 
 static void tsc_clear(FAR struct ads7843e_config_s *state)
 {
-  /* Does nothing */
+  /* Does nothing.  The interrupt is cleared automatically in the GPIO
+   * logic for the LPC17xx family.
+   */
 }
 
 static bool tsc_busy(FAR struct ads7843e_config_s *state)

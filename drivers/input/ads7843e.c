@@ -1051,8 +1051,6 @@ static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct inode         *inode;
   FAR struct ads7843e_dev_s *priv;
-  pollevent_t               eventset;
-  int                       ndx;
   int                       ret = OK;
   int                       i;
 
