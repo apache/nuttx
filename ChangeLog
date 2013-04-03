@@ -4511,3 +4511,7 @@
 	  lpc17_sspinitialize().  So they had to be renamed (2013-4-01).
 	* arch/arm/src/lpc17xx/lpc17_ssp.c:  Adapted to work the the LPC178x
 	  family (2013-4-01).
+	* arch/arm/src/lpc17xx/lpc17_gpio.c/.h:  Separate LPC176x and LPC178x
+	  logic into separate files.  The logic is diverging to much to
+	  try to retain common code (2013-4-03).
+
