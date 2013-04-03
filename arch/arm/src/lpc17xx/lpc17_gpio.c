@@ -549,7 +549,7 @@ static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port, un
    * into the correct position in the register value.
    */
 
-  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT) << IOCON_MODE_SHIFT);
+  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PUMODE_SHIFT) << IOCON_MODE_SHIFT);
 
   /* Select input polarity */
 
@@ -667,7 +667,7 @@ static inline int lpc17_configoutput(lpc17_pinset_t cfgset, unsigned int port,
    * into the correct position in the register value.
    */
 
-  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT) << IOCON_MODE_SHIFT);
+  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PUMODE_SHIFT) << IOCON_MODE_SHIFT);
 
   /* Set IOCON register */
 
@@ -735,7 +735,7 @@ static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
    * into the correct position in the register value.
    */
 
-  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PINMODE_SHIFT) << IOCON_MODE_SHIFT);
+  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PUMODE_SHIFT) << IOCON_MODE_SHIFT);
 
   /* Select open drain output */
 
