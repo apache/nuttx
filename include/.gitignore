@@ -1,0 +1,12 @@
+./arch
+./apps
+./avr
+./math.h
+./float.h
+./stdarg.h
+./features.h
+./uClibc++
+
+
+
+

@@ -1,0 +1,7 @@
+nettest.hex
+nettest.map
+nettest.lod
+nettest.wsp
+*.asm
+Debug
+

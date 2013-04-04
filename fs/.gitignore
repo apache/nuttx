@@ -1,0 +1,13 @@
+Make.dep
+.depend
+*.swp
+*.asm
+*.obj
+*.rel
+*.lst
+*.sym
+*.adb
+*.lib
+*.src
+
+

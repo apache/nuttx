@@ -134,12 +134,19 @@ Installation Directories with Spaces in the Path
 Downloading from Repositories
 -----------------------------
 
-  NuttX is available in from both GIT and SVN repositories.  The GIT
-  repository is the current 'master' and the SVN repository is maintained
-  current so as to not disrupt people are used to using the SVN repository.
-  Feel free to use either.  Download instructions are available here:
+  The current NuttX du jour is available in from a GIT repository.  Download
+  instructions are available here:
 
-  https://sourceforge.net/p/nuttx/code
+  https://sourceforge.net/p/nuttx/git
+
+  Older versions of NuttX are still available in the old SVN repository.
+  The GIT repository is, however, the current 'master' and the SVN
+  repository is no longer maintained.  An honest attempt was made to keep
+  current so as to not disrupt people are used to using the SVN repository.
+  However, too many authorization-related restrictions were encountered and
+  the SVN repository has been abandoned.  Download instructions for the old
+  SVN repository are available here:
+
   https://sourceforge.net/p/nuttx/git
 
 Notes about Header Files

@@ -1,0 +1,11 @@
+./Make.dep
+./.depend
+./*.swp
+./*.o1
+./*.src
+./*.obj
+./*.asm
+./*.lst
+./*.sym
+./*.adb
+./*.lib

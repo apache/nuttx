@@ -1,0 +1,11 @@
+./Make.dep
+./.depend
+./uClibc++
+./*.swp
+./*.asm
+./*.rel
+./*.lst
+./*.sym
+./*.adb
+./*.lib
+./*.src
