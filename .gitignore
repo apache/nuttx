@@ -1,0 +1,7 @@
+Make.defs
+setenv.sh
+nuttx
+System.map
+nuttx.bin
+nuttx.hex
+

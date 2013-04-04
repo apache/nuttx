@@ -6,6 +6,7 @@ README
     - Download and Unpack
     - Semi-Optional apps/ Package
     - Installation Directories with Spaces in the Path
+    - Downloading from Repositories
     - Notes about Header Files
   o Configuring NuttX
     - Instantiating "Canned" Configurations
@@ -130,6 +131,17 @@ Installation Directories with Spaces in the Path
   Then I install NuttX in /home/nuttx and always build from 
   /home/nuttx/nuttx-code.
 
+Downloading from Repositories
+-----------------------------
+
+  NuttX is available in from both GIT and SVN repositories.  The GIT
+  repository is the current 'master' and the SVN repository is maintained
+  current so as to not disrupt people are used to using the SVN repository.
+  Feel free to use either.  Download instructions are available here:
+
+  https://sourceforge.net/p/nuttx/code
+  https://sourceforge.net/p/nuttx/git
+
 Notes about Header Files
 ------------------------
 
@@ -199,9 +211,16 @@ Notes about Header Files
 
   stdarg.h
 
-    In most cases, the correct version of stdarg.h is the version provided with your toolchain.  However, sometimes there are issues with with using your toolchains stdarg.h.  For example, it may attempt to draw in header files that do not exist in NuttX or perhaps the header files that is uses are not compatible with the NuttX header files.  In those cases, you can use an architecture-specific stdarg.h header file by defining CONFIG_ARCH_STDARG_H=y.
-    See the discussion above for the math.h header.  This setting works exactly
-    the same for the stdarg.h header file.
+    In most cases, the correct version of stdarg.h is the version provided
+    with your toolchain.  However, sometimes there are issues with with
+    using your toolchains stdarg.h.  For example, it may attempt to draw in
+    header files that do not exist in NuttX or perhaps the header files that
+    is uses are not compatible with the NuttX header files.  In those cases,
+    you can use an architecture-specific stdarg.h header file by defining
+    CONFIG_ARCH_STDARG_H=y.
+
+    See the discussion above for the math.h header.  This setting works
+    exactly the same for the stdarg.h header file.
 
 CONFIGURING NUTTX
 ^^^^^^^^^^^^^^^^^
