@@ -1,0 +1,7 @@
+ostest.hex
+ostest.map
+ostest.lod
+ostest.wsp
+*.asm
+Debug
+
