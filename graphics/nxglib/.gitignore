@@ -1,11 +1,7 @@
-nxglib_setpixel_*bpp.c
-nxglib_fillrectangle_*bpp.c
-nxglib_getrectangle_*bpp.c
-nxglib_filltrapezoid_*bpp.c
-nxglib_moverectangle_*bpp.c
-nxglib_copyrectangle_*bpp.c
-.*.swp
-*.i
-
-
+/nxglib_setpixel_*bpp.c
+/nxglib_fillrectangle_*bpp.c
+/nxglib_getrectangle_*bpp.c
+/nxglib_filltrapezoid_*bpp.c
+/nxglib_moverectangle_*bpp.c
+/nxglib_copyrectangle_*bpp.c
 

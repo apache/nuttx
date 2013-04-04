@@ -154,7 +154,7 @@ $(AOBJS) $(UAOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 $(COBJS) $(UCOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN): $(OBJS)
+$(BIN) $(KBIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 $(UBIN): $(UOBJS)

@@ -1,6 +1,5 @@
-Make.dep
-.depend
-*.swp
+/Make.dep
+/.depend
 *.asm
 *.rel
 *.lst

@@ -1,6 +1,5 @@
-Make.dep
-.depend
-*.swp
+/Make.dep
+/.depend
 *.asm
 *.obj
 *.rel
@@ -9,5 +8,3 @@ Make.dep
 *.adb
 *.lib
 *.src
-
-
