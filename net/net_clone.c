@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_clone.c
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,10 +75,10 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
   psock2->s_flags    = psock1->s_flags;     /* See _SF_* definitions */
 #ifdef CONFIG_NET_SOCKOPTS
   psock2->s_options  = psock1->s_options;   /* Selected socket options */
-#endif
 #ifndef CONFIG_DISABLE_CLOCK
   psock2->s_rcvtimeo = psock1->s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
   psock2->s_sndtimeo = psock1->s_sndtimeo;  /* Send timeout value (in deciseconds) */
+#endif
 #endif
   psock2->s_conn     = psock1->s_conn;      /* UDP or TCP connection structure */
 

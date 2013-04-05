@@ -155,7 +155,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
             {
               err = EINVAL;
               goto errout;
-           }
+            }
 
           /* Return the socket type */
 
@@ -180,7 +180,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
             {
               err = EINVAL;
               goto errout;
-           }
+            }
 
           /* Get the timeout value.  This is a atomic operation and should
          * require no special operation.
@@ -217,6 +217,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
         err = ENOPROTOOPT;
         goto errout;
     }
+
   return OK;
 
 errout:

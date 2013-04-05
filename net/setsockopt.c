@@ -137,7 +137,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
             {
               err = EINVAL;
               goto errout;
-           }
+            }
 
           /* Get the value.  Is the option being set or cleared? */
 
@@ -177,7 +177,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
             {
               err = EINVAL;
               goto errout;
-           }
+            }
 
           /* Get the timeout value */
 
@@ -226,6 +226,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
         err = ENOPROTOOPT;
         goto errout;
     }
+
   return OK;
 
 errout:
