@@ -320,6 +320,8 @@
 #define IOCON_ADMODE_MASK           (1 << IOCON_ADMODE_SHIFT)
 #define IOCON_FILTER_SHIFT          (8)   /* Bit 8: Type A */
 #define IOCON_FILTER_MASK           (1 << IOCON_FILTER_SHIFT)
+#define IOCON_I2CHS_SHIFT           (8)/* Bits 8: Type I */
+#define IOCON_I2CHS_MASK            (1 << IOCON_I2CHS_SHIFT)
 #define IOCON_SLEW_SHIFT            (9)   /* Bit 9: Type W */
 #define IOCON_SLEW_MASK             (1 << IOCON_SLEW_SHIFT)
 #define IOCON_HIDRIVE_SHIFT         (9)   /* Bit 9: Type I */
@@ -343,6 +345,20 @@
 #define IOCON_TYPE_U_MASK (0x00000007) /* USB P0:29 to 31 */
 #define IOCON_TYPE_I_MASK (0x00000347) /* I2C/USB P0:27-28, P5:2-3  */
 #define IOCON_TYPE_W_MASK (0x000007ff) /* I2S P0:7-9 */
+
+/* Slew rate modes */
+
+#define IOCON_SLEWMODE_NORMAL      (0 << IOCON_SLEW_SHIFT)
+#define IOCON_SLEWMODE_FAST        (1 << IOCON_SLEW_SHIFT)
+
+/* I2C modes */
+
+#define IOCON_I2CMODE_SHIFT        (IOCON_I2CHS_SHIFT)
+#define IOCON_I2CMODE_MASK         (3 << IOCON_I2CMODE_SHIFT)
+#define IOCON_I2CMODE_FAST         (0 << IOCON_I2CMODE_SHIFT)
+#define IOCON_I2CMODE_FASTPLUS     (1 << IOCON_I2CMODE_SHIFT)/*   */
+#define IOCON_I2CMODE_HIOPENDRAIN  (2 << IOCON_I2CMODE_SHIFT)/*  */
+#define IOCON_I2CMODE_OPENDRAIN    (3 << IOCON_I2CMODE_SHIFT)/*  */
 
 /************************************************************************************
  * Public Types

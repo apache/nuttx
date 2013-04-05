@@ -119,10 +119,10 @@ const uint32_t g_intbase[GPIO_NPORTS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_configiocon
+ * Name: lpc17_getioconmask
  *
  * Description:
- *   Set the LPC178x IOCON register
+ *   Get the LPC178x IOCON register mask.
  *
  *   Type D: FUNC, MODE, HYS, INV, SLEW, OD             -
  *   Type A: FUNC, MODE, INV, ADMODE, FILTER, OD, DACEN -P0[12:13,23:26],P1[30:31]
@@ -132,11 +132,9 @@ const uint32_t g_intbase[GPIO_NPORTS] =
  *
  ****************************************************************************/
 
-static int lpc17_configiocon(unsigned int port, unsigned int pin,
-                             unsigned int value)
+#if 0 /* Not used */
+static uint32_t lpc17_getioconmask(unsigned int port, unsigned int pin)
 {
-  uint32_t regaddr;
-  uint32_t regval;
   uint32_t typemask = IOCON_TYPE_D_MASK;
 
   /* Select the mask based on pin usage */
@@ -207,13 +205,352 @@ static int lpc17_configiocon(unsigned int port, unsigned int pin,
         break;
     }
 
+  return typemask;
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc17_seti2cmode
+ *
+ * Description:
+ *   Configure I2C pin drive mode.  Applies to Type I pins
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void lpc17_seti2cmode(unsigned int port,unsigned int pin, uint32_t value)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
   regaddr = LPC17_IOCON_P(port, pin);
   regval  = getreg32(regaddr);
-  regval |= value;
-  regval &= typemask;
+  regval &= ~IOCON_I2CMODE_MASK;
+  regval |= ((value << IOCON_I2CMODE_SHIFT) & IOCON_I2CMODE_MASK);
   putreg32(regval, regaddr);
+}
+#endif
 
-  return OK;
+/****************************************************************************
+ * Name: lpc17_setpinfunction
+ *
+ * Description:
+ *   Select pin function.
+ *
+ ****************************************************************************/
+
+static void lpc17_setpinfunction(unsigned int port, unsigned int pin,
+                                 unsigned int value)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval &= ~IOCON_FUNC_MASK;
+  regval |= ((value << IOCON_FUNC_SHIFT) & IOCON_FUNC_MASK);
+  putreg32(regval, regaddr);
+}
+
+/****************************************************************************
+ * Name: lpc17_setinvertinput
+ *
+ * Description:
+ *   Configure pin input polarity.  Applies to Type D, A, I and W pins.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void lpc17_setinvertinput(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval |= IOCON_INV_MASK;
+  putreg32(regval, regaddr);
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc17_setslewfast
+ *
+ * Description:
+ *   Configure pin mode slew rate drive.  Applies to Type D and Type W pins
+ *
+ ****************************************************************************/
+
+static void lpc17_setslewfast(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval |= IOCON_SLEW_MASK;
+  putreg32(regval, regaddr);
+}
+
+/****************************************************************************
+ * Name: lpc17_setslewnormal
+ *
+ * Description:
+ *   Configure pin mode slew rate drive.  Applies to Type D and Type W pins
+ *
+ ****************************************************************************/
+
+static void lpc17_setslewnormal(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval &= ~IOCON_SLEW_MASK;
+  putreg32(regval, regaddr);
+}
+
+/****************************************************************************
+ * Name: lpc17_setmodedigital
+ *
+ * Description:
+ *   Configure pin mode as analog or digital IO. Applies to Type A pins
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void lpc17_setmodedigital(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval |= IOCON_ADMODE_MASK;
+  putreg32(regval, regaddr);
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc17_setmodeanalog
+ *
+ * Description:
+ *   Configure pin mode as analog or digital IO. Applies to Type A pins
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void lpc17_setmodeanalog(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval &= ~IOCON_ADMODE_MASK;
+  putreg32(regval, regaddr);
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc17_setdacenable
+ *
+ * Description:
+ *   Configure DAC output. Applies to Type A pins P0:26 only
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void lpc17_setdacenable(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval |= IOCON_DACEN_MASK;
+  putreg32(regval, regaddr);
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc17_setdacdisable
+ *
+ * Description:
+ *   Configure DAC output. Applies to Type A pins P0:26 only
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void lpc17_setdacdisable(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval &= ~IOCON_DACEN_MASK;
+  putreg32(regval, regaddr);
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc17_setfilter
+ *
+ * Description:
+ *   Configure analog pin's glitch filter.  Applies to Type A and Type W pins
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void lpc17_setfilter(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval &= ~IOCON_FILTER_MASK;
+  putreg32(regval, regaddr);
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc17_clrfilter
+ *
+ * Description:
+ *   Configure analog pin's glitch filter.  Applies to Type A and Type W pins
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void lpc17_clrfilter(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval |= IOCON_FILTER_MASK;
+  putreg32(regval, regaddr);
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc17_setopendrain
+ *
+ * Description:
+ *   Configure a GPIO's opendrain mode.  Applies to Type A, Type D, and
+ *   Type W pins.
+ *
+ ****************************************************************************/
+
+static void lpc17_setopendrain(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval |= IOCON_OD_MASK;
+  putreg32(regval, regaddr);
+}
+
+/****************************************************************************
+ * Name: lpc17_clropendrain
+ *
+ * Description:
+ *   Configure a GPIO's opendrain mode.  Applies to Type A, Type D, and
+ *   Type W pins.
+ *
+ ****************************************************************************/
+
+static void lpc17_clropendrain(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval &= ~IOCON_OD_MASK;
+  putreg32(regval, regaddr);
+}
+
+/****************************************************************************
+ * Name: lpc17_clrhysteresis
+ *
+ * Description:
+ *   Configure a GPIO's hysteresis mode.  Applies to Type D and Type W pins
+ *   Default is enabled.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void lpc17_clrhysteresis(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval &= ~IOCON_HYS_MASK;
+  putreg32(regval, regaddr);
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc17_sethysteresis
+ *
+ * Description:
+ *   Configure a GPIO's hysteresis mode.  Applies to Type D and Type W pins
+ *   Default is enabled.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void lpc17_sethysteresis(unsigned int port, unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+  regval |= IOCON_HYS_MASK;
+  putreg32(regval, regaddr);
+}
+#endif
+
+/****************************************************************************
+ * Name: lpc17_pullup
+ *
+ * Description:
+ *   Clear and set the pin mode bits.  Applies to Type A, Type D, and
+ *   Type W pins.
+ *
+ ****************************************************************************/
+
+static void lpc17_setpullup(lpc17_pinset_t cfgset, unsigned int port,
+                            unsigned int pin)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+  uint32_t pinmode;
+
+  /* Decode the request pull-up mode */
+
+  pinmode = ((cfgset & GPIO_PUMODE_MASK) >> GPIO_PUMODE_SHIFT);
+
+  /* Get the current IOCON register contents */
+
+  regaddr = LPC17_IOCON_P(port, pin);
+  regval  = getreg32(regaddr);
+
+  /* Set the new mode bits */
+
+  regval &= ~IOCON_MODE_MASK;
+  regval |= (pinmode << IOCON_MODE_SHIFT);
+  putreg32(regval, regaddr);
 }
 
 /****************************************************************************
@@ -259,11 +596,12 @@ static void lpc17_setintedge(unsigned int port, unsigned int pin,
  * Name: lpc17_configinput
  *
  * Description:
- *   Configure a GPIO inpue pin based on bit-encoded description of the pin.
+ *   Configure a GPIO input pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
-static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port, unsigned int pin)
+static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port,
+                                    unsigned int pin)
 {
   uint32_t regval;
   uint32_t fiobase;
@@ -276,7 +614,7 @@ static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port, un
 
   /* Set as input */
 
-  regval = getreg32(fiobase + LPC17_FIO_DIR_OFFSET);
+  regval  = getreg32(fiobase + LPC17_FIO_DIR_OFFSET);
   regval &= ~pinmask;
   putreg32(regval, fiobase + LPC17_FIO_DIR_OFFSET);
 
@@ -293,7 +631,7 @@ static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port, un
 
       /* Disable any falling edge interrupts */
 
-      regval = getreg32(intbase + LPC17_GPIOINT_INTENF_OFFSET);
+      regval  = getreg32(intbase + LPC17_GPIOINT_INTENF_OFFSET);
       regval &= ~pinmask;
       putreg32(regval, intbase + LPC17_GPIOINT_INTENF_OFFSET);
 
@@ -304,36 +642,26 @@ static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port, un
 #endif
     }
 
-  /* Set up PINSEL registers */
-  /* Configure the pin as a GPIO.  Clear opendrain, input inversion,
-   * hysteris, slew.  Set analog pins as digital.
-   */
+  /* Configure as GPIO */
 
-  regval = IOCON_FUNC_GPIO;
+  lpc17_setpinfunction(port, pin, IOCON_FUNC_GPIO);
 
-  /* Set pull-up mode.  Isolate the field from the cfgset and move it
-   * into the correct position in the register value.
-   */
+  /* Set pull-up mode */
 
-  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PUMODE_SHIFT) << IOCON_MODE_SHIFT);
+  lpc17_setpullup(cfgset, port, pin);
 
-  /* Select input polarity */
+  /* Clear opendrain */
 
-  if ((cfgset & GPIO_INVERT) != 0)
-  {
-    regval |= IOCON_INV_MASK;
-  }
+  lpc17_clropendrain(port, pin);
 
-  /* Select hysteresis enable */
+  /* Set analog pins as digital */
+  //Todo
 
-  if ((cfgset & GPIO_HYSTERESIS) != 0)
-  {
-    regval |= IOCON_HYS_MASK;
-  }
+  /* Set input polarity */
+  //Todo
 
-  /* Set IOCON register */
-
-  lpc17_configiocon(port, pin, regval);
+  /* Set hysteresis mode */
+  //Todo
 
   return OK;
 }
@@ -391,39 +719,42 @@ static inline int lpc17_configoutput(lpc17_pinset_t cfgset, unsigned int port,
   regval |= (1 << pin);
   putreg32(regval, fiobase + LPC17_FIO_DIR_OFFSET);
 
-  /* Configure the pin as a GPIO.  Clear opendrain, input inversion,
-   * hysteris, slew.  Set analog pins as digital.
-   */
-
-  regval = IOCON_FUNC_GPIO;
-
-  /* Select open drain output */
+  /* Check for open drain output */
 
   if ((cfgset & GPIO_OPEN_DRAIN) != 0)
     {
-      regval |= IOCON_OD_MASK;
+      /* Set pull-up mode.  This normally only applies to input pins, but does have
+       * meaning if the port is an open drain output.
+       */
+
+      lpc17_setpullup(cfgset, port, pin);
+
+      /* Select open drain output */
+
+      lpc17_setopendrain(port, pin);
     }
 
-  /* Select slew output */
+  /* Check for slew rate output */
 
   if ((cfgset & GPIO_SLEW) != 0)
     {
-      regval |= IOCON_SLEW_MASK;
+      /* Slew rate is normal mode at reset */
+
+      lpc17_setslewfast(port, pin);
     }
+  else
+    {
+      /* But we still may need to set the normal mode because we may
+       * be reconfiguring the GPIO pin.
+       */
 
-  /* Set pull-up mode.  Isolate the field from the cfgset and move it
-   * into the correct position in the register value.
-   */
-
-  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PUMODE_SHIFT) << IOCON_MODE_SHIFT);
-
-  /* Set IOCON register */
-
-  lpc17_configiocon(port, pin, regval);
+      lpc17_setslewnormal(port, pin);
+    }
 
   /* Set the initial value of the output */
 
   lpc17_gpiowrite(cfgset, ((cfgset & GPIO_VALUE) != GPIO_VALUE_ZERO));
+
   return OK;
 }
 
@@ -439,8 +770,6 @@ static inline int lpc17_configoutput(lpc17_pinset_t cfgset, unsigned int port,
 static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
                                  unsigned int pin, uint32_t alt)
 {
-  uint32_t regval;
-
   /* First, configure the port as an input so that we have a known
    * starting point and consistent behavior during the re-configuration.
    */
@@ -449,31 +778,23 @@ static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
 
   /* Select the alternate pin */
 
-  regval = (alt & IOCON_FUNC_MASK);
+  lpc17_setpinfunction(port, pin, alt);
 
-  /* Select analog mode */
+  /* Set IO mode: Analog/Digital */
+  //Todo
 
-  if ((cfgset & GPIO_ADMODE) != 0)
-  {
-    regval |= IOCON_ADMODE_MASK;
-  }
+  /* Set pull-up mode */
 
-  /* Set pull-up mode.  Isolate the field from the cfgset and move it
-   * into the correct position in the register value.
-   */
+  lpc17_setpullup(cfgset, port, pin);
 
-  regval |= (((cfgset & GPIO_PUMODE_MASK) >> GPIO_PUMODE_SHIFT) << IOCON_MODE_SHIFT);
-
-  /* Select open drain output */
+  /* Check for open drain output */
 
   if ((cfgset & GPIO_OPEN_DRAIN) != 0)
     {
-      regval |= IOCON_OD_MASK;
+      /* Select open drain output */
+
+      lpc17_setopendrain(port, pin);
     }
-
-  /* Set IOCON register */
-
-  lpc17_configiocon(port, pin, regval);
 
   return OK;
 }
@@ -494,6 +815,7 @@ int lpc17_configgpio(lpc17_pinset_t cfgset)
 {
   unsigned int port;
   unsigned int pin;
+
   int ret = -EINVAL;
 
   /* Verify that this hardware supports the select GPIO port */
@@ -501,7 +823,9 @@ int lpc17_configgpio(lpc17_pinset_t cfgset)
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   if (port < GPIO_NPORTS)
     {
-      /* Get the pin number and select the port configuration register for that pin */
+      /* Get the pin number and select the port configuration register for
+       * that pin.
+       */
 
       pin = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
 
