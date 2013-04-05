@@ -1,5 +1,5 @@
-chip
-board
-.depend
-Make.dep
+/chip
+/board
+/.depend
+/Make.dep
 
