@@ -2,7 +2,7 @@
  * include/nuttx/serial/uart_16550.h
  * Serial driver for 16550 UART
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,31 +153,31 @@
  * any UARTn, n=0,1,2,3
  */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_16550_UART0)
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
+#if defined(CONFIG_16550_UART0_SERIAL_CONSOLE) && defined(CONFIG_16550_UART0)
+#  undef CONFIG_16550_UART1_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART2_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART3_SERIAL_CONSOLE
 #  define HAVE_16550_CONSOLE 1
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_16550_UART1)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
+#elif defined(CONFIG_16550_UART1_SERIAL_CONSOLE) && defined(CONFIG_16550_UART1)
+#  undef CONFIG_16550_UART0_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART2_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART3_SERIAL_CONSOLE
 #  define HAVE_16550_CONSOLE 1
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_16550_UART2)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
+#elif defined(CONFIG_16550_UART2_SERIAL_CONSOLE) && defined(CONFIG_16550_UART2)
+#  undef CONFIG_16550_UART0_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART1_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART3_SERIAL_CONSOLE
 #  define HAVE_16550_CONSOLE 1
-#elif defined(CONFIG_UART3_SERIAL_CONSOLE) && defined(CONFIG_16550_UART3)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
+#elif defined(CONFIG_16550_UART3_SERIAL_CONSOLE) && defined(CONFIG_16550_UART3)
+#  undef CONFIG_16550_UART0_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART1_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART2_SERIAL_CONSOLE
 #  define HAVE_16550_CONSOLE 1
 #else
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART0_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART1_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART2_SERIAL_CONSOLE
+#  undef CONFIG_16550_UART3_SERIAL_CONSOLE
 #  undef HAVE_16550_CONSOLE
 #endif
 
@@ -347,5 +347,5 @@ typedef uint32_t uart_addrwidth_t;
 extern uart_datawidth_t uart_getreg(uart_addrwidth_t base, unsigned int offset);
 extern void uart_putreg(uart_addrwidth_t base, unsigned int offset, uart_datawidth_t value);
 
-#endif /* CONFIG_UART_16550 */
+#endif /* CONFIG_16550_UART */
 #endif /* __INCLUDE_NUTTX_SERIAL_UART_16550_H */
