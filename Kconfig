@@ -398,71 +398,99 @@ config DEBUG_LCD
 	default n
 	depends on LCD
 	---help---
-		Enable low level debug SYSLOG output from the LCD driver (disabled by default)
+		Enable low level debug SYSLOG output from the LCD driver (disabled
+		by default).  Support for this debug option is board-specific and
+		may not be available for some boards.
 
 config DEBUG_LEDS
 	bool "Enable Low-level LED Debug Output"
 	default n
 	depends on ARCH_HAVE_LEDS
 	---help---
-		Enable low level debug from board-specific LED logic
+		Enable low level debug from board-specific LED logic.  Support for
+		this debug option is board-specific and may not be available for
+		some boards.
 
 config DEBUG_INPUT
 	bool "Enable Input Device Debug Output"
 	default n
 	depends on INPUT
 	---help---
-		Enable low level debug SYSLOG output from the input device drivers such as
- 		mice and touchscreens (disabled by default)
+		Enable low level debug SYSLOG output from the input device drivers
+		such as mice and touchscreens (disabled by default).  Support for
+		this debug option is board-specific and may not be available for
+		some boards.
 
 config DEBUG_ANALOG
 	bool "Enable Analog Device Debug Output"
 	default n
 	---help---
-		Enable low level debug SYSLOG output from the analog device drivers such as
- 		A/D and D/A converters (disabled by default)
+		Enable low level debug SYSLOG output from the analog device drivers
+		such as A/D and D/A converters (disabled by default).  Support for
+		this debug option is architecgture-specific and may not be available
+		for some MCUs.
 
 config DEBUG_I2C
 	bool "Enable I2C Debug Output"
 	default n
 	depends on I2C
 	---help---
-		Enable I2C driver debug SYSLOG output (disabled by default)
+		Enable I2C driver debug SYSLOG output (disabled by default).
+		Support for this debug option is architecgture-specific and may not
+		be available for some MCUs.
 
 config DEBUG_SPI
 	bool "Enable SPI Debug Output"
 	default n
 	depends on SPI
 	---help---
-		Enable I2C driver debug SYSLOG output (disabled by default)
+		Enable I2C driver debug SYSLOG output (disabled by default).
+		Support for this debug option is architecgture-specific and may not
+		be available for some MCUs.
 
 config DEBUG_CAN
 	bool "Enable CAN Debug Output"
 	default n
 	depends on CAN
 	---help---
-		Enable CAN driver debug SYSLOG output (disabled by default)
+		Enable CAN driver debug SYSLOG output (disabled by default).
+		Support for this debug option is architecgture-specific and may not
+		be available for some MCUs.
 
 config DEBUG_SDIO
 	bool "Enable SDIO Debug Output"
 	default n
 	depends on MMCSD_SDIO
 	---help---
-		Enable SDIO driver debug SYSLOG output (disabled by default)
+		Enable SDIO driver debug SYSLOG output (disabled by default).
+		Support for this debug option is architecgture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_GPIO
+	bool "Enable GPIO Debug Output"
+	default n
+	---help---
+		Enable GPIO-releated debug SYSLOG output (disabled by default).
+		Support for this debug option is architecgture-specific and may not
+		be available for some MCUs.
 
 config DEBUG_DMA
 	bool "Enable DMA Debug Output"
 	default n
 	depends on ARCH_DMA
 	---help---
-		Enable DMA-releated debug SYSLOG output (disabled by default)
+		Enable DMA-releated debug SYSLOG output (disabled by default).
+		Support for this debug option is architecgture-specific and may not
+		be available for some MCUs.
 
 config DEBUG_WATCHDOG
 	bool "Enable Watchdog Timer Debug Output"
 	default n
 	depends on WATCHDOG
 	---help---
-		Enable watchdog timer debug SYSLOG output (disabled by default)
+		Enable watchdog timer debug SYSLOG output (disabled by default).
+		Support for this debug option is architecgture-specific and may not
+		be available for some MCUs.
 
 endif
 

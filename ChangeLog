@@ -4514,4 +4514,13 @@
 	* arch/arm/src/lpc17xx/lpc17_gpio.c/.h:  Separate LPC176x and LPC178x
 	  logic into separate files.  The logic is diverging to much to
 	  try to retain common code (2013-4-03).
+	* net/net_clone.c:  Fix compilation error when socket options are
+	  are disabled. Reported by Daniel O'Connor (2013-4-05).
+	* configs/zkit-arm-1769/src/up_leds.c:  Fix a typo introduced into
+	  the button interrupt logic (2013-4-05).
+	* arch/arm/src/lpc17xx/lpc178x_gpio.c:  Re-design of the GPIO
+	  logic for the LPC178x family by Rommel Marcelo (2013-4-05).
+	* arch/arm/src/lpc17_gpiodbg.c:  Updated so that it correctly
+	  reports LPC177x/8x GPIO registers when GPIO debug is enabled
+	  (2013-4-05).
 
