@@ -195,12 +195,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* These tables have global scope only because they are shared between lpc17_gpio.c,
- * lpc17_gpioint.c, and lpc17_gpiodbg.c
- */
-
-EXTERN const uint32_t g_ioconport[GPIO_NPORTS];
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

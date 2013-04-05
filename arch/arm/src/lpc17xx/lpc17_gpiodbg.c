@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_gpiodbg.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
@@ -47,7 +48,6 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "lpc17_gpio.h"
-
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,6 +80,7 @@
  *
  ****************************************************************************/
 
+#ifdef LPC176x
 static uint32_t lpc17_pinsel(unsigned int port, unsigned int pin)
 {
   if (pin < 16)
@@ -91,6 +92,7 @@ static uint32_t lpc17_pinsel(unsigned int port, unsigned int pin)
       return g_hipinsel[port];
     }
 }
+#endif /* LPC176x */
 
 /****************************************************************************
  * Name: lpc17_pinmode
@@ -101,6 +103,7 @@ static uint32_t lpc17_pinsel(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
+#ifdef LPC176x
 static uint32_t lpc17_pinmode(unsigned int port, unsigned int pin)
 {
   if (pin < 16)
@@ -112,6 +115,7 @@ static uint32_t lpc17_pinmode(unsigned int port, unsigned int pin)
       return g_hipinmode[port];
     }
 }
+#endif /* LPC176x */
 
 /****************************************************************************
  * Global Functions
@@ -125,12 +129,16 @@ static uint32_t lpc17_pinmode(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
-int lpc17_dumpgpio(uint16_t pinset, const char *msg)
+int lpc17_dumpgpio(lpc17_pinset_t pinset, const char *msg)
 {
   irqstate_t   flags;
   uint32_t     base;
+#if defined(LPC176x)
   uint32_t     pinsel;
   uint32_t     pinmode;
+#elif defined(LPC178x)
+  uint32_t     iocon;
+#endif /* LPC176x */
   unsigned int port;
   unsigned int pin;
 
@@ -138,19 +146,28 @@ int lpc17_dumpgpio(uint16_t pinset, const char *msg)
 
   port    = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   pin     = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+
+#if defined(LPC176x)
   pinsel  = lpc17_pinsel(port, pin);
   pinmode = lpc17_pinmode(port, pin);
+#elif defined(LPC178x)
+  iocon   = LPC17_IOCON_P(port, pin);
+#endif /* LPC176x */
 
   /* The following requires exclusive access to the GPIO registers */
 
   flags = irqsave();
-  lldbg("GPIO%c pinset: %08x -- %s\n",
-        port + '0', pinset, msg);
+  lldbg("GPIO%c pin%d (pinset: %08x) -- %s\n",
+        port + '0', pin, pinset, msg);
 
+#if defined(LPC176x)
   lldbg("  PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n",
         pinsel,  pinsel  ? getreg32(pinsel) : 0,
         pinmode, pinmode ? getreg32(pinmode) : 0, 
         g_odmode[port],    getreg32(g_odmode[port]));
+#elif defined(LPC178x)
+  lldbg("  IOCON[%08x]:\n", getreg32(iocon));
+#endif
 
   base = g_fiobase[port];
   lldbg("  FIODIR[%08x]: %08x FIOMASK[%08x]: %08x FIOPIN[%08x]: %08x\n",
