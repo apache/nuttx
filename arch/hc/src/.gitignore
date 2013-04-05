@@ -1,7 +1,6 @@
-.depend
-Make.dep
-board
-chip
-*.r
-
+/.depend
+/Make.dep
+/board
+/chip
+/*.r
 

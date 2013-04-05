@@ -57,14 +57,8 @@
  */
 
 /* Special Pin Functions
- * For pins that has ADC/DAC, USB, I2C
+ * For pins that have ADC/DAC, USB, I2C
  */
-
-#define GPIO_IOCON_TYPE_D_MASK (0x0000067f) /* All port except where ADC/DAC, USB, I2C is present */
-#define GPIO_IOCON_TYPE_A_MASK (0x000105df) /* USB/ADC/DAC P0:12-13, P0:23-26, P1:30-31 */
-#define GPIO_IOCON_TYPE_U_MASK (0x00000007) /* USB P0:29 to 31 */
-#define GPIO_IOCON_TYPE_I_MASK (0x00000347) /* I2C/USB P0:27-28, P5:2-3  */
-#define GPIO_IOCON_TYPE_W_MASK (0x000007ff) /* I2S P0:7-9 */
 
 #define GPIO_IOCON_MASK        (0x00ff0000)
 #  define GPIO_HYSTERESIS      (1 << 16) /* Bit 16: HYSTERESIS: 0-Disable, 1-Enabled */

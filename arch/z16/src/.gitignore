@@ -1,8 +1,8 @@
-Make.dep
-.depend
-board
-chip
-nuttx.linkcmd
+/Make.dep
+/.depend
+/board
+/chip
+/nuttx.linkcmd
 *.asm
 *.obj
 *.lib

@@ -137,7 +137,7 @@ static int lpc17_configiocon(unsigned int port, unsigned int pin,
 {
   uint32_t regaddr;
   uint32_t regval;
-  uint32_t typemask = GPIO_IOCON_TYPE_D_MASK;
+  uint32_t typemask = IOCON_TYPE_D_MASK;
 
   /* Select the mask based on pin usage */
 
@@ -149,7 +149,7 @@ static int lpc17_configiocon(unsigned int port, unsigned int pin,
             case 7:
             case 8:
             case 9:
-              typemask = GPIO_IOCON_TYPE_W_MASK;
+              typemask = IOCON_TYPE_W_MASK;
               break;
 
             case 12:
@@ -158,18 +158,18 @@ static int lpc17_configiocon(unsigned int port, unsigned int pin,
             case 24:
             case 25:
             case 26:
-              typemask = GPIO_IOCON_TYPE_A_MASK;
+              typemask = IOCON_TYPE_A_MASK;
               break;
 
             case 27:
             case 28:
-              typemask = GPIO_IOCON_TYPE_I_MASK;
+              typemask = IOCON_TYPE_I_MASK;
               break;
 
             case 29:
             case 30:
             case 31:
-              typemask = GPIO_IOCON_TYPE_U_MASK;
+              typemask = IOCON_TYPE_U_MASK;
               break;
 
             default:
@@ -182,7 +182,7 @@ static int lpc17_configiocon(unsigned int port, unsigned int pin,
           {
             case 30:
             case 31:
-              typemask = GPIO_IOCON_TYPE_A_MASK;
+              typemask = IOCON_TYPE_A_MASK;
               break;
 
             default:
@@ -195,7 +195,7 @@ static int lpc17_configiocon(unsigned int port, unsigned int pin,
           {
             case 2:
             case 3:
-              typemask = GPIO_IOCON_TYPE_I_MASK;
+              typemask = IOCON_TYPE_I_MASK;
               break;
 
             default:

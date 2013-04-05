@@ -1,9 +1,9 @@
-Make.dep
-.depend
-up_mem.h
-asm_mem.h
-board
-chip
+/Make.dep
+/.depend
+/up_mem.h
+/asm_mem.h
+/board
+/chip
 *.sym
 *.asm
 *.obj
@@ -20,5 +20,4 @@ chip
 *.hex
 *.linkcmd
 *.noi
-
 

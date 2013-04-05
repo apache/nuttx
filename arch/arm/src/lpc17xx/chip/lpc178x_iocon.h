@@ -336,6 +336,14 @@
 #define IOCON_MODE_PU               (2)      /* 10: pin has a pull-up resistor enabled */
 #define IOCON_MODE_RM               (3)      /* 11: pin has repeater mode enabled */
 
+/* Pin types */
+
+#define IOCON_TYPE_D_MASK (0x0000067f) /* All ports except where ADC/DAC, USB, I2C is present */
+#define IOCON_TYPE_A_MASK (0x000105df) /* USB/ADC/DAC P0:12-13, P0:23-26, P1:30-31 */
+#define IOCON_TYPE_U_MASK (0x00000007) /* USB P0:29 to 31 */
+#define IOCON_TYPE_I_MASK (0x00000347) /* I2C/USB P0:27-28, P5:2-3  */
+#define IOCON_TYPE_W_MASK (0x000007ff) /* I2S P0:7-9 */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
