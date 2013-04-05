@@ -180,7 +180,7 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
         {
           /* Configure KEY5 as an interrupting input */
 
-          lpc17_configgpio(ZKITARM_INT_ KEY5);
+          lpc17_configgpio(ZKITARM_INT_KEY5);
 
           /* Attach the new interrupt handler and enable the interrupt */
 
