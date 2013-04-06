@@ -217,7 +217,6 @@ static uint32_t lpc17_getioconmask(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
-#if 0 /* Not used */
 static void lpc17_seti2cmode(unsigned int port,unsigned int pin, uint32_t value)
 {
   uint32_t regaddr;
@@ -229,7 +228,6 @@ static void lpc17_seti2cmode(unsigned int port,unsigned int pin, uint32_t value)
   regval |= ((value << IOCON_I2CMODE_SHIFT) & IOCON_I2CMODE_MASK);
   putreg32(regval, regaddr);
 }
-#endif
 
 /****************************************************************************
  * Name: lpc17_setpinfunction
@@ -247,6 +245,7 @@ static void lpc17_setpinfunction(unsigned int port, unsigned int pin,
 
   regaddr = LPC17_IOCON_P(port, pin);
   regval  = getreg32(regaddr);
+
   regval &= ~IOCON_FUNC_MASK;
   regval |= ((value << IOCON_FUNC_SHIFT) & IOCON_FUNC_MASK);
   putreg32(regval, regaddr);
@@ -260,7 +259,6 @@ static void lpc17_setpinfunction(unsigned int port, unsigned int pin,
  *
  ****************************************************************************/
 
-#if 0 /* Not used */
 static void lpc17_setinvertinput(unsigned int port, unsigned int pin)
 {
   uint32_t regaddr;
@@ -271,7 +269,6 @@ static void lpc17_setinvertinput(unsigned int port, unsigned int pin)
   regval |= IOCON_INV_MASK;
   putreg32(regval, regaddr);
 }
-#endif
 
 /****************************************************************************
  * Name: lpc17_setslewfast
@@ -340,7 +337,6 @@ static void lpc17_setmodedigital(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
-#if 0 /* Not used */
 static void lpc17_setmodeanalog(unsigned int port, unsigned int pin)
 {
   uint32_t regaddr;
@@ -351,7 +347,6 @@ static void lpc17_setmodeanalog(unsigned int port, unsigned int pin)
   regval &= ~IOCON_ADMODE_MASK;
   putreg32(regval, regaddr);
 }
-#endif
 
 /****************************************************************************
  * Name: lpc17_setdacenable
@@ -361,7 +356,6 @@ static void lpc17_setmodeanalog(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
-#if 0 /* Not used */
 static void lpc17_setdacenable(unsigned int port, unsigned int pin)
 {
   uint32_t regaddr;
@@ -372,7 +366,6 @@ static void lpc17_setdacenable(unsigned int port, unsigned int pin)
   regval |= IOCON_DACEN_MASK;
   putreg32(regval, regaddr);
 }
-#endif
 
 /****************************************************************************
  * Name: lpc17_setdacdisable
@@ -403,7 +396,6 @@ static void lpc17_setdacdisable(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
-#if 0 /* Not used */
 static void lpc17_setfilter(unsigned int port, unsigned int pin)
 {
   uint32_t regaddr;
@@ -414,7 +406,6 @@ static void lpc17_setfilter(unsigned int port, unsigned int pin)
   regval &= ~IOCON_FILTER_MASK;
   putreg32(regval, regaddr);
 }
-#endif
 
 /****************************************************************************
  * Name: lpc17_clrfilter
@@ -508,7 +499,6 @@ static void lpc17_clrhysteresis(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
-#if 0 /* Not used */
 static void lpc17_sethysteresis(unsigned int port, unsigned int pin)
 {
   uint32_t regaddr;
@@ -519,7 +509,6 @@ static void lpc17_sethysteresis(unsigned int port, unsigned int pin)
   regval |= IOCON_HYS_MASK;
   putreg32(regval, regaddr);
 }
-#endif
 
 /****************************************************************************
  * Name: lpc17_pullup
@@ -642,10 +631,6 @@ static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port,
 #endif
     }
 
-  /* Configure as GPIO */
-
-  lpc17_setpinfunction(port, pin, IOCON_FUNC_GPIO);
-
   /* Set pull-up mode */
 
   lpc17_setpullup(cfgset, port, pin);
@@ -654,14 +639,32 @@ static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port,
 
   lpc17_clropendrain(port, pin);
 
-  /* Set analog pins as digital */
-  //Todo
-
   /* Set input polarity */
-  //Todo
 
-  /* Set hysteresis mode */
-  //Todo
+  if ((cfgset & GPIO_INVERT) != 0)
+    {
+      lpc17_setinvertinput(port, pin);
+    }
+
+  /* Set hysteresis */
+
+  if ((cfgset & GPIO_HYSTERESIS) != 0)
+    {
+      lpc17_sethysteresis(port, pin);
+    }
+
+  /* Set filtering */
+
+  if ((cfgset & GPIO_FILTER) != 0)
+    {
+      /* Slew rate is normal mode at reset */
+
+      lpc17_setfilter(port, pin);
+    }
+
+  /* Configure as GPIO */
+
+  lpc17_setpinfunction(port, pin, IOCON_FUNC_GPIO);
 
   return OK;
 }
@@ -770,22 +773,44 @@ static inline int lpc17_configoutput(lpc17_pinset_t cfgset, unsigned int port,
 static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
                                  unsigned int pin, uint32_t alt)
 {
+  uint32_t i2cmode;
+
   /* First, configure the port as an input so that we have a known
    * starting point and consistent behavior during the re-configuration.
    */
 
   (void)lpc17_configinput(DEFAULT_INPUT, port, pin);
 
-  /* Select the alternate pin */
-
-  lpc17_setpinfunction(port, pin, alt);
-
-  /* Set IO mode: Analog/Digital */
-  //Todo
-
   /* Set pull-up mode */
 
   lpc17_setpullup(cfgset, port, pin);
+
+  /* Check for analog mode */
+
+  if ((cfgset & GPIO_ADMODE) != 0)
+    {
+      lpc17_setmodeanalog(port, pin);
+
+      /* Check for DAC output enable */
+
+      if ((cfgset & GPIO_DACEN) != 0)
+        {
+          lpc17_setdacenable(port, pin);
+        }
+    }
+
+  /* Check for I2C modes */
+
+  if ((cfgset & (GPIO_I2CHS | GPIO_HIDRIVE)) != 0)
+    {
+	  /* WARNING:  Using literal values (14) is a maintenance problem */
+
+      i2cmode = ((cfgset & (GPIO_I2CHS | GPIO_HIDRIVE)) >> 14);
+
+      /* Set I2C Modes */
+
+      lpc17_seti2cmode(port, pin, i2cmode);
+    }
 
   /* Check for open drain output */
 
@@ -795,6 +820,10 @@ static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
 
       lpc17_setopendrain(port, pin);
     }
+
+  /* Select the alternate pin */
+
+  lpc17_setpinfunction(port, pin, alt);
 
   return OK;
 }
