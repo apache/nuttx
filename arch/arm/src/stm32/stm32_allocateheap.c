@@ -157,6 +157,7 @@
     */
 
 #    if CONFIG_MM_REGIONS < 2
+
        /* Only one memory region.  Force Configuration 1 */
 
 #      ifndef CONFIG_STM32_CCMEXCLUDE
@@ -192,24 +193,30 @@
 #      endif
 #    endif
 
-/* All members of the STM32F20xxx and STM32F40xxx families have 128Kb in two
- * banks:
+/* All members of both the STM32F20xxx and STM32F40xxx families have 128Kib
+ * in two banks:
  *
- * 1) 112Kb of System SRAM beginning at address 0x2000:0000
- * 2)  16Kb of System SRAM beginning at address 0x2001:c000
+ * 1) 112KiB of System SRAM beginning at address 0x2000:0000
+ * 2)  16KiB of System SRAM beginning at address 0x2001:c000
  *
- * The STM32F40xxx family has an additional 64Kb of CCM SRAM for a total of
- * 192KB.
+ * Members of the STM32F40xxx family have an additional 64Kib of CCM RAM
+ * for a total of 192KB.
  *
- * 3)  64Kb of CCM SRAM beginning at address 0x1000:0000
+ * 3)  64Kib of CCM SRAM beginning at address 0x1000:0000
  *
- * As determined by ld.script, g_idle_topstack lies in the 112Kb memory
+ * The STM32F427/437 parts have another 64KiB of System SRAM for a total of
+ * 256KiB.
+ *
+ * 3)  64Kib of System SRAM beginning at address 0x2002:0000
+ *
+ * As determined by ld.script, g_heapbase lies in the 112KiB memory
  * region and that extends to 0x2001:0000.  But the  first and second memory
  * regions are contiguous and treated as one in this logic that extends to
- * 0x2002:0000.
+ * 0x2002:0000 (or 0x2003:0000 for the F427/F437).
  *
- * As a complication, CCM SRAM cannot be used for DMA.  So, if STM32 DMA is
- * enabled, CCM SRAM should probably be excluded from the heap.
+ * As a complication, CCM SRAM cannot be used for DMA.  So, if STM32 DMA is enabled, 
+ * CCM SRAM should probably be excluded from the heap or the application must take
+ * extra care to ensure that DMA buffers are not allocated in CCM SRAM.
  *
  * In addition, external FSMC SRAM may be available.
  */
@@ -225,7 +232,11 @@
 
    /* Set the end of system SRAM */
 
-#  define SRAM1_END   0x20020000
+#  if defined(CONFIG_STM32_STM32F427)
+#    define SRAM1_END   0x20030000
+#  else
+#    define SRAM1_END   0x20020000
+#  endif
 
    /* Set the range of CCM SRAM as well (although we may not use it) */
 
@@ -262,6 +273,7 @@
     */
 
 #    if CONFIG_MM_REGIONS < 2
+
        /* Only one memory region.  Force Configuration 1 */
 
 #      warning "FSMC SRAM (and CCM SRAM) excluded from the heap"
@@ -293,6 +305,7 @@
 #        ifdef CONFIG_ARCH_DMA
 #          warning "CCM SRAM is included in the heap AND DMA is enabled"
 #        endif
+
 #        if CONFIG_MM_REGIONS != 3
 #          error "CONFIG_MM_REGIONS > 3 but I don't know what some of the region(s) are"
 #          undef CONFIG_MM_REGIONS
@@ -319,6 +332,7 @@
 #    ifdef CONFIG_ARCH_DMA
 #      warning "CCM SRAM is included in the heap AND DMA is enabled"
 #    endif
+
 #    if CONFIG_MM_REGIONS < 2
 #      error "CCM SRAM excluded from the heap because CONFIG_MM_REGIONS < 2"
 #      undef CONFIG_STM32_CCMEXCLUDE
@@ -329,6 +343,7 @@
 #      define CONFIG_MM_REGIONS 2
 #    endif
 #  endif
+
 #else
 #  error "Unsupported STM32 chip"
 #endif
