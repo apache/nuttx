@@ -320,7 +320,7 @@
 #define IOCON_ADMODE_MASK           (1 << IOCON_ADMODE_SHIFT)
 #define IOCON_FILTER_SHIFT          (8)   /* Bit 8: Type A */
 #define IOCON_FILTER_MASK           (1 << IOCON_FILTER_SHIFT)
-#define IOCON_I2CHS_SHIFT           (8)/* Bits 8: Type I */
+#define IOCON_I2CHS_SHIFT           (8)   /* Bit 8: Type I */
 #define IOCON_I2CHS_MASK            (1 << IOCON_I2CHS_SHIFT)
 #define IOCON_SLEW_SHIFT            (9)   /* Bit 9: Type W */
 #define IOCON_SLEW_MASK             (1 << IOCON_SLEW_SHIFT)
@@ -333,10 +333,10 @@
 
 /* Pin modes */
 
-#define IOCON_MODE_FLOAT            (0)      /* 00: pin has neither pull-up nor pull-down */
-#define IOCON_MODE_PD               (1)      /* 01: pin has a pull-down resistor enabled */
-#define IOCON_MODE_PU               (2)      /* 10: pin has a pull-up resistor enabled */
-#define IOCON_MODE_RM               (3)      /* 11: pin has repeater mode enabled */
+#define IOCON_MODE_FLOAT            (0)   /* 00: pin has neither pull-up nor pull-down */
+#define IOCON_MODE_PD               (1)   /* 01: pin has a pull-down resistor enabled */
+#define IOCON_MODE_PU               (2)   /* 10: pin has a pull-up resistor enabled */
+#define IOCON_MODE_RM               (3)   /* 11: pin has repeater mode enabled */
 
 /* Pin types */
 
