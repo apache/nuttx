@@ -348,17 +348,17 @@
 
 /* Slew rate modes */
 
-#define IOCON_SLEWMODE_NORMAL      (0 << IOCON_SLEW_SHIFT)
-#define IOCON_SLEWMODE_FAST        (1 << IOCON_SLEW_SHIFT)
+#define IOCON_SLEWMODE_NORMAL       (0 << IOCON_SLEW_SHIFT)
+#define IOCON_SLEWMODE_FAST         (1 << IOCON_SLEW_SHIFT)
 
 /* I2C modes */
 
-#define IOCON_I2CMODE_SHIFT        (IOCON_I2CHS_SHIFT)
-#define IOCON_I2CMODE_MASK         (3 << IOCON_I2CMODE_SHIFT)
-#define IOCON_I2CMODE_FAST         (0 << IOCON_I2CMODE_SHIFT)
-#define IOCON_I2CMODE_FASTPLUS     (1 << IOCON_I2CMODE_SHIFT)/*   */
-#define IOCON_I2CMODE_HIOPENDRAIN  (2 << IOCON_I2CMODE_SHIFT)/*  */
-#define IOCON_I2CMODE_OPENDRAIN    (3 << IOCON_I2CMODE_SHIFT)/*  */
+#define IOCON_I2CMODE_SHIFT         (IOCON_I2CHS_SHIFT)
+#define IOCON_I2CMODE_MASK          (3 << IOCON_I2CMODE_SHIFT)
+#  define IOCON_I2CMODE_FAST        (0 << IOCON_I2CMODE_SHIFT)
+#  define IOCON_I2CMODE_FASTPLUS    (1 << IOCON_I2CMODE_SHIFT)/*   */
+#  define IOCON_I2CMODE_HIOPENDRAIN (2 << IOCON_I2CMODE_SHIFT)/*  */
+#  define IOCON_I2CMODE_OPENDRAIN   (3 << IOCON_I2CMODE_SHIFT)/*  */
 
 /************************************************************************************
  * Public Types

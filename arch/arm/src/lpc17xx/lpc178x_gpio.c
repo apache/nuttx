@@ -803,9 +803,9 @@ static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
 
   if ((cfgset & (GPIO_I2CHS | GPIO_HIDRIVE)) != 0)
     {
-	  /* WARNING:  Using literal values (14) is a maintenance problem */
+      /* Isolate the I2C mode bits */
 
-      i2cmode = ((cfgset & (GPIO_I2CHS | GPIO_HIDRIVE)) >> 14);
+      i2cmode = ((cfgset & GPIO_I2CMODE_MASK) >> GPIO_I2CMODE_SHIFT);
 
       /* Set I2C Modes */
 
