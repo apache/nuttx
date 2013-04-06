@@ -67,8 +67,11 @@
 #  define GPIO_ADMODE          (1 << 19) /* Bit 19: A/D Modes: 0-Analog, 1-Digital  */
 #  define GPIO_FILTER          (1 << 20) /* Bit 20: Filter: 0-Off, 1-ON */
 #  define GPIO_DACEN           (1 << 21) /* Bit 21: DAC: 0-Disabled, 1-Enabled, P0:26 only */
-#  define GPIO_I2CHS           (1 << 22) /* Bit 22: Filter and Rate Control: 0-Enabled, 1-Disabled */
-#  define GPIO_HIDRIVE         (1 << 23) /* Bit 23: Current Sink: 0-4mA, 1-20mA  P5:2 and P5:3 only,*/
+
+#  define GPIO_I2CMODE_SHIFT   (22)      /* Bits 22-23: I2C mode */
+#  define GPIO_I2CMODE_MASK    (3 << GPIO_I2CMODE_SHIFT)
+#    define GPIO_I2CHS         (1 << 22) /* Bit 22: Filter and Rate Control: 0-Enabled, 1-Disabled */
+#    define GPIO_HIDRIVE       (1 << 23) /* Bit 23: Current Sink: 0-4mA, 1-20mA  P5:2 and P5:3 only,*/
 
 /* Pin Function bits: FFFF
  * Only meaningful when the GPIO function is GPIO_PIN
