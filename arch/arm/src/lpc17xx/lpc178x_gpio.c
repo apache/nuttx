@@ -278,33 +278,26 @@ static void lpc17_setinvertinput(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
-static void lpc17_setslewfast(unsigned int port, unsigned int pin)
+static void lpc17_setslewmode(lpc17_pinset_t cfgset, unsigned int port,
+                              unsigned int pin)
 {
   uint32_t regaddr;
   uint32_t regval;
+  uint32_t value;
+
+  /* Decode the request output slew rate */
+
+  value = ((cfgset & GPIO_SLEW) >> GPIO_SLEW_SHIFT);
+
+  /* Get the current IOCON register contents */
 
   regaddr = LPC17_IOCON_P(port, pin);
   regval  = getreg32(regaddr);
-  regval |= IOCON_SLEW_MASK;
-  putreg32(regval, regaddr);
-}
 
-/****************************************************************************
- * Name: lpc17_setslewnormal
- *
- * Description:
- *   Configure pin mode slew rate drive.  Applies to Type D and Type W pins
- *
- ****************************************************************************/
+  /* Set the driver slew rate */
 
-static void lpc17_setslewnormal(unsigned int port, unsigned int pin)
-{
-  uint32_t regaddr;
-  uint32_t regval;
-
-  regaddr = LPC17_IOCON_P(port, pin);
-  regval  = getreg32(regaddr);
   regval &= ~IOCON_SLEW_MASK;
+  regval |= ((value << IOCON_SLEW_SHIFT) & IOCON_SLEW_MASK);
   putreg32(regval, regaddr);
 }
 
@@ -396,37 +389,28 @@ static void lpc17_setdacdisable(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
-static void lpc17_setfilter(unsigned int port, unsigned int pin)
+static void lpc17_setfilter(lpc17_pinset_t cfgset, unsigned int port,
+                            unsigned int pin)
 {
   uint32_t regaddr;
   uint32_t regval;
+  uint32_t value;
+
+  /* Decode the request input filter */
+
+  value = ((cfgset & GPIO_FILTER) >> GPIO_FILTER_SHIFT);
+
+  /* Get the current IOCON register contents */
 
   regaddr = LPC17_IOCON_P(port, pin);
   regval  = getreg32(regaddr);
+
+  /* Set the input filter enable bit */
+
   regval &= ~IOCON_FILTER_MASK;
+  regval |= ((value << IOCON_FILTER_SHIFT) & IOCON_FILTER_MASK);
   putreg32(regval, regaddr);
 }
-
-/****************************************************************************
- * Name: lpc17_clrfilter
- *
- * Description:
- *   Configure analog pin's glitch filter.  Applies to Type A and Type W pins
- *
- ****************************************************************************/
-
-#if 0 /* Not used */
-static void lpc17_clrfilter(unsigned int port, unsigned int pin)
-{
-  uint32_t regaddr;
-  uint32_t regval;
-
-  regaddr = LPC17_IOCON_P(port, pin);
-  regval  = getreg32(regaddr);
-  regval |= IOCON_FILTER_MASK;
-  putreg32(regval, regaddr);
-}
-#endif
 
 /****************************************************************************
  * Name: lpc17_setopendrain
@@ -469,28 +453,6 @@ static void lpc17_clropendrain(unsigned int port, unsigned int pin)
 }
 
 /****************************************************************************
- * Name: lpc17_clrhysteresis
- *
- * Description:
- *   Configure a GPIO's hysteresis mode.  Applies to Type D and Type W pins
- *   Default is enabled.
- *
- ****************************************************************************/
-
-#if 0 /* Not used */
-static void lpc17_clrhysteresis(unsigned int port, unsigned int pin)
-{
-  uint32_t regaddr;
-  uint32_t regval;
-
-  regaddr = LPC17_IOCON_P(port, pin);
-  regval  = getreg32(regaddr);
-  regval &= ~IOCON_HYS_MASK;
-  putreg32(regval, regaddr);
-}
-#endif
-
-/****************************************************************************
  * Name: lpc17_sethysteresis
  *
  * Description:
@@ -499,14 +461,26 @@ static void lpc17_clrhysteresis(unsigned int port, unsigned int pin)
  *
  ****************************************************************************/
 
-static void lpc17_sethysteresis(unsigned int port, unsigned int pin)
+static void lpc17_sethysteresis(lpc17_pinset_t cfgset, unsigned int port,
+                                unsigned int pin)
 {
   uint32_t regaddr;
   uint32_t regval;
+  uint32_t value;
+
+  /* Decode the request input buffer */
+
+  value = ((cfgset & GPIO_HYSTERESIS) >> GPIO_INBUFF_SHIFT);
+
+  /* Get the current IOCON register contents */
 
   regaddr = LPC17_IOCON_P(port, pin);
   regval  = getreg32(regaddr);
-  regval |= IOCON_HYS_MASK;
+
+  /* Set the input buffer enable bit */
+
+  regval &= ~IOCON_HYS_MASK;
+  regval |= ((value << IOCON_HYS_SHIFT) & IOCON_HYS_MASK);
   putreg32(regval, regaddr);
 }
 
@@ -538,7 +512,7 @@ static void lpc17_setpullup(lpc17_pinset_t cfgset, unsigned int port,
   /* Set the new mode bits */
 
   regval &= ~IOCON_MODE_MASK;
-  regval |= (pinmode << IOCON_MODE_SHIFT);
+  regval |= ((pinmode << IOCON_MODE_SHIFT) & IOCON_MODE_MASK);
   putreg32(regval, regaddr);
 }
 
@@ -646,21 +620,13 @@ static inline int lpc17_configinput(lpc17_pinset_t cfgset, unsigned int port,
       lpc17_setinvertinput(port, pin);
     }
 
-  /* Set hysteresis */
+  /* Set input hysteresis */
 
-  if ((cfgset & GPIO_HYSTERESIS) != 0)
-    {
-      lpc17_sethysteresis(port, pin);
-    }
+  lpc17_sethysteresis(cfgset, port, pin);
 
-  /* Set filtering */
+  /* Set input filtering */
 
-  if ((cfgset & GPIO_FILTER) != 0)
-    {
-      /* Slew rate is normal mode at reset */
-
-      lpc17_setfilter(port, pin);
-    }
+  lpc17_setfilter(cfgset, port, pin);
 
   /* Configure as GPIO */
 
@@ -737,22 +703,9 @@ static inline int lpc17_configoutput(lpc17_pinset_t cfgset, unsigned int port,
       lpc17_setopendrain(port, pin);
     }
 
-  /* Check for slew rate output */
+  /* Set output slew rate */
 
-  if ((cfgset & GPIO_SLEW) != 0)
-    {
-      /* Slew rate is normal mode at reset */
-
-      lpc17_setslewfast(port, pin);
-    }
-  else
-    {
-      /* But we still may need to set the normal mode because we may
-       * be reconfiguring the GPIO pin.
-       */
-
-      lpc17_setslewnormal(port, pin);
-    }
+  lpc17_setslewmode(cfgset, port, pin);
 
   /* Set the initial value of the output */
 
