@@ -178,21 +178,19 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
   ivdbg("enable:%d\n", enable);
   if (enable)
     {
-      /* Configure the PENIRQ GPIO as an interrupting enable and enable the interrupt */
+      /* Enable the pin interrupt.  The pin interrupt is enabled from worker thread
+       * logic after completion of processing of the touchscreen interrupt.
+       */
 
-      (void)lpc17_configgpio(GPIO_TC_PENIRQ);
       up_enable_irq(LPC17_IRQ_PENIRQ);
     }
   else
     {
-      /* Disable PENIRQ interrupts and reconfigure the pin as a normal input pin.
-       * We have to do this because the PENIRQ interrupt will be disabled from
-       * interrupt handling logic and, in that case, will be automatically re-enabled
-       * when the interrupt returns.
+      /* Disable PENIRQ interrupts.  NOTE: The PENIRQ interrupt will be disabled from
+       * interrupt handling logic.
        */
 
       up_disable_irq(LPC17_IRQ_PENIRQ);
-      (void)lpc17_configgpio(GPIO_TC_PEN);
     }
 }
 
@@ -288,12 +286,9 @@ int arch_tcinitialize(int minor)
 
   if (!initialized)
     {
-      /* Configure and enable the XPT2046 PENIRQ pin as a normal input.  It
-       * will be reconfigured as an interrupting input when tsc_enable is
-       * called to enable the PENIRQ interrupt.
-       */
+      /* Configure and enable the XPT2046 PENIRQ pin as an interrupting input. */
 
-      (void)lpc17_configgpio(GPIO_TC_PEN);
+      (void)lpc17_configgpio(GPIO_TC_PENIRQ);
 
       /* Configure the XPT2046 BUSY pin as a normal input. */
 
