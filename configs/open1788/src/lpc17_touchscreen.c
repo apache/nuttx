@@ -178,7 +178,7 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
   ivdbg("enable:%d\n", enable);
   if (enable)
     {
-      /* Enable the pin interrupt.  The pin interrupt is enabled from worker thread
+      /* Enable PENIRQ interrupts.  NOTE: The pin interrupt is enabled from worker thread
        * logic after completion of processing of the touchscreen interrupt.
        */
 
