@@ -454,17 +454,40 @@
 #define SYSCON_RSID_LOCKUP               (1 << 5)  /* Bit 5:  Lockup Reset */
                                                    /* Bits 6-31: Reserved */
 /* System control registers -- Matrix Arbitration Priorities */
-/*TODO*/
-#define SYSCON_MATRIXARB_PRI_ICODE       (3 << 0)  /* Bit 0-1:  I-Code bus priority (should be lower than D-Code */
-#define SYSCON_MATRIXARB_PRI_DCODE       (3 << 2)  /* Bit 2-3:  D-Code bus priority */
-#define SYSCON_MATRIXARB_PRI_SYS         (3 << 4)  /* Bit 4-5:  System bus priority */
-#define SYSCON_MATRIXARB_PRI_GPDMA       (3 << 6)  /* Bit 6-7:  General Purpose DMA priority */
-#define SYSCON_MATRIXARB_PRI_ETH         (3 << 8)  /* Bit 8-9:  Ethernet DMA priority */
-#define SYSCON_MATRIXARB_PRI_LCD         (3 << 10) /* Bit 10-11:  LCD DMA priority */
-#define SYSCON_MATRIXARB_PRI_USB         (3 << 12) /* Bit 12-13:  USB DMA priority */
+
+# define SYSCON_MATRIXARB_PRI_LOWEST     (0)
+# define SYSCON_MATRIXARB_PRI_LOW        (1)
+# define SYSCON_MATRIXARB_PRI_HIGH       (2)
+# define SYSCON_MATRIXARB_PRI_HIGHEST    (3)
+
+#define SYSCON_MATRIXARB_PRI_ICODE_SHIFT (0)       /* Bits 0-1:  I-Code bus priority (should be lower than D-Code) */
+#define SYSCON_MATRIXARB_PRI_ICODE_MASK  (3 << SYSCON_MATRIXARB_PRI_ICODE_SHIFT)
+#  define SYSCON_MATRIXARB_PRI_ICODE(n)  ((n) << SYSCON_MATRIXARB_PRI_ICODE_SHIFT)
+#define SYSCON_MATRIXARB_PRI_DCODE_SHIFT (2)       /* Bits 2-3:  D-Code bus priority */
+#define SYSCON_MATRIXARB_PRI_DCODE_MASK  (3 << SYSCON_MATRIXARB_PRI_DCODE_SHIFT)
+#  define SYSCON_MATRIXARB_PRI_DCODE(n)  ((n) << SYSCON_MATRIXARB_PRI_DCODE_SHIFT)
+#define SYSCON_MATRIXARB_PRI_SYS_SHIFT   (4)       /* Bits 4-5:  System bus priority */
+#define SYSCON_MATRIXARB_PRI_SYS_MASK    (3 << SYSCON_MATRIXARB_PRI_SYS_SHIFT)
+#  define SYSCON_MATRIXARB_PRI_SYS(n)    ((n) << SYSCON_MATRIXARB_PRI_SYS_SHIFT)
+#define SYSCON_MATRIXARB_PRI_GPDMA_SHIFT (6)       /* Bits 6-7:  General Purpose DMA priority */
+#define SYSCON_MATRIXARB_PRI_GPDMA_MASK  (3 << SYSCON_MATRIXARB_PRI_GPDMA_SHIFT)
+#  define SYSCON_MATRIXARB_PRI_GPDMA(n)  ((n) << SYSCON_MATRIXARB_PRI_GPDMA_SHIFT)
+#define SYSCON_MATRIXARB_PRI_ETH_SHIFT   (8)       /* Bits 8-9:  Ethernet DMA priority */
+#define SYSCON_MATRIXARB_PRI_ETH_MASK    (3 << SYSCON_MATRIXARB_PRI_ETH_SHIFT)
+#  define SYSCON_MATRIXARB_PRI_ETH(n)    ((n) << SYSCON_MATRIXARB_PRI_ETH_SHIFT)
+#define SYSCON_MATRIXARB_PRI_LCD_SHIFT   (10)      /* Bits 10-11:  LCD DMA priority */
+#define SYSCON_MATRIXARB_PRI_LCD_MASK    (3 << SYSCON_MATRIXARB_PRI_LCD_SHIFT)
+#  define SYSCON_MATRIXARB_PRI_LCD(n)    ((n) << SYSCON_MATRIXARB_PRI_LCD_SHIFT)
+#define SYSCON_MATRIXARB_PRI_USB_SHIFT   (12)      /* Bits 12-13:  USB DMA priority */
+#define SYSCON_MATRIXARB_PRI_USB_MASK    (3 << SYSCON_MATRIXARB_PRI_USB_SHIFT)
+#  define SYSCON_MATRIXARB_PRI_USB(n)    ((n) << SYSCON_MATRIXARB_PRI_USB_SHIFT)
                                                    /* Bits 14-15: Reserved */
-#define SYSCON_MATRIXARB_ROM_LAT         (1 << 16) /* Bit 16:  ROM Latency select (should always be zero) */
+#define SYSCON_MATRIXARB_ROM_LAT_SHIFT   (16)      /* Bit 16:  ROM Latency select (should always be zero) */
+#define SYSCON_MATRIXARB_ROM_LAT         (1 << SYSCON_MATRIXARB_ROM_LAT_SHIFT)
                                                    /* Bits 17-31: Reserved */
+
+#define SYSCON_MATRIXARB_PRI_MASK        (0x00013fff)
+
 /* System control registers -- Syscon Miscellaneous Registers */
 
 #define SYSCON_SCS_EMCSC                 (1 << 0)  /* Bit 0:  EMC shift control */
@@ -581,7 +604,7 @@
                                                   /* Bits 8-13: Reserved */
 #define SYSCON_EMCCAL_START_SHIFT        (14)     /* Bit 14: Start control bit for EMC calibration counter */
 #define SYSCON_EMCCAL_START_MASK         (1 << SYSCON_EMCCAL_START_SHIFT)
-# define SYSCON_EMCCAL_START             (1)      /* Automatically cleared when measurement is done */
+#  define SYSCON_EMCCAL_START            (1)      /* Automatically cleared when measurement is done */
 #define SYSCON_EMCCAL_DONE_SHIFT         (15)     /* Bit 15: Measurement completetion flag bit */
 #define SYSCON_EMCCAL_DONE_MASK          (1 << SYSCON_EMCCAL_DONE_SHIFT)
                                                   /* Automatically cleared when START bit is set */
