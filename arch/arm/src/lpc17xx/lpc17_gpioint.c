@@ -116,7 +116,12 @@ static unsigned int lpc17_getintedge(unsigned int port, unsigned int pin)
 static void lpc17_setintedge(uint32_t intbase, unsigned int pin,
                              unsigned int edges)
 {
+  irqstate_t flags;
   int regval;
+
+  /* These must be atomic */
+
+  flags = irqsave();
 
   /* Set/clear the rising edge enable bit */
 
@@ -145,6 +150,7 @@ static void lpc17_setintedge(uint32_t intbase, unsigned int pin,
     }
 
   putreg32(regval, intbase + LPC17_GPIOINT_INTENF_OFFSET);
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -389,9 +395,10 @@ static void lpc17_gpiodemux(uint32_t intbase, uint32_t intmask,
  * Name: lpc17_gpiointerrupt
  *
  * Description:
- *  Handle the EINT3 interrupt that also indicates that a GPIO interrupt has
- *  occurred.  NOTE:  This logic will have to be extended if EINT3 is
- *  actually used for External Interrupt 3.
+ *   Handle the GPIO interrupt.  For the LPC176x family, that interrupt could
+ *   also that also indicates that an EINT3 interrupt has occurred.  NOTE: 
+ *   This logic would  have to be extended if EINT3 is actually used for
+ *   External Interrupt 3 on an LPC176x platform.
  *
  ****************************************************************************/
 
