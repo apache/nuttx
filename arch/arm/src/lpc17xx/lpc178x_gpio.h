@@ -61,11 +61,14 @@
  */
 
 #define GPIO_IOCON_MASK        (0x00ff0000)
-#  define GPIO_HYSTERESIS      (1 << 16) /* Bit 16: HYSTERESIS: 0-Disable, 1-Enabled */
+#  define GPIO_INBUFF_SHIFT    (16)
+#  define GPIO_HYSTERESIS      (1 << GPIO_INBUFF_SHIFT) /* Bit 16: HYSTERESIS: 0-Disable, 1-Enabled */
 #  define GPIO_INVERT          (1 << 17) /* Bit 17: Input: 0-Not Inverted, 1-Inverted */
-#  define GPIO_SLEW            (1 << 18) /* Bit 18: Rate Control: 0-Standard mode, 1-Fast mode */
+#  define GPIO_SLEW_SHIFT      (18) /* Bit 18: Rate Control: 0-Standard mode, 1-Fast mode */
+#  define GPIO_SLEW            (1 << GPIO_SLEW_SHIFT) /* Bit 18: Rate Control: 0-Standard mode, 1-Fast mode */
 #  define GPIO_ADMODE          (1 << 19) /* Bit 19: A/D Modes: 0-Analog, 1-Digital  */
-#  define GPIO_FILTER          (1 << 20) /* Bit 20: Filter: 0-Off, 1-ON */
+#  define GPIO_FILTER_SHIFT    (20)
+#  define GPIO_FILTER          (1 << GPIO_FILTER_SHIFT) /* Bit 20: Filter: 0-Off, 1-ON */
 #  define GPIO_DACEN           (1 << 21) /* Bit 21: DAC: 0-Disabled, 1-Enabled, P0:26 only */
 
 #  define GPIO_I2CMODE_SHIFT   (22)      /* Bits 22-23: I2C mode */
