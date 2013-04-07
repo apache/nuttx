@@ -12,6 +12,7 @@ CONTENTS
   o Buttons
   o FPU
   o Using OpenOCD with the Olimex ARM-USB-OCD
+  o Loading Code with the ISP Board
   o Configuration
 
 LEDs
@@ -245,27 +246,53 @@ Using OpenOCD with the Olimex ARM-USB-OCD
      (gdb) monitor halt
 
     NOTES:
+
     1. The MCU must be halted using 'monitor halt' prior to loading code.
+
     2. 'monitor reset' will restart the processor after loading code.
+
     3. The 'monitor' command can be abbreviated as just 'mon'.
 
-    After starting GDB, you can load the NuttX ELF file:
+    After starting GDB, you can load the NuttX ELF file like this:
 
       (gdb) mon halt
       (gdb) load nuttx
 
     NOTES:
+
     1. NuttX should have been built so that it has debugging symbols
        (by setting CONFIG_DEBUG_SYMBOLS=y in the .config file).
+
     2. The MCU must be halted prior to loading code.
-    3. I find that there are often undetected write failures.  I usually
-       load nuttx twice to assure good FLASH contents:
+
+    3. I find that there are often undetected write failures when using
+       the Olimex ARM-USB-OCD debugber and that if you start the program
+       with a bad FLASH failure, it will lock up OpenOCD.  I usually 
+       oad nuttx twice, restarting OpenOCD in between in order to assure
+       good FLASH contents:
  
       (gdb) mon halt
       (gdb) load nuttx
       (gdb) mon reset
+
+      Exit GDB, kill the OpenOCD server, recycle power on the board,
+      restart the OpenOCD server and GDB, then:
+ 
       (gdb) mon halt
       (gdb) load nuttx
+      (gdb) mon reset
+
+      Other debuggers may not have these issues and such drastic steps may
+      not be necessary.
+
+Loading Code with the ISP Board
+===============================
+
+  Use can also load code onto the board using the WaveShare and the UART0
+  ISP/VCOM board.  I use the FlashMagic program for Windows available here:
+  http://www.flashmagictool.com/ . It is so easy to use that no further
+  explanation should be necessary:  Just select the LPC1788, the ISP COM
+  port, and the NuttX .hex file and program it.
 
 CONFIGURATION
 =============
@@ -452,15 +479,20 @@ CONFIGURATION
        on the 4.3" LCD module by modifying the configuration in the
        following ways:
 
-       CONFIG_INPUT=y                      : Enable support for input devices
-       CONFIG_INPUT_ADS7843E=y             : Enable support for the XPT2048
-       CONFIG_ADS7843E_SPIDEV=1            : Use SSP1 for communication
-       CONFIG_SPI=y                        : Enable SPI support
-       CONFIG_SPI_EXCHANGE=n               : exchange() method is not supported
-       CONFIG_GPIO_IRQ=y                   : GPIO interrupt support
-       CONFIG_LPC17_SSP1=y                 : Enable support for SSP1
-       CONFIG_EXAMPLES_TOUCHSCREEN=y       : Enable the touchscreen built-int test
-       CONFIG_EXAMPLES_TOUCHSCREEN_BUILTIN=y
+       Drivers:
+         CONFIG_INPUT=y                    : Enable support for input devices
+         CONFIG_INPUT_ADS7843E=y           : Enable support for the XPT2048
+         CONFIG_ADS7843E_SPIDEV=1          : Use SSP1 for communication
+         CONFIG_SPI=y                      : Enable SPI support
+         CONFIG_SPI_EXCHANGE=n             : exchange() method is not supported
+
+       System Type:
+         CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
+         CONFIG_LPC17_SSP1=y               : Enable support for SSP1
+ 
+       Applicaton Configuration:
+         CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
+         CONFIG_EXAMPLES_TOUCHSCREEN_BUILTIN=y
 
        Defaults should be okay for related touchscreen settings.
 
@@ -470,18 +502,24 @@ CONFIGURATION
        There is a jumper on board that enables the CD pin.  OR, you can simply
        remove the SD module so that it does not drive the CD pin.
 
-       CONFIG_LPC17_GPDMA=n                : No DMA
-       CONFIG_ARCH_DMA=n
-       CONFIG_LPC17_SDCARD=n               : No SD card driver
-       CONFIG_SDIO_DMA=n                   : No SD card DMA
-       CONFIG_MMCSD=n                      : No MMC/SD driver support
-       CONFIG_FS_FAT=n                     : No FAT file system support
+       Drivers:
+         CONFIG_MMCSD=n                    : No MMC/SD driver support
+
+       System Type:
+         CONFIG_LPC17_GPDMA=n              : No DMA
+         CONFIG_LPC17_SDCARD=n             : No SD card driver
+         CONFIG_SDIO_DMA=n                 : No SD card DMA
+         CONFIG_ARCH_DMA=n
+
+       File Systems:
+         CONFIG_FS_FAT=n                   : No FAT file system support
 
        For touchscreen debug output:
 
-       CONFIG_DEBUG=y
-       CONFIG_DEBUG_VERBOSE=y
-       CONFIG_DEBUG_INPUT=y
+       Build Setup:
+         CONFIG_DEBUG=y
+         CONFIG_DEBUG_VERBOSE=y
+         CONFIG_DEBUG_INPUT=y
 
   nxlines
   -------
