@@ -178,11 +178,21 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
   ivdbg("enable:%d\n", enable);
   if (enable)
     {
+      /* Configure the PENIRQ GPIO as an interrupting enable and enable the interrupt */
+
+      (void)lpc17_configgpio(GPIO_TC_PENIRQ);
       up_enable_irq(LPC17_IRQ_PENIRQ);
     }
   else
     {
+      /* Disable PENIRQ interrupts and reconfigure the pin as a normal input pin.
+       * We have to do this because the PENIRQ interrupt will be disabled from
+       * interrupt handling logic and, in that case, will be automatically re-enabled
+       * when the interrupt returns.
+       */
+
       up_disable_irq(LPC17_IRQ_PENIRQ);
+      (void)lpc17_configgpio(GPIO_TC_PEN);
     }
 }
 
@@ -278,9 +288,12 @@ int arch_tcinitialize(int minor)
 
   if (!initialized)
     {
-      /* Configure and enable the XPT2046 PENIRQ pin as an interrupting input. */
+      /* Configure and enable the XPT2046 PENIRQ pin as a normal input.  It
+       * will be reconfigured as an interrupting input when tsc_enable is
+       * called to enable the PENIRQ interrupt.
+       */
 
-      (void)lpc17_configgpio(GPIO_TC_PENIRQ);
+      (void)lpc17_configgpio(GPIO_TC_PEN);
 
       /* Configure the XPT2046 BUSY pin as a normal input. */
 
@@ -304,7 +317,7 @@ int arch_tcinitialize(int minor)
         {
           idbg("Failed to register touchscreen device minor=%d\n",
                CONFIG_ADS7843E_DEVMINOR);
-          /* up_spiuninitialize(dev); */
+       /* up_spiuninitialize(dev); */
           return -ENODEV;
         }
 
@@ -336,4 +349,3 @@ void arch_tcuninitialize(void)
 }
 
 #endif /* CONFIG_INPUT_ADS7843E */
-

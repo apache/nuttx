@@ -364,8 +364,6 @@ o Kernel Build
                A similar issue exists in NSH that uses some internal OS
                interfaces that would not be available in a kernel build
                (such as foreach_task, foreach_mountpoint, etc.).
-
-               See also "Memory Management" for another kernel build issue.
   Status:      Open
   Priority:    Low -- the kernel build configuration is not fully fielded
                yet.

@@ -4523,4 +4523,10 @@
 	* arch/arm/src/lpc17_gpiodbg.c:  Updated so that it correctly
 	  reports LPC177x/8x GPIO registers when GPIO debug is enabled
 	  (2013-4-05).
-
+	* arch/arm/src/Makefile:  The variable NUTTX already includes
+	  the extension $(EXEEXT).  So remove the second extension
+	  $(NUTTX)$(EXEEXT) in two places (2013-4-7).
+	* arch/arm/src/lpc17xx/lpc17_gpioint.c:  Disable interrrupts in
+	  lpc17_setintedge().  This logic must be atomic because it can be
+	  re-entered before it completes enabled interrupts, sometimes
+	  leaving the interrupts in a strange state (2013-4-7).
