@@ -233,9 +233,9 @@
    /* Set the end of system SRAM */
 
 #  if defined(CONFIG_STM32_STM32F427)
-#    define SRAM1_END   0x20030000
+#    define SRAM1_END 0x20030000
 #  else
-#    define SRAM1_END   0x20020000
+#    define SRAM1_END 0x20020000
 #  endif
 
    /* Set the range of CCM SRAM as well (although we may not use it) */
