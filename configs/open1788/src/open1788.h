@@ -132,7 +132,6 @@
  * Pins are configured as floating because there are pullups on the module.
  */
 
-#define GPIO_TC_PEN      (GPIO_INPUT | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN15)
 #define GPIO_TC_PENIRQ   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN15)
 #define GPIO_TC_BUSY     (GPIO_INPUT | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN14)
 #define GPIO_TC_CS       (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN8)

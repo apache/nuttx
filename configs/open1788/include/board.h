@@ -219,7 +219,7 @@
  * any way.  The following definitions are used to access individual LEDs.
  *
  * LED1 -- Connected to P1[14]
- * LED2 -- Connected to P0[16]
+ * LED2 -- Connected to P0[16] (shared with UART1 RXD)
  * LED3 -- Connected to P1[13]
  * LED4 -- Connected to P4[27]
  *
@@ -310,6 +310,30 @@
 #define GPIO_UART0_TXD             GPIO_UART0_TXD_2
 #define GPIO_UART0_RXD             GPIO_UART0_RXD_2
 
+/* UART1:
+ *
+ * All pin options are controlled by older briges on the bottom of the board.  There
+ * are the default settings on my board as it came out of the box:
+ *
+ * RTS   --- Connected to P0[22]
+ * RI    --- Connected to P0[21]
+ * DSR   --- Connected to P0[19]
+ * DCD   --- Connected to P0[18]
+ * CTS   --- Connected to P0[17]
+ * DTR   --- Connected to P0[20]
+ * TXD   --- Connected to P0[15]
+ * RXD   --- Connected to P0[16] (Shared with LED2)
+ */
+
+#define GPIO_UART1_RTS             GPIO_UART1_RTS_2
+#define GPIO_UART1_RI              GPIO_UART1_RI_1
+#define GPIO_UART1_DSR             GPIO_UART1_DSR_1
+#define GPIO_UART1_DCD             GPIO_UART1_DCD_1
+#define GPIO_UART1_CTS             GPIO_UART1_CTS_1
+#define GPIO_UART1_DTR             GPIO_UART1_DTR_1
+#define GPIO_UART1_TXD             GPIO_UART1_TXD_1
+#define GPIO_UART1_RXD             GPIO_UART1_RXD_1
+
 /* MCI-SDIO:
  *
  * D0    --- Connected to P1[6]
@@ -371,14 +395,14 @@
 
 /* LCD B:
  *
- * VD16   --- Connected to  P0[8]
- * VD17   --- Connected to  P0[9]
- * VD18   --- Connected to  P2[12]
- * VD19   --- Connected to  P2[13]
- * VD20   --- Connected to  P1[26]
- * VD21   --- Connected to  P1[27]
- * VD22   --- Connected to  P1[28]
- * VD23   --- Connected to  P1[29]
+ * VD16   --- Connected to P0[8]
+ * VD17   --- Connected to P0[9]
+ * VD18   --- Connected to P2[12]
+ * VD19   --- Connected to P2[13]
+ * VD20   --- Connected to P1[26]
+ * VD21   --- Connected to P1[27]
+ * VD22   --- Connected to P1[28]
+ * VD23   --- Connected to P1[29]
  *
  * DCLK   --- Connected to P2[2]
  * LP     --- Connected to P2[5]
