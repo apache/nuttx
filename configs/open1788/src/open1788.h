@@ -53,7 +53,7 @@
  * reconfigure this pin as normal GPIO input if NAND is used.
  */
 
-#define GPIO_NAND_RB (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN21)
+#define GPIO_NAND_RB     (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN21)
 
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
  * any way.  The following definitions are used to access individual LEDs.
@@ -66,14 +66,16 @@
  * These LEDs are connecte to ground so a high output value will illuminate them.
  */
 
-#define GPIO_LED1    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN14)
-#define GPIO_LED2    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN16)
-#define GPIO_LED3    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN13)
-#define GPIO_LED4    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT4 | GPIO_PIN27)
+#define GPIO_LED1        (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN14)
+#define GPIO_LED2        (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN16)
+#define GPIO_LED3        (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN13)
+#define GPIO_LED4        (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT4 | GPIO_PIN27)
 
 /* Button definitions ***************************************************************/
-/* The Open1788 supports several buttons.  All will read "1" when open and "0"
- * when closed
+/* The Open1788 supports several buttons.  All must be pulled up by the Open1788.
+ * When closed, the pins will be pulled to ground.  So the buttons will read "1"
+ * when open and "0" when closed.  All except USER1 are capable of generating
+ * interrupts.
  *
  * USER1           -- Connected to P4[26]
  * USER2           -- Connected to P2[22]
@@ -85,21 +87,31 @@
  * JOY_B           -- Connected to P2[26]
  * JOY_C           -- Connected to P2[23]
  * JOY_D           -- Connected to P2[19]
- * JOY_CTR         -- Connected to P0[14]
+ * JOY_CTR         -- Connected to P0[14] (shared with SSP1 SSEL)
  *
- * The switches are all connected to ground and should be pulled up and sensed
- * with a value of '0' when closed.
+ * For the interrupting buttons, interrupts are generated on both edges (press and
+ * release).
  */
 
-#define GPIO_USER1   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT4 | GPIO_PIN26)
-#define GPIO_USER2   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN22)
-#define GPIO_USER3   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN10)
+#define GPIO_USER1       (GPIO_INPUT   | GPIO_PULLUP | GPIO_PORT4 | GPIO_PIN26)
+#define GPIO_USER2       (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN22)
+#define GPIO_USER3       (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN10)
 
-#define GPIO_JOY_A   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN25)
-#define GPIO_JOY_B   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN26)
-#define GPIO_JOY_C   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN23)
-#define GPIO_JOY_D   (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN19)
-#define GPIO_JOY_CTR (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT0 | GPIO_PIN14)
+#define GPIO_JOY_A       (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN25)
+#define GPIO_JOY_B       (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN26)
+#define GPIO_JOY_C       (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN23)
+#define GPIO_JOY_D       (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT2 | GPIO_PIN19)
+#define GPIO_JOY_CTR     (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN14)
+
+/* IRQ numbers for the buttons that do support interrrupts */
+
+#define GPIO_USER2_IRQ   LPC17_IRQ_P2p22
+#define GPIO_USER3_IRQ   LPC17_IRQ_P0p10
+#define GPIO_JOY_A_IRQ   LPC17_IRQ_P2p25
+#define GPIO_JOY_B_IRQ   LPC17_IRQ_P2p26
+#define GPIO_JOY_C_IRQ   LPC17_IRQ_P2p23
+#define GPIO_JOY_D_IRQ   LPC17_IRQ_P2p19
+#define GPIO_JOY_CTR_IRQ LPC17_IRQ_P0p14
 
 /* SD Card **************************************************************************/
 /* The SD card detect (CD) signal is on P0[13].  This signal is shared.  It is also
@@ -109,12 +121,12 @@
  * The CD pin is interrupting:
  */
 
-#define GPIO_SD_CD   (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN13)
+#define GPIO_SD_CD       (GPIO_INTBOTH | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN13)
 
 /* LCD ******************************************************************************/
 /* Backlight enable, P2[1].  Initial state is OFF (zero) */
 
-#define GPIO_LCD_BL  (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN1)
+#define GPIO_LCD_BL      (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN1)
 
 /* XPT2046 Touchscreen **************************************************************/
 /* -------------- -------------------- ------------ --------------

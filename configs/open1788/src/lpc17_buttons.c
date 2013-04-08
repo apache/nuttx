@@ -101,7 +101,7 @@ static xcpt_t g_buttonisr[BOARD_NUM_BUTTONS];
 
 static uint8_t g_buttonirq[BOARD_NUM_BUTTONS] =
 {
-  GPIO_USER1_IRQ, GPIO_USER2_IRQ, GPIO_USER3_IRQ, GPIO_JOY_A_IRQ,
+  0,              GPIO_USER2_IRQ, GPIO_USER3_IRQ, GPIO_JOY_A_IRQ,
   GPIO_JOY_B_IRQ, GPIO_JOY_C_IRQ, GPIO_JOY_D_IRQ, GPIO_JOY_CTR_IRQ
 };
 #endif
@@ -209,36 +209,43 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
 
   if ((unsigned)id < BOARD_NUM_BUTTONS)
     {
-      /* Return the current button handler and set the new interrupt handler */
-
-      oldhandler      = g_buttonisr[id];
-      g_buttonisr[id] = irqhandler;
-
-      /* Disable interrupts until we are done */
-
-      flags = irqsave();
-
-      /* Configure the interrupt.  Either attach and enable the new
-       * interrupt or disable and detach the old interrupt handler.
+      /* Get the IRQ number for the button; A value of zero indicates that
+       * the button does not support the interrupt function.
        */
 
       irq = g_buttonirq[id];
-      if (irqhandler)
+      if (irq > 0)
         {
-          /* Attach then enable the new interrupt handler */
+          /* Disable interrupts until we are done */
 
-          (void)irq_attach(irq, irqhandler);
-          up_enable_irq(irq);
+          flags = irqsave();
+
+          /* Return the current button handler and set the new interrupt handler */
+
+          oldhandler      = g_buttonisr[id];
+          g_buttonisr[id] = irqhandler;
+
+          /* Configure the interrupt.  Either attach and enable the new
+           * interrupt or disable and detach the old interrupt handler.
+           */
+
+          if (irqhandler)
+            {
+              /* Attach then enable the new interrupt handler */
+
+              (void)irq_attach(irq, irqhandler);
+              up_enable_irq(irq);
+            }
+          else
+            {
+              /* Disable then then detach the the old interrupt handler */
+
+              up_disable_irq(irq);
+              (void)irq_detach(irq);
+            }
+
+          irqrestore(flags);
         }
-      else
-        {
-          /* Disable then then detach the the old interrupt handler */
-
-          up_disable_irq(irq);
-          (void)irq_detach(irq);
-        }
-
-      irqrestore(flags);
     }
 
   return oldhandler;
