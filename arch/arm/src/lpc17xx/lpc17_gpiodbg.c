@@ -166,7 +166,7 @@ int lpc17_dumpgpio(lpc17_pinset_t pinset, const char *msg)
         pinmode, pinmode ? getreg32(pinmode) : 0, 
         g_odmode[port],    getreg32(g_odmode[port]));
 #elif defined(LPC178x)
-  lldbg("  IOCON[%08x]:\n", getreg32(iocon));
+  lldbg("  IOCON[%08x]: %08x\n", iocon, getreg32(iocon));
 #endif
 
   base = g_fiobase[port];
