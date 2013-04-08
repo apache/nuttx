@@ -258,8 +258,10 @@
                                        *              OFF while sleeping            */
 
 /* Button definitions ***************************************************************/
-/* The Open1788 supports several buttons.  All will read "1" when open and "0"
- * when closed
+/* The Open1788 supports several buttons.  All must be pulled up by the Open1788.
+ * When closed, the pins will be pulled to ground.  So the buttons will read "1"
+ * when open and "0" when closed.  All except USER1 are capable of generating
+ * interrupts.
  *
  * USER1           -- Connected to P4[26]
  * USER2           -- Connected to P2[22]
@@ -271,11 +273,12 @@
  * JOY_B           -- Connected to P2[26]
  * JOY_C           -- Connected to P2[23]
  * JOY_D           -- Connected to P2[19]
- * JOY_CTR         -- Connected to P0[14]
+ * JOY_CTR         -- Connected to P0[14] (shared with SSP1 SSEL)
  *
- * The switches are all connected to ground and should be pulled up and sensed
- * with a value of '0' when closed.
+ * For the interrupting buttons, interrupts are generated on both edges (press and
+ * release).
  */
+
 
 #define BOARD_BUTTON_USER1         0
 #define BOARD_BUTTON_USER2         1
