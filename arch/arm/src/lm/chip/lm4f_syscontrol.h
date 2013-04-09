@@ -475,7 +475,8 @@
 #define SYSCON_RCC2_SYSDIV2_SHIFT      23        /* Bits 28-23: System Clock Divisor */
 #define SYSCON_RCC2_SYSDIV2_MASK       (0x3f << SYSCON_RCC2_SYSDIV2_SHIFT)
 #  define SYSCON_RCC2_SYSDIV(n)        ((n-1) << SYSCON_RCC2_SYSDIV2_SHIFT)
-#define SYSCON_RCC2_DIV400             (1 << 30) /* Bit 3-: Divide PLL as 400 MHz vs. 200 MHz */
+#  define SYSCON_RCC2_SYSDIV_DIV400(n) (((n-1) >> 1) << SYSCON_RCC2_SYSDIV2_SHIFT)
+#define SYSCON_RCC2_DIV400             (1 << 30) /* Bit 30: Divide PLL as 400 MHz vs. 200 MHz */
 #define SYSCON_RCC2_USERCC2            (1 << 31) /* Bit 31: Use RCC2 When set */
 
 /* Main Oscillator Control */

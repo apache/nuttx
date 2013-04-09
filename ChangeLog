@@ -4532,3 +4532,7 @@
 	  leaving the interrupts in a strange state (2013-4-7).
 	* arch/arm/src/lpc17_lcd.c:  Rommel Marcelo go the LPC1788
 	  framebuffer-based LCD working.  Very nice! (2013-4-08).
+	* arch/arm/src/lm/lm_clockconfig.c and configs/lm4f120-launchpad:
+	  Fix handling of the RCC SYSDIV2 field whent the PLL output is
+	  400MHz.  Don't forget to set the USERCC2 bit in the register or
+	  all is for naught (2013-4-09).
