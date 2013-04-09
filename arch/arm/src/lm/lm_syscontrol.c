@@ -57,26 +57,29 @@
  ****************************************************************************/
 
 #ifdef LM4F
-#  define RCC_OSCMASK (SYSCON_RCC_MOSCDIS)
+#  define RCC_OSCMASK   (SYSCON_RCC_MOSCDIS)
+#  define RCC_XTALMASK  (SYSCON_RCC_XTAL_MASK | SYSCON_RCC_OSCSRC_MASK | \
+                         SYSCON_RCC_PWRDN)
+#  define RCC2_XTALMASK (SYSCON_RCC2_OSCSRC2_MASK | SYSCON_RCC2_PWRDN2 | \
+                         SYSCON_RCC2_SYSDIV2LSB | SYSCON_RCC2_SYSDIV2_MASK | \
+                         SYSCON_RCC2_DIV400 | SYSCON_RCC2_USERCC2)
+#  define RCC_DIVMASK   (SYSCON_RCC_SYSDIV_MASK | SYSCON_RCC_USESYSDIV | \
+                         SYSCON_RCC_MOSCDIS)
+#  define RCC2_DIVMASK  (SYSCON_RCC2_SYSDIV2LSB | SYSCON_RCC2_SYSDIV2_MASK)
 #else
-#  define RCC_OSCMASK (SYSCON_RCC_IOSCDIS|SYSCON_RCC_MOSCDIS)
+#  define RCC_OSCMASK   (SYSCON_RCC_IOSCDIS | SYSCON_RCC_MOSCDIS)
+#  define RCC_XTALMASK  (SYSCON_RCC_XTAL_MASK | SYSCON_RCC_OSCSRC_MASK | \
+                         SYSCON_RCC_PWRDN)
+#  define RCC2_XTALMASK (SYSCON_RCC2_OSCSRC2_MASK | SYSCON_RCC2_PWRDN2 | \
+                         SYSCON_RCC2_SYSDIV2_MASK | SYSCON_RCC2_USERCC2)
+#  define RCC_DIVMASK   (SYSCON_RCC_SYSDIV_MASK | SYSCON_RCC_USESYSDIV | \
+                         SYSCON_RCC_IOSCDIS | SYSCON_RCC_MOSCDIS)
+#  define RCC2_DIVMASK  (SYSCON_RCC2_SYSDIV2_MASK)
 #endif
-#define RCC_XTALMASK  (SYSCON_RCC_XTAL_MASK|SYSCON_RCC_OSCSRC_MASK|\
-                       SYSCON_RCC_PWRDN)
-#define RCC2_XTALMASK (SYSCON_RCC2_USERCC2|SYSCON_RCC2_OSCSRC2_MASK|\
-                       SYSCON_RCC2_PWRDN2)
-#ifdef LM4F
-#  define RCC_DIVMASK (SYSCON_RCC_SYSDIV_MASK|SYSCON_RCC_USESYSDIV|\
-                       SYSCON_RCC_MOSCDIS)
-#else
-#  define RCC_DIVMASK (SYSCON_RCC_SYSDIV_MASK|SYSCON_RCC_USESYSDIV|\
-                       SYSCON_RCC_IOSCDIS|SYSCON_RCC_MOSCDIS)
-#endif
-#define RCC2_DIVMASK  (SYSCON_RCC2_SYSDIV2_MASK)
 
-#define FAST_OSCDELAY (512*1024)
-#define SLOW_OSCDELAY (4*1024)
-#define PLLLOCK_DELAY (32*1024)
+#define FAST_OSCDELAY   (512*1024)
+#define SLOW_OSCDELAY   (4*1024)
+#define PLLLOCK_DELAY   (32*1024)
 
 /****************************************************************************
  * Private Data
@@ -253,16 +256,25 @@ void lm_clockconfig(uint32_t newrcc, uint32_t newrcc2)
 
   putreg32(SYSCON_MISC_PLLLMIS, LM_SYSCON_MISC);
 
-  /* Write the new RCC/RCC2 values.  Order depends upon whether RCC2 or RCC
-   * is currently enabled.
+  /* Write the new RCC/RCC2 values.
+   *
+   * Original LM3S Logic: Order depends upon whether RCC2 or RCC is
+   * currently enabled.
+   *
+   * LM4F120 Data Sheet:  "Write the RCC register prior to writing the
+   * RCC2 register. If a subsequent write to the RCC register is required,
+   * include another register access after writing the RCC register and
+   * before writing the RCC2 register.
    */
 
-  if (rcc2 & SYSCON_RCC2_USERCC2)
+#ifndef LM4F
+  if ((rcc2 & SYSCON_RCC2_USERCC2) != 0)
     {
       putreg32(rcc2, LM_SYSCON_RCC2);
       putreg32(rcc, LM_SYSCON_RCC);
     }
-    else
+  else
+#endif
     {
       putreg32(rcc, LM_SYSCON_RCC);
       putreg32(rcc2, LM_SYSCON_RCC2);
@@ -294,9 +306,18 @@ void lm_clockconfig(uint32_t newrcc, uint32_t newrcc2)
       rcc2 &= ~SYSCON_RCC2_BYPASS2;
     }
 
-  /* Now we can set the final RCC/RCC2 values */
+  /* Now we can set the final RCC/RCC2 values:
+   *
+   * LM4F120 Data Sheet:  "Write the RCC register prior to writing the
+   * RCC2 register. If a subsequent write to the RCC register is required,
+   * include another register access after writing the RCC register and
+   * before writing the RCC2 register.
+   */
 
   putreg32(rcc, LM_SYSCON_RCC);
+#ifdef LM4F
+  rcc = getreg32(LM_SYSCON_RCC);
+#endif
   putreg32(rcc2, LM_SYSCON_RCC2);
 
   /* Wait for the system divider to be effective */
