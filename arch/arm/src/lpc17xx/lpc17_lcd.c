@@ -466,16 +466,12 @@ int up_fbinitialize(void)
 
   gvdbg("Entry\n");
 
-  /* Disable LCD controller */
+  /* Give LCD bus priority */
 
-  regval = getreg32(LPC17_LCD_CTRL);
-  regval &= ~LCD_CTRL_LCDPWR;
-  putreg32(regval, LPC17_LCD_CTRL);
-
-  for (i = LPC17_LCD_PWRDIS_DELAY; i; i--);
-
-  regval &= ~LCD_CTRL_LCDEN;
-  putreg32(regval, LPC17_LCD_CTRL);
+  regval = ((SYSCON_MATRIXARB_PRI_ICODE(SYSCON_MATRIXARB_PRI_LOW)) |
+            (SYSCON_MATRIXARB_PRI_DCODE(SYSCON_MATRIXARB_PRI_HIGHEST)) |
+            (SYSCON_MATRIXARB_PRI_LCD(SYSCON_MATRIXARB_PRI_HIGHEST)));
+  putreg32(regval, LPC17_SYSCON_MATRIXARB);
 
   /* Configure pins */
   /* Video data */
@@ -519,11 +515,11 @@ int up_fbinitialize(void)
   lpc17_configgpio(GPIO_LCD_ENABM);
   lpc17_configgpio(GPIO_LCD_PWR);
 
-  gvdbg("Configuring the LCD controller\n");
-
   /* Turn on LCD clock */
 
   modifyreg32(LPC17_SYSCON_PCONP, 0, SYSCON_PCONP_PCLCD);
+
+  gvdbg("Configuring the LCD controller\n");
 
   /* Disable the cursor */
 
@@ -531,9 +527,18 @@ int up_fbinitialize(void)
   regval &= ~LCD_CRSR_CTRL_CRSON;
   putreg32(regval, LPC17_LCD_CRSR_CRTL);
 
+  /* Clear any pending interrupts */
+
+  putreg32(LCD_INTCLR_ALL, LPC17_LCD_INTCLR);
+
   /* Disable GLCD controller */
 
   putreg32(0, LPC17_LCD_CTRL);
+
+  /* Initialize pixel clock (assuming clock source is the peripheral clock) */
+
+  putreg32(((uint32_t)BOARD_PCLK_FREQUENCY / (uint32_t)LPC17_LCD_PIXEL_CLOCK)+1,
+           LPC17_SYSCON_LCDCFG);
 
   /* Set the bits per pixel */
 
@@ -558,24 +563,19 @@ int up_fbinitialize(void)
   regval |= LCD_CTRL_LCDBPP_444;    /* 12 bpp, 4:4:4 mode */
 #endif
 
-  putreg32(regval, LPC17_LCD_CTRL);
-
   /* TFT panel */
 
 #if CONFIG_LPC17_LCD_TFTPANEL
   regval |= LCD_CTRL_LCDTFT;
-  putreg32(regval, LPC17_LCD_CTRL);
 #endif
+
+  /* Swap red and blue */
+
+  regval |= LCD_CTRL_BGR;
 
   /* Single panel */
 
   regval &= ~LCD_CTRL_LCDDUAL;
-  putreg32(regval, LPC17_LCD_CTRL);
-
-  /* Normal RGB output */
-
-  regval &= ~LCD_CTRL_BGR;
-  putreg32(regval, LPC17_LCD_CTRL);
 
   /* Select monochrome or color LCD */
 
@@ -583,77 +583,30 @@ int up_fbinitialize(void)
   /* Select monochrome LCD */
 
   regval &= ~LCD_CTRL_BGR;
-  putreg32(regval, LPC17_LCD_CTRL);
 
   /* Select 4- or 8-bit monochrome interface */
 
-#if LPC17_BPP > 4
+#  if LPC17_BPP > 4
   regval |= LCD_CTRL_LCDMONO8;
-#else
+#  else
   regval &= ~LCD_CTRL_LCDMONO8;
-#endif
-  putreg32(regval, LPC17_LCD_CTRL);
+#  endif
 
 #else
   /* Select color LCD */
 
   regval &= ~(LCD_CTRL_LCDBW | LCD_CTRL_LCDMONO8);
-  putreg32(regval, LPC17_LCD_CTRL);
-#endif
+
+#endif /* CONFIG_LPC17_LCD_MONOCHROME */
 
   /* Little endian byte order */
 
   regval &= ~LCD_CTRL_BEBO;
-  putreg32(regval, LPC17_LCD_CTRL);
 
   /* Little endian pixel order */
 
   regval &= ~LCD_CTRL_BEPO;
   putreg32(regval, LPC17_LCD_CTRL);
-
-  /* Disable power */
-
-  regval &= ~LCD_CTRL_LCDPWR;
-  putreg32(regval, LPC17_LCD_CTRL);
-
-  /* Initialize pixel clock (assuming clock source is the peripheral clock) */
-
-  putreg32(BOARD_PCLK_FREQUENCY / LPC17_LCD_PIXEL_CLOCK, LPC17_SYSCON_LCDCFG);
-
-  /* Bypass internal pixel clock divider */
-
-  regval  = getreg32(LPC17_LCD_POL);
-  regval |= LCD_POL_BCD;
-  putreg32(regval, LPC17_LCD_POL);
-
-  /* Select the PCLK for the LCD block clock source */
-
-  regval &= ~LCD_POL_CLKSEL;
-  putreg32(regval, LPC17_LCD_POL);
-
-  /* LCDFP pin is active LOW and inactive HIGH */
-
-  regval |= LCD_POL_IVS;
-  putreg32(regval, LPC17_LCD_POL);
-
-  /* LCDLP pin is active LOW and inactive HIGH */
-
-  regval |= LCD_POL_IHS;
-  putreg32(regval, LPC17_LCD_POL);
-
-  /* Data is driven out into the LCD on the falling edge */
-
-  regval &= ~LCD_POL_IPC;
-  putreg32(regval, LPC17_LCD_POL);
-
-  /* Active high */
-
-  regval &= ~LCD_POL_IOE;
-  putreg32(regval, LPC17_LCD_POL);
-
-  regval &= ~LCD_POL_CPL_MASK;
-  regval |= (CONFIG_LPC17_LCD_HWIDTH-1) << LCD_POL_CPL_SHIFT;
-  putreg32(regval, LPC17_LCD_POL);
 
   /* Initialize horizontal timing */
 
@@ -673,6 +626,40 @@ int up_fbinitialize(void)
             (CONFIG_LPC17_LCD_VPULSE - 1)  << LCD_TIMV_VSW_SHIFT |
             (CONFIG_LPC17_LCD_VFRONTPORCH) << LCD_TIMV_VFP_SHIFT |
             (CONFIG_LPC17_LCD_VBACKPORCH)  << LCD_TIMV_VBP_SHIFT);
+  putreg32(regval, LPC17_LCD_TIMV);
+
+  /* Initialize clock and signal polarity */
+
+  regval = getreg32(LPC17_LCD_POL);
+
+  /* LCDFP pin is active LOW and inactive HIGH */
+
+  regval |= LCD_POL_IVS;
+
+  /* LCDLP pin is active LOW and inactive HIGH */
+
+  regval |= LCD_POL_IHS;
+
+  /* Data is driven out into the LCD on the falling edge */
+
+  regval &= ~LCD_POL_IPC;
+
+  /* Set number of clocks per line */
+
+  regval |= ((CONFIG_LPC17_LCD_HWIDTH-1) << LCD_POL_CPL_SHIFT);
+
+  /* Bypass internal pixel clock divider */
+
+  regval |= LCD_POL_BCD;
+
+  /* LCD_ENAB_M is active high */
+
+  regval &= ~LCD_POL_IOE;
+
+  /* Select CCLK for the LCD block clock source */
+
+  regval &= ~LCD_POL_CLKSEL;
+  putreg32(regval, LPC17_LCD_POL);
 
   /* Frame base address doubleword aligned */
 
@@ -682,26 +669,32 @@ int up_fbinitialize(void)
   /* Clear the display */
 
   lpc17_lcdclear(CONFIG_LPC17_LCD_BACKCOLOR);
-  for (i = LPC17_LCD_PWREN_DELAY; i; i--);
-
-  /* Enable LCD */
-
-  gvdbg("Enabling the display\n");
-
-  regval  = getreg32(LPC17_LCD_CTRL);
-  regval |= LCD_CTRL_LCDEN;
-  putreg32(regval, LPC17_LCD_CTRL);
-
-  for (i = LPC17_LCD_PWREN_DELAY; i; i--);
-
-  regval |= LCD_CTRL_LCDPWR;
-  putreg32(regval, LPC17_LCD_CTRL);
 
 #ifdef CONFIG_LPC17_LCD_BACKLIGHT
   /* Turn on the back light */
 
   lpc17_backlight(true);
 #endif
+
+  putreg32(0, LPC17_LCD_INTMSK);
+  gvdbg("Enabling the display\n");
+
+  for (i = LPC17_LCD_PWREN_DELAY; i; i--);
+
+  /* Enable LCD */
+
+  regval  = getreg32(LPC17_LCD_CTRL);
+  regval |= LCD_CTRL_LCDEN;
+  putreg32(regval, LPC17_LCD_CTRL);
+
+  /* Enable LCD power */
+
+  for (i = LPC17_LCD_PWREN_DELAY; i; i--);
+
+  regval  = getreg32(LPC17_LCD_CTRL);
+  regval |= LCD_CTRL_LCDPWR;
+  putreg32(regval, LPC17_LCD_CTRL);
+
   return OK;
 }
 
