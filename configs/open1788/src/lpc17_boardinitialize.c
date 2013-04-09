@@ -94,7 +94,7 @@ void lpc17_boardinitialize(void)
    * function open1788_sspinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1)
+#if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1) || defined(CONFIG_LPC17_SSP2)
   if (open1788_sspinitialize)
     {
       open1788_sspinitialize();
