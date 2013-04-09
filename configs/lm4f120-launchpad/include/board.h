@@ -77,16 +77,36 @@
  * - No auto-clock gating reset
  */
 
-#define LM_RCC_VALUE (SYSCON_RCC_OSCSRC | SYSCON_RCC_XTAL | SYSCON_RCC_USESYSDIV | SYSCON_RCC_SYSDIV(LM_SYSDIV))
+#define LM_RCC_VALUE (SYSCON_RCC_OSCSRC | SYSCON_RCC_XTAL | \
+                      SYSCON_RCC_USESYSDIV | SYSCON_RCC_SYSDIV(LM_SYSDIV))
 
-/* RCC2 settings -- RCC2 not used.  Other RCC2 settings
+/* RCC2 settings
  *
  * - PLL and sys dividers not bypassed.
  * - PLL not powered down
  * - Not using RCC2
+ *
+ * When SYSCON_RCC2_DIV400 is not selected, SYSDIV2 is the divisor-1.
+ * When SYSCON_RCC2_DIV400 is selected, SYSDIV2 is the divisor-1)/2, plus
+ * the LSB:
+ *
+ * SYSDIV2 SYSDIV2LSB DIVISOR
+ *   0       N/A         2
+ *   1       0           3
+ *   "       1           4
+ *   2       0           5
+ *   "       1           6
+ *   etc.
  */
 
-#define LM_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV(LM_SYSDIV) | SYSCON_RCC2_DIV400)
+#if (LM_SYSDIV & 1) == 0
+#  define LM_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV2LSB | \
+                         SYSCON_RCC2_SYSDIV_DIV400(LM_SYSDIV) | \
+                         SYSCON_RCC2_DIV400 | SYSCON_RCC2_USERCC2)
+#else
+#  define LM_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV_DIV400(LM_SYSDIV) | \
+                         SYSCON_RCC2_DIV400 | SYSCON_RCC2_USERCC2)
+#endif
 
 /* LED definitions ******************************************************************/
 /* The LM4F120 LaunchPad has a single RGB LED.  There is only one visible LED which
