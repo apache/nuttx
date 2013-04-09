@@ -132,6 +132,7 @@ const uint32_t g_intbase[GPIO_NPORTS] =
  *
  ****************************************************************************/
 
+#if 0 /* Not used */
 static uint32_t lpc17_getioconmask(unsigned int port, unsigned int pin)
 {
   uint32_t typemask = IOCON_TYPE_D_MASK;
@@ -206,7 +207,7 @@ static uint32_t lpc17_getioconmask(unsigned int port, unsigned int pin)
 
   return typemask;
 }
-
+#endif
 
 /****************************************************************************
  * Name: lpc17_seti2cmode
@@ -241,15 +242,12 @@ static void lpc17_setpinfunction(unsigned int port, unsigned int pin,
 {
   uint32_t regaddr;
   uint32_t regval;
-  uint32_t typemask;
 
-  typemask= lpc17_getioconmask(port,pin);
   regaddr = LPC17_IOCON_P(port, pin);
   regval  = getreg32(regaddr);
 
   regval &= ~IOCON_FUNC_MASK;
   regval |= ((value << IOCON_FUNC_SHIFT) & IOCON_FUNC_MASK);
-  regval &= typemask;
   putreg32(regval, regaddr);
 }
 
