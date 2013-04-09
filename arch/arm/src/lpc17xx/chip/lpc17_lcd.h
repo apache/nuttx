@@ -206,6 +206,8 @@
 #define LCD_INTMSK_VCOMPIM              (1 << 3)  /* Bit 3: Vertical compare interrupt enable */
 #define LCD_INTMSK_BERIM                (1 << 4)  /* Bit 4: AHB Master error interrupt enable */
                                                   /* Bits 5-31: Reserved */
+#define LCD_INTMSK_ALL                  (0x1e)
+
 /* LCD_INTRAW - Raw Interrupt Status Register */
                                                   /* Bits 0: Reserved */
 #define LCD_INTRAW_FUFRIS               (1 << 1)  /* Bit 1: FIFO Undeflow raw interrupt status */
@@ -213,6 +215,8 @@
 #define LCD_INTRAW_VCOMPRIS             (1 << 3)  /* Bit 3: Vertical compare interrupt status */
 #define LCD_INTRAW_BERRAW               (1 << 4)  /* Bit 4: AHB Master bus error interrupt status */
                                                   /* Bits 5-31: Reserved */
+#define LCD_INTRAW_ALL                  (0x1e)
+
 /* LCD_INTSTAT - Masked Interrupt Status Register */
                                                   /* Bits 0: Reserved */
 #define LCD_INTSTAT_FUFMIS              (1 << 1)  /* Bit 1: FIFO Undeflow raw interrupt status */
@@ -220,6 +224,8 @@
 #define LCD_INTSTAT_VCOMPMIS            (1 << 3)  /* Bit 3: Vertical compare interrupt status */
 #define LCD_INTSTAT_BERMIS              (1 << 4)  /* Bit 4: AHB Master bus error interrupt status */
                                                   /* Bits 15-31: Reserved */
+#define LCD_INTSTAT_ALL                 (0x1e)
+
 /* LCD_INTCLR - Interrupt Clear Register */
                                                   /* Bits 0: Reserved */
 #define LCD_INTCLR_FUFIC                (1 << 1)  /* Bit 1: FIFO Undeflow raw interrupt clear */
@@ -227,6 +233,8 @@
 #define LCD_INTCLR_VCOMPIC              (1 << 3)  /* Bit 3: Vertical compare interrupt clear */
 #define LCD_INTCLR_BERIC                (1 << 4)  /* Bit 4: AHB Master bus error interrupt clear */
                                                   /* Bits 15-31: Reserved */
+#define LCD_INTCLR_ALL                  (0x1e)
+
 /* Upper and Lower Panel Address register has no bitfields */
 /*
  *   Upper Panel Current Address register (LCDUPCURR)

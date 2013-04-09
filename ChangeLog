@@ -4530,3 +4530,5 @@
 	  lpc17_setintedge().  This logic must be atomic because it can be
 	  re-entered before it completes enabled interrupts, sometimes
 	  leaving the interrupts in a strange state (2013-4-7).
+	* arch/arm/src/lpc17_lcd.c:  Rommel Marcelo go the LPC1788
+	  framebuffer-based LCD working.  Very nice! (2013-4-08).
