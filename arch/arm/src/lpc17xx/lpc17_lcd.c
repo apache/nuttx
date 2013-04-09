@@ -569,7 +569,7 @@ int up_fbinitialize(void)
   regval |= LCD_CTRL_LCDTFT;
 #endif
 
-  /* Swap red and blue */
+  /* Swap red and blue.  The colors will be 0x00RRGGBB, not 0x00BBGGRR. */
 
   regval |= LCD_CTRL_BGR;
 
