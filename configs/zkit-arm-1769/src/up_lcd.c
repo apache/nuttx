@@ -108,12 +108,11 @@ FAR struct lcd_dev_s *dev;
 int up_lcdinitialize(void)
 {
   lpc17_configgpio(ZKITARM_OLED_RST);
-  lpc17_configgpio(ZKITARM_OLED_CS);
   lpc17_configgpio(ZKITARM_OLED_RS);
   lpc17_gpiowrite(ZKITARM_OLED_RST, 1);
-  lpc17_gpiowrite(ZKITARM_OLED_CS, 1);
   lpc17_gpiowrite(ZKITARM_OLED_RS, 1);
 
+  zkit_sspinitialize();
   spi = lpc17_sspinitialize(0);
   if (!spi)
     {

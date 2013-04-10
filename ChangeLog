@@ -4536,3 +4536,6 @@
 	  Fix handling of the RCC SYSDIV2 field whent the PLL output is
 	  400MHz.  Don't forget to set the USERCC2 bit in the register or
 	  all is for naught (2013-4-09).
+	* configs/zkit-arm-1769/src/up_lcd.c, up_ssp.c, and up_spi.c:
+	  Use SSP0 to LCD and SPI to SD-Card on the Zkit-arm-1769 board.
+	  From Manikandan. S (2013-4-10)

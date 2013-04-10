@@ -63,6 +63,10 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS += up_can.c
 endif
 
+ifeq ($(CONFIG_LPC17_SPI),y)
+CSRCS += up_spi.c
+endif
+
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
