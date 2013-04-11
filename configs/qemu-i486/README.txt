@@ -90,8 +90,18 @@ Toolchains
   not produce ELF final binaries but, rather, DOS MZ executables (i.e., .exe
   files).  Those cannot be used with QEMU.
 
-  The file */setenv.sh should be modified to point to the correct path to the
-  GCC toolchain (if different from the default in your PATH variable).
+    NOTE: It has also been reported to me that with a certain Ubuntu virtual
+    installation, the native x86 did not build correct i486 code.  Other
+    installations of the same vintage do not have such issues.  However,
+    there is always a possibility that any GCC release will be incompatible
+    with i486.  That fallback used by this person in this particular case
+    was to use the Buildroot i486 cross-development tool described below.  I
+    suspect that this was not necessary, but it was a simple work-around
+    that allowed that person to build a work-able system.
+
+  In any event, the file */setenv.sh should be modified to point to the correct
+  path to the GCC toolchain (if different from the default in your PATH
+  variable).
 
 Cygwin Buildroot Toolchain
 --------------------------
