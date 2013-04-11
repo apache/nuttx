@@ -204,7 +204,7 @@ int uip_backlogdestroy(FAR struct uip_conn *conn)
 
        /* Then free the entire backlog structure */
 
-       lib_free(blg);
+       kfree(blg);
     }
 
   return OK;
