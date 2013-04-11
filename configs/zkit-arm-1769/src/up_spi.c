@@ -188,3 +188,4 @@ int lpc17_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 }
 
 #endif /* CONFIG_SPI_CMDDATA */
+#endif /* CONFIG_LPC17_SPI */
