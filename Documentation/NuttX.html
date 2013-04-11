@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 1, 2013</p>
+      <p>Last Updated: April 10, 2013</p>
     </td>
   </tr>
 </table>
@@ -2417,11 +2417,11 @@ nsh>
     </p>
     <ul>
       <b>STATUS:</b>
-      This is still a work in progess.
       At present there is a working basic port with OS verification, Nuttshell (<a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>) configurations, and a graphics test configuration.
       The NSH configuration includes verfied support for (DMA-based) SD card interface.
       SDRAM is working.
-      The LCD driver is not functional as of this writing, but is actively underwork and is expected to be available in the NuttX-6.27 release.
+      The frame-buffer LCD driver is functional and the touchscreen interface is actively underwork.
+      Both should be available in the NuttX-6.27 release.
       </ul>
    </td>
 </tr>
@@ -2650,13 +2650,13 @@ nsh>
     <p>
       <b>TI Stellaris LM4F120</b>.
       This port uses the TI Stellaris LM4F120 LaunchPad.
-      Jose Pablo Carballo is doing this port.
+      Jose Pablo Carballo and I are doing this port.
     </p>
     <ul>
       <p>
         <b>STATUS:</b>
-        As of this writing, the basic port is code complete but still untested.
-        The fully verified LM4F120 LaunchPad port is expected in NuttX-6.27.
+        As of this writing, the basic port is code complete and fully verified configurations exit for the basic NuttX OS test and for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+        The first fully functional LM4F120 LaunchPad port was released in NuttX-6.27.
       </p>
     </ul>
   </td>
