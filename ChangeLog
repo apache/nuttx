@@ -4544,3 +4544,5 @@
 	* drivers/usbdev/pl2303.c: Fix some compilation errors that
 	  crept in when fixes to the CDC/ACM driver where blindly
 	  incorporated in the PL2303 driver (2013-4-12).
+	* configs/stm3210e-eval/usbserial:  Converted to use the
+	  the kconfig-config frontends tools (2013-4-12).
