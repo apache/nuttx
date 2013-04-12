@@ -60,27 +60,39 @@
  * For pins that have ADC/DAC, USB, I2C
  */
 
-#define GPIO_IOCON_MASK        (0x00ff0000)
-#  define GPIO_INBUFF_SHIFT    (16)
-#  define GPIO_HYSTERESIS      (1 << GPIO_INBUFF_SHIFT) /* Bit 16: HYSTERESIS: 0-Disable, 1-Enabled */
-#  define GPIO_INVERT          (1 << 17) /* Bit 17: Input: 0-Not Inverted, 1-Inverted */
-#  define GPIO_SLEW_SHIFT      (18) /* Bit 18: Rate Control: 0-Standard mode, 1-Fast mode */
-#  define GPIO_SLEW            (1 << GPIO_SLEW_SHIFT) /* Bit 18: Rate Control: 0-Standard mode, 1-Fast mode */
-#  define GPIO_ADMODE          (1 << 19) /* Bit 19: A/D Modes: 0-Analog, 1-Digital  */
-#  define GPIO_FILTER_SHIFT    (20)
-#  define GPIO_FILTER          (1 << GPIO_FILTER_SHIFT) /* Bit 20: Filter: 0-Off, 1-ON */
-#  define GPIO_DACEN           (1 << 21) /* Bit 21: DAC: 0-Disabled, 1-Enabled, P0:26 only */
+#define GPIO_INBUFF_SHIFT      (16)      /* Bit 16: HYSTERESIS: 0-Disable, 1-Enabled */
+#define GPIO_INBUFF_MASK       (1 << GPIO_INBUFF_SHIFT)
+#  define GPIO_HYSTERESIS      (1 << GPIO_INBUFF_SHIFT)
 
-#  define GPIO_I2CMODE_SHIFT   (22)      /* Bits 22-23: I2C mode */
-#  define GPIO_I2CMODE_MASK    (3 << GPIO_I2CMODE_SHIFT)
-#    define GPIO_I2CHS         (1 << 22) /* Bit 22: Filter and Rate Control: 0-Enabled, 1-Disabled */
-#    define GPIO_HIDRIVE       (1 << 23) /* Bit 23: Current Sink: 0-4mA, 1-20mA  P5:2 and P5:3 only,*/
+#define GPIO_INVERT            (1 << 17) /* Bit 17: Input: 0-Not Inverted, 1-Inverted */
+
+#define GPIO_SLEW_SHIFT        (18)      /* Bit 18: Rate Control: 0-Standard mode, 1-Fast mode */
+#define GPIO_SLEW_MASK         (1 << GPIO_SLEW_SHIFT)
+#  define GPIO_SLEW_NORMAL     (0 << GPIO_SLEW_SHIFT)
+#  define GPIO_SLEW_FAST       (1 << GPIO_SLEW_SHIFT)
+
+#define GPIO_ADMODE_SHIFT      (19)      /* Bit 19: A/D Modes: 0-Analog, 1-Digital  */
+#define GPIO_ADMODE_MASK       (1 << GPIO_ADMODE_SHIFT)
+#  define GPIO_MODE_DIGITAL    (0 << GPIO_ADMODE_SHIFT)
+#  define GPIO_MODE_ANALOG     (1 << GPIO_ADMODE_SHIFT)
+
+#define GPIO_FILTER_SHIFT      (20)      /* Bit 20: Filter: 0-Off, 1-ON */
+#define GPIO_FILTER_MASK       (1 << GPIO_FILTER_SHIFT)
+#  define GPIO_FILTER_OFF      (0 << GPIO_FILTER_SHIFT)
+#  define GPIO_FILTER_ON       (1 << GPIO_FILTER_SHIFT)
+
+#define GPIO_DACEN             (1 << 21) /* Bit 21: DAC: 0-Disabled, 1-Enabled, P0:26 only */
+
+#define GPIO_I2CMODE_SHIFT     (22)      /* Bits 22-23: I2C mode */
+#define GPIO_I2CMODE_MASK      (3 << GPIO_I2CMODE_SHIFT)
+#  define GPIO_I2CHS           (1 << 22) /* Bit 22: Filter and Rate Control: 0-Enabled, 1-Disabled */
+#  define GPIO_HIDRIVE         (1 << 23) /* Bit 23: Current Sink: 0-4mA, 1-20mA  P5:2 and P5:3 only,*/
 
 /* Pin Function bits: FFFF
  * Only meaningful when the GPIO function is GPIO_PIN
  */
 
-#define GPIO_FUNC_SHIFT        (12)       /* Bits 12-15: GPIO mode */
+#define GPIO_FUNC_SHIFT        (12)    /* Bits 12-15: GPIO mode */
 #define GPIO_FUNC_MASK         (15 << GPIO_FUNC_SHIFT)
 #  define GPIO_INPUT           (0 << GPIO_FUNC_SHIFT) /* 0000 GPIO input pin */
 #  define GPIO_INTFE           (1 << GPIO_FUNC_SHIFT) /* 0001 GPIO interrupt falling edge */
@@ -95,7 +107,7 @@
 #  define GPIO_ALT6            (10 << GPIO_FUNC_SHIFT) /* 1010 Alternate function 6 */
 #  define GPIO_ALT7            (11 << GPIO_FUNC_SHIFT) /* 1011 Alternate function 7 */
 
-#define GPIO_EDGE_SHIFT        (12)       /* Bits 12-13: Interrupt edge bits */
+#define GPIO_EDGE_SHIFT        (12)      /* Bits 12-13: Interrupt edge bits */
 #define GPIO_EDGE_MASK         (3 << GPIO_EDGE_SHIFT)
 
 #define GPIO_INOUT_MASK        GPIO_OUTPUT
@@ -133,7 +145,7 @@
 
 /* Port number: PPP (0-5) */
 
-#define GPIO_PORT_SHIFT        (5)         /* Bit 5-7:  Port number */
+#define GPIO_PORT_SHIFT        (5)       /* Bit 5-7:  Port number */
 #define GPIO_PORT_MASK         (7 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT0           (0 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT1           (1 << GPIO_PORT_SHIFT)
@@ -146,7 +158,7 @@
 
 /* Pin number: NNNNN (0-31) */
 
-#define GPIO_PIN_SHIFT         0        /* Bits 0-4: GPIO number: 0-31 */
+#define GPIO_PIN_SHIFT         0         /* Bits 0-4: GPIO number: 0-31 */
 #define GPIO_PIN_MASK          (31 << GPIO_PIN_SHIFT)
 #  define GPIO_PIN0            (0  << GPIO_PIN_SHIFT)
 #  define GPIO_PIN1            (1  << GPIO_PIN_SHIFT)
