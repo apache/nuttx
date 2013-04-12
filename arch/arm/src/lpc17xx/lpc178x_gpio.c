@@ -287,7 +287,7 @@ static void lpc17_setslewmode(lpc17_pinset_t cfgset, unsigned int port,
 
   /* Decode the request output slew rate */
 
-  value = ((cfgset & GPIO_SLEW) >> GPIO_SLEW_SHIFT);
+  value = ((cfgset & GPIO_SLEW_MASK) >> GPIO_SLEW_SHIFT);
 
   /* Get the current IOCON register contents */
 
@@ -398,7 +398,7 @@ static void lpc17_setfilter(lpc17_pinset_t cfgset, unsigned int port,
 
   /* Decode the request input filter */
 
-  value = ((cfgset & GPIO_FILTER) >> GPIO_FILTER_SHIFT);
+  value = ((cfgset & GPIO_FILTER_MASK) >> GPIO_FILTER_SHIFT);
 
   /* Get the current IOCON register contents */
 
@@ -740,7 +740,7 @@ static int lpc17_configalternate(lpc17_pinset_t cfgset, unsigned int port,
 
   /* Check for analog mode */
 
-  if ((cfgset & GPIO_ADMODE) != 0)
+  if ((cfgset & GPIO_MODE_ANALOG) != 0)
     {
       lpc17_setmodeanalog(port, pin);
 
