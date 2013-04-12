@@ -452,12 +452,12 @@ o Kernel Build
 
   Title:       MICRO-KERNEL
   Description: The initial kernel build cut many interfaces at a very high level.
-               The resulting monolithic kernel is then rather large.  it would
+               The resulting monolithic kernel is then rather large.  It would
                not be a prohibitively large task to reorganize the interfaces so
                that NuttX is built as a micro-kernel, i.e., with only the core
                OS services within the kernel and with other OS facilities, such
-               as the file system, to reside in user-space and to interface with
-               those core OS facilities through traps.
+               as the file system, message queues, etc., residing in user-space
+               and to interfacing with those core OS facilities through traps.
   Status:      Open 
   Priority:    Low.  This is a good idea and certainly an architectural
                improvement.  However, there is no strong motivivation now do

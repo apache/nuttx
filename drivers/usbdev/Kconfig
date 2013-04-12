@@ -36,9 +36,11 @@ endchoice
 config USBDEV_MAXPOWER
 	int "Maximum power consumption in mA"
 	default 100
-	depends on USBDEV_BUSPOWERED
+#	depends on USBDEV_BUSPOWERED
 	---help---
-		Maximum power consumption in mA
+		Maximum power consumption in mA.  This selection should only apply if
+		the device is bus powered (USBDEV_BUSPOWERED).  It is, however, used
+		unconditionally in several USB device drivers.
 
 config USBDEV_DMA
 	bool "Enable DMA methods"

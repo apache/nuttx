@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/pl2303.c
  *
- *   Copyright (C) 2008-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic emulates the Prolific PL2303 serial/USB converter
@@ -1911,7 +1911,7 @@ static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
 static void usbclass_suspend(FAR struct usbdevclass_driver_s *driver,
                  FAR struct usbdev_s *dev)
 {
-  FAR struct cdcacm_dev_s *priv;
+  FAR struct pl2303_dev_s *priv;
 
   usbtrace(TRACE_CLASSSUSPEND, 0);
 
@@ -1925,7 +1925,7 @@ static void usbclass_suspend(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct cdcacm_driver_s*)driver)->dev;
+  priv = ((FAR struct pl2303_driver_s*)driver)->dev;
 
   /* And let the "upper half" driver now that we are suspended */
 
@@ -1945,7 +1945,7 @@ static void usbclass_suspend(FAR struct usbdevclass_driver_s *driver,
 static void usbclass_resume(FAR struct usbdevclass_driver_s *driver,
                        FAR struct usbdev_s *dev)
 {
-  FAR struct cdcacm_dev_s *priv;
+  FAR struct pl2303_dev_s *priv;
 
   usbtrace(TRACE_CLASSRESUME, 0);
 
@@ -1959,7 +1959,7 @@ static void usbclass_resume(FAR struct usbdevclass_driver_s *driver,
 
   /* Extract reference to private data */
 
-  priv = ((FAR struct cdcacm_driver_s*)driver)->dev;
+  priv = ((FAR struct pl2303_driver_s*)driver)->dev;
 
   /* Are we still configured? */
 

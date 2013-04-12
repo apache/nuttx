@@ -4539,3 +4539,8 @@
 	* configs/zkit-arm-1769/src/up_lcd.c, up_ssp.c, and up_spi.c:
 	  Use SSP0 to LCD and SPI to SD-Card on the Zkit-arm-1769 board.
 	  From Manikandan. S (2013-4-10)
+	* configs/olimex-lpc1766stk/usbserial:  Converted to use the
+	  the kconfig-config frontends tools (2013-4-12).
+	* drivers/usbdev/pl2303.c: Fix some compilation errors that
+	  crept in when fixes to the CDC/ACM driver where blindly
+	  incorporated in the PL2303 driver (2013-4-12).
