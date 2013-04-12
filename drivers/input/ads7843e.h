@@ -73,21 +73,22 @@
 /* ADS7843E Interfaces *********************************************************************/
 /* ADS7843E command bit settings */
 
-#define ADS7843E_CMD_PD0              (1 << 0)  /* PD0 */
-#define ADS7843E_CMD_PD1              (1 << 1)  /* PD1 */
-#define ADS7843E_CMD_DFR              (1 << 2)  /* SER/DFR */
-#define ADS7843E_CMD_EIGHT_BITS_MOD   (1 << 3)  /* Mode */
-#define ADS7843E_CMD_START            (1 << 7)  /* Start Bit */
-#define ADS7843E_CMD_SWITCH_SHIFT     4         /* Address setting */
+#define ADS7843E_CMD_PD0          (1 << 0)  /* Bit 0: Power down mode select bit 0 */
+#define ADS7843E_CMD_PD1          (1 << 1)  /* Bit 1: Power down mode select bit 1 */
+#define ADS7843E_CMD_SER          (1 << 2)  /* Bit 2: SER/DFR\: 0:DFR 1:SER */
+#define ADS7843E_CMD_MODE8        (1 << 3)  /* Bit 3: Mode 1:8-bits 0:12-bits */
+#define ADS7843E_CMD_CHAN_SHIFT   (4)       /* Bits 4-6: Channel select bits */
+#define ADS7843E_CMD_CHAN_MASK    (7 << ADS7843E_CMD_CHAN_SHIFT)
+#define ADS7843E_CMD_START        (1 << 7)  /* Bit 7: Start Bit */
 
 /* ADS7843E Commands */
 
 #define ADS7843_CMD_YPOSITION \
-  ((1 << ADS7843E_CMD_SWITCH_SHIFT)|ADS7843E_CMD_START|ADS7843E_CMD_PD0|ADS7843E_CMD_PD1)
+  ((1 << ADS7843E_CMD_CHAN_SHIFT)| ADS7843E_CMD_START | ADS7843E_CMD_PD0 | ADS7843E_CMD_PD1)
 #define ADS7843_CMD_XPOSITION \
-  ((5 << ADS7843E_CMD_SWITCH_SHIFT)|ADS7843E_CMD_START|ADS7843E_CMD_PD0|ADS7843E_CMD_PD1)
+  ((5 << ADS7843E_CMD_CHAN_SHIFT)| ADS7843E_CMD_START | ADS7843E_CMD_PD0 | ADS7843E_CMD_PD1)
 #define ADS7843_CMD_ENABPINIRQ \
-  ((1 << ADS7843E_CMD_SWITCH_SHIFT)|ADS7843E_CMD_START)
+  ((1 << ADS7843E_CMD_CHAN_SHIFT)| ADS7843E_CMD_START)
 
 /* Driver support **************************************************************************/
 /* This format is used to construct the /dev/input[n] device driver path.  It
