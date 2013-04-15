@@ -179,7 +179,7 @@ Serial Console
       CONFIG_UART1_2STOP=0
 
   In this configuration using UART1, it is necessary to disable LED support
-  on the board.  That is because UART1 RXD is set for pin p0.16, but so it
+  on the board.  That is because UART1 RXD is set for pin p0.16, but so is
   LED2.  If you do not disable LED support then no incoming serial data will
   be recevied.
 
@@ -187,11 +187,12 @@ Serial Console
       CONFIG_ARCH_LEDS=n             : Disable LED support
 
   You should also remove the LED2 jumper so that the RXD input does not
-  attempt to drive LED2 as well (this this does not seem to interfere with
+  attempt to drive LED2 as well (However, this does not seem to interfere with
   data receipt).
 
-  NOTE:  If you intend to use LEDs, then you might want to redesign some of
-  the LED logic in the src/ subdirectory so that it does not use LED2.
+  NOTE:  If you intend to use LEDs with UART1, then you might want to
+  redesign some ofthe LED logic in the src/ subdirectory so that it does not
+  attempt to use LED2.
 
 Using OpenOCD with the Olimex ARM-USB-OCD
 =========================================

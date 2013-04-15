@@ -632,7 +632,9 @@ static void ads7843e_worker(FAR void *arg)
     }
   else
     {
-      /* Handle pen down events.  First, sample positional values. */
+      /* Handle pen down events.  First, sample positional values. NOTE:
+       * that these commands have the side-effect of disabling the PENIRQ.
+       */
 
 #ifdef CONFIG_ADS7843E_SWAPXY
       x = ads7843e_sendcmd(priv, ADS7843_CMD_YPOSITION);
@@ -703,7 +705,12 @@ static void ads7843e_worker(FAR void *arg)
 
 ignored:
 
-  (void)ads7843e_sendcmd(priv, ADS7843_CMD_ENABPINIRQ);
+  /* Re-enable the PENIRQ interrupt at the ADS7843E */
+
+  (void)ads7843e_sendcmd(priv, ADS7843_CMD_ENABPENIRQ);
+
+  /* Re-enable the PENIRQ interrupt at the MCU's interrupt controller */
+
   config->enable(config, true);
 
   /* Release our lock on the state structure and unlock the SPI bus */
@@ -1228,7 +1235,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
 
   /* Enable the PEN IRQ */
   
-  ads7843e_sendcmd(priv, ADS7843_CMD_ENABPINIRQ);
+  ads7843e_sendcmd(priv, ADS7843_CMD_ENABPENIRQ);
 
   /* Unlock the bus */
 
