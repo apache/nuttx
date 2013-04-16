@@ -52,7 +52,6 @@
 #include "chip/kl_fmc.h"
 #include "chip/kl_llwu.h"
 #include "chip/kl_pinmux.h"
-#include "MKL25Z4.h"
 
 /****************************************************************************
  * Private Data
@@ -74,7 +73,6 @@
  *
  ****************************************************************************/
 
-#if 0
 static inline void kl_portclocks(void)
 {
   uint32_t regval;
@@ -86,7 +84,6 @@ static inline void kl_portclocks(void)
              SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
   putreg32(regval, KL_SIM_SCGC5);
 }
-#endif
 
 /****************************************************************************
  * Name: kl_pllconfig
@@ -97,147 +94,115 @@ static inline void kl_portclocks(void)
  *
  ****************************************************************************/
 
-#if 0
 void kl_pllconfig(void)
 {
   uint32_t regval32;
   uint8_t regval8;
 
   /* Enable clock gate to Port A module to enable pin routing (PORTA=1) */
-  regval32 = getreg32(KL_SIM_SCGC5);
+
+  regval32  = getreg32(KL_SIM_SCGC5);
   regval32 |= SIM_SCGC5_PORTA;
   putreg32(regval32, KL_SIM_SCGC5);
 
   /* Divide-by-2 for clock 1 and clock 4 (OUTDIV1=1, OUTDIV4=1) */
-  regval32 = SIM_CLKDIV1_OUTDIV1(1) | SIM_CLKDIV1_OUTDIV4(1);
+
+  regval32 = (SIM_CLKDIV1_OUTDIV1(1) | SIM_CLKDIV1_OUTDIV4(1));
   putreg32(regval32, KL_SIM_CLKDIV1);
 
   /* System oscillator drives 32 kHz clock for various peripherals (OSC32KSEL=0) */
-  regval32 = getreg32(KL_SIM_SOPT1);
+
+  regval32  = getreg32(KL_SIM_SOPT1);
   regval32 &= ~(SIM_SOPT1_OSC32KSEL);
   putreg32(regval32, KL_SIM_SOPT1);
 
   /* Select PLL as a clock source for various peripherals (PLLFLLSEL=1)
-     Clock source for TPM counter clock is MCGFLLCLK or MCGPLLCLK/2 */
-  regval32 = getreg32(KL_SIM_SOPT2);
+   * Clock source for TPM counter clock is MCGFLLCLK or MCGPLLCLK/2
+   */
+
+  regval32  = getreg32(KL_SIM_SOPT2);
   regval32 |= SIM_SOPT2_PLLFLLSEL;
   putreg32(regval32, KL_SIM_SOPT2);
-  regval32 = (regval32 & ~(SIM_SOPT2_TPMSRC_OCSERCLK)) | SIM_SOPT2_TPMSRC_MCGCLK;
+
+  regval32  = (regval32 & ~(SIM_SOPT2_TPMSRC_OCSERCLK)) | SIM_SOPT2_TPMSRC_MCGCLK;
   putreg32(regval32, KL_SIM_SOPT2);
 
-  /* PORTA_PCR18: ISF=0,MUX=0 */
-  /* PORTA_PCR19: ISF=0,MUX=0 */
-  regval32 = getreg32(KL_PORTA_PCR18);
-  regval32 = ~(PORT_PCR_ISF | PORT_PCR_MUX_ALT7);
+  /* PORTA_PCR18: ISF=0, MUX=0 */
+  /* PORTA_PCR19: ISF=0, MUX=0 */
+
+  regval32  = getreg32(KL_PORTA_PCR18);
+  regval32 &= ~(PORT_PCR_ISF | PORT_PCR_MUX_ALT7);
   putreg32(regval32, KL_PORTA_PCR18);  
-  regval32 = getreg32(KL_PORTA_PCR19);
-  regval32 = ~(PORT_PCR_ISF | PORT_PCR_MUX_ALT7);
+
+  regval32  = getreg32(KL_PORTA_PCR19);
+  regval32 &= ~(PORT_PCR_ISF | PORT_PCR_MUX_ALT7);
   putreg32(regval32, KL_PORTA_PCR19);  
 
   /* Switch to FBE Mode */
-  /* OSC0_CR: ERCLKEN=0,??=0,EREFSTEN=0,??=0,SC2P=0,SC4P=0,SC8P=0,SC16P=0 */
+  /* OSC0_CR: ERCLKEN=0, ??=0, EREFSTEN=0, ??=0, SC2P=0, SC4P=0, SC8P=0, SC16P=0 */
+
   putreg8(0, KL_OSC_CR);
-  /* MCG_C2: LOCRE0=0,??=0,RANGE0=2,HGO0=0,EREFS0=1,LP=0,IRCS=0 */
-  //regval8 = (MCG_C2_RANGE_VHIGH | MCG_C2_EREFS);
-  regval8 = MCG_C2_EREFS;
+
+  /* MCG_C2: LOCRE0=0, ??=0, RANGE0=2, HGO0=0, EREFS0=1, LP=0, IRCS=0 */
+
+  regval8 = (MCG_C2_RANGE_VHIGH | MCG_C2_EREFS);
   putreg8(regval8, KL_MCG_C2);
-  /* MCG_C1: CLKS=2,FRDIV=3,IREFS=0,IRCLKEN=0,IREFSTEN=0 */
+
+  /* MCG_C1: CLKS=2, FRDIV=3, IREFS=0, IRCLKEN=0, IREFSTEN=0 */
+
   regval8 = (MCG_C1_CLKS_EXTREF | MCG_C1_FRDIV_R0DIV8);
   putreg8(regval8, KL_MCG_C1);
-  /* MCG_C4: DMX32=0,DRST_DRS=0 */
-  regval8 = ~(MCG_C4_DMX32 | MCG_C4_DRST_DRS_HIGH);
+
+  /* MCG_C4: DMX32=0, DRST_DRS=0 */
+
+  regval8  = getreg8(KL_MCG_C4);
+  regval8 &= ~(MCG_C4_DMX32 | MCG_C4_DRST_DRS_MASK);
   putreg8(regval8, KL_MCG_C4);
-  /* MCG_C5: ??=0,PLLCLKEN0=0,PLLSTEN0=0,PRDIV0=1 */
+
+  /* MCG_C5: ??=0, PLLCLKEN0=0, PLLSTEN0=0, PRDIV0=1 */
+
   regval8 = MCG_C5_PRDIV(1);
   putreg8(regval8, KL_MCG_C5);
-  /* MCG_C6: LOLIE0=0,PLLS=0,CME0=0,VDIV0=0 */
+
+  /* MCG_C6: LOLIE0=0, PLLS=0, CME0=0, VDIV0=0 */
+
   putreg8(0, KL_MCG_C6);
   
-  /* Check that the source of the FLL reference clock is
-     the external reference clock. */
+  /* Check that the source of the FLL reference clock is the external
+   * reference clock.
+   */
+
   while((getreg8(KL_MCG_S) & MCG_S_IREFST) != 0)
     ;
 
   /* Wait until external reference */
+
   while((getreg8(KL_MCG_S) & MCG_S_CLKST_MASK) != 8)
     ;
 
-  /* Switch to PBE mode
-     Select PLL as MCG source (PLLS=1) */
+  /* Switch to PBE mode.
+   * Select PLL as MCG source (PLLS=1)
+   */
+
   putreg8(MCG_C6_PLLS, KL_MCG_C6);
+
   /* Wait until PLL locked */
-  while((getreg8(KL_MCG_S) & MCG_S_LOCK) != 0)
+
+  while((getreg8(KL_MCG_S) & MCG_S_LOCK) == 0)
     ;
 
   /* Switch to PEE mode
-     Select PLL output (CLKS=0)
-     FLL external reference divider (FRDIV=3)
-     External reference clock for FLL (IREFS=0) */
+   * Select PLL output (CLKS=0)
+   * FLL external reference divider (FRDIV=3)
+   * External reference clock for FLL (IREFS=0)
+   */
+
   putreg8(MCG_C1_FRDIV_R0DIV8, KL_MCG_C1);
 
   /* Wait until PLL output */
+
   while((getreg8(KL_MCG_S) & MCG_S_CLKST_MASK) != 0x0C)
     ;
-}
-#endif
-
-static void init_clocks(void)
-{
-    // Enable clock gate to Port A module to enable pin routing (PORTA=1)
-    SIM_SCGC5 |= SIM_SCGC5_PORTA_MASK;
-
-    // Divide-by-2 for clock 1 and clock 4 (OUTDIV1=1, OUTDIV4=1)   
-    SIM_CLKDIV1 = SIM_CLKDIV1_OUTDIV1(0x01) | SIM_CLKDIV1_OUTDIV4(0x01);
-
-    // System oscillator drives 32 kHz clock for various peripherals (OSC32KSEL=0)
-    SIM_SOPT1 &= ~SIM_SOPT1_OSC32KSEL(0x03);
-
-    // Select PLL as a clock source for various peripherals (PLLFLLSEL=1)
-    // Clock source for TPM counter clock is MCGFLLCLK or MCGPLLCLK/2
-    SIM_SOPT2 |= SIM_SOPT2_PLLFLLSEL_MASK;
-    SIM_SOPT2 = (SIM_SOPT2 & ~(SIM_SOPT2_TPMSRC(0x02))) | SIM_SOPT2_TPMSRC(0x01);
-
-    /* PORTA_PCR18: ISF=0,MUX=0 */
-    /* PORTA_PCR19: ISF=0,MUX=0 */
-    PORTA_PCR18 &= ~((PORT_PCR_ISF_MASK | PORT_PCR_MUX(0x07)));
-    PORTA_PCR19 &= ~((PORT_PCR_ISF_MASK | PORT_PCR_MUX(0x07)));
-    /* Switch to FBE Mode */
-
-    /* OSC0_CR: ERCLKEN=0,??=0,EREFSTEN=0,??=0,SC2P=0,SC4P=0,SC8P=0,SC16P=0 */
-    OSC0_CR = 0;
-    /* MCG_C2: LOCRE0=0,??=0,RANGE0=2,HGO0=0,EREFS0=1,LP=0,IRCS=0 */
-    MCG_C2 = (MCG_C2_RANGE0(0x02) | MCG_C2_EREFS0_MASK);
-    /* MCG_C1: CLKS=2,FRDIV=3,IREFS=0,IRCLKEN=0,IREFSTEN=0 */
-    MCG_C1 = (MCG_C1_CLKS(0x02) | MCG_C1_FRDIV(0x03));
-    /* MCG_C4: DMX32=0,DRST_DRS=0 */
-    MCG_C4 &= ~((MCG_C4_DMX32_MASK | MCG_C4_DRST_DRS(0x03)));
-    /* MCG_C5: ??=0,PLLCLKEN0=0,PLLSTEN0=0,PRDIV0=1 */
-    MCG_C5 = MCG_C5_PRDIV0(0x01);
-    /* MCG_C6: LOLIE0=0,PLLS=0,CME0=0,VDIV0=0 */
-    MCG_C6 = 0;
-
-
-    // Check that the source of the FLL reference clock is 
-    // the external reference clock.
-    while((MCG_S & MCG_S_IREFST_MASK) != 0)
-        ;
-
-    while((MCG_S & MCG_S_CLKST_MASK) != 8)      // Wait until external reference
-        ;
-
-    // Switch to PBE mode
-    //   Select PLL as MCG source (PLLS=1)
-    MCG_C6 = MCG_C6_PLLS_MASK;
-    while((MCG_S & MCG_S_LOCK0_MASK) == 0)      // Wait until PLL locked
-        ;
-
-    // Switch to PEE mode
-    //    Select PLL output (CLKS=0)
-    //    FLL external reference divider (FRDIV=3)
-    //    External reference clock for FLL (IREFS=0)
-    MCG_C1 = MCG_C1_FRDIV(0x03);
-    while((MCG_S & MCG_S_CLKST_MASK) != 0x0CU)  // Wait until PLL output
-        ;
 }
 
 /****************************************************************************
@@ -258,12 +223,11 @@ void kl_clockconfig(void)
 {
   /* Enable all of the port clocks */
 
-  //kl_portclocks();
+  kl_portclocks();
 
   /* Configure the PLL based on settings in the board.h file */
 
-  //kl_pllconfig();
-  init_clocks();
+  kl_pllconfig();
 
   /* For debugging, we will normally want to enable the trace clock and/or
    * the FlexBus clock.
