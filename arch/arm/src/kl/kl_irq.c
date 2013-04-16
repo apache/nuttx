@@ -198,13 +198,13 @@ static inline void kl_clrpend(int irq)
 
   /* Check for an external interrupt */
 
-  if (irq >= KL_IRQ_INTERRUPT && irq < KL_IRQ_INTERRUPT + 32)
+  if (irq >= KL_IRQ_EXTINT && irq < (KL_IRQ_EXTINT + 32))
     {
       /* Set the appropriate bit in the ISER register to enable the
        * interrupt
        */
 
-      putreg32((1 << (irq - KL_IRQ_INTERRUPT)), ARMV6M_NVIC_ICPR);
+      putreg32((1 << (irq - KL_IRQ_EXTINT)), ARMV6M_NVIC_ICPR);
     }
 }
 
@@ -295,13 +295,13 @@ void up_disable_irq(int irq)
 
   /* Check for an external interrupt */
 
-  if (irq >= KL_IRQ_INTERRUPT && irq < KL_IRQ_INTERRUPT + 32)
+  if (irq >= KL_IRQ_EXTINT && irq < (KL_IRQ_EXTINT + 32))
     {
       /* Set the appropriate bit in the ICER register to disable the
        * interrupt
        */
 
-      putreg32((1 << (irq - KL_IRQ_INTERRUPT)), ARMV6M_NVIC_ICER);
+      putreg32((1 << (irq - KL_IRQ_EXTINT)), ARMV6M_NVIC_ICER);
     }
 
   /* Handle processor exceptions.  Only SysTick can be disabled */
@@ -332,13 +332,13 @@ void up_enable_irq(int irq)
 
   /* Check for external interrupt */
 
-  if (irq >= KL_IRQ_INTERRUPT && irq < KL_IRQ_INTERRUPT + 32)
+  if (irq >= KL_IRQ_EXTINT && irq < (KL_IRQ_EXTINT + 32))
     {
       /* Set the appropriate bit in the ISER register to enable the
        * interrupt
        */
 
-      putreg32((1 << (irq - KL_IRQ_INTERRUPT)), ARMV6M_NVIC_ISER);
+      putreg32((1 << (irq - KL_IRQ_EXTINT)), ARMV6M_NVIC_ISER);
     }
 
   /* Handle processor exceptions.  Only SysTick can be disabled */
@@ -386,13 +386,13 @@ int up_prioritize_irq(int irq, int priority)
   DEBUGASSERT(irq == KL_IRQ_SVCALL ||
               irq == KL_IRQ_PENDSV ||
               irq == KL_IRQ_SYSTICK ||
-             (irq >= KL_IRQ_INTERRUPT && irq < NR_IRQS));
+             (irq >= KL_IRQ_EXTINT && irq < NR_IRQS));
   DEBUGASSERT(priority >= NVIC_SYSH_DISABLE_PRIORITY &&
               priority <= NVIC_SYSH_PRIORITY_MIN);
 
   /* Check for external interrupt */
 
-  if (irq >= KL_IRQ_INTERRUPT && irq < KL_IRQ_INTERRUPT + 32)
+  if (irq >= KL_IRQ_EXTINT && irq < (KL_IRQ_EXTINT + 32))
     {
       /* ARMV6M_NVIC_IPR() maps register IPR0-IPR7 with four settings per
        * register.

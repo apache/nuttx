@@ -301,13 +301,13 @@
  */
 
 #  define NR_VECTORS              (120) /* 120 vectors */
-#  define NR_IRQS                 (108) /* 97 interrupts but 108 IRQ numbers */
+#  define NR_IRQS                 (108) /* 120 interrupts but 108 IRQ numbers */
 
 #else
   /* The interrupt vectors for other parts are defined in other documents and may or
    * may not be the same as above (the family members are all very similar)  This
    * error just means that you have to look at the document and determine for yourself
-   * if the memory map is the same.
+   * if the vectors are the same.
    */
 
 #  error "No IRQ numbers for this Kinetis part"
