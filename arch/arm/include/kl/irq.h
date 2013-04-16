@@ -122,15 +122,14 @@
  * now) seems to justify the waste.
  */
 
-#  define NR_VECTORS            (64) /* 64 vectors */
-#  define NR_IRQS               (64) /* 64 interrupts but 48 IRQ numbers */
-#  define KL_IRQ_INTERRUPT      (64)
+#  define NR_VECTORS           (64) /* 64 vectors */
+#  define NR_IRQS              (48) /* 64 interrupts but 48 IRQ numbers */
 
 #else
   /* The interrupt vectors for other parts are defined in other documents and may or
    * may not be the same as above (the family members are all very similar)  This
    * error just means that you have to look at the document and determine for yourself
-   * if the memory map is the same.
+   * if the vectors are the same.
    */
 
 #  error "No IRQ numbers for this Kinetis L part"
