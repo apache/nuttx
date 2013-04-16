@@ -2,8 +2,8 @@ README.txt
 ==========
 
 This is the README file for the port of NuttX to the Freescale
-Freedom K25Z board.  This board has the K25Z120LE3AN chip
-with a built-in NuLink debugger.
+Freedom KL25Z board.  This board has the K25Z120LE3AN chip
+with a built-in SDA debugger.
 
 Contents
 ========
@@ -95,16 +95,16 @@ LEDs
 Serial Console
 ==============
 
-As with most NuttX configurations, the Freedom K25Z configurations
+As with most NuttX configurations, the Freedom KL25Z configurations
 depend on having a serial console to interact with the software.  The
-Freedom K25Z, however, has not on-board RS-232 drivers so will be
-necessary to connect the Freedom K25Z UART pins to an external
+Freedom KL25Z, however, has not on-board RS-232 drivers so will be
+necessary to connect the Freedom KL25Z UART pins to an external
 RS-232 driver board or TTL-to-Serial USB adaptor.
 
 By default UART1 is used as the serial console on these boards.  K25Z120LE3AN
 is provided as an LQFP48 package and, for this case, the UART1 RX signal
 (RXD1) is on PB.4, pin 8, and the TX signal (TXD1) is on PB.5, pin 9.
-These pins are available on the Freedom K25Z JP5.
+These pins are available on the Freedom KL25Z JP5.
 
   NOTE: The TX vs RX labeling may be confusing.  On one RS-232 driver board,
   I had to connect the K25Z120 TXD0 pin to the driver boards RXD pin.  How
@@ -112,7 +112,7 @@ These pins are available on the Freedom K25Z JP5.
 
 UART0 is an alternative that can be selected by modifying the default
 configuation.  UART0 RX (RXD0) is on PB.0, pin 17, and the TX signal (TXD0)
-is on PB.1, pin 18.  These pins are available on the Freedom K25Z JP1.
+is on PB.1, pin 18.  These pins are available on the Freedom KL25Z JP1.
 
   NOTE: PB.0, pin 17, is also used to control the user LED on board (labeled
   "IO").  CONFIG_ARCH_LED should not be selected if UART0 is used.
@@ -122,7 +122,7 @@ The K25Z120LE3AN does not support UART2.
 Debugging
 =========
 
-The Freedom K25Z includes a built-in NuLink debugger.  Unfortunately,
+The Freedom KL25Z includes a built-in SDA debugger.  Unfortunately,
 full debug support is available only with the Keil and IAR toolchains.
 There is, however, a free program called ICP (In-Circuit Programmer).  It
 can be used to burn programs into FLASH (aka APROM).
