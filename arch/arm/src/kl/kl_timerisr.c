@@ -70,7 +70,7 @@
 #elif defined(CONFIG_KL_SYSTICK_HCLKd2)
 #  define SYSTICK_CLOCK (BOARD_HCLK_FREQUENCY/2)   /* HCLK/2 */
 #elif defined(CONFIG_KL_SYSTICK_INTHId2)
-#  define SYSTICK_CLOCK (KL_INTHI_FREQUENCY/2)    /* Internal high speed clock/2 */
+#  define SYSTICK_CLOCK (KL_INTHI_FREQUENCY/2)     /* Internal high speed clock/2 */
 #endif
 
 /* The desired timer interrupt frequency is provided by the definition
@@ -190,7 +190,6 @@ void up_timerinit(void)
    */
 
 #ifndef CONFIG_KL_SYSTICK_CORECLK
-
   /* This field is write protected and must be unlocked */
 
   kl_unlock();
