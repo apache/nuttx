@@ -4548,4 +4548,11 @@
 	  kconfig-config frontends tools (2013-4-12).
 	* configs/nucleus2g/usbserial:  Converted to use the
 	  kconfig-config frontends tools (2013-4-12).
-
+	* arch/arm/src/kl and arch/arm/include/kl:  Add support for the
+	  Kinetis L family of Cortex-M0+ MCUs.  Contributed by Alan
+	  Carvalho de Assis.  NOTE:  This is still very much a work in
+	  progress as of this initial commit (2013-04-16).
+	* configs/freedom-kl25z:  Support for the Freedom KL25Z board
+	  contributed by Alan Carvalho de Assis.  NOTE:  This is still
+	  very much a work inprogress as of this initial commit
+	  (2013-04-16).
