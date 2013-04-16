@@ -289,6 +289,15 @@ config KL_PIT
 
 endmenu
 
+choice
+	prompt "SysTick clock source"
+	default KL_SYSTICK_CORECLK
+
+config KL_SYSTICK_CORECLK
+	bool "Cortex-M0 core clock"
+
+endchoice
+
 comment "Kinetis GPIO Interrupt Configuration"
 
 config GPIO_IRQ

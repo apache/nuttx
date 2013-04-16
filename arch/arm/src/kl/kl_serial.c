@@ -62,7 +62,8 @@
 #include "kl_lowputc.h"
 #include "chip.h"
 #include "chip/kl_uart.h"
-//#include "kl_internal.h"
+
+#include "kl_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

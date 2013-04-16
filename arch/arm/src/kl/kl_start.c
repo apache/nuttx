@@ -52,8 +52,8 @@
 
 #include "kl_config.h"
 #include "kl_lowputc.h"
-//#include "kl_clockconfig.h"
 #include "kl_userspace.h"
+#include "kl_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -104,8 +104,10 @@ const uint32_t g_idle_topstack = HEAP_BASE;
 
 void iprintf(const char *string)
 {
-   while(*string != NULL)
-        kl_lowputc((char) *string++);
+  while(*string != '\0')
+    {
+      kl_lowputc((char) *string++);
+    }
 }
 
 /****************************************************************************
@@ -119,8 +121,9 @@ void iprintf(const char *string)
 void __start(void)
 {
   const uint32_t *src;
-  uint32_t *dest, i=0;
+  uint32_t *dest;
   volatile unsigned int *SIM_COPC = ((volatile unsigned int *)0x40048100);
+  //int i = 0;
 
   /*acassis: disable SIM_COP*/
   *SIM_COPC = 0;
