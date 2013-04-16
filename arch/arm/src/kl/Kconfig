@@ -1,0 +1,432 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+comment "Kinetis Configuration Options"
+
+choice
+	prompt "Kinetis Chip Selection"
+	default ARCH_CHIP_MKL25Z128
+	depends on ARCH_CHIP_KL
+
+config ARCH_CHIP_MKL25Z128
+	bool "MKL25Z128"
+	select ARCH_FAMILY_KL2X
+
+endchoice
+
+# Chip families
+
+config ARCH_FAMILY_KL2X
+	bool
+	default n
+
+menu "Kinetis Peripheral Support"
+
+config KL_TRACE
+	bool "Trace"
+	default n
+	---help---
+		Enable trace clocking on power up.
+
+config KL_FLEXBUS
+	bool "FlexBus"
+	default n
+	---help---
+		Enable flexbus clocking on power up.
+
+config KL_UART0
+	bool "UART0"
+	default n
+	select ARCH_HAVE_UART0
+	---help---
+		Support UART0
+
+config KL_UART1
+	bool "UART1"
+	default n
+	select ARCH_HAVE_UART1
+	---help---
+		Support UART1
+
+config KL_UART2
+	bool "UART2"
+	default n
+	select ARCH_HAVE_UART2
+	---help---
+		Support UART2
+
+config KL_UART3
+	bool "UART3"
+	default n
+	select ARCH_HAVE_UART3
+	---help---
+		Support UART3
+
+config KL_UART4
+	bool "UART4"
+	default n
+	select ARCH_HAVE_UART4
+	---help---
+		Support UART4
+
+config KL_UART5
+	bool "UART5"
+	default n
+	select ARCH_HAVE_UART5
+	---help---
+		Support UART5
+
+config KL_ENET
+	bool "Ethernet"
+	default n
+	depends on ARCH_FAMILY_K60
+	select NET
+	---help---
+		Support Ethernet (K60 only)
+
+config KL_RNGB
+	bool "Random number generator"
+	default n
+	depends on ARCH_FAMILY_K60
+	---help---
+		Support the random number generator(K60 only)
+
+config KL_FLEXCAN0
+	bool "FlexCAN0"
+	default n
+	---help---
+		Support FlexCAN0
+
+config KL_FLEXCAN1
+	bool "FlexCAN1"
+	default n
+	---help---
+		Support FlexCAN1
+
+config KL_SPI0
+	bool "SPI0"
+	default n
+	---help---
+		Support SPI0
+
+config KL_SPI1
+	bool "SPI1"
+	default n
+	---help---
+		Support SPI1
+
+config KL_SPI2
+	bool "SPI2"
+	default n
+	---help---
+		Support SPI2
+
+config KL_I2C0
+	bool "I2C0"
+	default n
+	---help---
+		Support I2C0
+
+config KL_I2C1
+	bool "I2C1"
+	default n
+	---help---
+		Support I2C1
+
+config KL_I2S
+	bool "I2S"
+	default n
+	---help---
+		Support I2S
+
+config KL_DAC0
+	bool "DAC0"
+	default n
+	---help---
+		Support DAC0
+
+config KL_DAC1
+	bool "DAC1"
+	default n
+	---help---
+		Support DAC1
+
+config KL_ADC0
+	bool "ADC0"
+	default n
+	---help---
+		Support ADC0
+
+config KL_ADC1
+	bool "ADC1"
+	default n
+	---help---
+		Support ADC1
+
+config KL_CMP
+	bool "CMP"
+	default n
+	---help---
+		Support CMP
+
+config KL_VREF
+	bool "VREF"
+	default n
+	---help---
+		Support VREF
+
+config KL_SDHC
+	bool "SDHC"
+	default n
+	select MMCSD_SDIO
+	---help---
+		Support SD host controller
+
+config KL_FTM0
+	bool "FTM0"
+	default n
+	---help---
+		Support FlexTimer 0
+
+config KL_FTM1
+	bool "FTM1"
+	default n
+	---help---
+		Support FlexTimer 1
+
+config KL_FTM2
+	bool "FTM2"
+	default n
+	---help---
+		Support FlexTimer 2
+
+config KL_LPTIMER
+	bool "Low power timer (LPTIMER)"
+	default n
+	---help---
+		Support the low power timer
+
+config KL_RTC
+	bool "RTC"
+	default n
+	---help---
+		Support RTC
+
+config KL_SLCD
+	bool "Segment LCD (SLCD)"
+	default n
+	depends on ARCH_FAMILY_K40
+	---help---
+		Support the segment LCD (K40 only)
+
+config KL_EWM
+	bool "External watchdog (WVM)"
+	default n
+	---help---
+		Support the external watchdog
+
+config KL_CMT
+	bool "Carrier modulator transmitter (CMT)"
+	default n
+	---help---
+		Support Carrier Modulator Transmitter
+
+config KL_USBOTG
+	bool "USB OTG"
+	default n
+	---help---
+		Support USB OTG (see also USBHOST and USBDEV)
+
+config KL_USBDCD
+	bool "USB device controller"
+	default n
+	---help---
+		Support the USB Device Charger Detection module
+
+config KL_LLWU
+	bool "Low leakage wake-up unit (LLWU)"
+	default n
+	---help---
+		Support the Low Leakage Wake-Up Unit
+
+config KL_TSI
+	bool "Touchscreen interface (TSI)"
+	default n
+	---help---
+		Support the touch screeen interface
+
+config KL_FTFL
+	bool "FLASH (FTFL)"
+	default n
+	---help---
+		Support FLASH
+
+config KL_DMA
+	bool "DMA"
+	default n
+	---help---
+		Support DMA
+
+config KL_CRC
+	bool "CRC"
+	default n
+	---help---
+		Support CRC
+
+config KL_PDB
+	bool "Programmable delay block (PDB)"
+	default n
+	---help---
+		Support the Programmable Delay Block
+
+config KL_PIT
+	bool "Programmable interval timer (PIT)"
+	default n
+	---help---
+		Support Programmable Interval Timers
+
+endmenu
+
+comment "Kinetis GPIO Interrupt Configuration"
+
+config GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
+if GPIO_IRQ
+
+config KL_PORTAINTS
+	bool "GPIOA interrupts"
+	---help---
+		Enable support for 32 interrupts from GPIO port A pins
+
+config KL_PORTBINTS
+	bool "GPIOB interrupts"
+	---help---
+		Enable support for 32 interrupts from GPIO port B pins
+
+config KL_PORTCINTS
+	bool "GPIOC interrupts"
+	---help---
+		Enable support for 32 interrupts from GPIO port C pins
+
+config KL_PORTDINTS
+	bool "GPIOD interrupts"
+	---help---
+		Enable support for 32 interrupts from GPIO port D pins
+
+config KL_PORTEINTS
+	bool "GPIOE interrupts"
+	---help---
+		Enable support for 32 interrupts from GPIO port E pins
+
+endif
+
+if KL_ENET
+
+comment "Kinetis Ethernet Configuration"
+
+config ENET_ENHANCEDBD
+	bool "Use enhanced buffer descriptors"
+	default n
+	---help---
+		Use enhanced, 32-byte buffer descriptors
+
+config ENET_NETHIFS
+	int "Number of Ethernet interfaces"
+	default 1
+	---help---
+		Number of Ethernet interfaces supported by the hardware.  Must be
+		one for now.
+
+config ENET_NRXBUFFERS
+	int "Number of Ethernet Rx buffers"
+	default 6
+	---help---
+		Number of Ethernet Rx buffers to use.  The size of one buffer is
+		determined by CONFIG_NET_BUFSIZE
+
+config ENET_NTXBUFFERS
+	int "Number of Ethernet Tx buffers"
+	default 2
+	---help---
+		Number of Ethernet Tx buffers to use. The size of one buffer is
+		determined by CONFIG_NET_BUFSIZE
+
+config ENET_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		MII/RMII address of the PHY
+
+config ENET_USEMII
+	bool "Use MII interface"
+	default n
+	---help---
+		The the MII PHY interface.  Default:  Use RMII interface
+
+endif
+
+if KL_SDHC
+
+comment "Kinetis SDHC Configuration"
+
+config KL_SDHC_ABSFREQ
+	bool "Custom transfer frequencies"
+	default n
+	---help---
+		Select SDCLK frequencies corresponding to various modes of operation.
+		These values may be provided in either the NuttX configuration file
+		or in the board.h file
+
+		NOTE:  These settings are not currently used.  Since there are only
+		four frequencies, it makes more sense to just "can" the fixed
+		frequency prescaler and divider values.
+
+if KL_SDHC_ABSFREQ
+
+config KL_IDMODE_FREQ
+	int "ID mode frequency"
+	default 400000
+	---help---
+		Initial, ID mode SD frequency
+
+config KL_MMCXFR_FREQ
+	int "MMC transfer frequency"
+	default 20000000
+	---help---
+		Frequency to use for transferring data to/from an MMC card
+
+config KL_SD1BIT_FREQ
+	int "SD 1-bit transfer frequency"
+	default 20000000
+	depends on CONFIG_SDIO_WIDTH_D1_ONLY
+	---help---
+		Frequency to use for transferring data to/from an SD card using on a single data liune.
+
+config KL_SD4BIT_FREQ
+	int "SD 4-bit transfer frequency"
+	default 20000000
+	depends on !CONFIG_SDIO_WIDTH_D1_ONLY
+	---help---
+		Frequency to use for transferring data to/from an SD card using all four data lines.
+
+endif
+
+config KL_SDHC_DMAPRIO
+	int "SDHC DMA priority"
+	depends on SDIO_DMA
+	---help---
+		SDHC DMA priority
+
+endif
+
+comment "Kinetis UART Configuration"
+
+config KL_UARTFIFOS
+	bool "Enable UART0 FIFO"
+	default n
+	depends on KL_UART0

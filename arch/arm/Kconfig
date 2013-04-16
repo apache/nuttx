@@ -51,6 +51,13 @@ config ARCH_CHIP_KINETIS
 	---help---
 		Freescale Kinetis Architectures (ARM Cortex-M4)
 
+config ARCH_CHIP_KL
+	bool "Freescale Kinetis L"
+	select ARCH_CORTEXM0
+	select ARCH_HAVE_CMNVECTOR
+	---help---
+		Freescale Kinetis L Architectures (ARM Cortex-M0+)
+
 config ARCH_CHIP_LM
 	bool "TI Stellaris"
 	select ARCH_HAVE_MPU

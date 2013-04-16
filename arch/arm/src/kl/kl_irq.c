@@ -1,0 +1,435 @@
+/****************************************************************************
+ * arch/arm/src/stm32/kl_irq.c
+ * arch/arm/src/chip/kl_irq.c
+ *
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <debug.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <arch/irq.h>
+
+#include "nvic.h"
+#include "up_arch.h"
+#include "os_internal.h"
+#include "up_internal.h"
+
+#include "kl_irq.h"
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/* Get a 32-bit version of the default priority */
+
+#define DEFPRIORITY32 \
+  (NVIC_SYSH_PRIORITY_DEFAULT << 24 | NVIC_SYSH_PRIORITY_DEFAULT << 16 |\
+   NVIC_SYSH_PRIORITY_DEFAULT << 8  | NVIC_SYSH_PRIORITY_DEFAULT)
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+volatile uint32_t *current_regs;
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: kl_dumpnvic
+ *
+ * Description:
+ *   Dump some interesting NVIC registers
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_IRQ) && defined (CONFIG_DEBUG)
+static void kl_dumpnvic(const char *msg, int irq)
+{
+  irqstate_t flags;
+
+  flags = irqsave();
+
+  slldbg("NVIC (%s, irq=%d):\n", msg, irq);
+  slldbg("  ISER:       %08x ICER:   %08x\n",
+         getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER));
+  slldbg("  ISPR:       %08x ICPR:   %08x\n",
+         getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
+  slldbg("  IRQ PRIO:   %08x %08x %08x %08x\n", 
+        getreg32(ARMV6M_NVIC_IPR0), getreg32(ARMV6M_NVIC_IPR1),
+        getreg32(ARMV6M_NVIC_IPR2), getreg32(ARMV6M_NVIC_IPR3));
+  slldbg("              %08x %08x %08x %08x\n", 
+        getreg32(ARMV6M_NVIC_IPR4), getreg32(ARMV6M_NVIC_IPR5),
+        getreg32(ARMV6M_NVIC_IPR6), getreg32(ARMV6M_NVIC_IPR7));
+
+  slldbg("SYSCON:\n");
+  slldbg("  CPUID:      %08x\n",
+         getreg32(ARMV6M_SYSCON_CPUID));
+  slldbg("  ICSR:       %08x AIRCR:  %08x\n",
+         getreg32(ARMV6M_SYSCON_ICSR), getreg32(ARMV6M_SYSCON_AIRCR));
+  slldbg("  SCR:        %08x CCR:    %08x\n",
+         getreg32(ARMV6M_SYSCON_SCR), getreg32(ARMV6M_SYSCON_CCR));
+  slldbg("  SHPR2:      %08x SHPR3:  %08x\n",
+         getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
+
+  irqrestore(flags);
+}
+
+#else
+#  define kl_dumpnvic(msg, irq)
+#endif
+
+/****************************************************************************
+ * Name: kl_nmi, kl_busfault, kl_usagefault, kl_pendsv,
+ *       kl_dbgmonitor, kl_pendsv, kl_reserved
+ *
+ * Description:
+ *   Handlers for various execptions.  None are handled and all are fatal
+ *   error conditions.  The only advantage these provided over the default
+ *   unexpected interrupt handler is that they provide a diagnostic output.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG
+static int kl_nmi(int irq, FAR void *context)
+{
+  (void)irqsave();
+  dbg("PANIC!!! NMI received\n");
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+
+static int kl_pendsv(int irq, FAR void *context)
+{
+  (void)irqsave();
+  dbg("PANIC!!! PendSV received\n");
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+
+static int kl_reserved(int irq, FAR void *context)
+{
+  (void)irqsave();
+  dbg("PANIC!!! Reserved interrupt\n");
+  PANIC(OSERR_UNEXPECTEDISR);
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: kl_prioritize_syscall
+ *
+ * Description:
+ *   Set the priority of an exception.  This function may be needed
+ *   internally even if support for prioritized interrupts is not enabled.
+ *
+ ****************************************************************************/
+
+static inline void kl_prioritize_syscall(int priority)
+{
+  uint32_t regval;
+
+  /* SVCALL is system handler 11 */
+
+  regval = getreg32(ARMV6M_SYSCON_SHPR2);
+  regval &= ~SYSCON_SHPR2_PRI_11_MASK;
+  regval |= (priority << SYSCON_SHPR2_PRI_11_SHIFT);
+  putreg32(regval, ARMV6M_SYSCON_SHPR2);
+}
+
+/****************************************************************************
+ * Name: kl_clrpend
+ *
+ * Description:
+ *   Clear a pending interrupt at the NVIC.
+ *
+ ****************************************************************************/
+
+static inline void kl_clrpend(int irq)
+{
+  /* This will be called on each interrupt exit whether the interrupt can be
+   * enambled or not.  So this assertion is necessarily lame.
+   */
+
+  DEBUGASSERT((unsigned)irq < NR_IRQS);
+
+  /* Check for an external interrupt */
+
+  if (irq >= KL_IRQ_INTERRUPT && irq < KL_IRQ_INTERRUPT + 32)
+    {
+      /* Set the appropriate bit in the ISER register to enable the
+       * interrupt
+       */
+
+      putreg32((1 << (irq - KL_IRQ_INTERRUPT)), ARMV6M_NVIC_ICPR);
+    }
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_irqinitialize
+ ****************************************************************************/
+
+void up_irqinitialize(void)
+{
+  uint32_t regaddr;
+  int i;
+
+  /* Disable all interrupts */
+
+  putreg32(0xffffffff, ARMV6M_NVIC_ICER);
+
+  /* Set all interrupts (and exceptions) to the default priority */
+
+  putreg32(DEFPRIORITY32, ARMV6M_SYSCON_SHPR2);
+  putreg32(DEFPRIORITY32, ARMV6M_SYSCON_SHPR3);
+
+  /* Now set all of the interrupt lines to the default priority */
+
+  for (i = 0; i < 8; i++)
+    {
+      regaddr = ARMV6M_NVIC_IPR(i);
+      putreg32(DEFPRIORITY32, regaddr);
+    }
+
+  /* currents_regs is non-NULL only while processing an interrupt */
+
+  current_regs = NULL;
+
+  /* Attach the SVCall and Hard Fault exception handlers.  The SVCall
+   * exception is used for performing context switches; The Hard Fault
+   * must also be caught because a SVCall may show up as a Hard Fault
+   * under certain conditions.
+   */
+
+  irq_attach(KL_IRQ_SVCALL, up_svcall);
+  irq_attach(KL_IRQ_HARDFAULT, up_hardfault);
+
+  /* Set the priority of the SVCall interrupt */
+
+#ifdef CONFIG_ARCH_IRQPRIO
+/* up_prioritize_irq(KL_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
+#endif
+   kl_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
+
+  /* Attach all other processor exceptions (except reset and sys tick) */
+
+#ifdef CONFIG_DEBUG
+  irq_attach(KL_IRQ_NMI, kl_nmi);
+  irq_attach(KL_IRQ_PENDSV, kl_pendsv);
+  irq_attach(KL_IRQ_RESERVED, kl_reserved);
+#endif
+
+  kl_dumpnvic("initial", NR_IRQS);
+
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+
+  /* And finally, enable interrupts */
+
+  irqenable();
+#endif
+}
+
+/****************************************************************************
+ * Name: up_disable_irq
+ *
+ * Description:
+ *   Disable the IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void up_disable_irq(int irq)
+{
+  /* This will be called on each interrupt (via up_maskack_irq()) whether
+   * the interrupt can be disabled or not.  So this assertion is necessarily
+   * lame.
+   */
+
+  DEBUGASSERT((unsigned)irq < NR_IRQS);
+
+  /* Check for an external interrupt */
+
+  if (irq >= KL_IRQ_INTERRUPT && irq < KL_IRQ_INTERRUPT + 32)
+    {
+      /* Set the appropriate bit in the ICER register to disable the
+       * interrupt
+       */
+
+      putreg32((1 << (irq - KL_IRQ_INTERRUPT)), ARMV6M_NVIC_ICER);
+    }
+
+  /* Handle processor exceptions.  Only SysTick can be disabled */
+
+  else if (irq == KL_IRQ_SYSTICK)
+    {
+      modifyreg32(ARMV6M_SYSTICK_CSR, SYSTICK_CSR_ENABLE, 0);
+    }
+
+  kl_dumpnvic("disable", irq);
+}
+
+/****************************************************************************
+ * Name: up_enable_irq
+ *
+ * Description:
+ *   Enable the IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void up_enable_irq(int irq)
+{
+  /* This will be called on each interrupt exit whether the interrupt can be
+   * enambled or not.  So this assertion is necessarily lame.
+   */
+
+  DEBUGASSERT((unsigned)irq < NR_IRQS);
+
+  /* Check for external interrupt */
+
+  if (irq >= KL_IRQ_INTERRUPT && irq < KL_IRQ_INTERRUPT + 32)
+    {
+      /* Set the appropriate bit in the ISER register to enable the
+       * interrupt
+       */
+
+      putreg32((1 << (irq - KL_IRQ_INTERRUPT)), ARMV6M_NVIC_ISER);
+    }
+
+  /* Handle processor exceptions.  Only SysTick can be disabled */
+
+  else if (irq == KL_IRQ_SYSTICK)
+    {
+      modifyreg32(ARMV6M_SYSTICK_CSR, 0, SYSTICK_CSR_ENABLE);
+    }
+
+  kl_dumpnvic("enable", irq);
+}
+
+/****************************************************************************
+ * Name: up_maskack_irq
+ *
+ * Description:
+ *   Mask the IRQ and acknowledge it
+ *
+ ****************************************************************************/
+
+void up_maskack_irq(int irq)
+{
+  up_disable_irq(irq);
+  kl_clrpend(irq);
+}
+
+/****************************************************************************
+ * Name: up_prioritize_irq
+ *
+ * Description:
+ *   Set the priority of an IRQ.
+ *
+ *   Since this API is not supported on all architectures, it should be
+ *   avoided in common implementations where possible.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQPRIO
+int up_prioritize_irq(int irq, int priority)
+{
+  uint32_t regaddr;
+  uint32_t regval;
+  int shift;
+
+  DEBUGASSERT(irq == KL_IRQ_SVCALL ||
+              irq == KL_IRQ_PENDSV ||
+              irq == KL_IRQ_SYSTICK ||
+             (irq >= KL_IRQ_INTERRUPT && irq < NR_IRQS));
+  DEBUGASSERT(priority >= NVIC_SYSH_DISABLE_PRIORITY &&
+              priority <= NVIC_SYSH_PRIORITY_MIN);
+
+  /* Check for external interrupt */
+
+  if (irq >= KL_IRQ_INTERRUPT && irq < KL_IRQ_INTERRUPT + 32)
+    {
+      /* ARMV6M_NVIC_IPR() maps register IPR0-IPR7 with four settings per
+       * register.
+       */
+
+      regaddr = ARMV6M_NVIC_IPR(irq >> 2);
+      shift   = (irq & 3) << 3;
+    }
+
+  /* Handle processor exceptions.  Only SVCall, PendSV, and SysTick can be
+   * reprioritized.  And we will not permit modification of SVCall through
+   * this function.
+   */
+
+  else if (irq == KL_IRQ_PENDSV)
+    {
+      regaddr = ARMV6M_SYSCON_SHPR2;
+      shift   = SYSCON_SHPR3_PRI_14_SHIFT;
+    }
+  else if (irq == KL_IRQ_SYSTICK)
+    {
+      regaddr = ARMV6M_SYSCON_SHPR2;
+      shift   = SYSCON_SHPR3_PRI_15_SHIFT;
+    }
+  else
+    {
+      return ERROR;
+    }
+
+  /* Set the priority */
+
+  regval  = getreg32(regaddr);
+  regval &= ~((uint32_t)0xff << shift);
+  regval |= ((uint32_t)priority << shift);
+  putreg32(regval, regaddr);
+
+  kl_dumpnvic("prioritize", irq);
+  return OK;
+}
+#endif
