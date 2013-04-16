@@ -170,6 +170,7 @@ config ARCH_CHIP
 	default "dm320"		if ARCH_CHIP_DM320
 	default "imx"		if ARCH_CHIP_IMX
 	default "kinetis"	if ARCH_CHIP_KINETIS
+	default "kl"		if ARCH_CHIP_KL
 	default "lm"		if ARCH_CHIP_LM
 	default "lpc17xx"	if ARCH_CHIP_LPC17XX
 	default "lpc214x"	if ARCH_CHIP_LPC214X
@@ -299,6 +300,9 @@ source arch/arm/src/imx/Kconfig
 endif
 if ARCH_CHIP_KINETIS
 source arch/arm/src/kinetis/Kconfig
+endif
+if ARCH_CHIP_KL
+source arch/arm/src/kl/Kconfig
 endif
 if ARCH_CHIP_LM
 source arch/arm/src/lm/Kconfig

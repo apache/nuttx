@@ -52,7 +52,7 @@
 #include "up_internal.h"
 #include "kl_config.h"
 #include "chip.h"
-#include "kl_port.h"
+#include "chip/kl_port.h"
 
 /************************************************************************************
  * Definitions

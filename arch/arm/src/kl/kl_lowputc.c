@@ -48,8 +48,8 @@
 #include "up_arch.h"
 
 #include "kl_config.h"
-//#include "kl_lowputc.h"
-//#include "chip/kl_internal.h"
+#include "kl_lowputc.h"
+#include "kl_internal.h"
 #include "chip/kl_uart.h"
 #include "chip/kl_sim.h"
 #include "chip/kl_port.h"
@@ -109,7 +109,7 @@ static uint8_t g_sizemap[8] = {1, 4, 8, 16, 32, 64, 128, 0};
  *
  **************************************************************************/
 
-void kl_lowputc(char ch)
+void kl_lowputc(uint32_t ch)
 {
 #if defined HAVE_UART_DEVICE && defined HAVE_SERIAL_CONSOLE
 #ifdef CONFIG_KL_UARTFIFOS

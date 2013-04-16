@@ -45,7 +45,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "chip/kl_internal.h"
+#include "kl_internal.h"
 #include "chip/kl_mcg.h"
 #include "chip/kl_sim.h"
 #include "chip/kl_osc.h"
