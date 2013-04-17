@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 10, 2013</p>
+      <p>Last Updated: April 17, 2013</p>
     </td>
   </tr>
 </table>
@@ -1551,7 +1551,7 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
       <li><a href="#arm7tdmi">ARM7TDMI</b></a> (5)</li>
       <li><a href="#arm920t">ARM920T</a> (1) </li>
       <li><a href="#arm926ejs">ARM926EJS</a> (3) </li>
-      <li><a href="#armcortexm0">ARM Cortex-M0</a> (1)</li>
+      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (2)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (17)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (7)</li>
     </ul>
@@ -1924,6 +1924,30 @@ nsh>
       A DIY toolchain for Linux or Cygwin is provided by the NuttX
       <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a> package.
     </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>FreeScale Freedom KL25Z</b>.
+      This is a port of NuttX to the Nuvoton NuTiny-SDK-NUC120 that features the NUC120LE3AN MCU.
+      See the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=FRDM-KL25Z&tid=vanFRDM-KL25Z">Freescale</a> website for further information about this board.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS</b>.
+        This is a work in progress by Alan Carvalho de Assis.
+        This initial support is very minimal:
+        There is an OS test configuration that verifies the correct port of NuttX to the part and
+        a NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
+        As of this writing, more testing and more device driver development are needed to make this a more complete port.
+      </p>
+    </ul>
   </td>
 </tr>
 <tr>
