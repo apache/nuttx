@@ -230,12 +230,6 @@ void up_irqinitialize(void)
   irq_attach(NUC_IRQ_SVCALL, up_svcall);
   irq_attach(NUC_IRQ_HARDFAULT, up_hardfault);
 
-  /* Set the priority of the SVCall interrupt */
-
-#ifdef CONFIG_ARCH_IRQPRIO
-/* up_prioritize_irq(NUC_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
-#endif
-
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
