@@ -107,7 +107,7 @@ void up_sigdeliver(void)
 
   up_copystate(regs, rtcb->xcp.regs);
   regs[REG_PC]         = rtcb->xcp.saved_pc;
-  regs[REG_BASEPRI]    = rtcb->xcp.saved_basepri;
+  regs[REG_PRIMASK]    = rtcb->xcp.saved_primask;
   regs[REG_XPSR]       = rtcb->xcp.saved_xpsr;
 
   /* Get a local copy of the sigdeliver function pointer. We do this so that
@@ -120,7 +120,7 @@ void up_sigdeliver(void)
 
   /* Then restore the task interrupt state */
 
-  irqrestore((uint8_t)regs[REG_BASEPRI]);
+  irqrestore((uint8_t)regs[REG_PRIMASK]);
 
   /* Deliver the signal */
 

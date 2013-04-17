@@ -113,15 +113,15 @@ exception_common:
 	 */
 
 2:
-	/* Save SP, BASEPRI, and R4-R7 in the context array */
+	/* Save SP, PRIMASK, and R4-R7 in the context array */
 
 	sub		r1, #SW_XCPT_SIZE		/* R1=Beginning of context array on the stack */
 	mov		r2, #XCPTCONTEXT_SIZE   /* R2=Size of the context array */
 	add		r2, r1					/* R2=MSP/PSP before the interrupt was taken */
 									/* (ignoring the xPSR[9] alignment bit) */
-	mrs		r3, basepri				/* R3=Current BASEPRI setting */
+	mrs		r3, primask				/* R3=Current PRIMASK setting */
 	mov		r0, r1					/* Copy the context array pointer */
-	stmia	r0!, {r2-r7}			/* Save the SP, BASEPRI, and R4-R7 in the context array */
+	stmia	r0!, {r2-r7}			/* Save the SP, PRIMASK, and R4-R7 in the context array */
 
 	/* Save R8-R11 and the EXEC_RETURN value in the context array */
 
@@ -215,7 +215,7 @@ exception_common:
 	mov		r11, r5
 #endif
 
-	/* Recover SP (R2), BASEPRI (R3), and R4-R7. Determine the value of
+	/* Recover SP (R2), PRIMASK (R3), and R4-R7. Determine the value of
 	 * the stack pointer as it was on entry to the exception handler.
 	 */
 
@@ -246,7 +246,7 @@ exception_common:
 
 	/* Restore the interrupt state */
 
-	msr		basepri, r3				/* Restore interrupts priority masking*/
+	msr		primask, r3				/* Restore interrupts priority masking*/
 	cpsie	i						/* Re-enable interrupts */
 
 	/* Always return with R14 containing the special value that will: (1)

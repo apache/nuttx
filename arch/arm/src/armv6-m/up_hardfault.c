@@ -90,23 +90,68 @@
 
 int up_hardfault(int irq, FAR void *context)
 {
-#if defined(CONFIG_DEBUG_HARDFAULT)
+#if defined(CONFIG_DEBUG_HARDFAULT) || !defined(CONFIG_ARMV7M_USEBASEPRI)
   uint32_t *regs = (uint32_t*)context;
+#endif
 
+  /* Get the value of the program counter where the fault occurred */
+
+#ifndef CONFIG_ARMV7M_USEBASEPRI
+  uint16_t *pc = (uint16_t*)regs[REG_PC] - 1;
+
+  /* Check if the pc lies in known FLASH memory.
+   * REVISIT:  What if the PC lies in "unknown" external memory?  Best
+   * use the BASEPRI register if you have external memory.
+   */
+
+#ifdef CONFIG_NUTTX_KERNEL
+  /* In the kernel build, SVCalls are expected in either the base, kernel
+   * FLASH region or in the user FLASH region.
+   */
+
+  if (((uintptr_t)pc >= (uintptr_t)&_stext &&
+       (uintptr_t)pc <  (uintptr_t)&_etext) ||
+      ((uintptr_t)pc >= (uintptr_t)USERSPACE->us_textstart &&
+       (uintptr_t)pc <  (uintptr_t)USERSPACE->us_textend))
+#else
+  /* SVCalls are expected only from the base, kernel FLASH region */
+
+  if ((uintptr_t)pc >= (uintptr_t)&_stext &&
+      (uintptr_t)pc <  (uintptr_t)&_etext)
+#endif
+    {
+      /* Fetch the instruction that caused the Hard fault */
+
+      uint16_t insn = *pc;
+      hfdbg("  PC: %p INSN: %04x\n", pc, insn);
+
+      /* If this was the instruction 'svc 0', then forward processing
+       * to the SVCall handler
+       */
+
+      if (insn == INSN_SVC0)
+        {
+          hfdbg("Forward SVCall\n");
+          return up_svcall(irq, context);
+        }
+    }
+#endif
+
+#if defined(CONFIG_DEBUG_HARDFAULT)
   /* Dump some hard fault info */
 
   hfdbg("\nHard Fault:\n");
   hfdbg("  IRQ: %d regs: %p\n", irq, regs);
-  hfdbg("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x\n",
-        getbasepri(), getprimask(), getipsr());
+  hfdbg("  PRIMASK: %08x IPSR: %08x\n",
+        getprimask(), getipsr());
   hfdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
   hfdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  hfdbg("  xPSR: %08x BASEPRI: %08x (saved)\n",
-        current_regs[REG_XPSR],  current_regs[REG_BASEPRI]);
+  hfdbg("  xPSR: %08x PRIMASK: %08x (saved)\n",
+        current_regs[REG_XPSR],  current_regs[REG_PRIMASK]);
 #endif
 
   (void)irqsave();
