@@ -72,13 +72,13 @@
  */
 
 #define IDLE_STACK ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
-#define HEAP_BASE  ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
+#define HEAP_BASE  ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-const uint32_t g_idle_topstack = HEAP_BASE;
+const uint32_t g_idle_topstack = IDLE_STACK;
 
 /****************************************************************************
  * Private Functions
