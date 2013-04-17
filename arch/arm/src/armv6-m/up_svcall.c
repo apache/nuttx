@@ -183,11 +183,11 @@ int up_svcall(int irq, FAR void *context)
              regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
              regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
 # ifdef CONFIG_NUTTX_KERNEL
-      svcdbg(" PSR: %08x BASEPRI: %08x EXC_RETURN: %08x\n",
-             regs[REG_XPSR], regs[REG_BASEPRI], regs[REG_EXC_RETURN]);
+      svcdbg(" PSR: %08x PRIMASK: %08x EXC_RETURN: %08x\n",
+             regs[REG_XPSR], regs[REG_PRIMASK], regs[REG_EXC_RETURN]);
 # else
-      svcdbg(" PSR: %08x BASEPRI: %08x\n",
-             regs[REG_XPSR], regs[REG_BASEPRI]);
+      svcdbg(" PSR: %08x PRIMASK: %08x\n",
+             regs[REG_XPSR], regs[REG_PRIMASK]);
 # endif
     }
 #endif
@@ -495,12 +495,12 @@ int up_svcall(int irq, FAR void *context)
              current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
              current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
 #ifdef CONFIG_NUTTX_KERNEL
-      svcdbg(" PSR: %08x BASEPRI: %08x EXC_RETURN: %08x\n",
-             current_regs[REG_XPSR], current_regs[REG_BASEPRI],
+      svcdbg(" PSR: %08x PRIMASK: %08x EXC_RETURN: %08x\n",
+             current_regs[REG_XPSR], current_regs[REG_PRIMASK],
              current_regs[REG_EXC_RETURN]);
 #else
-      svcdbg(" PSR: %08x BASEPRI: %08x\n",
-             current_regs[REG_XPSR], current_regs[REG_BASEPRI]);
+      svcdbg(" PSR: %08x PRIMASK: %08x\n",
+             current_regs[REG_XPSR], current_regs[REG_PRIMASK]);
 #endif
     }
 # ifdef CONFIG_DEBUG_SVCALL

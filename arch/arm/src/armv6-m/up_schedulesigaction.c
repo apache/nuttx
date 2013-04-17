@@ -156,7 +156,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               tcb->xcp.sigdeliver       = sigdeliver;
               tcb->xcp.saved_pc         = current_regs[REG_PC];
-              tcb->xcp.saved_basepri    = current_regs[REG_BASEPRI];
+              tcb->xcp.saved_primask    = current_regs[REG_PRIMASK];
               tcb->xcp.saved_xpsr       = current_regs[REG_XPSR];
 
               /* Then set up to vector to the trampoline with interrupts
@@ -165,7 +165,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               current_regs[REG_PC]      = (uint32_t)up_sigdeliver;
-              current_regs[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
+              current_regs[REG_PRIMASK] = 1;
               current_regs[REG_XPSR]    = ARMV6M_XPSR_T;
 #ifdef CONFIG_NUTTX_KERNEL
               current_regs[REG_XPSR]    = EXC_RETURN_PRIVTHR;
@@ -194,7 +194,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.sigdeliver       = sigdeliver;
           tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
-          tcb->xcp.saved_basepri    = tcb->xcp.regs[REG_BASEPRI];
+          tcb->xcp.saved_primask    = tcb->xcp.regs[REG_PRIMASK];
           tcb->xcp.saved_xpsr       = tcb->xcp.regs[REG_XPSR];
 
           /* Then set up to vector to the trampoline with interrupts
@@ -203,7 +203,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
-          tcb->xcp.regs[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
+          tcb->xcp.regs[REG_PRIMASK] = 1;
           tcb->xcp.regs[REG_XPSR]    = ARMV6M_XPSR_T;
         }
 

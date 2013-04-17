@@ -46,7 +46,7 @@
 
 #include <arch/kl/chip.h>
 
-/* Define the number of interrupt vectors that needed to be support for this chip */
+/* Define the number of interrupt vectors that need to be supported for this chip */
 
 #define ARMV6M_PERIPHERAL_INTERRUPTS 32
 

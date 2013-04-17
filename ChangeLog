@@ -4556,3 +4556,8 @@
 	  contributed by Alan Carvalho de Assis.  NOTE:  This is still
 	  very much a work inprogress as of this initial commit
 	  (2013-04-16).
+	* arm/arm/src/armv6-m and arch/arm/include/armv6-m:  Ooops.  Fix
+	  a major screw-up:  The Cortex-M0 has no BASEPRI register but
+	  the current logic was using it to manage interrupts.  Switch
+	  to using the PRIMASK.  This means that hardfaults will (again)
+	  occur when SVC instructions are executed (2013-4-16).
