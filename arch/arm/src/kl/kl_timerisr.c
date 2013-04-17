@@ -51,26 +51,20 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "chip/kl_clk.h"
 #include "chip/kl_gcr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Get the frequency of the selected clock source */
+/* "The CLKSOURCE bit in SysTick Control and Status register selects either
+ * the core clock (when CLKSOURCE = 1) or a divide-by-16 of the core clock
+ * (when CLKSOURCE = 0). ..."
+ */
 
 #if defined(CONFIG_KL_SYSTICK_CORECLK)
-#  define SYSTICK_CLOCK BOARD_HCLK_FREQUENCY       /* Core clock */
-#elif defined(CONFIG_KL_SYSTICK_XTALHI)
-#  define SYSTICK_CLOCK BOARD_XTALHI_FREQUENCY     /* High speed XTAL clock */
-#elif defined(CONFIG_KL_SYSTICK_XTALLO)
-#  define SYSTICK_CLOCK BOARD_XTALLO_FREQUENCY     /* Low speed XTAL clock */
-#elif defined(CONFIG_KL_SYSTICK_XTALHId2)
-#  define SYSTICK_CLOCK (BOARD_XTALHI_FREQUENCY/2) /* High speed XTAL clock/2 */
-#elif defined(CONFIG_KL_SYSTICK_HCLKd2)
-#  define SYSTICK_CLOCK (BOARD_HCLK_FREQUENCY/2)   /* HCLK/2 */
-#elif defined(CONFIG_KL_SYSTICK_INTHId2)
-#  define SYSTICK_CLOCK (KL_INTHI_FREQUENCY/2)     /* Internal high speed clock/2 */
+#  define SYSTICK_CLOCK BOARD_CORECLK_FREQ        /* Core clock */
+#elif defined(CONFIG_KL_SYSTICK_CORECLK_DIV16)
+#  define (SYSTICK_CLOCK BOARD_CORECLK_FREQ / 16) /* Core clock divided by 16 */
 #endif
 
 /* The desired timer interrupt frequency is provided by the definition
@@ -108,50 +102,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kl_unlock
- *
- * Description:
- *   Unlock registers
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KL_SYSTICK_CORECLK
-static inline void kl_unlock(void)
-{
-  putreg32(0x59, KL_GCR_REGWRPROT);
-  putreg32(0x16, KL_GCR_REGWRPROT);
-  putreg32(0x88, KL_GCR_REGWRPROT);
-}
-#endif
-
-/****************************************************************************
- * Name: kl_clock
- *
- * Description:
- *   Lok registers
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KL_SYSTICK_CORECLK
-static inline void kl_lock(void)
-{
-  putreg32(0, KL_GCR_REGWRPROT);
-}
-#endif
-
-/****************************************************************************
  * Global Functions
  ****************************************************************************/
 
@@ -185,37 +135,6 @@ void up_timerinit(void)
 {
   uint32_t regval;
 
-  /* Configure the SysTick clock source. This is only necessary if we are not
-   * using the Cortex-M0 core clock as the frequency source.
-   */
-
-#ifndef CONFIG_KL_SYSTICK_CORECLK
-  /* This field is write protected and must be unlocked */
-
-  kl_unlock();
-
-  /* Read the CLKSEL0 register and set the STCLK_S field appropriately */
-
-  regval  = getreg32(KL_CLK_CLKSEL0);
-  regval &= ~CLK_CLKSEL0_STCLK_S_MASK;
-#if defined(CONFIG_KL_SYSTICK_XTALHI)
-  regval |= CLK_CLKSEL0_STCLK_S_XTALHI;   /* High speed XTAL clock */
-#elif defined(CONFIG_KL_SYSTICK_XTALLO)
-  regval |= CLK_CLKSEL0_STCLK_S_XTALLO;   /* Low speed XTAL clock */
-#elif defined(CONFIG_KL_SYSTICK_XTALHId2)
-  regval |= CLK_CLKSEL0_STCLK_S_XTALDIV2; /* High speed XTAL clock/2 */
-#elif defined(CONFIG_KL_SYSTICK_HCLKd2)
-  regval |= CLK_CLKSEL0_STCLK_S_HCLKDIV2; /* HCLK/2 */
-#elif defined(CONFIG_KL_SYSTICK_INTHId2)
-  regval |= CLK_CLKSEL0_STCLK_S_INTDIV2;  /* Internal high speed clock/2 */
-#endif
-  putreg32(regval, KL_CLK_CLKSEL0);
-
-  /* Re-lock the register */
-
-  kl_lock();
-#endif
-
   /* Set the SysTick interrupt to the default priority */
 
   regval = getreg32(ARMV6M_SYSCON_SHPR3);
@@ -231,8 +150,9 @@ void up_timerinit(void)
 
   (void)irq_attach(KL_IRQ_SYSTICK, (xcpt_t)up_timerisr);
 
-  /* Enable SysTick interrupts.  We need to select the core clock here if
-   * we are not using one of the alternative clock sources above.
+  /* Enable SysTick interrupts.  "The CLKSOURCE bit in SysTick Control and
+   * Status register selects either the core clock (when CLKSOURCE = 1) or
+   * a divide-by-16 of the core clock (when CLKSOURCE = 0). ..."
    */
 
 #ifdef CONFIG_KL_SYSTICK_CORECLK

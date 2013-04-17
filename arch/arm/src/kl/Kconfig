@@ -296,6 +296,9 @@ choice
 config KL_SYSTICK_CORECLK
 	bool "Cortex-M0 core clock"
 
+config KL_SYSTICK_CORECLK_DIV16
+	bool "Cortex-M0 core clock divided by 16"
+
 endchoice
 
 comment "Kinetis GPIO Interrupt Configuration"
