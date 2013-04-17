@@ -54,8 +54,7 @@
 /* The Kwikstik-K40 has a 4MHz crystal on board */
 
 #undef  BOARD_EXTCLOCK                      /* Crystal */
-#define BOARD_EXTAL_FREQ     8000000        /* 8MHz crystal frequency (REFCLK) */
-#define BOARD_HCLK_FREQUENCY BOARD_EXTAL_FREQ
+#define BOARD_XTAL_FREQ      8000000        /* 8MHz crystal frequency (REFCLK) */
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
 
 /* PLL Configuration.  NOTE: Only even frequency crystals are supported that will
@@ -69,7 +68,7 @@
 #define BOARD_PRDIV          2              /* PLL External Reference Divider */
 #define BOARD_VDIV           48             /* PLL VCO Divider (frequency multiplier) */
 
-#define BOARD_PLLIN_FREQ     (BOARD_EXTAL_FREQ / BOARD_PRDIV)
+#define BOARD_PLLIN_FREQ     (BOARD_XTAL_FREQ / BOARD_PRDIV)
 #define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV)
 #define BOARD_MCG_FREQ       BOARD_PLLOUT_FREQ
 
