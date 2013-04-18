@@ -541,11 +541,39 @@ static inline void task_exitwakeup(FAR struct tcb_s *tcb, int status)
 #endif
 
 /****************************************************************************
+ * Name: task_flushstreams
+ *
+ * Description:
+ *   Flush all streams when the final thread of a group exits.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_STREAMS > 0
+static inline void task_flushstreams(FAR struct tcb_s *tcb)
+{
+  FAR struct task_group_s *group = tcb->group;
+
+  /* Have we already left the group?  Are we the last thread in the group? */
+
+  if (group && group->tg_nmembers == 1)
+    {
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+      (void)lib_flushall(tcb->group->tg_streamlist);
+#else
+      (void)lib_flushall(&tcb->group->tg_streamlist);
+#endif
+    }
+}
+#else
+#  define task_flushstreams(tcb)
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_hook
+ * Name: task_exithook
  *
  * Description:
  *   This function implements some of the internal logic of exit() and
@@ -604,17 +632,11 @@ void task_exithook(FAR struct tcb_s *tcb, int status)
 
   task_exitwakeup(tcb, status);
 
-  /* Flush all streams (File descriptors will be closed when
-   * the TCB is deallocated).
+  /* If this is the last thread in the group, then flush all streams (File
+   * descriptors will be closed when the TCB is deallocated).
    */
 
-#if CONFIG_NFILE_STREAMS > 0
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-  (void)lib_flushall(tcb->group->tg_streamlist);
-#else
-  (void)lib_flushall(&tcb->group->tg_streamlist);
-#endif
-#endif
+  task_flushstreams(tcb);
 
   /* Leave the task group.  Perhaps discarding any un-reaped child
    * status (no zombies here!)
