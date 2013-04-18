@@ -88,7 +88,7 @@ FAR int *get_errno_ptr(void)
       /* We were called from the normal tasking context.  Verify that the
        * task at the head of the ready-to-run list is actually running.  It
        * may not be running during very brief times during context switching
-       * logic (see, for example, task_deletecurrent.c).
+       * logic (see, for example, task_exit.c).
        */
 
       FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;

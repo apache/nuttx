@@ -140,7 +140,7 @@ static inline void task_atexit(FAR struct tcb_s *tcb)
  * Name: task_onexit
  *
  * Description:
- *   Call any registerd on)exit function(s)
+ *   Call any registerd on_exit function(s)
  *
  ****************************************************************************/
  

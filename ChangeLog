@@ -4563,3 +4563,16 @@
 	  occur when SVC instructions are executed (2013-4-16).
 	* configs/stm3240g-eval/ostest:  Converted to use the kconfig-frontends
 	  tools (2013-4-17).
+	* sched/task_exithook.c:  Don't flush the streams until the
+	  final thread of the group exits.  Flushing may cause the
+	  thread to get suspended at a bad time and other threads in the
+	  group may run while the exiting thread is in an unhealthy state.
+	  This can cause crashes under certain circumstance.  This is a
+	  critical bugfix (2013-4-18).
+	* drivers/mtd/ramtron.c:  Extended to support the FM25V01 device.
+	  Contributed by Lorenz Meier (2013-4-18).
+	* sched/task_deletecurrent.c and task_exit.c, arch/*/up_exit.c:
+	  Renamed task_deletecurrent() and task_exit() since it really
+	  handles the architecture independent part of _exit().  _exit()
+	  is used internally, but if it is called from the user, it should
+	  unregister any atexit() or on_exit() functions (2013-4-18).

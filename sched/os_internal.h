@@ -264,8 +264,8 @@ void task_start(void);
 int  task_schedsetup(FAR struct task_tcb_s *tcb, int priority, start_t start,
                      main_t main, uint8_t ttype);
 int  task_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name, FAR char * const argv[]);
+int  task_exit(void);
 void task_exithook(FAR struct tcb_s *tcb, int status);
-int  task_deletecurrent(void);
 void task_recover(FAR struct tcb_s *tcb);
 
 #ifndef CONFIG_CUSTOM_STACK

@@ -93,7 +93,7 @@
  *
  *   - pthread_exit().  Calls exit()
  *   - exit(). Calls _exit()
- *   - _exit().  Calls task_deletecurrent() making the currently running task
+ *   - _exit().  Calls task_exit() making the currently running task
  *     non-running then calls task_delete() to terminate the non-running
  *     task.
  *   - task_delete()
