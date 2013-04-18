@@ -173,12 +173,12 @@ void kl_pllconfig(void)
    * reference clock.
    */
 
-  while((getreg8(KL_MCG_S) & MCG_S_IREFST) != 0)
+  while ((getreg8(KL_MCG_S) & MCG_S_IREFST) != 0)
     ;
 
   /* Wait until external reference */
 
-  while((getreg8(KL_MCG_S) & MCG_S_CLKST_MASK) != 8)
+  while ((getreg8(KL_MCG_S) & MCG_S_CLKST_MASK) != 8)
     ;
 
   /* Switch to PBE mode.
@@ -189,7 +189,7 @@ void kl_pllconfig(void)
 
   /* Wait until PLL locked */
 
-  while((getreg8(KL_MCG_S) & MCG_S_LOCK) == 0)
+  while ((getreg8(KL_MCG_S) & MCG_S_LOCK) == 0)
     ;
 
   /* Switch to PEE mode
@@ -202,7 +202,7 @@ void kl_pllconfig(void)
 
   /* Wait until PLL output */
 
-  while((getreg8(KL_MCG_S) & MCG_S_CLKST_MASK) != 0x0C)
+  while ((getreg8(KL_MCG_S) & MCG_S_CLKST_MASK) != 0x0C)
     ;
 }
 
