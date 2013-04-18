@@ -41,6 +41,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/mm.h>
 
