@@ -140,6 +140,11 @@ int       atexit(CODE void (*func)(void));
 int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
 #endif
 
+/* _Exit() is a stdlib.h equivalent to the unistd.h _exit() function */
+
+void      _exit(int status); /* See unistd.h */
+#define   _Exit(s) _exit(s)
+
 /* String to binary conversions */
 
 long      strtol(const char *, char **, int);
