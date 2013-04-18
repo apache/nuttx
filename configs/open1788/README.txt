@@ -162,8 +162,10 @@ Serial Console
   may be connected to your computer via an external RS-232 driver or via the
   WaveShare USB ISP/VCOM module.
 
-  As an option, UART1 can also be used for the serial console by reconfiguring
-  as follows:
+  As an option, UART1 can also be used for the serial console.  You might want,
+  to do this, for example, if you use UART0 for the ISP function and you want
+  to use a different UART for console output.  UART1 can be configured as the
+  serial console by changing the configuration as follows:
 
     System Type:
       CONFIG_LPC17_UART0=n          : Disable UART0 if it is no longer used
