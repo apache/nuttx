@@ -154,7 +154,7 @@
 #define STM32_IRQ_FPU         (STM32_IRQ_INTERRUPTS+81) /* 81: FPU global interrupt */
 
 #ifndef CONFIG_STM32_STM32F427
-#  define NR_IRQS               (STM32_IRQ_INTERRUPTS+87)
+#  define NR_IRQS               (STM32_IRQ_INTERRUPTS+82)
 #else
 #  define STM32_IRQ_UART7       (STM32_IRQ_INTERRUPTS+82) /* 82: UART7 interrupt */
 #  define STM32_IRQ_UART8       (STM32_IRQ_INTERRUPTS+83) /* 83: UART8 interrupt */
