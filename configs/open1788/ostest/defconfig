@@ -65,6 +65,7 @@ CONFIG_ARCH="arm"
 # CONFIG_ARCH_CHIP_DM320 is not set
 # CONFIG_ARCH_CHIP_IMX is not set
 # CONFIG_ARCH_CHIP_KINETIS is not set
+# CONFIG_ARCH_CHIP_KL is not set
 # CONFIG_ARCH_CHIP_LM is not set
 CONFIG_ARCH_CHIP_LPC17XX=y
 # CONFIG_ARCH_CHIP_LPC214X is not set
@@ -92,6 +93,7 @@ CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y
 # CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL is not set
 # CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI is not set
 CONFIG_ARMV7M_OABI_TOOLCHAIN=y
+# CONFIG_GPIO_IRQ is not set
 
 #
 # LPC17xx Configuration Options
@@ -127,17 +129,20 @@ CONFIG_LPC17_PLL0=y
 CONFIG_LPC17_PLL1=y
 # CONFIG_LPC17_EMC is not set
 # CONFIG_LPC17_ETHERNET is not set
+# CONFIG_LPC17_LCD is not set
 # CONFIG_LPC17_USBHOST is not set
 # CONFIG_LPC17_USBDEV is not set
+# CONFIG_LPC17_SDCARD is not set
 CONFIG_LPC17_UART0=y
 # CONFIG_LPC17_UART1 is not set
 # CONFIG_LPC17_UART2 is not set
 # CONFIG_LPC17_UART3 is not set
+# CONFIG_LPC17_UART4 is not set
 # CONFIG_LPC17_CAN1 is not set
 # CONFIG_LPC17_CAN2 is not set
-# CONFIG_LPC17_SPI is not set
 # CONFIG_LPC17_SSP0 is not set
 # CONFIG_LPC17_SSP1 is not set
+# CONFIG_LPC17_SSP2 is not set
 # CONFIG_LPC17_I2C0 is not set
 # CONFIG_LPC17_I2C1 is not set
 # CONFIG_LPC17_I2C2 is not set
@@ -148,14 +153,16 @@ CONFIG_LPC17_UART0=y
 # CONFIG_LPC17_TMR3 is not set
 # CONFIG_LPC17_RIT is not set
 # CONFIG_LPC17_PWM0 is not set
-# CONFIG_LPC17_MCPWM is not set
+# CONFIG_LPC17_PWM1 is not set
 # CONFIG_LPC17_QEI is not set
 # CONFIG_LPC17_RTC is not set
 # CONFIG_LPC17_WDT is not set
 # CONFIG_LPC17_ADC is not set
 # CONFIG_LPC17_DAC is not set
 # CONFIG_LPC17_GPDMA is not set
+# CONFIG_LPC17_CRC is not set
 # CONFIG_LPC17_FLASH is not set
+# CONFIG_LPC17_EEPROM is not set
 
 #
 # Serial driver options
@@ -164,47 +171,8 @@ CONFIG_LPC17_UART0=y
 # CONFIG_UART0_FLOWCONTROL is not set
 
 #
-# ADC driver options
-#
-
-#
-# CAN driver options
-#
-# CONFIG_GPIO_IRQ is not set
-
-#
-# I2C driver options
-#
-
-#
-# Ethernet driver options
-#
-
-#
-# USB device driver options
-#
-
-#
-# USB host driver options
-#
-
-#
 # External Memory Configuration
 #
-CONFIG_ARCH_HAVE_EXTNAND=y
-CONFIG_ARCH_HAVE_EXTNOR=y
-CONFIG_ARCH_HAVE_EXTDRAM=y
-CONFIG_ARCH_HAVE_EXTSRAM0=y
-CONFIG_ARCH_EXTNAND=y
-CONFIG_ARCH_EXTNANDSIZE=134217728
-CONFIG_ARCH_EXTNOR=y
-CONFIG_ARCH_EXTNORSIZE=4194304
-CONFIG_ARCH_EXTDRAM=y
-CONFIG_ARCH_EXTDRAMSIZE=67108864
-CONFIG_ARCH_EXTDRAMHEAP=y
-CONFIG_ARCH_EXTSRAM0=y
-CONFIG_ARCH_EXTSRAM0SIZE=131072
-CONFIG_ARCH_EXTSRAM0HEAP=y
 
 #
 # Architecture Options
@@ -219,6 +187,8 @@ CONFIG_ARCH_HAVE_VFORK=y
 CONFIG_ARCH_STACKDUMP=y
 # CONFIG_ENDIAN_BIG is not set
 # CONFIG_ARCH_HAVE_RAMFUNCS is not set
+CONFIG_ARCH_HAVE_RAMVECTORS=y
+# CONFIG_ARCH_RAMVECTORS is not set
 
 #
 # Board Settings
@@ -278,7 +248,6 @@ CONFIG_DEV_CONSOLE=y
 # CONFIG_FDCLONE_DISABLE is not set
 # CONFIG_FDCLONE_STDIO is not set
 CONFIG_SDCLONE_DISABLE=y
-# CONFIG_SCHED_WORKQUEUE is not set
 # CONFIG_SCHED_WAITPID is not set
 # CONFIG_SCHED_STARTHOOK is not set
 # CONFIG_SCHED_ATEXIT is not set
@@ -407,6 +376,7 @@ CONFIG_DISABLE_MOUNTPOINT=y
 #
 # Memory Management
 #
+# CONFIG_MM_MULTIHEAP is not set
 # CONFIG_MM_SMALL is not set
 CONFIG_MM_REGIONS=2
 # CONFIG_GRAN is not set
@@ -449,8 +419,9 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_ARCH_OPTIMIZED_FUNCTIONS is not set
 
 #
-# Non-standard Helper Functions
+# Non-standard Library Support
 #
+# CONFIG_SCHED_WORKQUEUE is not set
 # CONFIG_LIB_KBDCODEC is not set
 
 #
@@ -587,6 +558,11 @@ CONFIG_EXAMPLES_OSTEST_RR_RUNS=10
 # FLASH Program Installation
 #
 # CONFIG_SYSTEM_INSTALL is not set
+
+#
+# RAM Test
+#
+# CONFIG_SYSTEM_RAMTEST is not set
 
 #
 # readline()
