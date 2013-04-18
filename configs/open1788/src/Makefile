@@ -40,6 +40,7 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS = 
 CSRCS = lpc17_boardinitialize.c lpc17_ssp.c
 
+ifeq ($(CONFIG_LPC17_EMC),y)
 ifeq ($(CONFIG_ARCH_EXTNOR),y)
   CSRCS += lpc17_norinitialize.c
 endif
@@ -50,6 +51,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_EXTDRAM),y)
   CSRCS += lpc17_sdraminitialize.c
+endif
 endif
 
 ifeq ($(CONFIG_LPC17_LCD),y)
