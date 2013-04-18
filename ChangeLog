@@ -4561,3 +4561,5 @@
 	  the current logic was using it to manage interrupts.  Switch
 	  to using the PRIMASK.  This means that hardfaults will (again)
 	  occur when SVC instructions are executed (2013-4-16).
+	* configs/stm3240g-eval/ostest:  Converted to use the kconfig-frontends
+	  tools (2013-4-17).
