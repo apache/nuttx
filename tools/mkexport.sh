@@ -189,7 +189,6 @@ echo "ARCHCXXFLAGS = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/build/Make.defs"
 
 cp -LR -p "${TOPDIR}/include" "${EXPORTDIR}/." || \
 	{ echo "MK: 'cp ${TOPDIR}/include' failed"; exit 1; }
-find "${EXPORTDIR}/include" -name .svn | xargs rm -rf
 
 # Copy the startup object file(s)
 

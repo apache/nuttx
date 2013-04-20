@@ -111,7 +111,7 @@ Cygwin Buildroot Toolchain
   create such a toolchain.
 
   NOTE: As of this writing, none of the released buildroot packages support the
-  i486 build.  This is only available in SVN or in any any 1.10 or later buildroot
+  i486 build.  This is only available in GIT or in any any 1.10 or later buildroot
   release.
 
 Buildroot Instructions

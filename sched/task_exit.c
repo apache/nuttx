@@ -99,7 +99,7 @@ static inline void task_cancel_atexit(FAR struct tcb_s *tcb)
   FAR struct task_group_s *group = tcb->group;
   DEBUGASSERT(group);
 
-  /* This behavior applies only to tasks that _exit() */
+  /* This behavior applies only to tasks that call _exit() */
 
 #ifndef CONFIG_DISABLE_PTHREAD
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
@@ -155,7 +155,7 @@ static inline void task_cancel_onexit(FAR struct tcb_s *tcb)
   FAR struct task_group_s *group = tcb->group;
   DEBUGASSERT(group);
 
-  /* This behavior applies only to tasks that _exit() */
+  /* This behavior applies only to tasks that call _exit() */
 
 #ifndef CONFIG_DISABLE_PTHREAD
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)

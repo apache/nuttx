@@ -107,6 +107,15 @@ ifdef HOSTEXEEXT
 cmpconfig: cmpconfig$(HOSTEXEEXT)
 endif
 
+# kconfig2html - Create an HTML document describing the configuration options
+
+kconfig2html$(HOSTEXEEXT): kconfig2html.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o kconfig2html$(HOSTEXEEXT) kconfig2html.c
+
+ifdef HOSTEXEEXT
+kconfig2html: kconfig2html$(HOSTEXEEXT)
+endif
+
 # mkversion - Convert a .version file into a C version.h file
 
 mkversion$(HOSTEXEEXT): mkconfig.c cfgdefine.c

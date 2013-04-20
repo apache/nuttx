@@ -139,16 +139,6 @@ Downloading from Repositories
 
   https://sourceforge.net/p/nuttx/git
 
-  Older versions of NuttX are still available in the old SVN repository.
-  The GIT repository is, however, the current 'master' and the SVN
-  repository is no longer maintained.  An honest attempt was made to keep
-  current so as to not disrupt people are used to using the SVN repository.
-  However, too many authorization-related restrictions were encountered and
-  the SVN repository has been abandoned.  Download instructions for the old
-  SVN repository are available here:
-
-  https://sourceforge.net/p/nuttx/git
-
 Notes about Header Files
 ------------------------
 

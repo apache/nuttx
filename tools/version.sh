@@ -109,17 +109,17 @@ if [ "X${MAJOR}" = "X${VERSION}" ]; then
 fi
 MINOR=`echo ${VERSION} | cut -d'.' -f2`
 
-# Get SVN information (if not provided on the command line)
+# Get GIT information (if not provided on the command line)
 
 if [ -z "${BUILD}" ]; then
-	SVNINFO=`svn info 2>/dev/null | fgrep 'Revision:'`
-	if [ -z "${SVNINFO}" ]; then
-		echo "SVN version information is not available"
+	GITINFO=`git log 2>/dev/null | head 1`
+	if [ -z "${GITINFO}" ]; then
+		echo "GIT version information is not available"
 		exit 3
 	fi
-	BUILD=`echo ${SVNINFO} | cut -d' ' -f2`
+	BUILD=`echo ${GITINFO} | cut -d' ' -f2`
 	if [ -z "${BUILD}" ]; then
-		echo "SVN build information not found"
+		echo "GIT build information not found"
 		exit 4
 	fi
 fi

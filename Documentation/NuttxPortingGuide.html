@@ -571,8 +571,8 @@
       <li><code>arch/z80/include/z80</code> and <code>arch/z80/src/z80</code>:
         The Z80 port was released in nuttx-0.3.6 has been verified using only a
         z80 instruction simulator.
-        The set simulator  can be found in the NuttX SVN at
-        http://svn.code.sf.net/p/nuttx/code/trunk/misc/sims/z80sim.
+        The set simulator  can be found in the NuttX GIT at
+        http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/sims/z80sim.
         This port also uses the SDCC toolchain (http://sdcc.sourceforge.net/")
         (verified with version 2.6.0 and 2.7.0).
       </li>
@@ -991,8 +991,8 @@
 
   <li><code>configs/z80sim</code>:
     z80 Microcontroller.  This port uses a Z80 instruction set simulator.
-    That simulator can be found in the NuttX SVN
-    <a href="http://svn.code.sf.net/p/nuttx/code/trunk/misc/sims/z80sim">here</a>.
+    That simulator can be found in the NuttX GIT
+    <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/sims/z80sim">here</a>.
     This port also the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain
     under Linux or Cygwin(verified with version 2.6.0).
   </li>
@@ -1446,7 +1446,7 @@ netutils/
   The NuttX build expects to find a version file located in the top-level NuttX build directory.
   That version file is called <code>.version</code>.
   The correct version file is installed in each versioned NuttX released.
-  However, if you are working from an SVN snapshot, then there will be no version file.
+  However, if you are working from an GIT snapshot, then there will be no version file.
   If there is no version file, the top-level <code>Makefile</code> will create a dummy <code>.version</code> file on the first make.
   This dummy version file will contain all zeroes for version information.
   If that is not what you want, they you should run the <code>version.sh</code> script to create a better <code>.version</code> file.
@@ -1475,7 +1475,7 @@ Where:
 </pre></ul>
 
 <p>
-  As an example, the following command will generate a version file for version 6.1 using the current SVN revision number:
+  As an example, the following command will generate a version file for version 6.1 using the current GIT revision number:
 </p>
 <ul><pre>
 tools/version.h -v 6.1 .version
