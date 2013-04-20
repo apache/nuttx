@@ -24,35 +24,36 @@ config PM_ALARM_SEC
 	int "PM_STANDBY delay (seconds)"
 	default 15
 	depends on PM && RTC_ALARM
-	--help---
+	---help---
 		Number of seconds to wait in PM_STANDBY before going to PM_STANDBY mode.
 
 config PM_ALARM_NSEC
 	int "PM_STANDBY delay (nanoseconds)"
 	default 0
 	depends on PM && RTC_ALARM
-	--help---
+	---help---
 		Number of additional nanoseconds to wait in PM_STANDBY before going to PM_STANDBY mode.
 
 config PM_SLEEP_WAKEUP
 	bool "PM_SLEEP wake-up alarm"
 	default n
 	depends on PM && RTC_ALARM
-	--help---
+	---help---
 		Wake-up of PM_SLEEP mode after a delay and resume normal operation.
 
 config PM_SLEEP_WAKEUP_SEC
 	int "PM_SLEEP delay (seconds)"
 	default 10
 	depends on PM && RTC_ALARM
-	--help---
+	---help---
 		Number of seconds to wait in PM_SLEEP before going to PM_STANDBY mode.
 
 config PM_SLEEP_WAKEUP_NSEC
 	int "PM_SLEEP delay (nanoseconds)"
 	default 0
 	depends on PM && RTC_ALARM
-	--help---
+	---help---
 		Number of additional nanoseconds to wait in PM_SLEEP before going to PM_STANDBY mode.
 
 endif
+
