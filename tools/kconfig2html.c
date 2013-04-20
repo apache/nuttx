@@ -1033,16 +1033,16 @@ static inline char *process_config(FILE *stream, const char *configname,
                   char *value;
                   int ndx;
 
-                  ndx = config.cnselect + 1;
-                  if (ndx > MAX_SELECT)
+                  ndx = config.cnselect;
+                  if (ndx >= MAX_SELECT)
                     {
                       fprintf(stderr, "Too many 'select' lines\n");
                       exit(ERROR_TOO_MANY_SELECT);
                     }
 
-                  value = strtok_r(NULL, " ", &g_lasts);
+                  value               = strtok_r(NULL, " ", &g_lasts);
                   config.cselect[ndx] = strdup(value);
-                  config.cnselect     = ndx;
+                  config.cnselect     = ndx + 1;
                   token               = NULL;
                 }
                 break;
@@ -1100,7 +1100,7 @@ static inline char *process_config(FILE *stream, const char *configname,
     {
       /* Print the configuration variable name and the short description */
 
-      body("<h3><a name=\"%s\">", config.cname);
+      body("<h3><a name=\"CONFIG_%s\">", config.cname);
 
       /* If we are not in a choice block, than give the variable a paragraph
        * number and put it in the table of contents.
@@ -1109,7 +1109,7 @@ static inline char *process_config(FILE *stream, const char *configname,
       if (!g_inchoice)
         {
           paranum = get_paranum();
-          output("<li><a href=\"#%s\">%s <code>CONFIG_%s</code>",
+          output("<li><a href=\"#CONFIG_%s\">%s <code>CONFIG_%s</code>",
                  config.cname, paranum, config.cname);
           body("%s ", paranum);
           incr_paranum();
@@ -1175,12 +1175,12 @@ static inline char *process_config(FILE *stream, const char *configname,
 
       if (config.cnselect > 0)
         {
-          body("  <li><i>Selects</i>: <a href=\"CONFIG_%s\">CONFIG_%s</a>",
+          body("  <li><i>Selects</i>: <a href=\"#CONFIG_%s\">CONFIG_%s</a>",
                config.cselect[0], config.cselect[0]);
 
           for (i = 1; i < config.cnselect; i++)
             {
-              body(", <a href=\"CONFIG_%s\">CONFIG_%s</a>",
+              body(", <a href=\"#CONFIG_%s\">CONFIG_%s</a>",
                    config.cselect[i], config.cselect[i]);
             }
 
@@ -1541,11 +1541,13 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
              g_menu_number, paranum);
     }
 
+  g_menu_number++;
+
   /* Print the list of dependencies (if any) */
 
+  body("<ul>\n");
   if (g_ndependencies > 0)
     {
-      body("<ul>\n");
       body("  <li><i>Dependencies</i>: %s", g_dependencies[0]);
 
       for (i = 1; i < g_ndependencies; i++)
@@ -1554,10 +1556,12 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
         }
 
       body("</li>\n");
-      body("</ul>\n");
     }
 
-  g_menu_number++;
+  /* Show the configuration file */
+
+  body("  <li><i>Kconfig file</i>: <code>%s/Kconfig</code>\n", kconfigdir);
+  body("</ul>\n");
 
   /* Remove any dependencies that apply only to this configuration */
 
@@ -1918,9 +1922,9 @@ int main(int argc, char **argv, char **envp)
 
   incr_level();
   paranum = get_paranum();
-  output("<li><a href=\"#menu_%d\">%s NuttX Configuration Variables</a></li>\n",
+  output("<li><a href=\"#menu_%d\">%s Menu: Main</a></li>\n",
          g_menu_number, paranum);
-  body("<h1><a name=\"menu_%d\">%s  NuttX Configuration Variables</a></h1>\n",
+  body("<h1><a name=\"menu_%d\">%s Menu: Main</a></h1>\n",
        g_menu_number, paranum);
   g_menu_number++;
 
