@@ -77,6 +77,7 @@ enum token_type_e
   TOKEN_HEX,
   TOKEN_STRING,
   TOKEN_DEFAULT,
+  TOKEN_RANGE,
   TOKEN_SELECT,
   TOKEN_DEPENDS,
   TOKEN_ON,
@@ -138,6 +139,8 @@ struct config_s
   char              *cname;
   char              *cdesc;
   char              *cdefault;
+  char              *clower;
+  char              *cupper;
   char              *cselect[MAX_SELECT];
   int                cnselect;
   int                cndependencies;
@@ -188,6 +191,7 @@ static struct reserved_s g_reserved[] =
   {TOKEN_HEX,        "hex"},
   {TOKEN_STRING,     "string"},
   {TOKEN_DEFAULT,    "default"},
+  {TOKEN_RANGE,      "range"},
   {TOKEN_SELECT,     "select"},
   {TOKEN_DEPENDS,    "depends"},
   {TOKEN_ON,         "on"},
@@ -1006,6 +1010,24 @@ static inline char *process_config(FILE *stream, const char *configname,
                 }
                 break;
 
+              case TOKEN_RANGE:
+                {
+                  char *value = strtok_r(NULL, " ,", &g_lasts);
+                  if (value)
+                    {
+                      config.clower = strdup(value);
+
+                      value = strtok_r(NULL, " ", &g_lasts);
+                      if (value)
+                        {
+                          config.cupper = strdup(value);
+                        }
+                    }
+
+                  token = NULL;
+                }
+                break;
+
               case TOKEN_SELECT:
                 {
                   char *value;
@@ -1129,6 +1151,26 @@ static inline char *process_config(FILE *stream, const char *configname,
           body("  <li><i>Default</i>: %s</li>\n", config.cdefault);
         }
 
+      /* Print the range of values of the configuration variable */
+
+      if (config.clower || config.cupper)
+        {
+          body("  <li><i>Range</i>:\n");
+          if (config.clower)
+            {
+              body(" %s", config.clower);
+            }
+
+          body(" -", config.clower);
+
+          if (config.cupper)
+            {
+              body(" %s", config.cupper);
+            }
+
+          body("</li>\n");
+        }
+
       /* Print the default value of the configuration variable auto-selected by this setting */
 
       if (config.cnselect > 0)
@@ -1202,6 +1244,16 @@ static inline char *process_config(FILE *stream, const char *configname,
   if (config.cdefault)
     {
       free(config.cdefault);
+    }
+
+  if (config.clower)
+    {
+      free(config.clower);
+    }
+
+  if (config.cupper)
+    {
+      free(config.cupper);
     }
 
   if (config.cnselect > 0)
@@ -1473,13 +1525,13 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
   /* Output menu information */
 
   paranum = get_paranum();
-  if (menuname)
+  if (menu.mname)
     {
       output("<li><a href=\"#menu_%d\">%s Menu: %s</a></li>\n",
-             g_menu_number, paranum, menuname);
+             g_menu_number, paranum, menu.mname);
       output("<ul>\n");
              body("\n<h1><a name=\"menu_%d\">%s Menu: %s</a></h1>\n",
-             g_menu_number, paranum, menuname);
+             g_menu_number, paranum, menu.mname);
     }
   else
     {
@@ -1512,6 +1564,13 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
   for (i = 0; i < menu.mndependencies; i++)
     {
       pop_dependency();
+    }
+
+  /* Free any allocated memory */
+
+  if (menu.mname)
+    {
+      free(menu.mname);
     }
 
   /* Increment the nesting level */

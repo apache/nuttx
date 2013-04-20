@@ -48,7 +48,7 @@ if LCD_P14201
 config P14201_NINTERFACES
 	int "Number of physical P14201 devices"
 	default 1
-	range 1,1
+	range 1 1
 	---help---
 		Specifies the number of physical P14201
 		devices that will be supported.
@@ -56,7 +56,7 @@ config P14201_NINTERFACES
 config P14201_SPIMODE
 	int "SPI mode"
 	default 2
-	range 0,3
+	range 0 3
 	---help---
 		Controls the SPI mode
 
@@ -93,7 +93,7 @@ if LCD_NOKIA6100
 config NOKIA6100_NINTERFACES
 	int "Number of physical NOKIA6100 devices"
 	default 1
-	range 1,1
+	range 1 1
 	---help---
 		Specifies the number of physical Nokia
 		6100 devices that will be supported.
@@ -115,7 +115,7 @@ endchoice
 config NOKIA6100_SPIMODE
 	int "SPI mode"
 	default 0
-	range 0,3
+	range 0 3
 	---help---
 		Controls the SPI mode
 
@@ -141,42 +141,42 @@ config NOKIA6100_BPP
 config NOKIA6100_INVERT
 	int "Display inversion"
 	default 1
-	range 0,1
+	range 0 1
 	---help---
 		Display inversion, 0 or 1, Default: 1
 
 config NOKIA6100_MY
 	int "Display row direction"
 	default 0
-	range 0,1
+	range 0 1
 	---help---
 		Display row direction, 0 or 1, Default: 0
 
 config NOKIA6100_MX
 	int "Display column direction"
 	default 1
-	range 0,1
+	range 0 1
 	---help---
 		Display column direction, 0 or 1, Default: 1
 
 config NOKIA6100_V
 	int "Display address direction"
 	default 0
-	range 0,1
+	range 0 1
 	---help---
 		Display address direction, 0 or 1, Default: 0
 
 config NOKIA6100_ML
 	int "Display scan direction"
 	default 0
-	range 0,1
+	range 0 1
 	---help---
 		Display scan direction, 0 or 1, Default: 0
 
 config NOKIA6100_RGBORD
 	int "Display RGB order"
 	default 0
-	range 0,1
+	range 0 1
 	---help---
 		Display RGB order, 0 or 1, Default: 0
 		Required LCD driver settings:
