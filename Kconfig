@@ -96,7 +96,8 @@ config APPS_DIR
 		the NuttX top build direcory. If you had an application
 		directory and the NuttX directory each in separate directory
 		trees like this:
-		
+
+		<pre>
 		build
 		|-nuttx
 		|  |
@@ -104,6 +105,7 @@ config APPS_DIR
 		`-application
 		|
 		`- Makefile
+		</pre>
 		
 		Then you would set CONFIG_APPS_DIR=../application.
 
@@ -238,11 +240,13 @@ config ARCH_STDBOOL_H
 		However, that header includes logic to redirect the inclusion of an
 		architecture specific header file like:
 
+		<pre>
 		#ifdef CONFIG_ARCH_STDBOOL_H
 		#  include <arch/stdbool.h>
 		#else
 		...
 		#endif
+		</pre>
 
 		Recall that that include path, include/arch, is a symbolic link and
 		will refer to a version of stdbool.h at nuttx/arch/<architecture>/include/stdbool.h.
@@ -259,9 +263,11 @@ config ARCH_MATH_H
 		will then include the architecture-specific version of math.h that you
 		must provide at nuttx/arch/>architecture</include/math.h.
 
+		<pre>
 		#ifdef CONFIG_ARCH_MATH_H
 		#  include <arch/math.h>
 		#endif
+		</pre>
 
 		So for the architectures that define ARCH_MATH_H=y, include/math.h
 		will be the redirecting math.h header file; for the architectures

@@ -82,6 +82,14 @@ cmdconfig.c
   This C file can be used to build a utility for comparing two NuttX
   configuration files.
 
+kconfig2html.c
+--------------
+
+  This is a C file that can be used build a utility for converting the
+  NuttX configuration in the Kconfig files to an HTML document.  This
+  auto-generated documentation will, eventually, replace the manually
+  updated configuratin documentation that is fallling woefully behind.
+
 mkexport.sh and Makefile.export
 -------------------------------
 

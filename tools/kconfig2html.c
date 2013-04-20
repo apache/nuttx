@@ -56,6 +56,7 @@
 #define SCRATCH_SIZE     1024
 #define MAX_DEPENDENCIES 100
 #define MAX_LEVELS       100
+#define TAB_SIZE         4
 
 #define TMPFILE_NAME     "kconfig2html-tmp.dat"
 
@@ -78,6 +79,7 @@ enum token_type_e
   TOKEN_ENDMENU,
   TOKEN_CHOICE,
   TOKEN_ENDCHOICE,
+  TOKEN_PROMPT,
   TOKEN_IF,
   TOKEN_ENDIF,
   TOKEN_SOURCE
@@ -128,6 +130,12 @@ struct config_s
   char              *cdefault;
 };
 
+struct choice_s
+{
+  char              *cprompt;
+  char              *cdefault;
+};
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -139,6 +147,7 @@ static FILE *g_tmpfile;
 static char *g_lasts;
 static bool g_debug;
 static bool g_internal;
+static bool g_preread;
 static const char *g_kconfigroot;
 static const char *g_appsdir;
 static int g_paranum[MAX_LEVELS];
@@ -163,6 +172,7 @@ static struct reserved_s g_reserved[] =
   {TOKEN_ENDMENU,    "endmenu"},
   {TOKEN_CHOICE,     "choice"},
   {TOKEN_ENDCHOICE,  "endchoice"},
+  {TOKEN_PROMPT,     "prompt"},
   {TOKEN_SOURCE,     "source"},
   {TOKEN_IF,         "if"},
   {TOKEN_ENDIF,      "endif"},
@@ -175,6 +185,14 @@ static struct reserved_s g_reserved[] =
 
 /****************************************************************************
  * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: show_usage
+ *
+ * Description:
+ *   Show usage of this program and exit with the specified error code
+ *
  ****************************************************************************/
 
 static void show_usage(const char *progname, int exitcode)
@@ -193,7 +211,13 @@ static void show_usage(const char *progname, int exitcode)
   exit(exitcode);
 }
 
-/* Skip over any spaces */
+/****************************************************************************
+ * Name: skip_space
+ *
+ * Description:
+ *   Skip over any spaces
+ *
+ ****************************************************************************/
 
 static char *skip_space(char *ptr)
 {
@@ -201,7 +225,13 @@ static char *skip_space(char *ptr)
   return ptr;
 }
 
-/* Debug output */
+/****************************************************************************
+ * Name: debug
+ *
+ * Description:
+ *   Debug output (conditional)
+ *
+ ****************************************************************************/
 
 static void debug(const char *fmt, ...)
 {
@@ -215,7 +245,13 @@ static void debug(const char *fmt, ...)
     }
 }
 
-/* HTML output */
+/****************************************************************************
+ * Name: output
+ *
+ * Description:
+ *   Output to the final HTML file
+ *
+ ****************************************************************************/
 
 static void output(const char *fmt, ...)
 {
@@ -226,6 +262,14 @@ static void output(const char *fmt, ...)
   va_end(ap);
 }
 
+/****************************************************************************
+ * Name: body
+ *
+ * Description:
+ *   HTML body output to a temporary file.
+ *
+ ****************************************************************************/
+
 static void body(const char *fmt, ...)
 {
   va_list ap;
@@ -234,6 +278,14 @@ static void body(const char *fmt, ...)
   (void)vfprintf(g_tmpfile, fmt, ap);
   va_end(ap);
 }
+
+/****************************************************************************
+ * Name: dequote
+ *
+ * Description:
+ *   Remove quotation marks from a string.
+ *
+ ****************************************************************************/
 
 static char *dequote(char *ptr)
 {
@@ -270,6 +322,15 @@ static char *dequote(char *ptr)
   return ptr;
 }
 
+/****************************************************************************
+ * Name: read_line
+ *
+ * Description:
+ *   Read a new line, skipping over leading white space and ignore lines
+ *   that contain only comments.
+ *
+ ****************************************************************************/
+
 /* Read the next line from the Kconfig file */
 
 static char *read_line(FILE *stream)
@@ -278,39 +339,52 @@ static char *read_line(FILE *stream)
 
   for (;;)
     {
-      g_line[LINE_SIZE] = '\0';
-      if (!fgets(g_line, LINE_SIZE, stream))
+      /* Is there already valid data in the line buffer?  This can happen while parsing
+       * help text and we read one line too far.
+       */
+
+      if (!g_preread)
         {
-          return NULL;
+          g_line[LINE_SIZE] = '\0';
+          if (!fgets(g_line, LINE_SIZE, stream))
+            {
+              return NULL;
+            }
         }
-      else
+
+      g_preread = false;
+
+      /* Replace all whitespace characters with spaces to simplify parsing */
+
+      for (ptr = g_line; *ptr; ptr++)
         {
-          /* Replace all whitespace characters with spaces to simplify parsing */
-
-          for (ptr = g_line; *ptr; ptr++)
+          if (isspace(((int)*ptr)))
             {
-              if (isspace(((int)*ptr)))
-                {
-                  *ptr = ' ';
-                }
+              *ptr = ' ';
             }
+        }
 
-          /* Skip any leading whitespace.  Ignore empty lines and lines that
-           * contain only comments.
-           */
+      /* Skip any leading whitespace.  Ignore empty lines and lines that
+       * contain only comments.
+       */
 
-          ptr = skip_space(g_line);
-          if (*ptr && *ptr != '#' && *ptr != '\n')
-            {
-              return ptr;
-            }
+      ptr = skip_space(g_line);
+      if (*ptr && *ptr != '#' && *ptr != '\n')
+        {
+          return ptr;
         }
     }
 }
 
-/* Read the next line from the Kconfig file */
+/****************************************************************************
+ * Name: tokenize
+ *
+ * Description:
+ *   Check if this string corresponds to a string in the reserved word table.
+ *
+ ****************************************************************************/
 
-enum token_type_e tokenize(const char *token)
+static enum token_type_e tokenize(const char *token)
 {
   struct reserved_s *ptr;
 
@@ -324,6 +398,14 @@ enum token_type_e tokenize(const char *token)
 
   return ptr->ttype;
 }
+
+/****************************************************************************
+ * Name: MY_strtok_r
+ *
+ * Description:
+ *   A replacement that can be used if your platform does not support strtok_r.
+ *
+ ****************************************************************************/
 
 #ifndef HAVE_STRTOK_R
 static char *MY_strtok_r(char *str, const char *delim, char **saveptr)
@@ -395,6 +477,16 @@ static char *MY_strtok_r(char *str, const char *delim, char **saveptr)
 #define strtok_r MY_strtok_r
 #endif
 
+/****************************************************************************
+ * Name: findchar
+ *
+ * Description:
+ *   Find a character in a string.  This differs from strchr() because it
+ *   skips over quoted characters.  For example, if you are searching for
+ *   '"', encountering '"' will terminate the search, but "\"" will not.
+ *
+ ****************************************************************************/
+
 static char *findchar(char *ptr, char ch)
 {
   bool escaped = false;
@@ -426,6 +518,14 @@ static char *findchar(char *ptr, char ch)
   return NULL;
 }
 
+/****************************************************************************
+ * Name: getstring
+ *
+ * Description:
+ *   Extract a quoted string
+ *
+ ****************************************************************************/
+
 static char *getstring(char *ptr)
 {
   char *endptr;
@@ -453,6 +553,14 @@ static char *getstring(char *ptr)
   return ptr;
 }
 
+/****************************************************************************
+ * Name: push_dependency
+ *
+ * Description:
+ *   Add the new dependency to the current list of dependencies.
+ *
+ ****************************************************************************/
+
 static void push_dependency(const char *dependency)
 {
   int ndx = g_ndependencies;
@@ -466,6 +574,14 @@ static void push_dependency(const char *dependency)
   g_dependencies[ndx] = strdup(dependency);
   g_ndependencies = ndx + 1;
 }
+
+/****************************************************************************
+ * Name: pop_dependency
+ *
+ * Description:
+ *   Remove the last, pushed dependency
+ *
+ ****************************************************************************/
 
 static void pop_dependency(void)
 {
@@ -485,6 +601,14 @@ static void pop_dependency(void)
   g_ndependencies = ndx;
 }
 
+/****************************************************************************
+ * Name: incr_level
+ *
+ * Description:
+ *   Increment the paragraph numbering level
+ *
+ ****************************************************************************/
+
 static void incr_level(void)
 {
   int ndx = g_level;
@@ -498,6 +622,14 @@ static void incr_level(void)
   g_paranum[ndx] = 1;
   g_level = ndx + 1;
 }
+
+/****************************************************************************
+ * Name: decr_level
+ *
+ * Description:
+ *   Decrease the paragraph numbering level.
+ *
+ ****************************************************************************/
 
 static void decr_level(void)
 {
@@ -515,6 +647,14 @@ static void decr_level(void)
   g_level = ndx;
 }
 
+/****************************************************************************
+ * Name: incr_paranum
+ *
+ * Description:
+ *   Increment the paragraph number at this level
+ *
+ ****************************************************************************/
+
 static void incr_paranum(void)
 {
   int ndx = g_level - 1;
@@ -527,6 +667,14 @@ static void incr_paranum(void)
 
   g_paranum[ndx]++;
 }
+
+/****************************************************************************
+ * Name: get_paranum
+ *
+ * Description:
+ *   Return a string for this paragraph (uses g_scratch[]).
+ *
+ ****************************************************************************/
 
 static const char *get_paranum(void)
 {
@@ -547,6 +695,15 @@ static const char *get_paranum(void)
 
   return g_scratch;
 }
+
+/****************************************************************************
+ * Name: type2str
+ *
+ * Description:
+ *   Return a string given a member of the configuration variable type
+ *   enumeration.
+ *
+ ****************************************************************************/
 
 static const char *type2str(enum config_type_e valtype)
 {
@@ -571,7 +728,140 @@ static const char *type2str(enum config_type_e valtype)
   return "Unknown";
 }
 
-static inline char *process_config(FILE *stream, const char *configname, const char *kconfigdir)
+/****************************************************************************
+ * Name: process_help
+ *
+ * Description:
+ *   Read and generate HTML for the help text that is expected after the
+ *   configuration configuration variable description.
+ *
+ ****************************************************************************/
+
+static inline void process_help(FILE *stream)
+{
+  char *ptr;
+  int help_indent = 0;
+  int indent;
+  bool blank;
+  bool done;
+  bool newpara;
+
+  /* Read each comment line */
+
+  newpara = true;
+  for (;;)
+   {
+      /* Read the next line of comment text */
+
+      g_line[LINE_SIZE] = '\0';
+      if (!fgets(g_line, LINE_SIZE, stream))
+        {
+          break;
+        }
+
+      /* What is the indentation level? The first help line sets the
+       * indentation level.  The first line encounter with lower
+       * indentation terminates the help.
+       */
+
+      ptr     = g_line;
+      indent  = 0;
+      blank   = false;
+      done    = false;
+
+      while (!done)
+        {
+          int ch = (int)*ptr;
+          switch (ch)
+            {
+              case ' ':
+                indent++;
+                ptr++;
+                break;
+
+              case '\t':
+                indent += TAB_SIZE;
+                ptr++;
+                break;
+
+              case '#':
+#if 0
+                blank = true;
+#endif
+                done = true;
+                break;
+
+              case '\n':
+              case '\0':
+                blank = true;
+                done = true;
+                break;
+
+              default:
+                done = true;
+                break;
+            }
+        }
+
+      /* Blank lines are a special case */
+
+      if (blank)
+        {
+          /* Avoid putting an empty paragraph at the end of the help */
+
+          if (!newpara)
+            {
+              body("</p>\n");
+              newpara = true;
+            }
+
+          continue;
+        }
+
+      /* Check the indentation level */
+
+      if (indent == 0)
+        {
+          g_preread = true;
+          break;
+        }
+      else if (!help_indent)
+        {
+          help_indent = indent;
+        }
+      else if (indent < help_indent)
+        {
+          g_preread = true;
+          break;
+        }
+
+      /* Add the next line of help text */
+
+      if (newpara)
+        {
+          body("</p>\n");
+          newpara = false;
+        }
+
+      body("  %s", ptr);
+    }
+
+  if (!newpara)
+    {
+      body("</p>\n");
+    }
+}
+
+/****************************************************************************
+ * Name: process_config
+ *
+ * Description:
+ *   Process one configuration variable paragraph
+ *
+ ****************************************************************************/
+
+static inline char *process_config(FILE *stream, const char *configname,
+                                   const char *kconfigdir)
 {
   enum token_type_e tokid;
   struct config_s config;
@@ -702,9 +992,9 @@ static inline char *process_config(FILE *stream, const char *configname, const c
                 break;
             }
 
-          /* Break out on the first unhandled token */
+          /* Break out on the help token (or the first unhandled token) */
 
-          if (token != NULL)
+          if (help || token != NULL)
             {
               break;
             }
@@ -793,6 +1083,8 @@ static inline char *process_config(FILE *stream, const char *configname, const c
 
       if (help)
         {
+          process_help(stream);
+          token = NULL;
         }
       else if (!config.cdesc)
         {
@@ -823,6 +1115,134 @@ static inline char *process_config(FILE *stream, const char *configname, const c
 
   return token;
 }
+
+/****************************************************************************
+ * Name: process_choice
+ *
+ * Description:
+ *   Process a choice paragraph
+ *
+ ****************************************************************************/
+
+static char *parse_kconfigfile(FILE *stream, const char *kconfigdir); /* Forward reference */
+static inline char *process_choice(FILE *stream, const char *kconfigdir)
+{
+  enum token_type_e tokid;
+  struct choice_s choice;
+  const char *paranum;
+  char *token;
+  char *ptr;
+
+  /* Get the choice information */
+
+  memset(&choice, 0, sizeof(struct choice_s));
+
+  /* Process each line in the choice */
+
+  while ((ptr = read_line(stream)) != NULL)
+    {
+      /* Process the first token on the Kconfig file line */
+
+      g_lasts = NULL;
+      token = strtok_r(ptr, " ", &g_lasts);
+      if (token != NULL)
+        {
+          tokid = tokenize(token);
+          switch (tokid)
+            {
+              case TOKEN_PROMPT:
+                {
+                  /* Get the prompt string */
+
+                  ptr = getstring(g_lasts);
+                  if (ptr)
+                    {
+                      choice.cprompt = strdup(ptr);
+                    }
+
+                  /* Indicate that the line has been consumed */
+
+                  token = NULL;
+                }
+                break;
+
+              case TOKEN_DEFAULT:
+                {
+                  char *value = strtok_r(NULL, " ", &g_lasts);
+                  choice.cdefault = strdup(value);
+                  token = NULL;
+                }
+                break;
+
+              default:
+                {
+                  debug("Unhandled token: %s\n", token);
+                }
+                break;
+            }
+
+          /* Break out on the first unhandled token */
+
+          if (token != NULL)
+            {
+              break;
+            }
+        }
+    }
+
+   paranum = get_paranum();
+   output("<li><a href=\"#choice_%d\">%s Choice", g_choice_number, paranum);
+   body("\n<h3><a name=\"choice_%d\">%s Choice", g_choice_number, paranum);
+ 
+   if (choice.cprompt)
+     {
+       output(": %s", choice.cprompt);
+       body(": %s", choice.cprompt);
+     }
+
+   output("</a></li>\n");
+   body("</a></h3>\n");
+   g_choice_number++;
+
+   /* Show the configuration file */
+
+   body("<p><i>Kconfig file</i>: <code>%s/Kconfig</code>\n</p>", kconfigdir);
+   body("<p><i>Options</i>:</p>", kconfigdir);
+   body("<ul>\n");
+
+  /* Free allocated memory */
+
+  if (choice.cprompt)
+    {
+      free(choice.cprompt);
+    }
+
+  if (choice.cdefault)
+    {
+      free(choice.cdefault);
+    }
+
+  /* Increment the nesting level */
+
+   incr_level();
+
+   debug("process_choice: Recursing for TOKEN_CHOICE\n");
+   debug("  kconfigdir:  %s\n", kconfigdir);
+   debug("  level:       %d\n", g_level);
+
+   /* Then recurse */
+
+   g_inchoice++;
+   return parse_kconfigfile(stream, kconfigdir);
+}
+
+/****************************************************************************
+ * Name: parse_kconfigfile
+ *
+ * Description:
+ *   Parse a Kconfig file.
+ *
+ ****************************************************************************/
 
 static void process_kconfigfile(const char *kconfigdir); /* Forward reference */
 static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
@@ -938,27 +1358,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
 
               case TOKEN_CHOICE:
                 {
-                  paranum = get_paranum();
-                  body("\n<h3>%s Choice</h3>\n<ul>\n", paranum);
-
-                  output("<li><a href=\"#choice_%d\">%s Choice</a></li>\n",
-                         g_choice_number, paranum);
-                  body("\n<h3><a name=\"choice_%d\">%s Choice</a></h3>\n",
-                       g_choice_number, paranum);
-                  g_choice_number++;
-
-                  /* Increment the nesting level */
-
-                  incr_level();
-
-                  debug("parse_kconfigfile: Recursing for TOKEN_CHOICE\n");
-                  debug("  kconfigdir:  %s\n", kconfigdir);
-                  debug("  level:       %d\n", g_level);
-
-                  /* Then recurse */
-
-                  g_inchoice++;
-                  token = parse_kconfigfile(stream, kconfigdir);
+                  token = process_choice(stream, kconfigdir);
                 }
                 break;
 
@@ -1021,6 +1421,14 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
   return token;
 }
 
+/****************************************************************************
+ * Name: process_kconfigfile
+ *
+ * Description:
+ *   Open and parse a Kconfig file
+ *
+ ****************************************************************************/
+
 static void process_kconfigfile(const char *kconfigdir)
 {
   FILE *stream;
@@ -1055,6 +1463,14 @@ static void process_kconfigfile(const char *kconfigdir)
 
 /****************************************************************************
  * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: main
+ *
+ * Description:
+ *   Program entry point.
+ *
  ****************************************************************************/
 
 int main(int argc, char **argv, char **envp)
