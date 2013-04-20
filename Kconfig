@@ -50,7 +50,7 @@ config WINDOWS_NATIVE
 
 config WINDOWS_CYGWIN
 	bool "Cygwin"
--	--help---
+	---help---
 		Build natively in a Cygwin environment with POSIX style paths (like /cygdrive/c/cgywin/home)
 
 config WINDOWS_MSYS

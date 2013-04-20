@@ -56,6 +56,7 @@
 #define SCRATCH_SIZE     1024
 #define MAX_DEPENDENCIES 100
 #define MAX_LEVELS       100
+#define MAX_SELECT       16
 #define TAB_SIZE         4
 
 #define TMPFILE_NAME     "kconfig2html-tmp.dat"
@@ -68,13 +69,20 @@ enum token_type_e
 {
   TOKEN_NONE = 0,
   TOKEN_NOTRESERVED,
+  TOKEN_COMMENT,
   TOKEN_CONFIG,
+  TOKEN_MENUCONFIG,
   TOKEN_BOOL,
   TOKEN_INT,
   TOKEN_HEX,
   TOKEN_STRING,
   TOKEN_DEFAULT,
+  TOKEN_SELECT,
+  TOKEN_DEPENDS,
+  TOKEN_ON,
+  TOKEN_OPTION,
   TOKEN_HELP,
+  TOKEN_MAINMENU,
   TOKEN_MENU,
   TOKEN_ENDMENU,
   TOKEN_CHOICE,
@@ -103,8 +111,10 @@ enum error_e
   ERROR_OUTFILE_OPEN_FAILURE,
   ERROR_TMPFILE_OPEN_FAILURE,
   ERROR_KCONFIG_OPEN_FAILURE,
+  ERROR_TOO_MANY_SELECT,
   ERROR_TOO_MANY_DEPENDENCIES,
   ERROR_DEPENDENCIES_UNDERFLOW,
+  ERRROR_ON_AFTER_DEPENDS,
   ERROR_NESTING_TOO_DEEP,
   ERROR_NESTING_UNDERFLOW
 };
@@ -128,12 +138,22 @@ struct config_s
   char              *cname;
   char              *cdesc;
   char              *cdefault;
+  char              *cselect[MAX_SELECT];
+  int                cnselect;
+  int                cndependencies;
 };
 
 struct choice_s
 {
   char              *cprompt;
   char              *cdefault;
+  int                cndependencies;
+};
+
+struct menu_s
+{
+  char              *mname;
+  int                mndependencies;
 };
 
 /****************************************************************************
@@ -160,14 +180,21 @@ static int g_choice_number;
 
 static struct reserved_s g_reserved[] =
 {
+  {TOKEN_COMMENT,    "comment"},
   {TOKEN_CONFIG,     "config"},
+  {TOKEN_MENUCONFIG, "menuconfig"},
   {TOKEN_BOOL,       "bool"},
   {TOKEN_INT,        "int"},
   {TOKEN_HEX,        "hex"},
   {TOKEN_STRING,     "string"},
   {TOKEN_DEFAULT,    "default"},
+  {TOKEN_SELECT,     "select"},
+  {TOKEN_DEPENDS,    "depends"},
+  {TOKEN_ON,         "on"},
+  {TOKEN_OPTION,     "option"},
   {TOKEN_HELP,       "help"},
   {TOKEN_HELP,       "---help---"},
+  {TOKEN_MAINMENU,   "mainmenu"},
   {TOKEN_MENU,       "menu"},
   {TOKEN_ENDMENU,    "endmenu"},
   {TOKEN_CHOICE,     "choice"},
@@ -202,7 +229,7 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "Where:\n\n");
   fprintf(stderr, "\t-a : Select relative path to the apps/ directory. Theis path is relative\n");
   fprintf(stderr, "\t     to the <Kconfig directory>.  Default: ../apps\n");
-  fprintf(stderr, "\t-o : Send output to <out file>.  Default:  Output goes to stdout\n");
+  fprintf(stderr, "\t-o : Send output to <out file>.  Default: Output goes to stdout\n");
   fprintf(stderr, "\t-i : Show hidden, internal configuration variables\n");
   fprintf(stderr, "\t-d : Enable debug output\n");
   fprintf(stderr, "\t-h : Prints this message and exits\n");
@@ -869,6 +896,7 @@ static inline char *process_config(FILE *stream, const char *configname,
   const char *paranum;
   char *token;
   char *ptr;
+  int i;
 
   /* Get the configuration information */
 
@@ -978,6 +1006,46 @@ static inline char *process_config(FILE *stream, const char *configname,
                 }
                 break;
 
+              case TOKEN_SELECT:
+                {
+                  char *value;
+                  int ndx;
+
+                  ndx = config.cnselect + 1;
+                  if (ndx > MAX_SELECT)
+                    {
+                      fprintf(stderr, "Too many 'select' lines\n");
+                      exit(ERROR_TOO_MANY_SELECT);
+                    }
+
+                  value = strtok_r(NULL, " ", &g_lasts);
+                  config.cselect[ndx] = strdup(value);
+                  config.cnselect     = ndx;
+                  token               = NULL;
+                }
+                break;
+
+              case TOKEN_DEPENDS:
+                {
+                  char *value = strtok_r(NULL, " ", &g_lasts);
+                  if (strcmp(value, "on") != 0)
+                    {
+                      fprintf(stderr, "Expected \"on\" after \"depends\"\n");
+                      exit(ERRROR_ON_AFTER_DEPENDS);
+                    }
+
+                  push_dependency(g_lasts);
+                  config.cndependencies++;
+                  token = NULL;
+                }
+                break;
+
+              case TOKEN_OPTION:
+                {
+                  token = NULL; /* Ignored */
+                }
+                break;
+
               case TOKEN_HELP:
                 {
                   help  = true;
@@ -987,7 +1055,7 @@ static inline char *process_config(FILE *stream, const char *configname,
 
               default:
                 {
-                  debug("Unhandled token: %s\n", token);
+                  debug("Terminating token: %s\n", token);
                 }
                 break;
             }
@@ -1051,27 +1119,43 @@ static inline char *process_config(FILE *stream, const char *configname,
 
       if (config.ctype != VALUE_NONE)
         {
-          body("  <li><i>Type</i>:         %s</li>\n", type2str(config.ctype));
+          body("  <li><i>Type</i>: %s</li>\n", type2str(config.ctype));
         }
 
       /* Print the default value of the configuration variable */
 
       if (config.cdefault)
         {
-          body("  <li><i>Default</i>:      %s</li>\n", config.cdefault);
+          body("  <li><i>Default</i>: %s</li>\n", config.cdefault);
+        }
+
+      /* Print the default value of the configuration variable auto-selected by this setting */
+
+      if (config.cnselect > 0)
+        {
+          body("  <li><i>Selects</i>: <a href=\"CONFIG_%s\">CONFIG_%s</a>",
+               config.cselect[0], config.cselect[0]);
+
+          for (i = 1; i < config.cnselect; i++)
+            {
+              body(", <a href=\"CONFIG_%s\">CONFIG_%s</a>",
+                   config.cselect[i], config.cselect[i]);
+            }
+
+          body("</li>\n");
         }
 
       /* Print the list of dependencies (if any) */
 
       if (g_ndependencies > 0)
         {
-          int i;
-
           body("  <li><i>Dependencies</i>: %s", g_dependencies[0]);
+
           for (i = 1; i < g_ndependencies; i++)
             {
               body(", %s\n", g_dependencies[i]);
             }
+
           body("</li>\n");
         }
 
@@ -1096,6 +1180,13 @@ static inline char *process_config(FILE *stream, const char *configname,
       body("</ul>\n");
   }
 
+  /* Remove any dependencies that apply only to this configuration */
+
+  for (i = 0; i < config.cndependencies; i++)
+    {
+      pop_dependency();
+    }
+
   /* Free allocated memory */
 
   if (config.cname)
@@ -1111,6 +1202,14 @@ static inline char *process_config(FILE *stream, const char *configname,
   if (config.cdefault)
     {
       free(config.cdefault);
+    }
+
+  if (config.cnselect > 0)
+    {
+      for (i = 0; i < config.cnselect; i++)
+        {
+          free(config.cselect[i]);
+        }
     }
 
   return token;
@@ -1130,8 +1229,10 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
   enum token_type_e tokid;
   struct choice_s choice;
   const char *paranum;
-  char *token;
+  char *token = NULL;
   char *ptr;
+  bool help;
+  int i;
 
   /* Get the choice information */
 
@@ -1174,41 +1275,103 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
                 }
                 break;
 
+              case TOKEN_DEPENDS:
+                {
+                  char *value = strtok_r(NULL, " ", &g_lasts);
+                  if (strcmp(value, "on") != 0)
+                    {
+                      fprintf(stderr, "Expected \"on\" after \"depends\"\n");
+                      exit(ERRROR_ON_AFTER_DEPENDS);
+                    }
+
+                  push_dependency(g_lasts);
+                  choice.cndependencies++;
+                  token = NULL;
+                }
+                break;
+
+              case TOKEN_HELP:
+                {
+                  help  = true;
+                  token = NULL;
+                }
+                break;
+
               default:
                 {
-                  debug("Unhandled token: %s\n", token);
+                  debug("Terminating token: %s\n", token);
                 }
                 break;
             }
 
-          /* Break out on the first unhandled token */
+          /* Break out on the help token (or the first unhandled token) */
 
-          if (token != NULL)
+          if (help || token != NULL)
             {
               break;
             }
         }
     }
 
-   paranum = get_paranum();
-   output("<li><a href=\"#choice_%d\">%s Choice", g_choice_number, paranum);
-   body("\n<h3><a name=\"choice_%d\">%s Choice", g_choice_number, paranum);
- 
-   if (choice.cprompt)
-     {
-       output(": %s", choice.cprompt);
-       body(": %s", choice.cprompt);
-     }
+  paranum = get_paranum();
+  output("<li><a href=\"#choice_%d\">%s Choice", g_choice_number, paranum);
+  body("\n<h3><a name=\"choice_%d\">%s Choice", g_choice_number, paranum);
 
-   output("</a></li>\n");
-   body("</a></h3>\n");
-   g_choice_number++;
+  if (choice.cprompt)
+    {
+      output(": %s", choice.cprompt);
+      body(": %s", choice.cprompt);
+    }
+
+  output("</a></li>\n");
+  body("</a></h3>\n");
+  g_choice_number++;
+
+  /* Show the default */
+
+  body("<ul>\n");
+  if (choice.cdefault)
+    {
+      body("  <li><i>Default</i>: <code>CONFIG_%s</code>\n</li>", choice.cdefault);
+    }
+
+  /* Print the list of dependencies (if any) */
+
+  if (g_ndependencies > 0)
+    {
+      body("  <li><i>Dependencies</i>: %s", g_dependencies[0]);
+      for (i = 1; i < g_ndependencies; i++)
+        {
+          body(", %s\n", g_dependencies[i]);
+        }
+      body("</li>\n");
+    }
 
    /* Show the configuration file */
 
-   body("<p><i>Kconfig file</i>: <code>%s/Kconfig</code>\n</p>", kconfigdir);
-   body("<p><i>Options</i>:</p>", kconfigdir);
+   body("  <li><i>Kconfig file</i>: <code>%s/Kconfig</code>\n</li>", kconfigdir);
+
+   /* Print any help text */
+
+  if (help)
+    {
+      process_help(stream);
+      token = NULL;
+    }
+
+   body("</ul>\n");
+
+   /* Then show the choice options */
+
+   body("<p><b>Choice Options:</b></p>", kconfigdir);
    body("<ul>\n");
+
+  /* Remove any dependencies that apply only to this configuration */
+
+  for (i = 0; i < choice.cndependencies; i++)
+    {
+      pop_dependency();
+    }
 
   /* Free allocated memory */
 
@@ -1226,14 +1389,142 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
 
    incr_level();
 
-   debug("process_choice: Recursing for TOKEN_CHOICE\n");
+   debug("process_choice: TOKEN_CHOICE\n");
    debug("  kconfigdir:  %s\n", kconfigdir);
    debug("  level:       %d\n", g_level);
 
-   /* Then recurse */
+   /* Then return in choice mode */
 
    g_inchoice++;
-   return parse_kconfigfile(stream, kconfigdir);
+   return token;
+}
+
+/****************************************************************************
+ * Name: process_menu
+ *
+ * Description:
+ *   Process a menu paragraph
+ *
+ ****************************************************************************/
+
+static inline char *process_menu(FILE *stream, const char *kconfigdir)
+{
+  enum token_type_e tokid;
+  struct menu_s menu;
+  const char *paranum;
+  char *menuname;
+  char *token = NULL;
+  char *ptr;
+  int i;
+
+  /* Get the menu information */
+
+  memset(&menu, 0, sizeof(struct menu_s));
+
+  /* Get the menu name */
+
+  menuname = getstring(g_lasts);
+  menu.mname = strdup(menuname);
+
+  /* Process each line in the choice */
+
+  while ((ptr = read_line(stream)) != NULL)
+    {
+      /* Process the first token on the Kconfig file line */
+
+      g_lasts = NULL;
+      token = strtok_r(ptr, " ", &g_lasts);
+      if (token != NULL)
+        {
+          tokid = tokenize(token);
+          switch (tokid)
+            {
+              case TOKEN_DEPENDS:
+                {
+                  char *value = strtok_r(NULL, " ", &g_lasts);
+                  if (strcmp(value, "on") != 0)
+                    {
+                      fprintf(stderr, "Expected \"on\" after \"depends\"\n");
+                      exit(ERRROR_ON_AFTER_DEPENDS);
+                    }
+
+                  push_dependency(g_lasts);
+                  menu.mndependencies++;
+                  token = NULL;
+                }
+                break;
+
+              default:
+                {
+                  debug("Terminating token: %s\n", token);
+                }
+                break;
+            }
+
+          /* Break out on the first unhandled token */
+
+          if (token != NULL)
+            {
+              break;
+            }
+        }
+    }
+
+  /* Output menu information */
+
+  paranum = get_paranum();
+  if (menuname)
+    {
+      output("<li><a href=\"#menu_%d\">%s Menu: %s</a></li>\n",
+             g_menu_number, paranum, menuname);
+      output("<ul>\n");
+             body("\n<h1><a name=\"menu_%d\">%s Menu: %s</a></h1>\n",
+             g_menu_number, paranum, menuname);
+    }
+  else
+    {
+      output("<li><a href=\"#menu_%d\">%s Menu</a></li>\n",
+             g_menu_number, paranum);
+      body("\n<h1><a name=\"menu_%d\">%s Menu</a></h1>\n",
+             g_menu_number, paranum);
+    }
+
+  /* Print the list of dependencies (if any) */
+
+  if (g_ndependencies > 0)
+    {
+      body("<ul>\n");
+      body("  <li><i>Dependencies</i>: %s", g_dependencies[0]);
+
+      for (i = 1; i < g_ndependencies; i++)
+        {
+          body(", %s\n", g_dependencies[i]);
+        }
+
+      body("</li>\n");
+      body("</ul>\n");
+    }
+
+  g_menu_number++;
+
+  /* Remove any dependencies that apply only to this configuration */
+
+  for (i = 0; i < menu.mndependencies; i++)
+    {
+      pop_dependency();
+    }
+
+  /* Increment the nesting level */
+
+  incr_level();
+
+  debug("process_menu: TOKEN_MENU\n");
+  debug("  kconfigdir:  %s\n", kconfigdir);
+  debug("  level:       %d\n", g_level);
+
+  /* Return the terminating token */
+
+  return token;
 }
 
 /****************************************************************************
@@ -1248,8 +1539,7 @@ static void process_kconfigfile(const char *kconfigdir); /* Forward reference */
 static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
 {
   enum token_type_e tokid;
-  const char *paranum;
-  char *token;
+  char *token = NULL;
   char *ptr;
 
   /* Process each line in the Kconfig file */
@@ -1314,45 +1604,23 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
                 break;
 
               case TOKEN_CONFIG:
+              case TOKEN_MENUCONFIG:
                 {
                   char *configname = strtok_r(NULL, " ", &g_lasts);
                   token = process_config(stream, configname, kconfigdir);
                 }
                 break;
 
+              case TOKEN_COMMENT:
+              case TOKEN_MAINMENU:
+                {
+                  token = NULL; /* ignored */
+                }
+                break;
+
               case TOKEN_MENU:
                 {
-                  char *menuname = getstring(g_lasts);
-
-                  paranum = get_paranum();
-                  if (menuname)
-                    {
-                      output("<li><a href=\"#menu_%d\">%s Menu: %s</a></li>\n",
-                             g_menu_number, paranum, menuname);
-                      output("<ul>\n");
-                      body("\n<h1><a name=\"menu_%d\">%s Menu: %s</a></h1>\n",
-                           g_menu_number, paranum, menuname);
-                    }
-                  else
-                    {
-                      output("<li><a href=\"#menu_%d\">%s Menu</a></li>\n",
-                             g_menu_number, paranum);
-                      body("\n<h1><a name=\"menu_%d\">%s Menu</a></h1>\n",
-                           g_menu_number, paranum);
-                    }
-                  g_menu_number++;
-
-                  /* Increment the nesting level */
-
-                  incr_level();
-
-                  debug("parse_kconfigfile: Recursing for TOKEN_MENU\n");
-                  debug("  kconfigdir:  %s\n", kconfigdir);
-                  debug("  level:       %d\n", g_level);
-
-                  /* Then recurse */
-
-                  token = parse_kconfigfile(stream, kconfigdir);
+                  token = process_menu(stream, kconfigdir);
                 }
                 break;
 
@@ -1373,7 +1641,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
 
                   decr_level();
                   incr_paranum();
-                  return NULL;
+                  token = NULL;
                 }
                 break;
 
@@ -1387,7 +1655,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
 
                   decr_level();
                   incr_paranum();
-                  return NULL;
+                  token = NULL;
                 }
                 break;
 
