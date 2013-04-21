@@ -87,7 +87,7 @@ config HIDKBD_RAWSCANCODES
 		codes.  This option is useful during testing. Default: ASCII conversion.
 
 config HIDKBD_ENCODED
-	bool "Enocode Special Keys"
+	bool "Encode Special Keys"
 	default n
 	depends on !HIDKBD_RAWSCANCODES && LIB_KBDCODEC
 	---help---

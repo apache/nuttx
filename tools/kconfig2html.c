@@ -58,6 +58,8 @@
 #define MAX_LEVELS       100
 #define MAX_SELECT       16
 #define TAB_SIZE         4
+#define VAR_SIZE         80
+#define HTML_VAR_SIZE    (2*VAR_SIZE + 64)
 
 #define TMPFILE_NAME     "kconfig2html-tmp.dat"
 
@@ -371,23 +373,115 @@ static char *dequote(char *ptr)
 }
 
 /****************************************************************************
- * Name: htmlize
+ * Name: htmlize_character
  *
  * Description:
- *   HTML-ize a string. Convert characters:
+ *   Transfer and HTML-ize a character. Convert characters:
  *
  *     "   &quot;   quotation mark
- *     '   &apos;   apostrophe 
+ *     '   &apos;   apostrophe
  *     &   &amp;     ampersand
  *     <   &lt;     less-than
  *     >   &gt;     greater-than
  *
  ****************************************************************************/
 
-static char *htmlize(const char *src)
+static int htmlize_character(char *dest, char ch)
+{
+  const char *str;
+
+  /* Transfer the character from into the destination buffer, perform the
+   * conversion only the the character is one of the special characters.
+   */
+
+  str = NULL;
+
+  switch (ch)
+    {
+      case '"':
+        str = "&quot;";
+        break;
+
+      case '\'':
+        str = "&apos;";
+        break;
+
+      case '&':
+        str = "&amp;";
+        break;
+
+      case '<':
+        str = "&lt;";
+        break;
+
+      case '>':
+        str = "&gt;";
+        break;
+
+      default:
+        *dest++ = ch;
+        *dest   = '\0';
+        return 1;
+    }
+
+  /* Transfer a string */
+
+  *dest = '\0';
+  strcat(dest, str);
+  return strlen(str);
+}
+
+/****************************************************************************
+ * Name: htmlize_text
+ *
+ * Description:
+ *   HTML-ize a free-text string.  This function preforms the conversions of
+ *   in htmlize_character() for a text string.
+ *
+ ****************************************************************************/
+
+static char *htmlize_text(const char *src)
 {
   char *dest = g_scratch;
-  const char *str;
+
+  /* We may get here with the source pointer equal to NULL.  Return the
+   * disfavor.
+   */
+
+  if (!src)
+    {
+      return NULL;
+    }
+
+  /* Transfer each character from the source string into the scratch buffer */
+
+  for (; *src; src++)
+    {
+      /* Expand characters as necessary */
+
+      dest += htmlize_character(dest, *src);
+    }
+
+  return g_scratch;
+}
+
+/****************************************************************************
+ * Name: htmlize_expression
+ *
+ * Description:
+ *   HTML-ize an expression of configuration variables.  This function
+ *   preforms the same conversions as in htmlize_character(), but also
+ *   expands and adds hyper links for configuration variables.
+ *
+ ****************************************************************************/
+
+static char *htmlize_expression(const char *src)
+{
+  char varname[VAR_SIZE+1];
+  char htmlvar[HTML_VAR_SIZE+1];
+  char *dest = g_scratch;
+  char ch = '\0';
+  char lastc;
 
   /* We may get here with the source pointer equal to NULL.  Return the
    * disfavor.
@@ -403,43 +497,85 @@ static char *htmlize(const char *src)
   dest  = g_scratch;
   *dest = '\0';
 
-  for (; *src; src++)
+  while (*src)
     {
-      /* Expand characters as necessary */
+      /* Remember the last character and advance to the next character */
 
-      str = NULL;
-      switch (*src)
+      lastc = ch;
+      ch    = *src;
+
+      /* Skip control characters and out-of-range 7-bit ASCII characters */
+
+      if (*src < 0x20 || *src > 0x7e)
         {
-          case '"':
-            str = "&quot;";
-            break;
-
-          case '\'':
-            str = "&apos;";
-            break;
-
-          case '&':
-            str = "&amp;";
-            break;
-
-          case '<':
-            str = "&lt;";
-            break;
-
-          case '>':
-            str = "&gt;";
-            break;
-
-          default:
-            *dest++ = *src;
-            *dest   = '\0';
-            continue;
+          src++;
+          continue;
         }
 
-      /* Transfer a string */
+      /* Output no more than one consecutive space character.  This depends
+       * on the fact that kconfig_line has replaces all of the forms of
+       * whitespace with a space character.
+       */
 
-      strcat(dest, str);
-      dest += strlen(str);
+      if (*src == ' ')
+        {
+          if (lastc != ' ')
+            {
+              *dest++ = *src;
+              *dest   = '\0';
+            }
+
+          src++;
+          continue;
+        }
+
+      /* Concatenate variable name strings.  There strings probably begin
+       * with a uppercase letter, but here all alphanumeric values (plus '_'_
+       * are concatenated.
+       */
+
+      if (isalnum(((int)*src)) || *src == '_')
+        {
+          int namlen = 0;
+
+          do
+            {
+              /* Don't overflow the tiny variable name buffer */
+
+              if (namlen >= VAR_SIZE)
+                {
+                  error("Configuration variable name too long\n");
+                  break;
+                }
+
+              /* Add the next character to the name */
+
+              varname[namlen] = *src++;
+              namlen++;
+              varname[namlen] = '\0';
+            }
+          while (isalnum(((int)*src)) || *src == '_');
+
+          /* HTML-ize the name into our bigger, local scratch buffer */
+
+          snprintf(htmlvar, HTML_VAR_SIZE, "<a href=\"#CONFIG_%s\"><code>CONFIG_%s</code></a>",
+                   varname, varname);
+
+          /* Then transfer the string into the scratch buffer */
+
+          strcat(dest, htmlvar);
+          dest += strlen(htmlvar);
+        }
+
+      /* All that remains are space and the punctuation characters */
+
+      else
+        {
+          /* Expand characters as necessary */
+
+          dest += htmlize_character(dest, *src);
+          src++;
+        }
     }
 
   return g_scratch;
@@ -746,7 +882,7 @@ static char *getstring(char *ptr)
         }
     }
 
-  return htmlize(ptr);
+  return htmlize_text(ptr);
 }
 
 /****************************************************************************
@@ -1038,7 +1174,7 @@ static inline void process_help(FILE *stream)
           newpara = false;
         }
 
-      body("  %s", htmlize(ptr));
+      body("  %s", htmlize_text(ptr));
     }
 
   if (!newpara)
@@ -1220,7 +1356,7 @@ static inline char *process_config(FILE *stream, const char *configname,
                       exit(ERRROR_ON_AFTER_DEPENDS);
                     }
 
-                  push_dependency(g_lasts);
+                  push_dependency(htmlize_expression(g_lasts));
                   config.cndependencies++;
                   token = NULL;
                 }
@@ -1501,7 +1637,7 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
                       exit(ERRROR_ON_AFTER_DEPENDS);
                     }
 
-                  push_dependency(g_lasts);
+                  push_dependency(htmlize_expression(g_lasts));
                   choice.cndependencies++;
                   token = NULL;
                 }
@@ -1665,7 +1801,7 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
                       exit(ERRROR_ON_AFTER_DEPENDS);
                     }
 
-                  push_dependency(g_lasts);
+                  push_dependency(htmlize_expression(g_lasts));
                   menu.mndependencies++;
                   token = NULL;
                 }
@@ -1890,7 +2026,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
               case TOKEN_IF:
                 {
                   char *dependency = strtok_r(NULL, " ", &g_lasts);
-                  push_dependency(dependency);
+                  push_dependency(htmlize_expression(dependency));
                   token = NULL;
                 }
                 break;
@@ -2092,6 +2228,25 @@ int main(int argc, char **argv, char **envp)
   body("<h1><a name=\"menu_%d\">%s Menu: Main</a></h1>\n",
        g_menu_number, paranum);
   g_menu_number++;
+
+  /* Tell the reader that this is an auto-generated file */
+
+  body("<p>\n");
+  body("  <b>Maintaining this Document</b>.\n");
+  body("  The NuttX RTOS is highly configurable.\n");
+  body("  The NuttX configuration files are maintained using the <a href=\"http://ymorin.is-a-geek.org/projects/kconfig-frontends\">kconfig-frontends</a> tool.\n");
+  body("  That configuration tool uses <code>Kconfig</code> files that can be found through the NuttX source tree.\n");
+  body("  Each <code>Kconfig</code> files contains declarations of configuration variables.\n");
+  body("  Each configuration variable provides one configuration option for the NuttX RTOS.\n");
+  body("  This configurable options are descrived in this document.\n");
+  body("</p>\n");
+  body("<p>\n");
+  body("  <b>NOTE</b>:\n");
+  body("  This documenation was auto-generated using the <a href=\"http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/tools/kconfig2html.c\">kconfig2html</a> tool\n");
+  body("  That tools analyzes the NuttX <code>Kconfig</code> and generates this HTML document.\n");
+  body("  This HTML document file should not be editted manually.\n");
+  body("  In order to make changes to this document, you should instead modify the <code>Kconfig</code> file(s) that were used to generated this document and then execute the <code>kconfig2html</code> again to regenerate the HTML document file.\n");
+  body("</p>\n");
 
   /* Process the Kconfig files through recursive descent */
 
