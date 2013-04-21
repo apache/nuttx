@@ -219,44 +219,6 @@ static struct reserved_s g_reserved[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: show_usage
- *
- * Description:
- *   Show usage of this program and exit with the specified error code
- *
- ****************************************************************************/
-
-static void show_usage(const char *progname, int exitcode)
-{
-  fprintf(stderr, "USAGE: %s [-d] [-i] [-a <apps directory>] {-o <out file>] [<Kconfig root>]\n", progname);
-  fprintf(stderr, "       %s [-h]\n\n", progname);
-  fprintf(stderr, "Where:\n\n");
-  fprintf(stderr, "\t-a : Select relative path to the apps/ directory. Theis path is relative\n");
-  fprintf(stderr, "\t     to the <Kconfig directory>.  Default: ../apps\n");
-  fprintf(stderr, "\t-o : Send output to <out file>.  Default: Output goes to stdout\n");
-  fprintf(stderr, "\t-i : Show hidden, internal configuration variables\n");
-  fprintf(stderr, "\t-d : Enable debug output\n");
-  fprintf(stderr, "\t-h : Prints this message and exits\n");
-  fprintf(stderr, "\t<Kconfig root> is the directory containing the root Kconfig file.\n");
-  fprintf(stderr, "\t     Default <Kconfig directory>: .\n");
-  exit(exitcode);
-}
-
-/****************************************************************************
- * Name: skip_space
- *
- * Description:
- *   Skip over any spaces
- *
- ****************************************************************************/
-
-static char *skip_space(char *ptr)
-{
-  while (*ptr && isspace((int)*ptr)) ptr++;
-  return ptr;
-}
-
-/****************************************************************************
  * Name: debug
  *
  * Description:
@@ -274,6 +236,23 @@ static void debug(const char *fmt, ...)
       (void)vfprintf(stderr, fmt, ap);
       va_end(ap);
     }
+}
+
+/****************************************************************************
+ * Name: error
+ *
+ * Description:
+ *   Error output (unconditional)
+ *
+ ****************************************************************************/
+
+static void error(const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start(ap, fmt);
+  (void)vfprintf(stderr, fmt, ap);
+  va_end(ap);
 }
 
 /****************************************************************************
@@ -308,6 +287,44 @@ static void body(const char *fmt, ...)
   va_start(ap, fmt);
   (void)vfprintf(g_tmpfile, fmt, ap);
   va_end(ap);
+}
+
+/****************************************************************************
+ * Name: show_usage
+ *
+ * Description:
+ *   Show usage of this program and exit with the specified error code
+ *
+ ****************************************************************************/
+
+static void show_usage(const char *progname, int exitcode)
+{
+  error("USAGE: %s [-d] [-i] [-a <apps directory>] {-o <out file>] [<Kconfig root>]\n", progname);
+  error("       %s [-h]\n\n", progname);
+  error("Where:\n\n");
+  error("\t-a : Select relative path to the apps/ directory. Theis path is relative\n");
+  error("\t     to the <Kconfig directory>.  Default: ../apps\n");
+  error("\t-o : Send output to <out file>.  Default: Output goes to stdout\n");
+  error("\t-i : Show hidden, internal configuration variables\n");
+  error("\t-d : Enable debug output\n");
+  error("\t-h : Prints this message and exits\n");
+  error("\t<Kconfig root> is the directory containing the root Kconfig file.\n");
+  error("\t     Default <Kconfig directory>: .\n");
+  exit(exitcode);
+}
+
+/****************************************************************************
+ * Name: skip_space
+ *
+ * Description:
+ *   Skip over any spaces
+ *
+ ****************************************************************************/
+
+static char *skip_space(char *ptr)
+{
+  while (*ptr && isspace((int)*ptr)) ptr++;
+  return ptr;
 }
 
 /****************************************************************************
@@ -354,7 +371,155 @@ static char *dequote(char *ptr)
 }
 
 /****************************************************************************
+ * Name: htmlize
+ *
+ * Description:
+ *   HTML-ize a string. Convert characters:
+ *
+ *     "   &quot;   quotation mark
+ *     '   &apos;   apostrophe 
+ *     &   &amp;     ampersand
+ *     <   &lt;     less-than
+ *     >   &gt;     greater-than
+ *
+ ****************************************************************************/
+
+static char *htmlize(const char *src)
+{
+  char *dest = g_scratch;
+  const char *str;
+
+  /* We may get here with the source pointer equal to NULL.  Return the
+   * disfavor.
+   */
+
+  if (!src)
+    {
+      return NULL;
+    }
+
+  /* Transfer each character from the source string into the scratch buffer */
+
+  dest  = g_scratch;
+  *dest = '\0';
+
+  for (; *src; src++)
+    {
+      /* Expand characters as necessary */
+
+      str = NULL;
+      switch (*src)
+        {
+          case '"':
+            str = "&quot;";
+            break;
+
+          case '\'':
+            str = "&apos;";
+            break;
+
+          case '&':
+            str = "&amp;";
+            break;
+
+          case '<':
+            str = "&lt;";
+            break;
+
+          case '>':
+            str = "&gt;";
+            break;
+
+          default:
+            *dest++ = *src;
+            *dest   = '\0';
+            continue;
+        }
+
+      /* Transfer a string */
+
+      strcat(dest, str);
+      dest += strlen(str);
+    }
+
+  return g_scratch;
+}
+
+/****************************************************************************
  * Name: read_line
+ *
+ * Description:
+ *   Read a new line from the Kconfig file into the g_line[] buffer, using
+ *   the g_scratch buffer if necessary to concatenate lines that end with a
+ *   line continuation character (backslash).
+ *
+ ****************************************************************************/
+
+static char *read_line(FILE *stream)
+{
+  char *ptr;
+  int len;
+
+  /* Read the next line */
+
+  g_line[LINE_SIZE] = '\0';
+  if (!fgets(g_line, LINE_SIZE, stream))
+    {
+      return NULL;
+    }
+
+  /* Loop to handle continuation lines */
+
+  for(;;)
+    {
+      /* How long is the line so far? */
+
+      len = strlen(g_line);
+
+      /* Remove any newline character at the end of the buffer */
+
+      if (g_line[len-1] == '\n')
+        {
+          len--;
+          g_line[len] = '\0';
+        }
+
+      /* Does this continue on the next line?  Note taht this check
+       * could erroneoulsy combine two lines if a comment line ends with
+       * a line continuation... Don't do that!
+       */
+
+      if (g_line[len-1] != '\\')
+        {
+          /* No.. return now */
+
+          return g_line;
+        }
+
+      /* Yes.. Replace the backslash with a space delimiter */
+
+      g_line[len-1] = ' ';
+
+      /* Read the next line into the scratch buffer */
+
+      g_scratch[SCRATCH_SIZE] = '\0';
+      if (!fgets(g_scratch, SCRATCH_SIZE, stream))
+        {
+          return NULL;
+        }
+
+      /* Skip any leading whitespace and copy the rest of the next line
+       * into the line buffer.  Note that the leading white space is
+       * replaced with a single character to serve as a delimiter.
+       */
+
+      ptr = skip_space(g_scratch);
+      strncpy(&g_line[len], ptr, LINE_SIZE - len);
+    }
+}
+
+/****************************************************************************
+ * Name: kconfig_line
  *
  * Description:
  *   Read a new line, skipping over leading white space and ignore lines
@@ -362,22 +527,22 @@ static char *dequote(char *ptr)
  *
  ****************************************************************************/
 
-/* Read the next line from the Kconfig file */
-
-static char *read_line(FILE *stream)
+static char *kconfig_line(FILE *stream)
 {
   char *ptr;
 
   for (;;)
     {
+      /* Read the next line from the Kconfig file */
       /* Is there already valid data in the line buffer?  This can happen while parsing
        * help text and we read one line too far.
        */
 
       if (!g_preread)
         {
-          g_line[LINE_SIZE] = '\0';
-          if (!fgets(g_line, LINE_SIZE, stream))
+          /* Read the next line */
+
+          if (!read_line(stream))
             {
               return NULL;
             }
@@ -581,7 +746,7 @@ static char *getstring(char *ptr)
         }
     }
 
-  return ptr;
+  return htmlize(ptr);
 }
 
 /****************************************************************************
@@ -598,7 +763,7 @@ static void push_dependency(const char *dependency)
 
   if (ndx >= MAX_DEPENDENCIES)
     {
-      fprintf(stderr, "Too many dependencies, aborting\n");
+      error("Too many dependencies, aborting\n");
       exit(ERROR_TOO_MANY_DEPENDENCIES);
     }
 
@@ -619,7 +784,7 @@ static void pop_dependency(void)
   int ndx = g_ndependencies - 1;
   if (ndx < 0)
     {
-      fprintf(stderr, "Dependency underflow, aborting\n");
+      error("Dependency underflow, aborting\n");
       exit(ERROR_DEPENDENCIES_UNDERFLOW);
     }
 
@@ -646,7 +811,7 @@ static void incr_level(void)
 
   if (ndx >= MAX_LEVELS)
     {
-      fprintf(stderr, "Nesting level is too deep, aborting\n");
+      error("Nesting level is too deep, aborting\n");
       exit(ERROR_NESTING_TOO_DEEP);
     }
 
@@ -671,7 +836,7 @@ static void decr_level(void)
 
   if (ndx < 0)
     {
-      fprintf(stderr, "Nesting level underflow, aborting\n");
+      error("Nesting level underflow, aborting\n");
       exit(ERROR_NESTING_UNDERFLOW);
     }
 
@@ -692,7 +857,7 @@ static void incr_paranum(void)
 
   if (ndx < 0)
     {
-      fprintf(stderr, "Nesting level underflow, aborting\n");
+      error("Nesting level underflow, aborting\n");
       exit(ERROR_NESTING_UNDERFLOW);
     }
 
@@ -784,8 +949,7 @@ static inline void process_help(FILE *stream)
    {
       /* Read the next line of comment text */
 
-      g_line[LINE_SIZE] = '\0';
-      if (!fgets(g_line, LINE_SIZE, stream))
+      if (!read_line(stream))
         {
           break;
         }
@@ -874,7 +1038,7 @@ static inline void process_help(FILE *stream)
           newpara = false;
         }
 
-      body("  %s", ptr);
+      body("  %s", htmlize(ptr));
     }
 
   if (!newpara)
@@ -911,7 +1075,7 @@ static inline char *process_config(FILE *stream, const char *configname,
 
   help = false;
 
-  while ((ptr = read_line(stream)) != NULL)
+  while ((ptr = kconfig_line(stream)) != NULL)
     {
       /* Process the first token on the Kconfig file line */
 
@@ -1036,7 +1200,7 @@ static inline char *process_config(FILE *stream, const char *configname,
                   ndx = config.cnselect;
                   if (ndx >= MAX_SELECT)
                     {
-                      fprintf(stderr, "Too many 'select' lines\n");
+                      error("Too many 'select' lines\n");
                       exit(ERROR_TOO_MANY_SELECT);
                     }
 
@@ -1052,7 +1216,7 @@ static inline char *process_config(FILE *stream, const char *configname,
                   char *value = strtok_r(NULL, " ", &g_lasts);
                   if (strcmp(value, "on") != 0)
                     {
-                      fprintf(stderr, "Expected \"on\" after \"depends\"\n");
+                      error("Expected \"on\" after \"depends\"\n");
                       exit(ERRROR_ON_AFTER_DEPENDS);
                     }
 
@@ -1077,7 +1241,8 @@ static inline char *process_config(FILE *stream, const char *configname,
 
               default:
                 {
-                  debug("Terminating token: %s\n", token);
+                  debug("CONFIG_%s: Terminating token: %s\n",
+                        config.cname, token);
                 }
                 break;
             }
@@ -1292,7 +1457,7 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
 
   /* Process each line in the choice */
 
-  while ((ptr = read_line(stream)) != NULL)
+  while ((ptr = kconfig_line(stream)) != NULL)
     {
       /* Process the first token on the Kconfig file line */
 
@@ -1332,7 +1497,7 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
                   char *value = strtok_r(NULL, " ", &g_lasts);
                   if (strcmp(value, "on") != 0)
                     {
-                      fprintf(stderr, "Expected \"on\" after \"depends\"\n");
+                      error("Expected \"on\" after \"depends\"\n");
                       exit(ERRROR_ON_AFTER_DEPENDS);
                     }
 
@@ -1351,7 +1516,7 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
 
               default:
                 {
-                  debug("Terminating token: %s\n", token);
+                  debug("Choice: Terminating token: %s\n", token);
                 }
                 break;
             }
@@ -1480,7 +1645,7 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
 
   /* Process each line in the choice */
 
-  while ((ptr = read_line(stream)) != NULL)
+  while ((ptr = kconfig_line(stream)) != NULL)
     {
       /* Process the first token on the Kconfig file line */
 
@@ -1496,7 +1661,7 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
                   char *value = strtok_r(NULL, " ", &g_lasts);
                   if (strcmp(value, "on") != 0)
                     {
-                      fprintf(stderr, "Expected \"on\" after \"depends\"\n");
+                      error("Expected \"on\" after \"depends\"\n");
                       exit(ERRROR_ON_AFTER_DEPENDS);
                     }
 
@@ -1508,7 +1673,7 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
 
               default:
                 {
-                  debug("Terminating token: %s\n", token);
+                  debug("Menu: Terminating token: %s\n", token);
                 }
                 break;
             }
@@ -1607,7 +1772,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
 
   /* Process each line in the Kconfig file */
 
-  while ((ptr = read_line(stream)) != NULL)
+  while ((ptr = kconfig_line(stream)) != NULL)
     {
       /* Process the first token on the Kconfig file line */
 
@@ -1741,7 +1906,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
                 {
                   /* Set token to NULL to skip to the next line */
 
-                  debug("Unhandled token: %s\n", token);
+                  error("Unhandled token: %s\n", token);
                   token = NULL;
                 }
                 break;
@@ -1778,7 +1943,7 @@ static void process_kconfigfile(const char *kconfigdir)
   stream = fopen(kconfigpath, "r");
   if (!stream)
     {
-      fprintf(stderr, "open %s failed: %s\n", kconfigpath, strerror(errno));
+      error("open %s failed: %s\n", kconfigpath, strerror(errno));
       exit(ERROR_KCONFIG_OPEN_FAILURE);
     }
 
@@ -1845,15 +2010,15 @@ int main(int argc, char **argv, char **envp)
             break;
 
           case '?' :
-            fprintf(stderr, "Unrecognized option: %c\n", optopt);
+            error("Unrecognized option: %c\n", optopt);
             show_usage(argv[0], ERROR_UNRECOGNIZED_OPTION);
 
           case ':' :
-            fprintf(stderr, "Missing option argument, option: %c\n", optopt);
+            error("Missing option argument, option: %c\n", optopt);
             show_usage(argv[0], ERROR_MISSING_OPTION_ARGUMENT);
 
            break;
-            fprintf(stderr, "Unexpected option: %c\n", ch);
+            error("Unexpected option: %c\n", ch);
             show_usage(argv[0], ERROR_UNEXPECTED_OPTION);
         }
     }
@@ -1870,7 +2035,7 @@ int main(int argc, char **argv, char **envp)
 
   if (optind < argc)
     {
-       fprintf(stderr, "Unexpected garbage at the end of the line\n");
+       error("Unexpected garbage at the end of the line\n");
        show_usage(argv[0], ERROR_TOO_MANY_ARGUMENTS);
     }
 
@@ -1881,7 +2046,7 @@ int main(int argc, char **argv, char **envp)
       g_outfile = fopen(outfile, "w");
       if (!g_outfile)
         {
-          fprintf(stderr, "open %s failed: %s\n", outfile, strerror(errno));
+          error("open %s failed: %s\n", outfile, strerror(errno));
           exit(ERROR_OUTFILE_OPEN_FAILURE);
         }
     }
@@ -1891,7 +2056,7 @@ int main(int argc, char **argv, char **envp)
   g_tmpfile = fopen(TMPFILE_NAME, "w");
   if (!g_tmpfile)
     {
-      fprintf(stderr, "open %s failed: %s\n", TMPFILE_NAME, strerror(errno));
+      error("open %s failed: %s\n", TMPFILE_NAME, strerror(errno));
       exit(ERROR_TMPFILE_OPEN_FAILURE);
     }
 
@@ -1942,7 +2107,7 @@ int main(int argc, char **argv, char **envp)
   g_tmpfile = fopen(TMPFILE_NAME, "r");
   if (!g_tmpfile)
     {
-      fprintf(stderr, "open %s failed: %s\n", TMPFILE_NAME, strerror(errno));
+      error("open %s failed: %s\n", TMPFILE_NAME, strerror(errno));
       exit(ERROR_TMPFILE_OPEN_FAILURE);
     }
 
