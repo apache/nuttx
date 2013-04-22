@@ -5,6 +5,7 @@ Table of Contents
 
   o Board-Specific Configurations
   o Summary of Files
+  o Configuration Variables
   o Supported Architectures
   o Configuring NuttX
   o Building Symbol Tables
@@ -131,8 +132,29 @@ defconfig -- This is a configuration file similar to the Linux
     (2) to generate include/nuttx/config.h which is included by
         most C files in the system.
 
-  The following variables are recognized by the build (you may
-  also include architecture/board-specific settings).
+appconfig -- This is another configuration file that is specific to the
+  application.  This file is copied into the application build directory
+  when NuttX is configured.  See ../apps/README.txt for further details.
+
+setenv.sh -- This is a script that you can include that will be installed at
+  the toplevel of the directory structure and can be sourced to set any
+  necessary environment variables.  You will most likely have to customize the
+  default setenv.sh script in order for it to work correctly in your
+  environment.
+
+Configuration Variables
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Note. This section is deprecated. Documentation of NuttX configuration is
+now provided in a separate, auto-generated Configuration Variable Document.
+That configuration variable document is generated using the kconfig2html
+tool. That tool analyzes the NuttX Kconfig files and generates the HTML
+document. As a consequence, this file may not be present at any given time
+but can be regenerated following the instructions in tools directory README
+file. 
+
+The following variables are recognized by the build (you may also include
+architecture/board-specific settings).
 
   Architecture selection:
 
@@ -1671,16 +1693,6 @@ defconfig -- This is a configuration file similar to the Linux
       for the main user thread that begins at the user_start() entry point.
     CONFIG_PTHREAD_STACK_MIN - Minimum pthread stack size
     CONFIG_PTHREAD_STACK_DEFAULT - Default pthread stack size
-
-appconfig -- This is another configuration file that is specific to the
-  application.  This file is copied into the application build directory
-  when NuttX is configured.  See ../apps/README.txt for further details.
-
-setenv.sh -- This is a script that you can include that will be installed at
-  the toplevel of the directory structure and can be sourced to set any
-  necessary environment variables.  You will most likely have to customize the
-  default setenv.sh script in order for it to work correctly in your
-  environment.
 
 Supported Boards
 ^^^^^^^^^^^^^^^^
