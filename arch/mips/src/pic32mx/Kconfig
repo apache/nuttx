@@ -1076,8 +1076,8 @@ config PIC32MX_FETHIO
 	---help---
 		Ethernet I/O Pin Selection bit:
 
-			1 = Default Ethernet I/O Pins
-			0 = Alternate Ethernet I/O Pins
+		1 = Default Ethernet I/O Pins
+		0 = Alternate Ethernet I/O Pins
 
 config PIC32MX_FMIIEN
 	int "Ethernet MII"
@@ -1085,8 +1085,8 @@ config PIC32MX_FMIIEN
 	---help---
 		Ethernet MII Enable bit
 
-			1 = MII enabled
-			0 = RMII enabled
+		1 = MII enabled
+		0 = RMII enabled
 
 endmenu
 

@@ -540,7 +540,7 @@ config SDIO_WIDTH_D1_ONLY
 	---help---
 		Select 1-bit transfer mode.  This may be selected to force the driver
 		operate with only a single data line (the default is to use all
- 		4 SD data lines).Default: 4-bit transfer mode.
+		4 SD data lines).Default: 4-bit transfer mode.
 
 endmenu
 

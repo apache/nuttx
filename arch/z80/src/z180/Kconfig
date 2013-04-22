@@ -55,26 +55,26 @@ config Z180_BANKAREA_VIRTBASE
 
 		NuttX Memory Organization:
 
-			Common Area 0:  This area holds the common NuttX code that is
-			directly call-able from all application threads.  Common Area
-			always starts at virtual address 0x0000 and extends to the
-			Bank Area
+		Common Area 0:  This area holds the common NuttX code that is
+		directly call-able from all application threads.  Common Area
+		always starts at virtual address 0x0000 and extends to the
+		Bank Area
 
-			Base Area: This area holds the common NuttX data (including the
-			share-able heap) that is accessible from all applications and
-			extends to Common Area 1.
+		Base Area: This area holds the common NuttX data (including the
+		share-able heap) that is accessible from all applications and
+		extends to Common Area 1.
 
-			NOTE:  That is execution from RAM, the common NuttX code and
-			data may be contiguous and lie in the same region (either
-			Common Area 0 or the Bank Area).  The two regions above would
-			apply in a ROM'ed system, where Common Area 1 is ROM and the
-			Base Area is RAM.
+		NOTE:  That is execution from RAM, the common NuttX code and
+		data may be contiguous and lie in the same region (either
+		Common Area 0 or the Bank Area).  The two regions above would
+		apply in a ROM'ed system, where Common Area 1 is ROM and the
+		Base Area is RAM.
 
-			Common Area 1:  This area holds the code and data that is unique
-			to a particular task.  his area extends to the end of the virtual
-			address space.  All tasks share the same virtual Common Area 2
-			virtual address (but each has a unique mapping to different,
-			underlying physical addresses).
+		Common Area 1:  This area holds the code and data that is unique
+		to a particular task.  his area extends to the end of the virtual
+		address space.  All tasks share the same virtual Common Area 2
+		virtual address (but each has a unique mapping to different,
+		underlying physical addresses).
 
 config Z180_BANKAREA_PHYSBASE
 	hex "Physical Start of Bank Area"
@@ -93,26 +93,26 @@ config Z180_COMMON1AREA_VIRTBASE
 
 		NuttX Memory Organization:
 
-			Common Area 0:  This area holds the common NuttX code that is
-			directly call-able from all application threads.  Common Area
-			always starts at virtual address 0x0000 and extends to the
-			Bank Area
+		Common Area 0:  This area holds the common NuttX code that is
+		directly call-able from all application threads.  Common Area
+		always starts at virtual address 0x0000 and extends to the
+		Bank Area
 
-			Base Area: This area holds the common NuttX data (including the
-			share-able heap) that is accessible from all applications and
-			extends to Common Area 1.
+		Base Area: This area holds the common NuttX data (including the
+		share-able heap) that is accessible from all applications and
+		extends to Common Area 1.
 
-			NOTE:  That is execution from RAM, the common NuttX code and
-			data may be contiguous and lie in the same region (either
-			Common Area 0 or the Bank Area).  The two regions above would
-			apply in a ROM'ed system, where Common Area 1 is ROM and the
-			Base Area is RAM.
+		NOTE:  That is execution from RAM, the common NuttX code and
+		data may be contiguous and lie in the same region (either
+		Common Area 0 or the Bank Area).  The two regions above would
+		apply in a ROM'ed system, where Common Area 1 is ROM and the
+		Base Area is RAM.
 
-			Common Area 1:  This area holds the code and data that is unique
-			to a particular task.  his area extends to the end of the virtual
-			address space.  All tasks share the same virtual Common Area 2
-			virtual address (but each has a unique mapping to different,
-			underlying physical addresses).
+		Common Area 1:  This area holds the code and data that is unique
+		to a particular task.  his area extends to the end of the virtual
+		address space.  All tasks share the same virtual Common Area 2
+		virtual address (but each has a unique mapping to different,
+		underlying physical addresses).
 
 config Z180_PHYSHEAP_START
 	hex "Physical Start of Free Memory"
