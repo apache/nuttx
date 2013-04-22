@@ -57,6 +57,7 @@
 #define MAX_DEPENDENCIES 100
 #define MAX_LEVELS       100
 #define MAX_SELECT       16
+#define MAX_DEFAULTS     80
 #define TAB_SIZE         4
 #define VAR_SIZE         80
 #define HTML_VAR_SIZE    (2*VAR_SIZE + 64)
@@ -114,9 +115,14 @@ enum error_e
   ERROR_OUTFILE_OPEN_FAILURE,
   ERROR_TMPFILE_OPEN_FAILURE,
   ERROR_KCONFIG_OPEN_FAILURE,
+  ERROR_TOO_MANY_DEFAULTS,
+  ERROR_MISSING_DEFAULT_VALUE,
+  ERROR_GARBAGE_AFTER_DEFAULT,
+  ERROR_DEFAULT_UNDERFLOW,
   ERROR_TOO_MANY_SELECT,
   ERROR_TOO_MANY_DEPENDENCIES,
   ERROR_DEPENDENCIES_UNDERFLOW,
+  ERRROR_MISSING_ON_AFTER_DEPENDS,
   ERRROR_ON_AFTER_DEPENDS,
   ERROR_NESTING_TOO_DEEP,
   ERROR_NESTING_UNDERFLOW
@@ -125,40 +131,50 @@ enum error_e
 struct reserved_s
 {
   enum token_type_e ttype;
-  const char       *tname;
+  const char *tname;
 };
 
-union value_u
+struct default_item_s
 {
-  char *s;
-  int   i;
-  bool  b;
+  char *ddefault;
+  char *ddependency;
+};
+
+struct default_s
+{
+  int dnitems;
+  struct default_item_s ditem[MAX_DEFAULTS];
+};
+
+struct select_s
+{
+  int snvar;
+  char *svarname[MAX_SELECT];
 };
 
 struct config_s
 {
   enum config_type_e ctype;
-  char              *cname;
-  char              *cdesc;
-  char              *cdefault;
-  char              *clower;
-  char              *cupper;
-  char              *cselect[MAX_SELECT];
-  int                cnselect;
-  int                cndependencies;
+  char *cname;
+  char *cdesc;
+  char *clower;
+  char *cupper;
+  struct default_s cdefault;
+  struct select_s cselect;
+  int cndependencies;
 };
 
 struct choice_s
 {
-  char              *cprompt;
-  char              *cdefault;
-  int                cndependencies;
+  char *cprompt;
+  struct default_s cdefault;
+  int cndependencies;
 };
 
 struct menu_s
 {
-  char              *mname;
-  int                mndependencies;
+  char *mname;
+  int mndependencies;
 };
 
 /****************************************************************************
@@ -169,7 +185,7 @@ static char g_line[LINE_SIZE+1];
 static char g_scratch[SCRATCH_SIZE+1];
 static FILE *g_outfile;
 static FILE *g_tmpfile;
-static char *g_lasts;
+static char *g_lnptr;
 static bool g_debug;
 static bool g_internal;
 static bool g_preread;
@@ -182,6 +198,8 @@ static int g_ndependencies;
 static int g_inchoice;
 static int g_menu_number;
 static int g_choice_number;
+
+static const char g_delimiters[] = " ,";
 
 static struct reserved_s g_reserved[] =
 {
@@ -596,6 +614,8 @@ static char *read_line(FILE *stream)
   char *ptr;
   int len;
 
+  g_lnptr = NULL;
+
   /* Read the next line */
 
   g_line[LINE_SIZE] = '\0';
@@ -629,6 +649,7 @@ static char *read_line(FILE *stream)
         {
           /* No.. return now */
 
+          g_lnptr = g_line;
           return g_line;
         }
 
@@ -703,6 +724,7 @@ static char *kconfig_line(FILE *stream)
       ptr = skip_space(g_line);
       if (*ptr && *ptr != '#' && *ptr != '\n')
         {
+          g_lnptr = ptr;
           return ptr;
         }
     }
@@ -730,84 +752,6 @@ static enum token_type_e tokenize(const char *token)
 
   return ptr->ttype;
 }
-
-/****************************************************************************
- * Name: MY_strtok_r
- *
- * Description:
- *   A replacement that can be used if your platform does not support strtok_r.
- *
- ****************************************************************************/
-
-#ifndef HAVE_STRTOK_R
-static char *MY_strtok_r(char *str, const char *delim, char **saveptr)
-{
-  char *pbegin;
-  char *pend = NULL;
-
-  /* Decide if we are starting a new string or continuing from
-   * the point we left off.
-   */
-
-  if (str)
-    {
-      pbegin = str;
-    }
-  else if (saveptr && *saveptr)
-    {
-      pbegin = *saveptr;
-    }
-  else
-    {
-      return NULL;
-    }
-
-  /* Find the beginning of the next token */
-
-  for (;
-       *pbegin && strchr(delim, *pbegin) != NULL;
-       pbegin++);
-
-  /* If we are at the end of the string with nothing
-   * but delimiters found, then return NULL.
-   */
-
-  if (!*pbegin)
-    {
-      return NULL;
-    }
-
-  /* Find the end of the token */
-
-  for (pend = pbegin + 1;
-       *pend && strchr(delim, *pend) == NULL;
-       pend++);
-
-  /* pend either points to the end of the string or to
-   * the first delimiter after the string.
-   */
-
-  if (*pend)
-    {
-      /* Turn the delimiter into a null terminator */
-
-      *pend++ = '\0';
-    }
-
-  /* Save the pointer where we left off and return the
-   * beginning of the token.
-   */
-
-  if (saveptr)
-    {
-      *saveptr = pend;
-    }
-
-  return pbegin;
-}
-
-#define strtok_r MY_strtok_r
-#endif
 
 /****************************************************************************
  * Name: findchar
@@ -851,38 +795,117 @@ static char *findchar(char *ptr, char ch)
 }
 
 /****************************************************************************
- * Name: getstring
+ * Name: get_token
  *
  * Description:
- *   Extract a quoted string
+ *   Get the next delimited token from the line buffer.
  *
  ****************************************************************************/
 
-static char *getstring(char *ptr)
+static char *get_token(void)
 {
-  char *endptr;
+  char *pbegin;
+  char *pend = NULL;
 
-  /* Search for the leading quotation mark */
+  /* The position to begin/resume parsing is in g_lnptr. */
 
-  ptr = findchar(ptr, '"');
-  if (ptr)
+  if (g_lnptr && *g_lnptr)
+    {
+      pbegin = g_lnptr;
+    }
+  else
+    {
+      return NULL;
+    }
+
+  /* Find the beginning of the next token */
+
+  for (;
+       *pbegin && strchr(g_delimiters, *pbegin) != NULL;
+       pbegin++);
+
+  /* If we are at the end of the string with nothing
+   * but delimiters found, then return NULL.
+   */
+
+  if (!*pbegin)
+    {
+      g_lnptr = pbegin;
+      return NULL;
+    }
+
+  /* Get if the token is a quoted string */
+
+  if (*pbegin == '"')
+    {
+      /*  Search for the trailing quotation mark */
+
+      pend = findchar(pbegin + 1, '"');
+    }
+  else
+    {
+      /* Find the end of the token */
+
+      for (pend = pbegin + 1;
+           *pend && strchr(g_delimiters, *pend) == NULL;
+           pend++);
+    }
+
+  /* pend either points to the end of the string or to
+   * the first delimiter after the string.
+   */
+
+  if (*pend)
+    {
+      /* Turn the delimiter into a null terminator */
+
+      *pend++ = '\0';
+    }
+
+  /* Save the pointer where we left off and return the
+   * beginning of the token.
+   */
+
+  g_lnptr = pend;
+  return pbegin;
+}
+
+/****************************************************************************
+ * Name: get_html_string
+ *
+ * Description:
+ *   Extract a quoted string from the line buffer, dequote it, and make it
+ *   HTML ready.
+ *
+ ****************************************************************************/
+
+static char *get_html_string(void)
+{
+  char *pbegin;
+  char *pend;
+
+  /* Search for the leading quotation mark in the line buffer */
+
+  pbegin = strchr(g_lnptr, '"');
+  if (pbegin)
     {
       /* Skip over the quote */
 
-      ptr++;
+      pbegin++;
 
       /*  Search for the trailing quotation mark */
 
-      endptr = findchar(ptr, '"');
-      if (endptr)
+      pend = findchar(pbegin, '"');
+      if (pend)
         {
           /* Replace the final quote with a NUL */
 
-          *endptr = '\0';
+          *pend = '\0';
         }
     }
 
-  return htmlize_text(ptr);
+  g_lnptr = pend + 1;
+  return htmlize_text(pbegin);
 }
 
 /****************************************************************************
@@ -1184,6 +1207,168 @@ static inline void process_help(FILE *stream)
 }
 
 /****************************************************************************
+ * Name: process_default
+ *
+ * Description:
+ *   Read and parse the Kconfig default statement.
+ *
+ ****************************************************************************/
+
+static void process_default(FILE *stream, struct default_s *defp)
+{
+  enum token_type_e tokid;
+  char *token;
+  int ndx;
+
+  /* Check if we have space for another default value */
+
+  ndx = defp->dnitems;
+  if (ndx >= MAX_DEFAULTS)
+    {
+      error("Too many default values\n");
+      exit(ERROR_TOO_MANY_DEFAULTS);
+    }
+
+  /* Get the next token which will be the value of the default */
+
+  token = get_token();
+  if (!token)
+    {
+      error("Missing default value\n");
+      exit(ERROR_MISSING_DEFAULT_VALUE);
+    }
+
+  defp->ditem[ndx].ddefault = strdup(token);
+  defp->ditem[ndx].ddependency = NULL;
+
+  /* Check if the default value is followed by "depends on" */
+
+  token = get_token();
+  if (token)
+    {
+      /* Yes.. something follows the default value. */
+
+      tokid = tokenize(token);
+      if (tokid != TOKEN_IF)
+        {
+          error("Unrecognized garbage after default value\n");
+          exit(ERROR_GARBAGE_AFTER_DEFAULT);
+        }
+
+      /* The rest of the line is the dependency */
+
+      defp->ditem[ndx].ddependency = strdup(g_lnptr);
+   }
+
+  /* Update the number of defaults we have encountered in this block */
+
+  defp->dnitems++;
+}
+
+/****************************************************************************
+ * Name: print_default
+ *
+ * Description:
+ *   Output and the list of defaults to the the HTML body file.
+ *
+ ****************************************************************************/
+
+static void print_default(struct default_s *defp)
+{
+  struct default_item_s *item;
+  int i;
+
+  /* Check if there are any default value */
+
+  if (defp->dnitems > 0)
+    {
+      /* Yes, output the defaults differently if there is only one */
+
+      if (defp->dnitems == 1)
+        {
+          /* Output the Default */
+
+          item = &defp->ditem[0];
+          body("  <li>\n");
+          body("    <i>Default</i>: %s\n", item->ddefault);
+
+          /* Output the dependency */
+
+          if (item->ddependency)
+            {
+              body("    <p>\n");
+              body("      <i>Dependency:</i>\n");
+              body("      %s\n", htmlize_expression(item->ddependency));
+              body("    </p>\n");
+            }
+
+          body("  </li>\n");
+        }
+      else
+        {
+          /* Output a sub-list of defaults. */
+
+          body("  <li>\n");
+          body("    <i>Default Values</i>:\n");
+          body("    <ul>\n");
+
+          for (i = 0; i < defp->dnitems; i++)
+            {
+              /* Output the Default */
+
+              item = &defp->ditem[i];
+              body("      <li>\n");
+              body("        <i>Default</i>: %s\n", item->ddefault);
+
+              /* Output the dependency */
+
+              if (item->ddependency)
+                {
+                  body("        <p>\n");
+                  body("          <i>Dependency:</i>\n");
+                  body("          %s\n", htmlize_expression(item->ddependency));
+                  body("        </p>\n");
+                }
+            }
+
+          body("    </ul>\n");
+          body("  </li>\n");
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: free_default
+ *
+ * Description:
+ *   Output and the list of defaults to the the HTML body file.
+ *
+ ****************************************************************************/
+
+static void free_default(struct default_s *defp)
+{
+  struct default_item_s *item;
+  int i;
+
+  /* Free strings for each default */
+
+  for (i = 0; i < defp->dnitems; i++)
+    {
+      /* Free the default value string */
+
+      item = &defp->ditem[i];
+      free(item->ddefault);
+
+      /* Free any dependency on the default */
+
+      if (item->ddependency)
+        {
+          free(item->ddependency);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: process_config
  *
  * Description:
@@ -1215,8 +1400,7 @@ static inline char *process_config(FILE *stream, const char *configname,
     {
       /* Process the first token on the Kconfig file line */
 
-      g_lasts = NULL;
-      token = strtok_r(ptr, " ", &g_lasts);
+      token = get_token();
       if (token != NULL)
         {
           tokid = tokenize(token);
@@ -1230,7 +1414,7 @@ static inline char *process_config(FILE *stream, const char *configname,
 
                   /* Get the description following the type */
 
-                  ptr = getstring(g_lasts);
+                  ptr = get_html_string();
                   if (ptr)
                     {
                       config.cdesc = strdup(ptr);
@@ -1250,7 +1434,7 @@ static inline char *process_config(FILE *stream, const char *configname,
 
                   /* Get the description following the type */
 
-                  ptr = getstring(g_lasts);
+                  ptr = get_html_string();
                   if (ptr)
                     {
                       config.cdesc = strdup(ptr);
@@ -1270,7 +1454,7 @@ static inline char *process_config(FILE *stream, const char *configname,
 
                   /* Get the description following the type */
 
-                  ptr = getstring(g_lasts);
+                  ptr = get_html_string();
                   if (ptr)
                     {
                       config.cdesc = strdup(ptr);
@@ -1290,7 +1474,7 @@ static inline char *process_config(FILE *stream, const char *configname,
 
                   /* Get the description following the type */
 
-                  ptr = getstring(g_lasts);
+                  ptr = get_html_string();
                   if (ptr)
                     {
                       config.cdesc = strdup(ptr);
@@ -1304,20 +1488,19 @@ static inline char *process_config(FILE *stream, const char *configname,
 
               case TOKEN_DEFAULT:
                 {
-                  char *value = strtok_r(NULL, " ", &g_lasts);
-                  config.cdefault = strdup(value);
+                  process_default(stream, &config.cdefault);
                   token = NULL;
                 }
                 break;
 
               case TOKEN_RANGE:
                 {
-                  char *value = strtok_r(NULL, " ,", &g_lasts);
+                  char *value = get_token();
                   if (value)
                     {
                       config.clower = strdup(value);
 
-                      value = strtok_r(NULL, " ", &g_lasts);
+                      value = get_token();
                       if (value)
                         {
                           config.cupper = strdup(value);
@@ -1333,30 +1516,30 @@ static inline char *process_config(FILE *stream, const char *configname,
                   char *value;
                   int ndx;
 
-                  ndx = config.cnselect;
+                  ndx = config.cselect.snvar;
                   if (ndx >= MAX_SELECT)
                     {
                       error("Too many 'select' lines\n");
                       exit(ERROR_TOO_MANY_SELECT);
                     }
 
-                  value               = strtok_r(NULL, " ", &g_lasts);
-                  config.cselect[ndx] = strdup(value);
-                  config.cnselect     = ndx + 1;
-                  token               = NULL;
+                  value = get_token();
+                  config.cselect.svarname[ndx] = strdup(value);
+                  config.cselect.snvar = ndx + 1;
+                  token = NULL;
                 }
                 break;
 
               case TOKEN_DEPENDS:
                 {
-                  char *value = strtok_r(NULL, " ", &g_lasts);
+                  char *value = get_token();
                   if (strcmp(value, "on") != 0)
                     {
                       error("Expected \"on\" after \"depends\"\n");
                       exit(ERRROR_ON_AFTER_DEPENDS);
                     }
 
-                  push_dependency(htmlize_expression(g_lasts));
+                  push_dependency(htmlize_expression(g_lnptr));
                   config.cndependencies++;
                   token = NULL;
                 }
@@ -1445,12 +1628,9 @@ static inline char *process_config(FILE *stream, const char *configname,
           body("  <li><i>Type</i>: %s</li>\n", type2str(config.ctype));
         }
 
-      /* Print the default value of the configuration variable */
+      /* Print the default values of the configuration variable */
 
-      if (config.cdefault)
-        {
-          body("  <li><i>Default</i>: %s</li>\n", config.cdefault);
-        }
+      print_default(&config.cdefault);
 
       /* Print the range of values of the configuration variable */
 
@@ -1474,15 +1654,15 @@ static inline char *process_config(FILE *stream, const char *configname,
 
       /* Print the default value of the configuration variable auto-selected by this setting */
 
-      if (config.cnselect > 0)
+      if (config.cselect.snvar > 0)
         {
           body("  <li><i>Selects</i>: <a href=\"#CONFIG_%s\">CONFIG_%s</a>",
-               config.cselect[0], config.cselect[0]);
+               config.cselect.svarname[0], config.cselect.svarname[0]);
 
-          for (i = 1; i < config.cnselect; i++)
+          for (i = 1; i < config.cselect.snvar; i++)
             {
               body(", <a href=\"#CONFIG_%s\">CONFIG_%s</a>",
-                   config.cselect[i], config.cselect[i]);
+                   config.cselect.svarname[i], config.cselect.svarname[i]);
             }
 
           body("</li>\n");
@@ -1532,6 +1712,8 @@ static inline char *process_config(FILE *stream, const char *configname,
 
   /* Free allocated memory */
 
+  free_default(&config.cdefault);
+
   if (config.cname)
     {
       free(config.cname);
@@ -1540,11 +1722,6 @@ static inline char *process_config(FILE *stream, const char *configname,
   if (config.cdesc)
     {
       free(config.cdesc);
-    }
-
-  if (config.cdefault)
-    {
-      free(config.cdefault);
     }
 
   if (config.clower)
@@ -1557,11 +1734,11 @@ static inline char *process_config(FILE *stream, const char *configname,
       free(config.cupper);
     }
 
-  if (config.cnselect > 0)
+  if (config.cselect.snvar > 0)
     {
-      for (i = 0; i < config.cnselect; i++)
+      for (i = 0; i < config.cselect.snvar; i++)
         {
-          free(config.cselect[i]);
+          free(config.cselect.svarname[i]);
         }
     }
 
@@ -1597,8 +1774,7 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
     {
       /* Process the first token on the Kconfig file line */
 
-      g_lasts = NULL;
-      token = strtok_r(ptr, " ", &g_lasts);
+      token = get_token();
       if (token != NULL)
         {
           tokid = tokenize(token);
@@ -1608,7 +1784,7 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
                 {
                   /* Get the prompt string */
 
-                  ptr = getstring(g_lasts);
+                  ptr = get_html_string();
                   if (ptr)
                     {
                       choice.cprompt = strdup(ptr);
@@ -1622,22 +1798,21 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
 
               case TOKEN_DEFAULT:
                 {
-                  char *value = strtok_r(NULL, " ", &g_lasts);
-                  choice.cdefault = strdup(value);
+                  process_default(stream, &choice.cdefault);
                   token = NULL;
                 }
                 break;
 
               case TOKEN_DEPENDS:
                 {
-                  char *value = strtok_r(NULL, " ", &g_lasts);
+                  char *value = get_token();
                   if (strcmp(value, "on") != 0)
                     {
                       error("Expected \"on\" after \"depends\"\n");
                       exit(ERRROR_ON_AFTER_DEPENDS);
                     }
 
-                  push_dependency(htmlize_expression(g_lasts));
+                  push_dependency(htmlize_expression(g_lnptr));
                   choice.cndependencies++;
                   token = NULL;
                 }
@@ -1680,13 +1855,10 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
   body("</a></h3>\n");
   g_choice_number++;
 
-  /* Show the default */
+  /* Print the default values of the configuration variable */
 
   body("<ul>\n");
-  if (choice.cdefault)
-    {
-      body("  <li><i>Default</i>: <code>CONFIG_%s</code>\n</li>", choice.cdefault);
-    }
+  print_default(&choice.cdefault);
 
   /* Print the list of dependencies (if any) */
 
@@ -1728,14 +1900,11 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
 
   /* Free allocated memory */
 
+  free_default(&choice.cdefault);
+
   if (choice.cprompt)
     {
       free(choice.cprompt);
-    }
-
-  if (choice.cdefault)
-    {
-      free(choice.cdefault);
     }
 
   /* Increment the nesting level */
@@ -1776,7 +1945,7 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
 
   /* Get the menu name */
 
-  menuname = getstring(g_lasts);
+  menuname = get_html_string();
   menu.mname = strdup(menuname);
 
   /* Process each line in the choice */
@@ -1785,8 +1954,7 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
     {
       /* Process the first token on the Kconfig file line */
 
-      g_lasts = NULL;
-      token = strtok_r(ptr, " ", &g_lasts);
+      token = get_token();
       if (token != NULL)
         {
           tokid = tokenize(token);
@@ -1794,14 +1962,14 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
             {
               case TOKEN_DEPENDS:
                 {
-                  char *value = strtok_r(NULL, " ", &g_lasts);
+                  char *value = get_token();
                   if (strcmp(value, "on") != 0)
                     {
                       error("Expected \"on\" after \"depends\"\n");
                       exit(ERRROR_ON_AFTER_DEPENDS);
                     }
 
-                  push_dependency(htmlize_expression(g_lasts));
+                  push_dependency(htmlize_expression(g_lnptr));
                   menu.mndependencies++;
                   token = NULL;
                 }
@@ -1912,8 +2080,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
     {
       /* Process the first token on the Kconfig file line */
 
-      g_lasts = NULL;
-      token = strtok_r(ptr, " ", &g_lasts);
+      token = get_token();
       while (token != NULL)
         {
           tokid = tokenize(token);
@@ -1924,7 +2091,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
                 {
                   /* Get the relative path from the Kconfig file line */
 
-                  char *relpath = strtok_r(NULL, " ", &g_lasts);
+                  char *relpath = get_token();
 
                   /* Remove optional quoting */
 
@@ -1970,7 +2137,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
               case TOKEN_CONFIG:
               case TOKEN_MENUCONFIG:
                 {
-                  char *configname = strtok_r(NULL, " ", &g_lasts);
+                  char *configname = get_token();
                   token = process_config(stream, configname, kconfigdir);
                 }
                 break;
@@ -2025,7 +2192,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
 
               case TOKEN_IF:
                 {
-                  char *dependency = strtok_r(NULL, " ", &g_lasts);
+                  char *dependency = get_token();
                   push_dependency(htmlize_expression(dependency));
                   token = NULL;
                 }
@@ -2232,7 +2399,7 @@ int main(int argc, char **argv, char **envp)
   /* Tell the reader that this is an auto-generated file */
 
   body("<p>\n");
-  body("  <b>Maintaining this Document</b>.\n");
+  body("  <b>Overview</b>.\n");
   body("  The NuttX RTOS is highly configurable.\n");
   body("  The NuttX configuration files are maintained using the <a href=\"http://ymorin.is-a-geek.org/projects/kconfig-frontends\">kconfig-frontends</a> tool.\n");
   body("  That configuration tool uses <code>Kconfig</code> files that can be found through the NuttX source tree.\n");
@@ -2241,7 +2408,7 @@ int main(int argc, char **argv, char **envp)
   body("  This configurable options are descrived in this document.\n");
   body("</p>\n");
   body("<p>\n");
-  body("  <b>NOTE</b>:\n");
+  body("  <b>Mainenance Note</b>.\n");
   body("  This documenation was auto-generated using the <a href=\"http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/tools/kconfig2html.c\">kconfig2html</a> tool\n");
   body("  That tools analyzes the NuttX <code>Kconfig</code> and generates this HTML document.\n");
   body("  This HTML document file should not be editted manually.\n");
