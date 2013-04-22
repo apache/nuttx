@@ -90,6 +90,27 @@ kconfig2html.c
   auto-generated documentation will, eventually, replace the manually
   updated configuratin documentation that is fallling woefully behind.
 
+  USAGE: kconfig2html [-d] [-a <apps directory>] {-o <out file>] [<Kconfig root>]
+         kconfig2html [-h]
+
+  Where:
+
+    -a : Select relative path to the apps/ directory. Theis path is relative
+         to the <Kconfig directory>.  Default: ../apps
+    -o : Send output to <out file>.  Default: Output goes to stdout
+    -d : Enable debug output
+    -h : Prints this message and exits
+    <Kconfig root> is the directory containing the root Kconfig file.
+         Default <Kconfig directory>: .
+
+mkconfigvars.sh
+---------------
+
+  The HTML documentation expects to have a copy of the auto-generated
+  configuration variabled documentation Documentation/NuttXConfigVariables.html.
+  The script mkconfigvars.sh is a simple script that can be used to
+  re-generated that file as needed.
+
 mkexport.sh and Makefile.export
 -------------------------------
 

@@ -2520,15 +2520,30 @@ int main(int argc, char **argv, char **envp)
   output("}\n");
   output("</script>\n");
 
-  output("<center><h1>Table of contents</h1></center>\n");
+  output("<hr><hr>\n");
+  output("<table width =\"100%%\">\n");
+  output("  <tr bgcolor=\"#e4e4e4\">\n");
+  output("    <td>\n");
+  output("      <h1>Table of Contents</h1>\n");
+  output("    </td>\n");
+  output("  </tr>\n");
+  output("</table>\n");
   output("<ul>\n");
 
   incr_level();
   paranum = get_paranum();
   output("<li><a href=\"#menu_%d\">%s Menu: Main</a></li>\n",
          g_menu_number, paranum);
-  body("<h1><a name=\"menu_%d\">%s Menu: Main</a></h1>\n",
+
+  body("<table width =\"100%%\">\n");
+  body("  <tr bgcolor=\"#e4e4e4\">\n");
+  body("  <td>\n");
+  body("    <a name=\"menu_%d\"><h1>%s Menu: Main</h1></a>\n",
        g_menu_number, paranum);
+  body("  </td>\n");
+  body("  </tr>\n");
+  body("</table>\n");
+
   g_menu_number++;
 
   /* Increment the paragraph level again:  Everything is included within the main menu. */
@@ -2555,7 +2570,7 @@ int main(int argc, char **argv, char **envp)
   body("<p>\n");
   body("  <b>Mainenance Note</b>.\n");
   body("  This documenation was auto-generated using the <a href=\"http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/tools/kconfig2html.c\">kconfig2html</a> tool\n");
-  body("  That tools analyzes the NuttX <code>Kconfig</code> and generates this HTML document.\n");
+  body("  That tool analyzes the NuttX <code>Kconfig</code> files and generates this HTML document.\n");
   body("  This HTML document file should not be editted manually.\n");
   body("  In order to make changes to this document, you should instead modify the <code>Kconfig</code> file(s) that were used to generated this document and then execute the <code>kconfig2html</code> again to regenerate the HTML document file.\n");
   body("</p>\n");
@@ -2566,7 +2581,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Terminate the table of contents */
 
-  output("<li><a href=\"#appendixa\">Appendix A</a></li>\n");
+  output("<li><a href=\"#appendixa\">Appendix A: Hidden Configuration Variables</a></li>\n");
   output("</ul>\n");
 
   /* Close the HMTL body file and copy it to the output file */
@@ -2576,7 +2591,14 @@ int main(int argc, char **argv, char **envp)
 
   /* Output introductory information for the appendix */
 
-  output("<h1><a name=\"appendixa\">Appendix A</a></h1>\n");
+  output("<table width =\"100%%\">\n");
+  output("  <tr bgcolor=\"#e4e4e4\">\n");
+  output("  <td>\n");
+  output("    <a name=\"appendixa\"><h1>Appendix A: Hidden Configuration Variables</h1></a>\n");
+  output("  </td>\n");
+  output("  </tr>\n");
+  output("</table>\n");
+
   output("<p>\n");
   output("  This appendex holds internal configurations variables that are not visible to the user.\n");
   output("  These settings are presented out-of-context because they cannot be directly controlled by the user.\n");

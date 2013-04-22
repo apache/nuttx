@@ -4586,3 +4586,6 @@
 	  Aimonen (2014-4-22).
 	* fs/fat/fs_writefat.c: mkfatfs was writing the boot code to the
 	  wrong location.  From Petteri Aimonen (2014-4-22).
+	* Documentation:  The NuttX documentation now expects to find an
+	  auto-generated version of the configuration variable documentation
+	  at Documentation/NuttXConfigVariables.html (2014-4-22).
