@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 17, 2013</p>
+      <p>Last Updated: April 22, 2013</p>
     </td>
   </tr>
 </table>
@@ -16,7 +16,7 @@
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
     <td>
-  <h1>Table of Contents</h1>
+      <h1>Table of Contents</h1>
     </td>
   </tr>
 </table>
@@ -1019,7 +1019,7 @@
          This configuration file contains a long list of settings that control
          what is built into NuttX and what is not.
          There are hundreds of such settings
-         (see the <a href="NuttxPortingGuide.html#apndxconfigs">NuttX Porting Guide</a>
+         (see the <a href="NuttXConfigVariables.html">Configuration Variable Documentation</a>
          for a partial list that excludes platform specific settings).
          These many, many configuration options allow NuttX to be highly tuned to
          meet size requirements.
@@ -4177,6 +4177,10 @@ pascal-3.0 2011-05-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 </tr>
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
+  <td><a href="NuttXConfigVariables.html">Configuration Variables</a><sup>1</sup></td>
+</tr>
+<tr>
+  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td><a href="NuttShell.html">NuttShell (NSH)</a></td>
 </tr>
 <tr>
@@ -4215,7 +4219,14 @@ pascal-3.0 2011-05-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td><a href="UsbTrace.html">USB Device Driver Tracing</a></td>
 </tr>
-</center></ul>
+</table></ul>
+
+<small><blockquote>
+  <sup>1</sup>
+  This configuration variable document is auto-generated using the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/tools/kconfig2html.c">kconfig2html</a> tool
+  That tool analyzes the NuttX <code>Kconfig</code> files and generates the HTML document.
+  As a consequence, this file may not be present at any given time but can be regenerated following the instructions in <code>tools</code> directory <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/tools/README.txt">README</a> file.
+</blockquote></small>
 
 <small>
 <table width ="100%">
@@ -4225,6 +4236,7 @@ pascal-3.0 2011-05-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
   </td>
   </tr>
 </table>
+
 <ul>
   <li>ARM, ARM7 ARM7TDMI, ARM9, ARM920T, ARM926EJS Cortex-M3 are trademarks of Advanced RISC Machines, Limited.</li>
   <li>Cygwin is a trademark of Red Hat, Incorporated.</li>
@@ -4244,4 +4256,3 @@ pascal-3.0 2011-05-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
 </body>
 </html>
-
