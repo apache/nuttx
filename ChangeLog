@@ -4581,3 +4581,8 @@
 	  variables with auto-generated documentation.  The initial checkin
 	  is an incomplete, poorly structured prototype that I hope to
 	  evolve into a useful tool (2014-4-20).
+	* libc/string/lib_strchr.c:  strchr(str, '\0') should return a
+	  pointer to the end of the string, not NULL.  From Petteri
+	  Aimonen (2014-4-22).
+	* fs/fat/fs_writefat.c: mkfatfs was writing the boot code to the
+	  wrong location.  From Petteri Aimonen (2014-4-22).

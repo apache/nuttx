@@ -212,7 +212,7 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
 
       /* Boot code may be placed in the remainder of the sector */
 
-      memcpy(&var->fv_sect[BS16_BOOTCODE], var->fv_bootcode, var->fv_bootcodesize);
+      memcpy(&var->fv_sect[BS32_BOOTCODE], var->fv_bootcode, var->fv_bootcodesize);
     }
 
   /* The magic bytes at the end of the MBR are common to FAT12/16/32 */

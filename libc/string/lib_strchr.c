@@ -64,11 +64,16 @@ FAR char *strchr(FAR const char *s, int c)
 {
   if (s)
     {
-      for (; *s; s++)
+      for (; ; s++)
         {
           if (*s == c)
             {
               return (FAR char *)s;
+            }
+
+          if (!*s)
+            {
+              break;
             }
         }
     }
