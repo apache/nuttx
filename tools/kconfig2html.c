@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 #define LINE_SIZE        1024
-#define SCRATCH_SIZE     1024
+#define SCRATCH_SIZE     2048
 #define MAX_DEPENDENCIES 100
 #define MAX_LEVELS       100
 #define MAX_SELECT       16
@@ -62,7 +62,8 @@
 #define VAR_SIZE         80
 #define HTML_VAR_SIZE    (2*VAR_SIZE + 64)
 
-#define TMPFILE_NAME     "kconfig2html-tmp.dat"
+#define BODYFILE_NAME    ".k2h-body.dat"
+#define APNDXFILE_NAME   ".k2h-apndx.dat"
 
 /****************************************************************************
  * Private Types
@@ -113,8 +114,10 @@ enum error_e
   ERROR_UNEXPECTED_OPTION,
   ERROR_TOO_MANY_ARGUMENTS,
   ERROR_OUTFILE_OPEN_FAILURE,
-  ERROR_TMPFILE_OPEN_FAILURE,
+  ERROR_BODYFILE_OPEN_FAILURE,
+  ERROR_APNDXFILE_OPEN_FAILURE,
   ERROR_KCONFIG_OPEN_FAILURE,
+  ERROR_APPENDFILE_OPEN_FAILURE,
   ERROR_TOO_MANY_DEFAULTS,
   ERROR_MISSING_DEFAULT_VALUE,
   ERROR_GARBAGE_AFTER_DEFAULT,
@@ -128,6 +131,8 @@ enum error_e
   ERROR_NESTING_UNDERFLOW
 };
 
+typedef void (*output_t)(const char *fmt, ...);
+
 struct reserved_s
 {
   enum token_type_e ttype;
@@ -136,45 +141,45 @@ struct reserved_s
 
 struct default_item_s
 {
-  char *ddefault;
-  char *ddependency;
+  char *d_default;
+  char *d_dependency;
 };
 
 struct default_s
 {
-  int dnitems;
-  struct default_item_s ditem[MAX_DEFAULTS];
+  int d_nitems;
+  struct default_item_s d_item[MAX_DEFAULTS];
 };
 
 struct select_s
 {
-  int snvar;
-  char *svarname[MAX_SELECT];
+  int s_nvar;
+  char *s_varname[MAX_SELECT];
 };
 
 struct config_s
 {
-  enum config_type_e ctype;
-  char *cname;
-  char *cdesc;
-  char *clower;
-  char *cupper;
-  struct default_s cdefault;
-  struct select_s cselect;
-  int cndependencies;
+  enum config_type_e c_type;
+  char *c_name;
+  char *c_desc;
+  char *c_lower;
+  char *c_upper;
+  struct default_s c_default;
+  struct select_s c_select;
+  int c_ndependencies;
 };
 
 struct choice_s
 {
-  char *cprompt;
-  struct default_s cdefault;
-  int cndependencies;
+  char *c_prompt;
+  struct default_s c_default;
+  int c_ndependencies;
 };
 
 struct menu_s
 {
-  char *mname;
-  int mndependencies;
+  char *m_name;
+  int m_ndependencies;
 };
 
 /****************************************************************************
@@ -184,10 +189,10 @@ struct menu_s
 static char g_line[LINE_SIZE+1];
 static char g_scratch[SCRATCH_SIZE+1];
 static FILE *g_outfile;
-static FILE *g_tmpfile;
+static FILE *g_bodyfile;
+static FILE *g_apndxfile;
 static char *g_lnptr;
 static bool g_debug;
-static bool g_internal;
 static bool g_preread;
 static const char *g_kconfigroot;
 static const char *g_appsdir;
@@ -305,8 +310,60 @@ static void body(const char *fmt, ...)
   va_list ap;
 
   va_start(ap, fmt);
-  (void)vfprintf(g_tmpfile, fmt, ap);
+  (void)vfprintf(g_bodyfile, fmt, ap);
   va_end(ap);
+}
+
+/****************************************************************************
+ * Name: appendix
+ *
+ * Description:
+ *   Output to a appendix file.
+ *
+ ****************************************************************************/
+
+static void appendix(const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start(ap, fmt);
+  (void)vfprintf(g_apndxfile, fmt, ap);
+  va_end(ap);
+}
+
+/****************************************************************************
+ * Name: append_file
+ *
+ * Description:
+ *   Append the specified file to the output file and remove it.
+ *
+ ****************************************************************************/
+
+static void append_file(const char *filename)
+{
+  FILE *stream;
+  int ch;
+
+  /* Open the file for reading */
+
+  stream = fopen(filename, "r");
+  if (!stream)
+    {
+      error("open %s failed: %s\n", filename, strerror(errno));
+      exit(ERROR_APPENDFILE_OPEN_FAILURE);
+    }
+
+  /* Copy the file to the output */
+
+  while ((ch = getc(stream)) != EOF)
+    {
+      (void)putc(ch, g_outfile);
+    }
+
+  /* Close and remove the file */
+
+  fclose(stream);
+  unlink(filename);
 }
 
 /****************************************************************************
@@ -319,13 +376,12 @@ static void body(const char *fmt, ...)
 
 static void show_usage(const char *progname, int exitcode)
 {
-  error("USAGE: %s [-d] [-i] [-a <apps directory>] {-o <out file>] [<Kconfig root>]\n", progname);
+  error("USAGE: %s [-d] [-a <apps directory>] {-o <out file>] [<Kconfig root>]\n", progname);
   error("       %s [-h]\n\n", progname);
   error("Where:\n\n");
   error("\t-a : Select relative path to the apps/ directory. Theis path is relative\n");
   error("\t     to the <Kconfig directory>.  Default: ../apps\n");
   error("\t-o : Send output to <out file>.  Default: Output goes to stdout\n");
-  error("\t-i : Show hidden, internal configuration variables\n");
   error("\t-d : Enable debug output\n");
   error("\t-h : Prints this message and exits\n");
   error("\t<Kconfig root> is the directory containing the root Kconfig file.\n");
@@ -475,7 +531,10 @@ static char *htmlize_text(const char *src)
 
   for (; *src; src++)
     {
-      /* Expand characters as necessary */
+      /* Expand characters as necessary.  NOTE:  There is no check if the
+       * HTML-expanded text overflows the g_scratch[] buffer.  If you see
+       * errors, be suspicous.
+       */
 
       dest += htmlize_character(dest, *src);
     }
@@ -1092,7 +1151,7 @@ static const char *type2str(enum config_type_e valtype)
  *
  ****************************************************************************/
 
-static inline void process_help(FILE *stream)
+static inline void process_help(FILE *stream, output_t outfunc)
 {
   char *ptr;
   int help_indent = 0;
@@ -1168,7 +1227,7 @@ static inline void process_help(FILE *stream)
 
           if (!newpara)
             {
-              body("\n</p>\n");
+              outfunc("\n</p>\n");
               newpara = true;
             }
 
@@ -1196,7 +1255,7 @@ static inline void process_help(FILE *stream)
 
       if (newpara)
         {
-          body("<p>\n");
+          outfunc("<p>\n");
           newpara = false;
         }
 
@@ -1209,32 +1268,32 @@ static inline void process_help(FILE *stream)
         {
           if (!preformatted)
             {
-              body("\n  <ul><pre>\n");
+              outfunc("\n  <ul><pre>\n");
               preformatted = true;
             }
 
-          body("%s\n", htmlize_text(ptr));
+          outfunc("%s\n", htmlize_text(ptr));
         }
       else
         {
           if (preformatted)
             {
-              body("</pre></ul>\n");
+              outfunc("</pre></ul>\n");
               preformatted = false;
             }
 
-          body("  %s", htmlize_text(ptr));
+          outfunc("  %s", htmlize_text(ptr));
         }
     }
 
   if (!newpara)
     {
-      body("\n</p>\n");
+      outfunc("\n</p>\n");
     }
 
   if (preformatted)
     {
-      body("</pre></ul>\n");
+      outfunc("</pre></ul>\n");
     }
 }
 
@@ -1254,7 +1313,7 @@ static void process_default(FILE *stream, struct default_s *defp)
 
   /* Check if we have space for another default value */
 
-  ndx = defp->dnitems;
+  ndx = defp->d_nitems;
   if (ndx >= MAX_DEFAULTS)
     {
       error("Too many default values\n");
@@ -1270,8 +1329,8 @@ static void process_default(FILE *stream, struct default_s *defp)
       exit(ERROR_MISSING_DEFAULT_VALUE);
     }
 
-  defp->ditem[ndx].ddefault = strdup(token);
-  defp->ditem[ndx].ddependency = NULL;
+  defp->d_item[ndx].d_default = strdup(token);
+  defp->d_item[ndx].d_dependency = NULL;
 
   /* Check if the default value is followed by "depends on" */
 
@@ -1289,12 +1348,12 @@ static void process_default(FILE *stream, struct default_s *defp)
 
       /* The rest of the line is the dependency */
 
-      defp->ditem[ndx].ddependency = strdup(g_lnptr);
+      defp->d_item[ndx].d_dependency = strdup(g_lnptr);
    }
 
   /* Update the number of defaults we have encountered in this block */
 
-  defp->dnitems++;
+  defp->d_nitems++;
 }
 
 /****************************************************************************
@@ -1305,66 +1364,66 @@ static void process_default(FILE *stream, struct default_s *defp)
  *
  ****************************************************************************/
 
-static void print_default(struct default_s *defp)
+static void print_default(struct default_s *defp, output_t outfunc)
 {
   struct default_item_s *item;
   int i;
 
   /* Check if there are any default value */
 
-  if (defp->dnitems > 0)
+  if (defp->d_nitems > 0)
     {
       /* Yes, output the defaults differently if there is only one */
 
-      if (defp->dnitems == 1)
+      if (defp->d_nitems == 1)
         {
           /* Output the Default */
 
-          item = &defp->ditem[0];
-          body("  <li>\n");
-          body("    <i>Default</i>: %s\n", item->ddefault);
+          item = &defp->d_item[0];
+          outfunc("  <li>\n");
+          outfunc("    <i>Default</i>: %s\n", item->d_default);
 
           /* Output the dependency */
 
-          if (item->ddependency)
+          if (item->d_dependency)
             {
-              body("    <p>\n");
-              body("      <i>Dependency:</i>\n");
-              body("      %s\n", htmlize_expression(item->ddependency));
-              body("    </p>\n");
+              outfunc("    <p>\n");
+              outfunc("      <i>Dependency:</i>\n");
+              outfunc("      %s\n", htmlize_expression(item->d_dependency));
+              outfunc("    </p>\n");
             }
 
-          body("  </li>\n");
+          outfunc("  </li>\n");
         }
       else
         {
           /* Output a sub-list of defaults. */
 
-          body("  <li>\n");
-          body("    <i>Default Values</i>:\n");
-          body("    <ul>\n");
+          outfunc("  <li>\n");
+          outfunc("    <i>Default Values</i>:\n");
+          outfunc("    <ul>\n");
 
-          for (i = 0; i < defp->dnitems; i++)
+          for (i = 0; i < defp->d_nitems; i++)
             {
               /* Output the Default */
 
-              item = &defp->ditem[i];
-              body("      <li>\n");
-              body("        <i>Default</i>: %s\n", item->ddefault);
+              item = &defp->d_item[i];
+              outfunc("      <li>\n");
+              outfunc("        <i>Default</i>: %s\n", item->d_default);
 
               /* Output the dependency */
 
-              if (item->ddependency)
+              if (item->d_dependency)
                 {
-                  body("        <p>\n");
-                  body("          <i>Dependency:</i>\n");
-                  body("          %s\n", htmlize_expression(item->ddependency));
-                  body("        </p>\n");
+                  outfunc("        <p>\n");
+                  outfunc("          <i>Dependency:</i>\n");
+                  outfunc("          %s\n", htmlize_expression(item->d_dependency));
+                  outfunc("        </p>\n");
                 }
             }
 
-          body("    </ul>\n");
-          body("  </li>\n");
+          outfunc("    </ul>\n");
+          outfunc("  </li>\n");
         }
     }
 }
@@ -1384,19 +1443,83 @@ static void free_default(struct default_s *defp)
 
   /* Free strings for each default */
 
-  for (i = 0; i < defp->dnitems; i++)
+  for (i = 0; i < defp->d_nitems; i++)
     {
       /* Free the default value string */
 
-      item = &defp->ditem[i];
-      free(item->ddefault);
+      item = &defp->d_item[i];
+      free(item->d_default);
 
       /* Free any dependency on the default */
 
-      if (item->ddependency)
+      if (item->d_dependency)
         {
-          free(item->ddependency);
+          free(item->d_dependency);
         }
+    }
+}
+
+/****************************************************************************
+ * Name: process_dependson
+ *
+ * Description:
+ *   Parse a "depends on" dependency and add the new dependency to the
+ *   stack of dependencies.
+ *
+ ****************************************************************************/
+
+static void process_dependson(void)
+{
+  char *value = get_token();
+  if (strcmp(value, "on") != 0)
+    {
+      error("Expected \"on\" after \"depends\"\n");
+      exit(ERRROR_ON_AFTER_DEPENDS);
+    }
+
+    push_dependency(htmlize_expression(g_lnptr));
+}
+
+/****************************************************************************
+ * Name: print_dependencies
+ *
+ * Description:
+ *   Output the current stack of depenencies
+ *
+ ****************************************************************************/
+
+static void print_dependencies(output_t outfunc)
+{
+  int i;
+
+  if (g_ndependencies > 0)
+    {
+      outfunc("  <li><i>Dependencies</i>: %s", g_dependencies[0]);
+
+      for (i = 1; i < g_ndependencies; i++)
+        {
+          outfunc(", %s\n", g_dependencies[i]);
+        }
+
+      outfunc("</li>\n");
+    }
+}
+
+/****************************************************************************
+ * Name: free_dependencies
+ *
+ * Description:
+ *   Pop dependencies from the stack.
+ *
+ ****************************************************************************/
+
+static void free_dependencies(int ndependencies)
+{
+  int i;
+
+  for (i = 0; i < ndependencies; i++)
+    {
+      pop_dependency();
     }
 }
 
@@ -1413,7 +1536,9 @@ static inline char *process_config(FILE *stream, const char *configname,
 {
   enum token_type_e tokid;
   struct config_s config;
+  output_t outfunc;
   bool help;
+  bool hidden;
   const char *paranum;
   char *token;
   char *ptr;
@@ -1422,7 +1547,7 @@ static inline char *process_config(FILE *stream, const char *configname,
   /* Get the configuration information */
 
   memset(&config, 0, sizeof(struct config_s));
-  config.cname = strdup(configname);
+  config.c_name = strdup(configname);
 
   /* Process each line in the configuration */
 
@@ -1442,14 +1567,14 @@ static inline char *process_config(FILE *stream, const char *configname,
                 {
                   /* Save the type of the configuration variable */
 
-                  config.ctype = VALUE_BOOL;
+                  config.c_type = VALUE_BOOL;
 
                   /* Get the description following the type */
 
                   ptr = get_html_string();
                   if (ptr)
                     {
-                      config.cdesc = strdup(ptr);
+                      config.c_desc = strdup(ptr);
                     }
 
                   /* Indicate that the line has been consumed */
@@ -1462,14 +1587,14 @@ static inline char *process_config(FILE *stream, const char *configname,
                 {
                   /* Save the type of the configuration variable */
 
-                  config.ctype = VALUE_INT;
+                  config.c_type = VALUE_INT;
 
                   /* Get the description following the type */
 
                   ptr = get_html_string();
                   if (ptr)
                     {
-                      config.cdesc = strdup(ptr);
+                      config.c_desc = strdup(ptr);
                     }
 
                   /* Indicate that the line has been consumed */
@@ -1482,14 +1607,14 @@ static inline char *process_config(FILE *stream, const char *configname,
                 {
                   /* Save the type of the configuration variable */
 
-                  config.ctype = VALUE_HEX;
+                  config.c_type = VALUE_HEX;
 
                   /* Get the description following the type */
 
                   ptr = get_html_string();
                   if (ptr)
                     {
-                      config.cdesc = strdup(ptr);
+                      config.c_desc = strdup(ptr);
                     }
 
                   /* Indicate that the line has been consumed */
@@ -1502,14 +1627,14 @@ static inline char *process_config(FILE *stream, const char *configname,
                 {
                   /* Save the type of the configuration variable */
 
-                  config.ctype = VALUE_STRING;
+                  config.c_type = VALUE_STRING;
 
                   /* Get the description following the type */
 
                   ptr = get_html_string();
                   if (ptr)
                     {
-                      config.cdesc = strdup(ptr);
+                      config.c_desc = strdup(ptr);
                     }
 
                   /* Indicate that the line has been consumed */
@@ -1520,7 +1645,7 @@ static inline char *process_config(FILE *stream, const char *configname,
 
               case TOKEN_DEFAULT:
                 {
-                  process_default(stream, &config.cdefault);
+                  process_default(stream, &config.c_default);
                   token = NULL;
                 }
                 break;
@@ -1530,12 +1655,12 @@ static inline char *process_config(FILE *stream, const char *configname,
                   char *value = get_token();
                   if (value)
                     {
-                      config.clower = strdup(value);
+                      config.c_lower = strdup(value);
 
                       value = get_token();
                       if (value)
                         {
-                          config.cupper = strdup(value);
+                          config.c_upper = strdup(value);
                         }
                     }
 
@@ -1548,7 +1673,7 @@ static inline char *process_config(FILE *stream, const char *configname,
                   char *value;
                   int ndx;
 
-                  ndx = config.cselect.snvar;
+                  ndx = config.c_select.s_nvar;
                   if (ndx >= MAX_SELECT)
                     {
                       error("Too many 'select' lines\n");
@@ -1556,23 +1681,16 @@ static inline char *process_config(FILE *stream, const char *configname,
                     }
 
                   value = get_token();
-                  config.cselect.svarname[ndx] = strdup(value);
-                  config.cselect.snvar = ndx + 1;
+                  config.c_select.s_varname[ndx] = strdup(value);
+                  config.c_select.s_nvar = ndx + 1;
                   token = NULL;
                 }
                 break;
 
               case TOKEN_DEPENDS:
                 {
-                  char *value = get_token();
-                  if (strcmp(value, "on") != 0)
-                    {
-                      error("Expected \"on\" after \"depends\"\n");
-                      exit(ERRROR_ON_AFTER_DEPENDS);
-                    }
-
-                  push_dependency(htmlize_expression(g_lnptr));
-                  config.cndependencies++;
+                  process_dependson();
+                  config.c_ndependencies++;
                   token = NULL;
                 }
                 break;
@@ -1593,7 +1711,7 @@ static inline char *process_config(FILE *stream, const char *configname,
               default:
                 {
                   debug("CONFIG_%s: Terminating token: %s\n",
-                        config.cname, token);
+                        config.c_name, token);
                 }
                 break;
             }
@@ -1607,170 +1725,153 @@ static inline char *process_config(FILE *stream, const char *configname,
         }
     }
 
-  /* Is this an internal configuration varaible with no description?
-   * Were we asked to show these internal variables?  If not then
-   * don't output anything.
+  /* Is this an internal configuration varaible with no description? 
+   * If so, send the output to the appendix file.
    */
 
-  if (config.cdesc || g_internal)
+  hidden  = (config.c_desc == NULL);
+  outfunc = hidden ? appendix : body;
+  hidden |= g_inchoice;
+
+  /* Print the configuration variable name and the short description */
+
+  outfunc("<h3><a name=\"CONFIG_%s\">", config.c_name);
+
+  /* If we are not in a choice block, than give the variable a paragraph
+   * number and put it in the table of contents.
+   */
+
+  if (!hidden)
     {
-      /* Print the configuration variable name and the short description */
-
-      body("<h3><a name=\"CONFIG_%s\">", config.cname);
-
-      /* If we are not in a choice block, than give the variable a paragraph
-       * number and put it in the table of contents.
-       */
-
-      if (!g_inchoice)
-        {
-          paranum = get_paranum();
-          output("<li><a href=\"#CONFIG_%s\">%s <code>CONFIG_%s</code>",
-                 config.cname, paranum, config.cname);
-          body("%s ", paranum);
-          incr_paranum();
-        }
-
-      body("<code>CONFIG_%s</code>", config.cname);
-
-      if (config.cdesc)
-        {
-          if (!g_inchoice)
-            {
-              output(": %s", config.cdesc);
-            }
-
-          body(": %s", config.cdesc);
-        }
-
-      body("</a></h3>\n");
-      if (!g_inchoice)
-        {
-          output("</a></li>\n");
-        }
-
-      /* Configuration description is indented */
-
-      body("<ul>\n");
-
-      /* Print the type of the configuration variable */
-
-      if (config.ctype != VALUE_NONE)
-        {
-          body("  <li><i>Type</i>: %s</li>\n", type2str(config.ctype));
-        }
-
-      /* Print the default values of the configuration variable */
-
-      print_default(&config.cdefault);
-
-      /* Print the range of values of the configuration variable */
-
-      if (config.clower || config.cupper)
-        {
-          body("  <li><i>Range</i>:\n");
-          if (config.clower)
-            {
-              body(" %s", config.clower);
-            }
-
-          body(" -", config.clower);
-
-          if (config.cupper)
-            {
-              body(" %s", config.cupper);
-            }
-
-          body("</li>\n");
-        }
-
-      /* Print the default value of the configuration variable auto-selected by this setting */
-
-      if (config.cselect.snvar > 0)
-        {
-          body("  <li><i>Selects</i>: <a href=\"#CONFIG_%s\">CONFIG_%s</a>",
-               config.cselect.svarname[0], config.cselect.svarname[0]);
-
-          for (i = 1; i < config.cselect.snvar; i++)
-            {
-              body(", <a href=\"#CONFIG_%s\">CONFIG_%s</a>",
-                   config.cselect.svarname[i], config.cselect.svarname[i]);
-            }
-
-          body("</li>\n");
-        }
-
-      /* Print the list of dependencies (if any) */
-
-      if (g_ndependencies > 0)
-        {
-          body("  <li><i>Dependencies</i>: %s", g_dependencies[0]);
-
-          for (i = 1; i < g_ndependencies; i++)
-            {
-              body(", %s\n", g_dependencies[i]);
-            }
-
-          body("</li>\n");
-        }
-
-      /* Show the configuration file */
-
-      body("  <li><i>Kconfig file</i>: <code>%s/Kconfig</code>\n", kconfigdir);
-
-      /* Print any help text */
-
-      if (help)
-        {
-          process_help(stream);
-          token = NULL;
-        }
-      else if (!config.cdesc)
-        {
-          body("<p>This is a hidden, internal configuration variable that cannot be explicitly set by the user.</p>\n");
-        }
-
-      /* End of configuration description */
-
-      body("</ul>\n");
-  }
-
-  /* Remove any dependencies that apply only to this configuration */
-
-  for (i = 0; i < config.cndependencies; i++)
-    {
-      pop_dependency();
+      paranum = get_paranum();
+      output("<li><a href=\"#CONFIG_%s\">%s <code>CONFIG_%s</code>",
+             config.c_name, paranum, config.c_name);
+      outfunc("%s ", paranum);
+      incr_paranum();
     }
+
+  outfunc("<code>CONFIG_%s</code>", config.c_name);
+
+  /* Output the short description in the paragraph title (if we have one) */
+
+  if (config.c_desc)
+    {
+      if (!hidden)
+        {
+          output(": %s", config.c_desc);
+        }
+
+      outfunc(": %s", config.c_desc);
+    }
+
+  outfunc("</a></h3>\n");
+
+  if (!hidden)
+    {
+      output("</a></li>\n");
+    }
+
+  /* Configuration description is indented */
+
+  outfunc("<ul>\n");
+
+  /* Print the type of the configuration variable */
+
+  if (config.c_type != VALUE_NONE)
+    {
+      outfunc("  <li><i>Type</i>: %s</li>\n", type2str(config.c_type));
+    }
+
+  /* Print the default values of the configuration variable */
+
+  print_default(&config.c_default, outfunc);
+
+  /* Print the range of values of the configuration variable */
+
+  if (config.c_lower || config.c_upper)
+    {
+      outfunc("  <li><i>Range</i>:\n");
+      if (config.c_lower)
+        {
+          outfunc(" %s", config.c_lower);
+        }
+
+      outfunc(" -", config.c_lower);
+
+      if (config.c_upper)
+        {
+          outfunc(" %s", config.c_upper);
+        }
+
+      outfunc("</li>\n");
+    }
+
+  /* Print the default value of the configuration variable auto-selected by this setting */
+
+  if (config.c_select.s_nvar > 0)
+    {
+      outfunc("  <li><i>Selects</i>: <a href=\"#CONFIG_%s\">CONFIG_%s</a>",
+              config.c_select.s_varname[0], config.c_select.s_varname[0]);
+
+      for (i = 1; i < config.c_select.s_nvar; i++)
+        {
+          outfunc(", <a href=\"#CONFIG_%s\">CONFIG_%s</a>",
+                  config.c_select.s_varname[i], config.c_select.s_varname[i]);
+        }
+
+      outfunc("</li>\n");
+    }
+
+  /* Print the list of dependencies (if any) */
+
+  print_dependencies(outfunc);
+
+  /* Show the configuration file */
+
+  outfunc("  <li><i>Kconfig file</i>: <code>%s/Kconfig</code>\n", kconfigdir);
+
+  /* Print any help text */
+
+  if (help)
+    {
+      process_help(stream, outfunc);
+      token = NULL;
+    }
+
+  /* End of configuration description */
+
+  outfunc("</ul>\n");
 
   /* Free allocated memory */
 
-  free_default(&config.cdefault);
+  free_dependencies(config.c_ndependencies);
+  free_default(&config.c_default);
 
-  if (config.cname)
+  if (config.c_name)
     {
-      free(config.cname);
+      free(config.c_name);
     }
 
-  if (config.cdesc)
+  if (config.c_desc)
     {
-      free(config.cdesc);
+      free(config.c_desc);
     }
 
-  if (config.clower)
+  if (config.c_lower)
     {
-      free(config.clower);
+      free(config.c_lower);
     }
 
-  if (config.cupper)
+  if (config.c_upper)
     {
-      free(config.cupper);
+      free(config.c_upper);
     }
 
-  if (config.cselect.snvar > 0)
+  if (config.c_select.s_nvar > 0)
     {
-      for (i = 0; i < config.cselect.snvar; i++)
+      for (i = 0; i < config.c_select.s_nvar; i++)
         {
-          free(config.cselect.svarname[i]);
+          free(config.c_select.s_varname[i]);
         }
     }
 
@@ -1794,7 +1895,6 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
   char *token = NULL;
   char *ptr;
   bool help = false;
-  int i;
 
   /* Get the choice information */
 
@@ -1819,7 +1919,7 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
                   ptr = get_html_string();
                   if (ptr)
                     {
-                      choice.cprompt = strdup(ptr);
+                      choice.c_prompt = strdup(ptr);
                     }
 
                   /* Indicate that the line has been consumed */
@@ -1830,22 +1930,15 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
 
               case TOKEN_DEFAULT:
                 {
-                  process_default(stream, &choice.cdefault);
+                  process_default(stream, &choice.c_default);
                   token = NULL;
                 }
                 break;
 
               case TOKEN_DEPENDS:
                 {
-                  char *value = get_token();
-                  if (strcmp(value, "on") != 0)
-                    {
-                      error("Expected \"on\" after \"depends\"\n");
-                      exit(ERRROR_ON_AFTER_DEPENDS);
-                    }
-
-                  push_dependency(htmlize_expression(g_lnptr));
-                  choice.cndependencies++;
+                  process_dependson();
+                  choice.c_ndependencies++;
                   token = NULL;
                 }
                 break;
@@ -1877,10 +1970,10 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
   output("<li><a href=\"#choice_%d\">%s Choice", g_choice_number, paranum);
   body("\n<h3><a name=\"choice_%d\">%s Choice", g_choice_number, paranum);
 
-  if (choice.cprompt)
+  if (choice.c_prompt)
     {
-      output(": %s", choice.cprompt);
-      body(": %s", choice.cprompt);
+      output(": %s", choice.c_prompt);
+      body(": %s", choice.c_prompt);
     }
 
   output("</a></li>\n");
@@ -1890,19 +1983,11 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
   /* Print the default values of the configuration variable */
 
   body("<ul>\n");
-  print_default(&choice.cdefault);
+  print_default(&choice.c_default, body);
 
   /* Print the list of dependencies (if any) */
 
-  if (g_ndependencies > 0)
-    {
-      body("  <li><i>Dependencies</i>: %s", g_dependencies[0]);
-      for (i = 1; i < g_ndependencies; i++)
-        {
-          body(", %s\n", g_dependencies[i]);
-        }
-      body("</li>\n");
-    }
+  print_dependencies(body);
 
    /* Show the configuration file */
 
@@ -1912,7 +1997,7 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
 
   if (help)
     {
-      process_help(stream);
+      process_help(stream, body);
       token = NULL;
     }
 
@@ -1923,34 +2008,28 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
    body("<p><b>Choice Options:</b></p>", kconfigdir);
    body("<ul>\n");
 
-  /* Remove any dependencies that apply only to this configuration */
-
-  for (i = 0; i < choice.cndependencies; i++)
-    {
-      pop_dependency();
-    }
-
   /* Free allocated memory */
 
-  free_default(&choice.cdefault);
+  free_dependencies(choice.c_ndependencies);
+  free_default(&choice.c_default);
 
-  if (choice.cprompt)
+  if (choice.c_prompt)
     {
-      free(choice.cprompt);
+      free(choice.c_prompt);
     }
 
   /* Increment the nesting level */
 
-   incr_level();
+  incr_level();
 
-   debug("process_choice: TOKEN_CHOICE\n");
-   debug("  kconfigdir:  %s\n", kconfigdir);
-   debug("  level:       %d\n", g_level);
+  debug("process_choice: TOKEN_CHOICE\n");
+  debug("  kconfigdir:  %s\n", kconfigdir);
+  debug("  level:       %d\n", g_level);
 
-   /* Then return in choice mode */
+  /* Then return in choice mode */
 
-   g_inchoice++;
-   return token;
+  g_inchoice++;
+  return token;
 }
 
 /****************************************************************************
@@ -1969,7 +2048,6 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
   char *menuname;
   char *token = NULL;
   char *ptr;
-  int i;
 
   /* Get the menu information */
 
@@ -1978,7 +2056,7 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
   /* Get the menu name */
 
   menuname = get_html_string();
-  menu.mname = strdup(menuname);
+  menu.m_name = strdup(menuname);
 
   /* Process each line in the choice */
 
@@ -1994,15 +2072,8 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
             {
               case TOKEN_DEPENDS:
                 {
-                  char *value = get_token();
-                  if (strcmp(value, "on") != 0)
-                    {
-                      error("Expected \"on\" after \"depends\"\n");
-                      exit(ERRROR_ON_AFTER_DEPENDS);
-                    }
-
-                  push_dependency(htmlize_expression(g_lnptr));
-                  menu.mndependencies++;
+                  process_dependson();
+                  menu.m_ndependencies++;
                   token = NULL;
                 }
                 break;
@@ -2026,13 +2097,13 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
   /* Output menu information */
 
   paranum = get_paranum();
-  if (menu.mname)
+  if (menu.m_name)
     {
       output("<li><a href=\"#menu_%d\">%s Menu: %s</a></li>\n",
-             g_menu_number, paranum, menu.mname);
+             g_menu_number, paranum, menu.m_name);
       output("<ul>\n");
              body("\n<h1><a name=\"menu_%d\">%s Menu: %s</a></h1>\n",
-             g_menu_number, paranum, menu.mname);
+             g_menu_number, paranum, menu.m_name);
     }
   else
     {
@@ -2047,35 +2118,20 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
   /* Print the list of dependencies (if any) */
 
   body("<ul>\n");
-  if (g_ndependencies > 0)
-    {
-      body("  <li><i>Dependencies</i>: %s", g_dependencies[0]);
-
-      for (i = 1; i < g_ndependencies; i++)
-        {
-          body(", %s\n", g_dependencies[i]);
-        }
-
-      body("</li>\n");
-    }
+  print_dependencies(body);
 
   /* Show the configuration file */
 
   body("  <li><i>Kconfig file</i>: <code>%s/Kconfig</code>\n", kconfigdir);
   body("</ul>\n");
 
-  /* Remove any dependencies that apply only to this configuration */
-
-  for (i = 0; i < menu.mndependencies; i++)
-    {
-      pop_dependency();
-    }
-
   /* Free any allocated memory */
 
-  if (menu.mname)
+  free_dependencies(menu.m_ndependencies);
+
+  if (menu.m_name)
     {
-      free(menu.mname);
+      free(menu.m_name);
     }
 
   /* Increment the nesting level */
@@ -2315,13 +2371,12 @@ int main(int argc, char **argv, char **envp)
   /* Parse command line options */
 
   g_debug       = false;
-  g_internal    = false;
   g_kconfigroot = ".";
   g_appsdir     = "../apps";
   g_outfile     = stdout;
   outfile       = NULL;
 
-  while ((ch = getopt(argc, argv, ":dha:o:")) > 0)
+  while ((ch = getopt(argc, argv, ":dhia:o:")) > 0)
     {
       switch (ch)
         {
@@ -2331,10 +2386,6 @@ int main(int argc, char **argv, char **envp)
 
           case 'o' :
             outfile = optarg;
-            break;
-
-          case 'i' :
-            g_internal = true;
             break;
 
           case 'h' :
@@ -2374,7 +2425,9 @@ int main(int argc, char **argv, char **envp)
        show_usage(argv[0], ERROR_TOO_MANY_ARGUMENTS);
     }
 
-  /* Open the output file (if any) */
+  /* Open the output file (if any).  The output file will hold the
+   * Table of Contents as the HTML document is generated.
+   */
 
   if (outfile)
     {
@@ -2386,13 +2439,26 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
-  /* Open the temporary file */
+  /* Open the temporary file that holds the HTML body.  The HTML
+   * body will be appended after the Table of contents.
+   */
 
-  g_tmpfile = fopen(TMPFILE_NAME, "w");
-  if (!g_tmpfile)
+  g_bodyfile = fopen(BODYFILE_NAME, "w");
+  if (!g_bodyfile)
     {
-      error("open %s failed: %s\n", TMPFILE_NAME, strerror(errno));
-      exit(ERROR_TMPFILE_OPEN_FAILURE);
+      error("open %s failed: %s\n", BODYFILE_NAME, strerror(errno));
+      exit(ERROR_BODYFILE_OPEN_FAILURE);
+    }
+
+  /* Open the temporary file that holds the appendix.  The appendix
+   * will be appended after the HTML body.
+   */
+
+  g_apndxfile = fopen(APNDXFILE_NAME, "w");
+  if (!g_apndxfile)
+    {
+      error("open %s failed: %s\n", APNDXFILE_NAME, strerror(errno));
+      exit(ERROR_APNDXFILE_OPEN_FAILURE);
     }
 
   /* Get the current date string in the scratch buffer */
@@ -2428,6 +2494,10 @@ int main(int argc, char **argv, char **envp)
        g_menu_number, paranum);
   g_menu_number++;
 
+  /* Increment the nesting level again:  Everything is included within the main menu. */
+
+  incr_level();
+
   /* Tell the reader that this is an auto-generated file */
 
   body("<p>\n");
@@ -2438,6 +2508,12 @@ int main(int argc, char **argv, char **envp)
   body("  Each <code>Kconfig</code> files contains declarations of configuration variables.\n");
   body("  Each configuration variable provides one configuration option for the NuttX RTOS.\n");
   body("  This configurable options are descrived in this document.\n");
+  body("</p>\n");
+  body("<p>\n");
+  body("  <b>Main Menu</b>.\n");
+  body("  The normal way to start the NuttX configuration is to enter this command line from the NuttX build directory: <code>make menuconfig</code>.\n");
+  body("  Note that NuttX must first be configured <i>before</i> this command so that the configuration file (<code>.config</code>) is present in the top-level build directory.\n");
+  body("  The main menu is the name give to the opening menu display after this command is executed.\n");
   body("</p>\n");
   body("<p>\n");
   body("  <b>Mainenance Note</b>.\n");
@@ -2453,30 +2529,34 @@ int main(int argc, char **argv, char **envp)
 
   /* Terminate the table of contents */
 
+  output("<li><a href=\"#appendixa\">Appendix A</a></li>\n");
   output("</ul>\n");
 
-  /* Close the temporary file and copy it to the output file */
+  /* Close the HMTL body file and copy it to the output file */
 
-  fclose(g_tmpfile);
-  g_tmpfile = fopen(TMPFILE_NAME, "r");
-  if (!g_tmpfile)
-    {
-      error("open %s failed: %s\n", TMPFILE_NAME, strerror(errno));
-      exit(ERROR_TMPFILE_OPEN_FAILURE);
-    }
+  fclose(g_bodyfile);
+  append_file(BODYFILE_NAME);
 
-   while ((ch = getc(g_tmpfile)) != EOF)
-     {
-       (void)putc(ch, g_outfile);
-     }
+  /* Output introductory information for the appendix */
 
-  /* Close and remove the temporary file again */
+  output("<h1><a name=\"appendixa\">Appendix A</a></h1>\n");
+  output("<p>\n");
+  output("  This appendex holds internal configurations variables that are not visible to the user.\n");
+  output("  These settings are presented out-of-context because they cannot be directly controlled by the user.\n");
+  output("  Many of these settings are selected automatically and indirectly when other, visible configuration variables are selected.\n");
+  output("  One purpose of these hidden configuration variables is to control menuing in the kconfig-frontends configuration tool.\n");
+  output("  Many configuration variables with a form like <code>CONFIG_ARCH_HAVE_</code><i>feature</i>, for example, are used only to indicate that the selected archicture supports <i>feature</i> and so addition selection associated with <i>feature</i> will become accessible to the user.\n");
+  output("</p>\n");
+  output("<ul>\n");
 
-  fclose(g_tmpfile);
-  unlink(TMPFILE_NAME);
+  /* Close the appendix file and copy it to the output file */
+
+  fclose(g_apndxfile);
+  append_file(APNDXFILE_NAME);
 
   /* Output trailer boilerplater */
 
+  output("</ul>\n");
   output("</body>\n");
   output("</html>\n");
 
