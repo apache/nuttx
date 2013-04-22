@@ -288,12 +288,12 @@ config ARCH_BOARD_NTOSD_DM320
 		This port uses the Neuros OSD v1.0 Dev Board with a GNU arm-nuttx-elf
 		toolchain*: see
 
-			http://wiki.neurostechnology.com/index.php/OSD_1.0_Developer_Home
+		http://wiki.neurostechnology.com/index.php/OSD_1.0_Developer_Home
 
 		There are some differences between the Dev Board and the currently
 		available commercial v1.0 Boards.  See
 
-			http://wiki.neurostechnology.com/index.php/OSD_Developer_Board_v1
+		http://wiki.neurostechnology.com/index.php/OSD_Developer_Board_v1
 
 		NuttX operates on the ARM9EJS of this dual core processor.
 		STATUS: This port is code complete, verified, and included in the

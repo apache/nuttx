@@ -11,15 +11,15 @@ config BOARD_INITIALIZE
 		custom initialization logic:
 
 		1) <arch>_boardinitialize():  This function is used only for
-		   initialize of very low-level things like configuration of
-		   GPIO pins, power setting.  The OS has not been initialized
-		   at this point, so you cannot allocate memory or initialize
-		   device drivers at this phase.
+		initialize of very low-level things like configuration of
+		GPIO pins, power setting.  The OS has not been initialized
+		at this point, so you cannot allocate memory or initialize
+		device drivers at this phase.
 
 		2) The next level of initialization is performed by a call to
-		   up_initialize() (in arch/<arch>/src/common/up_initialize.c).
-		   The OS has been initialized at this point and it is okay to
-		   initialize drivers in this phase.
+		up_initialize() (in arch/<arch>/src/common/up_initialize.c).
+		The OS has been initialized at this point and it is okay to
+		initialize drivers in this phase.
 
 		3) And, finally, when the user application code starts.
 
@@ -88,8 +88,8 @@ config SCHED_CHILD_STATUS
 		Without this setting, wait(), waitpid() or waitid() may fail.  For
 		example, if you do:
 
-			1) Start child task
-			2) Wait for exit status (using wait(), waitpid(), or waitid()).
+		1) Start child task
+		2) Wait for exit status (using wait(), waitpid(), or waitid()).
 
 		This can fail because the child task may run to completion before
 		the wait begins.  There is a non-standard work-around in this case:
@@ -317,19 +317,19 @@ config DISABLE_OS_API
 	bool "Disable NuttX interfaces"
 	default y
 	---help---
-	The following can be used to disable categories of
-	APIs supported by the OS.  If the compiler supports
-	weak functions, then it should not be necessary to
-	disable functions unless you want to restrict usage
-	of those APIs.
+		The following can be used to disable categories of
+		APIs supported by the OS.  If the compiler supports
+		weak functions, then it should not be necessary to
+		disable functions unless you want to restrict usage
+		of those APIs.
 
-	There are certain dependency relationships in these
-	features.
+		There are certain dependency relationships in these
+		features.
 
-	o mq_notify logic depends on signals to awaken tasks
-	  waiting for queues to become full or empty.
-	o pthread_condtimedwait() depends on signals to wake
-	  up waiting tasks.
+		1) mq_notify logic depends on signals to awaken tasks
+		waiting for queues to become full or empty.
+		2) pthread_condtimedwait() depends on signals to wake
+		up waiting tasks.
 
 config DISABLE_CLOCK
 	bool "Disable clock interfaces"
@@ -478,7 +478,7 @@ config PREALLOC_WDOGS
 	---help---
 		The number of pre-allocated watchdog structures.  The system manages a
 		pool of preallocated watchdog structures to minimize dynamic allocations
-	
+
 config PREALLOC_TIMERS
 	int "Number of pre-allocated POSIX timers"
 	default 8
@@ -516,4 +516,3 @@ config PTHREAD_STACK_DEFAULT
 	default 2048
 	---help---
 		Default pthread stack size
-

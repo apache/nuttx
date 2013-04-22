@@ -188,7 +188,7 @@ config ARMV7M_USEBASEPRI
 	depends on ARCH_CORTEXM3 || ARCH_CORTEXM4
 	---help---
 		Use the BASEPRI register to enable and disable able interrupts.  By
- 		default, the PRIMASK register is used for this purpose.  This
+		default, the PRIMASK register is used for this purpose.  This
 		usually results in hardfaults that are properly handling by the
 		RTOS.  Using the BASEPRI register will avoid these hardfault.
 		That is needed primarily for integration with some toolchains.

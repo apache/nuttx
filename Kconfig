@@ -97,34 +97,32 @@ config APPS_DIR
 		directory and the NuttX directory each in separate directory
 		trees like this:
 
-		<pre>
-		build
-		|-nuttx
-		|  |
-		|  `- Makefile
-		`-application
-		|
-		`- Makefile
-		</pre>
+			build
+			|-nuttx
+			|  |
+			|  `- Makefile
+			`-application
+			|
+			`- Makefile
 		
 		Then you would set CONFIG_APPS_DIR=../application.
 
 		The application direction must contain Makefile and this make
 		file must support the following targets:
 		
-		libapps$(LIBEXT) (usually libapps.a). libapps.a is a static
+		1)libapps$(LIBEXT) (usually libapps.a). libapps.a is a static
 		library ( an archive) that contains all of application object
 		files.
 		
-		clean. Do whatever is appropriate to clean the application
+		2)clean. Do whatever is appropriate to clean the application
 		directories for a fresh build.
 		
-		distclean. Clean everthing -- auto-generated files, symbolic
+		3)distclean. Clean everthing -- auto-generated files, symbolic
 		links etc. -- so that the directory contents are the same as
 		the contents in your configuration management system.
 		This is only done when you change the NuttX configuration.
 		
-		depend. Make or update the application build dependencies.
+		4)depend. Make or update the application build dependencies.
 		
 		When this application is invoked it will receive the setting TOPDIR like:
 		
@@ -240,13 +238,11 @@ config ARCH_STDBOOL_H
 		However, that header includes logic to redirect the inclusion of an
 		architecture specific header file like:
 
-		<pre>
-		#ifdef CONFIG_ARCH_STDBOOL_H
-		#  include <arch/stdbool.h>
-		#else
-		...
-		#endif
-		</pre>
+			#ifdef CONFIG_ARCH_STDBOOL_H
+			#  include <arch/stdbool.h>
+			#else
+			...
+			#endif
 
 		Recall that that include path, include/arch, is a symbolic link and
 		will refer to a version of stdbool.h at nuttx/arch/<architecture>/include/stdbool.h.
@@ -259,15 +255,13 @@ config ARCH_MATH_H
 		However, it resides out-of-the-way at include/nuttx/math.h because it
 		conflicts too often with the system math.h. If ARCH_MATH_H=y is
 		defined, however, the top-level makefile will copy the redirecting
- 		math.h header file from include/nuttx/math.h to include/math.h. math.h
+		math.h header file from include/nuttx/math.h to include/math.h. math.h
 		will then include the architecture-specific version of math.h that you
 		must provide at nuttx/arch/>architecture</include/math.h.
 
-		<pre>
-		#ifdef CONFIG_ARCH_MATH_H
-		#  include <arch/math.h>
-		#endif
-		</pre>
+			#ifdef CONFIG_ARCH_MATH_H
+			#  include <arch/math.h>
+			#endif
 
 		So for the architectures that define ARCH_MATH_H=y, include/math.h
 		will be the redirecting math.h header file; for the architectures
@@ -282,7 +276,7 @@ config ARCH_FLOAT_H
 		point implementation.  It would always be best to use your
 		toolchain's float.h header file but if none is avaiable, a default
 		float.h header file will provided if this option is selected.  However
- 		there is no assurance that the settings in this float.h are actually
+		there is no assurance that the settings in this float.h are actually
 		correct for your platform!
 
 config ARCH_STDARG_H

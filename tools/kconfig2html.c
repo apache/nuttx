@@ -1100,10 +1100,13 @@ static inline void process_help(FILE *stream)
   bool blank;
   bool done;
   bool newpara;
+  bool preformatted;
 
   /* Read each comment line */
 
   newpara = true;
+  preformatted = false;
+
   for (;;)
    {
       /* Read the next line of comment text */
@@ -1165,7 +1168,7 @@ static inline void process_help(FILE *stream)
 
           if (!newpara)
             {
-              body("</p>\n");
+              body("\n</p>\n");
               newpara = true;
             }
 
@@ -1193,16 +1196,45 @@ static inline void process_help(FILE *stream)
 
       if (newpara)
         {
-          body("</p>\n");
+          body("<p>\n");
           newpara = false;
         }
 
-      body("  %s", htmlize_text(ptr));
+      /* Lines that are indented at greater levels are assumed to be
+       * pre-formatted text.  This is not part of the Kconfig language but
+       * rather simply a NuttX Kconfig convention.
+       */
+
+      if (indent > help_indent)
+        {
+          if (!preformatted)
+            {
+              body("\n  <ul><pre>\n");
+              preformatted = true;
+            }
+
+          body("%s\n", htmlize_text(ptr));
+        }
+      else
+        {
+          if (preformatted)
+            {
+              body("</pre></ul>\n");
+              preformatted = false;
+            }
+
+          body("  %s", htmlize_text(ptr));
+        }
     }
 
   if (!newpara)
     {
-      body("</p>\n");
+      body("\n</p>\n");
+    }
+
+  if (preformatted)
+    {
+      body("</pre></ul>\n");
     }
 }
 
@@ -1761,7 +1793,7 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
   const char *paranum;
   char *token = NULL;
   char *ptr;
-  bool help;
+  bool help = false;
   int i;
 
   /* Get the choice information */

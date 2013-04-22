@@ -18,7 +18,7 @@ config LIBM
 		Another possibility is that you have a custom, architecture-specific math
 		libary and that the corresponding math.h file resides at arch/<architecture>/include/math.h.
 		The option is selected via ARCH_MATH_H.  If ARCH_MATH_H is selected,then the include/nuttx/math.h
- 		header file will be copied to include/math.h where it can be used by your applications.
+		header file will be copied to include/math.h where it can be used by your applications.
 
 		If ARCH_MATH_H is not defined, then this option can be selected to build a generic,
 		math library built into NuttX.  This math library comes from the Rhombus OS and
