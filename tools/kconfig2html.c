@@ -1819,12 +1819,12 @@ static inline char *process_config(FILE *stream, const char *configname,
 
   if (config.c_select.s_nvar > 0)
     {
-      outfunc("  <li><i>Selects</i>: <a href=\"#CONFIG_%s\">CONFIG_%s</a>",
+      outfunc("  <li><i>Selects</i>: <a href=\"#CONFIG_%s\"><code>CONFIG_%s</code></a>",
               config.c_select.s_varname[0], config.c_select.s_varname[0]);
 
       for (i = 1; i < config.c_select.s_nvar; i++)
         {
-          outfunc(", <a href=\"#CONFIG_%s\">CONFIG_%s</a>",
+          outfunc(", <a href=\"#CONFIG_%s\"><code>CONFIG_%s</code></a>",
                   config.c_select.s_varname[i], config.c_select.s_varname[i]);
         }
 
