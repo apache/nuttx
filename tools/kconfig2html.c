@@ -118,6 +118,7 @@ enum error_e
   ERROR_APNDXFILE_OPEN_FAILURE,
   ERROR_KCONFIG_OPEN_FAILURE,
   ERROR_APPENDFILE_OPEN_FAILURE,
+  ERROR_MENU_LEVEL_UNDERRUN,
   ERROR_TOO_MANY_DEFAULTS,
   ERROR_MISSING_DEFAULT_VALUE,
   ERROR_GARBAGE_AFTER_DEFAULT,
@@ -203,6 +204,7 @@ static int g_ndependencies;
 static int g_inchoice;
 static int g_menu_number;
 static int g_choice_number;
+static int g_toggle_number;
 
 static const char g_delimiters[] = " ,";
 
@@ -1225,9 +1227,15 @@ static inline void process_help(FILE *stream, output_t outfunc)
         {
           /* Avoid putting an empty paragraph at the end of the help */
 
+          if (preformatted)
+            {
+              outfunc("</pre></ul>\n");
+              preformatted = false;
+            }
+
           if (!newpara)
             {
-              outfunc("\n</p>\n");
+              outfunc("</p>\n");
               newpara = true;
             }
 
@@ -1268,7 +1276,8 @@ static inline void process_help(FILE *stream, output_t outfunc)
         {
           if (!preformatted)
             {
-              outfunc("\n  <ul><pre>\n");
+              outfunc("  <ul><pre>\n");
+              newpara = false;
               preformatted = true;
             }
 
@@ -2018,7 +2027,7 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir)
       free(choice.c_prompt);
     }
 
-  /* Increment the nesting level */
+  /* Increment the paragraph level */
 
   incr_level();
 
@@ -2101,9 +2110,8 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
     {
       output("<li><a href=\"#menu_%d\">%s Menu: %s</a></li>\n",
              g_menu_number, paranum, menu.m_name);
-      output("<ul>\n");
-             body("\n<h1><a name=\"menu_%d\">%s Menu: %s</a></h1>\n",
-             g_menu_number, paranum, menu.m_name);
+      body("\n<h1><a name=\"menu_%d\">%s Menu: %s</a></h1>\n",
+           g_menu_number, paranum, menu.m_name);
     }
   else
     {
@@ -2114,6 +2122,17 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
     }
 
   g_menu_number++;
+
+  /* Output logic to toggle the contents below the menu in the table of
+   * contents.
+   */
+
+  output("<a href=\"#\" onclick=\"toggle('toggle_%d', this)\">Expand</a>\n",
+         g_toggle_number);
+  output("<ul id=\"toggle_%d\"  style=\"display:none\">\n",
+         g_toggle_number);
+
+  g_toggle_number++;
 
   /* Print the list of dependencies (if any) */
 
@@ -2134,7 +2153,7 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
       free(menu.m_name);
     }
 
-  /* Increment the nesting level */
+  /* Increment the paragraph level */
 
   incr_level();
 
@@ -2256,7 +2275,7 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
                   body("</ul>\n");
                   g_inchoice--;
 
-                  /* Decrement the nesting level */
+                  /* Decrement the paragraph level */
 
                   decr_level();
                   incr_paranum();
@@ -2266,11 +2285,14 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
 
               case TOKEN_ENDMENU:
                 {
-                  /* Reduce table of contents indentation level */
+                  /* Reduce table of contents indentation level.  NOTE that
+                   * this also terminates the toggle block that began with the
+                   * matching <ul>
+                   */
 
                   output("</ul>\n");
 
-                  /* Decrement the nesting level */
+                  /* Decrement the paragraph level */
 
                   decr_level();
                   incr_paranum();
@@ -2473,6 +2495,7 @@ int main(int argc, char **argv, char **envp)
   output("<head>\n");
   output("<title>NuttX Configuration Options</title>\n");
   output("</head>\n");
+
   output("<body background=\"backgd.gif\">\n");
   output("<hr><hr>\n");
   output("<table width =\"100%%\">\n");
@@ -2483,6 +2506,20 @@ int main(int argc, char **argv, char **envp)
   output("</td>\n");
   output("</tr>\n");
   output("</table>\n");
+  
+  output("<script type=\"text/javascript\">\n");
+  output("function toggle(id, link) {\n");
+  output("  var e = document.getElementById(id);\n");
+  output("  if (e.style.display == '') {\n");
+  output("    e.style.display = 'none';\n");
+  output("    link.innerHTML = 'Expand';\n");
+  output("  } else {\n");
+  output("    e.style.display = '';\n");
+  output("    link.innerHTML = 'Collapse';\n");
+  output("  }\n");
+  output("}\n");
+  output("</script>\n");
+
   output("<center><h1>Table of contents</h1></center>\n");
   output("<ul>\n");
 
@@ -2494,7 +2531,7 @@ int main(int argc, char **argv, char **envp)
        g_menu_number, paranum);
   g_menu_number++;
 
-  /* Increment the nesting level again:  Everything is included within the main menu. */
+  /* Increment the paragraph level again:  Everything is included within the main menu. */
 
   incr_level();
 
