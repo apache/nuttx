@@ -4589,3 +4589,6 @@
 	* Documentation:  The NuttX documentation now expects to find an
 	  auto-generated version of the configuration variable documentation
 	  at Documentation/NuttXConfigVariables.html (2014-4-22).
+	* arch/arm/src/lpc17xx/lpc17_adc.c:  Only one ADC pin was configured.
+	  Need to configure all that are in the ADC0 set.  From MKannan
+          (2014-4-23).
