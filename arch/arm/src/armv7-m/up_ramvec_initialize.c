@@ -100,7 +100,7 @@ void up_ramvec_initialize(void)
 
   /* The vector table must be aligned */
 
-  DEBUGASSERT(((uintptr)g_ram_vectors & ~NVIC_VECTAB_TBLOFF_MASK) == 0);
+  DEBUGASSERT(((uint32_t)g_ram_vectors & ~NVIC_VECTAB_TBLOFF_MASK) == 0);
 
   /* Copy the ROM vector table at address zero to RAM vector table.
    *

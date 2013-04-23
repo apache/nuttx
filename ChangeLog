@@ -4594,3 +4594,5 @@
           (2014-4-23).
 	* configs/zkit-arm-1769/src:  ADC and SPI/USB MSC updates from
 	  MKannan (2014-4-23).
+	* arm/src/armv7-m/ram_vectors.h and arm/src/armv7-m/up_ramvec_initialize.c:
+	  Fixes to RAM vector logic from Paul Y. Zhang (2014-4-23)

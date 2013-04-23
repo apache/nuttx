@@ -68,7 +68,7 @@
  * the table.
  */
 
-#define ARMV7M_VECTAB_SIZE (ARMV7M_PERIPHERAL_INTERRUPTS)
+#define ARMV7M_VECTAB_SIZE (ARMV7M_PERIPHERAL_INTERRUPTS + 16)
 
 /************************************************************************************
  * Public Data
