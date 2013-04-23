@@ -1206,7 +1206,7 @@ Where <subdir> is one of the following:
       -CONFIG_EXAMPLES_USBMSC_DEVPATH1="/dev/mmcsd0"
       +CONFIG_EXAMPLES_USBMSC_DEVPATH1="/dev/ram0"
 
-  2. Changes to nuttx/.config.
+  2. Changes to apps/.config.
 
     a) Enable building of the examples/usbstorage:
 

@@ -417,15 +417,15 @@ static inline void task_sigchild(FAR struct tcb_s *ptcb,
 #endif /* CONFIG_SCHED_HAVE_PARENT */
 
 /****************************************************************************
- * Name: task_leavegroup
+ * Name: task_signalparent
  *
  * Description:
- *   Send the SIGCHILD signal to the parent thread
+ *   Send the SIGCHILD signal to the parent task group
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
-static inline void task_leavegroup(FAR struct tcb_s *ctcb, int status)
+static inline void task_signalparent(FAR struct tcb_s *ctcb, int status)
 {
 #ifdef HAVE_GROUP_MEMBERS
   DEBUGASSERT(ctcb && ctcb->group);
@@ -446,7 +446,7 @@ static inline void task_leavegroup(FAR struct tcb_s *ctcb, int status)
   sched_lock();
 
   /* Get the TCB of the receiving, parent task.  We do this early to
-   * handle multiple calls to task_leavegroup.  ctcb->ppid is set to an
+   * handle multiple calls to task_signalparent.  ctcb->ppid is set to an
    * invalid value below and the following call will fail if we are
    * called again.
    */
@@ -471,7 +471,7 @@ static inline void task_leavegroup(FAR struct tcb_s *ctcb, int status)
 #endif
 }
 #else
-#  define task_leavegroup(ctcb,status)
+#  define task_signalparent(ctcb,status)
 #endif
 
 /****************************************************************************
@@ -626,6 +626,7 @@ void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
    *    the exit functions *not* be called.
    */
 
+#if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
   if (!nonblocking)
     {
       task_atexit(tcb);
@@ -634,6 +635,7 @@ void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
 
       task_onexit(tcb, status);
     }
+#endif
 
   /* If the task was terminated by another task, it may be in an unknown
    * state.  Make some feeble effort to recover the state.
@@ -641,9 +643,9 @@ void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
 
   task_recover(tcb);
 
-  /* Leave the task group */
+  /* Send the SIGCHILD signal to the parent task group */
 
-  task_leavegroup(tcb, status);
+  task_signalparent(tcb, status);
 
   /* Wakeup any tasks waiting for this task to exit */
 
