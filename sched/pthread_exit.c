@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/pthread_exit.c
  *
- *   Copyright (C) 2007, 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 
 #include <nuttx/arch.h>
 
+#include "os_internal.h"
 #include "pthread_internal.h"
 
 /************************************************************************
@@ -93,7 +94,7 @@
 
 void pthread_exit(FAR void *exit_value)
 {
-  int error_code = (int)((intptr_t)exit_value);
+  struct tcb_s *tcb = (struct tcb_s*)g_readytorun.head;
   int status;
 
   sdbg("exit_value=%p\n", exit_value);
@@ -115,23 +116,25 @@ void pthread_exit(FAR void *exit_value)
   if (status != OK)
     {
       /* Assume that the join completion failured because this
-       * not really a pthread.  Exit by calling exit() to flush
-       * and close all file descriptors and calling atexit()
-       * functions.
+       * not really a pthread.  Exit by calling exit().
        */
 
-      if (error_code == EXIT_SUCCESS)
-        {
-           error_code = EXIT_FAILURE;
-        }
-
-      exit(error_code);
+      exit(EXIT_FAILURE);
     }
+
+  /* Perform common task termination logic.  This will get called again later
+   * through logic kicked off by _exit().  However, we need to call it before
+   * calling _exit() in order certain operations if this is the last thread
+   * of a task group:  (2) To handle atexit() and on_exit() callbacks and
+   * (2) so that we can flush buffered I/O (which may required suspending).
+   */
+
+  task_exithook(tcb, EXIT_SUCCESS, false);
 
   /* Then just exit, retaining all file descriptors and without
    * calling atexit() functions.
    */
 
-  _exit(error_code);
+  _exit(EXIT_SUCCESS);
 }
 

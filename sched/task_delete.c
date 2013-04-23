@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task_delete.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,30 +77,36 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_delete
+ * Name: task_terminate
  *
  * Description:
  *   This function causes a specified task to cease to exist. Its  stack and
- *   TCB will be deallocated.  This function is the companion to task_create().
+ *   TCB will be deallocated.  This function is the internal implementation
+ *   of the task_delete() function.  It includes and additional parameter
+ *   to determine if blocking is permitted or not.
  *
- *   The logic in this function only deletes non-running tasks.  If the 'pid'
- *   parameter refers to to the currently runing task, then processing is
- *   redirected to exit().
+ *   This function is the final function called all task termination
+ *   sequences.  task_terminate() is called only from task_delete() (with
+ *   nonblocking == false) and from task_exit() (with nonblocking == true).
  *
- *   Control will still be returned to task_delete() after the exit() logic
- *   finishes.  In fact, this function is the final function called all task
- *   termination sequences.  Here are all possible exit scenarios:
+ *   The path through task_exit() supports the final stops of the exit(),
+ *   _exit(), and pthread_exit
  *
- *   - pthread_exit().  Calls exit()
+ *   - pthread_exit().  Calls _exit()
  *   - exit(). Calls _exit()
  *   - _exit().  Calls task_exit() making the currently running task
- *     non-running then calls task_delete() to terminate the non-running
- *     task.
- *   - task_delete()
+ *     non-running. task_exit then calls task_terminate() (with nonblocking
+ *     == true) to terminate the non-running task.
+ *
+ *   NOTE: that the state of non-blocking is irrelevant when called through
+ *   exit() and pthread_exit().  In those cases task_exithook() has already
+ *   been called with nonblocking == false;
  *
  * Inputs:
  *   pid - The task ID of the task to delete.  A pid of zero
  *         signifies the calling task.
+ *   nonblocking - True: The task is an unhealthy, partially torn down
+ *         state and is not permitted to block.
  *
  * Return Value:
  *   OK on success; or ERROR on failure
@@ -110,24 +116,11 @@
  *
  ****************************************************************************/
 
-int task_delete(pid_t pid)
+int task_terminate(pid_t pid, bool nonblocking)
 {
-  FAR struct tcb_s *rtcb;
   FAR struct tcb_s *dtcb;
   irqstate_t saved_state;
   int ret = ERROR;
-
-  /* Check if the task to delete is the calling task */
-
-  rtcb = (FAR struct tcb_s*)g_readytorun.head;
-  if (pid == 0 || pid == rtcb->pid)
-    {
-      /* If it is, then what we really wanted to do was exit. Note that we
-       * don't bother to unlock the TCB since it will be going away.
-       */
-
-      exit(EXIT_SUCCESS);
-    }
 
   /* Make sure the task does not become ready-to-run while we are futzing with
    * its TCB by locking ourselves as the executing task.
@@ -166,7 +159,7 @@ int task_delete(pid_t pid)
    * I suppose EXIT_SUCCESS is an appropriate return value???
    */
 
-  task_exithook(dtcb, EXIT_SUCCESS);
+  task_exithook(dtcb, EXIT_SUCCESS, nonblocking);
 
   /* Remove the task from the OS's tasks lists. */
 
@@ -192,3 +185,61 @@ int task_delete(pid_t pid)
   return ret;
 }
 
+/****************************************************************************
+ * Name: task_delete
+ *
+ * Description:
+ *   This function causes a specified task to cease to exist. Its  stack and
+ *   TCB will be deallocated.  This function is the companion to task_create().
+ *   This is the version of the function exposed to the user; it is simply
+ *   a wrapper around the internal, task_terminate function.
+ *
+ *   The logic in this function only deletes non-running tasks.  If the 'pid'
+ *   parameter refers to to the currently runing task, then processing is
+ *   redirected to exit().  This can only happen if a task calls task_delete()
+ *   in order to delete itself.
+ *
+ *   In fact, this function (and task_terminate) are the final functions
+ *   called all task termination sequences.  task_delete may be called
+ *   from:
+ *
+ *   - task_restart(),
+ *   - pthread_cancel(),
+ *   - and directly from user code.
+ *
+ *   Other exit paths (exit(), _eixt(), and pthread_exit()) will go through
+ *   task_terminate()
+ *
+ * Inputs:
+ *   pid - The task ID of the task to delete.  A pid of zero
+ *         signifies the calling task.
+ *
+ * Return Value:
+ *   OK on success; or ERROR on failure
+ *
+ *   This function can fail if the provided pid does not correspond to a
+ *   task (errno is not set)
+ *
+ ****************************************************************************/
+
+int task_delete(pid_t pid)
+{
+  FAR struct tcb_s *rtcb;
+
+  /* Check if the task to delete is the calling task */
+
+  rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  if (pid == 0 || pid == rtcb->pid)
+    {
+      /* If it is, then what we really wanted to do was exit. Note that we
+       * don't bother to unlock the TCB since it will be going away.
+       */
+
+      DEBUGASSERT(!nonblocking);
+      exit(EXIT_SUCCESS);
+    }
+
+  /* Then let task_terminate do the heavy lifting */
+
+  return task_terminate(pid, false);
+}

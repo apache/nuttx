@@ -143,7 +143,7 @@ static inline void task_atexit(FAR struct tcb_s *tcb)
  *   Call any registerd on_exit function(s)
  *
  ****************************************************************************/
- 
+
 #ifdef CONFIG_SCHED_ONEXIT
 static inline void task_onexit(FAR struct tcb_s *tcb, int status)
 {
@@ -298,7 +298,7 @@ static inline void task_sigchild(gid_t pgid, FAR struct tcb_s *ctcb, int status)
   DEBUGASSERT(chgrp);
 
   /* Get the parent task group.  It is possible that all of the members of
-   * the parent task group have exited.  This would not be an error.  In 
+   * the parent task group have exited.  This would not be an error.  In
    * this case, the child task group has been orphaned.
    */
 
@@ -508,8 +508,8 @@ static inline void task_exitwakeup(FAR struct tcb_s *tcb, int status)
            *
            * "If more than one thread is suspended in waitpid() awaiting
            *  termination of the same process, exactly one thread will
-           * return the process status at the time of the target process
-           * termination." 
+           *  return the process status at the time of the target process
+           *  termination."
            *
            *  Hmmm.. what do we return to the others?
            */
@@ -528,7 +528,7 @@ static inline void task_exitwakeup(FAR struct tcb_s *tcb, int status)
 
          group->tg_statloc = NULL;
          while (group->tg_exitsem.semcount < 0)
-            { 
+            {
               /* Wake up the thread */
 
               sem_post(&group->tg_exitsem);
@@ -588,14 +588,18 @@ static inline void task_flushstreams(FAR struct tcb_s *tcb)
  *   to-run list.  The following logic is safe because we will not be
  *   returning from the exit() call.
  *
- *   When called from task_delete() we are operating on a different thread;
+ *   When called from task_terminate() we are operating on a different thread;
  *   on the thread that called task_delete().  In this case, task_delete
  *   will have already removed the tcb from the ready-to-run list to prevent
  *   any further action on this task.
  *
+ *   nonblocking will be set true only when we are called from task_terminate()
+ *   via _exit().  In that case, we must be careful to do nothing that can
+ *   cause the cause the thread to block.
+ *
  ****************************************************************************/
 
-void task_exithook(FAR struct tcb_s *tcb, int status)
+void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
 {
   /* Under certain conditions, task_exithook() can be called multiple times.
    * A bit in the TCB was set the first time this function was called.  If
@@ -608,15 +612,28 @@ void task_exithook(FAR struct tcb_s *tcb, int status)
     }
 
   /* If exit function(s) were registered, call them now before we do any un-
-   * initialization.  NOTE:  In the case of task_delete(), the exit function
-   * will *not* be called on the thread execution of the task being deleted!
+   * initialization.
+   *
+   * NOTES:
+   *
+   * 1. In the case of task_delete(), the exit function will *not* be called
+   *    on the thread execution of the task being deleted!  That is probably
+   *    a bug.
+   * 2. We cannot call the exit functions if nonblocking is requested:  These
+   *    functions might block.
+   * 3. This function will only be called with with non-blocking == true
+   *    only when called through _exit(). _exit() behaviors requires that
+   *    the exit functions *not* be called.
    */
 
-  task_atexit(tcb);
+  if (!nonblocking)
+    {
+      task_atexit(tcb);
 
-  /* Call any registered on_exit function(s) */
+      /* Call any registered on_exit function(s) */
 
-  task_onexit(tcb, status);
+      task_onexit(tcb, status);
+    }
 
   /* If the task was terminated by another task, it may be in an unknown
    * state.  Make some feeble effort to recover the state.
@@ -634,9 +651,19 @@ void task_exithook(FAR struct tcb_s *tcb, int status)
 
   /* If this is the last thread in the group, then flush all streams (File
    * descriptors will be closed when the TCB is deallocated).
+   *
+   * NOTES:
+   * 1. We cannot flush the buffered I/O if nonblocking is requested.
+   *    that might cause this logic to block.
+   * 2. This function will only be called with with non-blocking == true
+   *    only when called through _exit(). _exit() behavior does not
+   *    require that the streams be flushed
    */
 
-  task_flushstreams(tcb);
+  if (!nonblocking)
+    {
+      task_flushstreams(tcb);
+    }
 
   /* Leave the task group.  Perhaps discarding any un-reaped child
    * status (no zombies here!)

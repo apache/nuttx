@@ -289,8 +289,8 @@ struct usbdev_s
 {
   const struct usbdev_ops_s *ops; /* Access to hardware specific features */
   struct usbdev_ep_s *ep0;        /* Endpoint zero */
-  uint8_t  speed;                 /* Current speed of the host connection */
-  uint8_t  dualspeed:1;           /* 1:supports high and full speed operation */
+  uint8_t speed;                  /* Current speed of the host connection */
+  uint8_t dualspeed:1;            /* 1:supports high and full speed operation */
 };
 
 /* USB Device Class Implementations *************************************************/

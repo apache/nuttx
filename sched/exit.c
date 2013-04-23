@@ -100,10 +100,11 @@ void exit(int status)
 
   /* Perform common task termination logic.  This will get called again later
    * through logic kicked off by _exit().  However, we need to call it before
-   * calling _exit() in order to handle atexit() and on_exit() callbacks.
+   * calling _exit() in order to handle atexit() and on_exit() callbacks and
+   * so that we can flush buffered I/O (both of which may required suspending).
    */
 
-  task_exithook(tcb, status);
+  task_exithook(tcb, status, false);
 
   /* Then "really" exit.  Only the lower 8 bits of the exit status are used. */
 

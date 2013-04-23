@@ -563,7 +563,7 @@
 	  types.
 
 0.3.19 2008-11-26 Gregory Nutt <gnutt@nuttx.org>
-	* Add poll() and select() APIs (in the initial check-in, these work only with character devices) 
+	* Add poll() and select() APIs (in the initial check-in, these work only with character devices)
 	* Add poll() methods to /dev/null, /dev/zero, pipes, fifos, and serial drivers.
 	* Add examples/poll for testing poll() and select()
 	* Fix hostile behavior of getc, fgetc, getchar, etc.: the serial driver was waiting for a
@@ -612,8 +612,8 @@
 
 0.4.2 2009-02-28 Gregory Nutt <gnutt@nuttx.org>
 
-	* M16C: Add support for the Renesas M16C MCU and the SKP16C26 StarterKit. However, 
-	  the target cannot be built because the GNU m16c-elf-ld link fails with 
+	* M16C: Add support for the Renesas M16C MCU and the SKP16C26 StarterKit. However,
+	  the target cannot be built because the GNU m16c-elf-ld link fails with
 	  the following message:
 
 		m32c-elf-ld: BFD (GNU Binutils) 2.19 assertion fail /home/Owner/projects/nuttx/buildroot/toolchain_build_m32c/binutils-2.19/bfd/elf32-m32c.c:482
@@ -711,7 +711,7 @@
 	  -R .note.gnu.build-id -R .comment"  This has been fixed in arch/arm/src/Makefile,
 	  but other architectures may have the same problem.  Thanks to Dave Marples
 	  for verifying this.
-	* configs/eagle100/ostest: Added support for the MicroMint Eagle100 board. 
+	* configs/eagle100/ostest: Added support for the MicroMint Eagle100 board.
 	  This board has a Luminary LM3S6918 Cortex-M3. Added a configuration to build
 	  examples/ostest.
 	* arch/arm/src/lpc214x: Add configuration option to enable fast GPIO (vs.
@@ -1045,7 +1045,7 @@
 	* configs/sam3u-3k/ostest: Completed verification of the basic NuttX
 	  OS test for the SAM3U.
 	* arch/arm/src/common/up_createstack: stack was always been cleared
-	  when it was allocated.  This is a good feature for monitoring the 
+	  when it was allocated.  This is a good feature for monitoring the
 	  stack during debug, but really hurts thread start-up performance.
 	  Clearing is now done if CONFIG_DEBUG=y only.  Changes was only made
 	  for arm, but really should be made for all architectures.
@@ -1186,7 +1186,7 @@
 	* examples/nsh/nsh_telnetd.c: Fix compilation errors that happen
 	  when both DHCPC and TELNETD are enabled in the Nuttshell.
 	* graphics/nxglib/fb/nxglib_moverectangle.c: Fix a logic error
-	  that caused an uninitialized variable warning.  I still don't 
+	  that caused an uninitialized variable warning.  I still don't
 	  have a test to prove that the changes are correct.
 	* configs/olimex-lpc2378: Add support for the CodeSourcery toolchain
 	  under Linux (contributed by Alan Carvalho de Assis).
@@ -1669,14 +1669,14 @@
 	* arch/arm/src/lpc17xx/lpc17_gpioint.c: Correct errors in logic that maps
 	  and IRQ number into a register bit number.
 	* Makefile: Fix an error introduced in the top-level Makefile in NuttX-6.1.
-	  This error only shows up if you have a /tftpboot directory.  Then the 
+	  This error only shows up if you have a /tftpboot directory.  Then the
 	  make will fail with an obscure error about not being able to stat pass2.
 	* configs/lpcxpresso-lpc1768/nsh: Add an NSH configuration for the
 	  LPCXpresso board.
 	* configs/*/ld.script: Removed 'sh_link not set for section .ARM.edix' for
 	  a few of the builds.  In you have this warning, it can be removed with the
 	  following change to the ld.script file:
-	  
+	
 		+ __exidx_start = ABSOLUTE(.);
 		.ARM.exidx : {
 		-     __exidx_start = ABSOLUTE(.);
@@ -1802,7 +1802,7 @@
 	  already disconnected and the buffered data is stranded.  Now, recvfrom
 	  will continue to return success after the socket is disconnected until
 	  the readahead buffer is drained.
-	* olimex-lp1766stk/ftpc/defconfig: Many configurations have the MTU 
+	* olimex-lp1766stk/ftpc/defconfig: Many configurations have the MTU
 	  (CONFIG_NET_BUFSIZE) set to very small numbers, less then the minimum
 	  MTU size that must be supported -- 576. This can cause problems in
 	  some networks:  CONFIG_NET_BUFSIZE should be set to at least 576 in
@@ -1915,7 +1915,7 @@
 	  new file; Implement VFAT long file name support.
 	* fs/fat/fat_fat32dirent.c:  The configuration CONFIG_FAT_LCNAMES has
 	  been around for some time but never tested until now.  This setting
-	  will mimic the NT 8.3 file name behavior:  File names or extensions 
+	  will mimic the NT 8.3 file name behavior:  File names or extensions
 	  may be all upper or all lower case (but not mixed).  If
 	  CONFIG_FAT_LCNAMES is not selected, all filenames are strictly upper
 	  case.
@@ -1943,7 +1943,7 @@
 	  program.  The bdf-converter program be used to convert fonts in Bitmap
 	  Distribution Format (BDF) into fonts that can be used in the NX graphics
 	  system.
-	* include/nuttx/nx:  Move all NX header files from include/nuttx to 
+	* include/nuttx/nx:  Move all NX header files from include/nuttx to
 	  include/nuttx/nx.
 	* drivers/usbdev/usbdev_usbstorage.c and arch/arm/src/stm32/stm32_usbdev.c:
 	  Correct a memory leak when the USB mass storage driver is connected and
@@ -2051,7 +2051,7 @@
 	* arch/*/src/Makefile:  Use of -print-libgcc-file-name to get path to
 	  libgcc.a may select the wrong libgcc.a if a multilib toolchain (like
 	  CodeSourcery) is used. This can be a serious problem and can cause
-	  crashes on Cortex-M3 if the ARM libgcc is used, for example.  The fix 
+	  crashes on Cortex-M3 if the ARM libgcc is used, for example.  The fix
 	  is to include ARCHCPUFLAGS on the gcc command line when asking it to
 	  -print-libgcc-file-name.
 	* lib/time/lib_gmtimer.c:  Correct several calculations that could lead
@@ -2280,7 +2280,7 @@
 	  the particular condition that revealed the bug occurred.  My impression is
 	  that this latter bugfix also fixes some STM32 USB performance problems.
 	* configs/hymini-stm32v: A configuration for the HY-Mini STM32v board contributed
-	  by Laurent Latil.  These changes also include support for the STM32F103VCT6. 
+	  by Laurent Latil.  These changes also include support for the STM32F103VCT6.
 	* arch/configs/stm3240g-eval/src/up_pwm.c:  Add hooks needed to use the new
 	  apps/examples/pwm test of the STM32 PWM  driver.
 	* drivers/mtd/mp25x.c:  Add ability to use different SPI modes and different
@@ -2394,7 +2394,7 @@
 	  common upper half battery driver.
 	* drivers/power/max1704x.c:  Add a driver for MAX17040x battery "fuel gauge"
 	* arch/arm/src/stm32/stm32_i2c.c: Add support for I2C3
-	* drivers/usbdev/: Lots of name changes: cdc_serial->cdcacm, usbstrg->usbmsc, 
+	* drivers/usbdev/: Lots of name changes: cdc_serial->cdcacm, usbstrg->usbmsc,
 	  usbser->pl2303
 	* drivers/usbdev/composite: Fleshed out support for a composite USB device.
 	* drivers/stm3210e-eval/composite and drivers/stm3210e-eval/src/up_composite.c:
@@ -2704,7 +2704,7 @@
 	  platform did not make into all of the Make.defs files.
 	* graphics/nxmu/nx_move.c:  Wrong opcode was being used in the server message;
 	  Also there was an error in the offset calculation.
-	* graphics/nxglib/fb/nxglib_moverectangle.c:  Offset argument is really a 
+	* graphics/nxglib/fb/nxglib_moverectangle.c:  Offset argument is really a
 	  position, not an offset.
 	* graphics/nxtk/nxtk_drawframe.c:  Framed windows are now drawn in three
 	  colors (instead of just two).
@@ -2938,7 +2938,7 @@
 	  is slowly evolving in these directories.
 	* configs/stm3210e-eval/pm:  Add a new configuration for testing STM32 power
 	  management.
-	* configs/stm3210e-eval/scripts:  Moved all of the duplicate ST3210-EVAL 
+	* configs/stm3210e-eval/scripts:  Moved all of the duplicate ST3210-EVAL
 	  linker scripts into one set of linker scripts at this location.
 	* configs/stm3210e-eval/src/up_buttons.c, up_lcd.c, and up_pm.c:  New logic
 	  for testing STM32 power management.
@@ -3139,7 +3139,7 @@
 	  customize the behavior of NSH.
 	* arch/arm/src/stm32/chip/stm32f1*_pinmap.h: STM32 CAN TX/RX pins reversed;
 	  inconsistent conditional compilation.  Reported by Max Holtzberg.
-	* arch/arm/*/stm32:  Add support for STM32 F107 "Connectivity Line" 
+	* arch/arm/*/stm32:  Add support for STM32 F107 "Connectivity Line"
 	  Ethernet (contributed by Max Holtzberg).
 	* configs/olimex-stm32-p107:  Add board support for the Olimiex STM32-P107
 	   board (contributed by Max Holtzberg).
@@ -3317,7 +3317,7 @@
 	  to allocate the block driver I/O buffers.
 	* CONFIG_NET_ENC28J60 renamed CONFIG_ENC28J60 to be consistent
 	  in all places.
-	* drivers/enc28j60.c, include/nuttx/net/enc28j60.h, and 
+	* drivers/enc28j60.c, include/nuttx/net/enc28j60.h, and
 	  olimex-strp711/src/up_enc28j60.c:  No longer passes IRQ number
 	  as a parameter.  Instead now passes a call table to manage
 	  ENC28J60 GPIO interrupts.  That is because GPIO interrupts are
@@ -3630,7 +3630,7 @@
 	  just needs re-implemented.
 	* configs/mirtoo: Update Mirtoo pin definitions for Release 2.  Provided
 	  by Konstantin Dimitrov.
-	* Fixed an uninitialized variable in the file system that can cause 
+	* Fixed an uninitialized variable in the file system that can cause
 	  assertions if DEBUG on (contributed by Lorenz Meier).
 	* Config.mk:  Defined DELIM to be either / or \, depending upon
 	  CONFIG_WINDOWS_NATIVE.  This will allow me to eliminate a lot of
@@ -4088,7 +4088,7 @@
 	  switched to SPI mode for first time.  Having a pull-up resistor on
 	  MISO may avoid this problem, but this patch makes it work also
 	  without pull-up.  From Petteri Aimonen.
-	* fs/fat/fs_fat32.c: Fix a compilation error when FAT_DMAMEMORY=y. 
+	* fs/fat/fs_fat32.c: Fix a compilation error when FAT_DMAMEMORY=y.
 	  From Petteri Aimonen.
 	* arch/arm/src/stm32/chip/stm32_spi.h: STM32F4 max SPI clock freq is
 	  37.5 MHz.  Patch from Petteri Aimonen.
@@ -4599,4 +4599,10 @@
 	* tools/kconfig2html.c:  Improve behavior of Expand/Collapse
 	  Table of Contents; Handle errors in parsing of strings and in
 	  some uninitialized variables.  Add an option to use jQuery.
-	* tools/mkconfigvar.sh: Fix make target.
+	* tools/mkconfigvar.sh: Fix make target (2014-4-23).
+	* sched/exit.c, pthread_exit.c, task_exit.c, task_delete,c and
+	  task_exithook.c:  For pthread_exit(), move some logic to an early
+	  point in the exit sequence where the task may need to block.  Add
+	  conditional logic in the lower end of the eixt logic kicked off by
+	  _exit() to prohibit blocking after the task has been torn down and is
+	  no longer cabable of blocking (2014-4-23).
