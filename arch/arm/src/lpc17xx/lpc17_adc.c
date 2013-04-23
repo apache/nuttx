@@ -174,31 +174,31 @@ static void adc_reset(FAR struct adc_dev_s *dev)
     {
       lpc17_configgpio(GPIO_AD0p0);
     }
-  else if ((priv->mask & 0x02) != 0)
+  if ((priv->mask & 0x02) != 0)
     {
       lpc17_configgpio(GPIO_AD0p1);
     }
-  else if ((priv->mask & 0x04) != 0)
+  if ((priv->mask & 0x04) != 0)
     {
       lpc17_configgpio(GPIO_AD0p2);
     }
-  else if ((priv->mask & 0x08) != 0)
+  if ((priv->mask & 0x08) != 0)
     {
       lpc17_configgpio(GPIO_AD0p3);
     }
-  else if ((priv->mask & 0x10) != 0)
+  if ((priv->mask & 0x10) != 0)
     {
       lpc17_configgpio(GPIO_AD0p4);
     }
-  else if ((priv->mask & 0x20) != 0)
+  if ((priv->mask & 0x20) != 0)
     {
       lpc17_configgpio(GPIO_AD0p5);
     }
-  else if ((priv->mask & 0x40) != 0)
+  if ((priv->mask & 0x40) != 0)
     {
       lpc17_configgpio(GPIO_AD0p6);
     }
-  else if ((priv->mask & 0x80) != 0)
+  if ((priv->mask & 0x80) != 0)
     {
       lpc17_configgpio(GPIO_AD0p7);
     }
