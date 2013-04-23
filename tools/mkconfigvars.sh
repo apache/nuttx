@@ -41,6 +41,7 @@ KCONFIG2HTML2=tools/kconfig2html.exe
 KCONFIG2MAKEFILE=Makefile.host
 KCONFIG2MAKEDIR=tools
 HTMLFILE=Documentation/NuttXConfigVariables.html
+BKUPFILE=Documentation/NuttXConfigVariables.bkp
 
 # A version argument may be provided
 
@@ -94,6 +95,14 @@ else
     echo "ERROR: Failed to create  ${KCONFIG2HTML1}"
     exit 1
   fi
+fi
+
+# Keep a backup of the previous HTML file.  This is usefully primarily
+# for testing the effects of changes.
+
+if [ -e "${HTMLFILE}" ]; then
+  rm -f ${BKUPFILE} || { echo "ERROR: Failed to remove ${BKUPFILE}" ; exit 1 ; }
+  mv ${HTMLFILE} ${BKUPFILE} || { echo "ERROR: Failed to move ${HTMLFILE}" ; exit 1 ; }
 fi
 
 # Now re-create the configuration variable document
