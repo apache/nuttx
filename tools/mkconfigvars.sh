@@ -36,6 +36,7 @@
 # see the directories to tar up
 
 MYNAME=`basename $0`
+KCONFIG2HTML_TARGET=kconfig2html
 KCONFIG2HTML1=tools/kconfig2html
 KCONFIG2HTML2=tools/kconfig2html.exe
 KCONFIG2MAKEFILE=Makefile.host
@@ -81,7 +82,7 @@ else
   if [ -x ${KCONFIG2HTML2} ]; then
     KCONFIG2HTML=${KCONFIG2HTML2}
   else
-    make -C ${KCONFIG2MAKEDIR} -f ${KCONFIG2MAKEFILE} ${KCONFIG2HTML1} || \
+    make -C ${KCONFIG2MAKEDIR} -f ${KCONFIG2MAKEFILE} ${KCONFIG2HTML_TARGET} || \
       { echo "ERROR: make ${KCONFIG2HTML1} failed" ; exit 1 ; }
   fi
 fi

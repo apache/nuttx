@@ -4591,8 +4591,12 @@
 	  at Documentation/NuttXConfigVariables.html (2014-4-22).
 	* arch/arm/src/lpc17xx/lpc17_adc.c:  Only one ADC pin was configured.
 	  Need to configure all that are in the ADC0 set.  From MKannan
-          (2014-4-23).
+	  (2014-4-23).
 	* configs/zkit-arm-1769/src:  ADC and SPI/USB MSC updates from
 	  MKannan (2014-4-23).
 	* arm/src/armv7-m/ram_vectors.h and arm/src/armv7-m/up_ramvec_initialize.c:
 	  Fixes to RAM vector logic from Paul Y. Zhang (2014-4-23)
+	* tools/kconfig2html.c:  Improve behavior of Expand/Collapse
+	  Table of Contents; Handle errors in parsing of strings and in
+	  some uninitialized variables.  Add an option to use jQuery.
+	* tools/mkconfigvar.sh: Fix make target.

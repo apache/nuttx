@@ -52,6 +52,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#undef USE_JQUERY
+
 #define LINE_SIZE        1024
 #define SCRATCH_SIZE     2048
 #define MAX_DEPENDENCIES 100
@@ -902,6 +904,15 @@ static char *get_token(void)
       /*  Search for the trailing quotation mark */
 
       pend = findchar(pbegin + 1, '"');
+
+      /* Did we find the trailing quotation mark */
+
+      if (pend)
+        {
+          /* Yes.. skip over it */
+
+          pend++;
+        }
     }
   else
     {
@@ -950,22 +961,43 @@ static char *get_html_string(void)
   pbegin = strchr(g_lnptr, '"');
   if (pbegin)
     {
-      /* Skip over the quote */
+      /* We found the leading quote. Skip over the leading quote */
 
       pbegin++;
+    }
+  else
+    {
+      /* The string is unquoted.  The beginning of the string is here,
+       * skipping over any leading whitespace.
+       */
 
-      /*  Search for the trailing quotation mark */
-
-      pend = findchar(pbegin, '"');
-      if (pend)
-        {
-          /* Replace the final quote with a NUL */
-
-          *pend = '\0';
-        }
+      pbegin = skip_space(g_lnptr);
     }
 
-  g_lnptr = pend + 1;
+  /* Search for the trailing quotation mark.  If there is none, then
+   * the string goes to the end of the line.
+   */
+
+  pend = findchar(pbegin, '"');
+  if (pend)
+    {
+      /* Replace the final quote with a NUL.  g_lnptr is set to to
+       * the next valid character after the terminating quote.
+       */
+
+      *pend   = '\0';
+      g_lnptr = pend + 1;
+    }
+  else
+    {
+      /* Use the rest of the line.  g_lnptr is set to point at the
+       * terminating NUL.
+       */
+
+      pend = pbegin + strlen(pbegin);
+      g_lnptr = pend;
+    }
+
   return htmlize_text(pbegin);
 }
 
@@ -1561,6 +1593,7 @@ static inline char *process_config(FILE *stream, const char *configname,
   /* Process each line in the configuration */
 
   help = false;
+  token = NULL;
 
   while ((ptr = kconfig_line(stream)) != NULL)
     {
@@ -1734,7 +1767,7 @@ static inline char *process_config(FILE *stream, const char *configname,
         }
     }
 
-  /* Is this an internal configuration varaible with no description? 
+  /* Is this an internal configuration varaible with no description?
    * If so, send the output to the appendix file.
    */
 
@@ -2108,30 +2141,34 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
   paranum = get_paranum();
   if (menu.m_name)
     {
-      output("<li><a href=\"#menu_%d\">%s Menu: %s</a></li>\n",
-             g_menu_number, paranum, menu.m_name);
+      output("<li><a name=\"menu_%d_toc\"><a href=\"#menu_%d\">%s Menu: %s</a></a></li>\n",
+             g_menu_number, g_menu_number, paranum, menu.m_name);
       body("\n<h1><a name=\"menu_%d\">%s Menu: %s</a></h1>\n",
            g_menu_number, paranum, menu.m_name);
     }
   else
     {
-      output("<li><a href=\"#menu_%d\">%s Menu</a></li>\n",
-             g_menu_number, paranum);
+      output("<li><a name=\"menu_%d_toc\"><a href=\"#menu_%d\">%s Menu</a></a></li>\n",
+             g_menu_number, g_menu_number, paranum);
       body("\n<h1><a name=\"menu_%d\">%s Menu</a></h1>\n",
              g_menu_number, paranum);
     }
-
-  g_menu_number++;
 
   /* Output logic to toggle the contents below the menu in the table of
    * contents.
    */
 
-  output("<a href=\"#\" onclick=\"toggle('toggle_%d', this)\">Expand</a>\n",
-         g_toggle_number);
+#ifdef USE_JQUERY
+  output("<a id=\"link_%d\" href=\"#menu_%d_toc\" onclick=\"toggle('toggle_%d', 'link_%d')\">Expand</a>\n",
+         g_menu_number, g_toggle_number, g_toggle_number);
+#else
+  output("<a href=\"#menu_%d_toc\" onclick=\"toggle('toggle_%d', this)\">Expand</a>\n",
+         g_menu_number, g_toggle_number);
+#endif
   output("<ul id=\"toggle_%d\"  style=\"display:none\">\n",
          g_toggle_number);
 
+  g_menu_number++;
   g_toggle_number++;
 
   /* Print the list of dependencies (if any) */
@@ -2506,7 +2543,23 @@ int main(int argc, char **argv, char **envp)
   output("</td>\n");
   output("</tr>\n");
   output("</table>\n");
-  
+
+#ifdef USE_JQUERY
+  output("<script src=\"http://code.jquery.com/jquery-1.9.1.js\"></script>\n");
+  output("<script type=\"text/javascript\">\n");
+  output("function toggle(list_id, link_id) {\n");
+  output("  var list = $('#' + list_id);\n");
+  output("  var link = $('#' + link_id);\n");
+  output("  if (list.is(\":visible\")) {\n");
+  output("    list.hide();\n");
+  output("    link.text('Expand');\n");
+  output("  } else {\n");
+  output("    list.show();\n");
+  output("    link.text('Collapse');\n");
+  output("  }\n");
+  output("}\n");
+  output("</script>\n");
+#else
   output("<script type=\"text/javascript\">\n");
   output("function toggle(id, link) {\n");
   output("  var e = document.getElementById(id);\n");
@@ -2519,6 +2572,7 @@ int main(int argc, char **argv, char **envp)
   output("  }\n");
   output("}\n");
   output("</script>\n");
+#endif
 
   output("<hr><hr>\n");
   output("<table width =\"100%%\">\n");
