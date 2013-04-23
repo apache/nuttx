@@ -522,11 +522,12 @@ static char *htmlize_text(const char *src)
 {
   char *dest = g_scratch;
 
-  /* We may get here with the source pointer equal to NULL.  Return the
+  /* We may get here with the source pointer equal to NULL (or a pointer to
+   * a NUL string).  Return the
    * disfavor.
    */
 
-  if (!src)
+  if (!src || !*src)
     {
       return NULL;
     }
@@ -955,6 +956,7 @@ static char *get_html_string(void)
 {
   char *pbegin;
   char *pend;
+  int len;
 
   /* Search for the leading quotation mark in the line buffer */
 
@@ -990,11 +992,21 @@ static char *get_html_string(void)
     }
   else
     {
+      /* Get the length of the string.  Return NULL if all that is
+       * left on the line is a NUL string.
+       */
+
+      len = strlen(pbegin);
+      if (len < 1)
+        {
+          return NULL;
+        }
+
       /* Use the rest of the line.  g_lnptr is set to point at the
        * terminating NUL.
        */
 
-      pend = pbegin + strlen(pbegin);
+      pend = pbegin + len;
       g_lnptr = pend;
     }
 
