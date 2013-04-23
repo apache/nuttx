@@ -79,7 +79,7 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG
-#    define message(...) lib_lowprintf(__VA_ARGS__)
+#    define message(...) lowsyslog(__VA_ARGS__)
 #    define msgflush()
 #  else
 #    define message(...) printf(__VA_ARGS__)
@@ -87,7 +87,7 @@
 #  endif
 #else
 #  ifdef CONFIG_DEBUG
-#    define message lib_lowprintf
+#    define message lowsyslog
 #    define msgflush()
 #  else
 #    define message printf
@@ -116,8 +116,8 @@ int usbmsc_archinitialize(void)
 
   message("usbmsc_archinitialize: Initializing SPI port %d\n",
           LPC17XX_MMCSDSPIPORTNO);
-
-  spi = lpc17_sspinitialize(LPC17XX_MMCSDSPIPORTNO);
+  zkit_spiinitialize();
+  spi = lpc17_spiinitialize(LPC17XX_MMCSDSPIPORTNO);
   if (!spi)
     {
       message("usbmsc_archinitialize: Failed to initialize SPI port %d\n",

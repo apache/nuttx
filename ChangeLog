@@ -4592,3 +4592,5 @@
 	* arch/arm/src/lpc17xx/lpc17_adc.c:  Only one ADC pin was configured.
 	  Need to configure all that are in the ADC0 set.  From MKannan
           (2014-4-23).
+	* configs/zkit-arm-1769/src:  ADC and SPI/USB MSC updates from
+	  MKannan (2014-4-23).
