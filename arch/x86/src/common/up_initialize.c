@@ -148,8 +148,16 @@ void up_initialize(void)
   /* Register devices */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
+
+#if defined(CONFIG_DEV_NULL)
   devnull_register();   /* Standard /dev/null */
 #endif
+
+#if defined(CONFIG_DEV_ZERO)
+  devzero_register();   /* Standard /dev/zero */
+#endif
+
+#endif /* CONFIG_NFILE_DESCRIPTORS */
 
   /* Initialize the serial device driver */
 

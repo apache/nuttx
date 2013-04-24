@@ -4606,3 +4606,8 @@
 	  conditional logic in the lower end of the eixt logic kicked off by
 	  _exit() to prohibit blocking after the task has been torn down and is
 	  no longer cabable of blocking (2014-4-23).
+	* arch/arm/src/common/up_initialize.c: Add missing registration
+	  of /dev/zero.  Registration of /dev/null should depend upon
+	  conditional compilation.  From Ken Pettit (2014-4-24).
+	* arch/*/src/common/up_initialize.c:  Same change required to other
+	  architectures (2014-4-24).
