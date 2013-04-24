@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/common/up_initialize.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,8 +148,16 @@ void up_initialize(void)
   /* Register devices */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
+
+#if defined(CONFIG_DEV_NULL)
   devnull_register();   /* Standard /dev/null */
 #endif
+
+#if defined(CONFIG_DEV_ZERO)
+  devzero_register();   /* Standard /dev/zero */
+#endif
+
+#endif /* CONFIG_NFILE_DESCRIPTORS */
 
   /* Initialize the serial device driver */
 
