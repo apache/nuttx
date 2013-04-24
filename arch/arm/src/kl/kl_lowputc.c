@@ -56,18 +56,35 @@
 #include "chip/kl_uart.h"
 #include "chip/kl_pinmux.h"
 
-
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
-     
+
+#warning "Revisit"
+#undef BOARD_CORECLK_FREQ
+#define BOARD_CORECLK_FREQ 48000000
+
 /* Select UART parameters for the selected console */
 
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     KL_UART0_BASE
 #  define CONSOLE_FREQ     48000000
 #  define CONSOLE_BAUD     CONFIG_UART0_BAUD
 #  define CONSOLE_BITS     CONFIG_UART0_BITS
 #  define CONSOLE_PARITY   CONFIG_UART0_PARITY
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#  define CONSOLE_BASE     KL_UART1_BASE
+#  define CONSOLE_FREQ     48000000
+#  define CONSOLE_BAUD     CONFIG_UART1_BAUD
+#  define CONSOLE_BITS     CONFIG_UART1_BITS
+#  define CONSOLE_PARITY   CONFIG_UART1_PARITY
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#  define CONSOLE_BASE     KL_UART2_BASE
+#  define CONSOLE_FREQ     48000000
+#  define CONSOLE_BAUD     CONFIG_UART2_BAUD
+#  define CONSOLE_BITS     CONFIG_UART2_BITS
+#  define CONSOLE_PARITY   CONFIG_UART2_PARITY
+#endif
 
 /**************************************************************************
  * Private Types
@@ -215,7 +232,7 @@ void kl_lowsetup(void)
 //#if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
 
 //  kl_uartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_FREQ,
-//                        CONSOLE_PARITY, CONSOLE_BITS);
+//                   CONSOLE_PARITY, CONSOLE_BITS);
 //#endif
 }
 
@@ -249,9 +266,8 @@ void kl_uartreset(uintptr_t uart_base)
  ******************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void kl_uartconfigure(uintptr_t uart_base, uint32_t baud,
-                           uint32_t clock, unsigned int parity,
-                           unsigned int nbits)
+void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
+                      unsigned int parity, unsigned int nbits)
 {
   uint32_t     sbr;
   uint32_t     brfa;

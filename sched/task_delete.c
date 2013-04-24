@@ -235,7 +235,6 @@ int task_delete(pid_t pid)
        * don't bother to unlock the TCB since it will be going away.
        */
 
-      DEBUGASSERT(!nonblocking);
       exit(EXIT_SUCCESS);
     }
 
