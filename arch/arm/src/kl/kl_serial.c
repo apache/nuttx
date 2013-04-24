@@ -69,6 +69,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Some sanity checks *******************************************************/
+
+#warning "Revisit"
+#undef BOARD_CORECLK_FREQ
+#define BOARD_CORECLK_FREQ 48000000
+
 /* Is there at least one UART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_UART_DEVICE
