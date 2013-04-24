@@ -13,7 +13,7 @@ Contents
   - NuttX Buildroot Toolchain
   - LEDs
   - Serial Console
-  - Debugging
+  - mbed
   - NuTiny-specific Configuration Options
   - Configurations
 
@@ -97,42 +97,35 @@ Serial Console
 
 As with most NuttX configurations, the Freedom KL25Z configurations
 depend on having a serial console to interact with the software.  The
-Freedom KL25Z, however, has not on-board RS-232 drivers so will be
+Freedom KL25Z, however, has no on-board RS-232 drivers so will be
 necessary to connect the Freedom KL25Z UART pins to an external
 RS-232 driver board or TTL-to-Serial USB adaptor.
 
-By default UART1 is used as the serial console on these boards.  K25Z120LE3AN
-is provided as an LQFP48 package and, for this case, the UART1 RX signal
-(RXD1) is on PB.4, pin 8, and the TX signal (TXD1) is on PB.5, pin 9.
-These pins are available on the Freedom KL25Z JP5.
+By default UART0 is used as the serial console on this boards.  The UART0
+is configured to work with the OpenSDA USB CDC/ACM port:
 
-  NOTE: The TX vs RX labeling may be confusing.  On one RS-232 driver board,
-  I had to connect the K25Z120 TXD0 pin to the driver boards RXD pin.  How
-  confusing!
+  ------ ------------------------------- -----------------------------
+  PIN    PIN FUNCTIONS                   BOARD SIGNALS
+  ------ ------------------------------- -----------------------------
+  Pin 27 PTA1/TSI0_CH2/UART0_RX/FTM2_CH0 UART1_RX_TGTMCU and D0 (PTA1)
+  Pin 28 PTA2/TSI0_CH3/UART0_TX/FTM2_CH1 UART1_TX_TGTMCU and D1 (PTA2)
 
-UART0 is an alternative that can be selected by modifying the default
-configuation.  UART0 RX (RXD0) is on PB.0, pin 17, and the TX signal (TXD0)
-is on PB.1, pin 18.  These pins are available on the Freedom KL25Z JP1.
+But the UART Tx/Rx signals are also available on J1:
 
-  NOTE: PB.0, pin 17, is also used to control the user LED on board (labeled
-  "IO").  CONFIG_ARCH_LED should not be selected if UART0 is used.
+  ---------------- ---------
+  UART0 SIGNAL     J1 pin
+  ---------------- ---------
+  UART0_RX (PTA1)  J1, pin 2
+  UART0_TX (PTA2)  J1, pin 4
 
-The K25Z120LE3AN does not support UART2.
+mbed
+====
 
-Debugging
-=========
+The Freedom KL25Z includes a built-in SDA debugger.  An alternative
+to the SDA bootloader is this boot loader from mbed:
 
-The Freedom KL25Z includes a built-in SDA debugger.  Unfortunately,
-full debug support is available only with the Keil and IAR toolchains.
-There is, however, a free program called ICP (In-Circuit Programmer).  It
-can be used to burn programs into FLASH (aka APROM).
-
-The ICP program can also be used to burn an ISP program into LDROM.  The
-ISP (In-System Programmer) is available free from the Nuvton website.
-
-Then NuttX build does not set the configuration words at 0x0030000-0x00300004.
-You should uncheck the Config box when burning APROM or the previous contents
-of the configuration words will be erased.
+http://mbed.org/handbook/mbed-FRDM-KL25Z-Getting-Started
+http://mbed.org/handbook/Firmware-FRDM-KL25Z
 
 NuTiny-specific Configuration Options
 =====================================
