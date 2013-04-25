@@ -68,8 +68,8 @@ CMN_CSRCS += up_dumpnvic.c
 endif
 
 CHIP_ASRCS  = 
-CHIP_CSRCS  = kl_clockconfig.c kl_gpio.c kl_idle.c kl_irq.c kl_lowputc.c
-CHIP_CSRCS += kl_serial.c kl_start.c kl_timerisr.c kl_cfmconfig.c kl_led.c
+CHIP_CSRCS  = kl_clockconfig.c kl_gpio.c kl_idle.c kl_irq.c kl_irqprio.c
+CHIP_CSRCS += kl_lowputc.c kl_serial.c kl_start.c kl_timerisr.c kl_cfmconfig.c
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += kl_userspace.c

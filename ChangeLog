@@ -4619,3 +4619,7 @@
 	  register definitions (2014-4-25).
 	* arch/arm/src/kl/Kconfig, kl_lowputc.c, kl_serial.c, and kl_config.h:
 	  No UART3-5 (2014-4-25).
+	* arch/arm/src/kl/kl_serial.c:  Various fixes to various fils in the
+	  KL architecture directory as need to get the interrupt-driven
+	  serial driver to work.  The Freedom KL25Z NSH configuration now
+	  works (2014-4-25).

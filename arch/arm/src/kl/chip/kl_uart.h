@@ -154,6 +154,7 @@
 #define UART_S1_RDRF                (1 << 5)  /* Bit 5: Receive Data Register Full Flag */
 #define UART_S1_TC                  (1 << 6)  /* Bit 6: Transmit Complete Flag */
 #define UART_S1_TDRE                (1 << 7)  /* Bit 7: Transmit Data Register Empty Flag */
+#define UART_S1_ERRORS              (0x0f)
 
 /* UART Status Register 2 */
 

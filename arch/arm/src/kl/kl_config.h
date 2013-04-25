@@ -97,32 +97,6 @@
 # undef CONFIG_UART1_FLOWCONTROL
 # undef CONFIG_UART2_FLOWCONTROL
 
-/* UART FIFO support is not fully implemented.
- *
- * NOTE:  UART0 has an 8-byte deep FIFO; the other UARTs have no FIFOs
- * (1-deep).  There appears to be no way to know when the FIFO is not
- * full (other than reading the FIFO length and comparing the FIFO count).
- * Hence, the FIFOs are not used in this implementation and, as a result
- * TDRE indeed mean that the single output buffer is available.
- *
- * Performance on UART0 could be improved by enabling the FIFO and by
- * redesigning all of the FIFO status logic.
- */
-
-#undef CONFIG_KL_UARTFIFOS
-
-/* UART Default Interrupt Priorities */
-
-#ifndef CONFIG_KL_UART0PRIO
-#  define CONFIG_KL_UART0PRIO NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-#ifndef CONFIG_KL_UART1PRIO
-#  define CONFIG_KL_UART1PRIO NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-#ifndef CONFIG_KL_UART2PRIO
-#  define CONFIG_KL_UART2PRIO NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-
 /* Ethernet controller configuration */
 
 #ifndef CONFIG_ENET_NRXBUFFERS

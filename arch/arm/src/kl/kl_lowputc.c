@@ -99,14 +99,6 @@
  * Private Variables
  **************************************************************************/
 
-/* This array maps an encoded FIFO depth (index) to the actual size of the
- * FIFO (indexed value).  NOTE:  That there is no 8th value.
- */
-
-#ifdef CONFIG_KL_UARTFIFOS
-static uint8_t g_sizemap[8] = {1, 4, 8, 16, 32, 64, 128, 0};
-#endif
-
 /**************************************************************************
  * Private Functions
  **************************************************************************/
@@ -126,15 +118,6 @@ static uint8_t g_sizemap[8] = {1, 4, 8, 16, 32, 64, 128, 0};
 void kl_lowputc(uint32_t ch)
 {
 #if defined HAVE_UART_DEVICE && defined HAVE_SERIAL_CONSOLE
-#ifdef CONFIG_KL_UARTFIFOS
-  /* Wait until there is space in the TX FIFO:  Read the number of bytes
-   * currently in the FIFO and compare that to the size of the FIFO.  If
-   * there are fewer bytes in the FIFO than the size of the FIFO, then we
-   * are able to transmit.
-   */
-
-#  error "Missing logic"
-#else
   /* Wait until the transmit data register is "empty" (TDRE).  This state
    * depends on the TX watermark setting and may not mean that the transmit
    * buffer is truly empty.  It just means that we can now add another
@@ -151,8 +134,6 @@ void kl_lowputc(uint32_t ch)
    */
 
   while ((getreg8(CONSOLE_BASE+KL_UART_S1_OFFSET) & UART_S1_TDRE) == 0);
-
-#endif
 
  /* Then write the character to the UART data register */
 
@@ -272,9 +253,6 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
   uint32_t     sbr;
   uint32_t     tmp;
   uint8_t      regval;
-#ifdef CONFIG_KL_UARTFIFOS
-  unsigned int depth;
-#endif
 
   /* Disable the transmitter and receiver throughout the reconfiguration */
 

@@ -414,10 +414,3 @@ config KL_SDHC_DMAPRIO
 		SDHC DMA priority
 
 endif
-
-comment "Kinetis UART Configuration"
-
-config KL_UARTFIFOS
-	bool "Enable UART0 FIFO"
-	default n
-	depends on KL_UART0
