@@ -788,7 +788,7 @@ static int up_rcvinterrupt(int irq, void *context)
   else
 #endif
     {
-      PANIC(OSERR_INTERNAL);
+      PANIC();
     }
 
   /* Handle incoming, receive bytes (RDRF: Receive Data Register Full) */
@@ -954,7 +954,7 @@ static int up_xmtinterrupt(int irq, void *context)
   else
 #endif
     {
-      PANIC(OSERR_INTERNAL);
+      PANIC();
     }
 
   /* Handle outgoing, transmit bytes */

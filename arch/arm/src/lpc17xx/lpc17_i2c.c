@@ -364,7 +364,7 @@ static int i2c_interrupt(int irq, FAR void *context)
   else
 #endif
     {
-      PANIC(OSERR_INTERNAL);
+      PANIC();
     }
 
 /* Reference UM10360 19.10.5 */    

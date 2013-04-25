@@ -114,7 +114,7 @@ static void lpc214x_decodeirq( uint32_t *regs)
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   lowsyslog("Unexpected IRQ\n");
   current_regs = regs;
-  PANIC(OSERR_ERREXCEPTION);
+  PANIC();
 #else
 
   /* Decode the interrupt. We have to do this by search for the lowest numbered

@@ -194,6 +194,6 @@ uint32_t *pic32mx_exception(uint32_t *regs)
   /* Crash with currents_regs set so that we can dump the register contents. */
 
   current_regs = regs;
-  PANIC(OSERR_ERREXCEPTION);
+  PANIC();
   return regs; /* Won't get here */
 }

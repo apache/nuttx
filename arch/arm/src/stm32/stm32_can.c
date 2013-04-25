@@ -1009,7 +1009,7 @@ static int can_rx0interrupt(int irq, void *context)
     }
   else
     {
-      PANIC(OSERR_UNEXPECTEDISR);
+      PANIC();
     }
 #elif defined(CONFIG_STM32_CAN1)
   dev = &g_can1dev;
@@ -1125,7 +1125,7 @@ static int can_txinterrupt(int irq, void *context)
     }
   else
     {
-      PANIC(OSERR_UNEXPECTEDISR);
+      PANIC();
     }
 #elif defined(CONFIG_STM32_CAN1)
   dev = &g_can1dev;

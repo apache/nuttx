@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/arm/up_undefinedinsn.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,5 +77,5 @@ void up_undefinedinsn(uint32_t *regs)
 {
   lldbg("Undefined instruction at 0x%x\n", regs[REG_PC]);
   current_regs = regs;
-  PANIC(OSERR_UNDEFINEDINSN);
+  PANIC();
 }

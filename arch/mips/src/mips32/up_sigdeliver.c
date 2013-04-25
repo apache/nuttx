@@ -142,7 +142,7 @@ void up_sigdeliver(void)
    * interrupts are disabled.
    */
 
-  PANIC(OSERR_INTERNAL);
+  PANIC();
 }
 
 #endif /* !CONFIG_DISABLE_SIGNALS */

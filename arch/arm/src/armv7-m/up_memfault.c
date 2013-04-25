@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_memfault.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,6 +126,6 @@ int up_memfault(int irq, FAR void *context)
 #  endif
 #endif
 
-  PANIC(OSERR_UNEXPECTEDISR);
-  return OK;
+  PANIC();
+  return OK; /* Won't get here */
 }

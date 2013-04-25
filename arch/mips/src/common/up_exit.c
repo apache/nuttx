@@ -171,6 +171,6 @@ void _exit(int status)
    * interrupts are disabled.
    */
 
-  PANIC(OSERR_INTERNAL);
+  PANIC();
 }
 

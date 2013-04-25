@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_head.c
  *
- *   Copyright (C) 2007-2009, 2011-2112 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2113 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,11 +81,5 @@ int main(int argc, char **argv, char **envp)
 void up_assert(const uint8_t *filename, int line)
 {
   fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
-  longjmp(sim_abort, 1);
-}
-
-void up_assert_code(const uint8_t *filename, int line, int code)
-{
-  fprintf(stderr, "Assertion failed at file:%s line: %d error code: %d\n", filename, line, code);
   longjmp(sim_abort, 1);
 }

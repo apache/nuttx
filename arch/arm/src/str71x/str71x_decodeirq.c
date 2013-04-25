@@ -93,7 +93,7 @@ void up_decodeirq(uint32_t *regs)
   up_ledon(LED_INIRQ);
   lowsyslog("Unexpected IRQ\n");
   current_regs = regs;
-  PANIC(OSERR_ERREXCEPTION);
+  PANIC();
 #else
   unsigned int irq;
 
@@ -139,7 +139,7 @@ void up_decodeirq(uint32_t *regs)
 #if CONFIG_DEBUG
   else
     {
-      PANIC(OSERR_ERREXCEPTION); /* Normally never happens */
+      PANIC(); /* Normally never happens */
     }
 #endif
   up_ledoff(LED_INIRQ);

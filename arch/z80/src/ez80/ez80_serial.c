@@ -490,7 +490,7 @@ static int ez80_interrrupt(int irq, void *context)
   else
 #endif
     {
-      PANIC(OSERR_INTERNAL);
+      PANIC();
     }
   priv = (struct ez80_dev_s*)dev->priv;
 

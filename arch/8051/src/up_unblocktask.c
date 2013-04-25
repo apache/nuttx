@@ -1,7 +1,7 @@
 /************************************************************************
  * up_unblocktask.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,85 +82,80 @@
 
 void up_unblock_task(FAR struct tcb_s *tcb)
 {
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+
   /* Verify that the context switch can be performed */
 
-  if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
-      (tcb->task_state > LAST_BLOCKED_STATE))
-    {
-      PANIC(OSERR_BADUNBLOCKSTATE);
-    }
-  else
-    {
-      FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  ASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
+         (tcb->task_state <= LAST_BLOCKED_STATE));
 
-      dbg("Unblocking TCB=%p\n", tcb);
+  dbg("Unblocking TCB=%p\n", tcb);
 
-     /* Remove the task from the blocked task list */
+  /* Remove the task from the blocked task list */
 
-     sched_removeblocked(tcb);
+  sched_removeblocked(tcb);
 
-     /* Reset its timeslice.  This is only meaningful for round
-      * robin tasks but it doesn't here to do it for everything
-      */
+  /* Reset its timeslice.  This is only meaningful for round
+   * robin tasks but it doesn't here to do it for everything
+   */
 
 #if CONFIG_RR_INTERVAL > 0
-     tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
+  tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
 #endif
 
-     /* Add the task in the correct location in the prioritized
-      * g_readytorun task list
-      */
+  /* Add the task in the correct location in the prioritized
+   * g_readytorun task list
+   */
 
-     if (sched_addreadytorun(tcb))
-       {
-         /* The currently active task has changed! We need to do
-          * a context switch to the new task.
-          *
-          * Are we in an interrupt handler? 
-          */
+  if (sched_addreadytorun(tcb))
+    {
+      /* The currently active task has changed! We need to do
+       * a context switch to the new task.
+       *
+       * Are we in an interrupt handler? 
+       */
 
-          if (g_irqtos)
-            {
-              /* Yes, then we have to do things differently.
-               * Just copy the current stack into the OLD rtcb.
-               */
+      if (g_irqtos)
+        {
+          /* Yes, then we have to do things differently.
+           * Just copy the current stack into the OLD rtcb.
+           */
 
-               up_saveirqcontext(&rtcb->xcp);
+           up_saveirqcontext(&rtcb->xcp);
 
-              /* Restore the exception context of the rtcb at the (new) head 
-               * of the g_readytorun task list.
-               */
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
 
-              rtcb = (FAR struct tcb_s*)g_readytorun.head;
-              dbg("New Active Task TCB=%p\n", rtcb);
+          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          dbg("New Active Task TCB=%p\n", rtcb);
 
-              /* Then setup so that the context will be performed on exit
-               * from the interrupt.
-               */
+          /* Then setup so that the context will be performed on exit
+           * from the interrupt.
+           */
 
-              g_irqcontext = &rtcb->xcp;
-            }
+          g_irqcontext = &rtcb->xcp;
+        }
 
-         /* We are not in an interrupt andler.  Copy the user C context
-          * into the TCB of the task that was previously active.  if 
-          * up_savecontext returns a non-zero value, then this is really the
-          * previously running task restarting!
-          */
+      /* We are not in an interrupt andler.  Copy the user C context
+       * into the TCB of the task that was previously active.  if 
+       * up_savecontext returns a non-zero value, then this is really the
+       * previously running task restarting!
+       */
 
-         else if (!up_savecontext(&rtcb->xcp))
-           {
-             /* Restore the exception context of the new task that is ready to
-              * run (probably tcb).  This is the new rtcb at the head of the
-              * g_readytorun task list.
-              */
+      else if (!up_savecontext(&rtcb->xcp))
+        {
+          /* Restore the exception context of the new task that is ready to
+           * run (probably tcb).  This is the new rtcb at the head of the
+           * g_readytorun task list.
+           */
 
-             rtcb = (FAR struct tcb_s*)g_readytorun.head;
-             dbg("New Active Task TCB=%p\n", rtcb);
+          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          dbg("New Active Task TCB=%p\n", rtcb);
 
-              /* Then switch contexts */
+           /* Then switch contexts */
 
-             up_restorecontext(&rtcb->xcp);
-           }
-       }
+          up_restorecontext(&rtcb->xcp);
+        }
     }
 }

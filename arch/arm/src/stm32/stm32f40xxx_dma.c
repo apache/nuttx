@@ -405,7 +405,7 @@ static int stm32_dmainterrupt(int irq, void *context)
   else
 #endif
     {
-      PANIC(OSERR_INTERNAL);
+      PANIC();
     }
 
   /* Get the stream structure from the stream and controller numbers */

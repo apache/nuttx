@@ -181,6 +181,6 @@ int up_hardfault(int irq, FAR void *context)
 
   (void)irqsave();
   lldbg("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
-  PANIC(OSERR_UNEXPECTEDISR);
+  PANIC();
   return OK;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/common/up_blocktask.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,88 +87,83 @@
 
 void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
 {
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  bool switch_needed;
+
   /* Verify that the context switch can be performed */
 
-  if ((tcb->task_state < FIRST_READY_TO_RUN_STATE) ||
-      (tcb->task_state > LAST_READY_TO_RUN_STATE))
+  ASSERT((tcb->task_state >= FIRST_READY_TO_RUN_STATE) &&
+         (tcb->task_state <= LAST_READY_TO_RUN_STATE));
+
+  /* dbg("Blocking TCB=%p\n", tcb); */
+
+  /* Remove the tcb task from the ready-to-run list.  If we
+   * are blocking the task at the head of the task list (the
+   * most likely case), then a context switch to the next
+   * ready-to-run task is needed. In this case, it should
+   * also be true that rtcb == tcb.
+   */
+
+  switch_needed = sched_removereadytorun(tcb);
+
+  /* Add the task to the specified blocked task list */
+
+  sched_addblocked(tcb, (tstate_t)task_state);
+
+  /* If there are any pending tasks, then add them to the g_readytorun
+   * task list now
+   */
+
+  if (g_pendingtasks.head)
     {
-      PANIC(OSERR_BADBLOCKSTATE);
+      switch_needed |= sched_mergepending();
     }
-  else
+
+  /* Now, perform the context switch if one is needed */
+
+  if (switch_needed)
     {
-      FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
-      bool switch_needed;
+      /* Are we in an interrupt handler? */
 
-      /* dbg("Blocking TCB=%p\n", tcb); */
-
-      /* Remove the tcb task from the ready-to-run list.  If we
-       * are blocking the task at the head of the task list (the
-       * most likely case), then a context switch to the next
-       * ready-to-run task is needed. In this case, it should
-       * also be true that rtcb == tcb.
-       */
-
-      switch_needed = sched_removereadytorun(tcb);
-
-      /* Add the task to the specified blocked task list */
-
-      sched_addblocked(tcb, (tstate_t)task_state);
-
-      /* If there are any pending tasks, then add them to the g_readytorun
-       * task list now
-       */
-
-      if (g_pendingtasks.head)
+      if (IN_INTERRUPT())
         {
-          switch_needed |= sched_mergepending();
-        }
-
-      /* Now, perform the context switch if one is needed */
-
-      if (switch_needed)
-        {
-          /* Are we in an interrupt handler? */
-
-          if (IN_INTERRUPT())
-            {
-              /* Yes, then we have to do things differently.
-               * Just copy the current registers into the OLD rtcb.
-               */
-
-               SAVE_IRQCONTEXT(rtcb);
-
-              /* Restore the exception context of the rtcb at the (new) head 
-               * of the g_readytorun task list.
-               */
-
-              rtcb = (FAR struct tcb_s*)g_readytorun.head;
-              /* dbg("New Active Task TCB=%p\n", rtcb); */
-
-              /* Then setup so that the context will be performed on exit
-               * from the interrupt.
-               */
-
-              SET_IRQCONTEXT(rtcb);
-            }
-
-          /* Copy the user C context into the TCB at the (old) head of the
-           * g_readytorun Task list. if SAVE_USERCONTEXT returns a non-zero
-           * value, then this is really the previously running task restarting!
+          /* Yes, then we have to do things differently.
+           * Just copy the current registers into the OLD rtcb.
            */
 
-          else if (!SAVE_USERCONTEXT(rtcb))
-            {
-              /* Restore the exception context of the rtcb at the (new) head 
-               * of the g_readytorun task list.
-               */
+          SAVE_IRQCONTEXT(rtcb);
 
-              rtcb = (FAR struct tcb_s*)g_readytorun.head;
-              /* dbg("New Active Task TCB=%p\n", rtcb); */
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
 
-              /* Then switch contexts */
+          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          /* dbg("New Active Task TCB=%p\n", rtcb); */
 
-              RESTORE_USERCONTEXT(rtcb);
-            }
+          /* Then setup so that the context will be performed on exit
+           * from the interrupt.
+           */
+
+          SET_IRQCONTEXT(rtcb);
+        }
+
+      /* Copy the user C context into the TCB at the (old) head of the
+       * g_readytorun Task list. if SAVE_USERCONTEXT returns a non-zero
+       * value, then this is really the previously running task restarting!
+       */
+
+      else if (!SAVE_USERCONTEXT(rtcb))
+        {
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
+
+          rtcb = (FAR struct tcb_s*)g_readytorun.head;
+          /* dbg("New Active Task TCB=%p\n", rtcb); */
+
+          /* Then switch contexts */
+
+          RESTORE_USERCONTEXT(rtcb);
         }
     }
 }

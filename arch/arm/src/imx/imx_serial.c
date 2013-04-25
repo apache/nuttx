@@ -799,7 +799,7 @@ static inline struct uart_dev_s *up_mapirq(int irq)
 #endif
 
       default:
-        PANIC(OSERR_INTERNAL);
+        PANIC();
         break;
     }
   return dev;

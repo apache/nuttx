@@ -443,7 +443,7 @@ static int z16f_rxinterrupt(int irq, void *context)
     }
   else
     {
-      PANIC(OSERR_INTERNAL);
+      PANIC();
     }
 
   priv = (struct z16f_uart_s*)dev->priv;
@@ -492,7 +492,7 @@ static int z16f_txinterrupt(int irq, void *context)
     }
   else
     {
-      PANIC(OSERR_INTERNAL);
+      PANIC();
     }
 
   priv = (struct z16f_uart_s*)dev->priv;

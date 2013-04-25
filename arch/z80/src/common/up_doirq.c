@@ -78,7 +78,7 @@ FAR chipreg_t *up_doirq(uint8_t irq, FAR chipreg_t *regs)
 
   lowsyslog("Unexpected IRQ\n");
   IRQ_ENTER(regs);
-  PANIC(OSERR_ERREXCEPTION);
+  PANIC();
   return NULL; /* Won't get here */
 
 #else

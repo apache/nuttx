@@ -142,7 +142,7 @@ uint32_t *isr_handler(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   up_ledon(LED_INIRQ);
-  PANIC(OSERR_ERREXCEPTION); /* Doesn't return */
+  PANIC(); /* Doesn't return */
   return regs;               /* To keep the compiler happy */
 #else
   uint32_t *ret;
@@ -168,7 +168,7 @@ uint32_t *irq_handler(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   up_ledon(LED_INIRQ);
-  PANIC(OSERR_ERREXCEPTION); /* Doesn't return */
+  PANIC(); /* Doesn't return */
   return regs;               /* To keep the compiler happy */
 #else
   uint32_t *ret;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_blocktask.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,75 +86,71 @@
 
 void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 {
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  bool switch_needed;
+
   /* Verify that the context switch can be performed */
-  if ((tcb->task_state < FIRST_READY_TO_RUN_STATE) ||
-      (tcb->task_state > LAST_READY_TO_RUN_STATE))
+
+  ASSERT((tcb->task_state >= FIRST_READY_TO_RUN_STATE) &&
+         (tcb->task_state <= LAST_READY_TO_RUN_STATE));
+
+  sdbg("Blocking TCB=%p\n", tcb);
+
+  /* Remove the tcb task from the ready-to-run list.  If we
+   * are blocking the task at the head of the task list (the
+   * most likely case), then a context switch to the next
+   * ready-to-run task is needed. In this case, it should
+   * also be true that rtcb == tcb.
+   */
+
+  switch_needed = sched_removereadytorun(tcb);
+
+  /* Add the task to the specified blocked task list */
+
+  sched_addblocked(tcb, (tstate_t)task_state);
+
+  /* If there are any pending tasks, then add them to the g_readytorun
+   * task list now
+   */
+
+  if (g_pendingtasks.head)
     {
-      PANIC(OSERR_BADBLOCKSTATE);
+      switch_needed |= sched_mergepending();
     }
-  else
+
+  /* Now, perform the context switch if one is needed */
+
+  if (switch_needed)
     {
-      struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
-      bool switch_needed;
-
-      sdbg("Blocking TCB=%p\n", tcb);
-
-      /* Remove the tcb task from the ready-to-run list.  If we
-       * are blocking the task at the head of the task list (the
-       * most likely case), then a context switch to the next
-       * ready-to-run task is needed. In this case, it should
-       * also be true that rtcb == tcb.
+      /* Copy the exception context into the TCB at the (old) head of the
+       * g_readytorun Task list. if up_setjmp returns a non-zero
+       * value, then this is really the previously running task restarting!
        */
 
-      switch_needed = sched_removereadytorun(tcb);
-
-      /* Add the task to the specified blocked task list */
-
-      sched_addblocked(tcb, (tstate_t)task_state);
-
-      /* If there are any pending tasks, then add them to the g_readytorun
-       * task list now
-       */
-
-      if (g_pendingtasks.head)
+      if (!up_setjmp(rtcb->xcp.regs))
         {
-          switch_needed |= sched_mergepending();
-        }
-
-      /* Now, perform the context switch if one is needed */
-
-      if (switch_needed)
-        {
-          /* Copy the exception context into the TCB at the (old) head of the
-          * g_readytorun Task list. if up_setjmp returns a non-zero
-           * value, then this is really the previously running task restarting!
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
            */
 
-          if (!up_setjmp(rtcb->xcp.regs))
+          rtcb = (struct tcb_s*)g_readytorun.head;
+          sdbg("New Active Task TCB=%p\n", rtcb);
+
+          /* The way that we handle signals in the simulation is kind of
+           * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
+           * driven environment.
+           */
+
+          if (rtcb->xcp.sigdeliver)
             {
-              /* Restore the exception context of the rtcb at the (new) head 
-               * of the g_readytorun task list.
-               */
-
-              rtcb = (struct tcb_s*)g_readytorun.head;
-              sdbg("New Active Task TCB=%p\n", rtcb);
-
-              /* The way that we handle signals in the simulation is kind of
-               * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
-               * driven environment.
-               */
-
-              if (rtcb->xcp.sigdeliver)
-                {
-                  sdbg("Delivering signals TCB=%p\n", rtcb);
-                  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
-                  rtcb->xcp.sigdeliver = NULL;
-                }
-
-              /* Then switch contexts */
-
-              up_longjmp(rtcb->xcp.regs, 1);
+              sdbg("Delivering signals TCB=%p\n", rtcb);
+              ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+              rtcb->xcp.sigdeliver = NULL;
             }
+
+          /* Then switch contexts */
+
+          up_longjmp(rtcb->xcp.regs, 1);
         }
     }
 }

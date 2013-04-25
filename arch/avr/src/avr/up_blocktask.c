@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/avr/up_blocktask.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,82 +86,77 @@
 
 void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 {
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  bool switch_needed;
+
   /* Verify that the context switch can be performed */
 
-  if ((tcb->task_state < FIRST_READY_TO_RUN_STATE) ||
-      (tcb->task_state > LAST_READY_TO_RUN_STATE))
+  ASSERT((tcb->task_state >= FIRST_READY_TO_RUN_STATE) &&
+         (tcb->task_state <= LAST_READY_TO_RUN_STATE));
+
+  /* Remove the tcb task from the ready-to-run list.  If we
+   * are blocking the task at the head of the task list (the
+   * most likely case), then a context switch to the next
+   * ready-to-run task is needed. In this case, it should
+   * also be true that rtcb == tcb.
+   */
+
+  switch_needed = sched_removereadytorun(tcb);
+
+  /* Add the task to the specified blocked task list */
+
+  sched_addblocked(tcb, (tstate_t)task_state);
+
+  /* If there are any pending tasks, then add them to the g_readytorun
+   * task list now
+   */
+
+  if (g_pendingtasks.head)
     {
-      PANIC(OSERR_BADBLOCKSTATE);
+      switch_needed |= sched_mergepending();
     }
-  else
+
+  /* Now, perform the context switch if one is needed */
+
+  if (switch_needed)
     {
-      struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
-      bool switch_needed;
+      /* Are we in an interrupt handler? */
 
-      /* Remove the tcb task from the ready-to-run list.  If we
-       * are blocking the task at the head of the task list (the
-       * most likely case), then a context switch to the next
-       * ready-to-run task is needed. In this case, it should
-       * also be true that rtcb == tcb.
-       */
-
-      switch_needed = sched_removereadytorun(tcb);
-
-      /* Add the task to the specified blocked task list */
-
-      sched_addblocked(tcb, (tstate_t)task_state);
-
-      /* If there are any pending tasks, then add them to the g_readytorun
-       * task list now
-       */
-
-      if (g_pendingtasks.head)
+      if (current_regs)
         {
-          switch_needed |= sched_mergepending();
+          /* Yes, then we have to do things differently.
+           * Just copy the current_regs into the OLD rtcb.
+           */
+
+          up_savestate(rtcb->xcp.regs);
+
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
+
+          rtcb = (struct tcb_s*)g_readytorun.head;
+
+          /* Then switch contexts */
+
+          up_restorestate(rtcb->xcp.regs);
         }
 
-      /* Now, perform the context switch if one is needed */
+      /* No, then we will need to perform the user context switch */
 
-      if (switch_needed)
+      else
         {
-          /* Are we in an interrupt handler? */
+          /* Switch context to the context of the task at the head of the
+           * ready to run list.
+           */
 
-          if (current_regs)
-            {
-              /* Yes, then we have to do things differently.
-               * Just copy the current_regs into the OLD rtcb.
-               */
+          struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
+          up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
 
-               up_savestate(rtcb->xcp.regs);
-
-              /* Restore the exception context of the rtcb at the (new) head 
-               * of the g_readytorun task list.
-               */
-
-              rtcb = (struct tcb_s*)g_readytorun.head;
-
-              /* Then switch contexts */
-
-              up_restorestate(rtcb->xcp.regs);
-            }
-
-          /* No, then we will need to perform the user context switch */
-
-          else
-            {
-              /* Switch context to the context of the task at the head of the
-               * ready to run list.
-               */
-
-               struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
-               up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
-
-              /* up_switchcontext forces a context switch to the task at the
-               * head of the ready-to-run list.  It does not 'return' in the
-               * normal sense.  When it does return, it is because the blocked
-               * task is again ready to run and has execution priority.
-               */
-           }
+          /* up_switchcontext forces a context switch to the task at the
+           * head of the ready-to-run list.  It does not 'return' in the
+           * normal sense.  When it does return, it is because the blocked
+           * task is again ready to run and has execution priority.
+           */
         }
     }
 }

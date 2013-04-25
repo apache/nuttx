@@ -99,7 +99,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
 #endif
     )
     {
-       PANIC(OSERR_BADREPRIORITIZESTATE);
+       PANIC();
     }
   else
     {
