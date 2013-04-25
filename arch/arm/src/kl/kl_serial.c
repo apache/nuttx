@@ -158,11 +158,7 @@ struct up_dev_s
   uintptr_t uartbase;  /* Base address of UART registers */
   uint32_t  baud;      /* Configured baud */
   uint32_t  clock;     /* Clocking frequency of the UART module */
-#ifdef CONFIG_DEBUG
-  uint8_t   irqe;      /* Error IRQ associated with this UART (for enable) */
-#endif
-  uint8_t   irqs;      /* Status IRQ associated with this UART (for enable) */
-  uint8_t   irqprio;   /* Interrupt priority */
+  uint8_t   irq;       /* IRQ associated with this UART (for enable) */
   uint8_t   ie;        /* Interrupts enabled */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (8 or 9) */
@@ -176,9 +172,6 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-#ifdef CONFIG_DEBUG
-static int  up_interrupte(int irq, void *context);
-#endif
 static int  up_interrupts(int irq, void *context);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
@@ -187,9 +180,6 @@ static bool up_rxavailable(struct uart_dev_s *dev);
 static void up_send(struct uart_dev_s *dev, int ch);
 static void up_txint(struct uart_dev_s *dev, bool enable);
 static bool up_txready(struct uart_dev_s *dev);
-#ifdef CONFIG_KL_UARTFIFOS
-static bool up_txempty(struct uart_dev_s *dev);
-#endif
 
 /****************************************************************************
  * Private Variables
@@ -208,11 +198,7 @@ static const struct uart_ops_s g_uart_ops =
   .send           = up_send,
   .txint          = up_txint,
   .txready        = up_txready,
-#ifdef CONFIG_KL_UARTFIFOS
-  .txempty        = up_txempty,
-#else
   .txempty        = up_txready,
-#endif
 };
 
 /* I/O buffers */
@@ -238,7 +224,7 @@ static struct up_dev_s g_uart0priv =
   .uartbase       = KL_UART0_BASE,
   .clock          = BOARD_CORECLK_FREQ,
   .baud           = CONFIG_UART0_BAUD,
-  .irqprio        = CONFIG_KL_UART0PRIO,
+  .irq            = KL_IRQ_UART0,
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
 };
@@ -268,11 +254,7 @@ static struct up_dev_s g_uart1priv =
   .uartbase       = KL_UART1_BASE,
   .clock          = BOARD_BUSCLK_FREQ,
   .baud           = CONFIG_UART1_BAUD,
-#ifdef CONFIG_DEBUG
-  .irqe           = KL_IRQ_UART1E,
-#endif
-  .irqs           = KL_IRQ_UART1S,
-  .irqprio        = CONFIG_KL_UART1PRIO,
+  .irq            = KL_IRQ_UART1,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
 };
@@ -302,11 +284,7 @@ static struct up_dev_s g_uart2priv =
   .uartbase       = KL_UART2_BASE,
   .clock          = BOARD_BUSCLK_FREQ,
   .baud           = CONFIG_UART2_BAUD,
-#ifdef CONFIG_DEBUG
-  .irqe           = KL_IRQ_UART2E,
-#endif
-  .irqs           = KL_IRQ_UART2S,
-  .irqprio        = CONFIG_KL_UART2PRIO,
+  .irq            = KL_IRQ_UART2,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
 };
@@ -426,13 +404,6 @@ static int up_setup(struct uart_dev_s *dev)
   /* Make sure that all interrupts are disabled */
 
   up_restoreuartint(priv, 0);
-
-  /* Set up the interrupt priority */
-
-  up_prioritize_irq(priv->irqs, priv->irqprio);
-#ifdef CONFIG_DEBUG
-  up_prioritize_irq(priv->irqe, priv->irqprio);
-#endif
   return OK;
 }
 
@@ -482,20 +453,10 @@ static int up_attach(struct uart_dev_s *dev)
    * disabled in the C2 register.
    */
 
-  ret = irq_attach(priv->irqs, up_interrupts);
-#ifdef CONFIG_DEBUG
+  ret = irq_attach(priv->irq, up_interrupts);
   if (ret == OK)
     {
-      ret = irq_attach(priv->irqe, up_interrupte);
-    }
-#endif
-
-  if (ret == OK)
-    {
-#ifdef CONFIG_DEBUG
-      up_enable_irq(priv->irqe);
-#endif
-      up_enable_irq(priv->irqs);
+      up_enable_irq(priv->irq);
     }
 
   return ret;
@@ -518,78 +479,12 @@ static void up_detach(struct uart_dev_s *dev)
   /* Disable interrupts */
 
   up_restoreuartint(priv, 0);
-#ifdef CONFIG_DEBUG
-  up_disable_irq(priv->irqe);
-#endif
-  up_disable_irq(priv->irqs);
+  up_disable_irq(priv->irq);
 
   /* Detach from the interrupt(s) */
 
-  irq_detach(priv->irqs);
-#ifdef CONFIG_DEBUG
-  irq_detach(priv->irqe);
-#endif
+  irq_detach(priv->irq);
 }
-
-/****************************************************************************
- * Name: up_interrupte
- *
- * Description:
- *   This is the UART error interrupt handler.  It will be invoked when an
- *   interrupt received on the 'irq'
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-static int up_interrupte(int irq, void *context)
-{
-  struct uart_dev_s *dev = NULL;
-  struct up_dev_s   *priv;
-  uint8_t            regval;
-
-#ifdef CONFIG_KL_UART0
-  if (g_uart0priv.irqe == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_KL_UART1
-  if (g_uart1priv.irqe == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_KL_UART2
-  if (g_uart2priv.irqe == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-    {
-      PANIC(OSERR_INTERNAL);
-    }
-  priv = (struct up_dev_s*)dev->priv;
-  DEBUGASSERT(priv);
-
-  /* Handle error interrupts.  This interrupt may be caused by:
-   *
-   * FE: Framing error. To clear FE, read S1 with FE set and then read the
-   *     UART data register (D).
-   * NF: Noise flag. To clear NF, read S1 and then read the UART data
-   *     register (D).
-   * PF: Parity error flag. To clear PF, read S1 and then read the UART data
-   *     register (D).
-   */
-
-  regval = up_serialin(priv, KL_UART_S1_OFFSET);
-  lldbg("S1: %02x\n", regval);
-  regval = up_serialin(priv, KL_UART_D_OFFSET);
-  return OK;
-}
-#endif /* CONFIG_DEBUG */
 
 /****************************************************************************
  * Name: up_interrupts
@@ -608,29 +503,25 @@ static int up_interrupts(int irq, void *context)
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
   int                passes;
-#ifdef CONFIG_KL_UARTFIFOS
-  unsigned int       count;
-#else
   uint8_t            s1;
-#endif
   bool               handled;
 
 #ifdef CONFIG_KL_UART0
-  if (g_uart0priv.irqs == irq)
+  if (g_uart0priv.irq == irq)
     {
       dev = &g_uart0port;
     }
   else
 #endif
 #ifdef CONFIG_KL_UART1
-  if (g_uart1priv.irqs == irq)
+  if (g_uart1priv.irq == irq)
     {
       dev = &g_uart1port;
     }
   else
 #endif
 #ifdef CONFIG_KL_UART2
-  if (g_uart2priv.irqs == irq)
+  if (g_uart2priv.irq == irq)
     {
       dev = &g_uart2port;
     }
@@ -653,18 +544,8 @@ static int up_interrupts(int irq, void *context)
 
       /* Read status register 1 */
 
-#ifndef CONFIG_KL_UARTFIFOS
       s1 = up_serialin(priv, KL_UART_S1_OFFSET);
-#endif
 
-      /* Handle incoming, receive bytes */
-
-#ifdef CONFIG_KL_UARTFIFOS
-      /* Check the count of bytes in the RX FIFO */
-
-      count = up_serialin(priv, KL_UART_RCFIFO_OFFSET);
-      if (count > 0)
-#else
       /* Check if the receive data register is full (RDRF).  NOTE:  If
        * FIFOS are enabled, this does not mean that the the FIFO is full,
        * rather, it means that the the number of bytes in the RX FIFO has
@@ -676,7 +557,6 @@ static int up_interrupts(int irq, void *context)
        */
 
       if ((s1 & UART_S1_RDRF) != 0)
-#endif
         {
           /* Process incoming bytes */
 
@@ -686,14 +566,6 @@ static int up_interrupts(int irq, void *context)
 
       /* Handle outgoing, transmit bytes */
 
-#ifdef CONFIG_KL_UARTFIFOS
-      /* Read the number of bytes currently in the FIFO and compare that to
-       * the size of the FIFO.  If there are fewer bytes in the FIFO than
-       * the size of the FIFO, then we are able to transmit.
-       */
-
-#  error "Missing logic"
-#else
       /* Check if the transmit data register is "empty."  NOTE:  If FIFOS
        * are enabled, this does not mean that the the FIFO is empty, rather,
        * it means that the the number of bytes in the TX FIFO is below the
@@ -705,13 +577,25 @@ static int up_interrupts(int irq, void *context)
        */
 
       if ((s1 & UART_S1_TDRE) != 0)
-#endif
         {
           /* Process outgoing bytes */
 
           uart_xmitchars(dev);
           handled = true;
         }
+
+      /* Handle error interrupts.  This interrupt may be caused by:
+       *
+       * FE: Framing error. To clear FE, write a logic one to the FE flag.
+       * NF: Noise flag. To clear NF, write logic one to the NF.
+       * PF: Parity error flag. To clear PF, write a logic one to the PF.
+       * OR: Receiver Overrun Flag.  To clear OR, write a logic 1 to the OR flag.
+       */
+
+       if ((s1 & UART_S1_ERRORS) != 0)
+         {
+           up_serialout(priv, KL_UART_S1_OFFSET, (s1 & UART_S1_ERRORS));
+         }
     }
 
   return OK;
@@ -824,12 +708,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-#ifdef CONFIG_DEBUG
-#  warning "Revisit:  How are errors enabled?"
       priv->ie |= UART_C2_RIE;
-#else
-      priv->ie |= UART_C2_RIE;
-#endif
       up_setuartint(priv);
     }
 
@@ -847,14 +726,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-#ifdef CONFIG_KL_UARTFIFOS
-  unsigned int count;
 
-  /* Return true if there are any bytes in the RX FIFO */
-
-  count = up_serialin(priv, KL_UART_RCFIFO_OFFSET);
-  return count > 0;
-#else
   /* Return true if the receive data register is full (RDRF).  NOTE:  If
    * FIFOS are enabled, this does not mean that the the FIFO is full,
    * rather, it means that the the number of bytes in the RX FIFO has
@@ -863,7 +735,6 @@ static bool up_rxavailable(struct uart_dev_s *dev)
    */
 
   return (up_serialin(priv, KL_UART_S1_OFFSET) & UART_S1_RDRF) != 0;
-#endif
 }
 
 /****************************************************************************
@@ -932,14 +803,6 @@ static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
 
-#ifdef CONFIG_KL_UARTFIFOS
-  /* Read the number of bytes currently in the FIFO and compare that to the
-   * size of the FIFO.  If there are fewer bytes in the FIFO than the size
-   * of the FIFO, then we are able to transmit.
-   */
-
-#  error "Missing logic"
-#else
   /* Return true if the transmit data register is "empty."  NOTE:  If
    * FIFOS are enabled, this does not mean that the the FIFO is empty,
    * rather, it means that the the number of bytes in the TX FIFO is
@@ -948,27 +811,7 @@ static bool up_txready(struct uart_dev_s *dev)
    */
 
   return (up_serialin(priv, KL_UART_S1_OFFSET) & UART_S1_TDRE) != 0;
-#endif
 }
-
-/****************************************************************************
- * Name: up_txempty
- *
- * Description:
- *   Return true if the tranmsit data register is empty
- *
- ****************************************************************************/
-
-#ifdef CONFIG_KL_UARTFIFOS
-static bool up_txempty(struct uart_dev_s *dev)
-{
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-
-  /* Return true if the transmit buffer/fifo is "empty." */
-
-  return (up_serialin(priv, KL_UART_SFIFO_OFFSET) & UART_SFIFO_TXEMPT) != 0;
-}
-#endif
 
 /****************************************************************************
  * Public Functions

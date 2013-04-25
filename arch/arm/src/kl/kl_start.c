@@ -50,6 +50,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "chip/kl_sim.h"
+
 #include "kl_config.h"
 #include "kl_lowputc.h"
 #include "kl_userspace.h"
@@ -102,14 +104,6 @@ const uint32_t g_idle_topstack = IDLE_STACK;
  * Public Functions
  ****************************************************************************/
 
-void iprintf(const char *string)
-{
-  while(*string != '\0')
-    {
-      kl_lowputc((char) *string++);
-    }
-}
-
 /****************************************************************************
  * Name: _start
  *
@@ -122,22 +116,16 @@ void __start(void)
 {
   const uint32_t *src;
   uint32_t *dest;
-  volatile unsigned int *SIM_COPC = ((volatile unsigned int *)0x40048100);
-  //int i = 0;
 
-  /*acassis: disable SIM_COP*/
-  *SIM_COPC = 0;
+  /* Disable the watchdog */
+
+  putreg32(0, KL_SIM_COPC);
 
   /* Configure the uart so that we can get debug output as soon as possible */
 
   kl_clockconfig();
   kl_lowsetup();
-  //uart_init();
   showprogress('A');
-
-  /* Blink blue LED to indicate we are here */
-  //for (; ; i++)
-  //    blueled(i & 0x10000);
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
@@ -186,12 +174,8 @@ void __start(void)
 
   /* Then start NuttX */
 
-  //iprintf("\r\nWelcome to NuttX!\r\n");
-
-  //showprogress('\r');
-  //showprogress('\n');
-
-  iprintf("\r\n\r\n");
+  showprogress('\r');
+  showprogress('\n');
 
   os_start();
 
