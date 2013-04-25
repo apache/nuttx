@@ -67,7 +67,7 @@
 # define KL_SRAMU_BASE     0x20000000 /* -0x200fffff SRAM_U: Upper SRAM bitband
                                        *             region */
                         /* 0x20100000  * -0x3fffffff Reserved */
-# define KIP_APS_BASE      0x40000000 /* -0x4007ffff AIPS Peripherals */
+# define KIP_AIPS_BASE     0x40000000 /* -0x4007ffff AIPS Peripherals */
                         /* 0x40080000  * -0x400fffff Reserved */
 # define KL_GPIO_BASE      0x400ff000 /* -0x400fffff General purpose input/output (GPIO) */
                         /* 0x40100000  * -0x43ffffff Reserved */
@@ -78,10 +78,10 @@
                         /* 0xe0100000  * -0xefffffff Reserved */
 # define KL_MTB_BASE       0xf0000000 /* -0xffffffff Micro Trace Buffer (MTB) registers */
 
-/* API Memory Map *******************************************************************/
+/* AIPS Memory Map ******************************************************************/
 
 # define KL_DMAC_BASE      0x40008000 /* DMA controller */
-# define KL_AIPGPIO_BASE   0x4000f000 /* GPIO controller (aliased to 0x400f_000) */
+# define KL_AIPSGPIO_BASE  0x4000f000 /* GPIO controller (aliased to 0x400ff000) */
 # define KL_FTFL_BASE      0x40020000 /* Flash memory */
 # define KL_DMAMUX0_BASE   0x40021000 /* DMA channel mutiplexer 0 */
 # define KL_PIT_BASE       0x40037000 /* Periodic interrupt timers (PIT) */
