@@ -57,27 +57,6 @@ config KL_UART2
 	---help---
 		Support UART2
 
-config KL_UART3
-	bool "UART3"
-	default n
-	select ARCH_HAVE_UART3
-	---help---
-		Support UART3
-
-config KL_UART4
-	bool "UART4"
-	default n
-	select ARCH_HAVE_UART4
-	---help---
-		Support UART4
-
-config KL_UART5
-	bool "UART5"
-	default n
-	select ARCH_HAVE_UART5
-	---help---
-		Support UART5
-
 config KL_ENET
 	bool "Ethernet"
 	default n

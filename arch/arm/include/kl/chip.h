@@ -63,7 +63,6 @@
 #  undef  KL_NSDHC                      /* No SD host controller */
 #  define KL_NTOUCHIF        1          /* Xtrinsic touch sensing interface */
 #  define KL_NI2C            2          /* Two I2C modules */
-#  undef  KL_NISO7816                   /* No UART with ISO-786 */
 #  define KL_NUART           3          /* Three UARTs */
 #  define KL_NSPI            2          /* Two SPI modules */
 #  undef  KL_NCAN                       /* No CAN in 64-pin chips */

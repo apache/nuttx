@@ -81,6 +81,8 @@
 #  define CONSOLE_PARITY   CONFIG_UART2_PARITY
 #endif
 
+#define OVER_SAMPLE 16
+
 /**************************************************************************
  * Private Types
  **************************************************************************/
@@ -173,9 +175,11 @@ void kl_lowsetup(void)
    uint32_t regval;
    uint8_t regval8;
 
-   //regval = getreg32(KL_SIM_SOPT2);
-   //regval |= SIM_SOPT2_PLLFLLSEL | SIM_SOPT2_UART0SRC_MCGCLK ;
-   //putreg32(regval, KL_SIM_SOPT2);
+#if 0
+   regval = getreg32(KL_SIM_SOPT2);
+   regval |= SIM_SOPT2_PLLFLLSEL | SIM_SOPT2_UART0SRC_MCGCLK ;
+   putreg32(regval, KL_SIM_SOPT2);
+#endif
 
    regval = getreg32(KL_SIM_SCGC5);
    regval |= SIM_SCGC5_PORTA;
@@ -197,25 +201,26 @@ void kl_lowsetup(void)
    putreg32((PORT_PCR_MUX_ALT2), KL_PORTA_PCR2);
 
    /* Disable UART before changing registers */
+
    putreg8(0, KL_UART0_C2);
    putreg8(0, KL_UART0_C1);
    putreg8(0, KL_UART0_C3);
    putreg8(0, KL_UART0_S2);
 
-   // Set the baud rate divisor
-   #define CORE_CLOCK 48000000
-   #define OVER_SAMPLE 16
-   uint16_t divisor = (CORE_CLOCK / OVER_SAMPLE) / CONSOLE_BAUD;
+   /* Set the baud rate divisor */
+
+   uint16_t divisor = (CONSOLE_FREQ / OVER_SAMPLE) / CONSOLE_BAUD;
    regval8 = OVER_SAMPLE - 1;
    putreg8(regval8, KL_UART0_C4);
 
-   regval8 = (divisor >> 8) & UARTLP_BDH_SBR_MASK;
+   regval8 = (divisor >> 8) & UART_BDH_SBR_MASK;
    putreg8(regval8, KL_UART0_BDH);
 
-   regval8 = (divisor & UARTLP_BDL_SBR_MASK);
+   regval8 = (divisor & UART_BDL_SBR_MASK);
    putreg8(regval8, KL_UART0_BDL);
 
    /* Enable UART before changing registers */
+
    regval8 = getreg8(KL_UART0_C2);
    regval8 |= (UART_C2_RE | UART_C2_TE);
    putreg8(regval8, KL_UART0_C2);
@@ -224,11 +229,11 @@ void kl_lowsetup(void)
    * when the serial driver is opened.
    */
 
-//#if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+#if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
 
-//  kl_uartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_FREQ,
-//                   CONSOLE_PARITY, CONSOLE_BITS);
-//#endif
+  kl_uartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_FREQ,
+                   CONSOLE_PARITY, CONSOLE_BITS);
+#endif
 }
 
 /******************************************************************************
@@ -246,9 +251,9 @@ void kl_uartreset(uintptr_t uart_base)
 
   /* Just disable the transmitter and receiver */
 
-  regval = getreg8(uart_base+KL_UART_C2_OFFSET);
-  regval &= ~(UART_C2_RE|UART_C2_TE);
-  putreg8(regval, uart_base+KL_UART_C2_OFFSET);
+  regval = getreg8(uart_base + KL_UART_C2_OFFSET);
+  regval &= ~(UART_C2_RE | UART_C2_TE);
+  putreg8(regval, uart_base + KL_UART_C2_OFFSET);
 }
 #endif
 
@@ -265,7 +270,6 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
                       unsigned int parity, unsigned int nbits)
 {
   uint32_t     sbr;
-  uint32_t     brfa;
   uint32_t     tmp;
   uint8_t      regval;
 #ifdef CONFIG_KL_UARTFIFOS
@@ -286,7 +290,7 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
 
   if (parity == 1)
     {
-      regval |= (UART_C1_PE|UART_C1_PT); /* Enable + odd parity type */
+      regval |= (UART_C1_PE | UART_C1_PT); /* Enable + odd parity type */
     }
 
   /* Check for even parity */
@@ -317,7 +321,7 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
       DEBUGASSERT(nbits == 8);
     }
 
-  putreg8(regval, uart_base+KL_UART_C1_OFFSET);
+  putreg8(regval, uart_base + KL_UART_C1_OFFSET);
 
   /* Calculate baud settings (truncating) */
 
@@ -328,85 +332,19 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
    * register.
    */
 
-  regval  = getreg8(uart_base+KL_UART_BDH_OFFSET) & UART_BDH_SBR_MASK;
+  regval  = getreg8(uart_base + KL_UART_BDH_OFFSET) & UART_BDH_SBR_MASK;
   tmp     = sbr >> 8;
   regval |= (((uint8_t)tmp) << UART_BDH_SBR_SHIFT) & UART_BDH_SBR_MASK;
-  putreg8(regval, uart_base+KL_UART_BDH_OFFSET);
+  putreg8(regval, uart_base + KL_UART_BDH_OFFSET);
 
   regval  = sbr & 0xff;
-  putreg8(regval, uart_base+KL_UART_BDL_OFFSET);
-
-  /* Calculate a fractional divider to get closer to the requested baud.
-   * The fractional divider, BRFA, is a 5 bit fractional value that is
-   * logically added to the SBR:
-   *
-   *   UART baud rate = clock / (16 × (SBR + BRFD))
-   *
-   * The BRFA the remainder.  This will be a non-negative value since the SBR
-   * was calculated by truncation.
-   */
-
-  tmp  = clock - (sbr * (baud << 4));
-  brfa = (tmp << 5) / (baud << 4);
-
-  /* Set the BRFA field (retaining other bits in the UARTx_C4 register) */
-
-  regval  = getreg8(uart_base+KL_UART_C4_OFFSET) & UART_C4_BRFA_MASK;
-  regval |= ((uint8_t)brfa << UART_C4_BRFA_SHIFT) & UART_C4_BRFA_MASK;
-  putreg8(regval, uart_base+KL_UART_C4_OFFSET);
-
-  /* Set the FIFO watermarks.
-   *
-   * NOTE:  UART0 has an 8-byte deep FIFO; the other UARTs have no FIFOs
-   * (1-deep).  There appears to be no way to know when the FIFO is not
-   * full (other than reading the FIFO length and comparing the FIFO count).
-   * Hence, the FIFOs are not used in this implementation and, as a result
-   * TDRE indeed mean that the single output buffer is available.
-   *
-   * Performance on UART0 could be improved by enabling the FIFO and by
-   * redesigning all of the FIFO status logic.
-   */
-
-#ifdef CONFIG_KL_UARTFIFOS
-  depth = g_sizemap[(regval & UART_PFIFO_RXFIFOSIZE_MASK) >> UART_PFIFO_RXFIFOSIZE_SHIFT];
-  if (depth > 1)
-    {
-      depth = (3 * depth) >> 2;
-    }
-  putreg8(depth , uart_base+KL_UART_RWFIFO_OFFSET);
-
-  depth = g_sizemap[(regval & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT];
-  if (depth > 3)
-    {
-      depth = (depth >> 2);
-    }
-  putreg8(depth, uart_base+KL_UART_TWFIFO_OFFSET);
-
-  /* Enable RX and TX FIFOs */
-
-  putreg8(UART_PFIFO_RXFE | UART_PFIFO_TXFE, uart_base+KL_UART_PFIFO_OFFSET);
-#else
-  /* Otherwise, disable the FIFOs.  Then the FIFOs are disable, the effective
-   * FIFO depth is 1.  So set the watermarks as follows:
-   *
-   * TWFIFO[TXWATER] = 0:  TDRE will be set when the number of queued bytes
-   *  (1 in this case) is less than or equal to 0.
-   * RWFIFO[RXWATER] = 1:  RDRF will be set when the number of queued bytes
-   *  (1 in this case) is greater than or equal to 1.
-   *
-   * Set the watermarks to one/zero and disable the FIFOs
-   */
-
-  putreg8(1, uart_base+KL_UART_RWFIFO_OFFSET);
-  putreg8(0, uart_base+KL_UART_TWFIFO_OFFSET);
-  putreg8(0, uart_base+KL_UART_PFIFO_OFFSET);
-#endif
+  putreg8(regval, uart_base + KL_UART_BDL_OFFSET);
 
   /* Now we can (re-)enable the transmitter and receiver */
 
-  regval = getreg8(uart_base+KL_UART_C2_OFFSET);
+  regval = getreg8(uart_base + KL_UART_C2_OFFSET);
   regval |= (UART_C2_RE | UART_C2_TE);
-  putreg8(regval, uart_base+KL_UART_C2_OFFSET);
+  putreg8(regval, uart_base + KL_UART_C2_OFFSET);
 }
 #endif
 
