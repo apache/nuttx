@@ -395,14 +395,14 @@ config ENET_NRXBUFFERS
 	default 6
 	---help---
 		Number of Ethernet Rx buffers to use.  The size of one buffer is
-		determined by CONFIG_NET_BUFSIZE
+		determined by NET_BUFSIZE
 
 config ENET_NTXBUFFERS
 	int "Number of Ethernet Tx buffers"
 	default 2
 	---help---
 		Number of Ethernet Tx buffers to use. The size of one buffer is
-		determined by CONFIG_NET_BUFSIZE
+		determined by NET_BUFSIZE
 
 config ENET_PHYADDR
 	int "PHY address"
@@ -451,14 +451,14 @@ config KINETIS_MMCXFR_FREQ
 config KINETIS_SD1BIT_FREQ
 	int "SD 1-bit transfer frequency"
 	default 20000000
-	depends on CONFIG_SDIO_WIDTH_D1_ONLY
+	depends on SDIO_WIDTH_D1_ONLY
 	---help---
 		Frequency to use for transferring data to/from an SD card using on a single data liune.
 
 config KINETIS_SD4BIT_FREQ
 	int "SD 4-bit transfer frequency"
 	default 20000000
-	depends on !CONFIG_SDIO_WIDTH_D1_ONLY
+	depends on !SDIO_WIDTH_D1_ONLY
 	---help---
 		Frequency to use for transferring data to/from an SD card using all four data lines.
 

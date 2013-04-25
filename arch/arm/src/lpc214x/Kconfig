@@ -117,7 +117,7 @@ config LPC214X_USBDEV_DMA
 	bool "USB Device DMA Support"
 	default n
 
-config CONFIG_LPC214X_USBDEV_NDMADESCRIPTORS
+config LPC214X_USBDEV_NDMADESCRIPTORS
 	int "Number of USB DMA Descriptors"
 	default 8
 	depends on LPC214X_USBDEV_DMA
