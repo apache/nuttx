@@ -97,38 +97,6 @@
 # undef CONFIG_UART1_FLOWCONTROL
 # undef CONFIG_UART2_FLOWCONTROL
 
-/* Ethernet controller configuration */
-
-#ifndef CONFIG_ENET_NRXBUFFERS
-#  define CONFIG_ENET_NRXBUFFERS 6
-#endif
-#ifndef CONFIG_ENET_NTXBUFFERS
-#  define CONFIG_ENET_NTXBUFFERS 2
-#endif
-
-#ifndef CONFIG_ENET_PHYADDR
-#  define CONFIG_ENET_PHYADDR 1
-#endif
-
-#ifndef CONFIG_ENET_NETHIFS
-# define CONFIG_ENET_NETHIFS 1
-#endif
-
-/* EMAC Default Interrupt Priorities */
-
-#ifndef CONFIG_KL_EMACTMR_PRIO
-#  define CONFIG_KL_EMACTMR_PRIO  NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-#ifndef CONFIG_KL_EMACTX_PRIO
-#  define CONFIG_KL_EMACTX_PRIO   NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-#ifndef CONFIG_KL_EMACRX_PRIO
-#  define CONFIG_KL_EMACRX_PRIO   NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-#ifndef CONFIG_KL_EMACMISC_PRIO
-#  define CONFIG_KL_EMACMISC_PRIO NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/

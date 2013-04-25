@@ -283,7 +283,7 @@
 #define SIM_SCGC6_PIT                (1 << 23) /* Bit 23: PIT Clock Gate Control */
 #define SIM_SCGC6_TPM0               (1 << 24) /* Bit 24: TPM0 Clock Gate Control */
 #define SIM_SCGC6_TPM1               (1 << 25) /* Bit 25: TPM1 Clock Gate Control */
-#define SIM_SCGC6_TPM6               (1 << 26) /* Bit 25: TPM2 Clock Gate Control */
+#define SIM_SCGC6_TPM2               (1 << 26) /* Bit 25: TPM2 Clock Gate Control */
 #define SIM_SCGC6_ADC0               (1 << 27) /* Bit 27: ADC0 Clock Gate Control */
                                                /* Bit 28: Reserved */
 #define SIM_SCGC6_RTC                (1 << 29) /* Bit 29: RTC Clock Gate Control */

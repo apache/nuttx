@@ -57,14 +57,6 @@ config KL_UART2
 	---help---
 		Support UART2
 
-config KL_ENET
-	bool "Ethernet"
-	default n
-	depends on ARCH_FAMILY_K60
-	select NET
-	---help---
-		Support Ethernet (K60 only)
-
 config KL_RNGB
 	bool "Random number generator"
 	default n
@@ -156,27 +148,20 @@ config KL_VREF
 	---help---
 		Support VREF
 
-config KL_SDHC
-	bool "SDHC"
-	default n
-	select MMCSD_SDIO
-	---help---
-		Support SD host controller
-
-config KL_FTM0
-	bool "FTM0"
+config KL_TPM0
+	bool "Timer/PWM Module 0"
 	default n
 	---help---
 		Support FlexTimer 0
 
-config KL_FTM1
-	bool "FTM1"
+config KL_TPM1
+	bool "Timer/PWM Module 1"
 	default n
 	---help---
 		Support FlexTimer 1
 
-config KL_FTM2
-	bool "FTM2"
+config KL_TPM2
+	bool "Timer/PWM Module 2"
 	default n
 	---help---
 		Support FlexTimer 2
@@ -316,101 +301,3 @@ config KL_PORTEINTS
 
 endif
 
-if KL_ENET
-
-comment "Kinetis Ethernet Configuration"
-
-config ENET_ENHANCEDBD
-	bool "Use enhanced buffer descriptors"
-	default n
-	---help---
-		Use enhanced, 32-byte buffer descriptors
-
-config ENET_NETHIFS
-	int "Number of Ethernet interfaces"
-	default 1
-	---help---
-		Number of Ethernet interfaces supported by the hardware.  Must be
-		one for now.
-
-config ENET_NRXBUFFERS
-	int "Number of Ethernet Rx buffers"
-	default 6
-	---help---
-		Number of Ethernet Rx buffers to use.  The size of one buffer is
-		determined by CONFIG_NET_BUFSIZE
-
-config ENET_NTXBUFFERS
-	int "Number of Ethernet Tx buffers"
-	default 2
-	---help---
-		Number of Ethernet Tx buffers to use. The size of one buffer is
-		determined by CONFIG_NET_BUFSIZE
-
-config ENET_PHYADDR
-	int "PHY address"
-	default 1
-	---help---
-		MII/RMII address of the PHY
-
-config ENET_USEMII
-	bool "Use MII interface"
-	default n
-	---help---
-		The the MII PHY interface.  Default:  Use RMII interface
-
-endif
-
-if KL_SDHC
-
-comment "Kinetis SDHC Configuration"
-
-config KL_SDHC_ABSFREQ
-	bool "Custom transfer frequencies"
-	default n
-	---help---
-		Select SDCLK frequencies corresponding to various modes of operation.
-		These values may be provided in either the NuttX configuration file
-		or in the board.h file
-
-		NOTE:  These settings are not currently used.  Since there are only
-		four frequencies, it makes more sense to just "can" the fixed
-		frequency prescaler and divider values.
-
-if KL_SDHC_ABSFREQ
-
-config KL_IDMODE_FREQ
-	int "ID mode frequency"
-	default 400000
-	---help---
-		Initial, ID mode SD frequency
-
-config KL_MMCXFR_FREQ
-	int "MMC transfer frequency"
-	default 20000000
-	---help---
-		Frequency to use for transferring data to/from an MMC card
-
-config KL_SD1BIT_FREQ
-	int "SD 1-bit transfer frequency"
-	default 20000000
-	depends on CONFIG_SDIO_WIDTH_D1_ONLY
-	---help---
-		Frequency to use for transferring data to/from an SD card using on a single data liune.
-
-config KL_SD4BIT_FREQ
-	int "SD 4-bit transfer frequency"
-	default 20000000
-	depends on !CONFIG_SDIO_WIDTH_D1_ONLY
-	---help---
-		Frequency to use for transferring data to/from an SD card using all four data lines.
-
-endif
-
-config KL_SDHC_DMAPRIO
-	int "SDHC DMA priority"
-	depends on SDIO_DMA
-	---help---
-		SDHC DMA priority
-
-endif
