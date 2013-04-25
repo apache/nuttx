@@ -32,7 +32,7 @@ config FAT_MAXFNAME
 	depends on FAT_LFN
 	default 32
 	---help---
-		If CONFIG_FAT_LFN is defined, then the default, maximum long file
+		If FAT_LFN is defined, then the default, maximum long file
 		name is 255 bytes.  This can eat up a lot of memory (especially stack
 		space).  If you are willing to live with some non-standard, short long
 		file names, then define this value to be something more reasonable.  A

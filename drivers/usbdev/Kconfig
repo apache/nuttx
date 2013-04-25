@@ -259,7 +259,7 @@ config CDCACM_COMPOSITE
 	depends on USBDEV_COMPOSITE
 	---help---
 		Configure the CDC serial driver as part of a composite driver
-		(only if CONFIG_USBDEV_COMPOSITE is also defined)
+		(only if USBDEV_COMPOSITE is also defined)
 
 config CDCACM_IFNOBASE
 	int "Offset the CDC/ACM interface numbers"
@@ -281,7 +281,7 @@ config CDCACM_STRBASE
 		unique and contiguous.  When used with the Mass Storage driver, the
 		correct value for this offset is four (this value actuallly only needs
 		to be defined if names are provided for the Notification interface,
-		config CDCACM_NOTIFSTR, or the data interface, CONFIG_CDCACM_DATAIFSTR).
+		config CDCACM_NOTIFSTR, or the data interface, CDCACM_DATAIFSTR).
 
 config CDCACM_EP0MAXPACKET
 	int "Endpoint 0 max packet size"
@@ -432,7 +432,7 @@ config USBMSC_COMPOSITE
 	depends on USBDEV_COMPOSITE
 	---help---
 		Configure the mass storage driver as part of a composite driver
-		(only if CONFIG_USBDEV_COMPOSITE is also defined)
+		(only if USBDEV_COMPOSITE is also defined)
 
 config USBMSC_IFNOBASE
 	int "Offset the mass storage interface number"
@@ -454,7 +454,7 @@ config USBMSC_STRBASE
 		be defined to offset the mass storage string numbers so that they are
 		unique and contiguous.  When used with the CDC/ACM driver, the
 		correct value for this offset is four (or perhaps 5 or 6, depending
-		on if CONFIG_CDCACM_NOTIFSTR or CONFIG_CDCACM_DATAIFSTR are defined).
+		on if CDCACM_NOTIFSTR or CDCACM_DATAIFSTR are defined).
 
 config USBMSC_EP0MAXPACKET
 	int "Max packet size for endpoint 0"

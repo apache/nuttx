@@ -21,7 +21,7 @@ config LCD_RDSHIFT
 		When reading 16-bit gram data, there appears to be a shift in the returned
 		data.  This value fixes the offset.  Default 5.
 
-config CONFIG_STM32_ILI9320_DISABLE
+config STM32_ILI9320_DISABLE
 	bool "Disable LCD_ILI9320 (and LCD_ILI9321) support"
 	default n
 	depends on STM3240G_LCD
@@ -30,7 +30,7 @@ config CONFIG_STM32_ILI9320_DISABLE
 		ID value.  However, code size can be reduced by suppressing support for
 		individual LCDs using this option.
 
-config CONFIG_STM32_ILI9325_DISABLE
+config STM32_ILI9325_DISABLE
 	bool "Disable LCD_ILI9325 support"
 	default n
 	depends on STM3240G_LCD
