@@ -134,7 +134,7 @@
 
 #define MCG_C5_PRDIV_SHIFT        (0)       /* Bits 0-4: PLL External Reference Divider */
 #define MCG_C5_PRDIV_MASK         (31 << MCG_C5_PRDIV_SHIFT)
-#  define MCG_C5_PRDIV(n)         (n << MCG_C5_PRDIV_SHIFT) /* Divide factor n=1..25 */
+#  define MCG_C5_PRDIV(n)         (((n)-1) << MCG_C5_PRDIV_SHIFT) /* Divide factor n=1..25 */
 #define MCG_C5_PLLSTEN            (1 << 5)  /* Bit 5:  PLL Stop Enable */
 #define MCG_C5_PLLCLKEN           (1 << 6)  /* Bit 6:  PLL Clock Enable */
                                             /* Bit 7: Reserved */

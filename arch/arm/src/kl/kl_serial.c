@@ -69,11 +69,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Some sanity checks *******************************************************/
-
-#warning "Revisit"
-#undef BOARD_CORECLK_FREQ
-#define BOARD_CORECLK_FREQ 48000000
-
 /* Is there at least one UART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_UART_DEVICE
@@ -359,7 +354,7 @@ static uart_dev_t g_uart0port =
 static struct up_dev_s g_uart1priv =
 {
   .uartbase       = KL_UART1_BASE,
-  .clock          = BOARD_CORECLK_FREQ,
+  .clock          = BOARD_BUSCLK_FREQ,
   .baud           = CONFIG_UART1_BAUD,
 #ifdef CONFIG_DEBUG
   .irqe           = KL_IRQ_UART1E,
@@ -393,7 +388,7 @@ static uart_dev_t g_uart1port =
 static struct up_dev_s g_uart2priv =
 {
   .uartbase       = KL_UART2_BASE,
-  .clock          = BOARD_BUS_FREQ,
+  .clock          = BOARD_BUSCLK_FREQ,
   .baud           = CONFIG_UART2_BAUD,
 #ifdef CONFIG_DEBUG
   .irqe           = KL_IRQ_UART2E,
@@ -427,7 +422,7 @@ static uart_dev_t g_uart2port =
 static struct up_dev_s g_uart3priv =
 {
   .uartbase       = KL_UART3_BASE,
-  .clock          = BOARD_BUS_FREQ,
+  .clock          = BOARD_BUSCLK_FREQ,
   .baud           = CONFIG_UART3_BAUD,
 #ifdef CONFIG_DEBUG
   .irqe           = KL_IRQ_UART3E,
@@ -461,7 +456,7 @@ static uart_dev_t g_uart3port =
 static struct up_dev_s g_uart4priv =
 {
   .uartbase       = KL_UART4_BASE,
-  .clock          = BOARD_BUS_FREQ,
+  .clock          = BOARD_BUSCLK_FREQ,
   .baud           = CONFIG_UART4_BAUD,
 #ifdef CONFIG_DEBUG
   .irqe           = KL_IRQ_UART4E,
@@ -495,7 +490,7 @@ static uart_dev_t g_uart4port =
 static struct up_dev_s g_uart5priv =
 {
   .uartbase       = KL_UART5_BASE,
-  .clock          = BOARD_BUS_FREQ,
+  .clock          = BOARD_BUSCLK_FREQ,
   .baud           = CONFIG_UART5_BAUD,
 #ifdef CONFIG_DEBUG
   .irqe           = KL_IRQ_UART5E,
@@ -709,7 +704,7 @@ static int up_attach(struct uart_dev_s *dev)
 static void up_detach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  
+
   /* Disable interrupts */
 
   up_restoreuartint(priv, 0);
