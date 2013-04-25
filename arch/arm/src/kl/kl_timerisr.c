@@ -51,7 +51,6 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "chip/kl_gcr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
