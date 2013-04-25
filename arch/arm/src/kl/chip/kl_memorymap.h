@@ -48,10 +48,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* from NUC memmap */
-#define KL_GPIO_BASEOLD    0x50004000 /* -0x50007fff: GPIO control registers */
-#define KL_GCR_BASE        0x50000000 /* -0x500001ff: System global control registers */
-
 /* Memory Map ***********************************************************************/
 /* K40 Family
  *
