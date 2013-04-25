@@ -50,27 +50,13 @@
  ************************************************************************************/
 
 /* Configuration *********************************************************************/
-/* Make that no unsupport UARTs are enabled */
 
-#ifndef KL_NISO7816
-#  define KL_NISO7816 0
-#endif
-
-#if (KL_NISO7816 + KL_NUART) < 6
-#  undef CONFIG_KL_UART5
-#  if (KL_NISO7816 + KL_NUART) < 5
-#    undef CONFIG_KL_UART4
-#    if (KL_NISO7816 + KL_NUART) < 4
-#      undef CONFIG_KL_UART3
-#      if (KL_NISO7816 + KL_NUART) < 3
-#        undef CONFIG_KL_UART2
-#        if (KL_NISO7816 + KL_NUART) < 2
-#          undef CONFIG_KL_UART1
-#          if (KL_NISO7816 + KL_NUART) < 1
-#            undef CONFIG_KL_UART0
-#          endif
-#        endif
-#      endif
+#if (KL_NUART) < 3
+#  undef CONFIG_KL_UART2
+#  if (KL_NUART) < 2
+#    undef CONFIG_KL_UART1
+#    if (KL_NUART) < 1
+#      undef CONFIG_KL_UART0
 #    endif
 #  endif
 #endif
@@ -78,9 +64,7 @@
 /* Are any UARTs enabled? */
 
 #undef HAVE_UART_DEVICE
-#if defined(CONFIG_KL_UART0) || defined(CONFIG_KL_UART1) || \
-    defined(CONFIG_KL_UART2) || defined(CONFIG_KL_UART3) || \
-    defined(CONFIG_KL_UART5)
+#if defined(CONFIG_KL_UART0) || defined(CONFIG_KL_UART1) || defined(CONFIG_KL_UART2) 
 #  define HAVE_UART_DEVICE 1
 #endif
 
@@ -91,52 +75,19 @@
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_KL_UART0)
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_KL_UART1)
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_KL_UART2)
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
-#  define HAVE_SERIAL_CONSOLE 1
-#elif defined(CONFIG_UART3_SERIAL_CONSOLE) && defined(CONFIG_KL_UART3)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
-#  define HAVE_SERIAL_CONSOLE 1
-#elif defined(CONFIG_UART4_SERIAL_CONSOLE) && defined(CONFIG_KL_UART4)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
-#  define HAVE_SERIAL_CONSOLE 1
-#elif defined(CONFIG_UART5_SERIAL_CONSOLE) && defined(CONFIG_KL_UART5)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
 #else
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_UART2_SERIAL_CONSOLE
-#  undef CONFIG_UART3_SERIAL_CONSOLE
-#  undef CONFIG_UART4_SERIAL_CONSOLE
-#  undef CONFIG_UART5_SERIAL_CONSOLE
 #  undef HAVE_SERIAL_CONSOLE
 #endif
 
@@ -145,9 +96,6 @@
 # undef CONFIG_UART0_FLOWCONTROL
 # undef CONFIG_UART1_FLOWCONTROL
 # undef CONFIG_UART2_FLOWCONTROL
-# undef CONFIG_UART3_FLOWCONTROL
-# undef CONFIG_UART4_FLOWCONTROL
-# undef CONFIG_UART5_FLOWCONTROL
 
 /* UART FIFO support is not fully implemented.
  *
@@ -173,15 +121,6 @@
 #endif
 #ifndef CONFIG_KL_UART2PRIO
 #  define CONFIG_KL_UART2PRIO NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-#ifndef CONFIG_KL_UART3PRIO
-#  define CONFIG_KL_UART3PRIO NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-#ifndef CONFIG_KL_UART4PRIO
-#  define CONFIG_KL_UART4PRIO NVIC_SYSH_PRIORITY_DEFAULT
-#endif
-#ifndef CONFIG_KL_UART5PRIO
-#  define CONFIG_KL_UART5PRIO NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
 /* Ethernet controller configuration */

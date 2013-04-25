@@ -116,7 +116,7 @@ void kl_pllconfig(void)
   /* System oscillator drives 32 kHz clock for various peripherals (OSC32KSEL=0) */
 
   regval32  = getreg32(KL_SIM_SOPT1);
-  regval32 &= ~(SIM_SOPT1_OSC32KSEL);
+  regval32 &= ~(SIM_SOPT1_OSC32KSEL_MASK);
   putreg32(regval32, KL_SIM_SOPT1);
 
   /* Select PLL as a clock source for various peripherals (PLLFLLSEL=1)

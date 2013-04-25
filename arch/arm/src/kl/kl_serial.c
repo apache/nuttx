@@ -99,17 +99,6 @@
 #    define CONSOLE_DEV         g_uart2port /* UART2 is console */
 #    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
 #    define UART2_ASSIGNED      1
-#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart3port /* UART3 is console */
-#    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
-#    define UART3_ASSIGNED      1
-#elif defined(CONFIG_UART4_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart4port /* UART4 is console */
-#    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
-#    define UART4_ASSIGNED      1
-#elif defined(CONFIG_UART5_SERIAL_CONSOLE)
-#    define CONSOLE_DEV         g_uart5port /* UART5 is console */
-#    define TTYS5_DEV           g_uart5port /* UART5 is ttyS0 */
 #else
 #  undef CONSOLE_DEV                        /* No console */
 #  if defined(CONFIG_KL_UART0)
@@ -121,15 +110,6 @@
 #  elif defined(CONFIG_KL_UART2)
 #    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
 #    define UART2_ASSIGNED      1
-#  elif defined(CONFIG_KL_UART3)
-#    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
-#    define UART3_ASSIGNED      1
-#  elif defined(CONFIG_KL_UART4)
-#    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
-#    define UART4_ASSIGNED      1
-#  elif defined(CONFIG_KL_UART5)
-#    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
-#    define UART5_ASSIGNED      1
 #  endif
 #endif
 
@@ -144,15 +124,6 @@
 #elif defined(CONFIG_KL_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS1_DEV           g_uart2port /* UART2 is ttyS1 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_KL_UART3) && !defined(UART3_ASSIGNED)
-#  define TTYS1_DEV           g_uart3port /* UART3 is ttyS1 */
-#  define UART3_ASSIGNED      1
-#elif defined(CONFIG_KL_UART4) && !defined(UART4_ASSIGNED)
-#  define TTYS1_DEV           g_uart4port /* UART4 is ttyS1 */
-#  define UART4_ASSIGNED      1
-#elif defined(CONFIG_KL_UART5) && !defined(UART5_ASSIGNED)
-#  define TTYS1_DEV           g_uart5port /* UART5 is ttyS1 */
-#  define UART5_ASSIGNED      1
 #endif
 
 /* Pick ttys2.  This could be one of UART1-5. It can't be UART0 because that
@@ -166,15 +137,6 @@
 #elif defined(CONFIG_KL_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS2_DEV           g_uart2port /* UART2 is ttyS2 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_KL_UART3) && !defined(UART3_ASSIGNED)
-#  define TTYS2_DEV           g_uart3port /* UART3 is ttyS2 */
-#  define UART3_ASSIGNED      1
-#elif defined(CONFIG_KL_UART4) && !defined(UART4_ASSIGNED)
-#  define TTYS2_DEV           g_uart4port /* UART4 is ttyS2 */
-#  define UART4_ASSIGNED      1
-#elif defined(CONFIG_KL_UART5) && !defined(UART5_ASSIGNED)
-#  define TTYS2_DEV           g_uart5port /* UART5 is ttyS2 */
-#  define UART5_ASSIGNED      1
 #endif
 
 /* Pick ttys3. This could be one of UART2-5. It can't be UART0-1 because
@@ -185,44 +147,6 @@
 #if defined(CONFIG_KL_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS3_DEV           g_uart2port /* UART2 is ttyS3 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_KL_UART3) && !defined(UART3_ASSIGNED)
-#  define TTYS3_DEV           g_uart3port /* UART3 is ttyS3 */
-#  define UART3_ASSIGNED      1
-#elif defined(CONFIG_KL_UART4) && !defined(UART4_ASSIGNED)
-#  define TTYS3_DEV           g_uart4port /* UART4 is ttyS3 */
-#  define UART4_ASSIGNED      1
-#elif defined(CONFIG_KL_UART5) && !defined(UART5_ASSIGNED)
-#  define TTYS3_DEV           g_uart5port /* UART5 is ttyS3 */
-#  define UART5_ASSIGNED      1
-#endif
-
-/* Pick ttys4. This could be one of UART3-5. It can't be UART0-2 because
- * those have already been assigned to ttsyS0, 1, 2 or 3.  One of
- * UART 3-5 could also be the console.
- */
-
-#if defined(CONFIG_KL_UART3) && !defined(UART3_ASSIGNED)
-#  define TTYS4_DEV           g_uart3port /* UART3 is ttyS4 */
-#  define UART3_ASSIGNED      1
-#elif defined(CONFIG_KL_UART4) && !defined(UART4_ASSIGNED)
-#  define TTYS4_DEV           g_uart4port /* UART4 is ttyS4 */
-#  define UART4_ASSIGNED      1
-#elif defined(CONFIG_KL_UART5) && !defined(UART5_ASSIGNED)
-#  define TTYS4_DEV           g_uart5port /* UART5 is ttyS4 */
-#  define UART5_ASSIGNED      1
-#endif
-
-/* Pick ttys5. This could be one of UART4-5. It can't be UART0-3 because
- * those have already been assigned to ttsyS0, 1, 2, 3 or 4.  One of
- * UART 4-5 could also be the console.
- */
-
-#if defined(CONFIG_KL_UART4) && !defined(UART4_ASSIGNED)
-#  define TTYS5_DEV           g_uart4port /* UART4 is ttyS5 */
-#  define UART4_ASSIGNED      1
-#elif defined(CONFIG_KL_UART5) && !defined(UART5_ASSIGNED)
-#  define TTYS5_DEV           g_uart5port /* UART5 is ttyS5 */
-#  define UART5_ASSIGNED      1
 #endif
 
 /****************************************************************************
@@ -304,18 +228,6 @@ static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 #ifdef CONFIG_KL_UART2
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
-#endif
-#ifdef CONFIG_KL_UART3
-static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
-static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
-#endif
-#ifdef CONFIG_KL_UART4
-static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
-static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
-#endif
-#ifdef CONFIG_KL_UART5
-static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
-static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 #endif
 
 /* This describes the state of the Kinetis UART0 port. */
@@ -413,108 +325,6 @@ static uart_dev_t g_uart2port =
    },
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
-};
-#endif
-
-/* This describes the state of the Kinetis UART3 port. */
-
-#ifdef CONFIG_KL_UART3
-static struct up_dev_s g_uart3priv =
-{
-  .uartbase       = KL_UART3_BASE,
-  .clock          = BOARD_BUSCLK_FREQ,
-  .baud           = CONFIG_UART3_BAUD,
-#ifdef CONFIG_DEBUG
-  .irqe           = KL_IRQ_UART3E,
-#endif
-  .irqs           = KL_IRQ_UART3S,
-  .irqprio        = CONFIG_KL_UART3PRIO,
-  .parity         = CONFIG_UART3_PARITY,
-  .bits           = CONFIG_UART3_BITS,
-};
-
-static uart_dev_t g_uart3port =
-{
-  .recv     =
-  {
-    .size   = CONFIG_UART3_RXBUFSIZE,
-    .buffer = g_uart3rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART3_TXBUFSIZE,
-    .buffer = g_uart3txbuffer,
-   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart3priv,
-};
-#endif
-
-/* This describes the state of the Kinetis UART4 port. */
-
-#ifdef CONFIG_KL_UART4
-static struct up_dev_s g_uart4priv =
-{
-  .uartbase       = KL_UART4_BASE,
-  .clock          = BOARD_BUSCLK_FREQ,
-  .baud           = CONFIG_UART4_BAUD,
-#ifdef CONFIG_DEBUG
-  .irqe           = KL_IRQ_UART4E,
-#endif
-  .irqs           = KL_IRQ_UART4S,
-  .irqprio        = CONFIG_KL_UART4PRIO,
-  .parity         = CONFIG_UART4_PARITY,
-  .bits           = CONFIG_UART4_BITS,
-};
-
-static uart_dev_t g_uart4port =
-{
-  .recv     =
-  {
-    .size   = CONFIG_UART4_RXBUFSIZE,
-    .buffer = g_uart4rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART4_TXBUFSIZE,
-    .buffer = g_uart4txbuffer,
-   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart4priv,
-};
-#endif
-
-/* This describes the state of the Kinetis UART5 port. */
-
-#ifdef CONFIG_KL_UART5
-static struct up_dev_s g_uart5priv =
-{
-  .uartbase       = KL_UART5_BASE,
-  .clock          = BOARD_BUSCLK_FREQ,
-  .baud           = CONFIG_UART5_BAUD,
-#ifdef CONFIG_DEBUG
-  .irqe           = KL_IRQ_UART5E,
-#endif
-  .irqs           = KL_IRQ_UART5S,
-  .irqprio        = CONFIG_KL_UART5PRIO,
-  .parity         = CONFIG_UART5_PARITY,
-  .bits           = CONFIG_UART5_BITS,
-};
-
-static uart_dev_t g_uart5port =
-{
-  .recv     =
-  {
-    .size   = CONFIG_UART5_RXBUFSIZE,
-    .buffer = g_uart5rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART5_TXBUFSIZE,
-    .buffer = g_uart5txbuffer,
-   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart5priv,
 };
 #endif
 
@@ -758,27 +568,6 @@ static int up_interrupte(int irq, void *context)
     }
   else
 #endif
-#ifdef CONFIG_KL_UART3
-  if (g_uart3priv.irqe == irq)
-    {
-      dev = &g_uart3port;
-    }
-  else
-#endif
-#ifdef CONFIG_KL_UART4
-  if (g_uart4priv.irqe == irq)
-    {
-      dev = &g_uart4port;
-    }
-  else
-#endif
-#ifdef CONFIG_KL_UART5
-  if (g_uart5priv.irqe == irq)
-    {
-      dev = &g_uart5port;
-    }
-  else
-#endif
     {
       PANIC(OSERR_INTERNAL);
     }
@@ -844,27 +633,6 @@ static int up_interrupts(int irq, void *context)
   if (g_uart2priv.irqs == irq)
     {
       dev = &g_uart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_KL_UART3
-  if (g_uart3priv.irqs == irq)
-    {
-      dev = &g_uart3port;
-    }
-  else
-#endif
-#ifdef CONFIG_KL_UART4
-  if (g_uart4priv.irqs == irq)
-    {
-      dev = &g_uart4port;
-    }
-  else
-#endif
-#ifdef CONFIG_KL_UART5
-  if (g_uart5priv.irq == irqs)
-    {
-      dev = &g_uart5port;
     }
   else
 #endif
