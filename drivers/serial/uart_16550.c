@@ -2,7 +2,7 @@
  * drivers/serial/uart_16550.c
  * Serial driver for 16550 UART
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -865,6 +865,7 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
+#ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
         struct u16550_s *user = (struct u16550_s*)arg;
@@ -879,6 +880,7 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif
 
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {

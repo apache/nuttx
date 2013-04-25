@@ -336,13 +336,25 @@ config STANDARD_SERIAL
 	---help---
 		Enable the standard, upper-half serial driver used by most MCU serial peripherals.
 
-config CONFIG_SERIAL_NPOLLWAITERS
+config SERIAL_NPOLLWAITERS
 	int "Number of poll threads"
 	default 2
 	depends on !DISABLE_POLL && STANDARD_SERIAL
 	---help---
 		Maximum number of threads than can be waiting for POLL events.
 		Default: 2
+
+config SERIAL_TIOCSERGSTRUCT
+	bool "Support TIOCSERGSTRUCT"
+	default n
+	depends on DEBUG && (MCU_SERIAL || 16550_UART)
+	---help---
+		As a debug option, many serial bottom half drivers support the TIOCSERGSTRUCT
+		that allows you to get the internal drvier data structure.  By default, this
+		IOCTL is not supported in order to reduce footprint.  But if (1) the driver
+		supports the TIOCSERGSTRUCT ioctl, and (2) this option is selected, then
+		support for the TIOCSERGSTRUCT will be enabled.
+
 
 #
 # U[S]ARTn_XYZ settings for MCU serial drivers

@@ -760,6 +760,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
+#ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
         struct nuc_dev_s *user = (struct nuc_dev_s*)arg;
@@ -773,6 +774,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif
 
     case TIOCSBRK:   /* BSD compatibility: Turn break on, unconditionally */
     case TIOCCBRK:   /* BSD compatibility: Turn break off, unconditionally */

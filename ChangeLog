@@ -4628,3 +4628,7 @@
 	  could be a good feature, the codes have not be well utilized nor
 	  documented.  Give that situation it is better to remove the API
 	  and reduce the footprint a little (2014-4-25).
+	* drivers/serial/Kconfig and arch/*/src/*/*_serial.c:  Add
+	  compilation so that the useless TIOCSERGSTRUCT ioctl logic
+	  is not build unless CONFIG_DEBUG and CONFIG_SERIAL_TIOCSERGSTRUCT
+	  are defined.
