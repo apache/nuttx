@@ -57,32 +57,42 @@
 #define BOARD_XTAL_FREQ      8000000        /* 8MHz crystal frequency (REFCLK) */
 #define BOARD_XTAL32_FREQ    32768          /* 32KHz RTC Oscillator */
 
-/* PLL Configuration.  NOTE: Only even frequency crystals are supported that will
- * produce a 2MHz reference clock to the PLL.
+/* PLL Configuration.
  *
- *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 4MHz/2 = 2MHz
- *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2Mhz*48 = 96MHz
- *   MCG Frequency:         PLLOUT = 96MHz
+ *   PLL Input frequency:   PLLIN     = REFCLK / PRDIV0 = 8MHz / 2 = 4MHz
+ *   PLL Output frequency:  PLLOUT    = PLLIN * VDIV0   = 4Mhz * 24 = 96MHz
+ *   MCGPLLCLK Frequency:   MCGPLLCLK = 96MHz
  */
 
-#define BOARD_PRDIV          2              /* PLL External Reference Divider */
-#define BOARD_VDIV           48             /* PLL VCO Divider (frequency multiplier) */
+#define BOARD_PRDIV0         2              /* PLL External Reference Divider */
+#define BOARD_VDIV0          24             /* PLL VCO Divider (frequency multiplier) */
 
-#define BOARD_PLLIN_FREQ     (BOARD_XTAL_FREQ / BOARD_PRDIV)
-#define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV)
-#define BOARD_MCG_FREQ       BOARD_PLLOUT_FREQ
+#define BOARD_PLLIN_FREQ     (BOARD_XTAL_FREQ / BOARD_PRDIV0)
+#define BOARD_PLLOUT_FREQ    (BOARD_PLLIN_FREQ * BOARD_VDIV0)
+#define BOARD_MCGPLLCLK_FREQ  BOARD_PLLOUT_FREQ
 
-/* SIM CLKDIV1 dividers */
+/* MCGOUTCLK: MCG output of either IRC, MCGFLLCLK, MCGPLLCLK, or MCG's external
+ * reference clock that sources the core, system, bus, and flash clock.
+ *
+ * MCGOUTCLK = MCGPLLCLK = 96MHz
+ */
 
-#define BOARD_OUTDIV1        1              /* Core        = MCG, 96MHz */
-#define BOARD_OUTDIV2        2              /* Bus         = MCG/2, 48MHz */
-#define BOARD_OUTDIV3        2              /* FlexBus     = MCG/2, 48MHz */
-#define BOARD_OUTDIV4        4              /* Flash clock = MCG/4, 24MHz */
+#define BOARD_MCGOUTCLK_FREQ  BOARD_MCGPLLCLK_FREQ
 
-#define BOARD_CORECLK_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV1)
-#define BOARD_BUS_FREQ      (BOARD_MCG_FREQ / BOARD_OUTDIV2)
-#define BOARD_FLEXBUS_FREQ  (BOARD_MCG_FREQ / BOARD_OUTDIV3)
-#define BOARD_FLASHCLK_FREQ (BOARD_MCG_FREQ / BOARD_OUTDIV4)
+/* SIM CLKDIV1 dividers.
+ *
+ * Core/system clock
+ *   MCGOUTCLK divided by OUTDIV1, clocks the ARM Cortex-M0+ core
+ *
+ * Bus clock
+ *   System clock divided by OUTDIV4, clocks the bus slaves and peripherals.
+ */
+
+#define BOARD_OUTDIV1        2              /* Core/system = MCGOUTCLK / 2, 48MHz */
+#define BOARD_OUTDIV4        2              /* Bus clock   = System clock / 2, 24MHz */
+
+#define BOARD_CORECLK_FREQ  (BOARD_MCGOUTCLK_FREQ / BOARD_OUTDIV1)
+#define BOARD_BUSCLK_FREQ   (BOARD_CORECLK_FREQ / BOARD_OUTDIV4)
 
 /* SDHC clocking ********************************************************************/
 
