@@ -4632,3 +4632,6 @@
 	  compilation so that the useless TIOCSERGSTRUCT ioctl logic
 	  is not build unless CONFIG_DEBUG and CONFIG_SERIAL_TIOCSERGSTRUCT
 	  are defined.
+	* sched/task_delete.c and task_terminate.c:  Most task_terminate()
+	  out of task_delete.c into its own C file.  This should prevent
+	  dragging task_delete() into the link when it is never called.
