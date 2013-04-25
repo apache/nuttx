@@ -400,11 +400,10 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
 /* Prototype is in unistd.h */
 
 /****************************************************************************
- * Name: up_assert and up_assert_code
+ * Name: up_assert
  *
  * Description:
- *   Assertions may be handled in an architecture-specific
- *   way.
+ *   Assertions may be handled in an architecture-specific way.
  *
  ****************************************************************************/
 /* Prototype is in assert.h */

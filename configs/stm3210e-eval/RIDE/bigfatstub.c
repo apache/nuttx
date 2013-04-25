@@ -9,7 +9,7 @@ void os_start(void)
 	for (;;);
 }
 
-void up_assert_code(const uint8_t *filename, int lineno, int errorcode)
+void up_assert(const uint8_t *filename, int lineno)
 {
 	up_lowputc('?');
 	up_lowputc('\n');

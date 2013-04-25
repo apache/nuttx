@@ -61,9 +61,6 @@
 #  define ASSERT(f) \
      { if (!(f)) up_assert((const uint8_t *)__FILE__, (int)__LINE__); }
 
-#  define ASSERTCODE(f, code) \
-     { if (!(f)) up_assert_code((const uint8_t *)__FILE__, (int)__LINE__, code); }
-
 #  define VERIFY(f) \
      { if ((f) < 0) up_assert((const uint8_t *)__FILE__, (int)__LINE__); }
 
@@ -77,15 +74,12 @@
 #    define DEBUGVERIFY(f) ((void)(f))
 #  endif /* CONFIG_DEBUG */
 
-#  define PANIC(code) \
-      up_assert_code((const uint8_t *)__FILE__, (int)__LINE__, (code)|0x8000)
+#  define PANIC() \
+      up_assert((const uint8_t *)__FILE__, (int)__LINE__)
 
 #else
 #  define ASSERT(f) \
      { if (!(f)) up_assert(); }
-
-#  define ASSERTCODE(f, code) \
-     { if (!(f)) up_assert_code(code); }
 
 #    define VERIFY(f) \
        { if ((f) < 0) up_assert(); }
@@ -101,7 +95,7 @@
 #  endif /* CONFIG_DEBUG */
 
 #  define PANIC(code) \
-      up_assert_code((code)|0x8000)
+      up_assert()
 
 #endif
 
@@ -131,11 +125,8 @@ extern "C"
 
 #ifdef CONFIG_HAVE_FILENAME
 void up_assert(FAR const uint8_t *filename, int linenum) noreturn_function;
-void up_assert_code(FAR const uint8_t *filename, int linenum, int errcode)
-       noreturn_function;
 #else
 void up_assert(void) noreturn_function;
-void up_assert_code(int errcode) noreturn_function;
 #endif
 
 #undef EXTERN

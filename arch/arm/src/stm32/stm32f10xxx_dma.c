@@ -299,7 +299,7 @@ static int stm32_dmainterrupt(int irq, void *context)
   else
 #endif
     {
-      PANIC(OSERR_INTERNAL);
+      PANIC();
     }
   dmach = &g_dma[chndx];
 

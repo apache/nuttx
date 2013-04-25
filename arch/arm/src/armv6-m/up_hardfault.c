@@ -151,6 +151,6 @@ int up_hardfault(int irq, FAR void *context)
 
   (void)irqsave();
   lldbg("PANIC!!! Hard fault\n");
-  PANIC(OSERR_UNEXPECTEDISR);
-  return OK;
+  PANIC();
+  return OK; /* Won't get here */
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/arm/up_doirq.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@ void up_doirq(int irq, uint32_t *regs)
 {
   up_ledon(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC(OSERR_ERREXCEPTION);
+  PANIC();
 #else
   uint32_t *savestate;
 

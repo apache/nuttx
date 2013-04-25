@@ -101,10 +101,7 @@ static FAR sigactq_t *sig_allocateaction(void)
       /* And try again */
 
       sigact = (FAR sigactq_t*)sq_remfirst(&g_sigfreeaction);
-      if (!sigact)
-        {
-          PANIC(OSERR_OUTOFMEMORY);
-        }
+      ASSERT(sigact);
     }
 
   return sigact;

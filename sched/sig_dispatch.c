@@ -349,10 +349,7 @@ int sig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
       else
         {
           irqrestore(saved_state);
-          if (!sig_addpendingsignal(stcb, info))
-            {
-              PANIC(OSERR_FAILEDTOADDSIGNAL);
-            }
+          ASSERT(sig_addpendingsignal(stcb, info));
         }
     }
 

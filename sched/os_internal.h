@@ -53,36 +53,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* OS CRASH CODES:  All must lie in the range 0-99 */
-
-enum os_crash_codes_e
-{
-  OSERR_NOERROR = 0,          /* No error */
-  OSERR_NOTIMPLEMENTED,       /* Feature is not implemented */
-  OSERR_INTERNAL,             /* Internal logic error */
-  OSERR_UNEXPECTEDISR,        /* Received unexpected interrupt */
-  OSERR_UNDEFINEDINSN,        /* Undefined instruction */
-  OSERR_ERREXCEPTION,         /* Other CPU-detected errors */
-  OSERR_OUTOFMEMORY,          /* Insufficient memory */
-  OSERR_OUTOFMESSAGES,        /* Out of messages */
-  OSERR_NOIDLETASK,           /* There is no idle task */
-  OSERR_MQNONEMPTYCOUNT,      /* Expected waiter for non-empty queue */
-  OSERR_MQNOTFULLCOUNT,       /* Expected waiter for non-full queue */
-  OSERR_MQNOWAITER,           /* Expected a queue for the waiter */
-  OSERR_BADWAITSEM,           /* Already waiting for a semaphore */
-  OSERR_BADMSGTYPE,           /* Tried to free a bad message type */
-  OSERR_FAILEDTOADDSIGNAL,    /* Failed to add pending signal */
-  OSERR_FAILEDTOREMOVESIGNAL, /* Failed to remove pending signal */
-  OSERR_TIMEOUTNOTCB,         /* Timed out, but not TCB registered */
-  OSERR_NOPENDINGSIGNAL,      /* Expected a signal to be pending */
-  OSERR_BADDELETESTATE,       /* Bad state in task deletion */
-  OSERR_WDOGNOTFOUND,         /* Active watchdog not found */
-  OSERR_EXITFROMINTERRUPT,    /* Interrupt code attempted to exit */
-  OSERR_BADUNBLOCKSTATE,      /* Attempt to unblock from bad state */
-  OSERR_BADBLOCKSTATE,        /* Attempt to block from bad state */
-  OSERR_BADREPRIORITIZESTATE  /* Attempt to reprioritize in bad state or priority */
-};
-
 /* Special task IDS.  Any negative PID is invalid. */
 
 #define NULL_TASK_PROCESS_ID (pid_t)0

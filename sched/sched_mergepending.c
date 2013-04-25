@@ -125,42 +125,37 @@ bool sched_mergepending(void)
        * the g_readytorun list!
        */
 
-      if (!rtrtcb)
+      ASSERT(rtrtcb);
+
+      /* The pndtcb goes just before rtrtcb */
+
+      rtrprev = rtrtcb->blink;
+      if (!rtrprev)
         {
-          PANIC(OSERR_NOIDLETASK);
+          /* Special case: Inserting pndtcb at the head of the list */
+          /* Inform the instrumentation layer that we are switching tasks */
+
+          sched_note_switch(rtrtcb, pndtcb);
+
+          /* Then insert at the head of the list */
+
+          pndtcb->flink      = rtrtcb;
+          pndtcb->blink      = NULL;
+          rtrtcb->blink      = pndtcb;
+          g_readytorun.head  = (FAR dq_entry_t*)pndtcb;
+          rtrtcb->task_state = TSTATE_TASK_READYTORUN;
+          pndtcb->task_state = TSTATE_TASK_RUNNING;
+          ret                = true;
         }
       else
         {
-          /* The pndtcb goes just before rtrtcb */
+          /* Insert in the middle of the list */
 
-          rtrprev = rtrtcb->blink;
-          if (!rtrprev)
-            {
-              /* Special case: Inserting pndtcb at the head of the list */
-              /* Inform the instrumentation layer that we are switching tasks */
-
-              sched_note_switch(rtrtcb, pndtcb);
-
-              /* Then insert at the head of the list */
-
-              pndtcb->flink      = rtrtcb;
-              pndtcb->blink      = NULL;
-              rtrtcb->blink      = pndtcb;
-              g_readytorun.head  = (FAR dq_entry_t*)pndtcb;
-              rtrtcb->task_state = TSTATE_TASK_READYTORUN;
-              pndtcb->task_state = TSTATE_TASK_RUNNING;
-              ret                = true;
-            }
-          else
-            {
-              /* Insert in the middle of the list */
-
-              pndtcb->flink      = rtrtcb;
-              pndtcb->blink      = rtrprev;
-              rtrprev->flink     = pndtcb;
-              rtrtcb->blink      = pndtcb;
-              pndtcb->task_state = TSTATE_TASK_READYTORUN;
-            }
+          pndtcb->flink      = rtrtcb;
+          pndtcb->blink      = rtrprev;
+          rtrprev->flink     = pndtcb;
+          rtrtcb->blink      = pndtcb;
+          pndtcb->task_state = TSTATE_TASK_READYTORUN;
         }
 
       /* Set up for the next time through */

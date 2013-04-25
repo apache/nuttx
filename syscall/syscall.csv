@@ -137,8 +137,6 @@
 "unsetenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int","const char*"
 "up_assert","assert.h","","void","FAR const uint8_t*","int"
 #"up_assert","assert.h","","void"
-"up_assert_code","assert.h","","void","FAR const uint8_t*","int","int"
-#"up_assert_code","assert.h","","void","int"
 "usleep","unistd.h","!defined(CONFIG_DISABLE_SIGNALS)","int","useconds_t"
 "vfork","unistd.h","defined(CONFIG_ARCH_HAVE_VFORK)","pid_t"
 "wait","sys/wait.h","defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_SCHED_HAVE_PARENT)","pid_t","int*"

@@ -113,7 +113,7 @@ static void lpc23xx_decodeirq(uint32_t *regs)
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   lowsyslog("Unexpected IRQ\n");
   current_regs = regs;
-  PANIC(OSERR_ERREXCEPTION);
+  PANIC();
 #else
 
   /* Check which IRQ fires */

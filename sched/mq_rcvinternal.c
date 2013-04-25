@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/mq_rcvinternal.c
  *
- *   Copyright (C) 2007, 2008, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -292,16 +292,11 @@ ssize_t mq_doreceive(mqd_t mqdes, mqmsg_t *mqmsg, void *ubuffer, int *prio)
        * time the task is unblocked
        */
 
-      if (!btcb)
-        {
-          PANIC(OSERR_MQNOTFULLCOUNT);
-        }
-      else
-        {
-          btcb->msgwaitq = NULL;
-          msgq->nwaitnotfull--;
-          up_unblock_task(btcb);
-        }
+      ASSERT(btcb);
+
+       btcb->msgwaitq = NULL;
+       msgq->nwaitnotfull--;
+       up_unblock_task(btcb);
 
       irqrestore(saved_state);
     }

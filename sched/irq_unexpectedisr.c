@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/irq_unexpectedisr.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,6 +83,6 @@ int irq_unexpected_isr(int irq, FAR void *context)
 {
   (void)irqsave();
   lldbg("irq: %d\n", irq);
-  PANIC(OSERR_UNEXPECTEDISR);
+  PANIC();
   return OK; /* Won't get here */
 }

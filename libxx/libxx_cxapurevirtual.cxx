@@ -1,7 +1,7 @@
 //***************************************************************************
 // libxx/libxx_cxapurevirtual.cxx
 //
-//   Copyright (C) 2009 2011 Gregory Nutt. All rights reserved.
+//   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
 //   Author: Gregory Nutt <gnutt@nuttx.org>
 //
 // Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@ extern "C"
 {
   void __cxa_pure_virtual(void)
   {
-    PANIC(100);
+    PANIC();
   }
 }
 

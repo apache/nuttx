@@ -337,7 +337,7 @@ void wd_timer(void)
                 {
                   default:
 #ifdef CONFIG_DEBUG
-                    PANIC(OSERR_INTERNAL);
+                    PANIC();
 #endif
                   case 0:
                     (*((wdentry0_t)(wdog->func)))(0);

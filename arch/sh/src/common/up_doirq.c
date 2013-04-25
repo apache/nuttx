@@ -73,7 +73,7 @@ uint32_t *up_doirq(int irq, uint32_t* regs)
 {
   up_ledon(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC(OSERR_ERREXCEPTION);
+  PANIC();
 #else
   if ((unsigned)irq < NR_IRQS)
     {

@@ -74,7 +74,7 @@ uint8_t *up_doirq(int irq, uint8_t *regs)
 {
   up_ledon(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC(OSERR_ERREXCEPTION);
+  PANIC();
 #else
   uint8_t *savestate;
 

@@ -87,8 +87,6 @@ uintptr_t STUB_task_create(int nbr, uintptr_t parm1, uintptr_t parm2,
 uintptr_t STUB_task_delete(int nbr, uintptr_t parm1);
 uintptr_t STUB_task_restart(int nbr, uintptr_t parm1);
 uintptr_t STUB_up_assert(int nbr, uintptr_t parm1, uintptr_t parm2);
-uintptr_t STUB_up_assert_code(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm3);
 
 /* The following can be individually enabled */
 

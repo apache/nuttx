@@ -145,7 +145,7 @@ int task_terminate(pid_t pid, bool nonblocking)
       dtcb->task_state >= NUM_TASK_STATES)
     {
       sched_unlock();
-      PANIC(OSERR_BADDELETESTATE);
+      PANIC();
     }
 
   /* Perform common task termination logic (flushing streams, calling

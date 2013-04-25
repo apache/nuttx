@@ -203,18 +203,8 @@ FAR mqmsg_t *mq_msgalloc(void)
 
           /* Check if we got an allocated message */
 
-          if (mqmsg)
-            {
-              mqmsg->type = MQ_ALLOC_DYN;
-            }
-
-          /* No?  We are dead */
-
-          else
-            {
-              sdbg("Out of messages\n");
-              PANIC((uint32_t)OSERR_OUTOFMESSAGES);
-            }
+          ASSERT(mqmsg);
+          mqmsg->type = MQ_ALLOC_DYN;
         }
     }
 
@@ -436,16 +426,11 @@ int mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg, size_t msglen, i
 
       /* If one was found, unblock it */
 
-      if (!btcb)
-        {
-          PANIC(OSERR_MQNONEMPTYCOUNT);
-        }
-      else
-        {
-          btcb->msgwaitq = NULL;
-          msgq->nwaitnotempty--;
-          up_unblock_task(btcb);
-        }
+      ASSERT(btcb);
+
+      btcb->msgwaitq = NULL;
+      msgq->nwaitnotempty--;
+      up_unblock_task(btcb);
     }
 
   irqrestore(saved_state);

@@ -123,37 +123,33 @@ int wd_cancel (WDOG_ID wdid)
        * error has occurred because the watchdog is marked active!
        */
 
-      if (!curr)
+      ASSERT(curr);
+
+      /* If there is a watchdog in the timer queue after the one that
+       * is being canceled, then it inherits the remaining ticks.
+       */
+
+      if (curr->next)
         {
-          PANIC(OSERR_WDOGNOTFOUND);
+          curr->next->lag += curr->lag;
+        }
+
+      /* Now, remove the watchdog from the timer queue */
+
+      if (prev)
+        {
+          (void)sq_remafter((FAR sq_entry_t*)prev, &g_wdactivelist);
         }
       else
         {
-          /* If there is a watchdog in the timer queue after the one that
-           * is being canceled, then it inherits the remaining ticks.
-           */
-
-          if (curr->next)
-            {
-              curr->next->lag += curr->lag;
-            }
-
-          /* Now, remove the watchdog from the timer queue */
-
-          if (prev)
-            {
-              (void)sq_remafter((FAR sq_entry_t*)prev, &g_wdactivelist);
-            }
-          else
-            {
-              (void)sq_remfirst(&g_wdactivelist);
-            }
-          wdid->next = NULL;
-
-          /* Return success */
-
-          ret = OK;
+          (void)sq_remfirst(&g_wdactivelist);
         }
+
+      wdid->next = NULL;
+
+      /* Return success */
+
+      ret = OK;
 
       /* Mark the watchdog inactive */
 

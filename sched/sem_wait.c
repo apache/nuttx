@@ -139,10 +139,7 @@ int sem_wait(FAR sem_t *sem)
            * semaphore
            */
 
-          if (rtcb->waitsem != NULL)
-            {
-              PANIC(OSERR_BADWAITSEM);
-            }
+          ASSERT(rtcb->waitsem == NULL);
 
           /* Handle the POSIX semaphore (but don't set the owner yet) */
 

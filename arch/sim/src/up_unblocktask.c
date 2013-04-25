@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_unblocktask.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,68 +81,64 @@
 
 void up_unblock_task(struct tcb_s *tcb)
 {
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+
   /* Verify that the context switch can be performed */
-  if ((tcb->task_state < FIRST_BLOCKED_STATE) ||
-      (tcb->task_state > LAST_BLOCKED_STATE))
-    {
-      PANIC(OSERR_BADUNBLOCKSTATE);
-    }
-  else
-    {
-      struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
 
-      sdbg("Unblocking TCB=%p\n", tcb);
+  ASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
+         (tcb->task_state <= LAST_BLOCKED_STATE));
 
-     /* Remove the task from the blocked task list */
+  sdbg("Unblocking TCB=%p\n", tcb);
 
-     sched_removeblocked(tcb);
+  /* Remove the task from the blocked task list */
 
-     /* Reset its timeslice.  This is only meaningful for round
-      * robin tasks but it doesn't here to do it for everything
-      */
+  sched_removeblocked(tcb);
+
+  /* Reset its timeslice.  This is only meaningful for round
+   * robin tasks but it doesn't here to do it for everything
+   */
 
 #if CONFIG_RR_INTERVAL > 0
-     tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
+  tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
 #endif
 
-     /* Add the task in the correct location in the prioritized
-      * g_readytorun task list
-      */
+  /* Add the task in the correct location in the prioritized
+   * g_readytorun task list
+   */
 
-     if (sched_addreadytorun(tcb))
-       {
-         /* The currently active task has changed! Copy the exception context
-          * into the TCB of the task that was previously active.  if 
-          * up_setjmp returns a non-zero value, then this is really the
-          * previously running task restarting!
-          */
+  if (sched_addreadytorun(tcb))
+    {
+      /* The currently active task has changed! Copy the exception context
+       * into the TCB of the task that was previously active.  if 
+       * up_setjmp returns a non-zero value, then this is really the
+       * previously running task restarting!
+       */
 
-         if (!up_setjmp(rtcb->xcp.regs))
-           {
-             /* Restore the exception context of the new task that is ready to
-              * run (probably tcb).  This is the new rtcb at the head of the
-              * g_readytorun task list.
-              */
+      if (!up_setjmp(rtcb->xcp.regs))
+        {
+          /* Restore the exception context of the new task that is ready to
+           * run (probably tcb).  This is the new rtcb at the head of the
+           * g_readytorun task list.
+           */
 
-             rtcb = (struct tcb_s*)g_readytorun.head;
-             sdbg("New Active Task TCB=%p\n", rtcb);
+          rtcb = (struct tcb_s*)g_readytorun.head;
+          sdbg("New Active Task TCB=%p\n", rtcb);
 
-              /* The way that we handle signals in the simulation is kind of
-               * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
-               * driven environment.
-               */
+          /* The way that we handle signals in the simulation is kind of
+           * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
+           * driven environment.
+           */
 
-              if (rtcb->xcp.sigdeliver)
-                {
-                  sdbg("Delivering signals TCB=%p\n", rtcb);
-                  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
-                  rtcb->xcp.sigdeliver = NULL;
-                }
+          if (rtcb->xcp.sigdeliver)
+            {
+              sdbg("Delivering signals TCB=%p\n", rtcb);
+              ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+              rtcb->xcp.sigdeliver = NULL;
+            }
 
-              /* Then switch contexts */
+          /* Then switch contexts */
 
-             up_longjmp(rtcb->xcp.regs, 1);
-           }
+          up_longjmp(rtcb->xcp.regs, 1);
        }
     }
 }

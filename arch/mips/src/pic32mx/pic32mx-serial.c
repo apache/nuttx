@@ -468,7 +468,7 @@ static int up_interrupt(int irq, void *context)
   else
 #endif
     {
-      PANIC(OSERR_INTERNAL);
+      PANIC();
     }
   priv = (struct up_dev_s*)dev->priv;
   DEBUGASSERT(priv);

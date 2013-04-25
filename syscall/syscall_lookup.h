@@ -68,7 +68,6 @@ SYSCALL_LOOKUP(task_create,               5, STUB_task_create)
 SYSCALL_LOOKUP(task_delete,               1, STUB_task_delete)
 SYSCALL_LOOKUP(task_restart,              1, STUB_task_restart)
 SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
-SYSCALL_LOOKUP(up_assert_code,            3, STUB_up_assert_code)
 
 /* The following can be individually enabled */
 

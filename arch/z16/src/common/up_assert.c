@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_assert.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,41 +139,4 @@ void up_assert(void)
   up_stackdump();
   up_registerdump();
  _up_assert(EXIT_FAILURE);
-}
-
-/****************************************************************************
- * Name: up_assert_code
- ****************************************************************************/
-
-#ifdef CONFIG_HAVE_FILENAME
-void up_assert_code(const uint8_t *filename, int lineno, int errorcode)
-#else
-void up_assert_code(int errorcode)
-#endif
-{
-#if CONFIG_TASK_NAME_SIZE > 0
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
-#endif
-
-  up_ledon(LED_ASSERTION);
-
-#ifdef CONFIG_HAVE_FILENAME
-#if CONFIG_TASK_NAME_SIZE > 0
-  lldbg("Assertion failed at file:%s line: %d task: %s error code: %d\n",
-        filename, lineno, rtcb->name, errorcode);
-#else
-  lldbg("Assertion failed at file:%s line: %d error code: %d\n",
-        filename, lineno, errorcode);
-#endif
-#else
-#if CONFIG_TASK_NAME_SIZE > 0
-  lldbg("Assertion failed: task: %s error code: %d\n", rtcb->name, errorcode);
-#else
-  lldbg("Assertion failed: error code: %d\n", errorcode);
-#endif
-#endif
-
-  up_stackdump();
-  up_registerdump();
- _up_assert(errorcode);
 }

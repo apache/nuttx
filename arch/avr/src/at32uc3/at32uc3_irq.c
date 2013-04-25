@@ -179,7 +179,7 @@ static int avr32_xcptn(int irq, FAR void *context)
 {
   (void)irqsave();
   lldbg("PANIC!!! Exception IRQ: %d\n", irq);
-  PANIC(OSERR_UNEXPECTEDISR);
+  PANIC();
   return 0;
 }
 

@@ -505,7 +505,7 @@ static int z8_rxinterrupt(int irq, FAR void *context)
     }
   else
     {
-      PANIC(OSERR_INTERNAL);
+      PANIC();
     }
 
   priv = (struct z8_uart_s*)dev->priv;
@@ -554,7 +554,7 @@ static int z8_txinterrupt(int irq, FAR void *context)
     }
   else
     {
-      PANIC(OSERR_INTERNAL);
+      PANIC();
     }
 
   priv = (struct z8_uart_s*)dev->priv;

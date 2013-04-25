@@ -113,46 +113,20 @@ void mq_waitirq(FAR struct tcb_s *wtcb, int errcode)
       /* Get the message queue associated with the waiter from the TCB */
 
       msgq = wtcb->msgwaitq;
-#ifdef CONFIG_DEBUG
-      if (!msgq)
-        {
-          /* In these states there must always be an associated message queue */
+      DEBUGASSERT(msgq);
 
-          PANIC((uint32_t)OSERR_MQNOWAITER);
-        }
-#endif
       wtcb->msgwaitq = NULL;
 
       /* Decrement the count of waiters and cancel the wait */
 
       if (wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY)
         {
-#ifdef CONFIG_DEBUG
-          if (msgq->nwaitnotempty <= 0)
-            {
-              /* This state, there should be a positive, non-zero waiter
-               * count.
-               */
-
-               PANIC((uint32_t)OSERR_MQNONEMPTYCOUNT);
-
-            }
-#endif
+          DEBUGASSERT(msgq->nwaitnotempty > 0);
           msgq->nwaitnotempty--;
         }
       else
         {
-#ifdef CONFIG_DEBUG
-          if (msgq->nwaitnotfull <= 0)
-            {
-              /* This state, there should be a positive, non-zero waiter
-               * count.
-               */
-
-               PANIC((uint32_t)OSERR_MQNOTFULLCOUNT);
-
-            }
-#endif
+          DEBUGASSERT(msgq->nwaitnotfull > 0);
           msgq->nwaitnotfull--;
         }
 

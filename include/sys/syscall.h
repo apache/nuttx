@@ -94,8 +94,7 @@
 #define SYS_task_delete                (CONFIG_SYS_RESERVED+22)
 #define SYS_task_restart               (CONFIG_SYS_RESERVED+23)
 #define SYS_up_assert                  (CONFIG_SYS_RESERVED+24)
-#define SYS_up_assert_code             (CONFIG_SYS_RESERVED+25)
-#define __SYS_vfork                    (CONFIG_SYS_RESERVED+26)
+#define __SYS_vfork                    (CONFIG_SYS_RESERVED+25)
 
 /* The following can be individually enabled */
 

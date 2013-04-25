@@ -80,7 +80,6 @@
 
 void z16f_sysexec(FAR chipreg_t *regs)
 {
-  int errcode = OSERR_ERREXCEPTION;
   uint16_t excp;
   
   /* Save that register reference so that it can be used for built-in
@@ -98,35 +97,42 @@ void z16f_sysexec(FAR chipreg_t *regs)
     {
       SYSDBG("SP OVERFLOW\n");
     }
+
   if ((excp & Z16F_SYSEXCP_PCOVF) != 0)
     {
       SYSDBG("PC OVERFLOW\n");
     }
+
   if ((excp & Z16F_SYSEXCP_DIV0) != 0)
     {
       SYSDBG("Divide by zero\n");
     }
+
   if ((excp & Z16F_SYSEXCP_DIVOVF) != 0)
     {
       SYSDBG("Divide overflow\n");
     }
+
   if ((excp & Z16F_SYSEXCP_ILL) != 0)
     {
       SYSDBG("Illegal instruction\n");
-      errcode = OSERR_UNDEFINEDINSN;
     }
+
   if ((excp & Z16F_SYSEXCP_WDTOSC) != 0)
     {
       SYSDBG("WDT oscillator failure\n");
     }
+
   if ((excp & Z16F_SYSEXCP_PRIOSC) != 0)
     {
       SYSDBG("Primary Oscillator Failure\n");
     }
+
   if ((excp & Z16F_SYSEXCP_WDT) != 0)
     {
       SYSDBG("Watchdog timeout\n");
       z16f_reset();
     }
-  PANIC(errcode);
+
+  PANIC();
 }

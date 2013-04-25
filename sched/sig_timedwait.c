@@ -104,12 +104,8 @@ static void sig_timeout(int argc, uint32_t itcb)
       uint32_t itcb;
     } u;
 
-   u.itcb = itcb;
-
-  if (!u.wtcb)
-    {
-      PANIC(OSERR_TIMEOUTNOTCB);
-    }
+  u.itcb = itcb;
+  ASSERT(u.wtcb);
 
   /* There may be a race condition -- make sure the task is
    * still waiting for a signal
@@ -210,10 +206,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
        */
 
       sigpend = sig_removependingsignal(rtcb, sig_lowest(&intersection));
-      if (!sigpend)
-        {
-          PANIC(OSERR_NOPENDINGSIGNAL);
-        }
+      ASSERT(sigpend);
 
       /* Return the signal info to the caller if so requested */
 

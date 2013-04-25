@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/src/up_prefetchabort.c
  *
- *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -149,6 +149,6 @@ void up_prefetchabort(uint32_t *regs)
 #endif
     {
       lldbg("Prefetch abort. PC: %08x\n", regs[REG_PC]);
-      PANIC(OSERR_ERREXCEPTION);
+      PANIC();
     }
 }

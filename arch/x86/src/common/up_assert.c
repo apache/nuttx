@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/x86/src/common/up_assert.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -248,6 +248,7 @@ void up_assert(const uint8_t *filename, int lineno)
 #endif
 
   up_ledon(LED_ASSERTION);
+
 #ifdef CONFIG_PRINT_TASKNAME
   lldbg("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
@@ -255,29 +256,7 @@ void up_assert(const uint8_t *filename, int lineno)
   lldbg("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
+
   up_dumpstate();
   _up_assert(EXIT_FAILURE);
-}
-
-/****************************************************************************
- * Name: up_assert_code
- ****************************************************************************/
-
-void up_assert_code(const uint8_t *filename, int lineno, int errorcode)
-{
-#ifdef CONFIG_PRINT_TASKNAME
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
-#endif
-
-  up_ledon(LED_ASSERTION);
-
-#ifdef CONFIG_PRINT_TASKNAME
-  lldbg("Assertion failed at file:%s line: %d task: %s error code: %d\n",
-        filename, lineno, rtcb->name, errorcode);
-#else
-  lldbg("Assertion failed at file:%s line: %d error code: %d\n",
-        filename, lineno, errorcode);
-#endif
-  up_dumpstate();
-  _up_assert(errorcode);
 }

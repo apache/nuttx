@@ -4623,3 +4623,8 @@
 	  KL architecture directory as need to get the interrupt-driven
 	  serial driver to work.  The Freedom KL25Z NSH configuration now
 	  works (2014-4-25).
+	* include/nuttx/assert.h, arch/*/src/*/up_assert.c, and other file:
+	  Remove up_assert_code().  While asserting with an encoded value
+	  could be a good feature, the codes have not be well utilized nor
+	  documented.  Give that situation it is better to remove the API
+	  and reduce the footprint a little (2014-4-25).

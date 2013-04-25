@@ -140,10 +140,7 @@ int sigsuspend(FAR const sigset_t *set)
 
       unblocksigno = sig_lowest(&intersection);
       sigpend = sig_removependingsignal(rtcb, unblocksigno);
-      if (!sigpend)
-        {
-          PANIC(OSERR_FAILEDTOREMOVESIGNAL);
-        }
+      ASSERT(sigpend);
 
       sig_releasependingsignal(sigpend);
       irqrestore(saved_state);
