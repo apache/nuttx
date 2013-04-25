@@ -4611,3 +4611,7 @@
 	  conditional compilation.  From Ken Pettit (2014-4-24).
 	* arch/*/src/common/up_initialize.c:  Same change required to other
 	  architectures (2014-4-24).
+	* arch/arm/src/kl/kl_clockconfig.c and configs/freedom-kl25z/include/board.h:
+	  Modify out PLL configuration so that it uses the values in
+	  board.h;  Fix PLL settings in board.h so that the correct core
+	  and bus clock frequencies are generated. (2014-4-24).

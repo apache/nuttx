@@ -59,28 +59,23 @@
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
-
-#warning "Revisit"
-#undef BOARD_CORECLK_FREQ
-#define BOARD_CORECLK_FREQ 48000000
-
 /* Select UART parameters for the selected console */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     KL_UART0_BASE
-#  define CONSOLE_FREQ     48000000
+#  define CONSOLE_FREQ     BOARD_CORECLK_FREQ
 #  define CONSOLE_BAUD     CONFIG_UART0_BAUD
 #  define CONSOLE_BITS     CONFIG_UART0_BITS
 #  define CONSOLE_PARITY   CONFIG_UART0_PARITY
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     KL_UART1_BASE
-#  define CONSOLE_FREQ     48000000
+#  define CONSOLE_FREQ     BOARD_BUSCLK_FREQ
 #  define CONSOLE_BAUD     CONFIG_UART1_BAUD
 #  define CONSOLE_BITS     CONFIG_UART1_BITS
 #  define CONSOLE_PARITY   CONFIG_UART1_PARITY
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
 #  define CONSOLE_BASE     KL_UART2_BASE
-#  define CONSOLE_FREQ     48000000
+#  define CONSOLE_FREQ     BOARD_BUSCLK_FREQ
 #  define CONSOLE_BAUD     CONFIG_UART2_BAUD
 #  define CONSOLE_BITS     CONFIG_UART2_BITS
 #  define CONSOLE_PARITY   CONFIG_UART2_PARITY
@@ -113,7 +108,7 @@ static uint8_t g_sizemap[8] = {1, 4, 8, 16, 32, 64, 128, 0};
 /**************************************************************************
  * Private Functions
  **************************************************************************/
- 
+
 /**************************************************************************
  * Public Functions
  **************************************************************************/
@@ -314,7 +309,7 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
     {
       regval |= UART_C1_M;
     }
-  
+
   /* The only other option is 8-bit operation */
 
   else
@@ -328,7 +323,7 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
 
   sbr = clock / (baud << 4);
   DEBUGASSERT(sbr < 0x2000);
-        
+
   /* Save the new baud divisor, retaining other bits in the UARTx_BDH
    * register.
    */
@@ -340,7 +335,7 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
 
   regval  = sbr & 0xff;
   putreg8(regval, uart_base+KL_UART_BDL_OFFSET);
-    
+
   /* Calculate a fractional divider to get closer to the requested baud.
    * The fractional divider, BRFA, is a 5 bit fractional value that is
    * logically added to the SBR:
@@ -353,7 +348,7 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
 
   tmp  = clock - (sbr * (baud << 4));
   brfa = (tmp << 5) / (baud << 4);
-    
+
   /* Set the BRFA field (retaining other bits in the UARTx_C4 register) */
 
   regval  = getreg8(uart_base+KL_UART_C4_OFFSET) & UART_C4_BRFA_MASK;
@@ -379,14 +374,14 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
       depth = (3 * depth) >> 2;
     }
   putreg8(depth , uart_base+KL_UART_RWFIFO_OFFSET);
-  
+
   depth = g_sizemap[(regval & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT];
   if (depth > 3)
     {
       depth = (depth >> 2);
     }
   putreg8(depth, uart_base+KL_UART_TWFIFO_OFFSET);
-  
+
   /* Enable RX and TX FIFOs */
 
   putreg8(UART_PFIFO_RXFE | UART_PFIFO_TXFE, uart_base+KL_UART_PFIFO_OFFSET);
@@ -398,8 +393,8 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
    *  (1 in this case) is less than or equal to 0.
    * RWFIFO[RXWATER] = 1:  RDRF will be set when the number of queued bytes
    *  (1 in this case) is greater than or equal to 1.
-   * 
-   * Set the watermarks to one/zero and disable the FIFOs 
+   *
+   * Set the watermarks to one/zero and disable the FIFOs
    */
 
   putreg8(1, uart_base+KL_UART_RWFIFO_OFFSET);

@@ -106,9 +106,11 @@ void kl_pllconfig(void)
   regval32 |= SIM_SCGC5_PORTA;
   putreg32(regval32, KL_SIM_SCGC5);
 
-  /* Divide-by-2 for clock 1 and clock 4 (OUTDIV1=1, OUTDIV4=1) */
+  /* Divide-by-2 for clock 1 and clock 4. OUTDIV1 and OUTDIV4 determined by
+   * settings in the board.h header file.
+   */
 
-  regval32 = (SIM_CLKDIV1_OUTDIV1(1) | SIM_CLKDIV1_OUTDIV4(1));
+  regval32 = (SIM_CLKDIV1_OUTDIV1(BOARD_OUTDIV1) | SIM_CLKDIV1_OUTDIV4(BOARD_OUTDIV4));
   putreg32(regval32, KL_SIM_CLKDIV1);
 
   /* System oscillator drives 32 kHz clock for various peripherals (OSC32KSEL=0) */
@@ -133,11 +135,11 @@ void kl_pllconfig(void)
 
   regval32  = getreg32(KL_PORTA_PCR18);
   regval32 &= ~(PORT_PCR_ISF | PORT_PCR_MUX_ALT7);
-  putreg32(regval32, KL_PORTA_PCR18);  
+  putreg32(regval32, KL_PORTA_PCR18);
 
   regval32  = getreg32(KL_PORTA_PCR19);
   regval32 &= ~(PORT_PCR_ISF | PORT_PCR_MUX_ALT7);
-  putreg32(regval32, KL_PORTA_PCR19);  
+  putreg32(regval32, KL_PORTA_PCR19);
 
   /* Switch to FBE Mode */
   /* OSC0_CR: ERCLKEN=0, ??=0, EREFSTEN=0, ??=0, SC2P=0, SC4P=0, SC8P=0, SC16P=0 */
@@ -160,15 +162,19 @@ void kl_pllconfig(void)
   regval8 &= ~(MCG_C4_DMX32 | MCG_C4_DRST_DRS_MASK);
   putreg8(regval8, KL_MCG_C4);
 
-  /* MCG_C5: ??=0, PLLCLKEN0=0, PLLSTEN0=0, PRDIV0=1 */
+  /* MCG_C5: ??=0, PLLCLKEN0=0, PLLSTEN0=0, PRDIV0 determined by board
+   * settings in the board.h header file.
+   */
 
-  regval8 = MCG_C5_PRDIV(1);
+  regval8 = MCG_C5_PRDIV(BOARD_PRDIV0);
   putreg8(regval8, KL_MCG_C5);
 
-  /* MCG_C6: LOLIE0=0, PLLS=0, CME0=0, VDIV0=0 */
+  /* MCG_C6: LOLIE0=0, PLLS=0, CME0=0, VDIV0 determined by board
+   * settings in the board.h header file.
+   */
 
-  putreg8(0, KL_MCG_C6);
-  
+  putreg8(MCG_C6_VDIV(BOARD_VDIV0), KL_MCG_C6);
+
   /* Check that the source of the FLL reference clock is the external
    * reference clock.
    */
