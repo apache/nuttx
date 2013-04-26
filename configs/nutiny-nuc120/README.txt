@@ -36,7 +36,7 @@ NuttX Buildroot Toolchain
 =========================
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
-  be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
+  be modified to point to the correct path to the Cortex-M0 GCC toolchain (if
   different from the default in your PATH variable).
 
   If you have no Cortex-M0 toolchain, one can be downloaded from the NuttX
@@ -67,7 +67,7 @@ NuttX Buildroot Toolchain
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
-  building a Cortex-M3 toolchain for Cygwin under Windows.
+  building a Cortex-M0 toolchain for Cygwin under Windows.
 
 LEDs
 ====

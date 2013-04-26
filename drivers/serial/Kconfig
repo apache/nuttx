@@ -350,7 +350,7 @@ config SERIAL_TIOCSERGSTRUCT
 	depends on DEBUG && (MCU_SERIAL || 16550_UART)
 	---help---
 		As a debug option, many serial bottom half drivers support the TIOCSERGSTRUCT
-		that allows you to get the internal drvier data structure.  By default, this
+		that allows you to get the internal driver data structure.  By default, this
 		IOCTL is not supported in order to reduce footprint.  But if (1) the driver
 		supports the TIOCSERGSTRUCT ioctl, and (2) this option is selected, then
 		support for the TIOCSERGSTRUCT will be enabled.

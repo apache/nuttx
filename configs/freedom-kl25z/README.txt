@@ -1,9 +1,8 @@
 README.txt
 ==========
 
-This is the README file for the port of NuttX to the Freescale
-Freedom KL25Z board.  This board has the K25Z120LE3AN chip
-with a built-in SDA debugger.
+This is the README file for the port of NuttX to the Freescale Freedom KL25Z
+board.  This board has the MKL25Z128 chip with a built-in SDA debugger.
 
 Contents
 ========
@@ -14,13 +13,13 @@ Contents
   - LEDs
   - Serial Console
   - mbed
-  - NuTiny-specific Configuration Options
+  - Freedom KL25Z-specific Configuration Options
   - Configurations
 
 Development Environment
 =======================
 
-  Either Linux or Cygwin on Windows can be used for the development environment.
+  Either Linux or Cygwin under Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
   toolchains will likely cause problems.
 
@@ -36,7 +35,7 @@ NuttX Buildroot Toolchain
 =========================
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
-  be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
+  be modified to point to the correct path to the Cortex-M0 GCC toolchain (if
   different from the default in your PATH variable).
 
   If you have no Cortex-M0 toolchain, one can be downloaded from the NuttX
@@ -67,29 +66,36 @@ NuttX Buildroot Toolchain
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
-  building a Cortex-M3 toolchain for Cygwin under Windows.
+  building a Cortex-M0 toolchain for Cygwin under Windows.
 
 LEDs
 ====
 
-  The NuTiny has a single green LED that can be controlled from sofware.
-  This LED is connected to PIN17.  It is pulled high so a low value will
-  illuminate the LED.
+  The Freedom KL25Z has a single RGB LED driven by the KL25Z as follows:
+
+    ------------- --------
+    RGB LED       KL25Z128
+    ------------- --------
+    Red Cathode   PTB18
+    Green Cathode PTB19
+    Blue Cathode  PTD1
+
+   NOTE: PTD1 is also connected to the I/O header on J2 pin 10 (also known as D13).
 
   If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
-  NuTiny.  The following definitions describe how NuttX controls the LEDs:
+  Freedom KL25Z.  The following definitions describe how NuttX controls the LEDs:
 
     SYMBOL                Meaning                 LED state
                                                   Initially all LED is OFF
-    -------------------  -----------------------  ------------- ------------
-    LED_STARTED          NuttX has been started   LED ON
-    LED_HEAPALLOCATE     Heap has been allocated  LED ON
-    LED_IRQSENABLED      Interrupts enabled       LED ON
-    LED_STACKCREATED     Idle stack created       LED ON
-    LED_INIRQ            In an interrupt          LED should glow
-    LED_SIGNAL           In a signal handler      LED might glow
-    LED_ASSERTION        An assertion failed      LED ON while handling the assertion
-    LED_PANIC            The system has crashed   LED Blinking at 2Hz
+    -------------------  -----------------------  --------------------------
+    LED_STARTED          NuttX has been started   
+    LED_HEAPALLOCATE     Heap has been allocated  
+    LED_IRQSENABLED      Interrupts enabled       
+    LED_STACKCREATED     Idle stack created       
+    LED_INIRQ            In an interrupt          
+    LED_SIGNAL           In a signal handler      
+    LED_ASSERTION        An assertion failed      
+    LED_PANIC            The system has crashed   
     LED_IDLE             K25Z1XX is in sleep mode  (Optional, not used)
 
 Serial Console
@@ -127,8 +133,8 @@ to the SDA bootloader is this boot loader from mbed:
 http://mbed.org/handbook/mbed-FRDM-KL25Z-Getting-Started
 http://mbed.org/handbook/Firmware-FRDM-KL25Z
 
-NuTiny-specific Configuration Options
-=====================================
+Freedom KL25Z-specific Configuration Options
+============================================
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
@@ -150,7 +156,7 @@ NuTiny-specific Configuration Options
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_K25Z120LE3AN=y
+       CONFIG_ARCH_CHIP_MKL25Z128=y
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
@@ -199,7 +205,7 @@ NuTiny-specific Configuration Options
        the delay actually is 100 seconds.
 
   Individual subsystems can be enabled as follows.  These settings are for
-  all of the K25Z100/120 line and may not be available for the K25Z120LE3AN
+  all of the K25Z100/120 line and may not be available for the MKL25Z128
   in particular:
 
   AHB
@@ -283,7 +289,7 @@ Where <subdir> is one of the following:
     apps/examples/ostest.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -313,7 +319,7 @@ Where <subdir> is one of the following:
     builtin applications is disabled.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
