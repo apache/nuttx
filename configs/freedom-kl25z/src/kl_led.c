@@ -33,25 +33,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* The NuTiny has a single green LED that can be controlled from sofware.
- * This LED is connected to PIN17.  It is pulled high so a low value will
- * illuminate the LED.
+/* The Freedom KL25Z has a single RGB LED driven by the KL25Z as follows:
+ *
+ *   ------------- --------
+ *   RGB LED       KL25Z128
+ *   ------------- --------
+ *   Red Cathode   PTB18
+ *   Green Cathode PTB19
+ *   Blue Cathode  PTD1
  *
  * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
- * NuTiny.  The following definitions describe how NuttX controls the LEDs:
+ * Freedom KL25Z.  The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                                 Initially all LED is OFF
- *   -------------------  -----------------------  ------------- ------------
- *   LED_STARTED          NuttX has been started   LED ON
- *   LED_HEAPALLOCATE     Heap has been allocated  LED ON
- *   LED_IRQSENABLED      Interrupts enabled       LED ON
- *   LED_STACKCREATED     Idle stack created       LED ON
- *   LED_INIRQ            In an interrupt          LED should glow
- *   LED_SIGNAL           In a signal handler      LED might glow
- *   LED_ASSERTION        An assertion failed      LED ON while handling the assertion
- *   LED_PANIC            The system has crashed   LED Blinking at 2Hz
- *   LED_IDLE             NUC1XX is is sleep mode   (Optional, not used)
+ *   -------------------  -----------------------  --------------------------
+ *   LED_STARTED          NuttX has been started   
+ *   LED_HEAPALLOCATE     Heap has been allocated  
+ *   LED_IRQSENABLED      Interrupts enabled       
+ *   LED_STACKCREATED     Idle stack created       
+ *   LED_INIRQ            In an interrupt          
+ *   LED_SIGNAL           In a signal handler      
+ *   LED_ASSERTION        An assertion failed      
+ *   LED_PANIC            The system has crashed   
+ *   LED_IDLE             K25Z1XX is in sleep mode  (Optional, not used)
  */
 
 /****************************************************************************
@@ -69,9 +74,6 @@
 #include "chip.h"
 #include "kl_gpio.h"
 #include "freedom-kl25z.h"
-
-//extern void blueled(int on);
-//int i=0;
 
 #ifdef CONFIG_ARCH_LEDS
 
@@ -98,7 +100,7 @@
 /* Dump GPIO registers */
 
 #if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_LEDS)
-#  define led_dumpgpio(m) kl_dumpgpio(GPIO_LED, m)
+#  define led_dumpgpio(m) kl_dumpgpio(GPIO_LED_B, m)
 #else
 #  define led_dumpgpio(m)
 #endif
@@ -126,10 +128,9 @@
 void kl_ledinit(void)
 {
   led_dumpgpio("Before configuration");
-  //kl_configgpio(GPIO_LED);
-  /* Blink blue LED to indicate we are here */
-  //for (; ; i++)
-  //      blueled(i & 0x10000);
+  //kl_configgpio(GPIO_LED_R);
+  //kl_configgpio(GPIO_LED_G);
+  //kl_configgpio(GPIO_LED_B);
   led_dumpgpio("After configuration");
 }
 
@@ -139,7 +140,7 @@ void kl_ledinit(void)
 
 void up_ledon(int led)
 {
-  kl_gpiowrite(GPIO_LED, false);
+  kl_gpiowrite(GPIO_LED_B, false);
 }
 
 /****************************************************************************
@@ -148,7 +149,7 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  kl_gpiowrite(GPIO_LED, true);
+  kl_gpiowrite(GPIO_LED_B, true);
 }
 
 #endif /* CONFIG_ARCH_LEDS */

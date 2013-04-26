@@ -34,8 +34,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_NUTINY_NUC120_SRC_NUTINY_NUC120_H
-#define __CONFIGS_NUTINY_NUC120_SRC_NUTINY_NUC120_H
+#ifndef __CONFIGS_FREEDOM_KL25Z_SRC_FREEDOM_KL25Z_H
+#define __CONFIGS_FREEDOM_KL25Z_SRC_FREEDOM_KL25Z_H
 
 /****************************************************************************************************
  * Included Files
@@ -50,31 +50,41 @@
  ****************************************************************************************************/
 /* Configuration ************************************************************************************/
 
-/* NuTiny-EVB-120 GPIOs *****************************************************************************/
-/* The NuTiny has a single green LED that can be controlled from sofware.  This LED
- * is connected to PIN17 (PB.0).  It is pulled high so a low value will illuminate the LED.
+/* Freedom KL25Z GPIOs ******************************************************************************/
+/* The Freedom KL25Z has a single RGB LED driven by the KL25Z as follows:
+ *
+ *   ------------- --------
+ *   RGB LED       KL25Z128
+ *   ------------- --------
+ *   Red Cathode   PTB18
+ *   Green Cathode PTB19
+ *   Blue Cathode  PTD1
+ *
+ * NOTE: PTD1 is also connected to the I/O header on J2 pin 10 (also known as D13).
  *
  * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
- * NuTiny.  The following definitions describe how NuttX controls the LEDs:
+ * Freedom KL25Z.  The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
  *                                                 Initially all LED is OFF
- *   -------------------  -----------------------  ------------- ------------
- *   LED_STARTED          NuttX has been started   LED ON
- *   LED_HEAPALLOCATE     Heap has been allocated  LED ON
- *   LED_IRQSENABLED      Interrupts enabled       LED ON
- *   LED_STACKCREATED     Idle stack created       LED ON
- *   LED_INIRQ            In an interrupt          LED should glow
- *   LED_SIGNAL           In a signal handler      LED might glow
- *   LED_ASSERTION        An assertion failed      LED ON while handling the assertion
- *   LED_PANIC            The system has crashed   LED Blinking at 2Hz
- *   LED_IDLE             NUC1XX is in sleep mode   (Optional, not used)
+ *   -------------------  -----------------------  --------------------------
+ *   LED_STARTED          NuttX has been started   
+ *   LED_HEAPALLOCATE     Heap has been allocated  
+ *   LED_IRQSENABLED      Interrupts enabled       
+ *   LED_STACKCREATED     Idle stack created       
+ *   LED_INIRQ            In an interrupt          
+ *   LED_SIGNAL           In a signal handler      
+ *   LED_ASSERTION        An assertion failed      
+ *   LED_PANIC            The system has crashed   
+ *   LED_IDLE             K25Z1XX is in sleep mode  (Optional, not used)
  */
 
-#define GPIO_LED (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN0)
+#define GPIO_LED_R (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN18)
+#define GPIO_LED_G (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN19)
+#define GPIO_LED_B (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN1)
 
 /* Button definitions ***************************************************************/
-/* The NuTiny has no buttons */
+/* The Freedom KL25Z has no buttons */
 
 /****************************************************************************************************
  * Public Types
@@ -94,7 +104,7 @@
  * Name: kl_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the NuTiny-EVB-120 board.
+ *   Called to configure SPI chip select GPIO pins for the Freedom KL25Z board.
  *
  ****************************************************************************************************/
 
@@ -105,7 +115,7 @@ void weak_function kl_spiinitialize(void);
  *
  * Description:
  *   Called from kl_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the NuTiny-EVB-120 board.
+ *   GPIO pins for the Freedom KL25Z board.
  *
  ****************************************************************************************************/
 
@@ -127,5 +137,5 @@ void kl_ledinit(void);
 
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_NUTINY_NUC120_SRC_NUTINY_NUC120_H */
+#endif /* __CONFIGS_FREEDOM_KL25Z_SRC_FREEDOM_KL25Z_H */
 

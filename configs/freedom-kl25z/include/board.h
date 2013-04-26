@@ -134,7 +134,33 @@
 #endif
 
 /* LED definitions ******************************************************************/
-/* The KwikStik-K40 board has no MCU driven, GPIO-based LEDs */
+/* The Freedom KL25Z has a single RGB LED driven by the KL25Z as follows:
+ *
+ *   ------------- --------
+ *   RGB LED       KL25Z128
+ *   ------------- --------
+ *   Red Cathode   PTB18
+ *   Green Cathode PTB19
+ *   Blue Cathode  PTD1
+ *
+ * NOTE: PTD1 is also connected to the I/O header on J2 pin 10 (also known as D13).
+ *
+ * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board the
+ * Freedom KL25Z.  The following definitions describe how NuttX controls the LEDs:
+ *
+ *   SYMBOL                Meaning                 LED state
+ *                                                 Initially all LED is OFF
+ *   -------------------  -----------------------  --------------------------
+ *   LED_STARTED          NuttX has been started   
+ *   LED_HEAPALLOCATE     Heap has been allocated  
+ *   LED_IRQSENABLED      Interrupts enabled       
+ *   LED_STACKCREATED     Idle stack created       
+ *   LED_INIRQ            In an interrupt          
+ *   LED_SIGNAL           In a signal handler      
+ *   LED_ASSERTION        An assertion failed      
+ *   LED_PANIC            The system has crashed   
+ *   LED_IDLE             K25Z1XX is in sleep mode  (Optional, not used)
+ */
 
 #define LED_STARTED       0
 #define LED_HEAPALLOCATE  1
@@ -146,7 +172,7 @@
 #define LED_PANIC         7
 
 /* Button definitions ***************************************************************/
-/* The KwikStik-K40 board has no standard GPIO contact buttons */
+/* The Freedom KL25Z board has no standard GPIO contact buttons */
 
 /* Alternative pin resolution *******************************************************/
 /* If there are alternative configurations for various pins in the
