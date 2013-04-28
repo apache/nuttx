@@ -4099,23 +4099,23 @@ Additional new features and extended functionality:
  
       - Added kernel build support
 
-    * STM32
+    * STM32:
 
       - Added support for kernel mode build.
       - Added architecure support for the STM32 F427/F437 chips. Contributed
         by Mike Smith
 
-    * STM32 Boards
+    * STM32 Boards:
 
       - Added a configuration to support a kernel mode build of the OS test
         on the STM32F4Discovery
 
-    * Stellaris LM3S/LM4F
+    * Stellaris LM3S/LM4F:
 
       - Added kernel build support
       - Added support for the 7 UARTs on the LM4F120
 
-    * Stellaris LM4F Boards
+    * Stellaris LM4F Boards:
 
       - Added scripts and instructions to simplify use of OpenOCD with ICDI
         (JP Carballo)
@@ -4189,7 +4189,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
         serial driver.
       - PL2303 compilation errors
 
-    * Stellaris LM3S/4F
+    * Stellaris LM3S/4F:
 
       - Corrected typos in alternate function definitions.
 

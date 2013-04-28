@@ -4577,7 +4577,7 @@
 	  is used internally, but if it is called from the user, it should
 	  unregister any atexit() or on_exit() functions (2013-4-18).
 	* tools/kconfig2html.c: This is the beginning of a tool to
-	  replace the hand-generated documentation of the NuttX configruation
+	  replace the hand-generated documentation of the NuttX configuration
 	  variables with auto-generated documentation.  The initial checkin
 	  is an incomplete, poorly structured prototype that I hope to
 	  evolve into a useful tool (2014-4-20).
