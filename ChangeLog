@@ -1632,7 +1632,7 @@
 	  from sched/ to lib/pthread where they more appropriately belong.
 	* sched/ and lib/semaphore/:  Move some semaphore-related interfaces
 	  from sched/ to lib/pthread where they more appropriately belong.
-	* syscall/: The beginnings of an optional syscall kernal interface.
+	* syscall/: The beginnings of an optional syscall Kernel interface.
 	* tools/mksyscall.c:  Add a tool that will auto-generate syscall proxies
 	  and stubs from a comma-separated-value (CSV) data file.
 	* arch/arm/src/cortexm3/mpu.h: Add a header file describing the Cortex-M3
@@ -4331,7 +4331,7 @@
 	* libc/stdlib/lib_itoa.c:  Implementation of itoa() contributed by
 	  Ryan Sundberg. (2013-03-14).
 
-6.27 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+6.27 2013-04-28 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/armv7-m/up_mpu.c:  Correct MPU sub-region settings for
 	  unaligned regions (2013-03-15).
@@ -4339,7 +4339,7 @@
 	  ARMv7-M version (2013-03-15).
 	* configs/lm4f120-launchpad/tools:  Add scripts and instructions to
 	  simplify use of OpenOCD with ICDI (from JP Carballo, 2013-03-15).
-	* tools/mkconfig.c:  Logic that attempts to suppressed buffered I/O
+	* tools/mkconfig.c:  Logic that attempts to suppress buffered I/O
 	  within the kernel is wrong.  sizeof(struct file_struct) must be
 	  the same in both kernel- and user-spaces (2013-03-16).
 	* arch/arm/src/common/up_pthread_start.c, libc/pthread/pthread_startup.c,
@@ -4377,18 +4377,18 @@
       (2013-03-18).
 	* arch/arm/src/armv7-m/up_exception.S, sam3u/sam3u_vectors.S, and
 	  lpc17xx/lpc17_vectors.S: In exception handling with CONFIG_NUTTX_KERNEL,
-	  need to explicity set and cleare the privilege bit in the CONTROL
+	  need to explicity set and clear the privilege bit in the CONTROL
 	  register on return.  I assumed this would be handled automatically
 	  by the EXC_RETURN.  Silly me (2013-03-18).
 	* arch/arm/src/lpc17_adc.c:  Add a work-around for an ADC errata.  From
-	  Chris Taglia (2013-93-19).
+	  Chris Taglia (2013-3-19).
 	* arch/arm/src/armv7-m/up_hardfault.c:  If the PRIMASK is used to disable
 	  interrupts, then additional logic is required in the hard fault handler
-	  (2013-93-19).
+	  (2013-3-19).
 	* libc/ and mm/: Directories where the same sources files are used to
 	  build different objects in the first and second pass kernel builds need
 	  to keep those objects in separate directories so that they are not
-	  constantly rebuilt (2013-93-19).
+	  constantly rebuilt (2013-3-19).
 	* fs/fat:  Create an error in FAT file creation.  The FAT logic was
 	  not making a distinction between directory non-existence and file
 	  non-existence so when it you try to create a file in a non-existent
@@ -4421,10 +4421,10 @@
 	* configs/stme32f4discovery/kernel and scripts:  Add support for
 	  the kernel mode build on the STM32F4Discovery  (2013-03-21).
 	* drivers/st7567.c/h and include/nuttx/lcd/st7567.h:  Driver for
-	  the the ST7567 LCD Display Module from Univision Technology Inc.
+	  the ST7567 LCD Display Module from Univision Technology Inc.
 	  contributed by Manikandan.S (2013-03-22).
 	* configs/zkit-arm-1769:  Now supports the ST7567 LCD display
-	  module.  Added an nxhello configurtion for testing (Manikandan.S,
+	  module.  Added an nxhello configuration for testing (Manikandan.S,
 	  2013-03-22).
 	* configs/stm32f4discovery/kostest:  Add a kernel mode version
 	  of the OS test for the STM32F4Discovery board (2013-03-22).
@@ -4435,7 +4435,7 @@
 	  and simpler.  However, the C code intermixed with SVC calls was
 	  not properly preserving registers.  The more complex, assembly
 	  language version does not suffer from these issues.  I believe
-	  the the kernel build can not be called "feature complete"
+	  the the kernel build can now be called "feature complete"
 	  (2013-03-23).
 	* binfmt/binfmt_execmodule.c:  Here is a place where I forget
 	  to update the call to sched_releasetcb() to pass the thread
@@ -4457,7 +4457,7 @@
 	  konfig-frontends tool (2013-03-25).
 	* configs/twr-k60n512:  Converted configurations to use the
 	  konfig-frontends tool (2013-03-25).
-	* arch/arm/src/lpc17xx/lpc17_lcd.c:  Add an LCD framebuffer drier
+	* arch/arm/src/lpc17xx/lpc17_lcd.c:  Add an LCD framebuffer driver
 	  for the LPC177x/8x family (2103-3-26).
 	* arch/arm/src/lpc17xx/lpc17_emc.c and
 	  configs/open1788/src/lpc17_sdraminitialize.c:  Began testing the
@@ -4491,7 +4491,7 @@
 	  lpcxpresso-lpc1768:  The initialization function for both the LPC17xx
 	  SPI and SSP blocks was called up_spinitialize() which is the common API
 	  definition of include/nuttx/spi.h.  But this raises a problem when the
-	  MCU has multiple blocks for differ SPI implementatins as does the
+	  MCU has multiple blocks for differ SPI implementations as does the
 	  LPC17xx (and also as does other architectures like STM32 that have
 	  USARTs that can serve as SPI interfaces as well).  These were renamed
 	  to lpc17_spiinitialize() and lpc17_sspinitialize() in this case.
@@ -4530,7 +4530,7 @@
 	  lpc17_setintedge().  This logic must be atomic because it can be
 	  re-entered before it completes enabled interrupts, sometimes
 	  leaving the interrupts in a strange state (2013-4-7).
-	* arch/arm/src/lpc17_lcd.c:  Rommel Marcelo go the LPC1788
+	* arch/arm/src/lpc17_lcd.c:  Rommel Marcelo got the LPC1788
 	  framebuffer-based LCD working.  Very nice! (2013-4-08).
 	* arch/arm/src/lm/lm_clockconfig.c and configs/lm4f120-launchpad:
 	  Fix handling of the RCC SYSDIV2 field whent the PLL output is
@@ -4619,7 +4619,7 @@
 	  register definitions (2014-4-25).
 	* arch/arm/src/kl/Kconfig, kl_lowputc.c, kl_serial.c, and kl_config.h:
 	  No UART3-5 (2014-4-25).
-	* arch/arm/src/kl/kl_serial.c:  Various fixes to various fils in the
+	* arch/arm/src/kl/kl_serial.c:  Various fixes to various files in the
 	  KL architecture directory as need to get the interrupt-driven
 	  serial driver to work.  The Freedom KL25Z NSH configuration now
 	  works (2014-4-25).
@@ -4635,3 +4635,5 @@
 	* sched/task_delete.c and task_terminate.c:  Most task_terminate()
 	  out of task_delete.c into its own C file.  This should prevent
 	  dragging task_delete() into the link when it is never called.
+
+6.28 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
