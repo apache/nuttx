@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 22, 2013</p>
+      <p>Last Updated: April 28, 2013</p>
     </td>
   </tr>
 </table>
@@ -1064,29 +1064,16 @@
   </tr>
 </table>
 
-<h2>NuttX-6.26 Release Notes</h2>
+<h2>NuttX-6.27 Release Notes</h2>
 <p>
-  The 93<sup>rd</sup> release of NuttX, Version 6.26, was made on March 15, 2013, and is available for download from the
+  The 94<sup>th</sup> release of NuttX, Version 6.27, was made on April 28, 2013, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-6.26.tar.gz</code> and <code>apps-6.26.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-6.27.tar.gz</code> and <code>apps-6.27.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information)
   The change log associated with the release is available <a href="#currentrelease">here</a>.
   Unreleased changes after this release are available in GIT.
   These unreleased changes are also listed <a href="#pendingchanges">here</a>.
 </p>
-<p>
-  This release corresponds with GIT release number: r5745,
-  Note that all GIT information has been stripped from the tarballs.
-  If you need the GIT configuration, you should check out directly from GIT.
-  Revision r5745 should equivalent to release 6.26 of NuttX:
-</p>
-<ul><pre>
-svn checkout -r5745 svn://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
-</pre></ul>
-<p>Or (HTTP):</p>
-<ul><pre>
-svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
-</pre></ul>
 <p>
   <b>Additional new features and extended functionality</b>
 </p>
@@ -1097,7 +1084,10 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Add an additional call-out to support board-specific driver initialization during the boot-up phase (available with <code>CONFIG_BOARD_INITIALIZE=y</code>).
+        Add missing registration of <code>/dev/zero</code>.
+        Registration of <code>/dev/null</code> should depend upon conditional compilation.
+        From Ken Pettit.
+      </li>
     </ul>
   </li>
   <li>
@@ -1106,16 +1096,12 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        New interface <code>task_spawn()</code> that is like <code>posix_spawn()</code>, but uses entry point addresses like <code>ask_create()</code>.
+        Added a new interface to set aside memory on the task's stack.
+        This is used (at least in the kernel build) to hold task arguments.
       </li>
       <li>
-        Additional data restructuring as a continuation of the <i>task group</i> changes of NuttX 6.25.
-        These data structures were moved from the TCB structure into the task group:
-        pthread join data, <code>atexit</code>/<code>on_exit</code> callbacks, <code>waitpid</code>data structures, message queues.
-      </li>
-      <li>
-        TCBs for tasks and pthreads are now separate structures.
-        This saves a little memory since tasks do not have to carry the overhead for threads and vice versa.
+        Remove <code>up_assert_code()</code>.
+        One assertion routine is enough.
       </li>
     </ul>
   </li>
@@ -1128,37 +1114,14 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
         Extensive changes were made to support the kernel build mode.
         In this mode, NuttX is built as a monolithic kernel.
         NuttX is built as a separate kernel mode &quot;blob&quot; and the applications are built as a separate user mode &quot;blob&quot;.
-        The kernel runs in kernel mode and the applications run in user mode (with the MPU restricting user
-        mode accesses).
-        Access to the kernel from the user blob is only via system calls (<i>SVCalls</i>).
+        The kernel runs in supervisor mode and the applications run in user mode (with the MPU restricting user mode accesses).
+        Access to the kernel from the user blob is only via system calls (SVCalls in this case).
       </li>
       <li>
-        Extensive changes were made to the syscall, SVCall, and trapping logic.
-        Many internal interfaces were renamed.
+        Kernel build configurations for the Open1788 board and for the STM32F4Discovery now execute correctly.
       </li>
       <li>
-        The memory manager was extended to support both kernel- and user-mode allocations.
-        Logic within the kernel needs to use the correct kernel- or user-space allocator, depending upon the user of the allocated memory.
-      </li>
-      <li>
-        The user-space blob now contains a header built in at the beginning of the block that provides the same information that was previously provided by a kludgy, auto-generated header file (<code>user_map.h</code>).
-      </li>
-      <li>
-        Basic support implemented for the ARMv7-M family with fragments also implemetned for the ARMv6-M and MIPS32 families.
-      </li>
-      <li>
-        Kernel build supported added for the LPC17xx Open1788 and for the Atmel SAM3U-EK board.
-        All testing is being performed on the Open1788 board.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Signals</b>
-    </p>
-    <ul>
-      <li>
-        Delivery of signals to threads within a task group is now compatible with the way that signals are delivered to threads within a process.
+        Changes were made to task and thread start-up routines, signal handling, data structures, ARMv7-M SVCalls, stack management interfaces,
       </li>
     </ul>
   </li>
@@ -1168,47 +1131,38 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Add a driver for the SST29VF NOR FLASH parts.
+        Driver for the ST7567 LCD Display Module from Univision Technology Inc.
+        Contributed by Manikandan.S
       </li>
       <li>
-        USB device trace/debug feature extended to decode device-specific trace events to make the trace output more readable (from Petteri Aimonen).
+        SPI initialize functions renamed so that multiple SPI blocks can be initialized.
       </li>
       <li>
-        USB MSC device driver can not support names of differing sizes in the USB descriptor and the SCSI fields (from Petteri Aimonen).
+        Extended to support the RAMTRON FM25V01 device.
+        Contributed by Lorenz Meier
       </li>
       <li>
-        Locking added to MMC/SD SPI drivers so that MMC/SD can co-exist on the same bus as other SPI devices.
-        Frequency is reset each time that the MMC/SD SPI has the bus locked. (from Petteri Aimonen).
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>ARMv6-M (Cortex-M0)</b>
-    </p>
-    <ul>
-      <li>
-        Added support for the ARM Cortex-M0 family.
+        Serial drivers: <code>TIOCSERGSTRUCT ioctls</code> now conditioned on <code>CONFIG_SERIAL_TIOCSERGSTRUCT</code>
       </li>
     </ul>
   </li>
   <li>
     <p>
-      <b>nuvoTon NUC120</b>
+      <b>ARMv7-M (Cortex-M3/4)</b>
     </p>
     <ul>
       <li>
-        Added support for the nuvoTon NUC120 MCU (Cortex-M0).
+        Added support for modifiable interrupt vectors in RAM
       </li>
     </ul>
   </li>
   <li>
     <p>
-      <b>nuvoTon NUC120 Boards</b>
+      <b>nuvoTon NUC1xx</b>
     </p>
     <ul>
       <li>
-        Added basic support for the nuvoTon NuTiny-SDK-NUC120 board (Cortex-M0).
+        Added kernel build support
       </li>
     </ul>
   </li>
@@ -1217,9 +1171,9 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
       <b>LPC17xx</b>
     </p>
     <ul>
-      <li>
-        Added support for the LPC177x and LPC178x families.
-        Most of this is the work of Rommel Marcelo.
+      </li>
+        Now holds off sleep mode in the IDLE loop is DMA is in progress
+        (because sleep mode will disable CPU SRAM).
       </li>
     </ul>
   </li>
@@ -1229,13 +1183,26 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Added support for Zilogic System's ARM development Kit, ZKIT-ARM-1769.
-        From Rashid.
+        ZKIT-ARM-1769:  Now supports the ST7567 LCD display module.
+        Added an nxhello configuration for testing (Manikandan.S).
       </li>
       <li>
-        The port for the WaveShare Open1788 board is now functional.
-        Basic OS test and NuttShell (NSH) configurations are functional.
-        More driver development and testing is needed (from Rommel Marcelo).
+        ZKIT-ARM-1769:  Add support for both CAN1 and CAN2.
+        Contributed by M.Kannan
+      </li>
+      <li>
+        Open1788: Basic support for the WaveShare Open1788 board is complete with working OS test, NSH, and graphics configurations.
+      </li>
+      <li>
+        Open1788:  Integrated the LPC178x LCD driver with the WaveShare display.
+        Touchscreen support is included, howerver, there appears to be an issue with the Open1788 touchscreen interrupt signal.
+      </li>
+      <li>
+        Open1788:  Now supports SDRAM (used to provide the LCD framebuffer).
+      </li>
+      <li>
+        Open 1788: Reversed sense of the IDLE LCD. It is now off when the LPC17 is sleeping and on when awake.
+        That is much a better visual indication of the dynamic CPU load
       </li>
     </ul>
   </li>
@@ -1245,8 +1212,32 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Added an SD card MSI driver for the LPC178x.
-        The driver is marginally functional but requires DMA capability to be reliable.
+        Added an LCD framebuffer driver for the LPC177x/8x family.
+      </li>
+      <li>
+        Implemented LPC17xx GPDMA support.
+      </li>
+      <li>
+        Integrated the LPC17xx GPDMA support into the SD card driver.
+      </li>
+      <li>
+        SSP driver adapted to work with the LPC178x family.
+      </li>
+      <li>
+        Separate LPC176x and LPC178x GPIO logic; this logic is too different to maintain in one file with conditional compilation.
+      </li>
+      <li>
+        Re-design of the GPIO logic for the LPC178x family by Rommel Marcelo.
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>
+      <b>LPC43xx</b>
+    </p>
+    <ul>
+      <li>
+        Added kernel build support
       </li>
     </ul>
   </li>
@@ -1256,7 +1247,11 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Support extended to handle the STM32 F3 family (Cortex-M4 with F1-like peripherals).
+        Added support for kernel mode build.
+      </li>
+      <li>
+        Added architecure support for the STM32 F427/F437 chips.
+        Contributed by Mike Smith
       </li>
     </ul>
   </li>
@@ -1266,7 +1261,7 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Added support the STMicro STM32F3Discovery board (STM32 F3).
+        Added a configuration to support a kernel mode build of the OS test on the STM32F4Discovery
       </li>
     </ul>
   </li>
@@ -1276,7 +1271,10 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Basic support for the LM4F120 family is in place, but untested (mostly from Jose Pablo Carballo).
+        Added kernel build support
+      </li>
+      <li>
+        Added support for the 7 UARTs on the LM4F120
       </li>
     </ul>
   </li>
@@ -1286,33 +1284,12 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Add support for the LM4F120 LaunchPad (untested).
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Networking</b>
-    </p>
-    <ul>
-      <li>
-        <code>select()</code> should now allocate a little less memory.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Memory Management</b>
-    </p>
-    <ul>
-      <li>
-        Extended to support multiple heaps.
-        This is used as part of the kernel build in order to support separater user- and kernel-mode heaps.
+        Added scripts and instructions to simplify use of OpenOCD with ICDI (JP Carballo)
       </li>
       <li>
-        The stand-alone memory manger test had to be removed.
-        It was too entangled and made extension of the memory manager nearly impossible.
-        This is a loss.
+        The basic for the Stellaris LM4F120 Launchpad is complete.
+        This includes support for OS test and NSH configurations.
+        Additional driver development is needed.
       </li>
     </ul>
   </li>
@@ -1322,22 +1299,7 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Several configurations converted to use the <i>kconfig-frontends</i> configuration tool.
-        There are still many more that need to be converted.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>C Library</b>
-    </p>
-    <ul>
-      <li>
-        Move the workqueue logic into the C library.
-        There is now a special user-space version of the work queue (which will only be used with a NuttX kernel build).
-      </li>
-      <li>
-        Implementation of <code>itoa()</code> contributed by Ryan Sundberg.
+        Directories where the same sources files are used to build different objects in the first and second pass kernel builds need to keep those objects in separate directories so that they are not constantly rebuilt.
       </li>
     </ul>
   </li>
@@ -1347,14 +1309,23 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        The NSH builtin task logic now uses <code>task_spawn()</code> to start builtin applications.
+        <code>apps/system/ramtest</code>:
+        Added a simple memory test that can be built as an NSH command.
       </li>
+    </ul>
+  </li>
+  <li>
+    <p>
+      <b>Tools</b>
+    </p>
+    <ul>
       <li>
-        The OS test now includes a test cased to verify <code>task_restart()</code>.
+        <code>kconfig2html</code> is a new tool which will replace the hand-generated documentation of the NuttX configruation variables with auto-generated documentation.
       </li>
     </ul>
   </li>
 </ul>
+
 <p>
   <b>Efforts In Progress</b>.
   The following are features that are partially implemented but present in this release.
@@ -1363,32 +1334,13 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
 <ul>
   <li>
     <p>
-      <b>LM4F120 LaunchPad port</b>
+      <b>Freescale Freedom KL25Z</b>
     </p>
     <ul>
       <li>
-        Code is in place, but nothing has been tested.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>WaveShare Open1788 port</b>
-    </p>
-    <ul>
-      <li>
-        This port as actually complete and functional.
-        However, there is still ongoing development and testing of drivers.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Kernel Build</b>
-    </p>
-    <ul>
-      <li>
-        Much progress has been made, but there kernel build is not yet fully functional due to several user resources that are not yet properly disentangled from the kernel blob.
+        A port to the Freescale Freedom KL25Z is complete but not yet stable enough.
+        The KL25Z is a low-cost Cortex-M0+ part with 128KB of FLASH and 16KB of SRAM.
+        This is is the effort of Alan Carvalho de Assis.
       </li>
     </ul>
   </li>
@@ -1399,6 +1351,7 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     <ul>
       <li>
         Conversion of old configurations to use the <i>kconfig-frontends</i> tool is an ongoing effort that will continue for some time.
+        At this time, only 32% of the configurations have been converted to use the kconfig-frontends tools.
       </li>
     </ul>
   </li>
@@ -1414,22 +1367,42 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        The wrong PID was being signalled with <code>SIGCHILD</code>.
-        It should be  the PID of the task that create the task group, not the ID of the last thread to leave the task group.
-      </li>
-      <li>
-        Added logic so that some internal resources and states are recovered when tasks are deleted or restarted.
-        Handle cases where there are outstanding timed events pending when tasks are deleted or restarted.
+        Fixed a critical bug:
+        When there is pending C buffered output and the system is very busy, the a pthread may be blocked at a critical point when trying to exit.
+        Blocking at this critical point would cause crashes.
+        All entire task/thread exit logic paths were reviewed and failsafe mechanisms were put in place to assure that exitting tasks never block after task teardown has been started.
       </li>
     </ul>
   </li>
   <li>
     <p>
-      <b>ARMv7-M</b>
+      <b>ARMv6-M (Cortex-M0/M0+)</b>
     </p>
     <ul>
       <li>
-        Several fixes to the MPU control logic.
+        Fixed parameter passing for all system call inline functions with &gt; 3 parameters
+      </li>
+      <li>
+        Fixed a major problem:
+        The Cortex-M0 has no BASEPRI register but thelogic of NuttX-6.26 was using it to manage interrupts.
+        Switched to using the PRIMASK instead.
+        This means that hardfaults will (again) occur when SVC instructions are executed
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>
+      <b>ARMv7-M (Cortex-M3/4)</b>
+    </p>
+    <ul>
+      <li>
+        Corrected Correct MPU sub-region settings for unaligned regions.
+      </li>
+      <li>
+        In exception handling with <code>CONFIG_NUTTX_KERNEL<.code>, need to explicitly set and clear the privilege bit in the <codee>CONTROL</code> register.
+      </li>
+      <li>
+        Fixed parameter passing for all system call inline functions with &gt; 3 parameters
       </li>
     </ul>
   </li>
@@ -1439,38 +1412,55 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Removable serial drivers race conditions fixed.
+        Support for <code>O_NONBLOCK</code> was not supported in the &quot;upper half&quot; serial driver.
       </li>
       <li>
-        MAX11802 timing bug (from Petteri Aimonen).
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>STM32 Drivers</b>
-    </p>
-    <ul>
-      <li>
-        Handle cases were SPI DMA logic fails if <code>sem_wait()</code> is awakened by a signal.
-        Need to clear error flags to prevent corruption of subsequent transfers.
-        Also, bit count should not be changed while the SPI peripheral is enabled (from Petteri Aimonen).
-      </li>
-      <li>
-        Fixes to the OTG FS device driver from Petteri Aimonen.
-      </li>
-      <li>
-        Fix typos in DMA register header file (from Yan T.)
+        PL2303 compilation errors
       </li>
     </ul>
   </li>
   <li>
     <p>
-      <b>Graphics</b>
+      <b>Stellaris LM3S/4F</b>
     </p>
     <ul>
       <li>
-        Correction to the hyphen in the SANS 17x22 font (from Petteri Aimonen).
+        Corrected typos in alternate function definitions.
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>
+      <b>LPC17xx Drivers</b>
+    </p>
+    <ul>
+      <li>
+        Added a work-around for an ADC errata.
+        From Chris Taglia
+      </li>
+      <li>
+        Only one ADC pin was configured.
+        Need to configure all that are in the ADC0 set.
+        From MKannan
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>
+      <b>File Systems</b>
+    </p>
+    <ul>
+      <li>
+        The FAT logic was not making a distinction between directory non-existence and file non-existence so when it you try to create a file in a non-existent directory; it would create a file with the name of the missing directory.
+        Reported by Andrew Tridgell
+      </li>
+      <li>
+        Several fixes to the FAT file system from Ronen Vainish.
+        These fixes mostly involve the logic to extend directory clusters for the case of long file names but also include a few important general fixes (such as for storing 32 bit FAT values)
+      </li>
+      <li>
+        <code>mkfatfs</code> was writing the boot code to the wrong location.
+        From Petteri Aimonen
       </li>
     </ul>
   </li>
@@ -1480,19 +1470,24 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Corrected errors in the socket <code>poll</code>/<code>select</code> logic.  Additional
-        state logic was needed to detect if the socket is still connected
-        before starting the poll wait. (bug reported by Qiang Yu).
+        Fixed a compilation error when socket options are are disabled.
+        Reported by Daniel O'Connor
       </li>
     </ul>
   </li>
   <li>
     <p>
-      <b>Memory Management</b>
+      <b>C Library</b>
     </p>
     <ul>
       <li>
-        <code>mallinfo()</code> should hold the memory manager semaphore (from Petteri Aimonen.
+        Corrected an error in <code>sscanf()</code>.
+        If %n occurs in the format statement after the input data stream has been fully parsed, the %n format specifier will not be handled.
+        Reported by Lorenz Meier
+      </li>
+      <li>
+        <code>strchr(str, '\0')</code> should return a pointer to the end of the string, not NULL.
+        From Petteri Aimonen
       </li>
     </ul>
   </li>
@@ -1502,7 +1497,7 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Resolved several build errors reported by Mike Smith.
+        Fix naming of NuttX target if <code>EXEEXT</code> is defined.
       </li>
     </ul>
   </li>
@@ -1512,14 +1507,12 @@ svn checkout -r5745 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
     </p>
     <ul>
       <li>
-        Fixed an NSH memory leak:
-        Needed to detach after creating each pthread.
+        OS test: Fix timing error in non-cancelable thread test.
       </li>
       <li>
-        <code>readline()</code> now returns <code>EOF</code> on any failure (instead of a negated <code>errno</code> value).
-        This is because the underlying read is based on logic similar to <code>getc</code>.
-        The value zero (meaning end-of-file) was being confused with a NUL.
-        So if a NUL was received, the NSH session would terminate because it thought it was the end of file.
+        NSH: Correct the test of the skip input parameter.
+        Was limiting the range to &lt;= count.
+        From Ken Petit.
       </li>
     </ul>
   </li>
@@ -1935,17 +1928,16 @@ nsh>
   <td>
     <p>
       <b>FreeScale Freedom KL25Z</b>.
-      This is a port of NuttX to the Nuvoton NuTiny-SDK-NUC120 that features the NUC120LE3AN MCU.
+      This is a port of NuttX to the Freedom KL25Z board that features the MKL25Z128 Cortex-M0+ MCU, 128KB of FLASH and 16KB of SRAM.
       See the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=FRDM-KL25Z&tid=vanFRDM-KL25Z">Freescale</a> website for further information about this board.
     </p>
     <ul>
       <p>
         <b>STATUS</b>.
         This is a work in progress by Alan Carvalho de Assis.
-        This initial support is very minimal:
-        There is an OS test configuration that verifies the correct port of NuttX to the part and
-        a NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
-        As of this writing, more testing and more device driver development are needed to make this a more complete port.
+        This initial support is in place but is minimal and not yet completely stable:
+        There is a working OS test configuration that verifies the correct port of NuttX to the part and a working NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
+        As NuttX-6.27, more testing, completion of some GPIO logic, and more device driver development are needed to make this a more complete port.
       </p>
     </ul>
   </td>
@@ -2441,11 +2433,12 @@ nsh>
     </p>
     <ul>
       <b>STATUS:</b>
-      At present there is a working basic port with OS verification, Nuttshell (<a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>) configurations, and a graphics test configuration.
-      The NSH configuration includes verfied support for (DMA-based) SD card interface.
-      SDRAM is working.
-      The frame-buffer LCD driver is functional and the touchscreen interface is actively underwork.
-      Both should be available in the NuttX-6.27 release.
+      Initial Open1788 support appeared in NuttX-6.26 with the first verified configurations in NuttX-6.27.
+      In NuttX-6.27 there is a working basic port with OS verification, Nuttshell (<a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>) configurations, and a graphics test configuration.
+      SDRAM and GPDMA are working.
+      The NSH configuration includes verfied support for a DMA-based SD card interface.
+      The frame-buffer LCD driver is functional and uses the SDRAM for frame-buffer memory.
+      A touchscreen interface has been developed but there appears to be a hardware issue with the WaveShare implementation of the XPT2046 touchscreen controller.
       </ul>
    </td>
 </tr>
@@ -3781,318 +3774,337 @@ Other memory:
 </table>
 
 <ul><pre>
-nuttx-6.26 2013-05-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
+6.27 2013-04-28 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
-    * drivers/serial/serial.c:  Correct some race conditions when checking
-      for disconnection of a removable serial device.
-    * sched/task_posixspawn.c, task_spawn.c, task_spawnparms.c and
-      spawn_internal.h:  Create new interface task_spawn() that is
-      like posix_spawn(), but uses entry point addresses like
-      task_create().
-    * Corrected all argv[] arguments. Should be char * const *, not
-      const char **.
-    * sched/pthread* and include/nuttx/sched: Move pthread join data
-      and pthread key calculation data into the &quot;task group&quot; structure.
-    * sched/atexit.c, on_exit.c, task_exithook.c and include/nuttx/sched.h:
-      Move atexit and on_exit data structures to task group.  These
-      callbacks are only issued now when the final member of the task
-      group exits.
-    * sched/waitpid.c, task_exithook.c and include/nuttx/sched.h:
-      Move waitpid data data structures to task group.  Callers of
-      of waitpid() are now only awakened whent he final thread of the
-      task group exits.
-    * sched/mq_descreate.c, mq_open.c, mq_remove.c, group_leave.c, and
-      include/nuttx/sched.h:  Move list of opened message queues to
-      the task group structures.  Now all message queues opened by
-      members of the group are closed when the last member of the group
-      exits.
-    * includes/nuttx/sched.h and Lots of files:  Change name of _TCB to
-      struct tcb_s so that (1) it is consitent with other NuttX naming and
-      so that (2) the naming can handle some upcoming changes.
-    * includes/nuttx/sched.h and sched/:  There are three TCB structures:
-      struct tcb_s is a generic common version, struct task_tcb_s is a
-      version for tasks and kernel threads and pthread_tcb_s is a version
-      for pthreads.  By dividing the TCB structure into these variants,
-      pthreads do not have to be burdened by task-specific data structures
-      (and vice versa).
-    * sched/task_exithook.c adn group_create.c:  Fix an error, the
-      task within the task group may exit early leaving a pthread to
-      exit the task group last.  In this case, we need to remember the
-      the PID of the main task in the task group and use that PID for
-      signalling SIGCHILD to the parent task group.
-    * included/nuttx/sched.h and sched/sig*.c:  Numerous changes to the
-      signal deliver logic so that the delivery of signals to threads
-      within a task group will be compliant with delivery of signals
-      to threads within a POSIX process.
-    * sched/mq_recover.c and task_exithook.c:  Add logic to handle the
-      case where a task is deleted (or pthread canceled) while it is
-      waiting on a message queue.  task_delete() and pthread_cancel()
-      are dangerous interfaces.  This is only one feeble recover measure
-      of *many* that would be needed to do this safely.
-    * sched/group_killchildren.c, task_recover.c, group_foreachchild.c,
-      sched/restart.c, sched/task_delete.c, and others:  Beef up logic
-      to better support task deletion and pthread cancellation.  Needed
-      to pass need OS test case for task_restart().
-    * sched/include/sched.h and all timed functions in sched/:  Move
-      timer from local variables to TCB.  This is needed so that if a
-      task is canceled or restarted while it is waiting for a timed
-      event, we can gracefully recover.  We can't let the timer expire
-      after the task has been deleted.
-    * arch/arm/include/stm32 and arch/arm/src/stm32:  Add support for
-      the STM32 F3 family (still missing some things).
-    * configs/stm32f3discovery:  This will (eventually) be support for
-      the STM32F3Discovery board.
-    * STM32 F3 and STM32F3Discovery port is complete a ready for test.
-    * arch/arm/src/lpc17xx: Add support for the Cortex-M4 FPU and
-      Mikes &quot;common vector&quot; logic.  The LPC1788 is going to need
-      these things.
-    * arch/arm/src/stm32/stm32_spi.c:  Fix SPI DMA logic that does
-      not work if sem_wait() is interrupt by a signal.  From Petteri
-      Aimonen.
-    * drivers/input/max11802.c: MAX11802: Fix a timing bug that
-      corrupted coordinates.  From Petteri Aimonen.
-    * drivers/mmcsd/mmcsd_spi.c:  Use SPI locking so that MMC/SD can
-      exist on the same bus as other SPI devices.  From Petteri
-      Aimonen.
-    * graphics/nxfonts/nxfonts_sans17x22.h: Small mod to hyphen in
-      sans17x22 font.  The hyphen did not have any space on its sides.
-      This caused it to run together with other characters so that for
-      example &quot;+-&quot; would look weird. From Petteri Aimonen.
-    * mm/mm_mallinfo.c:  Take MM semaphore in mm_mallinfo. From Petteri
-      Aimonen.
-    * configs/stm32f3discovery/nsh/defconfig:  Disable SPI.  It is not
-      used.
-    * drivers/mtd/sst39vf:  Add a driver for the SST29VF NOR FLASH parts.
-    * sched/os_start.c:  Add an additional call-out to support board-
-      specific driver initialization during the start phase:  If
-      CONFIG_BOARD_INITIALIZE is defined, then an additioinal
-      initialization function called board_initialize() will be called
-      just after up_initialize() is called and just before the initial
-      application is started.
-    * arch/arm/src/stm32/stm32_otgfsdev.c, drivers/usbdev/usbdev_trprintf.c,
-      and include/nuttx/usb/usbdev_trace.h:  Add logic to support decoding
-      of device-specific trace events to make the trace ouput more readable.
-      From Petteri Aimonen.
-    * arch/arm/src/stm32/stm32_otgfsdev.c:  Need to manually set CNAK in
-      the case where we are waiting for a SETUP command with DATA.  Otherwise,
-      the core may NAK further transactions.  From Petteri Aimonen.
-    * arch/arm/src/stm32/stm32_otgfsdev.c: Add logic to prevent premature
-      to IDLE state.  This change (plus the previous) was necessary to get
-      the CDC/ACM driver working the certain STM32 F4 hardware (but not others).
-      These changes appear to prevent certain race conditions that may or may
-      not cause USB problems.  From Petteri Aimonen.
-    * arch/arm/include/armv6-m and arch/arm/src/armv6-m: First cut at support
-      for the Cortex-M0
-    * configs/nutiny-nuc120, arch/arm/include/nu1xx, and arch/arm/src/nuc1xx:
-      Support for Nuvoton NuTiny NUC120.
-    * 2013-02-22:  the Cortex-M0, NuvoTron NUC1xx, and NuTiny-SDK-NUC120 port
-      is code complete and ready for testing.
-    * configs/ekk-lm3s9b96/ostest and nsh:  All EKK-LM3S9B96 configurations
-      converted to use the mconf configuration tool.
-    * configs/zkit-arm-1769:  Add support for Zilogic System's ARM development
-      Kit, ZKIT-ARM-1769.  From Rashid.
-    * configs/zkit-arm-1769/hello:  Add a &quot;Hello, World!&quot; configuration for
-      the KBIT-ARM-1769 board.  From Rashid.
-    * configs/zkit-arm-1769/thttpd:  Add a THTTPD configuration for the
-      KBIT-ARM-1769 board.  From Rashid.
-    * 2013-02-27: All configurations for the Cortex-M0 NuTINY-SDK-NUC120
-      appear to be functional and stable.
-    * configs/zkit-arm-1769/nsh:  Add an NSH configuration for the
-      KBIT-ARM-1769 board.  From Rashid.
-    * arch/arm/src/stm32/stm32_otgfsdev.c:  Fixes from Petterri Aimonen
-      related to corner cases that can cause infinite interrupts.
-    * drivers/usbdev/usbmsc_scsi.c:  Change to allow the full name in the
-      USB descriptor but a truncated, 8-byte name in the SCSI field.
-      From Petteri Aimonen.
-    * arch/arm/src/stm32/stm32_spi.c: Need to clear error flags to prevent
-      corruption of subsequent transfers.  Also, bit count should not be
-      changed while the SPI peripheral is enabled.  From Petteri Aimonen.
-    * drivers/mmcsd/mmcsd_spi.c:  When bus is shared, the speed has to be
-      set every time.  Also SD cards require a few dummy clocks to react
-      into CS release.  From Petteri Aimonen.
-    * configs/lm4f120-launchpad: In initial configuration for testing
-      the LM4F120 LaunchPad port.  This is to support testing only and
-      is not yet a functional board port (as of 2013-03-01).
-    * arch/arm/include/lm/lm4f_irq.h and arch/arm/src/lm/chip/lm4f_vector.h:
-      Add interrupt vector/IRQ number definitions for the LM4F120.
-    * arch/arm/src/stm32f20xxx_dma.c and stm32f40xxx_dma.c:  Fix a typo
-      in assigned base register addresses for each DMA channel.  From
-      Yan T.
-    * Several build fixes from Mike Smith were incorporated.  These were
-      mostly compilation errors introduced into the system because of the
-      large number of recent changes with broad scope (2013-03-04).
-    * configs/zkit-arm-17969/src/up_can.c:  Add CAN support to the
-      Zilogics Technologies ZKIT-ARM-1769 board (From Rashid Fatah, (2013-03-04)).
-    * arch/arm/src/lpc17/lpc17*_clockconfig.c:  The WaveShare Open1788
-      board now boots and passes the OS test.  This is the work of
-      Rommel Marcelo (2013-03-04).
-    * arch/arm/src/lm/lm_gpio.c, lm_gpio.h, and chip/lm4f_pinconfig.h
-      Extend GPIO logic to handle LM4F.  Add LM4F pin configuration header
-      file (2013-03-04).
-    * configs/open1788:  Enable LED support in all configurations.
-      (2013-03-04)
-    * configs/open1788/nsh:  NSH configuration verified function.  By Rommel
-      Marcelo (2013-03-05).
-    * configs/open1788/src/lpc17_nsh.c:  Use the SD card interface, not SPI
-      to interface with SD cards (2013-03-05.
-    * arch/arm/src/lpc17xx/lpc17_sdcard.c and header files:  Clone the STM32
-      SD card interface to the LPC1788.  It appears to be the same IP.
-      (2013-03-05)
-    * libc/wqueue:  Work queue logic moved from sched/ to libc/wqueue.  It
-      is not really core OS functionality and this move helps prepare for
-      user-space work queues. (2013-03-05)
-    * libc/wqueue:  Implemented user-space work queues.  These will not
-      get tested until the next time I attempt a NuttX kernel build.
-      (2013-03-05).
-    * arch/arm: Correct some bad syscall dispatching logic.  This change
-      cannot be fully tested until there is a fielded NuttX kernel build.
-      (2013-03-06).
-    * net/net_poll.c:  Correct logic that checks if the socket is
-      disconnected when the poll is setup.  That is bad logic:  Listen
-      sockets, for example, are not connected.  In that case, the purpose of
-      the poll is to wait for connection events.  As a result of this,
-      poll/select would return immediately with POLLHUP with it was used to
-      detect connection events.  This fix for now was to check instead if
-      the socket is closed (meaning that it was connected at one time but
-      was closed by the remote peer).  That excludes the listen socket which
-      was never connected.  This does introduce a new problem, however.  If
-      the socket was not closed, but lost the connection through an abnormal
-      event, then poll/select will hang.  That needs to be revisited.
-      (2013-03-07)
-    * fs/fs_select.c:  Was not checking if the timeout parameter was NULL
-      but would, instead, setup a bogus timeout based on whatever it found at
-      address zero.  Also, improved some of the memory allocation logic so
-      that it will not use so much memory. (2013-03-07)
-    * net/net_poll.c:  Handle the missing case.  Now tests for not connected
-      AND not listening.  I think that now covers all of the cases including
-      the missing case noted above. (2013-03-07)
-    * mm/:  Move all memory manager globals into a structure.  A reference
-      to this structure is now passed internally between mm APIs. This
-      change will (eventually) support multiple heaps and heap allocators.
-      (2013-03-08).
-    * mm/ and include/nuttx/mm.h:  Implement support for multiple heaps.
-      (2013-03-08).
-    * arch/*/src: xyz_addregion() needs to call kmm_addregion, not mm_addregion.
-      (2013-03-08).
-    * sched/kmm*.c:  Move this garbage kmm*.c file to mm/. until I decide what
-      to do with them (which is probably to just delete them). (2013-03-08).
-    * mm/mm_test.c and Makefile.test:  Deleted the memory test.  This was
-      a good test and helped me a lot when I wrote the memory manager, but
-      now it is in the way and paralyzing other efforts.  So the memory unit
-      test was deleted. (2013-03-08)
-    * sched/sched_free.c:  Rename sched_free() to sched_ufree(); Add
-      sched_kfree() to handler deferred kernel heap allocations. (2013-03-10)
-    * arch/:  User user-accessible heap to allocate all stacks. (2013-03-10)
-    * arch/arm/src/sam3u:  The AT91SAM3U will now support a kernel heap if
-      so configured. (2013-03-10)
-    * configs/sam3u-ek/knsh:  This configuration was converted to use the
-      kconfigs-frontends build tool. (2013-03-10)
-    * configs/*/include/user_map.h and include/nuttx/userspace.h:  Remove
-      the very kludgy user_map.h file and replace it with a header that
-      is expected at the beginning of the user-space blob. (2013-03-10)
-    * configs/sam3u-ek/kernel/up_userspace.c:  This is the header for
-      the SAM3U-EK's user space.  (2013-03-10)
-    * sched/os_bringup.c:  In the kernel build, os_bringup() now uses the
-      user-space header to automatically start the user-space work queue,
-      if so configured. (2013-03-10)
-    * arch/arm/src/lpc17xx/lpc17_mpuinit.c and lpc17_userpace.c:  Add
-      support for the MPU and kernel build for the LPC17xx family.
-      (2013-03-11)
-    * configs/open1788/kernel and knsh:  Add kernel build support and
-      a kernel NSH configuration for the WaveShare Open1788 board.
-      (2013-03-11)
-    * configs/sam3u_ek/kernel, knsh, and scripts:  Move some files around
-      for better supportability. (2013-03-11)
-    * configs/open1788/kernel, knsh, and scripts:  Add a kernel mode build
-      configuration for the WaveShare Open1788 board. (2013-03-11)
-    * arch/arm/src/armv7-m/up_mpu.c:  Several fixes to MPU logic.
-      (2013-03-12).
-    * arch/arm, configs/sam3u-ek, configs/open1788:  Fix memory map for
-      kernel mode build; Some regions were overlapping. (2013-03-13).
-    * arch/:  Rename g_heapbase to g_idle_topstack.  This is the same value
-      however:  The top of the IDLE stack is the same as the base of the
-      heap in the flat build.  But not in the kernel build:  The base of
-      the heap is elsewhere so the naming was wrong. (2013-03-13).
-    * libc/stdlib/lib_itoa.c:  Implementation of itoa() contributed by
-      Ryan Sundberg. (2013-03-14).
+    * arch/arm/src/armv7-m/up_mpu.c:  Correct MPU sub-region settings for
+      unaligned regions (2013-03-15).
+    * arch/arm/src/armv6-m/up_svcall.c:  Bring up to equivalent to the
+      ARMv7-M version (2013-03-15).
+    * configs/lm4f120-launchpad/tools:  Add scripts and instructions to
+      simplify use of OpenOCD with ICDI (from JP Carballo, 2013-03-15).
+    * tools/mkconfig.c:  Logic that attempts to suppress buffered I/O
+      within the kernel is wrong.  sizeof(struct file_struct) must be
+      the same in both kernel- and user-spaces (2013-03-16).
+    * arch/arm/src/common/up_pthread_start.c, libc/pthread/pthread_startup.c,
+      and related files:  Implement switch to user-space and user-space
+      pthread start-up function (2013-03-16).
+    * arch/arm/src/common/up_signal_handler.c, libc/pthread/pthread_startup.c,
+      and related files:  Implement switch to user-space and user-space
+      pthread start-up function (2013-03-16).
+    * arch/arm/src/common/up_signal_handler.c, libc/signal/signal_handler.c,
+      arch/arm/src/armv[6|7]-m/up_svcall.c, arch/arm/include/armv[6|7]-m/svcall.h,
+      include/nuttx/userspace.h, and sched/sig_deliver.c:  Implement switch
+      to user-space from kernel signal delivery trampoline before calling user-
+      space signal handler.  Return from user-space signal handler using a
+      system call (2013-03-16).
+    * arch/arm/src/armv[6|7]-m/up_schedulesigaction.c: Need make sure we are
+      in kernel mode before switching to kernel-mode signal handler
+      trampoline (2013-03-16).
+    * arch/arm/include/armv[6|7]-m/irq.h, and arch/arm/src/armv[6|7]-m/up_svcall.c:
+      Add support for nested system calls.  In the current design, this can
+      happen only under one condition:  When the kernel system call logic calls
+      back into user space in order to allocate user space memory.  So it is
+      expected that the maximum nesting level will be only 2 (2013-03-17).
+    * libc/stdio/lib_sccanf.c:  Correct an error in sscanf.  If %n occurs in
+      the format statement after the input data stream has been fully
+      parsed, the %n format specifier will not be handled.  Reported by
+      Lorenz Meier (and also earlier by Kate) (2013-03-17).
+    * drivers/serial/serial.c:  Support for O_NONBLOCK was not supported
+      in the &quot;upper half&quot; serial driver.  This is normally not an issue
+      because UART TX is almost always available, but it does become an
+      if the UART uses hardware flow control or if the a &quot;lower half&quot; is
+      something like the USB CDC/ACM driver that may need to block for
+      significant amounts of time (2013-03-18).
+    * arch/arm/src/armv7-h/ram_vectors.h, up_ramvec_*.c, arch/arm/src/*/*_irq.c,
+      and Make.defs:  Add support for modifiable interrupt vectors in RAM
+      (2013-03-18).
+    * arch/arm/src/armv7-m/up_exception.S, sam3u/sam3u_vectors.S, and
+      lpc17xx/lpc17_vectors.S: In exception handling with CONFIG_NUTTX_KERNEL,
+      need to explicitly set and clear the privilege bit in the CONTROL
+      register on return.  I assumed this would be handled automatically
+      by the EXC_RETURN.  Silly me (2013-03-18).
+    * arch/arm/src/lpc17_adc.c:  Add a work-around for an ADC errata.  From
+      Chris Taglia (2013-3-19).
+    * arch/arm/src/armv7-m/up_hardfault.c:  If the PRIMASK is used to disable
+      interrupts, then additional logic is required in the hard fault handler
+      (2013-3-19).
+    * libc/ and mm/: Directories where the same sources files are used to
+      build different objects in the first and second pass kernel builds need
+      to keep those objects in separate directories so that they are not
+      constantly rebuilt (2013-3-19).
+    * fs/fat:  Create an error in FAT file creation.  The FAT logic was
+      not making a distinction between directory non-existence and file
+      non-existence so when it you try to create a file in a non-existent
+      directory, it would create a file with the name of the missing
+      directory.  Reported by Andrew Tridgell (2013-03-30).
+    * Numerous files:  Changed the protoypes of up_create_stack() and
+      up_release_stack() so that is includes a task type.  Normally you
+      can get this type from the TCB parameter, but there are certain
+      conditions when the task type is not valid in the TCB when these
+      functions are called.  Only the prototypes were changed on this
+      big, initial checkin.  The next step will be to add logic to
+      allocate stacks for kernel threads from protected kernel memory
+      and all other task types from unprotected user memory (2013-03-20).
+    * arch/*/src/common/up_createstack.c, up_use_stack.c, and
+      up_release_stack.c:  If creating or releasing the stack for a kernel
+      thread, use the kernel allocator so that the kernel thread stacks
+      are protected from user application meddling (2013-03-20).
+    * arch/arm/src/armv[6|7]-m/up_scall.c:  Fix parameter passing for
+      all system call inline functions with &gt; 3 parameters (2013-03-20)
+    * arch/*/src/common/up_stackframe.c and include/nuttx/arch.h:  Add
+      and new interface to set aside memory on the stack.  This will be
+      used at least in the kernel build to hold task arguments (2013-03-21).
+    * sched/sig_deliver.c:  When dispatching signals to user threads,
+      copy the siginfo_t from the sigq to the stack.  The signal queue
+      is allocated from kernel memory; however, the current stack is
+      the user's stack and the user code will be able to access the
+      signinfo_t data from the stack copy (2013-03-21).
+    * arch/arm/src/stm32:  Added support for the kernel mode build
+      (cloned from the lpc17xx).  (2013-03-21).
+    * configs/stme32f4discovery/kernel and scripts:  Add support for
+      the kernel mode build on the STM32F4Discovery  (2013-03-21).
+    * drivers/st7567.c/h and include/nuttx/lcd/st7567.h:  Driver for
+      the ST7567 LCD Display Module from Univision Technology Inc.
+      contributed by Manikandan.S (2013-03-22).
+    * configs/zkit-arm-1769:  Now supports the ST7567 LCD display
+      module.  Added an nxhello configuration for testing (Manikandan.S,
+      2013-03-22).
+    * configs/stm32f4discovery/kostest:  Add a kernel mode version
+      of the OS test for the STM32F4Discovery board (2013-03-22).
+    * nuttx/include/nuttx,  nuttx/configs/sam3u-ek, nuttx/configs/open1788,
+      nuttx/configs/stm32f4discovery, and nuttx/arch/arm:  Complete
+      re-archtecting of how signals are dispatched to user-space code
+      in the kernel build.  The original implementation was C-based
+      and simpler.  However, the C code intermixed with SVC calls was
+      not properly preserving registers.  The more complex, assembly
+      language version does not suffer from these issues.  I believe
+      the the kernel build can now be called &quot;feature complete&quot;
+      (2013-03-23).
+    * binfmt/binfmt_execmodule.c:  Here is a place where I forget
+      to update the call to sched_releasetcb() to pass the thread
+      type as the second parameter (2013-03-23).
+    * arch/arm/src/lm, kinetis, lpc32, and nuc1xx:  Add kernel build
+      support to all ARMv7-M and ARMv6-M chips.  There are no
+      configurations in place to to verify these additions!
+      (2013-03-24).
+    * arch/arm/src/lm/lm_gpio.h:  Correct typos in alternate function
+      definitions (2013-03-24).
+    * arch/arm/src/lm/lm_lowputc.c and lm_serial.c:  Add support for
+      the 7 UARTs on the LM4F120 (2013-03-24).
+    * configs/lm4f120-launchpad/ostest/defconfig:  Fix the configured
+      RAM size.  This appears to be the last show-stopper bug:  The
+      LaunchPad now runs NuttX!  (2013-03-24).
+    * configs/lm4f120-launchpad/nsh:  Add an NSH configuration for the
+      LaunchPad (2013-03-24).
+    * configs/kwikstik-k40:  Converted configurations to use the
+      konfig-frontends tool (2013-03-25).
+    * configs/twr-k60n512:  Converted configurations to use the
+      konfig-frontends tool (2013-03-25).
+    * arch/arm/src/lpc17xx/lpc17_lcd.c:  Add an LCD framebuffer driver
+      for the LPC177x/8x family (2103-3-26).
+    * arch/arm/src/lpc17xx/lpc17_emc.c and
+      configs/open1788/src/lpc17_sdraminitialize.c:  Began testing the
+      Open1788 SDRAM.  The SDRAM is basically functional, but there are
+      failures with the SDRAM is stressed by the memory test at
+      apps/example/ramtest (SDRAM support and the RAM test can be configured
+      into the base configs/open1788/nsh configuration as described in
+      configs/open1788/READMT.txt (2103-3-27).
+    * configs/open1788/nxlines:  Add a configuration to test both the
+      Open1788 LCD and SDRAM which is used as a framebuffer (2013-3-27).
+    * arch/arm/src/lpc17xx/lpc17_gdma.c and lpc17_sdcard.c:  Began
+      implementation of the LPC17 DMA and integration into the SDCARD
+      driver (2013-3-29).
+    * arch/arm/src/lpc17xx/lpc17_gdma.c: LPC17 DMA is code complete and
+      under test.  Does not yet work (2013-3-30).
+    * fs/fat/fs_fat32dirent.c and fs_fat32util.c:  Several fixes to the
+      FAT file system from Ronen Vainish.  These fixes mostly involve the
+      logic to extend directory clusters for the case of long file names
+      but also include a few important general fixes (such as for storing
+      32 bit FAT values) (2013-03-31).
+    * arch/arm/src/lpc17xx/lpc17_gdma.c and lpc17_sdcard.c:  SD card DMA
+      is now functional.  Thre may be some issues with DMA from CPU SRAM
+      which is apparently disabled in sleep mode; up_idle() always enters
+      sleep mode (2013-03-31).
+    * arch/arm/src/stm32:  Add architecure support for the STM32 F427/F437
+      chips. Contributed by Mike Smith (2013-4-01).
+    * configs/zkit-arm-1769/src/up_can.c:  Add support for both CAN1
+      and CAN2.  Contributed by M.Kannan (2013-4-01).
+    * arch/arm/src/lpc17xx/lpc17_spi.c and lpc17_ssp.c and
+      configs/olimex-lpc1766stk, nucleus2g, zkit-arm-1769, and
+      lpcxpresso-lpc1768:  The initialization function for both the LPC17xx
+      SPI and SSP blocks was called up_spinitialize() which is the common API
+      definition of include/nuttx/spi.h.  But this raises a problem when the
+      MCU has multiple blocks for differ SPI implementations as does the
+      LPC17xx (and also as does other architectures like STM32 that have
+      USARTs that can serve as SPI interfaces as well).  These were renamed
+      to lpc17_spiinitialize() and lpc17_sspinitialize() in this case.
+      Problem reported by M. Kannan (2013-4-01).
+    * arch/arm/src/lpc17xx/lpc17_gpdma.c and lpc17_idle.c:  In sleep mode,
+      DMA can only be performed from peripheral SRAM.  CPU SRAM is shutdown
+      in sleep mode.  In order to simplify DMA memory allocation, the LPC17xx
+      IDLE will now hold off going to sleep mode if there is a DMA in progress
+     (2013-4-01).
+    * configs/open1788/src/lpc17_autoleds.c:  Reversed sense of the IDLE LCD.
+      It is now off when the LPC17 is sleeping and on when awake.  That is
+      much more useful because it provides a good visual indication of the
+      dynamic CPU load (2013-4-01).
+    * configs/open1788/src/lpc17_touchscreen.c and lpc17_ssp.c:  Add
+      support for the touschscreen on the WaveShare LCD (2013-4-01).
+    * configs/several:  There were already some functions called
+      lpc17_sspinitialize().  So they had to be renamed (2013-4-01).
+    * arch/arm/src/lpc17xx/lpc17_ssp.c:  Adapted to work the the LPC178x
+      family (2013-4-01).
+    * arch/arm/src/lpc17xx/lpc17_gpio.c/.h:  Separate LPC176x and LPC178x
+      logic into separate files.  The logic is diverging to much to
+      try to retain common code (2013-4-03).
+    * net/net_clone.c:  Fix compilation error when socket options are
+      are disabled. Reported by Daniel O'Connor (2013-4-05).
+    * configs/zkit-arm-1769/src/up_leds.c:  Fix a typo introduced into
+      the button interrupt logic (2013-4-05).
+    * arch/arm/src/lpc17xx/lpc178x_gpio.c:  Re-design of the GPIO
+      logic for the LPC178x family by Rommel Marcelo (2013-4-05).
+    * arch/arm/src/lpc17_gpiodbg.c:  Updated so that it correctly
+      reports LPC177x/8x GPIO registers when GPIO debug is enabled
+      (2013-4-05).
+    * arch/arm/src/Makefile:  The variable NUTTX already includes
+      the extension $(EXEEXT).  So remove the second extension
+      $(NUTTX)$(EXEEXT) in two places (2013-4-7).
+    * arch/arm/src/lpc17xx/lpc17_gpioint.c:  Disable interrrupts in
+      lpc17_setintedge().  This logic must be atomic because it can be
+      re-entered before it completes enabled interrupts, sometimes
+      leaving the interrupts in a strange state (2013-4-7).
+    * arch/arm/src/lpc17_lcd.c:  Rommel Marcelo got the LPC1788
+      framebuffer-based LCD working.  Very nice! (2013-4-08).
+    * arch/arm/src/lm/lm_clockconfig.c and configs/lm4f120-launchpad:
+      Fix handling of the RCC SYSDIV2 field whent the PLL output is
+      400MHz.  Don't forget to set the USERCC2 bit in the register or
+      all is for naught (2013-4-09).
+    * configs/zkit-arm-1769/src/up_lcd.c, up_ssp.c, and up_spi.c:
+      Use SSP0 to LCD and SPI to SD-Card on the Zkit-arm-1769 board.
+      From Manikandan. S (2013-4-10)
+    * configs/olimex-lpc1766stk/usbserial:  Converted to use the
+      kconfig-config frontends tools (2013-4-12).
+    * drivers/usbdev/pl2303.c: Fix some compilation errors that
+      crept in when fixes to the CDC/ACM driver where blindly
+      incorporated in the PL2303 driver (2013-4-12).
+    * configs/stm3210e-eval/usbserial:  Converted to use the
+      kconfig-config frontends tools (2013-4-12).
+    * configs/nucleus2g/usbserial:  Converted to use the
+      kconfig-config frontends tools (2013-4-12).
+    * arch/arm/src/kl and arch/arm/include/kl:  Add support for the
+      Kinetis L family of Cortex-M0+ MCUs.  Contributed by Alan
+      Carvalho de Assis.  NOTE:  This is still very much a work in
+      progress as of this initial commit (2013-04-16).
+    * configs/freedom-kl25z:  Support for the Freedom KL25Z board
+      contributed by Alan Carvalho de Assis.  NOTE:  This is still
+      very much a work inprogress as of this initial commit
+      (2013-04-16).
+    * arm/arm/src/armv6-m and arch/arm/include/armv6-m:  Ooops.  Fix
+      a major screw-up:  The Cortex-M0 has no BASEPRI register but
+      the current logic was using it to manage interrupts.  Switch
+      to using the PRIMASK.  This means that hardfaults will (again)
+      occur when SVC instructions are executed (2013-4-16).
+    * configs/stm3240g-eval/ostest:  Converted to use the kconfig-frontends
+      tools (2013-4-17).
+    * sched/task_exithook.c:  Don't flush the streams until the
+      final thread of the group exits.  Flushing may cause the
+      thread to get suspended at a bad time and other threads in the
+      group may run while the exiting thread is in an unhealthy state.
+      This can cause crashes under certain circumstance.  This is a
+      critical bugfix (2013-4-18).
+    * drivers/mtd/ramtron.c:  Extended to support the FM25V01 device.
+      Contributed by Lorenz Meier (2013-4-18).
+    * sched/task_deletecurrent.c and task_exit.c, arch/*/up_exit.c:
+      Renamed task_deletecurrent() and task_exit() since it really
+      handles the architecture independent part of _exit().  _exit()
+      is used internally, but if it is called from the user, it should
+      unregister any atexit() or on_exit() functions (2013-4-18).
+    * tools/kconfig2html.c: This is the beginning of a tool to
+      replace the hand-generated documentation of the NuttX configruation
+      variables with auto-generated documentation.  The initial checkin
+      is an incomplete, poorly structured prototype that I hope to
+      evolve into a useful tool (2014-4-20).
+    * libc/string/lib_strchr.c:  strchr(str, '\0') should return a
+      pointer to the end of the string, not NULL.  From Petteri
+      Aimonen (2014-4-22).
+    * fs/fat/fs_writefat.c: mkfatfs was writing the boot code to the
+      wrong location.  From Petteri Aimonen (2014-4-22).
+    * Documentation:  The NuttX documentation now expects to find an
+      auto-generated version of the configuration variable documentation
+      at Documentation/NuttXConfigVariables.html (2014-4-22).
+    * arch/arm/src/lpc17xx/lpc17_adc.c:  Only one ADC pin was configured.
+      Need to configure all that are in the ADC0 set.  From MKannan
+      (2014-4-23).
+    * configs/zkit-arm-1769/src:  ADC and SPI/USB MSC updates from
+      MKannan (2014-4-23).
+    * arm/src/armv7-m/ram_vectors.h and arm/src/armv7-m/up_ramvec_initialize.c:
+      Fixes to RAM vector logic from Paul Y. Zhang (2014-4-23)
+    * tools/kconfig2html.c:  Improve behavior of Expand/Collapse
+      Table of Contents; Handle errors in parsing of strings and in
+      some uninitialized variables.  Add an option to use jQuery.
+    * tools/mkconfigvar.sh: Fix make target (2014-4-23).
+    * sched/exit.c, pthread_exit.c, task_exit.c, task_delete,c and
+      task_exithook.c:  For pthread_exit(), move some logic to an early
+      point in the exit sequence where the task may need to block.  Add
+      conditional logic in the lower end of the eixt logic kicked off by
+      _exit() to prohibit blocking after the task has been torn down and is
+      no longer cabable of blocking (2014-4-23).
+    * arch/arm/src/common/up_initialize.c: Add missing registration
+      of /dev/zero.  Registration of /dev/null should depend upon
+      conditional compilation.  From Ken Pettit (2014-4-24).
+    * arch/*/src/common/up_initialize.c:  Same change required to other
+      architectures (2014-4-24).
+    * arch/arm/src/kl/kl_clockconfig.c and configs/freedom-kl25z/include/board.h:
+      Modify out PLL configuration so that it uses the values in
+      board.h;  Fix PLL settings in board.h so that the correct core
+      and bus clock frequencies are generated. (2014-4-24).
+    * arm/src/kl/chip/kl_memorymap.h, kl_sim.h, andkl_uart.h:  Correct some
+      register definitions (2014-4-25).
+    * arch/arm/src/kl/Kconfig, kl_lowputc.c, kl_serial.c, and kl_config.h:
+      No UART3-5 (2014-4-25).
+    * arch/arm/src/kl/kl_serial.c:  Various fixes to various files in the
+      KL architecture directory as need to get the interrupt-driven
+      serial driver to work.  The Freedom KL25Z NSH configuration now
+      works (2014-4-25).
+    * include/nuttx/assert.h, arch/*/src/*/up_assert.c, and other file:
+      Remove up_assert_code().  While asserting with an encoded value
+      could be a good feature, the codes have not be well utilized nor
+      documented.  Give that situation it is better to remove the API
+      and reduce the footprint a little (2014-4-25).
+    * drivers/serial/Kconfig and arch/*/src/*/*_serial.c:  Add
+      compilation so that the useless TIOCSERGSTRUCT ioctl logic
+      is not build unless CONFIG_DEBUG and CONFIG_SERIAL_TIOCSERGSTRUCT
+      are defined.
+    * sched/task_delete.c and task_terminate.c:  Most task_terminate()
+      out of task_delete.c into its own C file.  This should prevent
+      dragging task_delete() into the link when it is never called.
 
-apps-6.26 2013-03-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
+apps-6.27 2013-04-28 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
-    * apps/builtin/exec_builtin.c:  Now uses task_spawn() to start
-      builtin applications.
-    * Type of argv has changed from const char ** to char * const *
-    * apps/nshlib/nsh_parse.c:  Fix memory lead: Need to detach after
-      creating a pthread.
-    * apps/examples and nshlib:  Change name of _TCB to struct tcb_s to
-      match NuttX name change.
-    * apps/examples/ostest/restart.c:  Add a test case to verify
-      task_restart().
-    * apps/system/readline.c:  readline() now returns EOF on any failure
-      (instead of a negated errno value).  This is because the underlying
-      read is based on logic similar to getc.  The value zero was being
-      confused with a NUL.  So if a NUL was received, the NSH session
-      would terminate because it thought it was the end of file.
+    * apps/system/ramtest:  Add a simple memory test (2013-03-26).
+    * apps/examples/ostest:  In the non-cancelable thread test, we need
+      to give the thread an opportunity to run and to set the non-
+      cancelable state.
+    * apps/nshlib/nsh_ddcmd.c: Correct the test of the skip input
+      parameter.  Was limiting the range to &lt;= count.  From Ken
+      Petit (2014-4-24).
 
-NxWidgets-1.6 2013-03-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
+NxWidgets-1.7 2013-04-28 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
-    * Type of argv[] has changed from const char ** to char * const *
-    * NXWidgets::CNxWidget:  Add an inline function to get the current style.
-    * NxWM::CTaskBar: Make a some methods of CTaskbar virtual to allow
-      customizations.  From Petteri Aimonen.
-    * NXWidgets::CCycleButton: Make CCycleButton change state in onPreRelease().
-      This way the new value is already available when a listener gets the
-      action event.  From Petteri Aimonen.
-    * NxWidgets/tools/bitmap_converter.py: Fix bitmap_converter.py so that
-      it works with indexed input images.
-    * NxWidgets::CLabel: Fix backward conditional compilation in the
-      &quot;flicker free&quot; logic.
-    * NxWidgets::CNxTimer:  Previously repeated timers were re-enabled after
-      the timer action event. Consequently, if the action event handler tried
-      to stop the timer, the request would be ignored.  Changes the order
-      so that the timer is re-enabled before the callback.  There is still
-      no risk of re-entrancy, because everything executes on the USRWORK work
-      queue.  From Petteri Aimonen.
-    * NxWidgets::CMultiLineTestBox: Fix text placement error.  From Petteri
-      Aimonen.
-    * NxWidgets::CWidgetControl:  Added another semaphore, boundssem, which
-      is set as soon as the screen bounds are known.  This corrects two
-      problems:
-      1) Due to the way nxgl_rectsize computes the size, it will never
-         be 0,0 like CWidgetControl expects. Therefore the size is considered
-         valid even though it has not been set yet.
-      2) After the check is fixed to test for &gt; 1, NxWM window creation will
-         hang. This is due to the fact that it uses the screen bounds for
-         determining window size. This was being blocked on geosem, which
-         is only posted after the size has been set.
-      From Petteri Aimonen.
-    * NxWidgets::CImage:  Two enhancements:
-      1) Allow changing the bitmap even after the control has been created.
-      2) Allow giving 'null' to have the control draw no image at all.
-      From Petteri Aimonen.
-    * NxWM::CTaskBar:  Allow windows with null icon. This makes sense for e.g.
-      full screen windows.  From Petteri Aimonen.
-    * NxWM::CApplicationWindow:  Add config options to override NxWM
-      stop/minimize icons.  From Petteri Aimonen.
-    * NwWM::CStartWindow, NxWM::CWindowMessenger: Get rid of the start window
-      thread. Instead, handle all events through the USRWORK work queue.
-      For me, this was necessary because I would open some files in button
-      handlers and close them in NxTimer handlers. If these belonged to
-      different tasks, the close operation would fail.  Further benefits:
-      + Gets rid of one task and message queue.
-      + Reduces the amount of code required
-      + Decouples CStartWindow from everything else - now it is just a window
-        with application icons, not an integral part of the event logic.
-      + All events come from the same thread, which reduces the possibility of
-        multithreading errors in user code.
-      + The user code can also send events to USRWORK, so that everything gets
-        serialized nicely without having to use so many mutexes.
-      Drawbacks:
-      - Currently the work state structure is malloc()ed, causing one allocation
-        and free per each input event. Could add a memory pool for these later, but
-        the speed difference doesn't seem noticeable.
-      - The work queue will add ~50 ms latency to input events. This is however
-        configurable, and the delay is anyway short enough that it is unnoticeable.
-      From Petteri Aimonen.
+    * NxWidgets bitmap_converter.py: Fix bug when image width &gt; 255.  From
+      Petteri Aimonen (2013-4-22).
+    * NxWM::CScrollbarPanel:  Fix spelling error in class name: CScollbarPanel
+      should be CScrollbarPanel.  From Petteri Aimonen (2013-4-22).
+    * NxWidgets:: CGlyphButton: Generate action event, like CButton does.
+      From Petteri Aimonen (2013-4-22).
+    * NxWidgets:: CGlyphButton:  Prevent drawing outside of the bitmap size.
+      From Petteri Aimonen (2013-4-22).
+    * NxWM::CTaskBar:  Add option CONFIG_NXWM_TASKBAR_NO_BORDER to suppress
+      drawing of the border on the taskbar.  From Petteri Aimonen (2013-4-22).
+    * NxWidgets::CNxTimer:  Add function to check if CNxTimer is running.
+      From Petteri Aimonen (2013-4-22).
+    * NxWidgets::CNxWidgets:  Allow overriding of the checkCollision() method.
+      From Petteri Aimonen (2013-4-22).
 
 uClibc++-1.0 2011-11-05 &lt;gnutt@nuttx.org&gt;
 
