@@ -161,7 +161,7 @@ cd ${NUTTX}/Documentation || \
 cp -f ../TODO TODO.txt
 cp -f ../ChangeLog ChangeLog.txt
 
-# Write a version file into the NuttX directoy.  The syntax of file is such that it
+# Write a version file into the NuttX directory.  The syntax of file is such that it
 # may be sourced by a bash script or included by a Makefile.
 
 VERSIONSH=${NUTTX}/tools/version.sh
@@ -172,7 +172,23 @@ fi
 
 ${VERSIONSH} ${BUILD} -v ${VERSION} ${NUTTX}/.version || \
     { echo "${VERSIONSH} failed"; cat ${NUTTX}/.version; exit 1; }
-chmod 755 ${NUTTX}/.version
+chmod 755 ${NUTTX}/.version || \
+    { echo "'chmod 755 ${NUTTX}/.version' failed"; exit 1; }
+
+# Update the configuration variable documentation
+
+MKCONFIGVARS=${NUTTX}/tools/mkconfigvars.sh
+CONFIGVARHTML=${NUTTX}/Documentation/NuttXConfigVariables.html
+
+if [ ! -x "${MKCONFIGVARS}" ]; then
+    echo "No executable script was found at: ${MKCONFIGVARS}"
+    exit 1
+fi
+
+${MKCONFIGVARS} ${VERSION} || \
+    { echo "${MKCONFIGVARS} failed"; exit 1; }
+chmod 644 ${CONFIGVARHTML} || \
+    { echo "'chmod 644 ${CONFIGVARHTML}' failed"; exit 1; }
 
 # Perform a full clean for the distribution
 
