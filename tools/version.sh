@@ -36,7 +36,7 @@ WD=`pwd`
 
 # Get command line parameters
 
-USAGE="USAGE: $0 [-d|-h] [-b build] -v <major.minor> <outfile-path>"
+USAGE="USAGE: $0 [-d|-h] [-b <build>] -v <major.minor> <outfile-path>"
 ADVICE="Try '$0 -h' for more information"
 
 unset VERSION
@@ -62,12 +62,15 @@ while [ ! -z "$1" ]; do
 		echo $USAGE
 		echo ""
 		echo "Where:"
+		echo "	-b <build>"
+		echo "		Use this build identification string.  Default: use GIT build ID"
+		echo "		NOTE: GIT build information may not be available in a snapshot"
 		echo "	-d"
 		echo "		Enable script debug"
 		echo "	-h"
 		echo "		show this help message and exit"
 		echo "	-v <major.minor>"
-		echo "		The NuttX version number expressed a major and minor number separated"
+		echo "		The NuttX version number expressed as a major and minor number separated"
 		echo "		by a period"
 		echo " 	<outfile-path>"
 		echo "		The full path to the version file to be created"

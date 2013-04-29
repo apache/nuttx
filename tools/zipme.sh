@@ -1,7 +1,7 @@
 #!/bin/bash
 # zipme.sh
 #
-#   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,15 +35,62 @@
 #set -x
 
 WD=`pwd`
-VERSION=$1
 
 TAR="tar cvf"
 ZIP=gzip
+
+# Get command line parameters
+
+USAGE="USAGE: $0 [-d|h] [-b <build]> <major.minor>"
+ADVICE="Try '$0 -h' for more information"
+
+unset VERSION
+unset BUILD
+
+while [ ! -z "$1" ]; do 
+    case $1 in
+    -b )
+        shift
+        BUILD="-b ${1}"
+        ;;
+    -d )
+        set -x
+        ;;
+    -h )
+        echo "$0 is a tool for generation of release versions of NuttX"
+        echo ""
+        echo $USAGE
+        echo ""
+        echo "Where:"
+        echo "  -b <build>"
+        echo "     Use this build identification string.  Default: use GIT build ID"
+        echo "     NOTE: GIT build information may not be available in a snapshot"
+        echo "  -d"
+        echo "     Enable script debug"
+        echo "  -h"
+        echo "     show this help message and exit"
+        echo "  <major.minor>"
+        echo "     The NuttX version number expressed as a major and minor number separated"
+        echo "     by a period"
+        exit 0
+        ;;
+    * )
+        break;
+        ;;
+    esac
+    shift
+done
+
+# The last thing on the command line is the version number
+
+VERSION=$1
 
 # Make sure we know what is going on
 
 if [ -z ${VERSION} ] ; then
    echo "You must supply a version like xx.yy as a parameter"
+   echo $USAGE
+   echo $ADVICE
    exit 1;
 fi
 
@@ -119,11 +166,12 @@ cp -f ../ChangeLog ChangeLog.txt
 
 VERSIONSH=${NUTTX}/tools/version.sh
 if [ ! -x "${VERSIONSH}" ]; then
-	echo "No executable script was found at: ${VERSIONSH}"
-	exit 1
+    echo "No executable script was found at: ${VERSIONSH}"
+    exit 1
 fi
-${VERSIONSH} -v ${VERSION} ${NUTTX}/.version || \
-	{ echo "${VERSIONSH} failed"; cat ${NUTTX}/.version; exit 1; }
+
+${VERSIONSH} ${BUILD} -v ${VERSION} ${NUTTX}/.version || \
+    { echo "${VERSIONSH} failed"; cat ${NUTTX}/.version; exit 1; }
 chmod 755 ${NUTTX}/.version
 
 # Perform a full clean for the distribution
