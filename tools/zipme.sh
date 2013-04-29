@@ -45,7 +45,9 @@ USAGE="USAGE: $0 [-d|h] [-b <build]> <major.minor>"
 ADVICE="Try '$0 -h' for more information"
 
 unset VERSION
+unset VERSIONOPT
 unset BUILD
+unset DEBUG
 
 while [ ! -z "$1" ]; do 
     case $1 in
@@ -55,6 +57,7 @@ while [ ! -z "$1" ]; do
         ;;
     -d )
         set -x
+        DEBUG=-d
         ;;
     -h )
         echo "$0 is a tool for generation of release versions of NuttX"
@@ -84,6 +87,7 @@ done
 # The last thing on the command line is the version number
 
 VERSION=$1
+VERSIONOPT="-v ${VERSION}"
 
 # Make sure we know what is going on
 
@@ -93,6 +97,18 @@ if [ -z ${VERSION} ] ; then
    echo $ADVICE
    exit 1;
 fi
+
+if [ -z "${BUILD}" ]; then
+    GITINFO=`git log 2>/dev/null | head -1`
+    if [ -z "${GITINFO}" ]; then
+        echo "GIT version information is not available. Use the -b option"
+        echo $USAGE
+        echo $ADVICE
+        exit 1;
+    fi
+    echo "GIT: ${GITINFO}"
+fi
+
 
 # Find the directory we were executed from and were we expect to
 # see the directories to tar up
@@ -170,7 +186,7 @@ if [ ! -x "${VERSIONSH}" ]; then
     exit 1
 fi
 
-${VERSIONSH} ${BUILD} -v ${VERSION} ${NUTTX}/.version || \
+${VERSIONSH} ${DEBUG} ${BUILD} ${VERSIONOPT} ${NUTTX}/.version || \
     { echo "${VERSIONSH} failed"; cat ${NUTTX}/.version; exit 1; }
 chmod 755 ${NUTTX}/.version || \
     { echo "'chmod 755 ${NUTTX}/.version' failed"; exit 1; }
@@ -185,7 +201,10 @@ if [ ! -x "${MKCONFIGVARS}" ]; then
     exit 1
 fi
 
-${MKCONFIGVARS} ${VERSION} || \
+cd ${NUTTX} || \
+   { echo "Failed to cd to ${NUTTX}" ; exit 1 ; }
+
+${MKCONFIGVARS} ${DEBUG} ${VERSIONOPT} || \
     { echo "${MKCONFIGVARS} failed"; exit 1; }
 chmod 644 ${CONFIGVARHTML} || \
     { echo "'chmod 644 ${CONFIGVARHTML}' failed"; exit 1; }
