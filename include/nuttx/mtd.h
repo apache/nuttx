@@ -151,8 +151,8 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t offset,
-                                    off_t nblocks);
+FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
+                                    off_t firstblock, off_t nblocks);
 
 /****************************************************************************
  * Name: ftl_initialize

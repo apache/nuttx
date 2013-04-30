@@ -74,7 +74,7 @@ struct mtd_partition_s
 
   FAR struct mtd_dev_s *parent; /* The "parent" MTD driver that manages the
                                  * entire FLASH */
-  off_t offset;                 /* Offset to the first sector of the managed
+  off_t firstblock;             /* Offset to the first block of the managed
                                  * sub-region */
   off_t neraseblocks;           /* The number of erase blocks in the managed
                                  * sub-region */
@@ -130,11 +130,11 @@ static int part_erase(FAR struct mtd_dev_s *dev, off_t startblock,
       return -ENXIO;
     }
 
-  /* Just add the partition offset to the requested offset and let the
+  /* Just add the partition offset to the requested block and let the
    * underlying MTD driver perform the erase.
    */
 
-  return priv->parent->erase(priv->parent, startblock + priv->offset,
+  return priv->parent->erase(priv->parent, startblock + priv->firstblock,
                              nblocks);
 }
 
@@ -163,11 +163,11 @@ static ssize_t part_bread(FAR struct mtd_dev_s *dev, off_t startblock,
       return -ENXIO;
     }
 
-  /* Just add the partition offset to the requested offset and let the
+  /* Just add the partition offset to the requested block and let the
    * underlying MTD driver perform the read.
    */
 
-  return priv->parent->bread(priv->parent, startblock + priv->offset,
+  return priv->parent->bread(priv->parent, startblock + priv->firstblock,
                              nblocks, buf);
 }
 
@@ -196,11 +196,11 @@ static ssize_t part_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
       return -ENXIO;
     }
 
-  /* Just add the partition offset to the requested offset and let the
+  /* Just add the partition offset to the requested block and let the
    * underlying MTD driver perform the write.
    */
 
-  return priv->parent->bwrite(priv->parent, startblock + priv->offset,
+  return priv->parent->bwrite(priv->parent, startblock + priv->firstblock,
                               nblocks, buf);
 }
 
@@ -237,11 +237,11 @@ static ssize_t part_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
           return -ENXIO;
         }
 
-      /* Just add the partition offset to the requested offset and let the
+      /* Just add the partition offset to the requested block and let the
        * underlying MTD driver perform the read.
        */
 
-      newoffset = offset + priv->offset * priv->blocksize;
+      newoffset = offset + priv->firstblock * priv->blocksize;
       return priv->parent->read(priv->parent, newoffset, nbytes, buffer);
     }
 
@@ -297,7 +297,7 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                    * return the sum to the caller.
                    */
 
-                  *ppv = (FAR void *)(base + priv->offset * priv->blocksize);
+                  *ppv = (FAR void *)(base + priv->firstblock * priv->blocksize);
                 }
             }
         }
@@ -307,13 +307,17 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           /* Erase the entire partition */
 
-          ret = priv->parent->erase(priv->parent, priv->offset,
+          ret = priv->parent->erase(priv->parent, priv->firstblock,
                                     priv->neraseblocks * priv->blkpererase);
         }
         break;
 
       default:
-        ret = -ENOTTY; /* Bad command */
+        {
+          /* Pass any unhandled ioctl() calls to the underlying driver */
+
+          ret = priv->parent->ioctl(priv->parent, cmd, arg);
+        }
         break;
     }
 
@@ -336,7 +340,7 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t offset,
+FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
                                     off_t nblocks)
 {
   FAR struct mtd_partition_s *part;
@@ -371,8 +375,8 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t offset,
    * beyond the sub-region.
    */
 
-  erasestart = (offset + blkpererase - 1) / blkpererase;
-  eraseend   = (offset + nblocks) / blkpererase;
+  erasestart = (firstblock + blkpererase - 1) / blkpererase;
+  eraseend   = (firstblock + nblocks) / blkpererase;
 
   if (erasestart >= eraseend)
     {
@@ -407,7 +411,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t offset,
   part->child.ioctl  = part_ioctl;
 
   part->parent       = mtd;
-  part->offset       = erasestart * blkpererase;
+  part->firstblock   = erasestart * blkpererase;
   part->neraseblocks = eraseend - erasestart;
   part->blocksize    = geo.blocksize;
   part->blkpererase  = blkpererase;
