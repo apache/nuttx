@@ -98,9 +98,11 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
 
   attr->policy = sched_getscheduler(0);
 
+#ifndef CONFIG_DISABLE_SIGNALS
   /* Empty signal masek */
 
   attr->sigmask = 0;
+#endif
 
   /* Default stack size */
 

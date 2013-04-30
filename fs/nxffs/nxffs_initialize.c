@@ -122,11 +122,11 @@ const uint8_t g_inodemagic[NXFFS_MAGICSIZE] = { 'I', 'n', 'o', 'd' };
 
 const uint8_t g_datamagic[NXFFS_MAGICSIZE] = { 'D', 'a', 't', 'a' };
 
-/* If CONFIG_NXFSS_PREALLOCATED is defined, then this is the single, pre-
+/* If CONFIG_NXFFS_PREALLOCATED is defined, then this is the single, pre-
  * allocated NXFFS volume instance.
  */
 
-#ifdef CONFIG_NXFSS_PREALLOCATED
+#ifdef CONFIG_NXFFS_PREALLOCATED
 struct nxffs_volume_s g_volume;
 #endif
 
@@ -160,11 +160,11 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   off_t threshold;
   int ret;
 
-  /* If CONFIG_NXFSS_PREALLOCATED is defined, then this is the single, pre-
+  /* If CONFIG_NXFFS_PREALLOCATED is defined, then this is the single, pre-
    * allocated NXFFS volume instance.
    */
 
-#ifdef CONFIG_NXFSS_PREALLOCATED
+#ifdef CONFIG_NXFFS_PREALLOCATED
 
   volume = &g_volume;
   memset(volume, 0, sizeof(struct nxffs_volume_s));
@@ -282,7 +282,7 @@ errout_with_buffer:
 errout_with_cache:
   kfree(volume->cache);
 errout_with_volume:
-#ifndef CONFIG_NXFSS_PREALLOCATED
+#ifndef CONFIG_NXFFS_PREALLOCATED
   kfree(volume);
 #endif
   return ret;
@@ -490,11 +490,11 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
 int nxffs_bind(FAR struct inode *blkdriver, FAR const void *data,
                FAR void **handle)
 {
-#ifndef CONFIG_NXFSS_PREALLOCATED
+#ifndef CONFIG_NXFFS_PREALLOCATED
 #  error "No design to support dynamic allocation of volumes"
 #else
 
-  /* If CONFIG_NXFSS_PREALLOCATED is defined, then this is the single, pre-
+  /* If CONFIG_NXFFS_PREALLOCATED is defined, then this is the single, pre-
    * allocated NXFFS volume instance.
    */
 
@@ -514,7 +514,7 @@ int nxffs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
 int nxffs_unbind(FAR void *handle, FAR struct inode **blkdriver)
 {
-#ifndef CONFIG_NXFSS_PREALLOCATED
+#ifndef CONFIG_NXFFS_PREALLOCATED
 #  error "No design to support dynamic allocation of volumes"
 #else
   return g_volume.ofiles ? -EBUSY : OK;

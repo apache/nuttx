@@ -24,6 +24,35 @@ config MTD_PARTITION
 		managing the sub-region of flash beginning at 'offset' (in blocks)
 		and of size 'nblocks' on the device specified by 'mtd'.
 
+config RAMMTD
+	bool "RAM-based MTD driver"
+	default n
+	---help---
+		Build support for a RAM-based MTD driver.
+
+if RAMMTD
+
+config RAMMTD_BLOCKSIZE
+	int "RAM MTD block size"
+	default 512
+
+config RAMMTD_ERASESIZE
+	int "RAM MTD erase block size"
+	default 4096
+
+config RAMMTD_ERASESTATE
+	hex "Simulated erase state"
+	default 0xff
+
+config RAMMTD_FLASHSIM
+	bool "RAM MTD FLASH Simulation"
+	default n
+	---help---
+		RAMMTD_FLASHSIM will add some extra logic to improve the level of
+		FLASH simulation.
+
+endif
+
 config MTD_AT24XX
 	bool "I2C-based AT24XX eeprom"
 	default n

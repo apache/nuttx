@@ -334,11 +334,11 @@ extern const uint8_t g_inodemagic[NXFFS_MAGICSIZE];
 
 extern const uint8_t g_datamagic[NXFFS_MAGICSIZE];
 
-/* If CONFIG_NXFSS_PREALLOCATED is defined, then this is the single, pre-
+/* If CONFIG_NXFFS_PREALLOCATED is defined, then this is the single, pre-
  * allocated NXFFS volume instance.
  */
 
-#ifdef CONFIG_NXFSS_PREALLOCATED
+#ifdef CONFIG_NXFFS_PREALLOCATED
 extern struct nxffs_volume_s g_volume;
 #endif
 

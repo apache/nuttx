@@ -40,7 +40,9 @@
 #include <nuttx/config.h>
 
 #include <stdlib.h>
+
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 
 #include "up_internal.h"
 

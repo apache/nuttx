@@ -75,10 +75,10 @@
 #  error "Must have CONFIG_RAMMTD_BLOCKSIZE <= CONFIG_RAMMTD_ERASESIZE"
 #endif
 
-#undef  CONFIG_RAMMTD_BLKPER
-#define CONFIG_RAMMTD_BLKPER (CONFIG_RAMMTD_ERASESIZE/CONFIG_RAMMTD_BLOCKSIZE)
+#undef  RAMMTD_BLKPER
+#define RAMMTD_BLKPER (CONFIG_RAMMTD_ERASESIZE/CONFIG_RAMMTD_BLOCKSIZE)
 
-#if CONFIG_RAMMTD_BLKPER*CONFIG_RAMMTD_BLOCKSIZE != CONFIG_RAMMTD_ERASESIZE
+#if RAMMTD_BLKPER*CONFIG_RAMMTD_BLOCKSIZE != CONFIG_RAMMTD_ERASESIZE
 #  error "CONFIG_RAMMTD_ERASESIZE must be an even multiple of CONFIG_RAMMTD_BLOCKSIZE"
 #endif
 
@@ -208,8 +208,8 @@ static int ram_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks
    * in logical block numbers
    */
 
-  startblock *= CONFIG_RAMMTD_BLKPER;
-  nblocks    *= CONFIG_RAMMTD_BLKPER;
+  startblock *= RAMMTD_BLKPER;
+  nblocks    *= RAMMTD_BLKPER;
 
   /* Get the offset corresponding to the first block and the size
    * corresponding to the number of blocks.
@@ -240,7 +240,7 @@ static ssize_t ram_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
 
   /* Don't let the read exceed the size of the ram buffer */
 
-  maxblock = priv->nblocks * CONFIG_RAMMTD_BLKPER;
+  maxblock = priv->nblocks * RAMMTD_BLKPER;
   if (startblock >= maxblock)
     {
       return 0;
@@ -280,7 +280,7 @@ static ssize_t ram_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Don't let the write exceed the size of the ram buffer */
 
-  maxblock = priv->nblocks * CONFIG_RAMMTD_BLKPER;
+  maxblock = priv->nblocks * RAMMTD_BLKPER;
   if (startblock >= maxblock)
     {
       return 0;

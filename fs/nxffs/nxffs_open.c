@@ -71,7 +71,7 @@
  * to pre-allocate the write state structure.
  */
 
-#ifdef CONFIG_NXFSS_PREALLOCATED
+#ifdef CONFIG_NXFFS_PREALLOCATED
 static struct nxffs_wrfile_s g_wrfile;
 #endif
 
@@ -503,7 +503,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
    * that includes additional information to support the write operation.
    */
 
-#ifdef CONFIG_NXFSS_PREALLOCATED
+#ifdef CONFIG_NXFFS_PREALLOCATED
   wrfile = &g_wrfile;
   memset(wrfile, 0, sizeof(struct nxffs_wrfile_s));
 #else
@@ -673,7 +673,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
 errout_with_name:
   kfree(wrfile->ofile.entry.name);
 errout_with_ofile:
-#ifndef CONFIG_NXFSS_PREALLOCATED
+#ifndef CONFIG_NXFFS_PREALLOCATED
   kfree(wrfile);
 #endif
 
@@ -845,7 +845,7 @@ static inline void nxffs_freeofile(FAR struct nxffs_volume_s *volume,
    * write-only open file container)
    */
 
-#ifdef CONFIG_NXFSS_PREALLOCATED
+#ifdef CONFIG_NXFFS_PREALLOCATED
   if ((FAR struct nxffs_wrfile_s*)ofile != &g_wrfile)
 #endif
     {
@@ -983,7 +983,7 @@ FAR struct nxffs_wrfile_s *nxffs_findwriter(FAR struct nxffs_volume_s *volume)
    * name attached.
    */
 
-#ifdef CONFIG_NXFSS_PREALLOCATED
+#ifdef CONFIG_NXFFS_PREALLOCATED
   return g_wrfile.ofile.entry.name != NULL ? &g_wrfile : NULL;
 #else
 #  error "Missing implementation"

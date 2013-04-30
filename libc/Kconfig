@@ -48,6 +48,14 @@ config LIBC_FLOATINGPOINT
 		By default, floating point
 		support in printf, sscanf, etc. is disabled.
 
+config LIB_RAND_ORDER
+	int "Order of the random number generate"
+	default 1
+	range 1 3
+	---help---
+		The order of the random number generator. 1=fast but very bad random
+		numbers, 3=slow but very good random numbers.
+
 choice
 	prompt "Newline Options"
 	default EOL_IS_EITHER_CRLF

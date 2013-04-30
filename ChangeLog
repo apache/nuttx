@@ -4645,4 +4645,8 @@
 	  sense, so it is disabled in the code (2013-4-30).
 	* drivers/mtd/mtd_partition.c:  Support capability to clone one
 	  MTD driver into several, MTD partition drivers, each of which
-	  can manage a sub-region of the FLASH.
+	  can manage a sub-region of the FLASH (2013-4-30).
+	* configs/sim/nxffs:  Converted to use the kconfig-frontends
+	  tools (20130-4-30).
+	* configs/sim/mtdpart:  A new configuration to test MTD
+	  partitions (2013-4-30).

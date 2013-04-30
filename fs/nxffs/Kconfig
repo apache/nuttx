@@ -11,6 +11,14 @@ config FS_NXFFS
 		Enable NuttX FLASH file system (NXFF) support.
 
 if FS_NXFFS
+
+config NXFFS_PREALLOCATED
+	bool "Single, preallocated volume"
+	default n
+	---help---
+		If CONFIG_NXFSS_PREALLOCATED is defined, then this is the single, pre-
+		allocated NXFFS volume instance.
+
 config NXFFS_ERASEDSTATE
 	hex "FLASH erased state"
 	default 0xff
