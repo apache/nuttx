@@ -2,7 +2,7 @@
  * include/nuttx/mtd.h
  * Memory Technology Device (MTD) interface
  *
- *   Copyright (C) 2009-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -132,6 +132,27 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: mtd_partition
+ *
+ * Description:
+ *   Given an instance of an MTD driver, create a flash partition, ie.,
+ *   another MTD driver instance that only operates with a sub-region of
+ *   FLASH media.  That sub-region is defined by a sector offsetset and a
+ *   sector count (where the size of a sector is provided the by parent MTD
+ *   driver).
+ *
+ *   NOTE: Since there may be a number of MTD partition drivers operating on
+ *   the same, underlying FLASH driver, that FLASH driver must be capable
+ *   of enforcing mutually exclusive access to the FLASH device.  Without
+ *   paritions, that mutual exclusing would be provided by the file system
+ *   abover the FLASH driver.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t offset,
+                                    off_t nblocks);
 
 /****************************************************************************
  * Name: ftl_initialize

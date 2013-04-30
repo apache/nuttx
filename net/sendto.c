@@ -57,9 +57,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* timeouts on sendto() do not make sense.  Each polling cycle from the
+/* Timeouts on sendto() do not make sense.  Each polling cycle from the
  * driver is an opportunity to send a packet.  If the driver is not polling,
- * then the network is not up (and there is not polling cycles to drive
+ * then the network is not up (and there are no polling cycles to drive
  * the timeout).
  *
  * There is a remote possibility that if there is a lot of other network

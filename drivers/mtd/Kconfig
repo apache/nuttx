@@ -2,10 +2,35 @@
 # For a description of the syntax of this configuration file,
 # see misc/tools/kconfig-language.txt.
 #
+
+config MTD_PARTITION
+	bool "Support MTD partitions"
+	default n
+	---help---
+		MTD partitions are build as MTD drivers that manage a sub-region
+		of the FLASH memory.  The contain the original FLASH MTD driver and
+		simply manage all accesses to assure that (1) FLASH accesses are
+		always offset to the beginning of the partition, and (2) that FLASH
+		accesses do not extend outside of the partition.
+
+		A FLASH device may be broken up into several partitions managed,
+		each managed by a separate MTD driver.  The MTD parition interface
+		is described in:
+
+			include/nuttx/mtd.h
+			FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t offset, off_t nblocks);
+
+		Each call to mtd_partition() will create a new MTD driver instance
+		managing the sub-region of flash beginning at 'offset' (in blocks)
+		and of size 'nblocks' on the device specified by 'mtd'.
+
 config MTD_AT24XX
 	bool "I2C-based AT24XX eeprom"
 	default n
 	select I2C
+	---help---
+		Build support for I2C-based at24cxx EEPROM(at24c32, at24c64,
+		at24c128, at24c256)
 
 if MTD_AT24XX
 

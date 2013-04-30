@@ -109,7 +109,7 @@ static int skel_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
 
-  /* The interface definition assumes that all erase blocks ar the same size.
+  /* The interface definition assumes that all erase blocks are the same size.
    * If that is not true for this particular device, then transform the
    * start block and nblocks as necessary.
    */
@@ -132,7 +132,7 @@ static ssize_t skel_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
 
-  /* The interface definition assumes that all read/write blocks ar the same size.
+  /* The interface definition assumes that all read/write blocks are the same size.
    * If that is not true for this particular device, then transform the
    * start block and nblocks as necessary.
    */
@@ -157,7 +157,7 @@ static ssize_t skel_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
 
-  /* The interface definition assumes that all read/write blocks ar the same size.
+  /* The interface definition assumes that all read/write blocks are the same size.
    * If that is not true for this particular device, then transform the
    * start block and nblocks as necessary.
    */
@@ -190,7 +190,7 @@ static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
    * instance.
    */
 
-  /* The interface definition assumes that all read/write blocks ar the same size.
+  /* The interface definition assumes that all read/write blocks are the same size.
    * If that is not true for this particular device, then transform the
    * start block and nblocks as necessary.
    */
@@ -218,7 +218,7 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
           if (geo)
             {
-              /* Populate the geometry structure with information need to know
+              /* Populate the geometry structure with information needed to know
                * the capacity and how to access the device.
                *
                * NOTE: that the device is treated as though it where just an array

@@ -90,8 +90,9 @@ kconfig2html.c
   auto-generated documentation will, eventually, replace the manually
   updated configuratin documentation that is fallling woefully behind.
 
-  USAGE: kconfig2html [-d] [-a <apps directory>] {-o <out file>] [<Kconfig root>]
-         kconfig2html [-h]
+  $ tools/kconfig2html.exe -h
+  USAGE: tools/kconfig2html [-d] [-a <apps directory>] {-o <out file>] [<Kconfig root>]
+         tools/kconfig2html [-h]
 
   Where:
 
@@ -110,6 +111,20 @@ mkconfigvars.sh
   configuration variabled documentation Documentation/NuttXConfigVariables.html.
   The script mkconfigvars.sh is a simple script that can be used to
   re-generated that file as needed.
+
+  $ tools/mkconfigvars.sh -h
+  tools/mkconfigvars.sh is a tool for generation of configuration variable documentation
+
+  USAGE: tools/mkconfigvars.sh [-d|h] [-v <major.minor>]
+
+  Where:
+    -v <major.minor>
+       The NuttX version number expressed as a major and minor number separated
+       by a period
+    -d
+       Enable script debug
+    -h
+       show this help message and exit
 
 mkexport.sh and Makefile.export
 -------------------------------

@@ -1554,7 +1554,7 @@ o ARM/STM32 (arch/arm/src/stm32/)
   Status:      Open
   Priority:    Medium-High
   
-  Title:       DMA EXTENSIONS
+  Title:       DMA EXTENSIONS F1/3
   Description: DMA logic needs to be extended.  DMA2, Channel 5, will not work
                because the DMA2 channels 4 & 5 share the same interrupt.
   Status:      Open

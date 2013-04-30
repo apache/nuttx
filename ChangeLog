@@ -4639,7 +4639,10 @@
 6.28 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/lpc17xx/lpc17_i2c.c:  Interrupts were not being
-	  re-enabled in the I2C intializatin function (2013-4-30).
+	  re-enabled in the I2C intialization function (2013-4-30).
 	* net/sendto.c:  Added skeleton of implementation of send timeouts
 	  for UDP.  However, this functionality really does not make
 	  sense, so it is disabled in the code (2013-4-30).
+	* drivers/mtd/mtd_partition.c:  Support capability to clone one
+	  MTD driver into several, MTD partition drivers, each of which
+	  can manage a sub-region of the FLASH.
