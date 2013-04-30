@@ -4637,3 +4637,7 @@
 	  dragging task_delete() into the link when it is never called.
 
 6.28 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/lpc17xx/lpc17_i2c.c:  Interrupts were not being
+	  re-enabled in the I2C intializatin function.
+

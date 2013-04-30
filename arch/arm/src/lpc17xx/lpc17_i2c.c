@@ -9,7 +9,7 @@
  *
  *   Author: David Hewson
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -537,6 +537,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
   else
 #endif
     {
+      irqrestore(flags);
       return NULL;
     }
 
@@ -561,6 +562,8 @@ struct i2c_dev_s *up_i2cinitialize(int port)
   /* Install our operations */
 
   priv->dev.ops = &lpc17_i2c_ops;
+
+  irqrestore(flags);
   return &priv->dev;
 }
 
