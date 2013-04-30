@@ -89,7 +89,7 @@ struct send_s
   uint32_t                   snd_isn;     /* Initial sequence number */
   uint32_t                   snd_acked;   /* The number of bytes acked */
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  uint32_t                   snd_time;    /* last send time for determining timeout */
+  uint32_t                   snd_time;    /* Last send time for determining timeout */
 #endif
 #if defined(CONFIG_NET_TCP_SPLIT)
   bool                       snd_odd;     /* True: Odd packet in pair transaction */
@@ -118,7 +118,7 @@ struct send_s
  ****************************************************************************/
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-static inline int send_timeout(struct send_s *pstate)
+static inline int send_timeout(FAR struct send_s *pstate)
 {
   FAR struct socket *psock = 0;
 
@@ -160,11 +160,11 @@ static inline int send_timeout(struct send_s *pstate)
  *
  ****************************************************************************/
 
-static uint16_t send_interrupt(struct uip_driver_s *dev, void *pvconn,
-                               void *pvpriv, uint16_t flags)
+static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
+                               FAR void *pvpriv, uint16_t flags)
 {
-  struct uip_conn *conn = (struct uip_conn*)pvconn;
-  struct send_s *pstate = (struct send_s *)pvpriv;
+  FAR struct uip_conn *conn = (FAR struct uip_conn*)pvconn;
+  FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
 
   nllvdbg("flags: %04x acked: %d sent: %d\n",
           flags, pstate->snd_acked, pstate->snd_sent);
@@ -501,7 +501,8 @@ end_wait:
  *
  ****************************************************************************/
 
-ssize_t psock_send(FAR struct socket *psock, const void *buf, size_t len, int flags)
+ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
+                   int flags)
 {
   struct send_s state;
   uip_lock_t save;
@@ -561,7 +562,7 @@ ssize_t psock_send(FAR struct socket *psock, const void *buf, size_t len, int fl
 
           conn->unacked         = 0;
 
-          /* Update the initial time for calculating timeouts */
+          /* Set the initial time for calculating timeouts */
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
           state.snd_time        = clock_systimer();
@@ -622,7 +623,7 @@ ssize_t psock_send(FAR struct socket *psock, const void *buf, size_t len, int fl
   return state.snd_sent;
 
 errout:
-  *get_errno_ptr() = err;
+  set_errno(err);
   return ERROR;
 }
 
@@ -690,7 +691,7 @@ errout:
  *
  ****************************************************************************/
 
-ssize_t send(int sockfd, const void *buf, size_t len, int flags)
+ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags)
 {
   return psock_send(sockfd_socket(sockfd), buf, len, flags);
 }

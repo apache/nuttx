@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/sendto.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,14 +47,35 @@
 #include <errno.h>
 #include <debug.h>
 #include <arch/irq.h>
+
+#include <nuttx/clock.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "net_internal.h"
 #include "uip/uip_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+/* timeouts on sendto() do not make sense.  Each polling cycle from the
+ * driver is an opportunity to send a packet.  If the driver is not polling,
+ * then the network is not up (and there is not polling cycles to drive
+ * the timeout).
+ *
+ * There is a remote possibility that if there is a lot of other network
+ * traffic that a UDP sendto could get delayed, but I would not expect this
+ * generate a timeout.
+ */
+ 
+#undef CONFIG_NET_SENDTO_TIMEOUT
+
+/* If supported, the sendto timeout function would depend on socket options
+ * and a system clock.
+ */
+
+#if !defined(CONFIG_NET_SOCKOPTS) || defined(CONFIG_DISABLE_CLOCK)
+#  undef CONFIG_NET_SENDTO_TIMEOUT
+#endif
 
 /****************************************************************************
  * Private Types
@@ -62,16 +83,60 @@
 
 struct sendto_s
 {
+#ifdef CONFIG_NET_SENDTO_TIMEOUT
+  FAR struct socket *st_sock;       /* Points to the parent socket structure */
+  uint32_t st_time;                 /* Last send time for determining timeout */
+#endif
   FAR struct uip_callback_s *st_cb; /* Reference to callback instance */
-  sem_t       st_sem;        /* Semaphore signals sendto completion */
-  uint16_t    st_buflen;     /* Length of send buffer (error if <0) */
-  const char *st_buffer;     /* Pointer to send buffer */
-  int         st_sndlen;     /* Result of the send (length sent or negated errno) */
+  sem_t st_sem;                     /* Semaphore signals sendto completion */
+  uint16_t st_buflen;               /* Length of send buffer (error if <0) */
+  const char *st_buffer;            /* Pointer to send buffer */
+  int st_sndlen;                    /* Result of the send (length sent or negated errno) */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: send_timeout
+ *
+ * Description:
+ *   Check for send timeout.
+ *
+ * Parameters:
+ *   pstate   send state structure
+ *
+ * Returned Value:
+ *   TRUE:timeout FALSE:no timeout
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_SENDTO_TIMEOUT
+static inline int send_timeout(FAR struct sendto_s *pstate)
+{
+  FAR struct socket *psock = 0;
+
+  /* Check for a timeout configured via setsockopts(SO_SNDTIMEO).
+   * If none... we well let the send wait forever.
+   */
+
+  psock = pstate->st_sock;
+  if (psock && psock->s_sndtimeo != 0)
+    {
+      /* Check if the configured timeout has elapsed */
+
+      return net_timeo(pstate->st_time, psock->s_sndtimeo);
+    }
+
+  /* No timeout */
+
+  return FALSE;
+}
+#endif /* CONFIG_NET_SENDTO_TIMEOUT */
 
 /****************************************************************************
  * Function: sendto_interrupt
@@ -98,12 +163,12 @@ struct sendto_s
 static uint16_t sendto_interrupt(struct uip_driver_s *dev, void *conn,
                                  void *pvpriv, uint16_t flags)
 {
-  struct sendto_s *pstate = (struct sendto_s *)pvpriv;
+  FAR struct sendto_s *pstate = (FAR struct sendto_s *)pvpriv;
 
   nllvdbg("flags: %04x\n", flags);
   if (pstate)
     {
-      /* Check if the outgoing packet is available (it may have been claimed
+      /* Check if the outgoing packet is available.  It may have been claimed
        * by a sendto interrupt serving a different thread -OR- if the output
        * buffer currently contains unprocessed incoming data.  In these cases
        * we will just have to wait for the next polling cycle.
@@ -112,10 +177,25 @@ static uint16_t sendto_interrupt(struct uip_driver_s *dev, void *conn,
       if (dev->d_sndlen > 0 || (flags & UIP_NEWDATA) != 0)
         {
            /* Another thread has beat us sending data or the buffer is busy,
-            * wait for the next polling cycle
+            * Check for a timeout.  If not timed out, wait for the next
+            * polling cycle and check again.
             */
 
-           return flags;
+#ifdef CONFIG_NET_SENDTO_TIMEOUT
+          if (send_timeout(pstate))
+            {
+              /* Yes.. report the timeout */
+
+              nlldbg("SEND timeout\n");
+              pstate->st_sndlen = -ETIMEDOUT;
+            }
+          else
+#endif /* CONFIG_NET_SENDTO_TIMEOUT */
+            {
+               /* No timeout.  Just wait for the next polling cycle */
+
+               return flags;
+            }
         }
 
       /* It looks like we are good to send the data */
@@ -283,11 +363,18 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
    * are ready.
    */
 
-  save            = uip_lock();
+  save = uip_lock();
   memset(&state, 0, sizeof(struct sendto_s));
   sem_init(&state.st_sem, 0, 0);
   state.st_buflen = len;
   state.st_buffer = buf;
+
+  /* Set the initial time for calculating timeouts */
+
+#ifdef CONFIG_NET_SENDTO_TIMEOUT
+  state.st_sock = psock;
+  state.st_time = clock_systimer();
+#endif
 
   /* Setup the UDP socket */
 
@@ -354,7 +441,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 #endif
 
 errout:
-  errno = err;
+  set_errno(err);
   return ERROR;
 }
 
