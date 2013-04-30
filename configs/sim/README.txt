@@ -240,6 +240,11 @@ mount
     cd <nuttx-directory>/tools
     ./configure.sh sim/mount
 
+mtdpart
+
+  This is the apps/examples/mtdpart test using a MTD RAM driver to
+  simulate the FLASH part.
+
 nettest
 
   Description
@@ -486,6 +491,11 @@ nx11
     +CONFIGURED_APPS += examples/nxconsole
 
   See apps/examples/README.txt for further details.
+
+nxffs
+
+  This is the apps/examples/nxffs test using a MTD RAM driver to
+  simulate the FLASH part.
 
 nxlines
 
