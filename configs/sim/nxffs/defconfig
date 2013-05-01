@@ -216,7 +216,6 @@ CONFIG_RAMMTD_FLASHSIM=y
 # CONFIG_MTD_AT45DB is not set
 # CONFIG_MTD_MP25P is not set
 # CONFIG_MTD_RAMTRON is not set
-# CONFIG_MTD_RAM is not set
 # CONFIG_MTD_SST25 is not set
 # CONFIG_MTD_SST39FV is not set
 # CONFIG_MTD_W25 is not set

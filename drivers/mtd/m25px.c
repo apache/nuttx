@@ -78,12 +78,18 @@
 #  define CONFIG_MP25P_MANUFACTURER 0x20
 #endif
 
+#ifndef CONFIG_MP25P_MEMORY_TYPE
+#  define CONFIG_MP25P_MEMORY_TYPE  0x20
+#endif
+
 /* M25P Registers *******************************************************************/
 /* Indentification register values */
 
 #define M25P_MANUFACTURER         CONFIG_MP25P_MANUFACTURER
-#define M25P_MEMORY_TYPE          0x20
+#define M25P_MEMORY_TYPE          CONFIG_MP25P_MEMORY_TYPE
+#define M25P_RES_ID               0x13
 #define M25P_M25P1_CAPACITY       0x11 /* 1 M-bit */
+#define M25P_EN25F80_CAPACITY     0x14 /* 8 M-bit */
 #define M25P_M25P32_CAPACITY      0x16 /* 32 M-bit */
 #define M25P_M25P64_CAPACITY      0x17 /* 64 M-bit */
 #define M25P_M25P128_CAPACITY     0x18 /* 128 M-bit */
@@ -97,6 +103,17 @@
 #define M25P_M25P1_NSECTORS      4
 #define M25P_M25P1_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
 #define M25P_M25P1_NPAGES        512
+
+/*  EN25F80 capacity is 1,048,576 bytes:
+ *  (16 sectors) * (65,536 bytes per sector)
+ *  (512 pages) * (256 bytes per page)
+ */
+
+#define M25P_EN25F80_SECTOR_SHIFT 16    /* Sector size 1 << 15 = 65,536 */
+#define M25P_EN25F80_NSECTORS     16
+#define M25P_EN25F80_PAGE_SHIFT   8     /* Page size 1 << 8 = 256 */
+#define M25P_EN25F80_NPAGES       4096
+#define M25P_EN25F80_SUBSECT_SHIFT 12   /* Sub-Sector size 1 << 12 = 4,096 */
 
 /*  M25P32 capacity is 4,194,304 bytes:
  *  (64 sectors) * (65,536 bytes per sector)
@@ -142,6 +159,7 @@
 #define M25P_BE        0xc7    /* 1 Bulk Erase                0   0     0 */
 #define M25P_DP        0xb9    /* 2 Deep power down           0   0     0 */
 #define M25P_RES       0xab    /* 2 Read Electronic Signature 0   3     >=1 */
+#define M25P_SSE       0x20    /* 1 Sub-Sector Erase          0   0     0 */
 
 /* NOTE 1: All parts, NOTE 2: M25P632/M25P64 */
 
@@ -181,6 +199,9 @@ struct m25p_dev_s
   uint8_t  pageshift;        /* 8 */
   uint16_t nsectors;         /* 128 or 64 */
   uint32_t npages;           /* 32,768 or 65,536 */
+#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+  uint8_t  subsectorshift;   /* 0, 12 or 13 (4K or 8K) */
+#endif
 };
 
 /************************************************************************************
@@ -198,6 +219,9 @@ static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t offset);
 static inline int  m25p_bulkerase(struct m25p_dev_s *priv);
 static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *buffer,
                                   off_t offset);
+#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+static inline void m25p_subsectorerase(struct m25p_dev_s *priv, off_t offset);
+#endif
 
 /* MTD driver methods */
 
@@ -292,6 +316,10 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
     {
       /* Okay.. is it a FLASH capacity that we understand? */
 
+#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+      priv->subsectorshift = 0;
+#endif
+
       if (capacity == M25P_M25P1_CAPACITY)
         {
            /* Save the FLASH geometry */
@@ -300,6 +328,19 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
            priv->nsectors    = M25P_M25P1_NSECTORS;
            priv->pageshift   = M25P_M25P1_PAGE_SHIFT;
            priv->npages      = M25P_M25P1_NPAGES;
+           return OK;
+        }
+      else if (capacity == M25P_EN25F80_CAPACITY)
+        {
+           /* Save the FLASH geometry */
+
+           priv->sectorshift    = M25P_EN25F80_SECTOR_SHIFT;
+           priv->nsectors       = M25P_EN25F80_NSECTORS;
+           priv->pageshift      = M25P_EN25F80_PAGE_SHIFT;
+           priv->npages         = M25P_EN25F80_NPAGES;
+#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+           priv->subsectorshift = M25P_EN25F80_SUBSECT_SHIFT;
+#endif
            return OK;
         }
       else if (capacity == M25P_M25P32_CAPACITY)
@@ -356,7 +397,7 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
   /* Send "Read Status Register (RDSR)" command */
 
   (void)SPI_SEND(priv->dev, M25P_RDSR);
-  
+
   /* Loop as long as the memory is busy with a write cycle */
 
   do
@@ -424,7 +465,7 @@ static void m25p_writeenable(struct m25p_dev_s *priv)
   /* Send "Write Enable (WREN)" command */
 
   (void)SPI_SEND(priv->dev, M25P_WREN);
-  
+
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
@@ -475,6 +516,53 @@ static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector)
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   fvdbg("Erased\n");
 }
+
+/************************************************************************************
+ * Name:  m25p_subsectorerase
+ ************************************************************************************/
+
+#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+static inline void m25p_subsectorerase(struct m25p_dev_s *priv, off_t subsector)
+{
+  off_t offset = subsector << priv->subsectorshift;
+
+  fvdbg("subsector: %9lx\n", (long)subsector);
+
+  /* Wait for any preceding write to complete.  We could simplify things by
+   * perform this wait at the end of each write operation (rather than at
+   * the beginning of ALL operations), but have the wait first will slightly
+   * improve performance.
+   */
+
+  m25p_waitwritecomplete(priv);
+
+  /* Send write enable instruction */
+
+  m25p_writeenable(priv);
+
+  /* Select this FLASH part */
+
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+
+  /* Send the "Sub-Sector Erase (SSE)" instruction */
+
+  (void)SPI_SEND(priv->dev, M25P_SSE);
+
+  /* Send the sector offset high byte first.  For all of the supported
+   * parts, the sector number is completely contained in the first byte
+   * and the values used in the following two bytes don't really matter.
+   */
+
+  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  (void)SPI_SEND(priv->dev, offset & 0xff);
+
+  /* Deselect the FLASH */
+
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  fvdbg("Erased\n");
+}
+#endif
 
 /************************************************************************************
  * Name:  m25p_bulkerase
@@ -533,7 +621,7 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *bu
   /* Enable the write access to the FLASH */
 
   m25p_writeenable(priv);
-  
+
   /* Select this FLASH part */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
@@ -551,12 +639,59 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *bu
   /* Then write the specified number of bytes */
 
   SPI_SNDBLOCK(priv->dev, buffer, 1 << priv->pageshift);
-  
+
   /* Deselect the FLASH: Chip Select high */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   fvdbg("Written\n");
 }
+
+/************************************************************************************
+ * Name:  m25p_bytewrite
+ ************************************************************************************/
+
+#ifdef CONFIG_MP25P_BYTEWRITE
+static inline void m25p_bytewrite(struct m25p_dev_s *priv, FAR const uint8_t *buffer,
+                                  off_t offset, uint16_t count)
+{
+  fvdbg("offset: %08lx  count:%d\n", (long)offset, count);
+
+  /* Wait for any preceding write to complete.  We could simplify things by
+   * perform this wait at the end of each write operation (rather than at
+   * the beginning of ALL operations), but have the wait first will slightly
+   * improve performance.
+   */
+
+  m25p_waitwritecomplete(priv);
+
+  /* Enable the write access to the FLASH */
+
+  m25p_writeenable(priv);
+
+  /* Select this FLASH part */
+
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
+
+  /* Send "Page Program (PP)" command */
+
+  (void)SPI_SEND(priv->dev, M25P_PP);
+
+  /* Send the page offset high byte first. */
+
+  (void)SPI_SEND(priv->dev, (offset >> 16) & 0xff);
+  (void)SPI_SEND(priv->dev, (offset >> 8) & 0xff);
+  (void)SPI_SEND(priv->dev, offset & 0xff);
+
+  /* Then write the specified number of bytes */
+
+  SPI_SNDBLOCK(priv->dev, buffer, count);
+
+  /* Deselect the FLASH: Chip Select high */
+
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  fvdbg("Written\n");
+}
+#endif
 
 /************************************************************************************
  * Name: m25p_erase
@@ -614,6 +749,7 @@ static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
 {
   FAR struct m25p_dev_s *priv = (FAR struct m25p_dev_s *)dev;
   size_t blocksleft = nblocks;
+  size_t pagesize = 1 << priv->pageshift;
 
   fvdbg("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
@@ -623,6 +759,7 @@ static ssize_t m25p_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
   while (blocksleft-- > 0)
     {
       m25p_pagewrite(priv, buffer, startblock);
+      buffer += pagesize;
       startblock++;
    }
   m25p_unlock(priv->dev);
@@ -703,10 +840,15 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                * appear so.
                */
 
-              geo->blocksize    = (1 << priv->pageshift);
-              geo->erasesize    = (1 << priv->sectorshift);
-              geo->neraseblocks = priv->nsectors;
-              ret               = OK;
+              geo->blocksize     = (1 << priv->pageshift);
+              geo->erasesize     = (1 << priv->sectorshift);
+              geo->neraseblocks  = priv->nsectors;
+#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+              geo->subsectorsize = (1 << priv->subsectorshift);
+              geo->nsubsectors   = priv->nsectors * (1 << (priv->sectorshift -
+                                   priv->subsectorshift));
+#endif
+              ret                = OK;
 
               fvdbg("blocksize: %d erasesize: %d neraseblocks: %d\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
@@ -723,7 +865,98 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             m25p_unlock(priv->dev);
         }
         break;
- 
+
+#ifdef CONFIG_FS_SMARTFS
+      case MTDIOC_GETCAPS:
+        {
+          ret = 0;
+#ifdef CONFIG_MP25P_BYTEWRITE
+          ret |= MTDIOC_CAPS_BYTEWRITE;
+#endif
+
+#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+          ret |= MTDIOC_CAPS_SECTERASE;
+#endif
+          break;
+        }
+#endif /* CONFIG_FS_SMARTFS */
+
+#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+      case MTDIOC_SECTERASE:
+        {
+          m25p_subsectorerase(priv, (off_t) arg);
+          ret = OK;
+          break;
+        }
+#endif
+
+#ifdef CONFIG_MP25P_BYTEWRITE
+      case MTDIOC_BYTEWRITE:
+        {
+          struct mtd_byte_write_s *bytewrite = (struct mtd_byte_write_s *) arg;
+          int    startpage;
+          int    endpage;
+          int    count;
+          int    index;
+          int    pagesize;
+          int    bytestowrite;
+          size_t offset;
+
+          /* We must test if the offset + count crosses one or more pages
+           * and perform individual writes.  The devices can only write in
+           * page increments.
+           */
+
+          startpage = bytewrite->offset / (1 << priv->pageshift);
+          endpage = (bytewrite->offset + bytewrite->count) / (1 << priv->pageshift);
+
+          if (startpage == endpage)
+            {
+              m25p_bytewrite(priv, bytewrite->buffer, bytewrite->offset,
+                             bytewrite->count);
+            }
+          else
+            {
+              /* Write the 1st partial-page */
+
+              count = bytewrite->count;
+              pagesize = (1 << priv->pageshift);
+              offset = bytewrite->offset;
+              bytestowrite = pagesize - (bytewrite->offset & (pagesize-1));
+              m25p_bytewrite(priv, bytewrite->buffer, offset, bytestowrite);
+
+              /* Update offset and count */
+
+              offset += bytestowrite;
+              count -=  bytestowrite;
+              index = bytestowrite;
+
+              /* Write full pages */
+
+              while (count >= pagesize)
+                {
+                  m25p_bytewrite(priv, &bytewrite->buffer[index], offset, pagesize);
+
+                  /* Update offset and count */
+
+                  offset += pagesize;
+                  count -= pagesize;
+                  index += pagesize;
+                }
+
+              /* Now write any partial page at the end */
+
+              if (count > 0)
+                {
+                  m25p_bytewrite(priv, &bytewrite->buffer[index], offset, count);
+                }
+            }
+
+          ret = OK;
+          break;
+        }
+#endif
+
       case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */

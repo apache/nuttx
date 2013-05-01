@@ -51,6 +51,13 @@ config RAMMTD_FLASHSIM
 		RAMMTD_FLASHSIM will add some extra logic to improve the level of
 		FLASH simulation.
 
+config RAMMTD_SMART
+	bool "SMART block driver support in the RAM MTD driver"
+	default n
+	---help---
+		Builds in additional ioctl and interface code to support the
+		SMART block driver / filesystem.
+
 endif
 
 config MTD_AT24XX
@@ -113,7 +120,53 @@ config MP25P_MANUFACTURER
 		for the STMicro MP25x serial FLASH.  If, for example, you are using the a Macronix
 		International MX25 serial FLASH, the correct manufacturer ID would be 0xc2.
 
+config MP25P_MEMORY_TYPE
+	hex "MP25P memory type ID"
+	default 0x20
+	---help---
+		The memory type for M25 "P" series is 0x20, but the driver also supports "F" series
+		devices, such as the EON EN25F80 part which adds a 4K sector erase capability.  The
+		ID for "F" series parts from EON is 0x31.
+
+config MP25P_SUBSECTOR_ERASE
+	bool "Sub-Sector Erase"
+	default n
+	---help---
+		Some devices (the EON EN25F80) support a smaller erase block size (4K vs 64K).
+		This option enables support for sub-sector erase.  The SMART file system can
+		take advantage of this option if it is enabled.
+
+config MP25P_BYTEWRITE
+	bool "Enable ByteWrite ioctl support"
+	default n
+	---help---
+		The MP25P series of devices allow writing to a page with less than a full-page
+		size of data.  In this case, only the written bytes are updated without affecting
+		the other bytes in the page.  The SMART FS requires this option for proper operation.
+
 endif
+
+config MTD_SMART
+	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
+	default y
+	select MP25P_BYTEWRITE
+	---help---
+		The MP25x series of Flash devices are typically very small and have a very large
+		erase block size.  This causes issues with the standard Flash Translation Layer
+		block driver since it tries to allocate a RAM block the size of a flash erase
+		block, which is typically 64K.  This block driver uses a different approach
+		to sacrifice performance for RAM memory footprint by saving data in sectors
+		(typically 2K - 4K based on memory size) and relocating sectors as needed when
+		an erase block needs to be erased.
+
+config MTD_SMART_SECTOR_SIZE
+	int "SMART Device sector size"
+    depends on MTD_SMART
+	default 1024
+	---help---
+		Sets the size of a single alloction on the SMART device.  Larger sector sizes
+		reduce overhead per sector, but cause more wasted space with a lot of smaller
+		files.
 
 config MTD_RAMTRON
 	bool "SPI-based RAMTRON NVRAM Devices FM25V10"
@@ -121,10 +174,6 @@ config MTD_RAMTRON
 	select SPI
 	---help---
 		SPI-based RAMTRON NVRAM Devices FM25V10
-
-config MTD_RAM
-	bool "Memory bus ram"
-	default n
 
 config MTD_SST25
 	bool "SPI-based SST25 FLASH"

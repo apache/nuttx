@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mtd/rammtd.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -225,6 +225,30 @@ static int ram_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks
 }
 
 /****************************************************************************
+ * Name: ram_readbytes
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMMTD_SMART
+static ssize_t ram_read_bytes(FAR struct mtd_dev_s *dev, off_t offset,
+        size_t nbytes, FAR uint8_t *buf)
+{
+  FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
+
+  DEBUGASSERT(dev && buf);
+
+  /* Don't let read read past end of buffer */
+
+  if (offset + nbytes > priv->nblocks * CONFIG_RAMMTD_ERASESIZE)
+   {
+     return 0;
+   }
+
+  ram_read(buf, &priv->start[offset], nbytes);
+  return nbytes;
+}
+#endif
+
+/****************************************************************************
  * Name: ram_bread
  ****************************************************************************/
 
@@ -349,13 +373,31 @@ static int ram_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
             size_t size = priv->nblocks * CONFIG_RAMMTD_ERASESIZE;
 
-	        /* Erase the entire device */
+            /* Erase the entire device */
 
             memset(priv->start, CONFIG_RAMMTD_ERASESTATE, size);
-	        ret = OK;
+            ret = OK;
         }
         break;
- 
+
+#ifdef CONFIG_RAMMTD_SMART
+      case MTDIOC_GETCAPS:
+        {
+          ret = MTDIOC_CAPS_BYTEWRITE;
+          break;
+        }
+
+      case MTDIOC_BYTEWRITE:
+        {
+          struct mtd_byte_write_s *bytewrite = (struct mtd_byte_write_s *) arg;
+
+          ram_write(&priv->start[bytewrite->offset], bytewrite->buffer,
+                  bytewrite->count);
+          ret = OK;
+          break;
+        }
+#endif
+
       default:
         ret = -ENOTTY; /* Bad command */
         break;
@@ -402,7 +444,7 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
       fdbg("Need to provide at least one full erase block\n");
       return NULL;
     }
-  
+
   /* Perform initialization as necessary */
 
   priv->mtd.erase  = ram_erase;
@@ -410,6 +452,10 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
   priv->mtd.bwrite = ram_bwrite;
   priv->mtd.ioctl  = ram_ioctl;
   priv->mtd.erase  = ram_erase;
+
+#ifdef CONFIG_RAMMTD_SMART
+  priv->mtd.read   = ram_read_bytes;
+#endif
 
   priv->start      = start;
   priv->nblocks    = nblocks;
