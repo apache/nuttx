@@ -1,8 +1,8 @@
 /************************************************************************************
- * configs/stm32f4disovery/src/up_extmem.c
+ * configs/mikroe_stm32f4/src/up_extmem.c
  * arch/arm/src/board/up_extmem.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without

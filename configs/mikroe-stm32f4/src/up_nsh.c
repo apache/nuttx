@@ -2,7 +2,7 @@
  * config/mikroe_stm32f4/src/up_nsh.c
  * arch/arm/src/board/up_nsh.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -192,6 +192,7 @@ int nsh_archinitialize(void)
       message("nsh_archinitialize: Failed to initialize SPI port 3\n");
       return -ENODEV;
     }
+
   message("nsh_archinitialize: Successfully initialized SPI port 3\n");
 
   /* Now bind the SPI interface to the M25P8 SPI FLASH driver */
@@ -208,6 +209,7 @@ int nsh_archinitialize(void)
       message("nsh_archinitialize: Successfully bound SPI port 3 to the SPI FLASH driver\n");
 
       /* Now initialize a SMART Flash block device and bind it to the MTD device */
+
 #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
       smart_initialize(0, mtd);
 #endif
@@ -216,7 +218,6 @@ int nsh_archinitialize(void)
   /* Create a RAM MTD device if configured */
 
 #ifdef CONFIG_MTD_RAM
-
   {
       uint8_t *start = (uint8_t *) kmalloc(CONFIG_EXAMPLES_SMART_BUFSIZE);
       mtd = rammtd_initialize(start, CONFIG_EXAMPLES_SMART_BUFSIZE);
@@ -231,9 +232,7 @@ int nsh_archinitialize(void)
 #endif /* CONFIG_MTD_RAM */
 
 #endif /* CONFIG_MTD */
-
-//#warning "Now what are we going to do with this SPI FLASH driver?"
-#endif
+#endif /* CONFIG_STM32_SPI3 */
 
   /* Create the SPI FLASH MTD instance */
   /* The M25Pxx is not a good media to implement a file system..
@@ -255,7 +254,7 @@ int nsh_archinitialize(void)
   else
     {
       message("nsh_archinitialize: Successfully bound SPI to the MMC/SD driver\n");
-  
+
     }
 #endif
 

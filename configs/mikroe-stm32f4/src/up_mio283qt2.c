@@ -5,7 +5,7 @@
  * Interface definition for the MI0283QT-2 LCD from Multi-Inno Technology Co., Ltd.
  * This LCD is based on the Himax HX8347-D LCD controller.
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  **************************************************************************************/
- 
+
 /**************************************************************************************
  * Included Files
  **************************************************************************************/
@@ -92,14 +92,14 @@
  *   6 RC1/T2CK                           LCD_RST              TFT display
  *  43 PMA1/AETXD3/AN14/ERXD2/PMALH/RB14  LCD-CS#              TFT display, HDR2 pin 3
  *  77 OC3/RD2                            LCD_BLED             LCD backlight LED
- *  44 PMA0/AETXD2/AN15/CN12/ERXD3/OCFB/  LCD-RS               TFT display       
+ *  44 PMA0/AETXD2/AN15/CN12/ERXD3/OCFB/  LCD-RS               TFT display
  *     PMALL/RB15
  *
  *  34 PMA13/AN10/RB10/CVREFOUT           LCD-YD               TFT display
  *  35 PMA12/AETXERR/AN11/ERXERR/RB11     LCD-XR               TFT display
  *  41 PMA11/AECRS/AN12/ERXD0/RB12        LCD-YU               TFT display
  *  42 PMA10/AECOL/AN13/ERXD1/RB13        LCD-XL               TFT display
- * 
+ *
  *  93 PMD0/RE0                           PMPD0                TFT display, HDR1 pin 18
  *  94 PMD1/RE1                           PMPD1                TFT display, HDR1 pin 17
  *  98 PMD2/RE2                           PMPD2                TFT display, HDR1 pin 16
@@ -116,9 +116,9 @@
  *  80 PMD13/CN19/ETXD3/RD13              PMPD13               TFT display, HDR1 pin 5
  *  83 PMD14/CN15/ETXEN/RD6               PMPD14               TFT display, HDR1 pin 4
  *  84 PMD15/CN16/ETXCLK/RD7              PMPD15               TFT display, HDR1 pin 3
- * 
- *  82 CN14/PMRD/RD5                      PMPRD                
- *  81 CN13/OC5/PMWR/RD4                  PMPWR                
+ *
+ *  82 CN14/PMRD/RD5                      PMPRD
+ *  81 CN13/OC5/PMWR/RD4                  PMPWR
  */
 
 /* RC1, Reset -- Low value holds in reset */
@@ -549,5 +549,3 @@ void pic32mx_lcdinitialize(void)
    pic32mx_configgpio(GPIO_LCD_BLED);
 #endif
 }
-
-

@@ -2,7 +2,7 @@
  * configs/mikroe-stm32f4/src/mikroe-stm32f4-internal.h
  * arch/arm/src/board/mikroe-stm32f4-internal.n
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,7 @@
                          GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN0)
 #define GPIO_SD_CD      (GPIO_INPUT|GPIO_PORTD|GPIO_PIN15)
 
-/* USB OTG FS 
+/* USB OTG FS
  *
  * PA9  OTG_FS_VBUS VBUS sensing (also connected to the green LED)
  * PC0  OTG_FS_PowerSwitchOn

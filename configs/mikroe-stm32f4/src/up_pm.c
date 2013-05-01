@@ -2,7 +2,7 @@
  * configs/mikroe_stm32f4/src/up_pm.c
  * arch/arm/src/board/up_pm.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *

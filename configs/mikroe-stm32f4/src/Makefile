@@ -1,7 +1,7 @@
 ############################################################################
 # configs/mikroe-stm32f4/src/Makefile
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 #   Updates: 04/15/2013 - Ken Pettit
@@ -41,7 +41,7 @@
 
 CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS = 
+ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = up_boot.c up_spi.c

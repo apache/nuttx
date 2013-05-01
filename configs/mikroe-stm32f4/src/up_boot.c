@@ -2,7 +2,7 @@
  * configs/mikroe_stm32f4/src/up_boot.c
  * arch/arm/src/board/up_boot.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@ void stm32_boardinitialize(void)
 #endif
 
   /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
-   * disabled, and 3) the weak function stm32_usbinitialize() has been brought 
+   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
    * into the build. Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also
    * selected.
    */
@@ -94,5 +94,4 @@ void stm32_boardinitialize(void)
       stm32_usbinitialize();
     }
 #endif
-
 }
