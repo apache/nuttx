@@ -2,7 +2,7 @@
  * configs/mikroe-stm32f4/include/board.h
  * include/arch/board/board.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,7 +150,7 @@
 #define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
- * otherwise frequency is 2xAPBx. 
+ * otherwise frequency is 2xAPBx.
  * Note: TIM1,8 are on APB2, others on APB1
  */
 

@@ -74,10 +74,10 @@ void stm32_board_clockconfig(void)
 {
   uint32_t regval;
 
-  /* Configure chip clocking to use the internal 16Mhz RC oscillator.  
-
-    NOTE: We will assume the HSIRDY (High Speed Internal RC Ready) bit is 
-     set, otherwise we wouldn't be here executing code.  
+  /* Configure chip clocking to use the internal 16Mhz RC oscillator.
+   *
+   * NOTE: We will assume the HSIRDY (High Speed Internal RC Ready) bit is
+   * set, otherwise we wouldn't be here executing code.
    */
 
   regval  = getreg32(STM32_RCC_APB1ENR);

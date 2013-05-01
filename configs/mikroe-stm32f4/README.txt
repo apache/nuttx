@@ -40,7 +40,7 @@ GNU Toolchain Options
   toolchain options.
 
   1. The CodeSourcery GNU toolchain,
-  2. The Atollic Toolchain, 
+  2. The Atollic Toolchain,
   3. The devkitARM GNU toolchain,
   4. Raisonance GNU toolchain, or
   5. The NuttX buildroot Toolchain (see below).
@@ -119,7 +119,7 @@ GNU Toolchain Options
   In order to compile successfully.  Otherwise, you will get errors like:
 
     "C++ Compiler only available in TrueSTUDIO Professional"
-  
+
   The make may then fail in some of the post link processing because of some of
   the other missing tools.  The Make.defs file replaces the ar and nm with
   the default system x86 tool versions and these seem to work okay.  Disable all
@@ -141,7 +141,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -238,7 +238,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -296,7 +296,7 @@ USART2
 
 Default USART/UART Configuration
 --------------------------------
- 
+
 USART2 is enabled in all configurations (see */defconfig).  RX and TX are
 configured on pins PD6 and PD5, respectively (see include/board.h).
 
@@ -411,7 +411,7 @@ the following lines in each Make.defs file:
 If you are using a toolchain other than the Atollic toolchain, then to use the FPU
 you will also have to modify the CFLAGS to enable compiler support for the ARMv7-M
 FPU.  As of this writing, there are not many GCC toolchains that will support the
-ARMv7-M FPU.  
+ARMv7-M FPU.
 
 As a minimum you will need to add CFLAG options to (1) enable hardware floating point
 code generation, and to (2) select the FPU implementation.  You might try the same
@@ -475,7 +475,7 @@ Mikroe-STM32F4-specific Configuration Options
        configuration features.
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
- 
+
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
@@ -619,7 +619,7 @@ Mikroe-STM32F4-specific Configuration Options
   configuration settings:
 
     CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
- 
+
   NOTE: The STM32 timers are each capable of generating different signals on
   each of the four channels with different duty cycles.  That capability is
   not supported by this driver:  Only one output channel per timer.
@@ -676,7 +676,7 @@ Mikroe-STM32F4-specific Configuration Options
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
     CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
-    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority. 
+    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.
@@ -684,15 +684,15 @@ Mikroe-STM32F4-specific Configuration Options
   STM32 USB OTG FS Host Driver Support
 
   Pre-requisites
- 
+
    CONFIG_USBDEV          - Enable USB device support
    CONFIG_USBHOST         - Enable USB host support
    CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
    CONFIG_STM32_SYSCFG    - Needed
    CONFIG_SCHED_WORKQUEUE - Worker thread support is required
- 
+
   Options:
- 
+
    CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
      Default 128 (512 bytes)
    CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
@@ -734,7 +734,7 @@ Where <subdir> is one of the following:
     builtin RS-232 drivers.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 

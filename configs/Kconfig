@@ -546,6 +546,13 @@ config ARCH_BOARD_STM32F4_DISCOVERY
 	---help---
 		STMicro STM32F4-Discovery board based on the STMicro STM32F407VGT6 MCU.
 
+config ARCH_BOARD_MIKROE_STM32F4
+	bool "MikroElektronika Mikromedia for STM32F4 board"
+	depends on ARCH_CHIP_STM32F407VG
+	---help---
+		This is the port NuttX to the Mikroelektronika Mikromedia for STM32F4 Multimedia Board
+		(MMB).  See http://www.mikroe.com/ for further information.
+
 config ARCH_BOARD_SUREPIC32MX
 	bool "Sure PIC32MX boards"
 	depends on ARCH_CHIP_PIC32MX440F512H
@@ -747,6 +754,7 @@ config ARCH_BOARD
 	default "stm32f100rc_generic" if ARCH_BOARD_STM32F100RC_GENERIC
 	default "stm32f3discovery"    if ARCH_BOARD_STM32F3_DISCOVERY
 	default "stm32f4discovery"    if ARCH_BOARD_STM32F4_DISCOVERY
+	default "mikroe-stm32f4"      if ARCH_BOARD_MIKROE_STM32F4
 	default "sure-pic32mx"        if ARCH_BOARD_SUREPIC32MX
 	default "teensy"              if ARCH_BOARD_TEENSY
 	default "twr-k60n512"         if ARCH_BOARD_TWR_K60N512
@@ -970,6 +978,9 @@ source "configs/stm32f100rc_generic/Kconfig"
 endif
 if ARCH_BOARD_STM32F4_DISCOVERY
 source "configs/stm32f4discovery/Kconfig"
+endif
+if ARCH_BOARD_MIKROE_STM32F4
+source "configs/mikroe-stm32f4/Kconfig"
 endif
 if ARCH_BOARD_SUREPIC32MX
 source "configs/sure-pic32mx/Kconfig"

@@ -2,7 +2,7 @@
  * configs/pic32mx7mmb/src/up_boot.c
  * arch/mips/src/board/up_boot.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -550,11 +550,11 @@ static int tc_sample(FAR struct tc_dev_s *priv,
           priv->id++;
         }
       else if (sample->contact == CONTACT_DOWN)
-       {
+        {
           /* First report -- next report will be a movement */
 
-         priv->sample.contact = CONTACT_MOVE;
-       }
+          priv->sample.contact = CONTACT_MOVE;
+        }
 
       priv->penchange = false;
       ret = OK;
@@ -1206,9 +1206,9 @@ static int tc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ivdbg("cmd: %d arg: %ld\n", cmd, arg);
   return -ENOTTY; /* None yet supported */
 #else
-  FAR struct inode         *inode;
+  FAR struct inode *inode;
   FAR struct tc_dev_s *priv;
-  int                       ret;
+  int ret;
 
   ivdbg("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);

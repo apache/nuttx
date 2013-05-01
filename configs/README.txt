@@ -1816,6 +1816,10 @@ configs/mbed
   that features the NXP LPC1768 microcontroller. This OS is also built
   with the arm-nuttx-elf toolchain*.  STATUS:  Contributed.
 
+configs/mikroe-stm32f4
+  This is the port of NuttX to the MikroElektronika Mikromedia for STM32F4
+  development board.  Contributed by Ken Petit.
+
 configs/mcu123-lpc214x
   This port is for the NXP LPC2148 as provided on the mcu123.com
   lpc214x development board. This OS is also built with the arm-nuttx-elf

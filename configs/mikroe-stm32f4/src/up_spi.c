@@ -2,7 +2,7 @@
  * configs/mikroe_stm32f4/src/up_spi.c
  * arch/arm/src/board/up_spi.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Modifications:
@@ -179,7 +179,8 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
   else
 #endif
  
-    /* Must be the expansion header device */
+  /* Must be the expansion header device */
+
   if (devid == SPIDEV_EXPANDER)
     {
       stm32_gpiowrite(GPIO_CS_EXP_SPI3, !selected);
@@ -194,6 +195,7 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
   if (devid == SPIDEV_MMCSD)
     {
       /* A low value indicates the card is present */
+
       if (!stm32_gpioread(GPIO_SD_CD))
         {
           ret = SPI_STATUS_PRESENT;

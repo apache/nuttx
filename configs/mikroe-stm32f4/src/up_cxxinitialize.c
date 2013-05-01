@@ -2,7 +2,7 @@
  * configs/mikroe_stm32f4/src/up_cxxinitialize.c
  * arch/arm/src/board/up_cxxinitialize.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -152,4 +152,3 @@ void up_cxxinitialize(void)
 }
 
 #endif /* CONFIG_HAVE_CXX && CONFIG_HAVE_CXXINITIALIZE */
-
