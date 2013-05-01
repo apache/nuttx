@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: November 27, 2012</p>
+      <p>Last Updated: April 30, 2013</p>
     </td>
   </tr>
 </table>
@@ -1001,7 +1001,7 @@ nsh&gt; dd if=/dev/ram0 of=/dev/null
 </table>
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-df
+df [-h]
 </pre></ul>
 <p>
   <b>Synopsis</b>.
@@ -1019,6 +1019,9 @@ nsh> df
    512      985        2       983 /tmp
 nsh> 
 </pre></ul>
+<p>
+  If <code>CONFIG_NSH_CMDOPT_DF_H</code> is defined in the NuttX configuration, the the <code>df</code> will also support an option <code>-h</code> which may be used to show the the volume information in <i>human readable</i> format.
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
