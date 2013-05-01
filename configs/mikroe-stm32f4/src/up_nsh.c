@@ -153,7 +153,7 @@
  ****************************************************************************/
 /* Pre-allocated simulated flash */
 
-#ifdef CONFIG_MTD_RAM
+#ifdef CONFIG_RAMMTD
 //static uint8_t g_simflash[CONFIG_EXAMPLES_SMART_BUFSIZE];
 #endif
 
@@ -217,7 +217,7 @@ int nsh_archinitialize(void)
 
   /* Create a RAM MTD device if configured */
 
-#ifdef CONFIG_MTD_RAM
+#ifdef CONFIG_RAMMTD
   {
       uint8_t *start = (uint8_t *) kmalloc(CONFIG_EXAMPLES_SMART_BUFSIZE);
       mtd = rammtd_initialize(start, CONFIG_EXAMPLES_SMART_BUFSIZE);
@@ -229,7 +229,7 @@ int nsh_archinitialize(void)
 #endif
   }
 
-#endif /* CONFIG_MTD_RAM */
+#endif /* CONFIG_RAMMTD */
 
 #endif /* CONFIG_MTD */
 #endif /* CONFIG_STM32_SPI3 */
