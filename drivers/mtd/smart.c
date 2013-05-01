@@ -2084,8 +2084,10 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd)
 
       /* Set these to zero in case the device doesn't support them */
 
+#ifdef CONFIG_MTD_SUBSECTOR_ERASE
       dev->geo.subsectorsize= 0;
       dev->geo.nsubsectors  = 0;
+#endif
       ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&dev->geo));
       if (ret < 0)
         {
