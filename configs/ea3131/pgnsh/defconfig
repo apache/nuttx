@@ -103,9 +103,9 @@ CONFIG_UART_PARITY=0
 CONFIG_UART_2STOP=0
 
 #
-# MP25x Configuration
+# M25Px Configuration
 #
-CONFIG_MP25P_SPIMODE=3
+CONFIG_M25P_SPIMODE=3
 
 #
 # General build options
