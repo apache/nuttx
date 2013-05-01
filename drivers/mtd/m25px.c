@@ -146,22 +146,26 @@
 #define M25P_M25P128_NPAGES       65536
 
 /* Instructions */
-/*      Command        Value      N Description             Addr Dummy Data */
-#define M25P_WREN      0x06    /* 1 Write Enable              0   0     0 */
-#define M25P_WRDI      0x04    /* 1 Write Disable             0   0     0 */
-#define M25P_RDID      0x9f    /* 1 Read Identification       0   0     1-3 */
-#define M25P_RDSR      0x05    /* 1 Read Status Register      0   0     >=1 */
-#define M25P_WRSR      0x01    /* 1 Write Status Register     0   0     1 */
-#define M25P_READ      0x03    /* 1 Read Data Bytes           3   0     >=1 */
-#define M25P_FAST_READ 0x0b    /* 1 Higher speed read         3   1     >=1 */
+/*      Command        Value      N Description             Addr Dummy Data   */
+#define M25P_WREN      0x06    /* 1 Write Enable              0   0     0     */
+#define M25P_WRDI      0x04    /* 1 Write Disable             0   0     0     */
+#define M25P_RDID      0x9f    /* 1 Read Identification       0   0     1-3   */
+#define M25P_RDSR      0x05    /* 1 Read Status Register      0   0     >=1   */
+#define M25P_WRSR      0x01    /* 1 Write Status Register     0   0     1     */
+#define M25P_READ      0x03    /* 1 Read Data Bytes           3   0     >=1   */
+#define M25P_FAST_READ 0x0b    /* 1 Higher speed read         3   1     >=1   */
 #define M25P_PP        0x02    /* 1 Page Program              3   0     1-256 */
-#define M25P_SE        0xd8    /* 1 Sector Erase              3   0     0 */
-#define M25P_BE        0xc7    /* 1 Bulk Erase                0   0     0 */
-#define M25P_DP        0xb9    /* 2 Deep power down           0   0     0 */
-#define M25P_RES       0xab    /* 2 Read Electronic Signature 0   3     >=1 */
-#define M25P_SSE       0x20    /* 1 Sub-Sector Erase          0   0     0 */
+#define M25P_SE        0xd8    /* 1 Sector Erase              3   0     0     */
+#define M25P_BE        0xc7    /* 1 Bulk Erase                0   0     0     */
+#define M25P_DP        0xb9    /* 2 Deep power down           0   0     0     */
+#define M25P_RES       0xab    /* 2 Read Electronic Signature 0   3     >=1   */
+#define M25P_SSE       0x20    /* 3 Sub-Sector Erase          0   0     0     */
 
-/* NOTE 1: All parts, NOTE 2: M25P632/M25P64 */
+/* NOTE 1: All parts.
+ * NOTE 2: M25P632/M25P64
+ * NOTE 3: EN25F80.  In EN25F80 terminology, 0xd8 is a block erase and 0x20
+ *         is a sector erase.
+ */
 
 /* Status register bit definitions */
 
