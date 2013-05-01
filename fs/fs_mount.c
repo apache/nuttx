@@ -99,6 +99,9 @@ extern const struct mountpt_operations fat_operations;
 #ifdef CONFIG_FS_ROMFS
 extern const struct mountpt_operations romfs_operations;
 #endif
+#ifdef CONFIG_FS_SMARTFS
+extern const struct mountpt_operations smartfs_operations;
+#endif
 
 static const struct fsmap_t g_bdfsmap[] =
 {
@@ -107,6 +110,9 @@ static const struct fsmap_t g_bdfsmap[] =
 #endif
 #ifdef CONFIG_FS_ROMFS
     { "romfs", &romfs_operations },
+#endif
+#ifdef CONFIG_FS_SMARTFS
+    { "smartfs", &smartfs_operations },
 #endif
     { NULL,   NULL },
 };

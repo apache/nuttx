@@ -100,6 +100,7 @@
 
 #define BINFS_MAGIC           0x4242
 #define NXFFS_MAGIC           0x4747
+#define SMARTFS_MAGIC         0x54524D53
 
 /****************************************************************************
  * Type Definitions

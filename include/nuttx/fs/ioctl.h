@@ -105,7 +105,7 @@
 #define FIOC_OPTIMIZE   _FIOC(0x0003)     /* IN:  None
                                            * OUT: None
                                            */
-#define FIOC_FILENAME   _FIOC(0x0004)     /* IN:  FAR const char ** pointer 
+#define FIOC_FILENAME   _FIOC(0x0004)     /* IN:  FAR const char ** pointer
                                            * OUT: Pointer to a persistent file name
                                            *      (Guaranteed to persist while the file
                                            *      is open).
@@ -146,6 +146,35 @@
                                            * IN:  None
                                            * OUT: None (ioctl return value provides
                                            *      success/failure indication). */
+#define BIOC_LLFORMAT   _BIOC(0x0004)     /* Low-Level Format on SMART flash devices
+                                           * IN:  None
+                                           * OUT: None (ioctl return value provides
+                                           *      success/failure indication). */
+#define BIOC_GETFORMAT  _BIOC(0x0005)     /* Returns SMART flash format information
+                                           * such as format status, logical sector
+                                           * size, total sectors, free sectors, etc.
+                                           * IN:  None
+                                           * OUT: Pointer to the format information. */
+#define BIOC_ALLOCSECT  _BIOC(0x0006)     /* Allocate a logical sector from the block
+                                           * device.
+                                           * IN:  None
+                                           * OUT: Logical sector number allocated. */
+#define BIOC_FREESECT   _BIOC(0x0007)     /* Allocate a logical sector from the block
+                                           * device.
+                                           * IN:  None
+                                           * OUT: Logical sector number allocated. */
+#define BIOC_READSECT   _BIOC(0x0008)     /* Read a logical sector from the block
+                                           * device.
+                                           * IN:  Pointer to sector read data (the
+                                           *      logical sector number, count and
+                                           *      read buffer address
+                                           * OUT: Number of bytes read or error */
+#define BIOC_WRITESECT  _BIOC(0x0009)     /* Write to data to a logical sector
+                                           * IN:  Pointer to sector write data (the
+                                           *      logical secor number and write
+                                           *      buffer address
+                                           * OUT: None (ioctl return value provides
+                                           *      success/failure indication). */
 
 /* NuttX MTD driver ioctl definitions ***************************************/
 
@@ -164,6 +193,15 @@
                                            *      of device memory */
 #define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
                                            * OUT: None */
+#define MTDIOC_GETCAPS    _MTDIOC(0x0004) /* IN:  None
+                                           * OUT: Capabilities flags */
+#define MTDIOC_SECTERASE  _MTDIOC(0x0005) /* IN:  Sector number to erase
+                                           * OUT: None */
+#define MTDIOC_BYTEWRITE  _MTDIOC(0x0006) /* IN:  Pointer to bytewrite structure
+                                           * OUT: None */
+
+#define MTDIOC_CAPS_SECTERASE  0x01
+#define MTDIOC_CAPS_BYTEWRITE  0x02
 
 /* NuttX ARP driver ioctl definitions (see netinet/arp.h) *******************/
 

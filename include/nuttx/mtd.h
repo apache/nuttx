@@ -58,6 +58,14 @@
 #define MTD_BWRITE(d,s,n,b)((d)->bwrite ? (d)->bwrite(d,s,n,b) : (-ENOSYS))
 #define MTD_IOCTL(d,c,a)   ((d)->ioctl  ? (d)->ioctl(d,c,a)    : (-ENOSYS))
 
+/* If any of the low-level device drivers declare they want sub-sector erase
+ * support, then define MTD_SUBSECTOR_ERASE.
+ */
+
+#if defined(CONFIG_MP25P_SUBSECTOR_ERASE)
+#  define CONFIG_MTD_SUBSECTOR_ERASE 1
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -70,10 +78,25 @@
 
 struct mtd_geometry_s
 {
-  uint16_t blocksize;   /* Size of one read/write block */
-  uint16_t erasesize;   /* Size of one erase blocks -- must be a multiple
-                         * of blocksize. */
-  size_t neraseblocks;  /* Number of erase blocks */
+  uint16_t blocksize;     /* Size of one read/write block */
+  uint16_t erasesize;     /* Size of one erase blocks -- must be a multiple
+                           * of blocksize. */
+  size_t neraseblocks;    /* Number of erase blocks */
+#ifdef CONFIG_MTD_SUBSECTOR_ERASE
+  uint16_t subsectorsize; /* Size of the sub-sector erase block */
+  uint16_t nsubsectors;   /* Number of sub-sector erase blocks */
+#endif
+};
+
+/* The following defines the information for writing bytes to a sector
+ * that are not a full page write (bytewrite).
+ */
+
+struct mtd_byte_write_s
+{
+  uint32_t offset;        /* Offset within the device to write to */
+  uint16_t count;         /* Number of bytes to write */
+  const uint8_t *buffer;  /* Pointer to the data to write */
 };
 
 /* This structure defines the interface to a simple memory technology device.
@@ -168,6 +191,22 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
  ****************************************************************************/
 
 int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
+
+/****************************************************************************
+ * Name: smart_initialize
+ *
+ * Description:
+ *   Initialize to provide a Sector Mapped Allocation for Really Tiny (SMART)
+ *   Flash block driver wrapper around an MTD interface
+ *
+ * Input Parameters:
+ *   minor - The minor device number.  The MTD block device will be
+ *      registered as as /dev/mtdsmartN where N is the minor number.
+ *   mtd - The MTD device that supports the FLASH interface.
+ *
+ ****************************************************************************/
+
+int smart_initialize(int minor, FAR struct mtd_dev_s *mtd);
 
 /****************************************************************************
  * Name: flash_eraseall

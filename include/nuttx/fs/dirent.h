@@ -134,6 +134,20 @@ struct nfsdir_s
 };
 #endif
 
+#ifdef CONFIG_FS_SMARTFS
+/* SMARTFS is the Sector Mapped Allocation for Really Tiny FLASH filesystem.
+ * it is designed to use small sectors on small serial FLASH devices, using
+ * minimal RAM footprint.
+ */
+
+struct fs_smartfsdir_s
+{
+  uint16_t fs_firstsector;                    /* First sector of directory list */
+  uint16_t fs_currsector;                     /* Current sector of directory list */
+  uint16_t fs_curroffset;                     /* Current offset withing current sector */
+};
+#endif
+
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 struct fs_dirent_s
@@ -174,19 +188,22 @@ struct fs_dirent_s
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 #ifdef CONFIG_FS_FAT
-      struct fs_fatdir_s    fat;
+      struct fs_fatdir_s     fat;
 #endif
 #ifdef CONFIG_FS_ROMFS
-      struct fs_romfsdir_s  romfs;
+      struct fs_romfsdir_s   romfs;
 #endif
 #ifdef CONFIG_FS_BINFS
-      struct fs_binfsdir_s  binfs;
+      struct fs_binfsdir_s   binfs;
 #endif
 #ifdef CONFIG_FS_NXFFS
-      struct fs_nxffsdir_s  nxffs;
+      struct fs_nxffsdir_s   nxffs;
 #endif
 #ifdef CONFIG_NFS
-      struct nfsdir_s       nfs;
+      struct nfsdir_s        nfs;
+#endif
+#ifdef CONFIG_FS_SMARTFS
+      struct fs_smartfsdir_s smartfs;
 #endif
 #endif /* !CONFIG_DISABLE_MOUNTPOINT */
    } u;

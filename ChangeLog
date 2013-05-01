@@ -4652,3 +4652,4 @@
 	  partitions (2013-4-30).
 	* configs/sim/mkroe-stm32f4:  Support for the MikroElektronika
 	  Mikromedia for STM32F4 development board (from Ken Petit, 2013-4-30).
+	* fs/smartfs:  Add Ken Pettits SMART FS (2013-4-30).

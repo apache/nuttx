@@ -1,0 +1,53 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config FS_SMARTFS
+	bool "SMART file system"
+	default n
+	depends on !DISABLE_MOUNTPOINT
+	---help---
+		Enable NuttX SMART Flash file system (SMARTFS) support.
+
+if FS_SMARTFS
+config SMARTFS_ERASEDSTATE
+	hex "FLASH erased state"
+	default 0xff
+	---help---
+		The erased state of FLASH.
+		This must have one of the values of 0xff or 0x00.
+		Default: 0xff.
+
+config SMARTFS_MAXNAMLEN
+	int "Maximum file name length"
+	default 16
+	---help---	
+		The maximum size of a SMARTFS file name at a given
+		directory level.  Overall path name is not restricted
+		by this value, only individual segments in a path,
+		such as (assuming /usr is the mount point):
+
+			/usr/games/chess/player_stats/game1.xml
+
+		Default: 16.
+
+config SMARTFS_MULTI_ROOT_DIRS
+	bool "Support multiple Root Directories / Mount Points"
+	default n
+	---help---
+		Enables support for multiple root directory entries
+		on the SMART FLASH.  Multiple root directories means
+		the device can have multiple mount point in the VFS,
+		each with it's own unique directory structure under it.
+
+		When this option is enabled, instead of reporting the
+		SMART block devices as "/dev/mtdsmart0", they will be
+		reported as "/dev/mtdsmart0d1", "/dev/mtdsmart0d2", etc.
+		The number of root entries actually created is set
+		during the "mksmartfs" command when the device is
+		initialized.
+
+		Default: y.
+
+endif

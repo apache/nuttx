@@ -103,6 +103,7 @@ include fat/Make.defs
 include romfs/Make.defs
 include nxffs/Make.defs
 include nfs/Make.defs
+include smartfs/Make.defs
 include binfs/Make.defs
 
 endif
