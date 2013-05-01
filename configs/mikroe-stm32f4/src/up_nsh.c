@@ -51,7 +51,7 @@
 #  include <nuttx/mmcsd.h>
 #endif
 
-#ifdef CONFIG_MTD_MP25P
+#ifdef CONFIG_MTD_M25P
 #  include <nuttx/mtd.h>
 #endif
 

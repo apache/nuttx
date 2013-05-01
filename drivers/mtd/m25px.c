@@ -58,15 +58,15 @@
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
-/* Per the data sheet, MP25P10 parts can be driven with either SPI mode 0 (CPOL=0 and
+/* Per the data sheet, M25P10 parts can be driven with either SPI mode 0 (CPOL=0 and
  * CPHA=0) or mode 3 (CPOL=1 and CPHA=1). But I have heard that other devices can
- * operated in mode 0 or 1.  So you may need to specify CONFIG_MP25P_SPIMODE to
- * select the best mode for your device.  If CONFIG_MP25P_SPIMODE is not defined,
+ * operated in mode 0 or 1.  So you may need to specify CONFIG_M25P_SPIMODE to
+ * select the best mode for your device.  If CONFIG_M25P_SPIMODE is not defined,
  * mode 0 will be used.
  */
 
-#ifndef CONFIG_MP25P_SPIMODE
-#  define CONFIG_MP25P_SPIMODE SPIDEV_MODE0
+#ifndef CONFIG_M25P_SPIMODE
+#  define CONFIG_M25P_SPIMODE SPIDEV_MODE0
 #endif
 
 /* Various manufacturers may have produced the parts.  0x20 is the manufacturer ID
@@ -74,19 +74,19 @@
  * International MX25 serial FLASH, the correct manufacturer ID would be 0xc2.
  */
 
-#ifndef CONFIG_MP25P_MANUFACTURER
-#  define CONFIG_MP25P_MANUFACTURER 0x20
+#ifndef CONFIG_M25P_MANUFACTURER
+#  define CONFIG_M25P_MANUFACTURER 0x20
 #endif
 
-#ifndef CONFIG_MP25P_MEMORY_TYPE
-#  define CONFIG_MP25P_MEMORY_TYPE  0x20
+#ifndef CONFIG_M25P_MEMORY_TYPE
+#  define CONFIG_M25P_MEMORY_TYPE  0x20
 #endif
 
 /* M25P Registers *******************************************************************/
 /* Indentification register values */
 
-#define M25P_MANUFACTURER         CONFIG_MP25P_MANUFACTURER
-#define M25P_MEMORY_TYPE          CONFIG_MP25P_MEMORY_TYPE
+#define M25P_MANUFACTURER         CONFIG_M25P_MANUFACTURER
+#define M25P_MEMORY_TYPE          CONFIG_M25P_MEMORY_TYPE
 #define M25P_RES_ID               0x13
 #define M25P_M25P1_CAPACITY       0x11 /* 1 M-bit */
 #define M25P_EN25F80_CAPACITY     0x14 /* 8 M-bit */
@@ -203,7 +203,7 @@ struct m25p_dev_s
   uint8_t  pageshift;        /* 8 */
   uint16_t nsectors;         /* 128 or 64 */
   uint32_t npages;           /* 32,768 or 65,536 */
-#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
   uint8_t  subsectorshift;   /* 0, 12 or 13 (4K or 8K) */
 #endif
 };
@@ -223,7 +223,7 @@ static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t offset);
 static inline int  m25p_bulkerase(struct m25p_dev_s *priv);
 static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *buffer,
                                   off_t offset);
-#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
 static inline void m25p_subsectorerase(struct m25p_dev_s *priv, off_t offset);
 #endif
 
@@ -268,7 +268,7 @@ static void m25p_lock(FAR struct spi_dev_s *dev)
    * state.
    */
 
-  SPI_SETMODE(dev, CONFIG_MP25P_SPIMODE);
+  SPI_SETMODE(dev, CONFIG_M25P_SPIMODE);
   SPI_SETBITS(dev, 8);
   (void)SPI_SETFREQUENCY(dev, 20000000);
 }
@@ -320,7 +320,7 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
     {
       /* Okay.. is it a FLASH capacity that we understand? */
 
-#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
       priv->subsectorshift = 0;
 #endif
 
@@ -342,7 +342,7 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
            priv->nsectors       = M25P_EN25F80_NSECTORS;
            priv->pageshift      = M25P_EN25F80_PAGE_SHIFT;
            priv->npages         = M25P_EN25F80_NPAGES;
-#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
            priv->subsectorshift = M25P_EN25F80_SUBSECT_SHIFT;
 #endif
            return OK;
@@ -525,7 +525,7 @@ static inline void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector)
  * Name:  m25p_subsectorerase
  ************************************************************************************/
 
-#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
 static inline void m25p_subsectorerase(struct m25p_dev_s *priv, off_t subsector)
 {
   off_t offset = subsector << priv->subsectorshift;
@@ -654,7 +654,7 @@ static inline void m25p_pagewrite(struct m25p_dev_s *priv, FAR const uint8_t *bu
  * Name:  m25p_bytewrite
  ************************************************************************************/
 
-#ifdef CONFIG_MP25P_BYTEWRITE
+#ifdef CONFIG_M25P_BYTEWRITE
 static inline void m25p_bytewrite(struct m25p_dev_s *priv, FAR const uint8_t *buffer,
                                   off_t offset, uint16_t count)
 {
@@ -847,7 +847,7 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->blocksize     = (1 << priv->pageshift);
               geo->erasesize     = (1 << priv->sectorshift);
               geo->neraseblocks  = priv->nsectors;
-#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
               geo->subsectorsize = (1 << priv->subsectorshift);
               geo->nsubsectors   = priv->nsectors * (1 << (priv->sectorshift -
                                    priv->subsectorshift));
@@ -874,18 +874,18 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
       case MTDIOC_GETCAPS:
         {
           ret = 0;
-#ifdef CONFIG_MP25P_BYTEWRITE
+#ifdef CONFIG_M25P_BYTEWRITE
           ret |= MTDIOC_CAPS_BYTEWRITE;
 #endif
 
-#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
           ret |= MTDIOC_CAPS_SECTERASE;
 #endif
           break;
         }
 #endif /* CONFIG_FS_SMARTFS */
 
-#ifdef CONFIG_MP25P_SUBSECTOR_ERASE
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
       case MTDIOC_SECTERASE:
         {
           m25p_subsectorerase(priv, (off_t) arg);
@@ -894,7 +894,7 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
 #endif
 
-#ifdef CONFIG_MP25P_BYTEWRITE
+#ifdef CONFIG_M25P_BYTEWRITE
       case MTDIOC_BYTEWRITE:
         {
           struct mtd_byte_write_s *bytewrite = (struct mtd_byte_write_s *) arg;

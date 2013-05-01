@@ -102,7 +102,7 @@ void weak_function stm32_spiinitialize(void)
 {
 #ifdef CONFIG_STM32_SPI3
 
-#ifdef CONFIG_MTD_MP25P
+#ifdef CONFIG_MTD_M25P
   (void)stm32_configgpio(GPIO_CS_FLASH);    /* FLASH chip select */
   stm32_gpiowrite(GPIO_CS_FLASH, 1);        /* Ensure the CS is inactive */
 #endif
@@ -155,7 +155,7 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_MTD_MP25P)
+#if defined(CONFIG_MTD_M25P)
   if (devid == SPIDEV_FLASH)
     {
       stm32_gpiowrite(GPIO_CS_FLASH, !selected);

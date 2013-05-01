@@ -114,34 +114,34 @@ config AT45DB_PWRSAVE
 
 endif
 
-config MTD_MP25P
+config MTD_M25P
 	bool "SPI-based M25P FLASH"
 	default n
 	select SPI
 
-if MTD_MP25P
+if MTD_M25P
 
-config MP25P_SPIMODE
-	int "MP25P SPI mode"
+config M25P_SPIMODE
+	int "M25P SPI mode"
 	default 0
 
-config MP25P_MANUFACTURER
-	hex "MP25P manufacturers ID"
+config M25P_MANUFACTURER
+	hex "M25P manufacturers ID"
 	default 0x20
 	---help---
 		Various manufacturers may have produced the parts.  0x20 is the manufacturer ID
 		for the STMicro MP25x serial FLASH.  If, for example, you are using the a Macronix
 		International MX25 serial FLASH, the correct manufacturer ID would be 0xc2.
 
-config MP25P_MEMORY_TYPE
-	hex "MP25P memory type ID"
+config M25P_MEMORY_TYPE
+	hex "M25P memory type ID"
 	default 0x20
 	---help---
 		The memory type for M25 "P" series is 0x20, but the driver also supports "F" series
 		devices, such as the EON EN25F80 part which adds a 4K sector erase capability.  The
 		ID for "F" series parts from EON is 0x31.
 
-config MP25P_SUBSECTOR_ERASE
+config M25P_SUBSECTOR_ERASE
 	bool "Sub-Sector Erase"
 	default n
 	---help---
@@ -149,11 +149,11 @@ config MP25P_SUBSECTOR_ERASE
 		size (4K vs 64K).  This option enables support for sub-sector erase.
 		The SMART file system can take advantage of this option if it is enabled.
 
-config MP25P_BYTEWRITE
+config M25P_BYTEWRITE
 	bool "Enable ByteWrite ioctl support"
 	default n
 	---help---
-		The MP25P series of devices allow writing to a page with less than a full-page
+		The M25P series of devices allow writing to a page with less than a full-page
 		size of data.  In this case, only the written bytes are updated without affecting
 		the other bytes in the page.  The SMART FS requires this option for proper operation.
 
@@ -162,7 +162,7 @@ endif
 config MTD_SMART
 	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
 	default y
-	select MP25P_BYTEWRITE
+	select M25P_BYTEWRITE
 	---help---
 		The MP25x series of Flash devices are typically very small and have a very large
 		erase block size.  This causes issues with the standard Flash Translation Layer

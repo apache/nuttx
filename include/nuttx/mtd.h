@@ -63,7 +63,7 @@
  * support, then define MTD_SUBSECTOR_ERASE.
  */
 
-#if defined(CONFIG_MP25P_SUBSECTOR_ERASE)
+#if defined(CONFIG_M25P_SUBSECTOR_ERASE)
 #  define CONFIG_MTD_SUBSECTOR_ERASE 1
 #endif
 
