@@ -429,7 +429,7 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
 
   /* Create an instance of the RAM MTD device state structure */
 
-  priv = (FAR struct ram_dev_s *)kmalloc(sizeof(struct ram_dev_s));
+  priv = (FAR struct ram_dev_s *)kzalloc(sizeof(struct ram_dev_s));
   if (!priv)
     {
       fdbg("Failed to allocate the RAM MTD state structure\n");
@@ -445,7 +445,9 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
       return NULL;
     }
 
-  /* Perform initialization as necessary */
+  /* Perform initialization as necessary. (unsupported methods were
+   * nullified by kzalloc).
+   */
 
   priv->mtd.erase  = ram_erase;
   priv->mtd.bread  = ram_bread;

@@ -660,10 +660,12 @@ FAR struct mtd_dev_s *ramtron_initialize(FAR struct spi_dev_s *dev)
    * to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct ramtron_dev_s *)kmalloc(sizeof(struct ramtron_dev_s));
+  priv = (FAR struct ramtron_dev_s *)kzalloc(sizeof(struct ramtron_dev_s));
   if (priv)
     {
-      /* Initialize the allocated structure */
+      /* Initialize the allocated structure. (unsupported methods were
+       * nullified by kzalloc).
+       */
 
       priv->mtd.erase  = ramtron_erase;
       priv->mtd.bread  = ramtron_bread;

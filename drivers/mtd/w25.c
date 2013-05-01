@@ -2,7 +2,7 @@
  * drivers/mtd/w25.c
  * Driver for SPI-based W25x16, x32, and x64 and W25q16, q32, q64, and q128 FLASH
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1124,7 +1124,9 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
   priv = (FAR struct w25_dev_s *)kzalloc(sizeof(struct w25_dev_s));
   if (priv)
     {
-      /* Initialize the allocated structure */
+      /* Initialize the allocated structure (unsupported methods were
+       * nullified by kzalloc).
+       */
 
       priv->mtd.erase  = w25_erase;
       priv->mtd.bread  = w25_bread;

@@ -4653,3 +4653,6 @@
 	* configs/sim/mkroe-stm32f4:  Support for the MikroElektronika
 	  Mikromedia for STM32F4 development board (from Ken Petit, 2013-4-30).
 	* fs/smartfs:  Add Ken Pettits SMART FS (2013-4-30).
+	* include/nuttx/mtd.h and most MTD drivers:  Add support for
+	  (optional) method to perform byte oriented writes if so configured
+	  (2013-5-1)

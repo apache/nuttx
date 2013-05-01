@@ -3,6 +3,8 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+comment "MTD Configuration"
+
 config MTD_PARTITION
 	bool "Support MTD partitions"
 	default n
@@ -23,6 +25,17 @@ config MTD_PARTITION
 		Each call to mtd_partition() will create a new MTD driver instance
 		managing the sub-region of flash beginning at 'offset' (in blocks)
 		and of size 'nblocks' on the device specified by 'mtd'.
+
+config MTD_BYTE_WRITE
+	bool "Byte write"
+	default n
+	---help---
+		Some devices (such as the EON EN25F80) support writing an arbitrary
+		number of bytes to FLASH. This setting enables MTD interfaces to
+		support such writes.  The SMART file system can take advantage of
+		this option if it is enabled.
+
+comment "MTD Device Drivers"
 
 config RAMMTD
 	bool "RAM-based MTD driver"
@@ -132,9 +145,9 @@ config MP25P_SUBSECTOR_ERASE
 	bool "Sub-Sector Erase"
 	default n
 	---help---
-		Some devices (the EON EN25F80) support a smaller erase block size (4K vs 64K).
-		This option enables support for sub-sector erase.  The SMART file system can
-		take advantage of this option if it is enabled.
+		Some devices (such as the EON EN25F80) support a smaller erase block
+		size (4K vs 64K).  This option enables support for sub-sector erase.
+		The SMART file system can take advantage of this option if it is enabled.
 
 config MP25P_BYTEWRITE
 	bool "Enable ByteWrite ioctl support"

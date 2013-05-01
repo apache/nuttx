@@ -52,11 +52,12 @@
 
 /* Macros to hide implementation */
 
-#define MTD_ERASE(d,s,n)   ((d)->erase  ? (d)->erase(d,s,n)    : (-ENOSYS))
-#define MTD_BREAD(d,s,n,b) ((d)->bread  ? (d)->bread(d,s,n,b)  : (-ENOSYS))
-#define MTD_READ(d,s,n,b)  ((d)->read   ? (d)->read(d,s,n,b)   : (-ENOSYS))
-#define MTD_BWRITE(d,s,n,b)((d)->bwrite ? (d)->bwrite(d,s,n,b) : (-ENOSYS))
-#define MTD_IOCTL(d,c,a)   ((d)->ioctl  ? (d)->ioctl(d,c,a)    : (-ENOSYS))
+#define MTD_ERASE(d,s,n)   ((d)->erase   ? (d)->erase(d,s,n)    : (-ENOSYS))
+#define MTD_BREAD(d,s,n,b) ((d)->bread   ? (d)->bread(d,s,n,b)  : (-ENOSYS))
+#define MTD_BWRITE(d,s,n,b)((d)->bwrite  ? (d)->bwrite(d,s,n,b) : (-ENOSYS))
+#define MTD_READ(d,s,n,b)  ((d)->read    ? (d)->read(d,s,n,b)   : (-ENOSYS))
+#define MTD_WRITE(d,s,n,b) ((d)->write   ? (d)->write(d,s,n,b)  : (-ENOSYS))
+#define MTD_IOCTL(d,c,a)   ((d)->ioctl   ? (d)->ioctl(d,c,a)    : (-ENOSYS))
 
 /* If any of the low-level device drivers declare they want sub-sector erase
  * support, then define MTD_SUBSECTOR_ERASE.
@@ -108,7 +109,12 @@ struct mtd_dev_s
 {
   /* The following methods operate on the MTD: */
 
-  /* Erase the specified erase blocks (units are erase blocks) */
+  /* Erase the specified erase blocks (units are erase blocks).  Semantic
+   * Clarification:  Here, we are not referring to the erase block according
+   * to the FLASH data sheet.  Rather, we are referring to the *smallest*
+   * eraseable part of the FLASH which may have a name like a page or sector
+   * or subsector.
+   */
 
   int (*erase)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
 
@@ -127,6 +133,10 @@ struct mtd_dev_s
 
   ssize_t (*read)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
                   FAR uint8_t *buffer);
+#ifdef CONFIG_MTD_BYTE_WRITE
+  ssize_t (*write)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                   FAR const uint8_t *buffer);
+#endif
 
   /* Support other, less frequently used commands:
    *  - MTDIOC_GEOMETRY:  Get MTD geometry

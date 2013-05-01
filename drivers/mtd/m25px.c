@@ -995,10 +995,12 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
    * to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct m25p_dev_s *)kmalloc(sizeof(struct m25p_dev_s));
+  priv = (FAR struct m25p_dev_s *)kzalloc(sizeof(struct m25p_dev_s));
   if (priv)
     {
-      /* Initialize the allocated structure */
+      /* Initialize the allocated structure. (unsupported methods were
+       * nullified by kzalloc).
+       */
 
       priv->mtd.erase  = m25p_erase;
       priv->mtd.bread  = m25p_bread;

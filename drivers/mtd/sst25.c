@@ -2,7 +2,7 @@
  * drivers/mtd/sst25.c
  * Driver for SPI-based SST25 FLASH.
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1195,7 +1195,9 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
   priv = (FAR struct sst25_dev_s *)kzalloc(sizeof(struct sst25_dev_s));
   if (priv)
     {
-      /* Initialize the allocated structure */
+      /* Initialize the allocated structure. (unsupported methods were
+       * nullified by kzalloc).
+       */
 
       priv->mtd.erase  = sst25_erase;
       priv->mtd.bread  = sst25_bread;

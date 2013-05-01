@@ -79,6 +79,10 @@ static ssize_t skel_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
                            FAR const uint8_t *buf);
 static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
                          FAR uint8_t *buffer);
+#ifdef CONFIG_MTD_BYTE_WRITE
+static ssize_t skel_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                          FAR const uint8_t *buffer);
+#endif
 static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -88,7 +92,15 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 static struct skel_dev_s g_skeldev =
 {
-  { skel_erase, skel_rbead, skel_bwrite, skel_read, skel_ioctl },
+  { skel_erase,
+    skel_rbead,
+    skel_bwrite,
+    skel_read,
+#ifdef CONFIG_MTD_BYTE_WRITE
+    skel_write,
+#endif
+    skel_ioctl
+  },
   /* Initialization of any other implementation specific data goes here */
 };
 
@@ -201,6 +213,23 @@ static ssize_t skel_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
   return 0;
 }
+
+/****************************************************************************
+ * Name: skel_write
+ *
+ * Description:
+ *   Some FLASH parts have the ability to write an arbitrary number of
+ *   bytes to an arbitrary offset on the device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_BYTE_WRITE
+static ssize_t skel_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                          FAR const uint8_t *buffer)
+{
+  return -ENOSYS;
+}
+#endif
 
 /****************************************************************************
  * Name: skel_ioctl

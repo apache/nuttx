@@ -10,7 +10,7 @@
  *
  * Derived from drivers/mtd/m25px.c
  *
- *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -365,7 +365,7 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         break;
 
       case MTDIOC_BULKERASE:
-        ret=at24c_eraseall(priv);
+        ret = at24c_eraseall(priv);
         break;
 
       case MTDIOC_XIPBASE:
@@ -412,6 +412,10 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev)
       priv->addr       = CONFIG_AT24XX_ADDR;
       priv->pagesize   = AT24XX_PAGESIZE;
       priv->npages     = AT24XX_NPAGES;
+
+      /* NOTE since the pre-allocated device structure lies in .bss, any
+       * unsupported methods should have been nullified.
+       */
 
       priv->mtd.erase  = at24c_erase;
       priv->mtd.bread  = at24c_bread;

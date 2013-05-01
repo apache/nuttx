@@ -395,14 +395,16 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
 
   /* Allocate a partition device structure */
 
-  part = (FAR struct mtd_partition_s *)malloc(sizeof(struct mtd_partition_s));
+  part = (FAR struct mtd_partition_s *)kzalloc(sizeof(struct mtd_partition_s));
   if (!part)
     {
       fdbg("ERROR: Failed to allocate memory for the partition device\n");
       return NULL;      
     }
 
-  /* Initialize the partition device structure */
+  /* Initialize the partition device structure. (unsupported methods were
+   * nullified by kzalloc).
+   */
 
   part->child.erase  = part_erase;
   part->child.bread  = part_bread;

@@ -201,7 +201,10 @@ static struct sst39vf_dev_s g_sst39vf =
     sst39vf_bread,          /* bread method */
     sst39vf_bwrite,         /* bwrte method */
     sst39vf_read,           /* read method */
-    sst39vf_ioctl           /* write method */
+#ifdef CONFIG_MTD_BYTE_WRITE
+    NULL,                   /* write method */
+#endif
+    sst39vf_ioctl           /* ioctl method */
   },
   NULL                      /* Chip */
 };

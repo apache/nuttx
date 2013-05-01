@@ -3192,11 +3192,20 @@ extern void up_ledoff(int led);
     </ul>
     <p>
       Some devices may support byte oriented reads (optional).
-      Most MTD devices are inherently block oriented so byte-oriented writing is not supported.
+      Most MTD devices are inherently block oriented so byte-oriented accesses are not supported.
       It is recommended that low-level drivers not support read() if it requires buffering.
     </p>
     <ul>
      <p><code>ssize_t (*read)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes, FAR uint8_t *buffer);</code></p>
+    </ul>
+    <p>
+      Some devices may also support byte oriented writes (optional).
+      Most MTD devices are inherently block oriented so byte-oriented accesses are not supported.
+      It is recommended that low-level drivers not support read() if it requires buffering.
+      This interface is only available if <code>CONFIG_MTD_BYTE_WRITE</code> is defined.
+    </p>
+    <ul>
+     <p><code>ssize_t (*write)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes, FAR const uint8_t *buffer);</code></p>
     </ul>
     <p>
       Support other, less frequently used commands:
