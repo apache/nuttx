@@ -55,6 +55,7 @@
 #include "up_internal.h"
 
 #include "zkitarm_internal.h"
+#include "lpc17_dac.h"
 
 #ifdef CONFIG_DAC
 

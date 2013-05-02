@@ -53,11 +53,13 @@
 #include <nuttx/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/st7567.h>
+#include <nuttx/arch.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
 
 #include "lpc17_gpio.h"
+#include "lpc17_ssp.h"
 #include "zkitarm_internal.h"
 
 #ifdef CONFIG_NX_LCDDRIVER
