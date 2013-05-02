@@ -48,7 +48,7 @@
  * by the logic in chip.h.
  */
 
-#include "k25z120_pinmux.h"
+#include "k25z128_pinmux.h"
 
 /********************************************************************************************
  * Pre-processor Definitions
