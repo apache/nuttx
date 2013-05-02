@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/kl/kl_gpio.c
+ *  arch/arm/src/kl/kl_pin.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,22 +38,24 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/board/board.h>
 
-#include <stdint.h>
 #include <assert.h>
-#include <debug.h>
+#include <errno.h>
 
-#include <arch/kl/chip.h>
+#include <nuttx/arch.h>
 
 #include "up_arch.h"
-
-#include "chip.h"
-#include "chip/kl_gpio.h"
+#include "up_internal.h"
 
 #include "kl_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -68,150 +70,150 @@
  * Name: kl_configgpio
  *
  * Description:
- *   Configure a GPIO pin based on bit-encoded description of the pin.
- *   Once it is configured as Alternative (GPIO_ALT|GPIO_CNF_AFPP|...)
- *   function, it must be unconfigured with kl_unconfiggpio() with
- *   the same cfgset first before it can be set to non-alternative function.
- *
- * Returns:
- *   OK on success
- *   ERROR on invalid port, or when pin is locked as ALT function.
+ *   Configure a PIN based on bit-encoded description of the pin.  NOTE that
+ *   DMA/interrupts are disabled at the initial PIN configuratin.
  *
  ****************************************************************************/
 
-int kl_configgpio(gpio_cfgset_t cfgset)
+int kl_configgpio(uint32_t cfgset)
 {
-  uintptr_t base;
-  uint32_t regaddr;
-  uint32_t regval;
-  uint32_t isrc;
-  uint32_t imd;
-  uint32_t ien;
-  uint32_t value;
-  int port;
-  int pin;
+  uintptr_t    base;
+  uint32_t     regval;
+  unsigned int port;
+  unsigned int pin;
+  unsigned int mode;
 
-  /* Decode the port and pin.  Use the port number to get the GPIO base
-   * address.
-   */
+  /* Get the port number and pin number */
 
-  port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pin  = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  port = (cfgset & _PIN_PORT_MASK) >> _PIN_PORT_SHIFT;
+  pin  = (cfgset & _PIN_MASK)      >> _PIN_SHIFT;
 
-  DEBUGASSERT((unsigned)port <= KL_GPIO_PORTE);
-  base = KL_GPIO_CTRL_BASE(port);
-
-  /* Set the the GPIO PMD register */
-
-  regaddr = base + KL_GPIO_PMD_OFFSET;
-  regval = getreg32(regaddr);
-  regval &= ~GPIO_PMD_MASK(pin);
-
-  switch (cfgset & GPIO_MODE_MASK)
+  DEBUGASSERT(port < KL_NPORTS);
+  if (port < KL_NPORTS)
     {
-    default:
-    case GPIO_INPUT:     /* Input */
-      value = GPIO_PMD_INPUT;
-      break;
+      /* Get the base address of PORT block for this port */
 
-    case GPIO_OUTPUT:    /* Push-pull output */
-      value = GPIO_PMD_OUTPUT;
-      break;
+      base =  KL_PORT_BASE(port);
 
-    case GPIO_OPENDRAIN: /* Open drain output */
-      value = GPIO_PMD_OPENDRAIN;
-      break;
+      /* Get the port mode */
 
-    case GPIO_BIDI:      /* Quasi bi-directional */
-      value = GPIO_PMD_BIDI;
-      break;
+      mode = (cfgset & _PIN_MODE_MASK)  >> _PIN_MODE_SHIFT;
+
+      /* Special case analog port mode.  In this case, not of the digital
+       * options are applicable.
+       */
+
+      if (mode == _PIN_MODE_ANALOG)
+        {
+          /* Set the analog mode with all digital options zeroed */
+
+          regval = PORT_PCR_MUX_ANALOG | PORT_PCR_IRQC_DISABLED;
+          putreg32(regval, base + KL_PORT_PCR_OFFSET(pin));
+        }
+      else
+        {
+          /* Configure the digital pin options */
+
+          regval = (mode << PORT_PCR_MUX_SHIFT);
+          if ((cfgset & _PIN_IO_MASK) == _PIN_INPUT)
+            {
+              /* Handle input-only digital options */
+              /* Check for pull-up or pull-down */
+
+              if ((cfgset & _PIN_INPUT_PULLMASK) == _PIN_INPUT_PULLDOWN)
+                {
+                  regval |= PORT_PCR_PE;
+                }
+              else if ((cfgset & _PIN_INPUT_PULLMASK) == _PIN_INPUT_PULLUP)
+                {
+                  regval |= (PORT_PCR_PE | PORT_PCR_PS);
+                }
+            }
+          else
+            {
+              /* Handle output-only digital options */
+              /* Check for slow slew rate setting */
+
+              if ((cfgset & _PIN_OUTPUT_SLEW_MASK) == _PIN_OUTPUT_SLOW)
+                {
+                  regval |= PORT_PCR_SRE;
+                }
+
+              /* Check for open drain output */
+
+              if ((cfgset & _PIN_OUTPUT_OD_MASK) == _PIN_OUTPUT_OPENDRAIN)
+                {
+                  regval |= PORT_PCR_ODE;
+                }
+              
+              /* Check for high drive output */
+
+              if ((cfgset & _PIN_OUTPUT_DRIVE_MASK) == _PIN_OUTPUT_HIGHDRIVE)
+                {
+                  regval |= PORT_PCR_DSE;
+                }
+            }
+
+          /* Check for passive filter enable.  Passive Filter configuration
+           * is valid in all digital pin muxing modes.
+           */
+
+          if ((cfgset & PIN_PASV_FILTER) != 0)
+            {
+              regval |= PORT_PCR_PFE;
+            }
+
+          /* Set the digital mode with all of the selected options */
+
+          putreg32(regval, base + KL_PORT_PCR_OFFSET(pin));
+
+          /* Check for digital filter enable.  Digital Filter configuration
+           * is valid in all digital pin muxing modes.
+           */
+
+          regval = getreg32(base + KL_PORT_DFER_OFFSET);
+          if ((cfgset & PIN_DIG_FILTER) != 0)
+            {
+              regval |= (1 << pin);
+            }
+          else
+            {
+              regval &= ~(1 << pin);
+            }
+          putreg32(regval, base + KL_PORT_DFER_OFFSET);
+
+          /* Additional configuration for the case of Alternative 1 (GPIO) modes */
+
+          if (mode == _PIN_MODE_GPIO)
+            {
+              /* Set the GPIO port direction */
+
+              base   = KL_GPIO_BASE(port);
+              regval = getreg32(base + KL_GPIO_PDDR_OFFSET);
+              if ((cfgset & _PIN_IO_MASK) == _PIN_INPUT)
+                {
+                  /* Select GPIO input */
+
+                  regval &= ~(1 << pin);
+                  putreg32(regval, base + KL_GPIO_PDDR_OFFSET);
+                }
+              else /* if ((cfgset & _PIN_IO_MASK) == _PIN_OUTPUT) */
+                {
+                  /* Select GPIO input */
+
+                  regval |= (1 << pin);
+                  putreg32(regval, base + KL_GPIO_PDDR_OFFSET);
+
+                  /* Set the initial value of the GPIO output */
+
+                  kl_gpiowrite(cfgset, ((cfgset & GPIO_OUTPUT_ONE) != 0));
+                }
+            }
+        }
+
+      return OK;
     }
-
-  regval |= GPIO_PMD(pin, value);
-  putreg32(regval, regaddr);
-
-  /* Check if we need to disable the digital input path */
-
-  regaddr = base + KL_GPIO_OFFD_OFFSET;
-  regval  = getreg32(regaddr);
-  regval &= ~GPIO_OFFD(pin);
-
-  if ((cfgset & GPIO_ANALOG) != 0)
-    {
-      regval |= GPIO_OFFD(pin);
-    }
- 
-  putreg32(regval, regaddr);
-
-  /* Check if we need to enable debouncing */
-
-  regaddr = base + KL_GPIO_DBEN_OFFSET;
-  regval  = getreg32(regaddr);
-  regval &= ~GPIO_DBEN(pin);
-
-  if ((cfgset & GPIO_DEBOUNCE) != 0)
-    {
-      regval |= GPIO_DBEN(pin);
-    }
- 
-  putreg32(regval, regaddr);
-
-  /* Configure interrupting pins */
-
-  isrc = getreg32(base + KL_GPIO_ISRC_OFFSET);
-  isrc &= ~GPIO_ISRC(pin);
-
-  imd  = getreg32(base + KL_GPIO_IMD_OFFSET);
-  imd &= ~GPIO_IMD(pin);
-
-  ien  = getreg32(base + KL_GPIO_IEN_OFFSET);
-  ien &= ~(GPIO_IF_EN(pin) | GPIO_IR_EN(pin));
-
-  switch (cfgset & GPIO_INTERRUPT_MASK)
-    {
-    case GPIO_INTERRUPT_RISING_EDGE:
-      isrc |= GPIO_ISRC(pin);
-      ien  |= GPIO_IR_EN(pin);
-      break;
-
-    case GPIO_INTERRUPT_FALLING_EDGE:
-      isrc |= GPIO_ISRC(pin);
-      ien  |= GPIO_IF_EN(pin);
-      break;
-
-    case GPIO_INTERRUPT_BOTH_EDGES:
-      isrc |= GPIO_ISRC(pin);
-      ien  |= (GPIO_IF_EN(pin) | GPIO_IR_EN(pin));
-      break;
-
-    case GPIO_INTERRUPT_HIGH_LEVEL:
-      isrc |= GPIO_ISRC(pin);
-      imd  |= GPIO_IMD(pin);
-      ien  |= GPIO_IR_EN(pin);
-      break;
-
-    case GPIO_INTERRUPT_LOW_LEVEL:
-      isrc |= GPIO_ISRC(pin);
-      imd  |= GPIO_IMD(pin);
-      ien  |= GPIO_IF_EN(pin);
-      break;
-
-    default:
-      break;
-    }
-
-  putreg32(ien, base + KL_GPIO_IEN_OFFSET);
-  putreg32(imd, base + KL_GPIO_IMD_OFFSET);
-  putreg32(isrc, base + KL_GPIO_ISRC_OFFSET);
-
-  /* If the pin is an output, set the initial output value */
-
-  if ((cfgset & GPIO_MODE_MASK) == GPIO_OUTPUT)
-    {
-      kl_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0);
-    }
-
-  return 0;
+  return -EINVAL;
 }
 
 /****************************************************************************
@@ -222,48 +224,38 @@ int kl_configgpio(gpio_cfgset_t cfgset)
  *
  ****************************************************************************/
 
-void kl_gpiowrite(gpio_cfgset_t pinset, bool value)
+void kl_gpiowrite(uint32_t pinset, bool value)
 {
-#ifndef KL_LOW
-  irqstate_t flags;
-  uintptr_t base;
-#endif
-  int port;
-  int pin;
+  uintptr_t    base;
+  unsigned int port;
+  unsigned int pin;
 
-  /* Decode the port and pin.  Use the port number to get the GPIO base
-   * address.
-   */
+  DEBUGASSERT((pinset & _PIN_MODE_MASK) == _PIN_MODE_GPIO);
+  DEBUGASSERT((pinset & _PIN_IO_MASK) == _PIN_OUTPUT);
 
-  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  /* Get the port number and pin number */
 
-  DEBUGASSERT((unsigned)port <= KL_GPIO_PORTE);
+  port = (pinset & _PIN_PORT_MASK) >> _PIN_PORT_SHIFT;
+  pin  = (pinset & _PIN_MASK)      >> _PIN_SHIFT;
 
-  /* Only the low density K25Z100/120 chips support bit-band access to GPIO
-   * pins.
-   */
+  DEBUGASSERT(port < KL_NPORTS);
+  if (port < KL_NPORTS)
+    {
+      /* Get the base address of GPIO block for this port */
 
-#ifdef KL_LOW
-  putreg32((uint32_t)value, KL_PORT_PDIO(port, pin));
-#else
-  /* Get the base address of the GPIO port registers */
+      base = KL_GPIO_BASE(port);
 
-  base = KL_GPIO_CTRL_BASE(port);
+      /* Set or clear the output */
 
-  /* Disable interrupts -- the following operations must be atomic */
-
-  flags = irqsave();
-
-  /* Allow writing only to the selected pin in the DOUT register */
-
-  putreg32(~(1 << pin), base + KL_GPIO_DMASK_OFFSET);
-
-  /* Set the pin to the selected value and re-enable interrupts */
-
-  putreg32(((uint32_t)value << pin), base + KL_GPIO_DOUT_OFFSET);
-  irqrestore(flags);
-#endif
+      if (value)
+        {
+          putreg32((1 << pin), base + KL_GPIO_PSOR_OFFSET);
+        }
+      else
+        {
+          putreg32((1 << pin), base + KL_GPIO_PCOR_OFFSET);
+        }
+    }
 }
 
 /****************************************************************************
@@ -274,36 +266,34 @@ void kl_gpiowrite(gpio_cfgset_t pinset, bool value)
  *
  ****************************************************************************/
 
-bool kl_gpioread(gpio_cfgset_t pinset)
+bool kl_gpioread(uint32_t pinset)
 {
-#ifndef KL_LOW
-  uintptr_t base;
-#endif
-  int port;
-  int pin;
+  uintptr_t    base;
+  uint32_t     regval;
+  unsigned int port;
+  unsigned int pin;
+  bool         ret = false;
 
-  /* Decode the port and pin.  Use the port number to get the GPIO base
-   * address.
-   */
+  DEBUGASSERT((pinset & _PIN_MODE_MASK) == _PIN_MODE_GPIO);
+  DEBUGASSERT((pinset & _PIN_IO_MASK) == _PIN_INPUT);
 
-  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  /* Get the port number and pin number */
 
-  DEBUGASSERT((unsigned)port <= KL_GPIO_PORTE);
+  port = (pinset & _PIN_PORT_MASK) >> _PIN_PORT_SHIFT;
+  pin  = (pinset & _PIN_MASK)      >> _PIN_SHIFT;
 
-  /* Only the low density K25Z100/120 chips support bit-band access to GPIO
-   * pins.
-   */
+  DEBUGASSERT(port < KL_NPORTS);
+  if (port < KL_NPORTS)
+    {
+      /* Get the base address of GPIO block for this port */
 
-#ifdef KL_LOW
-  return (getreg32(KL_PORT_PDIO(port, pin)) & PORT_MASK) != 0;
-#else
-  /* Get the base address of the GPIO port registers */
+      base = KL_GPIO_BASE(port);
 
-  base = KL_GPIO_CTRL_BASE(port);
+      /* return the state of the pin */
 
-  /* Return the state of the selected pin */
-
- return (getreg32(base + KL_GPIO_PIN_OFFSET) & (1 << pin)) != 0;
-#endif
+      regval = getreg32(base + KL_GPIO_PDIR_OFFSET);
+      ret    = ((regval & (1 << pin)) != 0);
+    }
+  return ret;
 }
+

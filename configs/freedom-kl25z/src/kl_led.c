@@ -127,11 +127,9 @@
 
 void kl_ledinit(void)
 {
-  led_dumpgpio("Before configuration");
-  //kl_configgpio(GPIO_LED_R);
-  //kl_configgpio(GPIO_LED_G);
-  //kl_configgpio(GPIO_LED_B);
-  led_dumpgpio("After configuration");
+  kl_configgpio(GPIO_LED_R);
+  kl_configgpio(GPIO_LED_G);
+  kl_configgpio(GPIO_LED_B);
 }
 
 /****************************************************************************

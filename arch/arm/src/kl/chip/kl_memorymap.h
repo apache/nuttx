@@ -65,7 +65,7 @@
                         /* 0x20100000  * -0x3fffffff Reserved */
 # define KIP_AIPS_BASE     0x40000000 /* -0x4007ffff AIPS Peripherals */
                         /* 0x40080000  * -0x400fffff Reserved */
-# define KL_GPIO_BASE      0x400ff000 /* -0x400fffff General purpose input/output (GPIO) */
+# define KL_GPIO_BASE(n)   (0x400ff000 + ((n) << 6))
                         /* 0x40100000  * -0x43ffffff Reserved */
 # define KL_BME_BASE       0x44000000 /* -0x5fffffff Bit Manipulation Engine (BME) access
                                        *             to AIPS Peripherals for slots 0-127 */

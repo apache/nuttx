@@ -4661,3 +4661,5 @@
 	  (2013-5-2).
 	* drivers/mtd/mtd_partition.c:  Fix a few bugs and add support for the
 	  (option) byte write method (2013-5-3).
+	* arch/arm/src/kl:  Repartitioning of definitions in headef files
+	  from Alan Carvalho de Assis (2013-5-3).

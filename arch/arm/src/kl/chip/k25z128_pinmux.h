@@ -312,7 +312,7 @@
 #define PIN_I2C0_SDA_4           (PIN_ALT5   | PIN_PORTE | PIN25)
 
 #define PIN_CMP0_IN5             (PIN_ANALOG | PIN_PORTE | PIN29)
-#define PIN_ADC0_SE4A            (PIN_ANALOG | PIN_PORTE | PIN29)
+#define PIN_ADC0_SE4B            (PIN_ANALOG | PIN_PORTE | PIN29)
 #define PIN_TPM0_CH2_4           (PIN_ALT3   | PIN_PORTE | PIN29)
 #define PIN_TPM_CLKIN0_4         (PIN_ALT4   | PIN_PORTE | PIN29)
 
