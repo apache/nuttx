@@ -190,7 +190,7 @@
 #define MCPWM_CAPCON_HNFCAP0         (1 << 21) /* Bit 21: Hardware noise filter */
 #define MCPWM_CAPCON_HNFCAP1         (1 << 22) /* Bit 22: Hardware noise filter */
 #define MCPWM_CAPCON_HNFCAP2         (1 << 23) /* Bit 23: Hardware noise filter */
-                                               /* Bits 24-31: Reserved
+                                               /* Bits 24-31: Reserved */
 /* Dead time register */
 
 #define MCPWM_DT_DT0_SHIFT           (0)       /* Bits 0-9: Dead time for channel 0 */

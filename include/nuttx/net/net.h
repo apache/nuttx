@@ -112,7 +112,7 @@ struct socketlist
 
 /* Callback from netdev_foreach() */
 
-struct uip_driver_s; /* Forward reference.  See nuttx/net/uip/uip-arch.h */
+struct uip_driver_s; /* Forward reference. Defined in nuttx/net/uip/uip-arch.h */
 typedef int (*netdev_callback_t)(FAR struct uip_driver_s *dev, void *arg);
 
 /****************************************************************************
@@ -172,6 +172,7 @@ int psock_close(FAR struct socket *psock);
 /* net_close.c ***************************************************************/
 /* Performs the bind() operation on a socket instance */
 
+struct sockaddr; /* Forward reference. Defined in nuttx/include/sys/socket.h */
 int psock_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
                socklen_t addrlen);
 
@@ -198,7 +199,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 /* recvfrom using the underlying socket structure */
 
 ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                       int flags,FAR struct sockaddr *from,
+                       int flags, FAR struct sockaddr *from,
                        FAR socklen_t *fromlen);
 
 /* recv using the underlying socket structure */

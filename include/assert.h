@@ -47,14 +47,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macro Name: ASSERT, ASSERTCODE, et al. */
+/* Macro Name: ASSERT, VERIFY, et al. */
 
-#undef ASSERT       - Assert if the condition is not true
-#undef ASSERTCODE   - Assert with an error code if the condition is not true
-#undef VERIFY       - Assert if a function returns a negative value
-#undef DEBUGASSERT  - Like ASSERT, but only if CONFIG_DEBUG is defined
-#undef DEBUGVERIFY  - Like VERIFY, but only if CONFIG_DEBUG is defined
-#undef PANIC        - Unconditional error with code
+#undef ASSERT       /* Assert if the condition is not true */
+#undef VERIFY       /* Assert if a function returns a negative value */
+#undef DEBUGASSERT  /* Like ASSERT, but only if CONFIG_DEBUG is defined */
+#undef DEBUGVERIFY  /* Like VERIFY, but only if CONFIG_DEBUG is defined */
+#undef PANIC        /* Unconditional abort */
 
 #ifdef CONFIG_HAVE_FILENAME
 

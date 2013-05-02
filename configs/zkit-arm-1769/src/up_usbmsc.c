@@ -53,6 +53,9 @@
 #include <nuttx/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "lpc17_spi.h"
+#include "zkitarm_internal.h"
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/

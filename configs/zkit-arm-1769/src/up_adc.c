@@ -54,7 +54,7 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "lpc17_pwm.h"
+#include "lpc17_adc.h"
 #include "zkitarm_internal.h"
 
 #ifdef CONFIG_ADC

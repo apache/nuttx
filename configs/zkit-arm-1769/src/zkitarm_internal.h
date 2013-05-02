@@ -145,7 +145,7 @@
 #define ZKITARM_KEY4 (GPIO_INPUT | GPIO_FLOAT | GPIO_PORT1 | GPIO_PIN31)
 #define ZKITARM_KEY5 (GPIO_INPUT | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN13)
 
-#define ZKITARM_INT_KEY5 (GPIO_INTBOTH | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN13)
+#define ZKITARM_INT_KEY5 (GPIO_INTFE | GPIO_FLOAT | GPIO_PORT2 | GPIO_PIN13)
 #define ZKITARM_KEY5_IRQ LPC17_IRQ_P2p13
 
 /* SD Slot
@@ -234,11 +234,21 @@
  * Name: zkit_sspinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the LPCXpresso board.
+ *   Called to configure SSP chip select GPIO pins for the ZKit-ARM-1769 board.
  *
  ************************************************************************************/
 
 void weak_function zkit_sspinitialize(void);
+
+/************************************************************************************
+ * Name: zkit_spinitialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the ZKit-ARM-1769 board.
+ *
+ ************************************************************************************/
+
+void weak_function zkit_spiinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_ZKITARM_LPC1768_SRC_ZKITARM_INTERNAL_H */
