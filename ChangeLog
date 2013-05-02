@@ -4655,4 +4655,7 @@
 	* fs/smartfs:  Add Ken Pettits SMART FS (2013-4-30).
 	* include/nuttx/mtd.h and most MTD drivers:  Add support for
 	  (optional) method to perform byte oriented writes if so configured
-	  (2013-5-1)
+	  (2013-5-1).
+	* arch/arm/src/kl/chip/kl25z128_pinmux.h:  Corrections fo the
+	  pin multiplexing definitions from Alan Carvalho de Assis
+	  (2013-5-2).
