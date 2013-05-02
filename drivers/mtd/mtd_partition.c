@@ -46,8 +46,9 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -95,11 +96,49 @@ static ssize_t part_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
                            FAR const uint8_t *buf);
 static ssize_t part_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
                          FAR uint8_t *buffer);
+#ifdef CONFIG_MTD_BYTE_WRITE
+static ssize_t part_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                          FAR const uint8_t *buffer);
+#endif
 static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: part_blockcheck
+ *
+ * Description:
+ *   Check if the provided block offset lies within the partition
+ *
+ ****************************************************************************/
+
+static bool part_blockcheck(FAR struct mtd_partition_s *priv, off_t block)
+{
+  off_t partsize;
+
+  partsize = priv->neraseblocks * priv->blkpererase;
+  return block < partsize;
+}
+
+/****************************************************************************
+ * Name: part_bytecheck
+ *
+ * Description:
+ *   Check if the provided byte offset lies within the partition
+ *
+ ****************************************************************************/
+
+static bool part_bytecheck(FAR struct mtd_partition_s *priv, off_t byoff)
+{
+  off_t erasesize;
+  off_t readend;
+
+  erasesize = priv->blocksize * priv->blkpererase;
+  readend   = (byoff + erasesize - 1) / erasesize;
+  return readend <  priv->neraseblocks;
+}
 
 /****************************************************************************
  * Private Functions
@@ -117,14 +156,13 @@ static int part_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                       size_t nblocks)
 {
   FAR struct mtd_partition_s *priv = (FAR struct mtd_partition_s *)dev;
-  off_t partsize;
+  off_t eoffset;
 
   DEBUGASSERT(priv);
 
   /* Make sure that erase would not extend past the end of the partition */
 
-  partsize = priv->neraseblocks * priv->blkpererase;
-  if ((startblock + nblocks) > partsize)
+  if (!part_blockcheck(priv, startblock + nblocks - 1))
     {
       fdbg("ERROR: Read beyond the end of the partition\n");
       return -ENXIO;
@@ -132,10 +170,14 @@ static int part_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Just add the partition offset to the requested block and let the
    * underlying MTD driver perform the erase.
+   *
+   * NOTE: the offset here is in units of erase blocks.
    */
 
-  return priv->parent->erase(priv->parent, startblock + priv->firstblock,
-                             nblocks);
+  eoffset = priv->firstblock / priv->blkpererase;
+  DEBUGASSERT(eoffset * priv->blkpererase == priv->firstblock);
+
+  return priv->parent->erase(priv->parent, startblock + eoffset, nblocks);
 }
 
 /****************************************************************************
@@ -150,14 +192,12 @@ static ssize_t part_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                           size_t nblocks, FAR uint8_t *buf)
 {
   FAR struct mtd_partition_s *priv = (FAR struct mtd_partition_s *)dev;
-  off_t partsize;
 
   DEBUGASSERT(priv && (buf || nblocks == 0));
 
   /* Make sure that read would not extend past the end of the partition */
 
-  partsize = priv->neraseblocks * priv->blkpererase;
-  if ((startblock + nblocks) > partsize)
+  if (!part_blockcheck(priv, startblock + nblocks - 1))
     {
       fdbg("ERROR: Read beyond the end of the partition\n");
       return -ENXIO;
@@ -183,14 +223,12 @@ static ssize_t part_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                            size_t nblocks, FAR const uint8_t *buf)
 {
   FAR struct mtd_partition_s *priv = (FAR struct mtd_partition_s *)dev;
-  off_t partsize;
 
   DEBUGASSERT(priv && (buf || nblocks == 0));
 
   /* Make sure that write would not extend past the end of the partition */
 
-  partsize = priv->neraseblocks * priv->blkpererase;
-  if ((startblock + nblocks) > partsize)
+  if (!part_blockcheck(priv, startblock + nblocks - 1))
     {
       fdbg("ERROR: Write beyond the end of the partition\n");
       return -ENXIO;
@@ -216,8 +254,6 @@ static ssize_t part_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
                          FAR uint8_t *buffer)
 {
   FAR struct mtd_partition_s *priv = (FAR struct mtd_partition_s *)dev;
-  off_t erasesize;
-  off_t readend;
   off_t newoffset;
 
   DEBUGASSERT(priv && (buffer || nbytes == 0));
@@ -228,10 +264,7 @@ static ssize_t part_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
     {
       /* Make sure that read would not extend past the end of the partition */
 
-      erasesize = priv->blocksize * priv->blkpererase;
-      readend   = (offset + nbytes + erasesize - 1) / erasesize;
-
-      if (readend > priv->neraseblocks)
+      if (!part_bytecheck(priv, offset + nbytes - 1))
         {
           fdbg("ERROR: Read beyond the end of the partition\n");
           return -ENXIO;
@@ -249,6 +282,45 @@ static ssize_t part_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
 
   return -ENOSYS;
 }
+
+/****************************************************************************
+ * Name: part_write
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_BYTE_WRITE
+static ssize_t part_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+                          FAR const uint8_t *buffer)
+{
+  FAR struct mtd_partition_s *priv = (FAR struct mtd_partition_s *)dev;
+  off_t newoffset;
+
+  DEBUGASSERT(priv && (buffer || nbytes == 0));
+
+  /* Does the underlying MTD device support the write method? */
+
+  if (priv->parent->write)
+    {
+      /* Make sure that write would not extend past the end of the partition */
+
+      if (!part_bytecheck(priv, offset + nbytes - 1))
+        {
+          fdbg("ERROR: Write beyond the end of the partition\n");
+          return -ENXIO;
+        }
+
+      /* Just add the partition offset to the requested block and let the
+       * underlying MTD driver perform the write.
+       */
+
+      newoffset = offset + priv->firstblock * priv->blocksize;
+      return priv->parent->write(priv->parent, newoffset, nbytes, buffer);
+    }
+
+  /* The underlying MTD driver does not support the write() method */
+
+  return -ENOSYS;
+}
+#endif
 
 /****************************************************************************
  * Name: part_ioctl

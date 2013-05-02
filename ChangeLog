@@ -4659,3 +4659,5 @@
 	* arch/arm/src/kl/chip/kl25z128_pinmux.h:  Corrections fo the
 	  pin multiplexing definitions from Alan Carvalho de Assis
 	  (2013-5-2).
+	* drivers/mtd/mtd_partition.c:  Fix a few bugs and add support for the
+	  (option) byte write method (2013-5-3).

@@ -221,8 +221,8 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
    * alignment.
    */
 
-   mask         = dev->blkper - 1;
-   alignedblock = (startblock + mask) & ~mask;
+  mask         = dev->blkper - 1;
+  alignedblock = (startblock + mask) & ~mask;
 
   /* Handle partial erase blocks before the first unaligned block */
 
@@ -271,7 +271,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
 
       memcpy(dev->eblock + offset, buffer, nbytes);
 
-      /* And write the erase back to flash */
+      /* And write the erase block back to flash */
 
       nxfrd = MTD_BWRITE(dev->mtd, rwblock, dev->blkper, dev->eblock);
       if (nxfrd != dev->blkper)
@@ -333,7 +333,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
     {
       /* Read the full erase block into the buffer */
 
-     nxfrd   = MTD_BREAD(dev->mtd, alignedblock, dev->blkper, dev->eblock);
+     nxfrd = MTD_BREAD(dev->mtd, alignedblock, dev->blkper, dev->eblock);
       if (nxfrd != dev->blkper)
         {
           fdbg("Read erase block %d failed: %d\n", alignedblock, nxfrd);

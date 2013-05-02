@@ -97,7 +97,7 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
       return 0;
     }
 
-  /* Convert the file position into a sector number an offset. */
+  /* Convert the file position into a sector number and offset. */
 
   sector     = offset / bch->sectsize;
   sectoffset = offset - sector * bch->sectsize;
