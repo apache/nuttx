@@ -74,48 +74,50 @@ extern "C"
  * Name: kl_lowsetup
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level initialization.
+ *   Called at the very beginning of _start.  Performs low level initialization
+ *   including setup of the console UART.  This UART done early so that the serial
+ *   console is available for debugging very early in the boot sequence.
  *
  ************************************************************************************/
 
 void kl_lowsetup(void);
 
-/****************************************************************************
- * Name: kl_setbaud
+/************************************************************************************
+ * Name: kl_uartreset
  *
  * Description:
- *   Set the BAUD divxisor for the selected UART
+ *   Reset a UART.
  *
- *   Mode DIV_X_EN DIV_X_ONE Divider X   BRD  (Baud rate equation)
- *   -------------------------------------------------------------
- *   0    Disable  0         B           A    UART_CLK / [16 * (A+2)]
- *   1    Enable   0         B           A    UART_CLK / [(B+1) * (A+2)] , B must >= 8
- *   2    Enable   1         Don't care  A    UART_CLK / (A+2), A must >=3
- *
- * Here we assume that the default clock source for the UART modules is
- * the external high speed crystal.
- *
- *****************************************************************************/
+ ************************************************************************************/
 
-#ifdef HAVE_UART
-void kl_setbaud(uintptr_t base, uint32_t baud);
+#ifdef HAVE_UART_DEVICE
+void kl_uartreset(uintptr_t uart_base);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kl_lowputc
  *
  * Description:
  *   Output one character to the UART using a simple polling method.
  *
- *****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_SERIAL_CONSOLE
 void kl_lowputc(uint32_t ch);
 #endif
 
-void kl_uartconfigure(uintptr_t uart_base, uint32_t baud,
-                           uint32_t clock, unsigned int parity,
-                           unsigned int nbits);
+/************************************************************************************
+ * Name: kl_uartconfigure
+ *
+ * Description:
+ *   Configure a UART as a RS-232 UART.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_UART_DEVICE
+void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
+                      unsigned int parity, unsigned int nbits);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -53,9 +53,10 @@
 #include "chip/kl_sim.h"
 
 #include "kl_config.h"
+#include "kl_gpio.h"
 #include "kl_lowputc.h"
 #include "kl_userspace.h"
-#include "kl_internal.h"
+#include "kl_clockconfig.h"
 
 /****************************************************************************
  * Pre-processor Definitions

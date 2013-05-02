@@ -42,137 +42,253 @@
 
 #include <nuttx/config.h>
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#  include <stdbool.h>
-#endif
+#include <stdbool.h>
 
 #include <nuttx/irq.h>
 
-#include "chip.h"
+#include "kl_config.h"
 #include "chip/kl_gpio.h"
+#include "chip/kl_port.h"
 
 /****************************************************************************
  * Pre-processor Declarations
  ****************************************************************************/
-
-/* Bit-encoded input to kl_configgpio() */
-
-/* 16-bit Encoding:
+/* Bit-encoded input to kl_pinconfig() *****************************************/
+/* General form (32-bits, only 22 bits are unused in the encoding):
  *
- * 1111 1100 0000 0000
- * 5432 1098 7654 3210
- * ---- ---- ---- ----
- * MMAD III. VPPP BBBB
+ * oooo mmmv iiii ifd- ---- -ppp ---b bbbb
  */
 
-/* GPIO mode:
+/* Bits 25-31: 7 bits are used to encode the basic pin configuration:
  *
- * 1111 1100 0000 0000
- * 5432 1098 7654 3210
- * ---- ---- ---- ----
- * MM.. .... .... ....
+ * oooo mmm- ---- ---- ---- ---- ---- ----
+ * oooommm:
+ * |   `--- mmm: mode
+ * `------- oooo: options (may be combined)
  */
 
-#define GPIO_MODE_SHIFT               (14)      /* Bits 14-15: GPIO mode */
-#define GPIO_MODE_MASK                (3 << GPIO_MODE_SHIFT)
-#  define GPIO_INPUT                  (0 << GPIO_MODE_SHIFT) /* Input */
-#  define GPIO_OUTPUT                 (1 << GPIO_MODE_SHIFT) /* Push-pull output */
-#  define GPIO_OPENDRAIN              (2 << GPIO_MODE_SHIFT) /* Open drain output */
-#  define GPIO_BIDI                   (3 << GPIO_MODE_SHIFT) /* Quasi bi-directional */
+#define _PIN_MODE_SHIFT        (25) /* Bits 25-27: Pin mode */
+#define _PIN_MODE_MASK         (7 << _PIN_MODE_SHIFT)
+#define _PIN_OPTIONS_SHIFT     (28) /* Bits 28-31: Pin mode options */
+#define _PIN_OPTIONS_MASK      (15 << _PIN_OPTIONS_SHIFT)
 
-/* GPIO analog: If the pin is an analog input, then it would be necessary to
- * disable the digital input
- *
- * 1111 1100 0000 0000
- * 5432 1098 7654 3210
- * ---- ---- ---- ----
- * ..A. .... .... ....
+/* Port Modes */
+
+#define _PIN_MODE_ANALOG       (0 << _PIN_MODE_SHIFT)  /* 000 Pin Disabled (Analog) */
+#define _PIN_MODE_GPIO         (1 << _PIN_MODE_SHIFT)  /* 001 Alternative 1 (GPIO) */
+#define _PIN_MODE_ALT2         (2 << _PIN_MODE_SHIFT)  /* 010 Alternative 2 */
+#define _PIN_MODE_ALT3         (3 << _PIN_MODE_SHIFT)  /* 011 Alternative 3 */
+#define _PIN_MODE_ALT4         (4 << _PIN_MODE_SHIFT)  /* 100 Alternative 4 */
+#define _PIN_MODE_ALT5         (5 << _PIN_MODE_SHIFT)  /* 101 Alternative 5 */
+#define _PIN_MODE_ALT6         (6 << _PIN_MODE_SHIFT)  /* 110 Alternative 6 */
+#define _PIN_MODE_ALT7         (7 << _PIN_MODE_SHIFT)  /* 111 Alternative 7 */
+
+/* Options for all digital modes (Alternatives 1-7).  None of the digital
+ * options apply if the analog mode is selected.
  */
 
-#define GPIO_ANALOG                   (1 << 13) /* Bit 13: Disable digital input */
+#define _PIN_IO_MASK           (1 << _PIN_OPTIONS_SHIFT) /* xxx1 Digital input/output mask */
+#define _PIN_INPUT             (0 << _PIN_OPTIONS_SHIFT) /* xxx0 Digital input */
+#define _PIN_OUTPUT            (1 << _PIN_OPTIONS_SHIFT) /* xxx1 Digital output */
 
-/* De-bounce enable:
- *
- * 1111 1100 0000 0000
- * 5432 1098 7654 3210
- * ---- ---- ---- ----
- * ...D .... .... ....
+#define _PIN_INPUT_PULLMASK    (7 << _PIN_OPTIONS_SHIFT) /* x111 Mask for pull-up or -down bits */
+#define _PIN_INPUT_PULLDOWN    (2 << _PIN_OPTIONS_SHIFT) /* x010 Input with internal pull-down resistor */
+#define _PIN_INPUT_PULLUP      (6 << _PIN_OPTIONS_SHIFT) /* x110 Input with internal pull-up resistor */
+
+#define _PIN_OUTPUT_SLEW_MASK  (3 << _PIN_OPTIONS_SHIFT) /* xx11 Mask to test for slow slew rate */
+#define _PIN_OUTPUT_FAST       (1 << _PIN_OPTIONS_SHIFT) /* xx01 Output with fast slew rate */
+#define _PIN_OUTPUT_SLOW       (3 << _PIN_OPTIONS_SHIFT) /* xx11 Output with slow slew rate */
+#define _PIN_OUTPUT_OD_MASK    (5 << _PIN_OPTIONS_SHIFT) /* x1x1 Mask to test for open drain */
+#define _PIN_OUTPUT_OPENDRAIN  (5 << _PIN_OPTIONS_SHIFT) /* x1x1 Output with open drain enabled */
+#define _PIN_OUTPUT_DRIVE_MASK (9 << _PIN_OPTIONS_SHIFT) /* 1xx1 Mask to test for high drive strengh */
+#define _PIN_OUTPUT_LOWDRIVE   (1 << _PIN_OPTIONS_SHIFT) /* 0xx1 Output with low drive strength */
+#define _PIN_OUTPUT_HIGHDRIVE  (9 << _PIN_OPTIONS_SHIFT) /* 1xx1 Output with high drive strength */
+
+/* End-user pin modes and configurations.  Notes:  (1) None of the digital options
+ * are available for the analog mode, (2) digital settings may be combined (OR'ed)
+ * provided that input-only and output-only options are not intermixed.
  */
 
-#define GPIO_DEBOUNCE                 (1 << 12) /* Bit 12: Debounce enable */
+#define PIN_ANALOG             _PIN_MODE_ANALOG
 
-/* Interrupt Controls:
+#define GPIO_INPUT             (_PIN_MODE_GPIO | _PIN_INPUT)
+#define GPIO_PULLDOWN          (_PIN_MODE_GPIO | _PIN_INPUT_PULLDOWN)
+#define GPIO_PULLUP            (_PIN_MODE_GPIO | _PIN_INPUT_PULLUP)
+#define GPIO_OUTPUT            (_PIN_MODE_GPIO | _PIN_OUTPUT)
+#define GPIO_FAST              (_PIN_MODE_GPIO | _PIN_OUTPUT_FAST)
+#define GPIO_SLOW              (_PIN_MODE_GPIO | _PIN_OUTPUT_SLOW)
+#define GPIO_OPENDRAIN         (_PIN_MODE_GPIO | _PIN_OUTPUT_LOWDRIVE)
+#define GPIO_LOWDRIVE          (_PIN_MODE_GPIO | _PIN_OUTPUT_OPENDRAIN)
+#define GPIO_HIGHDRIVE         (_PIN_MODE_GPIO | _PIN_OUTPUT_HIGHDRIVE)
+
+#define PIN_ALT2               _PIN_MODE_ALT2
+#define PIN_ALT2_INPUT         (_PIN_MODE_ALT2 | _PIN_INPUT)
+#define PIN_ALT2_PULLDOWN      (_PIN_MODE_ALT2 | _PIN_INPUT_PULLDOWN)
+#define PIN_ALT2_PULLUP        (_PIN_MODE_ALT2 | _PIN_INPUT_PULLUP)
+#define PIN_ALT2_OUTPUT        (_PIN_MODE_ALT2 | _PIN_OUTPUT)
+#define PIN_ALT2_FAST          (_PIN_MODE_ALT2 | _PIN_OUTPUT_FAST)
+#define PIN_ALT2_SLOW          (_PIN_MODE_ALT2 | _PIN_OUTPUT_SLOW)
+#define PIN_ALT2_OPENDRAIN     (_PIN_MODE_ALT2 | _PIN_OUTPUT_LOWDRIVE)
+#define PIN_ALT2_LOWDRIVE      (_PIN_MODE_ALT2 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT2_HIGHDRIVE     (_PIN_MODE_ALT2 | _PIN_OUTPUT_HIGHDRIVE)
+
+#define PIN_ALT3               _PIN_MODE_ALT3
+#define PIN_ALT3_INPUT         (_PIN_MODE_ALT3 | _PIN_INPUT)
+#define PIN_ALT3_PULLDOWN      (_PIN_MODE_ALT3 | _PIN_INPUT_PULLDOWN)
+#define PIN_ALT3_PULLUP        (_PIN_MODE_ALT3 | _PIN_INPUT_PULLUP)
+#define PIN_ALT3_OUTPUT        (_PIN_MODE_ALT3 | _PIN_OUTPUT)
+#define PIN_ALT3_FAST          (_PIN_MODE_ALT3 | _PIN_OUTPUT_FAST)
+#define PIN_ALT3_SLOW          (_PIN_MODE_ALT3 | _PIN_OUTPUT_SLOW)
+#define PIN_ALT3_OPENDRAIN     (_PIN_MODE_ALT3 | _PIN_OUTPUT_LOWDRIVE)
+#define PIN_ALT3_LOWDRIVE      (_PIN_MODE_ALT3 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT3_HIGHDRIVE     (_PIN_MODE_ALT3 | _PIN_OUTPUT_HIGHDRIVE)
+
+#define PIN_ALT4               _PIN_MODE_ALT4
+#define PIN_ALT4_INPUT         (_PIN_MODE_ALT4 | _PIN_INPUT)
+#define PIN_ALT4_PULLDOWN      (_PIN_MODE_ALT4 | _PIN_INPUT_PULLDOWN)
+#define PIN_ALT4_PULLUP        (_PIN_MODE_ALT4 | _PIN_INPUT_PULLUP)
+#define PIN_ALT4_OUTPUT        (_PIN_MODE_ALT4 | _PIN_OUTPUT)
+#define PIN_ALT4_FAST          (_PIN_MODE_ALT4 | _PIN_OUTPUT_FAST)
+#define PIN_ALT4_SLOW          (_PIN_MODE_ALT4 | _PIN_OUTPUT_SLOW)
+#define PIN_ALT4_OPENDRAIN     (_PIN_MODE_ALT4 | _PIN_OUTPUT_LOWDRIVE)
+#define PIN_ALT4_LOWDRIVE      (_PIN_MODE_ALT4 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT4_HIGHDRIVE     (_PIN_MODE_ALT4 | _PIN_OUTPUT_HIGHDRIVE)
+
+#define PIN_ALT5               _PIN_MODE_ALT5
+#define PIN_ALT5_INPUT         (_PIN_MODE_ALT5 | _PIN_INPUT)
+#define PIN_ALT5_PULLDOWN      (_PIN_MODE_ALT5 | _PIN_INPUT_PULLDOWN)
+#define PIN_ALT5_PULLUP        (_PIN_MODE_ALT5 | _PIN_INPUT_PULLUP)
+#define PIN_ALT5_OUTPUT        (_PIN_MODE_ALT5 | _PIN_OUTPUT)
+#define PIN_ALT5_FAST          (_PIN_MODE_ALT5 | _PIN_OUTPUT_FAST)
+#define PIN_ALT5_SLOW          (_PIN_MODE_ALT5 | _PIN_OUTPUT_SLOW)
+#define PIN_ALT5_OPENDRAIN     (_PIN_MODE_ALT5 | _PIN_OUTPUT_LOWDRIVE)
+#define PIN_ALT5_LOWDRIVE      (_PIN_MODE_ALT5 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT5_HIGHDRIVE     (_PIN_MODE_ALT5 | _PIN_OUTPUT_HIGHDRIVE)
+
+#define PIN_ALT6               _PIN_MODE_ALT6
+#define PIN_ALT6_INPUT         (_PIN_MODE_ALT6 | _PIN_INPUT)
+#define PIN_ALT6_PULLDOWN      (_PIN_MODE_ALT6 | _PIN_INPUT_PULLDOWN)
+#define PIN_ALT6_PULLUP        (_PIN_MODE_ALT6 | _PIN_INPUT_PULLUP)
+#define PIN_ALT6_OUTPUT        (_PIN_MODE_ALT6 | _PIN_OUTPUT)
+#define PIN_ALT6_FAST          (_PIN_MODE_ALT6 | _PIN_OUTPUT_FAST)
+#define PIN_ALT6_SLOW          (_PIN_MODE_ALT6 | _PIN_OUTPUT_SLOW)
+#define PIN_ALT6_OPENDRAIN     (_PIN_MODE_ALT6 | _PIN_OUTPUT_LOWDRIVE)
+#define PIN_ALT6_LOWDRIVE      (_PIN_MODE_ALT6 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT6_HIGHDRIVE     (_PIN_MODE_ALT6 | _PIN_OUTPUT_HIGHDRIVE)
+
+#define PIN_ALT7               _PIN_MODE_ALT7
+#define PIN_ALT7_INPUT         (_PIN_MODE_ALT7 | _PIN_INPUT)
+#define PIN_ALT7_PULLDOWN      (_PIN_MODE_ALT7 | _PIN_INPUT_PULLDOWN)
+#define PIN_ALT7_PULLUP        (_PIN_MODE_ALT7 | _PIN_INPUT_PULLUP)
+#define PIN_ALT7_OUTPUT        (_PIN_MODE_ALT7 | _PIN_OUTPUT)
+#define PIN_ALT7_FAST          (_PIN_MODE_ALT7 | _PIN_OUTPUT_FAST)
+#define PIN_ALT7_SLOW          (_PIN_MODE_ALT7 | _PIN_OUTPUT_SLOW)
+#define PIN_ALT7_OPENDRAIN     (_PIN_MODE_ALT7 | _PIN_OUTPUT_LOWDRIVE)
+#define PIN_ALT7_LOWDRIVE      (_PIN_MODE_ALT7 | _PIN_OUTPUT_OPENDRAIN)
+#define PIN_ALT7_HIGHDRIVE     (_PIN_MODE_ALT7 | _PIN_OUTPUT_HIGHDRIVE)
+
+/* The initial value for GPIO (Alternative 1 outputs):
  *
- * 1111 1100 0000 0000
- * 5432 1098 7654 3210
- * ---- ---- ---- ----
- * .... III. .... ....
+ * ---- ---v ---- ---- ---- ---- ---- ----
+ *
+ * Passive Filter and digital filter enable are valid in all digital pin
+ * muxing modes.
  */
 
-#define GPIO_INTERRUPT_SHIFT          (9)       /* Bits 9-11:  Interrupt controls */
-#define GPIO_INTERRUPT_MASK           (7 << GPIO_INTERRUPT_SHIFT)
-#  define GPIO_INTERRUPT_NONE         (0 << GPIO_INTERRUPT_SHIFT)
-#  define GPIO_INTERRUPT_RISING_EDGE  (1 << GPIO_INTERRUPT_SHIFT)
-#  define GPIO_INTERRUPT_FALLING_EDGE (2 << GPIO_INTERRUPT_SHIFT)
-#  define GPIO_INTERRUPT_BOTH_EDGES   (3 << GPIO_INTERRUPT_SHIFT)
-#  define GPIO_INTERRUPT_HIGH_LEVEL   (4 << GPIO_INTERRUPT_SHIFT)
-#  define GPIO_INTERRUPT_LOW_LEVEL    (5 << GPIO_INTERRUPT_SHIFT)
+#define GPIO_OUTPUT_ONE        (1 << 24)  /* Bit 24: 1:Initial output value=1 */
+#define GPIO_OUTPUT_ZER0       (0)        /* Bit 24: 0:Initial output value=0 */
 
-/* If the pin is a GPIO digital output, then this identifies the initial output value.
+/* Five bits are used to incode DMA/interrupt options:
  *
- * 1111 1100 0000 0000
- * 5432 1098 7654 3210
- * ---- ---- ---- ----
- * .... .... V... ....
+ * ---- ---- iiii i--- ---- ---- ---- ----
+ *
+ * The pin interrupt configuration is valid in all digital pin muxing modes
+ * (restricted to inputs).
  */
 
-#define GPIO_OUTPUT_SET               (1 << 7)                   /* Bit 7: If output, inital value of output */
-#define GPIO_OUTPUT_CLEAR             (0)
+#define _PIN_INT_SHIFT         (20)
+#define _PIN_INT_MASK          (31 << _PIN_INT_SHIFT)
 
-/* This identifies the GPIO port:
+#define _PIN_INTDMA_MASK       (3 << _PIN_INT_SHIFT)
+#define _PIN_INTDMA_NONE       (0 << _PIN_INT_SHIFT)
+#define _PIN_DMA               (1 << _PIN_INT_SHIFT)
+#define _PIN_INTERRUPT         (2 << _PIN_INT_SHIFT)
+
+#define PIN_DMA_RISING         (5  << _PIN_INT_SHIFT) /* 00101 DMA Request on rising edge */
+#define PIN_DMA_FALLING        (9  << _PIN_INT_SHIFT) /* 01001 DMA Request on falling edge */
+#define PIN_DMA_BOTH           (13 << _PIN_INT_SHIFT) /* 01101 DMA Request on either edge */
+#define PIN_INT_ZERO           (2  << _PIN_INT_SHIFT) /* 00010 Interrupt when logic zero */
+#define PIN_INT_RISING         (6  << _PIN_INT_SHIFT) /* 00110 Interrupt on rising edge */
+#define PIN_INT_FALLING        (10 << _PIN_INT_SHIFT) /* 01010 Interrupt on falling edge */
+#define PIN_INT_BOTH           (14 << _PIN_INT_SHIFT) /* 01110 Interrupt on either edge */
+#define PIN_INT_ONE            (18 << _PIN_INT_SHIFT) /* 10010 Interrupt when logic one */
+
+/* Two bits is used to enable the filter options:
  *
- * 1111 1100 0000 0000
- * 5432 1098 7654 3210
- * ---- ---- ---- ----
- * .... .... .PPP ....
+ * ---- ---- ---- -fd- ---- ---- ---- ----
+ *
+ * Passive Filter and digital filter enable are valid in all digital pin
+ * muxing modes.
  */
 
-#define GPIO_PORT_SHIFT               4                          /* Bit 4-6:  Port number */
-#define GPIO_PORT_MASK                (7 << GPIO_PORT_SHIFT)
-#  define GPIO_PORTA                  (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
-#  define GPIO_PORTB                  (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
-#  define GPIO_PORTC                  (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
-#  define GPIO_PORTD                  (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
-#  define GPIO_PORTE                  (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
-#
-
-/* This identifies the bit in the port:
+#define PIN_PASV_FILTER        (1 << 18)  /* Bit 18: Enable passive filter */
+#define PIN_DIG_FILTER         (1 << 17)  /* Bit 17: Enable digital filter */
+ 
+/* Three bits are used to define the port number:
  *
- * 1111 1100 0000 0000
- * 5432 1098 7654 3210
- * ---- ---- ---- ----
- * .... .... .... BBBB
+ * ---- ---- ---- ---- ---- -ppp ---- ----
  */
 
-#define GPIO_PIN_SHIFT                0                          /* Bits 0-3: GPIO number: 0-15 */
-#define GPIO_PIN_MASK                 (15 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN0                   (0 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN1                   (1 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN2                   (2 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN3                   (3 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN4                   (4 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN5                   (5 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN6                   (6 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN7                   (7 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN8                   (8 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN9                   (9 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN10                  (10 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN11                  (11 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN12                  (12 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN13                  (13 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN14                  (14 << GPIO_PIN_SHIFT)
-#  define GPIO_PIN15                  (15 << GPIO_PIN_SHIFT)
+#define _PIN_PORT_SHIFT        (8)  /* Bits 8-10: port number */
+#define _PIN_PORT_MASK         (7 << _PIN_PORT_SHIFT)
+
+#define PIN_PORTA              (KL_PORTA << _PIN_PORT_SHIFT)
+#define PIN_PORTB              (KL_PORTB << _PIN_PORT_SHIFT)
+#define PIN_PORTC              (KL_PORTC << _PIN_PORT_SHIFT)
+#define PIN_PORTD              (KL_PORTD << _PIN_PORT_SHIFT)
+#define PIN_PORTE              (KL_PORTE << _PIN_PORT_SHIFT)
+
+/* Five bits are used to define the pin number:
+ *
+ * ---- ---- ---- ---- ---- ---- ---b bbbb
+ */
+
+#define _PIN_SHIFT             (0)  /* Bits 0-4: port number */
+#define _PIN_MASK              (31 << _PIN_SHIFT)
+
+#define PIN(n)                 ((n) << _PIN_SHIFT)
+#define PIN0                   (0 << _PIN_SHIFT)
+#define PIN1                   (1 << _PIN_SHIFT)
+#define PIN2                   (2 << _PIN_SHIFT)
+#define PIN3                   (3 << _PIN_SHIFT)
+#define PIN4                   (4 << _PIN_SHIFT)
+#define PIN5                   (5 << _PIN_SHIFT)
+#define PIN6                   (6 << _PIN_SHIFT)
+#define PIN7                   (7 << _PIN_SHIFT)
+#define PIN8                   (8 << _PIN_SHIFT)
+#define PIN9                   (9 << _PIN_SHIFT)
+#define PIN10                  (10 << _PIN_SHIFT)
+#define PIN11                  (11 << _PIN_SHIFT)
+#define PIN12                  (12 << _PIN_SHIFT)
+#define PIN13                  (13 << _PIN_SHIFT)
+#define PIN14                  (14 << _PIN_SHIFT)
+#define PIN15                  (15 << _PIN_SHIFT)
+#define PIN16                  (16 << _PIN_SHIFT)
+#define PIN17                  (17 << _PIN_SHIFT)
+#define PIN18                  (18 << _PIN_SHIFT)
+#define PIN19                  (19 << _PIN_SHIFT)
+#define PIN20                  (20 << _PIN_SHIFT)
+#define PIN21                  (21 << _PIN_SHIFT)
+#define PIN22                  (22 << _PIN_SHIFT)
+#define PIN23                  (23 << _PIN_SHIFT)
+#define PIN24                  (24 << _PIN_SHIFT)
+#define PIN25                  (25 << _PIN_SHIFT)
+#define PIN26                  (26 << _PIN_SHIFT)
+#define PIN27                  (27 << _PIN_SHIFT)
+#define PIN28                  (28 << _PIN_SHIFT)
+#define PIN29                  (29 << _PIN_SHIFT)
+#define PIN30                  (30 << _PIN_SHIFT)
+#define PIN31                  (31 << _PIN_SHIFT)
 
 /****************************************************************************
  * Public Types
@@ -202,18 +318,12 @@ extern "C" {
  * Name: kl_configgpio
  *
  * Description:
- *   Configure a GPIO pin based on bit-encoded description of the pin.
- *   Once it is configured as Alternative (GPIO_ALT|GPIO_CNF_AFPP|...)
- *   function, it must be unconfigured with kl_unconfiggpio() with
- *   the same cfgset first before it can be set to non-alternative function.
- *
- * Returns:
- *   OK on success
- *   ERROR on invalid port, or when pin is locked as ALT function.
+ *   Configure a PIN based on bit-encoded description of the pin.  NOTE that
+ *   DMA/interrupts are disabled at the initial PIN configuratin.
  *
  ****************************************************************************/
 
-int kl_configgpio(gpio_cfgset_t cfgset);
+int kl_configgpio(uint32_t cfgset);
 
 /****************************************************************************
  * Name: kl_gpiowrite
@@ -223,7 +333,7 @@ int kl_configgpio(gpio_cfgset_t cfgset);
  *
  ****************************************************************************/
 
-void kl_gpiowrite(gpio_cfgset_t pinset, bool value);
+void kl_gpiowrite(uint32_t pinset, bool value);
 
 /****************************************************************************
  * Name: kl_gpioread
@@ -233,27 +343,7 @@ void kl_gpiowrite(gpio_cfgset_t pinset, bool value);
  *
  ****************************************************************************/
 
-bool kl_gpioread(gpio_cfgset_t pinset);
-
-/****************************************************************************
- * Function:  kl_dumpgpio
- *
- * Description:
- *   Dump all GPIO registers associated with the provided pin description
- *   along with a descriptive messasge.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-void kl_dumpgpio(gpio_cfgset_t pinset, const char *msg);
-#else
-#  define kl_dumpgpio(p,m)
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
+bool kl_gpioread(uint32_t pinset);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_KL_KINETIS_GPIO_H */

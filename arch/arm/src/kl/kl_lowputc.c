@@ -49,7 +49,8 @@
 
 #include "kl_config.h"
 #include "kl_lowputc.h"
-#include "kl_internal.h"
+#include "kl_gpio.h"
+
 #include "chip/kl_uart.h"
 #include "chip/kl_sim.h"
 #include "chip/kl_port.h"
