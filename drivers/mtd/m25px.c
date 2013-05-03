@@ -704,7 +704,7 @@ static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
             {
               /* Do a full sector erase */
 
-              m25p_sectorerase(priv, startblock / blkper, M25P_SE);
+              m25p_sectorerase(priv, startblock, M25P_SE);
               startblock += blkper;
               blocksleft -= blkper;
               continue;
