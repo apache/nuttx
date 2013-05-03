@@ -121,6 +121,12 @@ static ssize_t ram_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
                           FAR uint8_t *buf);
 static ssize_t ram_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
                            FAR const uint8_t *buf);
+static ssize_t ram_byteread(FAR struct mtd_dev_s *dev, off_t offset,
+                            size_t nbytes, FAR uint8_t *buf);
+#ifdef CONFIG_MTD_BYTE_WRITE
+static ssize_t ram_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
+                             size_t nbytes, FAR const uint8_t *buf);
+#endif
 static int ram_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -160,7 +166,7 @@ static void *ram_write(FAR void *dest, FAR const void *src, size_t len)
 #endif
 
       /* Report any attempt to change the value of bits that are not in the
-       *  erased state.
+       * erased state.
        */
 
 #ifdef CONFIG_DEBUG
@@ -223,30 +229,6 @@ static int ram_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks
   memset(&priv->start[offset], CONFIG_RAMMTD_ERASESTATE, nbytes);
   return OK;
 }
-
-/****************************************************************************
- * Name: ram_readbytes
- ****************************************************************************/
-
-#ifdef CONFIG_MTD_SMART
-static ssize_t ram_read_bytes(FAR struct mtd_dev_s *dev, off_t offset,
-        size_t nbytes, FAR uint8_t *buf)
-{
-  FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
-
-  DEBUGASSERT(dev && buf);
-
-  /* Don't let read read past end of buffer */
-
-  if (offset + nbytes > priv->nblocks * CONFIG_RAMMTD_ERASESIZE)
-   {
-     return 0;
-   }
-
-  ram_read(buf, &priv->start[offset], nbytes);
-  return nbytes;
-}
-#endif
 
 /****************************************************************************
  * Name: ram_bread
@@ -329,12 +311,34 @@ static ssize_t ram_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 }
 
 /****************************************************************************
+ * Name: ram_byteread
+ ****************************************************************************/
+
+static ssize_t ram_byteread(FAR struct mtd_dev_s *dev, off_t offset,
+                            size_t nbytes, FAR uint8_t *buf)
+{
+  FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
+
+  DEBUGASSERT(dev && buf);
+
+  /* Don't let read read past end of buffer */
+
+  if (offset + nbytes > priv->nblocks * CONFIG_RAMMTD_ERASESIZE)
+   {
+     return 0;
+   }
+
+  ram_read(buf, &priv->start[offset], nbytes);
+  return nbytes;
+}
+
+/****************************************************************************
  * Name: ram_bytewrite
  ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
 static ssize_t ram_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
-                          size_t nbytes, FAR const uint8_t *buf)
+                             size_t nbytes, FAR const uint8_t *buf)
 {
   FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
   off_t maxaddr;
@@ -462,17 +466,11 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
   priv->mtd.erase  = ram_erase;
   priv->mtd.bread  = ram_bread;
   priv->mtd.bwrite = ram_bwrite;
-  priv->mtd.ioctl  = ram_ioctl;
-  priv->mtd.erase  = ram_erase;
+  priv->mtd.read   = ram_byteread;
 #ifdef CONFIG_MTD_BYTE_WRITE
   priv->mtd.write  = ram_bytewrite;
 #endif
-
-#ifdef CONFIG_MTD_SMART
-  priv->mtd.read   = ram_read_bytes;
-#else
-  priv->mtd.read   = NULL;
-#endif
+  priv->mtd.ioctl  = ram_ioctl;
 
   priv->start      = start;
   priv->nblocks    = nblocks;

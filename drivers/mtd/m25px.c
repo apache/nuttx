@@ -204,7 +204,7 @@ struct m25p_dev_s
   uint8_t  pageshift;        /* 8 */
   uint16_t nsectors;         /* 128 or 64 */
   uint32_t npages;           /* 32,768 or 65,536 */
-#ifdef CONFIG_MTD_SMART
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
   uint8_t  subsectorshift;   /* 0, 12 or 13 (4K or 8K) */
 #endif
 };
@@ -322,7 +322,7 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
     {
       /* Okay.. is it a FLASH capacity that we understand? */
 
-#ifdef CONFIG_MTD_SMART
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
       priv->subsectorshift = 0;
 #endif
 
@@ -344,7 +344,7 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
            priv->npages         = M25P_EN25F80_NPAGES;
            priv->sectorshift    = M25P_EN25F80_SECTOR_SHIFT;
            priv->nsectors       = M25P_EN25F80_NSECTORS;
-#ifdef CONFIG_MTD_SMART
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
            priv->subsectorshift = M25P_EN25F80_SUBSECT_SHIFT;
 #endif
            return OK;
@@ -486,7 +486,7 @@ static void m25p_sectorerase(struct m25p_dev_s *priv, off_t sector, uint8_t type
 {
   off_t offset;
 
-#ifdef CONFIG_MTD_SMART
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
   if (priv->subsectorshift > 0)
     {
       offset = sector << priv->subsectorshift;
@@ -681,7 +681,7 @@ static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
   m25p_lock(priv->dev);
   while (blocksleft > 0)
     {
-#ifdef CONFIG_MTD_SMART
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
       size_t sectorboundry;
       size_t blkper;
 
@@ -928,7 +928,7 @@ static int m25p_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                */
 
               geo->blocksize = (1 << priv->pageshift);
-#ifdef CONFIG_MTD_SMART
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
               if (priv->subsectorshift > 0)
                 {
                   geo->erasesize    = (1 << priv->subsectorshift);

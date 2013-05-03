@@ -135,6 +135,14 @@ config M25P_MEMORY_TYPE
 		memory type for "F" series parts from EON is 0x31.  The 4K sector erase size will
 		automatically be enabled when filessytems that can use it are enabled, such as SMART.
 
+config M25P_SUBSECTOR_ERASE
+	bool "Sub-Sector Erase"
+	default n
+	---help---
+		Some devices (such as the EON EN25F80) support a smaller erase block
+		size (4K vs 64K).  This option enables support for sub-sector erase.
+		The SMART file system can take advantage of this option if it is enabled.
+
 endif
 
 config MTD_SMART
