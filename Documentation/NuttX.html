@@ -2552,6 +2552,19 @@ nsh>
     <p>
       <b>STMicro STM32F4-Discovery (STM32 F4 family)</b>.
       This port uses the STMicro STM32F4-Discovery board featuring the STM32F407VGT6 MCU.
+      The STM32F407VGT6 is a 168MHz Cortex-M4 operation with 1Mbit Flash memory and 128kbytes.
+      The board features:
+    </p>
+    <ul>
+      <li>On-board ST-LINK/V2 for programming and debugging,</li>
+      <li>LIS302DL, ST MEMS motion sensor, 3-axis digital output accelerometer,</li>
+      <li>MP45DT02, ST MEMS audio sensor, omni-directional digital microphone,</li>
+      <li>CS43L22, audio DAC with integrated class D speaker driver,</li>
+      <li>Eight LEDs and two push-buttons,</li>
+      <li>USB OTG FS with micro-AB connector, and</li>
+      <li>Easy access to most MCU pins.</li>
+    </ul>
+    <p>
       Refer to the <a href="http://www.st.com/internet/evalboard/product/252419.jsp">STMicro web site</a> for further information about this board.
     </p>
     <ul>
@@ -2559,6 +2572,38 @@ nsh>
         <b>STATUS:</b>
         The basic port for the STM32F4-Discovery was contributed by Mike Smith and was first released in NuttX-6.14.
         All drivers listed for the STM3240G-EVAL are usable on this plaform as well.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>MikroElektronika Mikromedia for STM32F4</b>.
+      This is another board supported by NuttX that uses the same STM32F407VGT6 MCU as does the STM32F4-Discovery board.
+      This board, however, has very different on-board peripherals than does the STM32F4-Discovery:
+    </p>
+    <ul>
+      <li>TFT display with touch panel,</li>
+      <li>VS1053 stereo audio codec with headphone jack,</li>
+      <li>SD card slot,</li>
+      <li>Serial FLASH memory,</li>
+      <li>USB OTG FS with micro-AB connector, and</li>
+      <li>Battery connect and batter charger circuit.</li>
+    </ul>
+    <p>
+      See the <a href="http://www.mikroe.com/mikromedia/stm32-m4/">Mikroelektronika website<a> for more information about this board.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        The basic port for the Mikromedia STM32 M4 was contributed by Ken Petit and was first released in NuttX-6.128.
+        All drivers for the STM32 F4 family may be used with this board as well.
       </p>
     </ul>
   </td>
