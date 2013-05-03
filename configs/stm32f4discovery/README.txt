@@ -2,7 +2,20 @@ README
 ======
 
 This README discusses issues unique to NuttX configurations for the
-STMicro STM32F4Discovery development board.
+STMicro STM32F4Discovery development board featuring the STM32F407VGT6
+MCU. The STM32F407VGT6 is a 168MHz Cortex-M4 operation with 1Mbit Flash
+memory and 128kbytes. The board features:
+
+  - On-board ST-LINK/V2 for programming and debugging,
+  - LIS302DL, ST MEMS motion sensor, 3-axis digital output accelerometer,
+  - MP45DT02, ST MEMS audio sensor, omni-directional digital microphone,
+  - CS43L22, audio DAC with integrated class D speaker driver,
+  - Eight LEDs and two push-buttons,
+  - USB OTG FS with micro-AB connector, and
+  - Easy access to most MCU pins.
+
+Refer to http://www.st.com/internet/evalboard/product/252419.jsp for
+further information about this board. 
 
 Contents
 ========

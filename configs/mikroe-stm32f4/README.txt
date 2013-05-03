@@ -2,7 +2,20 @@ README
 ======
 
 This README discusses issues unique to NuttX configurations for the
-MikroElektronika Mikromedia for STM32F4 development board.
+MikroElektronika Mikromedia for STM32F4 development board.  This is
+another board support by NuttX that uses the same STM32F407VGT6 MCU
+as does the STM32F4-Discovery board. This board, however, has very
+different on-board peripherals than does the STM32F4-Discovery:
+
+  - TFT display with touch panel,
+  - VS1053 stereo audio codec with headphone jack,
+  - SD card slot,
+  - Serial FLASH memory,
+  - USB OTG FS with micro-AB connector, and
+  - Battery connect and batter charger circuit.
+
+See the http://www.mikroe.com/mikromedia/stm32-m4/ for more information
+about this board.
 
 Contents
 ========
