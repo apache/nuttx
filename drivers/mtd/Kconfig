@@ -64,13 +64,6 @@ config RAMMTD_FLASHSIM
 		RAMMTD_FLASHSIM will add some extra logic to improve the level of
 		FLASH simulation.
 
-config RAMMTD_SMART
-	bool "SMART block driver support in the RAM MTD driver"
-	default n
-	---help---
-		Builds in additional ioctl and interface code to support the
-		SMART block driver / filesystem.
-
 endif
 
 config MTD_AT24XX
@@ -139,30 +132,14 @@ config M25P_MEMORY_TYPE
 	---help---
 		The memory type for M25 "P" series is 0x20, but the driver also supports "F" series
 		devices, such as the EON EN25F80 part which adds a 4K sector erase capability.  The
-		ID for "F" series parts from EON is 0x31.
-
-config M25P_SUBSECTOR_ERASE
-	bool "Sub-Sector Erase"
-	default n
-	---help---
-		Some devices (such as the EON EN25F80) support a smaller erase block
-		size (4K vs 64K).  This option enables support for sub-sector erase.
-		The SMART file system can take advantage of this option if it is enabled.
-
-config M25P_BYTEWRITE
-	bool "Enable ByteWrite ioctl support"
-	default n
-	---help---
-		The M25P series of devices allow writing to a page with less than a full-page
-		size of data.  In this case, only the written bytes are updated without affecting
-		the other bytes in the page.  The SMART FS requires this option for proper operation.
+		memory type for "F" series parts from EON is 0x31.  The 4K sector erase size will
+		automatically be enabled when filessytems that can use it are enabled, such as SMART.
 
 endif
 
 config MTD_SMART
 	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
 	default y
-	select M25P_BYTEWRITE
 	---help---
 		The MP25x series of Flash devices are typically very small and have a very large
 		erase block size.  This causes issues with the standard Flash Translation Layer

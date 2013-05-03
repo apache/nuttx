@@ -389,6 +389,7 @@ static int smartfs_close(FAR struct file *filep)
   /* Remove ourselves from the linked list */
 
   nextfile = fs->fs_head;
+  prevfile = nextfile;
   while ((nextfile != sf) && (nextfile != NULL))
     {
       /* Save the previous file pointer too */
@@ -577,7 +578,7 @@ static int smartfs_sync_internal(struct smartfs_mountpt_s *fs,
 
   if (sf->byteswritten > 0)
     {
-      fdbg("Syncing sector %d\n", sf->currsector);
+      fvdbg("Syncing sector %d\n", sf->currsector);
 
       /* Read the existing sector used bytes value */
 
@@ -880,6 +881,7 @@ static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
   switch (whence)
   {
     case SEEK_SET:
+    default:
       newpos = offset;
       break;
 
@@ -1034,7 +1036,7 @@ static int smartfs_sync(FAR struct file *filep)
   struct inode             *inode;
   struct smartfs_mountpt_s *fs;
   struct smartfs_ofile_s   *sf;
-  int                       ret = OK;
+  int                       ret;
 
   /* Sanity checks */
 
@@ -1067,7 +1069,6 @@ static int smartfs_sync(FAR struct file *filep)
 
 static int smartfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
-  FAR struct smart_mountpt_s *fs;
   struct smartfs_ofile_s   *sf;
 
   fvdbg("Dup %p->%p\n", oldp, newp);
@@ -1080,10 +1081,8 @@ static int smartfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Recover our private data from the struct file instance */
 
-  fs = (struct smart_mountpt_s *)oldp->f_inode->i_private;
   sf    = oldp->f_priv;
 
-  DEBUGASSERT(fs != NULL);
   DEBUGASSERT(sf != NULL);
 
   /* Just increment the reference count on the ofile */

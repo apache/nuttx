@@ -128,9 +128,14 @@
 #    define CONFIG_EXAMPLES_SMART_NEBLOCKS (22)
 #  endif
 
-#  undef CONFIG_EXAMPLES_SMART_BUFSIZE
-#  define CONFIG_EXAMPLES_SMART_BUFSIZE \
-  (CONFIG_RAMMTD_ERASESIZE * CONFIG_EXAMPLES_SMART_NEBLOCKS)
+#ifdef CONFIG_MIKROE_RAMMTD
+#  ifndef CONFIG_MIKROE_RAMMTD_MINOR
+#    define CONFIG_MIKROE_RAMMTD_MINOR    1
+#  endif
+#  ifndef CONFIG_MIKROE_RAMMTD_SIZE
+#    define CONFIG_MIKROE_RAMMTD_SIZE     32
+#  endif
+#endif
 
 /* Debug ********************************************************************/
 
@@ -151,11 +156,6 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* Pre-allocated simulated flash */
-
-#ifdef CONFIG_RAMMTD
-//static uint8_t g_simflash[CONFIG_EXAMPLES_SMART_BUFSIZE];
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -197,7 +197,7 @@ int nsh_archinitialize(void)
 
   /* Now bind the SPI interface to the M25P8 SPI FLASH driver */
 
-#ifdef CONFIG_MTD
+#if defined(CONFIG_MTD) && defined(CONFIG_MIKROE_FLASH)
   message("nsh_archinitialize: Bind SPI to the SPI flash driver\n");
   mtd = m25p_initialize(spi);
   if (!mtd)
@@ -208,28 +208,78 @@ int nsh_archinitialize(void)
     {
       message("nsh_archinitialize: Successfully bound SPI port 3 to the SPI FLASH driver\n");
 
-      /* Now initialize a SMART Flash block device and bind it to the MTD device */
+#ifdef CONFIG_MIKROE_FLASH_PART
+      {
+        int partno;
+        int partsize;
+        int partoffset;
+        const char *partstring = CONFIG_MIKROE_FLASH_PART_LIST;
+        const char *ptr;
+        FAR struct mtd_dev_s *mtd_part;
+        char  partname[4];
+
+        /* Now create a partition on the FLASH device */
+
+        partno = 0;
+        ptr = partstring;
+        partoffset = 0;
+        while (*ptr != '\0')
+          {
+            /* Get the partition size */
+
+            partsize = atoi(ptr);
+            mtd_part = mtd_partition(mtd, partoffset, (partsize>>2)*16);
+            partoffset += (partsize >> 2) * 16;
+
+            /* Now initialize a SMART Flash block device and bind it to the MTD device */
 
 #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-      smart_initialize(0, mtd);
+            sprintf(partname, "p%d", partno);
+            smart_initialize(CONFIG_MIKROE_FLASH_MINOR, mtd_part, partname);
 #endif
+
+            /* Update the pointer to point to the next size in the list */
+
+            while ((*ptr >= '0') && (*ptr <= '9'))
+              {
+                ptr++;
+              }
+
+            if (*ptr == ',')
+              {
+                ptr++;
+              }
+
+            /* Increment the part number */
+
+            partno++;
+          }
+      }
+#else /* CONFIG_MIKROE_FLASH_PART */
+
+        /* Configure the device with no partition support */
+
+        smart_initialize(CONFIG_MIKROE_FLASH_MINOR, mtd, NULL);
+
+#endif /* CONFIG_MIKROE_FLASH_PART */
     }
 
   /* Create a RAM MTD device if configured */
 
-#ifdef CONFIG_RAMMTD
+#if defined(CONFIG_RAMMTD) && defined(CONFIG_MIKROE_RAMMTD)
   {
-      uint8_t *start = (uint8_t *) kmalloc(CONFIG_EXAMPLES_SMART_BUFSIZE);
-      mtd = rammtd_initialize(start, CONFIG_EXAMPLES_SMART_BUFSIZE);
+      uint8_t *start = (uint8_t *) kmalloc(CONFIG_MIKROE_RAMMTD_SIZE * 1024);
+      mtd = rammtd_initialize(start, CONFIG_MIKROE_RAMMTD_SIZE * 1024);
       mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
 
       /* Now initialize a SMART Flash block device and bind it to the MTD device */
+
 #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-      smart_initialize(1, mtd);
+      smart_initialize(CONFIG_MIKROE_RAMMTD_MINOR, mtd, NULL);
 #endif
   }
 
-#endif /* CONFIG_RAMMTD */
+#endif /* CONFIG_RAMMTD && CONFIG_MIKROE_RAMMTD */
 
 #endif /* CONFIG_MTD */
 #endif /* CONFIG_STM32_SPI3 */

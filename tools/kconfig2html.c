@@ -2368,7 +2368,8 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
                 {
                   /* Set token to NULL to skip to the next line */
 
-                  error("Unhandled token: %s\n", token);
+                  error("File %s/Kconfig Unhandled token: %s\n",
+                        kconfigdir, token);
                   token = NULL;
                 }
                 break;

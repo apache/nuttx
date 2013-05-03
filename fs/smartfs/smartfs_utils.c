@@ -502,6 +502,8 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
 
           /* Read the directory */
 
+          offset = 0xFFFF;
+
 #if CONFIG_SMARTFS_ERASEDSTATE == 0xFF
           while (dirsector != 0xFFFF)
 #else
@@ -549,7 +551,8 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
 
                   /* Test if the name matches */
 
-                  if (strcmp(entry->name, fs->fs_workbuffer) == 0)
+                  if (strncmp(entry->name, fs->fs_workbuffer,
+                      fs->fs_llformat.namesize) == 0)
                     {
                       /* We found it!  If this is the last segment entry,
                        * then report the entry.  If it isn't the last
@@ -571,10 +574,11 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
                           direntry->dfirst = dirstack[depth];
                           if (direntry->name == NULL)
                             {
-                              direntry->name = (char *) kmalloc(fs->fs_llformat.namesize);
+                              direntry->name = (char *) kmalloc(fs->fs_llformat.namesize+1);
                             }
 
-                          strcpy(direntry->name, entry->name);
+                          memset(direntry->name, 0, fs->fs_llformat.namesize + 1);
+                          strncpy(direntry->name, entry->name, fs->fs_llformat.namesize);
                           direntry->datlen = 0;
 
                           /* Scan the file's sectors to calculate the length and perform
@@ -734,7 +738,7 @@ int smartfs_createentry(struct smartfs_mountpt_s *fs,
 
   /* Validate the name isn't too long */
 
-  if (strlen(filename) + 1 > fs->fs_llformat.namesize)
+  if (strlen(filename) > fs->fs_llformat.namesize)
     {
       return -ENAMETOOLONG;
     }
@@ -887,13 +891,13 @@ int smartfs_createentry(struct smartfs_mountpt_s *fs,
   entry->firstsector = nextsector;
   entry->utc = 0;
   memset(entry->name, 0, fs->fs_llformat.namesize);
-  strncpy(entry->name, filename, fs->fs_llformat.namesize-1);
+  strncpy(entry->name, filename, fs->fs_llformat.namesize);
 
   /* Now write the new entry to the parent directory sector */
 
   readwrite.logsector = psector;
   readwrite.offset = offset;
-  readwrite.count = sizeof(struct smartfs_entry_header_s) + fs->fs_llformat.namesize;
+  readwrite.count = entrysize;
   readwrite.buffer = (uint8_t *) &fs->fs_rwbuffer[offset];
   ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
   if (ret < 0)
@@ -911,11 +915,11 @@ int smartfs_createentry(struct smartfs_mountpt_s *fs,
   direntry->datlen = 0;
   if (direntry->name == NULL)
     {
-      direntry->name = (FAR char *) kmalloc(fs->fs_llformat.namesize);
+      direntry->name = (FAR char *) kmalloc(fs->fs_llformat.namesize+1);
     }
 
-  memset(direntry->name, 0, fs->fs_llformat.namesize);
-  strncpy(direntry->name, filename, fs->fs_llformat.namesize-1);
+  memset(direntry->name, 0, fs->fs_llformat.namesize+1);
+  strncpy(direntry->name, filename, fs->fs_llformat.namesize);
 
   ret = OK;
 

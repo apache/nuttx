@@ -193,15 +193,6 @@
                                            *      of device memory */
 #define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
                                            * OUT: None */
-#define MTDIOC_GETCAPS    _MTDIOC(0x0004) /* IN:  None
-                                           * OUT: Capabilities flags */
-#define MTDIOC_SECTERASE  _MTDIOC(0x0005) /* IN:  Sector number to erase
-                                           * OUT: None */
-#define MTDIOC_BYTEWRITE  _MTDIOC(0x0006) /* IN:  Pointer to bytewrite structure
-                                           * OUT: None */
-
-#define MTDIOC_CAPS_SECTERASE  0x01
-#define MTDIOC_CAPS_BYTEWRITE  0x02
 
 /* NuttX ARP driver ioctl definitions (see netinet/arp.h) *******************/
 

@@ -97,7 +97,7 @@
 
 #define SMART_FMT_VERSION           1
 
-#define SMART_FIRST_ALLOC_SECTOR    16      /* First logical sector number we will
+#define SMART_FIRST_ALLOC_SECTOR    12      /* First logical sector number we will
                                              * use for assignment of requested Alloc
                                              * sectors.  All enries below this are
                                              * reserved (some for root dir entries,
@@ -134,6 +134,7 @@ struct smart_struct_s
   FAR uint8_t          *releasecount;     /* Count of released sectors per erase block */
   FAR uint8_t          *freecount;        /* Count of free sectors per erase block */
   FAR char             *rwbuffer;         /* Our sector read/write buffer */
+  const FAR char       *partname;         /* Optional partition name */
   uint8_t               formatversion;    /* Format version on the device */
   uint8_t               formatstatus;     /* Indicates the status of the device format */
   uint8_t               namesize;         /* Length of filenames on this device */
@@ -471,49 +472,21 @@ static int smart_setsectorsize(struct smart_struct_s *dev, uint16_t size)
 {
   uint32_t  erasesize;
   uint32_t  totalsectors;
-  int       ret;
 
-  /* Check if the device supports sub-sector erase regions. If it does, then
-   * use the sub-sector erase size instead of the larger erase size to
-   * provide finer granularity.
-   */
+  /* Validate the size isn't zero so we don't divide by zero below */
 
-#ifdef CONFIG_MTD_SUBSECTOR_ERASE
-  ret = MTD_IOCTL(dev->mtd, MTDIOC_GETCAPS, 0);
-  if (ret >= 0)
+  if (size == 0)
     {
-      /* The block device supports the GETCAPS ioctl. Now check if sub-sector
-       * erase is supported.
-       */
-
-      if (!(ret & MTDIOC_CAPS_SECTERASE))
-        {
-          /* Ensure the subsector size is zero */
-          dev->geo.subsectorsize = 0;
-          dev->geo.nsubsectors = 0;
-        }
+      size = CONFIG_MTD_SMART_SECTOR_SIZE;
     }
 
-  /* Now calculate the variables */
-
-  if (dev->geo.subsectorsize != 0)
-    {
-      /* Use the sub-sector erase size */
-
-      erasesize = dev->geo.subsectorsize;
-      dev->neraseblocks = dev->geo.nsubsectors;
-    }
-  else
-#endif /* CONFIG_MTD_SUBSECTOR_ERASE */
-    {
-      erasesize = dev->geo.erasesize;
-      dev->neraseblocks = dev->geo.neraseblocks;
-    }
+  erasesize = dev->geo.erasesize;
+  dev->neraseblocks = dev->geo.neraseblocks;
 
   /* Most FLASH devices have erase size of 64K, but geo.erasesize is only
    * 16 bits, so it will be zero
    */
- 
+
   if (erasesize == 0)
     {
       erasesize = 65536;
@@ -569,6 +542,74 @@ static int smart_setsectorsize(struct smart_struct_s *dev, uint16_t size)
 }
 
 /****************************************************************************
+ * Name: smart_bytewrite
+ *
+ * Description: Writes a non-page size count of bytes to the underlying
+ *              MTD device.  If the MTD driver supports a direct impl of
+ *              write, then it uses it, otherwise it does a read-modify-write
+ *              and depends on the architecture of the flash to only program
+ *              bits that acutally changed.
+ *
+ ****************************************************************************/
+
+static ssize_t smart_bytewrite(struct smart_struct_s *dev, size_t offset,
+        int nbytes, const uint8_t *buffer)
+{
+  ssize_t       ret;
+
+#ifdef CONFIG_MTD_BYTE_WRITE
+  /* Check if the underlying MTD device supports write */
+
+  if (dev->mtd->write != NULL)
+    {
+      /* Use the MTD's write method to write individual bytes */
+
+      ret = dev->mtd->write(dev->mtd, offset, nbytes, buffer);
+    }
+  else
+#endif
+    {
+      /* Perform block-based read-modify-write */
+
+      uint16_t  startblock;
+      uint16_t  nblocks;
+
+      /* First calculate the start block and number of blocks affected */
+
+      startblock = offset / dev->geo.blocksize;
+      nblocks = (nbytes + dev->geo.blocksize-1) / dev->geo.blocksize;
+      DEBUGASSERT(nblocks <= dev->mtdBlksPerSector);
+
+      /* Do a block read */
+
+      ret = MTD_BREAD(dev->mtd, startblock, nblocks, (uint8_t *) dev->rwbuffer);
+      if (ret < 0)
+        {
+          fdbg("Error %d reading from device\n", -ret);
+          goto errout;
+        }
+
+      /* Modify the data */
+
+      memcpy(&dev->rwbuffer[offset - startblock * dev->geo.blocksize], buffer, nbytes);
+
+      /* Write the data back to the device */
+
+      ret = MTD_BWRITE(dev->mtd, startblock, nblocks, (uint8_t *) dev->rwbuffer);
+      if (ret < 0)
+        {
+          fdbg("Error %d writing to device\n", -ret);
+          goto errout;
+        }
+    }
+
+  ret = nbytes;
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
  * Name: smart_scan
  *
  * Description: Performs a scan of the MTD device searching for format
@@ -581,17 +622,17 @@ static int smart_scan(struct smart_struct_s *dev)
 {
   int       sector;
   int       ret;
-  int       x;
+  int       offset;
   uint16_t  totalsectors;
   uint16_t  sectorsize;
   uint16_t  logicalsector;
   uint16_t  seq1;
   uint16_t  seq2;
-  char      devname[18];
   size_t    readaddress;
   struct    smart_sect_header_s header;
-  struct    mtd_byte_write_s bytewrite;
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
+  int       x;
+  char      devname[22];
   struct    smart_multiroot_device_s *rootdirdev;
 #endif
 
@@ -675,7 +716,7 @@ static int smart_scan(struct smart_struct_s *dev)
         }
 #endif
 
-      /* Test if this sector has been commited */
+      /* Test if this sector has been committed */
 
       if ((header.status & SMART_STATUS_COMMITTED) ==
               (CONFIG_SMARTFS_ERASEDSTATE & SMART_STATUS_COMMITTED))
@@ -763,7 +804,16 @@ static int smart_scan(struct smart_struct_s *dev)
 
           for (x = 1; x < dev->rootdirentries; x++)
             {
-              snprintf(devname, 18, "/dev/smart%dd%d", dev->minor, x + 1);
+              if (dev->partname != NULL)
+                {
+                  snprintf(dev->rwbuffer, sizeof(devname), "/dev/smart%d%s%d",
+                          dev->minor, dev->partname, x+1);
+                }
+              else
+                {
+                  snprintf(devname, sizeof(devname), "/dev/smart%dd%d", dev->minor,
+                           x + 1);
+                }
 
               /* Inode private data is a reference to a struct containing
                * the SMART device structure and the root directory number.
@@ -792,9 +842,9 @@ static int smart_scan(struct smart_struct_s *dev)
 
       /* Test for duplicate logical sectors on the device */
 
-      if (dev->sMap[logicalsector] != -1)
+      if (dev->sMap[logicalsector] != 0xFFFF)
         {
-          /* TODO: Uh-oh, we found more than 1 physical sector claiming to be
+          /* Uh-oh, we found more than 1 physical sector claiming to be
            * the * same logical sector.  Use the sequence number information
            * to resolve who wins.
            */
@@ -853,10 +903,13 @@ static int smart_scan(struct smart_struct_s *dev)
 #else
           header.status |= SMART_STATUS_RELEASED;
 #endif
-          bytewrite.offset = readaddress + offsetof(struct smart_sect_header_s, status);
-          bytewrite.count = 1;
-          bytewrite.buffer = &header.status;
-          ret = MTD_IOCTL(dev->mtd, MTDIOC_BYTEWRITE, (unsigned long) &bytewrite);
+          offset = readaddress + offsetof(struct smart_sect_header_s, status);
+          ret = smart_bytewrite(dev, offset, 1, &header.status);
+          if (ret < 0)
+            {
+              fdbg("Error %d releasing duplicate sector\n", -ret);
+              goto err_out;
+            }
         }
 
       /* Update the logical to physical sector map */
@@ -886,9 +939,11 @@ err_out:
 
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
 static inline int smart_getformat(struct smart_struct_s *dev,
-        struct smart_format_s *fmt, uint8_t rootdirnum)
+                                  struct smart_format_s *fmt,
+                                  uint8_t rootdirnum)
 #else
-static inline int smart_getformat(struct smart_struct_s *dev, struct smart_format_s *fmt)
+static inline int smart_getformat(struct smart_struct_s *dev,
+                                  struct smart_format_s *fmt)
 #endif
 {
   int ret;
@@ -913,8 +968,6 @@ static inline int smart_getformat(struct smart_struct_s *dev, struct smart_forma
           goto err_out;
         }
     }
-
-  /* TODO: Determine if the underlying MTD device supports bytewrite */
 
   /* Now fill in the structure */
 
@@ -978,7 +1031,7 @@ static inline int smart_llformat(struct smart_struct_s *dev, unsigned long arg)
   /* Erase the MTD device */
 
   ret = MTD_IOCTL(dev->mtd, MTDIOC_BULKERASE, 0);
-  if (ret != OK)
+  if (ret < 0)
     {
       return ret;
     }
@@ -1180,8 +1233,9 @@ static int smart_garbagecollect(struct smart_struct_s *dev)
   bool      collect = TRUE;
   int       x;
   int       ret;
+  size_t    offset;
   struct    smart_sect_header_s *header;
-  struct    mtd_byte_write_s bytewrite;
+  uint8_t   newstatus;
 
   while (collect)
     {
@@ -1196,8 +1250,6 @@ static int smart_garbagecollect(struct smart_struct_s *dev)
         {
           releasedsectors += dev->releasecount[x];
           if (dev->releasecount[x] > releasemax)
-//          if (dev->releasecount[x] > releasemax &&
-//              dev->freecount[x] < (dev->sectorsPerBlk >> 1))
             {
               releasemax = dev->releasecount[x];
               collectblock = x;
@@ -1205,7 +1257,8 @@ static int smart_garbagecollect(struct smart_struct_s *dev)
         }
 
       /* Test if the released sectors count is greater than the
-       * free sectors.  If it is, then we will do garbage collection */
+       * free sectors.  If it is, then we will do garbage collection.
+       */
 
       if (releasedsectors > dev->freesectors)
         collect = TRUE;
@@ -1238,7 +1291,8 @@ static int smart_garbagecollect(struct smart_struct_s *dev)
 
           /* Perform collection on block with the most released sectors.
            * First mark the block as having no free sectors so we don't
-           * try to move sectors into the block we are trying to erase. */
+           * try to move sectors into the block we are trying to erase.
+           */
 
           dev->freecount[collectblock] = 0;
 
@@ -1267,7 +1321,8 @@ static int smart_garbagecollect(struct smart_struct_s *dev)
                    (CONFIG_SMARTFS_ERASEDSTATE & SMART_STATUS_RELEASED)))
                 {
                   /* This sector doesn't have live data (free or released).
-                   * just continue to the next sector and don't move it. */
+                   * just continue to the next sector and don't move it.
+                   */
 
                   continue;
                 }
@@ -1304,27 +1359,35 @@ static int smart_garbagecollect(struct smart_struct_s *dev)
 
               /* Commit the sector */
 
-              bytewrite.offset = newsector * dev->mtdBlksPerSector * dev->geo.blocksize +
+              offset = newsector * dev->mtdBlksPerSector * dev->geo.blocksize +
                   offsetof(struct smart_sect_header_s, status);
 #if CONFIG_SMARTFS_ERASEDSTATE == 0xFF
-              header->status &= ~SMART_STATUS_COMMITTED;
+              newstatus = header->status & ~SMART_STATUS_COMMITTED;
 #else
-              header->status |= SMART_STATUS_COMMITTED;
+              newstatus = header->status | SMART_STATUS_COMMITTED;
 #endif
-              bytewrite.count = 1;
-              bytewrite.buffer = &header->status;
-              ret = MTD_IOCTL(dev->mtd, MTDIOC_BYTEWRITE, (unsigned long) &bytewrite);
+              ret = smart_bytewrite(dev, offset, 1, &newstatus);
+              if (ret < 0)
+                {
+                  fdbg("Error %d committing new sector %d\n" -ret, newsector);
+                  goto errout;
+                }
 
               /* Release the old physical sector */
 
 #if CONFIG_SMARTFS_ERASEDSTATE == 0xFF
-              header->status &= ~SMART_STATUS_RELEASED;
+              newstatus = header->status & ~SMART_STATUS_RELEASED;
 #else
-              header->status |= SMART_STATUS_RELEASED;
+              newstatus = header->status | SMART_STATUS_RELEASED;
 #endif
-              bytewrite.offset = x * dev->mtdBlksPerSector * dev->geo.blocksize +
+              offset = x * dev->mtdBlksPerSector * dev->geo.blocksize +
                   offsetof(struct smart_sect_header_s, status);
-              ret = MTD_IOCTL(dev->mtd, MTDIOC_BYTEWRITE, (unsigned long) &bytewrite);
+              ret = smart_bytewrite(dev, offset, 1, &newstatus);
+              if (ret < 0)
+                {
+                  fdbg("Error %d releasing old sector %d\n" -ret, x);
+                  goto errout;
+                }
 
               /* Update the variables */
 
@@ -1334,17 +1397,7 @@ static int smart_garbagecollect(struct smart_struct_s *dev)
 
           /* Now erase the erase block */
 
-#ifdef CONFIG_MTD_SUBSECTOR_ERASE
-          if (dev->geo.subsectorsize != 0)
-            {
-              /* Perform a sub-sector erase */
-              MTD_IOCTL(dev->mtd, MTDIOC_SECTERASE, collectblock);
-            }
-          else
-#endif
-            {
-              MTD_ERASE(dev->mtd, collectblock, 1);
-            }
+          MTD_ERASE(dev->mtd, collectblock, 1);
 
           dev->freesectors += dev->releasecount[collectblock];
           dev->freecount[collectblock] = dev->sectorsPerBlk;
@@ -1357,18 +1410,19 @@ static int smart_garbagecollect(struct smart_struct_s *dev)
               /* Set the sector size in the 1st header */
 
               uint8_t sectsize = dev->sectorsize >> 7;
-              header = (struct smart_sect_header_s *) dev->rwbuffer;
 #if ( CONFIG_SMARTFS_ERASEDSTATE == 0xFF )
-              header->status = (uint8_t) ~SMART_STATUS_SIZEBITS | sectsize;
+              newstatus = (uint8_t) ~SMART_STATUS_SIZEBITS | sectsize;
 #else
-              header->status = (uint8_t) sectsize;
+              newstatus = (uint8_t) sectsize;
 #endif
               /* Write the sector size to the device */
 
-              bytewrite.offset = offsetof(struct smart_sect_header_s, status);
-              bytewrite.count = 1;
-              bytewrite.buffer = &header->status;
-              MTD_IOCTL(dev->mtd, MTDIOC_BYTEWRITE, (unsigned long) &bytewrite);
+              offset = offsetof(struct smart_sect_header_s, status);
+              ret = smart_bytewrite(dev, offset, 1, &newstatus);
+              if (ret < 0)
+                {
+                  fdbg("Error %d setting sector 0 size\n", -ret);
+                }
             }
 
           /* Update the block aging information in the format signature sector */
@@ -1402,15 +1456,15 @@ errout:
 #ifdef CONFIG_FS_WRITABLE
 static inline int smart_writesector(struct smart_struct_s *dev, unsigned long arg)
 {
-  int ret;
-  uint16_t x;
-  bool needsrelocate = FALSE;
-  uint16_t mtdblock;
-  uint16_t physsector;
-  struct smart_read_write_s *req;
-  struct smart_sect_header_s *header;
-  struct mtd_byte_write_s bytewrite;
-  uint8_t byte;
+  int       ret;
+  uint16_t  x;
+  bool      needsrelocate = FALSE;
+  uint16_t  mtdblock;
+  uint16_t  physsector;
+  struct    smart_read_write_s *req;
+  struct    smart_sect_header_s *header;
+  size_t    offset;
+  uint8_t   byte;
 
   fvdbg("Entry\n");
   req = (struct smart_read_write_s *) arg;
@@ -1515,16 +1569,14 @@ static inline int smart_writesector(struct smart_struct_s *dev, unsigned long ar
       /* Commit the new physical sector */
 
 #if CONFIG_SMARTFS_ERASEDSTATE == 0xFF
-      header->status &= ~SMART_STATUS_COMMITTED;
+      byte = header->status & ~SMART_STATUS_COMMITTED;
 #else
-      header->status |= SMART_STATUS_COMMITTED;
+      byte = header->status | SMART_STATUS_COMMITTED;
 #endif
-      bytewrite.offset = physsector * dev->mtdBlksPerSector *
-          dev->geo.blocksize + offsetof(struct smart_sect_header_s, status);
-      bytewrite.count = 1;
-      bytewrite.buffer = (uint8_t *) &header->status;
-      ret = MTD_IOCTL(dev->mtd, MTDIOC_BYTEWRITE, (unsigned long) &bytewrite);
-      if (ret != OK)
+      offset = physsector * dev->mtdBlksPerSector * dev->geo.blocksize +
+          offsetof(struct smart_sect_header_s, status);
+      ret = smart_bytewrite(dev, offset, 1, &byte);
+      if (ret != 1)
         {
           fvdbg("Error committing physical sector %d\n", physsector);
           ret = -EIO;
@@ -1534,13 +1586,13 @@ static inline int smart_writesector(struct smart_struct_s *dev, unsigned long ar
       /* Release the old physical sector */
 
 #if CONFIG_SMARTFS_ERASEDSTATE == 0xFF
-      header->status &= ~SMART_STATUS_RELEASED;
+      byte = header->status & ~SMART_STATUS_RELEASED;
 #else
-      header->status |= SMART_STATUS_RELEASED;
+      byte = header->status | SMART_STATUS_RELEASED;
 #endif
-      bytewrite.offset = mtdblock * dev->geo.blocksize +
+      offset = mtdblock * dev->geo.blocksize +
           offsetof(struct smart_sect_header_s, status);
-      ret = MTD_IOCTL(dev->mtd, MTDIOC_BYTEWRITE, (unsigned long) &bytewrite);
+      ret = smart_bytewrite(dev, offset, 1, &byte);
 
       /* Update releasecount for released sector and freecount for the
        * newly allocated physical sector. */
@@ -1564,11 +1616,9 @@ static inline int smart_writesector(struct smart_struct_s *dev, unsigned long ar
       /* Not relocated.  Just write the portion of the sector that needs
        * to be written. */
 
-      bytewrite.offset = mtdblock * dev->geo.blocksize +
+      offset = mtdblock * dev->geo.blocksize +
           sizeof(struct smart_sect_header_s) + req->offset;
-      bytewrite.count = req->count;
-      bytewrite.buffer = req->buffer;
-      ret = MTD_IOCTL(dev->mtd, MTDIOC_BYTEWRITE, (unsigned long) &bytewrite);
+      ret = smart_bytewrite(dev, offset, req->count, req->buffer);
     }
 
   ret = OK;
@@ -1743,9 +1793,8 @@ static inline int smart_allocsector(struct smart_struct_s *dev, unsigned long re
        * rescan and try again to "self heal" in case of a
        * bug in our code? */
 
-      fdbg("Couldn't find free sector when I expected too\n");
-
-      /* Unlock the mutex if we add one */
+      fdbg("No free logical sector numbers!  Free sectors = %d\n",
+              dev->freesectors);
 
       return -EIO;
     }
@@ -1827,7 +1876,7 @@ static inline int smart_freesector(struct smart_struct_s *dev, unsigned long
   uint16_t  physsector;
   uint16_t  block;
   struct    smart_sect_header_s  header;
-  struct    mtd_byte_write_s bytewrite;
+  size_t    offset;
 
   /* Check if the logical sector is within bounds */
 
@@ -1875,11 +1924,9 @@ static inline int smart_freesector(struct smart_struct_s *dev, unsigned long
 
   /* Write the status back to the device */
 
-  bytewrite.offset = readaddr + offsetof(struct smart_sect_header_s, status);
-  bytewrite.count = 1;
-  bytewrite.buffer = &header.status;
-  ret = MTD_IOCTL(dev->mtd, MTDIOC_BYTEWRITE, (unsigned long) &bytewrite);
-  if (ret != OK)
+  offset = readaddr + offsetof(struct smart_sect_header_s, status);
+  ret = smart_bytewrite(dev, offset, 1, &header.status);
+  if (ret != 1)
     {
       fdbg("Error updating physicl sector %d status\n", physsector);
       goto errout;
@@ -1900,15 +1947,7 @@ static inline int smart_freesector(struct smart_struct_s *dev, unsigned long
     {
       /* Erase the block */
 
-#ifdef CONFIG_MTD_SUBSECTOR_ERASE
-      if (dev->geo.subsectorsize != 0)
-        {
-          /* Perform a sub-sector erase */
-          MTD_IOCTL(dev->mtd, MTDIOC_SECTERASE, block);
-        }
-      else
-#endif
-        MTD_ERASE(dev->mtd, block, 1);
+      MTD_ERASE(dev->mtd, block, 1);
 
       dev->freesectors += dev->releasecount[block];
       dev->releasecount[block] = 0;
@@ -2050,7 +2089,7 @@ ok_out:
  *
  ****************************************************************************/
 
-int smart_initialize(int minor, FAR struct mtd_dev_s *mtd)
+int smart_initialize(int minor, FAR struct mtd_dev_s *mtd, const char *partname)
 {
   struct smart_struct_s *dev;
   int ret = -ENOMEM;
@@ -2084,10 +2123,6 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd)
 
       /* Set these to zero in case the device doesn't support them */
 
-#ifdef CONFIG_MTD_SUBSECTOR_ERASE
-      dev->geo.subsectorsize= 0;
-      dev->geo.nsubsectors  = 0;
-#endif
       ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&dev->geo));
       if (ret < 0)
         {
@@ -2123,6 +2158,7 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd)
 
       dev->formatstatus = SMART_FMT_STAT_UNKNOWN;
       dev->namesize = CONFIG_SMARTFS_MAXNAMLEN;
+      dev->partname = partname;
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
       dev->minor = minor;
 #endif
@@ -2130,7 +2166,10 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd)
       /* Create a MTD block device name */
 
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
-      snprintf(dev->rwbuffer, 18, "/dev/smart%dd1", minor);
+      if (partname != NULL)
+        snprintf(dev->rwbuffer, 18, "/dev/smart%d%sd1", minor, partname);
+      else
+        snprintf(dev->rwbuffer, 18, "/dev/smart%dd1", minor);
 
       /* Inode private data is a reference to a struct containing
        * the SMART device structure and the root directory number.
@@ -2154,7 +2193,10 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd)
       ret = register_blockdriver(dev->rwbuffer, &g_bops, 0, rootdirdev);
 
 #else
-      snprintf(dev->rwbuffer, 18, "/dev/smart%d", minor);
+      if (partname != NULL)
+        snprintf(dev->rwbuffer, 18, "/dev/smart%d%s", minor, partname);
+      else
+        snprintf(dev->rwbuffer, 18, "/dev/smart%d", minor);
 
       /* Inode private data is a reference to the SMART device structure */
 
@@ -2167,6 +2209,7 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd)
           kfree(dev->sMap);
           kfree(dev->rwbuffer);
           kfree(dev);
+          goto errout;
         }
 
       /* Do a scan of the device */

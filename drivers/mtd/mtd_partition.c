@@ -137,7 +137,7 @@ static bool part_bytecheck(FAR struct mtd_partition_s *priv, off_t byoff)
 
   erasesize = priv->blocksize * priv->blkpererase;
   readend   = (byoff + erasesize - 1) / erasesize;
-  return readend <  priv->neraseblocks;
+  return readend <= priv->neraseblocks;
 }
 
 /****************************************************************************
@@ -410,6 +410,12 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *   sector count (where the size of a sector is provided the by parent MTD
  *   driver).
  *
+ *   NOTE: Since there may be a number of MTD partition drivers operating on
+ *   the same, underlying FLASH driver, that FLASH driver must be capable
+ *   of enforcing mutually exclusive access to the FLASH device.  Without
+ *   partitions, that mutual exclusion would be provided by the file system
+ *   above the FLASH driver.
+ *
  ****************************************************************************/
 
 FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
@@ -483,6 +489,9 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
   part->child.bwrite = part_bwrite;
   part->child.read   = mtd->read ? part_read : NULL;
   part->child.ioctl  = part_ioctl;
+#ifdef CONFIG_MTD_BYTE_WRITE
+  part->child.write  = mtd->write ? part_write : NULL;
+#endif
 
   part->parent       = mtd;
   part->firstblock   = erasestart * blkpererase;

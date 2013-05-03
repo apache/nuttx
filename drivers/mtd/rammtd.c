@@ -228,7 +228,7 @@ static int ram_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks
  * Name: ram_readbytes
  ****************************************************************************/
 
-#ifdef CONFIG_RAMMTD_SMART
+#ifdef CONFIG_MTD_SMART
 static ssize_t ram_read_bytes(FAR struct mtd_dev_s *dev, off_t offset,
         size_t nbytes, FAR uint8_t *buf)
 {
@@ -329,6 +329,34 @@ static ssize_t ram_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 }
 
 /****************************************************************************
+ * Name: ram_bytewrite
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_BYTE_WRITE
+static ssize_t ram_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
+                          size_t nbytes, FAR const uint8_t *buf)
+{
+  FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
+  off_t maxaddr;
+
+  DEBUGASSERT(dev && buf);
+
+  /* Don't let the write exceed the size of the ram buffer */
+
+  maxaddr = priv->nblocks * CONFIG_RAMMTD_ERASESIZE;
+  if (offset + nbytes > maxaddr)
+    {
+      return 0;
+    }
+
+  /* Then write the data to RAM */
+
+  ram_write(&priv->start[offset], buf, nbytes);
+  return nbytes;
+}
+#endif
+
+/****************************************************************************
  * Name: ram_ioctl
  ****************************************************************************/
 
@@ -379,24 +407,6 @@ static int ram_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             ret = OK;
         }
         break;
-
-#ifdef CONFIG_RAMMTD_SMART
-      case MTDIOC_GETCAPS:
-        {
-          ret = MTDIOC_CAPS_BYTEWRITE;
-          break;
-        }
-
-      case MTDIOC_BYTEWRITE:
-        {
-          struct mtd_byte_write_s *bytewrite = (struct mtd_byte_write_s *) arg;
-
-          ram_write(&priv->start[bytewrite->offset], bytewrite->buffer,
-                  bytewrite->count);
-          ret = OK;
-          break;
-        }
-#endif
 
       default:
         ret = -ENOTTY; /* Bad command */
@@ -454,9 +464,14 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
   priv->mtd.bwrite = ram_bwrite;
   priv->mtd.ioctl  = ram_ioctl;
   priv->mtd.erase  = ram_erase;
+#ifdef CONFIG_MTD_BYTE_WRITE
+  priv->mtd.write  = ram_bytewrite;
+#endif
 
-#ifdef CONFIG_RAMMTD_SMART
+#ifdef CONFIG_MTD_SMART
   priv->mtd.read   = ram_read_bytes;
+#else
+  priv->mtd.read   = NULL;
 #endif
 
   priv->start      = start;

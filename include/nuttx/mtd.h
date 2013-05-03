@@ -83,10 +83,6 @@ struct mtd_geometry_s
   uint16_t erasesize;     /* Size of one erase blocks -- must be a multiple
                            * of blocksize. */
   size_t neraseblocks;    /* Number of erase blocks */
-#ifdef CONFIG_MTD_SUBSECTOR_ERASE
-  uint16_t subsectorsize; /* Size of the sub-sector erase block */
-  uint16_t nsubsectors;   /* Number of sub-sector erase blocks */
-#endif
 };
 
 /* The following defines the information for writing bytes to a sector
@@ -179,8 +175,8 @@ extern "C"
  *   NOTE: Since there may be a number of MTD partition drivers operating on
  *   the same, underlying FLASH driver, that FLASH driver must be capable
  *   of enforcing mutually exclusive access to the FLASH device.  Without
- *   paritions, that mutual exclusing would be provided by the file system
- *   abover the FLASH driver.
+ *   partitions, that mutual exclusion would be provided by the file system
+ *   above the FLASH driver.
  *
  ****************************************************************************/
 
@@ -213,10 +209,13 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
  *   minor - The minor device number.  The MTD block device will be
  *      registered as as /dev/mtdsmartN where N is the minor number.
  *   mtd - The MTD device that supports the FLASH interface.
+ *   partname - Optional partition name to append to dev entry, NULL if
+ *              not supplied.
  *
  ****************************************************************************/
 
-int smart_initialize(int minor, FAR struct mtd_dev_s *mtd);
+int smart_initialize(int minor, FAR struct mtd_dev_s *mtd,
+                     FAR const char *partname);
 
 /****************************************************************************
  * Name: flash_eraseall
