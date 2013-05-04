@@ -904,6 +904,9 @@ endif
 if ARCH_BOARD_MICROPENDOUS3
 source "configs/micropendous3/Kconfig"
 endif
+if ARCH_BOARD_MIKROE_STM32F4
+source "configs/mikroe-stm32f4/Kconfig"
+endif
 if ARCH_BOARD_MIRTOO
 source "configs/mirtoo/Kconfig"
 endif
@@ -978,9 +981,6 @@ source "configs/stm32f100rc_generic/Kconfig"
 endif
 if ARCH_BOARD_STM32F4_DISCOVERY
 source "configs/stm32f4discovery/Kconfig"
-endif
-if ARCH_BOARD_MIKROE_STM32F4
-source "configs/mikroe-stm32f4/Kconfig"
 endif
 if ARCH_BOARD_SUREPIC32MX
 source "configs/sure-pic32mx/Kconfig"
