@@ -47,7 +47,9 @@
 #include <stdint.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+
 #include <arch/calypso/memory.h>
+#include <arch/calypso/clock.h>
 
 #include "arm.h"
 #include "up_arch.h"
@@ -56,21 +58,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BASE_ADDR_IRQ	0xfffffa00
-#define BASE_ADDR_IBOOT_EXC	0x0080001C
+#define BASE_ADDR_IRQ       0xfffffa00
+#define BASE_ADDR_IBOOT_EXC 0x0080001C
 
-enum irq_reg {
-	IT_REG1		= 0x00,
-	IT_REG2		= 0x02,
-	MASK_IT_REG1	= 0x08,
-	MASK_IT_REG2	= 0x0a,
-	IRQ_NUM		= 0x10,
-	FIQ_NUM		= 0x12,
-	IRQ_CTRL	= 0x14,
+enum irq_reg
+{
+  IT_REG1      = 0x00,
+  IT_REG2      = 0x02,
+  MASK_IT_REG1 = 0x08,
+  MASK_IT_REG2 = 0x0a,
+  IRQ_NUM      = 0x10,
+  FIQ_NUM      = 0x12,
+  IRQ_CTRL     = 0x14,
 };
 
-#define ILR_IRQ(x)	(0x20 + (x*2))
-#define IRQ_REG(x)	((void *)BASE_ADDR_IRQ + (x))
+#define ILR_IRQ(x)  (0x20 + (x*2))
+#define IRQ_REG(x)  (BASE_ADDR_IRQ + (x))
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
@@ -87,28 +90,29 @@ extern uint32_t _exceptions;
  * Private Data
  ****************************************************************************/
 
-static uint8_t default_irq_prio[] = {
-	[IRQ_WATCHDOG]		= 0xff,
-	[IRQ_TIMER1]		= 0xff,
-	[IRQ_TIMER2]		= 0xff,
-	[IRQ_TSP_RX]		= 0,
-	[IRQ_TPU_FRAME]		= 3,
-	[IRQ_TPU_PAGE]		= 0xff,
-	[IRQ_SIMCARD]		= 0xff,
-	[IRQ_UART_MODEM]	= 8,
-	[IRQ_KEYPAD_GPIO]	= 4,
-	[IRQ_RTC_TIMER]		= 9,
-	[IRQ_RTC_ALARM_I2C]	= 10,
-	[IRQ_ULPD_GAUGING]	= 2,
-	[IRQ_EXTERNAL]		= 12,
-	[IRQ_SPI]		= 0xff,
-	[IRQ_DMA]		= 0xff,
-	[IRQ_API]		= 0xff,
-	[IRQ_SIM_DETECT]	= 0,
-	[IRQ_EXTERNAL_FIQ]	= 7,
-	[IRQ_UART_IRDA]		= 2,
-	[IRQ_ULPD_GSM_TIMER]	= 1,
-	[IRQ_GEA]		= 0xff,
+static uint8_t default_irq_prio[] =
+{
+  [IRQ_WATCHDOG]       = 0xff,
+  [IRQ_TIMER1]         = 0xff,
+  [IRQ_TIMER2]         = 0xff,
+  [IRQ_TSP_RX]         = 0,
+  [IRQ_TPU_FRAME]      = 3,
+  [IRQ_TPU_PAGE]       = 0xff,
+  [IRQ_SIMCARD]        = 0xff,
+  [IRQ_UART_MODEM]     = 8,
+  [IRQ_KEYPAD_GPIO]    = 4,
+  [IRQ_RTC_TIMER]      = 9,
+  [IRQ_RTC_ALARM_I2C]  = 10,
+  [IRQ_ULPD_GAUGING]   = 2,
+  [IRQ_EXTERNAL]       = 12,
+  [IRQ_SPI]            = 0xff,
+  [IRQ_DMA]            = 0xff,
+  [IRQ_API]            = 0xff,
+  [IRQ_SIM_DETECT]     = 0,
+  [IRQ_EXTERNAL_FIQ]   = 7,
+  [IRQ_UART_IRDA]      = 2,
+  [IRQ_ULPD_GSM_TIMER] = 1,
+  [IRQ_GEA]            = 0xff,
 };
 
 /****************************************************************************
@@ -117,53 +121,66 @@ static uint8_t default_irq_prio[] = {
 
 static void _irq_enable(enum irq_nr nr, int enable)
 {
-	uint16_t *reg = IRQ_REG(MASK_IT_REG1);
-	uint16_t val;
+  uintptr_t reg = IRQ_REG(MASK_IT_REG1);
+  uint16_t val;
 
-	if (nr > 15) {
-		reg = IRQ_REG(MASK_IT_REG2);
-		nr -= 16;
-	}
+  if (nr > 15)
+    {
+      reg = IRQ_REG(MASK_IT_REG2);
+      nr -= 16;
+    }
 
-	val = getreg16(reg);
-	if (enable)
-		val &= ~(1 << nr);
-	else
-		val |= (1 << nr);
-	putreg16(val, reg);
+  val = getreg16(reg);
+  if (enable)
+    {
+      val &= ~(1 << nr);
+    }
+  else
+    {
+      val |= (1 << nr);
+    }
+
+  putreg16(val, reg);
 }
 
 static void set_default_priorities(void)
 {
-	unsigned int i;
+  unsigned int i;
 
-	for (i = 0; i < ARRAY_SIZE(default_irq_prio); i++) {
-		uint16_t val;
-		uint8_t prio = default_irq_prio[i];
-		if (prio > 31)
-			prio = 31;
+  for (i = 0; i < ARRAY_SIZE(default_irq_prio); i++)
+    {
+      uint16_t val;
+      uint8_t prio = default_irq_prio[i];
 
-		val = getreg16(IRQ_REG(ILR_IRQ(i)));
-		val &= ~(0x1f << 2);
-		val |= prio << 2;
+      if (prio > 31)
+        {
+          prio = 31;
+        }
 
-		/* Make edge mode default. Hopefully causes less trouble */
-		val |= 0x02;
+      val = getreg16(IRQ_REG(ILR_IRQ(i)));
+      val &= ~(0x1f << 2);
+      val |= prio << 2;
 
-		putreg16(val, IRQ_REG(ILR_IRQ(i)));
-	}
+      /* Make edge mode default. Hopefully causes less trouble */
+
+      val |= 0x02;
+
+      putreg16(val, IRQ_REG(ILR_IRQ(i)));
+    }
 }
 
 /* Install the exception handlers to where the ROM loader jumps */
+
 static void calypso_exceptions_install(void)
 {
-	uint32_t *exceptions_dst = (uint32_t *) BASE_ADDR_IBOOT_EXC;
-	uint32_t *exceptions_src = &_exceptions;
-	int i;
+  uint32_t *exceptions_dst = (uint32_t *) BASE_ADDR_IBOOT_EXC;
+  uint32_t *exceptions_src = &_exceptions;
+  int i;
 
-	for (i = 0; i < 7; i++)
-		*exceptions_dst++ = *exceptions_src++;
-
+  for (i = 0; i < 7; i++)
+    {
+      *exceptions_dst++ = *exceptions_src++;
+    }
 }
 
 /****************************************************************************
@@ -180,27 +197,32 @@ static void calypso_exceptions_install(void)
 
 void up_irqinitialize(void)
 {
-	/* Prepare hardware */
-	calypso_exceptions_install();
-	current_regs = NULL;
+  /* Prepare hardware */
 
-	/* Switch to internal ROM */
-	calypso_bootrom(1);
+  calypso_exceptions_install();
+  current_regs = NULL;
 
-	/* set default priorities */
-	set_default_priorities();
+  /* Switch to internal ROM */
 
-	/* mask all interrupts off */
-	putreg16(0xffff, IRQ_REG(MASK_IT_REG1));
-	putreg16(0xffff, IRQ_REG(MASK_IT_REG2));
+  calypso_bootrom(1);
 
-	/* clear all pending interrupts */
-	putreg16(0, IRQ_REG(IT_REG1));
-	putreg16(0, IRQ_REG(IT_REG2));
+  /* Set default priorities */
 
-	/* enable interrupts globally to the ARM core */
+  set_default_priorities();
+
+  /* Mask all interrupts off */
+
+  putreg16(0xffff, IRQ_REG(MASK_IT_REG1));
+  putreg16(0xffff, IRQ_REG(MASK_IT_REG2));
+
+  /* clear all pending interrupts */
+  putreg16(0, IRQ_REG(IT_REG1));
+  putreg16(0, IRQ_REG(IT_REG2));
+
+  /* Enable interrupts globally to the ARM core */
+
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-	irqrestore(SVC_MODE | PSR_F_BIT);
+  irqrestore(SVC_MODE | PSR_F_BIT);
 #endif
 }
 
@@ -214,8 +236,10 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-	if((unsigned)irq < NR_IRQS)
-		_irq_enable(irq, 0);
+  if ((unsigned)irq < NR_IRQS)
+    {
+      _irq_enable(irq, 0);
+    }
 }
 
 /****************************************************************************
@@ -228,8 +252,10 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-	if((unsigned)irq < NR_IRQS)
-		_irq_enable(irq, 1);
+  if((unsigned)irq < NR_IRQS)
+    {
+      _irq_enable(irq, 1);
+    }
 }
 
 /****************************************************************************
@@ -243,18 +269,22 @@ void up_enable_irq(int irq)
 #ifndef CONFIG_ARCH_IRQPRIO
 int up_prioritize_irq(int nr, int prio)
 {
-	uint16_t val;
+  uint16_t val;
 
-	if (prio == -1)
-		prio = default_irq_prio[nr];
+  if (prio == -1)
+    {
+      prio = default_irq_prio[nr];
+    }
 
-	if (prio > 31)
-		prio = 31;
+  if (prio > 31)
+    {
+      prio = 31;
+    }
 
-	val = prio << 2;
-	putreg16(val, IRQ_REG(ILR_IRQ(nr)));
+  val = prio << 2;
+  putreg16(val, IRQ_REG(ILR_IRQ(nr)));
 
-	return 0; // XXX: what's the return???
+  return 0;
 }
 #endif
 
@@ -264,25 +294,28 @@ int up_prioritize_irq(int nr, int prio)
 
 void up_decodeirq(uint32_t *regs)
 {
-	uint8_t num, tmp;
-	uint32_t *saved_regs;
+  uint8_t num, tmp;
+  uint32_t *saved_regs;
 
-	/* XXX: What is this???
-	 * Passed to but ignored in IRQ handlers
-	 * Only valid meaning is apparently non-NULL == IRQ context */
-	saved_regs = (uint32_t *)current_regs;
-	current_regs = regs;
+  /* XXX: What is this???
+   * Passed to but ignored in IRQ handlers
+   * Only valid meaning is apparently non-NULL == IRQ context */
 
-	/* Detect & deliver the IRQ */
-	num = getreg8(IRQ_REG(IRQ_NUM)) & 0x1f;
-	irq_dispatch(num, regs);
+  saved_regs = (uint32_t *)current_regs;
+  current_regs = regs;
 
-	/* Start new IRQ agreement */
-	tmp = getreg8(IRQ_REG(IRQ_CTRL));
-	tmp |= 0x01;
-	putreg8(tmp, IRQ_REG(IRQ_CTRL));
+  /* Detect & deliver the IRQ */
 
-	current_regs = saved_regs;
+  num = getreg8(IRQ_REG(IRQ_NUM)) & 0x1f;
+  irq_dispatch(num, regs);
+
+  /* Start new IRQ agreement */
+
+  tmp = getreg8(IRQ_REG(IRQ_CTRL));
+  tmp |= 0x01;
+  putreg8(tmp, IRQ_REG(IRQ_CTRL));
+
+  current_regs = saved_regs;
 }
 
 /****************************************************************************
@@ -291,23 +324,26 @@ void up_decodeirq(uint32_t *regs)
 
 void calypso_fiq(void)
 {
-	uint8_t num, tmp;
-	uint32_t *regs;
+  uint8_t num, tmp;
+  uint32_t *regs;
 
-	/* XXX: What is this???
-	 * Passed to but ignored in IRQ handlers
-	 * Only valid meaning is apparently non-NULL == IRQ context */
-	regs = (uint32_t *)current_regs;
-	current_regs = (uint32_t *)&num;
+  /* XXX: What is this???
+   * Passed to but ignored in IRQ handlers
+   * Only valid meaning is apparently non-NULL == IRQ context */
 
-	/* Detect & deliver like an IRQ but we are in FIQ context */
-	num = getreg8(IRQ_REG(FIQ_NUM)) & 0x1f;
-	irq_dispatch(num, regs);
+  regs = (uint32_t *)current_regs;
+  current_regs = (uint32_t *)&num;
 
-	/* Start new FIQ agreement */
-	tmp = getreg8(IRQ_REG(IRQ_CTRL));
-	tmp |= 0x02;
-	putreg8(tmp, IRQ_REG(IRQ_CTRL));
+  /* Detect & deliver like an IRQ but we are in FIQ context */
 
-	current_regs = regs;
+  num = getreg8(IRQ_REG(FIQ_NUM)) & 0x1f;
+  irq_dispatch(num, regs);
+
+  /* Start new FIQ agreement */
+
+  tmp = getreg8(IRQ_REG(IRQ_CTRL));
+  tmp |= 0x02;
+  putreg8(tmp, IRQ_REG(IRQ_CTRL));
+
+  current_regs = regs;
 }

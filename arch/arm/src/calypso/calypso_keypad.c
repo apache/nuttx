@@ -48,6 +48,7 @@
 #include <arch/calypso/defines.h>
 #include <arch/calypso/memory.h>
 #include <arch/calypso/timer.h>
+#include <arch/calypso/armio.h>
 
 /****************************************************************************
  * HW access
