@@ -1,7 +1,7 @@
 pirelli_dpl10
 =============
 
-This directory contains the board support for pirelli dpl10 phones.
+This directory contains the board support for Pirelli dpl10 phones.
 
 It is a variant of the compal_e88 configuration with the small change of
 enabling the IrDA serial console:

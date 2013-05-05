@@ -1938,8 +1938,8 @@ configs/pic32mx7mmb
 
 configs/pirelli_dpl10
   This directory contains the board support for pirelli dpl10 phones.
-  It is a variant of the compal_e88 config with the small change of enabling
-  the IrDA serial console.
+  It is a variant of the compal_e88 config with the small changes for the
+  differences in the board.
 
 configs/pjrc-8051
   8051 Microcontroller.  This port uses the PJRC 87C52 development system
