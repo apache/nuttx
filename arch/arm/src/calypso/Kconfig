@@ -4,3 +4,109 @@
 #
 
 comment "Calypso Configuration Options"
+
+menu "Modem UART Configuration"
+
+config UART_MODEM_BAUD
+	int "Modem UART BAUD"
+	default 115200
+
+config UART_MODEM_PARITY
+	int "Modem UART parity"
+	default 0
+	---help---
+		Modem UART parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config UART_MODEM_BITS
+	int "Modem UART number of bits"
+	default 8
+	---help---
+		Modem UART number of bits.  Default: 8
+
+config UART_MODEM_2STOP
+	int "Modem UART two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config UART_MODEM_RXBUFSIZE
+	int "Modem UART Rx buffer size"
+	default 256
+	---help---
+		Modem UART Rx buffer size.  Default: 256
+
+config UART_MODEM_TXBUFSIZE
+	int "Modem UART Tx buffer size"
+	default 256
+	---help---
+		Modem UART Tx buffer size.  Default: 256
+
+config UART_MODEM_HWFLOWCONTROL
+	bool "Hardware flow control"
+	default n
+	---help---
+		Enabled Modem UART hardware flow control. Default: n
+
+endmenu
+
+menu "IrDA UART Configuration"
+
+config UART_IRDA_BAUD
+	int "IrDA UART BAUD"
+	default 115200
+
+config UART_IRDA_PARITY
+	int "IrDA UART parity"
+	default 0
+	---help---
+		IrDA UART parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config UART_IRDA_BITS
+	int "IrDA UART number of bits"
+	default 8
+	---help---
+		IrDA UART number of bits.  Default: 8
+
+config UART_IRDA_2STOP
+	int "IrDA UART two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config UART_IRDA_RXBUFSIZE
+	int "IrDA UART Rx buffer size"
+	default 256
+	---help---
+		IrDA UART Rx buffer size.  Default: 256
+
+config UART_IRDA_TXBUFSIZE
+	int "IrDA UART Tx buffer size"
+	default 256
+	---help---
+		IrDA UART Tx buffer size.  Default: 256
+
+config UART_IRDA_HWFLOWCONTROL
+	bool "Hardware flow control"
+	default n
+	---help---
+		Enabled IrDA UART hardware flow control. Default: n
+
+endmenu
+
+choice
+	prompt "Serial Console Selection"
+	default SERIAL_CONSOLE_NONE
+
+config SERCOMM_CONSOLE
+	bool "SERCOMM console"
+
+config SERIAL_MODEM_CONSOLE
+	bool "Serial console on modem UART"
+
+config SERIAL_IRDA_CONSOLE
+	bool "Serial console on IrDA UART"
+
+config SERIAL_CONSOLE_NONE
+	bool "No serial console"
+
+endchoice

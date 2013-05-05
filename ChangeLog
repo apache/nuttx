@@ -4670,4 +4670,7 @@
 	  capability (when possible) and to use 4KB sectors for the erase block
 	  size when the part supports it (Ken Pettit, 2013-5-3).
 	* configs/pirelli_dpl10: Adds a configuration for the pirelli phone
-	  (from Alan Alan Carvalho de Assis, 2013-5-3).
+	  (from Craig Comstock via Alan Alan Carvalho de Assis, 2013-5-3).
+	* arch/arm/src/calypso:  Fix some compilation warnings (2013-5-5).
+	* configs/pirelli_dpl10/nsh_highram:  Converted to use the
+	  kconfig-frontends tools (2013-5-5).
