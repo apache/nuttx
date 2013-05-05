@@ -47,30 +47,29 @@
  * HW access
  ****************************************************************************/
 
-#define BASE_ADDR_ARMIO	0xfffe4800
-#define ARMIO_REG(x)	((void *)BASE_ADDR_ARMIO + (x))
+#define BASE_ADDR_ARMIO  0xfffe4800
+#define ARMIO_REG(x)     (BASE_ADDR_ARMIO + (x))
 
 enum armio_reg {
-	LATCH_IN	= 0x00,
-	LATCH_OUT	= 0x02,
-	IO_CNTL		= 0x04,
-	CNTL_REG	= 0x06,
-	LOAD_TIM	= 0x08,
-	KBR_LATCH_REG	= 0x0a,
-	KBC_REG		= 0x0c,
-	BUZZ_LIGHT_REG	= 0x0e,
-	LIGHT_LEVEL	= 0x10,
-	BUZZER_LEVEL	= 0x12,
-	GPIO_EVENT_MODE	= 0x14,
-	KBD_GPIO_INT	= 0x16,
-	KBD_GPIO_MASKIT	= 0x18,
-	GPIO_DEBOUNCING	= 0x1a,
-	GPIO_LATCH	= 0x1c,
+  LATCH_IN        = 0x00,
+  LATCH_OUT       = 0x02,
+  IO_CNTL         = 0x04,
+  CNTL_REG        = 0x06,
+  LOAD_TIM        = 0x08,
+  KBR_LATCH_REG   = 0x0a,
+  KBC_REG         = 0x0c,
+  BUZZ_LIGHT_REG  = 0x0e,
+  LIGHT_LEVEL     = 0x10,
+  BUZZER_LEVEL    = 0x12,
+  GPIO_EVENT_MODE = 0x14,
+  KBD_GPIO_INT    = 0x16,
+  KBD_GPIO_MASKIT = 0x18,
+  GPIO_DEBOUNCING = 0x1a,
+  GPIO_LATCH      = 0x1c,
 };
 
-#define KBD_INT		(1<<0)
-#define GPIO_INT	(1<<1)
-
+#define KBD_INT    (1 << 0)
+#define GPIO_INT   (1 << 1)
 
 /****************************************************************************
  * ARMIO interrupt handler
@@ -80,11 +79,8 @@ enum armio_reg {
 
 static int kbd_gpio_irq(int irq, uint32_t *regs)
 {
-	calypso_kbd_irq();
-
-	return 0;
+  return calypso_kbd_irq(irq, regs);
 }
-
 
 /****************************************************************************
  * Initialize ARMIO
@@ -92,13 +88,16 @@ static int kbd_gpio_irq(int irq, uint32_t *regs)
 
 void calypso_armio(void)
 {
-	/* Enable ARMIO clock */
-	putreg16(1<<5, ARMIO_REG(CNTL_REG));
+  /* Enable ARMIO clock */
 
-	/* Mask GPIO interrupt and keypad interrupt */
-	putreg16(KBD_INT|GPIO_INT, ARMIO_REG(KBD_GPIO_MASKIT));
+  putreg16(1<<5, ARMIO_REG(CNTL_REG));
 
-	/* Attach and enable the interrupt */
-	irq_attach(IRQ_KEYPAD_GPIO, (xcpt_t)kbd_gpio_irq);
-	up_enable_irq(IRQ_KEYPAD_GPIO);
+  /* Mask GPIO interrupt and keypad interrupt */
+
+  putreg16(KBD_INT|GPIO_INT, ARMIO_REG(KBD_GPIO_MASKIT));
+
+  /* Attach and enable the interrupt */
+
+  irq_attach(IRQ_KEYPAD_GPIO, (xcpt_t)kbd_gpio_irq);
+  up_enable_irq(IRQ_KEYPAD_GPIO);
 }

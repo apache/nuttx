@@ -34,19 +34,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
+#include <stdint.h>
 
 /****************************************************************************
  * Prototypes for interrupt handling
  ****************************************************************************/
 
-void calypso_kbd_irq();
-void calypso_gpio_irq();
-
+inline int calypso_kbd_irq(int irq, uint32_t *regs);
 
 /****************************************************************************
  * Initialize device, add /dev/... nodes
  ****************************************************************************/
 
 void calypso_armio(void);
-void calypso_keypad(void);

@@ -4669,5 +4669,5 @@
 	* drivers/mtd/m25px.c:  Some rearchitecting to use the byte write
 	  capability (when possible) and to use 4KB sectors for the erase block
 	  size when the part supports it (Ken Pettit, 2013-5-3).
-	* configs/pirelli_dp10: Adds a configuration for the pirelli phone
+	* configs/pirelli_dpl10: Adds a configuration for the pirelli phone
 	  (from Alan Alan Carvalho de Assis, 2013-5-3).

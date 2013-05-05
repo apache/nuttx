@@ -1021,6 +1021,8 @@ nuttx
  |   |   `- README.txt
  |   |-  fire-stm32v2/
  |   |   `- README.txt
+ |   |-  freedom-kl25z/
+ |   |   `- README.txt
  |   |-  hymini-stm32v/
  |   |   |- include/README.txt
  |   |   |- src/README.txt
@@ -1055,6 +1057,8 @@ nuttx
  |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- micropendous3/
+ |   |   `- README.txt
+ |   |- mikroe-stm32f/
  |   |   `- README.txt
  |   |- mirtoo/
  |   |   `- README.txt
@@ -1091,6 +1095,8 @@ nuttx
  |   |- pic32-starterkit/
  |   |   `- README.txt
  |   |- pic32mx7mmb/
+ |   |   `- README.txt
+ |   |- pirelli_dpl10/
  |   |   `- README.txt
  |   |- pjrc-8051/
  |   |   |- include/README.txt
