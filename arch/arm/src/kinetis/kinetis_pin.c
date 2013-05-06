@@ -106,7 +106,7 @@ int kinetis_pinconfig(uint32_t cfgset)
        * options are applicable.
        */
 
-      if (mode == _PIN_MODE_ANALOG)
+      if (mode == PIN_MODE_ANALOG)
         {
           /* Set the analog mode with all digital options zeroed */
 
@@ -148,7 +148,7 @@ int kinetis_pinconfig(uint32_t cfgset)
                 {
                   regval |= PORT_PCR_ODE;
                 }
-              
+
               /* Check for high drive output */
 
               if ((cfgset & _PIN_OUTPUT_DRIVE_MASK) == _PIN_OUTPUT_HIGHDRIVE)
@@ -187,7 +187,7 @@ int kinetis_pinconfig(uint32_t cfgset)
 
           /* Additional configuration for the case of Alternative 1 (GPIO) modes */
 
-          if (mode == _PIN_MODE_GPIO)
+          if (mode == PIN_MODE_GPIO)
             {
               /* Set the GPIO port direction */
 
@@ -216,6 +216,7 @@ int kinetis_pinconfig(uint32_t cfgset)
 
       return OK;
     }
+
   return -EINVAL;
 }
 
