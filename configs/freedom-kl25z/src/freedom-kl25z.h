@@ -79,9 +79,9 @@
  *   LED_IDLE             K25Z1XX is in sleep mode  (Optional, not used)
  */
 
-#define GPIO_LED_R (GPIO_OUTPUT | PIN_PORTB | PIN18)
-#define GPIO_LED_G (GPIO_OUTPUT | PIN_PORTB | PIN19)
-#define GPIO_LED_B (GPIO_OUTPUT | PIN_PORTD | PIN1)
+#define GPIO_LED_R (GPIO_OUTPUT | GPIO_OUTPUT_ONE | PIN_PORTB | PIN18)
+#define GPIO_LED_G (GPIO_OUTPUT | GPIO_OUTPUT_ONE | PIN_PORTB | PIN19)
+#define GPIO_LED_B (GPIO_OUTPUT | GPIO_OUTPUT_ONE | PIN_PORTD | PIN1)
 
 /* Button definitions ***************************************************************/
 /* The Freedom KL25Z has no buttons */
