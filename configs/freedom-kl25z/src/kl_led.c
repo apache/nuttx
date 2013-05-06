@@ -1,6 +1,6 @@
 /****************************************************************************
- * configs/freedom-kl25z/src/up_autoleds.c
- * arch/arm/src/board/up_autoleds.c
+ * configs/freedom-kl25z/src/kl_led.c
+ * arch/arm/src/board/kl_led.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,15 +48,15 @@
  *   SYMBOL                Meaning                 LED state
  *                                                 Initially all LED is OFF
  *   -------------------  -----------------------  --------------------------
- *   LED_STARTED          NuttX has been started   
- *   LED_HEAPALLOCATE     Heap has been allocated  
- *   LED_IRQSENABLED      Interrupts enabled       
- *   LED_STACKCREATED     Idle stack created       
- *   LED_INIRQ            In an interrupt          
- *   LED_SIGNAL           In a signal handler      
- *   LED_ASSERTION        An assertion failed      
- *   LED_PANIC            The system has crashed   
- *   LED_IDLE             K25Z1XX is in sleep mode  (Optional, not used)
+ *   LED_STARTED          NuttX has been started   R=OFF G=OFF B=OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated  (no change)
+ *   LED_IRQSENABLED      Interrupts enabled       (no change)  
+ *   LED_STACKCREATED     Idle stack created       R=OFF G=OFF B=ON
+ *   LED_INIRQ            In an interrupt          (no change)
+ *   LED_SIGNAL           In a signal handler      (no change)
+ *   LED_ASSERTION        An assertion failed      (no change)
+ *   LED_PANIC            The system has crashed   R=FLASHING G=OFF B=OFF
+ *   LED_IDLE             K25Z1XX is in sleep mode (Optional, not used)
  */
 
 /****************************************************************************
@@ -138,7 +138,18 @@ void kl_ledinit(void)
 
 void up_ledon(int led)
 {
-  kl_gpiowrite(GPIO_LED_B, false);
+  if (led == LED_STACKCREATED)
+    {
+      kl_gpiowrite(GPIO_LED_R, true);
+      kl_gpiowrite(GPIO_LED_G, true);
+      kl_gpiowrite(GPIO_LED_B, false);
+    }
+  else if (led == LED_PANIC)
+    {
+      kl_gpiowrite(GPIO_LED_R, false);
+      kl_gpiowrite(GPIO_LED_G, true);
+      kl_gpiowrite(GPIO_LED_B, true);
+    }
 }
 
 /****************************************************************************
@@ -147,7 +158,12 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  kl_gpiowrite(GPIO_LED_B, true);
+  if (led == LED_PANIC)
+    {
+      kl_gpiowrite(GPIO_LED_R, true);
+      kl_gpiowrite(GPIO_LED_G, true);
+      kl_gpiowrite(GPIO_LED_B, true);
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */
