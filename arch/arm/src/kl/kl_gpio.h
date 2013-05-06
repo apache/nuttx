@@ -62,17 +62,25 @@
 /* Bits 25-31: 7 bits are used to encode the basic pin configuration:
  *
  * oooo mmm- ---- ---- ---- ---- ---- ----
- * oooommm:
- * |   `--- mmm: mode
+ * |    `--- mmm: mode
  * `------- oooo: options (may be combined)
  */
 
-#define _PIN_MODE_SHIFT        (25) /* Bits 25-27: Pin mode */
+#define _PIN_MODE_SHIFT        (25)                    /* Bits 25-27: Pin mode */
 #define _PIN_MODE_MASK         (7 << _PIN_MODE_SHIFT)
-#define _PIN_OPTIONS_SHIFT     (28) /* Bits 28-31: Pin mode options */
+#define _PIN_OPTIONS_SHIFT     (28)                    /* Bits 28-31: Pin mode options */
 #define _PIN_OPTIONS_MASK      (15 << _PIN_OPTIONS_SHIFT)
 
 /* Port Modes */
+
+#define PIN_MODE_ANALOG        (0)                     /* 000 Pin Disabled (Analog) */
+#define PIN_MODE_GPIO          (1)                     /* 001 Alternative 1 (GPIO) */
+#define PIN_MODE_ALT2          (2)                     /* 010 Alternative 2 */
+#define PIN_MODE_ALT3          (3)                     /* 011 Alternative 3 */
+#define PIN_MODE_ALT4          (4)                     /* 100 Alternative 4 */
+#define PIN_MODE_ALT5          (5)                     /* 101 Alternative 5 */
+#define PIN_MODE_ALT6          (6)                     /* 110 Alternative 6 */
+#define PIN_MODE_ALT7          (7)                     /* 111 Alternative 7 */
 
 #define _PIN_MODE_ANALOG       (0 << _PIN_MODE_SHIFT)  /* 000 Pin Disabled (Analog) */
 #define _PIN_MODE_GPIO         (1 << _PIN_MODE_SHIFT)  /* 001 Alternative 1 (GPIO) */
@@ -294,7 +302,7 @@
  * Public Types
  ****************************************************************************/
 
-typedef uint16_t gpio_cfgset_t;
+typedef uint32_t gpio_cfgset_t;
 
 /****************************************************************************
  * Public Data

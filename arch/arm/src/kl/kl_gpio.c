@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/kl/kl_pin.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,7 @@ int kl_configgpio(uint32_t cfgset)
        * options are applicable.
        */
 
-      if (mode == _PIN_MODE_ANALOG)
+      if (mode == PIN_MODE_ANALOG)
         {
           /* Set the analog mode with all digital options zeroed */
 
@@ -184,7 +184,7 @@ int kl_configgpio(uint32_t cfgset)
 
           /* Additional configuration for the case of Alternative 1 (GPIO) modes */
 
-          if (mode == _PIN_MODE_GPIO)
+          if (mode == PIN_MODE_GPIO)
             {
               /* Set the GPIO port direction */
 
@@ -213,6 +213,7 @@ int kl_configgpio(uint32_t cfgset)
 
       return OK;
     }
+
   return -EINVAL;
 }
 
