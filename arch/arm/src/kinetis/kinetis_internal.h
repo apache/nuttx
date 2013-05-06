@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/kinetis/kinetis_internal.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,26 +69,34 @@
 /* Bits 25-31: 7 bits are used to encode the basic pin configuration:
  *
  * oooo mmm- ---- ---- ---- ---- ---- ----
- * oooommm:
- * |   `--- mmm: mode
+ * |    `--- mmm: mode
  * `------- oooo: options (may be combined)
  */
 
-#define _PIN_MODE_SHIFT        (25) /* Bits 25-27: Pin mode */
+#define _PIN_MODE_SHIFT        (25)                    /* Bits 25-27: Pin mode */
 #define _PIN_MODE_MASK         (7 << _PIN_MODE_SHIFT)
-#define _PIN_OPTIONS_SHIFT     (28) /* Bits 28-31: Pin mode options */
+#define _PIN_OPTIONS_SHIFT     (28)                    /* Bits 28-31: Pin mode options */
 #define _PIN_OPTIONS_MASK      (15 << _PIN_OPTIONS_SHIFT)
 
 /* Port Modes */
-
-#define _PIN_MODE_ANALOG       (0 << _PIN_MODE_SHIFT)  /* 000 Pin Disabled (Analog) */
-#define _PIN_MODE_GPIO         (1 << _PIN_MODE_SHIFT)  /* 001 Alternative 1 (GPIO) */
-#define _PIN_MODE_ALT2         (2 << _PIN_MODE_SHIFT)  /* 010 Alternative 2 */
-#define _PIN_MODE_ALT3         (3 << _PIN_MODE_SHIFT)  /* 011 Alternative 3 */
-#define _PIN_MODE_ALT4         (4 << _PIN_MODE_SHIFT)  /* 100 Alternative 4 */
-#define _PIN_MODE_ALT5         (5 << _PIN_MODE_SHIFT)  /* 101 Alternative 5 */
-#define _PIN_MODE_ALT6         (6 << _PIN_MODE_SHIFT)  /* 110 Alternative 6 */
-#define _PIN_MODE_ALT7         (7 << _PIN_MODE_SHIFT)  /* 111 Alternative 7 */
+                                                       /* Unshifted versions: */
+#define PIN_MODE_ANALOG        (0)                     /*   000 Pin Disabled (Analog) */
+#define PIN_MODE_GPIO          (1)                     /*   001 Alternative 1 (GPIO) */
+#define PIN_MODE_ALT2          (2)                     /*   010 Alternative 2 */
+#define PIN_MODE_ALT3          (3)                     /*   011 Alternative 3 */
+#define PIN_MODE_ALT4          (4)                     /*   100 Alternative 4 */
+#define PIN_MODE_ALT5          (5)                     /*   101 Alternative 5 */
+#define PIN_MODE_ALT6          (6)                     /*   110 Alternative 6 */
+#define PIN_MODE_ALT7          (7)                     /*   111 Alternative 7 */
+                                                       /* Shifted versions: */
+#define _PIN_MODE_ANALOG       (0 << _PIN_MODE_SHIFT)  /*   000 Pin Disabled (Analog) */
+#define _PIN_MODE_GPIO         (1 << _PIN_MODE_SHIFT)  /*   001 Alternative 1 (GPIO) */
+#define _PIN_MODE_ALT2         (2 << _PIN_MODE_SHIFT)  /*   010 Alternative 2 */
+#define _PIN_MODE_ALT3         (3 << _PIN_MODE_SHIFT)  /*   011 Alternative 3 */
+#define _PIN_MODE_ALT4         (4 << _PIN_MODE_SHIFT)  /*   100 Alternative 4 */
+#define _PIN_MODE_ALT5         (5 << _PIN_MODE_SHIFT)  /*   101 Alternative 5 */
+#define _PIN_MODE_ALT6         (6 << _PIN_MODE_SHIFT)  /*   110 Alternative 6 */
+#define _PIN_MODE_ALT7         (7 << _PIN_MODE_SHIFT)  /*   111 Alternative 7 */
 
 /* Options for all digital modes (Alternatives 1-7).  None of the digital
  * options apply if the analog mode is selected.
@@ -240,7 +248,7 @@
 
 #define PIN_PASV_FILTER        (1 << 18)  /* Bit 18: Enable passive filter */
 #define PIN_DIG_FILTER         (1 << 17)  /* Bit 17: Enable digital filter */
- 
+
 /* Three bits are used to define the port number:
  *
  * ---- ---- ---- ---- ---- -ppp ---- ----
@@ -581,7 +589,7 @@ void kinetis_clrpend(int irq);
  * Description:
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods 
+ *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods
  *   including up_spiinitialize()) are provided by common Kinetis logic.  To use
  *   this common SPI logic on your board:
  *
@@ -597,7 +605,7 @@ void kinetis_clrpend(int irq);
  *   3. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -800,7 +808,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno);
  *
  * Input Parameters:
  *   dev        - An instance of the SDIO driver device state structure.
- *   cardinslot - true is a card has been detected in the slot; false if a 
+ *   cardinslot - true is a card has been detected in the slot; false if a
  *                card has been removed from the slot.  Only transitions
  *                (inserted->removed or removed->inserted should be reported)
  *

@@ -4680,4 +4680,6 @@
 	* arch/arm/src/kl/kl_gpio.c and .h, configs/freedom-kl25z/src/freedom-kl25z.h,
 	  and configs/freedom-kl25z/src/kl_led.c:  Fixes LEDs on the Freedom KL25Z
 	  board (2013-5-6).
-
+	* arch/arm/src/kinetis/kinetis_pin.c and arch/arm/src/kinetis/kinetis_internal.h:
+	  The Kinetis GPIO logic had some of the same issues as did the
+	  Kinetis L (2013-5-6).
