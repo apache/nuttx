@@ -50,7 +50,7 @@
  *   -------------------  -----------------------  --------------------------
  *   LED_STARTED          NuttX has been started   R=OFF G=OFF B=OFF
  *   LED_HEAPALLOCATE     Heap has been allocated  (no change)
- *   LED_IRQSENABLED      Interrupts enabled       (no change)  
+ *   LED_IRQSENABLED      Interrupts enabled       (no change)
  *   LED_STACKCREATED     Idle stack created       R=OFF G=OFF B=ON
  *   LED_INIRQ            In an interrupt          (no change)
  *   LED_SIGNAL           In a signal handler      (no change)

@@ -151,15 +151,15 @@
  *   SYMBOL                Meaning                 LED state
  *                                                 Initially all LED is OFF
  *   -------------------  -----------------------  --------------------------
- *   LED_STARTED          NuttX has been started   
- *   LED_HEAPALLOCATE     Heap has been allocated  
- *   LED_IRQSENABLED      Interrupts enabled       
- *   LED_STACKCREATED     Idle stack created       
- *   LED_INIRQ            In an interrupt          
- *   LED_SIGNAL           In a signal handler      
- *   LED_ASSERTION        An assertion failed      
- *   LED_PANIC            The system has crashed   
- *   LED_IDLE             K25Z1XX is in sleep mode  (Optional, not used)
+ *   LED_STARTED          NuttX has been started   R=OFF G=OFF B=OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated  (no change)
+ *   LED_IRQSENABLED      Interrupts enabled       (no change)
+ *   LED_STACKCREATED     Idle stack created       R=OFF G=OFF B=ON
+ *   LED_INIRQ            In an interrupt          (no change)
+ *   LED_SIGNAL           In a signal handler      (no change)
+ *   LED_ASSERTION        An assertion failed      (no change)
+ *   LED_PANIC            The system has crashed   R=FLASHING G=OFF B=OFF
+ *   LED_IDLE             K25Z1XX is in sleep mode (Optional, not used)
  */
 
 #define LED_STARTED       0
