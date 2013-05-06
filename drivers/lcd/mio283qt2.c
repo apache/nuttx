@@ -690,6 +690,10 @@ static int mio283qt2_getpower(FAR struct lcd_dev_s *dev)
 
 static int mio283qt2_poweroff(FAR struct mio283qt2_lcd_s *lcd)
 {
+  /* Select the LCD */
+
+  lcd->select(lcd);
+
   /* Set the backlight off */
 
   lcd->backlight(lcd, 0);
@@ -697,6 +701,10 @@ static int mio283qt2_poweroff(FAR struct mio283qt2_lcd_s *lcd)
   /* Turn the display off */
 
   mio283qt2_putreg(lcd, 0x28, 0x0000); /* GON=0, DTE=0, D=0 */
+
+  /* Deselect the LCD */
+
+  lcd->deselect(lcd);
 
   /* Remember the power off state */
 
@@ -725,6 +733,10 @@ static int mio283qt2_setpower(FAR struct lcd_dev_s *dev, int power)
 
   if (power > 0)
     {
+      /* Select the LCD */
+
+      lcd->select(lcd);
+
       /* Set the backlight level */
 
       lcd->backlight(lcd, power);
@@ -733,11 +745,15 @@ static int mio283qt2_setpower(FAR struct lcd_dev_s *dev, int power)
        * D=ON(3) CM=0 DTE=1 GON=1 SPT=0 VLE=0 PT=0
        */
 
-      /* Display on */
-
       mio283qt2_putreg(lcd, 0x28, 0x0038); /* GON=1, DTE=1, D=2 */
       up_mdelay(40);
       mio283qt2_putreg(lcd, 0x28, 0x003c); /* GON=1, DTE=1, D=3 */
+
+      /* Deselect the LCD */
+
+      lcd->deselect(lcd);
+
+      /* Remember the power on state */
 
       g_lcddev.power = power;
     }
@@ -793,6 +809,7 @@ static inline int mio283qt2_hwinitialize(FAR struct mio283qt2_dev_s *priv)
 #ifndef CONFIG_LCD_NOGETRUN
   uint16_t id;
 #endif
+  int ret;
 
   /* Select the LCD */
 
@@ -903,19 +920,20 @@ static inline int mio283qt2_hwinitialize(FAR struct mio283qt2_dev_s *priv)
       /* Window setting */
 
       mio283qt2_setarea(lcd, 0, 0, (MIO283QT2_XRES-1), (MIO283QT2_YRES-1));
-      return OK;
+      ret = OK;
     }
 #ifndef CONFIG_LCD_NOGETRUN
   else
     {
       lcddbg("Unsupported LCD type\n");
-      return -ENODEV;
+      ret = -ENODEV;
     }
 #endif
 
   /* De-select the LCD */
 
   lcd->deselect(lcd);
+  return ret;
 }
 
  /*************************************************************************************

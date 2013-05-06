@@ -4674,3 +4674,6 @@
 	* arch/arm/src/calypso:  Fix some compilation warnings (2013-5-5).
 	* configs/pirelli_dpl10/nsh_highram:  Converted to use the
 	  kconfig-frontends tools (2013-5-5).
+	* drivers/lcd/mio283qt2.c:  LCD was not being selected in setpower
+	  method (also not being deselected in hwinitialize function)
+	 (2013-5-6).

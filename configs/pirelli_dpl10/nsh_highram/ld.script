@@ -13,8 +13,8 @@ MEMORY
 {
     /* 0x800000-0x83ffff */
     /* compal-loaded binary: our text, initialized data */
-    LRAM (rw) : ORIGIN = 0x00800000, LENGTH = 0x00020000
-    TRAM (rw) : ORIGIN = 0x00820000, LENGTH = 0x00010000
+    LRAM (rw) : ORIGIN = 0x00800000, LENGTH = 128K
+    TRAM (rw) : ORIGIN = 0x00820000, LENGTH = 64K
     /* compal-loaded binary: our unitialized data, stacks, heap */
     IRAM (rw) : ORIGIN = 0x00830000, LENGTH = 0x00010000
 }
@@ -34,7 +34,7 @@ SECTIONS
         PROVIDE(__start = .);
         KEEP(*(.text.start))
         *(.text.start)
-    } > TRAM
+    } > LRAM
 
     /* exception vectors from 0x80001c to 0x800034 */
     .text.exceptions 0x80001c : AT (LOADADDR(.text.start) + SIZEOF(.text.start)) {
@@ -46,8 +46,7 @@ SECTIONS
 
     /* code */
     . = ALIGN(4);
-    .text (LOADADDR(.text.exceptions) + SIZEOF(.text.exceptions)) :
-          AT (LOADADDR(.text.exceptions) + SIZEOF(.text.exceptions)) {
+    .text : {
         /* regular code */
         *(.text*)
         /* always-in-ram code */
@@ -55,7 +54,7 @@ SECTIONS
         /* gcc voodoo */
         *(.glue_7t) *(.glue_7) *(.vfp11_veneer) *(.v4_bx)
         . = ALIGN(4);
-    } > TRAM
+    } > LRAM
     PROVIDE(_text_start = LOADADDR(.text));
     PROVIDE(_text_end = LOADADDR(.text) + SIZEOF(.text));
 
@@ -67,7 +66,7 @@ SECTIONS
         KEEP(*(SORT(.ctors)))
         /* end of list */
         LONG(0)
-    } > TRAM
+    } > LRAM
     PROVIDE(_ctor_start = LOADADDR(.ctors));
     PROVIDE(_ctor_end = LOADADDR(.ctors) + SIZEOF(.ctors));
 
@@ -79,7 +78,7 @@ SECTIONS
         KEEP(*(SORT(.dtors)))
         /* end of list */
         LONG(0)
-    } > TRAM
+    } > LRAM
     PROVIDE(_dtor_start = LOADADDR(.dtors));
     PROVIDE(_dtor_end = LOADADDR(.dtors) + SIZEOF(.dtors));
 
@@ -87,14 +86,16 @@ SECTIONS
     . = ALIGN(4);
     .rodata : {
         *(.rodata*)
-    } > TRAM
+    } > LRAM
     PROVIDE(_rodata_start = LOADADDR(.rodata));
     PROVIDE(_rodata_end = LOADADDR(.rodata) + SIZEOF(.rodata));
 
     /* initialized data */
     . = ALIGN(4);
     .data : {
+        _sdata = ABSOLUTE(.);
         *(.data)
+        _edata = ABSOLUTE(.);
     } > TRAM
     PROVIDE(_data_start = LOADADDR(.data));
     PROVIDE(_data_end = LOADADDR(.data) + SIZEOF(.data));
