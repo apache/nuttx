@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 3, 2013</p>
+      <p>Last Updated: May 6, 2013</p>
     </td>
   </tr>
 </table>
@@ -985,7 +985,7 @@
       How can that be a tiny OS?
       Actually, the large number of files is one of the tricks to keep NuttX small and
       as scalable as possible.
-      Most files contain only a single function. 
+      Most files contain only a single function.
       Sometimes just one tiny function with only a few lines of code.
       Why?
     </p>
@@ -1821,14 +1821,14 @@
   <td><br></td>
   <td>
     <b>NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a></b>.
-    The port for the NXP LPC3131 on the <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a> 
+    The port for the NXP LPC3131 on the <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a>
     development board was first released in NuttX-5.1 with a GNU arm-nuttx-elf or arm-eabi toolchain* under Linux or Cygwin
     (but was not functional until NuttX-5.2).
     </p>
     <ul>
       <p>
         <b>STATUS:</b>
-          The basic EA3131 port is complete and verified in NuttX-5.2 
+          The basic EA3131 port is complete and verified in NuttX-5.2
           This basic port includes basic boot-up, serial console, and timer interrupts.
           This port was extended in NuttX 5.3 with a USB high speed driver contributed by David Hewson.
           David also contributed I2C and SPI drivers plus several important LPC313x USB bug fixes
@@ -1943,10 +1943,10 @@ nsh>
     <ul>
       <p>
         <b>STATUS</b>.
-        This is a work in progress by Alan Carvalho de Assis.
-        This initial support is in place but is minimal and not yet completely stable:
+        This is the work of Alan Carvalho de Assis.
+        Verified, initial, minimal support for the Freedom KL25Z is in place in NuttX 6.27 and 6.28:
         There is a working OS test configuration that verifies the correct port of NuttX to the part and a working NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
-        As NuttX-6.27, more testing, completion of some GPIO logic, and more device driver development are needed to make this a more complete port.
+        As of NuttX-6.28 more device driver development would be needed to make this a complete port, particularly to support  USB OTG.
       </p>
     </ul>
   </td>
@@ -2013,7 +2013,7 @@ nsh>
     <ul>
       <p>
         <b>STATUS:</b>
-          This port was released in NuttX 5.5.  
+          This port was released in NuttX 5.5.
           Features are the same as with the Eagle-100 LM3S6918 described above.
           The apps/examples/ostest configuration has been successfully verified and an
           NSH configuration with Telnet support is available.
@@ -2048,7 +2048,7 @@ nsh>
     <ul>
       <p>
         <b>STATUS:</b>
-          This port was released in NuttX 5.10. 
+          This port was released in NuttX 5.10.
           Features are the same as with the Eagle-100 LM3S6918 described above.
       </p>
      </ul>
@@ -2088,7 +2088,7 @@ nsh>
     <ul>
       <p>
         <b>STATUS:</b>
-          This port was will be released in NuttX 6.14. 
+          This port was will be released in NuttX 6.14.
       </p>
      </ul>
   </td>
@@ -2213,7 +2213,7 @@ nsh>
         <b>STATUS:</b>
         In progress.
         The following have been verified:
-        (1) Basic Cortex-M3 port, 
+        (1) Basic Cortex-M3 port,
         (2) Ethernet,
         (3) On-board LEDs
       </ul>
@@ -2860,7 +2860,7 @@ nsh>
   <td>
       <p>
         <b>Development Environments:</b>
-        1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS with Windows native toolchain, or 4) Native Windows. 
+        1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS with Windows native toolchain, or 4) Native Windows.
         All testing, however, has been performed using the NuttX DIY toolchain for Linux  or Cygwin is provided by the NuttX
         <a href="http://sourceforge.net/projects/nuttx/files/buildroot/">buildroot</a> package.
         As a result, that toolchain is recommended.
@@ -3239,7 +3239,7 @@ nsh>
   <td>
     <p>
       <b>Renesas M16C/26 Microcontroller</b>.
-      This port uses the Renesas SKP16C26 Starter kit and the GNU M32C toolchain. 
+      This port uses the Renesas SKP16C26 Starter kit and the GNU M32C toolchain.
       The development environment is either Linux or Cygwin under WinXP.
     </p>
     <ul>
@@ -3463,7 +3463,7 @@ avr, m68k, m68hc11, m68hc12, m9s12, blackfin, m32c, h8, and SuperH ports.</block
       page.
       This download may be used to build a NuttX-compatible ELF toolchain under Linux or Cygwin.
       That toolchain will support ARM, m68k, m68hc11, m68hc12, and SuperH ports.
-      The buildroot GIT may be accessed in the 
+      The buildroot GIT may be accessed in the
       <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/buildroot/">NuttX GIT</a>.
     </p>
    </td>
@@ -3479,7 +3479,7 @@ avr, m68k, m68hc11, m68hc12, m9s12, blackfin, m32c, h8, and SuperH ports.</block
   <td><br></td>
   <td>
     <p>
-      Also very usable is the Linux environment using the 
+      Also very usable is the Linux environment using the
       <a href="http://sdcc.sourceforge.net/">SDCC</a> compiler.
       The SDCC compiler provides support for the 8051/2, z80, hc08, and other microcontrollers.
       The SDCC-based logic is less well exercised and you will likely find some compilation
@@ -4176,7 +4176,7 @@ pascal-3.0 2011-05-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
 
     * nuttx/:  The Pascal add-on module now installs and builds under the
       apps/interpreters directory.  This means that the pascal-2.1 module is
-      incompatible with will all releases of NuttX prior to nuttx-6.0 where the 
+      incompatible with will all releases of NuttX prior to nuttx-6.0 where the
       apps/ module was introduced.
 </pre></ul>
 
