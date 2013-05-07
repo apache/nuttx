@@ -1937,7 +1937,7 @@ configs/pic32mx7mmb
   http://www.mikroe.com/ for further information.
 
 configs/pirelli_dpl10
-  This directory contains the board support for pirelli dpl10 phones.
+  This directory contains the board support for Pirelli "Discus" DP-L10 phones.
   It is a variant of the compal_e88 config with the small changes for the
   differences in the board.
 
