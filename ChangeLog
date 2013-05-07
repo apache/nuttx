@@ -4683,3 +4683,8 @@
 	* arch/arm/src/kinetis/kinetis_pin.c and arch/arm/src/kinetis/kinetis_internal.h:
 	  The Kinetis GPIO logic had some of the same issues as did the
 	  Kinetis L (2013-5-6).
+	* arch/arm/src/stm32/stm32_idle.c: Add an option to conditionally disable
+	  the "wfi" sleep mode.  This is needed with certain JTAG debuggers to
+	  to prevent the debug session from begin disconnected.  From Ken Pettit
+	  (2013-5-7).
+
