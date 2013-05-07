@@ -202,9 +202,11 @@ void up_idle(void)
    */
 
 #if !defined(CONFIG_STM32_CONNECTIVITYLINE) || !defined(CONFIG_STM32_ETHMAC)
+#if !(defined(CONFIG_DEBUG_SYMBOLS) && defined(CONFIG_STM32_DISABLE_IDLE_SLEEP_DURING_DEBUG))
   BEGIN_IDLE();
   asm("WFI");
   END_IDLE();
+#endif
 #endif
 #endif
 }
