@@ -115,6 +115,70 @@
 #  define GPIO_OTGFS_OVER  (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTD|GPIO_PIN5)
 #endif
 
+/* TFT LCD Controller GPIOs
+ *
+ * PE8,  LCD_RST -- Low value holds in reset
+ * PE15, LCD_CS  -- Low value selects LCD
+ * PE9,  LCD_BLED -- Backlight -- Low value turns off
+ * PE12, RS -- High values selects data
+ *
+ * PE10, PMPRD -- Low to read from the LCD
+ * PE11, PMPWR -- Low to write to the LCD
+ *
+ */
+
+#define GPIO_LCD_RST    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_PORTE|GPIO_PIN8)
+
+#define GPIO_LCD_CS     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN15)
+#define LCD_CS_PIN      GPIO_PIN15
+
+#define GPIO_LCD_BLED   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_PORTE|GPIO_PIN9)
+
+#define GPIO_LCD_RS     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_PORTE|GPIO_PIN12)
+#define LCD_RS_PIN      GPIO_PIN12
+
+#define GPIO_LCD_PMPRD  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN10)
+#define LCD_PMPRD_PIN   GPIO_PIN10
+
+#define GPIO_LCD_PMPWR  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN11)
+#define LCD_PMPWR_PIN   GPIO_PIN11
+
+#define GPIO_LCD_T_D0   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_PORTE|GPIO_PIN0)
+
+#define GPIO_LCD_T_D1   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_PORTE|GPIO_PIN1)
+
+#define GPIO_LCD_T_D2   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_PORTE|GPIO_PIN2)
+
+#define GPIO_LCD_T_D3   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_PORTE|GPIO_PIN3)
+
+#define GPIO_LCD_T_D4   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_PORTE|GPIO_PIN4)
+
+#define GPIO_LCD_T_D5   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_PORTE|GPIO_PIN5)
+
+#define GPIO_LCD_T_D6   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_PORTE|GPIO_PIN6)
+
+#define GPIO_LCD_T_D7   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_PORTE|GPIO_PIN7)
+
+#define GPIO_TP_DRIVEA  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN8)
+
+#define GPIO_TP_DRIVEB  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN9)
+
 /****************************************************************************************************
  * Public Types
  ****************************************************************************************************/
@@ -165,6 +229,31 @@ void weak_function stm32_usbinitialize(void);
 #error "The Mikroe-STM32F4 board does not support HOST OTG, only device!"
 #endif
 
+/****************************************************************************************************
+ * Name: stm32_lcdinitialize
+ *
+ * Description:
+ *   Initialize the LCD.  This function should be called early in the boot sequendce -- Even if the
+ *   LCD is not enabled.  In that case we should at a minimum at least disable the LCD backlight.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_LCD_MIO283QT2
+void stm32_lcdinitialize(void);
+#endif
+
+/****************************************************************************************************
+ * Name:  up_lcdinitialize
+ *
+ * Description:
+ *   Initialize the LCD video hardware.  The initial state of the LCD is fully initialized, display
+ *   memory cleared, and the LCD ready to use, but with the power setting at 0 (full off).
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_LCD_MIO283QT2
+int up_lcdinitialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_MIKROE_STM32F4_SRC_MIKROE_STM32F4_INTERNAL_H */
-

@@ -405,6 +405,16 @@ There are two version of the FPU support built into the STM32 port.
    +ENTRY(__start)         /* Treat __start as the anchor for dead code stripping */
    +EXTERN(_vectors)       /* Force the vectors to be included in the output */
 
+MIO283QT-2
+==========
+
+The Mikroe-SMT32F4 board as an on-board MIO283QT-2 TFT LCD that can be
+configured and used.  This is a 320x240 resolution display with color
+capability to 262K colors, though the mio283qt-2 driver in NuttX only
+supports 16-bit color depth, or 65K colors.  Changes to both the 
+mio283qt-2 driver and the driver interface layer would need to be made
+to support 24 BPP mode.
+
 CFLAGS
 ------
 
@@ -738,6 +748,54 @@ instead of configure.sh:
 
 Where <subdir> is one of the following:
 
+  fulldemo
+  --------
+  This is an example that includes an NSH shell over USB that also 
+  enables all features of the Mikroe-STM32F4 board including the LCD,
+  on-board 1M Flash with SMART filesystem, Aux RS-232 serial port on the
+  expansion header, etc.  A couple of the NX graphics commands are made
+  available via the NSH prompt for performing LCD demonstrations, and the
+  nximage example is used as a splash-screen at startup.
+
+
+  nsh
+  ---
+  This is an NSH example that uses USART2 as the console.  Note that
+  the Mikroe-STM32F4 board doesn't actually have onboard line drivers
+  or a connector for USART2, but it does route the USART2 signals to
+  the expansion header.  To use this demo, you would need to connect
+  an external 3.3V RS-232 line driver to the USART's I/O lines on the
+  expansion header.
+
+  NOTE:  This demo doesn't quite work yet.  I can get output to the
+         USART, but so far, I have not gotten nsh to actually come up.
+
+
+  nx
+  --
+    An example using the NuttX graphics system (NX).  This example
+    focuses on general window controls, movement, mouse and keyboard
+    input.
+
+      CONFIG_LCD_LANDSCAPE=y        : 320x240 landscape orientation
+      CONFIG_LCD_MIO283QT2
+
+  nxlines:
+  ------
+    An example using the NuttX graphics system (NX).   This example focuses on
+    placing lines on the background in various orientations using the
+    on-board TFT LCD.
+
+      CONFIG_LCD_LANDSCAPE=y        : 320x240 landscape orientation
+      CONFIG_LCD_MIO283QT2
+
+  nxtext:
+  ------
+    Another example using the NuttX graphics system (NX).   This
+    example focuses on placing text on the background while pop-up
+    windows occur.  Text should continue to update normally with
+    or without the popup windows present.
+
   usbnsh:
   -------
 
@@ -810,40 +868,3 @@ Where <subdir> is one of the following:
       CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
       CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
 
-  winbuild:
-  --------
-
-    This is a version of the apps/example/ostest, but configure to build natively
-    in the Windows CMD shell.
-
-    NOTES:
-
-    1. The beginnings of a Windows native build are in place but still not full
-       usable as of this writing.  The windows native build logic is currently
-       separate and must be started by:
-
-        make -f Makefile.win
-
-      This build:
-
-        - Uses all Windows style paths
-        - Uses primarily Windows batch commands from cmd.exe, with
-        - A few extensions from GNUWin32 (or MSYS is you prefer)
-
-      In this build, you cannot use a Cygwin or MSYS shell. Rather the build must
-      be performed in a Windows console. Here is a better shell than than the
-      standard issue, CMD.exe shell:  ConEmu which can be downloaded from:
-      http://code.google.com/p/conemu-maximus5/
-
-       CONFIG_HOST_WINDOWS=y         : Windows
-       CONFIG_WINDOWS_NATIVE=y       : Native Windows environment
-       CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-
-      Build Tools.  The build still relies on some Unix-like commands.  I use
-      the GNUWin32 tools that can be downloaded from http://gnuwin32.sourceforge.net/.
-      The MSYS tools are probably also a option but are likely lower performance
-      since they are based on Cygwin 1.3.
-
-      Host Compiler:  I use the MingGW compiler which can be downloaded from
-      http://www.mingw.org/.  If you are using GNUWin32, then it is recommended
-      the you not install the optional MSYS components as there may be conflicts.

@@ -71,6 +71,12 @@
 
 void stm32_boardinitialize(void)
 {
+  /* Configure GPIOs for controlling the LCD */
+
+#ifdef CONFIG_LCD_MIO283QT2
+  stm32_lcdinitialize();
+#endif
+
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
    * stm32_spiinitialize() has been brought into the link.
    */
