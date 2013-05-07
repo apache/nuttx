@@ -4687,4 +4687,7 @@
 	  the "wfi" sleep mode.  This is needed with certain JTAG debuggers to
 	  to prevent the debug session from begin disconnected.  From Ken Pettit
 	  (2013-5-7).
-
+* configs/mikroe-stm32f4/fulldemo/, nx/, nxlines/, nxtext/:  Add more
+  configurationsf for the Mikroelektronika Multimedia STM32-M4 board.
+  From Ken Pettit (2013-5-7).
+* 

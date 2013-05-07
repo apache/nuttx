@@ -182,6 +182,13 @@ config NOKIA6100_RGBORD
 		Required LCD driver settings:
 endif
 
+config LCD_MIO283QT2
+	bool "MIO283QT-2 TFT LCD Display Module"
+	default n
+	---help---
+		OLED Display Module, MIO283QT-2, Multi-Inno Technology, Co.
+		based on the Himax HX8347-D LCD controller.
+
 config LCD_UG9664HSWAG01
 	bool "UG-9664HSWAG01 OLED Display Module"
 	default n

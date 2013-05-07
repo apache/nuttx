@@ -90,7 +90,7 @@ ifeq ($(CONFIG_INPUT),y)
 CSRCS += up_touchscreen.c
 endif
 
-ifeq ($(ARCH_CONFIG_LCD_MIO283QT2),y)
+ifeq ($(CONFIG_LCD_MIO283QT2),y)
 CSRCS += up_mio283qt2.c
 endif
 

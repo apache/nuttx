@@ -8,6 +8,8 @@
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
+ *   Modified: 2013 by Ken Pettit to support Mikroe-STM32F4 board.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -57,6 +59,7 @@
 
 #include "up_arch.h"
 #include "stm32.h"
+#include "stm32_gpio.h"
 #include "mikroe-stm32f4-internal.h"
 
 #ifdef CONFIG_LCD_MIO283QT2
@@ -65,10 +68,6 @@
  * Pre-processor Definitions
  **************************************************************************************/
 /* Configuration **********************************************************************/
-
-#ifndef CONFIG_PIC32MX_PMP
-#  error "CONFIG_PIC32MX_PMP is required to use the LCD"
-#endif
 
 /* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
  * also be enabled.
@@ -84,58 +83,39 @@
 #  undef CONFIG_DEBUG_LCD
 #endif
 
-/* PIC32MX7MMB LCD Hardware Definitions ***********************************************/
+/* Mikroe-STM32F4 Hardware Definitions ************************************************/
 /* --- ---------------------------------- -------------------- ------------------------
  * PIN CONFIGURATIONS                     SIGNAL NAME          ON-BOARD CONNECTIONS
  *     (Family Data Sheet Table 1-1)     (PIC32MX7 Schematic)
  * --- ---------------------------------- -------------------- ------------------------
- *   6 RC1/T2CK                           LCD_RST              TFT display
- *  43 PMA1/AETXD3/AN14/ERXD2/PMALH/RB14  LCD-CS#              TFT display, HDR2 pin 3
- *  77 OC3/RD2                            LCD_BLED             LCD backlight LED
- *  44 PMA0/AETXD2/AN15/CN12/ERXD3/OCFB/  LCD-RS               TFT display
- *     PMALL/RB15
+ *  39 PE8                                LCD_RST              TFT display
+ *  46 PE15                               LCD-CS#              TFT display
+ *  40 PE9                                LCD_BLED             LCD backlight LED
+ *  43 PE12                               LCD-RS               TFT display
  *
- *  34 PMA13/AN10/RB10/CVREFOUT           LCD-YD               TFT display
- *  35 PMA12/AETXERR/AN11/ERXERR/RB11     LCD-XR               TFT display
- *  41 PMA11/AECRS/AN12/ERXD0/RB12        LCD-YU               TFT display
- *  42 PMA10/AECOL/AN13/ERXD1/RB13        LCD-XL               TFT display
  *
- *  93 PMD0/RE0                           PMPD0                TFT display, HDR1 pin 18
- *  94 PMD1/RE1                           PMPD1                TFT display, HDR1 pin 17
- *  98 PMD2/RE2                           PMPD2                TFT display, HDR1 pin 16
- *  99 PMD3/RE3                           PMPD3                TFT display, HDR1 pin 15
- * 100 PMD4/RE4                           PMPD4                TFT display, HDR1 pin 14
- *   3 PMD5/RE5                           PMPD5                TFT display, HDR1 pin 13
- *   4 PMD6/RE6                           PMPD6                TFT display, HDR1 pin 12
- *   5 PMD7/RE7                           PMPD7                TFT display, HDR1 pin 11
- *  90 PMD8/C2RX/RG0                      PMPD8                TFT display, HDR1 pin 10
- *  89 PMD9/C2TX/ETXERR/RG1               PMPD9                TFT display, HDR1 pin 9
- *  88 PMD10/C1TX/ETXD0/RF1               PMPD10               TFT display, HDR1 pin 8
- *  87 PMD11/C1RX/ETXD1/RF0               PMPD11               TFT display, HDR1 pin 7
- *  79 PMD12/ETXD2/IC5/RD12               PMPD12               TFT display, HDR1 pin 6
- *  80 PMD13/CN19/ETXD3/RD13              PMPD13               TFT display, HDR1 pin 5
- *  83 PMD14/CN15/ETXEN/RD6               PMPD14               TFT display, HDR1 pin 4
- *  84 PMD15/CN16/ETXCLK/RD7              PMPD15               TFT display, HDR1 pin 3
+ *  97 RE0                                T_D0                 TFT display
+ *  98 RE1                                T_D1                 TFT display
+ *   1 RE2                                T_D2                 TFT display
+ *   2 RE3                                T_D3                 TFT display
+ *   3 RE4                                T_D4                 TFT display
+ *   4 RE5                                T_D5                 TFT display
+ *   5 RE6                                T_D6                 TFT display
+ *  38 RE7                                T_D7                 TFT display
  *
- *  82 CN14/PMRD/RD5                      PMPRD
- *  81 CN13/OC5/PMWR/RD4                  PMPWR
+ *  41 PE10                               PMPRD
+ *  42 RE11                               PMPWR
+ *
+ * TOUCHSCREEN PIN CONFIGURATIONS
+ * PIN CONFIGURATIONS                     SIGNAL NAME          ON-BOARD CONNECTIONS
+ * --- ---------------------------------- -------------------- ------------------------
+ *  35 PB0                                LCD-YD               TFT display
+ *   ?                                    LCD-XR               TFT display
+ *   ?                                    LCD-YU               TFT display
+ *  36 PB1                                LCD-XL               TFT display
+ *  95 PB8                                DRIVEA               TFT display
+ *  96 PB9                                DRIVEB               TFT display
  */
-
-/* RC1, Reset -- Low value holds in reset */
-
-#define GPIO_LCD_RST  (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTC|GPIO_PIN1)
-
-/* RB14, LCD select -- Low value selects LCD */
-
-#define GPIO_LCD_CS   (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTB|GPIO_PIN14)
-
-/* RD2, Backlight -- Low value turns off */
-
-#define GPIO_LCD_BLED (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTD|GPIO_PIN2)
-
-/* RB15, RS -- High values selects data */
-
-#define GPIO_LCD_RS   (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTB|GPIO_PIN15)
 
 /* Debug ******************************************************************************/
 
@@ -151,12 +131,11 @@
  * Private Type Definition
  **************************************************************************************/
 
-struct pic32mx7mmb_dev_s
+struct stm32f4_dev_s
 {
   struct mio283qt2_lcd_s dev;      /* The externally visible part of the driver */
-  bool                   data;     /* true=data selected */
-  bool                   selected; /* true=LCD selected */
-  bool                   reading;  /* true=We are in a read sequence */
+  bool                   grammode; /* true=Writing to GRAM (16-bit write vs 8-bit) */
+  bool                   firstread;/* First GRAM read? */
   FAR struct lcd_dev_s  *drvr;     /* The saved instance of the LCD driver */
 };
 
@@ -165,14 +144,14 @@ struct pic32mx7mmb_dev_s
  **************************************************************************************/
 /* Low Level LCD access */
 
-static void pic32mx_select(FAR struct mio283qt2_lcd_s *dev);
-static void pic32mx_deselect(FAR struct mio283qt2_lcd_s *dev);
-static void pic32mx_index(FAR struct mio283qt2_lcd_s *dev, uint8_t index);
-#ifndef CONFIG_MIO283QT2_WRONLY
-static uint16_t pic32mx_read(FAR struct mio283qt2_lcd_s *dev);
+static void stm32_select(FAR struct mio283qt2_lcd_s *dev);
+static void stm32_deselect(FAR struct mio283qt2_lcd_s *dev);
+static void stm32_index(FAR struct mio283qt2_lcd_s *dev, uint8_t index);
+#if !defined(CONFIG_MIO283QT2_WRONLY) && CONFIG_LCD_NOGETRUN != 1
+static uint16_t stm32_read(FAR struct mio283qt2_lcd_s *dev);
 #endif
-static void pic32mx_write(FAR struct mio283qt2_lcd_s *dev, uint16_t data);
-static void pic32mx_backlight(FAR struct mio283qt2_lcd_s *dev, int power);
+static void stm32_write(FAR struct mio283qt2_lcd_s *dev, uint16_t data);
+static void stm32_backlight(FAR struct mio283qt2_lcd_s *dev, int power);
 
 /**************************************************************************************
  * Private Data
@@ -180,234 +159,330 @@ static void pic32mx_backlight(FAR struct mio283qt2_lcd_s *dev, int power);
 
 /* This is the driver state structure (there is no retained state information) */
 
-static struct pic32mx7mmb_dev_s g_pic32mx7mmb_lcd =
+static struct stm32f4_dev_s g_stm32f4_lcd =
 {
   {
-    .select    = pic32mx_select,
-    .deselect  = pic32mx_deselect,
-    .index     = pic32mx_index,
-#ifndef CONFIG_MIO283QT2_WRONLY
-    .read      = pic32mx_read,
+    .select    = stm32_select,
+    .deselect  = stm32_deselect,
+    .index     = stm32_index,
+#if !defined(CONFIG_MIO283QT2_WRONLY) && CONFIG_LCD_NOGETRUN != 1
+    .read      = stm32_read,
 #endif
-    .write     = pic32mx_write,
-    .backlight = pic32mx_backlight
+    .write     = stm32_write,
+    .backlight = stm32_backlight
   }
 };
+
+static uint32_t * volatile g_portsetreset = (uint32_t *) STM32_GPIOE_BSRR;
 
 /**************************************************************************************
  * Private Functions
  **************************************************************************************/
 
 /**************************************************************************************
- * Name: pic32mx_command
+ * Name: stm32_tinydelay
+ *
+ * Description:
+ *   Delay for a few hundered NS.
+ *
+ **************************************************************************************/
+
+static void stm32_tinydelay(void)
+{
+  volatile uint8_t x = 0;
+
+  for (x = 1; x > 0; x--)
+    ;
+}
+
+/**************************************************************************************
+ * Name: stm32_command
  *
  * Description:
  *   Configure to write an LCD command
  *
  **************************************************************************************/
 
-static void pic32mx_command(FAR struct pic32mx7mmb_dev_s *priv)
+static inline void stm32_command(void)
 {
+  uint32_t  * volatile portsetreset = (uint32_t *) STM32_GPIOE_BSRR;
+
   /* Low selects command */
 
-  if (priv->data)
-    {
-      pic32mx_gpiowrite(GPIO_LCD_RS, false);
-
-      priv->data    = false;  /* Command, not data */
-      priv->reading = false;  /* No read sequence in progress */
-    }
+  *portsetreset = (1 << LCD_RS_PIN) << 16;
 }
 
 /**************************************************************************************
- * Name: pic32mx_data
+ * Name: stm32_data
  *
  * Description:
  *   Configure to read or write LCD data
  *
  **************************************************************************************/
 
-static void pic32mx_data(FAR struct pic32mx7mmb_dev_s *priv)
+static inline void stm32_data(void)
 {
   /* Hi selects data */
 
-  if (!priv->data)
-    {
-      pic32mx_gpiowrite(GPIO_LCD_RS, true);
-
-      priv->data    = true;   /* Data, not command */
-      priv->reading = false;  /* No read sequence in progress */
-    }
+  *g_portsetreset = 1 << LCD_RS_PIN;
 }
 
 /**************************************************************************************
- * Name: pic32mx_data
- *
- * Description:
- *   Wait until the PMP is no longer busy
- *
- **************************************************************************************/
-
-static void pic32mx_busywait(void)
-{
-  while ((getreg32(PIC32MX_PMP_MODE) & PMP_MODE_BUSY) != 0);
-}
-
-/**************************************************************************************
- * Name: pic32mx_select
+ * Name: stm32_select
  *
  * Description:
  *   Select the LCD device
  *
  **************************************************************************************/
 
-static void pic32mx_select(FAR struct mio283qt2_lcd_s *dev)
+static void stm32_select(FAR struct mio283qt2_lcd_s *dev)
 {
-  FAR struct pic32mx7mmb_dev_s *priv = (FAR struct pic32mx7mmb_dev_s *)dev;
-
   /* CS low selects */
 
-  if (!priv->selected)
-    {
-      pic32mx_gpiowrite(GPIO_LCD_CS, false);
-
-      priv->selected = true;  /* LCD selected */
-      priv->reading  = false; /* No read sequence in progress */
-    }
+  *g_portsetreset = (1 << LCD_CS_PIN) << 16;
 }
 
 /**************************************************************************************
- * Name: pic32mx_deselect
+ * Name: stm32_deselect
  *
  * Description:
  *   De-select the LCD device
  *
  **************************************************************************************/
 
-static void pic32mx_deselect(FAR struct mio283qt2_lcd_s *dev)
+static void stm32_deselect(FAR struct mio283qt2_lcd_s *dev)
 {
-  FAR struct pic32mx7mmb_dev_s *priv = (FAR struct pic32mx7mmb_dev_s *)dev;
-
   /* CS high de-selects */
 
-  if (priv->selected)
-    {
-      pic32mx_gpiowrite(GPIO_LCD_CS, true);
-
-      priv->selected = false; /* LCD not selected */
-      priv->reading  = false; /* No read sequence in progress */
-    }
+  *g_portsetreset = 1 << LCD_CS_PIN;
 }
 
 /**************************************************************************************
- * Name: pic32mx_index
+ * Name: stm32_index
  *
  * Description:
  *   Set the index register
  *
  **************************************************************************************/
 
-static void pic32mx_index(FAR struct mio283qt2_lcd_s *dev, uint8_t index)
+static void stm32_index(FAR struct mio283qt2_lcd_s *dev, uint8_t index)
 {
-  FAR struct pic32mx7mmb_dev_s *priv = (FAR struct pic32mx7mmb_dev_s *)dev;
+  FAR struct stm32f4_dev_s *priv = (FAR struct stm32f4_dev_s *)dev;
 
-  /* Make sure that the PMP is not busy from the last transaction.  Read data is not
-   * available until the busy bit becomes zero.
+  /* Setup to write in command mode (vs data mode) */
+
+  stm32_command();
+
+  /* Write the index register to the 8-bit GPIO pin bus.  We are violating the
+   * datasheet here a little by driving the WR pin low at the same time as
+   * the data, but the fact is that all ASIC logic will latch on the rising
+   * edge of WR anyway, not the falling edge.  We are just shaving off a few
+   * cycles every time this routine is called, which will be farirly often.
    */
 
-  pic32mx_busywait();
+  *g_portsetreset = index | ((uint8_t) (~index) << 16) |
+      ((1 << LCD_PMPWR_PIN) << 16);
 
-  /* Write the 8-bit command (on the 16-bit data bus) */
+  /* Record if we are accessing GRAM or not (16 vs 8 bit accesses)
+   * NOTE.  This also serves as a delay between WR low to WR high
+   * transition.
+   */
 
-  pic32mx_command(priv);
-  putreg16((uint16_t)index, PIC32MX_PMP_DIN);
+  priv->grammode = index == 0x22;
+  priv->firstread = true;
+
+  /* Now raise the WR line */
+
+  *g_portsetreset = (1 << LCD_PMPWR_PIN);
+
+  /* Back to data mode to read/write the data */
+
+  stm32_data();
 }
 
 /**************************************************************************************
- * Name: pic32mx_read
+ * Name: stm32_read
  *
  * Description:
  *   Read LCD data (GRAM data or register contents)
  *
  **************************************************************************************/
 
-#ifndef CONFIG_MIO283QT2_WRONLY
-static uint16_t pic32mx_read(FAR struct mio283qt2_lcd_s *dev)
+#if !defined(CONFIG_MIO283QT2_WRONLY) && CONFIG_LCD_NOGETRUN != 1
+static uint16_t stm32_read(FAR struct mio283qt2_lcd_s *dev)
 {
-  FAR struct pic32mx7mmb_dev_s *priv = (FAR struct pic32mx7mmb_dev_s *)dev;
+  FAR struct stm32f4_dev_s *priv = (FAR struct stm32f4_dev_s *)dev;
+  uint32_t  * volatile portsetreset = (uint32_t *) STM32_GPIOE_BSRR;
+  uint32_t  * volatile portmode = (uint32_t *) STM32_GPIOE_MODER;
+  uint32_t  * volatile portinput = (uint32_t *) STM32_GPIOE_IDR;
   uint16_t data;
 
-  /* Make sure that the PMP is not busy from the last transaction.  Read data is not
-   * available until the busy bit becomes zero.
-   */
+  /* Set the I/O Port to input mode.  Ugly, but fast. */
 
-  pic32mx_busywait();
+  *portmode &= 0xFFFF0000;
 
-  /* Read 16-bits of data */
+  /* Read the data */
 
-  pic32mx_data(priv);
-  data = getreg16(PIC32MX_PMP_DIN);
+  *portsetreset = (1 << LCD_PMPRD_PIN) << 16;
+  stm32_tinydelay();
+  data = *portinput & 0x00FF;
+  *portsetreset = (1 << LCD_PMPRD_PIN);
 
-  /* We need to discard the first 16-bits of data that we read and re-read inorder
-   * to get valid data (that is just the way that the PMP works).
-   */
+  /* Test if a 16-bit read is needed (GRAM mode) */
 
-  if (!priv->reading)
+  if (priv->grammode)
     {
-      data = getreg16(PIC32MX_PMP_DIN);
+      /* If this is the 1st GRAM read, then discard the dummy byte */
+
+      if (priv->firstread)
+        {
+          priv->firstread = false;
+          *portsetreset = (1 << LCD_PMPRD_PIN) << 16;
+          stm32_tinydelay();
+          data = *portinput;
+          *portsetreset = (1 << LCD_PMPRD_PIN);
+       }
+
+      /* Okay, a 16-bit read is actually a 24-bit read from the LCD.
+       * this is because the read color format of the MIO283QT-2 is a bit
+       * different than the 16-bit write color format.  During a read,
+       * the R,G and B samples are read on subsequent bytes, and the
+       * data is MSB aligned.  We must re-construct the 16-bit 565 data.
+       */
+
+      /* Clip RED sample to 5-bits and shit to MSB */
+
+      data = (data & 0xF8) << 8;
+
+      /* Now read Green sample */
+
+      *portsetreset = (1 << LCD_PMPRD_PIN) << 16;
+      stm32_tinydelay();
+      data |= (*portinput & 0x00FC) << 3;
+      *portsetreset = (1 << LCD_PMPRD_PIN);
+
+      /* Now read Blue sample */
+
+      *portsetreset = (1 << LCD_PMPRD_PIN) << 16;
+      stm32_tinydelay();
+      data |= (*portinput & 0x00F8) >> 3;
+      *portsetreset = (1 << LCD_PMPRD_PIN);
     }
+
+  /* Put the port back in output mode.  Ugly, but fast. */
+
+  *portmode |= 0x00005555;
 
   return data;
 }
 #endif
 
 /**************************************************************************************
- * Name: pic32mx_write
+ * Name: stm32_write
  *
  * Description:
  *   Write LCD data (GRAM data or register contents)
  *
  **************************************************************************************/
 
-static void pic32mx_write(FAR struct mio283qt2_lcd_s *dev, uint16_t data)
+static void stm32_write(FAR struct mio283qt2_lcd_s *dev, uint16_t data)
 {
-  FAR struct pic32mx7mmb_dev_s *priv = (FAR struct pic32mx7mmb_dev_s *)dev;
+  FAR struct stm32f4_dev_s *priv = (FAR struct stm32f4_dev_s *)dev;
 
-  /* Make sure that the PMP is not busy from the last transaction */
+  /* Write the data register to the 8-bit GPIO pin bus.  We are violating the
+   * datasheet here a little by driving the WR pin low at the same time as
+   * the data, but the fact is that all ASIC logic will latch on the rising
+   * edge of WR anyway, not the falling edge.  We are just shaving off a few
+   * cycles every time this routine is called, which will be farirly often.
+   */
 
-  pic32mx_busywait();
+  if (priv->grammode)
+    {
+      /* Need to write 16-bit pixel data (16 BPP).  Write the upper pixel data first */
 
-  /* Write 16-bits of data */
+      *g_portsetreset = ((data>>8) & 0xFF) | (((~data>>8) & 0xFF) << 16) |
+        ((1 << LCD_PMPWR_PIN) << 16);
+      stm32_tinydelay();
+      *g_portsetreset = (1 << LCD_PMPWR_PIN);
+    }
 
-  pic32mx_data(priv);
-  putreg16(data, PIC32MX_PMP_DIN);
+  /* Now write the lower 8-bit of data */
 
-  /* We are not in a write sequence */
-
-  priv->reading = false;
+  *g_portsetreset = (data & 0xFF) | ((~data & 0xFF) << 16) |
+    ((1 << LCD_PMPWR_PIN) << 16);
+  stm32_tinydelay();
+  *g_portsetreset = (1 << LCD_PMPWR_PIN);
 }
 
 /**************************************************************************************
- * Name: pic32mx_write
+ * Name: stm32_backlight
  *
  * Description:
- *   Write LCD data (GRAM data or register contents)
+ *   Set the backlight power level.
  *
  **************************************************************************************/
 
-static void pic32mx_backlight(FAR struct mio283qt2_lcd_s *dev, int power)
+static void stm32_backlight(FAR struct mio283qt2_lcd_s *dev, int power)
 {
   /* For now, we just control the backlight as a discrete.  Pulse width modulation
    * would be required to vary the backlight level.  A low value turns the backlight
    * off.
    */
 
-  pic32mx_gpiowrite(GPIO_LCD_BLED, power > 0);
+  stm32_gpiowrite(GPIO_LCD_BLED, power > 0);
 }
 
 /**************************************************************************************
  * Public Functions
  **************************************************************************************/
+
+/**************************************************************************************
+ * Name: stm32_lcdinitialize
+ *
+ * Description:
+ *   Initialize the LCD.  This function should be called early in the boot
+ *   sequendce -- Even if the LCD is not enabled.  In that case we should
+ *   at a minimum at least disable the LCD backlight.
+ *
+ **************************************************************************************/
+
+void stm32_lcdinitialize(void)
+{
+  /* Configure all LCD discrete controls.  LCD will be left in this state:
+   * 1. Held in reset,
+   * 2. Not selected,
+   * 3. Backlight off,
+   * 4. Command selected.
+   */
+
+#ifdef CONFIG_LCD_MIO283QT2
+   stm32_configgpio(GPIO_LCD_RST);
+   stm32_configgpio(GPIO_LCD_CS);
+   stm32_configgpio(GPIO_LCD_BLED);
+   stm32_gpiowrite(GPIO_LCD_BLED, false);
+   stm32_configgpio(GPIO_LCD_RS);
+   stm32_configgpio(GPIO_LCD_PMPWR);
+   stm32_configgpio(GPIO_LCD_PMPRD);
+
+   /* Configure PE0-7 for output */
+
+   stm32_configgpio(GPIO_LCD_T_D0);
+   stm32_configgpio(GPIO_LCD_T_D1);
+   stm32_configgpio(GPIO_LCD_T_D2);
+   stm32_configgpio(GPIO_LCD_T_D3);
+   stm32_configgpio(GPIO_LCD_T_D4);
+   stm32_configgpio(GPIO_LCD_T_D5);
+   stm32_configgpio(GPIO_LCD_T_D6);
+   stm32_configgpio(GPIO_LCD_T_D7);
+
+#else
+  /* Just configure the backlight control as an output and turn off the
+   * backlight for now.
+   */
+
+   stm32_configgpio(GPIO_LCD_BLED);
+#endif
+}
 
 /**************************************************************************************
  * Name:  up_lcdinitialize
@@ -421,66 +496,37 @@ static void pic32mx_backlight(FAR struct mio283qt2_lcd_s *dev, int power)
 
 int up_lcdinitialize(void)
 {
-  uint32_t regval;
-
   /* Only initialize the driver once.  NOTE: The LCD GPIOs were already configured
-   * by pic32mx_lcdinitialize.
+   * by stm32_lcdinitialize.
    */
 
-  if (!g_pic32mx7mmb_lcd.drvr)
+  if (!g_stm32f4_lcd.drvr)
     {
       lcdvdbg("Initializing\n");
 
       /* Hold the LCD in reset (active low)  */
 
-      pic32mx_gpiowrite(GPIO_LCD_RST, false);
-
-      /* Configure PMP to support the LCD */
-
-      putreg32(0, PIC32MX_PMP_MODE);
-      putreg32(0, PIC32MX_PMP_AEN);
-      putreg32(0, PIC32MX_PMP_CON);
-
-      /* Set LCD timing values, PMP master mode 2, 16-bit mode, no address
-       * increment, and no interrupts.
-       */
-
-      regval = (PMP_MODE_WAITE_RD(0) | PMP_MODE_WAITM(3) | PMP_MODE_WAITB_1TPB |
-                PMP_MODE_MODE_MODE2 | PMP_MODE_MODE16 | PMP_MODE_INCM_NONE |
-                PMP_MODE_IRQM_NONE);
-      putreg32(regval, PIC32MX_PMP_MODE);
-
-      /* Enable the PMP  for reading and writing */
-
-      regval = (PMP_CON_CSF_ADDR1415 | PMP_CON_PTRDEN | PMP_CON_PTWREN |
-                PMP_CON_ADRMUX_NONE | PMP_CON_ON);
-      putreg32(regval, PIC32MX_PMP_CON);
+      stm32_gpiowrite(GPIO_LCD_RST, false);
 
       /* Bring the LCD out of reset */
 
       up_mdelay(5);
-      pic32mx_gpiowrite(GPIO_LCD_RST, true);
+      stm32_gpiowrite(GPIO_LCD_RST, true);
 
       /* Configure and enable the LCD */
 
       up_mdelay(50);
-      g_pic32mx7mmb_lcd.drvr = mio283qt2_lcdinitialize(&g_pic32mx7mmb_lcd.dev);
-      if (!g_pic32mx7mmb_lcd.drvr)
+      g_stm32f4_lcd.drvr = mio283qt2_lcdinitialize(&g_stm32f4_lcd.dev);
+      if (!g_stm32f4_lcd.drvr)
         {
           lcddbg("ERROR: mio283qt2_lcdinitialize failed\n");
           return -ENODEV;
         }
     }
 
-  /* Clear the display (setting it to the color 0=black) */
-
-#if 0 /* Already done in the driver */
-  mio283qt2_clear(g_pic32mx7mmb_lcd.drvr, 0);
-#endif
-
   /* Turn the display off */
 
-  g_pic32mx7mmb_lcd.drvr->setpower(g_pic32mx7mmb_lcd.drvr, 0);
+  g_stm32f4_lcd.drvr->setpower(g_stm32f4_lcd.drvr, 0);
   return OK;
 }
 
@@ -496,7 +542,7 @@ int up_lcdinitialize(void)
 FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
 {
   DEBUGASSERT(lcddev == 0);
-  return g_pic32mx7mmb_lcd.drvr;
+  return g_stm32f4_lcd.drvr;
 }
 
 /**************************************************************************************
@@ -511,41 +557,7 @@ void up_lcduninitialize(void)
 {
   /* Turn the display off */
 
-  g_pic32mx7mmb_lcd.drvr->setpower(g_pic32mx7mmb_lcd.drvr, 0);
+  g_stm32f4_lcd.drvr->setpower(g_stm32f4_lcd.drvr, 0);
 }
 
 #endif /* CONFIG_LCD_MIO283QT2 */
-
-/****************************************************************************
- * Name: pic32mx_lcdinitialize
- *
- * Description:
- *   Initialize the LCD.  This function should be called early in the boot
- *   sequendce -- Even if the LCD is not enabled.  In that case we should
- *   at a minimum at least disable the LCD backlight.
- *
- ****************************************************************************/
-
-void pic32mx_lcdinitialize(void)
-{
-  /* Configure all LCD discrete controls.  LCD will be left in this state:
-   * 1. Held in reset,
-   * 2. Not selected,
-   * 3. Backlight off,
-   * 4. Command selected.
-   */
-
-#ifdef CONFIG_LCD_MIO283QT2
-   pic32mx_configgpio(GPIO_LCD_RST);
-   pic32mx_configgpio(GPIO_LCD_CS);
-   pic32mx_configgpio(GPIO_LCD_BLED);
-   pic32mx_configgpio(GPIO_LCD_RS);
-
-#else
-  /* Just configure the backlight control as an output and turn off the
-   * backlight for now.
-   */
-
-   pic32mx_configgpio(GPIO_LCD_BLED);
-#endif
-}

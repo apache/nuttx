@@ -331,5 +331,18 @@ int nsh_archinitialize(void)
     }
 #endif
 
+#ifdef CONFIG_LCD_MIO283QT2
+  /* Configure the TFT LCD module */
+
+  message("nsh_archinitialize: Initializing TFT LCD module\n");
+
+  ret = up_lcdinitialize();
+  if (ret != OK)
+    {
+      message("nsh_archinitialize: Failed to initialize TFT LCD module\n");
+    }
+
+#endif
+
   return OK;
 }
