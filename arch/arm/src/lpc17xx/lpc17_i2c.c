@@ -4,7 +4,7 @@
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-20 initial version
- * 
+ *
  * Derived from arch/arm/src/lpc31xx/lpc31_i2c.c
  *
  *   Author: David Hewson
@@ -199,7 +199,7 @@ static int i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
   DEBUGASSERT(dev != NULL);
   DEBUGASSERT(nbits == 7 );
 
-  priv->msg.addr  = addr<<1;
+  priv->msg.addr  = addr << 1;
   priv->msg.flags = 0 ;
 
   return OK;
@@ -221,12 +221,12 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
 
   DEBUGASSERT(dev != NULL);
 
-  priv->wrcnt = 0;
-  priv->rdcnt = 0;
-  priv->msg.addr &= ~0x01;
+  priv->wrcnt      = 0;
+  priv->rdcnt      = 0;
+  priv->msg.addr  &= ~0x01;
   priv->msg.buffer = (uint8_t*)buffer;
   priv->msg.length = buflen;
-  
+
   ret = i2c_start(priv);
 
   return ret > 0 ? OK : -ETIMEDOUT;
@@ -248,9 +248,9 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 
   DEBUGASSERT(dev != NULL);
 
-  priv->wrcnt = 0;
-  priv->rdcnt = 0;
-  priv->msg.addr |= 0x01;
+  priv->wrcnt      = 0;
+  priv->rdcnt      = 0;
+  priv->msg.addr  |= 0x01;
   priv->msg.buffer = buffer;
   priv->msg.length = buflen;
 
@@ -273,8 +273,8 @@ static int i2c_start(struct lpc17_i2cdev_s *priv)
 
   sem_wait(&priv->mutex);
 
-  putreg32(I2C_CONCLR_STAC|I2C_CONCLR_SIC, priv->base+LPC17_I2C_CONCLR_OFFSET);
-  putreg32(I2C_CONSET_STA, priv->base+LPC17_I2C_CONSET_OFFSET);
+  putreg32(I2C_CONCLR_STAC | I2C_CONCLR_SIC, priv->base + LPC17_I2C_CONCLR_OFFSET);
+  putreg32(I2C_CONSET_STA, priv->base + LPC17_I2C_CONSET_OFFSET);
 
   wd_start(priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (uint32_t)priv);
   sem_wait(&priv->wait);
@@ -291,7 +291,7 @@ static int i2c_start(struct lpc17_i2cdev_s *priv)
     }
 
   return ret;
-} 
+}
 
 /*******************************************************************************
  * Name: i2c_stop
@@ -305,7 +305,7 @@ static void i2c_stop(struct lpc17_i2cdev_s *priv)
 {
   if (priv->state != 0x38)
     {
-      putreg32(I2C_CONSET_STO|I2C_CONSET_AA,priv->base+LPC17_I2C_CONSET_OFFSET);
+      putreg32(I2C_CONSET_STO | I2C_CONSET_AA, priv->base + LPC17_I2C_CONSET_OFFSET);
     }
 
   sem_post(&priv->wait);
@@ -367,39 +367,39 @@ static int i2c_interrupt(int irq, FAR void *context)
       PANIC();
     }
 
-/* Reference UM10360 19.10.5 */    
+/* Reference UM10360 19.10.5 */
 
-  state = getreg32(priv->base+LPC17_I2C_STAT_OFFSET);
-  putreg32(I2C_CONCLR_SIC, priv->base+LPC17_I2C_CONCLR_OFFSET);
+  state = getreg32(priv->base + LPC17_I2C_STAT_OFFSET);
+  putreg32(I2C_CONCLR_SIC, priv->base + LPC17_I2C_CONCLR_OFFSET);
   priv->state = state;
   state &= 0xf8;
 
   switch (state)
     {
     case 0x00:      // Bus Error
-    case 0x20:     
+    case 0x20:
     case 0x30:
     case 0x38:
     case 0x48:
       i2c_stop(priv);
       break;
 
-    case 0x08:     // START 
-    case 0x10:     // Repeat START 
-      putreg32(priv->msg.addr, priv->base+LPC17_I2C_DAT_OFFSET);
-      putreg32(I2C_CONCLR_STAC, priv->base+LPC17_I2C_CONCLR_OFFSET);
+    case 0x08:     // START
+    case 0x10:     // Repeat START
+      putreg32(priv->msg.addr, priv->base + LPC17_I2C_DAT_OFFSET);
+      putreg32(I2C_CONCLR_STAC, priv->base + LPC17_I2C_CONCLR_OFFSET);
       break;
 
     case 0x18:
       priv->wrcnt = 0;
-      putreg32(priv->msg.buffer[0], priv->base+LPC17_I2C_DAT_OFFSET);
-      break; 
+      putreg32(priv->msg.buffer[0], priv->base + LPC17_I2C_DAT_OFFSET);
+      break;
 
     case 0x28:
       priv->wrcnt++;
       if (priv->wrcnt<priv->msg.length)
         {
-          putreg32(priv->msg.buffer[priv->wrcnt],priv->base+LPC17_I2C_DAT_OFFSET);
+          putreg32(priv->msg.buffer[priv->wrcnt], priv->base + LPC17_I2C_DAT_OFFSET);
         }
       else
         {
@@ -408,20 +408,20 @@ static int i2c_interrupt(int irq, FAR void *context)
       break;
 
     case 0x40:
-      priv->rdcnt = -1;
-      putreg32(I2C_CONSET_AA, priv->base+LPC17_I2C_CONSET_OFFSET);
+      priv->rdcnt = 0;
+      putreg32(I2C_CONSET_AA, priv->base + LPC17_I2C_CONSET_OFFSET);
       break;
 
     case 0x50:
-      priv->rdcnt++;
       if (priv->rdcnt < priv->msg.length)
         {
-          priv->msg.buffer[priv->rdcnt] = getreg32(priv->base+LPC17_I2C_BUFR_OFFSET);
+          priv->msg.buffer[priv->rdcnt] = getreg32(priv->base + LPC17_I2C_BUFR_OFFSET);
+          priv->rdcnt++;
         }
 
-      if (priv->rdcnt>=priv->msg.length-1)
+      if (priv->rdcnt >= priv->msg.length)
         {
-          putreg32(I2C_CONCLR_AAC|I2C_CONCLR_SIC, priv->base+LPC17_I2C_CONCLR_OFFSET);
+          putreg32(I2C_CONCLR_AAC | I2C_CONCLR_SIC, priv->base + LPC17_I2C_CONCLR_OFFSET);
         }
       break;
 
@@ -479,10 +479,10 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       regval &= ~SYSCON_PCLKSEL0_I2C0_MASK;
       regval |= (SYSCON_PCLKSEL_CCLK << SYSCON_PCLKSEL0_I2C0_SHIFT);
       putreg32(regval, LPC17_SYSCON_PCLKSEL0);
-        
+
       lpc17_configgpio(GPIO_I2C0_SCL);
       lpc17_configgpio(GPIO_I2C0_SDA);
-        
+
       putreg32(LPC17_CCLK/CONFIG_I2C0_FREQ/2, priv->base + LPC17_I2C_SCLH_OFFSET);
       putreg32(LPC17_CCLK/CONFIG_I2C0_FREQ/2, priv->base + LPC17_I2C_SCLL_OFFSET);
     }
@@ -527,10 +527,10 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       regval &= ~SYSCON_PCLKSEL1_I2C2_MASK;
       regval |= (SYSCON_PCLKSEL_CCLK << SYSCON_PCLKSEL1_I2C2_SHIFT);
       putreg32(regval, LPC17_SYSCON_PCLKSEL1);
-        
+
       lpc17_configgpio(GPIO_I2C2_SCL);
       lpc17_configgpio(GPIO_I2C2_SDA);
-        
+
       putreg32(LPC17_CCLK/CONFIG_I2C2_FREQ/2, priv->base + LPC17_I2C_SCLH_OFFSET);
       putreg32(LPC17_CCLK/CONFIG_I2C2_FREQ/2, priv->base + LPC17_I2C_SCLL_OFFSET);
     }
@@ -541,7 +541,7 @@ struct i2c_dev_s *up_i2cinitialize(int port)
       return NULL;
     }
 
-  putreg32(I2C_CONSET_I2EN, priv->base+LPC17_I2C_CONSET_OFFSET);
+  putreg32(I2C_CONSET_I2EN, priv->base + LPC17_I2C_CONSET_OFFSET);
 
   sem_init(&priv->mutex, 0, 1);
   sem_init(&priv->wait, 0, 0);
@@ -578,10 +578,10 @@ struct i2c_dev_s *up_i2cinitialize(int port)
 int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
 {
   struct lpc17_i2cdev_s *priv = (struct lpc17_i2cdev_s *) dev;
-  
+
   /* Disable I2C */
 
-  putreg32(I2C_CONCLRT_I2ENC, priv->base+LPC17_I2C_CONCLR_OFFSET);
+  putreg32(I2C_CONCLRT_I2ENC, priv->base + LPC17_I2C_CONCLR_OFFSET);
 
   /* Reset data structures */
 
