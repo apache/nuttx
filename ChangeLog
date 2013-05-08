@@ -4687,7 +4687,11 @@
 	  the "wfi" sleep mode.  This is needed with certain JTAG debuggers to
 	  to prevent the debug session from begin disconnected.  From Ken Pettit
 	  (2013-5-7).
-* configs/mikroe-stm32f4/fulldemo/, nx/, nxlines/, nxtext/:  Add more
-  configurationsf for the Mikroelektronika Multimedia STM32-M4 board.
-  From Ken Pettit (2013-5-7).
-* 
+	* configs/mikroe-stm32f4/fulldemo/, nx/, nxlines/, nxtext/:  Add more
+	  configurationsf for the Mikroelektronika Multimedia STM32-M4 board.
+	  From Ken Pettit (2013-5-7).
+	* configs/mikroe-stm32f4/src/up_mio283qt2.c and other files:  Integrate the
+	  MIO283QT2 display on the Mikroelektronika Multimedia STM32-M4 board.
+	  From Ken Pettit (2013-5-7).
+	* arch/arm/src/lpc17xx/lpc17_i2c.c:  Fix for lpc17xx i2c single byte read
+	  timeout error problem from M.Kannan (2013-5-8).
