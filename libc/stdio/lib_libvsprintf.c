@@ -1526,7 +1526,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const char *src, va_list a
 
               /* Get the width of the output */
 
-              luwidth = getpsize(FMT_CHAR, flags, p);
+              pwidth = getpsize(FMT_CHAR, flags, p);
 
               /* Perform left field justification actions */
 

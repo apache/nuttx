@@ -571,7 +571,7 @@ static int smartfs_sync_internal(struct smartfs_mountpt_s *fs,
 {
   struct smart_read_write_s readwrite;
   struct smartfs_chain_header_s *header;
-  int     ret;
+  int ret = OK;
 
   /* Test if we have written bytes to the current sector that
    * need to be recorded in the chain header's used bytes field. */

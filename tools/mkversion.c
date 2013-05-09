@@ -102,5 +102,8 @@ int main(int argc, char **argv, char **envp)
   printf("\n#define CONFIG_VERSION ((CONFIG_VERSION_MAJOR << 8) | (CONFIG_VERSION_MINOR))\n\n");
   printf("#endif /* __INCLUDE_NUTTX_VERSION_H */\n");
   fclose(stream);
+
+  /* Exit (without bothering to clean up allocations) */
+
   return 0;
 }

@@ -311,5 +311,7 @@ int main(int argc, char **argv, char **envp)
       fprintf(stderr, "Failed to rename '%s' to '%s'\n", destfile, srcfile);
     }
 
+  /* Exit (without bothering to clean up allocations) */
+
   return 0;
 }

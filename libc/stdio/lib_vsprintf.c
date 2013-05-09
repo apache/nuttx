@@ -87,6 +87,8 @@ int vsprintf(FAR char *dest, const char *src, va_list ap)
    * libc/stdio/lib_vsprintf do the work.
    */
 
-  lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream, dest, LIB_BUFLEN_UNKNOWN);
-  return lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public, src, ap);
+  lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream, dest,
+                   LIB_BUFLEN_UNKNOWN);
+  return lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+                      src, ap);
 }

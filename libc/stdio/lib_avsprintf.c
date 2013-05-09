@@ -130,7 +130,8 @@ int avsprintf(FAR char **ptr, const char *fmt, va_list ap)
 
   /* Then let lib_vsprintf do it's real thing */
 
-  nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public, fmt, ap);
+  nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+                        fmt, ap);
 
   /* Return a pointer to the string to the caller.  NOTE: the memstream put()
    * method has already added the NUL terminator to the end of the string (not

@@ -532,7 +532,6 @@ static void do_dependency(const char *file, char separator)
 static char *cywin2windows(const char *str, const char *append, enum slashmode_e mode)
 {
   static const char cygdrive[] = "/cydrive";
-  const char *src = src;
   char *dest;
   char *newpath;
   char *allocpath = NULL;
@@ -560,18 +559,19 @@ static char *cywin2windows(const char *str, const char *append, enum slashmode_e
         }
 
       snprintf(allocpath, alloclen, "%s/%s", str, append);
+      str = allocpath;
     }
 
   /* Looking for path of the form /cygdrive/c/bla/bla/bla */
 
-  if (strcasecmp(src, cygdrive) == 0)
+  if (strcasecmp(str, cygdrive) == 0)
     {
       int cygsize = sizeof(cygdrive);
-      if (src[cygsize] == '/')
+      if (str[cygsize] == '/')
         {
           cygsize++;
           srclen -= cygsize;
-          src += cygsize;
+          str += cygsize;
 
           if (srclen <= 0)
             {
@@ -579,7 +579,7 @@ static char *cywin2windows(const char *str, const char *append, enum slashmode_e
               exit(EXIT_FAILURE);
             }
 
-          drive = toupper(*src);
+          drive = toupper(*str);
           if (drive < 'A' || drive > 'Z')
             {
               fprintf(stderr, "ERROR: Drive charager: \"%s\"\n", str);
@@ -587,18 +587,18 @@ static char *cywin2windows(const char *str, const char *append, enum slashmode_e
             }
 
           srclen--;
-          src++;
+          str++;
           alloclen = 2;
         }
     }
 
   /* Determine the size of the new path */
 
-  alloclen += sizeof(src) + 1;
+  alloclen += sizeof(str) + 1;
   if (mode == MODE_DBLBACK)
     {
       const char *tmpptr;
-      for (tmpptr = src; *tmpptr; tmpptr++)
+      for (tmpptr = str; *tmpptr; tmpptr++)
         {
           if (*tmpptr == '/') alloclen++;
         }
@@ -628,9 +628,9 @@ static char *cywin2windows(const char *str, const char *append, enum slashmode_e
    */
 
   lastchar = '\0';
-  for (; *src; src++)
+  for (; *str; str++)
     {
-      if (mode != MODE_FSLASH && *src == '/')
+      if (mode != MODE_FSLASH && *str == '/')
         {
           if (lastchar != '/')
             {
@@ -643,10 +643,10 @@ static char *cywin2windows(const char *str, const char *append, enum slashmode_e
         }
       else
         {
-          *dest++ = *src;
+          *dest++ = *str;
         }
 
-      lastchar = *src;
+      lastchar = *str;
     }
 
   *dest++ = '\0';

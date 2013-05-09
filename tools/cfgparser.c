@@ -253,26 +253,26 @@ void parse_file(FILE *stream, struct variable_s **list)
                       curr->val = &curr->storage[varlen];
                       strcpy(curr->val, varval);
                     }
-                }
 
-              prev = 0;
-              next = *list;
-              while (next && strcmp(next->var, curr->var) <= 0)
-                {
-                  prev = next;
-                  next = next->flink;
-                }
+                  prev = 0;
+                  next = *list;
+                  while (next && strcmp(next->var, curr->var) <= 0)
+                    {
+                      prev = next;
+                      next = next->flink;
+                    }
 
-              if (prev)
-                {
-                  prev->flink = curr;
-                }
-              else
-                {
-                  *list = curr;
-                }
+                  if (prev)
+                    {
+                      prev->flink = curr;
+                    }
+                  else
+                    {
+                      *list = curr;
+                    }
 
-              curr->flink = next;
+                  curr->flink = next;
+                }
             }
         }
     }

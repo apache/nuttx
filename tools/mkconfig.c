@@ -270,5 +270,8 @@ int main(int argc, char **argv, char **envp)
   printf("#endif\n\n");
   printf("#endif /* __INCLUDE_NUTTX_CONFIG_H */\n");
   fclose(stream);
+
+  /* Exit (without bothering to clean up allocations) */
+
   return 0;
 }

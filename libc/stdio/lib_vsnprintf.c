@@ -87,10 +87,12 @@ int vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap)
 
   /* Initialize a memory stream to write to the buffer */
 
-  lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream, buf, size);
+  lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream,
+                    buf, size);
 
   /* Then let lib_vsprintf do the real work */
 
-  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public, format, ap);
+  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+                   format, ap);
   return n;
 }

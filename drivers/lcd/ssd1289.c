@@ -1135,7 +1135,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
 #if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
       ssd1289_putreg(lcd, SSD1289_OUTCTRL,
                      (SSD1289_OUTCTRL_MUX(319) | SSD1289_OUTCTRL_TB |
-                      SSD1289_OUTCTRL_BGR      | SSD1289_OUTCTRL_REV);
+                      SSD1289_OUTCTRL_BGR      | SSD1289_OUTCTRL_REV));
 #else
       ssd1289_putreg(lcd, SSD1289_OUTCTRL,
                      (SSD1289_OUTCTRL_MUX(319) | SSD1289_OUTCTRL_BGR |

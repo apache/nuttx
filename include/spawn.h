@@ -51,6 +51,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE
+#  define CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE 2048
+#endif
 
 /* "The spawn.h header shall define the flags that may be set in a
  * posix_spawnattr_t object using the posix_spawnattr_setflags() function:"

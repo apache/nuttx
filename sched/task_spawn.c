@@ -111,6 +111,8 @@ static int task_spawn_exec(FAR pid_t *pidp, FAR const char *name,
                            main_t entry, FAR const posix_spawnattr_t *attr,
                            FAR char * const *argv)
 {
+  size_t stacksize;
+  int priority;
   int pid;
   int ret = OK;
 
@@ -121,9 +123,32 @@ static int task_spawn_exec(FAR pid_t *pidp, FAR const char *name,
 
   sched_lock();
 
+  /* Use the default task priority and stack size if no attributes are provided */
+
+  if (attr)
+    {
+      priority  = attr->priority;
+      stacksize = attr->stacksize;
+    }
+  else
+    {
+      struct sched_param param;
+
+      /* Set the default priority to the same priority as this task */
+
+      ret = sched_getparam(0, &param);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      priority  = param.sched_priority;
+      stacksize = CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE;
+    }
+
   /* Start the task */
 
-  pid = TASK_CREATE(name, attr->priority, attr->stacksize, entry, argv);
+  pid = TASK_CREATE(name, priority, stacksize, entry, argv);
   if (pid < 0)
     {
       ret = errno;

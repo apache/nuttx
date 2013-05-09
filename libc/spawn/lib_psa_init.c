@@ -48,10 +48,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef TASK_SPAWN_DEFAULT_STACKSIZE
-#  define TASK_SPAWN_DEFAULT_STACKSIZE 2048
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -106,6 +102,6 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
 
   /* Default stack size */
 
-  attr->stacksize = TASK_SPAWN_DEFAULT_STACKSIZE;
+  attr->stacksize = CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE;
   return OK;
 }

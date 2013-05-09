@@ -93,7 +93,8 @@ int snprintf(FAR char *buf, size_t size, const char *format, ...)
   /* Then let lib_vsprintf do the real work */
 
   va_start(ap, format);
-  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public, format, ap);
+  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+                   format, ap);
   va_end(ap);
   return n;
 }

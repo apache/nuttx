@@ -84,12 +84,14 @@ int sprintf (FAR char *buf, const char *fmt, ...)
 
   /* Initialize a memory stream to write to the buffer */
 
-  lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream, buf, LIB_BUFLEN_UNKNOWN);
+  lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream, buf,
+                    LIB_BUFLEN_UNKNOWN);
 
   /* Then let lib_vsprintf do the real work */
 
   va_start(ap, fmt);
-  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public, fmt, ap);
+  n = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+                   fmt, ap);
   va_end(ap);
   return n;
 }

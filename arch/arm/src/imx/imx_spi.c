@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/imx/imx_spi.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -728,9 +728,12 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
-  uint32_t actual = priv->actual;
+  uint32_t actual;
 
-  if (priv && frequency != priv->frequency)
+  DEBUGASSERT(priv);
+  actual = priv->actual;
+
+  if (frequency != priv->frequency)
     {
       uint32_t freqbits;
       uint32_t regval;

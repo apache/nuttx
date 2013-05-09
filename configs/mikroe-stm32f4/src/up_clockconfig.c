@@ -124,7 +124,7 @@ void stm32_board_clockconfig(void)
   /* Wait until the PLL is ready */
 
   while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0)
-      ;
+    ;
 
   /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
 
@@ -145,7 +145,6 @@ void stm32_board_clockconfig(void)
   /* Wait until the PLL source is used as the system clock source */
 
   while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL)
-      ;
-
+    ;
 #endif
 }
