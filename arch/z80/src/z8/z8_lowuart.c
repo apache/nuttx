@@ -80,10 +80,9 @@ void up_lowserialinit(void)
   uint8_t  val;
 
 #ifdef CONFIG_UART0_SERIAL_CONSOLE
+  /* Set the baudrate */
 
   brg = (freq +(uint32_t)CONFIG_UART0_BAUD * 8) /((uint32_t)CONFIG_UART0_BAUD * 16) ;
-
-  /* Set the baudrate */
 
   putreg8(brg >> 8, U0BRH);
   putreg8(brg & 0xff, U0BRL);
@@ -106,6 +105,8 @@ void up_lowserialinit(void)
 
 #elif defined(EZ8_UART1) && defined(CONFIG_UART1_SERIAL_CONSOLE)
   /* Set the baudrate */
+
+  brg = (freq +(uint32_t)CONFIG_UART1_BAUD * 8) /((uint32_t)CONFIG_UART1_BAUD * 16) ;
 
   putreg8(brg >> 8, U1BRH);
   putreg8(brg & 0xff, U1BRL);

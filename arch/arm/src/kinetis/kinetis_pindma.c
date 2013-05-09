@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/kinetis/kinetis_pindma.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 201, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,6 +84,10 @@ void kinetis_pindmaenable(uint32_t pinset)
   DEBUGASSERT(port < KINETIS_NPORTS);
   if (port < KINETIS_NPORTS)
     {
+      /* Get the base address of PORT block for this port */
+
+      base =  KINETIS_PORT_BASE(port);
+
       /* Modify the IRQC field of the port PCR register in order to enable DMA. */
 
       regval = getreg32(base + KINETIS_PORT_PCR_OFFSET(pin));
@@ -134,6 +138,10 @@ void kinetis_pindmadisable(uint32_t pinset)
   DEBUGASSERT(port < KINETIS_NPORTS);
   if (port < KINETIS_NPORTS)
     {
+      /* Get the base address of PORT block for this port */
+
+      base =  KINETIS_PORT_BASE(port);
+
       /* Clear the IRQC field of the port PCR register in order to disable DMA. */
 
       regval = getreg32(base + KINETIS_PORT_PCR_OFFSET(pin));

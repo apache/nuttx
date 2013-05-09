@@ -313,7 +313,8 @@ typedef uint32_t gpio_cfgset_t;
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -353,5 +354,9 @@ void kl_gpiowrite(uint32_t pinset, bool value);
 
 bool kl_gpioread(uint32_t pinset);
 
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_KL_KINETIS_GPIO_H */
