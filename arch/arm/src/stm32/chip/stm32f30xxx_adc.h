@@ -243,22 +243,22 @@
 /* ADC configuration register */
 
 #define ADC_CFGR_DMACFG              (1 << 1)  /* Bit 0:  Direct memory access configuration */
-#define ACD_CFGR_RES_SHIFT           (3)       /* Bits 3-4: Data resolution */
-#define ACD_CFGR_RES_MASK            (3 << ACD_CFGR_RES_SHIFT)
-#  define ACD_CFGR_RES_12BIT         (0 << ACD_CFGR_RES_SHIFT) /* 15 ADCCLK clyes */
-#  define ACD_CFGR_RES_10BIT         (1 << ACD_CFGR_RES_SHIFT) /* 13 ADCCLK clyes */
-#  define ACD_CFGR_RES_8BIT          (2 << ACD_CFGR_RES_SHIFT) /* 11 ADCCLK clyes */
-#  define ACD_CFGR_RES_6BIT          (3 << ACD_CFGR_RES_SHIFT) /* 9 ADCCLK clyes */
+#define ADC_CFGR_RES_SHIFT           (3)       /* Bits 3-4: Data resolution */
+#define ADC_CFGR_RES_MASK            (3 << ADC_CFGR_RES_SHIFT)
+#  define ADC_CFGR_RES_12BIT         (0 << ADC_CFGR_RES_SHIFT) /* 15 ADCCLK clyes */
+#  define ADC_CFGR_RES_10BIT         (1 << ADC_CFGR_RES_SHIFT) /* 13 ADCCLK clyes */
+#  define ADC_CFGR_RES_8BIT          (2 << ADC_CFGR_RES_SHIFT) /* 11 ADCCLK clyes */
+#  define ADC_CFGR_RES_6BIT          (3 << ADC_CFGR_RES_SHIFT) /* 9 ADCCLK clyes */
 #define ADC_CFGR_ALIGN               (1 << 5)  /* Bit 5:  Data Alignment */
 #define ADC_CFGR_EXTSEL_SHIFT        (6)       /* Bits 6-9: External Event Select for regular group */
 #define ADC_CFGR_EXTSEL_MASK         (15 << ADC_CFGR_EXTSEL_SHIFT)
 #  define ADC_CFGR_EXTSEL(event)     ((event) << ADC_CFGR_EXTSEL_SHIFT) /* Event = 0..15 */
-#define ACD_CFGR_EXTEN_SHIFT         (10)      /* Bits 10-11: External trigger/polarity selection regular channels */
-#define ACD_CFGR_EXTEN_MASK          (3 << ACD_CFGR_EXTEN_SHIFT)
-#  define ACD_CFGR_EXTEN_NONE        (0 << ACD_CFGR_EXTEN_SHIFT) /* Trigger detection disabled */
-#  define ACD_CFGR_EXTEN_RISING      (1 << ACD_CFGR_EXTEN_SHIFT) /* Trigger detection on the rising edge */
-#  define ACD_CFGR_EXTEN_FALLING     (2 << ACD_CFGR_EXTEN_SHIFT) /* Trigger detection on the falling edge */
-#  define ACD_CFGR_EXTEN_BOTH        (3 << ACD_CFGR_EXTEN_SHIFT) /* Trigger detection on both edges */
+#define ADC_CFGR_EXTEN_SHIFT         (10)      /* Bits 10-11: External trigger/polarity selection regular channels */
+#define ADC_CFGR_EXTEN_MASK          (3 << ADC_CFGR_EXTEN_SHIFT)
+#  define ADC_CFGR_EXTEN_NONE        (0 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection disabled */
+#  define ADC_CFGR_EXTEN_RISING      (1 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection on the rising edge */
+#  define ADC_CFGR_EXTEN_FALLING     (2 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection on the falling edge */
+#  define ADC_CFGR_EXTEN_BOTH        (3 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection on both edges */
 #define ADC_CFGR_OVRMOD              (1 << 12) /* Bit 12: Overrun Mode */
 #define ADC_CFGR_CONT                (1 << 13) /* Bit 13: Continuous mode for regular conversions */
 #define ADC_CFGR_AUTDLY              (1 << 14) /* Bit 14: Delayed conversion mode */

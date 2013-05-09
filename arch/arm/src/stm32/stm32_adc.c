@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_adc.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -1043,7 +1043,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   /* Set the resolution of the conversion */
 
-  regval |= ACD_CR1_RES_12BIT;
+  regval |= ADC_CR1_RES_12BIT;
 #endif
 
   adc_putreg(priv, STM32_ADC_CR1_OFFSET, regval);
@@ -1063,7 +1063,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
   /* External trigger enable for regular channels */
 
-  regval |= ACD_CR2_EXTEN_RISING;
+  regval |= ADC_CR2_EXTEN_RISING;
 #endif
 
   adc_putreg(priv, STM32_ADC_CR2_OFFSET, regval);
