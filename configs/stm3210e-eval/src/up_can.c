@@ -53,7 +53,7 @@
 #include "stm32_can.h"
 #include "stm3210e-internal.h"
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1)
+#if defined(CONFIG_CAN) && defined(CONFIG_STM32_CAN1)
 
 /************************************************************************************
  * Pre-processor Definitions

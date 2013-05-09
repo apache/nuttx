@@ -124,7 +124,6 @@
  *
  * PE10, PMPRD -- Low to read from the LCD
  * PE11, PMPWR -- Low to write to the LCD
- *
  */
 
 #define GPIO_LCD_RST    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
@@ -226,7 +225,7 @@ void weak_function stm32_usbinitialize(void);
  ****************************************************************************************************/
 
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
-#error "The Mikroe-STM32F4 board does not support HOST OTG, only device!"
+#  error "The Mikroe-STM32F4 board does not support HOST OTG, only device!"
 #endif
 
 /****************************************************************************************************

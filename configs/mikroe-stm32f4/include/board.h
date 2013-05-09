@@ -256,7 +256,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -274,7 +275,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void stm32_boardinitialize(void);
+void stm32_boardinitialize(void);
 
 /************************************************************************************
  * Name:  stm32_ledinit, stm32_setled, and stm32_setleds
@@ -287,9 +288,9 @@ EXTERN void stm32_boardinitialize(void);
  ************************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-EXTERN void stm32_ledinit(void);
-EXTERN void stm32_setled(int led, bool ledon);
-EXTERN void stm32_setleds(uint8_t ledset);
+void stm32_ledinit(void);
+void stm32_setled(int led, bool ledon);
+void stm32_setleds(uint8_t ledset);
 #endif
 
 /************************************************************************************
@@ -316,10 +317,10 @@ EXTERN void stm32_setleds(uint8_t ledset);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-EXTERN void up_buttoninit(void);
-EXTERN uint8_t up_buttons(void);
+void up_buttoninit(void);
+uint8_t up_buttons(void);
 #ifdef CONFIG_ARCH_IRQBUTTONS
-EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
+xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 #endif
 
@@ -327,6 +328,5 @@ EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #if defined(__cplusplus)
 }
 #endif
-
 #endif /* __ASSEMBLY__ */
 #endif  /* __CONFIG_MIKROE_STM32F4_INCLUDE_BOARD_H */
