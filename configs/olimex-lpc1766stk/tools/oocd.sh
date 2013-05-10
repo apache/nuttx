@@ -11,14 +11,14 @@ if [ -z "${TOPDIR}" ]; then
 	exit 1
 fi
 
-# Assume that OpenOCD was installed and at /usr/local/bin.  Uncomment
-# the following to run directly from the build directory
-#OPENOCD_PATH="/home/OpenOCD/openocd/src"
-#TARGET_PATH="/home/OpenOCD/openocd/tcl"
+# Assume that OpenOCD was installed and at /usr/local/bin or maybe c:\OpenOCD
+#OPENOCD_PATH="/cygdrive/c/OpenOCD/openocd-0.4.0/src"
+#TARGET_PATH="c:\OpenOCD\openocd-0.4.0\tcl"
 OPENOCD_PATH="/usr/local/bin"
 TARGET_PATH="/usr/local/share/openocd/scripts"
 
 OPENOCD_EXE=openocd.exe
+#OPENOCD_CFG=`cygpath -w "${TOPDIR}/configs/olimex-lpc1766stk/tools/olimex.cfg"`
 OPENOCD_CFG="${TOPDIR}/configs/olimex-lpc1766stk/tools/olimex.cfg"
 OPENOCD_ARGS="-f ${OPENOCD_CFG} -s ${TARGET_PATH}"
 

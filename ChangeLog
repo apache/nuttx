@@ -4696,4 +4696,7 @@
 	* arch/arm/src/lpc17xx/lpc17_i2c.c:  Fix for lpc17xx i2c single byte read
 	  timeout error problem from M.Kannan (2013-5-8).
 	* arch/arm/src/stm32/stm32_adc.c:  Typo in F2/F4 specific logic:  ACD_
-	  instead of ADC_.  From Ken Pettit (2013-5-8).
+	  instead of ADC_.  From Ken Pettit (2014-5-8).
+	* configs/olimex-lpc1766stk/tools:  Tweaks to support OpenOCD-0.70
+	  (2013-5-10).
+
