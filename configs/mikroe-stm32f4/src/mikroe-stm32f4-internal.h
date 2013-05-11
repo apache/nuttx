@@ -176,7 +176,11 @@
                          GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN8)
 
 #define GPIO_TP_DRIVEB  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN9)
+                         GPIO_PORTB|GPIO_PIN9)
+
+#define GPIO_TP_YD      (GPIO_ANALOG|GPIO_PORTB|GPIO_PIN0)
+
+#define GPIO_TP_XL      (GPIO_ANALOG|GPIO_PORTB|GPIO_PIN1)
 
 /****************************************************************************************************
  * Public Types

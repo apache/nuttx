@@ -4699,4 +4699,6 @@
 	  instead of ADC_.  From Ken Pettit (2014-5-8).
 	* configs/olimex-lpc1766stk/tools:  Tweaks to support OpenOCD-0.70
 	  (2013-5-10).
+	* configs/mikroe-stm32f4:  Changes to get the Mikroelektronika MultiMedia
+	  STM32 F4 touchsceen working.  From Ken Pettit (2013-5-11).
 
