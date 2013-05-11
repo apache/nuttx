@@ -1,9 +1,10 @@
 /************************************************************************************
- * configs/pic32mx7mmb/src/up_boot.c
- * arch/mips/src/board/up_boot.c
+ * configs/mikroe-stm32f4/src/up_touchscreen.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ *   Modified:  May, 2013 by Ken Pettit to adapt for Mikroe-STM32M4 board
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -71,33 +72,43 @@
 /* Reference counting is partially implemented, but not needed in the current design.
  */
 
-#undef CONFIG_TOUCHSCREEN_REFCNT
-
+#define CONFIG_TOUCHSCREEN_REFCNT
 /* Should we try again on bad samples? */
 
 #undef CONFIG_TOUCHSCREEN_RESAMPLE
 
+/* TP uses ADC Channel #2 in a dedicated mode.  Ensure ADC2 not selected for general
+ * use via the menuconfig */
+
+#ifndef CONFIG_STM32_ADC2
+#  error   Touchpanel Input (CONFIG_INPUT=y) requires enablinga ADC2 (CONFIG_STM32_ADC2=y)
+#endif
+
 /* Work queue support is required */
 
 #ifndef CONFIG_SCHED_WORKQUEUE
-#  warning "Work queue support is required (CONFIG_SCHED_WORKQUEUE=y)
+#  warning Work queue support is required (CONFIG_SCHED_WORKQUEUE=y)
 #endif
 
 /* CONFIG_TOUCHSCREEN_THRESHX and CONFIG_TOUCHSCREEN_THRESHY
  *   Touchscreen data comes in a a very high rate.  New touch positions
  *   will only be reported when the X or Y data changes by these thresholds.
  *   This trades reduces data rate for some loss in dragging accuracy.  The
- *   touchscreen is configure for 10-bit values so the raw ranges are 0-1023. So
+ *   touchscreen is configure for 12-bit values so the raw ranges are 0-4096. So
  *   for example, if your display is 320x240, then THRESHX=3 and THRESHY=4
  *   would correspond to one pixel.  Default: 4
  */
 
 #ifndef CONFIG_TOUCHSCREEN_THRESHX
-#  define CONFIG_TOUCHSCREEN_THRESHX 4
+#  define CONFIG_TOUCHSCREEN_THRESHX 12
 #endif
 
 #ifndef CONFIG_TOUCHSCREEN_THRESHY
-#  define CONFIG_TOUCHSCREEN_THRESHY 4
+#  define CONFIG_TOUCHSCREEN_THRESHY 12
+#endif
+
+#ifndef CONFIG_TOUCHSCREEN_AVG_SAMPLES
+#  define CONFIG_TOUCHSCREEN_AVG_SAMPLES 2
 #endif
 
 /* Driver support *******************************************************************/
@@ -108,44 +119,49 @@
 #define DEV_FORMAT   "/dev/input%d"
 #define DEV_NAMELEN  16
 
-/* PIC32MX7MMB Touchscreen Hardware Definitions *************************************/
-/*   ----- ------ --------------------
- *   GPIO  ADC IN TFT Signal Name
- *   ----- ------ --------------------
- *   RB10   AN10   LCD-YD
- *   RB11   AN11   LCD-XR
- *   RB12   AN12   LCD-YU
- *   RB13   AN13   LCD-XL
+/* Mikroe-STM32M4 Touchscreen Hardware Definitions *********************************
+ * PIN CONFIGURATIONS      SIGNAL NAME          ON-BOARD CONNECTIONS
+ * --- ---------------------------------- -------------------- ------------------------
+ *  35 PB0                 LCD-YD               YD Analog input
+ *  36 PB1                 LCD-XL               XL Analog input
+ *  95 PB8                 DRIVEA               Drives XR, XL and YU
+ *  96 PB9                 DRIVEB               Drives YD
  */
 
-#define LCD_XPLUS_PIN  (11)
-#define LCD_YPLUS_PIN  (12)
-#define LCD_XMINUS_PIN (13)
-#define LCD_YMINUS_PIN (10)
+#define LCD_YD_PIN           (0)
+#define LCD_XL_PIN           (1)
+#define LCD_YD_CHANNEL       (8)
+#define LCD_XL_CHANNEL       (9)
+#define LCD_DRIVEA_PIN       (8)
+#define LCD_DRIVEB_PIN       (9)
 
-#define LCD_XPLUS_BIT  (1 << LCD_XPLUS_PIN)
-#define LCD_YPLUS_BIT  (1 << LCD_YPLUS_PIN)
-#define LCD_XMINUS_BIT (1 << LCD_XMINUS_PIN)
-#define LCD_YMINUS_BIT (1 << LCD_YMINUS_PIN)
-#define LCD_ALL_BITS   (LCD_XPLUS_BIT | LCD_YPLUS_BIT | LCD_XMINUS_BIT | LCD_YMINUS_BIT)
+#define LCD_DRIVEA_BIT       (1 << LCD_DRIVEA_PIN)
+#define LCD_DRIVEB_BIT       (1 << LCD_DRIVEB_PIN)
+#define LCD_SAMPX_BITS       (LCD_DRIVEA_BIT | (LCD_DRIVEB_BIT << 16))
+#define LCD_SAMPY_BITS       (LCD_DRIVEB_BIT | (LCD_DRIVEA_BIT << 16))
+#define LCD_TP_PORT_SETRESET  STM32_GPIOB_BSRR
+
+#define TC_ADC_BASE           STM32_ADC2_BASE      /* ADC Channel base for TP */
+#define ADC_CR1_ALLINTS       (ADC_CR1_AWDIE | ADC_CR1_EOCIE | ADC_CR1_JEOCIE)
 
 /* Conversions are performed as 10-bit samples represented as 16-bit unsigned integers: */
 
-#define MAX_ADC        (1023)
+#define MAX_ADC               (4096)
 
 /* A measured value has to be within this range to be considered */
 
-#define UPPER_THRESHOLD        (MAX_ADC-1)
-#define LOWER_THRESHOLD        (1)
+#define UPPER_THRESHOLD       (MAX_ADC-1)
+#define LOWER_THRESHOLD       (362)
 
 /* Delays ***************************************************************************/
 /* All values will be increased by one system timer tick (probably 10MS). */
 
-#define TC_PENUP_POLL_TICKS   (100 / MSEC_PER_TICK) /* IDLE polling rate: 100 MSec */
-#define TC_PENDOWN_POLL_TICKS (60 / MSEC_PER_TICK)  /* Active polling rate: 60 MSec */
-#define TC_DEBOUNCE_TICKS     (30 / MSEC_PER_TICK)  /* Delay before re-sampling: 30 MSec */
-#define TC_SAMPLE_TICKS       (4 / MSEC_PER_TICK)   /* Delay for A/D sampling: 4 MSec */
-#define TC_RESAMPLE_TICKS     TC_SAMPLE_TICKS       
+#define TC_PENUP_POLL_TICKS   (70 / MSEC_PER_TICK) /* IDLE polling rate: 100 MSec */
+#define TC_PENDOWN_POLL_TICKS (40 / MSEC_PER_TICK) /* Active polling rate: 60 MSec */
+#define TC_DEBOUNCE_TICKS     (16 / MSEC_PER_TICK) /* Delay before re-sampling: 30 MSec */
+#define TC_SAMPLE_TICKS       (4 / MSEC_PER_TICK)  /* Delay for A/D sampling: 4 MSec */
+#define TC_SETTLE_TICKS       (10 / MSEC_PER_TICK) /* Delay for A/D settling: 4 MSec */
+#define TC_RESAMPLE_TICKS     TC_SAMPLE_TICKS
 
 /************************************************************************************
  * Private Types
@@ -155,13 +171,14 @@
 enum tc_state_e
 {
   TC_READY = 0,                        /* Ready to begin next sample */
-  TC_YMPENDOWN,                        /* Allowing time for the Y- pen down sampling */
+  TC_READY_SETTLE,                     /* Allowing time for Y DRIVE to settle */
+  TC_YPENDOWN,                         /* Allowing time for the Y pen down sampling */
   TC_DEBOUNCE,                         /* Allowing a debounce time for the first sample */
   TC_RESAMPLE,                         /* Restart sampling on a bad measurement */
-  TC_YMSAMPLE,                         /* Allowing time for the Y- sampling */
-  TC_YPSAMPLE,                         /* Allowing time for the Y+ sampling */
-  TC_XPSAMPLE,                         /* Allowing time for the X+ sampling */
-  TC_XMSAMPLE,                         /* Allowing time for the X- sampling */
+  TC_YSAMPLE,                          /* Allowing time for the Y sampling */
+  TC_XSETTLE,                          /* Allowing time for the X to settle after changing DRIVE*/
+  TC_XSAMPLE,                          /* Allowing time for the X sampling */
+  TC_XRESAMPLE,                        /* Allow time to resample X */
   TC_PENDOWN,                          /* Conversion is complete -- pen down */
   TC_PENUP                             /* Conversion is complete -- pen up */
 };
@@ -200,6 +217,8 @@ struct tc_dev_s
   volatile bool penchange;             /* An unreported event is buffered */
   uint16_t value;                      /* Partial sample value (Y+ or X-) */
   uint16_t newy;                       /* New, un-thresholded Y value */
+  uint8_t sampcount;                   /* Count of samples for average so far */
+  uint8_t resamplecount;               /* Countdown to PENUP */
   sem_t devsem;                        /* Manages exclusive access to this structure */
   sem_t waitsem;                       /* Used to wait for the availability of data */
   struct tc_sample_s sample;           /* Last sampled touch point data */
@@ -219,12 +238,11 @@ struct tc_dev_s
  * Private Function Prototypes
  ************************************************************************************/
 
-static void tc_adc_sample(int pin);
-static uint16_t tc_adc_convert(void);
-static void tc_yminus_sample(void);
-static void tc_yplus_sample(void);
-static void tc_xplus_sample(void);
-static void tc_xminus_sample(void);
+static void tc_adc_init(void);
+static void tc_adc_start_sample(int pin);
+static uint16_t tc_adc_read_sample(void);
+static void tc_y_sample(void);
+static void tc_x_sample(void);
 static inline bool tc_valid_sample(uint16_t sample);
 
 static void tc_notify(FAR struct tc_dev_s *priv);
@@ -269,13 +287,183 @@ static const struct file_operations tc_fops =
 
 #ifndef CONFIG_TOUCHSCREEN_MULTIPLE
 static struct tc_dev_s g_touchscreen;
+static bool g_touchinitdone = false;
 #endif
 
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
 /************************************************************************************
- * Name: tc_adc_sample
+ * Name: tc_adc_getreg
+ *
+ * Description:
+ *   Read the value of an TC ADC channel (#2) register.
+ *
+ * Input Parameters:
+ *   offset - The offset to the register to read
+ *   value
+ *
+ * Returned Value:
+ *
+ ************************************************************************************/
+
+static inline uint32_t tc_adc_getreg(int offset)
+{
+  return getreg32(TC_ADC_BASE + offset);
+}
+
+/************************************************************************************
+ * Name: tc_adc_putreg
+ *
+ * Description:
+ *   Set the value of an ADC register.
+ *
+ * Input Parameters:
+ *   offset - The offset to the register to read
+ *
+ * Returned Value:
+ *
+ ************************************************************************************/
+
+static inline void tc_adc_putreg(int offset, uint32_t value)
+{
+  putreg32(value, TC_ADC_BASE + offset);
+}
+
+/************************************************************************************
+ * Name: tc_adc_init
+ *
+ * Description:
+ *   Initialize ADC Channel #2 for use with the touch panel.  The touch panel uses
+ *   Channels 8 and 9 (PB0 and PB1) to read the X and Y axis touch positions.
+ *
+ ************************************************************************************/
+
+static void tc_adc_init(void)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  /* Do an rcc reset to reset the ADC peripheral */
+
+  /* Disable interrupts.  This is necessary because the APB2RTSR register
+   * is used by several different drivers.
+   */
+
+  flags = irqsave();
+
+  /* Enable  ADC reset state */
+
+  regval = getreg32(STM32_RCC_APB2RSTR);
+  regval |= RCC_APB2RSTR_ADCRST;
+  putreg32(regval, STM32_RCC_APB2RSTR);
+
+  /* Release ADC from reset state */
+
+  regval &= ~RCC_APB2RSTR_ADCRST;
+  putreg32(regval, STM32_RCC_APB2RSTR);
+
+  /* Initialize the watchdog high threshold register */
+
+  tc_adc_putreg(STM32_ADC_HTR_OFFSET, 0x00000fff);
+
+  /* Initialize the watchdog low threshold register */
+
+  tc_adc_putreg(STM32_ADC_LTR_OFFSET, 0x00000000);
+
+  /* Initialize the same sample time for each ADC 55.5 cycles
+   *
+   * During sample cycles channel selection bits must remain unchanged.
+   *
+   *   000:   1.5 cycles
+   *   001:   7.5 cycles
+   *   010:  13.5 cycles
+   *   011:  28.5 cycles
+   *   100:  41.5 cycles
+   *   101:  55.5 cycles
+   *   110:  71.5 cycles
+   *   111: 239.5 cycles
+   */
+
+  tc_adc_putreg(STM32_ADC_SMPR1_OFFSET, 0x00b6db6d);
+  tc_adc_putreg(STM32_ADC_SMPR2_OFFSET, 0x00b6db6d);
+
+  /* ADC CR1 Configuration */
+
+  regval  = tc_adc_getreg(STM32_ADC_CR1_OFFSET);
+
+  /* Initialize the Analog watchdog enable */
+
+  regval &= ~ADC_CR1_AWDEN;
+  regval |= (LCD_YD_CHANNEL << ADC_CR1_AWDCH_SHIFT);
+
+  /* Enable interrupt flags */
+
+  //regval |= ADC_CR1_ALLINTS;
+
+  /* Disable Overrun interrupt */
+
+  regval &= ~ADC_CR1_OVRIE;
+
+  /* Set the resolution of the conversion.  We only need 10 bits. */
+
+  regval |= ADC_CR1_RES_12BIT;
+
+  tc_adc_putreg(STM32_ADC_CR1_OFFSET, regval);
+
+  /* ADC CR2 Configuration */
+
+  regval  = tc_adc_getreg(STM32_ADC_CR2_OFFSET);
+
+  /* Clear CONT, continuous mode disable.  We will perform single
+   * sampling on one channel at a time. */
+
+  regval &= ~ADC_CR2_CONT;
+
+  /* Set ALIGN (Right = 0) */
+
+  regval &= ~ADC_CR2_ALIGN;
+
+  /* External trigger disable.  We will do SW triggering */
+
+  regval &= ~ADC_CR2_EXTEN_MASK;
+
+  tc_adc_putreg(STM32_ADC_CR2_OFFSET, regval);
+
+  /* Configuration of the channel conversion - start with Y sampling */
+
+  regval = tc_adc_getreg(STM32_ADC_SQR3_OFFSET) & ADC_SQR3_RESERVED;
+  regval |= LCD_YD_CHANNEL;
+  tc_adc_putreg(STM32_ADC_SQR3_OFFSET, regval);
+  regval = tc_adc_getreg(STM32_ADC_SQR3_OFFSET);
+
+  /* Set the number of conversions = 1 */
+
+  regval = tc_adc_getreg(STM32_ADC_SQR1_OFFSET) & ADC_SQR1_RESERVED;
+  regval |= 0 << ADC_SQR1_L_SHIFT;
+  tc_adc_putreg(STM32_ADC_SQR1_OFFSET, regval);
+
+  /* ADC CCR configuration */
+
+  regval  = getreg32(STM32_ADC_CCR);
+  regval &= ~(ADC_CCR_MULTI_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DDS | ADC_CCR_DMA_MASK |
+              ADC_CCR_ADCPRE_MASK | ADC_CCR_VBATE | ADC_CCR_TSVREFE);
+  regval |=  (ADC_CCR_MULTI_NONE | ADC_CCR_DMA_DISABLED | ADC_CCR_ADCPRE_DIV2);
+  putreg32(regval, STM32_ADC_CCR);
+
+  /* Set ADON to wake up the ADC from Power Down state. */
+
+  regval  = tc_adc_getreg(STM32_ADC_CR2_OFFSET);
+  regval |= ADC_CR2_ADON;
+  tc_adc_putreg(STM32_ADC_CR2_OFFSET, regval);
+
+  /* Restore the IRQ state */
+
+  irqrestore(flags);
+}
+
+/************************************************************************************
+ * Name: tc_adc_start_sample
  *
  * Description:
  *   Perform A/D sampling.    Time must be allowed betwen the start of sampling
@@ -283,49 +471,31 @@ static struct tc_dev_s g_touchscreen;
  *
  ************************************************************************************/
 
-static void tc_adc_sample(int pin)
+static void tc_adc_start_sample(int channel)
 {
-  /* Configure the pins for as an analog input. AD1PCFG specifies the
-   * configuration of device pins to be used as analog inputs. A pin
-   * is configured as an analog input when the corresponding PCFGn bit
-   * is 0.
-   */
+  uint32_t regval;
 
-  putreg32(ADC_CFG(pin), PIC32MX_ADC_CFGCLR);
+  /* Configure the specified channel for ADC conversion.  */
 
-  /* Set SAMP=0, format 16-bit unsigned integer, manual conversion,
-   * SAMP=1 will trigger.
-   */
+  regval = tc_adc_getreg(STM32_ADC_SQR3_OFFSET) & ADC_SQR3_RESERVED;
+  regval |= channel;
+  tc_adc_putreg(STM32_ADC_SQR3_OFFSET, regval);
 
-  putreg32(0, PIC32MX_ADC_CON1);
+  /* Configure the Watchdog for this channel */
 
-  /* Select the pin as the MUXA CH0 input (positive) */
+  regval = tc_adc_getreg(STM32_ADC_CR1_OFFSET) & ADC_CR1_AWDCH_MASK;
+  regval |= (channel << ADC_CR1_AWDCH_SHIFT);
+  tc_adc_putreg(STM32_ADC_CR1_OFFSET, regval);
 
-  putreg32(ADC_CHS_CH0SA(pin), PIC32MX_ADC_CHS);
+  /* Start the conversion */
 
-  /* No input scan */
-
-  putreg32(0, PIC32MX_ADC_CSSL);
-
-  /* Manual sample, TAD = internal, 6 TPB */
-
-  putreg32(ADC_CON3_ADCS(6) | ADC_CON3_SAMC(0), PIC32MX_ADC_CON3);
-
-  /* No interrrupts, no scan, internal voltage reference */
-
-  putreg32(ADC_CON2_VCFG_AVDDAVSS, PIC32MX_ADC_CON2);
-
-  /* Turn on the ADC */
-
-  putreg32(ADC_CON1_ON, PIC32MX_ADC_CON1SET);
-
-  /* Start sampling */
-
-  putreg32(ADC_CON1_SAMP, PIC32MX_ADC_CON1SET);
+  regval = tc_adc_getreg(STM32_ADC_CR2_OFFSET);
+  regval |= ADC_CR2_SWSTART;
+  tc_adc_putreg(STM32_ADC_CR2_OFFSET, regval);
 }
 
 /************************************************************************************
- * Name: tc_adc_convert
+ * Name: tc_adc_read_sample
  *
  * Description:
  *   Begin A/D conversion.  Time must be allowed betwen the start of sampling
@@ -337,130 +507,62 @@ static void tc_adc_sample(int pin)
  *
  ************************************************************************************/
 
-static uint16_t tc_adc_convert(void)
+static uint16_t tc_adc_read_sample(void)
 {
-  uint32_t retval;
+  uint16_t retval;
+  uint32_t adcsr;
+  uint16_t count = 0;
 
-  /* Start conversion */
+  /* Validate the conversion is complete */
 
-  putreg32(ADC_CON1_SAMP, PIC32MX_ADC_CON1CLR);
+  adcsr = tc_adc_getreg(STM32_ADC_SR_OFFSET);
+  while ((adcsr & ADC_SR_EOC) == 0)
+    {
+      adcsr = tc_adc_getreg(STM32_ADC_SR_OFFSET);
+      count++;
+    }
 
-  /* Wait for the conversion to complete */
+  /* Read the sample */
 
-  while ((getreg32(PIC32MX_ADC_CON1) & ADC_CON1_DONE) == 0);
+  retval = tc_adc_getreg(STM32_ADC_DR_OFFSET);
+  retval &= ADC_DR_DATA_MASK;
 
-  /* Then read the converted ADC value */
+  if (count > 0)
+    {
+      idbg("Count = %d\n", count);
+    }
 
-  retval = getreg32(PIC32MX_ADC_BUF0);
-
-  /* Disable the ADC */
-
-  putreg32(ADC_CON1_ON, PIC32MX_ADC_CON1CLR);
-
-  /* Reset all pins to digital function */
-
-  putreg32(LCD_ALL_BITS, PIC32MX_ADC_CFGSET);
-  return (uint16_t)retval;
+  return retval;
 }
 
 /************************************************************************************
- * Name: tc_yminus_sample
+ * Name: tc_y_sample
  *
  * Description:
- *   Initiate sampling on Y-
+ *   Initiate sampling on Y
  *
  ************************************************************************************/
 
-static void tc_yminus_sample(void)
+static void tc_y_sample(void)
 {
-  /* Configure X- as an input and X+, Y+, and Y- as outputs */
-
-  putreg32(LCD_XPLUS_BIT | LCD_YPLUS_BIT | LCD_YMINUS_BIT, PIC32MX_IOPORTB_TRISCLR);
-  putreg32(LCD_XMINUS_BIT, PIC32MX_IOPORTB_TRISSET);
-
-  /* Energize the X plate: Y+ and Y- high, X+ low */
-
-  putreg32(LCD_XPLUS_BIT, PIC32MX_IOPORTB_PORTCLR);
-  putreg32(LCD_YPLUS_BIT | LCD_YMINUS_BIT, PIC32MX_IOPORTB_PORTSET);
-
   /* Start the Y axis sampling */
 
-  tc_adc_sample(LCD_XMINUS_PIN);
+  tc_adc_start_sample(LCD_XL_CHANNEL);
 }
 
 /************************************************************************************
- * Name: tc_yplus_sample
+ * Name: tc_x_sample
  *
  * Description:
- *   Initiate sampling on Y+
+ *   Initiate sampling on X
  *
  ************************************************************************************/
 
-static void tc_yplus_sample(void)
+static void tc_x_sample(void)
 {
-  /* Configure X+ as an input and X-, Y+, and Y- as outputs */
+  /* Start the X axis sampling */
 
-  putreg32(LCD_XMINUS_BIT | LCD_YPLUS_BIT | LCD_YMINUS_BIT, PIC32MX_IOPORTB_TRISCLR);
-  putreg32(LCD_XPLUS_BIT, PIC32MX_IOPORTB_TRISSET);
-
-  /* Energize the X plate: Y+ and Y- High, X- low (X+ is an input) */
-
-  putreg32(LCD_XMINUS_BIT, PIC32MX_IOPORTB_PORTCLR);
-  putreg32(LCD_YPLUS_BIT | LCD_YMINUS_BIT, PIC32MX_IOPORTB_PORTSET);
-
-  /* Start the Y axis sampling */
-
-  tc_adc_sample(LCD_XPLUS_PIN);
-}
-
-/************************************************************************************
- * Name: tc_xplus_sample
- *
- * Description:
- *   Initiate sampling on X+
- *
- ************************************************************************************/
-
-static void tc_xplus_sample(void)
-{
-  /* Configure Y+ as an input and X+, X-, and Y- as outputs */
-
-  putreg32(LCD_XPLUS_BIT | LCD_XMINUS_BIT | LCD_YMINUS_BIT, PIC32MX_IOPORTB_TRISCLR);
-  putreg32(LCD_YPLUS_BIT, PIC32MX_IOPORTB_TRISSET);
-
-  /* Energize the Y plate: X+ and X- high, Y- low (Y+ is an input) */
-
-  putreg32(LCD_YMINUS_BIT, PIC32MX_IOPORTB_PORTCLR);
-  putreg32(LCD_XPLUS_BIT | LCD_XMINUS_BIT, PIC32MX_IOPORTB_PORTSET);
-
-  /* Read the X axis value */
-
-  tc_adc_sample(LCD_YPLUS_PIN);
-}
-
-/************************************************************************************
- * Name: tc_xminus_sample
- *
- * Description:
- *   Initiate sampling on X-
- *
- ************************************************************************************/
-
-static void tc_xminus_sample(void)
-{
-  /* Configure Y- as an input and X+, Y+, and X- as outputs */
-
-  putreg32(LCD_XPLUS_BIT | LCD_XMINUS_BIT | LCD_YPLUS_BIT, PIC32MX_IOPORTB_TRISCLR);
-  putreg32(LCD_YMINUS_BIT, PIC32MX_IOPORTB_TRISSET);
-
-  /* Energize the Y plate: X+ and X- high, Y+ low (Y- is an input) */
-
-  putreg32(LCD_YPLUS_BIT, PIC32MX_IOPORTB_PORTCLR);
-  putreg32(LCD_XPLUS_BIT | LCD_XMINUS_BIT, PIC32MX_IOPORTB_PORTSET);
-
-  /* Start X axis sampling */
-
-  tc_adc_sample(LCD_YMINUS_PIN);
+  tc_adc_start_sample(LCD_YD_CHANNEL);
 }
 
 /****************************************************************************
@@ -469,7 +571,7 @@ static void tc_xminus_sample(void)
 
 static inline bool tc_valid_sample(uint16_t sample)
 {
-  return (sample > LOWER_THRESHOLD /* && sample < UPPER_THRESHOLD */);
+  return (sample > LOWER_THRESHOLD);
 }
 
 /****************************************************************************
@@ -482,6 +584,18 @@ static void tc_notify(FAR struct tc_dev_s *priv)
   int i;
 #endif
 
+  /* If no threads have the driver open, then just dump the state */
+
+#ifdef CONFIG_TOUCHSCREEN_REFCNT
+  if ((priv->crefs == 0) && priv->sample.contact == CONTACT_UP)
+    {
+      priv->sample.contact = CONTACT_NONE;
+      priv->sample.valid   = false;
+      priv->id++;
+      return;
+    }
+#endif
+
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
    */
@@ -492,7 +606,7 @@ static void tc_notify(FAR struct tc_dev_s *priv)
        * is no longer available.
        */
 
-      sem_post(&priv->waitsem); 
+      sem_post(&priv->waitsem);
     }
 
   /* If there are threads waiting on poll() for touchscreen data to become available,
@@ -592,7 +706,7 @@ static int tc_waitsample(FAR struct tc_dev_s *priv,
   while (tc_sample(priv, sample) < 0)
     {
       /* Wait for a change in the touchscreen state */
- 
+
       priv->nwaiters++;
       ret = sem_wait(&priv->waitsem);
       priv->nwaiters--;
@@ -634,9 +748,9 @@ errout:
 static void tc_worker(FAR void *arg)
 {
   FAR struct tc_dev_s *priv = (FAR struct tc_dev_s *)arg;
-  uint32_t delay;
+  uint32_t delay = TC_PENUP_POLL_TICKS;
   uint16_t value;
-  uint16_t newx;
+  uint16_t newx = 0;
   int16_t xdiff;
   int16_t ydiff;
   int ret;
@@ -651,26 +765,47 @@ static void tc_worker(FAR void *arg)
 
     case TC_READY:
       {
-        /* Start Y- sampling */
+        /* Select DRIVE for Y sampling */
 
-        tc_yminus_sample();
+        /* Configure XL, XR with drive voltages and disable YU drive.  Note that
+         * this is configuring the DRIVEA and DRIVEB outputs to enable the on-board
+         * transistor drive logic to energize the touch panel.
+         */
 
-        /* Allow time for the Y- pend down sampling */
- 
-        priv->state = TC_YMPENDOWN;
+        *((uint32_t *) LCD_TP_PORT_SETRESET) = LCD_SAMPY_BITS;
+
+        /* Allow time for the Y DRIVE to settle */
+
+        priv->resamplecount = 0;
+        priv->sampcount = 0;
+        priv->value = 0;
+        priv->state = TC_READY_SETTLE;
+        delay       = TC_SETTLE_TICKS;
+      }
+      break;
+
+    case TC_READY_SETTLE:
+      {
+        /* Start Y sampling */
+
+        tc_y_sample();
+
+        /* Allow time for the Y pend down sampling */
+
+        priv->state = TC_YPENDOWN;
         delay       = TC_SAMPLE_TICKS;
       }
       break;
 
-    /* The Y- sampling time has elapsed and the Y- value should be ready
-     * for conversion 
+    /* The Y sampling time has elapsed and the Y value should be ready
+     * for conversion
      */
 
-    case TC_YMPENDOWN:
+    case TC_YPENDOWN:
       {
-        /* Convert the Y- sample value */
+        /* Convert the Y sample value */
 
-        value = tc_adc_convert();
+        value = tc_adc_read_sample();
 
         /* A converted value at the minimum would mean that there is no touch
          * and that the sampling period is complete.
@@ -683,7 +818,7 @@ static void tc_worker(FAR void *arg)
         else
           {
             /* Allow time for touch inputs to stabilize */
- 
+
             priv->state = TC_DEBOUNCE;
             delay       = TC_DEBOUNCE_TICKS;
           }
@@ -695,62 +830,45 @@ static void tc_worker(FAR void *arg)
      */
 
     case TC_RESAMPLE:
+      {
+        /* Select DRIVE for Y sampling */
+
+        /* Configure XL, XR with drive voltages and disable YU drive.  Note that
+         * this is configuring the DRIVEA and DRIVEB outputs to enable the on-board
+         * transistor drive logic to energize the touch panel.
+         */
+
+        *((uint32_t *) LCD_TP_PORT_SETRESET) = LCD_SAMPY_BITS;
+
+        /* Allow time for the Y DRIVE to settle */
+
+        priv->state = TC_DEBOUNCE;
+        delay       = TC_SETTLE_TICKS;
+      }
+      break;
+
     case TC_DEBOUNCE:
       {
-        /* (Re-)start Y- sampling */
+        /* (Re-)start Y sampling */
 
-        tc_yminus_sample();
+        tc_y_sample();
 
-        /* Allow time for the Y- sampling */
- 
-        priv->state = TC_YMSAMPLE;
+        /* Allow time for the Y sampling */
+
+        priv->state = TC_YSAMPLE;
         delay       = TC_SAMPLE_TICKS;
       }
       break;
 
-    /* The Y- sampling period has elapsed and we are ready to perform the
+    /* The Y sampling period has elapsed and we are ready to perform the
      * conversion.
      */
 
-    case TC_YMSAMPLE:
+    case TC_YSAMPLE:                          /* Allowing time for the Y sampling */
       {
-        /* Convert and save the Y- sample value */
+        /* Read the Y axis position */
 
-        value = tc_adc_convert();
-
-        /* A converted value at the minimum would mean that there is no touch
-         * and that the sampling period is complete.  At converted value at
-         * the maximum value is probably bad too.
-         */
-
-        if (!tc_valid_sample(value))
-          {
-            priv->state = TC_PENUP;
-          }
-        else
-          {
-            /* Save the Y- sample and start Y+ sampling */
-
-            priv->value = value;
-            tc_yplus_sample();
-
-            /* Allow time for the Y+ sampling */
- 
-            priv->state = TC_YPSAMPLE;
-            delay       = TC_SAMPLE_TICKS;
-          }
-      }
-      break;
-
-    /* The Y+ sampling period has elapsed and we are ready to perform the
-     * conversion.
-     */
-
-    case TC_YPSAMPLE:                         /* Allowing time for the Y+ sampling */
-      {
-        /* Read the Y+ axis position */
-
-        value = tc_adc_convert();
+        value = tc_adc_read_sample();
 
         /* A converted value at the minimum would mean that we lost the contact
          * before all of the conversions were completed.  At converted value at
@@ -768,31 +886,66 @@ static void tc_worker(FAR void *arg)
           }
         else
           {
-            value      = MAX_ADC - value;
-            priv->newy = (value + priv->value) >> 1;
-            ivdbg("Y-=%d Y+=%d[%d] Y=%d\n", priv->value, value, MAX_ADC - value, priv->newy);
+            value       = MAX_ADC - value;
+            priv->value += value;
+            if (++priv->sampcount < CONFIG_TOUCHSCREEN_AVG_SAMPLES)
+              {
+                priv->state = TC_READY_SETTLE;
+                delay = 1;
+                break;
+              }
 
-            /* Start X+ sampling */
+            priv->newy  = value / CONFIG_TOUCHSCREEN_AVG_SAMPLES;
+            priv->value = 0;
+            priv->sampcount = 0;
+            ivdbg("Y=%d\n", priv->newy);
 
-            tc_xplus_sample();
+            /* Configure YU and YD with drive voltages and disable XR drive.  Note that
+             * this is configuring the DRIVEA and DRIVEB outputs to enable the on-board
+             * transistor drive logic to energize the touch panel.
+             */
 
-            /* Allow time for the X+ sampling */
- 
-            priv->state = TC_XPSAMPLE;
-            delay       = TC_SAMPLE_TICKS;
+            *((uint32_t *) LCD_TP_PORT_SETRESET) = LCD_SAMPX_BITS;
+
+            /* Allow time for the X sampling */
+
+            priv->state = TC_XSETTLE;
+            delay       = TC_SETTLE_TICKS;
           }
       }
       break;
 
-    /* The X+ sampling period has elapsed and we are ready to perform the
-     * conversion.
-     */
-
-    case TC_XPSAMPLE:
+    case TC_XRESAMPLE:                /* Perform X resampling */
       {
-        /* Convert the X+ sample value */
+        if (priv->resamplecount-- == 0)
+          {
+            priv->state = TC_PENUP;
+            break;
+          }
+      }
 
-        value = tc_adc_convert();
+    case TC_XSETTLE:                  /* Allowing time X to settle after changing DRIVE */
+      {
+        /* The X Drive settling time has elaspsed and it's time to start
+         * the conversion
+         */
+
+        /* Start X sampling */
+
+        tc_x_sample();
+
+        /* Allow time for the X sampling */
+
+        priv->state = TC_XSAMPLE;
+        delay       = TC_SAMPLE_TICKS;
+      }
+      break;
+
+    case TC_XSAMPLE:                 /* Allowing time for the X sampling */
+      {
+        /* Read the converted X axis position */
+
+        value = tc_adc_read_sample();
 
         /* A converted value at the minimum would mean that we lost the contact
          * before all of the conversions were completed.  At converted value at
@@ -802,7 +955,9 @@ static void tc_worker(FAR void *arg)
         if (!tc_valid_sample(value))
           {
 #ifdef CONFIG_TOUCHSCREEN_RESAMPLE
-            priv->state = TC_RESAMPLE;
+            priv->state = TC_XRESAMPLE;
+            if (priv->resamplecount == 0)
+                priv->resamplecount = 1;
             delay       = TC_RESAMPLE_TICKS;
 #else
             priv->state = TC_PENUP;
@@ -810,53 +965,19 @@ static void tc_worker(FAR void *arg)
           }
         else
           {
-            /* Save the X+ sample value */
+            /* Calculate the X axis position */
 
-            priv->value = value;
+            //value = MAX_ADC - value;
+            priv->value += value;
+            if (++priv->sampcount < CONFIG_TOUCHSCREEN_AVG_SAMPLES)
+              {
+                priv->state = TC_XSETTLE;
+                delay = 1;
+                break;
+              }
 
-            /* Start X- sampling */
-
-            tc_xminus_sample();
-
-            /* Allow time for the X- pend down sampling */
- 
-            priv->state = TC_XMSAMPLE;
-            delay       = TC_SAMPLE_TICKS;
-          }
-      }
-      break;
-
-    /* The X+ sampling period has elapsed and we are ready to perform the
-     * conversion.
-     */
-
-    case TC_XMSAMPLE:                         /* Allowing time for the X- sampling */
-      {
-        /* Read the converted X- axis position */
-
-        value = tc_adc_convert();
-
-        /* A converted value at the minimum would mean that we lost the contact
-         * before all of the conversions were completed.  At converted value at
-         * the maximum value is probably bad too.
-         */
-
-        if (!tc_valid_sample(value))
-          {
-#ifdef CONFIG_TOUCHSCREEN_RESAMPLE
-            priv->state = TC_RESAMPLE;
-            delay       = TC_RESAMPLE_TICKS;
-#else
-            priv->state = TC_PENUP;
-#endif
-          }
-        else
-          {
-            /* Calculate the X- axis position */
-
-            value = MAX_ADC - value;
-            newx  = (value + priv->value) >> 1;
-            ivdbg("X+=%d X-=%d[%d] X=%d\n", priv->value, value, MAX_ADC - value, newx);
+            newx  = value / CONFIG_TOUCHSCREEN_AVG_SAMPLES;
+            ivdbg("X=%d\n", newx);
 
             /* Samples are available */
 
@@ -878,7 +999,8 @@ static void tc_worker(FAR void *arg)
        * reported.  CONTACT_UP == pen up, but not reported)
        */
 
-      if (priv->sample.contact != CONTACT_NONE)
+      if (priv->sample.contact != CONTACT_NONE &&
+          priv->sample.contact != CONTACT_UP)
         {
           /* The pen is up.  We know from the above test, that this is a
            * loss of contact condition.  This will be changed to CONTACT_NONE
@@ -892,7 +1014,9 @@ static void tc_worker(FAR void *arg)
           priv->sample.id = priv->id;
           priv->penchange = true;
 
-          /* Notify any waiters that nes touchscreen data is available */
+          /* Notify any waiters that new touchscreen data is available */
+
+          idbg("1:X=%d, Y=%d\n", priv->sample.x, priv->sample.y);
 
           tc_notify(priv);
         }
@@ -936,8 +1060,13 @@ static void tc_worker(FAR void *arg)
             {
               /* There is some change above the threshold... Report the change. */
 
+#ifdef CONFIG_LCD_LANDSCAPE
+              priv->sample.x     = MAX_ADC - priv->newy;
+              priv->sample.y     = newx;
+#else
               priv->sample.x     = newx;
               priv->sample.y     = priv->newy;
+#endif
               priv->sample.valid = true;
 
               /* If this is the first (acknowledged) penddown report, then report
@@ -958,6 +1087,8 @@ static void tc_worker(FAR void *arg)
               priv->penchange = true;
 
               /* Notify any waiters that nes touchscreen data is available */
+
+              idbg("2:X=%d, Y=%d\n", priv->sample.x, priv->sample.y);
 
               tc_notify(priv);
             }
@@ -1372,16 +1503,26 @@ int arch_tcinitialize(int minor)
   ivdbg("minor: %d\n", minor);
   DEBUGASSERT(minor >= 0 && minor < 100);
 
-  /* Configure all touchscreen pins as inputs, undriven */
+  /* If we only have one touchscreen, check if we already did init */
 
-  putreg32(LCD_ALL_BITS, PIC32MX_IOPORTB_TRISSET);
+#ifndef CONFIG_TOUCHSCREEN_MULTIPLE
+  if (g_touchinitdone)
+    {
+      return OK;
+    }
+#endif
 
-  /* Configure all pins for as digital. AD1PCFG specifies the configuration
-   * of device pins to be used as analog inputs. A pin is configured as an
-   * analog input when the corresponding PCFGn bit is 0.
-   */
+  /* Configure the touchscreen DRIVEA and DRIVEB pins for output */
 
-  putreg32(LCD_ALL_BITS, PIC32MX_ADC_CFGSET);
+  stm32_configgpio(GPIO_TP_DRIVEA);
+  stm32_configgpio(GPIO_TP_DRIVEB);
+
+  /* Configure Analog inputs for sampling X and Y coordinates */
+
+  stm32_configgpio(GPIO_TP_XL);
+  stm32_configgpio(GPIO_TP_YD);
+
+  tc_adc_init();
 
   /* Create and initialize a touchscreen device driver instance */
 
@@ -1427,6 +1568,10 @@ int arch_tcinitialize(int minor)
     }
 
   /* And return success (?) */
+
+#ifndef CONFIG_TOUCHSCREEN_MULTIPLE
+  g_touchinitdone = true;
+#endif
 
   return OK;
 
