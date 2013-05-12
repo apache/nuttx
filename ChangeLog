@@ -4701,4 +4701,5 @@
 	  (2013-5-10).
 	* configs/mikroe-stm32f4:  Changes to get the Mikroelektronika MultiMedia
 	  STM32 F4 touchsceen working.  From Ken Pettit (2013-5-11).
-
+	* configs/*/nxwm:  Default priorities for NxWidget and NxWM threads
+	  should be 100, not 50, to be consistent with other default priorities.
