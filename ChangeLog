@@ -4711,3 +4711,5 @@
 	  configurations (Laurent Latil, 2013-5-14).
 	* configs/hymini-stm32v/src/up_nsh.c:  Add support for the card detect
 	  (CD) interrupt (Laurent Latil, 2013-5-14).
+	* configs/hymini-stm32v/src/nx and nxlines:  Removed these configurations
+	  (Laurent Latil, 2013-5-14).
