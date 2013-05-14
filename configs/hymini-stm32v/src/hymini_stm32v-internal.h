@@ -97,7 +97,7 @@
 #define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTOD|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN7)
 
-/* SD card detect pin: PD.3 */
+/* SD card detect pin: PD.3   (line is pulled up on board) */
 #define GPIO_SD_CD (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|\
                          GPIO_PORTD|GPIO_PIN3)
 
