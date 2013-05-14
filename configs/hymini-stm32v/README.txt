@@ -13,7 +13,7 @@ Contents
   - NuttX EABI "buildroot" Toolchain
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
-  - DFU
+  - ST Bootloader
   - LEDs
   - RTC
   - HY-Mini specific Configuration Options
@@ -96,7 +96,7 @@ IDEs
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project (There is a simple RIDE project
   in the RIDE subdirectory).
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -193,13 +193,13 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh lpcxpresso-lpc1768/<sub-dir>
+     ./configure.sh hymini-stm32v/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -218,51 +218,31 @@ NXFLAT Toolchain
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly builtNXFLAT binaries.
 
-DFU
-===
+ST Bootloader
+=============
 
-  The linker files in these projects can be configured to indicate that you
-  will be loading code using STMicro built-in USB Device Firmware Upgrade (DFU)
-  loader or via some JTAG emulator.  You can specify the DFU bootloader by
-  adding the following line:
+  A bootloader code is available in an internal boot ROM memory (called
+  'system memory' in STM documentation) in all STM32 MCUs. For the F103xx
+  this bootloader can be used to upload & flash a firmware image through
+  the USART1.
 
-    CONFIG_STM32_DFU=y
+  Notes:
 
-  to your .config file. Most of the configurations in this directory are set
-  up to use the DFU loader.
+  - The bootloader is activated by the BOOT0 / BOOT1 pins after a MCU reset.
+    See STM application note 2606 for more details.
+  - On the hymini-stm32 board the USART1 is connected to a PL2303
+    USB<->serial converter.
 
-  If CONFIG_STM32_DFU is defined, the code will not be positioned at the beginning
-  of FLASH (0x08000000) but will be offset to 0x08003000.  This offset is needed
-  to make space for the DFU loader and 0x08003000 is where the DFU loader expects
-  to find new applications at boot time.  If you need to change that origin for some
-  other bootloader, you will need to edit the file(s) ld.script.dfu for each
-  configuration.
+  To enter bootloader mode in the hymini-stm32 board:
 
-  The DFU SE PC-based software is available from the STMicro website,
-  http://www.st.com.  General usage instructions:
-  
-  1. Convert the NuttX Intel Hex file (nuttx.hex) into a special DFU
-     file (nuttx.dfu)... see below for details.
-  2. Connect the Hy-Mini STM32v board to your computer using a USB
-     cable.
-  3. Start the DFU loader on the Hy-Mini STM32v board.  You do this by
-     resetting the board while holding the "Key" button.  Windows should
-     recognize that the DFU loader has been installed.
-  3. Run the DFU SE program to load nuttx.dfu into FLASH.
+  - Press the 'boot0' button  (located next to 'reset' button)
+  - While boot0 button is pressed, reset the board through the reset button.
+  - Once you pressed / released the 'reset' button, the MCU has (re)started
+    in bootloader mode (and you can then release the boot0 button).
 
-  What if the DFU loader is not in FLASH?  The loader code is available
-  inside of the Demo dirctory of the USBLib ZIP file that can be downloaded
-  from the STMicro Website.  You can build it using RIDE (or other toolchains);
-  you will need a JTAG emulator to burn it into FLASH the first time.
-
-  In order to use STMicro's built-in DFU loader, you will have to get
-  the NuttX binary into a special format with a .dfu extension.  The
-  DFU SE PC_based software installation includes a file "DFU File Manager"
-  conversion program that a file in Intel Hex format to the special DFU
-  format.  When you successfully build NuttX, you will find a file called
-  nutt.hex in the top-level directory.  That is the file that you should
-  provide to the DFU File Manager. You will end up with a file called
-  nuttx.dfu that you can use with the STMicro DFU SE program.
+  A flash utility must be used on your development workstation to upload / flash
+  a firmware image. (The 'stm32flash' open source tool, available at
+  http://stm32flash.googlecode.com/ has been used sucessfully).
 
 LEDs
 ====
@@ -271,16 +251,16 @@ The HY-MiniSTM32 board provides only two controlable LEDs labeled LED1 and LED2.
 Usage of these LEDs is defined in include/board.h and src/up_leds.c.
 They are encoded as follows:
 
-    SYMBOL              Meaning                 LED1*   LED2    
-    ------------------- ----------------------- ------- -------    
-    LED_STARTED         NuttX has been started  OFF     OFF        
-    LED_HEAPALLOCATE    Heap has been allocated ON      OFF        
-    LED_IRQSENABLED     Interrupts enabled      OFF     ON        
-    LED_STACKCREATED    Idle stack created      ON      OFF        
-    LED_INIRQ           In an interrupt**       OFF     N/C        
-    LED_SIGNAL          In a signal handler***  N/C     ON        
-    LED_ASSERTION       An assertion failed     ON      ON        
-    LED_PANIC           The system has crashed  BLINK   BLINK        
+    SYMBOL              Meaning                 LED1*   LED2
+    ------------------- ----------------------- ------- -------
+    LED_STARTED         NuttX has been started  OFF     OFF
+    LED_HEAPALLOCATE    Heap has been allocated ON      OFF
+    LED_IRQSENABLED     Interrupts enabled      OFF     ON
+    LED_STACKCREATED    Idle stack created      ON      OFF
+    LED_INIRQ           In an interrupt**       OFF     N/C
+    LED_SIGNAL          In a signal handler***  N/C     ON
+    LED_ASSERTION       An assertion failed     ON      ON
+    LED_PANIC           The system has crashed  BLINK   BLINK
     LED_IDLE            STM32 is is sleep mode  (Optional, not used)
 
   * If Nuttx starts correctly, normal state is to have LED1 on and LED2 off.
@@ -304,7 +284,7 @@ RTC
       CONFIG_RTC_FREQUENCY - If CONFIG_RTC_HIRES is defined, then the
       frequency of the high resolution RTC must be provided.  If CONFIG_RTC_HIRES
       is not defined, CONFIG_RTC_FREQUENCY is assumed to be one.
-    CONFIG_RTC_ALARM - Enable if the RTC hardware supports setting of an alarm. 
+    CONFIG_RTC_ALARM - Enable if the RTC hardware supports setting of an alarm.
       A callback function will be executed when the alarm goes off
 
   In hi-res mode, the STM32 RTC operates only at 16384Hz.  Overflow interrupts
@@ -348,7 +328,7 @@ HY-Mini specific Configuration Options
        configuration features.
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
- 
+
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
@@ -447,9 +427,9 @@ HY-Mini specific Configuration Options
     CONFIG_STM32_FORCEPOWER
 
   The Timer3 alternate mapping is required for PWM control of LCD backlight
-  
+
     CONFIG_STM32_TIM3_PARTIAL_REMAP=y
-    
+
   Timer devices may be used for different purposes.  One special purpose is
   to generate modulated outputs for such things as motor control.  If CONFIG_STM32_TIMn
   is defined (as above) then the following may also be defined to indicate that
@@ -489,10 +469,10 @@ HY-Mini specific Configuration Options
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=1,2,3) or UART
            m (m=4,5) for the console and ttys0 (default is the USART1).
-           
+
            Note: USART1 is connected to a PL2303 serial to USB converter.
            So USART1 is available through USB port labeled CN3 on the board.
-           
+
     CONFIG_U[S]ARTn_RXBUFSIZE - Characters are buffered as received.
        This specific the size of the receive buffer
     CONFIG_U[S]ARTn_TXBUFSIZE - Characters are buffered before
@@ -511,7 +491,7 @@ HY-Mini specific Configuration Options
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
     CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
-    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority. 
+    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.
@@ -555,10 +535,28 @@ HY-Mini specific Configuration Options
     CONFIG_LCD_BACKLIGHT - Define to support an adjustable backlight
       using timer 3.  The granularity of the settings is determined
       by CONFIG_LCD_MAXPOWER.  Requires CONFIG_STM32_TIM3.
-    
+
 
 Configurations
 ==============
+
+NOTES:
+
+  - All configurations described below are using the mconf-based
+    configuration tool.  To change their configuration using that tool, you
+    should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       and misc/tools/
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+  - All configurations use a generic GNU EABI toolchain for Linux by
+    default.
+
+  - They are all configured to generate a binary image that can be flashed
+    through the STM32 internal bootloader.
 
 Each HY-MiniSTM32V configuration is maintained in a sub-directory and
 can be selected as follow:
@@ -575,8 +573,8 @@ Where <subdir> is one of the following:
 
     Uses apps/examples/buttons to exercise HY-MiniSTM32V buttons and
     button interrupts.
- 
-    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
+
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : Generic GNU EABI toolchain
 
   nsh and nsh2:
   ------------
@@ -587,21 +585,17 @@ Where <subdir> is one of the following:
     =========== ======================= ================================
                 nsh                     nsh2
     =========== ======================= ================================
-    Toolchain:  Codesourcery for Linux  Codesourcery for Linux (1)
-    ----------- ----------------------- --------------------------------
-    Loader:     ST bootloader           ST bootloader
-    ----------- ----------------------- --------------------------------
     Serial      Debug output: USART1    Debug output: USART1
-    Console:    NSH output:   USART1    NSH output:   USART1 (3)
+    Console:    NSH output:   USART1    NSH output:   USART1 (2)
     ----------- ----------------------- --------------------------------
-    microSD     Yes                     Yes
+    microSD     Yes (5)                 Yes (5)
     Support
     ----------- ----------------------- --------------------------------
     FAT FS      CONFIG_FAT_LCNAME=y     CONFIG_FAT_LCNAME=y
-    Config      CONFIG_FAT_LFN=n        CONFIG_FAT_LFN=y (4)
+    Config      CONFIG_FAT_LFN=n        CONFIG_FAT_LFN=y (3)
     ----------- ----------------------- --------------------------------
     LCD Driver  No                      Yes
-    Support 
+    Support
     ----------- ----------------------- --------------------------------
     RTC Support No                      Yes
     ----------- ----------------------- --------------------------------
@@ -611,7 +605,7 @@ Where <subdir> is one of the following:
     ----------- ----------------------- --------------------------------
     Built-in    None                    apps/examples/nx
     Apps                                apps/examples/nxhello
-                                        apps/examples/usbstorage (5)
+                                        apps/examples/usbstorage (4)
                                         apps/examples/buttons
                                         apps/examples/nximage
     =========== ======================= ================================
@@ -619,18 +613,16 @@ Where <subdir> is one of the following:
     (1) You will probably need to modify nsh/setenv.sh or nsh2/setenv.sh
         to set up the correct PATH variable for whichever toolchain you
         may use.
-    (2) Since DfuSe is assumed, this configuration may only work under
-        Cygwin without modification.
-    (3) When any other device other than /dev/console is used for a user
+    (2) When any other device other than /dev/console is used for a user
         interface, (1) linefeeds (\n) will not be expanded to carriage return
         / linefeeds \r\n). You will need to configure your terminal program
         to account for this. And (2) input is not automatically echoed so
         you will have to turn local echo on.
-    (4) Microsoft holds several patents related to the design of
+    (3) Microsoft holds several patents related to the design of
         long file names in the FAT file system.  Please refer to the
         details in the top-level COPYING file.  Please do not use FAT
         long file name unless you are familiar with these patent issues.
-    (5) When built as an NSH add-on command (CONFIG_EXAMPLES_USBMSC_BUILTIN=y),
+    (4) When built as an NSH add-on command (CONFIG_EXAMPLES_USBMSC_BUILTIN=y),
         Caution should be used to assure that the SD drive is not in use when
         the USB storage device is configured.  Specifically, the SD driver
         should be unmounted like:
@@ -644,80 +636,61 @@ Where <subdir> is one of the following:
         nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard # Restore the mount
 
         Failure to do this could result in corruption of the SD card format.
+    (5) Option CONFIG_NSH_ARCHINIT must be enabled in order to call the SDIO slot
+        initialization code.
 
-  nx:
-  ---
-    An example using the NuttX graphics system (NX).  This example
-    focuses on general window controls, movement, mouse and keyboard
-    input.
-
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_LCD_RPORTRAIT=y        : 240x320 reverse portrait
-
-  nxlines:
+  ostest:
   ------
-    Another example using the NuttX graphics system (NX).   This
-    example focuses on placing lines on the background in various
-    orientations.
+    This configuration directory, performs a simple OS test using
+    apps/examples/ostest.
 
-    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_LCD_RPORTRAIT=y        : 240x320 reverse portrait
+  usbnsh:
+  -------
 
-  usbserial:
-  ---------
-    This configuration directory exercises the USB serial class
-    driver at examples/usbserial.  See examples/README.txt for
-    more information.
+    This is another NSH example.  If differs from other 'nsh' configurations
+    in that this configurations uses a USB serial device for console I/O.
 
-    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
-    
-    USB debug output can be enabled as by changing the following
-    settings in the configuration file:
+    NOTES:
 
-    -CONFIG_DEBUG=n
-    -CONFIG_DEBUG_VERBOSE=n
-    -CONFIG_DEBUG_USB=n
-    +CONFIG_DEBUG=y
-    +CONFIG_DEBUG_VERBOSE=y
-    +CONFIG_DEBUG_USB=y
+    1. This configuration does have UART2 output enabled and set up as
+       the system logging device:
 
-    -CONFIG_EXAMPLES_USBSERIAL_TRACEINIT=n
-    -CONFIG_EXAMPLES_USBSERIAL_TRACECLASS=n
-    -CONFIG_EXAMPLES_USBSERIAL_TRACETRANSFERS=n
-    -CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER=n
-    -CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=n
-    +CONFIG_EXAMPLES_USBSERIAL_TRACEINIT=y
-    +CONFIG_EXAMPLES_USBSERIAL_TRACECLASS=y
-    +CONFIG_EXAMPLES_USBSERIAL_TRACETRANSFERS=y
-    +CONFIG_EXAMPLES_USBSERIAL_TRACECONTROLLER=y
-    +CONFIG_EXAMPLES_USBSERIAL_TRACEINTERRUPTS=y
+       CONFIG_SYSLOG=y                    : Enable output to syslog, not console
+       CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
+       CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART2 will be /dev/ttyS0
 
-    By default, the usbserial example uses the Prolific PL2303
-    serial/USB converter emulation.  The example can be modified
-    to use the CDC/ACM serial class by making the following changes
-    to the configuration file:
+       However, there is nothing to generate SYLOG output in the default
+       configuration so nothing should appear on UART2 unless you enable
+       some debug output or enable the USB monitor.
 
-    -CONFIG_PL2303=y
-    +CONFIG_PL2303=n
+    2. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
+       device will save encoded trace output in in-memory buffer; if the
+       USB monitor is enabled, that trace buffer will be periodically
+       emptied and dumped to the system loggin device (UART2 in this
+       configuraion):
 
-    -CONFIG_CDCACM=n
-    +CONFIG_CDCACM=y
+       CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
+       CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
+       CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
+       CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+       CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
+       CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+       CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+       CONFIG_SYSTEM_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
 
-    The example can also be converted to use the alternative
-    USB serial example at apps/examples/usbterm by changing the 
-    following:
+       CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+       CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
+       CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
+       CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
+       CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
 
-    -CONFIGURED_APPS += examples/usbserial
-    +CONFIGURED_APPS += examples/usbterm
 
-    In either the original appconfig file (before configuring)
-    or in the final apps/.config file (after configuring).
+    Using the Prolifics PL2303 Emulation
+    ------------------------------------
+    You could also use the non-standard PL2303 serial device instead of
+    the standard CDC/ACM serial device by changing:
 
-  usbstorage:
-  ----------
-    This configuration directory exercises the USB mass storage
-    class driver at examples/usbstorage.  See examples/README.txt for
-    more information.
-
-    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
-
+      CONFIG_CDCACM=y               : Disable the CDC/ACM serial device class
+      CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is NOT the console
+      CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
+      CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
