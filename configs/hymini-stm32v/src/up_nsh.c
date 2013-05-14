@@ -69,30 +69,19 @@
 #undef CONFIG_STM32_SPI1
 
 
-/* PORT and SLOT number probably depend on the board configuration */
+/* Check if we can have USB device in NSH */
 
-#ifdef CONFIG_ARCH_BOARD_HYMINI_STM32V
-#  define NSH_HAVEUSBDEV 1
-#  define NSH_HAVEMMCSD  1
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "Only one MMC/SD slot"
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#  endif
-#  ifndef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#else
-   /* Add configuration for new STM32 boards here */
-#  error "Unrecognized STM32 board"
-#  undef NSH_HAVEUSBDEV
-#  undef NSH_HAVEMMCSD
-#endif
+#define NSH_HAVEUSBDEV 1
 
 /* Can't support USB features if USB is not enabled */
 
 #ifndef CONFIG_USBDEV
 #  undef NSH_HAVEUSBDEV
 #endif
+
+/* Check if we can have MMC/SD slot support in NSH */
+
+#define NSH_HAVEMMCSD  1
 
 /* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
  * is not enabled.
@@ -102,9 +91,19 @@
 #  undef NSH_HAVEMMCSD
 #endif
 
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
+#ifdef NSH_HAVEMMCSD
+#  ifndef CONFIG_NSH_MMCSDMINOR
+#    define CONFIG_NSH_MMCSDMINOR 0
+#  endif
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#    error "Only one MMC/SD slot"
+#    undef CONFIG_NSH_MMCSDSLOTNO
+#  endif
+#  ifndef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
+#  endif
 #endif
+
 
 /* Debug ********************************************************************/
 
@@ -123,6 +122,43 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_MMCSD
+static FAR struct sdio_dev_s *g_sdiodev;
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nsh_cdinterrupt
+ *
+ * Description:
+ *   Card detect interrupt handler.
+ *
+ ****************************************************************************/
+
+#ifdef NSH_HAVEMMCSD
+static int nsh_cdinterrupt(int irq, FAR void *context)
+{
+  static bool inserted = 0xff; /* Impossible value */
+  bool present;
+
+  present = !stm32_gpioread(GPIO_SD_CD);
+  if (present != inserted)
+    {
+      sdio_mediachange(g_sdiodev, present);
+      inserted = present;
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -137,22 +173,27 @@
 int nsh_archinitialize(void)
 {
 #ifdef NSH_HAVEMMCSD
-  FAR struct sdio_dev_s *sdio;
   int ret;
 
   /* Card detect */
   bool cd_status;
-#endif
+
+  /* Configure the card detect GPIO */
+
+  stm32_configgpio(GPIO_SD_CD);
+
+  /* Register an interrupt handler for the card detect pin */
+
+  stm32_gpiosetevent(GPIO_SD_CD, true, true, true, nsh_cdinterrupt);
 
   /* Mount the SDIO-based MMC/SD block driver */
 
-#ifdef NSH_HAVEMMCSD
   /* First, get an instance of the SDIO interface */
 
   message("nsh_archinitialize: Initializing SDIO slot %d\n",
           CONFIG_NSH_MMCSDSLOTNO);
-  sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
-  if (!sdio)
+  g_sdiodev = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  if (!g_sdiodev)
     {
       message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
               CONFIG_NSH_MMCSDSLOTNO);
@@ -163,20 +204,20 @@ int nsh_archinitialize(void)
 
   message("nsh_archinitialize: Bind SDIO to the MMC/SD driver, minor=%d\n",
           CONFIG_NSH_MMCSDMINOR);
-  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdiodev);
   if (ret != OK)
     {
       message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
-  message("nsh_archinitialize: Successfully bound SDIO to the MMC/SD driver\n");
+  dbg("nsh_archinitialize: Successfully bound SDIO to the MMC/SD driver\n");
   
   /* Use SD card detect pin to check if a card is inserted */
 
   cd_status = !stm32_gpioread(GPIO_SD_CD);
-  message("Card detect : %hhu", cd_status);
+  vdbg("Card detect : %hhu\n", cd_status);
 
-  sdio_mediachange(sdio, cd_status);
+  sdio_mediachange(g_sdiodev, cd_status);
 #endif
   return OK;
 }
