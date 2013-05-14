@@ -4703,3 +4703,7 @@
 	  STM32 F4 touchsceen working.  From Ken Pettit (2013-5-11).
 	* configs/*/nxwm:  Default priorities for NxWidget and NxWM threads
 	  should be 100, not 50, to be consistent with other default priorities.
+	* configs/hymini-stm32v/nsh and nsh2:  Configurations converted to use
+	  the kconfig-frontends tools (Laurent Latil, 2013-5-14)
+	* configs/hymini-stm32v/src:  Converted to use the common SSD1289 driver
+	  (Laurent Latil, 2013-5-14)

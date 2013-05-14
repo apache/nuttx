@@ -1594,7 +1594,7 @@ o ARM/STM32 (arch/arm/src/stm32/)
   Status:      Open
   Priority:    Low
 
-  Title:       USB DRIVER IN STM32F4DISCVORY usbnsh CONFIGURATION
+  Title:       USB DRIVER IN STM32F3DISCVORY usbnsh CONFIGURATION
   Description: The USB device driver is not reliable in the
                configs/stm32f3discovery/upnsh configuration.  When a large
                volume of serial data is sent (for example, by entering

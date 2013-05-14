@@ -147,13 +147,13 @@ config ARCH_BOARD_FREEDOM_KL25Z
 
 config ARCH_BOARD_HYMINI_STM32V
 	bool "HY-Mini STM32v board"
-	depends on ARCH_CHIP_STM32F103VCT
+	depends on ARCH_CHIP_STM32F103VCT6
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		A configuration for the HY-Mini STM32v board.  This board is based on the
-		STM32F103VCT chip.
+		STM32F103VCT6 chip.
 
 config ARCH_BOARD_LINCOLN60
 	bool "Micromint Lincoln 60 board"
