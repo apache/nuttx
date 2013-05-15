@@ -4715,3 +4715,5 @@
 	  (Laurent Latil, 2013-5-14).
 	* arch/arm/src/stm32/chip/stm32f10xx_dma.h:  Fix some bad DMA register
 	  definitions.  From Laurent Latil (2013-5-15).
+	* configs/hymini-stm32v:  Enable SDIO in nsh2 configuration; remove
+	  warning from src/up_ssd1289.c.  From Laurent Latil (2013-5-15).
