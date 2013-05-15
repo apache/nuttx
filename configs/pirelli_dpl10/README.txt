@@ -54,6 +54,21 @@ o highram is for phones having the romloader(if the phone has a bootrom)
   by talking to the ramloader) when having a ramloader(which can only
   load 64k).
 
+Memory Map
+=========
+
+Calypso has 256KB of internal SRAM (0x800000-0x83ffff).  Only this internal SRAM
+is used by these configurations.  The internal SRAM is broken up into three
+logic banks.
+
+    LRAM (rw) : ORIGIN = 0x00800000, LENGTH = 0x00020000
+    TRAM (rw) : ORIGIN = 0x00820000, LENGTH = 0x00010000
+    IRAM (rw) : ORIGIN = 0x00830000, LENGTH = 0x00010000
+
+Code can be loaded by the bootloader only into TRAM and, hence, is restricted
+to 64KB.  The additional 64KB if IRAM may be used for uninitialized data and
+for the NuttX heap only.
+
 JTAG and Alternative Serial Console
 ===================================
 
@@ -116,3 +131,54 @@ JTAG Apapter:
                                       the MCU to enter a bootloader on reset.
                                       Use 10K-100K Ohm pull up resistor.
   ------- ----------- --------------- --------------------------------------
+
+NuttX OABI "buildroot" Toolchain
+================================
+
+  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  be modified to point to the correct path to the ARM GCC toolchain (if
+  different from the default in your PATH variable).
+
+  If you have no ARMtoolchain, one can be downloaded from the NuttX
+  SourceForge download site (https://sourceforge.net/projects/nuttx/files/buildroot/).
+  This GNU toolchain builds and executes in the Linux or Cygwin environment.
+
+  1. You must have already configured Nuttx in <some-dir>/nuttx.
+
+     cd tools
+     ./configure.sh pirelli_dpl10/<sub-dir>
+
+  2. Download the latest buildroot package into <some-dir>
+
+  3. unpack the buildroot tarball.  The resulting directory may
+     have versioning information on it like buildroot-x.y.z.  If so,
+     rename <some-dir>/buildroot-x.y.z to <some-dir>/buildroot.
+
+  4. cd <some-dir>/buildroot
+
+  5. cp configs/arm7tdmi-defconfig-4.3.3 .config
+
+  6. make oldconfig
+
+  7. make
+
+  8. Edit setenv.h, if necessary, so that the PATH variable includes
+     the path to the newly built binaries.
+
+  See the file configs/README.txt in the buildroot source tree.  That has more
+  details PLUS some special instructions that you will need to follow if you are
+  building a Cortex-M3 toolchain for Cygwin under Windows.
+
+Generic OABI Toolchain
+======================
+
+  The NuttX OABI toolchain is selected with:
+
+    CONFIG_ARM_TOOLCHAIN_BUILDROOT=y
+    CONFIG_ARM_OABI_TOOLCHAIN=y
+
+  In most cases, OsmocomBB is built with a different OABI toolchain with a 
+  prefix of arm-elf-.  To use that toolchain, change the configuration as
+  follows:
+
+    CONFIG_ARM_TOOLCHAIN_GNU_OABI=y

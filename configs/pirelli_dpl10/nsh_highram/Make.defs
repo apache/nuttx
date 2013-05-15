@@ -35,6 +35,7 @@
 
 include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
+include ${TOPDIR}/arch/arm/src/arm/Toolchain.defs
 
 ifeq ("${CONFIG_SERCOMM_CONSOLE}","y")
 OSMODIR		= $(TOPDIR)/../../osmocom-bb
@@ -45,7 +46,6 @@ EXTRA_LIBS	= $(OSMODIR)/src/target/firmware/comm/libcomm.a \
 			# ^^^ Stupid hack! Why do I have to put it twice???
 endif
 
-CROSSDEV	= arm-elf-
 CC			= $(CROSSDEV)gcc
 CPP			= $(CROSSDEV)gcc -E
 LD			= $(CROSSDEV)ld
@@ -73,7 +73,7 @@ ARCHPICFLAGS	= -fpic -msingle-pic-base -mpic-register=r10
 ARCHWARNINGS	= -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES		=
 ARCHINCLUDES	= -I. -I$(OSMODIR)/src/shared/libosmocore/include -isystem $(TOPDIR)/include
-ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/nsh_highram/ld.script
+ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/highram.ld
 
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 				  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
