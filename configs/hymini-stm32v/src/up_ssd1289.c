@@ -292,7 +292,6 @@ static void init_lcd_backlight(void)
 {
   uint16_t ccmr;
   uint16_t ccer;
-  uint16_t cr2;
 
   /* Configure PB5 as TIM3 CH2 output */
 
@@ -328,10 +327,6 @@ static void init_lcd_backlight(void)
   ccer  = getreg16(STM32_TIM3_CCER);
   ccer &= ~ATIM_CCER_CC2E;
   putreg16(ccer, STM32_TIM3_CCER);
-
-  /* Get the TIM3 CR2 register value */
-
-  cr2  = getreg16(STM32_TIM3_CR2);
 
   /* Select the Output Compare Mode Bits */
 
