@@ -55,14 +55,14 @@
 #define STM32_DMA_ISR_OFFSET       0x0000 /* DMA interrupt status register */
 #define STM32_DMA_IFCR_OFFSET      0x0004 /* DMA interrupt flag clear register */
 
-#define STM32_DMACHAN_OFFSET(n)    (0x0008 + 0x0014*(n))
-#define STM32_DMACHAN1_OFFSET      0x0008
-#define STM32_DMACHAN2_OFFSET      0x001c
-#define STM32_DMACHAN3_OFFSET      0x0030
-#define STM32_DMACHAN4_OFFSET      0x0044
-#define STM32_DMACHAN5_OFFSET      0x0058
-#define STM32_DMACHAN6_OFFSET      0x006c
-#define STM32_DMACHAN7_OFFSET      0x0080
+#define STM32_DMACHAN_OFFSET(n)    (0x0014*(n))
+#define STM32_DMACHAN1_OFFSET      0x0000
+#define STM32_DMACHAN2_OFFSET      0x0014
+#define STM32_DMACHAN3_OFFSET      0x0028
+#define STM32_DMACHAN4_OFFSET      0x003c
+#define STM32_DMACHAN5_OFFSET      0x0050
+#define STM32_DMACHAN6_OFFSET      0x0064
+#define STM32_DMACHAN7_OFFSET      0x0078
 
 #define STM32_DMACHAN_CCR_OFFSET   0x0008 /* DMA channel configuration register */
 #define STM32_DMACHAN_CNDTR_OFFSET 0x000c /* DMA channel number of data register */

@@ -1,83 +1,106 @@
 pirelli_dpl10
 =============
 
-This directory contains the board support for Pirelli "Discus" DP-L10
-phones.
+  This directory contains the board support for Pirelli "Discus" DP-L10
+  phones.
 
-This port is a variant of the compal_e88 configuration with the small
-change of enabling the IrDA serial console:
+  This port is a variant of the compal_e88 configuration with the small
+  change of enabling the IrDA serial console:
 
-  * CONFIG_SERIAL_IRDA_CONSOLE=y
+    - CONFIG_SERIAL_IRDA_CONSOLE=y
 
-This port is based on patches contributed by Denis Carikli for both the
-compal e99 and e88. At the time of initial check-in, the following phones
-were tested:
+  This port is based on patches contributed by Denis Carikli for both the
+  compal e99 and e88. At the time of initial check-in, the following phones
+  were tested:
 
-  * Pirelli DPL-10 nsh_highram loaded via romload in osmocon
+    - Pirelli DPL-10 nsh_highram loaded via romload in osmocon
 
-The patches were made by Alan Carvalho de Assis and Denis Carikli using
-the Stefan Richter's patches that can be found here:
+  The patches were made by Alan Carvalho de Assis and Denis Carikli using
+  the Stefan Richter's patches that can be found here:
 
-  http://cgit.osmocom.org/cgit/nuttx-bb/log/?h=lputt%2Ftesting
+    http://cgit.osmocom.org/cgit/nuttx-bb/log/?h=lputt%2Ftesting
 
 Osmocom-BB Dependencies and Sercomm
 ===================================
 
-The build environment assumes that you have the osmocom-bb project
-directory at same level as the nuttx project:
+  The build environment assumes that you have the osmocom-bb project
+  directory at same level as the nuttx project:
 
-  |- nuttx
-  |- apps
-  `- osmocom-bb
+    |- nuttx
+    |- apps
+    `- osmocom-bb
 
-If you attempt to build this configuration without osmocom-bb, and that
-you added support for sercomm in your configuration(CONFIG_SERCOMM_CONSOLE=y) 
-you will get compilation errors in drivers/sercomm due to header files that 
-are needed from the osmocom-bb directory.
+  If you attempt to build this configuration without osmocom-bb, and that
+  you added support for sercomm in your configuration(CONFIG_SERCOMM_CONSOLE=y)
+  you will get compilation errors in drivers/sercomm due to header files that
+  are needed from the osmocom-bb directory.
 
-By default, NuttX will not use sercomm (HDLC protocol) to communicate with 
-the host system. Sercomm is the transport used by osmocom-bb that runs on top
-of serial.  See http://bb.osmocom.org/trac/wiki/nuttx-bb/run for detailed
-the usage of nuttx with sercomm.
+  By default, NuttX will not use sercomm (HDLC protocol) to communicate with
+  the host system. Sercomm is the transport used by osmocom-bb that runs on top
+  of serial.  See http://bb.osmocom.org/trac/wiki/nuttx-bb/run for detailed
+  the usage of nuttx with sercomm.
 
 Loading NuttX
 =============
 
-The osmocom-bb wiki describes how to load NuttX.  See
-http://bb.osmocom.org/trac/wiki/nuttx-bb for detailed information.
-The way that nuttx is loaded depends on the configuration (highram/compalram)
-and phone:
+  The osmocom-bb wiki describes how to load NuttX.  See
+  http://bb.osmocom.org/trac/wiki/nuttx-bb for detailed information.
+  The way that nuttx is loaded depends on the configuration (highram/compalram)
+  and phone:
 
-o compalram is for the ramloader(for phone having a bootloader on flash)
-o highram is for phones having the romloader(if the phone has a bootrom)
-  or for loading in the ram trough a special loader(loaded first on ram
-  by talking to the ramloader) when having a ramloader(which can only
-  load 64k).
+  - compalram is for the ramloader(for phone having a bootloader on flash)
+  - highram is for phones having the romloader(if the phone has a bootrom)
+    or for loading in the ram trough a special loader(loaded first on ram
+    by talking to the ramloader) when having a ramloader(which can only
+    load 64k).
+
+  The Pirelli phone is epecially easy to use because you just use the
+  supplied USB cable.  The phone already has an integrated Silabs CP210x
+  USB-UART, which is supported by Linux.  No need for a T191 cable.
+
+  Most of the phones seem to use USB vid:pid 0489:e003, which is mainline
+  since Linux 2.6.36. You can do the following for Kernels < 2.6.36:
+
+    # modprobe -v cp210x
+    # echo "0489 e003" > /sys/bus/usb-serial/drivers/cp210x/new_id
+
+  Here's how I load NuttX into the phone:
+
+  - Take out the battery
+  - Plug in the USB adapter into the phone then the computer
+  - Start osmocon like: osmocon -p /dev/ttyUSB0 -m romload nuttx.bin
+  - Put the battery back in
+
+  This works most of the time.  Sometimes I have to take out and put in
+  the battery a few times or re-start the whole set of steps but it's
+  generally quite reliable.
 
 Memory Map
 =========
 
-Calypso has 256KB of internal SRAM (0x800000-0x83ffff).  Only this internal SRAM
-is used by these configurations.  The internal SRAM is broken up into three
-logic banks.
+  Calypso has 256KB of internal SRAM (0x800000-0x83ffff).  Only this internal SRAM
+  is used by these configurations.  The internal SRAM is broken up into three
+  logic banks.
 
     LRAM (rw) : ORIGIN = 0x00800000, LENGTH = 0x00020000
     TRAM (rw) : ORIGIN = 0x00820000, LENGTH = 0x00010000
     IRAM (rw) : ORIGIN = 0x00830000, LENGTH = 0x00010000
 
-Code can be loaded by the bootloader only into TRAM and, hence, is restricted
-to 64KB.  The additional 64KB if IRAM may be used for uninitialized data and
-for the NuttX heap only.
+  Code can be loaded by the bootloader only into TRAM and, hence, is restricted
+  to 64KB.  The additional 64KB if IRAM may be used for uninitialized data and
+  for the NuttX heap only.
 
 JTAG and Alternative Serial Console
 ===================================
 
 JTAG
   All JTAG lines, as well as the second uart (UART_MODEM), go to the
-  unpopulated connector next to the display connector.
+  unpopulated connector next to the display connector.  NOTE:  You have
+  to disassemble the phone to get to this connector.
+
 
   --- ---------------------------
-  PIN SIGNAL 
+  PIN SIGNAL
   --- ---------------------------
     1 Vcc
     2 RX_MODEM
@@ -177,7 +200,7 @@ Generic OABI Toolchain
     CONFIG_ARM_TOOLCHAIN_BUILDROOT=y
     CONFIG_ARM_OABI_TOOLCHAIN=y
 
-  In most cases, OsmocomBB is built with a different OABI toolchain with a 
+  In most cases, OsmocomBB is built with a different OABI toolchain with a
   prefix of arm-elf-.  To use that toolchain, change the configuration as
   follows:
 
