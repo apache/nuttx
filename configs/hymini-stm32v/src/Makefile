@@ -43,8 +43,12 @@ AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		= up_boot.c up_leds.c up_buttons.c up_spi.c up_usbdev.c
 
-ifeq ($(CONFIG_NX_LCDDRIVER),y)
+ifeq ($(CONFIG_LCD_SSD1289),y)
 CSRCS		+= up_ssd1289.c
+else
+ifeq ($(CONFIG_LCD_R61505U),y)
+CSRCS		+= up_r61505u.c
+endif
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
