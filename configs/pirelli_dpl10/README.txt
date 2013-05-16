@@ -4,6 +4,20 @@ pirelli_dpl10
   This directory contains the board support for Pirelli "Discus" DP-L10
   phones.
 
+Contents
+========
+
+  * History
+  * Osmocom-BB Dependencies and Sercomm
+  * Loading NuttX
+  * Memory Map
+  * USB Serial Console
+  * NuttX OABI "buildroot" Toolchain
+  * Generic OABI Toolchain
+  * Configurations
+
+History
+=======
   This port is a variant of the compal_e88 configuration with the small
   change of enabling the IrDA serial console:
 
@@ -43,6 +57,8 @@ Osmocom-BB Dependencies and Sercomm
 Loading NuttX
 =============
 
+  General
+  -------
   The osmocom-bb wiki describes how to load NuttX.  See
   http://bb.osmocom.org/trac/wiki/nuttx-bb for detailed information.
   The way that nuttx is loaded depends on the configuration (highram/compalram)
@@ -54,6 +70,8 @@ Loading NuttX
     by talking to the ramloader) when having a ramloader(which can only
     load 64k).
 
+  The Pirelli USB Serial Interface
+  --------------------------------
   The Pirelli phone is epecially easy to use because you just use the
   supplied USB cable.  The phone already has an integrated Silabs CP210x
   USB-UART, which is supported by Linux.  No need for a T191 cable.
@@ -64,6 +82,8 @@ Loading NuttX
     # modprobe -v cp210x
     # echo "0489 e003" > /sys/bus/usb-serial/drivers/cp210x/new_id
 
+  Loading NuttX
+  -------------
   Here's how I load NuttX into the phone:
 
   - Take out the battery
@@ -78,6 +98,8 @@ Loading NuttX
 Memory Map
 =========
 
+  Internal SRAM and ROM
+  ---------------------
   Calypso has 256KB of internal SRAM (0x800000-0x83ffff, although some of
   this is, I believe, actually ROM).  Only this internal SRAM is used by
   these configurations.  The internal SRAM is broken up into two logical
@@ -85,11 +107,57 @@ Memory Map
 
     LRAM (rw) : ORIGIN = 0x00800000, LENGTH = 0x00020000
     HRAM (rw) : ORIGIN = 0x00820000, LENGTH = 0x00020000
-    IRAM (rw) : ORIGIN = 0x00830000, LENGTH = 0x00010000
 
   Code can be loaded by the CalypsoBootloader only into HRAM beginning at
   address 0x00820000 and, hence, is restricted to 128KB (including then
   non-loaded sections:  uninitialized data and for the NuttX heap).
+
+
+  SDRAM
+  -----
+  The Pirelli DP-L10 has 8MB of SDRAM beginning at address 0x01000000.
+  This DRAM appears to be initialized by the Pirelli ROM loader and is
+  ready for use with no further initialization required.
+
+  NOR FLASH
+  ---------
+  There is non-volatile memory at address 0x00000000.  The other Calypso
+  phones have NOR FLASH at this location.  This needs more investigation
+  for the Pirelli phones.
+
+USB Serial Console
+==================
+
+  These configurations are set up to use the Calypso IrDA UART as the serial
+  port.  On the Pirelli phone, this port connects to the built-in USB-serial
+  adaptor so that that NuttX serial console will be available on your PC as
+  a USB serial device.  You should see something this using 'dmesg' when you
+  plug the Pirelli phone into a PC running Linux:
+
+    usb 5-2: new full speed USB device number 3 using uhci_hcd
+    usb 5-2: New USB device found, idVendor=0489, idProduct=e003
+    usb 5-2: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+    usb 5-2: Product: DP-L10
+    usb 5-2: Manufacturer: Silicon Labs
+    usb 5-2: SerialNumber: 0001
+    usbcore: registered new interface driver usbserial
+    USB Serial support registered for generic
+    usbcore: registered new interface driver usbserial_generic
+    usbserial: USB Serial Driver core
+    USB Serial support registered for cp210x
+    cp210x 5-2:1.0: cp210x converter detected
+    usb 5-2: reset full speed USB device number 3 using uhci_hcd
+    usb 5-2: cp210x converter now attached to ttyUSB0
+    usbcore: registered new interface driver cp210x
+    cp210x: v0.09:Silicon Labs CP210x RS232 serial adaptor driver
+
+
+  Before you use this port to communicate with Nuttx, make sure that osmocon is
+  no longer running.  Then start a serial terminal such as minicom on your host
+  PC.  Configure the serial terminal so that it uses:
+
+    Port:  /dev/ttyUSB0
+    Baud:  115,200 8N1
 
 JTAG and Alternative Serial Console
 ===================================
@@ -206,3 +274,42 @@ Generic OABI Toolchain
   follows:
 
     CONFIG_ARM_TOOLCHAIN_GNU_OABI=y
+
+Configurations
+==============
+
+  nsh:
+  ---
+    Configures the NuttShell (nsh) located at apps/examples/nsh.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. This configuration enables the serial interface on IrDA UART which
+       will appears as a USB serial device.
+
+       CONFIG_SERIAL_IRDA_CONSOLE=y
+
+    3. By default, this configuration uses the CodeSourcery toolchain
+       for Windows and builds under Cygwin (or probably MSYS).  That
+       can easily be reconfigured, of course.
+
+       CONFIG_HOST_LINUX=y                     : Builds under Windows
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y        : NuttX buildroot OABI toolchain
+       CONFIG_ARM_OABI_TOOLCHAIN=y
+
+       You can switch to use the generic arm-elf- GCC toolchain by
+       setting:
+
+        CONFIG_ARM_TOOLCHAIN_GNU_OABI=y        : General arm-elf- toolchain
+
+    4. Support for builtin applications is enabled.  A builtin 'poweroff'
+       command is supported.
