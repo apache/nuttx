@@ -8,6 +8,7 @@ Contents
 ========
 
   * History
+  * Hardware
   * Osmocom-BB Dependencies and Sercomm
   * Loading NuttX
   * Memory Map
@@ -34,25 +35,70 @@ History
 
     http://cgit.osmocom.org/cgit/nuttx-bb/log/?h=lputt%2Ftesting
 
+Hardware
+========
+
+    * CPU/DBB: TI Calypso (D751992AZHH)
+
+      See http://bb.osmocom.org/trac/wiki/Hardware/Calypso
+
+    * ABB: TI Iota (TWL3014)
+
+      Analog baseband chip.  See http://bb.osmocom.org/trac/wiki/Iota
+
+    * GSM Transceiver: TI Rita (TRF6151)
+
+      GSM Transceiver.  See http://bb.osmocom.org/trac/wiki/Rita
+
+    * PA: SKY77328-13
+
+      Quad-band GSM/GPRS:  See http://www.skyworksinc.com/Product.aspx?ProductID=434
+
+    * Flash/SRAM: Spansion S71PL129NC0 128MBit/64MBit
+
+      Combined FLASH and SDRAM:
+      FLASH: 128Mbit
+      SDRAM: 64Mbit
+
+    * Wifi: Marvell 88W8385 802.11 MAC
+            Marvell 88W8015 802.11b/g transceiver
+
+    * Winbond W56940 ringtone chip
+
+    * Sunplus SPCA552E multimedia controller
+
+      Multimedia processor: integrates CMOS sensor interface, DSC processor, JPEG
+      codec engine, LCM interface and other peripherals.
+
+      I have not yet been able to find a data sheet for this chip.  I believe that
+      it will be critical to develop drivers for the display.
+
+    * LSI-65194A1 ASIC (seems to be a DSP for VoIP en-/decoding)
+
+    * Silabs CP2102 USB UART (connected to UART_IRDA of the Calypso)
+
 Osmocom-BB Dependencies and Sercomm
 ===================================
 
-  The build environment assumes that you have the osmocom-bb project
-  directory at same level as the nuttx project:
+  Sercomm is an HDLC protocol used to communicate between a Calypso phone
+  and the host PC.  By default, NuttX will not use sercomm (HDLC protocol) to
+  communicate with the host system.  Sercomm is the transport used by
+  osmocom-bb that runs on top of serial.  See
+  http://bb.osmocom.org/trac/wiki/nuttx-bb/run for detailed the usage of nuttx
+  with sercomm.
+
+  If you build with sercomm, you must add support for sercomm in your
+  configuration (CONFIG_SERCOMM_CONSOLE=y).  In this case, the build
+  environment assumes that you have the osmocom-bb project directory at same
+  level as the nuttx project:
 
     |- nuttx
     |- apps
     `- osmocom-bb
 
-  If you attempt to build this configuration without osmocom-bb, and that
-  you added support for sercomm in your configuration(CONFIG_SERCOMM_CONSOLE=y)
+  If you attempt to build a sercomm-enaled configuration without osmocom-bb,
   you will get compilation errors in drivers/sercomm due to header files that
   are needed from the osmocom-bb directory.
-
-  By default, NuttX will not use sercomm (HDLC protocol) to communicate with
-  the host system. Sercomm is the transport used by osmocom-bb that runs on top
-  of serial.  See http://bb.osmocom.org/trac/wiki/nuttx-bb/run for detailed
-  the usage of nuttx with sercomm.
 
 Loading NuttX
 =============
@@ -302,7 +348,7 @@ Configurations
        for Windows and builds under Cygwin (or probably MSYS).  That
        can easily be reconfigured, of course.
 
-       CONFIG_HOST_LINUX=y                     : Builds under Windows
+       CONFIG_HOST_LINUX=y                     : Builds under Linux
        CONFIG_ARM_TOOLCHAIN_BUILDROOT=y        : NuttX buildroot OABI toolchain
        CONFIG_ARM_OABI_TOOLCHAIN=y
 
