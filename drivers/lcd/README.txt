@@ -174,6 +174,10 @@ that makes then less re-usable:
       AM-240320D5TOQW01H (LCD_ILI9325)
     configs/shenzhou/src/up_ili93xx.c. Another ILI93xx driver.
 
+  R61505U
+
+    configs/hymini-stm32v/src/up_r61505u.c
+
   OLEDs:
 
     configs/stm32f4discovery/src/up_ug2864ambag01.c

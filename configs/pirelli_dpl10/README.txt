@@ -156,20 +156,22 @@ Memory Map
 
   Code can be loaded by the CalypsoBootloader only into HRAM beginning at
   address 0x00820000 and, hence, is restricted to 128KB (including then
-  non-loaded sections:  uninitialized data and for the NuttX heap).
+  non-loaded sections:  Uninitialized data and the NuttX heap).
 
+  SDRAM and NOR FLASH
+  -------------------
+  SDRAM is provided  by a Flash/SRAM: Spansion S71PL129NC0 part that provices
+  128MBit (16MB) of FLASH and 64MBit (8MB) of SDRAM.
 
-  SDRAM
-  -----
-  The Pirelli DP-L10 has 8MB of SDRAM beginning at address 0x01000000.
-  This DRAM appears to be initialized by the Pirelli ROM loader and is
-  ready for use with no further initialization required.
+  *  SDRAM
 
-  NOR FLASH
-  ---------
-  There is non-volatile memory at address 0x00000000.  The other Calypso
-  phones have NOR FLASH at this location.  This needs more investigation
-  for the Pirelli phones.
+    The Pirelli DP-L10 has 8MB of SDRAM beginning at address 0x01000000.
+    This DRAM appears to be initialized by the Pirelli ROM loader and is
+    ready for use with no further initialization required.
+
+  * NOR FLASH
+
+    The 16MB FLASH is at address 0x00000000.
 
 USB Serial Console
 ==================

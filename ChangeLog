@@ -4717,3 +4717,6 @@
 	  definitions.  From Laurent Latil (2013-5-15).
 	* configs/hymini-stm32v:  Enable SDIO in nsh2 configuration; remove
 	  warning from src/up_ssd1289.c.  From Laurent Latil (2013-5-15).
+	* configs/hymini-stm32v/src/up_r61505u.c:   Support for the R65105-
+	  based LCD that comes with some HY-Mini STM32v board.  From Christian
+	  Faure (2013-5-16).
