@@ -1,23 +1,27 @@
 /*
- * Linker script for running from internal SRAM on Compal phones
+ * Linker script for running from internal SRAM on Pirelli DP-L10 phones
  *
  * This script is tailored specifically to the requirements imposed
- * on us by the Compal bootloader.
+ * on us by the CalypsoRomloader in the Pirelli rom.
  *
  */
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(__start)
+
 MEMORY
 {
-    /* 0x800000-0x83ffff */
-    /* compal-loaded binary: our text, initialized data */
+    /* 0x00800000-0x0082000:  Low RAM.  Used only for exception vectors */
+
     LRAM (rw) : ORIGIN = 0x00800000, LENGTH = 0x00020000
-    TRAM (rw) : ORIGIN = 0x00820000, LENGTH = 0x00010000
-    /* compal-loaded binary: our unitialized data, stacks, heap */
-    IRAM (rw) : ORIGIN = 0x00830000, LENGTH = 0x00010000
+
+    /* 0x00820000-0x0084000: High RAM.  The CalypsoRomloader loads binary to
+	 * address 0x00820000 */
+
+    HRAM (rw) : ORIGIN = 0x00820000, LENGTH = 0x00020000
 }
+
 SECTIONS
 {
     . = 0x800000;
@@ -34,7 +38,7 @@ SECTIONS
         PROVIDE(__start = .);
         KEEP(*(.text.start))
         *(.text.start)
-    } > TRAM
+    } > HRAM
 
     /* exception vectors from 0x80001c to 0x800034 */
     .text.exceptions 0x80001c : AT (LOADADDR(.text.start) + SIZEOF(.text.start)) {
@@ -55,7 +59,7 @@ SECTIONS
         /* gcc voodoo */
         *(.glue_7t) *(.glue_7) *(.vfp11_veneer) *(.v4_bx)
         . = ALIGN(4);
-    } > TRAM
+    } > HRAM
     PROVIDE(_text_start = LOADADDR(.text));
     PROVIDE(_text_end = LOADADDR(.text) + SIZEOF(.text));
 
@@ -67,7 +71,7 @@ SECTIONS
         KEEP(*(SORT(.ctors)))
         /* end of list */
         LONG(0)
-    } > TRAM
+    } > HRAM
     PROVIDE(_ctor_start = LOADADDR(.ctors));
     PROVIDE(_ctor_end = LOADADDR(.ctors) + SIZEOF(.ctors));
 
@@ -79,7 +83,7 @@ SECTIONS
         KEEP(*(SORT(.dtors)))
         /* end of list */
         LONG(0)
-    } > TRAM
+    } > HRAM
     PROVIDE(_dtor_start = LOADADDR(.dtors));
     PROVIDE(_dtor_end = LOADADDR(.dtors) + SIZEOF(.dtors));
 
@@ -87,7 +91,7 @@ SECTIONS
     . = ALIGN(4);
     .rodata : {
         *(.rodata*)
-    } > TRAM
+    } > HRAM
     PROVIDE(_rodata_start = LOADADDR(.rodata));
     PROVIDE(_rodata_end = LOADADDR(.rodata) + SIZEOF(.rodata));
 
@@ -95,7 +99,7 @@ SECTIONS
     . = ALIGN(4);
     .data : {
         *(.data)
-    } > TRAM
+    } > HRAM
     PROVIDE(_data_start = LOADADDR(.data));
     PROVIDE(_data_end = LOADADDR(.data) + SIZEOF(.data));
 
@@ -104,7 +108,7 @@ SECTIONS
     .got : {
         *(.got)
         *(.got.plt) *(.igot.plt) *(.got) *(.igot)
-    } > TRAM
+    } > HRAM
     PROVIDE(_got_start = LOADADDR(.got));
     PROVIDE(_got_end = LOADADDR(.got) + SIZEOF(.got));
 
@@ -115,7 +119,7 @@ SECTIONS
         _sbss = ABSOLUTE(.);
         *(.bss)
         _ebss = ABSOLUTE(.);
-    } > IRAM
+    } > HRAM
     . = ALIGN(4);
     __bss_end = .;
     PROVIDE(_bss_start = __bss_start);

@@ -78,17 +78,18 @@ Loading NuttX
 Memory Map
 =========
 
-  Calypso has 256KB of internal SRAM (0x800000-0x83ffff).  Only this internal SRAM
-  is used by these configurations.  The internal SRAM is broken up into three
-  logic banks.
+  Calypso has 256KB of internal SRAM (0x800000-0x83ffff, although some of
+  this is, I believe, actually ROM).  Only this internal SRAM is used by
+  these configurations.  The internal SRAM is broken up into two logical
+  banks.
 
     LRAM (rw) : ORIGIN = 0x00800000, LENGTH = 0x00020000
-    TRAM (rw) : ORIGIN = 0x00820000, LENGTH = 0x00010000
+    HRAM (rw) : ORIGIN = 0x00820000, LENGTH = 0x00020000
     IRAM (rw) : ORIGIN = 0x00830000, LENGTH = 0x00010000
 
-  Code can be loaded by the bootloader only into TRAM and, hence, is restricted
-  to 64KB.  The additional 64KB if IRAM may be used for uninitialized data and
-  for the NuttX heap only.
+  Code can be loaded by the CalypsoBootloader only into HRAM beginning at
+  address 0x00820000 and, hence, is restricted to 128KB (including then
+  non-loaded sections:  uninitialized data and for the NuttX heap).
 
 JTAG and Alternative Serial Console
 ===================================
