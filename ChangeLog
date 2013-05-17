@@ -4724,3 +4724,6 @@
 	  Reported by Ken Pettit (2013-5-17).
 	* nuttx/syscall/syscall.csv:  Type of first parameter of on_exit() is
 	  wrong. Reported by Ken Pettit (2013-5-17).
+	* configs/mikroe-stm32f4/kernel/, kostest/ and scripts/:  Add kernel build
+	  support and kernel mode OS test example for the the MikroElektronkia
+	  MultiMedia STM32 M4 board.  From Ken Pettit (2013-5-17).
