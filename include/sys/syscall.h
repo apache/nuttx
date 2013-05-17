@@ -100,23 +100,23 @@
 
 #ifdef CONFIG_ARCH_HAVE_VFORK
 #  define SYS_vfork                    __SYS_vfork
-#  define __SYS_atexit                (__SYS_vfork+1)
+#  define __SYS_atexit                 (__SYS_vfork+1)
 #else
-#  define __SYS_atexit                __SYS_vfork
+#  define __SYS_atexit                 __SYS_vfork
 #endif
 
 #ifdef CONFIG_SCHED_ATEXIT
 #  define SYS_atexit                   __SYS_atexit
-#  define __SYS_onexit                (__SYS_atexit+1)
+#  define __SYS_on_exit                (__SYS_atexit+1)
 #else
-#  define __SYS_onexit                __SYS_atexit
+#  define __SYS_on_exit                __SYS_atexit
 #endif
 
 #ifdef CONFIG_SCHED_ONEXIT
-#  define SYS_onexit                   __SYS_onexit
-#  define __SYS_waitpid                (__SYS_onexit+1)
+#  define SYS_on_exit                  __SYS_on_exit
+#  define __SYS_waitpid                (__SYS_on_exit+1)
 #else
-#  define __SYS_waitpid                __SYS_onexit
+#  define __SYS_waitpid                __SYS_on_exit
 #endif
 
 #ifdef CONFIG_SCHED_WAITPID
